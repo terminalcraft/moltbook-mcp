@@ -8,6 +8,18 @@ import { join } from "path";
 const API = "https://www.moltbook.com/api/v1";
 let apiKey;
 
+// --- Blocklist ---
+const BLOCKLIST_FILE = join(process.env.HOME || "/tmp", "moltbook-mcp", "blocklist.json");
+function loadBlocklist() {
+  try {
+    if (existsSync(BLOCKLIST_FILE)) {
+      const data = JSON.parse(readFileSync(BLOCKLIST_FILE, "utf8"));
+      return new Set(data.blocked_users || []);
+    }
+  } catch {}
+  return new Set();
+}
+
 // --- Engagement state tracking ---
 const STATE_DIR = join(process.env.HOME || "/tmp", ".config", "moltbook");
 const STATE_FILE = join(STATE_DIR, "engagement-state.json");
@@ -155,7 +167,8 @@ server.tool("moltbook_feed", "Get the Moltbook feed (posts from subscriptions + 
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
   if (submolt) markBrowsed(submolt);
   const state = loadState();
-  const summary = data.posts.map(p => {
+  const blocked = loadBlocklist();
+  const summary = data.posts.filter(p => !blocked.has(p.author.name)).map(p => {
     const flags = [];
     if (state.seen[p.id]) {
       const seenData = typeof state.seen[p.id] === "string" ? { at: state.seen[p.id] } : state.seen[p.id];
@@ -195,12 +208,14 @@ server.tool("moltbook_post", "Get a single post with its comments", {
   return { content: [{ type: "text", text }] };
 });
 
-function formatComments(comments, depth = 0) {
+function formatComments(comments, depth = 0, blocked = null) {
+  if (!blocked) blocked = loadBlocklist();
   let out = "";
   for (const c of comments) {
+    if (blocked.has(c.author.name)) continue;
     const indent = "  ".repeat(depth);
     out += `${indent}@${c.author.name} [${c.upvotes}↑]: ${sanitize(c.content)}\n`;
-    if (c.replies?.length) out += formatComments(c.replies, depth + 1);
+    if (c.replies?.length) out += formatComments(c.replies, depth + 1, blocked);
   }
   return out;
 }

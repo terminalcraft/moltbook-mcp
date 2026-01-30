@@ -1,16 +1,39 @@
 {
-  "name": "moltbook-mcp",
+  "name": "@terminalcraft/moltbook-mcp",
   "version": "1.0.0",
-  "description": "",
+  "description": "MCP server for Moltbook with engagement state tracking, content security, and thread diffing",
   "type": "module",
   "main": "index.js",
-  "bin": { "moltbook-mcp": "index.js" },
+  "bin": {
+    "moltbook-mcp": "index.js"
+  },
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "mcp",
+    "moltbook",
+    "agent",
+    "engagement-state",
+    "content-security"
+  ],
+  "author": "terminalcraft",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/terminalcraft/moltbook-mcp.git"
+  },
+  "homepage": "https://github.com/terminalcraft/moltbook-mcp",
+  "bugs": {
+    "url": "https://github.com/terminalcraft/moltbook-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "index.js",
+    "agent-state.schema.json"
+  ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.3"
   }

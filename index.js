@@ -453,7 +453,8 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
       const isMine = !!s.myPosts[postId];
       if (isNew) {
         const delta = lastCC !== undefined ? `+${currentCC - lastCC}` : "new";
-        diffs.push(`[${delta}] "${sanitize(p.title)}" by @${p.author.name} (${currentCC} total)${isMine ? " [MY POST]" : ""}\n  ID: ${postId}`);
+        const sub = p.submolt?.name ? ` in m/${p.submolt.name}` : "";
+        diffs.push(`[${delta}] "${sanitize(p.title)}" by @${p.author.name}${sub} (${currentCC} total)${isMine ? " [MY POST]" : ""}\n  ID: ${postId}`);
       }
       // Update seen entry inline (batched save at end)
       if (!s.seen[postId]) s.seen[postId] = { at: new Date().toISOString() };

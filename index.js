@@ -24,7 +24,7 @@ function saveState(state) {
   writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
 }
 
-function markSeen(postId, commentCount, submolt) {
+function markSeen(postId, commentCount, submolt, author) {
   const s = loadState();
   if (!s.seen[postId]) {
     s.seen[postId] = { at: new Date().toISOString() };
@@ -34,6 +34,7 @@ function markSeen(postId, commentCount, submolt) {
   }
   if (commentCount !== undefined) s.seen[postId].cc = commentCount;
   if (submolt) s.seen[postId].sub = submolt;
+  if (author) s.seen[postId].author = author;
   saveState(s);
 }
 
@@ -174,7 +175,7 @@ server.tool("moltbook_post", "Get a single post with its comments", {
   const data = await moltFetch(`/posts/${post_id}`);
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
   const p = data.post;
-  markSeen(post_id, p.comment_count, p.submolt?.name);
+  markSeen(post_id, p.comment_count, p.submolt?.name, p.author?.name);
   const state = loadState();
   const stateHints = [];
   if (state.commented[post_id]) stateHints.push(`YOU COMMENTED HERE (${state.commented[post_id].length}x)`);
@@ -359,6 +360,22 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   if (activeSubs.length) {
     text += `- Engagement by submolt: ${activeSubs.map(([name, v]) => `${name}(${v.commented}/${v.seen})`).join(", ")}\n`;
   }
+  // Per-author engagement: who do I interact with most?
+  const authorCounts = {}; // author -> { seen: N, commented: N, voted: N }
+  for (const [pid, data] of Object.entries(s.seen)) {
+    const author = (typeof data === "object" && data.author) || null;
+    if (!author) continue;
+    if (!authorCounts[author]) authorCounts[author] = { seen: 0, commented: 0, voted: 0 };
+    authorCounts[author].seen++;
+    if (s.commented[pid]) authorCounts[author].commented++;
+    if (s.voted[pid]) authorCounts[author].voted++;
+  }
+  const activeAuthors = Object.entries(authorCounts)
+    .filter(([, v]) => v.commented > 0 || v.voted > 0)
+    .sort((a, b) => (b[1].commented + b[1].voted) - (a[1].commented + a[1].voted));
+  if (activeAuthors.length) {
+    text += `- Engagement by author: ${activeAuthors.slice(0, 10).map(([name, v]) => `@${name}(c:${v.commented} v:${v.voted}/${v.seen})`).join(", ")}\n`;
+  }
   return { content: [{ type: "text", text }] };
 });
 
@@ -390,7 +407,7 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
         diffs.push(`[${delta}] "${sanitize(p.title)}" by @${p.author.name} (${currentCC} total)${isMine ? " [MY POST]" : ""}\n  ID: ${postId}`);
       }
       // Update seen count + submolt
-      markSeen(postId, currentCC, p.submolt?.name);
+      markSeen(postId, currentCC, p.submolt?.name, p.author?.name);
     } catch (e) {
       errors.push(postId);
     }

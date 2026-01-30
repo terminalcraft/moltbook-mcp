@@ -43,6 +43,12 @@ function markVoted(targetId) {
   saveState(s);
 }
 
+function unmarkVoted(targetId) {
+  const s = loadState();
+  delete s.voted[targetId];
+  saveState(s);
+}
+
 function markMyPost(postId) {
   const s = loadState();
   s.myPosts[postId] = new Date().toISOString();
@@ -165,6 +171,7 @@ server.tool("moltbook_vote", "Upvote or downvote a post or comment", {
   const prefix = type === "post" ? "posts" : "comments";
   const data = await moltFetch(`/${prefix}/${id}/${direction}`, { method: "POST" });
   if (data.success && data.action === "upvoted") markVoted(id);
+  if (data.success && data.action === "removed") unmarkVoted(id);
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 });
 

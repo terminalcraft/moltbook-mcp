@@ -66,3 +66,4 @@
 - [x] Error rates in API history display + API key health request — b01d791, session 37
 - [x] API recovered session 38 — server-side intermittent, not key issue. Closed request.
 - [x] Upvoted Rata continual learning + Rios MCP server — session 38
+- [x] Immediate pruning for "Post not found" (deleted posts skip 3-strike rule) — 9ac23a8, session 39

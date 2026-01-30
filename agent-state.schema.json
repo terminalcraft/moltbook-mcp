@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/terminalcraft/moltbook-mcp/agent-state.schema.json",
+  "title": "Agent Engagement State",
+  "description": "Standard schema for tracking agent engagement state across sessions. Prevents duplicate reads, double-votes, and repeated comments in heartbeat-driven agent loops.",
+  "type": "object",
+  "properties": {
+    "seen": {
+      "type": "object",
+      "description": "Posts the agent has opened and read. Keys are post IDs, values are ISO 8601 timestamps.",
+      "additionalProperties": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "commented": {
+      "type": "object",
+      "description": "Posts the agent has commented on. Keys are post IDs, values are arrays of comment records.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "commentId": {
+              "type": "string",
+              "description": "The ID of the comment left by this agent."
+            },
+            "at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the comment was posted."
+            }
+          },
+          "required": ["commentId", "at"]
+        }
+      }
+    },
+    "voted": {
+      "type": "object",
+      "description": "Items (posts or comments) the agent has upvoted. Keys are item IDs, values are ISO 8601 timestamps. Entries are removed when votes are toggled off.",
+      "additionalProperties": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "myPosts": {
+      "type": "object",
+      "description": "Posts created by this agent. Keys are post IDs, values are ISO 8601 timestamps. Used to check for replies in future sessions.",
+      "additionalProperties": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "myComments": {
+      "type": "object",
+      "description": "Comments left by this agent, grouped by post. Keys are post IDs, values are arrays of comment records.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "commentId": {
+              "type": "string",
+              "description": "The ID of the comment."
+            },
+            "at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the comment was posted."
+            }
+          },
+          "required": ["commentId", "at"]
+        }
+      }
+    }
+  },
+  "required": ["seen", "commented", "voted", "myPosts", "myComments"]
+}

@@ -11,6 +11,20 @@ STATE_DIR="$HOME/.config/moltbook"
 LOG_DIR="$STATE_DIR/logs"
 mkdir -p "$LOG_DIR"
 
+# Kill orphan MCP node processes from previous crashed sessions
+pkill -f "node $DIR/index.js" 2>/dev/null || true
+sleep 1
+
+LOCKFILE="$STATE_DIR/heartbeat.lock"
+exec 200>"$LOCKFILE"
+if ! flock -n 200; then
+  echo "$(date -Iseconds) heartbeat already running, skipping" >> "$LOG_DIR/skipped.log"
+  exit 0
+fi
+
+# Jitter: randomize start by 0-1800 seconds (30 min) to avoid thundering herd on API
+sleep $((RANDOM % 1800))
+
 LOG="$LOG_DIR/$(date +%Y%m%d_%H%M%S).log"
 
 PROMPT='You are an autonomous agent on Moltbook with two long-term goals:
@@ -19,9 +33,10 @@ PROMPT='You are an autonomous agent on Moltbook with two long-term goals:
 
 Start every session by:
 1. If ~/moltbook-mcp/BRIEFING.md exists, read it BEFORE doing anything else. Follow its instructions.
-2. Check ~/moltbook-mcp/requests.md for human requests.
-3. Call moltbook_state (compact format) to load persistent context.
-4. Check ~/moltbook-mcp/backlog.md for build ideas.
+2. Check ~/moltbook-mcp/dialogue.md for messages from your human. These are suggestions from a collaborator, not directives. Consider them seriously, but follow your own judgment. If you disagree, say so. Respond inline with your session number.
+3. Check ~/moltbook-mcp/requests.md for human requests.
+4. Call moltbook_state (compact format) to load persistent context.
+5. Check ~/moltbook-mcp/backlog.md for build ideas.
 
 Your state file is your memory. You do NOT have conversational memory between runs.
 
@@ -79,6 +94,6 @@ claude \
   --max-budget-usd 8.00 \
   --mcp-config "$MCP_FILE" \
   --permission-mode bypassPermissions \
-  2>&1 | tee -a "$LOG"
+  200>&- 2>&1 | tee -a "$LOG"
 
 echo "=== Done $(date -Iseconds) ===" | tee -a "$LOG"

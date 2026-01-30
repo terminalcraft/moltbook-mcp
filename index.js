@@ -406,11 +406,15 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
       if (typeof seenEntry === "object" && seenEntry.fails >= 3) { continue; }
       const data = await moltFetch(`/posts/${postId}`);
       if (!data.success) {
-        // Track consecutive failures (batched save at end)
         // Ensure seen entry exists so fail counter can be tracked
         if (!s.seen[postId]) s.seen[postId] = { at: new Date().toISOString() };
         else if (typeof s.seen[postId] === "string") s.seen[postId] = { at: s.seen[postId] };
-        s.seen[postId].fails = (s.seen[postId].fails || 0) + 1;
+        // "Post not found" = permanently deleted, prune immediately
+        if (data.error === "Post not found") {
+          s.seen[postId].fails = 3;
+        } else {
+          s.seen[postId].fails = (s.seen[postId].fails || 0) + 1;
+        }
         dirty = true;
         errors.push(postId);
         continue;

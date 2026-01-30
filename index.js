@@ -104,6 +104,7 @@ function sanitize(text) {
 
 // API call tracking — counts calls per session + persists history across sessions
 let apiCallCount = 0;
+let apiErrorCount = 0;
 const apiCallLog = {}; // path prefix -> count
 const sessionStart = new Date().toISOString();
 
@@ -116,7 +117,7 @@ function saveApiSession() {
   if (!s.apiHistory) s.apiHistory = [];
   // Update or append current session entry
   const existing = s.apiHistory.findIndex(h => h.session === sessionStart);
-  const entry = { session: sessionStart, calls: apiCallCount, log: { ...apiCallLog }, actions: [...sessionActions] };
+  const entry = { session: sessionStart, calls: apiCallCount, errors: apiErrorCount, log: { ...apiCallLog }, actions: [...sessionActions] };
   if (existing >= 0) s.apiHistory[existing] = entry;
   else s.apiHistory.push(entry);
   // Keep last 50 sessions
@@ -133,7 +134,9 @@ async function moltFetch(path, opts = {}) {
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
   const res = await fetch(url, { ...opts, headers: { ...headers, ...opts.headers } });
-  return res.json();
+  const json = await res.json();
+  if (!res.ok || json.error) apiErrorCount++;
+  return json;
 }
 
 const server = new McpServer({ name: "moltbook", version: "1.0.0" });
@@ -328,7 +331,7 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
     const sorted = browsedEntries.sort((a, b) => a[1].localeCompare(b[1]));
     text += `- Submolts browsed (oldest first): ${sorted.map(([name, ts]) => `${name} (${ts.slice(0, 10)})`).join(", ")}\n`;
   }
-  text += `- API calls this session: ${apiCallCount}`;
+  text += `- API calls this session: ${apiCallCount}${apiErrorCount ? ` (${apiErrorCount} errors)` : ""}`;
   if (Object.keys(apiCallLog).length) {
     text += ` (${Object.entries(apiCallLog).map(([k, v]) => `${k}: ${v}`).join(", ")})`;
   }

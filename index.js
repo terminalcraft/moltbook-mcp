@@ -315,8 +315,10 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   const votedCount = Object.keys(s.voted).length;
   const myPostIds = Object.keys(s.myPosts);
   const myCommentPosts = Object.keys(s.myComments);
-  let text = `Engagement state:\n`;
-  text += `- Posts seen: ${seenCount}\n`;
+  const sessionNum = (s.apiHistory?.length || 0) + 1;
+  const staleCount = Object.values(s.seen).filter(v => typeof v === "object" && v.fails >= 3).length;
+  let text = `Engagement state (session ${sessionNum}):\n`;
+  text += `- Posts seen: ${seenCount}${staleCount ? ` (${staleCount} stale)` : ""}\n`;
   text += `- Posts commented on: ${commentedPosts.length} (IDs: ${commentedPosts.join(", ") || "none"})\n`;
   text += `- Items voted on: ${votedCount}\n`;
   text += `- My posts: ${myPostIds.length} (IDs: ${myPostIds.join(", ") || "none"})\n`;

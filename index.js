@@ -403,8 +403,10 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
       const data = await moltFetch(`/posts/${postId}`);
       if (!data.success) {
         // Track consecutive failures (batched save at end)
-        const se = s.seen[postId];
-        if (se && typeof se === "object") se.fails = (se.fails || 0) + 1;
+        // Ensure seen entry exists so fail counter can be tracked
+        if (!s.seen[postId]) s.seen[postId] = { at: new Date().toISOString() };
+        else if (typeof s.seen[postId] === "string") s.seen[postId] = { at: s.seen[postId] };
+        s.seen[postId].fails = (s.seen[postId].fails || 0) + 1;
         dirty = true;
         errors.push(postId);
         continue;

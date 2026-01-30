@@ -68,6 +68,24 @@ function markMyComment(postId, commentId) {
   saveState(s);
 }
 
+// Check outbound content for accidental sensitive data leakage.
+// Returns warnings (strings) if suspicious patterns are found. Does not block posting.
+function checkOutbound(text) {
+  if (!text) return [];
+  const warnings = [];
+  const patterns = [
+    [/(?:\/home\/\w+|~\/)\.\w+/g, "possible dotfile path"],
+    [/(?:sk-|key-|token-)[a-zA-Z0-9]{20,}/g, "possible API key/token"],
+    [/[A-Za-z0-9+/]{40,}={0,2}/g, "possible base64-encoded secret"],
+    [/(?:ANTHROPIC|OPENAI|AWS|GITHUB|MOLTBOOK)_[A-Z_]*(?:KEY|TOKEN|SECRET)/gi, "possible env var name"],
+    [/Bearer\s+[a-zA-Z0-9._-]{20,}/g, "possible auth header"],
+  ];
+  for (const [re, label] of patterns) {
+    if (re.test(text)) warnings.push(label);
+  }
+  return warnings;
+}
+
 // Sanitize user-generated content to reduce prompt injection surface.
 // Wraps untrusted text in markers so the LLM can distinguish it from instructions.
 function sanitize(text) {
@@ -152,12 +170,15 @@ server.tool("moltbook_post_create", "Create a new post in a submolt", {
   content: z.string().optional().describe("Post body text"),
   url: z.string().optional().describe("Link URL (for link posts)"),
 }, async ({ submolt, title, content, url }) => {
+  const outboundWarnings = [...checkOutbound(title), ...checkOutbound(content)];
   const body = { submolt, title };
   if (content) body.content = content;
   if (url) body.url = url;
   const data = await moltFetch("/posts", { method: "POST", body: JSON.stringify(body) });
   if (data.success && data.post) markMyPost(data.post.id);
-  return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+  let text = JSON.stringify(data, null, 2);
+  if (outboundWarnings.length) text += `\n\n⚠️ OUTBOUND WARNINGS: ${outboundWarnings.join(", ")}. Review your post for accidental sensitive data.`;
+  return { content: [{ type: "text", text }] };
 });
 
 // Comment
@@ -166,6 +187,7 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
   content: z.string().describe("Comment text"),
   parent_id: z.string().optional().describe("Parent comment ID for replies"),
 }, async ({ post_id, content, parent_id }) => {
+  const outboundWarnings = checkOutbound(content);
   const body = { content };
   if (parent_id) body.parent_id = parent_id;
   const data = await moltFetch(`/posts/${post_id}/comments`, { method: "POST", body: JSON.stringify(body) });
@@ -173,7 +195,9 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
     markCommented(post_id, data.comment.id);
     markMyComment(post_id, data.comment.id);
   }
-  return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+  let text = JSON.stringify(data, null, 2);
+  if (outboundWarnings.length) text += `\n\n⚠️ OUTBOUND WARNINGS: ${outboundWarnings.join(", ")}. Review your comment for accidental sensitive data.`;
+  return { content: [{ type: "text", text }] };
 });
 
 // Vote

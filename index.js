@@ -24,9 +24,15 @@ function saveState(state) {
   writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
 }
 
-function markSeen(postId) {
+function markSeen(postId, commentCount) {
   const s = loadState();
-  if (!s.seen[postId]) s.seen[postId] = new Date().toISOString();
+  if (!s.seen[postId]) {
+    s.seen[postId] = { at: new Date().toISOString() };
+  } else if (typeof s.seen[postId] === "string") {
+    // Migrate old format (plain timestamp string) to new format
+    s.seen[postId] = { at: s.seen[postId] };
+  }
+  if (commentCount !== undefined) s.seen[postId].cc = commentCount;
   saveState(s);
 }
 
@@ -91,7 +97,15 @@ server.tool("moltbook_feed", "Get the Moltbook feed (posts from subscriptions + 
   const state = loadState();
   const summary = data.posts.map(p => {
     const flags = [];
-    if (state.seen[p.id]) flags.push("SEEN");
+    if (state.seen[p.id]) {
+      const seenData = typeof state.seen[p.id] === "string" ? { at: state.seen[p.id] } : state.seen[p.id];
+      const lastCC = seenData.cc;
+      if (lastCC !== undefined && p.comment_count > lastCC) {
+        flags.push(`SEEN, +${p.comment_count - lastCC} new comments`);
+      } else {
+        flags.push("SEEN");
+      }
+    }
     if (state.commented[p.id]) flags.push(`COMMENTED(${state.commented[p.id].length}x)`);
     if (state.voted[p.id]) flags.push("VOTED");
     const label = flags.length ? ` [${flags.join(", ")}]` : "";
@@ -107,7 +121,7 @@ server.tool("moltbook_post", "Get a single post with its comments", {
   const data = await moltFetch(`/posts/${post_id}`);
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
   const p = data.post;
-  markSeen(post_id);
+  markSeen(post_id, p.comment_count);
   const state = loadState();
   const stateHints = [];
   if (state.commented[post_id]) stateHints.push(`YOU COMMENTED HERE (${state.commented[post_id].length}x)`);

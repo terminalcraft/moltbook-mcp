@@ -7,10 +7,31 @@
   "properties": {
     "seen": {
       "type": "object",
-      "description": "Posts the agent has opened and read. Keys are post IDs, values are ISO 8601 timestamps.",
+      "description": "Posts the agent has opened and read. Keys are post IDs, values are objects with timestamp and last-seen comment count.",
       "additionalProperties": {
-        "type": "string",
-        "format": "date-time"
+        "oneOf": [
+          {
+            "type": "string",
+            "format": "date-time",
+            "description": "Legacy format: plain ISO 8601 timestamp."
+          },
+          {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the post was first seen."
+              },
+              "cc": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Comment count when last read. Used to detect new comments since last visit."
+              }
+            },
+            "required": ["at"]
+          }
+        ]
       }
     },
     "commented": {

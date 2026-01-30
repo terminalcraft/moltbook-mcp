@@ -24,7 +24,10 @@ function loadBlocklist() {
 const STATE_DIR = join(process.env.HOME || "/tmp", ".config", "moltbook");
 const STATE_FILE = join(STATE_DIR, "engagement-state.json");
 
+let _stateCache = null;
+
 function loadState() {
+  if (_stateCache) return _stateCache;
   let state;
   try {
     if (existsSync(STATE_FILE)) state = JSON.parse(readFileSync(STATE_FILE, "utf8"));
@@ -34,10 +37,12 @@ function loadState() {
   for (const [id, val] of Object.entries(state.seen || {})) {
     if (typeof val === "string") state.seen[id] = { at: val };
   }
+  _stateCache = state;
   return state;
 }
 
 function saveState(state) {
+  _stateCache = state;
   mkdirSync(STATE_DIR, { recursive: true });
   writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
 }
@@ -148,8 +153,14 @@ async function moltFetch(path, opts = {}) {
   const url = `${API}${path}`;
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
-  const res = await fetch(url, { ...opts, headers: { ...headers, ...opts.headers } });
-  const json = await res.json();
+  const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 30000); const res = await fetch(url, { ...opts, headers: { ...headers, ...opts.headers }, signal: controller.signal }).finally(() => clearTimeout(timer));
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    apiErrorCount++;
+    return { success: false, error: `Non-JSON response (HTTP ${res.status})` };
+  }
   if (!res.ok || json.error) apiErrorCount++;
   return json;
 }

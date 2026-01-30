@@ -307,6 +307,14 @@ server.tool("moltbook_profile", "View your profile or another molty's profile", 
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 });
 
+// Profile update
+server.tool("moltbook_profile_update", "Update your Moltbook profile description", {
+  description: z.string().describe("New profile description"),
+}, async ({ description }) => {
+  const data = await moltFetch("/agents/me", { method: "PATCH", body: JSON.stringify({ description }) });
+  return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+});
+
 // Status
 server.tool("moltbook_status", "Check your claim status", {}, async () => {
   const data = await moltFetch("/agents/status");

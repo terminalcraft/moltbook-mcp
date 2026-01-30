@@ -394,9 +394,25 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
   const errors = [];
   for (const postId of allIds) {
     try {
+      // Skip posts that have failed too many times
+      const seenEntry = s.seen[postId];
+      if (typeof seenEntry === "object" && seenEntry.fails >= 3) { continue; }
       const data = await moltFetch(`/posts/${postId}`);
-      if (!data.success) { errors.push(postId); continue; }
+      if (!data.success) {
+        // Track consecutive failures for pruning
+        const se = s.seen[postId];
+        if (se && typeof se === "object") {
+          se.fails = (se.fails || 0) + 1;
+          saveState(s);
+        }
+        errors.push(postId);
+        continue;
+      }
       const p = data.post;
+      // Reset fail counter on success
+      if (typeof s.seen[postId] === "object" && s.seen[postId].fails) {
+        delete s.seen[postId].fails;
+      }
       const seenData = s.seen[postId];
       const lastCC = seenData && typeof seenData === "object" ? seenData.cc : undefined;
       const currentCC = p.comment_count;
@@ -419,7 +435,13 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
   } else {
     text = `All ${allIds.size} tracked threads are stable. No new comments.`;
   }
+  // Count pruned (stale) threads
+  const pruned = [...allIds].filter(id => {
+    const e = s.seen[id];
+    return typeof e === "object" && e.fails >= 3;
+  }).length;
   if (errors.length) text += `\n\n⚠️ Failed to check ${errors.length} thread(s): ${errors.join(", ")}`;
+  if (pruned > 0) text += `\n📋 ${pruned} stale thread(s) skipped (3+ consecutive failures).`;
   return { content: [{ type: "text", text }] };
 });
 

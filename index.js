@@ -399,11 +399,20 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
   const diffs = [];
   const errors = [];
   let dirty = false;
+  const currentSession = (s.apiHistory || []).length + 1;
+  let skippedBackoff = 0;
   for (const postId of allIds) {
     try {
-      // Skip posts that have failed too many times
       const seenEntry = s.seen[postId];
-      if (typeof seenEntry === "object" && seenEntry.fails >= 3) { continue; }
+      // Exponential backoff: skip if not yet due for recheck
+      if (typeof seenEntry === "object" && seenEntry.fails) {
+        if (seenEntry.nextCheck && currentSession < seenEntry.nextCheck) {
+          skippedBackoff++;
+          continue;
+        }
+        // Dead posts (fails >= 3 without nextCheck) are legacy stale — skip
+        if (seenEntry.fails >= 3 && !seenEntry.nextCheck) { continue; }
+      }
       const data = await moltFetch(`/posts/${postId}`);
       if (!data.success) {
         // Ensure seen entry exists so fail counter can be tracked
@@ -412,17 +421,21 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
         // "Post not found" = permanently deleted, prune immediately
         if (data.error === "Post not found") {
           s.seen[postId].fails = 3;
+          delete s.seen[postId].nextCheck;
         } else {
-          s.seen[postId].fails = (s.seen[postId].fails || 0) + 1;
+          const fails = (s.seen[postId].fails || 0) + 1;
+          s.seen[postId].fails = fails;
+          s.seen[postId].nextCheck = currentSession + Math.pow(2, fails);
         }
         dirty = true;
         errors.push(postId);
         continue;
       }
       const p = data.post;
-      // Reset fail counter on success
+      // Reset fail counter and backoff on success
       if (typeof s.seen[postId] === "object" && s.seen[postId].fails) {
         delete s.seen[postId].fails;
+        delete s.seen[postId].nextCheck;
       }
       const seenData = s.seen[postId];
       const lastCC = seenData && typeof seenData === "object" ? seenData.cc : undefined;
@@ -460,7 +473,8 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
     return typeof e === "object" && e.fails >= 3;
   }).length;
   if (errors.length) text += `\n\n⚠️ Failed to check ${errors.length} thread(s): ${errors.join(", ")}`;
-  if (pruned > 0) text += `\n📋 ${pruned} stale thread(s) skipped (3+ consecutive failures).`;
+  if (pruned > 0) text += `\n📋 ${pruned} stale thread(s) skipped (permanently failed).`;
+  if (skippedBackoff > 0) text += `\n⏳ ${skippedBackoff} thread(s) in backoff (will retry later).`;
   return { content: [{ type: "text", text }] };
 });
 

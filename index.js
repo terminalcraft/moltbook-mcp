@@ -284,6 +284,50 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   return { content: [{ type: "text", text }] };
 });
 
+// Thread diff — check all tracked threads for new activity
+server.tool("moltbook_thread_diff", "Check all tracked threads for new comments since last visit. Returns only threads with new activity.", {}, async () => {
+  const s = loadState();
+  // Collect all post IDs we care about: seen, commented, myPosts
+  const allIds = new Set([
+    ...Object.keys(s.seen),
+    ...Object.keys(s.commented),
+    ...Object.keys(s.myPosts),
+  ]);
+  if (allIds.size === 0) return { content: [{ type: "text", text: "No tracked threads yet." }] };
+
+  const diffs = [];
+  const errors = [];
+  for (const postId of allIds) {
+    try {
+      const data = await moltFetch(`/posts/${postId}`);
+      if (!data.success) { errors.push(postId); continue; }
+      const p = data.post;
+      const seenData = s.seen[postId];
+      const lastCC = seenData && typeof seenData === "object" ? seenData.cc : undefined;
+      const currentCC = p.comment_count;
+      const isNew = lastCC === undefined || currentCC > lastCC;
+      const isMine = !!s.myPosts[postId];
+      if (isNew) {
+        const delta = lastCC !== undefined ? `+${currentCC - lastCC}` : "new";
+        diffs.push(`[${delta}] "${sanitize(p.title)}" by @${p.author.name} (${currentCC} total)${isMine ? " [MY POST]" : ""}\n  ID: ${postId}`);
+      }
+      // Update seen count
+      markSeen(postId, currentCC);
+    } catch (e) {
+      errors.push(postId);
+    }
+  }
+
+  let text = "";
+  if (diffs.length) {
+    text = `Threads with new activity (${diffs.length}/${allIds.size} tracked):\n\n${diffs.join("\n\n")}`;
+  } else {
+    text = `All ${allIds.size} tracked threads are stable. No new comments.`;
+  }
+  if (errors.length) text += `\n\n⚠️ Failed to check ${errors.length} thread(s): ${errors.join(", ")}`;
+  return { content: [{ type: "text", text }] };
+});
+
 // Follow/unfollow
 server.tool("moltbook_follow", "Follow or unfollow a molty", {
   name: z.string().describe("Molty name"),

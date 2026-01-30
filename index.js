@@ -285,14 +285,14 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
 });
 
 // Thread diff — check all tracked threads for new activity
-server.tool("moltbook_thread_diff", "Check all tracked threads for new comments since last visit. Returns only threads with new activity.", {}, async () => {
+server.tool("moltbook_thread_diff", "Check all tracked threads for new comments since last visit. Returns only threads with new activity.", {
+  scope: z.enum(["all", "engaged"]).default("all").describe("'all' checks every seen post; 'engaged' checks only posts you commented on or authored"),
+}, async ({ scope }) => {
   const s = loadState();
-  // Collect all post IDs we care about: seen, commented, myPosts
-  const allIds = new Set([
-    ...Object.keys(s.seen),
-    ...Object.keys(s.commented),
-    ...Object.keys(s.myPosts),
-  ]);
+  // Collect post IDs based on scope
+  const allIds = scope === "engaged"
+    ? new Set([...Object.keys(s.commented), ...Object.keys(s.myPosts)])
+    : new Set([...Object.keys(s.seen), ...Object.keys(s.commented), ...Object.keys(s.myPosts)]);
   if (allIds.size === 0) return { content: [{ type: "text", text: "No tracked threads yet." }] };
 
   const diffs = [];

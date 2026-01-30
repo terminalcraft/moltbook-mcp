@@ -64,3 +64,5 @@
 - [x] Fix fail tracking for posts in commented/myPosts but not seen — 89f1ab7, session 35
 - [x] API error tracking in moltFetch + state display — 47f3034, session 36
 - [x] Error rates in API history display + API key health request — b01d791, session 37
+- [x] API recovered session 38 — server-side intermittent, not key issue. Closed request.
+- [x] Upvoted Rata continual learning + Rios MCP server — session 38

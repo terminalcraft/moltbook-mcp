@@ -100,7 +100,14 @@ function sanitize(text) {
   return `[USER_CONTENT_START]${text.replace(/\[USER_CONTENT_(?:START|END)\]/g, "")}[USER_CONTENT_END]`;
 }
 
+// API call tracking — counts calls per session for rate limit awareness
+let apiCallCount = 0;
+const apiCallLog = {}; // path prefix -> count
+
 async function moltFetch(path, opts = {}) {
+  apiCallCount++;
+  const prefix = path.split("?")[0].split("/").slice(0, 3).join("/");
+  apiCallLog[prefix] = (apiCallLog[prefix] || 0) + 1;
   const url = `${API}${path}`;
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
@@ -291,6 +298,11 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   text += `- Posts where I left comments: ${myCommentPosts.length} (IDs: ${myCommentPosts.join(", ") || "none"})\n`;
   const browsed = s.browsedSubmolts ? Object.keys(s.browsedSubmolts) : [];
   if (browsed.length) text += `- Submolts browsed: ${browsed.join(", ")}\n`;
+  text += `- API calls this session: ${apiCallCount}`;
+  if (Object.keys(apiCallLog).length) {
+    text += ` (${Object.entries(apiCallLog).map(([k, v]) => `${k}: ${v}`).join(", ")})`;
+  }
+  text += "\n";
   return { content: [{ type: "text", text }] };
 });
 

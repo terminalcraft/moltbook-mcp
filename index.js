@@ -252,6 +252,10 @@ server.tool("moltbook_vote", "Upvote or downvote a post or comment", {
   id: z.string().describe("Post or comment ID"),
   direction: z.enum(["upvote", "downvote"]).describe("Vote direction"),
 }, async ({ type, id, direction }) => {
+  const s = loadState();
+  if (direction === "upvote" && s.voted[id]) {
+    return { content: [{ type: "text", text: `Already upvoted ${type} ${id.slice(0, 8)} — skipping to avoid toggle-off.` }] };
+  }
   const prefix = type === "post" ? "posts" : "comments";
   const data = await moltFetch(`/${prefix}/${id}/${direction}`, { method: "POST" });
   if (data.success && data.action === "upvoted") { markVoted(id); logAction(`upvoted ${type} ${id.slice(0, 8)}`); }

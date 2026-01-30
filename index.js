@@ -2,11 +2,59 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 
 const API = "https://www.moltbook.com/api/v1";
 let apiKey;
+
+// --- Engagement state tracking ---
+const STATE_DIR = join(process.env.HOME || "/tmp", ".config", "moltbook");
+const STATE_FILE = join(STATE_DIR, "engagement-state.json");
+
+function loadState() {
+  try {
+    if (existsSync(STATE_FILE)) return JSON.parse(readFileSync(STATE_FILE, "utf8"));
+  } catch {}
+  return { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {} };
+}
+
+function saveState(state) {
+  mkdirSync(STATE_DIR, { recursive: true });
+  writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+}
+
+function markSeen(postId) {
+  const s = loadState();
+  if (!s.seen[postId]) s.seen[postId] = new Date().toISOString();
+  saveState(s);
+}
+
+function markCommented(postId, commentId) {
+  const s = loadState();
+  if (!s.commented[postId]) s.commented[postId] = [];
+  s.commented[postId].push({ commentId, at: new Date().toISOString() });
+  saveState(s);
+}
+
+function markVoted(targetId) {
+  const s = loadState();
+  s.voted[targetId] = new Date().toISOString();
+  saveState(s);
+}
+
+function markMyPost(postId) {
+  const s = loadState();
+  s.myPosts[postId] = new Date().toISOString();
+  saveState(s);
+}
+
+function markMyComment(postId, commentId) {
+  const s = loadState();
+  if (!s.myComments[postId]) s.myComments[postId] = [];
+  s.myComments[postId].push({ commentId, at: new Date().toISOString() });
+  saveState(s);
+}
 
 // Sanitize user-generated content to reduce prompt injection surface.
 // Wraps untrusted text in markers so the LLM can distinguish it from instructions.
@@ -34,9 +82,15 @@ server.tool("moltbook_feed", "Get the Moltbook feed (posts from subscriptions + 
   const endpoint = submolt ? `/posts?submolt=${encodeURIComponent(submolt)}&sort=${sort}&limit=${limit}` : `/feed?sort=${sort}&limit=${limit}`;
   const data = await moltFetch(endpoint);
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
-  const summary = data.posts.map(p =>
-    `[${p.upvotes}↑ ${p.comment_count}c] "${sanitize(p.title)}" by @${p.author.name} in m/${p.submolt.name}\n  ID: ${p.id}\n  ${sanitize(p.content?.substring(0, 200)) || p.url || ""}...`
-  ).join("\n\n");
+  const state = loadState();
+  const summary = data.posts.map(p => {
+    const flags = [];
+    if (state.seen[p.id]) flags.push("SEEN");
+    if (state.commented[p.id]) flags.push(`COMMENTED(${state.commented[p.id].length}x)`);
+    if (state.voted[p.id]) flags.push("VOTED");
+    const label = flags.length ? ` [${flags.join(", ")}]` : "";
+    return `[${p.upvotes}↑ ${p.comment_count}c] "${sanitize(p.title)}" by @${p.author.name} in m/${p.submolt.name}${label}\n  ID: ${p.id}\n  ${sanitize(p.content?.substring(0, 200)) || p.url || ""}...`;
+  }).join("\n\n");
   return { content: [{ type: "text", text: summary || "No posts found." }] };
 });
 
@@ -47,7 +101,13 @@ server.tool("moltbook_post", "Get a single post with its comments", {
   const data = await moltFetch(`/posts/${post_id}`);
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
   const p = data.post;
-  let text = `"${sanitize(p.title)}" by @${p.author.name} in m/${p.submolt.name}\n${p.upvotes}↑ ${p.downvotes}↓ ${p.comment_count} comments\n\n${sanitize(p.content) || p.url || ""}`;
+  markSeen(post_id);
+  const state = loadState();
+  const stateHints = [];
+  if (state.commented[post_id]) stateHints.push(`YOU COMMENTED HERE (${state.commented[post_id].length}x)`);
+  if (state.voted[post_id]) stateHints.push("YOU VOTED");
+  const stateLabel = stateHints.length ? ` [${stateHints.join(", ")}]` : "";
+  let text = `"${sanitize(p.title)}" by @${p.author.name} in m/${p.submolt.name}${stateLabel}\n${p.upvotes}↑ ${p.downvotes}↓ ${p.comment_count} comments\n\n${sanitize(p.content) || p.url || ""}`;
   if (data.comments?.length) {
     text += "\n\n--- Comments ---\n";
     text += formatComments(data.comments);
@@ -76,6 +136,7 @@ server.tool("moltbook_post_create", "Create a new post in a submolt", {
   if (content) body.content = content;
   if (url) body.url = url;
   const data = await moltFetch("/posts", { method: "POST", body: JSON.stringify(body) });
+  if (data.success && data.post) markMyPost(data.post.id);
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 });
 
@@ -88,6 +149,10 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
   const body = { content };
   if (parent_id) body.parent_id = parent_id;
   const data = await moltFetch(`/posts/${post_id}/comments`, { method: "POST", body: JSON.stringify(body) });
+  if (data.success && data.comment) {
+    markCommented(post_id, data.comment.id);
+    markMyComment(post_id, data.comment.id);
+  }
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 });
 
@@ -99,6 +164,7 @@ server.tool("moltbook_vote", "Upvote or downvote a post or comment", {
 }, async ({ type, id, direction }) => {
   const prefix = type === "post" ? "posts" : "comments";
   const data = await moltFetch(`/${prefix}/${id}/${direction}`, { method: "POST" });
+  if (data.success && data.action === "upvoted") markVoted(id);
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 });
 
@@ -154,6 +220,23 @@ server.tool("moltbook_profile", "View your profile or another molty's profile", 
 server.tool("moltbook_status", "Check your claim status", {}, async () => {
   const data = await moltFetch("/agents/status");
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+});
+
+// Engagement state
+server.tool("moltbook_state", "View your engagement state — posts seen, commented on, voted on, and your own posts", {}, async () => {
+  const s = loadState();
+  const seenCount = Object.keys(s.seen).length;
+  const commentedPosts = Object.keys(s.commented);
+  const votedCount = Object.keys(s.voted).length;
+  const myPostIds = Object.keys(s.myPosts);
+  const myCommentPosts = Object.keys(s.myComments);
+  let text = `Engagement state:\n`;
+  text += `- Posts seen: ${seenCount}\n`;
+  text += `- Posts commented on: ${commentedPosts.length} (IDs: ${commentedPosts.join(", ") || "none"})\n`;
+  text += `- Items voted on: ${votedCount}\n`;
+  text += `- My posts: ${myPostIds.length} (IDs: ${myPostIds.join(", ") || "none"})\n`;
+  text += `- Posts where I left comments: ${myCommentPosts.length} (IDs: ${myCommentPosts.join(", ") || "none"})\n`;
+  return { content: [{ type: "text", text }] };
 });
 
 // Follow/unfollow

@@ -311,8 +311,11 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   text += `- Items voted on: ${votedCount}\n`;
   text += `- My posts: ${myPostIds.length} (IDs: ${myPostIds.join(", ") || "none"})\n`;
   text += `- Posts where I left comments: ${myCommentPosts.length} (IDs: ${myCommentPosts.join(", ") || "none"})\n`;
-  const browsed = s.browsedSubmolts ? Object.keys(s.browsedSubmolts) : [];
-  if (browsed.length) text += `- Submolts browsed: ${browsed.join(", ")}\n`;
+  const browsedEntries = s.browsedSubmolts ? Object.entries(s.browsedSubmolts) : [];
+  if (browsedEntries.length) {
+    const sorted = browsedEntries.sort((a, b) => a[1].localeCompare(b[1]));
+    text += `- Submolts browsed (oldest first): ${sorted.map(([name, ts]) => `${name} (${ts.slice(0, 10)})`).join(", ")}\n`;
+  }
   text += `- API calls this session: ${apiCallCount}`;
   if (Object.keys(apiCallLog).length) {
     text += ` (${Object.entries(apiCallLog).map(([k, v]) => `${k}: ${v}`).join(", ")})`;

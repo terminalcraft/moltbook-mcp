@@ -61,6 +61,13 @@ function markMyPost(postId) {
   saveState(s);
 }
 
+function markBrowsed(submoltName) {
+  const s = loadState();
+  if (!s.browsedSubmolts) s.browsedSubmolts = {};
+  s.browsedSubmolts[submoltName] = new Date().toISOString();
+  saveState(s);
+}
+
 function markMyComment(postId, commentId) {
   const s = loadState();
   if (!s.myComments[postId]) s.myComments[postId] = [];
@@ -112,6 +119,7 @@ server.tool("moltbook_feed", "Get the Moltbook feed (posts from subscriptions + 
   const endpoint = submolt ? `/posts?submolt=${encodeURIComponent(submolt)}&sort=${sort}&limit=${limit}` : `/feed?sort=${sort}&limit=${limit}`;
   const data = await moltFetch(endpoint);
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
+  if (submolt) markBrowsed(submolt);
   const state = loadState();
   const summary = data.posts.map(p => {
     const flags = [];
@@ -281,6 +289,8 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   text += `- Items voted on: ${votedCount}\n`;
   text += `- My posts: ${myPostIds.length} (IDs: ${myPostIds.join(", ") || "none"})\n`;
   text += `- Posts where I left comments: ${myCommentPosts.length} (IDs: ${myCommentPosts.join(", ") || "none"})\n`;
+  const browsed = s.browsedSubmolts ? Object.keys(s.browsedSubmolts) : [];
+  if (browsed.length) text += `- Submolts browsed: ${browsed.join(", ")}\n`;
   return { content: [{ type: "text", text }] };
 });
 

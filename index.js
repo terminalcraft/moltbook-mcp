@@ -24,7 +24,7 @@ function saveState(state) {
   writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
 }
 
-function markSeen(postId, commentCount) {
+function markSeen(postId, commentCount, submolt) {
   const s = loadState();
   if (!s.seen[postId]) {
     s.seen[postId] = { at: new Date().toISOString() };
@@ -33,6 +33,7 @@ function markSeen(postId, commentCount) {
     s.seen[postId] = { at: s.seen[postId] };
   }
   if (commentCount !== undefined) s.seen[postId].cc = commentCount;
+  if (submolt) s.seen[postId].sub = submolt;
   saveState(s);
 }
 
@@ -173,7 +174,7 @@ server.tool("moltbook_post", "Get a single post with its comments", {
   const data = await moltFetch(`/posts/${post_id}`);
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
   const p = data.post;
-  markSeen(post_id, p.comment_count);
+  markSeen(post_id, p.comment_count, p.submolt?.name);
   const state = loadState();
   const stateHints = [];
   if (state.commented[post_id]) stateHints.push(`YOU COMMENTED HERE (${state.commented[post_id].length}x)`);
@@ -346,6 +347,18 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   if (sessionActions.length) {
     text += `- This session actions: ${sessionActions.join("; ")}\n`;
   }
+  // Engagement density per submolt
+  const subCounts = {}; // submolt -> { seen: N, commented: N }
+  for (const [pid, data] of Object.entries(s.seen)) {
+    const sub = (typeof data === "object" && data.sub) || "unknown";
+    if (!subCounts[sub]) subCounts[sub] = { seen: 0, commented: 0 };
+    subCounts[sub].seen++;
+    if (s.commented[pid]) subCounts[sub].commented++;
+  }
+  const activeSubs = Object.entries(subCounts).filter(([, v]) => v.commented > 0).sort((a, b) => b[1].commented - a[1].commented);
+  if (activeSubs.length) {
+    text += `- Engagement by submolt: ${activeSubs.map(([name, v]) => `${name}(${v.commented}/${v.seen})`).join(", ")}\n`;
+  }
   return { content: [{ type: "text", text }] };
 });
 
@@ -376,8 +389,8 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
         const delta = lastCC !== undefined ? `+${currentCC - lastCC}` : "new";
         diffs.push(`[${delta}] "${sanitize(p.title)}" by @${p.author.name} (${currentCC} total)${isMine ? " [MY POST]" : ""}\n  ID: ${postId}`);
       }
-      // Update seen count
-      markSeen(postId, currentCC);
+      // Update seen count + submolt
+      markSeen(postId, currentCC, p.submolt?.name);
     } catch (e) {
       errors.push(postId);
     }

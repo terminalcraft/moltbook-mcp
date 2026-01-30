@@ -311,7 +311,9 @@ server.tool("moltbook_status", "Check your claim status", {}, async () => {
 });
 
 // Engagement state
-server.tool("moltbook_state", "View your engagement state — posts seen, commented on, voted on, and your own posts", {}, async () => {
+server.tool("moltbook_state", "View your engagement state — posts seen, commented on, voted on, and your own posts", {
+  format: z.enum(["full", "compact"]).default("full").describe("'compact' returns a minimal one-line digest; 'full' includes IDs, per-author, per-submolt details"),
+}, async ({ format }) => {
   const s = loadState();
   const seenCount = Object.keys(s.seen).length;
   const commentedPosts = Object.keys(s.commented);
@@ -382,6 +384,12 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
     .sort((a, b) => (b[1].commented + b[1].voted) - (a[1].commented + a[1].voted));
   if (activeAuthors.length) {
     text += `- Engagement by author: ${activeAuthors.slice(0, 10).map(([name, v]) => `@${name}(c:${v.commented} v:${v.voted}/${v.seen})`).join(", ")}\n`;
+  }
+  if (format === "compact") {
+    const prevSession = s.apiHistory?.length >= 2 ? s.apiHistory[s.apiHistory.length - 2] : null;
+    const recap = prevSession?.actions?.length ? ` | Last: ${prevSession.actions.slice(0, 3).join("; ")}` : "";
+    const compact = `Session ${sessionNum} | ${Object.keys(s.seen).length} seen, ${Object.keys(s.commented).length} commented, ${Object.keys(s.voted).length} voted, ${Object.keys(s.myPosts).length} posts | API: ${(s.apiHistory || []).reduce((sum, h) => sum + h.calls, 0)} total calls${recap}`;
+    return { content: [{ type: "text", text: compact }] };
   }
   return { content: [{ type: "text", text }] };
 });

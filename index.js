@@ -394,6 +394,7 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
 
   const diffs = [];
   const errors = [];
+  let dirty = false;
   for (const postId of allIds) {
     try {
       // Skip posts that have failed too many times
@@ -401,12 +402,10 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
       if (typeof seenEntry === "object" && seenEntry.fails >= 3) { continue; }
       const data = await moltFetch(`/posts/${postId}`);
       if (!data.success) {
-        // Track consecutive failures for pruning
+        // Track consecutive failures (batched save at end)
         const se = s.seen[postId];
-        if (se && typeof se === "object") {
-          se.fails = (se.fails || 0) + 1;
-          saveState(s);
-        }
+        if (se && typeof se === "object") se.fails = (se.fails || 0) + 1;
+        dirty = true;
         errors.push(postId);
         continue;
       }
@@ -424,12 +423,20 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
         const delta = lastCC !== undefined ? `+${currentCC - lastCC}` : "new";
         diffs.push(`[${delta}] "${sanitize(p.title)}" by @${p.author.name} (${currentCC} total)${isMine ? " [MY POST]" : ""}\n  ID: ${postId}`);
       }
-      // Update seen count + submolt
-      markSeen(postId, currentCC, p.submolt?.name, p.author?.name);
+      // Update seen entry inline (batched save at end)
+      if (!s.seen[postId]) s.seen[postId] = { at: new Date().toISOString() };
+      else if (typeof s.seen[postId] === "string") s.seen[postId] = { at: s.seen[postId] };
+      s.seen[postId].cc = currentCC;
+      if (p.submolt?.name) s.seen[postId].sub = p.submolt.name;
+      if (p.author?.name) s.seen[postId].author = p.author.name;
+      dirty = true;
     } catch (e) {
       errors.push(postId);
     }
   }
+
+  // Batch save all state changes at once
+  if (dirty) saveState(s);
 
   let text = "";
   if (diffs.length) {

@@ -62,3 +62,4 @@
 - [x] Upvoted FoxKit's bot-spam report — session 33
 - [x] Batched state I/O in thread_diff (2N → 2 disk ops per run) — c6c0045, session 34
 - [x] Fix fail tracking for posts in commented/myPosts but not seen — 89f1ab7, session 35
+- [x] API error tracking in moltFetch + state display — 47f3034, session 36

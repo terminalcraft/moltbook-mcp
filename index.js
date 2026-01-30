@@ -105,12 +105,16 @@ let apiCallCount = 0;
 const apiCallLog = {}; // path prefix -> count
 const sessionStart = new Date().toISOString();
 
+// Session activity log — semantic actions this session
+const sessionActions = []; // ["commented on X", "posted Y", ...]
+function logAction(action) { sessionActions.push(action); }
+
 function saveApiSession() {
   const s = loadState();
   if (!s.apiHistory) s.apiHistory = [];
   // Update or append current session entry
   const existing = s.apiHistory.findIndex(h => h.session === sessionStart);
-  const entry = { session: sessionStart, calls: apiCallCount, log: { ...apiCallLog } };
+  const entry = { session: sessionStart, calls: apiCallCount, log: { ...apiCallLog }, actions: [...sessionActions] };
   if (existing >= 0) s.apiHistory[existing] = entry;
   else s.apiHistory.push(entry);
   // Keep last 50 sessions
@@ -205,7 +209,10 @@ server.tool("moltbook_post_create", "Create a new post in a submolt", {
   if (content) body.content = content;
   if (url) body.url = url;
   const data = await moltFetch("/posts", { method: "POST", body: JSON.stringify(body) });
-  if (data.success && data.post) markMyPost(data.post.id);
+  if (data.success && data.post) {
+    markMyPost(data.post.id);
+    logAction(`posted "${title}" in m/${submolt}`);
+  }
   let text = JSON.stringify(data, null, 2);
   if (outboundWarnings.length) text += `\n\n⚠️ OUTBOUND WARNINGS: ${outboundWarnings.join(", ")}. Review your post for accidental sensitive data.`;
   return { content: [{ type: "text", text }] };
@@ -224,6 +231,7 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
   if (data.success && data.comment) {
     markCommented(post_id, data.comment.id);
     markMyComment(post_id, data.comment.id);
+    logAction(`commented on ${post_id.slice(0, 8)}`);
   }
   let text = JSON.stringify(data, null, 2);
   if (outboundWarnings.length) text += `\n\n⚠️ OUTBOUND WARNINGS: ${outboundWarnings.join(", ")}. Review your comment for accidental sensitive data.`;
@@ -238,8 +246,8 @@ server.tool("moltbook_vote", "Upvote or downvote a post or comment", {
 }, async ({ type, id, direction }) => {
   const prefix = type === "post" ? "posts" : "comments";
   const data = await moltFetch(`/${prefix}/${id}/${direction}`, { method: "POST" });
-  if (data.success && data.action === "upvoted") markVoted(id);
-  if (data.success && data.action === "removed") unmarkVoted(id);
+  if (data.success && data.action === "upvoted") { markVoted(id); logAction(`upvoted ${type} ${id.slice(0, 8)}`); }
+  if (data.success && data.action === "removed") { unmarkVoted(id); logAction(`unvoted ${type} ${id.slice(0, 8)}`); }
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 });
 
@@ -329,6 +337,14 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
     const recent5 = s.apiHistory.slice(-5).map(h => `${h.session.slice(0, 10)}: ${h.calls}`).join(", ");
     text += `- API history: ${totalCalls} calls across ${sessionCount} sessions (avg ${avg}/session)\n`;
     text += `- Recent sessions: ${recent5}\n`;
+    // Show last session's actions as recap
+    const prevSession = s.apiHistory.length >= 2 ? s.apiHistory[s.apiHistory.length - 2] : null;
+    if (prevSession?.actions?.length) {
+      text += `- Last session actions: ${prevSession.actions.join("; ")}\n`;
+    }
+  }
+  if (sessionActions.length) {
+    text += `- This session actions: ${sessionActions.join("; ")}\n`;
   }
   return { content: [{ type: "text", text }] };
 });

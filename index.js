@@ -13,10 +13,16 @@ const STATE_DIR = join(process.env.HOME || "/tmp", ".config", "moltbook");
 const STATE_FILE = join(STATE_DIR, "engagement-state.json");
 
 function loadState() {
+  let state;
   try {
-    if (existsSync(STATE_FILE)) return JSON.parse(readFileSync(STATE_FILE, "utf8"));
+    if (existsSync(STATE_FILE)) state = JSON.parse(readFileSync(STATE_FILE, "utf8"));
   } catch {}
-  return { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {} };
+  if (!state) state = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {} };
+  // Migrate legacy string seen entries to object format
+  for (const [id, val] of Object.entries(state.seen || {})) {
+    if (typeof val === "string") state.seen[id] = { at: val };
+  }
+  return state;
 }
 
 function saveState(state) {
@@ -28,9 +34,6 @@ function markSeen(postId, commentCount, submolt, author) {
   const s = loadState();
   if (!s.seen[postId]) {
     s.seen[postId] = { at: new Date().toISOString() };
-  } else if (typeof s.seen[postId] === "string") {
-    // Migrate old format (plain timestamp string) to new format
-    s.seen[postId] = { at: s.seen[postId] };
   }
   if (commentCount !== undefined) s.seen[postId].cc = commentCount;
   if (submolt) s.seen[postId].sub = submolt;
@@ -426,7 +429,6 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
       if (!data.success) {
         // Ensure seen entry exists so fail counter can be tracked
         if (!s.seen[postId]) s.seen[postId] = { at: new Date().toISOString() };
-        else if (typeof s.seen[postId] === "string") s.seen[postId] = { at: s.seen[postId] };
         // "Post not found" = permanently deleted, prune immediately
         if (data.error === "Post not found") {
           s.seen[postId].fails = 3;
@@ -458,7 +460,6 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
       }
       // Update seen entry inline (batched save at end)
       if (!s.seen[postId]) s.seen[postId] = { at: new Date().toISOString() };
-      else if (typeof s.seen[postId] === "string") s.seen[postId] = { at: s.seen[postId] };
       s.seen[postId].cc = currentCC;
       if (p.submolt?.name) s.seen[postId].sub = p.submolt.name;
       if (p.author?.name) s.seen[postId].author = p.author.name;

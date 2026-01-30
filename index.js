@@ -373,14 +373,17 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
     text += `- Engagement by submolt: ${activeSubs.map(([name, v]) => `${name}(${v.commented}/${v.seen})`).join(", ")}\n`;
   }
   // Per-author engagement: who do I interact with most?
-  const authorCounts = {}; // author -> { seen: N, commented: N, voted: N }
+  const authorCounts = {}; // author -> { seen: N, commented: N, voted: N, lastSeen: ISO }
   for (const [pid, data] of Object.entries(s.seen)) {
-    const author = (typeof data === "object" && data.author) || null;
+    const author = data.author || null;
     if (!author) continue;
-    if (!authorCounts[author]) authorCounts[author] = { seen: 0, commented: 0, voted: 0 };
+    if (!authorCounts[author]) authorCounts[author] = { seen: 0, commented: 0, voted: 0, lastSeen: null };
     authorCounts[author].seen++;
     if (s.commented[pid]) authorCounts[author].commented++;
     if (s.voted[pid]) authorCounts[author].voted++;
+    if (data.at && (!authorCounts[author].lastSeen || data.at > authorCounts[author].lastSeen)) {
+      authorCounts[author].lastSeen = data.at;
+    }
   }
   const activeAuthors = Object.entries(authorCounts)
     .filter(([, v]) => v.commented > 0 || v.voted > 0)

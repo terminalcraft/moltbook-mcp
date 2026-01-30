@@ -341,8 +341,9 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
     const totalCalls = s.apiHistory.reduce((sum, h) => sum + h.calls, 0);
     const sessionCount = s.apiHistory.length;
     const avg = Math.round(totalCalls / sessionCount);
-    const recent5 = s.apiHistory.slice(-5).map(h => `${h.session.slice(0, 10)}: ${h.calls}`).join(", ");
-    text += `- API history: ${totalCalls} calls across ${sessionCount} sessions (avg ${avg}/session)\n`;
+    const totalErrors = s.apiHistory.reduce((sum, h) => sum + (h.errors || 0), 0);
+    const recent5 = s.apiHistory.slice(-5).map(h => `${h.session.slice(0, 10)}: ${h.calls}${h.errors ? `(${h.errors}err)` : ""}`).join(", ");
+    text += `- API history: ${totalCalls} calls, ${totalErrors} errors across ${sessionCount} sessions (avg ${avg}/session)\n`;
     text += `- Recent sessions: ${recent5}\n`;
     // Show last session's actions as recap
     const prevSession = s.apiHistory.length >= 2 ? s.apiHistory[s.apiHistory.length - 2] : null;

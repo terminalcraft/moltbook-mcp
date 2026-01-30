@@ -464,6 +464,25 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
   return { content: [{ type: "text", text }] };
 });
 
+// Cleanup — remove stale (deleted) posts from tracked state
+server.tool("moltbook_cleanup", "Remove stale posts (3+ fetch failures) from all state maps", {}, async () => {
+  const s = loadState();
+  const staleIds = Object.entries(s.seen)
+    .filter(([, v]) => typeof v === "object" && v.fails >= 3)
+    .map(([id]) => id);
+  if (staleIds.length === 0) return { content: [{ type: "text", text: "No stale entries to clean up." }] };
+  for (const id of staleIds) {
+    delete s.seen[id];
+    delete s.commented[id];
+    delete s.voted[id];
+    delete s.myPosts[id];
+    delete s.myComments[id];
+  }
+  saveState(s);
+  logAction(`cleaned ${staleIds.length} stale posts`);
+  return { content: [{ type: "text", text: `Cleaned ${staleIds.length} stale post(s): ${staleIds.join(", ")}` }] };
+});
+
 // Follow/unfollow
 server.tool("moltbook_follow", "Follow or unfollow a molty", {
   name: z.string().describe("Molty name"),

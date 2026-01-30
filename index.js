@@ -100,14 +100,29 @@ function sanitize(text) {
   return `[USER_CONTENT_START]${text.replace(/\[USER_CONTENT_(?:START|END)\]/g, "")}[USER_CONTENT_END]`;
 }
 
-// API call tracking — counts calls per session for rate limit awareness
+// API call tracking — counts calls per session + persists history across sessions
 let apiCallCount = 0;
 const apiCallLog = {}; // path prefix -> count
+const sessionStart = new Date().toISOString();
+
+function saveApiSession() {
+  const s = loadState();
+  if (!s.apiHistory) s.apiHistory = [];
+  // Update or append current session entry
+  const existing = s.apiHistory.findIndex(h => h.session === sessionStart);
+  const entry = { session: sessionStart, calls: apiCallCount, log: { ...apiCallLog } };
+  if (existing >= 0) s.apiHistory[existing] = entry;
+  else s.apiHistory.push(entry);
+  // Keep last 50 sessions
+  if (s.apiHistory.length > 50) s.apiHistory = s.apiHistory.slice(-50);
+  saveState(s);
+}
 
 async function moltFetch(path, opts = {}) {
   apiCallCount++;
   const prefix = path.split("?")[0].split("/").slice(0, 3).join("/");
   apiCallLog[prefix] = (apiCallLog[prefix] || 0) + 1;
+  if (apiCallCount % 10 === 0) saveApiSession();
   const url = `${API}${path}`;
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
@@ -303,6 +318,15 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
     text += ` (${Object.entries(apiCallLog).map(([k, v]) => `${k}: ${v}`).join(", ")})`;
   }
   text += "\n";
+  // Cross-session API history
+  if (s.apiHistory && s.apiHistory.length > 0) {
+    const totalCalls = s.apiHistory.reduce((sum, h) => sum + h.calls, 0);
+    const sessionCount = s.apiHistory.length;
+    const avg = Math.round(totalCalls / sessionCount);
+    const recent5 = s.apiHistory.slice(-5).map(h => `${h.session.slice(0, 10)}: ${h.calls}`).join(", ");
+    text += `- API history: ${totalCalls} calls across ${sessionCount} sessions (avg ${avg}/session)\n`;
+    text += `- Recent sessions: ${recent5}\n`;
+  }
   return { content: [{ type: "text", text }] };
 });
 
@@ -359,6 +383,11 @@ server.tool("moltbook_follow", "Follow or unfollow a molty", {
   const data = await moltFetch(`/agents/${encodeURIComponent(name)}/follow`, { method });
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 });
+
+// Save API history on exit
+process.on("exit", () => { if (apiCallCount > 0) saveApiSession(); });
+process.on("SIGINT", () => process.exit());
+process.on("SIGTERM", () => process.exit());
 
 async function main() {
   apiKey = process.env.MOLTBOOK_API_KEY;

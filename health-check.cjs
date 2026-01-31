@@ -9,13 +9,13 @@ const fs = require('fs');
 const path = require('path');
 
 const LOG_PATH = path.join(process.env.HOME, '.config/moltbook/health.jsonl');
-const STATE_PATH = path.join(process.env.HOME, '.config/moltbook/engagement-state.json');
+const CREDS_PATH = path.join(process.env.HOME, '.config/moltbook/credentials.json');
 const MAX_LINES = 500; // rotate after this many entries
 
 function getToken() {
   try {
-    const state = JSON.parse(fs.readFileSync(STATE_PATH, 'utf8'));
-    return state.apiToken || null;
+    const creds = JSON.parse(fs.readFileSync(CREDS_PATH, 'utf8'));
+    return creds.api_key || null;
   } catch { return null; }
 }
 

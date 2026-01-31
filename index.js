@@ -686,6 +686,48 @@ server.tool("moltbook_analytics", "Analyze engagement patterns: top authors, sub
     lines.push(`- m/${s.name}: ${s.commented}c ${s.voted}v / ${s.seen} seen (${s.rate}%)`);
   });
 
+  // Time windows for temporal analysis
+  const now = Date.now();
+  const DAY_MS = 86400000;
+  const recentCutoff = new Date(now - DAY_MS).toISOString();
+  const olderCutoff = new Date(now - 3 * DAY_MS).toISOString();
+
+  // Submolt temporal trending (v6): per-submolt velocity over time windows
+  const subTrend = {};
+  for (const [pid, data] of Object.entries(s.seen)) {
+    if (typeof data !== "object" || !data.at || !data.sub) continue;
+    const sub = data.sub;
+    if (!subTrend[sub]) subTrend[sub] = { recent: 0, older: 0, recentEng: 0, olderEng: 0 };
+    if (data.at >= recentCutoff) {
+      subTrend[sub].recent++;
+      if (s.commented[pid] || s.voted[pid]) subTrend[sub].recentEng++;
+    } else if (data.at >= olderCutoff) {
+      subTrend[sub].older++;
+      if (s.commented[pid] || s.voted[pid]) subTrend[sub].olderEng++;
+    }
+  }
+  const trendingSubs = Object.entries(subTrend)
+    .map(([name, v]) => ({ name, ...v, delta: v.recent - v.older }))
+    .filter(s => s.recent + s.older >= 2)
+    .sort((a, b) => b.delta - a.delta);
+  const risingSubs = trendingSubs.filter(s => s.delta > 0);
+  const coolingSubs = trendingSubs.filter(s => s.delta < 0);
+  if (risingSubs.length || coolingSubs.length) {
+    lines.push("\n## Submolt Trending (24h vs prior 48h)");
+    if (risingSubs.length) {
+      lines.push("Rising:");
+      risingSubs.forEach(s => {
+        lines.push(`  - m/${s.name}: ${s.recent} posts last 24h (was ${s.older}), ${s.recentEng} engagements`);
+      });
+    }
+    if (coolingSubs.length) {
+      lines.push("Cooling:");
+      coolingSubs.forEach(s => {
+        lines.push(`  - m/${s.name}: ${s.recent} posts last 24h (was ${s.older})`);
+      });
+    }
+  }
+
   // Session activity trend (last 10 sessions)
   const history = (s.apiHistory || []).slice(-10);
   if (history.length >= 2) {
@@ -698,11 +740,6 @@ server.tool("moltbook_analytics", "Analyze engagement patterns: top authors, sub
   }
 
   // Temporal trending: rising/falling authors + engagement decay
-  const now = Date.now();
-  const DAY_MS = 86400000;
-  const recentCutoff = new Date(now - DAY_MS).toISOString();
-  const olderCutoff = new Date(now - 3 * DAY_MS).toISOString();
-
   for (const a of topAuthors) {
     a.recent = 0;
     a.older = 0;
@@ -780,6 +817,8 @@ server.tool("moltbook_analytics", "Analyze engagement patterns: top authors, sub
   lines.push(`- Sessions recorded: ${(s.apiHistory || []).length}`);
   lines.push(`- Rising authors: ${rising.length}`);
   lines.push(`- Decayed authors: ${decayed.length}`);
+  lines.push(`- Rising submolts: ${risingSubs.length}`);
+  lines.push(`- Cooling submolts: ${coolingSubs.length}`);
 
   return { content: [{ type: "text", text: lines.join("\n") }] };
 });

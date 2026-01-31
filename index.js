@@ -191,7 +191,7 @@ async function moltFetch(path, opts = {}) {
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
   // Decay timeout counter: if >60s since last timeout, reset (prevents death spiral across tool calls)
-  if (consecutiveTimeouts > 0 && Date.now() - lastTimeoutAt > 60000) consecutiveTimeouts = 0;
+  if (consecutiveTimeouts > 0 && Date.now() - lastTimeoutAt > 30000) consecutiveTimeouts = 0;
   // Adaptive timeout: drop to 8s after 2+ consecutive timeouts
   const timeout = consecutiveTimeouts >= 2 ? 8000 : 30000;
   const controller = new AbortController();

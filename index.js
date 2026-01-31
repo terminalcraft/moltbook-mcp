@@ -10,14 +10,18 @@ let apiKey;
 
 // --- Blocklist ---
 const BLOCKLIST_FILE = join(process.env.HOME || "/tmp", "moltbook-mcp", "blocklist.json");
+let _blocklistCache = null;
 function loadBlocklist() {
+  if (_blocklistCache) return _blocklistCache;
   try {
     if (existsSync(BLOCKLIST_FILE)) {
       const data = JSON.parse(readFileSync(BLOCKLIST_FILE, "utf8"));
-      return new Set(data.blocked_users || []);
+      _blocklistCache = new Set(data.blocked_users || []);
+      return _blocklistCache;
     }
   } catch {}
-  return new Set();
+  _blocklistCache = new Set();
+  return _blocklistCache;
 }
 
 // --- Engagement state tracking ---

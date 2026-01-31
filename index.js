@@ -300,7 +300,7 @@ server.tool("moltbook_post", "Get a single post with its comments", {
   if (state.commented[post_id]) stateHints.push(`YOU COMMENTED HERE (${state.commented[post_id].length}x)`);
   if (state.voted[post_id]) stateHints.push("YOU VOTED");
   const stateLabel = stateHints.length ? ` [${stateHints.join(", ")}]` : "";
-  let text = `"${sanitize(p.title)}" by @${p.author.name} in m/${p.submolt.name}${stateLabel}\n${p.upvotes}↑ ${p.downvotes}↓ ${p.comment_count} comments\n\n${sanitize(p.content) || p.url || ""}`;
+  let text = `"${sanitize(p.title)}" by @${p.author?.name || "unknown"} in m/${p.submolt?.name || "unknown"}${stateLabel}\n${p.upvotes}↑ ${p.downvotes}↓ ${p.comment_count} comments\n\n${sanitize(p.content) || p.url || ""}`;
   if (data.comments?.length) {
     text += "\n\n--- Comments ---\n";
     text += formatComments(data.comments);
@@ -312,9 +312,9 @@ function formatComments(comments, depth = 0, blocked = null) {
   if (!blocked) blocked = loadBlocklist();
   let out = "";
   for (const c of comments) {
-    if (blocked.has(c.author.name)) continue;
+    if (blocked.has(c.author?.name)) continue;
     const indent = "  ".repeat(depth);
-    out += `${indent}@${c.author.name} [${c.upvotes}↑] (id:${c.id}): ${sanitize(c.content)}\n`;
+    out += `${indent}@${c.author?.name || "unknown"} [${c.upvotes}↑] (id:${c.id}): ${sanitize(c.content)}\n`;
     if (c.replies?.length) out += formatComments(c.replies, depth + 1, blocked);
   }
   return out;
@@ -413,7 +413,7 @@ server.tool("moltbook_search", "Search posts, agents, and submolts", {
   const r = data.results;
   let text = "";
   if (r.posts?.length) {
-    text += "Posts:\n" + r.posts.map(p => `  [${p.upvotes}↑] "${sanitize(p.title)}" by @${p.author.name} (${p.id})`).join("\n") + "\n\n";
+    text += "Posts:\n" + r.posts.map(p => `  [${p.upvotes}↑] "${sanitize(p.title)}" by @${p.author?.name || "unknown"} (${p.id})`).join("\n") + "\n\n";
   }
   if (r.moltys?.length) {
     text += "Agents:\n" + r.moltys.map(a => `  @${a.name}: ${sanitize(a.description) || ""}`).join("\n") + "\n\n";
@@ -616,13 +616,13 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
       if (isNew) {
         const delta = lastCC !== undefined ? `+${currentCC - lastCC}` : "new";
         const sub = p.submolt?.name ? ` in m/${p.submolt.name}` : "";
-        diffs.push(`[${delta}] "${sanitize(p.title)}" by @${p.author.name}${sub} (${currentCC} total)${isMine ? " [MY POST]" : ""}\n  ID: ${postId}`);
+        diffs.push(`[${delta}] "${sanitize(p.title)}" by @${p.author?.name || "unknown"}${sub} (${currentCC} total)${isMine ? " [MY POST]" : ""}\n  ID: ${postId}`);
       }
       // Update seen entry inline (batched save at end)
       if (!s.seen[postId]) s.seen[postId] = { at: new Date().toISOString() };
       s.seen[postId].cc = currentCC;
       if (p.submolt?.name) s.seen[postId].sub = p.submolt.name;
-      if (p.author?.name) s.seen[postId].author = p.author.name;
+      if (p.author?.name) s.seen[postId].author = p.author?.name;
       dirty = true;
     } catch (e) {
       // Network errors should also increment fail counter + backoff
@@ -735,7 +735,7 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
 
   // Score each post for signal quality + traction prediction
   const scored = data.posts
-    .filter(p => !blocked.has(p.author.name))
+    .filter(p => !blocked.has(p.author?.name))
     .map(p => {
       let score = 0;
       const title = (p.title || "").toLowerCase();
@@ -758,7 +758,7 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
       if (state.seen[p.id] && state.commented[p.id]) score -= 3;
 
       // Traction prediction from author history
-      const aStats = authorStats[p.author.name];
+      const aStats = authorStats[p.author?.name];
       if (aStats && aStats.seen >= 3) {
         const voteRate = aStats.voted / aStats.seen;
         if (voteRate >= 0.5) score += 2;       // high-quality author
@@ -800,7 +800,7 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
     if (state.voted[p.id]) flags.push("VOTED");
     if (inflated) flags.push("INFLATED?");
     const label = flags.length ? ` [${flags.join(", ")}]` : "";
-    return `[score:${score} ${p.upvotes}↑ ${p.comment_count}c] "${sanitize(p.title)}" by @${p.author.name} in m/${p.submolt.name}${label}\n  ID: ${p.id}`;
+    return `[score:${score} ${p.upvotes}↑ ${p.comment_count}c] "${sanitize(p.title)}" by @${p.author?.name || "unknown"} in m/${p.submolt?.name || "unknown"}${label}\n  ID: ${p.id}`;
   }).join("\n\n");
 
   // Persist feed quality snapshot
@@ -810,8 +810,8 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
     at: new Date().toISOString(),
     scanned: data.posts.length,
     signal: scored.length,
-    noise: data.posts.length - scored.length - (data.posts.filter(p => blocked.has(p.author.name)).length),
-    blocked: data.posts.filter(p => blocked.has(p.author.name)).length,
+    noise: data.posts.length - scored.length - (data.posts.filter(p => blocked.has(p.author?.name)).length),
+    blocked: data.posts.filter(p => blocked.has(p.author?.name)).length,
     avgScore: parseFloat(avgScore),
     sort, mode,
   };

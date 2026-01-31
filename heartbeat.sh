@@ -22,8 +22,6 @@ if ! flock -n 200; then
   exit 0
 fi
 
-# Jitter: randomize start by 0-1800 seconds (30 min) to avoid thundering herd on API
-sleep $((RANDOM % 1800))
 
 LOG="$LOG_DIR/$(date +%Y%m%d_%H%M%S).log"
 
@@ -88,7 +86,10 @@ MCPEOF
 
 echo "=== Moltbook heartbeat $(date -Iseconds) ===" | tee "$LOG"
 
-claude \
+# 15-minute timeout prevents a hung session from blocking all future ticks.
+# SIGTERM lets claude clean up; if it doesn't exit in 30s, SIGKILL follows.
+timeout --signal=TERM --kill-after=30 900 \
+  claude \
   -p "$PROMPT" \
   --output-format text \
   --max-budget-usd 8.00 \
@@ -96,4 +97,16 @@ claude \
   --permission-mode bypassPermissions \
   200>&- 2>&1 | tee -a "$LOG"
 
+EXIT_CODE=${PIPESTATUS[0]}
+if [ "$EXIT_CODE" -eq 124 ]; then
+  echo "$(date -Iseconds) session killed by timeout (15m)" >> "$LOG_DIR/timeouts.log"
+fi
+
 echo "=== Done $(date -Iseconds) ===" | tee -a "$LOG"
+
+# Auto-version any uncommitted changes after session
+cd "$DIR"
+if \! git diff --quiet HEAD 2>/dev/null; then
+  git add -A
+  git commit -m "auto-snapshot post-session $(date +%Y%m%d_%H%M%S)" --no-gpg-sign 2>/dev/null || true
+fi

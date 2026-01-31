@@ -36,20 +36,28 @@ async function main() {
   // Login first (ensures account is registered)
   await post('api.mymonero.com', '/login', { ...creds, create_account: true });
 
-  // Get balance
+  // Get blockchain info for sync status
   const info = await post('api.mymonero.com', '/get_address_info', creds);
-
-  const totalXMR = (parseInt(info.total_received || '0', 10) - parseInt(info.total_sent || '0', 10)) / 1e12;
-  const lockedXMR = parseInt(info.locked_funds || '0', 10) / 1e12;
   const synced = info.scanned_block_height >= (info.blockchain_height - 10);
+
+  // Use get_unspent_outs for accurate balance (get_address_info total_sent is unreliable —
+  // MyMonero light wallet server counts false key image matches as spent outputs)
+  const unspent = await post('api.mymonero.com', '/get_unspent_outs', {
+    ...creds, amount: '0', mixin: 15, use_dust: true, dust_threshold: '2000000000'
+  });
+
+  const outputs = unspent.outputs || [];
+  const totalPiconero = outputs.reduce((sum, o) => sum + parseInt(o.amount || '0', 10), 0);
+  const totalXMR = totalPiconero / 1e12;
+  const lockedXMR = parseInt(info.locked_funds || '0', 10) / 1e12;
 
   const result = {
     balance_xmr: totalXMR,
     locked_xmr: lockedXMR,
+    utxo_count: outputs.length,
     synced,
     scanned_height: info.scanned_block_height,
     blockchain_height: info.blockchain_height,
-    start_height: info.start_height,
     checked_at: new Date().toISOString()
   };
 
@@ -60,9 +68,8 @@ async function main() {
   if (process.argv.includes('--json')) {
     console.log(JSON.stringify(result));
   } else {
-    console.log(`XMR Balance: ${totalXMR.toFixed(12)} (locked: ${lockedXMR.toFixed(12)})`);
+    console.log(`XMR Balance: ${totalXMR.toFixed(12)} (${outputs.length} UTXOs, locked: ${lockedXMR.toFixed(12)})`);
     console.log(`Sync: ${synced ? 'YES' : 'NO'} (${info.scanned_block_height}/${info.blockchain_height})`);
-    if (!synced) console.log(`Start height: ${info.start_height} — wallet still syncing`);
   }
 }
 

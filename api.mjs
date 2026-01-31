@@ -1,5 +1,5 @@
 import express from "express";
-import { readFileSync, writeFileSync, readdirSync } from "fs";
+import { readFileSync, writeFileSync, readdirSync, statSync, openSync, readSync, closeSync } from "fs";
 import { execSync } from "child_process";
 import { join } from "path";
 
@@ -97,7 +97,7 @@ app.get("/status", (req, res) => {
     if (running) {
       try {
         const info = execSync(
-          `LOG=$(ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | head -1) && echo "$LOG" && stat --format='%W' "$LOG" && date +%s && grep -c '"type":"tool_use"' "$LOG" 2>/dev/null || echo 0`,
+          `LOG=$(ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | grep -v health | head -1) && echo "$LOG" && stat --format='%W' "$LOG" && date +%s && grep -c '"type":"tool_use"' "$LOG" 2>/dev/null || echo 0`,
           { encoding: "utf-8" }
         );
         const parts = info.trim().split("\n");
@@ -125,6 +125,126 @@ app.get("/status", (req, res) => {
     next_heartbeat = Math.round((next.getTime() - nowDate.getTime()) / 1000);
 
     res.json({ running, tools, elapsed_seconds, next_heartbeat });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+function getNewestLog() {
+  try {
+    const result = execSync(
+      `ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | grep -v health | head -1`,
+      { encoding: "utf-8" }
+    ).trim();
+    return result || null;
+  } catch { return null; }
+}
+
+function parseLiveActions(logPath, offset) {
+  const st = statSync(logPath);
+  const totalBytes = st.size;
+  if (offset >= totalBytes) {
+    const mtimeAgo = Math.floor((Date.now() - st.mtimeMs) / 1000);
+    return { actions: [], log_bytes: totalBytes, last_activity_ago: mtimeAgo, stats: null };
+  }
+
+  // Read from offset to end
+  const readSize = Math.min(totalBytes - offset, 512 * 1024); // cap at 512KB
+  const buf = Buffer.alloc(readSize);
+  const fd = openSync(logPath, "r");
+  readSync(fd, buf, 0, readSize, offset);
+  closeSync(fd);
+
+  const text = buf.toString("utf-8");
+  const lines = text.split("\n").filter(l => l.trim());
+  const actions = [];
+  const toolCounts = {};
+  let errors = 0;
+  let phase = null;
+
+  for (let idx = 0; idx < lines.length; idx++) {
+    let obj;
+    try { obj = JSON.parse(lines[idx]); } catch { continue; }
+
+    // Extract timestamp from the JSON line
+    const ts = obj.timestamp || null;
+
+    if (obj.type === "assistant" && obj.message?.content) {
+      for (const block of obj.message.content) {
+        if (block.type === "text" && block.text) {
+          const truncated = block.text.length > 200 ? block.text.slice(0, 200) + "..." : block.text;
+          actions.push({ type: "think", text: truncated, ts });
+        }
+        if (block.type === "tool_use") {
+          const name = block.name || "unknown";
+          const inputSummary = block.input ?
+            (typeof block.input === "string" ? block.input.slice(0, 80) :
+             block.input.path || block.input.command?.slice(0, 80) || block.input.query?.slice(0, 80) || "") : "";
+          actions.push({ type: "tool", name, input_summary: inputSummary, ts });
+          toolCounts[name] = (toolCounts[name] || 0) + 1;
+          // Phase inference
+          if (name.startsWith("moltbook_")) {
+            const sub = name.replace("moltbook_", "");
+            if (["digest", "feed"].includes(sub)) phase = "LISTEN";
+            else if (["upvote", "comment", "post"].includes(sub)) phase = "ENGAGE";
+            else if (["thread_diff", "write_post"].includes(sub)) phase = "BUILD";
+          }
+        }
+      }
+    } else if (obj.type === "user" && obj.message?.content) {
+      for (const block of obj.message.content) {
+        if (block.type === "tool_result") {
+          const success = !block.is_error;
+          if (!success) errors++;
+          actions.push({ type: "tool_result", name: block.tool_use_id || "", success, ts });
+        }
+      }
+    } else if (obj.type === "result") {
+      actions.push({
+        type: "end",
+        cost_usd: obj.cost_usd || null,
+        duration_ms: obj.duration_ms || null,
+        input_tokens: obj.usage?.input_tokens || null,
+        output_tokens: obj.usage?.output_tokens || null,
+        ts,
+      });
+    }
+  }
+
+  // Keep only last 30 actions
+  const trimmed = actions.slice(-30);
+  const mtimeAgo = Math.floor((Date.now() - st.mtimeMs) / 1000);
+  const totalTools = Object.values(toolCounts).reduce((a, b) => a + b, 0);
+
+  return {
+    actions: trimmed,
+    log_bytes: totalBytes,
+    last_activity_ago: mtimeAgo,
+    stats: { tools_total: totalTools, tool_counts: toolCounts, errors, phase },
+  };
+}
+
+app.get("/live", (req, res) => {
+  try {
+    const logPath = getNewestLog();
+    if (!logPath) {
+      return res.json({ active: false, actions: [], log_bytes: 0, last_activity_ago: null, stats: null });
+    }
+
+    // Check if session is actually running
+    let running = false;
+    try {
+      const lockCheck = execSync(
+        "flock -n /home/moltbot/.config/moltbook/heartbeat.lock true 2>/dev/null && echo free || echo locked",
+        { encoding: "utf-8" }
+      ).trim();
+      running = lockCheck === "locked";
+    } catch { running = false; }
+
+    const offset = parseInt(req.query.offset) || 0;
+    const result = parseLiveActions(logPath, offset);
+    result.active = running;
+    res.json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

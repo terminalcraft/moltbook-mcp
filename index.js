@@ -1140,6 +1140,80 @@ server.tool("moltbook_follow", "Follow or unfollow a molty", {
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 });
 
+// --- State export/import for cross-agent handoff ---
+
+server.tool("moltbook_export", "Export engagement state as portable JSON for handoff to another agent", {}, async () => {
+  trackTool("moltbook_export");
+  const s = loadState();
+  const portable = {
+    "$schema": "https://github.com/terminalcraft/moltbook-mcp/agent-state.schema.json",
+    version: 1,
+    exported_at: new Date().toISOString(),
+    seen: {},
+    commented: {},
+    voted: {},
+    myPosts: {},
+    myComments: {}
+  };
+  // Export seen with normalized format
+  for (const [id, val] of Object.entries(s.seen || {})) {
+    const entry = typeof val === "string" ? { at: val } : val;
+    portable.seen[id] = { at: entry.at, cc: entry.cc || 0 };
+  }
+  // Export commented, voted, myPosts, myComments directly
+  for (const [id, val] of Object.entries(s.commented || {})) {
+    portable.commented[id] = Array.isArray(val) ? val : [{ commentId: "unknown", at: val }];
+  }
+  for (const [id, val] of Object.entries(s.voted || {})) {
+    portable.voted[id] = typeof val === "string" ? val : new Date().toISOString();
+  }
+  for (const [id, val] of Object.entries(s.myPosts || {})) {
+    portable.myPosts[id] = typeof val === "string" ? val : new Date().toISOString();
+  }
+  for (const [id, val] of Object.entries(s.myComments || {})) {
+    portable.myComments[id] = Array.isArray(val) ? val : [{ commentId: "unknown", at: val }];
+  }
+  const json = JSON.stringify(portable, null, 2);
+  const stats = `Exported: ${Object.keys(portable.seen).length} seen, ${Object.keys(portable.commented).length} commented, ${Object.keys(portable.voted).length} voted, ${Object.keys(portable.myPosts).length} posts, ${Object.keys(portable.myComments).length} comment threads`;
+  return { content: [{ type: "text", text: `${stats}\n\n${json}` }] };
+});
+
+server.tool("moltbook_import", "Import engagement state from another agent (additive merge, no overwrites)", {
+  state_json: z.string().describe("JSON string of exported state (matching agent-state schema)")
+}, async ({ state_json }) => {
+  trackTool("moltbook_import");
+  let imported;
+  try {
+    imported = JSON.parse(state_json);
+  } catch (e) {
+    return { content: [{ type: "text", text: `Invalid JSON: ${e.message}` }] };
+  }
+  if (!imported.seen || !imported.voted) {
+    return { content: [{ type: "text", text: "Missing required fields (seen, voted). Is this a valid export?" }] };
+  }
+  const s = loadState();
+  let added = { seen: 0, commented: 0, voted: 0, myPosts: 0, myComments: 0 };
+  // Additive merge — only add entries we don't already have
+  for (const [id, val] of Object.entries(imported.seen || {})) {
+    if (!s.seen[id]) { s.seen[id] = typeof val === "string" ? { at: val } : val; added.seen++; }
+  }
+  for (const [id, val] of Object.entries(imported.commented || {})) {
+    if (!s.commented[id]) { s.commented[id] = val; added.commented++; }
+  }
+  for (const [id, val] of Object.entries(imported.voted || {})) {
+    if (!s.voted[id]) { s.voted[id] = val; added.voted++; }
+  }
+  for (const [id, val] of Object.entries(imported.myPosts || {})) {
+    if (!s.myPosts[id]) { s.myPosts[id] = val; added.myPosts++; }
+  }
+  for (const [id, val] of Object.entries(imported.myComments || {})) {
+    if (!s.myComments[id]) { s.myComments[id] = val; added.myComments++; }
+  }
+  saveState(s);
+  const stats = Object.entries(added).map(([k, v]) => `${k}: +${v}`).join(", ");
+  return { content: [{ type: "text", text: `Import complete. Added: ${stats}` }] };
+});
+
 // Save API history on exit
 process.on("exit", () => { if (apiCallCount > 0) saveApiSession(); saveToolUsage(); });
 process.on("SIGINT", () => process.exit());

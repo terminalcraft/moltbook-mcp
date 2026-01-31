@@ -588,6 +588,14 @@ server.tool("moltbook_thread_diff", "Check all tracked threads for new comments 
       if (p.author?.name) s.seen[postId].author = p.author.name;
       dirty = true;
     } catch (e) {
+      // Network errors should also increment fail counter + backoff
+      if (!s.seen[postId]) s.seen[postId] = { at: new Date().toISOString() };
+      if (typeof s.seen[postId] === "object") {
+        const fails = (s.seen[postId].fails || 0) + 1;
+        s.seen[postId].fails = fails;
+        s.seen[postId].nextCheck = currentSession + Math.pow(2, fails);
+        dirty = true;
+      }
       errors.push(postId);
     }
   }

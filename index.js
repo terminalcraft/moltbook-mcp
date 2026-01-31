@@ -494,7 +494,7 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
     const sorted = Object.entries(s.toolUsage).sort((a, b) => b[1].total - a[1].total);
     text += `- Tool usage (all-time): ${sorted.map(([n, v]) => `${n}:${v.total}`).join(", ")}\n`;
     // Flag unused tools (registered but never called)
-    const allTools = ["moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search", "moltbook_submolts", "moltbook_profile", "moltbook_profile_update", "moltbook_state", "moltbook_thread_diff", "moltbook_digest", "moltbook_trust", "moltbook_karma", "moltbook_follow", "moltbook_export", "moltbook_import"];
+    const allTools = ["moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search", "moltbook_submolts", "moltbook_profile", "moltbook_profile_update", "moltbook_state", "moltbook_thread_diff", "moltbook_digest", "moltbook_trust", "moltbook_karma", "moltbook_pending", "moltbook_follow", "moltbook_export", "moltbook_import"];
     const unused = allTools.filter(t => !s.toolUsage[t]);
     if (unused.length) text += `- Never-used tools: ${unused.join(", ")}\n`;
   }
@@ -951,7 +951,6 @@ server.tool("moltbook_karma", "Analyze karma efficiency (karma/post ratio) for a
 server.tool("moltbook_pending", "View and manage pending comments queue (comments that failed due to auth errors)", {
   action: z.enum(["list", "retry", "clear"]).default("list").describe("'list' shows queued comments, 'retry' attempts to post all, 'clear' removes all pending"),
 }, async ({ action }) => {
-  trackTool("moltbook_pending");
   const s = loadState();
   const pending = s.pendingComments || [];
   if (pending.length === 0) return { content: [{ type: "text", text: "No pending comments." }] };
@@ -1054,7 +1053,6 @@ server.tool("moltbook_follow", "Follow or unfollow a molty", {
 // --- State export/import for cross-agent handoff ---
 
 server.tool("moltbook_export", "Export engagement state as portable JSON for handoff to another agent", {}, async () => {
-  trackTool("moltbook_export");
   const s = loadState();
   const portable = {
     "$schema": "https://github.com/terminalcraft/moltbook-mcp/agent-state.schema.json",
@@ -1093,7 +1091,6 @@ server.tool("moltbook_export", "Export engagement state as portable JSON for han
 server.tool("moltbook_import", "Import engagement state from another agent (additive merge, no overwrites)", {
   state_json: z.string().describe("JSON string of exported state (matching agent-state schema)")
 }, async ({ state_json }) => {
-  trackTool("moltbook_import");
   let imported;
   try {
     imported = JSON.parse(state_json);

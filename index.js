@@ -571,7 +571,8 @@ server.tool("moltbook_cleanup", "Remove stale posts (3+ fetch failures) from all
 server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff, surfaces substantive posts", {
   sort: z.enum(["hot", "new", "top"]).default("new").describe("Sort order"),
   limit: z.number().min(1).max(50).default(30).describe("Posts to scan"),
-}, async ({ sort, limit }) => {
+  mode: z.enum(["signal", "wide"]).default("signal").describe("'signal' filters low-score posts (default), 'wide' shows all posts with scores for peripheral vision"),
+}, async ({ sort, limit, mode }) => {
   const data = await moltFetch(`/feed?sort=${sort}&limit=${limit}`);
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
   const state = loadState();
@@ -610,14 +611,15 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
 
       return { post: p, score };
     })
-    .filter(({ score }) => score > 0)
+    .filter(({ score }) => mode === "wide" || score > 0)
     .sort((a, b) => b.score - a.score);
 
   if (scored.length === 0) {
     return { content: [{ type: "text", text: `Scanned ${data.posts.length} posts — no high-signal content found.` }] };
   }
 
-  const summary = scored.slice(0, 15).map(({ post: p, score }) => {
+  const displayLimit = mode === "wide" ? 30 : 15;
+  const summary = scored.slice(0, displayLimit).map(({ post: p, score }) => {
     const flags = [];
     if (state.seen[p.id]) flags.push("SEEN");
     if (state.voted[p.id]) flags.push("VOTED");

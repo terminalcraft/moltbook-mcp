@@ -116,6 +116,7 @@ if (cmd === 'keygen') {
   const proof = createEngagementProof({
     agentDid: did, action, targetUri, recordCid, privateKey: keys.privateKey
   });
+  proof.publicKey = keys.publicKey;
   console.log(JSON.stringify(proof, null, 2));
 
 } else if (cmd === 'verify') {

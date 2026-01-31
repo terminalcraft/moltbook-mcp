@@ -24,7 +24,27 @@ function saveStore(store) {
   fs.writeFileSync(STORE_PATH, JSON.stringify(store.slice(-MAX_STORED), null, 2));
 }
 
-function verifyProof(proof) {
+// Normalize ATProto-format proofs to internal format
+function normalizeProof(raw) {
+  // ATProto format: agentDid, platformSig, createdAt, publicKey optional
+  if (raw.agentDid && raw.platformSig) {
+    return {
+      did: raw.agentDid,
+      action: raw.action,
+      timestamp: raw.createdAt,
+      publicKey: raw.publicKey || null,
+      signature: raw.platformSig,
+      targetUri: raw.targetUri,
+      recordCid: raw.recordCid,
+      format: 'atproto'
+    };
+  }
+  // Generic format: did, signature, timestamp, publicKey
+  return { ...raw, format: 'generic' };
+}
+
+function verifyProof(rawProof) {
+  const proof = normalizeProof(rawProof);
   const errors = [];
 
   // Required fields
@@ -55,12 +75,19 @@ function verifyProof(proof) {
     const pubKeyDer = Buffer.from(proof.publicKey, 'base64url');
     const pubKeyObj = crypto.createPublicKey({ key: pubKeyDer, format: 'der', type: 'spki' });
 
-    // Reconstruct the signed payload (canonical JSON of proof fields minus signature)
-    const { signature, ...payload } = proof;
-    const canonical = JSON.stringify(payload, Object.keys(payload).sort());
-    const sigBuf = Buffer.from(signature, 'base64url');
+    // Reconstruct signed payload based on format
+    let payloadStr;
+    if (proof.format === 'atproto') {
+      // ATProto engagement-proof.cjs uses pipe-delimited: did|action|recordCid|timestamp
+      payloadStr = [proof.did, proof.action, proof.recordCid || '', proof.timestamp].join('|');
+    } else {
+      // Generic: canonical JSON of all fields minus signature and format
+      const { signature, format, ...payload } = proof;
+      payloadStr = JSON.stringify(payload, Object.keys(payload).sort());
+    }
 
-    const ok = crypto.verify(null, Buffer.from(canonical), pubKeyObj, sigBuf);
+    const sigBuf = Buffer.from(proof.signature, 'base64url');
+    const ok = crypto.verify(null, Buffer.from(payloadStr), pubKeyObj, sigBuf);
     if (!ok) {
       return { valid: false, errors: ['signature verification failed'] };
     }
@@ -68,7 +95,7 @@ function verifyProof(proof) {
     return { valid: false, errors: [`crypto error: ${e.message}`] };
   }
 
-  return { valid: true, errors: [] };
+  return { valid: true, errors: [], did: proof.did, action: proof.action, format: proof.format };
 }
 
 function jsonResponse(res, status, data) {
@@ -135,14 +162,16 @@ const server = http.createServer(async (req, res) => {
     result.verifiedBy = 'did:web:terminalcraft.bsky.social';
 
     if (result.valid) {
+      const normalized = normalizeProof(proof);
       const store = loadStore();
       store.push({
-        did: proof.did,
-        action: proof.action,
-        timestamp: proof.timestamp,
-        target: proof.target || null,
-        publicKeyPrefix: proof.publicKey.substring(0, 16) + '...',
+        did: normalized.did,
+        action: normalized.action,
+        timestamp: normalized.timestamp,
+        target: normalized.targetUri || proof.target || null,
+        publicKeyPrefix: normalized.publicKey.substring(0, 16) + '...',
         verifiedAt: result.verifiedAt,
+        format: result.format,
       });
       saveStore(store);
     }

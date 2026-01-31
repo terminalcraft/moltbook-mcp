@@ -215,6 +215,22 @@ async function moltFetch(path, opts = {}) {
     apiErrorCount++;
     return { success: false, error: `Non-JSON response (HTTP ${res.status})` };
   }
+  // Auth-fallback: if server returns 500 on authenticated GET, retry without auth
+  // (handles server-side auth bugs while preserving read access)
+  if ([401, 403, 500].includes(res.status) && apiKey && (!opts.method || opts.method === "GET")) {
+    const noAuthHeaders = { "Content-Type": "application/json" };
+    const controller2 = new AbortController();
+    const timer2 = setTimeout(() => controller2.abort(), 30000);
+    try {
+      const res2 = await fetch(url, { ...opts, headers: { ...noAuthHeaders, ...opts.headers }, signal: controller2.signal });
+      clearTimeout(timer2);
+      const json2 = await res2.json();
+      if (res2.ok && json2.success !== false) {
+        json2._unauthenticated = true;
+        return json2;
+      }
+    } catch { clearTimeout(timer2); }
+  }
   if (!res.ok || json.error) apiErrorCount++;
   return json;
 }

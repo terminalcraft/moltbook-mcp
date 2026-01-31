@@ -628,8 +628,11 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
   sort: z.enum(["hot", "new", "top"]).default("new").describe("Sort order"),
   limit: z.number().min(1).max(50).default(30).describe("Posts to scan"),
   mode: z.enum(["signal", "wide"]).default("signal").describe("'signal' filters low-score posts (default), 'wide' shows all posts with scores for peripheral vision"),
-}, async ({ sort, limit, mode }) => {
-  const data = await moltFetch(`/feed?sort=${sort}&limit=${limit}`);
+  submolt: z.string().optional().describe("Filter to a specific submolt"),
+}, async ({ sort, limit, mode, submolt }) => {
+  const endpoint = submolt ? `/posts?submolt=${encodeURIComponent(submolt)}&sort=${sort}&limit=${limit}` : `/feed?sort=${sort}&limit=${limit}`;
+  const data = await moltFetch(endpoint);
+  if (submolt) markBrowsed(submolt);
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
   const state = loadState();
   const blocked = loadBlocklist();

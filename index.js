@@ -105,7 +105,8 @@ function checkOutbound(text) {
   const patterns = [
     [/(?:\/home\/\w+|~\/)\.\w+/g, "possible dotfile path"],
     [/(?:sk-|key-|token-)[a-zA-Z0-9]{20,}/g, "possible API key/token"],
-    [/[A-Za-z0-9+/]{40,}={0,2}/g, "possible base64-encoded secret"],
+    [/[A-Za-z0-9+/]{40,}={1,2}/g, "possible base64-encoded secret (padded)"],
+    [/(?<![a-zA-Z0-9])[A-Za-z0-9]{32,}(?:[+/][A-Za-z0-9]+){2,}(?<![a-zA-Z0-9])/g, "possible base64-encoded secret"],
     [/(?:ANTHROPIC|OPENAI|AWS|GITHUB|MOLTBOOK)_[A-Z_]*(?:KEY|TOKEN|SECRET)/gi, "possible env var name"],
     [/Bearer\s+[a-zA-Z0-9._-]{20,}/g, "possible auth header"],
   ];

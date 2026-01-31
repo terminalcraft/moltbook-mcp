@@ -11,8 +11,15 @@ const path = require('path');
 
 const PORT = parseInt(process.env.VERIFY_PORT || '3847', 10);
 const STORE_PATH = path.join(__dirname, 'verified-proofs.json');
+const BLOCKLIST_PATH = path.join(__dirname, 'blocklist.json');
 const MAX_STORED = 500;
 const MAX_BODY = 16384; // 16KB max request body
+
+function loadBlocklist() {
+  try {
+    return JSON.parse(fs.readFileSync(BLOCKLIST_PATH, 'utf8'));
+  } catch { return { blocked_users: [], reasons: {} }; }
+}
 
 function loadStore() {
   try {
@@ -160,6 +167,8 @@ function renderHtml(store) {
   <li><code>POST /verify</code> — submit proof JSON for verification</li>
   <li><code>GET /verified</code> — public ledger (JSON)</li>
   <li><code>GET /health</code> — health check</li>
+  <li><code>GET /blocklist</code> — shared spam/bot blocklist (JSON)</li>
+  <li><code>GET /blocklist?check=username</code> — check if a user is blocked</li>
 </ul>
 <p style="font-size:.85rem"><a href="https://github.com/terminalcraft/moltbook-mcp/blob/main/docs/agent-engagement-proof-lexicon.md">Spec</a> · Operator: <a href="https://bsky.app/profile/terminalcraft.bsky.social">@terminalcraft</a></p>
 <h2 style="color:#c9d1d9;font-size:1rem">Public Ledger</h2>
@@ -252,15 +261,38 @@ const server = http.createServer(async (req, res) => {
     }
     return jsonResponse(res, 200, {
       service: 'Agent Engagement Proof Verifier',
-      version: '1.1.0',
+      version: '1.2.0',
       operator: 'terminalcraft.bsky.social',
       endpoints: {
         'POST /verify': 'Submit a proof JSON for signature verification',
         'GET /verified': 'List recently verified proofs (public ledger)',
         'GET /verified?format=html': 'Public ledger (HTML)',
         'GET /health': 'Service health check',
+        'GET /blocklist': 'Shared spam/bot blocklist',
+        'GET /blocklist?check=username': 'Check if a specific user is blocked',
       },
       spec: 'https://github.com/terminalcraft/moltbook-mcp/blob/main/docs/agent-engagement-proof-lexicon.md',
+    });
+  }
+
+  // Blocklist API
+  if (url.pathname === '/blocklist' && req.method === 'GET') {
+    const bl = loadBlocklist();
+    const user = url.searchParams.get('check');
+    if (user) {
+      const blocked = (bl.blocked_users || []).includes(user);
+      return jsonResponse(res, 200, {
+        user,
+        blocked,
+        reason: blocked ? (bl.reasons?.[user] || 'no reason recorded') : null,
+      });
+    }
+    return jsonResponse(res, 200, {
+      count: (bl.blocked_users || []).length,
+      last_updated: bl.last_updated || null,
+      version: bl.version || 1,
+      users: bl.blocked_users || [],
+      reasons: bl.reasons || {},
     });
   }
 

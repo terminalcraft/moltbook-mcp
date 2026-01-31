@@ -1161,6 +1161,56 @@ server.tool("moltbook_thread_quality", "Score a thread's comment quality: substa
   return { content: [{ type: "text", text: lines.join("\n") }] };
 });
 
+// Submolt comparison — cross-submolt analytics from accumulated state
+server.tool("moltbook_submolt_compare", "Compare submolts by engagement density, quality, and activity from state data", {}, async () => {
+  const s = loadState();
+  const subs = {};
+
+  // Aggregate from seen posts
+  for (const [pid, data] of Object.entries(s.seen || {})) {
+    if (typeof data !== "object" || !data.sub) continue;
+    const sub = data.sub;
+    if (!subs[sub]) subs[sub] = { seen: 0, voted: 0, commented: 0, authors: new Set(), recent: 0, qualitySum: 0, qualityCount: 0 };
+    subs[sub].seen++;
+    if (data.author) subs[sub].authors.add(data.author);
+    // Recent = last 48h
+    if (data.at && Date.now() - new Date(data.at).getTime() < 172800000) subs[sub].recent++;
+    if (s.voted[pid]) subs[sub].voted++;
+    if (s.commented[pid]) subs[sub].commented++;
+  }
+
+  // Overlay quality scores
+  for (const [, q] of Object.entries(s.qualityScores || {})) {
+    const sub = q.sub || "unknown";
+    if (subs[sub]) {
+      subs[sub].qualitySum += q.score;
+      subs[sub].qualityCount++;
+    }
+  }
+
+  const entries = Object.entries(subs).filter(([, v]) => v.seen >= 3);
+  if (entries.length === 0) return { content: [{ type: "text", text: "Not enough state data yet. Browse more posts first." }] };
+
+  // Compute engagement density = (voted + commented) / seen
+  const ranked = entries.map(([name, v]) => {
+    const density = ((v.voted + v.commented) / v.seen * 100).toFixed(0);
+    const avgQuality = v.qualityCount > 0 ? Math.round(v.qualitySum / v.qualityCount) : null;
+    return { name, ...v, authors: v.authors.size, density: parseFloat(density), avgQuality };
+  }).sort((a, b) => b.density - a.density);
+
+  const lines = ["## Submolt Comparison\n"];
+  lines.push("| Submolt | Posts | Authors | Voted | Commented | Density | Quality | Recent |");
+  lines.push("|---------|-------|---------|-------|-----------|---------|---------|--------|");
+  for (const r of ranked) {
+    const q = r.avgQuality !== null ? `${r.avgQuality}/100` : "—";
+    lines.push(`| m/${r.name} | ${r.seen} | ${r.authors} | ${r.voted} | ${r.commented} | ${r.density}% | ${q} | ${r.recent} |`);
+  }
+
+  lines.push(`\nDensity = (voted + commented) / seen. Higher = more engaging content.`);
+  lines.push(`Recent = posts seen in last 48h.`);
+  return { content: [{ type: "text", text: lines.join("\n") }] };
+});
+
 // Quality trends per submolt
 server.tool("moltbook_quality_trends", "Show thread quality score trends per submolt over time", {}, async () => {
   const s = loadState();

@@ -86,6 +86,9 @@ cat > "$MCP_FILE" <<MCPEOF
 }
 MCPEOF
 
+# Probe API health before session (non-blocking, best-effort)
+node "$DIR/health-check.cjs" >> "$LOG_DIR/health.log" 2>&1 || true
+
 echo "=== Moltbook heartbeat $(date -Iseconds) ===" | tee "$LOG"
 
 # 15-minute timeout prevents a hung session from blocking all future ticks.

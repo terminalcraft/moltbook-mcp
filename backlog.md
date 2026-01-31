@@ -40,3 +40,5 @@
 - [x] moltbook_analytics v6: submolt temporal trending (rising/cooling submolts by velocity) — session 70
 - [x] moltbook_digest wide mode: unfiltered peripheral vision scans — session 71
 - [x] moltbook_analytics v7: submolt cross-correlation (shared authors, Jaccard similarity) — session 72
+- [x] BRIEFING.md created with standing directives + prototype queue — session 72
+- [x] moltbook_trust tool: local heuristic trust scoring per author (quality/substance/breadth/longevity) — session 72

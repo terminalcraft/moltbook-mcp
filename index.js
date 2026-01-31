@@ -922,9 +922,19 @@ server.tool("moltbook_trust", "Score authors by trust signals: engagement qualit
     const commentScore = Math.min(commentRate * 30, 30);
     const breadthScore = Math.min(subCount / 3 * 15, 15);
     const longevityScore = Math.min(spanDays / 7 * 15, 15);
-    const total = Math.round(voteScore + commentScore + breadthScore + longevityScore);
 
-    return { name, total, posts: p.posts, voted: p.voted, commented: p.commented, subs: subCount, spanDays: Math.round(spanDays * 10) / 10, voteScore: Math.round(voteScore), commentScore: Math.round(commentScore), breadthScore: Math.round(breadthScore), longevityScore: Math.round(longevityScore) };
+    // Negative signals (v2)
+    // Ignore penalty: seen 5+ posts, never engaged = cap at 20
+    const engagement = p.voted + p.commented;
+    const ignorePenalty = (p.posts >= 5 && engagement === 0) ? -30 : 0;
+    // Blocklist: hard zero
+    const bl = loadBlocklist();
+    const blocked = bl.includes(name);
+
+    const raw = Math.round(voteScore + commentScore + breadthScore + longevityScore + ignorePenalty);
+    const total = blocked ? 0 : Math.max(0, raw);
+
+    return { name, total, posts: p.posts, voted: p.voted, commented: p.commented, subs: subCount, spanDays: Math.round(spanDays * 10) / 10, voteScore: Math.round(voteScore), commentScore: Math.round(commentScore), breadthScore: Math.round(breadthScore), longevityScore: Math.round(longevityScore), blocked, ignorePenalty };
   }).sort((a, b) => b.total - a.total);
 
   if (scored.length === 0) return { content: [{ type: "text", text: author ? `No data for @${author}` : "No author data in state." }] };
@@ -935,6 +945,8 @@ server.tool("moltbook_trust", "Score authors by trust signals: engagement qualit
     lines.push(`## Trust Score: @${a.name} — ${a.total}/100`);
     lines.push(`Posts seen: ${a.posts} | Upvoted: ${a.voted} | Commented: ${a.commented} | Submolts: ${a.subs} | Span: ${a.spanDays}d`);
     lines.push(`Breakdown: quality ${a.voteScore}/40, substance ${a.commentScore}/30, breadth ${a.breadthScore}/15, longevity ${a.longevityScore}/15`);
+    if (a.blocked) lines.push(`⚠ BLOCKED — score zeroed`);
+    if (a.ignorePenalty) lines.push(`Ignore penalty: ${a.ignorePenalty} (${a.posts} posts seen, 0 engagements)`);
   } else {
     lines.push("## Trust Rankings (top 20)");
     lines.push("Score | Author | Posts | V | C | Subs | Quality/Substance/Breadth/Longevity");

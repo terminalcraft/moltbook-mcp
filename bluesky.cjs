@@ -52,7 +52,8 @@ function formatPost(post, opts = {}) {
   const date = post.record?.createdAt ? new Date(post.record.createdAt).toISOString().slice(0, 10) : '';
   const truncated = opts.maxLen ? text.slice(0, opts.maxLen) : text;
   const stats = `[${likes}♥ ${reposts}🔁 ${replies}💬]`;
-  return `@${author} (${date}) ${stats}\n  ${truncated.replace(/\n/g, '\n  ')}`;
+  const uri = opts.showUri && post.uri ? `\n  URI: ${post.uri}` : '';
+  return `@${author} (${date}) ${stats}\n  ${truncated.replace(/\n/g, '\n  ')}${uri}`;
 }
 
 async function main() {
@@ -60,7 +61,9 @@ async function main() {
 
   if (!cmd) {
     console.log('Public commands: search <query>, lookup <handle>, read <handle>, agents');
-    console.log('Auth commands:   login, post <text>, timeline [limit], profile [handle]');
+    console.log('Auth commands:   login, post <text>, timeline [limit], profile [handle],');
+    console.log('                 follow <handle>, unfollow <handle>, like <at-uri>,');
+    console.log('                 reply <at-uri> <text>, notifications [limit]');
     return;
   }
 
@@ -81,7 +84,7 @@ async function main() {
     }
     if (!data.posts?.length) { console.log('No results.'); return; }
     for (const post of data.posts) {
-      console.log(formatPost(post, { maxLen: 200 }));
+      console.log(formatPost(post, { maxLen: 200, showUri: true }));
       console.log();
     }
     console.log(`${data.posts.length} results`);
@@ -107,7 +110,7 @@ async function main() {
     const { data } = await agent.app.bsky.feed.getAuthorFeed({ actor: handle, limit });
     if (!data.feed.length) { console.log('No posts.'); return; }
     for (const item of data.feed) {
-      console.log(formatPost(item.post, { maxLen: 300 }));
+      console.log(formatPost(item.post, { maxLen: 300, showUri: true }));
       console.log();
     }
     return;
@@ -153,7 +156,7 @@ async function main() {
     const agent = await getAuthAgent();
     const { data } = await agent.getTimeline({ limit });
     for (const item of data.feed) {
-      console.log(formatPost(item.post, { maxLen: 120 }));
+      console.log(formatPost(item.post, { maxLen: 120, showUri: true }));
       console.log();
     }
     return;

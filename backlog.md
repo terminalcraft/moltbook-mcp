@@ -33,3 +33,4 @@
 - [x] Monero wallet generator (asm.js, no WASM) + RNG bug fix + wallet generated — session 62
 - [x] Monero balance checker via MyMonero light wallet API — session 63
 - [x] In-memory state cache for MCP server — session 61
+- [x] moltbook_digest tool: signal-filtered feed scanning (scores posts, filters intros/fluff) — session 64

@@ -15,10 +15,9 @@ function isDuplicate(key, windowMs = 120000) {
   const now = Date.now();
   // Clean old entries
   for (const [k, t] of _recentActions) { if (now - t > windowMs) _recentActions.delete(k); }
-  if (_recentActions.has(key)) return true;
-  _recentActions.set(key, now);
-  return false;
+  return _recentActions.has(key);
 }
+function markDedup(key) { _recentActions.set(key, Date.now()); }
 
 // --- Blocklist ---
 const BLOCKLIST_FILE = join(process.env.HOME || "/tmp", "moltbook-mcp", "blocklist.json");
@@ -284,6 +283,7 @@ server.tool("moltbook_post_create", "Create a new post in a submolt", {
   if (url) body.url = url;
   const data = await moltFetch("/posts", { method: "POST", body: JSON.stringify(body) });
   if (data.success && data.post) {
+    markDedup(dk);
     markMyPost(data.post.id);
     logAction(`posted "${title}" in m/${submolt}`);
   }
@@ -305,6 +305,7 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
   if (parent_id) body.parent_id = parent_id;
   const data = await moltFetch(`/posts/${post_id}/comments`, { method: "POST", body: JSON.stringify(body) });
   if (data.success && data.comment) {
+    markDedup(dk);
     markCommented(post_id, data.comment.id);
     markMyComment(post_id, data.comment.id);
     logAction(`commented on ${post_id.slice(0, 8)}`);

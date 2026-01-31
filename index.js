@@ -679,12 +679,53 @@ server.tool("moltbook_analytics", "Analyze engagement patterns: top authors, sub
     });
   }
 
+  // Temporal trending: rising/falling authors + engagement decay
+  const now = Date.now();
+  const DAY_MS = 86400000;
+  const recentCutoff = new Date(now - DAY_MS).toISOString();
+  const olderCutoff = new Date(now - 3 * DAY_MS).toISOString();
+
+  for (const a of topAuthors) {
+    a.recent = 0;
+    a.older = 0;
+  }
+  const authorMap = Object.fromEntries(topAuthors.map(a => [a.name, a]));
+  for (const [pid, data] of Object.entries(s.seen)) {
+    if (typeof data !== "object" || !data.author || !data.at) continue;
+    const a = authorMap[data.author];
+    if (!a) continue;
+    if (data.at >= recentCutoff) a.recent++;
+    else if (data.at >= olderCutoff) a.older++;
+  }
+
+  // Rising: authors with >= 2 recent posts and more recent than older
+  const rising = topAuthors.filter(a => a.recent >= 2 && a.recent > a.older);
+  if (rising.length) {
+    lines.push("\n## Rising Authors (high recent activity)");
+    rising.slice(0, 10).forEach(a => {
+      lines.push(`- @${a.name}: ${a.recent} posts last 24h (vs ${a.older} prior 48h)`);
+    });
+  }
+
+  // Engagement decay: authors seen 3+ times total, with lastSeen > 48h ago
+  const decayCutoff = new Date(now - 2 * DAY_MS).toISOString();
+  const decayed = topAuthors.filter(a => a.seen >= 3 && a.engagement > 0 && a.lastSeen && a.lastSeen < decayCutoff);
+  if (decayed.length) {
+    lines.push("\n## Engagement Decay (previously active, quiet 48h+)");
+    decayed.slice(0, 10).forEach(a => {
+      const ago = ((now - new Date(a.lastSeen).getTime()) / DAY_MS).toFixed(1);
+      lines.push(`- @${a.name}: ${a.engagement} engagements, last seen ${ago}d ago`);
+    });
+  }
+
   // Summary stats
   lines.push(`\n## Summary`);
   lines.push(`- Total authors tracked: ${Object.keys(authors).length}`);
   lines.push(`- Authors engaged with (comment or vote): ${topAuthors.filter(a => a.engagement > 0).length}`);
   lines.push(`- Active submolts: ${topSubs.filter(s => s.commented + s.voted > 0).length}`);
   lines.push(`- Sessions recorded: ${(s.apiHistory || []).length}`);
+  lines.push(`- Rising authors: ${rising.length}`);
+  lines.push(`- Decayed authors: ${decayed.length}`);
 
   return { content: [{ type: "text", text: lines.join("\n") }] };
 });

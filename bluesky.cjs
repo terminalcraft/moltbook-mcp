@@ -10,6 +10,11 @@
 //   post <text>             - Create a post
 //   timeline [limit]        - Read home timeline
 //   profile [handle]        - View a profile
+//   follow <handle>         - Follow an account
+//   unfollow <handle>       - Unfollow an account
+//   like <uri>              - Like a post by AT URI
+//   reply <uri> <text>      - Reply to a post
+//   notifications [limit]   - View recent notifications
 
 const { BskyAgent } = require('@atproto/api');
 const fs = require('fs');
@@ -151,6 +156,75 @@ async function main() {
       console.log(formatPost(item.post, { maxLen: 120 }));
       console.log();
     }
+    return;
+  }
+
+  if (cmd === 'follow') {
+    const handle = args[0];
+    if (!handle) { console.error('Usage: follow <handle>'); process.exit(1); }
+    const agent = await getAuthAgent();
+    const { data: prof } = await agent.getProfile({ actor: handle });
+    await agent.follow(prof.did);
+    console.log(`Followed @${prof.handle}`);
+    return;
+  }
+
+  if (cmd === 'unfollow') {
+    const handle = args[0];
+    if (!handle) { console.error('Usage: unfollow <handle>'); process.exit(1); }
+    const agent = await getAuthAgent();
+    const { data: prof } = await agent.getProfile({ actor: handle });
+    if (!prof.viewer?.following) { console.log(`Not following @${prof.handle}`); return; }
+    await agent.deleteFollow(prof.viewer.following);
+    console.log(`Unfollowed @${prof.handle}`);
+    return;
+  }
+
+  if (cmd === 'like') {
+    const uri = args[0];
+    if (!uri) { console.error('Usage: like <at-uri>'); process.exit(1); }
+    const agent = await getAuthAgent();
+    // Resolve the post to get its CID
+    const thread = await agent.getPostThread({ uri, depth: 0 });
+    const post = thread.data.thread.post;
+    await agent.like(post.uri, post.cid);
+    console.log(`Liked post by @${post.author.handle}`);
+    return;
+  }
+
+  if (cmd === 'reply') {
+    const uri = args[0];
+    const text = args.slice(1).join(' ');
+    if (!uri || !text) { console.error('Usage: reply <at-uri> <text>'); process.exit(1); }
+    const agent = await getAuthAgent();
+    const thread = await agent.getPostThread({ uri, depth: 0 });
+    const parent = thread.data.thread.post;
+    // root is the top-level post in the thread
+    const root = thread.data.thread.parent?.post || parent;
+    await agent.post({
+      text,
+      reply: {
+        root: { uri: root.uri, cid: root.cid },
+        parent: { uri: parent.uri, cid: parent.cid }
+      },
+      createdAt: new Date().toISOString()
+    });
+    console.log(`Replied to @${parent.author.handle}`);
+    return;
+  }
+
+  if (cmd === 'notifications') {
+    const limit = parseInt(args[0]) || 20;
+    const agent = await getAuthAgent();
+    const { data } = await agent.listNotifications({ limit });
+    for (const n of data.notifications) {
+      const by = n.author?.handle || 'unknown';
+      const reason = n.reason;
+      const when = new Date(n.indexedAt).toISOString().slice(0, 16);
+      const text = n.record?.text ? `: ${n.record.text.slice(0, 100)}` : '';
+      console.log(`[${when}] ${reason} by @${by}${text}`);
+    }
+    if (!data.notifications.length) console.log('No notifications.');
     return;
   }
 

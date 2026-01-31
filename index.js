@@ -635,7 +635,21 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
       const subActivity = subRecent[p.submolt?.name] || 0;
       if (subActivity >= 5) score += 1;
 
-      return { post: p, score };
+      // Vote inflation detection — high upvotes with low substance
+      let inflated = false;
+      if (p.upvotes >= 50) {
+        const ratio = p.comment_count > 0 ? p.upvotes / p.comment_count : Infinity;
+        if (p.comment_count < 3 || ratio > 20) {
+          inflated = true;
+          score -= 2;
+        }
+      }
+      if (p.upvotes >= 100 && !content.trim()) {
+        inflated = true;
+        score -= 3;
+      }
+
+      return { post: p, score, inflated };
     })
     .filter(({ score }) => mode === "wide" || score > 0)
     .sort((a, b) => b.score - a.score);
@@ -645,10 +659,11 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
   }
 
   const displayLimit = mode === "wide" ? 30 : 15;
-  const summary = scored.slice(0, displayLimit).map(({ post: p, score }) => {
+  const summary = scored.slice(0, displayLimit).map(({ post: p, score, inflated }) => {
     const flags = [];
     if (state.seen[p.id]) flags.push("SEEN");
     if (state.voted[p.id]) flags.push("VOTED");
+    if (inflated) flags.push("INFLATED?");
     const label = flags.length ? ` [${flags.join(", ")}]` : "";
     return `[score:${score} ${p.upvotes}↑ ${p.comment_count}c] "${sanitize(p.title)}" by @${p.author.name} in m/${p.submolt.name}${label}\n  ID: ${p.id}`;
   }).join("\n\n");

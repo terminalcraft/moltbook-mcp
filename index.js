@@ -321,7 +321,7 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
     if (!s.pendingComments) s.pendingComments = [];
     const alreadyQueued = s.pendingComments.some(pc => pc.post_id === post_id && pc.content === content);
     if (!alreadyQueued) {
-      s.pendingComments.push({ post_id, content, parent_id: parent_id || null, queued_at: new Date().toISOString() });
+      s.pendingComments.push({ post_id, content, parent_id: parent_id || null, queued_at: new Date().toISOString(), attempts: 0 });
       saveState(s);
     }
     data._queued = true;
@@ -915,7 +915,7 @@ server.tool("moltbook_pending", "View and manage pending comments queue (comment
 
   if (action === "list") {
     const lines = pending.map((pc, i) =>
-      `${i + 1}. post:${pc.post_id.slice(0, 8)}${pc.parent_id ? ` reply:${pc.parent_id.slice(0, 8)}` : ""} queued:${pc.queued_at.slice(0, 10)} — "${pc.content.slice(0, 80)}${pc.content.length > 80 ? "…" : ""}"`
+      `${i + 1}. post:${pc.post_id.slice(0, 8)}${pc.parent_id ? ` reply:${pc.parent_id.slice(0, 8)}` : ""} queued:${pc.queued_at.slice(0, 10)} attempts:${pc.attempts || 0}/10 — "${pc.content.slice(0, 80)}${pc.content.length > 80 ? "…" : ""}"`
     );
     return { content: [{ type: "text", text: `📋 ${pending.length} pending comment(s):\n${lines.join("\n")}` }] };
   }
@@ -928,9 +928,16 @@ server.tool("moltbook_pending", "View and manage pending comments queue (comment
   }
 
   // action === "retry"
+  const MAX_RETRIES = 10;
   const results = [];
   const stillPending = [];
+  const pruned = [];
   for (const pc of pending) {
+    pc.attempts = (pc.attempts || 0) + 1;
+    if (pc.attempts > MAX_RETRIES) {
+      pruned.push(pc.post_id.slice(0, 8));
+      continue;
+    }
     const body = { content: pc.content };
     if (pc.parent_id) body.parent_id = pc.parent_id;
     try {
@@ -942,15 +949,16 @@ server.tool("moltbook_pending", "View and manage pending comments queue (comment
         results.push(`✅ ${pc.post_id.slice(0, 8)}`);
       } else {
         stillPending.push(pc);
-        results.push(`❌ ${pc.post_id.slice(0, 8)}: ${data.error || "unknown error"}`);
+        results.push(`❌ ${pc.post_id.slice(0, 8)}: ${data.error || "unknown error"} (attempt ${pc.attempts}/${MAX_RETRIES})`);
       }
     } catch (e) {
       stillPending.push(pc);
-      results.push(`❌ ${pc.post_id.slice(0, 8)}: ${e.message}`);
+      results.push(`❌ ${pc.post_id.slice(0, 8)}: ${e.message} (attempt ${pc.attempts}/${MAX_RETRIES})`);
     }
   }
   s.pendingComments = stillPending;
   saveState(s);
+  if (pruned.length) results.push(`🗑️ Pruned ${pruned.length} comment(s) after ${MAX_RETRIES} failed attempts: ${pruned.join(", ")}`);
   return { content: [{ type: "text", text: `Retry results (${results.length - stillPending.length}/${results.length} succeeded):\n${results.join("\n")}` }] };
 });
 

@@ -1031,6 +1031,79 @@ server.tool("moltbook_karma", "Analyze karma efficiency (karma/post ratio) for a
   return { content: [{ type: "text", text: lines.join("\n") }] };
 });
 
+// Thread quality scoring — substantive vs fluff comment analysis
+server.tool("moltbook_thread_quality", "Score a thread's comment quality: substance vs fluff, diversity, depth", {
+  post_id: z.string().describe("Post ID to analyze"),
+}, async ({ post_id }) => {
+  const data = await moltFetch(`/posts/${post_id}`);
+  if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
+  const p = data.post;
+  const comments = data.comments || [];
+  if (comments.length === 0) return { content: [{ type: "text", text: `"${sanitize(p.title)}" — no comments to analyze.` }] };
+
+  // Flatten comment tree
+  const flat = [];
+  function walk(arr, depth) {
+    for (const c of arr) {
+      flat.push({ ...c, depth });
+      if (c.replies?.length) walk(c.replies, depth + 1);
+    }
+  }
+  walk(comments, 0);
+
+  const fluffPatterns = /^(\+1|agreed|this[.!]*|great (post|point|writeup)|love this|nice|same|based|real|facts|100%?|so true|well said|exactly|good stuff|interesting|cool|awesome|amazing)[\s.!]*$/i;
+
+  let fluffCount = 0;
+  let substanceScore = 0;
+  let codeCount = 0;
+  let linkCount = 0;
+  let maxDepth = 0;
+  const authors = new Set();
+  const blocked = loadBlocklist();
+
+  for (const c of flat) {
+    if (blocked.has(c.author?.name)) continue;
+    authors.add(c.author?.name);
+    if (c.depth > maxDepth) maxDepth = c.depth;
+
+    const text = (c.content || "").trim();
+    if (fluffPatterns.test(text)) { fluffCount++; continue; }
+
+    // Substance scoring per comment
+    let cs = 0;
+    if (text.length >= 100) cs += 2;
+    else if (text.length >= 50) cs += 1;
+    if (/```/.test(text)) { cs += 2; codeCount++; }
+    if (/https?:\/\/|github\.com/.test(text)) { cs += 1; linkCount++; }
+    if (c.depth >= 1) cs += 1; // replies show engagement
+    substanceScore += cs;
+  }
+
+  const total = flat.length;
+  const fluffRate = total > 0 ? Math.round(fluffCount / total * 100) : 0;
+  const avgSubstance = (total - fluffCount) > 0 ? Math.round(substanceScore / (total - fluffCount) * 10) / 10 : 0;
+
+  // Overall quality score 0-100
+  const diversityScore = Math.min(authors.size / Math.max(total, 1) * 40, 40); // unique voices
+  const depthScore = Math.min(maxDepth / 3 * 20, 20); // conversation depth
+  const substanceNorm = Math.min(avgSubstance / 4 * 25, 25); // per-comment substance
+  const fluffPenalty = fluffRate > 50 ? -15 : fluffRate > 30 ? -5 : 0;
+  const quality = Math.max(0, Math.min(100, Math.round(diversityScore + depthScore + substanceNorm + 15 + fluffPenalty)));
+
+  const lines = [
+    `## Thread Quality: ${quality}/100`,
+    `"${sanitize(p.title)}" by @${p.author.name}`,
+    ``,
+    `Comments: ${total} | Authors: ${authors.size} | Max depth: ${maxDepth}`,
+    `Fluff: ${fluffCount}/${total} (${fluffRate}%) | Code blocks: ${codeCount} | Links: ${linkCount}`,
+    `Avg substance: ${avgSubstance}/comment`,
+    ``,
+    `Breakdown: diversity ${Math.round(diversityScore)}/40, depth ${Math.round(depthScore)}/20, substance ${Math.round(substanceNorm)}/25, base 15, fluff ${fluffPenalty}`,
+  ];
+
+  return { content: [{ type: "text", text: lines.join("\n") }] };
+});
+
 // Follow/unfollow
 server.tool("moltbook_follow", "Follow or unfollow a molty", {
   name: z.string().describe("Molty name"),

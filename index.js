@@ -47,7 +47,7 @@ function loadState() {
   try {
     if (existsSync(STATE_FILE)) state = JSON.parse(readFileSync(STATE_FILE, "utf8"));
   } catch {}
-  if (!state) state = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, qualityScores: {} };
+  if (!state) state = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, qualityScores: {}, pendingComments: [] };
   // Migrate legacy string seen entries to object format
   for (const [id, val] of Object.entries(state.seen || {})) {
     if (typeof val === "string") state.seen[id] = { at: val };
@@ -309,6 +309,23 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
     markCommented(post_id, data.comment.id);
     markMyComment(post_id, data.comment.id);
     logAction(`commented on ${post_id.slice(0, 8)}`);
+    // Remove from pending if this was a retry
+    const s = loadState();
+    if (s.pendingComments) {
+      s.pendingComments = s.pendingComments.filter(pc => !(pc.post_id === post_id && pc.content === content));
+      saveState(s);
+    }
+  } else if (data.error && /auth/i.test(data.error)) {
+    // Queue for retry next session
+    const s = loadState();
+    if (!s.pendingComments) s.pendingComments = [];
+    const alreadyQueued = s.pendingComments.some(pc => pc.post_id === post_id && pc.content === content);
+    if (!alreadyQueued) {
+      s.pendingComments.push({ post_id, content, parent_id: parent_id || null, queued_at: new Date().toISOString() });
+      saveState(s);
+    }
+    data._queued = true;
+    data._message = "Comment queued for retry — auth endpoint appears broken.";
   }
   let text = JSON.stringify(data, null, 2);
   if (outboundWarnings.length) text += `\n\n⚠️ OUTBOUND WARNINGS: ${outboundWarnings.join(", ")}. Review your comment for accidental sensitive data.`;
@@ -480,7 +497,9 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   if (format === "compact") {
     const prevSession = s.apiHistory?.length >= 2 ? s.apiHistory[s.apiHistory.length - 2] : null;
     const recap = prevSession?.actions?.length ? ` | Last: ${prevSession.actions.slice(0, 3).join("; ")}` : "";
-    const compact = `Session ${sessionNum} | ${Object.keys(s.seen).length} seen, ${Object.keys(s.commented).length} commented, ${Object.keys(s.voted).length} voted, ${Object.keys(s.myPosts).length} posts | API: ${(s.apiHistory || []).reduce((sum, h) => sum + h.calls, 0)} total calls${recap}`;
+    const pendingCount = (s.pendingComments || []).length;
+    const pendingNote = pendingCount ? ` | ⏳ ${pendingCount} pending comment${pendingCount > 1 ? "s" : ""} queued` : "";
+    const compact = `Session ${sessionNum} | ${Object.keys(s.seen).length} seen, ${Object.keys(s.commented).length} commented, ${Object.keys(s.voted).length} voted, ${Object.keys(s.myPosts).length} posts | API: ${(s.apiHistory || []).reduce((sum, h) => sum + h.calls, 0)} total calls${recap}${pendingNote}`;
     return { content: [{ type: "text", text: compact }] };
   }
   return { content: [{ type: "text", text }] };

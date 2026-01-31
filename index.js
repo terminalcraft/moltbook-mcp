@@ -125,6 +125,7 @@ function sanitize(text) {
 
 // API call tracking — counts calls per session + persists history across sessions
 let apiCallCount = 0;
+let sessionCounterIncremented = false;
 let apiErrorCount = 0;
 const apiCallLog = {}; // path prefix -> count
 const sessionStart = new Date().toISOString();
@@ -408,12 +409,19 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   format: z.enum(["full", "compact"]).default("full").describe("'compact' returns a minimal one-line digest; 'full' includes IDs, per-author, per-submolt details"),
 }, async ({ format }) => {
   const s = loadState();
+  // Increment session counter on first call per server lifetime
+  if (!s.session) s.session = 1;
+  if (!sessionCounterIncremented) {
+    s.session++;
+    sessionCounterIncremented = true;
+    saveState(s);
+  }
   const seenCount = Object.keys(s.seen).length;
   const commentedPosts = Object.keys(s.commented);
   const votedCount = Object.keys(s.voted).length;
   const myPostIds = Object.keys(s.myPosts);
   const myCommentPosts = Object.keys(s.myComments);
-  const sessionNum = (s.apiHistory?.length || 0) + 1;
+  const sessionNum = s.session || "??";
   const staleCount = Object.values(s.seen).filter(v => typeof v === "object" && v.fails >= 3).length;
   const backoffCount = Object.values(s.seen).filter(v => typeof v === "object" && v.fails && v.fails < 3 && v.nextCheck && sessionNum < v.nextCheck).length;
   let text = `Engagement state (session ${sessionNum}):\n`;
@@ -455,7 +463,7 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
     const sorted = Object.entries(s.toolUsage).sort((a, b) => b[1].total - a[1].total);
     text += `- Tool usage (all-time): ${sorted.map(([n, v]) => `${n}:${v.total}`).join(", ")}\n`;
     // Flag unused tools (registered but never called)
-    const allTools = ["moltbook_feed", "moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search", "moltbook_submolts", "moltbook_subscribe", "moltbook_profile", "moltbook_profile_update", "moltbook_status", "moltbook_state", "moltbook_thread_diff", "moltbook_cleanup", "moltbook_digest", "moltbook_feed_health", "moltbook_analytics", "moltbook_trust", "moltbook_karma", "moltbook_thread_quality", "moltbook_submolt_compare", "moltbook_quality_trends", "moltbook_follow"];
+    const allTools = ["moltbook_feed", "moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search", "moltbook_submolts", "moltbook_subscribe", "moltbook_profile", "moltbook_profile_update", "moltbook_status", "moltbook_state", "moltbook_thread_diff", "moltbook_cleanup", "moltbook_digest", "moltbook_feed_health", "moltbook_analytics", "moltbook_trust", "moltbook_karma", "moltbook_follow"];
     const unused = allTools.filter(t => !s.toolUsage[t]);
     if (unused.length) text += `- Never-used tools: ${unused.join(", ")}\n`;
   }
@@ -1122,169 +1130,6 @@ server.tool("moltbook_karma", "Analyze karma efficiency (karma/post ratio) for a
 });
 
 // Thread quality scoring — substantive vs fluff comment analysis
-server.tool("moltbook_thread_quality", "Score a thread's comment quality: substance vs fluff, diversity, depth", {
-  post_id: z.string().describe("Post ID to analyze"),
-}, async ({ post_id }) => {
-  const data = await moltFetch(`/posts/${post_id}`);
-  if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
-  const p = data.post;
-  const comments = data.comments || [];
-  if (comments.length === 0) return { content: [{ type: "text", text: `"${sanitize(p.title)}" — no comments to analyze.` }] };
-
-  // Flatten comment tree
-  const flat = [];
-  function walk(arr, depth) {
-    for (const c of arr) {
-      flat.push({ ...c, depth });
-      if (c.replies?.length) walk(c.replies, depth + 1);
-    }
-  }
-  walk(comments, 0);
-
-  const fluffPatterns = /^(\+1|agreed|this[.!]*|great (post|point|writeup)|love this|nice|same|based|real|facts|100%?|so true|well said|exactly|good stuff|interesting|cool|awesome|amazing)[\s.!]*$/i;
-
-  let fluffCount = 0;
-  let substanceScore = 0;
-  let codeCount = 0;
-  let linkCount = 0;
-  let maxDepth = 0;
-  const authors = new Set();
-  const blocked = loadBlocklist();
-
-  for (const c of flat) {
-    if (blocked.has(c.author?.name)) continue;
-    authors.add(c.author?.name);
-    if (c.depth > maxDepth) maxDepth = c.depth;
-
-    const text = (c.content || "").trim();
-    if (fluffPatterns.test(text)) { fluffCount++; continue; }
-
-    // Substance scoring per comment
-    let cs = 0;
-    if (text.length >= 100) cs += 2;
-    else if (text.length >= 50) cs += 1;
-    if (/```/.test(text)) { cs += 2; codeCount++; }
-    if (/https?:\/\/|github\.com/.test(text)) { cs += 1; linkCount++; }
-    if (c.depth >= 1) cs += 1; // replies show engagement
-    substanceScore += cs;
-  }
-
-  const total = flat.length;
-  const fluffRate = total > 0 ? Math.round(fluffCount / total * 100) : 0;
-  const avgSubstance = (total - fluffCount) > 0 ? Math.round(substanceScore / (total - fluffCount) * 10) / 10 : 0;
-
-  // Overall quality score 0-100
-  const diversityScore = Math.min(authors.size / Math.max(total, 1) * 40, 40); // unique voices
-  const depthScore = Math.min(maxDepth / 3 * 20, 20); // conversation depth
-  const substanceNorm = Math.min(avgSubstance / 4 * 25, 25); // per-comment substance
-  const fluffPenalty = fluffRate > 50 ? -15 : fluffRate > 30 ? -5 : 0;
-  const quality = Math.max(0, Math.min(100, Math.round(diversityScore + depthScore + substanceNorm + 15 + fluffPenalty)));
-
-  const lines = [
-    `## Thread Quality: ${quality}/100`,
-    `"${sanitize(p.title)}" by @${p.author.name}`,
-    ``,
-    `Comments: ${total} | Authors: ${authors.size} | Max depth: ${maxDepth}`,
-    `Fluff: ${fluffCount}/${total} (${fluffRate}%) | Code blocks: ${codeCount} | Links: ${linkCount}`,
-    `Avg substance: ${avgSubstance}/comment`,
-    ``,
-    `Breakdown: diversity ${Math.round(diversityScore)}/40, depth ${Math.round(depthScore)}/20, substance ${Math.round(substanceNorm)}/25, base 15, fluff ${fluffPenalty}`,
-  ];
-
-  // Persist quality score for trend tracking
-  const s = loadState();
-  if (!s.qualityScores) s.qualityScores = {};
-  s.qualityScores[post_id] = {
-    score: quality, sub: p.submolt?.name || "unknown", title: sanitize(p.title).slice(0, 60),
-    comments: total, authors: authors.size, fluffRate, at: new Date().toISOString()
-  };
-  saveState(s);
-
-  return { content: [{ type: "text", text: lines.join("\n") }] };
-});
-
-// Submolt comparison — cross-submolt analytics from accumulated state
-server.tool("moltbook_submolt_compare", "Compare submolts by engagement density, quality, and activity from state data", {}, async () => {
-  const s = loadState();
-  const subs = {};
-
-  // Aggregate from seen posts
-  for (const [pid, data] of Object.entries(s.seen || {})) {
-    if (typeof data !== "object" || !data.sub) continue;
-    const sub = data.sub;
-    if (!subs[sub]) subs[sub] = { seen: 0, voted: 0, commented: 0, authors: new Set(), recent: 0, qualitySum: 0, qualityCount: 0 };
-    subs[sub].seen++;
-    if (data.author) subs[sub].authors.add(data.author);
-    // Recent = last 48h
-    if (data.at && Date.now() - new Date(data.at).getTime() < 172800000) subs[sub].recent++;
-    if (s.voted[pid]) subs[sub].voted++;
-    if (s.commented[pid]) subs[sub].commented++;
-  }
-
-  // Overlay quality scores
-  for (const [, q] of Object.entries(s.qualityScores || {})) {
-    const sub = q.sub || "unknown";
-    if (subs[sub]) {
-      subs[sub].qualitySum += q.score;
-      subs[sub].qualityCount++;
-    }
-  }
-
-  const entries = Object.entries(subs).filter(([, v]) => v.seen >= 3);
-  if (entries.length === 0) return { content: [{ type: "text", text: "Not enough state data yet. Browse more posts first." }] };
-
-  // Compute engagement density = (voted + commented) / seen
-  const ranked = entries.map(([name, v]) => {
-    const density = ((v.voted + v.commented) / v.seen * 100).toFixed(0);
-    const avgQuality = v.qualityCount > 0 ? Math.round(v.qualitySum / v.qualityCount) : null;
-    return { name, ...v, authors: v.authors.size, density: parseFloat(density), avgQuality };
-  }).sort((a, b) => b.density - a.density);
-
-  const lines = ["## Submolt Comparison\n"];
-  lines.push("| Submolt | Posts | Authors | Voted | Commented | Density | Quality | Recent |");
-  lines.push("|---------|-------|---------|-------|-----------|---------|---------|--------|");
-  for (const r of ranked) {
-    const q = r.avgQuality !== null ? `${r.avgQuality}/100` : "—";
-    lines.push(`| m/${r.name} | ${r.seen} | ${r.authors} | ${r.voted} | ${r.commented} | ${r.density}% | ${q} | ${r.recent} |`);
-  }
-
-  lines.push(`\nDensity = (voted + commented) / seen. Higher = more engaging content.`);
-  lines.push(`Recent = posts seen in last 48h.`);
-  return { content: [{ type: "text", text: lines.join("\n") }] };
-});
-
-// Quality trends per submolt
-server.tool("moltbook_quality_trends", "Show thread quality score trends per submolt over time", {}, async () => {
-  const s = loadState();
-  const scores = s.qualityScores || {};
-  const entries = Object.entries(scores);
-  if (entries.length === 0) return { content: [{ type: "text", text: "No quality scores recorded yet. Use moltbook_thread_quality on posts first." }] };
-
-  // Group by submolt
-  const bySubmolt = {};
-  for (const [id, q] of entries) {
-    const sub = q.sub || "unknown";
-    if (!bySubmolt[sub]) bySubmolt[sub] = [];
-    bySubmolt[sub].push(q);
-  }
-
-  const lines = ["## Thread Quality Trends\n"];
-  for (const [sub, posts] of Object.entries(bySubmolt).sort((a, b) => b[1].length - a[1].length)) {
-    const avg = Math.round(posts.reduce((s, p) => s + p.score, 0) / posts.length);
-    const sorted = [...posts].sort((a, b) => new Date(a.at) - new Date(b.at));
-    const recent = sorted.slice(-3);
-    const recentAvg = Math.round(recent.reduce((s, p) => s + p.score, 0) / recent.length);
-    const trend = recent.length >= 2 ? (recentAvg > avg + 5 ? "↑" : recentAvg < avg - 5 ? "↓" : "→") : "—";
-    lines.push(`**m/${sub}** — ${posts.length} scored | avg ${avg}/100 | recent ${recentAvg}/100 ${trend}`);
-    for (const p of recent) {
-      lines.push(`  ${p.score}/100 "${p.title}" (${p.comments}c, ${p.fluffRate}% fluff)`);
-    }
-  }
-
-  lines.push(`\nTotal scored: ${entries.length}`);
-  return { content: [{ type: "text", text: lines.join("\n") }] };
-});
-
 // Follow/unfollow
 server.tool("moltbook_follow", "Follow or unfollow a molty", {
   name: z.string().describe("Molty name"),

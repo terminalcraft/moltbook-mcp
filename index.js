@@ -578,7 +578,27 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
   const state = loadState();
   const blocked = loadBlocklist();
 
-  // Score each post for signal quality
+  // Build per-author stats from state for traction prediction
+  const authorStats = {};
+  for (const [pid, data] of Object.entries(state.seen)) {
+    if (typeof data !== "object" || !data.author) continue;
+    const a = data.author;
+    if (!authorStats[a]) authorStats[a] = { seen: 0, voted: 0, commented: 0 };
+    authorStats[a].seen++;
+    if (state.voted[pid]) authorStats[a].voted++;
+    if (state.commented[pid]) authorStats[a].commented++;
+  }
+
+  // Build per-submolt recent activity for trending boost
+  const now = Date.now();
+  const subRecent = {};
+  for (const [, data] of Object.entries(state.seen)) {
+    if (typeof data !== "object" || !data.sub || !data.at) continue;
+    if (!subRecent[data.sub]) subRecent[data.sub] = 0;
+    if (now - new Date(data.at).getTime() < 86400000) subRecent[data.sub]++;
+  }
+
+  // Score each post for signal quality + traction prediction
   const scored = data.posts
     .filter(p => !blocked.has(p.author.name))
     .map(p => {
@@ -601,13 +621,19 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
       if (["infrastructure", "security", "todayilearned", "showandtell"].includes(p.submolt?.name)) score += 2;
       // Already engaged = lower priority (already seen)
       if (state.seen[p.id] && state.commented[p.id]) score -= 3;
-      // Author engagement history — boost authors we've found valuable
-      const authorData = Object.values(state.seen).filter(v => typeof v === "object" && v.author === p.author.name);
-      const authorCommented = authorData.filter((_, i) => {
-        const pid = Object.keys(state.seen).find((k, j) => j === i);
-        return pid && state.commented[pid];
-      });
-      if (authorCommented.length > 0) score += 1;
+
+      // Traction prediction from author history
+      const aStats = authorStats[p.author.name];
+      if (aStats && aStats.seen >= 3) {
+        const voteRate = aStats.voted / aStats.seen;
+        if (voteRate >= 0.5) score += 2;       // high-quality author
+        else if (voteRate >= 0.25) score += 1;  // decent author
+        if (aStats.commented >= 2) score += 1;  // engages substantive discussion
+      }
+
+      // Submolt trending boost — active submolts get slight priority
+      const subActivity = subRecent[p.submolt?.name] || 0;
+      if (subActivity >= 5) score += 1;
 
       return { post: p, score };
     })

@@ -921,6 +921,63 @@ server.tool("moltbook_trust", "Score authors by trust signals: engagement qualit
   return { content: [{ type: "text", text: lines.join("\n") }] };
 });
 
+// Karma efficiency — karma/post ratio for authors
+server.tool("moltbook_karma", "Analyze karma efficiency (karma/post ratio) for authors. Fetches profiles via API.", {
+  authors: z.array(z.string()).optional().describe("Specific authors to analyze (omit for top authors from state)"),
+  limit: z.number().min(1).max(30).default(15).describe("Max authors to analyze"),
+}, async ({ authors, limit }) => {
+  const s = loadState();
+
+  // If no authors specified, pick the most-seen authors from state
+  let authorList = authors;
+  if (!authorList || authorList.length === 0) {
+    const counts = {};
+    for (const [, data] of Object.entries(s.seen)) {
+      if (typeof data === "object" && data.author) {
+        counts[data.author] = (counts[data.author] || 0) + 1;
+      }
+    }
+    authorList = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, limit).map(e => e[0]);
+  } else {
+    authorList = authorList.slice(0, limit);
+  }
+
+  if (authorList.length === 0) return { content: [{ type: "text", text: "No authors in state." }] };
+
+  // Fetch profiles in parallel (batches of 5 to be polite)
+  const results = [];
+  for (let i = 0; i < authorList.length; i += 5) {
+    const batch = authorList.slice(i, i + 5);
+    const profiles = await Promise.allSettled(
+      batch.map(name => moltFetch(`/agents/profile?name=${encodeURIComponent(name)}`))
+    );
+    for (let j = 0; j < batch.length; j++) {
+      const r = profiles[j];
+      if (r.status === "fulfilled" && r.value?.agent) {
+        const a = r.value.agent;
+        const posts = a.stats?.posts || 0;
+        const comments = a.stats?.comments || 0;
+        const karma = a.karma || 0;
+        const kpp = posts > 0 ? Math.round(karma / posts * 10) / 10 : 0;
+        const kpc = comments > 0 ? Math.round(karma / comments * 10) / 10 : 0;
+        results.push({ name: a.name, karma, posts, comments, kpp, kpc, followers: a.follower_count || 0 });
+      }
+    }
+  }
+
+  if (results.length === 0) return { content: [{ type: "text", text: "Could not fetch any profiles." }] };
+
+  // Sort by karma per post descending
+  results.sort((a, b) => b.kpp - a.kpp);
+
+  const lines = ["## Karma Efficiency Rankings", "K/Post | K/Comment | Karma | Posts | Comments | Followers | Author", "-------|----------|-------|-------|----------|-----------|-------"];
+  for (const r of results) {
+    lines.push(`${String(r.kpp).padStart(6)} | ${String(r.kpc).padStart(8)} | ${String(r.karma).padStart(5)} | ${String(r.posts).padStart(5)} | ${String(r.comments).padStart(8)} | ${String(r.followers).padStart(9)} | @${r.name}`);
+  }
+
+  return { content: [{ type: "text", text: lines.join("\n") }] };
+});
+
 // Follow/unfollow
 server.tool("moltbook_follow", "Follow or unfollow a molty", {
   name: z.string().describe("Molty name"),

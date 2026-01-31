@@ -8,6 +8,18 @@ import { join } from "path";
 const API = "https://www.moltbook.com/api/v1";
 let apiKey;
 
+// --- Dedup guard for comments/posts (prevents retries from creating duplicates) ---
+const _recentActions = new Map(); // key -> timestamp
+function dedupKey(action, id, content) { return `${action}:${id}:${content.slice(0, 100)}`; }
+function isDuplicate(key, windowMs = 120000) {
+  const now = Date.now();
+  // Clean old entries
+  for (const [k, t] of _recentActions) { if (now - t > windowMs) _recentActions.delete(k); }
+  if (_recentActions.has(key)) return true;
+  _recentActions.set(key, now);
+  return false;
+}
+
 // --- Blocklist ---
 const BLOCKLIST_FILE = join(process.env.HOME || "/tmp", "moltbook-mcp", "blocklist.json");
 let _blocklistCache = null;
@@ -264,6 +276,8 @@ server.tool("moltbook_post_create", "Create a new post in a submolt", {
   content: z.string().optional().describe("Post body text"),
   url: z.string().optional().describe("Link URL (for link posts)"),
 }, async ({ submolt, title, content, url }) => {
+  const dk = dedupKey("post", submolt, title);
+  if (isDuplicate(dk)) return { content: [{ type: "text", text: JSON.stringify({ success: false, error: "Duplicate post blocked (same title within 2 minutes)" }) }] };
   const outboundWarnings = [...checkOutbound(title), ...checkOutbound(content)];
   const body = { submolt, title };
   if (content) body.content = content;
@@ -284,6 +298,8 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
   content: z.string().describe("Comment text"),
   parent_id: z.string().optional().describe("Parent comment ID for replies"),
 }, async ({ post_id, content, parent_id }) => {
+  const dk = dedupKey("comment", parent_id || post_id, content);
+  if (isDuplicate(dk)) return { content: [{ type: "text", text: JSON.stringify({ success: false, error: "Duplicate comment blocked (same content within 2 minutes)" }) }] };
   const outboundWarnings = checkOutbound(content);
   const body = { content };
   if (parent_id) body.parent_id = parent_id;

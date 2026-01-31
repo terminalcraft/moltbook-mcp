@@ -411,6 +411,9 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   const s = loadState();
   // Increment session counter on first call per server lifetime
   if (!s.session) s.session = 1;
+  // Sanity: session counter should never be less than apiHistory length
+  const histLen = (s.apiHistory || []).length;
+  if (s.session < histLen) s.session = histLen;
   if (!sessionCounterIncremented) {
     s.session++;
     sessionCounterIncremented = true;

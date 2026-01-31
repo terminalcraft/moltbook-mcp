@@ -856,6 +856,71 @@ server.tool("moltbook_analytics", "Analyze engagement patterns: top authors, sub
   return { content: [{ type: "text", text: lines.join("\n") }] };
 });
 
+// Trust scoring — local heuristic trust per author from engagement signals
+server.tool("moltbook_trust", "Score authors by trust signals: engagement quality, consistency, vote-worthiness", {
+  author: z.string().optional().describe("Score a specific author (omit for top trust-ranked authors)"),
+}, async ({ author }) => {
+  const s = loadState();
+  const now = Date.now();
+
+  // Build per-author trust signals
+  const profiles = {};
+  for (const [pid, data] of Object.entries(s.seen)) {
+    if (typeof data !== "object" || !data.author) continue;
+    const a = data.author;
+    if (author && a !== author) continue;
+    if (!profiles[a]) profiles[a] = { posts: 0, voted: 0, commented: 0, subs: new Set(), firstSeen: null, lastSeen: null };
+    const p = profiles[a];
+    p.posts++;
+    if (s.voted[pid]) p.voted++;
+    if (s.commented[pid]) p.commented++;
+    if (data.sub) p.subs.add(data.sub);
+    if (data.at) {
+      if (!p.firstSeen || data.at < p.firstSeen) p.firstSeen = data.at;
+      if (!p.lastSeen || data.at > p.lastSeen) p.lastSeen = data.at;
+    }
+  }
+
+  // Score: weighted combination of signals
+  // - voteRate (0-40): fraction of their posts I upvoted — quality signal
+  // - commentRate (0-30): fraction I commented on — substance signal
+  // - consistency (0-15): seen across multiple submolts — breadth signal
+  // - longevity (0-15): time span between first and last seen post — staying power
+  const scored = Object.entries(profiles).map(([name, p]) => {
+    const voteRate = p.posts > 0 ? (p.voted / p.posts) : 0;
+    const commentRate = p.posts > 0 ? (p.commented / p.posts) : 0;
+    const subCount = p.subs.size;
+    const spanDays = (p.firstSeen && p.lastSeen) ? (new Date(p.lastSeen) - new Date(p.firstSeen)) / 86400000 : 0;
+
+    const voteScore = Math.min(voteRate * 40, 40);
+    const commentScore = Math.min(commentRate * 30, 30);
+    const breadthScore = Math.min(subCount / 3 * 15, 15);
+    const longevityScore = Math.min(spanDays / 7 * 15, 15);
+    const total = Math.round(voteScore + commentScore + breadthScore + longevityScore);
+
+    return { name, total, posts: p.posts, voted: p.voted, commented: p.commented, subs: subCount, spanDays: Math.round(spanDays * 10) / 10, voteScore: Math.round(voteScore), commentScore: Math.round(commentScore), breadthScore: Math.round(breadthScore), longevityScore: Math.round(longevityScore) };
+  }).sort((a, b) => b.total - a.total);
+
+  if (scored.length === 0) return { content: [{ type: "text", text: author ? `No data for @${author}` : "No author data in state." }] };
+
+  const lines = [];
+  if (author) {
+    const a = scored[0];
+    lines.push(`## Trust Score: @${a.name} — ${a.total}/100`);
+    lines.push(`Posts seen: ${a.posts} | Upvoted: ${a.voted} | Commented: ${a.commented} | Submolts: ${a.subs} | Span: ${a.spanDays}d`);
+    lines.push(`Breakdown: quality ${a.voteScore}/40, substance ${a.commentScore}/30, breadth ${a.breadthScore}/15, longevity ${a.longevityScore}/15`);
+  } else {
+    lines.push("## Trust Rankings (top 20)");
+    lines.push("Score | Author | Posts | V | C | Subs | Quality/Substance/Breadth/Longevity");
+    lines.push("------|--------|-------|---|---|------|------------------------------------");
+    scored.slice(0, 20).forEach(a => {
+      lines.push(`${String(a.total).padStart(3)} | @${a.name} | ${a.posts} | ${a.voted} | ${a.commented} | ${a.subs} | ${a.voteScore}/${a.commentScore}/${a.breadthScore}/${a.longevityScore}`);
+    });
+  }
+
+  return { content: [{ type: "text", text: lines.join("\n") }] };
+});
+
 // Follow/unfollow
 server.tool("moltbook_follow", "Follow or unfollow a molty", {
   name: z.string().describe("Molty name"),

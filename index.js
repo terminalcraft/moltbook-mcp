@@ -669,7 +669,54 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
     return `[score:${score} ${p.upvotes}↑ ${p.comment_count}c] "${sanitize(p.title)}" by @${p.author.name} in m/${p.submolt.name}${label}\n  ID: ${p.id}`;
   }).join("\n\n");
 
-  return { content: [{ type: "text", text: `Digest (${scored.length} signal posts from ${data.posts.length} scanned):\n\n${summary}` }] };
+  // Persist feed quality snapshot
+  const allScores = scored.map(s => s.score);
+  const avgScore = allScores.length ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(1) : 0;
+  const snapshot = {
+    at: new Date().toISOString(),
+    scanned: data.posts.length,
+    signal: scored.length,
+    noise: data.posts.length - scored.length - (data.posts.filter(p => blocked.has(p.author.name)).length),
+    blocked: data.posts.filter(p => blocked.has(p.author.name)).length,
+    avgScore: parseFloat(avgScore),
+    sort, mode,
+  };
+  const s = loadState();
+  if (!s.feedQuality) s.feedQuality = [];
+  s.feedQuality.push(snapshot);
+  // Keep last 50 snapshots
+  if (s.feedQuality.length > 50) s.feedQuality = s.feedQuality.slice(-50);
+  saveState(s);
+
+  const signalPct = data.posts.length ? Math.round(scored.length / data.posts.length * 100) : 0;
+  return { content: [{ type: "text", text: `Digest (${scored.length} signal posts from ${data.posts.length} scanned, ${signalPct}% signal):\n\n${summary}` }] };
+});
+
+// Feed Health — signal/noise trend from digest snapshots
+server.tool("moltbook_feed_health", "Show feed quality trends over time from digest scan history", {}, async () => {
+  const s = loadState();
+  const snapshots = s.feedQuality || [];
+  if (snapshots.length === 0) return { content: [{ type: "text", text: "No feed quality data yet. Run moltbook_digest to start tracking." }] };
+
+  const recent = snapshots.slice(-10);
+  const lines = recent.map(snap => {
+    const pct = snap.scanned ? Math.round(snap.signal / snap.scanned * 100) : 0;
+    const date = snap.at.slice(0, 16).replace("T", " ");
+    return `${date} | ${snap.signal}/${snap.scanned} signal (${pct}%) | avg:${snap.avgScore} | blocked:${snap.blocked}`;
+  });
+
+  // Trend calculation
+  if (recent.length >= 3) {
+    const firstHalf = recent.slice(0, Math.floor(recent.length / 2));
+    const secondHalf = recent.slice(Math.floor(recent.length / 2));
+    const avgFirst = firstHalf.reduce((a, s) => a + s.avgScore, 0) / firstHalf.length;
+    const avgSecond = secondHalf.reduce((a, s) => a + s.avgScore, 0) / secondHalf.length;
+    const delta = avgSecond - avgFirst;
+    const trend = delta > 0.3 ? "IMPROVING" : delta < -0.3 ? "DECLINING" : "STABLE";
+    lines.push(`\nTrend: ${trend} (avg score ${avgFirst.toFixed(1)} → ${avgSecond.toFixed(1)})`);
+  }
+
+  return { content: [{ type: "text", text: `Feed Quality (last ${recent.length} scans):\n${lines.join("\n")}` }] };
 });
 
 // Analytics — engagement patterns from state

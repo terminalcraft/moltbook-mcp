@@ -97,15 +97,16 @@ app.get("/status", (req, res) => {
     if (running) {
       try {
         const info = execSync(
-          `LOG=$(ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | head -1) && echo "$LOG" && stat --format='%Y' "$LOG" && date +%s && grep -c '"type":"tool_use"' "$LOG" 2>/dev/null || echo 0`,
+          `LOG=$(ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | head -1) && echo "$LOG" && stat --format='%W' "$LOG" && date +%s && grep -c '"type":"tool_use"' "$LOG" 2>/dev/null || echo 0`,
           { encoding: "utf-8" }
         );
         const parts = info.trim().split("\n");
         if (parts.length >= 4) {
-          const mtime = parseInt(parts[1]);
+          const birthTime = parseInt(parts[1]);
           const now = parseInt(parts[2]);
           tools = parseInt(parts[3]) || 0;
-          elapsed_seconds = now - (mtime - 60);
+          // %W = birth time (creation). Falls back to 0 if unsupported.
+          elapsed_seconds = birthTime > 0 ? now - birthTime : null;
         }
       } catch {}
     }

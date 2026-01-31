@@ -929,9 +929,38 @@ server.tool("moltbook_pending", "View and manage pending comments queue (comment
 
   // action === "retry"
   const MAX_RETRIES = 10;
+  const CIRCUIT_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+  // Circuit breaker: if all recent retries failed with auth, skip full retry and probe first
+  const circuitOpenAt = s.commentCircuitOpen ? new Date(s.commentCircuitOpen).getTime() : 0;
+  const circuitAge = Date.now() - circuitOpenAt;
+  if (circuitOpenAt && circuitAge < CIRCUIT_COOLDOWN_MS) {
+    // Probe with first pending comment to check if endpoint is back
+    const probe = pending[0];
+    const probeBody = { content: probe.content };
+    if (probe.parent_id) probeBody.parent_id = probe.parent_id;
+    try {
+      const probeData = await moltFetch(`/posts/${probe.post_id}/comments`, { method: "POST", body: JSON.stringify(probeBody) });
+      if (probeData.success && probeData.comment) {
+        // Circuit closed — endpoint is back
+        delete s.commentCircuitOpen;
+        markCommented(probe.post_id, probeData.comment.id);
+        markMyComment(probe.post_id, probeData.comment.id);
+        logAction(`commented on ${probe.post_id.slice(0, 8)} (probe-retry)`);
+        s.pendingComments = pending.slice(1);
+        saveState(s);
+        return { content: [{ type: "text", text: `🟢 Circuit breaker: probe succeeded! Endpoint is back.\n✅ ${probe.post_id.slice(0, 8)} posted. ${pending.length - 1} remaining — retry again to post the rest.` }] };
+      }
+    } catch {}
+    // Probe failed — circuit stays open
+    const hoursLeft = Math.round((CIRCUIT_COOLDOWN_MS - circuitAge) / 3600000);
+    return { content: [{ type: "text", text: `🔴 Circuit breaker OPEN (probe failed). Comment endpoint still broken.\n${pending.length} comment(s) queued. Auto-reset in ~${hoursLeft}h, or clear with action:clear.` }] };
+  }
+
   const results = [];
   const stillPending = [];
   const pruned = [];
+  let authFailCount = 0;
   for (const pc of pending) {
     pc.attempts = (pc.attempts || 0) + 1;
     if (pc.attempts > MAX_RETRIES) {
@@ -949,17 +978,24 @@ server.tool("moltbook_pending", "View and manage pending comments queue (comment
         results.push(`✅ ${pc.post_id.slice(0, 8)}`);
       } else {
         stillPending.push(pc);
+        if (/auth/i.test(data.error || "")) authFailCount++;
         results.push(`❌ ${pc.post_id.slice(0, 8)}: ${data.error || "unknown error"} (attempt ${pc.attempts}/${MAX_RETRIES})`);
       }
     } catch (e) {
       stillPending.push(pc);
+      if (/auth/i.test(e.message)) authFailCount++;
       results.push(`❌ ${pc.post_id.slice(0, 8)}: ${e.message} (attempt ${pc.attempts}/${MAX_RETRIES})`);
     }
+  }
+  // If all failed with auth, open circuit breaker
+  if (stillPending.length > 0 && authFailCount === stillPending.length) {
+    s.commentCircuitOpen = new Date().toISOString();
   }
   s.pendingComments = stillPending;
   saveState(s);
   if (pruned.length) results.push(`🗑️ Pruned ${pruned.length} comment(s) after ${MAX_RETRIES} failed attempts: ${pruned.join(", ")}`);
-  return { content: [{ type: "text", text: `Retry results (${results.length - stillPending.length}/${results.length} succeeded):\n${results.join("\n")}` }] };
+  const circuitMsg = s.commentCircuitOpen ? "\n🔴 All retries failed with auth — circuit breaker opened. Next retry will probe with 1 request instead of retrying all." : "";
+  return { content: [{ type: "text", text: `Retry results (${results.length - stillPending.length}/${results.length} succeeded):\n${results.join("\n")}${circuitMsg}` }] };
 });
 
 // Follow/unfollow

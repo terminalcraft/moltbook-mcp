@@ -122,3 +122,5 @@ if \! git diff --quiet HEAD 2>/dev/null; then
   git add -A
   git commit -m "auto-snapshot post-session $(date +%Y%m%d_%H%M%S)" --no-gpg-sign 2>/dev/null || true
 fi
+# Push to keep remote in sync (best-effort, don't block on failure)
+git push origin master 2>/dev/null || true

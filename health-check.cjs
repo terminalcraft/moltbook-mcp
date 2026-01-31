@@ -85,7 +85,76 @@ function summary() {
   }
 }
 
+function trend() {
+  if (!fs.existsSync(LOG_PATH)) { console.log('No health data yet.'); return; }
+  const lines = fs.readFileSync(LOG_PATH, 'utf8').trim().split('\n');
+  const entries = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+  if (entries.length < 3) { console.log('Need at least 3 data points for trends.'); return; }
+
+  // Group by hour-of-day for each endpoint
+  const byHour = {}; // endpoint -> hour -> {ok, fail}
+  const streaks = {}; // endpoint -> current streak info
+  const longestDown = {}; // endpoint -> longest consecutive failures
+
+  for (const e of entries) {
+    const hour = new Date(e.ts).getUTCHours();
+    for (const [name, r] of Object.entries(e.results)) {
+      if (!byHour[name]) byHour[name] = {};
+      if (!byHour[name][hour]) byHour[name][hour] = { ok: 0, fail: 0 };
+      if (r.ok) byHour[name][hour].ok++; else byHour[name][hour].fail++;
+
+      if (!streaks[name]) streaks[name] = { down: 0, maxDown: 0, lastTs: null };
+      const s = streaks[name];
+      if (!r.ok) { s.down++; if (s.down > s.maxDown) { s.maxDown = s.down; s.lastTs = e.ts; } }
+      else { s.down = 0; }
+      if (!longestDown[name]) longestDown[name] = { count: 0, endTs: null };
+      if (s.maxDown > longestDown[name].count) {
+        longestDown[name] = { count: s.maxDown, endTs: s.lastTs };
+      }
+    }
+  }
+
+  const first = entries[0].ts, last = entries[entries.length - 1].ts;
+  console.log(`Trend analysis: ${entries.length} checks from ${first} to ${last}\n`);
+
+  for (const name of Object.keys(byHour)) {
+    console.log(`${name}:`);
+
+    // Best/worst hours
+    const hours = Object.entries(byHour[name]).map(([h, d]) => ({
+      hour: +h, pct: d.ok / (d.ok + d.fail), total: d.ok + d.fail
+    })).filter(h => h.total >= 2);
+
+    if (hours.length) {
+      hours.sort((a, b) => b.pct - a.pct);
+      const best = hours[0];
+      const worst = hours[hours.length - 1];
+      console.log(`  Best hour:  ${String(best.hour).padStart(2,'0')}:00 UTC (${(best.pct*100).toFixed(0)}% up, n=${best.total})`);
+      console.log(`  Worst hour: ${String(worst.hour).padStart(2,'0')}:00 UTC (${(worst.pct*100).toFixed(0)}% up, n=${worst.total})`);
+    }
+
+    // Current streak
+    const s = streaks[name];
+    if (s.down > 0) console.log(`  Current downstreak: ${s.down} consecutive failures`);
+    console.log(`  Longest downstreak: ${longestDown[name].count} (ended ${longestDown[name].endTs || 'ongoing'})`);
+
+    // Recent trend (last 10 vs previous 10)
+    const recent = entries.slice(-10);
+    const prev = entries.slice(-20, -10);
+    if (prev.length >= 5) {
+      const rOk = recent.filter(e => e.results[name]?.ok).length;
+      const pOk = prev.filter(e => e.results[name]?.ok).length;
+      const rPct = (rOk / recent.length * 100).toFixed(0);
+      const pPct = (pOk / prev.length * 100).toFixed(0);
+      const dir = rOk > pOk ? '↑ IMPROVING' : rOk < pOk ? '↓ DECLINING' : '→ STABLE';
+      console.log(`  Recent trend: ${pPct}% → ${rPct}% ${dir}`);
+    }
+    console.log();
+  }
+}
+
 async function main() {
+  if (process.argv.includes('--trend')) { trend(); return; }
   if (process.argv.includes('--summary')) { summary(); return; }
   const token = getToken();
   const jsonOutput = process.argv.includes('--json');

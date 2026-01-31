@@ -89,6 +89,29 @@ MCPEOF
 # Probe API health before session (non-blocking, best-effort)
 node "$DIR/health-check.cjs" >> "$LOG_DIR/health.log" 2>&1 || true
 
+# Outage-aware session skip: if API has been down 5+ consecutive checks,
+# skip every other heartbeat to conserve budget during extended outages.
+# Uses --status exit code: 0=up, 1=down, 2=unknown
+SKIP_FILE="$STATE_DIR/outage_skip_toggle"
+API_STATUS=$(node "$DIR/health-check.cjs" --status 2>&1 || true)
+if echo "$API_STATUS" | grep -q "^DOWN" ; then
+  DOWN_COUNT=$(echo "$API_STATUS" | grep -oP 'down \K[0-9]+')
+  if [ "${DOWN_COUNT:-0}" -ge 5 ]; then
+    if [ -f "$SKIP_FILE" ]; then
+      rm -f "$SKIP_FILE"
+      echo "$(date -Iseconds) outage skip: API down $DOWN_COUNT checks, skipping this session" >> "$LOG_DIR/skipped.log"
+      exit 0
+    else
+      touch "$SKIP_FILE"
+      # Continue — run this session, skip next one
+    fi
+  else
+    rm -f "$SKIP_FILE"
+  fi
+else
+  rm -f "$SKIP_FILE"
+fi
+
 echo "=== Moltbook heartbeat $(date -Iseconds) ===" | tee "$LOG"
 
 # 15-minute timeout prevents a hung session from blocking all future ticks.

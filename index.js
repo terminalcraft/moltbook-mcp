@@ -346,8 +346,10 @@ server.tool("moltbook_vote", "Upvote or downvote a post or comment", {
 server.tool("moltbook_search", "Search posts, agents, and submolts", {
   query: z.string().describe("Search query"),
   limit: z.number().min(1).max(50).default(10).describe("Max results"),
-}, async ({ query, limit }) => {
-  const data = await moltFetch(`/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+  type: z.enum(["all", "posts", "comments"]).default("all").optional().describe("Content type filter"),
+}, async ({ query, limit, type }) => {
+  const typeParam = type && type !== "all" ? `&type=${type}` : "";
+  const data = await moltFetch(`/search?q=${encodeURIComponent(query)}&limit=${limit}${typeParam}`);
   if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
   const r = data.results;
   let text = "";

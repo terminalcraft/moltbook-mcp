@@ -123,6 +123,52 @@ function readBody(req) {
   });
 }
 
+function renderHtml(store) {
+  const rows = store.slice().reverse().slice(0, 50).map(p => `
+    <tr>
+      <td title="${esc(p.did)}">${esc(p.did?.substring(0, 30))}…</td>
+      <td>${esc(p.action)}</td>
+      <td>${esc(p.timestamp?.substring(0, 19).replace('T', ' '))}</td>
+      <td>${esc(p.format)}</td>
+      <td>${esc(p.verifiedAt?.substring(0, 19).replace('T', ' '))}</td>
+    </tr>`).join('');
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Engagement Proof Verifier</title>
+<style>
+  body{font-family:monospace;background:#0d1117;color:#c9d1d9;margin:0;padding:2rem}
+  h1{color:#58a6ff;font-size:1.4rem}
+  p{color:#8b949e;max-width:60ch}
+  a{color:#58a6ff}
+  table{border-collapse:collapse;width:100%;margin-top:1rem}
+  th,td{text-align:left;padding:.4rem .6rem;border-bottom:1px solid #21262d;font-size:.85rem}
+  th{color:#8b949e;font-weight:normal;text-transform:uppercase;font-size:.75rem}
+  tr:hover{background:#161b22}
+  .stats{display:flex;gap:2rem;margin:1rem 0}
+  .stat{background:#161b22;padding:.6rem 1rem;border-radius:6px}
+  .stat-num{color:#58a6ff;font-size:1.2rem;font-weight:bold}
+  .stat-label{color:#8b949e;font-size:.75rem}
+  code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.85rem}
+</style></head><body>
+<h1>Agent Engagement Proof Verifier</h1>
+<p>Ed25519-signed engagement proofs submitted by autonomous agents, cryptographically verified on receipt.</p>
+<div class="stats">
+  <div class="stat"><div class="stat-num">${store.length}</div><div class="stat-label">verified proofs</div></div>
+</div>
+<h2 style="color:#c9d1d9;font-size:1rem">API</h2>
+<ul style="color:#8b949e;font-size:.85rem">
+  <li><code>POST /verify</code> — submit proof JSON for verification</li>
+  <li><code>GET /verified</code> — public ledger (JSON)</li>
+  <li><code>GET /health</code> — health check</li>
+</ul>
+<p style="font-size:.85rem"><a href="https://github.com/terminalcraft/moltbook-mcp/blob/main/docs/agent-engagement-proof-lexicon.md">Spec</a> · Operator: <a href="https://bsky.app/profile/terminalcraft.bsky.social">@terminalcraft</a></p>
+<h2 style="color:#c9d1d9;font-size:1rem">Public Ledger</h2>
+${store.length === 0 ? '<p>No verified proofs yet.</p>' : `<table><thead><tr><th>DID</th><th>Action</th><th>Timestamp</th><th>Format</th><th>Verified</th></tr></thead><tbody>${rows}</tbody></table>`}
+</body></html>`;
+}
+
+function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
 
@@ -182,6 +228,12 @@ const server = http.createServer(async (req, res) => {
   // List verified proofs
   if (url.pathname === '/verified' && req.method === 'GET') {
     const store = loadStore();
+    const accept = req.headers.accept || '';
+    if (accept.includes('text/html') || url.searchParams.get('format') === 'html') {
+      const html = renderHtml(store);
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
+      return res.end(html);
+    }
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 100);
     return jsonResponse(res, 200, {
       count: store.length,
@@ -189,15 +241,23 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  // Info page
+  // HTML info page
   if (url.pathname === '/' && req.method === 'GET') {
+    const accept = req.headers.accept || '';
+    if (accept.includes('text/html')) {
+      const store = loadStore();
+      const html = renderHtml(store);
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
+      return res.end(html);
+    }
     return jsonResponse(res, 200, {
       service: 'Agent Engagement Proof Verifier',
-      version: '1.0.0',
+      version: '1.1.0',
       operator: 'terminalcraft.bsky.social',
       endpoints: {
         'POST /verify': 'Submit a proof JSON for signature verification',
         'GET /verified': 'List recently verified proofs (public ledger)',
+        'GET /verified?format=html': 'Public ledger (HTML)',
         'GET /health': 'Service health check',
       },
       spec: 'https://github.com/terminalcraft/moltbook-mcp/blob/main/docs/agent-engagement-proof-lexicon.md',

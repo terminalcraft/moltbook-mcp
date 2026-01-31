@@ -186,6 +186,39 @@ async function moltFetch(path, opts = {}) {
 
 const server = new McpServer({ name: "moltbook", version: "1.0.0" });
 
+// --- Tool usage tracking ---
+const toolUsage = {}; // toolName -> count this session
+
+function trackTool(name) {
+  toolUsage[name] = (toolUsage[name] || 0) + 1;
+}
+
+function saveToolUsage() {
+  const s = loadState();
+  if (!s.toolUsage) s.toolUsage = {};
+  for (const [name, count] of Object.entries(toolUsage)) {
+    if (!s.toolUsage[name]) s.toolUsage[name] = { total: 0, lastUsed: null };
+    s.toolUsage[name].total += count;
+    s.toolUsage[name].lastUsed = new Date().toISOString();
+  }
+  saveState(s);
+}
+
+// Wrap server.tool to auto-track usage
+const _origTool = server.tool.bind(server);
+server.tool = function(name, ...args) {
+  // Find the handler (last function arg)
+  const handlerIdx = args.findIndex(a => typeof a === "function");
+  if (handlerIdx >= 0) {
+    const origHandler = args[handlerIdx];
+    args[handlerIdx] = function(...hArgs) {
+      trackTool(name);
+      return origHandler.apply(this, hArgs);
+    };
+  }
+  return _origTool(name, ...args);
+};
+
 // Read feed
 server.tool("moltbook_feed", "Get the Moltbook feed (posts from subscriptions + follows, or global)", {
   sort: z.enum(["hot", "new", "top", "rising"]).default("hot").describe("Sort order"),
@@ -416,6 +449,15 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
   }
   if (sessionActions.length) {
     text += `- This session actions: ${sessionActions.join("; ")}\n`;
+  }
+  // Tool usage stats
+  if (s.toolUsage && Object.keys(s.toolUsage).length) {
+    const sorted = Object.entries(s.toolUsage).sort((a, b) => b[1].total - a[1].total);
+    text += `- Tool usage (all-time): ${sorted.map(([n, v]) => `${n}:${v.total}`).join(", ")}\n`;
+    // Flag unused tools (registered but never called)
+    const allTools = ["moltbook_feed", "moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search", "moltbook_submolts", "moltbook_subscribe", "moltbook_profile", "moltbook_profile_update", "moltbook_status", "moltbook_state", "moltbook_thread_diff", "moltbook_cleanup", "moltbook_digest", "moltbook_feed_health", "moltbook_analytics", "moltbook_trust", "moltbook_karma", "moltbook_thread_quality", "moltbook_submolt_compare", "moltbook_quality_trends", "moltbook_follow"];
+    const unused = allTools.filter(t => !s.toolUsage[t]);
+    if (unused.length) text += `- Never-used tools: ${unused.join(", ")}\n`;
   }
   // Engagement density per submolt
   const subCounts = {}; // submolt -> { seen: N, commented: N }
@@ -1254,7 +1296,7 @@ server.tool("moltbook_follow", "Follow or unfollow a molty", {
 });
 
 // Save API history on exit
-process.on("exit", () => { if (apiCallCount > 0) saveApiSession(); });
+process.on("exit", () => { if (apiCallCount > 0) saveApiSession(); saveToolUsage(); });
 process.on("SIGINT", () => process.exit());
 process.on("SIGTERM", () => process.exit());
 

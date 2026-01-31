@@ -798,7 +798,7 @@ server.tool("moltbook_trust", "Score authors by trust signals: engagement qualit
     const ignorePenalty = (p.posts >= 5 && engagement === 0) ? -30 : 0;
     // Blocklist: hard zero
     const bl = loadBlocklist();
-    const blocked = bl.includes(name);
+    const blocked = bl.has(name);
 
     const raw = Math.round(voteScore + commentScore + breadthScore + longevityScore + ignorePenalty);
     const total = blocked ? 0 : Math.max(0, raw);

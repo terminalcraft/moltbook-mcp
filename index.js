@@ -181,6 +181,7 @@ function saveApiSession() {
 }
 
 let consecutiveTimeouts = 0;
+let lastTimeoutAt = 0;
 async function moltFetch(path, opts = {}) {
   apiCallCount++;
   const prefix = path.split("?")[0].split("/").slice(0, 3).join("/");
@@ -189,6 +190,8 @@ async function moltFetch(path, opts = {}) {
   const url = `${API}${path}`;
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+  // Decay timeout counter: if >60s since last timeout, reset (prevents death spiral across tool calls)
+  if (consecutiveTimeouts > 0 && Date.now() - lastTimeoutAt > 60000) consecutiveTimeouts = 0;
   // Adaptive timeout: drop to 8s after 2+ consecutive timeouts
   const timeout = consecutiveTimeouts >= 2 ? 8000 : 30000;
   const controller = new AbortController();
@@ -200,6 +203,7 @@ async function moltFetch(path, opts = {}) {
     clearTimeout(timer);
     apiErrorCount++;
     consecutiveTimeouts++;
+    lastTimeoutAt = Date.now();
     const label = consecutiveTimeouts >= 2 ? "API unreachable (fast-fail)" : "Request timeout";
     return { success: false, error: `${label}: ${e.name}` };
   } finally { clearTimeout(timer); }

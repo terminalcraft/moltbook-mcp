@@ -610,6 +610,85 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
   return { content: [{ type: "text", text: `Digest (${scored.length} signal posts from ${data.posts.length} scanned):\n\n${summary}` }] };
 });
 
+// Analytics — engagement patterns from state
+server.tool("moltbook_analytics", "Analyze engagement patterns: top authors, submolt activity, suggested follows, engagement trends", {}, async () => {
+  const s = loadState();
+  const lines = [];
+
+  // Build per-author stats
+  const authors = {};
+  for (const [pid, data] of Object.entries(s.seen)) {
+    if (typeof data !== "object" || !data.author) continue;
+    const a = data.author;
+    if (!authors[a]) authors[a] = { seen: 0, commented: 0, voted: 0, firstSeen: null, lastSeen: null };
+    authors[a].seen++;
+    if (s.commented[pid]) authors[a].commented++;
+    if (s.voted[pid]) authors[a].voted++;
+    if (data.at) {
+      if (!authors[a].firstSeen || data.at < authors[a].firstSeen) authors[a].firstSeen = data.at;
+      if (!authors[a].lastSeen || data.at > authors[a].lastSeen) authors[a].lastSeen = data.at;
+    }
+  }
+
+  // Top authors by engagement (commented + voted)
+  const topAuthors = Object.entries(authors)
+    .map(([name, v]) => ({ name, ...v, engagement: v.commented + v.voted, rate: v.seen > 0 ? ((v.commented + v.voted) / v.seen * 100).toFixed(0) : 0 }))
+    .sort((a, b) => b.engagement - a.engagement);
+
+  lines.push("## Top Authors by Engagement");
+  topAuthors.slice(0, 15).forEach((a, i) => {
+    lines.push(`${i + 1}. @${a.name} — ${a.commented}c ${a.voted}v / ${a.seen} seen (${a.rate}% rate)`);
+  });
+
+  // Suggested follows: high engagement rate (>=50%), seen >= 3 posts, not just one-offs
+  const suggestions = topAuthors.filter(a => a.seen >= 3 && parseInt(a.rate) >= 50 && a.engagement >= 3);
+  if (suggestions.length) {
+    lines.push("\n## Suggested Follows (>=50% engagement rate, 3+ posts seen)");
+    suggestions.forEach(a => {
+      lines.push(`- @${a.name}: ${a.rate}% engagement across ${a.seen} posts`);
+    });
+  }
+
+  // Submolt engagement density
+  const subs = {};
+  for (const [pid, data] of Object.entries(s.seen)) {
+    if (typeof data !== "object") continue;
+    const sub = data.sub || "unknown";
+    if (!subs[sub]) subs[sub] = { seen: 0, commented: 0, voted: 0 };
+    subs[sub].seen++;
+    if (s.commented[pid]) subs[sub].commented++;
+    if (s.voted[pid]) subs[sub].voted++;
+  }
+  const topSubs = Object.entries(subs)
+    .map(([name, v]) => ({ name, ...v, rate: v.seen > 0 ? ((v.commented + v.voted) / v.seen * 100).toFixed(0) : 0 }))
+    .sort((a, b) => (b.commented + b.voted) - (a.commented + a.voted));
+
+  lines.push("\n## Submolt Engagement");
+  topSubs.forEach(s => {
+    lines.push(`- m/${s.name}: ${s.commented}c ${s.voted}v / ${s.seen} seen (${s.rate}%)`);
+  });
+
+  // Session activity trend (last 10 sessions)
+  const history = (s.apiHistory || []).slice(-10);
+  if (history.length >= 2) {
+    lines.push("\n## Recent Session Activity");
+    history.forEach(h => {
+      const actions = (h.actions || []).length;
+      const date = h.session ? h.session.slice(0, 10) : "?";
+      lines.push(`- ${date}: ${h.calls} API calls, ${actions} actions`);
+    });
+  }
+
+  // Summary stats
+  lines.push(`\n## Summary`);
+  lines.push(`- Total authors tracked: ${Object.keys(authors).length}`);
+  lines.push(`- Authors engaged with (comment or vote): ${topAuthors.filter(a => a.engagement > 0).length}`);
+  lines.push(`- Active submolts: ${topSubs.filter(s => s.commented + s.voted > 0).length}`);
+  lines.push(`- Sessions recorded: ${(s.apiHistory || []).length}`);
+
+  return { content: [{ type: "text", text: lines.join("\n") }] };
+});
+
 // Follow/unfollow
 server.tool("moltbook_follow", "Follow or unfollow a molty", {
   name: z.string().describe("Molty name"),

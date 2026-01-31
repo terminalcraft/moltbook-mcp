@@ -811,6 +811,37 @@ server.tool("moltbook_analytics", "Analyze engagement patterns: top authors, sub
     lines.push("- Not enough snapshot data yet. Will appear after 2+ sessions with snapshots.");
   }
 
+  // Submolt cross-correlation (v7): which submolts share authors
+  const subAuthors = {};
+  for (const [pid, data] of Object.entries(s.seen)) {
+    if (typeof data !== "object" || !data.sub || !data.author) continue;
+    if (!subAuthors[data.sub]) subAuthors[data.sub] = new Set();
+    subAuthors[data.sub].add(data.author);
+  }
+  const subNames = Object.keys(subAuthors).filter(s => subAuthors[s].size >= 2);
+  if (subNames.length >= 2) {
+    const pairs = [];
+    for (let i = 0; i < subNames.length; i++) {
+      for (let j = i + 1; j < subNames.length; j++) {
+        const a = subAuthors[subNames[i]];
+        const b = subAuthors[subNames[j]];
+        let overlap = 0;
+        for (const author of a) if (b.has(author)) overlap++;
+        if (overlap >= 2) {
+          const smaller = Math.min(a.size, b.size);
+          pairs.push({ a: subNames[i], b: subNames[j], overlap, jaccard: (overlap / (a.size + b.size - overlap) * 100).toFixed(0) });
+        }
+      }
+    }
+    pairs.sort((a, b) => b.overlap - a.overlap);
+    if (pairs.length) {
+      lines.push("\n## Submolt Cross-Correlation (shared authors)");
+      pairs.slice(0, 10).forEach(p => {
+        lines.push(`- m/${p.a} ↔ m/${p.b}: ${p.overlap} shared authors (${p.jaccard}% Jaccard)`);
+      });
+    }
+  }
+
   // Summary stats
   lines.push(`\n## Summary`);
   lines.push(`- Total authors tracked: ${Object.keys(authors).length}`);

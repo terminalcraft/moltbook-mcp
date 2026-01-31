@@ -904,7 +904,56 @@ server.tool("moltbook_karma", "Analyze karma efficiency (karma/post ratio) for a
   return { content: [{ type: "text", text: lines.join("\n") }] };
 });
 
-// Thread quality scoring — substantive vs fluff comment analysis
+// Pending comments management
+server.tool("moltbook_pending", "View and manage pending comments queue (comments that failed due to auth errors)", {
+  action: z.enum(["list", "retry", "clear"]).default("list").describe("'list' shows queued comments, 'retry' attempts to post all, 'clear' removes all pending"),
+}, async ({ action }) => {
+  trackTool("moltbook_pending");
+  const s = loadState();
+  const pending = s.pendingComments || [];
+  if (pending.length === 0) return { content: [{ type: "text", text: "No pending comments." }] };
+
+  if (action === "list") {
+    const lines = pending.map((pc, i) =>
+      `${i + 1}. post:${pc.post_id.slice(0, 8)}${pc.parent_id ? ` reply:${pc.parent_id.slice(0, 8)}` : ""} queued:${pc.queued_at.slice(0, 10)} — "${pc.content.slice(0, 80)}${pc.content.length > 80 ? "…" : ""}"`
+    );
+    return { content: [{ type: "text", text: `📋 ${pending.length} pending comment(s):\n${lines.join("\n")}` }] };
+  }
+
+  if (action === "clear") {
+    const count = pending.length;
+    s.pendingComments = [];
+    saveState(s);
+    return { content: [{ type: "text", text: `Cleared ${count} pending comment(s).` }] };
+  }
+
+  // action === "retry"
+  const results = [];
+  const stillPending = [];
+  for (const pc of pending) {
+    const body = { content: pc.content };
+    if (pc.parent_id) body.parent_id = pc.parent_id;
+    try {
+      const data = await moltFetch(`/posts/${pc.post_id}/comments`, { method: "POST", body: JSON.stringify(body) });
+      if (data.success && data.comment) {
+        markCommented(pc.post_id, data.comment.id);
+        markMyComment(pc.post_id, data.comment.id);
+        logAction(`commented on ${pc.post_id.slice(0, 8)} (retry)`);
+        results.push(`✅ ${pc.post_id.slice(0, 8)}`);
+      } else {
+        stillPending.push(pc);
+        results.push(`❌ ${pc.post_id.slice(0, 8)}: ${data.error || "unknown error"}`);
+      }
+    } catch (e) {
+      stillPending.push(pc);
+      results.push(`❌ ${pc.post_id.slice(0, 8)}: ${e.message}`);
+    }
+  }
+  s.pendingComments = stillPending;
+  saveState(s);
+  return { content: [{ type: "text", text: `Retry results (${results.length - stillPending.length}/${results.length} succeeded):\n${results.join("\n")}` }] };
+});
+
 // Follow/unfollow
 server.tool("moltbook_follow", "Follow or unfollow a molty", {
   name: z.string().describe("Molty name"),

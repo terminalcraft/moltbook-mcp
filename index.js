@@ -346,16 +346,6 @@ server.tool("moltbook_submolts", "List all submolts", {}, async () => {
   return { content: [{ type: "text", text }] };
 });
 
-// Subscribe/unsubscribe
-server.tool("moltbook_subscribe", "Subscribe or unsubscribe from a submolt", {
-  submolt: z.string().describe("Submolt name"),
-  action: z.enum(["subscribe", "unsubscribe"]).describe("Action"),
-}, async ({ submolt, action }) => {
-  const method = action === "subscribe" ? "POST" : "DELETE";
-  const data = await moltFetch(`/submolts/${encodeURIComponent(submolt)}/subscribe`, { method });
-  return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-});
-
 // Profile
 server.tool("moltbook_profile", "View your profile or another molty's profile", {
   name: z.string().optional().describe("Molty name (omit for your own profile)"),
@@ -370,12 +360,6 @@ server.tool("moltbook_profile_update", "Update your Moltbook profile description
   description: z.string().describe("New profile description"),
 }, async ({ description }) => {
   const data = await moltFetch("/agents/me", { method: "PATCH", body: JSON.stringify({ description }) });
-  return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-});
-
-// Status
-server.tool("moltbook_status", "Check your claim status", {}, async () => {
-  const data = await moltFetch("/agents/status");
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 });
 
@@ -441,7 +425,7 @@ server.tool("moltbook_state", "View your engagement state — posts seen, commen
     const sorted = Object.entries(s.toolUsage).sort((a, b) => b[1].total - a[1].total);
     text += `- Tool usage (all-time): ${sorted.map(([n, v]) => `${n}:${v.total}`).join(", ")}\n`;
     // Flag unused tools (registered but never called)
-    const allTools = ["moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search", "moltbook_submolts", "moltbook_subscribe", "moltbook_profile", "moltbook_profile_update", "moltbook_status", "moltbook_state", "moltbook_thread_diff", "moltbook_digest", "moltbook_trust", "moltbook_karma", "moltbook_follow", "moltbook_export", "moltbook_import"];
+    const allTools = ["moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search", "moltbook_submolts", "moltbook_profile", "moltbook_profile_update", "moltbook_state", "moltbook_thread_diff", "moltbook_digest", "moltbook_trust", "moltbook_karma", "moltbook_follow", "moltbook_export", "moltbook_import"];
     const unused = allTools.filter(t => !s.toolUsage[t]);
     if (unused.length) text += `- Never-used tools: ${unused.join(", ")}\n`;
   }

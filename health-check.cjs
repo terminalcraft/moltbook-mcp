@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // API health monitor — probes key Moltbook endpoints and logs results.
-// Usage: node health-check.cjs [--json] [--summary]
+// Usage: node health-check.cjs [--json] [--summary] [--trend] [--status]
 // Designed to run from heartbeat.sh or cron independently.
 // Logs to ~/.config/moltbook/health.jsonl (append-only, one JSON line per check).
 
@@ -153,7 +153,43 @@ function trend() {
   }
 }
 
+function status() {
+  if (!fs.existsSync(LOG_PATH)) { console.log('UNKNOWN — no health data'); process.exit(2); return; }
+  const lines = fs.readFileSync(LOG_PATH, 'utf8').trim().split('\n');
+  const entries = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+  if (!entries.length) { console.log('UNKNOWN — no health data'); process.exit(2); return; }
+
+  // Check feed endpoint — that's the critical one
+  const feedKey = 'feed_auth';
+  let downSince = null;
+  let lastUp = null;
+
+  for (const e of entries) {
+    const r = e.results[feedKey];
+    if (r && r.ok) lastUp = e.ts;
+  }
+
+  // Count consecutive failures from end
+  let consecutiveDown = 0;
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const r = entries[i].results[feedKey];
+    if (r && !r.ok) { consecutiveDown++; downSince = entries[i].ts; }
+    else break;
+  }
+
+  if (consecutiveDown === 0) {
+    console.log('UP — feed endpoint responding');
+    process.exit(0);
+  } else {
+    const downMs = Date.now() - new Date(downSince).getTime();
+    const downHrs = (downMs / 3600000).toFixed(1);
+    console.log(`DOWN — feed down ${consecutiveDown} checks (${downHrs}h)${lastUp ? `, last up: ${lastUp}` : ', never seen up'}`);
+    process.exit(1);
+  }
+}
+
 async function main() {
+  if (process.argv.includes('--status')) { status(); return; }
   if (process.argv.includes('--trend')) { trend(); return; }
   if (process.argv.includes('--summary')) { summary(); return; }
   const token = getToken();

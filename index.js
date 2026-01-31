@@ -204,6 +204,23 @@ async function moltFetch(path, opts = {}) {
     apiErrorCount++;
     consecutiveTimeouts++;
     lastTimeoutAt = Date.now();
+    // Auth-fallback on timeout: if authenticated GET timed out, try without auth
+    // (handles server-side auth bugs that cause hangs on valid tokens)
+    if (apiKey && (!opts.method || opts.method === "GET")) {
+      const noAuthHeaders = { "Content-Type": "application/json" };
+      const controller2 = new AbortController();
+      const timer2 = setTimeout(() => controller2.abort(), 10000);
+      try {
+        const res2 = await fetch(url, { ...opts, headers: { ...noAuthHeaders, ...opts.headers }, signal: controller2.signal });
+        clearTimeout(timer2);
+        const json2 = await res2.json();
+        if (res2.ok && json2.success !== false) {
+          json2._unauthenticated = true;
+          consecutiveTimeouts = 0;
+          return json2;
+        }
+      } catch { clearTimeout(timer2); }
+    }
     const label = consecutiveTimeouts >= 2 ? "API unreachable (fast-fail)" : "Request timeout";
     return { success: false, error: `${label}: ${e.name}` };
   } finally { clearTimeout(timer); }

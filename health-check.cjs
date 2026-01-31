@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // API health monitor — probes key Moltbook endpoints and logs results.
-// Usage: node health-check.cjs [--json]
+// Usage: node health-check.cjs [--json] [--summary]
 // Designed to run from heartbeat.sh or cron independently.
 // Logs to ~/.config/moltbook/health.jsonl (append-only, one JSON line per check).
 
@@ -54,7 +54,39 @@ function probe(urlPath, token, timeoutMs = 10000) {
   });
 }
 
+function summary() {
+  if (!fs.existsSync(LOG_PATH)) { console.log('No health data yet.'); return; }
+  const lines = fs.readFileSync(LOG_PATH, 'utf8').trim().split('\n');
+  const entries = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+  if (!entries.length) { console.log('No health data yet.'); return; }
+
+  // Collect per-endpoint stats
+  const stats = {};
+  for (const e of entries) {
+    for (const [name, r] of Object.entries(e.results)) {
+      if (!stats[name]) stats[name] = { ok: 0, fail: 0, totalLatency: 0, errors: {} };
+      const s = stats[name];
+      if (r.ok) s.ok++; else s.fail++;
+      s.totalLatency += (r.latencyMs || 0);
+      if (r.error) s.errors[r.error] = (s.errors[r.error] || 0) + 1;
+      else if (!r.ok) { const k = `http_${r.status}`; s.errors[k] = (s.errors[k] || 0) + 1; }
+    }
+  }
+
+  const first = entries[0].ts, last = entries[entries.length - 1].ts;
+  console.log(`Health summary: ${entries.length} checks from ${first} to ${last}`);
+  for (const [name, s] of Object.entries(stats)) {
+    const total = s.ok + s.fail;
+    const pct = ((s.ok / total) * 100).toFixed(1);
+    const avgMs = Math.round(s.totalLatency / total);
+    const topErrors = Object.entries(s.errors).sort((a,b) => b[1]-a[1]).slice(0,3)
+      .map(([e,c]) => `${e}(${c})`).join(', ');
+    console.log(`  ${name}: ${pct}% up (${s.ok}/${total}), avg ${avgMs}ms${topErrors ? `, errors: ${topErrors}` : ''}`);
+  }
+}
+
 async function main() {
+  if (process.argv.includes('--summary')) { summary(); return; }
   const token = getToken();
   const jsonOutput = process.argv.includes('--json');
   const endpoints = [

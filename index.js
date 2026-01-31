@@ -244,7 +244,7 @@ function formatComments(comments, depth = 0, blocked = null) {
   for (const c of comments) {
     if (blocked.has(c.author.name)) continue;
     const indent = "  ".repeat(depth);
-    out += `${indent}@${c.author.name} [${c.upvotes}↑]: ${sanitize(c.content)}\n`;
+    out += `${indent}@${c.author.name} [${c.upvotes}↑] (id:${c.id}): ${sanitize(c.content)}\n`;
     if (c.replies?.length) out += formatComments(c.replies, depth + 1, blocked);
   }
   return out;

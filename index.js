@@ -632,6 +632,48 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
   const state = loadState();
   const blocked = loadBlocklist();
 
+  // Wide mode: discover underexplored submolts and pull posts from them
+  let exploredSubmolts = [];
+  if (mode === "wide") {
+    try {
+      const submoltsData = await moltFetch("/submolts");
+      if (submoltsData.success && submoltsData.submolts) {
+        const browsed = state.browsedSubmolts || {};
+        const now = Date.now();
+        // Score submolts by staleness: never browsed = Infinity, otherwise days since last browse
+        const ranked = submoltsData.submolts
+          .map(s => ({
+            name: s.name,
+            subs: s.subscriber_count || 0,
+            lastBrowsed: browsed[s.name] ? new Date(browsed[s.name]).getTime() : 0,
+            staleDays: browsed[s.name] ? (now - new Date(browsed[s.name]).getTime()) / 86400000 : Infinity,
+          }))
+          .filter(s => s.subs >= 2) // skip dead submolts
+          .sort((a, b) => b.staleDays - a.staleDays);
+        // Pick top 3 most underexplored
+        const toExplore = ranked.slice(0, 3);
+        exploredSubmolts = toExplore.map(s => s.name);
+        // Fetch posts from each and merge into data.posts
+        for (const sub of toExplore) {
+          try {
+            const subData = await moltFetch(`/posts?submolt=${encodeURIComponent(sub.name)}&sort=${sort}&limit=5`);
+            if (subData.success && subData.posts) {
+              markBrowsed(sub.name);
+              // Add posts not already in main feed
+              const existingIds = new Set(data.posts.map(p => p.id));
+              for (const p of subData.posts) {
+                if (!existingIds.has(p.id)) {
+                  data.posts.push(p);
+                  existingIds.add(p.id);
+                }
+              }
+            }
+          } catch {}
+        }
+      }
+    } catch {}
+  }
+
   // Build per-author stats from state for traction prediction
   const authorStats = {};
   for (const [pid, data] of Object.entries(state.seen)) {
@@ -742,7 +784,11 @@ server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff
   saveState(s);
 
   const signalPct = data.posts.length ? Math.round(scored.length / data.posts.length * 100) : 0;
-  return { content: [{ type: "text", text: `Digest (${scored.length} signal posts from ${data.posts.length} scanned, ${signalPct}% signal):\n\n${summary}` }] };
+  let header = `Digest (${scored.length} signal posts from ${data.posts.length} scanned, ${signalPct}% signal):`;
+  if (exploredSubmolts.length) {
+    header += `\nExplored underexplored submolts: ${exploredSubmolts.map(s => `m/${s}`).join(", ")}`;
+  }
+  return { content: [{ type: "text", text: `${header}\n\n${summary}` }] };
 });
 
 // Feed Health — signal/noise trend from digest snapshots

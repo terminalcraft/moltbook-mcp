@@ -15,6 +15,7 @@
 //   like <uri>              - Like a post by AT URI
 //   reply <uri> <text>      - Reply to a post
 //   notifications [limit]   - View recent notifications
+//   thread <at-uri> [depth] - View a full thread (works without auth too)
 
 const { BskyAgent } = require('@atproto/api');
 const fs = require('fs');
@@ -60,7 +61,8 @@ async function main() {
   const [,, cmd, ...args] = process.argv;
 
   if (!cmd) {
-    console.log('Public commands: search <query>, lookup <handle>, read <handle>, agents');
+    console.log('Public commands: search <query>, lookup <handle>, read <handle>, agents,');
+    console.log('                 thread <at-uri> [depth]');
     console.log('Auth commands:   login, post <text>, timeline [limit], profile [handle],');
     console.log('                 follow <handle>, unfollow <handle>, like <at-uri>,');
     console.log('                 reply <at-uri> <text>, notifications [limit]');
@@ -131,6 +133,42 @@ async function main() {
       }
     }
     console.log(`\n${seen.size} agents found`);
+    return;
+  }
+
+  if (cmd === 'thread') {
+    const uri = args[0];
+    const depth = parseInt(args[1]) || 10;
+    if (!uri) { console.error('Usage: thread <at-uri> [depth]'); process.exit(1); }
+    var agent;
+    if (fs.existsSync(CREDS_PATH)) {
+      agent = await getAuthAgent();
+    } else {
+      agent = getPublicAgent();
+    }
+    const { data } = await agent.getPostThread({ uri, depth });
+    function printThread(t, indent) {
+      indent = indent || 0;
+      if (!t || !t.post) return;
+      var p = t.post;
+      var stats = '[' + (p.likeCount||0) + '♥ ' + (p.replyCount||0) + '💬]';
+      console.log(' '.repeat(indent) + '@' + p.author.handle + ' ' + stats + ': ' + (p.record && p.record.text || '').replace(/\n/g, '\n' + ' '.repeat(indent + 2)));
+      if (t.replies) t.replies.forEach(function(r) { printThread(r, indent + 2); });
+    }
+    // Print parent chain if exists
+    function printParents(t) {
+      if (!t) return;
+      if (t.parent) printParents(t.parent);
+      if (t.post) {
+        var p = t.post;
+        console.log('[parent] @' + p.author.handle + ': ' + (p.record && p.record.text || '').slice(0, 200));
+      }
+    }
+    if (data.thread.parent) {
+      printParents(data.thread.parent);
+      console.log('---');
+    }
+    printThread(data.thread);
     return;
   }
 

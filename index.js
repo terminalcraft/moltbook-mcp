@@ -137,7 +137,25 @@ function saveApiSession() {
   if (!s.apiHistory) s.apiHistory = [];
   // Update or append current session entry
   const existing = s.apiHistory.findIndex(h => h.session === sessionStart);
-  const entry = { session: sessionStart, calls: apiCallCount, errors: apiErrorCount, log: { ...apiCallLog }, actions: [...sessionActions] };
+  // Build engagement snapshot for cross-session comparison
+  const seenCount = Object.keys(s.seen).length;
+  const commentedCount = Object.keys(s.commented).length;
+  const votedCount = Object.keys(s.voted).length;
+  const postCount = Object.keys(s.myPosts).length;
+  // Top 5 authors by engagement this snapshot
+  const authorEngagement = {};
+  for (const [pid, data] of Object.entries(s.seen)) {
+    if (typeof data !== "object" || !data.author) continue;
+    const a = data.author;
+    if (!authorEngagement[a]) authorEngagement[a] = 0;
+    if (s.commented[pid]) authorEngagement[a]++;
+    if (s.voted[pid]) authorEngagement[a]++;
+  }
+  const topSnap = Object.entries(authorEngagement)
+    .sort((a, b) => b[1] - a[1]).slice(0, 10)
+    .map(([name, eng]) => ({ name, eng }));
+  const snapshot = { seen: seenCount, commented: commentedCount, voted: votedCount, posts: postCount, topAuthors: topSnap };
+  const entry = { session: sessionStart, calls: apiCallCount, errors: apiErrorCount, log: { ...apiCallLog }, actions: [...sessionActions], snapshot };
   if (existing >= 0) s.apiHistory[existing] = entry;
   else s.apiHistory.push(entry);
   // Keep last 50 sessions
@@ -716,6 +734,42 @@ server.tool("moltbook_analytics", "Analyze engagement patterns: top authors, sub
       const ago = ((now - new Date(a.lastSeen).getTime()) / DAY_MS).toFixed(1);
       lines.push(`- @${a.name}: ${a.engagement} engagements, last seen ${ago}d ago`);
     });
+  }
+
+  // Cross-session comparison (v5)
+  const hist = (s.apiHistory || []).slice(-2);
+  if (hist.length >= 2 && hist[0].snapshot && hist[1].snapshot) {
+    const prev = hist[0].snapshot;
+    const curr = hist[1].snapshot;
+    const d = (field) => { const v = curr[field] - prev[field]; return v > 0 ? `+${v}` : `${v}`; };
+    lines.push("\n## Session Diff (vs previous)");
+    lines.push(`- Seen: ${curr.seen} (${d("seen")})`);
+    lines.push(`- Commented: ${curr.commented} (${d("commented")})`);
+    lines.push(`- Voted: ${curr.voted} (${d("voted")})`);
+    lines.push(`- Posts: ${curr.posts} (${d("posts")})`);
+    // Author engagement changes
+    if (curr.topAuthors && prev.topAuthors) {
+      const prevMap = Object.fromEntries((prev.topAuthors || []).map(a => [a.name, a.eng]));
+      const currMap = Object.fromEntries((curr.topAuthors || []).map(a => [a.name, a.eng]));
+      const allNames = new Set([...Object.keys(prevMap), ...Object.keys(currMap)]);
+      const diffs = [];
+      for (const name of allNames) {
+        const p = prevMap[name] || 0;
+        const c = currMap[name] || 0;
+        if (c !== p) diffs.push({ name, prev: p, curr: c, delta: c - p });
+      }
+      diffs.sort((a, b) => b.delta - a.delta);
+      if (diffs.length) {
+        lines.push("- Author changes:");
+        diffs.slice(0, 5).forEach(d => {
+          const sign = d.delta > 0 ? "+" : "";
+          lines.push(`  - @${d.name}: ${d.prev} → ${d.curr} (${sign}${d.delta})`);
+        });
+      }
+    }
+  } else {
+    lines.push("\n## Session Diff");
+    lines.push("- Not enough snapshot data yet. Will appear after 2+ sessions with snapshots.");
   }
 
   // Summary stats

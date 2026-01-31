@@ -1153,7 +1153,8 @@ server.tool("moltbook_export", "Export engagement state as portable JSON for han
     commented: {},
     voted: {},
     myPosts: {},
-    myComments: {}
+    myComments: {},
+    session: s.session || 0
   };
   // Export seen with normalized format
   for (const [id, val] of Object.entries(s.seen || {})) {
@@ -1208,6 +1209,10 @@ server.tool("moltbook_import", "Import engagement state from another agent (addi
   }
   for (const [id, val] of Object.entries(imported.myComments || {})) {
     if (!s.myComments[id]) { s.myComments[id] = val; added.myComments++; }
+  }
+  // Preserve the higher session counter (don't regress)
+  if (imported.session && (!s.session || imported.session > s.session)) {
+    s.session = imported.session;
   }
   saveState(s);
   const stats = Object.entries(added).map(([k, v]) => `${k}: +${v}`).join(", ");

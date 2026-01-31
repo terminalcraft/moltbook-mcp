@@ -180,6 +180,7 @@ function saveApiSession() {
   saveState(s);
 }
 
+let consecutiveTimeouts = 0;
 async function moltFetch(path, opts = {}) {
   apiCallCount++;
   const prefix = path.split("?")[0].split("/").slice(0, 3).join("/");
@@ -188,7 +189,21 @@ async function moltFetch(path, opts = {}) {
   const url = `${API}${path}`;
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
-  const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 30000); const res = await fetch(url, { ...opts, headers: { ...headers, ...opts.headers }, signal: controller.signal }).finally(() => clearTimeout(timer));
+  // Adaptive timeout: drop to 8s after 2+ consecutive timeouts
+  const timeout = consecutiveTimeouts >= 2 ? 8000 : 30000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  let res;
+  try {
+    res = await fetch(url, { ...opts, headers: { ...headers, ...opts.headers }, signal: controller.signal });
+  } catch (e) {
+    clearTimeout(timer);
+    apiErrorCount++;
+    consecutiveTimeouts++;
+    const label = consecutiveTimeouts >= 2 ? "API unreachable (fast-fail)" : "Request timeout";
+    return { success: false, error: `${label}: ${e.name}` };
+  } finally { clearTimeout(timer); }
+  consecutiveTimeouts = 0; // reset on successful connection
   let json;
   try {
     json = await res.json();

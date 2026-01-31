@@ -32,7 +32,7 @@ function loadState() {
   try {
     if (existsSync(STATE_FILE)) state = JSON.parse(readFileSync(STATE_FILE, "utf8"));
   } catch {}
-  if (!state) state = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {} };
+  if (!state) state = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, qualityScores: {} };
   // Migrate legacy string seen entries to object format
   for (const [id, val] of Object.entries(state.seen || {})) {
     if (typeof val === "string") state.seen[id] = { at: val };
@@ -1101,6 +1101,47 @@ server.tool("moltbook_thread_quality", "Score a thread's comment quality: substa
     `Breakdown: diversity ${Math.round(diversityScore)}/40, depth ${Math.round(depthScore)}/20, substance ${Math.round(substanceNorm)}/25, base 15, fluff ${fluffPenalty}`,
   ];
 
+  // Persist quality score for trend tracking
+  const s = loadState();
+  if (!s.qualityScores) s.qualityScores = {};
+  s.qualityScores[post_id] = {
+    score: quality, sub: p.submolt?.name || "unknown", title: sanitize(p.title).slice(0, 60),
+    comments: total, authors: authors.size, fluffRate, at: new Date().toISOString()
+  };
+  saveState(s);
+
+  return { content: [{ type: "text", text: lines.join("\n") }] };
+});
+
+// Quality trends per submolt
+server.tool("moltbook_quality_trends", "Show thread quality score trends per submolt over time", {}, async () => {
+  const s = loadState();
+  const scores = s.qualityScores || {};
+  const entries = Object.entries(scores);
+  if (entries.length === 0) return { content: [{ type: "text", text: "No quality scores recorded yet. Use moltbook_thread_quality on posts first." }] };
+
+  // Group by submolt
+  const bySubmolt = {};
+  for (const [id, q] of entries) {
+    const sub = q.sub || "unknown";
+    if (!bySubmolt[sub]) bySubmolt[sub] = [];
+    bySubmolt[sub].push(q);
+  }
+
+  const lines = ["## Thread Quality Trends\n"];
+  for (const [sub, posts] of Object.entries(bySubmolt).sort((a, b) => b[1].length - a[1].length)) {
+    const avg = Math.round(posts.reduce((s, p) => s + p.score, 0) / posts.length);
+    const sorted = [...posts].sort((a, b) => new Date(a.at) - new Date(b.at));
+    const recent = sorted.slice(-3);
+    const recentAvg = Math.round(recent.reduce((s, p) => s + p.score, 0) / recent.length);
+    const trend = recent.length >= 2 ? (recentAvg > avg + 5 ? "↑" : recentAvg < avg - 5 ? "↓" : "→") : "—";
+    lines.push(`**m/${sub}** — ${posts.length} scored | avg ${avg}/100 | recent ${recentAvg}/100 ${trend}`);
+    for (const p of recent) {
+      lines.push(`  ${p.score}/100 "${p.title}" (${p.comments}c, ${p.fluffRate}% fluff)`);
+    }
+  }
+
+  lines.push(`\nTotal scored: ${entries.length}`);
   return { content: [{ type: "text", text: lines.join("\n") }] };
 });
 

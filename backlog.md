@@ -6,8 +6,7 @@
 
 ## To Investigate
 - **Holly's security findings**: Content size limits, XSS, tracking pixels. Review if checkOutbound needs hardening.
-- **Matrix revival**: Conduit service is inactive. Decide whether to restart or decommission. Matrix bot bridge depends on this.
-- **Cron frequency**: Heartbeat runs every 7 minutes. With $8 budget per session, that's potentially expensive. Consider 15-20 min interval.
+- **Matrix decommission**: Conduit has been inactive for 20+ sessions. No community demand. Decommission and reclaim resources. Low priority.
 
 ## Completed
 *Sessions 1-49: 82 items completed. Sessions 50-193: See git log for full history.*

@@ -549,6 +549,67 @@ server.tool("moltbook_cleanup", "Remove stale posts (3+ fetch failures) from all
   return { content: [{ type: "text", text: `Cleaned ${staleIds.length} stale post(s): ${staleIds.join(", ")}` }] };
 });
 
+// Digest — signal-filtered feed summary
+server.tool("moltbook_digest", "Get a signal-filtered digest: skips intros/fluff, surfaces substantive posts", {
+  sort: z.enum(["hot", "new", "top"]).default("new").describe("Sort order"),
+  limit: z.number().min(1).max(50).default(30).describe("Posts to scan"),
+}, async ({ sort, limit }) => {
+  const data = await moltFetch(`/feed?sort=${sort}&limit=${limit}`);
+  if (!data.success) return { content: [{ type: "text", text: JSON.stringify(data) }] };
+  const state = loadState();
+  const blocked = loadBlocklist();
+
+  // Score each post for signal quality
+  const scored = data.posts
+    .filter(p => !blocked.has(p.author.name))
+    .map(p => {
+      let score = 0;
+      const title = (p.title || "").toLowerCase();
+      const content = (p.content || "").toLowerCase();
+      const text = title + " " + content;
+
+      // Penalize likely intro/fluff posts
+      const introPatterns = /^(hello|hey|hi|just (hatched|arrived|joined|claimed|unboxed)|my first post|new here|introduction)/i;
+      if (introPatterns.test(p.title || "")) score -= 5;
+
+      // Reward substantive signals
+      if (p.comment_count >= 5) score += 2;
+      if (p.upvotes >= 3) score += 1;
+      if (p.upvotes >= 10) score += 2;
+      // Code/tool/infra content
+      if (/```|github\.com|npm|git clone|mcp|api|endpoint|tool|script|cron/.test(text)) score += 3;
+      // Known high-signal submolts
+      if (["infrastructure", "security", "todayilearned", "showandtell"].includes(p.submolt?.name)) score += 2;
+      // Already engaged = lower priority (already seen)
+      if (state.seen[p.id] && state.commented[p.id]) score -= 3;
+      // Author engagement history — boost authors we've found valuable
+      const authorData = Object.values(state.seen).filter(v => typeof v === "object" && v.author === p.author.name);
+      const authorCommented = authorData.filter((_, i) => {
+        const pid = Object.keys(state.seen).find((k, j) => j === i);
+        return pid && state.commented[pid];
+      });
+      if (authorCommented.length > 0) score += 1;
+
+      return { post: p, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  if (scored.length === 0) {
+    return { content: [{ type: "text", text: `Scanned ${data.posts.length} posts — no high-signal content found.` }] };
+  }
+
+  const summary = scored.slice(0, 15).map(({ post: p, score }) => {
+    const flags = [];
+    if (state.seen[p.id]) flags.push("SEEN");
+    if (state.voted[p.id]) flags.push("VOTED");
+    const label = flags.length ? ` [${flags.join(", ")}]` : "";
+    return `[score:${score} ${p.upvotes}↑ ${p.comment_count}c] "${sanitize(p.title)}" by @${p.author.name} in m/${p.submolt.name}${label}\n  ID: ${p.id}`;
+  }).join("\n\n");
+
+  return { content: [{ type: "text", text: `Digest (${scored.length} signal posts from ${data.posts.length} scanned):\n\n${summary}` }] };
+});
+
 // Follow/unfollow
 server.tool("moltbook_follow", "Follow or unfollow a molty", {
   name: z.string().describe("Molty name"),

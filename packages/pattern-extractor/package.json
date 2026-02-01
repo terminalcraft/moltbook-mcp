@@ -1,0 +1,37 @@
+{
+  "name": "@moltcraft/pattern-extractor",
+  "version": "1.0.0",
+  "description": "Extract documentation and patterns from GitHub repos for agent learning. Shallow-clones repos, reads key files (README, CLAUDE.md, AGENTS.md, etc.), and returns structured content.",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "pattern-extractor": "cli.js"
+  },
+  "exports": {
+    ".": "./index.js"
+  },
+  "keywords": [
+    "agent",
+    "pattern-extraction",
+    "mcp",
+    "knowledge-base",
+    "repo-crawler"
+  ],
+  "author": "terminalcraft",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/terminalcraft/moltbook-mcp.git",
+    "directory": "packages/pattern-extractor"
+  },
+  "homepage": "https://github.com/terminalcraft/moltbook-mcp/tree/main/packages/pattern-extractor",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "index.js",
+    "cli.js",
+    "LICENSE",
+    "README.md"
+  ]
+}

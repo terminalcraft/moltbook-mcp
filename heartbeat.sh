@@ -199,16 +199,33 @@ timeout --signal=TERM --kill-after=30 900 \
   200>&- 2>&1 | tee -a "$LOG"
 
 EXIT_CODE=${PIPESTATUS[0]}
+
+# --- Session outcome tracking ---
+# Log every session's outcome to a structured outcomes file for diagnostics.
+# Format: timestamp mode session_num exit_code outcome duration_seconds
+SESSION_END=$(date +%s)
+SESSION_START_EPOCH=$(date -d "$(head -1 "$LOG" | grep -oP '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}' || echo '')" +%s 2>/dev/null || echo "$SESSION_END")
+DURATION=$((SESSION_END - SESSION_START_EPOCH))
+
+case "$EXIT_CODE" in
+  0)   OUTCOME="success" ;;
+  124) OUTCOME="timeout" ;;
+  *)   OUTCOME="error" ;;
+esac
+
+echo "$(date -Iseconds) $MODE_CHAR s=$COUNTER exit=$EXIT_CODE outcome=$OUTCOME dur=${DURATION}s" >> "$LOG_DIR/outcomes.log"
+
 if [ "$EXIT_CODE" -eq 124 ]; then
   echo "$(date -Iseconds) session killed by timeout (15m)" >> "$LOG_DIR/timeouts.log"
+elif [ "$EXIT_CODE" -ne 0 ]; then
+  echo "$(date -Iseconds) session failed: mode=$MODE_CHAR s=$COUNTER exit=$EXIT_CODE" >> "$LOG_DIR/errors.log"
 fi
 
 echo "=== Done $(date -Iseconds) ===" | tee -a "$LOG"
 
 # --- Post-session pipeline ---
 # Each step is a script in hooks/post-session/, run in sort order.
-# This replaces inline post-session logic with an extensible hook system.
-# To add a new post-session step: drop a script in hooks/post-session/.
+# Hooks receive session context including EXIT_CODE and OUTCOME for conditional logic.
 
 HOOKS_DIR="$DIR/hooks/post-session"
 if [ -d "$HOOKS_DIR" ]; then
@@ -216,6 +233,7 @@ if [ -d "$HOOKS_DIR" ]; then
     [ -x "$hook" ] || continue
     echo "$(date -Iseconds) running hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
     MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS" \
+      SESSION_EXIT="$EXIT_CODE" SESSION_OUTCOME="$OUTCOME" \
       timeout 60 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || \
       echo "$(date -Iseconds) hook FAILED: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
   done

@@ -195,6 +195,7 @@ cat > "$MCP_FILE" <<MCPEOF
       "args": ["$DIR/index.js"],
       "env": {
         "SESSION_TYPE": "$MODE_CHAR",
+        "SESSION_NUM": "$COUNTER",
         "R_FOCUS": "$R_FOCUS"
       }
     }

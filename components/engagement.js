@@ -9,14 +9,20 @@ export function register(server) {
     format: z.enum(["full", "compact"]).default("full").describe("'compact' returns a minimal one-line digest; 'full' includes IDs, per-author, per-submolt details"),
   }, async ({ format }) => {
     const s = loadState();
-    if (!s.session) s.session = 1;
-    const histLen = (s.apiHistory || []).length;
-    if (s.session < histLen) s.session = histLen;
-    if (!isSessionCounterIncremented()) {
-      s.session++;
-      setSessionCounterIncremented(true);
-      saveState(s);
+    // Session number: prefer env var from heartbeat.sh (authoritative), fall back to state file.
+    const envSession = parseInt(process.env.SESSION_NUM || "0", 10);
+    if (envSession > 0) {
+      s.session = envSession;
+    } else {
+      if (!s.session) s.session = 1;
+      const histLen = (s.apiHistory || []).length;
+      if (s.session < histLen) s.session = histLen;
+      if (!isSessionCounterIncremented()) {
+        s.session++;
+        setSessionCounterIncremented(true);
+      }
     }
+    saveState(s);
     const seenCount = Object.keys(s.seen).length;
     const commentedPosts = Object.keys(s.commented);
     const votedCount = Object.keys(s.voted).length;

@@ -18,7 +18,8 @@ import { register as registerRegistry } from "./components/registry.js";
 import { register as registerLeaderboard } from "./components/leaderboard.js";
 import { register as registerIdentity } from "./components/identity.js";
 
-const server = new McpServer({ name: "moltbook", version: "1.15.0" });
+const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
+const server = new McpServer({ name: "moltbook", version: "1.22.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);

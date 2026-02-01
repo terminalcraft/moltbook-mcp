@@ -40,7 +40,7 @@ for l in lines:
                 if b.get('type') == 'tool_use':
                     texts.append(f\"[tool: {b.get('name','')} {str(b.get('input',''))[:100]}]\")
     except: pass
-print('\n'.join(texts[-40:]))
+print('\n'.join(texts[-20:]))
 " 2>&1) || { log "ERROR: log extraction failed: $LOG_SUMMARY"; exit 0; }
 
 if [ -z "$LOG_SUMMARY" ]; then log "SKIP: empty log summary from $LOG_FILE"; exit 0; fi
@@ -64,34 +64,25 @@ CANONICAL_DIRECTIVES='[
   {"id": "no-heavy-coding", "modes": ["E"], "desc": "E sessions: focus on engagement, not building"}
 ]'
 
-APPLICABLE_DIRECTIVES=$(python3 -c "
-import json
-directives = json.loads('$CANONICAL_DIRECTIVES')
+APPLICABLE_DIRECTIVES=$(echo "$CANONICAL_DIRECTIVES" | python3 -c "
+import json, sys
+directives = json.load(sys.stdin)
 mode = '${MODE_CHAR:-}'
 applicable = [d for d in directives if mode in d['modes']]
 print(json.dumps(applicable, indent=2))
 ")
 
-PROMPT="You are auditing an autonomous agent session (mode=$MODE_CHAR).
+PROMPT="Audit this agent session (mode=$MODE_CHAR). Return ONLY a JSON object, no prose.
 
-IMPORTANT RULES:
-1. ONLY evaluate directives listed below. These are the ONLY directives applicable to this session type.
-2. Do NOT mention or evaluate directives for other session types.
-3. Map to canonical IDs only. Do NOT invent new names.
+Format: {\"followed\":[\"id\",...],\"ignored\":[{\"id\":\"id\",\"reason\":\"why\"},...]}
 
-Return ONLY valid JSON:
-{\"followed\":[\"canonical-id\",...],\"ignored\":[{\"id\":\"canonical-id\",\"reason\":\"short reason\"},...]}
-
-APPLICABLE DIRECTIVES FOR THIS SESSION ($MODE_CHAR):
+Use ONLY these directive IDs:
 $APPLICABLE_DIRECTIVES
 
-SESSION DIRECTIVES:
-$SESSION_CONTENT
-
-AGENT ACTIVITY:
+Agent activity:
 $LOG_SUMMARY"
 
-RAW_RESULT=$(claude -p "$PROMPT" --model haiku --max-budget-usd 0.02 --output-format text 2>&1) || {
+RAW_RESULT=$(echo "$PROMPT" | claude -p --model haiku --max-budget-usd 0.02 --output-format text 2>&1) || {
   log "ERROR: claude call failed: ${RAW_RESULT:0:200}"
   exit 0
 }
@@ -103,8 +94,13 @@ UPDATE_OUTPUT=$(python3 -c "
 import json, sys, re
 
 raw = sys.stdin.read().strip()
+# Try to extract JSON object from anywhere in the response
 raw = re.sub(r'^\`\`\`(?:json)?\s*', '', raw)
 raw = re.sub(r'\s*\`\`\`\s*$', '', raw)
+# Find first { ... } block
+m = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', raw, re.DOTALL)
+if m:
+    raw = m.group(0)
 audit = json.loads(raw.strip())
 
 # Directive metadata: which session modes each applies to

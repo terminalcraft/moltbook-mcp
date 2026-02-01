@@ -1,7 +1,6 @@
 #!/bin/bash
-# Post-session hook: extract session cost from log and append to cost history.
-# Primary: parse USD budget from system reminders in log.
-# Fallback: calculate from token usage via calc-session-cost.py.
+# Post-session hook: calculate session cost from token usage and append to cost history.
+# Uses calc-session-cost.py to parse token counts from stream-json logs.
 # Expects env: MODE_CHAR, SESSION_NUM, LOG_FILE
 
 set -euo pipefail
@@ -15,26 +14,13 @@ if [ ! -f "$COST_FILE" ]; then
 fi
 
 SPENT=""
-CAP=""
 SOURCE="none"
 
-# Try extracting from USD budget system reminder
-BUDGET_LINE=$(grep -oP 'USD budget: \$([0-9.]+)/\$([0-9.]+)' "$LOG_FILE" | tail -1 || true)
-if [ -n "$BUDGET_LINE" ]; then
-  SPENT=$(echo "$BUDGET_LINE" | grep -oP '\$\K[0-9.]+' | head -1)
-  CAP=$(echo "$BUDGET_LINE" | grep -oP '\$\K[0-9.]+' | tail -1)
-  SOURCE="budget-tag"
-fi
-
-# Fallback: calculate from token usage
-if [ -z "$SPENT" ]; then
-  SPENT=$(python3 "$DIR/scripts/calc-session-cost.py" "$LOG_FILE" --cost-only 2>/dev/null || true)
-  if [ -n "$SPENT" ]; then
-    # Strip leading $
-    SPENT="${SPENT#\$}"
-    CAP="estimated"
-    SOURCE="token-calc"
-  fi
+# Calculate from token usage in stream-json log
+SPENT=$(python3 "$DIR/scripts/calc-session-cost.py" "$LOG_FILE" --cost-only 2>/dev/null || true)
+if [ -n "$SPENT" ]; then
+  SPENT="${SPENT#\$}"
+  SOURCE="token-calc"
 fi
 
 if [ -z "$SPENT" ] || [ "$SPENT" = "0.0000" ]; then
@@ -50,7 +36,6 @@ entry = {
     'session': int('${SESSION_NUM:-0}'),
     'mode': '${MODE_CHAR:-?}',
     'spent': float('${SPENT}'),
-    'cap': '${CAP}',
     'source': '${SOURCE}'
 }
 data = json.load(open('$COST_FILE'))

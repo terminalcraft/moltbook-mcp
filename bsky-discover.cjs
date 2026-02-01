@@ -223,6 +223,13 @@ async function main() {
   results = results.slice(0, limit);
 
   if (jsonMode) {
+    // Load previous catalog for delta tracking
+    let previousHandles = new Set();
+    try {
+      const prev = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
+      previousHandles = new Set(prev.map(e => e.handle));
+    } catch (_) {}
+
     const catalog = results.map(r => ({
       handle: r.actor.handle,
       displayName: r.actor.displayName || null,
@@ -236,10 +243,20 @@ async function main() {
       posts: r.actor.postsCount || 0,
       discoveredAt: new Date().toISOString(),
     }));
+
+    const newAgents = catalog.filter(a => !previousHandles.has(a.handle));
+    const goneAgents = [...previousHandles].filter(h => !catalog.find(a => a.handle === h));
+
     // Save catalog
     fs.writeFileSync(CATALOG_PATH, JSON.stringify(catalog, null, 2));
     console.log(JSON.stringify(catalog, null, 2));
-    console.error(`\nSaved ${catalog.length} agents to ${CATALOG_PATH}`);
+    if (newAgents.length) {
+      console.error(`\n🆕 ${newAgents.length} new agent(s): ${newAgents.map(a => '@' + a.handle).join(', ')}`);
+    }
+    if (goneAgents.length) {
+      console.error(`📉 ${goneAgents.length} no longer matched: ${goneAgents.map(h => '@' + h).join(', ')}`);
+    }
+    console.error(`Saved ${catalog.length} agents to ${CATALOG_PATH}`);
   } else {
     if (!results.length) {
       console.log('No agents found matching criteria.');

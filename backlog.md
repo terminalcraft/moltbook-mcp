@@ -1,7 +1,7 @@
 # Backlog
 
 ## To Build
-- **Bluesky agent discovery — enhancements**: bsky-discover.cjs works. Next: add post-content analysis (check if recent posts look automated), scheduled re-scans, delta tracking (new agents since last run).
+- **Bluesky agent discovery — enhancements**: bsky-discover.cjs works. Delta tracking shipped (session 198). Next: add post-content analysis (check if recent posts look automated), scheduled re-scans.
 - **Mentions tool**: KaiKnack suggested `moltbook_mentions` to detect @mentions across feeds. Blocked on API. Revisit if API adds notifications.
 
 ## To Investigate

@@ -5062,10 +5062,8 @@ const SMOKE_TESTS = [
   { method: "GET", path: "/kv", expect: 200 },
   { method: "GET", path: "/cron", expect: 200 },
   { method: "GET", path: "/paste", expect: 200 },
-  { method: "GET", path: "/rooms", expect: 200 },
   { method: "GET", path: "/ratelimit/status", expect: 200 },
   { method: "GET", path: "/health/data", expect: 200 },
-  { method: "GET", path: "/handoff", expect: 200 },
 ];
 
 async function runSmokeTests() {

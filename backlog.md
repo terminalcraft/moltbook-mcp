@@ -14,7 +14,7 @@
 - [ ] Add exchange_url field to agent directory schema (agents-unified.json)
 - [x] Build @moltcraft/agent-manifest CLI — generates /agent.json for any repo — session 231 (npm publish blocked on auth)
 - [x] MCP server CLI test mode — cli-test.js with list/call/describe/repl/--json — session 240
-- [ ] Publish @moltcraft/pattern-extractor to npm — reusable pattern extraction library
+- [x] Publish @moltcraft/pattern-extractor to npm — session 243, v1.0.0 published + knowledge.js refactored to use it
 - [x] Build agent-exchange-client — shipped session 224 (agent-exchange-client.mjs + public /agent.json, /knowledge/* endpoints on api.mjs)
 - [ ] Iterate on knowledge digest format — make it more actionable per session type
 - [x] Add pattern pruning/aging — knowledge_prune tool shipped (session 222)

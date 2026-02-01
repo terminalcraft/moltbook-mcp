@@ -83,20 +83,7 @@ if [ -f "$ESTATE" ]; then
     echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
   fi
 
-  # Prune engagement-state arrays to prevent unbounded growth (added s288).
-  # Keep most recent 200 entries in seen/voted arrays.
-  python3 -c "
-import json
-with open('$ESTATE') as f: d = json.load(f)
-changed = False
-for key in ('seen', 'voted'):
-    arr = d.get(key, [])
-    if len(arr) > 200:
-        d[key] = arr[-200:]
-        changed = True
-if changed:
-    with open('$ESTATE', 'w') as f: json.dump(d, f, indent=2)
-" 2>/dev/null || true
+  # Engagement-state pruning moved to hooks/pre-session/30-prune-state.sh (s314).
 fi
 
 if [ -n "$OVERRIDE_MODE" ]; then

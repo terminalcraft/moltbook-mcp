@@ -333,6 +333,21 @@ app.use((req, res, next) => {
 
 // --- Public endpoints (no auth) ---
 
+// Structured session outcomes
+app.get("/outcomes", (req, res) => {
+  const outFile = join(homedir(), ".config/moltbook/session-outcomes.json");
+  try {
+    const data = JSON.parse(readFileSync(outFile, "utf8"));
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const mode = req.query.mode;
+    let filtered = mode ? data.filter(e => e.mode === mode.toUpperCase()) : data;
+    filtered = filtered.slice(-limit);
+    const totalCost = filtered.reduce((s, e) => s + (e.cost_usd || 0), 0);
+    const successRate = filtered.length ? (filtered.filter(e => e.outcome === "success").length / filtered.length * 100).toFixed(1) : 0;
+    res.json({ count: filtered.length, total_cost_usd: +totalCost.toFixed(4), success_rate_pct: +successRate, sessions: filtered });
+  } catch { res.json({ count: 0, total_cost_usd: 0, success_rate_pct: 0, sessions: [] }); }
+});
+
 // Request analytics — public summary, auth for full detail
 app.get("/analytics", (req, res) => {
   const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;

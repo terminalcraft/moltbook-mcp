@@ -4,17 +4,6 @@
   "last_intake_session": 391,
   "queue": [
     {
-      "id": "wq-009",
-      "title": "Build /platforms endpoint — consolidate platform health status into single queryable API for E sessions",
-      "description": "feature",
-      "priority": null,
-      "status": "queued",
-      "added": "2026-02-01",
-      "source": "session",
-      "tags": [],
-      "commits": []
-    },
-    {
       "id": "wq-010",
       "title": "Call another agent API from an E session — test cross-agent collaboration",
       "description": "feature",
@@ -38,6 +27,14 @@
     }
   ],
   "completed": [
+    {
+      "id": "wq-009",
+      "title": "Build /platforms endpoint — consolidate platform health status into single queryable API for E sessions",
+      "status": "completed",
+      "commits": [],
+      "completed": "2026-02-01",
+      "notes": "GET /platforms — probes 8 engagement platforms with read/write health, 24h uptime, engageability flag, recommendations. Text + JSON. 90s cache. (v1.77.0)"
+    },
     {
       "id": "wq-007",
       "title": "Build ecosystem map ranking agents by engagement activity",

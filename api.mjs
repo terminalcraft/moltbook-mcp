@@ -5803,6 +5803,162 @@ app.get("/integrations", (req, res) => {
   });
 });
 
+// === Platforms endpoint — E session health dashboard ===
+// Consolidates platform health into a single queryable API.
+// Returns only engagement-relevant platforms with status, write capability, and recommendations.
+const PLATFORM_DEFS = [
+  { id: "moltbook", name: "Moltbook", category: "social", url: "https://moltbook.com",
+    probeUrl: "https://moltbook.com/api/v1/posts?limit=1", writeProbeUrl: "https://moltbook.com/api/v1/posts/test123/comments",
+    writeMethod: "POST", writeHeaders: { "Content-Type": "application/json" }, writeBody: JSON.stringify({ content: "health-probe" }),
+    writeRedirect: "manual",
+    tools: ["moltbook_digest", "moltbook_post", "moltbook_search"] },
+  { id: "4claw", name: "4claw", category: "social", url: "https://www.4claw.org",
+    probeUrl: "https://www.4claw.org/api/v1/boards", authFrom: "fourclaw",
+    tools: ["fourclaw_boards", "fourclaw_threads", "fourclaw_reply"] },
+  { id: "chatr", name: "Chatr.ai", category: "communication", url: "https://chatr.ai",
+    probeUrl: "https://chatr.ai/api/messages?limit=1",
+    tools: ["chatr_read", "chatr_send", "chatr_digest"] },
+  { id: "lobchan", name: "LobChan", category: "social", url: "https://lobchan.ai",
+    probeUrl: "https://lobchan.ai/api/boards",
+    tools: [] },
+  { id: "mdi", name: "mydeadinternet.com", category: "social", url: "https://mydeadinternet.com",
+    probeUrl: "https://mydeadinternet.com/api/pulse",
+    tools: [] },
+  { id: "thecolony", name: "The Colony", category: "social", url: "https://thecolony.cc",
+    probeUrl: "https://thecolony.cc/api/colonies",
+    tools: [] },
+  { id: "grove", name: "Grove", category: "social", url: "https://grove.ctxly.app",
+    probeUrl: "https://grove.ctxly.app",
+    tools: [] },
+  { id: "tulip", name: "Tulip", category: "communication", url: "https://tulip.fg-goose.online",
+    probeUrl: "https://tulip.fg-goose.online",
+    tools: [] },
+];
+
+let _platformCache = null;
+let _platformCacheAt = 0;
+const PLATFORM_CACHE_TTL = 90_000; // 90s
+
+async function probePlatforms() {
+  const creds = {};
+  try { creds.fourclaw = JSON.parse(readFileSync(join(BASE, "fourclaw-credentials.json"), "utf8")); } catch {}
+
+  return Promise.all(PLATFORM_DEFS.map(async (plat) => {
+    const start = Date.now();
+    let readStatus = "down", readMs = 0, readHttp = null, readError = null;
+    let writeStatus = null;
+
+    // Read probe
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6000);
+      const opts = { signal: controller.signal };
+      if (plat.authFrom === "fourclaw" && creds.fourclaw?.api_key) {
+        opts.headers = { Authorization: `Bearer ${creds.fourclaw.api_key}` };
+      }
+      const resp = await fetch(plat.probeUrl, opts);
+      clearTimeout(timeout);
+      readMs = Date.now() - start;
+      readHttp = resp.status;
+      readStatus = resp.ok ? "up" : "degraded";
+    } catch (e) {
+      readMs = Date.now() - start;
+      readError = e.code || e.message?.slice(0, 60);
+    }
+
+    // Write probe (only if defined and read is up)
+    if (plat.writeProbeUrl && readStatus === "up") {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6000);
+        const opts = { signal: controller.signal, method: plat.writeMethod || "POST", redirect: plat.writeRedirect || "follow" };
+        if (plat.writeHeaders) opts.headers = plat.writeHeaders;
+        if (plat.writeBody) opts.body = plat.writeBody;
+        const resp = await fetch(plat.writeProbeUrl, opts);
+        clearTimeout(timeout);
+        // Auth errors = write broken, 2xx = write works
+        if (resp.ok) writeStatus = "up";
+        else if (resp.status >= 300 && resp.status < 400) writeStatus = "broken"; // redirect = auth broken
+        else if (resp.status === 401 || resp.status === 403) writeStatus = "broken";
+        else writeStatus = "degraded";
+      } catch {
+        writeStatus = "broken";
+      }
+    }
+
+    // Uptime stats from history
+    let uptime24h = null;
+    try {
+      const log = JSON.parse(readFileSync(join(BASE, "uptime-history.json"), "utf8"));
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      const recent = log.probes.filter(p => p.ts > cutoff);
+      const uptimeTarget = UPTIME_TARGETS.find(t => t.name.toLowerCase().includes(plat.id) || plat.name.includes(t.name));
+      if (uptimeTarget && recent.length > 0) {
+        const upCount = recent.filter(p => p.r[uptimeTarget.name] === 1).length;
+        uptime24h = Math.round((upCount / recent.length) * 100);
+      }
+    } catch {}
+
+    return {
+      id: plat.id,
+      name: plat.name,
+      category: plat.category,
+      url: plat.url,
+      read: { status: readStatus, http: readHttp, ms: readMs, error: readError },
+      write: writeStatus ? { status: writeStatus } : null,
+      uptime_24h: uptime24h,
+      tools: plat.tools,
+      engageable: readStatus === "up" && writeStatus !== "broken",
+    };
+  }));
+}
+
+app.get("/platforms", async (req, res) => {
+  const now = Date.now();
+  if (!_platformCache || now - _platformCacheAt > PLATFORM_CACHE_TTL) {
+    _platformCache = await probePlatforms();
+    _platformCacheAt = now;
+  }
+  const platforms = _platformCache;
+
+  const engageable = platforms.filter(p => p.engageable);
+  const degraded = platforms.filter(p => !p.engageable && p.read.status !== "down");
+  const down = platforms.filter(p => p.read.status === "down");
+
+  // Recommend top platforms for E sessions
+  const recommended = engageable
+    .sort((a, b) => (b.uptime_24h || 0) - (a.uptime_24h || 0))
+    .slice(0, 3)
+    .map(p => p.id);
+
+  let filtered = platforms;
+  if (req.query.status === "engageable") filtered = engageable;
+  else if (req.query.status === "down") filtered = down;
+  else if (req.query.status === "degraded") filtered = degraded;
+
+  if (req.query.format === "text" || (!req.query.format && req.headers.accept?.includes("text/plain"))) {
+    const lines = [
+      `Platforms: ${engageable.length} engageable, ${degraded.length} degraded, ${down.length} down`,
+      `Recommended: ${recommended.join(", ") || "none"}`,
+      "",
+    ];
+    for (const p of filtered) {
+      const icon = p.engageable ? "✓" : p.read.status === "down" ? "✗" : "~";
+      const write = p.write ? ` write:${p.write.status}` : "";
+      const uptime = p.uptime_24h !== null ? ` 24h:${p.uptime_24h}%` : "";
+      lines.push(`  ${icon} ${p.name} read:${p.read.status} ${p.read.ms}ms${write}${uptime}`);
+    }
+    return res.type("text/plain").send(lines.join("\n"));
+  }
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    summary: { total: platforms.length, engageable: engageable.length, degraded: degraded.length, down: down.length },
+    recommended,
+    platforms: filtered,
+  });
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 

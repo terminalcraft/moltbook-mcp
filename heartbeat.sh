@@ -103,17 +103,14 @@ if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
   fi
 fi
 
-# R sessions alternate between evolve/maintain focus (added s289, fixed s294, s299).
+# R session counter (evolve/maintain split retired s383 — maintenance automated via pre-hook).
 R_COUNTER_FILE="$STATE_DIR/r_session_counter"
-R_FOCUS="evolve"
+R_FOCUS="unified"
 if [ "$MODE_CHAR" = "R" ]; then
   R_COUNT=0
   [ -f "$R_COUNTER_FILE" ] && R_COUNT=$(cat "$R_COUNTER_FILE")
   R_COUNT=$((R_COUNT + 1))
   echo "$R_COUNT" > "$R_COUNTER_FILE"
-  if [ $((R_COUNT % 2)) -eq 0 ]; then
-    R_FOCUS="maintain"
-  fi
 fi
 
 # B sessions alternate between feature/meta focus (mirrors R evolve/maintain).
@@ -220,8 +217,8 @@ R_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "R" ]; then
   R_FOCUS_BLOCK="
 
-## R Session Focus: ${R_FOCUS}
-R_FOCUS=${R_FOCUS} (R session #${R_COUNT}). Follow the **${R_FOCUS}** checklist below."
+## R Session: #${R_COUNT}
+This is R session #${R_COUNT}. Follow the checklist in SESSION_REFLECT.md."
 fi
 
 PROMPT="${BASE_PROMPT}

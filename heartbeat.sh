@@ -157,6 +157,22 @@ ls -1t *.log 2>/dev/null | tail -n +51 | xargs -r rm --
 # Generate readable summary from stream-json log
 python3 "$DIR/scripts/summarize-session.py" "$LOG" 2>/dev/null || true
 
+# Append one-line session history for cheap cross-session context
+SUMMARY_FILE="${LOG%.log}.summary"
+HISTORY_FILE="$STATE_DIR/session-history.txt"
+if [ -f "$SUMMARY_FILE" ]; then
+  S_NUM=$(grep '^Session:' "$SUMMARY_FILE" | head -1 | awk '{print $2}')
+  S_DUR=$(grep '^Duration:' "$SUMMARY_FILE" | head -1 | awk '{print $2}')
+  S_BUILD=$(grep '^Build:' "$SUMMARY_FILE" | head -1 | cut -d' ' -f2-)
+  S_FILES=$(grep '^Files changed:' "$SUMMARY_FILE" | head -1 | cut -d' ' -f3-)
+  S_COMMITS=$(grep '^ *- ' "$SUMMARY_FILE" | head -1 | sed 's/^ *- //')
+  echo "$(date +%Y-%m-%d) mode=$MODE_CHAR s=$S_NUM dur=$S_DUR build=$S_BUILD files=[$S_FILES] ${S_COMMITS:+note: $S_COMMITS}" >> "$HISTORY_FILE"
+  # Keep last 30 entries
+  if [ "$(wc -l < "$HISTORY_FILE")" -gt 30 ]; then
+    tail -30 "$HISTORY_FILE" > "$HISTORY_FILE.tmp" && mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"
+  fi
+fi
+
 # Auto-version any uncommitted changes after session
 cd "$DIR"
 if \! git diff --quiet HEAD 2>/dev/null; then

@@ -25,7 +25,8 @@ async function trySendChatr(content) {
   });
   const data = await res.json();
   if (data.success) return { ok: true };
-  return { ok: false, error: data.error || "unknown error", rateLimited: /rate|limit|minute|cooldown/i.test(data.error || "") };
+  const err = data.error || "unknown error";
+  return { ok: false, error: err, rateLimited: /rate|limit|minute|cooldown/i.test(err), permanent: /cannot post URLs|banned|blocked/i.test(err) };
 }
 
 export function register(server) {
@@ -104,6 +105,9 @@ export function register(server) {
         saveChatrQueue(q);
         return { content: [{ type: "text", text: `Sent: ${content.slice(0, 80)}...` }] };
       }
+      if (result.permanent) {
+        return { content: [{ type: "text", text: `Permanent failure: ${result.error}. Message NOT queued. Remove URLs or get verified first.` }] };
+      }
       if (result.rateLimited) {
         const q = loadChatrQueue();
         q.messages.push({ content, queuedAt: new Date().toISOString() });
@@ -126,6 +130,13 @@ export function register(server) {
         q.lastSentAt = new Date().toISOString();
         saveChatrQueue(q);
         return { content: [{ type: "text", text: `Sent queued message (${q.messages.length} remaining): ${next.content.slice(0, 80)}...` }] };
+      }
+      if (result.permanent) {
+        if (!q.deadLetter) q.deadLetter = [];
+        q.deadLetter.push({ ...next, error: result.error, failedAt: new Date().toISOString() });
+        q.messages.shift();
+        saveChatrQueue(q);
+        return { content: [{ type: "text", text: `Permanent failure: ${result.error}. Moved to dead letter. ${q.messages.length} remaining.` }] };
       }
       if (result.rateLimited) {
         return { content: [{ type: "text", text: `Still rate limited. ${q.messages.length} messages waiting. Last sent: ${q.lastSentAt || "never"}.` }] };

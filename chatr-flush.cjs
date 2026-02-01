@@ -29,7 +29,29 @@ async function main() {
       fs.writeFileSync(QUEUE, JSON.stringify(q, null, 2));
       console.log(`Sent: ${msg.content.slice(0, 60)}... (${q.messages.length} remaining)`);
     } else {
-      console.log(`Failed: ${data.error || "unknown"} (${q.messages.length} in queue)`);
+      const err = data.error || "unknown";
+      const permanent = /cannot post URLs|banned|blocked/i.test(err);
+      if (permanent) {
+        // Move to dead letter, don't retry forever
+        if (!q.deadLetter) q.deadLetter = [];
+        q.deadLetter.push({ ...msg, error: err, failedAt: new Date().toISOString() });
+        q.messages.shift();
+        fs.writeFileSync(QUEUE, JSON.stringify(q, null, 2));
+        console.log(`Permanent failure, moved to dead letter: ${err} (${q.messages.length} remaining)`);
+      } else {
+        // Track retries, dead-letter after 50 attempts (~5 hours at 6min interval)
+        msg.retries = (msg.retries || 0) + 1;
+        if (msg.retries >= 50) {
+          if (!q.deadLetter) q.deadLetter = [];
+          q.deadLetter.push({ ...msg, error: `Max retries: ${err}`, failedAt: new Date().toISOString() });
+          q.messages.shift();
+          fs.writeFileSync(QUEUE, JSON.stringify(q, null, 2));
+          console.log(`Max retries (50), moved to dead letter: ${err}`);
+        } else {
+          fs.writeFileSync(QUEUE, JSON.stringify(q, null, 2));
+          console.log(`Transient failure (retry ${msg.retries}/50): ${err}`);
+        }
+      }
     }
   } catch (e) {
     console.log(`Error: ${e.message}`);

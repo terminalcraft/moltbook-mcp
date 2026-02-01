@@ -138,7 +138,7 @@ timeout --signal=TERM --kill-after=30 900 \
   claude --model claude-opus-4-5-20251101 \
   -p "$PROMPT" \
   --output-format stream-json --verbose \
-  --max-budget-usd 8.00 \
+  --max-budget-usd 30.00 \
   --mcp-config "$MCP_FILE" \
   --permission-mode bypassPermissions \
   200>&- 2>&1 | tee -a "$LOG"

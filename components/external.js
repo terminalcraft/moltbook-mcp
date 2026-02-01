@@ -4,6 +4,30 @@ import { join } from "path";
 import { getCtxlyKey, getChatrCredentials, CHATR_API } from "../providers/credentials.js";
 import { loadServices, saveServices } from "../providers/services.js";
 
+const CHATR_QUEUE_PATH = join(process.env.HOME || "/home/moltbot", "moltbook-mcp", "chatr-queue.json");
+
+function loadChatrQueue() {
+  try { return JSON.parse(readFileSync(CHATR_QUEUE_PATH, "utf8")); }
+  catch { return { messages: [], lastSentAt: null }; }
+}
+
+function saveChatrQueue(q) {
+  writeFileSync(CHATR_QUEUE_PATH, JSON.stringify(q, null, 2));
+}
+
+async function trySendChatr(content) {
+  const creds = getChatrCredentials();
+  if (!creds) return { ok: false, error: "No credentials" };
+  const res = await fetch(`${CHATR_API}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-api-key": creds.apiKey },
+    body: JSON.stringify({ agentId: creds.id, content }),
+  });
+  const data = await res.json();
+  if (data.success) return { ok: true };
+  return { ok: false, error: data.error || "unknown error", rateLimited: /rate|limit|minute|cooldown/i.test(data.error || "") };
+}
+
 export function register(server) {
   // agentid_lookup
   server.tool("agentid_lookup", "Look up an agent's AgentID identity and linked accounts (GitHub, Twitter, website).", {
@@ -68,17 +92,46 @@ export function register(server) {
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
   });
 
-  // chatr_send
+  // chatr_send — auto-queues on rate limit
   server.tool("chatr_send", "Send a message to Chatr.ai real-time agent chat", {
     content: z.string().describe("Message text"),
   }, async ({ content }) => {
     try {
-      const creds = getChatrCredentials();
-      if (!creds) return { content: [{ type: "text", text: "No Chatr.ai credentials found." }] };
-      const res = await fetch(`${CHATR_API}/messages`, { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": creds.apiKey }, body: JSON.stringify({ agentId: creds.id, content }) });
-      const data = await res.json();
-      return { content: [{ type: "text", text: data.success ? `Sent: ${content.slice(0, 80)}...` : `Error: ${JSON.stringify(data)}` }] };
+      const result = await trySendChatr(content);
+      if (result.ok) {
+        const q = loadChatrQueue();
+        q.lastSentAt = new Date().toISOString();
+        saveChatrQueue(q);
+        return { content: [{ type: "text", text: `Sent: ${content.slice(0, 80)}...` }] };
+      }
+      if (result.rateLimited) {
+        const q = loadChatrQueue();
+        q.messages.push({ content, queuedAt: new Date().toISOString() });
+        saveChatrQueue(q);
+        return { content: [{ type: "text", text: `Rate limited — queued for later (${q.messages.length} in queue). Will auto-send via chatr_flush.` }] };
+      }
+      return { content: [{ type: "text", text: `Error: ${result.error}` }] };
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
+  });
+
+  // chatr_flush — drain one message from the queue
+  server.tool("chatr_flush", "Send the next queued Chatr message. Call this when rate limit cooldown has passed.", {}, async () => {
+    try {
+      const q = loadChatrQueue();
+      if (!q.messages.length) return { content: [{ type: "text", text: "Queue empty — nothing to send." }] };
+      const next = q.messages[0];
+      const result = await trySendChatr(next.content);
+      if (result.ok) {
+        q.messages.shift();
+        q.lastSentAt = new Date().toISOString();
+        saveChatrQueue(q);
+        return { content: [{ type: "text", text: `Sent queued message (${q.messages.length} remaining): ${next.content.slice(0, 80)}...` }] };
+      }
+      if (result.rateLimited) {
+        return { content: [{ type: "text", text: `Still rate limited. ${q.messages.length} messages waiting. Last sent: ${q.lastSentAt || "never"}.` }] };
+      }
+      return { content: [{ type: "text", text: `Send failed: ${result.error}. Message stays in queue.` }] };
+    } catch (e) { return { content: [{ type: "text", text: `Flush error: ${e.message}` }] }; }
   });
 
   // chatr_agents

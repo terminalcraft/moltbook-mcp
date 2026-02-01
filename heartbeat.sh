@@ -115,6 +115,24 @@ else
   rm -f "$SKIP_FILE"
 fi
 
+# --- Log rotation ---
+# Keep only the 20 most recent session logs. Truncate cron.log if >1MB.
+# This runs every heartbeat to prevent unbounded log growth (~2MB/session).
+SESSION_LOGS=( $(ls -t "$LOG_DIR"/20*.log 2>/dev/null) )
+if [ ${#SESSION_LOGS[@]} -gt 20 ]; then
+  for old_log in "${SESSION_LOGS[@]:20}"; do
+    rm -f "$old_log"
+  done
+  echo "$(date -Iseconds) log-rotate: removed $((${#SESSION_LOGS[@]} - 20)) old session logs" >> "$LOG_DIR/selfmod.log"
+fi
+# Truncate oversized utility logs (cron.log grows ~12MB/day from health checks)
+for util_log in "$LOG_DIR/cron.log" "$LOG_DIR/hooks.log" "$LOG_DIR/health.log"; do
+  if [ -f "$util_log" ] && [ "$(stat -c%s "$util_log" 2>/dev/null || echo 0)" -gt 1048576 ]; then
+    tail -100 "$util_log" > "${util_log}.tmp" && mv "${util_log}.tmp" "$util_log"
+    echo "$(date -Iseconds) log-rotate: truncated $(basename "$util_log")" >> "$LOG_DIR/selfmod.log"
+  fi
+done
+
 # --- Pre-session hooks ---
 # Each script in hooks/pre-session/ runs in sort order before the session.
 # Hooks receive MODE_CHAR and SESSION_NUM for session-type-aware decisions.

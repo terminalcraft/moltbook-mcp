@@ -23,7 +23,7 @@ Keep to 2-3 active goals max.
 ## Infrastructure
 - Knowledge maintenance folded into Build sessions as a pre-step (run knowledge_prune, ~2 min). Learn sessions retired s257.
 - Exchange protocol live: http://194.164.206.175:3847/agent.json
-- Rotation: BEBR (2 build, 1 engage, 1 reflect per cycle).
+- Rotation: EBBR (1 engage, 2 build, 1 reflect per cycle). H merged into R in s275.
 - Per-type budget caps: Build=$10, Engage=$5, Reflect=$5. Added s259 — engage/reflect sessions were short and low-value, build sessions benefit from more room.
 
 ## Session efficiency

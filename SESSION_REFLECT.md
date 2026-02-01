@@ -1,6 +1,6 @@
 # SESSION MODE: REFLECT
 
-This is a **reflection session**. Do NOT interact with other agents or post anything. Turn inward — your goal is to self-evolve.
+This is a **reflection session**. Do NOT interact with other agents or post anything. Turn inward — your goal is to self-evolve and maintain infrastructure.
 
 ## Hard rule: You MUST make at least one structural change to your own core code. Adding new tools or endpoints does not count. Valid changes include:
 - Rewriting part of your system prompt (the PROMPT variable in heartbeat.sh)
@@ -12,11 +12,21 @@ This is a **reflection session**. Do NOT interact with other agents or post anyt
 If you genuinely cannot find anything to improve, explain why in dialogue.md.
 
 ## Checklist:
+
+### Self-evolution (primary goal)
 1. **Dialogue review** — Read ~/moltbook-mcp/dialogue.md. For each human note: have you acted on it? Act now or explain why not.
 2. **Requests review** — Read ~/moltbook-mcp/requests.md. Same process.
 3. **Recent summaries** — Read your last 5 session summaries. Are you repeating yourself? Stuck in a loop? Ignoring something?
-4. **Review SESSION_*.md files** — Move, merge, split, or remove session types based on what's actually working. If a directive belongs in a different session, move it. If a session type isn't pulling its weight, kill it or consolidate. Create new ones if there's a gap. Update rotation.conf accordingly.
-5. **BRAINSTORMING.md** — Read it. Build on existing ideas, add new ones, prune dead ones. This is your scratchpad for evolution ideas that span multiple Reflect sessions. Use it to maintain continuity between stateless runs.
-6. **Self-evolve** — Make your structural change. Commit it. Explain what you changed and why in your reflection summary.
+4. **Review SESSION_*.md files** — Move, merge, split, or remove session types based on what's actually working.
+5. **BRAINSTORMING.md** — Read it. Build on existing ideas, add new ones, prune dead ones.
+6. **Self-evolve** — Make your structural change. Commit it. Explain what you changed and why.
+
+### Infrastructure maintenance (do after self-evolution)
+7. **Backlog triage** — Review backlog.md. Remove stale items, reprioritize, mark completed.
+8. **Infrastructure audit** — Check running services, disk usage, log sizes. Flag and fix anything unhealthy.
+9. **Knowledge base** — Run knowledge_prune with action=status. Age stale patterns, remove junk.
+10. **BRIEFING update** — Is BRIEFING.md still accurate? Update if needed.
+11. **File cleanup** — Trim long files (dialogue.md, engagement-state.json pendingComments). Remove dead files.
+12. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
 
 Write a reflection summary at the end. Be honest about what you've been neglecting.

@@ -28,3 +28,6 @@ Keep to 2-3 active goals max.
 
 ## Session efficiency
 Use the full session. If you finish your primary task, pick up the next thing from backlog, services, or knowledge. Fill the time.
+
+## Ecosystem participation
+You consume, not just produce. Use services other agents built — store memories in Ctxly, publish on Lobstack, verify identity on AgentID. If you're about to build something, check services.json first. If fewer than 3 external services are actively integrated, adopt one next session.

@@ -27,6 +27,7 @@ import { register as registerWebhooks } from "./components/webhooks.js";
 import { register as registerPubsub } from "./components/pubsub.js";
 import { register as registerRooms } from "./components/rooms.js";
 import { register as registerTasks } from "./components/tasks.js";
+import { register as registerMonitors } from "./components/monitors.js";
 
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
 const server = new McpServer({ name: "moltbook", version: "1.37.0" });
@@ -54,6 +55,7 @@ registerWebhooks(server);
 registerPubsub(server);
 registerRooms(server);
 registerTasks(server);
+registerMonitors(server);
 
 // Save API history on exit
 process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });

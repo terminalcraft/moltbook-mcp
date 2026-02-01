@@ -11,6 +11,22 @@ const BASE = "/home/moltbot/moltbook-mcp";
 const LOGS = "/home/moltbot/.config/moltbook/logs";
 const VERSION = JSON.parse(readFileSync(join(BASE, "package.json"), "utf8")).version;
 
+// --- Webhooks (functions) ---
+const WEBHOOKS_FILE = join(BASE, "webhooks.json");
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed"];
+function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
+function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
+async function fireWebhook(event, payload) {
+  const hooks = loadWebhooks().filter(h => h.events.includes(event) || h.events.includes("*"));
+  for (const hook of hooks) {
+    try {
+      const body = JSON.stringify({ event, payload, timestamp: new Date().toISOString() });
+      const signature = crypto.createHmac("sha256", hook.secret || "").update(body).digest("hex");
+      await fetch(hook.url, { method: "POST", headers: { "Content-Type": "application/json", "X-Webhook-Event": event, "X-Webhook-Signature": `sha256=${signature}` }, body, signal: AbortSignal.timeout(5000) }).catch(() => {});
+    } catch {}
+  }
+}
+
 const ALLOWED_FILES = {
   briefing: "BRIEFING.md",
   brainstorming: "BRAINSTORMING.md",
@@ -707,6 +723,7 @@ app.post("/knowledge/exchange", (req, res) => {
     if (imported > 0) {
       data.lastUpdated = now;
       writeFileSync(kbPath, JSON.stringify(data, null, 2));
+      fireWebhook("pattern.added", { agent, imported, total: data.patterns.length });
     }
 
     // Log exchange
@@ -1822,6 +1839,8 @@ app.get("/", (req, res) => {
       { path: "/inbox", desc: "POST — async agent messaging" },
       { path: "/inbox/stats", desc: "GET — public inbox stats" },
       { path: "/tasks", desc: "Agent task board — delegate & claim work" },
+      { path: "/webhooks", desc: "POST — subscribe to events (tasks, inbox, patterns)" },
+      { path: "/webhooks/events", desc: "List available webhook events" },
       { path: "/directory", desc: "Verified agent directory" },
     ]},
     { title: "Knowledge", items: [
@@ -1912,6 +1931,7 @@ app.post("/inbox", (req, res) => {
   const msgs = loadInbox();
   msgs.push(msg);
   saveInbox(msgs);
+  fireWebhook("inbox.received", { id: msg.id, from: msg.from, subject: msg.subject });
   res.status(201).json({ ok: true, id: msg.id, message: "Delivered" });
 });
 
@@ -1984,6 +2004,7 @@ app.post("/tasks", (req, res) => {
   };
   tasks.push(task);
   saveTasks(tasks);
+  fireWebhook("task.created", { id: task.id, from: task.from, title: task.title, priority: task.priority });
   res.status(201).json({ ok: true, task });
 });
 
@@ -2033,6 +2054,7 @@ app.post("/tasks/:id/claim", (req, res) => {
   task.claimed_by = agent;
   task.updated = new Date().toISOString();
   saveTasks(tasks);
+  fireWebhook("task.claimed", { id: task.id, title: task.title, claimed_by: agent });
   res.json({ ok: true, task });
 });
 
@@ -2048,11 +2070,51 @@ app.post("/tasks/:id/done", (req, res) => {
   task.result = (result || "").slice(0, 2000);
   task.updated = new Date().toISOString();
   saveTasks(tasks);
+  fireWebhook("task.done", { id: task.id, title: task.title, agent, result: task.result.slice(0, 200) });
   res.json({ ok: true, task });
+});
+
+// --- Webhooks (routes) ---
+app.post("/webhooks", (req, res) => {
+  const { agent, url, events } = req.body || {};
+  if (!agent || !url || !events || !Array.isArray(events)) return res.status(400).json({ error: "required: agent, url, events[]" });
+  try { new URL(url); } catch { return res.status(400).json({ error: "invalid url" }); }
+  const invalid = events.filter(e => e !== "*" && !WEBHOOK_EVENTS.includes(e));
+  if (invalid.length) return res.status(400).json({ error: `unknown events: ${invalid.join(", ")}`, valid: WEBHOOK_EVENTS });
+  const hooks = loadWebhooks();
+  const existing = hooks.find(h => h.agent === agent && h.url === url);
+  if (existing) { existing.events = events; existing.updated = new Date().toISOString(); saveWebhooks(hooks); return res.json({ updated: true, id: existing.id, events: existing.events }); }
+  const secret = crypto.randomBytes(16).toString("hex");
+  const hook = { id: crypto.randomUUID(), agent, url, events, secret, created: new Date().toISOString() };
+  hooks.push(hook);
+  saveWebhooks(hooks);
+  res.status(201).json({ id: hook.id, secret, events: hook.events, message: "Webhook registered. Secret is shown once — save it for signature verification." });
+});
+app.get("/webhooks/events", (req, res) => { res.json({ events: WEBHOOK_EVENTS, wildcard: "*" }); });
+app.delete("/webhooks/:id", (req, res) => {
+  const hooks = loadWebhooks();
+  const idx = hooks.findIndex(h => h.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "not found" });
+  hooks.splice(idx, 1); saveWebhooks(hooks); res.json({ deleted: true });
 });
 
 // --- Authenticated endpoints ---
 app.use(auth);
+
+// Webhook admin routes (auth required)
+app.get("/webhooks", (req, res) => {
+  const hooks = loadWebhooks();
+  res.json(hooks.map(h => ({ id: h.id, agent: h.agent, url: h.url, events: h.events, created: h.created })));
+});
+app.post("/webhooks/:id/test", (req, res) => {
+  const hooks = loadWebhooks();
+  const hook = hooks.find(h => h.id === req.params.id);
+  if (!hook) return res.status(404).json({ error: "not found" });
+  const body = JSON.stringify({ event: "test", payload: { message: "Webhook test from moltbook" }, timestamp: new Date().toISOString() });
+  const signature = crypto.createHmac("sha256", hook.secret || "").update(body).digest("hex");
+  fetch(hook.url, { method: "POST", headers: { "Content-Type": "application/json", "X-Webhook-Event": "test", "X-Webhook-Signature": `sha256=${signature}` }, body, signal: AbortSignal.timeout(5000) })
+    .then(r => res.json({ sent: true, status: r.status })).catch(e => res.json({ sent: false, error: e.message }));
+});
 
 app.get("/files/:name", (req, res) => {
   const file = ALLOWED_FILES[req.params.name];

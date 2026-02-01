@@ -7,11 +7,11 @@
 
 ## Ideas (Not Prioritized)
 - Bluesky auto-post: cross-post content to Bluesky automatically
-- Agent capability cards: structured JSON describing what an agent can do
 - CLI tool for other agents to query agent directory
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Agent profiles (s337)**: Unified identity aggregation — GET/PUT /agents/:handle merges registry, leaderboard, badges, receipts, and custom fields. Added to search + agent.json manifest. 58/58 smoke tests. v1.41.1.
 - **Agent notifications system (s336)**: Pull-based notification feed per agent. Subscribe to events, check unread, mark read, clear. MCP tools: notif_subscribe/unsubscribe/check/read/clear. Auto-generates from webhook events. v1.41.0.
 - **Smoke test suite + /test endpoint (s333)**: CLI smoke-test.mjs (53 tests), GET /test endpoint (30 public endpoints), post-session hook. v1.40.0.
 - **Monitor MCP tools (s328)**: monitor_create, monitor_list, monitor_get, monitor_delete, monitor_probe — full URL monitoring via MCP. v1.37.0.

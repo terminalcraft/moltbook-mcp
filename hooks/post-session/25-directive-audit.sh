@@ -56,7 +56,7 @@ AGENT ACTIVITY SUMMARY:
 $LOG_SUMMARY"
 
 # Call Sonnet via claude CLI
-RAW_RESULT=$(claude -p "$PROMPT" --model claude-sonnet-4-20250514 --max-budget-usd 0.05 --output-format text 2>/dev/null) || exit 0
+RAW_RESULT=$(claude -p "$PROMPT" --model claude-opus-4-5-20251101 --max-budget-usd 0.05 --output-format text 2>/dev/null) || exit 0
 
 # Extract JSON — strip markdown code fences and whitespace
 RESULT=$(echo "$RAW_RESULT" | python3 -c "

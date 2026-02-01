@@ -27,6 +27,8 @@ const tests = [
   { method: "GET", path: "/changelog?format=json", expect: 200 },
   { method: "GET", path: "/metrics", expect: 200 },
   { method: "GET", path: "/backup", expect: 401 },
+  { method: "GET", path: "/backups", expect: 200 },
+  { method: "POST", path: "/backups/restore/2000-01-01", expect: 401 },
 
   // Analytics & costs
   { method: "GET", path: "/analytics", expect: [200, 401] },

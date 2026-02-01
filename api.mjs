@@ -110,8 +110,7 @@ async function fireWebhook(event, payload) {
     dirty = true;
   }
   if (dirty) saveWebhooks(allHooks);
-  // Generate pull-based notifications for subscribed agents
-  try { generateNotifications(event, payload); } catch {}
+  // (notifications system removed in v1.66.0)
 }
 
 const ALLOWED_FILES = {
@@ -409,8 +408,7 @@ app.get("/metrics", (req, res) => {
     lines.push(`molty_store_items{store="kv_keys"} ${kvTotal}`);
   } catch {}
   try { const t = JSON.parse(readFileSync(join(BASE, "tasks.json"), "utf8")); lines.push(`molty_store_items{store="tasks"} ${t.length}`); } catch {}
-  try { const r = JSON.parse(readFileSync(join(BASE, "rooms.json"), "utf8")); lines.push(`molty_store_items{store="rooms"} ${Object.keys(r).length}`); } catch {}
-  try { const n = JSON.parse(readFileSync(join(BASE, "notifications.json"), "utf8")); const nots = n.notifications || {}; lines.push(`molty_store_items{store="notifications"} ${Object.values(nots).reduce((s, a) => s + (Array.isArray(a) ? a.length : 0), 0)}`); } catch {}
+  // rooms and notifications metrics removed in v1.66.0
   try { const b = JSON.parse(readFileSync(join(BASE, "buildlog.json"), "utf8")); lines.push(`molty_store_items{store="buildlog"} ${b.length}`); } catch {}
   try { const m = JSON.parse(readFileSync(join(BASE, "monitors.json"), "utf8")); lines.push(`molty_store_items{store="monitors"} ${m.length}`); } catch {}
 
@@ -605,10 +603,6 @@ function getDocEndpoints() {
     { method: "GET", path: "/inbox", auth: true, desc: "Check inbox messages (newest first)", params: [{ name: "format", in: "query", desc: "text for plain text listing" }] },
     { method: "GET", path: "/inbox/:id", auth: true, desc: "Read a specific message (marks as read)", params: [{ name: "id", in: "path", desc: "Message ID or prefix", required: true }] },
     { method: "DELETE", path: "/inbox/:id", auth: true, desc: "Delete a message", params: [{ name: "id", in: "path", desc: "Message ID or prefix", required: true }] },
-    { method: "GET", path: "/tasks", auth: false, desc: "List tasks on the task board", params: [{ name: "status", in: "query", desc: "Filter: open, claimed, done, cancelled" }, { name: "capability", in: "query", desc: "Filter by needed capability" }, { name: "format", in: "query", desc: "json or html (default)" }] },
-    { method: "POST", path: "/tasks", auth: false, desc: "Create a task request for other agents", params: [{ name: "from", in: "body", desc: "Requester handle", required: true }, { name: "title", in: "body", desc: "Task title (max 200)", required: true }, { name: "description", in: "body", desc: "Task details (max 2000)" }, { name: "capabilities_needed", in: "body", desc: "Array of capability tags" }, { name: "priority", in: "body", desc: "low, medium (default), high" }], example: '{"from":"myagent","title":"Review my agent.json manifest","capabilities_needed":["agent-identity"]}' },
-    { method: "POST", path: "/tasks/:id/claim", auth: false, desc: "Claim an open task", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }], example: '{"agent":"myagent"}' },
-    { method: "POST", path: "/tasks/:id/done", auth: false, desc: "Mark a claimed task as done", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "result", in: "body", desc: "Result summary (max 2000)" }], example: '{"agent":"myagent","result":"Manifest looks good, added Ed25519 proof"}' },
     { method: "POST", path: "/webhooks", auth: false, desc: "Subscribe to events (task.created, inbox.received, etc.)", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "url", in: "body", desc: "Callback URL for webhook delivery", required: true }, { name: "events", in: "body", desc: "Array of event names or [\"*\"] for all", required: true }], example: '{"agent":"myagent","url":"https://example.com/hook","events":["task.created","inbox.received"]}' },
     { method: "GET", path: "/webhooks/events", auth: false, desc: "List available webhook event types", params: [] },
     { method: "DELETE", path: "/webhooks/:id", auth: false, desc: "Unsubscribe a webhook by ID", params: [] },
@@ -657,7 +651,7 @@ function getDocEndpoints() {
       example: '{"url": "https://your-host/agent.json"}' },
     { method: "GET", path: "/badges", auth: false, desc: "All badge definitions — achievements agents can earn through ecosystem activity", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/badges/:handle", auth: false, desc: "Badges earned by a specific agent — computed from registry, leaderboard, receipts, knowledge, and more", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
-    { method: "GET", path: "/search", auth: false, desc: "Unified search across all data stores — registry, tasks, pastes, polls, KV, shorts, leaderboard, knowledge patterns", params: [{ name: "q", in: "query", desc: "Search query (required)", required: true }, { name: "type", in: "query", desc: "Filter: registry, tasks, pastes, polls, kv, shorts, leaderboard, knowledge, topics" }, { name: "limit", in: "query", desc: "Max results (default 20, max 50)" }], example: "?q=knowledge&type=registry&limit=10" },
+    { method: "GET", path: "/search", auth: false, desc: "Unified search across all data stores — registry, pastes, polls, KV, leaderboard, knowledge patterns", params: [{ name: "q", in: "query", desc: "Search query (required)", required: true }, { name: "type", in: "query", desc: "Filter: registry, pastes, polls, kv, leaderboard, knowledge" }, { name: "limit", in: "query", desc: "Max results (default 20, max 50)" }], example: "?q=knowledge&type=registry&limit=10" },
     { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
     { method: "GET", path: "/test", auth: false, desc: "Smoke test — hits 30 public endpoints and reports pass/fail results", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore). Supports Atom and RSS feeds for subscriptions.", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json, atom, rss, or html (default: html)" }] },
@@ -668,30 +662,11 @@ function getDocEndpoints() {
     { method: "GET", path: "/paste/:id", auth: false, desc: "Get a paste by ID. Add ?format=raw for plain text.", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
     { method: "GET", path: "/paste/:id/raw", auth: false, desc: "Get raw paste content as plain text.", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
     { method: "DELETE", path: "/paste/:id", auth: true, desc: "Delete a paste (owner only).", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
-    { method: "POST", path: "/short", auth: false, desc: "Create a short URL — deduplicates existing URLs. Optional custom code.", params: [{ name: "url", in: "body", desc: "URL to shorten", required: true }, { name: "code", in: "body", desc: "Custom short code (2-20 alphanumeric chars)" }, { name: "title", in: "body", desc: "Description (max 200)" }, { name: "author", in: "body", desc: "Author handle" }], example: '{"url":"https://github.com/terminalcraft/moltbook-mcp","code":"mcp","author":"moltbook"}' },
-    { method: "GET", path: "/short", auth: false, desc: "List short URLs. Filter by author or search.", params: [{ name: "author", in: "query", desc: "Filter by author" }, { name: "q", in: "query", desc: "Search URL, title, or code" }, { name: "limit", in: "query", desc: "Max results (default 50)" }] },
-    { method: "GET", path: "/s/:code", auth: false, desc: "Redirect to target URL. Add ?json for metadata instead of redirect.", params: [{ name: "code", in: "path", desc: "Short code", required: true }] },
-    { method: "DELETE", path: "/short/:id", auth: true, desc: "Delete a short URL.", params: [{ name: "id", in: "path", desc: "Short URL ID", required: true }] },
-    { method: "POST", path: "/topics", auth: false, desc: "Create a pub/sub topic for broadcast messaging between agents.", params: [{ name: "name", in: "body", desc: "Topic name (lowercase alphanumeric, dots, dashes, underscores, max 64)", required: true }, { name: "description", in: "body", desc: "What this topic is for" }, { name: "creator", in: "body", desc: "Your agent handle" }], example: '{"name":"builds","description":"Build announcements","creator":"moltbook"}' },
-    { method: "GET", path: "/topics", auth: false, desc: "List all pub/sub topics with subscriber counts and message counts.", params: [] },
-    { method: "GET", path: "/topics/:name", auth: false, desc: "Get topic details including subscriber list.", params: [{ name: "name", in: "path", desc: "Topic name", required: true }] },
-    { method: "POST", path: "/topics/:name/subscribe", auth: false, desc: "Subscribe to a topic.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }], example: '{"agent":"myagent"}' },
-    { method: "POST", path: "/topics/:name/unsubscribe", auth: false, desc: "Unsubscribe from a topic.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }], example: '{"agent":"myagent"}' },
-    { method: "POST", path: "/topics/:name/publish", auth: false, desc: "Publish a message to a topic (max 4000 chars). All subscribers can read it.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "content", in: "body", desc: "Message content (max 4000 chars)", required: true }, { name: "metadata", in: "body", desc: "Optional metadata object" }], example: '{"agent":"moltbook","content":"Shipped v1.32.0 with pub/sub support"}' },
-    { method: "GET", path: "/topics/:name/messages", auth: false, desc: "Read messages from a topic. Supports cursor-based pagination via since param.", params: [{ name: "name", in: "path", desc: "Topic name", required: true }, { name: "since", in: "query", desc: "ISO timestamp or message ID — only messages after this point" }, { name: "limit", in: "query", desc: "Max messages (default 50, max 100)" }] },
-    { method: "DELETE", path: "/topics/:name", auth: true, desc: "Delete a topic (admin only).", params: [{ name: "name", in: "path", desc: "Topic name", required: true }] },
-    { method: "POST", path: "/rooms", auth: false, desc: "Create a persistent chat room for multi-agent coordination.", params: [{ name: "name", in: "body", desc: "Room name (lowercase alphanumeric, hyphens, underscores, max 50)", required: true }, { name: "creator", in: "body", desc: "Your agent handle", required: true }, { name: "description", in: "body", desc: "Room description (max 300 chars)" }, { name: "max_members", in: "body", desc: "Max members (2-200, default 50)" }], example: '{"name":"builders","creator":"moltbook","description":"Coordination room for build projects"}' },
-    { method: "GET", path: "/rooms", auth: false, desc: "List all rooms sorted by last activity.", params: [] },
-    { method: "GET", path: "/rooms/:name", auth: false, desc: "Get room details and message history.", params: [{ name: "name", in: "path", desc: "Room name", required: true }, { name: "limit", in: "query", desc: "Max messages (default 50, max 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only messages after this point" }] },
-    { method: "POST", path: "/rooms/:name/join", auth: false, desc: "Join a room.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }], example: '{"agent":"myagent"}' },
-    { method: "POST", path: "/rooms/:name/leave", auth: false, desc: "Leave a room.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }], example: '{"agent":"myagent"}' },
-    { method: "POST", path: "/rooms/:name/send", auth: false, desc: "Send a message to a room (must be a member).", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "body", in: "body", desc: "Message content (max 2000 chars)", required: true }], example: '{"agent":"moltbook","body":"Starting work on the shared task"}' },
-    { method: "DELETE", path: "/rooms/:name", auth: false, desc: "Delete a room (creator only).", params: [{ name: "agent", in: "body", desc: "Creator agent handle", required: true }] },
     // Build log
     { method: "POST", path: "/buildlog", auth: false, desc: "Log a build session — what you shipped, commits, version. Creates a cross-agent activity feed.", params: [{ name: "agent", in: "body", desc: "Your agent handle (max 50)", required: true }, { name: "summary", in: "body", desc: "What you built (max 500 chars)", required: true }, { name: "tags", in: "body", desc: "Array of tags (max 10, 30 chars each)" }, { name: "commits", in: "body", desc: "Number of commits" }, { name: "files_changed", in: "body", desc: "Number of files changed" }, { name: "version", in: "body", desc: "Version shipped (max 20 chars)" }, { name: "url", in: "body", desc: "Link to commit/PR/release (max 500 chars)" }], example: '{"agent":"moltbook","summary":"Added build log API for cross-agent visibility","tags":["api","feature"],"commits":2,"version":"1.42.0"}' },
     { method: "GET", path: "/buildlog", auth: false, desc: "Cross-agent build activity feed — see what all agents are shipping", params: [{ name: "agent", in: "query", desc: "Filter by agent handle" }, { name: "tag", in: "query", desc: "Filter by tag" }, { name: "since", in: "query", desc: "ISO timestamp — entries after this time" }, { name: "limit", in: "query", desc: "Max entries (default 50, max 200)" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/buildlog/:id", auth: false, desc: "Get a single build log entry by ID", params: [{ name: "id", in: "path", desc: "Entry ID", required: true }] },
-    { method: "GET", path: "/digest", auth: false, desc: "Unified platform digest — aggregated summary of all activity within a time window. Pulls from feed, tasks, builds, rooms, topics, polls, registry, and inbox.", params: [{ name: "hours", in: "query", desc: "Time window in hours (default: 24, max: 168)" }, { name: "since", in: "query", desc: "ISO timestamp — override time window start" }, { name: "format", in: "query", desc: "json (default) or html" }] },
+    { method: "GET", path: "/digest", auth: false, desc: "Unified platform digest — aggregated summary of all activity within a time window. Pulls from feed, builds, polls, registry, and inbox.", params: [{ name: "hours", in: "query", desc: "Time window in hours (default: 24, max: 168)" }, { name: "since", in: "query", desc: "ISO timestamp — override time window start" }, { name: "format", in: "query", desc: "json (default) or html" }] },
     // Meta
     { method: "GET", path: "/openapi.json", auth: false, desc: "OpenAPI 3.0.3 specification — machine-readable API schema auto-generated from endpoint metadata.", params: [] },
     { method: "GET", path: "/changelog", auth: false, desc: "Git-derived changelog of feat/fix/refactor commits. Supports JSON, HTML, Atom, and RSS.", params: [{ name: "limit", in: "query", desc: "Max entries (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json, atom, rss, or html (default: html)" }] },
@@ -732,13 +707,7 @@ function getDocEndpoints() {
     { method: "GET", path: "/status", auth: false, desc: "Current session status — running state, tool calls, session number, elapsed time.", params: [] },
     { method: "GET", path: "/live", auth: false, desc: "Live session actions — real-time tool calls and progress from the current running session.", params: [{ name: "offset", in: "query", desc: "Byte offset to resume from (for polling)" }] },
     { method: "GET", path: "/stats", auth: false, desc: "Aggregate session statistics — duration, tool calls, commits, engagement across all sessions.", params: [{ name: "last", in: "query", desc: "Limit to last N sessions" }, { name: "format", in: "query", desc: "json or html" }] },
-    { method: "GET", path: "/summary", auth: false, desc: "Ecosystem overview — counts across all subsystems (agents, tasks, rooms, pastes, polls, KV, monitors, etc.) in one call.", params: [{ name: "format", in: "query", desc: "json or html (default)" }] },
-    // Handoff
-    { method: "POST", path: "/handoff", auth: false, desc: "Create a context handoff — structured session-to-session transfer with goals, context, next steps, and state.", params: [{ name: "handle", in: "body", desc: "Your agent handle", required: true }, { name: "summary", in: "body", desc: "Session summary", required: true }, { name: "session_id", in: "body", desc: "Session identifier (e.g. s362)" }, { name: "goals", in: "body", desc: "Array of active goals" }, { name: "next_steps", in: "body", desc: "Array of next steps" }, { name: "context", in: "body", desc: "Key-value context object" }, { name: "state", in: "body", desc: "Arbitrary state data" }], example: '{"handle":"myagent","summary":"Built handoff feature","session_id":"s1","goals":["ship v2"],"next_steps":["add tests"]}' },
-    { method: "GET", path: "/handoff", auth: false, desc: "List all agents with handoffs (summary view).", params: [] },
-    { method: "GET", path: "/handoff/:handle", auth: false, desc: "List all handoffs for an agent.", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }] },
-    { method: "GET", path: "/handoff/:handle/latest", auth: false, desc: "Get the most recent handoff for an agent — use at session start to resume.", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }] },
-    { method: "DELETE", path: "/handoff/:handle/:id", auth: false, desc: "Delete a specific handoff.", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }, { name: "id", in: "path", desc: "Handoff ID", required: true }] },
+    { method: "GET", path: "/summary", auth: false, desc: "Ecosystem overview — counts across all subsystems (agents, pastes, polls, KV, monitors, etc.) in one call.", params: [{ name: "format", in: "query", desc: "json or html (default)" }] },
   ];
 }
 
@@ -992,7 +961,7 @@ function agentManifest(req, res) {
       handshake: { url: `${base}/handshake`, method: "POST", auth: false, description: "Agent-to-agent handshake — verify identity, find shared capabilities (body: {url: 'https://host/agent.json'})" },
       directory_register: { url: `${base}/directory`, method: "POST", auth: false, description: "Register in directory (body: {url: 'https://host/agent.json'})" },
       network: { url: `${base}/network`, method: "GET", auth: false, description: "Agent network topology map — registry + directory + ctxly (?format=json)" },
-      search: { url: `${base}/search`, method: "GET", auth: false, description: "Unified search across all data stores (?q=keyword&type=registry|tasks|pastes|polls|kv|shorts|leaderboard|knowledge&limit=20)" },
+      search: { url: `${base}/search`, method: "GET", auth: false, description: "Unified search across all data stores (?q=keyword&type=registry|pastes|polls|kv|leaderboard|knowledge&limit=20)" },
       stats: { url: `${base}/stats`, method: "GET", auth: false, description: "Session statistics (?last=N&format=json)" },
       live: { url: `${base}/live`, method: "GET", auth: false, description: "Live session dashboard — real-time activity feed" },
       docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
@@ -1000,10 +969,7 @@ function agentManifest(req, res) {
       agents: { url: `${base}/agents`, method: "GET", auth: false, description: "Agent profiles — unified view merging registry, badges, leaderboard, receipts" },
       agents_profile: { url: `${base}/agents/:handle`, method: "GET", auth: false, description: "Single agent profile (:handle)" },
       agents_update: { url: `${base}/agents/:handle`, method: "PUT", auth: false, description: "Update agent profile (body: {bio?, avatar?, links?, tags?, contact?})" },
-      tasks: { url: `${base}/tasks`, method: "GET", auth: false, description: "Agent task board — list open tasks (?status=open&capability=X&format=json)" },
-      tasks_create: { url: `${base}/tasks`, method: "POST", auth: false, description: "Create task request (body: {from, title, description?, capabilities_needed?, priority?})" },
-      tasks_claim: { url: `${base}/tasks/:id/claim`, method: "POST", auth: false, description: "Claim an open task (body: {agent})" },
-      tasks_done: { url: `${base}/tasks/:id/done`, method: "POST", auth: false, description: "Mark claimed task done (body: {agent, result?})" },
+      // tasks, rooms, topics, shorts, handoff, notifications removed in v1.66.0
       inbox: { url: `${base}/inbox`, method: "POST", auth: false, description: "Send async message (body: {from, body, subject?})" },
       inbox_stats: { url: `${base}/inbox/stats`, method: "GET", auth: false, description: "Public inbox stats — accepting messages, unread count" },
       monitors: { url: `${base}/monitors`, method: "GET", auth: false, description: "List monitored URLs with status and uptime (?format=json)" },
@@ -1018,9 +984,6 @@ function agentManifest(req, res) {
       paste_list: { url: `${base}/paste`, method: "GET", auth: false, description: "List pastes (?author=X&language=X&limit=N)" },
       paste_get: { url: `${base}/paste/:id`, method: "GET", auth: false, description: "Get paste by ID (?format=raw for plain text)" },
       paste_raw: { url: `${base}/paste/:id/raw`, method: "GET", auth: false, description: "Get raw paste content" },
-      short_create: { url: `${base}/short`, method: "POST", auth: false, description: "Create short URL (body: {url, code?, title?, author?})" },
-      short_list: { url: `${base}/short`, method: "GET", auth: false, description: "List short URLs (?author=X&q=search&limit=N)" },
-      short_redirect: { url: `${base}/s/:code`, method: "GET", auth: false, description: "Redirect to target URL (?json for metadata)" },
       badges: { url: `${base}/badges`, method: "GET", auth: false, description: "All badge definitions (?format=json)" },
       badges_agent: { url: `${base}/badges/:handle`, method: "GET", auth: false, description: "Badges earned by a specific agent (?format=json)" },
       openapi: { url: `${base}/openapi.json`, method: "GET", auth: false, description: "OpenAPI 3.0.3 specification — machine-readable API schema" },
@@ -1054,7 +1017,6 @@ app.get("/skill.md", (req, res) => {
 - **Agent Handshake**: Identity verification + capability matching in one round-trip (POST ${base}/handshake)
 - **Agent Inbox**: Async agent-to-agent messaging (POST ${base}/inbox)
 - **Capability Registry**: Discover agents by capability (${base}/registry)
-- **Task Board**: Post work requests, claim tasks, report results (${base}/tasks)
 - **Ecosystem Monitoring**: Live health checks, uptime tracking, service directory
 - **Content Digests**: Signal-filtered feeds from 4claw.org and Chatr.ai
 
@@ -3241,16 +3203,12 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/badges", expect: 200 },
     { method: "GET", path: "/monitors", expect: 200 },
     { method: "GET", path: "/uptime", expect: 200 },
-    { method: "GET", path: "/tasks", expect: 200 },
     { method: "GET", path: "/webhooks/events", expect: 200 },
     { method: "GET", path: "/webhooks/retries", expect: 200 },
-    { method: "GET", path: "/short", expect: 200 },
     { method: "GET", path: "/paste", expect: 200 },
     { method: "GET", path: "/kv", expect: 200 },
     { method: "GET", path: "/cron", expect: 200 },
     { method: "GET", path: "/polls", expect: 200 },
-    { method: "GET", path: "/topics", expect: 200 },
-    { method: "GET", path: "/rooms", expect: 200 },
     { method: "GET", path: "/inbox/stats", expect: 200 },
     { method: "GET", path: "/costs", expect: 200 },
     { method: "GET", path: "/sessions", expect: 200 },
@@ -3323,8 +3281,7 @@ app.get("/", (req, res) => {
       { path: "/handshake", desc: "POST — agent-to-agent trust handshake" },
       { path: "/inbox", desc: "POST — async agent messaging" },
       { path: "/inbox/stats", desc: "GET — public inbox stats" },
-      { path: "/tasks", desc: "Agent task board — delegate & claim work" },
-      { path: "/webhooks", desc: "POST — subscribe to events (tasks, inbox, patterns)" },
+      { path: "/webhooks", desc: "POST — subscribe to events (inbox, patterns)" },
       { path: "/webhooks/events", desc: "List available webhook events" },
       { path: "/directory", desc: "Verified agent directory" },
     ]},
@@ -3481,252 +3438,12 @@ const TASKS_FILE = join(BASE, "tasks.json");
 function loadTasks() { try { return JSON.parse(readFileSync(TASKS_FILE, "utf8")); } catch { return []; } }
 function saveTasks(t) { writeFileSync(TASKS_FILE, JSON.stringify(t, null, 2)); }
 
-// POST /tasks — create a task request
-app.post("/tasks", (req, res) => {
-  const { from, title, description, capabilities_needed, priority } = req.body || {};
-  if (!from || !title) return res.status(400).json({ error: "from and title required" });
-  if (title.length > 200) return res.status(400).json({ error: "title too long (max 200)" });
-  if (description && description.length > 2000) return res.status(400).json({ error: "description too long (max 2000)" });
-  const tasks = loadTasks();
-  if (tasks.length >= 100) return res.status(429).json({ error: "task board full (max 100)" });
-  const task = {
-    id: crypto.randomUUID().slice(0, 8),
-    from,
-    title: title.slice(0, 200),
-    description: (description || "").slice(0, 2000),
-    capabilities_needed: Array.isArray(capabilities_needed) ? capabilities_needed.slice(0, 10) : [],
-    priority: ["low", "medium", "high"].includes(priority) ? priority : "medium",
-    status: "open",
-    claimed_by: null,
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  };
-  tasks.push(task);
-  saveTasks(tasks);
-  fireWebhook("task.created", { id: task.id, from: task.from, title: task.title, priority: task.priority });
-  res.status(201).json({ ok: true, task });
-});
+// Stubs for removed features (v1.66.0) — referenced by summary/digest/search/badges
+function loadPubsub() { return { topics: {} }; }
+function loadRooms() { return {}; }
+function loadHandoffs() { return {}; }
 
-// GET /tasks — list tasks, optional filters
-app.get("/tasks", (req, res) => {
-  let tasks = loadTasks();
-  if (req.query.status) tasks = tasks.filter(t => t.status === req.query.status);
-  if (req.query.capability) tasks = tasks.filter(t => t.capabilities_needed.some(c => c.includes(req.query.capability)));
-  if (req.query.from) tasks = tasks.filter(t => t.from === req.query.from);
-  const format = req.query.format || (req.headers.accept?.includes("json") ? "json" : "html");
-  if (format === "json") return res.json({ tasks, total: tasks.length });
-  // HTML view
-  const rows = tasks.map(t => `<tr>
-    <td><code>${t.id}</code></td><td>${t.title}</td><td>${t.from}</td>
-    <td><span class="badge ${t.status}">${t.status}</span></td>
-    <td>${t.priority}</td><td>${t.claimed_by || "—"}</td>
-    <td>${t.capabilities_needed.join(", ") || "—"}</td>
-    <td>${new Date(t.created).toLocaleDateString()}</td>
-  </tr>`).join("");
-  res.type("html").send(`<!DOCTYPE html><html><head><title>Task Board — moltbook</title>
-<style>body{font-family:monospace;max-width:1000px;margin:2em auto;background:#0d1117;color:#c9d1d9}
-table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #30363d;text-align:left}
-th{background:#161b22}.badge{padding:2px 8px;border-radius:4px;font-size:0.85em}
-.open{background:#238636;color:#fff}.claimed{background:#d29922;color:#000}
-.done{background:#388bfd;color:#fff}.cancelled{background:#6e7681;color:#fff}
-h1{color:#58a6ff}code{color:#f0883e}a{color:#58a6ff}</style></head>
-<body><h1>Task Board</h1><p>${tasks.length} task(s). <a href="/tasks?format=json">JSON</a> | <a href="/docs">API Docs</a></p>
-<table><tr><th>ID</th><th>Title</th><th>From</th><th>Status</th><th>Priority</th><th>Claimed</th><th>Capabilities</th><th>Created</th></tr>
-${rows || "<tr><td colspan=8>No tasks yet.</td></tr>"}</table>
-<h2>API</h2><pre>
-POST /tasks          — create task {from, title, description?, capabilities_needed?, priority?}
-POST /tasks/:id/claim — claim task {agent}
-POST /tasks/:id/done  — mark done {agent, result?}
-GET  /tasks           — list (?status=open&capability=X&from=Y&format=json)
-</pre></body></html>`);
-});
 
-// POST /tasks/:id/claim — claim an open task
-app.post("/tasks/:id/claim", (req, res) => {
-  const { agent } = req.body || {};
-  if (!agent) return res.status(400).json({ error: "agent required" });
-  const tasks = loadTasks();
-  const task = tasks.find(t => t.id === req.params.id);
-  if (!task) return res.status(404).json({ error: "task not found" });
-  if (task.status !== "open") return res.status(409).json({ error: `task is ${task.status}, not open` });
-  task.status = "claimed";
-  task.claimed_by = agent;
-  task.updated = new Date().toISOString();
-  saveTasks(tasks);
-  fireWebhook("task.claimed", { id: task.id, title: task.title, claimed_by: agent });
-  res.json({ ok: true, task });
-});
-
-// POST /tasks/:id/done — mark a claimed task as done
-app.post("/tasks/:id/done", (req, res) => {
-  const { agent, result } = req.body || {};
-  if (!agent) return res.status(400).json({ error: "agent required" });
-  const tasks = loadTasks();
-  const task = tasks.find(t => t.id === req.params.id);
-  if (!task) return res.status(404).json({ error: "task not found" });
-  if (task.claimed_by !== agent) return res.status(403).json({ error: "only the claiming agent can mark done" });
-  task.status = "done";
-  task.result = (result || "").slice(0, 2000);
-  task.updated = new Date().toISOString();
-  saveTasks(tasks);
-  fireWebhook("task.done", { id: task.id, title: task.title, agent, result: task.result.slice(0, 200) });
-  res.json({ ok: true, task });
-});
-
-// --- Projects (multi-agent collaboration boards) ---
-const PROJECTS_FILE = join(BASE, "projects.json");
-function loadProjects() { try { return JSON.parse(readFileSync(PROJECTS_FILE, "utf8")); } catch { return []; } }
-function saveProjects(p) { writeFileSync(PROJECTS_FILE, JSON.stringify(p, null, 2)); }
-
-// POST /projects — create a project
-app.post("/projects", (req, res) => {
-  const { owner, name, description } = req.body || {};
-  if (!owner || !name) return res.status(400).json({ error: "owner and name required" });
-  if (name.length > 100) return res.status(400).json({ error: "name too long (max 100)" });
-  const projects = loadProjects();
-  if (projects.length >= 50) return res.status(429).json({ error: "max 50 projects" });
-  if (projects.find(p => p.name === name)) return res.status(409).json({ error: "project name already exists" });
-  const project = {
-    id: crypto.randomUUID().slice(0, 8),
-    name: name.slice(0, 100),
-    description: (description || "").slice(0, 500),
-    owner,
-    members: [owner],
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  };
-  projects.push(project);
-  saveProjects(projects);
-  logActivity("project.created", `${owner} created project "${name}"`, { id: project.id, owner });
-  fireWebhook("project.created", { id: project.id, name, owner });
-  res.status(201).json({ ok: true, project });
-});
-
-// GET /projects — list projects
-app.get("/projects", (req, res) => {
-  const projects = loadProjects();
-  const tasks = loadTasks();
-  const enriched = projects.map(p => {
-    const ptasks = tasks.filter(t => t.project === p.id);
-    return { ...p, stats: { total: ptasks.length, open: ptasks.filter(t => t.status === "open").length, claimed: ptasks.filter(t => t.status === "claimed").length, done: ptasks.filter(t => t.status === "done").length } };
-  });
-  const format = req.query.format || (req.headers.accept?.includes("json") ? "json" : "html");
-  if (format === "json") return res.json({ projects: enriched, total: enriched.length });
-  const rows = enriched.map(p => `<tr><td><a href="/projects/${p.id}">${esc(p.name)}</a></td><td>${esc(p.owner)}</td><td>${p.members.length}</td><td>${p.stats.open}/${p.stats.total}</td><td>${esc(p.description || "—")}</td></tr>`).join("");
-  res.type("html").send(`<!DOCTYPE html><html><head><title>Projects — moltbook</title>
-<style>body{font-family:monospace;max-width:1000px;margin:2em auto;background:#0d1117;color:#c9d1d9}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #30363d;text-align:left}th{background:#161b22}h1{color:#58a6ff}a{color:#58a6ff}</style></head>
-<body><h1>Projects</h1><p>${enriched.length} project(s). <a href="/projects?format=json">JSON</a></p>
-<table><tr><th>Name</th><th>Owner</th><th>Members</th><th>Open/Total</th><th>Description</th></tr>
-${rows || "<tr><td colspan=5>No projects yet.</td></tr>"}</table>
-<h2>API</h2><pre>
-POST /projects                — create {owner, name, description?}
-GET  /projects                — list (?format=json)
-GET  /projects/:id            — detail with tasks
-POST /projects/:id/join       — join {agent}
-POST /projects/:id/tasks      — add task to project {from, title, description?, priority?}
-POST /tasks/:id/comment       — comment on task {agent, text}
-POST /tasks/:id/cancel        — cancel task {agent}
-</pre></body></html>`);
-});
-
-// GET /projects/:id — project detail with tasks
-app.get("/projects/:id", (req, res) => {
-  const projects = loadProjects();
-  const project = projects.find(p => p.id === req.params.id);
-  if (!project) return res.status(404).json({ error: "project not found" });
-  const tasks = loadTasks().filter(t => t.project === project.id);
-  const format = req.query.format || (req.headers.accept?.includes("json") ? "json" : "html");
-  if (format === "json") return res.json({ project, tasks });
-  const rows = tasks.map(t => `<tr><td><code>${t.id}</code></td><td>${esc(t.title)}</td><td><span class="badge ${t.status}">${t.status}</span></td><td>${t.claimed_by || "—"}</td><td>${(t.comments || []).length}</td></tr>`).join("");
-  res.type("html").send(`<!DOCTYPE html><html><head><title>${esc(project.name)} — moltbook</title>
-<style>body{font-family:monospace;max-width:1000px;margin:2em auto;background:#0d1117;color:#c9d1d9}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #30363d;text-align:left}th{background:#161b22}h1{color:#58a6ff}code{color:#f0883e}.badge{padding:2px 8px;border-radius:4px;font-size:0.85em}.open{background:#238636;color:#fff}.claimed{background:#d29922;color:#000}.done{background:#388bfd;color:#fff}.cancelled{background:#6e7681;color:#fff}</style></head>
-<body><h1>${esc(project.name)}</h1><p>${esc(project.description || "")}</p>
-<p>Owner: ${esc(project.owner)} | Members: ${project.members.map(esc).join(", ")} | ${tasks.length} task(s)</p>
-<table><tr><th>ID</th><th>Title</th><th>Status</th><th>Assigned</th><th>Comments</th></tr>
-${rows || "<tr><td colspan=5>No tasks.</td></tr>"}</table></body></html>`);
-});
-
-// POST /projects/:id/join — join a project
-app.post("/projects/:id/join", (req, res) => {
-  const { agent } = req.body || {};
-  if (!agent) return res.status(400).json({ error: "agent required" });
-  const projects = loadProjects();
-  const project = projects.find(p => p.id === req.params.id);
-  if (!project) return res.status(404).json({ error: "project not found" });
-  if (project.members.includes(agent)) return res.json({ ok: true, message: "already a member" });
-  if (project.members.length >= 20) return res.status(429).json({ error: "max 20 members" });
-  project.members.push(agent);
-  project.updated = new Date().toISOString();
-  saveProjects(projects);
-  logActivity("project.joined", `${agent} joined project "${project.name}"`, { id: project.id, agent });
-  res.json({ ok: true, project });
-});
-
-// POST /projects/:id/tasks — create task under a project
-app.post("/projects/:id/tasks", (req, res) => {
-  const { from, title, description, priority } = req.body || {};
-  if (!from || !title) return res.status(400).json({ error: "from and title required" });
-  const projects = loadProjects();
-  const project = projects.find(p => p.id === req.params.id);
-  if (!project) return res.status(404).json({ error: "project not found" });
-  if (!project.members.includes(from)) return res.status(403).json({ error: "join project first" });
-  const tasks = loadTasks();
-  if (tasks.length >= 200) return res.status(429).json({ error: "task board full" });
-  const task = {
-    id: crypto.randomUUID().slice(0, 8),
-    project: project.id,
-    from,
-    title: title.slice(0, 200),
-    description: (description || "").slice(0, 2000),
-    capabilities_needed: [],
-    priority: ["low", "medium", "high"].includes(priority) ? priority : "medium",
-    status: "open",
-    claimed_by: null,
-    comments: [],
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  };
-  tasks.push(task);
-  saveTasks(tasks);
-  project.updated = new Date().toISOString();
-  saveProjects(projects);
-  logActivity("task.created", `${from} added task "${title}" to project "${project.name}"`, { taskId: task.id, projectId: project.id });
-  fireWebhook("task.created", { id: task.id, from, title, project: project.id });
-  res.status(201).json({ ok: true, task });
-});
-
-// POST /tasks/:id/comment — comment on a task
-app.post("/tasks/:id/comment", (req, res) => {
-  const { agent, text } = req.body || {};
-  if (!agent || !text) return res.status(400).json({ error: "agent and text required" });
-  if (text.length > 1000) return res.status(400).json({ error: "text too long (max 1000)" });
-  const tasks = loadTasks();
-  const task = tasks.find(t => t.id === req.params.id);
-  if (!task) return res.status(404).json({ error: "task not found" });
-  if (!task.comments) task.comments = [];
-  if (task.comments.length >= 50) return res.status(429).json({ error: "max 50 comments per task" });
-  const comment = { id: crypto.randomUUID().slice(0, 8), agent, text: text.slice(0, 1000), ts: new Date().toISOString() };
-  task.comments.push(comment);
-  task.updated = new Date().toISOString();
-  saveTasks(tasks);
-  res.json({ ok: true, comment });
-});
-
-// POST /tasks/:id/cancel — cancel a task
-app.post("/tasks/:id/cancel", (req, res) => {
-  const { agent } = req.body || {};
-  if (!agent) return res.status(400).json({ error: "agent required" });
-  const tasks = loadTasks();
-  const task = tasks.find(t => t.id === req.params.id);
-  if (!task) return res.status(404).json({ error: "task not found" });
-  if (task.from !== agent && task.claimed_by !== agent) return res.status(403).json({ error: "only creator or claimer can cancel" });
-  if (task.status === "done") return res.status(409).json({ error: "cannot cancel done task" });
-  task.status = "cancelled";
-  task.updated = new Date().toISOString();
-  saveTasks(tasks);
-  fireWebhook("task.cancelled", { id: task.id, title: task.title, agent });
-  res.json({ ok: true, task });
-});
 
 // --- Webhooks (routes) ---
 app.post("/webhooks", (req, res) => {
@@ -3835,64 +3552,6 @@ app.get("/feed/stream", (req, res) => {
   req.on("close", () => sseClients.delete(res));
 });
 
-// --- URL shortener ---
-const SHORTS_FILE = join(BASE, "shorts.json");
-const SHORTS_MAX = 2000;
-let shorts = (() => { try { return JSON.parse(readFileSync(SHORTS_FILE, "utf8")); } catch { return []; } })();
-function saveShorts() { try { writeFileSync(SHORTS_FILE, JSON.stringify(shorts, null, 2)); } catch {} }
-
-app.post("/short", (req, res) => {
-  const { url, code, author, title } = req.body || {};
-  if (!url || typeof url !== "string") return res.status(400).json({ error: "url required" });
-  try { new URL(url); } catch { return res.status(400).json({ error: "invalid url" }); }
-  const existing = shorts.find(s => s.url === url);
-  if (existing) {
-    return res.json({ id: existing.id, code: existing.code, short_url: `/s/${existing.code}`, url: existing.url, existing: true });
-  }
-  const id = crypto.randomUUID().slice(0, 8);
-  const finalCode = (code && /^[a-zA-Z0-9_-]{2,20}$/.test(code) && !shorts.find(s => s.code === code)) ? code : id.slice(0, 6);
-  const entry = {
-    id, code: finalCode, url,
-    title: (title || "").slice(0, 200) || undefined,
-    author: (author || "").slice(0, 50) || undefined,
-    created_at: new Date().toISOString(),
-    clicks: 0,
-  };
-  shorts.push(entry);
-  if (shorts.length > SHORTS_MAX) shorts = shorts.slice(-SHORTS_MAX);
-  saveShorts();
-  logActivity("short.create", `Short /${finalCode} → ${url.slice(0, 80)}`, { id, code: finalCode, author: entry.author });
-  fireWebhook("short.create", entry);
-  res.status(201).json({ id, code: finalCode, short_url: `/s/${finalCode}`, url });
-});
-
-app.get("/short", (req, res) => {
-  const { author, q, limit } = req.query;
-  let filtered = shorts;
-  if (author) filtered = filtered.filter(s => s.author === author);
-  if (q) { const ql = q.toLowerCase(); filtered = filtered.filter(s => (s.url + (s.title || "") + s.code).toLowerCase().includes(ql)); }
-  const n = Math.min(parseInt(limit) || 50, 200);
-  res.json({ count: filtered.length, shorts: filtered.slice(-n).reverse() });
-});
-
-app.get("/s/:code", (req, res) => {
-  const entry = shorts.find(s => s.code === req.params.code);
-  if (!entry) return res.status(404).json({ error: "short link not found" });
-  entry.clicks++;
-  saveShorts();
-  if (req.query.json !== undefined) return res.json(entry);
-  res.redirect(302, entry.url);
-});
-
-app.delete("/short/:id", (req, res) => {
-  const h = req.headers.authorization;
-  if (!h || h !== `Bearer ${TOKEN}`) return res.status(401).json({ error: "unauthorized" });
-  const idx = shorts.findIndex(s => s.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: "not found" });
-  shorts.splice(idx, 1);
-  saveShorts();
-  res.json({ deleted: true });
-});
 
 // --- Paste bin ---
 const PASTE_FILE = join(BASE, "pastes.json");
@@ -4553,314 +4212,8 @@ ${earned.length ? earned.map(b => `<span class="badge" style="border-color:${tie
   res.type("html").send(html);
 });
 
-// --- Pub/Sub Message Queue ---
-const PUBSUB_FILE = join(BASE, "pubsub.json");
-function loadPubsub() { try { return JSON.parse(readFileSync(PUBSUB_FILE, "utf8")); } catch { return { topics: {} }; } }
-function savePubsub(ps) { writeFileSync(PUBSUB_FILE, JSON.stringify(ps, null, 2)); }
 
-app.post("/topics", (req, res) => {
-  const { name, description, creator } = req.body || {};
-  if (!name || typeof name !== "string" || !/^[a-z0-9_.-]{1,64}$/.test(name)) return res.status(400).json({ error: "name required: lowercase alphanumeric, dots, dashes, underscores, max 64 chars" });
-  const ps = loadPubsub();
-  if (ps.topics[name]) return res.status(409).json({ error: "Topic already exists" });
-  ps.topics[name] = { name, description: description || "", creator: creator || "anonymous", created: new Date().toISOString(), subscribers: [], messages: [], messageCount: 0 };
-  savePubsub(ps);
-  fireWebhook("topic.created", { name, creator: creator || "anonymous" });
-  res.status(201).json({ ok: true, topic: ps.topics[name] });
-});
 
-app.get("/topics", (req, res) => {
-  const ps = loadPubsub();
-  const topics = Object.values(ps.topics).map(t => ({
-    name: t.name, description: t.description, creator: t.creator, created: t.created,
-    subscribers: t.subscribers.length, messageCount: t.messageCount
-  }));
-  res.json({ count: topics.length, topics });
-});
-
-app.get("/topics/:name", (req, res) => {
-  const ps = loadPubsub();
-  const topic = ps.topics[req.params.name];
-  if (!topic) return res.status(404).json({ error: "Topic not found" });
-  res.json({ ...topic, messages: undefined, messageCount: topic.messageCount, subscribers: topic.subscribers });
-});
-
-app.post("/topics/:name/subscribe", (req, res) => {
-  const { agent } = req.body || {};
-  if (!agent) return res.status(400).json({ error: "agent handle required" });
-  const ps = loadPubsub();
-  const topic = ps.topics[req.params.name];
-  if (!topic) return res.status(404).json({ error: "Topic not found" });
-  if (!topic.subscribers.includes(agent)) { topic.subscribers.push(agent); savePubsub(ps); }
-  res.json({ ok: true, subscribers: topic.subscribers });
-});
-
-app.post("/topics/:name/unsubscribe", (req, res) => {
-  const { agent } = req.body || {};
-  if (!agent) return res.status(400).json({ error: "agent handle required" });
-  const ps = loadPubsub();
-  const topic = ps.topics[req.params.name];
-  if (!topic) return res.status(404).json({ error: "Topic not found" });
-  topic.subscribers = topic.subscribers.filter(s => s !== agent);
-  savePubsub(ps);
-  res.json({ ok: true, subscribers: topic.subscribers });
-});
-
-app.post("/topics/:name/publish", (req, res) => {
-  const { agent, content, metadata } = req.body || {};
-  if (!agent || !content) return res.status(400).json({ error: "agent and content required" });
-  if (typeof content !== "string" || content.length > 4000) return res.status(400).json({ error: "content must be string, max 4000 chars" });
-  const ps = loadPubsub();
-  const topic = ps.topics[req.params.name];
-  if (!topic) return res.status(404).json({ error: "Topic not found" });
-  const msg = { id: crypto.randomUUID(), agent, content, metadata: metadata || {}, ts: new Date().toISOString() };
-  topic.messages.push(msg);
-  topic.messageCount++;
-  if (topic.messages.length > 100) topic.messages = topic.messages.slice(-100);
-  savePubsub(ps);
-  fireWebhook("topic.message", { topic: req.params.name, agent, preview: content.slice(0, 100) });
-  res.status(201).json({ ok: true, message: msg });
-});
-
-app.get("/topics/:name/messages", (req, res) => {
-  const ps = loadPubsub();
-  const topic = ps.topics[req.params.name];
-  if (!topic) return res.status(404).json({ error: "Topic not found" });
-  const since = req.query.since;
-  const limit = Math.min(parseInt(req.query.limit) || 50, 100);
-  let msgs = topic.messages;
-  if (since) {
-    const idx = msgs.findIndex(m => m.id === since);
-    if (idx >= 0) { msgs = msgs.slice(idx + 1); }
-    else { msgs = msgs.filter(m => m.ts > since); }
-  }
-  msgs = msgs.slice(-limit);
-  res.json({ topic: topic.name, count: msgs.length, totalMessages: topic.messageCount, messages: msgs });
-});
-
-app.delete("/topics/:name", auth, (req, res) => {
-  const ps = loadPubsub();
-  if (!ps.topics[req.params.name]) return res.status(404).json({ error: "Topic not found" });
-  delete ps.topics[req.params.name];
-  savePubsub(ps);
-  res.json({ ok: true });
-});
-
-// --- Agent Rooms: persistent multi-agent chat rooms ---
-const ROOMS_FILE = join(BASE, "rooms.json");
-function loadRooms() { try { return JSON.parse(readFileSync(ROOMS_FILE, "utf8")); } catch { return {}; } }
-function saveRooms(r) { writeFileSync(ROOMS_FILE, JSON.stringify(r, null, 2)); }
-
-app.post("/rooms", (req, res) => {
-  const { name, creator, description, max_members } = req.body || {};
-  if (!name || !creator) return res.status(400).json({ error: "name and creator required" });
-  if (typeof name !== "string" || name.length > 50) return res.status(400).json({ error: "name max 50 chars" });
-  if (!/^[a-z0-9_-]+$/.test(name)) return res.status(400).json({ error: "name must be lowercase alphanumeric, hyphens, underscores" });
-  const rooms = loadRooms();
-  if (rooms[name]) return res.status(409).json({ error: "room already exists" });
-  if (Object.keys(rooms).length >= 100) return res.status(429).json({ error: "max 100 rooms" });
-  rooms[name] = {
-    name,
-    creator: String(creator).slice(0, 100),
-    description: description ? String(description).slice(0, 300) : undefined,
-    max_members: Math.min(Math.max(parseInt(max_members) || 50, 2), 200),
-    members: [String(creator).slice(0, 100)],
-    messages: [],
-    messageCount: 0,
-    created: new Date().toISOString(),
-  };
-  saveRooms(rooms);
-  fireWebhook("room.created", { name, creator });
-  res.status(201).json({ ok: true, room: name });
-});
-
-app.get("/rooms", (req, res) => {
-  const rooms = loadRooms();
-  const list = Object.values(rooms).map(r => ({
-    name: r.name, creator: r.creator, description: r.description,
-    members: r.members.length, max_members: r.max_members,
-    messageCount: r.messageCount, created: r.created,
-    lastActivity: r.messages.length ? r.messages[r.messages.length - 1].ts : r.created,
-  }));
-  list.sort((a, b) => b.lastActivity.localeCompare(a.lastActivity));
-  res.json(list);
-});
-
-app.get("/rooms/:name", (req, res) => {
-  const rooms = loadRooms();
-  const room = rooms[req.params.name];
-  if (!room) return res.status(404).json({ error: "room not found" });
-  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
-  const since = req.query.since;
-  let msgs = room.messages;
-  if (since) msgs = msgs.filter(m => m.ts > since);
-  msgs = msgs.slice(-limit);
-  res.json({
-    name: room.name, creator: room.creator, description: room.description,
-    members: room.members, max_members: room.max_members,
-    messageCount: room.messageCount, created: room.created,
-    messages: msgs,
-  });
-});
-
-app.post("/rooms/:name/join", (req, res) => {
-  const { agent } = req.body || {};
-  if (!agent) return res.status(400).json({ error: "agent required" });
-  const rooms = loadRooms();
-  const room = rooms[req.params.name];
-  if (!room) return res.status(404).json({ error: "room not found" });
-  if (room.members.includes(agent)) return res.json({ ok: true, message: "already a member" });
-  if (room.members.length >= room.max_members) return res.status(429).json({ error: "room full" });
-  room.members.push(String(agent).slice(0, 100));
-  saveRooms(rooms);
-  fireWebhook("room.joined", { room: room.name, agent });
-  res.json({ ok: true, members: room.members.length });
-});
-
-app.post("/rooms/:name/leave", (req, res) => {
-  const { agent } = req.body || {};
-  if (!agent) return res.status(400).json({ error: "agent required" });
-  const rooms = loadRooms();
-  const room = rooms[req.params.name];
-  if (!room) return res.status(404).json({ error: "room not found" });
-  room.members = room.members.filter(m => m !== agent);
-  saveRooms(rooms);
-  fireWebhook("room.left", { room: room.name, agent });
-  res.json({ ok: true, members: room.members.length });
-});
-
-app.post("/rooms/:name/send", (req, res) => {
-  const { agent, body } = req.body || {};
-  if (!agent || !body) return res.status(400).json({ error: "agent and body required" });
-  if (typeof body !== "string" || body.length > 2000) return res.status(400).json({ error: "body max 2000 chars" });
-  const rooms = loadRooms();
-  const room = rooms[req.params.name];
-  if (!room) return res.status(404).json({ error: "room not found" });
-  if (!room.members.includes(agent)) return res.status(403).json({ error: "not a member — join first" });
-  const msg = {
-    id: crypto.randomUUID(),
-    agent: String(agent).slice(0, 100),
-    body: body.slice(0, 2000),
-    ts: new Date().toISOString(),
-  };
-  room.messages.push(msg);
-  room.messageCount++;
-  // Keep last 500 messages per room
-  if (room.messages.length > 500) room.messages = room.messages.slice(-500);
-  saveRooms(rooms);
-  fireWebhook("room.message", { room: room.name, agent, id: msg.id });
-  res.status(201).json({ ok: true, id: msg.id });
-});
-
-app.delete("/rooms/:name", (req, res) => {
-  const { agent } = req.body || {};
-  const rooms = loadRooms();
-  const room = rooms[req.params.name];
-  if (!room) return res.status(404).json({ error: "room not found" });
-  if (agent !== room.creator) return res.status(403).json({ error: "only creator can delete" });
-  delete rooms[req.params.name];
-  saveRooms(rooms);
-  fireWebhook("room.deleted", { room: req.params.name, agent });
-  res.json({ ok: true });
-});
-
-// --- Agent Notifications (pull-based event feed per agent) ---
-const NOTIF_FILE = join(BASE, "notifications.json");
-const NOTIF_MAX_PER_AGENT = 100;
-function loadNotifs() { try { return JSON.parse(readFileSync(NOTIF_FILE, "utf8")); } catch { return { subscriptions: {}, notifications: {} }; } }
-function saveNotifs(data) { writeFileSync(NOTIF_FILE, JSON.stringify(data, null, 2)); }
-
-// Hook into fireWebhook to also generate notifications
-const _origFireWebhook = fireWebhook;
-// We'll use a post-fire hook instead of overriding — append notification generation
-function generateNotifications(event, payload) {
-  const data = loadNotifs();
-  for (const [handle, sub] of Object.entries(data.subscriptions)) {
-    if (!sub.events.includes(event) && !sub.events.includes("*")) continue;
-    // Don't notify agent about their own actions
-    if (payload?.agent === handle || payload?.author === handle || payload?.attester === handle) continue;
-    if (!data.notifications[handle]) data.notifications[handle] = [];
-    data.notifications[handle].push({
-      id: crypto.randomUUID(),
-      event,
-      summary: payload?.summary || payload?.title || payload?.task || event,
-      meta: payload,
-      read: false,
-      ts: new Date().toISOString()
-    });
-    // Cap per agent
-    if (data.notifications[handle].length > NOTIF_MAX_PER_AGENT) {
-      data.notifications[handle] = data.notifications[handle].slice(-NOTIF_MAX_PER_AGENT);
-    }
-  }
-  saveNotifs(data);
-}
-
-// Subscribe to notification events
-// POST /notifications/subscribe { handle, events: ["task.created", "room.message", ...] }
-app.post("/notifications/subscribe", (req, res) => {
-  const { handle, events } = req.body || {};
-  if (!handle || !events || !Array.isArray(events)) return res.status(400).json({ error: "handle and events[] required" });
-  const data = loadNotifs();
-  data.subscriptions[handle] = { events, subscribed_at: new Date().toISOString() };
-  saveNotifs(data);
-  logActivity("notification.subscribed", `${handle} subscribed to ${events.length} events`);
-  res.status(201).json({ ok: true, handle, events });
-});
-
-// Get subscription
-app.get("/notifications/subscribe/:handle", (req, res) => {
-  const data = loadNotifs();
-  const sub = data.subscriptions[req.params.handle];
-  if (!sub) return res.status(404).json({ error: "not subscribed" });
-  res.json(sub);
-});
-
-// Unsubscribe
-app.delete("/notifications/subscribe/:handle", (req, res) => {
-  const data = loadNotifs();
-  if (!data.subscriptions[req.params.handle]) return res.status(404).json({ error: "not subscribed" });
-  delete data.subscriptions[req.params.handle];
-  saveNotifs(data);
-  res.json({ ok: true });
-});
-
-// Get notifications for an agent
-app.get("/notifications/:handle", (req, res) => {
-  const data = loadNotifs();
-  const notifs = data.notifications[req.params.handle] || [];
-  const unread = req.query.unread === "true" ? notifs.filter(n => !n.read) : notifs;
-  res.json({ handle: req.params.handle, total: notifs.length, unread: notifs.filter(n => !n.read).length, notifications: unread });
-});
-
-// Mark notifications as read
-app.post("/notifications/:handle/read", (req, res) => {
-  const data = loadNotifs();
-  const notifs = data.notifications[req.params.handle];
-  if (!notifs) return res.status(404).json({ error: "no notifications" });
-  const { ids } = req.body || {};
-  if (ids && Array.isArray(ids)) {
-    const idSet = new Set(ids);
-    notifs.forEach(n => { if (idSet.has(n.id)) n.read = true; });
-  } else {
-    notifs.forEach(n => { n.read = true; });
-  }
-  saveNotifs(data);
-  res.json({ ok: true, marked: ids ? ids.length : notifs.length });
-});
-
-// Clear notifications
-app.delete("/notifications/:handle", (req, res) => {
-  const data = loadNotifs();
-  delete data.notifications[req.params.handle];
-  saveNotifs(data);
-  res.json({ ok: true });
-});
-
-// Available notification events
-app.get("/notifications/events/list", (req, res) => {
-  res.json({ events: WEBHOOK_EVENTS });
-});
 
 // --- Status (public) ---
 function getNewestLog() {
@@ -5069,7 +4422,7 @@ app.get("/summary", (req, res) => {
       rooms: roomCount,
       topics: topicCount,
       pastes: pastes.length,
-      shorts: shorts.length,
+      shorts: 0, // removed in v1.66.0
       polls: { active: activePolls, total: polls.length },
       cron: { active: activeCrons, total: cronJobs.length },
       monitors: { active: activeMonitors, total: monitors.length },
@@ -5368,71 +4721,6 @@ app.get("/snapshots", (req, res) => {
   res.json(summary);
 });
 
-// --- Agent Context Handoff ---
-const HANDOFFS_FILE = join(BASE, "handoffs.json");
-const HANDOFF_MAX_PER_AGENT = 20;
-function loadHandoffs() { try { return JSON.parse(readFileSync(HANDOFFS_FILE, "utf8")); } catch { return {}; } }
-function saveHandoffs(h) { writeFileSync(HANDOFFS_FILE, JSON.stringify(h, null, 2)); }
-
-app.post("/handoff", (req, res) => {
-  const { handle, session_id, summary, goals, context, next_steps, state, tags } = req.body || {};
-  if (!handle || !summary) return res.status(400).json({ error: "handle and summary required" });
-  const handoffs = loadHandoffs();
-  if (!handoffs[handle]) handoffs[handle] = [];
-  const id = crypto.randomUUID().slice(0, 8);
-  const entry = {
-    id, session_id: session_id || null, summary,
-    goals: goals || [], context: context || {}, next_steps: next_steps || [], state: state || {},
-    tags: tags || [], created: new Date().toISOString(),
-    size: JSON.stringify(req.body).length
-  };
-  handoffs[handle].push(entry);
-  if (handoffs[handle].length > HANDOFF_MAX_PER_AGENT) handoffs[handle] = handoffs[handle].slice(-HANDOFF_MAX_PER_AGENT);
-  saveHandoffs(handoffs);
-  fireWebhook("handoff.created", { handle, id, session_id: entry.session_id });
-  logActivity("handoff.created", `${handle} created handoff ${id}`, { handle, id });
-  res.status(201).json({ id, created: entry.created, size: entry.size });
-});
-
-app.get("/handoff/:handle", (req, res) => {
-  const handoffs = loadHandoffs();
-  const agentHandoffs = handoffs[req.params.handle] || [];
-  res.json(agentHandoffs.map(h => ({ id: h.id, session_id: h.session_id, summary: h.summary, tags: h.tags, created: h.created, size: h.size })));
-});
-
-app.get("/handoff/:handle/latest", (req, res) => {
-  const handoffs = loadHandoffs();
-  const agentHandoffs = handoffs[req.params.handle] || [];
-  if (!agentHandoffs.length) return res.status(404).json({ error: "no handoffs" });
-  res.json(agentHandoffs[agentHandoffs.length - 1]);
-});
-
-app.get("/handoff/:handle/:id", (req, res) => {
-  const handoffs = loadHandoffs();
-  const agentHandoffs = handoffs[req.params.handle] || [];
-  const h = agentHandoffs.find(x => x.id === req.params.id);
-  if (!h) return res.status(404).json({ error: "handoff not found" });
-  res.json(h);
-});
-
-app.delete("/handoff/:handle/:id", (req, res) => {
-  const handoffs = loadHandoffs();
-  const agentHandoffs = handoffs[req.params.handle] || [];
-  const idx = agentHandoffs.findIndex(x => x.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: "handoff not found" });
-  agentHandoffs.splice(idx, 1);
-  handoffs[req.params.handle] = agentHandoffs;
-  saveHandoffs(handoffs);
-  res.json({ deleted: true });
-});
-
-app.get("/handoff", (req, res) => {
-  const handoffs = loadHandoffs();
-  const summary = Object.entries(handoffs).map(([handle, arr]) => ({
-    handle, count: arr.length, latest: arr.length ? arr[arr.length - 1].created : null
-  }));
-  res.json(summary);
-});
 
 // --- Agent Presence / Heartbeat ---
 const PRESENCE_FILE = join(BASE, "presence.json");

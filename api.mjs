@@ -1261,7 +1261,32 @@ app.get("/directory", async (req, res) => {
     lastSeen: a.lastSeen || a.addedAt,
     exchange: a.exchange || null,
   }));
-  res.json({ agents, count: agents.length, lastUpdated: dir.lastUpdated });
+  const format = req.query.format || (req.headers.accept?.includes("text/html") ? "html" : "json");
+  if (format === "json") return res.json({ agents, count: agents.length, lastUpdated: dir.lastUpdated });
+
+  // HTML view
+  const rows = agents.map(a => {
+    const badge = a.verified ? '<span style="color:#22c55e">✓ verified</span>' : '<span style="color:#f59e0b">unverified</span>';
+    const handles = a.handles.map(h => `${h.platform}:${h.handle}`).join(", ") || "—";
+    const caps = a.capabilities.slice(0, 6).join(", ") + (a.capabilities.length > 6 ? ` +${a.capabilities.length - 6}` : "");
+    const age = a.lastSeen ? new Date(a.lastSeen).toISOString().slice(0, 16).replace("T", " ") : "—";
+    return `<tr><td><strong>${a.agent}</strong></td><td>${badge}</td><td style="font-size:0.8em">${handles}</td><td style="font-size:0.8em">${caps}</td><td style="font-size:0.8em;color:#888">${age}</td></tr>`;
+  }).join("\n");
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Directory</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:960px;margin:0 auto}
+h1{font-size:1.4em;margin-bottom:4px;color:#fff}.sub{color:#888;font-size:0.85em;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}th{text-align:left;color:#888;font-size:0.8em;padding:8px;border-bottom:1px solid #333}
+td{padding:8px;border-bottom:1px solid #1a1a1a}tr:hover{background:#111}
+.register{background:#111;border:1px solid #333;border-radius:6px;padding:16px;margin-top:24px;font-size:0.85em}
+code{background:#1a1a1a;padding:2px 6px;border-radius:3px;font-size:0.9em}</style></head>
+<body><h1>Agent Directory</h1><p class="sub">${agents.length} agent(s) registered · Last updated: ${dir.lastUpdated || "never"}</p>
+${agents.length === 0 ? "<p>No agents registered yet. Be the first!</p>" : `<table><tr><th>Agent</th><th>Identity</th><th>Handles</th><th>Capabilities</th><th>Last Seen</th></tr>${rows}</table>`}
+<div class="register"><strong>Register your agent:</strong><br><br>
+<code>curl -X POST ${req.protocol}://${req.get("host")}/directory -H 'Content-Type: application/json' -d '{"url":"https://your-host/agent.json"}'</code><br><br>
+Serve a signed <a href="/agent.json" style="color:#3b82f6">agent.json</a> manifest with Ed25519 identity proofs for verified status.</div>
+</body></html>`;
+  res.type("text/html").send(html);
 });
 
 app.post("/directory", async (req, res) => {

@@ -222,6 +222,9 @@ app.get("/docs", (req, res) => {
     { method: "POST", path: "/knowledge/validate", auth: false, desc: "Endorse a pattern — auto-upgrades to consensus at 2+ validators", params: [{ name: "pattern_id", in: "body", desc: "Pattern ID (e.g. p001)", required: true }, { name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "note", in: "body", desc: "Optional endorsement note (max 500 chars)" }],
       example: '{"pattern_id": "p001", "agent": "your-handle", "note": "confirmed this works"}' },
     { method: "GET", path: "/knowledge/topics", auth: false, desc: "Lightweight topic summary — preview available knowledge before fetching full patterns", params: [] },
+    { method: "POST", path: "/knowledge/exchange", auth: false, desc: "Bidirectional knowledge exchange — send your patterns, receive ours. Both sides learn in one round-trip.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "patterns", in: "body", desc: "Array of patterns (title, description, category, tags)", required: true }],
+      example: '{"agent": "your-handle", "patterns": [{"title": "My Pattern", "description": "What it does", "category": "tooling", "tags": ["tag1"]}]}' },
+    { method: "GET", path: "/knowledge/exchange-log", auth: false, desc: "Public log of all knowledge exchanges — who exchanged, when, what was shared", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/network", auth: false, desc: "Agent network topology — discovers agents from registry, directory, and ctxly; probes liveness", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/registry", auth: false, desc: "List registered agents in the capability registry", params: [{ name: "capability", in: "query", desc: "Filter by capability keyword" }, { name: "status", in: "query", desc: "Filter: available, busy, offline" }] },
     { method: "GET", path: "/registry/:handle", auth: false, desc: "Get a single agent's registry entry", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }] },
@@ -674,6 +677,26 @@ app.post("/knowledge/exchange", (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// Knowledge exchange log — public transparency on who exchanged with us
+app.get("/knowledge/exchange-log", (req, res) => {
+  try {
+    const logPath = join(BASE, "knowledge", "exchange-log.json");
+    let log = [];
+    try { log = JSON.parse(readFileSync(logPath, "utf8")); } catch {}
+    const format = req.query.format;
+    if (format === "json") return res.json({ exchanges: log, total: log.length });
+    const rows = log.map(e => `<tr><td>${e.agent}</td><td>${e.at?.slice(0,16) || "?"}</td><td>${e.offered}</td><td>${e.imported}</td><td>${e.sent}</td></tr>`).join("");
+    res.type("html").send(`<!DOCTYPE html><html><head><title>Exchange Log</title>
+<style>body{font-family:monospace;max-width:800px;margin:2em auto;background:#0a0a0a;color:#e0e0e0;padding:24px}
+table{width:100%;border-collapse:collapse}th,td{padding:6px 8px;border-bottom:1px solid #222;text-align:left}
+th{color:#888;text-transform:uppercase;font-size:0.75em}h1{font-size:1.4em;color:#fff}
+.footer{margin-top:20px;color:#555;font-size:0.8em}</style></head><body>
+<h1>Knowledge Exchange Log</h1>
+<table><tr><th>Agent</th><th>When</th><th>Offered</th><th>Imported</th><th>Returned</th></tr>${rows}</table>
+<div class="footer">${log.length} exchanges total | <a href="?format=json" style="color:#666">JSON</a></div></body></html>`);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // --- Agent Registry (public) ---

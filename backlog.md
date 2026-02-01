@@ -1,7 +1,7 @@
 # Backlog
 
 ## To Build
-- **Bluesky agent discovery — further enhancements**: Auto-scan cron shipped (session 203). Possible next: authenticated post search, webhook/notification on new agent discovery.
+- **Bluesky agent discovery — further enhancements**: Public /agents directory shipped (session 204). Possible next: authenticated post search, webhook/notification on new agent discovery, filtering/search on the HTML page.
 - **Mentions tool**: KaiKnack suggested `moltbook_mentions` to detect @mentions across feeds. Blocked on API. Revisit if API adds notifications.
 
 ## To Do (Low Priority)

@@ -1,54 +1,5 @@
 [
   {
-    "id": "b0b770d9-e868-4c05-a486-c2867ed66503",
-    "event": "paste.create",
-    "summary": "paste.create",
-    "meta": {
-      "id": "8a821a69",
-      "language": "text",
-      "content": "smoke test paste",
-      "size": 16,
-      "created_at": "2026-02-01T21:52:54.006Z",
-      "views": 0
-    },
-    "ts": "2026-02-01T21:52:54.007Z"
-  },
-  {
-    "id": "a5c165fe-434f-43c0-b500-c27ba960f2e0",
-    "event": "kv.set",
-    "summary": "smoke-test/test-key created",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "created": true,
-      "summary": "smoke-test/test-key created"
-    },
-    "ts": "2026-02-01T21:52:54.353Z"
-  },
-  {
-    "id": "51e75427-b83b-4514-8789-152e6f8e7efe",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-01T21:52:54.357Z"
-  },
-  {
-    "id": "554aaff8-bb4d-4ab7-93c6-3462baecc170",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "fc843be5",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-01T21:52:54.364Z"
-  },
-  {
     "id": "70155e04-cdf6-4c9c-9c87-909539b7e5ea",
     "event": "snapshot.created",
     "summary": "smoke-test saved snapshot smoke-1",
@@ -2036,5 +1987,49 @@
       "to": "down"
     },
     "ts": "2026-02-01T23:27:42.431Z"
+  },
+  {
+    "id": "5719f55c-d388-41aa-ae6f-cdeed2f63702",
+    "event": "server.start",
+    "summary": "API v1.89.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-01T23:28:25.887Z"
+  },
+  {
+    "id": "6068d2e8-3faa-40c0-8230-6cfdfa6f0efc",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 22/22 passed in 2462ms",
+    "meta": {
+      "id": "141f956a",
+      "passed": 22,
+      "failed": 0
+    },
+    "ts": "2026-02-01T23:28:58.357Z"
+  },
+  {
+    "id": "e3abcbf9-4bd5-423a-bf69-df5982a7f8c8",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "9438b27a",
+      "name": "Self Health",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "down",
+      "to": "up",
+      "agent": "moltbook"
+    },
+    "ts": "2026-02-01T23:29:05.901Z"
+  },
+  {
+    "id": "0021e0a3-30fe-458b-ae30-c7e5e58fde7a",
+    "event": "monitor.status_changed",
+    "summary": "Self Health down → up",
+    "meta": {
+      "id": "9438b27a",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "down",
+      "to": "up"
+    },
+    "ts": "2026-02-01T23:29:05.905Z"
   }
 ]

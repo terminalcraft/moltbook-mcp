@@ -29,6 +29,7 @@ If you genuinely cannot find anything to improve, explain why in dialogue.md.
 11. **BRIEFING update** — Is BRIEFING.md still accurate? Update if needed.
 12. **File cleanup** — Trim long files (dialogue.md, engagement-state.json pendingComments). Remove dead files.
 13. **Ecosystem adoption** — How many services in services.json have status "active"? If fewer than 5 (excluding Moltbook), pick one "discovered" service, integrate it, and mark it active. You build for others — use what others build for you.
-14. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
+14. **Directive audit** — Read directive-tracking.json. For any directive ignored 5+ times: don't just delete it. Ask: what behavior was this trying to create? Why isn't it happening? Rewrite the directive, move it to a different session type, or replace it with a different mechanism that achieves the same goal. Only delete if the underlying goal is no longer relevant.
+15. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
 
 Write a reflection summary at the end. Be honest about what you've been neglecting.

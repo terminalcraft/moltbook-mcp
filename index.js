@@ -1915,6 +1915,109 @@ function getCtxlyKey() {
   } catch { return null; }
 }
 
+// --- Chatr.ai helpers ---
+function getChatrCredentials() {
+  try {
+    const home = process.env.HOME || process.env.USERPROFILE;
+    return JSON.parse(readFileSync(join(home, "moltbook-mcp", "chatr-credentials.json"), "utf8"));
+  } catch { return null; }
+}
+
+const CHATR_API = "https://chatr.ai/api";
+
+// --- Tool: chatr_read ---
+server.tool(
+  "chatr_read",
+  "Read recent messages from Chatr.ai real-time agent chat",
+  {
+    limit: z.number().default(20).describe("Max messages to return (1-50)"),
+    since_id: z.string().optional().describe("Only return messages after this ID")
+  },
+  async ({ limit, since_id }) => {
+    try {
+      const creds = getChatrCredentials();
+      if (!creds) return { content: [{ type: "text", text: "No Chatr.ai credentials found." }] };
+      let url = `${CHATR_API}/messages?limit=${Math.min(limit, 50)}`;
+      if (since_id) url += `&since=${since_id}`;
+      const res = await fetch(url, { headers: { "x-api-key": creds.apiKey } });
+      const data = await res.json();
+      if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
+      const msgs = (data.messages || []).map(m =>
+        `[${m.id}] ${m.agentName} ${m.avatar} (${new Date(m.timestamp).toISOString().slice(0,16)}): ${m.content}`
+      ).join("\n\n");
+      return { content: [{ type: "text", text: msgs || "No messages." }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] };
+    }
+  }
+);
+
+// --- Tool: chatr_send ---
+server.tool(
+  "chatr_send",
+  "Send a message to Chatr.ai real-time agent chat",
+  {
+    content: z.string().describe("Message text")
+  },
+  async ({ content }) => {
+    try {
+      const creds = getChatrCredentials();
+      if (!creds) return { content: [{ type: "text", text: "No Chatr.ai credentials found." }] };
+      const res = await fetch(`${CHATR_API}/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": creds.apiKey },
+        body: JSON.stringify({ agentId: creds.id, content })
+      });
+      const data = await res.json();
+      return { content: [{ type: "text", text: data.success ? `Sent: ${content.slice(0, 80)}...` : `Error: ${JSON.stringify(data)}` }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] };
+    }
+  }
+);
+
+// --- Tool: chatr_agents ---
+server.tool(
+  "chatr_agents",
+  "List agents on Chatr.ai with online status",
+  {},
+  async () => {
+    try {
+      const res = await fetch(`${CHATR_API}/agents`);
+      const data = await res.json();
+      if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
+      const agents = (data.agents || []).map(a =>
+        `${a.avatar} ${a.name} — ${a.online ? "🟢 online" : "⚫ offline"} (last: ${new Date(a.lastSeen).toISOString().slice(0,16)})${a.moltbookVerified ? " ✓moltbook" : ""}`
+      ).join("\n");
+      return { content: [{ type: "text", text: agents || "No agents." }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] };
+    }
+  }
+);
+
+// --- Tool: chatr_heartbeat ---
+server.tool(
+  "chatr_heartbeat",
+  "Send a heartbeat to Chatr.ai to maintain online status",
+  {},
+  async () => {
+    try {
+      const creds = getChatrCredentials();
+      if (!creds) return { content: [{ type: "text", text: "No Chatr.ai credentials found." }] };
+      const res = await fetch(`${CHATR_API}/heartbeat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": creds.apiKey },
+        body: JSON.stringify({ agentId: creds.id })
+      });
+      const data = await res.json();
+      return { content: [{ type: "text", text: data.success ? "Heartbeat sent." : `Error: ${JSON.stringify(data)}` }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] };
+    }
+  }
+);
+
 // Save API history on exit
 process.on("exit", () => { if (apiCallCount > 0) saveApiSession(); saveToolUsage(); });
 process.on("SIGINT", () => process.exit());

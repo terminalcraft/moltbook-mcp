@@ -220,6 +220,7 @@ app.get("/agent.json", (req, res) => {
       registry_get: { url: `${base}/registry/:handle`, method: "GET", auth: false, description: "Get a single agent's registry entry" },
       registry_register: { url: `${base}/registry`, method: "POST", auth: false, description: "Register or update (body: {handle, capabilities, ...})" },
       fourclaw_digest: { url: `${base}/4claw/digest`, method: "GET", auth: false, description: "Signal-filtered 4claw board digest (?board=X&limit=N)" },
+      chatr_digest: { url: `${base}/chatr/digest`, method: "GET", auth: false, description: "Signal-filtered Chatr.ai digest (?limit=N&mode=signal|wide)" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -410,6 +411,58 @@ app.get("/4claw/digest", async (req, res) => {
     const top = scored.slice(0, limit);
     const spamCount = threads.length - filtered.length;
     res.json({ board, total: threads.length, spam_filtered: spamCount, shown: top.length, threads: top });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Chatr digest endpoint
+const CHATR_SPAM_PATTERNS = [
+  /send\s*(me\s*)?\d+\s*USDC/i, /need\s*\d+\s*USDC/i,
+  /wallet:\s*0x[a-fA-F0-9]{40}/i, /0x[a-fA-F0-9]{40}/,
+  /\$CLAWIRC/i, /clawirc\.duckdns/i,
+];
+
+function scoreChatrMsg(msg, allMsgs) {
+  let score = 0;
+  const len = (msg.content || "").length;
+  if (len > 100) score += 2;
+  if (len > 200) score += 2;
+  if (len > 400) score += 1;
+  if (len < 20) score -= 2;
+  for (const p of CHATR_SPAM_PATTERNS) { if (p.test(msg.content || "")) score -= 5; }
+  const dupes = allMsgs.filter(m => m.id !== msg.id && m.agentName === msg.agentName && m.content === msg.content);
+  if (dupes.length > 0) score -= 4;
+  if (/@\w+/.test(msg.content || "")) score += 1;
+  if (/\?/.test(msg.content || "")) score += 1;
+  if (/(?:github|npm|api|endpoint|mcp|protocol|deploy|server|build|ship)/i.test(msg.content || "")) score += 2;
+  return score;
+}
+
+app.get("/chatr/digest", async (req, res) => {
+  try {
+    let creds;
+    try { creds = JSON.parse(readFileSync(join(BASE, "chatr-credentials.json"), "utf8")); }
+    catch { return res.status(500).json({ error: "Chatr credentials not configured" }); }
+    const limit = Math.min(parseInt(req.query.limit) || 30, 50);
+    const mode = req.query.mode === "wide" ? "wide" : "signal";
+    const resp = await fetch(`https://chatr.ai/api/messages?limit=${limit}`, {
+      headers: { "x-api-key": creds.apiKey },
+    });
+    if (!resp.ok) return res.status(502).json({ error: `Chatr returned ${resp.status}` });
+    const data = await resp.json();
+    const msgs = data.messages || [];
+    if (!msgs.length) return res.json({ total: 0, shown: 0, messages: [] });
+    const scored = msgs.map(m => ({ ...m, score: scoreChatrMsg(m, msgs) }));
+    const filtered = mode === "signal" ? scored.filter(m => m.score >= 0) : scored;
+    filtered.sort((a, b) => b.score - a.score || new Date(b.timestamp) - new Date(a.timestamp));
+    const spamCount = scored.length - scored.filter(m => m.score >= 0).length;
+    const result = filtered.map(m => ({
+      id: m.id, agent: m.agentName, score: m.score,
+      time: new Date(m.timestamp).toISOString().slice(0, 16),
+      content: m.content,
+    }));
+    res.json({ mode, total: msgs.length, spam_filtered: spamCount, shown: result.length, messages: result });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

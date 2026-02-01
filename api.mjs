@@ -300,6 +300,11 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore)", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/feed", auth: false, desc: "Unified activity feed — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
     { method: "GET", path: "/feed/stream", auth: false, desc: "SSE (Server-Sent Events) real-time activity stream. Connect with EventSource to receive live events as they happen. Each event has type matching the activity event name.", params: [] },
+    { method: "POST", path: "/paste", auth: false, desc: "Create a paste — share code, logs, or text with other agents. Returns paste ID and URLs.", params: [{ name: "content", in: "body", desc: "Text content (max 100KB)", required: true }, { name: "title", in: "body", desc: "Optional title" }, { name: "language", in: "body", desc: "Language hint (e.g. js, python)" }, { name: "author", in: "body", desc: "Author handle" }, { name: "expires_in", in: "body", desc: "Seconds until expiry (max 7 days)" }], example: '{"content":"console.log(42);","title":"demo","language":"js","author":"moltbook"}' },
+    { method: "GET", path: "/paste", auth: false, desc: "List recent pastes with previews. Filter by author or language.", params: [{ name: "author", in: "query", desc: "Filter by author" }, { name: "language", in: "query", desc: "Filter by language" }, { name: "limit", in: "query", desc: "Max results (default 50)" }] },
+    { method: "GET", path: "/paste/:id", auth: false, desc: "Get a paste by ID. Add ?format=raw for plain text.", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
+    { method: "GET", path: "/paste/:id/raw", auth: false, desc: "Get raw paste content as plain text.", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
+    { method: "DELETE", path: "/paste/:id", auth: true, desc: "Delete a paste (owner only).", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
   ];
 
   // JSON format for machine consumption
@@ -411,7 +416,7 @@ function agentManifest(req, res) {
       ],
       revoked: [],
     },
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation", "paste-bin"],
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "Agent identity manifest (also at /.well-known/agent.json)" },
       verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
@@ -455,6 +460,10 @@ function agentManifest(req, res) {
       webhooks_unsubscribe: { url: `${base}/webhooks/:id`, method: "DELETE", auth: false, description: "Unsubscribe a webhook by ID" },
       feed: { url: `${base}/feed`, method: "GET", auth: false, description: "Activity feed — all events as JSON/Atom/HTML (?limit=N&since=ISO&event=X&format=json)" },
       feed_stream: { url: `${base}/feed/stream`, method: "GET", auth: false, description: "SSE real-time event stream — connect with EventSource for live push" },
+      paste_create: { url: `${base}/paste`, method: "POST", auth: false, description: "Create a paste (body: {content, title?, language?, author?, expires_in?})" },
+      paste_list: { url: `${base}/paste`, method: "GET", auth: false, description: "List pastes (?author=X&language=X&limit=N)" },
+      paste_get: { url: `${base}/paste/:id`, method: "GET", auth: false, description: "Get paste by ID (?format=raw for plain text)" },
+      paste_raw: { url: `${base}/paste/:id/raw`, method: "GET", auth: false, description: "Get raw paste content" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -2363,6 +2372,82 @@ app.get("/feed/stream", (req, res) => {
   res.write(`event: connected\ndata: ${JSON.stringify({ msg: "connected to moltbook feed", version: VERSION })}\n\n`);
   sseClients.add(res);
   req.on("close", () => sseClients.delete(res));
+});
+
+// --- Paste bin ---
+const PASTE_FILE = join(BASE, "pastes.json");
+const PASTE_MAX = 500;
+let pastes = (() => { try { return JSON.parse(readFileSync(PASTE_FILE, "utf8")); } catch { return []; } })();
+function savePastes() { try { writeFileSync(PASTE_FILE, JSON.stringify(pastes, null, 2)); } catch {} }
+function prunePastes() {
+  const now = Date.now();
+  const before = pastes.length;
+  pastes = pastes.filter(p => !p.expires_at || new Date(p.expires_at).getTime() > now);
+  if (pastes.length !== before) savePastes();
+}
+
+app.post("/paste", (req, res) => {
+  prunePastes();
+  const { content, language, title, expires_in, author } = req.body || {};
+  if (!content || typeof content !== "string") return res.status(400).json({ error: "content required" });
+  if (content.length > 100000) return res.status(400).json({ error: "content too large (100KB max)" });
+  const id = crypto.randomUUID().slice(0, 8);
+  const paste = {
+    id,
+    title: (title || "").slice(0, 200) || undefined,
+    language: (language || "").slice(0, 30) || undefined,
+    author: (author || "").slice(0, 50) || undefined,
+    content,
+    size: content.length,
+    created_at: new Date().toISOString(),
+    expires_at: expires_in ? new Date(Date.now() + Math.min(expires_in, 7 * 86400) * 1000).toISOString() : undefined,
+    views: 0,
+  };
+  pastes.push(paste);
+  if (pastes.length > PASTE_MAX) pastes = pastes.slice(-PASTE_MAX);
+  savePastes();
+  logActivity("paste.create", `Paste ${id} created${paste.title ? `: ${paste.title}` : ""}`, { id, author: paste.author });
+  fireWebhook("paste.create", paste);
+  res.status(201).json({ id, url: `/paste/${id}`, raw: `/paste/${id}/raw`, created_at: paste.created_at, expires_at: paste.expires_at });
+});
+
+app.get("/paste", (req, res) => {
+  prunePastes();
+  const { author, language, limit } = req.query;
+  let filtered = pastes;
+  if (author) filtered = filtered.filter(p => p.author === author);
+  if (language) filtered = filtered.filter(p => p.language === language);
+  const n = Math.min(parseInt(limit) || 50, 100);
+  const list = filtered.slice(-n).reverse().map(({ content, ...rest }) => ({ ...rest, preview: content.slice(0, 120) }));
+  res.json({ count: list.length, total: pastes.length, pastes: list });
+});
+
+app.get("/paste/:id", (req, res) => {
+  prunePastes();
+  const paste = pastes.find(p => p.id === req.params.id);
+  if (!paste) return res.status(404).json({ error: "paste not found" });
+  paste.views++;
+  savePastes();
+  if (req.query.format === "raw" || req.headers.accept === "text/plain") {
+    return res.type("text/plain").send(paste.content);
+  }
+  res.json(paste);
+});
+
+app.get("/paste/:id/raw", (req, res) => {
+  const paste = pastes.find(p => p.id === req.params.id);
+  if (!paste) return res.status(404).type("text/plain").send("not found");
+  paste.views++;
+  savePastes();
+  res.type("text/plain").send(paste.content);
+});
+
+app.delete("/paste/:id", auth, (req, res) => {
+  const idx = pastes.findIndex(p => p.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "paste not found" });
+  pastes.splice(idx, 1);
+  savePastes();
+  res.json({ deleted: true });
 });
 
 // --- Authenticated endpoints ---

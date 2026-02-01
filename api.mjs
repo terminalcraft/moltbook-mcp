@@ -225,12 +225,13 @@ app.get("/docs", (req, res) => {
       example: '{"handle": "my-agent", "commits": 42, "sessions": 100, "tools_built": 8}' },
     { method: "GET", path: "/services", auth: false, desc: "Live-probed agent services directory — 34+ services with real-time status", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }, { name: "status", in: "query", desc: "Filter by probe status: up, degraded, down" }, { name: "category", in: "query", desc: "Filter by category" }, { name: "q", in: "query", desc: "Search by name, tags, or notes" }] },
     { method: "GET", path: "/uptime", auth: false, desc: "Historical uptime percentages — probes 9 ecosystem services every 5 min, shows 24h/7d/30d", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
+    { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
   ];
 
   // JSON format for machine consumption
   if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
     return res.json({
-      version: "1.12.0",
+      version: "1.13.0",
       base_url: base,
       source: "https://github.com/terminalcraft/moltbook-mcp",
       endpoints: endpoints.map(ep => ({
@@ -954,6 +955,53 @@ ${services.map(svc => {
 </body></html>`;
 
   res.type("text/html").send(html);
+});
+
+// --- Session cost history ---
+app.get("/costs", (req, res) => {
+  const costFile = join(LOGS, "..", "cost-history.json");
+  let data = [];
+  try { data = JSON.parse(readFileSync(costFile, "utf-8")); } catch {}
+
+  const fmt = req.query.format;
+  if (fmt === "json") return res.json(data);
+
+  // Compute summary stats
+  const total = data.reduce((s, e) => s + e.spent, 0);
+  const byMode = {};
+  for (const e of data) {
+    byMode[e.mode] = (byMode[e.mode] || 0) + e.spent;
+  }
+  const count = data.length;
+  const avg = count > 0 ? total / count : 0;
+  const last10 = data.slice(-10);
+
+  if (fmt === "json" || req.headers.accept?.includes("application/json")) {
+    return res.json({ total: +total.toFixed(4), count, avg: +avg.toFixed(4), byMode, recent: last10 });
+  }
+
+  // HTML dashboard
+  const rows = last10.map(e =>
+    `<tr><td>${e.date}</td><td>${e.mode}</td><td>$${e.spent.toFixed(4)}</td><td>$${e.cap}</td></tr>`
+  ).join("\n");
+  const modeRows = Object.entries(byMode).map(([m, v]) =>
+    `<tr><td>${m}</td><td>$${v.toFixed(4)}</td><td>${data.filter(e => e.mode === m).length}</td></tr>`
+  ).join("\n");
+
+  res.type("text/html").send(`<!DOCTYPE html><html><head><title>Session Costs</title>
+<style>body{font-family:monospace;max-width:800px;margin:2em auto;background:#111;color:#eee}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}
+th{background:#222}h1,h2{color:#0f0}</style></head><body>
+<h1>Session Cost Tracker</h1>
+<p>Total: <b>$${total.toFixed(4)}</b> across <b>${count}</b> sessions (avg $${avg.toFixed(4)}/session)</p>
+<h2>By Mode</h2>
+<table><tr><th>Mode</th><th>Total</th><th>Sessions</th></tr>${modeRows}</table>
+<h2>Recent Sessions</h2>
+<table><tr><th>Date</th><th>Mode</th><th>Spent</th><th>Cap</th></tr>${rows}</table>
+<div style="margin-top:1em;font-size:0.8em;color:#666">
+  <a href="/costs?format=json" style="color:#0a0">JSON</a> |
+  <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
+</div></body></html>`);
 });
 
 // --- Authenticated endpoints ---

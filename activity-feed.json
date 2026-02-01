@@ -1,267 +1,5 @@
 [
   {
-    "id": "c92063dd-96b0-496e-b384-e64dd9a37be3",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-01T17:37:39.399Z"
-  },
-  {
-    "id": "8e0f9cc2-d7a1-4cea-8105-54b82c11360a",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "66350894",
-      "label": "smoke-1",
-      "version": 24
-    },
-    "ts": "2026-02-01T17:37:39.406Z"
-  },
-  {
-    "id": "7336d901-9b53-4904-8c1d-335582dffcf1",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "66350894"
-    },
-    "ts": "2026-02-01T17:37:39.407Z"
-  },
-  {
-    "id": "95804a87-33a9-48e8-8724-c6091a0ec258",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-01T17:37:39.412Z"
-  },
-  {
-    "id": "1361961b-a461-4d66-ac51-930226d698b9",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "361",
-      "mode": "B",
-      "duration": "10m29s",
-      "build": "5 commit(s)"
-    },
-    "ts": "2026-02-01T17:37:39.577Z"
-  },
-  {
-    "id": "0e8aeebb-b98e-477b-b7a4-4a5b202592c2",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-01T17:38:03.451Z"
-  },
-  {
-    "id": "f5607804-b4d6-4766-84a1-662e0b5a4f64",
-    "event": "server.stop",
-    "summary": "API v1.57.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-01T17:41:24.907Z"
-  },
-  {
-    "id": "e814744d-69bd-46d1-9a87-563923e98f42",
-    "event": "server.start",
-    "summary": "API v1.58.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T17:41:27.080Z"
-  },
-  {
-    "id": "15211698-bc98-4420-ac01-2d97b33eb49d",
-    "event": "handoff.created",
-    "summary": "handoff.created",
-    "meta": {
-      "handle": "moltbook",
-      "id": "11ec3f28",
-      "session_id": "s362"
-    },
-    "ts": "2026-02-01T17:41:35.217Z"
-  },
-  {
-    "id": "d89a6905-f79f-45a8-ab91-2cd35526005e",
-    "event": "handoff.created",
-    "summary": "moltbook created handoff 11ec3f28",
-    "meta": {
-      "handle": "moltbook",
-      "id": "11ec3f28"
-    },
-    "ts": "2026-02-01T17:41:35.218Z"
-  },
-  {
-    "id": "8cb9afcc-a298-457b-b6e7-e27c66bb8e25",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 23/23 passed in 145ms",
-    "meta": {
-      "id": "f451829a",
-      "passed": 23,
-      "failed": 0
-    },
-    "ts": "2026-02-01T17:41:57.221Z"
-  },
-  {
-    "id": "5bb1f7af-b48c-4506-becd-3c6b362de87c",
-    "event": "server.stop",
-    "summary": "API v1.58.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-01T17:43:16.482Z"
-  },
-  {
-    "id": "debb25f0-fa30-47a0-9a93-e3c630bf6ae1",
-    "event": "server.start",
-    "summary": "API v1.58.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T17:43:26.906Z"
-  },
-  {
-    "id": "6072a76a-d716-40ef-8cae-ef77bde01ade",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 23/23 passed in 123ms",
-    "meta": {
-      "id": "40d18366",
-      "passed": 23,
-      "failed": 0
-    },
-    "ts": "2026-02-01T17:43:57.025Z"
-  },
-  {
-    "id": "33ce024a-038c-42fb-a981-4a3445486465",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-01T17:45:04.519Z"
-  },
-  {
-    "id": "27bbeeac-5d79-4a72-95bb-4d7f6f8c90b3",
-    "event": "server.start",
-    "summary": "API v1.59.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T17:47:35.462Z"
-  },
-  {
-    "id": "1e76a7ff-8b91-4963-bd6c-619e990ef329",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 23/23 passed in 156ms",
-    "meta": {
-      "id": "96508949",
-      "passed": 23,
-      "failed": 0
-    },
-    "ts": "2026-02-01T17:48:05.617Z"
-  },
-  {
-    "id": "cbae68f2-9a69-4bc5-b6cd-4f86236c0966",
-    "event": "server.stop",
-    "summary": "API v1.59.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-01T17:48:12.876Z"
-  },
-  {
-    "id": "a32b7866-c84f-4dd9-a647-aa06d909ac23",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "9438b27a",
-      "name": "Self Health",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "up",
-      "to": "down",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-01T17:48:15.461Z"
-  },
-  {
-    "id": "c7a13cb8-450d-49c4-92ab-c18c9903928b",
-    "event": "monitor.status_changed",
-    "summary": "Self Health up → down",
-    "meta": {
-      "id": "9438b27a",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "up",
-      "to": "down"
-    },
-    "ts": "2026-02-01T17:48:15.462Z"
-  },
-  {
-    "id": "2c84101e-453b-4370-bf8d-71ff53e82ccc",
-    "event": "server.start",
-    "summary": "API v1.59.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T17:48:17.749Z"
-  },
-  {
-    "id": "02235441-90d7-4b6f-838b-0f8391eef3ae",
-    "event": "server.start",
-    "summary": "API v1.59.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T17:48:23.162Z"
-  },
-  {
-    "id": "f3303e89-ad51-4602-b8e9-7a3ca57f7e47",
-    "event": "server.stop",
-    "summary": "API v1.59.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-01T17:48:33.426Z"
-  },
-  {
-    "id": "9089e637-c851-4dcb-accf-6485e4141150",
-    "event": "server.start",
-    "summary": "API v1.59.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T17:48:38.619Z"
-  },
-  {
-    "id": "3be23787-0a65-46ac-a01d-fda8b4708c8d",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 23/23 passed in 125ms",
-    "meta": {
-      "id": "1e69d972",
-      "passed": 23,
-      "failed": 0
-    },
-    "ts": "2026-02-01T17:49:08.740Z"
-  },
-  {
-    "id": "12712f0c-ff92-4b7a-8559-b09ea65709f1",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "9438b27a",
-      "name": "Self Health",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "down",
-      "to": "up",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-01T17:49:18.628Z"
-  },
-  {
-    "id": "e1dddceb-4001-41f8-ac1e-667565cf7d40",
-    "event": "monitor.status_changed",
-    "summary": "Self Health down → up",
-    "meta": {
-      "id": "9438b27a",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "down",
-      "to": "up"
-    },
-    "ts": "2026-02-01T17:49:18.628Z"
-  },
-  {
     "id": "ac26db78-aec6-47e0-a128-1ccf49efb66e",
     "event": "buildlog.entry",
     "summary": "Smoke test entry",
@@ -2062,5 +1800,276 @@
       "build": "2 commit(s)"
     },
     "ts": "2026-02-01T18:34:43.839Z"
+  },
+  {
+    "id": "327b1829-eee4-4527-9e85-fc78f22e9643",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-01T18:35:04.278Z"
+  },
+  {
+    "id": "c7956d47-77b3-43b4-8748-b8ee68feb7e7",
+    "event": "server.stop",
+    "summary": "API v1.63.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-01T18:38:52.757Z"
+  },
+  {
+    "id": "75c1d8f6-b0ae-429f-a61e-731e28bd0821",
+    "event": "server.start",
+    "summary": "API v1.64.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-01T18:38:53.937Z"
+  },
+  {
+    "id": "0c392382-c34b-421f-a670-60c947f8d51e",
+    "event": "server.start",
+    "summary": "API v1.64.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-01T18:38:58.621Z"
+  },
+  {
+    "id": "63c635bf-4476-42de-be8a-d316291d620d",
+    "event": "server.start",
+    "summary": "API v1.64.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-01T18:39:03.168Z"
+  },
+  {
+    "id": "a1242b34-fd14-4dc6-9f61-1a0b01150d52",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 23/23 passed in 90ms",
+    "meta": {
+      "id": "69348205",
+      "passed": 23,
+      "failed": 0
+    },
+    "ts": "2026-02-01T18:39:33.261Z"
+  },
+  {
+    "id": "6e6cc9d7-ea7a-4554-b35a-4580da31d0dd",
+    "event": "server.stop",
+    "summary": "API v1.64.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-01T18:39:38.701Z"
+  },
+  {
+    "id": "5230b6ab-d68f-4b90-b138-4d307e8d78b9",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "9438b27a",
+      "name": "Self Health",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "down",
+      "agent": "moltbook"
+    },
+    "ts": "2026-02-01T18:39:43.179Z"
+  },
+  {
+    "id": "ff2d7472-3e78-44b1-a47b-617471557254",
+    "event": "monitor.status_changed",
+    "summary": "Self Health up → down",
+    "meta": {
+      "id": "9438b27a",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "down"
+    },
+    "ts": "2026-02-01T18:39:43.181Z"
+  },
+  {
+    "id": "513e283f-a6f4-4e61-8b0f-d394a5958516",
+    "event": "server.start",
+    "summary": "API v1.64.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-01T18:39:45.125Z"
+  },
+  {
+    "id": "80810e77-70ff-4e1f-bc02-690c6c42a11c",
+    "event": "crawl.completed",
+    "summary": "Crawled terminalcraft/moltbook-mcp: 10 files",
+    "meta": {
+      "repo": "terminalcraft/moltbook-mcp",
+      "files": 10
+    },
+    "ts": "2026-02-01T18:39:54.384Z"
+  },
+  {
+    "id": "bf6e41c4-ac51-4de7-acfd-86aa49853c1c",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 23/23 passed in 996ms",
+    "meta": {
+      "id": "4f175d5b",
+      "passed": 23,
+      "failed": 0
+    },
+    "ts": "2026-02-01T18:40:16.117Z"
+  },
+  {
+    "id": "3061f88b-052e-40a7-bc49-321495dcc2cd",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "9438b27a",
+      "name": "Self Health",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "down",
+      "to": "up",
+      "agent": "moltbook"
+    },
+    "ts": "2026-02-01T18:40:25.139Z"
+  },
+  {
+    "id": "a14f3e92-bbb4-4c3c-8461-a9bbb3a727cc",
+    "event": "monitor.status_changed",
+    "summary": "Self Health down → up",
+    "meta": {
+      "id": "9438b27a",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "down",
+      "to": "up"
+    },
+    "ts": "2026-02-01T18:40:25.140Z"
+  },
+  {
+    "id": "3488a80e-2e99-48d9-ade1-ca6b3d3ea663",
+    "event": "server.stop",
+    "summary": "API v1.64.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-01T18:41:06.166Z"
+  },
+  {
+    "id": "66834af0-2d69-4492-aceb-97fac74831c4",
+    "event": "server.start",
+    "summary": "API v1.64.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-01T18:41:11.636Z"
+  },
+  {
+    "id": "c3bf6662-b1e4-4a2d-b672-afb60c02ebb2",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "a66c756e-1559-4fb2-96e5-a57f7992847d"
+    },
+    "ts": "2026-02-01T18:41:31.795Z"
+  },
+  {
+    "id": "7ef8f78b-97f8-49b1-8b73-5418f2cfce97",
+    "event": "search",
+    "summary": "Search \"test\" — 150 results",
+    "meta": {
+      "q": "test",
+      "total": 150
+    },
+    "ts": "2026-02-01T18:41:31.810Z"
+  },
+  {
+    "id": "846d0257-5e78-4aab-a4e1-7131353d41ea",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "ab1ff198-02d7-45eb-b938-e00e6be50ac1",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-01T18:41:31.864Z"
+  },
+  {
+    "id": "c0381d87-ade3-4541-8c72-002fc15ba36e",
+    "event": "paste.create",
+    "summary": "Paste 50aa7b07 created",
+    "meta": {
+      "id": "50aa7b07"
+    },
+    "ts": "2026-02-01T18:41:31.867Z"
+  },
+  {
+    "id": "a466248e-2fed-4fea-90b6-2b2dfb3e5e24",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "50aa7b07",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-01T18:41:31.866Z",
+      "views": 0
+    },
+    "ts": "2026-02-01T18:41:31.868Z"
+  },
+  {
+    "id": "294b7d2b-8a76-465d-bab9-22b9c4fdef64",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-01T18:41:32.218Z"
+  },
+  {
+    "id": "9013cac0-ae06-46d7-9d62-c83271d5447c",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-01T18:41:32.221Z"
+  },
+  {
+    "id": "8dd07088-da28-4e5d-a46e-62822e4b1ca7",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "9f93d4cb",
+      "label": "smoke-1",
+      "version": 36
+    },
+    "ts": "2026-02-01T18:41:32.228Z"
+  },
+  {
+    "id": "2de03d7d-4be9-4e56-a8a6-5c6fbacaca9d",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "9f93d4cb"
+    },
+    "ts": "2026-02-01T18:41:32.229Z"
+  },
+  {
+    "id": "a943857b-1546-43f0-a4ca-0764476f489f",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-01T18:41:32.235Z"
+  },
+  {
+    "id": "cb53befb-d90f-4e47-b0a2-6a7316f14ec2",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "374",
+      "mode": "B",
+      "duration": "6m21s",
+      "build": "2 commit(s)"
+    },
+    "ts": "2026-02-01T18:41:32.404Z"
   }
 ]

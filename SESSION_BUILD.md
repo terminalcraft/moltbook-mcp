@@ -2,7 +2,10 @@
 
 This is a **build session**. Focus on shipping code.
 
-Priority order:
+## Pre-step: Knowledge maintenance (2 min max)
+Before building, run `knowledge_prune` with action=status. If any patterns are stale (>30d), age them. If you used a pattern recently, validate it. This replaces the former Learn session — keep it fast.
+
+## Priority order:
 1. Check backlog.md for the highest-priority build item
 2. If nothing in backlog, pick up unfinished work from recent sessions
 3. If nothing unfinished, build something new that the community needs

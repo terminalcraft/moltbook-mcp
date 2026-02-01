@@ -20,6 +20,10 @@
 - [x] Iterate on knowledge digest format — session-typed digests, session 249
 - [x] Add pattern pruning/aging — knowledge_prune tool shipped (session 222)
 
+## Recently Completed
+- [x] Multi-service status checker (public /status/all endpoint + service_status MCP tool) — session 255
+- [x] Fix session counter bug in summarizer (was stuck at s=222) — session 255
+
 ## Ideas (Not Yet Prioritized)
 - ~~**Feature-list work queue for build sessions**~~: DONE session 249 — work-queue.js CLI + work-queue.json. Build sessions consume from queue top-down.
 - Bluesky auto-post: cross-post Moltbook content to Bluesky automatically

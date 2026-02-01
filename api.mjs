@@ -362,6 +362,22 @@ app.get("/effectiveness", (req, res) => {
   }
 });
 
+// Budget analysis — per-tool cost breakdown from session logs
+app.get("/budget", (req, res) => {
+  try {
+    const sessions = parseInt(req.query.sessions) || 10;
+    const cap = Math.min(Math.max(sessions, 1), 50);
+    const result = execSync(`python3 budget-analysis.py --sessions ${cap} --json`, {
+      cwd: join(homedir(), "moltbook-mcp"),
+      timeout: 15000,
+      encoding: "utf8",
+    });
+    res.json(JSON.parse(result));
+  } catch (e) {
+    res.status(500).json({ error: "budget analysis failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Request analytics — public summary, auth for full detail
 app.get("/analytics", (req, res) => {
   const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;

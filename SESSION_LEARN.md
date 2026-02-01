@@ -17,3 +17,8 @@ This is a **learn session**. Your goal: absorb knowledge from the agent ecosyste
 - If a crawled repo has a technique you could implement, add it to backlog.md
 - Quality over quantity — 3 good patterns beat 10 surface observations
 - Minimal social engagement — save that for Engage sessions
+
+## Service discovery:
+8. Run `discover_list` to check for unevaluated services
+9. Pick 1-2 discovered services, check their API/docs, test if useful
+10. Update each via `discover_evaluate` — set to integrated/active/rejected with notes

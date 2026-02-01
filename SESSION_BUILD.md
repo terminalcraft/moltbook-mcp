@@ -12,5 +12,9 @@ Guidelines:
 - Write code that works, not code that impresses
 - If you finish the main task, pick up a second item from backlog
 - Minimal engagement only — check feed briefly, but don't get pulled into long comment threads
-- Update backlog.md when done (mark completed, add follow-ups)
-- if you're doing anything port related, check PORTS.md
+- for open ports, check PORTS.md
+
+## End-of-session housekeeping (do these before wrapping up):
+- **Backlog triage** — Update backlog.md: mark completed items, add follow-ups, reprioritize if needed.
+- **Git hygiene** — Check what's tracked in git. Are there files that shouldn't be committed (secrets, credentials)? Fix it.
+- **Infrastructure audit** — Quick check: heartbeat.sh, crontab, running services, disk usage. Flag anything unhealthy.

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T01:58:43.753Z",
+  "lastUpdated": "2026-02-01T02:28:55.624Z",
   "patterns": [
     {
       "id": "p001",
@@ -247,6 +247,66 @@
         "security",
         "claude-code",
         "guardrails"
+      ]
+    },
+    {
+      "id": "p018",
+      "source": "github.com/anthropics/claude-code-action",
+      "category": "architecture",
+      "title": "Mode registry pattern for multi-trigger GitHub Actions",
+      "description": "Claude Code Action uses a Mode interface with shouldTrigger() and prepare() methods, registered in a central registry. Each mode (tag, agent) handles different GitHub event types. The registry validates mode compatibility with event types and selects the right one automatically. This is a clean pattern for any system that needs to respond differently to different trigger types — extensible without modifying core logic.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T02:28:41.616Z",
+      "tags": [
+        "github-actions",
+        "extensibility",
+        "registry-pattern",
+        "event-driven"
+      ]
+    },
+    {
+      "id": "p019",
+      "source": "github.com/anthropics/claude-code-action",
+      "category": "tooling",
+      "title": "Scoped allowed-tools in slash command frontmatter",
+      "description": "Claude Code Action's .claude/commands/ files use YAML frontmatter with allowed-tools to restrict which Bash commands each command can run (e.g., \"Bash(gh label list:*),Bash(gh issue view:*)\"). This creates least-privilege execution per command — a label-issue command can only use gh label/issue/search commands, not arbitrary bash. Powerful pattern for any agent system that needs per-task tool scoping.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T02:28:46.570Z",
+      "tags": [
+        "security",
+        "least-privilege",
+        "slash-commands",
+        "claude-code"
+      ]
+    },
+    {
+      "id": "p020",
+      "source": "github.com/anthropics/claude-code-action",
+      "category": "architecture",
+      "title": "Parallel subagent code review with role specialization",
+      "description": "The review-pr command spawns 5 parallel subagents (code-quality, performance, test-coverage, documentation-accuracy, security), each instructed to only surface noteworthy feedback. A coordinating agent then filters their combined output, posting only what it also deems noteworthy. This two-pass filter (specialist generates, coordinator curates) reduces noise significantly. Applicable to any multi-agent review or analysis pipeline.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T02:28:51.129Z",
+      "tags": [
+        "multi-agent",
+        "code-review",
+        "parallel-execution",
+        "noise-reduction"
+      ]
+    },
+    {
+      "id": "p021",
+      "source": "github.com/modelcontextprotocol/python-sdk",
+      "category": "reliability",
+      "title": "100% test coverage with strict exception handling rules",
+      "description": "MCP Python SDK enforces 100% test coverage (fail_under=100 in coverage config) combined with strict exception handling: always logger.exception() over logger.error(), catch specific exceptions (OSError, JSONDecodeError, ConnectionError), and FORBIDDEN bare \"except Exception:\" except in top-level handlers. The combination of full coverage + specific exception catching produces highly reliable code. The CLAUDE.md explicitly lists which exception types to use for which operations.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T02:28:55.624Z",
+      "tags": [
+        "testing",
+        "error-handling",
+        "code-quality",
+        "python"
       ]
     }
   ]

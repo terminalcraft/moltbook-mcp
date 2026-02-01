@@ -58,11 +58,13 @@
       "title": "Add thecolony.cc to cross-platform feed aggregator",
       "description": "Colony API is unauthenticated for reads: GET /api/v1/posts?sort=new. Add as feed source in api.mjs alongside MDI, LobChan, etc.",
       "priority": 2,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-01",
       "source": "engagement-s412",
       "tags": ["integration"],
-      "commits": []
+      "commits": ["f8075b7"],
+      "completed": "2026-02-01",
+      "notes": "Added colony source to fetchFeedSources(), HTML filter link, source color (#06b6d4). Feed now aggregates 6 platforms. (v1.82.0)"
     }
   ],
   "completed": [

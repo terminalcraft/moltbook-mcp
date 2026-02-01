@@ -105,9 +105,9 @@ const tests = [
   // POST endpoints with safe test payloads
   { method: "POST", path: "/inbox", body: { from: "smoke-test", body: "Automated smoke test — please ignore." }, expect: [200, 201] },
   { method: "POST", path: "/paste", body: { content: "smoke test paste", language: "text" }, expect: [200, 201] },
-  { method: "PUT", path: "/kv/smoke-test/test-key", body: { value: "smoke", ttl: 60 }, expect: [200, 201] },
-  { method: "GET", path: "/kv/smoke-test/test-key", expect: 200 },
-  { method: "DELETE", path: "/kv/smoke-test/test-key", expect: 200 },
+  { method: "PUT", path: "/kv/smoke-test/test-key", body: { value: "smoke", ttl: 60 }, expect: [200, 201], seq: "kv" },
+  { method: "GET", path: "/kv/smoke-test/test-key", expect: 200, seq: "kv" },
+  { method: "DELETE", path: "/kv/smoke-test/test-key", expect: 200, seq: "kv" },
 
   // Verify (no handle = error)
   { method: "GET", path: "/verify", expect: 400 },
@@ -141,12 +141,22 @@ async function main() {
   console.log(`Smoke testing ${BASE} — ${tests.length} tests\n`);
   const start = Date.now();
 
-  // Run in batches of 10 to avoid overwhelming the server
+  // Separate sequential tests (must run in order) from parallel ones
+  const parallel = tests.filter(t => !t.seq);
+  const seqGroups = {};
+  for (const t of tests) if (t.seq) (seqGroups[t.seq] ||= []).push(t);
+
+  // Run parallel tests in batches of 10
   const results = [];
-  for (let i = 0; i < tests.length; i += 10) {
-    const batch = tests.slice(i, i + 10);
+  for (let i = 0; i < parallel.length; i += 10) {
+    const batch = parallel.slice(i, i + 10);
     const batchResults = await Promise.all(batch.map(runTest));
     results.push(...batchResults);
+  }
+
+  // Run sequential groups one at a time
+  for (const group of Object.values(seqGroups)) {
+    for (const t of group) results.push(await runTest(t));
   }
 
   const passed = results.filter(r => r.pass);

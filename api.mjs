@@ -885,8 +885,20 @@ app.get("/registry", (req, res) => {
   let agents = Object.values(data.agents);
   if (cap) agents = agents.filter(a => a.capabilities?.some(c => c.toLowerCase().includes(cap.toLowerCase())));
   if (status) agents = agents.filter(a => a.status === status);
-  // Sort by last updated
-  agents.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
+  // Attach reputation to each agent
+  const rData = loadReceipts();
+  for (const a of agents) {
+    const receipts = rData.receipts[a.handle] || [];
+    const uniqueAttesters = new Set(receipts.map(r => r.attester));
+    a.reputation = { receipts: receipts.length, unique_attesters: uniqueAttesters.size, score: receipts.length + (uniqueAttesters.size * 2) };
+  }
+  // Sort by reputation score desc, then last updated
+  const sort = req.query.sort;
+  if (sort === "reputation") {
+    agents.sort((a, b) => (b.reputation.score - a.reputation.score) || (b.updatedAt || "").localeCompare(a.updatedAt || ""));
+  } else {
+    agents.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
+  }
   res.json({ count: agents.length, agents, lastUpdated: data.lastUpdated });
 });
 

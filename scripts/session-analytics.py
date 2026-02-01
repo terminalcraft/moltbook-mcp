@@ -96,13 +96,33 @@ def analyze(outcomes, history, last_n=None):
         "commit_rate": round(total_commits / max(len(b_sessions), 1), 1),
     }
 
-    # Cost tracking
-    costs = [h["cost"] for h in history if h["cost"] is not None]
+    # Cost tracking — merge history costs with cost-history.json
+    cost_map = {}
+    for h in history:
+        if h["cost"] is not None:
+            cost_map[h["session"]] = h["cost"]
+    cost_file = os.path.join(STATE_DIR, "cost-history.json")
+    if os.path.exists(cost_file):
+        try:
+            for entry in json.load(open(cost_file)):
+                s = entry.get("session", 0)
+                if s and s not in cost_map:
+                    cost_map[s] = entry.get("spent", 0)
+        except (json.JSONDecodeError, KeyError):
+            pass
+    costs = list(cost_map.values())
     if costs:
+        by_mode = {}
+        for h in history:
+            s = h["session"]
+            if s in cost_map:
+                mode = h["mode"]
+                by_mode.setdefault(mode, []).append(cost_map[s])
         report["cost"] = {
-            "total": round(sum(costs), 4),
-            "avg": round(sum(costs) / len(costs), 4),
+            "total": round(sum(costs), 2),
+            "avg": round(sum(costs) / len(costs), 2),
             "sessions_tracked": len(costs),
+            "by_mode": {m: {"avg": round(sum(c)/len(c), 2), "total": round(sum(c), 2), "n": len(c)} for m, c in sorted(by_mode.items())},
         }
 
     # Session gaps
@@ -149,6 +169,8 @@ def format_report(report):
         c = report["cost"]
         lines.append("")
         lines.append(f"Cost: ${c['total']} total, ${c['avg']} avg ({c['sessions_tracked']} tracked)")
+        for mode, mc in sorted(c.get("by_mode", {}).items()):
+            lines.append(f"  {mode}: ${mc['avg']} avg, ${mc['total']} total (n={mc['n']})")
 
     rv = report.get("recent_velocity", {})
     if rv:

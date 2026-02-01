@@ -15,7 +15,12 @@ const ALLOWED_FILES = {
   dialogue: "dialogue.md",
   requests: "requests.md",
   backlog: "backlog.md",
+  session_engage: "SESSION_ENGAGE.md",
+  session_build: "SESSION_BUILD.md",
+  session_reflect: "SESSION_REFLECT.md",
 };
+
+const WRITABLE_FILES = ["dialogue", "session_engage", "session_build", "session_reflect"];
 
 function auth(req, res, next) {
   const h = req.headers.authorization;
@@ -39,9 +44,13 @@ app.get("/files/:name", (req, res) => {
   }
 });
 
-app.post("/files/dialogue", (req, res) => {
+app.post("/files/:name", (req, res) => {
+  const name = req.params.name;
+  if (!WRITABLE_FILES.includes(name)) return res.status(403).json({ error: "not writable" });
+  const file = ALLOWED_FILES[name];
+  if (!file) return res.status(404).json({ error: "unknown file" });
   try {
-    writeFileSync(join(BASE, "dialogue.md"), req.body, "utf-8");
+    writeFileSync(join(BASE, file), req.body, "utf-8");
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -110,21 +119,42 @@ app.get("/status", (req, res) => {
         }
       } catch {}
     }
-    // Calculate next heartbeat: cron is */7, so next fire = next minute divisible by 7
-    const nowDate = new Date();
-    const mins = nowDate.getMinutes();
-    const nextMin = Math.ceil((mins + 1) / 7) * 7;
-    const next = new Date(nowDate);
-    next.setSeconds(0, 0);
-    if (nextMin >= 60) {
-      next.setHours(next.getHours() + 1);
-      next.setMinutes(nextMin - 60);
-    } else {
-      next.setMinutes(nextMin);
+    // Calculate next heartbeat from actual crontab
+    try {
+      const crontab = execSync("crontab -u moltbot -l 2>/dev/null", { encoding: "utf-8" });
+      const cronMatch = crontab.match(/\*\/(\d+)\s.*heartbeat/);
+      const interval = cronMatch ? parseInt(cronMatch[1]) : 20;
+      const nowDate = new Date();
+      const mins = nowDate.getMinutes();
+      const nextMin = Math.ceil((mins + 1) / interval) * interval;
+      const next = new Date(nowDate);
+      next.setSeconds(0, 0);
+      if (nextMin >= 60) {
+        next.setHours(next.getHours() + 1);
+        next.setMinutes(nextMin - 60);
+      } else {
+        next.setMinutes(nextMin);
+      }
+      next_heartbeat = Math.round((next.getTime() - nowDate.getTime()) / 1000);
+    } catch {
+      next_heartbeat = null;
     }
-    next_heartbeat = Math.round((next.getTime() - nowDate.getTime()) / 1000);
 
-    res.json({ running, tools, elapsed_seconds, next_heartbeat });
+    // Extract session mode from the newest log's first line
+    let session_mode = null;
+    try {
+      const logPath = getNewestLog();
+      if (logPath) {
+        const fd2 = openSync(logPath, "r");
+        const hdrBuf = Buffer.alloc(200);
+        readSync(fd2, hdrBuf, 0, 200, 0);
+        closeSync(fd2);
+        const modeMatch = hdrBuf.toString("utf-8").match(/mode=([EBR])/);
+        if (modeMatch) session_mode = modeMatch[1];
+      }
+    } catch {}
+
+    res.json({ running, tools, elapsed_seconds, next_heartbeat, session_mode });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

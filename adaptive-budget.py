@@ -1,67 +1,131 @@
 #!/usr/bin/env python3
-"""Adaptive session budgets based on recent session outcomes.
+"""Adaptive session budgets based on effectiveness data from session history.
 
 Usage: python3 adaptive-budget.py <session_type>
 Outputs a single number: the recommended budget for that session type.
 
-Reads ~/.config/moltbook/session-outcomes.json.
-Scales budget based on success rate and cost efficiency per session type.
+Reads ~/.config/moltbook/session-history.txt (same source as rotation-tuner.py).
+Computes cost/commit efficiency per type and adjusts budgets:
+- High-ROI types get more budget (up to cap)
+- Low-ROI types get less budget (down to floor)
+- E sessions judged on cost alone (commits=0 is expected)
 """
 
-import json, sys, os
+import re, sys, os, json
 
+HISTORY = os.path.expanduser("~/.config/moltbook/session-history.txt")
+
+# Base budgets (current defaults from heartbeat.sh)
 BASE = {'B': 10.0, 'R': 5.0, 'E': 5.0}
-CAPS = {'B': (6.0, 15.0), 'R': (3.0, 7.0), 'E': (3.0, 7.0)}
+# Hard floor/ceiling per type
+CAPS = {'B': (5.0, 12.0), 'R': (3.0, 7.0), 'E': (2.0, 5.0)}
 
-def main():
-    mode = sys.argv[1].upper() if len(sys.argv) > 1 else 'B'
-    outcomes_file = os.path.expanduser('~/.config/moltbook/session-outcomes.json')
+def parse_sessions():
+    sessions = []
+    if not os.path.exists(HISTORY):
+        return sessions
+    with open(HISTORY) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            m = re.match(
+                r'\S+ mode=(\w) s=(\d+) dur=~?(\d+)m(\d+)?s? cost=\$([0-9.]+) build=(\d+|[\(]none[\)])',
+                line
+            )
+            if not m:
+                continue
+            mode = m.group(1)
+            cost = float(m.group(5))
+            commits_raw = m.group(6)
+            commits = 0 if commits_raw.startswith("(") else int(commits_raw)
+            sessions.append({"mode": mode, "cost": cost, "commits": commits})
+    return sessions
+
+
+def compute_budget(mode, sessions):
     base = BASE.get(mode, 10.0)
+    lo, hi = CAPS.get(mode, (3.0, 12.0))
 
-    if not os.path.exists(outcomes_file):
-        print(f"{base:.2f}")
-        return
-
-    with open(outcomes_file) as f:
-        outcomes = json.load(f)
-
-    if not isinstance(outcomes, list) or not outcomes:
-        print(f"{base:.2f}")
-        return
-
-    # Filter to this mode's recent sessions
-    typed = [o for o in outcomes if o.get('mode', '').upper() == mode]
+    typed = [s for s in sessions if s["mode"] == mode]
     if len(typed) < 3:
-        print(f"{base:.2f}")
-        return
+        return base  # not enough data
 
     recent = typed[-10:]  # last 10 of this type
-    success_rate = sum(1 for o in recent if o.get('outcome') == 'success') / len(recent)
-    avg_cost = sum(float(o.get('cost_usd', 0) or 0) for o in recent) / len(recent)
-    files_avg = sum(len(o.get('files_changed', [])) for o in recent) / len(recent)
+    avg_cost = sum(s["cost"] for s in recent) / len(recent)
+    total_commits = sum(s["commits"] for s in recent)
+    cost_per_commit = sum(s["cost"] for s in recent) / max(total_commits, 1)
 
-    lo, hi = CAPS.get(mode, (3.0, 15.0))
-
-    # Scale: high success + productive = more budget, low success = less
-    if mode == 'B':
-        # B sessions: success + files changed = productive
-        if success_rate >= 0.8 and files_avg >= 3:
-            scale = 1.2
-        elif success_rate >= 0.6:
-            scale = 1.0
+    if mode in ('B', 'R'):
+        # Commit-producing types: reward low cost/commit
+        if cost_per_commit < 0.6:
+            # Very efficient — give more budget
+            budget = base * 1.3
+        elif cost_per_commit < 1.0:
+            # Efficient
+            budget = base * 1.15
+        elif cost_per_commit < 2.0:
+            # Normal
+            budget = base
         else:
-            scale = 0.7
-    elif mode == 'E':
-        # E sessions: if consistently cheap and successful, keep base
-        if avg_cost > base * 0.8:
-            scale = 0.8  # overrunning budget
-        else:
-            scale = 1.0
-    else:  # R
-        scale = 1.0  # R sessions are stable
+            # Expensive per commit — reduce
+            budget = base * 0.75
 
-    budget = min(hi, max(lo, base * scale))
+        # Bonus: if avg cost is well under base, they're not using it all anyway
+        if avg_cost < base * 0.5:
+            budget = min(budget, base)  # don't over-allocate if unused
+    else:
+        # E sessions: no commits expected. Judge on cost control.
+        if avg_cost < base * 0.6:
+            # Cheap sessions — keep budget modest
+            budget = base * 0.9
+        elif avg_cost > base * 0.9:
+            # Nearly hitting cap — give slight headroom
+            budget = base * 1.1
+        else:
+            budget = base
+
+    return round(min(hi, max(lo, budget)), 2)
+
+
+def all_budgets(sessions):
+    """Compute budgets for all types, with diagnostics."""
+    result = {}
+    for mode in ('B', 'R', 'E'):
+        typed = [s for s in sessions if s["mode"] == mode]
+        recent = typed[-10:] if typed else []
+        avg_cost = sum(s["cost"] for s in recent) / len(recent) if recent else 0
+        total_commits = sum(s["commits"] for s in recent)
+        cpc = sum(s["cost"] for s in recent) / max(total_commits, 1) if recent else 0
+        budget = compute_budget(mode, sessions)
+        result[mode] = {
+            "budget": budget,
+            "base": BASE[mode],
+            "recent_count": len(recent),
+            "avg_cost": round(avg_cost, 2),
+            "cost_per_commit": round(cpc, 2),
+            "total_commits": total_commits,
+        }
+    return result
+
+
+def main():
+    as_json = "--json" in sys.argv
+    args = [a for a in sys.argv[1:] if not a.startswith("-")]
+    mode = args[0].upper() if args else 'B'
+    sessions = parse_sessions()
+
+    if as_json:
+        print(json.dumps(all_budgets(sessions), indent=2))
+        return
+
+    if not sessions:
+        print(f"{BASE.get(mode, 10.0):.2f}")
+        return
+
+    budget = compute_budget(mode, sessions)
     print(f"{budget:.2f}")
+
 
 if __name__ == '__main__':
     main()

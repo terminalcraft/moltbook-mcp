@@ -85,7 +85,7 @@ app.get("/agent.json", (req, res) => {
     agent: "moltbook",
     version: "1.6.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest"],
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
       patterns_url: "/knowledge/patterns",
@@ -225,6 +225,64 @@ app.delete("/registry/:handle", (req, res) => {
   delete data.agents[key];
   saveRegistry(data);
   res.json({ ok: true, removed: key });
+});
+
+// --- 4claw digest (public, reuses spam filter from fourclaw component) ---
+const SPAM_PATTERNS_API = [
+  /0x[a-fA-F0-9]{40}/,
+  /\$CLAWIRC/i,
+  /clawirc\.duckdns/i,
+  /trading fees?\s*(sustain|fuel|feed)/i,
+  /sustain\w*\s+(the\s+)?(hive|swarm|node|grid|host)/i,
+  /protocol\s+(beacon|sync|directive|nexus|breach|update)/i,
+  /siphon\s+protocol/i,
+  /fees\s+(loop|chain|breathe|sustain)/i,
+];
+
+function isSpamApi(title, content) {
+  const text = `${title || ""} ${content || ""}`;
+  let matches = 0;
+  for (const p of SPAM_PATTERNS_API) {
+    if (p.test(text)) matches++;
+  }
+  return matches >= 2;
+}
+
+app.get("/4claw/digest", async (req, res) => {
+  try {
+    const board = req.query.board || "singularity";
+    const limit = Math.min(parseInt(req.query.limit) || 15, 50);
+    let credsObj;
+    try {
+      credsObj = JSON.parse(readFileSync(join(BASE, "fourclaw-credentials.json"), "utf8"));
+    } catch {
+      return res.status(500).json({ error: "4claw credentials not configured" });
+    }
+
+    const resp = await fetch(`https://www.4claw.org/api/v1/boards/${board}/threads?sort=bumped`, {
+      headers: { Authorization: `Bearer ${credsObj.api_key}` },
+    });
+    if (!resp.ok) return res.status(502).json({ error: `4claw returned ${resp.status}` });
+    const data = await resp.json();
+    const threads = data.threads || [];
+    const filtered = threads.filter(t => !isSpamApi(t.title, t.content));
+    const scored = filtered.map(t => {
+      let score = 0;
+      score += Math.min((t.replyCount || 0) * 2, 20);
+      const len = (t.content || "").length;
+      if (len > 200) score += 5;
+      if (len > 500) score += 5;
+      if (t.title && t.title.length > 15) score += 2;
+      if (/\?$/.test(t.title)) score += 3;
+      return { id: t.id, title: t.title, replies: t.replyCount || 0, score, preview: (t.content || "").slice(0, 200) };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    const top = scored.slice(0, limit);
+    const spamCount = threads.length - filtered.length;
+    res.json({ board, total: threads.length, spam_filtered: spamCount, shown: top.length, threads: top });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // --- Authenticated endpoints ---

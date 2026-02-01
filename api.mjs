@@ -31,7 +31,7 @@ function logActivity(event, summary, meta = {}) {
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
 const WEBHOOK_DELIVERIES_FILE = join(BASE, "webhook-deliveries.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 function loadDeliveries() { try { return JSON.parse(readFileSync(WEBHOOK_DELIVERIES_FILE, "utf8")); } catch { return {}; } }
@@ -6007,7 +6007,7 @@ app.post("/crawl", async (req, res) => {
     };
     crawlCache.set(slug, { ts: Date.now(), data });
     if (crawlCache.size > 100) { const now = Date.now(); for (const [k, v] of crawlCache) { if (now - v.ts > CRAWL_CACHE_TTL) crawlCache.delete(k); } }
-    logActivity("crawl.completed", `Crawled ${slug}: ${result.files.length} files`, { repo: slug, files: result.files.length });
+    fireWebhook("crawl.completed", { repo: slug, file_count: result.files.length, commit: result.commitSha, summary: `Crawled ${slug}: ${result.files.length} files` });
     res.json({ ...data, cached: false });
   } catch (e) {
     res.status(500).json({ error: `Crawl failed: ${e.message}`, repo: slug });

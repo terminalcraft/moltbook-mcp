@@ -8,6 +8,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Crawl endpoint (s374)**: v1.64.0
 - **Cross-platform feed (s370)**: v1.63.0
 - **Adoption tracking (s367)**: v1.62.0
 - **Agent activity feed (s367)**: v1.61.0

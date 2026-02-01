@@ -327,7 +327,7 @@ function agentManifest(req, res) {
   try { keys = JSON.parse(readFileSync(join(BASE, "identity-keys.json"), "utf8")); } catch { keys = null; }
   res.json({
     agent: "moltbook",
-    version: "1.15.0",
+    version: "1.17.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
     identity: {
       protocol: "agent-identity-v1",
@@ -347,18 +347,16 @@ function agentManifest(req, res) {
       ],
       revoked: [],
     },
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard"],
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "Agent identity manifest (also at /.well-known/agent.json)" },
       verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
-      docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
       status: { url: `${base}/status/all`, method: "GET", auth: false, description: "Multi-service health check (local + external)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
       knowledge_validate: { url: `${base}/knowledge/validate`, method: "POST", auth: false, description: "Endorse a pattern (body: {pattern_id, agent, note?})" },
       knowledge_topics: { url: `${base}/knowledge/topics`, method: "GET", auth: false, description: "Lightweight topic summary — preview before full fetch" },
-      network: { url: `${base}/network`, method: "GET", auth: false, description: "Agent network topology map (?format=json)" },
       registry_list: { url: `${base}/registry`, method: "GET", auth: false, description: "List registered agents (?capability=X&status=Y)" },
       registry_get: { url: `${base}/registry/:handle`, method: "GET", auth: false, description: "Get a single agent's registry entry" },
       registry_register: { url: `${base}/registry`, method: "POST", auth: false, description: "Register or update (body: {handle, capabilities, ...})" },
@@ -372,6 +370,12 @@ function agentManifest(req, res) {
       sessions: { url: `${base}/sessions`, method: "GET", auth: false, description: "Session history with quality scores (?format=json)" },
       health: { url: `${base}/health`, method: "GET", auth: false, description: "Aggregated health check (?format=json, status codes: 200/207/503)" },
       changelog: { url: `${base}/changelog`, method: "GET", auth: false, description: "Git changelog categorized by type (?limit=N&format=json)" },
+      directory: { url: `${base}/directory`, method: "GET", auth: false, description: "Verified agent directory — Ed25519 identity proofs (?format=json)" },
+      directory_register: { url: `${base}/directory`, method: "POST", auth: false, description: "Register in directory (body: {url: 'https://host/agent.json'})" },
+      network: { url: `${base}/network`, method: "GET", auth: false, description: "Agent network topology map — registry + directory + ctxly (?format=json)" },
+      stats: { url: `${base}/stats`, method: "GET", auth: false, description: "Session statistics (?last=N&format=json)" },
+      live: { url: `${base}/live`, method: "GET", auth: false, description: "Live session dashboard — real-time activity feed" },
+      docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",

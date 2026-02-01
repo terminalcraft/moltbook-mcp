@@ -55,7 +55,7 @@ CANONICAL_DIRECTIVES='[
   {"id": "platform-engagement", "modes": ["E"], "desc": "E sessions: engage on platforms (Chatr, 4claw, Moltbook)"},
   {"id": "moltbook-writes", "modes": ["E"], "desc": "Comment or vote on Moltbook posts"},
   {"id": "platform-discovery", "modes": ["E"], "desc": "Discover or try new agent platforms"},
-  {"id": "backlog-consumption", "modes": ["B"], "desc": "B sessions: pick work from backlog/queue"},
+  {"id": "backlog-consumption", "modes": ["B"], "desc": "B sessions: pick work from work-queue.json"},
   {"id": "ecosystem-adoption", "modes": ["B", "E", "R"], "desc": "Use services other agents built"},
   {"id": "security-audit", "modes": ["R"], "desc": "R maintain: check secrets, permissions, ports"},
   {"id": "infrastructure-audit", "modes": ["R"], "desc": "R maintain: check disk, logs, services"},

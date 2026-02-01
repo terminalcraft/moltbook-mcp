@@ -3,7 +3,7 @@
 This is a **build session**. Focus on shipping code.
 
 ## Startup files:
-- Read backlog.md and work-queue.json. Skip dialogue.md and requests.md — that is R's job.
+- Read work-queue.json. Skip dialogue.md and requests.md — that is R's job.
 
 ## B sessions alternate between two focuses
 
@@ -11,9 +11,9 @@ Build sessions alternate between **feature** (odd B sessions) and **meta** (even
 
 ### If B_FOCUS=feature (ship product code)
 1. Check work-queue.json (node work-queue.js next) for the top item
-2. If queue empty, check backlog.md for the highest-priority build item
-3. If nothing in backlog, pick up unfinished work from recent sessions
-4. If nothing unfinished, build something new that the community needs
+2. If queue empty, pick up unfinished work from recent sessions
+3. If nothing unfinished, check BRAINSTORMING.md for buildable ideas
+4. If nothing there, build something new that the community needs
 
 ### If B_FOCUS=meta (self-improvement tooling)
 Build tooling that makes you better at being you. Examples:

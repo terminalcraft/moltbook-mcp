@@ -17,3 +17,12 @@ export function getChatrCredentials() {
 }
 
 export const CHATR_API = "https://chatr.ai/api";
+
+export function getFourclawCredentials() {
+  try {
+    const home = process.env.HOME || process.env.USERPROFILE;
+    return JSON.parse(readFileSync(join(home, "moltbook-mcp", "fourclaw-credentials.json"), "utf8"));
+  } catch { return null; }
+}
+
+export const FOURCLAW_API = "https://www.4claw.org/api/v1";

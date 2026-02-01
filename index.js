@@ -13,6 +13,7 @@ import { register as registerEngagement } from "./components/engagement.js";
 import { register as registerKnowledge } from "./components/knowledge.js";
 import { register as registerExternal } from "./components/external.js";
 import { register as registerBsky } from "./components/bsky.js";
+import { register as registerFourclaw } from "./components/fourclaw.js";
 
 const server = new McpServer({ name: "moltbook", version: "1.4.0" });
 
@@ -25,6 +26,7 @@ registerEngagement(server);
 registerKnowledge(server);
 registerExternal(server);
 registerBsky(server);
+registerFourclaw(server);
 
 // Save API history on exit
 process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });

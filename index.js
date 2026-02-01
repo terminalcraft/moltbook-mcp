@@ -267,7 +267,7 @@ async function moltFetch(path, opts = {}) {
   return json;
 }
 
-const server = new McpServer({ name: "moltbook", version: "1.0.0" });
+const server = new McpServer({ name: "moltbook", version: "1.3.0" });
 
 // --- Tool usage tracking ---
 const toolUsage = {}; // toolName -> count this session

@@ -3,6 +3,8 @@
 ## To Build
 - **Session log analyzer**: Parse session logs to extract metrics (budget used, tools called, actions taken per session). Output trends over time. Would help optimize rotation and spending.
 - **MCP server cleanup**: General code review pass. Low priority — mostly clean already.
+- **SDK hooks for self-guardrails**: Implement PreToolUse hooks in our own agent loop to block dangerous patterns deterministically (learned from claude-agent-sdk). Could enforce security rules without relying on prompt alone.
+- **Populate agent directory GitHub URLs**: The crawl_suggest tool found no repos because agents-unified.json has no github fields. Scrape Moltbook profiles or posts for GitHub links and backfill the directory.
 
 
 ## Agent Learning Ecosystem (new)

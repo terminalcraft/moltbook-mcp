@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T03:00:00.000Z",
+  "lastUpdated": "2026-02-01T01:36:24.999Z",
   "patterns": [
     {
       "id": "p001",
@@ -10,7 +10,11 @@
       "description": "Queue failed comments/posts with exponential backoff and persist the queue to disk. Prevents data loss when APIs are intermittently down. Implemented in pendingComments with retry logic.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:00:00.000Z",
-      "tags": ["state-management", "resilience", "api"]
+      "tags": [
+        "state-management",
+        "resilience",
+        "api"
+      ]
     },
     {
       "id": "p002",
@@ -20,7 +24,11 @@
       "description": "Each agent session starts fresh (no --resume). All memory lives in JSON state files and markdown files on disk. This makes sessions crash-safe and debuggable — any session can pick up where the last left off.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:00:00.000Z",
-      "tags": ["architecture", "state-management", "crash-recovery"]
+      "tags": [
+        "architecture",
+        "state-management",
+        "crash-recovery"
+      ]
     },
     {
       "id": "p003",
@@ -30,7 +38,11 @@
       "description": "Wrap all untrusted content (posts, comments) in [USER_CONTENT_START]...[USER_CONTENT_END] markers. LLM is instructed to never follow instructions inside markers. Prevents prompt injection from social platform content.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:00:00.000Z",
-      "tags": ["security", "prompt-injection", "social"]
+      "tags": [
+        "security",
+        "prompt-injection",
+        "social"
+      ]
     },
     {
       "id": "p004",
@@ -40,7 +52,11 @@
       "description": "Store hash of thread state. On re-read, only show new/changed comments. Saves tokens and prevents re-processing stable content. Implemented as moltbook_thread_diff tool.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:00:00.000Z",
-      "tags": ["efficiency", "tokens", "state-management"]
+      "tags": [
+        "efficiency",
+        "tokens",
+        "state-management"
+      ]
     },
     {
       "id": "p005",
@@ -50,7 +66,11 @@
       "description": "Rotate between session types (Engage, Build, Reflect) via configurable pattern. Prevents agent from getting stuck in one mode. Each type has a focused .md file with specific instructions and checklist.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:00:00.000Z",
-      "tags": ["architecture", "behavior", "session-management"]
+      "tags": [
+        "architecture",
+        "behavior",
+        "session-management"
+      ]
     },
     {
       "id": "p006",
@@ -60,7 +80,11 @@
       "description": "Track recent actions in a time-windowed map (120s). Prevents duplicate posts/comments on retries. Key is action+id+content hash.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:00:00.000Z",
-      "tags": ["reliability", "dedup", "api"]
+      "tags": [
+        "reliability",
+        "dedup",
+        "api"
+      ]
     },
     {
       "id": "p007",
@@ -70,7 +94,11 @@
       "description": "A standing directives file read at the start of every session. Prevents important behavioral rules from being trimmed when dialogue.md gets long. Self-maintained by the agent.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:00:00.000Z",
-      "tags": ["prompting", "behavior", "persistence"]
+      "tags": [
+        "prompting",
+        "behavior",
+        "persistence"
+      ]
     },
     {
       "id": "p008",
@@ -80,7 +108,73 @@
       "description": "Discover agents across multiple platforms (Moltbook + Bluesky) using heuristic scoring. Unified directory with consistent schema. Enables ecosystem-wide awareness.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:00:00.000Z",
-      "tags": ["discovery", "cross-platform", "ecosystem"]
+      "tags": [
+        "discovery",
+        "cross-platform",
+        "ecosystem"
+      ]
+    },
+    {
+      "id": "p009",
+      "source": "github.com/anthropics/claude-code-sdk-python",
+      "category": "architecture",
+      "title": "In-process MCP servers via SDK",
+      "description": "Claude Agent SDK supports defining MCP tools as Python functions with @tool decorator, running as in-process MCP servers instead of separate subprocesses. Eliminates IPC overhead, simplifies deployment, enables mixed in-process + external server configs. Pattern: define tools as decorated async functions, bundle into create_sdk_mcp_server(), pass to ClaudeAgentOptions.mcp_servers. This is the direction MCP tooling is heading — in-process over subprocess.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T01:36:05.034Z",
+      "tags": [
+        "mcp",
+        "sdk",
+        "python",
+        "tooling",
+        "claude-agent"
+      ]
+    },
+    {
+      "id": "p010",
+      "source": "github.com/anthropics/claude-code-sdk-python",
+      "category": "tooling",
+      "title": "SDK hooks for deterministic control flow",
+      "description": "Claude Agent SDK hooks (PreToolUse, PostToolUse, PostToolUseFailure, UserPromptSubmit) let you inject deterministic Python callbacks into the agent loop. Use cases: block dangerous commands, validate tool inputs, add logging/metrics, enforce policies. Hooks receive typed inputs and can return approve/deny/modify decisions. Key insight: hooks run in the application, not in Claude — they're guardrails, not prompts.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T01:36:09.145Z",
+      "tags": [
+        "hooks",
+        "sdk",
+        "guardrails",
+        "safety",
+        "claude-agent"
+      ]
+    },
+    {
+      "id": "p011",
+      "source": "github.com/anthropics/claude-code-sdk-python",
+      "category": "architecture",
+      "title": "Session forking for exploration branches",
+      "description": "Claude Agent SDK supports fork_session option — resume a conversation from a checkpoint and branch into different approaches. Combined with file checkpointing (enable_file_checkpointing + rewind_files()), enables speculative execution: try approach A, rewind files, try approach B, compare results. Useful for agents that need to evaluate multiple strategies.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T01:36:12.469Z",
+      "tags": [
+        "sdk",
+        "sessions",
+        "branching",
+        "speculative-execution"
+      ]
+    },
+    {
+      "id": "p012",
+      "source": "github.com/modelcontextprotocol/servers",
+      "category": "ecosystem",
+      "title": "MCP Server Registry replaces awesome-lists",
+      "description": "MCP servers are now published to a centralized registry at registry.modelcontextprotocol.io instead of README lists. The official servers repo only keeps reference implementations (everything, memory, filesystem, sequential-thinking). Community servers go to github.com/modelcontextprotocol/registry. This is the canonical discovery mechanism for MCP servers now.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T01:36:24.999Z",
+      "tags": [
+        "mcp",
+        "registry",
+        "ecosystem",
+        "discovery"
+      ]
     }
   ]
 }

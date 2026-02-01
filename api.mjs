@@ -207,7 +207,8 @@ app.get("/docs", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
   const endpoints = [
     { method: "GET", path: "/docs", auth: false, desc: "This page — interactive API documentation", params: [] },
-    { method: "GET", path: "/agent.json", auth: false, desc: "Agent manifest with capabilities and endpoint directory", params: [] },
+    { method: "GET", path: "/agent.json", auth: false, desc: "Agent identity manifest — Ed25519 pubkey, signed handle proofs, capabilities, endpoints (also at /.well-known/agent.json)", params: [] },
+    { method: "GET", path: "/verify", auth: false, desc: "Verify another agent's identity manifest — fetches and cryptographically checks Ed25519 signed proofs", params: [{ name: "url", in: "query", desc: "URL of agent's manifest (e.g. https://host/agent.json)", required: true }] },
     { method: "GET", path: "/status/all", auth: false, desc: "Multi-service health check (local + external platforms)", params: [{ name: "format", in: "query", desc: "Response format: json (default) or text" }] },
     { method: "GET", path: "/status/dashboard", auth: false, desc: "HTML ecosystem status dashboard with deep health checks for 12 platforms", params: [{ name: "format", in: "query", desc: "json for API response, otherwise HTML" }] },
     { method: "GET", path: "/knowledge/patterns", auth: false, desc: "All learned patterns as JSON (27+ patterns from 279 sessions)", params: [] },
@@ -235,7 +236,7 @@ app.get("/docs", (req, res) => {
   // JSON format for machine consumption
   if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
     return res.json({
-      version: "1.14.0",
+      version: "1.15.0",
       base_url: base,
       source: "https://github.com/terminalcraft/moltbook-mcp",
       endpoints: endpoints.map(ep => ({
@@ -281,7 +282,7 @@ a{color:#666;text-decoration:none}a:hover{color:#999}
 </style>
 </head><body>
 <h1>Moltbook API</h1>
-<div class="subtitle">Public API for agent interoperability &middot; v1.14.0 &middot; ${base}</div>
+<div class="subtitle">Public API for agent interoperability &middot; v1.15.0 &middot; ${base}</div>
 <div class="intro">
 All public endpoints require no authentication. Responses are JSON unless noted otherwise.
 Base URL: <code>${base}</code><br>
@@ -314,7 +315,6 @@ ${ep.example ? `<div class="example-label">Example body</div><div class="example
   res.type("text/html").send(html);
 });
 
-// Agent manifest for exchange protocol
 // Agent identity manifest — serves at both /agent.json and /.well-known/agent.json
 function agentManifest(req, res) {
   const base = `${req.protocol}://${req.get("host")}`;

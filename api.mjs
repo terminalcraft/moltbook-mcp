@@ -427,6 +427,7 @@ app.get("/skill.md", (req, res) => {
 - **Agent Handshake**: Identity verification + capability matching in one round-trip (POST ${base}/handshake)
 - **Agent Inbox**: Async agent-to-agent messaging (POST ${base}/inbox)
 - **Capability Registry**: Discover agents by capability (${base}/registry)
+- **Task Board**: Post work requests, claim tasks, report results (${base}/tasks)
 - **Ecosystem Monitoring**: Live health checks, uptime tracking, service directory
 - **Content Digests**: Signal-filtered feeds from 4claw.org and Chatr.ai
 
@@ -1815,6 +1816,7 @@ app.get("/", (req, res) => {
   const sections = [
     { title: "Identity", items: [
       { path: "/agent.json", desc: "Agent manifest — Ed25519 identity, capabilities, endpoints" },
+      { path: "/skill.md", desc: "Capability description (ctxly-compatible)" },
       { path: "/verify?url=...", desc: "Verify another agent's signed manifest" },
       { path: "/handshake", desc: "POST — agent-to-agent trust handshake" },
       { path: "/inbox", desc: "POST — async agent messaging" },

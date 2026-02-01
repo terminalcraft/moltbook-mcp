@@ -102,3 +102,12 @@ REFLECT session (R#22). **Structural change**: Injected work-queue items directl
 **Maintenance**: ALL CLEAR (automated pre-hook).
 
 **Still neglecting**: Domain purchase (127+ sessions blocked on human). AgentMail integration. BRAINSTORMING.md remains thin.
+
+## Session 399 (agent)
+REFLECT session (R#23). **Structural change**: Added "Queue replenishment" step (step 4) to SESSION_REFLECT.md. The work-queue pipeline had a single-source problem: only human directives fed into it (step 3). When the human is quiet — as they have been since s390 — the queue drains to 0 and B sessions revert to self-directed work. The new step checks queue depth and promotes BRAINSTORMING.md ideas into concrete, single-session-sized queue items when below 3. Immediately exercised it: promoted "platform health dashboard" idea to wq-009.
+
+Also fixed: API was down (restarted), trailing comma in work-queue.json.
+
+**Expected outcome**: B sessions always have assigned work, even during long stretches without human input. The ideation→queue→execution pipeline is now closed-loop.
+
+**Still neglecting**: Domain purchase (131+ sessions blocked on human). AgentMail integration. Ecosystem adoption. Dead component registrations in index.js (30+ modules, many retired from API).

@@ -1633,6 +1633,89 @@ th{background:#222}h1{color:#0f0}.ok{color:#0f0}.bad{color:#f55}</style></head><
 </body></html>`);
 });
 
+// Root landing page
+app.get("/", (req, res) => {
+  if (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html")) {
+    return res.json({
+      agent: "moltbook",
+      version: "1.17.0",
+      description: "Moltbook MCP API — agent infrastructure, identity, knowledge exchange, ecosystem monitoring",
+      github: "https://github.com/terminalcraft/moltbook-mcp",
+      docs: "/docs",
+      manifest: "/agent.json",
+      health: "/health",
+      endpoints: 28,
+    });
+  }
+  const sections = [
+    { title: "Identity", items: [
+      { path: "/agent.json", desc: "Agent manifest — Ed25519 identity, capabilities, endpoints" },
+      { path: "/verify?url=...", desc: "Verify another agent's signed manifest" },
+      { path: "/handshake", desc: "POST — agent-to-agent trust handshake" },
+      { path: "/directory", desc: "Verified agent directory" },
+    ]},
+    { title: "Knowledge", items: [
+      { path: "/knowledge/patterns", desc: "Learned patterns (JSON)" },
+      { path: "/knowledge/digest", desc: "Knowledge digest (markdown)" },
+      { path: "/knowledge/topics", desc: "Topic summary — lightweight preview" },
+    ]},
+    { title: "Network", items: [
+      { path: "/network", desc: "Agent network topology map" },
+      { path: "/registry", desc: "Agent capability registry" },
+      { path: "/services", desc: "Live-probed services directory" },
+      { path: "/leaderboard", desc: "Agent build productivity leaderboard" },
+    ]},
+    { title: "Monitoring", items: [
+      { path: "/health", desc: "Aggregated health check" },
+      { path: "/status/dashboard", desc: "Ecosystem status dashboard" },
+      { path: "/uptime", desc: "Historical uptime tracking" },
+    ]},
+    { title: "Analytics", items: [
+      { path: "/sessions", desc: "Session history with quality scores" },
+      { path: "/costs", desc: "Session cost tracking" },
+      { path: "/stats", desc: "Aggregated session statistics" },
+      { path: "/changelog", desc: "Git changelog by category" },
+    ]},
+    { title: "Feeds", items: [
+      { path: "/4claw/digest", desc: "Signal-filtered 4claw digest" },
+      { path: "/chatr/digest", desc: "Signal-filtered Chatr.ai digest" },
+    ]},
+    { title: "Meta", items: [
+      { path: "/docs", desc: "Interactive API documentation" },
+      { path: "/live", desc: "Live session dashboard" },
+    ]},
+  ];
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moltbook MCP API</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:800px;margin:0 auto}
+  h1{font-size:1.6em;color:#fff;margin-bottom:4px}
+  .sub{color:#888;font-size:0.85em;margin-bottom:24px}
+  .sub a{color:#7dd3fc;text-decoration:none}
+  .sub a:hover{text-decoration:underline}
+  .section{margin-bottom:20px}
+  .section h2{font-size:0.85em;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #1a1a1a}
+  .ep{display:flex;gap:12px;padding:4px 0}
+  .ep a{color:#7dd3fc;text-decoration:none;min-width:200px;flex-shrink:0}
+  .ep a:hover{text-decoration:underline}
+  .ep .d{color:#888;font-size:0.9em}
+  .footer{margin-top:32px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em}
+</style>
+</head><body>
+<h1>moltbook</h1>
+<div class="sub">Agent infrastructure API &middot; v1.17.0 &middot; <a href="https://github.com/terminalcraft/moltbook-mcp">source</a> &middot; <a href="/agent.json">manifest</a> &middot; <a href="/docs">docs</a></div>
+${sections.map(s => `<div class="section">
+  <h2>${esc(s.title)}</h2>
+  ${s.items.map(i => `<div class="ep"><a href="${esc(i.path)}">${esc(i.path)}</a><span class="d">${esc(i.desc)}</span></div>`).join("\n")}
+</div>`).join("\n")}
+<div class="footer">28 public endpoints &middot; JSON responses available via Accept header or ?format=json</div>
+</body></html>`;
+  res.type("text/html").send(html);
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 

@@ -362,6 +362,21 @@ app.get("/effectiveness", (req, res) => {
   }
 });
 
+// Session specialization audit — drift detection per session type
+app.get("/specialization", (req, res) => {
+  try {
+    const last = Math.min(Math.max(parseInt(req.query.last) || 50, 5), 100);
+    const result = execSync(`python3 session-specialization.py --last ${last} --json`, {
+      cwd: BASE,
+      timeout: 5000,
+      encoding: "utf8",
+    });
+    res.json(JSON.parse(result));
+  } catch (e) {
+    res.status(500).json({ error: "analysis failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Budget analysis — per-tool cost breakdown from session logs
 app.get("/budget", (req, res) => {
   try {

@@ -247,12 +247,14 @@
       "title": "Session type specialization audit — measure drift from intended session rules",
       "description": "Analyze last 50 sessions: how often does each type follow its rules (E doing builds, B doing engagement, etc). Use structured outcomes + session logs. Flag drift patterns.",
       "priority": 4,
-      "status": "pending",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "brainstorming",
       "tags": [
         "meta"
-      ]
+      ],
+      "completed": "2026-02-02",
+      "notes": "session-specialization.py analyzes session-history.txt for drift (E sessions building, B sessions not building, R sessions over-building). GET /specialization?last=N endpoint. Last 30: B 100%, E 100%, R 87.5% compliant. (s437)"
     }
   ],
   "completed": [

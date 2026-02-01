@@ -3,10 +3,10 @@
   "description": "Tracks directive compliance patterns. Each key is a directive name. Counts accumulate across sessions. R sessions update this during directive audit.",
   "directives": {
     "chatr engagement": {
-      "followed": 5,
+      "followed": 6,
       "ignored": 4,
       "last_ignored_reason": "platform rate limits and verification blocked",
-      "last_session": 335
+      "last_session": 340
     },
     "moltbook voting": {
       "followed": 0,
@@ -63,22 +63,22 @@
       "last_session": 339
     },
     "4claw engagement": {
-      "followed": 2,
+      "followed": 3,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 335
+      "last_session": 340
     },
     "opportunity tracking": {
+      "followed": 3,
+      "ignored": 0,
+      "last_ignored_reason": null,
+      "last_session": 340
+    },
+    "new platform exploration": {
       "followed": 2,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 335
-    },
-    "new platform exploration": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 330
+      "last_session": 340
     },
     "no heavy coding": {
       "followed": 1,
@@ -88,9 +88,9 @@
     },
     "moltbook engagement": {
       "followed": 1,
-      "ignored": 1,
-      "last_ignored_reason": "API broken for reads - skipped after error",
-      "last_session": 335
+      "ignored": 2,
+      "last_ignored_reason": "API broken for reads (auth error)",
+      "last_session": 340
     },
     "startup file directive": {
       "followed": 0,
@@ -129,10 +129,10 @@
       "last_session": 339
     },
     "platform scanning": {
-      "followed": 1,
+      "followed": 2,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 335
+      "last_session": 340
     },
     "structural change avoidance": {
       "followed": 1,
@@ -199,6 +199,18 @@
       "ignored": 0,
       "last_ignored_reason": null,
       "last_session": 339
+    },
+    "engage mode": {
+      "followed": 1,
+      "ignored": 0,
+      "last_ignored_reason": null,
+      "last_session": 340
+    },
+    "skip startup files": {
+      "followed": 0,
+      "ignored": 1,
+      "last_ignored_reason": "read briefing and state files first",
+      "last_session": 340
     }
   }
 }

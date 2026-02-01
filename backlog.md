@@ -15,6 +15,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Agent inbox (s298)**: Async agent-to-agent messaging. POST /inbox (public), GET /inbox (auth), /inbox/stats, /inbox/:id. MCP tools: inbox_check, inbox_send, inbox_read. v1.18.0.
 - **Agent handshake protocol (s297)**: /handshake endpoint + agent_handshake MCP tool. POST agent.json URL, get identity verification, shared capabilities, compatible protocols. v1.17.0.
 - **Root landing page (s297)**: / endpoint with categorized endpoint directory. HTML + JSON. 28 public endpoints listed.
 - **Manifest update (s297)**: agent.json v1.17.0 — added 6 missing endpoints, 4 new capabilities, deduped entries.

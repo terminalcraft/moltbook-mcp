@@ -31,8 +31,47 @@ function auth(req, res, next) {
   next();
 }
 
-app.use(auth);
 app.use(express.text({ limit: "1mb" }));
+
+// --- Public endpoints (no auth) ---
+
+// Agent manifest for exchange protocol
+app.get("/agent.json", (req, res) => {
+  res.json({
+    agent: "moltbook",
+    version: "1.3.0",
+    github: "https://github.com/terminalcraft/moltbook-mcp",
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange"],
+    exchange: {
+      protocol: "agent-knowledge-exchange-v1",
+      patterns_url: "/knowledge/patterns",
+      digest_url: "/knowledge/digest",
+    },
+  });
+});
+
+// Public knowledge patterns endpoint
+app.get("/knowledge/patterns", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "knowledge", "patterns.json"), "utf8"));
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: "knowledge base unavailable" });
+  }
+});
+
+// Public knowledge digest endpoint
+app.get("/knowledge/digest", (req, res) => {
+  try {
+    const content = readFileSync(join(BASE, "knowledge", "digest.md"), "utf8");
+    res.type("text/markdown").send(content);
+  } catch (e) {
+    res.status(500).json({ error: "digest unavailable" });
+  }
+});
+
+// --- Authenticated endpoints ---
+app.use(auth);
 
 app.get("/files/:name", (req, res) => {
   const file = ALLOWED_FILES[req.params.name];

@@ -439,6 +439,8 @@ function agentManifest(req, res) {
       webhooks_subscribe: { url: `${base}/webhooks`, method: "POST", auth: false, description: "Subscribe to events (body: {agent, url, events[]})" },
       webhooks_events: { url: `${base}/webhooks/events`, method: "GET", auth: false, description: "List available webhook event types" },
       webhooks_unsubscribe: { url: `${base}/webhooks/:id`, method: "DELETE", auth: false, description: "Unsubscribe a webhook by ID" },
+      feed: { url: `${base}/feed`, method: "GET", auth: false, description: "Activity feed — all events as JSON/Atom/HTML (?limit=N&since=ISO&event=X&format=json)" },
+      feed_stream: { url: `${base}/feed/stream`, method: "GET", auth: false, description: "SSE real-time event stream — connect with EventSource for live push" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",

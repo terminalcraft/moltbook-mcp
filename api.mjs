@@ -645,6 +645,7 @@ function getDocEndpoints() {
     { method: "DELETE", path: "/monitors/:id", auth: false, desc: "Remove a URL monitor", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
     { method: "POST", path: "/monitors/:id/probe", auth: false, desc: "Trigger an immediate probe for a monitor (don't wait for the 5-min cycle)", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
     { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
+    { method: "GET", path: "/efficiency", auth: false, desc: "Session efficiency metrics — cost-per-commit, cost-per-file, aggregated by mode", params: [] },
     { method: "GET", path: "/sessions", auth: false, desc: "Structured session history with quality scores (0-10) — parses session-history.txt", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML table" }] },
     { method: "GET", path: "/directory", auth: false, desc: "Verified agent directory — lists agents who registered their manifest URLs, with identity verification status", params: [{ name: "refresh", in: "query", desc: "Set to 'true' to re-fetch and re-verify all manifests" }] },
     { method: "POST", path: "/directory", auth: false, desc: "Register your agent in the directory — provide your agent.json URL and we'll fetch, verify, and cache it", params: [{ name: "url", in: "body", desc: "URL of your agent.json manifest", required: true }],
@@ -955,6 +956,7 @@ function agentManifest(req, res) {
       services: { url: `${base}/services`, method: "GET", auth: false, description: "Live-probed agent services directory (?format=json&status=up&category=X&q=search)" },
       uptime: { url: `${base}/uptime`, method: "GET", auth: false, description: "Historical uptime percentages for ecosystem services (24h/7d/30d, ?format=json)" },
       costs: { url: `${base}/costs`, method: "GET", auth: false, description: "Session cost history and trends (?format=json for raw data)" },
+      efficiency: { url: `${base}/efficiency`, method: "GET", auth: false, description: "Session efficiency — cost-per-commit, cost-per-file, by mode" },
       sessions: { url: `${base}/sessions`, method: "GET", auth: false, description: "Session history with quality scores (?format=json)" },
       health: { url: `${base}/health`, method: "GET", auth: false, description: "Aggregated health check (?format=json, status codes: 200/207/503)" },
       changelog: { url: `${base}/changelog`, method: "GET", auth: false, description: "Git changelog categorized by type (?limit=N&format=json)" },
@@ -2673,6 +2675,54 @@ th{background:#222}h1,h2{color:#0f0}</style></head><body>
 </div></body></html>`);
 });
 
+// --- Session efficiency (cost-per-commit, cost-per-file, by mode) ---
+app.get("/efficiency", (req, res) => {
+  const costFile = join(LOGS, "..", "cost-history.json");
+  const histFile = "/home/moltbot/.config/moltbook/session-history.txt";
+  let costs = {};
+  try { for (const e of JSON.parse(readFileSync(costFile, "utf-8"))) costs[e.session] = e.spent; } catch {}
+
+  let lines = [];
+  try { lines = readFileSync(histFile, "utf-8").trim().split("\n").filter(Boolean); } catch {}
+
+  const sessions = lines.map(line => {
+    const m = line.match(/^(\S+)\s+mode=(\S+)\s+s=(\d+)\s+dur=(\S+)\s+(?:cost=\$(\S+)\s+)?build=(.+?)\s+files=\[([^\]]*)\]\s+note:\s*(.*)$/);
+    if (!m) return null;
+    const [, date, mode, session, duration, costInline, buildRaw, filesRaw] = m;
+    const s = +session;
+    const cost = costInline ? +costInline : costs[s] || null;
+    if (!cost || cost <= 0) return null;
+    const commits = buildRaw === "(none)" ? 0 : parseInt(buildRaw) || 0;
+    const files = filesRaw ? filesRaw.split(", ").filter(Boolean).length : 0;
+    const dm = duration.match(/(\d+)m(\d+)s/);
+    const durSec = dm ? parseInt(dm[1]) * 60 + parseInt(dm[2]) : 0;
+    return {
+      session: s, mode, date, cost: +cost.toFixed(4), commits, files, dur_sec: durSec,
+      cost_per_commit: commits > 0 ? +(cost / commits).toFixed(4) : null,
+      cost_per_file: files > 0 ? +(cost / files).toFixed(4) : null,
+    };
+  }).filter(Boolean);
+
+  // Aggregate by mode
+  const byMode = {};
+  for (const e of sessions) {
+    if (!byMode[e.mode]) byMode[e.mode] = { sessions: 0, cost: 0, commits: 0, files: 0 };
+    const d = byMode[e.mode];
+    d.sessions++; d.cost += e.cost; d.commits += e.commits; d.files += e.files;
+  }
+  for (const [m, d] of Object.entries(byMode)) {
+    d.avg_cost = +(d.cost / d.sessions).toFixed(4);
+    d.cost_per_commit = d.commits > 0 ? +(d.cost / d.commits).toFixed(4) : null;
+    d.cost_per_file = d.files > 0 ? +(d.cost / d.files).toFixed(4) : null;
+  }
+
+  const bSessions = sessions.filter(e => e.mode === "B" && e.cost_per_commit !== null);
+  const best = bSessions.length ? bSessions.reduce((a, b) => a.cost_per_commit < b.cost_per_commit ? a : b) : null;
+  const worst = bSessions.length ? bSessions.reduce((a, b) => a.cost_per_commit > b.cost_per_commit ? a : b) : null;
+
+  res.json({ sessions, by_mode: byMode, build_efficiency: { best, worst } });
+});
+
 // --- Session history with quality metrics ---
 app.get("/sessions", (req, res) => {
   const histFile = "/home/moltbot/.config/moltbook/session-history.txt";
@@ -3214,6 +3264,7 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/polls", expect: 200 },
     { method: "GET", path: "/inbox/stats", expect: 200 },
     { method: "GET", path: "/costs", expect: 200 },
+    { method: "GET", path: "/efficiency", expect: 200 },
     { method: "GET", path: "/sessions", expect: 200 },
     { method: "GET", path: "/directory", expect: 200 },
     { method: "GET", path: "/services", expect: 200 },

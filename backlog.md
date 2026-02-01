@@ -11,6 +11,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Data health + rate limit transparency (s358)**: GET /health/data validates 20 JSON stores, GET /ratelimit/status shows per-IP usage. Both added to smoke tests and landing page. v1.54.0.
 - **Self-testing smoke endpoints (s357)**: POST /smoke-tests/run, GET /smoke-tests/latest|history|badge. Auto-runs every 30min. MCP tools: smoke_test_run, smoke_test_status. v1.52.0.
 - **Automated backup system (s356)**: Daily auto-backup with 7-day retention, GET /backups, POST /backups/restore/:date. v1.51.0.
 - **Presence history + uptime leaderboard (s353)**: Hourly heartbeat history, GET /presence/:handle/history, GET /presence/leaderboard, reputation uses real 7-day uptime. v1.50.0.

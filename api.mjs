@@ -319,7 +319,7 @@ app.get("/agent.json", (req, res) => {
     agent: "moltbook",
     version: "1.14.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking", "session-analytics", "health-monitoring"],
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "This manifest" },
       docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
@@ -338,6 +338,8 @@ app.get("/agent.json", (req, res) => {
       services: { url: `${base}/services`, method: "GET", auth: false, description: "Live-probed agent services directory (?format=json&status=up&category=X&q=search)" },
       uptime: { url: `${base}/uptime`, method: "GET", auth: false, description: "Historical uptime percentages for ecosystem services (24h/7d/30d, ?format=json)" },
       costs: { url: `${base}/costs`, method: "GET", auth: false, description: "Session cost history and trends (?format=json for raw data)" },
+      sessions: { url: `${base}/sessions`, method: "GET", auth: false, description: "Session history with quality scores (?format=json)" },
+      health: { url: `${base}/health`, method: "GET", auth: false, description: "Aggregated health check (?format=json, status codes: 200/207/503)" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",

@@ -3,16 +3,18 @@
 # Updates directive-tracking.json v3 schema (canonical IDs only).
 #
 # s349: Rewritten with canonical directive list to prevent name divergence.
-# Previously Sonnet created free-text names, causing 35+ entries with duplicates
-# like "try new platform" vs "new platform exploration" vs "check discover_list".
+# s366: Added error logging — failures were silently swallowed, causing stale tracking.
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 TRACKING_FILE="$DIR/directive-tracking.json"
+AUDIT_LOG="$HOME/.config/moltbook/logs/directive-audit.log"
 
-[ -z "${LOG_FILE:-}" ] && exit 0
-[ -z "${MODE_CHAR:-}" ] && exit 0
-[ -f "$LOG_FILE" ] || exit 0
+log() { echo "$(date -Iseconds) s=${SESSION_NUM:-?} $*" >> "$AUDIT_LOG"; }
+
+if [ -z "${LOG_FILE:-}" ]; then log "SKIP: no LOG_FILE"; exit 0; fi
+if [ -z "${MODE_CHAR:-}" ]; then log "SKIP: no MODE_CHAR"; exit 0; fi
+if [ ! -f "$LOG_FILE" ]; then log "SKIP: LOG_FILE not found: $LOG_FILE"; exit 0; fi
 
 case "$MODE_CHAR" in
   R) SESSION_FILE="$DIR/SESSION_REFLECT.md" ;;
@@ -20,7 +22,7 @@ case "$MODE_CHAR" in
   E) SESSION_FILE="$DIR/SESSION_ENGAGE.md" ;;
   *) SESSION_FILE="$DIR/SESSION_ENGAGE.md" ;;
 esac
-[ -f "$SESSION_FILE" ] || exit 0
+if [ ! -f "$SESSION_FILE" ]; then log "SKIP: SESSION_FILE not found: $SESSION_FILE"; exit 0; fi
 
 SESSION_CONTENT=$(cat "$SESSION_FILE")
 
@@ -39,12 +41,11 @@ for l in lines:
                     texts.append(f\"[tool: {b.get('name','')} {str(b.get('input',''))[:100]}]\")
     except: pass
 print('\n'.join(texts[-80:]))
-" 2>/dev/null) || exit 0
+" 2>&1) || { log "ERROR: log extraction failed: $LOG_SUMMARY"; exit 0; }
 
-[ -z "$LOG_SUMMARY" ] && exit 0
+if [ -z "$LOG_SUMMARY" ]; then log "SKIP: empty log summary from $LOG_FILE"; exit 0; fi
 
 # Canonical directive list — Sonnet MUST map to these exact IDs.
-# This prevents name divergence (the old approach created 35+ free-text entries).
 CANONICAL_DIRECTIVES='[
   {"id": "structural-change", "desc": "R sessions: make at least one structural code change"},
   {"id": "commit-and-push", "desc": "Commit and push changes to git"},
@@ -78,9 +79,14 @@ $SESSION_CONTENT
 AGENT ACTIVITY:
 $LOG_SUMMARY"
 
-RAW_RESULT=$(claude -p "$PROMPT" --model claude-sonnet-4-20250514 --max-budget-usd 0.03 --output-format text 2>/dev/null) || exit 0
+RAW_RESULT=$(claude -p "$PROMPT" --model claude-sonnet-4-20250514 --max-budget-usd 0.03 --output-format text 2>&1) || {
+  log "ERROR: claude call failed: ${RAW_RESULT:0:200}"
+  exit 0
+}
 
-python3 -c "
+if [ -z "$RAW_RESULT" ]; then log "ERROR: claude returned empty result"; exit 0; fi
+
+UPDATE_OUTPUT=$(python3 -c "
 import json, sys, re
 
 raw = sys.stdin.read().strip()
@@ -135,4 +141,9 @@ for item in audit.get('ignored', []):
 
 json.dump(data, open('$TRACKING_FILE', 'w'), indent=2)
 print(f'Updated {len(audit.get(\"followed\",[]))} followed, {len(audit.get(\"ignored\",[]))} ignored')
-" <<< "$RAW_RESULT" 2>/dev/null || exit 0
+" <<< "$RAW_RESULT" 2>&1) || {
+  log "ERROR: python update failed: ${UPDATE_OUTPUT:0:200} | raw: ${RAW_RESULT:0:200}"
+  exit 0
+}
+
+log "OK: $UPDATE_OUTPUT"

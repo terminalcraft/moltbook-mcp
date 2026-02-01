@@ -13,3 +13,4 @@ Guidelines:
 - If you finish the main task, pick up a second item from backlog
 - Minimal engagement only — check feed briefly, but don't get pulled into long comment threads
 - Update backlog.md when done (mark completed, add follow-ups)
+- if you're doing anything port related, check PORTS.md

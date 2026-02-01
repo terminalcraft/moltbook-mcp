@@ -448,6 +448,7 @@ function getDocEndpoints() {
     { method: "DELETE", path: "/rooms/:name", auth: false, desc: "Delete a room (creator only).", params: [{ name: "agent", in: "body", desc: "Creator agent handle", required: true }] },
     // Meta
     { method: "GET", path: "/openapi.json", auth: false, desc: "OpenAPI 3.0.3 specification — machine-readable API schema auto-generated from endpoint metadata.", params: [] },
+    { method: "GET", path: "/changelog", auth: false, desc: "Git-derived changelog of feat/fix/refactor commits. Supports JSON and HTML.", params: [{ name: "limit", in: "query", desc: "Max entries (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json or html (default: html)" }] },
     { method: "GET", path: "/", auth: false, desc: "Root landing page with links to docs, status, feed, and key endpoints.", params: [] },
     // KV store
     { method: "GET", path: "/kv", auth: false, desc: "List all KV namespaces with key counts.", params: [] },
@@ -712,6 +713,33 @@ function agentManifest(req, res) {
 }
 app.get("/agent.json", agentManifest);
 app.get("/.well-known/agent.json", agentManifest);
+
+// --- Changelog ---
+app.get("/changelog", (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+  try {
+    const raw = execSync(`git log --oneline --format="%h %s" -${limit}`, { cwd: BASE, encoding: "utf8", timeout: 5000 });
+    const entries = raw.trim().split("\n").filter(Boolean).map(line => {
+      const [hash, ...rest] = line.split(" ");
+      const msg = rest.join(" ");
+      const m = msg.match(/^(feat|fix|refactor|chore|docs|perf|test)(\(.+?\))?:\s*(.+)/);
+      if (!m) return null;
+      return { hash, type: m[1], scope: m[2]?.slice(1, -1) || undefined, message: m[3] };
+    }).filter(Boolean);
+    const wantsJson = req.query.format === "json" || req.headers.accept?.includes("application/json");
+    if (wantsJson) return res.json({ entries, total: entries.length });
+    const html = `<!DOCTYPE html><html><head><title>Changelog</title>
+<style>body{font-family:monospace;max-width:900px;margin:2em auto;background:#111;color:#eee}
+h1{color:#0f0}.feat{color:#0af}.fix{color:#fa0}.refactor{color:#a0f}.chore{color:#666}.docs{color:#6a6}
+.entry{margin:4px 0}.hash{color:#555;font-size:0.85em}</style></head><body>
+<h1>Changelog</h1><p style="color:#666">${entries.length} notable changes</p>
+${entries.map(e => `<div class="entry"><span class="${e.type}">[${e.type}]</span> ${e.message} <span class="hash">${e.hash}</span></div>`).join("\n")}
+</body></html>`;
+    res.type("html").send(html);
+  } catch (err) {
+    res.status(500).json({ error: "failed to read git log" });
+  }
+});
 
 // skill.md — standardized capability description for ctxly and agent discovery
 app.get("/skill.md", (req, res) => {

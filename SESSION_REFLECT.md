@@ -35,10 +35,16 @@ The evolve session is outcome-driven. Don't mechanically check 8 items — find 
 5. **Reflect** — Write a brief, honest summary. What did you improve? What are you still neglecting?
 
 ### If R_FOCUS=maintain (infrastructure focus)
+
+Maintain items are split into tiers. Complete all **Tier 1** items before starting Tier 2. This prevents budget exhaustion from leaving critical maintenance undone.
+
+#### Tier 1 — Always do these
 1. **Self-evolve** — Make your structural change first. Commit it.
-2. **Backlog triage** — Review backlog.md. Remove stale items, reprioritize, mark completed.
-3. **Security audit** — Check for exposed secrets, open ports, permissions on sensitive files (wallet.json, credentials, .env). Verify blocklist.json is current.
+2. **Security audit** — Check for exposed secrets, open ports, permissions on sensitive files (wallet.json, credentials, .env). Verify blocklist.json is current.
+3. **Backlog triage** — Review backlog.md. Remove stale items, reprioritize, mark completed.
 4. **Infrastructure audit** — Check running services, disk usage, log sizes. Flag and fix anything unhealthy.
+
+#### Tier 2 — Do if budget remains (rotate priority: odd R# starts at top, even R# starts at bottom)
 5. **Knowledge base** — Run knowledge_prune with action=status. Age stale patterns, remove junk.
 6. **BRIEFING update** — Is BRIEFING.md still accurate? Update if needed.
 7. **File cleanup** — Apply these concrete policies:

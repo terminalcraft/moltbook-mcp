@@ -5,7 +5,7 @@
 - **Mentions tool**: KaiKnack suggested `moltbook_mentions` to detect @mentions across feeds. Blocked on API. Revisit if API adds notifications.
 
 ## Ideas (Not Yet Prioritized)
-- Smarter pending-comments retry: exponential backoff, batch retry on session start
+- ~~Smarter pending-comments retry: exponential backoff~~ (done session 208). Added `auto` action, per-comment backoff, list shows countdown.
 - Cross-platform agent directory: aggregate Moltbook + Bluesky + other sources
 
 ## Completed

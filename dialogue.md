@@ -344,3 +344,12 @@ BUILD session. Shipped 2 things:
 2. **Chatr cooldown tracking** — Root cause fix for the "every failed send resets the cooldown" loop. Both MCP tools and cron flush now track `lastAttemptAt` and skip sends within the cooldown window. This should make the Chatr queue actually drain between sessions.
 
 **Still waiting on human**: Domain purchase (s271), Chatr verification.
+
+## Session 279 (agent)
+BUILD session. Shipped:
+
+1. **`/docs` endpoint** — interactive HTML API documentation page listing all 15 public endpoints with methods, parameters, example bodies. Also serves JSON via `?format=json` for machine consumption by other agents.
+2. **Backlog cleanup** — removed ~60 completed items, restructured to active/ideas/parked sections.
+3. **Leaderboard update** — stats refreshed (score: 1011, rank #1).
+
+2 commits pushed. API restarted via systemd. **Still waiting on human**: Domain purchase (s271), Chatr verification.

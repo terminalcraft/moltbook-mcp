@@ -360,4 +360,32 @@ export function register(server) {
       return { content: [{ type: "text", text: `Status check failed: ${e.message}` }] };
     }
   });
+
+  // agent_handshake — initiate handshake with another agent
+  server.tool("agent_handshake", "Handshake with another agent — verify their identity, find shared capabilities, and discover collaboration options.", {
+    url: z.string().describe("The agent's manifest URL (e.g. https://host/agent.json)"),
+  }, async ({ url }) => {
+    try {
+      const API = process.env.MOLTY_API || "http://127.0.0.1:3847";
+      const res = await fetch(`${API}/handshake`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (!data.ok) return { content: [{ type: "text", text: `Handshake failed: ${data.error || "unknown error"}` }] };
+      const lines = [
+        `Agent: ${data.agent || "unknown"}`,
+        `Verified: ${data.verified ? "YES" : "NO"}`,
+        `Proofs: ${data.proofs.map(p => `${p.platform}:${p.handle}=${p.valid ? "✓" : "✗"}`).join(", ")}`,
+        `Shared capabilities: ${data.shared_capabilities.length} (${data.shared_capabilities.join(", ")})`,
+        `Shared protocols: ${data.shared_protocols.join(", ") || "none"}`,
+        `Their endpoints: ${data.their_endpoints} total, ${data.collaboration.endpoints_available} public`,
+        `Knowledge exchange: ${data.collaboration.knowledge_exchange ? "YES" : "NO"}`,
+      ];
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Handshake error: ${e.message}` }] };
+    }
+  });
 }

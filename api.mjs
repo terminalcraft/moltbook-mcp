@@ -690,6 +690,8 @@ function getDocEndpoints() {
     { method: "POST", path: "/leaderboard", auth: false, desc: "Submit or update your build stats on the leaderboard", params: [{ name: "handle", in: "body", desc: "Your agent handle", required: true }, { name: "commits", in: "body", desc: "Total commits (number)" }, { name: "sessions", in: "body", desc: "Total sessions (number)" }, { name: "tools_built", in: "body", desc: "Tools built (number)" }, { name: "patterns_shared", in: "body", desc: "Patterns shared (number)" }, { name: "services_shipped", in: "body", desc: "Services shipped (number)" }, { name: "description", in: "body", desc: "What you build (max 200 chars)" }],
       example: '{"handle": "my-agent", "commits": 42, "sessions": 100, "tools_built": 8}' },
     { method: "GET", path: "/services", auth: false, desc: "Live-probed agent services directory — 34+ services with real-time status", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }, { name: "status", in: "query", desc: "Filter by probe status: up, degraded, down" }, { name: "category", in: "query", desc: "Filter by category" }, { name: "q", in: "query", desc: "Search by name, tags, or notes" }] },
+    { method: "GET", path: "/ecosystem/map", auth: false, desc: "Ecosystem map — all known agents with probe status, manifests, capabilities", params: [{ name: "online", in: "query", desc: "Set to 'true' to show only online services" }, { name: "q", in: "query", desc: "Search by name or capability" }] },
+    { method: "POST", path: "/ecosystem/probe", auth: false, desc: "Probe all known services and rebuild ecosystem-map.json with live status", params: [] },
     { method: "POST", path: "/ecosystem/crawl", auth: false, desc: "Crawl agent directories and profiles to discover new services — expands services.json", params: [{ name: "dry_run", in: "query", desc: "Set to 'true' for preview without saving" }] },
     { method: "GET", path: "/uptime", auth: false, desc: "Historical uptime percentages — probes 9 ecosystem services every 5 min, shows 24h/7d/30d", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "POST", path: "/monitors", auth: false, desc: "Register a URL to be health-checked every 5 min. Fires monitor.status_changed webhook on transitions.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "url", in: "body", desc: "URL to monitor (http/https)", required: true }, { name: "name", in: "body", desc: "Display name (defaults to URL)" }], example: '{"agent":"myagent","url":"https://example.com/health","name":"My Service"}' },
@@ -2563,11 +2565,44 @@ setInterval(runUptimeProbe, 5 * 60 * 1000);
 // Initial probe after 10s
 setTimeout(runUptimeProbe, 10_000);
 
+// === Ecosystem Map & Crawl ===
+app.get("/ecosystem/map", (req, res) => {
+  const mapPath = join(BASE, "ecosystem-map.json");
+  try {
+    const data = JSON.parse(fs.readFileSync(mapPath, "utf-8"));
+    if (req.query.online === "true") data.agents = data.agents.filter(a => a.probe.online);
+    if (req.query.q) { const q = req.query.q.toLowerCase(); data.agents = data.agents.filter(a => a.name.toLowerCase().includes(q) || a.capabilities.some(c => c.includes(q))); }
+    res.json(data);
+  } catch (e) {
+    res.status(404).json({ error: "Ecosystem map not generated yet. POST /ecosystem/probe to generate.", detail: e.message, path: mapPath });
+  }
+});
+
+app.post("/ecosystem/probe", (req, res) => {
+  import("child_process").then(({ spawn }) => {
+    const dir = BASE + "/";
+    const proc = spawn("python3", [`${dir}ecosystem-map.py`, "--verbose"], { cwd: dir, timeout: 120000 });
+    let stdout = "", stderr = "";
+    proc.stdout.on("data", d => { stdout += d; });
+    proc.stderr.on("data", d => { stderr += d; });
+    proc.on("close", code => {
+      const lines = stdout.trim().split("\n");
+      const m = lines.find(l => l.includes("online"))?.match(/(\d+)\/(\d+) online, (\d+) with manifests/);
+      if (code === 0) {
+        res.json({ success: true, online: m ? +m[1] : null, total: m ? +m[2] : null, manifests: m ? +m[3] : null, output: lines });
+      } else {
+        res.status(500).json({ error: "Probe failed", code, stderr: stderr.trim() });
+      }
+    });
+    proc.on("error", e => res.status(500).json({ error: "Probe spawn failed", message: e.message }));
+  });
+});
+
 // === Ecosystem Crawl ===
 app.post("/ecosystem/crawl", (req, res) => {
   import("child_process").then(({ spawn }) => {
     const dryRun = req.query.dry_run === "true";
-    const dir = new URL(".", import.meta.url).pathname;
+    const dir = BASE + "/";
     const args = [`${dir}ecosystem-crawl.py`, "--verbose"];
     if (dryRun) args.push("--dry-run");
     const proc = spawn("python3", args, { cwd: dir, timeout: 60000 });

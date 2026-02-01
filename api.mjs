@@ -147,6 +147,29 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- Endpoint deprecation registry ---
+const DEPRECATION_FILE = join(BASE, "deprecations.json");
+function loadDeprecations() { try { return JSON.parse(readFileSync(DEPRECATION_FILE, "utf8")); } catch { return {}; } }
+function saveDeprecations(d) { writeFileSync(DEPRECATION_FILE, JSON.stringify(d, null, 2)); }
+// Middleware: intercept deprecated endpoints with 410 Gone
+app.use((req, res, next) => {
+  const deps = loadDeprecations();
+  const path = req.path?.split("?")[0];
+  const key = `${req.method} ${path}`;
+  const entry = deps[key] || deps[path]; // match by method+path or just path
+  if (entry && entry.status === "gone") {
+    res.set("Sunset", entry.sunset || new Date().toISOString());
+    if (entry.successor) res.set("Link", `<${entry.successor}>; rel="successor-version"`);
+    return res.status(410).json({ error: "Gone", message: entry.message || "This endpoint has been removed.", successor: entry.successor || null, sunset: entry.sunset });
+  }
+  if (entry && entry.status === "deprecated") {
+    res.set("Sunset", entry.sunset || "");
+    res.set("Deprecation", "true");
+    if (entry.successor) res.set("Link", `<${entry.successor}>; rel="successor-version"`);
+  }
+  next();
+});
+
 // --- Adoption tracking (per-agent endpoint usage) ---
 const ADOPTION_FILE = join(BASE, "adoption.json");
 function loadAdoption() { try { return JSON.parse(readFileSync(ADOPTION_FILE, "utf8")); } catch { return { agents: {}, endpoints: {}, updated: null }; } }
@@ -646,6 +669,9 @@ function getDocEndpoints() {
     { method: "POST", path: "/monitors/:id/probe", auth: false, desc: "Trigger an immediate probe for a monitor (don't wait for the 5-min cycle)", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
     { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
     { method: "GET", path: "/efficiency", auth: false, desc: "Session efficiency metrics — cost-per-commit, cost-per-file, aggregated by mode", params: [] },
+    { method: "GET", path: "/deprecations", auth: false, desc: "List deprecated/removed endpoints", params: [] },
+    { method: "POST", path: "/deprecations", auth: false, desc: "Mark an endpoint as deprecated or gone (410)", params: [{ name: "path", in: "body", desc: "Endpoint path", required: true }, { name: "status", in: "body", desc: "'deprecated' or 'gone'", required: true }, { name: "method", in: "body", desc: "HTTP method (optional)" }, { name: "successor", in: "body", desc: "Replacement endpoint URL" }, { name: "message", in: "body", desc: "Human-readable explanation" }] },
+    { method: "DELETE", path: "/deprecations", auth: false, desc: "Remove a deprecation entry", params: [{ name: "key", in: "body", desc: "Deprecation key (e.g. 'GET /old-path')", required: true }] },
     { method: "GET", path: "/sessions", auth: false, desc: "Structured session history with quality scores (0-10) — parses session-history.txt", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML table" }] },
     { method: "GET", path: "/directory", auth: false, desc: "Verified agent directory — lists agents who registered their manifest URLs, with identity verification status", params: [{ name: "refresh", in: "query", desc: "Set to 'true' to re-fetch and re-verify all manifests" }] },
     { method: "POST", path: "/directory", auth: false, desc: "Register your agent in the directory — provide your agent.json URL and we'll fetch, verify, and cache it", params: [{ name: "url", in: "body", desc: "URL of your agent.json manifest", required: true }],
@@ -2675,6 +2701,30 @@ th{background:#222}h1,h2{color:#0f0}</style></head><body>
 </div></body></html>`);
 });
 
+// --- Deprecation management API ---
+app.get("/deprecations", (req, res) => res.json(loadDeprecations()));
+
+app.post("/deprecations", express.json(), (req, res) => {
+  const { path, method, status, message, successor, sunset } = req.body || {};
+  if (!path) return res.status(400).json({ error: "path required" });
+  if (!["deprecated", "gone"].includes(status)) return res.status(400).json({ error: "status must be 'deprecated' or 'gone'" });
+  const deps = loadDeprecations();
+  const key = method ? `${method.toUpperCase()} ${path}` : path;
+  deps[key] = { status, message: message || null, successor: successor || null, sunset: sunset || new Date().toISOString(), added: new Date().toISOString() };
+  saveDeprecations(deps);
+  logActivity("deprecation.added", `${key} marked as ${status}`);
+  res.status(201).json({ ok: true, key, entry: deps[key] });
+});
+
+app.delete("/deprecations", express.json(), (req, res) => {
+  const deps = loadDeprecations();
+  const key = req.body?.key;
+  if (!key || !deps[key]) return res.status(404).json({ error: "Not found. Send {key: 'METHOD /path'}" });
+  delete deps[key];
+  saveDeprecations(deps);
+  res.json({ ok: true, removed: key });
+});
+
 // --- Session efficiency (cost-per-commit, cost-per-file, by mode) ---
 app.get("/efficiency", (req, res) => {
   const costFile = join(LOGS, "..", "cost-history.json");
@@ -3265,6 +3315,7 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/inbox/stats", expect: 200 },
     { method: "GET", path: "/costs", expect: 200 },
     { method: "GET", path: "/efficiency", expect: 200 },
+    { method: "GET", path: "/deprecations", expect: 200 },
     { method: "GET", path: "/sessions", expect: 200 },
     { method: "GET", path: "/directory", expect: 200 },
     { method: "GET", path: "/services", expect: 200 },

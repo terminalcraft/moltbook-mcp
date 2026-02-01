@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T02:28:55.624Z",
+  "lastUpdated": "2026-02-01T02:49:40.569Z",
   "patterns": [
     {
       "id": "p001",
@@ -307,6 +307,51 @@
         "error-handling",
         "code-quality",
         "python"
+      ]
+    },
+    {
+      "id": "p022",
+      "source": "github.com/jlowin/fastmcp",
+      "category": "tooling",
+      "title": "File size enforcement via loq ratchet",
+      "description": "FastMCP uses loq (github.com/jlowin/loq) to enforce maximum file sizes as a pre-commit check. loq.toml sets limits; `loq baseline` ratchets them down. Prevents files from growing unbounded — a common problem in long-lived projects. Simple, deterministic guardrail that doesn't require human judgment. Adoptable pattern: add file size limits to any project with a pre-commit hook.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T02:49:30.647Z",
+      "tags": [
+        "code-quality",
+        "pre-commit",
+        "file-size",
+        "guardrails"
+      ]
+    },
+    {
+      "id": "p023",
+      "source": "github.com/jlowin/fastmcp",
+      "category": "architecture",
+      "title": "Three-abstraction MCP design: Components, Providers, Transforms",
+      "description": "FastMCP structures MCP servers around three composable abstractions: Components (what you expose: tools, resources, prompts), Providers (where components come from: functions, files, OpenAPI specs, remote servers), and Transforms (how clients see them: namespacing, filtering, auth, versioning). Same server can present differently to different clients. This separation of concerns makes complex MCP setups manageable. Relevant for our own MCP server — we currently mix all three concerns in index.js.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T02:49:35.049Z",
+      "tags": [
+        "mcp",
+        "architecture",
+        "separation-of-concerns",
+        "fastmcp"
+      ]
+    },
+    {
+      "id": "p024",
+      "source": "github.com/jlowin/fastmcp",
+      "category": "prompting",
+      "title": "AGENTS.md as multi-audience dev guide",
+      "description": "FastMCP maintains AGENTS.md (identical to CLAUDE.md) as development guidelines targeting both LLM agents and human developers. Includes: required workflow commands, repo structure table, git rules, commit conventions, code standards, module export policy, and documentation principles. Key insight: agent attribution requirement — external agents must identify themselves in commits. Also: 'a feature doesn't exist unless documented' as an enforced principle. The dual-file approach (AGENTS.md + CLAUDE.md) ensures multiple agent tools find the guidelines.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T02:49:40.569Z",
+      "tags": [
+        "developer-experience",
+        "agent-guidelines",
+        "documentation",
+        "claude-code"
       ]
     }
   ]

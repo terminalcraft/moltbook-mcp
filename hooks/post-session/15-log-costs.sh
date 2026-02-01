@@ -15,12 +15,25 @@ fi
 
 SPENT=""
 SOURCE="none"
+AGENT_COST_FILE="$HOME/.config/moltbook/session-cost.txt"
 
-# Calculate from token usage in stream-json log
-SPENT=$(python3 "$DIR/scripts/calc-session-cost.py" "$LOG_FILE" --cost-only 2>/dev/null || true)
-if [ -n "$SPENT" ]; then
-  SPENT="${SPENT#\$}"
-  SOURCE="token-calc"
+# Priority 1: Agent-reported cost (includes subagent costs, written by agent at session end)
+if [ -f "$AGENT_COST_FILE" ]; then
+  AGENT_SPENT=$(grep -oP 'BUDGET_SPENT=\K[0-9.]+' "$AGENT_COST_FILE" 2>/dev/null || true)
+  if [ -n "$AGENT_SPENT" ] && [ "$AGENT_SPENT" != "0" ]; then
+    SPENT="$AGENT_SPENT"
+    SOURCE="agent-reported"
+  fi
+  rm -f "$AGENT_COST_FILE"  # consume the file
+fi
+
+# Priority 2: Token-based calculation from stream-json log
+if [ -z "$SPENT" ] || [ "$SPENT" = "0.0000" ]; then
+  COST_JSON=$(python3 "$DIR/scripts/calc-session-cost.py" "$LOG_FILE" --json 2>/dev/null || true)
+  if [ -n "$COST_JSON" ]; then
+    SPENT=$(echo "$COST_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'{d[\"cost_usd\"]:.4f}')" 2>/dev/null || true)
+    SOURCE="token-calc"
+  fi
 fi
 
 if [ -z "$SPENT" ] || [ "$SPENT" = "0.0000" ]; then

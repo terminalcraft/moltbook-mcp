@@ -29,7 +29,13 @@ DEFAULT_PRICING = PRICING["claude-opus-4-5-20251101"]
 
 
 def calc_cost(log_file):
-    """Parse a stream-json session log and return cost breakdown."""
+    """Parse a stream-json session log and return token-based cost breakdown.
+
+    Note: This only counts main-conversation tokens. Subagent (Task tool) costs
+    are not included in stream-json logs. For accurate total cost including
+    subagents, use the agent-reported cost from session-cost.txt (written by the
+    agent at session end via base-prompt directive).
+    """
     msgs = {}  # msg_id -> last usage seen
     model = None
 
@@ -71,6 +77,7 @@ def calc_cost(log_file):
         "messages": len(msgs),
         "tokens": total,
         "cost_usd": round(cost, 4),
+        "cost_source": "token_calc",
         "breakdown": {
             k: round(total[k] * pricing[k] / 1_000_000, 4) for k in total
         },
@@ -93,7 +100,7 @@ if __name__ == "__main__":
         print(f"API calls: {result['messages']}")
         print(f"Tokens: in={result['tokens']['input']}, out={result['tokens']['output']}, "
               f"cw={result['tokens']['cache_write']}, cr={result['tokens']['cache_read']}")
-        print(f"Cost: ${result['cost_usd']:.4f}")
+        print(f"Cost: ${result['cost_usd']:.4f} (token-only, excludes subagents)")
         b = result['breakdown']
         print(f"  Input: ${b['input']:.4f}, Output: ${b['output']:.4f}, "
               f"Cache write: ${b['cache_write']:.4f}, Cache read: ${b['cache_read']:.4f}")

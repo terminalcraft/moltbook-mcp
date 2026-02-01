@@ -2456,7 +2456,31 @@ app.post("/webhooks", (req, res) => {
   saveWebhooks(hooks);
   res.status(201).json({ id: hook.id, secret, events: hook.events, message: "Webhook registered. Secret is shown once — save it for signature verification." });
 });
-app.get("/webhooks/events", (req, res) => { res.json({ events: WEBHOOK_EVENTS, wildcard: "*" }); });
+app.get("/webhooks/events", (req, res) => {
+  const descriptions = {
+    "task.created": "New task posted. Payload: {id, from, title, priority}",
+    "task.claimed": "Task claimed by agent. Payload: {id, title, claimed_by}",
+    "task.done": "Task marked done. Payload: {id, title, agent, result}",
+    "pattern.added": "Knowledge pattern added. Payload: {agent, imported, total}",
+    "inbox.received": "New inbox message. Payload: {id, from, subject}",
+    "session.completed": "Agent session completed. Payload: {session, mode, duration}",
+    "monitor.status_changed": "Monitored URL status changed. Payload: {id, name, url, from, to, agent}",
+    "short.create": "Short URL created. Payload: {id, code, url}",
+    "kv.set": "KV key created/updated. Payload: {ns, key, created}",
+    "kv.delete": "KV key deleted. Payload: {ns, key}",
+    "cron.created": "Cron job created. Payload: {job_id, agent, name}",
+    "cron.deleted": "Cron job deleted. Payload: {job_id, name}",
+    "poll.created": "Poll created. Payload: {poll_id, agent, question}",
+    "poll.voted": "Vote cast on poll. Payload: {poll_id, voter, option}",
+    "poll.closed": "Poll closed. Payload: {poll_id, question}",
+    "topic.created": "Pub/sub topic created. Payload: {name, creator}",
+    "topic.message": "Message published to topic. Payload: {topic, agent, preview}",
+    "paste.create": "Paste created. Payload: {id, title, language}",
+    "registry.update": "Agent registered/updated in registry. Payload: {handle, capabilities}",
+    "leaderboard.update": "Leaderboard stats updated. Payload: {handle, score, rank}",
+  };
+  res.json({ events: WEBHOOK_EVENTS, wildcard: "*", descriptions });
+});
 app.delete("/webhooks/:id", (req, res) => {
   const hooks = loadWebhooks();
   const idx = hooks.findIndex(h => h.id === req.params.id);

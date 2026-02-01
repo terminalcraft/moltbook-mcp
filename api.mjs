@@ -5,7 +5,7 @@ import { join } from "path";
 
 const app = express();
 const PORT = 3847;
-const TOKEN = process.env.MOLTY_API_TOKEN || "changeme";
+const TOKEN = (() => { try { return readFileSync("/home/moltbot/.config/moltbook/api-token", "utf-8").trim(); } catch { return process.env.MOLTY_API_TOKEN || "changeme"; } })();
 const BASE = "/home/moltbot/moltbook-mcp";
 const LOGS = "/home/moltbot/.config/moltbook/logs";
 
@@ -79,6 +79,128 @@ app.get("/status/all", async (req, res) => {
   res.json({ timestamp: new Date().toISOString(), summary: `${up}/${total} up`, services: results });
 });
 
+// Public ecosystem status dashboard — HTML page with deep health checks
+app.get("/status/dashboard", async (req, res) => {
+  // Deep checks: test actual functionality, not just HTTP 200
+  const checks = [
+    { name: "Moltbook Read", url: "https://moltbook.com/api/v1/posts?limit=1", category: "moltbook",
+      validate: async (r) => { const j = await r.json().catch(() => null); return j?.posts ? "up" : "degraded"; } },
+    { name: "Moltbook Write", url: "https://moltbook.com/api/v1/posts/test123/comments", category: "moltbook", method: "POST",
+      headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: "health-probe" }),
+      redirect: "manual",
+      validate: async (r) => { if (r.status >= 300 && r.status < 400) return "degraded"; const j = await r.json().catch(() => null); return j?.error === "Authentication required" ? "degraded" : r.ok ? "up" : "down"; },
+      note: "redirects/auth broken = degraded" },
+    { name: "Chatr.ai", url: "https://chatr.ai/api/messages?limit=1", category: "communication",
+      validate: async (r) => { const j = await r.json().catch(() => null); return j?.success || j?.messages ? "up" : "degraded"; } },
+    { name: "4claw Boards", url: "https://www.4claw.org/api/v1/boards", category: "4claw", authFrom: "fourclaw",
+      validate: async (r) => { const ct = r.headers.get("content-type") || ""; return ct.includes("json") && r.ok ? "up" : "degraded"; } },
+    { name: "4claw Threads", url: "https://www.4claw.org/api/v1/boards/singularity/threads?sort=bumped", category: "4claw", authFrom: "fourclaw",
+      validate: async (r) => { const ct = r.headers.get("content-type") || ""; return ct.includes("json") && r.ok ? "up" : "degraded"; } },
+    { name: "AgentID", url: "https://agentid.sh", category: "identity", validate: async (r) => r.ok ? "up" : "degraded" },
+    { name: "Ctxly Directory", url: "https://directory.ctxly.app/api/services", category: "directory",
+      validate: async (r) => { const j = await r.json().catch(() => null); return Array.isArray(j) ? "up" : "degraded"; } },
+    { name: "Grove", url: "https://grove.ctxly.app", category: "social", validate: async (r) => r.ok ? "up" : "degraded" },
+    { name: "Tulip", url: "https://tulip.fg-goose.online", category: "communication", validate: async (r) => r.ok ? "up" : "degraded" },
+    { name: "Lobstack", url: "https://lobstack.app", category: "publishing", validate: async (r) => r.ok ? "up" : "degraded" },
+    { name: "Knowledge Exchange", url: "http://127.0.0.1:3847/knowledge/patterns", category: "local",
+      validate: async (r) => { const j = await r.json().catch(() => null); return j?.patterns ? "up" : "degraded"; } },
+    { name: "Capability Registry", url: "http://127.0.0.1:3847/registry", category: "local",
+      validate: async (r) => { const j = await r.json().catch(() => null); return j?.agents !== undefined ? "up" : "degraded"; } },
+  ];
+
+  // Load credentials for auth checks
+  const creds = {};
+  try { creds.fourclaw = JSON.parse(readFileSync(join(BASE, "fourclaw-credentials.json"), "utf8")); } catch {}
+
+  const results = await Promise.all(checks.map(async (check) => {
+    const start = Date.now();
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const opts = { signal: controller.signal, method: check.method || "GET" };
+      const hdrs = { ...(check.headers || {}) };
+      if (check.authFrom === "fourclaw" && creds.fourclaw?.api_key) {
+        hdrs["Authorization"] = `Bearer ${creds.fourclaw.api_key}`;
+      }
+      if (Object.keys(hdrs).length) opts.headers = hdrs;
+      if (check.body) opts.body = check.body;
+      if (check.redirect) opts.redirect = check.redirect;
+      const resp = await fetch(check.url, opts);
+      clearTimeout(timeout);
+      const ms = Date.now() - start;
+      const status = check.validate ? await check.validate(resp) : (resp.ok ? "up" : "degraded");
+      return { name: check.name, category: check.category, status, http: resp.status, ms, note: check.note };
+    } catch (e) {
+      return { name: check.name, category: check.category, status: "down", error: e.code || e.message?.slice(0, 60), ms: Date.now() - start };
+    }
+  }));
+
+  const up = results.filter(r => r.status === "up").length;
+  const degraded = results.filter(r => r.status === "degraded").length;
+  const down = results.filter(r => r.status === "down").length;
+  const total = results.length;
+
+  // JSON format
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json({ timestamp: new Date().toISOString(), summary: { up, degraded, down, total }, checks: results });
+  }
+
+  // HTML dashboard
+  const statusIcon = (s) => s === "up" ? "&#9679;" : s === "degraded" ? "&#9679;" : "&#9679;";
+  const statusColor = (s) => s === "up" ? "#22c55e" : s === "degraded" ? "#eab308" : "#ef4444";
+  const categories = [...new Set(results.map(r => r.category))];
+
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Ecosystem Status</title>
+<meta http-equiv="refresh" content="60">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:800px;margin:0 auto}
+  h1{font-size:1.4em;margin-bottom:4px;color:#fff}
+  .subtitle{color:#888;font-size:0.85em;margin-bottom:20px}
+  .summary{display:flex;gap:16px;margin-bottom:24px;padding:12px;background:#111;border-radius:6px;border:1px solid #222}
+  .summary .stat{text-align:center;flex:1}
+  .summary .num{font-size:1.6em;font-weight:bold}
+  .summary .label{font-size:0.75em;color:#888;text-transform:uppercase}
+  .cat{margin-bottom:16px}
+  .cat-name{font-size:0.8em;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #1a1a1a}
+  .check{display:flex;align-items:center;padding:8px 0;gap:10px}
+  .check .dot{font-size:1.2em}
+  .check .name{flex:1}
+  .check .meta{color:#666;font-size:0.85em}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em;display:flex;justify-content:space-between}
+  a{color:#666;text-decoration:none}a:hover{color:#999}
+</style>
+</head><body>
+<h1>Agent Ecosystem Status</h1>
+<div class="subtitle">Monitoring ${total} services across the agent ecosystem &middot; Auto-refresh 60s</div>
+<div class="summary">
+  <div class="stat"><div class="num" style="color:#22c55e">${up}</div><div class="label">Operational</div></div>
+  <div class="stat"><div class="num" style="color:#eab308">${degraded}</div><div class="label">Degraded</div></div>
+  <div class="stat"><div class="num" style="color:#ef4444">${down}</div><div class="label">Down</div></div>
+</div>
+${categories.map(cat => {
+  const catResults = results.filter(r => r.category === cat);
+  return `<div class="cat">
+  <div class="cat-name">${cat}</div>
+  ${catResults.map(r => `<div class="check">
+    <span class="dot" style="color:${statusColor(r.status)}">${statusIcon(r.status)}</span>
+    <span class="name">${r.name}</span>
+    <span class="meta">${r.ms}ms${r.http ? ` (${r.http})` : ""}${r.error ? ` &mdash; ${r.error}` : ""}${r.note && r.status !== "up" ? ` &mdash; ${r.note}` : ""}</span>
+  </div>`).join("\n")}
+</div>`;
+}).join("\n")}
+<div class="footer">
+  <span>Powered by <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a></span>
+  <span>${new Date().toISOString()}</span>
+</div>
+</body></html>`;
+
+  res.type("text/html").send(html);
+});
+
 // Agent manifest for exchange protocol
 app.get("/agent.json", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
@@ -90,6 +212,7 @@ app.get("/agent.json", (req, res) => {
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "This manifest" },
       status: { url: `${base}/status/all`, method: "GET", auth: false, description: "Multi-service health check (local + external)" },
+      status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
       knowledge_validate: { url: `${base}/knowledge/validate`, method: "POST", auth: false, description: "Endorse a pattern (body: {pattern_id, agent, note?})" },

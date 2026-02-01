@@ -3642,6 +3642,106 @@ app.delete("/rooms/:name", (req, res) => {
   res.json({ ok: true });
 });
 
+// --- Status (public) ---
+function getNewestLog() {
+  try {
+    const result = execSync(
+      `ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | grep -v health | head -1`,
+      { encoding: "utf-8" }
+    ).trim();
+    return result || null;
+  } catch { return null; }
+}
+
+app.get("/status", (req, res) => {
+  try {
+    let running = false;
+    let tools = 0;
+    let elapsed_seconds = null;
+    let next_heartbeat = null;
+    try {
+      const lockCheck = execSync(
+        "flock -n /home/moltbot/.config/moltbook/heartbeat.lock true 2>/dev/null && echo free || echo locked",
+        { encoding: "utf-8" }
+      ).trim();
+      running = lockCheck === "locked";
+    } catch {
+      running = false;
+    }
+    if (running) {
+      try {
+        const info = execSync(
+          `LOG=$(ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | grep -v health | head -1) && echo "$LOG" && stat --format='%W' "$LOG" && date +%s && grep -c '"type":"tool_use"' "$LOG" 2>/dev/null || echo 0`,
+          { encoding: "utf-8" }
+        );
+        const parts = info.trim().split("\n");
+        if (parts.length >= 4) {
+          const birthTime = parseInt(parts[1]);
+          const now = parseInt(parts[2]);
+          tools = parseInt(parts[3]) || 0;
+          elapsed_seconds = birthTime > 0 ? now - birthTime : null;
+        }
+      } catch {}
+    }
+    let interval = 20;
+    try {
+      const crontab = execSync("crontab -u moltbot -l 2>/dev/null", { encoding: "utf-8" });
+      const cronMatch = crontab.match(/\*\/(\d+)\s.*heartbeat/);
+      interval = cronMatch ? parseInt(cronMatch[1]) : 20;
+      const nowDate = new Date();
+      const mins = nowDate.getMinutes();
+      const nextMin = Math.ceil((mins + 1) / interval) * interval;
+      const next = new Date(nowDate);
+      next.setSeconds(0, 0);
+      if (nextMin >= 60) {
+        next.setHours(next.getHours() + 1);
+        next.setMinutes(nextMin - 60);
+      } else {
+        next.setMinutes(nextMin);
+      }
+      next_heartbeat = Math.round((next.getTime() - nowDate.getTime()) / 1000);
+    } catch {
+      next_heartbeat = null;
+    }
+    let session_mode = null;
+    try {
+      const logPath = getNewestLog();
+      if (logPath) {
+        const fd2 = openSync(logPath, "r");
+        const hdrBuf = Buffer.alloc(200);
+        readSync(fd2, hdrBuf, 0, 200, 0);
+        closeSync(fd2);
+        const modeMatch = hdrBuf.toString("utf-8").match(/mode=([EBRL])/);
+        if (modeMatch) session_mode = modeMatch[1];
+      }
+    } catch {}
+    let rotation_pattern = "EBR";
+    let rotation_counter = 0;
+    try {
+      const rc = readFileSync(BASE + "/rotation.conf", "utf-8");
+      const pm = rc.match(/^PATTERN=(.+)$/m);
+      if (pm) rotation_pattern = pm[1].trim();
+    } catch {}
+    try {
+      rotation_counter = parseInt(readFileSync("/home/moltbot/.config/moltbook/session_counter", "utf-8").trim()) || 0;
+    } catch {}
+    const ecosystem = {
+      registry: (() => { try { const d = JSON.parse(readFileSync(join(BASE, "registry.json"), "utf8")); const a = d.agents; return Array.isArray(a) ? a.length : (a ? Object.keys(a).length : 0); } catch { return 0; } })(),
+      rooms: (() => { try { const d = JSON.parse(readFileSync(join(BASE, "rooms.json"), "utf8")); return Array.isArray(d) ? d.length : Object.keys(d).length; } catch { return 0; } })(),
+      tasks: (() => { try { const d = JSON.parse(readFileSync(join(BASE, "tasks.json"), "utf8")); return Array.isArray(d) ? d.length : 0; } catch { return 0; } })(),
+      polls: polls.length,
+      cron_jobs: cronJobs.filter(j => j.active !== false).length,
+      knowledge_patterns: (() => { try { return JSON.parse(readFileSync(join(BASE, "knowledge.json"), "utf8")).length; } catch { return 0; } })(),
+      monitors: (() => { try { return JSON.parse(readFileSync(join(BASE, "monitors.json"), "utf8")).length; } catch { return 0; } })(),
+      webhooks: (() => { try { return JSON.parse(readFileSync(join(BASE, "webhooks.json"), "utf8")).length; } catch { return 0; } })(),
+      feed_events: activityFeed.length,
+    };
+    res.json({ running, tools, elapsed_seconds, next_heartbeat, session_mode, rotation_pattern, rotation_counter, cron_interval: interval, version: VERSION, ecosystem });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 
@@ -3717,106 +3817,6 @@ app.get("/summaries", (req, res) => {
   }
 });
 
-app.get("/status", (req, res) => {
-  try {
-    let running = false;
-    let tools = 0;
-    let elapsed_seconds = null;
-    let next_heartbeat = null;
-    try {
-      // Use pgrep with -x or pidof to avoid self-match; check for the actual claude binary
-      const pids = execSync(
-        "pgrep -f 'claude.*moltbook' 2>/dev/null | xargs -I{} ps -p {} -o pid= 2>/dev/null | wc -l",
-        { encoding: "utf-8" }
-      ).trim();
-      // Alternative: check for the timeout wrapper that heartbeat.sh uses
-      const lockCheck = execSync(
-        "flock -n /home/moltbot/.config/moltbook/heartbeat.lock true 2>/dev/null && echo free || echo locked",
-        { encoding: "utf-8" }
-      ).trim();
-      running = lockCheck === "locked";
-    } catch {
-      running = false;
-    }
-    if (running) {
-      try {
-        const info = execSync(
-          `LOG=$(ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | grep -v health | head -1) && echo "$LOG" && stat --format='%W' "$LOG" && date +%s && grep -c '"type":"tool_use"' "$LOG" 2>/dev/null || echo 0`,
-          { encoding: "utf-8" }
-        );
-        const parts = info.trim().split("\n");
-        if (parts.length >= 4) {
-          const birthTime = parseInt(parts[1]);
-          const now = parseInt(parts[2]);
-          tools = parseInt(parts[3]) || 0;
-          // %W = birth time (creation). Falls back to 0 if unsupported.
-          elapsed_seconds = birthTime > 0 ? now - birthTime : null;
-        }
-      } catch {}
-    }
-    // Calculate next heartbeat from actual crontab
-    let interval = 20;
-    try {
-      const crontab = execSync("crontab -u moltbot -l 2>/dev/null", { encoding: "utf-8" });
-      const cronMatch = crontab.match(/\*\/(\d+)\s.*heartbeat/);
-      interval = cronMatch ? parseInt(cronMatch[1]) : 20;
-      const nowDate = new Date();
-      const mins = nowDate.getMinutes();
-      const nextMin = Math.ceil((mins + 1) / interval) * interval;
-      const next = new Date(nowDate);
-      next.setSeconds(0, 0);
-      if (nextMin >= 60) {
-        next.setHours(next.getHours() + 1);
-        next.setMinutes(nextMin - 60);
-      } else {
-        next.setMinutes(nextMin);
-      }
-      next_heartbeat = Math.round((next.getTime() - nowDate.getTime()) / 1000);
-    } catch {
-      next_heartbeat = null;
-    }
-
-    // Extract session mode from the newest log's first line
-    let session_mode = null;
-    try {
-      const logPath = getNewestLog();
-      if (logPath) {
-        const fd2 = openSync(logPath, "r");
-        const hdrBuf = Buffer.alloc(200);
-        readSync(fd2, hdrBuf, 0, 200, 0);
-        closeSync(fd2);
-        const modeMatch = hdrBuf.toString("utf-8").match(/mode=([EBRL])/);
-        if (modeMatch) session_mode = modeMatch[1];
-      }
-    } catch {}
-
-    // Rotation info
-    let rotation_pattern = "EBR";
-    let rotation_counter = 0;
-    try {
-      const rc = readFileSync(BASE + "/rotation.conf", "utf-8");
-      const pm = rc.match(/^PATTERN=(.+)$/m);
-      if (pm) rotation_pattern = pm[1].trim();
-    } catch {}
-    try {
-      rotation_counter = parseInt(readFileSync("/home/moltbot/.config/moltbook/session_counter", "utf-8").trim()) || 0;
-    } catch {}
-
-    res.json({ running, tools, elapsed_seconds, next_heartbeat, session_mode, rotation_pattern, rotation_counter, cron_interval: interval });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-function getNewestLog() {
-  try {
-    const result = execSync(
-      `ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | grep -v health | head -1`,
-      { encoding: "utf-8" }
-    ).trim();
-    return result || null;
-  } catch { return null; }
-}
 
 function parseLiveActions(logPath, offset) {
   const st = statSync(logPath);

@@ -175,16 +175,25 @@ fi
 
 # Auto-version any uncommitted changes after session
 cd "$DIR"
-if \! git diff --quiet HEAD 2>/dev/null; then
-  git add -A
-# Validate critical shell scripts before committing — revert broken ones
-for f in heartbeat.sh send_heartbeat.sh; do
-  if [ -f "$f" ] && \! bash -n "$f" 2>/dev/null; then
-    echo "$(date -Iseconds) REVERTED $f (syntax error)" >> "$LOG_DIR/selfmod.log"
-    git checkout -- "$f" 2>/dev/null || true
+if \! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+  # Selective add: only stage known-safe file types instead of blanket -A.
+  # Prevents accidentally committing binaries, temp files, or anything
+  # .gitignore might miss.
+  git add -- '*.md' '*.js' '*.cjs' '*.mjs' '*.json' '*.sh' '*.py' '*.txt' \
+    '.gitignore' 'LICENSE' 2>/dev/null || true
+  # Also add any tracked files that were modified (catches renames, etc.)
+  git add -u 2>/dev/null || true
+  # Validate critical shell scripts before committing — revert broken ones
+  for f in heartbeat.sh send_heartbeat.sh; do
+    if [ -f "$f" ] && \! bash -n "$f" 2>/dev/null; then
+      echo "$(date -Iseconds) REVERTED $f (syntax error)" >> "$LOG_DIR/selfmod.log"
+      git checkout -- "$f" 2>/dev/null || true
+    fi
+  done
+  # Only commit if something was actually staged
+  if \! git diff --cached --quiet 2>/dev/null; then
+    git commit -m "auto-snapshot post-session $(date +%Y%m%d_%H%M%S)" --no-gpg-sign 2>/dev/null || true
   fi
-done
-  git commit -m "auto-snapshot post-session $(date +%Y%m%d_%H%M%S)" --no-gpg-sign 2>/dev/null || true
 fi
 # Push to keep remote in sync (best-effort, don't block on failure)
 git push origin master 2>/dev/null || true

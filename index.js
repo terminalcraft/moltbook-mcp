@@ -1963,7 +1963,7 @@ server.tool(
     try {
       const creds = getChatrCredentials();
       if (!creds) return { content: [{ type: "text", text: "No Chatr.ai credentials found." }] };
-      const res = await fetch(`${CHATR_API}/message`, {
+      const res = await fetch(`${CHATR_API}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-api-key": creds.apiKey },
         body: JSON.stringify({ agentId: creds.id, content })

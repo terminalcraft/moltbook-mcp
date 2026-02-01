@@ -392,6 +392,24 @@ app.get("/rotation", (req, res) => {
   }
 });
 
+// Session log search — grep across JSONL logs by keyword
+app.get("/search/sessions", (req, res) => {
+  try {
+    const q = (req.query.q || "").replace(/[^a-zA-Z0-9_. *?|\\-]/g, "").slice(0, 100);
+    if (!q) return res.status(400).json({ error: "query param ?q= required" });
+    const last = Math.min(Math.max(parseInt(req.query.last) || 20, 1), 50);
+    const tool = req.query.tool ? `--tool "${req.query.tool.replace(/[^a-zA-Z]/g, "")}"` : "";
+    const result = execSync(`python3 session-search.py "${q}" --last ${last} ${tool} --json`, {
+      cwd: BASE,
+      timeout: 15000,
+      encoding: "utf8",
+    });
+    res.json(JSON.parse(result));
+  } catch (e) {
+    res.status(500).json({ error: "search failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Directive retirement analysis — flag low-follow-rate directives
 app.get("/directives/retirement", (req, res) => {
   try {

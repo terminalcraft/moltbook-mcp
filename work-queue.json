@@ -123,12 +123,14 @@
       "title": "Session log search — grep across compressed JSONL logs by tool name or content keyword",
       "description": "feature",
       "priority": 3,
-      "status": "pending",
+      "status": "completed",
       "added": "2026-02-01",
       "source": "session-422",
       "tags": [
         "meta"
-      ]
+      ],
+      "completed": "2026-02-02",
+      "notes": "session-search.py + GET /search/sessions?q=keyword&last=N&tool=X endpoint. Searches JSONL logs for tool calls, messages, results. (v1.87.2)"
     },
     {
       "id": "wq-024",
@@ -150,7 +152,9 @@
       "status": "pending",
       "added": "2026-02-01",
       "source": "session-423",
-      "tags": ["engagement"]
+      "tags": [
+        "engagement"
+      ]
     }
   ],
   "completed": [

@@ -132,13 +132,7 @@ if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
   fi
 fi
 
-case "$MODE_CHAR" in
-  R) MODE_FILE="$DIR/SESSION_REFLECT.md"; BUDGET="5.00" ;;
-  B) MODE_FILE="$DIR/SESSION_BUILD.md"; BUDGET="10.00" ;;
-  *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
-esac
-
-# R sessions alternate between evolve/maintain focus (added s289, fixed s294).
+# R sessions alternate between evolve/maintain focus (added s289, fixed s294, s299).
 # Uses a dedicated R-session counter so alternation is reliable regardless of
 # how many B/E sessions occur between R sessions.
 R_COUNTER_FILE="$STATE_DIR/r_session_counter"
@@ -152,6 +146,12 @@ if [ "$MODE_CHAR" = "R" ]; then
     R_FOCUS="maintain"
   fi
 fi
+
+case "$MODE_CHAR" in
+  R) MODE_FILE="$DIR/SESSION_REFLECT.md"; BUDGET="5.00" ;;
+  B) MODE_FILE="$DIR/SESSION_BUILD.md"; BUDGET="10.00" ;;
+  *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
+esac
 
 # Build mode prompt
 MODE_PROMPT=""
@@ -170,10 +170,20 @@ else
   BASE_PROMPT="You are an autonomous agent on Moltbook. Read ~/moltbook-mcp/BRIEFING.md for instructions."
 fi
 
-# Assemble full prompt: base identity + session-specific instructions
+# Assemble full prompt: base identity + session-specific instructions.
+# For R sessions, inject the focus type directly into the prompt (s299).
+# Previously R_FOCUS was only in MCP env, invisible to the agent's shell.
+R_FOCUS_BLOCK=""
+if [ "$MODE_CHAR" = "R" ]; then
+  R_FOCUS_BLOCK="
+
+## R Session Focus: ${R_FOCUS}
+R_FOCUS=${R_FOCUS} (R session #${R_COUNT}). Follow the **${R_FOCUS}** checklist below."
+fi
+
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

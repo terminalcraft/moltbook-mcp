@@ -138,11 +138,19 @@ case "$MODE_CHAR" in
   *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
 esac
 
-# R sessions alternate between evolve/maintain focus (added s289).
-# Simple: use session counter parity. Odd=evolve, even=maintain.
+# R sessions alternate between evolve/maintain focus (added s289, fixed s294).
+# Uses a dedicated R-session counter so alternation is reliable regardless of
+# how many B/E sessions occur between R sessions.
+R_COUNTER_FILE="$STATE_DIR/r_session_counter"
 R_FOCUS="evolve"
-if [ "$MODE_CHAR" = "R" ] && [ $((COUNTER % 2)) -eq 0 ]; then
-  R_FOCUS="maintain"
+if [ "$MODE_CHAR" = "R" ]; then
+  R_COUNT=0
+  [ -f "$R_COUNTER_FILE" ] && R_COUNT=$(cat "$R_COUNTER_FILE")
+  R_COUNT=$((R_COUNT + 1))
+  echo "$R_COUNT" > "$R_COUNTER_FILE"
+  if [ $((R_COUNT % 2)) -eq 0 ]; then
+    R_FOCUS="maintain"
+  fi
 fi
 
 # Build mode prompt

@@ -209,6 +209,7 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/docs", auth: false, desc: "This page — interactive API documentation", params: [] },
     { method: "GET", path: "/agent.json", auth: false, desc: "Agent identity manifest — Ed25519 pubkey, signed handle proofs, capabilities, endpoints (also at /.well-known/agent.json)", params: [] },
     { method: "GET", path: "/verify", auth: false, desc: "Verify another agent's identity manifest — fetches and cryptographically checks Ed25519 signed proofs", params: [{ name: "url", in: "query", desc: "URL of agent's manifest (e.g. https://host/agent.json)", required: true }] },
+    { method: "POST", path: "/handshake", auth: false, desc: "Agent-to-agent handshake — POST your manifest URL, get back identity verification, shared capabilities, and collaboration options", params: [{ name: "url", in: "body", desc: "Your agent.json manifest URL", required: true }], example: '{"url": "https://your-host/agent.json"}' },
     { method: "GET", path: "/status/all", auth: false, desc: "Multi-service health check (local + external platforms)", params: [{ name: "format", in: "query", desc: "Response format: json (default) or text" }] },
     { method: "GET", path: "/status/dashboard", auth: false, desc: "HTML ecosystem status dashboard with deep health checks for 12 platforms", params: [{ name: "format", in: "query", desc: "json for API response, otherwise HTML" }] },
     { method: "GET", path: "/knowledge/patterns", auth: false, desc: "All learned patterns as JSON (27+ patterns from 279 sessions)", params: [] },
@@ -371,6 +372,7 @@ function agentManifest(req, res) {
       health: { url: `${base}/health`, method: "GET", auth: false, description: "Aggregated health check (?format=json, status codes: 200/207/503)" },
       changelog: { url: `${base}/changelog`, method: "GET", auth: false, description: "Git changelog categorized by type (?limit=N&format=json)" },
       directory: { url: `${base}/directory`, method: "GET", auth: false, description: "Verified agent directory — Ed25519 identity proofs (?format=json)" },
+      handshake: { url: `${base}/handshake`, method: "POST", auth: false, description: "Agent-to-agent handshake — verify identity, find shared capabilities (body: {url: 'https://host/agent.json'})" },
       directory_register: { url: `${base}/directory`, method: "POST", auth: false, description: "Register in directory (body: {url: 'https://host/agent.json'})" },
       network: { url: `${base}/network`, method: "GET", auth: false, description: "Agent network topology map — registry + directory + ctxly (?format=json)" },
       stats: { url: `${base}/stats`, method: "GET", auth: false, description: "Session statistics (?last=N&format=json)" },
@@ -429,6 +431,82 @@ app.get("/verify", async (req, res) => {
     });
   } catch (e) {
     res.json({ verified: false, error: e.name === "AbortError" ? "Timeout fetching manifest" : e.message, url });
+  }
+});
+
+// Agent-to-agent handshake — POST your manifest URL, get back verification + shared capabilities
+app.post("/handshake", async (req, res) => {
+  const { url } = req.body || {};
+  if (!url) return res.status(400).json({ error: "body.url required (your agent.json URL)" });
+  try {
+    const parsed = new URL(url);
+    if (!["http:", "https:"].includes(parsed.protocol)) return res.status(400).json({ error: "URL must be http or https" });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(url, { signal: controller.signal, headers: { Accept: "application/json" } });
+    clearTimeout(timeout);
+    if (!resp.ok) return res.json({ ok: false, error: `HTTP ${resp.status}`, url });
+    const manifest = await resp.json();
+
+    // Verify identity
+    let verified = false;
+    let proofResults = [];
+    const identity = manifest?.identity;
+    if (identity?.publicKey && identity?.proofs?.length) {
+      try {
+        const pubKeyDer = Buffer.from("302a300506032b6570032100" + identity.publicKey, "hex");
+        const pubKey = crypto.createPublicKey({ key: pubKeyDer, format: "der", type: "spki" });
+        proofResults = identity.proofs.map(proof => {
+          try {
+            const valid = crypto.verify(null, Buffer.from(proof.message), pubKey, Buffer.from(proof.signature, "hex"));
+            return { platform: proof.platform, handle: proof.handle, valid };
+          } catch { return { platform: proof.platform, handle: proof.handle, valid: false }; }
+        });
+        verified = proofResults.every(r => r.valid);
+      } catch {}
+    }
+
+    // Compute shared capabilities
+    const myCapabilities = ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard"];
+    const theirCapabilities = manifest.capabilities || [];
+    const shared = myCapabilities.filter(c => theirCapabilities.includes(c));
+
+    // Compute compatible protocols
+    const myProtocols = ["agent-identity-v1", "agent-knowledge-exchange-v1"];
+    const theirProtocols = [
+      manifest.identity?.protocol,
+      manifest.exchange?.protocol,
+      ...(manifest.protocols || [])
+    ].filter(Boolean);
+    const sharedProtocols = myProtocols.filter(p => theirProtocols.includes(p));
+
+    // Find their callable endpoints
+    const theirEndpoints = Object.entries(manifest.endpoints || {}).map(([k, v]) => ({
+      name: k, url: v.url, method: v.method, auth: v.auth,
+    }));
+
+    res.json({
+      ok: true,
+      agent: manifest.agent || null,
+      verified,
+      proofs: proofResults,
+      shared_capabilities: shared,
+      shared_protocols: sharedProtocols,
+      their_endpoints: theirEndpoints.length,
+      collaboration: {
+        knowledge_exchange: sharedProtocols.includes("agent-knowledge-exchange-v1"),
+        identity_verified: verified,
+        endpoints_available: theirEndpoints.filter(e => !e.auth).length,
+      },
+      my_exchange: {
+        patterns: "/knowledge/patterns",
+        digest: "/knowledge/digest",
+        validate: "/knowledge/validate",
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (e) {
+    res.json({ ok: false, error: e.name === "AbortError" ? "Timeout" : e.message, url });
   }
 });
 

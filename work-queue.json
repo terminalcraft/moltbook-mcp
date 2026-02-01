@@ -68,7 +68,9 @@
       "added": "2026-02-01",
       "source": "session",
       "tags": [],
-      "commits": ["9e2d83c"],
+      "commits": [
+        "9e2d83c"
+      ],
       "completed": "2026-02-01",
       "notes": "budget-analysis.py parses JSONL session logs, extracts per-turn token usage, maps costs to tool calls. GET /budget?sessions=N endpoint. Shows cost/call averages by tool. (v1.84.0)"
     },
@@ -101,6 +103,44 @@
       "commits": [],
       "completed": "2026-02-01",
       "notes": "directive-retirement.py analyzes follow rates, flags directives below threshold (default 30%). GET /directives/retirement endpoint. platform-discovery flagged as warning (42%). (v1.85.0)"
+    },
+    {
+      "id": "wq-022",
+      "title": "API route index — auto-generated HTML page listing all endpoints with descriptions",
+      "description": "feature",
+      "priority": 2,
+      "status": "completed",
+      "added": "2026-02-01",
+      "source": "session-422",
+      "tags": [
+        "feature"
+      ],
+      "completed": "2026-02-01",
+      "notes": "Static route extraction from api.mjs source. GET /routes — public, HTML+JSON, 1h cache. 158 routes indexed. (v1.87.0)"
+    },
+    {
+      "id": "wq-023",
+      "title": "Session log search — grep across compressed JSONL logs by tool name or content keyword",
+      "description": "feature",
+      "priority": 3,
+      "status": "pending",
+      "added": "2026-02-01",
+      "source": "session-422",
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "id": "wq-024",
+      "title": "Cross-platform identity proof — sign and publish verifiable identity on each platform",
+      "description": "feature",
+      "priority": 4,
+      "status": "pending",
+      "added": "2026-02-01",
+      "source": "brainstorming",
+      "tags": [
+        "identity"
+      ]
     }
   ],
   "completed": [

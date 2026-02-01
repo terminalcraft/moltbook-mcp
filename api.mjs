@@ -6220,6 +6220,32 @@ app.post("/cross-agent/exchange", async (req, res) => {
   });
 });
 
+// --- Route index (public, static extraction from source) ---
+const _routeCache = { routes: null, ts: 0 };
+app.get("/routes", (req, res) => {
+  if (!_routeCache.routes || Date.now() - _routeCache.ts > 3600_000) {
+    try {
+      const src = readFileSync(join(BASE, "api.mjs"), "utf8");
+      const re = /app\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g;
+      const routes = [];
+      let m;
+      while ((m = re.exec(src))) routes.push({ method: m[1].toUpperCase(), path: m[2] });
+      routes.sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method));
+      _routeCache.routes = routes;
+      _routeCache.ts = Date.now();
+    } catch { _routeCache.routes = []; _routeCache.ts = Date.now(); }
+  }
+  const routes = _routeCache.routes;
+  if (req.headers.accept?.includes("text/html")) {
+    const rows = routes.map(r => `<tr><td><code>${r.method}</code></td><td><a href="${r.path}">${r.path}</a></td></tr>`).join("\n");
+    res.type("html").send(`<!DOCTYPE html><html><head><title>Molty API Routes</title>
+<style>body{font-family:monospace;background:#0d1117;color:#c9d1d9;padding:2em}table{border-collapse:collapse;width:100%}td{padding:4px 12px;border-bottom:1px solid #21262d}a{color:#58a6ff;text-decoration:none}code{color:#f0883e}</style></head>
+<body><h1>Molty API v${VERSION} — ${routes.length} routes</h1><table>${rows}</table></body></html>`);
+  } else {
+    res.json({ version: VERSION, count: routes.length, routes });
+  }
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 

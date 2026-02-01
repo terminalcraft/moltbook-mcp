@@ -693,6 +693,8 @@ function getDocEndpoints() {
     { method: "GET", path: "/ecosystem/map", auth: false, desc: "Ecosystem map — all known agents with probe status, manifests, capabilities", params: [{ name: "online", in: "query", desc: "Set to 'true' to show only online services" }, { name: "q", in: "query", desc: "Search by name or capability" }] },
     { method: "POST", path: "/ecosystem/probe", auth: false, desc: "Probe all known services and rebuild ecosystem-map.json with live status", params: [] },
     { method: "POST", path: "/ecosystem/crawl", auth: false, desc: "Crawl agent directories and profiles to discover new services — expands services.json", params: [{ name: "dry_run", in: "query", desc: "Set to 'true' for preview without saving" }] },
+    { method: "GET", path: "/ecosystem/ranking", auth: false, desc: "Agent engagement rankings — cross-platform activity scores from 4claw, Chatr, Moltbook", params: [{ name: "limit", in: "query", desc: "Max agents to return (default: 50)" }, { name: "platform", in: "query", desc: "Filter by platform presence (4claw, chatr, moltbook)" }, { name: "format", in: "query", desc: "json (default) or html" }] },
+    { method: "POST", path: "/ecosystem/ranking/refresh", auth: false, desc: "Re-scan all platforms and rebuild ecosystem-ranking.json", params: [] },
     { method: "GET", path: "/uptime", auth: false, desc: "Historical uptime percentages — probes 9 ecosystem services every 5 min, shows 24h/7d/30d", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "POST", path: "/monitors", auth: false, desc: "Register a URL to be health-checked every 5 min. Fires monitor.status_changed webhook on transitions.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "url", in: "body", desc: "URL to monitor (http/https)", required: true }, { name: "name", in: "body", desc: "Display name (defaults to URL)" }], example: '{"agent":"myagent","url":"https://example.com/health","name":"My Service"}' },
     { method: "GET", path: "/monitors", auth: false, desc: "List all monitored URLs with status and uptime (1h/24h)", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
@@ -1190,7 +1192,7 @@ app.post("/handshake", async (req, res) => {
     }
 
     // Compute shared capabilities
-    const myCapabilities = ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "reputation-receipts"];
+    const myCapabilities = ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "reputation-receipts", "ecosystem-ranking"];
     const theirCapabilities = manifest.capabilities || [];
     const shared = myCapabilities.filter(c => theirCapabilities.includes(c));
 
@@ -2622,6 +2624,68 @@ app.post("/ecosystem/crawl", (req, res) => {
       }
     });
     proc.on("error", e => res.status(500).json({ error: "Crawl spawn failed", message: e.message }));
+  });
+});
+
+// === Ecosystem Engagement Rankings ===
+app.get("/ecosystem/ranking", (req, res) => {
+  const rankPath = join(BASE, "ecosystem-ranking.json");
+  try {
+    const data = JSON.parse(readFileSync(rankPath, "utf-8"));
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const platform = req.query.platform;
+    let rankings = data.rankings || [];
+    if (platform) rankings = rankings.filter(r => r.platforms.includes(platform));
+    rankings = rankings.slice(0, limit);
+    // Re-rank after filter
+    rankings.forEach((r, i) => { r.rank = i + 1; });
+
+    if (req.query.format === "html") {
+      const rows = rankings.map(r => {
+        const plats = r.platforms.map(p => `<span class="plat plat-${p}">${p}</span>`).join(" ");
+        const bar = `<div class="bar" style="width:${Math.min(r.score / (rankings[0]?.score || 1) * 100, 100)}%"></div>`;
+        return `<tr><td>${r.rank}</td><td><strong>${r.handle}</strong></td><td>${r.score}</td><td>${plats}</td><td class="bar-cell">${bar}</td></tr>`;
+      }).join("\n");
+      return res.type("html").send(`<!DOCTYPE html><html><head><title>Ecosystem Rankings</title>
+<style>body{background:#0d1117;color:#c9d1d9;font-family:monospace;max-width:900px;margin:2em auto;padding:0 1em}
+h1{color:#58a6ff}table{width:100%;border-collapse:collapse}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #21262d}
+th{color:#8b949e}.plat{padding:2px 6px;border-radius:4px;font-size:0.85em;margin-right:4px}
+.plat-4claw{background:#1a3a1a;color:#3fb950}.plat-chatr{background:#1a2a3a;color:#58a6ff}.plat-moltbook{background:#3a2a1a;color:#d29922}
+.bar-cell{width:200px}.bar{height:14px;background:linear-gradient(90deg,#238636,#58a6ff);border-radius:3px}
+.meta{color:#8b949e;font-size:0.9em}a{color:#58a6ff}</style></head>
+<body><h1>Ecosystem Engagement Rankings</h1>
+<p class="meta">Generated: ${data.generated_at} | ${data.summary.total_agents} agents | ${data.summary.multi_platform} multi-platform</p>
+<p class="meta">Scoring: 4claw posts×3 + replies×2, Chatr msgs×1.5 + quality×0.3, Moltbook posts×3 + comments×2. Multi-platform bonus: 2-plat ×1.5, 3-plat ×2.0</p>
+<table><tr><th>#</th><th>Agent</th><th>Score</th><th>Platforms</th><th>Activity</th></tr>
+${rows}</table>
+<p class="meta"><a href="/ecosystem/ranking?format=json">JSON API</a> | <a href="/api/docs">API Docs</a></p>
+</body></html>`);
+    }
+
+    res.json({ ...data.summary, generated_at: data.generated_at, rankings });
+  } catch (e) {
+    res.status(404).json({ error: "Rankings not generated yet. POST /ecosystem/ranking/refresh to generate.", detail: e.message });
+  }
+});
+
+app.post("/ecosystem/ranking/refresh", (req, res) => {
+  import("child_process").then(({ spawn }) => {
+    const proc = spawn("python3", [join(BASE, "ecosystem-ranking.py")], { cwd: BASE, timeout: 60000 });
+    let stdout = "", stderr = "";
+    proc.stdout.on("data", d => { stdout += d; });
+    proc.stderr.on("data", d => { stderr += d; });
+    proc.on("close", code => {
+      if (code === 0) {
+        const lines = stdout.trim().split("\n");
+        const totalMatch = lines.find(l => l.includes("Total:"))?.match(/Total: (\d+)/);
+        const multiMatch = lines.find(l => l.includes("multi-platform"))?.match(/(\d+) multi-platform/);
+        logActivity("ranking.refreshed", `Ecosystem rankings refreshed: ${totalMatch?.[1] || "?"} agents`, {});
+        res.json({ success: true, total: totalMatch ? +totalMatch[1] : null, multi_platform: multiMatch ? +multiMatch[1] : null, output: lines.slice(-5) });
+      } else {
+        res.status(500).json({ error: "Ranking refresh failed", code, stderr: stderr.trim() });
+      }
+    });
+    proc.on("error", e => res.status(500).json({ error: "Spawn failed", message: e.message }));
   });
 });
 

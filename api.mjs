@@ -4319,6 +4319,7 @@ const DATA_STORES = [
   { name: "cron-jobs", file: "cron-jobs.json", expect: "array" },
   { name: "presence", file: "presence.json", expect: "object" },
   { name: "snapshots", file: "snapshots.json", expect: "object" },
+  { name: "handoffs", file: "handoffs.json", expect: "object" },
   { name: "receipts", file: "receipts.json", expect: "object" },
   { name: "activity-feed", file: "activity-feed.json", expect: "array" },
 ];
@@ -4779,6 +4780,72 @@ app.get("/snapshots", (req, res) => {
   res.json(summary);
 });
 
+// --- Agent Context Handoff ---
+const HANDOFFS_FILE = join(BASE, "handoffs.json");
+const HANDOFF_MAX_PER_AGENT = 20;
+function loadHandoffs() { try { return JSON.parse(readFileSync(HANDOFFS_FILE, "utf8")); } catch { return {}; } }
+function saveHandoffs(h) { writeFileSync(HANDOFFS_FILE, JSON.stringify(h, null, 2)); }
+
+app.post("/handoff", (req, res) => {
+  const { handle, session_id, summary, goals, context, next_steps, state, tags } = req.body || {};
+  if (!handle || !summary) return res.status(400).json({ error: "handle and summary required" });
+  const handoffs = loadHandoffs();
+  if (!handoffs[handle]) handoffs[handle] = [];
+  const id = crypto.randomUUID().slice(0, 8);
+  const entry = {
+    id, session_id: session_id || null, summary,
+    goals: goals || [], context: context || {}, next_steps: next_steps || [], state: state || {},
+    tags: tags || [], created: new Date().toISOString(),
+    size: JSON.stringify(req.body).length
+  };
+  handoffs[handle].push(entry);
+  if (handoffs[handle].length > HANDOFF_MAX_PER_AGENT) handoffs[handle] = handoffs[handle].slice(-HANDOFF_MAX_PER_AGENT);
+  saveHandoffs(handoffs);
+  fireWebhook("handoff.created", { handle, id, session_id: entry.session_id });
+  logActivity("handoff.created", `${handle} created handoff ${id}`, { handle, id });
+  res.status(201).json({ id, created: entry.created, size: entry.size });
+});
+
+app.get("/handoff/:handle", (req, res) => {
+  const handoffs = loadHandoffs();
+  const agentHandoffs = handoffs[req.params.handle] || [];
+  res.json(agentHandoffs.map(h => ({ id: h.id, session_id: h.session_id, summary: h.summary, tags: h.tags, created: h.created, size: h.size })));
+});
+
+app.get("/handoff/:handle/latest", (req, res) => {
+  const handoffs = loadHandoffs();
+  const agentHandoffs = handoffs[req.params.handle] || [];
+  if (!agentHandoffs.length) return res.status(404).json({ error: "no handoffs" });
+  res.json(agentHandoffs[agentHandoffs.length - 1]);
+});
+
+app.get("/handoff/:handle/:id", (req, res) => {
+  const handoffs = loadHandoffs();
+  const agentHandoffs = handoffs[req.params.handle] || [];
+  const h = agentHandoffs.find(x => x.id === req.params.id);
+  if (!h) return res.status(404).json({ error: "handoff not found" });
+  res.json(h);
+});
+
+app.delete("/handoff/:handle/:id", (req, res) => {
+  const handoffs = loadHandoffs();
+  const agentHandoffs = handoffs[req.params.handle] || [];
+  const idx = agentHandoffs.findIndex(x => x.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "handoff not found" });
+  agentHandoffs.splice(idx, 1);
+  handoffs[req.params.handle] = agentHandoffs;
+  saveHandoffs(handoffs);
+  res.json({ deleted: true });
+});
+
+app.get("/handoff", (req, res) => {
+  const handoffs = loadHandoffs();
+  const summary = Object.entries(handoffs).map(([handle, arr]) => ({
+    handle, count: arr.length, latest: arr.length ? arr[arr.length - 1].created : null
+  }));
+  res.json(summary);
+});
+
 // --- Agent Presence / Heartbeat ---
 const PRESENCE_FILE = join(BASE, "presence.json");
 const PRESENCE_TTL = 5 * 60_000; // 5 minutes = online
@@ -5117,6 +5184,7 @@ const SMOKE_TESTS = [
   { method: "GET", path: "/rooms", expect: 200 },
   { method: "GET", path: "/ratelimit/status", expect: 200 },
   { method: "GET", path: "/health/data", expect: 200 },
+  { method: "GET", path: "/handoff", expect: 200 },
 ];
 
 async function runSmokeTests() {

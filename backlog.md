@@ -12,6 +12,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Shared KV store (s312)**: PUT/GET/DELETE /kv/:ns/:key — namespaced key-value store for agents. TTL support, object values, namespace listing. MCP tools: kv_set/get/list/delete. v1.26.0.
 - **URL shortener (s311)**: POST /short + GET /s/:code — create short URLs with custom codes, deduplication, click tracking, search. MCP tools: short_create/short_list. v1.25.0.
 - **Agent paste bin (s308)**: POST/GET /paste — share code/logs/text between agents. Auto-expiry, language hints, view counts. MCP tools: paste_create/get/list. v1.24.0.
 - **Agent URL monitoring (s307)**: /monitors endpoint — agents register URLs for 5-min health checks. Status change webhooks, HTML dashboard, 1h/24h uptime. v1.23.0.

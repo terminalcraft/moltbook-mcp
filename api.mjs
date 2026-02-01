@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -2514,6 +2514,77 @@ app.delete("/paste/:id", auth, (req, res) => {
   pastes.splice(idx, 1);
   savePastes();
   res.json({ deleted: true });
+});
+
+// --- Key-Value Store ---
+const KV_FILE = join(BASE, "kv-store.json");
+const KV_MAX_KEYS = 5000;
+const KV_MAX_VALUE_SIZE = 10000;
+const KV_MAX_NS = 100;
+let kvStore = (() => { try { return JSON.parse(readFileSync(KV_FILE, "utf8")); } catch { return {}; } })();
+function saveKV() { try { writeFileSync(KV_FILE, JSON.stringify(kvStore, null, 2)); } catch {} }
+function kvKeyCount() { return Object.values(kvStore).reduce((n, ns) => n + Object.keys(ns).length, 0); }
+
+app.get("/kv/:ns/:key", (req, res) => {
+  const { ns, key } = req.params;
+  const entry = kvStore[ns]?.[key];
+  if (!entry) return res.status(404).json({ error: "key not found" });
+  if (entry.expires_at && new Date(entry.expires_at).getTime() < Date.now()) {
+    delete kvStore[ns][key];
+    if (Object.keys(kvStore[ns]).length === 0) delete kvStore[ns];
+    saveKV();
+    return res.status(404).json({ error: "key expired" });
+  }
+  res.json({ ns, key, value: entry.value, created_at: entry.created_at, updated_at: entry.updated_at, expires_at: entry.expires_at });
+});
+
+app.put("/kv/:ns/:key", (req, res) => {
+  const { ns, key } = req.params;
+  const { value, ttl } = req.body || {};
+  if (value === undefined) return res.status(400).json({ error: "value required" });
+  const serialized = typeof value === "string" ? value : JSON.stringify(value);
+  if (serialized.length > KV_MAX_VALUE_SIZE) return res.status(400).json({ error: `value too large (${KV_MAX_VALUE_SIZE} char max)` });
+  if (ns.length > 64 || key.length > 128) return res.status(400).json({ error: "ns max 64 chars, key max 128 chars" });
+  if (!/^[a-zA-Z0-9_.-]+$/.test(ns) || !/^[a-zA-Z0-9_.\-/:]+$/.test(key)) return res.status(400).json({ error: "ns/key must be alphanumeric with _.-/:" });
+  if (!kvStore[ns] && Object.keys(kvStore).length >= KV_MAX_NS) return res.status(400).json({ error: `max ${KV_MAX_NS} namespaces` });
+  const isNew = !kvStore[ns]?.[key];
+  if (isNew && kvKeyCount() >= KV_MAX_KEYS) return res.status(400).json({ error: `max ${KV_MAX_KEYS} total keys` });
+  if (!kvStore[ns]) kvStore[ns] = {};
+  const now = new Date().toISOString();
+  kvStore[ns][key] = {
+    value,
+    created_at: kvStore[ns][key]?.created_at || now,
+    updated_at: now,
+    expires_at: ttl ? new Date(Date.now() + Math.min(ttl, 30 * 86400) * 1000).toISOString() : undefined,
+  };
+  saveKV();
+  logActivity("kv.set", `${ns}/${key} ${isNew ? "created" : "updated"}`, { ns, key });
+  res.status(isNew ? 201 : 200).json({ ns, key, created: isNew, updated_at: now, expires_at: kvStore[ns][key].expires_at });
+});
+
+app.delete("/kv/:ns/:key", (req, res) => {
+  const { ns, key } = req.params;
+  if (!kvStore[ns]?.[key]) return res.status(404).json({ error: "key not found" });
+  delete kvStore[ns][key];
+  if (Object.keys(kvStore[ns]).length === 0) delete kvStore[ns];
+  saveKV();
+  logActivity("kv.delete", `${ns}/${key} deleted`, { ns, key });
+  res.json({ deleted: true });
+});
+
+app.get("/kv/:ns", (req, res) => {
+  const { ns } = req.params;
+  const entries = kvStore[ns] || {};
+  const now = Date.now();
+  const keys = Object.entries(entries)
+    .filter(([, v]) => !v.expires_at || new Date(v.expires_at).getTime() > now)
+    .map(([k, v]) => ({ key: k, updated_at: v.updated_at, expires_at: v.expires_at }));
+  res.json({ ns, count: keys.length, keys });
+});
+
+app.get("/kv", (req, res) => {
+  const namespaces = Object.entries(kvStore).map(([ns, entries]) => ({ ns, keys: Object.keys(entries).length }));
+  res.json({ total_namespaces: namespaces.length, total_keys: kvKeyCount(), namespaces });
 });
 
 // --- Authenticated endpoints ---

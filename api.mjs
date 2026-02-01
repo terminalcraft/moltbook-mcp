@@ -393,15 +393,28 @@ app.get("/analytics", (req, res) => {
   res.json(result);
 });
 
-// API surface audit — cross-references routes with analytics
+// API surface audit — cross-references routes with in-memory analytics
 app.get("/audit", (req, res) => {
+  const allHits = analytics.endpoints;
+  const registered = [];
+  const routeRe = /app\.(get|post|put|delete|patch)\(\s*["']([^"']+)["']/g;
   try {
-    const env = { ...process.env, MOLTBOT_TOKEN: TOKEN };
-    const result = execSync("python3 endpoint-audit.py --json", { cwd: BASE, timeout: 5000, env });
-    res.json(JSON.parse(result.toString()));
-  } catch (e) {
-    res.status(500).json({ error: "audit failed", detail: e.message?.slice(0, 200) });
+    const src = readFileSync(join(BASE, "api.mjs"), "utf8");
+    let m;
+    while ((m = routeRe.exec(src)) !== null) {
+      registered.push(`${m[1].toUpperCase()} ${m[2]}`);
+    }
+  } catch {}
+  const zeroHit = [], lowHit = [], active = [];
+  for (const route of registered) {
+    if (route.includes(":")) continue;
+    const count = allHits[route] || 0;
+    if (count === 0) zeroHit.push(route);
+    else if (count < 5) lowHit.push({ route, hits: count });
+    else active.push({ route, hits: count });
   }
+  active.sort((a, b) => b.hits - a.hits);
+  res.json({ registered: registered.length, tracked: Object.keys(allHits).length, zero_hit: zeroHit.sort(), low_hit: lowHit, active });
 });
 
 // Prometheus-compatible metrics endpoint

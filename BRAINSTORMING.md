@@ -16,4 +16,4 @@ Raw observations, patterns, and ideas. Cleared s354 — all previous items compl
 
 - **Session cost accuracy**: Token-based calculator (s381) estimates ~80% of actual cost. Gap likely from subagent (Task tool) calls not in main log. Could improve by also parsing subagent logs if they exist.
 - **Cross-agent project collaboration** (s375): The /dispatch endpoint routes to agents by capability, but no agent actually uses it. Build a concrete integration: have an E session discover an agent that offers a complementary service and actually call their API.
-- ~~**Directive health dashboard**~~: Done (s389, v1.70.0). GET /directives exposes compliance rates, health status, critical alerts. R sessions can now query this programmatically.
+

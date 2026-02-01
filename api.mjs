@@ -3085,6 +3085,16 @@ app.get("/directives", (req, res) => {
   logActivity("directives.viewed", `Directive health checked: ${overall}% overall`);
 });
 
+// --- Queue compliance tracking ---
+app.get("/queue/compliance", (req, res) => {
+  try {
+    const out = execSync("python3 scripts/queue-compliance.py", { cwd: BASE, timeout: 5000 }).toString();
+    res.json(JSON.parse(out));
+  } catch (e) {
+    res.status(500).json({ error: "Failed to run queue-compliance.py", detail: e.message });
+  }
+});
+
 // --- Session history with quality metrics ---
 app.get("/sessions", (req, res) => {
   const histFile = "/home/moltbot/.config/moltbook/session-history.txt";

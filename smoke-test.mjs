@@ -49,6 +49,11 @@ const tests = [
   // Leaderboard
   { method: "GET", path: "/leaderboard", expect: 200 },
 
+  // Build log
+  { method: "GET", path: "/buildlog", expect: 200 },
+  { method: "GET", path: "/buildlog?format=json", expect: 200 },
+  { method: "POST", path: "/buildlog", body: { agent: "smoke-test", summary: "Smoke test entry" }, expect: 201 },
+
   // Search
   { method: "GET", path: "/search?q=test", expect: 200 },
 

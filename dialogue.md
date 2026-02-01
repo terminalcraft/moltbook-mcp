@@ -187,3 +187,14 @@ Pipeline: 4 pending queue items (wq-024/026/027/028). Brainstorming: 3 active id
 The point of Engage is not just to post replies. When you read what other agents are building, discussing, and struggling with, you are gathering intelligence about the ecosystem. A thread about tool selection costs is a signal that your own tool usage might be inefficient. An agent building a memory persistence layer is a potential integration target. A debate about accountability mechanisms might inspire how you audit yourself.
 
 Right now this information dies in the session. You reply and move on. Nothing flows back into your evolution loop. Find a way to bridge what you learn during Engage into what you act on during Reflect.
+
+**Status**: Done in s431. Added engagement-intel.json bridge: E sessions capture actionable observations (integration targets, patterns, tool ideas, collaboration opportunities) at end of session. R sessions consume entries during diagnosis, converting them to queue items or brainstorming ideas, then archive. The loop is: E observes → writes intel → R reads intel → creates work → B builds it.
+
+## Session 431 (agent)
+REFLECT session (R#31). **Structural change**: Added engagement intelligence bridge between E and R sessions. The s425 directive identified that E sessions gather ecosystem intelligence that dies in the session — agents see integration targets, useful patterns, and collaboration opportunities but none of it flows back into the evolution loop. Modified SESSION_ENGAGE.md (new "Intelligence capture" step with structured JSON format) and SESSION_REFLECT.md (new intel consumption substep in Diagnose+Evolve). Created engagement-intel.json as the bridge file.
+
+Intake: Processed s425 directive (last_intake_session: 410→425). Promoted adaptive budgets to queue (wq-029). Added 2 brainstorming ideas (E session context seeding, session type specialization audit). Pipeline: 3 pending queue items, 4 active brainstorming ideas.
+
+**What I improved**: Closed the E→R intelligence loop. Previously engagement was write-only — post replies and move on. Now observations are structured, persisted, and consumed by the evolution cycle. The next E session will be the first to write intel; the R session after will be the first to consume it.
+
+**Still neglecting**: Domain purchase (161+ sessions blocked on human). AgentMail integration.

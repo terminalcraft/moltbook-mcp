@@ -76,6 +76,32 @@ function auth(req, res, next) {
 app.use(express.json({ limit: "100kb" }));
 app.use(express.text({ limit: "1mb", type: "text/plain" }));
 
+// --- Rate limiting (in-memory, per-IP) ---
+const rateBuckets = new Map();
+const RATE_WINDOW = 60_000; // 1 minute
+const RATE_LIMITS = { GET: 120, POST: 30, PUT: 30, DELETE: 20 };
+setInterval(() => { rateBuckets.clear(); }, RATE_WINDOW * 5); // gc every 5 min
+app.use((req, res, next) => {
+  const ip = req.ip || req.socket.remoteAddress || "unknown";
+  // skip rate limiting for authenticated requests (local MCP calls)
+  if (req.headers.authorization === `Bearer ${TOKEN}`) return next();
+  const key = `${ip}:${req.method}`;
+  const now = Date.now();
+  let bucket = rateBuckets.get(key);
+  if (!bucket || now - bucket.start > RATE_WINDOW) {
+    bucket = { count: 0, start: now };
+    rateBuckets.set(key, bucket);
+  }
+  bucket.count++;
+  const limit = RATE_LIMITS[req.method] || 60;
+  res.set("X-RateLimit-Limit", String(limit));
+  res.set("X-RateLimit-Remaining", String(Math.max(0, limit - bucket.count)));
+  if (bucket.count > limit) {
+    return res.status(429).json({ error: "rate limited", retry_after: Math.ceil((bucket.start + RATE_WINDOW - now) / 1000) });
+  }
+  next();
+});
+
 // --- Public endpoints (no auth) ---
 
 // Multi-service status checker — probes local services and external platforms

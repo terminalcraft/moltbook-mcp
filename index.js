@@ -408,7 +408,7 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
     if (!s.pendingComments) s.pendingComments = [];
     const alreadyQueued = s.pendingComments.some(pc => pc.post_id === post_id && pc.content === content);
     if (!alreadyQueued) {
-      s.pendingComments.push({ post_id, content, parent_id: parent_id || null, queued_at: new Date().toISOString(), attempts: 0 });
+      s.pendingComments.push({ post_id, content, parent_id: parent_id || null, queued_at: new Date().toISOString(), attempts: 0, nextRetryAfter: new Date(Date.now() + 2 * 60000).toISOString() });
       saveState(s);
     }
     data._queued = true;
@@ -1001,16 +1001,20 @@ server.tool("moltbook_karma", "Analyze karma efficiency (karma/post ratio) for a
 
 // Pending comments management
 server.tool("moltbook_pending", "View and manage pending comments queue (comments that failed due to auth errors)", {
-  action: z.enum(["list", "retry", "clear"]).default("list").describe("'list' shows queued comments, 'retry' attempts to post all, 'clear' removes all pending"),
+  action: z.enum(["list", "retry", "auto", "clear"]).default("list").describe("'list' shows queued comments, 'retry' forces retry of all, 'auto' retries only backoff-eligible comments, 'clear' removes all pending"),
 }, async ({ action }) => {
   const s = loadState();
   const pending = s.pendingComments || [];
   if (pending.length === 0) return { content: [{ type: "text", text: "No pending comments." }] };
 
   if (action === "list") {
-    const lines = pending.map((pc, i) =>
-      `${i + 1}. post:${pc.post_id.slice(0, 8)}${pc.parent_id ? ` reply:${pc.parent_id.slice(0, 8)}` : ""} queued:${pc.queued_at.slice(0, 10)} attempts:${pc.attempts || 0}/10 — "${pc.content.slice(0, 80)}${pc.content.length > 80 ? "…" : ""}"`
-    );
+    const lines = pending.map((pc, i) => {
+      const backoffInfo = pc.nextRetryAfter ? (() => {
+        const ms = new Date(pc.nextRetryAfter).getTime() - Date.now();
+        return ms > 0 ? ` ⏳${Math.round(ms / 60000)}min` : " ✅ready";
+      })() : " ✅ready";
+      return `${i + 1}. post:${pc.post_id.slice(0, 8)}${pc.parent_id ? ` reply:${pc.parent_id.slice(0, 8)}` : ""} queued:${pc.queued_at.slice(0, 10)} attempts:${pc.attempts || 0}/10${backoffInfo} — "${pc.content.slice(0, 80)}${pc.content.length > 80 ? "…" : ""}"`;
+    });
     return { content: [{ type: "text", text: `📋 ${pending.length} pending comment(s):\n${lines.join("\n")}` }] };
   }
 
@@ -1021,9 +1025,22 @@ server.tool("moltbook_pending", "View and manage pending comments queue (comment
     return { content: [{ type: "text", text: `Cleared ${count} pending comment(s).` }] };
   }
 
-  // action === "retry"
+  // action === "retry" or "auto"
+  const isAuto = action === "auto";
   const MAX_RETRIES = 10;
   const CIRCUIT_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+  // For auto mode, filter to only backoff-eligible comments
+  const now = Date.now();
+  const eligible = isAuto ? pending.filter(pc => !pc.nextRetryAfter || new Date(pc.nextRetryAfter).getTime() <= now) : pending;
+  if (isAuto && eligible.length === 0) {
+    const nextUp = pending.reduce((earliest, pc) => {
+      const t = pc.nextRetryAfter ? new Date(pc.nextRetryAfter).getTime() : 0;
+      return t < earliest ? t : earliest;
+    }, Infinity);
+    const minsLeft = nextUp === Infinity ? "?" : Math.round((nextUp - now) / 60000);
+    return { content: [{ type: "text", text: `⏳ ${pending.length} pending comment(s), none eligible yet. Next eligible in ~${minsLeft}min.` }] };
+  }
 
   // Circuit breaker: if all recent retries failed with auth, skip full retry and probe first
   const circuitOpenAt = s.commentCircuitOpen ? new Date(s.commentCircuitOpen).getTime() : 0;
@@ -1055,7 +1072,9 @@ server.tool("moltbook_pending", "View and manage pending comments queue (comment
   const stillPending = [];
   const pruned = [];
   let authFailCount = 0;
-  for (const pc of pending) {
+  // Keep non-eligible comments as-is
+  const notEligible = isAuto ? pending.filter(pc => pc.nextRetryAfter && new Date(pc.nextRetryAfter).getTime() > now) : [];
+  for (const pc of eligible) {
     pc.attempts = (pc.attempts || 0) + 1;
     if (pc.attempts > MAX_RETRIES) {
       pruned.push(pc.post_id.slice(0, 8));
@@ -1071,25 +1090,31 @@ server.tool("moltbook_pending", "View and manage pending comments queue (comment
         logAction(`commented on ${pc.post_id.slice(0, 8)} (retry)`);
         results.push(`✅ ${pc.post_id.slice(0, 8)}`);
       } else {
+        // Exponential backoff: 2^attempts minutes, capped at 24h
+        const backoffMs = Math.min(Math.pow(2, pc.attempts) * 60000, 24 * 60 * 60 * 1000);
+        pc.nextRetryAfter = new Date(Date.now() + backoffMs).toISOString();
         stillPending.push(pc);
         if (/auth/i.test(data.error || "")) authFailCount++;
-        results.push(`❌ ${pc.post_id.slice(0, 8)}: ${data.error || "unknown error"} (attempt ${pc.attempts}/${MAX_RETRIES})`);
+        results.push(`❌ ${pc.post_id.slice(0, 8)}: ${data.error || "unknown error"} (attempt ${pc.attempts}/${MAX_RETRIES}, next retry in ${Math.round(backoffMs / 60000)}min)`);
       }
     } catch (e) {
+      const backoffMs = Math.min(Math.pow(2, pc.attempts) * 60000, 24 * 60 * 60 * 1000);
+      pc.nextRetryAfter = new Date(Date.now() + backoffMs).toISOString();
       stillPending.push(pc);
       if (/auth/i.test(e.message)) authFailCount++;
-      results.push(`❌ ${pc.post_id.slice(0, 8)}: ${e.message} (attempt ${pc.attempts}/${MAX_RETRIES})`);
+      results.push(`❌ ${pc.post_id.slice(0, 8)}: ${e.message} (attempt ${pc.attempts}/${MAX_RETRIES}, next retry in ${Math.round(backoffMs / 60000)}min)`);
     }
   }
   // If all failed with auth, open circuit breaker
   if (stillPending.length > 0 && authFailCount === stillPending.length) {
     s.commentCircuitOpen = new Date().toISOString();
   }
-  s.pendingComments = stillPending;
+  s.pendingComments = [...stillPending, ...notEligible];
   saveState(s);
   if (pruned.length) results.push(`🗑️ Pruned ${pruned.length} comment(s) after ${MAX_RETRIES} failed attempts: ${pruned.join(", ")}`);
   const circuitMsg = s.commentCircuitOpen ? "\n🔴 All retries failed with auth — circuit breaker opened. Next retry will probe with 1 request instead of retrying all." : "";
-  return { content: [{ type: "text", text: `Retry results (${results.length - stillPending.length}/${results.length} succeeded):\n${results.join("\n")}${circuitMsg}` }] };
+  const skippedMsg = notEligible.length ? `\n⏳ ${notEligible.length} comment(s) still in backoff.` : "";
+  return { content: [{ type: "text", text: `Retry results (${results.length - stillPending.length}/${eligible.length} succeeded):\n${results.join("\n")}${circuitMsg}${skippedMsg}` }] };
 });
 
 // Follow/unfollow

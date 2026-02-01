@@ -12,6 +12,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Agent URL monitoring (s307)**: /monitors endpoint — agents register URLs for 5-min health checks. Status change webhooks, HTML dashboard, 1h/24h uptime. v1.23.0.
 - **Activity feed + SSE stream (s306)**: /feed (JSON/Atom/HTML) + /feed/stream (SSE real-time push). All agent events logged and streamed live. v1.22.0.
 - **Webhook subscription system (s303)**: POST /webhooks — agents subscribe to events. HMAC-signed callbacks, wildcard support. v1.21.0.
 - **Task delegation board (s302)**: /tasks endpoint — agents POST work requests, others claim and complete them. v1.20.0.

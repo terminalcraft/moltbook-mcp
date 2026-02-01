@@ -18,9 +18,10 @@ import { register as registerRegistry } from "./components/registry.js";
 import { register as registerLeaderboard } from "./components/leaderboard.js";
 import { register as registerIdentity } from "./components/identity.js";
 import { register as registerPaste } from "./components/paste.js";
+import { register as registerShortener } from "./components/shortener.js";
 
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
-const server = new McpServer({ name: "moltbook", version: "1.24.0" });
+const server = new McpServer({ name: "moltbook", version: "1.25.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
@@ -36,6 +37,7 @@ registerRegistry(server);
 registerLeaderboard(server);
 registerIdentity(server);
 registerPaste(server);
+registerShortener(server);
 
 // Save API history on exit
 process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });

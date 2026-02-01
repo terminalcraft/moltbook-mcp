@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -305,6 +305,10 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/paste/:id", auth: false, desc: "Get a paste by ID. Add ?format=raw for plain text.", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
     { method: "GET", path: "/paste/:id/raw", auth: false, desc: "Get raw paste content as plain text.", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
     { method: "DELETE", path: "/paste/:id", auth: true, desc: "Delete a paste (owner only).", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
+    { method: "POST", path: "/short", auth: false, desc: "Create a short URL — deduplicates existing URLs. Optional custom code.", params: [{ name: "url", in: "body", desc: "URL to shorten", required: true }, { name: "code", in: "body", desc: "Custom short code (2-20 alphanumeric chars)" }, { name: "title", in: "body", desc: "Description (max 200)" }, { name: "author", in: "body", desc: "Author handle" }], example: '{"url":"https://github.com/terminalcraft/moltbook-mcp","code":"mcp","author":"moltbook"}' },
+    { method: "GET", path: "/short", auth: false, desc: "List short URLs. Filter by author or search.", params: [{ name: "author", in: "query", desc: "Filter by author" }, { name: "q", in: "query", desc: "Search URL, title, or code" }, { name: "limit", in: "query", desc: "Max results (default 50)" }] },
+    { method: "GET", path: "/s/:code", auth: false, desc: "Redirect to target URL. Add ?json for metadata instead of redirect.", params: [{ name: "code", in: "path", desc: "Short code", required: true }] },
+    { method: "DELETE", path: "/short/:id", auth: true, desc: "Delete a short URL.", params: [{ name: "id", in: "path", desc: "Short URL ID", required: true }] },
   ];
 
   // JSON format for machine consumption
@@ -416,7 +420,7 @@ function agentManifest(req, res) {
       ],
       revoked: [],
     },
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation", "paste-bin"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation", "paste-bin", "url-shortener"],
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "Agent identity manifest (also at /.well-known/agent.json)" },
       verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
@@ -464,6 +468,9 @@ function agentManifest(req, res) {
       paste_list: { url: `${base}/paste`, method: "GET", auth: false, description: "List pastes (?author=X&language=X&limit=N)" },
       paste_get: { url: `${base}/paste/:id`, method: "GET", auth: false, description: "Get paste by ID (?format=raw for plain text)" },
       paste_raw: { url: `${base}/paste/:id/raw`, method: "GET", auth: false, description: "Get raw paste content" },
+      short_create: { url: `${base}/short`, method: "POST", auth: false, description: "Create short URL (body: {url, code?, title?, author?})" },
+      short_list: { url: `${base}/short`, method: "GET", auth: false, description: "List short URLs (?author=X&q=search&limit=N)" },
+      short_redirect: { url: `${base}/s/:code`, method: "GET", auth: false, description: "Redirect to target URL (?json for metadata)" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -2372,6 +2379,65 @@ app.get("/feed/stream", (req, res) => {
   res.write(`event: connected\ndata: ${JSON.stringify({ msg: "connected to moltbook feed", version: VERSION })}\n\n`);
   sseClients.add(res);
   req.on("close", () => sseClients.delete(res));
+});
+
+// --- URL shortener ---
+const SHORTS_FILE = join(BASE, "shorts.json");
+const SHORTS_MAX = 2000;
+let shorts = (() => { try { return JSON.parse(readFileSync(SHORTS_FILE, "utf8")); } catch { return []; } })();
+function saveShorts() { try { writeFileSync(SHORTS_FILE, JSON.stringify(shorts, null, 2)); } catch {} }
+
+app.post("/short", (req, res) => {
+  const { url, code, author, title } = req.body || {};
+  if (!url || typeof url !== "string") return res.status(400).json({ error: "url required" });
+  try { new URL(url); } catch { return res.status(400).json({ error: "invalid url" }); }
+  const existing = shorts.find(s => s.url === url);
+  if (existing) {
+    return res.json({ id: existing.id, code: existing.code, short_url: `/s/${existing.code}`, url: existing.url, existing: true });
+  }
+  const id = crypto.randomUUID().slice(0, 8);
+  const finalCode = (code && /^[a-zA-Z0-9_-]{2,20}$/.test(code) && !shorts.find(s => s.code === code)) ? code : id.slice(0, 6);
+  const entry = {
+    id, code: finalCode, url,
+    title: (title || "").slice(0, 200) || undefined,
+    author: (author || "").slice(0, 50) || undefined,
+    created_at: new Date().toISOString(),
+    clicks: 0,
+  };
+  shorts.push(entry);
+  if (shorts.length > SHORTS_MAX) shorts = shorts.slice(-SHORTS_MAX);
+  saveShorts();
+  logActivity("short.create", `Short /${finalCode} → ${url.slice(0, 80)}`, { id, code: finalCode, author: entry.author });
+  fireWebhook("short.create", entry);
+  res.status(201).json({ id, code: finalCode, short_url: `/s/${finalCode}`, url });
+});
+
+app.get("/short", (req, res) => {
+  const { author, q, limit } = req.query;
+  let filtered = shorts;
+  if (author) filtered = filtered.filter(s => s.author === author);
+  if (q) { const ql = q.toLowerCase(); filtered = filtered.filter(s => (s.url + (s.title || "") + s.code).toLowerCase().includes(ql)); }
+  const n = Math.min(parseInt(limit) || 50, 200);
+  res.json({ count: filtered.length, shorts: filtered.slice(-n).reverse() });
+});
+
+app.get("/s/:code", (req, res) => {
+  const entry = shorts.find(s => s.code === req.params.code);
+  if (!entry) return res.status(404).json({ error: "short link not found" });
+  entry.clicks++;
+  saveShorts();
+  if (req.query.json !== undefined) return res.json(entry);
+  res.redirect(302, entry.url);
+});
+
+app.delete("/short/:id", (req, res) => {
+  const h = req.headers.authorization;
+  if (!h || h !== `Bearer ${TOKEN}`) return res.status(401).json({ error: "unauthorized" });
+  const idx = shorts.findIndex(s => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "not found" });
+  shorts.splice(idx, 1);
+  saveShorts();
+  res.json({ deleted: true });
 });
 
 // --- Paste bin ---

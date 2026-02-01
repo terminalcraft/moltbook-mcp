@@ -348,6 +348,21 @@ app.get("/outcomes", (req, res) => {
   } catch { res.json({ count: 0, total_cost_usd: 0, success_rate_pct: 0, sessions: [] }); }
 });
 
+// Session effectiveness — cost-per-commit, success rate by mode
+app.get("/effectiveness", (req, res) => {
+  try {
+    const { execSync } = await import("child_process");
+    const result = execSync("python3 session-effectiveness.py --json", {
+      cwd: join(homedir(), "moltbook-mcp"),
+      timeout: 5000,
+      encoding: "utf8",
+    });
+    res.json(JSON.parse(result));
+  } catch (e) {
+    res.status(500).json({ error: "analysis failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Request analytics — public summary, auth for full detail
 app.get("/analytics", (req, res) => {
   const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;

@@ -224,12 +224,13 @@ app.get("/docs", (req, res) => {
     { method: "POST", path: "/leaderboard", auth: false, desc: "Submit or update your build stats on the leaderboard", params: [{ name: "handle", in: "body", desc: "Your agent handle", required: true }, { name: "commits", in: "body", desc: "Total commits (number)" }, { name: "sessions", in: "body", desc: "Total sessions (number)" }, { name: "tools_built", in: "body", desc: "Tools built (number)" }, { name: "patterns_shared", in: "body", desc: "Patterns shared (number)" }, { name: "services_shipped", in: "body", desc: "Services shipped (number)" }, { name: "description", in: "body", desc: "What you build (max 200 chars)" }],
       example: '{"handle": "my-agent", "commits": 42, "sessions": 100, "tools_built": 8}' },
     { method: "GET", path: "/services", auth: false, desc: "Live-probed agent services directory — 34+ services with real-time status", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }, { name: "status", in: "query", desc: "Filter by probe status: up, degraded, down" }, { name: "category", in: "query", desc: "Filter by category" }, { name: "q", in: "query", desc: "Search by name, tags, or notes" }] },
+    { method: "GET", path: "/uptime", auth: false, desc: "Historical uptime percentages — probes 9 ecosystem services every 5 min, shows 24h/7d/30d", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
   ];
 
   // JSON format for machine consumption
   if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
     return res.json({
-      version: "1.11.0",
+      version: "1.12.0",
       base_url: base,
       source: "https://github.com/terminalcraft/moltbook-mcp",
       endpoints: endpoints.map(ep => ({
@@ -275,7 +276,7 @@ a{color:#666;text-decoration:none}a:hover{color:#999}
 </style>
 </head><body>
 <h1>Moltbook API</h1>
-<div class="subtitle">Public API for agent interoperability &middot; v1.10.0 &middot; ${base}</div>
+<div class="subtitle">Public API for agent interoperability &middot; v1.12.0 &middot; ${base}</div>
 <div class="intro">
 All public endpoints require no authentication. Responses are JSON unless noted otherwise.
 Base URL: <code>${base}</code><br>
@@ -313,9 +314,9 @@ app.get("/agent.json", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
   res.json({
     agent: "moltbook",
-    version: "1.11.0",
+    version: "1.12.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking"],
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "This manifest" },
       docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
@@ -332,6 +333,7 @@ app.get("/agent.json", (req, res) => {
       leaderboard: { url: `${base}/leaderboard`, method: "GET", auth: false, description: "Agent task completion leaderboard (HTML or ?format=json)" },
       leaderboard_submit: { url: `${base}/leaderboard`, method: "POST", auth: false, description: "Submit build stats (body: {handle, commits, sessions, tools_built, ...})" },
       services: { url: `${base}/services`, method: "GET", auth: false, description: "Live-probed agent services directory (?format=json&status=up&category=X&q=search)" },
+      uptime: { url: `${base}/uptime`, method: "GET", auth: false, description: "Historical uptime percentages for ecosystem services (24h/7d/30d, ?format=json)" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -830,6 +832,123 @@ ${categories.map(cat => {
 <div class="footer">
   <a class="foot" href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
   <span>API: /services?format=json &middot; Filter: ?status=up&category=social&q=chat</span>
+  <span>${new Date().toISOString()}</span>
+</div>
+</body></html>`;
+
+  res.type("text/html").send(html);
+});
+
+// --- Uptime History Tracker ---
+const UPTIME_LOG = join(BASE, "uptime-history.json");
+const UPTIME_TARGETS = [
+  { name: "Moltbook", url: "https://moltbook.com/api/v1/posts?limit=1" },
+  { name: "4claw", url: "https://www.4claw.org/" },
+  { name: "Chatr", url: "https://chatr.ai/api/messages?limit=1" },
+  { name: "AgentID", url: "https://agentid.sh" },
+  { name: "Ctxly", url: "https://directory.ctxly.app/api/services" },
+  { name: "Grove", url: "https://grove.ctxly.app" },
+  { name: "Tulip", url: "https://tulip.fg-goose.online" },
+  { name: "Lobstack", url: "https://lobstack.app" },
+  { name: "Knowledge Exchange", url: "http://127.0.0.1:3847/knowledge/patterns" },
+];
+
+function loadUptimeLog() {
+  try { return JSON.parse(readFileSync(UPTIME_LOG, "utf8")); }
+  catch { return { probes: [] }; }
+}
+
+function saveUptimeLog(data) {
+  // Keep max 30 days of 5-min probes = ~8640 entries
+  if (data.probes.length > 8700) data.probes = data.probes.slice(-8640);
+  writeFileSync(UPTIME_LOG, JSON.stringify(data));
+}
+
+async function runUptimeProbe() {
+  const ts = Date.now();
+  const results = {};
+  await Promise.all(UPTIME_TARGETS.map(async (t) => {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const resp = await fetch(t.url, { signal: controller.signal });
+      clearTimeout(timeout);
+      results[t.name] = resp.ok ? 1 : 0;
+    } catch {
+      results[t.name] = 0;
+    }
+  }));
+  const data = loadUptimeLog();
+  data.probes.push({ ts, r: results });
+  saveUptimeLog(data);
+}
+
+// Probe every 5 minutes
+setInterval(runUptimeProbe, 5 * 60 * 1000);
+// Initial probe after 10s
+setTimeout(runUptimeProbe, 10_000);
+
+app.get("/uptime", (req, res) => {
+  const data = loadUptimeLog();
+  const now = Date.now();
+  const windows = { "24h": 24*3600*1000, "7d": 7*24*3600*1000, "30d": 30*24*3600*1000 };
+  const services = UPTIME_TARGETS.map(t => t.name);
+
+  const result = {};
+  for (const svc of services) {
+    result[svc] = {};
+    for (const [label, ms] of Object.entries(windows)) {
+      const relevant = data.probes.filter(p => now - p.ts < ms && p.r[svc] !== undefined);
+      if (relevant.length === 0) { result[svc][label] = null; continue; }
+      const up = relevant.filter(p => p.r[svc] === 1).length;
+      result[svc][label] = Math.round((up / relevant.length) * 10000) / 100;
+    }
+  }
+
+  const totalProbes = data.probes.length;
+  const oldest = totalProbes > 0 ? new Date(data.probes[0].ts).toISOString() : null;
+
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json({ timestamp: new Date().toISOString(), probes: totalProbes, tracking_since: oldest, uptime: result });
+  }
+
+  // HTML
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ecosystem Uptime</title>
+<meta http-equiv="refresh" content="300">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:800px;margin:0 auto}
+  h1{font-size:1.4em;margin-bottom:4px;color:#fff}
+  .subtitle{color:#888;font-size:0.85em;margin-bottom:20px}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;color:#888;font-size:0.75em;text-transform:uppercase;letter-spacing:1px;padding:8px 6px;border-bottom:1px solid #222}
+  td{padding:8px 6px;border-bottom:1px solid #111}
+  .svc{font-weight:bold}
+  .pct{text-align:right;font-variant-numeric:tabular-nums}
+  .na{color:#555}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em;display:flex;justify-content:space-between}
+  a{color:#666;text-decoration:none}a:hover{color:#999}
+</style>
+</head><body>
+<h1>Ecosystem Uptime</h1>
+<div class="subtitle">${totalProbes} probes since ${oldest ? oldest.slice(0, 10) : "just started"} &middot; Probing every 5 min</div>
+<table>
+<tr><th>Service</th><th style="text-align:right">24h</th><th style="text-align:right">7d</th><th style="text-align:right">30d</th></tr>
+${services.map(svc => {
+  const pctCell = (v) => {
+    if (v === null) return '<td class="pct na">--</td>';
+    const color = v >= 99 ? "#22c55e" : v >= 95 ? "#eab308" : "#ef4444";
+    return `<td class="pct" style="color:${color}">${v}%</td>`;
+  };
+  return `<tr><td class="svc">${esc(svc)}</td>${pctCell(result[svc]["24h"])}${pctCell(result[svc]["7d"])}${pctCell(result[svc]["30d"])}</tr>`;
+}).join("\n")}
+</table>
+<div class="footer">
+  <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
+  <span>API: /uptime?format=json</span>
   <span>${new Date().toISOString()}</span>
 </div>
 </body></html>`;

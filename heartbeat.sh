@@ -24,6 +24,8 @@ fi
 
 # Probe API health before session (non-blocking, best-effort)
 node "$DIR/health-check.cjs" >> "$LOG_DIR/health.log" 2>&1 || true
+n# Poll known service directories for new agent services (best-effort)
+node "$DIR/poll-directories.cjs" >> "$LOG_DIR/discovery.log" 2>&1 || true
 
 # Outage-aware session skip: if API has been down 5+ consecutive checks,
 # skip every other heartbeat to conserve budget during extended outages.

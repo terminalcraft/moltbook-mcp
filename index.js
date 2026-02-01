@@ -2018,6 +2018,115 @@ server.tool(
   }
 );
 
+
+// =============================================================================
+// SERVICE DISCOVERY — Continuous engagement source discovery tools
+// =============================================================================
+
+const SERVICES_FILE = join(process.env.HOME || "/tmp", "moltbook-mcp", "services.json");
+
+function loadServices() {
+  try { return JSON.parse(readFileSync(SERVICES_FILE, "utf8")); }
+  catch { return { version: 1, lastUpdated: new Date().toISOString(), directories: [], services: [] }; }
+}
+
+function saveServices(data) {
+  data.lastUpdated = new Date().toISOString();
+  writeFileSync(SERVICES_FILE, JSON.stringify(data, null, 2));
+}
+
+// --- Tool: discover_list ---
+server.tool(
+  "discover_list",
+  "List discovered services from the service registry. Filter by status to find services needing evaluation.",
+  { status: z.enum(["discovered", "evaluated", "integrated", "active", "rejected", "all"]).default("discovered").describe("Filter by status, or 'all'") },
+  async ({ status }) => {
+    const data = loadServices();
+    let services = data.services;
+    if (status !== "all") services = services.filter(s => s.status === status);
+    services.sort((a, b) => new Date(b.discoveredAt) - new Date(a.discoveredAt));
+
+    if (services.length === 0) {
+      return { content: [{ type: "text", text: `No services with status "${status}". Use discover_list with status="all" to see everything.` }] };
+    }
+
+    const lines = services.map(s => {
+      let line = `[${s.status}] ${s.name} — ${s.url} (${s.category})`;
+      if (s.tags && s.tags.length) line += `\n  tags: ${s.tags.join(", ")}`;
+      if (s.notes) line += `\n  ${s.notes.slice(0, 120)}`;
+      if (s.api_docs) line += `\n  docs: ${s.api_docs}`;
+      return line;
+    });
+
+    return { content: [{ type: "text", text: `${services.length} service(s) [${status}]:\n\n${lines.join("\n\n")}` }] };
+  }
+);
+
+// --- Tool: discover_evaluate ---
+server.tool(
+  "discover_evaluate",
+  "Update the status and notes of a discovered service after evaluating it.",
+  {
+    service_id: z.string().describe("Service ID from discover_list"),
+    status: z.enum(["evaluated", "integrated", "active", "rejected"]).describe("New status"),
+    notes: z.string().default("").describe("Evaluation notes — what you found, why this status"),
+  },
+  async ({ service_id, status, notes }) => {
+    const data = loadServices();
+    const svc = data.services.find(s => s.id === service_id);
+    if (!svc) {
+      return { content: [{ type: "text", text: `Service "${service_id}" not found. Use discover_list to see available IDs.` }] };
+    }
+    svc.status = status;
+    if (notes) svc.notes = notes;
+    svc.evaluatedAt = new Date().toISOString();
+    saveServices(data);
+    return { content: [{ type: "text", text: `Updated ${svc.name}: status=${status}. ${data.services.filter(s => s.status === "discovered").length} services still awaiting evaluation.` }] };
+  }
+);
+
+// --- Tool: discover_log_url ---
+server.tool(
+  "discover_log_url",
+  "Log a URL you encountered that might be a useful service or platform for agents. It will be added to the service registry for future evaluation.",
+  {
+    url: z.string().describe("The URL of the service/platform"),
+    name: z.string().default("").describe("Name if known"),
+    context: z.string().describe("Where you saw this — e.g. 'post by @agent in m/builds' or 'bio of @user on Bluesky'"),
+  },
+  async ({ url: svcUrl, name, context }) => {
+    const data = loadServices();
+    // Dedup by domain
+    try {
+      const domain = new URL(svcUrl).hostname;
+      const existing = data.services.find(s => {
+        try { return new URL(s.url).hostname === domain; } catch { return false; }
+      });
+      if (existing) {
+        return { content: [{ type: "text", text: `Already tracked: ${existing.name} (${existing.url}) — status: ${existing.status}` }] };
+      }
+    } catch {
+      return { content: [{ type: "text", text: `Invalid URL: ${svcUrl}` }] };
+    }
+
+    const id = name ? name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : new URL(svcUrl).hostname.replace(/\./g, '-');
+    data.services.push({
+      id,
+      name: name || new URL(svcUrl).hostname,
+      url: svcUrl,
+      category: "unknown",
+      source: `snowball:${context}`,
+      status: "discovered",
+      discoveredAt: new Date().toISOString(),
+      evaluatedAt: null,
+      notes: `Found via: ${context}`,
+      api_docs: null,
+      tags: [],
+    });
+    saveServices(data);
+    return { content: [{ type: "text", text: `Logged ${svcUrl} for future evaluation. Registry now has ${data.services.length} services (${data.services.filter(s => s.status === "discovered").length} awaiting evaluation).` }] };
+  }
+);
 // Save API history on exit
 process.on("exit", () => { if (apiCallCount > 0) saveApiSession(); saveToolUsage(); });
 process.on("SIGINT", () => process.exit());

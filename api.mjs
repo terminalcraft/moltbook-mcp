@@ -7,6 +7,7 @@ import { extractFromRepo, parseGitHubUrl } from "./packages/pattern-extractor/in
 
 const app = express();
 const PORT = 3847;
+const MONITOR_PORT = 8443;
 const TOKEN = (() => { try { return readFileSync("/home/moltbot/.config/moltbook/api-token", "utf-8").trim(); } catch { return process.env.MOLTY_API_TOKEN || "changeme"; } })();
 const BASE = "/home/moltbot/moltbook-mcp";
 const LOGS = "/home/moltbot/.config/moltbook/logs";
@@ -2067,6 +2068,52 @@ async function fetchFeedSources() {
     }
   } catch {}
 
+  // mydeadinternet.com — recent fragments
+  try {
+    const mdiKey = (() => { try { return readFileSync("/home/moltbot/.mdi-key", "utf8").trim(); } catch { return null; } })();
+    const mdiHeaders = mdiKey ? { Authorization: `Bearer ${mdiKey}` } : {};
+    const resp = await fetch("https://mydeadinternet.com/api/stream?limit=15", {
+      headers: mdiHeaders,
+      signal: AbortSignal.timeout(5000),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      for (const f of (data.fragments || []).slice(0, 10)) {
+        items.push({
+          source: "mdi", type: f.type || "fragment", id: `mdi-${f.id}`,
+          title: null, content: (f.content || "").slice(0, 300),
+          author: f.agent_name || "unknown",
+          time: f.created_at,
+          replies: 0,
+          meta: { territory: f.territory_id, intensity: f.intensity, upvotes: f.upvotes },
+        });
+      }
+    }
+  } catch {}
+
+  // lobchan.ai — recent threads from /builds/ and /unsupervised/
+  for (const board of ["builds", "unsupervised"]) {
+    try {
+      const resp = await fetch(`https://lobchan.ai/api/boards/${board}/threads?limit=8`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        for (const t of (data.threads || []).slice(0, 8)) {
+          const op = t.posts?.[0];
+          items.push({
+            source: "lobchan", type: "thread", id: t.id,
+            title: t.title, content: (op?.content || "").slice(0, 300),
+            author: op?.authorName || op?.author || "anon",
+            time: t.bumpedAt || t.createdAt,
+            replies: t.replyCount || 0,
+            meta: { board },
+          });
+        }
+      }
+    } catch {}
+  }
+
   // Sort by time descending
   items.sort((a, b) => {
     const ta = a.time ? new Date(a.time).getTime() : 0;
@@ -2157,7 +2204,7 @@ ${rssItems}
     }
 
     // HTML view
-    const sourceColors = { "4claw": "#f59e0b", chatr: "#22c55e", moltbook: "#3b82f6" };
+    const sourceColors = { "4claw": "#f59e0b", chatr: "#22c55e", moltbook: "#3b82f6", mdi: "#a855f7", lobchan: "#ef4444" };
     const rows = items.map(i => {
       const color = sourceColors[i.source] || "#888";
       const time = i.time ? new Date(i.time).toISOString().slice(0, 16).replace("T", " ") : "—";
@@ -2190,6 +2237,8 @@ h1{font-size:1.4em;margin-bottom:4px;color:#fff}.sub{color:#888;font-size:0.85em
   <a href="/feed?source=4claw">4claw</a>
   <a href="/feed?source=chatr">Chatr</a>
   <a href="/feed?source=moltbook">Moltbook</a>
+  <a href="/feed?source=mdi">MDI</a>
+  <a href="/feed?source=lobchan">LobChan</a>
 </div>
 ${rows || "<p>No activity found.</p>"}
 </body></html>`;
@@ -2470,6 +2519,8 @@ const UPTIME_TARGETS = [
   { name: "Tulip", url: "https://tulip.fg-goose.online" },
   { name: "Lobstack", url: "https://lobstack.app" },
   { name: "Knowledge Exchange", url: "http://127.0.0.1:3847/knowledge/patterns" },
+  { name: "MDI", url: "https://mydeadinternet.com/api/pulse" },
+  { name: "LobChan", url: "https://lobchan.ai/api/boards" },
 ];
 
 function loadUptimeLog() {
@@ -5952,7 +6003,7 @@ const server1 = app.listen(PORT, "0.0.0.0", () => {
 });
 
 // Mirror on monitoring port so human monitor app stays up even if bot restarts main port
-app.listen(MONITOR_PORT, "0.0.0.0", () => {
+const server2 = app.listen(MONITOR_PORT, "0.0.0.0", () => {
   console.log(`Monitor API listening on port ${MONITOR_PORT}`);
 });
 

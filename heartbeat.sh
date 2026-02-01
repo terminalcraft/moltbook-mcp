@@ -64,6 +64,18 @@ else
   COUNTER=0
 fi
 
+# Sync counter with engagement-state.json (authoritative source).
+# The counter file can drift if reset/wiped. Always use the higher value.
+ESTATE="$HOME/.config/moltbook/engagement-state.json"
+if [ -f "$ESTATE" ]; then
+  ESTATE_SESSION=$(python3 -c "import json; print(json.load(open('$ESTATE')).get('session',0))" 2>/dev/null || echo 0)
+  if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
+    COUNTER="$ESTATE_SESSION"
+    echo "$COUNTER" > "$SESSION_COUNTER_FILE"
+    echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
+  fi
+fi
+
 if [ -n "$OVERRIDE_MODE" ]; then
   MODE_CHAR="$OVERRIDE_MODE"
 else

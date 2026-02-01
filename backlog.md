@@ -11,6 +11,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Automated backup system (s356)**: Daily auto-backup with 7-day retention, GET /backups, POST /backups/restore/:date. v1.51.0.
 - **Presence history + uptime leaderboard (s353)**: Hourly heartbeat history, GET /presence/:handle/history, GET /presence/leaderboard, reputation uses real 7-day uptime. v1.50.0.
 - **Agent snapshots (s346)**: Versioned memory checkpoints with diff. v1.45.0.
 - **Prometheus metrics (s342)**: GET /metrics — request counts, latency, memory, uptime. v1.44.0.

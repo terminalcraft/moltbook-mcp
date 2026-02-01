@@ -4815,6 +4815,34 @@ app.get("/reputation", (req, res) => {
   res.json({ count: results.length, agents: results });
 });
 
+// --- Backup system constants (shared by manual + automated backup) ---
+const BACKUP_DIR = join(BASE, "backups");
+const BACKUP_RETENTION_DAYS = 7;
+const BACKUP_STORES = {
+  analytics: ANALYTICS_FILE,
+  pastes: join(BASE, "pastes.json"),
+  polls: join(BASE, "polls.json"),
+  cron: join(BASE, "cron-jobs.json"),
+  kv: join(BASE, "kv-store.json"),
+  tasks: join(BASE, "tasks.json"),
+  rooms: join(BASE, "rooms.json"),
+  notifications: join(BASE, "notifications.json"),
+  buildlog: join(BASE, "buildlog.json"),
+  monitors: join(BASE, "monitors.json"),
+  shorts: join(BASE, "shorts.json"),
+  webhooks: WEBHOOKS_FILE,
+  directory: DIRECTORY_FILE,
+  profiles: PROFILES_FILE,
+  registry: join(BASE, "registry.json"),
+  leaderboard: join(BASE, "leaderboard.json"),
+  pubsub: join(BASE, "pubsub.json"),
+  inbox: INBOX_FILE,
+  feed: FEED_FILE,
+  snapshots: join(BASE, "snapshots.json"),
+  presence: join(BASE, "presence.json"),
+  badges: join(BASE, "badges-earned.json"),
+};
+
 // --- Automated backup listing (public) ---
 app.get("/backups", (req, res) => {
   ensureBackupDir();
@@ -5104,35 +5132,14 @@ app.get("/stats", (req, res) => {
 // --- Full data backup (auth required) ---
 app.get("/backup", auth, (req, res) => {
   const stores = {};
-  const files = {
-    analytics: ANALYTICS_FILE,
-    pastes: join(BASE, "pastes.json"),
-    polls: join(BASE, "polls.json"),
-    cron: join(BASE, "cron-jobs.json"),
-    kv: join(BASE, "kv-store.json"),
-    tasks: join(BASE, "tasks.json"),
-    rooms: join(BASE, "rooms.json"),
-    notifications: join(BASE, "notifications.json"),
-    buildlog: join(BASE, "buildlog.json"),
-    monitors: join(BASE, "monitors.json"),
-    shorts: join(BASE, "shorts.json"),
-    webhooks: WEBHOOKS_FILE,
-    directory: DIRECTORY_FILE,
-    profiles: PROFILES_FILE,
-    registry: join(BASE, "registry.json"),
-    leaderboard: join(BASE, "leaderboard.json"),
-    pubsub: join(BASE, "pubsub.json"),
-    inbox: INBOX_FILE,
-    feed: FEED_FILE,
-  };
-  for (const [name, path] of Object.entries(files)) {
+  for (const [name, path] of Object.entries(BACKUP_STORES)) {
     try { stores[name] = JSON.parse(readFileSync(path, "utf8")); }
     catch { stores[name] = null; }
   }
   stores._meta = {
     version: VERSION,
     ts: new Date().toISOString(),
-    storeCount: Object.keys(files).length,
+    storeCount: Object.keys(BACKUP_STORES).length,
     nonEmpty: Object.entries(stores).filter(([k, v]) => v !== null && k !== "_meta").length,
   };
   res.set("Content-Disposition", `attachment; filename="molty-backup-${new Date().toISOString().slice(0,10)}.json"`);
@@ -5143,68 +5150,19 @@ app.get("/backup", auth, (req, res) => {
 app.post("/backup", auth, (req, res) => {
   const data = req.body;
   if (!data || typeof data !== "object") return res.status(400).json({ error: "body must be a JSON object with store names as keys" });
-  const files = {
-    analytics: ANALYTICS_FILE,
-    pastes: join(BASE, "pastes.json"),
-    polls: join(BASE, "polls.json"),
-    cron: join(BASE, "cron-jobs.json"),
-    kv: join(BASE, "kv-store.json"),
-    tasks: join(BASE, "tasks.json"),
-    rooms: join(BASE, "rooms.json"),
-    notifications: join(BASE, "notifications.json"),
-    buildlog: join(BASE, "buildlog.json"),
-    monitors: join(BASE, "monitors.json"),
-    shorts: join(BASE, "shorts.json"),
-    webhooks: WEBHOOKS_FILE,
-    directory: DIRECTORY_FILE,
-    profiles: PROFILES_FILE,
-    registry: join(BASE, "registry.json"),
-    leaderboard: join(BASE, "leaderboard.json"),
-    pubsub: join(BASE, "pubsub.json"),
-    inbox: INBOX_FILE,
-    feed: FEED_FILE,
-  };
   const restored = [];
   const skipped = [];
   for (const [name, content] of Object.entries(data)) {
-    if (name === "_meta" || !files[name]) { skipped.push(name); continue; }
+    if (name === "_meta" || !BACKUP_STORES[name]) { skipped.push(name); continue; }
     if (content === null) { skipped.push(name); continue; }
     try {
-      writeFileSync(files[name], JSON.stringify(content, null, 2));
+      writeFileSync(BACKUP_STORES[name], JSON.stringify(content, null, 2));
       restored.push(name);
     } catch (e) { skipped.push(name); }
   }
   logActivity("backup.restore", `Restored ${restored.length} stores`, { restored, skipped });
   res.json({ ok: true, restored, skipped });
 });
-
-// --- Automated backup system (daily, 7-day retention) ---
-const BACKUP_DIR = join(BASE, "backups");
-const BACKUP_RETENTION_DAYS = 7;
-const BACKUP_STORES = {
-  analytics: ANALYTICS_FILE,
-  pastes: join(BASE, "pastes.json"),
-  polls: join(BASE, "polls.json"),
-  cron: join(BASE, "cron-jobs.json"),
-  kv: join(BASE, "kv-store.json"),
-  tasks: join(BASE, "tasks.json"),
-  rooms: join(BASE, "rooms.json"),
-  notifications: join(BASE, "notifications.json"),
-  buildlog: join(BASE, "buildlog.json"),
-  monitors: join(BASE, "monitors.json"),
-  shorts: join(BASE, "shorts.json"),
-  webhooks: WEBHOOKS_FILE,
-  directory: DIRECTORY_FILE,
-  profiles: PROFILES_FILE,
-  registry: join(BASE, "registry.json"),
-  leaderboard: join(BASE, "leaderboard.json"),
-  pubsub: join(BASE, "pubsub.json"),
-  inbox: INBOX_FILE,
-  feed: FEED_FILE,
-  snapshots: join(BASE, "snapshots.json"),
-  presence: join(BASE, "presence.json"),
-  badges: join(BASE, "badges-earned.json"),
-};
 
 function ensureBackupDir() {
   try { execSync(`mkdir -p "${BACKUP_DIR}"`); } catch {}

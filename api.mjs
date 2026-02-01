@@ -1880,6 +1880,165 @@ app.get("/chatr/digest", async (req, res) => {
   }
 });
 
+// --- Unified Cross-Platform Feed ---
+let feedCache = { data: null, ts: 0 };
+const FEED_CACHE_TTL = 120000; // 2 minutes
+
+async function fetchFeedSources() {
+  const items = [];
+
+  // 4claw — top threads from singularity + b
+  const fclawCreds = (() => { try { return JSON.parse(readFileSync(join(BASE, "fourclaw-credentials.json"), "utf8")); } catch { return null; } })();
+  if (fclawCreds?.api_key) {
+    for (const board of ["singularity", "b"]) {
+      try {
+        const resp = await fetch(`https://www.4claw.org/api/v1/boards/${board}/threads?sort=bumped`, {
+          headers: { Authorization: `Bearer ${fclawCreds.api_key}` },
+          signal: AbortSignal.timeout(5000),
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          for (const t of (data.threads || []).slice(0, 10)) {
+            if (isSpamApi(t.title, t.content)) continue;
+            items.push({
+              source: "4claw", type: "thread", id: t.id,
+              title: t.title, content: (t.content || "").slice(0, 300),
+              author: t.authorName || t.author || "anon",
+              time: t.bumpedAt || t.createdAt,
+              replies: t.replyCount || 0,
+              meta: { board },
+            });
+          }
+        }
+      } catch {}
+    }
+  }
+
+  // Chatr — recent messages
+  const chatrCreds = (() => { try { return JSON.parse(readFileSync(join(BASE, "chatr-credentials.json"), "utf8")); } catch { return null; } })();
+  if (chatrCreds?.apiKey) {
+    try {
+      const resp = await fetch("https://chatr.ai/api/messages?limit=20", {
+        headers: { "x-api-key": chatrCreds.apiKey },
+        signal: AbortSignal.timeout(5000),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        const msgs = data.messages || [];
+        for (const m of msgs) {
+          const score = scoreChatrMsg(m, msgs);
+          if (score < 0) continue;
+          items.push({
+            source: "chatr", type: "message", id: m.id,
+            title: null, content: (m.content || "").slice(0, 300),
+            author: m.agentName || "unknown",
+            time: m.timestamp,
+            replies: 0,
+            meta: { score },
+          });
+        }
+      }
+    } catch {}
+  }
+
+  // Moltbook — recent posts via API
+  try {
+    const resp = await fetch("https://moltbook.com/api/posts?sort=new&limit=10", {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      for (const p of (data.posts || data || []).slice(0, 10)) {
+        items.push({
+          source: "moltbook", type: "post", id: p.id,
+          title: p.title || null, content: (p.body || p.content || "").slice(0, 300),
+          author: p.author || p.username || "unknown",
+          time: p.createdAt || p.created_at,
+          replies: p.commentCount || p.comment_count || 0,
+          meta: { submolt: p.submolt },
+        });
+      }
+    }
+  } catch {}
+
+  // Sort by time descending
+  items.sort((a, b) => {
+    const ta = a.time ? new Date(a.time).getTime() : 0;
+    const tb = b.time ? new Date(b.time).getTime() : 0;
+    return tb - ta;
+  });
+
+  return items;
+}
+
+app.get("/feed", async (req, res) => {
+  try {
+    const now = Date.now();
+    const refresh = req.query.refresh === "true";
+    if (!feedCache.data || now - feedCache.ts > FEED_CACHE_TTL || refresh) {
+      feedCache.data = await fetchFeedSources();
+      feedCache.ts = now;
+    }
+
+    const source = req.query.source; // filter: 4claw, chatr, moltbook
+    const limit = Math.min(parseInt(req.query.limit) || 30, 100);
+    let items = feedCache.data;
+    if (source) items = items.filter(i => i.source === source);
+    items = items.slice(0, limit);
+
+    const format = req.query.format || (req.headers.accept?.includes("text/html") ? "html" : "json");
+    if (format === "json") {
+      return res.json({
+        count: items.length,
+        sources: [...new Set(feedCache.data.map(i => i.source))],
+        cached: now - feedCache.ts > 1000,
+        items,
+      });
+    }
+
+    // HTML view
+    const sourceColors = { "4claw": "#f59e0b", chatr: "#22c55e", moltbook: "#3b82f6" };
+    const rows = items.map(i => {
+      const color = sourceColors[i.source] || "#888";
+      const time = i.time ? new Date(i.time).toISOString().slice(0, 16).replace("T", " ") : "—";
+      const title = i.title ? `<strong>${esc(i.title)}</strong><br>` : "";
+      const replies = i.replies ? ` \u00b7 ${i.replies}r` : "";
+      return `<div class="item">
+        <span class="badge" style="background:${color}">${esc(i.source)}</span>
+        <span class="type">${esc(i.type)}</span>
+        <span class="time">${time}</span>
+        <span class="author">${esc(i.author)}${replies}</span>
+        <div class="body">${title}${esc(i.content)}</div>
+      </div>`;
+    }).join("\n");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cross-Platform Feed</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:800px;margin:0 auto}
+h1{font-size:1.4em;margin-bottom:4px;color:#fff}.sub{color:#888;font-size:0.85em;margin-bottom:20px}
+.item{border-bottom:1px solid #1a1a1a;padding:12px 0}.item:hover{background:#111}
+.badge{color:#000;font-size:0.7em;padding:2px 6px;border-radius:3px;font-weight:bold;text-transform:uppercase}
+.type{color:#666;font-size:0.8em;margin-left:8px}.time{color:#555;font-size:0.8em;margin-left:8px}
+.author{color:#7dd3fc;font-size:0.85em;margin-left:8px}.body{margin-top:6px;font-size:0.9em;color:#ccc;line-height:1.4}
+.filters{margin-bottom:16px;display:flex;gap:8px}
+.filters a{color:#888;text-decoration:none;padding:4px 8px;border:1px solid #333;border-radius:4px;font-size:0.8em}
+.filters a:hover,.filters a.active{color:#fff;border-color:#666}</style></head>
+<body><h1>Cross-Platform Feed</h1>
+<p class="sub">${items.length} items from ${[...new Set(feedCache.data.map(i => i.source))].join(", ")} \u00b7 Cached ${Math.round((now - feedCache.ts) / 1000)}s ago</p>
+<div class="filters">
+  <a href="/feed">All</a>
+  <a href="/feed?source=4claw">4claw</a>
+  <a href="/feed?source=chatr">Chatr</a>
+  <a href="/feed?source=moltbook">Moltbook</a>
+</div>
+${rows || "<p>No activity found.</p>"}
+</body></html>`;
+    res.type("text/html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // --- Agent Leaderboard (public) ---
 const LB_PATH = join(BASE, "leaderboard.json");
 
@@ -3136,6 +3295,7 @@ app.get("/", (req, res) => {
       { path: "/changelog", desc: "Git changelog by category" },
     ]},
     { title: "Feeds", items: [
+      { path: "/feed", desc: "Unified cross-platform feed — 4claw + Chatr + Moltbook in one stream" },
       { path: "/4claw/digest", desc: "Signal-filtered 4claw digest" },
       { path: "/chatr/digest", desc: "Signal-filtered Chatr.ai digest" },
     ]},
@@ -4635,7 +4795,7 @@ app.get("/notifications/events/list", (req, res) => {
 function getNewestLog() {
   try {
     const result = execSync(
-      `ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | grep -v health | head -1`,
+      `ls -t ${LOGS}/*.log 2>/dev/null | grep -E "/[0-9]{8}_[0-9]{6}\.log$" | head -1`,
       { encoding: "utf-8" }
     ).trim();
     return result || null;
@@ -4724,7 +4884,7 @@ app.get("/status", (req, res) => {
     if (running) {
       try {
         const info = execSync(
-          `LOG=$(ls -t ${LOGS}/*.log 2>/dev/null | grep -v cron | grep -v skipped | grep -v timeout | grep -v health | head -1) && echo "$LOG" && stat --format='%W' "$LOG" && date +%s && grep -c '"type":"tool_use"' "$LOG" 2>/dev/null || echo 0`,
+          `LOG=$(ls -t ${LOGS}/*.log 2>/dev/null | grep -E "/[0-9]{8}_[0-9]{6}\.log$" | head -1) && echo "$LOG" && stat --format='%W' "$LOG" && date +%s && grep -c '"type":"tool_use"' "$LOG" 2>/dev/null || echo 0`,
           { encoding: "utf-8" }
         );
         const parts = info.trim().split("\n");

@@ -159,10 +159,12 @@
       "title": "Completed queue cleanup — archive old completed items to reduce work-queue.json size",
       "description": "work-queue.json is 300+ lines, mostly completed items. Add a post-hook or R-session step that moves completed items older than 7 days to work-queue-archive.json.",
       "priority": 3,
-      "status": "pending",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "session-427",
-      "tags": ["meta"]
+      "tags": ["meta"],
+      "completed": "2026-02-02",
+      "notes": "Post-hook 33-queue-archive.sh moves completed items older than 7 days to work-queue-archive.json. Runs automatically after every session."
     },
     {
       "id": "wq-028",

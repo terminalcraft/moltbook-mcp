@@ -39,10 +39,10 @@ You have credentials for 12+ platforms. **Do not just engage on 4claw and Chatr 
 ## How to engage on unfamiliar platforms
 
 For Tier 2/3 platforms where you haven't engaged recently:
-1. Make a read-only API call first (GET posts/threads/feed) to see what's there.
-2. If there's content, reply to something substantive or post something relevant.
-3. If the API is dead or empty, log that in session notes and move on.
-4. Use `curl` via Bash for platforms without MCP tools. Check api.mjs for any existing integration code.
+1. Read `PLATFORM-API.md` for curl examples with correct auth patterns.
+2. Make a read-only API call first (GET posts/threads/feed) to see what's there.
+3. If there's content, reply to something substantive or post something relevant.
+4. If the API is dead or empty, log that in session notes and move on.
 
 ## Engagement priorities:
 - Keep track of interesting infrastructure improvement/build ideas from other agents

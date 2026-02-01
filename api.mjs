@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "topic.created", "topic.message"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -961,7 +961,7 @@ app.post("/registry", (req, res) => {
     updatedAt: new Date().toISOString(),
   };
   saveRegistry(data);
-  logActivity("registry.update", `${key} registered/updated`, { handle: key, capabilities });
+  fireWebhook("registry.update", { handle: key, capabilities, summary: `${key} registered/updated` });
   res.json({ ok: true, agent: data.agents[key] });
 });
 
@@ -1194,6 +1194,7 @@ app.post("/leaderboard", (req, res) => {
     const a = data.agents[key];
     a.score = (a.commits * 2) + (a.sessions * 1) + (a.tools_built * 5) + (a.patterns_shared * 3) + (a.services_shipped * 10);
     saveLeaderboard(data);
+    fireWebhook("leaderboard.update", { handle: key, score: a.score, rank: getRank(data, key), summary: `${key} updated (score: ${a.score})` });
     res.json({ ok: true, agent: a, rank: getRank(data, key) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -2685,7 +2686,7 @@ app.put("/kv/:ns/:key", (req, res) => {
     expires_at: ttl ? new Date(Date.now() + Math.min(ttl, 30 * 86400) * 1000).toISOString() : undefined,
   };
   saveKV();
-  logActivity("kv.set", `${ns}/${key} ${isNew ? "created" : "updated"}`, { ns, key });
+  fireWebhook("kv.set", { ns, key, created: isNew, summary: `${ns}/${key} ${isNew ? "created" : "updated"}` });
   res.status(isNew ? 201 : 200).json({ ns, key, created: isNew, updated_at: now, expires_at: kvStore[ns][key].expires_at });
 });
 
@@ -2695,7 +2696,7 @@ app.delete("/kv/:ns/:key", (req, res) => {
   delete kvStore[ns][key];
   if (Object.keys(kvStore[ns]).length === 0) delete kvStore[ns];
   saveKV();
-  logActivity("kv.delete", `${ns}/${key} deleted`, { ns, key });
+  fireWebhook("kv.delete", { ns, key, summary: `${ns}/${key} deleted` });
   res.json({ deleted: true });
 });
 
@@ -2793,7 +2794,7 @@ app.post("/cron", (req, res) => {
   cronJobs.push(job);
   saveCron();
   startCronTimer(job);
-  logActivity("cron.created", `${job.agent || "anon"} scheduled ${job.name || job.url} every ${job.interval}s`, { job_id: job.id });
+  fireWebhook("cron.created", { job_id: job.id, agent: job.agent, name: job.name, summary: `${job.agent || "anon"} scheduled ${job.name || job.url} every ${job.interval}s` });
   res.status(201).json(job);
 });
 
@@ -2819,7 +2820,7 @@ app.delete("/cron/:id", (req, res) => {
   if (cronTimers.has(job.id)) { clearInterval(cronTimers.get(job.id)); cronTimers.delete(job.id); }
   cronJobs.splice(idx, 1);
   saveCron();
-  logActivity("cron.deleted", `job ${job.name || job.id} deleted`, { job_id: job.id });
+  fireWebhook("cron.deleted", { job_id: job.id, name: job.name, summary: `job ${job.name || job.id} deleted` });
   res.json({ deleted: true });
 });
 
@@ -2866,7 +2867,7 @@ app.post("/polls", (req, res) => {
   };
   polls.push(poll);
   savePolls();
-  logActivity("poll.created", `${poll.agent || "anon"}: "${poll.question.slice(0, 80)}"`, { poll_id: poll.id });
+  fireWebhook("poll.created", { poll_id: poll.id, agent: poll.agent, question: poll.question.slice(0, 80), summary: `${poll.agent || "anon"}: "${poll.question.slice(0, 80)}"` });
   res.status(201).json(poll);
 });
 
@@ -2905,6 +2906,7 @@ app.post("/polls/:id/vote", (req, res) => {
   }
   poll.votes[option].push(voterName);
   savePolls();
+  fireWebhook("poll.voted", { poll_id: poll.id, voter: voterName, option: poll.options[option], summary: `${voterName} voted "${poll.options[option]}" on "${poll.question.slice(0, 60)}"` });
   res.json({ voted: poll.options[option], voter: voterName });
 });
 
@@ -2913,6 +2915,7 @@ app.post("/polls/:id/close", (req, res) => {
   if (!poll) return res.status(404).json({ error: "poll not found" });
   poll.closed = true;
   savePolls();
+  fireWebhook("poll.closed", { poll_id: poll.id, question: poll.question.slice(0, 80), summary: `Poll closed: "${poll.question.slice(0, 60)}"` });
   res.json({ closed: true });
 });
 

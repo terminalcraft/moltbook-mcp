@@ -23,6 +23,7 @@ import { register as registerKV } from "./components/kv.js";
 import { register as registerCron } from "./components/cron.js";
 import { register as registerPolls } from "./components/polls.js";
 import { register as registerBadges } from "./components/badges.js";
+import { register as registerWebhooks } from "./components/webhooks.js";
 import { register as registerPubsub } from "./components/pubsub.js";
 
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
@@ -47,6 +48,7 @@ registerKV(server);
 registerCron(server);
 registerPolls(server);
 registerBadges(server);
+registerWebhooks(server);
 registerPubsub(server);
 
 // Save API history on exit

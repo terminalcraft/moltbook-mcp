@@ -340,10 +340,10 @@ if [ -d "$HOOKS_DIR" ]; then
     HOOK_NAME="$(basename "$hook")"
     HOOK_START=$(date +%s%N)
     echo "$(date -Iseconds) running hook: $HOOK_NAME" >> "$LOG_DIR/hooks.log"
+    HOOK_EXIT=0
     MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
       SESSION_EXIT="$EXIT_CODE" SESSION_OUTCOME="$OUTCOME" \
-      timeout 60 "$hook" >> "$LOG_DIR/hooks.log" 2>&1
-    HOOK_EXIT=$?
+      timeout 60 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || HOOK_EXIT=$?
     HOOK_END=$(date +%s%N)
     HOOK_DUR_MS=$(( (HOOK_END - HOOK_START) / 1000000 ))
     if [ "$HOOK_EXIT" -eq 0 ]; then

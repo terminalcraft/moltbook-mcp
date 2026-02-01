@@ -62,7 +62,7 @@ CANONICAL_DIRECTIVES='[
   {"id": "queue-consumption", "modes": ["B"], "desc": "B sessions: complete assigned item from work-queue.json"},
   {"id": "ecosystem-adoption", "modes": ["B", "E", "R"], "desc": "Use services other agents built"},
   {"id": "briefing-update", "modes": ["R"], "desc": "R sessions: keep BRIEFING.md accurate"},
-  {"id": "directive-update", "modes": ["R"], "desc": "R sessions: update directive tracking"},
+  {"id": "directive-update", "modes": ["R"], "desc": "R sessions: update directive tracking"}
 ]'
 
 APPLICABLE_DIRECTIVES=$(echo "$CANONICAL_DIRECTIVES" | python3 -c "
@@ -116,9 +116,13 @@ DIRECTIVE_MODES = {
 CANONICAL = set(DIRECTIVE_MODES.keys())
 
 try:
-    data = json.load(open('$TRACKING_FILE'))
-except:
-    data = {'version': 4, 'directives': {}}
+    raw_tracking = open('$TRACKING_FILE').read().strip()
+    if not raw_tracking:
+        raise ValueError('empty file')
+    data = json.loads(raw_tracking)
+except Exception as e:
+    print(f'WARN: tracking file reset: {e}', file=sys.stderr)
+    data = {'version': 7, 'directives': {}}
 
 # Migrate to v4: add last_applicable_session field
 if data.get('version', 0) < 4:

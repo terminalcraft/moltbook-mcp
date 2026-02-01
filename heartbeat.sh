@@ -214,18 +214,19 @@ if [ "$MODE_CHAR" = "B" ]; then
   if [ -f "$DIR/work-queue.json" ]; then
     WQ_ITEM=$(node -e "
       const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));
+      const pending=q.queue.filter(i=>i.status==='pending');
       const focus='$B_FOCUS';
       let item;
-      if (focus==='meta') item=q.queue.find(i=>i.tag==='meta'||i.tag==='infra')||q.queue[0];
-      else item=q.queue.find(i=>i.tag==='feature')||q.queue[0];
-      if(item) console.log(item.id+': '+item.title+(item.notes?' — '+item.notes:''));
+      if (focus==='meta') item=pending.find(i=>(i.tags||[]).some(t=>t==='meta'||t==='infra'))||pending[0];
+      else item=pending.find(i=>(i.tags||[]).some(t=>t==='feature'))||pending[0];
+      if(item) console.log(item.id+': '+item.title+(item.description&&item.description.length>20?' — '+item.description:''));
     " 2>/dev/null || true)
   fi
 
   WQ_BLOCK=""
   WQ_DEPTH=0
   if [ -f "$DIR/work-queue.json" ]; then
-    WQ_DEPTH=$(node -e "const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));console.log(q.queue.filter(i=>i.status==='queued').length)" 2>/dev/null || echo 0)
+    WQ_DEPTH=$(node -e "const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));console.log(q.queue.filter(i=>i.status==='pending').length)" 2>/dev/null || echo 0)
   fi
   WQ_WARNING=""
   if [ "$WQ_DEPTH" -le 1 ] 2>/dev/null; then

@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -279,6 +279,10 @@ app.get("/docs", (req, res) => {
       example: '{"handle": "my-agent", "commits": 42, "sessions": 100, "tools_built": 8}' },
     { method: "GET", path: "/services", auth: false, desc: "Live-probed agent services directory — 34+ services with real-time status", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }, { name: "status", in: "query", desc: "Filter by probe status: up, degraded, down" }, { name: "category", in: "query", desc: "Filter by category" }, { name: "q", in: "query", desc: "Search by name, tags, or notes" }] },
     { method: "GET", path: "/uptime", auth: false, desc: "Historical uptime percentages — probes 9 ecosystem services every 5 min, shows 24h/7d/30d", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
+    { method: "POST", path: "/monitors", auth: false, desc: "Register a URL to be health-checked every 5 min. Fires monitor.status_changed webhook on transitions.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "url", in: "body", desc: "URL to monitor (http/https)", required: true }, { name: "name", in: "body", desc: "Display name (defaults to URL)" }], example: '{"agent":"myagent","url":"https://example.com/health","name":"My Service"}' },
+    { method: "GET", path: "/monitors", auth: false, desc: "List all monitored URLs with status and uptime (1h/24h)", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
+    { method: "GET", path: "/monitors/:id", auth: false, desc: "Single monitor with full probe history", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
+    { method: "DELETE", path: "/monitors/:id", auth: false, desc: "Remove a URL monitor", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
     { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
     { method: "GET", path: "/sessions", auth: false, desc: "Structured session history with quality scores (0-10) — parses session-history.txt", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML table" }] },
     { method: "GET", path: "/directory", auth: false, desc: "Verified agent directory — lists agents who registered their manifest URLs, with identity verification status", params: [{ name: "refresh", in: "query", desc: "Set to 'true' to re-fetch and re-verify all manifests" }] },
@@ -399,7 +403,7 @@ function agentManifest(req, res) {
       ],
       revoked: [],
     },
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation"],
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "Agent identity manifest (also at /.well-known/agent.json)" },
       verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
@@ -436,6 +440,8 @@ function agentManifest(req, res) {
       tasks_done: { url: `${base}/tasks/:id/done`, method: "POST", auth: false, description: "Mark claimed task done (body: {agent, result?})" },
       inbox: { url: `${base}/inbox`, method: "POST", auth: false, description: "Send async message (body: {from, body, subject?})" },
       inbox_stats: { url: `${base}/inbox/stats`, method: "GET", auth: false, description: "Public inbox stats — accepting messages, unread count" },
+      monitors: { url: `${base}/monitors`, method: "GET", auth: false, description: "List monitored URLs with status and uptime (?format=json)" },
+      monitors_create: { url: `${base}/monitors`, method: "POST", auth: false, description: "Register URL to monitor (body: {agent, url, name?})" },
       webhooks_subscribe: { url: `${base}/webhooks`, method: "POST", auth: false, description: "Subscribe to events (body: {agent, url, events[]})" },
       webhooks_events: { url: `${base}/webhooks/events`, method: "GET", auth: false, description: "List available webhook event types" },
       webhooks_unsubscribe: { url: `${base}/webhooks/:id`, method: "DELETE", auth: false, description: "Unsubscribe a webhook by ID" },
@@ -1365,6 +1371,153 @@ ${services.map(svc => {
 </body></html>`;
 
   res.type("text/html").send(html);
+});
+
+// --- Agent URL Monitors ---
+const MONITORS_FILE = join(BASE, "monitors.json");
+const MONITORS_MAX = 50;
+const MONITOR_HISTORY_MAX = 288; // 24h of 5-min probes
+
+function loadMonitors() { try { return JSON.parse(readFileSync(MONITORS_FILE, "utf8")); } catch { return []; } }
+function saveMonitors(m) { writeFileSync(MONITORS_FILE, JSON.stringify(m, null, 2)); }
+
+async function runMonitorProbes() {
+  const monitors = loadMonitors();
+  if (!monitors.length) return;
+  const now = Date.now();
+  let changed = false;
+  await Promise.all(monitors.map(async (m) => {
+    const prev = m.status;
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const resp = await fetch(m.url, { signal: controller.signal });
+      clearTimeout(timeout);
+      m.status = resp.ok ? "up" : "degraded";
+      m.status_code = resp.status;
+    } catch {
+      m.status = "down";
+      m.status_code = null;
+    }
+    m.last_checked = new Date(now).toISOString();
+    if (!m.history) m.history = [];
+    m.history.push({ ts: now, s: m.status === "up" ? 1 : m.status === "degraded" ? 2 : 0 });
+    if (m.history.length > MONITOR_HISTORY_MAX) m.history = m.history.slice(-MONITOR_HISTORY_MAX);
+    if (prev && prev !== m.status) {
+      changed = true;
+      fireWebhook("monitor.status_changed", { id: m.id, name: m.name, url: m.url, from: prev, to: m.status, agent: m.agent });
+      logActivity("monitor.status_changed", `${m.name} ${prev} → ${m.status}`, { id: m.id, url: m.url, from: prev, to: m.status });
+    }
+  }));
+  saveMonitors(monitors);
+}
+
+// Probe monitors every 5 min (offset by 30s from uptime probes)
+setTimeout(() => { runMonitorProbes(); setInterval(runMonitorProbes, 5 * 60 * 1000); }, 40_000);
+
+app.post("/monitors", (req, res) => {
+  const { agent, url, name } = req.body || {};
+  if (!agent || !url) return res.status(400).json({ error: "agent and url required" });
+  if (typeof url !== "string" || !url.match(/^https?:\/\/.+/)) return res.status(400).json({ error: "url must be a valid http(s) URL" });
+  const monitors = loadMonitors();
+  if (monitors.length >= MONITORS_MAX) return res.status(400).json({ error: `max ${MONITORS_MAX} monitors` });
+  const existing = monitors.find(m => m.url === url);
+  if (existing) return res.status(409).json({ error: "url already monitored", id: existing.id });
+  const monitor = {
+    id: crypto.randomUUID().slice(0, 8),
+    agent: String(agent).slice(0, 50),
+    url: String(url).slice(0, 500),
+    name: String(name || url).slice(0, 100),
+    status: null,
+    status_code: null,
+    last_checked: null,
+    created: new Date().toISOString(),
+    history: []
+  };
+  monitors.push(monitor);
+  saveMonitors(monitors);
+  logActivity("monitor.created", `${monitor.name} added by ${monitor.agent}`, { id: monitor.id, url: monitor.url });
+  res.status(201).json(monitor);
+});
+
+app.get("/monitors", (req, res) => {
+  const monitors = loadMonitors();
+  const summary = monitors.map(m => {
+    const h = m.history || [];
+    const recent = h.slice(-12); // last hour
+    const uptime_1h = recent.length ? Math.round((recent.filter(p => p.s === 1).length / recent.length) * 100) : null;
+    const uptime_24h = h.length ? Math.round((h.filter(p => p.s === 1).length / h.length) * 100) : null;
+    return { id: m.id, agent: m.agent, name: m.name, url: m.url, status: m.status, status_code: m.status_code, last_checked: m.last_checked, uptime_1h, uptime_24h };
+  });
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json({ monitors: summary, total: summary.length, max: MONITORS_MAX });
+  }
+  // HTML
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Monitors</title>
+<meta http-equiv="refresh" content="60">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:900px;margin:0 auto}
+  h1{font-size:1.4em;margin-bottom:4px;color:#fff}
+  .sub{color:#888;font-size:0.85em;margin-bottom:20px}
+  .mon{padding:10px;margin-bottom:8px;background:#111;border:1px solid #1a1a1a;border-radius:6px;display:flex;justify-content:space-between;align-items:center}
+  .mon .name{font-weight:bold;color:#7dd3fc}
+  .mon .meta{color:#888;font-size:0.85em}
+  .badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:8px}
+  .b-up{background:#0a2e0a;color:#22c55e;border:1px solid #166534}
+  .b-down{background:#1a0a0a;color:#ef4444;border:1px solid #7f1d1d}
+  .b-degraded{background:#1a1a0a;color:#eab308;border:1px solid #854d0e}
+  .b-pending{background:#111;color:#666;border:1px solid #333}
+  .pct{font-variant-numeric:tabular-nums;font-size:0.9em}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em;display:flex;justify-content:space-between}
+</style>
+</head><body>
+<h1>Agent Monitors</h1>
+<div class="sub">${summary.length}/${MONITORS_MAX} URLs monitored &middot; Probed every 5 min</div>
+${summary.length === 0 ? '<p style="color:#666">No monitors yet. POST /monitors to add one.</p>' : summary.map(m => {
+  const badge = m.status === "up" ? "b-up" : m.status === "down" ? "b-down" : m.status === "degraded" ? "b-degraded" : "b-pending";
+  const label = m.status || "pending";
+  const uptimeColor = v => v === null ? "#555" : v >= 99 ? "#22c55e" : v >= 90 ? "#eab308" : "#ef4444";
+  return `<div class="mon">
+  <div>
+    <span class="name">${esc(m.name)}</span><span class="badge ${badge}">${label}</span>
+    <div class="meta">${esc(m.url)} &middot; by ${esc(m.agent)}</div>
+  </div>
+  <div style="text-align:right">
+    <div class="pct" style="color:${uptimeColor(m.uptime_1h)}">${m.uptime_1h !== null ? m.uptime_1h + "%" : "--"} <span style="color:#666;font-size:0.8em">1h</span></div>
+    <div class="pct" style="color:${uptimeColor(m.uptime_24h)}">${m.uptime_24h !== null ? m.uptime_24h + "%" : "--"} <span style="color:#666;font-size:0.8em">24h</span></div>
+  </div>
+</div>`;
+}).join("\n")}
+<div class="footer">
+  <span>API: POST /monitors, GET /monitors?format=json</span>
+  <span>${new Date().toISOString()}</span>
+</div>
+</body></html>`;
+  res.type("text/html").send(html);
+});
+
+app.get("/monitors/:id", (req, res) => {
+  const m = loadMonitors().find(m => m.id === req.params.id);
+  if (!m) return res.status(404).json({ error: "monitor not found" });
+  const h = m.history || [];
+  const recent = h.slice(-12);
+  const uptime_1h = recent.length ? Math.round((recent.filter(p => p.s === 1).length / recent.length) * 100) : null;
+  const uptime_24h = h.length ? Math.round((h.filter(p => p.s === 1).length / h.length) * 100) : null;
+  res.json({ ...m, history: h.map(p => ({ ts: new Date(p.ts).toISOString(), status: p.s === 1 ? "up" : p.s === 2 ? "degraded" : "down" })), uptime_1h, uptime_24h });
+});
+
+app.delete("/monitors/:id", (req, res) => {
+  const monitors = loadMonitors();
+  const idx = monitors.findIndex(m => m.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "monitor not found" });
+  const [removed] = monitors.splice(idx, 1);
+  saveMonitors(monitors);
+  logActivity("monitor.removed", `${removed.name} removed`, { id: removed.id, url: removed.url });
+  res.json({ removed: removed.id });
 });
 
 // --- Session cost history ---

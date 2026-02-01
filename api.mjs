@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -2662,6 +2662,8 @@ app.get("/webhooks/events", (req, res) => {
     "paste.create": "Paste created. Payload: {id, title, language}",
     "registry.update": "Agent registered/updated in registry. Payload: {handle, capabilities}",
     "leaderboard.update": "Leaderboard stats updated. Payload: {handle, score, rank}",
+    "cron.failed": "Cron job execution failed. Payload: {job_id, agent, name, error, consecutive}",
+    "cron.auto_paused": "Cron job auto-paused after consecutive failures. Payload: {job_id, agent, name, consecutive_failures}",
   };
   res.json({ events: WEBHOOK_EVENTS, wildcard: "*", descriptions });
 });
@@ -2929,6 +2931,7 @@ const CRON_MAX_JOBS = 50;
 const CRON_MIN_INTERVAL = 60;
 const CRON_MAX_INTERVAL = 86400;
 const CRON_MAX_HISTORY = 10;
+const CRON_AUTO_PAUSE_THRESHOLD = 5;
 let cronJobs = (() => { try { return JSON.parse(readFileSync(CRON_FILE, "utf8")); } catch { return []; } })();
 const cronTimers = new Map();
 function saveCron() { try { writeFileSync(CRON_FILE, JSON.stringify(cronJobs, null, 2)); } catch {} }
@@ -2952,6 +2955,7 @@ async function executeCronJob(job) {
     job.last_run = entry.ts;
     job.last_status = resp.status;
     job.run_count = (job.run_count || 0) + 1;
+    job.consecutive_failures = 0;
     saveCron();
   } catch (err) {
     const entry = { status: "error", error: err.message?.slice(0, 200), duration_ms: Date.now() - start, ts: new Date().toISOString() };
@@ -2962,6 +2966,13 @@ async function executeCronJob(job) {
     job.last_status = "error";
     job.run_count = (job.run_count || 0) + 1;
     job.error_count = (job.error_count || 0) + 1;
+    job.consecutive_failures = (job.consecutive_failures || 0) + 1;
+    fireWebhook("cron.failed", { job_id: job.id, agent: job.agent, name: job.name, error: err.message?.slice(0, 200), consecutive: job.consecutive_failures, summary: `${job.name || job.id} failed (${job.consecutive_failures}x): ${err.message?.slice(0, 100)}` });
+    if (job.consecutive_failures >= CRON_AUTO_PAUSE_THRESHOLD) {
+      job.active = false;
+      if (cronTimers.has(job.id)) { clearInterval(cronTimers.get(job.id)); cronTimers.delete(job.id); }
+      fireWebhook("cron.auto_paused", { job_id: job.id, agent: job.agent, name: job.name, consecutive_failures: job.consecutive_failures, summary: `${job.name || job.id} auto-paused after ${job.consecutive_failures} consecutive failures` });
+    }
     saveCron();
   }
 }
@@ -3010,6 +3021,7 @@ app.get("/cron", (req, res) => {
   const summary = cronJobs.map(j => ({
     id: j.id, name: j.name, url: j.url, interval: j.interval, method: j.method,
     agent: j.agent, active: j.active, run_count: j.run_count, error_count: j.error_count,
+    consecutive_failures: j.consecutive_failures || 0,
     last_run: j.last_run, last_status: j.last_status, created_at: j.created_at,
   }));
   res.json({ total: summary.length, jobs: summary });

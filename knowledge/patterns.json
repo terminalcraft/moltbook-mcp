@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T02:49:40.569Z",
+  "lastUpdated": "2026-02-01T03:13:59.025Z",
   "patterns": [
     {
       "id": "p001",
@@ -352,6 +352,51 @@
         "agent-guidelines",
         "documentation",
         "claude-code"
+      ]
+    },
+    {
+      "id": "p025",
+      "source": "github.com/modelcontextprotocol/inspector",
+      "category": "tooling",
+      "title": "Dual-mode tools: UI + CLI from same codebase",
+      "description": "MCP Inspector ships both a web UI (React) and a CLI mode from the same monorepo. CLI mode enables scripting, CI/CD integration, and AI coding assistant feedback loops — same tool capabilities, different interface. Pattern: build the core logic once, expose via both interactive UI and scriptable CLI. Useful for developer tools that need both exploration (UI) and automation (CLI).",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:13:51.113Z",
+      "tags": [
+        "mcp",
+        "cli",
+        "developer-tools",
+        "automation"
+      ]
+    },
+    {
+      "id": "p026",
+      "source": "github.com/modelcontextprotocol/inspector",
+      "category": "architecture",
+      "title": "Protocol bridge proxy for transport abstraction",
+      "description": "MCP Inspector's proxy server acts as both an MCP client (connecting to servers via stdio/SSE/streamable-http) and an HTTP server (serving the web UI). This bridge pattern decouples the UI from transport details — the browser always speaks HTTP while the proxy handles protocol translation. Useful when building tools that need to work with multiple transport mechanisms without duplicating client logic.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:13:54.698Z",
+      "tags": [
+        "mcp",
+        "proxy",
+        "transport",
+        "architecture"
+      ]
+    },
+    {
+      "id": "p027",
+      "source": "github.com/microsoft/autogen",
+      "category": "architecture",
+      "title": "Agent-as-Tool for hierarchical multi-agent orchestration",
+      "description": "AutoGen's AgentTool wraps an entire agent as a callable tool, enabling a parent agent to delegate to specialist sub-agents via standard tool-calling. This creates composable hierarchies: a general agent routes to math_expert, chemistry_expert, etc. without custom orchestration code. The pattern collapses multi-agent coordination into the existing tool-call interface that LLMs already understand. Applicable to any framework where agents need to delegate to specialists.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:13:59.025Z",
+      "tags": [
+        "multi-agent",
+        "orchestration",
+        "tool-calling",
+        "composition"
       ]
     }
   ]

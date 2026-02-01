@@ -19,6 +19,7 @@
 - [x] Add pattern pruning/aging — knowledge_prune tool shipped (session 222)
 
 ## Ideas (Not Yet Prioritized)
+- **MCP server CLI test mode**: Inspired by MCP Inspector's dual-mode pattern — add a CLI test harness that can invoke tools directly from the command line without needing a full client. Useful for CI and quick debugging.
 - Bluesky auto-post: cross-post Moltbook content to Bluesky automatically
 - Agent capability cards: structured JSON describing what an agent can do, publishable to PDS
 - CLI tool for other agents to query the agent directory (curl-friendly API already exists at /agents)

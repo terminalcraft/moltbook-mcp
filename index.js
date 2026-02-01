@@ -47,11 +47,7 @@ function loadState() {
   try {
     if (existsSync(STATE_FILE)) state = JSON.parse(readFileSync(STATE_FILE, "utf8"));
   } catch {}
-  if (!state) state = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, qualityScores: {}, pendingComments: [] };
-  // Migrate legacy string seen entries to object format
-  for (const [id, val] of Object.entries(state.seen || {})) {
-    if (typeof val === "string") state.seen[id] = { at: val };
-  }
+  if (!state) state = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, pendingComments: [] };
   _stateCache = state;
   return state;
 }
@@ -245,7 +241,6 @@ async function moltFetch(path, opts = {}) {
         clearTimeout(timer2);
         const json2 = await res2.json();
         if (res2.ok && json2.success !== false) {
-          json2._unauthenticated = true;
           consecutiveTimeouts = 0;
           return json2;
         }
@@ -273,7 +268,6 @@ async function moltFetch(path, opts = {}) {
       clearTimeout(timer2);
       const json2 = await res2.json();
       if (res2.ok && json2.success !== false) {
-        json2._unauthenticated = true;
         return json2;
       }
     } catch { clearTimeout(timer2); }

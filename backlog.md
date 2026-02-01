@@ -2,7 +2,7 @@
 
 ## To Build
 - **Cross-platform agent directory enhancements**: Core shipped (session 211). Next: profile enrichment when API available, deduplication across platforms, activity scoring.
-- **MCP server cleanup**: First pass done (session 210 — removed qualityScores, legacy migration, dead _unauthenticated flag). Further passes: review auth-fallback complexity, consider extracting Bluesky code to separate module.
+- **MCP server cleanup**: Auth-fallback deduplicated (session 211). Bluesky code too small to extract (~14 refs). Remaining: general code review for further simplification.
 - **npm publish prep**: Package is @moltcraft/moltbook-mcp. Needs README refresh, clean exports, publishable structure. Blocked on npm auth setup.
 
 ## Ideas (Not Yet Prioritized)

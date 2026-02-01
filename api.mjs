@@ -228,6 +228,7 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
     { method: "GET", path: "/sessions", auth: false, desc: "Structured session history with quality scores (0-10) — parses session-history.txt", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML table" }] },
     { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
+    { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore)", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
   ];
 
   // JSON format for machine consumption
@@ -340,6 +341,7 @@ app.get("/agent.json", (req, res) => {
       costs: { url: `${base}/costs`, method: "GET", auth: false, description: "Session cost history and trends (?format=json for raw data)" },
       sessions: { url: `${base}/sessions`, method: "GET", auth: false, description: "Session history with quality scores (?format=json)" },
       health: { url: `${base}/health`, method: "GET", auth: false, description: "Aggregated health check (?format=json, status codes: 200/207/503)" },
+      changelog: { url: `${base}/changelog`, method: "GET", auth: false, description: "Git changelog categorized by type (?limit=N&format=json)" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -1063,6 +1065,49 @@ th{background:#222}h1{color:#0f0}.stat{color:#0a0;font-size:1.2em}</style></head
 ${rows}</table>
 <div style="margin-top:1em;font-size:0.8em;color:#666">
   <a href="/sessions?format=json" style="color:#0a0">JSON</a> |
+  <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
+</div></body></html>`);
+});
+
+// --- Changelog from git log ---
+app.get("/changelog", (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+  let raw = "";
+  try {
+    raw = execSync(`git -C ${BASE} log --pretty=format:'%H|%ai|%s' -n ${limit}`, { timeout: 5000 }).toString();
+  } catch { return res.status(500).json({ error: "git log failed" }); }
+
+  const commits = raw.trim().split("\n").filter(Boolean).map(line => {
+    const [hash, date, ...msgParts] = line.split("|");
+    const message = msgParts.join("|");
+    const type = message.startsWith("feat") ? "feature" : message.startsWith("fix") ? "fix" : message.startsWith("refactor") ? "refactor" : message.startsWith("chore") ? "chore" : "other";
+    return { hash: hash.slice(0, 8), date: date.trim().split(" ")[0], message, type };
+  });
+
+  const fmt = req.query.format;
+  if (fmt === "json" || req.headers.accept?.includes("application/json")) {
+    return res.json({ count: commits.length, commits });
+  }
+
+  const typeColor = { feature: "#22c55e", fix: "#eab308", refactor: "#3b82f6", chore: "#888", other: "#666" };
+  const rows = commits.map(c => {
+    const col = typeColor[c.type] || "#666";
+    return `<tr><td style="color:#666">${c.hash}</td><td>${c.date}</td><td><span style="color:${col}">${c.type}</span></td><td>${c.message.replace(/</g, "&lt;")}</td></tr>`;
+  }).join("\n");
+
+  const typeCounts = commits.reduce((acc, c) => { acc[c.type] = (acc[c.type] || 0) + 1; return acc; }, {});
+  const badges = Object.entries(typeCounts).map(([t, n]) => `<span style="color:${typeColor[t] || '#666'}">${t}: ${n}</span>`).join(" &middot; ");
+
+  res.type("text/html").send(`<!DOCTYPE html><html><head><title>Changelog</title>
+<style>body{font-family:monospace;max-width:1000px;margin:2em auto;background:#111;color:#eee}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}
+th{background:#222}h1{color:#0f0}</style></head><body>
+<h1>Changelog</h1>
+<p>${badges}</p>
+<table><tr><th>Hash</th><th>Date</th><th>Type</th><th>Message</th></tr>
+${rows}</table>
+<div style="margin-top:1em;font-size:0.8em;color:#666">
+  <a href="/changelog?format=json" style="color:#0a0">JSON</a> |
   <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
 </div></body></html>`);
 });

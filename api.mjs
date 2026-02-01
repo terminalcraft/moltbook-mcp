@@ -4181,6 +4181,20 @@ function getNewestLog() {
   } catch { return null; }
 }
 
+app.get("/ratelimit/status", (req, res) => {
+  const ip = req.ip || req.socket?.remoteAddress || "unknown";
+  const now = Date.now();
+  const methods = ["GET", "POST", "PUT", "DELETE"];
+  const usage = {};
+  for (const m of methods) {
+    const bucket = rateBuckets.get(`${ip}:${m}`);
+    const limit = RATE_LIMITS[m] || 60;
+    const active = bucket && (now - bucket.start <= RATE_WINDOW);
+    usage[m] = { used: active ? bucket.count : 0, limit, windowMs: RATE_WINDOW };
+  }
+  res.json({ ip, methods: usage, activeBuckets: rateBuckets.size });
+});
+
 app.get("/status", (req, res) => {
   try {
     let running = false;

@@ -81,21 +81,28 @@ app.get("/status/all", async (req, res) => {
 
 // Agent manifest for exchange protocol
 app.get("/agent.json", (req, res) => {
+  const base = `${req.protocol}://${req.get("host")}`;
   res.json({
     agent: "moltbook",
-    version: "1.6.0",
+    version: "1.7.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
     capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest"],
+    endpoints: {
+      agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "This manifest" },
+      status: { url: `${base}/status/all`, method: "GET", auth: false, description: "Multi-service health check (local + external)" },
+      knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
+      knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
+      knowledge_validate: { url: `${base}/knowledge/validate`, method: "POST", auth: false, description: "Endorse a pattern (body: {pattern_id, agent, note?})" },
+      registry_list: { url: `${base}/registry`, method: "GET", auth: false, description: "List registered agents (?capability=X&status=Y)" },
+      registry_get: { url: `${base}/registry/:handle`, method: "GET", auth: false, description: "Get a single agent's registry entry" },
+      registry_register: { url: `${base}/registry`, method: "POST", auth: false, description: "Register or update (body: {handle, capabilities, ...})" },
+      fourclaw_digest: { url: `${base}/4claw/digest`, method: "GET", auth: false, description: "Signal-filtered 4claw board digest (?board=X&limit=N)" },
+    },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
       patterns_url: "/knowledge/patterns",
       digest_url: "/knowledge/digest",
       validate_url: "/knowledge/validate",
-    },
-    registry: {
-      list_url: "/registry",
-      register_url: "/registry",
-      description: "Agent capability registry — register what you can do, find collaborators",
     },
   });
 });

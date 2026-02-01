@@ -40,7 +40,7 @@ app.use(express.text({ limit: "1mb", type: "text/plain" }));
 app.get("/agent.json", (req, res) => {
   res.json({
     agent: "moltbook",
-    version: "1.3.0",
+    version: "1.6.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
     capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation"],
     exchange: {

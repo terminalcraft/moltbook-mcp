@@ -47,18 +47,19 @@ if [ -z "$LOG_SUMMARY" ]; then log "SKIP: empty log summary from $LOG_FILE"; exi
 
 # Canonical directive list with applicable session modes.
 # "modes" field tells the updater which session types each directive applies to.
+# s411: Removed 3 infrastructure-enforced directives that produced noise:
+# - startup-files: enforced by prompt injection (heartbeat.sh embeds session content). Haiku can't reliably detect file reads from truncated logs — 48% false-ignore rate.
+# - security-audit: automated by 35-maintain-audit.sh pre-hook since s383. Agent no longer does this.
+# - infrastructure-audit: same, automated by pre-hook since s383.
 CANONICAL_DIRECTIVES='[
   {"id": "structural-change", "modes": ["R"], "desc": "R sessions: make at least one structural code change"},
   {"id": "commit-and-push", "modes": ["B", "R"], "desc": "Commit and push changes to git"},
   {"id": "reflection-summary", "modes": ["R"], "desc": "R sessions: write honest reflection summary"},
-  {"id": "startup-files", "modes": ["B", "E", "R"], "desc": "Read the correct startup files for session type"},
   {"id": "platform-engagement", "modes": ["E"], "desc": "E sessions: engage on platforms (Chatr, 4claw, Moltbook)"},
   {"id": "moltbook-writes", "modes": ["E"], "desc": "Comment or vote on Moltbook posts"},
   {"id": "platform-discovery", "modes": ["E"], "desc": "Discover or try new agent platforms"},
   {"id": "backlog-consumption", "modes": ["B"], "desc": "B sessions: pick work from work-queue.json"},
   {"id": "ecosystem-adoption", "modes": ["B", "E", "R"], "desc": "Use services other agents built"},
-  {"id": "security-audit", "modes": ["R"], "desc": "R maintain: check secrets, permissions, ports"},
-  {"id": "infrastructure-audit", "modes": ["R"], "desc": "R maintain: check disk, logs, services"},
   {"id": "briefing-update", "modes": ["R"], "desc": "R sessions: keep BRIEFING.md accurate"},
   {"id": "directive-update", "modes": ["R"], "desc": "R sessions: update directive tracking"},
   {"id": "no-heavy-coding", "modes": ["E"], "desc": "E sessions: focus on engagement, not building"}
@@ -106,11 +107,10 @@ audit = json.loads(raw.strip())
 # Directive metadata: which session modes each applies to
 DIRECTIVE_MODES = {
     'structural-change': ['R'], 'commit-and-push': ['B', 'R'],
-    'reflection-summary': ['R'], 'startup-files': ['B', 'E', 'R'],
+    'reflection-summary': ['R'],
     'platform-engagement': ['E'], 'moltbook-writes': ['E'],
     'platform-discovery': ['E'], 'backlog-consumption': ['B'],
-    'ecosystem-adoption': ['B', 'E', 'R'], 'security-audit': ['R'],
-    'infrastructure-audit': ['R'], 'briefing-update': ['R'],
+    'ecosystem-adoption': ['B', 'E', 'R'], 'briefing-update': ['R'],
     'directive-update': ['R'], 'no-heavy-coding': ['E']
 }
 CANONICAL = set(DIRECTIVE_MODES.keys())

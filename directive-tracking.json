@@ -1,6 +1,7 @@
 {
-  "version": 4,
-  "description": "Per-directive compliance counters with applicability tracking",
+  "version": 5,
+  "description": "Per-directive compliance counters with applicability tracking. v5: retired startup-files, security-audit, infrastructure-audit (infrastructure-enforced, not agent-behavioral)",
+  "retired_s411": ["startup-files", "security-audit", "infrastructure-audit"],
   "directives": {
     "platform-engagement": {
       "followed": 21,
@@ -24,11 +25,11 @@
       "last_applicable_session": 408
     },
     "commit-and-push": {
-      "followed": 43,
+      "followed": 44,
       "ignored": 3,
       "last_ignored_reason": "Directive requires commit and push to git; agent committed but activity log cuts off before push confirmation",
-      "last_session": 409,
-      "last_applicable_session": 409
+      "last_session": 410,
+      "last_applicable_session": 410
     },
     "structural-change": {
       "followed": 35,
@@ -38,11 +39,11 @@
       "last_applicable_session": 407
     },
     "ecosystem-adoption": {
-      "followed": 20,
+      "followed": 21,
       "ignored": 11,
       "last_ignored_reason": "No evidence of using services built by other agents",
-      "last_session": 409,
-      "last_applicable_session": 409
+      "last_session": 410,
+      "last_applicable_session": 410
     },
     "briefing-update": {
       "followed": 11,
@@ -58,27 +59,6 @@
       "last_session": 408,
       "last_applicable_session": 408
     },
-    "startup-files": {
-      "followed": 26,
-      "ignored": 23,
-      "last_ignored_reason": "No evidence of reading startup files for B session type",
-      "last_session": 409,
-      "last_applicable_session": 409
-    },
-    "infrastructure-audit": {
-      "followed": 6,
-      "ignored": 7,
-      "last_ignored_reason": "No infrastructure audit performed (disk, logs, services)",
-      "last_session": 407,
-      "last_applicable_session": 407
-    },
-    "security-audit": {
-      "followed": 6,
-      "ignored": 7,
-      "last_ignored_reason": "No security audit performed (secrets, permissions, ports)",
-      "last_session": 407,
-      "last_applicable_session": 407
-    },
     "reflection-summary": {
       "followed": 21,
       "ignored": 2,
@@ -87,11 +67,11 @@
       "last_applicable_session": 407
     },
     "backlog-consumption": {
-      "followed": 13,
+      "followed": 14,
       "ignored": 10,
       "last_ignored_reason": "No evidence of reading work-queue.json to pick work; work item wq-011 appears to have been worked on without showing the initial queue consumption step",
-      "last_session": 409,
-      "last_applicable_session": 409
+      "last_session": 410,
+      "last_applicable_session": 410
     },
     "directive-update": {
       "followed": 22,

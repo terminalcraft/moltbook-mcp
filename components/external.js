@@ -388,4 +388,56 @@ export function register(server) {
       return { content: [{ type: "text", text: `Handshake error: ${e.message}` }] };
     }
   });
+
+  // --- Agent Inbox tools ---
+  const API_BASE = "http://127.0.0.1:3847";
+  const getToken = () => { try { return readFileSync(join(process.env.HOME || "/home/moltbot", ".config/moltbook/api-token"), "utf-8").trim(); } catch { return "changeme"; } };
+
+  server.tool("inbox_check", "Check your agent inbox for messages from other agents", {
+    format: z.enum(["full", "compact"]).default("compact").describe("'compact' returns a one-line summary, 'full' includes message details"),
+  }, async ({ format }) => {
+    try {
+      const resp = await fetch(`${API_BASE}/inbox`, { headers: { Authorization: `Bearer ${getToken()}` } });
+      if (!resp.ok) return { content: [{ type: "text", text: `Inbox error: ${resp.status}` }] };
+      const data = await resp.json();
+      if (format === "compact") {
+        return { content: [{ type: "text", text: `Inbox: ${data.total} messages (${data.unread} unread)` }] };
+      }
+      if (data.messages.length === 0) return { content: [{ type: "text", text: "Inbox empty." }] };
+      const lines = [`Inbox: ${data.total} messages (${data.unread} unread)`, ""];
+      for (const m of data.messages.slice(0, 20)) {
+        lines.push(`${m.read ? " " : "*"} [${m.id.slice(0,8)}] ${m.timestamp.slice(0,16)} from:${m.from}${m.subject ? ` — ${m.subject}` : ""}`);
+        if (!m.read) lines.push(`  ${m.body.slice(0, 200)}`);
+      }
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    } catch (e) { return { content: [{ type: "text", text: `Inbox error: ${e.message}` }] }; }
+  });
+
+  server.tool("inbox_send", "Send a message to another agent's inbox (if they have one)", {
+    url: z.string().describe("Target agent's base URL, e.g. http://example.com:3847"),
+    body: z.string().max(2000).describe("Message body"),
+    subject: z.string().max(200).optional().describe("Optional subject line"),
+  }, async ({ url, body, subject }) => {
+    try {
+      const resp = await fetch(`${url.replace(/\/$/, "")}/inbox`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ from: "moltbook", body, subject }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) return { content: [{ type: "text", text: `Send failed: ${data.error || resp.status}` }] };
+      return { content: [{ type: "text", text: `Sent! Message ID: ${data.id}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `Send error: ${e.message}` }] }; }
+  });
+
+  server.tool("inbox_read", "Read a specific inbox message by ID (marks as read)", {
+    id: z.string().describe("Message ID (full or prefix)"),
+  }, async ({ id }) => {
+    try {
+      const resp = await fetch(`${API_BASE}/inbox/${id}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+      if (!resp.ok) return { content: [{ type: "text", text: `Not found: ${resp.status}` }] };
+      const m = await resp.json();
+      return { content: [{ type: "text", text: `From: ${m.from}\nTo: ${m.to}\nSubject: ${m.subject || "(none)"}\nDate: ${m.timestamp}\n\n${m.body}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `Read error: ${e.message}` }] }; }
+  });
 }

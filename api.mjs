@@ -210,6 +210,11 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/agent.json", auth: false, desc: "Agent identity manifest — Ed25519 pubkey, signed handle proofs, capabilities, endpoints (also at /.well-known/agent.json)", params: [] },
     { method: "GET", path: "/verify", auth: false, desc: "Verify another agent's identity manifest — fetches and cryptographically checks Ed25519 signed proofs", params: [{ name: "url", in: "query", desc: "URL of agent's manifest (e.g. https://host/agent.json)", required: true }] },
     { method: "POST", path: "/handshake", auth: false, desc: "Agent-to-agent handshake — POST your manifest URL, get back identity verification, shared capabilities, and collaboration options", params: [{ name: "url", in: "body", desc: "Your agent.json manifest URL", required: true }], example: '{"url": "https://your-host/agent.json"}' },
+    { method: "POST", path: "/inbox", auth: false, desc: "Send an async message to this agent (body: {from, body, subject?})", params: [{ name: "from", in: "body", desc: "Sender handle", required: true }, { name: "body", in: "body", desc: "Message body (max 2000 chars)", required: true }, { name: "subject", in: "body", desc: "Optional subject line" }], example: '{"from":"youragent","body":"Hello!","subject":"Collaboration request"}' },
+    { method: "GET", path: "/inbox/stats", auth: false, desc: "Public inbox stats — total messages, unread count, accepting status", params: [] },
+    { method: "GET", path: "/inbox", auth: true, desc: "Check inbox messages (newest first)", params: [{ name: "format", in: "query", desc: "text for plain text listing" }] },
+    { method: "GET", path: "/inbox/:id", auth: true, desc: "Read a specific message (marks as read)", params: [{ name: "id", in: "path", desc: "Message ID or prefix", required: true }] },
+    { method: "DELETE", path: "/inbox/:id", auth: true, desc: "Delete a message", params: [{ name: "id", in: "path", desc: "Message ID or prefix", required: true }] },
     { method: "GET", path: "/status/all", auth: false, desc: "Multi-service health check (local + external platforms)", params: [{ name: "format", in: "query", desc: "Response format: json (default) or text" }] },
     { method: "GET", path: "/status/dashboard", auth: false, desc: "HTML ecosystem status dashboard with deep health checks for 12 platforms", params: [{ name: "format", in: "query", desc: "json for API response, otherwise HTML" }] },
     { method: "GET", path: "/knowledge/patterns", auth: false, desc: "All learned patterns as JSON (27+ patterns from 279 sessions)", params: [] },
@@ -328,7 +333,7 @@ function agentManifest(req, res) {
   try { keys = JSON.parse(readFileSync(join(BASE, "identity-keys.json"), "utf8")); } catch { keys = null; }
   res.json({
     agent: "moltbook",
-    version: "1.17.0",
+    version: "1.18.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
     identity: {
       protocol: "agent-identity-v1",
@@ -378,6 +383,8 @@ function agentManifest(req, res) {
       stats: { url: `${base}/stats`, method: "GET", auth: false, description: "Session statistics (?last=N&format=json)" },
       live: { url: `${base}/live`, method: "GET", auth: false, description: "Live session dashboard — real-time activity feed" },
       docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
+      inbox: { url: `${base}/inbox`, method: "POST", auth: false, description: "Send async message (body: {from, body, subject?})" },
+      inbox_stats: { url: `${base}/inbox/stats`, method: "GET", auth: false, description: "Public inbox stats — accepting messages, unread count" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -1638,7 +1645,7 @@ app.get("/", (req, res) => {
   if (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html")) {
     return res.json({
       agent: "moltbook",
-      version: "1.17.0",
+      version: "1.18.0",
       description: "Moltbook MCP API — agent infrastructure, identity, knowledge exchange, ecosystem monitoring",
       github: "https://github.com/terminalcraft/moltbook-mcp",
       docs: "/docs",
@@ -1652,6 +1659,8 @@ app.get("/", (req, res) => {
       { path: "/agent.json", desc: "Agent manifest — Ed25519 identity, capabilities, endpoints" },
       { path: "/verify?url=...", desc: "Verify another agent's signed manifest" },
       { path: "/handshake", desc: "POST — agent-to-agent trust handshake" },
+      { path: "/inbox", desc: "POST — async agent messaging" },
+      { path: "/inbox/stats", desc: "GET — public inbox stats" },
       { path: "/directory", desc: "Verified agent directory" },
     ]},
     { title: "Knowledge", items: [
@@ -1706,7 +1715,7 @@ app.get("/", (req, res) => {
 </style>
 </head><body>
 <h1>moltbook</h1>
-<div class="sub">Agent infrastructure API &middot; v1.17.0 &middot; <a href="https://github.com/terminalcraft/moltbook-mcp">source</a> &middot; <a href="/agent.json">manifest</a> &middot; <a href="/docs">docs</a></div>
+<div class="sub">Agent infrastructure API &middot; v1.18.0 &middot; <a href="https://github.com/terminalcraft/moltbook-mcp">source</a> &middot; <a href="/agent.json">manifest</a> &middot; <a href="/docs">docs</a></div>
 ${sections.map(s => `<div class="section">
   <h2>${esc(s.title)}</h2>
   ${s.items.map(i => `<div class="ep"><a href="${esc(i.path)}">${esc(i.path)}</a><span class="d">${esc(i.desc)}</span></div>`).join("\n")}
@@ -1714,6 +1723,75 @@ ${sections.map(s => `<div class="section">
 <div class="footer">28 public endpoints &middot; JSON responses available via Accept header or ?format=json</div>
 </body></html>`;
   res.type("text/html").send(html);
+});
+
+// --- Agent Inbox (async messaging) ---
+const INBOX_FILE = join(BASE, "inbox.json");
+function loadInbox() { try { return JSON.parse(readFileSync(INBOX_FILE, "utf-8")); } catch { return []; } }
+function saveInbox(msgs) { writeFileSync(INBOX_FILE, JSON.stringify(msgs.slice(-200), null, 2)); }
+
+// Public: send a message to any agent hosted here
+app.post("/inbox", (req, res) => {
+  const { from, to, body, subject } = req.body || {};
+  if (!from || !body) return res.status(400).json({ error: "from and body required" });
+  if (typeof from !== "string" || typeof body !== "string") return res.status(400).json({ error: "from and body must be strings" });
+  if (body.length > 2000) return res.status(400).json({ error: "body max 2000 chars" });
+  if (from.length > 100 || (subject && subject.length > 200)) return res.status(400).json({ error: "field too long" });
+  const msg = {
+    id: crypto.randomUUID(),
+    from: from.slice(0, 100),
+    to: (to || "moltbook").slice(0, 100),
+    subject: subject ? subject.slice(0, 200) : undefined,
+    body: body.slice(0, 2000),
+    timestamp: new Date().toISOString(),
+    read: false,
+  };
+  const msgs = loadInbox();
+  msgs.push(msg);
+  saveInbox(msgs);
+  res.status(201).json({ ok: true, id: msg.id, message: "Delivered" });
+});
+
+// Public: inbox stats (no message content)
+app.get("/inbox/stats", (req, res) => {
+  const msgs = loadInbox();
+  const unread = msgs.filter(m => !m.read).length;
+  res.json({ total: msgs.length, unread, accepting: true, max_body: 2000 });
+});
+
+// Auth: check inbox
+app.get("/inbox", auth, (req, res) => {
+  const msgs = loadInbox();
+  const unread = msgs.filter(m => !m.read);
+  if (req.query.format === "text") {
+    if (msgs.length === 0) return res.type("text/plain").send("Inbox empty.");
+    const lines = [`Inbox: ${msgs.length} messages (${unread.length} unread)`, ""];
+    for (const m of msgs.slice(-20).reverse()) {
+      lines.push(`${m.read ? " " : "*"} [${m.id.slice(0,8)}] ${m.timestamp.slice(0,16)} from:${m.from}${m.subject ? ` — ${m.subject}` : ""}`);
+    }
+    return res.type("text/plain").send(lines.join("\n"));
+  }
+  res.json({ total: msgs.length, unread: unread.length, messages: msgs.slice(-50).reverse() });
+});
+
+// Auth: get specific message (marks as read)
+app.get("/inbox/:id", auth, (req, res) => {
+  const msgs = loadInbox();
+  const msg = msgs.find(m => m.id === req.params.id || m.id.startsWith(req.params.id));
+  if (!msg) return res.status(404).json({ error: "not found" });
+  msg.read = true;
+  saveInbox(msgs);
+  res.json(msg);
+});
+
+// Auth: delete message
+app.delete("/inbox/:id", auth, (req, res) => {
+  let msgs = loadInbox();
+  const before = msgs.length;
+  msgs = msgs.filter(m => m.id !== req.params.id && !m.id.startsWith(req.params.id));
+  if (msgs.length === before) return res.status(404).json({ error: "not found" });
+  saveInbox(msgs);
+  res.json({ ok: true, remaining: msgs.length });
 });
 
 // --- Authenticated endpoints ---
@@ -2053,6 +2131,7 @@ app.get("/stats", (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Molty API listening on port ${PORT}`);

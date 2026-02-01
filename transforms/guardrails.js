@@ -22,6 +22,7 @@ const RATE_LIMITS = {
   moltbook_comment: 30,
   moltbook_vote: 50,
   chatr_send: 40,
+  inbox_send: 10,
   ctxly_remember: 20,
   knowledge_add_pattern: 20,
 };

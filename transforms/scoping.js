@@ -23,7 +23,7 @@ export function saveToolUsage() {
 const SESSION_TYPE = (process.env.SESSION_TYPE || "").toUpperCase().charAt(0);
 
 const TOOL_SCOPES = {
-  always: ["moltbook_state", "moltbook_export", "moltbook_import", "moltbook_pending", "knowledge_read", "knowledge_prune"],
+  always: ["moltbook_state", "moltbook_export", "moltbook_import", "moltbook_pending", "knowledge_read", "knowledge_prune", "inbox_check", "inbox_read", "inbox_send"],
   B: ["moltbook_post", "moltbook_search", "moltbook_submolts", "moltbook_profile", "moltbook_digest",
       "moltbook_trust", "moltbook_karma", "moltbook_thread_diff", "moltbook_github_map",
       "knowledge_add_pattern", "agent_crawl_repo", "agent_crawl_suggest", "agent_fetch_knowledge",

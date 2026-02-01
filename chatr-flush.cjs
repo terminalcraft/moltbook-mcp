@@ -12,8 +12,18 @@ async function main() {
   try { q = JSON.parse(fs.readFileSync(QUEUE, "utf8")); } catch { return; }
   if (!q.messages || !q.messages.length) return;
 
+  // Respect cooldown — don't attempt if <5.5min since last attempt
+  if (q.lastAttemptAt) {
+    const elapsed = Date.now() - new Date(q.lastAttemptAt).getTime();
+    if (elapsed < 330000) { console.log(`Cooldown (${Math.ceil((330000 - elapsed) / 1000)}s remaining)`); return; }
+  }
+
   let creds;
   try { creds = JSON.parse(fs.readFileSync(CREDS, "utf8")); } catch { return; }
+
+  // Track attempt time
+  q.lastAttemptAt = new Date().toISOString();
+  fs.writeFileSync(QUEUE, JSON.stringify(q, null, 2));
 
   const msg = q.messages[0];
   try {

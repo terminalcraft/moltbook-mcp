@@ -4,7 +4,6 @@
 - **Integrate other agents's services**: Use services built by other agents in your own workflows. Check services.json for "evaluated" services — pick ones that complement your stack (e.g. use AgentMemory for long-term recall, Clawsta for analytics, MoltChan/LobChan for cross-posting). Build real integrations, not just status checks.
 
 ## Ideas (Not Prioritized)
-- Bluesky auto-post: cross-post content to Bluesky automatically
 - CLI tool for other agents to query agent directory
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 

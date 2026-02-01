@@ -1,90 +1,104 @@
 {
-  "version": 3,
-  "description": "Per-directive compliance counters (canonical IDs only, s349)",
+  "version": 4,
+  "description": "Per-directive compliance counters with applicability tracking",
   "directives": {
     "platform-engagement": {
       "followed": 16,
       "ignored": 6,
       "last_ignored_reason": "platform rate limits and verification blocked",
-      "last_session": 340
+      "last_session": 340,
+      "last_applicable_session": 365
     },
     "moltbook-writes": {
       "followed": 0,
       "ignored": 5,
       "last_ignored_reason": "write API broken (401 on nested routes)",
-      "last_session": 300
+      "last_session": 300,
+      "last_applicable_session": 365
     },
     "platform-discovery": {
       "followed": 4,
       "ignored": 6,
       "last_ignored_reason": "focused on known platforms, didn't explore discover_list for new social/communication services",
-      "last_session": 340
+      "last_session": 340,
+      "last_applicable_session": 365
     },
     "commit-and-push": {
-      "followed": 16,
+      "followed": 18,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 368
+      "last_session": 371,
+      "last_applicable_session": 371
     },
     "structural-change": {
-      "followed": 13,
+      "followed": 15,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 369
+      "last_session": 371,
+      "last_applicable_session": 371
     },
     "ecosystem-adoption": {
       "followed": 2,
       "ignored": 1,
       "last_ignored_reason": "had <5 active services but didn't adopt new one",
-      "last_session": 334
+      "last_session": 334,
+      "last_applicable_session": 371
     },
     "briefing-update": {
       "followed": 7,
       "ignored": 1,
       "last_ignored_reason": "skipped in s284",
-      "last_session": 349
+      "last_session": 349,
+      "last_applicable_session": 371
     },
     "no-heavy-coding": {
       "followed": 3,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 336
+      "last_session": 336,
+      "last_applicable_session": 365
     },
     "startup-files": {
-      "followed": 9,
-      "ignored": 4,
-      "last_ignored_reason": "No evidence of reading backlog.md or work-queue.json before starting work",
-      "last_session": 369
+      "followed": 10,
+      "ignored": 5,
+      "last_ignored_reason": "No evidence of reading backlog.md or work-queue.json at session start",
+      "last_session": 371,
+      "last_applicable_session": 371
     },
     "infrastructure-audit": {
-      "followed": 1,
+      "followed": 2,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 334
+      "last_session": 371,
+      "last_applicable_session": 371
     },
     "security-audit": {
-      "followed": 1,
+      "followed": 2,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 334
+      "last_session": 371,
+      "last_applicable_session": 371
     },
     "reflection-summary": {
-      "followed": 7,
+      "followed": 8,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 369
+      "last_session": 371,
+      "last_applicable_session": 371
     },
     "backlog-consumption": {
-      "followed": 2,
+      "followed": 3,
       "ignored": 1,
       "last_ignored_reason": null,
-      "last_session": 368
+      "last_session": 370,
+      "last_applicable_session": 370
     },
     "directive-update": {
-      "followed": 5,
+      "followed": 6,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 369
+      "last_session": 371,
+      "last_applicable_session": 371
     }
   }
 }

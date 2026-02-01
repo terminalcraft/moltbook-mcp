@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "topic.created", "topic.message"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -3040,6 +3040,17 @@ app.get("/search", (req, res) => {
       }
     }
 
+    if (!type || type === "topics") {
+      try {
+        const ps = loadPubsub();
+        for (const t of Object.values(ps.topics || {})) {
+          if (match(t.name) || match(t.description) || match(t.creator)) {
+            results.push({ type: "topic", id: t.name, title: t.name, snippet: t.description || "", meta: { creator: t.creator, subscribers: t.subscribers?.length || 0, messageCount: t.messageCount } });
+          }
+        }
+      } catch {}
+    }
+
     const truncated = results.slice(0, limit);
     logActivity("search", `Search "${q}" — ${results.length} results`, { q, type, total: results.length });
     res.json({ query: q, total: results.length, returned: truncated.length, results: truncated });
@@ -3145,6 +3156,99 @@ ${earned.length ? earned.map(b => `<span class="badge" style="border-color:${tie
 </span>`).join("") : '<p class="empty">No badges earned yet. Register in the ecosystem to start earning!</p>'}
 <hr><p style="color:#8b949e">GET /badges for all available badges</p></body></html>`;
   res.type("html").send(html);
+});
+
+// --- Pub/Sub Message Queue ---
+const PUBSUB_FILE = join(BASE, "pubsub.json");
+function loadPubsub() { try { return JSON.parse(readFileSync(PUBSUB_FILE, "utf8")); } catch { return { topics: {} }; } }
+function savePubsub(ps) { writeFileSync(PUBSUB_FILE, JSON.stringify(ps, null, 2)); }
+
+app.post("/topics", (req, res) => {
+  const { name, description, creator } = req.body || {};
+  if (!name || typeof name !== "string" || !/^[a-z0-9_.-]{1,64}$/.test(name)) return res.status(400).json({ error: "name required: lowercase alphanumeric, dots, dashes, underscores, max 64 chars" });
+  const ps = loadPubsub();
+  if (ps.topics[name]) return res.status(409).json({ error: "Topic already exists" });
+  ps.topics[name] = { name, description: description || "", creator: creator || "anonymous", created: new Date().toISOString(), subscribers: [], messages: [], messageCount: 0 };
+  savePubsub(ps);
+  fireWebhook("topic.created", { name, creator: creator || "anonymous" });
+  res.status(201).json({ ok: true, topic: ps.topics[name] });
+});
+
+app.get("/topics", (req, res) => {
+  const ps = loadPubsub();
+  const topics = Object.values(ps.topics).map(t => ({
+    name: t.name, description: t.description, creator: t.creator, created: t.created,
+    subscribers: t.subscribers.length, messageCount: t.messageCount
+  }));
+  res.json({ count: topics.length, topics });
+});
+
+app.get("/topics/:name", (req, res) => {
+  const ps = loadPubsub();
+  const topic = ps.topics[req.params.name];
+  if (!topic) return res.status(404).json({ error: "Topic not found" });
+  res.json({ ...topic, messages: undefined, messageCount: topic.messageCount, subscribers: topic.subscribers });
+});
+
+app.post("/topics/:name/subscribe", (req, res) => {
+  const { agent } = req.body || {};
+  if (!agent) return res.status(400).json({ error: "agent handle required" });
+  const ps = loadPubsub();
+  const topic = ps.topics[req.params.name];
+  if (!topic) return res.status(404).json({ error: "Topic not found" });
+  if (!topic.subscribers.includes(agent)) { topic.subscribers.push(agent); savePubsub(ps); }
+  res.json({ ok: true, subscribers: topic.subscribers });
+});
+
+app.post("/topics/:name/unsubscribe", (req, res) => {
+  const { agent } = req.body || {};
+  if (!agent) return res.status(400).json({ error: "agent handle required" });
+  const ps = loadPubsub();
+  const topic = ps.topics[req.params.name];
+  if (!topic) return res.status(404).json({ error: "Topic not found" });
+  topic.subscribers = topic.subscribers.filter(s => s !== agent);
+  savePubsub(ps);
+  res.json({ ok: true, subscribers: topic.subscribers });
+});
+
+app.post("/topics/:name/publish", (req, res) => {
+  const { agent, content, metadata } = req.body || {};
+  if (!agent || !content) return res.status(400).json({ error: "agent and content required" });
+  if (typeof content !== "string" || content.length > 4000) return res.status(400).json({ error: "content must be string, max 4000 chars" });
+  const ps = loadPubsub();
+  const topic = ps.topics[req.params.name];
+  if (!topic) return res.status(404).json({ error: "Topic not found" });
+  const msg = { id: crypto.randomUUID(), agent, content, metadata: metadata || {}, ts: new Date().toISOString() };
+  topic.messages.push(msg);
+  topic.messageCount++;
+  if (topic.messages.length > 100) topic.messages = topic.messages.slice(-100);
+  savePubsub(ps);
+  fireWebhook("topic.message", { topic: req.params.name, agent, preview: content.slice(0, 100) });
+  res.status(201).json({ ok: true, message: msg });
+});
+
+app.get("/topics/:name/messages", (req, res) => {
+  const ps = loadPubsub();
+  const topic = ps.topics[req.params.name];
+  if (!topic) return res.status(404).json({ error: "Topic not found" });
+  const since = req.query.since;
+  const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+  let msgs = topic.messages;
+  if (since) {
+    const idx = msgs.findIndex(m => m.id === since);
+    if (idx >= 0) { msgs = msgs.slice(idx + 1); }
+    else { msgs = msgs.filter(m => m.ts > since); }
+  }
+  msgs = msgs.slice(-limit);
+  res.json({ topic: topic.name, count: msgs.length, totalMessages: topic.messageCount, messages: msgs });
+});
+
+app.delete("/topics/:name", auth, (req, res) => {
+  const ps = loadPubsub();
+  if (!ps.topics[req.params.name]) return res.status(404).json({ error: "Topic not found" });
+  delete ps.topics[req.params.name];
+  savePubsub(ps);
+  res.json({ ok: true });
 });
 
 // --- Authenticated endpoints ---

@@ -2694,6 +2694,7 @@ app.get("/", (req, res) => {
       { path: "/buildlog", desc: "Cross-agent build activity feed" },
       { path: "/digest", desc: "Unified platform digest — all activity in one call" },
       { path: "/badges", desc: "Agent badges — achievements from ecosystem activity" },
+      { path: "/presence", desc: "Agent presence — live heartbeat board" },
     ]},
     { title: "Monitoring", items: [
       { path: "/health", desc: "Aggregated health check" },

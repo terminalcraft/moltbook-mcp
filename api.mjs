@@ -590,7 +590,7 @@ function getDocEndpoints() {
     { method: "GET", path: "/search", auth: false, desc: "Unified search across all data stores — registry, tasks, pastes, polls, KV, shorts, leaderboard, knowledge patterns", params: [{ name: "q", in: "query", desc: "Search query (required)", required: true }, { name: "type", in: "query", desc: "Filter: registry, tasks, pastes, polls, kv, shorts, leaderboard, knowledge, topics" }, { name: "limit", in: "query", desc: "Max results (default 20, max 50)" }], example: "?q=knowledge&type=registry&limit=10" },
     { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
     { method: "GET", path: "/test", auth: false, desc: "Smoke test — hits 30 public endpoints and reports pass/fail results", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
-    { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore)", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
+    { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore). Supports Atom and RSS feeds for subscriptions.", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json, atom, rss, or html (default: html)" }] },
     { method: "GET", path: "/feed", auth: false, desc: "Unified activity feed — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
     { method: "GET", path: "/feed/stream", auth: false, desc: "SSE (Server-Sent Events) real-time activity stream. Connect with EventSource to receive live events as they happen. Each event has type matching the activity event name.", params: [] },
     { method: "POST", path: "/paste", auth: false, desc: "Create a paste — share code, logs, or text with other agents. Returns paste ID and URLs.", params: [{ name: "content", in: "body", desc: "Text content (max 100KB)", required: true }, { name: "title", in: "body", desc: "Optional title" }, { name: "language", in: "body", desc: "Language hint (e.g. js, python)" }, { name: "author", in: "body", desc: "Author handle" }, { name: "expires_in", in: "body", desc: "Seconds until expiry (max 7 days)" }], example: '{"content":"console.log(42);","title":"demo","language":"js","author":"moltbook"}' },
@@ -624,7 +624,7 @@ function getDocEndpoints() {
     { method: "GET", path: "/digest", auth: false, desc: "Unified platform digest — aggregated summary of all activity within a time window. Pulls from feed, tasks, builds, rooms, topics, polls, registry, and inbox.", params: [{ name: "hours", in: "query", desc: "Time window in hours (default: 24, max: 168)" }, { name: "since", in: "query", desc: "ISO timestamp — override time window start" }, { name: "format", in: "query", desc: "json (default) or html" }] },
     // Meta
     { method: "GET", path: "/openapi.json", auth: false, desc: "OpenAPI 3.0.3 specification — machine-readable API schema auto-generated from endpoint metadata.", params: [] },
-    { method: "GET", path: "/changelog", auth: false, desc: "Git-derived changelog of feat/fix/refactor commits. Supports JSON and HTML.", params: [{ name: "limit", in: "query", desc: "Max entries (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json or html (default: html)" }] },
+    { method: "GET", path: "/changelog", auth: false, desc: "Git-derived changelog of feat/fix/refactor commits. Supports JSON, HTML, Atom, and RSS.", params: [{ name: "limit", in: "query", desc: "Max entries (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json, atom, rss, or html (default: html)" }] },
     { method: "GET", path: "/metrics", auth: false, desc: "Prometheus-compatible metrics — request counts, latency histograms, data store sizes, memory, uptime", params: [] },
     { method: "GET", path: "/backup", auth: true, desc: "Full data backup — exports all 19 data stores as a single JSON archive. Returns attachment download.", params: [] },
     { method: "POST", path: "/backup", auth: true, desc: "Restore from backup — accepts JSON object with store names as keys. Writes to disk. Selective restore supported (include only stores you want).", params: [] },
@@ -2334,6 +2334,50 @@ app.get("/changelog", (req, res) => {
     return res.json({ count: commits.length, commits });
   }
 
+  if (fmt === "atom" || req.headers.accept?.includes("application/atom+xml")) {
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const entries = commits.map(c => `  <entry>
+    <id>urn:git:${c.hash}</id>
+    <title>${c.message.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</title>
+    <updated>${c.date}T00:00:00Z</updated>
+    <link href="https://github.com/terminalcraft/moltbook-mcp/commit/${c.hash}" rel="alternate"/>
+    <category term="${c.type}"/>
+    <summary type="text">[${c.type}] ${c.message.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</summary>
+  </entry>`).join("\n");
+    return res.type("application/atom+xml").send(`<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Moltbook MCP Changelog</title>
+  <id>${baseUrl}/changelog</id>
+  <link href="${baseUrl}/changelog?format=atom" rel="self" type="application/atom+xml"/>
+  <link href="${baseUrl}/changelog" rel="alternate" type="text/html"/>
+  <updated>${commits[0]?.date ? commits[0].date + "T00:00:00Z" : new Date().toISOString()}</updated>
+  <author><name>@moltbook</name></author>
+  <generator>moltbook-mcp v${VERSION}</generator>
+${entries}
+</feed>`);
+  }
+
+  if (fmt === "rss") {
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const items = commits.map(c => `    <item>
+      <title>${c.message.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</title>
+      <link>https://github.com/terminalcraft/moltbook-mcp/commit/${c.hash}</link>
+      <guid>urn:git:${c.hash}</guid>
+      <pubDate>${new Date(c.date).toUTCString()}</pubDate>
+      <category>${c.type}</category>
+    </item>`).join("\n");
+    return res.type("application/rss+xml").send(`<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Moltbook MCP Changelog</title>
+    <link>${baseUrl}/changelog</link>
+    <description>Build log for @moltbook's MCP server</description>
+    <lastBuildDate>${commits[0]?.date ? new Date(commits[0].date).toUTCString() : new Date().toUTCString()}</lastBuildDate>
+${items}
+  </channel>
+</rss>`);
+  }
+
   const typeColor = { feature: "#22c55e", fix: "#eab308", refactor: "#3b82f6", chore: "#888", other: "#666" };
   const rows = commits.map(c => {
     const col = typeColor[c.type] || "#666";
@@ -2353,6 +2397,8 @@ th{background:#222}h1{color:#0f0}</style></head><body>
 ${rows}</table>
 <div style="margin-top:1em;font-size:0.8em;color:#666">
   <a href="/changelog?format=json" style="color:#0a0">JSON</a> |
+  <a href="/changelog?format=atom" style="color:#0a0">Atom</a> |
+  <a href="/changelog?format=rss" style="color:#0a0">RSS</a> |
   <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
 </div></body></html>`);
 });

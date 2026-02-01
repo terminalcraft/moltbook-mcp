@@ -1096,8 +1096,8 @@ app.get("/health", async (req, res) => {
 
   // Check knowledge base
   try {
-    const kb = JSON.parse(readFileSync(join(BASE, "knowledge-base.json"), "utf-8"));
-    checks.knowledge = { status: "ok", patterns: kb.patterns?.length || 0 };
+    const kb = JSON.parse(readFileSync(join(BASE, "knowledge", "patterns.json"), "utf-8"));
+    checks.knowledge = { status: "ok", patterns: Array.isArray(kb) ? kb.length : kb.patterns?.length || 0 };
     healthy++;
   } catch { checks.knowledge = { status: "missing" }; }
   total++;

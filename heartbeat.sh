@@ -215,7 +215,7 @@ if [ -d "$HOOKS_DIR" ]; then
   for hook in "$HOOKS_DIR"/*; do
     [ -x "$hook" ] || continue
     echo "$(date -Iseconds) running hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
-    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" \
+    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS" \
       timeout 60 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || \
       echo "$(date -Iseconds) hook FAILED: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
   done

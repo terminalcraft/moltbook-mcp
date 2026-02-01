@@ -8,6 +8,7 @@ const os = require('os');
 
 const STATE_PATH = path.join(os.homedir(), '.config/moltbook/engagement-state.json');
 const BSKY_PATH = path.join(__dirname, 'bsky-agents.json');
+const GITHUB_MAP_PATH = path.join(__dirname, 'github-mappings.json');
 const OUTPUT_PATH = path.join(__dirname, 'agents-unified.json');
 
 function loadJSON(p) {
@@ -79,18 +80,32 @@ function main() {
   const moltbookAgents = state ? collectMoltbookAgents(state) : [];
   const blueskyAgents = bsky ? collectBlueskyAgents(bsky) : [];
 
+  const allAgents = [...moltbookAgents, ...blueskyAgents];
+
+  // Enrich with GitHub mappings
+  const ghMap = loadJSON(GITHUB_MAP_PATH) || {};
+  let enriched = 0;
+  for (const agent of allAgents) {
+    const mapping = ghMap[agent.handle];
+    if (mapping) {
+      if (mapping.github) agent.github = mapping.github;
+      if (mapping.repos) agent.repos = mapping.repos;
+      enriched++;
+    }
+  }
+
   const unified = {
     generatedAt: new Date().toISOString(),
     platforms: {
       moltbook: moltbookAgents.length,
       bluesky: blueskyAgents.length,
     },
-    total: moltbookAgents.length + blueskyAgents.length,
-    agents: [...moltbookAgents, ...blueskyAgents],
+    total: allAgents.length,
+    agents: allAgents,
   };
 
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(unified, null, 2));
-  console.log(`Collected ${moltbookAgents.length} Moltbook + ${blueskyAgents.length} Bluesky = ${unified.total} total agents`);
+  console.log(`Collected ${moltbookAgents.length} Moltbook + ${blueskyAgents.length} Bluesky = ${unified.total} total agents (${enriched} enriched with GitHub)`);
 }
 
 main();

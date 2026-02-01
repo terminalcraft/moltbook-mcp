@@ -1189,6 +1189,62 @@ server.tool("moltbook_import", "Import engagement state from another agent (addi
   return { content: [{ type: "text", text: `Import complete. Added: ${stats}` }] };
 });
 
+// --- GitHub Mapping Tool ---
+const GITHUB_MAP_PATH = join(__dirname, "github-mappings.json");
+
+function loadGithubMap() {
+  try { return JSON.parse(readFileSync(GITHUB_MAP_PATH, "utf8")); }
+  catch { return {}; }
+}
+
+server.tool("moltbook_github_map", "Add or view GitHub URL mappings for agents in the directory", {
+  handle: z.string().optional().describe("Agent handle to map (omit to list all mappings)"),
+  github: z.string().optional().describe("GitHub profile URL (e.g. https://github.com/user)"),
+  repo: z.string().optional().describe("GitHub repo URL to add (e.g. https://github.com/user/repo)")
+}, async ({ handle, github, repo }) => {
+  const map = loadGithubMap();
+
+  // List mode
+  if (!handle) {
+    const entries = Object.entries(map).filter(([k]) => k !== "_comment");
+    if (entries.length === 0) return { content: [{ type: "text", text: "No GitHub mappings yet." }] };
+    const lines = entries.map(([h, d]) => {
+      const parts = [`@${h}`];
+      if (d.github) parts.push(`  GitHub: ${d.github}`);
+      if (d.repos?.length) parts.push(`  Repos: ${d.repos.join(", ")}`);
+      return parts.join("\n");
+    });
+    return { content: [{ type: "text", text: `GitHub mappings (${entries.length}):\n\n${lines.join("\n\n")}` }] };
+  }
+
+  // Add/update mode
+  if (!github && !repo) {
+    const existing = map[handle];
+    if (!existing) return { content: [{ type: "text", text: `No mapping for @${handle}. Provide github or repo to add one.` }] };
+    const parts = [`@${handle}`];
+    if (existing.github) parts.push(`GitHub: ${existing.github}`);
+    if (existing.repos?.length) parts.push(`Repos: ${existing.repos.join(", ")}`);
+    return { content: [{ type: "text", text: parts.join("\n") }] };
+  }
+
+  if (!map[handle]) map[handle] = { github: null, repos: [] };
+  if (github) map[handle].github = github;
+  if (repo && !map[handle].repos.includes(repo)) {
+    if (!map[handle].repos) map[handle].repos = [];
+    map[handle].repos.push(repo);
+  }
+
+  writeFileSync(GITHUB_MAP_PATH, JSON.stringify(map, null, 2) + "\n");
+
+  // Re-run collect-agents to update unified directory
+  try {
+    const { execSync } = require("child_process");
+    execSync(`node ${join(__dirname, "collect-agents.cjs")}`, { timeout: 10000 });
+  } catch {}
+
+  return { content: [{ type: "text", text: `Mapped @${handle} → ${github || map[handle].github || "(no profile)"}${repo ? ` + repo ${repo}` : ""}. Directory updated.` }] };
+});
+
 // --- Bluesky Agent Discovery ---
 const BSKY_PUBLIC = "https://public.api.bsky.app";
 const BSKY_CATALOG_PATH = join(process.env.HOME || "/tmp", "moltbook-mcp", "bsky-agents.json");

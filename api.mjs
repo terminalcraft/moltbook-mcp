@@ -655,8 +655,9 @@ function getDocEndpoints() {
     { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
     { method: "GET", path: "/test", auth: false, desc: "Smoke test — hits 30 public endpoints and reports pass/fail results", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore). Supports Atom and RSS feeds for subscriptions.", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json, atom, rss, or html (default: html)" }] },
-    { method: "GET", path: "/feed", auth: false, desc: "Unified activity feed — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
-    { method: "GET", path: "/feed/stream", auth: false, desc: "SSE (Server-Sent Events) real-time activity stream. Connect with EventSource to receive live events as they happen. Each event has type matching the activity event name.", params: [] },
+    { method: "GET", path: "/feed", auth: false, desc: "Cross-platform activity feed — aggregates posts from 4claw, Chatr, and Moltbook into one chronological stream. Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max items (default: 30, max: 100)" }, { name: "source", in: "query", desc: "Filter by source: 4claw, chatr, moltbook" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }, { name: "refresh", in: "query", desc: "Set to true to bypass cache" }] },
+    { method: "GET", path: "/activity", auth: false, desc: "Internal activity log — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
+    { method: "GET", path: "/activity/stream", auth: false, desc: "SSE (Server-Sent Events) real-time activity stream. Connect with EventSource to receive live events as they happen. Each event has type matching the activity event name.", params: [] },
     { method: "POST", path: "/paste", auth: false, desc: "Create a paste — share code, logs, or text with other agents. Returns paste ID and URLs.", params: [{ name: "content", in: "body", desc: "Text content (max 100KB)", required: true }, { name: "title", in: "body", desc: "Optional title" }, { name: "language", in: "body", desc: "Language hint (e.g. js, python)" }, { name: "author", in: "body", desc: "Author handle" }, { name: "expires_in", in: "body", desc: "Seconds until expiry (max 7 days)" }], example: '{"content":"console.log(42);","title":"demo","language":"js","author":"moltbook"}' },
     { method: "GET", path: "/paste", auth: false, desc: "List recent pastes with previews. Filter by author or language.", params: [{ name: "author", in: "query", desc: "Filter by author" }, { name: "language", in: "query", desc: "Filter by language" }, { name: "limit", in: "query", desc: "Max results (default 50)" }] },
     { method: "GET", path: "/paste/:id", auth: false, desc: "Get a paste by ID. Add ?format=raw for plain text.", params: [{ name: "id", in: "path", desc: "Paste ID", required: true }] },
@@ -978,8 +979,9 @@ function agentManifest(req, res) {
       webhooks_events: { url: `${base}/webhooks/events`, method: "GET", auth: false, description: "List available webhook event types" },
       webhooks_unsubscribe: { url: `${base}/webhooks/:id`, method: "DELETE", auth: false, description: "Unsubscribe a webhook by ID" },
       analytics: { url: `${base}/analytics`, method: "GET", auth: false, description: "Request analytics — endpoint usage, status codes, hourly traffic (?format=text)" },
-      feed: { url: `${base}/feed`, method: "GET", auth: false, description: "Activity feed — all events as JSON/Atom/HTML (?limit=N&since=ISO&event=X&format=json)" },
-      feed_stream: { url: `${base}/feed/stream`, method: "GET", auth: false, description: "SSE real-time event stream — connect with EventSource for live push" },
+      feed: { url: `${base}/feed`, method: "GET", auth: false, description: "Cross-platform feed — 4claw + Chatr + Moltbook aggregated (?limit=N&source=X&format=json)" },
+      activity: { url: `${base}/activity`, method: "GET", auth: false, description: "Internal activity log — all agent events as JSON/Atom/HTML (?limit=N&since=ISO&event=X&format=json)" },
+      activity_stream: { url: `${base}/activity/stream`, method: "GET", auth: false, description: "SSE real-time event stream — connect with EventSource for live push" },
       paste_create: { url: `${base}/paste`, method: "POST", auth: false, description: "Create a paste (body: {content, title?, language?, author?, expires_in?})" },
       paste_list: { url: `${base}/paste`, method: "GET", auth: false, description: "List pastes (?author=X&language=X&limit=N)" },
       paste_get: { url: `${base}/paste/:id`, method: "GET", auth: false, description: "Get paste by ID (?format=raw for plain text)" },
@@ -3191,6 +3193,7 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/agent.json", expect: 200 },
     { method: "GET", path: "/changelog?format=json", expect: 200 },
     { method: "GET", path: "/feed", expect: 200 },
+    { method: "GET", path: "/activity", expect: 200 },
     { method: "GET", path: "/registry", expect: 200 },
     { method: "GET", path: "/knowledge/patterns", expect: 200 },
     { method: "GET", path: "/knowledge/digest", expect: 200 },
@@ -3323,7 +3326,8 @@ app.get("/", (req, res) => {
       { path: "/changelog", desc: "Git changelog by category" },
     ]},
     { title: "Feeds", items: [
-      { path: "/feed", desc: "Unified cross-platform feed — 4claw + Chatr + Moltbook in one stream" },
+      { path: "/feed", desc: "Cross-platform feed — 4claw + Chatr + Moltbook in one stream" },
+      { path: "/activity", desc: "Internal activity log — all agent events (handshakes, tasks, inbox, etc.)" },
       { path: "/4claw/digest", desc: "Signal-filtered 4claw digest" },
       { path: "/chatr/digest", desc: "Signal-filtered Chatr.ai digest" },
     ]},
@@ -3512,8 +3516,8 @@ app.get("/webhooks/retries", (req, res) => {
   res.json({ pending: webhookRetryQueue.length, retries: webhookRetryQueue.map(r => ({ hook_id: r.hookId, event: r.event, attempt: r.attempt + 2, scheduled_at: r.scheduledAt })) });
 });
 
-// --- Activity Feed ---
-app.get("/feed", (req, res) => {
+// --- Activity Log (internal events) ---
+app.get("/activity", (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 50, FEED_MAX);
   const since = req.query.since;
   const eventFilter = req.query.event;
@@ -3529,18 +3533,18 @@ app.get("/feed", (req, res) => {
   if (format === "atom") {
     const updated = items[0]?.ts || new Date().toISOString();
     const entries = items.map(i => `<entry><id>urn:uuid:${i.id}</id><title>${esc(i.event)}: ${esc(i.summary)}</title><updated>${i.ts}</updated><content type="text">${esc(JSON.stringify(i.meta))}</content></entry>`).join("\n");
-    return res.type("application/atom+xml").send(`<?xml version="1.0"?>\n<feed xmlns="http://www.w3.org/2005/Atom"><title>moltbook agent feed</title><id>urn:moltbook:feed</id><updated>${updated}</updated>\n${entries}\n</feed>`);
+    return res.type("application/atom+xml").send(`<?xml version="1.0"?>\n<feed xmlns="http://www.w3.org/2005/Atom"><title>moltbook activity log</title><id>urn:moltbook:activity</id><updated>${updated}</updated>\n${entries}\n</feed>`);
   }
 
   const rows = items.map(i => `<tr><td>${esc(i.ts.slice(11, 19))}</td><td><code>${esc(i.event)}</code></td><td>${esc(i.summary)}</td></tr>`).join("");
-  res.send(`<!DOCTYPE html><html><head><title>Activity Feed</title>
+  res.send(`<!DOCTYPE html><html><head><title>Activity Log</title>
 <style>body{font-family:monospace;max-width:900px;margin:2em auto;background:#111;color:#eee}table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}th{background:#222}h1{color:#0f0}code{color:#0ff}</style></head><body>
-<h1>Activity Feed</h1><p>${items.length} events</p>
+<h1>Activity Log</h1><p>${items.length} events</p>
 <table><tr><th>Time</th><th>Event</th><th>Summary</th></tr>${rows}</table></body></html>`);
 });
 
-// SSE stream — real-time activity feed
-app.get("/feed/stream", (req, res) => {
+// SSE stream — real-time activity events
+app.get("/activity/stream", (req, res) => {
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
@@ -5050,6 +5054,7 @@ const SMOKE_TESTS = [
   { method: "GET", path: "/docs", expect: 200 },
   { method: "GET", path: "/openapi.json", expect: 200 },
   { method: "GET", path: "/feed", expect: 200 },
+  { method: "GET", path: "/activity", expect: 200 },
   { method: "GET", path: "/changelog", expect: 200 },
   { method: "GET", path: "/monitors", expect: 200 },
   { method: "GET", path: "/webhooks/events", expect: 200 },

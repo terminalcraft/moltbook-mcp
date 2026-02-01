@@ -1777,6 +1777,74 @@ server.tool(
     }
   }
 );
+// --- Tool: knowledge_prune ---
+server.tool(
+  "knowledge_prune",
+  "Manage pattern aging: validate patterns to keep them fresh, auto-downgrade stale ones, or remove low-value patterns.",
+  {
+    action: z.enum(["status", "validate", "age", "remove"]).default("status").describe("'status' shows staleness report, 'validate' refreshes a pattern, 'age' downgrades stale patterns, 'remove' deletes a pattern"),
+    pattern_id: z.string().optional().describe("Pattern ID for validate/remove actions (e.g. 'p001')"),
+    max_age_days: z.number().default(30).describe("Days before a pattern is considered stale (for age action)"),
+  },
+  async ({ action, pattern_id, max_age_days }) => {
+    const data = loadPatterns();
+    const now = Date.now();
+
+    // Ensure all patterns have lastValidated
+    for (const p of data.patterns) {
+      if (!p.lastValidated) p.lastValidated = p.extractedAt;
+    }
+
+    if (action === "validate") {
+      if (!pattern_id) return { content: [{ type: "text", text: "Provide pattern_id to validate." }] };
+      const p = data.patterns.find(pp => pp.id === pattern_id);
+      if (!p) return { content: [{ type: "text", text: `Pattern ${pattern_id} not found.` }] };
+      p.lastValidated = new Date().toISOString();
+      if (p.confidence === "speculative") p.confidence = "observed";
+      savePatterns(data);
+      return { content: [{ type: "text", text: `Validated ${p.id}: "${p.title}" — lastValidated set to now, confidence: ${p.confidence}.` }] };
+    }
+
+    if (action === "remove") {
+      if (!pattern_id) return { content: [{ type: "text", text: "Provide pattern_id to remove." }] };
+      const idx = data.patterns.findIndex(pp => pp.id === pattern_id);
+      if (idx === -1) return { content: [{ type: "text", text: `Pattern ${pattern_id} not found.` }] };
+      const removed = data.patterns.splice(idx, 1)[0];
+      savePatterns(data);
+      regenerateDigest();
+      return { content: [{ type: "text", text: `Removed ${removed.id}: "${removed.title}". ${data.patterns.length} patterns remain.` }] };
+    }
+
+    if (action === "age") {
+      const staleMs = max_age_days * 86400000;
+      let downgraded = 0;
+      for (const p of data.patterns) {
+        const age = now - new Date(p.lastValidated).getTime();
+        if (age > staleMs && p.confidence === "verified") {
+          p.confidence = "observed";
+          downgraded++;
+        } else if (age > staleMs * 2 && p.confidence === "observed") {
+          p.confidence = "speculative";
+          downgraded++;
+        }
+      }
+      if (downgraded > 0) {
+        savePatterns(data);
+        regenerateDigest();
+      }
+      return { content: [{ type: "text", text: `Aged patterns (${max_age_days}d threshold): ${downgraded} downgraded. ${data.patterns.length} total.` }] };
+    }
+
+    // status: show staleness report
+    const lines = data.patterns.map(p => {
+      const ageDays = ((now - new Date(p.lastValidated || p.extractedAt).getTime()) / 86400000).toFixed(1);
+      const stale = parseFloat(ageDays) > max_age_days ? " [STALE]" : "";
+      return `${p.id} (${p.confidence}) ${ageDays}d — ${p.title}${stale}`;
+    });
+    return { content: [{ type: "text", text: `Pattern staleness (${max_age_days}d threshold):\n${lines.join("\n")}` }] };
+  }
+);
+
 // --- Tool: agentid_lookup ---
 server.tool(
   "agentid_lookup",

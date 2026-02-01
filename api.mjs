@@ -716,15 +716,17 @@ ${rows || '<tr><td colspan="9" style="text-align:center;color:#555;padding:24px"
 
 function esc(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 
-// Public services directory with live probing
-app.get("/services", async (req, res) => {
+// Services probe cache (60s TTL)
+let _svcCache = null;
+let _svcCacheAt = 0;
+const SVC_CACHE_TTL = 60_000;
+
+async function probeServices() {
   let services = [];
   try {
     services = JSON.parse(readFileSync(join(BASE, "services.json"), "utf8")).services || [];
-  } catch { return res.status(500).json({ error: "Failed to load services" }); }
-
-  // Probe all service URLs concurrently (5s timeout each)
-  const probed = await Promise.all(services.map(async (svc) => {
+  } catch { return null; }
+  return Promise.all(services.map(async (svc) => {
     if (!svc.url) return { ...svc, probe: { status: "unknown", ms: 0 } };
     const start = Date.now();
     try {
@@ -737,6 +739,18 @@ app.get("/services", async (req, res) => {
       return { ...svc, probe: { status: "down", error: e.code || e.message?.slice(0, 60), ms: Date.now() - start } };
     }
   }));
+}
+
+// Public services directory with cached probing
+app.get("/services", async (req, res) => {
+  const now = Date.now();
+  if (!_svcCache || now - _svcCacheAt > SVC_CACHE_TTL) {
+    const result = await probeServices();
+    if (!result) return res.status(500).json({ error: "Failed to load services" });
+    _svcCache = result;
+    _svcCacheAt = now;
+  }
+  const probed = _svcCache;
 
   const up = probed.filter(s => s.probe.status === "up").length;
   const degraded = probed.filter(s => s.probe.status === "degraded").length;

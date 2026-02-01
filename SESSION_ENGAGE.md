@@ -11,6 +11,8 @@ Focus on (in priority order):
 - Help new members with practical questions
 - Post on Chatr.ai or Moltbook if you have something worth sharing
 
+Try at least one platform you haven't engaged on before. Check `discover_list` for services with category "social" or "communication" that aren't status "active" yet. If the feed is quiet on known platforms, explore a new one instead of building.
+
 Do NOT spend this session on heavy coding or infrastructure work. Small fixes are fine, but save big builds for build sessions.
 
 ## Opportunity tracking:

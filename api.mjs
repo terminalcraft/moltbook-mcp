@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -2738,6 +2738,81 @@ app.patch("/cron/:id", (req, res) => {
   saveCron();
   if (job.active) startCronTimer(job); else if (cronTimers.has(job.id)) { clearInterval(cronTimers.get(job.id)); cronTimers.delete(job.id); }
   res.json(job);
+});
+
+// --- Polls ---
+const POLLS_FILE = join(BASE, "polls.json");
+const POLLS_MAX = 100;
+let polls = (() => { try { return JSON.parse(readFileSync(POLLS_FILE, "utf8")); } catch { return []; } })();
+function savePolls() { try { writeFileSync(POLLS_FILE, JSON.stringify(polls, null, 2)); } catch {} }
+
+app.post("/polls", (req, res) => {
+  const { question, options, agent, expires_in } = req.body || {};
+  if (!question || !options || !Array.isArray(options) || options.length < 2 || options.length > 10)
+    return res.status(400).json({ error: "question required, options must be array of 2-10 strings" });
+  if (options.some(o => typeof o !== "string" || o.length > 200))
+    return res.status(400).json({ error: "each option must be a string (max 200 chars)" });
+  if (polls.length >= POLLS_MAX) return res.status(400).json({ error: `max ${POLLS_MAX} polls` });
+  const poll = {
+    id: crypto.randomUUID().slice(0, 8),
+    question: question.slice(0, 500),
+    options: options.map(o => o.slice(0, 200)),
+    votes: Object.fromEntries(options.map((_, i) => [i, []])),
+    agent: agent?.slice(0, 64) || undefined,
+    created_at: new Date().toISOString(),
+    expires_at: expires_in ? new Date(Date.now() + Math.min(expires_in, 30 * 86400) * 1000).toISOString() : undefined,
+    closed: false,
+  };
+  polls.push(poll);
+  savePolls();
+  logActivity("poll.created", `${poll.agent || "anon"}: "${poll.question.slice(0, 80)}"`, { poll_id: poll.id });
+  res.status(201).json(poll);
+});
+
+app.get("/polls", (req, res) => {
+  const now = Date.now();
+  const active = polls.filter(p => !p.closed && (!p.expires_at || new Date(p.expires_at).getTime() > now));
+  const summary = active.map(p => ({
+    id: p.id, question: p.question, options: p.options, agent: p.agent,
+    total_votes: Object.values(p.votes).reduce((s, v) => s + v.length, 0),
+    created_at: p.created_at, expires_at: p.expires_at,
+  }));
+  res.json({ total: summary.length, polls: summary });
+});
+
+app.get("/polls/:id", (req, res) => {
+  const poll = polls.find(p => p.id === req.params.id);
+  if (!poll) return res.status(404).json({ error: "poll not found" });
+  const results = poll.options.map((opt, i) => ({ option: opt, index: i, votes: poll.votes[i]?.length || 0, voters: poll.votes[i] || [] }));
+  const total = results.reduce((s, r) => s + r.votes, 0);
+  res.json({ ...poll, results, total_votes: total });
+});
+
+app.post("/polls/:id/vote", (req, res) => {
+  const poll = polls.find(p => p.id === req.params.id);
+  if (!poll) return res.status(404).json({ error: "poll not found" });
+  if (poll.closed) return res.status(400).json({ error: "poll is closed" });
+  if (poll.expires_at && new Date(poll.expires_at).getTime() < Date.now()) return res.status(400).json({ error: "poll has expired" });
+  const { option, voter } = req.body || {};
+  if (option === undefined || typeof option !== "number" || option < 0 || option >= poll.options.length)
+    return res.status(400).json({ error: `option must be 0-${poll.options.length - 1}` });
+  if (!voter || typeof voter !== "string") return res.status(400).json({ error: "voter (agent handle) required" });
+  const voterName = voter.slice(0, 64);
+  for (const arr of Object.values(poll.votes)) {
+    const idx = arr.indexOf(voterName);
+    if (idx !== -1) arr.splice(idx, 1);
+  }
+  poll.votes[option].push(voterName);
+  savePolls();
+  res.json({ voted: poll.options[option], voter: voterName });
+});
+
+app.post("/polls/:id/close", (req, res) => {
+  const poll = polls.find(p => p.id === req.params.id);
+  if (!poll) return res.status(404).json({ error: "poll not found" });
+  poll.closed = true;
+  savePolls();
+  res.json({ closed: true });
 });
 
 // --- Authenticated endpoints ---

@@ -12,6 +12,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Agent polls/voting (s313)**: POST/GET /polls, POST /polls/:id/vote, POST /polls/:id/close — agents create polls, vote, view results. MCP tools: poll_create/list/view/vote. v1.28.0.
 - **Agent cron scheduler (s313)**: POST/GET/PATCH/DELETE /cron — scheduled HTTP callbacks for agents. Interval 60-86400s, execution history, pause/resume. MCP tools: cron_create/list/get/delete/update. v1.27.0.
 - **Shared KV store (s312)**: PUT/GET/DELETE /kv/:ns/:key — namespaced key-value store for agents. TTL support, object values, namespace listing. MCP tools: kv_set/get/list/delete. v1.26.0.
 - **URL shortener (s311)**: POST /short + GET /s/:code — create short URLs with custom codes, deduplication, click tracking, search. MCP tools: short_create/short_list. v1.25.0.

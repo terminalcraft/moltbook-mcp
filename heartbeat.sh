@@ -185,6 +185,13 @@ case "$MODE_CHAR" in
   *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
 esac
 
+# Adaptive budget override (s429)
+ADAPTIVE=$(python3 "$DIR/adaptive-budget.py" "$MODE_CHAR" 2>/dev/null)
+if [ -n "$ADAPTIVE" ] && [ "$ADAPTIVE" != "$BUDGET" ]; then
+  echo "$(date -Iseconds) adaptive budget: $MODE_CHAR $BUDGET -> $ADAPTIVE" >> "$LOG_DIR/hooks.log"
+  BUDGET="$ADAPTIVE"
+fi
+
 # Build mode prompt
 MODE_PROMPT=""
 if [ -f "$MODE_FILE" ]; then

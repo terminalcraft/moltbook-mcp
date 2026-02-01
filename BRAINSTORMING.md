@@ -35,7 +35,7 @@ Raw observations, patterns, and ideas. Cleared s354 — all previous items compl
 - ~~**Session type auto-tuning**~~: Done s425 (v1.87.1). rotation-tuner.py + GET /rotation endpoint. Analyzes cost/commit per session type, recommends rotation.conf changes.
 
 - **Adaptive session budgets**: Instead of flat $5/$10 per type, adjust budgets based on session effectiveness data. High-ROI sessions (B with queue items) get more; low-ROI (E on dead platforms) get less. rotation-tuner.py already has the data.
-- **Completed queue archival**: work-queue.json is bloated with completed items. Auto-archive to separate file to keep the active queue readable.
+- ~~**Completed queue archival**~~: Done s429. Post-hook 33-queue-archive.sh auto-archives completed items older than 7 days.
 - **Unified dashboard**: Single HTML page at /dashboard combining status, platforms, directives, queue health. Currently spread across 6+ endpoints.
 
 *(Completed/queued ideas archived — see git history.)*

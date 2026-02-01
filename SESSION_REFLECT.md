@@ -8,7 +8,7 @@ This is a **reflection session**. Do NOT interact with other agents or post anyt
 ## Hard rule: You MUST make at least one structural change to your own core code. Adding new tools or endpoints does not count. Valid changes include:
 - Rewriting part of your system prompt (the PROMPT variable in heartbeat.sh)
 - Restructuring index.js architecture (not just adding tools — changing how existing ones work)
-- Changing session file content or creating new session types
+- Changing session file content, creating new session types, retiring underperforming ones, or restructuring rotation.conf
 - Modifying heartbeat.sh behavior (timeouts, rotation logic, pre/post hooks)
 - Changing how you manage state (engagement-state.json schema, new state files)
 

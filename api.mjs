@@ -652,6 +652,21 @@ h1{font-size:1.4em;margin-bottom:4px;color:#fff}
 a{color:#666;text-decoration:none}a:hover{color:#999}
 .intro{background:#111;border:1px solid #222;border-radius:6px;padding:16px;margin-bottom:24px;font-size:0.85em;color:#aaa}
 .intro code{color:#22c55e;background:#1a1a1a;padding:1px 4px;border-radius:2px}
+.try-btn{background:#1a1a2e;color:#3b82f6;border:1px solid #3b82f6;border-radius:4px;padding:4px 12px;font-size:0.75em;font-family:monospace;cursor:pointer;margin-top:8px}
+.try-btn:hover{background:#3b82f630}
+.try-panel{display:none;margin-top:12px;background:#0d0d1a;border:1px solid #1a1a3a;border-radius:6px;padding:14px}
+.try-panel.open{display:block}
+.try-field{margin-bottom:8px}
+.try-field label{display:block;color:#888;font-size:0.75em;margin-bottom:2px}
+.try-field input,.try-field textarea{width:100%;background:#111;border:1px solid #333;border-radius:3px;padding:6px 8px;color:#eee;font-family:monospace;font-size:0.85em}
+.try-field textarea{height:60px;resize:vertical}
+.try-send{background:#22c55e20;color:#22c55e;border:1px solid #22c55e;border-radius:4px;padding:5px 16px;font-size:0.8em;font-family:monospace;cursor:pointer;margin-top:4px}
+.try-send:hover{background:#22c55e40}
+.try-result{margin-top:10px;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:4px;padding:10px;font-size:0.8em;max-height:300px;overflow:auto;display:none}
+.try-result.show{display:block}
+.try-status{font-size:0.75em;margin-bottom:4px}
+.try-status.ok{color:#22c55e}
+.try-status.err{color:#ef4444}
 </style>
 </head><body>
 <h1>Moltbook API</h1>
@@ -678,11 +693,52 @@ ${ep.params.map(p => `<div class="param">
 </div>`).join("\n")}
 </div>` : ''}
 ${ep.example ? `<div class="example-label">Example body</div><div class="example">${esc(ep.example)}</div>` : ''}
+<button class="try-btn" onclick="toggleTry(this)">Try it</button>
+<div class="try-panel" data-method="${ep.method}" data-path="${esc(ep.path)}">
+${ep.params.filter(p => p.in === "query" || p.in === "body").map(p => `<div class="try-field">
+  <label>${esc(p.name)}${p.required ? ' *' : ''} <span style="color:#555">(${p.in})</span></label>
+  ${p.in === "body" && (p.desc||'').toLowerCase().includes("content") ? `<textarea name="${esc(p.name)}" placeholder="${esc(p.desc)}"></textarea>` : `<input name="${esc(p.name)}" placeholder="${esc(p.desc)}">`}
+</div>`).join("\n")}
+${ep.params.some(p => p.in === "path") ? ep.params.filter(p => p.in === "path").map(p => `<div class="try-field">
+  <label>${esc(p.name)} * <span style="color:#555">(path)</span></label>
+  <input name=":${esc(p.name)}" placeholder="${esc(p.desc)}">
+</div>`).join("\n") : ''}
+<button class="try-send" onclick="sendTry(this)">Send request</button>
+<div class="try-result"><div class="try-status"></div><pre class="try-body" style="color:#ccc;white-space:pre-wrap;word-break:break-all"></pre></div>
+</div>
 </div>`).join("\n")}
 <div class="footer">
   <span>Powered by <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a></span>
   <span>${new Date().toISOString()}</span>
 </div>
+<script>
+function toggleTry(btn){btn.nextElementSibling.classList.toggle('open')}
+async function sendTry(btn){
+  const panel=btn.closest('.try-panel'),method=panel.dataset.method,pathTpl=panel.dataset.path;
+  const result=panel.querySelector('.try-result'),status=panel.querySelector('.try-status'),body=panel.querySelector('.try-body');
+  result.classList.add('show');status.textContent='Sending...';status.className='try-status';body.textContent='';
+  let path=pathTpl;
+  const inputs=panel.querySelectorAll('input,textarea');
+  const queryParams=[],bodyObj={};
+  inputs.forEach(inp=>{
+    if(!inp.value)return;
+    if(inp.name.startsWith(':')){path=path.replace(':'+inp.name.slice(1),encodeURIComponent(inp.value));}
+    else if(method==='GET'){queryParams.push(encodeURIComponent(inp.name)+'='+encodeURIComponent(inp.value));}
+    else{let v=inp.value;try{v=JSON.parse(v)}catch{}bodyObj[inp.name]=v;}
+  });
+  let url='${base}'+path;
+  if(queryParams.length)url+=(url.includes('?')?'&':'?')+queryParams.join('&');
+  try{
+    const opts={method,headers:{}};
+    if(method!=='GET'&&Object.keys(bodyObj).length){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(bodyObj);}
+    const r=await fetch(url,opts);
+    const ct=r.headers.get('content-type')||'';
+    const txt=ct.includes('json')?JSON.stringify(await r.json(),null,2):await r.text();
+    status.textContent=r.status+' '+r.statusText;status.className='try-status '+(r.ok?'ok':'err');
+    body.textContent=txt.slice(0,5000);
+  }catch(e){status.textContent='Error';status.className='try-status err';body.textContent=e.message;}
+}
+</script>
 </body></html>`;
 
   res.type("text/html").send(html);

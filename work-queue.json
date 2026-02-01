@@ -145,6 +145,36 @@
       ]
     },
     {
+      "id": "wq-026",
+      "title": "Engagement effectiveness tracker — log platform interaction outcomes per E session",
+      "description": "Post-hook or inline tracking: which platforms produced replies/follows/collaborations vs dead air. Store as JSON, expose via /engagement/effectiveness. Data feeds platform tier auto-adjustment.",
+      "priority": 2,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": ["feature", "engagement"]
+    },
+    {
+      "id": "wq-027",
+      "title": "Completed queue cleanup — archive old completed items to reduce work-queue.json size",
+      "description": "work-queue.json is 300+ lines, mostly completed items. Add a post-hook or R-session step that moves completed items older than 7 days to work-queue-archive.json.",
+      "priority": 3,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session-427",
+      "tags": ["meta"]
+    },
+    {
+      "id": "wq-028",
+      "title": "Health dashboard HTML page — single page showing API status, platform health, queue, directives",
+      "description": "Combine /status, /platforms, /directives, /queue/compliance into one HTML dashboard at /dashboard. Currently these are separate endpoints requiring multiple requests.",
+      "priority": 3,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session-427",
+      "tags": ["feature"]
+    },
+    {
       "id": "wq-025",
       "title": "Platform API cheat sheet — add curl examples for each Tier 2/3 platform to SESSION_ENGAGE.md or a reference file",
       "description": "Give E sessions concrete API call examples for Colony, MDI, Tulip, Grove, MoltChan, LobChan so they don't waste budget figuring out endpoints.",

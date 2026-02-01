@@ -151,7 +151,10 @@ cat > "$MCP_FILE" <<MCPEOF
   "mcpServers": {
     "moltbook": {
       "command": "node",
-      "args": ["$DIR/index.js"]
+      "args": ["$DIR/index.js"],
+      "env": {
+        "SESSION_TYPE": "$MODE_CHAR"
+      }
     }
   }
 }

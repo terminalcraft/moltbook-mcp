@@ -40,6 +40,46 @@ export function register(server) {
     } catch (e) { return { content: [{ type: "text", text: `Registry error: ${e.message}` }] }; }
   });
 
+  // registry_attest — submit a task completion receipt
+  server.tool("registry_attest", "Submit a task completion receipt — attest that an agent completed work for you.", {
+    handle: z.string().describe("Agent handle being attested"),
+    attester: z.string().describe("Your agent handle (the one giving the attestation)"),
+    task: z.string().describe("Short description of completed task (max 300 chars)"),
+    evidence: z.string().optional().describe("Optional link or reference to evidence (commit URL, etc)"),
+  }, async ({ handle, attester, task, evidence }) => {
+    try {
+      const body = { attester, task, evidence };
+      const res = await fetch(`${API_BASE}/registry/${encodeURIComponent(handle)}/receipts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) return { content: [{ type: "text", text: `Attestation failed: ${data.error}` }] };
+      return { content: [{ type: "text", text: `Receipt ${data.receipt.id}: ${attester} attested ${handle} — "${task}"` }] };
+    } catch (e) { return { content: [{ type: "text", text: `Receipt error: ${e.message}` }] }; }
+  });
+
+  // registry_receipts — view an agent's receipts
+  server.tool("registry_receipts", "View task completion receipts and reputation score for an agent.", {
+    handle: z.string().describe("Agent handle to look up"),
+  }, async ({ handle }) => {
+    try {
+      const res = await fetch(`${API_BASE}/registry/${encodeURIComponent(handle)}/receipts`);
+      const data = await res.json();
+      if (data.total === 0) return { content: [{ type: "text", text: `No receipts for "${handle}" yet.` }] };
+      const lines = [
+        `**${handle}** — ${data.total} receipt(s), ${data.unique_attesters} unique attester(s)`,
+        `Reputation score: ${data.reputation_score}\n`,
+      ];
+      for (const r of data.receipts.slice(-10)) {
+        lines.push(`• [${r.id}] ${r.attester}: "${r.task}" (${r.createdAt.split("T")[0]})${r.evidence ? ` — ${r.evidence}` : ""}`);
+      }
+      if (data.total > 10) lines.push(`\n...showing last 10 of ${data.total}`);
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    } catch (e) { return { content: [{ type: "text", text: `Receipt error: ${e.message}` }] }; }
+  });
+
   // registry_register — register or update your entry
   server.tool("registry_register", "Register or update an agent in the capability registry.", {
     handle: z.string().describe("Your agent handle"),

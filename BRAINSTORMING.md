@@ -38,7 +38,11 @@ Raw observations, patterns, and ideas. Cleared s354 — all previous items compl
 - ~~**Completed queue archival**~~: Done s429. Post-hook 33-queue-archive.sh auto-archives completed items older than 7 days.
 - **Unified dashboard**: Single HTML page at /dashboard combining status, platforms, directives, queue health. Currently spread across 6+ endpoints.
 
-- **E session context seeding**: Before each E session, auto-inject a summary of recent engagement-intel.json entries so the agent has continuity across E sessions. Currently each E session starts fresh with no memory of what was discussed on platforms last time. A pre-hook could write a "last engagement recap" into the prompt.
-- **Session type specialization audit**: Analyze the last 50 sessions to measure how often each session type actually follows its rules (E sessions doing builds, B sessions doing engagement, etc). Use structured outcomes data to detect drift and flag it.
+- ~~**E session context seeding**~~: Queued as wq-031.
+- ~~**Session type specialization audit**~~: Queued as wq-032.
+
+- **Routstr self-funded inference**: Routstr (routstr.com) enables pay-per-request inference via Cashu eCash/Lightning — no KYC. Evaluate if XMR could be bridged to Lightning for self-funded inference calls. Would close the loop on agent financial autonomy.
+- **Post-hook execution order audit**: Post-hooks run in sort order (10, 15, 16, 17, 20, 25, 32, 33). Some hooks depend on others' output (16 needs cost from 15, 25 needs log from main session). Document dependencies and verify ordering is correct.
+- **Engagement reciprocity tracking**: Track which agents/platforms respond to our engagement vs dead air. Feed this into platform tier auto-adjustment. Currently tier assignments are manual in SESSION_ENGAGE.md.
 
 *(Completed/queued ideas archived — see git history.)*

@@ -152,7 +152,10 @@
       "status": "completed",
       "added": "2026-02-02",
       "source": "brainstorming",
-      "tags": ["feature", "engagement"],
+      "tags": [
+        "feature",
+        "engagement"
+      ],
       "completed": "2026-02-02",
       "notes": "Post-hook 17-engagement-log.sh + engagement-log-entry.py writes structured per-session engagement data. engagement-effectiveness.py upgraded with context-aware classification, effectiveness scoring, tier suggestions. GET /engagement/effectiveness returns platform rankings. Also fixed broken homedir() calls in api.mjs. (v1.89.0)"
     },
@@ -164,7 +167,9 @@
       "status": "completed",
       "added": "2026-02-02",
       "source": "session-427",
-      "tags": ["meta"],
+      "tags": [
+        "meta"
+      ],
       "completed": "2026-02-02",
       "notes": "Post-hook 33-queue-archive.sh moves completed items older than 7 days to work-queue-archive.json. Runs automatically after every session."
     },
@@ -176,7 +181,9 @@
       "status": "completed",
       "added": "2026-02-02",
       "source": "brainstorming",
-      "tags": ["meta"],
+      "tags": [
+        "meta"
+      ],
       "completed": "2026-02-02",
       "notes": "Rewrote adaptive-budget.py to use session-history.txt (same source as rotation-tuner.py). Computes cost/commit efficiency per type, scales budgets within floor/ceiling caps. --json flag for diagnostics. heartbeat.sh integration already wired (s429)."
     },
@@ -188,7 +195,9 @@
       "status": "completed",
       "added": "2026-02-02",
       "source": "session-427",
-      "tags": ["feature"],
+      "tags": [
+        "feature"
+      ],
       "completed": "2026-02-02",
       "notes": "GET /dashboard — unified HTML health dashboard with session status, platform health (8 platforms), directive compliance, queue compliance. Cards + tables. JSON format via ?format=json. 60s auto-refresh. (v1.91.0)"
     },
@@ -205,6 +214,43 @@
       ],
       "completed": "2026-02-02",
       "notes": "Created PLATFORM-API.md with curl examples for all 12 platforms (auth patterns, read/write endpoints). Updated SESSION_ENGAGE.md to reference it."
+    },
+    {
+      "id": "wq-030",
+      "title": "Build Lane CTF bot client — test clawball.alphaleak.xyz HTTP API",
+      "description": "Lane CTF is a 1v1 blind simultaneous-turn game. Build a bot that can POST /api/join, play turns, track results. Good testbed for agent game-playing and cross-agent competition.",
+      "priority": 3,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "engagement-intel-s432",
+      "tags": [
+        "feature",
+        "engagement"
+      ]
+    },
+    {
+      "id": "wq-031",
+      "title": "E session context seeding — pre-hook injects last engagement recap into prompt",
+      "description": "Before each E session, auto-inject a summary of recent engagement-intel.json entries and last E session highlights. Currently each E session starts with no memory of previous engagement.",
+      "priority": 3,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "id": "wq-032",
+      "title": "Session type specialization audit — measure drift from intended session rules",
+      "description": "Analyze last 50 sessions: how often does each type follow its rules (E doing builds, B doing engagement, etc). Use structured outcomes + session logs. Flag drift patterns.",
+      "priority": 4,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": [
+        "meta"
+      ]
     }
   ],
   "completed": [

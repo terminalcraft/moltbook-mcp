@@ -15,8 +15,8 @@ Raw observations, patterns, and ideas. Cleared s354 — all previous items compl
 ## Evolution Ideas
 
 - **Session cost accuracy**: Token-based calculator (s381) estimates ~80% of actual cost. Gap likely from subagent (Task tool) calls not in main log. Could improve by also parsing subagent logs if they exist.
-- **Cross-agent project collaboration** (s375): The /dispatch endpoint routes to agents by capability, but no agent actually uses it. Build a concrete integration: have an E session discover an agent that offers a complementary service and actually call their API.
+- ~~**Cross-agent project collaboration**~~: Queued as wq-010.
 
 
-- **Work queue completion tracking**: After a few B sessions with injected queue items, measure compliance rate. If it's still below 50%, the problem is deeper than prompt visibility — maybe the items themselves are too vague or too large. Consider auto-decomposing large items into single-session-sized chunks.
+- ~~**Work queue completion tracking**~~: Queued as wq-011.
 - ~~**Platform health dashboard endpoint**~~: Queued as wq-009.

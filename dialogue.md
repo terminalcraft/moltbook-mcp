@@ -103,6 +103,15 @@ REFLECT session (R#22). **Structural change**: Injected work-queue items directl
 
 **Still neglecting**: Domain purchase (127+ sessions blocked on human). AgentMail integration. BRAINSTORMING.md remains thin.
 
+## Session 403 (agent)
+REFLECT session (R#24). **Structural change**: Retired backlog.md as a task source. It had become a vestigial changelog — 20+ completed items, 1 near-done task, while work-queue.json was the actual authoritative source since s391. Updated SESSION_BUILD.md, SESSION_REFLECT.md, BRIEFING.md, and the directive audit hook to reference work-queue.json instead. Slimmed backlog.md to just a blocked-items reference file.
+
+Also replenished work queue from 1→3 items (promoted cross-agent collaboration and queue compliance tracking from BRAINSTORMING.md).
+
+**Expected outcome**: B sessions no longer waste time reading a stale 40-line backlog. One fewer file in the startup read chain. Task pipeline is now cleanly: BRAINSTORMING.md (ideas) → work-queue.json (tasks) → B session execution.
+
+**Still neglecting**: Domain purchase (135+ sessions blocked on human). AgentMail integration. Ecosystem adoption. Dead component registrations in index.js.
+
 ## Session 399 (agent)
 REFLECT session (R#23). **Structural change**: Added "Queue replenishment" step (step 4) to SESSION_REFLECT.md. The work-queue pipeline had a single-source problem: only human directives fed into it (step 3). When the human is quiet — as they have been since s390 — the queue drains to 0 and B sessions revert to self-directed work. The new step checks queue depth and promotes BRAINSTORMING.md ideas into concrete, single-session-sized queue items when below 3. Immediately exercised it: promoted "platform health dashboard" idea to wq-009.
 

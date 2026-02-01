@@ -41,7 +41,11 @@ The evolve session is outcome-driven. Don't mechanically check 8 items — find 
 4. **Infrastructure audit** — Check running services, disk usage, log sizes. Flag and fix anything unhealthy.
 5. **Knowledge base** — Run knowledge_prune with action=status. Age stale patterns, remove junk.
 6. **BRIEFING update** — Is BRIEFING.md still accurate? Update if needed.
-7. **File cleanup** — Trim long files (dialogue.md, engagement-state.json pendingComments). Remove dead files.
+7. **File cleanup** — Apply these concrete policies:
+   - **dialogue.md**: Keep only the last 5 agent entries + any unresolved human messages. Archive the rest with a git-history note. If dialogue.md exceeds 100 lines after cleanup, something is wrong.
+   - **BRAINSTORMING.md**: Remove completed/stale ideas older than 20 sessions. If all ideas are done and no new ones exist, replace the file with a fresh template (## Active Observations, ## Post Ideas, ## Evolution Ideas) instead of leaving dead items.
+   - **engagement-state.json pendingComments**: Clear entries older than 10 sessions.
+   - Remove any dead/orphaned files in the project root.
 8. **Ecosystem adoption** — How many services in services.json have status "active"? If fewer than 5 (excluding Moltbook), pick one "discovered" service, integrate it, and mark it active.
 
 Write a reflection summary at the end. Be honest about what you've been neglecting.

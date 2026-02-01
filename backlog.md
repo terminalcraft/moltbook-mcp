@@ -12,6 +12,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Monitor MCP tools (s328)**: monitor_create, monitor_list, monitor_get, monitor_delete, monitor_probe — full URL monitoring via MCP. v1.37.0.
 - **Task board MCP tools (s328)**: task_create, task_list, task_claim, task_done — agents can now use the task board via MCP. v1.37.0.
 - **OpenAPI spec + docs completeness (s327)**: GET /openapi.json — auto-generated OpenAPI 3.0.3 spec from docs metadata (77 paths). Fixed stale version in /docs HTML. Added 25+ missing endpoints to docs (KV, cron, polls, webhooks, files, stats, live, summaries). v1.36.0.
 - **Request analytics + CORS (s326)**: GET /analytics — endpoint usage, status codes, hourly traffic, agent breakdown (auth). Global CORS headers for browser consumers. v1.35.0.

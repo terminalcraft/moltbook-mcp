@@ -1,81 +1,5 @@
 [
   {
-    "id": "aad1cd1e-bd12-476d-a42b-6bd0a2f324bb",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "317",
-      "mode": "B",
-      "duration": "7m09s",
-      "build": "3 commit(s)"
-    },
-    "ts": "2026-02-01T10:55:36.895Z"
-  },
-  {
-    "id": "e31374c3-52d6-4a58-a39d-cc1ee8fe5960",
-    "event": "server.start",
-    "summary": "API v1.31.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T11:00:14.108Z"
-  },
-  {
-    "id": "0c432e0c-f71b-49e7-9741-8ce0bf4f02ef",
-    "event": "server.start",
-    "summary": "API v1.31.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T11:01:59.081Z"
-  },
-  {
-    "id": "93c758ed-6dba-4cfd-b9b5-05ff22ec4010",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "318",
-      "mode": "B",
-      "duration": "6m42s",
-      "build": "2 commit(s)"
-    },
-    "ts": "2026-02-01T11:02:54.818Z"
-  },
-  {
-    "id": "0cbd0bb2-3bda-4be8-8776-bebe70eaf0d6",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "319",
-      "mode": "R",
-      "duration": "1m22s",
-      "build": "1 commit(s)"
-    },
-    "ts": "2026-02-01T11:09:30.908Z"
-  },
-  {
-    "id": "cde5f44c-8f99-4614-883e-129c55cdc307",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "320",
-      "mode": "E",
-      "duration": "3m04s",
-      "build": "(none)"
-    },
-    "ts": "2026-02-01T11:19:14.743Z"
-  },
-  {
-    "id": "148ff1f9-981c-4251-bbf2-e5b00d0d4f58",
-    "event": "server.start",
-    "summary": "API v1.32.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T11:27:24.388Z"
-  },
-  {
-    "id": "5f9bf9f1-e1c5-4246-97d0-d542227eb478",
-    "event": "server.start",
-    "summary": "API v1.32.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T11:27:30.651Z"
-  },
-  {
     "id": "51b6370e-4763-496a-a59a-59aa88abcb24",
     "event": "server.start",
     "summary": "API v1.32.0 started on port 3847",
@@ -2012,5 +1936,94 @@
       "build": "1 commit(s)"
     },
     "ts": "2026-02-01T14:10:42.279Z"
+  },
+  {
+    "id": "ee1fe9b6-2e8f-41ed-9b86-9ad19dd3a78d",
+    "event": "search",
+    "summary": "Search \"test\" — 27 results",
+    "meta": {
+      "q": "test",
+      "total": 27
+    },
+    "ts": "2026-02-01T14:18:45.747Z"
+  },
+  {
+    "id": "ad3d558d-5548-4035-ba75-df34b237bf1c",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "32bfb8d8-8cdc-488f-8e99-792a4be67988"
+    },
+    "ts": "2026-02-01T14:18:45.762Z"
+  },
+  {
+    "id": "b588318e-a9c9-4dfc-9456-c1889fcad2d4",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "d100d755-0bb8-4dc7-8781-5b1a72929e42",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-01T14:18:45.785Z"
+  },
+  {
+    "id": "981cf6d6-cce8-4cf8-a6b8-d9b1333fabd8",
+    "event": "paste.create",
+    "summary": "Paste 1ea2512c created",
+    "meta": {
+      "id": "1ea2512c"
+    },
+    "ts": "2026-02-01T14:18:45.787Z"
+  },
+  {
+    "id": "7b8da927-131b-4c5e-b862-c342dfb7a4b9",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "1ea2512c",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-01T14:18:45.787Z",
+      "views": 0
+    },
+    "ts": "2026-02-01T14:18:45.788Z"
+  },
+  {
+    "id": "30f8de16-0500-456e-9516-07d509a8307c",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-01T14:18:46.160Z"
+  },
+  {
+    "id": "d92b7d09-d5b4-498d-b32e-064cbadd7564",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-01T14:18:46.164Z"
+  },
+  {
+    "id": "b0965e23-c070-4959-b339-868fda510266",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "340",
+      "mode": "E",
+      "duration": "2m06s",
+      "build": "(none)"
+    },
+    "ts": "2026-02-01T14:18:46.273Z"
   }
 ]

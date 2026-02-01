@@ -94,8 +94,9 @@ else
   IDX=$((COUNTER % PAT_LEN))
   MODE_CHAR="${PATTERN:$IDX:1}"
 
-  # Increment counter
-  echo $((COUNTER + 1)) > "$SESSION_COUNTER_FILE"
+  # Increment counter and update variable to match (so summarizer gets correct value)
+  COUNTER=$((COUNTER + 1))
+  echo "$COUNTER" > "$SESSION_COUNTER_FILE"
 fi
 
 # Engagement health gate: if E session but no platforms are writable, downgrade to B.
@@ -172,50 +173,18 @@ fi
 
 echo "=== Done $(date -Iseconds) ===" | tee -a "$LOG"
 
-# Log rotation — keep newest 50 session logs
-cd "$LOG_DIR"
-ls -1t *.log 2>/dev/null | tail -n +51 | xargs -r rm --
+# --- Post-session pipeline ---
+# Each step is a script in hooks/post-session/, run in sort order.
+# This replaces inline post-session logic with an extensible hook system.
+# To add a new post-session step: drop a script in hooks/post-session/.
 
-# Generate readable summary from stream-json log
-python3 "$DIR/scripts/summarize-session.py" "$LOG" "$COUNTER" 2>/dev/null || true
-
-# Append one-line session history for cheap cross-session context
-SUMMARY_FILE="${LOG%.log}.summary"
-HISTORY_FILE="$STATE_DIR/session-history.txt"
-if [ -f "$SUMMARY_FILE" ]; then
-  S_NUM=$(grep '^Session:' "$SUMMARY_FILE" | head -1 | awk '{print $2}')
-  S_DUR=$(grep '^Duration:' "$SUMMARY_FILE" | head -1 | awk '{print $2}')
-  S_BUILD=$(grep '^Build:' "$SUMMARY_FILE" | head -1 | cut -d' ' -f2-)
-  S_FILES=$(grep '^Files changed:' "$SUMMARY_FILE" | head -1 | cut -d' ' -f3-)
-  S_COMMITS=$(grep '^ *- ' "$SUMMARY_FILE" | head -1 | sed 's/^ *- //')
-  echo "$(date +%Y-%m-%d) mode=$MODE_CHAR s=$S_NUM dur=$S_DUR build=$S_BUILD files=[$S_FILES] ${S_COMMITS:+note: $S_COMMITS}" >> "$HISTORY_FILE"
-  # Keep last 30 entries
-  if [ "$(wc -l < "$HISTORY_FILE")" -gt 30 ]; then
-    tail -30 "$HISTORY_FILE" > "$HISTORY_FILE.tmp" && mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"
-  fi
-fi
-
-# Auto-version any uncommitted changes after session
-cd "$DIR"
-if \! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
-  # Selective add: only stage known-safe file types instead of blanket -A.
-  # Prevents accidentally committing binaries, temp files, or anything
-  # .gitignore might miss.
-  git add -- '*.md' '*.js' '*.cjs' '*.mjs' '*.json' '*.sh' '*.py' '*.txt' \
-    '.gitignore' 'LICENSE' 2>/dev/null || true
-  # Also add any tracked files that were modified (catches renames, etc.)
-  git add -u 2>/dev/null || true
-  # Validate critical shell scripts before committing — revert broken ones
-  for f in heartbeat.sh send_heartbeat.sh; do
-    if [ -f "$f" ] && \! bash -n "$f" 2>/dev/null; then
-      echo "$(date -Iseconds) REVERTED $f (syntax error)" >> "$LOG_DIR/selfmod.log"
-      git checkout -- "$f" 2>/dev/null || true
-    fi
+HOOKS_DIR="$DIR/hooks/post-session"
+if [ -d "$HOOKS_DIR" ]; then
+  for hook in "$HOOKS_DIR"/*; do
+    [ -x "$hook" ] || continue
+    echo "$(date -Iseconds) running hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
+    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" \
+      timeout 60 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || \
+      echo "$(date -Iseconds) hook FAILED: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
   done
-  # Only commit if something was actually staged
-  if \! git diff --cached --quiet 2>/dev/null; then
-    git commit -m "auto-snapshot post-session $(date +%Y%m%d_%H%M%S)" --no-gpg-sign 2>/dev/null || true
-  fi
 fi
-# Push to keep remote in sync (best-effort, don't block on failure)
-git push origin master 2>/dev/null || true

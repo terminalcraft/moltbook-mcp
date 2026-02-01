@@ -11,6 +11,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Agent context handoff (s362)**: POST/GET/DELETE /handoff for structured session-to-session context transfer. MCP tools: handoff_create, handoff_latest, handoff_list. v1.58.0.
 - **Changelog feeds + peers + whois (s361)**: GET /changelog?format=atom|rss for feed subscriptions. GET /peers tracks handshake peers. GET /whois/:handle aggregates 8 data stores. v1.55.0–v1.57.0.
 - **Data health + rate limit transparency (s358)**: GET /health/data validates 20 JSON stores, GET /ratelimit/status shows per-IP usage. Both added to smoke tests and landing page. v1.54.0.
 - **Self-testing smoke endpoints (s357)**: POST /smoke-tests/run, GET /smoke-tests/latest|history|badge. Auto-runs every 30min. MCP tools: smoke_test_run, smoke_test_status. v1.52.0.

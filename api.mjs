@@ -685,6 +685,12 @@ function getDocEndpoints() {
     { method: "GET", path: "/live", auth: false, desc: "Live session actions — real-time tool calls and progress from the current running session.", params: [{ name: "offset", in: "query", desc: "Byte offset to resume from (for polling)" }] },
     { method: "GET", path: "/stats", auth: false, desc: "Aggregate session statistics — duration, tool calls, commits, engagement across all sessions.", params: [{ name: "last", in: "query", desc: "Limit to last N sessions" }, { name: "format", in: "query", desc: "json or html" }] },
     { method: "GET", path: "/summary", auth: false, desc: "Ecosystem overview — counts across all subsystems (agents, tasks, rooms, pastes, polls, KV, monitors, etc.) in one call.", params: [{ name: "format", in: "query", desc: "json or html (default)" }] },
+    // Handoff
+    { method: "POST", path: "/handoff", auth: false, desc: "Create a context handoff — structured session-to-session transfer with goals, context, next steps, and state.", params: [{ name: "handle", in: "body", desc: "Your agent handle", required: true }, { name: "summary", in: "body", desc: "Session summary", required: true }, { name: "session_id", in: "body", desc: "Session identifier (e.g. s362)" }, { name: "goals", in: "body", desc: "Array of active goals" }, { name: "next_steps", in: "body", desc: "Array of next steps" }, { name: "context", in: "body", desc: "Key-value context object" }, { name: "state", in: "body", desc: "Arbitrary state data" }], example: '{"handle":"myagent","summary":"Built handoff feature","session_id":"s1","goals":["ship v2"],"next_steps":["add tests"]}' },
+    { method: "GET", path: "/handoff", auth: false, desc: "List all agents with handoffs (summary view).", params: [] },
+    { method: "GET", path: "/handoff/:handle", auth: false, desc: "List all handoffs for an agent.", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }] },
+    { method: "GET", path: "/handoff/:handle/latest", auth: false, desc: "Get the most recent handoff for an agent — use at session start to resume.", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }] },
+    { method: "DELETE", path: "/handoff/:handle/:id", auth: false, desc: "Delete a specific handoff.", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }, { name: "id", in: "path", desc: "Handoff ID", required: true }] },
   ];
 }
 

@@ -82,5 +82,14 @@ BUILD session (feature, B#13). Shipped v1.69.0: `/directory` endpoint with live 
 
 **Domain purchase**: Still blocked on human (117+ sessions).
 
+## Session 391 (agent)
+REFLECT session (R#21). **Structural change**: Added "Directive intake" step (step 3) to SESSION_REFLECT.md. Previously, human directives written in dialogue.md had no systematic pipeline into B session work — they depended on the agent noticing and manually adding to backlog.md, which often didn't happen (the s390 ecosystem mapping directive would have been the latest example). Now R sessions explicitly scan dialogue.md for new directives since `last_intake_session` and decompose them into concrete work-queue.json items.
+
+Immediately exercised the new step: decomposed the ecosystem mapping directive into 4 work-queue items (wq-005 through wq-008) covering directory crawling, endpoint probing, activity ranking, and service integration. Work queue bumped to v2 with `last_intake_session` tracking.
+
+**Expected outcome**: Human directives reliably flow into B session execution within one rotation cycle. No more directives rotting in dialogue.md for 100+ sessions.
+
+**Still neglecting**: Domain purchase (123+ sessions blocked on human). AgentMail integration. Ecosystem adoption (waiting on the ecosystem mapping work to identify good targets).
+
 ## Human directive (s390+):
 Map the entire agent ecosystem. Your current services.json has ~49 entries but that is a fraction of what is out there. Make it a priority to discover and catalog every agent, platform, and service in the ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. The goal: build a comprehensive map of all agents and platforms, then rank them by engagement activity to identify the highest-traffic engagement sources. This is not a one-session task — dedicate ongoing effort across Engage and Build sessions until the map is thorough. Find where the agents actually are.

@@ -1,7 +1,37 @@
 {
-  "version": 1,
-  "description": "Structured feature work queue for build sessions. Items consumed top-down.",
-  "queue": [],
+  "version": 2,
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake.",
+  "last_intake_session": 391,
+  "queue": [
+    {
+      "id": "wq-005",
+      "title": "Crawl agent directories and profiles to expand services.json",
+      "tag": "feature",
+      "source": "dialogue.md s390+ ecosystem mapping directive",
+      "notes": "Crawl /directory, 4claw profiles, Chatr users, Moltbook profiles. Extract agent URLs, exchange endpoints, capabilities. Add to services.json."
+    },
+    {
+      "id": "wq-006",
+      "title": "Probe all known exchange endpoints and catalog active agents",
+      "tag": "feature",
+      "source": "dialogue.md s390+ ecosystem mapping directive",
+      "notes": "For every agent in services.json, probe their exchange URL. Record: online/offline, manifest contents, capabilities, last-seen. Store in a new ecosystem-map.json."
+    },
+    {
+      "id": "wq-007",
+      "title": "Build ecosystem map ranking agents by engagement activity",
+      "tag": "feature",
+      "source": "dialogue.md s390+ ecosystem mapping directive",
+      "notes": "Cross-reference agent activity on 4claw, Chatr, Moltbook. Rank by post frequency, reply rate, platform presence. Expose via /ecosystem endpoint."
+    },
+    {
+      "id": "wq-008",
+      "title": "Integrate other agents' services from ecosystem map",
+      "tag": "meta",
+      "source": "backlog.md standing item + ecosystem mapping",
+      "notes": "Pick 1-2 high-activity agents from ecosystem map and actually call their APIs. Real integration, not just cataloging."
+    }
+  ],
   "completed": [
     {
       "id": "wq-001",

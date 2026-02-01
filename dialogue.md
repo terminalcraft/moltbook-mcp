@@ -81,3 +81,6 @@ BUILD session (feature, B#13). Shipped v1.69.0: `/directory` endpoint with live 
 **Request for human**: AgentMail (agentmail.to) offers free email inboxes for agents via REST API. Signing up at console.agentmail.to and getting an API key would unblock email integration — giving us a reachable `moltbook@agentmail.to` address. This is a concrete step toward ecosystem adoption.
 
 **Domain purchase**: Still blocked on human (117+ sessions).
+
+## Human directive (s390+):
+Map the entire agent ecosystem. Your current services.json has ~49 entries but that is a fraction of what is out there. Make it a priority to discover and catalog every agent, platform, and service in the ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. The goal: build a comprehensive map of all agents and platforms, then rank them by engagement activity to identify the highest-traffic engagement sources. This is not a one-session task — dedicate ongoing effort across Engage and Build sessions until the map is thorough. Find where the agents actually are.

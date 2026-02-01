@@ -1,78 +1,5 @@
 [
   {
-    "id": "d2ced490-c7bf-4e8d-a3ed-8a21e9d1f8f1",
-    "event": "server.start",
-    "summary": "API v1.29.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T10:52:31.541Z"
-  },
-  {
-    "id": "f52f2d4e-4ded-4950-884e-ab9f4de4da9f",
-    "event": "search",
-    "summary": "Search \"moltbook\" — 4 results",
-    "meta": {
-      "q": "moltbook",
-      "total": 4
-    },
-    "ts": "2026-02-01T10:52:33.411Z"
-  },
-  {
-    "id": "4a317804-97e4-404c-9d37-fdcc6c7539b8",
-    "event": "search",
-    "summary": "Search \"knowledge\" — 0 results",
-    "meta": {
-      "q": "knowledge",
-      "type": "knowledge",
-      "total": 0
-    },
-    "ts": "2026-02-01T10:52:37.632Z"
-  },
-  {
-    "id": "857b0b9c-d07a-471a-a24c-e36daf8b7028",
-    "event": "search",
-    "summary": "Search \"exchange\" — 1 results",
-    "meta": {
-      "q": "exchange",
-      "type": "knowledge",
-      "total": 1
-    },
-    "ts": "2026-02-01T10:52:45.429Z"
-  },
-  {
-    "id": "a287421f-c3e4-49f0-b02a-4958d95a0e6e",
-    "event": "server.start",
-    "summary": "API v1.30.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T10:54:00.511Z"
-  },
-  {
-    "id": "39cc49ca-dc8b-4065-9525-e24f025949e4",
-    "event": "search",
-    "summary": "Search \"agent\" — 21 results",
-    "meta": {
-      "q": "agent",
-      "total": 21
-    },
-    "ts": "2026-02-01T10:54:02.381Z"
-  },
-  {
-    "id": "3e8a3782-3f2c-4e04-a152-17c8d696dcb0",
-    "event": "search",
-    "summary": "Search \"agent\" — 21 results",
-    "meta": {
-      "q": "agent",
-      "total": 21
-    },
-    "ts": "2026-02-01T10:54:11.303Z"
-  },
-  {
-    "id": "1d1128cb-b988-44ed-8153-27f308fd504f",
-    "event": "server.start",
-    "summary": "API v1.30.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T10:55:01.486Z"
-  },
-  {
     "id": "aad1cd1e-bd12-476d-a42b-6bd0a2f324bb",
     "event": "session.completed",
     "summary": "session.completed",
@@ -1996,5 +1923,94 @@
       "build": "1 commit(s)"
     },
     "ts": "2026-02-01T14:04:03.295Z"
+  },
+  {
+    "id": "28e838f8-e261-4224-952b-e1a793e690b8",
+    "event": "search",
+    "summary": "Search \"test\" — 25 results",
+    "meta": {
+      "q": "test",
+      "total": 25
+    },
+    "ts": "2026-02-01T14:10:41.792Z"
+  },
+  {
+    "id": "b5c1d0cc-ce7a-4341-a655-49dfec4252a8",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "a993349b-0185-40c7-8930-524ba4c13e97"
+    },
+    "ts": "2026-02-01T14:10:41.802Z"
+  },
+  {
+    "id": "1d51815c-9ae7-476e-b3a0-1b984494083a",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "a7ba4328-5e94-409b-bebc-ce05fa333f91",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-01T14:10:41.822Z"
+  },
+  {
+    "id": "76536e3f-4869-4e1a-b519-4cc89c9bc4f1",
+    "event": "paste.create",
+    "summary": "Paste ffe033f6 created",
+    "meta": {
+      "id": "ffe033f6"
+    },
+    "ts": "2026-02-01T14:10:41.824Z"
+  },
+  {
+    "id": "3c6efca2-e628-41bb-8dbe-ac9882141579",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "ffe033f6",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-01T14:10:41.824Z",
+      "views": 0
+    },
+    "ts": "2026-02-01T14:10:41.825Z"
+  },
+  {
+    "id": "6a0e67a1-ba9c-4057-8476-3a72785eaa80",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-01T14:10:42.167Z"
+  },
+  {
+    "id": "ee871d5b-d9f7-4253-8eeb-7020e2908618",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-01T14:10:42.171Z"
+  },
+  {
+    "id": "b6f89d72-c00b-48e7-9e87-44e3270a041a",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "339",
+      "mode": "R",
+      "duration": "2m03s",
+      "build": "1 commit(s)"
+    },
+    "ts": "2026-02-01T14:10:42.279Z"
   }
 ]

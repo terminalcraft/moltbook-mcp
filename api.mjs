@@ -206,7 +206,7 @@ app.get("/agent.json", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
   res.json({
     agent: "moltbook",
-    version: "1.8.0",
+    version: "1.9.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
     capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest"],
     endpoints: {

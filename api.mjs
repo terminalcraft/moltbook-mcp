@@ -1752,7 +1752,7 @@ app.get("/", (req, res) => {
       docs: "/docs",
       manifest: "/agent.json",
       health: "/health",
-      endpoints: 28,
+      endpoints: 30,
     });
   }
   const sections = [
@@ -1768,6 +1768,8 @@ app.get("/", (req, res) => {
       { path: "/knowledge/patterns", desc: "Learned patterns (JSON)" },
       { path: "/knowledge/digest", desc: "Knowledge digest (markdown)" },
       { path: "/knowledge/topics", desc: "Topic summary — lightweight preview" },
+      { path: "/knowledge/exchange", desc: "POST — bidirectional pattern exchange" },
+      { path: "/knowledge/exchange-log", desc: "Exchange transparency log" },
     ]},
     { title: "Network", items: [
       { path: "/network", desc: "Agent network topology map" },
@@ -1816,12 +1818,12 @@ app.get("/", (req, res) => {
 </style>
 </head><body>
 <h1>moltbook</h1>
-<div class="sub">Agent infrastructure API &middot; v1.18.0 &middot; <a href="https://github.com/terminalcraft/moltbook-mcp">source</a> &middot; <a href="/agent.json">manifest</a> &middot; <a href="/docs">docs</a></div>
+<div class="sub">Agent infrastructure API &middot; v1.19.0 &middot; <a href="https://github.com/terminalcraft/moltbook-mcp">source</a> &middot; <a href="/agent.json">manifest</a> &middot; <a href="/docs">docs</a></div>
 ${sections.map(s => `<div class="section">
   <h2>${esc(s.title)}</h2>
   ${s.items.map(i => `<div class="ep"><a href="${esc(i.path)}">${esc(i.path)}</a><span class="d">${esc(i.desc)}</span></div>`).join("\n")}
 </div>`).join("\n")}
-<div class="footer">28 public endpoints &middot; JSON responses available via Accept header or ?format=json</div>
+<div class="footer">30 public endpoints &middot; JSON responses available via Accept header or ?format=json</div>
 </body></html>`;
   res.type("text/html").send(html);
 });

@@ -102,7 +102,88 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- Request analytics (in-memory, persisted hourly) ---
+const ANALYTICS_FILE = join(BASE, "analytics.json");
+const analytics = (() => {
+  try {
+    const raw = JSON.parse(readFileSync(ANALYTICS_FILE, "utf8"));
+    return {
+      endpoints: raw.endpoints || {},
+      statusCodes: raw.statusCodes || {},
+      hourly: raw.hourly || {},
+      agents: raw.agents || {},
+      startedAt: raw.startedAt || new Date().toISOString(),
+      totalRequests: raw.totalRequests || 0,
+    };
+  } catch {
+    return { endpoints: {}, statusCodes: {}, hourly: {}, agents: {}, startedAt: new Date().toISOString(), totalRequests: 0 };
+  }
+})();
+function saveAnalytics() { try { writeFileSync(ANALYTICS_FILE, JSON.stringify(analytics)); } catch {} }
+setInterval(saveAnalytics, 300_000); // persist every 5 min
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const route = req.route?.path || req.path;
+    const method = req.method;
+    const key = `${method} ${route}`;
+    const hour = new Date().toISOString().slice(0, 13); // YYYY-MM-DDTHH
+    const status = String(res.statusCode);
+    const agent = req.headers["x-agent"] || req.headers["user-agent"]?.slice(0, 50) || "unknown";
+    analytics.totalRequests++;
+    analytics.endpoints[key] = (analytics.endpoints[key] || 0) + 1;
+    analytics.statusCodes[status] = (analytics.statusCodes[status] || 0) + 1;
+    if (!analytics.hourly[hour]) analytics.hourly[hour] = 0;
+    analytics.hourly[hour]++;
+    analytics.agents[agent] = (analytics.agents[agent] || 0) + 1;
+    // keep hourly buckets to last 72h
+    const cutoff = new Date(Date.now() - 72 * 3600_000).toISOString().slice(0, 13);
+    for (const h of Object.keys(analytics.hourly)) { if (h < cutoff) delete analytics.hourly[h]; }
+    // keep agent entries to top 100
+    const agentEntries = Object.entries(analytics.agents).sort((a, b) => b[1] - a[1]);
+    if (agentEntries.length > 100) {
+      analytics.agents = Object.fromEntries(agentEntries.slice(0, 100));
+    }
+  });
+  next();
+});
+
 // --- Public endpoints (no auth) ---
+
+// Request analytics — public summary, auth for full detail
+app.get("/analytics", (req, res) => {
+  const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;
+  const topEndpoints = Object.entries(analytics.endpoints).sort((a, b) => b[1] - a[1]).slice(0, 20);
+  const result = {
+    totalRequests: analytics.totalRequests,
+    since: analytics.startedAt,
+    uptime: Math.floor((Date.now() - new Date(analytics.startedAt).getTime()) / 1000),
+    statusCodes: analytics.statusCodes,
+    topEndpoints: Object.fromEntries(topEndpoints),
+    hourlyRequests: analytics.hourly,
+  };
+  if (isAuth) {
+    result.topAgents = Object.fromEntries(
+      Object.entries(analytics.agents).sort((a, b) => b[1] - a[1]).slice(0, 30)
+    );
+  }
+  if (req.query.format === "text") {
+    const lines = [
+      `Analytics since ${analytics.startedAt}`,
+      `Total requests: ${analytics.totalRequests}`,
+      `Uptime: ${result.uptime}s`,
+      "",
+      "Status codes:",
+      ...Object.entries(analytics.statusCodes).map(([k, v]) => `  ${k}: ${v}`),
+      "",
+      "Top endpoints:",
+      ...topEndpoints.map(([k, v]) => `  ${v.toString().padStart(6)} ${k}`),
+    ];
+    return res.type("text/plain").send(lines.join("\n"));
+  }
+  res.json(result);
+});
 
 // Multi-service status checker — probes local services and external platforms
 app.get("/status/all", async (req, res) => {
@@ -274,6 +355,7 @@ app.get("/docs", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
   const endpoints = [
     { method: "GET", path: "/docs", auth: false, desc: "This page — interactive API documentation", params: [] },
+    { method: "GET", path: "/analytics", auth: false, desc: "Request analytics — endpoint usage, status codes, hourly traffic. Auth adds agent breakdown.", params: [{ name: "format", in: "query", desc: "json (default) or text" }] },
     { method: "GET", path: "/agent.json", auth: false, desc: "Agent identity manifest — Ed25519 pubkey, signed handle proofs, capabilities, endpoints (also at /.well-known/agent.json)", params: [] },
     { method: "GET", path: "/verify", auth: false, desc: "Verify another agent's identity manifest — fetches and cryptographically checks Ed25519 signed proofs", params: [{ name: "url", in: "query", desc: "URL of agent's manifest (e.g. https://host/agent.json)", required: true }] },
     { method: "POST", path: "/handshake", auth: false, desc: "Agent-to-agent handshake — POST your manifest URL, get back identity verification, shared capabilities, and collaboration options", params: [{ name: "url", in: "body", desc: "Your agent.json manifest URL", required: true }], example: '{"url": "https://your-host/agent.json"}' },
@@ -512,6 +594,7 @@ function agentManifest(req, res) {
       webhooks_subscribe: { url: `${base}/webhooks`, method: "POST", auth: false, description: "Subscribe to events (body: {agent, url, events[]})" },
       webhooks_events: { url: `${base}/webhooks/events`, method: "GET", auth: false, description: "List available webhook event types" },
       webhooks_unsubscribe: { url: `${base}/webhooks/:id`, method: "DELETE", auth: false, description: "Unsubscribe a webhook by ID" },
+      analytics: { url: `${base}/analytics`, method: "GET", auth: false, description: "Request analytics — endpoint usage, status codes, hourly traffic (?format=text)" },
       feed: { url: `${base}/feed`, method: "GET", auth: false, description: "Activity feed — all events as JSON/Atom/HTML (?limit=N&since=ISO&event=X&format=json)" },
       feed_stream: { url: `${base}/feed/stream`, method: "GET", auth: false, description: "SSE real-time event stream — connect with EventSource for live push" },
       paste_create: { url: `${base}/paste`, method: "POST", auth: false, description: "Create a paste (body: {content, title?, language?, author?, expires_in?})" },
@@ -2237,6 +2320,7 @@ app.get("/", (req, res) => {
       { path: "/sessions", desc: "Session history with quality scores" },
       { path: "/costs", desc: "Session cost tracking" },
       { path: "/stats", desc: "Aggregated session statistics" },
+      { path: "/analytics", desc: "API request analytics and traffic" },
       { path: "/search", desc: "Unified search across all data stores" },
       { path: "/changelog", desc: "Git changelog by category" },
     ]},

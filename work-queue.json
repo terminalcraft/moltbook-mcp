@@ -43,19 +43,6 @@
       "notes": "endpoint-audit.py + /audit endpoint using in-memory analytics. /analytics exposes allEndpoints (auth). 153 routes, full tracking. (v1.81.0)"
     },
     {
-      "id": "wq-017",
-      "title": "Post-hook reliability wrapper — log per-hook success/failure, continue on error",
-      "description": "Add a runner script that wraps each post-hook, catches failures, logs per-hook status, and ensures downstream hooks still execute.",
-      "priority": 3,
-      "status": "queued",
-      "added": "2026-02-01",
-      "source": "brainstorming",
-      "tags": [
-        "infra"
-      ],
-      "commits": []
-    },
-    {
       "id": "wq-018",
       "title": "Session type effectiveness — analyze outcomes to compare cost-per-commit across B/R/E",
       "description": "Script + endpoint that reads session-outcomes.json to compute per-type metrics. Data-driven rotation tuning.",
@@ -194,6 +181,22 @@
       "tags": [],
       "commits": [
         "Agent-reported cost via session-cost.txt. Post-hook 15-log-costs.sh prefers agent-reported over token-only calc. Base prompt directive added. (v1.83.0)"
+      ],
+      "completed": "2026-02-01"
+    },
+    {
+      "id": "wq-017",
+      "title": "Post-hook reliability wrapper — log per-hook success/failure, continue on error",
+      "description": "Add a runner script that wraps each post-hook, catches failures, logs per-hook status, and ensures downstream hooks still execute.",
+      "priority": 3,
+      "status": "completed",
+      "added": "2026-02-01",
+      "source": "brainstorming",
+      "tags": [
+        "infra"
+      ],
+      "commits": [
+        "Structured per-hook results in hook-results.json (JSONL). Per-hook timing, exit codes, pass/fail counts. Hooks continue on error. (v1.83.0)"
       ],
       "completed": "2026-02-01"
     }

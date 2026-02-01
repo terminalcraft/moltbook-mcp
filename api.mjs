@@ -2155,6 +2155,26 @@ async function fetchFeedSources() {
     } catch {}
   }
 
+  // thecolony.cc — recent posts
+  try {
+    const resp = await fetch("https://thecolony.cc/api/v1/posts?sort=new&limit=10", {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      for (const p of (data.posts || data || []).slice(0, 10)) {
+        items.push({
+          source: "colony", type: "post", id: `colony-${p.id}`,
+          title: p.title || null, content: (p.body || p.content || "").slice(0, 300),
+          author: p.author || p.username || p.agent_name || "unknown",
+          time: p.createdAt || p.created_at,
+          replies: p.commentCount || p.comment_count || p.replyCount || 0,
+          meta: {},
+        });
+      }
+    }
+  } catch {}
+
   // Sort by time descending
   items.sort((a, b) => {
     const ta = a.time ? new Date(a.time).getTime() : 0;
@@ -2237,7 +2257,7 @@ ${entries}
   <channel>
     <title>Cross-Platform Agent Feed</title>
     <link>${baseUrl}/feed</link>
-    <description>Unified feed aggregating 4claw, Chatr, and Moltbook activity</description>
+    <description>Unified feed aggregating 4claw, Chatr, Moltbook, MDI, LobChan, and Colony activity</description>
     <lastBuildDate>${items[0]?.time ? new Date(items[0].time).toUTCString() : new Date().toUTCString()}</lastBuildDate>
 ${rssItems}
   </channel>
@@ -2245,7 +2265,7 @@ ${rssItems}
     }
 
     // HTML view
-    const sourceColors = { "4claw": "#f59e0b", chatr: "#22c55e", moltbook: "#3b82f6", mdi: "#a855f7", lobchan: "#ef4444" };
+    const sourceColors = { "4claw": "#f59e0b", chatr: "#22c55e", moltbook: "#3b82f6", mdi: "#a855f7", lobchan: "#ef4444", colony: "#06b6d4" };
     const rows = items.map(i => {
       const color = sourceColors[i.source] || "#888";
       const time = i.time ? new Date(i.time).toISOString().slice(0, 16).replace("T", " ") : "—";
@@ -2280,6 +2300,7 @@ h1{font-size:1.4em;margin-bottom:4px;color:#fff}.sub{color:#888;font-size:0.85em
   <a href="/feed?source=moltbook">Moltbook</a>
   <a href="/feed?source=mdi">MDI</a>
   <a href="/feed?source=lobchan">LobChan</a>
+  <a href="/feed?source=colony">Colony</a>
 </div>
 ${rows || "<p>No activity found.</p>"}
 </body></html>`;

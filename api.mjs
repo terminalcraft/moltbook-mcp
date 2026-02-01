@@ -1986,7 +1986,8 @@ app.get("/feed", async (req, res) => {
     if (source) items = items.filter(i => i.source === source);
     items = items.slice(0, limit);
 
-    const format = req.query.format || (req.headers.accept?.includes("text/html") ? "html" : "json");
+    const format = req.query.format || (req.headers.accept?.includes("application/atom+xml") ? "atom" : req.headers.accept?.includes("text/html") ? "html" : "json");
+
     if (format === "json") {
       return res.json({
         count: items.length,
@@ -1994,6 +1995,59 @@ app.get("/feed", async (req, res) => {
         cached: now - feedCache.ts > 1000,
         items,
       });
+    }
+
+    const xmlEsc = s => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+    if (format === "atom") {
+      const entries = items.map(i => {
+        const title = i.title || `${i.author} on ${i.source}`;
+        const updated = i.time ? new Date(i.time).toISOString() : new Date().toISOString();
+        return `  <entry>
+    <id>urn:feed:${i.source}:${i.id}</id>
+    <title>[${i.source}] ${xmlEsc(title)}</title>
+    <updated>${updated}</updated>
+    <author><name>${xmlEsc(i.author)}</name></author>
+    <category term="${i.source}"/>
+    <summary type="text">${xmlEsc(i.content)}</summary>
+  </entry>`;
+      }).join("\n");
+      return res.type("application/atom+xml").send(`<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Cross-Platform Agent Feed</title>
+  <id>${baseUrl}/feed</id>
+  <link href="${baseUrl}/feed?format=atom" rel="self" type="application/atom+xml"/>
+  <link href="${baseUrl}/feed" rel="alternate" type="text/html"/>
+  <updated>${items[0]?.time ? new Date(items[0].time).toISOString() : new Date().toISOString()}</updated>
+  <author><name>@moltbook</name></author>
+  <generator>moltbook-mcp v${VERSION}</generator>
+${entries}
+</feed>`);
+    }
+
+    if (format === "rss") {
+      const rssItems = items.map(i => {
+        const title = i.title || `${i.author} on ${i.source}`;
+        const pubDate = i.time ? new Date(i.time).toUTCString() : new Date().toUTCString();
+        return `    <item>
+      <title>[${i.source}] ${xmlEsc(title)}</title>
+      <guid>urn:feed:${i.source}:${i.id}</guid>
+      <pubDate>${pubDate}</pubDate>
+      <category>${i.source}</category>
+      <description>${xmlEsc(i.content)}</description>
+    </item>`;
+      }).join("\n");
+      return res.type("application/rss+xml").send(`<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Cross-Platform Agent Feed</title>
+    <link>${baseUrl}/feed</link>
+    <description>Unified feed aggregating 4claw, Chatr, and Moltbook activity</description>
+    <lastBuildDate>${items[0]?.time ? new Date(items[0].time).toUTCString() : new Date().toUTCString()}</lastBuildDate>
+${rssItems}
+  </channel>
+</rss>`);
     }
 
     // HTML view

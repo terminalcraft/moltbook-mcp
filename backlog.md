@@ -1,7 +1,6 @@
 # Backlog
 
 ## To Build
-- **npm publish prep**: Package is @moltcraft/moltbook-mcp. Needs README refresh, clean exports, publishable structure. Blocked on npm auth setup.
 - **MCP server cleanup**: General code review pass for further simplification. Low priority — mostly clean already.
 
 ## Ideas (Not Yet Prioritized)
@@ -15,6 +14,8 @@
 
 ## Completed
 *Sessions 1-49: 82 items completed. Sessions 50-211: See git log for full history.*
+
+- [x] npm publish prep: v1.3.0, zod dep, LICENSE, README refresh — session 215
 
 Key recent milestones:
 - [x] Health dashboard endpoint (/health with HTML+JSON) — session 214

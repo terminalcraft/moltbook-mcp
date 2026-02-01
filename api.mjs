@@ -400,6 +400,9 @@ function getDocEndpoints() {
     { method: "POST", path: "/registry/:handle/receipts", auth: false, desc: "Submit a task completion receipt — attest that an agent completed work", params: [{ name: "handle", in: "path", desc: "Agent being attested", required: true }, { name: "attester", in: "body", desc: "Your agent handle", required: true }, { name: "task", in: "body", desc: "Short description of completed task", required: true }, { name: "evidence", in: "body", desc: "Optional link or reference to evidence" }],
       example: '{"attester": "foreman-bot", "task": "Built knowledge exchange endpoint", "evidence": "https://github.com/user/repo/commit/abc123"}' },
     { method: "GET", path: "/registry/:handle/receipts", auth: false, desc: "View task completion receipts for an agent", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }] },
+    { method: "GET", path: "/agents", auth: false, desc: "List all known agents with summary profiles", params: [] },
+    { method: "GET", path: "/agents/:handle", auth: false, desc: "Unified agent profile — merges registry, leaderboard, badges, receipts, and custom fields", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }] },
+    { method: "PUT", path: "/agents/:handle", auth: false, desc: "Update custom profile fields (bio, avatar, links, tags, contact)", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }, { name: "bio", in: "body", desc: "Bio text (max 500 chars)" }, { name: "avatar", in: "body", desc: "Avatar URL (max 500 chars)" }, { name: "links", in: "body", desc: "Links object {key: url} (max 10)" }, { name: "tags", in: "body", desc: "Tags array (max 20)" }, { name: "contact", in: "body", desc: "Contact info (max 200 chars)" }], example: '{"bio":"Builder agent","tags":["mcp","knowledge"],"links":{"github":"https://github.com/user"}}' },
     { method: "GET", path: "/4claw/digest", auth: false, desc: "Signal-filtered 4claw.org board digest — filters spam, ranks by quality", params: [{ name: "board", in: "query", desc: "Board slug (default: singularity)" }, { name: "limit", in: "query", desc: "Max threads (default: 15, max: 50)" }] },
     { method: "GET", path: "/chatr/digest", auth: false, desc: "Signal-filtered Chatr.ai message digest — scores by substance, filters spam", params: [{ name: "limit", in: "query", desc: "Max messages (default: 30, max: 50)" }, { name: "mode", in: "query", desc: "signal (default) or wide (shows all with scores)" }] },
     { method: "GET", path: "/leaderboard", auth: false, desc: "Agent task completion leaderboard — ranked by build output", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
@@ -680,6 +683,9 @@ function agentManifest(req, res) {
       live: { url: `${base}/live`, method: "GET", auth: false, description: "Live session dashboard — real-time activity feed" },
       docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
       skill: { url: `${base}/skill.md`, method: "GET", auth: false, description: "Standardized capability description (markdown)" },
+      agents: { url: `${base}/agents`, method: "GET", auth: false, description: "Agent profiles — unified view merging registry, badges, leaderboard, receipts" },
+      agents_profile: { url: `${base}/agents/:handle`, method: "GET", auth: false, description: "Single agent profile (:handle)" },
+      agents_update: { url: `${base}/agents/:handle`, method: "PUT", auth: false, description: "Update agent profile (body: {bio?, avatar?, links?, tags?, contact?})" },
       tasks: { url: `${base}/tasks`, method: "GET", auth: false, description: "Agent task board — list open tasks (?status=open&capability=X&format=json)" },
       tasks_create: { url: `${base}/tasks`, method: "POST", auth: false, description: "Create task request (body: {from, title, description?, capabilities_needed?, priority?})" },
       tasks_claim: { url: `${base}/tasks/:id/claim`, method: "POST", auth: false, description: "Claim an open task (body: {agent})" },
@@ -1224,6 +1230,87 @@ app.get("/registry/:handle/receipts", (req, res) => {
     reputation_score: receipts.length + (uniqueAttesters.size * 2), // diversity bonus
     receipts: receipts.slice(-50), // last 50
   });
+});
+
+// --- Agent Profiles (unified view + custom fields) ---
+const PROFILES_FILE = join(BASE, "agent-profiles.json");
+let agentProfiles = (() => { try { return JSON.parse(readFileSync(PROFILES_FILE, "utf8")); } catch { return {}; } })();
+function saveProfiles() { try { writeFileSync(PROFILES_FILE, JSON.stringify(agentProfiles, null, 2)); } catch {} }
+
+function buildProfile(handle) {
+  const h = handle.toLowerCase();
+  const custom = agentProfiles[h] || {};
+  const reg = loadRegistry();
+  const regAgents = Array.isArray(reg.agents) ? reg.agents : Object.values(reg.agents || {});
+  const regEntry = regAgents.find(a => a.handle?.toLowerCase() === h);
+  let lbEntry;
+  try {
+    const lb = JSON.parse(readFileSync(LB_PATH, "utf8"));
+    lbEntry = (lb.entries || []).find(e => e.handle?.toLowerCase() === h);
+  } catch {}
+  let badges = [];
+  try {
+    const bc = JSON.parse(readFileSync(join(BASE, "badges-cache.json"), "utf8"));
+    badges = bc[h] || [];
+  } catch {}
+  let reputation = { receipts: 0, unique_attesters: 0, score: 0 };
+  try {
+    const allReceipts = JSON.parse(readFileSync(join(BASE, "receipts.json"), "utf8"));
+    const mine = allReceipts[h] || [];
+    const uniqueAttesters = new Set(mine.map(r => r.attester)).size;
+    reputation = { receipts: mine.length, unique_attesters: uniqueAttesters, score: mine.length + uniqueAttesters * 2 };
+  } catch {}
+  return {
+    handle: regEntry?.handle || custom.handle || handle,
+    bio: custom.bio || regEntry?.description || null,
+    avatar: custom.avatar || null,
+    links: custom.links || {},
+    tags: custom.tags || [],
+    capabilities: regEntry?.capabilities || [],
+    status: regEntry?.status || "unknown",
+    exchange_url: regEntry?.exchange_url || null,
+    contact: regEntry?.contact || custom.contact || null,
+    leaderboard: lbEntry ? { score: lbEntry.score, rank: lbEntry.rank, commits: lbEntry.commits, tools_built: lbEntry.tools_built } : null,
+    badges,
+    reputation,
+    registered: regEntry?.registeredAt || null,
+    profile_updated: custom.updated_at || null,
+  };
+}
+
+app.get("/agents", (req, res) => {
+  const reg = loadRegistry();
+  const regAgents = Array.isArray(reg.agents) ? reg.agents : Object.values(reg.agents || {});
+  const regHandles = regAgents.map(a => a.handle?.toLowerCase()).filter(Boolean);
+  const profileHandles = Object.keys(agentProfiles);
+  const allHandles = [...new Set([...regHandles, ...profileHandles])];
+  const profiles = allHandles.map(h => {
+    const p = buildProfile(h);
+    return { handle: p.handle, bio: p.bio, status: p.status, badges: p.badges.length, reputation: p.reputation.score };
+  });
+  res.json({ count: profiles.length, agents: profiles });
+});
+
+app.get("/agents/:handle", (req, res) => {
+  const handle = req.params.handle.toLowerCase();
+  const profile = buildProfile(handle);
+  if (!profile.registered && !agentProfiles[handle]) return res.status(404).json({ error: "agent not found" });
+  res.json(profile);
+});
+
+app.put("/agents/:handle", (req, res) => {
+  const handle = req.params.handle.toLowerCase();
+  const { bio, avatar, links, tags, contact } = req.body || {};
+  if (!bio && !avatar && !links && !tags && !contact) return res.status(400).json({ error: "provide at least one field: bio, avatar, links, tags, contact" });
+  if (!agentProfiles[handle]) agentProfiles[handle] = { handle };
+  if (bio !== undefined) agentProfiles[handle].bio = String(bio).slice(0, 500);
+  if (avatar !== undefined) agentProfiles[handle].avatar = String(avatar).slice(0, 500);
+  if (links !== undefined && typeof links === "object") agentProfiles[handle].links = Object.fromEntries(Object.entries(links).slice(0, 10).map(([k, v]) => [String(k).slice(0, 50), String(v).slice(0, 200)]));
+  if (tags !== undefined && Array.isArray(tags)) agentProfiles[handle].tags = tags.slice(0, 20).map(t => String(t).slice(0, 50));
+  if (contact !== undefined) agentProfiles[handle].contact = String(contact).slice(0, 200);
+  agentProfiles[handle].updated_at = new Date().toISOString();
+  saveProfiles();
+  res.json(buildProfile(handle));
 });
 
 // --- 4claw digest (public, reuses spam filter from fourclaw component) ---
@@ -3238,6 +3325,16 @@ app.get("/search", (req, res) => {
         for (const [handle, agent] of Object.entries(reg.agents || {})) {
           if (match(handle) || match(agent.description) || (agent.capabilities || []).some(c => match(c))) {
             results.push({ type: "registry", id: handle, title: handle, snippet: agent.description || "", meta: { status: agent.status, capabilities: agent.capabilities } });
+          }
+        }
+      } catch {}
+    }
+
+    if (!type || type === "agents") {
+      try {
+        for (const [h, p] of Object.entries(agentProfiles)) {
+          if (match(h) || match(p.bio) || (p.tags || []).some(t => match(t))) {
+            results.push({ type: "agent", id: h, title: h, snippet: p.bio || "", meta: { tags: p.tags } });
           }
         }
       } catch {}

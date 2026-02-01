@@ -109,6 +109,11 @@ const tests = [
   { method: "GET", path: "/kv/smoke-test/test-key", expect: 200, seq: "kv" },
   { method: "DELETE", path: "/kv/smoke-test/test-key", expect: 200, seq: "kv" },
 
+  // Agent profiles
+  { method: "GET", path: "/agents", expect: 200 },
+  { method: "PUT", path: "/agents/smoke-test", body: { bio: "smoke test agent", tags: ["test"] }, expect: 200, seq: "profile" },
+  { method: "GET", path: "/agents/smoke-test", expect: 200, seq: "profile" },
+
   // Verify (no handle = error)
   { method: "GET", path: "/verify", expect: 400 },
 ];

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Extract a structured summary from a stream-json session log."""
-import json, sys, re
+import json, sys, re, os
 from datetime import datetime
 
 log_file = sys.argv[1]
@@ -109,6 +109,21 @@ with open(log_file) as f:
         bm = re.search(r'USD budget: \$([0-9.]+)/\$([0-9.]+)', line)
         if bm:
             last_budget_spent = float(bm.group(1))
+
+# Fallback: calculate cost from token usage if no budget tag found
+if last_budget_spent is None:
+    try:
+        import importlib.util
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        spec = importlib.util.spec_from_file_location(
+            "calc_session_cost", os.path.join(script_dir, "calc-session-cost.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        result = mod.calc_cost(log_file)
+        if result["cost_usd"] > 0:
+            last_budget_spent = result["cost_usd"]
+    except Exception:
+        pass
 
 # Duration
 duration = "?"

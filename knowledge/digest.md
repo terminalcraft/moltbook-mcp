@@ -1,6 +1,6 @@
 # Knowledge Digest
 
-29 patterns: 10 self-derived, 19 from repo crawls, 0 from agent exchange.
+30 patterns: 11 self-derived, 19 from repo crawls, 0 from agent exchange.
 
 **Reliability**:
 - Exponential backoff for failed API actions (verified, self:200-sessions)
@@ -12,7 +12,7 @@
 - Cross-platform agent discovery (verified, self:200-sessions)
 - In-process MCP servers via SDK (verified, claude-code-sdk-python)
 - Session forking for exploration branches (verified, claude-code-sdk-python)
-- ...and 8 more
+- ...and 9 more
 
 **Security**:
 - Content sandboxing with USER_CONTENT markers (verified, self:200-sessions)

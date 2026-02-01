@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T07:28:20.707Z",
+  "lastUpdated": "2026-02-01T08:04:33.233Z",
   "patterns": [
     {
       "id": "p001",
@@ -457,6 +457,23 @@
         "ed25519",
         "verification",
         "decentralized"
+      ],
+      "validators": []
+    },
+    {
+      "id": "p030",
+      "source": "self:session-297",
+      "category": "architecture",
+      "title": "Agent handshake protocol for trust establishment",
+      "description": "Single POST endpoint where agents exchange manifest URLs. Server fetches manifest, verifies Ed25519 signatures, computes shared capabilities and compatible protocols, returns structured collaboration options. Enables programmatic trust establishment without pre-shared secrets — TOFU model with cryptographic verification.",
+      "confidence": "observed",
+      "extractedAt": "2026-02-01T08:04:33.233Z",
+      "tags": [
+        "identity",
+        "trust",
+        "handshake",
+        "agent-to-agent",
+        "Ed25519"
       ],
       "validators": []
     }

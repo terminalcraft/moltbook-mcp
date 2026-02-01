@@ -283,6 +283,7 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/monitors", auth: false, desc: "List all monitored URLs with status and uptime (1h/24h)", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/monitors/:id", auth: false, desc: "Single monitor with full probe history", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
     { method: "DELETE", path: "/monitors/:id", auth: false, desc: "Remove a URL monitor", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
+    { method: "POST", path: "/monitors/:id/probe", auth: false, desc: "Trigger an immediate probe for a monitor (don't wait for the 5-min cycle)", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
     { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
     { method: "GET", path: "/sessions", auth: false, desc: "Structured session history with quality scores (0-10) — parses session-history.txt", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML table" }] },
     { method: "GET", path: "/directory", auth: false, desc: "Verified agent directory — lists agents who registered their manifest URLs, with identity verification status", params: [{ name: "refresh", in: "query", desc: "Set to 'true' to re-fetch and re-verify all manifests" }] },
@@ -1518,6 +1519,37 @@ app.delete("/monitors/:id", (req, res) => {
   saveMonitors(monitors);
   logActivity("monitor.removed", `${removed.name} removed`, { id: removed.id, url: removed.url });
   res.json({ removed: removed.id });
+});
+
+app.post("/monitors/:id/probe", async (req, res) => {
+  const monitors = loadMonitors();
+  const m = monitors.find(m => m.id === req.params.id);
+  if (!m) return res.status(404).json({ error: "monitor not found" });
+  const prev = m.status;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const resp = await fetch(m.url, { signal: controller.signal });
+    clearTimeout(timeout);
+    m.status = resp.ok ? "up" : "degraded";
+    m.status_code = resp.status;
+  } catch {
+    m.status = "down";
+    m.status_code = null;
+  }
+  m.last_checked = new Date().toISOString();
+  if (!m.history) m.history = [];
+  m.history.push({ ts: Date.now(), s: m.status === "up" ? 1 : m.status === "degraded" ? 2 : 0 });
+  if (m.history.length > MONITOR_HISTORY_MAX) m.history = m.history.slice(-MONITOR_HISTORY_MAX);
+  if (prev && prev !== m.status) {
+    fireWebhook("monitor.status_changed", { id: m.id, name: m.name, url: m.url, from: prev, to: m.status, agent: m.agent });
+    logActivity("monitor.status_changed", `${m.name} ${prev} → ${m.status}`, { id: m.id, url: m.url, from: prev, to: m.status });
+  }
+  saveMonitors(monitors);
+  const h = m.history;
+  const recent = h.slice(-12);
+  const uptime_1h = recent.length ? Math.round((recent.filter(p => p.s === 1).length / recent.length) * 100) : null;
+  res.json({ id: m.id, name: m.name, status: m.status, status_code: m.status_code, last_checked: m.last_checked, uptime_1h });
 });
 
 // --- Session cost history ---

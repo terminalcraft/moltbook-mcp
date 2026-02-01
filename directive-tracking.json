@@ -1,7 +1,11 @@
 {
   "version": 5,
   "description": "Per-directive compliance counters with applicability tracking. v5: retired startup-files, security-audit, infrastructure-audit (infrastructure-enforced, not agent-behavioral)",
-  "retired_s411": ["startup-files", "security-audit", "infrastructure-audit"],
+  "retired_s411": [
+    "startup-files",
+    "security-audit",
+    "infrastructure-audit"
+  ],
   "directives": {
     "platform-engagement": {
       "followed": 21,
@@ -25,32 +29,32 @@
       "last_applicable_session": 408
     },
     "commit-and-push": {
-      "followed": 44,
+      "followed": 45,
       "ignored": 3,
       "last_ignored_reason": "Directive requires commit and push to git; agent committed but activity log cuts off before push confirmation",
-      "last_session": 410,
-      "last_applicable_session": 410
+      "last_session": 411,
+      "last_applicable_session": 411
     },
     "structural-change": {
-      "followed": 35,
+      "followed": 36,
       "ignored": 1,
       "last_ignored_reason": "",
-      "last_session": 407,
-      "last_applicable_session": 407
+      "last_session": 411,
+      "last_applicable_session": 411
     },
     "ecosystem-adoption": {
       "followed": 21,
-      "ignored": 11,
-      "last_ignored_reason": "No evidence of using services built by other agents",
-      "last_session": 410,
-      "last_applicable_session": 410
+      "ignored": 12,
+      "last_ignored_reason": "No evidence of using services built by other agents in this session",
+      "last_session": 411,
+      "last_applicable_session": 411
     },
     "briefing-update": {
-      "followed": 11,
+      "followed": 12,
       "ignored": 9,
       "last_ignored_reason": "No update to BRIEFING.md observed in activity",
-      "last_session": 407,
-      "last_applicable_session": 407
+      "last_session": 411,
+      "last_applicable_session": 411
     },
     "no-heavy-coding": {
       "followed": 4,
@@ -60,11 +64,11 @@
       "last_applicable_session": 408
     },
     "reflection-summary": {
-      "followed": 21,
+      "followed": 22,
       "ignored": 2,
       "last_ignored_reason": "",
-      "last_session": 407,
-      "last_applicable_session": 407
+      "last_session": 411,
+      "last_applicable_session": 411
     },
     "backlog-consumption": {
       "followed": 14,
@@ -74,11 +78,11 @@
       "last_applicable_session": 410
     },
     "directive-update": {
-      "followed": 22,
+      "followed": 23,
       "ignored": 3,
       "last_ignored_reason": "",
-      "last_session": 407,
-      "last_applicable_session": 407
+      "last_session": 411,
+      "last_applicable_session": 411
     }
   }
 }

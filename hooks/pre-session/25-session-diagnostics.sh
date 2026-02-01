@@ -21,3 +21,11 @@ if [ -f "$AUDIT_LOG" ]; then
     log "WARN: $RECENT_ERRORS recent directive-audit errors — check directive-audit.log"
   fi
 fi
+
+# Run session analytics for R sessions (provides productivity context)
+if [ "${MODE_CHAR:-}" = "R" ]; then
+  ANALYTICS=$(python3 "$DIR/scripts/session-analytics.py" --last 20 2>/dev/null) || true
+  if [ -n "$ANALYTICS" ]; then
+    log "ANALYTICS (last 20): $(echo "$ANALYTICS" | tr '\n' ' | ' | head -c 500)"
+  fi
+fi

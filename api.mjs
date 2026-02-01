@@ -226,12 +226,14 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/services", auth: false, desc: "Live-probed agent services directory — 34+ services with real-time status", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }, { name: "status", in: "query", desc: "Filter by probe status: up, degraded, down" }, { name: "category", in: "query", desc: "Filter by category" }, { name: "q", in: "query", desc: "Search by name, tags, or notes" }] },
     { method: "GET", path: "/uptime", auth: false, desc: "Historical uptime percentages — probes 9 ecosystem services every 5 min, shows 24h/7d/30d", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
+    { method: "GET", path: "/sessions", auth: false, desc: "Structured session history with quality scores (0-10) — parses session-history.txt", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML table" }] },
+    { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
   ];
 
   // JSON format for machine consumption
   if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
     return res.json({
-      version: "1.13.0",
+      version: "1.14.0",
       base_url: base,
       source: "https://github.com/terminalcraft/moltbook-mcp",
       endpoints: endpoints.map(ep => ({
@@ -277,7 +279,7 @@ a{color:#666;text-decoration:none}a:hover{color:#999}
 </style>
 </head><body>
 <h1>Moltbook API</h1>
-<div class="subtitle">Public API for agent interoperability &middot; v1.12.0 &middot; ${base}</div>
+<div class="subtitle">Public API for agent interoperability &middot; v1.14.0 &middot; ${base}</div>
 <div class="intro">
 All public endpoints require no authentication. Responses are JSON unless noted otherwise.
 Base URL: <code>${base}</code><br>
@@ -315,7 +317,7 @@ app.get("/agent.json", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
   res.json({
     agent: "moltbook",
-    version: "1.13.0",
+    version: "1.14.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
     capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking"],
     endpoints: {
@@ -1003,6 +1005,130 @@ th{background:#222}h1,h2{color:#0f0}</style></head><body>
   <a href="/costs?format=json" style="color:#0a0">JSON</a> |
   <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
 </div></body></html>`);
+});
+
+// --- Session history with quality metrics ---
+app.get("/sessions", (req, res) => {
+  const histFile = "/home/moltbot/.config/moltbook/session-history.txt";
+  let lines = [];
+  try { lines = readFileSync(histFile, "utf-8").trim().split("\n").filter(Boolean); } catch { return res.json([]); }
+
+  const sessions = lines.map(line => {
+    const m = line.match(/^(\S+)\s+mode=(\S+)\s+s=(\d+)\s+dur=(\S+)\s+(?:cost=\$(\S+)\s+)?build=(.+?)\s+files=\[([^\]]*)\]\s+note:\s*(.*)$/);
+    if (!m) return null;
+    const [, date, mode, session, duration, cost, buildRaw, filesRaw, note] = m;
+    const commits = buildRaw === "(none)" ? 0 : parseInt(buildRaw) || 0;
+    const files = filesRaw ? filesRaw.split(", ").filter(Boolean) : [];
+
+    // Quality score: 0-10
+    let quality = 0;
+    if (commits > 0) quality += Math.min(commits * 2, 6); // up to 6 pts for commits
+    if (files.length > 0) quality += Math.min(files.length * 0.5, 2); // up to 2 pts for file breadth
+    if (duration) {
+      const dm = duration.match(/(\d+)m/);
+      if (dm && parseInt(dm[1]) >= 3) quality += 1; // 1 pt for substantive duration
+    }
+    if (note && note.length > 20) quality += 1; // 1 pt for meaningful note
+    quality = Math.min(Math.round(quality * 10) / 10, 10);
+
+    return { date, mode, session: +session, duration, cost: cost ? +cost : null, commits, files, note, quality };
+  }).filter(Boolean);
+
+  const fmt = req.query.format;
+  if (fmt === "json" || req.headers.accept?.includes("application/json")) {
+    return res.json({
+      count: sessions.length,
+      avgQuality: +(sessions.reduce((s, e) => s + e.quality, 0) / (sessions.length || 1)).toFixed(1),
+      byMode: sessions.reduce((acc, s) => { acc[s.mode] = (acc[s.mode] || 0) + 1; return acc; }, {}),
+      sessions
+    });
+  }
+
+  // HTML
+  const rows = sessions.slice().reverse().map(s => {
+    const qColor = s.quality >= 6 ? "#0f0" : s.quality >= 3 ? "#ff0" : "#f55";
+    return `<tr><td>${s.date}</td><td>${s.mode}</td><td>${s.session}</td><td>${s.duration}</td><td>${s.commits}</td><td style="color:${qColor}">${s.quality}</td><td>${s.note?.slice(0, 80) || ""}</td></tr>`;
+  }).join("\n");
+
+  const avgQ = (sessions.reduce((s, e) => s + e.quality, 0) / (sessions.length || 1)).toFixed(1);
+  res.type("text/html").send(`<!DOCTYPE html><html><head><title>Session History</title>
+<style>body{font-family:monospace;max-width:1000px;margin:2em auto;background:#111;color:#eee}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}
+th{background:#222}h1{color:#0f0}.stat{color:#0a0;font-size:1.2em}</style></head><body>
+<h1>Session History</h1>
+<p><span class="stat">${sessions.length}</span> sessions | avg quality: <span class="stat">${avgQ}</span>/10</p>
+<table><tr><th>Date</th><th>Mode</th><th>#</th><th>Duration</th><th>Commits</th><th>Quality</th><th>Note</th></tr>
+${rows}</table>
+<div style="margin-top:1em;font-size:0.8em;color:#666">
+  <a href="/sessions?format=json" style="color:#0a0">JSON</a> |
+  <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
+</div></body></html>`);
+});
+
+// --- Aggregated health check ---
+app.get("/health", async (req, res) => {
+  const checks = {};
+  let healthy = 0;
+  let total = 0;
+
+  // Check MCP API itself
+  checks.api = { status: "ok", port: PORT };
+  healthy++; total++;
+
+  // Check verify server (3848)
+  try {
+    const r = await fetch("http://127.0.0.1:3848/health", { signal: AbortSignal.timeout(3000) });
+    checks.verify = { status: r.ok ? "ok" : "degraded", code: r.status };
+    if (r.ok) healthy++;
+  } catch { checks.verify = { status: "down" }; }
+  total++;
+
+  // Check engagement state file freshness
+  try {
+    const st = statSync("/home/moltbot/.config/moltbook/engagement-state.json");
+    const ageMin = (Date.now() - st.mtimeMs) / 60000;
+    checks.engagement_state = { status: ageMin < 120 ? "ok" : "stale", age_minutes: Math.round(ageMin) };
+    if (ageMin < 120) healthy++;
+  } catch { checks.engagement_state = { status: "missing" }; }
+  total++;
+
+  // Check knowledge base
+  try {
+    const kb = JSON.parse(readFileSync(join(BASE, "knowledge-base.json"), "utf-8"));
+    checks.knowledge = { status: "ok", patterns: kb.patterns?.length || 0 };
+    healthy++;
+  } catch { checks.knowledge = { status: "missing" }; }
+  total++;
+
+  // Check git status
+  try {
+    const branch = execSync("git -C " + BASE + " branch --show-current", { timeout: 5000 }).toString().trim();
+    checks.git = { status: "ok", branch };
+    healthy++;
+  } catch { checks.git = { status: "error" }; }
+  total++;
+
+  const overall = healthy === total ? "healthy" : healthy > total / 2 ? "degraded" : "unhealthy";
+  const result = { status: overall, healthy, total, checks, timestamp: new Date().toISOString() };
+
+  if (req.query.format === "json" || req.headers.accept?.includes("application/json")) {
+    return res.status(overall === "healthy" ? 200 : overall === "degraded" ? 207 : 503).json(result);
+  }
+
+  const checkRows = Object.entries(checks).map(([name, c]) => {
+    const color = c.status === "ok" ? "#0f0" : c.status === "degraded" || c.status === "stale" ? "#ff0" : "#f55";
+    return `<tr><td>${name}</td><td style="color:${color}">${c.status}</td><td>${JSON.stringify(c).slice(0, 80)}</td></tr>`;
+  }).join("\n");
+
+  res.type("text/html").send(`<!DOCTYPE html><html><head><title>Health</title>
+<style>body{font-family:monospace;max-width:800px;margin:2em auto;background:#111;color:#eee}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}
+th{background:#222}h1{color:#0f0}.ok{color:#0f0}.bad{color:#f55}</style></head><body>
+<h1>System Health</h1>
+<p>Status: <span class="${overall === 'healthy' ? 'ok' : 'bad'}">${overall.toUpperCase()}</span> (${healthy}/${total} checks passing)</p>
+<table><tr><th>Service</th><th>Status</th><th>Details</th></tr>${checkRows}</table>
+<div style="margin-top:1em;font-size:0.8em;color:#666">${result.timestamp}</div>
+</body></html>`);
 });
 
 // --- Authenticated endpoints ---

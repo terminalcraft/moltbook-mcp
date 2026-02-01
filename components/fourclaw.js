@@ -1,6 +1,39 @@
 import { z } from "zod";
 import { getFourclawCredentials, FOURCLAW_API } from "../providers/credentials.js";
 
+// Spam detection for 4claw content
+const SPAM_PATTERNS = [
+  /0x[a-fA-F0-9]{40}/,                    // ETH addresses
+  /\$CLAWIRC/i,                            // Known spam token
+  /clawirc\.duckdns/i,                     // Known spam domain
+  /trading fees?\s*(sustain|fuel|feed)/i,   // Token shill phrases
+  /sustain\w*\s+(the\s+)?(hive|swarm|node|grid|host)/i,
+  /protocol\s+(beacon|sync|directive|nexus|breach|update)/i,
+  /siphon\s+protocol/i,
+  /fees\s+(loop|chain|breathe|sustain)/i,
+];
+
+function isSpam(title, content) {
+  const text = `${title || ""} ${content || ""}`;
+  let matches = 0;
+  for (const p of SPAM_PATTERNS) {
+    if (p.test(text)) matches++;
+  }
+  return matches >= 2;
+}
+
+function scoreThread(t) {
+  let score = 0;
+  const replies = t.replyCount || 0;
+  score += Math.min(replies * 2, 20);  // Up to 20 pts for replies
+  const len = (t.content || "").length;
+  if (len > 200) score += 5;           // Substantive content
+  if (len > 500) score += 5;
+  if (t.title && t.title.length > 15) score += 2;  // Non-trivial title
+  if (/\?$/.test(t.title)) score += 3;  // Questions spark discussion
+  return score;
+}
+
 export function register(server) {
   server.tool("fourclaw_boards", "List all boards on 4claw.org", {}, async () => {
     const creds = getFourclawCredentials();
@@ -123,6 +156,45 @@ export function register(server) {
       if (!results.length) return { content: [{ type: "text", text: "No results" }] };
       const out = results.map(r => `[${r.id?.slice(0, 8)}] "${r.title || "(reply)"}" — ${r.content?.slice(0, 150)}`).join("\n\n");
       return { content: [{ type: "text", text: out }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Error: ${e.message}` }] };
+    }
+  });
+
+  server.tool("fourclaw_digest", "Get a signal-filtered digest of a 4claw board (filters spam, ranks by quality)", {
+    board: z.string().optional().describe("Board slug (default: singularity)"),
+    limit: z.number().optional().describe("Max threads to return (default: 15)"),
+    mode: z.enum(["signal", "wide"]).optional().describe("'signal' filters spam (default), 'wide' shows all with scores"),
+  }, async ({ board, limit, mode }) => {
+    const creds = getFourclawCredentials();
+    if (!creds) return { content: [{ type: "text", text: "No 4claw credentials found" }] };
+    try {
+      const b = board || "singularity";
+      const max = limit || 15;
+      const m = mode || "signal";
+      const res = await fetch(`${FOURCLAW_API}/boards/${b}/threads?sort=bumped`, {
+        headers: { Authorization: `Bearer ${creds.api_key}` },
+      });
+      const data = await res.json();
+      if (data.error) return { content: [{ type: "text", text: `Error: ${data.error}` }] };
+      const threads = data.threads || [];
+      let filtered;
+      if (m === "signal") {
+        filtered = threads.filter(t => !isSpam(t.title, t.content));
+      } else {
+        filtered = threads;
+      }
+      const scored = filtered.map(t => ({ ...t, _score: scoreThread(t), _spam: isSpam(t.title, t.content) }));
+      scored.sort((a, b) => b._score - a._score);
+      const top = scored.slice(0, max);
+      if (!top.length) return { content: [{ type: "text", text: `/${b}/ digest: no signal found` }] };
+      const out = top.map(t => {
+        const spam = t._spam ? " [SPAM]" : "";
+        return `[${t._score}pts] [${t.id?.slice(0, 8)}] "${t.title}" (${t.replyCount || 0}r)${spam}\n  ${(t.content || "").slice(0, 100).replace(/\n/g, " ")}`;
+      }).join("\n\n");
+      const spamCount = threads.length - threads.filter(t => !isSpam(t.title, t.content)).length;
+      const header = `/${b}/ digest (${m}): ${top.length} threads shown, ${spamCount} spam filtered from ${threads.length} total`;
+      return { content: [{ type: "text", text: `${header}\n\n${out}` }] };
     } catch (e) {
       return { content: [{ type: "text", text: `Error: ${e.message}` }] };
     }

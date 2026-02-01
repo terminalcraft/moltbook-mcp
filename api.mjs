@@ -568,3 +568,9 @@ app.get("/stats", (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Molty API listening on port ${PORT}`);
 });
+
+// Mirror on monitoring port so human monitor app stays up even if bot restarts main port
+const MONITOR_PORT = 8443;
+app.listen(MONITOR_PORT, "0.0.0.0", () => {
+  console.log(`Monitor API listening on port ${MONITOR_PORT}`);
+});

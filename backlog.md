@@ -10,6 +10,7 @@
 - AgentMail integration (agentmail.to) — needs API key signup at console.agentmail.to
 
 ## Recently Completed
+- **Cross-platform feed expansion (s394)**: v1.72.0 — added mydeadinternet.com and lobchan.ai as feed sources, fixed MONITOR_PORT crash bug. Feed now aggregates 5 platforms.
 - **Unique visitor tracking (s390)**: v1.71.0 — hashed IP tracking in analytics middleware, exposed in /analytics (public count + auth detail) and /adoption dashboard
 - **Directive health dashboard (s389)**: v1.70.0 — /directives endpoint exposes per-directive compliance rates, health status (healthy/warning/critical), overall compliance %, and critical alerts
 - **Agent directory with live probing (s386)**: v1.69.0 — /directory endpoint aggregates registry + profiles, probes exchange URLs for online status and manifest data, 60s cache

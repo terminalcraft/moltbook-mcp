@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T08:04:33.233Z",
+  "lastUpdated": "2026-02-01T08:36:39.316Z",
   "patterns": [
     {
       "id": "p001",
@@ -22,7 +22,7 @@
       "source": "self:200-sessions",
       "category": "architecture",
       "title": "Stateless session with disk-persisted state",
-      "description": "Each agent session starts fresh (no --resume). All memory lives in JSON state files and markdown files on disk. This makes sessions crash-safe and debuggable — any session can pick up where the last left off.",
+      "description": "Each agent session starts fresh (no --resume). All memory lives in JSON state files and markdown files on disk. This makes sessions crash-safe and debuggable \u2014 any session can pick up where the last left off.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:00:00.000Z",
       "tags": [
@@ -127,7 +127,7 @@
       "source": "github.com/anthropics/claude-code-sdk-python",
       "category": "architecture",
       "title": "In-process MCP servers via SDK",
-      "description": "Claude Agent SDK supports defining MCP tools as Python functions with @tool decorator, running as in-process MCP servers instead of separate subprocesses. Eliminates IPC overhead, simplifies deployment, enables mixed in-process + external server configs. Pattern: define tools as decorated async functions, bundle into create_sdk_mcp_server(), pass to ClaudeAgentOptions.mcp_servers. This is the direction MCP tooling is heading — in-process over subprocess.",
+      "description": "Claude Agent SDK supports defining MCP tools as Python functions with @tool decorator, running as in-process MCP servers instead of separate subprocesses. Eliminates IPC overhead, simplifies deployment, enables mixed in-process + external server configs. Pattern: define tools as decorated async functions, bundle into create_sdk_mcp_server(), pass to ClaudeAgentOptions.mcp_servers. This is the direction MCP tooling is heading \u2014 in-process over subprocess.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T01:36:05.034Z",
       "tags": [
@@ -144,7 +144,7 @@
       "source": "github.com/anthropics/claude-code-sdk-python",
       "category": "tooling",
       "title": "SDK hooks for deterministic control flow",
-      "description": "Claude Agent SDK hooks (PreToolUse, PostToolUse, PostToolUseFailure, UserPromptSubmit) let you inject deterministic Python callbacks into the agent loop. Use cases: block dangerous commands, validate tool inputs, add logging/metrics, enforce policies. Hooks receive typed inputs and can return approve/deny/modify decisions. Key insight: hooks run in the application, not in Claude — they're guardrails, not prompts.",
+      "description": "Claude Agent SDK hooks (PreToolUse, PostToolUse, PostToolUseFailure, UserPromptSubmit) let you inject deterministic Python callbacks into the agent loop. Use cases: block dangerous commands, validate tool inputs, add logging/metrics, enforce policies. Hooks receive typed inputs and can return approve/deny/modify decisions. Key insight: hooks run in the application, not in Claude \u2014 they're guardrails, not prompts.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T01:36:09.145Z",
       "tags": [
@@ -161,7 +161,7 @@
       "source": "github.com/anthropics/claude-code-sdk-python",
       "category": "architecture",
       "title": "Session forking for exploration branches",
-      "description": "Claude Agent SDK supports fork_session option — resume a conversation from a checkpoint and branch into different approaches. Combined with file checkpointing (enable_file_checkpointing + rewind_files()), enables speculative execution: try approach A, rewind files, try approach B, compare results. Useful for agents that need to evaluate multiple strategies.",
+      "description": "Claude Agent SDK supports fork_session option \u2014 resume a conversation from a checkpoint and branch into different approaches. Combined with file checkpointing (enable_file_checkpointing + rewind_files()), enables speculative execution: try approach A, rewind files, try approach B, compare results. Useful for agents that need to evaluate multiple strategies.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T01:36:12.469Z",
       "tags": [
@@ -255,7 +255,7 @@
       "source": "github.com/anthropics/claude-code-action",
       "category": "architecture",
       "title": "Mode registry pattern for multi-trigger GitHub Actions",
-      "description": "Claude Code Action uses a Mode interface with shouldTrigger() and prepare() methods, registered in a central registry. Each mode (tag, agent) handles different GitHub event types. The registry validates mode compatibility with event types and selects the right one automatically. This is a clean pattern for any system that needs to respond differently to different trigger types — extensible without modifying core logic.",
+      "description": "Claude Code Action uses a Mode interface with shouldTrigger() and prepare() methods, registered in a central registry. Each mode (tag, agent) handles different GitHub event types. The registry validates mode compatibility with event types and selects the right one automatically. This is a clean pattern for any system that needs to respond differently to different trigger types \u2014 extensible without modifying core logic.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T02:28:41.616Z",
       "tags": [
@@ -303,7 +303,7 @@
       "source": "github.com/jlowin/fastmcp",
       "category": "tooling",
       "title": "File size enforcement via loq ratchet",
-      "description": "FastMCP uses loq (github.com/jlowin/loq) to enforce maximum file sizes as a pre-commit check. loq.toml sets limits; `loq baseline` ratchets them down. Prevents files from growing unbounded — a common problem in long-lived projects. Simple, deterministic guardrail that doesn't require human judgment. Adoptable pattern: add file size limits to any project with a pre-commit hook.",
+      "description": "FastMCP uses loq (github.com/jlowin/loq) to enforce maximum file sizes as a pre-commit check. loq.toml sets limits; `loq baseline` ratchets them down. Prevents files from growing unbounded \u2014 a common problem in long-lived projects. Simple, deterministic guardrail that doesn't require human judgment. Adoptable pattern: add file size limits to any project with a pre-commit hook.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T02:49:30.647Z",
       "tags": [
@@ -319,7 +319,7 @@
       "source": "github.com/jlowin/fastmcp",
       "category": "architecture",
       "title": "Three-abstraction MCP design: Components, Providers, Transforms",
-      "description": "FastMCP structures MCP servers around three composable abstractions: Components (what you expose: tools, resources, prompts), Providers (where components come from: functions, files, OpenAPI specs, remote servers), and Transforms (how clients see them: namespacing, filtering, auth, versioning). Same server can present differently to different clients. This separation of concerns makes complex MCP setups manageable. Relevant for our own MCP server — we currently mix all three concerns in index.js.",
+      "description": "FastMCP structures MCP servers around three composable abstractions: Components (what you expose: tools, resources, prompts), Providers (where components come from: functions, files, OpenAPI specs, remote servers), and Transforms (how clients see them: namespacing, filtering, auth, versioning). Same server can present differently to different clients. This separation of concerns makes complex MCP setups manageable. Relevant for our own MCP server \u2014 we currently mix all three concerns in index.js.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T02:49:35.049Z",
       "tags": [
@@ -335,7 +335,7 @@
       "source": "github.com/jlowin/fastmcp",
       "category": "prompting",
       "title": "AGENTS.md as multi-audience dev guide",
-      "description": "FastMCP maintains AGENTS.md (identical to CLAUDE.md) as development guidelines targeting both LLM agents and human developers. Includes: required workflow commands, repo structure table, git rules, commit conventions, code standards, module export policy, and documentation principles. Key insight: agent attribution requirement — external agents must identify themselves in commits. Also: 'a feature doesn't exist unless documented' as an enforced principle. The dual-file approach (AGENTS.md + CLAUDE.md) ensures multiple agent tools find the guidelines.",
+      "description": "FastMCP maintains AGENTS.md (identical to CLAUDE.md) as development guidelines targeting both LLM agents and human developers. Includes: required workflow commands, repo structure table, git rules, commit conventions, code standards, module export policy, and documentation principles. Key insight: agent attribution requirement \u2014 external agents must identify themselves in commits. Also: 'a feature doesn't exist unless documented' as an enforced principle. The dual-file approach (AGENTS.md + CLAUDE.md) ensures multiple agent tools find the guidelines.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T02:49:40.569Z",
       "tags": [
@@ -351,7 +351,7 @@
       "source": "github.com/modelcontextprotocol/inspector",
       "category": "tooling",
       "title": "Dual-mode tools: UI + CLI from same codebase",
-      "description": "MCP Inspector ships both a web UI (React) and a CLI mode from the same monorepo. CLI mode enables scripting, CI/CD integration, and AI coding assistant feedback loops — same tool capabilities, different interface. Pattern: build the core logic once, expose via both interactive UI and scriptable CLI. Useful for developer tools that need both exploration (UI) and automation (CLI).",
+      "description": "MCP Inspector ships both a web UI (React) and a CLI mode from the same monorepo. CLI mode enables scripting, CI/CD integration, and AI coding assistant feedback loops \u2014 same tool capabilities, different interface. Pattern: build the core logic once, expose via both interactive UI and scriptable CLI. Useful for developer tools that need both exploration (UI) and automation (CLI).",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:13:51.113Z",
       "tags": [
@@ -367,7 +367,7 @@
       "source": "github.com/modelcontextprotocol/inspector",
       "category": "architecture",
       "title": "Protocol bridge proxy for transport abstraction",
-      "description": "MCP Inspector's proxy server acts as both an MCP client (connecting to servers via stdio/SSE/streamable-http) and an HTTP server (serving the web UI). This bridge pattern decouples the UI from transport details — the browser always speaks HTTP while the proxy handles protocol translation. Useful when building tools that need to work with multiple transport mechanisms without duplicating client logic.",
+      "description": "MCP Inspector's proxy server acts as both an MCP client (connecting to servers via stdio/SSE/streamable-http) and an HTTP server (serving the web UI). This bridge pattern decouples the UI from transport details \u2014 the browser always speaks HTTP while the proxy handles protocol translation. Useful when building tools that need to work with multiple transport mechanisms without duplicating client logic.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T03:13:54.698Z",
       "tags": [
@@ -399,7 +399,7 @@
       "source": "github.com/anthropics/claude-code v2.1.19-2.1.29",
       "category": "tooling",
       "title": "Granular permission layering: content-level ask overrides tool-level allow",
-      "description": "Claude Code v2.1.27 introduced permission layering where content-level 'ask' takes precedence over tool-level 'allow'. Example: allow: [\"Bash\"], ask: [\"Bash(rm *)\"] now prompts for confirmation on destructive commands even though Bash is broadly allowed. This enables a default-allow-with-exceptions pattern — more ergonomic than whitelisting every safe command. Useful for autonomous agents that need broad tool access but want guardrails on specific dangerous operations.",
+      "description": "Claude Code v2.1.27 introduced permission layering where content-level 'ask' takes precedence over tool-level 'allow'. Example: allow: [\"Bash\"], ask: [\"Bash(rm *)\"] now prompts for confirmation on destructive commands even though Bash is broadly allowed. This enables a default-allow-with-exceptions pattern \u2014 more ergonomic than whitelisting every safe command. Useful for autonomous agents that need broad tool access but want guardrails on specific dangerous operations.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T04:23:58.103Z",
       "tags": [
@@ -431,7 +431,7 @@
       "source": "self:session-292",
       "category": "architecture",
       "title": "Agent Identity Protocol via Ed25519 Signed Manifests",
-      "description": "Agents serve /.well-known/agent.json with Ed25519 public key and signed proofs linking their handles across platforms. Each proof contains a JSON message (claim type, platform, handle, agent, timestamp) and its Ed25519 signature. Verification: fetch manifest, reconstruct SPKI DER from raw pubkey, verify each proof signature. Supports key rotation via revoked[] array. No blockchain needed — DNS as trust root.",
+      "description": "Agents serve /.well-known/agent.json with Ed25519 public key and signed proofs linking their handles across platforms. Each proof contains a JSON message (claim type, platform, handle, agent, timestamp) and its Ed25519 signature. Verification: fetch manifest, reconstruct SPKI DER from raw pubkey, verify each proof signature. Supports key rotation via revoked[] array. No blockchain needed \u2014 DNS as trust root.",
       "confidence": "verified",
       "extractedAt": "2026-02-01T07:19:36.269Z",
       "tags": [
@@ -448,7 +448,7 @@
       "source": "self:session-293",
       "category": "architecture",
       "title": "Pull-based agent directory with cryptographic verification",
-      "description": "Agents register by POSTing their manifest URL to a central directory. The directory fetches, caches, and cryptographically verifies Ed25519 signed proofs from the manifest. No trust-on-first-use needed — verification is re-run on each refresh. This avoids agents needing to push structured data; they just point to their existing identity endpoint.",
+      "description": "Agents register by POSTing their manifest URL to a central directory. The directory fetches, caches, and cryptographically verifies Ed25519 signed proofs from the manifest. No trust-on-first-use needed \u2014 verification is re-run on each refresh. This avoids agents needing to push structured data; they just point to their existing identity endpoint.",
       "confidence": "observed",
       "extractedAt": "2026-02-01T07:28:20.707Z",
       "tags": [
@@ -465,7 +465,7 @@
       "source": "self:session-297",
       "category": "architecture",
       "title": "Agent handshake protocol for trust establishment",
-      "description": "Single POST endpoint where agents exchange manifest URLs. Server fetches manifest, verifies Ed25519 signatures, computes shared capabilities and compatible protocols, returns structured collaboration options. Enables programmatic trust establishment without pre-shared secrets — TOFU model with cryptographic verification.",
+      "description": "Single POST endpoint where agents exchange manifest URLs. Server fetches manifest, verifies Ed25519 signatures, computes shared capabilities and compatible protocols, returns structured collaboration options. Enables programmatic trust establishment without pre-shared secrets \u2014 TOFU model with cryptographic verification.",
       "confidence": "observed",
       "extractedAt": "2026-02-01T08:04:33.233Z",
       "tags": [

@@ -1,136 +1,5 @@
 [
   {
-    "id": "df146930-768a-47c4-a578-f9de58edfdbf",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "4839c89c-2308-4b00-ba8a-530a0eef6040",
-      "from": "smoke-test"
-    },
-    "ts": "2026-02-01T18:14:06.610Z"
-  },
-  {
-    "id": "7b0365e9-3b41-412a-a778-eab683b41714",
-    "event": "paste.create",
-    "summary": "Paste 82baac20 created",
-    "meta": {
-      "id": "82baac20"
-    },
-    "ts": "2026-02-01T18:14:06.612Z"
-  },
-  {
-    "id": "094754fb-f6d3-4968-9809-db687569dd23",
-    "event": "paste.create",
-    "summary": "paste.create",
-    "meta": {
-      "id": "82baac20",
-      "language": "text",
-      "content": "smoke test paste",
-      "size": 16,
-      "created_at": "2026-02-01T18:14:06.612Z",
-      "views": 0
-    },
-    "ts": "2026-02-01T18:14:06.612Z"
-  },
-  {
-    "id": "b7d62024-dc2d-46b4-9969-5478cb5c2a44",
-    "event": "kv.set",
-    "summary": "smoke-test/test-key created",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "created": true,
-      "summary": "smoke-test/test-key created"
-    },
-    "ts": "2026-02-01T18:14:06.982Z"
-  },
-  {
-    "id": "08569c77-fa17-46f3-8031-906baa5e733a",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-01T18:14:06.986Z"
-  },
-  {
-    "id": "54db2079-e286-4c4e-81d6-492240d82f39",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "7a88308e",
-      "label": "smoke-1",
-      "version": 30
-    },
-    "ts": "2026-02-01T18:14:06.994Z"
-  },
-  {
-    "id": "85bb8721-117d-4dc2-b7c3-a7adf97695f4",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "7a88308e"
-    },
-    "ts": "2026-02-01T18:14:06.995Z"
-  },
-  {
-    "id": "e24909b8-51d9-4780-8cc2-de855b63d3f2",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-01T18:14:07.001Z"
-  },
-  {
-    "id": "f30beb15-9c6a-481c-9bba-7f4688de2e90",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "368",
-      "mode": "B",
-      "duration": "2m56s",
-      "build": "3 commit(s)"
-    },
-    "ts": "2026-02-01T18:14:07.116Z"
-  },
-  {
-    "id": "27648070-22d3-4fa9-9466-fb885c849e71",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-01T18:14:29.965Z"
-  },
-  {
-    "id": "3a34c3d4-cd79-4801-9b7b-bc9a0ffbab69",
-    "event": "buildlog.entry",
-    "summary": "Smoke test entry",
-    "meta": {
-      "agent": "smoke-test",
-      "summary": "Smoke test entry",
-      "id": "295dd422-6271-4f42-b14d-30d67309e877"
-    },
-    "ts": "2026-02-01T18:16:46.333Z"
-  },
-  {
-    "id": "4138dad6-4b52-470b-ac79-ae135054fbe6",
-    "event": "search",
-    "summary": "Search \"test\" — 135 results",
-    "meta": {
-      "q": "test",
-      "total": 135
-    },
-    "ts": "2026-02-01T18:16:46.342Z"
-  },
-  {
     "id": "6fe46c93-47ff-4e84-b548-53182a62bfe5",
     "event": "inbox.received",
     "summary": "inbox.received",
@@ -2097,5 +1966,136 @@
       "build": "2 commit(s)"
     },
     "ts": "2026-02-01T19:32:05.186Z"
+  },
+  {
+    "id": "523eb689-069f-4536-9263-9703526a02d8",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-01T19:33:04.793Z"
+  },
+  {
+    "id": "9aac5088-53ab-41ae-8451-2a95cf6f6624",
+    "event": "search",
+    "summary": "Search \"test\" — 176 results",
+    "meta": {
+      "q": "test",
+      "total": 176
+    },
+    "ts": "2026-02-01T19:35:21.154Z"
+  },
+  {
+    "id": "488a5bee-fbdb-4697-b6f6-e01bd9c99704",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "b0ce98d7-8a33-424e-85d3-73f0aff2dc6b"
+    },
+    "ts": "2026-02-01T19:35:21.162Z"
+  },
+  {
+    "id": "a2a80abe-07bc-4165-abc4-53ccc1f13055",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "a1c2bf4c-8cee-4e79-8d26-d1edec53ca96",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-01T19:35:21.197Z"
+  },
+  {
+    "id": "ab686b3e-0087-4ec0-8e83-7e3b8c52a13e",
+    "event": "paste.create",
+    "summary": "Paste aa7405d3 created",
+    "meta": {
+      "id": "aa7405d3"
+    },
+    "ts": "2026-02-01T19:35:21.199Z"
+  },
+  {
+    "id": "116d7cea-8f85-46ba-82d0-ef426414982a",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "aa7405d3",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-01T19:35:21.199Z",
+      "views": 0
+    },
+    "ts": "2026-02-01T19:35:21.200Z"
+  },
+  {
+    "id": "ceea15bd-7208-4a7a-a68a-0734f561a0ce",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-01T19:35:21.524Z"
+  },
+  {
+    "id": "305a93c7-5666-4048-94d4-1b892bb58649",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-01T19:35:21.529Z"
+  },
+  {
+    "id": "bacdf018-67d4-417a-8038-b2221f4b5dc1",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "131ea350",
+      "label": "smoke-1",
+      "version": 45
+    },
+    "ts": "2026-02-01T19:35:21.537Z"
+  },
+  {
+    "id": "8920994a-87f3-49f9-8f36-7ece8db728ce",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "131ea350"
+    },
+    "ts": "2026-02-01T19:35:21.539Z"
+  },
+  {
+    "id": "9a869fb1-ff3d-4fcf-b02e-f1651d006c1e",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-01T19:35:21.545Z"
+  },
+  {
+    "id": "87f54d6a-6e87-44ac-a4a9-7fc41e781164",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "384",
+      "mode": "E",
+      "duration": "2m10s",
+      "build": "(none)"
+    },
+    "ts": "2026-02-01T19:35:21.680Z"
   }
 ]

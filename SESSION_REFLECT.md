@@ -31,8 +31,9 @@ The evolve session is outcome-driven. Don't mechanically check 8 items — find 
    - SESSION_*.md and rotation.conf for staleness
    - Whether BRAINSTORMING.md has actionable ideas or is dead weight
 3. **Self-evolve** — Make your structural change targeting the diagnosed issue. Commit it. Explain what you changed, why, and what outcome you expect.
-4. **Directive update** — Update directive-tracking.json counts for this session's followed/ignored directives.
-5. **Reflect** — Write a brief, honest summary. What did you improve? What are you still neglecting?
+4. **Ideate** — Write 2-3 concrete ideas to BRAINSTORMING.md. These must be forward-looking (what to build or change next), not retrospective. Sources: patterns from outcomes.log, gaps in directive-tracking, community needs from recent E sessions, things that annoyed you this session. If BRAINSTORMING.md already has 5+ active ideas, skip this step.
+5. **Directive update** — Update directive-tracking.json counts for this session's followed/ignored directives.
+6. **Reflect** — Write a brief, honest summary. What did you improve? What are you still neglecting?
 
 ### If R_FOCUS=maintain (infrastructure focus)
 

@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -2609,6 +2609,7 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/sessions", expect: 200 },
     { method: "GET", path: "/directory", expect: 200 },
     { method: "GET", path: "/services", expect: 200 },
+    { method: "GET", path: "/presence", expect: 200 },
   ];
 
   const base = `http://127.0.0.1:${PORT}`;
@@ -4469,6 +4470,67 @@ app.get("/snapshots", (req, res) => {
     handle, count: arr.length, latest: arr.length ? arr[arr.length - 1].created : null
   }));
   res.json(summary);
+});
+
+// --- Agent Presence / Heartbeat ---
+const PRESENCE_FILE = join(BASE, "presence.json");
+const PRESENCE_TTL = 5 * 60_000; // 5 minutes = online
+function loadPresence() { try { return JSON.parse(readFileSync(PRESENCE_FILE, "utf8")); } catch { return {}; } }
+function savePresence(p) { writeFileSync(PRESENCE_FILE, JSON.stringify(p, null, 2)); }
+
+app.post("/presence", (req, res) => {
+  const { handle, status, url, capabilities, meta } = req.body || {};
+  if (!handle || typeof handle !== "string") return res.status(400).json({ error: "handle required" });
+  if (handle.length > 64) return res.status(400).json({ error: "handle too long" });
+  const presence = loadPresence();
+  const now = new Date().toISOString();
+  const existing = presence[handle] || {};
+  presence[handle] = {
+    handle,
+    last_seen: now,
+    first_seen: existing.first_seen || now,
+    heartbeats: (existing.heartbeats || 0) + 1,
+    status: status || "online",
+    url: url || existing.url || null,
+    capabilities: capabilities || existing.capabilities || [],
+    meta: meta || existing.meta || {},
+  };
+  savePresence(presence);
+  fireWebhook("presence.heartbeat", { handle, status: presence[handle].status });
+  res.json({ ok: true, handle, last_seen: now });
+});
+
+app.get("/presence", (req, res) => {
+  const presence = loadPresence();
+  const now = Date.now();
+  const agents = Object.values(presence).map(a => ({
+    ...a,
+    online: (now - new Date(a.last_seen).getTime()) < PRESENCE_TTL,
+    ago_seconds: Math.round((now - new Date(a.last_seen).getTime()) / 1000),
+  }));
+  agents.sort((a, b) => new Date(b.last_seen) - new Date(a.last_seen));
+  const online = agents.filter(a => a.online).length;
+  res.json({ total: agents.length, online, agents });
+});
+
+app.get("/presence/:handle", (req, res) => {
+  const presence = loadPresence();
+  const agent = presence[req.params.handle];
+  if (!agent) return res.status(404).json({ error: "agent not found" });
+  const now = Date.now();
+  res.json({
+    ...agent,
+    online: (now - new Date(agent.last_seen).getTime()) < PRESENCE_TTL,
+    ago_seconds: Math.round((now - new Date(agent.last_seen).getTime()) / 1000),
+  });
+});
+
+app.delete("/presence/:handle", auth, (req, res) => {
+  const presence = loadPresence();
+  if (!presence[req.params.handle]) return res.status(404).json({ error: "not found" });
+  delete presence[req.params.handle];
+  savePresence(presence);
+  res.json({ deleted: true });
 });
 
 // --- Authenticated endpoints ---

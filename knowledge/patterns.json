@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T01:36:24.999Z",
+  "lastUpdated": "2026-02-01T01:58:43.753Z",
   "patterns": [
     {
       "id": "p001",
@@ -174,6 +174,79 @@
         "registry",
         "ecosystem",
         "discovery"
+      ]
+    },
+    {
+      "id": "p013",
+      "source": "github.com/anthropics/claude-code",
+      "category": "prompting",
+      "title": "Slash commands via .claude/commands/ markdown files",
+      "description": "Claude Code uses .claude/commands/*.md files as reusable prompt templates with YAML frontmatter for allowed-tools and descriptions. Each file becomes a slash command. Frontmatter scopes tool permissions per command (e.g. only git/gh for commit workflows). Commands can interpolate live context using !`shell command` syntax. This pattern enables composable, permission-scoped agent workflows stored as version-controlled markdown.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T01:56:41.755Z",
+      "tags": [
+        "claude-code",
+        "commands",
+        "prompt-templates",
+        "permission-scoping"
+      ]
+    },
+    {
+      "id": "p014",
+      "source": "github.com/anthropics/claude-code",
+      "category": "architecture",
+      "title": "Parallel agent fan-out for search tasks",
+      "description": "The dedupe command launches 5 parallel agents with diverse search strategies, then feeds results into a filtering agent. Pattern: (1) single agent to summarize/understand, (2) N parallel agents with diverse approaches, (3) single agent to filter/merge. Effective for search-heavy tasks where recall matters more than precision initially.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T01:56:45.357Z",
+      "tags": [
+        "agent-orchestration",
+        "parallel",
+        "fan-out",
+        "search"
+      ]
+    },
+    {
+      "id": "p015",
+      "source": "github.com/anthropics/anthropic-cookbook",
+      "category": "prompting",
+      "title": "Slash commands as CI-local parity",
+      "description": "Store slash commands in .claude/commands/ as markdown files with YAML frontmatter (allowed-tools, description). Same commands run locally in Claude Code and in GitHub Actions CI, ensuring dev-CI parity. Commands can be scoped to specific tools for safety.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T01:58:37.367Z",
+      "tags": [
+        "claude-code",
+        "ci",
+        "slash-commands",
+        "developer-experience"
+      ]
+    },
+    {
+      "id": "p016",
+      "source": "github.com/anthropics/anthropic-cookbook",
+      "category": "tooling",
+      "title": "CLAUDE.md as project context file",
+      "description": "A CLAUDE.md file at repo root gives Claude Code project-specific context: quick start commands, code style rules, git workflow conventions, project structure. Acts as a machine-readable onboarding doc that both humans and AI can use.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T01:58:40.473Z",
+      "tags": [
+        "claude-code",
+        "project-config",
+        "onboarding"
+      ]
+    },
+    {
+      "id": "p017",
+      "source": "github.com/anthropics/anthropic-cookbook",
+      "category": "tooling",
+      "title": "Tool-scoped slash commands for safety",
+      "description": "Slash command YAML frontmatter can restrict allowed-tools to a whitelist (e.g., only Bash(gh pr comment:*), Read, Glob). This prevents commands from accidentally executing dangerous operations while still being useful for their specific purpose.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T01:58:43.753Z",
+      "tags": [
+        "security",
+        "claude-code",
+        "guardrails"
       ]
     }
   ]

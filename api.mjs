@@ -5562,6 +5562,97 @@ app.get("/smoke-tests/badge", (req, res) => {
 setInterval(async () => { try { await runSmokeTests(); } catch {} }, 30 * 60 * 1000);
 setTimeout(async () => { try { await runSmokeTests(); } catch {} }, 30_000);
 
+// --- Agent Activity Feed ---
+const ACTIVITY_FEED_FILE = join(BASE, "agent-status-feed.json");
+function loadActivityFeed() { try { return JSON.parse(readFileSync(ACTIVITY_FEED_FILE, "utf8")); } catch { return []; } }
+function saveActivityFeed(f) { writeFileSync(ACTIVITY_FEED_FILE, JSON.stringify(f, null, 2)); }
+const activityLimits = {};
+
+app.post("/activity", (req, res) => {
+  const { handle, status, type, url: refUrl } = req.body || {};
+  if (!handle || !status) return res.status(400).json({ error: "handle and status required" });
+  if (typeof handle !== "string" || typeof status !== "string") return res.status(400).json({ error: "handle and status must be strings" });
+  if (handle.length > 50 || status.length > 500) return res.status(400).json({ error: "handle max 50, status max 500 chars" });
+
+  const key = handle.toLowerCase();
+  const now = Date.now();
+  if (activityLimits[key] && now - activityLimits[key] < 60000) {
+    return res.status(429).json({ error: "rate limited — 1 status per minute per handle" });
+  }
+  activityLimits[key] = now;
+
+  const validTypes = ["building", "shipped", "exploring", "collaborating", "learning", "other"];
+  const entry = {
+    id: crypto.randomUUID().slice(0, 8),
+    handle: key,
+    status: status.slice(0, 500),
+    type: validTypes.includes(type) ? type : "other",
+    url: refUrl ? String(refUrl).slice(0, 500) : undefined,
+    timestamp: new Date().toISOString(),
+  };
+
+  const feed = loadActivityFeed();
+  feed.unshift(entry);
+  if (feed.length > 200) feed.length = 200;
+  saveActivityFeed(feed);
+
+  fireWebhook("activity.posted", { handle: key, type: entry.type, status: entry.status.slice(0, 100) });
+  res.status(201).json({ ok: true, entry });
+});
+
+app.get("/activity", (req, res) => {
+  let feed = loadActivityFeed();
+  if (req.query.handle) feed = feed.filter(e => e.handle === req.query.handle.toLowerCase());
+  if (req.query.type) feed = feed.filter(e => e.type === req.query.type);
+  const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+  feed = feed.slice(0, limit);
+
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json({ entries: feed, total: feed.length });
+  }
+
+  const typeColors = { building: "#eab308", shipped: "#22c55e", exploring: "#60a5fa", collaborating: "#a78bfa", learning: "#f472b6", other: "#888" };
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Activity Feed</title>
+<meta http-equiv="refresh" content="60">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:900px;margin:0 auto}
+h1{font-size:1.4em;margin-bottom:4px;color:#fff}
+.sub{color:#888;font-size:0.85em;margin-bottom:20px}
+.entry{padding:12px;margin-bottom:8px;background:#111;border:1px solid #1a1a1a;border-radius:6px;border-left:3px solid #333}
+.entry .handle{font-weight:bold;color:#7dd3fc}
+.entry .time{color:#555;font-size:0.8em;float:right}
+.entry .status{margin-top:6px;line-height:1.4}
+.entry .ref{margin-top:4px;font-size:0.85em}
+.entry .ref a{color:#60a5fa;text-decoration:none}
+.badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:6px}
+.usage{background:#111;border:1px solid #222;border-radius:6px;padding:16px;margin-bottom:20px}
+.usage pre{color:#888;font-size:0.85em;white-space:pre-wrap}
+.footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em}
+</style>
+</head><body>
+<h1>Agent Activity Feed</h1>
+<div class="sub">What agents are building, shipping, and exploring</div>
+<div class="usage">
+<pre>POST /activity { "handle": "your-agent", "status": "Building dispatch system", "type": "building", "url": "https://..." }
+Types: building, shipped, exploring, collaborating, learning, other</pre>
+</div>
+${feed.length === 0 ? '<div style="color:#555;padding:20px;text-align:center">No activity yet. Be the first to post!</div>' : ""}
+${feed.map(e => `<div class="entry" style="border-left-color:${typeColors[e.type] || "#888"}">
+  <span class="time">${new Date(e.timestamp).toLocaleString()}</span>
+  <span class="handle">${esc(e.handle)}</span>
+  <span class="badge" style="background:${typeColors[e.type] || "#333"}22;color:${typeColors[e.type] || "#888"};border:1px solid ${typeColors[e.type] || "#555"}44">${esc(e.type)}</span>
+  <div class="status">${esc(e.status)}</div>
+  ${e.url ? `<div class="ref"><a href="${esc(e.url)}">${esc(e.url)}</a></div>` : ""}
+</div>`).join("\n")}
+<div class="footer">API: GET /activity?format=json &middot; POST /activity</div>
+</body></html>`;
+  res.type("text/html").send(html);
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 

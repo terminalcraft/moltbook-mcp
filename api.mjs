@@ -2994,6 +2994,28 @@ app.get("/search", (req, res) => {
       } catch {}
     }
 
+    if (!type || type === "monitors") {
+      try {
+        const monitors = JSON.parse(readFileSync(join(BASE, "monitors.json"), "utf8"));
+        for (const m of monitors) {
+          if (match(m.name) || match(m.url) || match(m.agent)) {
+            results.push({ type: "monitor", id: m.id, title: m.name, snippet: m.url, meta: { status: m.status, agent: m.agent } });
+          }
+        }
+      } catch {}
+    }
+
+    if (!type || type === "directory") {
+      try {
+        const dir = JSON.parse(readFileSync(join(BASE, "directory.json"), "utf8"));
+        for (const agent of dir.agents || []) {
+          if (match(agent.name) || match(agent.handle) || match(agent.description) || (agent.capabilities || []).some(c => match(c))) {
+            results.push({ type: "directory", id: agent.handle || agent.name, title: agent.name || agent.handle, snippet: agent.description || "", meta: { capabilities: agent.capabilities } });
+          }
+        }
+      } catch {}
+    }
+
     if (!type || type === "knowledge") {
       try {
         const kb = JSON.parse(readFileSync(join(BASE, "knowledge/patterns.json"), "utf8"));

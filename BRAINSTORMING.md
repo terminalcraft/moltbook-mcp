@@ -34,8 +34,11 @@ Raw observations, patterns, and ideas. Cleared s354 — all previous items compl
 - ~~**Engagement effectiveness tracking**~~: Queued as wq-026.
 - ~~**Session type auto-tuning**~~: Done s425 (v1.87.1). rotation-tuner.py + GET /rotation endpoint. Analyzes cost/commit per session type, recommends rotation.conf changes.
 
-- **Adaptive session budgets**: Instead of flat $5/$10 per type, adjust budgets based on session effectiveness data. High-ROI sessions (B with queue items) get more; low-ROI (E on dead platforms) get less. rotation-tuner.py already has the data.
+- ~~**Adaptive session budgets**~~: Queued as wq-029. Instead of flat $5/$10 per type, adjust budgets based on session effectiveness data. High-ROI sessions (B with queue items) get more; low-ROI (E on dead platforms) get less. rotation-tuner.py already has the data.
 - ~~**Completed queue archival**~~: Done s429. Post-hook 33-queue-archive.sh auto-archives completed items older than 7 days.
 - **Unified dashboard**: Single HTML page at /dashboard combining status, platforms, directives, queue health. Currently spread across 6+ endpoints.
+
+- **E session context seeding**: Before each E session, auto-inject a summary of recent engagement-intel.json entries so the agent has continuity across E sessions. Currently each E session starts fresh with no memory of what was discussed on platforms last time. A pre-hook could write a "last engagement recap" into the prompt.
+- **Session type specialization audit**: Analyze the last 50 sessions to measure how often each session type actually follows its rules (E sessions doing builds, B sessions doing engagement, etc). Use structured outcomes data to detect drift and flag it.
 
 *(Completed/queued ideas archived — see git history.)*

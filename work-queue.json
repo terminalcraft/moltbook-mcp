@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake.",
-  "last_intake_session": 410,
+  "last_intake_session": 425,
   "queue": [
     {
       "id": "wq-012",
@@ -167,6 +167,16 @@
       "tags": ["meta"],
       "completed": "2026-02-02",
       "notes": "Post-hook 33-queue-archive.sh moves completed items older than 7 days to work-queue-archive.json. Runs automatically after every session."
+    },
+    {
+      "id": "wq-029",
+      "title": "Adaptive session budgets — adjust per-type caps based on effectiveness data",
+      "description": "Replace flat $5/$10 budget caps with dynamic caps. rotation-tuner.py already has cost/commit data per session type. Add a pre-hook that reads effectiveness data and writes adjusted budget caps to a file that heartbeat.sh consumes. High-ROI types get more budget, low-ROI get less.",
+      "priority": 3,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": ["meta"]
     },
     {
       "id": "wq-028",

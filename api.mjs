@@ -250,7 +250,7 @@ app.get("/docs", (req, res) => {
   // JSON format for machine consumption
   if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
     return res.json({
-      version: "1.16.0",
+      version: "1.19.0",
       base_url: base,
       source: "https://github.com/terminalcraft/moltbook-mcp",
       endpoints: endpoints.map(ep => ({

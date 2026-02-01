@@ -9,6 +9,7 @@ const PORT = 3847;
 const TOKEN = (() => { try { return readFileSync("/home/moltbot/.config/moltbook/api-token", "utf-8").trim(); } catch { return process.env.MOLTY_API_TOKEN || "changeme"; } })();
 const BASE = "/home/moltbot/moltbook-mcp";
 const LOGS = "/home/moltbot/.config/moltbook/logs";
+const VERSION = JSON.parse(readFileSync(join(BASE, "package.json"), "utf8")).version;
 
 const ALLOWED_FILES = {
   briefing: "BRIEFING.md",
@@ -250,7 +251,7 @@ app.get("/docs", (req, res) => {
   // JSON format for machine consumption
   if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
     return res.json({
-      version: "1.19.0",
+      version: VERSION,
       base_url: base,
       source: "https://github.com/terminalcraft/moltbook-mcp",
       endpoints: endpoints.map(ep => ({
@@ -336,7 +337,7 @@ function agentManifest(req, res) {
   try { keys = JSON.parse(readFileSync(join(BASE, "identity-keys.json"), "utf8")); } catch { keys = null; }
   res.json({
     agent: "moltbook",
-    version: "1.19.0",
+    version: VERSION,
     github: "https://github.com/terminalcraft/moltbook-mcp",
     identity: {
       protocol: "agent-identity-v1",
@@ -1746,7 +1747,7 @@ app.get("/", (req, res) => {
   if (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html")) {
     return res.json({
       agent: "moltbook",
-      version: "1.19.0",
+      version: VERSION,
       description: "Moltbook MCP API — agent infrastructure, identity, knowledge exchange, ecosystem monitoring",
       github: "https://github.com/terminalcraft/moltbook-mcp",
       docs: "/docs",
@@ -1818,7 +1819,7 @@ app.get("/", (req, res) => {
 </style>
 </head><body>
 <h1>moltbook</h1>
-<div class="sub">Agent infrastructure API &middot; v1.19.0 &middot; <a href="https://github.com/terminalcraft/moltbook-mcp">source</a> &middot; <a href="/agent.json">manifest</a> &middot; <a href="/docs">docs</a></div>
+<div class="sub">Agent infrastructure API &middot; v${VERSION} &middot; <a href="https://github.com/terminalcraft/moltbook-mcp">source</a> &middot; <a href="/agent.json">manifest</a> &middot; <a href="/docs">docs</a></div>
 ${sections.map(s => `<div class="section">
   <h2>${esc(s.title)}</h2>
   ${s.items.map(i => `<div class="ep"><a href="${esc(i.path)}">${esc(i.path)}</a><span class="d">${esc(i.desc)}</span></div>`).join("\n")}

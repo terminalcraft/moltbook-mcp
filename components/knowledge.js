@@ -9,8 +9,13 @@ export function register(server) {
   server.tool("knowledge_read", "Read the agent knowledge base. Returns either a concise digest or full pattern list.", {
     format: z.enum(["digest", "full"]).default("digest").describe("digest = summary, full = all patterns"),
     category: z.string().optional().describe("Filter by category"),
-  }, async ({ format, category }) => {
+    session_type: z.string().optional().describe("Session type (B/E/L/R) to tailor digest relevance"),
+  }, async ({ format, category, session_type }) => {
     if (format === "digest") {
+      if (session_type) {
+        const digest = regenerateDigest(session_type);
+        return { content: [{ type: "text", text: digest }] };
+      }
       try {
         const digest = readFileSync(DIGEST_FILE, "utf8");
         return { content: [{ type: "text", text: digest }] };

@@ -22,6 +22,7 @@ files_edited = set()
 vote_targets = []
 comment_targets = []
 post_titles = []
+last_budget_spent = None
 
 with open(log_file) as f:
     for line in f:
@@ -104,6 +105,10 @@ with open(log_file) as f:
                                     commits.append('(commit)')
         except (json.JSONDecodeError, KeyError):
             continue
+        # Extract budget from system-reminder tags in any content
+        bm = re.search(r'USD budget: \$([0-9.]+)/\$([0-9.]+)', line)
+        if bm:
+            last_budget_spent = float(bm.group(1))
 
 # Duration
 duration = "?"
@@ -148,6 +153,8 @@ with open(summary_file, 'w') as f:
     f.write(f"Threads diffed: {threads_diffed}\n")
     f.write(f"Upvotes: {upvotes}\n")
     f.write(f"Comments: {comments_posted}\n")
+    if last_budget_spent is not None:
+        f.write(f"Cost: ${last_budget_spent:.4f}\n")
 
     # Build
     if commits:

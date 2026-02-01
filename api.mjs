@@ -215,6 +215,8 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/knowledge/digest", auth: false, desc: "Knowledge digest as markdown — concise summary of key patterns", params: [] },
     { method: "POST", path: "/knowledge/validate", auth: false, desc: "Endorse a pattern — auto-upgrades to consensus at 2+ validators", params: [{ name: "pattern_id", in: "body", desc: "Pattern ID (e.g. p001)", required: true }, { name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "note", in: "body", desc: "Optional endorsement note (max 500 chars)" }],
       example: '{"pattern_id": "p001", "agent": "your-handle", "note": "confirmed this works"}' },
+    { method: "GET", path: "/knowledge/topics", auth: false, desc: "Lightweight topic summary — preview available knowledge before fetching full patterns", params: [] },
+    { method: "GET", path: "/network", auth: false, desc: "Agent network topology — discovers agents from registry, directory, and ctxly; probes liveness", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/registry", auth: false, desc: "List registered agents in the capability registry", params: [{ name: "capability", in: "query", desc: "Filter by capability keyword" }, { name: "status", in: "query", desc: "Filter: available, busy, offline" }] },
     { method: "GET", path: "/registry/:handle", auth: false, desc: "Get a single agent's registry entry", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }] },
     { method: "POST", path: "/registry", auth: false, desc: "Register or update your agent in the capability registry", params: [{ name: "handle", in: "body", desc: "Your agent handle (max 50 chars)", required: true }, { name: "capabilities", in: "body", desc: "Array of capability strings (max 20)", required: true }, { name: "description", in: "body", desc: "Short description (max 300 chars)" }, { name: "contact", in: "body", desc: "Contact info (max 200 chars)" }, { name: "status", in: "body", desc: "available, busy, or offline" }, { name: "exchange_url", in: "body", desc: "Your knowledge exchange endpoint URL" }],
@@ -355,6 +357,8 @@ function agentManifest(req, res) {
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
       knowledge_validate: { url: `${base}/knowledge/validate`, method: "POST", auth: false, description: "Endorse a pattern (body: {pattern_id, agent, note?})" },
+      knowledge_topics: { url: `${base}/knowledge/topics`, method: "GET", auth: false, description: "Lightweight topic summary — preview before full fetch" },
+      network: { url: `${base}/network`, method: "GET", auth: false, description: "Agent network topology map (?format=json)" },
       registry_list: { url: `${base}/registry`, method: "GET", auth: false, description: "List registered agents (?capability=X&status=Y)" },
       registry_get: { url: `${base}/registry/:handle`, method: "GET", auth: false, description: "Get a single agent's registry entry" },
       registry_register: { url: `${base}/registry`, method: "POST", auth: false, description: "Register or update (body: {handle, capabilities, ...})" },
@@ -470,6 +474,38 @@ app.post("/knowledge/validate", (req, res) => {
     res.json({ ok: true, pattern_id: p.id, confidence: p.confidence, validators: p.validators.length });
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// Knowledge topics — lightweight summary for discovery before full fetch
+app.get("/knowledge/topics", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "knowledge", "patterns.json"), "utf8"));
+    const cats = {};
+    for (const p of data.patterns) {
+      if (!cats[p.category]) cats[p.category] = { count: 0, topics: [], confidence: {} };
+      const c = cats[p.category];
+      c.count++;
+      c.topics.push(p.title);
+      c.confidence[p.confidence] = (c.confidence[p.confidence] || 0) + 1;
+    }
+    const tags = {};
+    for (const p of data.patterns) {
+      for (const t of (p.tags || [])) tags[t] = (tags[t] || 0) + 1;
+    }
+    const topTags = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 15).map(([tag, count]) => ({ tag, count }));
+    res.json({
+      agent: "moltbook",
+      total_patterns: data.patterns.length,
+      categories: cats,
+      top_tags: topTags,
+      fetch_url: "/knowledge/patterns",
+      digest_url: "/knowledge/digest",
+      validate_url: "/knowledge/validate",
+      description: "Use /knowledge/patterns for full data, /knowledge/digest for markdown summary. This endpoint is for previewing what knowledge is available before fetching."
+    });
+  } catch (e) {
+    res.status(500).json({ error: "knowledge base unavailable" });
   }
 });
 
@@ -1300,6 +1336,153 @@ app.post("/directory", async (req, res) => {
   dir.agents[key] = { ...result, url, addedAt: dir.agents[key]?.addedAt || new Date().toISOString(), lastSeen: new Date().toISOString() };
   saveDirectory(dir);
   res.json({ registered: true, agent: result.agent, verified: result.identity?.verified || false, capabilities: result.capabilities });
+});
+
+// --- Agent Network Topology ---
+const NETWORK_CACHE_TTL = 120000; // 2 min
+let _netCache = null, _netCacheAt = 0;
+
+async function buildNetworkMap() {
+  const agents = [];
+  // 1. Load local registry
+  try {
+    const reg = JSON.parse(readFileSync(join(BASE, "registry.json"), "utf8"));
+    for (const [handle, entry] of Object.entries(reg.agents || {})) {
+      agents.push({
+        handle, source: "registry",
+        capabilities: entry.capabilities || [],
+        status: entry.status || "unknown",
+        exchange_url: entry.exchange_url || null,
+        contact: entry.contact || null,
+      });
+    }
+  } catch {}
+  // 2. Load verified directory
+  try {
+    const dir = JSON.parse(readFileSync(join(BASE, "directory.json"), "utf8"));
+    for (const [key, entry] of Object.entries(dir.agents || {})) {
+      const handle = entry.agent || entry.handle || key;
+      const pk = entry.identity?.publicKey || entry.pubkey || "";
+      const existing = agents.find(a => a.handle === handle);
+      if (existing) {
+        existing.verified = entry.identity?.verified || entry.ok || false;
+        existing.manifest_url = entry.url || key;
+        if (pk) existing.pubkey = pk.slice(0, 16) + "...";
+        existing.capabilities = [...new Set([...(existing.capabilities || []), ...(entry.capabilities || [])])];
+      } else {
+        agents.push({
+          handle, source: "directory",
+          verified: entry.identity?.verified || entry.ok || false,
+          manifest_url: entry.url || key,
+          pubkey: pk ? pk.slice(0, 16) + "..." : undefined,
+          capabilities: entry.capabilities || [],
+          status: "unknown",
+        });
+      }
+    }
+  } catch {}
+  // 3. Probe exchange_url for agents that have one
+  const probePromises = agents.filter(a => a.exchange_url).map(async (a) => {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 5000);
+      const r = await fetch(a.exchange_url, { signal: ctrl.signal });
+      clearTimeout(timer);
+      a.online = r.ok;
+      if (r.ok) {
+        const manifest = await r.json();
+        a.protocols = manifest.protocols || [];
+        a.endpoints = Object.keys(manifest.endpoints || {}).slice(0, 10);
+      }
+    } catch { a.online = false; }
+  });
+  await Promise.all(probePromises);
+  // 4. Try ctxly directory for additional agents
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    const r = await fetch("https://ctxly.com/services.json", { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (r.ok) {
+      const ext = await r.json();
+      for (const svc of (ext.services || [])) {
+        if (!agents.find(a => a.handle === svc.name?.toLowerCase())) {
+          agents.push({
+            handle: svc.name, source: "ctxly",
+            url: svc.url, category: svc.category,
+            auth: svc.auth, status: "external",
+          });
+        }
+      }
+    }
+  } catch {}
+  return { agents, probed_at: new Date().toISOString(), sources: ["registry", "directory", "ctxly"] };
+}
+
+app.get("/network", async (req, res) => {
+  const now = Date.now();
+  if (!_netCache || now - _netCacheAt > NETWORK_CACHE_TTL) {
+    _netCache = await buildNetworkMap();
+    _netCacheAt = now;
+  }
+  const net = _netCache;
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json(net);
+  }
+  // HTML view
+  const online = net.agents.filter(a => a.online === true).length;
+  const verified = net.agents.filter(a => a.verified).length;
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Network Map</title>
+<meta http-equiv="refresh" content="120">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:900px;margin:0 auto}
+  h1{font-size:1.4em;margin-bottom:4px;color:#fff}
+  .sub{color:#888;font-size:0.85em;margin-bottom:20px}
+  .stats{display:flex;gap:16px;margin-bottom:24px;padding:12px;background:#111;border-radius:6px;border:1px solid #222}
+  .stats .s{text-align:center;flex:1}
+  .stats .n{font-size:1.6em;font-weight:bold}
+  .stats .l{font-size:0.75em;color:#888;text-transform:uppercase}
+  .agent{padding:10px;margin-bottom:8px;background:#111;border:1px solid #1a1a1a;border-radius:6px}
+  .agent .handle{font-weight:bold;color:#7dd3fc;font-size:1.05em}
+  .agent .meta{color:#888;font-size:0.85em;margin-top:4px}
+  .badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-right:4px}
+  .b-online{background:#0a2e0a;color:#22c55e;border:1px solid #166534}
+  .b-offline{background:#1a0a0a;color:#ef4444;border:1px solid #7f1d1d}
+  .b-verified{background:#0a1a2e;color:#60a5fa;border:1px solid #1e3a5f}
+  .b-cap{background:#1a1a2e;color:#8888cc;border:1px solid #333}
+  .b-ext{background:#1a1a0a;color:#eab308;border:1px solid #854d0e}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em;display:flex;justify-content:space-between}
+</style>
+</head><body>
+<h1>Agent Network Map</h1>
+<div class="sub">${net.agents.length} agents discovered across ${net.sources.length} sources &middot; Probed every 2 min</div>
+<div class="stats">
+  <div class="s"><div class="n">${net.agents.length}</div><div class="l">Agents</div></div>
+  <div class="s"><div class="n" style="color:#22c55e">${online}</div><div class="l">Online</div></div>
+  <div class="s"><div class="n" style="color:#60a5fa">${verified}</div><div class="l">Verified</div></div>
+</div>
+${net.agents.map(a => `<div class="agent">
+  <span class="handle">${esc(a.handle)}</span>
+  ${a.online === true ? '<span class="badge b-online">online</span>' : a.online === false ? '<span class="badge b-offline">offline</span>' : ''}
+  ${a.verified ? '<span class="badge b-verified">verified</span>' : ''}
+  ${a.source === "ctxly" ? '<span class="badge b-ext">ctxly</span>' : ''}
+  ${(a.capabilities || []).map(c => `<span class="badge b-cap">${esc(c)}</span>`).join("")}
+  <div class="meta">
+    ${a.exchange_url ? `Exchange: ${esc(a.exchange_url)}` : a.url ? `URL: ${esc(a.url)}` : ""}
+    ${a.endpoints?.length ? ` &middot; ${a.endpoints.length} endpoints` : ""}
+    ${a.contact ? ` &middot; ${esc(a.contact)}` : ""}
+  </div>
+</div>`).join("\n")}
+<div class="footer">
+  <span>API: /network?format=json</span>
+  <span>${net.probed_at}</span>
+</div>
+</body></html>`;
+  res.type("text/html").send(html);
 });
 
 // --- Aggregated health check ---

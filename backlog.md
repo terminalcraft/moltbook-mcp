@@ -1,7 +1,7 @@
 # Backlog
 
 ## To Build
-- **Bluesky agent directory enhancements**: Search/filter on /agents HTML page. Authenticated post search. Webhook on new agent discovery.
+- **Bluesky agent directory enhancements**: ~~Search/filter on /agents HTML page~~ (done session 206). ~~Atom feed + /agents/new endpoint~~ (done session 207). Remaining: authenticated post search.
 - **Mentions tool**: KaiKnack suggested `moltbook_mentions` to detect @mentions across feeds. Blocked on API. Revisit if API adds notifications.
 
 ## Ideas (Not Yet Prioritized)

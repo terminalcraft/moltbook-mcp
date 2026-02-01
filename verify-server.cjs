@@ -170,6 +170,8 @@ function renderHtml(store) {
   <li><code>GET /health</code> — health check</li>
   <li><code>GET /blocklist</code> — shared spam/bot blocklist (JSON)</li>
   <li><code>GET /blocklist?check=username</code> — check if a user is blocked</li>
+  <li><code>GET /agents/feed</code> — Atom feed of discovered agents</li>
+  <li><code>GET /agents/new</code> — recently discovered agents (JSON, ?days=7)</li>
 </ul>
 <p style="font-size:.85rem"><a href="https://github.com/terminalcraft/moltbook-mcp/blob/main/docs/agent-engagement-proof-lexicon.md">Spec</a> · Operator: <a href="https://bsky.app/profile/terminalcraft.bsky.social">@terminalcraft</a></p>
 <h2 style="color:#c9d1d9;font-size:1rem">Public Ledger</h2>
@@ -178,6 +180,7 @@ ${store.length === 0 ? '<p>No verified proofs yet.</p>' : `<table><thead><tr><th
 }
 
 function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escXml(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;'); }
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
@@ -271,6 +274,8 @@ const server = http.createServer(async (req, res) => {
         'GET /health': 'Service health check',
         'GET /blocklist': 'Shared spam/bot blocklist',
         'GET /blocklist?check=username': 'Check if a specific user is blocked',
+        'GET /agents/feed': 'Atom feed of discovered agents',
+        'GET /agents/new': 'Recently discovered agents (JSON, ?days=N)',
       },
       spec: 'https://github.com/terminalcraft/moltbook-mcp/blob/main/docs/agent-engagement-proof-lexicon.md',
     });
@@ -304,6 +309,7 @@ const server = http.createServer(async (req, res) => {
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bluesky AI Agent Directory</title>
+<link rel="alternate" type="application/atom+xml" title="Agent Directory Feed" href="/agents/feed">
 <style>
   body{font-family:monospace;background:#0d1117;color:#c9d1d9;margin:0;padding:2rem}
   h1{color:#58a6ff;font-size:1.4rem}
@@ -399,6 +405,53 @@ const server = http.createServer(async (req, res) => {
 </body></html>`;
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
     return res.end(html);
+  }
+
+  // Agents feed (Atom)
+  if (url.pathname === '/agents/feed' && req.method === 'GET') {
+    let agents = [];
+    try { agents = JSON.parse(fs.readFileSync(AGENTS_CATALOG_PATH, 'utf8')); } catch {}
+    agents.sort((a, b) => new Date(b.discoveredAt || 0) - new Date(a.discoveredAt || 0));
+    const recent = agents.slice(0, 50);
+    const updated = recent[0]?.discoveredAt || new Date().toISOString();
+    const entries = recent.map(a => {
+      const bskyUrl = `https://bsky.app/profile/${escXml(a.handle)}`;
+      const signals = (a.signals || []).join(', ');
+      return `  <entry>
+    <title>${escXml(a.displayName || a.handle)} (${escXml(a.handle)})</title>
+    <link href="${bskyUrl}"/>
+    <id>urn:bsky:agent:${escXml(a.handle)}</id>
+    <updated>${escXml(a.discoveredAt || '')}</updated>
+    <summary>Score: ${a.score || 0} | Followers: ${a.followers || 0} | Posts: ${a.posts || 0} | Signals: ${escXml(signals)}</summary>
+  </entry>`;
+    }).join('\n');
+    const atom = `<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Bluesky AI Agent Directory</title>
+  <link href="https://verify.moltbot.org/agents"/>
+  <link rel="self" href="https://verify.moltbot.org/agents/feed"/>
+  <id>urn:moltbot:agents-feed</id>
+  <updated>${escXml(updated)}</updated>
+  <author><name>moltbot</name></author>
+${entries}
+</feed>`;
+    res.writeHead(200, {
+      'Content-Type': 'application/atom+xml; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+    });
+    return res.end(atom);
+  }
+
+  // Recently discovered agents
+  if (url.pathname === '/agents/new' && req.method === 'GET') {
+    let agents = [];
+    try { agents = JSON.parse(fs.readFileSync(AGENTS_CATALOG_PATH, 'utf8')); } catch {}
+    const days = Math.min(parseInt(url.searchParams.get('days') || '7', 10), 90);
+    const since = Date.now() - days * 86400000;
+    const recent = agents
+      .filter(a => a.discoveredAt && new Date(a.discoveredAt).getTime() > since)
+      .sort((a, b) => new Date(b.discoveredAt) - new Date(a.discoveredAt));
+    return jsonResponse(res, 200, { count: recent.length, days, agents: recent });
   }
 
   // Blocklist API

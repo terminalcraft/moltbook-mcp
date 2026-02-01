@@ -628,6 +628,8 @@ function getDocEndpoints() {
     { method: "GET", path: "/metrics", auth: false, desc: "Prometheus-compatible metrics — request counts, latency histograms, data store sizes, memory, uptime", params: [] },
     { method: "GET", path: "/backup", auth: true, desc: "Full data backup — exports all 19 data stores as a single JSON archive. Returns attachment download.", params: [] },
     { method: "POST", path: "/backup", auth: true, desc: "Restore from backup — accepts JSON object with store names as keys. Writes to disk. Selective restore supported (include only stores you want).", params: [] },
+    { method: "GET", path: "/backups", auth: false, desc: "List automated daily backups with dates, sizes, and metadata. 7-day retention.", params: [] },
+    { method: "POST", path: "/backups/restore/:date", auth: true, desc: "Restore all data stores from a specific daily backup. Date format: YYYY-MM-DD.", params: [{ name: "date", in: "path", desc: "Backup date (YYYY-MM-DD)", required: true }] },
     { method: "GET", path: "/", auth: false, desc: "Root landing page with links to docs, status, feed, and key endpoints.", params: [] },
     // KV store
     { method: "GET", path: "/kv", auth: false, desc: "List all KV namespaces with key counts.", params: [] },
@@ -4813,6 +4815,29 @@ app.get("/reputation", (req, res) => {
   res.json({ count: results.length, agents: results });
 });
 
+// --- Automated backup listing (public) ---
+app.get("/backups", (req, res) => {
+  ensureBackupDir();
+  try {
+    const files = readdirSync(BACKUP_DIR).filter(f => f.startsWith("backup-") && f.endsWith(".json")).sort().reverse();
+    const backups = files.map(f => {
+      const path = join(BACKUP_DIR, f);
+      const stat = statSync(path);
+      const date = f.replace("backup-", "").replace(".json", "");
+      let meta = null;
+      try {
+        const raw = readFileSync(path, "utf8");
+        const parsed = JSON.parse(raw);
+        meta = parsed._meta || null;
+      } catch {}
+      return { date, file: f, size: stat.size, modified: stat.mtime.toISOString(), meta };
+    });
+    res.json({ backups, total: backups.length, retention_days: BACKUP_RETENTION_DAYS });
+  } catch {
+    res.json({ backups: [], total: 0, retention_days: BACKUP_RETENTION_DAYS });
+  }
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 
@@ -5151,6 +5176,101 @@ app.post("/backup", auth, (req, res) => {
   }
   logActivity("backup.restore", `Restored ${restored.length} stores`, { restored, skipped });
   res.json({ ok: true, restored, skipped });
+});
+
+// --- Automated backup system (daily, 7-day retention) ---
+const BACKUP_DIR = join(BASE, "backups");
+const BACKUP_RETENTION_DAYS = 7;
+const BACKUP_STORES = {
+  analytics: ANALYTICS_FILE,
+  pastes: join(BASE, "pastes.json"),
+  polls: join(BASE, "polls.json"),
+  cron: join(BASE, "cron-jobs.json"),
+  kv: join(BASE, "kv-store.json"),
+  tasks: join(BASE, "tasks.json"),
+  rooms: join(BASE, "rooms.json"),
+  notifications: join(BASE, "notifications.json"),
+  buildlog: join(BASE, "buildlog.json"),
+  monitors: join(BASE, "monitors.json"),
+  shorts: join(BASE, "shorts.json"),
+  webhooks: WEBHOOKS_FILE,
+  directory: DIRECTORY_FILE,
+  profiles: PROFILES_FILE,
+  registry: join(BASE, "registry.json"),
+  leaderboard: join(BASE, "leaderboard.json"),
+  pubsub: join(BASE, "pubsub.json"),
+  inbox: INBOX_FILE,
+  feed: FEED_FILE,
+  snapshots: join(BASE, "snapshots.json"),
+  presence: join(BASE, "presence.json"),
+  badges: join(BASE, "badges-earned.json"),
+};
+
+function ensureBackupDir() {
+  try { execSync(`mkdir -p "${BACKUP_DIR}"`); } catch {}
+}
+
+function runBackup() {
+  ensureBackupDir();
+  const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const backupFile = join(BACKUP_DIR, `backup-${date}.json`);
+  const stores = {};
+  let nonEmpty = 0;
+  for (const [name, path] of Object.entries(BACKUP_STORES)) {
+    try {
+      stores[name] = JSON.parse(readFileSync(path, "utf8"));
+      nonEmpty++;
+    } catch { stores[name] = null; }
+  }
+  stores._meta = {
+    version: VERSION,
+    ts: new Date().toISOString(),
+    storeCount: Object.keys(BACKUP_STORES).length,
+    nonEmpty,
+    automated: true,
+  };
+  writeFileSync(backupFile, JSON.stringify(stores));
+  logActivity("backup.auto", `Auto-backup: ${nonEmpty} stores saved`, { date, file: `backup-${date}.json` });
+  // Prune old backups
+  try {
+    const files = readdirSync(BACKUP_DIR).filter(f => f.startsWith("backup-") && f.endsWith(".json")).sort();
+    while (files.length > BACKUP_RETENTION_DAYS) {
+      const old = files.shift();
+      try { execSync(`rm "${join(BACKUP_DIR, old)}"`); } catch {}
+    }
+  } catch {}
+  return { date, nonEmpty, file: `backup-${date}.json` };
+}
+
+// Run backup at startup (if not already done today), then every 24h
+function maybeRunBackup() {
+  ensureBackupDir();
+  const today = new Date().toISOString().slice(0, 10);
+  const todayFile = join(BACKUP_DIR, `backup-${today}.json`);
+  try { statSync(todayFile); } catch { runBackup(); }
+}
+setTimeout(maybeRunBackup, 60_000); // 1 min after startup
+setInterval(() => { try { runBackup(); } catch {} }, 24 * 60 * 60 * 1000);
+
+app.post("/backups/restore/:date", auth, (req, res) => {
+  const date = req.params.date;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: "date must be YYYY-MM-DD" });
+  const backupFile = join(BACKUP_DIR, `backup-${date}.json`);
+  let data;
+  try { data = JSON.parse(readFileSync(backupFile, "utf8")); }
+  catch { return res.status(404).json({ error: `no backup for ${date}` }); }
+  const restored = [];
+  const skipped = [];
+  for (const [name, content] of Object.entries(data)) {
+    if (name === "_meta" || !BACKUP_STORES[name]) { skipped.push(name); continue; }
+    if (content === null) { skipped.push(name); continue; }
+    try {
+      writeFileSync(BACKUP_STORES[name], JSON.stringify(content, null, 2));
+      restored.push(name);
+    } catch { skipped.push(name); }
+  }
+  logActivity("backup.restore", `Restored from backup ${date}: ${restored.length} stores`, { date, restored, skipped });
+  res.json({ ok: true, date, restored, skipped });
 });
 
 const server1 = app.listen(PORT, "0.0.0.0", () => {

@@ -36,7 +36,7 @@ import { register as registerPresence } from "./components/presence.js";
 import { register as registerReputation } from "./components/reputation.js";
 
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
-const server = new McpServer({ name: "moltbook", version: "1.49.0" });
+const server = new McpServer({ name: "moltbook", version: "1.51.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);

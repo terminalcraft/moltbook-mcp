@@ -2,6 +2,7 @@ import { z } from "zod";
 import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, readdirSync } from "fs";
 import { join } from "path";
 import { loadPatterns, savePatterns, loadReposCrawled, saveReposCrawled, regenerateDigest, DIGEST_FILE, AGENTS_UNIFIED_FILE } from "../providers/knowledge.js";
+import { extractFromRepo, parseGitHubUrl, formatExtraction } from "../packages/pattern-extractor/index.js";
 
 export function register(server) {
   // knowledge_read
@@ -48,60 +49,22 @@ export function register(server) {
     github_url: z.string().describe("GitHub repo URL, e.g. https://github.com/user/repo"),
     force: z.boolean().default(false).describe("Force re-crawl even if recently crawled"),
   }, async ({ github_url, force }) => {
-    const { execSync } = await import("child_process");
-    const match = github_url.match(/github\.com\/([^\/]+\/[^\/\s#?]+)/);
-    if (!match) return { content: [{ type: "text", text: "Invalid GitHub URL. Use format: https://github.com/user/repo" }] };
-    const repoSlug = match[1].replace(/\.git$/, "");
+    const repoSlug = parseGitHubUrl(github_url);
+    if (!repoSlug) return { content: [{ type: "text", text: "Invalid GitHub URL. Use format: https://github.com/user/repo" }] };
     const repoKey = `github.com/${repoSlug}`;
     const crawled = loadReposCrawled();
     if (!force && crawled.repos[repoKey]) {
       const daysSince = (Date.now() - new Date(crawled.repos[repoKey].lastCrawled).getTime()) / 86400000;
       if (daysSince < 7) return { content: [{ type: "text", text: `Repo ${repoKey} was crawled ${daysSince.toFixed(1)} days ago. Use force=true to re-crawl. Previous files: ${crawled.repos[repoKey].filesRead.join(", ")}` }] };
     }
-    const tmpDir = `/tmp/agent-crawl-${Date.now()}`;
     try {
-      execSync(`git clone --depth 1 https://${repoKey}.git "${tmpDir}" 2>&1`, { timeout: 30000 });
-      const targetFiles = ["AGENTS.md", "CLAUDE.md", ".claude/commands", "README.md", "BRIEFING.md", "package.json", "pyproject.toml", "Cargo.toml"];
-      const allowedExts = new Set([".md", ".json", ".js", ".ts", ".py", ".sh", ".yaml", ".yml", ".toml", ".txt"]);
-      const MAX_FILE_SIZE = 50000;
-      const files = [];
-      for (const target of targetFiles) {
-        const fullPath = join(tmpDir, target);
-        try {
-          const stat = statSync(fullPath);
-          if (stat.isDirectory()) {
-            const entries = readdirSync(fullPath);
-            for (const entry of entries.slice(0, 10)) {
-              const ext = entry.includes(".") ? "." + entry.split(".").pop() : "";
-              if (!allowedExts.has(ext)) continue;
-              const entryPath = join(fullPath, entry);
-              const eStat = statSync(entryPath);
-              if (eStat.size > MAX_FILE_SIZE || !eStat.isFile()) continue;
-              files.push({ name: `${target}/${entry}`, content: readFileSync(entryPath, "utf8") });
-            }
-          } else if (stat.size <= MAX_FILE_SIZE) {
-            files.push({ name: target, content: readFileSync(fullPath, "utf8") });
-          }
-        } catch {}
-      }
-      try {
-        const rootFiles = readdirSync(tmpDir).filter(f => f.endsWith(".md") && !targetFiles.includes(f));
-        for (const f of rootFiles.slice(0, 5)) {
-          const fPath = join(tmpDir, f);
-          const fStat = statSync(fPath);
-          if (fStat.size <= MAX_FILE_SIZE) files.push({ name: f, content: readFileSync(fPath, "utf8") });
-        }
-      } catch {}
-      let commitSha = "";
-      try { commitSha = execSync(`git -C "${tmpDir}" rev-parse HEAD`, { encoding: "utf8" }).trim(); } catch {}
-      crawled.repos[repoKey] = { lastCrawled: new Date().toISOString(), commitSha, filesRead: files.map(f => f.name), patternsExtracted: 0 };
+      const result = await extractFromRepo(github_url);
+      crawled.repos[repoKey] = { lastCrawled: new Date().toISOString(), commitSha: result.commitSha, filesRead: result.files.map(f => f.name), patternsExtracted: 0 };
       saveReposCrawled(crawled);
-      execSync(`rm -rf "${tmpDir}"`);
-      if (files.length === 0) return { content: [{ type: "text", text: `Cloned ${repoKey} but found no readable documentation files.` }] };
-      const output = files.map(f => `--- ${f.name} ---\n${f.content}`).join("\n\n");
-      return { content: [{ type: "text", text: `Crawled ${repoKey} (${files.length} files, commit ${commitSha.slice(0, 8)}):\n\n${output}\n\nAnalyze these files and use knowledge_add_pattern for any useful techniques you find.` }] };
+      if (result.files.length === 0) return { content: [{ type: "text", text: `Cloned ${repoKey} but found no readable documentation files.` }] };
+      const output = formatExtraction(result);
+      return { content: [{ type: "text", text: `${output}\n\nAnalyze these files and use knowledge_add_pattern for any useful techniques you find.` }] };
     } catch (e) {
-      try { const { execSync: es } = await import("child_process"); es(`rm -rf "${tmpDir}"`); } catch {}
       return { content: [{ type: "text", text: `Crawl failed for ${repoKey}: ${e.message}` }] };
     }
   });

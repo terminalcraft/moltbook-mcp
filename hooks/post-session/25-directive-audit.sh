@@ -1,5 +1,5 @@
 #!/bin/bash
-# Post-session: audit which directives were followed/ignored using Haiku
+# Post-session: audit which directives were followed/ignored using Sonnet
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -24,8 +24,7 @@ esac
 
 SESSION_CONTENT=$(cat "$SESSION_FILE")
 
-# Extract a condensed version of the session log (last 200 lines of text output, skip raw JSON)
-# The log is stream-json, extract assistant text blocks
+# Extract a condensed version of the session log
 LOG_SUMMARY=$(python3 -c "
 import json, sys
 lines = open('$LOG_FILE').readlines()
@@ -47,7 +46,7 @@ print('\n'.join(texts[-80:]))
 
 PROMPT="You are auditing an autonomous agent session. Below are the SESSION DIRECTIVES the agent was supposed to follow, and a SUMMARY OF WHAT THE AGENT ACTUALLY DID.
 
-Return ONLY valid JSON (no markdown, no explanation) in this exact format:
+Return ONLY valid JSON with NO markdown formatting, NO code fences, NO explanation. Just the raw JSON object:
 {\"session_type\":\"$MODE_CHAR\",\"date\":\"$(date +%Y-%m-%d)\",\"session_num\":${SESSION_NUM:-0},\"directives_followed\":[\"short name of directive\"],\"directives_ignored\":[\"short name of directive\"],\"notes\":\"one sentence summary\"}
 
 SESSION DIRECTIVES:
@@ -56,22 +55,33 @@ $SESSION_CONTENT
 AGENT ACTIVITY SUMMARY:
 $LOG_SUMMARY"
 
-# Call Haiku via claude CLI (cheap, ~0.01 per audit)
-RESULT=$(claude -p "$PROMPT" --model claude-sonnet-4-20250514 --max-budget-usd 0.05 --output-format text 2>/dev/null) || exit 0
+# Call Sonnet via claude CLI
+RAW_RESULT=$(claude -p "$PROMPT" --model claude-sonnet-4-20250514 --max-budget-usd 0.05 --output-format text 2>/dev/null) || exit 0
 
+# Extract JSON — strip markdown code fences and whitespace
+RESULT=$(echo "$RAW_RESULT" | python3 -c "
+import sys, json, re
+text = sys.stdin.read().strip()
+# Remove markdown code fences
+text = re.sub(r'^\`\`\`(?:json)?\s*', '', text)
+text = re.sub(r'\s*\`\`\`\s*$', '', text)
+text = text.strip()
 # Validate it's JSON
-echo "$RESULT" | python3 -c "import json,sys; json.load(sys.stdin)" 2>/dev/null || exit 0
+obj = json.loads(text)
+print(json.dumps(obj))
+" 2>/dev/null) || exit 0
+
+[ -z "$RESULT" ] && exit 0
 
 # Append to tracking file
 python3 -c "
 import json, sys
-result = json.loads('''$RESULT''')
+result = json.loads(sys.stdin.read())
 try:
     data = json.load(open('$TRACKING_FILE'))
 except:
     data = {'version': 1, 'audits': []}
 data['audits'].append(result)
-# Keep last 50 audits
 data['audits'] = data['audits'][-50:]
 json.dump(data, open('$TRACKING_FILE', 'w'), indent=2)
-" 2>/dev/null || exit 0
+" <<< "$RESULT" 2>/dev/null || exit 0

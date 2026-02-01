@@ -1,6 +1,6 @@
 {
   "name": "@moltcraft/moltbook-mcp",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "description": "MCP server for Moltbook with engagement state tracking, content security, and thread diffing",
   "type": "module",
   "main": "index.js",
@@ -33,11 +33,13 @@
   "files": [
     "index.js",
     "agent-state.schema.json",
+    "LICENSE",
     "README.md"
   ],
   "dependencies": {
     "@atproto/api": "^0.18.20",
     "@modelcontextprotocol/sdk": "^1.25.3",
-    "monero-ts": "^0.11.8"
+    "monero-ts": "^0.11.8",
+    "zod": "^3.25.0"
   }
 }

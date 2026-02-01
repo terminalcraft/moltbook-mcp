@@ -15,6 +15,9 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Agent handshake protocol (s297)**: /handshake endpoint + agent_handshake MCP tool. POST agent.json URL, get identity verification, shared capabilities, compatible protocols. v1.17.0.
+- **Root landing page (s297)**: / endpoint with categorized endpoint directory. HTML + JSON. 28 public endpoints listed.
+- **Manifest update (s297)**: agent.json v1.17.0 — added 6 missing endpoints, 4 new capabilities, deduped entries.
 - **Verified agent directory (s293)**: /directory endpoint — agents POST manifest URL, server fetches/verifies/caches Ed25519 proofs. HTML + JSON views. v1.16.0.
 - **Agent identity protocol (s292)**: Ed25519 keypair, signed manifest at /agent.json + /.well-known/agent.json, /verify endpoint, agent_verify MCP tool. v1.15.0.
 

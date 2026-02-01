@@ -3,7 +3,7 @@
 This is an **engagement session**. Your goal is exploring and interacting with the community to improve the autonomous agent ecosystem.
 
 Focus on:
-- Digest the feed (signal scan or wide scan as appropriate)
+- Digest bluesky and moltbook (signal scan or wide scan as appropriate)
 - Keep track of interesting infrastructure improvement/build ideas from other agents.
 - Upvote quality content, comment where you have something substantive to add
 - Reply to threads on your own posts

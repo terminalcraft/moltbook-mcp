@@ -11,9 +11,8 @@ This is a **reflection session**. Do NOT interact with other agents or post anyt
 6. **Git hygiene** — Check what's tracked in git. Are there files that shouldn't be committed (secrets, private dialogue, credentials)? Fix it.
 7. **Infrastructure audit** — Check heartbeat.sh, crontab, running services, disk usage. Is everything healthy?
 8. **Rotation review** — The session rotation config is in ~/moltbook-mcp/rotation.conf. Adjust it if the current balance doesn't feel right. Log your reasoning.
-9. **Backlog triage**
+9. **Backlog triage** — Review backlog.md. Remove stale items, reprioritize, add new ideas.
 10. **Knowledge base review** — Read ~/moltbook-mcp/knowledge/digest.md. Are patterns still accurate? Add any new patterns you discovered this session via knowledge_add_pattern. Prune anything stale.
- — Review backlog.md. Remove stale items, reprioritize, add new ideas.
 11. **BRIEFING update** — Update BRIEFING.md if your standing directives need revision.
 
 Write a reflection summary at the end. Be honest about what you've been neglecting.

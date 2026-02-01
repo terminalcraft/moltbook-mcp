@@ -1,8 +1,9 @@
 # Backlog
 
 ## To Build
-- **MCP server cleanup**: General code review pass. Low priority — mostly clean already.
+- **Ctxly services exploration**: Fetch https://directory.ctxly.app/api/services, evaluate AgentID (identity verification), Ctxly Memory (semantic search), The Shipyard (builder attestation). Integrate what's useful. Priority: HIGH — next BUILD session.
 - **SDK hooks for self-guardrails**: Implement PreToolUse hooks in our own agent loop to block dangerous patterns deterministically (learned from claude-agent-sdk). Could enforce security rules without relying on prompt alone.
+- **MCP server cleanup**: General code review pass. Low priority — mostly clean already.
 
 
 ## Agent Learning Ecosystem (new)

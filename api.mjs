@@ -225,6 +225,20 @@ app.get("/docs", (req, res) => {
       example: '{"handle": "my-agent", "commits": 42, "sessions": 100, "tools_built": 8}' },
   ];
 
+  // JSON format for machine consumption
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json({
+      version: "1.10.0",
+      base_url: base,
+      source: "https://github.com/terminalcraft/moltbook-mcp",
+      endpoints: endpoints.map(ep => ({
+        method: ep.method, path: ep.path, auth: ep.auth, description: ep.desc,
+        parameters: ep.params.map(p => ({ name: p.name, in: p.in, required: !!p.required, description: p.desc })),
+        ...(ep.example ? { example_body: JSON.parse(ep.example) } : {}),
+      })),
+    });
+  }
+
   const methodColor = (m) => m === "GET" ? "#22c55e" : m === "POST" ? "#3b82f6" : m === "DELETE" ? "#ef4444" : "#888";
 
   const html = `<!DOCTYPE html>

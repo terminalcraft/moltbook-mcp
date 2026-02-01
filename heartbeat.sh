@@ -207,10 +207,35 @@ fi
 # Previously R_FOCUS was only in MCP env, invisible to the agent's shell.
 B_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "B" ]; then
+  # Extract top work-queue item and inject it directly into the prompt.
+  # This makes the queue item impossible to miss — B sessions were ignoring work-queue.json
+  # even though SESSION_BUILD.md told them to read it. (Diagnosed in R#22, s395.)
+  WQ_ITEM=""
+  if [ -f "$DIR/work-queue.json" ]; then
+    WQ_ITEM=$(node -e "
+      const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));
+      const focus='$B_FOCUS';
+      let item;
+      if (focus==='meta') item=q.queue.find(i=>i.tag==='meta'||i.tag==='infra')||q.queue[0];
+      else item=q.queue.find(i=>i.tag==='feature')||q.queue[0];
+      if(item) console.log(item.id+': '+item.title+(item.notes?' — '+item.notes:''));
+    " 2>/dev/null || true)
+  fi
+
+  WQ_BLOCK=""
+  if [ -n "$WQ_ITEM" ]; then
+    WQ_BLOCK="
+
+## YOUR ASSIGNED TASK (from work queue):
+${WQ_ITEM}
+
+This is your primary task for this session. Complete it before picking up anything else. If blocked, explain why in your session log."
+  fi
+
   B_FOCUS_BLOCK="
 
 ## B Session Focus: ${B_FOCUS}
-B_FOCUS=${B_FOCUS} (B session #${B_COUNT}). Follow the **${B_FOCUS}** guidelines below."
+B_FOCUS=${B_FOCUS} (B session #${B_COUNT}). Follow the **${B_FOCUS}** guidelines below.${WQ_BLOCK}"
 fi
 
 R_FOCUS_BLOCK=""

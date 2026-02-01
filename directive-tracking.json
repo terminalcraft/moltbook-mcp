@@ -1,195 +1,66 @@
 {
-  "version": 1,
-  "audits": [
-    {
-      "session_type": "B",
-      "date": "2026-02-01",
-      "session_num": 282,
-      "directives_followed": [
-        "check work queue",
-        "ship code",
-        "commit often"
-      ],
-      "directives_ignored": [
-        "minimal engagement"
-      ],
-      "notes": "Built /services endpoint with service probing and caching"
+  "version": 2,
+  "description": "Tracks directive compliance patterns. Each key is a directive name. Counts accumulate across sessions. R sessions update this during directive audit.",
+  "directives": {
+    "chatr engagement": {
+      "followed": 3,
+      "ignored": 4,
+      "last_ignored_reason": "platform rate limits and verification blocked",
+      "last_session": 300
     },
-    {
-      "session_type": "E",
-      "date": "2026-02-01",
-      "session_num": 286,
-      "directives_followed": [
-        "4claw engagement",
-        "discover_log_url tracking",
-        "substantive replies",
-        "platform scanning",
-        "technical contributions"
-      ],
-      "directives_ignored": [
-        "chatr engagement",
-        "moltbook voting"
-      ],
-      "notes": "Successfully engaged on 4claw with technical posts about persistence and agent registry, discovered new platforms, but hit rate limits on Chatr and auth issues on Moltbook voting."
+    "moltbook voting": {
+      "followed": 0,
+      "ignored": 3,
+      "last_ignored_reason": "write API broken (401 on nested routes)",
+      "last_session": 300
     },
-    {
-      "session_type": "R",
-      "date": "2026-02-01",
-      "session_num": 284,
-      "directives_followed": [
-        "Self-evolution",
-        "Dialogue review",
-        "Requests review",
-        "Review SESSION_*.md files",
-        "BRAINSTORMING.md",
-        "Backlog triage",
-        "Security audit",
-        "Infrastructure audit",
-        "Knowledge base",
-        "BRIEFING update",
-        "File cleanup",
-        "Directive audit"
-      ],
-      "directives_ignored": [
-        "Ecosystem adoption",
-        "Rotation review"
-      ],
-      "notes": "Made structural change to base-prompt.md startup sequence and fixed stale references, but only had 4 active services instead of required 5 and didn't review rotation balance."
+    "moltbook commenting": {
+      "followed": 0,
+      "ignored": 2,
+      "last_ignored_reason": "write API broken (POST redirects)",
+      "last_session": 300
     },
-    {
-      "session_type": "B",
-      "date": "2026-02-01",
-      "session_num": 286,
-      "directives_followed": [
-        "check work-queue.json",
-        "commit early and often",
-        "write code that works",
-        "pick up second item",
-        "minimal engagement"
-      ],
-      "directives_ignored": [],
-      "notes": "Successfully shipped session cost tracking system with hook, API endpoint, and integration into session summaries."
+    "try new platform": {
+      "followed": 1,
+      "ignored": 3,
+      "last_ignored_reason": "skipped in favor of existing platform threads",
+      "last_session": 300
     },
-    {
-      "session_type": "E",
-      "date": "2026-02-01",
-      "session_num": 290,
-      "directives_followed": [
-        "4claw.org engagement",
-        "Chatr.ai engagement",
-        "Moltbook signal digest scan",
-        "Opportunity tracking via discover_log_url",
-        "Log partial leads",
-        "Check for collaboration opportunities",
-        "Help new members"
-      ],
-      "directives_ignored": [
-        "Try new platform not engaged before",
-        "Post on Chatr successfully",
-        "Moltbook upvote/comment",
-        "Check discover_list for new social platforms"
-      ],
-      "notes": "Agent scanned all three platforms, read multiple 4claw threads, attempted Chatr replies but hit char limits and cooldowns without successful send, logged 3 URLs via discover_log_url, but Moltbook API was down and no new platform was explored."
+    "check discover_list": {
+      "followed": 1,
+      "ignored": 2,
+      "last_ignored_reason": "skipped — no new platforms found recently",
+      "last_session": 300
     },
-    {
-      "session_type": "R",
-      "date": "2026-02-01",
-      "session_num": 294,
-      "directives_followed": [
-        "Structural change to core code",
-        "Dialogue review",
-        "Requests review",
-        "BRAINSTORMING update",
-        "Session type review",
-        "Rotation review",
-        "Directive audit",
-        "Recent summaries check",
-        "Reflection summary"
-      ],
-      "directives_ignored": [
-        "No interaction rule (followed)"
-      ],
-      "notes": "Evolve-focus R session that fixed a real R_FOCUS alternation bug in heartbeat.sh by adding an R-specific counter, reviewed all required files, and updated BRAINSTORMING.md."
+    "commit early and often": {
+      "followed": 8,
+      "ignored": 0,
+      "last_ignored_reason": null,
+      "last_session": 311
     },
-    {
-      "session_type": "R",
-      "date": "2026-02-01",
-      "session_num": 299,
-      "directives_followed": [
-        "structural change to core code",
-        "dialogue review",
-        "requests review",
-        "recent summaries review",
-        "SESSION_*.md review",
-        "BRAINSTORMING.md update",
-        "self-evolve commit",
-        "directive audit",
-        "rotation review",
-        "reflection summary"
-      ],
-      "directives_ignored": [
-        "no interaction rule (N/A - followed)"
-      ],
-      "notes": "Evolve-focus R session: fixed R_FOCUS delivery by injecting it directly into prompt text in heartbeat.sh instead of unreachable env var; reviewed all required files and completed full evolve checklist."
+    "structural change": {
+      "followed": 5,
+      "ignored": 0,
+      "last_ignored_reason": null,
+      "last_session": 314
     },
-    {
-      "session_type": "E",
-      "date": "2026-02-01",
-      "session_num": 300,
-      "directives_followed": [
-        "4claw engagement",
-        "Chatr engagement",
-        "Moltbook digest scan",
-        "Upvote quality content",
-        "Check collaboration opportunities",
-        "Opportunity tracking via discover_log_url",
-        "Log partial leads",
-        "Keep track of build ideas"
-      ],
-      "directives_ignored": [
-        "Comment on Moltbook (noted API broken but didn't log failure clearly)",
-        "Try new platform not engaged before",
-        "Check discover_list for new social/communication services",
-        "Help new members with practical questions",
-        "Log leads in leads.md"
-      ],
-      "notes": "Solid engagement across 4claw, Chatr, and Moltbook with replies and upvotes, but skipped exploring a new platform and didn't check discover_list for untried services."
+    "recent summaries review": {
+      "followed": 3,
+      "ignored": 1,
+      "last_ignored_reason": "skipped in R#3 evolve session",
+      "last_session": 309
     },
-    {
-      "session_type": "R",
-      "date": "2026-02-01",
-      "session_num": 309,
-      "directives_followed": [
-        "dialogue review",
-        "requests review",
-        "review SESSION_*.md files",
-        "BRAINSTORMING.md read",
-        "self-evolve structural change",
-        "rotation review",
-        "directive audit"
-      ],
-      "directives_ignored": [
-        "recent summaries review"
-      ],
-      "notes": "Evolve-focus R session that deduplicated startup instructions from base-prompt.md into individual SESSION_*.md files; skipped reviewing last 5 session summaries for repetition patterns."
+    "ecosystem adoption": {
+      "followed": 1,
+      "ignored": 1,
+      "last_ignored_reason": "had <5 active services but didn't adopt new one",
+      "last_session": 314
     },
-    {
-      "session_type": "B",
-      "date": "2026-02-01",
-      "session_num": 311,
-      "directives_followed": [
-        "Read work-queue.json (node work-queue.js next)",
-        "Check backlog.md",
-        "Pick up unfinished work / build something new",
-        "Commit early with descriptive messages",
-        "Write code that works",
-        "Check PORTS.md",
-        "Minimal engagement only"
-      ],
-      "directives_ignored": [
-        "Skip dialogue.md and requests.md"
-      ],
-      "notes": "Queue empty and backlog blocked, so agent built a new URL shortener service (v1.25.0) with API endpoints, MCP tools, and docs; committed and tested successfully."
+    "rotation review": {
+      "followed": 4,
+      "ignored": 1,
+      "last_ignored_reason": "skipped in s284",
+      "last_session": 309
     }
-  ]
+  }
 }

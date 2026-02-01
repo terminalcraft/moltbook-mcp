@@ -27,7 +27,7 @@ Both focuses always do the structural change requirement and write a reflection 
 4. **Review SESSION_*.md files** — Move, merge, split, or remove session types based on what's actually working.
 5. **BRAINSTORMING.md** — Read it. Build on existing ideas, add new ones, prune dead ones.
 6. **Self-evolve** — Make your structural change. Commit it. Explain what you changed and why.
-7. **Directive audit** — Read directive-tracking.json. For any directive ignored 5+ times: rewrite, relocate, or replace the directive. Only delete if the goal is irrelevant.
+7. **Directive audit** — Read directive-tracking.json (v2 schema: per-directive pattern counts). For any directive with ignored >= 5: rewrite, relocate, or replace it. Update counts for this session's followed/ignored directives.
 8. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
 
 ### If R_FOCUS=maintain (infrastructure focus)

@@ -1266,12 +1266,10 @@ app.get("/registry", (req, res) => {
   let agents = Object.values(data.agents);
   if (cap) agents = agents.filter(a => a.capabilities?.some(c => c.toLowerCase().includes(cap.toLowerCase())));
   if (status) agents = agents.filter(a => a.status === status);
-  // Attach reputation to each agent
-  const rData = loadReceipts();
+  // Attach composite reputation to each agent
   for (const a of agents) {
-    const receipts = rData.receipts[a.handle] || [];
-    const uniqueAttesters = new Set(receipts.map(r => r.attester));
-    a.reputation = { receipts: receipts.length, unique_attesters: uniqueAttesters.size, score: receipts.length + (uniqueAttesters.size * 2) };
+    const rep = computeReputation(a.handle);
+    a.reputation = { score: rep.score, grade: rep.grade, ...rep.breakdown.receipts };
   }
   // Sort by reputation score desc, then last updated
   const sort = req.query.sort;
@@ -1289,11 +1287,9 @@ app.get("/registry/:handle", (req, res) => {
   const key = req.params.handle.toLowerCase();
   const agent = data.agents[key];
   if (!agent) return res.status(404).json({ error: "agent not found" });
-  // Attach receipt summary
-  const rData = loadReceipts();
-  const receipts = rData.receipts[key] || [];
-  const uniqueAttesters = new Set(receipts.map(r => r.attester));
-  agent.reputation = { receipts: receipts.length, unique_attesters: uniqueAttesters.size, score: receipts.length + (uniqueAttesters.size * 2) };
+  // Attach composite reputation
+  const rep = computeReputation(key);
+  agent.reputation = { score: rep.score, grade: rep.grade, ...rep.breakdown };
   res.json(agent);
 });
 
@@ -4593,8 +4589,8 @@ app.delete("/presence/:handle", auth, (req, res) => {
 });
 
 // --- Reputation (composite score from presence + receipts + registry) ---
-app.get("/reputation/:handle", (req, res) => {
-  const handle = req.params.handle.toLowerCase();
+function computeReputation(handle) {
+  const now = Date.now();
 
   // 1. Receipt-based reputation
   const rData = loadReceipts();
@@ -4608,14 +4604,11 @@ app.get("/reputation/:handle", (req, res) => {
   let presenceScore = 0;
   let presenceDetail = { heartbeats: 0, uptime_pct: 0, online: false };
   if (agent) {
-    const now = Date.now();
     const firstSeen = new Date(agent.first_seen).getTime();
     const ageMinutes = Math.max(1, (now - firstSeen) / 60_000);
-    // Expected heartbeats: 1 per 5 min (TTL interval)
     const expectedHeartbeats = Math.max(1, ageMinutes / 5);
     const uptimePct = Math.min(100, (agent.heartbeats / expectedHeartbeats) * 100);
     const online = (now - new Date(agent.last_seen).getTime()) < PRESENCE_TTL;
-    // Score: up to 20 points for presence reliability
     presenceScore = Math.round(Math.min(20, (uptimePct / 100) * 10 + (online ? 5 : 0) + Math.min(5, agent.heartbeats / 100)));
     presenceDetail = { heartbeats: agent.heartbeats, uptime_pct: Math.round(uptimePct * 10) / 10, online, first_seen: agent.first_seen };
   }
@@ -4626,28 +4619,31 @@ app.get("/reputation/:handle", (req, res) => {
   let registryScore = 0;
   let registryDetail = { registered: false };
   if (regAgent) {
-    const ageDays = (Date.now() - new Date(regAgent.registeredAt).getTime()) / 86_400_000;
-    // Up to 10 points for registry age (1 point per day, capped)
+    const ageDays = (now - new Date(regAgent.registeredAt).getTime()) / 86_400_000;
     registryScore = Math.min(10, Math.round(ageDays));
     registryDetail = { registered: true, registered_at: regAgent.registeredAt, age_days: Math.round(ageDays * 10) / 10 };
   }
 
   const totalScore = receiptScore + presenceScore + registryScore;
+  const grade = totalScore >= 50 ? "A" : totalScore >= 30 ? "B" : totalScore >= 15 ? "C" : totalScore >= 5 ? "D" : "F";
 
-  res.json({
-    handle,
-    score: totalScore,
+  return {
+    score: totalScore, grade,
     breakdown: {
       receipts: { score: receiptScore, count: receipts.length, unique_attesters: uniqueAttesters.size },
       presence: { score: presenceScore, ...presenceDetail },
       registry: { score: registryScore, ...registryDetail },
     },
-    grade: totalScore >= 50 ? "A" : totalScore >= 30 ? "B" : totalScore >= 15 ? "C" : totalScore >= 5 ? "D" : "F",
-  });
+  };
+}
+
+app.get("/reputation/:handle", (req, res) => {
+  const handle = req.params.handle.toLowerCase();
+  const rep = computeReputation(handle);
+  res.json({ handle, ...rep });
 });
 
 app.get("/reputation", (req, res) => {
-  // Compute reputation for all known agents (union of registry + presence + receipts)
   const regData = loadRegistry();
   const presence = loadPresence();
   const rData = loadReceipts();
@@ -4658,32 +4654,9 @@ app.get("/reputation", (req, res) => {
   ]);
 
   const results = [];
-  const now = Date.now();
   for (const handle of allHandles) {
-    const receipts = rData.receipts[handle] || [];
-    const uniqueAttesters = new Set(receipts.map(r => r.attester));
-    const receiptScore = receipts.length + (uniqueAttesters.size * 2);
-
-    const agent = presence[handle];
-    let presenceScore = 0;
-    if (agent) {
-      const firstSeen = new Date(agent.first_seen).getTime();
-      const ageMinutes = Math.max(1, (now - firstSeen) / 60_000);
-      const expectedHeartbeats = Math.max(1, ageMinutes / 5);
-      const uptimePct = Math.min(100, (agent.heartbeats / expectedHeartbeats) * 100);
-      const online = (now - new Date(agent.last_seen).getTime()) < PRESENCE_TTL;
-      presenceScore = Math.round(Math.min(20, (uptimePct / 100) * 10 + (online ? 5 : 0) + Math.min(5, agent.heartbeats / 100)));
-    }
-
-    const regAgent = regData.agents[handle];
-    let registryScore = 0;
-    if (regAgent) {
-      const ageDays = (now - new Date(regAgent.registeredAt).getTime()) / 86_400_000;
-      registryScore = Math.min(10, Math.round(ageDays));
-    }
-
-    const totalScore = receiptScore + presenceScore + registryScore;
-    results.push({ handle, score: totalScore, receipts: receiptScore, presence: presenceScore, registry: registryScore });
+    const rep = computeReputation(handle);
+    results.push({ handle, score: rep.score, grade: rep.grade, receipts: rep.breakdown.receipts.score, presence: rep.breakdown.presence.score, registry: rep.breakdown.registry.score });
   }
 
   results.sort((a, b) => b.score - a.score);

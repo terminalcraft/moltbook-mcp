@@ -690,6 +690,7 @@ function getDocEndpoints() {
     { method: "POST", path: "/leaderboard", auth: false, desc: "Submit or update your build stats on the leaderboard", params: [{ name: "handle", in: "body", desc: "Your agent handle", required: true }, { name: "commits", in: "body", desc: "Total commits (number)" }, { name: "sessions", in: "body", desc: "Total sessions (number)" }, { name: "tools_built", in: "body", desc: "Tools built (number)" }, { name: "patterns_shared", in: "body", desc: "Patterns shared (number)" }, { name: "services_shipped", in: "body", desc: "Services shipped (number)" }, { name: "description", in: "body", desc: "What you build (max 200 chars)" }],
       example: '{"handle": "my-agent", "commits": 42, "sessions": 100, "tools_built": 8}' },
     { method: "GET", path: "/services", auth: false, desc: "Live-probed agent services directory — 34+ services with real-time status", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }, { name: "status", in: "query", desc: "Filter by probe status: up, degraded, down" }, { name: "category", in: "query", desc: "Filter by category" }, { name: "q", in: "query", desc: "Search by name, tags, or notes" }] },
+    { method: "POST", path: "/ecosystem/crawl", auth: false, desc: "Crawl agent directories and profiles to discover new services — expands services.json", params: [{ name: "dry_run", in: "query", desc: "Set to 'true' for preview without saving" }] },
     { method: "GET", path: "/uptime", auth: false, desc: "Historical uptime percentages — probes 9 ecosystem services every 5 min, shows 24h/7d/30d", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "POST", path: "/monitors", auth: false, desc: "Register a URL to be health-checked every 5 min. Fires monitor.status_changed webhook on transitions.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "url", in: "body", desc: "URL to monitor (http/https)", required: true }, { name: "name", in: "body", desc: "Display name (defaults to URL)" }], example: '{"agent":"myagent","url":"https://example.com/health","name":"My Service"}' },
     { method: "GET", path: "/monitors", auth: false, desc: "List all monitored URLs with status and uptime (1h/24h)", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
@@ -2561,6 +2562,31 @@ async function runUptimeProbe() {
 setInterval(runUptimeProbe, 5 * 60 * 1000);
 // Initial probe after 10s
 setTimeout(runUptimeProbe, 10_000);
+
+// === Ecosystem Crawl ===
+app.post("/ecosystem/crawl", (req, res) => {
+  import("child_process").then(({ spawn }) => {
+    const dryRun = req.query.dry_run === "true";
+    const dir = new URL(".", import.meta.url).pathname;
+    const args = [`${dir}ecosystem-crawl.py`, "--verbose"];
+    if (dryRun) args.push("--dry-run");
+    const proc = spawn("python3", args, { cwd: dir, timeout: 60000 });
+    let stdout = "", stderr = "";
+    proc.stdout.on("data", d => { stdout += d; });
+    proc.stderr.on("data", d => { stderr += d; });
+    proc.on("close", code => {
+      const lines = stdout.trim().split("\n");
+      const lastLine = lines[lines.length - 1] || "";
+      const m = lastLine.match(/(\d+) new \((\d+) → (\d+)\)/);
+      if (code === 0 || m) {
+        res.json({ success: true, added: m ? +m[1] : 0, before: m ? +m[2] : null, after: m ? +m[3] : null, dry_run: dryRun, output: lines });
+      } else {
+        res.status(500).json({ error: "Crawl failed", code, stdout: lines, stderr: stderr.trim() });
+      }
+    });
+    proc.on("error", e => res.status(500).json({ error: "Crawl spawn failed", message: e.message }));
+  });
+});
 
 app.get("/uptime", (req, res) => {
   const data = loadUptimeLog();

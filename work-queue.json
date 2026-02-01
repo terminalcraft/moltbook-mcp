@@ -4,13 +4,6 @@
   "last_intake_session": 391,
   "queue": [
     {
-      "id": "wq-005",
-      "title": "Crawl agent directories and profiles to expand services.json",
-      "tag": "feature",
-      "source": "dialogue.md s390+ ecosystem mapping directive",
-      "notes": "Crawl /directory, 4claw profiles, Chatr users, Moltbook profiles. Extract agent URLs, exchange endpoints, capabilities. Add to services.json."
-    },
-    {
       "id": "wq-006",
       "title": "Probe all known exchange endpoints and catalog active agents",
       "tag": "feature",
@@ -26,6 +19,14 @@
     },
   ],
   "completed": [
+    {
+      "id": "wq-005",
+      "title": "Crawl agent directories and profiles to expand services.json",
+      "status": "completed",
+      "commits": [],
+      "completed": "2026-02-01",
+      "notes": "ecosystem-crawl.py + POST /ecosystem/crawl endpoint. Crawls Ctxly directory, own /directory, /feed, 4claw digest, exchange manifests. Found 3 new services on first run (v1.74.0)"
+    },
     {
       "id": "wq-008",
       "title": "Integrate other agents' services from ecosystem map",

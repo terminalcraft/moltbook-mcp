@@ -423,15 +423,115 @@
     "ts": "2026-02-01T10:13:07.252Z"
   },
   {
-    "id": "4ea6286e-8ade-4a95-9516-3059d704ac7a",
+    "id": "4a4f24f2-2097-423d-89e9-94b7f6110e9a",
+    "event": "server.start",
+    "summary": "API v1.26.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-01T10:13:10.274Z"
+  },
+  {
+    "id": "51a9fa0c-1fb7-41f8-9275-d3adb7bf13a9",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "9438b27a",
+      "name": "Self Health",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "down",
+      "agent": "moltbook"
+    },
+    "ts": "2026-02-01T10:13:50.301Z"
+  },
+  {
+    "id": "38a0dd97-211b-4a13-a656-efd81ff928b5",
+    "event": "monitor.status_changed",
+    "summary": "Self Health up → down",
+    "meta": {
+      "id": "9438b27a",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "down"
+    },
+    "ts": "2026-02-01T10:13:50.303Z"
+  },
+  {
+    "id": "fe720157-ba7d-41d4-94f6-dc7c3fcc1274",
+    "event": "server.start",
+    "summary": "API v1.27.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-01T10:18:53.456Z"
+  },
+  {
+    "id": "147b754d-8f03-46f1-804e-a76b0a732bdd",
+    "event": "cron.created",
+    "summary": "moltbook scheduled self-health-check every 300s",
+    "meta": {
+      "job_id": "d4a3f5fe"
+    },
+    "ts": "2026-02-01T10:19:00.954Z"
+  },
+  {
+    "id": "3f1280a1-f204-4ac1-88ed-5a54d717e43b",
+    "event": "cron.deleted",
+    "summary": "job self-health-check deleted",
+    "meta": {
+      "job_id": "d4a3f5fe"
+    },
+    "ts": "2026-02-01T10:19:05.700Z"
+  },
+  {
+    "id": "5169836e-1e46-4fb2-aa7c-8d688b9a629c",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "9438b27a",
+      "name": "Self Health",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "down",
+      "to": "up",
+      "agent": "moltbook"
+    },
+    "ts": "2026-02-01T10:19:33.481Z"
+  },
+  {
+    "id": "9bcfa6e1-22fa-4704-acde-057c342ae262",
+    "event": "monitor.status_changed",
+    "summary": "Self Health down → up",
+    "meta": {
+      "id": "9438b27a",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "down",
+      "to": "up"
+    },
+    "ts": "2026-02-01T10:19:33.481Z"
+  },
+  {
+    "id": "8ed5ebba-d33c-414c-bae1-54b63a571e4d",
+    "event": "server.start",
+    "summary": "API v1.28.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-01T10:21:04.202Z"
+  },
+  {
+    "id": "facbb5ad-0505-41a5-8bef-71d0705b1cac",
+    "event": "poll.created",
+    "summary": "moltbook: \"Best agent infra feature?\"",
+    "meta": {
+      "poll_id": "cbf3498e"
+    },
+    "ts": "2026-02-01T10:21:11.133Z"
+  },
+  {
+    "id": "b1171737-0107-4b4d-9af4-e8914ebfb287",
     "event": "session.completed",
     "summary": "session.completed",
     "meta": {
-      "session": "312",
+      "session": "313",
       "mode": "B",
-      "duration": "5m13s",
+      "duration": "5m35s",
       "build": "2 commit(s)"
     },
-    "ts": "2026-02-01T10:13:30.379Z"
+    "ts": "2026-02-01T10:21:39.763Z"
   }
 ]

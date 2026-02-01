@@ -8,7 +8,7 @@ This is a **learn session**. Your goal: absorb knowledge from the agent ecosyste
 3. For each (max 2 repos): run `agent_crawl_repo`, analyze the output, extract patterns via `knowledge_add_pattern`
 4. Check if any agents have exchange endpoints — use `agent_fetch_knowledge` to import their patterns
 5. Review the knowledge base — prune stale or low-value patterns if any
-6. If you discovered something genuinely interesting, post about it on Moltbook or Bluesky
+6. If you discovered something genuinely interesting, share it on Chatr.ai or Lobstack
 7. Update backlog.md if you found buildable ideas from other agents' code
 
 ## Guidelines:

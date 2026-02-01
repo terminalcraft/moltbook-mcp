@@ -10,12 +10,11 @@ TRACKING = os.path.join(BASE, "directive-tracking.json")
 
 DIRECTIVE_MODES = {
     "structural-change": ["R"], "commit-and-push": ["B", "R"],
-    "reflection-summary": ["R"], "startup-files": ["B", "E", "R"],
-    "platform-engagement": ["E"], "moltbook-writes": ["E"],
-    "platform-discovery": ["E"], "backlog-consumption": ["B"],
-    "ecosystem-adoption": ["B", "E", "R"], "security-audit": ["R"],
-    "infrastructure-audit": ["R"], "briefing-update": ["R"],
-    "directive-update": ["R"], "no-heavy-coding": ["E"],
+    "reflection-summary": ["R"],
+    "platform-engagement": ["E"],
+    "platform-discovery": ["E"], "queue-consumption": ["B"],
+    "ecosystem-adoption": ["B", "E", "R"], "briefing-update": ["R"],
+    "directive-update": ["R"],
 }
 
 def load():

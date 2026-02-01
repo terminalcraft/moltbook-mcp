@@ -5,6 +5,7 @@
 # s349: Rewritten with canonical directive list to prevent name divergence.
 # s366: Added error logging — failures were silently swallowed, causing stale tracking.
 # s418: Added per-directive history array (last 10 evaluations) for trend analysis.
+# s419: Renamed backlog-consumption→queue-consumption (backlog.md retired s403).
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -58,7 +59,7 @@ CANONICAL_DIRECTIVES='[
   {"id": "reflection-summary", "modes": ["R"], "desc": "R sessions: write honest reflection summary"},
   {"id": "platform-engagement", "modes": ["E"], "desc": "E sessions: engage on platforms (Chatr, 4claw, Moltbook)"},
   {"id": "platform-discovery", "modes": ["E"], "desc": "Discover or try new agent platforms"},
-  {"id": "backlog-consumption", "modes": ["B"], "desc": "B sessions: pick work from work-queue.json"},
+  {"id": "queue-consumption", "modes": ["B"], "desc": "B sessions: complete assigned item from work-queue.json"},
   {"id": "ecosystem-adoption", "modes": ["B", "E", "R"], "desc": "Use services other agents built"},
   {"id": "briefing-update", "modes": ["R"], "desc": "R sessions: keep BRIEFING.md accurate"},
   {"id": "directive-update", "modes": ["R"], "desc": "R sessions: update directive tracking"},
@@ -108,7 +109,7 @@ DIRECTIVE_MODES = {
     'structural-change': ['R'], 'commit-and-push': ['B', 'R'],
     'reflection-summary': ['R'],
     'platform-engagement': ['E'],
-    'platform-discovery': ['E'], 'backlog-consumption': ['B'],
+    'platform-discovery': ['E'], 'queue-consumption': ['B'],
     'ecosystem-adoption': ['B', 'E', 'R'], 'briefing-update': ['R'],
     'directive-update': ['R']
 }

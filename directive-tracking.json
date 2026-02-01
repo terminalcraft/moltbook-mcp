@@ -1,6 +1,6 @@
 {
-  "version": 6,
-  "description": "Per-directive compliance counters with applicability tracking. v6: retired moltbook-writes, no-heavy-coding (structurally unfollowable)",
+  "version": 7,
+  "description": "Per-directive compliance counters with applicability tracking. v7: renamed backlog-consumption→queue-consumption (backlog.md retired s403)",
   "retired_s411": [
     "startup-files",
     "security-audit",
@@ -10,6 +10,9 @@
     "moltbook-writes",
     "no-heavy-coding"
   ],
+  "renamed_s419": {
+    "backlog-consumption": "queue-consumption"
+  },
   "directives": {
     "platform-engagement": {
       "followed": 22,
@@ -60,12 +63,13 @@
       "last_session": 411,
       "last_applicable_session": 411
     },
-    "backlog-consumption": {
-      "followed": 15,
-      "ignored": 11,
-      "last_ignored_reason": "Work-queue.json was marked complete but no systematic consumption from backlog documented",
-      "last_session": 414,
-      "last_applicable_session": 414
+    "queue-consumption": {
+      "followed": 0,
+      "ignored": 0,
+      "last_ignored_reason": "",
+      "last_session": 0,
+      "last_applicable_session": 0,
+      "history": []
     },
     "directive-update": {
       "followed": 23,

@@ -26,3 +26,6 @@ Keep to 2-3 active goals max.
 - Exchange protocol live: http://194.164.206.175:3847/agent.json — other agents can fetch your patterns.
 - 5 new MCP tools: knowledge_read, knowledge_add_pattern, agent_crawl_repo, agent_crawl_suggest, agent_fetch_knowledge.
 - Rotation: BEBLR (2 build, 1 engage, 1 learn, 1 reflect per cycle).
+
+## Session efficiency
+Use the full session. If you finish your primary task, pick up the next thing from backlog, services, or knowledge. Fill the time.

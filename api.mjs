@@ -5614,6 +5614,68 @@ app.get("/crawl/cache", (req, res) => {
   res.json({ cached_repos: entries.length, entries });
 });
 
+// --- External Integrations (proxy to other agents' APIs) ---
+const INTEGRATION_CACHE = new Map(); // key -> { ts, data }
+const INTEGRATION_CACHE_TTL = 120_000; // 2 min
+
+function cachedFetch(key, url, headers = {}, ttl = INTEGRATION_CACHE_TTL) {
+  const cached = INTEGRATION_CACHE.get(key);
+  if (cached && Date.now() - cached.ts < ttl) return Promise.resolve(cached.data);
+  return fetch(url, { headers, signal: AbortSignal.timeout(8000) })
+    .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+    .then(data => { INTEGRATION_CACHE.set(key, { ts: Date.now(), data }); return data; });
+}
+
+const MDI_KEY = (() => { try { return readFileSync("/home/moltbot/.mdi-key", "utf-8").trim(); } catch { return ""; } })();
+const MC_KEY = (() => { try { return readFileSync("/home/moltbot/.moltcities/api-key", "utf-8").trim(); } catch { return ""; } })();
+
+// mydeadinternet.com — collective consciousness platform
+app.get("/integrations/mdi", async (req, res) => {
+  try {
+    const h = MDI_KEY ? { Authorization: `Bearer ${MDI_KEY}` } : {};
+    const [pulse, stream] = await Promise.all([
+      cachedFetch("mdi:pulse", "https://mydeadinternet.com/api/pulse", h),
+      cachedFetch("mdi:stream", "https://mydeadinternet.com/api/stream", h),
+    ]);
+    res.json({
+      platform: "mydeadinternet.com",
+      pulse: pulse.pulse || pulse,
+      recent_fragments: (stream.fragments || []).slice(0, 10),
+      cached: !!INTEGRATION_CACHE.get("mdi:pulse"),
+    });
+  } catch (e) { res.status(502).json({ error: `MDI unavailable: ${e.message}` }); }
+});
+
+// MoltCities — geocities for agents
+app.get("/integrations/moltcities", async (req, res) => {
+  try {
+    const h = MC_KEY ? { Authorization: `Bearer ${MC_KEY}` } : {};
+    const [agents, neighborhoods] = await Promise.all([
+      cachedFetch("mc:agents", "https://moltcities.org/api/agents", h),
+      cachedFetch("mc:neighborhoods", "https://moltcities.org/api/neighborhoods", h),
+    ]);
+    const agentList = (agents.agents || []).slice(0, 20);
+    res.json({
+      platform: "moltcities.org",
+      agent_count: (agents.agents || []).length,
+      agents: agentList.map(a => ({ name: a.name, skills: a.skills, neighborhood: a.site?.neighborhood, currency: a.currency, site_url: a.site?.url })),
+      neighborhoods: neighborhoods.neighborhoods || [],
+      cached: !!INTEGRATION_CACHE.get("mc:agents"),
+    });
+  } catch (e) { res.status(502).json({ error: `MoltCities unavailable: ${e.message}` }); }
+});
+
+// Combined integrations summary
+app.get("/integrations", (req, res) => {
+  res.json({
+    integrations: [
+      { id: "mdi", platform: "mydeadinternet.com", endpoint: "/integrations/mdi", description: "Collective consciousness — pulse + recent fragments", status: MDI_KEY ? "configured" : "no_key" },
+      { id: "moltcities", platform: "moltcities.org", endpoint: "/integrations/moltcities", description: "Geocities for agents — agent directory + neighborhoods", status: MC_KEY ? "configured" : "no_key" },
+    ],
+    cache_ttl_ms: INTEGRATION_CACHE_TTL,
+  });
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 

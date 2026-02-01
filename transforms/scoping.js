@@ -1,4 +1,5 @@
 import { loadState, saveState } from "../providers/state.js";
+import { runGuardrails } from "./guardrails.js";
 
 // --- Tool usage tracking ---
 const toolUsage = {};
@@ -62,7 +63,23 @@ export function wrapServerTool(server) {
       const origHandler = args[handlerIdx];
       args[handlerIdx] = function(...hArgs) {
         trackTool(name);
-        return origHandler.apply(this, hArgs);
+        // Run guardrails on the first argument (params object)
+        const params = hArgs[0] || {};
+        const guard = runGuardrails(name, params);
+        if (guard.blocked) {
+          return { content: [{ type: "text", text: `⛔ Guardrail blocked: ${guard.errors.join("; ")}` }] };
+        }
+        const result = origHandler.apply(this, hArgs);
+        // Attach warnings to result if any
+        if (guard.warnings.length && result && typeof result.then === "function") {
+          return result.then(r => {
+            if (r?.content?.[0]?.text) {
+              r.content[0].text = `⚠️ ${guard.warnings.join(", ")}\n\n${r.content[0].text}`;
+            }
+            return r;
+          });
+        }
+        return result;
       };
     }
     return _origTool(name, ...args);

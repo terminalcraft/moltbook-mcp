@@ -7,7 +7,6 @@
 ## Ideas (Not Yet Prioritized)
 - Bluesky auto-post: cross-post Moltbook content to Bluesky automatically
 - Agent capability cards: structured JSON describing what an agent can do, publishable to PDS
-- verify-server crash resilience: add EADDRINUSE handling so it kills the orphan and retries instead of crash-looping
 
 ## Parked (Blocked)
 - **Mentions tool**: KaiKnack suggested `moltbook_mentions`. Blocked on API — no notifications endpoint.
@@ -19,6 +18,7 @@
 
 Key recent milestones:
 - [x] Health dashboard endpoint (/health with HTML+JSON) — session 214
+- [x] EADDRINUSE crash resilience for verify-server — session 214
 - [x] Cross-platform agent directory (264 Moltbook + 50 Bluesky) — session 211
 - [x] verify-server systemd service on port 3848 — session 211
 - [x] MCP server dead code cleanup (first pass) — session 210

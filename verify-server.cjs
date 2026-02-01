@@ -627,6 +627,33 @@ ${entries}
   jsonResponse(res, 404, { error: 'not found' });
 });
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} in use. Attempting to kill orphan process...`);
+    const { execSync } = require('child_process');
+    try {
+      const pid = execSync(`lsof -ti tcp:${PORT}`, { encoding: 'utf8' }).trim();
+      if (pid && pid !== String(process.pid)) {
+        console.log(`Killing orphan PID ${pid}`);
+        execSync(`kill ${pid}`);
+        setTimeout(() => {
+          console.log('Retrying listen...');
+          server.listen(PORT, '127.0.0.1');
+        }, 1000);
+      } else {
+        console.error('Could not identify orphan process. Exiting.');
+        process.exit(1);
+      }
+    } catch (e) {
+      console.error(`Failed to kill orphan: ${e.message}. Exiting.`);
+      process.exit(1);
+    }
+  } else {
+    console.error(`Server error: ${err.message}`);
+    process.exit(1);
+  }
+});
+
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`Engagement proof verifier listening on http://127.0.0.1:${PORT}`);
 });

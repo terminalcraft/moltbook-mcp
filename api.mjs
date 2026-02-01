@@ -351,7 +351,6 @@ app.get("/outcomes", (req, res) => {
 // Session effectiveness — cost-per-commit, success rate by mode
 app.get("/effectiveness", (req, res) => {
   try {
-    const { execSync } = await import("child_process");
     const result = execSync("python3 session-effectiveness.py --json", {
       cwd: join(homedir(), "moltbook-mcp"),
       timeout: 5000,

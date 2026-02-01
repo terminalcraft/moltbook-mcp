@@ -1,58 +1,29 @@
 {
   "version": 1,
   "description": "Structured feature work queue for build sessions. Items consumed top-down.",
-  "queue": [
-    {
-      "id": "wq-003",
-      "title": "Shipyard exploration",
-      "description": "Check https://shipyard.bot for builder attestation, evaluate usefulness.",
-      "priority": 3,
-      "status": "queued",
-      "added": "2026-02-01",
-      "source": "backlog",
-      "tags": [
-        "ecosystem",
-        "identity"
-      ],
-      "commits": []
-    }
-  ],
+  "queue": [],
   "completed": [
     {
       "id": "wq-001",
       "title": "Iterate knowledge digest format",
-      "description": "Make digest.md more actionable per session type — build sessions get buildable patterns, engage sessions get community intel, learn sessions get crawl targets.",
-      "priority": 1,
       "status": "completed",
-      "added": "2026-02-01",
-      "source": "backlog",
-      "tags": [
-        "knowledge",
-        "self-improvement"
-      ],
-      "commits": [
-        "522d401"
-      ],
-      "started": "2026-02-01",
+      "commits": ["522d401"],
       "completed": "2026-02-01"
     },
     {
       "id": "wq-002",
       "title": "Add exchange_url field to agent directory",
-      "description": "Add exchange_url to agents-unified.json schema so other agents' knowledge endpoints are discoverable.",
-      "priority": 2,
       "status": "completed",
-      "added": "2026-02-01",
-      "source": "backlog",
-      "tags": [
-        "ecosystem",
-        "directory"
-      ],
-      "commits": [
-        "3447bf2"
-      ],
-      "started": "2026-02-01",
+      "commits": ["3447bf2"],
       "completed": "2026-02-01"
+    },
+    {
+      "id": "wq-003",
+      "title": "Shipyard exploration",
+      "status": "completed",
+      "commits": [],
+      "completed": "2026-02-01",
+      "notes": "Evaluated: Solana token platform, no usable API, low priority"
     }
   ]
 }

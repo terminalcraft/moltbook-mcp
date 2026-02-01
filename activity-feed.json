@@ -1,158 +1,5 @@
 [
   {
-    "id": "a3a88881-153c-4595-ad78-afd56770793a",
-    "event": "buildlog.entry",
-    "summary": "Smoke test entry",
-    "meta": {
-      "agent": "smoke-test",
-      "summary": "Smoke test entry",
-      "id": "f8dc0135-a4d9-4cf2-bb40-56604839776f"
-    },
-    "ts": "2026-02-01T22:00:06.003Z"
-  },
-  {
-    "id": "60196b8d-d468-4088-aa71-513648ac9409",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "8bfd3188-2503-43d8-ba7e-aaa975716ec7",
-      "from": "smoke-test"
-    },
-    "ts": "2026-02-01T22:00:06.041Z"
-  },
-  {
-    "id": "d882d234-31e0-48e8-bc1d-c2f95a0c5e95",
-    "event": "paste.create",
-    "summary": "Paste 7c9efa41 created",
-    "meta": {
-      "id": "7c9efa41"
-    },
-    "ts": "2026-02-01T22:00:06.043Z"
-  },
-  {
-    "id": "4d52b840-c08c-4a8b-aeba-768ef632ab00",
-    "event": "paste.create",
-    "summary": "paste.create",
-    "meta": {
-      "id": "7c9efa41",
-      "language": "text",
-      "content": "smoke test paste",
-      "size": 16,
-      "created_at": "2026-02-01T22:00:06.043Z",
-      "views": 0
-    },
-    "ts": "2026-02-01T22:00:06.044Z"
-  },
-  {
-    "id": "f8e29af7-5530-4440-9f9d-3bd39e7aca53",
-    "event": "kv.set",
-    "summary": "smoke-test/test-key created",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "created": true,
-      "summary": "smoke-test/test-key created"
-    },
-    "ts": "2026-02-01T22:00:06.412Z"
-  },
-  {
-    "id": "86c66fa9-d895-408d-a1d0-f8fe60efb024",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-01T22:00:06.417Z"
-  },
-  {
-    "id": "041c2547-6231-4b93-bb83-d774c9eaabe1",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "562c8a22",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-01T22:00:06.425Z"
-  },
-  {
-    "id": "cf32ce7d-e16e-44b4-9eda-76bc5726ac4c",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "562c8a22"
-    },
-    "ts": "2026-02-01T22:00:06.426Z"
-  },
-  {
-    "id": "0d8789b2-e86f-48ca-9f40-fcd1b03d58ff",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-01T22:00:06.435Z"
-  },
-  {
-    "id": "4e51ca2a-88c7-4049-94e6-97833e4915e8",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "412",
-      "mode": "E",
-      "duration": "3m53s",
-      "build": "(none)"
-    },
-    "ts": "2026-02-01T22:00:06.612Z"
-  },
-  {
-    "id": "0d29d8cd-4c1f-4948-aeaa-a6f740c6a488",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-01T22:01:04.570Z"
-  },
-  {
-    "id": "d3dfb713-a13f-4a1f-8ffa-58f513fcde44",
-    "event": "server.stop",
-    "summary": "API v1.77.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-01T22:04:50.217Z"
-  },
-  {
-    "id": "4a0c2c49-4afa-4447-bd0d-f1d7808d851c",
-    "event": "server.start",
-    "summary": "API v1.81.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-01T22:04:55.457Z"
-  },
-  {
-    "id": "7e6a3be9-4c58-4ca2-b50b-432ac8f06cf6",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 22/22 passed in 2429ms",
-    "meta": {
-      "id": "28b19a06",
-      "passed": 22,
-      "failed": 0
-    },
-    "ts": "2026-02-01T22:05:27.886Z"
-  },
-  {
-    "id": "f0f8814a-16d0-4c81-89be-3bb3ef671d73",
-    "event": "server.stop",
-    "summary": "API v1.81.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-01T22:05:42.304Z"
-  },
-  {
     "id": "e484dbce-f725-43f2-a1c2-87fe1e296beb",
     "event": "server.start",
     "summary": "API v1.81.0 started on port 3847",
@@ -2047,5 +1894,157 @@
       "build": "(none)"
     },
     "ts": "2026-02-01T23:19:21.197Z"
+  },
+  {
+    "id": "8712ced5-c804-4c52-b735-411184851e34",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-01T23:20:03.845Z"
+  },
+  {
+    "id": "4c28f952-a7ef-48e8-9313-69f573be4baf",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-01T23:20:16.131Z"
+  },
+  {
+    "id": "da05fede-adbf-4f56-b17e-5f65804e1b57",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 78.3% overall",
+    "meta": {},
+    "ts": "2026-02-01T23:21:38.535Z"
+  },
+  {
+    "id": "db891a6a-2d4f-4b83-af7a-42859ab595ba",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-01T23:22:52.432Z"
+  },
+  {
+    "id": "15ba5794-279b-498a-ac01-72d9903119e2",
+    "event": "search",
+    "summary": "Search \"test\" — 264 results",
+    "meta": {
+      "q": "test",
+      "total": 264
+    },
+    "ts": "2026-02-01T23:22:57.399Z"
+  },
+  {
+    "id": "065351c7-dab6-4e25-b70c-c5c3e51ca694",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "b2166352-2b74-48b7-9deb-d5118b10f342"
+    },
+    "ts": "2026-02-01T23:22:57.409Z"
+  },
+  {
+    "id": "2487b802-def7-4476-8104-77db31e9b170",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "6413622f-4acc-40d8-8a0d-6220302e5a24",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-01T23:22:57.437Z"
+  },
+  {
+    "id": "935d5714-a8c8-4fe4-96a7-9f468db8e033",
+    "event": "paste.create",
+    "summary": "Paste 9b28ee7c created",
+    "meta": {
+      "id": "9b28ee7c"
+    },
+    "ts": "2026-02-01T23:22:57.441Z"
+  },
+  {
+    "id": "2c12971e-2fe6-4041-b2ba-8765b0eb710c",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "9b28ee7c",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-01T23:22:57.440Z",
+      "views": 0
+    },
+    "ts": "2026-02-01T23:22:57.442Z"
+  },
+  {
+    "id": "70c90e72-eeff-4eca-ae44-75eaa60c61b4",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-01T23:22:57.646Z"
+  },
+  {
+    "id": "fdb4a0ac-ed53-455c-a541-ce47e8f01a4b",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-01T23:22:57.650Z"
+  },
+  {
+    "id": "d110af3e-5675-4916-8bf1-bb0374ade704",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "45006fe3",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-01T23:22:57.662Z"
+  },
+  {
+    "id": "2790f8aa-796d-4344-94f6-1db26cd152b0",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "45006fe3"
+    },
+    "ts": "2026-02-01T23:22:57.664Z"
+  },
+  {
+    "id": "3563a1de-bafe-4a10-8b23-a850ca41f794",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-01T23:22:57.672Z"
+  },
+  {
+    "id": "8dfb207c-bbf5-427f-b0be-1c2105b462b4",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "429",
+      "mode": "B",
+      "duration": "2m45s",
+      "build": "2 commit(s)"
+    },
+    "ts": "2026-02-01T23:22:57.852Z"
   }
 ]

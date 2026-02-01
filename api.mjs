@@ -670,6 +670,7 @@ function getDocEndpoints() {
     { method: "POST", path: "/monitors/:id/probe", auth: false, desc: "Trigger an immediate probe for a monitor (don't wait for the 5-min cycle)", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
     { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
     { method: "GET", path: "/efficiency", auth: false, desc: "Session efficiency metrics — cost-per-commit, cost-per-file, aggregated by mode", params: [] },
+    { method: "GET", path: "/directives", auth: false, desc: "Directive compliance dashboard — per-directive health, compliance rates, critical/warning alerts", params: [] },
     { method: "GET", path: "/deprecations", auth: false, desc: "List deprecated/removed endpoints", params: [] },
     { method: "POST", path: "/deprecations", auth: false, desc: "Mark an endpoint as deprecated or gone (410)", params: [{ name: "path", in: "body", desc: "Endpoint path", required: true }, { name: "status", in: "body", desc: "'deprecated' or 'gone'", required: true }, { name: "method", in: "body", desc: "HTTP method (optional)" }, { name: "successor", in: "body", desc: "Replacement endpoint URL" }, { name: "message", in: "body", desc: "Human-readable explanation" }] },
     { method: "DELETE", path: "/deprecations", auth: false, desc: "Remove a deprecation entry", params: [{ name: "key", in: "body", desc: "Deprecation key (e.g. 'GET /old-path')", required: true }] },
@@ -984,6 +985,7 @@ function agentManifest(req, res) {
       uptime: { url: `${base}/uptime`, method: "GET", auth: false, description: "Historical uptime percentages for ecosystem services (24h/7d/30d, ?format=json)" },
       costs: { url: `${base}/costs`, method: "GET", auth: false, description: "Session cost history and trends (?format=json for raw data)" },
       efficiency: { url: `${base}/efficiency`, method: "GET", auth: false, description: "Session efficiency — cost-per-commit, cost-per-file, by mode" },
+      directives: { url: `${base}/directives`, method: "GET", auth: false, description: "Directive compliance dashboard — health status, compliance rates, alerts" },
       sessions: { url: `${base}/sessions`, method: "GET", auth: false, description: "Session history with quality scores (?format=json)" },
       health: { url: `${base}/health`, method: "GET", auth: false, description: "Aggregated health check (?format=json, status codes: 200/207/503)" },
       changelog: { url: `${base}/changelog`, method: "GET", auth: false, description: "Git changelog categorized by type (?limit=N&format=json)" },
@@ -2847,6 +2849,37 @@ app.get("/efficiency", (req, res) => {
   res.json({ sessions, by_mode: byMode, build_efficiency: { best, worst } });
 });
 
+// --- Directive health dashboard ---
+app.get("/directives", (req, res) => {
+  const trackFile = join(BASE, "directive-tracking.json");
+  let data;
+  try { data = JSON.parse(readFileSync(trackFile, "utf-8")); } catch { return res.status(500).json({ error: "Cannot read directive-tracking.json" }); }
+  const directives = Object.entries(data.directives || {}).map(([name, d]) => {
+    const total = (d.followed || 0) + (d.ignored || 0);
+    const rate = total > 0 ? +((d.followed || 0) / total * 100).toFixed(1) : null;
+    return {
+      name, followed: d.followed || 0, ignored: d.ignored || 0, total,
+      compliance_pct: rate, last_session: d.last_session, last_applicable_session: d.last_applicable_session,
+      last_ignored_reason: d.last_ignored_reason || null,
+      status: rate === null ? "no_data" : rate >= 90 ? "healthy" : rate >= 70 ? "warning" : "critical",
+    };
+  });
+  const sorted = [...directives].sort((a, b) => (a.compliance_pct ?? 100) - (b.compliance_pct ?? 100));
+  const totalFollowed = directives.reduce((s, d) => s + d.followed, 0);
+  const totalIgnored = directives.reduce((s, d) => s + d.ignored, 0);
+  const totalAll = totalFollowed + totalIgnored;
+  const overall = totalAll > 0 ? +((totalFollowed / totalAll) * 100).toFixed(1) : null;
+  const critical = sorted.filter(d => d.status === "critical");
+  const warning = sorted.filter(d => d.status === "warning");
+  res.json({
+    version: data.version, overall_compliance_pct: overall,
+    summary: { total: directives.length, healthy: directives.filter(d => d.status === "healthy").length, warning: warning.length, critical: critical.length },
+    critical: critical.map(d => ({ name: d.name, compliance_pct: d.compliance_pct, last_ignored_reason: d.last_ignored_reason })),
+    directives: sorted,
+  });
+  logActivity("directives.viewed", `Directive health checked: ${overall}% overall`);
+});
+
 // --- Session history with quality metrics ---
 app.get("/sessions", (req, res) => {
   const histFile = "/home/moltbot/.config/moltbook/session-history.txt";
@@ -3389,6 +3422,7 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/inbox/stats", expect: 200 },
     { method: "GET", path: "/costs", expect: 200 },
     { method: "GET", path: "/efficiency", expect: 200 },
+    { method: "GET", path: "/directives", expect: 200 },
     { method: "GET", path: "/deprecations", expect: 200 },
     { method: "GET", path: "/sessions", expect: 200 },
     { method: "GET", path: "/directory", expect: 200 },

@@ -133,6 +133,15 @@ const analytics = (() => {
 function saveAnalytics() { try { writeFileSync(ANALYTICS_FILE, JSON.stringify(analytics)); } catch {} }
 setInterval(saveAnalytics, 300_000); // persist every 5 min
 
+// --- Metrics (Prometheus-compatible) ---
+const metrics = {
+  latencySum: {},   // {method_route: totalMs}
+  latencyCount: {}, // {method_route: count}
+  latencyBuckets: {}, // {method_route: {10: n, 50: n, 100: n, 500: n, 1000: n, 5000: n, Inf: n}}
+  processStart: Date.now(),
+};
+const LATENCY_BOUNDS = [10, 50, 100, 250, 500, 1000, 5000];
+
 app.use((req, res, next) => {
   const start = Date.now();
   res.on("finish", () => {
@@ -148,6 +157,14 @@ app.use((req, res, next) => {
     if (!analytics.hourly[hour]) analytics.hourly[hour] = 0;
     analytics.hourly[hour]++;
     analytics.agents[agent] = (analytics.agents[agent] || 0) + 1;
+    // latency metrics
+    const latMs = Date.now() - start;
+    metrics.latencySum[key] = (metrics.latencySum[key] || 0) + latMs;
+    metrics.latencyCount[key] = (metrics.latencyCount[key] || 0) + 1;
+    if (!metrics.latencyBuckets[key]) metrics.latencyBuckets[key] = {};
+    const bkt = metrics.latencyBuckets[key];
+    for (const b of LATENCY_BOUNDS) { if (latMs <= b) bkt[b] = (bkt[b] || 0) + 1; }
+    bkt["Inf"] = (bkt["Inf"] || 0) + 1;
     // keep hourly buckets to last 72h
     const cutoff = new Date(Date.now() - 72 * 3600_000).toISOString().slice(0, 13);
     for (const h of Object.keys(analytics.hourly)) { if (h < cutoff) delete analytics.hourly[h]; }
@@ -194,6 +211,94 @@ app.get("/analytics", (req, res) => {
     return res.type("text/plain").send(lines.join("\n"));
   }
   res.json(result);
+});
+
+// Prometheus-compatible metrics endpoint
+app.get("/metrics", (req, res) => {
+  const lines = [];
+  const up = 1;
+  const uptimeSec = Math.floor((Date.now() - metrics.processStart) / 1000);
+
+  // Process info
+  const mem = process.memoryUsage();
+  lines.push("# HELP molty_up Whether the API is up (1=yes, 0=no)");
+  lines.push("# TYPE molty_up gauge");
+  lines.push(`molty_up ${up}`);
+  lines.push("# HELP molty_uptime_seconds Seconds since process started");
+  lines.push("# TYPE molty_uptime_seconds gauge");
+  lines.push(`molty_uptime_seconds ${uptimeSec}`);
+  lines.push("# HELP process_resident_memory_bytes Resident memory in bytes");
+  lines.push("# TYPE process_resident_memory_bytes gauge");
+  lines.push(`process_resident_memory_bytes ${mem.rss}`);
+  lines.push("# HELP process_heap_used_bytes Heap used in bytes");
+  lines.push("# TYPE process_heap_used_bytes gauge");
+  lines.push(`process_heap_used_bytes ${mem.heapUsed}`);
+
+  // Request totals
+  lines.push("# HELP molty_http_requests_total Total HTTP requests");
+  lines.push("# TYPE molty_http_requests_total counter");
+  lines.push(`molty_http_requests_total ${analytics.totalRequests}`);
+
+  // Status codes
+  lines.push("# HELP molty_http_responses_total HTTP responses by status code");
+  lines.push("# TYPE molty_http_responses_total counter");
+  for (const [code, count] of Object.entries(analytics.statusCodes)) {
+    lines.push(`molty_http_responses_total{status="${code}"} ${count}`);
+  }
+
+  // Top endpoint request counts
+  lines.push("# HELP molty_endpoint_requests_total Requests per endpoint");
+  lines.push("# TYPE molty_endpoint_requests_total counter");
+  for (const [ep, count] of Object.entries(analytics.endpoints)) {
+    const [method, ...pathParts] = ep.split(" ");
+    const path = pathParts.join(" ");
+    lines.push(`molty_endpoint_requests_total{method="${method}",path="${path}"} ${count}`);
+  }
+
+  // Latency histogram
+  lines.push("# HELP molty_http_request_duration_ms HTTP request latency in ms");
+  lines.push("# TYPE molty_http_request_duration_ms histogram");
+  for (const [ep, bkt] of Object.entries(metrics.latencyBuckets)) {
+    const [method, ...pathParts] = ep.split(" ");
+    const path = pathParts.join(" ");
+    const labels = `method="${method}",path="${path}"`;
+    for (const b of LATENCY_BOUNDS) {
+      lines.push(`molty_http_request_duration_ms_bucket{${labels},le="${b}"} ${bkt[b] || 0}`);
+    }
+    lines.push(`molty_http_request_duration_ms_bucket{${labels},le="+Inf"} ${bkt["Inf"] || 0}`);
+    lines.push(`molty_http_request_duration_ms_sum{${labels}} ${metrics.latencySum[ep] || 0}`);
+    lines.push(`molty_http_request_duration_ms_count{${labels}} ${metrics.latencyCount[ep] || 0}`);
+  }
+
+  // Data store sizes
+  lines.push("# HELP molty_store_items Number of items in each data store");
+  lines.push("# TYPE molty_store_items gauge");
+  try { lines.push(`molty_store_items{store="pastes"} ${pastes.length}`); } catch {}
+  try { lines.push(`molty_store_items{store="polls"} ${polls.length}`); } catch {}
+  try { lines.push(`molty_store_items{store="cron_jobs"} ${cronJobs.length}`); } catch {}
+  try { lines.push(`molty_store_items{store="kv_namespaces"} ${Object.keys(kvStore).length}`); } catch {}
+  try { lines.push(`molty_store_items{store="activity_feed"} ${activityFeed.length}`); } catch {}
+  try {
+    const kvTotal = Object.values(kvStore).reduce((s, ns) => s + Object.keys(ns).length, 0);
+    lines.push(`molty_store_items{store="kv_keys"} ${kvTotal}`);
+  } catch {}
+  try { const t = JSON.parse(readFileSync(join(BASE, "tasks.json"), "utf8")); lines.push(`molty_store_items{store="tasks"} ${t.length}`); } catch {}
+  try { const r = JSON.parse(readFileSync(join(BASE, "rooms.json"), "utf8")); lines.push(`molty_store_items{store="rooms"} ${Object.keys(r).length}`); } catch {}
+  try { const n = JSON.parse(readFileSync(join(BASE, "notifications.json"), "utf8")); const nots = n.notifications || {}; lines.push(`molty_store_items{store="notifications"} ${Object.values(nots).reduce((s, a) => s + (Array.isArray(a) ? a.length : 0), 0)}`); } catch {}
+  try { const b = JSON.parse(readFileSync(join(BASE, "buildlog.json"), "utf8")); lines.push(`molty_store_items{store="buildlog"} ${b.length}`); } catch {}
+  try { const m = JSON.parse(readFileSync(join(BASE, "monitors.json"), "utf8")); lines.push(`molty_store_items{store="monitors"} ${m.length}`); } catch {}
+
+  // Rate limit buckets active
+  lines.push("# HELP molty_ratelimit_buckets_active Number of active rate limit buckets");
+  lines.push("# TYPE molty_ratelimit_buckets_active gauge");
+  lines.push(`molty_ratelimit_buckets_active ${rateBuckets.size}`);
+
+  // SSE clients
+  lines.push("# HELP molty_sse_clients_active Number of active SSE connections");
+  lines.push("# TYPE molty_sse_clients_active gauge");
+  lines.push(`molty_sse_clients_active ${sseClients.size}`);
+
+  res.set("Content-Type", "text/plain; version=0.0.4; charset=utf-8").send(lines.join("\n") + "\n");
 });
 
 // Multi-service status checker — probes local services and external platforms
@@ -460,6 +565,7 @@ function getDocEndpoints() {
     // Meta
     { method: "GET", path: "/openapi.json", auth: false, desc: "OpenAPI 3.0.3 specification — machine-readable API schema auto-generated from endpoint metadata.", params: [] },
     { method: "GET", path: "/changelog", auth: false, desc: "Git-derived changelog of feat/fix/refactor commits. Supports JSON and HTML.", params: [{ name: "limit", in: "query", desc: "Max entries (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json or html (default: html)" }] },
+    { method: "GET", path: "/metrics", auth: false, desc: "Prometheus-compatible metrics — request counts, latency histograms, data store sizes, memory, uptime", params: [] },
     { method: "GET", path: "/", auth: false, desc: "Root landing page with links to docs, status, feed, and key endpoints.", params: [] },
     // KV store
     { method: "GET", path: "/kv", auth: false, desc: "List all KV namespaces with key counts.", params: [] },

@@ -25,6 +25,7 @@ const tests = [
   { method: "GET", path: "/skill.md", expect: 200 },
   { method: "GET", path: "/changelog", expect: 200 },
   { method: "GET", path: "/changelog?format=json", expect: 200 },
+  { method: "GET", path: "/metrics", expect: 200 },
 
   // Analytics & costs
   { method: "GET", path: "/analytics", expect: [200, 401] },

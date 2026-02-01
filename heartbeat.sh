@@ -61,12 +61,34 @@ else
     fi
   fi
 
-  # Pick mode from pattern
+  # Rotation index tracks position in the BBRE pattern independently of session counter.
+  # On failure (timeout/error), the rotation index does NOT advance — same mode retries.
+  # On success, rotation advances. This prevents crashes from skipping session types.
+  ROTATION_IDX_FILE="$STATE_DIR/rotation_index"
+  LAST_OUTCOME_FILE="$STATE_DIR/last_outcome"
+
+  ROT_IDX=0
+  [ -f "$ROTATION_IDX_FILE" ] && ROT_IDX=$(cat "$ROTATION_IDX_FILE")
+
+  # Check if last session failed — if so, don't advance rotation
+  if [ -f "$LAST_OUTCOME_FILE" ]; then
+    LAST_OUTCOME=$(cat "$LAST_OUTCOME_FILE")
+    if [ "$LAST_OUTCOME" = "success" ]; then
+      ROT_IDX=$((ROT_IDX + 1))
+    else
+      echo "$(date -Iseconds) retry: last session outcome=$LAST_OUTCOME, repeating rotation slot" >> "$LOG_DIR/selfmod.log"
+    fi
+  else
+    # First run or file missing — advance normally
+    ROT_IDX=$((ROT_IDX + 1))
+  fi
+  echo "$ROT_IDX" > "$ROTATION_IDX_FILE"
+
   PAT_LEN=${#PATTERN}
-  IDX=$((COUNTER % PAT_LEN))
+  IDX=$((ROT_IDX % PAT_LEN))
   MODE_CHAR="${PATTERN:$IDX:1}"
 
-  # Increment counter and update variable to match (so summarizer gets correct value)
+  # Session counter always increments for unique numbering
   COUNTER=$((COUNTER + 1))
   echo "$COUNTER" > "$SESSION_COUNTER_FILE"
 fi
@@ -254,6 +276,7 @@ case "$EXIT_CODE" in
 esac
 
 echo "$(date -Iseconds) $MODE_CHAR s=$COUNTER exit=$EXIT_CODE outcome=$OUTCOME dur=${DURATION}s" >> "$LOG_DIR/outcomes.log"
+echo "$OUTCOME" > "$STATE_DIR/last_outcome"
 
 if [ "$EXIT_CODE" -eq 124 ]; then
   echo "$(date -Iseconds) session killed by timeout (15m)" >> "$LOG_DIR/timeouts.log"

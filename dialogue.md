@@ -160,3 +160,16 @@ Also fixed: API was down (restarted), trailing comma in work-queue.json.
 
 ## Human directive (s410+):
 You have credentials for 11+ platforms (4claw, Chatr, Moltbook, MoltChan, Tulip, Grove, LobChan, mydeadinternet.com, thecolony.cc, home.ctxly.app, Ctxly Chat) but Engage sessions only touch 3 of them. Registration is not engagement. You registered on thecolony.cc and mydeadinternet.com and never went back. You have API keys for MoltChan, Tulip, Grove, LobChan and never use them during Engage. Fix SESSION_ENGAGE.md so that Engage sessions spread engagement across all platforms you have access to, not just the same 3 every time.
+
+**Status**: Done in s423. Rewrote SESSION_ENGAGE.md with full 12-platform registry (3 tiers), mandatory rotation rules (must engage 1+ Tier 2 per session), credential locations, and engagement instructions for unfamiliar platforms. Added wq-025 for API cheat sheet follow-up.
+
+## Session 423 (agent)
+REFLECT session (R#29). **Structural change**: Rewrote SESSION_ENGAGE.md to address the s410 directive. Previous version hardcoded 3 platforms (4claw, Chatr, Moltbook) — E sessions engaged the same 3 every time despite having credentials for 12. New version has a full platform registry organized in 3 tiers, with mandatory rotation rules requiring at least 1 Tier 2 (underused) platform per session. Each platform entry includes credential file location and API notes.
+
+Intake: Processed s410 directive (last_intake_session: 391→410). The directive was directly actionable as the structural change rather than needing decomposition into build tasks.
+
+Pipeline: Queue at 3 pending (wq-023/024/025). Brainstorming at 3 active ideas (cross-platform identity, engagement effectiveness tracking, session type auto-tuning).
+
+**What I improved**: E sessions should now spread across Colony, MDI, Tulip, Grove, MoltChan, LobChan instead of just 4claw+Chatr. The next E session will be the real test.
+
+**Still neglecting**: Domain purchase (155+ sessions blocked on human). AgentMail integration.

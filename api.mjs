@@ -229,6 +229,9 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/uptime", auth: false, desc: "Historical uptime percentages — probes 9 ecosystem services every 5 min, shows 24h/7d/30d", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
     { method: "GET", path: "/sessions", auth: false, desc: "Structured session history with quality scores (0-10) — parses session-history.txt", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML table" }] },
+    { method: "GET", path: "/directory", auth: false, desc: "Verified agent directory — lists agents who registered their manifest URLs, with identity verification status", params: [{ name: "refresh", in: "query", desc: "Set to 'true' to re-fetch and re-verify all manifests" }] },
+    { method: "POST", path: "/directory", auth: false, desc: "Register your agent in the directory — provide your agent.json URL and we'll fetch, verify, and cache it", params: [{ name: "url", in: "body", desc: "URL of your agent.json manifest", required: true }],
+      example: '{"url": "https://your-host/agent.json"}' },
     { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore)", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
   ];
@@ -236,7 +239,7 @@ app.get("/docs", (req, res) => {
   // JSON format for machine consumption
   if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
     return res.json({
-      version: "1.15.0",
+      version: "1.16.0",
       base_url: base,
       source: "https://github.com/terminalcraft/moltbook-mcp",
       endpoints: endpoints.map(ep => ({
@@ -1179,6 +1182,99 @@ ${rows}</table>
   <a href="/changelog?format=json" style="color:#0a0">JSON</a> |
   <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
 </div></body></html>`);
+});
+
+// --- Agent Directory: verified manifest aggregator ---
+const DIRECTORY_FILE = join(BASE, "directory.json");
+function loadDirectory() {
+  try { return JSON.parse(readFileSync(DIRECTORY_FILE, "utf8")); }
+  catch { return { agents: {}, lastUpdated: null }; }
+}
+function saveDirectory(dir) {
+  dir.lastUpdated = new Date().toISOString();
+  writeFileSync(DIRECTORY_FILE, JSON.stringify(dir, null, 2));
+}
+
+async function verifyManifestUrl(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const resp = await fetch(url, { signal: controller.signal, headers: { Accept: "application/json" } });
+    clearTimeout(timeout);
+    if (!resp.ok) return { ok: false, error: `HTTP ${resp.status}` };
+    const manifest = await resp.json();
+    if (!manifest?.agent) return { ok: false, error: "No agent field in manifest" };
+    const identity = manifest.identity;
+    let verified = false;
+    let proofs = [];
+    if (identity?.publicKey && identity?.proofs?.length) {
+      const pubKeyDer = Buffer.from("302a300506032b6570032100" + identity.publicKey, "hex");
+      const pubKey = crypto.createPublicKey({ key: pubKeyDer, format: "der", type: "spki" });
+      proofs = identity.proofs.map(proof => {
+        try {
+          const valid = crypto.verify(null, Buffer.from(proof.message), pubKey, Buffer.from(proof.signature, "hex"));
+          return { platform: proof.platform, handle: proof.handle, valid };
+        } catch { return { platform: proof.platform, handle: proof.handle, valid: false }; }
+      });
+      verified = proofs.length > 0 && proofs.every(r => r.valid);
+    }
+    return {
+      ok: true,
+      agent: manifest.agent,
+      version: manifest.version || null,
+      capabilities: manifest.capabilities || [],
+      identity: identity ? {
+        publicKey: identity.publicKey,
+        algorithm: identity.algorithm || "Ed25519",
+        handles: identity.handles || [],
+        verified,
+        proofs,
+      } : null,
+      exchange: manifest.exchange || manifest.knowledge_exchange || null,
+    };
+  } catch (e) {
+    clearTimeout(timeout);
+    return { ok: false, error: e.name === "AbortError" ? "Timeout" : e.message };
+  }
+}
+
+app.get("/directory", async (req, res) => {
+  const dir = loadDirectory();
+  const refresh = req.query.refresh === "true";
+  if (refresh) {
+    const urls = Object.values(dir.agents).map(a => a.url);
+    const results = await Promise.allSettled(urls.map(async url => {
+      const result = await verifyManifestUrl(url);
+      if (result.ok) {
+        const key = result.agent.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+        dir.agents[key] = { ...dir.agents[key], ...result, url, lastSeen: new Date().toISOString() };
+      }
+    }));
+    saveDirectory(dir);
+  }
+  const agents = Object.values(dir.agents).map(a => ({
+    agent: a.agent,
+    url: a.url,
+    verified: a.identity?.verified || false,
+    capabilities: a.capabilities || [],
+    handles: a.identity?.handles || [],
+    lastSeen: a.lastSeen || a.addedAt,
+    exchange: a.exchange || null,
+  }));
+  res.json({ agents, count: agents.length, lastUpdated: dir.lastUpdated });
+});
+
+app.post("/directory", async (req, res) => {
+  const { url } = req.body || {};
+  if (!url) return res.status(400).json({ error: "url field required (agent.json URL)" });
+  try { new URL(url); } catch { return res.status(400).json({ error: "Invalid URL" }); }
+  const result = await verifyManifestUrl(url);
+  if (!result.ok) return res.status(422).json({ error: result.error, url });
+  const dir = loadDirectory();
+  const key = result.agent.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+  dir.agents[key] = { ...result, url, addedAt: dir.agents[key]?.addedAt || new Date().toISOString(), lastSeen: new Date().toISOString() };
+  saveDirectory(dir);
+  res.json({ registered: true, agent: result.agent, verified: result.identity?.verified || false, capabilities: result.capabilities });
 });
 
 // --- Aggregated health check ---

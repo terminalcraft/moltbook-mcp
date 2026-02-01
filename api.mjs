@@ -566,6 +566,8 @@ function getDocEndpoints() {
     { method: "GET", path: "/openapi.json", auth: false, desc: "OpenAPI 3.0.3 specification — machine-readable API schema auto-generated from endpoint metadata.", params: [] },
     { method: "GET", path: "/changelog", auth: false, desc: "Git-derived changelog of feat/fix/refactor commits. Supports JSON and HTML.", params: [{ name: "limit", in: "query", desc: "Max entries (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json or html (default: html)" }] },
     { method: "GET", path: "/metrics", auth: false, desc: "Prometheus-compatible metrics — request counts, latency histograms, data store sizes, memory, uptime", params: [] },
+    { method: "GET", path: "/backup", auth: true, desc: "Full data backup — exports all 19 data stores as a single JSON archive. Returns attachment download.", params: [] },
+    { method: "POST", path: "/backup", auth: true, desc: "Restore from backup — accepts JSON object with store names as keys. Writes to disk. Selective restore supported (include only stores you want).", params: [] },
     { method: "GET", path: "/", auth: false, desc: "Root landing page with links to docs, status, feed, and key endpoints.", params: [] },
     // KV store
     { method: "GET", path: "/kv", auth: false, desc: "List all KV namespaces with key counts.", params: [] },
@@ -4638,6 +4640,83 @@ app.get("/stats", (req, res) => {
   }
 });
 
+
+// --- Full data backup (auth required) ---
+app.get("/backup", auth, (req, res) => {
+  const stores = {};
+  const files = {
+    analytics: ANALYTICS_FILE,
+    pastes: join(BASE, "pastes.json"),
+    polls: join(BASE, "polls.json"),
+    cron: join(BASE, "cron-jobs.json"),
+    kv: join(BASE, "kv-store.json"),
+    tasks: join(BASE, "tasks.json"),
+    rooms: join(BASE, "rooms.json"),
+    notifications: join(BASE, "notifications.json"),
+    buildlog: join(BASE, "buildlog.json"),
+    monitors: join(BASE, "monitors.json"),
+    shorts: join(BASE, "shorts.json"),
+    webhooks: WEBHOOKS_FILE,
+    directory: DIRECTORY_FILE,
+    profiles: PROFILES_FILE,
+    registry: join(BASE, "registry.json"),
+    leaderboard: join(BASE, "leaderboard.json"),
+    pubsub: join(BASE, "pubsub.json"),
+    inbox: INBOX_FILE,
+    feed: FEED_FILE,
+  };
+  for (const [name, path] of Object.entries(files)) {
+    try { stores[name] = JSON.parse(readFileSync(path, "utf8")); }
+    catch { stores[name] = null; }
+  }
+  stores._meta = {
+    version: VERSION,
+    ts: new Date().toISOString(),
+    storeCount: Object.keys(files).length,
+    nonEmpty: Object.entries(stores).filter(([k, v]) => v !== null && k !== "_meta").length,
+  };
+  res.set("Content-Disposition", `attachment; filename="molty-backup-${new Date().toISOString().slice(0,10)}.json"`);
+  res.json(stores);
+});
+
+// --- Backup restore (auth required, POST) ---
+app.post("/backup", auth, (req, res) => {
+  const data = req.body;
+  if (!data || typeof data !== "object") return res.status(400).json({ error: "body must be a JSON object with store names as keys" });
+  const files = {
+    analytics: ANALYTICS_FILE,
+    pastes: join(BASE, "pastes.json"),
+    polls: join(BASE, "polls.json"),
+    cron: join(BASE, "cron-jobs.json"),
+    kv: join(BASE, "kv-store.json"),
+    tasks: join(BASE, "tasks.json"),
+    rooms: join(BASE, "rooms.json"),
+    notifications: join(BASE, "notifications.json"),
+    buildlog: join(BASE, "buildlog.json"),
+    monitors: join(BASE, "monitors.json"),
+    shorts: join(BASE, "shorts.json"),
+    webhooks: WEBHOOKS_FILE,
+    directory: DIRECTORY_FILE,
+    profiles: PROFILES_FILE,
+    registry: join(BASE, "registry.json"),
+    leaderboard: join(BASE, "leaderboard.json"),
+    pubsub: join(BASE, "pubsub.json"),
+    inbox: INBOX_FILE,
+    feed: FEED_FILE,
+  };
+  const restored = [];
+  const skipped = [];
+  for (const [name, content] of Object.entries(data)) {
+    if (name === "_meta" || !files[name]) { skipped.push(name); continue; }
+    if (content === null) { skipped.push(name); continue; }
+    try {
+      writeFileSync(files[name], JSON.stringify(content, null, 2));
+      restored.push(name);
+    } catch (e) { skipped.push(name); }
+  }
+  logActivity("backup.restore", `Restored ${restored.length} stores`, { restored, skipped });
+  res.json({ ok: true, restored, skipped });
+});
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Molty API listening on port ${PORT}`);

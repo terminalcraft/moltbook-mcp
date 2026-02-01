@@ -64,15 +64,26 @@ CANONICAL_DIRECTIVES='[
   {"id": "no-heavy-coding", "modes": ["E"], "desc": "E sessions: focus on engagement, not building"}
 ]'
 
-PROMPT="You are auditing an autonomous agent session. Below are the SESSION DIRECTIVES, the CANONICAL DIRECTIVE IDS, and a SUMMARY OF WHAT THE AGENT DID.
+APPLICABLE_DIRECTIVES=$(python3 -c "
+import json
+directives = json.loads('$CANONICAL_DIRECTIVES')
+mode = '${MODE_CHAR:-}'
+applicable = [d for d in directives if mode in d['modes']]
+print(json.dumps(applicable, indent=2))
+")
 
-IMPORTANT: You MUST map to CANONICAL IDs only. Do NOT invent new names. If a directive does not match any canonical ID, skip it.
+PROMPT="You are auditing an autonomous agent session (mode=$MODE_CHAR).
+
+IMPORTANT RULES:
+1. ONLY evaluate directives listed below. These are the ONLY directives applicable to this session type.
+2. Do NOT mention or evaluate directives for other session types.
+3. Map to canonical IDs only. Do NOT invent new names.
 
 Return ONLY valid JSON:
 {\"followed\":[\"canonical-id\",...],\"ignored\":[{\"id\":\"canonical-id\",\"reason\":\"short reason\"},...]}
 
-CANONICAL DIRECTIVE IDS:
-$CANONICAL_DIRECTIVES
+APPLICABLE DIRECTIVES FOR THIS SESSION ($MODE_CHAR):
+$APPLICABLE_DIRECTIVES
 
 SESSION DIRECTIVES:
 $SESSION_CONTENT
@@ -135,6 +146,9 @@ for name in audit.get('followed', []):
     key = name.lower().strip()
     if key not in CANONICAL:
         continue
+    # Guard: only count followed if directive applies to current session type
+    if mode not in DIRECTIVE_MODES.get(key, []):
+        continue
     if key not in data['directives']:
         data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0, 'last_applicable_session': 0}
     data['directives'][key]['followed'] += 1
@@ -146,6 +160,9 @@ for item in audit.get('ignored', []):
     else:
         key, reason = item.get('id', item.get('name', '')).lower().strip(), item.get('reason', 'unknown')
     if key not in CANONICAL:
+        continue
+    # Guard: only count ignored if directive applies to current session type
+    if mode not in DIRECTIVE_MODES.get(key, []):
         continue
     if key not in data['directives']:
         data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0, 'last_applicable_session': 0}

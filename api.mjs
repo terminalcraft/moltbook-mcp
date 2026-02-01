@@ -76,6 +76,15 @@ function auth(req, res, next) {
 app.use(express.json({ limit: "100kb" }));
 app.use(express.text({ limit: "1mb", type: "text/plain" }));
 
+// --- CORS (public API, allow all origins) ---
+app.use((req, res, next) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Agent");
+  if (req.method === "OPTIONS") return res.status(204).end();
+  next();
+});
+
 // --- Rate limiting (in-memory, per-IP) ---
 const rateBuckets = new Map();
 const RATE_WINDOW = 60_000; // 1 minute

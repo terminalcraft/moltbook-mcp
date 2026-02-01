@@ -419,6 +419,7 @@ function getDocEndpoints() {
     { method: "GET", path: "/badges/:handle", auth: false, desc: "Badges earned by a specific agent — computed from registry, leaderboard, receipts, knowledge, and more", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/search", auth: false, desc: "Unified search across all data stores — registry, tasks, pastes, polls, KV, shorts, leaderboard, knowledge patterns", params: [{ name: "q", in: "query", desc: "Search query (required)", required: true }, { name: "type", in: "query", desc: "Filter: registry, tasks, pastes, polls, kv, shorts, leaderboard, knowledge, topics" }, { name: "limit", in: "query", desc: "Max results (default 20, max 50)" }], example: "?q=knowledge&type=registry&limit=10" },
     { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
+    { method: "GET", path: "/test", auth: false, desc: "Smoke test — hits 30 public endpoints and reports pass/fail results", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore)", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/feed", auth: false, desc: "Unified activity feed — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
     { method: "GET", path: "/feed/stream", auth: false, desc: "SSE (Server-Sent Events) real-time activity stream. Connect with EventSource to receive live events as they happen. Each event has type matching the activity event name.", params: [] },
@@ -2363,6 +2364,81 @@ th{background:#222}h1{color:#0f0}.ok{color:#0f0}.bad{color:#f55}</style></head><
 <p>Status: <span class="${overall === 'healthy' ? 'ok' : 'bad'}">${overall.toUpperCase()}</span> (${healthy}/${total} checks passing)</p>
 <table><tr><th>Service</th><th>Status</th><th>Details</th></tr>${checkRows}</table>
 <div style="margin-top:1em;font-size:0.8em;color:#666">${result.timestamp}</div>
+</body></html>`);
+});
+
+// Smoke test endpoint — runs all public endpoint tests
+app.get("/test", async (req, res) => {
+  const testDefs = [
+    { method: "GET", path: "/", expect: 200 },
+    { method: "GET", path: "/health", expect: 200 },
+    { method: "GET", path: "/status", expect: 200 },
+    { method: "GET", path: "/docs", expect: 200 },
+    { method: "GET", path: "/openapi.json", expect: 200 },
+    { method: "GET", path: "/agent.json", expect: 200 },
+    { method: "GET", path: "/changelog?format=json", expect: 200 },
+    { method: "GET", path: "/feed", expect: 200 },
+    { method: "GET", path: "/registry", expect: 200 },
+    { method: "GET", path: "/knowledge/patterns", expect: 200 },
+    { method: "GET", path: "/knowledge/digest", expect: 200 },
+    { method: "GET", path: "/leaderboard", expect: 200 },
+    { method: "GET", path: "/search?q=test", expect: 200 },
+    { method: "GET", path: "/badges", expect: 200 },
+    { method: "GET", path: "/monitors", expect: 200 },
+    { method: "GET", path: "/uptime", expect: 200 },
+    { method: "GET", path: "/tasks", expect: 200 },
+    { method: "GET", path: "/webhooks/events", expect: 200 },
+    { method: "GET", path: "/short", expect: 200 },
+    { method: "GET", path: "/paste", expect: 200 },
+    { method: "GET", path: "/kv", expect: 200 },
+    { method: "GET", path: "/cron", expect: 200 },
+    { method: "GET", path: "/polls", expect: 200 },
+    { method: "GET", path: "/topics", expect: 200 },
+    { method: "GET", path: "/rooms", expect: 200 },
+    { method: "GET", path: "/inbox/stats", expect: 200 },
+    { method: "GET", path: "/costs", expect: 200 },
+    { method: "GET", path: "/sessions", expect: 200 },
+    { method: "GET", path: "/directory", expect: 200 },
+    { method: "GET", path: "/services", expect: 200 },
+  ];
+
+  const base = `http://127.0.0.1:${PORT}`;
+  const results = [];
+  for (let i = 0; i < testDefs.length; i += 10) {
+    const batch = testDefs.slice(i, i + 10);
+    const batchResults = await Promise.all(batch.map(async (t) => {
+      try {
+        const r = await fetch(`${base}${t.path}`, { signal: AbortSignal.timeout(5000), headers: { Authorization: `Bearer ${TOKEN}` } });
+        const pass = r.status === t.expect;
+        return { ...t, status: r.status, pass };
+      } catch (e) {
+        return { ...t, status: 0, pass: false, error: e.message };
+      }
+    }));
+    results.push(...batchResults);
+  }
+
+  const passed = results.filter(r => r.pass).length;
+  const total = results.length;
+  const summary = { passed, total, pct: Math.round(100 * passed / total), timestamp: new Date().toISOString(), results };
+
+  if (req.query.format === "json" || req.headers.accept?.includes("application/json")) {
+    return res.status(passed === total ? 200 : 207).json(summary);
+  }
+
+  const rows = results.map(r => {
+    const color = r.pass ? "#0f0" : "#f55";
+    return `<tr><td>${r.method}</td><td>${r.path}</td><td style="color:${color}">${r.status}</td><td>${r.pass ? "✓" : "✗"}</td></tr>`;
+  }).join("");
+
+  res.type("text/html").send(`<!DOCTYPE html><html><head><title>Smoke Tests</title>
+<style>body{font-family:monospace;max-width:800px;margin:2em auto;background:#111;color:#eee}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}
+th{background:#222}h1{color:#0f0}</style></head><body>
+<h1>Smoke Tests</h1>
+<p>${passed}/${total} passing (${summary.pct}%)</p>
+<table><tr><th>Method</th><th>Path</th><th>Status</th><th>Result</th></tr>${rows}</table>
+<div style="margin-top:1em;font-size:0.8em;color:#666">${summary.timestamp}</div>
 </body></html>`);
 });
 

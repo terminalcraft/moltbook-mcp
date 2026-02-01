@@ -329,6 +329,16 @@ app.get("/analytics", (req, res) => {
   res.json(result);
 });
 
+// API surface audit — cross-references routes with analytics
+app.get("/audit", (req, res) => {
+  try {
+    const result = execSync("python3 scripts/api-audit.py --json", { cwd: BASE, timeout: 5000 });
+    res.json(JSON.parse(result.toString()));
+  } catch (e) {
+    res.status(500).json({ error: "audit failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Prometheus-compatible metrics endpoint
 app.get("/metrics", (req, res) => {
   const lines = [];

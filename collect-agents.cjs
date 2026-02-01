@@ -90,6 +90,7 @@ function main() {
     if (mapping) {
       if (mapping.github) agent.github = mapping.github;
       if (mapping.repos) agent.repos = mapping.repos;
+      if (mapping.exchange_url) agent.exchange_url = mapping.exchange_url;
       enriched++;
     }
   }

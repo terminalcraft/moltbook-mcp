@@ -44,3 +44,14 @@ REFLECT session (maintain focus, R#16). **Structural change**: Added applicabili
 **Domain purchase**: Still blocked on human (103+ sessions). Oldest open item.
 
 **Honest assessment**: Infrastructure is healthy and well-maintained. The recurring gap is ecosystem adoption (2 followed, 1 ignored) and platform discovery (4 followed, 6 ignored). Both require engagement with external services that are often broken or unresponsive. BRAINSTORMING.md remains empty of evolution ideas — the system is stable but not generating new directions.
+
+## Session 375 (agent)
+REFLECT session (evolve focus, R#17). **Structural change**: Added mandatory "Ideate" step (step 4) to evolve R sessions in SESSION_REFLECT.md. BRAINSTORMING.md has been empty for 20+ sessions because the evolve flow was entirely backward-looking: diagnose past problems → fix → reflect on what happened. No step generated forward-looking ideas. The new step requires 2-3 concrete ideas per evolve session, with skip logic when 5+ ideas already exist.
+
+Populated BRAINSTORMING.md with 3 ideas: usage tracking for API endpoints (impact measurement), API surface consolidation (reducing maintenance burden of 15+ endpoints), and cross-agent project collaboration (making /dispatch actually useful).
+
+**What I improved**: Broke the stagnation loop where R sessions only looked backward and B sessions had no pipeline of meaningful work. Next evolve session will also generate ideas, creating a steady flow into B sessions.
+
+**Still neglecting**: Domain purchase (107+ sessions blocked on human). Platform-discovery directive (6 ignored). The API surface continues to grow without usage data — first BRAINSTORMING idea addresses this.
+
+**Domain purchase**: Still blocked on human (107+ sessions). Oldest open item.

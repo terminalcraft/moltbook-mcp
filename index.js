@@ -3,7 +3,11 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, readdirSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const API = "https://www.moltbook.com/api/v1";
 let apiKey;
@@ -1773,6 +1777,76 @@ server.tool(
     }
   }
 );
+// --- Tool: agentid_lookup ---
+server.tool(
+  "agentid_lookup",
+  "Look up an agent's AgentID identity and linked accounts (GitHub, Twitter, website).",
+  { handle: z.string().describe("AgentID handle to look up") },
+  async ({ handle }) => {
+    try {
+      const res = await fetch(`https://agentid.sh/api/verify/${encodeURIComponent(handle)}`);
+      const data = await res.json();
+      if (!data.success) return { content: [{ type: "text", text: `AgentID lookup failed: ${JSON.stringify(data)}` }] };
+      const d = data.data;
+      const links = (d.linked_accounts || []).map(a => `  ${a.platform}: @${a.platform_handle} (${a.verified ? "verified" : "unverified"})`).join("\n");
+      const text = `AgentID: ${d.handle}\nPublic key: ${d.public_key}\nBio: ${d.bio || "(none)"}\nLinked accounts:\n${links || "  (none)"}`;
+      return { content: [{ type: "text", text }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `AgentID lookup error: ${e.message}` }] };
+    }
+  }
+);
+
+// --- Tool: ctxly_remember ---
+server.tool(
+  "ctxly_remember",
+  "Store a memory in Ctxly cloud context. Requires CTXLY_API_KEY env var or ~/moltbook-mcp/ctxly.json.",
+  { content: z.string().describe("The memory to store"), tags: z.array(z.string()).optional().describe("Optional tags") },
+  async ({ content, tags }) => {
+    try {
+      const key = getCtxlyKey();
+      if (!key) return { content: [{ type: "text", text: "No Ctxly API key found. Set CTXLY_API_KEY or add api_key to ~/moltbook-mcp/ctxly.json" }] };
+      const body = { content };
+      if (tags) body.tags = tags;
+      const res = await fetch("https://ctxly.app/remember", {
+        method: "POST", headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] };
+    }
+  }
+);
+
+// --- Tool: ctxly_recall ---
+server.tool(
+  "ctxly_recall",
+  "Search Ctxly cloud memories by keyword. Requires CTXLY_API_KEY.",
+  { query: z.string().describe("Search query"), limit: z.number().default(10).describe("Max results") },
+  async ({ query, limit }) => {
+    try {
+      const key = getCtxlyKey();
+      if (!key) return { content: [{ type: "text", text: "No Ctxly API key found." }] };
+      const res = await fetch(`https://ctxly.app/recall?q=${encodeURIComponent(query)}&limit=${limit}`, {
+        headers: { "Authorization": `Bearer ${key}` }
+      });
+      const data = await res.json();
+      return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] };
+    }
+  }
+);
+
+function getCtxlyKey() {
+  if (process.env.CTXLY_API_KEY) return process.env.CTXLY_API_KEY;
+  try {
+    const home = process.env.HOME || process.env.USERPROFILE;
+    return JSON.parse(readFileSync(join(home, "moltbook-mcp", "ctxly.json"), "utf8")).api_key;
+  } catch { return null; }
+}
+
 // Save API history on exit
 process.on("exit", () => { if (apiCallCount > 0) saveApiSession(); saveToolUsage(); });
 process.on("SIGINT", () => process.exit());

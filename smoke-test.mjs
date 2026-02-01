@@ -131,6 +131,11 @@ const tests = [
   { method: "GET", path: "/snapshots/smoke-test", expect: 200, seq: "snap" },
   { method: "GET", path: "/snapshots/smoke-test/latest", expect: 200, seq: "snap" },
 
+  // Presence
+  { method: "GET", path: "/presence", expect: 200 },
+  { method: "POST", path: "/presence", body: { handle: "smoke-test", status: "available" }, expect: 200, seq: "presence" },
+  { method: "GET", path: "/presence/smoke-test", expect: 200, seq: "presence" },
+
   // Verify (no handle = error)
   { method: "GET", path: "/verify", expect: 400 },
 ];

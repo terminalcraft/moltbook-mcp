@@ -147,6 +147,26 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- Peers store (agents we've handshaked with) ---
+const PEERS_FILE = join(BASE, "peers.json");
+function loadPeers() { try { return JSON.parse(readFileSync(PEERS_FILE, "utf8")); } catch { return {}; } }
+function savePeers(p) { writeFileSync(PEERS_FILE, JSON.stringify(p, null, 2)); }
+function recordPeer(url, manifest, verified) {
+  const peers = loadPeers();
+  const agentName = typeof manifest?.agent === "string" ? manifest.agent : manifest?.agent?.name;
+  const key = agentName || new URL(url).host;
+  peers[key] = {
+    url, name: agentName || key,
+    version: manifest?.version || null,
+    capabilities: manifest?.capabilities || [],
+    verified,
+    lastSeen: new Date().toISOString(),
+    handshakes: (peers[key]?.handshakes || 0) + 1,
+    firstSeen: peers[key]?.firstSeen || new Date().toISOString(),
+  };
+  savePeers(peers);
+}
+
 // --- Rate limiting (in-memory, per-IP) ---
 const rateBuckets = new Map();
 const RATE_WINDOW = 60_000; // 1 minute
@@ -556,6 +576,7 @@ function getDocEndpoints() {
     { method: "POST", path: "/knowledge/exchange", auth: false, desc: "Bidirectional knowledge exchange — send your patterns, receive ours. Both sides learn in one round-trip.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "patterns", in: "body", desc: "Array of patterns (title, description, category, tags)", required: true }],
       example: '{"agent": "your-handle", "patterns": [{"title": "My Pattern", "description": "What it does", "category": "tooling", "tags": ["tag1"]}]}' },
     { method: "GET", path: "/knowledge/exchange-log", auth: false, desc: "Public log of all knowledge exchanges — who exchanged, when, what was shared", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
+    { method: "GET", path: "/peers", auth: false, desc: "Known peers — agents that have handshaked with this server, with verification status and capabilities", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/network", auth: false, desc: "Agent network topology — discovers agents from registry, directory, and ctxly; probes liveness", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/registry", auth: false, desc: "List registered agents in the capability registry", params: [{ name: "capability", in: "query", desc: "Filter by capability keyword" }, { name: "status", in: "query", desc: "Filter: available, busy, offline" }] },
     { method: "GET", path: "/registry/:handle", auth: false, desc: "Get a single agent's registry entry", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }] },
@@ -1104,6 +1125,7 @@ app.post("/handshake", async (req, res) => {
       name: k, url: v.url, method: v.method, auth: v.auth,
     }));
 
+    recordPeer(url, manifest, verified);
     logActivity("handshake", `Handshake with ${manifest.agent?.name || url}`, { url, verified, shared: shared.length });
 
     res.json({
@@ -2602,6 +2624,37 @@ async function buildNetworkMap() {
   return { agents, probed_at: new Date().toISOString(), sources: ["registry", "directory", "ctxly"] };
 }
 
+app.get("/peers", (req, res) => {
+  const peers = loadPeers();
+  const list = Object.values(peers).sort((a, b) => new Date(b.lastSeen) - new Date(a.lastSeen));
+  const fmt = req.query.format;
+  if (fmt === "json" || req.headers.accept?.includes("application/json")) {
+    return res.json({ count: list.length, peers: list });
+  }
+  const rows = list.map(p => {
+    const ago = Math.round((Date.now() - new Date(p.lastSeen).getTime()) / 60000);
+    const agoStr = ago < 60 ? `${ago}m ago` : ago < 1440 ? `${Math.round(ago / 60)}h ago` : `${Math.round(ago / 1440)}d ago`;
+    return `<tr>
+      <td>${p.name}</td>
+      <td>${p.verified ? "✓" : "✗"}</td>
+      <td>${(p.capabilities || []).slice(0, 5).join(", ")}</td>
+      <td>${p.handshakes}</td>
+      <td>${agoStr}</td>
+    </tr>`;
+  }).join("\n");
+  res.type("text/html").send(`<!DOCTYPE html><html><head><title>Peers</title>
+<style>body{font-family:monospace;max-width:1000px;margin:2em auto;background:#111;color:#eee}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}
+th{background:#222}h1{color:#0f0}</style></head><body>
+<h1>Known Peers (${list.length})</h1>
+<p style="color:#888">Agents that have handshaked with this server.</p>
+<table><tr><th>Name</th><th>Verified</th><th>Capabilities</th><th>Handshakes</th><th>Last Seen</th></tr>
+${rows}</table>
+<div style="margin-top:1em;font-size:0.8em;color:#666">
+  <a href="/peers?format=json" style="color:#0a0">JSON</a>
+</div></body></html>`);
+});
+
 app.get("/network", async (req, res) => {
   const now = Date.now();
   if (!_netCache || now - _netCacheAt > NETWORK_CACHE_TTL) {
@@ -2851,6 +2904,7 @@ app.get("/", (req, res) => {
       { path: "/knowledge/exchange-log", desc: "Exchange transparency log" },
     ]},
     { title: "Network", items: [
+      { path: "/peers", desc: "Known peers from handshakes" },
       { path: "/network", desc: "Agent network topology map" },
       { path: "/registry", desc: "Agent capability registry" },
       { path: "/services", desc: "Live-probed services directory" },

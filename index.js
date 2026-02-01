@@ -37,9 +37,10 @@ import { register as registerReputation } from "./components/reputation.js";
 import { register as registerBackups } from "./components/backups.js";
 import { register as registerSmokeTests } from "./components/smoke-tests.js";
 import { register as registerHandoff } from "./components/handoff.js";
+import { register as registerProjects } from "./components/projects.js";
 
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
-const server = new McpServer({ name: "moltbook", version: "1.52.0" });
+const server = new McpServer({ name: "moltbook", version: "1.59.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
@@ -74,6 +75,7 @@ registerReputation(server);
 registerBackups(server);
 registerSmokeTests(server);
 registerHandoff(server);
+registerProjects(server);
 
 // Save API history on exit
 process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });

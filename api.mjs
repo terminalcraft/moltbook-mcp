@@ -391,6 +391,8 @@ function agentManifest(req, res) {
       patterns_url: "/knowledge/patterns",
       digest_url: "/knowledge/digest",
       validate_url: "/knowledge/validate",
+      exchange_url: "/knowledge/exchange",
+      description: "POST agent handle + patterns to /knowledge/exchange for bidirectional exchange. Returns our patterns in response.",
     },
   });
 }
@@ -595,6 +597,82 @@ app.get("/knowledge/topics", (req, res) => {
     });
   } catch (e) {
     res.status(500).json({ error: "knowledge base unavailable" });
+  }
+});
+
+// Bidirectional knowledge exchange — POST your patterns, receive ours
+app.post("/knowledge/exchange", (req, res) => {
+  try {
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const { agent, patterns: incoming } = body;
+    if (!agent || typeof agent !== "string" || agent.length > 100) {
+      return res.status(400).json({ error: "agent handle required (max 100 chars)" });
+    }
+    if (!Array.isArray(incoming)) {
+      return res.status(400).json({ error: "patterns must be an array" });
+    }
+    if (incoming.length > 50) {
+      return res.status(400).json({ error: "max 50 patterns per exchange" });
+    }
+
+    const kbPath = join(BASE, "knowledge", "patterns.json");
+    const data = JSON.parse(readFileSync(kbPath, "utf8"));
+    const existingTitles = new Set(data.patterns.map(p => p.title.toLowerCase()));
+    const now = new Date().toISOString();
+    let imported = 0;
+
+    for (const p of incoming) {
+      if (!p.title || !p.description || !p.category) continue;
+      if (typeof p.title !== "string" || p.title.length > 200) continue;
+      if (typeof p.description !== "string" || p.description.length > 2000) continue;
+      if (existingTitles.has(p.title.toLowerCase())) continue;
+
+      const id = "p" + String(data.patterns.length + 1).padStart(3, "0");
+      data.patterns.push({
+        id,
+        title: p.title.slice(0, 200),
+        description: p.description.slice(0, 2000),
+        category: ["architecture", "prompting", "tooling", "reliability", "security", "ecosystem"].includes(p.category) ? p.category : "ecosystem",
+        confidence: "observed",
+        source: `exchange:${agent}`,
+        tags: Array.isArray(p.tags) ? p.tags.slice(0, 10).map(t => String(t).slice(0, 50)) : [],
+        addedAt: now,
+        lastValidated: now,
+      });
+      existingTitles.add(p.title.toLowerCase());
+      imported++;
+    }
+
+    if (imported > 0) {
+      data.lastUpdated = now;
+      writeFileSync(kbPath, JSON.stringify(data, null, 2));
+    }
+
+    // Log exchange
+    const logPath = join(BASE, "knowledge", "exchange-log.json");
+    let log = [];
+    try { log = JSON.parse(readFileSync(logPath, "utf8")); } catch {}
+    log.push({ agent, at: now, offered: incoming.length, imported, sent: data.patterns.length });
+    if (log.length > 100) log = log.slice(-100);
+    writeFileSync(logPath, JSON.stringify(log, null, 2));
+
+    res.json({
+      ok: true,
+      imported,
+      duplicates: incoming.length - imported,
+      patterns: data.patterns.map(p => ({
+        title: p.title,
+        description: p.description,
+        category: p.category,
+        confidence: p.confidence,
+        tags: p.tags || [],
+      })),
+      total: data.patterns.length,
+      exchange_url: "/knowledge/exchange",
+      topics_url: "/knowledge/topics",
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

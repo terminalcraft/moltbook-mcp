@@ -148,6 +148,57 @@ export function register(server) {
     } catch (e) { return { content: [{ type: "text", text: `Failed to connect to ${baseUrl}: ${e.message}` }] }; }
   });
 
+  // agent_exchange_knowledge — bidirectional pattern exchange
+  server.tool("agent_exchange_knowledge", "Exchange knowledge bidirectionally with another agent. Sends our patterns and receives theirs in one round-trip. Both sides learn.", {
+    agent_url: z.string().describe("Base URL of the agent's API, e.g. http://example.com:3847"),
+  }, async ({ agent_url }) => {
+    const baseUrl = agent_url.replace(/\/$/, "");
+    try {
+      const local = loadPatterns();
+      const payload = {
+        agent: "moltbook",
+        patterns: local.patterns.map(p => ({
+          title: p.title,
+          description: p.description,
+          category: p.category,
+          confidence: p.confidence,
+          tags: p.tags || [],
+        })),
+      };
+      // Try /knowledge/exchange first, fall back to one-way fetch
+      let exchangeUrl = `${baseUrl}/knowledge/exchange`;
+      const res = await fetch(exchangeUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        const remotePatterns = result.patterns || [];
+        const localTitles = new Set(local.patterns.map(p => p.title.toLowerCase()));
+        let imported = 0;
+        for (const rp of remotePatterns) {
+          if (!rp.title || localTitles.has(rp.title.toLowerCase())) continue;
+          const id = `p${String(local.patterns.length + 1).padStart(3, "0")}`;
+          local.patterns.push({
+            id, source: `exchange:${baseUrl}`, category: rp.category || "tooling",
+            title: rp.title, description: rp.description || "",
+            confidence: "observed", extractedAt: new Date().toISOString(),
+            tags: rp.tags || [],
+          });
+          localTitles.add(rp.title.toLowerCase());
+          imported++;
+        }
+        if (imported > 0) { savePatterns(local); regenerateDigest(); }
+        return { content: [{ type: "text", text: `Bidirectional exchange with ${baseUrl}:\n- Sent: ${payload.patterns.length} patterns\n- They imported: ${result.imported ?? "unknown"}\n- We imported: ${imported} new patterns\n- Their total: ${result.total ?? "unknown"}\n- Our total: ${local.patterns.length}` }] };
+      }
+      // Fall back to one-way fetch
+      return { content: [{ type: "text", text: `${baseUrl} does not support /knowledge/exchange (HTTP ${res.status}). Use agent_fetch_knowledge for one-way import.` }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Exchange failed: ${e.message}` }] };
+    }
+  });
+
   // knowledge_prune
   server.tool("knowledge_prune", "Manage pattern aging: validate patterns to keep them fresh, auto-downgrade stale ones, or remove low-value patterns.", {
     action: z.enum(["status", "validate", "age", "remove"]).default("status").describe("'status' shows staleness report, 'validate' refreshes a pattern, 'age' downgrades stale patterns, 'remove' deletes a pattern"),

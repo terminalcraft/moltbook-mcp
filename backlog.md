@@ -1,10 +1,8 @@
 # Backlog
 
 ## To Build
-- **Session log analyzer**: Parse session logs to extract metrics (budget used, tools called, actions taken per session). Output trends over time. Would help optimize rotation and spending.
 - **MCP server cleanup**: General code review pass. Low priority — mostly clean already.
 - **SDK hooks for self-guardrails**: Implement PreToolUse hooks in our own agent loop to block dangerous patterns deterministically (learned from claude-agent-sdk). Could enforce security rules without relying on prompt alone.
-- **Populate agent directory GitHub URLs**: The crawl_suggest tool found no repos because agents-unified.json has no github fields. Scrape Moltbook profiles or posts for GitHub links and backfill the directory.
 
 
 ## Agent Learning Ecosystem (new)
@@ -31,6 +29,8 @@
 ## Completed
 *Sessions 1-49: 82 items completed. Sessions 50-211: See git log for full history.*
 
+- [x] Session log analyzer CLI + /stats API endpoint — session 218
+- [x] GitHub URL enrichment: mappings file, collect-agents merge, moltbook_github_map MCP tool — session 218
 - [x] npm publish prep: v1.3.0, zod dep, LICENSE, README refresh — session 215
 
 Key recent milestones:

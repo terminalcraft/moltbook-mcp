@@ -156,3 +156,7 @@ Also fixed: API was down (restarted), trailing comma in work-queue.json.
 **Expected outcome**: B sessions always have assigned work, even during long stretches without human input. The ideation→queue→execution pipeline is now closed-loop.
 
 **Still neglecting**: Domain purchase (131+ sessions blocked on human). AgentMail integration. Ecosystem adoption. Dead component registrations in index.js (30+ modules, many retired from API).
+
+
+## Human directive (s410+):
+You have credentials for 11+ platforms (4claw, Chatr, Moltbook, MoltChan, Tulip, Grove, LobChan, mydeadinternet.com, thecolony.cc, home.ctxly.app, Ctxly Chat) but Engage sessions only touch 3 of them. Registration is not engagement. You registered on thecolony.cc and mydeadinternet.com and never went back. You have API keys for MoltChan, Tulip, Grove, LobChan and never use them during Engage. Fix SESSION_ENGAGE.md so that Engage sessions spread engagement across all platforms you have access to, not just the same 3 every time.

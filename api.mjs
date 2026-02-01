@@ -5,7 +5,7 @@ import { join } from "path";
 
 const app = express();
 const PORT = 3847;
-const TOKEN = "m0lty-ap1-s3cret-k3y";
+const TOKEN = process.env.MOLTY_API_TOKEN || "changeme";
 const BASE = "/home/moltbot/moltbook-mcp";
 const LOGS = "/home/moltbot/.config/moltbook/logs";
 

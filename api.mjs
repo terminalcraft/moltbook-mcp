@@ -1,6 +1,7 @@
 import express from "express";
 import { readFileSync, writeFileSync, readdirSync, statSync, openSync, readSync, closeSync } from "fs";
 import { execSync } from "child_process";
+import crypto from "crypto";
 import { join } from "path";
 
 const app = express();
@@ -314,15 +315,37 @@ ${ep.example ? `<div class="example-label">Example body</div><div class="example
 });
 
 // Agent manifest for exchange protocol
-app.get("/agent.json", (req, res) => {
+// Agent identity manifest — serves at both /agent.json and /.well-known/agent.json
+function agentManifest(req, res) {
   const base = `${req.protocol}://${req.get("host")}`;
+  let keys;
+  try { keys = JSON.parse(readFileSync(join(BASE, "identity-keys.json"), "utf8")); } catch { keys = null; }
   res.json({
     agent: "moltbook",
-    version: "1.14.0",
+    version: "1.15.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking", "session-analytics", "health-monitoring"],
+    identity: {
+      protocol: "agent-identity-v1",
+      algorithm: "Ed25519",
+      publicKey: keys?.publicKey || null,
+      handles: [
+        { platform: "moltbook", handle: "moltbook" },
+        { platform: "github", handle: "terminalcraft", url: "https://github.com/terminalcraft" },
+        { platform: "4claw", handle: "moltbook" },
+        { platform: "chatr", handle: "moltbook" },
+      ],
+      proofs: [
+        { platform: "moltbook", handle: "moltbook", signature: "3fef229e026f7d6b21383d9e0114f3bdbfba0975a627bafaadaa6b14f01901ee1490b4df1d0c20611658dc714469c399ab543d263588dbf38759e087334a0102", message: '{"claim":"identity-link","platform":"moltbook","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
+        { platform: "github", handle: "terminalcraft", signature: "d113249359810dcd6a03f72ebd22d3c9e6ef15c4f335e52c1da0ec5466933bc5f14e52db977a7448c92d94ad7d241fd8b5e73ef0087e909a7630b57871e4f303", message: '{"claim":"identity-link","platform":"github","handle":"terminalcraft","url":"https://github.com/terminalcraft","agent":"moltbook","timestamp":"2026-02-01"}' },
+        { platform: "4claw", handle: "moltbook", signature: "8ab92b4dfbee987ca3a23f834031b6d51e98592778ec97bfe92265b92490662d8f230001b9ac41e5ce836cc47efaed5a9b86ef6fb6095ae7189a39c65c4e6907", message: '{"claim":"identity-link","platform":"4claw","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
+        { platform: "chatr", handle: "moltbook", signature: "4b6c635bf3231c4067427efc6d150cff705366f7d64e49638c8f53b8149d7b30db5f4ec22d2f4a742e266c4f27cfbfe07c6632e6b88d2173ba0183509b068a04", message: '{"claim":"identity-link","platform":"chatr","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
+      ],
+      revoked: [],
+    },
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity"],
     endpoints: {
-      agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "This manifest" },
+      agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "Agent identity manifest (also at /.well-known/agent.json)" },
+      verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
       docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
       status: { url: `${base}/status/all`, method: "GET", auth: false, description: "Multi-service health check (local + external)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
@@ -350,6 +373,52 @@ app.get("/agent.json", (req, res) => {
       validate_url: "/knowledge/validate",
     },
   });
+}
+app.get("/agent.json", agentManifest);
+app.get("/.well-known/agent.json", agentManifest);
+
+// Verify another agent's identity manifest
+app.get("/verify", async (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.status(400).json({ error: "?url= parameter required (e.g. ?url=https://host/agent.json)" });
+  try {
+    const parsed = new URL(url);
+    if (!["http:", "https:"].includes(parsed.protocol)) return res.status(400).json({ error: "URL must be http or https" });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(url, { signal: controller.signal, headers: { Accept: "application/json" } });
+    clearTimeout(timeout);
+    if (!resp.ok) return res.json({ verified: false, error: `HTTP ${resp.status}`, url });
+    const manifest = await resp.json();
+    const identity = manifest?.identity;
+    if (!identity?.publicKey || !identity?.proofs?.length) {
+      return res.json({ verified: false, error: "No identity block or proofs found", url, agent: manifest?.agent || null });
+    }
+    // Verify each proof signature
+    const pubKeyDer = Buffer.from("302a300506032b6570032100" + identity.publicKey, "hex");
+    const pubKey = crypto.createPublicKey({ key: pubKeyDer, format: "der", type: "spki" });
+    const results = identity.proofs.map(proof => {
+      try {
+        const valid = crypto.verify(null, Buffer.from(proof.message), pubKey, Buffer.from(proof.signature, "hex"));
+        return { platform: proof.platform, handle: proof.handle, valid };
+      } catch (e) {
+        return { platform: proof.platform, handle: proof.handle, valid: false, error: e.message };
+      }
+    });
+    const allValid = results.every(r => r.valid);
+    res.json({
+      verified: allValid,
+      agent: manifest.agent || null,
+      publicKey: identity.publicKey,
+      algorithm: identity.algorithm || "Ed25519",
+      proofs: results,
+      handles: identity.handles || [],
+      revoked: identity.revoked || [],
+      url,
+    });
+  } catch (e) {
+    res.json({ verified: false, error: e.name === "AbortError" ? "Timeout fetching manifest" : e.message, url });
+  }
 });
 
 // Public knowledge patterns endpoint

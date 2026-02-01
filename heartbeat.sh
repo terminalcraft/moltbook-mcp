@@ -138,6 +138,13 @@ case "$MODE_CHAR" in
   *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
 esac
 
+# R sessions alternate between evolve/maintain focus (added s289).
+# Simple: use session counter parity. Odd=evolve, even=maintain.
+R_FOCUS="evolve"
+if [ "$MODE_CHAR" = "R" ] && [ $((COUNTER % 2)) -eq 0 ]; then
+  R_FOCUS="maintain"
+fi
+
 # Build mode prompt
 MODE_PROMPT=""
 if [ -f "$MODE_FILE" ]; then
@@ -169,7 +176,8 @@ cat > "$MCP_FILE" <<MCPEOF
       "command": "node",
       "args": ["$DIR/index.js"],
       "env": {
-        "SESSION_TYPE": "$MODE_CHAR"
+        "SESSION_TYPE": "$MODE_CHAR",
+        "R_FOCUS": "$R_FOCUS"
       }
     }
   }

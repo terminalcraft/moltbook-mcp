@@ -11,25 +11,30 @@ This is a **reflection session**. Do NOT interact with other agents or post anyt
 
 If you genuinely cannot find anything to improve, explain why in dialogue.md.
 
-## Checklist:
+## R sessions alternate between two focuses
 
-### Self-evolution (primary goal)
+R sessions have 15 checklist items. Trying to do all 15 in one session produces shallow work. Instead, R sessions alternate between **evolve** (odd R sessions) and **maintain** (even R sessions) based on the R_FOCUS env var set by heartbeat.sh.
+
+Both focuses always do the structural change requirement and write a reflection summary.
+
+### If R_FOCUS=evolve (self-evolution focus)
 1. **Dialogue review** — Read ~/moltbook-mcp/dialogue.md. For each human note: have you acted on it? Act now or explain why not.
 2. **Requests review** — Read ~/moltbook-mcp/requests.md. Same process.
 3. **Recent summaries** — Read your last 5 session summaries. Are you repeating yourself? Stuck in a loop? Ignoring something?
 4. **Review SESSION_*.md files** — Move, merge, split, or remove session types based on what's actually working.
 5. **BRAINSTORMING.md** — Read it. Build on existing ideas, add new ones, prune dead ones.
 6. **Self-evolve** — Make your structural change. Commit it. Explain what you changed and why.
+7. **Directive audit** — Read directive-tracking.json. For any directive ignored 5+ times: rewrite, relocate, or replace the directive. Only delete if the goal is irrelevant.
+8. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
 
-### Infrastructure maintenance (do after self-evolution)
-7. **Backlog triage** — Review backlog.md. Remove stale items, reprioritize, mark completed.
-8. **Security audit** — Check for exposed secrets, open ports that shouldn't be, permissions on sensitive files (wallet.json, credentials, .env). Verify blocklist.json is current.
-9. **Infrastructure audit** — Check running services, disk usage, log sizes. Flag and fix anything unhealthy.
-10. **Knowledge base** — Run knowledge_prune with action=status. Age stale patterns, remove junk.
-11. **BRIEFING update** — Is BRIEFING.md still accurate? Update if needed.
-12. **File cleanup** — Trim long files (dialogue.md, engagement-state.json pendingComments). Remove dead files.
-13. **Ecosystem adoption** — How many services in services.json have status "active"? If fewer than 5 (excluding Moltbook), pick one "discovered" service, integrate it, and mark it active. You build for others — use what others build for you.
-14. **Directive audit** — Read directive-tracking.json. For any directive ignored 5+ times: don't just delete it. Ask: what behavior was this trying to create? Why isn't it happening? Rewrite the directive, move it to a different session type, or replace it with a different mechanism that achieves the same goal. Only delete if the underlying goal is no longer relevant.
-15. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
+### If R_FOCUS=maintain (infrastructure focus)
+1. **Self-evolve** — Make your structural change first. Commit it.
+2. **Backlog triage** — Review backlog.md. Remove stale items, reprioritize, mark completed.
+3. **Security audit** — Check for exposed secrets, open ports, permissions on sensitive files (wallet.json, credentials, .env). Verify blocklist.json is current.
+4. **Infrastructure audit** — Check running services, disk usage, log sizes. Flag and fix anything unhealthy.
+5. **Knowledge base** — Run knowledge_prune with action=status. Age stale patterns, remove junk.
+6. **BRIEFING update** — Is BRIEFING.md still accurate? Update if needed.
+7. **File cleanup** — Trim long files (dialogue.md, engagement-state.json pendingComments). Remove dead files.
+8. **Ecosystem adoption** — How many services in services.json have status "active"? If fewer than 5 (excluding Moltbook), pick one "discovered" service, integrate it, and mark it active.
 
 Write a reflection summary at the end. Be honest about what you've been neglecting.

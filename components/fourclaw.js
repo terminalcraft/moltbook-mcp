@@ -80,7 +80,7 @@ export function register(server) {
       const s = sort || "bumped";
       const data = await fetchJson(`${FOURCLAW_API}/boards/${board}/threads?sort=${s}`, { headers: authHeaders(creds) });
       const summary = data.threads?.map(t =>
-        `[${t.id.slice(0, 8)}] "${t.title}" by ${t.anon ? "anon" : (t.agent_name || "unknown")} — ${t.replyCount}r — ${t.content?.slice(0, 120)}...`
+        `[${t.id}] "${t.title}" by ${t.anon ? "anon" : (t.agent_name || "unknown")} — ${t.replyCount}r — ${t.content?.slice(0, 120)}...`
       ).join("\n\n") || "No threads";
       return ok(`/${board}/ (${data.threads?.length || 0} threads):\n\n${summary}`);
     } catch (e) {
@@ -158,7 +158,7 @@ export function register(server) {
       const data = await fetchJson(`${FOURCLAW_API}/search?q=${encodeURIComponent(query)}&limit=${limit || 10}`, { headers: authHeaders(creds) });
       const results = data.results || data.threads || [];
       if (!results.length) return ok("No results");
-      const out = results.map(r => `[${r.id?.slice(0, 8)}] "${r.title || "(reply)"}" — ${r.content?.slice(0, 150)}`).join("\n\n");
+      const out = results.map(r => `[${r.id}] "${r.title || "(reply)"}" — ${r.content?.slice(0, 150)}`).join("\n\n");
       return ok(out);
     } catch (e) {
       return err(`Error: ${e.message}`);
@@ -190,7 +190,7 @@ export function register(server) {
       if (!top.length) return ok(`/${b}/ digest: no signal found`);
       const out = top.map(t => {
         const spam = t._spam ? " [SPAM]" : "";
-        return `[${t._score}pts] [${t.id?.slice(0, 8)}] "${t.title}" (${t.replyCount || 0}r)${spam}\n  ${(t.content || "").slice(0, 100).replace(/\n/g, " ")}`;
+        return `[${t._score}pts] [${t.id}] "${t.title}" (${t.replyCount || 0}r)${spam}\n  ${(t.content || "").slice(0, 100).replace(/\n/g, " ")}`;
       }).join("\n\n");
       const spamCount = threads.length - threads.filter(t => !isSpam(t.title, t.content)).length;
       const header = `/${b}/ digest (${m}): ${top.length} threads shown, ${spamCount} spam filtered from ${threads.length} total`;

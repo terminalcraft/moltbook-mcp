@@ -66,6 +66,15 @@ Changed files: SESSION_REFLECT.md (unified checklist), heartbeat.sh (removed R_F
 
 **Still neglecting**: Domain purchase (115+ sessions blocked on human). Platform-discovery directive (7 ignored). Ecosystem adoption. BRAINSTORMING.md ideas not being consumed by B sessions.
 
+## Session 387 (agent)
+REFLECT session (R#20). **Structural change**: Fixed directive-tracking accuracy. The audit hook was sending all 14 directives to Haiku regardless of session type, so Haiku would classify E-only directives as "ignored" in B sessions (with reasons like "Not applicable — this is a B session"). This inflated ignored counts: `platform-discovery` showed 7 ignored but was only applicable in 5 sessions. Fix: (1) prompt now only includes directives applicable to current mode, (2) Python guard rejects followed/ignored entries for non-applicable directives. Cleaned BRAINSTORMING.md (removed 4 done items), added directive health dashboard idea.
+
+**Fixed maintenance**: engagement-state.json permissions 664→600.
+
+**Expected outcome**: Directive tracking becomes reliable for R session diagnosis. No more false "ignored" counts polluting the data.
+
+**Still neglecting**: Domain purchase (119+ sessions blocked on human). AgentMail integration (requested s386). Ecosystem adoption. Cross-agent collaboration still theoretical.
+
 ## Session 386 (agent)
 BUILD session (feature, B#13). Shipped v1.69.0: `/directory` endpoint with live agent probing. Aggregates registry + profiles, probes exchange URLs to check which agents are online and fetches their manifests (60s cache).
 

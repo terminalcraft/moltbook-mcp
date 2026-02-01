@@ -155,4 +155,20 @@ export function register(server) {
     saveServices(data);
     return { content: [{ type: "text", text: `Logged ${svcUrl} for future evaluation. Registry now has ${data.services.length} services (${data.services.filter(s => s.status === "discovered").length} awaiting evaluation).` }] };
   });
+
+  // service_status — check all services and platforms
+  server.tool("service_status", "Check health of all local services and external platforms. Returns up/degraded/down for each.", {}, async () => {
+    try {
+      const resp = await fetch("http://127.0.0.1:3847/status/all");
+      const data = await resp.json();
+      const lines = [`Status: ${data.summary}`, ""];
+      for (const s of data.services) {
+        const icon = s.status === "up" ? "✓" : s.status === "degraded" ? "~" : "✗";
+        lines.push(`${icon} ${s.name} [${s.type}] ${s.status} ${s.ms}ms${s.error ? ` — ${s.error}` : ""}`);
+      }
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Status check failed: ${e.message}` }] };
+    }
+  });
 }

@@ -36,6 +36,49 @@ app.use(express.text({ limit: "1mb", type: "text/plain" }));
 
 // --- Public endpoints (no auth) ---
 
+// Multi-service status checker — probes local services and external platforms
+app.get("/status/all", async (req, res) => {
+  const checks = [
+    { name: "molty-api", url: "http://127.0.0.1:3847/agent.json", type: "local" },
+    { name: "verify-server", url: "http://127.0.0.1:3848/", type: "local" },
+    { name: "moltbook-api", url: "https://moltbook.com/api/v1/posts?limit=1", type: "external" },
+    { name: "chatr", url: "https://chatr.ai/api/messages?limit=1", type: "external" },
+    { name: "4claw", url: "https://4claw.org/", type: "external" },
+    { name: "ctxly-directory", url: "https://directory.ctxly.app/api/services", type: "external" },
+    { name: "agentid", url: "https://agentid.sh", type: "external" },
+    { name: "knowledge-exchange", url: "http://127.0.0.1:3847/knowledge/patterns", type: "local" },
+  ];
+
+  const results = await Promise.all(checks.map(async (check) => {
+    const start = Date.now();
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const resp = await fetch(check.url, { signal: controller.signal });
+      clearTimeout(timeout);
+      const ms = Date.now() - start;
+      return { name: check.name, type: check.type, status: resp.ok ? "up" : "degraded", http: resp.status, ms };
+    } catch (e) {
+      const ms = Date.now() - start;
+      return { name: check.name, type: check.type, status: "down", error: e.code || e.message?.slice(0, 60), ms };
+    }
+  }));
+
+  const up = results.filter(r => r.status === "up").length;
+  const total = results.length;
+
+  if (req.query.format === "text" || (!req.query.format && req.headers.accept?.includes("text/plain"))) {
+    const lines = [`Status: ${up}/${total} services up`, ""];
+    for (const r of results) {
+      const icon = r.status === "up" ? "✓" : r.status === "degraded" ? "~" : "✗";
+      lines.push(`  ${icon} ${r.name} [${r.type}] ${r.status} ${r.ms}ms${r.http ? ` (${r.http})` : ""}${r.error ? ` — ${r.error}` : ""}`);
+    }
+    return res.type("text/plain").send(lines.join("\n"));
+  }
+
+  res.json({ timestamp: new Date().toISOString(), summary: `${up}/${total} up`, services: results });
+});
+
 // Agent manifest for exchange protocol
 app.get("/agent.json", (req, res) => {
   res.json({

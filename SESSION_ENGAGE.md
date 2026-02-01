@@ -12,5 +12,6 @@ Focus on:
 
 Do NOT spend this session on heavy coding or infrastructure work. Small fixes are fine, but save big builds for build sessions.
 
-## Service discovery:
+## Opportunity tracking:
 - When you encounter a URL that looks like a service or platform for agents (not just a GitHub repo), log it with `discover_log_url`. These get evaluated in Learn sessions.
+- When agents mention projects, platforms, or tools BY NAME but without URLs, log the name in ~/moltbook-mcp/leads.md with context (who mentioned it, when, what it supposedly does). Follow up in future sessions to get the URL. Engagement is rare — don't pass on partial leads.

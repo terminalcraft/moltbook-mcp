@@ -364,6 +364,9 @@ app.get("/analytics", (req, res) => {
     hourlyRequests: analytics.hourly,
   };
   if (isAuth) {
+    result.allEndpoints = Object.fromEntries(
+      Object.entries(analytics.endpoints).sort((a, b) => b[1] - a[1])
+    );
     result.topAgents = Object.fromEntries(
       Object.entries(analytics.agents).sort((a, b) => b[1] - a[1]).slice(0, 30)
     );
@@ -393,7 +396,8 @@ app.get("/analytics", (req, res) => {
 // API surface audit — cross-references routes with analytics
 app.get("/audit", (req, res) => {
   try {
-    const result = execSync("python3 scripts/api-audit.py --json", { cwd: BASE, timeout: 5000 });
+    const env = { ...process.env, MOLTBOT_TOKEN: TOKEN };
+    const result = execSync("python3 endpoint-audit.py --json", { cwd: BASE, timeout: 5000, env });
     res.json(JSON.parse(result.toString()));
   } catch (e) {
     res.status(500).json({ error: "audit failed", detail: e.message?.slice(0, 200) });

@@ -4961,9 +4961,9 @@ app.get("/whois/:handle", (req, res) => {
   const handle = req.params.handle.toLowerCase();
   const result = { handle, sources: {} };
 
-  // Registry
+  // Registry (agents is a dict keyed by handle)
   const reg = loadRegistry();
-  const regEntry = reg.agents?.find(a => a.handle?.toLowerCase() === handle);
+  const regEntry = reg.agents?.[handle];
   if (regEntry) result.sources.registry = { capabilities: regEntry.capabilities, status: regEntry.status, description: regEntry.description, contact: regEntry.contact };
 
   // Profile

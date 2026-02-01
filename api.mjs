@@ -18,6 +18,7 @@ const ALLOWED_FILES = {
   session_engage: "SESSION_ENGAGE.md",
   session_build: "SESSION_BUILD.md",
   session_reflect: "SESSION_REFLECT.md",
+  session_learn: "SESSION_LEARN.md",
   ports: "PORTS.md",
   rotation: "rotation.conf",
 };
@@ -30,11 +31,7 @@ function auth(req, res, next) {
   next();
 }
 
-// Auth middleware — skip for public exchange protocol endpoints
-app.use((req, res, next) => {
-  if (req.path === "/agent.json" || req.path.startsWith("/knowledge/") || req.path === "/health") return next();
-  return auth(req, res, next);
-});
+app.use(auth);
 app.use(express.text({ limit: "1mb" }));
 
 app.get("/files/:name", (req, res) => {
@@ -152,7 +149,7 @@ app.get("/status", (req, res) => {
         const hdrBuf = Buffer.alloc(200);
         readSync(fd2, hdrBuf, 0, 200, 0);
         closeSync(fd2);
-        const modeMatch = hdrBuf.toString("utf-8").match(/mode=([EBR])/);
+        const modeMatch = hdrBuf.toString("utf-8").match(/mode=([EBRL])/);
         if (modeMatch) session_mode = modeMatch[1];
       }
     } catch {}
@@ -283,70 +280,79 @@ app.get("/live", (req, res) => {
   }
 });
 
-
-// =============================================================================
-// AGENT EXCHANGE PROTOCOL — Public endpoints (no auth required)
-// =============================================================================
-
-const KNOWLEDGE_DIR = "/home/moltbot/moltbook-mcp/knowledge";
-const PATTERNS_FILE = join(KNOWLEDGE_DIR, "patterns.json");
-const DIGEST_FILE = join(KNOWLEDGE_DIR, "digest.md");
-
-// GET /agent.json — Agent capability manifest (public, no auth)
-app.get("/agent.json", (req, res) => {
-  res.json({
-    agent: "@moltbook",
-    version: "1.0",
-    github: "https://github.com/terminalcraft/moltbook-mcp",
-    capabilities: [
-      "moltbook-social",
-      "agent-discovery",
-      "bsky-discovery",
-      "knowledge-sharing",
-      "engagement-proofs"
-    ],
-    exchange: {
-      patterns_url: "/knowledge/patterns",
-      digest_url: "/knowledge/digest",
-      format: "molty-knowledge-v1"
-    },
-    tools_published: [
-      { name: "moltbook-mcp", npm: "@moltcraft/moltbook-mcp", description: "MCP server for Moltbook social platform" }
-    ],
-    updated: new Date().toISOString()
-  });
-});
-
-// GET /knowledge/patterns — Published patterns (public, no auth)
-app.get("/knowledge/patterns", (req, res) => {
-  try {
-    const data = JSON.parse(readFileSync(PATTERNS_FILE, "utf-8"));
-    // Only publish verified patterns externally
-    const published = data.patterns.filter(p => p.confidence === "verified");
-    res.json({
-      count: published.length,
-      format: "molty-knowledge-v1",
-      patterns: published.map(p => ({
-        title: p.title,
-        category: p.category,
-        description: p.description,
-        confidence: p.confidence,
-        tags: p.tags,
-        source: p.source.startsWith("self:") ? "self" : p.source,
-      }))
-    });
-  } catch (e) {
-    res.json({ count: 0, patterns: [], error: "Knowledge base not yet initialized" });
+// --- Session Stats ---
+function getSessionStats(lastN) {
+  const files = readdirSync(LOGS).filter(f => f.endsWith(".summary")).sort();
+  const summaries = [];
+  for (const f of files) {
+    const content = readFileSync(join(LOGS, f), "utf8");
+    const data = { file: f };
+    for (const line of content.split("\n")) {
+      const kv = line.match(/^([^:]+):\s*(.+)$/);
+      if (!kv) continue;
+      const [, key, val] = kv;
+      switch (key.trim()) {
+        case "Session": data.session = parseInt(val); break;
+        case "Duration": data.duration = val.trim(); {
+          const m = val.match(/(\d+)m(\d+)s/);
+          data.durationSec = m ? parseInt(m[1]) * 60 + parseInt(m[2]) : 0;
+        } break;
+        case "Tools": data.toolCalls = parseInt(val); break;
+        case "Posts read": data.postsRead = parseInt(val); break;
+        case "Upvotes": data.upvotes = parseInt(val); break;
+        case "Comments": data.comments = parseInt(val); break;
+        case "Files changed": data.filesChanged = val.trim().split(", ").filter(Boolean).length; break;
+      }
+    }
+    const cm = content.match(/(\d+) commit/);
+    if (cm) data.commits = parseInt(cm[1]);
+    if (data.session) summaries.push(data);
   }
-});
+  const selected = lastN ? summaries.slice(-lastN) : summaries;
+  const t = selected.length;
+  return {
+    sessions: t,
+    range: t > 0 ? [selected[0].session, selected[t - 1].session] : [],
+    totalDurationSec: selected.reduce((s, d) => s + (d.durationSec || 0), 0),
+    avgDurationSec: t > 0 ? Math.round(selected.reduce((s, d) => s + (d.durationSec || 0), 0) / t) : 0,
+    totalToolCalls: selected.reduce((s, d) => s + (d.toolCalls || 0), 0),
+    avgToolCalls: t > 0 ? Math.round(selected.reduce((s, d) => s + (d.toolCalls || 0), 0) / t) : 0,
+    totalCommits: selected.reduce((s, d) => s + (d.commits || 0), 0),
+    totalPostsRead: selected.reduce((s, d) => s + (d.postsRead || 0), 0),
+    totalUpvotes: selected.reduce((s, d) => s + (d.upvotes || 0), 0),
+    totalComments: selected.reduce((s, d) => s + (d.comments || 0), 0),
+    recent: selected.slice(-10),
+  };
+}
 
-// GET /knowledge/digest — Markdown digest (public, no auth)
-app.get("/knowledge/digest", (req, res) => {
+app.get("/stats", (req, res) => {
   try {
-    const digest = readFileSync(DIGEST_FILE, "utf-8");
-    res.type("text/plain").send(digest);
-  } catch {
-    res.type("text/plain").send("# Knowledge Digest\n\nNo patterns yet.");
+    const lastN = req.query.last ? parseInt(req.query.last) : null;
+    const stats = getSessionStats(lastN);
+    const format = req.query.format || (req.headers.accept?.includes("text/html") ? "html" : "json");
+
+    if (format === "json") return res.json(stats);
+
+    // Plain text
+    const lines = [
+      `Session Stats (${stats.sessions} sessions${lastN ? `, last ${lastN}` : ""})`,
+      `Range: #${stats.range[0]} → #${stats.range[1]}`,
+      `Total duration: ${Math.floor(stats.totalDurationSec / 60)}m`,
+      `Avg duration: ${Math.floor(stats.avgDurationSec / 60)}m${stats.avgDurationSec % 60}s`,
+      `Tool calls: ${stats.totalToolCalls} (${stats.avgToolCalls}/session)`,
+      `Commits: ${stats.totalCommits}`,
+      `Posts read: ${stats.totalPostsRead}`,
+      `Upvotes: ${stats.totalUpvotes}`,
+      `Comments: ${stats.totalComments}`,
+      "",
+      "Recent:",
+      ...stats.recent.map(s =>
+        `  #${s.session} | ${s.duration || "?"} | ${s.toolCalls || 0} tools${s.commits ? ` | ${s.commits} commits` : ""}${s.filesChanged ? ` | ${s.filesChanged} files` : ""}`
+      ),
+    ];
+    res.type("text/plain").send(lines.join("\n"));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

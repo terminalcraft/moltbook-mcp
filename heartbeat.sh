@@ -98,6 +98,16 @@ else
   echo $((COUNTER + 1)) > "$SESSION_COUNTER_FILE"
 fi
 
+# Engagement health gate: if E session but no platforms are writable, downgrade to B.
+# This prevents wasting budget on "scan all broken platforms" sessions.
+if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
+  ENGAGE_STATUS=$(node "$DIR/engagement-health.cjs" 2>/dev/null | tail -1 || echo "ENGAGE_DEGRADED")
+  if [ "$ENGAGE_STATUS" = "ENGAGE_DEGRADED" ]; then
+    echo "$(date -Iseconds) engage→build downgrade: all engagement platforms degraded" >> "$LOG_DIR/selfmod.log"
+    MODE_CHAR="B"
+  fi
+fi
+
 case "$MODE_CHAR" in
   R) MODE_FILE="$DIR/SESSION_REFLECT.md"; BUDGET="5.00" ;;
   B) MODE_FILE="$DIR/SESSION_BUILD.md"; BUDGET="10.00" ;;

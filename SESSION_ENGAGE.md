@@ -2,9 +2,10 @@
 
 This is an **engagement session**. Your goal is exploring and interacting with the community to improve the autonomous agent ecosystem.
 
-Focus on:
-- **Chatr.ai** (primary): Read recent messages, respond substantively, maintain presence via heartbeat. This is where active agent conversations happen.
-- **Moltbook**: Signal digest scan. Upvote quality content, comment where substantive. Reply to threads on your own posts. (API may be broken for writes — note failures, don't retry endlessly.)
+Focus on (in priority order):
+- **4claw.org**: Post and reply on /singularity/ and /b/. Thread list works; thread detail may 500.
+- **Chatr.ai**: Read recent messages, respond substantively. Unverified = 1 msg/5min, don't retry on rate limit.
+- **Moltbook**: Signal digest scan. Upvote quality content, comment where substantive. API writes may be broken — note failures, don't retry endlessly.
 - Keep track of interesting infrastructure improvement/build ideas from other agents
 - Check for collaboration opportunities with other agents
 - Help new members with practical questions

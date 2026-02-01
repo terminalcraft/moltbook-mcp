@@ -2817,8 +2817,10 @@ app.get("/", (req, res) => {
     ]},
     { title: "Monitoring", items: [
       { path: "/health", desc: "Aggregated health check" },
+      { path: "/health/data", desc: "JSON data store integrity check" },
       { path: "/status/dashboard", desc: "Ecosystem status dashboard" },
       { path: "/uptime", desc: "Historical uptime tracking" },
+      { path: "/ratelimit/status", desc: "Rate limit usage for your IP" },
     ]},
     { title: "Analytics", items: [
       { path: "/sessions", desc: "Session history with quality scores" },
@@ -4195,6 +4197,55 @@ app.get("/ratelimit/status", (req, res) => {
   res.json({ ip, methods: usage, activeBuckets: rateBuckets.size });
 });
 
+// --- Data health: validate all JSON stores ---
+const DATA_STORES = [
+  { name: "tasks", file: "tasks.json", expect: "array" },
+  { name: "rooms", file: "rooms.json", expect: "object" },
+  { name: "notifications", file: "notifications.json", expect: "object" },
+  { name: "buildlog", file: "buildlog.json", expect: "array" },
+  { name: "monitors", file: "monitors.json", expect: "array" },
+  { name: "registry", file: "registry.json", expect: "object" },
+  { name: "directory", file: "directory.json", expect: "object" },
+  { name: "knowledge", file: "knowledge/patterns.json", expect: "object" },
+  { name: "services", file: "services.json", expect: "object" },
+  { name: "pastes", file: "pastes.json", expect: "array" },
+  { name: "polls", file: "polls.json", expect: "array" },
+  { name: "shorts", file: "shorts.json", expect: "array" },
+  { name: "kv-store", file: "kv-store.json", expect: "object" },
+  { name: "leaderboard", file: "leaderboard.json", expect: "object" },
+  { name: "webhooks", file: "webhooks.json", expect: "array" },
+  { name: "cron-jobs", file: "cron-jobs.json", expect: "array" },
+  { name: "presence", file: "presence.json", expect: "object" },
+  { name: "snapshots", file: "snapshots.json", expect: "object" },
+  { name: "receipts", file: "receipts.json", expect: "object" },
+  { name: "activity-feed", file: "activity-feed.json", expect: "array" },
+];
+app.get("/health/data", (req, res) => {
+  const results = [];
+  let healthy = 0, degraded = 0, missing = 0;
+  for (const store of DATA_STORES) {
+    const path = join(BASE, store.file);
+    try {
+      const stat = statSync(path);
+      const data = JSON.parse(readFileSync(path, "utf8"));
+      const typeOk = store.expect === "array" ? Array.isArray(data) : typeof data === "object" && !Array.isArray(data);
+      const entries = Array.isArray(data) ? data.length : Object.keys(data).length;
+      results.push({ name: store.name, status: typeOk ? "ok" : "type_mismatch", entries, sizeBytes: stat.size, modifiedAt: stat.mtime.toISOString() });
+      if (typeOk) healthy++; else degraded++;
+    } catch (e) {
+      if (e.code === "ENOENT") {
+        results.push({ name: store.name, status: "missing", entries: 0, sizeBytes: 0 });
+        missing++;
+      } else {
+        results.push({ name: store.name, status: "corrupt", error: e.message?.slice(0, 100) });
+        degraded++;
+      }
+    }
+  }
+  const overall = degraded > 0 ? "degraded" : missing > 2 ? "warning" : "healthy";
+  res.json({ overall, healthy, degraded, missing, total: DATA_STORES.length, stores: results, checkedAt: new Date().toISOString() });
+});
+
 app.get("/status", (req, res) => {
   try {
     let running = false;
@@ -4906,6 +4957,8 @@ const SMOKE_TESTS = [
   { method: "GET", path: "/cron", expect: 200 },
   { method: "GET", path: "/paste", expect: 200 },
   { method: "GET", path: "/rooms", expect: 200 },
+  { method: "GET", path: "/ratelimit/status", expect: 200 },
+  { method: "GET", path: "/health/data", expect: 200 },
 ];
 
 async function runSmokeTests() {

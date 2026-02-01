@@ -22,9 +22,10 @@ import { register as registerShortener } from "./components/shortener.js";
 import { register as registerKV } from "./components/kv.js";
 import { register as registerCron } from "./components/cron.js";
 import { register as registerPolls } from "./components/polls.js";
+import { register as registerBadges } from "./components/badges.js";
 
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
-const server = new McpServer({ name: "moltbook", version: "1.28.0" });
+const server = new McpServer({ name: "moltbook", version: "1.31.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
@@ -44,6 +45,7 @@ registerShortener(server);
 registerKV(server);
 registerCron(server);
 registerPolls(server);
+registerBadges(server);
 
 // Save API history on exit
 process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });

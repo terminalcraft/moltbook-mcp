@@ -208,6 +208,23 @@ function saveApiSession() {
 
 let consecutiveTimeouts = 0;
 let lastTimeoutAt = 0;
+
+// Retry a GET without auth token (handles server-side auth bugs)
+async function retryWithoutAuth(url, opts, timeoutMs = 10000) {
+  if (!apiKey || (opts.method && opts.method !== "GET")) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const headers = { "Content-Type": "application/json", ...opts.headers };
+    delete headers["Authorization"];
+    const res = await fetch(url, { ...opts, headers, signal: controller.signal });
+    clearTimeout(timer);
+    const json = await res.json();
+    if (res.ok && json.success !== false) return json;
+  } catch { clearTimeout(timer); }
+  return null;
+}
+
 async function moltFetch(path, opts = {}) {
   apiCallCount++;
   const prefix = path.split("?")[0].split("/").slice(0, 3).join("/");
@@ -216,9 +233,8 @@ async function moltFetch(path, opts = {}) {
   const url = `${API}${path}`;
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
-  // Decay timeout counter: if >60s since last timeout, reset (prevents death spiral across tool calls)
+  // Decay timeout counter: if >30s since last timeout, reset
   if (consecutiveTimeouts > 0 && Date.now() - lastTimeoutAt > 30000) consecutiveTimeouts = 0;
-  // Adaptive timeout: drop to 8s after 2+ consecutive timeouts
   const timeout = consecutiveTimeouts >= 2 ? 8000 : 30000;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
@@ -230,26 +246,12 @@ async function moltFetch(path, opts = {}) {
     apiErrorCount++;
     consecutiveTimeouts++;
     lastTimeoutAt = Date.now();
-    // Auth-fallback on timeout: if authenticated GET timed out, try without auth
-    // (handles server-side auth bugs that cause hangs on valid tokens)
-    if (apiKey && (!opts.method || opts.method === "GET")) {
-      const noAuthHeaders = { "Content-Type": "application/json" };
-      const controller2 = new AbortController();
-      const timer2 = setTimeout(() => controller2.abort(), 10000);
-      try {
-        const res2 = await fetch(url, { ...opts, headers: { ...noAuthHeaders, ...opts.headers }, signal: controller2.signal });
-        clearTimeout(timer2);
-        const json2 = await res2.json();
-        if (res2.ok && json2.success !== false) {
-          consecutiveTimeouts = 0;
-          return json2;
-        }
-      } catch { clearTimeout(timer2); }
-    }
+    const fallback = await retryWithoutAuth(url, opts);
+    if (fallback) { consecutiveTimeouts = 0; return fallback; }
     const label = consecutiveTimeouts >= 2 ? "API unreachable (fast-fail)" : "Request timeout";
     return { success: false, error: `${label}: ${e.name}` };
   } finally { clearTimeout(timer); }
-  consecutiveTimeouts = 0; // reset on successful connection
+  consecutiveTimeouts = 0;
   let json;
   try {
     json = await res.json();
@@ -257,20 +259,9 @@ async function moltFetch(path, opts = {}) {
     apiErrorCount++;
     return { success: false, error: `Non-JSON response (HTTP ${res.status})` };
   }
-  // Auth-fallback: if server returns 500 on authenticated GET, retry without auth
-  // (handles server-side auth bugs while preserving read access)
-  if ([401, 403, 500].includes(res.status) && apiKey && (!opts.method || opts.method === "GET")) {
-    const noAuthHeaders = { "Content-Type": "application/json" };
-    const controller2 = new AbortController();
-    const timer2 = setTimeout(() => controller2.abort(), 30000);
-    try {
-      const res2 = await fetch(url, { ...opts, headers: { ...noAuthHeaders, ...opts.headers }, signal: controller2.signal });
-      clearTimeout(timer2);
-      const json2 = await res2.json();
-      if (res2.ok && json2.success !== false) {
-        return json2;
-      }
-    } catch { clearTimeout(timer2); }
+  if ([401, 403, 500].includes(res.status)) {
+    const fallback = await retryWithoutAuth(url, opts, 30000);
+    if (fallback) return fallback;
   }
   if (!res.ok || json.error) apiErrorCount++;
   return json;

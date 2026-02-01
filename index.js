@@ -292,8 +292,46 @@ function saveToolUsage() {
 }
 
 // Wrap server.tool to auto-track usage
+// --- Per-session tool scoping ---
+// Set SESSION_TYPE env var to restrict which tools register (B=build, E=engage, L=learn, R=reflect)
+const SESSION_TYPE = (process.env.SESSION_TYPE || "").toUpperCase().charAt(0); // B, E, L, R, or empty
+const TOOL_SCOPES = {
+  // Tools allowed per session type. Empty/unset SESSION_TYPE = all tools (backwards compatible).
+  // "always" tools are registered in every session type.
+  always: ["moltbook_state", "moltbook_export", "moltbook_import", "moltbook_pending", "knowledge_read", "knowledge_prune"],
+  B: ["moltbook_post", "moltbook_search", "moltbook_submolts", "moltbook_profile", "moltbook_digest",
+      "moltbook_trust", "moltbook_karma", "moltbook_thread_diff", "moltbook_github_map",
+      "knowledge_add_pattern", "agent_crawl_repo", "agent_crawl_suggest", "agent_fetch_knowledge",
+      "discover_list", "discover_evaluate", "discover_log_url",
+      "ctxly_remember", "ctxly_recall", "chatr_read", "chatr_send", "chatr_agents", "chatr_heartbeat",
+      "agentid_lookup"],
+  E: ["moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search",
+      "moltbook_submolts", "moltbook_profile", "moltbook_profile_update", "moltbook_digest",
+      "moltbook_trust", "moltbook_karma", "moltbook_thread_diff", "moltbook_follow",
+      "moltbook_bsky_discover", "moltbook_github_map",
+      "chatr_read", "chatr_send", "chatr_agents", "chatr_heartbeat",
+      "ctxly_remember", "ctxly_recall", "agentid_lookup",
+      "discover_log_url"],
+  L: ["moltbook_post", "moltbook_search", "moltbook_digest", "moltbook_trust",
+      "knowledge_add_pattern", "agent_crawl_repo", "agent_crawl_suggest", "agent_fetch_knowledge",
+      "discover_list", "discover_evaluate", "discover_log_url",
+      "ctxly_remember", "ctxly_recall", "agentid_lookup",
+      "chatr_read", "chatr_agents"],
+  R: ["moltbook_post", "moltbook_search", "moltbook_digest", "moltbook_trust", "moltbook_karma",
+      "moltbook_thread_diff", "moltbook_profile",
+      "ctxly_remember", "ctxly_recall"],
+};
+
+function isToolAllowed(toolName) {
+  if (!SESSION_TYPE || !TOOL_SCOPES[SESSION_TYPE]) return true; // no scoping
+  if (TOOL_SCOPES.always.includes(toolName)) return true;
+  return TOOL_SCOPES[SESSION_TYPE].includes(toolName);
+}
+
 const _origTool = server.tool.bind(server);
 server.tool = function(name, ...args) {
+  // Skip registration if tool is out of scope for this session type
+  if (!isToolAllowed(name)) return;
   // Find the handler (last function arg)
   const handlerIdx = args.findIndex(a => typeof a === "function");
   if (handlerIdx >= 0) {

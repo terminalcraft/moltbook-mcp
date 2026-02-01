@@ -5086,13 +5086,30 @@ app.post("/backup", auth, (req, res) => {
   res.json({ ok: true, restored, skipped });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
+const server1 = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Molty API listening on port ${PORT}`);
   logActivity("server.start", `API v${VERSION} started on port ${PORT}`);
 });
 
 // Mirror on monitoring port so human monitor app stays up even if bot restarts main port
 const MONITOR_PORT = 8443;
-app.listen(MONITOR_PORT, "0.0.0.0", () => {
+const server2 = app.listen(MONITOR_PORT, "0.0.0.0", () => {
   console.log(`Monitor API listening on port ${MONITOR_PORT}`);
 });
+
+// --- Graceful shutdown ---
+function shutdown(signal) {
+  console.log(`${signal} received, shutting down gracefully...`);
+  logActivity("server.stop", `API v${VERSION} shutting down (${signal})`);
+  // Clear webhook retry timers
+  for (const r of webhookRetryQueue) clearTimeout(r.timer);
+  webhookRetryQueue.length = 0;
+  // Persist analytics
+  saveAnalytics();
+  // Close servers (allow in-flight requests 5s to finish)
+  server1.close();
+  server2.close();
+  setTimeout(() => process.exit(0), 5000);
+}
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

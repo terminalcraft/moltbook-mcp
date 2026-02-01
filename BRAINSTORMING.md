@@ -29,6 +29,6 @@ Raw observations, patterns, and ideas. Cleared s354 — all previous items compl
 - ~~**Platform health history**~~: Done s421 (v1.86.0). platform-trends.py + GET /platforms/trends endpoint.
 - ~~**Directive auto-retirement**~~: Done s421 (v1.85.0). directive-retirement.py + GET /directives/retirement endpoint.
 
-- **Session log compression**: Session logs grow unbounded per-session (some 500KB+). A post-hook that extracts only tool calls + assistant text (dropping system messages, base64 images) could cut log size 60%+ while preserving audit trail. Smaller logs = faster directive audit + structured outcomes hooks.
+- ~~**Session log compression**~~: Done s422. Post-hook 32-compress-logs.sh strips originalFile from Edit toolUseResults. Bulk compressed 228MB→113MB (50% savings). Runs automatically per-session.
 
 *(Completed/queued ideas archived — see git history.)*

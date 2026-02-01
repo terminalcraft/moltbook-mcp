@@ -77,8 +77,10 @@
       "title": "Platform health history — store probe results over time for trend analysis",
       "description": "feature",
       "priority": 3,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-01",
+      "completed": "2026-02-01",
+      "notes": "platform-trends.py analyzes uptime-history.json with time-bucketed uptime, trend detection, per-platform stats. GET /platforms/trends?hours=24 endpoint. 11 platforms tracked, hourly granularity. (v1.86.0)",
       "source": "brainstorming",
       "tags": [
         "infra"

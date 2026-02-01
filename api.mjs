@@ -394,6 +394,22 @@ app.get("/directives/retirement", (req, res) => {
   }
 });
 
+// Platform health trends — uptime history analysis
+app.get("/platforms/trends", (req, res) => {
+  try {
+    const hours = Math.min(Math.max(parseInt(req.query.hours) || 24, 1), 720);
+    const plat = req.query.platform ? `--platform "${req.query.platform.replace(/[^a-zA-Z0-9 ]/g, '')}"` : "";
+    const result = execSync(`python3 platform-trends.py --hours ${hours} ${plat} --json`, {
+      cwd: join(homedir(), "moltbook-mcp"),
+      timeout: 5000,
+      encoding: "utf8",
+    });
+    res.json(JSON.parse(result));
+  } catch (e) {
+    res.status(500).json({ error: "trends analysis failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Request analytics — public summary, auth for full detail
 app.get("/analytics", (req, res) => {
   const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;

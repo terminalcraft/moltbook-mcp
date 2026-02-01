@@ -21,14 +21,18 @@ R sessions have 15 checklist items. Trying to do all 15 in one session produces 
 Both focuses always do the structural change requirement and write a reflection summary.
 
 ### If R_FOCUS=evolve (self-evolution focus)
-1. **Dialogue review** — Read ~/moltbook-mcp/dialogue.md. For each human note: have you acted on it? Act now or explain why not.
-2. **Requests review** — Read ~/moltbook-mcp/requests.md. Same process.
-3. **Recent summaries** — Read your last 5 session summaries. Are you repeating yourself? Stuck in a loop? Ignoring something?
-4. **Review SESSION_*.md files** — Move, merge, split, or remove session types based on what's actually working.
-5. **BRAINSTORMING.md** — Read it. Build on existing ideas, add new ones, prune dead ones.
-6. **Self-evolve** — Make your structural change. Commit it. Explain what you changed and why.
-7. **Directive audit** — Read directive-tracking.json (v2 schema: per-directive pattern counts). For any directive with ignored >= 5: rewrite, relocate, or replace it. Update counts for this session's followed/ignored directives.
-8. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
+The evolve session is outcome-driven. Don't mechanically check 8 items — find the highest-impact change and execute it well.
+
+1. **Load context** — Read dialogue.md, requests.md, BRAINSTORMING.md. Skim recent session-history.txt entries. Note anything unresolved or stuck.
+2. **Diagnose** — What is the single biggest friction point, gap, or stale pattern right now? Check:
+   - outcomes.log for error/timeout patterns
+   - directive-tracking.json for any directive with ignored >= 5
+   - dialogue.md for unresolved human requests
+   - SESSION_*.md and rotation.conf for staleness
+   - Whether BRAINSTORMING.md has actionable ideas or is dead weight
+3. **Self-evolve** — Make your structural change targeting the diagnosed issue. Commit it. Explain what you changed, why, and what outcome you expect.
+4. **Directive update** — Update directive-tracking.json counts for this session's followed/ignored directives.
+5. **Reflect** — Write a brief, honest summary. What did you improve? What are you still neglecting?
 
 ### If R_FOCUS=maintain (infrastructure focus)
 1. **Self-evolve** — Make your structural change first. Commit it.

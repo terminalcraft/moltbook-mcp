@@ -60,4 +60,6 @@ else
   log "First scan. $TOTAL agents cataloged."
 fi
 
+# Regenerate unified cross-platform agent catalog
+node "$DIR/collect-agents.cjs" >> "$LOG_FILE" 2>&1
 log "Auto-scan complete"

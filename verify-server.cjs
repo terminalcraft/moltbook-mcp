@@ -13,6 +13,7 @@ const PORT = parseInt(process.env.VERIFY_PORT || '3847', 10);
 const STORE_PATH = path.join(__dirname, 'verified-proofs.json');
 const BLOCKLIST_PATH = path.join(__dirname, 'blocklist.json');
 const AGENTS_CATALOG_PATH = path.join(__dirname, 'bsky-agents.json');
+const UNIFIED_AGENTS_PATH = path.join(__dirname, 'agents-unified.json');
 const MAX_STORED = 500;
 const MAX_BODY = 16384; // 16KB max request body
 
@@ -274,41 +275,66 @@ const server = http.createServer(async (req, res) => {
         'GET /health': 'Service health check',
         'GET /blocklist': 'Shared spam/bot blocklist',
         'GET /blocklist?check=username': 'Check if a specific user is blocked',
+        'GET /agents?platform=moltbook|bluesky': 'Cross-platform agent directory (filter by platform)',
         'GET /agents/feed': 'Atom feed of discovered agents',
-        'GET /agents/new': 'Recently discovered agents (JSON, ?days=N)',
+        'GET /agents/new': 'Recently discovered agents (JSON, ?days=N&platform=moltbook|bluesky)',
       },
       spec: 'https://github.com/terminalcraft/moltbook-mcp/blob/main/docs/agent-engagement-proof-lexicon.md',
     });
   }
 
-  // Agents catalog
+  // Agents catalog (cross-platform)
   if (url.pathname === '/agents' && req.method === 'GET') {
+    let unified = null;
+    try { unified = JSON.parse(fs.readFileSync(UNIFIED_AGENTS_PATH, 'utf8')); } catch {}
+
+    // Fallback to bsky-only if unified not available
     let agents = [];
-    try { agents = JSON.parse(fs.readFileSync(AGENTS_CATALOG_PATH, 'utf8')); } catch {}
-    agents.sort((a, b) => b.score - a.score);
+    let platforms = {};
+    if (unified && unified.agents) {
+      agents = unified.agents;
+      platforms = unified.platforms || {};
+    } else {
+      try { agents = JSON.parse(fs.readFileSync(AGENTS_CATALOG_PATH, 'utf8')).map(a => ({ ...a, platform: 'bluesky', id: `bsky:${a.handle}`, profileUrl: `https://bsky.app/profile/${a.handle}` })); } catch {}
+      platforms = { bluesky: agents.length };
+    }
+
+    // Platform filter
+    const platformFilter = url.searchParams.get('platform');
+    if (platformFilter) {
+      agents = agents.filter(a => a.platform === platformFilter);
+    }
+
+    // Sort: bluesky by score desc, moltbook by postCount desc, mixed by postCount desc
+    agents.sort((a, b) => (b.postCount || b.score || 0) - (a.postCount || a.score || 0));
 
     const accept = req.headers.accept || '';
     const fmt = url.searchParams.get('format');
     if (fmt === 'json' || (!accept.includes('text/html') && accept.includes('application/json'))) {
-      return jsonResponse(res, 200, { count: agents.length, agents });
+      return jsonResponse(res, 200, { count: agents.length, platforms, agents });
     }
 
+    const platformBadge = (p) => p === 'bluesky'
+      ? '<span class="badge badge-bsky">bsky</span>'
+      : '<span class="badge badge-moltbook">moltbook</span>';
+
     const rows = agents.map(a => {
-      const bskyUrl = `https://bsky.app/profile/${esc(a.handle)}`;
-      const signals = (a.signals || []).map(s => `<span class="tag">${esc(s)}</span>`).join(' ');
-      return `<tr>
-        <td><a href="${bskyUrl}" target="_blank">${esc(a.handle)}</a></td>
+      const profileUrl = a.profileUrl || '#';
+      const signals = (a.signals || a.submolts || []).map(s => `<span class="tag">${esc(s)}</span>`).join(' ');
+      return `<tr data-platform="${esc(a.platform)}">
+        <td>${platformBadge(a.platform)}</td>
+        <td><a href="${esc(profileUrl)}" target="_blank">${esc(a.handle)}</a></td>
         <td>${esc(a.displayName || '')}</td>
-        <td>${a.score}</td>
-        <td>${a.followers || 0}</td>
-        <td>${a.posts || 0}</td>
+        <td>${a.postCount || a.score || 0}</td>
+        <td>${a.followers || ''}</td>
         <td class="signals">${signals}</td>
-        <td>${esc((a.discoveredAt || '').substring(0, 10))}</td>
+        <td>${esc((a.firstSeen || a.discoveredAt || '').substring(0, 10))}</td>
       </tr>`;
     }).join('');
 
+    const totalAgents = agents.length;
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bluesky AI Agent Directory</title>
+<title>Cross-Platform AI Agent Directory</title>
 <link rel="alternate" type="application/atom+xml" title="Agent Directory Feed" href="/agents/feed">
 <style>
   body{font-family:monospace;background:#0d1117;color:#c9d1d9;margin:0;padding:2rem}
@@ -319,7 +345,7 @@ const server = http.createServer(async (req, res) => {
   th,td{text-align:left;padding:.4rem .6rem;border-bottom:1px solid #21262d;font-size:.85rem}
   th{color:#8b949e;font-weight:normal;text-transform:uppercase;font-size:.75rem}
   tr:hover{background:#161b22}
-  .stats{display:flex;gap:2rem;margin:1rem 0}
+  .stats{display:flex;gap:2rem;margin:1rem 0;flex-wrap:wrap}
   .stat{background:#161b22;padding:.6rem 1rem;border-radius:6px}
   .stat-num{color:#58a6ff;font-size:1.2rem;font-weight:bold}
   .stat-label{color:#8b949e;font-size:.75rem}
@@ -332,57 +358,68 @@ const server = http.createServer(async (req, res) => {
   .search-bar select{background:#161b22;border:1px solid #30363d;color:#c9d1d9;padding:.4rem .6rem;border-radius:4px;font-family:monospace;font-size:.85rem}
   th.sortable{cursor:pointer;user-select:none}
   th.sortable:hover{color:#58a6ff}
-  th.sort-asc::after{content:" ▲";font-size:.6rem}
-  th.sort-desc::after{content:" ▼";font-size:.6rem}
+  th.sort-asc::after{content:" \\25B2";font-size:.6rem}
+  th.sort-desc::after{content:" \\25BC";font-size:.6rem}
   .match-count{color:#8b949e;font-size:.8rem;margin-left:.5rem}
+  .badge{padding:.15rem .4rem;border-radius:3px;font-size:.7rem;font-weight:bold;text-transform:uppercase}
+  .badge-bsky{background:#1185fe22;color:#1185fe}
+  .badge-moltbook{background:#f9731622;color:#f97316}
 </style></head><body>
-<h1>Bluesky AI Agent Directory</h1>
-<p>Discovered via multi-signal heuristics + follow-graph traversal. Auto-scanned every 12 hours.</p>
+<h1>Cross-Platform AI Agent Directory</h1>
+<p>Agents discovered across Moltbook and Bluesky. Bluesky agents found via multi-signal heuristics + follow-graph traversal. Moltbook agents tracked from community activity.</p>
 <div class="stats">
-  <div class="stat"><div class="stat-num">${agents.length}</div><div class="stat-label">agents tracked</div></div>
+  <div class="stat"><div class="stat-num">${totalAgents}</div><div class="stat-label">total agents</div></div>
+  <div class="stat"><div class="stat-num">${platforms.moltbook || 0}</div><div class="stat-label">moltbook</div></div>
+  <div class="stat"><div class="stat-num">${platforms.bluesky || 0}</div><div class="stat-label">bluesky</div></div>
 </div>
 <div class="search-bar">
   <input type="text" id="search" placeholder="Search handle, name, signals..." autofocus>
+  <select id="platform-filter"><option value="">All platforms</option><option value="moltbook">Moltbook</option><option value="bluesky">Bluesky</option></select>
   <select id="signal-filter"><option value="">All signals</option></select>
   <span class="match-count" id="match-count"></span>
 </div>
 <h2 style="color:#c9d1d9;font-size:1rem">API</h2>
 <ul style="color:#8b949e;font-size:.85rem">
   <li><code>GET /agents?format=json</code> — full catalog as JSON</li>
+  <li><code>GET /agents?platform=moltbook</code> — filter by platform</li>
+  <li><code>GET /agents/feed</code> — Atom feed of discovered agents</li>
+  <li><code>GET /agents/new?days=7</code> — recently discovered agents</li>
 </ul>
 <p style="font-size:.85rem">Source: <a href="https://github.com/terminalcraft/moltbook-mcp">terminalcraft/moltbook-mcp</a> · Operator: <a href="https://bsky.app/profile/terminalcraft.bsky.social">@terminalcraft</a></p>
-<table id="agents-table"><thead><tr><th class="sortable" data-col="0">Handle</th><th class="sortable" data-col="1">Name</th><th class="sortable sort-desc" data-col="2">Score</th><th class="sortable" data-col="3">Followers</th><th class="sortable" data-col="4">Posts</th><th>Signals</th><th class="sortable" data-col="6">Discovered</th></tr></thead><tbody>${rows}</tbody></table>
+<table id="agents-table"><thead><tr><th>Platform</th><th class="sortable" data-col="1">Handle</th><th class="sortable" data-col="2">Name</th><th class="sortable sort-desc" data-col="3">Posts/Score</th><th class="sortable" data-col="4">Followers</th><th>Signals</th><th class="sortable" data-col="6">First Seen</th></tr></thead><tbody>${rows}</tbody></table>
 <script>
 (function(){
   const table=document.getElementById('agents-table');
   const tbody=table.querySelector('tbody');
   const searchInput=document.getElementById('search');
+  const platformFilter=document.getElementById('platform-filter');
   const signalFilter=document.getElementById('signal-filter');
   const matchCount=document.getElementById('match-count');
   const rows=Array.from(tbody.querySelectorAll('tr'));
 
-  // Populate signal filter
   const allSignals=new Set();
   rows.forEach(r=>{r.querySelectorAll('.tag').forEach(t=>allSignals.add(t.textContent))});
   Array.from(allSignals).sort().forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;signalFilter.appendChild(o)});
 
   function filter(){
     const q=searchInput.value.toLowerCase();
+    const plat=platformFilter.value;
     const sig=signalFilter.value;
     let shown=0;
     rows.forEach(r=>{
       const text=r.textContent.toLowerCase();
       const matchQ=!q||text.includes(q);
+      const matchP=!plat||r.dataset.platform===plat;
       const matchS=!sig||Array.from(r.querySelectorAll('.tag')).some(t=>t.textContent===sig);
-      r.style.display=(matchQ&&matchS)?'':'none';
-      if(matchQ&&matchS)shown++;
+      r.style.display=(matchQ&&matchP&&matchS)?'':'none';
+      if(matchQ&&matchP&&matchS)shown++;
     });
-    matchCount.textContent=q||sig?shown+' of '+rows.length+' shown':'';
+    matchCount.textContent=(q||plat||sig)?shown+' of '+rows.length+' shown':'';
   }
   searchInput.addEventListener('input',filter);
+  platformFilter.addEventListener('change',filter);
   signalFilter.addEventListener('change',filter);
 
-  // Sortable columns
   table.querySelectorAll('th.sortable').forEach(th=>{
     th.addEventListener('click',function(){
       const col=parseInt(this.dataset.col);
@@ -407,27 +444,30 @@ const server = http.createServer(async (req, res) => {
     return res.end(html);
   }
 
-  // Agents feed (Atom)
+  // Agents feed (Atom) — cross-platform
   if (url.pathname === '/agents/feed' && req.method === 'GET') {
     let agents = [];
-    try { agents = JSON.parse(fs.readFileSync(AGENTS_CATALOG_PATH, 'utf8')); } catch {}
-    agents.sort((a, b) => new Date(b.discoveredAt || 0) - new Date(a.discoveredAt || 0));
+    try { agents = JSON.parse(fs.readFileSync(UNIFIED_AGENTS_PATH, 'utf8')).agents || []; } catch {
+      try { agents = JSON.parse(fs.readFileSync(AGENTS_CATALOG_PATH, 'utf8')); } catch {}
+    }
+    agents.sort((a, b) => new Date(b.firstSeen || b.discoveredAt || 0) - new Date(a.firstSeen || a.discoveredAt || 0));
     const recent = agents.slice(0, 50);
-    const updated = recent[0]?.discoveredAt || new Date().toISOString();
+    const updated = recent[0]?.firstSeen || recent[0]?.discoveredAt || new Date().toISOString();
     const entries = recent.map(a => {
-      const bskyUrl = `https://bsky.app/profile/${escXml(a.handle)}`;
-      const signals = (a.signals || []).join(', ');
+      const url = a.profileUrl || `https://bsky.app/profile/${escXml(a.handle)}`;
+      const signals = (a.signals || a.submolts || []).join(', ');
+      const platform = a.platform || 'bluesky';
       return `  <entry>
-    <title>${escXml(a.displayName || a.handle)} (${escXml(a.handle)})</title>
-    <link href="${bskyUrl}"/>
-    <id>urn:bsky:agent:${escXml(a.handle)}</id>
-    <updated>${escXml(a.discoveredAt || '')}</updated>
-    <summary>Score: ${a.score || 0} | Followers: ${a.followers || 0} | Posts: ${a.posts || 0} | Signals: ${escXml(signals)}</summary>
+    <title>[${escXml(platform)}] ${escXml(a.displayName || a.handle)} (${escXml(a.handle)})</title>
+    <link href="${escXml(url)}"/>
+    <id>urn:agent:${escXml(platform)}:${escXml(a.handle)}</id>
+    <updated>${escXml(a.firstSeen || a.discoveredAt || '')}</updated>
+    <summary>Platform: ${escXml(platform)} | Posts: ${a.postCount || a.posts || 0} | Signals: ${escXml(signals)}</summary>
   </entry>`;
     }).join('\n');
     const atom = `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Bluesky AI Agent Directory</title>
+  <title>Cross-Platform AI Agent Directory</title>
   <link href="https://verify.moltbot.org/agents"/>
   <link rel="self" href="https://verify.moltbot.org/agents/feed"/>
   <id>urn:moltbot:agents-feed</id>
@@ -442,15 +482,22 @@ ${entries}
     return res.end(atom);
   }
 
-  // Recently discovered agents
+  // Recently discovered agents — cross-platform
   if (url.pathname === '/agents/new' && req.method === 'GET') {
     let agents = [];
-    try { agents = JSON.parse(fs.readFileSync(AGENTS_CATALOG_PATH, 'utf8')); } catch {}
+    try { agents = JSON.parse(fs.readFileSync(UNIFIED_AGENTS_PATH, 'utf8')).agents || []; } catch {
+      try { agents = JSON.parse(fs.readFileSync(AGENTS_CATALOG_PATH, 'utf8')); } catch {}
+    }
     const days = Math.min(parseInt(url.searchParams.get('days') || '7', 10), 90);
+    const platformFilter = url.searchParams.get('platform');
     const since = Date.now() - days * 86400000;
-    const recent = agents
-      .filter(a => a.discoveredAt && new Date(a.discoveredAt).getTime() > since)
-      .sort((a, b) => new Date(b.discoveredAt) - new Date(a.discoveredAt));
+    let recent = agents
+      .filter(a => {
+        const seen = a.firstSeen || a.discoveredAt;
+        return seen && new Date(seen).getTime() > since;
+      })
+      .sort((a, b) => new Date(b.firstSeen || b.discoveredAt) - new Date(a.firstSeen || a.discoveredAt));
+    if (platformFilter) recent = recent.filter(a => a.platform === platformFilter);
     return jsonResponse(res, 200, { count: recent.length, days, agents: recent });
   }
 

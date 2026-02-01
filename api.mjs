@@ -4616,6 +4616,49 @@ const PRESENCE_TTL = 5 * 60_000; // 5 minutes = online
 function loadPresence() { try { return JSON.parse(readFileSync(PRESENCE_FILE, "utf8")); } catch { return {}; } }
 function savePresence(p) { writeFileSync(PRESENCE_FILE, JSON.stringify(p, null, 2)); }
 
+// Presence history — hourly buckets per handle, max 30 days
+const PRESENCE_HISTORY_FILE = join(BASE, "presence-history.json");
+const PRESENCE_HISTORY_MAX_DAYS = 30;
+function loadPresenceHistory() { try { return JSON.parse(readFileSync(PRESENCE_HISTORY_FILE, "utf8")); } catch { return {}; } }
+function savePresenceHistory(h) { writeFileSync(PRESENCE_HISTORY_FILE, JSON.stringify(h, null, 2)); }
+function recordHeartbeat(handle) {
+  const history = loadPresenceHistory();
+  if (!history[handle]) history[handle] = {};
+  const hourKey = new Date().toISOString().slice(0, 13); // "2026-02-01T16"
+  history[handle][hourKey] = (history[handle][hourKey] || 0) + 1;
+  // Prune old entries beyond 30 days
+  const cutoff = new Date(Date.now() - PRESENCE_HISTORY_MAX_DAYS * 86_400_000).toISOString().slice(0, 13);
+  for (const key of Object.keys(history[handle])) {
+    if (key < cutoff) delete history[handle][key];
+  }
+  savePresenceHistory(history);
+}
+function getPresenceStats(handle, days = 7) {
+  const history = loadPresenceHistory();
+  const agentHistory = history[handle] || {};
+  const cutoff = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 13);
+  const hours = Object.entries(agentHistory).filter(([k]) => k >= cutoff);
+  const totalHoursInRange = Math.min(days * 24, Math.max(1, Math.round((Date.now() - new Date(cutoff + ":00:00Z").getTime()) / 3_600_000)));
+  const activeHours = hours.length;
+  const totalHeartbeats = hours.reduce((s, [, c]) => s + c, 0);
+  // Daily breakdown
+  const daily = {};
+  for (const [hourKey, count] of hours) {
+    const day = hourKey.slice(0, 10);
+    if (!daily[day]) daily[day] = { hours_active: 0, heartbeats: 0 };
+    daily[day].hours_active++;
+    daily[day].heartbeats += count;
+  }
+  return {
+    period_days: days,
+    total_hours: totalHoursInRange,
+    active_hours: activeHours,
+    uptime_pct: Math.round((activeHours / totalHoursInRange) * 1000) / 10,
+    total_heartbeats: totalHeartbeats,
+    daily: Object.entries(daily).sort(([a], [b]) => b.localeCompare(a)).map(([day, d]) => ({ date: day, ...d })),
+  };
+}
+
 app.post("/presence", (req, res) => {
   const { handle, status, url, capabilities, meta } = req.body || {};
   if (!handle || typeof handle !== "string") return res.status(400).json({ error: "handle required" });
@@ -4634,6 +4677,7 @@ app.post("/presence", (req, res) => {
     meta: meta || existing.meta || {},
   };
   savePresence(presence);
+  recordHeartbeat(handle);
   fireWebhook("presence.heartbeat", { handle, status: presence[handle].status });
   res.json({ ok: true, handle, last_seen: now });
 });
@@ -4671,6 +4715,15 @@ app.delete("/presence/:handle", auth, (req, res) => {
   res.json({ deleted: true });
 });
 
+app.get("/presence/:handle/history", (req, res) => {
+  const handle = req.params.handle.toLowerCase();
+  const days = Math.min(30, Math.max(1, parseInt(req.query.days) || 7));
+  const presence = loadPresence();
+  if (!presence[handle]) return res.status(404).json({ error: "agent not found" });
+  const stats = getPresenceStats(handle, days);
+  res.json({ handle, ...stats });
+});
+
 // --- Reputation (composite score from presence + receipts + registry) ---
 function computeReputation(handle) {
   const now = Date.now();
@@ -4681,19 +4734,19 @@ function computeReputation(handle) {
   const uniqueAttesters = new Set(receipts.map(r => r.attester));
   const receiptScore = receipts.length + (uniqueAttesters.size * 2);
 
-  // 2. Presence-based reliability
+  // 2. Presence-based reliability (uses history for accurate uptime)
   const presence = loadPresence();
   const agent = presence[handle];
   let presenceScore = 0;
   let presenceDetail = { heartbeats: 0, uptime_pct: 0, online: false };
   if (agent) {
-    const firstSeen = new Date(agent.first_seen).getTime();
-    const ageMinutes = Math.max(1, (now - firstSeen) / 60_000);
-    const expectedHeartbeats = Math.max(1, ageMinutes / 5);
-    const uptimePct = Math.min(100, (agent.heartbeats / expectedHeartbeats) * 100);
     const online = (now - new Date(agent.last_seen).getTime()) < PRESENCE_TTL;
-    presenceScore = Math.round(Math.min(20, (uptimePct / 100) * 10 + (online ? 5 : 0) + Math.min(5, agent.heartbeats / 100)));
-    presenceDetail = { heartbeats: agent.heartbeats, uptime_pct: Math.round(uptimePct * 10) / 10, online, first_seen: agent.first_seen };
+    const stats = getPresenceStats(handle, 7); // 7-day window for reputation
+    const uptimePct = stats.uptime_pct;
+    // Score: up to 10 for uptime%, 5 for online now, up to 5 for consistency (active days)
+    const activeDays = stats.daily.length;
+    presenceScore = Math.round(Math.min(20, (uptimePct / 100) * 10 + (online ? 5 : 0) + Math.min(5, activeDays)));
+    presenceDetail = { heartbeats: agent.heartbeats, uptime_pct: uptimePct, online, active_days_7d: activeDays, first_seen: agent.first_seen };
   }
 
   // 3. Registry age bonus

@@ -34,14 +34,21 @@ function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "u
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
   logActivity(event, payload?.summary || payload?.title || event, payload);
-  const hooks = loadWebhooks().filter(h => h.events.includes(event) || h.events.includes("*"));
+  const allHooks = loadWebhooks();
+  const hooks = allHooks.filter(h => h.events.includes(event) || h.events.includes("*"));
+  let dirty = false;
   for (const hook of hooks) {
+    if (!hook.stats) hook.stats = { delivered: 0, failed: 0, last_delivery: null, last_failure: null };
     try {
       const body = JSON.stringify({ event, payload, timestamp: new Date().toISOString() });
       const signature = crypto.createHmac("sha256", hook.secret || "").update(body).digest("hex");
-      await fetch(hook.url, { method: "POST", headers: { "Content-Type": "application/json", "X-Webhook-Event": event, "X-Webhook-Signature": `sha256=${signature}` }, body, signal: AbortSignal.timeout(5000) }).catch(() => {});
-    } catch {}
+      const resp = await fetch(hook.url, { method: "POST", headers: { "Content-Type": "application/json", "X-Webhook-Event": event, "X-Webhook-Signature": `sha256=${signature}` }, body, signal: AbortSignal.timeout(5000) });
+      if (resp.ok) { hook.stats.delivered++; hook.stats.last_delivery = new Date().toISOString(); }
+      else { hook.stats.failed++; hook.stats.last_failure = new Date().toISOString(); }
+      dirty = true;
+    } catch { hook.stats.failed++; hook.stats.last_failure = new Date().toISOString(); dirty = true; }
   }
+  if (dirty) saveWebhooks(allHooks);
 }
 
 const ALLOWED_FILES = {
@@ -2311,6 +2318,11 @@ app.delete("/webhooks/:id", (req, res) => {
   const idx = hooks.findIndex(h => h.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: "not found" });
   hooks.splice(idx, 1); saveWebhooks(hooks); res.json({ deleted: true });
+});
+app.get("/webhooks/:id/stats", (req, res) => {
+  const hook = loadWebhooks().find(h => h.id === req.params.id);
+  if (!hook) return res.status(404).json({ error: "not found" });
+  res.json({ id: hook.id, agent: hook.agent, url: hook.url, events: hook.events, created: hook.created, stats: hook.stats || { delivered: 0, failed: 0, last_delivery: null, last_failure: null } });
 });
 
 // --- Activity Feed ---

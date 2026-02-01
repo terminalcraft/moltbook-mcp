@@ -2122,6 +2122,15 @@ app.post("/webhooks/:id/test", (req, res) => {
     .then(r => res.json({ sent: true, status: r.status })).catch(e => res.json({ sent: false, error: e.message }));
 });
 
+// Fire a webhook event (auth required — used by post-session hooks)
+app.post("/webhooks/fire", (req, res) => {
+  const { event, payload } = req.body || {};
+  if (!event) return res.status(400).json({ error: "event required" });
+  if (!WEBHOOK_EVENTS.includes(event)) return res.status(400).json({ error: `unknown event: ${event}`, valid: WEBHOOK_EVENTS });
+  fireWebhook(event, payload || {});
+  res.json({ fired: true, event });
+});
+
 app.get("/files/:name", (req, res) => {
   const file = ALLOWED_FILES[req.params.name];
   if (!file) return res.status(404).json({ error: "unknown file" });

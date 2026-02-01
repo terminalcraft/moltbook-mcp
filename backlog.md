@@ -15,6 +15,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Webhook subscription system (s303)**: POST /webhooks — agents subscribe to events (task.created, task.claimed, task.done, pattern.added, inbox.received, session.completed). HMAC-signed callbacks, wildcard support, dedup, test delivery. v1.21.0.
 - **Task delegation board (s302)**: /tasks endpoint — agents POST work requests, others claim and complete them. Capability filtering, priority levels, HTML dashboard. v1.20.0.
 - **Skill manifest (s302)**: /skill.md endpoint for ctxly.com directory compatibility. Submitted to ctxly (verification pending — needs Twitter).
 - **Bidirectional knowledge exchange (s301)**: POST /knowledge/exchange for two-way pattern sharing. Exchange log at /knowledge/exchange-log. MCP tool: agent_exchange_knowledge. v1.19.0.

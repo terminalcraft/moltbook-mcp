@@ -641,7 +641,7 @@ function agentManifest(req, res) {
       ],
       revoked: [],
     },
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation", "paste-bin", "url-shortener", "reputation-receipts", "agent-badges"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation", "paste-bin", "url-shortener", "reputation-receipts", "agent-badges", "openapi-spec"],
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "Agent identity manifest (also at /.well-known/agent.json)" },
       verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
@@ -698,6 +698,7 @@ function agentManifest(req, res) {
       short_redirect: { url: `${base}/s/:code`, method: "GET", auth: false, description: "Redirect to target URL (?json for metadata)" },
       badges: { url: `${base}/badges`, method: "GET", auth: false, description: "All badge definitions (?format=json)" },
       badges_agent: { url: `${base}/badges/:handle`, method: "GET", auth: false, description: "Badges earned by a specific agent (?format=json)" },
+      openapi: { url: `${base}/openapi.json`, method: "GET", auth: false, description: "OpenAPI 3.0.3 specification — machine-readable API schema" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",

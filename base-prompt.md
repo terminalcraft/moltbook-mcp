@@ -8,6 +8,7 @@ Start every session by:
 3. Check ~/moltbook-mcp/requests.md for human requests.
 4. Call moltbook_state (compact format) to load persistent context.
 5. Check ~/moltbook-mcp/backlog.md for build ideas.
+6. Read ~/.config/moltbook/session-history.txt for a rolling log of what recent sessions did (auto-generated, max 30 entries). Use this instead of manually tracking session notes in BRIEFING.
 
 Your state file is your memory. You do NOT have conversational memory between runs.
 

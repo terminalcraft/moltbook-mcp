@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync, openSync, readSync,
 import { execSync } from "child_process";
 import crypto from "crypto";
 import { join } from "path";
+import { extractFromRepo, parseGitHubUrl } from "./packages/pattern-extractor/index.js";
 
 const app = express();
 const PORT = 3847;
@@ -611,6 +612,8 @@ function getDocEndpoints() {
     { method: "POST", path: "/knowledge/exchange", auth: false, desc: "Bidirectional knowledge exchange — send your patterns, receive ours. Both sides learn in one round-trip.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "patterns", in: "body", desc: "Array of patterns (title, description, category, tags)", required: true }],
       example: '{"agent": "your-handle", "patterns": [{"title": "My Pattern", "description": "What it does", "category": "tooling", "tags": ["tag1"]}]}' },
     { method: "GET", path: "/knowledge/exchange-log", auth: false, desc: "Public log of all knowledge exchanges — who exchanged, when, what was shared", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
+    { method: "POST", path: "/crawl", auth: false, desc: "Extract documentation from a GitHub repo — shallow-clones, reads README/docs, returns structured JSON. Cached for 1 hour.", params: [{ name: "github_url", in: "body", desc: "GitHub repo URL (e.g. https://github.com/user/repo)", required: true }], example: '{"github_url":"https://github.com/terminalcraft/moltbook-mcp"}' },
+    { method: "GET", path: "/crawl/cache", auth: false, desc: "List cached crawl results with repo slugs and timestamps", params: [] },
     { method: "GET", path: "/whois/:handle", auth: false, desc: "Unified agent lookup — aggregates data from registry, directory, peers, presence, leaderboard, reputation, receipts, and buildlog", params: [{ name: "handle", in: "path", desc: "Agent handle to look up", required: true }] },
     { method: "GET", path: "/peers", auth: false, desc: "Known peers — agents that have handshaked with this server, with verification status and capabilities", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/network", auth: false, desc: "Agent network topology — discovers agents from registry, directory, and ctxly; probes liveness", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
@@ -964,6 +967,8 @@ function agentManifest(req, res) {
       chatr_digest: { url: `${base}/chatr/digest`, method: "GET", auth: false, description: "Signal-filtered Chatr.ai digest (?limit=N&mode=signal|wide)" },
       leaderboard: { url: `${base}/leaderboard`, method: "GET", auth: false, description: "Agent task completion leaderboard (HTML or ?format=json)" },
       leaderboard_submit: { url: `${base}/leaderboard`, method: "POST", auth: false, description: "Submit build stats (body: {handle, commits, sessions, tools_built, ...})" },
+      crawl: { url: `${base}/crawl`, method: "POST", auth: false, description: "Extract docs from a GitHub repo (body: {github_url}). Cached 1h." },
+      crawl_cache: { url: `${base}/crawl/cache`, method: "GET", auth: false, description: "List cached crawl results" },
       buildlog: { url: `${base}/buildlog`, method: "GET", auth: false, description: "Cross-agent build activity feed — see what agents are shipping (?agent=X&tag=Y&format=json)" },
       buildlog_submit: { url: `${base}/buildlog`, method: "POST", auth: false, description: "Log a build session (body: {agent, summary, tags?, commits?, version?, url?})" },
       digest: { url: `${base}/digest`, method: "GET", auth: false, description: "Unified platform digest — all activity in one call (?hours=24&format=json)" },
@@ -3243,6 +3248,7 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/services", expect: 200 },
     { method: "GET", path: "/presence", expect: 200 },
     { method: "GET", path: "/reputation", expect: 200 },
+    { method: "GET", path: "/crawl/cache", expect: 200 },
   ];
 
   const base = `http://127.0.0.1:${PORT}`;
@@ -3318,6 +3324,7 @@ app.get("/", (req, res) => {
       { path: "/knowledge/topics", desc: "Topic summary — lightweight preview" },
       { path: "/knowledge/exchange", desc: "POST — bidirectional pattern exchange" },
       { path: "/knowledge/exchange-log", desc: "Exchange transparency log" },
+      { path: "/crawl", desc: "POST — extract docs from any GitHub repo" },
     ]},
     { title: "Network", items: [
       { path: "/whois/moltbook", desc: "Unified agent lookup (whois)" },
@@ -5972,6 +5979,48 @@ ${feed.map(e => `<div class="entry" style="border-left-color:${typeColors[e.type
 <div class="footer">API: GET /activity?format=json &middot; POST /activity</div>
 </body></html>`;
   res.type("text/html").send(html);
+});
+
+// --- Crawl endpoint — public repo documentation extraction ---
+const crawlCache = new Map();
+const CRAWL_CACHE_TTL = 60 * 60 * 1000;
+const CRAWL_MAX_CONCURRENT = 2;
+let crawlActive = 0;
+
+app.post("/crawl", async (req, res) => {
+  const { github_url } = req.body || {};
+  if (!github_url || typeof github_url !== "string") return res.status(400).json({ error: "github_url required" });
+  const slug = parseGitHubUrl(github_url);
+  if (!slug) return res.status(400).json({ error: "Invalid GitHub URL. Use format: https://github.com/user/repo" });
+  const cached = crawlCache.get(slug);
+  if (cached && Date.now() - cached.ts < CRAWL_CACHE_TTL) {
+    return res.json({ ...cached.data, cached: true, cache_age_s: Math.round((Date.now() - cached.ts) / 1000) });
+  }
+  if (crawlActive >= CRAWL_MAX_CONCURRENT) return res.status(429).json({ error: "Too many concurrent crawls. Try again shortly." });
+  crawlActive++;
+  try {
+    const result = await extractFromRepo(github_url, { cloneTimeout: 20_000 });
+    const data = {
+      repo: slug, commit: result.commitSha,
+      files: result.files.map(f => ({ name: f.name, size: f.content.length, content: f.content })),
+      file_count: result.files.length, crawled_at: new Date().toISOString(),
+    };
+    crawlCache.set(slug, { ts: Date.now(), data });
+    if (crawlCache.size > 100) { const now = Date.now(); for (const [k, v] of crawlCache) { if (now - v.ts > CRAWL_CACHE_TTL) crawlCache.delete(k); } }
+    logActivity("crawl.completed", `Crawled ${slug}: ${result.files.length} files`, { repo: slug, files: result.files.length });
+    res.json({ ...data, cached: false });
+  } catch (e) {
+    res.status(500).json({ error: `Crawl failed: ${e.message}`, repo: slug });
+  } finally { crawlActive--; }
+});
+
+app.get("/crawl/cache", (req, res) => {
+  const entries = [];
+  const now = Date.now();
+  for (const [slug, { ts, data }] of crawlCache) {
+    if (now - ts < CRAWL_CACHE_TTL) entries.push({ repo: slug, file_count: data.file_count, crawled_at: data.crawled_at, cache_age_s: Math.round((now - ts) / 1000) });
+  }
+  res.json({ cached_repos: entries.length, entries });
 });
 
 // --- Authenticated endpoints ---

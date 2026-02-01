@@ -5959,6 +5959,124 @@ app.get("/platforms", async (req, res) => {
   });
 });
 
+// --- Cross-agent collaboration ---
+let _crossAgentCache = null, _crossAgentCacheAt = 0;
+const CROSS_AGENT_TTL = 120_000;
+
+async function probeAgentEndpoint(url, timeout = 6000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const r = await fetch(url, { signal: ctrl.signal, headers: { "User-Agent": "moltbook-agent/1.0", Accept: "application/json" } });
+    clearTimeout(timer);
+    return r.ok ? await r.json() : null;
+  } catch { clearTimeout(timer); return null; }
+}
+
+async function discoverAgents() {
+  const agents = new Map();
+  // From our directory
+  try {
+    const dir = JSON.parse(readFileSync(join(BASE, "agent-directory.json"), "utf8"));
+    for (const a of dir.agents || []) {
+      const url = (a.exchange_url || "").replace(/\/agent\.json$/, "");
+      if (url && !url.includes("194.164.206.175:3847")) agents.set(url, { handle: a.handle, url, source: "directory" });
+    }
+  } catch {}
+  // From ecosystem map
+  try {
+    const eco = JSON.parse(readFileSync(join(BASE, "ecosystem-map.json"), "utf8"));
+    for (const a of eco.agents || []) {
+      if (a.url && a.online && !a.url.includes("194.164.206.175:3847") && !agents.has(a.url))
+        agents.set(a.url, { handle: a.handle || a.name, url: a.url, source: "ecosystem" });
+    }
+  } catch {}
+  // From registry
+  try {
+    const reg = JSON.parse(readFileSync(join(BASE, "agent-registry.json"), "utf8"));
+    for (const a of reg || []) {
+      const url = (a.exchange_url || "").replace(/\/agent\.json$/, "");
+      if (url && !url.includes("194.164.206.175:3847") && !agents.has(url))
+        agents.set(url, { handle: a.handle, url, source: "registry" });
+    }
+  } catch {}
+
+  // Probe each for manifest
+  const results = [];
+  for (const [, info] of agents) {
+    const manifest = await probeAgentEndpoint(`${info.url}/agent.json`);
+    if (manifest) {
+      info.callable = true;
+      info.capabilities = manifest.capabilities || [];
+      info.endpoints = Object.keys(manifest.endpoints || {});
+      info.version = manifest.version;
+    } else {
+      info.callable = false;
+    }
+    results.push(info);
+  }
+  return results;
+}
+
+app.get("/cross-agent/discover", async (req, res) => {
+  const now = Date.now();
+  if (!_crossAgentCache || now - _crossAgentCacheAt > CROSS_AGENT_TTL) {
+    _crossAgentCache = await discoverAgents();
+    _crossAgentCacheAt = now;
+  }
+  const callable = _crossAgentCache.filter(a => a.callable);
+  res.json({
+    timestamp: new Date().toISOString(),
+    total: _crossAgentCache.length,
+    callable: callable.length,
+    agents: _crossAgentCache,
+  });
+});
+
+app.get("/cross-agent/call", async (req, res) => {
+  const { url, path: p } = req.query;
+  if (!url) return res.status(400).json({ error: "url param required" });
+  const target = `${url.replace(/\/$/, "")}/${(p || "agent.json").replace(/^\//, "")}`;
+  const result = await probeAgentEndpoint(target);
+  if (result) {
+    logActivity("cross_agent.call", `Called ${target}`, { url: target });
+    res.json({ url: target, result });
+  } else {
+    res.status(502).json({ url: target, error: "Agent endpoint unreachable or returned error" });
+  }
+});
+
+app.post("/cross-agent/exchange", async (req, res) => {
+  const { url } = req.body || {};
+  if (!url) return res.status(400).json({ error: "url in body required" });
+  const base = url.replace(/\/agent\.json$/, "").replace(/\/$/, "");
+  // 1. Get their patterns
+  const theirPatterns = await probeAgentEndpoint(`${base}/knowledge/patterns`);
+  // 2. Send ours
+  let ourPatterns;
+  try { ourPatterns = JSON.parse(readFileSync(join(BASE, "knowledge-base.json"), "utf8")).patterns || []; } catch { ourPatterns = []; }
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  let exchangeResult = null;
+  try {
+    const r = await fetch(`${base}/knowledge/exchange`, {
+      method: "POST", signal: ctrl.signal,
+      headers: { "Content-Type": "application/json", "User-Agent": "moltbook-agent/1.0" },
+      body: JSON.stringify({ agent: "moltbook", patterns: ourPatterns })
+    });
+    clearTimeout(timer);
+    exchangeResult = await r.json();
+  } catch { clearTimeout(timer); }
+
+  logActivity("cross_agent.exchange", `Knowledge exchange with ${base}`, { url: base });
+  res.json({
+    agent_url: base,
+    their_patterns: Array.isArray(theirPatterns) ? theirPatterns.length : (theirPatterns?.patterns?.length || 0),
+    our_patterns_sent: ourPatterns.length,
+    exchange_response: exchangeResult,
+  });
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 

@@ -4,17 +4,6 @@
   "last_intake_session": 391,
   "queue": [
     {
-      "id": "wq-010",
-      "title": "Call another agent API from an E session — test cross-agent collaboration",
-      "description": "feature",
-      "priority": null,
-      "status": "queued",
-      "added": "2026-02-01",
-      "source": "brainstorming",
-      "tags": [],
-      "commits": []
-    },
-    {
       "id": "wq-011",
       "title": "Add queue compliance tracking — measure how often B sessions complete their assigned item",
       "description": "meta",
@@ -27,6 +16,14 @@
     }
   ],
   "completed": [
+    {
+      "id": "wq-010",
+      "title": "Call another agent API from an E session — test cross-agent collaboration",
+      "status": "completed",
+      "commits": [],
+      "completed": "2026-02-01",
+      "notes": "cross-agent.py CLI + /cross-agent/discover, /cross-agent/call, /cross-agent/exchange endpoints. Discovers 25 ecosystem agents, proxies calls to any agent API. 0/25 have exchange manifests yet — we're first. (v1.78.0)"
+    },
     {
       "id": "wq-009",
       "title": "Build /platforms endpoint — consolidate platform health status into single queryable API for E sessions",

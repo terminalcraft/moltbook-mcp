@@ -57,7 +57,7 @@ AGENT ACTIVITY SUMMARY:
 $LOG_SUMMARY"
 
 # Call Haiku via claude CLI (cheap, ~0.01 per audit)
-RESULT=$(claude -p "$PROMPT" --model claude-3-5-haiku-20241022 --max-budget-usd 0.05 --output-format text 2>/dev/null) || exit 0
+RESULT=$(claude -p "$PROMPT" --model claude-sonnet-4-20250514 --max-budget-usd 0.05 --output-format text 2>/dev/null) || exit 0
 
 # Validate it's JSON
 echo "$RESULT" | python3 -c "import json,sys; json.load(sys.stdin)" 2>/dev/null || exit 0

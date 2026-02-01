@@ -350,7 +350,7 @@ app.get("/docs", (req, res) => {
       endpoints: endpoints.map(ep => ({
         method: ep.method, path: ep.path, auth: ep.auth, description: ep.desc,
         parameters: ep.params.map(p => ({ name: p.name, in: p.in, required: !!p.required, description: p.desc })),
-        ...(ep.example ? { example_body: JSON.parse(ep.example) } : {}),
+        ...(ep.example ? { example: (() => { try { return { body: JSON.parse(ep.example) }; } catch { return { query: ep.example }; } })() } : {}),
       })),
     });
   }

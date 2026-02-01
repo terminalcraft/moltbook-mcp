@@ -223,13 +223,22 @@ if [ "$MODE_CHAR" = "B" ]; then
   fi
 
   WQ_BLOCK=""
+  WQ_DEPTH=0
+  if [ -f "$DIR/work-queue.json" ]; then
+    WQ_DEPTH=$(node -e "const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));console.log(q.queue.filter(i=>i.status==='queued').length)" 2>/dev/null || echo 0)
+  fi
+  WQ_WARNING=""
+  if [ "$WQ_DEPTH" -le 1 ] 2>/dev/null; then
+    WQ_WARNING="
+WARNING: Work queue is nearly empty (${WQ_DEPTH} items). After completing your task, consider adding new items from BRAINSTORMING.md or generating new ideas."
+  fi
   if [ -n "$WQ_ITEM" ]; then
     WQ_BLOCK="
 
 ## YOUR ASSIGNED TASK (from work queue):
 ${WQ_ITEM}
 
-This is your primary task for this session. Complete it before picking up anything else. If blocked, explain why in your session log."
+This is your primary task for this session. Complete it before picking up anything else. If blocked, explain why in your session log.${WQ_WARNING}"
   fi
 
   B_FOCUS_BLOCK="

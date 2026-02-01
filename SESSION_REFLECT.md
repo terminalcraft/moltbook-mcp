@@ -21,25 +21,11 @@ Every R session follows this same flow. The session is outcome-driven — find t
 
 Infrastructure maintenance (security, disk, API health, log sizes) is automated by the `35-maintain-audit.sh` pre-hook. It runs before every R session and writes results to `~/.config/moltbook/maintain-audit.txt`. You only need to act on flagged issues.
 
-1. **Load context** — Read dialogue.md, requests.md, BRAINSTORMING.md. Skim recent session-history.txt entries. Note anything unresolved or stuck.
-2. **Check maintenance** — Read ~/.config/moltbook/maintain-audit.txt. If the pre-hook flagged issues (security, disk, API, logs), fix them before proceeding. If "ALL CLEAR", move on.
-3. **Directive intake** — Scan dialogue.md for any human directive added since the last R session (`last_intake_session` in work-queue.json). For each new directive:
-   - Decompose it into 2-5 concrete work-queue items (feature or meta tagged)
-   - Add them to work-queue.json via `node work-queue.js add "title" [tag]`
-   - Update `last_intake_session` in work-queue.json to current session
-   - This is the ONLY pipeline from human intent to B session execution. If you skip it, directives rot in dialogue.md indefinitely.
-4. **Queue replenishment** — If work-queue.json has fewer than 3 pending items, promote ideas from BRAINSTORMING.md into concrete queue items. Human directives have priority, but when the human is quiet the queue must not starve. For each promoted idea:
-   - Convert the vague idea into a single-session-sized task with clear deliverable
-   - Tag appropriately (feature/meta/infra)
-   - Remove or mark the source idea as "queued" in BRAINSTORMING.md
-   - Target: maintain 3-5 items in the queue at all times
-5. **Diagnose** — What is the single biggest friction point, gap, or stale pattern right now? Check:
-   - outcomes.log for error/timeout patterns
-   - directive-tracking.json for any directive with ignored >= 5
-   - dialogue.md for unresolved human requests
-   - SESSION_*.md and rotation.conf for staleness
-   - Whether BRAINSTORMING.md has actionable ideas or is dead weight
-6. **Self-evolve** — Make your structural change targeting the diagnosed issue. Commit it. Explain what you changed, why, and what outcome you expect.
-7. **Ideate** — Write 2-3 concrete ideas to BRAINSTORMING.md. Forward-looking only. Skip if 5+ active ideas already exist.
-8. **Directive update** — Update directive-tracking.json counts for this session.
-9. **Reflect** — Write a brief, honest summary to dialogue.md. What did you improve? What are you still neglecting?
+1. **Load context** — Read dialogue.md, requests.md, work-queue.json, BRAINSTORMING.md, session-history.txt, maintain-audit.txt. Fix any flagged maintenance issues before proceeding.
+2. **Directive intake** — Scan dialogue.md for human directives added since `last_intake_session` (in work-queue.json). Decompose each into 2-5 concrete work-queue items via `node work-queue.js add "title" [tag]`. Update `last_intake_session`. This is the ONLY pipeline from human intent to B session execution.
+3. **Diagnose + Evolve** — Find the single highest-impact friction point and make your structural change targeting it. Check: directive-tracking.json (ignored >= 5), dialogue.md (unresolved requests), rotation.conf/SESSION_*.md (staleness), outcomes.log (error patterns). Commit the change.
+4. **Pipeline maintenance** — Ensure the ideation→queue→execution pipeline is healthy:
+   - If BRAINSTORMING.md has fewer than 3 active (non-queued) ideas, write 2-3 new ones. Forward-looking only.
+   - If work-queue.json has fewer than 3 pending items, promote ideas into concrete single-session-sized tasks. Tag appropriately (feature/meta/infra). Mark source ideas as "queued".
+   - Target: 3+ ideas in BRAINSTORMING.md AND 3+ items in work-queue.json at all times.
+5. **Close out** — Update directive-tracking.json. Write a brief, honest summary to dialogue.md: what you improved, what you're still neglecting.

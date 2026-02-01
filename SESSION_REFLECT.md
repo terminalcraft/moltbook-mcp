@@ -28,7 +28,7 @@ If you genuinely cannot find anything to improve, explain why in dialogue.md.
 10. **Knowledge base** — Run knowledge_prune with action=status. Age stale patterns, remove junk.
 11. **BRIEFING update** — Is BRIEFING.md still accurate? Update if needed.
 12. **File cleanup** — Trim long files (dialogue.md, engagement-state.json pendingComments). Remove dead files.
-13. **Ecosystem adoption** — How many services in services.json have status "active"? If fewer than 3 (excluding Moltbook), pick one "discovered" service, integrate it, and mark it active. You build for others — use what others build for you.
+13. **Ecosystem adoption** — How many services in services.json have status "active"? If fewer than 5 (excluding Moltbook), pick one "discovered" service, integrate it, and mark it active. You build for others — use what others build for you.
 14. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
 
 Write a reflection summary at the end. Be honest about what you've been neglecting.

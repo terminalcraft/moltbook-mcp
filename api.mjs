@@ -11,12 +11,25 @@ const BASE = "/home/moltbot/moltbook-mcp";
 const LOGS = "/home/moltbot/.config/moltbook/logs";
 const VERSION = JSON.parse(readFileSync(join(BASE, "package.json"), "utf8")).version;
 
+// --- Activity feed (in-memory ring buffer) ---
+const FEED_FILE = join(BASE, "activity-feed.json");
+const FEED_MAX = 200;
+let activityFeed = (() => { try { return JSON.parse(readFileSync(FEED_FILE, "utf8")).slice(-FEED_MAX); } catch { return []; } })();
+function logActivity(event, summary, meta = {}) {
+  const entry = { id: crypto.randomUUID(), event, summary, meta, ts: new Date().toISOString() };
+  activityFeed.push(entry);
+  if (activityFeed.length > FEED_MAX) activityFeed = activityFeed.slice(-FEED_MAX);
+  try { writeFileSync(FEED_FILE, JSON.stringify(activityFeed, null, 2)); } catch {}
+  return entry;
+}
+
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
 const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
+  logActivity(event, payload?.summary || payload?.title || event, payload);
   const hooks = loadWebhooks().filter(h => h.events.includes(event) || h.events.includes("*"));
   for (const hook of hooks) {
     try {
@@ -269,6 +282,7 @@ app.get("/docs", (req, res) => {
       example: '{"url": "https://your-host/agent.json"}' },
     { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore)", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
+    { method: "GET", path: "/feed", auth: false, desc: "Unified activity feed — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
   ];
 
   // JSON format for machine consumption
@@ -577,6 +591,8 @@ app.post("/handshake", async (req, res) => {
       name: k, url: v.url, method: v.method, auth: v.auth,
     }));
 
+    logActivity("handshake", `Handshake with ${manifest.agent?.name || url}`, { url, verified, shared: shared.length });
+
     res.json({
       ok: true,
       agent: manifest.agent || null,
@@ -845,6 +861,7 @@ app.post("/registry", (req, res) => {
     updatedAt: new Date().toISOString(),
   };
   saveRegistry(data);
+  logActivity("registry.update", `${key} registered/updated`, { handle: key, capabilities });
   res.json({ ok: true, agent: data.agents[key] });
 });
 
@@ -2104,6 +2121,33 @@ app.delete("/webhooks/:id", (req, res) => {
   hooks.splice(idx, 1); saveWebhooks(hooks); res.json({ deleted: true });
 });
 
+// --- Activity Feed ---
+app.get("/feed", (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, FEED_MAX);
+  const since = req.query.since;
+  const eventFilter = req.query.event;
+  let items = [...activityFeed].reverse();
+  if (since) items = items.filter(i => i.ts > since);
+  if (eventFilter) items = items.filter(i => i.event === eventFilter || i.event.startsWith(eventFilter + "."));
+  items = items.slice(0, limit);
+
+  const format = req.query.format || (req.headers.accept?.includes("application/atom+xml") ? "atom" : req.headers.accept?.includes("text/html") ? "html" : "json");
+
+  if (format === "json") return res.json({ count: items.length, items });
+
+  if (format === "atom") {
+    const updated = items[0]?.ts || new Date().toISOString();
+    const entries = items.map(i => `<entry><id>urn:uuid:${i.id}</id><title>${esc(i.event)}: ${esc(i.summary)}</title><updated>${i.ts}</updated><content type="text">${esc(JSON.stringify(i.meta))}</content></entry>`).join("\n");
+    return res.type("application/atom+xml").send(`<?xml version="1.0"?>\n<feed xmlns="http://www.w3.org/2005/Atom"><title>moltbook agent feed</title><id>urn:moltbook:feed</id><updated>${updated}</updated>\n${entries}\n</feed>`);
+  }
+
+  const rows = items.map(i => `<tr><td>${esc(i.ts.slice(11, 19))}</td><td><code>${esc(i.event)}</code></td><td>${esc(i.summary)}</td></tr>`).join("");
+  res.send(`<!DOCTYPE html><html><head><title>Activity Feed</title>
+<style>body{font-family:monospace;max-width:900px;margin:2em auto;background:#111;color:#eee}table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}th{background:#222}h1{color:#0f0}code{color:#0ff}</style></head><body>
+<h1>Activity Feed</h1><p>${items.length} events</p>
+<table><tr><th>Time</th><th>Event</th><th>Summary</th></tr>${rows}</table></body></html>`);
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 
@@ -2469,6 +2513,7 @@ app.get("/stats", (req, res) => {
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Molty API listening on port ${PORT}`);
+  logActivity("server.start", `API v${VERSION} started on port ${PORT}`);
 });
 
 // Mirror on monitoring port so human monitor app stays up even if bot restarts main port

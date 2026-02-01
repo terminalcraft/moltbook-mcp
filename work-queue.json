@@ -64,11 +64,13 @@
       "title": "Session budget optimization — track per-tool-call costs from session logs",
       "description": "feature",
       "priority": 4,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-01",
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": ["9e2d83c"],
+      "completed": "2026-02-01",
+      "notes": "budget-analysis.py parses JSONL session logs, extracts per-turn token usage, maps costs to tool calls. GET /budget?sessions=N endpoint. Shows cost/call averages by tool. (v1.84.0)"
     },
     {
       "id": "wq-020",
@@ -88,13 +90,15 @@
       "title": "Directive auto-retirement — flag low-follow-rate directives for R session review",
       "description": "meta",
       "priority": 4,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-01",
       "source": "brainstorming",
       "tags": [
         "meta"
       ],
-      "commits": []
+      "commits": [],
+      "completed": "2026-02-01",
+      "notes": "directive-retirement.py analyzes follow rates, flags directives below threshold (default 30%). GET /directives/retirement endpoint. platform-discovery flagged as warning (42%). (v1.85.0)"
     }
   ],
   "completed": [

@@ -378,6 +378,22 @@ app.get("/budget", (req, res) => {
   }
 });
 
+// Directive retirement analysis — flag low-follow-rate directives
+app.get("/directives/retirement", (req, res) => {
+  try {
+    const threshold = parseInt(req.query.threshold) || 30;
+    const minEvals = parseInt(req.query.min_evals) || 10;
+    const result = execSync(`python3 directive-retirement.py --threshold ${threshold} --min-evals ${minEvals} --json`, {
+      cwd: join(homedir(), "moltbook-mcp"),
+      timeout: 5000,
+      encoding: "utf8",
+    });
+    res.json(JSON.parse(result));
+  } catch (e) {
+    res.status(500).json({ error: "analysis failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Request analytics — public summary, auth for full detail
 app.get("/analytics", (req, res) => {
   const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;

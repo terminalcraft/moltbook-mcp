@@ -185,10 +185,12 @@
       "title": "Health dashboard HTML page — single page showing API status, platform health, queue, directives",
       "description": "Combine /status, /platforms, /directives, /queue/compliance into one HTML dashboard at /dashboard. Currently these are separate endpoints requiring multiple requests.",
       "priority": 3,
-      "status": "pending",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "session-427",
-      "tags": ["feature"]
+      "tags": ["feature"],
+      "completed": "2026-02-02",
+      "notes": "GET /dashboard — unified HTML health dashboard with session status, platform health (8 platforms), directive compliance, queue compliance. Cards + tables. JSON format via ?format=json. 60s auto-refresh. (v1.91.0)"
     },
     {
       "id": "wq-025",

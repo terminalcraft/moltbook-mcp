@@ -781,6 +781,173 @@ ${categories.map(cat => {
   res.type("text/html").send(html);
 });
 
+// --- Unified health dashboard ---
+app.get("/dashboard", async (req, res) => {
+  // Gather all data in parallel
+  const [statusData, platformData, directiveData, queueData] = await Promise.all([
+    // Status
+    (async () => {
+      try {
+        let running = false;
+        try {
+          const lockCheck = execSync(
+            "flock -n /home/moltbot/.config/moltbook/heartbeat.lock true 2>/dev/null && echo free || echo locked",
+            { encoding: "utf-8" }
+          ).trim();
+          running = lockCheck === "locked";
+        } catch { running = false; }
+        let tools = 0, elapsed_seconds = null, session_mode = null;
+        if (running) {
+          try {
+            const info = execSync(
+              `LOG=$(ls -t ${LOGS}/*.log 2>/dev/null | grep -E "/[0-9]{8}_[0-9]{6}\\.log$" | head -1) && echo "$LOG" && stat --format='%W' "$LOG" && date +%s && grep -c '"type":"tool_use"' "$LOG" 2>/dev/null || echo 0`,
+              { encoding: "utf-8" }
+            );
+            const parts = info.trim().split("\n");
+            if (parts.length >= 4) {
+              elapsed_seconds = parseInt(parts[1]) > 0 ? parseInt(parts[2]) - parseInt(parts[1]) : null;
+              tools = parseInt(parts[3]) || 0;
+            }
+          } catch {}
+          try {
+            const logPath = getNewestLog();
+            if (logPath) {
+              const fd2 = openSync(logPath, "r");
+              const hdrBuf = Buffer.alloc(200);
+              readSync(fd2, hdrBuf, 0, 200, 0);
+              closeSync(fd2);
+              const modeMatch = hdrBuf.toString("utf-8").match(/mode=([EBRL])/);
+              if (modeMatch) session_mode = modeMatch[1];
+            }
+          } catch {}
+        }
+        let rotation_counter = 0;
+        try { rotation_counter = parseInt(readFileSync("/home/moltbot/.config/moltbook/session_counter", "utf-8").trim()) || 0; } catch {}
+        return { running, tools, elapsed_seconds, session_mode, rotation_counter };
+      } catch { return { running: false, tools: 0, elapsed_seconds: null, session_mode: null, rotation_counter: 0 }; }
+    })(),
+    // Platforms
+    (async () => {
+      try {
+        if (!_platformCache || Date.now() - _platformCacheAt > PLATFORM_CACHE_TTL) {
+          _platformCache = await probePlatforms();
+          _platformCacheAt = Date.now();
+        }
+        const p = _platformCache;
+        return { engageable: p.filter(x => x.engageable).length, degraded: p.filter(x => !x.engageable && x.read?.status !== "down").length, down: p.filter(x => x.read?.status === "down").length, total: p.length, platforms: p };
+      } catch { return { engageable: 0, degraded: 0, down: 0, total: 0, platforms: [] }; }
+    })(),
+    // Directives
+    (async () => {
+      try {
+        const data = JSON.parse(readFileSync(join(BASE, "directive-tracking.json"), "utf-8"));
+        const directives = Object.entries(data.directives || {}).map(([name, d]) => {
+          const total = (d.followed || 0) + (d.ignored || 0);
+          const rate = total > 0 ? +((d.followed || 0) / total * 100).toFixed(1) : null;
+          const status = rate === null ? "no_data" : rate >= 90 ? "healthy" : rate >= 70 ? "warning" : "critical";
+          return { name, compliance_pct: rate, status, followed: d.followed || 0, ignored: d.ignored || 0 };
+        });
+        const totalF = directives.reduce((s, d) => s + d.followed, 0);
+        const totalI = directives.reduce((s, d) => s + d.ignored, 0);
+        const overall = (totalF + totalI) > 0 ? +((totalF / (totalF + totalI)) * 100).toFixed(1) : null;
+        return { overall, healthy: directives.filter(d => d.status === "healthy").length, warning: directives.filter(d => d.status === "warning").length, critical: directives.filter(d => d.status === "critical").length, directives };
+      } catch { return { overall: null, healthy: 0, warning: 0, critical: 0, directives: [] }; }
+    })(),
+    // Queue compliance
+    (async () => {
+      try {
+        const out = execSync("python3 scripts/queue-compliance.py", { cwd: BASE, timeout: 5000 }).toString();
+        return JSON.parse(out);
+      } catch { return { compliance_rate: null, total: 0, completed: 0, skipped: 0 }; }
+    })(),
+  ]);
+
+  // JSON format
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json({ timestamp: new Date().toISOString(), status: statusData, platforms: platformData, directives: directiveData, queue: queueData });
+  }
+
+  // Render HTML
+  const statusColor = (s) => s === "up" || s === "healthy" ? "#22c55e" : s === "degraded" || s === "warning" ? "#eab308" : s === "down" || s === "critical" ? "#ef4444" : "#666";
+  const dot = (color) => `<span style="color:${color};font-size:1.1em">&#9679;</span>`;
+
+  const sessionInfo = statusData.running
+    ? `<span style="color:#22c55e">&#9679; Running</span> — session ${statusData.rotation_counter}, mode ${statusData.session_mode || "?"}, ${statusData.tools} tool calls, ${statusData.elapsed_seconds ? Math.round(statusData.elapsed_seconds / 60) + "m" : "?"}`
+    : `<span style="color:#666">&#9679; Idle</span> — session ${statusData.rotation_counter}`;
+
+  const platformRows = (platformData.platforms || []).map(p => {
+    const icon = p.engageable ? "#22c55e" : p.read?.status === "down" ? "#ef4444" : "#eab308";
+    const uptime = p.uptime_24h !== null ? `${p.uptime_24h}%` : "—";
+    return `<tr><td>${dot(icon)}</td><td>${p.name || p.id}</td><td>${p.read?.status || "?"}</td><td>${p.read?.ms || "?"}ms</td><td>${uptime}</td></tr>`;
+  }).join("");
+
+  const directiveRows = (directiveData.directives || [])
+    .sort((a, b) => (a.compliance_pct ?? 100) - (b.compliance_pct ?? 100))
+    .map(d => {
+      const color = statusColor(d.status);
+      return `<tr><td>${dot(color)}</td><td>${d.name}</td><td style="color:${color}">${d.compliance_pct !== null ? d.compliance_pct + "%" : "—"}</td><td>${d.followed}/${d.followed + d.ignored}</td></tr>`;
+    }).join("");
+
+  const qc = queueData;
+  const qcRate = qc.compliance_rate ?? qc.rate ?? null;
+
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>@moltbook Health Dashboard</title>
+<meta http-equiv="refresh" content="60">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:960px;margin:0 auto}
+  h1{font-size:1.5em;color:#fff;margin-bottom:4px}
+  .sub{color:#888;font-size:0.85em;margin-bottom:20px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+  .card{background:#111;border:1px solid #222;border-radius:6px;padding:14px}
+  .card h3{font-size:0.75em;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .card .val{font-size:1.6em;font-weight:bold}
+  section{margin-bottom:28px}
+  section h2{font-size:1.1em;color:#ccc;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1a1a1a}
+  table{border-collapse:collapse;width:100%}
+  td,th{padding:6px 10px;text-align:left;border-bottom:1px solid #1a1a1a;font-size:0.9em}
+  th{color:#888;font-size:0.75em;text-transform:uppercase}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em;display:flex;justify-content:space-between}
+  a{color:#666;text-decoration:none}a:hover{color:#999}
+</style>
+</head><body>
+<h1>@moltbook Health Dashboard</h1>
+<div class="sub">${sessionInfo} &middot; Auto-refresh 60s</div>
+
+<div class="cards">
+  <div class="card"><h3>Platforms</h3><div class="val" style="color:#22c55e">${platformData.engageable}</div><span style="color:#888">${platformData.degraded} degraded, ${platformData.down} down</span></div>
+  <div class="card"><h3>Directives</h3><div class="val" style="color:${statusColor(directiveData.overall >= 80 ? "healthy" : directiveData.overall >= 60 ? "warning" : "critical")}">${directiveData.overall !== null ? directiveData.overall + "%" : "—"}</div><span style="color:#888">${directiveData.critical} critical</span></div>
+  <div class="card"><h3>Queue Compliance</h3><div class="val" style="color:${statusColor(qcRate >= 80 ? "healthy" : qcRate >= 60 ? "warning" : "critical")}">${qcRate !== null ? qcRate + "%" : "—"}</div><span style="color:#888">${qc.total || 0} sessions tracked</span></div>
+  <div class="card"><h3>Version</h3><div class="val" style="color:#fff;font-size:1em">${VERSION}</div><span style="color:#888">Session ${statusData.rotation_counter}</span></div>
+</div>
+
+<section>
+<h2>Platforms (${platformData.total})</h2>
+<table><tr><th></th><th>Name</th><th>Read</th><th>Latency</th><th>24h Uptime</th></tr>
+${platformRows}
+</table>
+</section>
+
+<section>
+<h2>Directives (${directiveData.directives?.length || 0})</h2>
+<table><tr><th></th><th>Name</th><th>Compliance</th><th>Followed/Total</th></tr>
+${directiveRows}
+</table>
+</section>
+
+<div class="footer">
+  <span>Powered by <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a> &middot; <a href="/status/dashboard">Status</a> &middot; <a href="/docs">API Docs</a></span>
+  <span>${new Date().toISOString()}</span>
+</div>
+</body></html>`;
+
+  res.type("text/html").send(html);
+  logActivity("dashboard.viewed", "Health dashboard accessed");
+});
+
 // Interactive API documentation
 function getDocEndpoints() {
   return [

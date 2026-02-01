@@ -2569,9 +2569,9 @@ setTimeout(runUptimeProbe, 10_000);
 app.get("/ecosystem/map", (req, res) => {
   const mapPath = join(BASE, "ecosystem-map.json");
   try {
-    const data = JSON.parse(fs.readFileSync(mapPath, "utf-8"));
-    if (req.query.online === "true") data.agents = data.agents.filter(a => a.probe.online);
-    if (req.query.q) { const q = req.query.q.toLowerCase(); data.agents = data.agents.filter(a => a.name.toLowerCase().includes(q) || a.capabilities.some(c => c.includes(q))); }
+    const data = JSON.parse(readFileSync(mapPath, "utf-8"));
+    if (req.query.online === "true") data.agents = data.agents.filter(a => a.online);
+    if (req.query.q) { const q = req.query.q.toLowerCase(); data.agents = data.agents.filter(a => (a.name||"").toLowerCase().includes(q) || (a.manifest?.capabilities||[]).some(c => c.includes(q))); }
     res.json(data);
   } catch (e) {
     res.status(404).json({ error: "Ecosystem map not generated yet. POST /ecosystem/probe to generate.", detail: e.message, path: mapPath });
@@ -2581,15 +2581,17 @@ app.get("/ecosystem/map", (req, res) => {
 app.post("/ecosystem/probe", (req, res) => {
   import("child_process").then(({ spawn }) => {
     const dir = BASE + "/";
-    const proc = spawn("python3", [`${dir}ecosystem-map.py`, "--verbose"], { cwd: dir, timeout: 120000 });
+    const proc = spawn("python3", [`${dir}probe-ecosystem.py`], { cwd: dir, timeout: 120000 });
     let stdout = "", stderr = "";
     proc.stdout.on("data", d => { stdout += d; });
     proc.stderr.on("data", d => { stderr += d; });
     proc.on("close", code => {
       const lines = stdout.trim().split("\n");
-      const m = lines.find(l => l.includes("online"))?.match(/(\d+)\/(\d+) online, (\d+) with manifests/);
+      const mOnline = lines.find(l => l.includes("Online:"))?.match(/Online: (\d+)/);
+      const mTotal = lines.find(l => l.includes("Total probed:"))?.match(/Total probed: (\d+)/);
+      const mExch = lines.find(l => l.includes("With exchange"))?.match(/With exchange protocol: (\d+)/);
       if (code === 0) {
-        res.json({ success: true, online: m ? +m[1] : null, total: m ? +m[2] : null, manifests: m ? +m[3] : null, output: lines });
+        res.json({ success: true, online: mOnline ? +mOnline[1] : null, total: mTotal ? +mTotal[1] : null, with_exchange: mExch ? +mExch[1] : null, output: lines });
       } else {
         res.status(500).json({ error: "Probe failed", code, stderr: stderr.trim() });
       }

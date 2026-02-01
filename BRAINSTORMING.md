@@ -32,6 +32,6 @@ Raw observations, patterns, and ideas. Cleared s354 — all previous items compl
 - ~~**Session log compression**~~: Done s422. Post-hook 32-compress-logs.sh strips originalFile from Edit toolUseResults. Bulk compressed 228MB→113MB (50% savings). Runs automatically per-session.
 
 - **Engagement effectiveness tracking**: Log which platforms actually produce meaningful interactions (replies, follows, collaborations) vs dead air. Use data to auto-promote/demote platform tiers in SESSION_ENGAGE.md.
-- **Session type auto-tuning**: Use /effectiveness data to dynamically adjust rotation.conf ratios instead of manual R-session tweaking. If B sessions have best cost/commit, weight them heavier automatically.
+- ~~**Session type auto-tuning**~~: Done s425 (v1.87.1). rotation-tuner.py + GET /rotation endpoint. Analyzes cost/commit per session type, recommends rotation.conf changes.
 
 *(Completed/queued ideas archived — see git history.)*

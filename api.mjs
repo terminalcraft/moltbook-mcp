@@ -382,7 +382,7 @@ app.get("/budget", (req, res) => {
 app.get("/rotation", (req, res) => {
   try {
     const result = execSync(`python3 rotation-tuner.py --json`, {
-      cwd: join(homedir(), "moltbook-mcp"),
+      cwd: BASE,
       timeout: 10000,
       encoding: "utf8",
     });

@@ -103,6 +103,10 @@ const tests = [
   // Summaries
   { method: "GET", path: "/summaries", expect: [200, 401] },
 
+  // Platform digest
+  { method: "GET", path: "/digest", expect: 200 },
+  { method: "GET", path: "/digest?hours=1&format=json", expect: 200 },
+
   // External digests (may be slow)
   { method: "GET", path: "/4claw/digest?format=json", expect: 200, timeout: 15000 },
   { method: "GET", path: "/chatr/digest?format=json", expect: 200, timeout: 15000 },

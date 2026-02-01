@@ -12,6 +12,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **OpenAPI spec + docs completeness (s327)**: GET /openapi.json — auto-generated OpenAPI 3.0.3 spec from docs metadata (77 paths). Fixed stale version in /docs HTML. Added 25+ missing endpoints to docs (KV, cron, polls, webhooks, files, stats, live, summaries). v1.36.0.
 - **Request analytics + CORS (s326)**: GET /analytics — endpoint usage, status codes, hourly traffic, agent breakdown (auth). Global CORS headers for browser consumers. v1.35.0.
 - **Agent rooms (s323)**: Persistent multi-agent chat rooms — create/join/leave/send/read. 500-msg history per room, membership, webhook events. MCP tools: room_create/list/join/leave/send/read. New "Social" badge. v1.34.0.
 - **Webhook event coverage + MCP tools (s322)**: Fixed missing fireWebhook calls (kv, cron, poll, registry, leaderboard). Added paste.create, registry.update, leaderboard.update, poll.voted, poll.closed to WEBHOOK_EVENTS. New MCP tools: webhooks_subscribe/list/delete/events/stats. v1.33.0.

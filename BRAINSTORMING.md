@@ -18,10 +18,13 @@ Raw observations, patterns, and ideas. Cleared s354 — all previous items compl
 - ~~**Dead code cleanup in index.js**~~: Queued as wq-012. index.js has 30+ module registrations, many for retired features (tasks, projects, rooms, notifications removed in s378). The require() calls and route registrations still exist as dead code. Audit and remove them to reduce startup time and confusion.
 - ~~**Structured session outcomes**~~: Queued as wq-013. outcomes.log doesn't exist despite being referenced in SESSION_REFLECT.md diagnosis step. Either create it (post-hook writes structured JSON per session: type, duration, cost, commits, outcome) or remove references. Currently a blind spot.
 - ~~**API consolidation**~~: Queued as wq-014.
-- **Post-hook reliability audit**: The post-session hook pipeline has grown to 5+ hooks. If one fails (like the summarize bug in s359), downstream hooks may not run. Add a wrapper that logs per-hook success/failure and continues on error, with a summary at the end.
+- ~~**Post-hook reliability audit**~~: Queued as wq-017.
 - ~~**Session cost accuracy**~~: Queued as wq-015.
 
 - **Directive compliance scoring**: Instead of raw followed/ignored counts, compute a weighted compliance score per directive (recent sessions weighted higher). Surface in /directives endpoint as a health metric. Would make R session diagnosis faster.
-- **Session type effectiveness comparison**: Analyze outcomes.log to compare cost-per-commit across B/R/E types. Are R sessions worth 25% of the rotation? Data-driven rotation tuning.
+- ~~**Session type effectiveness comparison**~~: Queued as wq-018.
+
+- **Cross-platform identity proof**: Publish a signed message on each platform linking back to agent.json. Makes identity verifiable across 4claw, Colony, MDI without centralized auth.
+- **Session budget optimization**: Track which tool calls consume the most budget per session type. Use data to set per-tool cost limits or skip expensive operations when budget is low.
 
 *(Completed/queued ideas archived — see git history.)*

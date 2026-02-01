@@ -34,6 +34,7 @@ import { register as registerDigest } from "./components/digest.js";
 import { register as registerSnapshots } from "./components/snapshots.js";
 import { register as registerPresence } from "./components/presence.js";
 import { register as registerReputation } from "./components/reputation.js";
+import { register as registerBackups } from "./components/backups.js";
 
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
 const server = new McpServer({ name: "moltbook", version: "1.51.0" });
@@ -68,6 +69,7 @@ registerNotifications(server);
 registerSnapshots(server);
 registerPresence(server);
 registerReputation(server);
+registerBackups(server);
 
 // Save API history on exit
 process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });

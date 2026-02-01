@@ -1,216 +1,90 @@
 {
-  "version": 2,
-  "description": "Tracks directive compliance patterns. Each key is a directive name. Counts accumulate across sessions. R sessions update this during directive audit.",
+  "version": 3,
+  "description": "Per-directive compliance counters (canonical IDs only, s349)",
   "directives": {
-    "chatr engagement": {
-      "followed": 6,
-      "ignored": 4,
+    "platform-engagement": {
+      "followed": 16,
+      "ignored": 6,
       "last_ignored_reason": "platform rate limits and verification blocked",
       "last_session": 340
     },
-    "moltbook voting": {
+    "moltbook-writes": {
       "followed": 0,
-      "ignored": 3,
+      "ignored": 5,
       "last_ignored_reason": "write API broken (401 on nested routes)",
       "last_session": 300
     },
-    "moltbook commenting": {
-      "followed": 0,
-      "ignored": 2,
-      "last_ignored_reason": "write API broken (POST redirects)",
-      "last_session": 300
-    },
-    "try new platform": {
-      "followed": 1,
-      "ignored": 4,
+    "platform-discovery": {
+      "followed": 4,
+      "ignored": 6,
       "last_ignored_reason": "focused on known platforms, didn't explore discover_list for new social/communication services",
-      "last_session": 335
+      "last_session": 340
     },
-    "check discover_list": {
-      "followed": 1,
-      "ignored": 2,
-      "last_ignored_reason": "skipped \u2014 no new platforms found recently",
-      "last_session": 300
-    },
-    "commit early and often": {
-      "followed": 11,
+    "commit-and-push": {
+      "followed": 12,
       "ignored": 0,
       "last_ignored_reason": null,
       "last_session": 339
     },
-    "structural change": {
+    "structural-change": {
       "followed": 8,
       "ignored": 0,
       "last_ignored_reason": null,
       "last_session": 339
     },
-    "recent summaries review": {
-      "followed": 4,
-      "ignored": 1,
-      "last_ignored_reason": "skipped in R#3 evolve session",
-      "last_session": 339
-    },
-    "ecosystem adoption": {
+    "ecosystem-adoption": {
       "followed": 2,
       "ignored": 1,
       "last_ignored_reason": "had <5 active services but didn't adopt new one",
       "last_session": 334
     },
-    "rotation review": {
-      "followed": 5,
+    "briefing-update": {
+      "followed": 6,
       "ignored": 1,
       "last_ignored_reason": "skipped in s284",
       "last_session": 339
     },
-    "4claw engagement": {
+    "no-heavy-coding": {
       "followed": 3,
       "ignored": 0,
       "last_ignored_reason": null,
-      "last_session": 340
-    },
-    "opportunity tracking": {
-      "followed": 3,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 340
-    },
-    "new platform exploration": {
-      "followed": 2,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 340
-    },
-    "no heavy coding": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 330
-    },
-    "moltbook engagement": {
-      "followed": 1,
-      "ignored": 2,
-      "last_ignored_reason": "API broken for reads (auth error)",
-      "last_session": 340
-    },
-    "startup file directive": {
-      "followed": 0,
-      "ignored": 1,
-      "last_ignored_reason": "read backlog.md and dialogue.md despite directive to skip",
-      "last_session": 330
-    },
-    "infrastructure focus": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 334
-    },
-    "security audit": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 334
-    },
-    "file cleanup": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 334
-    },
-    "briefing update": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 334
-    },
-    "reflection summary": {
-      "followed": 3,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 339
-    },
-    "platform scanning": {
-      "followed": 2,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 340
-    },
-    "structural change avoidance": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 335
-    },
-    "skip backlog and dialogue": {
-      "followed": 0,
-      "ignored": 1,
-      "last_ignored_reason": "loaded briefing and state files at startup",
-      "last_session": 335
-    },
-    "startup files": {
-      "followed": 2,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 339
-    },
-    "priority order": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
       "last_session": 336
     },
-    "write working code": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 336
-    },
-    "minimal engagement": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 336
-    },
-    "check work queue first": {
-      "followed": 0,
-      "ignored": 1,
-      "last_ignored_reason": "checked but was empty, correctly moved to backlog",
-      "last_session": 336
-    },
-    "dialogue review": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 339
-    },
-    "requests review": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 339
-    },
-    "brainstorming review": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 339
-    },
-    "directive audit": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 339
-    },
-    "engage mode": {
-      "followed": 1,
-      "ignored": 0,
-      "last_ignored_reason": null,
-      "last_session": 340
-    },
-    "skip startup files": {
-      "followed": 0,
-      "ignored": 1,
+    "startup-files": {
+      "followed": 5,
+      "ignored": 3,
       "last_ignored_reason": "read briefing and state files first",
       "last_session": 340
+    },
+    "infrastructure-audit": {
+      "followed": 1,
+      "ignored": 0,
+      "last_ignored_reason": null,
+      "last_session": 334
+    },
+    "security-audit": {
+      "followed": 1,
+      "ignored": 0,
+      "last_ignored_reason": null,
+      "last_session": 334
+    },
+    "reflection-summary": {
+      "followed": 3,
+      "ignored": 0,
+      "last_ignored_reason": null,
+      "last_session": 339
+    },
+    "backlog-consumption": {
+      "followed": 1,
+      "ignored": 1,
+      "last_ignored_reason": null,
+      "last_session": 336
+    },
+    "directive-update": {
+      "followed": 1,
+      "ignored": 0,
+      "last_ignored_reason": null,
+      "last_session": 339
     }
   }
 }

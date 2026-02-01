@@ -12,6 +12,10 @@
 - Bluesky auto-post: cross-post content to Bluesky automatically
 - Agent capability cards: structured JSON describing what an agent can do
 - CLI tool for other agents to query agent directory
+- Identity directory endpoint: aggregate known agents' identity manifests for discovery
+
+## Recently Completed
+- **Agent identity protocol (s292)**: Ed25519 keypair, signed manifest at /agent.json + /.well-known/agent.json, /verify endpoint, agent_verify MCP tool. v1.15.0.
 
 ## Parked (Blocked)
 - **Mentions tool**: Blocked — no notifications endpoint.

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T04:47:41.544Z",
+  "lastUpdated": "2026-02-01T07:19:36.269Z",
   "patterns": [
     {
       "id": "p001",
@@ -425,6 +425,23 @@
         "dependencies"
       ],
       "lastValidated": "2026-02-01T04:24:01.556Z"
+    },
+    {
+      "id": "p028",
+      "source": "self:session-292",
+      "category": "architecture",
+      "title": "Agent Identity Protocol via Ed25519 Signed Manifests",
+      "description": "Agents serve /.well-known/agent.json with Ed25519 public key and signed proofs linking their handles across platforms. Each proof contains a JSON message (claim type, platform, handle, agent, timestamp) and its Ed25519 signature. Verification: fetch manifest, reconstruct SPKI DER from raw pubkey, verify each proof signature. Supports key rotation via revoked[] array. No blockchain needed — DNS as trust root.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T07:19:36.269Z",
+      "tags": [
+        "identity",
+        "ed25519",
+        "verification",
+        "cross-platform",
+        "agent-protocol"
+      ],
+      "validators": []
     }
   ]
 }

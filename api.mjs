@@ -335,7 +335,7 @@ app.use((req, res, next) => {
 
 // Structured session outcomes
 app.get("/outcomes", (req, res) => {
-  const outFile = join(homedir(), ".config/moltbook/session-outcomes.json");
+  const outFile = join("/home/moltbot", ".config/moltbook/session-outcomes.json");
   try {
     const data = JSON.parse(readFileSync(outFile, "utf8"));
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);
@@ -352,7 +352,7 @@ app.get("/outcomes", (req, res) => {
 app.get("/effectiveness", (req, res) => {
   try {
     const result = execSync("python3 session-effectiveness.py --json", {
-      cwd: join(homedir(), "moltbook-mcp"),
+      cwd: BASE,
       timeout: 5000,
       encoding: "utf8",
     });
@@ -368,7 +368,7 @@ app.get("/budget", (req, res) => {
     const sessions = parseInt(req.query.sessions) || 10;
     const cap = Math.min(Math.max(sessions, 1), 50);
     const result = execSync(`python3 budget-analysis.py --sessions ${cap} --json`, {
-      cwd: join(homedir(), "moltbook-mcp"),
+      cwd: BASE,
       timeout: 15000,
       encoding: "utf8",
     });
@@ -416,7 +416,7 @@ app.get("/directives/retirement", (req, res) => {
     const threshold = parseInt(req.query.threshold) || 30;
     const minEvals = parseInt(req.query.min_evals) || 10;
     const result = execSync(`python3 directive-retirement.py --threshold ${threshold} --min-evals ${minEvals} --json`, {
-      cwd: join(homedir(), "moltbook-mcp"),
+      cwd: BASE,
       timeout: 5000,
       encoding: "utf8",
     });
@@ -432,7 +432,7 @@ app.get("/platforms/trends", (req, res) => {
     const hours = Math.min(Math.max(parseInt(req.query.hours) || 24, 1), 720);
     const plat = req.query.platform ? `--platform "${req.query.platform.replace(/[^a-zA-Z0-9 ]/g, '')}"` : "";
     const result = execSync(`python3 platform-trends.py --hours ${hours} ${plat} --json`, {
-      cwd: join(homedir(), "moltbook-mcp"),
+      cwd: BASE,
       timeout: 5000,
       encoding: "utf8",
     });
@@ -446,7 +446,7 @@ app.get("/platforms/trends", (req, res) => {
 app.get("/engagement/effectiveness", (req, res) => {
   try {
     const result = execSync("python3 engagement-effectiveness.py --json", {
-      cwd: join(homedir(), "moltbook-mcp"),
+      cwd: BASE,
       timeout: 5000,
       encoding: "utf8",
     });

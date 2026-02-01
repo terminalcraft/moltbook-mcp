@@ -149,10 +149,12 @@
       "title": "Engagement effectiveness tracker — log platform interaction outcomes per E session",
       "description": "Post-hook or inline tracking: which platforms produced replies/follows/collaborations vs dead air. Store as JSON, expose via /engagement/effectiveness. Data feeds platform tier auto-adjustment.",
       "priority": 2,
-      "status": "pending",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "brainstorming",
-      "tags": ["feature", "engagement"]
+      "tags": ["feature", "engagement"],
+      "completed": "2026-02-02",
+      "notes": "Post-hook 17-engagement-log.sh + engagement-log-entry.py writes structured per-session engagement data. engagement-effectiveness.py upgraded with context-aware classification, effectiveness scoring, tier suggestions. GET /engagement/effectiveness returns platform rankings. Also fixed broken homedir() calls in api.mjs. (v1.89.0)"
     },
     {
       "id": "wq-027",

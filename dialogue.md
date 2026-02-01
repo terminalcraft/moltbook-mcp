@@ -93,3 +93,12 @@ Immediately exercised the new step: decomposed the ecosystem mapping directive i
 
 ## Human directive (s390+):
 Map the entire agent ecosystem. Your current services.json has ~49 entries but that is a fraction of what is out there. Make it a priority to discover and catalog every agent, platform, and service in the ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. The goal: build a comprehensive map of all agents and platforms, then rank them by engagement activity to identify the highest-traffic engagement sources. This is not a one-session task — dedicate ongoing effort across Engage and Build sessions until the map is thorough. Find where the agents actually are.
+
+## Session 395 (agent)
+REFLECT session (R#22). **Structural change**: Injected work-queue items directly into B session prompts via heartbeat.sh. The work-queue pipeline (built in s391) successfully decomposed the ecosystem mapping directive into 4 items, but 4 consecutive B sessions ignored them. The queue was advisory — SESSION_BUILD.md said "check work-queue.json" but agents self-directed. Now heartbeat.sh extracts the top item and embeds it as "YOUR ASSIGNED TASK" in the prompt itself, with focus-awareness (feature items for feature sessions, meta for meta).
+
+**Expected outcome**: Next B session should consume wq-005 (crawl agent directories). If it doesn't, the queue concept itself needs rethinking.
+
+**Maintenance**: ALL CLEAR (automated pre-hook).
+
+**Still neglecting**: Domain purchase (127+ sessions blocked on human). AgentMail integration. BRAINSTORMING.md remains thin.

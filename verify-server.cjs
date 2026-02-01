@@ -191,14 +191,116 @@ const server = http.createServer(async (req, res) => {
     return jsonResponse(res, 204, {});
   }
 
-  // Health check
+  // Health check / dashboard
   if (url.pathname === '/health' && req.method === 'GET') {
     const store = loadStore();
-    return jsonResponse(res, 200, {
-      status: 'ok',
-      verified_count: store.length,
-      uptime: process.uptime(),
+    const mem = process.memoryUsage();
+    const uptimeSec = process.uptime();
+
+    // Check data files
+    const dataFiles = [
+      { name: 'verified-proofs.json', path: STORE_PATH },
+      { name: 'blocklist.json', path: BLOCKLIST_PATH },
+      { name: 'agents-unified.json', path: UNIFIED_AGENTS_PATH },
+      { name: 'bsky-agents.json', path: AGENTS_CATALOG_PATH },
+    ].map(f => {
+      try {
+        const stat = fs.statSync(f.path);
+        return { name: f.name, ok: true, size: stat.size, modified: stat.mtime.toISOString() };
+      } catch {
+        return { name: f.name, ok: false, size: 0, modified: null };
+      }
     });
+
+    // Agent counts
+    let agentCounts = { moltbook: 0, bluesky: 0, total: 0 };
+    try {
+      const unified = JSON.parse(fs.readFileSync(UNIFIED_AGENTS_PATH, 'utf8'));
+      agentCounts = { ...unified.platforms, total: (unified.agents || []).length };
+    } catch {}
+
+    const health = {
+      status: 'ok',
+      version: '1.3.0',
+      uptime: uptimeSec,
+      uptimeHuman: `${Math.floor(uptimeSec / 86400)}d ${Math.floor((uptimeSec % 86400) / 3600)}h ${Math.floor((uptimeSec % 3600) / 60)}m`,
+      memory: {
+        rss: Math.round(mem.rss / 1048576),
+        heapUsed: Math.round(mem.heapUsed / 1048576),
+        heapTotal: Math.round(mem.heapTotal / 1048576),
+      },
+      verified_count: store.length,
+      agents: agentCounts,
+      dataFiles,
+      node: process.version,
+      pid: process.pid,
+      timestamp: new Date().toISOString(),
+    };
+
+    const accept = req.headers.accept || '';
+    if (accept.includes('text/html') || url.searchParams.get('format') === 'html') {
+      const fileRows = dataFiles.map(f => `
+        <tr>
+          <td>${esc(f.name)}</td>
+          <td>${f.ok ? '<span style="color:#3fb950">OK</span>' : '<span style="color:#f85149">MISSING</span>'}</td>
+          <td>${f.ok ? (f.size / 1024).toFixed(1) + ' KB' : '-'}</td>
+          <td>${f.modified ? esc(f.modified.substring(0, 19).replace('T', ' ')) : '-'}</td>
+        </tr>`).join('');
+
+      const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Health Dashboard — verify.moltbot.org</title>
+<style>
+  body{font-family:monospace;background:#0d1117;color:#c9d1d9;margin:0;padding:2rem}
+  h1{color:#58a6ff;font-size:1.4rem}
+  h2{color:#c9d1d9;font-size:1rem;margin-top:1.5rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.8rem;margin:1rem 0}
+  .card{background:#161b22;padding:.8rem 1rem;border-radius:6px;border:1px solid #21262d}
+  .card-num{color:#58a6ff;font-size:1.3rem;font-weight:bold}
+  .card-label{color:#8b949e;font-size:.75rem;margin-top:.2rem}
+  .status-ok{color:#3fb950;font-weight:bold}
+  table{border-collapse:collapse;width:100%;margin-top:.5rem}
+  th,td{text-align:left;padding:.35rem .6rem;border-bottom:1px solid #21262d;font-size:.85rem}
+  th{color:#8b949e;font-weight:normal;text-transform:uppercase;font-size:.75rem}
+  code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.85rem}
+  a{color:#58a6ff}
+  .footer{margin-top:2rem;color:#484f58;font-size:.75rem}
+</style></head><body>
+<h1>Health Dashboard</h1>
+<p class="status-ok">● All systems operational</p>
+<div class="grid">
+  <div class="card"><div class="card-num">${health.uptimeHuman}</div><div class="card-label">Uptime</div></div>
+  <div class="card"><div class="card-num">${health.memory.rss} MB</div><div class="card-label">Memory (RSS)</div></div>
+  <div class="card"><div class="card-num">${health.verified_count}</div><div class="card-label">Verified Proofs</div></div>
+  <div class="card"><div class="card-num">${health.agents.total}</div><div class="card-label">Agents Tracked</div></div>
+  <div class="card"><div class="card-num">${health.agents.moltbook || 0}</div><div class="card-label">Moltbook Agents</div></div>
+  <div class="card"><div class="card-num">${health.agents.bluesky || 0}</div><div class="card-label">Bluesky Agents</div></div>
+</div>
+<h2>Data Files</h2>
+<table><thead><tr><th>File</th><th>Status</th><th>Size</th><th>Last Modified</th></tr></thead><tbody>${fileRows}</tbody></table>
+<h2>Runtime</h2>
+<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>
+  <tr><td>Node.js</td><td>${esc(health.node)}</td></tr>
+  <tr><td>PID</td><td>${health.pid}</td></tr>
+  <tr><td>Heap Used</td><td>${health.memory.heapUsed} / ${health.memory.heapTotal} MB</td></tr>
+  <tr><td>Version</td><td>${esc(health.version)}</td></tr>
+</tbody></table>
+<h2>Endpoints</h2>
+<table><thead><tr><th>Endpoint</th><th>Description</th></tr></thead><tbody>
+  <tr><td><code>GET /health</code></td><td>This dashboard</td></tr>
+  <tr><td><code>POST /verify</code></td><td>Submit engagement proof</td></tr>
+  <tr><td><code>GET /verified</code></td><td>Public proof ledger</td></tr>
+  <tr><td><code>GET /blocklist</code></td><td>Shared blocklist</td></tr>
+  <tr><td><code>GET /agents</code></td><td>Agent directory</td></tr>
+  <tr><td><code>GET /agents/feed</code></td><td>Atom feed</td></tr>
+  <tr><td><code>GET /agents/new</code></td><td>Recently discovered</td></tr>
+</tbody></table>
+<div class="footer">Generated ${esc(health.timestamp)} · <a href="https://github.com/terminalcraft/moltbook-mcp">source</a></div>
+</body></html>`;
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
+      return res.end(html);
+    }
+
+    return jsonResponse(res, 200, health);
   }
 
   // Verify a proof
@@ -266,13 +368,13 @@ const server = http.createServer(async (req, res) => {
     }
     return jsonResponse(res, 200, {
       service: 'Agent Engagement Proof Verifier',
-      version: '1.2.0',
+      version: '1.3.0',
       operator: 'terminalcraft.bsky.social',
       endpoints: {
         'POST /verify': 'Submit a proof JSON for signature verification',
         'GET /verified': 'List recently verified proofs (public ledger)',
         'GET /verified?format=html': 'Public ledger (HTML)',
-        'GET /health': 'Service health check',
+        'GET /health': 'Health dashboard (JSON, or HTML with ?format=html)',
         'GET /blocklist': 'Shared spam/bot blocklist',
         'GET /blocklist?check=username': 'Check if a specific user is blocked',
         'GET /agents?platform=moltbook|bluesky': 'Cross-platform agent directory (filter by platform)',

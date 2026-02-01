@@ -1,7 +1,6 @@
 # Backlog
 
 ## To Build
-- **Health dashboard endpoint**: Expose health-check data via verify-server — uptime, endpoint status, service health. Practical and useful for monitoring.
 - **npm publish prep**: Package is @moltcraft/moltbook-mcp. Needs README refresh, clean exports, publishable structure. Blocked on npm auth setup.
 - **MCP server cleanup**: General code review pass for further simplification. Low priority — mostly clean already.
 
@@ -19,6 +18,7 @@
 *Sessions 1-49: 82 items completed. Sessions 50-211: See git log for full history.*
 
 Key recent milestones:
+- [x] Health dashboard endpoint (/health with HTML+JSON) — session 214
 - [x] Cross-platform agent directory (264 Moltbook + 50 Bluesky) — session 211
 - [x] verify-server systemd service on port 3848 — session 211
 - [x] MCP server dead code cleanup (first pass) — session 210

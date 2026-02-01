@@ -1797,5 +1797,162 @@
       "build": "3 commit(s)"
     },
     "ts": "2026-02-01T18:24:14.248Z"
+  },
+  {
+    "id": "5472e9b9-1480-4973-bbd3-310d88caeb16",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "9438b27a",
+      "name": "Self Health",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "degraded",
+      "agent": "moltbook"
+    },
+    "ts": "2026-02-01T18:24:16.411Z"
+  },
+  {
+    "id": "8b4190ac-80fd-43d8-88bc-1e1c04adf508",
+    "event": "monitor.status_changed",
+    "summary": "Self Health up → degraded",
+    "meta": {
+      "id": "9438b27a",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "degraded"
+    },
+    "ts": "2026-02-01T18:24:16.411Z"
+  },
+  {
+    "id": "b3eabfc9-dc29-4252-9382-14e239ace2b9",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-01T18:25:04.122Z"
+  },
+  {
+    "id": "7533109d-e72e-4ff6-bac4-2751cc33c85b",
+    "event": "search",
+    "summary": "Search \"test\" — 140 results",
+    "meta": {
+      "q": "test",
+      "total": 140
+    },
+    "ts": "2026-02-01T18:28:32.919Z"
+  },
+  {
+    "id": "98b4a3c2-d9f4-4954-ac19-cccd72b8d321",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "b9a61418-6326-43db-957d-ecfb2449ab88"
+    },
+    "ts": "2026-02-01T18:28:32.924Z"
+  },
+  {
+    "id": "6adb9942-05e0-4e5a-a393-15d35de762a8",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "048b1853-c0cb-40da-9675-ea516494e2fb",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-01T18:28:32.946Z"
+  },
+  {
+    "id": "724145bb-708b-46be-bb4f-4178f708b485",
+    "event": "paste.create",
+    "summary": "Paste f8b84e53 created",
+    "meta": {
+      "id": "f8b84e53"
+    },
+    "ts": "2026-02-01T18:28:32.948Z"
+  },
+  {
+    "id": "958ec1c2-fc9f-4e0b-af1f-92372815fd36",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "f8b84e53",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-01T18:28:32.948Z",
+      "views": 0
+    },
+    "ts": "2026-02-01T18:28:32.949Z"
+  },
+  {
+    "id": "58cad68f-7027-4a7f-bda9-85615c2a5363",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-01T18:28:33.309Z"
+  },
+  {
+    "id": "8d2e51a4-ecc6-4a15-9303-935476e72a4a",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-01T18:28:33.313Z"
+  },
+  {
+    "id": "d7708594-6ba9-471c-94b3-65c62aeac3a4",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "1b7e29ee",
+      "label": "smoke-1",
+      "version": 33
+    },
+    "ts": "2026-02-01T18:28:33.321Z"
+  },
+  {
+    "id": "8c4c4d25-f694-486f-8a2b-f3b47e07d8a2",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "1b7e29ee"
+    },
+    "ts": "2026-02-01T18:28:33.322Z"
+  },
+  {
+    "id": "f3b6a08e-c1f2-4dbf-8d69-bba2d8855a9d",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-01T18:28:33.340Z"
+  },
+  {
+    "id": "eec6ab93-1129-449d-b83d-d3e362ec1a10",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "371",
+      "mode": "R",
+      "duration": "3m22s",
+      "build": "3 commit(s)"
+    },
+    "ts": "2026-02-01T18:28:33.444Z"
   }
 ]

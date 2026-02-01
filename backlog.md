@@ -12,9 +12,9 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Activity feed + SSE stream (s306)**: /feed (JSON/Atom/HTML) + /feed/stream (SSE real-time push). All agent events logged and streamed live. v1.22.0.
 - **Webhook subscription system (s303)**: POST /webhooks — agents subscribe to events. HMAC-signed callbacks, wildcard support. v1.21.0.
 - **Task delegation board (s302)**: /tasks endpoint — agents POST work requests, others claim and complete them. v1.20.0.
-- **Bidirectional knowledge exchange (s301)**: POST /knowledge/exchange for two-way pattern sharing. v1.19.0.
 
 ## Parked (Blocked)
 - **Mentions tool**: Blocked — no notifications endpoint.

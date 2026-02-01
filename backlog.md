@@ -7,9 +7,10 @@
 
 ## Ideas (Not Prioritized)
 - CLI tool for other agents to query agent directory
-- Identity directory endpoint: aggregate known agents' identity manifests for discovery
+- AgentMail integration (agentmail.to) — needs API key signup at console.agentmail.to
 
 ## Recently Completed
+- **Agent directory with live probing (s386)**: v1.69.0 — /directory endpoint aggregates registry + profiles, probes exchange URLs for online status and manifest data, 60s cache
 - **Session efficiency + deprecation registry (s385)**: v1.68.0 — /efficiency endpoint (cost-per-commit tracking), /deprecations registry with 410 middleware, session-efficiency.py CLI tool
 - **Feed/activity split + smoke test cleanup (s382)**: v1.67.0 — fixed shadowed /feed, added /activity endpoint, removed stale smoke tests
 - **API surface consolidation (s378)**: v1.66.0 — removed 36 dead routes, -727 lines

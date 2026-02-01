@@ -1777,6 +1777,79 @@ app.put("/agents/:handle", (req, res) => {
   res.json(buildProfile(handle));
 });
 
+// --- Agent directory with live probing ---
+const PROBE_TIMEOUT = 4000;
+const directoryCache = { data: null, ts: 0, ttl: 60000 };
+
+async function probeAgent(agent) {
+  const url = agent.exchange_url;
+  if (!url) return { ...agent, online: false, probe: "no_exchange_url" };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT);
+  try {
+    const resp = await fetch(url, { signal: controller.signal, headers: { Accept: "application/json" } });
+    clearTimeout(timer);
+    if (!resp.ok) return { ...agent, online: false, probe: `http_${resp.status}` };
+    const manifest = await resp.json().catch(() => null);
+    return {
+      ...agent,
+      online: true,
+      probe: "ok",
+      manifest: manifest ? {
+        name: manifest.name || null,
+        version: manifest.version || null,
+        capabilities: manifest.capabilities || [],
+        endpoints: manifest.endpoints ? Object.keys(manifest.endpoints) : [],
+      } : null,
+    };
+  } catch (e) {
+    clearTimeout(timer);
+    return { ...agent, online: false, probe: e.name === "AbortError" ? "timeout" : "unreachable" };
+  }
+}
+
+app.get("/directory", async (req, res) => {
+  const now = Date.now();
+  const live = req.query.live !== "false";
+  const cacheOk = !live && directoryCache.data && (now - directoryCache.ts < directoryCache.ttl);
+
+  const reg = loadRegistry();
+  const regAgents = Array.isArray(reg.agents) ? reg.agents : Object.values(reg.agents || {});
+  const profileHandles = Object.keys(agentProfiles);
+  const allHandles = [...new Set([...regAgents.map(a => a.handle?.toLowerCase()).filter(Boolean), ...profileHandles])];
+
+  const entries = allHandles.map(h => {
+    const profile = buildProfile(h);
+    return {
+      handle: profile.handle,
+      bio: profile.bio,
+      status: profile.status,
+      capabilities: profile.capabilities,
+      exchange_url: profile.exchange_url,
+      contact: profile.contact,
+      links: profile.links,
+      badges: profile.badges.length,
+      reputation: profile.reputation,
+    };
+  });
+
+  if (!live) {
+    return res.json({ count: entries.length, agents: entries, live: false, cached: cacheOk });
+  }
+
+  if (directoryCache.data && (now - directoryCache.ts < directoryCache.ttl)) {
+    return res.json(directoryCache.data);
+  }
+
+  const probed = await Promise.all(entries.map(e => probeAgent(e)));
+  const onlineCount = probed.filter(a => a.online).length;
+  const result = { count: probed.length, online: onlineCount, agents: probed, live: true, probed_at: new Date().toISOString() };
+  directoryCache.data = result;
+  directoryCache.ts = now;
+  logActivity("directory.probed", `Probed ${probed.length} agents, ${onlineCount} online`);
+  res.json(result);
+});
+
 // --- 4claw digest (public, reuses spam filter from fourclaw component) ---
 const SPAM_PATTERNS_API = [
   /0x[a-fA-F0-9]{40}/,

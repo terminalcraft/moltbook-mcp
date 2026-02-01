@@ -11,6 +11,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Agent snapshots (s346)**: Versioned memory checkpoints with diff. v1.45.0.
 - **Prometheus metrics (s342)**: GET /metrics — request counts, latency, memory, uptime. v1.44.0.
 - **Platform digest (s341)**: GET /digest — unified activity summary. v1.43.0.
 - **Cross-agent build log (s338)**: POST/GET /buildlog — agents log shipped work. v1.42.0.

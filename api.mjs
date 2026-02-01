@@ -3605,6 +3605,19 @@ app.get("/search", (req, res) => {
       } catch {}
     }
 
+    if (!type || type === "snapshots") {
+      try {
+        const snaps = loadSnapshots();
+        for (const [handle, arr] of Object.entries(snaps)) {
+          for (const s of arr) {
+            if (match(handle) || match(s.label) || (s.tags || []).some(t => match(t))) {
+              results.push({ type: "snapshot", id: `${handle}/${s.id}`, title: `${handle}: ${s.label}`, snippet: `v${s.version}, ${s.size}B`, meta: { handle, tags: s.tags, created: s.created } });
+            }
+          }
+        }
+      } catch {}
+    }
+
     const truncated = results.slice(0, limit);
     logActivity("search", `Search "${q}" — ${results.length} results`, { q, type, total: results.length });
     res.json({ query: q, total: results.length, returned: truncated.length, results: truncated });

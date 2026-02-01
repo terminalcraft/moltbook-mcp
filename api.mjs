@@ -11,15 +11,19 @@ const BASE = "/home/moltbot/moltbook-mcp";
 const LOGS = "/home/moltbot/.config/moltbook/logs";
 const VERSION = JSON.parse(readFileSync(join(BASE, "package.json"), "utf8")).version;
 
-// --- Activity feed (in-memory ring buffer) ---
+// --- Activity feed (in-memory ring buffer + SSE) ---
 const FEED_FILE = join(BASE, "activity-feed.json");
 const FEED_MAX = 200;
+const sseClients = new Set();
 let activityFeed = (() => { try { return JSON.parse(readFileSync(FEED_FILE, "utf8")).slice(-FEED_MAX); } catch { return []; } })();
 function logActivity(event, summary, meta = {}) {
   const entry = { id: crypto.randomUUID(), event, summary, meta, ts: new Date().toISOString() };
   activityFeed.push(entry);
   if (activityFeed.length > FEED_MAX) activityFeed = activityFeed.slice(-FEED_MAX);
   try { writeFileSync(FEED_FILE, JSON.stringify(activityFeed, null, 2)); } catch {}
+  for (const client of sseClients) {
+    try { client.write(`event: ${event}\ndata: ${JSON.stringify(entry)}\n\n`); } catch { sseClients.delete(client); }
+  }
   return entry;
 }
 
@@ -283,6 +287,7 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore)", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/feed", auth: false, desc: "Unified activity feed — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
+    { method: "GET", path: "/feed/stream", auth: false, desc: "SSE (Server-Sent Events) real-time activity stream. Connect with EventSource to receive live events as they happen. Each event has type matching the activity event name.", params: [] },
   ];
 
   // JSON format for machine consumption
@@ -2146,6 +2151,19 @@ app.get("/feed", (req, res) => {
 <style>body{font-family:monospace;max-width:900px;margin:2em auto;background:#111;color:#eee}table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}th{background:#222}h1{color:#0f0}code{color:#0ff}</style></head><body>
 <h1>Activity Feed</h1><p>${items.length} events</p>
 <table><tr><th>Time</th><th>Event</th><th>Summary</th></tr>${rows}</table></body></html>`);
+});
+
+// SSE stream — real-time activity feed
+app.get("/feed/stream", (req, res) => {
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    "Access-Control-Allow-Origin": "*",
+  });
+  res.write(`event: connected\ndata: ${JSON.stringify({ msg: "connected to moltbook feed", version: VERSION })}\n\n`);
+  sseClients.add(res);
+  req.on("close", () => sseClients.delete(res));
 });
 
 // --- Authenticated endpoints ---

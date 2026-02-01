@@ -6,6 +6,62 @@ import { loadServices, saveServices } from "../providers/services.js";
 
 const CHATR_QUEUE_PATH = join(process.env.HOME || "/home/moltbot", "moltbook-mcp", "chatr-queue.json");
 
+// Chatr spam/noise detection
+const CHATR_SPAM_PATTERNS = [
+  /send\s*(me\s*)?\d+\s*USDC/i,
+  /need\s*\d+\s*USDC/i,
+  /wallet:\s*0x[a-fA-F0-9]{40}/i,
+  /0x[a-fA-F0-9]{40}/,
+  /\$CLAWIRC/i,
+  /clawirc\.duckdns/i,
+];
+
+function scoreChatrMessage(msg, allMsgs) {
+  let score = 0;
+  const len = (msg.content || "").length;
+
+  // Length signals
+  if (len > 100) score += 2;
+  if (len > 200) score += 2;
+  if (len > 400) score += 1;
+  if (len < 20) score -= 2;
+
+  // Spam pattern penalty
+  let spamHits = 0;
+  for (const p of CHATR_SPAM_PATTERNS) {
+    if (p.test(msg.content || "")) spamHits++;
+  }
+  if (spamHits >= 1) score -= 5;
+
+  // Duplicate content penalty — if same agent sent near-identical message
+  const dupes = allMsgs.filter(m =>
+    m.id !== msg.id &&
+    m.agentName === msg.agentName &&
+    m.content && msg.content &&
+    (m.content === msg.content || levenshteinSimilar(m.content, msg.content))
+  );
+  if (dupes.length > 0) score -= 4;
+
+  // Mentions other agents (conversational) — bonus
+  if (/@\w+/.test(msg.content || "")) score += 1;
+
+  // Question — bonus
+  if (/\?/.test(msg.content || "")) score += 1;
+
+  // Technical content — bonus
+  if (/(?:github|npm|api|endpoint|mcp|protocol|deploy|server|build|ship)/i.test(msg.content || "")) score += 2;
+
+  return score;
+}
+
+function levenshteinSimilar(a, b) {
+  // Quick similarity check: same first 40 chars or >80% overlap by length
+  if (a.slice(0, 40) === b.slice(0, 40)) return true;
+  const shorter = Math.min(a.length, b.length);
+  const longer = Math.max(a.length, b.length);
+  return shorter / longer > 0.8 && a.slice(0, 60) === b.slice(0, 60);
+}
+
 function loadChatrQueue() {
   try { return JSON.parse(readFileSync(CHATR_QUEUE_PATH, "utf8")); }
   catch { return { messages: [], lastSentAt: null }; }
@@ -165,6 +221,49 @@ export function register(server) {
       const data = await res.json();
       return { content: [{ type: "text", text: data.success ? "Heartbeat sent." : `Error: ${JSON.stringify(data)}` }] };
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
+  });
+
+  // chatr_digest — signal-filtered chat digest
+  server.tool("chatr_digest", "Get a signal-filtered digest of Chatr.ai messages (filters spam, ranks by quality)", {
+    limit: z.number().default(30).describe("Max messages to scan (1-50)"),
+    mode: z.enum(["signal", "wide"]).default("signal").describe("'signal' filters low-score messages (default), 'wide' shows all with scores"),
+  }, async ({ limit, mode }) => {
+    try {
+      const creds = getChatrCredentials();
+      if (!creds) return { content: [{ type: "text", text: "No Chatr.ai credentials found." }] };
+      const url = `${CHATR_API}/messages?limit=${Math.min(limit, 50)}`;
+      const res = await fetch(url, { headers: { "x-api-key": creds.apiKey } });
+      const data = await res.json();
+      if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
+      const msgs = data.messages || [];
+      if (!msgs.length) return { content: [{ type: "text", text: "No messages." }] };
+
+      // Score all messages
+      const scored = msgs.map(m => ({ ...m, score: scoreChatrMessage(m, msgs) }));
+
+      let filtered;
+      if (mode === "signal") {
+        filtered = scored.filter(m => m.score >= 0);
+      } else {
+        filtered = scored;
+      }
+
+      // Sort by score desc, then by timestamp desc for ties
+      filtered.sort((a, b) => b.score - a.score || new Date(b.timestamp) - new Date(a.timestamp));
+
+      const spamCount = scored.length - scored.filter(m => m.score >= 0).length;
+      const lines = filtered.map(m => {
+        const ts = new Date(m.timestamp).toISOString().slice(11, 16);
+        const tag = m.score < 0 ? " [spam]" : "";
+        return `[${m.score}pt] ${m.agentName} (${ts})${tag}: ${m.content}`;
+      });
+
+      const header = mode === "signal"
+        ? `Chatr digest (signal): ${filtered.length} shown, ${spamCount} filtered from ${msgs.length} total`
+        : `Chatr digest (wide): ${filtered.length} messages with scores`;
+
+      return { content: [{ type: "text", text: `${header}\n\n${lines.join("\n\n")}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `Chatr digest error: ${e.message}` }] }; }
   });
 
   // discover_list

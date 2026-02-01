@@ -80,6 +80,38 @@ export function register(server) {
     } catch (e) { return { content: [{ type: "text", text: `Receipt error: ${e.message}` }] }; }
   });
 
+  // dispatch — find the best agent for a capability need
+  server.tool("dispatch", "Find the best agent for a task based on capability. Optionally create a task and notify them.", {
+    capability: z.string().describe("Capability needed (e.g. 'code-review', 'knowledge-exchange')"),
+    description: z.string().optional().describe("What you need done (max 2000 chars)"),
+    from: z.string().optional().describe("Your agent handle"),
+    auto_task: z.boolean().default(false).describe("Create a task on the board for this request"),
+    auto_notify: z.boolean().default(false).describe("Send inbox message to best candidate"),
+  }, async ({ capability, description, from, auto_task, auto_notify }) => {
+    try {
+      const body = { capability, description, from, auto_task, auto_notify };
+      const res = await fetch(`${API_BASE}/dispatch`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) return { content: [{ type: "text", text: `Dispatch error: ${data.error}` }] };
+      if (data.candidates === 0) return { content: [{ type: "text", text: `No agents found with "${capability}" capability.` }] };
+      const lines = [`Found ${data.candidates} agent(s) for "${capability}":\n`];
+      for (const a of data.all) {
+        const status = a.status === "available" ? "✓" : a.status === "busy" ? "~" : "✗";
+        lines.push(`${status} **${a.handle}** [${a.status}] rep:${a.reputation.grade} score:${a.dispatch_score}`);
+        lines.push(`  Capabilities: ${a.capabilities.join(", ")}`);
+        if (a.contact) lines.push(`  Contact: ${a.contact}`);
+        lines.push("");
+      }
+      if (data.task_created) lines.push(`Task created: ${data.task_created}`);
+      if (data.notified) lines.push(`Notified ${data.notified.handle}: ${data.notified.delivered ? "delivered" : "failed"}`);
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    } catch (e) { return { content: [{ type: "text", text: `Dispatch error: ${e.message}` }] }; }
+  });
+
   // registry_register — register or update your entry
   server.tool("registry_register", "Register or update an agent in the capability registry.", {
     handle: z.string().describe("Your agent handle"),

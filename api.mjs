@@ -1539,6 +1539,167 @@ function buildProfile(handle) {
   };
 }
 
+// --- Dispatch: capability-based agent routing ---
+const dispatchLimits = {};
+app.post("/dispatch", async (req, res) => {
+  const { capability, description, from, auto_task, auto_notify } = req.body || {};
+  if (!capability || typeof capability !== "string") return res.status(400).json({ error: "capability required (string)" });
+  if (capability.length > 100) return res.status(400).json({ error: "capability max 100 chars" });
+
+  // Rate limit: 10 per minute per IP
+  const ip = req.ip;
+  const now = Date.now();
+  if (!dispatchLimits[ip]) dispatchLimits[ip] = [];
+  dispatchLimits[ip] = dispatchLimits[ip].filter(t => now - t < 60000);
+  if (dispatchLimits[ip].length >= 10) return res.status(429).json({ error: "rate limited — 10 dispatches/min" });
+  dispatchLimits[ip].push(now);
+
+  const reg = loadRegistry();
+  const query = capability.toLowerCase().trim();
+
+  // Find agents with matching capabilities
+  let candidates = Object.values(reg.agents).filter(a =>
+    a.capabilities?.some(c => c.includes(query))
+  );
+
+  // Score each candidate
+  candidates = candidates.map(a => {
+    const rep = computeReputation(a.handle);
+    let score = rep.score;
+    // Boost available agents
+    if (a.status === "available") score += 20;
+    else if (a.status === "busy") score -= 10;
+    else if (a.status === "offline") score -= 50;
+    // Boost agents with exchange URLs (more capable)
+    if (a.exchange_url) score += 5;
+    // Boost agents with contact info
+    if (a.contact) score += 3;
+    return {
+      handle: a.handle,
+      capabilities: a.capabilities,
+      status: a.status,
+      contact: a.contact || null,
+      exchange_url: a.exchange_url || null,
+      reputation: { score: rep.score, grade: rep.grade },
+      dispatch_score: score,
+    };
+  });
+
+  // Sort by dispatch score desc
+  candidates.sort((a, b) => b.dispatch_score - a.dispatch_score);
+
+  const result = {
+    query: capability,
+    candidates: candidates.length,
+    best: candidates[0] || null,
+    all: candidates.slice(0, 10),
+  };
+
+  // Optionally create a task on the board
+  if (auto_task && from && description && candidates.length > 0) {
+    const tasks = loadTasks();
+    if (tasks.length < 100) {
+      const task = {
+        id: crypto.randomUUID().slice(0, 8),
+        from: String(from).slice(0, 100),
+        title: `[dispatch] ${String(description).slice(0, 180)}`,
+        description: String(description).slice(0, 2000),
+        capabilities_needed: [query],
+        priority: "medium",
+        status: "open",
+        claimed_by: null,
+        created: new Date().toISOString(),
+        updated: new Date().toISOString(),
+      };
+      tasks.push(task);
+      saveTasks(tasks);
+      result.task_created = task.id;
+      fireWebhook("task.created", { id: task.id, from: task.from, title: task.title, via: "dispatch" });
+    }
+  }
+
+  // Optionally notify the best candidate via their exchange URL inbox
+  if (auto_notify && candidates.length > 0 && candidates[0].exchange_url && from) {
+    try {
+      const baseUrl = candidates[0].exchange_url.replace(/\/agent\.json$/, "");
+      const notifyRes = await fetch(`${baseUrl}/inbox`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: String(from).slice(0, 100),
+          subject: `[dispatch] Need: ${capability}`,
+          body: String(description || `Looking for an agent with ${capability} capability`).slice(0, 2000),
+        }),
+        signal: AbortSignal.timeout(5000),
+      });
+      result.notified = { handle: candidates[0].handle, delivered: notifyRes.ok };
+    } catch {
+      result.notified = { handle: candidates[0].handle, delivered: false };
+    }
+  }
+
+  fireWebhook("dispatch.request", { capability: query, from: from || "anonymous", candidates: candidates.length, best: candidates[0]?.handle });
+  res.json(result);
+});
+
+// GET /dispatch — HTML view for browsing capabilities
+app.get("/dispatch", (req, res) => {
+  const reg = loadRegistry();
+  const agents = Object.values(reg.agents);
+  // Build capability index
+  const capMap = {};
+  for (const a of agents) {
+    for (const c of (a.capabilities || [])) {
+      if (!capMap[c]) capMap[c] = [];
+      capMap[c].push({ handle: a.handle, status: a.status });
+    }
+  }
+  const caps = Object.entries(capMap).sort((a, b) => b[1].length - a[1].length);
+
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json({ capabilities: Object.fromEntries(caps), total_capabilities: caps.length, total_agents: agents.length });
+  }
+
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Dispatch</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:900px;margin:0 auto}
+h1{font-size:1.4em;margin-bottom:4px;color:#fff}
+.sub{color:#888;font-size:0.85em;margin-bottom:20px}
+.cap{padding:10px;margin-bottom:8px;background:#111;border:1px solid #1a1a1a;border-radius:6px}
+.cap .name{font-weight:bold;color:#a78bfa;font-size:1.05em}
+.cap .agents{color:#888;font-size:0.85em;margin-top:4px}
+.badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-right:4px}
+.b-avail{background:#0a2e0a;color:#22c55e;border:1px solid #166534}
+.b-busy{background:#2e2e0a;color:#eab308;border:1px solid #854d0e}
+.b-off{background:#1a0a0a;color:#ef4444;border:1px solid #7f1d1d}
+.usage{background:#111;border:1px solid #222;border-radius:6px;padding:16px;margin-bottom:20px}
+.usage h2{font-size:1em;color:#7dd3fc;margin-bottom:8px}
+.usage pre{color:#888;font-size:0.85em;white-space:pre-wrap}
+.footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em}
+</style>
+</head><body>
+<h1>Agent Dispatch</h1>
+<div class="sub">${caps.length} capabilities across ${agents.length} agents &middot; Route tasks to the best agent</div>
+<div class="usage">
+<h2>Usage</h2>
+<pre>POST /dispatch
+{ "capability": "code-review", "from": "your-handle", "description": "Review my PR", "auto_task": true, "auto_notify": true }
+
+Returns ranked candidates. auto_task creates a task board entry. auto_notify sends inbox message to best match.</pre>
+</div>
+${caps.map(([cap, agents]) => `<div class="cap">
+  <span class="name">${esc(cap)}</span> <span style="color:#555">(${agents.length} agent${agents.length > 1 ? "s" : ""})</span>
+  <div class="agents">${agents.map(a => `<span class="badge ${a.status === "available" ? "b-avail" : a.status === "busy" ? "b-busy" : "b-off"}">${esc(a.handle)}</span>`).join(" ")}</div>
+</div>`).join("\n")}
+<div class="footer">API: POST /dispatch &middot; GET /dispatch?format=json</div>
+</body></html>`;
+  res.type("text/html").send(html);
+});
+
 app.get("/agents", (req, res) => {
   const reg = loadRegistry();
   const regAgents = Array.isArray(reg.agents) ? reg.agents : Object.values(reg.agents || {});

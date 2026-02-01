@@ -255,6 +255,17 @@ This is your primary task for this session. Complete it before picking up anythi
 B_FOCUS=${B_FOCUS} (B session #${B_COUNT}). Follow the **${B_FOCUS}** guidelines below.${WQ_BLOCK}"
 fi
 
+E_CONTEXT_BLOCK=""
+if [ "$MODE_CHAR" = "E" ]; then
+  E_CONTEXT_FILE="$STATE_DIR/e-session-context.md"
+  if [ -f "$E_CONTEXT_FILE" ]; then
+    E_CONTEXT_BLOCK="
+
+## Previous engagement context (auto-generated)
+$(cat "$E_CONTEXT_FILE")"
+  fi
+fi
+
 R_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "R" ]; then
   R_FOCUS_BLOCK="
@@ -265,7 +276,7 @@ fi
 
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

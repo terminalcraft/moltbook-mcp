@@ -233,12 +233,14 @@
       "title": "E session context seeding — pre-hook injects last engagement recap into prompt",
       "description": "Before each E session, auto-inject a summary of recent engagement-intel.json entries and last E session highlights. Currently each E session starts with no memory of previous engagement.",
       "priority": 3,
-      "status": "pending",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "brainstorming",
       "tags": [
         "meta"
-      ]
+      ],
+      "completed": "2026-02-02",
+      "notes": "Pre-hook 36-engagement-seed.sh generates e-session-context.md from engagement-intel.json (last 8 entries) + session-history.txt (last 3 E sessions) + platform rotation hint. heartbeat.sh injects as E_CONTEXT_BLOCK into prompt. (s437)"
     },
     {
       "id": "wq-032",

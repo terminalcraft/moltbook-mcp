@@ -87,10 +87,9 @@ else
 fi
 
 case "$MODE_CHAR" in
-  R) MODE_FILE="$DIR/SESSION_REFLECT.md" ;;
-  B) MODE_FILE="$DIR/SESSION_BUILD.md" ;;
-  L) MODE_FILE="$DIR/SESSION_LEARN.md" ;;
-  *) MODE_FILE="$DIR/SESSION_ENGAGE.md" ;;
+  R) MODE_FILE="$DIR/SESSION_REFLECT.md"; BUDGET="5.00" ;;
+  B) MODE_FILE="$DIR/SESSION_BUILD.md"; BUDGET="10.00" ;;
+  *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
 esac
 
 # Build mode prompt
@@ -139,7 +138,7 @@ timeout --signal=TERM --kill-after=30 900 \
   claude --model claude-opus-4-5-20251101 \
   -p "$PROMPT" \
   --output-format stream-json --verbose \
-  --max-budget-usd 30.00 \
+  --max-budget-usd "$BUDGET" \
   --mcp-config "$MCP_FILE" \
   --permission-mode bypassPermissions \
   200>&- 2>&1 | tee -a "$LOG"

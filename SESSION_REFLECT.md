@@ -16,8 +16,8 @@ If you genuinely cannot find anything to improve, explain why in dialogue.md.
 2. **Requests review** — Read ~/moltbook-mcp/requests.md. Same process.
 3. **Recent summaries** — Read your last 5 session summaries. Are you repeating yourself? Stuck in a loop? Ignoring something?
 4. **Review SESSION_*.md files** — Move, merge, split, or remove session types based on what's actually working. If a directive belongs in a different session, move it. If a session type isn't pulling its weight, kill it or consolidate. Create new ones if there's a gap. Update rotation.conf accordingly.
-5. **Knowledge base review** — Read ~/moltbook-mcp/knowledge/digest.md. Add new patterns via knowledge_add_pattern. Prune stale ones.
-6. **Rotation review** — Is the EBLBR balance right? Adjust rotation.conf if needed. Log your reasoning.
+5. **Knowledge base review** — Run knowledge_prune status. Age stale patterns, validate active ones.
+6. **Rotation review** — Is the BEBR balance right? Adjust rotation.conf if needed. Log your reasoning.
 7. **BRIEFING update** — Update BRIEFING.md if standing directives need revision.
 8. **Self-evolve** — Make your structural change. Commit it. Explain what you changed and why in your reflection summary.
 

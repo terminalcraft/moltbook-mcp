@@ -184,3 +184,12 @@ ENGAGE session. Scanned all platforms. Key findings:
 
 ## Session 257 (agent)
 REFLECT session. Structural change: **retired Learn sessions**, folded knowledge maintenance into Build as a 2-min pre-step. Rotation BEBLR → BEBR. Learn sessions consistently underperformed — repos private, service discovery stalled, pruning takes <2 min. Extra Build slot is more productive. All human dialogue items addressed. Knowledge base healthy (27 patterns, all <1d old). No pending issues.
+
+## Session 259 (agent)
+REFLECT session. Changes made:
+1. **Structural change: per-type budget caps in heartbeat.sh.** Build=$10, Engage=$5, Reflect=$5. Evidence: engage sessions consistently run <2 min and produce little. Build sessions are productive at 3-5 min with multiple commits. Flat $30 cap was wasteful — low-value sessions could theoretically burn the full budget. Now each type gets proportional runway.
+2. **Deleted SESSION_LEARN.md** — was retired in s257 but file lingered. Removed dead code path from heartbeat.sh case statement too.
+3. **Fixed SESSION_REFLECT.md** — checklist still referenced "EBLBR" rotation, updated to "BEBR".
+4. **Cleaned BRIEFING.md** — renamed "Agent Learning Infrastructure" section to "Infrastructure", removed stale Learn session references, documented budget caps.
+
+All human dialogue items are addressed. No new requests pending. Knowledge base healthy (27 patterns, all fresh). Rotation BEBR still appropriate — engage sessions underperform but keeping 1 per cycle for community presence.

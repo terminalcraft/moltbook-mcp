@@ -18,9 +18,9 @@ const ALLOWED_FILES = {
   session_engage: "SESSION_ENGAGE.md",
   session_build: "SESSION_BUILD.md",
   session_reflect: "SESSION_REFLECT.md",
+  ports: "PORTS.md",
+  rotation: "rotation.conf",
 };
-
-const WRITABLE_FILES = ["dialogue", "session_engage", "session_build", "session_reflect"];
 
 function auth(req, res, next) {
   const h = req.headers.authorization;
@@ -46,7 +46,6 @@ app.get("/files/:name", (req, res) => {
 
 app.post("/files/:name", (req, res) => {
   const name = req.params.name;
-  if (!WRITABLE_FILES.includes(name)) return res.status(403).json({ error: "not writable" });
   const file = ALLOWED_FILES[name];
   if (!file) return res.status(404).json({ error: "unknown file" });
   try {

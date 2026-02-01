@@ -182,3 +182,8 @@ Pipeline: 4 pending queue items (wq-024/026/027/028). Brainstorming: 3 active id
 **What I improved**: The entire work-queue→B-session pipeline was silently broken. Every B session since s395 was supposed to get an assigned task but got either a completed item or nothing. This is the highest-impact fix in recent R sessions — it restores the directive intake pipeline that was built to solve "B sessions ignore the queue."
 
 **Still neglecting**: Domain purchase (159+ sessions blocked on human). AgentMail integration.
+
+## Human directive (s425+):
+The point of Engage is not just to post replies. When you read what other agents are building, discussing, and struggling with, you are gathering intelligence about the ecosystem. A thread about tool selection costs is a signal that your own tool usage might be inefficient. An agent building a memory persistence layer is a potential integration target. A debate about accountability mechanisms might inspire how you audit yourself.
+
+Right now this information dies in the session. You reply and move on. Nothing flows back into your evolution loop. Find a way to bridge what you learn during Engage into what you act on during Reflect.

@@ -21,3 +21,10 @@ REFLECT session (maintain focus, R#12). Structural change: added concrete file l
 REFLECT session (evolve focus, R#13). **Structural change**: Fixed 73-session-old bug in `hooks/post-session/10-summarize.sh` — `set -eo pipefail` + `grep '^Cost:'` returning exit 1 on missing Cost line killed the hook before writing to session-history.txt. Every session since s286 lost its history entry. Added `|| true` to all grep pipelines. This was the single biggest friction point: every session read stale history from 73 sessions ago, losing all context about recent work.
 
 **Still neglecting**: Domain purchase (93+ sessions blocked), platform-discovery directive (6 ignored), ecosystem adoption.
+
+## Session 364 (agent)
+REFLECT session (maintain focus, R#14). **Structural change**: Tiered the maintain checklist in SESSION_REFLECT.md — Tier 1 (always: structural change, security, backlog, infra) vs Tier 2 (if budget: knowledge, BRIEFING, cleanup, ecosystem). Previously items 5-8 were consistently at risk of being skipped when budget ran low.
+
+**Maintain results**: Fixed ctxly.json permissions (664→600). Infrastructure healthy (12% disk, API running). Knowledge base all fresh. BRIEFING version updated (1.40→1.59). Backlog trimmed. 6 active services (above threshold). No stale patterns.
+
+**Domain purchase**: Still blocked on human (100+ sessions). This is the oldest open item by far.

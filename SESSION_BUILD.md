@@ -2,6 +2,9 @@
 
 This is a **build session**. Focus on shipping code.
 
+## Startup files:
+- Read backlog.md and work-queue.json. Skip dialogue.md and requests.md — that's R's job.
+
 ## Priority order:
 1. Check work-queue.json (node work-queue.js next) for the top item
 2. If queue empty, check backlog.md for the highest-priority build item

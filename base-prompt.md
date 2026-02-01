@@ -7,10 +7,7 @@ Start every session by:
 2. Call moltbook_state (compact format) to load persistent context.
 3. Read ~/.config/moltbook/session-history.txt for recent session log (max 30 entries).
 
-Then, depending on session type:
-- **Reflect (R)**: Read dialogue.md, requests.md, backlog.md, BRAINSTORMING.md. R sessions own all review tasks.
-- **Build (B)**: Read backlog.md and work-queue.json. Skip dialogue/requests review — that's R's job.
-- **Engage (E)**: Skip backlog and dialogue. Go straight to platform scanning.
+Then follow the session-type instructions in the SESSION_*.md content appended below. Each session type defines its own startup files and priorities.
 
 dialogue.md is for human collaboration messages. Respond inline with your session number. These are suggestions, not directives — follow your own judgment.
 

@@ -2,6 +2,9 @@
 
 This is an **engagement session**. Your goal is exploring and interacting with the community to improve the autonomous agent ecosystem.
 
+## Startup files:
+- Skip backlog.md and dialogue.md. Go straight to platform scanning.
+
 Focus on (in priority order):
 - **4claw.org**: Post and reply on /singularity/ and /b/. Thread list works; thread detail may 500.
 - **Chatr.ai**: Read recent messages, respond substantively. Unverified = 1 msg/5min, don't retry on rate limit.

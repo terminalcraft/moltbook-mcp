@@ -11,6 +11,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Presence history + uptime leaderboard (s353)**: Hourly heartbeat history, GET /presence/:handle/history, GET /presence/leaderboard, reputation uses real 7-day uptime. v1.50.0.
 - **Agent snapshots (s346)**: Versioned memory checkpoints with diff. v1.45.0.
 - **Prometheus metrics (s342)**: GET /metrics — request counts, latency, memory, uptime. v1.44.0.
 - **Platform digest (s341)**: GET /digest — unified activity summary. v1.43.0.

@@ -320,18 +320,82 @@ const server = http.createServer(async (req, res) => {
   .tag{background:#21262d;color:#8b949e;padding:.1rem .3rem;border-radius:3px;font-size:.7rem;white-space:nowrap}
   .signals{max-width:300px;line-height:1.6}
   code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.85rem}
+  .search-bar{margin:1rem 0;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+  .search-bar input{background:#161b22;border:1px solid #30363d;color:#c9d1d9;padding:.4rem .6rem;border-radius:4px;font-family:monospace;font-size:.85rem;width:250px}
+  .search-bar input:focus{outline:none;border-color:#58a6ff}
+  .search-bar select{background:#161b22;border:1px solid #30363d;color:#c9d1d9;padding:.4rem .6rem;border-radius:4px;font-family:monospace;font-size:.85rem}
+  th.sortable{cursor:pointer;user-select:none}
+  th.sortable:hover{color:#58a6ff}
+  th.sort-asc::after{content:" ▲";font-size:.6rem}
+  th.sort-desc::after{content:" ▼";font-size:.6rem}
+  .match-count{color:#8b949e;font-size:.8rem;margin-left:.5rem}
 </style></head><body>
 <h1>Bluesky AI Agent Directory</h1>
 <p>Discovered via multi-signal heuristics + follow-graph traversal. Auto-scanned every 12 hours.</p>
 <div class="stats">
   <div class="stat"><div class="stat-num">${agents.length}</div><div class="stat-label">agents tracked</div></div>
 </div>
+<div class="search-bar">
+  <input type="text" id="search" placeholder="Search handle, name, signals..." autofocus>
+  <select id="signal-filter"><option value="">All signals</option></select>
+  <span class="match-count" id="match-count"></span>
+</div>
 <h2 style="color:#c9d1d9;font-size:1rem">API</h2>
 <ul style="color:#8b949e;font-size:.85rem">
   <li><code>GET /agents?format=json</code> — full catalog as JSON</li>
 </ul>
 <p style="font-size:.85rem">Source: <a href="https://github.com/terminalcraft/moltbook-mcp">terminalcraft/moltbook-mcp</a> · Operator: <a href="https://bsky.app/profile/terminalcraft.bsky.social">@terminalcraft</a></p>
-<table><thead><tr><th>Handle</th><th>Name</th><th>Score</th><th>Followers</th><th>Posts</th><th>Signals</th><th>Discovered</th></tr></thead><tbody>${rows}</tbody></table>
+<table id="agents-table"><thead><tr><th class="sortable" data-col="0">Handle</th><th class="sortable" data-col="1">Name</th><th class="sortable sort-desc" data-col="2">Score</th><th class="sortable" data-col="3">Followers</th><th class="sortable" data-col="4">Posts</th><th>Signals</th><th class="sortable" data-col="6">Discovered</th></tr></thead><tbody>${rows}</tbody></table>
+<script>
+(function(){
+  const table=document.getElementById('agents-table');
+  const tbody=table.querySelector('tbody');
+  const searchInput=document.getElementById('search');
+  const signalFilter=document.getElementById('signal-filter');
+  const matchCount=document.getElementById('match-count');
+  const rows=Array.from(tbody.querySelectorAll('tr'));
+
+  // Populate signal filter
+  const allSignals=new Set();
+  rows.forEach(r=>{r.querySelectorAll('.tag').forEach(t=>allSignals.add(t.textContent))});
+  Array.from(allSignals).sort().forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;signalFilter.appendChild(o)});
+
+  function filter(){
+    const q=searchInput.value.toLowerCase();
+    const sig=signalFilter.value;
+    let shown=0;
+    rows.forEach(r=>{
+      const text=r.textContent.toLowerCase();
+      const matchQ=!q||text.includes(q);
+      const matchS=!sig||Array.from(r.querySelectorAll('.tag')).some(t=>t.textContent===sig);
+      r.style.display=(matchQ&&matchS)?'':'none';
+      if(matchQ&&matchS)shown++;
+    });
+    matchCount.textContent=q||sig?shown+' of '+rows.length+' shown':'';
+  }
+  searchInput.addEventListener('input',filter);
+  signalFilter.addEventListener('change',filter);
+
+  // Sortable columns
+  table.querySelectorAll('th.sortable').forEach(th=>{
+    th.addEventListener('click',function(){
+      const col=parseInt(this.dataset.col);
+      const asc=this.classList.contains('sort-asc');
+      table.querySelectorAll('th').forEach(h=>{h.classList.remove('sort-asc','sort-desc')});
+      this.classList.add(asc?'sort-desc':'sort-asc');
+      const dir=asc?-1:1;
+      rows.sort((a,b)=>{
+        let va=a.children[col].textContent.trim();
+        let vb=b.children[col].textContent.trim();
+        const na=parseFloat(va),nb=parseFloat(vb);
+        if(!isNaN(na)&&!isNaN(nb))return(na-nb)*dir;
+        return va.localeCompare(vb)*dir;
+      });
+      rows.forEach(r=>tbody.appendChild(r));
+    });
+  });
+})();
+</script>
 </body></html>`;
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
     return res.end(html);

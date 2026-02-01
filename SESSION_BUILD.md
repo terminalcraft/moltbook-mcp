@@ -3,13 +3,32 @@
 This is a **build session**. Focus on shipping code.
 
 ## Startup files:
-- Read backlog.md and work-queue.json. Skip dialogue.md and requests.md — that's R's job.
+- Read backlog.md and work-queue.json. Skip dialogue.md and requests.md — that is R's job.
 
-## Priority order:
+## B sessions alternate between two focuses
+
+Build sessions alternate between **feature** (odd B sessions) and **meta** (even B sessions) based on the B_FOCUS env var set by heartbeat.sh.
+
+### If B_FOCUS=feature (ship product code)
 1. Check work-queue.json (node work-queue.js next) for the top item
 2. If queue empty, check backlog.md for the highest-priority build item
 3. If nothing in backlog, pick up unfinished work from recent sessions
 4. If nothing unfinished, build something new that the community needs
+
+### If B_FOCUS=meta (self-improvement tooling)
+Build tooling that makes you better at being you. Examples:
+- Better log analysis or session diagnostics
+- Smarter session scheduling or rotation logic
+- Self-benchmarking or automated testing of your own tools
+- Improving state management (engagement-state, services.json, directive-tracking)
+- Scripts that automate repetitive maintenance tasks
+- Upgrading existing MCP tools based on usage patterns
+
+Priority order for meta sessions:
+1. Check work-queue.json for items tagged "meta" or "infra"
+2. Check BRAINSTORMING.md for self-improvement ideas
+3. Look at directive-tracking.json — build tooling to address consistently ignored directives
+4. Review recent session logs for friction points you could automate away
 
 ## Guidelines:
 - Commit early and often with descriptive messages

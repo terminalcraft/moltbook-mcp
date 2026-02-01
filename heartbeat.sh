@@ -94,6 +94,19 @@ if [ "$MODE_CHAR" = "R" ]; then
   fi
 fi
 
+# B sessions alternate between feature/meta focus (mirrors R evolve/maintain).
+B_COUNTER_FILE="$STATE_DIR/b_session_counter"
+B_FOCUS="feature"
+if [ "$MODE_CHAR" = "B" ]; then
+  B_COUNT=0
+  [ -f "$B_COUNTER_FILE" ] && B_COUNT=$(cat "$B_COUNTER_FILE")
+  B_COUNT=$((B_COUNT + 1))
+  echo "$B_COUNT" > "$B_COUNTER_FILE"
+  if [ $((B_COUNT % 2)) -eq 0 ]; then
+    B_FOCUS="meta"
+  fi
+fi
+
 # --- Outage-aware session skip ---
 # If API has been down 5+ consecutive checks, skip every other heartbeat.
 SKIP_FILE="$STATE_DIR/outage_skip_toggle"
@@ -141,7 +154,7 @@ if [ -d "$PRE_HOOKS_DIR" ]; then
   for hook in "$PRE_HOOKS_DIR"/*; do
     [ -x "$hook" ] || continue
     echo "$(date -Iseconds) running pre-hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
-    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" \
+    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
       timeout 30 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || \
       echo "$(date -Iseconds) pre-hook FAILED: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
   done
@@ -173,6 +186,14 @@ fi
 # Assemble full prompt: base identity + session-specific instructions.
 # For R sessions, inject the focus type directly into the prompt (s299).
 # Previously R_FOCUS was only in MCP env, invisible to the agent's shell.
+B_FOCUS_BLOCK=""
+if [ "$MODE_CHAR" = "B" ]; then
+  B_FOCUS_BLOCK="
+
+## B Session Focus: ${B_FOCUS}
+B_FOCUS=${B_FOCUS} (B session #${B_COUNT}). Follow the **${B_FOCUS}** guidelines below."
+fi
+
 R_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "R" ]; then
   R_FOCUS_BLOCK="
@@ -183,7 +204,7 @@ fi
 
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"
@@ -196,7 +217,8 @@ cat > "$MCP_FILE" <<MCPEOF
       "env": {
         "SESSION_TYPE": "$MODE_CHAR",
         "SESSION_NUM": "$COUNTER",
-        "R_FOCUS": "$R_FOCUS"
+        "R_FOCUS": "$R_FOCUS",
+        "B_FOCUS": "$B_FOCUS"
       }
     }
   }
@@ -250,7 +272,7 @@ if [ -d "$HOOKS_DIR" ]; then
   for hook in "$HOOKS_DIR"/*; do
     [ -x "$hook" ] || continue
     echo "$(date -Iseconds) running hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
-    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS" \
+    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
       SESSION_EXIT="$EXIT_CODE" SESSION_OUTCOME="$OUTCOME" \
       timeout 60 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || \
       echo "$(date -Iseconds) hook FAILED: $(basename "$hook")" >> "$LOG_DIR/hooks.log"

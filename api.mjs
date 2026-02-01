@@ -261,11 +261,12 @@ const analytics = (() => {
       statusCodes: raw.statusCodes || {},
       hourly: raw.hourly || {},
       agents: raw.agents || {},
+      visitors: raw.visitors || {},
       startedAt: raw.startedAt || new Date().toISOString(),
       totalRequests: raw.totalRequests || 0,
     };
   } catch {
-    return { endpoints: {}, statusCodes: {}, hourly: {}, agents: {}, startedAt: new Date().toISOString(), totalRequests: 0 };
+    return { endpoints: {}, statusCodes: {}, hourly: {}, agents: {}, visitors: {}, startedAt: new Date().toISOString(), totalRequests: 0 };
   }
 })();
 function saveAnalytics() { try { writeFileSync(ANALYTICS_FILE, JSON.stringify(analytics)); } catch {} }
@@ -295,6 +296,20 @@ app.use((req, res, next) => {
     if (!analytics.hourly[hour]) analytics.hourly[hour] = 0;
     analytics.hourly[hour]++;
     analytics.agents[agent] = (analytics.agents[agent] || 0) + 1;
+    // unique visitor tracking (hashed IP)
+    const rawIp = req.ip || req.connection?.remoteAddress || "unknown";
+    const ipHash = crypto.createHash("sha256").update(rawIp + "moltbot-salt").digest("hex").slice(0, 16);
+    if (!analytics.visitors[ipHash]) {
+      analytics.visitors[ipHash] = { first_seen: new Date().toISOString(), last_seen: new Date().toISOString(), requests: 0 };
+    }
+    analytics.visitors[ipHash].last_seen = new Date().toISOString();
+    analytics.visitors[ipHash].requests++;
+    // cap visitors to 500 entries by evicting least-recent
+    const vEntries = Object.entries(analytics.visitors);
+    if (vEntries.length > 500) {
+      vEntries.sort((a, b) => a[1].last_seen.localeCompare(b[1].last_seen));
+      for (const [k] of vEntries.slice(0, vEntries.length - 500)) delete analytics.visitors[k];
+    }
     // latency metrics
     const latMs = Date.now() - start;
     metrics.latencySum[key] = (metrics.latencySum[key] || 0) + latMs;
@@ -321,8 +336,11 @@ app.use((req, res, next) => {
 app.get("/analytics", (req, res) => {
   const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;
   const topEndpoints = Object.entries(analytics.endpoints).sort((a, b) => b[1] - a[1]).slice(0, 20);
+  const uniqueVisitors = Object.keys(analytics.visitors).length;
+  const topVisitors = Object.entries(analytics.visitors).sort((a, b) => b[1].requests - a[1].requests).slice(0, 20);
   const result = {
     totalRequests: analytics.totalRequests,
+    uniqueVisitors,
     since: analytics.startedAt,
     uptime: Math.floor((Date.now() - new Date(analytics.startedAt).getTime()) / 1000),
     statusCodes: analytics.statusCodes,
@@ -333,11 +351,16 @@ app.get("/analytics", (req, res) => {
     result.topAgents = Object.fromEntries(
       Object.entries(analytics.agents).sort((a, b) => b[1] - a[1]).slice(0, 30)
     );
+    result.visitors = {
+      total: uniqueVisitors,
+      top: topVisitors.map(([hash, v]) => ({ hash, ...v })),
+    };
   }
   if (req.query.format === "text") {
     const lines = [
       `Analytics since ${analytics.startedAt}`,
       `Total requests: ${analytics.totalRequests}`,
+      `Unique visitors: ${uniqueVisitors}`,
       `Uptime: ${result.uptime}s`,
       "",
       "Status codes:",
@@ -617,7 +640,7 @@ ${categories.map(cat => {
 function getDocEndpoints() {
   return [
     { method: "GET", path: "/docs", auth: false, desc: "This page — interactive API documentation", params: [] },
-    { method: "GET", path: "/analytics", auth: false, desc: "Request analytics — endpoint usage, status codes, hourly traffic. Auth adds agent breakdown.", params: [{ name: "format", in: "query", desc: "json (default) or text" }] },
+    { method: "GET", path: "/analytics", auth: false, desc: "Request analytics — endpoint usage, status codes, hourly traffic, unique visitors. Auth adds agent + visitor breakdown.", params: [{ name: "format", in: "query", desc: "json (default) or text" }] },
     { method: "GET", path: "/agent.json", auth: false, desc: "Agent identity manifest — Ed25519 pubkey, signed handle proofs, capabilities, endpoints (also at /.well-known/agent.json)", params: [] },
     { method: "GET", path: "/verify", auth: false, desc: "Verify another agent's identity manifest — fetches and cryptographically checks Ed25519 signed proofs", params: [{ name: "url", in: "query", desc: "URL of agent's manifest (e.g. https://host/agent.json)", required: true }] },
     { method: "POST", path: "/handshake", auth: false, desc: "Agent-to-agent handshake — POST your manifest URL, get back identity verification, shared capabilities, and collaboration options", params: [{ name: "url", in: "body", desc: "Your agent.json manifest URL", required: true }], example: '{"url": "https://your-host/agent.json"}' },
@@ -5343,8 +5366,9 @@ app.get("/adoption", (req, res) => {
     top_agents: Object.entries(info.agents || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([h, c]) => ({ handle: h, count: c })),
   })).sort((a, b) => b.total - a.total);
 
+  const uniqueIPs = Object.keys(analytics.visitors).length;
   if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
-    return res.json({ agents, endpoints: endpoints.slice(0, 50), total_agents: agents.length, total_endpoints: endpoints.length, updated: data.updated });
+    return res.json({ agents, endpoints: endpoints.slice(0, 50), total_agents: agents.length, total_endpoints: endpoints.length, uniqueVisitors: uniqueIPs, updated: data.updated });
   }
 
   const html = `<!DOCTYPE html>
@@ -5375,6 +5399,7 @@ tr:hover{background:#111}
 <div class="sub">Per-agent API usage tracking &middot; Send X-Agent header for attribution</div>
 <div class="stats">
   <div class="s"><div class="n">${agents.length}</div><div class="l">Agents</div></div>
+  <div class="s"><div class="n">${uniqueIPs}</div><div class="l">Unique IPs</div></div>
   <div class="s"><div class="n">${agents.reduce((s, a) => s + a.requests, 0)}</div><div class="l">Requests</div></div>
   <div class="s"><div class="n">${endpoints.length}</div><div class="l">Endpoints Used</div></div>
 </div>

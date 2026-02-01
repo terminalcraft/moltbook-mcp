@@ -45,22 +45,23 @@ print('\n'.join(texts[-40:]))
 
 if [ -z "$LOG_SUMMARY" ]; then log "SKIP: empty log summary from $LOG_FILE"; exit 0; fi
 
-# Canonical directive list — Sonnet MUST map to these exact IDs.
+# Canonical directive list with applicable session modes.
+# "modes" field tells the updater which session types each directive applies to.
 CANONICAL_DIRECTIVES='[
-  {"id": "structural-change", "desc": "R sessions: make at least one structural code change"},
-  {"id": "commit-and-push", "desc": "Commit and push changes to git"},
-  {"id": "reflection-summary", "desc": "R sessions: write honest reflection summary"},
-  {"id": "startup-files", "desc": "Read the correct startup files for session type"},
-  {"id": "platform-engagement", "desc": "E sessions: engage on platforms (Chatr, 4claw, Moltbook)"},
-  {"id": "moltbook-writes", "desc": "Comment or vote on Moltbook posts"},
-  {"id": "platform-discovery", "desc": "Discover or try new agent platforms"},
-  {"id": "backlog-consumption", "desc": "B sessions: pick work from backlog/queue"},
-  {"id": "ecosystem-adoption", "desc": "Use services other agents built"},
-  {"id": "security-audit", "desc": "R maintain: check secrets, permissions, ports"},
-  {"id": "infrastructure-audit", "desc": "R maintain: check disk, logs, services"},
-  {"id": "briefing-update", "desc": "R sessions: keep BRIEFING.md accurate"},
-  {"id": "directive-update", "desc": "R sessions: update directive tracking"},
-  {"id": "no-heavy-coding", "desc": "E sessions: focus on engagement, not building"}
+  {"id": "structural-change", "modes": ["R"], "desc": "R sessions: make at least one structural code change"},
+  {"id": "commit-and-push", "modes": ["B", "R"], "desc": "Commit and push changes to git"},
+  {"id": "reflection-summary", "modes": ["R"], "desc": "R sessions: write honest reflection summary"},
+  {"id": "startup-files", "modes": ["B", "E", "R"], "desc": "Read the correct startup files for session type"},
+  {"id": "platform-engagement", "modes": ["E"], "desc": "E sessions: engage on platforms (Chatr, 4claw, Moltbook)"},
+  {"id": "moltbook-writes", "modes": ["E"], "desc": "Comment or vote on Moltbook posts"},
+  {"id": "platform-discovery", "modes": ["E"], "desc": "Discover or try new agent platforms"},
+  {"id": "backlog-consumption", "modes": ["B"], "desc": "B sessions: pick work from backlog/queue"},
+  {"id": "ecosystem-adoption", "modes": ["B", "E", "R"], "desc": "Use services other agents built"},
+  {"id": "security-audit", "modes": ["R"], "desc": "R maintain: check secrets, permissions, ports"},
+  {"id": "infrastructure-audit", "modes": ["R"], "desc": "R maintain: check disk, logs, services"},
+  {"id": "briefing-update", "modes": ["R"], "desc": "R sessions: keep BRIEFING.md accurate"},
+  {"id": "directive-update", "modes": ["R"], "desc": "R sessions: update directive tracking"},
+  {"id": "no-heavy-coding", "modes": ["E"], "desc": "E sessions: focus on engagement, not building"}
 ]'
 
 PROMPT="You are auditing an autonomous agent session. Below are the SESSION DIRECTIVES, the CANONICAL DIRECTIVE IDS, and a SUMMARY OF WHAT THE AGENT DID.
@@ -95,35 +96,47 @@ raw = re.sub(r'^\`\`\`(?:json)?\s*', '', raw)
 raw = re.sub(r'\s*\`\`\`\s*$', '', raw)
 audit = json.loads(raw.strip())
 
-CANONICAL = {
-    'structural-change', 'commit-and-push', 'reflection-summary',
-    'startup-files', 'platform-engagement', 'moltbook-writes',
-    'platform-discovery', 'backlog-consumption', 'ecosystem-adoption',
-    'security-audit', 'infrastructure-audit', 'briefing-update',
-    'directive-update', 'no-heavy-coding'
+# Directive metadata: which session modes each applies to
+DIRECTIVE_MODES = {
+    'structural-change': ['R'], 'commit-and-push': ['B', 'R'],
+    'reflection-summary': ['R'], 'startup-files': ['B', 'E', 'R'],
+    'platform-engagement': ['E'], 'moltbook-writes': ['E'],
+    'platform-discovery': ['E'], 'backlog-consumption': ['B'],
+    'ecosystem-adoption': ['B', 'E', 'R'], 'security-audit': ['R'],
+    'infrastructure-audit': ['R'], 'briefing-update': ['R'],
+    'directive-update': ['R'], 'no-heavy-coding': ['E']
 }
+CANONICAL = set(DIRECTIVE_MODES.keys())
 
 try:
     data = json.load(open('$TRACKING_FILE'))
 except:
-    data = {'version': 3, 'description': 'Per-directive compliance counters (canonical IDs only)', 'directives': {}}
+    data = {'version': 4, 'directives': {}}
 
-# Migrate v2 -> v3: drop old free-text entries, keep canonical matches
-if data.get('version', 0) < 3:
-    old = data.get('directives', {})
-    data = {'version': 3, 'description': 'Per-directive compliance counters (canonical IDs only)', 'directives': {}}
-    for k, v in old.items():
-        if k in CANONICAL:
-            data['directives'][k] = v
+# Migrate to v4: add last_applicable_session field
+if data.get('version', 0) < 4:
+    data['version'] = 4
+    data['description'] = 'Per-directive compliance counters with applicability tracking'
+    for k, v in data.get('directives', {}).items():
+        if isinstance(v, dict) and 'last_applicable_session' not in v:
+            v['last_applicable_session'] = v.get('last_session', 0)
 
 session = ${SESSION_NUM:-0}
+mode = '${MODE_CHAR:-}'
+
+# Mark all applicable directives for this session type
+for did, modes in DIRECTIVE_MODES.items():
+    if mode in modes:
+        if did not in data['directives']:
+            data['directives'][did] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0, 'last_applicable_session': 0}
+        data['directives'][did]['last_applicable_session'] = session
 
 for name in audit.get('followed', []):
     key = name.lower().strip()
     if key not in CANONICAL:
         continue
     if key not in data['directives']:
-        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0}
+        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0, 'last_applicable_session': 0}
     data['directives'][key]['followed'] += 1
     data['directives'][key]['last_session'] = session
 
@@ -135,13 +148,14 @@ for item in audit.get('ignored', []):
     if key not in CANONICAL:
         continue
     if key not in data['directives']:
-        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0}
+        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0, 'last_applicable_session': 0}
     data['directives'][key]['ignored'] += 1
     data['directives'][key]['last_ignored_reason'] = reason
     data['directives'][key]['last_session'] = session
 
 json.dump(data, open('$TRACKING_FILE', 'w'), indent=2)
-print(f'Updated {len(audit.get(\"followed\",[]))} followed, {len(audit.get(\"ignored\",[]))} ignored')
+applicable_count = sum(1 for d, m in DIRECTIVE_MODES.items() if mode in m)
+print(f'Updated {len(audit.get(\"followed\",[]))} followed, {len(audit.get(\"ignored\",[]))} ignored, {applicable_count} applicable for mode {mode}')
 " <<< "$RAW_RESULT" 2>&1) || {
   log "ERROR: python update failed: ${UPDATE_OUTPUT:0:200} | raw: ${RAW_RESULT:0:200}"
   exit 0

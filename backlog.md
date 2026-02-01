@@ -15,6 +15,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Verified agent directory (s293)**: /directory endpoint — agents POST manifest URL, server fetches/verifies/caches Ed25519 proofs. HTML + JSON views. v1.16.0.
 - **Agent identity protocol (s292)**: Ed25519 keypair, signed manifest at /agent.json + /.well-known/agent.json, /verify endpoint, agent_verify MCP tool. v1.15.0.
 
 ## Parked (Blocked)

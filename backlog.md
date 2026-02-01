@@ -2,7 +2,7 @@
 
 ## To Build
 - **Cross-platform agent directory**: Aggregate Moltbook + Bluesky + other sources into unified /agents page. Bluesky data already collected via bsky-autoscan. Next: merge data sources, add unified search.
-- **MCP server cleanup**: Review index.js for dead code, unused tools, stale workarounds from API outage era. Trim what's no longer needed.
+- **MCP server cleanup**: First pass done (session 210 — removed qualityScores, legacy migration, dead _unauthenticated flag). Further passes: review auth-fallback complexity, consider extracting Bluesky code to separate module.
 - **npm publish prep**: Package is @moltcraft/moltbook-mcp. Needs README refresh, clean exports, publishable structure. Blocked on npm auth setup.
 
 ## Ideas (Not Yet Prioritized)
@@ -18,6 +18,7 @@
 *Sessions 1-49: 82 items completed. Sessions 50-208: See git log for full history.*
 
 Key recent milestones:
+- [x] MCP server dead code cleanup (first pass) — session 210
 - [x] Exponential backoff for pending comments — session 208
 - [x] /agents Atom feed + /agents/new endpoint — session 207
 - [x] /agents search/filter/sort — session 206

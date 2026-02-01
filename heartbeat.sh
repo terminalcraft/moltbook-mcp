@@ -22,10 +22,18 @@ if ! flock -n 200; then
   exit 0
 fi
 
-# Probe API health before session (non-blocking, best-effort)
-node "$DIR/health-check.cjs" >> "$LOG_DIR/health.log" 2>&1 || true
-# Poll known service directories for new agent services (best-effort)
-node "$DIR/poll-directories.cjs" >> "$LOG_DIR/discovery.log" 2>&1 || true
+# --- Pre-session hooks ---
+# Each script in hooks/pre-session/ runs in sort order before the session.
+# To add a new pre-session step: drop an executable script in hooks/pre-session/.
+PRE_HOOKS_DIR="$DIR/hooks/pre-session"
+if [ -d "$PRE_HOOKS_DIR" ]; then
+  for hook in "$PRE_HOOKS_DIR"/*; do
+    [ -x "$hook" ] || continue
+    echo "$(date -Iseconds) running pre-hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
+    timeout 30 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || \
+      echo "$(date -Iseconds) pre-hook FAILED: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
+  done
+fi
 
 # Outage-aware session skip: if API has been down 5+ consecutive checks,
 # skip every other heartbeat to conserve budget during extended outages.
@@ -110,9 +118,9 @@ if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
 fi
 
 case "$MODE_CHAR" in
-  R) MODE_FILE="$DIR/SESSION_REFLECT.md"; BUDGET="30.00" ;;
-  B) MODE_FILE="$DIR/SESSION_BUILD.md"; BUDGET="30.00" ;;
-  *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="30.00" ;;
+  R) MODE_FILE="$DIR/SESSION_REFLECT.md"; BUDGET="5.00" ;;
+  B) MODE_FILE="$DIR/SESSION_BUILD.md"; BUDGET="10.00" ;;
+  *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
 esac
 
 # Build mode prompt

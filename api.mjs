@@ -193,7 +193,19 @@ app.get("/status", (req, res) => {
       }
     } catch {}
 
-    res.json({ running, tools, elapsed_seconds, next_heartbeat, session_mode });
+    // Rotation info
+    let rotation_pattern = "EBR";
+    let rotation_counter = 0;
+    try {
+      const rc = readFileSync(BASE + "/rotation.conf", "utf-8");
+      const pm = rc.match(/^PATTERN=(.+)$/m);
+      if (pm) rotation_pattern = pm[1].trim();
+    } catch {}
+    try {
+      rotation_counter = parseInt(readFileSync("/home/moltbot/.config/moltbook/session_counter", "utf-8").trim()) || 0;
+    } catch {}
+
+    res.json({ running, tools, elapsed_seconds, next_heartbeat, session_mode, rotation_pattern, rotation_counter });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

@@ -29,9 +29,63 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
+const WEBHOOK_DELIVERIES_FILE = join(BASE, "webhook-deliveries.json");
 const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
+function loadDeliveries() { try { return JSON.parse(readFileSync(WEBHOOK_DELIVERIES_FILE, "utf8")); } catch { return {}; } }
+function saveDeliveries(d) { try { writeFileSync(WEBHOOK_DELIVERIES_FILE, JSON.stringify(d)); } catch {} }
+const DELIVERY_LOG_MAX = 50;
+function logDelivery(hookId, entry) {
+  const deliveries = loadDeliveries();
+  if (!deliveries[hookId]) deliveries[hookId] = [];
+  deliveries[hookId].push(entry);
+  if (deliveries[hookId].length > DELIVERY_LOG_MAX) deliveries[hookId] = deliveries[hookId].slice(-DELIVERY_LOG_MAX);
+  saveDeliveries(deliveries);
+}
+
+// --- Webhook retry queue (exponential backoff) ---
+const RETRY_DELAYS = [10_000, 60_000, 300_000]; // 10s, 1min, 5min
+const webhookRetryQueue = [];
+async function deliverWebhook(hook, body, signature, event) {
+  try {
+    const resp = await fetch(hook.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Webhook-Event": event, "X-Webhook-Signature": `sha256=${signature}` },
+      body, signal: AbortSignal.timeout(5000),
+    });
+    const status = resp.status;
+    if (resp.ok) return { ok: true, status };
+    return { ok: false, status, error: `HTTP ${status}` };
+  } catch (e) { return { ok: false, status: 0, error: e.message || "network error" }; }
+}
+function scheduleRetry(hook, body, signature, event, attempt) {
+  if (attempt >= RETRY_DELAYS.length) return; // max retries exhausted
+  const delay = RETRY_DELAYS[attempt];
+  const timer = setTimeout(async () => {
+    const idx = webhookRetryQueue.findIndex(r => r.timer === timer);
+    if (idx >= 0) webhookRetryQueue.splice(idx, 1);
+    const result = await deliverWebhook(hook, body, signature, event);
+    const allHooks = loadWebhooks();
+    const liveHook = allHooks.find(h => h.id === hook.id);
+    if (liveHook) {
+      if (!liveHook.stats) liveHook.stats = { delivered: 0, failed: 0, last_delivery: null, last_failure: null };
+      if (result.ok) {
+        liveHook.stats.delivered++;
+        liveHook.stats.last_delivery = new Date().toISOString();
+        logDelivery(hook.id, { event, status: result.status, ok: true, attempt: attempt + 2, ts: new Date().toISOString() });
+      } else {
+        liveHook.stats.failed++;
+        liveHook.stats.last_failure = new Date().toISOString();
+        logDelivery(hook.id, { event, status: result.status, ok: false, error: result.error, attempt: attempt + 2, ts: new Date().toISOString() });
+        scheduleRetry(hook, body, signature, event, attempt + 1);
+      }
+      saveWebhooks(allHooks);
+    }
+  }, delay);
+  webhookRetryQueue.push({ hookId: hook.id, event, attempt, timer, scheduledAt: new Date().toISOString() });
+}
+
 async function fireWebhook(event, payload) {
   logActivity(event, payload?.summary || payload?.title || event, payload);
   const allHooks = loadWebhooks();
@@ -39,14 +93,20 @@ async function fireWebhook(event, payload) {
   let dirty = false;
   for (const hook of hooks) {
     if (!hook.stats) hook.stats = { delivered: 0, failed: 0, last_delivery: null, last_failure: null };
-    try {
-      const body = JSON.stringify({ event, payload, timestamp: new Date().toISOString() });
-      const signature = crypto.createHmac("sha256", hook.secret || "").update(body).digest("hex");
-      const resp = await fetch(hook.url, { method: "POST", headers: { "Content-Type": "application/json", "X-Webhook-Event": event, "X-Webhook-Signature": `sha256=${signature}` }, body, signal: AbortSignal.timeout(5000) });
-      if (resp.ok) { hook.stats.delivered++; hook.stats.last_delivery = new Date().toISOString(); }
-      else { hook.stats.failed++; hook.stats.last_failure = new Date().toISOString(); }
-      dirty = true;
-    } catch { hook.stats.failed++; hook.stats.last_failure = new Date().toISOString(); dirty = true; }
+    const body = JSON.stringify({ event, payload, timestamp: new Date().toISOString() });
+    const signature = crypto.createHmac("sha256", hook.secret || "").update(body).digest("hex");
+    const result = await deliverWebhook(hook, body, signature, event);
+    if (result.ok) {
+      hook.stats.delivered++;
+      hook.stats.last_delivery = new Date().toISOString();
+      logDelivery(hook.id, { event, status: result.status, ok: true, attempt: 1, ts: new Date().toISOString() });
+    } else {
+      hook.stats.failed++;
+      hook.stats.last_failure = new Date().toISOString();
+      logDelivery(hook.id, { event, status: result.status, ok: false, error: result.error, attempt: 1, ts: new Date().toISOString() });
+      scheduleRetry(hook, body, signature, event, 0);
+    }
+    dirty = true;
   }
   if (dirty) saveWebhooks(allHooks);
   // Generate pull-based notifications for subscribed agents
@@ -589,7 +649,9 @@ function getDocEndpoints() {
     { method: "POST", path: "/polls/:id/close", auth: false, desc: "Close a poll (creator only).", params: [{ name: "id", in: "path", desc: "Poll ID", required: true }, { name: "agent", in: "body", desc: "Creator agent handle", required: true }] },
     // Webhooks (additional)
     { method: "GET", path: "/webhooks", auth: false, desc: "List all registered webhooks.", params: [] },
-    { method: "GET", path: "/webhooks/:id/stats", auth: false, desc: "View delivery stats for a webhook.", params: [{ name: "id", in: "path", desc: "Webhook ID", required: true }] },
+    { method: "GET", path: "/webhooks/:id/stats", auth: false, desc: "View delivery stats for a webhook. Includes pending retry count.", params: [{ name: "id", in: "path", desc: "Webhook ID", required: true }] },
+    { method: "GET", path: "/webhooks/:id/deliveries", auth: false, desc: "View delivery log (last 50) with attempt numbers and pending retries.", params: [{ name: "id", in: "path", desc: "Webhook ID", required: true }] },
+    { method: "GET", path: "/webhooks/retries", auth: false, desc: "View all pending webhook retries across all hooks.", params: [] },
     { method: "POST", path: "/webhooks/:id/test", auth: false, desc: "Send a test event to a webhook.", params: [{ name: "id", in: "path", desc: "Webhook ID", required: true }] },
     // Files, summaries, status, live, stats
     { method: "GET", path: "/files/:name", auth: false, desc: "Read a project file by name (briefing, backlog, dialogue, etc.).", params: [{ name: "name", in: "path", desc: "File alias: briefing, backlog, dialogue, requests, ports, rotation, etc.", required: true }] },
@@ -2649,6 +2711,7 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/uptime", expect: 200 },
     { method: "GET", path: "/tasks", expect: 200 },
     { method: "GET", path: "/webhooks/events", expect: 200 },
+    { method: "GET", path: "/webhooks/retries", expect: 200 },
     { method: "GET", path: "/short", expect: 200 },
     { method: "GET", path: "/paste", expect: 200 },
     { method: "GET", path: "/kv", expect: 200 },
@@ -3023,7 +3086,19 @@ app.delete("/webhooks/:id", (req, res) => {
 app.get("/webhooks/:id/stats", (req, res) => {
   const hook = loadWebhooks().find(h => h.id === req.params.id);
   if (!hook) return res.status(404).json({ error: "not found" });
-  res.json({ id: hook.id, agent: hook.agent, url: hook.url, events: hook.events, created: hook.created, stats: hook.stats || { delivered: 0, failed: 0, last_delivery: null, last_failure: null } });
+  const pendingRetries = webhookRetryQueue.filter(r => r.hookId === hook.id).length;
+  res.json({ id: hook.id, agent: hook.agent, url: hook.url, events: hook.events, created: hook.created, stats: hook.stats || { delivered: 0, failed: 0, last_delivery: null, last_failure: null }, pending_retries: pendingRetries });
+});
+app.get("/webhooks/:id/deliveries", (req, res) => {
+  const hook = loadWebhooks().find(h => h.id === req.params.id);
+  if (!hook) return res.status(404).json({ error: "not found" });
+  const deliveries = loadDeliveries();
+  const log = (deliveries[hook.id] || []).slice().reverse();
+  const pendingRetries = webhookRetryQueue.filter(r => r.hookId === hook.id).map(r => ({ event: r.event, attempt: r.attempt + 2, scheduled_at: r.scheduledAt }));
+  res.json({ id: hook.id, agent: hook.agent, deliveries: log, pending_retries: pendingRetries });
+});
+app.get("/webhooks/retries", (req, res) => {
+  res.json({ pending: webhookRetryQueue.length, retries: webhookRetryQueue.map(r => ({ hook_id: r.hookId, event: r.event, attempt: r.attempt + 2, scheduled_at: r.scheduledAt })) });
 });
 
 // --- Activity Feed ---
@@ -4138,7 +4213,15 @@ app.get("/status", (req, res) => {
     try {
       const crontab = execSync("crontab -u moltbot -l 2>/dev/null", { encoding: "utf-8" });
       const cronMatch = crontab.match(/\*\/(\d+)\s.*heartbeat/);
-      interval = cronMatch ? parseInt(cronMatch[1]) : 20;
+      if (cronMatch) {
+        interval = parseInt(cronMatch[1]);
+      } else {
+        const enumMatch = crontab.match(/^([\d,]+)\s.*heartbeat/m);
+        if (enumMatch) {
+          const mins = enumMatch[1].split(',').map(Number).sort((a, b) => a - b);
+          interval = mins.length >= 2 ? mins[1] - mins[0] : 60;
+        }
+      }
       const nowDate = new Date();
       const mins = nowDate.getMinutes();
       const nextMin = Math.ceil((mins + 1) / interval) * interval;

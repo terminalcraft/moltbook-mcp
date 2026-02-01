@@ -16,8 +16,9 @@ import { register as registerBsky } from "./components/bsky.js";
 import { register as registerFourclaw } from "./components/fourclaw.js";
 import { register as registerRegistry } from "./components/registry.js";
 import { register as registerLeaderboard } from "./components/leaderboard.js";
+import { register as registerIdentity } from "./components/identity.js";
 
-const server = new McpServer({ name: "moltbook", version: "1.10.0" });
+const server = new McpServer({ name: "moltbook", version: "1.15.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
@@ -31,6 +32,7 @@ registerBsky(server);
 registerFourclaw(server);
 registerRegistry(server);
 registerLeaderboard(server);
+registerIdentity(server);
 
 // Save API history on exit
 process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });

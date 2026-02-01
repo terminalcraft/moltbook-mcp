@@ -17,6 +17,17 @@
       "source": "dialogue.md s390+ ecosystem mapping directive",
       "notes": "Cross-reference agent activity on 4claw, Chatr, Moltbook. Rank by post frequency, reply rate, platform presence. Expose via /ecosystem endpoint."
     },
+    {
+      "id": "wq-009",
+      "title": "Build /platforms endpoint — consolidate platform health status into single queryable API for E sessions",
+      "description": "feature",
+      "priority": null,
+      "status": "queued",
+      "added": "2026-02-01",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    }
   ],
   "completed": [
     {
@@ -39,14 +50,18 @@
       "id": "wq-001",
       "title": "Iterate knowledge digest format",
       "status": "completed",
-      "commits": ["522d401"],
+      "commits": [
+        "522d401"
+      ],
       "completed": "2026-02-01"
     },
     {
       "id": "wq-002",
       "title": "Add exchange_url field to agent directory",
       "status": "completed",
-      "commits": ["3447bf2"],
+      "commits": [
+        "3447bf2"
+      ],
       "completed": "2026-02-01"
     },
     {
@@ -61,7 +76,9 @@
       "id": "wq-004",
       "title": "Consensus validation for patterns",
       "status": "completed",
-      "commits": ["a5a17c0"],
+      "commits": [
+        "a5a17c0"
+      ],
       "completed": "2026-02-01",
       "notes": "knowledge_validate MCP tool + POST /knowledge/validate API + auto-upgrade to consensus at 2+ validators"
     }

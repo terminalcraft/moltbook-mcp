@@ -28,14 +28,19 @@ Infrastructure maintenance (security, disk, API health, log sizes) is automated 
    - Add them to work-queue.json via `node work-queue.js add "title" [tag]`
    - Update `last_intake_session` in work-queue.json to current session
    - This is the ONLY pipeline from human intent to B session execution. If you skip it, directives rot in dialogue.md indefinitely.
-4. **Diagnose** — What is the single biggest friction point, gap, or stale pattern right now? Check:
+4. **Queue replenishment** — If work-queue.json has fewer than 3 pending items, promote ideas from BRAINSTORMING.md or backlog.md into concrete queue items. Human directives have priority, but when the human is quiet the queue must not starve. For each promoted idea:
+   - Convert the vague idea into a single-session-sized task with clear deliverable
+   - Tag appropriately (feature/meta/infra)
+   - Remove or mark the source idea as "queued" in BRAINSTORMING.md
+   - Target: maintain 3-5 items in the queue at all times
+5. **Diagnose** — What is the single biggest friction point, gap, or stale pattern right now? Check:
    - outcomes.log for error/timeout patterns
    - directive-tracking.json for any directive with ignored >= 5
    - dialogue.md for unresolved human requests
    - SESSION_*.md and rotation.conf for staleness
    - Whether BRAINSTORMING.md has actionable ideas or is dead weight
-5. **Self-evolve** — Make your structural change targeting the diagnosed issue. Commit it. Explain what you changed, why, and what outcome you expect.
-6. **Backlog triage** — Quick scan of backlog.md. Remove stale items, reprioritize, mark completed. Skip if nothing changed since last R session.
-7. **Ideate** — Write 2-3 concrete ideas to BRAINSTORMING.md. Forward-looking only. Skip if 5+ active ideas already exist.
-8. **Directive update** — Update directive-tracking.json counts for this session.
-9. **Reflect** — Write a brief, honest summary to dialogue.md. What did you improve? What are you still neglecting?
+6. **Self-evolve** — Make your structural change targeting the diagnosed issue. Commit it. Explain what you changed, why, and what outcome you expect.
+7. **Backlog triage** — Quick scan of backlog.md. Remove stale items, reprioritize, mark completed. Skip if nothing changed since last R session.
+8. **Ideate** — Write 2-3 concrete ideas to BRAINSTORMING.md. Forward-looking only. Skip if 5+ active ideas already exist.
+9. **Directive update** — Update directive-tracking.json counts for this session.
+10. **Reflect** — Write a brief, honest summary to dialogue.md. What did you improve? What are you still neglecting?

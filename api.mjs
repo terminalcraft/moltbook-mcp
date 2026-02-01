@@ -479,6 +479,7 @@ function getDocEndpoints() {
     { method: "GET", path: "/status", auth: false, desc: "Current session status — running state, tool calls, session number, elapsed time.", params: [] },
     { method: "GET", path: "/live", auth: false, desc: "Live session actions — real-time tool calls and progress from the current running session.", params: [{ name: "offset", in: "query", desc: "Byte offset to resume from (for polling)" }] },
     { method: "GET", path: "/stats", auth: false, desc: "Aggregate session statistics — duration, tool calls, commits, engagement across all sessions.", params: [{ name: "last", in: "query", desc: "Limit to last N sessions" }, { name: "format", in: "query", desc: "json or html" }] },
+    { method: "GET", path: "/summary", auth: false, desc: "Ecosystem overview — counts across all subsystems (agents, tasks, rooms, pastes, polls, KV, monitors, etc.) in one call.", params: [{ name: "format", in: "query", desc: "json or html (default)" }] },
   ];
 }
 
@@ -715,32 +716,6 @@ app.get("/agent.json", agentManifest);
 app.get("/.well-known/agent.json", agentManifest);
 
 // --- Changelog ---
-app.get("/changelog", (req, res) => {
-  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
-  try {
-    const raw = execSync(`git log --oneline --format="%h %s" -${limit}`, { cwd: BASE, encoding: "utf8", timeout: 5000 });
-    const entries = raw.trim().split("\n").filter(Boolean).map(line => {
-      const [hash, ...rest] = line.split(" ");
-      const msg = rest.join(" ");
-      const m = msg.match(/^(feat|fix|refactor|chore|docs|perf|test)(\(.+?\))?:\s*(.+)/);
-      if (!m) return null;
-      return { hash, type: m[1], scope: m[2]?.slice(1, -1) || undefined, message: m[3] };
-    }).filter(Boolean);
-    const wantsJson = req.query.format === "json" || req.headers.accept?.includes("application/json");
-    if (wantsJson) return res.json({ entries, total: entries.length });
-    const html = `<!DOCTYPE html><html><head><title>Changelog</title>
-<style>body{font-family:monospace;max-width:900px;margin:2em auto;background:#111;color:#eee}
-h1{color:#0f0}.feat{color:#0af}.fix{color:#fa0}.refactor{color:#a0f}.chore{color:#666}.docs{color:#6a6}
-.entry{margin:4px 0}.hash{color:#555;font-size:0.85em}</style></head><body>
-<h1>Changelog</h1><p style="color:#666">${entries.length} notable changes</p>
-${entries.map(e => `<div class="entry"><span class="${e.type}">[${e.type}]</span> ${e.message} <span class="hash">${e.hash}</span></div>`).join("\n")}
-</body></html>`;
-    res.type("html").send(html);
-  } catch (err) {
-    res.status(500).json({ error: "failed to read git log" });
-  }
-});
-
 // skill.md — standardized capability description for ctxly and agent discovery
 app.get("/skill.md", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
@@ -2441,6 +2416,7 @@ app.get("/", (req, res) => {
       { path: "/sessions", desc: "Session history with quality scores" },
       { path: "/costs", desc: "Session cost tracking" },
       { path: "/stats", desc: "Aggregated session statistics" },
+      { path: "/summary", desc: "Ecosystem overview — all subsystem counts" },
       { path: "/analytics", desc: "API request analytics and traffic" },
       { path: "/search", desc: "Unified search across all data stores" },
       { path: "/changelog", desc: "Git changelog by category" },
@@ -3737,6 +3713,79 @@ app.get("/status", (req, res) => {
       feed_events: activityFeed.length,
     };
     res.json({ running, tools, elapsed_seconds, next_heartbeat, session_mode, rotation_pattern, rotation_counter, cron_interval: interval, version: VERSION, ecosystem });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// --- Ecosystem summary ---
+app.get("/summary", (req, res) => {
+  try {
+    const registry = loadRegistry();
+    const tasks = loadTasks();
+    const rooms = loadRooms();
+    const pubsub = loadPubsub();
+    const monitors = loadMonitors();
+    const lb = loadLeaderboard();
+    const dir = loadDirectory();
+    const webhooks = loadWebhooks();
+    const inbox = loadInbox();
+    let knowledgeCount = 0;
+    try { knowledgeCount = JSON.parse(readFileSync(join(BASE, "knowledge", "patterns.json"), "utf8")).patterns.length; } catch {}
+
+    const agentCount = Object.keys(registry.agents || {}).length;
+    const topicCount = Object.keys(pubsub.topics || {}).length;
+    const roomCount = Object.keys(rooms || {}).length;
+    const dirAgents = Object.keys(dir.agents || {}).length;
+    const openTasks = tasks.filter(t => t.status === "open").length;
+    const claimedTasks = tasks.filter(t => t.status === "claimed").length;
+    const doneTasks = tasks.filter(t => t.status === "done").length;
+    const activePolls = polls.filter(p => !p.closed).length;
+    const activeCrons = cronJobs.filter(j => j.active !== false).length;
+    const activeMonitors = monitors.filter(m => m.active !== false).length;
+
+    const summary = {
+      version: VERSION,
+      timestamp: new Date().toISOString(),
+      agents: { registry: agentCount, directory: dirAgents },
+      knowledge: { patterns: knowledgeCount },
+      tasks: { open: openTasks, claimed: claimedTasks, done: doneTasks, total: tasks.length },
+      rooms: roomCount,
+      topics: topicCount,
+      pastes: pastes.length,
+      shorts: shorts.length,
+      polls: { active: activePolls, total: polls.length },
+      cron: { active: activeCrons, total: cronJobs.length },
+      monitors: { active: activeMonitors, total: monitors.length },
+      kv: { namespaces: Object.keys(kvStore).length, keys: Object.values(kvStore).reduce((s, ns) => s + Object.keys(ns).length, 0) },
+      webhooks: webhooks.length,
+      leaderboard: (lb.entries || lb || []).length,
+      inbox: inbox.length,
+      feed: activityFeed.length,
+      sse_clients: sseClients.size,
+    };
+
+    const fmt = req.query.format || (req.headers.accept?.includes("application/json") ? "json" : "html");
+    if (fmt === "json") return res.json(summary);
+
+    const rows = Object.entries(summary).filter(([k]) => !["version", "timestamp"].includes(k)).map(([k, v]) => {
+      const val = typeof v === "object" ? Object.entries(v).map(([sk, sv]) => `${sk}: ${sv}`).join(", ") : v;
+      return `<tr><td>${k}</td><td>${val}</td></tr>`;
+    }).join("\n");
+
+    res.type("html").send(`<!DOCTYPE html><html><head><title>Ecosystem Summary</title>
+<style>body{font-family:monospace;max-width:700px;margin:2em auto;background:#111;color:#eee}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:6px 10px;text-align:left}
+th{background:#222}h1{color:#0f0}.ts{color:#666;font-size:0.85em}</style></head><body>
+<h1>Ecosystem Summary</h1>
+<p class="ts">v${VERSION} &middot; ${summary.timestamp}</p>
+<table><tr><th>Subsystem</th><th>Counts</th></tr>
+${rows}</table>
+<div style="margin-top:1em;font-size:0.8em;color:#666">
+  <a href="/summary?format=json" style="color:#0a0">JSON</a> |
+  <a href="/health" style="color:#0a0">Health</a> |
+  <a href="/stats" style="color:#0a0">Stats</a>
+</div></body></html>`);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

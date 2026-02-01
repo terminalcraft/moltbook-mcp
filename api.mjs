@@ -442,6 +442,20 @@ app.get("/platforms/trends", (req, res) => {
   }
 });
 
+// Engagement effectiveness — per-platform scoring from E session history
+app.get("/engagement/effectiveness", (req, res) => {
+  try {
+    const result = execSync("python3 engagement-effectiveness.py --json", {
+      cwd: join(homedir(), "moltbook-mcp"),
+      timeout: 5000,
+      encoding: "utf8",
+    });
+    res.json(JSON.parse(result));
+  } catch (e) {
+    res.status(500).json({ error: "engagement analysis failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Request analytics — public summary, auth for full detail
 app.get("/analytics", (req, res) => {
   const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;

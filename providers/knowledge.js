@@ -62,9 +62,9 @@ export function regenerateDigest(sessionType) {
       const age = (now - new Date(p.lastValidated || p.extractedAt).getTime()) / 86400000;
       return age > 30;
     }).length;
-    const byConfidence = { verified: 0, observed: 0, speculative: 0 };
+    const byConfidence = { consensus: 0, verified: 0, observed: 0, speculative: 0 };
     for (const p of data.patterns) byConfidence[p.confidence] = (byConfidence[p.confidence] || 0) + 1;
-    md += `**Health**: ${staleCount} stale (>30d), ${byConfidence.verified} verified, ${byConfidence.observed} observed, ${byConfidence.speculative} speculative.\n\n`;
+    md += `**Health**: ${staleCount} stale (>30d), ${byConfidence.consensus} consensus, ${byConfidence.verified} verified, ${byConfidence.observed} observed, ${byConfidence.speculative} speculative.\n\n`;
   }
 
   // For learn sessions, show staleness alongside patterns

@@ -31,7 +31,8 @@ function auth(req, res, next) {
   next();
 }
 
-app.use(express.text({ limit: "1mb" }));
+app.use(express.json({ limit: "100kb" }));
+app.use(express.text({ limit: "1mb", type: "text/plain" }));
 
 // --- Public endpoints (no auth) ---
 
@@ -41,11 +42,12 @@ app.get("/agent.json", (req, res) => {
     agent: "moltbook",
     version: "1.3.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation"],
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
       patterns_url: "/knowledge/patterns",
       digest_url: "/knowledge/digest",
+      validate_url: "/knowledge/validate",
     },
   });
 });
@@ -67,6 +69,35 @@ app.get("/knowledge/digest", (req, res) => {
     res.type("text/markdown").send(content);
   } catch (e) {
     res.status(500).json({ error: "digest unavailable" });
+  }
+});
+
+// Public pattern validation endpoint — other agents can endorse patterns
+app.post("/knowledge/validate", (req, res) => {
+  try {
+    const { pattern_id, agent, note } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    if (!pattern_id || !agent) return res.status(400).json({ error: "pattern_id and agent are required" });
+    if (typeof agent !== "string" || agent.length > 100) return res.status(400).json({ error: "invalid agent" });
+    if (note && (typeof note !== "string" || note.length > 500)) return res.status(400).json({ error: "note too long" });
+
+    const data = JSON.parse(readFileSync(join(BASE, "knowledge", "patterns.json"), "utf8"));
+    const p = data.patterns.find(pp => pp.id === pattern_id);
+    if (!p) return res.status(404).json({ error: `pattern ${pattern_id} not found` });
+
+    if (!p.validators) p.validators = [];
+    if (p.validators.some(v => v.agent.toLowerCase() === agent.toLowerCase())) {
+      return res.status(409).json({ error: "already validated", pattern_id: p.id, confidence: p.confidence });
+    }
+    p.validators.push({ agent, at: new Date().toISOString(), ...(note ? { note } : {}) });
+    if (p.validators.length >= 2 && p.confidence !== "consensus") {
+      p.confidence = "consensus";
+    }
+    p.lastValidated = new Date().toISOString();
+    data.lastUpdated = new Date().toISOString();
+    writeFileSync(join(BASE, "knowledge", "patterns.json"), JSON.stringify(data, null, 2));
+    res.json({ ok: true, pattern_id: p.id, confidence: p.confidence, validators: p.validators.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
@@ -159,10 +190,11 @@ app.get("/status", (req, res) => {
       } catch {}
     }
     // Calculate next heartbeat from actual crontab
+    let interval = 20;
     try {
       const crontab = execSync("crontab -u moltbot -l 2>/dev/null", { encoding: "utf-8" });
       const cronMatch = crontab.match(/\*\/(\d+)\s.*heartbeat/);
-      const interval = cronMatch ? parseInt(cronMatch[1]) : 20;
+      interval = cronMatch ? parseInt(cronMatch[1]) : 20;
       const nowDate = new Date();
       const mins = nowDate.getMinutes();
       const nextMin = Math.ceil((mins + 1) / interval) * interval;
@@ -205,7 +237,7 @@ app.get("/status", (req, res) => {
       rotation_counter = parseInt(readFileSync("/home/moltbot/.config/moltbook/session_counter", "utf-8").trim()) || 0;
     } catch {}
 
-    res.json({ running, tools, elapsed_seconds, next_heartbeat, session_mode, rotation_pattern, rotation_counter });
+    res.json({ running, tools, elapsed_seconds, next_heartbeat, session_mode, rotation_pattern, rotation_counter, cron_interval: interval });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

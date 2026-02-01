@@ -37,13 +37,13 @@ export function register(server) {
     title: z.string().describe("Short descriptive title"),
     description: z.string().describe("What the pattern is and why it works"),
     tags: z.array(z.string()).default([]).describe("Searchable tags"),
-    confidence: z.enum(["verified", "observed", "speculative"]).default("observed").describe("How confident are we this pattern works"),
+    confidence: z.enum(["verified", "observed", "speculative", "consensus"]).default("observed").describe("How confident are we this pattern works. 'consensus' = validated by 2+ independent agents."),
   }, async ({ source, category, title, description, tags, confidence }) => {
     const data = loadPatterns();
     const existing = data.patterns.find(p => p.title.toLowerCase() === title.toLowerCase());
     if (existing) return { content: [{ type: "text", text: `Pattern already exists: ${existing.id} — "${existing.title}". Update it manually if needed.` }] };
     const id = `p${String(data.patterns.length + 1).padStart(3, "0")}`;
-    data.patterns.push({ id, source, category, title, description, confidence, extractedAt: new Date().toISOString(), tags });
+    data.patterns.push({ id, source, category, title, description, confidence, extractedAt: new Date().toISOString(), tags, validators: [] });
     savePatterns(data);
     const digest = regenerateDigest();
     return { content: [{ type: "text", text: `Added pattern ${id}: "${title}" (${category}, ${confidence}). Knowledge base now has ${data.patterns.length} patterns.\n\nUpdated digest:\n${digest}` }] };
@@ -180,6 +180,7 @@ export function register(server) {
       let downgraded = 0;
       for (const p of data.patterns) {
         const age = now - new Date(p.lastValidated).getTime();
+        if (p.confidence === "consensus") continue; // consensus patterns are protected from aging
         if (age > staleMs && p.confidence === "verified") { p.confidence = "observed"; downgraded++; }
         else if (age > staleMs * 2 && p.confidence === "observed") { p.confidence = "speculative"; downgraded++; }
       }
@@ -189,8 +190,35 @@ export function register(server) {
     const lines = data.patterns.map(p => {
       const ageDays = ((now - new Date(p.lastValidated || p.extractedAt).getTime()) / 86400000).toFixed(1);
       const stale = parseFloat(ageDays) > max_age_days ? " [STALE]" : "";
-      return `${p.id} (${p.confidence}) ${ageDays}d — ${p.title}${stale}`;
+      const vCount = (p.validators || []).length;
+      const vTag = vCount > 0 ? ` [${vCount} validators]` : "";
+      return `${p.id} (${p.confidence}) ${ageDays}d — ${p.title}${stale}${vTag}`;
     });
     return { content: [{ type: "text", text: `Pattern staleness (${max_age_days}d threshold):\n${lines.join("\n")}` }] };
+  });
+
+  // knowledge_validate — endorse a pattern (used by other agents via exchange or locally)
+  server.tool("knowledge_validate", "Endorse a pattern as valid. When 2+ independent agents validate a pattern, it auto-upgrades to 'consensus' confidence.", {
+    pattern_id: z.string().describe("Pattern ID to validate (e.g. 'p001')"),
+    agent: z.string().describe("Agent handle endorsing this pattern (e.g. 'dragonbotz')"),
+    note: z.string().optional().describe("Optional note about why this pattern is valid"),
+  }, async ({ pattern_id, agent, note }) => {
+    const data = loadPatterns();
+    const p = data.patterns.find(pp => pp.id === pattern_id);
+    if (!p) return { content: [{ type: "text", text: `Pattern ${pattern_id} not found.` }] };
+    if (!p.validators) p.validators = [];
+    const agentLower = agent.toLowerCase();
+    if (p.validators.some(v => v.agent.toLowerCase() === agentLower)) {
+      return { content: [{ type: "text", text: `Agent "${agent}" already validated ${p.id}: "${p.title}".` }] };
+    }
+    p.validators.push({ agent, at: new Date().toISOString(), ...(note ? { note } : {}) });
+    // Auto-upgrade to consensus at 2+ validators
+    if (p.validators.length >= 2 && p.confidence !== "consensus") {
+      p.confidence = "consensus";
+    }
+    p.lastValidated = new Date().toISOString();
+    savePatterns(data);
+    regenerateDigest();
+    return { content: [{ type: "text", text: `Validated ${p.id}: "${p.title}" by ${agent}. Validators: ${p.validators.length}. Confidence: ${p.confidence}.` }] };
   });
 }

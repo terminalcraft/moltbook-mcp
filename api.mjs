@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -2611,6 +2611,133 @@ app.get("/kv/:ns", (req, res) => {
 app.get("/kv", (req, res) => {
   const namespaces = Object.entries(kvStore).map(([ns, entries]) => ({ ns, keys: Object.keys(entries).length }));
   res.json({ total_namespaces: namespaces.length, total_keys: kvKeyCount(), namespaces });
+});
+
+// --- Cron Scheduler ---
+const CRON_FILE = join(BASE, "cron-jobs.json");
+const CRON_MAX_JOBS = 50;
+const CRON_MIN_INTERVAL = 60;
+const CRON_MAX_INTERVAL = 86400;
+const CRON_MAX_HISTORY = 10;
+let cronJobs = (() => { try { return JSON.parse(readFileSync(CRON_FILE, "utf8")); } catch { return []; } })();
+const cronTimers = new Map();
+function saveCron() { try { writeFileSync(CRON_FILE, JSON.stringify(cronJobs, null, 2)); } catch {} }
+
+async function executeCronJob(job) {
+  const start = Date.now();
+  try {
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 15000);
+    const resp = await fetch(job.url, {
+      method: job.method || "POST",
+      headers: { "Content-Type": "application/json", "X-Cron-Job": job.id, "X-Cron-Agent": job.agent || "unknown" },
+      body: job.payload ? JSON.stringify(job.payload) : undefined,
+      signal: ctrl.signal,
+    });
+    clearTimeout(timeout);
+    const entry = { status: resp.status, duration_ms: Date.now() - start, ts: new Date().toISOString() };
+    if (!job.history) job.history = [];
+    job.history.push(entry);
+    if (job.history.length > CRON_MAX_HISTORY) job.history = job.history.slice(-CRON_MAX_HISTORY);
+    job.last_run = entry.ts;
+    job.last_status = resp.status;
+    job.run_count = (job.run_count || 0) + 1;
+    saveCron();
+  } catch (err) {
+    const entry = { status: "error", error: err.message?.slice(0, 200), duration_ms: Date.now() - start, ts: new Date().toISOString() };
+    if (!job.history) job.history = [];
+    job.history.push(entry);
+    if (job.history.length > CRON_MAX_HISTORY) job.history = job.history.slice(-CRON_MAX_HISTORY);
+    job.last_run = entry.ts;
+    job.last_status = "error";
+    job.run_count = (job.run_count || 0) + 1;
+    job.error_count = (job.error_count || 0) + 1;
+    saveCron();
+  }
+}
+
+function startCronTimer(job) {
+  if (cronTimers.has(job.id)) clearInterval(cronTimers.get(job.id));
+  const timer = setInterval(() => executeCronJob(job), job.interval * 1000);
+  timer.unref();
+  cronTimers.set(job.id, timer);
+}
+
+// Start all existing jobs on boot
+for (const job of cronJobs) { if (job.active !== false) startCronTimer(job); }
+
+app.post("/cron", (req, res) => {
+  const { url, interval, agent, payload, method, name } = req.body || {};
+  if (!url || !interval) return res.status(400).json({ error: "url and interval required" });
+  if (typeof url !== "string" || !url.startsWith("http")) return res.status(400).json({ error: "url must be a valid HTTP URL" });
+  if (typeof interval !== "number" || interval < CRON_MIN_INTERVAL || interval > CRON_MAX_INTERVAL)
+    return res.status(400).json({ error: `interval must be ${CRON_MIN_INTERVAL}-${CRON_MAX_INTERVAL} seconds` });
+  if (method && !["GET", "POST", "PUT", "PATCH"].includes(method.toUpperCase()))
+    return res.status(400).json({ error: "method must be GET, POST, PUT, or PATCH" });
+  if (cronJobs.length >= CRON_MAX_JOBS) return res.status(400).json({ error: `max ${CRON_MAX_JOBS} jobs` });
+  const job = {
+    id: crypto.randomUUID().slice(0, 8),
+    name: name?.slice(0, 100) || undefined,
+    url,
+    interval,
+    method: method?.toUpperCase() || "POST",
+    agent: agent?.slice(0, 64) || undefined,
+    payload: payload || undefined,
+    active: true,
+    run_count: 0,
+    error_count: 0,
+    history: [],
+    created_at: new Date().toISOString(),
+  };
+  cronJobs.push(job);
+  saveCron();
+  startCronTimer(job);
+  logActivity("cron.created", `${job.agent || "anon"} scheduled ${job.name || job.url} every ${job.interval}s`, { job_id: job.id });
+  res.status(201).json(job);
+});
+
+app.get("/cron", (req, res) => {
+  const summary = cronJobs.map(j => ({
+    id: j.id, name: j.name, url: j.url, interval: j.interval, method: j.method,
+    agent: j.agent, active: j.active, run_count: j.run_count, error_count: j.error_count,
+    last_run: j.last_run, last_status: j.last_status, created_at: j.created_at,
+  }));
+  res.json({ total: summary.length, jobs: summary });
+});
+
+app.get("/cron/:id", (req, res) => {
+  const job = cronJobs.find(j => j.id === req.params.id);
+  if (!job) return res.status(404).json({ error: "job not found" });
+  res.json(job);
+});
+
+app.delete("/cron/:id", (req, res) => {
+  const idx = cronJobs.findIndex(j => j.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "job not found" });
+  const job = cronJobs[idx];
+  if (cronTimers.has(job.id)) { clearInterval(cronTimers.get(job.id)); cronTimers.delete(job.id); }
+  cronJobs.splice(idx, 1);
+  saveCron();
+  logActivity("cron.deleted", `job ${job.name || job.id} deleted`, { job_id: job.id });
+  res.json({ deleted: true });
+});
+
+app.patch("/cron/:id", (req, res) => {
+  const job = cronJobs.find(j => j.id === req.params.id);
+  if (!job) return res.status(404).json({ error: "job not found" });
+  const { active, interval, url, payload, name } = req.body || {};
+  if (active !== undefined) job.active = !!active;
+  if (interval !== undefined) {
+    if (typeof interval !== "number" || interval < CRON_MIN_INTERVAL || interval > CRON_MAX_INTERVAL)
+      return res.status(400).json({ error: `interval must be ${CRON_MIN_INTERVAL}-${CRON_MAX_INTERVAL} seconds` });
+    job.interval = interval;
+  }
+  if (url !== undefined) job.url = url;
+  if (payload !== undefined) job.payload = payload;
+  if (name !== undefined) job.name = name?.slice(0, 100);
+  saveCron();
+  if (job.active) startCronTimer(job); else if (cronTimers.has(job.id)) { clearInterval(cronTimers.get(job.id)); cronTimers.delete(job.id); }
+  res.json(job);
 });
 
 // --- Authenticated endpoints ---

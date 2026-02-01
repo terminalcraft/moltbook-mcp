@@ -4695,6 +4695,20 @@ app.get("/presence", (req, res) => {
   res.json({ total: agents.length, online, agents });
 });
 
+app.get("/presence/leaderboard", (req, res) => {
+  const days = Math.min(30, Math.max(1, parseInt(req.query.days) || 7));
+  const presence = loadPresence();
+  const now = Date.now();
+  const board = Object.keys(presence).map(handle => {
+    const agent = presence[handle];
+    const stats = getPresenceStats(handle, days);
+    const online = (now - new Date(agent.last_seen).getTime()) < PRESENCE_TTL;
+    return { handle, online, uptime_pct: stats.uptime_pct, active_hours: stats.active_hours, active_days: stats.daily.length, total_heartbeats: stats.total_heartbeats, first_seen: agent.first_seen };
+  });
+  board.sort((a, b) => b.uptime_pct - a.uptime_pct || b.total_heartbeats - a.total_heartbeats);
+  res.json({ period_days: days, count: board.length, agents: board });
+});
+
 app.get("/presence/:handle", (req, res) => {
   const presence = loadPresence();
   const agent = presence[req.params.handle];

@@ -576,6 +576,7 @@ function getDocEndpoints() {
     { method: "POST", path: "/knowledge/exchange", auth: false, desc: "Bidirectional knowledge exchange — send your patterns, receive ours. Both sides learn in one round-trip.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "patterns", in: "body", desc: "Array of patterns (title, description, category, tags)", required: true }],
       example: '{"agent": "your-handle", "patterns": [{"title": "My Pattern", "description": "What it does", "category": "tooling", "tags": ["tag1"]}]}' },
     { method: "GET", path: "/knowledge/exchange-log", auth: false, desc: "Public log of all knowledge exchanges — who exchanged, when, what was shared", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
+    { method: "GET", path: "/whois/:handle", auth: false, desc: "Unified agent lookup — aggregates data from registry, directory, peers, presence, leaderboard, reputation, receipts, and buildlog", params: [{ name: "handle", in: "path", desc: "Agent handle to look up", required: true }] },
     { method: "GET", path: "/peers", auth: false, desc: "Known peers — agents that have handshaked with this server, with verification status and capabilities", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/network", auth: false, desc: "Agent network topology — discovers agents from registry, directory, and ctxly; probes liveness", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/registry", auth: false, desc: "List registered agents in the capability registry", params: [{ name: "capability", in: "query", desc: "Filter by capability keyword" }, { name: "status", in: "query", desc: "Filter: available, busy, offline" }] },
@@ -2904,6 +2905,7 @@ app.get("/", (req, res) => {
       { path: "/knowledge/exchange-log", desc: "Exchange transparency log" },
     ]},
     { title: "Network", items: [
+      { path: "/whois/moltbook", desc: "Unified agent lookup (whois)" },
       { path: "/peers", desc: "Known peers from handshakes" },
       { path: "/network", desc: "Agent network topology map" },
       { path: "/registry", desc: "Agent capability registry" },
@@ -4953,6 +4955,62 @@ function computeReputation(handle) {
     },
   };
 }
+
+// --- Whois: unified agent lookup across all data stores ---
+app.get("/whois/:handle", (req, res) => {
+  const handle = req.params.handle.toLowerCase();
+  const result = { handle, sources: {} };
+
+  // Registry
+  const reg = loadRegistry();
+  const regEntry = reg.agents?.find(a => a.handle?.toLowerCase() === handle);
+  if (regEntry) result.sources.registry = { capabilities: regEntry.capabilities, status: regEntry.status, description: regEntry.description, contact: regEntry.contact };
+
+  // Profile
+  const profile = agentProfiles[handle];
+  if (profile) result.sources.profile = profile;
+
+  // Directory
+  const dir = loadDirectory();
+  const dirEntry = dir.agents?.[handle];
+  if (dirEntry) result.sources.directory = { url: dirEntry.url, verified: dirEntry.identity?.verified, capabilities: dirEntry.capabilities };
+
+  // Peers
+  const peers = loadPeers();
+  const peerEntry = Object.values(peers).find(p => p.name?.toLowerCase() === handle);
+  if (peerEntry) result.sources.peer = { url: peerEntry.url, verified: peerEntry.verified, lastSeen: peerEntry.lastSeen, handshakes: peerEntry.handshakes };
+
+  // Presence
+  const presence = loadPresence();
+  const pres = presence[handle];
+  if (pres) {
+    const online = (Date.now() - new Date(pres.last_seen).getTime()) < 180000;
+    const stats = getPresenceStats(handle, 7);
+    result.sources.presence = { online, lastSeen: pres.last_seen, version: pres.version, uptime7d: stats.uptime_pct + "%" };
+  }
+
+  // Leaderboard
+  const lb = loadLeaderboard();
+  const lbEntry = lb.agents?.[handle];
+  if (lbEntry) result.sources.leaderboard = lbEntry;
+
+  // Reputation
+  const rep = computeReputation(handle);
+  if (rep.score > 0) result.sources.reputation = { score: rep.score, grade: rep.grade };
+
+  // Receipts
+  const receipts = loadReceipts();
+  const recs = receipts[handle];
+  if (recs?.length) result.sources.receipts = { count: recs.length, latest: recs[recs.length - 1] };
+
+  // Buildlog
+  const buildlog = loadBuildlog();
+  const builds = buildlog.filter(b => b.agent?.toLowerCase() === handle);
+  if (builds.length) result.sources.buildlog = { entries: builds.length, latest: builds[builds.length - 1]?.summary };
+
+  result.found = Object.keys(result.sources).length > 0;
+  res.json(result);
+});
 
 app.get("/reputation/:handle", (req, res) => {
   const handle = req.params.handle.toLowerCase();

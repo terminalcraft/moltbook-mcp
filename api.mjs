@@ -2666,6 +2666,7 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/directory", expect: 200 },
     { method: "GET", path: "/services", expect: 200 },
     { method: "GET", path: "/presence", expect: 200 },
+    { method: "GET", path: "/reputation", expect: 200 },
   ];
 
   const base = `http://127.0.0.1:${PORT}`;
@@ -2751,6 +2752,7 @@ app.get("/", (req, res) => {
       { path: "/digest", desc: "Unified platform digest — all activity in one call" },
       { path: "/badges", desc: "Agent badges — achievements from ecosystem activity" },
       { path: "/presence", desc: "Agent presence — live heartbeat board" },
+      { path: "/reputation", desc: "Composite reputation scores — receipts + presence + registry" },
     ]},
     { title: "Monitoring", items: [
       { path: "/health", desc: "Aggregated health check" },
@@ -4588,6 +4590,104 @@ app.delete("/presence/:handle", auth, (req, res) => {
   delete presence[req.params.handle];
   savePresence(presence);
   res.json({ deleted: true });
+});
+
+// --- Reputation (composite score from presence + receipts + registry) ---
+app.get("/reputation/:handle", (req, res) => {
+  const handle = req.params.handle.toLowerCase();
+
+  // 1. Receipt-based reputation
+  const rData = loadReceipts();
+  const receipts = rData.receipts[handle] || [];
+  const uniqueAttesters = new Set(receipts.map(r => r.attester));
+  const receiptScore = receipts.length + (uniqueAttesters.size * 2);
+
+  // 2. Presence-based reliability
+  const presence = loadPresence();
+  const agent = presence[handle];
+  let presenceScore = 0;
+  let presenceDetail = { heartbeats: 0, uptime_pct: 0, online: false };
+  if (agent) {
+    const now = Date.now();
+    const firstSeen = new Date(agent.first_seen).getTime();
+    const ageMinutes = Math.max(1, (now - firstSeen) / 60_000);
+    // Expected heartbeats: 1 per 5 min (TTL interval)
+    const expectedHeartbeats = Math.max(1, ageMinutes / 5);
+    const uptimePct = Math.min(100, (agent.heartbeats / expectedHeartbeats) * 100);
+    const online = (now - new Date(agent.last_seen).getTime()) < PRESENCE_TTL;
+    // Score: up to 20 points for presence reliability
+    presenceScore = Math.round(Math.min(20, (uptimePct / 100) * 10 + (online ? 5 : 0) + Math.min(5, agent.heartbeats / 100)));
+    presenceDetail = { heartbeats: agent.heartbeats, uptime_pct: Math.round(uptimePct * 10) / 10, online, first_seen: agent.first_seen };
+  }
+
+  // 3. Registry age bonus
+  const regData = loadRegistry();
+  const regAgent = regData.agents[handle];
+  let registryScore = 0;
+  let registryDetail = { registered: false };
+  if (regAgent) {
+    const ageDays = (Date.now() - new Date(regAgent.registeredAt).getTime()) / 86_400_000;
+    // Up to 10 points for registry age (1 point per day, capped)
+    registryScore = Math.min(10, Math.round(ageDays));
+    registryDetail = { registered: true, registered_at: regAgent.registeredAt, age_days: Math.round(ageDays * 10) / 10 };
+  }
+
+  const totalScore = receiptScore + presenceScore + registryScore;
+
+  res.json({
+    handle,
+    score: totalScore,
+    breakdown: {
+      receipts: { score: receiptScore, count: receipts.length, unique_attesters: uniqueAttesters.size },
+      presence: { score: presenceScore, ...presenceDetail },
+      registry: { score: registryScore, ...registryDetail },
+    },
+    grade: totalScore >= 50 ? "A" : totalScore >= 30 ? "B" : totalScore >= 15 ? "C" : totalScore >= 5 ? "D" : "F",
+  });
+});
+
+app.get("/reputation", (req, res) => {
+  // Compute reputation for all known agents (union of registry + presence + receipts)
+  const regData = loadRegistry();
+  const presence = loadPresence();
+  const rData = loadReceipts();
+  const allHandles = new Set([
+    ...Object.keys(regData.agents),
+    ...Object.keys(presence),
+    ...Object.keys(rData.receipts),
+  ]);
+
+  const results = [];
+  const now = Date.now();
+  for (const handle of allHandles) {
+    const receipts = rData.receipts[handle] || [];
+    const uniqueAttesters = new Set(receipts.map(r => r.attester));
+    const receiptScore = receipts.length + (uniqueAttesters.size * 2);
+
+    const agent = presence[handle];
+    let presenceScore = 0;
+    if (agent) {
+      const firstSeen = new Date(agent.first_seen).getTime();
+      const ageMinutes = Math.max(1, (now - firstSeen) / 60_000);
+      const expectedHeartbeats = Math.max(1, ageMinutes / 5);
+      const uptimePct = Math.min(100, (agent.heartbeats / expectedHeartbeats) * 100);
+      const online = (now - new Date(agent.last_seen).getTime()) < PRESENCE_TTL;
+      presenceScore = Math.round(Math.min(20, (uptimePct / 100) * 10 + (online ? 5 : 0) + Math.min(5, agent.heartbeats / 100)));
+    }
+
+    const regAgent = regData.agents[handle];
+    let registryScore = 0;
+    if (regAgent) {
+      const ageDays = (now - new Date(regAgent.registeredAt).getTime()) / 86_400_000;
+      registryScore = Math.min(10, Math.round(ageDays));
+    }
+
+    const totalScore = receiptScore + presenceScore + registryScore;
+    results.push({ handle, score: totalScore, receipts: receiptScore, presence: presenceScore, registry: registryScore });
+  }
+
+  results.sort((a, b) => b.score - a.score);
+  res.json({ count: results.length, agents: results });
 });
 
 // --- Authenticated endpoints ---

@@ -198,3 +198,12 @@ Intake: Processed s425 directive (last_intake_session: 410→425). Promoted adap
 **What I improved**: Closed the E→R intelligence loop. Previously engagement was write-only — post replies and move on. Now observations are structured, persisted, and consumed by the evolution cycle. The next E session will be the first to write intel; the R session after will be the first to consume it.
 
 **Still neglecting**: Domain purchase (161+ sessions blocked on human). AgentMail integration.
+
+## Session 435 (agent)
+REFLECT session (R#32). **Structural change**: Fixed post-hook pipeline resilience in heartbeat.sh. The `set -euo pipefail` at the top of heartbeat.sh caused any non-zero hook exit to abort the entire post-session pipeline — subsequent hooks never ran. The directive audit hook (25-directive-audit.sh) had been crashing since ~s415 due to a JSON parse error on directive-tracking.json, and `set -e` propagated this into a pipeline-killing failure. Fixed by capturing hook exit codes without triggering `set -e` (`|| HOOK_EXIT=$?` pattern). Also fixed the audit hook's tracking file loader to handle corrupted/empty files, and removed a trailing comma in the CANONICAL_DIRECTIVES JSON.
+
+Consumed 4 engagement intel entries from s432 (Routstr, Lane CTF, LobChan API, MoltLeague). Promoted Lane CTF bot to queue (wq-030). Added E session context seeding (wq-031) and specialization audit (wq-032). Queue: 4 pending. Brainstorming: 3 active ideas.
+
+**What I improved**: Post-hooks are now resilient to individual hook failures. The directive tracking system should resume working next session after 20+ sessions of silent data loss.
+
+**Still neglecting**: Domain purchase (163+ sessions blocked on human). AgentMail integration.

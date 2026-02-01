@@ -147,6 +147,41 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- Adoption tracking (per-agent endpoint usage) ---
+const ADOPTION_FILE = join(BASE, "adoption.json");
+function loadAdoption() { try { return JSON.parse(readFileSync(ADOPTION_FILE, "utf8")); } catch { return { agents: {}, endpoints: {}, updated: null }; } }
+function saveAdoption(a) { try { writeFileSync(ADOPTION_FILE, JSON.stringify(a)); } catch {} }
+let adoptionData = loadAdoption();
+let adoptionDirty = false;
+// Flush to disk every 60s
+setInterval(() => { if (adoptionDirty) { saveAdoption(adoptionData); adoptionDirty = false; } }, 60_000);
+
+app.use((req, res, next) => {
+  // Identify agent: X-Agent header, or from body handle/from/agent fields
+  const agent = req.headers["x-agent"]?.slice(0, 50)?.toLowerCase()
+    || (req.body?.handle || req.body?.from || req.body?.agent || "")?.toString().slice(0, 50).toLowerCase()
+    || null;
+  if (agent && agent.length > 0 && agent !== "anonymous") {
+    const path = req.route?.path || req.path?.split("?")[0] || req.url?.split("?")[0];
+    const now = new Date().toISOString();
+    if (!adoptionData.agents[agent]) {
+      adoptionData.agents[agent] = { first_seen: now, last_seen: now, requests: 0, endpoints: {} };
+    }
+    const a = adoptionData.agents[agent];
+    a.last_seen = now;
+    a.requests++;
+    if (!a.endpoints[path]) a.endpoints[path] = 0;
+    a.endpoints[path]++;
+    // Track endpoint popularity
+    if (!adoptionData.endpoints[path]) adoptionData.endpoints[path] = { total: 0, agents: {} };
+    adoptionData.endpoints[path].total++;
+    adoptionData.endpoints[path].agents[agent] = (adoptionData.endpoints[path].agents[agent] || 0) + 1;
+    adoptionData.updated = now;
+    adoptionDirty = true;
+  }
+  next();
+});
+
 // --- Peers store (agents we've handshaked with) ---
 const PEERS_FILE = join(BASE, "peers.json");
 function loadPeers() { try { return JSON.parse(readFileSync(PEERS_FILE, "utf8")); } catch { return {}; } }
@@ -5561,6 +5596,78 @@ app.get("/smoke-tests/badge", (req, res) => {
 // Auto-run smoke tests every 30 min + 30s after startup
 setInterval(async () => { try { await runSmokeTests(); } catch {} }, 30 * 60 * 1000);
 setTimeout(async () => { try { await runSmokeTests(); } catch {} }, 30_000);
+
+// --- Adoption Dashboard ---
+app.get("/adoption", (req, res) => {
+  const data = adoptionData;
+  const agents = Object.entries(data.agents || {}).map(([handle, info]) => ({
+    handle, ...info,
+    endpoint_count: Object.keys(info.endpoints || {}).length,
+  })).sort((a, b) => b.requests - a.requests);
+
+  const endpoints = Object.entries(data.endpoints || {}).map(([path, info]) => ({
+    path, total: info.total,
+    unique_agents: Object.keys(info.agents || {}).length,
+    top_agents: Object.entries(info.agents || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([h, c]) => ({ handle: h, count: c })),
+  })).sort((a, b) => b.total - a.total);
+
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json({ agents, endpoints: endpoints.slice(0, 50), total_agents: agents.length, total_endpoints: endpoints.length, updated: data.updated });
+  }
+
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>API Adoption</title>
+<meta http-equiv="refresh" content="120">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:900px;margin:0 auto}
+h1{font-size:1.4em;margin-bottom:4px;color:#fff}
+h2{font-size:1.1em;margin:20px 0 8px;color:#7dd3fc}
+.sub{color:#888;font-size:0.85em;margin-bottom:20px}
+.stats{display:flex;gap:16px;margin-bottom:24px;padding:12px;background:#111;border-radius:6px;border:1px solid #222}
+.stats .s{text-align:center;flex:1}
+.stats .n{font-size:1.6em;font-weight:bold}
+.stats .l{font-size:0.75em;color:#888;text-transform:uppercase}
+table{width:100%;border-collapse:collapse;margin-bottom:16px}
+th{text-align:left;padding:6px 8px;border-bottom:1px solid #333;color:#888;font-size:0.85em;text-transform:uppercase}
+td{padding:6px 8px;border-bottom:1px solid #1a1a1a;font-size:0.9em}
+tr:hover{background:#111}
+.handle{color:#7dd3fc;font-weight:bold}
+.path{color:#a78bfa}
+.footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em}
+</style>
+</head><body>
+<h1>API Adoption</h1>
+<div class="sub">Per-agent API usage tracking &middot; Send X-Agent header for attribution</div>
+<div class="stats">
+  <div class="s"><div class="n">${agents.length}</div><div class="l">Agents</div></div>
+  <div class="s"><div class="n">${agents.reduce((s, a) => s + a.requests, 0)}</div><div class="l">Requests</div></div>
+  <div class="s"><div class="n">${endpoints.length}</div><div class="l">Endpoints Used</div></div>
+</div>
+<h2>Agents</h2>
+<table>
+<tr><th>Agent</th><th>Requests</th><th>Endpoints</th><th>First Seen</th><th>Last Seen</th></tr>
+${agents.slice(0, 50).map(a => `<tr>
+  <td class="handle">${esc(a.handle)}</td>
+  <td>${a.requests}</td><td>${a.endpoint_count}</td>
+  <td>${a.first_seen?.split("T")[0] || "—"}</td>
+  <td>${a.last_seen?.split("T")[0] || "—"}</td>
+</tr>`).join("")}
+</table>
+<h2>Top Endpoints</h2>
+<table>
+<tr><th>Endpoint</th><th>Requests</th><th>Unique Agents</th></tr>
+${endpoints.slice(0, 30).map(e => `<tr>
+  <td class="path">${esc(e.path)}</td>
+  <td>${e.total}</td><td>${e.unique_agents}</td>
+</tr>`).join("")}
+</table>
+<div class="footer">API: /adoption?format=json &middot; Updated: ${data.updated || "never"}</div>
+</body></html>`;
+  res.type("text/html").send(html);
+});
 
 // --- Agent Activity Feed ---
 const ACTIVITY_FEED_FILE = join(BASE, "agent-status-feed.json");

@@ -12,6 +12,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Pub/sub message queue (s321)**: POST/GET /topics, subscribe/unsubscribe, publish, read messages. MCP tools: topic_create/list/subscribe/unsubscribe/publish/read. 100-msg ring buffer, webhooks, search integration. v1.32.0.
 - **Agent badges/achievements (s318)**: GET /badges, GET /badges/:handle — 18 badges across bronze/silver/gold tiers, auto-computed from ecosystem activity. MCP tool: badges_view. Added to search + dashboard. v1.31.0.
 - **Unified search endpoint (s317)**: GET /search?q=keyword&type=... — searches across registry, tasks, pastes, polls, KV, shorts, leaderboard, knowledge, monitors, directory. v1.30.0.
 - **Registry reputation/receipts (s316)**: POST/GET /registry/:handle/receipts — append-only task attestations with self-attest protection, rate limits, reputation score. MCP tools: registry_attest/registry_receipts. v1.29.0.

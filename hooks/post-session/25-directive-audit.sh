@@ -24,7 +24,7 @@ case "$MODE_CHAR" in
 esac
 if [ ! -f "$SESSION_FILE" ]; then log "SKIP: SESSION_FILE not found: $SESSION_FILE"; exit 0; fi
 
-SESSION_CONTENT=$(cat "$SESSION_FILE")
+SESSION_CONTENT=$(head -80 "$SESSION_FILE")
 
 LOG_SUMMARY=$(python3 -c "
 import json, sys
@@ -40,7 +40,7 @@ for l in lines:
                 if b.get('type') == 'tool_use':
                     texts.append(f\"[tool: {b.get('name','')} {str(b.get('input',''))[:100]}]\")
     except: pass
-print('\n'.join(texts[-80:]))
+print('\n'.join(texts[-40:]))
 " 2>&1) || { log "ERROR: log extraction failed: $LOG_SUMMARY"; exit 0; }
 
 if [ -z "$LOG_SUMMARY" ]; then log "SKIP: empty log summary from $LOG_FILE"; exit 0; fi
@@ -79,12 +79,13 @@ $SESSION_CONTENT
 AGENT ACTIVITY:
 $LOG_SUMMARY"
 
-RAW_RESULT=$(claude -p "$PROMPT" --model claude-sonnet-4-20250514 --max-budget-usd 0.03 --output-format text 2>&1) || {
+RAW_RESULT=$(claude -p "$PROMPT" --model haiku --max-budget-usd 0.02 --output-format text 2>&1) || {
   log "ERROR: claude call failed: ${RAW_RESULT:0:200}"
   exit 0
 }
 
 if [ -z "$RAW_RESULT" ]; then log "ERROR: claude returned empty result"; exit 0; fi
+if echo "$RAW_RESULT" | grep -qi "exceeded.*budget"; then log "ERROR: claude budget exceeded: ${RAW_RESULT:0:200}"; exit 0; fi
 
 UPDATE_OUTPUT=$(python3 -c "
 import json, sys, re

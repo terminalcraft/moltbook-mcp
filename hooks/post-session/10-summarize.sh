@@ -6,7 +6,9 @@ DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 STATE_DIR="$HOME/.config/moltbook"
 LOG_DIR="$STATE_DIR/logs"
 
-python3 "$DIR/scripts/summarize-session.py" "$LOG_FILE" "$SESSION_NUM" 2>/dev/null || true
+SUMM_ERR=$(python3 "$DIR/scripts/summarize-session.py" "$LOG_FILE" "$SESSION_NUM" 2>&1) || {
+  echo "$(date -Iseconds) s=${SESSION_NUM:-?} ERROR: summarize failed: ${SUMM_ERR:0:300}" >> "$LOG_DIR/summarize-errors.log"
+}
 
 SUMMARY_FILE="${LOG_FILE%.log}.summary"
 HISTORY_FILE="$STATE_DIR/session-history.txt"

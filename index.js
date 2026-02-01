@@ -112,6 +112,11 @@ function markMyComment(postId, commentId) {
   saveState(s);
 }
 
+// Outbound content size limits
+const MAX_POST_TITLE_LEN = 300;
+const MAX_POST_CONTENT_LEN = 5000;
+const MAX_COMMENT_LEN = 3000;
+
 // Check outbound content for accidental sensitive data leakage.
 // Returns warnings (strings) if suspicious patterns are found. Does not block posting.
 function checkOutbound(text) {
@@ -127,6 +132,31 @@ function checkOutbound(text) {
   ];
   for (const [re, label] of patterns) {
     if (re.test(text)) warnings.push(label);
+  }
+  return warnings;
+}
+
+// Detect tracking pixels and suspicious URLs in inbound content.
+// Returns warning strings for display alongside the content.
+function checkInboundTracking(text) {
+  if (!text) return [];
+  const warnings = [];
+  // 1x1 pixel images, tracking beacons
+  if (/!\[.*?\]\(https?:\/\/[^)]*(?:track|pixel|beacon|1x1|ping|open|click|collect|analytics)/i.test(text)) {
+    warnings.push("possible tracking pixel/URL");
+  }
+  // External image embeds (markdown images to third-party domains)
+  const imgMatches = text.match(/!\[.*?\]\((https?:\/\/[^)]+)\)/g) || [];
+  if (imgMatches.length > 0) {
+    warnings.push(`${imgMatches.length} external image(s) embedded`);
+  }
+  // HTML img tags (if platform allows raw HTML)
+  if (/<img\s+[^>]*src\s*=/i.test(text)) {
+    warnings.push("HTML img tag detected");
+  }
+  // Extremely long content that could be used for resource exhaustion
+  if (text.length > 50000) {
+    warnings.push(`very large content (${(text.length / 1000).toFixed(0)}KB)`);
   }
   return warnings;
 }
@@ -300,7 +330,9 @@ server.tool("moltbook_post", "Get a single post with its comments", {
   if (state.commented[post_id]) stateHints.push(`YOU COMMENTED HERE (${state.commented[post_id].length}x)`);
   if (state.voted[post_id]) stateHints.push("YOU VOTED");
   const stateLabel = stateHints.length ? ` [${stateHints.join(", ")}]` : "";
-  let text = `"${sanitize(p.title)}" by @${p.author?.name || "unknown"} in m/${p.submolt?.name || "unknown"}${stateLabel}\n${p.upvotes}↑ ${p.downvotes}↓ ${p.comment_count} comments\n\n${sanitize(p.content) || p.url || ""}`;
+  const trackingWarnings = [...checkInboundTracking(p.content), ...checkInboundTracking(p.title)];
+  const trackingNote = trackingWarnings.length ? `\n⚠️ INBOUND: ${trackingWarnings.join(", ")}` : "";
+  let text = `"${sanitize(p.title)}" by @${p.author?.name || "unknown"} in m/${p.submolt?.name || "unknown"}${stateLabel}\n${p.upvotes}↑ ${p.downvotes}↓ ${p.comment_count} comments\n\n${sanitize(p.content) || p.url || ""}${trackingNote}`;
   if (data.comments?.length) {
     text += "\n\n--- Comments ---\n";
     text += formatComments(data.comments);
@@ -327,6 +359,8 @@ server.tool("moltbook_post_create", "Create a new post in a submolt", {
   content: z.string().optional().describe("Post body text"),
   url: z.string().optional().describe("Link URL (for link posts)"),
 }, async ({ submolt, title, content, url }) => {
+  if (title && title.length > MAX_POST_TITLE_LEN) title = title.slice(0, MAX_POST_TITLE_LEN) + "…";
+  if (content && content.length > MAX_POST_CONTENT_LEN) content = content.slice(0, MAX_POST_CONTENT_LEN) + "\n\n[truncated]";
   const dk = dedupKey("post", submolt, title);
   if (isDuplicate(dk)) return { content: [{ type: "text", text: JSON.stringify({ success: false, error: "Duplicate post blocked (same title within 2 minutes)" }) }] };
   const outboundWarnings = [...checkOutbound(title), ...checkOutbound(content)];
@@ -350,6 +384,7 @@ server.tool("moltbook_comment", "Add a comment to a post (or reply to a comment)
   content: z.string().describe("Comment text"),
   parent_id: z.string().optional().describe("Parent comment ID for replies"),
 }, async ({ post_id, content, parent_id }) => {
+  if (content && content.length > MAX_COMMENT_LEN) content = content.slice(0, MAX_COMMENT_LEN) + "\n\n[truncated]";
   const dk = dedupKey("comment", parent_id || post_id, content);
   if (isDuplicate(dk)) return { content: [{ type: "text", text: JSON.stringify({ success: false, error: "Duplicate comment blocked (same content within 2 minutes)" }) }] };
   const outboundWarnings = checkOutbound(content);

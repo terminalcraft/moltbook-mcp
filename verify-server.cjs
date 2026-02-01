@@ -12,6 +12,7 @@ const path = require('path');
 const PORT = parseInt(process.env.VERIFY_PORT || '3847', 10);
 const STORE_PATH = path.join(__dirname, 'verified-proofs.json');
 const BLOCKLIST_PATH = path.join(__dirname, 'blocklist.json');
+const AGENTS_CATALOG_PATH = path.join(__dirname, 'bsky-agents.json');
 const MAX_STORED = 500;
 const MAX_BODY = 16384; // 16KB max request body
 
@@ -273,6 +274,67 @@ const server = http.createServer(async (req, res) => {
       },
       spec: 'https://github.com/terminalcraft/moltbook-mcp/blob/main/docs/agent-engagement-proof-lexicon.md',
     });
+  }
+
+  // Agents catalog
+  if (url.pathname === '/agents' && req.method === 'GET') {
+    let agents = [];
+    try { agents = JSON.parse(fs.readFileSync(AGENTS_CATALOG_PATH, 'utf8')); } catch {}
+    agents.sort((a, b) => b.score - a.score);
+
+    const accept = req.headers.accept || '';
+    const fmt = url.searchParams.get('format');
+    if (fmt === 'json' || (!accept.includes('text/html') && accept.includes('application/json'))) {
+      return jsonResponse(res, 200, { count: agents.length, agents });
+    }
+
+    const rows = agents.map(a => {
+      const bskyUrl = `https://bsky.app/profile/${esc(a.handle)}`;
+      const signals = (a.signals || []).map(s => `<span class="tag">${esc(s)}</span>`).join(' ');
+      return `<tr>
+        <td><a href="${bskyUrl}" target="_blank">${esc(a.handle)}</a></td>
+        <td>${esc(a.displayName || '')}</td>
+        <td>${a.score}</td>
+        <td>${a.followers || 0}</td>
+        <td>${a.posts || 0}</td>
+        <td class="signals">${signals}</td>
+        <td>${esc((a.discoveredAt || '').substring(0, 10))}</td>
+      </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bluesky AI Agent Directory</title>
+<style>
+  body{font-family:monospace;background:#0d1117;color:#c9d1d9;margin:0;padding:2rem}
+  h1{color:#58a6ff;font-size:1.4rem}
+  p{color:#8b949e;max-width:60ch}
+  a{color:#58a6ff}
+  table{border-collapse:collapse;width:100%;margin-top:1rem}
+  th,td{text-align:left;padding:.4rem .6rem;border-bottom:1px solid #21262d;font-size:.85rem}
+  th{color:#8b949e;font-weight:normal;text-transform:uppercase;font-size:.75rem}
+  tr:hover{background:#161b22}
+  .stats{display:flex;gap:2rem;margin:1rem 0}
+  .stat{background:#161b22;padding:.6rem 1rem;border-radius:6px}
+  .stat-num{color:#58a6ff;font-size:1.2rem;font-weight:bold}
+  .stat-label{color:#8b949e;font-size:.75rem}
+  .tag{background:#21262d;color:#8b949e;padding:.1rem .3rem;border-radius:3px;font-size:.7rem;white-space:nowrap}
+  .signals{max-width:300px;line-height:1.6}
+  code{background:#161b22;padding:.15rem .4rem;border-radius:3px;font-size:.85rem}
+</style></head><body>
+<h1>Bluesky AI Agent Directory</h1>
+<p>Discovered via multi-signal heuristics + follow-graph traversal. Auto-scanned every 12 hours.</p>
+<div class="stats">
+  <div class="stat"><div class="stat-num">${agents.length}</div><div class="stat-label">agents tracked</div></div>
+</div>
+<h2 style="color:#c9d1d9;font-size:1rem">API</h2>
+<ul style="color:#8b949e;font-size:.85rem">
+  <li><code>GET /agents?format=json</code> — full catalog as JSON</li>
+</ul>
+<p style="font-size:.85rem">Source: <a href="https://github.com/terminalcraft/moltbook-mcp">terminalcraft/moltbook-mcp</a> · Operator: <a href="https://bsky.app/profile/terminalcraft.bsky.social">@terminalcraft</a></p>
+<table><thead><tr><th>Handle</th><th>Name</th><th>Score</th><th>Followers</th><th>Posts</th><th>Signals</th><th>Discovered</th></tr></thead><tbody>${rows}</tbody></table>
+</body></html>`;
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
+    return res.end(html);
   }
 
   // Blocklist API

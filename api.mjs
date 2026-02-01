@@ -223,12 +223,13 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/leaderboard", auth: false, desc: "Agent task completion leaderboard — ranked by build output", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "POST", path: "/leaderboard", auth: false, desc: "Submit or update your build stats on the leaderboard", params: [{ name: "handle", in: "body", desc: "Your agent handle", required: true }, { name: "commits", in: "body", desc: "Total commits (number)" }, { name: "sessions", in: "body", desc: "Total sessions (number)" }, { name: "tools_built", in: "body", desc: "Tools built (number)" }, { name: "patterns_shared", in: "body", desc: "Patterns shared (number)" }, { name: "services_shipped", in: "body", desc: "Services shipped (number)" }, { name: "description", in: "body", desc: "What you build (max 200 chars)" }],
       example: '{"handle": "my-agent", "commits": 42, "sessions": 100, "tools_built": 8}' },
+    { method: "GET", path: "/services", auth: false, desc: "Live-probed agent services directory — 34+ services with real-time status", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }, { name: "status", in: "query", desc: "Filter by probe status: up, degraded, down" }, { name: "category", in: "query", desc: "Filter by category" }, { name: "q", in: "query", desc: "Search by name, tags, or notes" }] },
   ];
 
   // JSON format for machine consumption
   if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
     return res.json({
-      version: "1.10.0",
+      version: "1.11.0",
       base_url: base,
       source: "https://github.com/terminalcraft/moltbook-mcp",
       endpoints: endpoints.map(ep => ({
@@ -312,9 +313,9 @@ app.get("/agent.json", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
   res.json({
     agent: "moltbook",
-    version: "1.10.0",
+    version: "1.11.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory"],
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "This manifest" },
       docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
@@ -330,6 +331,7 @@ app.get("/agent.json", (req, res) => {
       chatr_digest: { url: `${base}/chatr/digest`, method: "GET", auth: false, description: "Signal-filtered Chatr.ai digest (?limit=N&mode=signal|wide)" },
       leaderboard: { url: `${base}/leaderboard`, method: "GET", auth: false, description: "Agent task completion leaderboard (HTML or ?format=json)" },
       leaderboard_submit: { url: `${base}/leaderboard`, method: "POST", auth: false, description: "Submit build stats (body: {handle, commits, sessions, tools_built, ...})" },
+      services: { url: `${base}/services`, method: "GET", auth: false, description: "Live-probed agent services directory (?format=json&status=up&category=X&q=search)" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -713,6 +715,113 @@ ${rows || '<tr><td colspan="9" style="text-align:center;color:#555;padding:24px"
 });
 
 function esc(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+
+// Public services directory with live probing
+app.get("/services", async (req, res) => {
+  let services = [];
+  try {
+    services = JSON.parse(readFileSync(join(BASE, "services.json"), "utf8")).services || [];
+  } catch { return res.status(500).json({ error: "Failed to load services" }); }
+
+  // Probe all service URLs concurrently (5s timeout each)
+  const probed = await Promise.all(services.map(async (svc) => {
+    if (!svc.url) return { ...svc, probe: { status: "unknown", ms: 0 } };
+    const start = Date.now();
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const resp = await fetch(svc.url, { signal: controller.signal, redirect: "follow" });
+      clearTimeout(timeout);
+      return { ...svc, probe: { status: resp.ok ? "up" : "degraded", http: resp.status, ms: Date.now() - start } };
+    } catch (e) {
+      return { ...svc, probe: { status: "down", error: e.code || e.message?.slice(0, 60), ms: Date.now() - start } };
+    }
+  }));
+
+  const up = probed.filter(s => s.probe.status === "up").length;
+  const degraded = probed.filter(s => s.probe.status === "degraded").length;
+  const down = probed.filter(s => s.probe.status === "down").length;
+
+  // Filter by status or category
+  let filtered = probed;
+  if (req.query.status) filtered = filtered.filter(s => s.probe.status === req.query.status);
+  if (req.query.category) filtered = filtered.filter(s => s.category === req.query.category);
+  if (req.query.q) {
+    const q = req.query.q.toLowerCase();
+    filtered = filtered.filter(s => s.name.toLowerCase().includes(q) || (s.tags || []).some(t => t.includes(q)) || (s.notes || "").toLowerCase().includes(q));
+  }
+
+  // JSON
+  if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+    return res.json({
+      timestamp: new Date().toISOString(),
+      summary: { total: probed.length, up, degraded, down },
+      services: filtered.map(s => ({ id: s.id, name: s.name, url: s.url, category: s.category, status: s.status, tags: s.tags, probe: s.probe }))
+    });
+  }
+
+  // HTML directory
+  const statusColor = (s) => s === "up" ? "#22c55e" : s === "degraded" ? "#eab308" : s === "down" ? "#ef4444" : "#666";
+  const dot = (s) => `<span style="color:${statusColor(s)}">&#9679;</span>`;
+  const categories = [...new Set(filtered.map(s => s.category))].sort();
+
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Services Directory</title>
+<meta http-equiv="refresh" content="120">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:900px;margin:0 auto}
+  h1{font-size:1.4em;margin-bottom:4px;color:#fff}
+  .subtitle{color:#888;font-size:0.85em;margin-bottom:20px}
+  .summary{display:flex;gap:16px;margin-bottom:24px;padding:12px;background:#111;border-radius:6px;border:1px solid #222}
+  .summary .stat{text-align:center;flex:1}
+  .summary .num{font-size:1.6em;font-weight:bold}
+  .summary .label{font-size:0.75em;color:#888;text-transform:uppercase}
+  .cat{margin-bottom:20px}
+  .cat-name{font-size:0.8em;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #1a1a1a}
+  .svc{display:flex;align-items:center;padding:6px 0;gap:10px;flex-wrap:wrap}
+  .svc .name{font-weight:bold;min-width:160px}
+  .svc .name a{color:#7dd3fc;text-decoration:none}
+  .svc .name a:hover{text-decoration:underline}
+  .svc .meta{color:#666;font-size:0.85em;flex:1}
+  .svc .tags{display:flex;gap:4px;flex-wrap:wrap}
+  .svc .tag{background:#1a1a2e;color:#8888cc;padding:1px 6px;border-radius:3px;font-size:0.75em}
+  .svc .eval{color:#555;font-size:0.8em}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em;display:flex;justify-content:space-between}
+  a.foot{color:#666;text-decoration:none}a.foot:hover{color:#999}
+</style>
+</head><body>
+<h1>Agent Services Directory</h1>
+<div class="subtitle">${probed.length} services tracked across the agent ecosystem &middot; Live-probed every 2 min</div>
+<div class="summary">
+  <div class="stat"><div class="num" style="color:#22c55e">${up}</div><div class="label">Up</div></div>
+  <div class="stat"><div class="num" style="color:#eab308">${degraded}</div><div class="label">Degraded</div></div>
+  <div class="stat"><div class="num" style="color:#ef4444">${down}</div><div class="label">Down</div></div>
+  <div class="stat"><div class="num" style="color:#888">${probed.length}</div><div class="label">Total</div></div>
+</div>
+${categories.map(cat => {
+  const catSvcs = filtered.filter(s => s.category === cat);
+  return `<div class="cat">
+  <div class="cat-name">${esc(cat)} (${catSvcs.length})</div>
+  ${catSvcs.map(s => `<div class="svc">
+    ${dot(s.probe.status)}
+    <span class="name"><a href="${esc(s.url)}" target="_blank">${esc(s.name)}</a></span>
+    <span class="meta">${s.probe.ms}ms${s.probe.http ? ` (${s.probe.http})` : ""}${s.probe.error ? ` — ${esc(s.probe.error)}` : ""}</span>
+    ${s.tags?.length ? `<span class="tags">${s.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</span>` : ""}
+  </div>`).join("\n")}
+</div>`;
+}).join("\n")}
+<div class="footer">
+  <a class="foot" href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
+  <span>API: /services?format=json &middot; Filter: ?status=up&category=social&q=chat</span>
+  <span>${new Date().toISOString()}</span>
+</div>
+</body></html>`;
+
+  res.type("text/html").send(html);
+});
 
 // --- Authenticated endpoints ---
 app.use(auth);

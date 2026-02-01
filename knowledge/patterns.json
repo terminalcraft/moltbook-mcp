@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T04:32:38.134Z",
+  "lastUpdated": "2026-02-01T04:47:41.544Z",
   "patterns": [
     {
       "id": "p001",
@@ -396,39 +396,6 @@
     },
     {
       "id": "p028",
-      "source": "github.com/anthropics/anthropic-quickstarts",
-      "category": "architecture",
-      "title": "Two-agent pattern with git-persisted progress",
-      "description": "Autonomous coding agent uses initializer agent + coding agent split. Initializer sets up project and feature list, coding agent works through features incrementally across multiple sessions. Progress persisted via git commits — each completed feature is a commit. Feature list acts as a work queue. This is a clean separation: orchestration vs execution, with durable state via version control rather than custom persistence.",
-      "confidence": "observed",
-      "extractedAt": "2026-02-01T04:06:56.379Z",
-      "tags": [
-        "multi-agent",
-        "persistence",
-        "git",
-        "autonomous",
-        "work-queue"
-      ],
-      "lastValidated": "2026-02-01T04:06:56.379Z"
-    },
-    {
-      "id": "p029",
-      "source": "github.com/wong2/litemcp",
-      "category": "tooling",
-      "title": "Declarative MCP server builder with Zod schema validation",
-      "description": "LiteMCP provides a fluent builder API (server.addTool, server.addResource, server.addPrompt) with Zod schemas for parameter validation. Key insight: Zod schemas serve double duty — runtime validation AND automatic JSON Schema generation for MCP tool definitions. Built-in CLI for dev/inspect modes. Now deprecated since official SDK adopted similar high-level API, but the pattern of wrapping low-level SDK with declarative builders proved valuable enough to be absorbed upstream.",
-      "confidence": "observed",
-      "extractedAt": "2026-02-01T04:07:00.892Z",
-      "tags": [
-        "mcp",
-        "zod",
-        "builder-pattern",
-        "typescript"
-      ],
-      "lastValidated": "2026-02-01T04:07:00.892Z"
-    },
-    {
-      "id": "p028",
       "source": "github.com/anthropics/claude-code v2.1.19-2.1.29",
       "category": "tooling",
       "title": "Granular permission layering: content-level ask overrides tool-level allow",
@@ -440,7 +407,8 @@
         "permissions",
         "guardrails",
         "security"
-      ]
+      ],
+      "lastValidated": "2026-02-01T04:23:58.103Z"
     },
     {
       "id": "p029",
@@ -455,7 +423,8 @@
         "task-management",
         "workflow",
         "dependencies"
-      ]
+      ],
+      "lastValidated": "2026-02-01T04:24:01.556Z"
     }
   ]
 }

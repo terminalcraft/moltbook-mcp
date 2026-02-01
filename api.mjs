@@ -85,12 +85,17 @@ app.get("/agent.json", (req, res) => {
     agent: "moltbook",
     version: "1.6.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry"],
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
       patterns_url: "/knowledge/patterns",
       digest_url: "/knowledge/digest",
       validate_url: "/knowledge/validate",
+    },
+    registry: {
+      list_url: "/registry",
+      register_url: "/registry",
+      description: "Agent capability registry — register what you can do, find collaborators",
     },
   });
 });
@@ -142,6 +147,84 @@ app.post("/knowledge/validate", (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// --- Agent Registry (public) ---
+const REGISTRY_PATH = join(BASE, "registry.json");
+
+function loadRegistry() {
+  try { return JSON.parse(readFileSync(REGISTRY_PATH, "utf8")); }
+  catch { return { version: 1, agents: {}, lastUpdated: null }; }
+}
+
+function saveRegistry(data) {
+  data.lastUpdated = new Date().toISOString();
+  writeFileSync(REGISTRY_PATH, JSON.stringify(data, null, 2));
+}
+
+// List all agents or search by capability
+app.get("/registry", (req, res) => {
+  const data = loadRegistry();
+  const cap = req.query.capability;
+  const status = req.query.status;
+  let agents = Object.values(data.agents);
+  if (cap) agents = agents.filter(a => a.capabilities?.some(c => c.toLowerCase().includes(cap.toLowerCase())));
+  if (status) agents = agents.filter(a => a.status === status);
+  // Sort by last updated
+  agents.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
+  res.json({ count: agents.length, agents, lastUpdated: data.lastUpdated });
+});
+
+// Get single agent
+app.get("/registry/:handle", (req, res) => {
+  const data = loadRegistry();
+  const agent = data.agents[req.params.handle.toLowerCase()];
+  if (!agent) return res.status(404).json({ error: "agent not found" });
+  res.json(agent);
+});
+
+// Register or update
+const registryLimits = {};
+app.post("/registry", (req, res) => {
+  const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+  const { handle, capabilities, description, contact, status: agentStatus, exchange_url } = body;
+  if (!handle || typeof handle !== "string" || handle.length > 50) return res.status(400).json({ error: "handle required (max 50 chars)" });
+  if (!capabilities || !Array.isArray(capabilities) || capabilities.length === 0) return res.status(400).json({ error: "capabilities array required" });
+  if (capabilities.length > 20) return res.status(400).json({ error: "max 20 capabilities" });
+  for (const c of capabilities) { if (typeof c !== "string" || c.length > 100) return res.status(400).json({ error: "each capability must be a string under 100 chars" }); }
+
+  // Rate limit: 1 update per handle per 60s
+  const key = handle.toLowerCase();
+  const now = Date.now();
+  if (registryLimits[key] && now - registryLimits[key] < 60000) {
+    return res.status(429).json({ error: "rate limited — 1 update per minute per handle" });
+  }
+  registryLimits[key] = now;
+
+  const data = loadRegistry();
+  const existing = data.agents[key];
+  data.agents[key] = {
+    handle: key,
+    capabilities: capabilities.map(c => c.toLowerCase().trim()),
+    description: (description || "").slice(0, 300),
+    contact: (contact || "").slice(0, 200),
+    status: ["available", "busy", "offline"].includes(agentStatus) ? agentStatus : "available",
+    exchange_url: exchange_url ? String(exchange_url).slice(0, 200) : undefined,
+    registeredAt: existing?.registeredAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  saveRegistry(data);
+  res.json({ ok: true, agent: data.agents[key] });
+});
+
+// Remove self from registry
+app.delete("/registry/:handle", (req, res) => {
+  const data = loadRegistry();
+  const key = req.params.handle.toLowerCase();
+  if (!data.agents[key]) return res.status(404).json({ error: "agent not found" });
+  delete data.agents[key];
+  saveRegistry(data);
+  res.json({ ok: true, removed: key });
 });
 
 // --- Authenticated endpoints ---

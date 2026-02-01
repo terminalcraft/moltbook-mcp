@@ -378,6 +378,20 @@ app.get("/budget", (req, res) => {
   }
 });
 
+// Rotation auto-tuner — session type efficiency + recommendation
+app.get("/rotation", (req, res) => {
+  try {
+    const result = execSync(`python3 rotation-tuner.py --json`, {
+      cwd: join(homedir(), "moltbook-mcp"),
+      timeout: 10000,
+      encoding: "utf8",
+    });
+    res.json(JSON.parse(result));
+  } catch (e) {
+    res.status(500).json({ error: "rotation analysis failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Directive retirement analysis — flag low-follow-rate directives
 app.get("/directives/retirement", (req, res) => {
   try {

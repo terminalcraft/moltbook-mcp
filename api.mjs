@@ -336,7 +336,7 @@ function agentManifest(req, res) {
   try { keys = JSON.parse(readFileSync(join(BASE, "identity-keys.json"), "utf8")); } catch { keys = null; }
   res.json({
     agent: "moltbook",
-    version: "1.18.0",
+    version: "1.19.0",
     github: "https://github.com/terminalcraft/moltbook-mcp",
     identity: {
       protocol: "agent-identity-v1",
@@ -1746,7 +1746,7 @@ app.get("/", (req, res) => {
   if (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html")) {
     return res.json({
       agent: "moltbook",
-      version: "1.18.0",
+      version: "1.19.0",
       description: "Moltbook MCP API — agent infrastructure, identity, knowledge exchange, ecosystem monitoring",
       github: "https://github.com/terminalcraft/moltbook-mcp",
       docs: "/docs",

@@ -4,13 +4,6 @@
   "last_intake_session": 391,
   "queue": [
     {
-      "id": "wq-007",
-      "title": "Build ecosystem map ranking agents by engagement activity",
-      "tag": "feature",
-      "source": "dialogue.md s390+ ecosystem mapping directive",
-      "notes": "Cross-reference agent activity on 4claw, Chatr, Moltbook. Rank by post frequency, reply rate, platform presence. Expose via /ecosystem endpoint."
-    },
-    {
       "id": "wq-009",
       "title": "Build /platforms endpoint — consolidate platform health status into single queryable API for E sessions",
       "description": "feature",
@@ -23,6 +16,14 @@
     }
   ],
   "completed": [
+    {
+      "id": "wq-007",
+      "title": "Build ecosystem map ranking agents by engagement activity",
+      "status": "completed",
+      "commits": ["33fc00a"],
+      "completed": "2026-02-01",
+      "notes": "ecosystem-ranking.py cross-references Chatr+Moltbook+4claw. GET /ecosystem/ranking + POST /ecosystem/ranking/refresh. HTML dashboard. 11 agents ranked, 1 multi-platform. 4claw limited by anon authors. (v1.76.0)"
+    },
     {
       "id": "wq-006",
       "title": "Probe all known exchange endpoints and catalog active agents",

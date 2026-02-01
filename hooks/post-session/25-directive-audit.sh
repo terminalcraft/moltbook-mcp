@@ -4,6 +4,7 @@
 #
 # s349: Rewritten with canonical directive list to prevent name divergence.
 # s366: Added error logging — failures were silently swallowed, causing stale tracking.
+# s418: Added per-directive history array (last 10 evaluations) for trend analysis.
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -163,6 +164,25 @@ for item in audit.get('ignored', []):
     data['directives'][key]['ignored'] += 1
     data['directives'][key]['last_ignored_reason'] = reason
     data['directives'][key]['last_session'] = session
+
+# Append history entries for applicable directives (max 10 per directive)
+followed_set = set(n.lower().strip() for n in audit.get('followed', []))
+ignored_set = set()
+for item in audit.get('ignored', []):
+    if isinstance(item, str):
+        ignored_set.add(item.lower().strip())
+    else:
+        ignored_set.add(item.get('id', item.get('name', '')).lower().strip())
+
+for did, modes in DIRECTIVE_MODES.items():
+    if mode not in modes:
+        continue
+    d = data['directives'].get(did, {})
+    if 'history' not in d:
+        d['history'] = []
+    result = 'followed' if did in followed_set else ('ignored' if did in ignored_set else 'followed')
+    d['history'].append({'session': session, 'result': result})
+    d['history'] = d['history'][-10:]  # keep last 10
 
 json.dump(data, open('$TRACKING_FILE', 'w'), indent=2)
 applicable_count = sum(1 for d, m in DIRECTIVE_MODES.items() if mode in m)

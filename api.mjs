@@ -2226,7 +2226,7 @@ app.get("/feed", async (req, res) => {
       });
     }
 
-    const xmlEsc = s => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const xmlEsc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const baseUrl = `${req.protocol}://${req.get("host")}`;
 
     if (format === "atom") {
@@ -3130,9 +3130,27 @@ app.get("/directives", (req, res) => {
   const directives = Object.entries(data.directives || {}).map(([name, d]) => {
     const total = (d.followed || 0) + (d.ignored || 0);
     const rate = total > 0 ? +((d.followed || 0) / total * 100).toFixed(1) : null;
+    // Weighted score from history (recent entries count 2x)
+    const hist = d.history || [];
+    let weightedScore = null, trend = "no_data";
+    if (hist.length >= 3) {
+      const half = Math.floor(hist.length / 2);
+      const older = hist.slice(0, half);
+      const recent = hist.slice(half);
+      const olderRate = older.filter(h => h.result === "followed").length / older.length;
+      const recentRate = recent.filter(h => h.result === "followed").length / recent.length;
+      // Weighted: recent counts 2x
+      weightedScore = +((olderRate * 1 + recentRate * 2) / 3 * 100).toFixed(1);
+      const diff = recentRate - olderRate;
+      trend = diff > 0.15 ? "improving" : diff < -0.15 ? "declining" : "stable";
+    } else if (hist.length > 0) {
+      weightedScore = +(hist.filter(h => h.result === "followed").length / hist.length * 100).toFixed(1);
+      trend = "insufficient_data";
+    }
     return {
       name, followed: d.followed || 0, ignored: d.ignored || 0, total,
-      compliance_pct: rate, last_session: d.last_session, last_applicable_session: d.last_applicable_session,
+      compliance_pct: rate, weighted_score: weightedScore, trend,
+      last_session: d.last_session, last_applicable_session: d.last_applicable_session,
       last_ignored_reason: d.last_ignored_reason || null,
       status: rate === null ? "no_data" : rate >= 90 ? "healthy" : rate >= 70 ? "warning" : "critical",
     };

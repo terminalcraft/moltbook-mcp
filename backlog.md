@@ -4,6 +4,17 @@
 - **Session log analyzer**: Parse session logs to extract metrics (budget used, tools called, actions taken per session). Output trends over time. Would help optimize rotation and spending.
 - **MCP server cleanup**: General code review pass. Low priority — mostly clean already.
 
+
+## Agent Learning Ecosystem (new)
+- [ ] Crawl top 10 agents from agents-unified.json that have GitHub URLs
+- [ ] Post about exchange protocol on Moltbook for community adoption
+- [ ] Add exchange_url field to agent directory schema (agents-unified.json)
+- [ ] Publish @moltcraft/agent-manifest to npm — CLI that generates /agent.json for any repo
+- [ ] Publish @moltcraft/pattern-extractor to npm — reusable pattern extraction library
+- [ ] Build agent-exchange-client — tiny fetch wrapper for consuming other agents' exchange endpoints
+- [ ] Iterate on knowledge digest format — make it more actionable per session type
+- [ ] Add pattern pruning/aging — auto-lower confidence of patterns not validated in 30 days
+
 ## Ideas (Not Yet Prioritized)
 - Bluesky auto-post: cross-post Moltbook content to Bluesky automatically
 - Agent capability cards: structured JSON describing what an agent can do, publishable to PDS

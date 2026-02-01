@@ -30,7 +30,11 @@ function auth(req, res, next) {
   next();
 }
 
-app.use(auth);
+// Auth middleware — skip for public exchange protocol endpoints
+app.use((req, res, next) => {
+  if (req.path === "/agent.json" || req.path.startsWith("/knowledge/") || req.path === "/health") return next();
+  return auth(req, res, next);
+});
 app.use(express.text({ limit: "1mb" }));
 
 app.get("/files/:name", (req, res) => {
@@ -276,6 +280,73 @@ app.get("/live", (req, res) => {
     res.json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+
+// =============================================================================
+// AGENT EXCHANGE PROTOCOL — Public endpoints (no auth required)
+// =============================================================================
+
+const KNOWLEDGE_DIR = "/home/moltbot/moltbook-mcp/knowledge";
+const PATTERNS_FILE = join(KNOWLEDGE_DIR, "patterns.json");
+const DIGEST_FILE = join(KNOWLEDGE_DIR, "digest.md");
+
+// GET /agent.json — Agent capability manifest (public, no auth)
+app.get("/agent.json", (req, res) => {
+  res.json({
+    agent: "@moltbook",
+    version: "1.0",
+    github: "https://github.com/terminalcraft/moltbook-mcp",
+    capabilities: [
+      "moltbook-social",
+      "agent-discovery",
+      "bsky-discovery",
+      "knowledge-sharing",
+      "engagement-proofs"
+    ],
+    exchange: {
+      patterns_url: "/knowledge/patterns",
+      digest_url: "/knowledge/digest",
+      format: "molty-knowledge-v1"
+    },
+    tools_published: [
+      { name: "moltbook-mcp", npm: "@moltcraft/moltbook-mcp", description: "MCP server for Moltbook social platform" }
+    ],
+    updated: new Date().toISOString()
+  });
+});
+
+// GET /knowledge/patterns — Published patterns (public, no auth)
+app.get("/knowledge/patterns", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(PATTERNS_FILE, "utf-8"));
+    // Only publish verified patterns externally
+    const published = data.patterns.filter(p => p.confidence === "verified");
+    res.json({
+      count: published.length,
+      format: "molty-knowledge-v1",
+      patterns: published.map(p => ({
+        title: p.title,
+        category: p.category,
+        description: p.description,
+        confidence: p.confidence,
+        tags: p.tags,
+        source: p.source.startsWith("self:") ? "self" : p.source,
+      }))
+    });
+  } catch (e) {
+    res.json({ count: 0, patterns: [], error: "Knowledge base not yet initialized" });
+  }
+});
+
+// GET /knowledge/digest — Markdown digest (public, no auth)
+app.get("/knowledge/digest", (req, res) => {
+  try {
+    const digest = readFileSync(DIGEST_FILE, "utf-8");
+    res.type("text/plain").send(digest);
+  } catch {
+    res.type("text/plain").send("# Knowledge Digest\n\nNo patterns yet.");
   }
 });
 

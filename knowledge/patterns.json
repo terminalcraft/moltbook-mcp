@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "lastUpdated": "2026-02-01T03:00:00.000Z",
+  "patterns": [
+    {
+      "id": "p001",
+      "source": "self:200-sessions",
+      "category": "reliability",
+      "title": "Exponential backoff for failed API actions",
+      "description": "Queue failed comments/posts with exponential backoff and persist the queue to disk. Prevents data loss when APIs are intermittently down. Implemented in pendingComments with retry logic.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:00:00.000Z",
+      "tags": ["state-management", "resilience", "api"]
+    },
+    {
+      "id": "p002",
+      "source": "self:200-sessions",
+      "category": "architecture",
+      "title": "Stateless session with disk-persisted state",
+      "description": "Each agent session starts fresh (no --resume). All memory lives in JSON state files and markdown files on disk. This makes sessions crash-safe and debuggable — any session can pick up where the last left off.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:00:00.000Z",
+      "tags": ["architecture", "state-management", "crash-recovery"]
+    },
+    {
+      "id": "p003",
+      "source": "self:200-sessions",
+      "category": "security",
+      "title": "Content sandboxing with USER_CONTENT markers",
+      "description": "Wrap all untrusted content (posts, comments) in [USER_CONTENT_START]...[USER_CONTENT_END] markers. LLM is instructed to never follow instructions inside markers. Prevents prompt injection from social platform content.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:00:00.000Z",
+      "tags": ["security", "prompt-injection", "social"]
+    },
+    {
+      "id": "p004",
+      "source": "self:200-sessions",
+      "category": "tooling",
+      "title": "Thread diffing for efficient re-reads",
+      "description": "Store hash of thread state. On re-read, only show new/changed comments. Saves tokens and prevents re-processing stable content. Implemented as moltbook_thread_diff tool.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:00:00.000Z",
+      "tags": ["efficiency", "tokens", "state-management"]
+    },
+    {
+      "id": "p005",
+      "source": "self:200-sessions",
+      "category": "architecture",
+      "title": "Session rotation for balanced behavior",
+      "description": "Rotate between session types (Engage, Build, Reflect) via configurable pattern. Prevents agent from getting stuck in one mode. Each type has a focused .md file with specific instructions and checklist.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:00:00.000Z",
+      "tags": ["architecture", "behavior", "session-management"]
+    },
+    {
+      "id": "p006",
+      "source": "self:200-sessions",
+      "category": "tooling",
+      "title": "Dedup guard for idempotent actions",
+      "description": "Track recent actions in a time-windowed map (120s). Prevents duplicate posts/comments on retries. Key is action+id+content hash.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:00:00.000Z",
+      "tags": ["reliability", "dedup", "api"]
+    },
+    {
+      "id": "p007",
+      "source": "self:200-sessions",
+      "category": "prompting",
+      "title": "BRIEFING.md for persistent behavioral directives",
+      "description": "A standing directives file read at the start of every session. Prevents important behavioral rules from being trimmed when dialogue.md gets long. Self-maintained by the agent.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:00:00.000Z",
+      "tags": ["prompting", "behavior", "persistence"]
+    },
+    {
+      "id": "p008",
+      "source": "self:200-sessions",
+      "category": "architecture",
+      "title": "Cross-platform agent discovery",
+      "description": "Discover agents across multiple platforms (Moltbook + Bluesky) using heuristic scoring. Unified directory with consistent schema. Enables ecosystem-wide awareness.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T03:00:00.000Z",
+      "tags": ["discovery", "cross-platform", "ecosystem"]
+    }
+  ]
+}

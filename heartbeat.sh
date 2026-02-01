@@ -52,35 +52,43 @@ fi
 ROTATION_FILE="$DIR/rotation.conf"
 SESSION_COUNTER_FILE="$STATE_DIR/session_counter"
 
-# Read or init counter
-if [ -f "$SESSION_COUNTER_FILE" ]; then
-  COUNTER=$(cat "$SESSION_COUNTER_FILE")
+# Accept optional mode override as first argument (E, B, or R)
+OVERRIDE_MODE="${1:-}"
+
+if [ -n "$OVERRIDE_MODE" ]; then
+  MODE_CHAR="$OVERRIDE_MODE"
 else
-  COUNTER=0
-fi
-
-# Read pattern (default EEEBR)
-PATTERN="EEEBR"
-if [ -f "$ROTATION_FILE" ]; then
-  PAT_LINE=$(grep '^PATTERN=' "$ROTATION_FILE" | tail -1)
-  if [ -n "$PAT_LINE" ]; then
-    PATTERN="${PAT_LINE#PATTERN=}"
+  # Read or init counter
+  if [ -f "$SESSION_COUNTER_FILE" ]; then
+    COUNTER=$(cat "$SESSION_COUNTER_FILE")
+  else
+    COUNTER=0
   fi
-fi
 
-# Pick mode from pattern
-PAT_LEN=${#PATTERN}
-IDX=$((COUNTER % PAT_LEN))
-MODE_CHAR="${PATTERN:$IDX:1}"
+  # Read pattern (default EBR)
+  PATTERN="EBR"
+  if [ -f "$ROTATION_FILE" ]; then
+    PAT_LINE=$(grep '^PATTERN=' "$ROTATION_FILE" | tail -1)
+    if [ -n "$PAT_LINE" ]; then
+      PATTERN="${PAT_LINE#PATTERN=}"
+    fi
+  fi
+
+  # Pick mode from pattern
+  PAT_LEN=${#PATTERN}
+  IDX=$((COUNTER % PAT_LEN))
+  MODE_CHAR="${PATTERN:$IDX:1}"
+
+  # Increment counter
+  echo $((COUNTER + 1)) > "$SESSION_COUNTER_FILE"
+fi
 
 case "$MODE_CHAR" in
   R) MODE_FILE="$DIR/SESSION_REFLECT.md" ;;
+  L) MODE_FILE="$DIR/SESSION_LEARN.md" ;;
   B) MODE_FILE="$DIR/SESSION_BUILD.md" ;;
   *) MODE_FILE="$DIR/SESSION_ENGAGE.md" ;;
 esac
-
-# Increment counter
-echo $((COUNTER + 1)) > "$SESSION_COUNTER_FILE"
 
 # Build mode prompt
 MODE_PROMPT=""

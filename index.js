@@ -2,7 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, readdirSync } from "fs";
 import { join } from "path";
 
 const API = "https://www.moltbook.com/api/v1";
@@ -1369,6 +1369,354 @@ server.tool("moltbook_bsky_discover", "Discover AI agent accounts on Bluesky usi
   }
 });
 
+
+// =============================================================================
+// AGENT LEARNING ECOSYSTEM — Knowledge base and cross-agent learning tools
+// =============================================================================
+
+const KNOWLEDGE_DIR = join(process.env.HOME || "/tmp", "moltbook-mcp", "knowledge");
+const PATTERNS_FILE = join(KNOWLEDGE_DIR, "patterns.json");
+const REPOS_CRAWLED_FILE = join(KNOWLEDGE_DIR, "repos-crawled.json");
+const DIGEST_FILE = join(KNOWLEDGE_DIR, "digest.md");
+const AGENTS_UNIFIED_FILE = join(process.env.HOME || "/tmp", "moltbook-mcp", "agents-unified.json");
+
+function loadPatterns() {
+  try { return JSON.parse(readFileSync(PATTERNS_FILE, "utf8")); }
+  catch { return { version: 1, lastUpdated: new Date().toISOString(), patterns: [] }; }
+}
+
+function savePatterns(data) {
+  data.lastUpdated = new Date().toISOString();
+  mkdirSync(KNOWLEDGE_DIR, { recursive: true });
+  writeFileSync(PATTERNS_FILE, JSON.stringify(data, null, 2));
+}
+
+function loadReposCrawled() {
+  try { return JSON.parse(readFileSync(REPOS_CRAWLED_FILE, "utf8")); }
+  catch { return { version: 1, repos: {} }; }
+}
+
+function saveReposCrawled(data) {
+  mkdirSync(KNOWLEDGE_DIR, { recursive: true });
+  writeFileSync(REPOS_CRAWLED_FILE, JSON.stringify(data, null, 2));
+}
+
+function regenerateDigest() {
+  const data = loadPatterns();
+  const byCategory = {};
+  for (const p of data.patterns) {
+    if (!byCategory[p.category]) byCategory[p.category] = [];
+    byCategory[p.category].push(p);
+  }
+  const selfCount = data.patterns.filter(p => p.source.startsWith("self:")).length;
+  const crawlCount = data.patterns.filter(p => p.source.startsWith("github.com/") || p.source.startsWith("crawl:")).length;
+  const exchangeCount = data.patterns.filter(p => p.source.startsWith("exchange:")).length;
+
+  let md = `# Knowledge Digest\n\n${data.patterns.length} patterns: ${selfCount} self-derived, ${crawlCount} from repo crawls, ${exchangeCount} from agent exchange.\n\n`;
+  for (const [cat, patterns] of Object.entries(byCategory)) {
+    md += `**${cat.charAt(0).toUpperCase() + cat.slice(1)}**:\n`;
+    for (const p of patterns.slice(0, 5)) {
+      md += `- ${p.title} (${p.confidence}, ${p.source.split("/").slice(-1)[0] || p.source})\n`;
+    }
+    if (patterns.length > 5) md += `- ...and ${patterns.length - 5} more\n`;
+    md += "\n";
+  }
+  if (crawlCount === 0 && exchangeCount === 0) {
+    md += "*No external patterns yet. Use agent_crawl_repo or agent_fetch_knowledge to learn from other agents.*\n";
+  }
+  mkdirSync(KNOWLEDGE_DIR, { recursive: true });
+  writeFileSync(DIGEST_FILE, md);
+  return md;
+}
+
+// --- Tool: knowledge_read ---
+server.tool(
+  "knowledge_read",
+  "Read the agent knowledge base. Returns either a concise digest or full pattern list.",
+  { format: z.enum(["digest", "full"]).default("digest").describe("digest = summary, full = all patterns"), category: z.string().optional().describe("Filter by category") },
+  async ({ format, category }) => {
+    if (format === "digest") {
+      try {
+        const digest = readFileSync(DIGEST_FILE, "utf8");
+        return { content: [{ type: "text", text: digest }] };
+      } catch {
+        const digest = regenerateDigest();
+        return { content: [{ type: "text", text: digest }] };
+      }
+    }
+    const data = loadPatterns();
+    let patterns = data.patterns;
+    if (category) patterns = patterns.filter(p => p.category === category);
+    return { content: [{ type: "text", text: JSON.stringify({ count: patterns.length, patterns }, null, 2) }] };
+  }
+);
+
+// --- Tool: knowledge_add_pattern ---
+server.tool(
+  "knowledge_add_pattern",
+  "Add a learned pattern to the knowledge base. Use after analyzing a repo or discovering a useful technique.",
+  {
+    source: z.string().describe("Where this pattern came from, e.g. 'github.com/user/repo' or 'self:session-215'"),
+    category: z.enum(["architecture", "prompting", "tooling", "reliability", "security", "ecosystem"]).describe("Pattern category"),
+    title: z.string().describe("Short descriptive title"),
+    description: z.string().describe("What the pattern is and why it works"),
+    tags: z.array(z.string()).default([]).describe("Searchable tags"),
+    confidence: z.enum(["verified", "observed", "speculative"]).default("observed").describe("How confident are we this pattern works"),
+  },
+  async ({ source, category, title, description, tags, confidence }) => {
+    const data = loadPatterns();
+    // Dedup by title similarity
+    const existing = data.patterns.find(p => p.title.toLowerCase() === title.toLowerCase());
+    if (existing) {
+      return { content: [{ type: "text", text: `Pattern already exists: ${existing.id} — "${existing.title}". Update it manually if needed.` }] };
+    }
+    const id = `p${String(data.patterns.length + 1).padStart(3, "0")}`;
+    data.patterns.push({ id, source, category, title, description, confidence, extractedAt: new Date().toISOString(), tags });
+    savePatterns(data);
+    const digest = regenerateDigest();
+    return { content: [{ type: "text", text: `Added pattern ${id}: "${title}" (${category}, ${confidence}). Knowledge base now has ${data.patterns.length} patterns.\n\nUpdated digest:\n${digest}` }] };
+  }
+);
+
+// --- Tool: agent_crawl_repo ---
+server.tool(
+  "agent_crawl_repo",
+  "Clone an agent's GitHub repo (shallow) and extract documentation files for learning. Does NOT execute any code. Returns file contents for you to analyze and extract patterns from.",
+  {
+    github_url: z.string().describe("GitHub repo URL, e.g. https://github.com/user/repo"),
+    force: z.boolean().default(false).describe("Force re-crawl even if recently crawled"),
+  },
+  async ({ github_url, force }) => {
+    const { execSync } = await import("child_process");
+    // Normalize URL
+    const match = github_url.match(/github\.com\/([^\/]+\/[^\/\s#?]+)/);
+    if (!match) return { content: [{ type: "text", text: "Invalid GitHub URL. Use format: https://github.com/user/repo" }] };
+    const repoSlug = match[1].replace(/\.git$/, "");
+    const repoKey = `github.com/${repoSlug}`;
+
+    // Check if recently crawled
+    const crawled = loadReposCrawled();
+    if (!force && crawled.repos[repoKey]) {
+      const daysSince = (Date.now() - new Date(crawled.repos[repoKey].lastCrawled).getTime()) / 86400000;
+      if (daysSince < 7) {
+        return { content: [{ type: "text", text: `Repo ${repoKey} was crawled ${daysSince.toFixed(1)} days ago. Use force=true to re-crawl. Previous files: ${crawled.repos[repoKey].filesRead.join(", ")}` }] };
+      }
+    }
+
+    const tmpDir = `/tmp/agent-crawl-${Date.now()}`;
+    try {
+      // Shallow clone
+      execSync(`git clone --depth 1 https://${repoKey}.git "${tmpDir}" 2>&1`, { timeout: 30000 });
+
+      // Read target files (priority order)
+      const targetFiles = [
+        "AGENTS.md", "CLAUDE.md", ".claude/commands", "README.md", "BRIEFING.md",
+        "package.json", "pyproject.toml", "Cargo.toml",
+      ];
+      const allowedExts = new Set([".md", ".json", ".js", ".ts", ".py", ".sh", ".yaml", ".yml", ".toml", ".txt"]);
+      const MAX_FILE_SIZE = 50000;
+
+      const files = [];
+      for (const target of targetFiles) {
+        const fullPath = join(tmpDir, target);
+        try {
+          const stat = statSync(fullPath);
+          if (stat.isDirectory()) {
+            // Read all files in directory (e.g. .claude/commands/)
+            const entries = readdirSync(fullPath);
+            for (const entry of entries.slice(0, 10)) {
+              const ext = entry.includes(".") ? "." + entry.split(".").pop() : "";
+              if (!allowedExts.has(ext)) continue;
+              const entryPath = join(fullPath, entry);
+              const eStat = statSync(entryPath);
+              if (eStat.size > MAX_FILE_SIZE || !eStat.isFile()) continue;
+              files.push({ name: `${target}/${entry}`, content: readFileSync(entryPath, "utf8") });
+            }
+          } else if (stat.size <= MAX_FILE_SIZE) {
+            files.push({ name: target, content: readFileSync(fullPath, "utf8") });
+          }
+        } catch { /* file doesn't exist, skip */ }
+      }
+
+      // Also check root .md files not in target list
+      try {
+        const rootFiles = readdirSync(tmpDir).filter(f => f.endsWith(".md") && !targetFiles.includes(f));
+        for (const f of rootFiles.slice(0, 5)) {
+          const fPath = join(tmpDir, f);
+          const fStat = statSync(fPath);
+          if (fStat.size <= MAX_FILE_SIZE) {
+            files.push({ name: f, content: readFileSync(fPath, "utf8") });
+          }
+        }
+      } catch {}
+
+      // Get repo meta via git
+      let commitSha = "";
+      try { commitSha = execSync(`git -C "${tmpDir}" rev-parse HEAD`, { encoding: "utf8" }).trim(); } catch {}
+
+      // Update crawl tracking
+      crawled.repos[repoKey] = {
+        lastCrawled: new Date().toISOString(),
+        commitSha,
+        filesRead: files.map(f => f.name),
+        patternsExtracted: 0,
+      };
+      saveReposCrawled(crawled);
+
+      // Cleanup
+      execSync(`rm -rf "${tmpDir}"`);
+
+      if (files.length === 0) {
+        return { content: [{ type: "text", text: `Cloned ${repoKey} but found no readable documentation files.` }] };
+      }
+
+      const output = files.map(f => `--- ${f.name} ---\n${f.content}`).join("\n\n");
+      return { content: [{ type: "text", text: `Crawled ${repoKey} (${files.length} files, commit ${commitSha.slice(0, 8)}):\n\n${output}\n\nAnalyze these files and use knowledge_add_pattern for any useful techniques you find.` }] };
+    } catch (e) {
+      try { execSync(`rm -rf "${tmpDir}"`); } catch {}
+      return { content: [{ type: "text", text: `Crawl failed for ${repoKey}: ${e.message}` }] };
+    }
+  }
+);
+
+// --- Tool: agent_crawl_suggest ---
+server.tool(
+  "agent_crawl_suggest",
+  "Suggest the best agent repos to crawl next. Picks from the agent directory, prioritizing uncrawled repos with GitHub URLs.",
+  { limit: z.number().default(3).describe("How many suggestions to return") },
+  async ({ limit }) => {
+    const { execSync } = await import("child_process");
+    // Load agent directory
+    let agents = [];
+    try { agents = JSON.parse(readFileSync(AGENTS_UNIFIED_FILE, "utf8")).agents || []; } catch {}
+
+    // Load crawl history
+    const crawled = loadReposCrawled();
+
+    // Find agents with GitHub URLs from their profiles or known repos
+    // Also check the Bluesky agents for GitHub links in their bios
+    const candidates = [];
+
+    for (const agent of agents) {
+      // Check if agent has a GitHub URL in their profile
+      let githubUrl = null;
+      if (agent.github) githubUrl = agent.github;
+      if (agent.handle && agent.platform === "bluesky") {
+        // Bluesky agents sometimes have github in their signals
+        if (agent.signals && agent.signals.some(s => s.includes("github"))) {
+          // Try to extract from signals
+          for (const sig of agent.signals) {
+            const ghMatch = sig.match(/github\.com\/([^\s,)]+)/);
+            if (ghMatch) { githubUrl = `https://github.com/${ghMatch[1]}`; break; }
+          }
+        }
+      }
+      if (!githubUrl) continue;
+
+      const repoMatch = githubUrl.match(/github\.com\/([^\/]+\/[^\/\s#?]+)/);
+      if (!repoMatch) continue;
+      const repoKey = `github.com/${repoMatch[1].replace(/\.git$/, "")}`;
+
+      const crawlInfo = crawled.repos[repoKey];
+      const daysSinceLastCrawl = crawlInfo ? (Date.now() - new Date(crawlInfo.lastCrawled).getTime()) / 86400000 : Infinity;
+
+      candidates.push({
+        agent: agent.handle,
+        platform: agent.platform,
+        repoUrl: githubUrl,
+        repoKey,
+        daysSinceLastCrawl,
+        postCount: agent.postCount || 0,
+        score: agent.score || 0,
+        neverCrawled: !crawlInfo,
+      });
+    }
+
+    // Sort: never-crawled first, then by staleness, then by activity
+    candidates.sort((a, b) => {
+      if (a.neverCrawled !== b.neverCrawled) return a.neverCrawled ? -1 : 1;
+      if (Math.abs(a.daysSinceLastCrawl - b.daysSinceLastCrawl) > 1) return b.daysSinceLastCrawl - a.daysSinceLastCrawl;
+      return (b.postCount + b.score) - (a.postCount + a.score);
+    });
+
+    const top = candidates.slice(0, limit);
+    if (top.length === 0) {
+      return { content: [{ type: "text", text: "No agent repos found with GitHub URLs in the directory. Try discovering more agents first, or manually crawl a known repo with agent_crawl_repo." }] };
+    }
+
+    const lines = top.map((c, i) => `${i + 1}. @${c.agent} (${c.platform}) — ${c.repoUrl}\n   ${c.neverCrawled ? "Never crawled" : `Last crawled ${c.daysSinceLastCrawl.toFixed(0)} days ago`} | ${c.postCount} posts`);
+    return { content: [{ type: "text", text: `Top ${top.length} repos to crawl:\n\n${lines.join("\n\n")}\n\nUse agent_crawl_repo to inspect any of these.` }] };
+  }
+);
+
+// --- Tool: agent_fetch_knowledge ---
+server.tool(
+  "agent_fetch_knowledge",
+  "Fetch knowledge from another agent's exchange endpoint. Checks their /agent.json for capabilities, then imports published patterns.",
+  { agent_url: z.string().describe("Base URL of the agent's API, e.g. http://example.com:3847") },
+  async ({ agent_url }) => {
+    const baseUrl = agent_url.replace(/\/$/, "");
+    try {
+      // Fetch agent manifest
+      const manifestRes = await fetch(`${baseUrl}/agent.json`);
+      if (!manifestRes.ok) {
+        return { content: [{ type: "text", text: `No agent manifest at ${baseUrl}/agent.json (HTTP ${manifestRes.status}). This agent may not support the exchange protocol.` }] };
+      }
+      const manifest = await manifestRes.json();
+
+      let output = `Agent: ${manifest.agent || "unknown"}\nCapabilities: ${(manifest.capabilities || []).join(", ")}\nGitHub: ${manifest.github || "none"}\n`;
+
+      // Try to fetch patterns
+      const patternsUrl = manifest.exchange?.patterns_url
+        ? (manifest.exchange.patterns_url.startsWith("http") ? manifest.exchange.patterns_url : `${baseUrl}${manifest.exchange.patterns_url}`)
+        : `${baseUrl}/knowledge/patterns`;
+
+      try {
+        const pRes = await fetch(patternsUrl);
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          const remotePatterns = pData.patterns || [];
+          output += `\nPatterns available: ${remotePatterns.length}\n`;
+
+          // Import new patterns (dedup by title)
+          const local = loadPatterns();
+          const localTitles = new Set(local.patterns.map(p => p.title.toLowerCase()));
+          let imported = 0;
+          for (const rp of remotePatterns) {
+            if (localTitles.has((rp.title || "").toLowerCase())) continue;
+            const id = `p${String(local.patterns.length + 1).padStart(3, "0")}`;
+            local.patterns.push({
+              id,
+              source: `exchange:${manifest.agent || baseUrl}`,
+              category: rp.category || "tooling",
+              title: rp.title,
+              description: rp.description || "",
+              confidence: "observed",
+              extractedAt: new Date().toISOString(),
+              tags: rp.tags || [],
+            });
+            imported++;
+          }
+          if (imported > 0) {
+            savePatterns(local);
+            regenerateDigest();
+            output += `Imported ${imported} new patterns. Knowledge base now has ${local.patterns.length} patterns.`;
+          } else {
+            output += "No new patterns to import (all duplicates or empty).";
+          }
+        } else {
+          output += `\nPatterns endpoint returned HTTP ${pRes.status}`;
+        }
+      } catch (e) {
+        output += `\nCould not fetch patterns: ${e.message}`;
+      }
+
+      return { content: [{ type: "text", text: output }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Failed to connect to ${baseUrl}: ${e.message}` }] };
+    }
+  }
+);
 // Save API history on exit
 process.on("exit", () => { if (apiCallCount > 0) saveApiSession(); saveToolUsage(); });
 process.on("SIGINT", () => process.exit());

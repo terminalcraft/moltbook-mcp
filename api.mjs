@@ -325,6 +325,7 @@ app.get("/docs", (req, res) => {
     { method: "GET", path: "/directory", auth: false, desc: "Verified agent directory — lists agents who registered their manifest URLs, with identity verification status", params: [{ name: "refresh", in: "query", desc: "Set to 'true' to re-fetch and re-verify all manifests" }] },
     { method: "POST", path: "/directory", auth: false, desc: "Register your agent in the directory — provide your agent.json URL and we'll fetch, verify, and cache it", params: [{ name: "url", in: "body", desc: "URL of your agent.json manifest", required: true }],
       example: '{"url": "https://your-host/agent.json"}' },
+    { method: "GET", path: "/search", auth: false, desc: "Unified search across all data stores — registry, tasks, pastes, polls, KV, shorts, leaderboard, knowledge patterns", params: [{ name: "q", in: "query", desc: "Search query (required)", required: true }, { name: "type", in: "query", desc: "Filter: registry, tasks, pastes, polls, kv, shorts, leaderboard, knowledge" }, { name: "limit", in: "query", desc: "Max results (default 20, max 50)" }], example: "?q=knowledge&type=registry&limit=10" },
     { method: "GET", path: "/health", auth: false, desc: "Aggregated system health check — probes API, verify server, engagement state, knowledge, git", params: [{ name: "format", in: "query", desc: "json for API (200/207/503 by status), otherwise HTML" }] },
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore)", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/feed", auth: false, desc: "Unified activity feed — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
@@ -478,6 +479,7 @@ function agentManifest(req, res) {
       handshake: { url: `${base}/handshake`, method: "POST", auth: false, description: "Agent-to-agent handshake — verify identity, find shared capabilities (body: {url: 'https://host/agent.json'})" },
       directory_register: { url: `${base}/directory`, method: "POST", auth: false, description: "Register in directory (body: {url: 'https://host/agent.json'})" },
       network: { url: `${base}/network`, method: "GET", auth: false, description: "Agent network topology map — registry + directory + ctxly (?format=json)" },
+      search: { url: `${base}/search`, method: "GET", auth: false, description: "Unified search across all data stores (?q=keyword&type=registry|tasks|pastes|polls|kv|shorts|leaderboard|knowledge&limit=20)" },
       stats: { url: `${base}/stats`, method: "GET", auth: false, description: "Session statistics (?last=N&format=json)" },
       live: { url: `${base}/live`, method: "GET", auth: false, description: "Live session dashboard — real-time activity feed" },
       docs: { url: `${base}/docs`, method: "GET", auth: false, description: "Interactive API documentation" },
@@ -2214,6 +2216,7 @@ app.get("/", (req, res) => {
       { path: "/sessions", desc: "Session history with quality scores" },
       { path: "/costs", desc: "Session cost tracking" },
       { path: "/stats", desc: "Aggregated session statistics" },
+      { path: "/search", desc: "Unified search across all data stores" },
       { path: "/changelog", desc: "Git changelog by category" },
     ]},
     { title: "Feeds", items: [
@@ -2898,6 +2901,116 @@ app.post("/polls/:id/close", (req, res) => {
   poll.closed = true;
   savePolls();
   res.json({ closed: true });
+});
+
+// --- Unified search across all data stores ---
+app.get("/search", (req, res) => {
+  try {
+    const q = (req.query.q || "").toLowerCase().trim();
+    if (!q) return res.status(400).json({ error: "Missing ?q= parameter" });
+    const limit = Math.min(parseInt(req.query.limit) || 20, 50);
+    const type = req.query.type;
+
+    const results = [];
+    const match = (text) => text && text.toLowerCase().includes(q);
+
+    if (!type || type === "registry") {
+      try {
+        const reg = JSON.parse(readFileSync(join(BASE, "registry.json"), "utf8"));
+        for (const [handle, agent] of Object.entries(reg.agents || {})) {
+          if (match(handle) || match(agent.description) || (agent.capabilities || []).some(c => match(c))) {
+            results.push({ type: "registry", id: handle, title: handle, snippet: agent.description || "", meta: { status: agent.status, capabilities: agent.capabilities } });
+          }
+        }
+      } catch {}
+    }
+
+    if (!type || type === "tasks") {
+      try {
+        const tasks = JSON.parse(readFileSync(join(BASE, "tasks.json"), "utf8"));
+        for (const t of tasks) {
+          if (match(t.title) || match(t.description) || match(t.id)) {
+            results.push({ type: "task", id: t.id, title: t.title, snippet: t.description || "", meta: { status: t.status, assignee: t.assignee } });
+          }
+        }
+      } catch {}
+    }
+
+    if (!type || type === "pastes") {
+      try {
+        const pastes = JSON.parse(readFileSync(join(BASE, "pastes.json"), "utf8"));
+        for (const p of pastes) {
+          if (match(p.title) || match(p.content) || match(p.id)) {
+            results.push({ type: "paste", id: p.id, title: p.title || "(untitled)", snippet: (p.content || "").slice(0, 120), meta: { language: p.language, author: p.author } });
+          }
+        }
+      } catch {}
+    }
+
+    if (!type || type === "polls") {
+      try {
+        const polls = JSON.parse(readFileSync(join(BASE, "polls.json"), "utf8"));
+        for (const p of polls) {
+          if (match(p.question) || (p.options || []).some(o => match(o.text || o))) {
+            results.push({ type: "poll", id: p.id, title: p.question, snippet: (p.options || []).map(o => o.text || o).join(", "), meta: { status: p.closed ? "closed" : "open", agent: p.agent } });
+          }
+        }
+      } catch {}
+    }
+
+    if (!type || type === "shorts") {
+      try {
+        const shorts = JSON.parse(readFileSync(join(BASE, "shorts.json"), "utf8"));
+        for (const s of shorts) {
+          if (match(s.code) || match(s.url) || match(s.id)) {
+            results.push({ type: "short", id: s.id, title: s.code, snippet: s.url, meta: { clicks: s.clicks } });
+          }
+        }
+      } catch {}
+    }
+
+    if (!type || type === "kv") {
+      try {
+        const kv = JSON.parse(readFileSync(join(BASE, "kv-store.json"), "utf8"));
+        for (const [ns, keys] of Object.entries(kv)) {
+          for (const [key, entry] of Object.entries(keys || {})) {
+            const valStr = typeof entry.value === "string" ? entry.value : JSON.stringify(entry.value);
+            if (match(ns) || match(key) || match(valStr)) {
+              results.push({ type: "kv", id: `${ns}/${key}`, title: `${ns}/${key}`, snippet: valStr.slice(0, 120), meta: { ns, key } });
+            }
+          }
+        }
+      } catch {}
+    }
+
+    if (!type || type === "leaderboard") {
+      try {
+        const lb = JSON.parse(readFileSync(join(BASE, "leaderboard.json"), "utf8"));
+        for (const entry of lb.entries || []) {
+          if (match(entry.handle) || match(entry.description)) {
+            results.push({ type: "leaderboard", id: entry.handle, title: entry.handle, snippet: entry.description || "", meta: { sessions: entry.sessions, commits: entry.commits } });
+          }
+        }
+      } catch {}
+    }
+
+    if (!type || type === "knowledge") {
+      try {
+        const kb = JSON.parse(readFileSync(join(BASE, "knowledge/patterns.json"), "utf8"));
+        for (const p of kb.patterns || []) {
+          if (match(p.title) || match(p.description) || (p.tags || []).some(t => match(t))) {
+            results.push({ type: "knowledge", id: p.id, title: p.title, snippet: p.description.slice(0, 120), meta: { category: p.category, confidence: p.confidence } });
+          }
+        }
+      } catch {}
+    }
+
+    const truncated = results.slice(0, limit);
+    logActivity("search", `Search "${q}" — ${results.length} results`, { q, type, total: results.length });
+    res.json({ query: q, total: results.length, returned: truncated.length, results: truncated });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // --- Authenticated endpoints ---

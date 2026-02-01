@@ -29,7 +29,7 @@ function logActivity(event, summary, meta = {}) {
 
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 async function fireWebhook(event, payload) {
@@ -4376,6 +4376,86 @@ app.get("/digest", (req, res) => {
 ${buildRows ? `<h2>Builds</h2><table><tr><th>Agent</th><th>Summary</th><th>Version</th><th>Time</th></tr>${buildRows}</table>` : ""}
 ${eventRows ? `<h2>Recent Events</h2><table><tr><th>Time</th><th>Event</th><th>Summary</th></tr>${eventRows}</table>` : ""}
 </body></html>`);
+});
+
+// --- Agent Snapshots (versioned memory checkpoints) ---
+const SNAPSHOTS_FILE = join(BASE, "snapshots.json");
+const SNAP_MAX_PER_AGENT = 50;
+function loadSnapshots() { try { return JSON.parse(readFileSync(SNAPSHOTS_FILE, "utf8")); } catch { return {}; } }
+function saveSnapshots(s) { writeFileSync(SNAPSHOTS_FILE, JSON.stringify(s, null, 2)); }
+
+app.post("/snapshots", (req, res) => {
+  const { handle, label, data, tags } = req.body || {};
+  if (!handle || !data) return res.status(400).json({ error: "handle and data required" });
+  if (typeof data !== "object") return res.status(400).json({ error: "data must be an object" });
+  const snaps = loadSnapshots();
+  if (!snaps[handle]) snaps[handle] = [];
+  const id = crypto.randomUUID().slice(0, 8);
+  const version = snaps[handle].length + 1;
+  const entry = { id, version, label: label || `v${version}`, tags: tags || [], data, created: new Date().toISOString(), size: JSON.stringify(data).length };
+  snaps[handle].push(entry);
+  if (snaps[handle].length > SNAP_MAX_PER_AGENT) snaps[handle] = snaps[handle].slice(-SNAP_MAX_PER_AGENT);
+  saveSnapshots(snaps);
+  fireWebhook("snapshot.created", { handle, id, label: entry.label, version });
+  logActivity("snapshot.created", `${handle} saved snapshot ${entry.label}`, { handle, id });
+  res.status(201).json({ id, version, label: entry.label, created: entry.created, size: entry.size });
+});
+
+app.get("/snapshots/:handle", (req, res) => {
+  const snaps = loadSnapshots();
+  const agentSnaps = snaps[req.params.handle] || [];
+  res.json(agentSnaps.map(s => ({ id: s.id, version: s.version, label: s.label, tags: s.tags, created: s.created, size: s.size })));
+});
+
+app.get("/snapshots/:handle/latest", (req, res) => {
+  const snaps = loadSnapshots();
+  const agentSnaps = snaps[req.params.handle] || [];
+  if (!agentSnaps.length) return res.status(404).json({ error: "no snapshots" });
+  res.json(agentSnaps[agentSnaps.length - 1]);
+});
+
+app.get("/snapshots/:handle/:id", (req, res) => {
+  const snaps = loadSnapshots();
+  const agentSnaps = snaps[req.params.handle] || [];
+  const snap = agentSnaps.find(s => s.id === req.params.id);
+  if (!snap) return res.status(404).json({ error: "snapshot not found" });
+  res.json(snap);
+});
+
+app.get("/snapshots/:handle/diff/:id1/:id2", (req, res) => {
+  const snaps = loadSnapshots();
+  const agentSnaps = snaps[req.params.handle] || [];
+  const s1 = agentSnaps.find(s => s.id === req.params.id1);
+  const s2 = agentSnaps.find(s => s.id === req.params.id2);
+  if (!s1 || !s2) return res.status(404).json({ error: "one or both snapshots not found" });
+  const diff = { added: {}, removed: {}, changed: {} };
+  const allKeys = new Set([...Object.keys(s1.data), ...Object.keys(s2.data)]);
+  for (const k of allKeys) {
+    const v1 = JSON.stringify(s1.data[k]), v2 = JSON.stringify(s2.data[k]);
+    if (v1 === undefined && v2 !== undefined) diff.added[k] = s2.data[k];
+    else if (v1 !== undefined && v2 === undefined) diff.removed[k] = s1.data[k];
+    else if (v1 !== v2) diff.changed[k] = { from: s1.data[k], to: s2.data[k] };
+  }
+  res.json({ from: { id: s1.id, label: s1.label, version: s1.version }, to: { id: s2.id, label: s2.label, version: s2.version }, diff });
+});
+
+app.delete("/snapshots/:handle/:id", (req, res) => {
+  const snaps = loadSnapshots();
+  const agentSnaps = snaps[req.params.handle] || [];
+  const idx = agentSnaps.findIndex(s => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "snapshot not found" });
+  agentSnaps.splice(idx, 1);
+  snaps[req.params.handle] = agentSnaps;
+  saveSnapshots(snaps);
+  res.json({ deleted: true });
+});
+
+app.get("/snapshots", (req, res) => {
+  const snaps = loadSnapshots();
+  const summary = Object.entries(snaps).map(([handle, arr]) => ({
+    handle, count: arr.length, latest: arr.length ? arr[arr.length - 1].created : null
+  }));
+  res.json(summary);
 });
 
 // --- Authenticated endpoints ---

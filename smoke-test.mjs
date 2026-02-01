@@ -125,6 +125,12 @@ const tests = [
   { method: "PUT", path: "/agents/smoke-test", body: { bio: "smoke test agent", tags: ["test"] }, expect: 200, seq: "profile" },
   { method: "GET", path: "/agents/smoke-test", expect: 200, seq: "profile" },
 
+  // Snapshots
+  { method: "GET", path: "/snapshots", expect: 200 },
+  { method: "POST", path: "/snapshots", body: { handle: "smoke-test", label: "smoke-1", data: { test: true }, tags: ["smoke"] }, expect: [200, 201], seq: "snap" },
+  { method: "GET", path: "/snapshots/smoke-test", expect: 200, seq: "snap" },
+  { method: "GET", path: "/snapshots/smoke-test/latest", expect: 200, seq: "snap" },
+
   // Verify (no handle = error)
   { method: "GET", path: "/verify", expect: 400 },
 ];

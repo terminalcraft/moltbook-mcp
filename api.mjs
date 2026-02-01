@@ -30,7 +30,7 @@ function logActivity(event, summary, meta = {}) {
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
 const WEBHOOK_DELIVERIES_FILE = join(BASE, "webhook-deliveries.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 function loadDeliveries() { try { return JSON.parse(readFileSync(WEBHOOK_DELIVERIES_FILE, "utf8")); } catch { return {}; } }
@@ -4866,8 +4866,95 @@ app.get("/backups", (req, res) => {
   }
 });
 
+// --- Smoke Tests (self-testing with history) ---
+const SMOKE_RESULTS_FILE = join(BASE, "smoke-results.json");
+function loadSmokeResults() { try { return JSON.parse(readFileSync(SMOKE_RESULTS_FILE, "utf8")); } catch { return []; } }
+function saveSmokeResults(results) { try { writeFileSync(SMOKE_RESULTS_FILE, JSON.stringify(results)); } catch {} }
+
+const SMOKE_TESTS = [
+  { method: "GET", path: "/health", expect: 200 },
+  { method: "GET", path: "/status", expect: 200 },
+  { method: "GET", path: "/agent.json", expect: 200 },
+  { method: "GET", path: "/knowledge/patterns", expect: 200 },
+  { method: "GET", path: "/registry", expect: 200 },
+  { method: "GET", path: "/leaderboard", expect: 200 },
+  { method: "GET", path: "/presence", expect: 200 },
+  { method: "GET", path: "/backups", expect: 200 },
+  { method: "GET", path: "/metrics", expect: 200 },
+  { method: "GET", path: "/docs", expect: 200 },
+  { method: "GET", path: "/openapi.json", expect: 200 },
+  { method: "GET", path: "/feed", expect: 200 },
+  { method: "GET", path: "/changelog", expect: 200 },
+  { method: "GET", path: "/monitors", expect: 200 },
+  { method: "GET", path: "/webhooks/events", expect: 200 },
+  { method: "GET", path: "/polls", expect: 200 },
+  { method: "GET", path: "/kv", expect: 200 },
+  { method: "GET", path: "/cron", expect: 200 },
+  { method: "GET", path: "/paste", expect: 200 },
+  { method: "GET", path: "/rooms", expect: 200 },
+];
+
+async function runSmokeTests() {
+  const results = [];
+  const start = Date.now();
+  await Promise.all(SMOKE_TESTS.map(async (test) => {
+    const url = `http://127.0.0.1:${PORT}${test.path}`;
+    const t0 = Date.now();
+    try {
+      const resp = await fetch(url, { method: test.method, signal: AbortSignal.timeout(5000) });
+      const latency = Date.now() - t0;
+      const expected = Array.isArray(test.expect) ? test.expect : [test.expect];
+      results.push({ method: test.method, path: test.path, status: resp.status, pass: expected.includes(resp.status), latency, error: null });
+    } catch (e) {
+      results.push({ method: test.method, path: test.path, status: 0, pass: false, latency: Date.now() - t0, error: e.name === "AbortError" ? "TIMEOUT" : e.message });
+    }
+  }));
+  const elapsed = Date.now() - start;
+  const passed = results.filter(r => r.pass).length;
+  const run = { id: crypto.randomUUID().slice(0, 8), ts: new Date().toISOString(), total: results.length, passed, failed: results.length - passed, elapsed, results };
+  const history = loadSmokeResults();
+  history.push(run);
+  if (history.length > 100) history.splice(0, history.length - 100);
+  saveSmokeResults(history);
+  logActivity("smoke.run", `Smoke tests: ${passed}/${results.length} passed in ${elapsed}ms`, { id: run.id, passed, failed: run.failed });
+  fireWebhookEvent("smoke.completed", run);
+  return run;
+}
+
+// Public: read smoke test results
+app.get("/smoke-tests/latest", (req, res) => {
+  const history = loadSmokeResults();
+  if (history.length === 0) return res.json({ message: "no smoke test runs yet" });
+  res.json(history[history.length - 1]);
+});
+
+app.get("/smoke-tests/history", (req, res) => {
+  const history = loadSmokeResults();
+  const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+  const summary = history.slice(-limit).map(r => ({ id: r.id, ts: r.ts, total: r.total, passed: r.passed, failed: r.failed, elapsed: r.elapsed }));
+  res.json({ total_runs: history.length, results: summary });
+});
+
+app.get("/smoke-tests/badge", (req, res) => {
+  const history = loadSmokeResults();
+  const latest = history[history.length - 1];
+  if (!latest) return res.json({ schemaVersion: 1, label: "smoke tests", message: "no data", color: "lightgrey" });
+  const ok = latest.failed === 0;
+  res.json({ schemaVersion: 1, label: "smoke tests", message: ok ? `${latest.passed} passed` : `${latest.failed} failed`, color: ok ? "brightgreen" : "red" });
+});
+
+// Auto-run smoke tests every 30 min + 30s after startup
+setInterval(async () => { try { await runSmokeTests(); } catch {} }, 30 * 60 * 1000);
+setTimeout(async () => { try { await runSmokeTests(); } catch {} }, 30_000);
+
 // --- Authenticated endpoints ---
 app.use(auth);
+
+// Auth-protected: trigger smoke test run
+app.post("/smoke-tests/run", async (req, res) => {
+  try { res.json(await runSmokeTests()); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 // Webhook admin routes (auth required)
 app.get("/webhooks", (req, res) => {

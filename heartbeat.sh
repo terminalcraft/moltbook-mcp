@@ -22,43 +22,7 @@ if ! flock -n 200; then
   exit 0
 fi
 
-# --- Pre-session hooks ---
-# Each script in hooks/pre-session/ runs in sort order before the session.
-# To add a new pre-session step: drop an executable script in hooks/pre-session/.
-PRE_HOOKS_DIR="$DIR/hooks/pre-session"
-if [ -d "$PRE_HOOKS_DIR" ]; then
-  for hook in "$PRE_HOOKS_DIR"/*; do
-    [ -x "$hook" ] || continue
-    echo "$(date -Iseconds) running pre-hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
-    timeout 30 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || \
-      echo "$(date -Iseconds) pre-hook FAILED: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
-  done
-fi
-
-# Outage-aware session skip: if API has been down 5+ consecutive checks,
-# skip every other heartbeat to conserve budget during extended outages.
-# Uses --status exit code: 0=up, 1=down, 2=unknown
-SKIP_FILE="$STATE_DIR/outage_skip_toggle"
-API_STATUS=$(node "$DIR/health-check.cjs" --status 2>&1 || true)
-if echo "$API_STATUS" | grep -q "^DOWN" ; then
-  DOWN_COUNT=$(echo "$API_STATUS" | grep -oP 'down \K[0-9]+')
-  if [ "${DOWN_COUNT:-0}" -ge 5 ]; then
-    if [ -f "$SKIP_FILE" ]; then
-      rm -f "$SKIP_FILE"
-      echo "$(date -Iseconds) outage skip: API down $DOWN_COUNT checks, skipping this session" >> "$LOG_DIR/skipped.log"
-      exit 0
-    else
-      touch "$SKIP_FILE"
-      # Continue — run this session, skip next one
-    fi
-  else
-    rm -f "$SKIP_FILE"
-  fi
-else
-  rm -f "$SKIP_FILE"
-fi
-
-# --- Session rotation ---
+# --- Session rotation (computed before hooks so pre-hooks have context) ---
 ROTATION_FILE="$DIR/rotation.conf"
 SESSION_COUNTER_FILE="$STATE_DIR/session_counter"
 
@@ -76,14 +40,12 @@ fi
 # The counter file can drift if reset/wiped. Always use the higher value.
 ESTATE="$HOME/.config/moltbook/engagement-state.json"
 if [ -f "$ESTATE" ]; then
-  ESTATE_SESSION=$(python3 -c "import json; print(json.load(open('$ESTATE')).get('session',0))" 2>/dev/null || echo 0)
+  ESTATE_SESSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('$ESTATE','utf8')).session||0)}catch{console.log(0)}" 2>/dev/null || echo 0)
   if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
     COUNTER="$ESTATE_SESSION"
     echo "$COUNTER" > "$SESSION_COUNTER_FILE"
     echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
   fi
-
-  # Engagement-state pruning moved to hooks/pre-session/30-prune-state.sh (s314).
 fi
 
 if [ -n "$OVERRIDE_MODE" ]; then
@@ -120,8 +82,6 @@ if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
 fi
 
 # R sessions alternate between evolve/maintain focus (added s289, fixed s294, s299).
-# Uses a dedicated R-session counter so alternation is reliable regardless of
-# how many B/E sessions occur between R sessions.
 R_COUNTER_FILE="$STATE_DIR/r_session_counter"
 R_FOCUS="evolve"
 if [ "$MODE_CHAR" = "R" ]; then
@@ -132,6 +92,41 @@ if [ "$MODE_CHAR" = "R" ]; then
   if [ $((R_COUNT % 2)) -eq 0 ]; then
     R_FOCUS="maintain"
   fi
+fi
+
+# --- Outage-aware session skip ---
+# If API has been down 5+ consecutive checks, skip every other heartbeat.
+SKIP_FILE="$STATE_DIR/outage_skip_toggle"
+API_STATUS=$(node "$DIR/health-check.cjs" --status 2>&1 || true)
+if echo "$API_STATUS" | grep -q "^DOWN" ; then
+  DOWN_COUNT=$(echo "$API_STATUS" | grep -oP 'down \K[0-9]+')
+  if [ "${DOWN_COUNT:-0}" -ge 5 ]; then
+    if [ -f "$SKIP_FILE" ]; then
+      rm -f "$SKIP_FILE"
+      echo "$(date -Iseconds) outage skip: API down $DOWN_COUNT checks, skipping this session" >> "$LOG_DIR/skipped.log"
+      exit 0
+    else
+      touch "$SKIP_FILE"
+    fi
+  else
+    rm -f "$SKIP_FILE"
+  fi
+else
+  rm -f "$SKIP_FILE"
+fi
+
+# --- Pre-session hooks ---
+# Each script in hooks/pre-session/ runs in sort order before the session.
+# Hooks receive MODE_CHAR and SESSION_NUM for session-type-aware decisions.
+PRE_HOOKS_DIR="$DIR/hooks/pre-session"
+if [ -d "$PRE_HOOKS_DIR" ]; then
+  for hook in "$PRE_HOOKS_DIR"/*; do
+    [ -x "$hook" ] || continue
+    echo "$(date -Iseconds) running pre-hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
+    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" \
+      timeout 30 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || \
+      echo "$(date -Iseconds) pre-hook FAILED: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
+  done
 fi
 
 case "$MODE_CHAR" in

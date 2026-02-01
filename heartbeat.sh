@@ -57,15 +57,16 @@ SESSION_COUNTER_FILE="$STATE_DIR/session_counter"
 # Accept optional mode override as first argument (E, B, or R)
 OVERRIDE_MODE="${1:-}"
 
+# Always read session counter (used for logging even on override)
+if [ -f "$SESSION_COUNTER_FILE" ]; then
+  COUNTER=$(cat "$SESSION_COUNTER_FILE")
+else
+  COUNTER=0
+fi
+
 if [ -n "$OVERRIDE_MODE" ]; then
   MODE_CHAR="$OVERRIDE_MODE"
 else
-  # Read or init counter
-  if [ -f "$SESSION_COUNTER_FILE" ]; then
-    COUNTER=$(cat "$SESSION_COUNTER_FILE")
-  else
-    COUNTER=0
-  fi
 
   # Read pattern (default EBR)
   PATTERN="EBR"
@@ -155,7 +156,7 @@ cd "$LOG_DIR"
 ls -1t *.log 2>/dev/null | tail -n +51 | xargs -r rm --
 
 # Generate readable summary from stream-json log
-python3 "$DIR/scripts/summarize-session.py" "$LOG" 2>/dev/null || true
+python3 "$DIR/scripts/summarize-session.py" "$LOG" "$COUNTER" 2>/dev/null || true
 
 # Append one-line session history for cheap cross-session context
 SUMMARY_FILE="${LOG%.log}.summary"

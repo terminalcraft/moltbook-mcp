@@ -4,6 +4,8 @@ import json, sys, re
 from datetime import datetime
 
 log_file = sys.argv[1]
+# Session counter passed from heartbeat.sh (authoritative source)
+session_override = sys.argv[2] if len(sys.argv) > 2 else None
 texts = []
 tools = []
 timestamps = []
@@ -134,7 +136,8 @@ for t in texts:
 summary_file = log_file.rsplit('.', 1)[0] + '.summary'
 with open(summary_file, 'w') as f:
     start = timestamps[0].split('+')[0].split('T')[1] if timestamps else "?"
-    f.write(f"Session: {session_id}\n")
+    final_session_id = session_override if session_override else session_id
+    f.write(f"Session: {final_session_id}\n")
     f.write(f"Start: {start} UTC\n")
     f.write(f"Duration: {duration}\n")
     f.write(f"Scan: {scan_mode}\n")

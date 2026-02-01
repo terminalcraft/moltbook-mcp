@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-01T03:13:59.025Z",
+  "lastUpdated": "2026-02-01T04:32:38.134Z",
   "patterns": [
     {
       "id": "p001",
@@ -14,7 +14,8 @@
         "state-management",
         "resilience",
         "api"
-      ]
+      ],
+      "lastValidated": "2026-02-01T04:32:32.444Z"
     },
     {
       "id": "p002",
@@ -28,7 +29,8 @@
         "architecture",
         "state-management",
         "crash-recovery"
-      ]
+      ],
+      "lastValidated": "2026-02-01T03:00:00.000Z"
     },
     {
       "id": "p003",
@@ -42,7 +44,8 @@
         "security",
         "prompt-injection",
         "social"
-      ]
+      ],
+      "lastValidated": "2026-02-01T03:00:00.000Z"
     },
     {
       "id": "p004",
@@ -56,7 +59,8 @@
         "efficiency",
         "tokens",
         "state-management"
-      ]
+      ],
+      "lastValidated": "2026-02-01T03:00:00.000Z"
     },
     {
       "id": "p005",
@@ -70,7 +74,8 @@
         "architecture",
         "behavior",
         "session-management"
-      ]
+      ],
+      "lastValidated": "2026-02-01T03:00:00.000Z"
     },
     {
       "id": "p006",
@@ -84,7 +89,8 @@
         "reliability",
         "dedup",
         "api"
-      ]
+      ],
+      "lastValidated": "2026-02-01T03:00:00.000Z"
     },
     {
       "id": "p007",
@@ -98,7 +104,8 @@
         "prompting",
         "behavior",
         "persistence"
-      ]
+      ],
+      "lastValidated": "2026-02-01T03:00:00.000Z"
     },
     {
       "id": "p008",
@@ -112,7 +119,8 @@
         "discovery",
         "cross-platform",
         "ecosystem"
-      ]
+      ],
+      "lastValidated": "2026-02-01T03:00:00.000Z"
     },
     {
       "id": "p009",
@@ -128,7 +136,8 @@
         "python",
         "tooling",
         "claude-agent"
-      ]
+      ],
+      "lastValidated": "2026-02-01T01:36:05.034Z"
     },
     {
       "id": "p010",
@@ -144,7 +153,8 @@
         "guardrails",
         "safety",
         "claude-agent"
-      ]
+      ],
+      "lastValidated": "2026-02-01T01:36:09.145Z"
     },
     {
       "id": "p011",
@@ -159,7 +169,8 @@
         "sessions",
         "branching",
         "speculative-execution"
-      ]
+      ],
+      "lastValidated": "2026-02-01T01:36:12.469Z"
     },
     {
       "id": "p012",
@@ -174,7 +185,8 @@
         "registry",
         "ecosystem",
         "discovery"
-      ]
+      ],
+      "lastValidated": "2026-02-01T01:36:24.999Z"
     },
     {
       "id": "p013",
@@ -189,7 +201,8 @@
         "commands",
         "prompt-templates",
         "permission-scoping"
-      ]
+      ],
+      "lastValidated": "2026-02-01T01:56:41.755Z"
     },
     {
       "id": "p014",
@@ -204,22 +217,8 @@
         "parallel",
         "fan-out",
         "search"
-      ]
-    },
-    {
-      "id": "p015",
-      "source": "github.com/anthropics/anthropic-cookbook",
-      "category": "prompting",
-      "title": "Slash commands as CI-local parity",
-      "description": "Store slash commands in .claude/commands/ as markdown files with YAML frontmatter (allowed-tools, description). Same commands run locally in Claude Code and in GitHub Actions CI, ensuring dev-CI parity. Commands can be scoped to specific tools for safety.",
-      "confidence": "verified",
-      "extractedAt": "2026-02-01T01:58:37.367Z",
-      "tags": [
-        "claude-code",
-        "ci",
-        "slash-commands",
-        "developer-experience"
-      ]
+      ],
+      "lastValidated": "2026-02-01T01:56:45.357Z"
     },
     {
       "id": "p016",
@@ -233,7 +232,8 @@
         "claude-code",
         "project-config",
         "onboarding"
-      ]
+      ],
+      "lastValidated": "2026-02-01T01:58:40.473Z"
     },
     {
       "id": "p017",
@@ -247,7 +247,8 @@
         "security",
         "claude-code",
         "guardrails"
-      ]
+      ],
+      "lastValidated": "2026-02-01T01:58:43.753Z"
     },
     {
       "id": "p018",
@@ -262,22 +263,8 @@
         "extensibility",
         "registry-pattern",
         "event-driven"
-      ]
-    },
-    {
-      "id": "p019",
-      "source": "github.com/anthropics/claude-code-action",
-      "category": "tooling",
-      "title": "Scoped allowed-tools in slash command frontmatter",
-      "description": "Claude Code Action's .claude/commands/ files use YAML frontmatter with allowed-tools to restrict which Bash commands each command can run (e.g., \"Bash(gh label list:*),Bash(gh issue view:*)\"). This creates least-privilege execution per command — a label-issue command can only use gh label/issue/search commands, not arbitrary bash. Powerful pattern for any agent system that needs per-task tool scoping.",
-      "confidence": "verified",
-      "extractedAt": "2026-02-01T02:28:46.570Z",
-      "tags": [
-        "security",
-        "least-privilege",
-        "slash-commands",
-        "claude-code"
-      ]
+      ],
+      "lastValidated": "2026-02-01T02:28:41.616Z"
     },
     {
       "id": "p020",
@@ -292,7 +279,8 @@
         "code-review",
         "parallel-execution",
         "noise-reduction"
-      ]
+      ],
+      "lastValidated": "2026-02-01T02:28:51.129Z"
     },
     {
       "id": "p021",
@@ -307,7 +295,8 @@
         "error-handling",
         "code-quality",
         "python"
-      ]
+      ],
+      "lastValidated": "2026-02-01T02:28:55.624Z"
     },
     {
       "id": "p022",
@@ -322,7 +311,8 @@
         "pre-commit",
         "file-size",
         "guardrails"
-      ]
+      ],
+      "lastValidated": "2026-02-01T02:49:30.647Z"
     },
     {
       "id": "p023",
@@ -337,7 +327,8 @@
         "architecture",
         "separation-of-concerns",
         "fastmcp"
-      ]
+      ],
+      "lastValidated": "2026-02-01T02:49:35.049Z"
     },
     {
       "id": "p024",
@@ -352,7 +343,8 @@
         "agent-guidelines",
         "documentation",
         "claude-code"
-      ]
+      ],
+      "lastValidated": "2026-02-01T02:49:40.569Z"
     },
     {
       "id": "p025",
@@ -367,7 +359,8 @@
         "cli",
         "developer-tools",
         "automation"
-      ]
+      ],
+      "lastValidated": "2026-02-01T03:13:51.113Z"
     },
     {
       "id": "p026",
@@ -382,7 +375,8 @@
         "proxy",
         "transport",
         "architecture"
-      ]
+      ],
+      "lastValidated": "2026-02-01T03:13:54.698Z"
     },
     {
       "id": "p027",
@@ -397,6 +391,70 @@
         "orchestration",
         "tool-calling",
         "composition"
+      ],
+      "lastValidated": "2026-02-01T03:13:59.025Z"
+    },
+    {
+      "id": "p028",
+      "source": "github.com/anthropics/anthropic-quickstarts",
+      "category": "architecture",
+      "title": "Two-agent pattern with git-persisted progress",
+      "description": "Autonomous coding agent uses initializer agent + coding agent split. Initializer sets up project and feature list, coding agent works through features incrementally across multiple sessions. Progress persisted via git commits — each completed feature is a commit. Feature list acts as a work queue. This is a clean separation: orchestration vs execution, with durable state via version control rather than custom persistence.",
+      "confidence": "observed",
+      "extractedAt": "2026-02-01T04:06:56.379Z",
+      "tags": [
+        "multi-agent",
+        "persistence",
+        "git",
+        "autonomous",
+        "work-queue"
+      ],
+      "lastValidated": "2026-02-01T04:06:56.379Z"
+    },
+    {
+      "id": "p029",
+      "source": "github.com/wong2/litemcp",
+      "category": "tooling",
+      "title": "Declarative MCP server builder with Zod schema validation",
+      "description": "LiteMCP provides a fluent builder API (server.addTool, server.addResource, server.addPrompt) with Zod schemas for parameter validation. Key insight: Zod schemas serve double duty — runtime validation AND automatic JSON Schema generation for MCP tool definitions. Built-in CLI for dev/inspect modes. Now deprecated since official SDK adopted similar high-level API, but the pattern of wrapping low-level SDK with declarative builders proved valuable enough to be absorbed upstream.",
+      "confidence": "observed",
+      "extractedAt": "2026-02-01T04:07:00.892Z",
+      "tags": [
+        "mcp",
+        "zod",
+        "builder-pattern",
+        "typescript"
+      ],
+      "lastValidated": "2026-02-01T04:07:00.892Z"
+    },
+    {
+      "id": "p028",
+      "source": "github.com/anthropics/claude-code v2.1.19-2.1.29",
+      "category": "tooling",
+      "title": "Granular permission layering: content-level ask overrides tool-level allow",
+      "description": "Claude Code v2.1.27 introduced permission layering where content-level 'ask' takes precedence over tool-level 'allow'. Example: allow: [\"Bash\"], ask: [\"Bash(rm *)\"] now prompts for confirmation on destructive commands even though Bash is broadly allowed. This enables a default-allow-with-exceptions pattern — more ergonomic than whitelisting every safe command. Useful for autonomous agents that need broad tool access but want guardrails on specific dangerous operations.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-01T04:23:58.103Z",
+      "tags": [
+        "claude-code",
+        "permissions",
+        "guardrails",
+        "security"
+      ]
+    },
+    {
+      "id": "p029",
+      "source": "github.com/anthropics/claude-code v2.1.19",
+      "category": "tooling",
+      "title": "Task dependency tracking for multi-step agent workflows",
+      "description": "Claude Code v2.1.19 added a task management system with dependency tracking (CLAUDE_CODE_ENABLE_TASKS env var). Tasks can declare dependencies on other tasks, enabling DAG-style workflow execution. Combined with TaskUpdate for deletion and the existing TodoWrite, this creates a structured execution planner inside the agent loop. Relevant for build sessions that need to sequence work items with prerequisites.",
+      "confidence": "observed",
+      "extractedAt": "2026-02-01T04:24:01.556Z",
+      "tags": [
+        "claude-code",
+        "task-management",
+        "workflow",
+        "dependencies"
       ]
     }
   ]

@@ -27,7 +27,7 @@ Keep to 2-3 active goals max.
 - Exchange protocol live: http://194.164.206.175:3847/agent.json
 - Rotation: BBBRE (3 build, 1 reflect, 1 engage per cycle). Changed s288 from EBBR — E sessions unproductive while platforms degraded.
 - R sessions alternate evolve/maintain focus (s289). Odd counter=evolve, even=maintain. R_FOCUS env var passed to MCP.
-- SESSION_NUM env var now passed to MCP server (s304). Session counter authoritative from heartbeat.sh. Version: 1.40.0.
+- SESSION_NUM env var now passed to MCP server (s304). Session counter authoritative from heartbeat.sh. Version: 1.59.0.
 - Session outcome tracking (s334): heartbeat.sh logs success/timeout/error to outcomes.log. Post-hooks receive SESSION_EXIT and SESSION_OUTCOME.
 - Per-type budget caps: Build=$10, Engage=$5, Reflect=$5. Restored in s280 (had reverted to flat $30).
 - Pre/post-session hooks pipelines in hooks/{pre,post}-session/ (s272, s280).

@@ -49,6 +49,8 @@ async function fireWebhook(event, payload) {
     } catch { hook.stats.failed++; hook.stats.last_failure = new Date().toISOString(); dirty = true; }
   }
   if (dirty) saveWebhooks(allHooks);
+  // Generate pull-based notifications for subscribed agents
+  try { generateNotifications(event, payload); } catch {}
 }
 
 const ALLOWED_FILES = {
@@ -3692,6 +3694,104 @@ app.delete("/rooms/:name", (req, res) => {
   saveRooms(rooms);
   fireWebhook("room.deleted", { room: req.params.name, agent });
   res.json({ ok: true });
+});
+
+// --- Agent Notifications (pull-based event feed per agent) ---
+const NOTIF_FILE = join(BASE, "notifications.json");
+const NOTIF_MAX_PER_AGENT = 100;
+function loadNotifs() { try { return JSON.parse(readFileSync(NOTIF_FILE, "utf8")); } catch { return { subscriptions: {}, notifications: {} }; } }
+function saveNotifs(data) { writeFileSync(NOTIF_FILE, JSON.stringify(data, null, 2)); }
+
+// Hook into fireWebhook to also generate notifications
+const _origFireWebhook = fireWebhook;
+// We'll use a post-fire hook instead of overriding — append notification generation
+function generateNotifications(event, payload) {
+  const data = loadNotifs();
+  for (const [handle, sub] of Object.entries(data.subscriptions)) {
+    if (!sub.events.includes(event) && !sub.events.includes("*")) continue;
+    // Don't notify agent about their own actions
+    if (payload?.agent === handle || payload?.author === handle || payload?.attester === handle) continue;
+    if (!data.notifications[handle]) data.notifications[handle] = [];
+    data.notifications[handle].push({
+      id: crypto.randomUUID(),
+      event,
+      summary: payload?.summary || payload?.title || payload?.task || event,
+      meta: payload,
+      read: false,
+      ts: new Date().toISOString()
+    });
+    // Cap per agent
+    if (data.notifications[handle].length > NOTIF_MAX_PER_AGENT) {
+      data.notifications[handle] = data.notifications[handle].slice(-NOTIF_MAX_PER_AGENT);
+    }
+  }
+  saveNotifs(data);
+}
+
+// Subscribe to notification events
+// POST /notifications/subscribe { handle, events: ["task.created", "room.message", ...] }
+app.post("/notifications/subscribe", (req, res) => {
+  const { handle, events } = req.body || {};
+  if (!handle || !events || !Array.isArray(events)) return res.status(400).json({ error: "handle and events[] required" });
+  const data = loadNotifs();
+  data.subscriptions[handle] = { events, subscribed_at: new Date().toISOString() };
+  saveNotifs(data);
+  logActivity("notification.subscribed", `${handle} subscribed to ${events.length} events`);
+  res.status(201).json({ ok: true, handle, events });
+});
+
+// Get subscription
+app.get("/notifications/subscribe/:handle", (req, res) => {
+  const data = loadNotifs();
+  const sub = data.subscriptions[req.params.handle];
+  if (!sub) return res.status(404).json({ error: "not subscribed" });
+  res.json(sub);
+});
+
+// Unsubscribe
+app.delete("/notifications/subscribe/:handle", (req, res) => {
+  const data = loadNotifs();
+  if (!data.subscriptions[req.params.handle]) return res.status(404).json({ error: "not subscribed" });
+  delete data.subscriptions[req.params.handle];
+  saveNotifs(data);
+  res.json({ ok: true });
+});
+
+// Get notifications for an agent
+app.get("/notifications/:handle", (req, res) => {
+  const data = loadNotifs();
+  const notifs = data.notifications[req.params.handle] || [];
+  const unread = req.query.unread === "true" ? notifs.filter(n => !n.read) : notifs;
+  res.json({ handle: req.params.handle, total: notifs.length, unread: notifs.filter(n => !n.read).length, notifications: unread });
+});
+
+// Mark notifications as read
+app.post("/notifications/:handle/read", (req, res) => {
+  const data = loadNotifs();
+  const notifs = data.notifications[req.params.handle];
+  if (!notifs) return res.status(404).json({ error: "no notifications" });
+  const { ids } = req.body || {};
+  if (ids && Array.isArray(ids)) {
+    const idSet = new Set(ids);
+    notifs.forEach(n => { if (idSet.has(n.id)) n.read = true; });
+  } else {
+    notifs.forEach(n => { n.read = true; });
+  }
+  saveNotifs(data);
+  res.json({ ok: true, marked: ids ? ids.length : notifs.length });
+});
+
+// Clear notifications
+app.delete("/notifications/:handle", (req, res) => {
+  const data = loadNotifs();
+  delete data.notifications[req.params.handle];
+  saveNotifs(data);
+  res.json({ ok: true });
+});
+
+// Available notification events
+app.get("/notifications/events/list", (req, res) => {
+  res.json({ events: WEBHOOK_EVENTS });
 });
 
 // --- Status (public) ---

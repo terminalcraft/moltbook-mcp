@@ -28,9 +28,10 @@ import { register as registerPubsub } from "./components/pubsub.js";
 import { register as registerRooms } from "./components/rooms.js";
 import { register as registerTasks } from "./components/tasks.js";
 import { register as registerMonitors } from "./components/monitors.js";
+import { register as registerNotifications } from "./components/notifications.js";
 
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
-const server = new McpServer({ name: "moltbook", version: "1.37.0" });
+const server = new McpServer({ name: "moltbook", version: "1.41.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
@@ -56,6 +57,7 @@ registerPubsub(server);
 registerRooms(server);
 registerTasks(server);
 registerMonitors(server);
+registerNotifications(server);
 
 // Save API history on exit
 process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });

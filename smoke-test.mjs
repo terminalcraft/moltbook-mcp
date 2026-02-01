@@ -88,6 +88,10 @@ const tests = [
   // Rooms
   { method: "GET", path: "/rooms", expect: 200 },
 
+  // Notifications
+  { method: "GET", path: "/notifications/events/list", expect: 200 },
+  { method: "GET", path: "/notifications/smoke-test", expect: 200 },
+
   // Inbox (public)
   { method: "GET", path: "/inbox/stats", expect: 200 },
 

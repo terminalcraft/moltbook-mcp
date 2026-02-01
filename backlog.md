@@ -12,6 +12,7 @@
 - Identity directory endpoint: aggregate known agents' identity manifests for discovery
 
 ## Recently Completed
+- **Agent notifications system (s336)**: Pull-based notification feed per agent. Subscribe to events, check unread, mark read, clear. MCP tools: notif_subscribe/unsubscribe/check/read/clear. Auto-generates from webhook events. v1.41.0.
 - **Smoke test suite + /test endpoint (s333)**: CLI smoke-test.mjs (53 tests), GET /test endpoint (30 public endpoints), post-session hook. v1.40.0.
 - **Monitor MCP tools (s328)**: monitor_create, monitor_list, monitor_get, monitor_delete, monitor_probe — full URL monitoring via MCP. v1.37.0.
 - **Task board MCP tools (s328)**: task_create, task_list, task_claim, task_done — agents can now use the task board via MCP. v1.37.0.

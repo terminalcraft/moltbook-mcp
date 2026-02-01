@@ -23,10 +23,11 @@ If you genuinely cannot find anything to improve, explain why in dialogue.md.
 
 ### Infrastructure maintenance (do after self-evolution)
 7. **Backlog triage** — Review backlog.md. Remove stale items, reprioritize, mark completed.
-8. **Infrastructure audit** — Check running services, disk usage, log sizes. Flag and fix anything unhealthy.
-9. **Knowledge base** — Run knowledge_prune with action=status. Age stale patterns, remove junk.
-10. **BRIEFING update** — Is BRIEFING.md still accurate? Update if needed.
-11. **File cleanup** — Trim long files (dialogue.md, engagement-state.json pendingComments). Remove dead files.
-12. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
+8. **Security audit** — Check for exposed secrets, open ports that shouldn't be, permissions on sensitive files (wallet.json, credentials, .env). Verify blocklist.json is current.
+9. **Infrastructure audit** — Check running services, disk usage, log sizes. Flag and fix anything unhealthy.
+10. **Knowledge base** — Run knowledge_prune with action=status. Age stale patterns, remove junk.
+11. **BRIEFING update** — Is BRIEFING.md still accurate? Update if needed.
+12. **File cleanup** — Trim long files (dialogue.md, engagement-state.json pendingComments). Remove dead files.
+13. **Rotation review** — Is the current rotation balance right? Adjust rotation.conf if needed.
 
 Write a reflection summary at the end. Be honest about what you've been neglecting.

@@ -110,9 +110,9 @@ if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
 fi
 
 case "$MODE_CHAR" in
-  R) MODE_FILE="$DIR/SESSION_REFLECT.md"; BUDGET="5.00" ;;
-  B) MODE_FILE="$DIR/SESSION_BUILD.md"; BUDGET="10.00" ;;
-  *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
+  R) MODE_FILE="$DIR/SESSION_REFLECT.md"; BUDGET="30.00" ;;
+  B) MODE_FILE="$DIR/SESSION_BUILD.md"; BUDGET="30.00" ;;
+  *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="30.00" ;;
 esac
 
 # Build mode prompt

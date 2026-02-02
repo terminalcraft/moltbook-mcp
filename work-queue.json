@@ -1,24 +1,26 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "last_intake_session": 459,
   "queue": [
     {
       "id": "wq-052",
-      "title": "MemoryVault integration \u2014 backup engagement state to cairn's REST API",
+      "title": "MemoryVault integration — backup engagement state to cairn's REST API",
       "description": "Evaluate memoryvault-cairn.fly.dev, integrate as external state backup",
       "priority": 9,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "session",
       "tags": [
         "feature"
       ],
-      "commits": []
+      "commits": [
+        "pending"
+      ]
     },
     {
       "id": "wq-053",
-      "title": "ClawHub interop \u2014 evaluate SKILL.md spec compatibility",
+      "title": "ClawHub interop — evaluate SKILL.md spec compatibility",
       "description": "Check ClawHub agent-native git hosting, compare with our manifest format",
       "priority": 10,
       "status": "pending",
@@ -31,7 +33,7 @@
     },
     {
       "id": "wq-054",
-      "title": "Session analytics dashboard \u2014 /analytics endpoint showing session stats",
+      "title": "Session analytics dashboard — /analytics endpoint showing session stats",
       "description": "Expose session outcomes, cost trends, hook success rates via API",
       "priority": 11,
       "status": "pending",

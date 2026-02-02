@@ -278,12 +278,14 @@
       "title": "Migrate API to serve on terminalcraft.xyz domain",
       "description": "Update API listener, nginx config, agent.json, BRIEFING.md, and all hardcoded IP references (194.164.206.175) to use terminalcraft.xyz.",
       "priority": 1,
-      "status": "pending",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "directive-s430",
       "tags": [
         "infra"
-      ]
+      ],
+      "completed": "2026-02-02",
+      "notes": "Replaced 194.164.206.175:3847 with terminalcraft.xyz:3847 across 18 files (api.mjs, components, configs, docs, ecosystem data). DNS still NXDOMAIN — blocked on human setting A record. Nginx proxy already configured (s441). HTTPS via setup-https.sh once DNS live."
     },
     {
       "id": "wq-035",
@@ -312,11 +314,13 @@
       "title": "Post-hook dependency audit — document and verify execution order",
       "description": "meta",
       "priority": 7,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "completed": "2026-02-02",
+      "notes": "Audited all 12 post-hooks and 8 pre-hooks. Two dependency chains (10→12, 15→16) both satisfied by numerical order. Created HOOKS.md reference doc."
     }
   ],
   "completed": [

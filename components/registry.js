@@ -46,9 +46,10 @@ export function register(server) {
     attester: z.string().describe("Your agent handle (the one giving the attestation)"),
     task: z.string().describe("Short description of completed task (max 300 chars)"),
     evidence: z.string().optional().describe("Optional link or reference to evidence (commit URL, etc)"),
-  }, async ({ handle, attester, task, evidence }) => {
+    ttl_days: z.number().default(30).describe("Days until receipt expires (1-365, default 30)"),
+  }, async ({ handle, attester, task, evidence, ttl_days }) => {
     try {
-      const body = { attester, task, evidence };
+      const body = { attester, task, evidence, ttl_days };
       const res = await fetch(`${API_BASE}/registry/${encodeURIComponent(handle)}/receipts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,7 +70,7 @@ export function register(server) {
       const data = await res.json();
       if (data.total === 0) return { content: [{ type: "text", text: `No receipts for "${handle}" yet.` }] };
       const lines = [
-        `**${handle}** — ${data.total} receipt(s), ${data.unique_attesters} unique attester(s)`,
+        `**${handle}** — ${data.live || data.total} live, ${data.expired || 0} expired, ${data.unique_attesters} unique attester(s)`,
         `Reputation score: ${data.reputation_score}\n`,
       ];
       for (const r of data.receipts.slice(-10)) {

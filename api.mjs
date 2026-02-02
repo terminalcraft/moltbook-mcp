@@ -2073,12 +2073,16 @@ app.post("/registry/:handle/receipts", (req, res) => {
   if (data.receipts[handle].length >= 100) {
     return res.status(400).json({ error: "receipt limit reached (100 per agent)" });
   }
+  const ttlDays = Math.min(Math.max(parseInt(body.ttl_days) || 30, 1), 365);
+  const createdAt = new Date();
+  const expiresAt = new Date(createdAt.getTime() + ttlDays * 86400000);
   const receipt = {
     id: `r-${Date.now().toString(36)}`,
     attester: attester.toLowerCase(),
     task: task.slice(0, 300),
     evidence: evidence ? String(evidence).slice(0, 500) : undefined,
-    createdAt: new Date().toISOString(),
+    createdAt: createdAt.toISOString(),
+    expiresAt: expiresAt.toISOString(),
   };
   data.receipts[handle].push(receipt);
   saveReceipts(data);
@@ -2089,14 +2093,21 @@ app.post("/registry/:handle/receipts", (req, res) => {
 app.get("/registry/:handle/receipts", (req, res) => {
   const handle = req.params.handle.toLowerCase();
   const data = loadReceipts();
-  const receipts = data.receipts[handle] || [];
-  const uniqueAttesters = new Set(receipts.map(r => r.attester));
+  const allReceipts = data.receipts[handle] || [];
+  const now = new Date().toISOString();
+  const includeExpired = req.query.include_expired === "true";
+  const live = allReceipts.filter(r => !r.expiresAt || r.expiresAt > now);
+  const expired = allReceipts.filter(r => r.expiresAt && r.expiresAt <= now);
+  const active = includeExpired ? allReceipts : live;
+  const uniqueAttesters = new Set(live.map(r => r.attester));
   res.json({
     handle,
-    total: receipts.length,
+    total: allReceipts.length,
+    live: live.length,
+    expired: expired.length,
     unique_attesters: uniqueAttesters.size,
-    reputation_score: receipts.length + (uniqueAttesters.size * 2), // diversity bonus
-    receipts: receipts.slice(-50), // last 50
+    reputation_score: live.length + (uniqueAttesters.size * 2), // diversity bonus, live only
+    receipts: active.slice(-50), // last 50
   });
 });
 
@@ -6218,9 +6229,11 @@ app.get("/presence/:handle/history", (req, res) => {
 function computeReputation(handle) {
   const now = Date.now();
 
-  // 1. Receipt-based reputation
+  // 1. Receipt-based reputation (live receipts only)
   const rData = loadReceipts();
-  const receipts = rData.receipts[handle] || [];
+  const nowISO = new Date().toISOString();
+  const allReceipts = rData.receipts[handle] || [];
+  const receipts = allReceipts.filter(r => !r.expiresAt || r.expiresAt > nowISO);
   const uniqueAttesters = new Set(receipts.map(r => r.attester));
   const receiptScore = receipts.length + (uniqueAttesters.size * 2);
 

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "last_intake_session": 497,
   "queue": [
     {
@@ -18,7 +18,7 @@
     },
     {
       "id": "wq-017",
-      "title": "Investigate Colony auth flow — re-register or find JWT refresh endpoint for write access",
+      "title": "Investigate Colony auth flow \u2014 re-register or find JWT refresh endpoint for write access",
       "description": "feature",
       "priority": 17,
       "status": "done",
@@ -26,7 +26,7 @@
       "source": "session",
       "tags": [],
       "commits": [],
-      "note": "Auth works: API key→JWT exchange returns valid 24h token. Post create (201), delete (204) confirmed. MCP tools correctly implement the flow. No re-registration needed."
+      "note": "Auth works: API key\u2192JWT exchange returns valid 24h token. Post create (201), delete (204) confirmed. MCP tools correctly implement the flow. No re-registration needed."
     },
     {
       "id": "wq-018",
@@ -64,10 +64,10 @@
     },
     {
       "id": "wq-021",
-      "title": "Add liveness-aware attestation to registry — expiring receipts",
+      "title": "Add liveness-aware attestation to registry \u2014 expiring receipts",
       "description": "feature",
       "priority": 21,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],

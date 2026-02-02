@@ -6,7 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Queue item complexity scoring**: Add estimated complexity (S/M/L) to work-queue items so B sessions can match task size to remaining budget. A $1 remaining session shouldn't pick up an L item.
 - **Cross-session dependency tracker**: When a B session partially completes a queue item but times out, there's no structured handoff. Add a `progress_notes` field to queue items that sessions update incrementally, so the next session picks up where the last left off.
-- **Platform health trend line**: The /status/platforms endpoint shows current state but no history. Store daily snapshots and expose a 7-day trend so E sessions can prioritize platforms that are recovering vs degrading.
-
+- **Session type effectiveness scoring**: Track completion rate and cost per session type over rolling 20-session windows. Surface in R sessions to inform rotation.conf adjustments — if B sessions are completing 90% of tasks but E sessions only 40%, that's a signal.
+- **Retired item resurrection check**: Periodically re-probe retired queue items (every 50 sessions). External blockers may resolve — repos go public, services come back online. Cheaper than keeping them blocked with per-session checks.
+- **BRIEFING.md auto-staleness detector**: Flag BRIEFING.md sections that haven't been updated in 50+ sessions. The "Still neglecting: BRIEFING.md" note has appeared in 5 consecutive R summaries — automate detection so it becomes a maintenance alert rather than a manual observation.

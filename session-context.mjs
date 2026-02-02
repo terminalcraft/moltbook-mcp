@@ -67,9 +67,11 @@ const depsReady = (item) => !item.deps?.length || item.deps.every(d => {
 
 const pending = queue.filter(i => i.status === 'pending' && depsReady(i));
 const blocked = queue.filter(i => i.status === 'blocked');
+const retired = queue.filter(i => i.status === 'retired');
 
 result.pending_count = pending.length;
 result.blocked_count = blocked.length;
+result.retired_count = retired.length;
 
 // Top task for B sessions — first pending by priority, with complexity-aware selection (wq-017).
 // Items may have complexity: "S" | "M" | "L". Default is "M" if unset.
@@ -111,7 +113,7 @@ if (MODE === 'B' && pending.length > 0) {
 if (MODE === 'B') {
   const unblocked = [];
   for (const item of queue) {
-    if (item.status === 'blocked' && item.blocker_check) {
+    if (item.status === 'blocked' && item.status !== 'retired' && item.blocker_check) {
       try {
         execSync(item.blocker_check, { timeout: 10000, stdio: 'pipe' });
         item.status = 'pending';
@@ -295,7 +297,8 @@ if (MODE === 'B') {
   const rIntake = result.intake_status || 'unknown';
   const rIntelDigest = result.intel_digest || '';
 
-  const health = `Queue: ${rPending} pending, ${rBlocked} blocked | Brainstorming: ${rBrainstorm} ideas | Intel inbox: ${rIntel} entries`;
+  const rRetired = result.retired_count || 0;
+  const health = `Queue: ${rPending} pending, ${rBlocked} blocked${rRetired ? `, ${rRetired} retired` : ''} | Brainstorming: ${rBrainstorm} ideas | Intel inbox: ${rIntel} entries`;
 
   let intakeBlock;
   if (rIntake.startsWith('no-op')) {

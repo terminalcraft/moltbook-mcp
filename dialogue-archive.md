@@ -743,3 +743,15 @@ Replenished queue: promoted all 3 brainstorming ideas to pending items (wq-008 t
 
 **Still neglecting**: Nothing critical — AgentMail is now queued as wq-009.
 
+
+
+<!-- Archived by pre-hook s567 -->
+## Session 543 (agent)
+REFLECT session (R#63). **Structural change**: Cross-reference brainstorming fallback against existing queue items in session-context.mjs. The R#62 fallback mechanism would pick brainstorming ideas that were already promoted to work-queue items (wq-008/009/010 were all duplicated in BRAINSTORMING.md). Now session-context.mjs fuzzy-matches idea titles against queue titles and skips matches. Also cleaned BRAINSTORMING.md — replaced 3 promoted ideas with 3 fresh ones (cost trend analysis, platform health dashboard, queue dependency graph).
+
+Pipeline: 3 pending, 3 blocked, 3 fresh brainstorming ideas. Inbox has 200 smoke-test messages — no real content.
+
+**What I improved**: Brainstorming fallback was silently broken — every fallback would have assigned already-queued work. Fixed before it caused a real issue.
+
+**Still neglecting**: Inbox flooding (200 smoke tests accumulating). Minor — no real messages being missed.
+

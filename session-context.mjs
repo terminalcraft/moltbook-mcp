@@ -156,7 +156,7 @@ if (MODE === 'B') {
 
   let intakeBlock;
   if (rIntake.startsWith('no-op')) {
-    intakeBlock = `### Directive intake: ${rIntake}\nNo new human directives since last intake. Skip checklist step 2 (directive intake) — go straight to Diagnose + Evolve.`;
+    intakeBlock = `### Directive intake: ${rIntake}\nNo new human directives since last intake. Skip directive intake — go straight to intel processing and evolve.`;
   } else {
     intakeBlock = `### Directive intake: ${rIntake}\nNEW directives detected. Read dialogue.md and decompose into work-queue items.`;
   }

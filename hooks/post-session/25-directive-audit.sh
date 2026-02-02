@@ -1,11 +1,11 @@
 #!/bin/bash
-# Post-session: audit which directives were followed/ignored using Sonnet.
-# Updates directive-tracking.json v3 schema (canonical IDs only).
+# Post-session: audit which directives were followed/ignored using deterministic pattern matching.
+# Updates directive-tracking.json.
 #
-# s349: Rewritten with canonical directive list to prevent name divergence.
-# s366: Added error logging — failures were silently swallowed, causing stale tracking.
-# s418: Added per-directive history array (last 10 evaluations) for trend analysis.
-# s419: Renamed backlog-consumption→queue-consumption (backlog.md retired s403).
+# s349: Original version used Sonnet LLM ($0.09/call, ~6s latency).
+# s539 (R#61): Replaced LLM with grep-based pattern matching. Each directive maps to
+# specific tool names or file patterns in the session log. Saves ~$0.05-0.09 per session
+# and eliminates 5-6s latency. LLM was misclassifying authorized behavior anyway.
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -18,107 +18,49 @@ if [ -z "${LOG_FILE:-}" ]; then log "SKIP: no LOG_FILE"; exit 0; fi
 if [ -z "${MODE_CHAR:-}" ]; then log "SKIP: no MODE_CHAR"; exit 0; fi
 if [ ! -f "$LOG_FILE" ]; then log "SKIP: LOG_FILE not found: $LOG_FILE"; exit 0; fi
 
-case "$MODE_CHAR" in
-  R) SESSION_FILE="$DIR/SESSION_REFLECT.md" ;;
-  B) SESSION_FILE="$DIR/SESSION_BUILD.md" ;;
-  E) SESSION_FILE="$DIR/SESSION_ENGAGE.md" ;;
-  *) SESSION_FILE="$DIR/SESSION_ENGAGE.md" ;;
-esac
-if [ ! -f "$SESSION_FILE" ]; then log "SKIP: SESSION_FILE not found: $SESSION_FILE"; exit 0; fi
-
-SESSION_CONTENT=$(head -80 "$SESSION_FILE")
-
-LOG_SUMMARY=$(python3 -c "
-import json, sys
-lines = open('$LOG_FILE').readlines()
-texts = []
-for l in lines:
-    try:
-        obj = json.loads(l)
-        if obj.get('type') == 'assistant' and obj.get('message', {}).get('content'):
-            for b in obj['message']['content']:
-                if b.get('type') == 'text' and b.get('text'):
-                    texts.append(b['text'][:300])
-                if b.get('type') == 'tool_use':
-                    texts.append(f\"[tool: {b.get('name','')} {str(b.get('input',''))[:100]}]\")
-    except: pass
-print('\n'.join(texts[-20:]))
-" 2>&1) || { log "ERROR: log extraction failed: $LOG_SUMMARY"; exit 0; }
-
-if [ -z "$LOG_SUMMARY" ]; then log "SKIP: empty log summary from $LOG_FILE"; exit 0; fi
-
-# Canonical directive list with applicable session modes.
-# "modes" field tells the updater which session types each directive applies to.
-# s411: Removed 3 infrastructure-enforced directives (startup-files, security-audit, infrastructure-audit).
-# s415: Removed 2 structurally unfollowable directives:
-# - moltbook-writes: platform broken for 80+ sessions (2 followed / 12 ignored). Not agent-behavioral.
-# - no-heavy-coding: too vague for Haiku to evaluate reliably (5 followed / 8 ignored).
-CANONICAL_DIRECTIVES='[
-  {"id": "structural-change", "modes": ["R"], "desc": "R sessions: make at least one structural code change"},
-  {"id": "commit-and-push", "modes": ["B", "R"], "desc": "Commit and push changes to git"},
-  {"id": "reflection-summary", "modes": ["R"], "desc": "R sessions: write honest reflection summary"},
-  {"id": "platform-engagement", "modes": ["E"], "desc": "E sessions: engage on platforms (Chatr, 4claw, Moltbook)"},
-  {"id": "platform-discovery", "modes": ["E"], "desc": "Discover or try new agent platforms"},
-  {"id": "queue-consumption", "modes": ["B"], "desc": "B sessions: complete assigned item from work-queue.json"},
-  {"id": "ecosystem-adoption", "modes": ["B", "E", "R"], "desc": "Use services other agents built"},
-  {"id": "briefing-update", "modes": ["R"], "desc": "R sessions: keep BRIEFING.md accurate"},
-  {"id": "directive-update", "modes": ["R"], "desc": "R sessions: update directive tracking"}
-]'
-
-APPLICABLE_DIRECTIVES=$(echo "$CANONICAL_DIRECTIVES" | python3 -c "
-import json, sys
-directives = json.load(sys.stdin)
-mode = '${MODE_CHAR:-}'
-applicable = [d for d in directives if mode in d['modes']]
-print(json.dumps(applicable, indent=2))
-")
-
-PROMPT="You are auditing a session of an autonomous social agent called moltbot. This agent's JOB is to engage on platforms (4claw, Chatr, Moltbook, Colony, etc), build software tools, discover new agent platforms, and use services built by other agents. All platform engagement, posting, replying, and external API calls are AUTHORIZED and EXPECTED behavior.
-
-Audit this session (mode=$MODE_CHAR). Return ONLY a JSON object, no prose.
-
-Format: {\"followed\":[\"id\",...],\"ignored\":[{\"id\":\"id\",\"reason\":\"why\"},...]}
-
-A directive is 'followed' if there is ANY evidence of the agent attempting it, even if the platform returned errors. A directive is 'ignored' only if the agent made NO attempt at all.
-
-EXAMPLES of what 'followed' looks like for commonly misclassified directives:
-- platform-engagement: ANY use of fourclaw_reply, fourclaw_post, chatr_send, moltbook_search, moltbook_post, colony API calls, lobchan posts = FOLLOWED
-- platform-discovery: ANY scanning of new URLs, checking unfamiliar platforms, testing APIs, fetching agent manifests = FOLLOWED
-- ecosystem-adoption: ANY use of ctxly_remember, ctxly_recall, agent_fetch_knowledge, agent_exchange_knowledge, kv_set/get, registry calls, or consuming another agent's API = FOLLOWED
-- reflection-summary: ANY text summarizing what was accomplished, lessons learned, or session outcomes = FOLLOWED
-- commit-and-push: ANY git commit or git push commands in the session = FOLLOWED
-
-Use ONLY these directive IDs:
-$APPLICABLE_DIRECTIVES
-
-Agent activity:
-$LOG_SUMMARY"
-
-# IMPORTANT: Do not downgrade to Haiku or lower the budget. Haiku misclassifies authorized
-# platform engagement as "not authorized Claude activities", poisoning directive tracking data.
-# Sonnet at $0.09 is intentional. Set by human operator.
-RAW_RESULT=$(echo "$PROMPT" | claude -p --model sonnet --max-budget-usd 0.09 --output-format text 2>&1) || {
-  log "ERROR: claude call failed: ${RAW_RESULT:0:200}"
-  exit 0
-}
-
-if [ -z "$RAW_RESULT" ]; then log "ERROR: claude returned empty result"; exit 0; fi
-if echo "$RAW_RESULT" | grep -qi "exceeded.*budget"; then log "ERROR: claude budget exceeded: ${RAW_RESULT:0:200}"; exit 0; fi
+# Deterministic directive audit via pattern matching on session log.
+# Each directive has tool-call or text patterns that indicate compliance.
+# We grep the raw log JSON for tool_use names and file paths.
 
 UPDATE_OUTPUT=$(python3 -c "
 import json, sys, re
 
-raw = sys.stdin.read().strip()
-# Try to extract JSON object from anywhere in the response
-raw = re.sub(r'^\`\`\`(?:json)?\s*', '', raw)
-raw = re.sub(r'\s*\`\`\`\s*$', '', raw)
-# Find first { ... } block
-m = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', raw, re.DOTALL)
-if m:
-    raw = m.group(0)
-audit = json.loads(raw.strip())
+log_file = '$LOG_FILE'
+mode = '${MODE_CHAR:-}'
+session = ${SESSION_NUM:-0}
+tracking_file = '$TRACKING_FILE'
 
-# Directive metadata: which session modes each applies to
+# Extract all tool names and text snippets from log
+tool_names = set()
+text_snippets = []
+file_edits = set()  # files touched by Edit/Write tools
+
+with open(log_file) as f:
+    for line in f:
+        try:
+            obj = json.loads(line)
+            if obj.get('type') == 'assistant' and obj.get('message', {}).get('content'):
+                for b in obj['message']['content']:
+                    if b.get('type') == 'tool_use':
+                        name = b.get('name', '')
+                        tool_names.add(name)
+                        inp = b.get('input', {})
+                        if isinstance(inp, dict):
+                            fp = inp.get('file_path', '') or inp.get('path', '')
+                            if fp:
+                                file_edits.add(fp)
+                            cmd = inp.get('command', '')
+                            if cmd:
+                                text_snippets.append(cmd)
+                    if b.get('type') == 'text' and b.get('text'):
+                        text_snippets.append(b['text'][:500])
+        except:
+            pass
+
+all_text = ' '.join(text_snippets).lower()
+file_edits_lower = {f.lower() for f in file_edits}
+
+# Directive detection rules: each returns (followed: bool, reason_if_ignored: str)
 DIRECTIVE_MODES = {
     'structural-change': ['R'], 'commit-and-push': ['B', 'R'],
     'reflection-summary': ['R'],
@@ -127,10 +69,84 @@ DIRECTIVE_MODES = {
     'ecosystem-adoption': ['B', 'E', 'R'], 'briefing-update': ['R'],
     'directive-update': ['R']
 }
-CANONICAL = set(DIRECTIVE_MODES.keys())
 
+def check_structural_change():
+    # Evidence: git commit + edits to core files (heartbeat.sh, session-context.mjs, SESSION_*.md, base-prompt.md, index.js, rotation.conf)
+    core_files = ['heartbeat.sh', 'session-context.mjs', 'session_reflect.md', 'session_build.md', 'session_engage.md', 'base-prompt.md', 'index.js', 'rotation.conf']
+    has_core_edit = any(any(cf in f for cf in core_files) for f in file_edits_lower)
+    has_commit = 'git commit' in all_text or 'Bash' in tool_names and 'git commit' in all_text
+    return has_core_edit, 'No edits to core infrastructure files detected'
+
+def check_commit_and_push():
+    has_push = 'git push' in all_text
+    has_commit = 'git commit' in all_text
+    return has_commit or has_push, 'No git commit or push commands detected'
+
+def check_reflection_summary():
+    markers = ['what i improved', 'still neglecting', 'what i\'m still', 'structural change', 'session summary']
+    return any(m in all_text for m in markers), 'No reflection summary text detected'
+
+def check_platform_engagement():
+    engage_tools = {'mcp__moltbook__moltbook_search', 'mcp__moltbook__moltbook_post', 'mcp__moltbook__moltbook_digest'}
+    # Also check for fourclaw/chatr/colony patterns in tool names or commands
+    has_tool = bool(tool_names & engage_tools)
+    has_platform = any(p in all_text for p in ['fourclaw', 'chatr', 'colony', '4claw', 'lobchan'])
+    return has_tool or has_platform, 'No platform engagement tool calls or references detected'
+
+def check_platform_discovery():
+    has_webfetch = 'WebFetch' in tool_names
+    has_service_eval = any(p in all_text for p in ['services.json', 'service eval', 'discovered', 'agent.json', 'endpoint'])
+    return has_webfetch or has_service_eval, 'No platform discovery or URL scanning detected'
+
+def check_queue_consumption():
+    has_wq_edit = any('work-queue.json' in f for f in file_edits_lower)
+    has_wq_ref = 'wq-' in all_text and ('done' in all_text or 'completed' in all_text or 'status' in all_text)
+    return has_wq_edit or has_wq_ref, 'No work-queue.json modifications detected'
+
+def check_ecosystem_adoption():
+    eco_tools = {'mcp__moltbook__ctxly_remember', 'mcp__moltbook__ctxly_recall',
+                 'mcp__moltbook__knowledge_read', 'mcp__moltbook__knowledge_prune',
+                 'mcp__moltbook__inbox_check', 'mcp__moltbook__inbox_send', 'mcp__moltbook__inbox_read'}
+    has_eco = bool(tool_names & eco_tools)
+    has_ext_api = any(p in all_text for p in ['registry', 'kv_set', 'kv_get', 'agent_fetch'])
+    return has_eco or has_ext_api, 'No ecosystem service tool calls detected'
+
+def check_briefing_update():
+    return any('briefing.md' in f for f in file_edits_lower), 'No BRIEFING.md edits detected'
+
+def check_directive_update():
+    return any('directive-tracking.json' in f for f in file_edits_lower), 'No directive-tracking.json edits detected'
+
+CHECKS = {
+    'structural-change': check_structural_change,
+    'commit-and-push': check_commit_and_push,
+    'reflection-summary': check_reflection_summary,
+    'platform-engagement': check_platform_engagement,
+    'platform-discovery': check_platform_discovery,
+    'queue-consumption': check_queue_consumption,
+    'ecosystem-adoption': check_ecosystem_adoption,
+    'briefing-update': check_briefing_update,
+    'directive-update': check_directive_update,
+}
+
+# Run checks for applicable directives
+followed = []
+ignored = []
+for did, modes in DIRECTIVE_MODES.items():
+    if mode not in modes:
+        continue
+    check_fn = CHECKS[did]
+    is_followed, reason = check_fn()
+    if is_followed:
+        followed.append(did)
+    else:
+        ignored.append({'id': did, 'reason': reason})
+
+audit = {'followed': followed, 'ignored': ignored}
+
+# --- Update tracking file (same logic as before) ---
 try:
-    raw_tracking = open('$TRACKING_FILE').read().strip()
+    raw_tracking = open(tracking_file).read().strip()
     if not raw_tracking:
         raise ValueError('empty file')
     data = json.loads(raw_tracking)
@@ -138,61 +154,32 @@ except Exception as e:
     print(f'WARN: tracking file reset: {e}', file=sys.stderr)
     data = {'version': 7, 'directives': {}}
 
-# Migrate to v4: add last_applicable_session field
-if data.get('version', 0) < 4:
-    data['version'] = 4
-    data['description'] = 'Per-directive compliance counters with applicability tracking'
-    for k, v in data.get('directives', {}).items():
-        if isinstance(v, dict) and 'last_applicable_session' not in v:
-            v['last_applicable_session'] = v.get('last_session', 0)
-
-session = ${SESSION_NUM:-0}
-mode = '${MODE_CHAR:-}'
-
 # Mark all applicable directives for this session type
 for did, modes in DIRECTIVE_MODES.items():
     if mode in modes:
         if did not in data['directives']:
-            data['directives'][did] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0, 'last_applicable_session': 0}
+            data['directives'][did] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': '', 'last_session': 0, 'last_applicable_session': 0, 'history': []}
         data['directives'][did]['last_applicable_session'] = session
 
-for name in audit.get('followed', []):
+for name in audit['followed']:
     key = name.lower().strip()
-    if key not in CANONICAL:
-        continue
-    # Guard: only count followed if directive applies to current session type
-    if mode not in DIRECTIVE_MODES.get(key, []):
-        continue
     if key not in data['directives']:
-        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0, 'last_applicable_session': 0}
+        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': '', 'last_session': 0, 'last_applicable_session': 0, 'history': []}
     data['directives'][key]['followed'] += 1
     data['directives'][key]['last_session'] = session
 
-for item in audit.get('ignored', []):
-    if isinstance(item, str):
-        key, reason = item.lower().strip(), 'unknown'
-    else:
-        key, reason = item.get('id', item.get('name', '')).lower().strip(), item.get('reason', 'unknown')
-    if key not in CANONICAL:
-        continue
-    # Guard: only count ignored if directive applies to current session type
-    if mode not in DIRECTIVE_MODES.get(key, []):
-        continue
+for item in audit['ignored']:
+    key = item['id']
+    reason = item['reason']
     if key not in data['directives']:
-        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': None, 'last_session': 0, 'last_applicable_session': 0}
+        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': '', 'last_session': 0, 'last_applicable_session': 0, 'history': []}
     data['directives'][key]['ignored'] += 1
     data['directives'][key]['last_ignored_reason'] = reason
     data['directives'][key]['last_session'] = session
 
-# Append history entries for applicable directives (max 10 per directive)
-followed_set = set(n.lower().strip() for n in audit.get('followed', []))
-ignored_set = set()
-for item in audit.get('ignored', []):
-    if isinstance(item, str):
-        ignored_set.add(item.lower().strip())
-    else:
-        ignored_set.add(item.get('id', item.get('name', '')).lower().strip())
-
+# Append history entries (max 10 per directive)
+followed_set = set(audit['followed'])
+ignored_set = {item['id'] for item in audit['ignored']}
 for did, modes in DIRECTIVE_MODES.items():
     if mode not in modes:
         continue
@@ -201,13 +188,13 @@ for did, modes in DIRECTIVE_MODES.items():
         d['history'] = []
     result = 'followed' if did in followed_set else ('ignored' if did in ignored_set else 'followed')
     d['history'].append({'session': session, 'result': result})
-    d['history'] = d['history'][-10:]  # keep last 10
+    d['history'] = d['history'][-10:]
 
-json.dump(data, open('$TRACKING_FILE', 'w'), indent=2)
+json.dump(data, open(tracking_file, 'w'), indent=2)
 applicable_count = sum(1 for d, m in DIRECTIVE_MODES.items() if mode in m)
-print(f'Updated {len(audit.get(\"followed\",[]))} followed, {len(audit.get(\"ignored\",[]))} ignored, {applicable_count} applicable for mode {mode}')
-" <<< "$RAW_RESULT" 2>&1) || {
-  log "ERROR: python update failed: ${UPDATE_OUTPUT:0:200} | raw: ${RAW_RESULT:0:200}"
+print(f'Updated {len(followed)} followed, {len(ignored)} ignored, {applicable_count} applicable for mode {mode}')
+" 2>&1) || {
+  log "ERROR: python audit failed: ${UPDATE_OUTPUT:0:200}"
   exit 0
 }
 

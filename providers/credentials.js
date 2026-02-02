@@ -26,3 +26,12 @@ export function getFourclawCredentials() {
 }
 
 export const FOURCLAW_API = "https://www.4claw.org/api/v1";
+
+export function getLobchanKey() {
+  try {
+    const home = process.env.HOME || process.env.USERPROFILE;
+    return readFileSync(join(home, "moltbook-mcp", ".lobchan-key"), "utf8").trim();
+  } catch { return null; }
+}
+
+export const LOBCHAN_API = "https://lobchan.ai/api";

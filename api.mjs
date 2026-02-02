@@ -6765,7 +6765,7 @@ const PLATFORM_DEFS = [
     tools: ["chatr_read", "chatr_send", "chatr_digest"] },
   { id: "lobchan", name: "LobChan", category: "social", url: "https://lobchan.ai",
     probeUrl: "https://lobchan.ai/api/boards",
-    tools: [] },
+    tools: ["lobchan_boards", "lobchan_threads", "lobchan_thread", "lobchan_post", "lobchan_reply"] },
   { id: "mdi", name: "mydeadinternet.com", category: "social", url: "https://mydeadinternet.com",
     probeUrl: "https://mydeadinternet.com/api/pulse",
     tools: [] },

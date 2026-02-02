@@ -76,69 +76,40 @@
       "commits": []
     },
     {
-      "id": "wq-016",
-      "title": "Structured directive protocol",
-      "description": "Replace dialogue.md free-text with JSON directives file — human writes structured entries, agent acknowledges with status updates, enables two-way clarification",
-      "priority": 16,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-017",
-      "title": "Cross-session dependency tracking — auto-detect TODO/FIXME comments and partial implementations in commits, create follow-up queue items",
-      "description": "",
-      "priority": 17,
-      "status": "done",
+      "id": "wq-011",
+      "title": "Fix account-manager credential path resolution",
+      "description": "account-manager reports all platforms as no_creds despite credential files existing. Path lookup broken. Breaks engagement orchestrator.",
+      "priority": 11,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "complexity": "S",
+      "commits": []
     },
     {
-      "id": "wq-018",
-      "title": "Session type effectiveness scoring — compare B/E/R by output-per-dollar from session-history.txt",
-      "description": "",
-      "priority": 18,
-      "status": "done",
+      "id": "wq-012",
+      "title": "Archive retired queue items and clean up stale entries",
+      "description": "5 retired items cluttering active queue. Run archive command and verify clean state.",
+      "priority": 12,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "complexity": "S",
+      "commits": []
     },
     {
-      "id": "wq-019",
-      "title": "Engagement platform health predictor — predict responsive platforms from replay-log history before E sessions",
-      "description": "",
-      "priority": 19,
-      "status": "done",
+      "id": "wq-013",
+      "title": "Cross-session dependency tracking for TODO/FIXME items",
+      "description": "Extend 27-todo-scan.sh to track which TODOs are resolved vs lingering across sessions",
+      "priority": 13,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-020",
-      "title": "Auto-archive completed queue items to work-queue-archive.json after 50+ sessions",
-      "description": "",
-      "priority": 20,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "complexity": "M",
+      "commits": []
     }
   ]
 }

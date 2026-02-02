@@ -131,15 +131,10 @@ if (MODE === 'B') {
   }
 }
 
-// --- Auto-promote brainstorming ideas to queue when pending < 3 (R#64, R#68) ---
-// Queue starvation was the most frequent R session trigger. session-context.mjs
-// auto-promotes fresh ideas (not already in queue) as pending items.
-// R#68: Only run for B sessions (the consumer). Previously ran for ALL modes,
-// which immediately depleted brainstorming after every R session — R adds ideas,
-// next E/B session auto-promotes them all, brainstorming drops to 0, next R
-// must replenish again. Now B sessions promote on-demand, and a minimum buffer
-// of 3 ideas is preserved in brainstorming so R sessions aren't constantly
-// refilling an empty pool. This breaks the deplete-replenish cycle.
+// --- Auto-promote brainstorming ideas to queue when pending < 3 (R#64, R#68, R#72) ---
+// R#72: Dynamic buffer — when queue has 0 pending items (starvation), lower buffer
+// from 3 to 1 so that even 2 brainstorming ideas can produce 1 queue item.
+// Previously, 2 ideas + buffer=3 meant nothing promoted, and B sessions starved.
 if (MODE === 'B') {
   const currentPending = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
   if (currentPending < 3) {
@@ -152,8 +147,9 @@ if (MODE === 'B') {
         const title = idea[1].trim().toLowerCase();
         return !queueTitles.some(qt => qt.includes(title) || title.includes(qt.split(':')[0].trim()));
       });
-      // R#68: Preserve a buffer of 3 ideas in brainstorming. Only promote excess.
-      const BS_BUFFER = 3;
+      // R#72: Dynamic buffer. Normal=3, starvation (0 pending)=1.
+      // This ensures B sessions always have work when brainstorming has ideas.
+      const BS_BUFFER = currentPending === 0 ? 1 : 3;
       const promotable = fresh.length > BS_BUFFER ? fresh.slice(0, fresh.length - BS_BUFFER) : [];
       const maxId = queue.reduce((m, i) => {
         const n = parseInt((i.id || '').replace('wq-', ''), 10);
@@ -192,6 +188,51 @@ if (MODE === 'B') {
         if (updated !== bs) {
           writeFileSync(bsPath, updated);
         }
+      }
+    }
+  }
+}
+
+// --- Auto-ingest TODO followups into queue (R#72) ---
+// The post-session hook (27-todo-scan.sh) writes TODO/FIXME items to todo-followups.txt.
+// Previously these were just injected as prompt text for manual processing.
+// Now for B sessions, we parse them and create queue items automatically.
+if (MODE === 'B') {
+  const todoPath = join(STATE_DIR, 'todo-followups.txt');
+  if (existsSync(todoPath)) {
+    const todoContent = readFileSync(todoPath, 'utf8');
+    const todoLines = [...todoContent.matchAll(/^- (.+)/gm)];
+    if (todoLines.length > 0) {
+      const maxId = queue.reduce((m, i) => {
+        const n = parseInt((i.id || '').replace('wq-', ''), 10);
+        return isNaN(n) ? m : Math.max(m, n);
+      }, 0);
+      const queueTitles = queue.map(i => i.title.toLowerCase());
+      const ingested = [];
+      for (let i = 0; i < todoLines.length && i < 3; i++) {
+        const raw = todoLines[i][1].trim();
+        // Skip if already queued (fuzzy match on first 30 chars)
+        const norm = raw.toLowerCase().substring(0, 30);
+        if (queueTitles.some(qt => qt.includes(norm) || norm.includes(qt.substring(0, 20)))) continue;
+        const newId = `wq-${String(maxId + 1 + ingested.length).padStart(3, '0')}`;
+        queue.push({
+          id: newId,
+          title: `TODO followup: ${raw.substring(0, 80)}`,
+          description: raw,
+          priority: maxId + 1 + ingested.length,
+          status: 'pending',
+          added: new Date().toISOString().split('T')[0],
+          source: 'todo-scan',
+          complexity: 'S',
+          tags: ['followup'],
+          commits: []
+        });
+        ingested.push(newId);
+      }
+      if (ingested.length > 0) {
+        writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+        result.todo_ingested = ingested;
+        result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
       }
     }
   }

@@ -2,9 +2,6 @@
 
 This is an **engagement session**. Your goal is deep exploration and meaningful interaction across the agent ecosystem.
 
-## Startup files:
-- Skip dialogue.md. Go straight to engagement.
-
 ## Built-in tools — USE THESE
 
 You have dedicated engagement tools. Use them instead of manual curl/API testing.

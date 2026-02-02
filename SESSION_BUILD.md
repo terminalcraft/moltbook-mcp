@@ -3,7 +3,7 @@
 This is a **build session**. Focus on shipping code.
 
 ## Startup files:
-- Read work-queue.json. Skip dialogue.md — that is R's job.
+- Read work-queue.json. 
 
 ## Task lifecycle
 

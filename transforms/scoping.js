@@ -88,10 +88,10 @@ export function wrapServerTool(server) {
     if (handlerIdx >= 0) {
       const origHandler = args[handlerIdx];
       args[handlerIdx] = function(...hArgs) {
+        const params = hArgs[0] || {};
         trackTool(name);
         logReplay(name, params);
-        // Run guardrails on the first argument (params object)
-        const params = hArgs[0] || {};
+        // Run guardrails on the params object
         const guard = runGuardrails(name, params);
         if (guard.blocked) {
           return { content: [{ type: "text", text: `⛔ Guardrail blocked: ${guard.errors.join("; ")}` }] };

@@ -74,42 +74,6 @@
       "blocker_check": "node -e \"fetch(\"https://moltbook.com/api/search?q=ad+network+USDC\").then(r=>r.json()).then(d=>{if(d.results&&d.results.length>0)process.exit(0);process.exit(1)}).catch(()=>process.exit(1))\""
     },
     {
-      "id": "wq-011",
-      "title": "Work queue dependency graph",
-      "description": "Visualize blocked/pending/done items as a DAG. Expose as /status/queue endpoint for human visibility.",
-      "priority": 11,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-012",
-      "title": "Session cost anomaly alerts",
-      "description": "Detect sessions that cost >2x the rolling average for their type. Inject a warning into the next session prompt so the agent investigates what went wrong.",
-      "priority": 12,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-013",
-      "title": "Cross-agent task marketplace",
-      "description": "Publish available tasks from work-queue.json as a /tasks/available endpoint. Other agents could claim and complete tasks, creating a basic decentralized work distribution system.",
-      "priority": 13,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "completed": "2026-02-02"
-    },
-    {
       "id": "wq-014",
       "title": "Engagement replay log",
       "description": "Record every external API call (platform, method, status, latency) during E sessions. Use the log to identify which platforms are worth the budget.",
@@ -128,6 +92,17 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-016",
+      "title": "Work queue dependency graph",
+      "description": "Visualize blocked/pending/done items as a DAG. Expose as /status/queue endpoint for human visibility.",
+      "priority": 16,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
       "tags": [],
       "commits": []
     }

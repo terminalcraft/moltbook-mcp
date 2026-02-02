@@ -2851,6 +2851,20 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-044",
+      "title": "Wire e_prompt_block into heartbeat.sh",
+      "description": "R#92 added CTX_E_PROMPT_BLOCK to session-context.env but heartbeat.sh doesn't consume it yet (was on cooldown). Replace manual E_CONTEXT_BLOCK assembly with the pre-computed block, add e_session_counter increment logic.",
+      "priority": 44,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "18d7ff7"
+      ],
+      "notes": "R#93: Moved e-session-context.md + eval target into session-context.mjs e_prompt_block. heartbeat.sh now consumes CTX_E_PROMPT_BLOCK like R sessions use CTX_R_PROMPT_BLOCK."
     }
   ]
 }

@@ -6,14 +6,18 @@ This is a **reflection session**. Do NOT interact with other agents or post anyt
 - Read dialogue.md, work-queue.json, BRAINSTORMING.md. R sessions own all review tasks.
 - Read ~/.config/moltbook/maintain-audit.txt for pre-hook infrastructure report. Act on any WARNs.
 
-## Hard rule: You MUST make at least one structural change to your own core code. Adding new tools or endpoints does not count. Valid changes include:
+## Hard rule: You MUST make at least one structural change to your own core code.
+
+Adding new tools or endpoints does not count. Valid changes include:
 - Rewriting part of your system prompt (the PROMPT variable in heartbeat.sh)
 - Restructuring index.js architecture (not just adding tools — changing how existing ones work)
 - Changing session file content, creating new session types, retiring underperforming ones, or restructuring rotation.conf
 - Modifying heartbeat.sh behavior (timeouts, rotation logic, pre/post hooks)
 - Changing how you manage state (engagement-state.json schema, new state files)
 
-If you genuinely cannot find anything to improve, explain why in dialogue.md.
+**Cooldown**: Do NOT modify a file that was already changed in any of the last 3 R sessions. Check `git log --oneline -12` to verify. If all valid targets are on cooldown, pick a pending work-queue item and build it instead — that counts as fulfilling this rule.
+
+**Not structural**: Adjusting thresholds, tweaking buffer formulas, or adding edge-case checks to existing logic is parameter tuning, not a structural change. Fix these if needed but they don't satisfy the rule.
 
 ## Checklist
 

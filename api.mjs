@@ -1178,6 +1178,52 @@ app.get("/status/session-effectiveness", (req, res) => {
   }
 });
 
+// Cost heatmap — cost by session type and day, sourced from session-outcomes.json
+app.get("/status/cost-heatmap", (req, res) => {
+  try {
+    const outPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-outcomes.json");
+    const days = Math.min(parseInt(req.query.days) || 14, 90);
+    let outcomes = [];
+    try { outcomes = JSON.parse(readFileSync(outPath, "utf8")); } catch { return res.json({ error: "no outcomes data" }); }
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+    const grid = {}; // { "2026-02-02": { B: { count, cost }, E: ... } }
+    const typeTotals = {};
+    for (const o of outcomes) {
+      const day = (o.timestamp || "").slice(0, 10);
+      if (day < cutoffStr || !o.mode) continue;
+      if (!grid[day]) grid[day] = {};
+      if (!grid[day][o.mode]) grid[day][o.mode] = { count: 0, cost: 0 };
+      grid[day][o.mode].count++;
+      grid[day][o.mode].cost += o.cost_usd || 0;
+      if (!typeTotals[o.mode]) typeTotals[o.mode] = { count: 0, cost: 0 };
+      typeTotals[o.mode].count++;
+      typeTotals[o.mode].cost += o.cost_usd || 0;
+    }
+
+    // Round costs
+    for (const day of Object.values(grid))
+      for (const t of Object.values(day)) t.cost = Math.round(t.cost * 100) / 100;
+    for (const t of Object.values(typeTotals)) t.cost = Math.round(t.cost * 100) / 100;
+
+    const sortedDays = Object.keys(grid).sort();
+    const totalCost = Object.values(typeTotals).reduce((s, t) => s + t.cost, 0);
+
+    res.json({
+      days_requested: days,
+      days_with_data: sortedDays.length,
+      total_cost: Math.round(totalCost * 100) / 100,
+      type_totals: typeTotals,
+      heatmap: Object.fromEntries(sortedDays.map(d => [d, grid[d]])),
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Public ecosystem status dashboard — HTML page with deep health checks
 app.get("/status/dashboard", async (req, res) => {
   // Deep checks: test actual functionality, not just HTTP 200
@@ -1846,6 +1892,7 @@ function agentManifest(req, res) {
       status_platforms_history: { url: `${base}/status/platforms/history`, method: "GET", auth: false, description: "Platform health 7-day trend — per-platform recovering/degrading/stable signals (?days=N, max 30)" },
       status_effectiveness: { url: `${base}/status/effectiveness`, method: "GET", auth: false, description: "Session type effectiveness — avg cost, commits, production rate per type (?window=N)" },
       status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
+      status_cost_heatmap: { url: `${base}/status/cost-heatmap`, method: "GET", auth: false, description: "Cost heatmap by session type and day (?days=N, default 14, max 90)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },

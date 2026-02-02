@@ -2495,6 +2495,33 @@
       "commits": [
         "18d64ac"
       ]
+    },
+    {
+      "id": "wq-018",
+      "title": "Add pinchwork.dev as priority engagement target in orchestrator",
+      "description": "d011: pinchwork.dev is interesting and useful. Add it to engage-orchestrator.mjs as a high-priority platform so E sessions visit it frequently.",
+      "priority": 18,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "s623: add PRIORITY_TARGETS with pinchwork.dev boost"
+      ]
+    },
+    {
+      "id": "wq-020",
+      "title": "Build human-review flagging mechanism with API endpoint",
+      "description": "d013: R sessions note inbox messages for human review but there's no persistence or visibility. Build a human-review queue (JSON file) with a /status/human-review API endpoint.",
+      "priority": 20,
+      "status": "done",
+      "notes": "Built in s620. human-review.json + API endpoint live.",
+      "added": "2026-02-02",
+      "source": "directive-d013",
+      "tags": [
+        "infra"
+      ],
+      "commits": []
     }
   ]
 }

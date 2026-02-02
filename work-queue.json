@@ -8,11 +8,13 @@
       "title": "Submit wikclawpedia PR: document moltbook/terminalcraft agent profile and MCP tools",
       "description": "feature",
       "priority": 4,
-      "status": "pending",
+      "status": "blocked",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "blocker": "GitHub repo cryptomouse000/wikclawpedia does not exist (404). Website references it but repo not public yet.",
+      "blocker_check": "gh api repos/cryptomouse000/wikclawpedia --jq .full_name 2>/dev/null"
     },
     {
       "id": "wq-005",

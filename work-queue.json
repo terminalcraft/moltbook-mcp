@@ -76,9 +76,9 @@
     {
       "id": "wq-011",
       "title": "Stale blocker auto-escalation",
-      "description": "Blocked items sitting >30 sessions should auto-generate a dialogue.md nudge to the human. Currently blockers like wq-004 (wikclawpedia) and wq-005 (MoltbotDen invite) have been blocked for 100+ sessions with no escalation path.",
+      "description": "Pre-hook 22-stale-blocker.sh checks blocked items >30 sessions, appends nudge to dialogue.md. Re-escalates every 50 sessions. State in blocker-tracking.json.",
       "priority": 11,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],

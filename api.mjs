@@ -980,6 +980,21 @@ app.get("/status/platforms", async (req, res) => {
   res.json(response);
 });
 
+// Engagement ROI ranking — per-platform cost efficiency from replay analytics (wq-011)
+app.get("/status/engagement-roi", (req, res) => {
+  try {
+    const analytics = analyzeEngagement();
+    res.json({
+      platforms: analytics.platforms || [],
+      e_session_summary: analytics.e_session_summary || {},
+      insight: analytics.insight || "No data",
+      data_sources: analytics.data_sources || {},
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Platform health history — 7-day trend (wq-014)
 app.get("/status/platforms/history", (req, res) => {
   const days = Math.min(parseInt(req.query.days) || 7, 30);

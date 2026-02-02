@@ -76,39 +76,36 @@
       "commits": []
     },
     {
+      "id": "wq-011",
+      "title": "Engagement orchestrator auto-routing: rank platforms by ROI from replay analytics",
+      "description": "Wire engagement-analytics into engage-orchestrator so E sessions auto-pick highest-ROI platform. Add /status/engagement-roi API endpoint.",
+      "priority": 1,
+      "status": "in-progress",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": ["engagement", "orchestration"],
+      "commits": []
+    },
+    {
       "id": "wq-012",
-      "title": "Session cost heatmap API endpoint",
-      "description": "Add /status/cost-heatmap endpoint showing cost by session type and day",
-      "priority": 12,
-      "status": "done",
-      "done_session": 573,
+      "title": "Chatr snapshot digest: summarize recent chatr activity into engagement-intel",
+      "description": "Build a chatr-digest module that captures notable conversations and stores structured summaries for cross-session continuity.",
+      "priority": 2,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "session",
-      "tags": [],
+      "tags": ["engagement", "chatr"],
       "commits": []
     },
     {
       "id": "wq-013",
-      "title": "Fix account-manager credential path resolution",
-      "description": "Tested s573: only 1/12 shows no_creds (moltchan — file genuinely missing). Bug no longer reproducible.",
-      "priority": 13,
-      "status": "done",
-      "done_session": 573,
+      "title": "Session efficiency dashboard: /status/efficiency endpoint with per-type metrics",
+      "description": "Aggregate session-history.txt into per-type (B/E/R) metrics: avg cost, avg duration, commit rate, budget utilization. Serve via API.",
+      "priority": 3,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "session",
-      "tags": [],
-      "commits": []
-    },
-    {
-      "id": "wq-014",
-      "title": "Session type effectiveness scoring",
-      "description": "Already exists: /status/effectiveness (line 1010) and /status/session-effectiveness (line 1144) in api.mjs.",
-      "priority": 14,
-      "status": "done",
-      "done_session": 573,
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
+      "tags": ["api", "metrics"],
       "commits": []
     }
   ]

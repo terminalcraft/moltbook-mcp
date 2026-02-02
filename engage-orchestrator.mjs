@@ -15,6 +15,7 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 import { execSync } from "child_process";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { analyzeEngagement } from "./providers/engagement-analytics.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVICES_PATH = join(__dirname, "services.json");
@@ -95,21 +96,87 @@ function evaluateService(service) {
   }
 }
 
+// --- Phase 3.5: Platform ROI Ranking ---
+
+// Normalize analytics platform name to match health/account-manager names
+function normalizePlatformName(analyticsName) {
+  const map = {
+    "moltbook": "Moltbook",
+    "4claw": "4claw.org",
+    "chatr": "Chatr.ai",
+    "ctxly": "Ctxly Chat",
+    "colony": "thecolony.cc",
+    "lobchan": "LobChan",
+    "lobstack": "Lobstack",
+    "tulip": "Tulip",
+    "grove": "Grove",
+    "mydeadinternet": "mydeadinternet.com",
+    "bluesky": "Bluesky",
+  };
+  return map[analyticsName] || analyticsName;
+}
+
+function rankPlatformsByROI(livePlatformNames) {
+  try {
+    const analytics = analyzeEngagement();
+    if (!analytics?.platforms?.length) return { ranked: livePlatformNames, roi: null };
+
+    // Build ROI score: lower cost_per_write = better. Platforms with writes but no cost data get neutral score.
+    const roiMap = {};
+    for (const p of analytics.platforms) {
+      const name = normalizePlatformName(p.platform);
+      const writes = p.writes || 0;
+      const costPerWrite = p.cost_per_write;
+      const writeRatio = p.write_ratio || 0;
+
+      // ROI score: high writes + low cost + high write ratio = good
+      // Score range: 0-100, higher = better ROI
+      let score = 0;
+      if (writes > 0) {
+        score += Math.min(writes, 50); // cap write volume contribution at 50
+        score += writeRatio * 0.3;     // write ratio contributes up to 30
+        if (costPerWrite !== null && costPerWrite > 0) {
+          score += Math.max(0, 20 - costPerWrite * 10); // lower cost = higher score, cap at 20
+        } else {
+          score += 10; // neutral if no cost data
+        }
+      }
+      roiMap[name] = { score: Math.round(score), writes, costPerWrite, writeRatio };
+    }
+
+    // Rank live platforms by ROI score (highest first), unknown platforms get score 0
+    const ranked = [...livePlatformNames].sort((a, b) => {
+      const sa = roiMap[a]?.score || 0;
+      const sb = roiMap[b]?.score || 0;
+      return sb - sa;
+    });
+
+    return { ranked, roi: roiMap, analytics_summary: analytics.insight };
+  } catch (e) {
+    return { ranked: livePlatformNames, roi: null, error: e.message };
+  }
+}
+
 // --- Phase 4: Generate Session Plan ---
 
-function generatePlan(health, service, evalReport) {
+function generatePlan(health, service, evalReport, roiData) {
   const plan = {
     generated_at: new Date().toISOString(),
     phases: [],
   };
 
-  // Phase A: Platform engagement
+  // Phase A: Platform engagement (ROI-ranked)
   if (health.live?.length > 0) {
-    const platformNames = health.live.map(p => p.platform);
+    const platformNames = roiData?.ranked || health.live.map(p => p.platform);
+    const roiDetail = roiData?.roi;
+    const desc = roiDetail
+      ? `Engage ${platformNames.length} platform(s) by ROI: ${platformNames.map(p => `${p}(${roiDetail[p]?.score ?? "?"})`).join(" > ")}`
+      : `Check ${platformNames.length} live platform(s): ${platformNames.join(", ")}`;
     plan.phases.push({
       name: "platform_engagement",
-      description: `Check ${platformNames.length} live platform(s): ${platformNames.join(", ")}`,
+      description: desc,
       platforms: platformNames,
+      roi: roiDetail || null,
       priority: "high",
     });
   } else {
@@ -166,7 +233,11 @@ if (service && !planOnly) {
   evalReport = evaluateService(service);
 }
 
-const plan = generatePlan(health, service, evalReport);
+console.error("[orchestrator] Phase 3.5: Ranking platforms by ROI...");
+const livePlatformNames = health.live?.map(p => p.platform) || [];
+const roiData = rankPlatformsByROI(livePlatformNames);
+
+const plan = generatePlan(health, service, evalReport, roiData);
 
 const output = {
   session_plan: plan,
@@ -175,6 +246,7 @@ const output = {
     down_count: health.down?.length || 0,
     live: health.live?.map(p => p.platform) || [],
   },
+  roi_ranking: roiData,
   service_to_evaluate: service ? {
     id: service.id,
     name: service.name,
@@ -189,10 +261,18 @@ if (jsonMode) {
 } else {
   console.log("\n=== Engagement Session Plan ===\n");
 
-  // Platform health
+  // Platform health + ROI ranking
   if (health.live?.length) {
-    console.log(`Live platforms (${health.live.length}):`);
-    for (const p of health.live) console.log(`  ✓ ${p.platform}`);
+    console.log(`Live platforms (${health.live.length}), ranked by ROI:`);
+    const ranked = roiData?.ranked || health.live.map(p => p.platform);
+    for (const name of ranked) {
+      const roi = roiData?.roi?.[name];
+      const score = roi ? ` [ROI:${roi.score} writes:${roi.writes} $/w:${roi.costPerWrite ?? "n/a"}]` : "";
+      console.log(`  ✓ ${name}${score}`);
+    }
+    if (roiData?.analytics_summary) {
+      console.log(`  Insight: ${roiData.analytics_summary}`);
+    }
   } else {
     console.log("No live platforms detected.");
   }

@@ -172,7 +172,8 @@
       "session": 651,
       "content": "If an application needs human intervention to be able to get auth acces, notify me through a review.",
       "status": "pending",
-      "created": "2026-02-02T20:01:45.218Z"
+      "created": "2026-02-02T20:01:45.218Z",
+      "acked_session": 653
     },
     {
       "id": "d018",
@@ -180,7 +181,17 @@
       "session": 651,
       "content": "You're allowed to check your emails and answer them.",
       "status": "pending",
-      "created": "2026-02-02T20:03:03.326Z"
+      "created": "2026-02-02T20:03:03.326Z",
+      "acked_session": 653
+    },
+    {
+      "id": "d019",
+      "from": "human",
+      "session": 651,
+      "content": "Check if the engage session is indeed using the tools created after d016",
+      "status": "pending",
+      "created": "2026-02-02T20:04:26.875Z",
+      "acked_session": 653
     }
   ],
   "questions": [],
@@ -287,16 +298,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 201,
+        "followed": 202,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 651,
-        "last_applicable_session": 651,
+        "last_session": 652,
+        "last_applicable_session": 652,
         "history": [
-          {
-            "session": 639,
-            "result": "followed"
-          },
           {
             "session": 640,
             "result": "followed"
@@ -332,20 +339,20 @@
           {
             "session": 651,
             "result": "followed"
+          },
+          {
+            "session": 652,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 106,
+        "followed": 107,
         "ignored": 2,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 648,
-        "last_applicable_session": 648,
+        "last_session": 652,
+        "last_applicable_session": 652,
         "history": [
-          {
-            "session": 612,
-            "result": "followed"
-          },
           {
             "session": 616,
             "result": "followed"
@@ -381,20 +388,20 @@
           {
             "session": 648,
             "result": "followed"
+          },
+          {
+            "session": 652,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 154,
+        "followed": 155,
         "ignored": 87,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 651,
-        "last_applicable_session": 651,
+        "last_session": 652,
+        "last_applicable_session": 652,
         "history": [
-          {
-            "session": 642,
-            "result": "followed"
-          },
           {
             "session": 643,
             "result": "followed"
@@ -430,20 +437,20 @@
           {
             "session": 651,
             "result": "followed"
+          },
+          {
+            "session": 652,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 74,
+        "followed": 75,
         "ignored": 14,
         "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 648,
-        "last_applicable_session": 648,
+        "last_session": 652,
+        "last_applicable_session": 652,
         "history": [
-          {
-            "session": 612,
-            "result": "followed"
-          },
           {
             "session": 616,
             "result": "followed"
@@ -478,21 +485,21 @@
           },
           {
             "session": 648,
+            "result": "followed"
+          },
+          {
+            "session": 652,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 86,
+        "followed": 87,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 648,
-        "last_applicable_session": 648,
+        "last_session": 652,
+        "last_applicable_session": 652,
         "history": [
-          {
-            "session": 612,
-            "result": "followed"
-          },
           {
             "session": 616,
             "result": "followed"
@@ -527,6 +534,10 @@
           },
           {
             "session": 648,
+            "result": "followed"
+          },
+          {
+            "session": 652,
             "result": "followed"
           }
         ]
@@ -581,16 +592,12 @@
         ]
       },
       "directive-update": {
-        "followed": 84,
+        "followed": 85,
         "ignored": 12,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 648,
-        "last_applicable_session": 648,
+        "last_session": 652,
+        "last_applicable_session": 652,
         "history": [
-          {
-            "session": 612,
-            "result": "followed"
-          },
           {
             "session": 616,
             "result": "followed"
@@ -626,6 +633,10 @@
           {
             "session": 648,
             "result": "ignored"
+          },
+          {
+            "session": 652,
+            "result": "followed"
           }
         ]
       }

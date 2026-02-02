@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,24 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
-    },
-    {
-      "id": "wq-015",
-      "title": "Deep-explore one new platform end-to-end",
-      "description": "Directive d003: pick an unevaluated service, register, post, measure response",
-      "priority": 15,
-      "status": "done",
-      "completed": "2026-02-02",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-016",
       "title": "Add session-context.mjs integration test with real file fixtures",
-      "description": "Current 60 unit tests mock everything — add 5 integration tests using temp directories with actual JSON files to catch path/parsing bugs",
+      "description": "Current 60 unit tests mock everything \u2014 add 5 integration tests using temp directories with actual JSON files to catch path/parsing bugs",
       "priority": 16,
       "status": "pending",
       "added": "2026-02-02",
@@ -48,7 +36,10 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "directive-d010",
-      "tags": ["engage", "exploration"],
+      "tags": [
+        "engage",
+        "exploration"
+      ],
       "commits": []
     }
   ]

@@ -4,7 +4,7 @@
 // Usage: node session-context.mjs <MODE_CHAR> <COUNTER> <B_FOCUS>
 // Output: JSON to stdout with all computed context fields.
 
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
 import { join } from 'path';
 
@@ -61,7 +61,6 @@ if (MODE === 'B') {
     }
   }
   if (unblocked.length > 0) {
-    const { writeFileSync } = await import('fs');
     writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
     result.unblocked = unblocked;
     // Recompute pending after unblock
@@ -120,18 +119,20 @@ if (MODE === 'B') {
     }
     result.intel_digest = lines.join('\n');
 
-    // Auto-archive intel when running for R sessions (R#56).
-    // Previously every R session manually read, archived, and cleared intel (~4 tool calls).
-    // Now session-context.mjs handles it: digest is injected into prompt, entries are archived,
-    // inbox is cleared. R session only needs to act on the digest (promote/brainstorm).
-    if (MODE === 'R') {
+    // Auto-archive intel unconditionally (R#58, was R-only since R#56).
+    // Previously gated by MODE === 'R', but B→R downgrades (queue starvation gate)
+    // happen AFTER session-context.mjs runs. A downgraded session would see intel
+    // in its R prompt block but entries wouldn't be archived, causing duplicates
+    // on the next real R session. Same class of bug as R#51 (prompt block gate).
+    // Safe to always archive: digest is computed unconditionally, and if the session
+    // doesn't use the R prompt block, the entries were still consumed.
+    {
       const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
       let archive = [];
       try { archive = JSON.parse(readFileSync(archivePath, 'utf8')); } catch {}
       archive.push(...intel.map(e => ({ ...e, archived_session: COUNTER })));
-      const { writeFileSync: wfs } = await import('fs');
-      wfs(archivePath, JSON.stringify(archive, null, 2) + '\n');
-      wfs(intelPath, '[]\n');
+      writeFileSync(archivePath, JSON.stringify(archive, null, 2) + '\n');
+      writeFileSync(intelPath, '[]\n');
       result.intel_archived = intel.length;
     }
   }
@@ -210,7 +211,6 @@ console.log(JSON.stringify(result));
 
 // Also write a shell-sourceable file to eliminate per-field node process spawns.
 // heartbeat.sh can `source` this instead of calling ctx() 11+ times. (R#50)
-import { writeFileSync } from 'fs';
 const envPath = join(STATE_DIR, 'session-context.env');
 const shellLines = [];
 for (const [key, val] of Object.entries(result)) {

@@ -60,19 +60,34 @@ else
   ROT_IDX=0
   [ -f "$ROTATION_IDX_FILE" ] && ROT_IDX=$(cat "$ROTATION_IDX_FILE")
 
-  # Check if last session failed — if so, don't advance rotation
+  # Check if last session failed — if so, don't advance rotation (with retry cap).
+  # Retry cap (R#59): if the same slot fails 3+ consecutive times, advance anyway.
+  # Prevents a persistently failing session type from starving the entire rotation.
+  RETRY_COUNT_FILE="$STATE_DIR/rotation_retry_count"
+  RETRY_COUNT=0
+  [ -f "$RETRY_COUNT_FILE" ] && RETRY_COUNT=$(cat "$RETRY_COUNT_FILE")
+  MAX_RETRIES=3
+
   if [ -f "$LAST_OUTCOME_FILE" ]; then
     LAST_OUTCOME=$(cat "$LAST_OUTCOME_FILE")
     if [ "$LAST_OUTCOME" = "success" ]; then
       ROT_IDX=$((ROT_IDX + 1))
+      RETRY_COUNT=0
+    elif [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
+      echo "$(date -Iseconds) retry-cap: slot failed $RETRY_COUNT consecutive times, advancing rotation" >> "$LOG_DIR/selfmod.log"
+      ROT_IDX=$((ROT_IDX + 1))
+      RETRY_COUNT=0
     else
-      echo "$(date -Iseconds) retry: last session outcome=$LAST_OUTCOME, repeating rotation slot" >> "$LOG_DIR/selfmod.log"
+      RETRY_COUNT=$((RETRY_COUNT + 1))
+      echo "$(date -Iseconds) retry: last session outcome=$LAST_OUTCOME, attempt $RETRY_COUNT/$MAX_RETRIES" >> "$LOG_DIR/selfmod.log"
     fi
   else
     # First run or file missing — advance normally
     ROT_IDX=$((ROT_IDX + 1))
+    RETRY_COUNT=0
   fi
   echo "$ROT_IDX" > "$ROTATION_IDX_FILE"
+  echo "$RETRY_COUNT" > "$RETRY_COUNT_FILE"
 
   PAT_LEN=${#PATTERN}
   IDX=$((ROT_IDX % PAT_LEN))

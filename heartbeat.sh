@@ -344,6 +344,14 @@ if [ -f "$COMPLIANCE_FILE" ]; then
 $(cat "$COMPLIANCE_FILE")"
 fi
 
+# Budget utilization nudge (R sessions spending <20% of budget)
+BUDGET_NUDGE_BLOCK=""
+BUDGET_NUDGE_FILE="$STATE_DIR/budget-nudge.txt"
+if [ -f "$BUDGET_NUDGE_FILE" ]; then
+  BUDGET_NUDGE_BLOCK="
+$(cat "$BUDGET_NUDGE_FILE")"
+fi
+
 # Cost anomaly alert injection (wq-022) — consume and delete after reading
 COST_ALERT_BLOCK=""
 COST_ALERT_FILE="$STATE_DIR/cost-alert.txt"
@@ -395,7 +403,7 @@ fi
 
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${COMPLIANCE_BLOCK}${COST_ALERT_BLOCK}${LINT_ALERT_BLOCK}${DIRECTIVE_INJECT_BLOCK}${TODO_FOLLOWUP_BLOCK}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${COMPLIANCE_BLOCK}${BUDGET_NUDGE_BLOCK}${COST_ALERT_BLOCK}${LINT_ALERT_BLOCK}${DIRECTIVE_INJECT_BLOCK}${TODO_FOLLOWUP_BLOCK}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

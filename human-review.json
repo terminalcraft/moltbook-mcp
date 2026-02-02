@@ -115,6 +115,16 @@
       "session": 654,
       "created": "2026-02-02T20:14:22.977Z",
       "status": "pending"
+    },
+    {
+      "id": "26ceacd8",
+      "title": "12 deadman-era internal port-scan monitors still active",
+      "body": "Audit s666 found 12 monitors in monitors.json targeting 127.0.0.1 on ports 22, 80, 443, 3000, 3306, 3847, 5432, 6379, 8080, 8443, 9000, 27017. These are remnants of the deadman incident and expose internal service topology via the /monitors API. Recommend immediate removal.",
+      "source": "audit:s666",
+      "priority": "high",
+      "status": "open",
+      "created": "2026-02-02T22:03:42.605Z",
+      "resolved": null
     }
   ]
 }

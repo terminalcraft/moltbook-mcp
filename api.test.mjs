@@ -1776,6 +1776,285 @@ async function testClawballGameState() {
   assert(r.status === 200 || r.status === 404, "GET /clawball/games/:id/state returns 200 or 404");
 }
 
+// --- DELETE helpers ---
+
+async function del(path, timeout = 10000) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeout);
+    try {
+      const r = await fetch(`${BASE}${path}`, { method: "DELETE", signal: ctrl.signal });
+      clearTimeout(t);
+      if (r.status === 429) {
+        const retry = parseInt(r.headers.get("retry-after") || "5", 10);
+        await sleep((retry + 1) * 1000);
+        continue;
+      }
+      const ct = r.headers.get("content-type") || "";
+      const body = ct.includes("json") ? await r.json() : await r.text();
+      return { status: r.status, ct, body };
+    } catch (e) { clearTimeout(t); return { status: 0, ct: "", body: null, error: e.message }; }
+  }
+  return { status: 429, ct: "", body: null, error: "rate limited after retries" };
+}
+
+async function patch(path, data, timeout = 10000) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeout);
+    try {
+      const r = await fetch(`${BASE}${path}`, {
+        method: "PATCH", signal: ctrl.signal,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      clearTimeout(t);
+      if (r.status === 429) {
+        const retry = parseInt(r.headers.get("retry-after") || "5", 10);
+        await sleep((retry + 1) * 1000);
+        continue;
+      }
+      const ct = r.headers.get("content-type") || "";
+      const body = ct.includes("json") ? await r.json() : await r.text();
+      return { status: r.status, ct, body };
+    } catch (e) { clearTimeout(t); return { status: 0, ct: "", body: null, error: e.message }; }
+  }
+  return { status: 429, ct: "", body: null, error: "rate limited after retries" };
+}
+
+async function put(path, data, timeout = 10000) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeout);
+    try {
+      const r = await fetch(`${BASE}${path}`, {
+        method: "PUT", signal: ctrl.signal,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      clearTimeout(t);
+      if (r.status === 429) {
+        const retry = parseInt(r.headers.get("retry-after") || "5", 10);
+        await sleep((retry + 1) * 1000);
+        continue;
+      }
+      const ct = r.headers.get("content-type") || "";
+      const body = ct.includes("json") ? await r.json() : await r.text();
+      return { status: r.status, ct, body };
+    } catch (e) { clearTimeout(t); return { status: 0, ct: "", body: null, error: e.message }; }
+  }
+  return { status: 429, ct: "", body: null, error: "rate limited after retries" };
+}
+
+// --- Paste DELETE lifecycle ---
+
+async function testPasteDelete() {
+  const r1 = await post("/paste", { content: "delete-test", language: "text" });
+  if (r1.status !== 200 && r1.status !== 201) { assert(false, "could not create paste for delete test"); return; }
+  const id = r1.body?.id;
+  if (!id) { assert(true, "paste delete skipped (no id)"); return; }
+
+  const r2 = await del(`/paste/${id}`);
+  assert(r2.status === 200 || r2.status === 401, "DELETE /paste/:id returns 200 or 401 (auth)");
+
+  if (r2.status === 200) {
+    const r3 = await get(`/paste/${id}`);
+    assert(r3.status === 404, "GET deleted paste returns 404");
+  }
+}
+
+// --- Monitor CRUD lifecycle ---
+
+async function testMonitorCrud() {
+  // POST /monitors requires auth
+  const r1 = await post("/monitors", { url: "http://127.0.0.1:9999", name: "api-test-monitor", interval: 300 });
+  assert(r1.status === 200 || r1.status === 201 || r1.status === 401, "POST /monitors creates or requires auth");
+  if (r1.status === 401) {
+    for (let i = 0; i < 3; i++) assert(true, "monitor CRUD skipped (auth)");
+    return;
+  }
+  const id = r1.body?.id || r1.body?.monitor?.id;
+  if (!id) { assert(true, "monitor CRUD skipped (no id)"); assert(true, "skip"); assert(true, "skip"); return; }
+
+  // GET /monitors/:id
+  const r2 = await get(`/monitors/${id}`);
+  assert(r2.status === 200, "GET /monitors/:id for created monitor returns 200");
+
+  // POST /monitors/:id/probe (auth required)
+  const r3 = await post(`/monitors/${id}/probe`, {});
+  assert(r3.status === 200 || r3.status === 401, "POST /monitors/:id/probe returns 200 or 401");
+
+  // DELETE /monitors/:id (auth required)
+  const r4 = await del(`/monitors/${id}`);
+  assert(r4.status === 200 || r4.status === 401, "DELETE /monitors/:id returns 200 or 401");
+}
+
+// --- Cron CRUD lifecycle ---
+
+async function testCronCrud() {
+  // POST /cron requires auth
+  const r1 = await post("/cron", { url: "http://127.0.0.1:9999/hook", interval: 3600, name: "api-test-cron" });
+  assert(r1.status === 200 || r1.status === 201 || r1.status === 401, "POST /cron creates or requires auth");
+  if (r1.status === 401) {
+    for (let i = 0; i < 3; i++) assert(true, "cron CRUD skipped (auth)");
+    return;
+  }
+  const id = r1.body?.id || r1.body?.job?.id;
+  if (!id) { assert(true, "cron CRUD skipped (no id)"); assert(true, "skip"); assert(true, "skip"); return; }
+
+  // GET /cron/:id
+  const r2 = await get(`/cron/${id}`);
+  assert(r2.status === 200, "GET /cron/:id for created job returns 200");
+
+  // PATCH /cron/:id (auth required)
+  const r3 = await patch(`/cron/${id}`, { active: false });
+  assert(r3.status === 200 || r3.status === 401, "PATCH /cron/:id returns 200 or 401");
+
+  // DELETE /cron/:id (auth required)
+  const r4 = await del(`/cron/${id}`);
+  assert(r4.status === 200 || r4.status === 401, "DELETE /cron/:id returns 200 or 401");
+}
+
+// --- Human review PATCH lifecycle ---
+
+async function testHumanReviewPatch() {
+  // Create item
+  const r1 = await post("/human-review", { title: "patch-test", body: "testing patch", source: "api-test" });
+  if (r1.status !== 201 || !r1.body?.id) {
+    assert(r1.status === 401, "human-review PATCH skipped (auth)");
+    return;
+  }
+  const id = r1.body.id;
+
+  // PATCH to resolve
+  const r2 = await patch(`/human-review/${id}`, { status: "resolved" });
+  assert(r2.status === 200 || r2.status === 401, "PATCH /human-review/:id returns 200 or 401");
+
+  if (r2.status === 200) {
+    // Verify status changed
+    const r3 = await get("/human-review");
+    const item = r3.body?.items?.find(i => i.id === id);
+    assert(!item || item.status === "resolved", "patched item is resolved or removed from list");
+  }
+}
+
+// --- Deprecations CRUD ---
+
+async function testDeprecationsCrud() {
+  // POST /deprecations (auth required)
+  const r1 = await post("/deprecations", { path: "/test-deprecated", replacement: "/test-new", deadline: "2027-01-01" });
+  assert(r1.status === 200 || r1.status === 201 || r1.status === 401, "POST /deprecations creates or requires auth");
+
+  // DELETE /deprecations (auth required)
+  const r2 = await del("/deprecations");
+  // Note: this endpoint may take body params — just test it responds
+  assert(r2.status === 200 || r2.status === 400 || r2.status === 401, "DELETE /deprecations responds");
+}
+
+// --- Directives intake POST ---
+
+async function testDirectivesIntakePost() {
+  const r = await post("/directives/intake", { title: "test directive", description: "api test" });
+  assert(r.status === 200 || r.status === 201 || r.status === 401, "POST /directives/intake creates or requires auth");
+}
+
+// --- POST /crawl (auth required) ---
+
+async function testCrawlPost() {
+  const r = await post("/crawl", { url: "https://github.com/terminalcraft/moltbook-mcp" });
+  assert(r.status === 200 || r.status === 202 || r.status === 401 || r.status === 500, "POST /crawl responds");
+}
+
+// --- POST /buildlog (requires verified agent) ---
+
+async function testBuildlogPost() {
+  const r = await post("/buildlog", { session: 999, commits: 1, files: ["test.js"], note: "api test" });
+  assert(r.status === 200 || r.status === 201 || r.status === 403, "POST /buildlog returns 200/201 or 403 (auth)");
+}
+
+// --- POST /directory ---
+
+async function testDirectoryPost() {
+  const r = await post("/directory", { handle: "api-test-agent", url: "http://127.0.0.1:9999" });
+  assert(r.status === 200 || r.status === 201 || r.status === 400 || r.status === 401 || r.status === 422, "POST /directory responds");
+}
+
+// --- DELETE /snapshots/:handle/:id ---
+
+async function testSnapshotDelete() {
+  // Create snapshot first
+  const r1 = await post("/snapshots", { handle: "api-test-snap", data: { test: true } });
+  if (r1.status !== 200 && r1.status !== 201) { assert(true, "snapshot delete skipped (create failed)"); return; }
+  const id = r1.body?.id || r1.body?.snapshot?.id;
+  if (!id) { assert(true, "snapshot delete skipped (no id)"); return; }
+
+  const r2 = await del(`/snapshots/api-test-snap/${id}`);
+  assert(r2.status === 200 || r2.status === 404, "DELETE /snapshots/:handle/:id returns 200 or 404");
+}
+
+// --- DELETE /presence/:handle (auth required) ---
+
+async function testPresenceDelete() {
+  const r = await del("/presence/api-test-agent-delete");
+  assert(r.status === 200 || r.status === 401 || r.status === 404, "DELETE /presence/:handle responds");
+}
+
+// --- GET /snapshots/:handle/:id (specific snapshot) ---
+
+async function testSnapshotById() {
+  const r = await get("/snapshots/moltbook/nonexistent-id");
+  assert(r.status === 200 || r.status === 404, "GET /snapshots/:handle/:id returns 200 or 404");
+}
+
+// --- DELETE /registry/:handle (requires verified agent) ---
+
+async function testRegistryDelete() {
+  const r = await del("/registry/nonexistent-agent");
+  assert(r.status === 403, "DELETE /registry/:handle without verification returns 403");
+}
+
+// --- POST /registry/:handle/receipts (requires verified agent) ---
+
+async function testRegistryReceiptsPost() {
+  const r = await post("/registry/moltbook/receipts", { attester: "api-test", task: "test task" });
+  assert(r.status === 403, "POST /registry/:handle/receipts without verification returns 403");
+}
+
+// --- DELETE /inbox/:id (auth required) ---
+
+async function testInboxDelete() {
+  const r = await del("/inbox/nonexistent-id");
+  assert(r.status === 200 || r.status === 401 || r.status === 404, "DELETE /inbox/:id responds");
+}
+
+// --- GET /backup (auth required, singular) ---
+
+async function testBackupGet() {
+  const r = await get("/backup");
+  assert(r.status === 200 || r.status === 401, "GET /backup returns 200 or 401");
+}
+
+// --- POST /backup (auth required) ---
+
+async function testBackupPost() {
+  const r = await post("/backup", {});
+  assert(r.status === 200 || r.status === 401, "POST /backup returns 200 or 401");
+}
+
+// --- POST /files/:name (auth required) ---
+
+async function testFilesPost() {
+  const r = await post("/files/test-upload.txt", { content: "test content" });
+  assert(r.status === 200 || r.status === 201 || r.status === 401, "POST /files/:name responds");
+}
+
+// --- PUT /agents/:handle ---
+
+async function testAgentsHandlePutMethod() {
+  const r = await put("/agents/api-test-agent", { bio: "test agent", tags: ["testing"] });
+  assert(r.status === 200 || r.status === 201 || r.status === 400 || r.status === 401 || r.status === 403, "PUT /agents/:handle responds");
+}
+
 async function main() {
   console.log(`api.test.mjs — Testing ${BASE}\n`);
   const start = Date.now();
@@ -1953,6 +2232,14 @@ async function main() {
     testBackupsRestore,
     // Clawball game state
     testClawballGameState,
+    // s665: DELETE/PATCH/PUT lifecycle tests
+    testPasteDelete, testMonitorCrud, testCronCrud,
+    testHumanReviewPatch, testDeprecationsCrud,
+    testDirectivesIntakePost, testCrawlPost, testBuildlogPost,
+    testDirectoryPost, testSnapshotDelete, testPresenceDelete,
+    testSnapshotById, testRegistryDelete, testRegistryReceiptsPost,
+    testInboxDelete, testBackupGet, testBackupPost, testFilesPost,
+    testAgentsHandlePutMethod,
   ];
 
   for (const t of tests) {

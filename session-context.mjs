@@ -51,8 +51,15 @@ if (MODE === 'B' && pending.length > 0) {
   if (existsSync(bsPath)) {
     const bs = readFileSync(bsPath, 'utf8');
     const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
-    if (ideas.length > 0) {
-      const idea = ideas[0];
+    // Filter out ideas already in the work queue (by fuzzy title match).
+    // Prevents fallback from assigning work that's already queued/blocked/done.
+    const queueTitles = queue.map(i => i.title.toLowerCase());
+    const fresh = ideas.filter(idea => {
+      const title = idea[1].trim().toLowerCase();
+      return !queueTitles.some(qt => qt.includes(title) || title.includes(qt.split(':')[0].trim()));
+    });
+    if (fresh.length > 0) {
+      const idea = fresh[0];
       result.wq_item = `BRAINSTORM-FALLBACK: ${idea[1].trim()} — ${idea[2].trim()}`;
       result.wq_fallback = true;
     }

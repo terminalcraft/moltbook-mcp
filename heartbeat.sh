@@ -36,17 +36,7 @@ else
   COUNTER=0
 fi
 
-# Sync counter with engagement-state.json (authoritative source).
-# The counter file can drift if reset/wiped. Always use the higher value.
-ESTATE="$HOME/.config/moltbook/engagement-state.json"
-if [ -f "$ESTATE" ]; then
-  ESTATE_SESSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('$ESTATE','utf8')).session||0)}catch{console.log(0)}" 2>/dev/null || echo 0)
-  if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
-    COUNTER="$ESTATE_SESSION"
-    echo "$COUNTER" > "$SESSION_COUNTER_FILE"
-    echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
-  fi
-fi
+# Counter sync with engagement-state moved to session-context.mjs (R#47)
 
 if [ -n "$OVERRIDE_MODE" ]; then
   MODE_CHAR="$OVERRIDE_MODE"
@@ -93,6 +83,20 @@ else
   echo "$COUNTER" > "$SESSION_COUNTER_FILE"
 fi
 
+# --- Single-pass context computation ---
+# Replaces 7+ inline `node -e` invocations with one script. (R#47, s487)
+CTX_FILE="$STATE_DIR/session-context.json"
+node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo '{}' > "$CTX_FILE"
+ctx() { node -e "const c=JSON.parse(require('fs').readFileSync('$CTX_FILE','utf8'));const v=c['$1'];console.log(v===undefined||v===null?'$2':v)" 2>/dev/null || echo "$2"; }
+
+# Sync counter with engagement-state (from session-context.mjs)
+ESTATE_SESSION=$(ctx estate_session 0)
+if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
+  COUNTER="$ESTATE_SESSION"
+  echo "$COUNTER" > "$SESSION_COUNTER_FILE"
+  echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
+fi
+
 # Engagement health gate: if E session but no platforms are writable, downgrade to B.
 # This prevents wasting budget on "scan all broken platforms" sessions.
 if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
@@ -108,7 +112,7 @@ fi
 # With BBRE rotation, R sessions replenish every 4th session. B should run whenever
 # there's ANY pending work, not wait for 2+ items.
 if [ "$MODE_CHAR" = "B" ] && [ -z "$OVERRIDE_MODE" ]; then
-  PENDING_COUNT=$(node -e "try{const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));console.log(q.queue.filter(i=>i.status==='pending').length)}catch{console.log(0)}" 2>/dev/null || echo 0)
+  PENDING_COUNT=$(ctx pending_count 0)
   if [ "$PENDING_COUNT" -lt 1 ]; then
     echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items" >> "$LOG_DIR/selfmod.log"
     MODE_CHAR="R"
@@ -226,52 +230,11 @@ fi
 # Previously R_FOCUS was only in MCP env, invisible to the agent's shell.
 B_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "B" ]; then
-  # Auto-unblock: check blocked items with blocker_check commands.
-  # If the check command exits 0, promote the item to pending. (s459, R#38)
-  if [ -f "$DIR/work-queue.json" ]; then
-    node -e "
-      const fs=require('fs');
-      const {execSync}=require('child_process');
-      const f='$DIR/work-queue.json';
-      const q=JSON.parse(fs.readFileSync(f,'utf8'));
-      let changed=false;
-      for(const item of q.queue){
-        if(item.status==='blocked' && item.blocker_check){
-          try{
-            execSync(item.blocker_check,{timeout:10000,stdio:'pipe'});
-            item.status='pending';
-            item.notes=(item.notes||'')+' Auto-unblocked s$COUNTER: blocker_check passed.';
-            delete item.blocker_check;
-            changed=true;
-          }catch(e){}
-        }
-      }
-      if(changed) fs.writeFileSync(f,JSON.stringify(q,null,2)+'\n');
-    " 2>/dev/null || true
-  fi
-
-  # Extract top work-queue item and inject it directly into the prompt.
-  # This makes the queue item impossible to miss — B sessions were ignoring work-queue.json
-  # even though SESSION_BUILD.md told them to read it. (Diagnosed in R#22, s395.)
-  WQ_ITEM=""
-  if [ -f "$DIR/work-queue.json" ]; then
-    WQ_ITEM=$(node -e "
-      const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));
-      const depsReady=(item)=>!item.deps||!item.deps.length||item.deps.every(d=>{const dep=q.queue.find(i=>i.id===d);return dep&&dep.status==='done';});
-      const pending=q.queue.filter(i=>i.status==='pending'&&depsReady(i));
-      const focus='$B_FOCUS';
-      let item;
-      if (focus==='meta') item=pending.find(i=>(i.tags||[]).some(t=>t==='meta'||t==='infra'))||pending[0];
-      else item=pending.find(i=>(i.tags||[]).some(t=>t==='feature'))||pending[0];
-      if(item) console.log(item.id+': '+item.title+(item.description&&item.description.length>20?' — '+item.description:''));
-    " 2>/dev/null || true)
-  fi
+  # Auto-unblock + task extraction handled by session-context.mjs (R#47)
+  WQ_ITEM=$(ctx wq_item "")
 
   WQ_BLOCK=""
-  WQ_DEPTH=0
-  if [ -f "$DIR/work-queue.json" ]; then
-    WQ_DEPTH=$(node -e "const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));const dr=(item)=>!item.deps||!item.deps.length||item.deps.every(d=>{const dep=q.queue.find(i=>i.id===d);return dep&&dep.status==='done';});console.log(q.queue.filter(i=>i.status==='pending'&&dr(i)).length)" 2>/dev/null || echo 0)
-  fi
+  WQ_DEPTH=$(ctx pending_count 0)
   WQ_WARNING=""
   if [ "$WQ_DEPTH" -le 1 ] 2>/dev/null; then
     WQ_WARNING="
@@ -302,15 +265,8 @@ if [ "$MODE_CHAR" = "E" ]; then
 $(cat "$E_CONTEXT_FILE")"
   fi
 
-  # Inject a random unevaluated service for deep-dive exploration (s463, R#39).
-  EVAL_TARGET=""
-  if [ -f "$DIR/services.json" ]; then
-    EVAL_TARGET=$(node -e "
-      const s=JSON.parse(require('fs').readFileSync('$DIR/services.json','utf8'));
-      const uneval=s.filter(x=>x.status==='discovered'||!x.status);
-      if(uneval.length){const pick=uneval[Math.floor(Math.random()*uneval.length)];console.log(pick.name+' — '+(pick.url||'no url')+(pick.description?' ('+pick.description+')':''));}
-    " 2>/dev/null || true)
-  fi
+  # Eval target from session-context.mjs (R#47)
+  EVAL_TARGET=$(ctx eval_target "")
   if [ -n "$EVAL_TARGET" ]; then
     E_CONTEXT_BLOCK="${E_CONTEXT_BLOCK}
 
@@ -323,39 +279,12 @@ fi
 
 R_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "R" ]; then
-  # Inject pipeline health snapshot so R sessions immediately know what needs attention.
-  R_PENDING=0
-  R_BLOCKED=0
-  R_BRAINSTORM=0
-  R_INTEL=0
-  if [ -f "$DIR/work-queue.json" ]; then
-    R_PENDING=$(node -e "const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));console.log(q.queue.filter(i=>i.status==='pending').length)" 2>/dev/null || echo 0)
-    R_BLOCKED=$(node -e "const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));console.log(q.queue.filter(i=>i.status==='blocked').length)" 2>/dev/null || echo 0)
-  fi
-  if [ -f "$DIR/BRAINSTORMING.md" ]; then
-    R_BRAINSTORM=$(grep -c '^\- \*\*' "$DIR/BRAINSTORMING.md" 2>/dev/null || echo 0)
-  fi
-  INTEL_FILE="$HOME/.config/moltbook/engagement-intel.json"
-  if [ -f "$INTEL_FILE" ]; then
-    R_INTEL=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('$INTEL_FILE','utf8')).length)}catch{console.log(0)}" 2>/dev/null || echo 0)
-  fi
-
-  # Directive intake check: detect if new human directives exist since last_intake_session.
-  # This saves R sessions from re-reading dialogue.md when there's nothing new.
-  R_INTAKE_STATUS="no-op"
-  if [ -f "$DIR/work-queue.json" ] && [ -f "$DIR/dialogue.md" ]; then
-    R_INTAKE_STATUS=$(node -e "
-      const fs=require('fs');
-      const q=JSON.parse(fs.readFileSync('$DIR/work-queue.json','utf8'));
-      const d=fs.readFileSync('$DIR/dialogue.md','utf8');
-      const lastIntake=q.last_intake_session||0;
-      // Find highest session number in human directive headers
-      const matches=[...d.matchAll(/Human.*?\(s(\d+)/gi),...d.matchAll(/Human directive \(s(\d+)/gi),...d.matchAll(/Human \(s(\d+)/gi)];
-      const maxDirective=matches.reduce((m,x)=>Math.max(m,parseInt(x[1]||0)),0);
-      if(maxDirective>lastIntake) console.log('NEW:s'+maxDirective);
-      else console.log('no-op:s'+lastIntake);
-    " 2>/dev/null || echo "unknown")
-  fi
+  # Pipeline health + directive intake from session-context.mjs (R#47)
+  R_PENDING=$(ctx pending_count 0)
+  R_BLOCKED=$(ctx blocked_count 0)
+  R_BRAINSTORM=$(ctx brainstorm_count 0)
+  R_INTEL=$(ctx intel_count 0)
+  R_INTAKE_STATUS=$(ctx intake_status "unknown")
 
   R_HEALTH="Queue: ${R_PENDING} pending, ${R_BLOCKED} blocked | Brainstorming: ${R_BRAINSTORM} ideas | Intel inbox: ${R_INTEL} entries"
   R_URGENT=""

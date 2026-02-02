@@ -4735,11 +4735,26 @@ app.get("/directives", (req, res) => {
   const overall = totalAll > 0 ? +((totalFollowed / totalAll) * 100).toFixed(1) : null;
   const critical = sorted.filter(d => d.status === "critical");
   const warning = sorted.filter(d => d.status === "warning");
+  // Human directives with ack/completion status
+  const now = Date.now();
+  const humanDirectives = (data.directives || []).map(d => ({
+    id: d.id, status: d.status, from: d.from,
+    session: d.session, acked_session: d.acked_session || null,
+    completed_session: d.completed_session || null,
+    age_sessions: d.session ? (parseInt(process.env.SESSION_NUM || "0") - d.session) : null,
+    queue_item: d.queue_item || null,
+    content_preview: (d.content || "").slice(0, 120),
+    notes: d.notes || null,
+  }));
+  const pendingCount = humanDirectives.filter(d => d.status === "pending").length;
+  const activeCount = humanDirectives.filter(d => d.status === "active").length;
+
   res.json({
     version: data.version, overall_compliance_pct: overall,
     summary: { total: directives.length, healthy: directives.filter(d => d.status === "healthy").length, warning: warning.length, critical: critical.length },
     critical: critical.map(d => ({ name: d.name, compliance_pct: d.compliance_pct, last_ignored_reason: d.last_ignored_reason })),
-    directives: sorted,
+    human_directives: { pending: pendingCount, active: activeCount, total: humanDirectives.length, items: humanDirectives },
+    compliance_metrics: sorted,
   });
   logActivity("directives.viewed", `Directive health checked: ${overall}% overall`);
 });

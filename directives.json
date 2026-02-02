@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "description": "Structured human\u2194agent directive system. Replaces dialogue.md for directive intake.",
+  "description": "Structured human↔agent directive system. Replaces dialogue.md for directive intake.",
   "directives": [
     {
       "id": "d001",
       "from": "human",
       "session": 268,
-      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR \u2014 Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
+      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR — Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
       "status": "completed",
       "acked_session": 271,
       "completed_session": 439,
@@ -19,7 +19,7 @@
       "content": "Map the entire agent ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. Build a comprehensive map of all agents and platforms, rank by engagement activity.",
       "status": "active",
       "acked_session": 390,
-      "notes": "Ongoing \u2014 49+ services mapped",
+      "notes": "Ongoing — 49+ services mapped",
       "updated": "2026-02-02T12:53:29.369Z"
     },
     {
@@ -77,7 +77,7 @@
       "id": "d008",
       "from": "human",
       "session": 575,
-      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution \u2014 it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system \u2014 directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed \u2014 d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
+      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution — it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system — directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed — d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
       "status": "completed",
       "acked_session": 586,
       "notes": "s586: dialogue.md fully replaced. Web UI at /directives/inbox, stale-blocker writes to directives.json, session-context reads from directives.json.",
@@ -127,7 +127,7 @@
       "acked_session": 620,
       "completed_session": 620,
       "queue_item": null,
-      "notes": "Already fixed \u2014 inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
+      "notes": "Already fixed — inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
     },
     {
       "id": "d013",
@@ -146,7 +146,7 @@
       "content": "go through the registering proccess of Chatr by posting a message the appropriated moltbook thread",
       "status": "completed",
       "created": "2026-02-02T16:32:34.151Z",
-      "acked_session": null,
+      "acked_session": 629,
       "updated": "2026-02-02T16:39:44.155Z",
       "notes": "Decomposed to wq-022. Acked R#84 s624.",
       "completed_session": 626
@@ -266,16 +266,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 183,
+        "followed": 184,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 627,
-        "last_applicable_session": 627,
+        "last_session": 628,
+        "last_applicable_session": 628,
         "history": [
-          {
-            "session": 615,
-            "result": "followed"
-          },
           {
             "session": 616,
             "result": "followed"
@@ -311,20 +307,20 @@
           {
             "session": 627,
             "result": "followed"
+          },
+          {
+            "session": 628,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 100,
+        "followed": 101,
         "ignored": 2,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 624,
-        "last_applicable_session": 624,
+        "last_session": 628,
+        "last_applicable_session": 628,
         "history": [
-          {
-            "session": 595,
-            "result": "followed"
-          },
           {
             "session": 595,
             "result": "followed"
@@ -360,20 +356,20 @@
           {
             "session": 624,
             "result": "followed"
+          },
+          {
+            "session": 628,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 136,
+        "followed": 137,
         "ignored": 81,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 627,
-        "last_applicable_session": 627,
+        "last_session": 628,
+        "last_applicable_session": 628,
         "history": [
-          {
-            "session": 618,
-            "result": "followed"
-          },
           {
             "session": 619,
             "result": "ignored"
@@ -409,20 +405,20 @@
           {
             "session": 627,
             "result": "followed"
+          },
+          {
+            "session": 628,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 68,
+        "followed": 69,
         "ignored": 14,
-        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 624,
-        "last_applicable_session": 624,
+        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
+        "last_session": 628,
+        "last_applicable_session": 628,
         "history": [
-          {
-            "session": 595,
-            "result": "followed"
-          },
           {
             "session": 595,
             "result": "followed"
@@ -457,21 +453,21 @@
           },
           {
             "session": 624,
+            "result": "followed"
+          },
+          {
+            "session": 628,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 80,
+        "followed": 81,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 624,
-        "last_applicable_session": 624,
+        "last_session": 628,
+        "last_applicable_session": 628,
         "history": [
-          {
-            "session": 595,
-            "result": "followed"
-          },
           {
             "session": 595,
             "result": "followed"
@@ -506,6 +502,10 @@
           },
           {
             "session": 624,
+            "result": "followed"
+          },
+          {
+            "session": 628,
             "result": "followed"
           }
         ]
@@ -560,16 +560,12 @@
         ]
       },
       "directive-update": {
-        "followed": 79,
+        "followed": 80,
         "ignored": 11,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 624,
-        "last_applicable_session": 624,
+        "last_session": 628,
+        "last_applicable_session": 628,
         "history": [
-          {
-            "session": 595,
-            "result": "followed"
-          },
           {
             "session": 595,
             "result": "followed"
@@ -605,6 +601,10 @@
           {
             "session": 624,
             "result": "ignored"
+          },
+          {
+            "session": 628,
+            "result": "followed"
           }
         ]
       }

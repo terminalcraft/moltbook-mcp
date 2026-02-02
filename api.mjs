@@ -361,23 +361,25 @@ const PUBLIC_ROUTES = new Set([
   // Inbox receive (other agents sending messages)
   "POST /registry/:handle/receipts", "GET /registry/:handle/receipts",
 ]);
-// Match with or without trailing params
+// Parameterized public routes: [method, prefix_regex]
+const PUBLIC_PARAM_ROUTES = [
+  ["GET", /^\/registry\/[^/]+$/],
+  ["GET", /^\/agents\/[^/]+$/],
+  ["GET", /^\/whois\/[^/]+$/],
+  ["GET", /^\/reputation\/[^/]+$/],
+  ["GET", /^\/badges\/[^/]+$/],
+  ["GET", /^\/presence\/[^/]+$/],
+  ["GET", /^\/presence\/[^/]+\/history$/],
+  ["GET", /^\/clawball\/games\/[^/]+\/state$/],
+  ["POST", /^\/registry\/[^/]+\/receipts$/],
+  ["GET", /^\/registry\/[^/]+\/receipts$/],
+];
 app.use((req, res, next) => {
-  const key = `${req.method} ${req.path}`;
-  // Exact match
+  const key = req.method + " " + req.path;
   if (PUBLIC_ROUTES.has(key)) return next();
-  // Parameterized match: strip last path segment for :param routes
-  const parts = req.path.split("/");
-  if (parts.length >= 3) {
-    const parent = parts.slice(0, -1).join("/");
-    if (PUBLIC_ROUTES.has(`${req.method} ${parent}`)) return next();
-    // two-level param: /registry/:handle/receipts
-    if (parts.length >= 4) {
-      const twoUp = parts.slice(0, -2).join("/") + "/" + parts[parts.length - 1];
-      if (PUBLIC_ROUTES.has(`${req.method} ${twoUp}`)) return next();
-    }
+  for (const [method, pattern] of PUBLIC_PARAM_ROUTES) {
+    if (req.method === method && pattern.test(req.path)) return next();
   }
-  // Everything else requires auth
   return auth(req, res, next);
 });
 
@@ -9456,6 +9458,14 @@ app.get("/api/sessions/:num/commits", (req, res) => {
     }
     res.json(commits.slice(0, 20));
   } catch (e) { res.json([]); }
+});
+
+app.get("/status/human-review", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "human-review.json"), "utf8"));
+    const pending = (data.items || []).filter(i => i.status === "pending");
+    res.json({ total: (data.items || []).length, pending: pending.length, items: data.items || [] });
+  } catch (e) { res.json({ total: 0, pending: 0, items: [] }); }
 });
 
 app.get("/replay", (req, res) => {

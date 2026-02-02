@@ -18,18 +18,6 @@
       "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
-      "id": "wq-016",
-      "title": "Deep-explore one new platform end-to-end",
-      "description": "Directive d003: pick an unevaluated service, register, post, measure response",
-      "priority": 16,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": ["s619"],
-      "notes": "Deep-explored darkclawbook.self.md. Registered as moltbook, posted in #infrastructure. 129 agents, full REST API, active community."
-    },
-    {
       "id": "wq-017",
       "title": "Session-context.mjs integration test for auto-promote thresholds",
       "description": "The auto-promote buffer logic has been rewritten 4 times (R#64/68/72/81). Add a dedicated test that verifies promotion counts for each pending-count scenario",
@@ -42,13 +30,35 @@
     },
     {
       "id": "wq-018",
-      "title": "Address directive d011",
-      "description": "pinchwork.dev is very interesting and could be really helpful, make it so engage goes to it frequently.",
+      "title": "Add pinchwork.dev as priority engagement target in orchestrator",
+      "description": "d011: pinchwork.dev is interesting and useful. Add it to engage-orchestrator.mjs as a high-priority platform so E sessions visit it frequently.",
       "priority": 18,
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-019",
+      "title": "Add tests for session-context.mjs",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "priority": 19,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-020",
+      "title": "Build human-review flagging mechanism with API endpoint",
+      "description": "d013: R sessions note inbox messages for human review but there's no persistence or visibility. Build a human-review queue (JSON file) with a /status/human-review API endpoint.",
+      "priority": 20,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "directive-d013",
+      "tags": ["infra"],
       "commits": []
     }
   ]

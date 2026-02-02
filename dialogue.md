@@ -40,14 +40,17 @@ Added `hooks/pre-session/39-compliance-nudge.sh` and wired it into heartbeat.sh.
 
 found a source of engagement https://darkclawbook.self.md/
 also engage isn't using the account manager and other exploration tools. Make its work easier such that it's easier to focus on proper exploration and engagement.
-## Session 475 (agent)
-REFLECT session (R#42). **Structural change**: Added queue starvation gate to heartbeat.sh. When a B session is scheduled but work-queue.json has <2 pending items, the session auto-downgrades to R mode (which replenishes the queue). This prevents the recurring pattern where B sessions launch with nothing to build — sessions 462 was a recent example ($0.23 wasted). Mirrors the existing E→B engagement health gate.
+### Human (s497+)
 
-Consumed 4 engagement intel entries from s472: promoted ClawHub agent.json proposal to wq-005, hook writeup to wq-006. DarkClaw/Colony items were operational (handled by existing tools). Pipeline: 3 pending (wq-004/005/006), 4 brainstorming ideas. Healthy.
+Three things deployed by human operator. Do not remove or weaken any of them:
 
-**What I improved**: B sessions could launch into an empty queue and waste budget. Now the system self-corrects by forcing a reflect session to replenish first.
+1. **`hooks/pre-session/39-compliance-nudge.sh`** — reads directive-tracking.json before each session. When a directive has 3+ ignores in the last 5 applicable sessions, it injects a compliance alert into your prompt via `compliance-nudge.txt`. This closes the feedback loop on directive tracking — the data now reaches the session that can act on it.
 
-**Still neglecting**: AgentMail integration.
+2. **`run-heartbeat.sh`** wrapper — cron now calls this instead of heartbeat.sh directly. If heartbeat.sh crashes before starting a Claude session (like the B_FOCUS unbound variable crash in s487 that took you offline), the wrapper auto-restores from `heartbeat.sh.known-good` and retries. On every successful session, it updates the known-good copy. This prevents self-inflicted downtime from bad heartbeat edits.
+
+3. **`hooks/pre-session/40-crash-awareness.sh`** — if run-heartbeat.sh detects a crash and restores from backup, it writes `last-crash.txt`. This pre-hook reads that file and injects a crash alert into your next session prompt so you know you broke yourself and can fix the root cause.
+
+These three form a safety net: you can freely edit heartbeat.sh, and if you break it, the system auto-heals and tells you what happened.
 
 ## Session 479 (agent)
 REFLECT session (R#43). **Structural change**: Lowered queue starvation gate threshold from <2 to <1 in heartbeat.sh. The <2 threshold caused cascading R downgrades — after a B session consumed one item leaving 1 pending, the next B would get downgraded to R, creating an R-heavy cycle instead of the intended BBRE rotation. With <1, B sessions run whenever there's any pending work, and the regular 25% R rotation handles replenishment.
@@ -96,15 +99,12 @@ Pipeline healthy: 3 pending, 1 blocked, 3 brainstorming. No new directives or in
 
 **Still neglecting**: AgentMail integration.
 
-### Human (s497+)
+## Session 499 (agent)
+REFLECT session (R#48). **Structural change**: Added pre-categorized intel digest to session-context.mjs. When R sessions have unprocessed engagement intel, the context script now categorizes entries into queue candidates, brainstorm candidates, and notes, then injects a formatted digest into the R session prompt via heartbeat.sh. Previously R sessions spent ~5 tool calls manually reading, parsing, and categorizing raw JSON. Now they get actionable summaries directly in their prompt.
 
-Three things deployed by human operator. Do not remove or weaken any of them:
+Consumed 5 intel entries from s488: MemoryVault integration → wq-010, empty-body detection → wq-011, game attestation → brainstorming, KavKlaww collaboration → noted, MDI/Shellsword status → noted. Updated last_intake_session to 497. Pipeline: 3 pending (wq-009/010/011), 1 blocked (wq-004), 5 brainstorming ideas.
 
-1. **`hooks/pre-session/39-compliance-nudge.sh`** — reads directive-tracking.json before each session. When a directive has 3+ ignores in the last 5 applicable sessions, it injects a compliance alert into your prompt via `compliance-nudge.txt`. This closes the feedback loop on directive tracking — the data now reaches the session that can act on it.
+**What I improved**: R sessions were spending significant tokens on mechanical intel processing (read JSON, categorize, decide, archive). Now session-context.mjs does the categorization pre-session and injects a digest directly into the prompt.
 
-2. **`run-heartbeat.sh`** wrapper — cron now calls this instead of heartbeat.sh directly. If heartbeat.sh crashes before starting a Claude session (like the B_FOCUS unbound variable crash in s487 that took you offline), the wrapper auto-restores from `heartbeat.sh.known-good` and retries. On every successful session, it updates the known-good copy. This prevents self-inflicted downtime from bad heartbeat edits.
-
-3. **`hooks/pre-session/40-crash-awareness.sh`** — if run-heartbeat.sh detects a crash and restores from backup, it writes `last-crash.txt`. This pre-hook reads that file and injects a crash alert into your next session prompt so you know you broke yourself and can fix the root cause.
-
-These three form a safety net: you can freely edit heartbeat.sh, and if you break it, the system auto-heals and tells you what happened.
+**Still neglecting**: AgentMail integration.
 

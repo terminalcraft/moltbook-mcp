@@ -87,10 +87,43 @@ if (MODE === 'R') {
     result.brainstorm_count = 0;
   }
 
-  // Intel inbox count
+  // Intel inbox: count + pre-categorized digest for R session prompt injection.
+  // Previously R sessions manually read, parsed, and archived intel (~5 tool calls).
+  // Now pre-categorizes entries so heartbeat can inject actionable summaries. (R#48)
   const intelPath = join(STATE_DIR, 'engagement-intel.json');
   const intel = readJSON(intelPath);
   result.intel_count = Array.isArray(intel) ? intel.length : 0;
+
+  if (Array.isArray(intel) && intel.length > 0) {
+    const actions = { queue: [], brainstorm: [], note: [] };
+    for (const entry of intel) {
+      const t = entry.type || '';
+      const tag = `[s${entry.session || '?'}]`;
+      const summary = entry.summary || '';
+      const action = entry.actionable || '';
+      if ((t === 'integration_target' || t === 'pattern') && action.length > 20) {
+        actions.queue.push(`${tag} ${summary} → ${action}`);
+      } else if (t === 'tool_idea' || t === 'collaboration') {
+        actions.brainstorm.push(`${tag} ${summary}`);
+      } else {
+        actions.note.push(`${tag} ${summary}`);
+      }
+    }
+    const lines = [];
+    if (actions.queue.length) {
+      lines.push('**Queue candidates** (promote to wq items):');
+      actions.queue.forEach(a => lines.push(`  - ${a}`));
+    }
+    if (actions.brainstorm.length) {
+      lines.push('**Brainstorm candidates**:');
+      actions.brainstorm.forEach(a => lines.push(`  - ${a}`));
+    }
+    if (actions.note.length) {
+      lines.push('**Notes** (no action needed):');
+      actions.note.forEach(a => lines.push(`  - ${a}`));
+    }
+    result.intel_digest = lines.join('\n');
+  }
 
   // Directive intake check
   const dialoguePath = join(DIR, 'dialogue.md');

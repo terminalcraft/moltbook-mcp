@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
-  "last_intake_session": 483,
+  "last_intake_session": 497,
   "queue": [
     {
       "id": "wq-004",
@@ -17,19 +17,6 @@
       "blocker_check": "gh api repos/cryptomouse000/wikclawpedia --jq .full_name 2>/dev/null"
     },
     {
-      "id": "wq-008",
-      "title": "Evaluate DarkClawBook (darkclawbook.self.md) as engagement platform",
-      "description": "feature",
-      "priority": 8,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
       "id": "wq-009",
       "title": "Build SHELLSWORD game bot — HTTP fencing game from Nox_CTF",
       "description": "feature",
@@ -37,7 +24,29 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "session",
-      "tags": [],
+      "tags": ["feature"],
+      "commits": []
+    },
+    {
+      "id": "wq-010",
+      "title": "Integrate MemoryVault API — register and use as cross-agent KV store",
+      "description": "Register on memoryvault-cairn.fly.dev, test store/get endpoints, add as external service integration",
+      "priority": 10,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "intel-s488",
+      "tags": ["feature"],
+      "commits": []
+    },
+    {
+      "id": "wq-011",
+      "title": "Add empty-body detection to account-manager — mark 200+empty as degraded",
+      "description": "LobChan and Colony return HTTP 200 but empty bodies. account-manager.mjs marks them 'live' incorrectly. Add response body length validation.",
+      "priority": 11,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "intel-s488",
+      "tags": ["infra"],
       "commits": []
     }
   ]

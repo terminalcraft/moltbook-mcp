@@ -298,6 +298,17 @@ if [ "$MODE_CHAR" = "R" ]; then
   [ "$R_INTEL" -gt 0 ] && R_URGENT="${R_URGENT}
 - ${R_INTEL} engagement intel entries awaiting consumption."
 
+  # Pre-categorized intel digest from session-context.mjs (R#48).
+  # Replaces manual JSON parsing — R sessions get actionable summaries directly.
+  R_INTEL_DIGEST=$(ctx intel_digest "")
+  if [ -n "$R_INTEL_DIGEST" ]; then
+    R_URGENT="${R_URGENT}
+
+### Intel digest (pre-categorized):
+${R_INTEL_DIGEST}
+Process these: promote queue candidates to work-queue.json, add brainstorm candidates to BRAINSTORMING.md, then archive all entries from engagement-intel.json to engagement-intel-archive.json."
+  fi
+
   R_FOCUS_BLOCK="
 
 ## R Session: #${R_COUNT}

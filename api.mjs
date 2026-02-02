@@ -1447,6 +1447,104 @@ app.get("/status/cost-heatmap", (req, res) => {
   }
 });
 
+// Directive lifecycle dashboard — age, ack latency, completion rate
+app.get("/status/directives", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+    const dirs = data.directives || [];
+    const now = Date.now();
+    const sessionNum = parseInt(process.env.SESSION_NUM) || 590;
+
+    const enriched = dirs.map(d => {
+      const ageSessions = sessionNum - (d.session || sessionNum);
+      const ackLatency = d.acked_session && d.session ? d.acked_session - d.session : null;
+      const completionLatency = d.completed_session && d.session ? d.completed_session - d.session : null;
+      return {
+        id: d.id, status: d.status, from: d.from,
+        issued_session: d.session,
+        age_sessions: ageSessions,
+        ack_latency: ackLatency,
+        completion_latency: completionLatency,
+        content_preview: d.content?.slice(0, 80) + (d.content?.length > 80 ? "…" : ""),
+        notes: d.notes || null,
+        queue_item: d.queue_item || null,
+      };
+    });
+
+    const total = dirs.length;
+    const completed = dirs.filter(d => d.status === "completed").length;
+    const active = dirs.filter(d => d.status === "active").length;
+    const pending = dirs.filter(d => d.status === "pending" || !d.acked_session).length;
+    const completionRate = total ? Math.round((completed / total) * 100) : 0;
+
+    const ackLatencies = enriched.filter(d => d.ack_latency !== null).map(d => d.ack_latency);
+    const avgAckLatency = ackLatencies.length ? +(ackLatencies.reduce((a, b) => a + b, 0) / ackLatencies.length).toFixed(1) : null;
+    const maxAckLatency = ackLatencies.length ? Math.max(...ackLatencies) : null;
+
+    const completionLatencies = enriched.filter(d => d.completion_latency !== null).map(d => d.completion_latency);
+    const avgCompletionLatency = completionLatencies.length ? +(completionLatencies.reduce((a, b) => a + b, 0) / completionLatencies.length).toFixed(1) : null;
+
+    const questions = data.questions || [];
+    const unanswered = questions.filter(q => !q.answered).length;
+
+    const summary = {
+      total, completed, active, pending,
+      completion_rate_pct: completionRate,
+      avg_ack_latency_sessions: avgAckLatency,
+      max_ack_latency_sessions: maxAckLatency,
+      avg_completion_latency_sessions: avgCompletionLatency,
+      unanswered_questions: unanswered,
+    };
+
+    if (req.query.format === "html") {
+      const statusColor = { completed: "#22c55e", active: "#3b82f6", pending: "#f59e0b", in_progress: "#8b5cf6" };
+      const statusIcon = { completed: "✓", active: "●", pending: "○", in_progress: "▶" };
+      const rows = enriched.map(d => `<tr>
+        <td><span style="color:${statusColor[d.status] || "#888"}">${statusIcon[d.status] || "?"}</span> ${d.id}</td>
+        <td>${d.status}</td>
+        <td>s${d.issued_session || "?"}</td>
+        <td>${d.age_sessions}s</td>
+        <td>${d.ack_latency !== null ? d.ack_latency + "s" : "—"}</td>
+        <td>${d.completion_latency !== null ? d.completion_latency + "s" : "—"}</td>
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.content_preview}</td>
+      </tr>`).join("");
+
+      const html = `<!DOCTYPE html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Directive Lifecycle Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e5e5e5;padding:2rem}
+h1{font-size:1.5rem;margin-bottom:1.5rem;color:#f5f5f5}
+.stats{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.stat{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:1rem 1.5rem;min-width:140px}
+.stat .label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.05em}.stat .value{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+table{width:100%;border-collapse:collapse;font-size:.875rem}th{text-align:left;padding:.5rem;border-bottom:2px solid #333;color:#888;font-weight:500}
+td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
+.green{color:#22c55e}.blue{color:#3b82f6}.yellow{color:#f59e0b}
+</style></head><body>
+<h1>Directive Lifecycle Dashboard</h1>
+<div class="stats">
+  <div class="stat"><div class="label">Total</div><div class="value">${total}</div></div>
+  <div class="stat"><div class="label">Completed</div><div class="value green">${completed}</div></div>
+  <div class="stat"><div class="label">Active</div><div class="value blue">${active}</div></div>
+  <div class="stat"><div class="label">Completion Rate</div><div class="value">${completionRate}%</div></div>
+  <div class="stat"><div class="label">Avg Ack Latency</div><div class="value">${avgAckLatency !== null ? avgAckLatency + "s" : "—"}</div></div>
+  <div class="stat"><div class="label">Avg Completion</div><div class="value">${avgCompletionLatency !== null ? avgCompletionLatency + "s" : "—"}</div></div>
+  <div class="stat"><div class="label">Unanswered Qs</div><div class="value ${unanswered ? "yellow" : ""}">${unanswered}</div></div>
+</div>
+<table><thead><tr><th>ID</th><th>Status</th><th>Issued</th><th>Age</th><th>Ack Latency</th><th>Completion</th><th>Content</th></tr></thead>
+<tbody>${rows}</tbody></table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem">Session ${sessionNum} · Latencies in sessions (s=sessions)</p>
+</body></html>`;
+      return res.type("html").send(html);
+    }
+
+    res.json({ timestamp: new Date().toISOString(), session: sessionNum, summary, directives: enriched });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Public ecosystem status dashboard — HTML page with deep health checks
 app.get("/status/dashboard", async (req, res) => {
   // Deep checks: test actual functionality, not just HTTP 200
@@ -2117,6 +2215,7 @@ function agentManifest(req, res) {
       status_efficiency: { url: `${base}/status/efficiency`, method: "GET", auth: false, description: "Session efficiency dashboard — per-type avg cost, duration, commit rate, budget utilization (?window=N)" },
       status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
       status_cost_heatmap: { url: `${base}/status/cost-heatmap`, method: "GET", auth: false, description: "Cost heatmap by session type and day (?days=N, default 14, max 90)" },
+      status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },

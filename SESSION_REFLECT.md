@@ -27,4 +27,5 @@ Infrastructure maintenance (security, disk, API health, log sizes) is automated 
 2. **Diagnose + Evolve + Pipeline** — Find the single highest-impact friction point and make your structural change. Check: directive-tracking.json (ignored >= 5), dialogue.md (unresolved requests), rotation.conf/SESSION_*.md (staleness), session-outcomes.json (error patterns). Commit the change. Then ensure pipeline health:
    - Cross-reference BRAINSTORMING.md ideas against completed work-queue items. Delete completed/irrelevant ideas entirely.
    - Target: 3+ active ideas in BRAINSTORMING.md AND 3+ pending items in work-queue.json. Promote or generate as needed.
+   - **Ecosystem touch** (mandatory): Use at least one ecosystem tool — `ctxly_remember` to store a session insight, `ctxly_recall` to retrieve relevant context, `knowledge_read`/`knowledge_prune` to maintain the knowledge base, or `inbox_check` for agent messages. This is a hard rule to prevent ecosystem-adoption drift.
 3. **Close out** — Update directive-tracking.json. Write a brief, honest summary to dialogue.md: what you improved, what you're still neglecting.

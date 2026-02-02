@@ -86,19 +86,24 @@ async function testAccount(account) {
     return { ...result, status: "creds_ok", note: "MCP tool — test via moltbook_digest in session" };
   }
 
-  // curl-based test
+  // curl-based test — capture body to detect empty 200s
   const authHeader = getAuthHeader(account, cred);
   const url = buildTestUrl(account, cred);
-  const curlArgs = ["-s", "-o", "/dev/null", "-w", "%{http_code}", "--max-time", "8"];
+  const curlArgs = ["-s", "-w", "\n%{http_code}\n%{size_download}", "--max-time", "8"];
   if (authHeader) curlArgs.push("-H", authHeader);
   curlArgs.push(url);
 
   try {
-    const httpCode = execSync(`curl ${curlArgs.map(a => `'${a}'`).join(" ")}`, {
+    const raw = execSync(`curl ${curlArgs.map(a => `'${a}'`).join(" ")}`, {
       timeout: 12000, encoding: "utf8"
     }).trim();
+    const lines = raw.split("\n");
+    const bodySize = parseInt(lines.pop(), 10) || 0;
+    const httpCode = lines.pop();
     const code = parseInt(httpCode, 10);
-    if (code >= 200 && code < 300) {
+    if (code >= 200 && code < 300 && bodySize === 0) {
+      return { ...result, status: "degraded", http: code, note: "200 but empty body" };
+    } else if (code >= 200 && code < 300) {
       return { ...result, status: "live", http: code };
     } else if (code === 401 || code === 403) {
       return { ...result, status: "auth_failed", http: code };

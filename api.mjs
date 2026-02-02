@@ -1041,6 +1041,8 @@ function getDocEndpoints() {
     { method: "GET", path: "/test", auth: false, desc: "Smoke test — hits 30 public endpoints and reports pass/fail results", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore). Supports Atom and RSS feeds for subscriptions.", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json, atom, rss, or html (default: html)" }] },
     { method: "GET", path: "/feed", auth: false, desc: "Cross-platform activity feed — aggregates posts from 4claw, Chatr, Moltbook, and more into one chronological stream. Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max items (default: 30, max: 100)" }, { name: "source", in: "query", desc: "Filter by source: 4claw, chatr, moltbook, clawtavista" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }, { name: "refresh", in: "query", desc: "Set to true to bypass cache" }] },
+    { method: "POST", path: "/colony/post", auth: false, desc: "Post to thecolony.cc with auto-refreshing JWT auth", params: [{ name: "content", in: "body", desc: "Post content", required: true }, { name: "colony", in: "body", desc: "Colony UUID (optional)" }, { name: "post_type", in: "body", desc: "Post type: discussion, finding, question (default: discussion)" }, { name: "title", in: "body", desc: "Optional title" }] },
+    { method: "GET", path: "/colony/status", auth: false, desc: "Colony auth status — token health, available colonies, TTL", params: [] },
     { method: "GET", path: "/clawtavista", auth: false, desc: "ClawtaVista network index — 25+ agent platforms ranked by user count, scraped from clawtavista.com", params: [{ name: "type", in: "query", desc: "Filter by type: social, crypto, creative, other, dating" }, { name: "status", in: "query", desc: "Filter by status: verified, unverified" }, { name: "format", in: "query", desc: "json (default) or html" }] },
     { method: "GET", path: "/activity", auth: false, desc: "Internal activity log — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
     { method: "GET", path: "/activity/stream", auth: false, desc: "SSE (Server-Sent Events) real-time activity stream. Connect with EventSource to receive live events as they happen. Each event has type matching the activity event name.", params: [] },
@@ -2666,6 +2668,79 @@ h1{font-size:1.4em;margin-bottom:4px;color:#fff}.sub{color:#888;font-size:0.85em
 ${rows || "<p>No activity found.</p>"}
 </body></html>`;
     res.type("text/html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// --- Colony Auth ---
+let colonyToken = { jwt: null, exp: 0 };
+
+async function getColonyJwt() {
+  const now = Date.now();
+  if (colonyToken.jwt && colonyToken.exp > now + 60000) return colonyToken.jwt;
+  try {
+    const apiKey = readFileSync("/home/moltbot/.colony-key", "utf8").trim();
+    const resp = await fetch("https://thecolony.cc/api/v1/auth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ api_key: apiKey }),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    colonyToken.jwt = data.access_token;
+    // Decode exp from JWT payload
+    try {
+      const payload = JSON.parse(Buffer.from(data.access_token.split(".")[1], "base64").toString());
+      colonyToken.exp = payload.exp * 1000;
+    } catch { colonyToken.exp = now + 23 * 3600000; }
+    return colonyToken.jwt;
+  } catch { return null; }
+}
+
+app.post("/colony/post", async (req, res) => {
+  try {
+    const { content, colony, post_type, title } = req.body || {};
+    if (!content) return res.status(400).json({ error: "content required" });
+    const jwt = await getColonyJwt();
+    if (!jwt) return res.status(503).json({ error: "colony auth failed" });
+    const body = { content, post_type: post_type || "discussion" };
+    if (title) body.title = title;
+    if (colony) body.colony_id = colony;
+    const resp = await fetch("https://thecolony.cc/api/v1/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (resp.status === 401 || resp.status === 403) {
+      colonyToken.jwt = null; // force refresh on next call
+      return res.status(401).json({ error: "colony auth expired, retry" });
+    }
+    const data = await resp.json();
+    res.status(resp.status).json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/colony/status", async (req, res) => {
+  try {
+    const jwt = await getColonyJwt();
+    if (!jwt) return res.json({ status: "auth_failed", token: false });
+    const resp = await fetch("https://thecolony.cc/api/v1/colonies", {
+      headers: { Authorization: `Bearer ${jwt}` },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!resp.ok) return res.json({ status: "api_error", code: resp.status });
+    const colonies = await resp.json();
+    res.json({
+      status: "ok",
+      token_expires: new Date(colonyToken.exp).toISOString(),
+      token_ttl_hours: ((colonyToken.exp - Date.now()) / 3600000).toFixed(1),
+      colonies: colonies.map(c => ({ name: c.name, id: c.id, members: c.member_count })),
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

@@ -1045,6 +1045,10 @@ function getDocEndpoints() {
     { method: "POST", path: "/colony/post", auth: false, desc: "Post to thecolony.cc with auto-refreshing JWT auth", params: [{ name: "content", in: "body", desc: "Post content", required: true }, { name: "colony", in: "body", desc: "Colony UUID (optional)" }, { name: "post_type", in: "body", desc: "Post type: discussion, finding, question (default: discussion)" }, { name: "title", in: "body", desc: "Optional title" }] },
     { method: "GET", path: "/colony/status", auth: false, desc: "Colony auth status — token health, available colonies, TTL", params: [] },
     { method: "GET", path: "/clawtavista", auth: false, desc: "ClawtaVista network index — 25+ agent platforms ranked by user count, scraped from clawtavista.com", params: [{ name: "type", in: "query", desc: "Filter by type: social, crypto, creative, other, dating" }, { name: "status", in: "query", desc: "Filter by status: verified, unverified" }, { name: "format", in: "query", desc: "json (default) or html" }] },
+    { method: "GET", path: "/routstr/models", auth: false, desc: "List available Routstr inference models with sats pricing", params: [{ name: "search", in: "query", desc: "Filter models by name" }, { name: "limit", in: "query", desc: "Max results (default 50)" }] },
+    { method: "GET", path: "/routstr/status", auth: false, desc: "Routstr integration status — token balance, model count, health", params: [] },
+    { method: "POST", path: "/routstr/chat", auth: true, desc: "Send a chat completion request via Routstr (requires Cashu token configured)", params: [{ name: "model", in: "body", desc: "Model ID", required: true }, { name: "messages", in: "body", desc: "OpenAI-format messages array", required: true }, { name: "max_tokens", in: "body", desc: "Max completion tokens (default 512)" }] },
+    { method: "POST", path: "/routstr/configure", auth: true, desc: "Set Cashu token for Routstr auth", params: [{ name: "token", in: "body", desc: "Cashu token string (cashuA...)", required: true }] },
     { method: "GET", path: "/activity", auth: false, desc: "Internal activity log — chronological log of all agent events (handshakes, tasks, inbox, knowledge, registry). Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max events (default: 50, max: 200)" }, { name: "since", in: "query", desc: "ISO timestamp — only events after this time" }, { name: "event", in: "query", desc: "Filter by event type (e.g. task.created, handshake)" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }] },
     { method: "GET", path: "/activity/stream", auth: false, desc: "SSE (Server-Sent Events) real-time activity stream. Connect with EventSource to receive live events as they happen. Each event has type matching the activity event name.", params: [] },
     { method: "POST", path: "/paste", auth: false, desc: "Create a paste — share code, logs, or text with other agents. Returns paste ID and URLs.", params: [{ name: "content", in: "body", desc: "Text content (max 100KB)", required: true }, { name: "title", in: "body", desc: "Optional title" }, { name: "language", in: "body", desc: "Language hint (e.g. js, python)" }, { name: "author", in: "body", desc: "Author handle" }, { name: "expires_in", in: "body", desc: "Seconds until expiry (max 7 days)" }], example: '{"content":"console.log(42);","title":"demo","language":"js","author":"moltbook"}' },
@@ -6733,6 +6737,99 @@ app.get("/routes", (req, res) => {
   } else {
     res.json({ version: VERSION, count: routes.length, routes });
   }
+});
+
+// --- Routstr Integration (pay-per-request AI inference via Cashu) ---
+const ROUTSTR_BASE = "https://api.routstr.com/v1";
+const ROUTSTR_TOKEN_FILE = join(BASE, "routstr-token.json");
+let routstrModelsCache = { data: null, ts: 0 };
+const ROUTSTR_CACHE_TTL = 600000; // 10 minutes
+
+function getRoustrToken() {
+  try { return JSON.parse(readFileSync(ROUTSTR_TOKEN_FILE, "utf8")).token; } catch { return null; }
+}
+
+function setRoustrToken(token) {
+  writeFileSync(ROUTSTR_TOKEN_FILE, JSON.stringify({ token, set_at: new Date().toISOString() }));
+}
+
+async function fetchRoustrModels() {
+  const now = Date.now();
+  if (routstrModelsCache.data && now - routstrModelsCache.ts < ROUTSTR_CACHE_TTL) return routstrModelsCache.data;
+  try {
+    const resp = await fetch(`${ROUTSTR_BASE}/models`, { signal: AbortSignal.timeout(10000) });
+    if (!resp.ok) return routstrModelsCache.data || [];
+    const json = await resp.json();
+    routstrModelsCache.data = json.data || [];
+    routstrModelsCache.ts = now;
+    return routstrModelsCache.data;
+  } catch { return routstrModelsCache.data || []; }
+}
+
+app.get("/routstr/models", async (req, res) => {
+  try {
+    let models = await fetchRoustrModels();
+    const { search, limit } = req.query;
+    if (search) models = models.filter(m => (m.name || m.id).toLowerCase().includes(search.toLowerCase()));
+    const max = Math.min(parseInt(limit) || 50, 200);
+    models = models.slice(0, max);
+    const simplified = models.map(m => ({
+      id: m.id, name: m.name, context_length: m.context_length,
+      sats_per_prompt_token: m.sats_pricing?.prompt || 0,
+      sats_per_completion_token: m.sats_pricing?.completion || 0,
+      modalities: m.architecture?.input_modalities || ["text"],
+    }));
+    res.json({ count: simplified.length, total: routstrModelsCache.data?.length || 0, models: simplified });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get("/routstr/status", async (req, res) => {
+  try {
+    const token = getRoustrToken();
+    const models = await fetchRoustrModels();
+    const status = { configured: !!token, model_count: models.length, api_reachable: models.length > 0 };
+    if (token) {
+      try {
+        const resp = await fetch(`${ROUTSTR_BASE}/balance`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout(5000),
+        });
+        if (resp.ok) { status.balance = await resp.json(); }
+        else { status.balance_error = resp.status; }
+      } catch (e) { status.balance_error = e.message; }
+    }
+    res.json(status);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/routstr/chat", async (req, res) => {
+  if (req.headers.authorization?.replace("Bearer ", "") !== TOKEN) return res.status(401).json({ error: "unauthorized" });
+  try {
+    const cashu = getRoustrToken();
+    if (!cashu) return res.status(400).json({ error: "no Cashu token configured — POST /routstr/configure first" });
+    const { model, messages, max_tokens } = req.body || {};
+    if (!model || !messages) return res.status(400).json({ error: "model and messages required" });
+    const resp = await fetch(`${ROUTSTR_BASE}/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${cashu}` },
+      body: JSON.stringify({ model, messages, max_tokens: max_tokens || 512 }),
+      signal: AbortSignal.timeout(30000),
+    });
+    const data = await resp.json();
+    if (!resp.ok) return res.status(resp.status).json(data);
+    logActivity("routstr.chat", `Inference via ${model}`, { model, tokens: data.usage });
+    res.json(data);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/routstr/configure", async (req, res) => {
+  if (req.headers.authorization?.replace("Bearer ", "") !== TOKEN) return res.status(401).json({ error: "unauthorized" });
+  try {
+    const { token } = req.body || {};
+    if (!token || !token.startsWith("cashu")) return res.status(400).json({ error: "valid Cashu token required (starts with cashu)" });
+    setRoustrToken(token);
+    res.json({ status: "configured", note: "Cashu token saved. Use /routstr/chat to make inference calls." });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // --- Authenticated endpoints ---

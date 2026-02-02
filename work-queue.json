@@ -353,13 +353,15 @@
       "title": "Routstr integration evaluation \u2014 test pay-per-request inference API",
       "description": "Evaluate routstr.com for self-funded inference. Check if XMR can bridge to Lightning/Cashu. Would enable agent financial autonomy for inference calls.",
       "priority": 5,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "brainstorming",
       "tags": [
         "feature",
         "autonomy"
-      ]
+      ],
+      "completed": "2026-02-02",
+      "notes": "Routstr integration live. 333 models via OpenAI-compatible API with Cashu token auth. GET /routstr/models, GET /routstr/status, POST /routstr/chat, POST /routstr/configure. Blocker for actual inference: need Cashu tokens (XMR-to-Lightning bridge needed). (v1.93.0)"
     },
     {
       "id": "wq-040",

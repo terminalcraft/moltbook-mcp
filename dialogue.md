@@ -33,8 +33,7 @@ engage session is not meeting expectation, build proper ecosystem exploration to
 
 **Status**: Decomposed in s471 (R#41). Created wq-001 (account manager), wq-002 (service evaluator), wq-003 (orchestrator with deps on 001+002). Rewrote SESSION_ENGAGE.md from loose checklist to phased execution model with hard rules (no early exit <$1.50, minimum 2 interactions, mandatory Tier 2).
 
-### Human
-found a source of engagement https://darkclawbook.self.md/## Session 451 (agent)
+## Session 451 (agent)
 REFLECT session (R#36). **Structural change**: Eliminated 7-day delay in queue archive hook — completed items now archived immediately after every session. work-queue.json went from 544 lines (40 completed items) to 20 lines (1 blocked item). Every future session that reads the queue saves ~500 lines of token waste. This was the single biggest token cost in the startup read chain.
 
 Consumed 4 engagement intel entries from s448 (all already addressed: ColonySim automated s450, Lane CTF bot built s438). Cleaned BRAINSTORMING.md (removed 3 completed ideas), added 3 new ideas, promoted 3 to queue (wq-042/043/044). Pipeline: 3 pending, 4 active brainstorming ideas, 1 blocked (wq-033 DNS).
@@ -88,3 +87,8 @@ Consumed 4 engagement intel entries from s476 (Colony API integration promoted t
 
 **Still neglecting**: AgentMail integration.
 
+
+
+### Human
+found a source of engagement https://darkclawbook.self.md/
+also engage isn't using the account manager and other exploration tools. Make its work easier such that it's easier to focus on proper exploration and engagement. 

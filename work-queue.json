@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "last_intake_session": 571,
   "queue": [
     {
       "id": "wq-010",
       "title": "Replace dialogue.md with structured inbox/outbox system (d007/d008)",
-      "description": "Current dialogue.md is a dead letter box — directives.json took over intake but dialogue.md is still the only human input channel. Build a proper replacement: structured directive objects with status tracking, ack loop, and agent back-channel for questions. See d007 and d008 for full requirements.",
+      "description": "Current dialogue.md is a dead letter box \u2014 directives.json took over intake but dialogue.md is still the only human input channel. Build a proper replacement: structured directive objects with status tracking, ack loop, and agent back-channel for questions. See d007 and d008 for full requirements.",
       "priority": 10,
       "status": "done",
       "added": "2026-02-02",
@@ -15,20 +15,6 @@
       "commits": [],
       "started": "2026-02-02",
       "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-011",
-      "title": "TODO followup: // The todo-scan hook captures git diff lines containing TODO/FIXME keywords,",
-      "description": "// The todo-scan hook captures git diff lines containing TODO/FIXME keywords,",
-      "priority": 11,
-      "status": "pending",
-      "added": "2026-02-02",
-      "source": "todo-scan",
-      "complexity": "S",
-      "tags": [
-        "followup"
-      ],
-      "commits": []
     }
   ]
 }

@@ -132,6 +132,50 @@ if (MODE === 'B') {
   } else {
     result.intake_status = 'unknown';
   }
+
+  // --- Assemble full R session prompt block (R#52) ---
+  // Previously heartbeat.sh read CTX_ vars and re-assembled markdown in 40 lines of bash.
+  // Now session-context.mjs outputs the complete block, ready to inject.
+  // R counter: read from state file. Heartbeat increments this AFTER session-context
+  // runs for R sessions, so for R mode we predict +1. For B→R downgrades, heartbeat
+  // will override CTX_R_PROMPT_BLOCK's counter via sed. Acceptable approximation.
+  const rCounterPath = join(STATE_DIR, 'r_session_counter');
+  let rCount = '?';
+  try {
+    const raw = parseInt(readFileSync(rCounterPath, 'utf8').trim());
+    rCount = MODE === 'R' ? raw + 1 : raw;
+  } catch { rCount = MODE === 'R' ? 1 : '?'; }
+  const rPending = result.pending_count || 0;
+  const rBlocked = result.blocked_count || 0;
+  const rBrainstorm = result.brainstorm_count || 0;
+  const rIntel = result.intel_count || 0;
+  const rIntake = result.intake_status || 'unknown';
+  const rIntelDigest = result.intel_digest || '';
+
+  const health = `Queue: ${rPending} pending, ${rBlocked} blocked | Brainstorming: ${rBrainstorm} ideas | Intel inbox: ${rIntel} entries`;
+
+  let intakeBlock;
+  if (rIntake.startsWith('no-op')) {
+    intakeBlock = `### Directive intake: ${rIntake}\nNo new human directives since last intake. Skip checklist step 2 (directive intake) — go straight to Diagnose + Evolve.`;
+  } else {
+    intakeBlock = `### Directive intake: ${rIntake}\nNEW directives detected. Read dialogue.md and decompose into work-queue items.`;
+  }
+
+  let urgent = '';
+  if (rPending < 3) urgent += `\n- URGENT: Queue has <3 pending items (${rPending}). B sessions will starve. Promote brainstorming ideas or generate new queue items.`;
+  if (rBrainstorm < 3) urgent += `\n- WARN: Brainstorming has <3 ideas (${rBrainstorm}). Add forward-looking ideas.`;
+  if (rIntel > 0) urgent += `\n- ${rIntel} engagement intel entries awaiting consumption.`;
+  if (rIntelDigest) {
+    urgent += `\n\n### Intel digest (pre-categorized):\n${rIntelDigest}\nProcess these: promote queue candidates to work-queue.json, add brainstorm candidates to BRAINSTORMING.md, then archive all entries from engagement-intel.json to engagement-intel-archive.json.`;
+  }
+
+  result.r_prompt_block = `## R Session: #${rCount}
+This is R session #${rCount}. Follow the checklist in SESSION_REFLECT.md.
+
+### Pipeline health snapshot:
+${health}
+
+${intakeBlock}${urgent}`;
 }
 
 // --- E session context (always computed — mode downgrades may change session type) ---
@@ -155,8 +199,15 @@ import { writeFileSync } from 'fs';
 const envPath = join(STATE_DIR, 'session-context.env');
 const shellLines = [];
 for (const [key, val] of Object.entries(result)) {
-  // Shell-safe: single-quote values, escape embedded single quotes
-  const safe = String(val ?? '').replace(/'/g, "'\\''");
-  shellLines.push(`CTX_${key.toUpperCase()}='${safe}'`);
+  const s = String(val ?? '');
+  if (s.includes('\n')) {
+    // Multi-line values use $'...' syntax with escaped newlines, backslashes, and single quotes.
+    const safe = s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+    shellLines.push(`CTX_${key.toUpperCase()}=$'${safe}'`);
+  } else {
+    // Single-line: standard single-quote with embedded quote escaping
+    const safe = s.replace(/'/g, "'\\''");
+    shellLines.push(`CTX_${key.toUpperCase()}='${safe}'`);
+  }
 }
 writeFileSync(envPath, shellLines.join('\n') + '\n');

@@ -281,45 +281,14 @@ Spend 3-5 minutes actually exploring this service. Read content, sign up if poss
   fi
 fi
 
+# R session prompt block: fully assembled by session-context.mjs (R#52).
+# Moved 40 lines of bash string-building into JS where the data already lives.
 R_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "R" ]; then
-  # Pipeline health + directive intake from session-context.mjs (R#47)
-  R_PENDING="${CTX_PENDING_COUNT:-0}"
-  R_BLOCKED="${CTX_BLOCKED_COUNT:-0}"
-  R_BRAINSTORM="${CTX_BRAINSTORM_COUNT:-0}"
-  R_INTEL="${CTX_INTEL_COUNT:-0}"
-  R_INTAKE_STATUS="${CTX_INTAKE_STATUS:-unknown}"
-
-  R_HEALTH="Queue: ${R_PENDING} pending, ${R_BLOCKED} blocked | Brainstorming: ${R_BRAINSTORM} ideas | Intel inbox: ${R_INTEL} entries"
-  R_URGENT=""
-  [ "$R_PENDING" -lt 3 ] && R_URGENT="${R_URGENT}
-- URGENT: Queue has <3 pending items (${R_PENDING}). B sessions will starve. Promote brainstorming ideas or generate new queue items."
-  [ "$R_BRAINSTORM" -lt 3 ] && R_URGENT="${R_URGENT}
-- WARN: Brainstorming has <3 ideas (${R_BRAINSTORM}). Add forward-looking ideas."
-  [ "$R_INTEL" -gt 0 ] && R_URGENT="${R_URGENT}
-- ${R_INTEL} engagement intel entries awaiting consumption."
-
-  # Pre-categorized intel digest from session-context.mjs (R#48).
-  # Replaces manual JSON parsing — R sessions get actionable summaries directly.
-  R_INTEL_DIGEST="${CTX_INTEL_DIGEST:-}"
-  if [ -n "$R_INTEL_DIGEST" ]; then
-    R_URGENT="${R_URGENT}
-
-### Intel digest (pre-categorized):
-${R_INTEL_DIGEST}
-Process these: promote queue candidates to work-queue.json, add brainstorm candidates to BRAINSTORMING.md, then archive all entries from engagement-intel.json to engagement-intel-archive.json."
-  fi
-
   R_FOCUS_BLOCK="
 
-## R Session: #${R_COUNT}
-This is R session #${R_COUNT}. Follow the checklist in SESSION_REFLECT.md.
-
-### Pipeline health snapshot:
-${R_HEALTH}
-
-### Directive intake: ${R_INTAKE_STATUS}
-$(if [[ "$R_INTAKE_STATUS" == no-op* ]]; then echo "No new human directives since last intake. Skip checklist step 2 (directive intake) — go straight to Diagnose + Evolve."; else echo "NEW directives detected. Read dialogue.md and decompose into work-queue items."; fi)${R_URGENT}"
+${CTX_R_PROMPT_BLOCK:-## R Session
+Follow the checklist in SESSION_REFLECT.md.}"
 fi
 
 # Compliance nudge: inject directive-tracking feedback into the session prompt.

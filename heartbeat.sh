@@ -240,7 +240,8 @@ done
 if [ -z "$DRY_RUN" ]; then
   MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
     LOG_DIR="$LOG_DIR" \
-    "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 || true
+    "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
+      --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" || true
 fi
 
 case "$MODE_CHAR" in

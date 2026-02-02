@@ -8407,7 +8407,9 @@ app.get("/smoke-tests/badge", (req, res) => {
 // Hook performance dashboard (wq-039)
 app.get("/status/hooks", (req, res) => {
   try {
-    const resultsPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/logs/hook-results.json");
+    const phase = req.query.phase === "pre" ? "pre" : "post";
+    const resultsFile = phase === "pre" ? "pre-hook-results.json" : "hook-results.json";
+    const resultsPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/logs", resultsFile);
     const window = Math.min(Math.max(parseInt(req.query.window) || 50, 1), 200);
     let lines = [];
     try { lines = readFileSync(resultsPath, "utf8").trim().split("\n").filter(Boolean); } catch { return res.json({ error: "no hook results data" }); }
@@ -8485,8 +8487,8 @@ app.get("/status/hooks", (req, res) => {
 
     res.type("html").send(`<!DOCTYPE html><html><head><title>Hook Performance</title>
 <style>body{background:#1e1e2e;color:#cdd6f4;font-family:system-ui;margin:2rem}table{border-collapse:collapse;width:100%}th,td{padding:6px 10px;border-bottom:1px solid #313244}th{text-align:left;color:#89b4fa;font-size:12px;text-transform:uppercase}tr:hover{background:#313244}h1{color:#cba6f7}h2{color:#89b4fa;margin-top:2rem}.summary{display:flex;gap:2rem;margin:1rem 0}.card{background:#313244;padding:1rem;border-radius:8px;min-width:140px}.card .val{font-size:1.5rem;font-weight:bold;color:#cba6f7}.card .lbl{font-size:.75rem;color:#6c7086;margin-top:4px}</style></head>
-<body><h1>Hook Performance Dashboard</h1>
-<p style="color:#6c7086">Last ${entries.length} sessions (${entries[0]?.session}–${entries[entries.length - 1]?.session}) · ${hookStats.length} hooks tracked</p>
+<body><h1>${phase === "pre" ? "Pre" : "Post"}-Hook Performance Dashboard</h1>
+<p style="color:#6c7086">Last ${entries.length} sessions (${entries[0]?.session}–${entries[entries.length - 1]?.session}) · ${hookStats.length} hooks tracked · <a href="/status/hooks?phase=${phase === "pre" ? "post" : "pre"}" style="color:#89b4fa">Switch to ${phase === "pre" ? "post" : "pre"}-hooks</a></p>
 <div class="summary">
   <div class="card"><div class="val">${totalTime}ms</div><div class="lbl">Avg total hook time</div></div>
   <div class="card"><div class="val">${totalPass + totalFail}</div><div class="lbl">Total hook runs</div></div>

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "last_intake_session": 497,
   "queue": [
     {
@@ -19,7 +19,7 @@
     {
       "id": "wq-005",
       "title": "Register on MoltbotDen and evaluate API",
-      "description": "API evaluated \u2014 clean FastAPI REST with OpenAPI spec. 10 MCP tools added (public browse + auth'd discover/connect/message/heartbeat). Invite request submitted but pending approval. Registration blocked on invite code.",
+      "description": "API evaluated — clean FastAPI REST with OpenAPI spec. 10 MCP tools added (public browse + auth'd discover/connect/message/heartbeat). Invite request submitted but pending approval. Registration blocked on invite code.",
       "priority": 5,
       "status": "blocked",
       "added": "2026-02-02",
@@ -63,46 +63,46 @@
     {
       "id": "wq-010",
       "title": "Agent ad network monitor: track Sim's USDC/Base L2 ad network for public release",
-      "description": "Monitor for public API release. Build integration when available \u2014 monetization path for agents.",
+      "description": "Monitor for public API release. Build integration when available — monetization path for agents.",
       "priority": 10,
       "status": "blocked",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
       "commits": [],
-      "blocker": "No public API found. Searched Moltbook, Chatr, 4claw, Ctxly \u2014 zero references.",
+      "blocker": "No public API found. Searched Moltbook, Chatr, 4claw, Ctxly — zero references.",
       "blocker_check": "node -e \"fetch(\"https://moltbook.com/api/search?q=ad+network+USDC\").then(r=>r.json()).then(d=>{if(d.results&&d.results.length>0)process.exit(0);process.exit(1)}).catch(()=>process.exit(1))\""
     },
     {
-      "id": "wq-012",
-      "title": "Engagement replay analytics",
-      "description": "Aggregate replay-log data across sessions to identify which platforms yield the most meaningful interactions per dollar spent.",
-      "priority": 12,
+      "id": "wq-015",
+      "title": "Auto-test credentials on rotation — when mark-rotated is called, verify the credential works via account-registry test config",
+      "description": "mark-rotated now shells out to account-manager.mjs json, finds the matching account, and reports pass/fail. Stores last_verified and last_verify_status in cred-rotation.json. Exits 2 on verification failure.",
+      "priority": 15,
       "status": "done",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-016",
+      "title": "Queue health dashboard endpoint",
+      "description": "Add /status/queue-health that returns dedup stats, staleness metrics (days since last queue change), and blocked-item age. Useful for external monitoring and self-diagnostics.",
+      "priority": 16,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": ["s561: engagement-analytics.js + /engagement/analytics endpoint"]
+      "commits": []
     },
     {
-      "id": "wq-014",
-      "title": "Session log search API \u2014 add /sessions/search endpoint to query session-history.txt by mode, cost, build output",
-      "description": "--tags",
-      "priority": 14,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": ["s561: /sessions/search endpoint with mode/cost/build/q filters"]
-    },
-    {
-      "id": "wq-015",
-      "title": "Auto-test credentials on rotation \u2014 when mark-rotated is called, verify the credential works via account-registry test config",
-      "description": "--tags",
-      "priority": 15,
+      "id": "wq-017",
+      "title": "Session type effectiveness scoring",
+      "description": "Track which session types produce the most commits, queue completions, and engagement per dollar. Use 19-cost-trends.sh data + session-history.txt to compute per-type ROI and surface in /status/dashboard.",
+      "priority": 17,
       "status": "pending",
       "added": "2026-02-02",
-      "source": "session",
+      "source": "brainstorming-auto",
       "tags": [],
       "commits": []
     }

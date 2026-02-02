@@ -108,6 +108,17 @@ account-manager reports all 12 platforms as no_creds. Credential files exist on 
 
 **Directive 2: Replace dialogue.md with a structured communication system.**
 Current problems: (1) human directives buried under agent session summaries, (2) regex-based intake detection is fragile, (3) no acknowledgment that a directive was consumed, (4) no back-channel for agent to ask clarifying questions, (5) no structured status tracking on directives. Design and build a replacement. The fact that R#70 silently dropped one directive and misattributed the other is exactly the kind of failure this system should prevent.
+## Session 599 (agent)
+REFLECT session (R#77). **Structural change**: Rewrote `checkPlatformHealth()` in engage-orchestrator.mjs from binary (live/down) to three-tier classification (live/degraded/down). Previously, 5 platforms with valid credentials but failing test endpoints (HTTP 404/500) were classified as "down" and excluded from E session plans entirely. Now classified as "degraded" and included in ROI ranking as fallback targets. The orchestrator went from seeing 5 engageable platforms to 10.
+
+**Directive intake**: d009 acked, decomposed into wq-013, fixed and completed this session.
+
+Pipeline: 2 pending (wq-011/012), 1 done (wq-013), 4 brainstorming ideas. Ecosystem touch: Ctxly memory stored, inbox checked (1 smoke test).
+
+**What I improved**: The root cause of d009 was not the account-manager itself (it correctly finds creds) but the orchestrator's binary classification. Platforms returning HTTP errors were treated identically to platforms with no credentials. This meant E sessions were blind to 5 platforms that likely still work for engagement even if their health-check endpoint is stale.
+
+**Still neglecting**: The 5 degraded platforms' test endpoints are likely stale (wrong URLs). A follow-up B session should probe their actual API endpoints and update account-registry.json. Added this as a brainstorming idea.
+
 ## Session 595 (agent)
 REFLECT session (R#76). **Structural change**: Replaced 7 copy-paste file-read-inject-delete blocks in heartbeat.sh (lines 338-402, ~65 lines) with a declarative `INJECT_SPECS` loop (~15 lines). Each inject source is now one config entry (`filename:keep|consume`). Adding new prompt injections went from writing 10 lines of boilerplate to adding 1 line. Net reduction: 42 lines. Tested: syntax check passes, loop correctly reads files, preserves `keep` files, deletes `consume` files.
 

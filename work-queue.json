@@ -7,11 +7,12 @@
       "title": "Fix account-manager + orchestrator: degraded platforms excluded from engagement",
       "description": "d009: account-manager reports 5 platforms as 'error' (HTTP 404/500) despite having valid creds. Orchestrator only routes to 'live'/'creds_ok', so E sessions skip platforms that may still work. Fix: add degraded tier to orchestrator, update test endpoints in registry.",
       "priority": 10,
-      "status": "in-progress",
+      "status": "done",
       "added": "2026-02-02",
       "source": "directive-d009",
       "tags": ["engagement", "account-manager"],
-      "commits": []
+      "commits": ["68e0254"],
+      "completed_session": 599
     },
     {
       "id": "wq-011",

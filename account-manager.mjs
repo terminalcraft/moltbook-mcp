@@ -10,10 +10,10 @@
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
-import { execSync } from "child_process";
 import { join } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import { safeFetch } from "./lib/safe-fetch.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -86,21 +86,25 @@ async function testAccount(account) {
     return { ...result, status: "creds_ok", note: "MCP tool — test via moltbook_digest in session" };
   }
 
-  // curl-based test — capture body to detect empty 200s
+  // fetch-based test — capture body to detect empty 200s
   const authHeader = getAuthHeader(account, cred);
   const url = buildTestUrl(account, cred);
-  const curlArgs = ["-s", "-w", "\n%{http_code}\n%{size_download}", "--max-time", "8"];
-  if (authHeader) curlArgs.push("-H", authHeader);
-  curlArgs.push(url);
+  const fetchHeaders = {};
+  if (authHeader) {
+    const [key, ...vals] = authHeader.split(": ");
+    fetchHeaders[key] = vals.join(": ");
+  }
 
   try {
-    const raw = execSync(`curl ${curlArgs.map(a => `'${a}'`).join(" ")}`, {
-      timeout: 12000, encoding: "utf8"
-    }).trim();
-    const lines = raw.split("\n");
-    const bodySize = parseInt(lines.pop(), 10) || 0;
-    const httpCode = lines.pop();
-    const code = parseInt(httpCode, 10);
+    const resp = await safeFetch(url, {
+      timeout: 8000,
+      headers: fetchHeaders,
+      allowInternal: true, // account tests may hit local services
+    });
+
+    const code = resp.status;
+    const bodySize = (resp.body || "").length;
+
     if (code >= 200 && code < 300 && bodySize === 0) {
       return { ...result, status: "degraded", http: code, note: "200 but empty body" };
     } else if (code >= 200 && code < 300) {

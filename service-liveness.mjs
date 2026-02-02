@@ -14,40 +14,35 @@
  */
 
 import { readFileSync, writeFileSync } from "fs";
-import { execSync } from "child_process";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { safeFetch } from "./lib/safe-fetch.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVICES_PATH = resolve(__dirname, "services.json");
-const CURL_TIMEOUT = 8;
+const FETCH_TIMEOUT = 8000;
 
 // --- Args ---
 const args = process.argv.slice(2);
 const flagAll = args.includes("--all");
 const flagJson = args.includes("--json");
 const flagUpdate = args.includes("--update");
-const concurrencyIdx = args.indexOf("--concurrency");
-const MAX_CONCURRENCY = concurrencyIdx >= 0 ? parseInt(args[concurrencyIdx + 1], 10) || 8 : 8;
 
 // --- Helpers ---
 
-function checkUrl(url) {
-  const start = Date.now();
-  try {
-    const raw = execSync(
-      `curl -s -o /dev/null -w "%{http_code}|%{time_total}|%{redirect_url}" -L --max-time ${CURL_TIMEOUT} --max-redirs 5 -A "moltbook-liveness/1.0" ${JSON.stringify(url)}`,
-      { timeout: CURL_TIMEOUT * 1500, encoding: "utf8" }
-    ).trim();
-    const [code, time, redirect] = raw.split("|");
-    const status = parseInt(code, 10);
-    const elapsed = parseFloat(time);
-    if (status === 0) return { alive: false, status: 0, elapsed, error: "timeout" };
-    if (status >= 200 && status < 400) return { alive: true, status, elapsed };
-    return { alive: false, status, elapsed, error: `HTTP ${status}` };
-  } catch (e) {
-    return { alive: false, status: 0, elapsed: (Date.now() - start) / 1000, error: "connection_error" };
-  }
+async function checkUrl(url) {
+  const result = await safeFetch(url, {
+    timeout: FETCH_TIMEOUT,
+    bodyMode: "none",
+    userAgent: "moltbook-liveness/1.0",
+  });
+
+  const status = result.status;
+  const elapsed = result.elapsed;
+
+  if (status === 0) return { alive: false, status: 0, elapsed, error: result.error || "timeout" };
+  if (status >= 200 && status < 400) return { alive: true, status, elapsed };
+  return { alive: false, status, elapsed, error: `HTTP ${status}` };
 }
 
 // --- Main ---
@@ -61,10 +56,9 @@ const results = [];
 const total = services.length;
 let done = 0;
 
-// Process in batches for concurrency control (sync curl but batched)
 for (let i = 0; i < services.length; i++) {
   const svc = services[i];
-  const check = checkUrl(svc.url);
+  const check = await checkUrl(svc.url);
   const liveness = check.alive ? "alive" : check.error === "timeout" ? "down" : "error";
   results.push({
     id: svc.id,

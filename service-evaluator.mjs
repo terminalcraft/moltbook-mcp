@@ -11,49 +11,11 @@
  * activity signals, registration attempt (if --register).
  */
 
-import { execSync } from "child_process";
+import { safeFetch, fetchStatus, fetchBody } from "./lib/safe-fetch.mjs";
 
-const TIMEOUT_MS = 10000;
-const CURL_TIMEOUT = 8;
+const FETCH_TIMEOUT = 8000;
 
 // --- Helpers ---
-
-function curl(url, opts = {}) {
-  const args = [
-    "-s", "-L",
-    "--max-time", String(opts.timeout || CURL_TIMEOUT),
-    "--max-redirs", "5",
-    "-A", "moltbook-evaluator/1.0",
-  ];
-  if (opts.headOnly) args.push("-I");
-  if (opts.headers) {
-    for (const [k, v] of Object.entries(opts.headers)) {
-      args.push("-H", `${k}: ${v}`);
-    }
-  }
-  args.push(url);
-  try {
-    return execSync(`curl ${args.map(a => JSON.stringify(a)).join(" ")}`, {
-      timeout: (opts.timeout || CURL_TIMEOUT) * 1500,
-      encoding: "utf8",
-      maxBuffer: 2 * 1024 * 1024,
-    });
-  } catch {
-    return null;
-  }
-}
-
-function curlStatus(url) {
-  try {
-    const code = execSync(
-      `curl -s -o /dev/null -w "%{http_code}" -L --max-time ${CURL_TIMEOUT} --max-redirs 5 -A "moltbook-evaluator/1.0" ${JSON.stringify(url)}`,
-      { timeout: CURL_TIMEOUT * 1500, encoding: "utf8" }
-    ).trim();
-    return parseInt(code, 10);
-  } catch {
-    return 0;
-  }
-}
 
 function extractTitle(html) {
   const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
@@ -78,8 +40,8 @@ function extractLinks(html, baseUrl) {
 
 // --- Evaluation Steps ---
 
-function evaluateReachability(url) {
-  const status = curlStatus(url);
+async function evaluateReachability(url) {
+  const status = await fetchStatus(url, { timeout: FETCH_TIMEOUT, userAgent: "moltbook-evaluator/1.0" });
   return {
     url,
     http_status: status,
@@ -88,8 +50,8 @@ function evaluateReachability(url) {
   };
 }
 
-function evaluatePage(url) {
-  const html = curl(url);
+async function evaluatePage(url) {
+  const html = await fetchBody(url, { timeout: FETCH_TIMEOUT, userAgent: "moltbook-evaluator/1.0" });
   if (!html) return { error: "Could not fetch page" };
 
   const title = extractTitle(html);
@@ -115,7 +77,7 @@ function evaluatePage(url) {
   };
 }
 
-function discoverAPIs(baseUrl) {
+async function discoverAPIs(baseUrl) {
   const base = baseUrl.replace(/\/$/, "");
   const candidates = [
     "/api", "/api/v1", "/api/v2", "/v1", "/v2",
@@ -129,7 +91,7 @@ function discoverAPIs(baseUrl) {
   const results = [];
   for (const path of candidates) {
     const url = base + path;
-    const status = curlStatus(url);
+    const status = await fetchStatus(url, { timeout: FETCH_TIMEOUT, userAgent: "moltbook-evaluator/1.0" });
     if (status >= 200 && status < 400) {
       results.push({ path, status });
     }
@@ -137,11 +99,11 @@ function discoverAPIs(baseUrl) {
   return results;
 }
 
-function checkActivity(baseUrl, pageHtmlSize) {
+async function checkActivity(baseUrl, pageHtmlSize) {
   const signals = [];
 
   // Try to fetch robots.txt for sitemap hints
-  const robots = curl(baseUrl.replace(/\/$/, "") + "/robots.txt");
+  const robots = await fetchBody(baseUrl.replace(/\/$/, "") + "/robots.txt", { timeout: FETCH_TIMEOUT, userAgent: "moltbook-evaluator/1.0" });
   if (robots && robots.length > 10) {
     signals.push({ type: "robots.txt", present: true, size: robots.length });
   }
@@ -151,17 +113,16 @@ function checkActivity(baseUrl, pageHtmlSize) {
   const base = baseUrl.replace(/\/$/, "");
   const seenSizes = new Set();
   if (robots) seenSizes.add(robots.length);
-  if (pageHtmlSize) seenSizes.add(pageHtmlSize); // Dedupe SPA catch-all responses
+  if (pageHtmlSize) seenSizes.add(pageHtmlSize);
   for (const path of activityPaths) {
-    const body = curl(base + path);
+    const body = await fetchBody(base + path, { timeout: FETCH_TIMEOUT, userAgent: "moltbook-evaluator/1.0" });
     if (body && body.length > 50 && !seenSizes.has(body.length)) {
       seenSizes.add(body.length);
-      // Check for timestamps in the response
       const timestamps = body.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/g) || [];
       const recent = timestamps.filter(t => {
         const d = new Date(t);
         const age = Date.now() - d.getTime();
-        return age < 7 * 24 * 3600 * 1000; // within 7 days
+        return age < 7 * 24 * 3600 * 1000;
       });
       signals.push({
         type: "feed",
@@ -176,36 +137,30 @@ function checkActivity(baseUrl, pageHtmlSize) {
   return signals;
 }
 
-function attemptRegistration(baseUrl) {
+async function attemptRegistration(baseUrl) {
   const base = baseUrl.replace(/\/$/, "");
   const regPaths = ["/api/register", "/api/signup", "/api/auth/register", "/register", "/api/users"];
 
   for (const path of regPaths) {
-    // First check if the endpoint exists with OPTIONS/GET
-    const status = curlStatus(base + path);
+    const status = await fetchStatus(base + path, { timeout: FETCH_TIMEOUT, userAgent: "moltbook-evaluator/1.0" });
     if (status === 0 || status >= 500) continue;
 
-    // Try POST with a test payload
     const handle = `moltbook_eval_${Date.now().toString(36)}`;
     const payload = JSON.stringify({ username: handle, handle, name: "moltbook-evaluator" });
-    try {
-      const resp = execSync(
-        `curl -s -w "\\n%{http_code}" -X POST -H "Content-Type: application/json" -d ${JSON.stringify(payload)} --max-time ${CURL_TIMEOUT} ${JSON.stringify(base + path)}`,
-        { timeout: CURL_TIMEOUT * 1500, encoding: "utf8" }
-      );
-      const lines = resp.trim().split("\n");
-      const httpCode = parseInt(lines.pop(), 10);
-      const body = lines.join("\n");
+    const result = await safeFetch(base + path, {
+      method: "POST",
+      timeout: FETCH_TIMEOUT,
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      userAgent: "moltbook-evaluator/1.0",
+    });
 
-      return {
-        path,
-        http_status: httpCode,
-        success: httpCode >= 200 && httpCode < 300,
-        response_preview: body.slice(0, 500),
-      };
-    } catch {
-      continue;
-    }
+    return {
+      path,
+      http_status: result.status,
+      success: result.status >= 200 && result.status < 300,
+      response_preview: (result.body || "").slice(0, 500),
+    };
   }
 
   return { attempted: true, found_endpoint: false };
@@ -226,28 +181,28 @@ async function evaluate(url, opts = {}) {
   };
 
   // Step 1: Reachability
-  report.reachability = evaluateReachability(url);
+  report.reachability = await evaluateReachability(url);
   if (!report.reachability.reachable) {
     report.summary = { verdict: "unreachable", score: 0 };
     return report;
   }
 
   // Step 2: Page analysis
-  report.page = evaluatePage(url);
+  report.page = await evaluatePage(url);
 
   // Step 3: API discovery
-  report.api_discovery = discoverAPIs(url);
+  report.api_discovery = await discoverAPIs(url);
 
   // Step 4: Activity check
-  report.activity = checkActivity(url, report.page?.html_size);
+  report.activity = await checkActivity(url, report.page?.html_size);
 
   // Step 5: Registration (if requested)
   if (opts.register) {
-    report.registration = attemptRegistration(url);
+    report.registration = await attemptRegistration(url);
   }
 
   // Scoring
-  let score = 1; // reachable = 1
+  let score = 1;
   if (report.page.title) score += 1;
   if (report.api_discovery.length > 2) score += 2;
   else if (report.api_discovery.length > 0) score += 1;
@@ -282,7 +237,6 @@ const report = await evaluate(urlArg, { register: registerMode });
 if (jsonMode) {
   console.log(JSON.stringify(report, null, 2));
 } else {
-  // Human-readable output
   console.log(`\nService Evaluation: ${report.url}`);
   console.log("=".repeat(60));
 

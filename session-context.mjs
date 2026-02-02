@@ -322,8 +322,15 @@ if (MODE === 'B') {
           const content = (d.content || '').toLowerCase();
           const match = DIRECTIVE_SEED_TABLE.find(row => row.keywords.some(k => content.includes(k)));
           if (match?.skip) continue;
-          const title = match ? match.title : `Address directive ${d.id}`;
-          const desc = match ? `Directive ${d.id}: ${match.desc}` : (d.content || '').substring(0, 120);
+          // R#86: Always include directive ID in title to prevent cross-directive
+          // collisions. Previously, two directives matching the same keyword row
+          // (e.g. d002 and d010 both hitting 'ecosystem') produced identical titles
+          // like "Batch-evaluate 5 undiscovered services". The dedup caught this
+          // within a single run but not across sessions (pre-existing dupes persisted).
+          // Now titles are directive-specific: "Batch-evaluate 5 undiscovered services (d002)".
+          const baseTitle = match ? match.title : `Address directive ${d.id}`;
+          const title = match ? `${baseTitle} (${d.id})` : baseTitle;
+          const desc = match ? match.desc : (d.content || '').substring(0, 120);
           if (!isDupe(title)) {
             seeds.push(`- **${title}**: ${desc}`);
           }

@@ -35,7 +35,7 @@ function depsReady(item, queue) {
   if (!item.deps || !item.deps.length) return true;
   return item.deps.every(depId => {
     const dep = queue.find(i => i.id === depId);
-    return dep && dep.status === "done";
+    return !dep || dep.status === "done"; // missing = archived = done
   });
 }
 

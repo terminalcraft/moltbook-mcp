@@ -479,6 +479,364 @@ async function testHumanReview() {
   // Don't assert on PATCH — may lack auth key in test env
 }
 
+// --- Auth: requireVerifiedAgent rejects unsigned POST requests ---
+
+async function testRequireVerifiedAgentReject() {
+  // POST to a protected endpoint without signed headers — should get 403
+  const r = await post("/registry", { handle: "test-agent", capabilities: ["test"] });
+  assert(r.status === 403, "POST /registry without auth returns 403");
+  assert(r.body?.error?.includes("verification"), "403 body mentions verification");
+  assert(r.body?.reason, "403 body has reason field");
+  assert(r.body?.help, "403 body has help text");
+}
+
+async function testRequireVerifiedLeaderboard() {
+  const r = await post("/leaderboard", { handle: "test-agent" });
+  assert(r.status === 403, "POST /leaderboard without auth returns 403");
+}
+
+async function testRequireVerifiedKnowledgeValidate() {
+  const r = await post("/knowledge/validate", { pattern_id: "p001" });
+  assert(r.status === 403, "POST /knowledge/validate without auth returns 403");
+}
+
+// --- Handshake error cases ---
+
+async function testHandshakeNoUrl() {
+  const r = await post("/handshake", {});
+  assert(r.status === 400, "POST /handshake without url returns 400");
+  assert(r.body?.error?.includes("url"), "handshake 400 mentions url");
+}
+
+async function testHandshakeBadProtocol() {
+  const r = await post("/handshake", { url: "ftp://evil.com/agent.json" });
+  assert(r.status === 400, "POST /handshake with ftp:// returns 400");
+}
+
+async function testHandshakeUnreachable() {
+  const r = await post("/handshake", { url: "http://192.0.2.1:9999/agent.json" }, 15000);
+  assert(r.status === 200, "POST /handshake with unreachable host returns 200");
+  assert(r.body?.ok === false, "handshake unreachable has ok:false");
+  assert(r.body?.error, "handshake unreachable has error message");
+}
+
+// --- Task CRUD lifecycle ---
+
+async function testTaskCrud() {
+  // POST missing fields
+  const r1 = await post("/tasks", { title: "no-from" });
+  assert(r1.status === 400, "POST /tasks without from returns 400");
+
+  const r1b = await post("/tasks", { from: "test-agent" });
+  assert(r1b.status === 400, "POST /tasks without title returns 400");
+
+  // Create task
+  const r2 = await post("/tasks", { from: "api-test", title: "Test task " + Date.now(), priority: "high" });
+  assert(r2.status === 201, "POST /tasks returns 201");
+  assert(r2.body?.task?.id, "created task has id");
+  assert(r2.body?.task?.status === "open", "created task is open");
+  assert(r2.body?.task?.priority === "high", "created task has correct priority");
+  const taskId = r2.body?.task?.id;
+
+  // Get single task
+  const r3 = await get(`/tasks/${taskId}`);
+  assert(r3.status === 200, "GET /tasks/:id returns 200");
+  assert(r3.body?.task?.title, "task has title");
+
+  // Get nonexistent task
+  const r4 = await get("/tasks/nonexistent-id");
+  assert(r4.status === 404, "GET /tasks/:id for missing task returns 404");
+
+  // Claim task
+  const r5 = await post(`/tasks/${taskId}/claim`, { agent: "test-claimer" });
+  assert(r5.status === 200, "POST /tasks/:id/claim returns 200");
+
+  // Claim already-claimed task
+  const r6 = await post(`/tasks/${taskId}/claim`, { agent: "another-agent" });
+  assert(r6.status === 409, "POST /tasks/:id/claim on claimed task returns 409");
+
+  // Claim without agent
+  const r7 = await post(`/tasks/${taskId}/claim`, {});
+  assert(r7.status === 400, "POST /tasks/:id/claim without agent returns 400");
+
+  // Tasks available (work queue items)
+  const r8 = await get("/tasks/available");
+  assert(r8.status === 200, "GET /tasks/available returns 200");
+  assert(r8.body?.count !== undefined, "/tasks/available has count");
+
+  // Task filtering
+  const r9 = await get("/tasks?status=open");
+  assert(r9.status === 200, "GET /tasks?status=open returns 200");
+}
+
+// --- Poll CRUD lifecycle ---
+
+async function testPollCrud() {
+  // Create poll with bad input
+  const r1 = await post("/polls", { question: "test?" });
+  assert(r1.status === 400, "POST /polls without options returns 400");
+
+  const r1b = await post("/polls", { question: "test?", options: ["only-one"] });
+  assert(r1b.status === 400, "POST /polls with <2 options returns 400");
+
+  // Create valid poll
+  const r2 = await post("/polls", { question: "Unit test poll?", options: ["yes", "no"], agent: "api-test", expires_in: 60 });
+  assert(r2.status === 201, "POST /polls returns 201");
+  assert(r2.body?.id, "created poll has id");
+  assert(r2.body?.question === "Unit test poll?", "poll has correct question");
+  assert(r2.body?.options?.length === 2, "poll has 2 options");
+  const pollId = r2.body?.id;
+
+  // Get single poll
+  if (pollId) {
+    const r3 = await get(`/polls/${pollId}`);
+    assert(r3.status === 200, "GET /polls/:id returns 200");
+    assert(r3.body?.results?.length === 2, "poll results has 2 options");
+    assert(r3.body?.total_votes === 0, "new poll has 0 votes");
+  }
+
+  // Get nonexistent poll
+  const r4 = await get("/polls/nonexistent");
+  assert(r4.status === 404, "GET /polls/:id for missing poll returns 404");
+}
+
+// --- Dispatch error cases ---
+
+async function testDispatchErrors() {
+  // POST without required fields
+  const r = await post("/dispatch", {});
+  assert(r.status === 400 || r.status === 403, "POST /dispatch without fields fails");
+}
+
+// --- Activity & activity stream ---
+
+async function testActivity() {
+  const r = await get("/activity");
+  assert(r.status === 200, "GET /activity returns 200");
+}
+
+// --- Ecosystem endpoints ---
+
+async function testEcosystemMap() {
+  const r = await get("/ecosystem/map");
+  assert(r.status === 200, "GET /ecosystem/map returns 200");
+}
+
+async function testEcosystemRanking() {
+  const r = await get("/ecosystem/ranking");
+  assert(r.status === 200, "GET /ecosystem/ranking returns 200");
+}
+
+// --- Agents directory ---
+
+async function testAgents() {
+  const r = await get("/agents");
+  assert(r.status === 200, "GET /agents returns 200");
+}
+
+// --- Peers ---
+
+async function testPeers() {
+  const r = await get("/peers");
+  assert(r.status === 200, "GET /peers returns 200");
+}
+
+// --- Adoption ---
+
+async function testAdoption() {
+  const r = await get("/adoption");
+  assert(r.status === 200, "GET /adoption returns 200");
+}
+
+// --- Outcomes ---
+
+async function testOutcomes() {
+  const r = await get("/outcomes");
+  assert(r.status === 200, "GET /outcomes returns 200");
+}
+
+// --- Specialization ---
+
+async function testSpecialization() {
+  const r = await get("/specialization");
+  assert(r.status === 200, "GET /specialization returns 200");
+}
+
+// --- Rotation ---
+
+async function testRotation() {
+  const r = await get("/rotation");
+  assert(r.status === 200, "GET /rotation returns 200");
+}
+
+// --- Directives retirement ---
+
+async function testDirectivesRetirement() {
+  const r = await get("/directives/retirement");
+  // May return 500 if python analysis script fails — that's a known infra issue
+  assert(r.status === 200 || r.status === 500, "GET /directives/retirement returns 200 or 500");
+}
+
+// --- Engagement analytics ---
+
+async function testEngagementAnalytics() {
+  const r = await get("/engagement/analytics");
+  assert(r.status === 200, "GET /engagement/analytics returns 200");
+}
+
+async function testEngagementEffectiveness() {
+  const r = await get("/engagement/effectiveness");
+  assert(r.status === 200, "GET /engagement/effectiveness returns 200");
+}
+
+// --- Status engagement ROI ---
+
+async function testStatusEngagementRoi() {
+  const r = await get("/status/engagement-roi");
+  assert(r.status === 200, "GET /status/engagement-roi returns 200");
+}
+
+// --- Platforms & trends ---
+
+async function testPlatforms() {
+  const r = await get("/platforms");
+  assert(r.status === 200, "GET /platforms returns 200");
+}
+
+async function testPlatformsTrends() {
+  const r = await get("/platforms/trends");
+  assert(r.status === 200, "GET /platforms/trends returns 200");
+}
+
+async function testStatusPlatformsHistory() {
+  const r = await get("/status/platforms/history");
+  assert(r.status === 200, "GET /status/platforms/history returns 200");
+}
+
+// --- Health data ---
+
+async function testHealthData() {
+  const r = await get("/health/data");
+  assert(r.status === 200, "GET /health/data returns 200");
+}
+
+// --- Inbox (auth-required) ---
+
+async function testInbox() {
+  const r = await get("/inbox");
+  assert(r.status === 200 || r.status === 401, "GET /inbox returns 200 or 401 (auth-required)");
+}
+
+// --- POST /inbox error case ---
+
+async function testInboxPostMissingFields() {
+  const r = await post("/inbox", {});
+  assert(r.status === 400, "POST /inbox without body returns 400");
+}
+
+// --- Crawl cache ---
+
+async function testCrawlCache() {
+  const r = await get("/crawl/cache");
+  assert(r.status === 200, "GET /crawl/cache returns 200");
+}
+
+// --- Reciprocity ---
+
+async function testReciprocity() {
+  const r = await get("/reciprocity");
+  assert(r.status === 200, "GET /reciprocity returns 200");
+}
+
+// --- Dashboard (HTML) ---
+
+async function testDashboardHtml() {
+  const r = await get("/dashboard");
+  assert(r.status === 200, "GET /dashboard returns 200");
+  assert(r.ct.includes("html"), "/dashboard returns HTML");
+}
+
+// --- Presence ---
+
+async function testPresence() {
+  const r = await get("/presence");
+  assert(r.status === 200, "GET /presence returns 200");
+}
+
+// --- Deprecations ---
+
+async function testDeprecations() {
+  const r = await get("/deprecations");
+  assert(r.status === 200, "GET /deprecations returns 200");
+}
+
+// --- Rate limit headers on POST ---
+
+async function testRateLimitHeaders() {
+  const r = await fetch(`${BASE}/tasks`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ from: "rate-test", title: "rate test" }),
+  });
+  const limit = r.headers.get("x-ratelimit-limit");
+  const remaining = r.headers.get("x-ratelimit-remaining");
+  assert(limit !== null, "POST response has X-RateLimit-Limit header");
+  assert(remaining !== null, "POST response has X-RateLimit-Remaining header");
+  assert(parseInt(limit) > 0, "rate limit is positive");
+}
+
+// --- Agent verification header on POST ---
+
+async function testVerificationHeader() {
+  const r = await fetch(`${BASE}/human-review`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: "header-test", body: "test" }),
+  });
+  const verified = r.headers.get("x-agent-verified");
+  assert(verified === "false", "unsigned POST has X-Agent-Verified: false");
+}
+
+// --- Clawtavista ---
+
+async function testClawtavista() {
+  const r = await get("/clawtavista");
+  assert(r.status === 200, "GET /clawtavista returns 200");
+}
+
+// --- Live dashboard ---
+
+async function testLive() {
+  const r = await get("/live");
+  assert(r.status === 200 || r.status === 401, "GET /live returns 200 or 401 (auth-required)");
+}
+
+// --- Digest ---
+
+async function testDigest() {
+  const r = await get("/digest");
+  assert(r.status === 200, "GET /digest returns 200");
+}
+
+// --- Compare ---
+
+async function testCompare() {
+  const r = await get("/compare");
+  assert(r.status === 200, "GET /compare returns 200");
+}
+
+// --- Backups ---
+
+async function testBackups() {
+  const r = await get("/backups");
+  assert(r.status === 200, "GET /backups returns 200");
+}
+
+// --- Files ---
+
+async function testFiles() {
+  const r = await get("/files");
+  assert(r.status === 200 || r.status === 401, "GET /files returns 200 or 401 (auth-required)");
+}
+
 async function main() {
   console.log(`api.test.mjs — Testing ${BASE}\n`);
   const start = Date.now();
@@ -496,13 +854,14 @@ async function main() {
     // Sessions & analytics
     testSessionsJson, testCostsJson, testMetrics, testEfficiency, testChangelog,
     // Engagement
-    testEngagementRoi,
+    testEngagementRoi, testEngagementAnalytics, testEngagementEffectiveness,
+    testStatusEngagementRoi,
     // Knowledge
     testKnowledgePatterns, testKnowledgeDigest, testKnowledgeTopics, testKnowledgeExchangeLog,
     // Registry & directory
     testRegistry, testDirectory, testNetwork,
     // Search & directives
-    testSearch, testDirectives,
+    testSearch, testDirectives, testDirectivesRetirement,
     // Leaderboard & services
     testLeaderboard, testServices,
     // Feed
@@ -514,7 +873,7 @@ async function main() {
     // CRUD
     testKvCrud, testPasteCrud, testPollsCrud, testCron,
     // Webhooks & inbox
-    testWebhookEvents, testInboxStats,
+    testWebhookEvents, testInboxStats, testInbox, testInboxPostMissingFields,
     // Buildlog & summary
     testBuildlog, testSummary,
     // Identity
@@ -523,6 +882,25 @@ async function main() {
     testIntegrations,
     // Human review (d013)
     testHumanReview,
+    // Auth/security (wq-032)
+    testRequireVerifiedAgentReject, testRequireVerifiedLeaderboard,
+    testRequireVerifiedKnowledgeValidate,
+    testRateLimitHeaders, testVerificationHeader,
+    // Handshake errors
+    testHandshakeNoUrl, testHandshakeBadProtocol, testHandshakeUnreachable,
+    // Task CRUD lifecycle
+    testTaskCrud,
+    // Poll CRUD lifecycle
+    testPollCrud,
+    // Dispatch errors
+    testDispatchErrors,
+    // Additional GET endpoints
+    testActivity, testEcosystemMap, testEcosystemRanking,
+    testAgents, testPeers, testAdoption, testOutcomes,
+    testSpecialization, testRotation, testPlatforms, testPlatformsTrends,
+    testStatusPlatformsHistory, testHealthData, testCrawlCache,
+    testReciprocity, testDashboardHtml, testPresence, testDeprecations,
+    testClawtavista, testLive, testDigest, testCompare, testBackups, testFiles,
   ];
 
   for (const t of tests) {

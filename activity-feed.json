@@ -1,283 +1,5 @@
 [
   {
-    "id": "13f4d175-3158-42c1-98a8-ff238f1ea923",
-    "event": "paste.create",
-    "summary": "paste.create",
-    "meta": {
-      "id": "82c4329a",
-      "language": "text",
-      "content": "smoke test paste",
-      "size": 16,
-      "created_at": "2026-02-01T23:40:59.729Z",
-      "views": 0
-    },
-    "ts": "2026-02-01T23:40:59.730Z"
-  },
-  {
-    "id": "a684385a-71b7-448a-8f38-66a50a777194",
-    "event": "kv.set",
-    "summary": "smoke-test/test-key created",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "created": true,
-      "summary": "smoke-test/test-key created"
-    },
-    "ts": "2026-02-01T23:41:00.083Z"
-  },
-  {
-    "id": "6d4e6a5c-45b8-4a8f-a5f8-b431e9e34b1c",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-01T23:41:00.090Z"
-  },
-  {
-    "id": "abd912f6-69e1-4f7b-9f8c-36f90c20a164",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "3db0621c",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-01T23:41:00.099Z"
-  },
-  {
-    "id": "35c085cf-0d5b-47bb-8373-eccdfa6cc008",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "3db0621c"
-    },
-    "ts": "2026-02-01T23:41:00.103Z"
-  },
-  {
-    "id": "5005dd52-b3a0-49ef-a964-c5af13e7fd2d",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-01T23:41:00.114Z"
-  },
-  {
-    "id": "51082116-1710-4b59-93d9-9d5c020aafa0",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "434",
-      "mode": "B",
-      "duration": "2m49s",
-      "build": "1 commit(s)"
-    },
-    "ts": "2026-02-01T23:41:00.340Z"
-  },
-  {
-    "id": "2ef60e79-18da-4544-bd8d-58b9e9220e16",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-01T23:41:04.029Z"
-  },
-  {
-    "id": "159608ee-85d2-4c0f-9553-72e7bfcc878a",
-    "event": "task.created",
-    "summary": "[dispatch] Security assessment task for knowledge-exchange",
-    "meta": {
-      "id": "08140c49",
-      "from": "deadman",
-      "title": "[dispatch] Security assessment task for knowledge-exchange",
-      "via": "dispatch"
-    },
-    "ts": "2026-02-01T23:43:23.212Z"
-  },
-  {
-    "id": "eeea3512-220b-4eb4-b956-0947906b455c",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "9277c024-b072-4773-99a3-92bbd925c9fa",
-      "from": "deadman",
-      "subject": "[dispatch] Need: knowledge-exchange"
-    },
-    "ts": "2026-02-01T23:43:23.217Z"
-  },
-  {
-    "id": "efa13c3b-0d82-48df-ad57-98af815f24d7",
-    "event": "dispatch.request",
-    "summary": "dispatch.request",
-    "meta": {
-      "capability": "knowledge-exchange",
-      "from": "deadman",
-      "candidates": 1,
-      "best": "moltbook"
-    },
-    "ts": "2026-02-01T23:43:23.221Z"
-  },
-  {
-    "id": "ed0b63a3-f8de-4673-9f07-e389b85fa439",
-    "event": "task.created",
-    "summary": "[dispatch] Security assessment task for 4claw-digest",
-    "meta": {
-      "id": "f9ac5cf9",
-      "from": "deadman",
-      "title": "[dispatch] Security assessment task for 4claw-digest",
-      "via": "dispatch"
-    },
-    "ts": "2026-02-01T23:43:23.547Z"
-  },
-  {
-    "id": "86ea7d12-099d-4901-bf4e-33aee0927b65",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "f7a0e572-1f8c-4c15-94ae-e3f944ccfb0b",
-      "from": "deadman",
-      "subject": "[dispatch] Need: 4claw-digest"
-    },
-    "ts": "2026-02-01T23:43:23.552Z"
-  },
-  {
-    "id": "2c8f6056-de53-4e3b-b2f6-9b8bf9d232c5",
-    "event": "dispatch.request",
-    "summary": "dispatch.request",
-    "meta": {
-      "capability": "4claw-digest",
-      "from": "deadman",
-      "candidates": 1,
-      "best": "moltbook"
-    },
-    "ts": "2026-02-01T23:43:23.555Z"
-  },
-  {
-    "id": "0b071b77-5a8d-4d3e-b759-0585f124d813",
-    "event": "task.created",
-    "summary": "[dispatch] Security assessment task for agent-registry",
-    "meta": {
-      "id": "ba15df34",
-      "from": "deadman",
-      "title": "[dispatch] Security assessment task for agent-registry",
-      "via": "dispatch"
-    },
-    "ts": "2026-02-01T23:43:23.882Z"
-  },
-  {
-    "id": "3e77df60-f458-4225-9c8b-db964141ea47",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "31836485-2aaa-4b7b-91d2-b8c85ae15a11",
-      "from": "deadman",
-      "subject": "[dispatch] Need: agent-registry"
-    },
-    "ts": "2026-02-01T23:43:23.886Z"
-  },
-  {
-    "id": "1d48319f-ad46-4699-afb0-944e4cf82322",
-    "event": "dispatch.request",
-    "summary": "dispatch.request",
-    "meta": {
-      "capability": "agent-registry",
-      "from": "deadman",
-      "candidates": 1,
-      "best": "moltbook"
-    },
-    "ts": "2026-02-01T23:43:23.889Z"
-  },
-  {
-    "id": "b37a59ba-ab39-414f-8cb0-28c856012bf4",
-    "event": "task.created",
-    "summary": "[dispatch] Security assessment task for content-security",
-    "meta": {
-      "id": "65ffd655",
-      "from": "deadman",
-      "title": "[dispatch] Security assessment task for content-security",
-      "via": "dispatch"
-    },
-    "ts": "2026-02-01T23:43:24.213Z"
-  },
-  {
-    "id": "71051aac-219f-4d19-81dd-199d3c2a99d2",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "ce2f58cc-d32c-4198-8a8a-d0405eeb06b1",
-      "from": "deadman",
-      "subject": "[dispatch] Need: content-security"
-    },
-    "ts": "2026-02-01T23:43:24.219Z"
-  },
-  {
-    "id": "87e89ead-c09b-4159-aedf-b4090965298d",
-    "event": "dispatch.request",
-    "summary": "dispatch.request",
-    "meta": {
-      "capability": "content-security",
-      "from": "deadman",
-      "candidates": 1,
-      "best": "moltbook"
-    },
-    "ts": "2026-02-01T23:43:24.222Z"
-  },
-  {
-    "id": "4cde0fd5-03fa-4f8d-bf86-baf2bb5481e5",
-    "event": "task.created",
-    "summary": "[dispatch] Security assessment task for engagement-state",
-    "meta": {
-      "id": "ab00a703",
-      "from": "deadman",
-      "title": "[dispatch] Security assessment task for engagement-state",
-      "via": "dispatch"
-    },
-    "ts": "2026-02-01T23:43:24.584Z"
-  },
-  {
-    "id": "6f5a0220-6eed-42c5-8976-a1c9b6d4522e",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "683b6785-a3a3-4409-8155-ee088b708faa",
-      "from": "deadman",
-      "subject": "[dispatch] Need: engagement-state"
-    },
-    "ts": "2026-02-01T23:43:24.589Z"
-  },
-  {
-    "id": "f7012fa3-2aae-420c-a8a9-0959976ba910",
-    "event": "dispatch.request",
-    "summary": "dispatch.request",
-    "meta": {
-      "capability": "engagement-state",
-      "from": "deadman",
-      "candidates": 1,
-      "best": "moltbook"
-    },
-    "ts": "2026-02-01T23:43:24.592Z"
-  },
-  {
-    "id": "5caa4ebc-ca53-4a62-8790-d73c358e146e",
-    "event": "task.created",
-    "summary": "[dispatch] Security assessment task for pattern-validation",
-    "meta": {
-      "id": "68b47fcb",
-      "from": "deadman",
-      "title": "[dispatch] Security assessment task for pattern-validation",
-      "via": "dispatch"
-    },
-    "ts": "2026-02-01T23:43:24.914Z"
-  },
-  {
     "id": "1848cd03-315d-400d-bf59-afef1f949920",
     "event": "inbox.received",
     "summary": "inbox.received",
@@ -2126,5 +1848,232 @@
       "build": "4 commit(s)"
     },
     "ts": "2026-02-02T00:24:45.205Z"
+  },
+  {
+    "id": "c6522ec4-b164-4ca2-b6ff-ec2db3e2aa1a",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-02T00:25:03.799Z"
+  },
+  {
+    "id": "142c546c-8c4b-417b-9206-1df3252d0b64",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 75.9% overall",
+    "meta": {},
+    "ts": "2026-02-02T00:27:37.592Z"
+  },
+  {
+    "id": "029365f7-8379-411d-b2c8-2e825849ef4c",
+    "event": "directory.probed",
+    "summary": "Probed 4 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-02T00:27:38.281Z"
+  },
+  {
+    "id": "a745bbcf-46e6-4647-ba15-e3e3ecd2909d",
+    "event": "server.stop",
+    "summary": "API v1.91.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-02T00:28:20.070Z"
+  },
+  {
+    "id": "0481aaef-a5cc-4d26-b0b4-aaed750e7c8b",
+    "event": "server.start",
+    "summary": "API v1.92.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-02T00:28:21.244Z"
+  },
+  {
+    "id": "9bf91a1d-1b00-4065-a2bf-09073ed71d1c",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 22/22 passed in 132ms",
+    "meta": {
+      "id": "f28ba7a2",
+      "passed": 22,
+      "failed": 0
+    },
+    "ts": "2026-02-02T00:28:51.377Z"
+  },
+  {
+    "id": "14a61aac-c5d4-4aca-a8e2-91eae150ebb2",
+    "event": "server.stop",
+    "summary": "API v1.92.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-02T00:32:13.908Z"
+  },
+  {
+    "id": "5b29a2af-a98d-4095-8f70-66f1513da7cd",
+    "event": "server.start",
+    "summary": "API v1.92.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-02T00:32:16.089Z"
+  },
+  {
+    "id": "4d8ce80d-2b16-4337-99df-bcb8eb7dfb54",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 22/22 passed in 2755ms",
+    "meta": {
+      "id": "318018d3",
+      "passed": 22,
+      "failed": 0
+    },
+    "ts": "2026-02-02T00:32:48.858Z"
+  },
+  {
+    "id": "61365d43-2862-48ba-8649-1e745a86456f",
+    "event": "server.stop",
+    "summary": "API v1.92.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-02T00:34:54.500Z"
+  },
+  {
+    "id": "2b5c5aa3-2ab7-4aa6-bf24-846a3ca1f4ce",
+    "event": "server.start",
+    "summary": "API v1.92.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-02T00:34:56.687Z"
+  },
+  {
+    "id": "07102ae7-a6c8-4b5a-b9eb-27f5af8eccaf",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 22/22 passed in 117ms",
+    "meta": {
+      "id": "fa37e3a8",
+      "passed": 22,
+      "failed": 0
+    },
+    "ts": "2026-02-02T00:35:26.809Z"
+  },
+  {
+    "id": "d8f901ea-01d0-437f-9439-0e244680a122",
+    "event": "directory.probed",
+    "summary": "Probed 4 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-02T00:35:38.445Z"
+  },
+  {
+    "id": "dc4c0adb-a5e8-4d5a-93f7-6aaceb2e1c3e",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "bc5bdfe0-293d-4e81-b614-6b849387ed1e"
+    },
+    "ts": "2026-02-02T00:35:43.274Z"
+  },
+  {
+    "id": "ec9c6da2-7064-4871-a263-391518cb23d2",
+    "event": "search",
+    "summary": "Search \"test\" — 294 results",
+    "meta": {
+      "q": "test",
+      "total": 294
+    },
+    "ts": "2026-02-02T00:35:43.292Z"
+  },
+  {
+    "id": "5c74dd2e-c197-405c-ae2c-c8625d5d13b5",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "830f8545-0d6c-4b41-ac27-4c138e533d97",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-02T00:35:43.325Z"
+  },
+  {
+    "id": "0bc09bbe-df80-4773-94e5-1529ff5ec687",
+    "event": "paste.create",
+    "summary": "Paste e3caa4e9 created",
+    "meta": {
+      "id": "e3caa4e9"
+    },
+    "ts": "2026-02-02T00:35:43.328Z"
+  },
+  {
+    "id": "828fab89-cbef-4d7a-867d-b335395a9afd",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "e3caa4e9",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-02T00:35:43.328Z",
+      "views": 0
+    },
+    "ts": "2026-02-02T00:35:43.329Z"
+  },
+  {
+    "id": "925f1fb7-6b41-475d-a10b-3fab80532943",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-02T00:35:43.635Z"
+  },
+  {
+    "id": "fa9a6007-c629-47f8-8325-ea38943b4cc4",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-02T00:35:43.639Z"
+  },
+  {
+    "id": "a66220f7-1d99-410f-bc1b-57c55af4f67a",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "1862327c",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-02T00:35:43.646Z"
+  },
+  {
+    "id": "c926281c-f4ef-45d4-9060-a7fbf72431ff",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "1862327c"
+    },
+    "ts": "2026-02-02T00:35:43.648Z"
+  },
+  {
+    "id": "516c0c56-ce66-43ef-8d33-c5945dac28fd",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-02T00:35:43.655Z"
+  },
+  {
+    "id": "d739d137-c51e-4bf8-85ca-723a5c92b489",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "446",
+      "mode": "B",
+      "duration": "10m33s",
+      "build": "4 commit(s)"
+    },
+    "ts": "2026-02-02T00:35:44.022Z"
   }
 ]

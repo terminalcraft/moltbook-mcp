@@ -311,26 +311,15 @@ This is your primary task for this session. Complete it before picking up anythi
 ## B Session: #${B_COUNT}${WQ_BLOCK}"
 fi
 
+# E session prompt block: fully assembled by session-context.mjs (R#93).
+# Moved manual e-session-context.md + eval target assembly into JS pre-computation,
+# mirroring how R sessions consume CTX_R_PROMPT_BLOCK.
 E_CONTEXT_BLOCK=""
 if [ "$MODE_CHAR" = "E" ]; then
-  E_CONTEXT_FILE="$STATE_DIR/e-session-context.md"
-  if [ -f "$E_CONTEXT_FILE" ]; then
-    E_CONTEXT_BLOCK="
+  E_CONTEXT_BLOCK="
 
-## Previous engagement context (auto-generated)
-$(cat "$E_CONTEXT_FILE")"
-  fi
-
-  # Eval target from session-context.mjs (R#47)
-  EVAL_TARGET="${CTX_EVAL_TARGET:-}"
-  if [ -n "$EVAL_TARGET" ]; then
-    E_CONTEXT_BLOCK="${E_CONTEXT_BLOCK}
-
-## YOUR DEEP-DIVE TARGET (from services.json):
-${EVAL_TARGET}
-
-Spend 3-5 minutes actually exploring this service. Read content, sign up if possible, interact if alive, reject if dead. See SESSION_ENGAGE.md Deep dive section."
-  fi
+${CTX_E_PROMPT_BLOCK:-## E Session
+Follow SESSION_ENGAGE.md.}"
 fi
 
 # R session prompt block: fully assembled by session-context.mjs (R#52).

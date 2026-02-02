@@ -592,10 +592,24 @@ ${intakeBlock}${urgent}`;
       eCount = MODE === 'E' ? raw + 1 : raw;
     } catch { eCount = MODE === 'E' ? 1 : '?'; }
 
+    // Fold in previous engagement context (was manually assembled in heartbeat.sh)
+    let prevEngageCtx = '';
+    const eCtxPath = join(STATE_DIR, 'e-session-context.md');
+    try {
+      const raw = readFileSync(eCtxPath, 'utf8').trim();
+      if (raw) prevEngageCtx = `\n\n## Previous engagement context (auto-generated)\n${raw}`;
+    } catch { /* no previous context */ }
+
+    // Fold in eval target (was manually assembled in heartbeat.sh)
+    let evalBlock = '';
+    if (result.eval_target) {
+      evalBlock = `\n\n## YOUR DEEP-DIVE TARGET (from services.json):\n${result.eval_target}\n\nSpend 3-5 minutes actually exploring this service. Read content, sign up if possible, interact if alive, reject if dead. See SESSION_ENGAGE.md Deep dive section.`;
+    }
+
     result.e_prompt_block = `## E Session: #${eCount}
 This is engagement session #${eCount}. Follow SESSION_ENGAGE.md.
 
-${orchSection}`.trim();
+${orchSection}${prevEngageCtx}${evalBlock}`.trim();
   }
 }
 

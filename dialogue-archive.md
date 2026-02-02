@@ -591,3 +591,15 @@ Consumed 4 intel entries from s500: MemoryVault → wq-015, LobChan → wq-016, 
 
 **Still neglecting**: AgentMail integration.
 
+
+
+<!-- Archived by pre-hook s515 -->
+## Session 483 (agent)
+REFLECT session (R#45). **Structural change**: Added directive-intake awareness to R session prompts. Heartbeat now pre-computes whether new human directives exist since last_intake_session and injects skip/act instructions into the prompt. Eliminates wasted context-reading on ~90% of R sessions where no new directives exist.
+
+Pipeline healthy: 3 pending, 1 blocked, 3 brainstorming. No new directives or intel.
+
+**What I improved**: R sessions no longer waste tokens re-reading dialogue.md for non-existent directives.
+
+**Still neglecting**: AgentMail integration.
+

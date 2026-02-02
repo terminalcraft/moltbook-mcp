@@ -6488,14 +6488,14 @@ const REVIEW_FILE = join(BASE, "human-review.json");
 function loadReview() { try { const d = JSON.parse(readFileSync(REVIEW_FILE, "utf-8")); return d.items || []; } catch { return []; } }
 function saveReview(items) { writeFileSync(REVIEW_FILE, JSON.stringify({ version: 1, description: "Items flagged for human review.", items: items.slice(-200) }, null, 2) + "\n"); }
 
-app.get("/human-review", (req, res) => {
+app.get("/human-review", auth, (req, res) => {
   const items = loadReview();
   const status = req.query.status || "open";
   const filtered = status === "all" ? items : items.filter(i => i.status === status);
   res.json({ count: filtered.length, items: filtered });
 });
 
-app.post("/human-review", (req, res) => {
+app.post("/human-review", auth, (req, res) => {
   const { title, body, source, priority } = req.body || {};
   if (!title) return res.status(400).json({ error: "title required" });
   const item = {

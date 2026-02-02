@@ -1,5 +1,20 @@
 import { loadState, saveState } from "../providers/state.js";
 import { runGuardrails } from "./guardrails.js";
+import { appendFileSync } from "fs";
+import { join } from "path";
+
+// --- Engagement replay log (wq-023) ---
+const REPLAY_FILE = join(process.env.HOME || "/home/moltbot", ".config/moltbook/engagement-replay.jsonl");
+const IS_E_SESSION = (process.env.SESSION_TYPE || "").toUpperCase().charAt(0) === "E";
+const REPLAY_SESSION = parseInt(process.env.SESSION_NUM || "0", 10);
+
+function logReplay(name, params) {
+  if (!IS_E_SESSION) return;
+  try {
+    const entry = JSON.stringify({ ts: new Date().toISOString(), s: REPLAY_SESSION, tool: name, params });
+    appendFileSync(REPLAY_FILE, entry + "\n");
+  } catch {}
+}
 
 // --- Tool usage tracking ---
 const toolUsage = {};
@@ -74,6 +89,7 @@ export function wrapServerTool(server) {
       const origHandler = args[handlerIdx];
       args[handlerIdx] = function(...hArgs) {
         trackTool(name);
+        logReplay(name, params);
         // Run guardrails on the first argument (params object)
         const params = hArgs[0] || {};
         const guard = runGuardrails(name, params);

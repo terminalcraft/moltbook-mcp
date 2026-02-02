@@ -442,6 +442,27 @@ app.get("/directives/retirement", (req, res) => {
 });
 
 // Platform health trends — uptime history analysis
+// Engagement replay log — tool calls during E sessions (wq-023)
+app.get("/engagement/replay", (req, res) => {
+  try {
+    const replayFile = join(process.env.HOME || "/home/moltbot", ".config/moltbook/engagement-replay.jsonl");
+    const lines = readFileSync(replayFile, "utf8").trim().split("\n").filter(Boolean);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 500);
+    const session = req.query.session ? parseInt(req.query.session) : null;
+    let entries = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+    if (session) entries = entries.filter(e => e.s === session);
+    entries = entries.slice(-limit);
+    // Platform ROI summary
+    const byTool = {};
+    for (const e of entries) {
+      byTool[e.tool] = (byTool[e.tool] || 0) + 1;
+    }
+    res.json({ total: entries.length, by_tool: byTool, entries });
+  } catch (e) {
+    res.json({ total: 0, by_tool: {}, entries: [], note: "No replay data yet" });
+  }
+});
+
 app.get("/platforms/trends", (req, res) => {
   try {
     const hours = Math.min(Math.max(parseInt(req.query.hours) || 24, 1), 720);

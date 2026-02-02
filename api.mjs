@@ -1196,6 +1196,64 @@ app.get("/status/queue-health", (req, res) => {
   }
 });
 
+// Queue velocity — items added/completed/retired per 10-session window
+app.get("/status/queue-velocity", (req, res) => {
+  try {
+    const wq = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf8"));
+    let archive = [];
+    try {
+      const raw = JSON.parse(readFileSync(join(BASE, "work-queue-archive.json"), "utf8"));
+      archive = Array.isArray(raw) ? raw : (raw.archived || []);
+    } catch {}
+
+    const allItems = [...(wq.queue || []), ...archive];
+    const windowSize = parseInt(req.query.window) || 10;
+
+    // Parse session history for session numbers
+    const histPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    const histLines = readFileSync(histPath, "utf8").trim().split("\n").filter(Boolean);
+    const sessionRe = /s=(\d+)/;
+    const sessions = histLines.map(l => {
+      const m = l.match(sessionRe);
+      return m ? parseInt(m[1]) : 0;
+    }).filter(Boolean);
+    const maxSession = Math.max(...sessions, 0);
+
+    // Build windows
+    const windows = [];
+    for (let end = maxSession; end > maxSession - windowSize * 5 && end > 0; end -= windowSize) {
+      const start = end - windowSize + 1;
+      const added = allItems.filter(i => {
+        const s = i.added_session || 0;
+        return s >= start && s <= end;
+      }).length;
+      const completed = allItems.filter(i => {
+        const s = i.completed_session || 0;
+        return (i.status === "done" || i.status === "completed") && s >= start && s <= end;
+      }).length;
+      const retired = allItems.filter(i => {
+        const s = i.retired_session || 0;
+        return i.status === "retired" && s >= start && s <= end;
+      }).length;
+      windows.push({ range: `${start}-${end}`, added, completed, retired, net: added - completed - retired });
+    }
+
+    // Current throughput
+    const totalDone = allItems.filter(i => i.status === "done" || i.status === "completed").length;
+    const totalRetired = allItems.filter(i => i.status === "retired").length;
+    const pending = (wq.queue || []).filter(i => i.status === "pending").length;
+    const inProgress = (wq.queue || []).filter(i => i.status === "in-progress").length;
+
+    res.json({
+      current: { pending, in_progress: inProgress, total_completed: totalDone, total_retired: totalRetired },
+      windows: windows.reverse(),
+      window_size: windowSize,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Session type effectiveness scoring — commits, cost, ROI per mode
 app.get("/status/session-effectiveness", (req, res) => {
   try {

@@ -1852,6 +1852,33 @@ td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
   }
 });
 
+// Unified pipeline view — queue + brainstorming + directives in one response
+app.get("/status/pipeline", (req, res) => {
+  try {
+    const wq = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf8"));
+    const queue = (wq.queue || []).map(i => ({ id: i.id, title: i.title, status: i.status, priority: i.priority, complexity: i.complexity || "M", tags: i.tags || [] }));
+    const qSummary = { total: queue.length, pending: queue.filter(i => i.status === "pending").length, blocked: queue.filter(i => i.status === "blocked").length, in_progress: queue.filter(i => i.status === "in-progress").length, done: queue.filter(i => i.status === "done").length, retired: queue.filter(i => i.status === "retired").length };
+
+    let brainstorming = [];
+    try {
+      const bs = readFileSync(join(BASE, "BRAINSTORMING.md"), "utf8");
+      brainstorming = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)].map(m => ({ title: m[1].trim(), description: m[2].trim() }));
+    } catch {}
+
+    let directives = { active: [], pending: [], total: 0 };
+    try {
+      const dd = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+      const all = dd.directives || [];
+      directives = { active: all.filter(d => d.status === "active").map(d => ({ id: d.id, content: (d.content || "").substring(0, 120), source_session: d.source_session })), pending: all.filter(d => d.status === "pending").map(d => ({ id: d.id, content: (d.content || "").substring(0, 120) })), total: all.length };
+    } catch {}
+
+    const pipeline = { queue: { summary: qSummary, items: queue.filter(i => i.status !== "done") }, brainstorming: { count: brainstorming.length, ideas: brainstorming }, directives, health: { queue_starvation: qSummary.pending < 3, brainstorm_low: brainstorming.length < 3 } };
+    res.json(pipeline);
+  } catch (e) {
+    res.status(500).json({ error: "pipeline analysis failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Public ecosystem status dashboard — HTML page with deep health checks
 app.get("/status/dashboard", async (req, res) => {
   // Deep checks: test actual functionality, not just HTTP 200

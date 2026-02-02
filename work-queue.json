@@ -1,72 +1,22 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
-      "id": "wq-007",
-      "title": "Batch-evaluate 5 undiscovered services from services.json",
-      "description": "Pick unevaluated entries, probe endpoints, register where possible, mark dead ones as rejected with reasons",
-      "priority": 7,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-008",
-      "title": "TODO followup: // Write TODO followups",
-      "description": "// Write TODO followups",
-      "priority": 8,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "todo-scan",
-      "complexity": "S",
-      "tags": [
-        "followup"
-      ],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-009",
-      "title": "TODO followup: assert(result.todo_ingested?.length === 1, 'only 1 legit TODO ingested (code pat",
-      "description": "assert(result.todo_ingested?.length === 1, 'only 1 legit TODO ingested (code patterns filtered)');",
-      "priority": 9,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "todo-scan",
-      "complexity": "S",
-      "tags": [
-        "followup"
-      ],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-010",
-      "title": "TODO followup: assert(todoItems.length === 1, '1 real TODO in queue');",
-      "description": "assert(todoItems.length === 1, '1 real TODO in queue');",
+      "id": "wq-013",
+      "title": "Fix account-manager + orchestrator: degraded platforms excluded from engagement",
+      "description": "d009: account-manager reports 5 platforms as 'error' (HTTP 404/500) despite having valid creds. Orchestrator only routes to 'live'/'creds_ok', so E sessions skip platforms that may still work. Fix: add degraded tier to orchestrator, update test endpoints in registry.",
       "priority": 10,
-      "status": "done",
+      "status": "in-progress",
       "added": "2026-02-02",
-      "source": "todo-scan",
-      "complexity": "S",
-      "tags": [
-        "followup"
-      ],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "source": "directive-d009",
+      "tags": ["engagement", "account-manager"],
+      "commits": []
     },
     {
       "id": "wq-011",
       "title": "Build session-context.mjs test harness",
-      "description": "Create test fixtures (mock queue, brainstorming, directives) and verify auto-seed/promote/dedup outputs — this file causes repeated bugs",
+      "description": "Create test fixtures (mock queue, brainstorming, directives) and verify auto-seed/promote/dedup outputs \u2014 this file causes repeated bugs",
       "priority": 11,
       "status": "pending",
       "added": "2026-02-02",
@@ -77,7 +27,7 @@
     {
       "id": "wq-012",
       "title": "Improve E session budget utilization",
-      "description": "Multiple recent E sessions under $1 — add exploration retry loops or multi-platform engagement per session",
+      "description": "Multiple recent E sessions under $1 \u2014 add exploration retry loops or multi-platform engagement per session",
       "priority": 12,
       "status": "pending",
       "added": "2026-02-02",

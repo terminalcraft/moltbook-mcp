@@ -45,11 +45,18 @@ function checkPlatformHealth() {
   if (!raw) return { error: "account-manager failed", platforms: [] };
   try {
     const platforms = JSON.parse(raw);
-    return {
-      live: platforms.filter(p => p.status === "live" || p.status === "creds_ok"),
-      down: platforms.filter(p => p.status !== "live" && p.status !== "creds_ok"),
-      all: platforms,
-    };
+    // Three tiers: live (confirmed working), degraded (has creds but test failed),
+    // down (no creds or unreachable). Degraded platforms are still engageable —
+    // the test endpoint may be wrong or the platform temporarily erroring.
+    const live = platforms.filter(p => p.status === "live" || p.status === "creds_ok");
+    const degraded = platforms.filter(p =>
+      p.status !== "live" && p.status !== "creds_ok" &&
+      p.status !== "no_creds" && p.status !== "unreachable"
+    );
+    const down = platforms.filter(p =>
+      p.status === "no_creds" || p.status === "unreachable"
+    );
+    return { live, degraded, down, all: platforms };
   } catch {
     return { error: "parse error", platforms: [] };
   }
@@ -165,25 +172,29 @@ function generatePlan(health, service, evalReport, roiData) {
     phases: [],
   };
 
-  // Phase A: Platform engagement (ROI-ranked)
-  if (health.live?.length > 0) {
-    const platformNames = roiData?.ranked || health.live.map(p => p.platform);
+  // Phase A: Platform engagement (ROI-ranked, includes degraded as fallbacks)
+  const livePlatforms = health.live?.map(p => p.platform) || [];
+  const degradedPlatforms = health.degraded?.map(p => p.platform) || [];
+  if (livePlatforms.length > 0 || degradedPlatforms.length > 0) {
+    const primaryNames = roiData?.ranked || livePlatforms;
     const roiDetail = roiData?.roi;
     const desc = roiDetail
-      ? `Engage ${platformNames.length} platform(s) by ROI: ${platformNames.map(p => `${p}(${roiDetail[p]?.score ?? "?"})`).join(" > ")}`
-      : `Check ${platformNames.length} live platform(s): ${platformNames.join(", ")}`;
+      ? `Engage ${primaryNames.length} live platform(s) by ROI: ${primaryNames.map(p => `${p}(${roiDetail[p]?.score ?? "?"})`).join(" > ")}`
+      : `Check ${primaryNames.length} live platform(s): ${primaryNames.join(", ")}`;
     plan.phases.push({
       name: "platform_engagement",
-      description: desc,
-      platforms: platformNames,
+      description: desc + (degradedPlatforms.length ? ` + ${degradedPlatforms.length} degraded fallback(s)` : ""),
+      platforms: primaryNames,
+      degraded_fallbacks: degradedPlatforms,
       roi: roiDetail || null,
       priority: "high",
     });
   } else {
     plan.phases.push({
       name: "platform_engagement",
-      description: "No live platforms — skip engagement, focus on evaluation",
+      description: "No live or degraded platforms — skip engagement, focus on evaluation",
       platforms: [],
+      degraded_fallbacks: [],
       priority: "skip",
     });
   }
@@ -234,7 +245,10 @@ if (service && !planOnly) {
 }
 
 console.error("[orchestrator] Phase 3.5: Ranking platforms by ROI...");
-const livePlatformNames = health.live?.map(p => p.platform) || [];
+const livePlatformNames = [
+  ...(health.live?.map(p => p.platform) || []),
+  ...(health.degraded?.map(p => p.platform) || []),
+];
 const roiData = rankPlatformsByROI(livePlatformNames);
 
 const plan = generatePlan(health, service, evalReport, roiData);
@@ -243,8 +257,10 @@ const output = {
   session_plan: plan,
   platform_health: {
     live_count: health.live?.length || 0,
+    degraded_count: health.degraded?.length || 0,
     down_count: health.down?.length || 0,
     live: health.live?.map(p => p.platform) || [],
+    degraded: health.degraded?.map(p => p.platform) || [],
   },
   roi_ranking: roiData,
   service_to_evaluate: service ? {
@@ -275,6 +291,10 @@ if (jsonMode) {
     }
   } else {
     console.log("No live platforms detected.");
+  }
+  if (health.degraded?.length) {
+    console.log(`Degraded — creds exist, test endpoint failing (${health.degraded.length}):`);
+    for (const p of health.degraded) console.log(`  ~ ${p.platform} (${p.status} ${p.http ? `HTTP ${p.http}` : ""})`);
   }
   if (health.down?.length) {
     console.log(`Down/unavailable (${health.down.length}):`);

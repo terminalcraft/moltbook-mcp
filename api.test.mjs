@@ -2162,6 +2162,155 @@ async function testPresenceLeaderboardStructure() {
   assert(r.body && typeof r.body === "object", "/presence/leaderboard returns object");
 }
 
+// --- Task board response structure ---
+
+async function testTaskListStructure() {
+  const r = await get("/tasks");
+  assert(r.status === 200, "GET /tasks returns 200");
+  assert(typeof r.body?.total === "number", "/tasks has total count");
+  assert(Array.isArray(r.body?.tasks), "/tasks has tasks array");
+}
+
+async function testTaskAvailableStructure() {
+  const r = await get("/tasks/available");
+  assert(r.status === 200, "GET /tasks/available returns 200");
+  assert(typeof r.body?.count === "number", "/tasks/available has count");
+  assert(Array.isArray(r.body?.items), "/tasks/available has items array");
+  if (r.body?.items?.length > 0) {
+    const item = r.body.items[0];
+    assert(item.id, "available task has id");
+    assert(item.title, "available task has title");
+    assert(item.claim_instructions, "available task has claim_instructions");
+  }
+}
+
+// --- Feed response structure ---
+
+async function testFeedStructure() {
+  const r = await get("/feed?format=json");
+  assert(r.status === 200, "GET /feed?format=json returns 200");
+  if (r.body?.items) {
+    assert(Array.isArray(r.body.items), "/feed items is array");
+  }
+}
+
+// --- Services response structure ---
+
+async function testServicesStructure() {
+  const r = await get("/services?format=json");
+  assert(r.status === 200, "GET /services?format=json returns 200");
+  if (Array.isArray(r.body)) {
+    assert(r.body.length >= 0, "/services returns array");
+    if (r.body.length > 0) {
+      assert(r.body[0].name || r.body[0].url, "service entry has name or url");
+    }
+  }
+}
+
+// --- Digest response structure ---
+
+async function testDigestStructure() {
+  const r = await get("/digest?format=json");
+  assert(r.status === 200, "GET /digest?format=json returns 200");
+  assert(r.body && typeof r.body === "object", "/digest returns object");
+}
+
+// --- Summary response structure ---
+
+async function testSummaryStructure() {
+  const r = await get("/summary?format=json");
+  assert(r.status === 200, "GET /summary?format=json returns 200");
+  assert(r.body && typeof r.body === "object", "/summary returns object");
+}
+
+// --- Outcomes response structure ---
+
+async function testOutcomesStructure() {
+  const r = await get("/outcomes");
+  assert(r.status === 200, "GET /outcomes returns 200");
+  assert(r.body && typeof r.body === "object", "/outcomes returns object");
+}
+
+// --- Rotation response structure (deeper) ---
+
+async function testRotationStructure() {
+  const r = await get("/rotation");
+  assert(r.status === 200, "GET /rotation returns 200 (structure)");
+  if (r.body?.analysis?.B) {
+    assert(typeof r.body.analysis.B.count === "number", "/rotation B has count");
+  }
+}
+
+// --- Search with type filter ---
+
+async function testSearchWithType() {
+  const r = await get("/search?q=test&type=pastes");
+  assert(r.status === 200, "GET /search?q=test&type=pastes returns 200");
+}
+
+async function testSearchEmpty() {
+  const r = await get("/search?q=zzzznonexistent99999");
+  assert(r.status === 200, "GET /search with no results returns 200");
+}
+
+// --- Changelog formats ---
+
+async function testChangelogAtom() {
+  const r = await get("/changelog?format=atom");
+  assert(r.status === 200, "GET /changelog?format=atom returns 200");
+  assert(r.ct.includes("xml") || r.ct.includes("atom"), "/changelog atom has xml content-type");
+}
+
+async function testChangelogRss() {
+  const r = await get("/changelog?format=rss");
+  assert(r.status === 200, "GET /changelog?format=rss returns 200");
+}
+
+// --- Activity with filters ---
+
+async function testActivityWithFilter() {
+  const r = await get("/activity?event=task.created&limit=5");
+  assert(r.status === 200, "GET /activity?event=task.created returns 200");
+}
+
+// --- Colony status structure ---
+
+async function testColonyStatusStructure() {
+  const r = await get("/colony/status");
+  assert(r.status === 200, "GET /colony/status returns 200 (structure)");
+  assert(r.body && typeof r.body === "object", "/colony/status returns object");
+}
+
+// --- Network response structure ---
+
+async function testNetworkStructure() {
+  const r = await get("/network?format=json");
+  assert(r.status === 200, "GET /network?format=json returns 200");
+}
+
+// --- Registry list structure ---
+
+async function testRegistryStructure() {
+  const r = await get("/registry");
+  assert(r.status === 200, "GET /registry returns 200 (structure)");
+  if (Array.isArray(r.body)) {
+    assert(r.body.length >= 0, "/registry returns array");
+    if (r.body.length > 0) {
+      assert(r.body[0].handle, "registry entry has handle");
+    }
+  }
+}
+
+// --- OpenAPI /tasks paths ---
+
+async function testOpenApiTaskPaths() {
+  const r = await get("/openapi.json");
+  if (r.status !== 200) return;
+  const paths = Object.keys(r.body.paths);
+  assert(paths.includes("/tasks"), "openapi documents /tasks");
+  assert(paths.some(p => p.includes("/tasks/")), "openapi documents /tasks sub-routes");
+}
+
 async function main() {
   console.log(`api.test.mjs — Testing ${BASE}\n`);
   const start = Date.now();
@@ -2351,6 +2500,14 @@ async function main() {
     testOpenApiPaths, testContentTypeHeaders, testCorsHeaders,
     testUnknownRoute404, testEngagementReplayStructure,
     testEffectivenessStructure, testPresenceLeaderboardStructure,
+    // s669: response structure validation
+    testTaskListStructure, testTaskAvailableStructure,
+    testFeedStructure, testServicesStructure, testDigestStructure,
+    testSummaryStructure, testOutcomesStructure, testRotationStructure,
+    testSearchWithType, testSearchEmpty,
+    testChangelogAtom, testChangelogRss,
+    testActivityWithFilter, testColonyStatusStructure,
+    testNetworkStructure, testRegistryStructure, testOpenApiTaskPaths,
   ];
 
   for (const t of tests) {

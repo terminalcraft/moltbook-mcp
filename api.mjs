@@ -9624,7 +9624,7 @@ app.get("/status/human-review", (req, res) => {
   try {
     const data = JSON.parse(readFileSync(join(BASE, "human-review.json"), "utf8"));
     const items = data.items || [];
-    const pending = items.filter(i => i.status === "pending");
+    const pending = items.filter(i => i.status === "open" || i.status === "pending");
     const resolved = items.filter(i => i.status === "resolved");
     const dismissed = items.filter(i => i.status === "dismissed");
 
@@ -9632,8 +9632,8 @@ app.get("/status/human-review", (req, res) => {
       return res.json({ total: items.length, pending: pending.length, items });
     }
 
-    const statusColor = { pending: "#f59e0b", resolved: "#22c55e", dismissed: "#6c7086" };
-    const statusIcon = { pending: "⚠", resolved: "✓", dismissed: "✕" };
+    const statusColor = { open: "#f59e0b", pending: "#f59e0b", resolved: "#22c55e", dismissed: "#6c7086" };
+    const statusIcon = { open: "⚠", pending: "⚠", resolved: "✓", dismissed: "✕" };
     const priorityColor = { high: "#ef4444", medium: "#f59e0b", low: "#6c7086" };
 
     const rows = items.length ? items.map(i => {

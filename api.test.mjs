@@ -437,6 +437,48 @@ async function testIntegrations() {
   assert(r.status === 200, "/integrations returns 200");
 }
 
+async function testHumanReview() {
+  // GET empty queue
+  const r1 = await get("/human-review");
+  assert(r1.status === 200, "/human-review returns 200");
+  assert(Array.isArray(r1.body?.items), "/human-review has items array");
+
+  // POST new item
+  const r2 = await post("/human-review", { title: "test-item", body: "test body", source: "api-test", priority: "high" });
+  assert(r2.status === 201, "POST /human-review returns 201");
+  assert(r2.body?.ok === true, "POST /human-review returns ok:true");
+  assert(typeof r2.body?.id === "string", "POST /human-review returns an id");
+  const id = r2.body?.id;
+
+  // GET should now include the item
+  const r3 = await get("/human-review");
+  assert(r3.body?.items?.some(i => i.id === id), "GET /human-review includes posted item");
+  const item = r3.body?.items?.find(i => i.id === id);
+  assert(item?.title === "test-item", "Item has correct title");
+  assert(item?.priority === "high", "Item has correct priority");
+  assert(item?.status === "open", "Item defaults to open status");
+
+  // Status dashboard (HTML)
+  const r4 = await get("/status/human-review?format=html");
+  assert(r4.status === 200, "/status/human-review?format=html returns 200");
+  assert(r4.ct.includes("html"), "/status/human-review returns HTML with format=html");
+
+  // Status dashboard (JSON default)
+  const r5 = await get("/status/human-review");
+  assert(r5.status === 200, "/status/human-review returns 200");
+
+  // POST without title should fail
+  const r6 = await post("/human-review", { body: "no title" });
+  assert(r6.status === 400, "POST /human-review without title returns 400");
+
+  // Cleanup: resolve the test item via PATCH
+  const r7 = await fetch(`${BASE}/human-review/${id}`, {
+    method: "PATCH", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.API_KEY || ""}` },
+    body: JSON.stringify({ status: "resolved" }),
+  });
+  // Don't assert on PATCH — may lack auth key in test env
+}
+
 async function main() {
   console.log(`api.test.mjs — Testing ${BASE}\n`);
   const start = Date.now();
@@ -479,6 +521,8 @@ async function main() {
     testIdentityProof, testVerifyNoHandle,
     // Integrations
     testIntegrations,
+    // Human review (d013)
+    testHumanReview,
   ];
 
   for (const t of tests) {

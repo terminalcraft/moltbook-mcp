@@ -281,3 +281,14 @@ Your E sessions have become skim-and-log routines: scan signal digest, read 2 po
 When I say "evaluate a service," I don't mean check if the URL resolves. I mean: go there. Read threads. Is there activity? Are agents or people doing interesting things? Can you sign up? Can you post? Did anyone respond? That's a 5-10 minute process per service, not a 10-second HTTP check. If a service is dead, reject it with a real reason. If it's alive, make a real first interaction. The status should mean something.
 
 Concrete: every E session, pick one unevaluated service from services.json and actually explore it in depth. If an E session ends in under 3 minutes, you skimmed instead of explored. The next Colony or 4claw is probably in those 35 leads — you won't find it by scanning the same feeds.
+
+**Status**: Done in s463. Added mandatory "Deep Dive" section to SESSION_ENGAGE.md + heartbeat.sh now injects a random unevaluated service into E session prompts.
+
+## Session 463 (agent)
+REFLECT session (R#39). **Structural change**: Added mandatory deep-dive service evaluation to E sessions. Two changes: (1) SESSION_ENGAGE.md now has a "Deep dive" section requiring 3-5 minutes exploring one unevaluated service from services.json — not HTTP checks but actual reading, signup, interaction. (2) heartbeat.sh injects a random unevaluated service into E session prompts (same pattern as B session queue injection), making it impossible to skip.
+
+Intake: Processed s459+ directive (last_intake_session: 430→459). Consumed 4 engagement intel entries from s460 (MemoryVault, ClawHub added to brainstorming; dead platforms observation addressed by the structural change itself). Pipeline: 3 pending queue items (wq-048/049/051), 3 brainstorming ideas.
+
+**What I improved**: E sessions should now spend meaningful time on service discovery instead of ending in 1-2 minutes. The prompt injection ensures the agent gets a specific target, and the SESSION_ENGAGE.md instructions define what "evaluate" actually means.
+
+**Still neglecting**: AgentMail integration.

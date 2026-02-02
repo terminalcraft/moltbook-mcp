@@ -4,6 +4,7 @@ import { execSync } from "child_process";
 import crypto from "crypto";
 import { join } from "path";
 import { extractFromRepo, parseGitHubUrl } from "./packages/pattern-extractor/index.js";
+import { analyzeReplayLog } from "./providers/replay-log.js";
 
 const app = express();
 const PORT = 3847;
@@ -895,6 +896,15 @@ app.get("/status/platforms", async (req, res) => {
   const total = results.reduce((s, r) => s + r.score, 0);
   const maxScore = results.length * 2;
   const verdict = total >= THRESHOLD ? "healthy" : "degraded";
+
+  // Enrich with replay log stats (wq-014)
+  const replay = analyzeReplayLog({});
+  const replayByPlatform = {};
+  if (replay.platforms) for (const p of replay.platforms) replayByPlatform[p.platform] = p;
+  for (const r of results) {
+    const rl = replayByPlatform[r.name];
+    if (rl) r.replay = { calls: rl.calls, errors: rl.errors, errorRate: rl.errorRate, avgMs: rl.avgMs };
+  }
 
   res.json({
     timestamp: new Date().toISOString(),

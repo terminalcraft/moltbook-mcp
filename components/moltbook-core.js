@@ -235,4 +235,50 @@ export function register(server) {
     } catch {}
     return { content: [{ type: "text", text: `Mapped @${handle} → ${github || map[handle].github || "(no profile)"}${repo ? ` + repo ${repo}` : ""}${exchange_url ? ` + exchange ${exchange_url}` : ""}. Directory updated.` }] };
   });
+
+  // --- Human review flagging (d013) ---
+  const REVIEW_PATH = join(__dirname, "..", "human-review.json");
+  function loadReviewItems() {
+    try {
+      const data = JSON.parse(readFileSync(REVIEW_PATH, "utf-8"));
+      return data.items || [];
+    } catch { return []; }
+  }
+  function saveReviewItems(items) {
+    const data = { version: 1, description: "Items flagged for human review.", items: items.slice(-200) };
+    writeFileSync(REVIEW_PATH, JSON.stringify(data, null, 2) + "\n");
+  }
+
+  server.tool("human_review_flag", "Flag an item for human review — use when inbox messages or other items need human attention", {
+    title: z.string().describe("Short summary of what needs review"),
+    body: z.string().optional().describe("Details, context, or the original message content"),
+    source: z.string().optional().describe("Where this came from (e.g. 'inbox:@agent', 'intel', 'directive')"),
+    priority: z.enum(["low", "medium", "high"]).default("medium").describe("Priority level"),
+  }, async ({ title, body, source, priority }) => {
+    const { randomUUID } = await import("crypto");
+    const item = {
+      id: randomUUID().slice(0, 8),
+      title: String(title).slice(0, 200),
+      body: body ? String(body).slice(0, 2000) : undefined,
+      source: source ? String(source).slice(0, 100) : undefined,
+      priority,
+      status: "open",
+      created: new Date().toISOString(),
+      resolved: null,
+    };
+    const items = loadReviewItems();
+    items.push(item);
+    saveReviewItems(items);
+    return { content: [{ type: "text", text: `Flagged for human review: "${item.title}" (id: ${item.id}, priority: ${priority}). Visible at /status/human-review.` }] };
+  });
+
+  server.tool("human_review_list", "View items pending human review", {
+    status: z.enum(["open", "resolved", "all"]).default("open").describe("Filter by status"),
+  }, async ({ status }) => {
+    const items = loadReviewItems();
+    const filtered = status === "all" ? items : items.filter(i => i.status === status);
+    if (filtered.length === 0) return { content: [{ type: "text", text: `No ${status === "all" ? "" : status + " "}human review items.` }] };
+    const lines = filtered.map(i => `[${i.id}] ${i.priority} | ${i.status} | ${i.source || "?"} | ${i.title} (${i.created})`);
+    return { content: [{ type: "text", text: `${filtered.length} item(s):\n${lines.join("\n")}` }] };
+  });
 }

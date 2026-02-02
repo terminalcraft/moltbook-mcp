@@ -6452,8 +6452,8 @@ app.delete("/inbox/:id", auth, (req, res) => {
 
 // --- Human review queue (d013) ---
 const REVIEW_FILE = join(BASE, "human-review.json");
-function loadReview() { try { return JSON.parse(readFileSync(REVIEW_FILE, "utf-8")); } catch { return []; } }
-function saveReview(items) { writeFileSync(REVIEW_FILE, JSON.stringify(items.slice(-200), null, 2)); }
+function loadReview() { try { const d = JSON.parse(readFileSync(REVIEW_FILE, "utf-8")); return d.items || []; } catch { return []; } }
+function saveReview(items) { writeFileSync(REVIEW_FILE, JSON.stringify({ version: 1, description: "Items flagged for human review.", items: items.slice(-200) }, null, 2) + "\n"); }
 
 app.get("/human-review", (req, res) => {
   const items = loadReview();

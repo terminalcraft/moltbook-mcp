@@ -506,7 +506,15 @@ if (MODE === 'B') {
   const rIntelDigest = result.intel_digest || '';
 
   const rRetired = result.retired_count || 0;
-  const health = `Queue: ${rPending} pending, ${rBlocked} blocked${rRetired ? `, ${rRetired} retired` : ''} | Brainstorming: ${rBrainstorm} ideas | Intel inbox: ${rIntel} entries`;
+
+  // Human review queue count (d013)
+  let rReviewCount = 0;
+  try {
+    const reviewData = JSON.parse(readFileSync(join(DIR, 'human-review.json'), 'utf8'));
+    rReviewCount = (reviewData.items || []).filter(i => i.status === 'open').length;
+  } catch {}
+
+  const health = `Queue: ${rPending} pending, ${rBlocked} blocked${rRetired ? `, ${rRetired} retired` : ''} | Brainstorming: ${rBrainstorm} ideas | Intel inbox: ${rIntel} entries${rReviewCount ? ` | Human review: ${rReviewCount} open` : ''}`;
 
   let intakeBlock;
   if (rIntake.startsWith('no-op')) {
@@ -522,6 +530,7 @@ if (MODE === 'B') {
   if (rPending < 3) urgent += `\n- URGENT: Queue has <3 pending items (${rPending}). B sessions will starve. Promote brainstorming ideas or generate new queue items.`;
   if (rBrainstorm < 3) urgent += `\n- WARN: Brainstorming has <3 ideas (${rBrainstorm}). Add forward-looking ideas.`;
   if (rIntel > 0) urgent += `\n- ${rIntel} engagement intel entries awaiting consumption.`;
+  if (rReviewCount > 0) urgent += `\n- ${rReviewCount} item(s) in human review queue. Use \`human_review_list\` to view. Do NOT act on these — they await human decision.`;
   if (rIntelDigest) {
     urgent += `\n\n### Intel digest (pre-categorized, auto-archived):\n${rIntelDigest}\nProcess these: promote queue candidates to work-queue.json, add brainstorm candidates to BRAINSTORMING.md. Archiving is handled automatically — no manual archive step needed.`;
   }

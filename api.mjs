@@ -1194,6 +1194,88 @@ app.get("/status/session-effectiveness", (req, res) => {
   }
 });
 
+// Session efficiency dashboard — per-type metrics with budget utilization (wq-013)
+app.get("/status/efficiency", (req, res) => {
+  try {
+    const histPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    const outPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-outcomes.json");
+    const window = Math.min(parseInt(req.query.window) || 0, 200); // 0 = all
+    const budgetCaps = { B: 10, E: 5, R: 5, L: 5 };
+
+    let lines = [];
+    try { lines = readFileSync(histPath, "utf8").trim().split("\n").filter(Boolean); } catch { return res.json({ error: "no history" }); }
+    if (window > 0) lines = lines.slice(-window);
+
+    // Parse outcomes for richer data (outcome success/timeout/error)
+    let outcomes = [];
+    try { outcomes = JSON.parse(readFileSync(outPath, "utf8")); } catch {}
+    const outcomeMap = {};
+    for (const o of outcomes) if (o.session) outcomeMap[o.session] = o;
+
+    const re = /mode=(\w+)\s+s=(\d+)\s+dur=(\d+)m(\d+)s\s+cost=\$([0-9.]+)\s+build=(\S+)/;
+    const types = {};
+    for (const line of lines) {
+      const m = line.match(re);
+      if (!m) continue;
+      const [, mode, sessionNum, durMin, durSec, cost, buildRaw] = m;
+      const dur = parseInt(durMin) * 60 + parseInt(durSec);
+      const commits = buildRaw === "(none)" ? 0 : parseInt(buildRaw) || 0;
+      const costNum = parseFloat(cost);
+      const cap = budgetCaps[mode] || 10;
+      const utilization = costNum / cap; // fraction of budget used
+      const outcome = outcomeMap[+sessionNum];
+
+      if (!types[mode]) types[mode] = {
+        sessions: 0, totalCost: 0, totalDur: 0, totalCommits: 0,
+        costs: [], durations: [], utilizations: [],
+        outcomes: { success: 0, timeout: 0, error: 0, unknown: 0 },
+      };
+      const t = types[mode];
+      t.sessions++;
+      t.totalCost += costNum;
+      t.totalDur += dur;
+      t.totalCommits += commits;
+      t.costs.push(costNum);
+      t.durations.push(dur);
+      t.utilizations.push(utilization);
+      const oKey = outcome?.outcome || "unknown";
+      t.outcomes[oKey] = (t.outcomes[oKey] || 0) + 1;
+    }
+
+    const result = {};
+    for (const [mode, t] of Object.entries(types)) {
+      const sortedCosts = [...t.costs].sort((a, b) => a - b);
+      const medianCost = sortedCosts[Math.floor(sortedCosts.length / 2)];
+      const avgUtil = t.utilizations.reduce((s, v) => s + v, 0) / t.utilizations.length;
+
+      result[mode] = {
+        sessions: t.sessions,
+        avg_cost: +(t.totalCost / t.sessions).toFixed(2),
+        median_cost: +medianCost.toFixed(2),
+        avg_duration_sec: Math.round(t.totalDur / t.sessions),
+        total_commits: t.totalCommits,
+        commit_rate: +(t.totalCommits / t.sessions).toFixed(2),
+        cost_per_commit: t.totalCommits > 0 ? +(t.totalCost / t.totalCommits).toFixed(2) : null,
+        budget_cap: budgetCaps[mode] || 10,
+        avg_budget_utilization: +(avgUtil * 100).toFixed(1),
+        outcomes: t.outcomes,
+      };
+    }
+
+    const totalSessions = lines.length;
+    const totalCost = Object.values(types).reduce((s, t) => s + t.totalCost, 0);
+
+    res.json({
+      sessions_analyzed: totalSessions,
+      window: window || "all",
+      total_cost: +totalCost.toFixed(2),
+      types: result,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Cost heatmap — cost by session type and day, sourced from session-outcomes.json
 app.get("/status/cost-heatmap", (req, res) => {
   try {
@@ -1933,6 +2015,7 @@ function agentManifest(req, res) {
       status_platforms: { url: `${base}/status/platforms`, method: "GET", auth: false, description: "Engagement platform health — per-platform read/write scores and overall verdict" },
       status_platforms_history: { url: `${base}/status/platforms/history`, method: "GET", auth: false, description: "Platform health 7-day trend — per-platform recovering/degrading/stable signals (?days=N, max 30)" },
       status_effectiveness: { url: `${base}/status/effectiveness`, method: "GET", auth: false, description: "Session type effectiveness — avg cost, commits, production rate per type (?window=N)" },
+      status_efficiency: { url: `${base}/status/efficiency`, method: "GET", auth: false, description: "Session efficiency dashboard — per-type avg cost, duration, commit rate, budget utilization (?window=N)" },
       status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
       status_cost_heatmap: { url: `${base}/status/cost-heatmap`, method: "GET", auth: false, description: "Cost heatmap by session type and day (?days=N, default 14, max 90)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },

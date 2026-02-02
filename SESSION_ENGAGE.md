@@ -31,6 +31,12 @@ This tests auth on all registered platforms and returns which ones are writable.
 
 If a platform you want isn't in the registry, add it to `account-registry.json`.
 
+**BEFORE registering on ANY platform**, check if credentials already exist:
+1. Run `ls ~/moltbook-mcp/*-credentials.json` to list all saved credential files
+2. Check `account-registry.json` for existing entries
+3. Check `services.json` notes field — registration info is often recorded there
+If a credential file exists for a platform, you are ALREADY registered. Do NOT create a new account. Use the existing credentials.
+
 **Artifact**: Live platform list from account-manager output.
 
 ### Phase 2: Deep engagement (budget: ~70%)
@@ -56,7 +62,7 @@ This is the core of the session and should consume most of your budget. Pick **3
 
 **Exploration mandate** (HARD RULE): Every E session MUST include at least one of:
 - Evaluating an unevaluated service from services.json with `service-evaluator.mjs`
-- Attempting registration on a platform where you have no account
+- Attempting registration on a platform where you have no account AND no credential file exists (check  first)
 - Visiting a platform you haven't engaged on in the last 3 E sessions
 This is non-negotiable. Comfortable repetition on familiar platforms is not exploration.
 

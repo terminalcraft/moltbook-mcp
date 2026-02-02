@@ -108,6 +108,17 @@ account-manager reports all 12 platforms as no_creds. Credential files exist on 
 
 **Directive 2: Replace dialogue.md with a structured communication system.**
 Current problems: (1) human directives buried under agent session summaries, (2) regex-based intake detection is fragile, (3) no acknowledgment that a directive was consumed, (4) no back-channel for agent to ask clarifying questions, (5) no structured status tracking on directives. Design and build a replacement. The fact that R#70 silently dropped one directive and misattributed the other is exactly the kind of failure this system should prevent.
+## Session 595 (agent)
+REFLECT session (R#76). **Structural change**: Replaced 7 copy-paste file-read-inject-delete blocks in heartbeat.sh (lines 338-402, ~65 lines) with a declarative `INJECT_SPECS` loop (~15 lines). Each inject source is now one config entry (`filename:keep|consume`). Adding new prompt injections went from writing 10 lines of boilerplate to adding 1 line. Net reduction: 42 lines. Tested: syntax check passes, loop correctly reads files, preserves `keep` files, deletes `consume` files.
+
+Pipeline: 3 pending (wq-006/007/008), 0 blocked, 3 brainstorming ideas. Ecosystem touch: Ctxly memory stored, inbox checked (200 messages).
+
+**What I improved**: heartbeat.sh's prompt assembly was the largest DRY violation in the codebase. Every new inject source required copying the same 10-line pattern. The loop makes it trivial to add/remove inject sources and eliminates a class of bugs where variables were accidentally merged (e.g., `LINT_ALERT_BLOCK` was accumulating both lint and cred alerts into one variable — now each file is independent).
+
+**Compliance**: ecosystem-adoption addressed (ctxly_remember + inbox_check). Budget utilization: targeting $1.50+.
+
+**Still neglecting**: The 200 inbox messages are unprocessed. BRIEFING.md still references dialogue.md as the channel in places.
+
 ## Session 567 (agent)
 REFLECT session (R#69). **Structural change**: Added `retired` status to work queue system. 5 items (wq-004/005/007/009/010) had been blocked for 100-165 sessions with no resolution path — they were zombie entries inflating blocked count and triggering useless per-session blocker_check commands. Now marked `retired` with session/reason metadata. session-context.mjs updated to track retired separately from blocked. Queue went from 1 pending + 5 zombies to 3 pending + 5 retired.
 

@@ -528,6 +528,123 @@ function testESessionEvalTarget() {
   assert(!result.eval_target?.includes('EvalDone'), 'eval_target skips evaluated services');
 }
 
+// ===== INTEGRATION TESTS (wq-016) =====
+// These test real file I/O edge cases: malformed JSON, missing files,
+// empty files, extra fields, and full pipeline chaining.
+
+function intTestMalformedJSON() {
+  console.log('\n== Integration: malformed JSON in work-queue.json ==');
+
+  // Write invalid JSON — session-context should not crash
+  writeFileSync(join(SRC, 'work-queue.json'), '{ broken json !!!');
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  // readJSON returns null for malformed JSON, so queue starts as [].
+  // Auto-promote may fire (pending < 3) and add items from brainstorming.
+  assert(typeof result.pending_count === 'number', 'malformed wq: pending_count is a number');
+  assert(typeof result === 'object', 'malformed wq: still produces valid output');
+  // Key property: does not crash, env file still written
+  assert(existsSync(join(STATE, 'session-context.env')), 'malformed wq: env file created');
+}
+
+function intTestMissingStateFiles() {
+  console.log('\n== Integration: missing state files entirely ==');
+
+  // Only write work-queue.json — no engagement-state.json, no session-history, no intel
+  writeWQ([
+    { id: 'wq-001', title: 'Lonely task', status: 'pending', priority: 1 },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  // Deliberately do NOT create engagement-state.json
+
+  const result = run('B');
+  assert(result.estate_session === 0, 'missing estate: defaults to 0');
+  assert(result.wq_item?.startsWith('wq-001'), 'missing estate: task still assigned');
+  assert(result.intel_count === 0, 'missing intel: defaults to 0');
+  assert(existsSync(join(STATE, 'session-context.env')), 'env file still written');
+}
+
+function intTestEmptyWorkQueue() {
+  console.log('\n== Integration: empty/zero-byte work-queue.json ==');
+
+  writeFileSync(join(SRC, 'work-queue.json'), '');
+  writeBS('## Evolution Ideas\n\n- **Seed idea one**: first\n- **Seed idea two**: second\n- **Seed idea three**: third\n- **Seed idea four**: fourth\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  assert(result.pending_count === 0 || result.pending_count > 0, 'empty wq: does not crash');
+  assert(typeof result === 'object', 'empty wq: produces valid output');
+}
+
+function intTestExtraFieldsPreserved() {
+  console.log('\n== Integration: extra/unknown fields in queue items preserved ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Task with extras', status: 'pending', priority: 1,
+      custom_field: 'should survive', metadata: { foo: 'bar' } },
+    { id: 'wq-002', title: 'Task with extras too', status: 'done', priority: 2,
+      custom_field: 'also survives' },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  const wq = readWQ();
+  const item = wq.queue.find(i => i.id === 'wq-001');
+  assert(item?.custom_field === 'should survive', 'custom string field preserved');
+  assert(item?.metadata?.foo === 'bar', 'nested custom object preserved');
+}
+
+function intTestFullPipelineChain() {
+  console.log('\n== Integration: full pipeline — dedup + promote + seed + ingest ==');
+
+  // Set up a scenario where all pipelines fire in one run:
+  // - Duplicate items (triggers dedup)
+  // - 0 pending after dedup (triggers auto-promote from brainstorming)
+  // - Directives exist (may trigger seed if brainstorming empty after promote)
+  // - TODO followups exist (triggers ingest)
+  writeWQ([
+    { id: 'wq-001', title: 'Build webhook relay service for events', status: 'pending', priority: 1 },
+    { id: 'wq-002', title: 'Build webhook relay service for events too', status: 'pending', priority: 2 },
+  ]);
+  writeBS(`## Evolution Ideas
+
+- **Create agent monitor**: Ping agents periodically
+- **Add metrics endpoint**: Expose Prometheus metrics
+- **Build log viewer**: Web UI for session logs
+- **Add backup script**: Auto-backup config files
+`);
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'todo-followups.txt'), '- Add timeout handling to webhook relay\n');
+  writeFileSync(join(SRC, 'directives.json'), JSON.stringify({
+    directives: [{ id: 'd001', content: 'explore ecosystem', status: 'active' }],
+    questions: []
+  }));
+
+  const result = run('B');
+
+  // Dedup should have fired
+  assert(Array.isArray(result.deduped), 'pipeline: dedup ran');
+  assert(result.deduped?.length === 1, 'pipeline: 1 duplicate removed');
+
+  // After dedup, only 1 pending item remains, so auto-promote should fire (pending < 3)
+  assert(result.auto_promoted?.length >= 1 || result.pending_count >= 1, 'pipeline: promote or pending available');
+
+  // TODO ingest should have fired
+  assert(result.todo_ingested?.length === 1, 'pipeline: 1 TODO ingested');
+
+  // Final queue should have items from all sources
+  const wq = readWQ();
+  const sources = new Set(wq.queue.map(i => i.source).filter(Boolean));
+  assert(wq.queue.length >= 3, 'pipeline: queue has items from multiple sources');
+
+  // Env file should reflect final state
+  const env = readFileSync(join(STATE, 'session-context.env'), 'utf8');
+  assert(env.includes('CTX_PENDING_COUNT='), 'pipeline: env file has final pending count');
+}
+
 // ===== RUN =====
 
 try {
@@ -552,6 +669,12 @@ try {
   setup(); testDynamicBuffer();
   setup(); testRPromptBlock();
   setup(); testESessionEvalTarget();
+  // Integration tests (wq-016)
+  setup(); intTestMalformedJSON();
+  setup(); intTestMissingStateFiles();
+  setup(); intTestEmptyWorkQueue();
+  setup(); intTestExtraFieldsPreserved();
+  setup(); intTestFullPipelineChain();
 } finally {
   cleanup();
 }

@@ -81,7 +81,12 @@ if (MODE === 'B' && pending.length > 0) {
   const sized = pending.map(i => ({ ...i, _c: (i.complexity || 'M').toUpperCase() }));
   const preferred = sized.filter(i => i._c !== 'L');
   const item = (preferred.length > 0 && BUDGET_CAP <= 5) ? preferred[0] : pending[0];
-  result.wq_item = item.id + ': ' + item.title + (item.description?.length > 20 ? ' — ' + item.description : '');
+  let taskText = item.id + ': ' + item.title + (item.description?.length > 20 ? ' — ' + item.description : '');
+  if (item.progress_notes?.length) {
+    const recent = item.progress_notes.slice(-3);
+    taskText += '\n\nProgress notes from previous sessions:\n' + recent.map(n => `- [s${n.session}] ${n.text}`).join('\n');
+  }
+  result.wq_item = taskText;
 } else if (MODE === 'B' && pending.length === 0) {
   const bsPath = join(DIR, 'BRAINSTORMING.md');
   if (existsSync(bsPath)) {

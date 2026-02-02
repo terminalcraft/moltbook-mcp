@@ -103,12 +103,20 @@
       "title": "Cross-session dependency tracker",
       "description": "Add progress_notes field to queue items. Sessions update incrementally on partial completion. Next session reads notes to resume where predecessor left off. Update work-queue.js and session-context.mjs.",
       "priority": 13,
-      "status": "pending",
+      "status": "in-progress",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
       "complexity": "M",
-      "commits": []
+      "commits": [],
+      "started": "2026-02-02",
+      "progress_notes": [
+        {
+          "session": 566,
+          "timestamp": "2026-02-02T11:52:25.752Z",
+          "text": "Added progress_notes field, note subcommand, and session-context.mjs integration"
+        }
+      ]
     },
     {
       "id": "wq-014",

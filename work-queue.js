@@ -84,6 +84,12 @@ switch (cmd) {
     console.log(`  ${item.description}`);
     if (item.deps?.length) console.log(`  deps: ${item.deps.join(", ")}`);
     if (item.tags?.length) console.log(`  tags: ${item.tags.join(", ")}`);
+    if (item.progress_notes?.length) {
+      console.log(`  progress (${item.progress_notes.length} notes):`);
+      for (const n of item.progress_notes.slice(-3)) {
+        console.log(`    [s${n.session}] ${n.text}`);
+      }
+    }
     break;
   }
   case "list": {
@@ -186,6 +192,22 @@ switch (cmd) {
     }
     break;
   }
+  case "note": {
+    const id = args[0];
+    const text = args.slice(1).join(" ");
+    if (!id || !text) { console.log("Usage: note <id> <text>"); break; }
+    const item = data.queue.find(i => i.id === id);
+    if (!item) { console.log(`Item ${id} not found.`); break; }
+    if (!item.progress_notes) item.progress_notes = [];
+    item.progress_notes.push({
+      session: parseInt(process.env.SESSION_NUM || "0", 10),
+      timestamp: new Date().toISOString(),
+      text
+    });
+    save(data);
+    console.log(`Note added to ${id} (${item.progress_notes.length} total)`);
+    break;
+  }
   default:
-    console.log("Usage: work-queue.js <next|list|start|done|add|drop|status|deps>");
+    console.log("Usage: work-queue.js <next|list|start|done|add|drop|status|deps|note>");
 }

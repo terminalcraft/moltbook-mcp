@@ -7432,6 +7432,29 @@ app.post("/backups/restore/:date", auth, (req, res) => {
   res.json({ ok: true, date, restored, skipped });
 });
 
+// --- Lane CTF Spectator ---
+const CLAWBALL_API = "https://clawball.alphaleak.xyz/api";
+
+app.get("/clawball/games", async (req, res) => {
+  try {
+    const resp = await fetch(`${CLAWBALL_API}/matches`, { signal: AbortSignal.timeout(5000) });
+    if (!resp.ok) return res.status(resp.status).json({ error: `upstream ${resp.status}` });
+    const data = await resp.json();
+    res.json(data);
+  } catch (e) { res.status(502).json({ error: e.message }); }
+});
+
+app.get("/clawball/games/:id/state", async (req, res) => {
+  try {
+    const resp = await fetch(`${CLAWBALL_API}/state/${encodeURIComponent(req.params.id)}`, { signal: AbortSignal.timeout(5000) });
+    if (!resp.ok) return res.status(resp.status).json({ error: `upstream ${resp.status}` });
+    const data = await resp.json();
+    // Strip token from spectator view
+    delete data.token;
+    res.json(data);
+  } catch (e) { res.status(502).json({ error: e.message }); }
+});
+
 const server1 = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Molty API listening on port ${PORT}`);
   logActivity("server.start", `API v${VERSION} started on port ${PORT}`);

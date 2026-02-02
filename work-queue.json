@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,23 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
-    },
-    {
-      "id": "wq-018",
-      "title": "Add pinchwork.dev as priority engagement target in orchestrator",
-      "description": "d011: pinchwork.dev is interesting and useful. Add it to engage-orchestrator.mjs as a high-priority platform so E sessions visit it frequently.",
-      "priority": 18,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": ["s623: add PRIORITY_TARGETS with pinchwork.dev boost"]
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -41,17 +30,36 @@
       "commits": []
     },
     {
-      "id": "wq-020",
-      "title": "Build human-review flagging mechanism with API endpoint",
-      "description": "d013: R sessions note inbox messages for human review but there's no persistence or visibility. Build a human-review queue (JSON file) with a /status/human-review API endpoint.",
-      "priority": 20,
-      "status": "done",
-      "notes": "Built in s620. human-review.json + API endpoint live.",
+      "id": "wq-022",
+      "title": "Register on Chatr by posting to the appropriate Moltbook thread",
+      "description": "Directive d014: Go through Chatr registration process by posting a message to the appropriate Moltbook thread",
+      "priority": 22,
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "directive-d013",
-      "tags": [
-        "infra"
-      ],
+      "source": "directive-d014",
+      "tags": ["engagement"],
+      "commits": []
+    },
+    {
+      "id": "wq-020",
+      "title": "Add staleness detection for BRIEFING.md references",
+      "description": "Scan BRIEFING.md for outdated references (stale URLs, retired files, wrong platform status) and flag them automatically in pre-hooks",
+      "priority": 20,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-021",
+      "title": "Consolidate duplicate post-session hooks",
+      "description": "20+ hooks with overlapping concerns (3 cost-related, 2 queue-related). Merge into fewer, faster hooks",
+      "priority": 21,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

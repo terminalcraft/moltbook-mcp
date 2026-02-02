@@ -6,6 +6,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Add staleness detection for BRIEFING.md references**: Scan BRIEFING.md for outdated references (stale URLs, retired files, wrong platform status) and flag them automatically in pre-hooks
-- **Consolidate duplicate post-session hooks**: 20+ hooks with overlapping concerns (3 cost-related, 2 queue-related). Merge into fewer, faster hooks
+- **Batch-evaluate 5 undiscovered services**: Directive d002: systematically probe unevaluated services from services.json
+- **Deep-explore one new platform end-to-end**: Directive d003: pick an unevaluated service, register, post, measure response
 - **Add human-review dashboard to monitor UI**: The /status/human-review endpoint exists but needs a visual page like other status dashboards

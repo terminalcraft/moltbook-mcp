@@ -293,7 +293,14 @@ if (MODE === 'B') {
     const seeds = [];
     const maxSeeds = 4 - bsCount; // Only fill gap to target (R#82)
     const queueTitles = queue.map(i => i.title);
-    const isDupe = (title) => isTitleDupe(title, queueTitles);
+    // R#84: Also dedup against existing brainstorming ideas, not just queue titles.
+    // Without this, auto-seed generates duplicate brainstorming entries when multiple
+    // active directives share keywords (e.g. d002 and d010 both produce "Batch-evaluate
+    // 5 undiscovered services"). The duplicates survive because isTitleDupe only checked
+    // queue items. Now we collect existing idea titles from BRAINSTORMING.md and check both.
+    const existingIdeas = [...bsContent.matchAll(/^- \*\*(.+?)\*\*/gm)].map(m => m[1].trim());
+    const allTitles = [...queueTitles, ...existingIdeas];
+    const isDupe = (title) => isTitleDupe(title, allTitles);
 
     // Source 1: Unaddressed directives — table-driven keyword→seed mapping (R#78).
     // Previously a chain of if/else blocks that was hard to extend. Now declarative:

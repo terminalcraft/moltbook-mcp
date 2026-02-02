@@ -217,6 +217,65 @@ function rankPlatformsByROI(livePlatformNames) {
   }
 }
 
+// --- Phase 3.75: Dynamic Tier Computation (d016) ---
+
+/**
+ * Computes platform tiers dynamically from engagement analytics instead of
+ * relying on static tier assignments in account-registry.json.
+ *
+ * Tier 1: High-quality engagement — writes > 5, good write ratio or cost efficiency, 3+ E sessions
+ * Tier 2: Some engagement history — any writes or 1+ E sessions
+ * Tier 3: No meaningful engagement data
+ *
+ * Priority targets (PRIORITY_TARGETS) are always tier 1 regardless of metrics.
+ * Writes back updated tiers to account-registry.json.
+ */
+function computeDynamicTiers(roiMap) {
+  const registryPath = join(__dirname, "account-registry.json");
+  const registry = loadJSON(registryPath);
+  if (!registry?.accounts) return { updated: 0, error: "no registry" };
+
+  const priorityNames = new Set(PRIORITY_TARGETS.map(t => t.name));
+  let updated = 0;
+  const changes = [];
+
+  for (const account of registry.accounts) {
+    const platformName = account.platform;
+    const roi = roiMap?.[platformName];
+    const oldTier = account.tier;
+    let newTier;
+
+    // Priority targets are always tier 1
+    if (priorityNames.has(platformName)) {
+      newTier = 1;
+    } else if (roi) {
+      const { writes, writeRatio, costPerWrite, eSessions } = roi;
+      if (writes > 5 && (writeRatio > 10 || (costPerWrite !== null && costPerWrite < 0.50)) && eSessions >= 3) {
+        newTier = 1;
+      } else if (writes > 0 || eSessions > 0) {
+        newTier = 2;
+      } else {
+        newTier = 3;
+      }
+    } else {
+      // No analytics data — keep current tier
+      newTier = oldTier || 3;
+    }
+
+    if (newTier !== oldTier) {
+      changes.push({ platform: platformName, from: oldTier, to: newTier });
+      account.tier = newTier;
+      updated++;
+    }
+  }
+
+  if (updated > 0) {
+    saveJSON(registryPath, registry);
+  }
+
+  return { updated, changes };
+}
+
 // --- Phase 4: Generate Session Plan ---
 
 function generatePlan(health, service, evalReport, roiData) {
@@ -359,10 +418,17 @@ const livePlatformNames = [
 ];
 const roiData = rankPlatformsByROI(livePlatformNames);
 
+console.error("[orchestrator] Phase 3.75: Computing dynamic tiers...");
+const tierResult = computeDynamicTiers(roiData?.roi);
+if (tierResult.changes?.length) {
+  console.error(`[orchestrator] Tier changes: ${tierResult.changes.map(c => `${c.platform} ${c.from}→${c.to}`).join(", ")}`);
+}
+
 const plan = generatePlan(health, service, evalReport, roiData);
 
 const output = {
   session_plan: plan,
+  tier_updates: tierResult,
   platform_health: {
     live_count: health.live?.length || 0,
     degraded_count: health.degraded?.length || 0,
@@ -421,6 +487,14 @@ if (jsonMode) {
     }
   } else {
     console.log("\nNo services need evaluation right now.");
+  }
+
+  // Tier updates
+  if (tierResult.changes?.length) {
+    console.log(`\nDynamic tier updates (${tierResult.updated} changed):`);
+    for (const c of tierResult.changes) {
+      console.log(`  ${c.platform}: tier ${c.from} → ${c.to}`);
+    }
   }
 
   // Plan summary

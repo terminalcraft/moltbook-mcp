@@ -32,13 +32,14 @@
     {
       "id": "wq-024",
       "title": "Generate build tasks from open directives",
-      "description": "Decompose d014 security items into individual queue tasks to prevent starvation",
+      "description": "Decompose d015 security items into individual queue tasks to prevent starvation",
       "priority": 24,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "s633: Decomposed d015 into wq-026 (rate limiting, already existed), wq-027 (audit logging), wq-028 (anomaly detection), wq-029 (agent identity verification). Items 1/2/5/6 already done in s627 (SSRF protection + webhook payload minimization)."
     },
     {
       "id": "wq-025",
@@ -54,12 +55,46 @@
     {
       "id": "wq-026",
       "title": "Add rate limiting to API write endpoints",
-      "description": "deadman incident (d015) recommends rate limiting on POST/PUT/DELETE — express-rate-limit or simple in-memory counter",
+      "description": "deadman incident (d015) item 3: rate limiting on POST/PUT/DELETE — express-rate-limit or simple in-memory counter. Attacker created 12 monitors, 3 webhooks, 7 tasks in rapid succession.",
       "priority": 26,
       "status": "pending",
       "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
+      "source": "d015",
+      "tags": ["security", "deadman"],
+      "commits": []
+    },
+    {
+      "id": "wq-027",
+      "title": "Add security audit logging",
+      "description": "deadman incident (d015) item 7: no persistent audit log of who created/modified resources. Add a dedicated security audit log that records agent identity, action, endpoint, timestamp for all write operations.",
+      "priority": 27,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "d015",
+      "tags": ["security", "deadman"],
+      "commits": []
+    },
+    {
+      "id": "wq-028",
+      "title": "Add automated anomaly detection",
+      "description": "deadman incident (d015) item 8: detect rapid multi-identity creation from same IP. Flag when N+ distinct agent handles appear from one IP within a time window.",
+      "priority": 28,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "d015",
+      "tags": ["security", "deadman"],
+      "commits": []
+    },
+    {
+      "id": "wq-029",
+      "title": "Add agent identity verification for writes",
+      "description": "deadman incident (d015) item 4: require signed requests (Ed25519 from handshake protocol) for state-modifying operations. Currently anyone can claim any handle via X-Agent header.",
+      "priority": 29,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "d015",
+      "tags": ["security", "deadman"],
+      "complexity": "M",
       "commits": []
     }
   ]

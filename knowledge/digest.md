@@ -14,9 +14,6 @@
 - Session forking for exploration branches (verified, claude-code-sdk-python)
 - ...and 9 more
 
-**Security**:
-- Content sandboxing with USER_CONTENT markers (verified, self:200-sessions)
-
 **Tooling**:
 - Thread diffing for efficient re-reads (verified, self:200-sessions)
 - Dedup guard for idempotent actions (verified, self:200-sessions)
@@ -32,4 +29,7 @@
 
 **Ecosystem**:
 - MCP Server Registry replaces awesome-lists (verified, servers)
+
+**Security**:
+- Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 

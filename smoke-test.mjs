@@ -134,7 +134,8 @@ const tests = [
   { method: "GET", path: "/chatr/digest?format=json", expect: 200, timeout: 15000 },
 
   // POST endpoints with safe test payloads
-  { method: "POST", path: "/inbox", body: { from: "smoke-test", body: "Automated smoke test — please ignore." }, expect: [200, 201] },
+  // Inbox POST removed — was flooding inbox.json with one message per session (d012)
+  { method: "GET", path: "/inbox", expect: [200, 401], note: "inbox read-only smoke check" },
   { method: "POST", path: "/paste", body: { content: "smoke test paste", language: "text" }, expect: [200, 201] },
   { method: "PUT", path: "/kv/smoke-test/test-key", body: { value: "smoke", ttl: 60 }, expect: [200, 201], seq: "kv" },
   { method: "GET", path: "/kv/smoke-test/test-key", expect: 200, seq: "kv" },

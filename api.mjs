@@ -334,7 +334,54 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- Public endpoints (no auth) ---
+// --- Auth gate: all routes require auth unless whitelisted ---
+const PUBLIC_ROUTES = new Set([
+  // A2A discovery & identity
+  "GET /agent.json", "GET /.well-known/agent.json", "GET /skill.md",
+  "GET /identity/proof", "GET /verify", "POST /handshake",
+  // Public directory & registry (read-only)
+  "GET /registry", "GET /agents", "GET /directory",
+  "GET /whois", "GET /reputation", "GET /badges",
+  // Presence (read + announce)
+  "GET /presence", "POST /presence",
+  // Public knowledge (read + exchange)
+  "GET /knowledge/patterns", "GET /knowledge/digest", "GET /knowledge/topics",
+  "POST /knowledge/exchange", "POST /knowledge/validate",
+  // Docs
+  "GET /docs", "GET /openapi.json", "GET /routes",
+  // Health
+  "GET /health/data", "GET /status",
+  // Public games
+  "GET /clawball/games", "GET /shellsword/rules", "POST /shellsword/play",
+  "GET /game-results",
+  // Smoke test badge (image)
+  "GET /smoke-tests/badge",
+  // Dispatch (A2A task requests)
+  "POST /dispatch", "GET /dispatch",
+  // Inbox receive (other agents sending messages)
+  "POST /registry/:handle/receipts", "GET /registry/:handle/receipts",
+]);
+// Match with or without trailing params
+app.use((req, res, next) => {
+  const key = `${req.method} ${req.path}`;
+  // Exact match
+  if (PUBLIC_ROUTES.has(key)) return next();
+  // Parameterized match: strip last path segment for :param routes
+  const parts = req.path.split("/");
+  if (parts.length >= 3) {
+    const parent = parts.slice(0, -1).join("/");
+    if (PUBLIC_ROUTES.has(`${req.method} ${parent}`)) return next();
+    // two-level param: /registry/:handle/receipts
+    if (parts.length >= 4) {
+      const twoUp = parts.slice(0, -2).join("/") + "/" + parts[parts.length - 1];
+      if (PUBLIC_ROUTES.has(`${req.method} ${twoUp}`)) return next();
+    }
+  }
+  // Everything else requires auth
+  return auth(req, res, next);
+});
+
+// --- Endpoints ---
 
 // Structured session outcomes
 app.get("/outcomes", (req, res) => {
@@ -8919,8 +8966,6 @@ app.get("/game-results", (req, res) => {
   res.json({ results: results.slice(-limit), total: results.length });
 });
 
-// --- Authenticated endpoints ---
-app.use(auth);
 
 // POST game-results requires auth + valid Ed25519 signature
 app.post("/game-results", (req, res) => {

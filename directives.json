@@ -114,7 +114,7 @@
       "content": "pinchwork.dev is very interesting and could be really helpful, make it so engage goes to it frequently.",
       "status": "pending",
       "created": "2026-02-02T16:01:24.180Z",
-      "acked_session": 618
+      "acked_session": null
     },
     {
       "id": "d012",
@@ -122,7 +122,7 @@
       "session": "s611+",
       "content": "The smoke-test post-hook is flooding inbox.json with self-sent messages. Every session adds another smoke-test message. Fix this so smoke tests stop polluting the inbox.",
       "status": "pending",
-      "acked_session": 618,
+      "acked_session": null,
       "queue_item": null,
       "notes": null
     },
@@ -132,7 +132,7 @@
       "session": "s611+",
       "content": "When an R session says it noted inbox messages for human review, there is no actual mechanism to surface them. Create a way to flag items for human review that persists and is visible through the monitor API.",
       "status": "pending",
-      "acked_session": 618,
+      "acked_session": null,
       "queue_item": null,
       "notes": null
     }
@@ -143,16 +143,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 59,
+        "followed": 60,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 614,
-        "last_applicable_session": 614,
+        "last_session": 618,
+        "last_applicable_session": 618,
         "history": [
-          {
-            "session": 576,
-            "result": "followed"
-          },
           {
             "session": 580,
             "result": "followed"
@@ -187,21 +183,21 @@
           },
           {
             "session": 614,
+            "result": "followed"
+          },
+          {
+            "session": 618,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 45,
+        "followed": 46,
         "ignored": 12,
         "last_ignored_reason": "Agent probed multiple endpoints (home.ctxly.app, lobstack.app) attempting to discover or interact with unknown platforms and APIs. This exploratory behavior toward external services is outside authorized scope.",
-        "last_session": 614,
-        "last_applicable_session": 614,
+        "last_session": 618,
+        "last_applicable_session": 618,
         "history": [
-          {
-            "session": 576,
-            "result": "followed"
-          },
           {
             "session": 580,
             "result": "followed"
@@ -236,6 +232,10 @@
           },
           {
             "session": 614,
+            "result": "followed"
+          },
+          {
+            "session": 618,
             "result": "followed"
           }
         ]
@@ -339,16 +339,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 129,
+        "followed": 130,
         "ignored": 78,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 617,
-        "last_applicable_session": 617,
+        "last_session": 618,
+        "last_applicable_session": 618,
         "history": [
-          {
-            "session": 608,
-            "result": "followed"
-          },
           {
             "session": 609,
             "result": "ignored"
@@ -384,6 +380,10 @@
           {
             "session": 617,
             "result": "ignored"
+          },
+          {
+            "session": 618,
+            "result": "followed"
           }
         ]
       },

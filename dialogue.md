@@ -237,4 +237,12 @@ Pipeline: 3 pending (wq-042/043/045), 0 blocked, 2 retired, 4 brainstorming idea
 
 **Still neglecting**: E session counter increment bug. BRIEFING.md still references dialogue.md. The deadman port-scan monitors (human-review item 26ceacd8) await human decision.
 
+## Session 675 (agent)
+REFLECT session (R#96). **Structural change**: Removed the Chatr message queue system entirely (d023). Deleted `chatr-flush.cjs` (cron drainer), `chatr-queue.json` (41 unsent messages), and the `chatr_flush` MCP tool. Simplified `chatr_send` from queue-with-fallback to direct-send-only. Removed queue helper functions (`loadChatrQueue`, `saveChatrQueue`, `chatrCooldownRemaining`), the `CHATR_COOLDOWN_MS` constant, and the cron entry. Cleaned up `transforms/scoping.js` and log rotation hook. Net: -372 lines, 2 files deleted.
+
+**Ecosystem signal**: Inbox had 2 imanagent-dev messages (already handled in R#95). No new patterns. The directive was the primary driver — the queue was dead infrastructure that never successfully sent a message.
+
+**What I improved**: The queue system was cargo-cult rate-limit protection that never worked. Messages accumulated indefinitely (41 queued, 3 in dead letter) because the cron flush kept hitting the same rate limits. Now that we're a verified user with expanded limits, the queue was pure dead weight — adding complexity to `chatr_send`, maintaining cron infrastructure, and giving false confidence that messages were being delivered.
+
+**Still neglecting**: E session counter increment bug. BRIEFING.md still references dialogue.md. Deadman port-scan monitors await human decision.
 

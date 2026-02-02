@@ -113,7 +113,28 @@
       "session": 615,
       "content": "pinchwork.dev is very interesting and could be really helpful, make it so engage goes to it frequently.",
       "status": "pending",
-      "created": "2026-02-02T16:01:24.180Z"
+      "created": "2026-02-02T16:01:24.180Z",
+      "acked_session": null
+    },
+    {
+      "id": "d012",
+      "from": "human",
+      "session": "s611+",
+      "content": "The smoke-test post-hook is flooding inbox.json with self-sent messages. Every session adds another smoke-test message. Fix this so smoke tests stop polluting the inbox.",
+      "status": "pending",
+      "acked_session": null,
+      "queue_item": null,
+      "notes": null
+    },
+    {
+      "id": "d013",
+      "from": "human",
+      "session": "s611+",
+      "content": "When an R session says it noted inbox messages for human review, there is no actual mechanism to surface them. Create a way to flag items for human review that persists and is visible through the monitor API.",
+      "status": "pending",
+      "acked_session": null,
+      "queue_item": null,
+      "notes": null
     }
   ],
   "questions": [],
@@ -220,16 +241,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 174,
+        "followed": 175,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 615,
-        "last_applicable_session": 615,
+        "last_session": 616,
+        "last_applicable_session": 616,
         "history": [
-          {
-            "session": 603,
-            "result": "followed"
-          },
           {
             "session": 604,
             "result": "followed"
@@ -265,20 +282,20 @@
           {
             "session": 615,
             "result": "followed"
+          },
+          {
+            "session": 616,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 97,
+        "followed": 98,
         "ignored": 2,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 612,
-        "last_applicable_session": 612,
+        "last_session": 616,
+        "last_applicable_session": 616,
         "history": [
-          {
-            "session": 583,
-            "result": "followed"
-          },
           {
             "session": 587,
             "result": "followed"
@@ -314,20 +331,20 @@
           {
             "session": 612,
             "result": "followed"
+          },
+          {
+            "session": 616,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 128,
+        "followed": 129,
         "ignored": 77,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 615,
-        "last_applicable_session": 615,
+        "last_session": 616,
+        "last_applicable_session": 616,
         "history": [
-          {
-            "session": 606,
-            "result": "followed"
-          },
           {
             "session": 607,
             "result": "followed"
@@ -363,20 +380,20 @@
           {
             "session": 615,
             "result": "ignored"
+          },
+          {
+            "session": 616,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 65,
+        "followed": 66,
         "ignored": 14,
         "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 612,
-        "last_applicable_session": 612,
+        "last_session": 616,
+        "last_applicable_session": 616,
         "history": [
-          {
-            "session": 583,
-            "result": "followed"
-          },
           {
             "session": 587,
             "result": "followed"
@@ -411,21 +428,21 @@
           },
           {
             "session": 612,
+            "result": "followed"
+          },
+          {
+            "session": 616,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 77,
+        "followed": 78,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 612,
-        "last_applicable_session": 612,
+        "last_session": 616,
+        "last_applicable_session": 616,
         "history": [
-          {
-            "session": 583,
-            "result": "followed"
-          },
           {
             "session": 587,
             "result": "followed"
@@ -460,6 +477,10 @@
           },
           {
             "session": 612,
+            "result": "followed"
+          },
+          {
+            "session": 616,
             "result": "followed"
           }
         ]
@@ -514,16 +535,12 @@
         ]
       },
       "directive-update": {
-        "followed": 77,
+        "followed": 78,
         "ignored": 10,
         "last_ignored_reason": "",
-        "last_session": 612,
-        "last_applicable_session": 612,
+        "last_session": 616,
+        "last_applicable_session": 616,
         "history": [
-          {
-            "session": 583,
-            "result": "followed"
-          },
           {
             "session": 587,
             "result": "followed"
@@ -558,6 +575,10 @@
           },
           {
             "session": 612,
+            "result": "followed"
+          },
+          {
+            "session": 616,
             "result": "followed"
           }
         ]

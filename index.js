@@ -2,7 +2,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
 import { setApiKey, saveApiSession, getApiCallCount } from "./providers/api.js";
 import { wrapServerTool, saveToolUsage } from "./transforms/scoping.js";
@@ -11,57 +12,34 @@ import { installReplayLog } from "./providers/replay-log.js";
 // Install fetch instrumentation before any components load (wq-014)
 installReplayLog();
 
-// Active component registrations (zero-usage MCP wrappers removed in s410)
-import { register as registerCore } from "./components/moltbook-core.js";
-import { register as registerEngagement } from "./components/engagement.js";
-import { register as registerKnowledge } from "./components/knowledge.js";
-import { register as registerExternal } from "./components/external.js";
-import { register as registerFourclaw } from "./components/fourclaw.js";
-import { register as registerRegistry } from "./components/registry.js";
-import { register as registerLeaderboard } from "./components/leaderboard.js";
-import { register as registerKV } from "./components/kv.js";
-import { register as registerCron } from "./components/cron.js";
-import { register as registerPolls } from "./components/polls.js";
-import { register as registerBadges } from "./components/badges.js";
-import { register as registerWebhooks } from "./components/webhooks.js";
-import { register as registerColony } from "./components/colony.js";
-import { register as registerLobchan } from "./components/lobchan.js";
-import { register as registerMDI } from "./components/mdi.js";
-import { register as registerImanagent } from "./components/imanagent.js";
-import { register as registerMoltbotden } from "./components/moltbotden.js";
-import { register as registerEngagementLog } from "./components/engagement-log.js";
-
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
-const server = new McpServer({ name: "moltbook", version: "1.85.0" });
+const server = new McpServer({ name: "moltbook", version: "1.95.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
 
-// Register active tool components
-registerCore(server);
-registerEngagement(server);
-registerKnowledge(server);
-registerExternal(server);
-registerFourclaw(server);
-registerRegistry(server);
-registerLeaderboard(server);
-registerKV(server);
-registerCron(server);
-registerPolls(server);
-registerBadges(server);
-registerWebhooks(server);
-registerColony(server);
-registerLobchan(server);
-registerMDI(server);
-registerImanagent(server);
-registerMoltbotden(server);
-registerEngagementLog(server);
+// Manifest-driven component loader (R#95: replaces 18 manual import/register pairs)
+// Add or remove components by editing components.json — no index.js changes needed.
+const manifest = JSON.parse(readFileSync(join(__dirname, "components.json"), "utf8"));
+const loadErrors = [];
 
-// Retired MCP wrappers (s410 dead code audit — 0 calls across 410 sessions):
-// bsky, identity, paste, shortener, pubsub, rooms, tasks, monitors,
-// notifications, buildlog, digest, snapshots, presence, reputation,
-// backups, smoke-tests, handoff, projects
-// Note: API routes in api.mjs still serve these features via HTTP.
+for (const name of manifest.active) {
+  try {
+    const mod = await import(`./components/${name}.js`);
+    if (typeof mod.register === "function") {
+      mod.register(server);
+    } else {
+      loadErrors.push(`${name}: no register() export`);
+    }
+  } catch (err) {
+    loadErrors.push(`${name}: ${err.message}`);
+  }
+}
+
+if (loadErrors.length > 0) {
+  console.error(`[moltbook] Component load errors:\n  ${loadErrors.join("\n  ")}`);
+}
 
 // Save API history on exit
 process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });

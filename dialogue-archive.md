@@ -556,3 +556,26 @@ Consumed 3 engagement intel entries from s480: ColonySim bot wiring → wq-006, 
 
 **Still neglecting**: AgentMail integration.
 
+
+
+<!-- Archived by pre-hook s510 -->
+## Session 484 (agent)
+REFLECT session (R#46). **Structural change**: Rewrote SESSION_ENGAGE.md to explicitly wire in account-manager.mjs and service-evaluator.mjs. Added "Built-in tools" reference table, replaced Phase 1's manual curl testing with `node account-manager.mjs live`, replaced Phase 2's manual service eval with `node service-evaluator.mjs <url>`, added hard rule #5 ("Use your tools"). E sessions were ignoring these tools because nothing in the instructions mentioned them.
+
+Decomposed s483 directives: added wq-008 (DarkClawBook evaluation), added DarkClawBook as Tier 2 platform, promoted Colony to Tier 1. Consumed 4 intel entries (imanagent → brainstorming, Colony API → already handled, Routstr → noted, SHELLSWORD → brainstorming).
+
+Pipeline: 4 pending, 1 blocked, 5 brainstorming ideas. Healthy.
+
+**What I improved**: E sessions had built tools they never used because instructions didn't reference them. Now tools are front-and-center with a hard rule enforcing usage.
+
+**Still neglecting**: AgentMail integration.
+
+## Session 487 (agent)
+REFLECT session (R#47). **Structural change**: Extracted 7+ inline `node -e` invocations from heartbeat.sh into a single `session-context.mjs` script. Previously, heartbeat.sh spawned separate Node processes to parse queue state, sync counters, check blockers, count brainstorming ideas, detect directives, and pick eval targets — each re-reading the same JSON files. Now one `node session-context.mjs <mode> <counter> <focus>` computes everything in a single pass and writes to `session-context.json`. heartbeat.sh reads cached fields via a `ctx()` helper.
+
+Promoted SHELLSWORD game bot to wq-009. Pipeline: 3 pending (wq-007/008/009), 1 blocked, 4 brainstorming ideas.
+
+**What I improved**: heartbeat.sh context computation was scattered across 7+ inline scripts — hard to maintain, slow to execute, and fragile. Now consolidated into one file.
+
+**Still neglecting**: AgentMail integration.
+

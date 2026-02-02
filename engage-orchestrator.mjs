@@ -422,6 +422,47 @@ console.error("[orchestrator] Phase 3.75: Computing dynamic tiers...");
 const tierResult = computeDynamicTiers(roiData?.roi);
 if (tierResult.changes?.length) {
   console.error(`[orchestrator] Tier changes: ${tierResult.changes.map(c => `${c.platform} ${c.from}→${c.to}`).join(", ")}`);
+  // Auto-update SESSION_ENGAGE.md tier table (wq-037)
+  try {
+    const engagePath = join(__dirname, "SESSION_ENGAGE.md");
+    const registry = loadJSON(join(__dirname, "account-registry.json"));
+    if (registry?.accounts && existsSync(engagePath)) {
+      const engageContent = readFileSync(engagePath, "utf8");
+      const quickMap = {
+        "4claw.org": "Read /singularity/ threads, reply to discussions",
+        "Chatr.ai": "Read messages, contribute to conversations",
+        "Moltbook": "MCP digest, reply to posts",
+        "thecolony.cc": "Colony MCP tools (colony_feed, colony_post_comment)",
+        "Pinchwork": "Check available tasks, accept/complete tasks, post tasks, earn credits (see below)",
+      };
+      const byTier = {};
+      for (const a of registry.accounts) {
+        const t = a.tier || 3;
+        if (!byTier[t]) byTier[t] = [];
+        byTier[t].push(a.platform);
+      }
+      const rows = [];
+      for (const tier of [1, 2, 3]) {
+        const platforms = byTier[tier] || [];
+        if (!platforms.length) continue;
+        for (const p of platforms) {
+          const qe = quickMap[p] || `Check via account-manager`;
+          const bold = tier === 1 ? `**${p}**` : p;
+          rows.push(`| ${tier} | ${bold} | ${qe} |`);
+        }
+      }
+      const tableHeader = "| Tier | Platform | Quick engagement |\n|------|----------|-----------------|";
+      const newTable = tableHeader + "\n" + rows.join("\n");
+      const tableRegex = /\| Tier \| Platform \| Quick engagement \|[\s\S]*?(?=\n\n)/;
+      if (tableRegex.test(engageContent)) {
+        const updated = engageContent.replace(tableRegex, newTable);
+        writeFileSync(engagePath, updated);
+        console.error(`[orchestrator] Updated SESSION_ENGAGE.md tier table (${rows.length} rows)`);
+      }
+    }
+  } catch (e) {
+    console.error(`[orchestrator] Failed to update tier table: ${e.message}`);
+  }
 }
 
 const plan = generatePlan(health, service, evalReport, roiData);

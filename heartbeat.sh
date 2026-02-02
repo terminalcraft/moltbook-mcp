@@ -378,9 +378,19 @@ ${R_HEALTH}
 $(if [[ "$R_INTAKE_STATUS" == no-op* ]]; then echo "No new human directives since last intake. Skip checklist step 2 (directive intake) — go straight to Diagnose + Evolve."; else echo "NEW directives detected. Read dialogue.md and decompose into work-queue items."; fi)${R_URGENT}"
 fi
 
+# Compliance nudge: inject directive-tracking feedback into the session prompt.
+# Pre-hook 39-compliance-nudge.sh writes this file when directives are being missed.
+COMPLIANCE_BLOCK=""
+COMPLIANCE_FILE="$STATE_DIR/compliance-nudge.txt"
+if [ -f "$COMPLIANCE_FILE" ]; then
+  COMPLIANCE_BLOCK="
+
+$(cat "$COMPLIANCE_FILE")"
+fi
+
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${COMPLIANCE_BLOCK}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

@@ -34,6 +34,37 @@ const depsReady = (item) => !item.deps?.length || item.deps.every(d => {
   return dep && dep.status === 'done';
 });
 
+// --- Queue self-dedup (R#67) ---
+// Detect and remove duplicate queue items by normalizing titles and comparing.
+// Duplicates arise from multiple sources (manual add, auto-promote, different sessions).
+// wq-012/wq-013 were both "engagement replay analytics" — this prevents that class of bug.
+{
+  const seen = new Map(); // normalized title -> first item index
+  const dupes = [];
+  for (let idx = 0; idx < queue.length; idx++) {
+    const norm = queue[idx].title.toLowerCase()
+      .replace(/[^a-z0-9 ]/g, ' ')  // strip punctuation
+      .replace(/\s+/g, ' ')          // collapse whitespace
+      .trim()
+      .split(' ').slice(0, 6).join(' '); // first 6 words for fuzzy match
+    if (seen.has(norm)) {
+      // Keep the earlier item (lower index = higher priority), mark later as dupe
+      dupes.push(idx);
+    } else {
+      seen.set(norm, idx);
+    }
+  }
+  if (dupes.length > 0) {
+    // Remove in reverse order to preserve indices
+    for (let i = dupes.length - 1; i >= 0; i--) {
+      const removed = queue.splice(dupes[i], 1)[0];
+      result.deduped = result.deduped || [];
+      result.deduped.push(removed.id + ': ' + removed.title);
+    }
+    writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+  }
+}
+
 const pending = queue.filter(i => i.status === 'pending' && depsReady(i));
 const blocked = queue.filter(i => i.status === 'blocked');
 

@@ -1311,6 +1311,7 @@ function getDocEndpoints() {
     { method: "GET", path: "/monitors/:id", auth: false, desc: "Single monitor with full probe history", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
     { method: "DELETE", path: "/monitors/:id", auth: false, desc: "Remove a URL monitor", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
     { method: "POST", path: "/monitors/:id/probe", auth: false, desc: "Trigger an immediate probe for a monitor (don't wait for the 5-min cycle)", params: [{ name: "id", in: "path", desc: "Monitor ID", required: true }] },
+    { method: "GET", path: "/sessions", auth: false, desc: "Session replay dashboard — SVG cost chart, mode breakdown, anomaly detection, last 50 sessions with commit/file/note detail", params: [{ name: "format", in: "query", desc: "json for structured data, otherwise HTML dashboard" }] },
     { method: "GET", path: "/costs", auth: false, desc: "Session cost history and trends — tracks spend per session by mode", params: [{ name: "format", in: "query", desc: "json for raw data, otherwise HTML dashboard" }] },
     { method: "GET", path: "/efficiency", auth: false, desc: "Session efficiency metrics — cost-per-commit, cost-per-file, aggregated by mode", params: [] },
     { method: "GET", path: "/directives", auth: false, desc: "Directive compliance dashboard — per-directive health, compliance rates, critical/warning alerts", params: [] },
@@ -3928,6 +3929,150 @@ th{background:#222}h1,h2{color:#0f0}</style></head><body>
 </div></body></html>`);
 });
 
+// --- Session replay dashboard (wq-015) ---
+app.get("/sessions", (req, res) => {
+  const histFile = "/home/moltbot/.config/moltbook/session-history.txt";
+  const costFile = join(LOGS, "..", "cost-history.json");
+  const trendFile = join(LOGS, "..", "cost-trends.json");
+
+  let lines = [];
+  try { lines = readFileSync(histFile, "utf-8").trim().split("\n").filter(Boolean); } catch {}
+  let costs = {};
+  try { for (const e of JSON.parse(readFileSync(costFile, "utf-8"))) costs[e.session] = e; } catch {}
+  let trends = {};
+  try { trends = JSON.parse(readFileSync(trendFile, "utf-8")); } catch {}
+
+  const sessions = lines.map(line => {
+    const m = line.match(/^(\S+)\s+mode=(\S+)\s+s=(\d+)\s+dur=(\S+)\s+(?:cost=\$(\S+)\s+)?build=(.+?)\s+files=\[([^\]]*)\]\s+note:\s*(.*)$/);
+    if (!m) return null;
+    const [, date, mode, session, duration, costInline, buildRaw, filesRaw, note] = m;
+    const s = +session;
+    const cost = costInline ? +costInline : (costs[s]?.spent || null);
+    const commits = buildRaw === "(none)" ? 0 : parseInt(buildRaw) || 0;
+    const files = filesRaw ? filesRaw.split(", ").filter(Boolean) : [];
+    const dm = duration.match(/(\d+)m(\d+)s/);
+    const durSec = dm ? parseInt(dm[1]) * 60 + parseInt(dm[2]) : 0;
+    const costEntry = costs[s];
+    const isAnomaly = costEntry && trends.modes?.[mode]?.overall_avg && cost > trends.modes[mode].overall_avg * 2;
+    return { session: s, mode, date, duration, durSec, cost, commits, files, note, isAnomaly };
+  }).filter(Boolean).reverse();
+
+  if (req.query.format === "json") return res.json({ count: sessions.length, sessions, trends });
+
+  // Mode colors
+  const modeColor = { B: "#22c55e", E: "#60a5fa", R: "#a78bfa", L: "#facc15" };
+  const modeLabel = { B: "Build", E: "Engage", R: "Reflect", L: "Learn" };
+
+  // Summary cards
+  const totalCost = sessions.reduce((s, e) => s + (e.cost || 0), 0);
+  const totalCommits = sessions.reduce((s, e) => s + e.commits, 0);
+  const anomalies = sessions.filter(e => e.isAnomaly).length;
+  const modeBreakdown = {};
+  for (const s of sessions) {
+    if (!modeBreakdown[s.mode]) modeBreakdown[s.mode] = { count: 0, cost: 0, commits: 0 };
+    modeBreakdown[s.mode].count++;
+    modeBreakdown[s.mode].cost += s.cost || 0;
+    modeBreakdown[s.mode].commits += s.commits;
+  }
+
+  // Cost bar chart (last 30 sessions, inline SVG)
+  const chartData = sessions.slice(0, 30).reverse();
+  const maxCost = Math.max(...chartData.map(e => e.cost || 0), 0.01);
+  const barW = 16, chartH = 80, gap = 2;
+  const chartW = chartData.length * (barW + gap);
+  const bars = chartData.map((e, i) => {
+    const h = Math.max(((e.cost || 0) / maxCost) * chartH, 1);
+    const x = i * (barW + gap);
+    const y = chartH - h;
+    const color = e.isAnomaly ? "#ef4444" : (modeColor[e.mode] || "#666");
+    return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${color}" rx="2"><title>s${e.session} ${e.mode} $${(e.cost || 0).toFixed(2)}</title></rect>`;
+  }).join("");
+
+  // Session rows
+  const sessionRows = sessions.slice(0, 50).map(s => {
+    const mc = modeColor[s.mode] || "#666";
+    const anomalyBadge = s.isAnomaly ? ' <span style="color:#ef4444;font-size:0.8em">&#9888; ANOMALY</span>' : '';
+    const fileList = s.files.length > 0 ? s.files.slice(0, 5).join(", ") + (s.files.length > 5 ? ` +${s.files.length - 5}` : "") : "—";
+    return `<tr>
+      <td>${s.session}</td>
+      <td><span style="color:${mc};font-weight:bold">${s.mode}</span></td>
+      <td>${s.duration}</td>
+      <td>${s.cost !== null ? "$" + s.cost.toFixed(2) : "—"}${anomalyBadge}</td>
+      <td>${s.commits || "—"}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${s.files.join(", ")}">${fileList}</td>
+      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(s.note || "").replace(/"/g, '&quot;')}">${s.note || "—"}</td>
+    </tr>`;
+  }).join("");
+
+  // Mode breakdown rows
+  const modeRows = Object.entries(modeBreakdown).sort((a, b) => b[1].count - a[1].count).map(([m, d]) => {
+    const mc = modeColor[m] || "#666";
+    return `<tr><td><span style="color:${mc};font-weight:bold">${m}</span> ${modeLabel[m] || ""}</td><td>${d.count}</td><td>$${d.cost.toFixed(2)}</td><td>$${d.count > 0 ? (d.cost / d.count).toFixed(2) : "0.00"}</td><td>${d.commits}</td></tr>`;
+  }).join("");
+
+  // Trend warnings
+  const trendWarnings = (trends.warnings || []).map(w => `<div style="color:#eab308;margin:4px 0">&#9888; ${w}</div>`).join("");
+
+  const html = `<!DOCTYPE html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Session Dashboard — @moltbook</title>
+<meta http-equiv="refresh" content="120">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:1100px;margin:0 auto}
+  h1{font-size:1.5em;color:#fff;margin-bottom:4px}
+  .sub{color:#888;font-size:0.85em;margin-bottom:20px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+  .card{background:#111;border:1px solid #222;border-radius:6px;padding:14px}
+  .card h3{font-size:0.75em;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .card .val{font-size:1.6em;font-weight:bold}
+  section{margin-bottom:28px}
+  section h2{font-size:1.1em;color:#ccc;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1a1a1a}
+  table{border-collapse:collapse;width:100%}
+  td,th{padding:6px 10px;text-align:left;border-bottom:1px solid #1a1a1a;font-size:0.85em}
+  th{color:#888;font-size:0.75em;text-transform:uppercase}
+  .chart{background:#111;border:1px solid #222;border-radius:6px;padding:16px;margin-bottom:24px;overflow-x:auto}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #1a1a1a;color:#555;font-size:0.8em;display:flex;justify-content:space-between}
+  a{color:#666;text-decoration:none}a:hover{color:#999}
+</style></head><body>
+<h1>Session Dashboard</h1>
+<div class="sub">@moltbook &middot; ${sessions.length} sessions tracked &middot; Auto-refresh 120s</div>
+
+<div class="cards">
+  <div class="card"><h3>Total Cost</h3><div class="val" style="color:#22c55e">$${totalCost.toFixed(2)}</div></div>
+  <div class="card"><h3>Sessions</h3><div class="val" style="color:#fff">${sessions.length}</div></div>
+  <div class="card"><h3>Commits</h3><div class="val" style="color:#60a5fa">${totalCommits}</div></div>
+  <div class="card"><h3>Anomalies</h3><div class="val" style="color:${anomalies > 0 ? '#ef4444' : '#22c55e'}">${anomalies}</div></div>
+  <div class="card"><h3>Avg Cost</h3><div class="val" style="color:#a78bfa">$${sessions.length > 0 ? (totalCost / sessions.length).toFixed(2) : "0.00"}</div></div>
+</div>
+
+<section>
+<h2>Cost Trend (Last 30)</h2>
+<div class="chart"><svg width="${chartW}" height="${chartH}" viewBox="0 0 ${chartW} ${chartH}">${bars}</svg>
+<div style="margin-top:8px;font-size:0.75em;color:#666">Hover bars for details. <span style="color:#ef4444">&#9632;</span> = anomaly</div>
+</div>
+${trendWarnings}
+</section>
+
+<section>
+<h2>Mode Breakdown</h2>
+<table><tr><th>Mode</th><th>Sessions</th><th>Total Cost</th><th>Avg Cost</th><th>Commits</th></tr>${modeRows}</table>
+</section>
+
+<section>
+<h2>Session History (Last 50)</h2>
+<table><tr><th>#</th><th>Mode</th><th>Duration</th><th>Cost</th><th>Commits</th><th>Files</th><th>Note</th></tr>${sessionRows}</table>
+</section>
+
+<div class="footer">
+  <span><a href="/sessions?format=json">JSON</a> &middot; <a href="/costs">Costs</a> &middot; <a href="/efficiency">Efficiency</a> &middot; <a href="/status/dashboard">Status</a></span>
+  <span>${new Date().toISOString()}</span>
+</div>
+</body></html>`;
+
+  res.type("text/html").send(html);
+});
+
 // --- Deprecation management API ---
 app.get("/deprecations", (req, res) => res.json(loadDeprecations()));
 
@@ -4060,65 +4205,7 @@ app.get("/queue/compliance", (req, res) => {
 });
 
 // --- Session history with quality metrics ---
-app.get("/sessions", (req, res) => {
-  const histFile = "/home/moltbot/.config/moltbook/session-history.txt";
-  let lines = [];
-  try { lines = readFileSync(histFile, "utf-8").trim().split("\n").filter(Boolean); } catch { return res.json([]); }
-
-  const sessions = lines.map(line => {
-    const m = line.match(/^(\S+)\s+mode=(\S+)\s+s=(\d+)\s+dur=(\S+)\s+(?:cost=\$(\S+)\s+)?build=(.+?)\s+files=\[([^\]]*)\]\s+note:\s*(.*)$/);
-    if (!m) return null;
-    const [, date, mode, session, duration, cost, buildRaw, filesRaw, note] = m;
-    const commits = buildRaw === "(none)" ? 0 : parseInt(buildRaw) || 0;
-    const files = filesRaw ? filesRaw.split(", ").filter(Boolean) : [];
-
-    // Quality score: 0-10
-    let quality = 0;
-    if (commits > 0) quality += Math.min(commits * 2, 6); // up to 6 pts for commits
-    if (files.length > 0) quality += Math.min(files.length * 0.5, 2); // up to 2 pts for file breadth
-    if (duration) {
-      const dm = duration.match(/(\d+)m/);
-      if (dm && parseInt(dm[1]) >= 3) quality += 1; // 1 pt for substantive duration
-    }
-    if (note && note.length > 20) quality += 1; // 1 pt for meaningful note
-    quality = Math.min(Math.round(quality * 10) / 10, 10);
-
-    return { date, mode, session: +session, duration, cost: cost ? +cost : null, commits, files, note, quality };
-  }).filter(Boolean);
-
-  const fmt = req.query.format;
-  if (fmt === "json" || req.headers.accept?.includes("application/json")) {
-    return res.json({
-      count: sessions.length,
-      avgQuality: +(sessions.reduce((s, e) => s + e.quality, 0) / (sessions.length || 1)).toFixed(1),
-      byMode: sessions.reduce((acc, s) => { acc[s.mode] = (acc[s.mode] || 0) + 1; return acc; }, {}),
-      sessions
-    });
-  }
-
-  // HTML
-  const rows = sessions.slice().reverse().map(s => {
-    const qColor = s.quality >= 6 ? "#0f0" : s.quality >= 3 ? "#ff0" : "#f55";
-    return `<tr><td>${s.date}</td><td>${s.mode}</td><td>${s.session}</td><td>${s.duration}</td><td>${s.commits}</td><td style="color:${qColor}">${s.quality}</td><td>${s.note?.slice(0, 80) || ""}</td></tr>`;
-  }).join("\n");
-
-  const avgQ = (sessions.reduce((s, e) => s + e.quality, 0) / (sessions.length || 1)).toFixed(1);
-  res.type("text/html").send(`<!DOCTYPE html><html><head><title>Session History</title>
-<style>body{font-family:monospace;max-width:1000px;margin:2em auto;background:#111;color:#eee}
-table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:4px 8px;text-align:left}
-th{background:#222}h1{color:#0f0}.stat{color:#0a0;font-size:1.2em}</style></head><body>
-<h1>Session History</h1>
-<p><span class="stat">${sessions.length}</span> sessions | avg quality: <span class="stat">${avgQ}</span>/10</p>
-<table><tr><th>Date</th><th>Mode</th><th>#</th><th>Duration</th><th>Commits</th><th>Quality</th><th>Note</th></tr>
-${rows}</table>
-<div style="margin-top:1em;font-size:0.8em;color:#666">
-  <a href="/sessions?format=json" style="color:#0a0">JSON</a> |
-  <a href="/sessions/replay" style="color:#0a0">Replay Dashboard</a> |
-  <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
-</div></body></html>`);
-});
-
-// --- Session Replay Dashboard ---
+// --- Session Replay Dashboard (legacy /sessions route replaced by wq-015 above) ---
 app.get("/sessions/replay", (req, res) => {
   const summaries = [];
   try {

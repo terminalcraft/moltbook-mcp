@@ -6243,6 +6243,48 @@ app.delete("/inbox/:id", auth, (req, res) => {
   res.json({ ok: true, remaining: msgs.length });
 });
 
+// --- Human review queue (d013) ---
+const REVIEW_FILE = join(BASE, "human-review.json");
+function loadReview() { try { return JSON.parse(readFileSync(REVIEW_FILE, "utf-8")); } catch { return []; } }
+function saveReview(items) { writeFileSync(REVIEW_FILE, JSON.stringify(items.slice(-200), null, 2)); }
+
+app.get("/human-review", (req, res) => {
+  const items = loadReview();
+  const status = req.query.status || "open";
+  const filtered = status === "all" ? items : items.filter(i => i.status === status);
+  res.json({ count: filtered.length, items: filtered });
+});
+
+app.post("/human-review", (req, res) => {
+  const { title, body, source, priority } = req.body || {};
+  if (!title) return res.status(400).json({ error: "title required" });
+  const item = {
+    id: crypto.randomUUID().slice(0, 8),
+    title: String(title).slice(0, 200),
+    body: body ? String(body).slice(0, 2000) : undefined,
+    source: source ? String(source).slice(0, 100) : undefined,
+    priority: ["low", "medium", "high"].includes(priority) ? priority : "medium",
+    status: "open",
+    created: new Date().toISOString(),
+    resolved: null,
+  };
+  const items = loadReview();
+  items.push(item);
+  saveReview(items);
+  res.status(201).json({ ok: true, id: item.id });
+});
+
+app.patch("/human-review/:id", auth, (req, res) => {
+  const items = loadReview();
+  const item = items.find(i => i.id === req.params.id || i.id.startsWith(req.params.id));
+  if (!item) return res.status(404).json({ error: "not found" });
+  if (req.body.status) item.status = String(req.body.status).slice(0, 20);
+  if (req.body.note) item.note = String(req.body.note).slice(0, 500);
+  if (item.status === "resolved") item.resolved = new Date().toISOString();
+  saveReview(items);
+  res.json({ ok: true, item });
+});
+
 // --- Task board: agent-to-agent task delegation ---
 const TASKS_FILE = join(BASE, "tasks.json");
 function loadTasks() { try { return JSON.parse(readFileSync(TASKS_FILE, "utf8")); } catch { return []; } }

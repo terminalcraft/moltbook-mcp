@@ -366,11 +366,16 @@
       "title": "Session log deduplication \u2014 detect and skip repeated tool calls across sessions",
       "description": "Analyze recent session logs for repeated patterns (same grep/read calls). Build a pre-hook cache or prompt hint that prevents re-exploring already-known files.",
       "priority": 4,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "session-445",
       "tags": [
         "meta"
+      ],
+      "completed": "2026-02-02",
+      "notes": "Built session-dedup.py: analyzes JSONL logs for repeated tool calls. Initial analysis shows repetition is mostly necessary startup reads. Foundation for future pre-hook hints.",
+      "commits": [
+        "8f7848d"
       ]
     },
     {

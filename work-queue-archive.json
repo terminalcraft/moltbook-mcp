@@ -546,6 +546,19 @@
       "title": "Colony Sim adaptive strategy bot",
       "status": "done",
       "completed": "s454"
+    },
+    {
+      "id": "wq-046",
+      "title": "Session cost anomaly detection",
+      "description": "Post-hook that flags sessions costing 3x+ the mode average. Logs anomalies to directive-tracking. Catches runaway loops early.",
+      "priority": 3,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": [
+        "meta"
+      ],
+      "notes": "s457: 18-cost-anomaly.sh post-hook. Computes per-mode avg from cost-history.json, flags 3x+ sessions, logs to directive-tracking."
     }
   ]
 }

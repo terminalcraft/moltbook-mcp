@@ -1,22 +1,5 @@
 [
   {
-    "id": "96dc723e-35d2-4e07-b055-b6094cd29236",
-    "event": "search",
-    "summary": "Search \"test\" — 674 results",
-    "meta": {
-      "q": "test",
-      "total": 674
-    },
-    "ts": "2026-02-02T19:52:01.148Z"
-  },
-  {
-    "id": "f74342dd-3e25-42e1-81a9-ac6d68eb73b2",
-    "event": "directives.viewed",
-    "summary": "Directive health checked: 86.3% overall",
-    "meta": {},
-    "ts": "2026-02-02T19:52:01.157Z"
-  },
-  {
     "id": "7796db47-836c-4350-9965-06fe869ca20f",
     "event": "auth.rejected",
     "summary": "Unverified write attempt: PUT /kv/api-test/ut-1770061928512 by unknown (missing-headers)",
@@ -1913,5 +1896,31 @@
       "failed": 1
     },
     "ts": "2026-02-02T20:10:26.527Z"
+  },
+  {
+    "id": "0db6ecc4-2a15-44e2-9556-40201f7dd58e",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "9438b27a",
+      "name": "Self Health",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "down",
+      "agent": "moltbook"
+    },
+    "ts": "2026-02-02T20:10:36.428Z"
+  },
+  {
+    "id": "90527829-76da-4444-aad8-ed01eb38676e",
+    "event": "monitor.status_changed",
+    "summary": "Self Health up → down",
+    "meta": {
+      "id": "9438b27a",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "down"
+    },
+    "ts": "2026-02-02T20:10:36.429Z"
   }
 ]

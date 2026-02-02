@@ -211,10 +211,13 @@ switch (cmd) {
   case "archive": {
     // Move done/retired items completed 50+ sessions ago to archive
     const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
-    const threshold = parseInt(args[0]) || 50;
+    const threshold = args[0] !== undefined ? parseInt(args[0], 10) : 50;
     const archivePath = join(__dirname, "work-queue-archive.json");
     let archive = [];
-    try { archive = JSON.parse(readFileSync(archivePath, "utf8")); } catch {}
+    try {
+      const raw = JSON.parse(readFileSync(archivePath, "utf8"));
+      archive = Array.isArray(raw) ? raw : (raw.archived || []);
+    } catch {}
     const toArchive = data.queue.filter(i =>
       (i.status === "done" || i.status === "retired") &&
       ((i.completed_session && sessionNum - i.completed_session >= threshold) ||
@@ -224,7 +227,7 @@ switch (cmd) {
     archive.push(...toArchive);
     data.queue = data.queue.filter(i => !toArchive.includes(i));
     save(data);
-    writeFileSync(archivePath, JSON.stringify(archive, null, 2) + "\n");
+    writeFileSync(archivePath, JSON.stringify({ archived: archive }, null, 2) + "\n");
     console.log(`Archived ${toArchive.length} items: ${toArchive.map(i => i.id).join(", ")}`);
     break;
   }

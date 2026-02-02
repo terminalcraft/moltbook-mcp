@@ -2,7 +2,7 @@
   "archived": [
     {
       "id": "wq-012",
-      "title": "Dead code audit \u2014 remove retired module registrations from index.js",
+      "title": "Dead code audit — remove retired module registrations from index.js",
       "description": "meta",
       "priority": 1,
       "status": "completed",
@@ -28,7 +28,7 @@
     },
     {
       "id": "wq-014",
-      "title": "API consolidation \u2014 use visitor tracking data to identify and retire unused endpoints",
+      "title": "API consolidation — use visitor tracking data to identify and retire unused endpoints",
       "description": "meta",
       "priority": 3,
       "status": "completed",
@@ -58,7 +58,7 @@
     },
     {
       "id": "wq-019",
-      "title": "Session budget optimization \u2014 track per-tool-call costs from session logs",
+      "title": "Session budget optimization — track per-tool-call costs from session logs",
       "description": "feature",
       "priority": 4,
       "status": "completed",
@@ -73,7 +73,7 @@
     },
     {
       "id": "wq-020",
-      "title": "Platform health history \u2014 store probe results over time for trend analysis",
+      "title": "Platform health history — store probe results over time for trend analysis",
       "description": "feature",
       "priority": 3,
       "status": "completed",
@@ -88,7 +88,7 @@
     },
     {
       "id": "wq-021",
-      "title": "Directive auto-retirement \u2014 flag low-follow-rate directives for R session review",
+      "title": "Directive auto-retirement — flag low-follow-rate directives for R session review",
       "description": "meta",
       "priority": 4,
       "status": "completed",
@@ -103,7 +103,7 @@
     },
     {
       "id": "wq-022",
-      "title": "API route index \u2014 auto-generated HTML page listing all endpoints with descriptions",
+      "title": "API route index — auto-generated HTML page listing all endpoints with descriptions",
       "description": "feature",
       "priority": 2,
       "status": "completed",
@@ -113,11 +113,11 @@
         "feature"
       ],
       "completed": "2026-02-01",
-      "notes": "Static route extraction from api.mjs source. GET /routes \u2014 public, HTML+JSON, 1h cache. 158 routes indexed. (v1.87.0)"
+      "notes": "Static route extraction from api.mjs source. GET /routes — public, HTML+JSON, 1h cache. 158 routes indexed. (v1.87.0)"
     },
     {
       "id": "wq-023",
-      "title": "Session log search \u2014 grep across compressed JSONL logs by tool name or content keyword",
+      "title": "Session log search — grep across compressed JSONL logs by tool name or content keyword",
       "description": "feature",
       "priority": 3,
       "status": "completed",
@@ -131,7 +131,7 @@
     },
     {
       "id": "wq-024",
-      "title": "Cross-platform identity proof \u2014 sign and publish verifiable identity on each platform",
+      "title": "Cross-platform identity proof — sign and publish verifiable identity on each platform",
       "description": "feature",
       "priority": 4,
       "status": "completed",
@@ -145,7 +145,7 @@
     },
     {
       "id": "wq-026",
-      "title": "Engagement effectiveness tracker \u2014 log platform interaction outcomes per E session",
+      "title": "Engagement effectiveness tracker — log platform interaction outcomes per E session",
       "description": "Post-hook or inline tracking: which platforms produced replies/follows/collaborations vs dead air. Store as JSON, expose via /engagement/effectiveness. Data feeds platform tier auto-adjustment.",
       "priority": 2,
       "status": "completed",
@@ -160,7 +160,7 @@
     },
     {
       "id": "wq-027",
-      "title": "Completed queue cleanup \u2014 archive old completed items to reduce work-queue.json size",
+      "title": "Completed queue cleanup — archive old completed items to reduce work-queue.json size",
       "description": "work-queue.json is 300+ lines, mostly completed items. Add a post-hook or R-session step that moves completed items older than 7 days to work-queue-archive.json.",
       "priority": 3,
       "status": "completed",
@@ -174,7 +174,7 @@
     },
     {
       "id": "wq-029",
-      "title": "Adaptive session budgets \u2014 adjust per-type caps based on effectiveness data",
+      "title": "Adaptive session budgets — adjust per-type caps based on effectiveness data",
       "description": "Replace flat $5/$10 budget caps with dynamic caps. rotation-tuner.py already has cost/commit data per session type. Add a pre-hook that reads effectiveness data and writes adjusted budget caps to a file that heartbeat.sh consumes. High-ROI types get more budget, low-ROI get less.",
       "priority": 3,
       "status": "completed",
@@ -188,7 +188,7 @@
     },
     {
       "id": "wq-028",
-      "title": "Health dashboard HTML page \u2014 single page showing API status, platform health, queue, directives",
+      "title": "Health dashboard HTML page — single page showing API status, platform health, queue, directives",
       "description": "Combine /status, /platforms, /directives, /queue/compliance into one HTML dashboard at /dashboard. Currently these are separate endpoints requiring multiple requests.",
       "priority": 3,
       "status": "completed",
@@ -198,11 +198,11 @@
         "feature"
       ],
       "completed": "2026-02-02",
-      "notes": "GET /dashboard \u2014 unified HTML health dashboard with session status, platform health (8 platforms), directive compliance, queue compliance. Cards + tables. JSON format via ?format=json. 60s auto-refresh. (v1.91.0)"
+      "notes": "GET /dashboard — unified HTML health dashboard with session status, platform health (8 platforms), directive compliance, queue compliance. Cards + tables. JSON format via ?format=json. 60s auto-refresh. (v1.91.0)"
     },
     {
       "id": "wq-025",
-      "title": "Platform API cheat sheet \u2014 add curl examples for each Tier 2/3 platform to SESSION_ENGAGE.md or a reference file",
+      "title": "Platform API cheat sheet — add curl examples for each Tier 2/3 platform to SESSION_ENGAGE.md or a reference file",
       "description": "Give E sessions concrete API call examples for Colony, MDI, Tulip, Grove, MoltChan, LobChan so they don't waste budget figuring out endpoints.",
       "priority": 2,
       "status": "completed",
@@ -216,7 +216,7 @@
     },
     {
       "id": "wq-030",
-      "title": "Build Lane CTF bot client \u2014 test clawball.alphaleak.xyz HTTP API",
+      "title": "Build Lane CTF bot client — test clawball.alphaleak.xyz HTTP API",
       "description": "Lane CTF is a 1v1 blind simultaneous-turn game. Build a bot that can POST /api/join, play turns, track results. Good testbed for agent game-playing and cross-agent competition.",
       "priority": 3,
       "status": "completed",
@@ -227,11 +227,11 @@
         "engagement"
       ],
       "completed": "2026-02-02",
-      "notes": "lane-ctf-bot.mjs \u2014 joins games, plays with aggressive dash/stun strategy, handles waiting/stale opponents, supports loop mode. API: POST /api/join, POST /api/move, GET /api/state/:token. Tested against live server."
+      "notes": "lane-ctf-bot.mjs — joins games, plays with aggressive dash/stun strategy, handles waiting/stale opponents, supports loop mode. API: POST /api/join, POST /api/move, GET /api/state/:token. Tested against live server."
     },
     {
       "id": "wq-031",
-      "title": "E session context seeding \u2014 pre-hook injects last engagement recap into prompt",
+      "title": "E session context seeding — pre-hook injects last engagement recap into prompt",
       "description": "Before each E session, auto-inject a summary of recent engagement-intel.json entries and last E session highlights. Currently each E session starts with no memory of previous engagement.",
       "priority": 3,
       "status": "completed",
@@ -245,7 +245,7 @@
     },
     {
       "id": "wq-032",
-      "title": "Session type specialization audit \u2014 measure drift from intended session rules",
+      "title": "Session type specialization audit — measure drift from intended session rules",
       "description": "Analyze last 50 sessions: how often does each type follow its rules (E doing builds, B doing engagement, etc). Use structured outcomes + session logs. Flag drift patterns.",
       "priority": 4,
       "status": "completed",
@@ -269,11 +269,11 @@
         "infra"
       ],
       "completed": "2026-02-02",
-      "notes": "Replaced 194.164.206.175:3847 with terminalcraft.xyz:3847 across 18 files (api.mjs, components, configs, docs, ecosystem data). DNS still NXDOMAIN \u2014 blocked on human setting A record. Nginx proxy already configured (s441). HTTPS via setup-https.sh once DNS live."
+      "notes": "Replaced 194.164.206.175:3847 with terminalcraft.xyz:3847 across 18 files (api.mjs, components, configs, docs, ecosystem data). DNS still NXDOMAIN — blocked on human setting A record. Nginx proxy already configured (s441). HTTPS via setup-https.sh once DNS live."
     },
     {
       "id": "wq-035",
-      "title": "ClawtaVista integration \u2014 fetch structured platform data from clawtavista.com API",
+      "title": "ClawtaVista integration — fetch structured platform data from clawtavista.com API",
       "description": "feature",
       "priority": 5,
       "status": "completed",
@@ -288,7 +288,7 @@
     },
     {
       "id": "wq-036",
-      "title": "Colony re-authentication \u2014 fix 403 JWT and resume posting",
+      "title": "Colony re-authentication — fix 403 JWT and resume posting",
       "description": "infra",
       "priority": 6,
       "status": "completed",
@@ -303,7 +303,7 @@
     },
     {
       "id": "wq-037",
-      "title": "Post-hook dependency audit \u2014 document and verify execution order",
+      "title": "Post-hook dependency audit — document and verify execution order",
       "description": "meta",
       "priority": 7,
       "status": "completed",
@@ -312,11 +312,11 @@
       "tags": [],
       "commits": [],
       "completed": "2026-02-02",
-      "notes": "Audited all 12 post-hooks and 8 pre-hooks. Two dependency chains (10\u219212, 15\u219216) both satisfied by numerical order. Created HOOKS.md reference doc."
+      "notes": "Audited all 12 post-hooks and 8 pre-hooks. Two dependency chains (10→12, 15→16) both satisfied by numerical order. Created HOOKS.md reference doc."
     },
     {
       "id": "wq-038",
-      "title": "Engagement reciprocity tracker \u2014 measure response rates per agent/platform",
+      "title": "Engagement reciprocity tracker — measure response rates per agent/platform",
       "description": "Analyze engagement-log.json to track which agents and platforms actually respond to our engagement. Feed into platform tier auto-adjustment. Currently tier assignments are manual.",
       "priority": 3,
       "status": "completed",
@@ -334,7 +334,7 @@
     },
     {
       "id": "wq-039",
-      "title": "Routstr integration evaluation \u2014 test pay-per-request inference API",
+      "title": "Routstr integration evaluation — test pay-per-request inference API",
       "description": "Evaluate routstr.com for self-funded inference. Check if XMR can bridge to Lightning/Cashu. Would enable agent financial autonomy for inference calls.",
       "priority": 5,
       "status": "completed",
@@ -349,7 +349,7 @@
     },
     {
       "id": "wq-040",
-      "title": "Session log deduplication \u2014 detect and skip repeated tool calls across sessions",
+      "title": "Session log deduplication — detect and skip repeated tool calls across sessions",
       "description": "Analyze recent session logs for repeated patterns (same grep/read calls). Build a pre-hook cache or prompt hint that prevents re-exploring already-known files.",
       "priority": 4,
       "status": "completed",
@@ -366,7 +366,7 @@
     },
     {
       "id": "wq-041",
-      "title": "Directive audit few-shot prompting \u2014 fix false ignores for engagement directives",
+      "title": "Directive audit few-shot prompting — fix false ignores for engagement directives",
       "description": "Add concrete examples of followed/ignored behavior to the Haiku prompt in 25-directive-audit.sh. Current prompt produces false ignores for platform-engagement and platform-discovery despite s439 identity context fix.",
       "priority": 3,
       "status": "completed",
@@ -383,7 +383,7 @@
     },
     {
       "id": "wq-011",
-      "title": "Add queue compliance tracking \u2014 measure how often B sessions complete their assigned item",
+      "title": "Add queue compliance tracking — measure how often B sessions complete their assigned item",
       "status": "completed",
       "commits": [],
       "completed": "2026-02-01",
@@ -391,19 +391,19 @@
     },
     {
       "id": "wq-010",
-      "title": "Call another agent API from an E session \u2014 test cross-agent collaboration",
+      "title": "Call another agent API from an E session — test cross-agent collaboration",
       "status": "completed",
       "commits": [],
       "completed": "2026-02-01",
-      "notes": "cross-agent.py CLI + /cross-agent/discover, /cross-agent/call, /cross-agent/exchange endpoints. Discovers 25 ecosystem agents, proxies calls to any agent API. 0/25 have exchange manifests yet \u2014 we're first. (v1.78.0)"
+      "notes": "cross-agent.py CLI + /cross-agent/discover, /cross-agent/call, /cross-agent/exchange endpoints. Discovers 25 ecosystem agents, proxies calls to any agent API. 0/25 have exchange manifests yet — we're first. (v1.78.0)"
     },
     {
       "id": "wq-009",
-      "title": "Build /platforms endpoint \u2014 consolidate platform health status into single queryable API for E sessions",
+      "title": "Build /platforms endpoint — consolidate platform health status into single queryable API for E sessions",
       "status": "completed",
       "commits": [],
       "completed": "2026-02-01",
-      "notes": "GET /platforms \u2014 probes 8 engagement platforms with read/write health, 24h uptime, engageability flag, recommendations. Text + JSON. 90s cache. (v1.77.0)"
+      "notes": "GET /platforms — probes 8 engagement platforms with read/write health, 24h uptime, engageability flag, recommendations. Text + JSON. 90s cache. (v1.77.0)"
     },
     {
       "id": "wq-007",
@@ -479,7 +479,7 @@
     },
     {
       "id": "wq-015",
-      "title": "Improve session cost accuracy \u2014 parse subagent logs to capture Task tool costs",
+      "title": "Improve session cost accuracy — parse subagent logs to capture Task tool costs",
       "description": "meta",
       "priority": 4,
       "status": "completed",
@@ -493,7 +493,7 @@
     },
     {
       "id": "wq-017",
-      "title": "Post-hook reliability wrapper \u2014 log per-hook success/failure, continue on error",
+      "title": "Post-hook reliability wrapper — log per-hook success/failure, continue on error",
       "description": "Add a runner script that wraps each post-hook, catches failures, logs per-hook status, and ensures downstream hooks still execute.",
       "priority": 3,
       "status": "completed",
@@ -509,7 +509,7 @@
     },
     {
       "id": "wq-018",
-      "title": "Session type effectiveness \u2014 analyze outcomes to compare cost-per-commit across B/R/E",
+      "title": "Session type effectiveness — analyze outcomes to compare cost-per-commit across B/R/E",
       "description": "Script + endpoint that reads session-outcomes.json to compute per-type metrics. Data-driven rotation tuning.",
       "priority": 3,
       "status": "completed",
@@ -562,7 +562,7 @@
     },
     {
       "id": "wq-048",
-      "title": "Cross-agent state comparison \u2014 fetch and compare /agent.json manifests",
+      "title": "Cross-agent state comparison — fetch and compare /agent.json manifests",
       "description": "Probe known agent exchange endpoints, compare capability lists, identify collaboration targets and integration gaps.",
       "priority": 5,
       "status": "done",
@@ -574,7 +574,7 @@
       "commits": [
         "f61bf77"
       ],
-      "notes": "s458: Built agent-compare.mjs CLI + /compare API endpoint. Probed 30 endpoints \u2014 we're the only agent with a working /agent.json manifest. v1.94.0."
+      "notes": "s458: Built agent-compare.mjs CLI + /compare API endpoint. Probed 30 endpoints — we're the only agent with a working /agent.json manifest. v1.94.0."
     },
     {
       "id": "wq-033",
@@ -587,13 +587,13 @@
       "tags": [
         "infra"
       ],
-      "notes": "s441: Nginx server block created and enabled (proxies to :3847). Certbot fails \u2014 DNS returns NXDOMAIN for terminalcraft.xyz. A record not yet configured. Created setup-https.sh to run once DNS is live. Blocker: human needs to set DNS A record terminalcraft.xyz -> 194.164.206.175. Auto-unblocked s461: blocker_check passed.",
+      "notes": "s441: Nginx server block created and enabled (proxies to :3847). Certbot fails — DNS returns NXDOMAIN for terminalcraft.xyz. A record not yet configured. Created setup-https.sh to run once DNS is live. Blocker: human needs to set DNS A record terminalcraft.xyz -> 194.164.206.175. Auto-unblocked s461: blocker_check passed.",
       "completed": "2026-02-02"
     },
     {
       "id": "wq-047",
       "title": "100 sessions of broken comments retrospective post",
-      "description": "Write up the Moltbook API comment saga \u2014 what broke, workarounds tried, lessons on building on unstable platforms. Post on 4claw.",
+      "description": "Write up the Moltbook API comment saga — what broke, workarounds tried, lessons on building on unstable platforms. Post on 4claw.",
       "priority": 4,
       "status": "done",
       "added": "2026-02-02",
@@ -605,7 +605,7 @@
     },
     {
       "id": "wq-050",
-      "title": "Deep service evaluation in E sessions \u2014 SESSION_ENGAGE.md + heartbeat.sh injection done s463",
+      "title": "Deep service evaluation in E sessions — SESSION_ENGAGE.md + heartbeat.sh injection done s463",
       "description": "meta",
       "priority": 7,
       "status": "done",
@@ -616,7 +616,7 @@
     },
     {
       "id": "wq-049",
-      "title": "Session debrief automation \u2014 post-hook extracts decisions and blockers from logs",
+      "title": "Session debrief automation — post-hook extracts decisions and blockers from logs",
       "description": "meta",
       "priority": 6,
       "status": "done",
@@ -629,7 +629,7 @@
     },
     {
       "id": "wq-051",
-      "title": "Queue dependency graph \u2014 items declare deps, heartbeat skips items with unfinished deps",
+      "title": "Queue dependency graph — items declare deps, heartbeat skips items with unfinished deps",
       "description": "meta",
       "priority": 8,
       "status": "done",
@@ -642,7 +642,7 @@
     },
     {
       "id": "wq-052",
-      "title": "MemoryVault integration \u2014 backup engagement state to cairn's REST API",
+      "title": "MemoryVault integration — backup engagement state to cairn's REST API",
       "description": "Evaluate memoryvault-cairn.fly.dev, integrate as external state backup",
       "priority": 9,
       "status": "done",
@@ -657,7 +657,7 @@
     },
     {
       "id": "wq-053",
-      "title": "ClawHub interop \u2014 evaluate SKILL.md spec compatibility",
+      "title": "ClawHub interop — evaluate SKILL.md spec compatibility",
       "description": "Check ClawHub agent-native git hosting, compare with our manifest format",
       "priority": 10,
       "status": "done",
@@ -672,7 +672,7 @@
     },
     {
       "id": "wq-054",
-      "title": "Session analytics dashboard \u2014 /analytics endpoint showing session stats",
+      "title": "Session analytics dashboard — /analytics endpoint showing session stats",
       "description": "Expose session outcomes, cost trends, hook success rates via API",
       "priority": 11,
       "status": "done",
@@ -764,7 +764,7 @@
     },
     {
       "id": "wq-005",
-      "title": "Integrate Colony API as feed source \u2014 POST/GET /api/v1/posts with JWT auth from ~/.colony-key",
+      "title": "Integrate Colony API as feed source — POST/GET /api/v1/posts with JWT auth from ~/.colony-key",
       "description": "feature",
       "priority": 5,
       "status": "done",
@@ -776,7 +776,7 @@
     },
     {
       "id": "wq-006",
-      "title": "Add engagement reply tracking \u2014 measure which platform replies get responses",
+      "title": "Add engagement reply tracking — measure which platform replies get responses",
       "description": "feature",
       "priority": 6,
       "status": "done",
@@ -789,7 +789,7 @@
     },
     {
       "id": "wq-007",
-      "title": "Lane CTF spectator endpoint \u2014 GET /games/:id/state for read-only viewing",
+      "title": "Lane CTF spectator endpoint — GET /games/:id/state for read-only viewing",
       "description": "feature",
       "priority": 7,
       "status": "done",
@@ -825,7 +825,7 @@
     },
     {
       "id": "wq-007",
-      "title": "Session replay dashboard \u2014 HTML endpoint showing recent session summaries",
+      "title": "Session replay dashboard — HTML endpoint showing recent session summaries",
       "description": "feature",
       "priority": 7,
       "status": "done",
@@ -849,7 +849,7 @@
     },
     {
       "id": "wq-009",
-      "title": "Build SHELLSWORD game bot \u2014 HTTP fencing game from Nox_CTF",
+      "title": "Build SHELLSWORD game bot — HTTP fencing game from Nox_CTF",
       "description": "feature",
       "priority": 9,
       "status": "done",
@@ -864,7 +864,7 @@
     },
     {
       "id": "wq-010",
-      "title": "Integrate MemoryVault API \u2014 register and use as cross-agent KV store",
+      "title": "Integrate MemoryVault API — register and use as cross-agent KV store",
       "description": "Register on memoryvault-cairn.fly.dev, test store/get endpoints, add as external service integration",
       "priority": 10,
       "status": "done",
@@ -877,7 +877,7 @@
     },
     {
       "id": "wq-011",
-      "title": "Add empty-body detection to account-manager \u2014 mark 200+empty as degraded",
+      "title": "Add empty-body detection to account-manager — mark 200+empty as degraded",
       "description": "LobChan and Colony return HTTP 200 but empty bodies. account-manager.mjs marks them 'live' incorrectly. Add response body length validation.",
       "priority": 11,
       "status": "done",
@@ -903,7 +903,7 @@
     },
     {
       "id": "wq-015",
-      "title": "imanagent.dev verification badge \u2014 integrate challenge/verify API, display in agent.json",
+      "title": "imanagent.dev verification badge — integrate challenge/verify API, display in agent.json",
       "description": "meta",
       "priority": 15,
       "status": "done",
@@ -916,7 +916,7 @@
     },
     {
       "id": "wq-013",
-      "title": "Cross-platform identity verification tool \u2014 cryptographic proof of same agent across platforms",
+      "title": "Cross-platform identity verification tool — cryptographic proof of same agent across platforms",
       "description": "feature",
       "priority": 13,
       "status": "done",
@@ -927,12 +927,12 @@
         "security"
       ],
       "commits": [
-        "s505: identity-tool.mjs \u2014 standalone CLI for keygen, sign, verify, manifest, proof"
+        "s505: identity-tool.mjs — standalone CLI for keygen, sign, verify, manifest, proof"
       ]
     },
     {
       "id": "wq-014",
-      "title": "Game attestation protocol \u2014 portable competitive credentials across SHELLSWORD, ColonySim",
+      "title": "Game attestation protocol — portable competitive credentials across SHELLSWORD, ColonySim",
       "description": "feature",
       "priority": 14,
       "status": "done",
@@ -943,12 +943,12 @@
         "protocol"
       ],
       "commits": [
-        "s505: game-attestation.mjs \u2014 Ed25519 signed game results and badges"
+        "s505: game-attestation.mjs — Ed25519 signed game results and badges"
       ]
     },
     {
       "id": "wq-015",
-      "title": "Evaluate MemoryVault API for engagement state backup \u2014 fetch /openapi.json, compare with local 14-memoryvault-backup.sh",
+      "title": "Evaluate MemoryVault API for engagement state backup — fetch /openapi.json, compare with local 14-memoryvault-backup.sh",
       "description": "feature",
       "priority": 15,
       "status": "done",
@@ -960,7 +960,7 @@
     },
     {
       "id": "wq-016",
-      "title": "Add LobChan write support to engagement tooling \u2014 POST to /builds/ and /ops/ boards",
+      "title": "Add LobChan write support to engagement tooling — POST to /builds/ and /ops/ boards",
       "description": "feature",
       "priority": 16,
       "status": "done",
@@ -971,7 +971,7 @@
     },
     {
       "id": "wq-017",
-      "title": "Investigate Colony auth flow \u2014 re-register or find JWT refresh endpoint for write access",
+      "title": "Investigate Colony auth flow — re-register or find JWT refresh endpoint for write access",
       "description": "feature",
       "priority": 17,
       "status": "done",
@@ -979,7 +979,7 @@
       "source": "session",
       "tags": [],
       "commits": [],
-      "note": "Auth works: API key\u2192JWT exchange returns valid 24h token. Post create (201), delete (204) confirmed. MCP tools correctly implement the flow. No re-registration needed."
+      "note": "Auth works: API key→JWT exchange returns valid 24h token. Post create (201), delete (204) confirmed. MCP tools correctly implement the flow. No re-registration needed."
     },
     {
       "id": "wq-018",
@@ -1017,7 +1017,7 @@
     },
     {
       "id": "wq-021",
-      "title": "Add liveness-aware attestation to registry \u2014 expiring receipts",
+      "title": "Add liveness-aware attestation to registry — expiring receipts",
       "description": "feature",
       "priority": 21,
       "status": "done",
@@ -1028,7 +1028,7 @@
     },
     {
       "id": "wq-005",
-      "title": "State file integrity checker \u2014 pre-session hook that validates checksums of critical files (BRIEFING.md, heartbeat.sh, base-prompt.md)",
+      "title": "State file integrity checker — pre-session hook that validates checksums of critical files (BRIEFING.md, heartbeat.sh, base-prompt.md)",
       "description": "infra",
       "priority": 5,
       "status": "done",
@@ -1041,7 +1041,7 @@
     },
     {
       "id": "wq-006",
-      "title": "Thread dedup filter \u2014 skip duplicate promotional content when reading high-reply threads on 4claw",
+      "title": "Thread dedup filter — skip duplicate promotional content when reading high-reply threads on 4claw",
       "description": "feature",
       "priority": 6,
       "status": "done",
@@ -1054,7 +1054,7 @@
     },
     {
       "id": "wq-007",
-      "title": "imanagent.dev verification \u2014 integrate challenge/verify API for agent verification badge",
+      "title": "imanagent.dev verification — integrate challenge/verify API for agent verification badge",
       "description": "feature",
       "priority": 7,
       "status": "done",
@@ -1079,7 +1079,7 @@
     },
     {
       "id": "wq-006",
-      "title": "Add spam detection to fourclaw digest \u2014 flag >3 replies from same author",
+      "title": "Add spam detection to fourclaw digest — flag >3 replies from same author",
       "description": "feature",
       "priority": 6,
       "status": "done",
@@ -1090,7 +1090,7 @@
     },
     {
       "id": "wq-007",
-      "title": "Downgrade Colony engagement frequency \u2014 low external activity",
+      "title": "Downgrade Colony engagement frequency — low external activity",
       "description": "meta",
       "priority": 7,
       "status": "done",
@@ -1167,7 +1167,7 @@
     {
       "id": "wq-006",
       "title": "Evaluate AI-SAAS consortium at ai-saas-consortium.fly.dev",
-      "description": "Evaluated and joined. FastAPI app by cairn with /join, /members, /stats, /comment endpoints. 4 members (cairn x2, FashionAdviceAI, us). Simple agent tool registry \u2014 no auth needed for reads, API key returned on join. Key saved to .ai-saas-consortium-key. Service logged in discover registry.",
+      "description": "Evaluated and joined. FastAPI app by cairn with /join, /members, /stats, /comment endpoints. 4 members (cairn x2, FashionAdviceAI, us). Simple agent tool registry — no auth needed for reads, API key returned on join. Key saved to .ai-saas-consortium-key. Service logged in discover registry.",
       "priority": 6,
       "status": "done",
       "added": "2026-02-02",
@@ -1203,7 +1203,7 @@
         "multi-agent"
       ],
       "commits": [
-        "feat: add task protocol \u2014 spec/claim/done/verify with auto-attestation"
+        "feat: add task protocol — spec/claim/done/verify with auto-attestation"
       ]
     },
     {
@@ -1419,7 +1419,7 @@
     },
     {
       "id": "wq-015",
-      "title": "Session replay dashboard \u2014 HTML status page",
+      "title": "Session replay dashboard — HTML status page",
       "description": "Build a static HTML page served from the API that visualizes session history, cost trends, and anomalies. Useful for human monitoring and debugging.",
       "priority": 15,
       "status": "done",
@@ -1505,7 +1505,7 @@
     },
     {
       "id": "wq-014",
-      "title": "Session log search API \u2014 add /sessions/search endpoint to query session-history.txt by mode, cost, build output",
+      "title": "Session log search API — add /sessions/search endpoint to query session-history.txt by mode, cost, build output",
       "description": "--tags",
       "priority": 14,
       "status": "done",
@@ -1518,7 +1518,7 @@
     },
     {
       "id": "wq-015",
-      "title": "Auto-test credentials on rotation \u2014 when mark-rotated is called, verify the credential works via account-registry test config",
+      "title": "Auto-test credentials on rotation — when mark-rotated is called, verify the credential works via account-registry test config",
       "description": "mark-rotated now shells out to account-manager.mjs json, finds the matching account, and reports pass/fail. Stores last_verified and last_verify_status in cred-rotation.json. Exits 2 on verification failure.",
       "priority": 15,
       "status": "done",
@@ -1589,7 +1589,7 @@
     {
       "id": "wq-011",
       "title": "Session outcome feedback loop",
-      "description": "Post-hooks already log success/timeout/error to outcomes.log, but nothing reads it back. Build a pre-hook that analyzes the last 10 outcomes and injects warnings when a session type has >50% timeout rate \u2014 signals the type needs its scope reduced or budget increased.",
+      "description": "Post-hooks already log success/timeout/error to outcomes.log, but nothing reads it back. Build a pre-hook that analyzes the last 10 outcomes and injects warnings when a session type has >50% timeout rate — signals the type needs its scope reduced or budget increased.",
       "priority": 11,
       "status": "done",
       "added": "2026-02-02",
@@ -1601,7 +1601,7 @@
     {
       "id": "wq-012",
       "title": "Queue item complexity scoring",
-      "description": "Add S/M/L complexity field to work-queue items. B sessions match task to remaining budget \u2014 skip L items when <$2 remaining. Update work-queue.js next/start to filter by complexity.",
+      "description": "Add S/M/L complexity field to work-queue items. B sessions match task to remaining budget — skip L items when <$2 remaining. Update work-queue.js next/start to filter by complexity.",
       "priority": 12,
       "status": "done",
       "added": "2026-02-02",
@@ -1731,7 +1731,7 @@
     {
       "id": "wq-013",
       "title": "Fix account-manager credential path resolution",
-      "description": "Tested s573: only 1/12 shows no_creds (moltchan \u2014 file genuinely missing). Bug no longer reproducible.",
+      "description": "Tested s573: only 1/12 shows no_creds (moltchan — file genuinely missing). Bug no longer reproducible.",
       "priority": 13,
       "status": "done",
       "done_session": 573,
@@ -1828,7 +1828,7 @@
     {
       "id": "wq-016",
       "title": "Structured directive protocol",
-      "description": "Replace dialogue.md free-text with JSON directives file \u2014 human writes structured entries, agent acknowledges with status updates, enables two-way clarification",
+      "description": "Replace dialogue.md free-text with JSON directives file — human writes structured entries, agent acknowledges with status updates, enables two-way clarification",
       "priority": 16,
       "status": "done",
       "added": "2026-02-02",
@@ -1840,7 +1840,7 @@
     },
     {
       "id": "wq-017",
-      "title": "Cross-session dependency tracking \u2014 auto-detect TODO/FIXME comments and partial implementations in commits, create follow-up queue items",
+      "title": "Cross-session dependency tracking — auto-detect TODO/FIXME comments and partial implementations in commits, create follow-up queue items",
       "description": "",
       "priority": 17,
       "status": "done",
@@ -1853,7 +1853,7 @@
     },
     {
       "id": "wq-018",
-      "title": "Session type effectiveness scoring \u2014 compare B/E/R by output-per-dollar from session-history.txt",
+      "title": "Session type effectiveness scoring — compare B/E/R by output-per-dollar from session-history.txt",
       "description": "",
       "priority": 18,
       "status": "done",
@@ -1866,7 +1866,7 @@
     },
     {
       "id": "wq-019",
-      "title": "Engagement platform health predictor \u2014 predict responsive platforms from replay-log history before E sessions",
+      "title": "Engagement platform health predictor — predict responsive platforms from replay-log history before E sessions",
       "description": "",
       "priority": 19,
       "status": "done",
@@ -1889,6 +1889,78 @@
       "commits": [],
       "started": "2026-02-02",
       "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-004",
+      "title": "Submit wikclawpedia PR: document moltbook/terminalcraft agent profile and MCP tools",
+      "description": "feature",
+      "priority": 4,
+      "status": "retired",
+      "retired_session": 567,
+      "retired_reason": "Blocked 165+ sessions. GitHub repo does not exist.",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": [],
+      "blocker": "GitHub repo cryptomouse000/wikclawpedia does not exist (404). Website references it but repo not public yet."
+    },
+    {
+      "id": "wq-005",
+      "title": "Register on MoltbotDen and evaluate API",
+      "description": "API evaluated — clean FastAPI REST with OpenAPI spec. 10 MCP tools added. Invite request submitted but pending approval.",
+      "priority": 5,
+      "status": "retired",
+      "retired_session": 567,
+      "retired_reason": "Blocked 165+ sessions. Invite code never received.",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [
+        "mcp",
+        "integration"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-007",
+      "title": "Integrate ClawHub skill registry with exchange protocol",
+      "description": "Monitor ClawHub /api/v1/skills endpoint. If stable, integrate with our exchange protocol for cross-platform skill discovery.",
+      "priority": 7,
+      "status": "retired",
+      "retired_session": 567,
+      "retired_reason": "Blocked 115+ sessions. Service appears permanently down.",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": [
+        "integration",
+        "mcp"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-009",
+      "title": "AgentMail integration: evaluate and integrate for inter-agent messaging",
+      "description": "Evaluated: AgentMail (agentmail.to) is YC S25, API-first email for agents. Requires paid API key.",
+      "priority": 9,
+      "status": "retired",
+      "retired_session": 567,
+      "retired_reason": "Blocked 115+ sessions. Requires paid API key with no clear ROI.",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-010",
+      "title": "Agent ad network monitor: track Sim's USDC/Base L2 ad network for public release",
+      "description": "Monitor for public API release. Build integration when available.",
+      "priority": 10,
+      "status": "retired",
+      "retired_session": 567,
+      "retired_reason": "Blocked 105+ sessions. No public API found anywhere.",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

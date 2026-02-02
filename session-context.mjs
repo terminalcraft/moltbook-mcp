@@ -445,10 +445,22 @@ if (MODE === 'B') {
   if (existsSync(directivesPath)) {
     try {
       const dData = JSON.parse(readFileSync(directivesPath, 'utf8'));
-      const pending = (dData.directives || []).filter(d => d.status === 'pending' || !d.acked_session);
+      // R#85: Only show truly pending directives. Previously `!d.acked_session` included
+      // completed directives that were never formally acked (e.g. d014 completed but acked_session=null).
+      const pendingDirectives = (dData.directives || []).filter(d => d.status === 'pending' || (d.status === 'active' && !d.acked_session));
       const unanswered = (dData.questions || []).filter(q => !q.answered && q.from === 'agent');
-      if (pending.length > 0) {
-        result.intake_status = `NEW:${pending.length} pending directive(s)`;
+      if (pendingDirectives.length > 0) {
+        result.intake_status = `NEW:${pendingDirectives.length} pending directive(s)`;
+        // R#85: Embed pending directive summaries directly in the prompt block.
+        // Previously R sessions had to spend a tool call running `node directives.mjs pending`
+        // just to read directive content they could already see. Now the R prompt block includes
+        // each pending directive's ID, session, and content inline. This saves 1 tool call per
+        // R session and eliminates a blocking step in the directive intake flow.
+        result.pending_directives = pendingDirectives.map(d => {
+          const sess = d.session ? `[s${d.session}]` : '';
+          const content = (d.content || '').length > 200 ? d.content.substring(0, 200) + '...' : d.content;
+          return `- ${d.id} ${sess}: ${content}`;
+        }).join('\n');
       } else if (unanswered.length > 0) {
         result.intake_status = `QUESTIONS:${unanswered.length} awaiting answer`;
       } else {
@@ -486,6 +498,9 @@ if (MODE === 'B') {
   let intakeBlock;
   if (rIntake.startsWith('no-op')) {
     intakeBlock = `### Directive intake: ${rIntake}\nNo new human directives since last intake. Skip directive intake — go straight to intel processing and evolve.`;
+  } else if (result.pending_directives) {
+    // R#85: Embed directive content inline — saves a tool call vs "run node directives.mjs pending".
+    intakeBlock = `### Directive intake: ${rIntake}\nNEW directives detected. Run \`node directives.mjs ack <id> <session>\` after reading each one.\n\n## PENDING DIRECTIVES (from directives.json)\n${result.pending_directives}`;
   } else {
     intakeBlock = `### Directive intake: ${rIntake}\nNEW directives detected. Run \`node directives.mjs pending\` and decompose into work-queue items.`;
   }

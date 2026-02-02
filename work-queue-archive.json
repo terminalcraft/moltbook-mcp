@@ -2827,6 +2827,18 @@
       "tags": [],
       "commits": [],
       "notes": "Done in B#137 (s653). /status/hooks endpoint with HTML dashboard + JSON API. Shows avg/p50/p95/max per hook, failure rates, slow hook identification."
+    },
+    {
+      "id": "wq-040",
+      "title": "Pre-hook result tracking",
+      "description": "run-hooks.sh supports --track for post-hooks but pre-hooks run without it \u2014 add pre-hook tracking to a separate results file to diagnose slow session startups",
+      "priority": 40,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "Already implemented in R#89 (s644) when run-hooks.sh was extracted. heartbeat.sh line 243 passes --track pre-hook-results.json. Confirmed working with data from s656-s657."
     }
   ]
 }

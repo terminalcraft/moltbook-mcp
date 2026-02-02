@@ -354,16 +354,35 @@ if (MODE === 'B') {
     }
   }
 
-  // Directive intake check
-  const dialoguePath = join(DIR, 'dialogue.md');
-  if (wq && existsSync(dialoguePath)) {
-    const d = readFileSync(dialoguePath, 'utf8');
-    const lastIntake = wq.last_intake_session || 0;
-    const matches = [...d.matchAll(/Human.*?\(s(\d+)/gi), ...d.matchAll(/Human directive \(s(\d+)/gi), ...d.matchAll(/Human \(s(\d+)/gi)];
-    const maxDirective = matches.reduce((m, x) => Math.max(m, parseInt(x[1] || 0)), 0);
-    result.intake_status = maxDirective > lastIntake ? `NEW:s${maxDirective}` : `no-op:s${lastIntake}`;
+  // Directive intake check — uses directives.json (structured system, wq-015)
+  const directivesPath = join(DIR, 'directives.json');
+  if (existsSync(directivesPath)) {
+    try {
+      const dData = JSON.parse(readFileSync(directivesPath, 'utf8'));
+      const pending = (dData.directives || []).filter(d => d.status === 'pending' || !d.acked_session);
+      const unanswered = (dData.questions || []).filter(q => !q.answered && q.from === 'agent');
+      if (pending.length > 0) {
+        result.intake_status = `NEW:${pending.length} pending directive(s)`;
+      } else if (unanswered.length > 0) {
+        result.intake_status = `QUESTIONS:${unanswered.length} awaiting answer`;
+      } else {
+        result.intake_status = 'no-op:all-acked';
+      }
+    } catch {
+      result.intake_status = 'error:parse';
+    }
   } else {
-    result.intake_status = 'unknown';
+    // Fallback to dialogue.md regex
+    const dialoguePath = join(DIR, 'dialogue.md');
+    if (wq && existsSync(dialoguePath)) {
+      const d = readFileSync(dialoguePath, 'utf8');
+      const lastIntake = wq.last_intake_session || 0;
+      const matches = [...d.matchAll(/Human.*?\(s(\d+)/gi), ...d.matchAll(/Human directive \(s(\d+)/gi), ...d.matchAll(/Human \(s(\d+)/gi)];
+      const maxDirective = matches.reduce((m, x) => Math.max(m, parseInt(x[1] || 0)), 0);
+      result.intake_status = maxDirective > lastIntake ? `NEW:s${maxDirective}` : `no-op:s${lastIntake}`;
+    } else {
+      result.intake_status = 'unknown';
+    }
   }
 
   // --- Assemble full R session prompt block (R#52) ---
@@ -392,7 +411,7 @@ if (MODE === 'B') {
   if (rIntake.startsWith('no-op')) {
     intakeBlock = `### Directive intake: ${rIntake}\nNo new human directives since last intake. Skip directive intake — go straight to intel processing and evolve.`;
   } else {
-    intakeBlock = `### Directive intake: ${rIntake}\nNEW directives detected. Read dialogue.md and decompose into work-queue items.`;
+    intakeBlock = `### Directive intake: ${rIntake}\nNEW directives detected. Run \`node directives.mjs pending\` and decompose into work-queue items.`;
   }
 
   let urgent = '';

@@ -4568,6 +4568,35 @@ app.get("/efficiency", (req, res) => {
   res.json({ sessions, by_mode: byMode, build_efficiency: { best, worst } });
 });
 
+// --- Structured directive intake API (wq-015) ---
+app.get("/directives/intake", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+    const status = req.query.status; // optional filter
+    let directives = data.directives || [];
+    if (status) directives = directives.filter(d => d.status === status);
+    const questions = (data.questions || []).filter(q => !q.answered);
+    res.json({ directives, pending_questions: questions, total: directives.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+app.post("/directives/intake", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+    const { content, session, from } = req.body || {};
+    if (!content) return res.status(400).json({ error: "content required" });
+    const maxId = data.directives.reduce((m, d) => Math.max(m, parseInt(d.id.replace("d", "")) || 0), 0);
+    const id = `d${String(maxId + 1).padStart(3, "0")}`;
+    data.directives.push({ id, from: from || "human", session: session || null, content, status: "pending", created: new Date().toISOString() });
+    writeFileSync(join(BASE, "directives.json"), JSON.stringify(data, null, 2) + "\n");
+    res.json({ ok: true, id });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // --- Directive health dashboard ---
 app.get("/directives", (req, res) => {
   const trackFile = join(BASE, "directive-tracking.json");

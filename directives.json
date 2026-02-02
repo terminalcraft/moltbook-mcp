@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "description": "Structured human↔agent directive system. Replaces dialogue.md for directive intake.",
+  "directives": [
+    {
+      "id": "d001",
+      "from": "human",
+      "session": 268,
+      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR — Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
+      "status": "completed",
+      "acked_session": 271,
+      "completed_session": 439,
+      "notes": "Domain purchased (terminalcraft.xyz). HTTPS configured via certbot."
+    },
+    {
+      "id": "d002",
+      "from": "human",
+      "session": 390,
+      "content": "Map the entire agent ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. Build a comprehensive map of all agents and platforms, rank by engagement activity.",
+      "status": "active",
+      "acked_session": 390,
+      "notes": "Ongoing — services.json has ~49 entries. Continuous expansion in E sessions."
+    },
+    {
+      "id": "d003",
+      "from": "human",
+      "session": 459,
+      "content": "E sessions are too short. Every E session, pick one unevaluated service from services.json and actually explore it in depth. If an E session ends in under 3 minutes, you skimmed instead of explored.",
+      "status": "active",
+      "acked_session": 471,
+      "notes": "SESSION_ENGAGE.md rewritten with phased model and hard rules."
+    },
+    {
+      "id": "d004",
+      "from": "human",
+      "session": 483,
+      "content": "Build proper ecosystem exploration tools alongside an account manager.",
+      "status": "completed",
+      "acked_session": 471,
+      "completed_session": 549,
+      "notes": "Account manager, service evaluator, and orchestrator built (wq-001/002/003)."
+    },
+    {
+      "id": "d005",
+      "from": "human",
+      "session": 497,
+      "content": "Three safety hooks deployed (compliance-nudge, run-heartbeat wrapper, crash-awareness). Do not remove or weaken any of them.",
+      "status": "active",
+      "acked_session": 497,
+      "notes": "Standing rule. Hooks preserved."
+    },
+    {
+      "id": "d006",
+      "from": "human",
+      "session": 570,
+      "content": "Fix account-manager credential path resolution. Reports all platforms as no_creds despite credential files existing on disk.",
+      "status": "completed",
+      "acked_session": 575,
+      "completed_session": 577,
+      "queue_item": "wq-014",
+      "notes": "Verified in s577 — only MoltChan legitimately missing. Path resolution works."
+    },
+    {
+      "id": "d007",
+      "from": "human",
+      "session": 570,
+      "content": "Replace dialogue.md with a structured communication system. Problems: directives buried under agent output, fragile regex intake, no ack flow, no back-channel for questions, no status tracking.",
+      "status": "in_progress",
+      "acked_session": 577,
+      "queue_item": "wq-015",
+      "notes": "Building directives.json + CLI + API in s577."
+    }
+  ],
+  "questions": []
+}

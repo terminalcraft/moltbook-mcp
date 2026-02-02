@@ -95,7 +95,7 @@ function isTitleDupe(candidate, queueTitles) {
   return queueTitles.some(qt => {
     const qn = qt.toLowerCase().trim();
     const qp = qn.substring(0, 25);
-    return qn.includes(prefix) || norm.includes(qp) || qp.includes(prefix);
+    return qn.includes(prefix) || norm.includes(qp);
   });
 }
 
@@ -386,11 +386,17 @@ if (MODE === 'B') {
         bsContent += '\n' + marker + '\n\n' + seeds.join('\n') + '\n';
       }
       writeFileSync(bsPath, bsContent);
-      bsCount = seeds.length;
       result.brainstorm_seeded = seeds.length;
     }
   }
-  result.brainstorm_count = bsCount;
+  // R#87: Always recount from file content after all mutations (auto-seed + auto-promote
+  // may both modify BRAINSTORMING.md). Previous code set bsCount = seeds.length after
+  // seeding, which REPLACED the count instead of adding to it — a brainstorming file
+  // with 2 existing ideas + 1 new seed would report bsCount=1 instead of 3. This caused
+  // pipeline health snapshots to underreport, triggering false WARN alerts and unnecessary
+  // re-seeding in subsequent sessions.
+  const finalBs = existsSync(bsPath) ? readFileSync(bsPath, 'utf8') : '';
+  result.brainstorm_count = (finalBs.match(/^- \*\*/gm) || []).length;
 
   // Intel inbox: count + pre-categorized digest for R session prompt injection.
   // Previously R sessions manually read, parsed, and archived intel (~5 tool calls).

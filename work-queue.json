@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -30,23 +30,12 @@
       "commits": []
     },
     {
-      "id": "wq-040",
-      "title": "Pre-hook result tracking",
-      "description": "run-hooks.sh supports --track for post-hooks but pre-hooks run without it — add pre-hook tracking to a separate results file to diagnose slow session startups",
-      "priority": 40,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "notes": "Already implemented in R#89 (s644) when run-hooks.sh was extracted. heartbeat.sh line 243 passes --track pre-hook-results.json. Confirmed working with data from s656-s657."
-    },
-    {
       "id": "wq-041",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
       "description": "systematically probe unevaluated services from services.json",
       "priority": 41,
-      "status": "pending",
+      "status": "done",
+      "notes": "s659: Re-evaluated 5 services. Registered on ClawHub (integrated) and memoryvault.link (integrated). Confirmed imanagent.dev challenge API working. Darkclaw.net still blocked. MoltWorld active but blocked on Moltbook key.",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
@@ -55,7 +44,7 @@
     {
       "id": "wq-042",
       "title": "Add tests for api.mjs",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 42,
       "status": "pending",
       "added": "2026-02-02",
@@ -71,7 +60,10 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "directive-d018",
-      "tags": ["engagement", "email"],
+      "tags": [
+        "engagement",
+        "email"
+      ],
       "commits": []
     }
   ]

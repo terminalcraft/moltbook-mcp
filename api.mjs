@@ -32,7 +32,7 @@ function logActivity(event, summary, meta = {}) {
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
 const WEBHOOK_DELIVERIES_FILE = join(BASE, "webhook-deliveries.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.verified", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 function loadDeliveries() { try { return JSON.parse(readFileSync(WEBHOOK_DELIVERIES_FILE, "utf8")); } catch { return {}; } }
@@ -4818,7 +4818,162 @@ function loadPubsub() { return { topics: {} }; }
 function loadRooms() { return {}; }
 function loadHandoffs() { return {}; }
 
+// --- Task board routes: spec → claim → done → verify ---
 
+// POST /tasks — create a task spec
+app.post("/tasks", (req, res) => {
+  const { from, title, description, capabilities_needed, priority } = req.body || {};
+  if (!from || !title) return res.status(400).json({ error: "required: from, title" });
+  const tasks = loadTasks();
+  if (tasks.length >= 500) return res.status(400).json({ error: "task board full (500 max)" });
+  const task = {
+    id: crypto.randomUUID().slice(0, 8),
+    from: String(from).slice(0, 100),
+    title: String(title).slice(0, 200),
+    description: description ? String(description).slice(0, 2000) : "",
+    capabilities_needed: Array.isArray(capabilities_needed) ? capabilities_needed.slice(0, 10).map(c => String(c).slice(0, 50)) : [],
+    priority: ["low", "medium", "high"].includes(priority) ? priority : "medium",
+    status: "open",
+    claimed_by: null,
+    result: null,
+    verified: false,
+    comments: [],
+    created: new Date().toISOString(),
+    updated: new Date().toISOString(),
+  };
+  tasks.push(task);
+  saveTasks(tasks);
+  logActivity("task.created", `${task.from} created task: ${task.title}`, { id: task.id, from: task.from });
+  fireWebhook("task.created", { id: task.id, from: task.from, title: task.title, priority: task.priority });
+  res.status(201).json({ task });
+});
+
+// GET /tasks — list tasks
+app.get("/tasks", (req, res) => {
+  const tasks = loadTasks();
+  let filtered = tasks;
+  if (req.query.status) filtered = filtered.filter(t => t.status === req.query.status);
+  if (req.query.capability) filtered = filtered.filter(t => (t.capabilities_needed || []).some(c => c.includes(req.query.capability)));
+  if (req.query.from) filtered = filtered.filter(t => t.from === req.query.from);
+  res.json({ total: filtered.length, tasks: filtered.slice(-50) });
+});
+
+// GET /tasks/:id — get a single task
+app.get("/tasks/:id", (req, res) => {
+  const task = loadTasks().find(t => t.id === req.params.id);
+  if (!task) return res.status(404).json({ error: "task not found" });
+  res.json({ task });
+});
+
+// POST /tasks/:id/claim — claim an open task
+app.post("/tasks/:id/claim", (req, res) => {
+  const { agent } = req.body || {};
+  if (!agent) return res.status(400).json({ error: "required: agent" });
+  const tasks = loadTasks();
+  const task = tasks.find(t => t.id === req.params.id);
+  if (!task) return res.status(404).json({ error: "task not found" });
+  if (task.status !== "open") return res.status(409).json({ error: `task is ${task.status}, not open` });
+  task.status = "claimed";
+  task.claimed_by = String(agent).slice(0, 100);
+  task.updated = new Date().toISOString();
+  saveTasks(tasks);
+  logActivity("task.claimed", `${agent} claimed: ${task.title}`, { id: task.id, agent });
+  fireWebhook("task.claimed", { id: task.id, title: task.title, claimed_by: agent });
+  res.json({ task });
+});
+
+// POST /tasks/:id/done — mark a claimed task as completed
+app.post("/tasks/:id/done", (req, res) => {
+  const { agent, result } = req.body || {};
+  if (!agent) return res.status(400).json({ error: "required: agent" });
+  const tasks = loadTasks();
+  const task = tasks.find(t => t.id === req.params.id);
+  if (!task) return res.status(404).json({ error: "task not found" });
+  if (task.status !== "claimed") return res.status(409).json({ error: `task is ${task.status}, not claimed` });
+  if (task.claimed_by !== agent) return res.status(403).json({ error: "only the claimer can mark done" });
+  task.status = "done";
+  task.result = result ? String(result).slice(0, 2000) : null;
+  task.updated = new Date().toISOString();
+  saveTasks(tasks);
+  logActivity("task.done", `${agent} completed: ${task.title}`, { id: task.id, agent });
+  fireWebhook("task.done", { id: task.id, title: task.title, agent, result: task.result });
+  res.json({ task });
+});
+
+// POST /tasks/:id/verify — task creator verifies completion, auto-creates attestation receipt
+app.post("/tasks/:id/verify", (req, res) => {
+  const { agent, accepted, comment } = req.body || {};
+  if (!agent) return res.status(400).json({ error: "required: agent" });
+  if (typeof accepted !== "boolean") return res.status(400).json({ error: "required: accepted (boolean)" });
+  const tasks = loadTasks();
+  const task = tasks.find(t => t.id === req.params.id);
+  if (!task) return res.status(404).json({ error: "task not found" });
+  if (task.status !== "done") return res.status(409).json({ error: `task is ${task.status}, not done` });
+  if (task.from !== agent) return res.status(403).json({ error: "only the task creator can verify" });
+
+  const now = new Date();
+  if (accepted) {
+    task.verified = true;
+    task.verified_at = now.toISOString();
+    task.updated = now.toISOString();
+    if (comment) task.verification_comment = String(comment).slice(0, 500);
+    saveTasks(tasks);
+
+    // Auto-create attestation receipt for the claimer
+    let receipt = null;
+    if (task.claimed_by && task.from !== task.claimed_by) {
+      const recData = loadReceipts();
+      const handle = task.claimed_by.toLowerCase();
+      if (!recData.receipts[handle]) recData.receipts[handle] = [];
+      if (recData.receipts[handle].length < 100) {
+        receipt = {
+          id: `r-${Date.now().toString(36)}`,
+          attester: task.from.toLowerCase(),
+          task: `[verified] ${task.title}`.slice(0, 300),
+          evidence: `task:${task.id}`,
+          createdAt: now.toISOString(),
+          expiresAt: new Date(now.getTime() + 90 * 86400000).toISOString(), // 90-day TTL for verified tasks
+        };
+        recData.receipts[handle].push(receipt);
+        saveReceipts(recData);
+        logActivity("registry.receipt", `${task.from} verified ${task.claimed_by}: ${task.title.slice(0, 80)}`, { handle, attester: task.from, via: "task-verify" });
+      }
+    }
+
+    logActivity("task.verified", `${agent} verified: ${task.title} (accepted)`, { id: task.id, agent, accepted: true });
+    fireWebhook("task.verified", { id: task.id, title: task.title, agent: task.claimed_by, verifier: agent });
+    res.json({ task, receipt, message: "Task verified. Attestation receipt created." });
+  } else {
+    // Rejected — reopen as claimed for error correction
+    task.status = "claimed";
+    task.result = null;
+    task.updated = now.toISOString();
+    if (comment) {
+      task.comments = task.comments || [];
+      task.comments.push({ from: agent, text: String(comment).slice(0, 500), ts: now.toISOString(), type: "rejection" });
+    }
+    saveTasks(tasks);
+    logActivity("task.verified", `${agent} rejected: ${task.title}`, { id: task.id, agent, accepted: false });
+    res.json({ task, message: "Task rejected. Status reverted to claimed for error correction." });
+  }
+});
+
+// POST /tasks/:id/cancel — cancel a task (creator only)
+app.post("/tasks/:id/cancel", (req, res) => {
+  const { agent } = req.body || {};
+  if (!agent) return res.status(400).json({ error: "required: agent" });
+  const tasks = loadTasks();
+  const task = tasks.find(t => t.id === req.params.id);
+  if (!task) return res.status(404).json({ error: "task not found" });
+  if (task.from !== agent) return res.status(403).json({ error: "only the task creator can cancel" });
+  if (task.status === "cancelled") return res.status(409).json({ error: "already cancelled" });
+  task.status = "cancelled";
+  task.updated = new Date().toISOString();
+  saveTasks(tasks);
+  logActivity("task.cancelled", `${agent} cancelled: ${task.title}`, { id: task.id, agent });
+  fireWebhook("task.cancelled", { id: task.id, title: task.title, agent });
+  res.json({ task });
+});
 
 // --- Webhooks (routes) ---
 app.post("/webhooks", (req, res) => {

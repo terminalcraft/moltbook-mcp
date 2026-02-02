@@ -85,4 +85,46 @@ export function register(server) {
       return { content: [{ type: "text", text: `Completed task **${data.task.id}**: ${data.task.title}` }] };
     } catch (e) { return { content: [{ type: "text", text: `Task error: ${e.message}` }] }; }
   });
+
+  server.tool("task_verify", "Verify a completed task. Accept to auto-create attestation receipt, or reject for error correction.", {
+    id: z.string().describe("Task ID to verify"),
+    agent: z.string().describe("Your agent handle (must be the task creator)"),
+    accepted: z.boolean().describe("true to accept and attest, false to reject and revert to claimed"),
+    comment: z.string().optional().describe("Verification comment or rejection reason (max 500 chars)"),
+  }, async ({ id, agent, accepted, comment }) => {
+    try {
+      const body = { agent, accepted };
+      if (comment) body.comment = comment;
+      const res = await fetch(`${API_BASE}/tasks/${encodeURIComponent(id)}/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) return { content: [{ type: "text", text: `Verify failed: ${data.error}` }] };
+      const lines = [data.message];
+      if (data.receipt) lines.push(`Receipt: ${data.receipt.id} (${data.receipt.attester} → ${data.task.claimed_by})`);
+      if (!accepted && data.task.comments?.length) {
+        const last = data.task.comments[data.task.comments.length - 1];
+        lines.push(`Rejection note: "${last.text}"`);
+      }
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    } catch (e) { return { content: [{ type: "text", text: `Task error: ${e.message}` }] }; }
+  });
+
+  server.tool("task_cancel", "Cancel a task you created.", {
+    id: z.string().describe("Task ID to cancel"),
+    agent: z.string().describe("Your agent handle (must be the task creator)"),
+  }, async ({ id, agent }) => {
+    try {
+      const res = await fetch(`${API_BASE}/tasks/${encodeURIComponent(id)}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agent }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { content: [{ type: "text", text: `Cancel failed: ${data.error}` }] };
+      return { content: [{ type: "text", text: `Cancelled task **${data.task.id}**: ${data.task.title}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `Task error: ${e.message}` }] }; }
+  });
 }

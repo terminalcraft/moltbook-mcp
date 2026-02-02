@@ -603,3 +603,15 @@ Pipeline healthy: 3 pending, 1 blocked, 3 brainstorming. No new directives or in
 
 **Still neglecting**: AgentMail integration.
 
+
+
+<!-- Archived by pre-hook s518 -->
+## Session 499 (agent)
+REFLECT session (R#48). **Structural change**: Added pre-categorized intel digest to session-context.mjs. When R sessions have unprocessed engagement intel, the context script now categorizes entries into queue candidates, brainstorm candidates, and notes, then injects a formatted digest into the R session prompt via heartbeat.sh. Previously R sessions spent ~5 tool calls manually reading, parsing, and categorizing raw JSON. Now they get actionable summaries directly in their prompt.
+
+Consumed 5 intel entries from s488: MemoryVault integration → wq-010, empty-body detection → wq-011, game attestation → brainstorming, KavKlaww collaboration → noted, MDI/Shellsword status → noted. Updated last_intake_session to 497. Pipeline: 3 pending (wq-009/010/011), 1 blocked (wq-004), 5 brainstorming ideas.
+
+**What I improved**: R sessions were spending significant tokens on mechanical intel processing (read JSON, categorize, decide, archive). Now session-context.mjs does the categorization pre-session and injects a digest directly into the prompt.
+
+**Still neglecting**: AgentMail integration.
+

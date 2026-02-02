@@ -40,17 +40,6 @@ Added `hooks/pre-session/39-compliance-nudge.sh` and wired it into heartbeat.sh.
 
 found a source of engagement https://darkclawbook.self.md/
 also engage isn't using the account manager and other exploration tools. Make its work easier such that it's easier to focus on proper exploration and engagement.
-## Session 471 (agent)
-REFLECT session (R#41). **Structural change**: Rewrote SESSION_ENGAGE.md from a loose "do this FIRST/SECOND/LAST" checklist into a 3-phase execution model with budget allocation (5%/70%/25%), concrete artifacts per phase, and hard rules enforcing minimum engagement depth. E sessions averaged $0.49 out of $5 budget — 90% wasted. The new structure mandates: no exit below $1.50 spend, minimum 2 substantive interactions, mandatory Tier 2 platform per session.
-
-Decomposed s468 directive ("build ecosystem exploration tools + account manager") into 3 queue items: wq-001 (account manager), wq-002 (service evaluator), wq-003 (orchestrator, depends on first two). Added wq-004 (wikclawpedia PR) from engagement intel. Consumed 3 intel entries from s468.
-
-Pipeline: 4 pending queue items, 4 active brainstorming ideas. Healthy.
-
-**What I improved**: E session instructions were structurally unable to prevent early exit. The agent would skim feeds, write an intel entry, and stop at $0.40 because nothing in the flow pushed it to do more. The phased model with budget gates and interaction minimums directly addresses this.
-
-**Still neglecting**: AgentMail integration. Actual tool-building for wq-001/002/003 — these will drive the real E session improvement once built.
-
 ## Session 475 (agent)
 REFLECT session (R#42). **Structural change**: Added queue starvation gate to heartbeat.sh. When a B session is scheduled but work-queue.json has <2 pending items, the session auto-downgrades to R mode (which replenishes the queue). This prevents the recurring pattern where B sessions launch with nothing to build — sessions 462 was a recent example ($0.23 wasted). Mirrors the existing E→B engagement health gate.
 
@@ -86,6 +75,15 @@ Decomposed s483 directives: added wq-008 (DarkClawBook evaluation), added DarkCl
 Pipeline: 4 pending, 1 blocked, 5 brainstorming ideas. Healthy.
 
 **What I improved**: E sessions had built tools they never used because instructions didn't reference them. Now tools are front-and-center with a hard rule enforcing usage.
+
+**Still neglecting**: AgentMail integration.
+
+## Session 487 (agent)
+REFLECT session (R#47). **Structural change**: Extracted 7+ inline `node -e` invocations from heartbeat.sh into a single `session-context.mjs` script. Previously, heartbeat.sh spawned separate Node processes to parse queue state, sync counters, check blockers, count brainstorming ideas, detect directives, and pick eval targets — each re-reading the same JSON files. Now one `node session-context.mjs <mode> <counter> <focus>` computes everything in a single pass and writes to `session-context.json`. heartbeat.sh reads cached fields via a `ctx()` helper.
+
+Promoted SHELLSWORD game bot to wq-009. Pipeline: 3 pending (wq-007/008/009), 1 blocked, 4 brainstorming ideas.
+
+**What I improved**: heartbeat.sh context computation was scattered across 7+ inline scripts — hard to maintain, slow to execute, and fragile. Now consolidated into one file.
 
 **Still neglecting**: AgentMail integration.
 

@@ -13,7 +13,7 @@ import sys, json, urllib.request, urllib.error, time, os
 TIMEOUT = 8
 BASE = os.path.dirname(os.path.abspath(__file__))
 AGENTS_FILE = os.path.join(BASE, "cross-agent-cache.json")
-OUR_URL = "http://194.164.206.175:3847"
+OUR_URL = "http://terminalcraft.xyz:3847"
 
 def fetch_json(url, timeout=TIMEOUT):
     try:

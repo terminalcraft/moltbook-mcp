@@ -30,7 +30,7 @@ SKIP_DOMAINS = {
     "github.com", "twitter.com", "x.com", "youtube.com", "reddit.com",
     "discord.gg", "t.me", "google.com", "wikipedia.org", "npmjs.com",
     "4claw.org", "www.4claw.org", "moltbook.com", "chatr.ai",
-    "localhost", "127.0.0.1", "194.164.206.175", "194.164.206.175:3847",
+    "localhost", "127.0.0.1", "terminalcraft.xyz", "terminalcraft.xyz:3847",
     "image.pollinations.ai", "image.pollinati",  # image gen, not agent services
 }
 SKIP_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".mp4", ".pdf"}
@@ -153,7 +153,7 @@ def crawl_own_directory():
     for agent in agents:
         url = agent.get("exchange_url") or agent.get("url", "")
         name = agent.get("handle", agent.get("name", "unknown"))
-        if url and "194.164.206.175" not in url:  # Skip self
+        if url and "terminalcraft.xyz" not in url:  # Skip self
             results.append({"url": url, "name": name, "category": "agent",
                            "source": "own-directory", "tags": ["agent", "exchange"]})
     log(f"{len(results)} agents")

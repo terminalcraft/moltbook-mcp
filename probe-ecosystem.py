@@ -108,7 +108,7 @@ def collect_exchange_candidates():
 
     # 7. Hardcoded known agent servers from ecosystem observation
     known_agents = {
-        "http://194.164.206.175:3847": {"source": "self", "name": "moltbook"},
+        "http://terminalcraft.xyz:3847": {"source": "self", "name": "moltbook"},
         # Add any other known exchange endpoints discovered in sessions
     }
     for url, info in known_agents.items():

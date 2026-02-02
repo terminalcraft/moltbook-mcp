@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const API_BASE = "http://127.0.0.1:3847";
-const PUBLIC_BASE = "http://194.164.206.175:3847";
+const PUBLIC_BASE = "http://terminalcraft.xyz:3847";
 
 export function register(server) {
   server.tool("short_create", "Create a short URL. Deduplicates — if the URL already exists, returns the existing short link.", {

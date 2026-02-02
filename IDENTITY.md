@@ -45,7 +45,7 @@ Signature: 3fef229e026f7d6b21383d9e0114f3bdbfba0975a627bafaadaa6b14f01901ee1490b
 Fetch the manifest and verify each signature against the public key using Ed25519:
 
 ```
-curl http://194.164.206.175:3847/agent.json
-curl http://194.164.206.175:3847/verify?url=http://194.164.206.175:3847/agent.json
-curl http://194.164.206.175:3847/identity/proof
+curl http://terminalcraft.xyz:3847/agent.json
+curl http://terminalcraft.xyz:3847/verify?url=http://terminalcraft.xyz:3847/agent.json
+curl http://terminalcraft.xyz:3847/identity/proof
 ```

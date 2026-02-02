@@ -1458,7 +1458,7 @@ app.get("/identity/proof", (req, res) => {
   if (platform && !proofs.length) return res.status(404).json({ error: `No proof for platform: ${platform}` });
 
   const pubKey = keys.publicKey;
-  const verifyUrl = "http://194.164.206.175:3847/verify?url=http://194.164.206.175:3847/agent.json";
+  const verifyUrl = "http://terminalcraft.xyz:3847/verify?url=http://terminalcraft.xyz:3847/agent.json";
 
   if (req.query.format === "json") return res.json({ publicKey: pubKey, proofs, verifyUrl });
 
@@ -1468,7 +1468,7 @@ app.get("/identity/proof", (req, res) => {
     "",
     `Agent: @moltbook`,
     `Public Key (Ed25519): ${pubKey}`,
-    `Manifest: http://194.164.206.175:3847/agent.json`,
+    `Manifest: http://terminalcraft.xyz:3847/agent.json`,
     `Verify: ${verifyUrl}`,
     `GitHub: https://github.com/terminalcraft/moltbook-mcp`,
     "",
@@ -6403,14 +6403,14 @@ async function discoverAgents() {
     const dir = JSON.parse(readFileSync(join(BASE, "agent-directory.json"), "utf8"));
     for (const a of dir.agents || []) {
       const url = (a.exchange_url || "").replace(/\/agent\.json$/, "");
-      if (url && !url.includes("194.164.206.175:3847")) agents.set(url, { handle: a.handle, url, source: "directory" });
+      if (url && !url.includes("terminalcraft.xyz:3847")) agents.set(url, { handle: a.handle, url, source: "directory" });
     }
   } catch {}
   // From ecosystem map
   try {
     const eco = JSON.parse(readFileSync(join(BASE, "ecosystem-map.json"), "utf8"));
     for (const a of eco.agents || []) {
-      if (a.url && a.online && !a.url.includes("194.164.206.175:3847") && !agents.has(a.url))
+      if (a.url && a.online && !a.url.includes("terminalcraft.xyz:3847") && !agents.has(a.url))
         agents.set(a.url, { handle: a.handle || a.name, url: a.url, source: "ecosystem" });
     }
   } catch {}
@@ -6419,7 +6419,7 @@ async function discoverAgents() {
     const reg = JSON.parse(readFileSync(join(BASE, "agent-registry.json"), "utf8"));
     for (const a of reg || []) {
       const url = (a.exchange_url || "").replace(/\/agent\.json$/, "");
-      if (url && !url.includes("194.164.206.175:3847") && !agents.has(url))
+      if (url && !url.includes("terminalcraft.xyz:3847") && !agents.has(url))
         agents.set(url, { handle: a.handle, url, source: "registry" });
     }
   } catch {}

@@ -23,8 +23,8 @@ export function register(server) {
       });
       const data = await res.json();
       if (!res.ok) return { content: [{ type: "text", text: `Paste failed: ${data.error}` }] };
-      const url = `http://194.164.206.175:3847/paste/${data.id}`;
-      const raw = `http://194.164.206.175:3847/paste/${data.id}/raw`;
+      const url = `http://terminalcraft.xyz:3847/paste/${data.id}`;
+      const raw = `http://terminalcraft.xyz:3847/paste/${data.id}/raw`;
       let text = `Paste created: **${data.id}**\nURL: ${url}\nRaw: ${raw}`;
       if (data.expires_at) text += `\nExpires: ${data.expires_at}`;
       return { content: [{ type: "text", text }] };

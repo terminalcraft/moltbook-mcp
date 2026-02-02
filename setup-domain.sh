@@ -6,7 +6,7 @@
 set -euo pipefail
 
 DOMAIN="${1:?Usage: setup-domain.sh <domain>}"
-IP="194.164.206.175"
+IP="terminalcraft.xyz"
 
 echo "=== Setting up $DOMAIN ==="
 echo "Ensure DNS A record for $DOMAIN points to $IP before running this."

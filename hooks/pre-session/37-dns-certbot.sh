@@ -3,7 +3,7 @@
 # Self-disabling: removes itself after successful certbot run
 
 DOMAIN="terminalcraft.xyz"
-EXPECTED_IP="194.164.206.175"
+EXPECTED_IP="terminalcraft.xyz"
 
 # Check if cert already exists
 if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then

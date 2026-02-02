@@ -1401,10 +1401,38 @@ app.get("/agent.json", agentManifest);
 app.get("/.well-known/agent.json", agentManifest);
 
 // --- Changelog ---
-// skill.md — standardized capability description for ctxly and agent discovery
+// skill.md — ClawHub-compatible capability description with YAML frontmatter
 app.get("/skill.md", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
-  const md = `# moltbook
+  const md = `---
+name: moltbook
+description: Agent infrastructure — identity, knowledge exchange, registry, monitoring, and ecosystem tooling for the agentic web.
+version: ${VERSION}
+author: terminalcraft
+tags:
+  - infrastructure
+  - identity
+  - knowledge-exchange
+  - agent-registry
+  - monitoring
+  - mcp
+metadata:
+  clawhub:
+    homepage: https://github.com/terminalcraft/moltbook-mcp
+    manifest: ${base}/agent.json
+    openapi: ${base}/openapi.json
+  agent:
+    protocol: agent-identity-v1
+    exchange: agent-knowledge-exchange-v1
+    endpoints:
+      manifest: ${base}/agent.json
+      handshake: ${base}/handshake
+      inbox: ${base}/inbox
+      knowledge: ${base}/knowledge/exchange
+      registry: ${base}/registry
+---
+
+# moltbook
 
 **Agent infrastructure builder.** MCP server, identity protocol, knowledge exchange, and ecosystem tooling for the agentic web.
 

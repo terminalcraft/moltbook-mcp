@@ -2679,6 +2679,25 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-029",
+      "title": "Add agent identity verification for writes",
+      "description": "deadman incident (d015) item 4: require signed requests (Ed25519 from handshake protocol) for state-modifying operations. Currently anyone can claim any handle via X-Agent header.",
+      "priority": 29,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "d015",
+      "tags": [
+        "security",
+        "deadman"
+      ],
+      "complexity": "M",
+      "commits": [
+        "9174f63"
+      ],
+      "completed": "2026-02-02",
+      "notes": "Ed25519 signed request verification middleware. 9 endpoints protected. Bearer auth bypass for local MCP. 5-min replay window."
     }
   ]
 }

@@ -108,6 +108,17 @@ account-manager reports all 12 platforms as no_creds. Credential files exist on 
 
 **Directive 2: Replace dialogue.md with a structured communication system.**
 Current problems: (1) human directives buried under agent session summaries, (2) regex-based intake detection is fragile, (3) no acknowledgment that a directive was consumed, (4) no back-channel for agent to ask clarifying questions, (5) no structured status tracking on directives. Design and build a replacement. The fact that R#70 silently dropped one directive and misattributed the other is exactly the kind of failure this system should prevent.
+## Session 656 (agent)
+REFLECT session (R#92). **Structural change**: Added orchestrator pre-execution to session-context.mjs for E sessions. Previously E sessions had to manually invoke `node engage-orchestrator.mjs` at runtime — a tool call that could be skipped or forgotten, leaving sessions without ROI rankings or dynamic tier updates (d016). Now session-context.mjs runs the orchestrator during pre-computation and embeds its output as `e_prompt_block` (analogous to `r_prompt_block`). This guarantees every E session sees the full plan before its first interaction. The `CTX_E_PROMPT_BLOCK` env var is ready for heartbeat.sh to consume (next R session, since heartbeat.sh was on cooldown).
+
+**Directive intake**: Acked d017/d018/d019. d017 (auth failure → human review) already working since s654. d018 (email access) decomposed to wq-043. d019 (verify d016 tools in E sessions) verified from s654 log — orchestrator runs and produces tier/ROI data.
+
+Pipeline: 4 pending, 0 blocked, 2 retired, 4 brainstorming ideas. Ecosystem touch: inbox_check, knowledge_read.
+
+**What I improved**: The core d016 machinery (dynamic tiers, ROI ranking) was only guaranteed to run if the E session agent chose to invoke the orchestrator. Now it's baked into session setup — every E session gets the plan injected, and tier updates happen as a side effect of pre-computation.
+
+**Still neglecting**: heartbeat.sh needs to be updated to consume `CTX_E_PROMPT_BLOCK` (on cooldown until R#93). The e_session_counter is initialized but not auto-incremented by heartbeat.sh yet.
+
 ## Session 604 (agent)
 REFLECT session (R#79). **Structural change**: Extracted shared `isTitleDupe()` function from 3 inline fuzzy title matchers in session-context.mjs. The 3 copies used divergent logic — different substring lengths (20 vs 15 chars), different normalization (one split on ':', others didn't). Unified to 25-char prefix bidirectional includes. All 60 existing tests pass.
 

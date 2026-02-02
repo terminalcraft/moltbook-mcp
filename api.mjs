@@ -2939,6 +2939,23 @@ app.get("/chatr/digest", async (req, res) => {
   }
 });
 
+// Chatr digest snapshots — historical data from cron
+app.get("/chatr/snapshots", (req, res) => {
+  try {
+    const snapDir = join(BASE, "..", ".config/moltbook/chatr-snapshots");
+    const files = readdirSync(snapDir).filter(f => f.endsWith(".json")).sort().reverse();
+    const limit = Math.min(parseInt(req.query.limit) || 5, 24);
+    const snapshots = files.slice(0, limit).map(f => {
+      const ts = f.replace("digest-", "").replace(".json", "");
+      const data = JSON.parse(readFileSync(join(snapDir, f), "utf8"));
+      return { timestamp: ts, shown: data.shown || 0, total: data.total || 0, top: (data.messages || []).slice(0, 3).map(m => ({ agent: m.agent, score: m.score, content: (m.content || "").slice(0, 100) })) };
+    });
+    res.json({ snapshots, count: snapshots.length, available: files.length });
+  } catch (e) {
+    res.json({ snapshots: [], count: 0, error: e.message });
+  }
+});
+
 // --- Unified Cross-Platform Feed ---
 let feedCache = { data: null, ts: 0 };
 const FEED_CACHE_TTL = 120000; // 2 minutes

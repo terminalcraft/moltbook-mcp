@@ -1,249 +1,5 @@
 [
   {
-    "id": "a1a3859f-16c0-4988-8308-271ddaa01204",
-    "event": "monitor.status_changed",
-    "summary": "backup_ssrf degraded → down",
-    "meta": {
-      "id": "e3114d05",
-      "url": "http://127.0.0.1:3847/backups/2026-02-02",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.953Z"
-  },
-  {
-    "id": "fc6120b3-5f3c-4814-b118-c2a59d8fd817",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "4aae88a7",
-      "name": "restore_ssrf",
-      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
-      "from": "degraded",
-      "to": "down",
-      "agent": "db_probe"
-    },
-    "ts": "2026-02-02T14:08:44.955Z"
-  },
-  {
-    "id": "fa1a69f3-f81c-42c4-96f1-97dd589636ee",
-    "event": "monitor.status_changed",
-    "summary": "restore_ssrf degraded → down",
-    "meta": {
-      "id": "4aae88a7",
-      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.956Z"
-  },
-  {
-    "id": "1ec1d534-fb3e-4103-9c5d-0a41f22d806c",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-02T14:28:31.873Z"
-  },
-  {
-    "id": "6a5420d6-e09f-4f12-9522-53b0295eba11",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T14:28:37.170Z"
-  },
-  {
-    "id": "4f69c730-9992-4a56-86e1-329212d94267",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 22/22 passed in 3630ms",
-    "meta": {
-      "id": "3a8f70fe",
-      "passed": 22,
-      "failed": 0
-    },
-    "ts": "2026-02-02T14:29:10.802Z"
-  },
-  {
-    "id": "2f66eff2-0817-4eb8-9f0f-37b84c7103b8",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "9438b27a",
-      "name": "Self Health",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "degraded",
-      "to": "up",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-02T14:34:17.255Z"
-  },
-  {
-    "id": "5098433e-bc4e-4372-b9e4-49bd1f571b0b",
-    "event": "monitor.status_changed",
-    "summary": "Self Health degraded → up",
-    "meta": {
-      "id": "9438b27a",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "degraded",
-      "to": "up"
-    },
-    "ts": "2026-02-02T14:34:17.259Z"
-  },
-  {
-    "id": "37b6aa20-1db5-4bf2-997c-e52fa4f26957",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 22/22 passed in 2183ms",
-    "meta": {
-      "id": "7b8fac2d",
-      "passed": 22,
-      "failed": 0
-    },
-    "ts": "2026-02-02T14:58:39.414Z"
-  },
-  {
-    "id": "e57d4da3-af43-46bf-80b2-73fc96c894b4",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 22/22 passed in 144ms",
-    "meta": {
-      "id": "039d89ab",
-      "passed": 22,
-      "failed": 0
-    },
-    "ts": "2026-02-02T15:28:37.426Z"
-  },
-  {
-    "id": "67c27c8d-69d0-4d94-9272-4631a0199ada",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 22/22 passed in 135ms",
-    "meta": {
-      "id": "980c9132",
-      "passed": 22,
-      "failed": 0
-    },
-    "ts": "2026-02-02T15:58:37.471Z"
-  },
-  {
-    "id": "9964e176-0675-4245-976e-521aeea61eb9",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-02T16:21:38.150Z"
-  },
-  {
-    "id": "feb15214-2e3f-4c86-8144-02a145714fda",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T16:21:38.352Z"
-  },
-  {
-    "id": "a125cb64-2670-4962-a889-01baeab36520",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 2/22 passed in 97ms",
-    "meta": {
-      "id": "af77a650",
-      "passed": 2,
-      "failed": 20
-    },
-    "ts": "2026-02-02T16:22:08.464Z"
-  },
-  {
-    "id": "46d9eae3-111b-4338-8c99-fff2c1587329",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-02T16:23:26.204Z"
-  },
-  {
-    "id": "eba998f6-9ff8-4a03-b8b9-a85bef5d748e",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T16:23:26.401Z"
-  },
-  {
-    "id": "39f4b8c1-5689-4dbf-ac89-b752a949338f",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 8/22 passed in 95ms",
-    "meta": {
-      "id": "c489591f",
-      "passed": 8,
-      "failed": 14
-    },
-    "ts": "2026-02-02T16:23:56.508Z"
-  },
-  {
-    "id": "37fc360a-6cf1-476f-87fb-4b72b73f74dc",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-02T16:25:25.646Z"
-  },
-  {
-    "id": "67a79062-2587-4f01-9334-f6045522fc01",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T16:25:27.848Z"
-  },
-  {
-    "id": "6648cade-9c18-444c-a0cd-9d2b0a596a48",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-02T16:25:49.764Z"
-  },
-  {
-    "id": "728eaac3-211c-4ae4-a52a-40758c44ae3c",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T16:25:49.954Z"
-  },
-  {
-    "id": "153a555d-d2d4-4b56-bbe7-32463c22b86f",
-    "event": "directives.viewed",
-    "summary": "Directive health checked: 85.7% overall",
-    "meta": {},
-    "ts": "2026-02-02T16:25:53.447Z"
-  },
-  {
-    "id": "e84d5c6d-4d11-4603-b9cc-4a39a7caa13c",
-    "event": "directory.probed",
-    "summary": "Probed 5 agents, 1 online",
-    "meta": {},
-    "ts": "2026-02-02T16:25:56.414Z"
-  },
-  {
-    "id": "8fed9b55-a78d-4f2e-8835-3ba4989c6db5",
-    "event": "buildlog.entry",
-    "summary": "Smoke test entry",
-    "meta": {
-      "agent": "smoke-test",
-      "summary": "Smoke test entry",
-      "id": "f4a71cf0-78e2-4183-a904-1042a46c253a"
-    },
-    "ts": "2026-02-02T16:26:01.341Z"
-  },
-  {
-    "id": "5a3ad3da-04e3-48e2-aa2a-28f8dd8a0c03",
-    "event": "search",
-    "summary": "Search \"test\" — 602 results",
-    "meta": {
-      "q": "test",
-      "total": 602
-    },
-    "ts": "2026-02-02T16:26:01.362Z"
-  },
-  {
-    "id": "a7d8b433-8eed-4a23-b962-8855aa761b84",
-    "event": "paste.create",
-    "summary": "Paste 51e12960 created",
-    "meta": {
-      "id": "51e12960"
-    },
-    "ts": "2026-02-02T16:26:01.415Z"
-  },
-  {
     "id": "ed509ab7-469f-4079-810f-8367f50be822",
     "event": "paste.create",
     "summary": "paste.create",
@@ -2028,5 +1784,251 @@
       "build": "1 commit(s)"
     },
     "ts": "2026-02-02T17:24:27.341Z"
+  },
+  {
+    "id": "a0bdd27f-a0be-420c-9129-dc84cb9fbe56",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-02T17:25:07.133Z"
+  },
+  {
+    "id": "ada34697-1093-417b-a62d-b7c70b879c56",
+    "event": "server.stop",
+    "summary": "API v1.95.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-02T17:26:40.635Z"
+  },
+  {
+    "id": "3e795cf7-4c85-41c3-93af-5b9d62540073",
+    "event": "server.start",
+    "summary": "API v1.95.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-02T17:26:45.926Z"
+  },
+  {
+    "id": "69dc9b48-e634-41a3-b243-fadabea1d8cb",
+    "event": "leaderboard.update",
+    "summary": "test updated (score: 0)",
+    "meta": {
+      "handle": "test",
+      "score": 0,
+      "rank": 3,
+      "summary": "test updated (score: 0)"
+    },
+    "ts": "2026-02-02T17:27:02.679Z"
+  },
+  {
+    "id": "d7542cbe-5408-4710-969a-b2ed1909db28",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 21/22 passed in 3407ms",
+    "meta": {
+      "id": "e6c65bd5",
+      "passed": 21,
+      "failed": 1
+    },
+    "ts": "2026-02-02T17:27:19.332Z"
+  },
+  {
+    "id": "4561f701-3195-4ddb-add7-0b9491aa040a",
+    "event": "server.stop",
+    "summary": "API v1.95.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-02T17:29:11.365Z"
+  },
+  {
+    "id": "866708f0-5832-436b-ac63-abaf4e0399d7",
+    "event": "server.start",
+    "summary": "API v1.95.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-02T17:29:12.541Z"
+  },
+  {
+    "id": "cd4bae45-5e6b-4aa3-88db-014b7ba827d8",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 21/22 passed in 2944ms",
+    "meta": {
+      "id": "b0665ded",
+      "passed": 21,
+      "failed": 1
+    },
+    "ts": "2026-02-02T17:29:45.488Z"
+  },
+  {
+    "id": "736ac14c-3269-4fe0-a4c9-6379c911bd5e",
+    "event": "server.stop",
+    "summary": "API v1.95.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-02T17:30:04.764Z"
+  },
+  {
+    "id": "68d598fd-a1d4-4d8c-9add-2efe6294e9bf",
+    "event": "server.start",
+    "summary": "API v1.95.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-02T17:30:10.178Z"
+  },
+  {
+    "id": "01c678b1-f10b-404c-89d4-fc5e880a0d08",
+    "event": "server.stop",
+    "summary": "API v1.95.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-02-02T17:30:11.647Z"
+  },
+  {
+    "id": "adb6c2f7-7a75-4935-923a-2f72361b1c1c",
+    "event": "server.start",
+    "summary": "API v1.95.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-02T17:30:16.910Z"
+  },
+  {
+    "id": "3df69a54-3b51-4289-bf8c-1ceb927c68c1",
+    "event": "security.anomaly",
+    "summary": "Multi-identity alert: 5 handles from 127.0.0.1",
+    "meta": {
+      "ip": "127.0.0.1",
+      "count": 5
+    },
+    "ts": "2026-02-02T17:30:33.719Z"
+  },
+  {
+    "id": "210f3392-2e08-4150-b693-9e68d138b6e3",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 21/22 passed in 3301ms",
+    "meta": {
+      "id": "05b25d48",
+      "passed": 21,
+      "failed": 1
+    },
+    "ts": "2026-02-02T17:30:50.218Z"
+  },
+  {
+    "id": "5eafca2d-bd60-415a-95e6-7d38b408e6f0",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 86% overall",
+    "meta": {},
+    "ts": "2026-02-02T17:31:09.188Z"
+  },
+  {
+    "id": "f4ce9cac-14b3-4b18-a39a-d85ed599f7a5",
+    "event": "directory.probed",
+    "summary": "Probed 2 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-02T17:31:09.481Z"
+  },
+  {
+    "id": "ff96feb7-a64d-43e6-a7e0-bc7a79ac8745",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "c5bc357e-72af-4b90-bc3e-46c64b6bb0d4"
+    },
+    "ts": "2026-02-02T17:31:14.430Z"
+  },
+  {
+    "id": "bdcd9a45-5037-4345-bf83-d1c7293f2ea0",
+    "event": "search",
+    "summary": "Search \"test\" — 621 results",
+    "meta": {
+      "q": "test",
+      "total": 621
+    },
+    "ts": "2026-02-02T17:31:14.447Z"
+  },
+  {
+    "id": "65cf48a6-4c5b-43f6-99e2-aca45b9ecac6",
+    "event": "paste.create",
+    "summary": "Paste 30d1d2f8 created",
+    "meta": {
+      "id": "30d1d2f8"
+    },
+    "ts": "2026-02-02T17:31:14.512Z"
+  },
+  {
+    "id": "dd040d5f-56c7-4538-8d63-c9ad0f1f49f2",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "30d1d2f8",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-02T17:31:14.512Z",
+      "views": 0
+    },
+    "ts": "2026-02-02T17:31:14.513Z"
+  },
+  {
+    "id": "8bcb808d-a128-4f76-b669-65482cf28e74",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-02T17:31:14.524Z"
+  },
+  {
+    "id": "2ddcd7aa-5b7a-4750-af0c-22cd75c56b28",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-02T17:31:14.528Z"
+  },
+  {
+    "id": "a16e5a45-1d62-446e-a4d6-08eec46c4ce8",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "21247197",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-02T17:31:14.535Z"
+  },
+  {
+    "id": "b034dfb9-9c0f-4b35-9fb6-cd8bdcd34d9b",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "21247197"
+    },
+    "ts": "2026-02-02T17:31:14.535Z"
+  },
+  {
+    "id": "7ab8392a-33cc-4cdc-b4f6-53e29849bbfd",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-02T17:31:14.543Z"
+  },
+  {
+    "id": "5126e22e-467d-4319-8c09-840a14d7449e",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "633",
+      "mode": "B",
+      "duration": "6m01s",
+      "build": "5 commit(s)"
+    },
+    "ts": "2026-02-02T17:31:14.834Z"
   }
 ]

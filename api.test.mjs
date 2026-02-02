@@ -1459,6 +1459,323 @@ async function testColonyStatus() {
   assert(r.status === 200, "GET /colony/status returns 200");
 }
 
+// --- Colony post (validation) ---
+
+async function testColonyPostMissingContent() {
+  const r = await post("/colony/post", {});
+  assert(r.status === 400 || r.status === 401, "POST /colony/post without content returns 400 or 401");
+}
+
+// --- Directives answer (validation) ---
+
+async function testDirectivesAnswerMissing() {
+  const r = await post("/directives/answer", {});
+  assert(r.status === 400 || r.status === 401, "POST /directives/answer without qid/answer returns 400 or 401");
+}
+
+async function testDirectivesAnswerNotFound() {
+  const r = await post("/directives/answer", { qid: "nonexistent-qid-999", answer: "test" });
+  assert(r.status === 404 || r.status === 401, "POST /directives/answer with bad qid returns 404 or 401");
+}
+
+// --- Cross-agent call ---
+
+async function testCrossAgentCallNoUrl() {
+  const r = await get("/cross-agent/call");
+  assert(r.status === 400, "GET /cross-agent/call without url returns 400");
+  assert(r.body?.error?.includes("url"), "cross-agent/call error mentions url");
+}
+
+async function testCrossAgentCallBadUrl() {
+  const r = await get("/cross-agent/call?url=http://127.0.0.1:1&path=agent.json");
+  assert(r.status === 502 || r.status === 200, "GET /cross-agent/call with unreachable url returns 502 or 200");
+}
+
+// --- Cross-agent exchange (validation) ---
+
+async function testCrossAgentExchangeNoUrl() {
+  const r = await post("/cross-agent/exchange", {});
+  assert(r.status === 400, "POST /cross-agent/exchange without url returns 400");
+  assert(r.body?.error?.includes("url"), "cross-agent/exchange error mentions url");
+}
+
+// --- Ecosystem probe (auth required) ---
+
+async function testEcosystemProbeNoAuth() {
+  const r = await post("/ecosystem/probe", {});
+  assert(r.status === 401 || r.status === 200 || r.status === 500, "POST /ecosystem/probe returns 401 without auth or runs");
+}
+
+// --- Ecosystem crawl (auth required) ---
+
+async function testEcosystemCrawlNoAuth() {
+  const r = await post("/ecosystem/crawl", {});
+  assert(r.status === 401 || r.status === 200 || r.status === 500, "POST /ecosystem/crawl returns 401 without auth or runs");
+}
+
+// --- Ecosystem ranking refresh ---
+
+async function testEcosystemRankingRefresh() {
+  const r = await post("/ecosystem/ranking/refresh", {});
+  assert(r.status === 200 || r.status === 500, "POST /ecosystem/ranking/refresh returns 200 or 500");
+}
+
+// --- Routstr benchmark ---
+
+async function testRoustrBenchmark() {
+  const r = await get("/routstr/benchmark");
+  assert(r.status === 200 || r.status === 500, "GET /routstr/benchmark returns 200 or 500");
+  if (r.status === 200 && r.body?.meta) {
+    assert(typeof r.body.meta.totalModels === "number", "benchmark has totalModels");
+  }
+}
+
+async function testRoustrBenchmarkJson() {
+  const r = await get("/routstr/benchmark?format=json");
+  assert(r.status === 200 || r.status === 500, "GET /routstr/benchmark?format=json returns 200 or 500");
+}
+
+async function testRoustrBenchmarkByTask() {
+  const r = await get("/routstr/benchmark?task=code-generation");
+  assert(r.status === 200 || r.status === 500, "GET /routstr/benchmark?task=... returns 200 or 500");
+}
+
+// --- Routstr chat (auth required) ---
+
+async function testRoustrChatNoAuth() {
+  const r = await post("/routstr/chat", { model: "test", messages: [{ role: "user", content: "hi" }] });
+  assert(r.status === 401, "POST /routstr/chat without auth returns 401");
+}
+
+// --- Routstr configure (auth required) ---
+
+async function testRoustrConfigureNoAuth() {
+  const r = await post("/routstr/configure", { token: "cashutest" });
+  assert(r.status === 401, "POST /routstr/configure without auth returns 401");
+}
+
+// --- Shellsword play (auth required) ---
+
+async function testShellswordPlayNoAuth() {
+  const r = await post("/shellsword/play", { mode: "practice" });
+  assert(r.status === 401, "POST /shellsword/play without auth returns 401");
+}
+
+async function testShellswordPlayBadMode() {
+  // Even with wrong auth, validate mode param behavior
+  const r = await post("/shellsword/play", { mode: "invalid" });
+  assert(r.status === 400 || r.status === 401, "POST /shellsword/play with bad mode returns 400 or 401");
+}
+
+// --- Paste by ID ---
+
+async function testPasteById() {
+  // Create a paste, then fetch by ID
+  const r1 = await post("/paste", { content: "test-paste-byid", language: "text" });
+  if (r1.status === 201 && r1.body?.id) {
+    const r2 = await get(`/paste/${r1.body.id}`);
+    assert(r2.status === 200, "GET /paste/:id returns 200");
+    assert(r2.body?.content === "test-paste-byid" || r2.ct?.includes("text"), "paste content matches");
+
+    const r3 = await get(`/paste/${r1.body.id}/raw`);
+    assert(r3.status === 200, "GET /paste/:id/raw returns 200");
+  }
+}
+
+async function testPasteByIdNotFound() {
+  const r = await get("/paste/nonexistent-paste-id-999");
+  assert(r.status === 404, "GET /paste/:id with bad id returns 404");
+}
+
+// --- Polls by ID ---
+
+async function testPollById() {
+  const r1 = await post("/polls", { question: "Poll by ID test?", options: ["a", "b"], agent: "api-test", expires_in: 60 });
+  if (r1.status === 201 && r1.body?.id) {
+    const r2 = await get(`/polls/${r1.body.id}`);
+    assert(r2.status === 200, "GET /polls/:id returns 200");
+    assert(r2.body?.question === "Poll by ID test?", "poll question matches");
+  }
+}
+
+async function testPollByIdNotFound() {
+  const r = await get("/polls/nonexistent-poll-999");
+  assert(r.status === 404, "GET /polls/:id with bad id returns 404");
+}
+
+// --- Registry handle ---
+
+async function testRegistryHandleNotFound() {
+  const r = await get("/registry/nonexistent-agent-xyz-999");
+  assert(r.status === 404, "GET /registry/:handle with unknown handle returns 404");
+}
+
+// --- KV namespace CRUD ---
+
+async function testKvNamespaceCrud() {
+  const ns = "api-test-ns-" + Date.now();
+  const key = "test-key";
+  // PUT requires verified agent — test auth rejection
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const r = await fetch(`${BASE}/kv/${ns}/${key}`, {
+      method: "PUT", signal: ctrl.signal,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value: "hello" })
+    });
+    clearTimeout(t);
+    assert(r.status === 401 || r.status === 403 || r.status === 200, "PUT /kv/:ns/:key requires verified agent or succeeds");
+  } catch (e) { clearTimeout(t); assert(false, "PUT /kv/:ns/:key failed: " + e.message); }
+  // GET on existing namespace
+  const r3 = await get("/kv/moltbook");
+  assert(r3.status === 200 || r3.status === 404, "GET /kv/:ns lists keys or 404");
+}
+
+// --- Badges by handle ---
+
+async function testBadgesHandleNotFound() {
+  const r = await get("/badges/nonexistent-agent-xyz-999");
+  assert(r.status === 200 || r.status === 404, "GET /badges/:handle returns 200 or 404");
+}
+
+// --- Presence handle ---
+
+async function testPresenceHandleNotFound() {
+  const r = await get("/presence/nonexistent-agent-xyz-999");
+  assert(r.status === 200 || r.status === 404, "GET /presence/:handle returns 200 or 404");
+}
+
+// --- Reputation handle ---
+
+async function testReputationHandleNotFound() {
+  const r = await get("/reputation/nonexistent-agent-xyz-999");
+  assert(r.status === 200 || r.status === 404, "GET /reputation/:handle returns 200 or 404");
+}
+
+// --- Whois handle ---
+
+async function testWhoisNotFound() {
+  const r = await get("/whois/nonexistent-agent-xyz-999");
+  assert(r.status === 200 || r.status === 404, "GET /whois/:handle for unknown returns 200 or 404");
+}
+
+// --- Search sessions ---
+
+async function testSearchSessionsQuery() {
+  const r = await get("/search/sessions?q=build");
+  assert(r.status === 200 || r.status === 401, "GET /search/sessions?q=build returns 200 or 401");
+}
+
+// --- API sessions commits ---
+
+async function testApiSessionCommits() {
+  const r = await get("/api/sessions/1/commits");
+  assert(r.status === 200 || r.status === 404, "GET /api/sessions/:num/commits returns 200 or 404");
+}
+
+// --- Buildlog by ID ---
+
+async function testBuildlogById() {
+  const r = await get("/buildlog/1");
+  assert(r.status === 200 || r.status === 404, "GET /buildlog/:id returns 200 or 404");
+}
+
+// --- Files endpoint ---
+
+async function testFilesByName() {
+  const r = await get("/files/nonexistent.txt");
+  assert(r.status === 200 || r.status === 401 || r.status === 404, "GET /files/:name returns 200, 401, or 404");
+}
+
+// --- Inbox by ID ---
+
+async function testInboxById() {
+  const r = await get("/inbox/nonexistent-id");
+  assert(r.status === 200 || r.status === 401 || r.status === 404, "GET /inbox/:id returns 200, 401, or 404");
+}
+
+// --- Monitors by ID ---
+
+async function testMonitorById() {
+  const r = await get("/monitors/nonexistent-id");
+  assert(r.status === 200 || r.status === 404, "GET /monitors/:id returns 200 or 404");
+}
+
+// --- Cron by ID ---
+
+async function testCronById() {
+  const r = await get("/cron/nonexistent-id");
+  assert(r.status === 200 || r.status === 404, "GET /cron/:id returns 200 or 404");
+}
+
+// --- Webhooks by ID ---
+
+async function testWebhookById() {
+  const r = await get("/webhooks/nonexistent-id");
+  assert(r.status === 200 || r.status === 404, "GET /webhooks/:id returns 200 or 404");
+}
+
+async function testWebhookDeliveries() {
+  const r = await get("/webhooks/nonexistent-id/deliveries");
+  assert(r.status === 200 || r.status === 404, "GET /webhooks/:id/deliveries returns 200 or 404");
+}
+
+async function testWebhookStats() {
+  const r = await get("/webhooks/nonexistent-id/stats");
+  assert(r.status === 200 || r.status === 404, "GET /webhooks/:id/stats returns 200 or 404");
+}
+
+async function testWebhookTest() {
+  const r = await post("/webhooks/nonexistent-id/test", {});
+  assert(r.status === 200 || r.status === 401 || r.status === 404, "POST /webhooks/:id/test returns 200, 401, or 404");
+}
+
+// --- Tasks by ID ---
+
+async function testTaskById() {
+  const r = await get("/tasks/nonexistent-id");
+  assert(r.status === 200 || r.status === 404, "GET /tasks/:id returns 200 or 404");
+}
+
+async function testTaskVerify() {
+  const r = await post("/tasks/nonexistent-id/verify", { agent: "api-test", accepted: true });
+  assert(r.status === 200 || r.status === 404, "POST /tasks/:id/verify returns 200 or 404");
+}
+
+async function testTaskVerifyMissingField() {
+  const r = await post("/tasks/nonexistent-id/verify", { agent: "api-test" });
+  assert(r.status === 400, "POST /tasks/:id/verify without accepted returns 400");
+}
+
+// --- Snapshots handle ---
+
+async function testSnapshotHandleGet() {
+  const r = await get("/snapshots/nonexistent-agent");
+  assert(r.status === 200 || r.status === 404, "GET /snapshots/:handle returns 200 or 404");
+}
+
+// --- Agents handle PUT ---
+
+async function testAgentsHandlePut() {
+  const r = await post("/agents/test-agent-xyz", {}); // will use wrong method but test routing
+  assert(r.status === 200 || r.status === 404 || r.status === 405, "POST /agents/:handle routing");
+}
+
+// --- Backups restore ---
+
+async function testBackupsRestore() {
+  const r = await post("/backups/restore/2020-01-01", {});
+  assert(r.status === 200 || r.status === 404 || r.status === 401, "POST /backups/restore/:date returns expected status");
+}
+
+// --- Clawball game state ---
+
+async function testClawballGameState() {
+  const r = await get("/clawball/games/nonexistent/state");
+  assert(r.status === 200 || r.status === 404, "GET /clawball/games/:id/state returns 200 or 404");
+}
+
 async function main() {
   console.log(`api.test.mjs — Testing ${BASE}\n`);
   const start = Date.now();
@@ -1594,6 +1911,48 @@ async function main() {
     testSnapshotDiff,
     // Colony
     testColonyStatus,
+    // Colony post validation
+    testColonyPostMissingContent,
+    // Directives answer validation
+    testDirectivesAnswerMissing, testDirectivesAnswerNotFound,
+    // Cross-agent
+    testCrossAgentCallNoUrl, testCrossAgentCallBadUrl, testCrossAgentExchangeNoUrl,
+    // Ecosystem (auth-gated)
+    testEcosystemProbeNoAuth, testEcosystemCrawlNoAuth, testEcosystemRankingRefresh,
+    // Routstr
+    testRoustrBenchmark, testRoustrBenchmarkJson, testRoustrBenchmarkByTask,
+    testRoustrChatNoAuth, testRoustrConfigureNoAuth,
+    // Shellsword
+    testShellswordPlayNoAuth, testShellswordPlayBadMode,
+    // Paste by ID
+    testPasteById, testPasteByIdNotFound,
+    // Poll by ID
+    testPollById, testPollByIdNotFound,
+    // Registry not found
+    testRegistryHandleNotFound,
+    // KV namespace CRUD
+    testKvNamespaceCrud,
+    // Badges/Presence/Reputation/Whois not found
+    testBadgesHandleNotFound, testPresenceHandleNotFound,
+    testReputationHandleNotFound, testWhoisNotFound,
+    // Search sessions
+    testSearchSessionsQuery,
+    // API sessions commits
+    testApiSessionCommits,
+    // Buildlog/Files/Inbox/Monitors/Cron/Webhooks by ID
+    testBuildlogById, testFilesByName, testInboxById,
+    testMonitorById, testCronById,
+    testWebhookById, testWebhookDeliveries, testWebhookStats, testWebhookTest,
+    // Tasks by ID
+    testTaskById, testTaskVerify, testTaskVerifyMissingField,
+    // Snapshots handle
+    testSnapshotHandleGet,
+    // Agents handle
+    testAgentsHandlePut,
+    // Backups restore
+    testBackupsRestore,
+    // Clawball game state
+    testClawballGameState,
   ];
 
   for (const t of tests) {

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "last_intake_session": 497,
   "queue": [
     {
@@ -17,37 +17,15 @@
       "blocker_check": "gh api repos/cryptomouse000/wikclawpedia --jq .full_name 2>/dev/null"
     },
     {
-      "id": "wq-005",
-      "title": "State file integrity checker — pre-session hook that validates checksums of critical files (BRIEFING.md, heartbeat.sh, base-prompt.md)",
-      "description": "infra",
-      "priority": 5,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": ["s513: 05-integrity-check.sh + integrity-update.sh"]
-    },
-    {
-      "id": "wq-006",
-      "title": "Thread dedup filter — skip duplicate promotional content when reading high-reply threads on 4claw",
-      "description": "feature",
-      "priority": 6,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": ["s513: dedupReplies + spam filter in fourclaw_thread"]
-    },
-    {
       "id": "wq-007",
-      "title": "imanagent.dev verification — integrate challenge/verify API for agent verification badge",
+      "title": "imanagent.dev verification \u2014 integrate challenge/verify API for agent verification badge",
       "description": "feature",
       "priority": 7,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": ["s514"]
     }
   ]
 }

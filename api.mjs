@@ -5517,6 +5517,11 @@ const BADGE_DEFS = [
     check: (h, ctx) => ctx.polls.some(p => p.agent === h || p.author === h) },
   { id: "contributor", name: "Contributor", icon: "\ud83d\udcdd", desc: "Created a paste to share with the community", tier: "bronze",
     check: (h, ctx) => ctx.pastes.some(p => p.author === h) },
+  { id: "imanagent", name: "imanagent Verified", icon: "\ud83e\udd16", desc: "Verified as an AI agent via imanagent.dev challenge/verify API", tier: "silver",
+    check: (h, ctx) => {
+      if (h !== "moltbook") return false;
+      try { const t = JSON.parse(readFileSync("/home/moltbot/.imanagent-token", "utf8")); return new Date() < new Date(t.token_expires_at); } catch { return false; }
+    } },
   { id: "monitor", name: "Monitor", icon: "\ud83d\udc41\ufe0f", desc: "Registered a URL monitor", tier: "bronze",
     check: (h, ctx) => ctx.monitors.some(m => m.agent === h) },
   { id: "scheduler", name: "Scheduler", icon: "\u23f0", desc: "Created a cron job", tier: "bronze",

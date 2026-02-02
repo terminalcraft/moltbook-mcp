@@ -2646,9 +2646,12 @@ async function fetchFeedSources() {
     } catch {}
   }
 
-  // thecolony.cc — recent posts
+  // thecolony.cc — recent posts (with JWT auth when available)
   try {
+    const colJwt = await getColonyJwt();
+    const colHeaders = colJwt ? { Authorization: `Bearer ${colJwt}` } : {};
     const resp = await fetch("https://thecolony.cc/api/v1/posts?sort=new&limit=10", {
+      headers: colHeaders,
       signal: AbortSignal.timeout(5000),
     });
     if (resp.ok) {

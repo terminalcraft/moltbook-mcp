@@ -4681,7 +4681,7 @@ app.get("/directives/intake", (req, res) => {
   }
 });
 
-app.post("/directives/intake", (req, res) => {
+app.post("/directives/intake", auth, (req, res) => {
   const isForm = req.headers["content-type"]?.includes("urlencoded");
   try {
     const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
@@ -4698,7 +4698,7 @@ app.post("/directives/intake", (req, res) => {
 });
 
 // --- Directive answer API (JSON + form) ---
-app.post("/directives/answer", (req, res) => {
+app.post("/directives/answer", auth, (req, res) => {
   const isForm = req.headers["content-type"]?.includes("urlencoded");
   try {
     const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
@@ -4717,7 +4717,7 @@ app.post("/directives/answer", (req, res) => {
 });
 
 // --- Directive inbox web UI (wq-010) ---
-app.get("/directives/inbox", (req, res) => {
+app.get("/directives/inbox", auth, (req, res) => {
   try {
     const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
     const directives = data.directives || [];

@@ -334,54 +334,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- Auth gate: all routes require auth unless whitelisted ---
-const PUBLIC_ROUTES = new Set([
-  // A2A discovery & identity
-  "GET /agent.json", "GET /.well-known/agent.json", "GET /skill.md",
-  "GET /identity/proof", "GET /verify", "POST /handshake",
-  // Public directory & registry (read-only)
-  "GET /registry", "GET /agents", "GET /directory",
-  "GET /whois", "GET /reputation", "GET /badges",
-  // Presence (read + announce)
-  "GET /presence", "POST /presence",
-  // Public knowledge (read + exchange)
-  "GET /knowledge/patterns", "GET /knowledge/digest", "GET /knowledge/topics",
-  "POST /knowledge/exchange", "POST /knowledge/validate",
-  // Docs
-  "GET /docs", "GET /openapi.json", "GET /routes",
-  // Health
-  "GET /health/data", "GET /status",
-  // Public games
-  "GET /clawball/games", "GET /shellsword/rules", "POST /shellsword/play",
-  "GET /game-results",
-  // Smoke test badge (image)
-  "GET /smoke-tests/badge",
-  // Dispatch (A2A task requests)
-  "POST /dispatch", "GET /dispatch",
-  // Inbox receive (other agents sending messages)
-  "POST /registry/:handle/receipts", "GET /registry/:handle/receipts",
-]);
-// Parameterized public routes: [method, prefix_regex]
-const PUBLIC_PARAM_ROUTES = [
-  ["GET", /^\/registry\/[^/]+$/],
-  ["GET", /^\/agents\/[^/]+$/],
-  ["GET", /^\/whois\/[^/]+$/],
-  ["GET", /^\/reputation\/[^/]+$/],
-  ["GET", /^\/badges\/[^/]+$/],
-  ["GET", /^\/presence\/[^/]+$/],
-  ["GET", /^\/presence\/[^/]+\/history$/],
-  ["GET", /^\/clawball\/games\/[^/]+\/state$/],
-  ["POST", /^\/registry\/[^/]+\/receipts$/],
-  ["GET", /^\/registry\/[^/]+\/receipts$/],
-];
-app.use((req, res, next) => {
-  const key = req.method + " " + req.path;
-  if (PUBLIC_ROUTES.has(key)) return next();
-  for (const [method, pattern] of PUBLIC_PARAM_ROUTES) {
-    if (req.method === method && pattern.test(req.path)) return next();
-  }
-  return auth(req, res, next);
-});
+// --- Endpoints (sensitive routes use auth middleware) ---
 
 // --- Endpoints ---
 
@@ -430,7 +383,7 @@ app.get("/specialization", (req, res) => {
 });
 
 // Budget analysis — per-tool cost breakdown from session logs
-app.get("/budget", (req, res) => {
+app.get("/budget", auth, (req, res) => {
   try {
     const sessions = parseInt(req.query.sessions) || 10;
     const cap = Math.min(Math.max(sessions, 1), 50);
@@ -460,7 +413,7 @@ app.get("/rotation", (req, res) => {
 });
 
 // Session log search — grep across JSONL logs by keyword
-app.get("/search/sessions", (req, res) => {
+app.get("/search/sessions", auth, (req, res) => {
   try {
     const q = (req.query.q || "").replace(/[^a-zA-Z0-9_. *?|\\-]/g, "").slice(0, 100);
     if (!q) return res.status(400).json({ error: "query param ?q= required" });
@@ -668,7 +621,7 @@ new Chart(document.getElementById("cpwChart"), {
 });
 
 // Session log search — query session-history.txt by mode, cost, build output (wq-014)
-app.get("/sessions/search", (req, res) => {
+app.get("/sessions/search", auth, (req, res) => {
   try {
     const histFile = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
     const lines = readFileSync(histFile, "utf8").trim().split("\n").filter(Boolean);
@@ -704,7 +657,7 @@ app.get("/sessions/search", (req, res) => {
 });
 
 // Request analytics — public summary, auth for full detail
-app.get("/analytics", (req, res) => {
+app.get("/analytics", auth, (req, res) => {
   const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;
   const topEndpoints = Object.entries(analytics.endpoints).sort((a, b) => b[1] - a[1]).slice(0, 20);
   const uniqueVisitors = Object.keys(analytics.visitors).length;
@@ -749,7 +702,7 @@ app.get("/analytics", (req, res) => {
 });
 
 // Session analytics dashboard — outcomes, cost trends, hook success rates
-app.get("/analytics/sessions", (req, res) => {
+app.get("/analytics/sessions", auth, (req, res) => {
   const HIST = "/home/moltbot/.config/moltbook/session-history.txt";
   const OUTCOMES = join(LOGS, "outcomes.log");
   const HOOKS = join(LOGS, "hook-results.json");
@@ -859,7 +812,7 @@ app.get("/analytics/sessions", (req, res) => {
 });
 
 // API surface audit — cross-references routes with in-memory analytics
-app.get("/audit", (req, res) => {
+app.get("/audit", auth, (req, res) => {
   const allHits = analytics.endpoints;
   const registered = [];
   const routeRe = /app\.(get|post|put|delete|patch)\(\s*["']([^"']+)["']/g;
@@ -883,7 +836,7 @@ app.get("/audit", (req, res) => {
 });
 
 // Prometheus-compatible metrics endpoint
-app.get("/metrics", (req, res) => {
+app.get("/metrics", auth, (req, res) => {
   const lines = [];
   const up = 1;
   const uptimeSec = Math.floor((Date.now() - metrics.processStart) / 1000);
@@ -1085,7 +1038,7 @@ function savePlatformSnapshot(snapshot) {
 }
 
 // Engagement platform health — per-platform read/write scores for other agents (wq-021)
-app.get("/status/platforms", async (req, res) => {
+app.get("/status/platforms", auth, async (req, res) => {
   const THRESHOLD = 3;
   const platforms = [
     { name: "moltbook", read: "https://moltbook.com/api/v1/feed?sort=new&limit=1", category: "social" },
@@ -1266,7 +1219,7 @@ app.get("/status/effectiveness", (req, res) => {
   res.json({ window: lines.length, types: results });
 });
 
-app.get("/status/all", async (req, res) => {
+app.get("/status/all", auth, async (req, res) => {
   const checks = [
     { name: "molty-api", url: "http://127.0.0.1:3847/agent.json", type: "local" },
     { name: "verify-server", url: "http://127.0.0.1:3848/", type: "local" },
@@ -1309,7 +1262,7 @@ app.get("/status/all", async (req, res) => {
 });
 
 // Credential rotation health (wq-011)
-app.get("/status/creds", (req, res) => {
+app.get("/status/creds", auth, (req, res) => {
   try {
     const out = execSync("node cred-rotation.mjs json", { cwd: BASE, encoding: "utf8", timeout: 5000 });
     res.json(JSON.parse(out));
@@ -1804,7 +1757,7 @@ new Chart(document.getElementById("utilChart"), {
 });
 
 // Directive lifecycle dashboard — age, ack latency, completion rate
-app.get("/status/directives", (req, res) => {
+app.get("/status/directives", auth, (req, res) => {
   try {
     const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
     const dirs = data.directives || [];
@@ -1902,7 +1855,7 @@ td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
 });
 
 // Unified pipeline view — queue + brainstorming + directives in one response
-app.get("/status/pipeline", (req, res) => {
+app.get("/status/pipeline", auth, (req, res) => {
   try {
     const wq = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf8"));
     const queue = (wq.queue || []).map(i => ({ id: i.id, title: i.title, status: i.status, priority: i.priority, complexity: i.complexity || "M", tags: i.tags || [] }));
@@ -1929,7 +1882,7 @@ app.get("/status/pipeline", (req, res) => {
 });
 
 // Public ecosystem status dashboard — HTML page with deep health checks
-app.get("/status/dashboard", async (req, res) => {
+app.get("/status/dashboard", auth, async (req, res) => {
   // Deep checks: test actual functionality, not just HTTP 200
   const checks = [
     { name: "Moltbook Read", url: "https://moltbook.com/api/v1/posts?limit=1", category: "moltbook",
@@ -4084,7 +4037,7 @@ async function getColonyJwt() {
   } catch { return null; }
 }
 
-app.post("/colony/post", async (req, res) => {
+app.post("/colony/post", auth, async (req, res) => {
   try {
     const { content, colony, post_type, title } = req.body || {};
     if (!content) return res.status(400).json({ error: "content required" });
@@ -4110,7 +4063,7 @@ app.post("/colony/post", async (req, res) => {
   }
 });
 
-app.get("/colony/status", async (req, res) => {
+app.get("/colony/status", auth, async (req, res) => {
   try {
     const jwt = await getColonyJwt();
     if (!jwt) return res.json({ status: "auth_failed", token: false });
@@ -4532,7 +4485,7 @@ app.get("/ecosystem/map", (req, res) => {
   }
 });
 
-app.post("/ecosystem/probe", (req, res) => {
+app.post("/ecosystem/probe", auth, (req, res) => {
   import("child_process").then(({ spawn }) => {
     const dir = BASE + "/";
     const proc = spawn("python3", [`${dir}probe-ecosystem.py`], { cwd: dir, timeout: 120000 });
@@ -4555,7 +4508,7 @@ app.post("/ecosystem/probe", (req, res) => {
 });
 
 // === Ecosystem Crawl ===
-app.post("/ecosystem/crawl", (req, res) => {
+app.post("/ecosystem/crawl", auth, (req, res) => {
   import("child_process").then(({ spawn }) => {
     const dryRun = req.query.dry_run === "true";
     const dir = BASE + "/";
@@ -5081,7 +5034,7 @@ ${trendWarnings}
 // --- Deprecation management API ---
 app.get("/deprecations", (req, res) => res.json(loadDeprecations()));
 
-app.post("/deprecations", express.json(), (req, res) => {
+app.post("/deprecations", auth, express.json(), (req, res) => {
   const { path, method, status, message, successor, sunset } = req.body || {};
   if (!path) return res.status(400).json({ error: "path required" });
   if (!["deprecated", "gone"].includes(status)) return res.status(400).json({ error: "status must be 'deprecated' or 'gone'" });
@@ -5093,7 +5046,7 @@ app.post("/deprecations", express.json(), (req, res) => {
   res.status(201).json({ ok: true, key, entry: deps[key] });
 });
 
-app.delete("/deprecations", express.json(), (req, res) => {
+app.delete("/deprecations", auth, express.json(), (req, res) => {
   const deps = loadDeprecations();
   const key = req.body?.key;
   if (!key || !deps[key]) return res.status(404).json({ error: "Not found. Send {key: 'METHOD /path'}" });
@@ -6525,7 +6478,7 @@ app.post("/tasks/:id/cancel", (req, res) => {
 });
 
 // --- Webhooks (routes) ---
-app.post("/webhooks", (req, res) => {
+app.post("/webhooks", auth, (req, res) => {
   const { agent, url, events } = req.body || {};
   if (!agent || !url || !events || !Array.isArray(events)) return res.status(400).json({ error: "required: agent, url, events[]" });
   try { new URL(url); } catch { return res.status(400).json({ error: "invalid url" }); }
@@ -6567,7 +6520,7 @@ app.get("/webhooks/events", (req, res) => {
   };
   res.json({ events: WEBHOOK_EVENTS, wildcard: "*", descriptions });
 });
-app.delete("/webhooks/:id", (req, res) => {
+app.delete("/webhooks/:id", auth, (req, res) => {
   const hooks = loadWebhooks();
   const idx = hooks.findIndex(h => h.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: "not found" });
@@ -6841,7 +6794,7 @@ function startCronTimer(job) {
 // Start all existing jobs on boot
 for (const job of cronJobs) { if (job.active !== false) startCronTimer(job); }
 
-app.post("/cron", (req, res) => {
+app.post("/cron", auth, (req, res) => {
   const { url, interval, agent, payload, method, name } = req.body || {};
   if (!url || !interval) return res.status(400).json({ error: "url and interval required" });
   if (typeof url !== "string" || !url.startsWith("http")) return res.status(400).json({ error: "url must be a valid HTTP URL" });
@@ -6887,7 +6840,7 @@ app.get("/cron/:id", (req, res) => {
   res.json(job);
 });
 
-app.delete("/cron/:id", (req, res) => {
+app.delete("/cron/:id", auth, (req, res) => {
   const idx = cronJobs.findIndex(j => j.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: "job not found" });
   const job = cronJobs[idx];
@@ -6898,7 +6851,7 @@ app.delete("/cron/:id", (req, res) => {
   res.json({ deleted: true });
 });
 
-app.patch("/cron/:id", (req, res) => {
+app.patch("/cron/:id", auth, (req, res) => {
   const job = cronJobs.find(j => j.id === req.params.id);
   if (!job) return res.status(404).json({ error: "job not found" });
   const { active, interval, url, payload, name } = req.body || {};
@@ -8414,7 +8367,7 @@ const CRAWL_CACHE_TTL = 60 * 60 * 1000;
 const CRAWL_MAX_CONCURRENT = 2;
 let crawlActive = 0;
 
-app.post("/crawl", async (req, res) => {
+app.post("/crawl", auth, async (req, res) => {
   const { github_url } = req.body || {};
   if (!github_url || typeof github_url !== "string") return res.status(400).json({ error: "github_url required" });
   const slug = parseGitHubUrl(github_url);
@@ -9020,7 +8973,7 @@ app.post("/webhooks/fire", (req, res) => {
   res.json({ fired: true, event });
 });
 
-app.get("/files", (req, res) => {
+app.get("/files", auth, (req, res) => {
   try {
     const files = readdirSync(BASE)
       .filter(f => f.endsWith(".md") || f.endsWith(".conf"))
@@ -9031,7 +8984,7 @@ app.get("/files", (req, res) => {
   }
 });
 
-app.get("/files/:name", (req, res) => {
+app.get("/files/:name", auth, (req, res) => {
   const name = req.params.name;
   const file = ALLOWED_FILES[name] || (name.endsWith(".md") || name.endsWith(".conf") ? name : null);
   if (!file) return res.status(404).json({ error: "unknown file" });
@@ -9045,7 +8998,7 @@ app.get("/files/:name", (req, res) => {
   }
 });
 
-app.post("/files/:name", (req, res) => {
+app.post("/files/:name", auth, (req, res) => {
   const name = req.params.name;
   const file = ALLOWED_FILES[name] || (name.endsWith(".md") || name.endsWith(".conf") ? name : null);
   if (!file) return res.status(404).json({ error: "unknown file" });
@@ -9059,7 +9012,7 @@ app.post("/files/:name", (req, res) => {
   }
 });
 
-app.get("/summaries", (req, res) => {
+app.get("/summaries", auth, (req, res) => {
   try {
     const files = readdirSync(LOGS)
       .filter(f => f.endsWith(".summary"))
@@ -9169,7 +9122,7 @@ function parseLiveActions(logPath, offset) {
   };
 }
 
-app.get("/live", (req, res) => {
+app.get("/live", auth, (req, res) => {
   try {
     const logPath = getNewestLog();
     if (!logPath) {

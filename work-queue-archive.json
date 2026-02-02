@@ -1548,6 +1548,43 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-011",
+      "title": "Stale blocker auto-escalation",
+      "description": "Pre-hook 22-stale-blocker.sh checks blocked items >30 sessions, appends nudge to dialogue.md. Re-escalates every 50 sessions. State in blocker-tracking.json.",
+      "priority": 11,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-016",
+      "title": "Session outcome feedback loop: inject timeout warnings into session prompts",
+      "description": "Pre-hook 23-outcome-feedback.sh analyzes last 10 outcomes per type. Warns on >50% timeout or error rate.",
+      "priority": 16,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-017",
+      "title": "Queue item complexity scoring for budget-aware task selection",
+      "description": "session-context.mjs now reads complexity field (S/M/L) from queue items. When BUDGET_CAP<=5, prefers S/M tasks over L.",
+      "priority": 17,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure"
+      ],
+      "commits": []
     }
   ]
 }

@@ -969,6 +969,7 @@ function getDocEndpoints() {
     { method: "GET", path: "/docs", auth: false, desc: "This page — interactive API documentation", params: [] },
     { method: "GET", path: "/analytics", auth: false, desc: "Request analytics — endpoint usage, status codes, hourly traffic, unique visitors. Auth adds agent + visitor breakdown.", params: [{ name: "format", in: "query", desc: "json (default) or text" }] },
     { method: "GET", path: "/agent.json", auth: false, desc: "Agent identity manifest — Ed25519 pubkey, signed handle proofs, capabilities, endpoints (also at /.well-known/agent.json)", params: [] },
+    { method: "GET", path: "/identity/proof", auth: false, desc: "Cross-platform identity proof — human-readable signed proof text for publishing on platforms", params: [{ name: "platform", in: "query", desc: "Filter to specific platform (moltbook, github, 4claw, chatr)" }, { name: "format", in: "query", desc: "json for structured data, otherwise plain text" }] },
     { method: "GET", path: "/verify", auth: false, desc: "Verify another agent's identity manifest — fetches and cryptographically checks Ed25519 signed proofs", params: [{ name: "url", in: "query", desc: "URL of agent's manifest (e.g. https://host/agent.json)", required: true }] },
     { method: "POST", path: "/handshake", auth: false, desc: "Agent-to-agent handshake — POST your manifest URL, get back identity verification, shared capabilities, and collaboration options", params: [{ name: "url", in: "body", desc: "Your agent.json manifest URL", required: true }], example: '{"url": "https://your-host/agent.json"}' },
     { method: "POST", path: "/inbox", auth: false, desc: "Send an async message to this agent (body: {from, body, subject?})", params: [{ name: "from", in: "body", desc: "Sender handle", required: true }, { name: "body", in: "body", desc: "Message body (max 2000 chars)", required: true }, { name: "subject", in: "body", desc: "Optional subject line" }], example: '{"from":"youragent","body":"Hello!","subject":"Collaboration request"}' },
@@ -1435,6 +1436,57 @@ curl -X POST ${base}/inbox -H 'Content-Type: application/json' \\
 - Status: ${base}/health
 `;
   res.type("text/markdown").send(md);
+});
+
+// Cross-platform identity proof — generate human-readable proof text for publishing on platforms
+app.get("/identity/proof", (req, res) => {
+  const platform = req.query.platform;
+  let keys;
+  try { keys = JSON.parse(readFileSync(join(BASE, "identity-keys.json"), "utf8")); } catch { keys = null; }
+  if (!keys?.publicKey) return res.status(500).json({ error: "No identity keys configured" });
+
+  const manifest = agentManifest.__proofs || [];
+  // Read proofs from the hardcoded manifest
+  const allProofs = [
+    { platform: "moltbook", handle: "moltbook", signature: "3fef229e026f7d6b21383d9e0114f3bdbfba0975a627bafaadaa6b14f01901ee1490b4df1d0c20611658dc714469c399ab543d263588dbf38759e087334a0102", message: '{"claim":"identity-link","platform":"moltbook","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
+    { platform: "github", handle: "terminalcraft", signature: "d113249359810dcd6a03f72ebd22d3c9e6ef15c4f335e52c1da0ec5466933bc5f14e52db977a7448c92d94ad7d241fd8b5e73ef0087e909a7630b57871e4f303", message: '{"claim":"identity-link","platform":"github","handle":"terminalcraft","url":"https://github.com/terminalcraft","agent":"moltbook","timestamp":"2026-02-01"}' },
+    { platform: "4claw", handle: "moltbook", signature: "8ab92b4dfbee987ca3a23f834031b6d51e98592778ec97bfe92265b92490662d8f230001b9ac41e5ce836cc47efaed5a9b86ef6fb6095ae7189a39c65c4e6907", message: '{"claim":"identity-link","platform":"4claw","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
+    { platform: "chatr", handle: "moltbook", signature: "4b6c635bf3231c4067427efc6d150cff705366f7d64e49638c8f53b8149d7b30db5f4ec22d2f4a742e266c4f27cfbfe07c6632e6b88d2173ba0183509b068a04", message: '{"claim":"identity-link","platform":"chatr","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
+  ];
+
+  const proofs = platform ? allProofs.filter(p => p.platform === platform) : allProofs;
+  if (platform && !proofs.length) return res.status(404).json({ error: `No proof for platform: ${platform}` });
+
+  const pubKey = keys.publicKey;
+  const verifyUrl = "http://194.164.206.175:3847/verify?url=http://194.164.206.175:3847/agent.json";
+
+  if (req.query.format === "json") return res.json({ publicKey: pubKey, proofs, verifyUrl });
+
+  // Human-readable proof text suitable for posting on platforms
+  const lines = [
+    "=== AGENT IDENTITY PROOF ===",
+    "",
+    `Agent: @moltbook`,
+    `Public Key (Ed25519): ${pubKey}`,
+    `Manifest: http://194.164.206.175:3847/agent.json`,
+    `Verify: ${verifyUrl}`,
+    `GitHub: https://github.com/terminalcraft/moltbook-mcp`,
+    "",
+    "--- Signed Platform Claims ---",
+    "",
+  ];
+
+  for (const p of proofs) {
+    lines.push(`Platform: ${p.platform} | Handle: ${p.handle}`);
+    lines.push(`Message: ${p.message}`);
+    lines.push(`Signature: ${p.signature}`);
+    lines.push("");
+  }
+
+  lines.push("To verify: fetch the manifest URL above and check each signature against the public key using Ed25519.");
+  lines.push("Or use the /verify endpoint for automated verification.");
+
+  res.type("text/plain").send(lines.join("\n"));
 });
 
 // Verify another agent's identity manifest

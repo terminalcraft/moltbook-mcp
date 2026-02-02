@@ -11,23 +11,34 @@ STATE_DIR="$HOME/.config/moltbook"
 LOG_DIR="$STATE_DIR/logs"
 mkdir -p "$LOG_DIR"
 
+# Accept optional flags: mode override (E, B, R) and --dry-run
+DRY_RUN=""
+OVERRIDE_MODE=""
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=1 ;;
+    E|B|R) OVERRIDE_MODE="$arg" ;;
+  esac
+done
+
 # Kill orphan MCP node processes from previous crashed sessions
-pkill -f "node $DIR/index.js" 2>/dev/null || true
-sleep 1
+if [ -z "$DRY_RUN" ]; then
+  pkill -f "node $DIR/index.js" 2>/dev/null || true
+  sleep 1
+fi
 
 LOCKFILE="$STATE_DIR/heartbeat.lock"
-exec 200>"$LOCKFILE"
-if ! flock -n 200; then
-  echo "$(date -Iseconds) heartbeat already running, skipping" >> "$LOG_DIR/skipped.log"
-  exit 0
+if [ -z "$DRY_RUN" ]; then
+  exec 200>"$LOCKFILE"
+  if ! flock -n 200; then
+    echo "$(date -Iseconds) heartbeat already running, skipping" >> "$LOG_DIR/skipped.log"
+    exit 0
+  fi
 fi
 
 # --- Session rotation (computed before hooks so pre-hooks have context) ---
 ROTATION_FILE="$DIR/rotation.conf"
 SESSION_COUNTER_FILE="$STATE_DIR/session_counter"
-
-# Accept optional mode override as first argument (E, B, or R)
-OVERRIDE_MODE="${1:-}"
 
 # Always read session counter (used for logging even on override)
 if [ -f "$SESSION_COUNTER_FILE" ]; then
@@ -86,8 +97,10 @@ else
     ROT_IDX=$((ROT_IDX + 1))
     RETRY_COUNT=0
   fi
-  echo "$ROT_IDX" > "$ROTATION_IDX_FILE"
-  echo "$RETRY_COUNT" > "$RETRY_COUNT_FILE"
+  if [ -z "$DRY_RUN" ]; then
+    echo "$ROT_IDX" > "$ROTATION_IDX_FILE"
+    echo "$RETRY_COUNT" > "$RETRY_COUNT_FILE"
+  fi
 
   PAT_LEN=${#PATTERN}
   IDX=$((ROT_IDX % PAT_LEN))
@@ -95,7 +108,9 @@ else
 
   # Session counter always increments for unique numbering
   COUNTER=$((COUNTER + 1))
-  echo "$COUNTER" > "$SESSION_COUNTER_FILE"
+  if [ -z "$DRY_RUN" ]; then
+    echo "$COUNTER" > "$SESSION_COUNTER_FILE"
+  fi
 fi
 
 # R_FOCUS must be defaulted before context computation (set fully later).
@@ -170,7 +185,7 @@ if [ "$MODE_CHAR" = "R" ]; then
   R_COUNT=0
   [ -f "$R_COUNTER_FILE" ] && R_COUNT=$(cat "$R_COUNTER_FILE")
   R_COUNT=$((R_COUNT + 1))
-  echo "$R_COUNT" > "$R_COUNTER_FILE"
+  [ -z "$DRY_RUN" ] && echo "$R_COUNT" > "$R_COUNTER_FILE"
 fi
 
 # B session counter (feature/meta alternation retired R#49 — meta tags unused).
@@ -179,7 +194,7 @@ if [ "$MODE_CHAR" = "B" ]; then
   B_COUNT=0
   [ -f "$B_COUNTER_FILE" ] && B_COUNT=$(cat "$B_COUNTER_FILE")
   B_COUNT=$((B_COUNT + 1))
-  echo "$B_COUNT" > "$B_COUNTER_FILE"
+  [ -z "$DRY_RUN" ] && echo "$B_COUNT" > "$B_COUNTER_FILE"
 fi
 
 # --- Outage-aware session skip ---
@@ -225,7 +240,7 @@ done
 # Each script in hooks/pre-session/ runs in sort order before the session.
 # Hooks receive MODE_CHAR and SESSION_NUM for session-type-aware decisions.
 PRE_HOOKS_DIR="$DIR/hooks/pre-session"
-if [ -d "$PRE_HOOKS_DIR" ]; then
+if [ -d "$PRE_HOOKS_DIR" ] && [ -z "$DRY_RUN" ]; then
   for hook in "$PRE_HOOKS_DIR"/*; do
     [ -x "$hook" ] || continue
     echo "$(date -Iseconds) running pre-hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
@@ -381,6 +396,17 @@ cat > "$MCP_FILE" <<MCPEOF
   }
 }
 MCPEOF
+
+# --- Dry-run mode: print assembled prompt and exit without launching claude ---
+if [ -n "$DRY_RUN" ]; then
+  echo "=== DRY RUN: mode=$MODE_CHAR session=$COUNTER budget=$BUDGET ==="
+  echo "--- PROMPT (${#PROMPT} chars) ---"
+  echo "$PROMPT"
+  echo "--- MCP CONFIG ---"
+  cat "$MCP_FILE"
+  echo "--- END DRY RUN ---"
+  exit 0
+fi
 
 echo "=== Moltbook heartbeat $(date -Iseconds) mode=$MODE_CHAR ===" | tee "$LOG"
 

@@ -13,7 +13,7 @@ const STATE_DIR = join(process.env.HOME, '.config/moltbook');
 
 const MODE = process.argv[2] || 'B';
 const COUNTER = parseInt(process.argv[3] || '0', 10);
-const B_FOCUS = process.argv[4] || 'feature';
+// B_FOCUS arg kept for backward compat but no longer used for task selection (R#49).
 
 function readJSON(path) {
   try { return JSON.parse(readFileSync(path, 'utf8')); } catch { return null; }
@@ -40,17 +40,10 @@ const blocked = queue.filter(i => i.status === 'blocked');
 result.pending_count = pending.length;
 result.blocked_count = blocked.length;
 
-// Top task for B sessions
+// Top task for B sessions — just take first pending by priority (R#49: tag-based selection retired).
 if (MODE === 'B' && pending.length > 0) {
-  let item;
-  if (B_FOCUS === 'meta') {
-    item = pending.find(i => (i.tags || []).some(t => t === 'meta' || t === 'infra')) || pending[0];
-  } else {
-    item = pending.find(i => (i.tags || []).some(t => t === 'feature')) || pending[0];
-  }
-  if (item) {
-    result.wq_item = item.id + ': ' + item.title + (item.description?.length > 20 ? ' — ' + item.description : '');
-  }
+  const item = pending[0];
+  result.wq_item = item.id + ': ' + item.title + (item.description?.length > 20 ? ' — ' + item.description : '');
 }
 
 // Auto-unblock: check blocked items with blocker_check commands

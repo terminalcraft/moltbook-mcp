@@ -83,9 +83,9 @@ else
   echo "$COUNTER" > "$SESSION_COUNTER_FILE"
 fi
 
-# B_FOCUS/R_FOCUS must be defaulted before context computation (set fully later).
-B_FOCUS=${B_FOCUS:-feature}
+# R_FOCUS must be defaulted before context computation (set fully later).
 R_FOCUS=${R_FOCUS:-evolve}
+B_FOCUS="feature"  # Legacy — kept for hook compatibility but no longer alternates.
 # --- Single-pass context computation ---
 # Replaces 7+ inline `node -e` invocations with one script. (R#47, s487)
 CTX_FILE="$STATE_DIR/session-context.json"
@@ -132,17 +132,13 @@ if [ "$MODE_CHAR" = "R" ]; then
   echo "$R_COUNT" > "$R_COUNTER_FILE"
 fi
 
-# B sessions alternate between feature/meta focus (mirrors R evolve/maintain).
+# B session counter (feature/meta alternation retired R#49 — meta tags unused).
 B_COUNTER_FILE="$STATE_DIR/b_session_counter"
-B_FOCUS="feature"
 if [ "$MODE_CHAR" = "B" ]; then
   B_COUNT=0
   [ -f "$B_COUNTER_FILE" ] && B_COUNT=$(cat "$B_COUNTER_FILE")
   B_COUNT=$((B_COUNT + 1))
   echo "$B_COUNT" > "$B_COUNTER_FILE"
-  if [ $((B_COUNT % 2)) -eq 0 ]; then
-    B_FOCUS="meta"
-  fi
 fi
 
 # --- Outage-aware session skip ---
@@ -254,8 +250,7 @@ This is your primary task for this session. Complete it before picking up anythi
 
   B_FOCUS_BLOCK="
 
-## B Session Focus: ${B_FOCUS}
-B_FOCUS=${B_FOCUS} (B session #${B_COUNT}). Follow the **${B_FOCUS}** guidelines below.${WQ_BLOCK}"
+## B Session: #${B_COUNT}${WQ_BLOCK}"
 fi
 
 E_CONTEXT_BLOCK=""

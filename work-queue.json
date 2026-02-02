@@ -1,24 +1,7 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
-    {
-      "id": "wq-002",
-      "title": "Directive lifecycle dashboard",
-      "description": "Expose directive age, ack latency, and completion rate via /status/directives — human has no visibility into whether directives are being addressed without manually reading JSON files",
-      "priority": 2,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-R74",
-      "complexity": "M",
-      "tags": [
-        "api",
-        "visibility"
-      ],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
     {
       "id": "wq-003",
       "title": "Session cost distribution analysis",
@@ -32,20 +15,6 @@
       "commits": []
     },
     {
-      "id": "wq-004",
-      "title": "Platform credential health check endpoint",
-      "description": "Add /status/credentials that shows per-platform auth status in real-time, complementing the account-manager diagnostic",
-      "priority": 4,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "complexity": "S",
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
       "id": "wq-005",
       "title": "Engagement ROI leaderboard",
       "description": "Rank platforms by engagement-per-dollar using replay analytics data to auto-prioritize E session targets",
@@ -54,6 +23,18 @@
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
+      "complexity": "M",
+      "commits": []
+    },
+    {
+      "id": "wq-006",
+      "title": "Add tests for session-context.mjs",
+      "description": "session-context.mjs is touched in nearly every R session and has caused multiple bugs (R#51, R#58, R#73). Add unit tests for auto-seed, auto-promote, dedup, and TODO ingest to prevent regressions.",
+      "priority": 6,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "reflect-r75",
+      "tags": ["testing"],
       "complexity": "M",
       "commits": []
     }

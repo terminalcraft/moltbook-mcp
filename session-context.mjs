@@ -266,11 +266,12 @@ if (MODE === 'B') {
   let bsCount = (bsContent.match(/^- \*\*/gm) || []).length;
 
   if (bsCount === 0) {
-    // Auto-seed (R#71): Generate specific, actionable ideas from multiple sources.
-    // Previous approach (R#70) used generic "Harden X / Extend X / Monitor X" templates
-    // from commit messages — produced formulaic ideas that didn't lead to useful work.
-    // New approach: scan for concrete gaps (unaddressed dialogue items, session patterns,
-    // queue gaps) and generate targeted seeds.
+    // Auto-seed (R#75): Generate concrete, buildable ideas with proper titles.
+    // Previous approach (R#71) extracted 80-char substrings of directive content as titles,
+    // producing ideas like "Address: Map the entire agent ecosystem. Crawl directories, follow links from agent profi"
+    // — these are unreadable when promoted to queue items and tell B sessions nothing actionable.
+    // New approach: each seed has a short imperative title (<60 chars) and a description.
+    // Title format matches what a B session needs: "Build X", "Add Y support", "Fix Z".
     const seeds = [];
     const queueTitles = queue.map(i => i.title.toLowerCase());
     const isDupe = (title) => queueTitles.some(qt =>
@@ -278,7 +279,7 @@ if (MODE === 'B') {
       title.toLowerCase().includes(qt.split(':')[0].trim().substring(0, 15))
     );
 
-    // Source 1: Unaddressed directives from directives.json (highest value — human asked for these)
+    // Source 1: Unaddressed directives — extract actionable build tasks, not raw content
     const directivesPath2 = join(DIR, 'directives.json');
     if (existsSync(directivesPath2)) {
       try {
@@ -286,29 +287,35 @@ if (MODE === 'B') {
         const active = (dData.directives || []).filter(d => d.status === 'active' || d.status === 'pending');
         for (const d of active) {
           if (seeds.length >= 4) break;
-          const preview = (d.content || '').substring(0, 80);
-          if (preview.length > 10 && !isDupe(preview)) {
-            seeds.push(`- **Address: ${preview}**: Unresolved directive ${d.id} — prioritize`);
+          const content = (d.content || '').toLowerCase();
+          // Generate a concrete task title based on directive theme, not a substring
+          let title = null, desc = null;
+          if (content.includes('ecosystem') || content.includes('map') || content.includes('discover')) {
+            title = 'Batch-evaluate 5 undiscovered services';
+            desc = `Directive ${d.id}: systematically probe unevaluated services from services.json`;
+          } else if (content.includes('explore') || content.includes('evaluate') || content.includes('e session')) {
+            title = 'Deep-explore one new platform end-to-end';
+            desc = `Directive ${d.id}: pick an unevaluated service, register, post, measure response`;
+          } else if (content.includes('safety') || content.includes('hook') || content.includes('do not remove')) {
+            // Standing rule directives — skip, not buildable
+            continue;
+          } else {
+            title = `Address directive ${d.id}`;
+            desc = (d.content || '').substring(0, 120);
+          }
+          if (title && !isDupe(title)) {
+            seeds.push(`- **${title}**: ${desc}`);
           }
         }
       } catch {}
     }
 
-    // Source 2: Recent session error/timeout patterns
+    // Source 2: Recent session patterns — find concrete improvement opportunities
     const histPath = join(STATE_DIR, 'session-history.txt');
     if (existsSync(histPath) && seeds.length < 4) {
       const hist = readFileSync(histPath, 'utf8');
       const lines = hist.trim().split('\n').slice(-20);
-      // Find sessions with no commits (potential waste) or very low cost (underutilized)
-      const lowCost = lines.filter(l => {
-        const costMatch = l.match(/cost=\$([0-9.]+)/);
-        const modeMatch = l.match(/mode=([A-Z])/);
-        return costMatch && modeMatch && modeMatch[1] === 'E' && parseFloat(costMatch[1]) < 1.0;
-      });
-      if (lowCost.length >= 3 && !isDupe('E session underutilization')) {
-        seeds.push(`- **Fix E session underutilization**: ${lowCost.length} recent E sessions under $1 — investigate root cause and improve orchestration`);
-      }
-      // Find repeated build patterns (same file touched 3+ times = unstable code)
+      // Find repeated build patterns (same file touched 4+ times = unstable code)
       const fileCounts = {};
       for (const line of lines) {
         const files = line.match(/files=\[([^\]]+)\]/)?.[1];
@@ -318,18 +325,29 @@ if (MODE === 'B') {
           }
         }
       }
-      const hotFiles = Object.entries(fileCounts).filter(([f, c]) => c >= 4 && f !== 'work-queue.json' && f !== 'BRAINSTORMING.md');
+      const hotFiles = Object.entries(fileCounts)
+        .filter(([f, c]) => c >= 4 && !['work-queue.json', 'BRAINSTORMING.md', 'dialogue.md'].includes(f))
+        .sort((a, b) => b[1] - a[1]);
       if (hotFiles.length > 0 && seeds.length < 4) {
-        const hotList = hotFiles.slice(0, 3).map(([f]) => f).join(', ');
-        if (!isDupe('stabilize hot files')) {
-          seeds.push(`- **Stabilize hot files (${hotList})**: Touched 4+ times recently — may need refactoring or tests`);
+        const top = hotFiles[0];
+        const title = `Add tests for ${top[0]}`;
+        if (!isDupe(title)) {
+          seeds.push(`- **${title}**: Touched ${top[1]} times in last 20 sessions — stabilize with unit tests`);
         }
+      }
+      // E session underutilization
+      const lowCostE = lines.filter(l => {
+        const c = l.match(/cost=\$([0-9.]+)/); const m = l.match(/mode=([A-Z])/);
+        return c && m && m[1] === 'E' && parseFloat(c[1]) < 1.0;
+      });
+      if (lowCostE.length >= 3 && seeds.length < 4 && !isDupe('E session budget utilization')) {
+        seeds.push(`- **Improve E session budget utilization**: ${lowCostE.length}/recent E sessions under $1 — add auto-retry or deeper exploration loops`);
       }
     }
 
-    // Source 3: Queue health gaps
+    // Source 3: Queue health
     if (pending.length === 0 && seeds.length < 4 && !isDupe('queue starvation')) {
-      seeds.push(`- **Prevent queue starvation**: Build a deeper pipeline of 5+ ready items from open directives and ecosystem opportunities`);
+      seeds.push(`- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work`);
     }
 
     if (seeds.length > 0) {

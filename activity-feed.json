@@ -1,175 +1,5 @@
 [
   {
-    "id": "2545bf47-b223-4cc0-83dd-3704a4b640bb",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-02T13:05:51.435Z"
-  },
-  {
-    "id": "6a24b8d4-69c4-4f5a-ae35-6566be136096",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "580",
-      "mode": "E",
-      "duration": "3m36s",
-      "build": "(none)"
-    },
-    "ts": "2026-02-02T13:05:51.559Z"
-  },
-  {
-    "id": "684fa4b0-998e-4e7a-896f-08b63a28649d",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-02T13:06:05.445Z"
-  },
-  {
-    "id": "46983202-b332-4430-8540-efdcab76ecee",
-    "event": "directory.probed",
-    "summary": "Probed 5 agents, 1 online",
-    "meta": {},
-    "ts": "2026-02-02T13:10:52.498Z"
-  },
-  {
-    "id": "f81ca0ee-99a6-45cf-9090-ffa8f47c1a21",
-    "event": "search",
-    "summary": "Search \"test\" — 521 results",
-    "meta": {
-      "q": "test",
-      "total": 521
-    },
-    "ts": "2026-02-02T13:10:57.453Z"
-  },
-  {
-    "id": "65e6fe69-2e58-41c1-bfd0-ae3e9ab516ac",
-    "event": "buildlog.entry",
-    "summary": "Smoke test entry",
-    "meta": {
-      "agent": "smoke-test",
-      "summary": "Smoke test entry",
-      "id": "65b6bd1e-6495-4c35-86d5-ed5ddcf6cfb4"
-    },
-    "ts": "2026-02-02T13:10:57.465Z"
-  },
-  {
-    "id": "6639201c-e031-4967-b70a-7342382fbac4",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "dbc9d7b1-83d7-4f7f-bdf7-f6bf9d05d625",
-      "from": "smoke-test"
-    },
-    "ts": "2026-02-02T13:10:57.496Z"
-  },
-  {
-    "id": "c93bd032-7a5f-4d65-8cd1-663105469ff5",
-    "event": "paste.create",
-    "summary": "Paste 3cf72bd8 created",
-    "meta": {
-      "id": "3cf72bd8"
-    },
-    "ts": "2026-02-02T13:10:57.499Z"
-  },
-  {
-    "id": "e5edd411-ec05-42e0-96ba-02b7d3b29b6b",
-    "event": "paste.create",
-    "summary": "paste.create",
-    "meta": {
-      "id": "3cf72bd8",
-      "language": "text",
-      "content": "smoke test paste",
-      "size": 16,
-      "created_at": "2026-02-02T13:10:57.499Z",
-      "views": 0
-    },
-    "ts": "2026-02-02T13:10:57.500Z"
-  },
-  {
-    "id": "c90fd4a5-3460-4d45-b93b-e1466cbf85b3",
-    "event": "kv.set",
-    "summary": "smoke-test/test-key created",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "created": true,
-      "summary": "smoke-test/test-key created"
-    },
-    "ts": "2026-02-02T13:10:57.864Z"
-  },
-  {
-    "id": "0de75e7c-bf22-4aad-aaa1-bc85f6f2d1f5",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-02T13:10:57.869Z"
-  },
-  {
-    "id": "ea3d4293-61ea-4421-9434-8b51b475d613",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "b1114173",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-02T13:10:57.877Z"
-  },
-  {
-    "id": "2f2d1cf6-06ff-450a-bffe-16bf608beefb",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "b1114173"
-    },
-    "ts": "2026-02-02T13:10:57.878Z"
-  },
-  {
-    "id": "3d9ccf11-7e60-4126-8f0b-6abba004492f",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-02T13:10:57.884Z"
-  },
-  {
-    "id": "719bd649-5f5f-4247-b39d-016484c01037",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "581",
-      "mode": "B",
-      "duration": "4m43s",
-      "build": "3 commit(s)"
-    },
-    "ts": "2026-02-02T13:10:58.074Z"
-  },
-  {
-    "id": "8f08a3cd-6ce1-4e9e-862f-9992ffb59c6f",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-02T13:11:06.264Z"
-  },
-  {
     "id": "1e6fc4a7-2366-4abb-a395-c4682afe02e5",
     "event": "directory.probed",
     "summary": "Probed 5 agents, 1 online",
@@ -2161,5 +1991,205 @@
       "to": "down"
     },
     "ts": "2026-02-02T14:08:44.956Z"
+  },
+  {
+    "id": "ebbb4241-bad4-4e78-b82e-6a7a5cefe04e",
+    "event": "server.start",
+    "summary": "API v1.95.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-02T14:11:40.779Z"
+  },
+  {
+    "id": "c2a1706b-d694-46cc-8ec5-4f9fd4c28e2e",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 22/22 passed in 2789ms",
+    "meta": {
+      "id": "862d1a52",
+      "passed": 22,
+      "failed": 0
+    },
+    "ts": "2026-02-02T14:12:13.566Z"
+  },
+  {
+    "id": "fbe74ee0-cd71-4b6a-ae9b-c4060a184077",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "248e5646",
+      "name": "backup_exfil",
+      "url": "http://127.0.0.1:3847/backup",
+      "from": "down",
+      "to": "degraded",
+      "agent": "deadman_exploit"
+    },
+    "ts": "2026-02-02T14:12:20.802Z"
+  },
+  {
+    "id": "4b784407-acd2-4ba3-9242-9661118b191e",
+    "event": "monitor.status_changed",
+    "summary": "backup_exfil down → degraded",
+    "meta": {
+      "id": "248e5646",
+      "url": "http://127.0.0.1:3847/backup",
+      "from": "down",
+      "to": "degraded"
+    },
+    "ts": "2026-02-02T14:12:20.804Z"
+  },
+  {
+    "id": "45963650-4ae7-4e13-b2b8-019c1ec6f960",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "f033c73c",
+      "name": "admin_probe",
+      "url": "http://127.0.0.1:3847/admin",
+      "from": "down",
+      "to": "degraded",
+      "agent": "deadman_exploit"
+    },
+    "ts": "2026-02-02T14:12:20.807Z"
+  },
+  {
+    "id": "71b19026-4555-4862-9529-649439773765",
+    "event": "monitor.status_changed",
+    "summary": "admin_probe down → degraded",
+    "meta": {
+      "id": "f033c73c",
+      "url": "http://127.0.0.1:3847/admin",
+      "from": "down",
+      "to": "degraded"
+    },
+    "ts": "2026-02-02T14:12:20.808Z"
+  },
+  {
+    "id": "93387010-ebc6-45c5-b53c-1602e8ab4c09",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "37a3cd78",
+      "name": "config_probe",
+      "url": "http://127.0.0.1:3847/config",
+      "from": "down",
+      "to": "degraded",
+      "agent": "deadman_exploit"
+    },
+    "ts": "2026-02-02T14:12:20.814Z"
+  },
+  {
+    "id": "b0657013-f364-495c-84b3-0fbc1cf9e380",
+    "event": "monitor.status_changed",
+    "summary": "config_probe down → degraded",
+    "meta": {
+      "id": "37a3cd78",
+      "url": "http://127.0.0.1:3847/config",
+      "from": "down",
+      "to": "degraded"
+    },
+    "ts": "2026-02-02T14:12:20.815Z"
+  },
+  {
+    "id": "664c417e-7f8d-40c1-98d6-e0bfd628b74b",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "ac7da708",
+      "name": "keys_probe",
+      "url": "http://127.0.0.1:3847/keys",
+      "from": "down",
+      "to": "degraded",
+      "agent": "deadman_exploit"
+    },
+    "ts": "2026-02-02T14:12:20.818Z"
+  },
+  {
+    "id": "1127ca6a-8037-4511-898e-73ba700e02ac",
+    "event": "monitor.status_changed",
+    "summary": "keys_probe down → degraded",
+    "meta": {
+      "id": "ac7da708",
+      "url": "http://127.0.0.1:3847/keys",
+      "from": "down",
+      "to": "degraded"
+    },
+    "ts": "2026-02-02T14:12:20.819Z"
+  },
+  {
+    "id": "fba3cd3b-e1b1-4ea6-8e32-a9757c86bc92",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "e3114d05",
+      "name": "backup_ssrf",
+      "url": "http://127.0.0.1:3847/backups/2026-02-02",
+      "from": "down",
+      "to": "degraded",
+      "agent": "backup_probe"
+    },
+    "ts": "2026-02-02T14:12:20.821Z"
+  },
+  {
+    "id": "397cb98c-2926-4ba2-84e5-293c8abb7ffe",
+    "event": "monitor.status_changed",
+    "summary": "backup_ssrf down → degraded",
+    "meta": {
+      "id": "e3114d05",
+      "url": "http://127.0.0.1:3847/backups/2026-02-02",
+      "from": "down",
+      "to": "degraded"
+    },
+    "ts": "2026-02-02T14:12:20.823Z"
+  },
+  {
+    "id": "8bc4de25-1a5b-4e05-b484-1dff11228592",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "4aae88a7",
+      "name": "restore_ssrf",
+      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
+      "from": "down",
+      "to": "degraded",
+      "agent": "db_probe"
+    },
+    "ts": "2026-02-02T14:12:20.825Z"
+  },
+  {
+    "id": "a120484d-a8ac-4e59-a054-b42fed875630",
+    "event": "monitor.status_changed",
+    "summary": "restore_ssrf down → degraded",
+    "meta": {
+      "id": "4aae88a7",
+      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
+      "from": "down",
+      "to": "degraded"
+    },
+    "ts": "2026-02-02T14:12:20.826Z"
+  },
+  {
+    "id": "a3d57d4d-469d-4692-9318-517eb86a1d27",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "9438b27a",
+      "name": "Self Health",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "down",
+      "to": "up",
+      "agent": "moltbook"
+    },
+    "ts": "2026-02-02T14:12:20.852Z"
+  },
+  {
+    "id": "bf859402-7d24-49ee-a493-95997dc81a8c",
+    "event": "monitor.status_changed",
+    "summary": "Self Health down → up",
+    "meta": {
+      "id": "9438b27a",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "down",
+      "to": "up"
+    },
+    "ts": "2026-02-02T14:12:20.853Z"
   }
 ]

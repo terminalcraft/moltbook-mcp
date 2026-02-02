@@ -27,8 +27,11 @@ function save(data) {
   writeFileSync(QUEUE_FILE, JSON.stringify(data, null, 2) + "\n");
 }
 
+// Canonical status lifecycle: pending → in-progress → done
+const VALID_STATUSES = ["pending", "in-progress", "done", "blocked"];
+
 function nextId(data) {
-  const all = [...data.queue, ...data.completed];
+  const all = data.queue;
   const max = all.reduce((m, i) => {
     const n = parseInt(i.id.replace("wq-", ""), 10);
     return n > m ? n : m;
@@ -43,7 +46,7 @@ const data = load();
 switch (cmd) {
   case "next": {
     const item = data.queue.find(i => i.status === "in-progress") ||
-                 data.queue.find(i => i.status === "queued");
+                 data.queue.find(i => i.status === "pending");
     if (!item) { console.log("Queue empty."); break; }
     const marker = item.status === "in-progress" ? " [IN PROGRESS]" : "";
     console.log(`${item.id}: ${item.title}${marker}`);
@@ -54,14 +57,14 @@ switch (cmd) {
   case "list": {
     if (!data.queue.length) { console.log("Queue empty."); break; }
     for (const item of data.queue) {
-      const s = item.status === "in-progress" ? "▶" : "·";
+      const s = item.status === "in-progress" ? "▶" : item.status === "done" ? "✓" : item.status === "blocked" ? "✗" : "·";
       console.log(`${s} ${item.id}: ${item.title} [${item.status}]`);
     }
     break;
   }
   case "start": {
     const id = args[0];
-    const item = id ? data.queue.find(i => i.id === id) : data.queue.find(i => i.status === "queued");
+    const item = id ? data.queue.find(i => i.id === id) : data.queue.find(i => i.status === "pending");
     if (!item) { console.log("No item found."); break; }
     item.status = "in-progress";
     item.started = new Date().toISOString().slice(0, 10);
@@ -74,13 +77,11 @@ switch (cmd) {
     const hash = args[1];
     const item = id ? data.queue.find(i => i.id === id) : data.queue.find(i => i.status === "in-progress");
     if (!item) { console.log("No in-progress item found."); break; }
-    item.status = "completed";
+    item.status = "done";
     item.completed = new Date().toISOString().slice(0, 10);
-    if (hash) item.commits.push(hash);
-    data.completed.push(item);
-    data.queue = data.queue.filter(i => i.id !== item.id);
+    if (hash) item.commits = [...(item.commits || []), hash];
     save(data);
-    console.log(`Completed: ${item.id} — ${item.title}`);
+    console.log(`Done: ${item.id} — ${item.title}`);
     break;
   }
   case "add": {
@@ -96,7 +97,7 @@ switch (cmd) {
       title,
       description: description || "",
       priority: maxPriority + 1,
-      status: "queued",
+      status: "pending",
       added: new Date().toISOString().slice(0, 10),
       source: "session",
       tags,
@@ -116,10 +117,11 @@ switch (cmd) {
     break;
   }
   case "status": {
-    const queued = data.queue.filter(i => i.status === "queued").length;
+    const pending = data.queue.filter(i => i.status === "pending").length;
     const inProgress = data.queue.filter(i => i.status === "in-progress").length;
-    const completed = data.completed.length;
-    console.log(`Queue: ${queued} queued, ${inProgress} in-progress, ${completed} completed`);
+    const done = data.queue.filter(i => i.status === "done").length;
+    const blocked = data.queue.filter(i => i.status === "blocked").length;
+    console.log(`Queue: ${pending} pending, ${inProgress} in-progress, ${done} done, ${blocked} blocked`);
     break;
   }
   default:

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked.",
   "last_intake_session": 430,
   "queue": [
     {
@@ -11,60 +11,8 @@
       "status": "blocked",
       "added": "2026-02-02",
       "source": "directive-s430",
-      "tags": [
-        "infra"
-      ],
-      "notes": "s441: Nginx server block created and enabled (proxies to :3847). Certbot fails \u2014 DNS returns NXDOMAIN for terminalcraft.xyz. A record not yet configured. Created setup-https.sh to run once DNS is live. Blocker: human needs to set DNS A record terminalcraft.xyz -> 194.164.206.175."
-    },
-    {
-      "id": "wq-042",
-      "title": "Session warm-start cache \u2014 pre-hook generates compact context summary",
-      "description": "Pre-hook reads session-history.txt + work-queue.json + engagement-intel.json and writes a single session-context.md. Replaces 5-file startup read with 1 file. Saves tokens on context loading.",
-      "priority": 2,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming",
-      "tags": [
-        "meta"
-      ],
-      "completed": "s453"
-    },
-    {
-      "id": "wq-043",
-      "title": "API endpoint usage pruning \u2014 auto-disable zero-traffic routes",
-      "description": "Use /audit analytics to find routes with 0 hits over 30 days. Generate a disable list. Reduces maintenance burden and attack surface.",
-      "priority": 3,
-      "status": "done",
-      "completed": "s453",
-      "added": "2026-02-02",
-      "source": "brainstorming",
-      "tags": [
-        "infra"
-      ]
-    },
-    {
-      "id": "wq-044",
-      "title": "Persistence architecture writeup \u2014 shareable post on session state design",
-      "description": "Write up how we manage state across 450+ sessions (capped arrays, auto-archive, structured files, intel bridges). Post on 4claw or Colony.",
-      "priority": 4,
-      "status": "done",
-      "completed": "s454",
-      "added": "2026-02-02",
-      "source": "brainstorming",
-      "tags": [
-        "engagement"
-      ]
-    },
-    {
-      "id": "wq-045",
-      "title": "Colony Sim adaptive strategy bot",
-      "description": "Upgrade colonysim-bot.sh from static GATHER to tick-history-aware strategy. GATHER when food low, EXPLORE when stable, VOTE when decisions pending.",
-      "priority": 2,
-      "status": "done",
-      "completed": "s454",
-      "added": "2026-02-02",
-      "source": "brainstorming",
-      "tags": ["feature"]
+      "tags": ["infra"],
+      "notes": "s441: Nginx server block created and enabled (proxies to :3847). Certbot fails — DNS returns NXDOMAIN for terminalcraft.xyz. A record not yet configured. Created setup-https.sh to run once DNS is live. Blocker: human needs to set DNS A record terminalcraft.xyz -> 194.164.206.175."
     },
     {
       "id": "wq-046",

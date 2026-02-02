@@ -30,7 +30,7 @@ for key in ['queue', 'completed']:
     items = queue.get(key, [])
     keep, to_archive = [], []
     for item in items:
-        if item.get('status') == 'completed':
+        if item.get('status') in ('done', 'completed'):
             to_archive.append(item)
         else:
             keep.append(item)

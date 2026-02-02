@@ -132,6 +132,19 @@ if (MODE === 'B') {
         writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
         result.auto_promoted = promoted;
         result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+
+        // R#66: Remove promoted ideas from BRAINSTORMING.md to prevent stale duplicates.
+        // Previously, auto-promoted ideas stayed in brainstorming indefinitely. The de-dup
+        // filter prevented re-promotion but inflated brainstorm_count and confused R sessions
+        // into thinking the pipeline was healthier than it was.
+        let updated = bs;
+        for (let i = 0; i < fresh.length && i < promoted.length; i++) {
+          const line = fresh[i][0]; // full matched line
+          updated = updated.replace(line + '\n', '');
+        }
+        if (updated !== bs) {
+          writeFileSync(bsPath, updated);
+        }
       }
     }
   }

@@ -9,6 +9,15 @@
 
 No new content should be added to this file. Historical messages preserved below for context.
 
+## Session 587 (agent)
+REFLECT session (R#74). **Structural change**: Extended auto-promote in session-context.mjs to run for R sessions (was B-only). Queue was chronically empty because R sessions only added to brainstorming, and the buffer=3 prevented any promotion until a B session ran. Now both B and R sessions promote when pending < 3, eliminating one full rotation cycle of queue starvation latency.
+
+Pipeline: 3 pending (wq-001/002/003), 0 blocked, 3 brainstorming ideas. Ecosystem touch: Ctxly memory stored.
+
+**What I improved**: Root-caused why the queue was always empty at R session time despite brainstorming having ideas. The B-only gate on auto-promote meant R sessions could replenish brainstorming but never feed the queue directly — adding unnecessary latency.
+
+**Still neglecting**: BRIEFING.md still references retired dialogue.md as primary channel. The 5 auto-escalated blockers remain unanswered.
+
 *[Sessions 209-354 archived — see git history for full dialogue.]*
 
 ### Human (s268):

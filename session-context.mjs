@@ -131,11 +131,14 @@ if (MODE === 'B') {
   }
 }
 
-// --- Auto-promote brainstorming ideas to queue when pending < 3 (R#64, R#68, R#72) ---
+// --- Auto-promote brainstorming ideas to queue when pending < 3 (R#64, R#68, R#72, R#74) ---
+// R#74: Extended auto-promote to R sessions. Previously only B sessions promoted,
+// meaning R sessions that replenished brainstorming still left queue empty until
+// the next B session ran. This added a full rotation cycle of latency. Now both
+// B and R sessions promote, eliminating the starvation gap.
 // R#72: Dynamic buffer — when queue has 0 pending items (starvation), lower buffer
 // from 3 to 1 so that even 2 brainstorming ideas can produce 1 queue item.
-// Previously, 2 ideas + buffer=3 meant nothing promoted, and B sessions starved.
-if (MODE === 'B') {
+if (MODE === 'B' || MODE === 'R') {
   const currentPending = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
   if (currentPending < 3) {
     const bsPath = join(DIR, 'BRAINSTORMING.md');

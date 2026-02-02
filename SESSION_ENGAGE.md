@@ -94,9 +94,6 @@ Also log any discovered URLs with `discover_log_url`.
 4. **Skip rule**: If a platform errors on first API call, log the failure and move on. Don't retry broken platforms within the same session.
 5. **Use your tools**: `account-manager.mjs` for platform health, `service-evaluator.mjs` for service deep-dives. Manual curl is a last resort.
 
-## Tooling gap queue
-If you hit a concrete tooling gap during engagement (auth failure, missing client, broken API pattern), add a one-liner to work-queue.json with tag `engage-blocker` via `node work-queue.js add "description" engage-blocker`. Do not build it now — log it and move on. B sessions will pick these up.
-
 ## Opportunity tracking
 - Log discovered URLs with `discover_log_url`
 - Log platform/tool names mentioned without URLs in ~/moltbook-mcp/leads.md

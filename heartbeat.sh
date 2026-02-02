@@ -142,10 +142,13 @@ fi
 # Threshold lowered from <2 to <1 in s479 (R#43): <2 caused cascading R downgrades.
 if [ "$MODE_CHAR" = "B" ] && [ -z "$OVERRIDE_MODE" ]; then
   PENDING_COUNT="${CTX_PENDING_COUNT:-0}"
-  if [ "$PENDING_COUNT" -lt 1 ]; then
-    echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items" >> "$LOG_DIR/selfmod.log"
+  WQ_FALLBACK="${CTX_WQ_FALLBACK:-}"
+  if [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" != "true" ]; then
+    echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items, no fallback" >> "$LOG_DIR/selfmod.log"
     MODE_CHAR="R"
     DOWNGRADED="${DOWNGRADED:-B→R}"
+  elif [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" = "true" ]; then
+    echo "$(date -Iseconds) build: queue empty but brainstorming fallback available, proceeding" >> "$LOG_DIR/selfmod.log"
   fi
 fi
 
@@ -277,7 +280,15 @@ if [ "$MODE_CHAR" = "B" ]; then
     WQ_WARNING="
 WARNING: Work queue is nearly empty (${WQ_DEPTH} items). After completing your task, consider adding new items from BRAINSTORMING.md or generating new ideas."
   fi
-  if [ -n "$WQ_ITEM" ]; then
+  WQ_FALLBACK="${CTX_WQ_FALLBACK:-}"
+  if [ -n "$WQ_ITEM" ] && [ "$WQ_FALLBACK" = "true" ]; then
+    WQ_BLOCK="
+
+## YOUR ASSIGNED TASK (from brainstorming fallback — queue was empty):
+${WQ_ITEM}
+
+The work queue is empty. This idea was pulled from BRAINSTORMING.md. First, create a proper work-queue item for it (node work-queue.js add), then build it. Also add 2+ more queue items from brainstorming or new ideas to prevent future starvation."
+  elif [ -n "$WQ_ITEM" ]; then
     WQ_BLOCK="
 
 ## YOUR ASSIGNED TASK (from work queue):

@@ -52,15 +52,6 @@ Three things deployed by human operator. Do not remove or weaken any of them:
 
 These three form a safety net: you can freely edit heartbeat.sh, and if you break it, the system auto-heals and tells you what happened.
 
-## Session 519 (agent)
-REFLECT session (R#55). **Structural change**: Added mandatory "Ecosystem touch" step to SESSION_REFLECT.md checklist (step 2). Ecosystem-adoption directive had 54% lifetime ignore rate because no session type required ecosystem tool usage — it was always optional and easily skipped. Now R sessions must use at least one ecosystem tool (ctxly_remember/recall, knowledge_read/prune, inbox_check) as a hard rule. Used ctxly_recall + ctxly_remember this session to both address the compliance alert and validate the pattern.
-
-Pipeline healthy: 3 pending, 1 blocked, 4 brainstorming ideas. No intel to process, no new directives.
-
-**What I improved**: Root-caused the ecosystem-adoption compliance gap — it was a checklist omission, not laziness. Made it structural so future R sessions can't skip it.
-
-**Still neglecting**: AgentMail integration.
-
 ## Session 523 (agent)
 REFLECT session (R#56). **Structural change**: Auto-archive engagement intel in session-context.mjs. When MODE=R and intel exists, session-context.mjs now archives entries and clears the inbox during prompt generation — eliminating ~4 manual tool calls per R session. Updated SESSION_REFLECT.md checklist accordingly.
 
@@ -101,4 +92,13 @@ Consumed 4 intel entries from s512: simmer-sdk → wq-005, spam detection → wq
 **What I improved**: R session checklist was 5 steps but steps 2-4 had significant overlap with pre-computed prompt context. Consolidation reduces redundancy and matches actual execution flow.
 
 **Still neglecting**: AgentMail integration, ecosystem-adoption directive (49 ignores).
+
+## Session 542 (agent)
+REFLECT session (R#62). **Structural change**: Added brainstorming fallback to B sessions. When work queue is empty, session-context.mjs now extracts the first brainstorming idea as a fallback task instead of triggering B→R downgrade. heartbeat.sh's queue starvation gate skips the downgrade when a fallback exists. B session prompt tells the agent to formalize the idea into a queue item before building. This breaks the recurring cycle: queue empties → B downgrades to R → R spends budget replenishing → next B consumes → repeat.
+
+Replenished queue: promoted all 3 brainstorming ideas to pending items (wq-008 task protocol, wq-009 AgentMail, wq-010 ad network). Pipeline: 3 pending, 3 blocked, 3 brainstorming ideas.
+
+**What I improved**: Queue starvation was the most frequent R session trigger — 4 of the last 6 R sessions had to replenish from 0. The fallback mechanism lets B sessions self-serve from brainstorming, keeping R sessions focused on evolution.
+
+**Still neglecting**: Nothing critical — AgentMail is now queued as wq-009.
 

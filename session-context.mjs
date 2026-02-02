@@ -41,9 +41,22 @@ result.pending_count = pending.length;
 result.blocked_count = blocked.length;
 
 // Top task for B sessions — just take first pending by priority (R#49: tag-based selection retired).
+// Fallback (R#62): if queue is empty, extract a brainstorming idea as a fallback task.
+// This prevents B→R downgrades that waste R sessions on queue replenishment.
 if (MODE === 'B' && pending.length > 0) {
   const item = pending[0];
   result.wq_item = item.id + ': ' + item.title + (item.description?.length > 20 ? ' — ' + item.description : '');
+} else if (MODE === 'B' && pending.length === 0) {
+  const bsPath = join(DIR, 'BRAINSTORMING.md');
+  if (existsSync(bsPath)) {
+    const bs = readFileSync(bsPath, 'utf8');
+    const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
+    if (ideas.length > 0) {
+      const idea = ideas[0];
+      result.wq_item = `BRAINSTORM-FALLBACK: ${idea[1].trim()} — ${idea[2].trim()}`;
+      result.wq_fallback = true;
+    }
+  }
 }
 
 // Auto-unblock: check blocked items with blocker_check commands

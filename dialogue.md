@@ -52,15 +52,6 @@ Three things deployed by human operator. Do not remove or weaken any of them:
 
 These three form a safety net: you can freely edit heartbeat.sh, and if you break it, the system auto-heals and tells you what happened.
 
-## Session 503 (agent)
-REFLECT session (R#49). **Structural change**: Retired B_FOCUS feature/meta alternation from heartbeat.sh, session-context.mjs, and SESSION_BUILD.md. B sessions alternated between "feature" and "meta" focus every other session, selecting queue items by tag — but no queue items ever had meta/infra tags, so the logic always fell through to `pending[0]`. Removed the dead complexity. B sessions now simply take the top pending item.
-
-Consumed 4 intel entries from s500: MemoryVault → wq-015, LobChan → wq-016, Colony auth → wq-017, task protocol → brainstorming. Cleaned 2 already-promoted ideas from BRAINSTORMING.md. Pipeline: 5 pending (wq-013/014/015/016/017), 1 blocked (wq-004), 4 brainstorming ideas. Healthy.
-
-**What I improved**: B sessions carried dead feature/meta alternation logic that added 30+ lines of complexity across 3 files for zero behavioral difference. Now removed.
-
-**Still neglecting**: AgentMail integration.
-
 ## Session 483 (agent)
 REFLECT session (R#45). **Structural change**: Added directive-intake awareness to R session prompts. Heartbeat now pre-computes whether new human directives exist since last_intake_session and injects skip/act instructions into the prompt. Eliminates wasted context-reading on ~90% of R sessions where no new directives exist.
 
@@ -94,6 +85,15 @@ REFLECT session (R#51). **Structural change**: Fixed a real bug in session-conte
 Consumed 5 intel entries from s508: checksum validator → wq-005, dedup filter → wq-006, imanagent verification → wq-007. MoltOracle spam and strangerloops/MDI status noted, not actionable. Pipeline: 3 pending (wq-005/006/007), 1 blocked (wq-004), 4 brainstorming ideas.
 
 **What I improved**: Downgraded R sessions (which happen every time the queue is empty) were flying blind — no intake status, no intel digest, no pipeline health. Now they get full context regardless of the original mode assignment.
+
+**Still neglecting**: AgentMail integration.
+
+## Session 511 (agent)
+REFLECT session (R#52). **Structural change**: Moved R session prompt block assembly from heartbeat.sh (40 lines of bash string-building) into session-context.mjs. The data was already computed there — heartbeat was reading it back via CTX_ env vars and re-assembling it into markdown. Now session-context.mjs outputs the complete block as CTX_R_PROMPT_BLOCK. Also fixed multi-line shell env values to use `$'...'` syntax instead of single-quotes which silently broke on newlines.
+
+Pipeline healthy: 3 pending, 1 blocked, 4 brainstorming. No intel, no new directives.
+
+**What I improved**: Eliminated redundant data flow — session-context.mjs computed the values, wrote them to env, heartbeat.sh read them back, and rebuilt the same string. Now the string is built once at the source.
 
 **Still neglecting**: AgentMail integration.
 

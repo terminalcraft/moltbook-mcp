@@ -12,6 +12,8 @@
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import crypto from "crypto";
+import "./node18-polyfill.mjs";
+import { schnorr, secp256k1 } from "@noble/curves/secp256k1.js";
 
 const ED25519_SPKI_PREFIX = "302a300506032b6570032100"; // DER prefix for Ed25519 public keys
 const ED25519_PKCS8_PREFIX = "302e020100300506032b657004220420"; // DER prefix for Ed25519 private keys
@@ -197,6 +199,101 @@ function proofText(keysFile, platform) {
   console.log(lines.join("\n"));
 }
 
+// --- Nostr ---
+
+function bech32Encode(prefix, data) {
+  const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+  // Convert 8-bit bytes to 5-bit groups
+  const values = [];
+  let acc = 0, bits = 0;
+  for (const b of data) {
+    acc = (acc << 8) | b;
+    bits += 8;
+    while (bits >= 5) { bits -= 5; values.push((acc >> bits) & 31); }
+  }
+  if (bits > 0) values.push((acc << (5 - bits)) & 31);
+  // bech32 checksum (BIP-173)
+  function polymod(v) {
+    const GEN = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
+    let chk = 1;
+    for (const val of v) {
+      const b = chk >> 25;
+      chk = ((chk & 0x1ffffff) << 5) ^ val;
+      for (let i = 0; i < 5; i++) if ((b >> i) & 1) chk ^= GEN[i];
+    }
+    return chk;
+  }
+  function hrpExpand(hrp) {
+    const r = [];
+    for (const c of hrp) r.push(c.charCodeAt(0) >> 5);
+    r.push(0);
+    for (const c of hrp) r.push(c.charCodeAt(0) & 31);
+    return r;
+  }
+  const expanded = [...hrpExpand(prefix), ...values];
+  const mod = polymod([...expanded, 0, 0, 0, 0, 0, 0]) ^ 1;
+  const checksum = [];
+  for (let i = 0; i < 6; i++) checksum.push((mod >> (5 * (5 - i))) & 31);
+  return prefix + "1" + [...values, ...checksum].map(v => CHARSET[v]).join("");
+}
+
+function nostrKeygen(outputFile) {
+  const privKey = crypto.randomBytes(32);
+  const pubKey = schnorr.getPublicKey(privKey); // x-only (32 bytes)
+  const privHex = Buffer.from(privKey).toString("hex");
+  const pubHex = Buffer.from(pubKey).toString("hex");
+  const npub = bech32Encode("npub", pubKey);
+  const nsec = bech32Encode("nsec", privKey);
+
+  const result = {
+    algorithm: "secp256k1-schnorr",
+    publicKey: pubHex,
+    privateKey: privHex,
+    npub,
+    nsec,
+    created: new Date().toISOString().split("T")[0],
+    note: "Nostr keypair. npub is your public identity. nsec is secret — never share it.",
+  };
+
+  const file = outputFile || "nostr-keys.json";
+  writeFileSync(file, JSON.stringify(result, null, 2) + "\n");
+  console.log(`Nostr keypair generated: ${file}`);
+  console.log(`npub: ${npub}`);
+  console.log(`Public key (hex): ${pubHex}`);
+  return result;
+}
+
+async function nostrSign(keysFile, content) {
+  const keys = JSON.parse(readFileSync(keysFile, "utf8"));
+  if (!keys.privateKey || keys.algorithm !== "secp256k1-schnorr") {
+    console.error("Not a Nostr key file (expected algorithm: secp256k1-schnorr)");
+    process.exit(1);
+  }
+
+  // NIP-01 event structure (kind 1 = text note)
+  const created_at = Math.floor(Date.now() / 1000);
+  const event = {
+    pubkey: keys.publicKey,
+    created_at,
+    kind: 1,
+    tags: [],
+    content,
+  };
+
+  // Event ID = sha256 of serialized event
+  const serialized = JSON.stringify([0, event.pubkey, event.created_at, event.kind, event.tags, event.content]);
+  const id = crypto.createHash("sha256").update(serialized).digest("hex");
+  event.id = id;
+
+  // Schnorr sign the event ID
+  const privBytes = Uint8Array.from(Buffer.from(keys.privateKey, "hex"));
+  const sig = schnorr.sign(Uint8Array.from(Buffer.from(id, "hex")), privBytes);
+  event.sig = Buffer.from(sig).toString("hex");
+
+  console.log(JSON.stringify(event, null, 2));
+  return event;
+}
+
 // --- CLI ---
 
 const args = process.argv.slice(2);
@@ -245,6 +342,18 @@ switch (cmd) {
     proofText(args[1], getFlag("--platform"));
     break;
 
+  case "nostr-keygen":
+    nostrKeygen(args[1]);
+    break;
+
+  case "nostr-sign":
+    if (!args[1] || !args[2]) {
+      console.error("Usage: identity-tool.mjs nostr-sign <nostr-keys-file> <content>");
+      process.exit(1);
+    }
+    nostrSign(args[1], args.slice(2).join(" "));
+    break;
+
   default:
     console.log(`identity-tool.mjs — Cross-platform agent identity verification
 
@@ -254,7 +363,10 @@ Commands:
   verify <manifest-url>                   Verify an agent's identity proofs
   manifest <keys> [proof-files...]        Generate agent.json identity block
   proof <keys> [--platform P]             Human-readable proof text
+  nostr-keygen [output-file]              Generate Nostr secp256k1 keypair (npub/nsec)
+  nostr-sign <keys> <content>             Sign a NIP-01 text note event
 
 Protocol: agent-identity-v1 (Ed25519 signatures over JSON claims)
+Nostr: NIP-01 events with schnorr signatures (secp256k1)
 Spec: https://github.com/terminalcraft/moltbook-mcp`);
 }

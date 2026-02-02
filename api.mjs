@@ -4759,6 +4759,52 @@ app.get("/directives", (req, res) => {
   logActivity("directives.viewed", `Directive health checked: ${overall}% overall`);
 });
 
+// --- Queue velocity dashboard (wq-006) ---
+app.get("/status/queue-velocity", (req, res) => {
+  try {
+    const queueData = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf-8"));
+    let archiveData = { archived: [] };
+    try { archiveData = JSON.parse(readFileSync(join(BASE, "work-queue-archive.json"), "utf-8")); } catch {}
+
+    const allItems = [...(queueData.queue || []), ...(archiveData.archived || [])];
+    const completed = allItems.filter(i => i.status === "done" || i.status === "completed");
+    const pending = allItems.filter(i => i.status === "pending");
+    const inProgress = allItems.filter(i => i.status === "in-progress");
+    const retired = allItems.filter(i => i.status === "retired");
+
+    // Parse session history for per-session queue activity
+    const histFile = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    let sessions = [];
+    try {
+      const lines = readFileSync(histFile, "utf-8").trim().split("\n").filter(Boolean);
+      for (const line of lines) {
+        const sm = line.match(/s=(\d+)/);
+        const mm = line.match(/mode=(\w)/);
+        const wqMatches = line.match(/wq-\d+/g);
+        if (sm) sessions.push({ session: +sm[1], mode: mm?.[1] || "?", wq_refs: wqMatches?.length || 0 });
+      }
+    } catch {}
+
+    // 10-session windows
+    const windowSize = 10;
+    const windows = [];
+    if (sessions.length >= windowSize) {
+      for (let i = sessions.length - windowSize; i >= 0 && windows.length < 5; i -= windowSize) {
+        const window = sessions.slice(i, i + windowSize);
+        const wqTotal = window.reduce((s, x) => s + x.wq_refs, 0);
+        const buildSessions = window.filter(x => x.mode === "B").length;
+        windows.unshift({ start: window[0].session, end: window[window.length - 1].session, wq_touches: wqTotal, build_sessions: buildSessions });
+      }
+    }
+
+    res.json({
+      totals: { completed: completed.length, pending: pending.length, in_progress: inProgress.length, retired: retired.length, total: allItems.length },
+      completion_rate: allItems.length > 0 ? +((completed.length / allItems.length) * 100).toFixed(1) : null,
+      windows,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // --- Queue compliance tracking ---
 app.get("/queue/compliance", (req, res) => {
   try {

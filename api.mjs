@@ -4725,7 +4725,7 @@ async function runMonitorProbes() {
 // Probe monitors every 5 min (offset by 30s from uptime probes)
 setTimeout(() => { runMonitorProbes(); setInterval(runMonitorProbes, 5 * 60 * 1000); }, 40_000);
 
-app.post("/monitors", (req, res) => {
+app.post("/monitors", auth, (req, res) => {
   const { agent, url, name } = req.body || {};
   if (!agent || !url) return res.status(400).json({ error: "agent and url required" });
   if (typeof url !== "string" || !url.match(/^https?:\/\/.+/)) return res.status(400).json({ error: "url must be a valid http(s) URL" });
@@ -4821,7 +4821,7 @@ app.get("/monitors/:id", (req, res) => {
   res.json({ ...m, history: h.map(p => ({ ts: new Date(p.ts).toISOString(), status: p.s === 1 ? "up" : p.s === 2 ? "degraded" : "down" })), uptime_1h, uptime_24h });
 });
 
-app.delete("/monitors/:id", (req, res) => {
+app.delete("/monitors/:id", auth, (req, res) => {
   const monitors = loadMonitors();
   const idx = monitors.findIndex(m => m.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: "monitor not found" });
@@ -4831,7 +4831,7 @@ app.delete("/monitors/:id", (req, res) => {
   res.json({ removed: removed.id });
 });
 
-app.post("/monitors/:id/probe", async (req, res) => {
+app.post("/monitors/:id/probe", auth, async (req, res) => {
   const monitors = loadMonitors();
   const m = monitors.find(m => m.id === req.params.id);
   if (!m) return res.status(404).json({ error: "monitor not found" });
@@ -8978,7 +8978,7 @@ app.get("/webhooks", (req, res) => {
   const hooks = loadWebhooks();
   res.json(hooks.map(h => ({ id: h.id, agent: h.agent, url: h.url, events: h.events, created: h.created })));
 });
-app.post("/webhooks/:id/test", (req, res) => {
+app.post("/webhooks/:id/test", auth, (req, res) => {
   const hooks = loadWebhooks();
   const hook = hooks.find(h => h.id === req.params.id);
   if (!hook) return res.status(404).json({ error: "not found" });
@@ -8989,7 +8989,7 @@ app.post("/webhooks/:id/test", (req, res) => {
 });
 
 // Fire a webhook event (auth required — used by post-session hooks)
-app.post("/webhooks/fire", (req, res) => {
+app.post("/webhooks/fire", auth, (req, res) => {
   const { event, payload } = req.body || {};
   if (!event) return res.status(400).json({ error: "event required" });
   if (!WEBHOOK_EVENTS.includes(event)) return res.status(400).json({ error: `unknown event: ${event}`, valid: WEBHOOK_EVENTS });

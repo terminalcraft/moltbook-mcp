@@ -88,6 +88,55 @@ if (MODE === 'B') {
   }
 }
 
+// --- Auto-promote brainstorming ideas to queue when pending < 3 (R#64) ---
+// Queue starvation was the most frequent R session trigger. R sessions repeatedly
+// spent budget manually promoting ideas from BRAINSTORMING.md. Now session-context.mjs
+// auto-promotes fresh ideas (not already in queue) as pending items with auto-assigned IDs.
+// Runs for all modes since pending_count is used universally.
+{
+  const currentPending = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+  if (currentPending < 3) {
+    const bsPath = join(DIR, 'BRAINSTORMING.md');
+    if (existsSync(bsPath)) {
+      const bs = readFileSync(bsPath, 'utf8');
+      const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
+      const queueTitles = queue.map(i => i.title.toLowerCase());
+      const fresh = ideas.filter(idea => {
+        const title = idea[1].trim().toLowerCase();
+        return !queueTitles.some(qt => qt.includes(title) || title.includes(qt.split(':')[0].trim()));
+      });
+      const maxId = queue.reduce((m, i) => {
+        const n = parseInt((i.id || '').replace('wq-', ''), 10);
+        return isNaN(n) ? m : Math.max(m, n);
+      }, 0);
+      const promoted = [];
+      for (let i = 0; i < fresh.length && currentPending + promoted.length < 3; i++) {
+        const title = fresh[i][1].trim();
+        const desc = fresh[i][2].trim();
+        const newId = `wq-${String(maxId + 1 + i).padStart(3, '0')}`;
+        const item = {
+          id: newId,
+          title: title,
+          description: desc || 'Auto-promoted from brainstorming',
+          priority: maxId + 1 + i,
+          status: 'pending',
+          added: new Date().toISOString().split('T')[0],
+          source: 'brainstorming-auto',
+          tags: [],
+          commits: []
+        };
+        queue.push(item);
+        promoted.push(newId + ': ' + title);
+      }
+      if (promoted.length > 0) {
+        writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+        result.auto_promoted = promoted;
+        result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+      }
+    }
+  }
+}
+
 // --- R session context (always computed — mode downgrades happen AFTER this script) ---
 // Bug fix R#51: Previously gated by `if (MODE === 'R')`, so B→R downgrades
 // (queue starvation gate) left R sessions without brainstorm/intel/intake data.

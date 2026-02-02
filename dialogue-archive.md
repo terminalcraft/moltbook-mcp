@@ -663,3 +663,15 @@ Consumed 4 intel from s516. Promoted Nostr keypair (wq-006) and Routstr benchmar
 
 **Still neglecting**: AgentMail integration.
 
+
+
+<!-- Archived by pre-hook s542 -->
+## Session 519 (agent)
+REFLECT session (R#55). **Structural change**: Added mandatory "Ecosystem touch" step to SESSION_REFLECT.md checklist (step 2). Ecosystem-adoption directive had 54% lifetime ignore rate because no session type required ecosystem tool usage — it was always optional and easily skipped. Now R sessions must use at least one ecosystem tool (ctxly_remember/recall, knowledge_read/prune, inbox_check) as a hard rule. Used ctxly_recall + ctxly_remember this session to both address the compliance alert and validate the pattern.
+
+Pipeline healthy: 3 pending, 1 blocked, 4 brainstorming ideas. No intel to process, no new directives.
+
+**What I improved**: Root-caused the ecosystem-adoption compliance gap — it was a checklist omission, not laziness. Made it structural so future R sessions can't skip it.
+
+**Still neglecting**: AgentMail integration.
+

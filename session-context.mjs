@@ -119,12 +119,16 @@ if (MODE === 'B') {
   }
 }
 
-// --- Auto-promote brainstorming ideas to queue when pending < 3 (R#64) ---
-// Queue starvation was the most frequent R session trigger. R sessions repeatedly
-// spent budget manually promoting ideas from BRAINSTORMING.md. Now session-context.mjs
-// auto-promotes fresh ideas (not already in queue) as pending items with auto-assigned IDs.
-// Runs for all modes since pending_count is used universally.
-{
+// --- Auto-promote brainstorming ideas to queue when pending < 3 (R#64, R#68) ---
+// Queue starvation was the most frequent R session trigger. session-context.mjs
+// auto-promotes fresh ideas (not already in queue) as pending items.
+// R#68: Only run for B sessions (the consumer). Previously ran for ALL modes,
+// which immediately depleted brainstorming after every R session — R adds ideas,
+// next E/B session auto-promotes them all, brainstorming drops to 0, next R
+// must replenish again. Now B sessions promote on-demand, and a minimum buffer
+// of 3 ideas is preserved in brainstorming so R sessions aren't constantly
+// refilling an empty pool. This breaks the deplete-replenish cycle.
+if (MODE === 'B') {
   const currentPending = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
   if (currentPending < 3) {
     const bsPath = join(DIR, 'BRAINSTORMING.md');
@@ -136,14 +140,17 @@ if (MODE === 'B') {
         const title = idea[1].trim().toLowerCase();
         return !queueTitles.some(qt => qt.includes(title) || title.includes(qt.split(':')[0].trim()));
       });
+      // R#68: Preserve a buffer of 3 ideas in brainstorming. Only promote excess.
+      const BS_BUFFER = 3;
+      const promotable = fresh.length > BS_BUFFER ? fresh.slice(0, fresh.length - BS_BUFFER) : [];
       const maxId = queue.reduce((m, i) => {
         const n = parseInt((i.id || '').replace('wq-', ''), 10);
         return isNaN(n) ? m : Math.max(m, n);
       }, 0);
       const promoted = [];
-      for (let i = 0; i < fresh.length && currentPending + promoted.length < 3; i++) {
-        const title = fresh[i][1].trim();
-        const desc = fresh[i][2].trim();
+      for (let i = 0; i < promotable.length && currentPending + promoted.length < 3; i++) {
+        const title = promotable[i][1].trim();
+        const desc = promotable[i][2].trim();
         const newId = `wq-${String(maxId + 1 + i).padStart(3, '0')}`;
         const item = {
           id: newId,
@@ -165,12 +172,9 @@ if (MODE === 'B') {
         result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
 
         // R#66: Remove promoted ideas from BRAINSTORMING.md to prevent stale duplicates.
-        // Previously, auto-promoted ideas stayed in brainstorming indefinitely. The de-dup
-        // filter prevented re-promotion but inflated brainstorm_count and confused R sessions
-        // into thinking the pipeline was healthier than it was.
         let updated = bs;
-        for (let i = 0; i < fresh.length && i < promoted.length; i++) {
-          const line = fresh[i][0]; // full matched line
+        for (let i = 0; i < promotable.length && i < promoted.length; i++) {
+          const line = promotable[i][0]; // full matched line
           updated = updated.replace(line + '\n', '');
         }
         if (updated !== bs) {

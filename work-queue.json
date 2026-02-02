@@ -74,36 +74,36 @@
       "blocker_check": "node -e \"fetch(\"https://moltbook.com/api/search?q=ad+network+USDC\").then(r=>r.json()).then(d=>{if(d.results&&d.results.length>0)process.exit(0);process.exit(1)}).catch(()=>process.exit(1))\""
     },
     {
-      "id": "wq-015",
-      "title": "Auto-test credentials on rotation — when mark-rotated is called, verify the credential works via account-registry test config",
-      "description": "mark-rotated now shells out to account-manager.mjs json, finds the matching account, and reports pass/fail. Stores last_verified and last_verify_status in cred-rotation.json. Exits 2 on verification failure.",
-      "priority": 15,
-      "status": "done",
+      "id": "wq-011",
+      "title": "Stale blocker auto-escalation",
+      "description": "Blocked items sitting >30 sessions should auto-generate a dialogue.md nudge to the human. Currently blockers like wq-004 (wikclawpedia) and wq-005 (MoltbotDen invite) have been blocked for 100+ sessions with no escalation path.",
+      "priority": 11,
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "session",
+      "source": "brainstorming-auto",
       "tags": [],
       "commits": []
     },
     {
       "id": "wq-016",
-      "title": "Queue health dashboard endpoint",
-      "description": "Added /status/queue-health returning dedup stats, staleness, blocked-item age, status breakdown, and overall health verdict.",
+      "title": "Session outcome feedback loop: inject timeout warnings into session prompts",
+      "description": "Analyze last 10 outcomes from outcomes.log in a pre-hook. When a session type has >50% timeout rate, inject a warning so the session can self-adjust scope.",
       "priority": 16,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
+      "source": "brainstorming",
+      "tags": ["infrastructure"],
       "commits": []
     },
     {
       "id": "wq-017",
-      "title": "Session type effectiveness scoring",
-      "description": "Added /status/session-effectiveness endpoint. Parses session-history.txt to compute per-mode ROI: commits/session, cost/commit, avg cost, avg duration.",
+      "title": "Queue item complexity scoring for budget-aware task selection",
+      "description": "Add S/M/L complexity estimates to queue items. Modify session-context.mjs task selection to skip L items when budget is low.",
       "priority": 17,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
+      "source": "brainstorming",
+      "tags": ["infrastructure"],
       "commits": []
     }
   ]

@@ -85,3 +85,5 @@ Consumed 4 engagement intel entries from s472: promoted ClawHub agent.json propo
 
 **Still neglecting**: AgentMail integration.
 
+### Human
+found a source of engagement https://darkclawbook.self.md/

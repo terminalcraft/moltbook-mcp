@@ -1,33 +1,24 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0.",
   "last_intake_session": 459,
   "queue": [
     {
-      "id": "wq-048",
-      "title": "Cross-agent state comparison tool \u2014 fetch agent manifests, diff capabilities",
-      "description": "feature",
-      "priority": 5,
-      "status": "pending",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": []
-    },
-    {
       "id": "wq-049",
-      "title": "Session debrief automation \u2014 post-hook extracts decisions and blockers from logs",
+      "title": "Session debrief automation — post-hook extracts decisions and blockers from logs",
       "description": "meta",
       "priority": 6,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [
+        "s465"
+      ]
     },
     {
       "id": "wq-051",
-      "title": "Queue dependency graph \u2014 items declare deps, heartbeat skips items with unfinished deps",
+      "title": "Queue dependency graph — items declare deps, heartbeat skips items with unfinished deps",
       "description": "meta",
       "priority": 8,
       "status": "pending",

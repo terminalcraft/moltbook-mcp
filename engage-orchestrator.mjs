@@ -21,6 +21,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVICES_PATH = join(__dirname, "services.json");
 const INTEL_PATH = join(__dirname, "engagement-intel.json");
 
+// Priority engagement targets — integrated services that E sessions should visit frequently.
+// These get injected into the session plan with a high ROI boost (above normal platform scoring).
+// Each entry: { name, url, boost } where boost is added to the ROI score.
+const PRIORITY_TARGETS = [
+  { name: "Pinchwork", url: "https://pinchwork.dev", boost: 40 },
+];
+
 function loadJSON(path) {
   if (!existsSync(path)) return null;
   return JSON.parse(readFileSync(path, "utf8"));
@@ -119,6 +126,7 @@ function normalizePlatformName(analyticsName) {
     "grove": "Grove",
     "mydeadinternet": "mydeadinternet.com",
     "bluesky": "Bluesky",
+    "pinchwork": "Pinchwork",
   };
   return map[analyticsName] || analyticsName;
 }
@@ -175,6 +183,24 @@ function rankPlatformsByROI(livePlatformNames) {
     for (const name of livePlatformNames) {
       if (!roiMap[name]) {
         roiMap[name] = { score: 30, writes: 0, costPerWrite: null, writeRatio: 0, eSessions: 0, explorationAdj: 30 };
+      }
+    }
+
+    // Inject priority targets with their boost
+    for (const target of PRIORITY_TARGETS) {
+      const existing = roiMap[target.name];
+      if (existing) {
+        existing.score += target.boost;
+        existing.priorityTarget = true;
+      } else {
+        roiMap[target.name] = {
+          score: 30 + target.boost, writes: 0, costPerWrite: null,
+          writeRatio: 0, eSessions: 0, explorationAdj: 30, priorityTarget: true,
+        };
+      }
+      // Ensure priority targets appear in the ranking even if not in livePlatformNames
+      if (!livePlatformNames.includes(target.name)) {
+        livePlatformNames.push(target.name);
       }
     }
 

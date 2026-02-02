@@ -64,9 +64,25 @@ export function markBrowsed(submoltName) {
   saveState(s);
 }
 
-export function markMyComment(postId, commentId) {
+export function markMyComment(postId, commentId, platform) {
   const s = loadState();
   if (!s.myComments[postId]) s.myComments[postId] = [];
-  s.myComments[postId].push({ commentId, at: new Date().toISOString() });
+  s.myComments[postId].push({ commentId, at: new Date().toISOString(), platform: platform || null });
   saveState(s);
+  // Auto-log to reply tracker
+  if (platform) {
+    try {
+      const trackerPath = join(STATE_DIR, "reply-tracker.json");
+      let tracker;
+      try { tracker = JSON.parse(readFileSync(trackerPath, "utf8")); }
+      catch { tracker = { comments: [], lastCheck: null }; }
+      tracker.comments.push({
+        platform, postId, commentId: commentId || null,
+        postedAt: new Date().toISOString(), lastChecked: null,
+        repliesAtPost: 0, repliesNow: null, gotReply: null,
+      });
+      if (tracker.comments.length > 200) tracker.comments = tracker.comments.slice(-200);
+      writeFileSync(trackerPath, JSON.stringify(tracker, null, 2));
+    } catch {}
+  }
 }

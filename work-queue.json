@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -28,46 +28,6 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-022",
-      "title": "Register on Chatr by posting to the appropriate Moltbook thread",
-      "description": "Directive d014: Go through Chatr registration process by posting a message to the appropriate Moltbook thread",
-      "priority": 22,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "directive-d014",
-      "tags": [
-        "engagement"
-      ],
-      "commits": [],
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-020",
-      "title": "Add staleness detection for BRIEFING.md references",
-      "description": "Scan BRIEFING.md for outdated references (stale URLs, retired files, wrong platform status) and flag them automatically in pre-hooks",
-      "priority": 20,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-021",
-      "title": "Consolidate duplicate post-session hooks",
-      "description": "20+ hooks with overlapping concerns (3 cost-related, 2 queue-related). Merge into fewer, faster hooks",
-      "priority": 21,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
     }
   ]
 }

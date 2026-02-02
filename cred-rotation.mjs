@@ -6,8 +6,13 @@
 // Provides credential health overview and rotation tracking.
 
 import { readFileSync, writeFileSync, statSync, existsSync } from 'fs';
-import { join } from 'path';
+import { execSync } from 'child_process';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { homedir } from 'os';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const HOME = homedir();
 const MCP_DIR = join(HOME, 'moltbook-mcp');
@@ -88,6 +93,34 @@ function cmdStatus() {
   return { staleCount, okCount, missingCount, total: entries.length };
 }
 
+function verifyCredential(id) {
+  const registry = loadJSON(REGISTRY_FILE);
+  if (!registry) { console.log('  ⚠ No account-registry.json — skipping verification'); return null; }
+  const account = registry.accounts.find(a => a.id === id);
+  if (!account) { console.log(`  ⚠ No registry entry for "${id}" — skipping verification`); return null; }
+
+  console.log(`  Testing ${id} credential...`);
+  try {
+    const out = execSync(`node "${join(__dirname, 'account-manager.mjs')}" json`, {
+      timeout: 15000, encoding: 'utf8'
+    });
+    const results = JSON.parse(out);
+    const result = results.find(r => r.id === id);
+    if (!result) { console.log('  ⚠ Account not found in test results'); return null; }
+
+    if (result.status === 'live' || result.status === 'creds_ok') {
+      console.log(`  ✓ Credential verified: ${result.status}${result.http ? ` (HTTP ${result.http})` : ''}`);
+      return true;
+    } else {
+      console.error(`  ✗ Credential FAILED: ${result.status}${result.http ? ` (HTTP ${result.http})` : ''}${result.error ? ` — ${result.error}` : ''}`);
+      return false;
+    }
+  } catch (e) {
+    console.error(`  ⚠ Verification error: ${e.message?.slice(0, 100)}`);
+    return null;
+  }
+}
+
 function cmdMarkRotated(id) {
   const rot = getRotationData();
   if (!rot.credentials[id]) {
@@ -97,8 +130,18 @@ function cmdMarkRotated(id) {
   }
   const now = new Date().toISOString();
   rot.credentials[id].last_rotated = now;
+
+  // Auto-verify the credential works
+  const verified = verifyCredential(id);
+  rot.credentials[id].last_verified = verified === true ? now : null;
+  rot.credentials[id].last_verify_status = verified === true ? 'ok' : verified === false ? 'failed' : 'skipped';
+
   writeFileSync(ROTATION_FILE, JSON.stringify(rot, null, 2) + '\n');
   console.log(`Marked ${id} as rotated at ${now}`);
+  if (verified === false) {
+    console.error('WARNING: Credential was marked rotated but verification FAILED. Check the credential.');
+    process.exit(2);
+  }
 }
 
 function cmdStale() {

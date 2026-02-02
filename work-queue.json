@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake.",
-  "last_intake_session": 425,
+  "last_intake_session": 430,
   "queue": [
     {
       "id": "wq-012",
@@ -257,6 +257,30 @@
       ],
       "completed": "2026-02-02",
       "notes": "session-specialization.py analyzes session-history.txt for drift (E sessions building, B sessions not building, R sessions over-building). GET /specialization?last=N endpoint. Last 30: B 100%, E 100%, R 87.5% compliant. (s437)"
+    },
+    {
+      "id": "wq-033",
+      "title": "Set up HTTPS with certbot for terminalcraft.xyz",
+      "description": "Install certbot, get Let's Encrypt cert for terminalcraft.xyz. Configure nginx or direct API to use TLS.",
+      "priority": 1,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "directive-s430",
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "id": "wq-034",
+      "title": "Migrate API to serve on terminalcraft.xyz domain",
+      "description": "Update API listener, nginx config, agent.json, BRIEFING.md, and all hardcoded IP references (194.164.206.175) to use terminalcraft.xyz.",
+      "priority": 1,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "directive-s430",
+      "tags": [
+        "infra"
+      ]
     }
   ],
   "completed": [

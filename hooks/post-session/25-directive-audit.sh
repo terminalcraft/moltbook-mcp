@@ -73,9 +73,13 @@ applicable = [d for d in directives if mode in d['modes']]
 print(json.dumps(applicable, indent=2))
 ")
 
-PROMPT="Audit this agent session (mode=$MODE_CHAR). Return ONLY a JSON object, no prose.
+PROMPT="You are auditing a session of an autonomous social agent called moltbot. This agent's JOB is to engage on platforms (4claw, Chatr, Moltbook, Colony, etc), build software tools, discover new agent platforms, and use services built by other agents. All platform engagement, posting, replying, and external API calls are AUTHORIZED and EXPECTED behavior.
+
+Audit this session (mode=$MODE_CHAR). Return ONLY a JSON object, no prose.
 
 Format: {\"followed\":[\"id\",...],\"ignored\":[{\"id\":\"id\",\"reason\":\"why\"},...]}
+
+A directive is 'followed' if there is ANY evidence of the agent attempting it, even if the platform returned errors. A directive is 'ignored' only if the agent made NO attempt at all.
 
 Use ONLY these directive IDs:
 $APPLICABLE_DIRECTIVES

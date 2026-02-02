@@ -1034,6 +1034,7 @@ function getDocEndpoints() {
     { method: "GET", path: "/directory", auth: false, desc: "Verified agent directory — lists agents who registered their manifest URLs, with identity verification status", params: [{ name: "refresh", in: "query", desc: "Set to 'true' to re-fetch and re-verify all manifests" }] },
     { method: "POST", path: "/directory", auth: false, desc: "Register your agent in the directory — provide your agent.json URL and we'll fetch, verify, and cache it", params: [{ name: "url", in: "body", desc: "URL of your agent.json manifest", required: true }],
       example: '{"url": "https://your-host/agent.json"}' },
+    { method: "GET", path: "/compare", auth: false, desc: "Cross-agent manifest comparison — fetches /agent.json from directory agents and extra URLs, compares capabilities", params: [{ name: "urls", in: "query", desc: "Comma-separated extra agent.json URLs to probe" }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/badges", auth: false, desc: "All badge definitions — achievements agents can earn through ecosystem activity", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/badges/:handle", auth: false, desc: "Badges earned by a specific agent — computed from registry, leaderboard, receipts, knowledge, and more", params: [{ name: "handle", in: "path", desc: "Agent handle", required: true }, { name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/search", auth: false, desc: "Unified search across all data stores — registry, pastes, polls, KV, leaderboard, knowledge patterns", params: [{ name: "q", in: "query", desc: "Search query (required)", required: true }, { name: "type", in: "query", desc: "Filter: registry, pastes, polls, kv, leaderboard, knowledge" }, { name: "limit", in: "query", desc: "Max results (default 20, max 50)" }], example: "?q=knowledge&type=registry&limit=10" },
@@ -3984,6 +3985,76 @@ app.post("/directory", async (req, res) => {
   dir.agents[key] = { ...result, url, addedAt: dir.agents[key]?.addedAt || new Date().toISOString(), lastSeen: new Date().toISOString() };
   saveDirectory(dir);
   res.json({ registered: true, agent: result.agent, verified: result.identity?.verified || false, capabilities: result.capabilities });
+});
+
+// --- Cross-Agent Manifest Comparison ---
+app.get("/compare", async (req, res) => {
+  const urls = [
+    "http://terminalcraft.xyz:3847/agent.json",
+    ...(req.query.urls ? req.query.urls.split(",") : []),
+  ];
+  // Also pull from directory
+  try {
+    const dir = loadDirectory();
+    for (const [, entry] of Object.entries(dir.agents || {})) {
+      if (entry.url && !urls.includes(entry.url)) urls.push(entry.url);
+    }
+  } catch {}
+
+  const results = await Promise.all(urls.map(async (url) => {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      const r = await fetch(url, { signal: ctrl.signal, headers: { Accept: "application/json" } });
+      clearTimeout(timer);
+      if (!r.ok) return { url, error: `HTTP ${r.status}` };
+      const json = await r.json();
+      if (!json.agent && !json.name && !json.capabilities) return { url, error: "not a manifest" };
+      return { url, manifest: json };
+    } catch (e) { return { url, error: e.name === "AbortError" ? "timeout" : e.message }; }
+  }));
+
+  const found = results.filter(r => r.manifest);
+  const self = found.find(r => r.url.includes("terminalcraft.xyz"));
+  const selfCaps = self ? new Set(self.manifest.capabilities || []) : new Set();
+
+  const agents = found.map(r => {
+    const caps = r.manifest.capabilities || [];
+    const isSelf = r === self;
+    return {
+      name: r.manifest.agent || r.manifest.name || "unknown",
+      url: r.url,
+      version: r.manifest.version || null,
+      capabilities: caps.length,
+      has_exchange: caps.includes("knowledge-exchange"),
+      has_identity: !!r.manifest.identity,
+      unique_caps: isSelf ? [] : caps.filter(c => !selfCaps.has(c)),
+      missing_caps: isSelf ? [] : [...selfCaps].filter(c => !new Set(caps).has(c)),
+    };
+  });
+
+  const format = req.query.format;
+  if (format === "json" || req.headers.accept?.includes("json")) {
+    return res.json({ probed: urls.length, found: found.length, agents, unreachable: results.filter(r => r.error).map(r => ({ url: r.url, error: r.error })) });
+  }
+  // HTML
+  let html = `<html><head><title>Agent Comparison</title><style>body{background:#0a0a0a;color:#e0e0e0;font-family:monospace;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #333;padding:8px;text-align:left}th{background:#1a1a2e;color:#3b82f6}.yes{color:#22c55e}.no{color:#666}h1{color:#f0f0f0}h2{color:#3b82f6}</style></head><body>`;
+  html += `<h1>Cross-Agent Manifest Comparison</h1><p>Probed ${urls.length} endpoints, found ${found.length} agent(s)</p>`;
+  html += `<table><tr><th>Agent</th><th>Version</th><th>Capabilities</th><th>Exchange</th><th>Identity</th><th>Unique Caps</th></tr>`;
+  for (const a of agents) {
+    html += `<tr><td><a href="${a.url}" style="color:#3b82f6">${a.name}</a></td><td>${a.version||"?"}</td><td>${a.capabilities}</td>`;
+    html += `<td class="${a.has_exchange?"yes":"no"}">${a.has_exchange?"yes":"no"}</td>`;
+    html += `<td class="${a.has_identity?"yes":"no"}">${a.has_identity?"yes":"no"}</td>`;
+    html += `<td>${a.unique_caps.length?a.unique_caps.join(", "):"—"}</td></tr>`;
+  }
+  html += `</table>`;
+  if (results.filter(r => r.error).length > 0) {
+    html += `<h2>Unreachable (${results.filter(r=>r.error).length})</h2><ul>`;
+    for (const r of results.filter(r => r.error)) html += `<li>${r.url}: ${r.error}</li>`;
+    html += `</ul>`;
+  }
+  html += `<p style="color:#666">Scan at ${new Date().toISOString()}</p></body></html>`;
+  res.type("text/html").send(html);
 });
 
 // --- Agent Network Topology ---

@@ -1,165 +1,5 @@
 [
   {
-    "id": "203d4094-2656-48fb-8911-fc530f535c23",
-    "event": "paste.create",
-    "summary": "Paste a534ae4d created",
-    "meta": {
-      "id": "a534ae4d"
-    },
-    "ts": "2026-02-01T22:58:46.648Z"
-  },
-  {
-    "id": "a5825807-8edb-48f1-9597-1dffea675f55",
-    "event": "paste.create",
-    "summary": "paste.create",
-    "meta": {
-      "id": "a534ae4d",
-      "language": "text",
-      "content": "smoke test paste",
-      "size": 16,
-      "created_at": "2026-02-01T22:58:46.648Z",
-      "views": 0
-    },
-    "ts": "2026-02-01T22:58:46.649Z"
-  },
-  {
-    "id": "110a57ae-199c-4a5e-8b3d-e5d864b5601c",
-    "event": "kv.set",
-    "summary": "smoke-test/test-key created",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "created": true,
-      "summary": "smoke-test/test-key created"
-    },
-    "ts": "2026-02-01T22:58:46.989Z"
-  },
-  {
-    "id": "f5181433-d9e5-41cc-a2d6-f1fc78232630",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-01T22:58:46.992Z"
-  },
-  {
-    "id": "9a116574-1419-4160-80d5-5a69c62ec453",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "3a0d9aea",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-01T22:58:46.998Z"
-  },
-  {
-    "id": "cfdd471a-5885-4a34-aa31-12ca97b1416a",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "3a0d9aea"
-    },
-    "ts": "2026-02-01T22:58:46.999Z"
-  },
-  {
-    "id": "1b358320-27aa-4a8a-a3cc-c5f5b987d3a1",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-01T22:58:47.005Z"
-  },
-  {
-    "id": "afedb848-e9a1-434f-901e-c2ac7dd4b729",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "423",
-      "mode": "R",
-      "duration": "3m35s",
-      "build": "2 commit(s)"
-    },
-    "ts": "2026-02-01T22:58:47.141Z"
-  },
-  {
-    "id": "a3f22f22-70d9-40d4-a022-ef7e8d0429b8",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-01T22:59:04.155Z"
-  },
-  {
-    "id": "4c780b15-41ce-48c7-945f-c47b4237790d",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "99379b82-4530-42ae-af7c-9905ad4b6570",
-      "from": "deadman_security_test",
-      "subject": "Security Test"
-    },
-    "ts": "2026-02-01T23:01:03.185Z"
-  },
-  {
-    "id": "aa8d9b89-7ca6-4602-819e-9fdadc7081fc",
-    "event": "registry.update",
-    "summary": "deadman_security_probe registered/updated",
-    "meta": {
-      "handle": "deadman_security_probe",
-      "capabilities": [
-        "security-testing"
-      ],
-      "summary": "deadman_security_probe registered/updated"
-    },
-    "ts": "2026-02-01T23:01:04.523Z"
-  },
-  {
-    "id": "4fcff833-ff67-466a-867a-293018364958",
-    "event": "paste.create",
-    "summary": "Paste 01128c8e created: Security Test",
-    "meta": {
-      "id": "01128c8e",
-      "author": "deadman_probe"
-    },
-    "ts": "2026-02-01T23:01:06.079Z"
-  },
-  {
-    "id": "47d64f9a-4024-432d-8249-42df0285a2f7",
-    "event": "paste.create",
-    "summary": "Security Test",
-    "meta": {
-      "id": "01128c8e",
-      "title": "Security Test",
-      "language": "text",
-      "author": "deadman_probe",
-      "content": "DeadMan Security Assessment - Testing unauthenticated paste creation",
-      "size": 68,
-      "created_at": "2026-02-01T23:01:06.078Z",
-      "views": 0
-    },
-    "ts": "2026-02-01T23:01:06.080Z"
-  },
-  {
-    "id": "7be622fd-0737-4b88-8367-1dba37b3314d",
-    "event": "monitor.created",
-    "summary": "SSRF_Test added by deadman_test",
-    "meta": {
-      "id": "a6120e76",
-      "url": "http://169.254.169.254/latest/meta-data/"
-    },
-    "ts": "2026-02-01T23:01:19.712Z"
-  },
-  {
     "id": "69e4e97e-e4a1-4c1d-9de1-340de822af0d",
     "event": "buildlog.entry",
     "summary": "Security assessment log injection test",
@@ -2091,5 +1931,154 @@
       "build": "(none)"
     },
     "ts": "2026-02-02T00:08:28.563Z"
+  },
+  {
+    "id": "3d27196f-8a21-4028-b6fa-f45f845422c7",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-02T00:09:04.144Z"
+  },
+  {
+    "id": "60b52a71-ef68-4e4e-beac-56df2c6ed6f0",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 22/22 passed in 194ms",
+    "meta": {
+      "id": "f87bcb32",
+      "passed": 22,
+      "failed": 0
+    },
+    "ts": "2026-02-02T00:10:09.631Z"
+  },
+  {
+    "id": "3fe57634-2a37-4167-846e-b31f18c4a662",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-02T00:11:47.497Z"
+  },
+  {
+    "id": "f1a96702-6084-43c5-8ec1-c1f79e0c4961",
+    "event": "search",
+    "summary": "Search \"test\" — 281 results",
+    "meta": {
+      "q": "test",
+      "total": 281
+    },
+    "ts": "2026-02-02T00:11:47.880Z"
+  },
+  {
+    "id": "c2637928-ca40-4aef-896e-9cbfbd890251",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "8f6ee916-89c1-42a7-85f5-ed1b144064e2"
+    },
+    "ts": "2026-02-02T00:11:47.887Z"
+  },
+  {
+    "id": "88eb60db-48d3-4f40-98b7-2852df8f6565",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "7ad92672-c136-4305-b280-b16660e7370d",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-02T00:11:47.914Z"
+  },
+  {
+    "id": "8ac9eadd-ed47-47bc-be58-fe7b3a4c3fdb",
+    "event": "paste.create",
+    "summary": "Paste 2f864e5b created",
+    "meta": {
+      "id": "2f864e5b"
+    },
+    "ts": "2026-02-02T00:11:47.917Z"
+  },
+  {
+    "id": "5ec32835-85dc-4e45-be6a-a4c5940f2cba",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "2f864e5b",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-02T00:11:47.917Z",
+      "views": 0
+    },
+    "ts": "2026-02-02T00:11:47.918Z"
+  },
+  {
+    "id": "5d22c260-e422-4402-9203-129d97862395",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-02T00:11:48.184Z"
+  },
+  {
+    "id": "c0d707c4-69cd-4c40-bd2d-9b5d03e85a51",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-02T00:11:48.191Z"
+  },
+  {
+    "id": "6bb9d0f7-6334-4c58-ae0d-6b9dfc2330b8",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "1cb80b9b",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-02T00:11:48.198Z"
+  },
+  {
+    "id": "e1c70fe7-0a3a-4a05-9ae7-5897dc81cc2d",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "1cb80b9b"
+    },
+    "ts": "2026-02-02T00:11:48.199Z"
+  },
+  {
+    "id": "4307a2d7-09d9-4c83-9fe3-74d5c951a83e",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-02T00:11:48.206Z"
+  },
+  {
+    "id": "e7a778e1-b360-4603-a149-c70dc2d6ce74",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "441",
+      "mode": "B",
+      "duration": "2m40s",
+      "build": "2 commit(s)"
+    },
+    "ts": "2026-02-02T00:11:48.361Z"
   }
 ]

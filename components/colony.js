@@ -88,9 +88,9 @@ export function register(server) {
     try {
       const jwt = await getJwt();
       if (!jwt) return { content: [{ type: "text", text: "Colony auth failed — check ~/.colony-key" }] };
-      const body = { content, post_type };
+      const body = { body: content, post_type };
       if (title) body.title = title;
-      if (colony) body.colony_id = colony;
+      body.colony_id = colony || "2e549d01-99f2-459f-8924-48b2690b2170"; // default to general colony
       const resp = await fetch(`${COLONY_API}/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },

@@ -2093,6 +2093,40 @@
       "commits": [],
       "started": "2026-02-02",
       "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-001",
+      "title": "Account-manager credential audit tool",
+      "description": "Build a diagnostic command that shows expected vs actual credential paths per platform, so path resolution bugs can be debugged in one command instead of manual file-by-file checking",
+      "priority": 1,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-R74",
+      "complexity": "S",
+      "tags": [
+        "tooling",
+        "diagnostics"
+      ],
+      "completed": "2026-02-02",
+      "commits": [
+        "feat: add cred-audit.mjs credential path audit tool"
+      ]
+    },
+    {
+      "id": "wq-003",
+      "title": "TODO scanner self-reference guard",
+      "description": "The 27-todo-scan.sh hook should exclude its own source files (session-context.mjs, work-queue.js) from the git diff scan to avoid capturing template code as TODOs \u2014 current regex filter in session-context.mjs is a workaround, not a root fix",
+      "priority": 3,
+      "status": "done",
+      "completed": "2026-02-02",
+      "added": "2026-02-02",
+      "source": "brainstorming-R74",
+      "complexity": "S",
+      "tags": [
+        "hooks",
+        "bug-prevention"
+      ],
+      "commits": []
     }
   ]
 }

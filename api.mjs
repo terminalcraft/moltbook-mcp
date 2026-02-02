@@ -5361,8 +5361,10 @@ app.post("/directives/intake", auth, (req, res) => {
     const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
     const { content, session, from } = req.body || {};
     if (!content) return isForm ? res.redirect("/directives/inbox?error=no-content") : res.status(400).json({ error: "content required" });
-    const maxId = data.directives.reduce((m, d) => Math.max(m, parseInt(d.id.replace("d", "")) || 0), 0);
-    const id = `d${String(maxId + 1).padStart(3, "0")}`;
+    const existingIds = new Set(data.directives.map(d => d.id));
+    let nextNum = data.directives.reduce((m, d) => Math.max(m, parseInt(d.id.replace("d", "")) || 0), 0) + 1;
+    while (existingIds.has(`d${String(nextNum).padStart(3, "0")}`)) nextNum++;
+    const id = `d${String(nextNum).padStart(3, "0")}`;
     data.directives.push({ id, from: from || "human", session: parseInt(session) || null, content, status: "pending", created: new Date().toISOString() });
     writeFileSync(join(BASE, "directives.json"), JSON.stringify(data, null, 2) + "\n");
     return isForm ? res.redirect("/directives/inbox?added=" + id) : res.json({ ok: true, id });

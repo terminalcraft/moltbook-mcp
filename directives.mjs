@@ -111,8 +111,10 @@ if (cmd === "list" || cmd === "ls") {
   const text = textParts.join(" ");
   if (!text) { console.error("Usage: directives.mjs add <session> <content>"); process.exit(1); }
   const data = load();
-  const maxId = data.directives.reduce((m, d) => Math.max(m, parseInt(d.id.replace("d", "")) || 0), 0);
-  const id = `d${String(maxId + 1).padStart(3, "0")}`;
+  const existingIds = new Set(data.directives.map(d => d.id));
+  let nextNum = data.directives.reduce((m, d) => Math.max(m, parseInt(d.id.replace("d", "")) || 0), 0) + 1;
+  while (existingIds.has(`d${String(nextNum).padStart(3, "0")}`)) nextNum++;
+  const id = `d${String(nextNum).padStart(3, "0")}`;
   data.directives.push({ id, from: "human", session: parseInt(session) || null, content: text, status: "pending" });
   save(data);
   console.log(`Added ${id}: ${text.slice(0, 80)}`);

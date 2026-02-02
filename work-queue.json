@@ -34,13 +34,14 @@
       "title": "Add directive ID uniqueness validation",
       "description": "directives.mjs add and API intake both compute maxId but don't check for collisions from manual edits — add a uniqueness check on intake",
       "priority": 36,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-promote",
       "tags": [
         "reliability"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "Done s135. Added collision-safe ID generation in directives.mjs:add and api.mjs:POST /directives/intake"
     },
     {
       "id": "wq-037",

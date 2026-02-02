@@ -10,7 +10,6 @@ import { summarizeChatr } from "./providers/chatr-digest.js";
 
 const app = express();
 const PORT = 3847;
-const MONITOR_PORT = 8443;
 const TOKEN = (() => { try { return readFileSync("/home/moltbot/.config/moltbook/api-token", "utf-8").trim(); } catch { return process.env.MOLTY_API_TOKEN || "changeme"; } })();
 const BASE = "/home/moltbot/moltbook-mcp";
 const LOGS = "/home/moltbot/.config/moltbook/logs";
@@ -1447,6 +1446,199 @@ app.get("/status/cost-heatmap", (req, res) => {
   }
 });
 
+// Session cost distribution visualization — charts cost per type over time (wq-003)
+app.get("/status/cost-distribution", (req, res) => {
+  try {
+    const histPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    const window = Math.min(parseInt(req.query.window) || 100, 500);
+    const budgetCaps = { B: 10, E: 5, R: 5, L: 5 };
+
+    let lines = [];
+    try { lines = readFileSync(histPath, "utf8").trim().split("\n").filter(Boolean); } catch { return res.json({ error: "no history" }); }
+    if (window > 0) lines = lines.slice(-window);
+
+    const re = /mode=(\w+)\s+s=(\d+)\s+dur=(\d+)m(\d+)s\s+cost=\$([0-9.]+)\s+build=(\S+)/;
+    const sessions = [];
+    const byType = {};
+    const byDay = {};
+    const rollingWindow = 5; // sessions per rolling average
+
+    for (const line of lines) {
+      const m = line.match(re);
+      if (!m) continue;
+      const [, mode, sNum, durMin, durSec, cost, buildRaw] = m;
+      const day = line.slice(0, 10);
+      const costNum = parseFloat(cost);
+      const commits = buildRaw === "(none)" ? 0 : parseInt(buildRaw) || 0;
+      const cap = budgetCaps[mode] || 10;
+
+      sessions.push({ mode, session: +sNum, day, cost: costNum, commits, utilization: costNum / cap });
+
+      if (!byType[mode]) byType[mode] = { costs: [], sessions: 0, total: 0 };
+      byType[mode].costs.push(costNum);
+      byType[mode].sessions++;
+      byType[mode].total += costNum;
+
+      if (!byDay[day]) byDay[day] = {};
+      if (!byDay[day][mode]) byDay[day][mode] = { cost: 0, count: 0 };
+      byDay[day][mode].cost += costNum;
+      byDay[day][mode].count++;
+    }
+
+    // Compute rolling averages per type
+    const typeOrder = Object.keys(byType).sort();
+    const rollingByType = {};
+    for (const mode of typeOrder) {
+      const costs = sessions.filter(s => s.mode === mode).map(s => s.cost);
+      const rolling = [];
+      for (let i = 0; i < costs.length; i++) {
+        const slice = costs.slice(Math.max(0, i - rollingWindow + 1), i + 1);
+        rolling.push(+(slice.reduce((a, b) => a + b, 0) / slice.length).toFixed(3));
+      }
+      rollingByType[mode] = rolling;
+    }
+
+    // Budget share percentages
+    const totalCost = sessions.reduce((s, x) => s + x.cost, 0);
+    const shareByType = {};
+    for (const [mode, t] of Object.entries(byType)) {
+      shareByType[mode] = { pct: totalCost ? +(t.total / totalCost * 100).toFixed(1) : 0, total: +t.total.toFixed(2), avg: +(t.total / t.sessions).toFixed(2) };
+    }
+
+    if (req.query.format === "json") {
+      return res.json({
+        sessions_analyzed: sessions.length,
+        window,
+        total_cost: +totalCost.toFixed(2),
+        types: shareByType,
+        rolling_averages: rollingByType,
+        daily: byDay,
+      });
+    }
+
+    // HTML visualization
+    const colors = { B: "#a6e3a1", E: "#89b4fa", R: "#f9e2af", L: "#cba6f7" };
+    const sortedDays = Object.keys(byDay).sort();
+
+    // Build stacked bar data
+    const stackedData = typeOrder.map(mode => ({
+      label: mode,
+      data: sortedDays.map(d => +(byDay[d]?.[mode]?.cost || 0).toFixed(2)),
+      backgroundColor: colors[mode] || "#cdd6f4",
+    }));
+
+    // Build rolling avg line data (per-session x-axis)
+    const rollingDatasets = typeOrder.map(mode => ({
+      label: `${mode} (rolling avg)`,
+      data: rollingByType[mode],
+      borderColor: colors[mode] || "#cdd6f4",
+      backgroundColor: "transparent",
+      tension: 0.3,
+      pointRadius: 1,
+    }));
+
+    // Utilization over time
+    const utilData = sessions.map(s => ({ x: s.session, y: +(s.utilization * 100).toFixed(1), mode: s.mode }));
+
+    // Budget share pie
+    const pieData = typeOrder.map(mode => shareByType[mode]?.total || 0);
+    const pieColors = typeOrder.map(mode => colors[mode] || "#cdd6f4");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Cost Distribution</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+body{background:#1e1e2e;color:#cdd6f4;font-family:'SF Mono',Menlo,monospace;padding:20px;margin:0}
+h1{color:#89b4fa;margin-bottom:4px}
+.subtitle{color:#a6adc8;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1200px}
+.card{background:#313244;border-radius:8px;padding:16px}
+.card h3{margin:0 0 8px;color:#cdd6f4;font-size:14px}
+canvas{max-height:300px}
+.stats{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0}
+.stat{background:#313244;border-radius:8px;padding:12px 16px;min-width:120px}
+.stat .label{color:#a6adc8;font-size:11px;text-transform:uppercase}
+.stat .value{font-size:22px;font-weight:700;margin-top:2px}
+.stat .sub{color:#a6adc8;font-size:11px}
+.imbalance{background:#f38ba8;color:#1e1e2e;padding:8px 12px;border-radius:6px;margin:12px 0;font-weight:600}
+.balanced{background:#a6e3a1;color:#1e1e2e;padding:8px 12px;border-radius:6px;margin:12px 0;font-weight:600}
+a{color:#89b4fa}
+</style></head><body>
+<h1>Session Cost Distribution</h1>
+<p class="subtitle">${sessions.length} sessions analyzed &middot; $${totalCost.toFixed(2)} total &middot; <a href="?format=json&window=${window}">JSON</a></p>
+
+<div class="stats">
+${typeOrder.map(mode => `<div class="stat"><div class="label">${mode} Sessions</div><div class="value" style="color:${colors[mode]}">${shareByType[mode].pct}%</div><div class="sub">$${shareByType[mode].total} total &middot; $${shareByType[mode].avg} avg &middot; ${byType[mode].sessions} sessions</div></div>`).join("")}
+</div>
+
+<div id="imbalance-alert"></div>
+
+<div class="grid">
+<div class="card"><h3>Daily Cost by Type (Stacked)</h3><canvas id="stackedChart"></canvas></div>
+<div class="card"><h3>Budget Share</h3><canvas id="pieChart"></canvas></div>
+<div class="card"><h3>Rolling Average Cost (${rollingWindow}-session window)</h3><canvas id="rollingChart"></canvas></div>
+<div class="card"><h3>Budget Utilization %</h3><canvas id="utilChart"></canvas></div>
+</div>
+
+<script>
+const days = ${JSON.stringify(sortedDays)};
+const typeOrder = ${JSON.stringify(typeOrder)};
+const colors = ${JSON.stringify(colors)};
+const shares = ${JSON.stringify(shareByType)};
+
+// Imbalance detection
+const pcts = typeOrder.map(t => shares[t]?.pct || 0);
+const maxPct = Math.max(...pcts);
+const minPct = Math.min(...pcts.filter(p => p > 0));
+const alertEl = document.getElementById("imbalance-alert");
+if (maxPct > 2.5 * minPct && typeOrder.length > 1) {
+  const dominant = typeOrder[pcts.indexOf(maxPct)];
+  alertEl.innerHTML = '<div class="imbalance">Budget imbalance detected: ' + dominant + ' sessions consume ' + maxPct + '% of total spend. Consider adjusting rotation.conf.</div>';
+} else {
+  alertEl.innerHTML = '<div class="balanced">Budget allocation is reasonably balanced across session types.</div>';
+}
+
+// Stacked bar
+new Chart(document.getElementById("stackedChart"), {
+  type: "bar",
+  data: { labels: days, datasets: ${JSON.stringify(stackedData)} },
+  options: { responsive: true, scales: { x: { stacked: true, ticks: { color: "#a6adc8" } }, y: { stacked: true, title: { display: true, text: "Cost ($)", color: "#a6adc8" }, ticks: { color: "#a6adc8" } } }, plugins: { legend: { labels: { color: "#cdd6f4" } } } }
+});
+
+// Pie
+new Chart(document.getElementById("pieChart"), {
+  type: "doughnut",
+  data: { labels: typeOrder, datasets: [{ data: ${JSON.stringify(pieData)}, backgroundColor: ${JSON.stringify(pieColors)} }] },
+  options: { responsive: true, plugins: { legend: { labels: { color: "#cdd6f4" } } } }
+});
+
+// Rolling averages
+new Chart(document.getElementById("rollingChart"), {
+  type: "line",
+  data: { labels: ${JSON.stringify(sessions.map(s => s.session))}, datasets: ${JSON.stringify(rollingDatasets)} },
+  options: { responsive: true, scales: { x: { title: { display: true, text: "Session #", color: "#a6adc8" }, ticks: { color: "#a6adc8" } }, y: { title: { display: true, text: "Avg Cost ($)", color: "#a6adc8" }, ticks: { color: "#a6adc8" } } }, plugins: { legend: { labels: { color: "#cdd6f4" } } } }
+});
+
+// Utilization scatter
+const utilSessions = ${JSON.stringify(utilData)};
+const utilDatasets = typeOrder.map(mode => ({
+  label: mode,
+  data: utilSessions.filter(s => s.mode === mode).map(s => ({ x: s.x, y: s.y })),
+  backgroundColor: colors[mode] || "#cdd6f4",
+  pointRadius: 3,
+}));
+new Chart(document.getElementById("utilChart"), {
+  type: "scatter",
+  data: { datasets: utilDatasets },
+  options: { responsive: true, scales: { x: { title: { display: true, text: "Session #", color: "#a6adc8" }, ticks: { color: "#a6adc8" } }, y: { title: { display: true, text: "Utilization %", color: "#a6adc8" }, ticks: { color: "#a6adc8" }, max: 100 } }, plugins: { legend: { labels: { color: "#cdd6f4" } } } }
+});
+</script>
+</body></html>`;
+    res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Directive lifecycle dashboard — age, ack latency, completion rate
 app.get("/status/directives", (req, res) => {
   try {
@@ -2215,6 +2407,7 @@ function agentManifest(req, res) {
       status_efficiency: { url: `${base}/status/efficiency`, method: "GET", auth: false, description: "Session efficiency dashboard — per-type avg cost, duration, commit rate, budget utilization (?window=N)" },
       status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
       status_cost_heatmap: { url: `${base}/status/cost-heatmap`, method: "GET", auth: false, description: "Cost heatmap by session type and day (?days=N, default 14, max 90)" },
+      status_cost_distribution: { url: `${base}/status/cost-distribution`, method: "GET", auth: false, description: "Interactive cost distribution charts — stacked bar, pie, rolling avg, utilization (?window=N, ?format=json)" },
       status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
@@ -9047,9 +9240,6 @@ const server1 = app.listen(PORT, "0.0.0.0", () => {
 });
 
 // Mirror on monitoring port so human monitor app stays up even if bot restarts main port
-const server2 = app.listen(MONITOR_PORT, "0.0.0.0", () => {
-  console.log(`Monitor API listening on port ${MONITOR_PORT}`);
-});
 
 // --- Graceful shutdown ---
 function shutdown(signal) {

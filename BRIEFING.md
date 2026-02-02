@@ -31,7 +31,7 @@ Keep to 2-3 active goals max.
 - Session outcome tracking: heartbeat.sh logs success/timeout/error to outcomes.log.
 - Per-type budget caps: Build=$10, Engage=$5, Reflect=$5.
 - Pre/post-session hooks in hooks/{pre,post}-session/. Post-hooks consolidated s625 (23→17).
-- Startup sequence is session-type-conditional: B skips dialogue/requests, E skips backlog. Only R reads everything.
+- Startup sequence is session-type-conditional: B skips directives/requests, E skips backlog. Only R reads everything.
 
 ## Session efficiency
 Use the full session. If you finish your primary task, pick up the next thing from work-queue.json, BRAINSTORMING.md, or services. Fill the time.

@@ -126,10 +126,11 @@
       "from": "human",
       "session": "s611+",
       "content": "When an R session says it noted inbox messages for human review, there is no actual mechanism to surface them. Create a way to flag items for human review that persists and is visible through the monitor API.",
-      "status": "active",
+      "status": "completed",
       "acked_session": 620,
-      "queue_item": "wq-020",
-      "notes": "Queued as wq-020: build human-review flagging mechanism with API endpoint."
+      "completed_session": 641,
+      "queue_item": "wq-031",
+      "notes": "s641: MCP tools (human_review_flag, human_review_list) added. API loadReview() fixed. R session prompt now shows open review count + urgent notice. Full pipeline: flag via MCP tool → persists to human-review.json → visible at /status/human-review → surfaced in R session prompt."
     },
     {
       "id": "d014",
@@ -270,16 +271,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 192,
+        "followed": 193,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 639,
-        "last_applicable_session": 639,
+        "last_session": 640,
+        "last_applicable_session": 640,
         "history": [
-          {
-            "session": 627,
-            "result": "followed"
-          },
           {
             "session": 628,
             "result": "followed"
@@ -315,20 +312,20 @@
           {
             "session": 639,
             "result": "followed"
+          },
+          {
+            "session": 640,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 103,
+        "followed": 104,
         "ignored": 2,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 636,
-        "last_applicable_session": 636,
+        "last_session": 640,
+        "last_applicable_session": 640,
         "history": [
-          {
-            "session": 600,
-            "result": "followed"
-          },
           {
             "session": 604,
             "result": "followed"
@@ -364,20 +361,20 @@
           {
             "session": 636,
             "result": "followed"
+          },
+          {
+            "session": 640,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 145,
+        "followed": 146,
         "ignored": 84,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 639,
-        "last_applicable_session": 639,
+        "last_session": 640,
+        "last_applicable_session": 640,
         "history": [
-          {
-            "session": 630,
-            "result": "followed"
-          },
           {
             "session": 631,
             "result": "followed"
@@ -413,20 +410,20 @@
           {
             "session": 639,
             "result": "ignored"
+          },
+          {
+            "session": 640,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 71,
+        "followed": 72,
         "ignored": 14,
         "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 636,
-        "last_applicable_session": 636,
+        "last_session": 640,
+        "last_applicable_session": 640,
         "history": [
-          {
-            "session": 600,
-            "result": "followed"
-          },
           {
             "session": 604,
             "result": "followed"
@@ -461,21 +458,21 @@
           },
           {
             "session": 636,
+            "result": "followed"
+          },
+          {
+            "session": 640,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 83,
+        "followed": 84,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 636,
-        "last_applicable_session": 636,
+        "last_session": 640,
+        "last_applicable_session": 640,
         "history": [
-          {
-            "session": 600,
-            "result": "followed"
-          },
           {
             "session": 604,
             "result": "followed"
@@ -510,6 +507,10 @@
           },
           {
             "session": 636,
+            "result": "followed"
+          },
+          {
+            "session": 640,
             "result": "followed"
           }
         ]
@@ -564,16 +565,12 @@
         ]
       },
       "directive-update": {
-        "followed": 82,
+        "followed": 83,
         "ignored": 11,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 636,
-        "last_applicable_session": 636,
+        "last_session": 640,
+        "last_applicable_session": 640,
         "history": [
-          {
-            "session": 600,
-            "result": "followed"
-          },
           {
             "session": 604,
             "result": "followed"
@@ -608,6 +605,10 @@
           },
           {
             "session": 636,
+            "result": "followed"
+          },
+          {
+            "session": 640,
             "result": "followed"
           }
         ]

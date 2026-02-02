@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -34,30 +34,19 @@
       "title": "Address directive d013",
       "description": "When an R session says it noted inbox messages for human review, there is no actual mechanism to surface them. Create a",
       "priority": 31,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["16b640b"],
+      "notes": "s641: Added human_review_flag + human_review_list MCP tools, fixed loadReview() bug, injected review count into R session prompt."
     },
     {
       "id": "wq-032",
       "title": "Add tests for api.mjs",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 32,
       "status": "pending",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
-    },
-    {
-      "id": "wq-033",
-      "title": "Dynamic platform tier computation from engagement metrics",
-      "description": "Change applications tier based on qualitative engagement metrics (d016)",
-      "priority": 33,
-      "status": "done",
-      "completed_session": 640,
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
@@ -71,7 +60,10 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-promote",
-      "tags": ["security", "d015"],
+      "tags": [
+        "security",
+        "d015"
+      ],
       "commits": []
     }
   ]

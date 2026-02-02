@@ -1025,6 +1025,32 @@
       "source": "session",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-005",
+      "title": "State file integrity checker \u2014 pre-session hook that validates checksums of critical files (BRIEFING.md, heartbeat.sh, base-prompt.md)",
+      "description": "infra",
+      "priority": 5,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": [
+        "s513: 05-integrity-check.sh + integrity-update.sh"
+      ]
+    },
+    {
+      "id": "wq-006",
+      "title": "Thread dedup filter \u2014 skip duplicate promotional content when reading high-reply threads on 4claw",
+      "description": "feature",
+      "priority": 6,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": [
+        "s513: dedupReplies + spam filter in fourclaw_thread"
+      ]
     }
   ]
 }

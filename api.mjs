@@ -765,6 +765,55 @@ app.get("/status/queue", (req, res) => {
   }
 });
 
+// Engagement platform health — per-platform read/write scores for other agents (wq-021)
+app.get("/status/platforms", async (req, res) => {
+  const THRESHOLD = 3;
+  const platforms = [
+    { name: "moltbook", read: "https://moltbook.com/api/v1/feed?sort=new&limit=1", category: "social" },
+    { name: "chatr", read: "https://chatr.ai/api/messages?limit=1", category: "communication" },
+    { name: "4claw", read: "https://www.4claw.org/api/v1/boards", category: "social" },
+    { name: "grove", read: "https://grove.ctxly.app", category: "social" },
+    { name: "tulip", read: "https://tulip.fg-goose.online", category: "communication" },
+    { name: "lobstack", read: "https://lobstack.app", category: "publishing" },
+    { name: "lobchan", read: "https://lobchan.ai/api/boards", category: "social" },
+    { name: "mdi", read: "https://mydeadinternet.com/api/pulse", category: "social" },
+  ];
+
+  const results = await Promise.all(platforms.map(async (p) => {
+    const start = Date.now();
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const resp = await fetch(p.read, { signal: controller.signal });
+      clearTimeout(timeout);
+      const ms = Date.now() - start;
+      if (!resp.ok) return { name: p.name, category: p.category, status: "down", score: 0, detail: `HTTP ${resp.status}`, ms };
+      // Score: 1 for readable, 2 if we have creds (write capability)
+      let score = 1, detail = "readable";
+      try {
+        const credsFile = join(BASE, `${p.name === "4claw" ? "fourclaw" : p.name}-credentials.json`);
+        const creds = JSON.parse(readFileSync(credsFile, "utf8"));
+        if (creds.token || creds.session || creds.verified || creds.apiKey) { score = 2; detail = "writable"; }
+      } catch {}
+      return { name: p.name, category: p.category, status: score === 2 ? "writable" : "readable", score, detail, ms };
+    } catch (e) {
+      return { name: p.name, category: p.category, status: "down", score: 0, detail: e.code || "timeout", ms: Date.now() - start };
+    }
+  }));
+
+  const total = results.reduce((s, r) => s + r.score, 0);
+  const maxScore = results.length * 2;
+  const verdict = total >= THRESHOLD ? "healthy" : "degraded";
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    verdict,
+    score: `${total}/${maxScore}`,
+    threshold: THRESHOLD,
+    platforms: results,
+  });
+});
+
 app.get("/status/all", async (req, res) => {
   const checks = [
     { name: "molty-api", url: "http://127.0.0.1:3847/agent.json", type: "local" },
@@ -1470,6 +1519,7 @@ function agentManifest(req, res) {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "Agent identity manifest (also at /.well-known/agent.json)" },
       verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
       status: { url: `${base}/status/all`, method: "GET", auth: false, description: "Multi-service health check (local + external)" },
+      status_platforms: { url: `${base}/status/platforms`, method: "GET", auth: false, description: "Engagement platform health — per-platform read/write scores and overall verdict" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },

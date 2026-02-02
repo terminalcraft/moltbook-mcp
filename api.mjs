@@ -3918,8 +3918,98 @@ th{background:#222}h1{color:#0f0}.stat{color:#0a0;font-size:1.2em}</style></head
 ${rows}</table>
 <div style="margin-top:1em;font-size:0.8em;color:#666">
   <a href="/sessions?format=json" style="color:#0a0">JSON</a> |
+  <a href="/sessions/replay" style="color:#0a0">Replay Dashboard</a> |
   <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>
 </div></body></html>`);
+});
+
+// --- Session Replay Dashboard ---
+app.get("/sessions/replay", (req, res) => {
+  const summaries = [];
+  try {
+    const files = readdirSync(LOGS).filter(f => f.endsWith(".summary")).sort().reverse();
+    for (const f of files.slice(0, 30)) {
+      try {
+        const raw = readFileSync(join(LOGS, f), "utf-8");
+        const hdr = {};
+        const lines = raw.split("\n");
+        let feedLines = [], thinkLines = [], section = "header";
+        for (const line of lines) {
+          if (line === "--- Agent thinking ---") { section = "thinking"; continue; }
+          if (section === "header") {
+            if (line.startsWith("Feed:")) { section = "feed"; continue; }
+            const m = line.match(/^([^:]+):\s*(.+)$/);
+            if (m) hdr[m[1].toLowerCase().replace(/\s+/g, "_")] = m[2];
+          } else if (section === "feed") {
+            if (line.startsWith("  - ")) feedLines.push(line.slice(4));
+          } else if (section === "thinking") {
+            thinkLines.push(line);
+          }
+        }
+        summaries.push({ file: f, ...hdr, feed: feedLines, thinking: thinkLines.join("\n").trim() });
+      } catch {}
+    }
+  } catch {}
+
+  // Enrich with mode from session-history
+  try {
+    const histLines = readFileSync("/home/moltbot/.config/moltbook/session-history.txt", "utf-8").trim().split("\n");
+    const modeMap = {};
+    for (const line of histLines) {
+      const m = line.match(/mode=(\S+)\s+s=(\d+)/);
+      if (m) modeMap[m[2]] = m[1];
+    }
+    for (const s of summaries) {
+      if (s.session && modeMap[s.session]) s.mode = modeMap[s.session];
+    }
+  } catch {}
+
+  const id = req.query.id;
+  if (id) {
+    const s = summaries.find(x => x.session === id || x.file === id);
+    if (!s) return res.status(404).type("text/html").send("<h1>Session not found</h1>");
+    const feedHtml = s.feed.length ? `<ul>${s.feed.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : "<p><em>No feed entries</em></p>";
+    const thinkHtml = s.thinking ? `<pre style="white-space:pre-wrap;background:#1a1a1a;padding:12px;border-radius:4px;max-height:600px;overflow-y:auto">${esc(s.thinking)}</pre>` : "<p><em>No agent thinking captured</em></p>";
+    const modeColor = { B: "#0af", E: "#fa0", R: "#f0a", L: "#0fa" }[s.mode] || "#888";
+    return res.type("text/html").send(`<!DOCTYPE html><html><head><title>Session ${esc(s.session || "?")} Replay</title>
+<style>body{font-family:monospace;max-width:900px;margin:2em auto;background:#111;color:#eee;padding:0 1em}
+a{color:#0a0}h1{color:#0f0}.meta{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:1em 0}
+.meta-item{background:#1a1a1a;padding:8px 12px;border-radius:4px}.meta-label{color:#888;font-size:0.85em}.meta-value{color:#0f0;font-size:1.1em}
+pre{font-size:0.85em;line-height:1.4}ul{padding-left:1.5em}li{margin:4px 0}</style></head><body>
+<a href="/sessions/replay">&larr; All sessions</a>
+<h1>Session ${esc(s.session || "?")}</h1>
+<div class="meta">
+  <div class="meta-item"><div class="meta-label">Mode</div><div class="meta-value">${esc(s.mode || "?")}</div></div>
+  <div class="meta-item"><div class="meta-label">Start</div><div class="meta-value">${esc(s.start || "?")}</div></div>
+  <div class="meta-item"><div class="meta-label">Duration</div><div class="meta-value">${esc(s.duration || "?")}</div></div>
+  <div class="meta-item"><div class="meta-label">Cost</div><div class="meta-value">${esc(s.cost || "?")}</div></div>
+  <div class="meta-item"><div class="meta-label">Tools</div><div class="meta-value">${esc(s.tools || "0")}</div></div>
+  <div class="meta-item"><div class="meta-label">Build</div><div class="meta-value">${esc(s.build || "(none)")}</div></div>
+  <div class="meta-item"><div class="meta-label">Files</div><div class="meta-value">${esc(s.files_changed || "(none)")}</div></div>
+</div>
+<h2>Feed</h2>${feedHtml}
+<h2>Agent Thinking</h2>${thinkHtml}
+</body></html>`);
+  }
+
+  // List view
+  const rows = summaries.map(s => {
+    const modeClass = { B: "mode-b", E: "mode-e", R: "mode-r" }[s.mode] || "";
+    return `<tr class="${modeClass}"><td><a href="/sessions/replay?id=${encodeURIComponent(s.session || s.file)}">${esc(s.session || "?")}</a></td><td>${esc(s.mode || "?")}</td><td>${esc(s.start || "?")}</td><td>${esc(s.duration || "?")}</td><td>${esc(s.cost || "?")}</td><td>${esc(s.build || "-")}</td><td>${esc(s.feed[0] || s.files_changed || "").slice(0, 60)}</td></tr>`;
+  }).join("\n");
+
+  res.type("text/html").send(`<!DOCTYPE html><html><head><title>Session Replay Dashboard</title>
+<style>body{font-family:monospace;max-width:1100px;margin:2em auto;background:#111;color:#eee;padding:0 1em}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #333;padding:6px 10px;text-align:left}
+th{background:#222;position:sticky;top:0}h1{color:#0f0}a{color:#0a0}
+tr.mode-b td:nth-child(2){color:#0af}tr.mode-e td:nth-child(2){color:#fa0}tr.mode-r td:nth-child(2){color:#f0a}
+tr:hover{background:#1a1a2a}.nav{margin:1em 0;font-size:0.9em}</style></head><body>
+<h1>Session Replay Dashboard</h1>
+<p class="nav"><a href="/sessions">Session History (table)</a> | <a href="/dashboard">Main Dashboard</a></p>
+<p>${summaries.length} sessions with summaries</p>
+<table><tr><th>#</th><th>Mode</th><th>Start</th><th>Duration</th><th>Cost</th><th>Build</th><th>Summary</th></tr>
+${rows}</table>
+<div style="margin-top:1em;font-size:0.8em;color:#666"><a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a></div></body></html>`);
 });
 
 // --- Changelog from git log ---

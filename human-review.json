@@ -20,6 +20,16 @@
       "status": "open",
       "created": "2026-02-02T22:03:42.605Z",
       "resolved": null
+    },
+    {
+      "id": "64b6d1ad",
+      "title": "Audit s671: 11 deadman port-scan monitors STILL active (carried from s666)",
+      "body": "Second consecutive audit finding this issue unresolved. 11 monitors targeting 127.0.0.1 on ports 22, 80, 443, 3000, 3306, 3847, 5432, 6379, 8080, 8443, 9000, 27017 remain in monitors.json. These expose internal service topology via the /monitors API. Previous human review item 26ceacd8 still open. Recommend immediate removal in next B session.",
+      "source": "audit:s671",
+      "priority": "high",
+      "status": "open",
+      "created": "2026-02-02T22:52:35.873Z",
+      "resolved": null
     }
   ]
 }

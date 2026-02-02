@@ -1006,6 +1006,46 @@ app.get("/status/platforms/history", (req, res) => {
   res.json({ days: history.length, period: { from: history[0]?.date, to: history[history.length - 1]?.date }, trends, snapshots: history });
 });
 
+// Session type effectiveness scoring (wq-016)
+app.get("/status/effectiveness", (req, res) => {
+  const HISTORY_FILE = "/home/moltbot/.config/moltbook/session-history.txt";
+  const window = Math.min(parseInt(req.query.window) || 20, 50);
+  let lines = [];
+  try { lines = readFileSync(HISTORY_FILE, "utf8").trim().split("\n").filter(Boolean); } catch { return res.json({ error: "no history" }); }
+  lines = lines.slice(-window);
+
+  const re = /mode=(\w+)\s+s=(\d+)\s+dur=(\d+)m(\d+)s\s+cost=\$([0-9.]+)\s+build=(\S+)/;
+  const types = {};
+  for (const line of lines) {
+    const m = line.match(re);
+    if (!m) continue;
+    const [, mode, , durMin, durSec, cost, buildRaw] = m;
+    const dur = parseInt(durMin) * 60 + parseInt(durSec);
+    const commits = buildRaw === "(none)" ? 0 : parseInt(buildRaw) || 0;
+    if (!types[mode]) types[mode] = { sessions: 0, totalCost: 0, totalDur: 0, totalCommits: 0, productive: 0 };
+    const t = types[mode];
+    t.sessions++;
+    t.totalCost += parseFloat(cost);
+    t.totalDur += dur;
+    t.totalCommits += commits;
+    if (commits > 0 || mode === "E") t.productive++; // E sessions are productive if they ran (engagement is output)
+  }
+
+  const results = {};
+  for (const [mode, t] of Object.entries(types)) {
+    results[mode] = {
+      sessions: t.sessions,
+      avgCost: +(t.totalCost / t.sessions).toFixed(2),
+      avgDurSec: Math.round(t.totalDur / t.sessions),
+      totalCommits: t.totalCommits,
+      costPerCommit: t.totalCommits ? +(t.totalCost / t.totalCommits).toFixed(2) : null,
+      productionRate: +(t.productive / t.sessions).toFixed(2),
+    };
+  }
+
+  res.json({ window: lines.length, types: results });
+});
+
 app.get("/status/all", async (req, res) => {
   const checks = [
     { name: "molty-api", url: "http://127.0.0.1:3847/agent.json", type: "local" },
@@ -1804,6 +1844,7 @@ function agentManifest(req, res) {
       status: { url: `${base}/status/all`, method: "GET", auth: false, description: "Multi-service health check (local + external)" },
       status_platforms: { url: `${base}/status/platforms`, method: "GET", auth: false, description: "Engagement platform health — per-platform read/write scores and overall verdict" },
       status_platforms_history: { url: `${base}/status/platforms/history`, method: "GET", auth: false, description: "Platform health 7-day trend — per-platform recovering/degrading/stable signals (?days=N, max 30)" },
+      status_effectiveness: { url: `${base}/status/effectiveness`, method: "GET", auth: false, description: "Session type effectiveness — avg cost, commits, production rate per type (?window=N)" },
       status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },

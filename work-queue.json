@@ -87,9 +87,9 @@
     {
       "id": "wq-016",
       "title": "Session outcome feedback loop: inject timeout warnings into session prompts",
-      "description": "Analyze last 10 outcomes from outcomes.log in a pre-hook. When a session type has >50% timeout rate, inject a warning so the session can self-adjust scope.",
+      "description": "Pre-hook 23-outcome-feedback.sh analyzes last 10 outcomes per type. Warns on >50% timeout or error rate.",
       "priority": 16,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming",
       "tags": ["infrastructure"],

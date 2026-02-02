@@ -198,6 +198,13 @@
       "acked_session": 656,
       "completed_session": 656,
       "notes": "Verified R#92: engage-orchestrator.mjs calls computeDynamicTiers() (line 422) on every E session start. s654 log confirms orchestrator ran and produced tier/ROI data. Dynamic tier computation from d016 is fully integrated."
+    },
+    {
+      "id": "d020",
+      "from": "human",
+      "session": null,
+      "content": "Use the web_fetch MCP tool for all external URL fetching instead of curl or WebFetch. Review existing platform interaction code (engagement tools, service evaluation, crawlers) and migrate any raw curl/WebFetch calls to web_fetch.",
+      "status": "pending"
     }
   ],
   "questions": [],
@@ -304,16 +311,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 205,
+        "followed": 206,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 659,
-        "last_applicable_session": 659,
+        "last_session": 660,
+        "last_applicable_session": 660,
         "history": [
-          {
-            "session": 644,
-            "result": "followed"
-          },
           {
             "session": 645,
             "result": "followed"
@@ -349,20 +352,20 @@
           {
             "session": 659,
             "result": "followed"
+          },
+          {
+            "session": 660,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 108,
+        "followed": 109,
         "ignored": 2,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 656,
-        "last_applicable_session": 656,
+        "last_session": 660,
+        "last_applicable_session": 660,
         "history": [
-          {
-            "session": 620,
-            "result": "followed"
-          },
           {
             "session": 624,
             "result": "followed"
@@ -398,20 +401,20 @@
           {
             "session": 656,
             "result": "followed"
+          },
+          {
+            "session": 660,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 159,
+        "followed": 160,
         "ignored": 88,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 659,
-        "last_applicable_session": 659,
+        "last_session": 660,
+        "last_applicable_session": 660,
         "history": [
-          {
-            "session": 648,
-            "result": "followed"
-          },
           {
             "session": 649,
             "result": "followed"
@@ -447,20 +450,20 @@
           {
             "session": 659,
             "result": "followed"
+          },
+          {
+            "session": 660,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 76,
+        "followed": 77,
         "ignored": 14,
         "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 656,
-        "last_applicable_session": 656,
+        "last_session": 660,
+        "last_applicable_session": 660,
         "history": [
-          {
-            "session": 620,
-            "result": "followed"
-          },
           {
             "session": 624,
             "result": "followed"
@@ -495,21 +498,21 @@
           },
           {
             "session": 656,
+            "result": "followed"
+          },
+          {
+            "session": 660,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 88,
+        "followed": 89,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 656,
-        "last_applicable_session": 656,
+        "last_session": 660,
+        "last_applicable_session": 660,
         "history": [
-          {
-            "session": 620,
-            "result": "followed"
-          },
           {
             "session": 624,
             "result": "followed"
@@ -544,6 +547,10 @@
           },
           {
             "session": 656,
+            "result": "followed"
+          },
+          {
+            "session": 660,
             "result": "followed"
           }
         ]
@@ -599,15 +606,11 @@
       },
       "directive-update": {
         "followed": 86,
-        "ignored": 12,
+        "ignored": 13,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 656,
-        "last_applicable_session": 656,
+        "last_session": 660,
+        "last_applicable_session": 660,
         "history": [
-          {
-            "session": 620,
-            "result": "followed"
-          },
           {
             "session": 624,
             "result": "ignored"
@@ -643,6 +646,10 @@
           {
             "session": 656,
             "result": "followed"
+          },
+          {
+            "session": 660,
+            "result": "ignored"
           }
         ]
       }

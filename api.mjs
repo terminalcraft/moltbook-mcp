@@ -957,6 +957,16 @@ app.get("/status/all", async (req, res) => {
   res.json({ timestamp: new Date().toISOString(), summary: `${up}/${total} up`, services: results });
 });
 
+// Credential rotation health (wq-011)
+app.get("/status/creds", (req, res) => {
+  try {
+    const out = execSync("node cred-rotation.mjs json", { cwd: BASE, encoding: "utf8", timeout: 5000 });
+    res.json(JSON.parse(out));
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Public ecosystem status dashboard — HTML page with deep health checks
 app.get("/status/dashboard", async (req, res) => {
   // Deep checks: test actual functionality, not just HTTP 200
@@ -1622,6 +1632,7 @@ function agentManifest(req, res) {
       verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
       status: { url: `${base}/status/all`, method: "GET", auth: false, description: "Multi-service health check (local + external)" },
       status_platforms: { url: `${base}/status/platforms`, method: "GET", auth: false, description: "Engagement platform health — per-platform read/write scores and overall verdict" },
+      status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },

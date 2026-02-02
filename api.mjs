@@ -1631,8 +1631,8 @@ app.get("/dashboard", async (req, res) => {
     // Directives
     (async () => {
       try {
-        const data = JSON.parse(readFileSync(join(BASE, "directive-tracking.json"), "utf-8"));
-        const directives = Object.entries(data.directives || {}).map(([name, d]) => {
+        const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf-8"));
+        const directives = Object.entries(data.compliance?.metrics || {}).map(([name, d]) => {
           const total = (d.followed || 0) + (d.ignored || 0);
           const rate = total > 0 ? +((d.followed || 0) / total * 100).toFixed(1) : null;
           const status = rate === null ? "no_data" : rate >= 90 ? "healthy" : rate >= 70 ? "warning" : "critical";
@@ -4697,10 +4697,10 @@ app.post("/directives/intake", (req, res) => {
 
 // --- Directive health dashboard ---
 app.get("/directives", (req, res) => {
-  const trackFile = join(BASE, "directive-tracking.json");
+  const trackFile = join(BASE, "directives.json");
   let data;
-  try { data = JSON.parse(readFileSync(trackFile, "utf-8")); } catch { return res.status(500).json({ error: "Cannot read directive-tracking.json" }); }
-  const directives = Object.entries(data.directives || {}).map(([name, d]) => {
+  try { data = JSON.parse(readFileSync(trackFile, "utf-8")); } catch { return res.status(500).json({ error: "Cannot read directives.json" }); }
+  const directives = Object.entries(data.compliance?.metrics || {}).map(([name, d]) => {
     const total = (d.followed || 0) + (d.ignored || 0);
     const rate = total > 0 ? +((d.followed || 0) / total * 100).toFixed(1) : null;
     // Weighted score from history (recent entries count 2x)

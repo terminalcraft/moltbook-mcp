@@ -9,7 +9,7 @@
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-TRACKING_FILE="$DIR/directive-tracking.json"
+TRACKING_FILE="$DIR/directives.json"
 AUDIT_LOG="$HOME/.config/moltbook/logs/directive-audit.log"
 
 log() { echo "$(date -Iseconds) s=${SESSION_NUM:-?} $*" >> "$AUDIT_LOG"; }
@@ -28,7 +28,7 @@ import json, sys, re
 log_file = '$LOG_FILE'
 mode = '${MODE_CHAR:-}'
 session = ${SESSION_NUM:-0}
-tracking_file = '$TRACKING_FILE'
+directives_file = '$TRACKING_FILE'
 
 # Extract all tool names and text snippets from log
 tool_names = set()
@@ -115,7 +115,7 @@ def check_briefing_update():
     return any('briefing.md' in f for f in file_edits_lower), 'No BRIEFING.md edits detected'
 
 def check_directive_update():
-    return any('directive-tracking.json' in f for f in file_edits_lower), 'No directive-tracking.json edits detected'
+    return any('directives.json' in f for f in file_edits_lower), 'No directives.json edits detected'
 
 CHECKS = {
     'structural-change': check_structural_change,
@@ -144,38 +144,40 @@ for did, modes in DIRECTIVE_MODES.items():
 
 audit = {'followed': followed, 'ignored': ignored}
 
-# --- Update tracking file (same logic as before) ---
+# --- Update compliance section in directives.json ---
 try:
-    raw_tracking = open(tracking_file).read().strip()
-    if not raw_tracking:
+    raw = open(directives_file).read().strip()
+    if not raw:
         raise ValueError('empty file')
-    data = json.loads(raw_tracking)
+    data = json.loads(raw)
 except Exception as e:
-    print(f'WARN: tracking file reset: {e}', file=sys.stderr)
-    data = {'version': 7, 'directives': {}}
+    print(f'ERROR: cannot read directives.json: {e}', file=sys.stderr)
+    sys.exit(0)
+
+metrics = data.setdefault('compliance', {}).setdefault('metrics', {})
 
 # Mark all applicable directives for this session type
 for did, modes in DIRECTIVE_MODES.items():
     if mode in modes:
-        if did not in data['directives']:
-            data['directives'][did] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': '', 'last_session': 0, 'last_applicable_session': 0, 'history': []}
-        data['directives'][did]['last_applicable_session'] = session
+        if did not in metrics:
+            metrics[did] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': '', 'last_session': 0, 'last_applicable_session': 0, 'history': []}
+        metrics[did]['last_applicable_session'] = session
 
 for name in audit['followed']:
     key = name.lower().strip()
-    if key not in data['directives']:
-        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': '', 'last_session': 0, 'last_applicable_session': 0, 'history': []}
-    data['directives'][key]['followed'] += 1
-    data['directives'][key]['last_session'] = session
+    if key not in metrics:
+        metrics[key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': '', 'last_session': 0, 'last_applicable_session': 0, 'history': []}
+    metrics[key]['followed'] += 1
+    metrics[key]['last_session'] = session
 
 for item in audit['ignored']:
     key = item['id']
     reason = item['reason']
-    if key not in data['directives']:
-        data['directives'][key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': '', 'last_session': 0, 'last_applicable_session': 0, 'history': []}
-    data['directives'][key]['ignored'] += 1
-    data['directives'][key]['last_ignored_reason'] = reason
-    data['directives'][key]['last_session'] = session
+    if key not in metrics:
+        metrics[key] = {'followed': 0, 'ignored': 0, 'last_ignored_reason': '', 'last_session': 0, 'last_applicable_session': 0, 'history': []}
+    metrics[key]['ignored'] += 1
+    metrics[key]['last_ignored_reason'] = reason
+    metrics[key]['last_session'] = session
 
 # Append history entries (max 10 per directive)
 followed_set = set(audit['followed'])
@@ -183,14 +185,16 @@ ignored_set = {item['id'] for item in audit['ignored']}
 for did, modes in DIRECTIVE_MODES.items():
     if mode not in modes:
         continue
-    d = data['directives'].get(did, {})
+    d = metrics.get(did, {})
     if 'history' not in d:
         d['history'] = []
     result = 'followed' if did in followed_set else ('ignored' if did in ignored_set else 'followed')
     d['history'].append({'session': session, 'result': result})
     d['history'] = d['history'][-10:]
 
-json.dump(data, open(tracking_file, 'w'), indent=2)
+with open(directives_file, 'w') as f:
+    json.dump(data, f, indent=2)
+    f.write('\n')
 applicable_count = sum(1 for d, m in DIRECTIVE_MODES.items() if mode in m)
 print(f'Updated {len(followed)} followed, {len(ignored)} ignored, {applicable_count} applicable for mode {mode}')
 " 2>&1) || {

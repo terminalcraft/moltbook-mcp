@@ -334,7 +334,7 @@ ${CTX_R_PROMPT_BLOCK:-## R Session
 Follow the checklist in SESSION_REFLECT.md.}"
 fi
 
-# Compliance nudge: inject directive-tracking feedback into the session prompt.
+# Compliance nudge: inject directives.json compliance feedback into the session prompt.
 # Pre-hook 39-compliance-nudge.sh writes this file when directives are being missed.
 COMPLIANCE_BLOCK=""
 COMPLIANCE_FILE="$STATE_DIR/compliance-nudge.txt"

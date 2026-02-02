@@ -7,7 +7,7 @@
 set -euo pipefail
 
 COST_FILE="$HOME/.config/moltbook/cost-history.json"
-DIRECTIVE_FILE="$HOME/moltbook-mcp/directive-tracking.json"
+DIRECTIVE_FILE="$HOME/moltbook-mcp/directives.json"
 
 [ -f "$COST_FILE" ] || exit 0
 
@@ -57,19 +57,19 @@ alert_file = os.path.expanduser("~/.config/moltbook/cost-alert.txt")
 with open(alert_file, 'w') as af:
     af.write(f"## COST ALERT\nLast session (s{session_num}, mode {mode}) cost ${this_cost:.2f} — {ratio:.1f}x the {mode}-mode average of ${avg:.2f}. Watch your budget this session.\n")
 
-# Log to directive-tracking under a "cost-anomaly" directive
+# Log to directives.json compliance.cost_anomaly
 try:
     dt = json.load(open(directive_file))
-    directives = dt.get('directives', {})
+    compliance = dt.setdefault('compliance', {})
 
-    if 'cost-anomaly' not in directives:
-        directives['cost-anomaly'] = {
+    if 'cost_anomaly' not in compliance:
+        compliance['cost_anomaly'] = {
             'description': 'Flag sessions costing 2x+ the mode average',
             'anomalies': [],
             'total_flagged': 0
         }
 
-    ca = directives['cost-anomaly']
+    ca = compliance['cost_anomaly']
     ca['anomalies'] = ca.get('anomalies', [])[-19:]  # keep last 20
     ca['anomalies'].append({
         'session': session_num,
@@ -82,12 +82,11 @@ try:
     ca['total_flagged'] = ca.get('total_flagged', 0) + 1
     ca['last_flagged_session'] = session_num
 
-    dt['directives'] = directives
     with open(directive_file, 'w') as f:
         json.dump(dt, f, indent=2)
         f.write('\n')
 
-    print(f"cost-anomaly: logged to directive-tracking")
+    print(f"cost-anomaly: logged to directives.json")
 except Exception as ex:
-    print(f"cost-anomaly: failed to write directive-tracking: {ex}", file=sys.stderr)
+    print(f"cost-anomaly: failed to write directives.json: {ex}", file=sys.stderr)
 PYEOF

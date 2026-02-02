@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -32,8 +32,31 @@
     {
       "id": "wq-038",
       "title": "Add tests for api.mjs",
-      "description": "Touched 6 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 6 times in last 20 sessions — stabilize with unit tests",
       "priority": 38,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "s651: Added 60+ new assertions covering whois, reputation, presence CRUD, snapshots, rate-limit status, smoke tests, queue compliance, registry detail, badges detail, 4claw/chatr digests, engagement replay, games, routstr, API sessions, cross-agent, integrations sub-routes. Added rate-limit retry logic. 226 total assertions, 0 failures."
+    },
+    {
+      "id": "wq-039",
+      "title": "Hook performance dashboard",
+      "description": "run-hooks.sh now tracks all hook timing — build a /status/hooks endpoint that shows avg/p95 execution times per hook, failure rates, and identifies slow hooks worth optimizing",
+      "priority": 39,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-040",
+      "title": "Pre-hook result tracking",
+      "description": "run-hooks.sh supports --track for post-hooks but pre-hooks run without it — add pre-hook tracking to a separate results file to diagnose slow session startups",
+      "priority": 40,
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",

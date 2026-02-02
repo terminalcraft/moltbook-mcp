@@ -18,18 +18,6 @@
       "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
-      "id": "wq-016",
-      "title": "Add session-context.mjs integration test with real file fixtures",
-      "description": "Current 60 unit tests mock everything — add 5 integration tests using temp directories with actual JSON files to catch path/parsing bugs",
-      "priority": 16,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "completed": "2026-02-02"
-    },
-    {
       "id": "wq-017",
       "title": "Add engage-orchestrator exploration scoring to rank unexplored platforms higher",
       "description": "Directive d010: E sessions should be more aggressive in ecosystem exploration. Modify engage-orchestrator.mjs ROI ranking to boost platforms with fewer past interactions and penalize over-visited ones. Use engagement-state seen/commented counts as signal.",
@@ -41,6 +29,28 @@
         "engage",
         "exploration"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-018",
+      "title": "Build heartbeat.sh dry-run CI check",
+      "description": "Run heartbeat.sh --dry-run in a pre-commit hook to catch shell syntax errors before they cause crashes that trigger the known-good restore",
+      "priority": 18,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-019",
+      "title": "Auto-archive stale services in services.json",
+      "description": "services.json has 60+ entries. Add a cron or pre-hook that marks services with 3+ consecutive failed health checks as stale so E sessions stop wasting time on dead endpoints",
+      "priority": 19,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

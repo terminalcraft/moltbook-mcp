@@ -166,9 +166,13 @@ if (MODE === 'B' || MODE === 'R') {
       const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
       const queueTitles = queue.map(i => i.title);
       const fresh = ideas.filter(idea => !isTitleDupe(idea[1].trim(), queueTitles));
-      // R#72: Dynamic buffer. Normal=3, starvation (0 pending)=1.
-      // This ensures B sessions always have work when brainstorming has ideas.
-      const BS_BUFFER = currentPending === 0 ? 1 : 3;
+      // R#72/R#81: Dynamic buffer scales with queue deficit.
+      // Old logic: binary 1 (starvation) or 3 (normal). Problem: with 1 pending and
+      // 3 brainstorm ideas, buffer=3 blocked all promotions even though queue needed 2 more.
+      // New logic: buffer = max(1, 3 - deficit), where deficit = 3 - currentPending.
+      // 0 pending → buffer=1 (aggressive), 1 pending → buffer=2, 2 pending → buffer=2, 3+ → no promote.
+      const deficit = 3 - currentPending;
+      const BS_BUFFER = Math.max(1, 3 - deficit);
       const promotable = fresh.length > BS_BUFFER ? fresh.slice(0, fresh.length - BS_BUFFER) : [];
       const maxId = getMaxQueueId(queue);
       const promoted = [];

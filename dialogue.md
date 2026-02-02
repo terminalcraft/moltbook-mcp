@@ -100,15 +100,6 @@ account-manager reports all 12 platforms as no_creds. Credential files exist on 
 
 **Directive 2: Replace dialogue.md with a structured communication system.**
 Current problems: (1) human directives buried under agent session summaries, (2) regex-based intake detection is fragile, (3) no acknowledgment that a directive was consumed, (4) no back-channel for agent to ask clarifying questions, (5) no structured status tracking on directives. Design and build a replacement. The fact that R#70 silently dropped one directive and misattributed the other is exactly the kind of failure this system should prevent.
-## Session 559 (agent)
-REFLECT session (R#67). **Structural change**: Added queue self-dedup pass to session-context.mjs. Normalizes titles (lowercase, strip punctuation, first 6 words) and removes later duplicates before any other queue processing runs. Triggered by wq-012 and wq-013 both being "engagement replay analytics" — accumulated from different sources (brainstorming-auto vs manual add). Cleaned the existing duplicate. Replenished brainstorming with 3 fresh ideas (queue health dashboard, session type effectiveness scoring, stale blocker auto-escalation).
-
-Pipeline: 3 pending, 5 blocked, 3 brainstorming ideas (all fresh). Ecosystem touch: Ctxly memory stored.
-
-**What I improved**: Duplicate queue items were silently accumulating. The de-dup logic in auto-promote only checked brainstorming-to-queue direction, not queue-to-queue. The new pass catches duplicates regardless of origin.
-
-**Still neglecting**: BRIEFING.md domain references still stale.
-
 ## Session 567 (agent)
 REFLECT session (R#69). **Structural change**: Added `retired` status to work queue system. 5 items (wq-004/005/007/009/010) had been blocked for 100-165 sessions with no resolution path — they were zombie entries inflating blocked count and triggering useless per-session blocker_check commands. Now marked `retired` with session/reason metadata. session-context.mjs updated to track retired separately from blocked. Queue went from 1 pending + 5 zombies to 3 pending + 5 retired.
 
@@ -146,6 +137,15 @@ Pipeline: 3 pending, 0 blocked, 5 retired, 3 brainstorming ideas. Ecosystem touc
 **What I improved**: Root-caused why the queue was at 0 pending despite having 2 brainstorming ideas — the fixed buffer of 3 prevented any promotion. The dynamic buffer ensures starvation triggers emergency promotion. The TODO auto-ingest means build sessions that leave TODOs automatically create follow-up work.
 
 **Still neglecting**: BRIEFING.md staleness (domain refs). The 5 retired blockers remain unanswered.
+
+## Session 583 (agent)
+REFLECT session (R#73). **Structural change**: Fixed TODO auto-ingest self-reference bug in session-context.mjs. The 27-todo-scan.sh post-hook was capturing template strings from session-context.mjs's own code (`title: \`TODO followup: ${raw.substring(0, 80)}\``) as literal TODO items, creating 3 garbage queue entries (wq-003/004/005). Added regex filter to reject lines containing JS template literals, code patterns, and JSON key strings. Removed the 3 garbage items from the queue.
+
+**Directive intake**: Acked d008. Decomposed account-manager credential fix into wq-008. Updated last_intake_session. Pipeline: 4 pending (wq-002/006/007/008), 0 blocked, 3 brainstorming ideas. Ecosystem touch: Ctxly memory stored.
+
+**What I improved**: The TODO→queue pipeline was creating garbage entries every time session-context.mjs itself was modified, because the todo-scan hook picked up its own template strings from git diffs. This is the root cause of the junk items from s582. The filter prevents this class of bug permanently.
+
+**Still neglecting**: d006 (account-manager cred path fix) is now properly queued as wq-008 but hasn't been built yet. d007 (dialogue.md replacement) is half-built — directives.json exists but dialogue.md remains the primary human input channel.
 
 ## Session 563 (agent)
 REFLECT session (R#68). **Structural change**: Restricted auto-promote in session-context.mjs to B sessions only and added a 3-idea buffer. Previously auto-promote ran for ALL modes, immediately depleting brainstorming after every R session — R adds ideas, next session promotes them all, brainstorming drops to 0, next R must replenish again. Now only B sessions (the actual consumer) trigger promotion, and they preserve at least 3 ideas in brainstorming. This breaks the deplete-replenish cycle that made every R session spend budget on pipeline maintenance.

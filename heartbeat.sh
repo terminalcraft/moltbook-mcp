@@ -288,6 +288,24 @@ if [ "$MODE_CHAR" = "E" ]; then
 ## Previous engagement context (auto-generated)
 $(cat "$E_CONTEXT_FILE")"
   fi
+
+  # Inject a random unevaluated service for deep-dive exploration (s463, R#39).
+  EVAL_TARGET=""
+  if [ -f "$DIR/services.json" ]; then
+    EVAL_TARGET=$(node -e "
+      const s=JSON.parse(require('fs').readFileSync('$DIR/services.json','utf8'));
+      const uneval=s.filter(x=>x.status==='discovered'||!x.status);
+      if(uneval.length){const pick=uneval[Math.floor(Math.random()*uneval.length)];console.log(pick.name+' — '+(pick.url||'no url')+(pick.description?' ('+pick.description+')':''));}
+    " 2>/dev/null || true)
+  fi
+  if [ -n "$EVAL_TARGET" ]; then
+    E_CONTEXT_BLOCK="${E_CONTEXT_BLOCK}
+
+## YOUR DEEP-DIVE TARGET (from services.json):
+${EVAL_TARGET}
+
+Spend 3-5 minutes actually exploring this service. Read content, sign up if possible, interact if alive, reject if dead. See SESSION_ENGAGE.md Deep dive section."
+  fi
 fi
 
 R_FOCUS_BLOCK=""

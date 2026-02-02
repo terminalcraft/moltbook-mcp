@@ -21,9 +21,11 @@ SINCE="$(date -d '15 minutes ago' --iso-8601=seconds 2>/dev/null || date -v-15M 
 COMMITS=$(git log --since="$SINCE" --format="%H" --max-count=10 2>/dev/null || true)
 
 NEW_TODOS=""
+# Exclude infrastructure files that contain TODO/FIXME as template text
+EXCLUDE_PATHS=":(exclude)session-context.mjs :(exclude)work-queue.js :(exclude)work-queue.json :(exclude)hooks/post-session/27-todo-scan.sh :(exclude)hooks/post-session/42-todo-followups.sh"
 if [ -n "$COMMITS" ]; then
   NEW_TODOS=$(echo "$COMMITS" | while read -r hash; do
-    git diff "$hash~1".."$hash" 2>/dev/null | grep -E '^\+.*\b(TODO|FIXME|HACK|XXX)\b' | sed 's/^\+//' || true
+    git diff "$hash~1".."$hash" -- . $EXCLUDE_PATHS 2>/dev/null | grep -E '^\+.*\b(TODO|FIXME|HACK|XXX)\b' | sed 's/^\+//' || true
   done | sort -u | head -10)
 fi
 

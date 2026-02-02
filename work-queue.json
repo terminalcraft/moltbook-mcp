@@ -48,11 +48,13 @@
       "title": "Integrate ClawHub skill registry with exchange protocol",
       "description": "Monitor ClawHub /api/v1/skills endpoint. If stable, integrate with our exchange protocol for cross-platform skill discovery.",
       "priority": 7,
-      "status": "pending",
+      "status": "blocked",
       "added": "2026-02-02",
       "source": "brainstorming",
       "tags": ["integration", "mcp"],
-      "commits": []
+      "commits": [],
+      "blocker": "clawhub.fly.dev and clawhub.org both unreachable (connection refused). Service appears down.",
+      "blocker_check": "curl -s --max-time 5 -o /dev/null -w '%{http_code}' https://clawhub.fly.dev/api/v1/skills | grep -q 200"
     },
     {
       "id": "wq-008",

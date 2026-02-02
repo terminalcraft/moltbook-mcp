@@ -645,6 +645,146 @@ function intTestFullPipelineChain() {
   assert(env.includes('CTX_PENDING_COUNT='), 'pipeline: env file has final pending count');
 }
 
+// ===== AUTO-PROMOTE THRESHOLD TESTS (wq-017) =====
+// Verify promotion counts for each pending-count scenario.
+// The buffer logic: BS_BUFFER = max(1, currentPending), promotable = fresh - BS_BUFFER,
+// capped at 3 - currentPending. These tests use 5 fresh ideas to exercise the cap.
+
+function cleanState() {
+  // Remove stale files from previous tests that setup() doesn't clear
+  for (const f of ['todo-followups.txt', 'session-history.txt', 'engagement-intel.json', 'engagement-intel-archive.json', 'r_session_counter']) {
+    try { rmSync(join(STATE, f)); } catch {}
+  }
+  for (const f of ['directives.json', 'services.json']) {
+    try { rmSync(join(SRC, f)); } catch {}
+  }
+}
+
+function makeFreshBS(count) {
+  const lines = [];
+  for (let i = 1; i <= count; i++) {
+    lines.push(`- **Unique threshold idea ${i} session ${Date.now()}**: description ${i}`);
+  }
+  return `## Evolution Ideas\n\n${lines.join('\n')}\n`;
+}
+
+function makePendingItems(count) {
+  const items = [];
+  for (let i = 1; i <= count; i++) {
+    items.push({ id: `wq-${String(i).padStart(3, '0')}`, title: `Existing pending task ${i}`, status: 'pending', priority: i });
+  }
+  return items;
+}
+
+function intTestAutoPromote0Pending() {
+  console.log('\n== Auto-promote threshold: 0 pending, 5 fresh ideas ==');
+
+  cleanState();
+  writeWQ([]);
+  writeBS(makeFreshBS(5));
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  // 0 pending → deficit=3, buffer=max(1,0)=1, promotable=5-1=4, cap=3-0=3 → 3 promoted
+  assert(result.auto_promoted?.length === 3, `0 pending: expected 3 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 3, `0 pending: final pending_count should be 3, got ${result.pending_count}`);
+
+  // At least 2 original ideas remain (5 - 3 promoted); auto-seed may add more
+  const bs = readBS();
+  const remaining = (bs.match(/^- \*\*/gm) || []).length;
+  assert(remaining >= 2, `0 pending: at least 2 ideas should remain in brainstorming, got ${remaining}`);
+}
+
+function intTestAutoPromote1Pending() {
+  console.log('\n== Auto-promote threshold: 1 pending, 5 fresh ideas ==');
+
+  cleanState();
+  writeWQ(makePendingItems(1));
+  writeBS(makeFreshBS(5));
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  // 1 pending → deficit=2, buffer=max(1,1)=1, promotable=5-1=4, cap=3-1=2 → 2 promoted
+  assert(result.auto_promoted?.length === 2, `1 pending: expected 2 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 3, `1 pending: final pending_count should be 3, got ${result.pending_count}`);
+}
+
+function intTestAutoPromote2Pending() {
+  console.log('\n== Auto-promote threshold: 2 pending, 5 fresh ideas ==');
+
+  cleanState();
+  writeWQ(makePendingItems(2));
+  writeBS(makeFreshBS(5));
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  // 2 pending → deficit=1, buffer=max(1,2)=2, promotable=5-2=3, cap=3-2=1 → 1 promoted
+  assert(result.auto_promoted?.length === 1, `2 pending: expected 1 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 3, `2 pending: final pending_count should be 3, got ${result.pending_count}`);
+}
+
+function intTestAutoPromote3Pending() {
+  console.log('\n== Auto-promote threshold: 3 pending, 5 fresh ideas ==');
+
+  cleanState();
+  writeWQ(makePendingItems(3));
+  writeBS(makeFreshBS(5));
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  // 3 pending → currentPending >= 3, auto-promote block skipped entirely
+  assert(!result.auto_promoted, `3 pending: no promotion expected, got ${result.auto_promoted?.length || 0}`);
+  assert(result.pending_count === 3, `3 pending: pending_count stays 3, got ${result.pending_count}`);
+}
+
+function intTestAutoPromoteFewIdeas() {
+  console.log('\n== Auto-promote threshold: 0 pending, 2 fresh ideas (starvation) ==');
+
+  cleanState();
+  writeWQ([]);
+  writeBS(makeFreshBS(2));
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  // 0 pending → buffer=1, promotable=2-1=1, cap=3 → 1 promoted
+  assert(result.auto_promoted?.length === 1, `starvation: expected 1 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 1, `starvation: pending_count should be 1, got ${result.pending_count}`);
+
+  // At least 1 original idea retained as buffer; auto-seed may add more
+  const bs = readBS();
+  const remaining = (bs.match(/^- \*\*/gm) || []).length;
+  assert(remaining >= 1, `starvation: at least 1 idea retained as buffer, got ${remaining}`);
+}
+
+function intTestAutoPromote1IdeaOnly() {
+  console.log('\n== Auto-promote threshold: 0 pending, 1 fresh idea ==');
+
+  cleanState();
+  writeWQ([]);
+  writeBS(makeFreshBS(1));
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  // 0 pending → buffer=1, promotable = 1>1? no → 0 promoted
+  assert(!result.auto_promoted || result.auto_promoted.length === 0, `1 idea: no promotion (buffer protects last idea)`);
+}
+
+function intTestAutoPromoteRThresholds() {
+  console.log('\n== Auto-promote threshold: R session with 1 pending, 4 fresh ideas ==');
+
+  cleanState();
+  writeWQ(makePendingItems(1));
+  writeBS(makeFreshBS(4));
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'r_session_counter'), '50');
+
+  const result = run('R', '200');
+  // Same logic applies in R sessions (R#74)
+  // 1 pending → buffer=1, promotable=4-1=3, cap=3-1=2 → 2 promoted
+  assert(result.auto_promoted?.length === 2, `R session: expected 2 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 3, `R session: final pending_count should be 3, got ${result.pending_count}`);
+}
+
 // ===== RUN =====
 
 try {
@@ -675,6 +815,14 @@ try {
   setup(); intTestEmptyWorkQueue();
   setup(); intTestExtraFieldsPreserved();
   setup(); intTestFullPipelineChain();
+  // Auto-promote threshold tests (wq-017)
+  setup(); intTestAutoPromote0Pending();
+  setup(); intTestAutoPromote1Pending();
+  setup(); intTestAutoPromote2Pending();
+  setup(); intTestAutoPromote3Pending();
+  setup(); intTestAutoPromoteFewIdeas();
+  setup(); intTestAutoPromote1IdeaOnly();
+  setup(); intTestAutoPromoteRThresholds();
 } finally {
   cleanup();
 }

@@ -1211,6 +1211,32 @@ app.get("/status/cost-heatmap", (req, res) => {
 
     const sortedDays = Object.keys(grid).sort();
     const totalCost = Object.values(typeTotals).reduce((s, t) => s + t.cost, 0);
+    const types = Object.keys(typeTotals).sort();
+
+    if (req.query.format === "html") {
+      const colors = { B: "#a6e3a1", E: "#89b4fa", R: "#f9e2af", L: "#cba6f7" };
+      const maxCost = Math.max(...sortedDays.flatMap(d => types.map(t => grid[d]?.[t]?.cost || 0)), 1);
+      let rows = "";
+      for (const day of sortedDays) {
+        let cells = `<td style="font-weight:600;padding:4px 8px">${day}</td>`;
+        for (const t of types) {
+          const c = grid[day]?.[t];
+          if (!c) { cells += `<td style="padding:4px 8px;background:#1e1e2e;color:#585b70">—</td>`; continue; }
+          const intensity = Math.min(c.cost / maxCost, 1);
+          const bg = colors[t] || "#cdd6f4";
+          const opacity = 0.15 + intensity * 0.85;
+          cells += `<td style="padding:4px 8px;background:${bg}${Math.round(opacity * 255).toString(16).padStart(2, "0")};text-align:center" title="${c.count} sessions">$${c.cost.toFixed(2)}</td>`;
+        }
+        rows += `<tr>${cells}</tr>`;
+      }
+      const totalRow = types.map(t => `<td style="padding:4px 8px;font-weight:700;text-align:center">$${(typeTotals[t]?.cost || 0).toFixed(2)}</td>`).join("");
+      const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Cost Heatmap</title>
+<style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:20px}table{border-collapse:collapse}td,th{border:1px solid #313244}th{padding:6px 8px;background:#313244}</style></head>
+<body><h2>Session Cost Heatmap (${days}d)</h2><p>Total: $${totalCost.toFixed(2)} across ${sortedDays.length} days</p>
+<table><thead><tr><th>Day</th>${types.map(t => `<th style="color:${colors[t] || "#cdd6f4"}">${t}</th>`).join("")}</tr></thead>
+<tbody>${rows}<tr style="border-top:2px solid #585b70"><td style="padding:4px 8px;font-weight:700">Total</td>${totalRow}</tr></tbody></table></body></html>`;
+      return res.type("html").send(html);
+    }
 
     res.json({
       days_requested: days,

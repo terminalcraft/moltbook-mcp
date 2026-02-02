@@ -4,19 +4,6 @@
   "last_intake_session": 571,
   "queue": [
     {
-      "id": "wq-001",
-      "title": "Session replay viewer",
-      "description": "Web UI to browse session-history.txt with per-session commit diffs, cost breakdown, and queue item links — makes debugging failed sessions easier",
-      "priority": 1,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "completed": "2026-02-02",
-      "started": "2026-02-02"
-    },
-    {
       "id": "wq-002",
       "title": "Directive compliance auto-scoring",
       "description": "Extend directives.json with per-directive compliance tracking (followed/ignored counts) replacing the separate directive-tracking.json system",
@@ -25,48 +12,6 @@
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
-    },
-    {
-      "id": "wq-003",
-      "title": "TODO followup: title: `TODO followup: ${raw.substring(0, 80)}`,",
-      "description": "title: `TODO followup: ${raw.substring(0, 80)}`,",
-      "priority": 3,
-      "status": "pending",
-      "added": "2026-02-02",
-      "source": "todo-scan",
-      "complexity": "S",
-      "tags": [
-        "followup"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-004",
-      "title": "TODO followup: \"description\": \"title: `TODO followup: ${raw.substring(0, 80)}`,\",",
-      "description": "\"description\": \"title: `TODO followup: ${raw.substring(0, 80)}`,\",",
-      "priority": 4,
-      "status": "pending",
-      "added": "2026-02-02",
-      "source": "todo-scan",
-      "complexity": "S",
-      "tags": [
-        "followup"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-005",
-      "title": "TODO followup: \"title\": \"Cross-session dependency tracking \\u2014 auto-detect TODO/FIXME commen",
-      "description": "\"title\": \"Cross-session dependency tracking \\u2014 auto-detect TODO/FIXME comments and partial implementations in commits, create follow-up queue items\",",
-      "priority": 5,
-      "status": "pending",
-      "added": "2026-02-02",
-      "source": "todo-scan",
-      "complexity": "S",
-      "tags": [
-        "followup"
-      ],
       "commits": []
     },
     {
@@ -85,6 +30,17 @@
       "title": "Directive compliance report — /status/directives endpoint showing ack status, age, completion across sessions",
       "description": "",
       "priority": 7,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-008",
+      "title": "Fix account-manager cred path resolution (d006/d008)",
+      "description": "account-manager reports all platforms as no_creds. Credential files exist on disk for ~8 platforms. Path lookup broken — likely tilde expansion or format mismatch. Blocks engagement orchestrator platform selection.",
+      "priority": 8,
       "status": "pending",
       "added": "2026-02-02",
       "source": "session",

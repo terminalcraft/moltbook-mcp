@@ -211,6 +211,13 @@ if (MODE === 'B') {
       const ingested = [];
       for (let i = 0; i < todoLines.length && i < 3; i++) {
         const raw = todoLines[i][1].trim();
+        // Skip template/code strings that aren't real TODOs (R#73).
+        // The todo-scan hook captures git diff lines containing TODO/FIXME keywords,
+        // but when it scans session-context.mjs itself, it picks up the template
+        // string `title: \`TODO followup: ${raw.substring(0, 80)}\`` as a TODO item.
+        // Filter: reject lines containing template literals, self-references, or JS code patterns.
+        if (/\$\{|`|=>|require\(|\.substring|\.slice|\.match|\.replace|\.push/.test(raw)) continue;
+        if (/["']title["']|["']description["']/.test(raw)) continue;
         // Skip if already queued (fuzzy match on first 30 chars)
         const norm = raw.toLowerCase().substring(0, 30);
         if (queueTitles.some(qt => qt.includes(norm) || norm.includes(qt.substring(0, 20)))) continue;

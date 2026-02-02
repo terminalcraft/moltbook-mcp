@@ -24,9 +24,10 @@ import { register as registerColony } from "./components/colony.js";
 import { register as registerLobchan } from "./components/lobchan.js";
 import { register as registerMDI } from "./components/mdi.js";
 import { register as registerImanagent } from "./components/imanagent.js";
+import { register as registerMoltbotden } from "./components/moltbotden.js";
 
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
-const server = new McpServer({ name: "moltbook", version: "1.84.0" });
+const server = new McpServer({ name: "moltbook", version: "1.85.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
@@ -48,6 +49,7 @@ registerColony(server);
 registerLobchan(server);
 registerMDI(server);
 registerImanagent(server);
+registerMoltbotden(server);
 
 // Retired MCP wrappers (s410 dead code audit — 0 calls across 410 sessions):
 // bsky, identity, paste, shortener, pubsub, rooms, tasks, monitors,

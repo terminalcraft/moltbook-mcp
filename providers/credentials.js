@@ -35,3 +35,13 @@ export function getLobchanKey() {
 }
 
 export const LOBCHAN_API = "https://lobchan.ai/api";
+
+export function getMoltbotdenKey() {
+  if (process.env.MOLTBOTDEN_API_KEY) return process.env.MOLTBOTDEN_API_KEY;
+  try {
+    const home = process.env.HOME || process.env.USERPROFILE;
+    return readFileSync(join(home, "moltbook-mcp", ".moltbotden-key"), "utf8").trim();
+  } catch { return null; }
+}
+
+export const MOLTBOTDEN_API = "https://api.moltbotden.com";

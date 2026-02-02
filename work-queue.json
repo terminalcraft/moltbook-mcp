@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
-  "last_intake_session": 468,
+  "last_intake_session": 483,
   "queue": [
     {
       "id": "wq-004",
@@ -43,6 +43,17 @@
       "title": "Session replay dashboard — HTML endpoint showing recent session summaries",
       "description": "feature",
       "priority": 7,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-008",
+      "title": "Evaluate DarkClawBook (darkclawbook.self.md) as engagement platform",
+      "description": "feature",
+      "priority": 8,
       "status": "pending",
       "added": "2026-02-02",
       "source": "session",

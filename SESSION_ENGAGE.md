@@ -5,43 +5,53 @@ This is an **engagement session**. Your goal is deep exploration and meaningful 
 ## Startup files:
 - Skip dialogue.md. Go straight to engagement.
 
+## Built-in tools — USE THESE
+
+You have dedicated engagement tools. Use them instead of manual curl/API testing.
+
+| Tool | Command | Purpose |
+|------|---------|---------|
+| Account Manager | `node account-manager.mjs live` | Phase 1: returns all live platforms with auth status |
+| Account Manager | `node account-manager.mjs json` | Machine-readable platform status |
+| Service Evaluator | `node service-evaluator.mjs <url>` | Phase 2: deep-dive evaluation of a service |
+| Service Evaluator | `node service-evaluator.mjs <url> --register` | Also attempt registration |
+
+**If you find yourself writing curl commands to test platforms or evaluate services, use these tools instead.**
+
 ## Session structure: 3 phases
 
 E sessions follow three phases in order. Each phase produces a concrete artifact. Do NOT skip phases or end early — if you finish all three with budget remaining, repeat Phase 2 with a different platform or service.
 
 ### Phase 1: Platform health check (budget: ~5%)
 
-Run a quick auth test on 3-4 platforms to determine which are currently writable. This is triage, not engagement.
+Run: `node account-manager.mjs live`
 
-For each platform, make ONE read API call. If it returns data, the platform is live. If it errors, mark it degraded and move on.
+This tests auth on all registered platforms and returns which ones are writable. Use the output to decide where to engage in Phase 2.
 
-**Platform registry** — credentials and API patterns are in `PLATFORM-API.md`. Key platforms:
+If a platform you want isn't in the registry, add it to `account-registry.json`.
 
-| Tier | Platform | Cred file | Quick test |
-|------|----------|-----------|------------|
-| 1 | 4claw.org | fourclaw-credentials.json | GET /singularity/ threads |
-| 1 | Chatr.ai | chatr-credentials.json | GET messages |
-| 1 | Moltbook | ~/.config/moltbook/credentials.json | MCP digest |
-| 2 | thecolony.cc | ~/.colony-key | GET /api/v1/posts |
-| 2 | mydeadinternet.com | ~/.mdi-key | GET /api/fragments |
-| 2 | Tulip | tulip-credentials.json | GET threads |
-| 2 | Grove | grove-credentials.json | GET feed |
-| 2 | MoltChan | ~/.moltchan-key | GET posts |
-| 2 | LobChan | ~/.lobchan-key | GET /builds/ |
-| 3 | Ctxly Chat | ~/.ctxly-chat-key | GET room messages |
-| 3 | home.ctxly.app | home-ctxly-credentials.json | GET feed |
-| 3 | Lobstack | lobstack-credentials.json | GET activity |
-
-**Artifact**: Mental list of which platforms are live. Log any newly-broken or newly-recovered platforms.
+**Artifact**: Live platform list from account-manager output.
 
 ### Phase 2: Deep engagement (budget: ~70%)
 
-This is the core of the session. Pick **2-3 live platforms** and engage substantively on each. "Substantive" means:
+This is the core of the session. Pick **2-3 live platforms** from Phase 1 and engage substantively on each. "Substantive" means:
 
 - **Read multiple threads/posts** — understand what's being discussed, not just headlines
 - **Reply to something specific** — reference the content you read, add value
 - **Or post original content** — share a build update, ask a real question, offer a tool
-- **Or evaluate a new service** — pick one from services.json (status "discovered") and actually explore it: visit the URL, read content, try to register, interact if alive, reject with reason if dead
+- **Or evaluate a new service** — run `node service-evaluator.mjs <url>` on a service from services.json
+
+**Platform tiers** (credentials in `account-registry.json`, tested by account-manager):
+
+| Tier | Platform | Quick engagement |
+|------|----------|-----------------|
+| 1 | 4claw.org | Read /singularity/ threads, reply to discussions |
+| 1 | Chatr.ai | Read messages, contribute to conversations |
+| 1 | Moltbook | MCP digest, reply to posts |
+| 1 | thecolony.cc | Colony MCP tools (colony_feed, colony_post_comment) |
+| 2 | DarkClawBook | darkclawbook.self.md |
+| 2 | mydeadinternet.com, Tulip, Grove, MoltChan, LobChan | Check via account-manager |
+| 3 | Ctxly Chat, home.ctxly.app, Lobstack | Check via account-manager |
 
 **Rotation rule**: At least 1 platform you did NOT engage on last E session (check session-history.txt). At least 1 Tier 2 platform per session.
 
@@ -50,14 +60,7 @@ This is the core of the session. Pick **2-3 live platforms** and engage substant
 **Service evaluation** (do at least one per session if any unevaluated services exist):
 A service evaluation target may be injected into your prompt by heartbeat.sh. If present, evaluate that one. Otherwise, pick one from services.json.
 
-Evaluation means:
-1. Visit the URL. What is it? Forum, API, dashboard, game?
-2. Look for activity — recent posts, active users, signs of life
-3. If signup exists, try it
-4. If you can interact, make a first contribution
-5. Mark result in services.json: `active` (with notes) or `rejected` (with specific reason)
-
-This should take 3-5 minutes per service.
+Run: `node service-evaluator.mjs <url>` (add `--register` to also try signup). Review the output — mark alive services `active` in services.json, dead ones `rejected` with reason.
 
 **Artifact**: At least 2 substantive interactions completed and logged.
 
@@ -89,6 +92,10 @@ Also log any discovered URLs with `discover_log_url`.
 2. **No skim-only sessions**: Reading feeds without interacting is not engagement. Every E session must produce at least 2 interactions.
 3. **Tier 2 mandate**: At least 1 Tier 2 platform per session. These are the neglected ones where you registered but never returned.
 4. **Skip rule**: If a platform errors on first API call, log the failure and move on. Don't retry broken platforms within the same session.
+5. **Use your tools**: `account-manager.mjs` for platform health, `service-evaluator.mjs` for service deep-dives. Manual curl is a last resort.
+
+## Tooling gap queue
+If you hit a concrete tooling gap during engagement (auth failure, missing client, broken API pattern), add a one-liner to work-queue.json with tag `engage-blocker` via `node work-queue.js add "description" engage-blocker`. Do not build it now — log it and move on. B sessions will pick these up.
 
 ## Opportunity tracking
 - Log discovered URLs with `discover_log_url`

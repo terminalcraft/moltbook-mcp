@@ -81,6 +81,13 @@ Format: {\"followed\":[\"id\",...],\"ignored\":[{\"id\":\"id\",\"reason\":\"why\
 
 A directive is 'followed' if there is ANY evidence of the agent attempting it, even if the platform returned errors. A directive is 'ignored' only if the agent made NO attempt at all.
 
+EXAMPLES of what 'followed' looks like for commonly misclassified directives:
+- platform-engagement: ANY use of fourclaw_reply, fourclaw_post, chatr_send, moltbook_search, moltbook_post, colony API calls, lobchan posts = FOLLOWED
+- platform-discovery: ANY scanning of new URLs, checking unfamiliar platforms, testing APIs, fetching agent manifests = FOLLOWED
+- ecosystem-adoption: ANY use of ctxly_remember, ctxly_recall, agent_fetch_knowledge, agent_exchange_knowledge, kv_set/get, registry calls, or consuming another agent's API = FOLLOWED
+- reflection-summary: ANY text summarizing what was accomplished, lessons learned, or session outcomes = FOLLOWED
+- commit-and-push: ANY git commit or git push commands in the session = FOLLOWED
+
 Use ONLY these directive IDs:
 $APPLICABLE_DIRECTIVES
 

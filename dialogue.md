@@ -96,3 +96,15 @@ Pipeline healthy: 3 pending, 1 blocked, 3 brainstorming. No new directives or in
 
 **Still neglecting**: AgentMail integration.
 
+### Human (s497+)
+
+Three things deployed by human operator. Do not remove or weaken any of them:
+
+1. **`hooks/pre-session/39-compliance-nudge.sh`** — reads directive-tracking.json before each session. When a directive has 3+ ignores in the last 5 applicable sessions, it injects a compliance alert into your prompt via `compliance-nudge.txt`. This closes the feedback loop on directive tracking — the data now reaches the session that can act on it.
+
+2. **`run-heartbeat.sh`** wrapper — cron now calls this instead of heartbeat.sh directly. If heartbeat.sh crashes before starting a Claude session (like the B_FOCUS unbound variable crash in s487 that took you offline), the wrapper auto-restores from `heartbeat.sh.known-good` and retries. On every successful session, it updates the known-good copy. This prevents self-inflicted downtime from bad heartbeat edits.
+
+3. **`hooks/pre-session/40-crash-awareness.sh`** — if run-heartbeat.sh detects a crash and restores from backup, it writes `last-crash.txt`. This pre-hook reads that file and injects a crash alert into your next session prompt so you know you broke yourself and can fix the root cause.
+
+These three form a safety net: you can freely edit heartbeat.sh, and if you break it, the system auto-heals and tells you what happened.
+

@@ -121,25 +121,42 @@ if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
   echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
 fi
 
+# --- Mode downgrade gates ---
+# Track whether a downgrade occurs so we can recompute session-context. (R#59)
+# session-context.mjs runs once with the initial mode, but downgrades change it.
+# Without recomputation, B→R downgrades get an R prompt block with a stale counter
+# (predicted as raw instead of raw+1), and E→B downgrades waste B-specific context.
+DOWNGRADED=""
+
 # Engagement health gate: if E session but no platforms are writable, downgrade to B.
-# This prevents wasting budget on "scan all broken platforms" sessions.
 if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
   ENGAGE_STATUS=$(node "$DIR/engagement-health.cjs" 2>/dev/null | tail -1 || echo "ENGAGE_DEGRADED")
   if [ "$ENGAGE_STATUS" = "ENGAGE_DEGRADED" ]; then
     echo "$(date -Iseconds) engage→build downgrade: all engagement platforms degraded" >> "$LOG_DIR/selfmod.log"
     MODE_CHAR="B"
+    DOWNGRADED="E→B"
   fi
 fi
 
 # Queue starvation gate: if B session but queue is empty, downgrade to R.
 # Threshold lowered from <2 to <1 in s479 (R#43): <2 caused cascading R downgrades.
-# With BBRE rotation, R sessions replenish every 4th session. B should run whenever
-# there's ANY pending work, not wait for 2+ items.
 if [ "$MODE_CHAR" = "B" ] && [ -z "$OVERRIDE_MODE" ]; then
   PENDING_COUNT="${CTX_PENDING_COUNT:-0}"
   if [ "$PENDING_COUNT" -lt 1 ]; then
     echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items" >> "$LOG_DIR/selfmod.log"
     MODE_CHAR="R"
+    DOWNGRADED="${DOWNGRADED:-B→R}"
+  fi
+fi
+
+# Recompute session context after downgrade so prompt blocks match actual mode. (R#59)
+# Fixes: B→R downgrades getting stale R counter (raw instead of raw+1),
+# E→B→R cascades getting neither B task nor R prompt block correct.
+if [ -n "$DOWNGRADED" ]; then
+  echo "$(date -Iseconds) recomputing session-context for downgrade: $DOWNGRADED → $MODE_CHAR" >> "$LOG_DIR/selfmod.log"
+  node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo '{}' > "$CTX_FILE"
+  if [ -f "$CTX_ENV" ]; then
+    source "$CTX_ENV"
   fi
 fi
 

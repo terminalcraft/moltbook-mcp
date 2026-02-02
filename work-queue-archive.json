@@ -559,6 +559,22 @@
         "meta"
       ],
       "notes": "s457: 18-cost-anomaly.sh post-hook. Computes per-mode avg from cost-history.json, flags 3x+ sessions, logs to directive-tracking."
+    },
+    {
+      "id": "wq-048",
+      "title": "Cross-agent state comparison \u2014 fetch and compare /agent.json manifests",
+      "description": "Probe known agent exchange endpoints, compare capability lists, identify collaboration targets and integration gaps.",
+      "priority": 5,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [
+        "feature"
+      ],
+      "commits": [
+        "f61bf77"
+      ],
+      "notes": "s458: Built agent-compare.mjs CLI + /compare API endpoint. Probed 30 endpoints \u2014 we're the only agent with a working /agent.json manifest. v1.94.0."
     }
   ]
 }

@@ -1,0 +1,7182 @@
+{
+  "meta": {
+    "generated": "2026-02-02T05:26:57.122Z",
+    "source": "https://api.routstr.com/v1/models",
+    "totalModels": 333,
+    "enabledModels": 333,
+    "modelsWithPricing": 333,
+    "freeModels": 2
+  },
+  "stats": {
+    "modalityCounts": {
+      "text+image->text": 59,
+      "text->text": 191,
+      "text+audio->text+audio": 3,
+      "text+image+video->text": 4,
+      "text+image+file+audio+video->text": 10,
+      "text+image+file->text": 36,
+      "text+image+file+video->text": 1,
+      "text+image->text+image": 2,
+      "text+audio->text": 1,
+      "text+image+file->text+image": 2,
+      "text+image+file+audio->text": 1,
+      "text+file->text": 2,
+      "text->embeddings": 21
+    },
+    "tagCounts": {
+      "coding": 113,
+      "reasoning": 175,
+      "vision": 115,
+      "long-context": 218,
+      "fast": 57,
+      "roleplay": 17,
+      "audio": 15,
+      "free": 2,
+      "premium": 20
+    },
+    "providerCounts": {
+      "MoonshotAI": 6,
+      "MiniMax": 5,
+      "Writer": 1,
+      "OpenAI": 59,
+      "Z.AI": 9,
+      "AllenAI": 6,
+      "ByteDance Seed": 2,
+      "Google": 20,
+      "Mistral": 29,
+      "Xiaomi": 1,
+      "NVIDIA": 6,
+      "Relace": 2,
+      "Nex AGI": 1,
+      "EssentialAI": 1,
+      "Amazon": 5,
+      "Arcee AI": 5,
+      "DeepSeek": 12,
+      "Prime Intellect": 1,
+      "TNG": 3,
+      "Anthropic": 11,
+      "xAI": 8,
+      "Deep Cogito": 3,
+      "Kwaipilot": 1,
+      "Perplexity": 5,
+      "Qwen": 39,
+      "LiquidAI": 2,
+      "IBM": 1,
+      "Baidu": 5,
+      "TheDrummer": 4,
+      "Tongyi DeepResearch 30B A3B": 1,
+      "OpenGVLab": 1,
+      "Meituan": 1,
+      "Cogito V2 Preview Llama 109B": 1,
+      "StepFun": 1,
+      "Nous": 5,
+      "AI21": 2,
+      "ByteDance": 1,
+      "Switchpoint Router": 1,
+      "Tencent": 1,
+      "Morph": 2,
+      "Inception": 2,
+      "Meta": 14,
+      "EleutherAI": 1,
+      "AlfredPros": 1,
+      "Cohere": 4,
+      "Llama Guard 3 8B": 1,
+      "AionLabs": 3,
+      "Microsoft": 1,
+      "Sao10K": 4,
+      "Mistral Large 2411": 1,
+      "Mistral Large 2407": 1,
+      "Qwen2.5 Coder 32B Instruct": 1,
+      "SorcererLM 8x22B": 1,
+      "Magnum v4 72B": 1,
+      "Inflection": 2,
+      "Qwen2.5 72B Instruct": 1,
+      "NeverSleep": 1,
+      "Sao10k": 1,
+      "NousResearch": 1,
+      "WizardLM-2 8x22B": 1,
+      "Mistral Large": 1,
+      "Mistral Tiny": 1,
+      "Noromaid 20B": 1,
+      "Goliath 120B": 1,
+      "Mancer": 1,
+      "ReMM SLERP 13B": 1,
+      "MythoMax 13B": 1,
+      "Thenlper": 2,
+      "Intfloat": 3,
+      "Sentence Transformers": 5,
+      "BAAI": 3
+    }
+  },
+  "rankings": {
+    "cheapest": [
+      {
+        "id": "gte-base",
+        "name": "Thenlper: GTE-Base",
+        "costPer1kTokens": 0.00000265,
+        "context": 512,
+        "tags": []
+      },
+      {
+        "id": "e5-base-v2",
+        "name": "Intfloat: E5-Base-v2",
+        "costPer1kTokens": 0.00000265,
+        "context": 512,
+        "tags": []
+      },
+      {
+        "id": "paraphrase-minilm-l6-v2",
+        "name": "Sentence Transformers: paraphrase-MiniLM-L6-v2",
+        "costPer1kTokens": 0.00000265,
+        "context": 512,
+        "tags": [
+          "fast"
+        ]
+      },
+      {
+        "id": "all-minilm-l12-v2",
+        "name": "Sentence Transformers: all-MiniLM-L12-v2",
+        "costPer1kTokens": 0.00000265,
+        "context": 512,
+        "tags": [
+          "fast"
+        ]
+      },
+      {
+        "id": "bge-base-en-v1.5",
+        "name": "BAAI: bge-base-en-v1.5",
+        "costPer1kTokens": 0.00000265,
+        "context": 512,
+        "tags": []
+      },
+      {
+        "id": "multi-qa-mpnet-base-dot-v1",
+        "name": "Sentence Transformers: multi-qa-mpnet-base-dot-v1",
+        "costPer1kTokens": 0.00000265,
+        "context": 512,
+        "tags": []
+      },
+      {
+        "id": "all-mpnet-base-v2",
+        "name": "Sentence Transformers: all-mpnet-base-v2",
+        "costPer1kTokens": 0.00000265,
+        "context": 512,
+        "tags": []
+      },
+      {
+        "id": "all-minilm-l6-v2",
+        "name": "Sentence Transformers: all-MiniLM-L6-v2",
+        "costPer1kTokens": 0.00000265,
+        "context": 512,
+        "tags": [
+          "fast"
+        ]
+      },
+      {
+        "id": "gte-large",
+        "name": "Thenlper: GTE-Large",
+        "costPer1kTokens": 0.0000053,
+        "context": 512,
+        "tags": []
+      },
+      {
+        "id": "e5-large-v2",
+        "name": "Intfloat: E5-Large-v2",
+        "costPer1kTokens": 0.0000053,
+        "context": 512,
+        "tags": []
+      },
+      {
+        "id": "multilingual-e5-large",
+        "name": "Intfloat: Multilingual-E5-Large",
+        "costPer1kTokens": 0.0000053,
+        "context": 512,
+        "tags": []
+      },
+      {
+        "id": "bge-large-en-v1.5",
+        "name": "BAAI: bge-large-en-v1.5",
+        "costPer1kTokens": 0.0000053,
+        "context": 512,
+        "tags": []
+      },
+      {
+        "id": "bge-m3",
+        "name": "BAAI: bge-m3",
+        "costPer1kTokens": 0.0000053,
+        "context": 8192,
+        "tags": []
+      },
+      {
+        "id": "qwen3-embedding-8b",
+        "name": "Qwen: Qwen3 Embedding 8B",
+        "costPer1kTokens": 0.0000053,
+        "context": 32000,
+        "tags": [
+          "reasoning"
+        ]
+      },
+      {
+        "id": "text-embedding-3-small",
+        "name": "OpenAI: Text Embedding 3 Small",
+        "costPer1kTokens": 0.0000106,
+        "context": 8192,
+        "tags": []
+      },
+      {
+        "id": "qwen3-embedding-4b",
+        "name": "Qwen: Qwen3 Embedding 4B",
+        "costPer1kTokens": 0.0000106,
+        "context": 32768,
+        "tags": [
+          "reasoning"
+        ]
+      },
+      {
+        "id": "lfm2-8b-a1b",
+        "name": "LiquidAI: LFM2-8B-A1B",
+        "costPer1kTokens": 0.0000159,
+        "context": 32768,
+        "tags": []
+      },
+      {
+        "id": "lfm-2.2-6b",
+        "name": "LiquidAI: LFM2-2.6B",
+        "costPer1kTokens": 0.0000159,
+        "context": 32768,
+        "tags": []
+      },
+      {
+        "id": "llama-3.2-3b-instruct",
+        "name": "Meta: Llama 3.2 3B Instruct",
+        "costPer1kTokens": 0.0000212,
+        "context": 131072,
+        "tags": [
+          "reasoning",
+          "long-context"
+        ]
+      },
+      {
+        "id": "gemma-3n-e4b-it",
+        "name": "Google: Gemma 3n 4B",
+        "costPer1kTokens": 0.0000318,
+        "context": 32768,
+        "tags": []
+      }
+    ],
+    "largestContext": [
+      {
+        "id": "grok-4.1-fast",
+        "name": "xAI: Grok 4.1 Fast",
+        "context_length": 2000000,
+        "costPer1kTokens": 0.000371
+      },
+      {
+        "id": "grok-4-fast",
+        "name": "xAI: Grok 4 Fast",
+        "context_length": 2000000,
+        "costPer1kTokens": 0.000371
+      },
+      {
+        "id": "gemini-3-flash-preview",
+        "name": "Google: Gemini 3 Flash Preview",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.001855
+      },
+      {
+        "id": "gemini-3-pro-preview",
+        "name": "Google: Gemini 3 Pro Preview",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.00742
+      },
+      {
+        "id": "gemini-2.5-flash-preview-09-2025",
+        "name": "Google: Gemini 2.5 Flash Preview 09-2025",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.0014840000000000003
+      },
+      {
+        "id": "gemini-2.5-flash-lite-preview-09-2025",
+        "name": "Google: Gemini 2.5 Flash Lite Preview 09-2025",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.000265
+      },
+      {
+        "id": "gemini-2.5-flash-lite",
+        "name": "Google: Gemini 2.5 Flash Lite",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.000265
+      },
+      {
+        "id": "gemini-2.5-flash",
+        "name": "Google: Gemini 2.5 Flash",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.0014840000000000003
+      },
+      {
+        "id": "gemini-2.5-pro",
+        "name": "Google: Gemini 2.5 Pro",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.005962500000000001
+      },
+      {
+        "id": "gemini-2.5-pro-preview",
+        "name": "Google: Gemini 2.5 Pro Preview 06-05",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.005962500000000001
+      },
+      {
+        "id": "gemini-2.5-pro-preview-05-06",
+        "name": "Google: Gemini 2.5 Pro Preview 05-06",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.005962500000000001
+      },
+      {
+        "id": "llama-4-maverick",
+        "name": "Meta: Llama 4 Maverick",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.0003975
+      },
+      {
+        "id": "gemini-2.0-flash-lite-001",
+        "name": "Google: Gemini 2.0 Flash Lite",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.00019875
+      },
+      {
+        "id": "gemini-2.0-flash-001",
+        "name": "Google: Gemini 2.0 Flash",
+        "context_length": 1048576,
+        "costPer1kTokens": 0.000265
+      },
+      {
+        "id": "gpt-4.1",
+        "name": "OpenAI: GPT-4.1",
+        "context_length": 1047576,
+        "costPer1kTokens": 0.0053
+      }
+    ],
+    "byTask": {
+      "code-generation": [
+        {
+          "rank": 1,
+          "id": "qwen3-embedding-8b",
+          "name": "Qwen: Qwen3 Embedding 8B",
+          "context_length": 32000,
+          "costPer1kTokens": 0.0000053,
+          "satsPer1kTokens": 0.00705352829462987,
+          "tags": [
+            "reasoning"
+          ]
+        },
+        {
+          "rank": 2,
+          "id": "qwen3-embedding-4b",
+          "name": "Qwen: Qwen3 Embedding 4B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000106,
+          "satsPer1kTokens": 0.01410705658925974,
+          "tags": [
+            "reasoning"
+          ]
+        },
+        {
+          "rank": 3,
+          "id": "lfm2-8b-a1b",
+          "name": "LiquidAI: LFM2-8B-A1B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000159,
+          "satsPer1kTokens": 0.02116058488388961,
+          "tags": []
+        },
+        {
+          "rank": 4,
+          "id": "lfm-2.2-6b",
+          "name": "LiquidAI: LFM2-2.6B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000159,
+          "satsPer1kTokens": 0.02116058488388961,
+          "tags": []
+        },
+        {
+          "rank": 5,
+          "id": "llama-3.2-3b-instruct",
+          "name": "Meta: Llama 3.2 3B Instruct",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000212,
+          "satsPer1kTokens": 0.02821411317851948,
+          "tags": [
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 6,
+          "id": "mistral-nemo",
+          "name": "Mistral: Mistral Nemo",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000318,
+          "satsPer1kTokens": 0.04232116976777922,
+          "tags": [
+            "long-context"
+          ]
+        },
+        {
+          "rank": 7,
+          "id": "gemma-3n-e4b-it",
+          "name": "Google: Gemma 3n 4B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000318,
+          "satsPer1kTokens": 0.04232116976777922,
+          "tags": []
+        },
+        {
+          "rank": 8,
+          "id": "llama-guard-3-8b",
+          "name": "Llama Guard 3 8B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000424,
+          "satsPer1kTokens": 0.05642822635703896,
+          "tags": [
+            "long-context"
+          ]
+        },
+        {
+          "rank": 9,
+          "id": "ministral-3b",
+          "name": "Mistral: Ministral 3B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000424,
+          "satsPer1kTokens": 0.05642822635703896,
+          "tags": [
+            "fast",
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 10,
+          "id": "gemma-3-4b-it",
+          "name": "Google: Gemma 3 4B",
+          "context_length": 96000,
+          "costPer1kTokens": 0.0000451473716,
+          "satsPer1kTokens": 0.06008457792618283,
+          "tags": [
+            "reasoning",
+            "vision"
+          ]
+        },
+        {
+          "rank": 11,
+          "id": "llama-3.2-11b-vision-instruct",
+          "name": "Meta: Llama 3.2 11B Vision Instruct",
+          "context_length": 131072,
+          "costPer1kTokens": 0.00005194000000000001,
+          "satsPer1kTokens": 0.06912457728737273,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 12,
+          "id": "gpt-oss-20b",
+          "name": "OpenAI: gpt-oss-20b",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000636,
+          "satsPer1kTokens": 0.08464233953555843,
+          "tags": [
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 13,
+          "id": "deephermes-3-mistral-24b-preview",
+          "name": "Nous: DeepHermes 3 Mistral 24B Preview",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000636,
+          "satsPer1kTokens": 0.08464233953555843,
+          "tags": [
+            "reasoning"
+          ]
+        },
+        {
+          "rank": 14,
+          "id": "qwen2.5-coder-7b-instruct",
+          "name": "Qwen: Qwen2.5 Coder 7B Instruct",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000636,
+          "satsPer1kTokens": 0.08464233953555844,
+          "tags": [
+            "coding",
+            "reasoning"
+          ]
+        },
+        {
+          "rank": 15,
+          "id": "granite-4.0-h-micro",
+          "name": "IBM: Granite 4.0 Micro",
+          "context_length": 131000,
+          "costPer1kTokens": 0.00006731000000000002,
+          "satsPer1kTokens": 0.08957980934179935,
+          "tags": [
+            "long-context"
+          ]
+        }
+      ],
+      "code-review": [
+        {
+          "rank": 1,
+          "id": "qwen3-embedding-8b",
+          "name": "Qwen: Qwen3 Embedding 8B",
+          "context_length": 32000,
+          "costPer1kTokens": 0.0000053,
+          "satsPer1kTokens": 0.00705352829462987,
+          "tags": [
+            "reasoning"
+          ]
+        },
+        {
+          "rank": 2,
+          "id": "qwen3-embedding-4b",
+          "name": "Qwen: Qwen3 Embedding 4B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000106,
+          "satsPer1kTokens": 0.01410705658925974,
+          "tags": [
+            "reasoning"
+          ]
+        },
+        {
+          "rank": 3,
+          "id": "lfm2-8b-a1b",
+          "name": "LiquidAI: LFM2-8B-A1B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000159,
+          "satsPer1kTokens": 0.02116058488388961,
+          "tags": []
+        },
+        {
+          "rank": 4,
+          "id": "lfm-2.2-6b",
+          "name": "LiquidAI: LFM2-2.6B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000159,
+          "satsPer1kTokens": 0.02116058488388961,
+          "tags": []
+        },
+        {
+          "rank": 5,
+          "id": "llama-3.2-3b-instruct",
+          "name": "Meta: Llama 3.2 3B Instruct",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000212,
+          "satsPer1kTokens": 0.02821411317851948,
+          "tags": [
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 6,
+          "id": "mistral-nemo",
+          "name": "Mistral: Mistral Nemo",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000318,
+          "satsPer1kTokens": 0.04232116976777922,
+          "tags": [
+            "long-context"
+          ]
+        },
+        {
+          "rank": 7,
+          "id": "gemma-3n-e4b-it",
+          "name": "Google: Gemma 3n 4B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000318,
+          "satsPer1kTokens": 0.04232116976777922,
+          "tags": []
+        },
+        {
+          "rank": 8,
+          "id": "llama-3.1-8b-instruct",
+          "name": "Meta: Llama 3.1 8B Instruct",
+          "context_length": 16384,
+          "costPer1kTokens": 0.0000371,
+          "satsPer1kTokens": 0.049374698062409086,
+          "tags": []
+        },
+        {
+          "rank": 9,
+          "id": "llama-guard-3-8b",
+          "name": "Llama Guard 3 8B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000424,
+          "satsPer1kTokens": 0.05642822635703896,
+          "tags": [
+            "long-context"
+          ]
+        },
+        {
+          "rank": 10,
+          "id": "ministral-3b",
+          "name": "Mistral: Ministral 3B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000424,
+          "satsPer1kTokens": 0.05642822635703896,
+          "tags": [
+            "fast",
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 11,
+          "id": "gemma-3-4b-it",
+          "name": "Google: Gemma 3 4B",
+          "context_length": 96000,
+          "costPer1kTokens": 0.0000451473716,
+          "satsPer1kTokens": 0.06008457792618283,
+          "tags": [
+            "reasoning",
+            "vision"
+          ]
+        },
+        {
+          "rank": 12,
+          "id": "llama-3.2-11b-vision-instruct",
+          "name": "Meta: Llama 3.2 11B Vision Instruct",
+          "context_length": 131072,
+          "costPer1kTokens": 0.00005194000000000001,
+          "satsPer1kTokens": 0.06912457728737273,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 13,
+          "id": "gpt-oss-20b",
+          "name": "OpenAI: gpt-oss-20b",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000636,
+          "satsPer1kTokens": 0.08464233953555843,
+          "tags": [
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 14,
+          "id": "deephermes-3-mistral-24b-preview",
+          "name": "Nous: DeepHermes 3 Mistral 24B Preview",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000636,
+          "satsPer1kTokens": 0.08464233953555843,
+          "tags": [
+            "reasoning"
+          ]
+        },
+        {
+          "rank": 15,
+          "id": "qwen2.5-coder-7b-instruct",
+          "name": "Qwen: Qwen2.5 Coder 7B Instruct",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000636,
+          "satsPer1kTokens": 0.08464233953555844,
+          "tags": [
+            "coding",
+            "reasoning"
+          ]
+        }
+      ],
+      "chat-agent": [
+        {
+          "rank": 1,
+          "id": "qwen3-embedding-8b",
+          "name": "Qwen: Qwen3 Embedding 8B",
+          "context_length": 32000,
+          "costPer1kTokens": 0.0000053,
+          "satsPer1kTokens": 0.00705352829462987,
+          "tags": [
+            "reasoning"
+          ]
+        },
+        {
+          "rank": 2,
+          "id": "bge-m3",
+          "name": "BAAI: bge-m3",
+          "context_length": 8192,
+          "costPer1kTokens": 0.0000053,
+          "satsPer1kTokens": 0.00705352829462987,
+          "tags": []
+        },
+        {
+          "rank": 3,
+          "id": "qwen3-embedding-4b",
+          "name": "Qwen: Qwen3 Embedding 4B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000106,
+          "satsPer1kTokens": 0.01410705658925974,
+          "tags": [
+            "reasoning"
+          ]
+        },
+        {
+          "rank": 4,
+          "id": "text-embedding-3-small",
+          "name": "OpenAI: Text Embedding 3 Small",
+          "context_length": 8192,
+          "costPer1kTokens": 0.0000106,
+          "satsPer1kTokens": 0.01410705658925974,
+          "tags": []
+        },
+        {
+          "rank": 5,
+          "id": "lfm2-8b-a1b",
+          "name": "LiquidAI: LFM2-8B-A1B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000159,
+          "satsPer1kTokens": 0.02116058488388961,
+          "tags": []
+        },
+        {
+          "rank": 6,
+          "id": "lfm-2.2-6b",
+          "name": "LiquidAI: LFM2-2.6B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000159,
+          "satsPer1kTokens": 0.02116058488388961,
+          "tags": []
+        },
+        {
+          "rank": 7,
+          "id": "llama-3.2-3b-instruct",
+          "name": "Meta: Llama 3.2 3B Instruct",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000212,
+          "satsPer1kTokens": 0.02821411317851948,
+          "tags": [
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 8,
+          "id": "mistral-nemo",
+          "name": "Mistral: Mistral Nemo",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000318,
+          "satsPer1kTokens": 0.04232116976777922,
+          "tags": [
+            "long-context"
+          ]
+        },
+        {
+          "rank": 9,
+          "id": "gemma-3n-e4b-it",
+          "name": "Google: Gemma 3n 4B",
+          "context_length": 32768,
+          "costPer1kTokens": 0.0000318,
+          "satsPer1kTokens": 0.04232116976777922,
+          "tags": []
+        },
+        {
+          "rank": 10,
+          "id": "llama-3.1-8b-instruct",
+          "name": "Meta: Llama 3.1 8B Instruct",
+          "context_length": 16384,
+          "costPer1kTokens": 0.0000371,
+          "satsPer1kTokens": 0.049374698062409086,
+          "tags": []
+        },
+        {
+          "rank": 11,
+          "id": "llama-guard-3-8b",
+          "name": "Llama Guard 3 8B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000424,
+          "satsPer1kTokens": 0.05642822635703896,
+          "tags": [
+            "long-context"
+          ]
+        },
+        {
+          "rank": 12,
+          "id": "ministral-3b",
+          "name": "Mistral: Ministral 3B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000424,
+          "satsPer1kTokens": 0.05642822635703896,
+          "tags": [
+            "fast",
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 13,
+          "id": "gemma-3-4b-it",
+          "name": "Google: Gemma 3 4B",
+          "context_length": 96000,
+          "costPer1kTokens": 0.0000451473716,
+          "satsPer1kTokens": 0.06008457792618283,
+          "tags": [
+            "reasoning",
+            "vision"
+          ]
+        },
+        {
+          "rank": 14,
+          "id": "l3-lunaris-8b",
+          "name": "Sao10K: Llama 3 8B Lunaris",
+          "context_length": 8192,
+          "costPer1kTokens": 0.000047699999999999994,
+          "satsPer1kTokens": 0.06348175465166882,
+          "tags": [
+            "reasoning",
+            "roleplay"
+          ]
+        },
+        {
+          "rank": 15,
+          "id": "llama-3-8b-instruct",
+          "name": "Meta: Llama 3 8B Instruct",
+          "context_length": 8192,
+          "costPer1kTokens": 0.000047699999999999994,
+          "satsPer1kTokens": 0.06348175465166883,
+          "tags": []
+        }
+      ],
+      "vision-analysis": [
+        {
+          "rank": 1,
+          "id": "grok-4.1-fast",
+          "name": "xAI: Grok 4.1 Fast",
+          "context_length": 2000000,
+          "costPer1kTokens": 0.000371,
+          "satsPer1kTokens": 0.49374698062409084,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 2,
+          "id": "grok-4-fast",
+          "name": "xAI: Grok 4 Fast",
+          "context_length": 2000000,
+          "costPer1kTokens": 0.000371,
+          "satsPer1kTokens": 0.49374698062409084,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 3,
+          "id": "gemini-3-flash-preview",
+          "name": "Google: Gemini 3 Flash Preview",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.001855,
+          "satsPer1kTokens": 2.4687349031204544,
+          "tags": [
+            "coding",
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 4,
+          "id": "gemini-3-pro-preview",
+          "name": "Google: Gemini 3 Pro Preview",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.00742,
+          "satsPer1kTokens": 9.874939612481818,
+          "tags": [
+            "coding",
+            "fast",
+            "premium",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 5,
+          "id": "gemini-2.5-flash-preview-09-2025",
+          "name": "Google: Gemini 2.5 Flash Preview 09-2025",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.0014840000000000003,
+          "satsPer1kTokens": 1.9749879224963638,
+          "tags": [
+            "coding",
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 6,
+          "id": "gemini-2.5-flash-lite-preview-09-2025",
+          "name": "Google: Gemini 2.5 Flash Lite Preview 09-2025",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.000265,
+          "satsPer1kTokens": 0.35267641473149347,
+          "tags": [
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 7,
+          "id": "gemini-2.5-flash-lite",
+          "name": "Google: Gemini 2.5 Flash Lite",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.000265,
+          "satsPer1kTokens": 0.35267641473149347,
+          "tags": [
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 8,
+          "id": "gemini-2.5-flash",
+          "name": "Google: Gemini 2.5 Flash",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.0014840000000000003,
+          "satsPer1kTokens": 1.9749879224963638,
+          "tags": [
+            "coding",
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 9,
+          "id": "gemini-2.5-pro",
+          "name": "Google: Gemini 2.5 Pro",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.005962500000000001,
+          "satsPer1kTokens": 7.935219331458604,
+          "tags": [
+            "coding",
+            "fast",
+            "premium",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 10,
+          "id": "gemini-2.5-pro-preview",
+          "name": "Google: Gemini 2.5 Pro Preview 06-05",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.005962500000000001,
+          "satsPer1kTokens": 7.935219331458604,
+          "tags": [
+            "coding",
+            "fast",
+            "premium",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 11,
+          "id": "gemini-2.5-pro-preview-05-06",
+          "name": "Google: Gemini 2.5 Pro Preview 05-06",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.005962500000000001,
+          "satsPer1kTokens": 7.935219331458604,
+          "tags": [
+            "coding",
+            "fast",
+            "premium",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 12,
+          "id": "llama-4-maverick",
+          "name": "Meta: Llama 4 Maverick",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.0003975,
+          "satsPer1kTokens": 0.5290146220972403,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 13,
+          "id": "gemini-2.0-flash-lite-001",
+          "name": "Google: Gemini 2.0 Flash Lite",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.00019875,
+          "satsPer1kTokens": 0.26450731104862013,
+          "tags": [
+            "fast",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 14,
+          "id": "gemini-2.0-flash-001",
+          "name": "Google: Gemini 2.0 Flash",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.000265,
+          "satsPer1kTokens": 0.35267641473149347,
+          "tags": [
+            "coding",
+            "fast",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 15,
+          "id": "gpt-4.1",
+          "name": "OpenAI: GPT-4.1",
+          "context_length": 1047576,
+          "costPer1kTokens": 0.0053,
+          "satsPer1kTokens": 7.053528294629869,
+          "tags": [
+            "coding",
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        }
+      ],
+      "document-processing": [
+        {
+          "rank": 1,
+          "id": "llama-3.2-3b-instruct",
+          "name": "Meta: Llama 3.2 3B Instruct",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000212,
+          "satsPer1kTokens": 0.02821411317851948,
+          "tags": [
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 2,
+          "id": "mistral-nemo",
+          "name": "Mistral: Mistral Nemo",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000318,
+          "satsPer1kTokens": 0.04232116976777922,
+          "tags": [
+            "long-context"
+          ]
+        },
+        {
+          "rank": 3,
+          "id": "llama-guard-3-8b",
+          "name": "Llama Guard 3 8B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000424,
+          "satsPer1kTokens": 0.05642822635703896,
+          "tags": [
+            "long-context"
+          ]
+        },
+        {
+          "rank": 4,
+          "id": "ministral-3b",
+          "name": "Mistral: Ministral 3B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000424,
+          "satsPer1kTokens": 0.05642822635703896,
+          "tags": [
+            "fast",
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 5,
+          "id": "gemma-3-4b-it",
+          "name": "Google: Gemma 3 4B",
+          "context_length": 96000,
+          "costPer1kTokens": 0.0000451473716,
+          "satsPer1kTokens": 0.06008457792618283,
+          "tags": [
+            "reasoning",
+            "vision"
+          ]
+        },
+        {
+          "rank": 6,
+          "id": "llama-3.2-11b-vision-instruct",
+          "name": "Meta: Llama 3.2 11B Vision Instruct",
+          "context_length": 131072,
+          "costPer1kTokens": 0.00005194000000000001,
+          "satsPer1kTokens": 0.06912457728737273,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 7,
+          "id": "gpt-oss-20b",
+          "name": "OpenAI: gpt-oss-20b",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000636,
+          "satsPer1kTokens": 0.08464233953555843,
+          "tags": [
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 8,
+          "id": "granite-4.0-h-micro",
+          "name": "IBM: Granite 4.0 Micro",
+          "context_length": 131000,
+          "costPer1kTokens": 0.00006731000000000002,
+          "satsPer1kTokens": 0.08957980934179935,
+          "tags": [
+            "long-context"
+          ]
+        },
+        {
+          "rank": 9,
+          "id": "gemma-3-12b-it",
+          "name": "Google: Gemma 3 12B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.00006890000000000001,
+          "satsPer1kTokens": 0.0916958678301883,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 10,
+          "id": "mistral-small-3.1-24b-instruct",
+          "name": "Mistral: Mistral Small 3.1 24B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000742,
+          "satsPer1kTokens": 0.09874939612481819,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 11,
+          "id": "deepseek-r1-distill-llama-70b",
+          "name": "DeepSeek: R1 Distill Llama 70B",
+          "context_length": 131072,
+          "costPer1kTokens": 0.0000742,
+          "satsPer1kTokens": 0.09874939612481819,
+          "tags": [
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 12,
+          "id": "nova-micro-v1",
+          "name": "Amazon: Nova Micro 1.0",
+          "context_length": 128000,
+          "costPer1kTokens": 0.00009275,
+          "satsPer1kTokens": 0.12343674515602274,
+          "tags": [
+            "coding",
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 13,
+          "id": "command-r7b-12-2024",
+          "name": "Cohere: Command R7B (12-2024)",
+          "context_length": 128000,
+          "costPer1kTokens": 0.000099375,
+          "satsPer1kTokens": 0.13225365552431007,
+          "tags": [
+            "reasoning",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 14,
+          "id": "gemma-3-27b-it",
+          "name": "Google: Gemma 3 27B",
+          "context_length": 96000,
+          "costPer1kTokens": 0.00010070000000000001,
+          "satsPer1kTokens": 0.13401703759796751,
+          "tags": [
+            "reasoning",
+            "vision"
+          ]
+        },
+        {
+          "rank": 15,
+          "id": "trinity-mini",
+          "name": "Arcee AI: Trinity Mini",
+          "context_length": 131072,
+          "costPer1kTokens": 0.00010335,
+          "satsPer1kTokens": 0.13754380174528244,
+          "tags": [
+            "fast",
+            "reasoning",
+            "long-context"
+          ]
+        }
+      ],
+      "reasoning": [
+        {
+          "rank": 1,
+          "id": "grok-4.1-fast",
+          "name": "xAI: Grok 4.1 Fast",
+          "context_length": 2000000,
+          "costPer1kTokens": 0.000371,
+          "satsPer1kTokens": 0.49374698062409084,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 2,
+          "id": "grok-4-fast",
+          "name": "xAI: Grok 4 Fast",
+          "context_length": 2000000,
+          "costPer1kTokens": 0.000371,
+          "satsPer1kTokens": 0.49374698062409084,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 3,
+          "id": "gemini-3-flash-preview",
+          "name": "Google: Gemini 3 Flash Preview",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.001855,
+          "satsPer1kTokens": 2.4687349031204544,
+          "tags": [
+            "coding",
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 4,
+          "id": "gemini-3-pro-preview",
+          "name": "Google: Gemini 3 Pro Preview",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.00742,
+          "satsPer1kTokens": 9.874939612481818,
+          "tags": [
+            "coding",
+            "fast",
+            "premium",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 5,
+          "id": "gemini-2.5-flash-preview-09-2025",
+          "name": "Google: Gemini 2.5 Flash Preview 09-2025",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.0014840000000000003,
+          "satsPer1kTokens": 1.9749879224963638,
+          "tags": [
+            "coding",
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 6,
+          "id": "gemini-2.5-flash-lite-preview-09-2025",
+          "name": "Google: Gemini 2.5 Flash Lite Preview 09-2025",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.000265,
+          "satsPer1kTokens": 0.35267641473149347,
+          "tags": [
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 7,
+          "id": "gemini-2.5-flash-lite",
+          "name": "Google: Gemini 2.5 Flash Lite",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.000265,
+          "satsPer1kTokens": 0.35267641473149347,
+          "tags": [
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 8,
+          "id": "gemini-2.5-flash",
+          "name": "Google: Gemini 2.5 Flash",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.0014840000000000003,
+          "satsPer1kTokens": 1.9749879224963638,
+          "tags": [
+            "coding",
+            "fast",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 9,
+          "id": "gemini-2.5-pro",
+          "name": "Google: Gemini 2.5 Pro",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.005962500000000001,
+          "satsPer1kTokens": 7.935219331458604,
+          "tags": [
+            "coding",
+            "fast",
+            "premium",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 10,
+          "id": "gemini-2.5-pro-preview",
+          "name": "Google: Gemini 2.5 Pro Preview 06-05",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.005962500000000001,
+          "satsPer1kTokens": 7.935219331458604,
+          "tags": [
+            "coding",
+            "fast",
+            "premium",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 11,
+          "id": "gemini-2.5-pro-preview-05-06",
+          "name": "Google: Gemini 2.5 Pro Preview 05-06",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.005962500000000001,
+          "satsPer1kTokens": 7.935219331458604,
+          "tags": [
+            "coding",
+            "fast",
+            "premium",
+            "reasoning",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 12,
+          "id": "llama-4-maverick",
+          "name": "Meta: Llama 4 Maverick",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.0003975,
+          "satsPer1kTokens": 0.5290146220972403,
+          "tags": [
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 13,
+          "id": "gemini-2.0-flash-lite-001",
+          "name": "Google: Gemini 2.0 Flash Lite",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.00019875,
+          "satsPer1kTokens": 0.26450731104862013,
+          "tags": [
+            "fast",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 14,
+          "id": "gemini-2.0-flash-001",
+          "name": "Google: Gemini 2.0 Flash",
+          "context_length": 1048576,
+          "costPer1kTokens": 0.000265,
+          "satsPer1kTokens": 0.35267641473149347,
+          "tags": [
+            "coding",
+            "fast",
+            "vision",
+            "audio",
+            "long-context"
+          ]
+        },
+        {
+          "rank": 15,
+          "id": "gpt-4.1",
+          "name": "OpenAI: GPT-4.1",
+          "context_length": 1047576,
+          "costPer1kTokens": 0.0053,
+          "satsPer1kTokens": 7.053528294629869,
+          "tags": [
+            "coding",
+            "reasoning",
+            "vision",
+            "long-context"
+          ]
+        }
+      ]
+    }
+  },
+  "catalog": [
+    {
+      "id": "grok-4.1-fast",
+      "name": "xAI: Grok 4.1 Fast",
+      "context_length": 2000000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000371
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.49374698062409084
+      }
+    },
+    {
+      "id": "grok-4-fast",
+      "name": "xAI: Grok 4 Fast",
+      "context_length": 2000000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000371
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.49374698062409084
+      }
+    },
+    {
+      "id": "gemini-3-flash-preview",
+      "name": "Google: Gemini 3 Flash Preview",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.001855
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.4687349031204544
+      }
+    },
+    {
+      "id": "gemini-3-pro-preview",
+      "name": "Google: Gemini 3 Pro Preview",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "premium",
+        "reasoning",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00742
+      },
+      "pricing_sats": {
+        "per1kTokens": 9.874939612481818
+      }
+    },
+    {
+      "id": "gemini-2.5-flash-preview-09-2025",
+      "name": "Google: Gemini 2.5 Flash Preview 09-2025",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0014840000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.9749879224963638
+      }
+    },
+    {
+      "id": "gemini-2.5-flash-lite-preview-09-2025",
+      "name": "Google: Gemini 2.5 Flash Lite Preview 09-2025",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.35267641473149347
+      }
+    },
+    {
+      "id": "gemini-2.5-flash-lite",
+      "name": "Google: Gemini 2.5 Flash Lite",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.35267641473149347
+      }
+    },
+    {
+      "id": "gemini-2.5-flash",
+      "name": "Google: Gemini 2.5 Flash",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0014840000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.9749879224963638
+      }
+    },
+    {
+      "id": "gemini-2.5-pro",
+      "name": "Google: Gemini 2.5 Pro",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "premium",
+        "reasoning",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "gemini-2.5-pro-preview",
+      "name": "Google: Gemini 2.5 Pro Preview 06-05",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "premium",
+        "reasoning",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "gemini-2.5-pro-preview-05-06",
+      "name": "Google: Gemini 2.5 Pro Preview 05-06",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "premium",
+        "reasoning",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "llama-4-maverick",
+      "name": "Meta: Llama 4 Maverick",
+      "context_length": 1048576,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003975
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5290146220972403
+      }
+    },
+    {
+      "id": "gemini-2.0-flash-lite-001",
+      "name": "Google: Gemini 2.0 Flash Lite",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00019875
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.26450731104862013
+      }
+    },
+    {
+      "id": "gemini-2.0-flash-001",
+      "name": "Google: Gemini 2.0 Flash",
+      "context_length": 1048576,
+      "modality": "text+image+file+audio+video->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "vision",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.35267641473149347
+      }
+    },
+    {
+      "id": "gpt-4.1",
+      "name": "OpenAI: GPT-4.1",
+      "context_length": 1047576,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0053
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.053528294629869
+      }
+    },
+    {
+      "id": "gpt-4.1-mini",
+      "name": "OpenAI: GPT-4.1 Mini",
+      "context_length": 1047576,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00106
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4107056589259739
+      }
+    },
+    {
+      "id": "gpt-4.1-nano",
+      "name": "OpenAI: GPT-4.1 Nano",
+      "context_length": 1047576,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.35267641473149347
+      }
+    },
+    {
+      "id": "palmyra-x5",
+      "name": "Writer: Palmyra X5",
+      "context_length": 1040000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0034980000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 4.655328674455713
+      }
+    },
+    {
+      "id": "minimax-01",
+      "name": "MiniMax: MiniMax-01",
+      "context_length": 1000192,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000689
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9169586783018832
+      }
+    },
+    {
+      "id": "nova-2-lite-v1",
+      "name": "Amazon: Nova 2 Lite",
+      "context_length": 1000000,
+      "modality": "text+image+file+video->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0014840000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.9749879224963638
+      }
+    },
+    {
+      "id": "nova-premier-v1",
+      "name": "Amazon: Nova Premier 1.0",
+      "context_length": 1000000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.007950000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 10.580292441944806
+      }
+    },
+    {
+      "id": "claude-sonnet-4.5",
+      "name": "Anthropic: Claude Sonnet 4.5",
+      "context_length": 1000000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00954
+      },
+      "pricing_sats": {
+        "per1kTokens": 12.696350930333763
+      }
+    },
+    {
+      "id": "qwen-plus-2025-07-28",
+      "name": "Qwen: Qwen Plus 0728",
+      "context_length": 1000000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000848
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.128564527140779
+      }
+    },
+    {
+      "id": "qwen-plus-2025-07-28:thinking",
+      "name": "Qwen: Qwen Plus 0728 (thinking)",
+      "context_length": 1000000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.002332
+      },
+      "pricing_sats": {
+        "per1kTokens": 3.1035524496371423
+      }
+    },
+    {
+      "id": "minimax-m1",
+      "name": "MiniMax: MiniMax M1",
+      "context_length": 1000000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.001378
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.8339173566037663
+      }
+    },
+    {
+      "id": "claude-sonnet-4",
+      "name": "Anthropic: Claude Sonnet 4",
+      "context_length": 1000000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00954
+      },
+      "pricing_sats": {
+        "per1kTokens": 12.696350930333763
+      }
+    },
+    {
+      "id": "qwen-turbo",
+      "name": "Qwen: Qwen-Turbo",
+      "context_length": 1000000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001325
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.17633820736574674
+      }
+    },
+    {
+      "id": "gpt-5.2-codex",
+      "name": "OpenAI: GPT-5.2-Codex",
+      "context_length": 400000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0083475
+      },
+      "pricing_sats": {
+        "per1kTokens": 11.109307064042044
+      }
+    },
+    {
+      "id": "gpt-5.2-pro",
+      "name": "OpenAI: GPT-5.2 Pro",
+      "context_length": 400000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "premium",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.10017
+      },
+      "pricing_sats": {
+        "per1kTokens": 133.31168476850453
+      }
+    },
+    {
+      "id": "gpt-5.2",
+      "name": "OpenAI: GPT-5.2",
+      "context_length": 400000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0083475
+      },
+      "pricing_sats": {
+        "per1kTokens": 11.109307064042044
+      }
+    },
+    {
+      "id": "gpt-5.1-codex-max",
+      "name": "OpenAI: GPT-5.1-Codex-Max",
+      "context_length": 400000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "gpt-5.1",
+      "name": "OpenAI: GPT-5.1",
+      "context_length": 400000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "gpt-5.1-codex",
+      "name": "OpenAI: GPT-5.1-Codex",
+      "context_length": 400000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "gpt-5.1-codex-mini",
+      "name": "OpenAI: GPT-5.1-Codex-Mini",
+      "context_length": 400000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0011925
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.5870438662917206
+      }
+    },
+    {
+      "id": "gpt-5-image-mini",
+      "name": "OpenAI: GPT-5 Image Mini",
+      "context_length": 400000,
+      "modality": "text+image+file->text+image",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.002385
+      },
+      "pricing_sats": {
+        "per1kTokens": 3.1740877325834416
+      }
+    },
+    {
+      "id": "gpt-5-image",
+      "name": "OpenAI: GPT-5 Image",
+      "context_length": 400000,
+      "modality": "text+image+file->text+image",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.010600000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 14.107056589259741
+      }
+    },
+    {
+      "id": "gpt-5-pro",
+      "name": "OpenAI: GPT-5 Pro",
+      "context_length": 400000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "premium",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.07155
+      },
+      "pricing_sats": {
+        "per1kTokens": 95.22263197750323
+      }
+    },
+    {
+      "id": "gpt-5-codex",
+      "name": "OpenAI: GPT-5 Codex",
+      "context_length": 400000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "gpt-5",
+      "name": "OpenAI: GPT-5",
+      "context_length": 400000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "gpt-5-mini",
+      "name": "OpenAI: GPT-5 Mini",
+      "context_length": 400000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0011925
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.5870438662917206
+      }
+    },
+    {
+      "id": "gpt-5-nano",
+      "name": "OpenAI: GPT-5 Nano",
+      "context_length": 400000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00023849999999999997
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.3174087732583441
+      }
+    },
+    {
+      "id": "llama-4-scout",
+      "name": "Meta: Llama 4 Scout",
+      "context_length": 327680,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00020140000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.26803407519593503
+      }
+    },
+    {
+      "id": "nova-lite-v1",
+      "name": "Amazon: Nova Lite 1.0",
+      "context_length": 300000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00015900000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.21160584883889608
+      }
+    },
+    {
+      "id": "nova-pro-v1",
+      "name": "Amazon: Nova Pro 1.0",
+      "context_length": 300000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "premium",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00212
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.8214113178519478
+      }
+    },
+    {
+      "id": "kimi-k2.5",
+      "name": "MoonshotAI: Kimi K2.5",
+      "context_length": 262144,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0017490000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.327664337227857
+      }
+    },
+    {
+      "id": "seed-1.6-flash",
+      "name": "ByteDance Seed: Seed 1.6 Flash",
+      "context_length": 262144,
+      "modality": "text+image+video->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00019875
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.26450731104862013
+      }
+    },
+    {
+      "id": "seed-1.6",
+      "name": "ByteDance Seed: Seed 1.6",
+      "context_length": 262144,
+      "modality": "text+image+video->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0011925
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.5870438662917206
+      }
+    },
+    {
+      "id": "mimo-v2-flash",
+      "name": "Xiaomi: MiMo-V2-Flash",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00020140000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.26803407519593503
+      }
+    },
+    {
+      "id": "nemotron-3-nano-30b-a3b",
+      "name": "NVIDIA: Nemotron 3 Nano 30B A3B",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "long-context",
+        "free"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001325
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.17633820736574674
+      }
+    },
+    {
+      "id": "devstral-2512",
+      "name": "Mistral: Devstral 2 2512",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001431
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.1904452639550065
+      }
+    },
+    {
+      "id": "ministral-14b-2512",
+      "name": "Mistral: Ministral 3 14B 2512",
+      "context_length": 262144,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.28214113178519473
+      }
+    },
+    {
+      "id": "ministral-8b-2512",
+      "name": "Mistral: Ministral 3 8B 2512",
+      "context_length": 262144,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00015900000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.21160584883889608
+      }
+    },
+    {
+      "id": "mistral-large-2512",
+      "name": "Mistral: Mistral Large 3 2512",
+      "context_length": 262144,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00106
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4107056589259739
+      }
+    },
+    {
+      "id": "kimi-k2-thinking",
+      "name": "MoonshotAI: Kimi K2 Thinking",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0011395
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.5165085833454222
+      }
+    },
+    {
+      "id": "qwen3-vl-32b-instruct",
+      "name": "Qwen: Qwen3 VL 32B Instruct",
+      "context_length": 262144,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00106
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4107056589259739
+      }
+    },
+    {
+      "id": "qwen3-vl-30b-a3b-instruct",
+      "name": "Qwen: Qwen3 VL 30B A3B Instruct",
+      "context_length": 262144,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003975
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5290146220972403
+      }
+    },
+    {
+      "id": "qwen3-vl-235b-a22b-thinking",
+      "name": "Qwen: Qwen3 VL 235B A22B Thinking",
+      "context_length": 262144,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0020935
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.7861436763787983
+      }
+    },
+    {
+      "id": "qwen3-vl-235b-a22b-instruct",
+      "name": "Qwen: Qwen3 VL 235B A22B Instruct",
+      "context_length": 262144,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000742
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9874939612481817
+      }
+    },
+    {
+      "id": "qwen3-next-80b-a3b-instruct",
+      "name": "Qwen: Qwen3 Next 80B A3B Instruct",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0006307000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8393698670609546
+      }
+    },
+    {
+      "id": "kimi-k2-0905",
+      "name": "MoonshotAI: Kimi K2 0905",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0012137
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.6152579794702404
+      }
+    },
+    {
+      "id": "kimi-k2-0905:exacto",
+      "name": "MoonshotAI: Kimi K2 0905 (exacto)",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0016430000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.18659377133526
+      }
+    },
+    {
+      "id": "qwen3-30b-a3b-instruct-2507",
+      "name": "Qwen: Qwen3 30B A3B Instruct 2507",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00021730000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.2891946600798247
+      }
+    },
+    {
+      "id": "qwen3-235b-a22b-thinking-2507",
+      "name": "Qwen: Qwen3 235B A22B Thinking 2507",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003763
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5008005089187207
+      }
+    },
+    {
+      "id": "qwen3-coder",
+      "name": "Qwen: Qwen3 Coder 480B A35B",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0006201
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8252628104716947
+      }
+    },
+    {
+      "id": "qwen3-coder:exacto",
+      "name": "Qwen: Qwen3 Coder 480B A35B (exacto)",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0010706000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4248127155152337
+      }
+    },
+    {
+      "id": "qwen3-235b-a22b-2507",
+      "name": "Qwen: Qwen3 235B A22B Instruct 2507",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00028302
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.376658410933235
+      }
+    },
+    {
+      "id": "morph-v3-large",
+      "name": "Morph: Morph V3 Large",
+      "context_length": 262144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.001484
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.9749879224963638
+      }
+    },
+    {
+      "id": "relace-search",
+      "name": "Relace: Relace Search",
+      "context_length": 256000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00212
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.8214113178519478
+      }
+    },
+    {
+      "id": "kat-coder-pro",
+      "name": "Kwaipilot: KAT-Coder-Pro V1",
+      "context_length": 256000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "premium",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0005485500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.7300401784941914
+      }
+    },
+    {
+      "id": "qwen3-vl-8b-thinking",
+      "name": "Qwen: Qwen3 VL 8B Thinking",
+      "context_length": 256000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0012083999999999999
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.6082044511756102
+      }
+    },
+    {
+      "id": "relace-apply-3",
+      "name": "Relace: Relace Apply 3",
+      "context_length": 256000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0011130000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.481240941872273
+      }
+    },
+    {
+      "id": "qwen3-max",
+      "name": "Qwen: Qwen3 Max",
+      "context_length": 256000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0038160000000000004
+      },
+      "pricing_sats": {
+        "per1kTokens": 5.078540372133506
+      }
+    },
+    {
+      "id": "grok-code-fast-1",
+      "name": "xAI: Grok Code Fast 1",
+      "context_length": 256000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000901
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.1990998100870778
+      }
+    },
+    {
+      "id": "jamba-mini-1.7",
+      "name": "AI21: Jamba Mini 1.7",
+      "context_length": 256000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000318
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.4232116976777921
+      }
+    },
+    {
+      "id": "jamba-large-1.7",
+      "name": "AI21: Jamba Large 1.7",
+      "context_length": 256000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0053
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.053528294629869
+      }
+    },
+    {
+      "id": "codestral-2508",
+      "name": "Mistral: Codestral 2508",
+      "context_length": 256000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0006360000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8464233953555844
+      }
+    },
+    {
+      "id": "grok-4",
+      "name": "xAI: Grok 4",
+      "context_length": 256000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00954
+      },
+      "pricing_sats": {
+        "per1kTokens": 12.696350930333763
+      }
+    },
+    {
+      "id": "command-a",
+      "name": "Cohere: Command A",
+      "context_length": 256000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "glm-4.6:exacto",
+      "name": "Z.AI: GLM 4.6 (exacto)",
+      "context_length": 204800,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0011660000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.5517762248185714
+      }
+    },
+    {
+      "id": "glm-4.7",
+      "name": "Z.AI: GLM 4.7",
+      "context_length": 202752,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.001007
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.3401703759796753
+      }
+    },
+    {
+      "id": "glm-4.6",
+      "name": "Z.AI: GLM 4.6",
+      "context_length": 202752,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0009805
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.3049027345065258
+      }
+    },
+    {
+      "id": "glm-4.7-flash",
+      "name": "Z.AI: GLM 4.7 Flash",
+      "context_length": 200000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0002491
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.3315158298476038
+      }
+    },
+    {
+      "id": "claude-opus-4.5",
+      "name": "Anthropic: Claude Opus 4.5",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "premium",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.015900000000000004
+      },
+      "pricing_sats": {
+        "per1kTokens": 21.160584883889612
+      }
+    },
+    {
+      "id": "sonar-pro-search",
+      "name": "Perplexity: Sonar Pro Search",
+      "context_length": 200000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "premium",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00954
+      },
+      "pricing_sats": {
+        "per1kTokens": 12.696350930333763
+      }
+    },
+    {
+      "id": "claude-haiku-4.5",
+      "name": "Anthropic: Claude Haiku 4.5",
+      "context_length": 200000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0031800000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 4.232116976777923
+      }
+    },
+    {
+      "id": "o3-deep-research",
+      "name": "OpenAI: o3 Deep Research",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.026500000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 35.267641473149354
+      }
+    },
+    {
+      "id": "o4-mini-deep-research",
+      "name": "OpenAI: o4 Mini Deep Research",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0053
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.053528294629869
+      }
+    },
+    {
+      "id": "claude-opus-4.1",
+      "name": "Anthropic: Claude Opus 4.1",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "premium",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.04769999999999999
+      },
+      "pricing_sats": {
+        "per1kTokens": 63.481754651668815
+      }
+    },
+    {
+      "id": "o3-pro",
+      "name": "OpenAI: o3 Pro",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "premium",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.053000000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 70.53528294629871
+      }
+    },
+    {
+      "id": "claude-opus-4",
+      "name": "Anthropic: Claude Opus 4",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "premium",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.04769999999999999
+      },
+      "pricing_sats": {
+        "per1kTokens": 63.481754651668815
+      }
+    },
+    {
+      "id": "o4-mini-high",
+      "name": "OpenAI: o4 Mini High",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0029150000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 3.8794405620464287
+      }
+    },
+    {
+      "id": "o3",
+      "name": "OpenAI: o3",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0053
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.053528294629869
+      }
+    },
+    {
+      "id": "o4-mini",
+      "name": "OpenAI: o4 Mini",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0029150000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 3.8794405620464287
+      }
+    },
+    {
+      "id": "o1-pro",
+      "name": "OpenAI: o1-pro",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "premium",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.39749999999999996
+      },
+      "pricing_sats": {
+        "per1kTokens": 529.0146220972401
+      }
+    },
+    {
+      "id": "sonar-pro",
+      "name": "Perplexity: Sonar Pro",
+      "context_length": 200000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "premium",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00954
+      },
+      "pricing_sats": {
+        "per1kTokens": 12.696350930333763
+      }
+    },
+    {
+      "id": "claude-3.7-sonnet:thinking",
+      "name": "Anthropic: Claude 3.7 Sonnet (thinking)",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00954
+      },
+      "pricing_sats": {
+        "per1kTokens": 12.696350930333763
+      }
+    },
+    {
+      "id": "claude-3.7-sonnet",
+      "name": "Anthropic: Claude 3.7 Sonnet",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00954
+      },
+      "pricing_sats": {
+        "per1kTokens": 12.696350930333763
+      }
+    },
+    {
+      "id": "o3-mini-high",
+      "name": "OpenAI: o3 Mini High",
+      "context_length": 200000,
+      "modality": "text+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0029150000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 3.8794405620464287
+      }
+    },
+    {
+      "id": "o3-mini",
+      "name": "OpenAI: o3 Mini",
+      "context_length": 200000,
+      "modality": "text+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0029150000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 3.8794405620464287
+      }
+    },
+    {
+      "id": "o1",
+      "name": "OpenAI: o1",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.03975
+      },
+      "pricing_sats": {
+        "per1kTokens": 52.901462209724016
+      }
+    },
+    {
+      "id": "claude-3.5-haiku",
+      "name": "Anthropic: Claude 3.5 Haiku",
+      "context_length": 200000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0025440000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 3.3856935814223372
+      }
+    },
+    {
+      "id": "claude-3.5-sonnet",
+      "name": "Anthropic: Claude 3.5 Sonnet",
+      "context_length": 200000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.01908
+      },
+      "pricing_sats": {
+        "per1kTokens": 25.392701860667525
+      }
+    },
+    {
+      "id": "claude-3-haiku",
+      "name": "Anthropic: Claude 3 Haiku",
+      "context_length": 200000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0007950000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.0580292441944807
+      }
+    },
+    {
+      "id": "minimax-m2.1",
+      "name": "MiniMax: MiniMax M2.1",
+      "context_length": 196608,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0007261000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9663333763642922
+      }
+    },
+    {
+      "id": "minimax-m2",
+      "name": "MiniMax: MiniMax M2",
+      "context_length": 196608,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00066515
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8852178009760486
+      }
+    },
+    {
+      "id": "deepseek-v3.2-speciale",
+      "name": "DeepSeek: DeepSeek V3.2 Speciale",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003604
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.4796399240348311
+      }
+    },
+    {
+      "id": "deepseek-v3.2",
+      "name": "DeepSeek: DeepSeek V3.2",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003339
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.4443722825616818
+      }
+    },
+    {
+      "id": "tng-r1t-chimera",
+      "name": "TNG: R1T Chimera",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "roleplay",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000583
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.7758881124092856
+      }
+    },
+    {
+      "id": "deepseek-v3.2-exp",
+      "name": "DeepSeek: DeepSeek V3.2 Exp",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003604
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.4796399240348311
+      }
+    },
+    {
+      "id": "deepseek-v3.1-terminus:exacto",
+      "name": "DeepSeek: DeepSeek V3.1 Terminus (exacto)",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.7053528294629869
+      }
+    },
+    {
+      "id": "deepseek-v3.1-terminus",
+      "name": "DeepSeek: DeepSeek V3.1 Terminus",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.7053528294629869
+      }
+    },
+    {
+      "id": "deepseek-r1t2-chimera",
+      "name": "TNG: DeepSeek R1T2 Chimera",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000583
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.7758881124092856
+      }
+    },
+    {
+      "id": "deepseek-r1-0528",
+      "name": "DeepSeek: R1 0528",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0011395
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.5165085833454222
+      }
+    },
+    {
+      "id": "llama-guard-4-12b",
+      "name": "Meta: Llama Guard 4 12B",
+      "context_length": 163840,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001908
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.2539270186066753
+      }
+    },
+    {
+      "id": "deepseek-r1t-chimera",
+      "name": "TNG: DeepSeek R1T Chimera",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000795
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.0580292441944805
+      }
+    },
+    {
+      "id": "deepseek-chat-v3-0324",
+      "name": "DeepSeek: DeepSeek V3 0324",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0005618000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.7476739992307662
+      }
+    },
+    {
+      "id": "deepseek-chat",
+      "name": "DeepSeek: DeepSeek V3",
+      "context_length": 163840,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000795
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.0580292441944805
+      }
+    },
+    {
+      "id": "qwen3-coder-30b-a3b-instruct",
+      "name": "Qwen: Qwen3 Coder 30B A3B Instruct",
+      "context_length": 160000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00018020000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.23981996201741557
+      }
+    },
+    {
+      "id": "glm-4.6v",
+      "name": "Z.AI: GLM 4.6V",
+      "context_length": 131072,
+      "modality": "text+image+video->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0006360000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8464233953555844
+      }
+    },
+    {
+      "id": "deepseek-v3.1-nex-n1",
+      "name": "Nex AGI: DeepSeek V3.1 Nex N1",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0006730999999999999
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8957980934179933
+      }
+    },
+    {
+      "id": "ministral-3b-2512",
+      "name": "Mistral: Ministral 3 3B 2512",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000106
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.14107056589259737
+      }
+    },
+    {
+      "id": "trinity-mini",
+      "name": "Arcee AI: Trinity Mini",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00010335
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.13754380174528244
+      }
+    },
+    {
+      "id": "intellect-3",
+      "name": "Prime Intellect: INTELLECT-3",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000689
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9169586783018832
+      }
+    },
+    {
+      "id": "gpt-oss-safeguard-20b",
+      "name": "OpenAI: gpt-oss-safeguard-20b",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00019875
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.26450731104862013
+      }
+    },
+    {
+      "id": "nemotron-nano-12b-v2-vl",
+      "name": "NVIDIA: Nemotron Nano 12B 2 VL",
+      "context_length": 131072,
+      "modality": "text+image+video->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "roleplay",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5642822635703895
+      }
+    },
+    {
+      "id": "qwen3-vl-8b-instruct",
+      "name": "Qwen: Qwen3 VL 8B Instruct",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003074
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.4091046410885324
+      }
+    },
+    {
+      "id": "llama-3.3-nemotron-super-49b-v1.5",
+      "name": "NVIDIA: Llama 3.3 Nemotron Super 49B V1.5",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.35267641473149347
+      }
+    },
+    {
+      "id": "ernie-4.5-21b-a3b-thinking",
+      "name": "Baidu: ERNIE 4.5 21B A3B Thinking",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001855
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.24687349031204547
+      }
+    },
+    {
+      "id": "qwen3-vl-30b-a3b-thinking",
+      "name": "Qwen: Qwen3 VL 30B A3B Thinking",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0006360000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8464233953555843
+      }
+    },
+    {
+      "id": "cydonia-24b-v4.1",
+      "name": "TheDrummer: Cydonia 24B V4.1",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5642822635703895
+      }
+    },
+    {
+      "id": "tongyi-deepresearch-30b-a3b",
+      "name": "Tongyi DeepResearch 30B A3B",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00025969999999999997
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.3456228864368636
+      }
+    },
+    {
+      "id": "longcat-flash-chat",
+      "name": "Meituan: LongCat Flash Chat",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.7053528294629869
+      }
+    },
+    {
+      "id": "nemotron-nano-9b-v2",
+      "name": "NVIDIA: Nemotron Nano 9B V2",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00010600000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.1410705658925974
+      }
+    },
+    {
+      "id": "hermes-4-70b",
+      "name": "Nous: Hermes 4 70B",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0002597
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.3456228864368636
+      }
+    },
+    {
+      "id": "hermes-4-405b",
+      "name": "Nous: Hermes 4 405B",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00212
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.8214113178519478
+      }
+    },
+    {
+      "id": "mistral-medium-3.1",
+      "name": "Mistral: Mistral Medium 3.1",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0012720000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.6928467907111686
+      }
+    },
+    {
+      "id": "gpt-oss-120b",
+      "name": "OpenAI: gpt-oss-120b",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00012137000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.161525797947024
+      }
+    },
+    {
+      "id": "gpt-oss-120b:exacto",
+      "name": "OpenAI: gpt-oss-120b (exacto)",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00012137000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.161525797947024
+      }
+    },
+    {
+      "id": "gpt-oss-20b",
+      "name": "OpenAI: gpt-oss-20b",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000636
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.08464233953555843
+      }
+    },
+    {
+      "id": "glm-4.5",
+      "name": "Z.AI: GLM 4.5",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.001007
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.3401703759796753
+      }
+    },
+    {
+      "id": "glm-4.5-air",
+      "name": "Z.AI: GLM 4.5 Air",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001431
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.1904452639550065
+      }
+    },
+    {
+      "id": "router",
+      "name": "Switchpoint Router",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0022525
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.9977495252176944
+      }
+    },
+    {
+      "id": "kimi-k2",
+      "name": "MoonshotAI: Kimi K2 0711",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0015370000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.045523205442662
+      }
+    },
+    {
+      "id": "devstral-medium",
+      "name": "Mistral: Devstral Medium",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0012720000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.6928467907111686
+      }
+    },
+    {
+      "id": "devstral-small",
+      "name": "Mistral: Devstral Small 1.1",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.28214113178519473
+      }
+    },
+    {
+      "id": "hunyuan-a13b-instruct",
+      "name": "Tencent: Hunyuan A13B Instruct",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00037630000000000004
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5008005089187207
+      }
+    },
+    {
+      "id": "mistral-small-3.2-24b-instruct",
+      "name": "Mistral: Mistral Small 3.2 24B",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001272
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.16928467907111688
+      }
+    },
+    {
+      "id": "kimi-dev-72b",
+      "name": "MoonshotAI: Kimi Dev 72B",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0007632
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.0157080744267013
+      }
+    },
+    {
+      "id": "grok-3-mini",
+      "name": "xAI: Grok 3 Mini",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5642822635703895
+      }
+    },
+    {
+      "id": "grok-3",
+      "name": "xAI: Grok 3",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00954
+      },
+      "pricing_sats": {
+        "per1kTokens": 12.696350930333763
+      }
+    },
+    {
+      "id": "mistral-medium-3",
+      "name": "Mistral: Mistral Medium 3",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0012720000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.6928467907111686
+      }
+    },
+    {
+      "id": "spotlight",
+      "name": "Arcee AI: Spotlight",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001908
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.2539270186066753
+      }
+    },
+    {
+      "id": "maestro-reasoning",
+      "name": "Arcee AI: Maestro Reasoning",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0022260000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.9624818837445455
+      }
+    },
+    {
+      "id": "virtuoso-large",
+      "name": "Arcee AI: Virtuoso Large",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0010335
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.3754380174528245
+      }
+    },
+    {
+      "id": "grok-3-mini-beta",
+      "name": "xAI: Grok 3 Mini Beta",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5642822635703895
+      }
+    },
+    {
+      "id": "grok-3-beta",
+      "name": "xAI: Grok 3 Beta",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00954
+      },
+      "pricing_sats": {
+        "per1kTokens": 12.696350930333763
+      }
+    },
+    {
+      "id": "llama-3.1-nemotron-ultra-253b-v1",
+      "name": "NVIDIA: Llama 3.1 Nemotron Ultra 253B v1",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "premium",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0012720000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.6928467907111688
+      }
+    },
+    {
+      "id": "mistral-small-3.1-24b-instruct",
+      "name": "Mistral: Mistral Small 3.1 24B",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000742
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.09874939612481819
+      }
+    },
+    {
+      "id": "gemma-3-12b-it",
+      "name": "Google: Gemma 3 12B",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00006890000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.0916958678301883
+      }
+    },
+    {
+      "id": "llama-guard-3-8b",
+      "name": "Llama Guard 3 8B",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.05642822635703896
+      }
+    },
+    {
+      "id": "aion-1.0",
+      "name": "AionLabs: Aion-1.0",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00636
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.464233953555844
+      }
+    },
+    {
+      "id": "aion-1.0-mini",
+      "name": "AionLabs: Aion-1.0-Mini",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0011130000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.481240941872273
+      }
+    },
+    {
+      "id": "qwen-vl-max",
+      "name": "Qwen: Qwen VL Max",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00212
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.8214113178519478
+      }
+    },
+    {
+      "id": "qwen-plus",
+      "name": "Qwen: Qwen-Plus",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000848
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.128564527140779
+      }
+    },
+    {
+      "id": "deepseek-r1-distill-llama-70b",
+      "name": "DeepSeek: R1 Distill Llama 70B",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000742
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.09874939612481819
+      }
+    },
+    {
+      "id": "l3.3-euryale-70b",
+      "name": "Sao10K: Llama 3.3 Euryale 70B",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000742
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9874939612481819
+      }
+    },
+    {
+      "id": "llama-3.3-70b-instruct",
+      "name": "Meta: Llama 3.3 70B Instruct",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0002226
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.29624818837445455
+      }
+    },
+    {
+      "id": "mistral-large-2411",
+      "name": "Mistral Large 2411",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00424
+      },
+      "pricing_sats": {
+        "per1kTokens": 5.6428226357038955
+      }
+    },
+    {
+      "id": "mistral-large-2407",
+      "name": "Mistral Large 2407",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00424
+      },
+      "pricing_sats": {
+        "per1kTokens": 5.6428226357038955
+      }
+    },
+    {
+      "id": "pixtral-large-2411",
+      "name": "Mistral: Pixtral Large 2411",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00424
+      },
+      "pricing_sats": {
+        "per1kTokens": 5.6428226357038955
+      }
+    },
+    {
+      "id": "ministral-3b",
+      "name": "Mistral: Ministral 3B",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.05642822635703896
+      }
+    },
+    {
+      "id": "ministral-8b",
+      "name": "Mistral: Ministral 8B",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000106
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.14107056589259737
+      }
+    },
+    {
+      "id": "llama-3.1-nemotron-70b-instruct",
+      "name": "NVIDIA: Llama 3.1 Nemotron 70B Instruct",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0012720000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.6928467907111686
+      }
+    },
+    {
+      "id": "llama-3.2-3b-instruct",
+      "name": "Meta: Llama 3.2 3B Instruct",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.02821411317851948
+      }
+    },
+    {
+      "id": "llama-3.2-11b-vision-instruct",
+      "name": "Meta: Llama 3.2 11B Vision Instruct",
+      "context_length": 131072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00005194000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.06912457728737273
+      }
+    },
+    {
+      "id": "hermes-3-llama-3.1-405b",
+      "name": "Nous: Hermes 3 405B Instruct",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "roleplay",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00106
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4107056589259739
+      }
+    },
+    {
+      "id": "llama-3.1-70b-instruct",
+      "name": "Meta: Llama 3.1 70B Instruct",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5642822635703895
+      }
+    },
+    {
+      "id": "mistral-nemo",
+      "name": "Mistral: Mistral Nemo",
+      "context_length": 131072,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000318
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.04232116976777922
+      }
+    },
+    {
+      "id": "granite-4.0-h-micro",
+      "name": "IBM: Granite 4.0 Micro",
+      "context_length": 131000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00006731000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.08957980934179935
+      }
+    },
+    {
+      "id": "gpt-audio",
+      "name": "OpenAI: GPT Audio",
+      "context_length": 128000,
+      "modality": "text+audio->text+audio",
+      "enabled": true,
+      "tags": [
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "gpt-audio-mini",
+      "name": "OpenAI: GPT Audio Mini",
+      "context_length": 128000,
+      "modality": "text+audio->text+audio",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00159
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.116058488388961
+      }
+    },
+    {
+      "id": "gpt-5.2-chat",
+      "name": "OpenAI: GPT-5.2 Chat",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0083475
+      },
+      "pricing_sats": {
+        "per1kTokens": 11.109307064042044
+      }
+    },
+    {
+      "id": "cogito-v2.1-671b",
+      "name": "Deep Cogito: Cogito v2.1 671B",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0013250000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.7633820736574677
+      }
+    },
+    {
+      "id": "gpt-5.1-chat",
+      "name": "OpenAI: GPT-5.1 Chat",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "qwen3-coder-plus",
+      "name": "Qwen: Qwen3 Coder Plus",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0031800000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 4.232116976777923
+      }
+    },
+    {
+      "id": "qwen3-coder-flash",
+      "name": "Qwen: Qwen3 Coder Flash",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0009540000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.2696350930333764
+      }
+    },
+    {
+      "id": "qwen3-next-80b-a3b-thinking",
+      "name": "Qwen: Qwen3 Next 80B A3B Thinking",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0007155000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9522263197750324
+      }
+    },
+    {
+      "id": "gpt-4o-audio-preview",
+      "name": "OpenAI: GPT-4o Audio",
+      "context_length": 128000,
+      "modality": "text+audio->text+audio",
+      "enabled": true,
+      "tags": [
+        "audio",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "gpt-5-chat",
+      "name": "OpenAI: GPT-5 Chat",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.005962500000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458604
+      }
+    },
+    {
+      "id": "glm-4-32b",
+      "name": "Z.AI: GLM 4 32B ",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000106
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.14107056589259737
+      }
+    },
+    {
+      "id": "ui-tars-1.5-7b",
+      "name": "ByteDance: UI-TARS 7B ",
+      "context_length": 128000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000159
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.21160584883889605
+      }
+    },
+    {
+      "id": "mercury",
+      "name": "Inception: Mercury",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0006625
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8816910368287336
+      }
+    },
+    {
+      "id": "mercury-coder",
+      "name": "Inception: Mercury Coder",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0006625
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8816910368287336
+      }
+    },
+    {
+      "id": "olmo-2-0325-32b-instruct",
+      "name": "AllenAI: Olmo 2 32B Instruct",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001325
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.17633820736574674
+      }
+    },
+    {
+      "id": "gpt-4o-mini-search-preview",
+      "name": "OpenAI: GPT-4o-mini Search Preview",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003975
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5290146220972403
+      }
+    },
+    {
+      "id": "gpt-4o-search-preview",
+      "name": "OpenAI: GPT-4o Search Preview",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "sonar-reasoning-pro",
+      "name": "Perplexity: Sonar Reasoning Pro",
+      "context_length": 128000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "premium",
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0053
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.053528294629869
+      }
+    },
+    {
+      "id": "sonar-deep-research",
+      "name": "Perplexity: Sonar Deep Research",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0053
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.053528294629869
+      }
+    },
+    {
+      "id": "command-r7b-12-2024",
+      "name": "Cohere: Command R7B (12-2024)",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000099375
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.13225365552431007
+      }
+    },
+    {
+      "id": "nova-micro-v1",
+      "name": "Amazon: Nova Micro 1.0",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00009275
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.12343674515602274
+      }
+    },
+    {
+      "id": "gpt-4o-2024-11-20",
+      "name": "OpenAI: GPT-4o (2024-11-20)",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "command-r-08-2024",
+      "name": "Cohere: Command R (08-2024)",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003975
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5290146220972403
+      }
+    },
+    {
+      "id": "command-r-plus-08-2024",
+      "name": "Cohere: Command R+ (08-2024)",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "chatgpt-4o-latest",
+      "name": "OpenAI: ChatGPT-4o",
+      "context_length": 128000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0106
+      },
+      "pricing_sats": {
+        "per1kTokens": 14.107056589259738
+      }
+    },
+    {
+      "id": "gpt-4o-2024-08-06",
+      "name": "OpenAI: GPT-4o (2024-08-06)",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "gpt-4o-mini",
+      "name": "OpenAI: GPT-4o-mini",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003975
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5290146220972403
+      }
+    },
+    {
+      "id": "gpt-4o-mini-2024-07-18",
+      "name": "OpenAI: GPT-4o-mini (2024-07-18)",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003975
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5290146220972403
+      }
+    },
+    {
+      "id": "gpt-4o-2024-05-13",
+      "name": "OpenAI: GPT-4o (2024-05-13)",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0106
+      },
+      "pricing_sats": {
+        "per1kTokens": 14.107056589259738
+      }
+    },
+    {
+      "id": "gpt-4o",
+      "name": "OpenAI: GPT-4o",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "gpt-4o:extended",
+      "name": "OpenAI: GPT-4o (extended)",
+      "context_length": 128000,
+      "modality": "text+image+file->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.01272
+      },
+      "pricing_sats": {
+        "per1kTokens": 16.92846790711169
+      }
+    },
+    {
+      "id": "gpt-4-turbo",
+      "name": "OpenAI: GPT-4 Turbo",
+      "context_length": 128000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0212
+      },
+      "pricing_sats": {
+        "per1kTokens": 28.214113178519476
+      }
+    },
+    {
+      "id": "mistral-large",
+      "name": "Mistral Large",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00424
+      },
+      "pricing_sats": {
+        "per1kTokens": 5.6428226357038955
+      }
+    },
+    {
+      "id": "gpt-4-turbo-preview",
+      "name": "OpenAI: GPT-4 Turbo Preview",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0212
+      },
+      "pricing_sats": {
+        "per1kTokens": 28.214113178519476
+      }
+    },
+    {
+      "id": "gpt-4-1106-preview",
+      "name": "OpenAI: GPT-4 Turbo (older v1106)",
+      "context_length": 128000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0212
+      },
+      "pricing_sats": {
+        "per1kTokens": 28.214113178519476
+      }
+    },
+    {
+      "id": "sonar",
+      "name": "Perplexity: Sonar",
+      "context_length": 127072,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00106
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4107056589259739
+      }
+    },
+    {
+      "id": "ernie-4.5-vl-424b-a47b",
+      "name": "Baidu: ERNIE 4.5 VL 424B A47B ",
+      "context_length": 123000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0008851000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.1779392252031884
+      }
+    },
+    {
+      "id": "ernie-4.5-300b-a47b",
+      "name": "Baidu: ERNIE 4.5 300B A47B ",
+      "context_length": 123000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0007314000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9733869046589221
+      }
+    },
+    {
+      "id": "ernie-4.5-21b-a3b",
+      "name": "Baidu: ERNIE 4.5 21B A3B",
+      "context_length": 120000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "long-context"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001855
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.24687349031204547
+      }
+    },
+    {
+      "id": "gemma-3-4b-it",
+      "name": "Google: Gemma 3 4B",
+      "context_length": 96000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000451473716
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.06008457792618283
+      }
+    },
+    {
+      "id": "gemma-3-27b-it",
+      "name": "Google: Gemma 3 27B",
+      "context_length": 96000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00010070000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.13401703759796751
+      }
+    },
+    {
+      "id": "morph-v3-fast",
+      "name": "Morph: Morph V3 Fast",
+      "context_length": 81920,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00106
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4107056589259739
+      }
+    },
+    {
+      "id": "minimax-m2-her",
+      "name": "MiniMax: MiniMax M2-her",
+      "context_length": 65536,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000795
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.0580292441944805
+      }
+    },
+    {
+      "id": "olmo-3.1-32b-instruct",
+      "name": "AllenAI: Olmo 3.1 32B Instruct",
+      "context_length": 65536,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5642822635703895
+      }
+    },
+    {
+      "id": "olmo-3.1-32b-think",
+      "name": "AllenAI: Olmo 3.1 32B Think",
+      "context_length": 65536,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00034449999999999997
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.4584793391509415
+      }
+    },
+    {
+      "id": "olmo-3-32b-think",
+      "name": "AllenAI: Olmo 3 32B Think",
+      "context_length": 65536,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00034449999999999997
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.4584793391509415
+      }
+    },
+    {
+      "id": "olmo-3-7b-instruct",
+      "name": "AllenAI: Olmo 3 7B Instruct",
+      "context_length": 65536,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000159
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.21160584883889605
+      }
+    },
+    {
+      "id": "olmo-3-7b-think",
+      "name": "AllenAI: Olmo 3 7B Think",
+      "context_length": 65536,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00016959999999999998
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.22571290542815584
+      }
+    },
+    {
+      "id": "gemini-3-pro-image-preview",
+      "name": "Google: Nano Banana Pro (Gemini 3 Pro Image Preview)",
+      "context_length": 65536,
+      "modality": "text+image->text+image",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "premium",
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00742
+      },
+      "pricing_sats": {
+        "per1kTokens": 9.874939612481818
+      }
+    },
+    {
+      "id": "step3",
+      "name": "StepFun: Step3",
+      "context_length": 65536,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0010547
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.403652130631344
+      }
+    },
+    {
+      "id": "glm-4.5v",
+      "name": "Z.AI: GLM 4.5V",
+      "context_length": 65536,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0012720000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.6928467907111688
+      }
+    },
+    {
+      "id": "hermes-3-llama-3.1-70b",
+      "name": "Nous: Hermes 3 70B Instruct",
+      "context_length": 65536,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00031800000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.42321169767779215
+      }
+    },
+    {
+      "id": "mixtral-8x22b-instruct",
+      "name": "Mistral: Mixtral 8x22B Instruct",
+      "context_length": 65536,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00424
+      },
+      "pricing_sats": {
+        "per1kTokens": 5.6428226357038955
+      }
+    },
+    {
+      "id": "wizardlm-2-8x22b",
+      "name": "WizardLM-2 8x22B",
+      "context_length": 65536,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0005088
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.6771387162844675
+      }
+    },
+    {
+      "id": "deepseek-r1",
+      "name": "DeepSeek: R1",
+      "context_length": 64000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "free"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0016960000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.2571290542815583
+      }
+    },
+    {
+      "id": "llama-3.2-1b-instruct",
+      "name": "Meta: Llama 3.2 1B Instruct",
+      "context_length": 60000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00012030999999999999
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.160115092288098
+      }
+    },
+    {
+      "id": "qwen3-30b-a3b",
+      "name": "Qwen: Qwen3 30B A3B",
+      "context_length": 40960,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001484
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.19749879224963637
+      }
+    },
+    {
+      "id": "qwen3-14b",
+      "name": "Qwen: Qwen3 14B",
+      "context_length": 40960,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001431
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.1904452639550065
+      }
+    },
+    {
+      "id": "qwen3-32b",
+      "name": "Qwen: Qwen3 32B",
+      "context_length": 40960,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001696
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.22571290542815584
+      }
+    },
+    {
+      "id": "qwen3-235b-a22b",
+      "name": "Qwen: Qwen3 235B A22B",
+      "context_length": 40960,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5642822635703895
+      }
+    },
+    {
+      "id": "mistral-small-creative",
+      "name": "Mistral: Mistral Small Creative",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.28214113178519473
+      }
+    },
+    {
+      "id": "rnj-1-instruct",
+      "name": "EssentialAI: Rnj 1 Instruct",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00015900000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.21160584883889608
+      }
+    },
+    {
+      "id": "lfm2-8b-a1b",
+      "name": "LiquidAI: LFM2-8B-A1B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000159
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.02116058488388961
+      }
+    },
+    {
+      "id": "lfm-2.2-6b",
+      "name": "LiquidAI: LFM2-2.6B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000159
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.02116058488388961
+      }
+    },
+    {
+      "id": "cogito-v2-preview-llama-405b",
+      "name": "Deep Cogito: Cogito V2 Preview Llama 405B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00371
+      },
+      "pricing_sats": {
+        "per1kTokens": 4.937469806240909
+      }
+    },
+    {
+      "id": "gemini-2.5-flash-image",
+      "name": "Google: Gemini 2.5 Flash Image (Nano Banana)",
+      "context_length": 32768,
+      "modality": "text+image->text+image",
+      "enabled": true,
+      "tags": [
+        "fast",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0014840000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.9749879224963638
+      }
+    },
+    {
+      "id": "internvl3-78b",
+      "name": "OpenGVLab: InternVL3 78B",
+      "context_length": 32768,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0002597
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.3456228864368637
+      }
+    },
+    {
+      "id": "cogito-v2-preview-llama-70b",
+      "name": "Deep Cogito: Cogito V2 Preview Llama 70B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0009328000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.2414209798548572
+      }
+    },
+    {
+      "id": "qwen3-30b-a3b-thinking-2507",
+      "name": "Qwen: Qwen3 30B A3B Thinking 2507",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00020722999999999998
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.2757929563200279
+      }
+    },
+    {
+      "id": "deepseek-chat-v3.1",
+      "name": "DeepSeek: DeepSeek V3.1",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00047700000000000005
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.6348175465166882
+      }
+    },
+    {
+      "id": "gemma-3n-e4b-it",
+      "name": "Google: Gemma 3n 4B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000318
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.04232116976777922
+      }
+    },
+    {
+      "id": "deephermes-3-mistral-24b-preview",
+      "name": "Nous: DeepHermes 3 Mistral 24B Preview",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000636
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.08464233953555843
+      }
+    },
+    {
+      "id": "coder-large",
+      "name": "Arcee AI: Coder Large",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0006889999999999999
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.916958678301883
+      }
+    },
+    {
+      "id": "qwen2.5-coder-7b-instruct",
+      "name": "Qwen: Qwen2.5 Coder 7B Instruct",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000636
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.08464233953555844
+      }
+    },
+    {
+      "id": "skyfall-36b-v2",
+      "name": "TheDrummer: Skyfall 36B V2",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0007155
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9522263197750325
+      }
+    },
+    {
+      "id": "qwq-32b",
+      "name": "Qwen: QwQ 32B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0002915
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.3879440562046428
+      }
+    },
+    {
+      "id": "mistral-saba",
+      "name": "Mistral: Saba",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5642822635703895
+      }
+    },
+    {
+      "id": "aion-rp-llama-3.1-8b",
+      "name": "AionLabs: Aion-RP 1.0 (8B)",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.001272
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.6928467907111684
+      }
+    },
+    {
+      "id": "qwen2.5-vl-72b-instruct",
+      "name": "Qwen: Qwen2.5 VL 72B Instruct",
+      "context_length": 32768,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003975
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5290146220972403
+      }
+    },
+    {
+      "id": "qwen-max",
+      "name": "Qwen: Qwen-Max ",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00424
+      },
+      "pricing_sats": {
+        "per1kTokens": 5.6428226357038955
+      }
+    },
+    {
+      "id": "mistral-small-24b-instruct-2501",
+      "name": "Mistral: Mistral Small 3",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000742
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.09874939612481819
+      }
+    },
+    {
+      "id": "deepseek-r1-distill-qwen-32b",
+      "name": "DeepSeek: R1 Distill Qwen 32B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0003074
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.40910464108853245
+      }
+    },
+    {
+      "id": "qwen-2.5-coder-32b-instruct",
+      "name": "Qwen2.5 Coder 32B Instruct",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000742
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.09874939612481819
+      }
+    },
+    {
+      "id": "unslopnemo-12b",
+      "name": "TheDrummer: UnslopNemo 12B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000424
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5642822635703895
+      }
+    },
+    {
+      "id": "qwen-2.5-7b-instruct",
+      "name": "Qwen: Qwen2.5 7B Instruct",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000742
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.09874939612481817
+      }
+    },
+    {
+      "id": "rocinante-12b",
+      "name": "TheDrummer: Rocinante 12B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00031800000000000003
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.42321169767779215
+      }
+    },
+    {
+      "id": "qwen-2.5-72b-instruct",
+      "name": "Qwen2.5 72B Instruct",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0002703
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.3597299430261234
+      }
+    },
+    {
+      "id": "llama-3.1-lumimaid-8b",
+      "name": "NeverSleep: Lumimaid v0.2 8B",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0003657
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.486693452329461
+      }
+    },
+    {
+      "id": "pixtral-12b",
+      "name": "Mistral: Pixtral 12B",
+      "context_length": 32768,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000106
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.14107056589259737
+      }
+    },
+    {
+      "id": "l3.1-euryale-70b",
+      "name": "Sao10K: Llama 3.1 Euryale 70B v2.2",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000742
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9874939612481819
+      }
+    },
+    {
+      "id": "qwen-2.5-vl-7b-instruct",
+      "name": "Qwen: Qwen2.5-VL 7B Instruct",
+      "context_length": 32768,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.28214113178519473
+      }
+    },
+    {
+      "id": "llama-3.1-405b",
+      "name": "Meta: Llama 3.1 405B (base)",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00424
+      },
+      "pricing_sats": {
+        "per1kTokens": 5.6428226357038955
+      }
+    },
+    {
+      "id": "mistral-7b-instruct-v0.3",
+      "name": "Mistral: Mistral 7B Instruct v0.3",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.28214113178519473
+      }
+    },
+    {
+      "id": "mistral-7b-instruct",
+      "name": "Mistral: Mistral 7B Instruct",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.28214113178519473
+      }
+    },
+    {
+      "id": "mistral-tiny",
+      "name": "Mistral Tiny",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.35267641473149347
+      }
+    },
+    {
+      "id": "mistral-7b-instruct-v0.2",
+      "name": "Mistral: Mistral 7B Instruct v0.2",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.28214113178519473
+      }
+    },
+    {
+      "id": "mixtral-8x7b-instruct",
+      "name": "Mistral: Mixtral 8x7B Instruct",
+      "context_length": 32768,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0005724
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.7617810558200259
+      }
+    },
+    {
+      "id": "qwen3-embedding-4b",
+      "name": "Qwen: Qwen3 Embedding 4B",
+      "context_length": 32768,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000106
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.01410705658925974
+      }
+    },
+    {
+      "id": "cogito-v2-preview-llama-109b-moe",
+      "name": "Cogito V2 Preview Llama 109B",
+      "context_length": 32767,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0004081
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5431216786865
+      }
+    },
+    {
+      "id": "voxtral-small-24b-2507",
+      "name": "Mistral: Voxtral Small 24B 2507",
+      "context_length": 32000,
+      "modality": "text+audio->text",
+      "enabled": true,
+      "tags": [
+        "audio"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.28214113178519473
+      }
+    },
+    {
+      "id": "qwen3-8b",
+      "name": "Qwen: Qwen3 8B",
+      "context_length": 32000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00015900000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.21160584883889608
+      }
+    },
+    {
+      "id": "qwen3-embedding-8b",
+      "name": "Qwen: Qwen3 Embedding 8B",
+      "context_length": 32000,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.00705352829462987
+      }
+    },
+    {
+      "id": "ernie-4.5-vl-28b-a3b",
+      "name": "Baidu: ERNIE 4.5 VL 28B A3B",
+      "context_length": 30000,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000371
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.49374698062409095
+      }
+    },
+    {
+      "id": "gemini-embedding-001",
+      "name": "Google: Gemini Embedding 001",
+      "context_length": 20000,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [
+        "coding",
+        "fast"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00007950000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.10580292441944804
+      }
+    },
+    {
+      "id": "gpt-3.5-turbo-16k",
+      "name": "OpenAI: GPT-3.5 Turbo 16k",
+      "context_length": 16385,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00371
+      },
+      "pricing_sats": {
+        "per1kTokens": 4.937469806240909
+      }
+    },
+    {
+      "id": "gpt-3.5-turbo",
+      "name": "OpenAI: GPT-3.5 Turbo",
+      "context_length": 16385,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00106
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4107056589259739
+      }
+    },
+    {
+      "id": "qwen2.5-vl-32b-instruct",
+      "name": "Qwen: Qwen2.5 VL 32B Instruct",
+      "context_length": 16384,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001431
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.1904452639550065
+      }
+    },
+    {
+      "id": "phi-4",
+      "name": "Microsoft: Phi 4",
+      "context_length": 16384,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000106
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.1410705658925974
+      }
+    },
+    {
+      "id": "magnum-v4-72b",
+      "name": "Magnum v4 72B",
+      "context_length": 16384,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00424
+      },
+      "pricing_sats": {
+        "per1kTokens": 5.642822635703896
+      }
+    },
+    {
+      "id": "llama-3.1-8b-instruct",
+      "name": "Meta: Llama 3.1 8B Instruct",
+      "context_length": 16384,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000371
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.049374698062409086
+      }
+    },
+    {
+      "id": "l3.1-70b-hanami-x1",
+      "name": "Sao10K: Llama 3.1 70B Hanami x1",
+      "context_length": 16000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00318
+      },
+      "pricing_sats": {
+        "per1kTokens": 4.232116976777922
+      }
+    },
+    {
+      "id": "sorcererlm-8x22b",
+      "name": "SorcererLM 8x22B",
+      "context_length": 16000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00477
+      },
+      "pricing_sats": {
+        "per1kTokens": 6.348175465166882
+      }
+    },
+    {
+      "id": "llama-3.1-405b-instruct",
+      "name": "Meta: Llama 3.1 405B Instruct",
+      "context_length": 10000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00371
+      },
+      "pricing_sats": {
+        "per1kTokens": 4.937469806240909
+      }
+    },
+    {
+      "id": "l3-lunaris-8b",
+      "name": "Sao10K: Llama 3 8B Lunaris",
+      "context_length": 8192,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning",
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000047699999999999994
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.06348175465166882
+      }
+    },
+    {
+      "id": "gemma-2-27b-it",
+      "name": "Google: Gemma 2 27B",
+      "context_length": 8192,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.000689
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.9169586783018832
+      }
+    },
+    {
+      "id": "gemma-2-9b-it",
+      "name": "Google: Gemma 2 9B",
+      "context_length": 8192,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000636
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.08464233953555844
+      }
+    },
+    {
+      "id": "l3-euryale-70b",
+      "name": "Sao10k: Llama 3 Euryale 70B v2.1",
+      "context_length": 8192,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0015688000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.0878443752104414
+      }
+    },
+    {
+      "id": "hermes-2-pro-llama-3-8b",
+      "name": "NousResearch: Hermes 2 Pro - Llama-3 8B",
+      "context_length": 8192,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "premium"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0001484
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.19749879224963637
+      }
+    },
+    {
+      "id": "llama-guard-2-8b",
+      "name": "Meta: LlamaGuard 2 8B",
+      "context_length": 8192,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000212
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.28214113178519473
+      }
+    },
+    {
+      "id": "llama-3-8b-instruct",
+      "name": "Meta: Llama 3 8B Instruct",
+      "context_length": 8192,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000047699999999999994
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.06348175465166883
+      }
+    },
+    {
+      "id": "llama-3-70b-instruct",
+      "name": "Meta: Llama 3 70B Instruct",
+      "context_length": 8192,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0006625
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.8816910368287337
+      }
+    },
+    {
+      "id": "bge-m3",
+      "name": "BAAI: bge-m3",
+      "context_length": 8192,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.00705352829462987
+      }
+    },
+    {
+      "id": "mistral-embed-2312",
+      "name": "Mistral: Mistral Embed 2312",
+      "context_length": 8192,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.07053528294629868
+      }
+    },
+    {
+      "id": "text-embedding-ada-002",
+      "name": "OpenAI: Text Embedding Ada 002",
+      "context_length": 8192,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.000053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.07053528294629868
+      }
+    },
+    {
+      "id": "codestral-embed-2505",
+      "name": "Mistral: Codestral Embed 2505",
+      "context_length": 8192,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [
+        "coding"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00007950000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.10580292441944804
+      }
+    },
+    {
+      "id": "text-embedding-3-large",
+      "name": "OpenAI: Text Embedding 3 Large",
+      "context_length": 8192,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00006890000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.09169586783018831
+      }
+    },
+    {
+      "id": "text-embedding-3-small",
+      "name": "OpenAI: Text Embedding 3 Small",
+      "context_length": 8192,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000106
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.01410705658925974
+      }
+    },
+    {
+      "id": "gpt-4-0314",
+      "name": "OpenAI: GPT-4 (older v0314)",
+      "context_length": 8191,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0477
+      },
+      "pricing_sats": {
+        "per1kTokens": 63.481754651668815
+      }
+    },
+    {
+      "id": "gpt-4",
+      "name": "OpenAI: GPT-4",
+      "context_length": 8191,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0477
+      },
+      "pricing_sats": {
+        "per1kTokens": 63.481754651668815
+      }
+    },
+    {
+      "id": "inflection-3-pi",
+      "name": "Inflection: Inflection 3 Pi",
+      "context_length": 8000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "inflection-3-productivity",
+      "name": "Inflection: Inflection 3 Productivity",
+      "context_length": 8000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "premium"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.006625000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 8.816910368287338
+      }
+    },
+    {
+      "id": "weaver",
+      "name": "Mancer: Weaver (alpha)",
+      "context_length": 8000,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0009275
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.2343674515602272
+      }
+    },
+    {
+      "id": "qwen-vl-plus",
+      "name": "Qwen: Qwen VL Plus",
+      "context_length": 7500,
+      "modality": "text+image->text",
+      "enabled": true,
+      "tags": [
+        "vision"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0004452
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.5924963767489091
+      }
+    },
+    {
+      "id": "goliath-120b",
+      "name": "Goliath 120B",
+      "context_length": 6144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0059625
+      },
+      "pricing_sats": {
+        "per1kTokens": 7.935219331458602
+      }
+    },
+    {
+      "id": "remm-slerp-l2-13b",
+      "name": "ReMM SLERP 13B",
+      "context_length": 6144,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0005830000000000001
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.7758881124092857
+      }
+    },
+    {
+      "id": "llemma_7b",
+      "name": "EleutherAI: Llemma 7b",
+      "context_length": 4096,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "reasoning"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00106
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4107056589259739
+      }
+    },
+    {
+      "id": "codellama-7b-instruct-solidity",
+      "name": "AlfredPros: CodeLLaMa 7B Instruct Solidity",
+      "context_length": 4096,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "coding"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00106
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.4107056589259739
+      }
+    },
+    {
+      "id": "noromaid-20b",
+      "name": "Noromaid 20B",
+      "context_length": 4096,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0014575
+      },
+      "pricing_sats": {
+        "per1kTokens": 1.9397202810232141
+      }
+    },
+    {
+      "id": "mythomax-l2-13b",
+      "name": "MythoMax 13B",
+      "context_length": 4096,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [
+        "roleplay"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.0000636
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.08464233953555844
+      }
+    },
+    {
+      "id": "gpt-3.5-turbo-0613",
+      "name": "OpenAI: GPT-3.5 Turbo (older v0613)",
+      "context_length": 4095,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00159
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.116058488388961
+      }
+    },
+    {
+      "id": "gpt-3.5-turbo-instruct",
+      "name": "OpenAI: GPT-3.5 Turbo Instruct",
+      "context_length": 4095,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.001855
+      },
+      "pricing_sats": {
+        "per1kTokens": 2.4687349031204544
+      }
+    },
+    {
+      "id": "mistral-7b-instruct-v0.1",
+      "name": "Mistral: Mistral 7B Instruct v0.1",
+      "context_length": 2824,
+      "modality": "text->text",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00015900000000000002
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.2116058488388961
+      }
+    },
+    {
+      "id": "gte-base",
+      "name": "Thenlper: GTE-Base",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.003526764147314935
+      }
+    },
+    {
+      "id": "gte-large",
+      "name": "Thenlper: GTE-Large",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.00705352829462987
+      }
+    },
+    {
+      "id": "e5-large-v2",
+      "name": "Intfloat: E5-Large-v2",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.00705352829462987
+      }
+    },
+    {
+      "id": "e5-base-v2",
+      "name": "Intfloat: E5-Base-v2",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.003526764147314935
+      }
+    },
+    {
+      "id": "multilingual-e5-large",
+      "name": "Intfloat: Multilingual-E5-Large",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.00705352829462987
+      }
+    },
+    {
+      "id": "paraphrase-minilm-l6-v2",
+      "name": "Sentence Transformers: paraphrase-MiniLM-L6-v2",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [
+        "fast"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.003526764147314935
+      }
+    },
+    {
+      "id": "all-minilm-l12-v2",
+      "name": "Sentence Transformers: all-MiniLM-L12-v2",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [
+        "fast"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.003526764147314935
+      }
+    },
+    {
+      "id": "bge-base-en-v1.5",
+      "name": "BAAI: bge-base-en-v1.5",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.003526764147314935
+      }
+    },
+    {
+      "id": "multi-qa-mpnet-base-dot-v1",
+      "name": "Sentence Transformers: multi-qa-mpnet-base-dot-v1",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.003526764147314935
+      }
+    },
+    {
+      "id": "bge-large-en-v1.5",
+      "name": "BAAI: bge-large-en-v1.5",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.0000053
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.00705352829462987
+      }
+    },
+    {
+      "id": "all-mpnet-base-v2",
+      "name": "Sentence Transformers: all-mpnet-base-v2",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [],
+      "pricing_usd": {
+        "per1kTokens": 0.00000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.003526764147314935
+      }
+    },
+    {
+      "id": "all-minilm-l6-v2",
+      "name": "Sentence Transformers: all-MiniLM-L6-v2",
+      "context_length": 512,
+      "modality": "text->embeddings",
+      "enabled": true,
+      "tags": [
+        "fast"
+      ],
+      "pricing_usd": {
+        "per1kTokens": 0.00000265
+      },
+      "pricing_sats": {
+        "per1kTokens": 0.003526764147314935
+      }
+    }
+  ]
+}

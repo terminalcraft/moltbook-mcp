@@ -7159,6 +7159,39 @@ app.post("/routstr/configure", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// --- Routstr Model Benchmark (public) ---
+const BENCH_FILE = join(BASE, "routstr-benchmark.json");
+app.get("/routstr/benchmark", (req, res) => {
+  try {
+    const report = JSON.parse(readFileSync(BENCH_FILE, "utf8"));
+    const task = req.query.task;
+    if (task && report.rankings.byTask[task]) {
+      return res.json({ task, models: report.rankings.byTask[task], generated: report.meta.generated });
+    }
+    if (req.query.format === "json" || (req.headers.accept?.includes("application/json") && !req.headers.accept?.includes("text/html"))) {
+      return res.json(report);
+    }
+    const cheapRows = report.rankings.cheapest.slice(0, 15).map(m => `<tr><td>${esc(m.id)}</td><td>${esc(m.name)}</td><td>$${m.costPer1kTokens.toFixed(6)}</td><td>${(m.context/1000).toFixed(0)}k</td><td>${m.tags.join(", ")}</td></tr>`).join("");
+    const ctxRows = report.rankings.largestContext.slice(0, 10).map(m => `<tr><td>${esc(m.id)}</td><td>${esc(m.name)}</td><td>${((m.context_length||0)/1000).toFixed(0)}k</td><td>${m.costPer1kTokens ? "$"+m.costPer1kTokens.toFixed(6) : "n/a"}</td></tr>`).join("");
+    const taskSections = Object.entries(report.rankings.byTask).map(([task, models]) => {
+      const rows = models.map(m => `<tr><td>${m.rank}</td><td>${esc(m.id)}</td><td>$${m.costPer1kTokens.toFixed(6)}</td><td>${((m.context_length||0)/1000).toFixed(0)}k</td><td>${m.tags.join(", ")}</td></tr>`).join("");
+      return `<h3>${esc(task)}</h3><table><tr><th>#</th><th>Model</th><th>$/1k tok</th><th>Context</th><th>Tags</th></tr>${rows}</table>`;
+    }).join("");
+    res.type("html").send(`<!DOCTYPE html><html><head><title>Routstr Model Benchmark</title>
+    <style>body{background:#111;color:#ddd;font-family:monospace;padding:20px;max-width:1000px;margin:0 auto}table{border-collapse:collapse;width:100%;margin-bottom:20px}th,td{border:1px solid #333;padding:6px 10px;text-align:left}th{background:#222;color:#0a0}tr:hover{background:#1a1a1a}h1,h2,h3{color:#0a0}a{color:#0a0}.stat{display:inline-block;background:#1a1a1a;padding:8px 16px;margin:4px;border-radius:4px;border:1px solid #333}</style>
+    </head><body><h1>Routstr Model Benchmark</h1>
+    <p>Generated: ${esc(report.meta.generated)} | <a href="/routstr/benchmark?format=json">JSON API</a></p>
+    <div><span class="stat">${report.meta.totalModels} models</span><span class="stat">${report.meta.enabledModels} enabled</span><span class="stat">${report.meta.freeModels} free</span></div>
+    <h2>Cheapest Models</h2>
+    <table><tr><th>ID</th><th>Name</th><th>$/1k tokens</th><th>Context</th><th>Tags</th></tr>${cheapRows}</table>
+    <h2>Largest Context Windows</h2>
+    <table><tr><th>ID</th><th>Name</th><th>Context</th><th>$/1k tokens</th></tr>${ctxRows}</table>
+    <h2>Best Models by Agent Task</h2>
+    <p>Query: <code>/routstr/benchmark?task=code-generation</code></p>
+    ${taskSections}</body></html>`);
+  } catch (e) { res.status(500).json({ error: "Benchmark data not available. Run routstr-bench.mjs first." }); }
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
 

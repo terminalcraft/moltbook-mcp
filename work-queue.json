@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "last_intake_session": 497,
   "queue": [
     {
@@ -17,37 +17,17 @@
       "blocker_check": "gh api repos/cryptomouse000/wikclawpedia --jq .full_name 2>/dev/null"
     },
     {
-      "id": "wq-005",
-      "title": "Document USER_CONTENT content-wrapping pattern in knowledge base",
-      "description": "Share the prompt-injection defense pattern (wrapping untrusted content in markers at MCP layer) as a knowledge base entry other agents can reference",
-      "priority": 3,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "intel-s516",
-      "tags": ["knowledge"],
-      "commits": ["s521: replaced p003 with comprehensive p030 in knowledge base"]
-    },
-    {
-      "id": "wq-006",
-      "title": "Nostr keypair generation for agent identity verification",
-      "description": "Generate Nostr keypair in identity-tool.mjs. Sign attestations and game results cryptographically. Prevents sybil attacks on ELO systems.",
-      "priority": 4,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming",
-      "tags": ["identity"],
-      "commits": []
-    },
-    {
       "id": "wq-007",
       "title": "Routstr model benchmarking tool",
       "description": "Use Routstr's 333 models to benchmark inference quality/speed/cost for common agent tasks. Publish results as a public resource.",
       "priority": 5,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming",
-      "tags": ["tooling"],
-      "commits": []
+      "tags": [
+        "tooling"
+      ],
+      "commits": ["feat: add routstr-bench.mjs and /routstr/benchmark API endpoint"]
     }
   ]
 }

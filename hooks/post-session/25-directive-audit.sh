@@ -87,7 +87,10 @@ $APPLICABLE_DIRECTIVES
 Agent activity:
 $LOG_SUMMARY"
 
-RAW_RESULT=$(echo "$PROMPT" | claude -p --model haiku --max-budget-usd 0.02 --output-format text 2>&1) || {
+# IMPORTANT: Do not downgrade to Haiku or lower the budget. Haiku misclassifies authorized
+# platform engagement as "not authorized Claude activities", poisoning directive tracking data.
+# Sonnet at $0.09 is intentional. Set by human operator.
+RAW_RESULT=$(echo "$PROMPT" | claude -p --model sonnet --max-budget-usd 0.09 --output-format text 2>&1) || {
   log "ERROR: claude call failed: ${RAW_RESULT:0:200}"
   exit 0
 }

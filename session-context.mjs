@@ -85,6 +85,20 @@ function getMaxQueueId(queue) {
   }, 0);
 }
 
+// Shared fuzzy title matcher (R#79 — was duplicated in 3 places with slight variations).
+// Checks if a candidate title is "close enough" to any existing queue title to be a duplicate.
+// Uses normalized prefix comparison: lowercase first 20 chars of each, bidirectional includes.
+// Centralizing prevents divergent matching logic (e.g. one copy split on ':', another didn't).
+function isTitleDupe(candidate, queueTitles) {
+  const norm = candidate.toLowerCase().trim();
+  const prefix = norm.substring(0, 25);
+  return queueTitles.some(qt => {
+    const qn = qt.toLowerCase().trim();
+    const qp = qn.substring(0, 25);
+    return qn.includes(prefix) || norm.includes(qp) || qp.includes(prefix);
+  });
+}
+
 const BUDGET_CAP = parseFloat(process.env.BUDGET_CAP || '10');
 if (MODE === 'B' && pending.length > 0) {
   // If multiple pending items, prefer S/M over L for budget efficiency
@@ -104,11 +118,8 @@ if (MODE === 'B' && pending.length > 0) {
     const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
     // Filter out ideas already in the work queue (by fuzzy title match).
     // Prevents fallback from assigning work that's already queued/blocked/done.
-    const queueTitles = queue.map(i => i.title.toLowerCase());
-    const fresh = ideas.filter(idea => {
-      const title = idea[1].trim().toLowerCase();
-      return !queueTitles.some(qt => qt.includes(title) || title.includes(qt.split(':')[0].trim()));
-    });
+    const queueTitles = queue.map(i => i.title);
+    const fresh = ideas.filter(idea => !isTitleDupe(idea[1].trim(), queueTitles));
     if (fresh.length > 0) {
       const idea = fresh[0];
       result.wq_item = `BRAINSTORM-FALLBACK: ${idea[1].trim()} — ${idea[2].trim()}`;
@@ -153,11 +164,8 @@ if (MODE === 'B' || MODE === 'R') {
     if (existsSync(bsPath)) {
       const bs = readFileSync(bsPath, 'utf8');
       const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
-      const queueTitles = queue.map(i => i.title.toLowerCase());
-      const fresh = ideas.filter(idea => {
-        const title = idea[1].trim().toLowerCase();
-        return !queueTitles.some(qt => qt.includes(title) || title.includes(qt.split(':')[0].trim()));
-      });
+      const queueTitles = queue.map(i => i.title);
+      const fresh = ideas.filter(idea => !isTitleDupe(idea[1].trim(), queueTitles));
       // R#72: Dynamic buffer. Normal=3, starvation (0 pending)=1.
       // This ensures B sessions always have work when brainstorming has ideas.
       const BS_BUFFER = currentPending === 0 ? 1 : 3;
@@ -275,11 +283,8 @@ if (MODE === 'B') {
     // New approach: each seed has a short imperative title (<60 chars) and a description.
     // Title format matches what a B session needs: "Build X", "Add Y support", "Fix Z".
     const seeds = [];
-    const queueTitles = queue.map(i => i.title.toLowerCase());
-    const isDupe = (title) => queueTitles.some(qt =>
-      qt.includes(title.toLowerCase().substring(0, 20)) ||
-      title.toLowerCase().includes(qt.split(':')[0].trim().substring(0, 15))
-    );
+    const queueTitles = queue.map(i => i.title);
+    const isDupe = (title) => isTitleDupe(title, queueTitles);
 
     // Source 1: Unaddressed directives — table-driven keyword→seed mapping (R#78).
     // Previously a chain of if/else blocks that was hard to extend. Now declarative:

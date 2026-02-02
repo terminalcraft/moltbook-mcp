@@ -738,6 +738,33 @@ app.get("/metrics", (req, res) => {
 });
 
 // Multi-service status checker — probes local services and external platforms
+// --- Work queue visualization endpoint (wq-022) ---
+app.get("/status/queue", (req, res) => {
+  try {
+    const wq = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf8"));
+    const items = (wq.queue || []).map(item => ({
+      id: item.id,
+      title: item.title,
+      status: item.status,
+      priority: item.priority,
+      tags: item.tags || [],
+      deps: item.deps || [],
+      blocker: item.blocker || null,
+      has_blocker_check: !!item.blocker_check,
+    }));
+    const summary = {
+      total: items.length,
+      pending: items.filter(i => i.status === "pending").length,
+      blocked: items.filter(i => i.status === "blocked").length,
+      in_progress: items.filter(i => i.status === "in-progress").length,
+      done: items.filter(i => i.status === "done").length,
+    };
+    res.json({ summary, items });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to read work queue" });
+  }
+});
+
 app.get("/status/all", async (req, res) => {
   const checks = [
     { name: "molty-api", url: "http://127.0.0.1:3847/agent.json", type: "local" },

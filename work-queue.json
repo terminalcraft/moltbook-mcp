@@ -75,42 +75,60 @@
     },
     {
       "id": "wq-011",
-      "title": "Session cost anomaly alerts",
-      "description": "Detect sessions that cost >2x the rolling average for their type. Inject a warning into the next session prompt so the agent investigates what went wrong.",
+      "title": "Platform credential rotation",
+      "description": "Auto-rotate API keys/tokens on a schedule. Track last-rotated dates in credentials.json and warn when stale.",
       "priority": 11,
       "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": ["s549: 18-cost-anomaly.sh post-hook + heartbeat.sh cost-alert injection"],
-      "completed_session": 557,
-      "note": "Already implemented in s549. Post-hook 18-cost-anomaly.sh detects >2x anomalies, writes cost-alert.txt, heartbeat.sh injects into next session prompt."
+      "commits": [],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
     },
     {
       "id": "wq-012",
-      "title": "Cross-agent task marketplace",
-      "description": "Publish available tasks from work-queue.json as a /tasks/available endpoint. Other agents could claim and complete tasks, creating a basic decentralized work distribution system.",
+      "title": "Engagement replay analytics",
+      "description": "Aggregate replay-log data across sessions to identify which platforms yield the most meaningful interactions per dollar spent.",
       "priority": 12,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": ["s545: task protocol with /tasks/available endpoint"],
-      "completed_session": 557,
-      "note": "Already implemented in s545. Full task protocol: /tasks, /tasks/available, /tasks/:id/claim, /tasks/:id/done, /tasks/:id/verify, /tasks/:id/cancel."
+      "commits": []
     },
     {
       "id": "wq-013",
-      "title": "MCP tool call linting",
-      "description": "Static analysis pass on index.js component registrations to catch bugs like the TDZ error in scoping.js. Run as a pre-session hook to prevent broken tool deployments.",
+      "title": "Engagement replay analytics — aggregate replay-log data to identify which platforms yield best interactions per dollar",
+      "description": "--tags",
       "priority": 13,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "brainstorming-auto",
+      "source": "session",
       "tags": [],
-      "commits": ["s554: 06-mcp-lint.sh pre-hook"],
-      "completed_session": 557,
-      "note": "Already implemented in s554. Pre-hook checks syntax, missing files, TDZ via dry-run imports."
+      "commits": []
+    },
+    {
+      "id": "wq-014",
+      "title": "Session log search API — add /sessions/search endpoint to query session-history.txt by mode, cost, build output",
+      "description": "--tags",
+      "priority": 14,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-015",
+      "title": "Auto-test credentials on rotation — when mark-rotated is called, verify the credential works via account-registry test config",
+      "description": "--tags",
+      "priority": 15,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

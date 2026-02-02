@@ -158,9 +158,36 @@ function isPrivateUrl(urlStr) {
   } catch { return false; }
 }
 
+// Rate limiting for write endpoints (d015 item 3)
+const RATE_WINDOW_MS = 60_000; // 1 minute
+const RATE_MAX_WRITES = 30;    // max write requests per IP per window
+const rateMap = new Map();     // ip -> { count, resetAt }
+setInterval(() => { // cleanup expired entries every 5 min
+  const now = Date.now();
+  for (const [ip, v] of rateMap) { if (v.resetAt <= now) rateMap.delete(ip); }
+}, 300_000);
+function rateLimit(req, res, next) {
+  if (req.method === "GET" || req.method === "OPTIONS" || req.method === "HEAD") return next();
+  const ip = req.ip || req.socket?.remoteAddress || "unknown";
+  const now = Date.now();
+  let entry = rateMap.get(ip);
+  if (!entry || entry.resetAt <= now) {
+    entry = { count: 0, resetAt: now + RATE_WINDOW_MS };
+    rateMap.set(ip, entry);
+  }
+  entry.count++;
+  res.set("X-RateLimit-Limit", String(RATE_MAX_WRITES));
+  res.set("X-RateLimit-Remaining", String(Math.max(0, RATE_MAX_WRITES - entry.count)));
+  if (entry.count > RATE_MAX_WRITES) {
+    return res.status(429).json({ error: "rate limit exceeded", retry_after_ms: entry.resetAt - now });
+  }
+  next();
+}
+
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ limit: "1mb", type: "text/plain" }));
+app.use(rateLimit);
 
 // --- CORS (public API, allow all origins) ---
 app.use((req, res, next) => {

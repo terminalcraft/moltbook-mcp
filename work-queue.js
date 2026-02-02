@@ -30,6 +30,10 @@ function save(data) {
 // Canonical status lifecycle: pending → in-progress → done
 const VALID_STATUSES = ["pending", "in-progress", "done", "blocked"];
 
+// Complexity scoring: S=small (<$1), M=medium ($1-3), L=large ($3+)
+const COMPLEXITY_BUDGET = { S: 1, M: 3, L: 10 };
+const VALID_COMPLEXITIES = ["S", "M", "L"];
+
 // Check if all deps of an item are satisfied (status === "done")
 function depsReady(item, queue) {
   if (!item.deps || !item.deps.length) return true;
@@ -48,17 +52,35 @@ function nextId(data) {
   return `wq-${String(max + 1).padStart(3, "0")}`;
 }
 
-const [cmd, ...args] = process.argv.slice(2);
+// Parse global flags
+const rawArgs = process.argv.slice(2);
+let budgetRemaining = null;
+const filteredArgs = [];
+for (let i = 0; i < rawArgs.length; i++) {
+  if (rawArgs[i] === "--budget" && rawArgs[i + 1]) {
+    budgetRemaining = parseFloat(rawArgs[++i]);
+  } else {
+    filteredArgs.push(rawArgs[i]);
+  }
+}
+const [cmd, ...args] = filteredArgs;
+
+function fitsbudget(item) {
+  if (budgetRemaining === null) return true;
+  const c = item.complexity || "M"; // default M
+  return COMPLEXITY_BUDGET[c] <= budgetRemaining;
+}
 
 const data = load();
 
 switch (cmd) {
   case "next": {
     const item = data.queue.find(i => i.status === "in-progress") ||
-                 data.queue.find(i => i.status === "pending" && depsReady(i, data.queue));
+                 data.queue.find(i => i.status === "pending" && depsReady(i, data.queue) && fitsbudget(i));
     if (!item) { console.log("Queue empty."); break; }
     const marker = item.status === "in-progress" ? " [IN PROGRESS]" : "";
-    console.log(`${item.id}: ${item.title}${marker}`);
+    const cx = item.complexity ? ` [${item.complexity}]` : "";
+    console.log(`${item.id}: ${item.title}${marker}${cx}`);
     console.log(`  ${item.description}`);
     if (item.deps?.length) console.log(`  deps: ${item.deps.join(", ")}`);
     if (item.tags?.length) console.log(`  tags: ${item.tags.join(", ")}`);
@@ -68,13 +90,14 @@ switch (cmd) {
     if (!data.queue.length) { console.log("Queue empty."); break; }
     for (const item of data.queue) {
       const s = item.status === "in-progress" ? "▶" : item.status === "done" ? "✓" : item.status === "blocked" ? "✗" : "·";
-      console.log(`${s} ${item.id}: ${item.title} [${item.status}]`);
+      const cx = item.complexity ? ` (${item.complexity})` : "";
+      console.log(`${s} ${item.id}: ${item.title} [${item.status}]${cx}`);
     }
     break;
   }
   case "start": {
     const id = args[0];
-    const item = id ? data.queue.find(i => i.id === id) : data.queue.find(i => i.status === "pending" && depsReady(i, data.queue));
+    const item = id ? data.queue.find(i => i.id === id) : data.queue.find(i => i.status === "pending" && depsReady(i, data.queue) && fitsbudget(i));
     if (!item) { console.log("No item found."); break; }
     if (!depsReady(item, data.queue)) {
       const unmet = item.deps.filter(d => { const dep = data.queue.find(i => i.id === d); return !dep || dep.status !== "done"; });
@@ -104,9 +127,14 @@ switch (cmd) {
     if (!title) { console.log("Usage: add \"title\" \"description\" [--tag t1]"); break; }
     const tags = [];
     const deps = [];
+    let complexity = undefined;
     for (let i = 0; i < rest.length; i++) {
       if (rest[i] === "--tag" && rest[i + 1]) tags.push(rest[++i]);
       else if (rest[i] === "--dep" && rest[i + 1]) deps.push(rest[++i]);
+      else if (rest[i] === "--complexity" && rest[i + 1]) {
+        const c = rest[++i].toUpperCase();
+        if (VALID_COMPLEXITIES.includes(c)) complexity = c;
+      }
     }
     const maxPriority = data.queue.reduce((m, i) => Math.max(m, i.priority), 0);
     const item = {
@@ -118,6 +146,7 @@ switch (cmd) {
       added: new Date().toISOString().slice(0, 10),
       source: "session",
       tags,
+      complexity,
       deps: deps.length ? deps : undefined,
       commits: []
     };

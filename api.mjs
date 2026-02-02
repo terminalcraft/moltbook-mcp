@@ -503,6 +503,121 @@ app.get("/engagement/effectiveness", (req, res) => {
   }
 });
 
+// Engagement ROI Leaderboard — ranked platforms by engagement-per-dollar (wq-005)
+app.get("/engagement/roi-leaderboard", (req, res) => {
+  try {
+    const analytics = analyzeEngagement();
+    const platforms = (analytics.platforms || []).filter(p => p.total_calls > 0);
+
+    // Score: ROI = writes / cost (higher = better). Platforms with no cost get "free" label.
+    const scored = platforms.map(p => {
+      const cpw = p.cost_per_write;
+      const roi = (cpw !== null && cpw > 0) ? +(1 / cpw).toFixed(2) : null; // writes per dollar
+      return { ...p, roi, roi_label: roi !== null ? `${roi} writes/$` : (p.writes > 0 ? "free" : "no writes") };
+    }).sort((a, b) => {
+      // Free platforms with writes first, then by ROI desc, then no-writes last
+      if (a.writes > 0 && a.roi === null && (b.roi !== null || b.writes === 0)) return -1;
+      if (b.writes > 0 && b.roi === null && (a.roi !== null || a.writes === 0)) return 1;
+      if (a.roi !== null && b.roi !== null) return b.roi - a.roi;
+      if (a.roi !== null) return -1;
+      if (b.roi !== null) return 1;
+      return b.writes - a.writes;
+    });
+
+    if (req.query.format === "json") {
+      return res.json({
+        leaderboard: scored,
+        e_session_summary: analytics.e_session_summary,
+        data_sources: analytics.data_sources,
+      });
+    }
+
+    // HTML dashboard
+    const eSummary = analytics.e_session_summary || {};
+    const platformColors = {
+      moltbook: "#a6e3a1", "4claw": "#89b4fa", chatr: "#f9e2af", ctxly: "#cba6f7",
+      colony: "#f38ba8", lobchan: "#fab387", bluesky: "#89dceb", tulip: "#f5c2e7",
+      grove: "#94e2d5", lobstack: "#74c7ec", discovery: "#585b70", registry: "#585b70",
+      knowledge: "#585b70", inbox: "#585b70", other: "#6c7086",
+    };
+    const getColor = (p) => platformColors[p] || "#9399b2";
+
+    const tableRows = scored.map((p, i) => {
+      const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`;
+      const bar = p.writes > 0 ? `<div style="background:${getColor(p.platform)};height:16px;width:${Math.min(p.writes * 3, 200)}px;border-radius:3px;display:inline-block"></div>` : "";
+      return `<tr>
+        <td style="text-align:center;font-size:1.2em">${medal}</td>
+        <td><strong>${esc(p.platform)}</strong></td>
+        <td style="text-align:right">${p.writes}</td>
+        <td style="text-align:right">${p.reads}</td>
+        <td style="text-align:right">${p.total_calls}</td>
+        <td style="text-align:right">${p.write_ratio}%</td>
+        <td style="text-align:right">${p.e_cost_allocated ? "$" + p.e_cost_allocated.toFixed(2) : "-"}</td>
+        <td style="text-align:right">${p.cost_per_write !== null ? "$" + p.cost_per_write.toFixed(2) : "-"}</td>
+        <td style="text-align:right;font-weight:bold;color:${p.roi !== null ? "#a6e3a1" : p.writes > 0 ? "#89dceb" : "#6c7086"}">${p.roi_label}</td>
+        <td>${bar}</td>
+      </tr>`;
+    }).join("");
+
+    const chartLabels = scored.filter(p => p.writes > 0).map(p => p.platform);
+    const chartWrites = scored.filter(p => p.writes > 0).map(p => p.writes);
+    const chartCPW = scored.filter(p => p.writes > 0).map(p => p.cost_per_write || 0);
+    const chartColors = chartLabels.map(l => getColor(l));
+
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Engagement ROI Leaderboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  body { background: #1e1e2e; color: #cdd6f4; font-family: monospace; margin: 2em; }
+  h1 { color: #89b4fa; } h2 { color: #a6e3a1; margin-top: 2em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th, td { padding: 8px 12px; border-bottom: 1px solid #313244; }
+  th { background: #181825; color: #89b4fa; text-align: left; }
+  tr:hover { background: #313244; }
+  .summary { display: flex; gap: 2em; margin: 1em 0; }
+  .card { background: #181825; padding: 1em 1.5em; border-radius: 8px; }
+  .card .val { font-size: 1.8em; color: #a6e3a1; }
+  .card .label { color: #6c7086; font-size: 0.85em; }
+  .charts { display: flex; gap: 2em; flex-wrap: wrap; margin-top: 1em; }
+  .charts canvas { background: #181825; border-radius: 8px; padding: 1em; max-width: 500px; }
+  a { color: #89b4fa; }
+</style></head><body>
+<h1>Engagement ROI Leaderboard</h1>
+<p>Platforms ranked by engagement yield per dollar spent. Data from ${eSummary.count || 0} E sessions ($${(eSummary.total_cost || 0).toFixed(2)} total).</p>
+<div class="summary">
+  <div class="card"><div class="val">${scored.length}</div><div class="label">Platforms tracked</div></div>
+  <div class="card"><div class="val">${scored.reduce((a, p) => a + p.writes, 0)}</div><div class="label">Total writes</div></div>
+  <div class="card"><div class="val">$${(eSummary.avg_cost || 0).toFixed(2)}</div><div class="label">Avg E session cost</div></div>
+  <div class="card"><div class="val">${scored[0]?.platform || "n/a"}</div><div class="label">Top ROI platform</div></div>
+</div>
+<table><thead><tr><th></th><th>Platform</th><th>Writes</th><th>Reads</th><th>Total</th><th>Write%</th><th>E Cost</th><th>$/Write</th><th>ROI</th><th>Volume</th></tr></thead><tbody>${tableRows}</tbody></table>
+<h2>Charts</h2>
+<div class="charts">
+  <canvas id="writesChart" width="480" height="300"></canvas>
+  <canvas id="cpwChart" width="480" height="300"></canvas>
+</div>
+<script>
+const labels = ${JSON.stringify(chartLabels)};
+const writes = ${JSON.stringify(chartWrites)};
+const cpw = ${JSON.stringify(chartCPW)};
+const colors = ${JSON.stringify(chartColors)};
+new Chart(document.getElementById("writesChart"), {
+  type: "bar",
+  data: { labels, datasets: [{ label: "Writes", data: writes, backgroundColor: colors }] },
+  options: { plugins: { title: { display: true, text: "Write Volume by Platform", color: "#cdd6f4" } }, scales: { y: { ticks: { color: "#6c7086" } }, x: { ticks: { color: "#6c7086" } } } }
+});
+new Chart(document.getElementById("cpwChart"), {
+  type: "bar",
+  data: { labels, datasets: [{ label: "$/Write", data: cpw, backgroundColor: colors.map(c => c + "99") }] },
+  options: { plugins: { title: { display: true, text: "Cost per Write (lower = better)", color: "#cdd6f4" } }, scales: { y: { ticks: { color: "#6c7086", callback: v => "$" + v.toFixed(2) } }, x: { ticks: { color: "#6c7086" } } } }
+});
+</script>
+<p style="color:#6c7086;margin-top:2em">Sources: replay-log.jsonl (${analytics.data_sources?.http_log_entries || 0} HTTP entries), engagement-replay.jsonl (${analytics.data_sources?.tool_log_entries || 0} tool entries). <a href="/engagement/roi-leaderboard?format=json">JSON</a> | <a href="/engagement/analytics">Raw analytics</a> | <a href="/status/engagement-roi">ROI ranking</a></p>
+</body></html>`);
+  } catch (e) {
+    res.status(500).json({ error: "ROI leaderboard failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Session log search — query session-history.txt by mode, cost, build output (wq-014)
 app.get("/sessions/search", (req, res) => {
   try {

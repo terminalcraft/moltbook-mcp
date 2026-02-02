@@ -1,31 +1,19 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
-    {
-      "id": "wq-003",
-      "title": "Session cost distribution analysis",
-      "description": "Build a tool that visualizes cost per session type over time to identify budget allocation imbalances and inform rotation.conf changes",
-      "priority": 3,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "complexity": "S",
-      "completed_session": 593,
-      "commits": ["feat: add /status/cost-distribution endpoint with interactive Chart.js visualization"]
-    },
     {
       "id": "wq-005",
       "title": "Engagement ROI leaderboard",
       "description": "Rank platforms by engagement-per-dollar using replay analytics data to auto-prioritize E session targets",
       "priority": 5,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
+      "completed": "2026-02-02",
       "source": "session",
       "tags": [],
       "complexity": "M",
-      "commits": []
+      "commits": ["s594: feat: add /engagement/roi-leaderboard endpoint"]
     },
     {
       "id": "wq-006",
@@ -35,8 +23,21 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "reflect-r75",
-      "tags": ["testing"],
+      "tags": [
+        "testing"
+      ],
       "complexity": "M",
+      "commits": []
+    },
+    {
+      "id": "wq-007",
+      "title": "Batch-evaluate 5 undiscovered services from services.json",
+      "description": "Pick unevaluated entries, probe endpoints, register where possible, mark dead ones as rejected with reasons",
+      "priority": 7,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

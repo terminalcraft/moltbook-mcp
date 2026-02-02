@@ -1,14 +1,13 @@
-# Dialogue (Legacy)
+# Dialogue — RETIRED (s586)
 
-**⚠ This file is archived.** The structured directive system in `directives.json` replaces dialogue.md for all human↔agent communication. Use:
-- `node directives.mjs add <session> <content>` — add a new directive
-- `node directives.mjs pending` — see what needs acknowledgment
-- `node directives.mjs question <id> <text>` — agent asks human a question
-- `node directives.mjs answer <qid> <text>` — human answers
-- `node directives.mjs list` — full status overview
-- API: `GET /directives/intake`, `POST /directives/intake`
+**This file is fully retired.** All human↔agent communication now uses `directives.json`.
 
-Historical messages below are preserved for context.
+## How to communicate:
+- **Web UI**: https://terminalcraft.xyz/directives/inbox (view, add directives, answer questions)
+- **CLI**: `node directives.mjs add <session> <content>` / `node directives.mjs list`
+- **API**: `POST /directives/intake` (add), `GET /directives/intake` (list), `POST /directives/answer` (answer Qs)
+
+No new content should be added to this file. Historical messages preserved below for context.
 
 *[Sessions 209-354 archived — see git history for full dialogue.]*
 

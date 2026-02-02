@@ -275,24 +275,20 @@ if (MODE === 'B') {
       title.toLowerCase().includes(qt.split(':')[0].trim().substring(0, 15))
     );
 
-    // Source 1: Unaddressed dialogue directives (highest value — human asked for these)
-    const dialoguePath2 = join(DIR, 'dialogue.md');
-    if (existsSync(dialoguePath2)) {
-      const d = readFileSync(dialoguePath2, 'utf8');
-      // Look for "Status" lines that indicate unresolved items
-      const statusBlocks = [...d.matchAll(/###\s*Human.*?\n([\s\S]*?)(?=###|## Session|$)/g)];
-      for (const block of statusBlocks) {
-        const text = block[1];
-        // If block mentions waiting, broken, or has no "done/completed" status
-        if (text.match(/waiting|broken|fix|build.*replacement|not.*meet/i) && !text.match(/Status.*done|completed/i)) {
-          // Extract a short description from the first substantive line
-          const firstLine = text.trim().split('\n')[0].replace(/^\*\*Status\*\*:?\s*/i, '').trim();
-          if (firstLine.length > 10 && firstLine.length < 120 && seeds.length < 4) {
-            const seed = `- **Address: ${firstLine.substring(0, 80)}**: Unresolved human directive — prioritize`;
-            if (!isDupe(firstLine)) seeds.push(seed);
+    // Source 1: Unaddressed directives from directives.json (highest value — human asked for these)
+    const directivesPath2 = join(DIR, 'directives.json');
+    if (existsSync(directivesPath2)) {
+      try {
+        const dData = JSON.parse(readFileSync(directivesPath2, 'utf8'));
+        const active = (dData.directives || []).filter(d => d.status === 'active' || d.status === 'pending');
+        for (const d of active) {
+          if (seeds.length >= 4) break;
+          const preview = (d.content || '').substring(0, 80);
+          if (preview.length > 10 && !isDupe(preview)) {
+            seeds.push(`- **Address: ${preview}**: Unresolved directive ${d.id} — prioritize`);
           }
         }
-      }
+      } catch {}
     }
 
     // Source 2: Recent session error/timeout patterns
@@ -420,17 +416,7 @@ if (MODE === 'B') {
       result.intake_status = 'error:parse';
     }
   } else {
-    // Fallback to dialogue.md regex
-    const dialoguePath = join(DIR, 'dialogue.md');
-    if (wq && existsSync(dialoguePath)) {
-      const d = readFileSync(dialoguePath, 'utf8');
-      const lastIntake = wq.last_intake_session || 0;
-      const matches = [...d.matchAll(/Human.*?\(s(\d+)/gi), ...d.matchAll(/Human directive \(s(\d+)/gi), ...d.matchAll(/Human \(s(\d+)/gi)];
-      const maxDirective = matches.reduce((m, x) => Math.max(m, parseInt(x[1] || 0)), 0);
-      result.intake_status = maxDirective > lastIntake ? `NEW:s${maxDirective}` : `no-op:s${lastIntake}`;
-    } else {
-      result.intake_status = 'unknown';
-    }
+    result.intake_status = 'unknown:no-directives-json';
   }
 
   // --- Assemble full R session prompt block (R#52) ---

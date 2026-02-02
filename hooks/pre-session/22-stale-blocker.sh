@@ -9,7 +9,7 @@ set -euo pipefail
 STATE_DIR="$HOME/.config/moltbook"
 BLOCKER_STATE="$STATE_DIR/blocker-tracking.json"
 QUEUE="$HOME/moltbook-mcp/work-queue.json"
-DIALOGUE="$HOME/moltbook-mcp/dialogue.md"
+DIRECTIVES="$HOME/moltbook-mcp/directives.json"
 SESSION_NUM="${SESSION_NUM:-0}"
 STALE_THRESHOLD=30
 RE_ESCALATE_INTERVAL=50
@@ -21,11 +21,11 @@ if [ ! -f "$BLOCKER_STATE" ]; then
   echo '{}' > "$BLOCKER_STATE"
 fi
 
-python3 - "$QUEUE" "$BLOCKER_STATE" "$DIALOGUE" "$SESSION_NUM" "$STALE_THRESHOLD" "$RE_ESCALATE_INTERVAL" <<'PYEOF'
+python3 - "$QUEUE" "$BLOCKER_STATE" "$DIRECTIVES" "$SESSION_NUM" "$STALE_THRESHOLD" "$RE_ESCALATE_INTERVAL" <<'PYEOF'
 import json, sys
 from pathlib import Path
 
-queue_file, state_file, dialogue_file = sys.argv[1], sys.argv[2], sys.argv[3]
+queue_file, state_file, directives_file = sys.argv[1], sys.argv[2], sys.argv[3]
 session = int(sys.argv[4])
 threshold = int(sys.argv[5])
 re_escalate = int(sys.argv[6])
@@ -45,7 +45,6 @@ for item in blocked:
     entry = state.get(wid, {})
 
     if not entry.get("first_seen_blocked"):
-        # First time seeing this item blocked — record it
         state[wid] = {
             "first_seen_blocked": session,
             "last_escalated": 0
@@ -59,11 +58,9 @@ for item in blocked:
     if age < threshold:
         continue
 
-    # Check cooldown
     if last_esc > 0 and (session - last_esc) < re_escalate:
         continue
 
-    # Escalate
     nudges.append({
         "id": wid,
         "title": item.get("title", ""),
@@ -72,28 +69,30 @@ for item in blocked:
     })
     state[wid]["last_escalated"] = session
 
-# Clean up state for items no longer blocked
 active_blocked_ids = {i["id"] for i in blocked}
 for wid in list(state.keys()):
     if wid not in active_blocked_ids:
         del state[wid]
 
-# Write state
 Path(state_file).write_text(json.dumps(state, indent=2) + "\n")
 
-# Append nudges to dialogue.md
+# Add escalation as a directive in directives.json
 if nudges:
-    lines = [f"\n### Auto-escalation (s{session}):\n"]
-    lines.append(f"The following work queue items have been blocked for **>{threshold} sessions** with no resolution:\n")
-    for n in nudges:
-        lines.append(f"- **{n['id']}** ({n['title']}): blocked {n['age']} sessions. Blocker: {n['blocker']}")
-    lines.append("")
-    lines.append("Human action may be needed to unblock these. Please review or drop them from the queue.\n")
-
-    with open(dialogue_file, "a") as f:
-        f.write("\n".join(lines))
-
-    print(f"STALE_BLOCKER: Escalated {len(nudges)} blocked items to dialogue.md")
+    directives = json.loads(Path(directives_file).read_text())
+    items_list = ", ".join(f"{n['id']} ({n['title'][:50]}, blocked {n['age']}s, blocker: {n['blocker'][:60]})" for n in nudges)
+    content = f"Auto-escalation: {len(nudges)} work queue items blocked >{threshold} sessions: {items_list}. Human action may be needed."
+    max_id = max((int(d["id"].replace("d", "")) for d in directives.get("directives", [])), default=0)
+    new_id = f"d{max_id + 1:03d}"
+    directives.setdefault("directives", []).append({
+        "id": new_id,
+        "from": "system",
+        "session": session,
+        "content": content,
+        "status": "pending",
+        "created": f"{__import__('datetime').datetime.utcnow().isoformat()}Z"
+    })
+    Path(directives_file).write_text(json.dumps(directives, indent=2) + "\n")
+    print(f"STALE_BLOCKER: Escalated {len(nudges)} blocked items as directive {new_id}")
 else:
     print(f"STALE_BLOCKER: {len(blocked)} blocked items, none stale enough to escalate")
 PYEOF

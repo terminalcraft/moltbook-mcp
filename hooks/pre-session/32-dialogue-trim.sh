@@ -1,8 +1,8 @@
 #!/bin/bash
-# Pre-hook: Trim dialogue.md before R sessions.
-# Keeps: header, open directives (Status != Done), last 5 agent summaries.
-# Archives removed content to dialogue-archive.md.
-# Only runs for R sessions. (s467, R#40)
+# Pre-hook: RETIRED (s586). dialogue.md replaced by directives.json inbox system.
+# All human directives now go through directives.json (CLI, API, or web UI at /directives/inbox).
+# This hook is a no-op. Kept for reference.
+exit 0
 
 [ "$MODE_CHAR" = "R" ] || exit 0
 

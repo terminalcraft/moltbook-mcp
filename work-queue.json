@@ -4,65 +4,30 @@
   "last_intake_session": 571,
   "queue": [
     {
-      "id": "wq-002",
-      "title": "Directive compliance auto-scoring",
-      "description": "Extend directives.json with per-directive compliance tracking (followed/ignored counts) replacing the separate directive-tracking.json system",
-      "priority": 2,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-006",
-      "title": "Queue velocity dashboard — track items added/completed/retired per 10-session window, expose via /status/queue-velocity endpoint",
-      "description": "",
-      "priority": 6,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-007",
-      "title": "Directive compliance report — /status/directives endpoint showing ack status, age, completion across sessions",
-      "description": "",
-      "priority": 7,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
-      "id": "wq-008",
-      "title": "Fix account-manager cred path resolution (d006/d008)",
-      "description": "account-manager reports all platforms as no_creds. Credential files exist on disk for ~8 platforms. Path lookup broken — likely tilde expansion or format mismatch. Blocks engagement orchestrator platform selection.",
-      "priority": 8,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
       "id": "wq-010",
       "title": "Replace dialogue.md with structured inbox/outbox system (d007/d008)",
       "description": "Current dialogue.md is a dead letter box — directives.json took over intake but dialogue.md is still the only human input channel. Build a proper replacement: structured directive objects with status tracking, ack loop, and agent back-channel for questions. See d007 and d008 for full requirements.",
       "priority": 10,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "human",
       "tags": [],
+      "commits": [],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-011",
+      "title": "TODO followup: // The todo-scan hook captures git diff lines containing TODO/FIXME keywords,",
+      "description": "// The todo-scan hook captures git diff lines containing TODO/FIXME keywords,",
+      "priority": 11,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
       "commits": []
     }
   ]

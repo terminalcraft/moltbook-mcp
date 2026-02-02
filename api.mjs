@@ -140,6 +140,7 @@ function auth(req, res, next) {
 }
 
 app.use(express.json({ limit: "100kb" }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ limit: "1mb", type: "text/plain" }));
 
 // --- CORS (public API, allow all origins) ---
@@ -4681,19 +4682,143 @@ app.get("/directives/intake", (req, res) => {
 });
 
 app.post("/directives/intake", (req, res) => {
+  const isForm = req.headers["content-type"]?.includes("urlencoded");
   try {
     const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
     const { content, session, from } = req.body || {};
-    if (!content) return res.status(400).json({ error: "content required" });
+    if (!content) return isForm ? res.redirect("/directives/inbox?error=no-content") : res.status(400).json({ error: "content required" });
     const maxId = data.directives.reduce((m, d) => Math.max(m, parseInt(d.id.replace("d", "")) || 0), 0);
     const id = `d${String(maxId + 1).padStart(3, "0")}`;
-    data.directives.push({ id, from: from || "human", session: session || null, content, status: "pending", created: new Date().toISOString() });
+    data.directives.push({ id, from: from || "human", session: parseInt(session) || null, content, status: "pending", created: new Date().toISOString() });
     writeFileSync(join(BASE, "directives.json"), JSON.stringify(data, null, 2) + "\n");
-    res.json({ ok: true, id });
+    return isForm ? res.redirect("/directives/inbox?added=" + id) : res.json({ ok: true, id });
   } catch (e) {
-    res.status(500).json({ error: e.message?.slice(0, 100) });
+    return isForm ? res.redirect("/directives/inbox?error=server") : res.status(500).json({ error: e.message?.slice(0, 100) });
   }
 });
+
+// --- Directive answer API (JSON + form) ---
+app.post("/directives/answer", (req, res) => {
+  const isForm = req.headers["content-type"]?.includes("urlencoded");
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+    const { qid, answer } = req.body || {};
+    if (!qid || !answer) return isForm ? res.redirect("/directives/inbox?error=missing-fields") : res.status(400).json({ error: "qid and answer required" });
+    const q = (data.questions || []).find(x => x.id === qid);
+    if (!q) return isForm ? res.redirect("/directives/inbox?error=not-found") : res.status(404).json({ error: `Question ${qid} not found` });
+    q.answered = true;
+    q.answer = answer;
+    q.answered_at = new Date().toISOString();
+    writeFileSync(join(BASE, "directives.json"), JSON.stringify(data, null, 2) + "\n");
+    return isForm ? res.redirect("/directives/inbox?answered=" + qid) : res.json({ ok: true, qid, answer });
+  } catch (e) {
+    return isForm ? res.redirect("/directives/inbox?error=server") : res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+// --- Directive inbox web UI (wq-010) ---
+app.get("/directives/inbox", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+    const directives = data.directives || [];
+    const questions = data.questions || [];
+
+    const statusIcon = (s) => s === "completed" ? "✓" : s === "active" ? "●" : s === "pending" ? "○" : "▶";
+    const statusColor = (s) => s === "completed" ? "#4a4" : s === "active" ? "#48f" : s === "pending" ? "#fa0" : "#888";
+
+    const directiveRows = directives.map(d => `
+      <tr>
+        <td style="color:${statusColor(d.status)}">${statusIcon(d.status)} ${d.id}</td>
+        <td>${d.status}</td>
+        <td>s${d.session || "?"}</td>
+        <td>${d.acked_session ? "s" + d.acked_session : "<em>unacked</em>"}</td>
+        <td style="max-width:400px;word-wrap:break-word">${(d.content || "").replace(/</g, "&lt;").slice(0, 200)}${(d.content || "").length > 200 ? "…" : ""}</td>
+        <td>${d.queue_item || "—"}</td>
+        <td style="font-size:0.85em;color:#888">${(d.notes || "—").replace(/</g, "&lt;").slice(0, 100)}</td>
+      </tr>`).join("");
+
+    const pendingQs = questions.filter(q => !q.answered);
+    const answeredQs = questions.filter(q => q.answered);
+
+    const qRows = pendingQs.map(q => `
+      <tr style="background:#332200">
+        <td>${q.id}</td>
+        <td>${q.directive_id}</td>
+        <td>${(q.text || "").replace(/</g, "&lt;")}</td>
+        <td><em>Awaiting answer</em></td>
+        <td>
+          <form method="POST" action="/directives/answer" style="display:inline">
+            <input type="hidden" name="qid" value="${q.id}">
+            <input name="answer" placeholder="Your answer…" style="width:200px;background:#222;color:#eee;border:1px solid #555;padding:4px">
+            <button type="submit" style="background:#48f;color:#fff;border:none;padding:4px 12px;cursor:pointer">Answer</button>
+          </form>
+        </td>
+      </tr>`).join("");
+
+    const answeredRows = answeredQs.map(q => `
+      <tr>
+        <td>${q.id}</td>
+        <td>${q.directive_id}</td>
+        <td>${(q.text || "").replace(/</g, "&lt;")}</td>
+        <td style="color:#4a4">${(q.answer || "").replace(/</g, "&lt;")}</td>
+        <td style="color:#888;font-size:0.85em">${q.answered_at || ""}</td>
+      </tr>`).join("");
+
+    const pending = directives.filter(d => d.status === "pending").length;
+    const active = directives.filter(d => d.status === "active").length;
+    const completed = directives.filter(d => d.status === "completed").length;
+
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Directive Inbox</title>
+    <style>
+      body{background:#111;color:#eee;font-family:monospace;padding:20px;max-width:1200px;margin:0 auto}
+      h1{color:#48f}h2{color:#fa0;margin-top:30px}
+      table{width:100%;border-collapse:collapse;margin:10px 0}
+      th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #333}
+      th{background:#1a1a1a;color:#888}
+      .stats{display:flex;gap:20px;margin:15px 0}
+      .stat{background:#1a1a2a;padding:12px 20px;border-radius:8px;text-align:center}
+      .stat .val{font-size:1.5em;font-weight:bold}
+      form.add{background:#1a1a2a;padding:15px;border-radius:8px;margin:15px 0}
+      form.add textarea{width:100%;background:#222;color:#eee;border:1px solid #555;padding:8px;min-height:60px;font-family:monospace}
+      form.add button{background:#48f;color:#fff;border:none;padding:8px 20px;cursor:pointer;margin-top:8px;font-size:1em}
+      form.add input{background:#222;color:#eee;border:1px solid #555;padding:6px;width:80px}
+    </style></head><body>
+    <h1>Directive Inbox</h1>
+    <p style="color:#888">Structured human↔agent communication. Replaces dialogue.md.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="val" style="color:#fa0">${pending}</div>Pending</div>
+      <div class="stat"><div class="val" style="color:#48f">${active}</div>Active</div>
+      <div class="stat"><div class="val" style="color:#4a4">${completed}</div>Completed</div>
+      <div class="stat"><div class="val" style="color:#f48">${pendingQs.length}</div>Unanswered Qs</div>
+    </div>
+
+    <h2>Add New Directive</h2>
+    <form class="add" method="POST" action="/directives/intake">
+      <label>Session: <input name="session" type="number" placeholder="e.g. 586"></label><br><br>
+      <textarea name="content" placeholder="Write your directive here…" required></textarea><br>
+      <button type="submit">Submit Directive</button>
+    </form>
+
+    ${pendingQs.length ? `<h2>Questions from Agent (need your answer)</h2>
+    <table><tr><th>ID</th><th>Re:</th><th>Question</th><th>Answer</th><th>Action</th></tr>${qRows}</table>` : ""}
+
+    <h2>All Directives</h2>
+    <table>
+      <tr><th>ID</th><th>Status</th><th>From</th><th>Acked</th><th>Content</th><th>Queue</th><th>Notes</th></tr>
+      ${directiveRows}
+    </table>
+
+    ${answeredRows ? `<h2>Answered Questions</h2>
+    <table><tr><th>ID</th><th>Re:</th><th>Question</th><th>Answer</th><th>When</th></tr>${answeredRows}</table>` : ""}
+
+    <p style="color:#555;margin-top:30px">API: POST /directives/intake (add), POST /directives/answer (answer Qs), GET /directives/intake (list)</p>
+    </body></html>`);
+  } catch (e) {
+    res.status(500).send("Error: " + (e.message || "").slice(0, 100));
+  }
+});
+
 
 // --- Directive health dashboard ---
 app.get("/directives", (req, res) => {

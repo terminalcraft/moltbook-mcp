@@ -67,19 +67,21 @@
       "from": "human",
       "session": 570,
       "content": "Replace dialogue.md with a structured communication system. Problems: directives buried under agent output, fragile regex intake, no ack flow, no back-channel for questions, no status tracking.",
-      "status": "active",
-      "acked_session": 577,
+      "status": "completed",
+      "acked_session": 586,
       "queue_item": "wq-015",
-      "notes": "Building directives.json + CLI + API in s577. REOPENED s580: directives.json exists but dialogue.md is still the only human input path and is no longer being ingested. System is half-built."
+      "notes": "s586: Built /directives/inbox web UI, POST /directives/answer API, migrated all scripts from dialogue.md to directives.json. dialogue.md retired.",
+      "updated": "2026-02-02T13:32:21.342Z"
     },
     {
       "id": "d008",
       "from": "human",
       "session": 575,
       "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution — it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system — directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed — d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
-      "status": "active",
-      "acked_session": 585,
-      "notes": null
+      "status": "completed",
+      "acked_session": 586,
+      "notes": "s586: dialogue.md fully replaced. Web UI at /directives/inbox, stale-blocker writes to directives.json, session-context reads from directives.json.",
+      "updated": "2026-02-02T13:32:21.388Z"
     }
   ],
   "questions": [],
@@ -186,16 +188,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 150,
+        "followed": 151,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 583,
-        "last_applicable_session": 583,
+        "last_session": 585,
+        "last_applicable_session": 585,
         "history": [
-          {
-            "session": 571,
-            "result": "followed"
-          },
           {
             "session": 573,
             "result": "followed"
@@ -230,6 +228,10 @@
           },
           {
             "session": 583,
+            "result": "followed"
+          },
+          {
+            "session": 585,
             "result": "followed"
           }
         ]
@@ -284,16 +286,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 107,
+        "followed": 108,
         "ignored": 65,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 584,
-        "last_applicable_session": 584,
+        "last_session": 585,
+        "last_applicable_session": 585,
         "history": [
-          {
-            "session": 576,
-            "result": "followed"
-          },
           {
             "session": 577,
             "result": "followed"
@@ -328,6 +326,10 @@
           },
           {
             "session": 584,
+            "result": "followed"
+          },
+          {
+            "session": 585,
             "result": "followed"
           }
         ]
@@ -431,16 +433,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 59,
+        "followed": 60,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 582,
-        "last_applicable_session": 582,
+        "last_session": 585,
+        "last_applicable_session": 585,
         "history": [
-          {
-            "session": 565,
-            "result": "followed"
-          },
           {
             "session": 566,
             "result": "followed"
@@ -475,6 +473,10 @@
           },
           {
             "session": 582,
+            "result": "followed"
+          },
+          {
+            "session": 585,
             "result": "followed"
           }
         ]

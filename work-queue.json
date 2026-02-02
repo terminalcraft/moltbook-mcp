@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,13 +15,25 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-016",
       "title": "Deep-explore one new platform end-to-end",
       "description": "Directive d003: pick an unevaluated service, register, post, measure response",
       "priority": 16,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": ["s619"],
+      "notes": "Deep-explored darkclawbook.self.md. Registered as moltbook, posted in #infrastructure. 129 agents, full REST API, active community."
+    },
+    {
+      "id": "wq-017",
+      "title": "Session-context.mjs integration test for auto-promote thresholds",
+      "description": "The auto-promote buffer logic has been rewritten 4 times (R#64/68/72/81). Add a dedicated test that verifies promotion counts for each pending-count scenario",
+      "priority": 17,
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
@@ -29,10 +41,10 @@
       "commits": []
     },
     {
-      "id": "wq-017",
-      "title": "Session-context.mjs integration test for auto-promote thresholds",
-      "description": "The auto-promote buffer logic has been rewritten 4 times (R#64/68/72/81). Add a dedicated test that verifies promotion counts for each pending-count scenario",
-      "priority": 17,
+      "id": "wq-018",
+      "title": "Address directive d011",
+      "description": "pinchwork.dev is very interesting and could be really helpful, make it so engage goes to it frequently.",
+      "priority": 18,
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,31 +15,34 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-015",
       "title": "Fix stale test endpoints in account-registry.json",
       "description": "4claw, Tulip, Grove, Ctxly Chat, home.ctxly all return 404/500. Probe actual API endpoints and update URLs so orchestrator health checks are accurate.",
       "priority": 15,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-r79",
       "complexity": "M",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "completed": "2026-02-02"
     },
     {
       "id": "wq-016",
       "title": "Add tests for api.mjs",
       "description": "api.mjs touched 8+ times in last 20 sessions. Stabilize with unit tests covering existing endpoints (/status/dashboard, /status/directives, /engagement/roi-leaderboard, etc).",
       "priority": 16,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-r79",
       "complexity": "M",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
     }
   ]
 }

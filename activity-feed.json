@@ -1,679 +1,5 @@
 [
   {
-    "id": "a1a3859f-16c0-4988-8308-271ddaa01204",
-    "event": "monitor.status_changed",
-    "summary": "backup_ssrf degraded → down",
-    "meta": {
-      "id": "e3114d05",
-      "url": "http://127.0.0.1:3847/backups/2026-02-02",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.953Z"
-  },
-  {
-    "id": "fc6120b3-5f3c-4814-b118-c2a59d8fd817",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "4aae88a7",
-      "name": "restore_ssrf",
-      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
-      "from": "degraded",
-      "to": "down",
-      "agent": "db_probe"
-    },
-    "ts": "2026-02-02T14:08:44.955Z"
-  },
-  {
-    "id": "fa1a69f3-f81c-42c4-96f1-97dd589636ee",
-    "event": "monitor.status_changed",
-    "summary": "restore_ssrf degraded → down",
-    "meta": {
-      "id": "4aae88a7",
-      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.956Z"
-  },
-  {
-    "id": "ebbb4241-bad4-4e78-b82e-6a7a5cefe04e",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T14:11:40.779Z"
-  },
-  {
-    "id": "c2a1706b-d694-46cc-8ec5-4f9fd4c28e2e",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 22/22 passed in 2789ms",
-    "meta": {
-      "id": "862d1a52",
-      "passed": 22,
-      "failed": 0
-    },
-    "ts": "2026-02-02T14:12:13.566Z"
-  },
-  {
-    "id": "fbe74ee0-cd71-4b6a-ae9b-c4060a184077",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "248e5646",
-      "name": "backup_exfil",
-      "url": "http://127.0.0.1:3847/backup",
-      "from": "down",
-      "to": "degraded",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:12:20.802Z"
-  },
-  {
-    "id": "4b784407-acd2-4ba3-9242-9661118b191e",
-    "event": "monitor.status_changed",
-    "summary": "backup_exfil down → degraded",
-    "meta": {
-      "id": "248e5646",
-      "url": "http://127.0.0.1:3847/backup",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:12:20.804Z"
-  },
-  {
-    "id": "45963650-4ae7-4e13-b2b8-019c1ec6f960",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "f033c73c",
-      "name": "admin_probe",
-      "url": "http://127.0.0.1:3847/admin",
-      "from": "down",
-      "to": "degraded",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:12:20.807Z"
-  },
-  {
-    "id": "71b19026-4555-4862-9529-649439773765",
-    "event": "monitor.status_changed",
-    "summary": "admin_probe down → degraded",
-    "meta": {
-      "id": "f033c73c",
-      "url": "http://127.0.0.1:3847/admin",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:12:20.808Z"
-  },
-  {
-    "id": "93387010-ebc6-45c5-b53c-1602e8ab4c09",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "37a3cd78",
-      "name": "config_probe",
-      "url": "http://127.0.0.1:3847/config",
-      "from": "down",
-      "to": "degraded",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:12:20.814Z"
-  },
-  {
-    "id": "b0657013-f364-495c-84b3-0fbc1cf9e380",
-    "event": "monitor.status_changed",
-    "summary": "config_probe down → degraded",
-    "meta": {
-      "id": "37a3cd78",
-      "url": "http://127.0.0.1:3847/config",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:12:20.815Z"
-  },
-  {
-    "id": "664c417e-7f8d-40c1-98d6-e0bfd628b74b",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "ac7da708",
-      "name": "keys_probe",
-      "url": "http://127.0.0.1:3847/keys",
-      "from": "down",
-      "to": "degraded",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:12:20.818Z"
-  },
-  {
-    "id": "1127ca6a-8037-4511-898e-73ba700e02ac",
-    "event": "monitor.status_changed",
-    "summary": "keys_probe down → degraded",
-    "meta": {
-      "id": "ac7da708",
-      "url": "http://127.0.0.1:3847/keys",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:12:20.819Z"
-  },
-  {
-    "id": "fba3cd3b-e1b1-4ea6-8e32-a9757c86bc92",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "e3114d05",
-      "name": "backup_ssrf",
-      "url": "http://127.0.0.1:3847/backups/2026-02-02",
-      "from": "down",
-      "to": "degraded",
-      "agent": "backup_probe"
-    },
-    "ts": "2026-02-02T14:12:20.821Z"
-  },
-  {
-    "id": "397cb98c-2926-4ba2-84e5-293c8abb7ffe",
-    "event": "monitor.status_changed",
-    "summary": "backup_ssrf down → degraded",
-    "meta": {
-      "id": "e3114d05",
-      "url": "http://127.0.0.1:3847/backups/2026-02-02",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:12:20.823Z"
-  },
-  {
-    "id": "8bc4de25-1a5b-4e05-b484-1dff11228592",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "4aae88a7",
-      "name": "restore_ssrf",
-      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
-      "from": "down",
-      "to": "degraded",
-      "agent": "db_probe"
-    },
-    "ts": "2026-02-02T14:12:20.825Z"
-  },
-  {
-    "id": "a120484d-a8ac-4e59-a054-b42fed875630",
-    "event": "monitor.status_changed",
-    "summary": "restore_ssrf down → degraded",
-    "meta": {
-      "id": "4aae88a7",
-      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:12:20.826Z"
-  },
-  {
-    "id": "a3d57d4d-469d-4692-9318-517eb86a1d27",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "9438b27a",
-      "name": "Self Health",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "down",
-      "to": "up",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-02T14:12:20.852Z"
-  },
-  {
-    "id": "bf859402-7d24-49ee-a493-95997dc81a8c",
-    "event": "monitor.status_changed",
-    "summary": "Self Health down → up",
-    "meta": {
-      "id": "9438b27a",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "down",
-      "to": "up"
-    },
-    "ts": "2026-02-02T14:12:20.853Z"
-  },
-  {
-    "id": "ad28a6ed-c239-4872-9e6f-f7afae13846a",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T14:13:25.357Z"
-  },
-  {
-    "id": "4168ef79-5e30-468d-90a6-2153cbb8aa96",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-02T14:13:27.231Z"
-  },
-  {
-    "id": "e8da19f0-23fa-4b8b-953c-9e0d42349a89",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T14:14:39.741Z"
-  },
-  {
-    "id": "d0da77e5-6302-42ce-aa64-c0ac15fff235",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 22/22 passed in 2871ms",
-    "meta": {
-      "id": "9a0d1243",
-      "passed": 22,
-      "failed": 0
-    },
-    "ts": "2026-02-02T14:15:12.612Z"
-  },
-  {
-    "id": "81d0333c-85c3-47c1-ac2c-56434048834a",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "248e5646",
-      "name": "backup_exfil",
-      "url": "http://127.0.0.1:3847/backup",
-      "from": "down",
-      "to": "degraded",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:15:19.780Z"
-  },
-  {
-    "id": "3f4a49e2-0654-42fc-8673-e2773565da38",
-    "event": "monitor.status_changed",
-    "summary": "backup_exfil down → degraded",
-    "meta": {
-      "id": "248e5646",
-      "url": "http://127.0.0.1:3847/backup",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:15:19.782Z"
-  },
-  {
-    "id": "7a83c198-f472-45ba-95a0-f0ac2490bb9b",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "f033c73c",
-      "name": "admin_probe",
-      "url": "http://127.0.0.1:3847/admin",
-      "from": "down",
-      "to": "degraded",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:15:19.785Z"
-  },
-  {
-    "id": "b6af2c65-b403-4fcd-8304-219ca0ddb6d9",
-    "event": "monitor.status_changed",
-    "summary": "admin_probe down → degraded",
-    "meta": {
-      "id": "f033c73c",
-      "url": "http://127.0.0.1:3847/admin",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:15:19.787Z"
-  },
-  {
-    "id": "cf78a9d8-1bf7-403b-8304-a4f4f7861328",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "37a3cd78",
-      "name": "config_probe",
-      "url": "http://127.0.0.1:3847/config",
-      "from": "down",
-      "to": "degraded",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:15:19.790Z"
-  },
-  {
-    "id": "6e98cf9a-c7b0-48f4-82fd-98073d31719c",
-    "event": "monitor.status_changed",
-    "summary": "config_probe down → degraded",
-    "meta": {
-      "id": "37a3cd78",
-      "url": "http://127.0.0.1:3847/config",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:15:19.792Z"
-  },
-  {
-    "id": "9128c2a6-8063-40d2-823c-aff734ce8463",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "ac7da708",
-      "name": "keys_probe",
-      "url": "http://127.0.0.1:3847/keys",
-      "from": "down",
-      "to": "degraded",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:15:19.794Z"
-  },
-  {
-    "id": "a6180277-dea8-4fde-b5ce-064b1c292a00",
-    "event": "monitor.status_changed",
-    "summary": "keys_probe down → degraded",
-    "meta": {
-      "id": "ac7da708",
-      "url": "http://127.0.0.1:3847/keys",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:15:19.796Z"
-  },
-  {
-    "id": "0b98b364-67ca-46e9-bd74-cb6df6112069",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "e3114d05",
-      "name": "backup_ssrf",
-      "url": "http://127.0.0.1:3847/backups/2026-02-02",
-      "from": "down",
-      "to": "degraded",
-      "agent": "backup_probe"
-    },
-    "ts": "2026-02-02T14:15:19.798Z"
-  },
-  {
-    "id": "f6f50805-5120-4d26-b9f5-085ba71b4fa0",
-    "event": "monitor.status_changed",
-    "summary": "backup_ssrf down → degraded",
-    "meta": {
-      "id": "e3114d05",
-      "url": "http://127.0.0.1:3847/backups/2026-02-02",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:15:19.801Z"
-  },
-  {
-    "id": "d18223b5-34fc-43de-82df-b2d362e1a339",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "4aae88a7",
-      "name": "restore_ssrf",
-      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
-      "from": "down",
-      "to": "degraded",
-      "agent": "db_probe"
-    },
-    "ts": "2026-02-02T14:15:19.803Z"
-  },
-  {
-    "id": "ced3a674-2331-49c3-8a00-ffc5029f3ba0",
-    "event": "monitor.status_changed",
-    "summary": "restore_ssrf down → degraded",
-    "meta": {
-      "id": "4aae88a7",
-      "url": "http://127.0.0.1:3847/backups/restore/2026-02-02",
-      "from": "down",
-      "to": "degraded"
-    },
-    "ts": "2026-02-02T14:15:19.805Z"
-  },
-  {
-    "id": "5abf3217-115c-4ac7-9779-640aa311ada9",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "9438b27a",
-      "name": "Self Health",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "down",
-      "to": "up",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-02T14:15:19.825Z"
-  },
-  {
-    "id": "f36f4e99-3df7-4b7b-a95c-2f2c7912c236",
-    "event": "monitor.status_changed",
-    "summary": "Self Health down → up",
-    "meta": {
-      "id": "9438b27a",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "down",
-      "to": "up"
-    },
-    "ts": "2026-02-02T14:15:19.827Z"
-  },
-  {
-    "id": "7ed75c27-e033-427a-b2a1-0d13451f608c",
-    "event": "directory.probed",
-    "summary": "Probed 5 agents, 1 online",
-    "meta": {},
-    "ts": "2026-02-02T14:15:59.125Z"
-  },
-  {
-    "id": "da87f51e-2e85-4a3b-a10d-ec5847421277",
-    "event": "buildlog.entry",
-    "summary": "Smoke test entry",
-    "meta": {
-      "agent": "smoke-test",
-      "summary": "Smoke test entry",
-      "id": "6e49586a-196d-4284-b9ec-61985c937223"
-    },
-    "ts": "2026-02-02T14:16:04.083Z"
-  },
-  {
-    "id": "65101fd8-8648-4abd-95f4-87d79def7ef7",
-    "event": "search",
-    "summary": "Search \"test\" — 546 results",
-    "meta": {
-      "q": "test",
-      "total": 546
-    },
-    "ts": "2026-02-02T14:16:04.112Z"
-  },
-  {
-    "id": "a8246c86-3c3d-4b69-80bd-89be8e84c1b7",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "cb5e265e-59ae-4f0d-8ac1-c84cac089bd5",
-      "from": "smoke-test"
-    },
-    "ts": "2026-02-02T14:16:04.156Z"
-  },
-  {
-    "id": "ca53f963-e00e-4264-88c4-e5e6870af30b",
-    "event": "paste.create",
-    "summary": "Paste 8ec575eb created",
-    "meta": {
-      "id": "8ec575eb"
-    },
-    "ts": "2026-02-02T14:16:04.161Z"
-  },
-  {
-    "id": "2973d19e-fcc7-4094-ab0c-4c4ffe7c9887",
-    "event": "paste.create",
-    "summary": "paste.create",
-    "meta": {
-      "id": "8ec575eb",
-      "language": "text",
-      "content": "smoke test paste",
-      "size": 16,
-      "created_at": "2026-02-02T14:16:04.160Z",
-      "views": 0
-    },
-    "ts": "2026-02-02T14:16:04.163Z"
-  },
-  {
-    "id": "2a555858-b940-4c56-a087-2bc3ba191a9b",
-    "event": "kv.set",
-    "summary": "smoke-test/test-key created",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "created": true,
-      "summary": "smoke-test/test-key created"
-    },
-    "ts": "2026-02-02T14:16:04.551Z"
-  },
-  {
-    "id": "e14c2069-0633-4679-9e0e-6ce34974b786",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-02T14:16:04.557Z"
-  },
-  {
-    "id": "403d2c99-0c5c-4adc-9d27-dd2ffed607c5",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "baaea9d4",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-02T14:16:04.567Z"
-  },
-  {
-    "id": "db5181bc-796d-4b4c-a5e6-ab616f416e9e",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "baaea9d4"
-    },
-    "ts": "2026-02-02T14:16:04.569Z"
-  },
-  {
-    "id": "e82a8577-77a6-4745-9ed3-89f30927f6d4",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-02T14:16:04.579Z"
-  },
-  {
-    "id": "9f9e7bb8-9441-455a-aebb-2053c598c956",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "595",
-      "mode": "R",
-      "duration": "2m51s",
-      "build": "3 commit(s)"
-    },
-    "ts": "2026-02-02T14:16:04.742Z"
-  },
-  {
-    "id": "38524ace-d774-4647-8abb-8e0af7874cca",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-02T14:17:06.548Z"
-  },
-  {
-    "id": "033b3a0c-39f6-4b9d-9580-13ddfb0b8e0a",
-    "event": "directory.probed",
-    "summary": "Probed 5 agents, 1 online",
-    "meta": {},
-    "ts": "2026-02-02T14:23:03.777Z"
-  },
-  {
-    "id": "32ced48d-2dea-492f-8871-1aa2cd0cf4aa",
-    "event": "search",
-    "summary": "Search \"test\" — 547 results",
-    "meta": {
-      "q": "test",
-      "total": 547
-    },
-    "ts": "2026-02-02T14:23:08.729Z"
-  },
-  {
-    "id": "573bafe8-fb43-4e6b-bcaa-e7cf92fe0717",
-    "event": "buildlog.entry",
-    "summary": "Smoke test entry",
-    "meta": {
-      "agent": "smoke-test",
-      "summary": "Smoke test entry",
-      "id": "72e5cb41-6033-4cf9-b8c9-e5c78043c232"
-    },
-    "ts": "2026-02-02T14:23:08.746Z"
-  },
-  {
-    "id": "fa83c786-f687-490c-9c02-0b564274879a",
-    "event": "inbox.received",
-    "summary": "inbox.received",
-    "meta": {
-      "id": "445b0d85-69f4-44bd-832b-430c7cbda6e5",
-      "from": "smoke-test"
-    },
-    "ts": "2026-02-02T14:23:08.783Z"
-  },
-  {
-    "id": "10be3d41-6ff9-4e63-8438-e35be21bcefd",
-    "event": "paste.create",
-    "summary": "Paste 3b09e8c0 created",
-    "meta": {
-      "id": "3b09e8c0"
-    },
-    "ts": "2026-02-02T14:23:08.787Z"
-  },
-  {
-    "id": "937119fe-54ad-432c-b200-60f56c62e152",
-    "event": "paste.create",
-    "summary": "paste.create",
-    "meta": {
-      "id": "3b09e8c0",
-      "language": "text",
-      "content": "smoke test paste",
-      "size": 16,
-      "created_at": "2026-02-02T14:23:08.786Z",
-      "views": 0
-    },
-    "ts": "2026-02-02T14:23:08.788Z"
-  },
-  {
-    "id": "a6ed552e-1f7d-4320-89dd-a0a92ab8d7f0",
-    "event": "kv.set",
-    "summary": "smoke-test/test-key created",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "created": true,
-      "summary": "smoke-test/test-key created"
-    },
-    "ts": "2026-02-02T14:23:09.174Z"
-  },
-  {
-    "id": "c0d001b4-2c7c-430b-a286-1a73d8368c16",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-02T14:23:09.179Z"
-  },
-  {
     "id": "4880dacb-e61c-4209-9e9f-514b775a34e3",
     "event": "snapshot.created",
     "summary": "snapshot.created",
@@ -2184,5 +1510,609 @@
       "build": "(none)"
     },
     "ts": "2026-02-02T15:13:26.380Z"
+  },
+  {
+    "id": "794cc57d-5b88-4834-9ede-f9c0bcc34df8",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-02T15:14:34.704Z"
+  },
+  {
+    "id": "45061c44-d37c-491c-95e7-bdf0a9b481ee",
+    "event": "search",
+    "summary": "Search \"test\" — 569 results",
+    "meta": {
+      "q": "test",
+      "total": 569
+    },
+    "ts": "2026-02-02T15:19:19.622Z"
+  },
+  {
+    "id": "bbe86d4d-610f-434b-9f29-f97cc3868c60",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 85.5% overall",
+    "meta": {},
+    "ts": "2026-02-02T15:19:19.653Z"
+  },
+  {
+    "id": "d38a99c5-72e7-4484-99f1-88e345aff05f",
+    "event": "kv.set",
+    "summary": "api-test/unit-1770045559672 created",
+    "meta": {
+      "ns": "api-test",
+      "key": "unit-1770045559672",
+      "created": true,
+      "summary": "api-test/unit-1770045559672 created"
+    },
+    "ts": "2026-02-02T15:19:19.676Z"
+  },
+  {
+    "id": "737ddfe6-5420-4b1c-9f85-6e00ccf4ea78",
+    "event": "kv.delete",
+    "summary": "api-test/unit-1770045559672 deleted",
+    "meta": {
+      "ns": "api-test",
+      "key": "unit-1770045559672",
+      "summary": "api-test/unit-1770045559672 deleted"
+    },
+    "ts": "2026-02-02T15:19:19.684Z"
+  },
+  {
+    "id": "7e49a945-25ad-4a73-8ab8-18bb8391b59f",
+    "event": "paste.create",
+    "summary": "Paste b8e9e493 created",
+    "meta": {
+      "id": "b8e9e493"
+    },
+    "ts": "2026-02-02T15:19:19.693Z"
+  },
+  {
+    "id": "65844f82-8e7e-48f9-a6f7-3df0582c0d55",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "b8e9e493",
+      "language": "text",
+      "content": "unit test paste",
+      "size": 15,
+      "created_at": "2026-02-02T15:19:19.691Z",
+      "views": 1
+    },
+    "ts": "2026-02-02T15:19:19.694Z"
+  },
+  {
+    "id": "cd5e47a1-2b85-4393-b1df-a0098f5410e7",
+    "event": "directory.probed",
+    "summary": "Probed 5 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-02T15:21:43.137Z"
+  },
+  {
+    "id": "46926696-3da6-4aae-95a4-82630e655072",
+    "event": "search",
+    "summary": "Search \"test\" — 570 results",
+    "meta": {
+      "q": "test",
+      "total": 570
+    },
+    "ts": "2026-02-02T15:21:43.555Z"
+  },
+  {
+    "id": "715d489a-a433-48bf-87bf-c4b880b007b0",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 85.5% overall",
+    "meta": {},
+    "ts": "2026-02-02T15:21:43.559Z"
+  },
+  {
+    "id": "f9b68294-6c6f-4f48-945d-ff495c8b62df",
+    "event": "kv.set",
+    "summary": "api-test/ut-1770045711197 created",
+    "meta": {
+      "ns": "api-test",
+      "key": "ut-1770045711197",
+      "created": true,
+      "summary": "api-test/ut-1770045711197 created"
+    },
+    "ts": "2026-02-02T15:21:51.201Z"
+  },
+  {
+    "id": "577ac5ad-a319-42b9-9ae2-2ada18fc62a5",
+    "event": "kv.delete",
+    "summary": "api-test/ut-1770045711197 deleted",
+    "meta": {
+      "ns": "api-test",
+      "key": "ut-1770045711197",
+      "summary": "api-test/ut-1770045711197 deleted"
+    },
+    "ts": "2026-02-02T15:21:51.207Z"
+  },
+  {
+    "id": "07962b7b-85e5-4f10-a63c-47baeecbdff5",
+    "event": "paste.create",
+    "summary": "Paste 9d7d355e created",
+    "meta": {
+      "id": "9d7d355e"
+    },
+    "ts": "2026-02-02T15:21:51.213Z"
+  },
+  {
+    "id": "f5cd900d-bf35-445b-83e1-e14e5eba9f65",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "9d7d355e",
+      "language": "text",
+      "content": "unit test paste",
+      "size": 15,
+      "created_at": "2026-02-02T15:21:51.212Z",
+      "views": 1
+    },
+    "ts": "2026-02-02T15:21:51.214Z"
+  },
+  {
+    "id": "6b3175b5-dd8e-4dd3-85f5-e846161f00eb",
+    "event": "search",
+    "summary": "Search \"test\" — 571 results",
+    "meta": {
+      "q": "test",
+      "total": 571
+    },
+    "ts": "2026-02-02T15:22:25.412Z"
+  },
+  {
+    "id": "28835f3a-a9d1-4088-a8d9-cda36de91594",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 85.5% overall",
+    "meta": {},
+    "ts": "2026-02-02T15:22:25.416Z"
+  },
+  {
+    "id": "2f0f29fd-607b-466e-92a5-1ab4b027d67e",
+    "event": "kv.set",
+    "summary": "api-test/ut-1770045745445 created",
+    "meta": {
+      "ns": "api-test",
+      "key": "ut-1770045745445",
+      "created": true,
+      "summary": "api-test/ut-1770045745445 created"
+    },
+    "ts": "2026-02-02T15:22:25.449Z"
+  },
+  {
+    "id": "2641bea7-36bd-47de-b4dd-77cf182dc13f",
+    "event": "kv.delete",
+    "summary": "api-test/ut-1770045745445 deleted",
+    "meta": {
+      "ns": "api-test",
+      "key": "ut-1770045745445",
+      "summary": "api-test/ut-1770045745445 deleted"
+    },
+    "ts": "2026-02-02T15:22:25.459Z"
+  },
+  {
+    "id": "1ee5ccce-3d58-4a6f-824a-bf53ba82653f",
+    "event": "paste.create",
+    "summary": "Paste 1591f57a created",
+    "meta": {
+      "id": "1591f57a"
+    },
+    "ts": "2026-02-02T15:22:25.465Z"
+  },
+  {
+    "id": "91f1284c-8cff-4da2-a360-55e512bc6b23",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "1591f57a",
+      "language": "text",
+      "content": "unit test paste",
+      "size": 15,
+      "created_at": "2026-02-02T15:22:25.464Z",
+      "views": 1
+    },
+    "ts": "2026-02-02T15:22:25.466Z"
+  },
+  {
+    "id": "26dd9045-9e99-44d6-a508-add52c23c378",
+    "event": "search",
+    "summary": "Search \"test\" — 572 results",
+    "meta": {
+      "q": "test",
+      "total": 572
+    },
+    "ts": "2026-02-02T15:22:42.250Z"
+  },
+  {
+    "id": "64c7592a-382c-4c29-a0b1-c4cb04701d5b",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 85.5% overall",
+    "meta": {},
+    "ts": "2026-02-02T15:22:42.254Z"
+  },
+  {
+    "id": "a78e096d-929a-48a8-8b88-faf8dcada77b",
+    "event": "kv.set",
+    "summary": "api-test/ut-1770045762283 created",
+    "meta": {
+      "ns": "api-test",
+      "key": "ut-1770045762283",
+      "created": true,
+      "summary": "api-test/ut-1770045762283 created"
+    },
+    "ts": "2026-02-02T15:22:42.287Z"
+  },
+  {
+    "id": "0af5efaa-0f36-460d-b46c-be62bc4298bf",
+    "event": "kv.delete",
+    "summary": "api-test/ut-1770045762283 deleted",
+    "meta": {
+      "ns": "api-test",
+      "key": "ut-1770045762283",
+      "summary": "api-test/ut-1770045762283 deleted"
+    },
+    "ts": "2026-02-02T15:22:42.294Z"
+  },
+  {
+    "id": "97171ac2-9561-4a4e-9934-3df1e97c7333",
+    "event": "paste.create",
+    "summary": "Paste 6078edcc created",
+    "meta": {
+      "id": "6078edcc"
+    },
+    "ts": "2026-02-02T15:22:42.300Z"
+  },
+  {
+    "id": "2593ef6b-ecab-4a6d-8430-beb952aced61",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "6078edcc",
+      "language": "text",
+      "content": "unit test paste",
+      "size": 15,
+      "created_at": "2026-02-02T15:22:42.299Z",
+      "views": 1
+    },
+    "ts": "2026-02-02T15:22:42.301Z"
+  },
+  {
+    "id": "029ed4f0-e50c-4e3a-8fc0-77ff25e561ee",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 85.5% overall",
+    "meta": {},
+    "ts": "2026-02-02T15:23:26.974Z"
+  },
+  {
+    "id": "07e7580e-5e09-4bbe-ada4-d01aff7ba14f",
+    "event": "directory.probed",
+    "summary": "Probed 5 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-02T15:23:27.937Z"
+  },
+  {
+    "id": "800c8e8c-ac5b-4336-bb86-7c9378e8300f",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "f62d038a-8ecb-4248-83e4-0ee9a7dbee5e"
+    },
+    "ts": "2026-02-02T15:23:32.940Z"
+  },
+  {
+    "id": "522fc7e8-3ed3-4e71-8975-20221875290f",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "2338e1f2-f620-4ca0-85cd-72d2d78761e7",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-02T15:23:32.975Z"
+  },
+  {
+    "id": "03a68dfc-227d-4c1d-b14b-967bd6c3e004",
+    "event": "paste.create",
+    "summary": "Paste 7282af66 created",
+    "meta": {
+      "id": "7282af66"
+    },
+    "ts": "2026-02-02T15:23:32.979Z"
+  },
+  {
+    "id": "dcef9007-9fcc-42a7-ac51-85e8f1b64abf",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "7282af66",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-02T15:23:32.978Z",
+      "views": 0
+    },
+    "ts": "2026-02-02T15:23:32.980Z"
+  },
+  {
+    "id": "c560be49-bb07-45a3-94d0-527ced2ce7c0",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-02T15:23:32.994Z"
+  },
+  {
+    "id": "af9b4b89-2a39-4e06-b16d-496a6252d758",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-02T15:23:33.001Z"
+  },
+  {
+    "id": "d2b9627a-53c9-453b-8831-6bf419a8ef6a",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "2519e600",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-02T15:23:33.010Z"
+  },
+  {
+    "id": "67fe549a-3c93-4705-9ce6-34cb877b7d49",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "2519e600"
+    },
+    "ts": "2026-02-02T15:23:33.011Z"
+  },
+  {
+    "id": "901aab9a-d692-4516-b1e8-90e8eb689f43",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-02T15:23:33.021Z"
+  },
+  {
+    "id": "12814097-aade-4ef0-98b7-32564e69d330",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 85.5% overall",
+    "meta": {},
+    "ts": "2026-02-02T15:23:37.939Z"
+  },
+  {
+    "id": "766857df-83f3-4254-b4b4-312ca6fb7f90",
+    "event": "search",
+    "summary": "Search \"test\" — 575 results",
+    "meta": {
+      "q": "test",
+      "total": 575
+    },
+    "ts": "2026-02-02T15:23:38.278Z"
+  },
+  {
+    "id": "0242c7b1-7960-4859-9bf9-65e83f089002",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "bf881617-08f6-4fdb-9585-0e96fafbfe08",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-02T15:23:38.310Z"
+  },
+  {
+    "id": "7c077653-d165-4bfa-b6bc-d6f933a8c0d0",
+    "event": "paste.create",
+    "summary": "Paste 372d4bc7 created",
+    "meta": {
+      "id": "372d4bc7"
+    },
+    "ts": "2026-02-02T15:23:38.313Z"
+  },
+  {
+    "id": "16003de6-2f88-4ae6-9ca2-fee9d5314fee",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "372d4bc7",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-02T15:23:38.313Z",
+      "views": 0
+    },
+    "ts": "2026-02-02T15:23:38.314Z"
+  },
+  {
+    "id": "5448d2fc-eeb8-4491-8cd5-c51e883c80d3",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-02T15:23:38.511Z"
+  },
+  {
+    "id": "2e7b6d77-b497-43f8-855f-f6428464b9b7",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-02T15:23:38.517Z"
+  },
+  {
+    "id": "6492900d-5816-4d8e-8485-28e1a9855133",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "c9577a1a",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-02T15:23:38.528Z"
+  },
+  {
+    "id": "beeb50d0-af21-427b-a094-b861d6aa9053",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "c9577a1a"
+    },
+    "ts": "2026-02-02T15:23:38.529Z"
+  },
+  {
+    "id": "b1e657d6-db39-4b7e-9ba0-2ad49b3737b1",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-02T15:23:38.537Z"
+  },
+  {
+    "id": "0e89b606-629a-4076-bce2-2e99494e6b4b",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 85.5% overall",
+    "meta": {},
+    "ts": "2026-02-02T15:24:01.817Z"
+  },
+  {
+    "id": "466e3f00-4d35-4589-b62d-88e18364ad72",
+    "event": "search",
+    "summary": "Search \"test\" — 576 results",
+    "meta": {
+      "q": "test",
+      "total": 576
+    },
+    "ts": "2026-02-02T15:24:04.429Z"
+  },
+  {
+    "id": "114e566a-fbdc-41d3-b616-9dec031e3ac3",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "90cdd7c9-7bff-4ced-8d6a-1fb30a9291ac",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-02T15:24:04.473Z"
+  },
+  {
+    "id": "be37d2b6-4363-460f-9505-2f7f06627c8a",
+    "event": "paste.create",
+    "summary": "Paste 6dacb764 created",
+    "meta": {
+      "id": "6dacb764"
+    },
+    "ts": "2026-02-02T15:24:04.478Z"
+  },
+  {
+    "id": "dcfec8f6-3a75-4f9b-b876-bfdeb38cb416",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "6dacb764",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-02T15:24:04.478Z",
+      "views": 0
+    },
+    "ts": "2026-02-02T15:24:04.479Z"
+  },
+  {
+    "id": "67ac59ab-34ae-41f1-ac27-984e006b06b8",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-02T15:24:04.666Z"
+  },
+  {
+    "id": "e5807b19-6adf-4fa8-a10a-ba735126bbe3",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-02T15:24:04.671Z"
+  },
+  {
+    "id": "0587e809-4f73-42de-9e3e-952e31547190",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "cb550899",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-02T15:24:04.684Z"
+  },
+  {
+    "id": "1d000e33-cb77-4028-be58-16f669f1f400",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "cb550899"
+    },
+    "ts": "2026-02-02T15:24:04.685Z"
+  },
+  {
+    "id": "1b4084cb-e70b-4317-b175-a4fb0e808d89",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-02T15:24:04.694Z"
+  },
+  {
+    "id": "18d1e1ec-0de4-49b6-bc1b-e8c13907c7d8",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "607",
+      "mode": "B",
+      "duration": "9m25s",
+      "build": "3 commit(s)"
+    },
+    "ts": "2026-02-02T15:24:04.927Z"
   }
 ]

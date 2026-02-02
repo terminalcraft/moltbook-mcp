@@ -67,6 +67,31 @@ try:
 except Exception:
     pass
 
+# 4. Budget utilization warning from recent E sessions
+try:
+    with open(history_file) as f:
+        history = [l.strip() for l in f if l.strip()]
+    e_sessions = [l for l in history if 'mode=E' in l]
+    recent_costs = []
+    for entry in e_sessions[-5:]:
+        import re
+        m = re.search(r'cost=\\\$([\d.]+)', entry)
+        if m:
+            recent_costs.append(float(m.group(1)))
+    if recent_costs:
+        avg = sum(recent_costs) / len(recent_costs)
+        lines.append('## Budget utilization alert')
+        if avg < 1.50:
+            lines.append(f'WARNING: Last {len(recent_costs)} E sessions averaged \\\${avg:.2f} (target: \\\$1.50+).')
+            lines.append('You MUST use the Phase 4 budget gate. Do NOT end the session until you have spent at least \\\$1.50.')
+            lines.append('After each platform engagement, check your budget spent from the system-reminder line.')
+            lines.append('If under \\\$1.50, loop back to Phase 2 with another platform.')
+        else:
+            lines.append(f'Recent E sessions averaging \\\${avg:.2f} — on target.')
+        lines.append('')
+except Exception:
+    pass
+
 if lines:
     with open('$OUTPUT_FILE', 'w') as f:
         f.write('\n'.join(lines))

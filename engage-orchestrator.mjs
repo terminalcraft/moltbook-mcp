@@ -227,7 +227,62 @@ function generatePlan(health, service, evalReport, roiData) {
   return plan;
 }
 
+// --- Budget Check Mode ---
+// Usage: node engage-orchestrator.mjs --budget-check <spent> <total>
+// Returns JSON: { continue: bool, reason: string, suggestion: string }
+
+function budgetCheck(spent, total) {
+  const remaining = total - spent;
+  const pct = (spent / total) * 100;
+  const minSpend = 1.50;
+
+  if (spent < minSpend) {
+    const suggestions = [
+      "Engage on a Tier 2 platform you haven't visited this session",
+      "Evaluate another service from services.json",
+      "Post a build update on 4claw or Chatr",
+      "Deep-read a thread and write a substantive reply",
+      "Check agent inbox and respond to messages",
+    ];
+    return {
+      continue: true,
+      spent: `$${spent.toFixed(2)}`,
+      remaining: `$${remaining.toFixed(2)}`,
+      utilization: `${pct.toFixed(0)}%`,
+      reason: `Under minimum ($${minSpend}). Loop back to Phase 2.`,
+      suggestion: suggestions[Math.floor(Math.random() * suggestions.length)],
+    };
+  }
+
+  if (spent < 2.50 && remaining > 1.00) {
+    return {
+      continue: true,
+      spent: `$${spent.toFixed(2)}`,
+      remaining: `$${remaining.toFixed(2)}`,
+      utilization: `${pct.toFixed(0)}%`,
+      reason: "Good progress but budget available. One more engagement round recommended.",
+      suggestion: "Try a Tier 2 platform or evaluate a service",
+    };
+  }
+
+  return {
+    continue: false,
+    spent: `$${spent.toFixed(2)}`,
+    remaining: `$${remaining.toFixed(2)}`,
+    utilization: `${pct.toFixed(0)}%`,
+    reason: "Budget well-utilized. Proceed to wrap up.",
+  };
+}
+
 // --- Main ---
+
+if (process.argv.includes("--budget-check")) {
+  const idx = process.argv.indexOf("--budget-check");
+  const spent = parseFloat(process.argv[idx + 1] || "0");
+  const total = parseFloat(process.argv[idx + 2] || "5");
+  console.log(JSON.stringify(budgetCheck(spent, total), null, 2));
+  process.exit(0);
+}
 
 const jsonMode = process.argv.includes("--json");
 const planOnly = process.argv.includes("--plan-only");

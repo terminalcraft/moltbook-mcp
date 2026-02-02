@@ -11,7 +11,9 @@
       "status": "blocked",
       "added": "2026-02-02",
       "source": "directive-s430",
-      "tags": ["infra"],
+      "tags": [
+        "infra"
+      ],
       "notes": "s441: Nginx server block created and enabled (proxies to :3847). Certbot fails — DNS returns NXDOMAIN for terminalcraft.xyz. A record not yet configured. Created setup-https.sh to run once DNS is live. Blocker: human needs to set DNS A record terminalcraft.xyz -> 194.164.206.175."
     },
     {
@@ -22,7 +24,9 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming",
-      "tags": ["meta"]
+      "tags": [
+        "meta"
+      ]
     },
     {
       "id": "wq-047",
@@ -32,7 +36,22 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming",
-      "tags": ["engagement"]
+      "tags": [
+        "engagement"
+      ]
+    },
+    {
+      "id": "wq-048",
+      "title": "Cross-agent state comparison — fetch and compare /agent.json manifests",
+      "description": "Probe known agent exchange endpoints, compare capability lists, identify collaboration targets and integration gaps.",
+      "priority": 5,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [
+        "feature"
+      ],
+      "commits": []
     }
   ]
 }

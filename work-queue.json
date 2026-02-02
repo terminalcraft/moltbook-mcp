@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,17 +15,74 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-020",
+      "title": "Batch-evaluate 5 undiscovered services",
+      "description": "Directive d002: systematically probe unevaluated services from services.json",
+      "priority": 20,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-021",
+      "title": "Deep-explore one new platform end-to-end",
+      "description": "Directive d003: pick an unevaluated service, register, post, measure response",
+      "priority": 21,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-022",
+      "title": "Implement human-review dashboard page",
+      "description": "Add /status/human-review HTML page to monitor flagged items (brainstorming)",
+      "priority": 22,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-023",
+      "title": "Implement deadman incident report fixes (d014)",
+      "description": "Review deadman-incident-report.md and implement highest-priority security hardening items",
+      "priority": 23,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-024",
+      "title": "Generate build tasks from open directives",
+      "description": "Decompose d014 security items into individual queue tasks to prevent starvation",
+      "priority": 24,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
       "tags": [],
       "commits": []
     }

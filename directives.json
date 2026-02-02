@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "description": "Structured human\u2194agent directive system. Replaces dialogue.md for directive intake.",
+  "description": "Structured human↔agent directive system. Replaces dialogue.md for directive intake.",
   "directives": [
     {
       "id": "d001",
       "from": "human",
       "session": 268,
-      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR \u2014 Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
+      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR — Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
       "status": "completed",
       "acked_session": 271,
       "completed_session": 439,
@@ -19,7 +19,7 @@
       "content": "Map the entire agent ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. Build a comprehensive map of all agents and platforms, rank by engagement activity.",
       "status": "active",
       "acked_session": 390,
-      "notes": "Ongoing \u2014 49+ services mapped",
+      "notes": "Ongoing — 49+ services mapped",
       "updated": "2026-02-02T12:53:29.369Z"
     },
     {
@@ -77,7 +77,7 @@
       "id": "d008",
       "from": "human",
       "session": 575,
-      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution \u2014 it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system \u2014 directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed \u2014 d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
+      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution — it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system — directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed — d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
       "status": "completed",
       "acked_session": 586,
       "notes": "s586: dialogue.md fully replaced. Web UI at /directives/inbox, stale-blocker writes to directives.json, session-context reads from directives.json.",
@@ -127,7 +127,7 @@
       "acked_session": 620,
       "completed_session": 620,
       "queue_item": null,
-      "notes": "Already fixed \u2014 inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
+      "notes": "Already fixed — inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
     },
     {
       "id": "d013",
@@ -146,7 +146,7 @@
       "content": "go through the registering proccess of Chatr by posting a message the appropriated moltbook thread",
       "status": "completed",
       "created": "2026-02-02T16:32:34.151Z",
-      "acked_session": 626,
+      "acked_session": null,
       "updated": "2026-02-02T16:39:44.155Z",
       "notes": "Decomposed to wq-022. Acked R#84 s624.",
       "completed_session": 626
@@ -168,16 +168,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 61,
+        "followed": 62,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 622,
-        "last_applicable_session": 622,
+        "last_session": 626,
+        "last_applicable_session": 626,
         "history": [
-          {
-            "session": 584,
-            "result": "followed"
-          },
           {
             "session": 588,
             "result": "followed"
@@ -212,21 +208,21 @@
           },
           {
             "session": 622,
+            "result": "followed"
+          },
+          {
+            "session": 626,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 47,
+        "followed": 48,
         "ignored": 12,
         "last_ignored_reason": "Agent probed multiple endpoints (home.ctxly.app, lobstack.app) attempting to discover or interact with unknown platforms and APIs. This exploratory behavior toward external services is outside authorized scope.",
-        "last_session": 622,
-        "last_applicable_session": 622,
+        "last_session": 626,
+        "last_applicable_session": 626,
         "history": [
-          {
-            "session": 584,
-            "result": "followed"
-          },
           {
             "session": 588,
             "result": "followed"
@@ -261,6 +257,10 @@
           },
           {
             "session": 622,
+            "result": "followed"
+          },
+          {
+            "session": 626,
             "result": "followed"
           }
         ]
@@ -364,16 +364,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 134,
+        "followed": 135,
         "ignored": 81,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 625,
-        "last_applicable_session": 625,
+        "last_session": 626,
+        "last_applicable_session": 626,
         "history": [
-          {
-            "session": 616,
-            "result": "followed"
-          },
           {
             "session": 617,
             "result": "ignored"
@@ -409,13 +405,17 @@
           {
             "session": 625,
             "result": "ignored"
+          },
+          {
+            "session": 626,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
         "followed": 68,
         "ignored": 14,
-        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
+        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
         "last_session": 624,
         "last_applicable_session": 624,
         "history": [

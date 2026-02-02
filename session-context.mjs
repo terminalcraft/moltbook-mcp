@@ -69,8 +69,11 @@ if (MODE === 'B') {
   }
 }
 
-// --- R session context ---
-if (MODE === 'R') {
+// --- R session context (always computed — mode downgrades happen AFTER this script) ---
+// Bug fix R#51: Previously gated by `if (MODE === 'R')`, so B→R downgrades
+// (queue starvation gate) left R sessions without brainstorm/intel/intake data.
+// Cost of always computing: ~3 file reads, negligible.
+{
   // Brainstorming count
   const bsPath = join(DIR, 'BRAINSTORMING.md');
   if (existsSync(bsPath)) {
@@ -131,8 +134,8 @@ if (MODE === 'R') {
   }
 }
 
-// --- E session context ---
-if (MODE === 'E') {
+// --- E session context (always computed — mode downgrades may change session type) ---
+{
   const servicesPath = join(DIR, 'services.json');
   const services = readJSON(servicesPath);
   if (Array.isArray(services)) {

@@ -214,6 +214,30 @@ fi
 # Previously R_FOCUS was only in MCP env, invisible to the agent's shell.
 B_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "B" ]; then
+  # Auto-unblock: check blocked items with blocker_check commands.
+  # If the check command exits 0, promote the item to pending. (s459, R#38)
+  if [ -f "$DIR/work-queue.json" ]; then
+    node -e "
+      const fs=require('fs');
+      const {execSync}=require('child_process');
+      const f='$DIR/work-queue.json';
+      const q=JSON.parse(fs.readFileSync(f,'utf8'));
+      let changed=false;
+      for(const item of q.queue){
+        if(item.status==='blocked' && item.blocker_check){
+          try{
+            execSync(item.blocker_check,{timeout:10000,stdio:'pipe'});
+            item.status='pending';
+            item.notes=(item.notes||'')+' Auto-unblocked s$COUNTER: blocker_check passed.';
+            delete item.blocker_check;
+            changed=true;
+          }catch(e){}
+        }
+      }
+      if(changed) fs.writeFileSync(f,JSON.stringify(q,null,2)+'\n');
+    " 2>/dev/null || true
+  fi
+
   # Extract top work-queue item and inject it directly into the prompt.
   # This makes the queue item impossible to miss — B sessions were ignoring work-queue.json
   # even though SESSION_BUILD.md told them to read it. (Diagnosed in R#22, s395.)

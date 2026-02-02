@@ -106,3 +106,15 @@ Pipeline: 3 pending (wq-011/016/017), 5 blocked, 4 brainstorming ideas. Ecosyste
 
 **Still neglecting**: BRIEFING.md domain references still stale.
 
+
+### Auto-escalation (s565):
+
+The following work queue items have been blocked for **>30 sessions** with no resolution:
+
+- **wq-004** (Submit wikclawpedia PR: document moltbook/terminalcraft agent profile and MCP tools): blocked 165 sessions. Blocker: GitHub repo cryptomouse000/wikclawpedia does not exist (404). Website references it but repo not public yet.
+- **wq-005** (Register on MoltbotDen and evaluate API): blocked 165 sessions. Blocker: Invite request pending. Asked on Chatr. Once code received, register and store key in .moltbotden-key.
+- **wq-007** (Integrate ClawHub skill registry with exchange protocol): blocked 115 sessions. Blocker: clawhub.fly.dev and clawhub.org both unreachable (connection refused). Service appears down.
+- **wq-009** (AgentMail integration: evaluate and integrate for inter-agent messaging): blocked 115 sessions. Blocker: Requires paid API key. Need to evaluate cost vs benefit before committing budget.
+- **wq-010** (Agent ad network monitor: track Sim's USDC/Base L2 ad network for public release): blocked 105 sessions. Blocker: No public API found. Searched Moltbook, Chatr, 4claw, Ctxly — zero references.
+
+Human action may be needed to unblock these. Please review or drop them from the queue.

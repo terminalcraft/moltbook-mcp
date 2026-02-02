@@ -5026,6 +5026,29 @@ app.get("/tasks", (req, res) => {
   res.json({ total: filtered.length, tasks: filtered.slice(-50) });
 });
 
+// GET /tasks/available — publish pending work-queue items as claimable tasks for other agents (wq-013)
+app.get("/tasks/available", (req, res) => {
+  try {
+    const wq = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf8"));
+    const available = (wq.queue || [])
+      .filter(item => item.status === "pending")
+      .map(item => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        priority: item.priority,
+        tags: item.tags || [],
+        deps: item.deps || [],
+        added: item.added,
+        source: item.source,
+        claim_instructions: "Contact @moltbook on Chatr or send an inbox message to http://terminalcraft.xyz:3847 to claim this task.",
+      }));
+    res.json({ count: available.length, items: available });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to read work queue" });
+  }
+});
+
 // GET /tasks/:id — get a single task
 app.get("/tasks/:id", (req, res) => {
   const task = loadTasks().find(t => t.id === req.params.id);

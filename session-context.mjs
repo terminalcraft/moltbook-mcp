@@ -215,44 +215,86 @@ if (MODE === 'B') {
   let bsCount = (bsContent.match(/^- \*\*/gm) || []).length;
 
   if (bsCount === 0) {
-    // Auto-seed: extract recent feat/fix commits from session history
+    // Auto-seed (R#71): Generate specific, actionable ideas from multiple sources.
+    // Previous approach (R#70) used generic "Harden X / Extend X / Monitor X" templates
+    // from commit messages — produced formulaic ideas that didn't lead to useful work.
+    // New approach: scan for concrete gaps (unaddressed dialogue items, session patterns,
+    // queue gaps) and generate targeted seeds.
+    const seeds = [];
+    const queueTitles = queue.map(i => i.title.toLowerCase());
+    const isDupe = (title) => queueTitles.some(qt =>
+      qt.includes(title.toLowerCase().substring(0, 20)) ||
+      title.toLowerCase().includes(qt.split(':')[0].trim().substring(0, 15))
+    );
+
+    // Source 1: Unaddressed dialogue directives (highest value — human asked for these)
+    const dialoguePath2 = join(DIR, 'dialogue.md');
+    if (existsSync(dialoguePath2)) {
+      const d = readFileSync(dialoguePath2, 'utf8');
+      // Look for "Status" lines that indicate unresolved items
+      const statusBlocks = [...d.matchAll(/###\s*Human.*?\n([\s\S]*?)(?=###|## Session|$)/g)];
+      for (const block of statusBlocks) {
+        const text = block[1];
+        // If block mentions waiting, broken, or has no "done/completed" status
+        if (text.match(/waiting|broken|fix|build.*replacement|not.*meet/i) && !text.match(/Status.*done|completed/i)) {
+          // Extract a short description from the first substantive line
+          const firstLine = text.trim().split('\n')[0].replace(/^\*\*Status\*\*:?\s*/i, '').trim();
+          if (firstLine.length > 10 && firstLine.length < 120 && seeds.length < 4) {
+            const seed = `- **Address: ${firstLine.substring(0, 80)}**: Unresolved human directive — prioritize`;
+            if (!isDupe(firstLine)) seeds.push(seed);
+          }
+        }
+      }
+    }
+
+    // Source 2: Recent session error/timeout patterns
     const histPath = join(STATE_DIR, 'session-history.txt');
-    if (existsSync(histPath)) {
+    if (existsSync(histPath) && seeds.length < 4) {
       const hist = readFileSync(histPath, 'utf8');
-      const lines = hist.trim().split('\n').slice(-15); // last 15 sessions
-      const feats = [];
+      const lines = hist.trim().split('\n').slice(-20);
+      // Find sessions with no commits (potential waste) or very low cost (underutilized)
+      const lowCost = lines.filter(l => {
+        const costMatch = l.match(/cost=\$([0-9.]+)/);
+        const modeMatch = l.match(/mode=([A-Z])/);
+        return costMatch && modeMatch && modeMatch[1] === 'E' && parseFloat(costMatch[1]) < 1.0;
+      });
+      if (lowCost.length >= 3 && !isDupe('E session underutilization')) {
+        seeds.push(`- **Fix E session underutilization**: ${lowCost.length} recent E sessions under $1 — investigate root cause and improve orchestration`);
+      }
+      // Find repeated build patterns (same file touched 3+ times = unstable code)
+      const fileCounts = {};
       for (const line of lines) {
-        const m = line.match(/note:\s*(feat|fix):\s*(.+)/);
-        if (m) feats.push({ type: m[1], desc: m[2].trim() });
-      }
-      // Generate follow-up ideas from recent features
-      const seeds = [];
-      const templates = [
-        (f) => `- **Harden ${f.desc.split('—')[0].trim()}**: Add error handling, edge case coverage, and integration tests`,
-        (f) => `- **Extend ${f.desc.split('—')[0].trim()}**: Add API endpoint exposing this data for dashboard consumption`,
-        (f) => `- **Monitor ${f.desc.split('—')[0].trim()}**: Add metrics/logging to track real-world usage and failure modes`,
-      ];
-      const queueTitles = queue.map(i => i.title.toLowerCase());
-      for (let i = 0; i < feats.length && seeds.length < 4; i++) {
-        const tmpl = templates[i % templates.length];
-        const seed = tmpl(feats[feats.length - 1 - i]); // newest first
-        // Skip if already in queue
-        const seedTitle = seed.match(/\*\*(.+?)\*\*/)?.[1]?.toLowerCase() || '';
-        if (!queueTitles.some(qt => seedTitle.includes(qt.split(':')[0].trim().substring(0, 15)))) {
-          seeds.push(seed);
+        const files = line.match(/files=\[([^\]]+)\]/)?.[1];
+        if (files) {
+          for (const f of files.split(',').map(s => s.trim())) {
+            fileCounts[f] = (fileCounts[f] || 0) + 1;
+          }
         }
       }
-      if (seeds.length > 0) {
-        const marker = '## Evolution Ideas';
-        if (bsContent.includes(marker)) {
-          bsContent = bsContent.replace(marker, marker + '\n\n' + seeds.join('\n'));
-        } else {
-          bsContent += '\n' + marker + '\n\n' + seeds.join('\n') + '\n';
+      const hotFiles = Object.entries(fileCounts).filter(([f, c]) => c >= 4 && f !== 'work-queue.json' && f !== 'BRAINSTORMING.md');
+      if (hotFiles.length > 0 && seeds.length < 4) {
+        const hotList = hotFiles.slice(0, 3).map(([f]) => f).join(', ');
+        if (!isDupe('stabilize hot files')) {
+          seeds.push(`- **Stabilize hot files (${hotList})**: Touched 4+ times recently — may need refactoring or tests`);
         }
-        writeFileSync(bsPath, bsContent);
-        bsCount = seeds.length;
-        result.brainstorm_seeded = seeds.length;
       }
+    }
+
+    // Source 3: Queue health gaps
+    if (pending.length === 0 && seeds.length < 4 && !isDupe('queue starvation')) {
+      seeds.push(`- **Prevent queue starvation**: Build a deeper pipeline of 5+ ready items from open directives and ecosystem opportunities`);
+    }
+
+    if (seeds.length > 0) {
+      const marker = '## Evolution Ideas';
+      if (bsContent.includes(marker)) {
+        bsContent = bsContent.replace(marker, marker + '\n\n' + seeds.join('\n'));
+      } else {
+        bsContent += '\n' + marker + '\n\n' + seeds.join('\n') + '\n';
+      }
+      writeFileSync(bsPath, bsContent);
+      bsCount = seeds.length;
+      result.brainstorm_seeded = seeds.length;
     }
   }
   result.brainstorm_count = bsCount;

@@ -208,6 +208,26 @@ switch (cmd) {
     console.log(`Note added to ${id} (${item.progress_notes.length} total)`);
     break;
   }
+  case "archive": {
+    // Move done/retired items completed 50+ sessions ago to archive
+    const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
+    const threshold = parseInt(args[0]) || 50;
+    const archivePath = join(__dirname, "work-queue-archive.json");
+    let archive = [];
+    try { archive = JSON.parse(readFileSync(archivePath, "utf8")); } catch {}
+    const toArchive = data.queue.filter(i =>
+      (i.status === "done" || i.status === "retired") &&
+      ((i.completed_session && sessionNum - i.completed_session >= threshold) ||
+       (i.retired_session && sessionNum - i.retired_session >= threshold))
+    );
+    if (toArchive.length === 0) { console.log("Nothing to archive."); break; }
+    archive.push(...toArchive);
+    data.queue = data.queue.filter(i => !toArchive.includes(i));
+    save(data);
+    writeFileSync(archivePath, JSON.stringify(archive, null, 2) + "\n");
+    console.log(`Archived ${toArchive.length} items: ${toArchive.map(i => i.id).join(", ")}`);
+    break;
+  }
   default:
-    console.log("Usage: work-queue.js <next|list|start|done|add|drop|status|deps|note>");
+    console.log("Usage: work-queue.js <next|list|start|done|add|drop|status|deps|note|archive>");
 }

@@ -6,6 +6,10 @@ import { join } from "path";
 
 import { setApiKey, saveApiSession, getApiCallCount } from "./providers/api.js";
 import { wrapServerTool, saveToolUsage } from "./transforms/scoping.js";
+import { installReplayLog } from "./providers/replay-log.js";
+
+// Install fetch instrumentation before any components load (wq-014)
+installReplayLog();
 
 // Active component registrations (zero-usage MCP wrappers removed in s410)
 import { register as registerCore } from "./components/moltbook-core.js";

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { moltFetch, logAction, getSessionActions, getApiCallCount, getApiErrorCount, getApiCallLog, isSessionCounterIncremented, setSessionCounterIncremented } from "../providers/api.js";
 import { loadState, saveState, markSeen, markCommented, markMyComment, markBrowsed } from "../providers/state.js";
 import { sanitize, loadBlocklist } from "../transforms/security.js";
+import { analyzeReplayLog, getSessionReplayCalls } from "../providers/replay-log.js";
 
 export function register(server) {
   // Engagement state
@@ -550,5 +551,35 @@ export function register(server) {
     saveState(s);
     const stats = Object.entries(added).map(([k, v]) => `${k}: +${v}`).join(", ");
     return { content: [{ type: "text", text: `Import complete. Added: ${stats}` }] };
+  });
+
+  // Engagement replay log — analyze external API call history (wq-014)
+  server.tool("moltbook_replay_log", "Analyze engagement replay log — shows per-platform API call stats (calls, errors, latency)", {
+    session: z.number().optional().describe("Filter to a specific session number"),
+    last_n: z.number().optional().describe("Show only last N entries"),
+    current: z.boolean().default(false).describe("Show only current session calls"),
+  }, async ({ session, last_n, current }) => {
+    if (current) {
+      const calls = getSessionReplayCalls();
+      if (calls.length === 0) return { content: [{ type: "text", text: "No external API calls this session." }] };
+      const byPlatform = {};
+      for (const c of calls) {
+        if (!byPlatform[c.p]) byPlatform[c.p] = { calls: 0, errors: 0, totalMs: 0 };
+        byPlatform[c.p].calls++;
+        if (c.err || c.st >= 400) byPlatform[c.p].errors++;
+        byPlatform[c.p].totalMs += c.ms || 0;
+      }
+      const lines = Object.entries(byPlatform).map(([p, d]) =>
+        `${p}: ${d.calls} calls, ${d.errors} errors, avg ${Math.round(d.totalMs / d.calls)}ms`
+      );
+      return { content: [{ type: "text", text: `Current session (${calls.length} calls):\n${lines.join("\n")}` }] };
+    }
+    const result = analyzeReplayLog({ sessionFilter: session, lastN: last_n });
+    if (result.error) return { content: [{ type: "text", text: result.error }] };
+    const lines = result.platforms.map(p =>
+      `${p.platform}: ${p.calls} calls, ${p.errors} err (${p.errorRate}%), avg ${p.avgMs}ms | ${JSON.stringify(p.statuses)}`
+    );
+    const header = `Replay log: ${result.totalEntries} entries, sessions ${result.sessionRange?.first}-${result.sessionRange?.last}`;
+    return { content: [{ type: "text", text: `${header}\n\n${lines.join("\n")}` }] };
   });
 }

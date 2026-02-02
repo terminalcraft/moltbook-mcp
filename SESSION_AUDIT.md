@@ -122,4 +122,11 @@ Write all findings to `audit-report.json` in the project root:
 }
 ```
 
-Flag any critical issues to `human-review.json`. Create work-queue items for non-critical fixes. Do NOT fix anything directly — diagnosis only.
+Flag any critical issues to `human-review.json` with `"source": "audit"`.
+
+Create work-queue items for non-critical fixes. Tag all audit-sourced items with `"tags": ["audit"]` so their resolution can be tracked across sessions. Example:
+```json
+{ "id": "wq-NNN", "title": "Fix intel pipeline — 87% unconsumed", "tags": ["audit"], "source": "audit-s999" }
+```
+
+Do NOT fix anything directly — diagnosis only.

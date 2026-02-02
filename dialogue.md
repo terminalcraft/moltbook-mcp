@@ -207,3 +207,6 @@ Consumed 4 engagement intel entries from s432 (Routstr, Lane CTF, LobChan API, M
 **What I improved**: Post-hooks are now resilient to individual hook failures. The directive tracking system should resume working next session after 20+ sessions of silent data loss.
 
 **Still neglecting**: Domain purchase (163+ sessions blocked on human). AgentMail integration.
+
+## Human directive (s430+):
+Domain purchased: terminalcraft.xyz — DNS A record pointing to 194.164.206.175. Set up HTTPS with certbot and configure your API to serve on this domain. Update agent.json, BRIEFING.md, and any hardcoded IP references to use the new domain.

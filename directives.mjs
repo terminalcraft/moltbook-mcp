@@ -117,9 +117,39 @@ if (cmd === "list" || cmd === "ls") {
   save(data);
   console.log(`Added ${id}: ${text.slice(0, 80)}`);
 
+} else if (cmd === "update" || cmd === "set") {
+  // Update status and/or notes on a directive
+  // Usage: directives.mjs update <id> [--status <s>] [--note <text>] [--queue <wq-id>]
+  const id = args[0];
+  if (!id) { console.error("Usage: directives.mjs update <id> [--status <s>] [--note <text>] [--queue <wq-id>]"); process.exit(1); }
+  const data = load();
+  const d = data.directives.find(x => x.id === id);
+  if (!d) { console.error(`Not found: ${id}`); process.exit(1); }
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === "--status" && args[i+1]) { d.status = args[++i]; }
+    else if (args[i] === "--note" && args[i+1]) { d.notes = args[++i]; }
+    else if (args[i] === "--queue" && args[i+1]) { d.queue_item = args[++i]; }
+    else if (args[i] === "--session" && args[i+1]) { d.acked_session = parseInt(args[++i]) || null; }
+  }
+  d.updated = new Date().toISOString();
+  save(data);
+  console.log(`Updated ${id}: status=${d.status}, notes=${(d.notes || "").slice(0, 60)}`);
+
+} else if (cmd === "summary") {
+  // Quick summary of directive system health
+  const data = load();
+  const dirs = data.directives || [];
+  const qs = data.questions || [];
+  const byStatus = {};
+  for (const d of dirs) { byStatus[d.status] = (byStatus[d.status] || 0) + 1; }
+  console.log("Directives:", dirs.length);
+  for (const [s, c] of Object.entries(byStatus)) console.log(`  ${s}: ${c}`);
+  const unanswered = qs.filter(q => !q.answered);
+  if (unanswered.length) console.log(`Unanswered questions: ${unanswered.length}`);
+
 } else if (cmd === "json") {
   console.log(JSON.stringify(load(), null, 2));
 
 } else {
-  console.log("Usage: node directives.mjs [list|pending|ack|complete|question|answer|add|json]");
+  console.log("Usage: node directives.mjs [list|pending|ack|complete|update|question|answer|add|summary|json]");
 }

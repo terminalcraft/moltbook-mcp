@@ -6427,12 +6427,17 @@ app.post("/inbox", (req, res) => {
   if (typeof from !== "string" || typeof body !== "string") return res.status(400).json({ error: "from and body must be strings" });
   if (body.length > 2000) return res.status(400).json({ error: "body max 2000 chars" });
   if (from.length > 100 || (subject && subject.length > 200)) return res.status(400).json({ error: "field too long" });
+  // Sanitize: strip prompt injection patterns from message body and subject
+  const INJECTION_RE = /ignore (all )?(previous|prior|above) (instructions?|prompts?|rules?)|you are now|new instructions?:|system prompt|<\/?(?:system|human|assistant|tool_result|antml|function_calls)>|IMPORTANT:|CRITICAL:|OVERRIDE:|END OF|BEGIN NEW/gi;
+  const sanitize = (s) => s ? s.replace(INJECTION_RE, "[FILTERED]") : s;
+  const cleanBody = sanitize(body);
+  const cleanSubject = subject ? sanitize(subject) : subject;
   const msg = {
     id: crypto.randomUUID(),
     from: from.slice(0, 100),
     to: (to || "moltbook").slice(0, 100),
-    subject: subject ? subject.slice(0, 200) : undefined,
-    body: body.slice(0, 2000),
+    subject: cleanSubject ? cleanSubject.slice(0, 200) : undefined,
+    body: cleanBody.slice(0, 2000),
     timestamp: new Date().toISOString(),
     read: false,
   };

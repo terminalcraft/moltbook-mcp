@@ -49,6 +49,39 @@ function scoreThread(t) {
   return score;
 }
 
+// Dedup: collapse near-identical replies in high-reply threads
+function dedupReplies(replies) {
+  if (!replies || replies.length < 5) return { replies, dupsRemoved: 0 };
+  const seen = new Map(); // normalized content -> first index
+  const kept = [];
+  let dupsRemoved = 0;
+  for (const r of replies) {
+    // Normalize: lowercase, collapse whitespace, strip URLs
+    const norm = (r.content || "").toLowerCase().replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim();
+    if (norm.length < 10) { kept.push(r); continue; } // Too short to dedup
+    // Check similarity: exact match or >80% overlap with a seen reply
+    let isDup = false;
+    for (const [key] of seen) {
+      if (key === norm) { isDup = true; break; }
+      // Simple overlap: shared prefix ratio
+      const minLen = Math.min(key.length, norm.length);
+      const maxLen = Math.max(key.length, norm.length);
+      if (minLen / maxLen > 0.8) {
+        let match = 0;
+        for (let i = 0; i < minLen; i++) { if (key[i] === norm[i]) match++; }
+        if (match / maxLen > 0.8) { isDup = true; break; }
+      }
+    }
+    if (isDup) {
+      dupsRemoved++;
+    } else {
+      seen.set(norm, kept.length);
+      kept.push(r);
+    }
+  }
+  return { replies: kept, dupsRemoved };
+}
+
 function err(msg) {
   return { content: [{ type: "text", text: msg }] };
 }
@@ -96,9 +129,16 @@ export function register(server) {
     try {
       const data = await fetchJson(`${FOURCLAW_API}/threads/${thread_id}`, { headers: authHeaders(creds) });
       const t = data.thread || data;
-      let out = `"${t.title}" by ${t.anon ? "anon" : (t.agent_name || "unknown")}\n${t.content}\n\n--- ${t.replyCount || 0} replies ---`;
-      if (data.replies?.length) {
-        out += "\n\n" + data.replies.map((r, i) =>
+      const nonSpamReplies = (data.replies || []).filter(r => !isSpam("", r.content));
+      const spamFiltered = (data.replies?.length || 0) - nonSpamReplies.length;
+      const { replies: cleanReplies, dupsRemoved } = dedupReplies(nonSpamReplies);
+      const filterNotes = [];
+      if (dupsRemoved > 0) filterNotes.push(`${dupsRemoved} duplicates`);
+      if (spamFiltered > 0) filterNotes.push(`${spamFiltered} spam`);
+      const dupNote = filterNotes.length ? ` (${filterNotes.join(", ")} hidden)` : "";
+      let out = `"${t.title}" by ${t.anon ? "anon" : (t.agent_name || "unknown")}\n${t.content}\n\n--- ${t.replyCount || 0} replies ---${dupNote}`;
+      if (cleanReplies?.length) {
+        out += "\n\n" + cleanReplies.map((r, i) =>
           `#${i + 1} ${r.anon ? "anon" : (r.agent_name || "unknown")}: ${r.content}`
         ).join("\n\n");
       }

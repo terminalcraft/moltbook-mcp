@@ -516,6 +516,116 @@ app.get("/analytics", (req, res) => {
   res.json(result);
 });
 
+// Session analytics dashboard — outcomes, cost trends, hook success rates
+app.get("/analytics/sessions", (req, res) => {
+  const HIST = "/home/moltbot/.config/moltbook/session-history.txt";
+  const OUTCOMES = join(LOGS, "outcomes.log");
+  const HOOKS = join(LOGS, "hook-results.json");
+  const last = parseInt(req.query.last) || 30;
+
+  // Parse session history
+  let sessions = [];
+  try {
+    const lines = readFileSync(HIST, "utf8").trim().split("\n").filter(Boolean);
+    for (const line of lines) {
+      const m = line.match(/mode=(\w)\s+s=(\d+)\s+dur=~?(\S+)\s+cost=\$?([\d.]+)\s+build=(\S+)/);
+      if (!m) continue;
+      const commits = m[5] === "(none)" ? 0 : parseInt(m[5]);
+      sessions.push({ session: +m[2], mode: m[1], duration: m[3], cost: +m[4], commits });
+    }
+  } catch {}
+  sessions = sessions.slice(-last);
+
+  // Parse outcomes
+  const outcomes = { success: 0, timeout: 0, error: 0 };
+  const sessionSet = new Set(sessions.map(s => s.session));
+  try {
+    const lines = readFileSync(OUTCOMES, "utf8").trim().split("\n").filter(Boolean);
+    for (const line of lines) {
+      const m = line.match(/s=(\d+).*outcome=(\w+)/);
+      if (m && sessionSet.has(+m[1])) outcomes[m[2]] = (outcomes[m[2]] || 0) + 1;
+    }
+  } catch {}
+
+  // Parse hook results
+  let hookStats = {};
+  try {
+    const lines = readFileSync(HOOKS, "utf8").trim().split("\n").filter(Boolean);
+    for (const line of lines) {
+      try {
+        const rec = JSON.parse(line);
+        if (!sessionSet.has(rec.session)) continue;
+        for (const h of (rec.hooks || [])) {
+          if (!hookStats[h.hook]) hookStats[h.hook] = { pass: 0, fail: 0, totalMs: 0 };
+          hookStats[h.hook][h.status === "ok" ? "pass" : "fail"]++;
+          hookStats[h.hook].totalMs += h.ms || 0;
+        }
+      } catch {}
+    }
+  } catch {}
+
+  // Compute hook summary with avg ms
+  const hooks = Object.entries(hookStats).map(([name, s]) => ({
+    name, pass: s.pass, fail: s.fail, rate: s.pass / (s.pass + s.fail),
+    avgMs: Math.round(s.totalMs / (s.pass + s.fail)),
+  })).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Cost trends by mode
+  const byMode = {};
+  for (const s of sessions) {
+    if (!byMode[s.mode]) byMode[s.mode] = { count: 0, totalCost: 0, totalCommits: 0 };
+    byMode[s.mode].count++;
+    byMode[s.mode].totalCost += s.cost;
+    byMode[s.mode].totalCommits += s.commits;
+  }
+  for (const m of Object.values(byMode)) {
+    m.avgCost = +(m.totalCost / m.count).toFixed(4);
+    m.totalCost = +m.totalCost.toFixed(4);
+  }
+
+  const totalCost = sessions.reduce((a, s) => a + s.cost, 0);
+  const totalCommits = sessions.reduce((a, s) => a + s.commits, 0);
+
+  const result = {
+    range: { first: sessions[0]?.session, last: sessions[sessions.length - 1]?.session, count: sessions.length },
+    totals: { cost: +totalCost.toFixed(4), commits: totalCommits, avgCostPerSession: +(totalCost / sessions.length).toFixed(4) },
+    outcomes,
+    byMode,
+    hooks,
+  };
+
+  if (req.query.format === "json") return res.json(result);
+
+  // HTML dashboard
+  const hookRows = hooks.map(h =>
+    `<tr><td>${h.name}</td><td>${h.pass}</td><td>${h.fail}</td><td>${(h.rate * 100).toFixed(0)}%</td><td>${h.avgMs}ms</td></tr>`
+  ).join("");
+  const modeRows = Object.entries(byMode).map(([m, d]) =>
+    `<tr><td>${m}</td><td>${d.count}</td><td>$${d.totalCost}</td><td>$${d.avgCost}</td><td>${d.totalCommits}</td></tr>`
+  ).join("");
+  const html = `<!DOCTYPE html><html><head><title>Session Analytics</title><style>
+    body{background:#111;color:#ddd;font-family:monospace;padding:20px;max-width:900px;margin:auto}
+    table{border-collapse:collapse;width:100%;margin:10px 0}th,td{border:1px solid #333;padding:6px 10px;text-align:left}
+    th{background:#222}h1{color:#0f0}h2{color:#0a0;margin-top:20px}a{color:#0a0}
+    .ok{color:#0f0}.warn{color:#ff0}.err{color:#f00}
+  </style></head><body>
+  <h1>Session Analytics</h1>
+  <p>Sessions ${result.range.first}–${result.range.last} (${result.range.count} sessions) |
+     <a href="?format=json">JSON</a></p>
+  <h2>Totals</h2>
+  <p>Cost: $${result.totals.cost} | Commits: ${result.totals.commits} | Avg: $${result.totals.avgCostPerSession}/session</p>
+  <h2>Outcomes</h2>
+  <p><span class="ok">Success: ${outcomes.success}</span> |
+     <span class="warn">Timeout: ${outcomes.timeout}</span> |
+     <span class="err">Error: ${outcomes.error}</span></p>
+  <h2>By Mode</h2>
+  <table><tr><th>Mode</th><th>Sessions</th><th>Total Cost</th><th>Avg Cost</th><th>Commits</th></tr>${modeRows}</table>
+  <h2>Hook Health</h2>
+  <table><tr><th>Hook</th><th>Pass</th><th>Fail</th><th>Rate</th><th>Avg Time</th></tr>${hookRows}</table>
+  </body></html>`;
+  res.type("html").send(html);
+});
+
 // API surface audit — cross-references routes with in-memory analytics
 app.get("/audit", (req, res) => {
   const allHits = analytics.endpoints;
@@ -1375,6 +1485,7 @@ function agentManifest(req, res) {
       webhooks_events: { url: `${base}/webhooks/events`, method: "GET", auth: false, description: "List available webhook event types" },
       webhooks_unsubscribe: { url: `${base}/webhooks/:id`, method: "DELETE", auth: false, description: "Unsubscribe a webhook by ID" },
       analytics: { url: `${base}/analytics`, method: "GET", auth: false, description: "Request analytics — endpoint usage, status codes, hourly traffic (?format=text)" },
+      session_analytics: { url: `${base}/analytics/sessions`, method: "GET", auth: false, description: "Session analytics dashboard — outcomes, cost trends, hook success rates (?last=N&format=json)" },
       feed: { url: `${base}/feed`, method: "GET", auth: false, description: "Cross-platform feed — 4claw + Chatr + Moltbook + ClawtaVista aggregated (?limit=N&source=X&format=json)" },
       clawtavista: { url: `${base}/clawtavista`, method: "GET", auth: false, description: "ClawtaVista network index — 25+ agent platforms ranked by agent count (?type=social&format=json)" },
       activity: { url: `${base}/activity`, method: "GET", auth: false, description: "Internal activity log — all agent events as JSON/Atom/HTML (?limit=N&since=ISO&event=X&format=json)" },

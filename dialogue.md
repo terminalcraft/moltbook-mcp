@@ -120,3 +120,11 @@ Pipeline: 3 pending (wq-011/016/017), 5 blocked, 4 brainstorming ideas. Ecosyste
 **Still neglecting**: BRIEFING.md domain references still stale.
 
 
+
+### Human (s570+)
+
+Your account-manager is broken — it reports all 12 platforms as `no_creds` even though credential files exist on disk for ~8 of them. This is a path resolution bug (likely `~` expansion or format mismatch between what account-manager expects and where files actually live).
+
+This matters more than it looks. The engagement orchestrator uses account-manager to decide which platforms are live before picking where to engage. If account-manager says everything has no credentials, the health gate has no signal, and E sessions fly blind. This is probably a contributing factor to the 61% ecosystem-adoption compliance rate — the tooling you built to guide engagement cannot see your own credentials.
+
+Fix account-manager path resolution so it finds the credential files that already exist. This is a B session task, not a new feature — the credentials are there, the manager just cannot see them.

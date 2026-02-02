@@ -4,59 +4,92 @@
   "last_intake_session": 571,
   "queue": [
     {
-      "id": "wq-011",
-      "title": "Fix account-manager credential path resolution",
-      "description": "account-manager reports all platforms as no_creds despite credential files existing. Path lookup broken. Breaks engagement orchestrator.",
-      "priority": 11,
+      "id": "wq-001",
+      "title": "Session replay viewer",
+      "description": "Web UI to browse session-history.txt with per-session commit diffs, cost breakdown, and queue item links — makes debugging failed sessions easier",
+      "priority": 1,
       "status": "done",
       "added": "2026-02-02",
-      "source": "session",
+      "source": "brainstorming-auto",
       "tags": [],
-      "complexity": "S",
       "commits": [],
-      "completed": "2026-02-02"
+      "completed": "2026-02-02",
+      "started": "2026-02-02"
     },
     {
-      "id": "wq-012",
-      "title": "Archive retired queue items and clean up stale entries",
-      "description": "5 retired items cluttering active queue. Run archive command and verify clean state.",
-      "priority": 12,
-      "status": "done",
+      "id": "wq-002",
+      "title": "Directive compliance auto-scoring",
+      "description": "Extend directives.json with per-directive compliance tracking (followed/ignored counts) replacing the separate directive-tracking.json system",
+      "priority": 2,
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "session",
+      "source": "brainstorming-auto",
       "tags": [],
-      "complexity": "S",
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "commits": []
     },
     {
-      "id": "wq-013",
-      "title": "Cross-session dependency tracking for TODO/FIXME items",
-      "description": "Extend 27-todo-scan.sh to track which TODOs are resolved vs lingering across sessions",
-      "priority": 13,
-      "status": "done",
+      "id": "wq-003",
+      "title": "TODO followup: title: `TODO followup: ${raw.substring(0, 80)}`,",
+      "description": "title: `TODO followup: ${raw.substring(0, 80)}`,",
+      "priority": 3,
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "complexity": "M",
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
+      "commits": []
     },
     {
-      "id": "wq-014",
-      "title": "Queue velocity dashboard — API endpoint tracking items added/completed/retired per 10-session window",
-      "description": "--priority",
-      "priority": 14,
-      "status": "done",
+      "id": "wq-004",
+      "title": "TODO followup: \"description\": \"title: `TODO followup: ${raw.substring(0, 80)}`,\",",
+      "description": "\"description\": \"title: `TODO followup: ${raw.substring(0, 80)}`,\",",
+      "priority": 4,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-005",
+      "title": "TODO followup: \"title\": \"Cross-session dependency tracking \\u2014 auto-detect TODO/FIXME commen",
+      "description": "\"title\": \"Cross-session dependency tracking \\u2014 auto-detect TODO/FIXME comments and partial implementations in commits, create follow-up queue items\",",
+      "priority": 5,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-006",
+      "title": "Queue velocity dashboard — track items added/completed/retired per 10-session window, expose via /status/queue-velocity endpoint",
+      "description": "",
+      "priority": 6,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "complexity": "S",
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "commits": []
+    },
+    {
+      "id": "wq-007",
+      "title": "Directive compliance report — /status/directives endpoint showing ack status, age, completion across sessions",
+      "description": "",
+      "priority": 7,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

@@ -130,9 +130,29 @@ const ALLOWED_FILES = {
   rotation: "rotation.conf",
 };
 
+// --- Structured audit logging for sensitive operations (wq-034, d015) ---
+const SENSITIVE_AUDIT_FILE = join(BASE, "sensitive-audit.json");
+const SENSITIVE_AUDIT_MAX = 500;
+let sensitiveAuditLog = (() => { try { return JSON.parse(readFileSync(SENSITIVE_AUDIT_FILE, "utf8")).slice(-SENSITIVE_AUDIT_MAX); } catch { return []; } })();
+function audit(action, details = {}, req = null) {
+  const entry = {
+    id: crypto.randomUUID(),
+    action,
+    ts: new Date().toISOString(),
+    ip: req ? (req.ip || req.socket?.remoteAddress || "unknown") : "system",
+    agent: req ? (req.agentHandle || req.headers?.["x-agent"] || null) : null,
+    ...details,
+  };
+  sensitiveAuditLog.push(entry);
+  if (sensitiveAuditLog.length > SENSITIVE_AUDIT_MAX) sensitiveAuditLog = sensitiveAuditLog.slice(-SENSITIVE_AUDIT_MAX);
+  try { writeFileSync(SENSITIVE_AUDIT_FILE, JSON.stringify(sensitiveAuditLog, null, 2)); } catch {}
+  return entry;
+}
+
 function auth(req, res, next) {
   const h = req.headers.authorization;
   if (!h || h !== `Bearer ${TOKEN}`) {
+    audit("auth.failed", { method: req.method, path: req.path, reason: h ? "invalid_token" : "missing_token" }, req);
     return res.status(401).json({ error: "unauthorized" });
   }
   next();
@@ -424,6 +444,7 @@ function requireVerifiedAgent(req, res, next) {
   if (req.agentVerified) return next();
   const reason = req.agentVerifyReason || "unverified";
   logActivity("auth.rejected", `Unverified write attempt: ${req.method} ${req.path} by ${req.agentHandle || "unknown"} (${reason})`);
+  audit("auth.rejected", { method: req.method, path: req.path, reason }, req);
   return res.status(403).json({
     error: "Agent identity verification required",
     reason,
@@ -875,6 +896,18 @@ app.get("/analytics", auth, (req, res) => {
     return res.type("text/plain").send(lines.join("\n"));
   }
   res.json(result);
+});
+
+// --- Sensitive audit log endpoint (wq-034) ---
+app.get("/audit/sensitive", auth, (req, res) => {
+  const { action, limit, since } = req.query;
+  let entries = sensitiveAuditLog;
+  if (action) entries = entries.filter(e => e.action === action || e.action.startsWith(action + "."));
+  if (since) entries = entries.filter(e => e.ts >= since);
+  const n = Math.min(parseInt(limit) || 100, SENSITIVE_AUDIT_MAX);
+  entries = entries.slice(-n);
+  const actions = [...new Set(sensitiveAuditLog.map(e => e.action))].sort();
+  res.json({ total: sensitiveAuditLog.length, showing: entries.length, actions, entries: entries.reverse() });
 });
 
 // Session analytics dashboard — outcomes, cost trends, hook success rates
@@ -6692,11 +6725,12 @@ app.post("/webhooks", auth, (req, res) => {
   if (invalid.length) return res.status(400).json({ error: `unknown events: ${invalid.join(", ")}`, valid: WEBHOOK_EVENTS });
   const hooks = loadWebhooks();
   const existing = hooks.find(h => h.agent === agent && h.url === url);
-  if (existing) { existing.events = events; existing.updated = new Date().toISOString(); saveWebhooks(hooks); return res.json({ updated: true, id: existing.id, events: existing.events }); }
+  if (existing) { existing.events = events; existing.updated = new Date().toISOString(); saveWebhooks(hooks); audit("webhook.updated", { id: existing.id, agent, url, events }, req); return res.json({ updated: true, id: existing.id, events: existing.events }); }
   const secret = crypto.randomBytes(16).toString("hex");
   const hook = { id: crypto.randomUUID(), agent, url, events, secret, created: new Date().toISOString() };
   hooks.push(hook);
   saveWebhooks(hooks);
+  audit("webhook.created", { id: hook.id, agent, url, events }, req);
   res.status(201).json({ id: hook.id, secret, events: hook.events, message: "Webhook registered. Secret is shown once — save it for signature verification." });
 });
 app.get("/webhooks/events", (req, res) => {
@@ -6730,7 +6764,10 @@ app.delete("/webhooks/:id", auth, (req, res) => {
   const hooks = loadWebhooks();
   const idx = hooks.findIndex(h => h.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: "not found" });
-  hooks.splice(idx, 1); saveWebhooks(hooks); res.json({ deleted: true });
+  const deleted = hooks[idx];
+  hooks.splice(idx, 1); saveWebhooks(hooks);
+  audit("webhook.deleted", { id: req.params.id, agent: deleted.agent, url: deleted.url }, req);
+  res.json({ deleted: true });
 });
 app.get("/webhooks/:id/stats", (req, res) => {
   const hook = loadWebhooks().find(h => h.id === req.params.id);
@@ -7027,6 +7064,7 @@ app.post("/cron", auth, (req, res) => {
   cronJobs.push(job);
   saveCron();
   startCronTimer(job);
+  audit("cron.created", { id: job.id, agent: job.agent, name: job.name, url: job.url, interval: job.interval }, req);
   fireWebhook("cron.created", { job_id: job.id, agent: job.agent, name: job.name, summary: `${job.agent || "anon"} scheduled ${job.name || job.url} every ${job.interval}s` });
   res.status(201).json(job);
 });
@@ -7054,6 +7092,7 @@ app.delete("/cron/:id", auth, (req, res) => {
   if (cronTimers.has(job.id)) { clearInterval(cronTimers.get(job.id)); cronTimers.delete(job.id); }
   cronJobs.splice(idx, 1);
   saveCron();
+  audit("cron.deleted", { id: job.id, name: job.name, url: job.url }, req);
   fireWebhook("cron.deleted", { job_id: job.id, name: job.name, summary: `job ${job.name || job.id} deleted` });
   res.json({ deleted: true });
 });
@@ -9464,6 +9503,7 @@ app.post("/backup", auth, (req, res) => {
     } catch (e) { skipped.push(name); }
   }
   logActivity("backup.restore", `Restored ${restored.length} stores`, { restored, skipped });
+  audit("backup.restored", { restored, skipped }, req);
   res.json({ ok: true, restored, skipped });
 });
 
@@ -9531,6 +9571,7 @@ app.post("/backups/restore/:date", auth, (req, res) => {
     } catch { skipped.push(name); }
   }
   logActivity("backup.restore", `Restored from backup ${date}: ${restored.length} stores`, { date, restored, skipped });
+  audit("backup.date_restored", { date, restored, skipped }, req);
   res.json({ ok: true, date, restored, skipped });
 });
 

@@ -340,6 +340,23 @@ if [ "$MODE_CHAR" = "R" ]; then
     R_INTEL=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('$INTEL_FILE','utf8')).length)}catch{console.log(0)}" 2>/dev/null || echo 0)
   fi
 
+  # Directive intake check: detect if new human directives exist since last_intake_session.
+  # This saves R sessions from re-reading dialogue.md when there's nothing new.
+  R_INTAKE_STATUS="no-op"
+  if [ -f "$DIR/work-queue.json" ] && [ -f "$DIR/dialogue.md" ]; then
+    R_INTAKE_STATUS=$(node -e "
+      const fs=require('fs');
+      const q=JSON.parse(fs.readFileSync('$DIR/work-queue.json','utf8'));
+      const d=fs.readFileSync('$DIR/dialogue.md','utf8');
+      const lastIntake=q.last_intake_session||0;
+      // Find highest session number in human directive headers
+      const matches=[...d.matchAll(/Human.*?\(s(\d+)/gi),...d.matchAll(/Human directive \(s(\d+)/gi),...d.matchAll(/Human \(s(\d+)/gi)];
+      const maxDirective=matches.reduce((m,x)=>Math.max(m,parseInt(x[1]||0)),0);
+      if(maxDirective>lastIntake) console.log('NEW:s'+maxDirective);
+      else console.log('no-op:s'+lastIntake);
+    " 2>/dev/null || echo "unknown")
+  fi
+
   R_HEALTH="Queue: ${R_PENDING} pending, ${R_BLOCKED} blocked | Brainstorming: ${R_BRAINSTORM} ideas | Intel inbox: ${R_INTEL} entries"
   R_URGENT=""
   [ "$R_PENDING" -lt 3 ] && R_URGENT="${R_URGENT}
@@ -355,7 +372,10 @@ if [ "$MODE_CHAR" = "R" ]; then
 This is R session #${R_COUNT}. Follow the checklist in SESSION_REFLECT.md.
 
 ### Pipeline health snapshot:
-${R_HEALTH}${R_URGENT}"
+${R_HEALTH}
+
+### Directive intake: ${R_INTAKE_STATUS}
+$(if [[ "$R_INTAKE_STATUS" == no-op* ]]; then echo "No new human directives since last intake. Skip checklist step 2 (directive intake) — go straight to Diagnose + Evolve."; else echo "NEW directives detected. Read dialogue.md and decompose into work-queue items."; fi)${R_URGENT}"
 fi
 
 PROMPT="${BASE_PROMPT}

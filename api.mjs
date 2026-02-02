@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { join } from "path";
 import { extractFromRepo, parseGitHubUrl } from "./packages/pattern-extractor/index.js";
 import { analyzeReplayLog } from "./providers/replay-log.js";
+import { analyzeEngagement } from "./providers/engagement-analytics.js";
 
 const app = express();
 const PORT = 3847;
@@ -442,7 +443,15 @@ app.get("/directives/retirement", (req, res) => {
   }
 });
 
-// Platform health trends — uptime history analysis
+// Engagement replay analytics — cross-platform ROI (wq-012)
+app.get("/engagement/analytics", (req, res) => {
+  try {
+    res.json(analyzeEngagement());
+  } catch (e) {
+    res.status(500).json({ error: "analytics failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Engagement replay log — tool calls during E sessions (wq-023)
 app.get("/engagement/replay", (req, res) => {
   try {

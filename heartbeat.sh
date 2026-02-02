@@ -364,6 +364,15 @@ $(cat "$LINT_ALERT_FILE")"
   rm -f "$LINT_ALERT_FILE"
 fi
 
+# Credential staleness alert injection (wq-014)
+CRED_ALERT_FILE="$STATE_DIR/cred-age-alert.txt"
+if [ -f "$CRED_ALERT_FILE" ]; then
+  LINT_ALERT_BLOCK="${LINT_ALERT_BLOCK}
+
+$(cat "$CRED_ALERT_FILE")"
+  rm -f "$CRED_ALERT_FILE"
+fi
+
 PROMPT="${BASE_PROMPT}
 
 ${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${COMPLIANCE_BLOCK}${COST_ALERT_BLOCK}${LINT_ALERT_BLOCK}"

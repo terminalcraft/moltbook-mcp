@@ -2573,6 +2573,7 @@ function agentManifest(req, res) {
       status_cost_heatmap: { url: `${base}/status/cost-heatmap`, method: "GET", auth: false, description: "Cost heatmap by session type and day (?days=N, default 14, max 90)" },
       status_cost_distribution: { url: `${base}/status/cost-distribution`, method: "GET", auth: false, description: "Interactive cost distribution charts — stacked bar, pie, rolling avg, utilization (?window=N, ?format=json)" },
       status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
+      status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
@@ -9439,8 +9440,59 @@ app.get("/api/sessions/:num/commits", (req, res) => {
 app.get("/status/human-review", (req, res) => {
   try {
     const data = JSON.parse(readFileSync(join(BASE, "human-review.json"), "utf8"));
-    const pending = (data.items || []).filter(i => i.status === "pending");
-    res.json({ total: (data.items || []).length, pending: pending.length, items: data.items || [] });
+    const items = data.items || [];
+    const pending = items.filter(i => i.status === "pending");
+    const resolved = items.filter(i => i.status === "resolved");
+    const dismissed = items.filter(i => i.status === "dismissed");
+
+    if (req.query.format !== "html") {
+      return res.json({ total: items.length, pending: pending.length, items });
+    }
+
+    const statusColor = { pending: "#f59e0b", resolved: "#22c55e", dismissed: "#6c7086" };
+    const statusIcon = { pending: "⚠", resolved: "✓", dismissed: "✕" };
+    const priorityColor = { high: "#ef4444", medium: "#f59e0b", low: "#6c7086" };
+
+    const rows = items.length ? items.map(i => {
+      const age = i.flagged_at ? Math.round((Date.now() - new Date(i.flagged_at).getTime()) / 3600000) : "?";
+      return `<tr>
+        <td><span style="color:${statusColor[i.status] || "#888"}">${statusIcon[i.status] || "?"}</span> ${i.status || "pending"}</td>
+        <td><span style="color:${priorityColor[i.priority] || "#888"}">${i.priority || "medium"}</span></td>
+        <td>${i.type || "—"}</td>
+        <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(i.summary || i.description || "—").replace(/</g, "&lt;")}</td>
+        <td>${i.source_session ? "s" + i.source_session : "—"}</td>
+        <td>${age}h</td>
+        <td>${i.resolved_at ? new Date(i.resolved_at).toISOString().slice(0, 10) : "—"}</td>
+      </tr>`;
+    }).join("") : `<tr><td colspan="7" style="text-align:center;color:#585b70;padding:2rem">No flagged items — all clear</td></tr>`;
+
+    const html = `<!DOCTYPE html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Human Review Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e5e5e5;padding:2rem}
+h1{font-size:1.5rem;margin-bottom:1.5rem;color:#f5f5f5}
+.stats{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.stat{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:1rem 1.5rem;min-width:140px}
+.stat .label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.05em}.stat .value{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+table{width:100%;border-collapse:collapse;font-size:.875rem}th{text-align:left;padding:.5rem;border-bottom:2px solid #333;color:#888;font-weight:500}
+td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
+.green{color:#22c55e}.yellow{color:#f59e0b}.red{color:#ef4444}
+.empty-state{text-align:center;padding:4rem 2rem;color:#585b70}
+.empty-state .icon{font-size:3rem;margin-bottom:1rem}
+</style></head><body>
+<h1>Human Review Dashboard</h1>
+<div class="stats">
+  <div class="stat"><div class="label">Total Flagged</div><div class="value">${items.length}</div></div>
+  <div class="stat"><div class="label">Pending</div><div class="value ${pending.length ? "yellow" : "green"}">${pending.length}</div></div>
+  <div class="stat"><div class="label">Resolved</div><div class="value green">${resolved.length}</div></div>
+  <div class="stat"><div class="label">Dismissed</div><div class="value">${dismissed.length}</div></div>
+</div>
+<table><thead><tr><th>Status</th><th>Priority</th><th>Type</th><th>Summary</th><th>Session</th><th>Age</th><th>Resolved</th></tr></thead>
+<tbody>${rows}</tbody></table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/human-review" style="color:#89b4fa">JSON</a> · <a href="/status/dashboard" style="color:#89b4fa">Status Dashboard</a></p>
+</body></html>`;
+    res.type("html").send(html);
   } catch (e) { res.json({ total: 0, pending: 0, items: [] }); }
 });
 

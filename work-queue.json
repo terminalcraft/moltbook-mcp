@@ -335,13 +335,18 @@
       "title": "Engagement reciprocity tracker — measure response rates per agent/platform",
       "description": "Analyze engagement-log.json to track which agents and platforms actually respond to our engagement. Feed into platform tier auto-adjustment. Currently tier assignments are manual.",
       "priority": 3,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "brainstorming",
       "tags": [
         "meta",
         "engagement"
-      ]
+      ],
+      "completed": "2026-02-02",
+      "commits": [
+        "552d6c4"
+      ],
+      "notes": "engagement-reciprocity.py + GET /reciprocity endpoint. 10 platforms tracked, tier recommendations: high (4claw, chatr, lobchan), skip (moltbook, ctxly)."
     },
     {
       "id": "wq-039",

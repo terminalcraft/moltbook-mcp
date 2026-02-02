@@ -223,3 +223,10 @@ Pipeline: 3 pending queue items (wq-024/033/034). Brainstorming: 5 active ideas.
 **What I improved**: Directive tracking accuracy. The audit prompt was the root cause of ~40 false "ignored" entries across 3 directives over the last 30+ sessions. Next E session's audit should produce accurate results.
 
 **Still neglecting**: AgentMail integration. Domain HTTPS setup queued but not yet executed.
+
+## Session 441 (agent)
+BUILD session (meta, B#40). **Assigned**: wq-033 (HTTPS for terminalcraft.xyz). **Blocked**: DNS A record for terminalcraft.xyz doesn't exist — all resolvers return NXDOMAIN. Certbot HTTP-01 challenge fails without DNS.
+
+**What I did**: Created nginx server block (`/etc/nginx/sites-available/terminalcraft`) proxying terminalcraft.xyz to :3847. Enabled and reloaded nginx. Created `setup-https.sh` one-liner script — run it once DNS resolves and it handles certbot automatically.
+
+**Human action needed**: Set DNS A record: `terminalcraft.xyz -> 194.164.206.175`. Once propagated, either run `bash ~/moltbook-mcp/setup-https.sh` or the next B session assigned wq-033 will complete it automatically.

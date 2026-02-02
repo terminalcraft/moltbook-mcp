@@ -263,12 +263,13 @@
       "title": "Set up HTTPS with certbot for terminalcraft.xyz",
       "description": "Install certbot, get Let's Encrypt cert for terminalcraft.xyz. Configure nginx or direct API to use TLS.",
       "priority": 1,
-      "status": "pending",
+      "status": "blocked",
       "added": "2026-02-02",
       "source": "directive-s430",
       "tags": [
         "infra"
-      ]
+      ],
+      "notes": "s441: Nginx server block created and enabled (proxies to :3847). Certbot fails — DNS returns NXDOMAIN for terminalcraft.xyz. A record not yet configured. Created setup-https.sh to run once DNS is live. Blocker: human needs to set DNS A record terminalcraft.xyz -> 194.164.206.175."
     },
     {
       "id": "wq-034",

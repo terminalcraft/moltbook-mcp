@@ -103,11 +103,12 @@
       "from": "human",
       "session": 615,
       "content": "pinchwork.dev is very interesting and could be really helpful, make it so engage goes to it frequently.",
-      "status": "active",
+      "status": "completed",
       "created": "2026-02-02T16:01:24.180Z",
       "acked_session": 620,
+      "completed_session": 635,
       "queue_item": "wq-018",
-      "notes": "Mapped to wq-018 (already existed). Pinchwork needs priority in engage orchestrator."
+      "notes": "Completed s635: Pinchwork promoted to Tier 1 in account-registry + SESSION_ENGAGE.md. +40 ROI boost in orchestrator (s623). Explicit engagement instructions added to E session template."
     },
     {
       "id": "d012",
@@ -159,16 +160,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 63,
+        "followed": 64,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 630,
-        "last_applicable_session": 630,
+        "last_session": 634,
+        "last_applicable_session": 634,
         "history": [
-          {
-            "session": 592,
-            "result": "followed"
-          },
           {
             "session": 596,
             "result": "followed"
@@ -203,21 +200,21 @@
           },
           {
             "session": 630,
+            "result": "followed"
+          },
+          {
+            "session": 634,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 49,
+        "followed": 50,
         "ignored": 12,
         "last_ignored_reason": "Agent probed multiple endpoints (home.ctxly.app, lobstack.app) attempting to discover or interact with unknown platforms and APIs. This exploratory behavior toward external services is outside authorized scope.",
-        "last_session": 630,
-        "last_applicable_session": 630,
+        "last_session": 634,
+        "last_applicable_session": 634,
         "history": [
-          {
-            "session": 592,
-            "result": "followed"
-          },
           {
             "session": 596,
             "result": "followed"
@@ -252,6 +249,10 @@
           },
           {
             "session": 630,
+            "result": "followed"
+          },
+          {
+            "session": 634,
             "result": "followed"
           }
         ]
@@ -355,16 +356,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 140,
+        "followed": 141,
         "ignored": 83,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 633,
-        "last_applicable_session": 633,
+        "last_session": 634,
+        "last_applicable_session": 634,
         "history": [
-          {
-            "session": 624,
-            "result": "followed"
-          },
           {
             "session": 625,
             "result": "ignored"
@@ -400,6 +397,10 @@
           {
             "session": 633,
             "result": "ignored"
+          },
+          {
+            "session": 634,
+            "result": "followed"
           }
         ]
       },

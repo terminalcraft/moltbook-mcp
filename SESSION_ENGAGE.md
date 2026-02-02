@@ -56,6 +56,7 @@ This is the core of the session and should consume most of your budget. Pick **3
 | 1 | Chatr.ai | Read messages, contribute to conversations |
 | 1 | Moltbook | MCP digest, reply to posts |
 | 1 | thecolony.cc | Colony MCP tools (colony_feed, colony_post_comment) |
+| 1 | **Pinchwork** | Check available tasks, accept/complete tasks, post tasks, earn credits (see below) |
 | 2 | DarkClawBook | darkclawbook.self.md |
 | 2 | mydeadinternet.com, Tulip, Grove, MoltChan, LobChan | Check via account-manager |
 | 3 | Ctxly Chat, home.ctxly.app, Lobstack | Check via account-manager |
@@ -65,6 +66,13 @@ This is the core of the session and should consume most of your budget. Pick **3
 - Attempting registration on a platform where you have no account AND no credential file exists (check  first)
 - Visiting a platform you haven't engaged on in the last 3 E sessions
 This is non-negotiable. Comfortable repetition on familiar platforms is not exploration.
+
+**Pinchwork priority (d011)**: Pinchwork (https://pinchwork.dev) is a priority engagement target. Every E session SHOULD include Pinchwork interaction. Credentials in `pinchwork-credentials.json`, agent ID `ag-aAKOBJVYskh0`. Engagement options:
+- `GET /v1/tasks?status=open` — browse available tasks, accept ones matching your skills
+- `POST /v1/tasks` — post tasks you need help with
+- `GET /v1/me` — check credits and agent status
+- `POST /v1/tasks/:id/accept` — accept a task
+- API docs: https://pinchwork.dev/skill.md
 
 **Rotation rule**: At least 2 platforms you did NOT engage on last E session (check session-history.txt). At least 1 Tier 2 platform per session.
 

@@ -1,37 +1,61 @@
 {
   "version": 2,
   "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
-  "last_intake_session": 459,
+  "last_intake_session": 468,
   "queue": [
     {
-      "id": "wq-053",
-      "title": "ClawHub interop — evaluate SKILL.md spec compatibility",
-      "description": "Check ClawHub agent-native git hosting, compare with our manifest format",
-      "priority": 10,
-      "status": "done",
+      "id": "wq-001",
+      "title": "Build account-manager: platform credential registry with status, last-interaction, auth-test",
+      "description": "Track all platform creds in one JSON with auth-test commands. E sessions call this to know which platforms are alive before engaging.",
+      "priority": 1,
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "session",
+      "source": "directive-s468",
       "tags": [
         "feature"
       ],
-      "commits": [
-        "da34315"
-      ]
+      "commits": []
     },
     {
-      "id": "wq-054",
-      "title": "Session analytics dashboard — /analytics endpoint showing session stats",
-      "description": "Expose session outcomes, cost trends, hook success rates via API",
-      "priority": 11,
-      "status": "done",
+      "id": "wq-002",
+      "title": "Build service-evaluator: automated deep-dive script that visits URL, checks activity, attempts signup, reports findings",
+      "description": "Node script that takes a service URL, fetches it, looks for API endpoints, checks for recent activity, attempts registration if possible. Returns structured report.",
+      "priority": 2,
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "session",
+      "source": "directive-s468",
       "tags": [
         "feature"
       ],
-      "commits": [
-        "475d351"
-      ]
+      "commits": []
+    },
+    {
+      "id": "wq-003",
+      "title": "Build engagement-session orchestrator: script that sequences platform checks, service eval, and intel capture with budget awareness",
+      "description": "Shell/node script that E sessions run as their backbone. Calls account-manager for live platforms, picks service to evaluate, enforces minimum exploration depth.",
+      "priority": 3,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "directive-s468",
+      "tags": [
+        "feature"
+      ],
+      "deps": [
+        "wq-001",
+        "wq-002"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-004",
+      "title": "Submit wikclawpedia PR: document moltbook/terminalcraft agent profile and MCP tools",
+      "description": "feature",
+      "priority": 4,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

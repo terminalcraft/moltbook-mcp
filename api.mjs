@@ -2791,6 +2791,7 @@ function agentManifest(req, res) {
       status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
       status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
+      status_hooks: { url: `${base}/status/hooks`, method: "GET", auth: false, description: "Hook performance dashboard — avg/p50/p95 execution times, failure rates, slow hook identification (?window=N&format=json)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
       knowledge_validate: { url: `${base}/knowledge/validate`, method: "POST", auth: false, description: "Endorse a pattern (body: {pattern_id, agent, note?})" },
@@ -8401,6 +8402,106 @@ app.get("/smoke-tests/badge", (req, res) => {
   if (!latest) return res.json({ schemaVersion: 1, label: "smoke tests", message: "no data", color: "lightgrey" });
   const ok = latest.failed === 0;
   res.json({ schemaVersion: 1, label: "smoke tests", message: ok ? `${latest.passed} passed` : `${latest.failed} failed`, color: ok ? "brightgreen" : "red" });
+});
+
+// Hook performance dashboard (wq-039)
+app.get("/status/hooks", (req, res) => {
+  try {
+    const resultsPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/logs/hook-results.json");
+    const window = Math.min(Math.max(parseInt(req.query.window) || 50, 1), 200);
+    let lines = [];
+    try { lines = readFileSync(resultsPath, "utf8").trim().split("\n").filter(Boolean); } catch { return res.json({ error: "no hook results data" }); }
+    if (window > 0) lines = lines.slice(-window);
+
+    const entries = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+    if (!entries.length) return res.json({ error: "no valid entries" });
+
+    // Aggregate per-hook stats
+    const hooks = {};
+    let totalPass = 0, totalFail = 0;
+    for (const entry of entries) {
+      totalPass += entry.pass || 0;
+      totalFail += entry.fail || 0;
+      for (const h of (entry.hooks || [])) {
+        if (!hooks[h.hook]) hooks[h.hook] = { runs: 0, failures: 0, times: [] };
+        hooks[h.hook].runs++;
+        if (h.status !== "ok") hooks[h.hook].failures++;
+        hooks[h.hook].times.push(h.ms);
+      }
+    }
+
+    const percentile = (arr, p) => {
+      const sorted = [...arr].sort((a, b) => a - b);
+      const idx = Math.ceil(sorted.length * p / 100) - 1;
+      return sorted[Math.max(0, idx)];
+    };
+
+    const hookStats = Object.entries(hooks).map(([name, d]) => ({
+      hook: name,
+      runs: d.runs,
+      failures: d.failures,
+      failure_rate: Math.round((d.failures / d.runs) * 10000) / 100,
+      avg_ms: Math.round(d.times.reduce((a, b) => a + b, 0) / d.times.length),
+      p50_ms: percentile(d.times, 50),
+      p95_ms: percentile(d.times, 95),
+      max_ms: Math.max(...d.times),
+      min_ms: Math.min(...d.times),
+    })).sort((a, b) => b.p95_ms - a.p95_ms);
+
+    const totalTime = hookStats.reduce((s, h) => s + h.avg_ms, 0);
+    const slow = hookStats.filter(h => h.p95_ms > 1000);
+
+    if (req.query.format === "json" || req.headers.accept?.includes("application/json")) {
+      return res.json({
+        sessions_analyzed: entries.length,
+        session_range: { from: entries[0]?.session, to: entries[entries.length - 1]?.session },
+        total_hook_runs: totalPass + totalFail,
+        total_failures: totalFail,
+        overall_failure_rate: Math.round((totalFail / (totalPass + totalFail)) * 10000) / 100,
+        avg_total_hook_time_ms: totalTime,
+        slow_hooks: slow.map(h => h.hook),
+        hooks: hookStats,
+      });
+    }
+
+    // HTML dashboard
+    const rows = hookStats.map(h => {
+      const bar = Math.min(Math.round(h.p95_ms / 100), 50);
+      const color = h.p95_ms > 5000 ? "#f38ba8" : h.p95_ms > 1000 ? "#fab387" : "#a6e3a1";
+      const failBadge = h.failures > 0 ? `<span style="color:#f38ba8;font-weight:bold">${h.failure_rate}%</span>` : `<span style="color:#a6e3a1">0%</span>`;
+      return `<tr>
+        <td style="font-family:monospace;white-space:nowrap">${h.hook}</td>
+        <td style="text-align:right">${h.runs}</td>
+        <td style="text-align:right">${failBadge}</td>
+        <td style="text-align:right">${h.avg_ms}</td>
+        <td style="text-align:right">${h.p50_ms}</td>
+        <td style="text-align:right;font-weight:bold;color:${color}">${h.p95_ms}</td>
+        <td style="text-align:right">${h.max_ms}</td>
+        <td><div style="background:${color};height:12px;width:${bar * 4}px;border-radius:3px"></div></td>
+      </tr>`;
+    }).join("\n");
+
+    const slowList = slow.length ? slow.map(h => `<li><code>${h.hook}</code> — p95: ${h.p95_ms}ms, avg: ${h.avg_ms}ms</li>`).join("") : "<li>None — all hooks under 1s p95</li>";
+
+    res.type("html").send(`<!DOCTYPE html><html><head><title>Hook Performance</title>
+<style>body{background:#1e1e2e;color:#cdd6f4;font-family:system-ui;margin:2rem}table{border-collapse:collapse;width:100%}th,td{padding:6px 10px;border-bottom:1px solid #313244}th{text-align:left;color:#89b4fa;font-size:12px;text-transform:uppercase}tr:hover{background:#313244}h1{color:#cba6f7}h2{color:#89b4fa;margin-top:2rem}.summary{display:flex;gap:2rem;margin:1rem 0}.card{background:#313244;padding:1rem;border-radius:8px;min-width:140px}.card .val{font-size:1.5rem;font-weight:bold;color:#cba6f7}.card .lbl{font-size:.75rem;color:#6c7086;margin-top:4px}</style></head>
+<body><h1>Hook Performance Dashboard</h1>
+<p style="color:#6c7086">Last ${entries.length} sessions (${entries[0]?.session}–${entries[entries.length - 1]?.session}) · ${hookStats.length} hooks tracked</p>
+<div class="summary">
+  <div class="card"><div class="val">${totalTime}ms</div><div class="lbl">Avg total hook time</div></div>
+  <div class="card"><div class="val">${totalPass + totalFail}</div><div class="lbl">Total hook runs</div></div>
+  <div class="card"><div class="val">${totalFail}</div><div class="lbl">Total failures</div></div>
+  <div class="card"><div class="val">${slow.length}</div><div class="lbl">Slow hooks (>1s p95)</div></div>
+</div>
+<h2>Optimization Targets</h2><ul>${slowList}</ul>
+<h2>Per-Hook Metrics</h2>
+<table><thead><tr><th>Hook</th><th>Runs</th><th>Fail%</th><th>Avg (ms)</th><th>P50 (ms)</th><th>P95 (ms)</th><th>Max (ms)</th><th>P95 bar</th></tr></thead>
+<tbody>${rows}</tbody></table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/hooks?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/dashboard" style="color:#89b4fa">Status Dashboard</a> · ?window=N (default 50, max 200)</p>
+</body></html>`);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
 });
 
 // HTML smoke test dashboard (wq-015)

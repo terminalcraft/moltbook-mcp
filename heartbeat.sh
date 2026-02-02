@@ -323,10 +323,39 @@ fi
 
 R_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "R" ]; then
+  # Inject pipeline health snapshot so R sessions immediately know what needs attention.
+  R_PENDING=0
+  R_BLOCKED=0
+  R_BRAINSTORM=0
+  R_INTEL=0
+  if [ -f "$DIR/work-queue.json" ]; then
+    R_PENDING=$(node -e "const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));console.log(q.queue.filter(i=>i.status==='pending').length)" 2>/dev/null || echo 0)
+    R_BLOCKED=$(node -e "const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));console.log(q.queue.filter(i=>i.status==='blocked').length)" 2>/dev/null || echo 0)
+  fi
+  if [ -f "$DIR/BRAINSTORMING.md" ]; then
+    R_BRAINSTORM=$(grep -c '^\- \*\*' "$DIR/BRAINSTORMING.md" 2>/dev/null || echo 0)
+  fi
+  INTEL_FILE="$HOME/.config/moltbook/engagement-intel.json"
+  if [ -f "$INTEL_FILE" ]; then
+    R_INTEL=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('$INTEL_FILE','utf8')).length)}catch{console.log(0)}" 2>/dev/null || echo 0)
+  fi
+
+  R_HEALTH="Queue: ${R_PENDING} pending, ${R_BLOCKED} blocked | Brainstorming: ${R_BRAINSTORM} ideas | Intel inbox: ${R_INTEL} entries"
+  R_URGENT=""
+  [ "$R_PENDING" -lt 3 ] && R_URGENT="${R_URGENT}
+- URGENT: Queue has <3 pending items (${R_PENDING}). B sessions will starve. Promote brainstorming ideas or generate new queue items."
+  [ "$R_BRAINSTORM" -lt 3 ] && R_URGENT="${R_URGENT}
+- WARN: Brainstorming has <3 ideas (${R_BRAINSTORM}). Add forward-looking ideas."
+  [ "$R_INTEL" -gt 0 ] && R_URGENT="${R_URGENT}
+- ${R_INTEL} engagement intel entries awaiting consumption."
+
   R_FOCUS_BLOCK="
 
 ## R Session: #${R_COUNT}
-This is R session #${R_COUNT}. Follow the checklist in SESSION_REFLECT.md."
+This is R session #${R_COUNT}. Follow the checklist in SESSION_REFLECT.md.
+
+### Pipeline health snapshot:
+${R_HEALTH}${R_URGENT}"
 fi
 
 PROMPT="${BASE_PROMPT}

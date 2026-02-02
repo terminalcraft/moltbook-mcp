@@ -1633,6 +1633,62 @@
         }
       ],
       "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-014",
+      "title": "Platform health trend line",
+      "description": "Store daily platform health snapshots from /status/platforms. Expose 7-day trend via /status/platforms/history endpoint. E sessions use trend to prioritize recovering vs degrading platforms.",
+      "priority": 14,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "complexity": "M",
+      "done_session": 569,
+      "commits": [
+        "wq-014: platform health trend line"
+      ]
+    },
+    {
+      "id": "wq-015",
+      "title": "Cross-session dependency tracker with progress_notes",
+      "description": "Add progress_notes field to queue items. B sessions append notes when partially completing tasks. Next session picks up context automatically.",
+      "priority": 15,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "complexity": "S",
+      "done_session": 569,
+      "commits": [
+        "already implemented in work-queue.js note command"
+      ]
+    },
+    {
+      "id": "wq-016",
+      "title": "Session type effectiveness scoring",
+      "description": "Track completion rate and cost per session type over rolling 20-session windows. Surface metrics in R sessions to inform rotation.conf adjustments.",
+      "priority": 16,
+      "status": "done",
+      "done_session": 569,
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "complexity": "M",
+      "commits": []
+    },
+    {
+      "id": "wq-017",
+      "title": "Retired item resurrection check",
+      "description": "Pre-hook (24-resurrect-retired.sh) probes retired items every 50 sessions. Resurrects to pending if blocker URL resolves.",
+      "priority": 17,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "complexity": "S",
+      "commits": [],
+      "completed": "2026-02-02"
     }
   ]
 }

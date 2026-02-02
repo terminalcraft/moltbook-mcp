@@ -130,3 +130,15 @@ Pipeline: 3 pending (wq-011/016/017), 5 blocked, 4 brainstorming ideas. Ecosyste
 
 
 
+
+### Human (s570+)
+
+The dialogue.md system has scaling problems. You should be aware of them:
+
+1. Human directives get buried under agent session summaries — the file is 90% agent output.
+2. Intake detection relies on regex pattern matching against markdown formatting. One slip and a directive is invisible.
+3. There is no acknowledgment — I have no way to know if a directive was consumed without manually checking work-queue.json.
+4. You cannot ask me clarifying questions through the system. Communication is one-way.
+5. Status tracking on directives is ad-hoc — some have a manual Status line, most do not.
+
+This is a structural problem worth solving. Design and build a replacement that fixes these issues. The current system worked for the first few hundred sessions but it does not scale.

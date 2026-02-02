@@ -331,6 +331,203 @@ function testShellEnvOutput() {
   assert(env.includes('CTX_WQ_ITEM='), 'env has CTX_WQ_ITEM');
 }
 
+function testGetMaxQueueId() {
+  console.log('\n== getMaxQueueId helper (R#78) ==');
+
+  // IDs with gaps — max should be highest numeric
+  writeWQ([
+    { id: 'wq-003', title: 'Third', status: 'pending', priority: 3 },
+    { id: 'wq-001', title: 'First', status: 'done', priority: 1 },
+    { id: 'wq-010', title: 'Tenth', status: 'pending', priority: 10 },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'todo-followups.txt'), '- Legit new TODO item\n');
+
+  const result = run('B');
+  // Auto-promote may run first (adding wq-011 from brainstorming), shifting TODO to wq-012+
+  // The key property: ingested IDs are sequential after the max existing ID
+  assert(result.todo_ingested?.length === 1, 'exactly 1 TODO ingested');
+  const ingestedNum = parseInt(result.todo_ingested[0].replace('wq-', ''), 10);
+  assert(ingestedNum > 10, 'getMaxQueueId computed correctly — ingested ID > 010');
+}
+
+function testDepsReady() {
+  console.log('\n== Dependency filtering ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Base task', status: 'done', priority: 1 },
+    { id: 'wq-002', title: 'Depends on done', status: 'pending', priority: 2, deps: ['wq-001'] },
+    { id: 'wq-003', title: 'Depends on pending', status: 'pending', priority: 3, deps: ['wq-002'] },
+    { id: 'wq-004', title: 'No deps', status: 'pending', priority: 4 },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  // wq-002 (dep done) and wq-004 (no deps) are ready; wq-003 (dep pending) is not
+  // Auto-promote may add items from brainstorming, so pending >= 2
+  assert(result.pending_count >= 2, 'items with met deps counted as pending (at least 2 of 3 original)');
+  // First pending with met deps should be assigned
+  assert(result.wq_item?.startsWith('wq-002'), 'wq-002 (dep met) is top task, not wq-003');
+}
+
+function testComplexitySelection() {
+  console.log('\n== Complexity-aware task selection ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Large task first', status: 'pending', priority: 1, complexity: 'L' },
+    { id: 'wq-002', title: 'Small task second', status: 'pending', priority: 2, complexity: 'S' },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // With BUDGET_CAP=10 (default), should pick first item regardless of complexity
+  const result1 = run('B');
+  assert(result1.wq_item?.startsWith('wq-001'), 'normal budget: picks first item (L)');
+
+  // With BUDGET_CAP=5, should prefer non-L items
+  setup();
+  writeWQ([
+    { id: 'wq-001', title: 'Large task first', status: 'pending', priority: 1, complexity: 'L' },
+    { id: 'wq-002', title: 'Small task second', status: 'pending', priority: 2, complexity: 'S' },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const out = execSync(`node ${join(SRC, 'session-context.mjs')} B 100`, {
+    env: { ...process.env, HOME: SCRATCH, BUDGET_CAP: '5' },
+    timeout: 10000,
+  }).toString().trim();
+  const result2 = JSON.parse(out);
+  assert(result2.wq_item?.startsWith('wq-002'), 'tight budget: prefers S over L');
+}
+
+function testDirectiveSeedTable() {
+  console.log('\n== Directive seed table (R#78) ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'r_session_counter'), '10');
+  writeFileSync(join(STATE, 'session-history.txt'), '');
+
+  // Directive with "ecosystem" keyword should seed "Batch-evaluate 5 undiscovered services"
+  writeFileSync(join(SRC, 'directives.json'), JSON.stringify({
+    directives: [
+      { id: 'd001', content: 'Map the ecosystem of agent services', status: 'active' },
+      { id: 'd002', content: 'Audit credential paths', status: 'active' },
+    ],
+    questions: []
+  }));
+
+  const result = run('B');
+  const bs = readBS();
+  assert(bs.includes('Batch-evaluate 5 undiscovered services'), 'ecosystem keyword maps to batch-evaluate seed');
+  assert(bs.includes('Fix credential management issues'), 'credential keyword maps to cred management seed');
+}
+
+function testDirectiveSeedTableSkip() {
+  console.log('\n== Directive seed table: safety skip ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'r_session_counter'), '10');
+  writeFileSync(join(STATE, 'session-history.txt'), '');
+
+  // Directive with safety keywords should be skipped
+  writeFileSync(join(SRC, 'directives.json'), JSON.stringify({
+    directives: [
+      { id: 'd001', content: 'Do not remove safety hooks ever', status: 'active' },
+    ],
+    questions: []
+  }));
+
+  const result = run('B');
+  const bs = readBS();
+  // Should NOT have generated a seed from the safety directive (skip: true)
+  // But might have other seeds from session history. Just check no safety-related seed.
+  assert(!bs.includes('do not remove'), 'safety directive skipped (not seeded)');
+}
+
+function testMultilineShellEnv() {
+  console.log('\n== Multi-line values in shell env ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Task with notes', status: 'pending', priority: 1,
+      progress_notes: [{ session: 99, text: 'Line one' }, { session: 100, text: 'Line two' }] },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  run('B');
+  const env = readFileSync(join(STATE, 'session-context.env'), 'utf8');
+  // wq_item should contain progress notes with newlines — encoded in $'...' syntax
+  assert(env.includes("$'"), 'multi-line value uses $-quote syntax');
+  assert(env.includes('\\n'), 'newlines escaped in shell env');
+}
+
+function testDynamicBuffer() {
+  console.log('\n== Dynamic promote buffer (R#72) ==');
+
+  // When queue has 0 pending, buffer drops to 1 (from 3)
+  // So even 2 brainstorming ideas can produce 1 queue item
+  writeWQ([
+    { id: 'wq-001', title: 'Done task', status: 'done', priority: 1 },
+  ]);
+  writeBS(`## Evolution Ideas
+
+- **First idea for testing**: description one
+- **Second idea for testing**: description two
+`);
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  // With 0 pending: buffer=1, 2 ideas, promotable = max(0, 2-1)=1
+  assert(result.auto_promoted?.length === 1, 'starvation buffer=1: promotes 1 of 2 ideas');
+}
+
+function testRPromptBlock() {
+  console.log('\n== R prompt block assembly ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Task A', status: 'pending', priority: 1 },
+    { id: 'wq-002', title: 'Task B', status: 'blocked', priority: 2 },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea1**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'r_session_counter'), '20');
+  writeFileSync(join(SRC, 'directives.json'), JSON.stringify({
+    directives: [{ id: 'd001', content: 'test', status: 'active', acked_session: 5 }],
+    questions: []
+  }));
+
+  const result = run('R', '200');
+  assert(result.r_prompt_block?.includes('## R Session: #21'), 'R counter incremented for R mode');
+  assert(result.r_prompt_block?.includes('pending'), 'prompt block has queue stats');
+  assert(result.r_prompt_block?.includes('1 blocked'), 'prompt block has blocked count');
+  assert(result.r_prompt_block?.includes('no-op:all-acked'), 'intake shows all-acked');
+}
+
+function testESessionEvalTarget() {
+  console.log('\n== E session eval target ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'r_session_counter'), '10');
+
+  writeFileSync(join(SRC, 'services.json'), JSON.stringify([
+    { name: 'TestService', url: 'https://example.com', status: 'discovered', description: 'A test service' },
+    { name: 'EvalDone', url: 'https://done.com', status: 'evaluated' },
+  ]));
+
+  const result = run('E', '100');
+  assert(result.eval_target?.includes('TestService'), 'eval_target picks discovered service');
+  assert(!result.eval_target?.includes('EvalDone'), 'eval_target skips evaluated services');
+}
+
 // ===== RUN =====
 
 try {
@@ -346,6 +543,15 @@ try {
   setup(); testBFallback();
   setup(); testIntelDigest();
   setup(); testShellEnvOutput();
+  setup(); testGetMaxQueueId();
+  setup(); testDepsReady();
+  setup(); testComplexitySelection();
+  setup(); testDirectiveSeedTable();
+  setup(); testDirectiveSeedTableSkip();
+  setup(); testMultilineShellEnv();
+  setup(); testDynamicBuffer();
+  setup(); testRPromptBlock();
+  setup(); testESessionEvalTarget();
 } finally {
   cleanup();
 }

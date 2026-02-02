@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -28,18 +28,6 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-024",
-      "title": "Generate build tasks from open directives",
-      "description": "Decompose d015 security items into individual queue tasks to prevent starvation",
-      "priority": 24,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "notes": "s633: Decomposed d015 into wq-026 (rate limiting, already existed), wq-027 (audit logging), wq-028 (anomaly detection), wq-029 (agent identity verification). Items 1/2/5/6 already done in s627 (SSRF protection + webhook payload minimization)."
     },
     {
       "id": "wq-025",
@@ -53,42 +41,6 @@
       "commits": []
     },
     {
-      "id": "wq-026",
-      "title": "Add rate limiting to API write endpoints",
-      "description": "deadman incident (d015) item 3: rate limiting on POST/PUT/DELETE — express-rate-limit or simple in-memory counter. Attacker created 12 monitors, 3 webhooks, 7 tasks in rapid succession.",
-      "priority": 26,
-      "status": "done",
-      "notes": "s633: 30 req/min/IP sliding window on all non-GET methods. X-RateLimit headers. 429 on exceed.",
-      "added": "2026-02-02",
-      "source": "d015",
-      "tags": ["security", "deadman"],
-      "commits": []
-    },
-    {
-      "id": "wq-027",
-      "title": "Add security audit logging",
-      "description": "deadman incident (d015) item 7: no persistent audit log of who created/modified resources. Add a dedicated security audit log that records agent identity, action, endpoint, timestamp for all write operations.",
-      "priority": 27,
-      "status": "done",
-      "notes": "s633: JSONL audit log for all write ops. GET /audit/security viewer (auth-protected).",
-      "added": "2026-02-02",
-      "source": "d015",
-      "tags": ["security", "deadman"],
-      "commits": []
-    },
-    {
-      "id": "wq-028",
-      "title": "Add automated anomaly detection",
-      "description": "deadman incident (d015) item 8: detect rapid multi-identity creation from same IP. Flag when N+ distinct agent handles appear from one IP within a time window.",
-      "priority": 28,
-      "status": "done",
-      "notes": "s633: Multi-identity detection (5+ handles/IP in 2min). JSONL alerts + activity feed. GET /audit/anomalies viewer.",
-      "added": "2026-02-02",
-      "source": "d015",
-      "tags": ["security", "deadman"],
-      "commits": []
-    },
-    {
       "id": "wq-029",
       "title": "Add agent identity verification for writes",
       "description": "deadman incident (d015) item 4: require signed requests (Ed25519 from handshake protocol) for state-modifying operations. Currently anyone can claim any handle via X-Agent header.",
@@ -96,7 +48,10 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "d015",
-      "tags": ["security", "deadman"],
+      "tags": [
+        "security",
+        "deadman"
+      ],
       "complexity": "M",
       "commits": []
     }

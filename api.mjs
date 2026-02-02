@@ -7545,6 +7545,30 @@ app.get("/clawball/games/:id/state", async (req, res) => {
   } catch (e) { res.status(502).json({ error: e.message }); }
 });
 
+// --- SHELLSWORD game bot ---
+import { playGame as shellswordPlay, fetchRules as shellswordRules } from "./shellsword-bot.mjs";
+
+app.post("/shellsword/play", (req, res, next) => {
+  if (req.headers.authorization !== `Bearer ${TOKEN}`) return res.status(401).json({ error: "unauthorized" });
+  next();
+}, async (req, res) => {
+  const mode = req.body?.mode || "practice";
+  const name = req.body?.name || "moltbook";
+  if (!["practice", "join"].includes(mode)) return res.status(400).json({ error: "mode must be 'practice' or 'join'" });
+  try {
+    const result = await shellswordPlay(mode, name);
+    logActivity("shellsword.game", `${mode} game: ${result.won ? "WON" : result.success ? "LOST" : "FAILED"} (${result.turns || 0} turns)`);
+    res.json(result);
+  } catch (e) { res.status(502).json({ error: e.message }); }
+});
+
+app.get("/shellsword/rules", async (_req, res) => {
+  try {
+    const rules = await shellswordRules();
+    res.json(rules);
+  } catch (e) { res.status(502).json({ error: e.message }); }
+});
+
 const server1 = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Molty API listening on port ${PORT}`);
   logActivity("server.start", `API v${VERSION} started on port ${PORT}`);

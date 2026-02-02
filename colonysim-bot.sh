@@ -8,10 +8,15 @@ set -euo pipefail
 KEY_FILE="$HOME/.colonysim-key"
 STATE_FILE="$HOME/.config/moltbook/colonysim-state.json"
 HISTORY_FILE="$HOME/.config/moltbook/colonysim-history.json"
+HEARTBEAT_FILE="$HOME/.config/moltbook/colonysim-heartbeat.json"
+ERROR_COUNT_FILE="$HOME/.config/moltbook/colonysim-errors"
 BASE="https://colonysim.ctxly.app/api/v1"
+
+mkdir -p "$HOME/.config/moltbook"
 
 if [[ ! -f "$KEY_FILE" ]]; then
   echo "ERROR: No ColonySim key at $KEY_FILE"
+  echo "{\"status\":\"error\",\"error\":\"no-key\",\"ts\":\"$(date -Is)\"}" > "$HEARTBEAT_FILE"
   exit 1
 fi
 
@@ -19,10 +24,17 @@ API_KEY=$(cat "$KEY_FILE")
 DRY_RUN="${1:-}"
 
 # Get current game state
-STATE=$(curl -sf "$BASE/tick" -H "Authorization: Bearer $API_KEY" 2>/dev/null) || {
+STATE=$(curl -sf --max-time 15 "$BASE/tick" -H "Authorization: Bearer $API_KEY" 2>/dev/null) || {
   echo "ERROR: Failed to fetch game state"
+  # Track consecutive errors
+  ERRS=0; [[ -f "$ERROR_COUNT_FILE" ]] && ERRS=$(cat "$ERROR_COUNT_FILE")
+  ERRS=$((ERRS + 1)); echo "$ERRS" > "$ERROR_COUNT_FILE"
+  echo "{\"status\":\"error\",\"error\":\"fetch-failed\",\"consecutive_errors\":$ERRS,\"ts\":\"$(date -Is)\"}" > "$HEARTBEAT_FILE"
   exit 1
 }
+
+# Reset error counter on successful fetch
+echo "0" > "$ERROR_COUNT_FILE"
 
 TICK=$(echo "$STATE" | python3 -c "import json,sys; print(json.load(sys.stdin)['data']['tick'])")
 HAS_SUBMITTED=$(echo "$STATE" | python3 -c "import json,sys; print(json.load(sys.stdin)['data']['hasSubmitted'])")
@@ -43,6 +55,7 @@ echo "Tick $TICK | food=$FOOD health=$HEALTH weather=$WEATHER members=$MEMBERS v
 if [[ "$HAS_SUBMITTED" == "True" ]] || [[ "$HAS_SUBMITTED" == "true" ]]; then
   echo "Already submitted for tick $TICK, skipping."
   echo "{\"tick\":$TICK,\"food\":$FOOD,\"health\":\"$HEALTH\",\"weather\":\"$WEATHER\",\"action\":\"none\",\"ts\":\"$(date -Is)\"}" > "$STATE_FILE"
+  echo "{\"status\":\"ok\",\"tick\":$TICK,\"food\":$FOOD,\"health\":\"$HEALTH\",\"weather\":\"$WEATHER\",\"action\":\"already-submitted\",\"members\":$MEMBERS,\"ts\":\"$(date -Is)\"}" > "$HEARTBEAT_FILE"
   exit 0
 fi
 
@@ -124,6 +137,9 @@ echo "Submitted: $RESULT"
 
 # Save current state
 echo "{\"tick\":$TICK,\"food\":$FOOD,\"health\":\"$HEALTH\",\"weather\":\"$WEATHER\",\"action\":\"$ACTION\",\"reason\":\"$REASON\",\"ts\":\"$(date -Is)\"}" > "$STATE_FILE"
+
+# Write heartbeat status (consumed by pre-session hook)
+echo "{\"status\":\"ok\",\"tick\":$TICK,\"food\":$FOOD,\"health\":\"$HEALTH\",\"weather\":\"$WEATHER\",\"action\":\"$ACTION\",\"members\":$MEMBERS,\"ts\":\"$(date -Is)\"}" > "$HEARTBEAT_FILE"
 
 # Append to history (capped at 50 entries)
 python3 -c "

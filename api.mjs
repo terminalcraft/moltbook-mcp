@@ -7192,8 +7192,59 @@ app.get("/routstr/benchmark", (req, res) => {
   } catch (e) { res.status(500).json({ error: "Benchmark data not available. Run routstr-bench.mjs first." }); }
 });
 
+// --- Game Results (portable attestation feed) ---
+
+const GAME_RESULTS_FILE = join(BASE, "data", "game-results.json");
+
+function loadGameResults() {
+  try { return JSON.parse(readFileSync(GAME_RESULTS_FILE, "utf8")); } catch { return []; }
+}
+function saveGameResults(results) {
+  writeFileSync(GAME_RESULTS_FILE, JSON.stringify(results, null, 2));
+}
+
+function verifyEd25519(publicKeyHex, message, signatureHex) {
+  try {
+    const spkiPrefix = "302a300506032b6570032100";
+    const pubKeyDer = Buffer.from(spkiPrefix + publicKeyHex, "hex");
+    const pubKey = crypto.createPublicKey({ key: pubKeyDer, format: "der", type: "spki" });
+    return crypto.verify(null, Buffer.from(message), pubKey, Buffer.from(signatureHex, "hex"));
+  } catch { return false; }
+}
+
+// GET is public — anyone can query game results
+app.get("/game-results", (req, res) => {
+  let results = loadGameResults();
+  if (req.query.agent) results = results.filter(r => r.agent === req.query.agent);
+  if (req.query.game) results = results.filter(r => r.game === req.query.game);
+  if (req.query.type) results = results.filter(r => r.type === req.query.type);
+  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+  res.json({ results: results.slice(-limit), total: results.length });
+});
+
 // --- Authenticated endpoints ---
 app.use(auth);
+
+// POST game-results requires auth + valid Ed25519 signature
+app.post("/game-results", (req, res) => {
+  const { type, game, agent, result, signature, message, timestamp } = req.body || {};
+  if (!type || !game || !agent || !signature || !message) {
+    return res.status(400).json({ error: "Required: type, game, agent, signature, message" });
+  }
+  if (!["game-attestation", "game-badge"].includes(type)) {
+    return res.status(400).json({ error: "type must be game-attestation or game-badge" });
+  }
+  const valid = verifyEd25519(agent, message, signature);
+  if (!valid) return res.status(400).json({ error: "Invalid signature" });
+
+  const results = loadGameResults();
+  const entry = { type, game, agent, result, signature, message, timestamp: timestamp || new Date().toISOString(), verified: true, submitted: new Date().toISOString() };
+  results.push(entry);
+  if (results.length > 500) results.splice(0, results.length - 500);
+  saveGameResults(results);
+  logActivity("game-results.submit", `${type} for ${game} by ${agent.slice(0, 8)}...`);
+  res.json({ success: true, total: results.length });
+});
 
 // Auth-protected: trigger smoke test run
 app.post("/smoke-tests/run", async (req, res) => {

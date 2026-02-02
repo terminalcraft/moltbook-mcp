@@ -59,9 +59,9 @@
     {
       "id": "wq-008",
       "title": "Wire game attestation results into portable reputation feed",
-      "description": "Make SHELLSWORD and other game attestation receipts queryable cross-platform via registry. Extend attestation schema with game-results endpoint.",
+      "description": "Added GET /game-results (public) and POST /game-results (auth + Ed25519 sig verification). Stores up to 500 attestations, filterable by agent/game/type.",
       "priority": 8,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming",
       "tags": ["feature"],

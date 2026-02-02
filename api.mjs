@@ -138,6 +138,26 @@ function auth(req, res, next) {
   next();
 }
 
+// SSRF protection: block private/reserved IP ranges in user-supplied URLs
+function isPrivateUrl(urlStr) {
+  try {
+    const u = new URL(urlStr);
+    const host = u.hostname;
+    if (host === "localhost" || host === "[::1]") return true;
+    // IPv4 checks
+    const parts = host.split(".").map(Number);
+    if (parts.length === 4 && parts.every(n => !isNaN(n))) {
+      if (parts[0] === 127) return true;                          // 127.0.0.0/8
+      if (parts[0] === 10) return true;                           // 10.0.0.0/8
+      if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true; // 172.16.0.0/12
+      if (parts[0] === 192 && parts[1] === 168) return true;     // 192.168.0.0/16
+      if (parts[0] === 169 && parts[1] === 254) return true;     // 169.254.0.0/16 (link-local/AWS metadata)
+      if (parts[0] === 0) return true;                            // 0.0.0.0/8
+    }
+    return false;
+  } catch { return false; }
+}
+
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ limit: "1mb", type: "text/plain" }));
@@ -4708,6 +4728,7 @@ app.post("/monitors", (req, res) => {
   const { agent, url, name } = req.body || {};
   if (!agent || !url) return res.status(400).json({ error: "agent and url required" });
   if (typeof url !== "string" || !url.match(/^https?:\/\/.+/)) return res.status(400).json({ error: "url must be a valid http(s) URL" });
+  if (isPrivateUrl(url)) return res.status(400).json({ error: "private/reserved IP addresses are not allowed" });
   const monitors = loadMonitors();
   if (monitors.length >= MONITORS_MAX) return res.status(400).json({ error: `max ${MONITORS_MAX} monitors` });
   const existing = monitors.find(m => m.url === url);
@@ -6199,7 +6220,7 @@ app.post("/inbox", (req, res) => {
   const msgs = loadInbox();
   msgs.push(msg);
   saveInbox(msgs);
-  fireWebhook("inbox.received", { id: msg.id, from: msg.from, subject: msg.subject });
+  fireWebhook("inbox.received", { id: msg.id, from: msg.from });
   res.status(201).json({ ok: true, id: msg.id, message: "Delivered" });
 });
 
@@ -6482,6 +6503,7 @@ app.post("/webhooks", auth, (req, res) => {
   const { agent, url, events } = req.body || {};
   if (!agent || !url || !events || !Array.isArray(events)) return res.status(400).json({ error: "required: agent, url, events[]" });
   try { new URL(url); } catch { return res.status(400).json({ error: "invalid url" }); }
+  if (isPrivateUrl(url)) return res.status(400).json({ error: "private/reserved IP addresses are not allowed for webhooks" });
   const invalid = events.filter(e => e !== "*" && !WEBHOOK_EVENTS.includes(e));
   if (invalid.length) return res.status(400).json({ error: `unknown events: ${invalid.join(", ")}`, valid: WEBHOOK_EVENTS });
   const hooks = loadWebhooks();
@@ -6499,7 +6521,7 @@ app.get("/webhooks/events", (req, res) => {
     "task.claimed": "Task claimed by agent. Payload: {id, title, claimed_by}",
     "task.done": "Task marked done. Payload: {id, title, agent, result}",
     "pattern.added": "Knowledge pattern added. Payload: {agent, imported, total}",
-    "inbox.received": "New inbox message. Payload: {id, from, subject}",
+    "inbox.received": "New inbox message. Payload: {id, from}",
     "session.completed": "Agent session completed. Payload: {session, mode, duration}",
     "monitor.status_changed": "Monitored URL status changed. Payload: {id, name, url, from, to, agent}",
     "short.create": "Short URL created. Payload: {id, code, url}",
@@ -6798,6 +6820,7 @@ app.post("/cron", auth, (req, res) => {
   const { url, interval, agent, payload, method, name } = req.body || {};
   if (!url || !interval) return res.status(400).json({ error: "url and interval required" });
   if (typeof url !== "string" || !url.startsWith("http")) return res.status(400).json({ error: "url must be a valid HTTP URL" });
+  if (isPrivateUrl(url)) return res.status(400).json({ error: "private/reserved IP addresses are not allowed for cron targets" });
   if (typeof interval !== "number" || interval < CRON_MIN_INTERVAL || interval > CRON_MAX_INTERVAL)
     return res.status(400).json({ error: `interval must be ${CRON_MIN_INTERVAL}-${CRON_MAX_INTERVAL} seconds` });
   if (method && !["GET", "POST", "PUT", "PATCH"].includes(method.toUpperCase()))

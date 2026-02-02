@@ -645,6 +645,7 @@ async function testDispatchErrors() {
 async function testActivity() {
   const r = await get("/activity");
   assert(r.status === 200, "GET /activity returns 200");
+  assert(r.body && typeof r.body === "object", "/activity returns object");
 }
 
 // --- Ecosystem endpoints ---
@@ -652,11 +653,13 @@ async function testActivity() {
 async function testEcosystemMap() {
   const r = await get("/ecosystem/map");
   assert(r.status === 200, "GET /ecosystem/map returns 200");
+  assert(r.body && typeof r.body === "object", "/ecosystem/map returns object");
 }
 
 async function testEcosystemRanking() {
   const r = await get("/ecosystem/ranking");
   assert(r.status === 200, "GET /ecosystem/ranking returns 200");
+  assert(r.body && typeof r.body === "object", "/ecosystem/ranking returns object");
 }
 
 // --- Agents directory ---
@@ -699,6 +702,9 @@ async function testSpecialization() {
 async function testRotation() {
   const r = await get("/rotation");
   assert(r.status === 200, "GET /rotation returns 200");
+  assert(r.body?.analysis && typeof r.body.analysis === "object", "/rotation has analysis object");
+  // Should have at least B and R session types
+  assert(r.body.analysis.B || r.body.analysis.R, "/rotation analysis has session type data");
 }
 
 // --- Directives retirement ---
@@ -938,6 +944,12 @@ async function testSnapshotLatest() {
 async function testRateLimitStatus() {
   const r = await get("/ratelimit/status");
   assert(r.status === 200, "GET /ratelimit/status returns 200");
+  assert(r.body?.ip, "/ratelimit/status has ip");
+  assert(r.body?.methods && typeof r.body.methods === "object", "/ratelimit/status has methods");
+  if (r.body?.methods?.GET) {
+    assert(typeof r.body.methods.GET.limit === "number", "/ratelimit/status GET has limit");
+    assert(typeof r.body.methods.GET.used === "number", "/ratelimit/status GET has used");
+  }
 }
 
 // --- Stats ---
@@ -945,6 +957,10 @@ async function testRateLimitStatus() {
 async function testStats() {
   const r = await get("/stats");
   assert(r.status === 200, "GET /stats returns 200");
+  assert(typeof r.body?.sessions === "number", "/stats has sessions count");
+  assert(Array.isArray(r.body?.range), "/stats has range array");
+  assert(typeof r.body?.totalCommits === "number", "/stats has totalCommits");
+  assert(typeof r.body?.avgDurationSec === "number", "/stats has avgDurationSec");
 }
 
 // --- Smoke tests ---
@@ -974,6 +990,7 @@ async function testStatusSmoke() {
 async function testQueueCompliance() {
   const r = await get("/queue/compliance");
   assert(r.status === 200, "GET /queue/compliance returns 200");
+  assert(r.body && typeof r.body === "object", "/queue/compliance returns object");
 }
 
 // --- Directives intake ---
@@ -1217,6 +1234,18 @@ async function testSessionsHtml() {
 async function testStatusHooks() {
   const r = await get("/status/hooks");
   assert(r.status === 200, "GET /status/hooks returns 200");
+  assert(r.ct.includes("html"), "/status/hooks returns HTML");
+  assert(typeof r.body === "string" && r.body.includes("Hook Performance"), "/status/hooks has performance title");
+}
+
+async function testStatusHooksJson() {
+  const r = await get("/status/hooks?format=json");
+  assert(r.status === 200, "GET /status/hooks?format=json returns 200");
+}
+
+async function testStatusHooksPre() {
+  const r = await get("/status/hooks?phase=pre");
+  assert(r.status === 200, "GET /status/hooks?phase=pre returns 200");
 }
 
 // --- Audit endpoints ---
@@ -1457,6 +1486,7 @@ async function testSnapshotDiff() {
 async function testColonyStatus() {
   const r = await get("/colony/status");
   assert(r.status === 200, "GET /colony/status returns 200");
+  assert(r.body && typeof r.body === "object", "/colony/status returns object");
 }
 
 // --- Colony post (validation) ---
@@ -2055,6 +2085,83 @@ async function testAgentsHandlePutMethod() {
   assert(r.status === 200 || r.status === 201 || r.status === 400 || r.status === 401 || r.status === 403, "PUT /agents/:handle responds");
 }
 
+// --- OpenAPI schema validation ---
+
+async function testOpenApiPaths() {
+  const r = await get("/openapi.json");
+  if (r.status !== 200) return;
+  const paths = Object.keys(r.body.paths);
+  // Verify key paths are documented
+  assert(paths.includes("/health"), "openapi documents /health");
+  assert(paths.includes("/agent.json"), "openapi documents /agent.json");
+  assert(paths.includes("/tasks"), "openapi documents /tasks");
+  assert(paths.includes("/polls"), "openapi documents /polls");
+  assert(paths.includes("/paste"), "openapi documents /paste");
+  assert(paths.includes("/kv"), "openapi documents /kv");
+  assert(r.body.info?.title, "openapi has info.title");
+  assert(r.body.info?.version, "openapi has info.version");
+}
+
+// --- Content-type headers ---
+
+async function testContentTypeHeaders() {
+  // JSON endpoint should return application/json
+  const r1 = await get("/stats");
+  assert(r1.ct.includes("json"), "/stats returns JSON content-type");
+
+  // HTML endpoint should return text/html
+  const r2 = await get("/health");
+  assert(r2.ct.includes("html"), "/health returns HTML content-type");
+
+  // agent.json should return JSON
+  const r3 = await get("/agent.json");
+  assert(r3.ct.includes("json"), "/agent.json returns JSON content-type");
+}
+
+// --- CORS headers ---
+
+async function testCorsHeaders() {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const r = await fetch(`${BASE}/agent.json`, { signal: ctrl.signal });
+    clearTimeout(t);
+    const cors = r.headers.get("access-control-allow-origin");
+    assert(cors === "*" || cors !== null, "API returns CORS headers");
+  } catch (e) { clearTimeout(t); assert(false, "CORS test failed: " + e.message); }
+}
+
+// --- 404 for unknown routes ---
+
+async function testUnknownRoute404() {
+  const r = await get("/this-route-definitely-does-not-exist-" + Date.now());
+  assert(r.status === 404, "Unknown route returns 404");
+}
+
+// --- Engagement replay response structure ---
+
+async function testEngagementReplayStructure() {
+  const r = await get("/engagement/replay");
+  assert(r.status === 200, "GET /engagement/replay returns 200");
+  assert(r.body && typeof r.body === "object", "/engagement/replay returns object");
+}
+
+// --- Effectiveness response structure ---
+
+async function testEffectivenessStructure() {
+  const r = await get("/effectiveness");
+  assert(r.status === 200, "GET /effectiveness returns 200");
+  assert(r.body && typeof r.body === "object", "/effectiveness returns object");
+}
+
+// --- Presence leaderboard structure ---
+
+async function testPresenceLeaderboardStructure() {
+  const r = await get("/presence/leaderboard");
+  assert(r.status === 200, "GET /presence/leaderboard returns 200");
+  assert(r.body && typeof r.body === "object", "/presence/leaderboard returns object");
+}
+
 async function main() {
   console.log(`api.test.mjs — Testing ${BASE}\n`);
   const start = Date.now();
@@ -2153,7 +2260,7 @@ async function main() {
     testAgentsHandle, testMonitorsHandle, testBuildlogHandle,
     testKnowledgeExchangeNoUrl, testChangelogHtml, testCostsHtml, testSessionsHtml,
     // Status hooks
-    testStatusHooks,
+    testStatusHooks, testStatusHooksJson, testStatusHooksPre,
     // Audit
     testAudit, testAuditSecurity, testAuditAnomalies, testAuditSensitive,
     // Analytics
@@ -2240,6 +2347,10 @@ async function main() {
     testSnapshotById, testRegistryDelete, testRegistryReceiptsPost,
     testInboxDelete, testBackupGet, testBackupPost, testFilesPost,
     testAgentsHandlePutMethod,
+    // s667: deeper response validation
+    testOpenApiPaths, testContentTypeHeaders, testCorsHeaders,
+    testUnknownRoute404, testEngagementReplayStructure,
+    testEffectivenessStructure, testPresenceLeaderboardStructure,
   ];
 
   for (const t of tests) {

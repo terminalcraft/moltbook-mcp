@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "description": "Structured human\u2194agent directive system. Replaces dialogue.md for directive intake.",
+  "description": "Structured human↔agent directive system. Replaces dialogue.md for directive intake.",
   "directives": [
     {
       "id": "d001",
       "from": "human",
       "session": 268,
-      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR \u2014 Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
+      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR — Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
       "status": "completed",
       "acked_session": 271,
       "completed_session": 439,
@@ -19,7 +19,7 @@
       "content": "Map the entire agent ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. Build a comprehensive map of all agents and platforms, rank by engagement activity.",
       "status": "active",
       "acked_session": 390,
-      "notes": "Ongoing \u2014 49+ services mapped",
+      "notes": "Ongoing — 49+ services mapped",
       "updated": "2026-02-02T12:53:29.369Z"
     },
     {
@@ -68,7 +68,7 @@
       "id": "d008",
       "from": "human",
       "session": 575,
-      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution \u2014 it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system \u2014 directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed \u2014 d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
+      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution — it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system — directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed — d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
       "status": "completed",
       "acked_session": 586,
       "notes": "s586: dialogue.md fully replaced. Web UI at /directives/inbox, stale-blocker writes to directives.json, session-context reads from directives.json.",
@@ -119,7 +119,7 @@
       "acked_session": 620,
       "completed_session": 620,
       "queue_item": null,
-      "notes": "Already fixed \u2014 inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
+      "notes": "Already fixed — inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
     },
     {
       "id": "d013",
@@ -130,7 +130,7 @@
       "acked_session": 620,
       "completed_session": 641,
       "queue_item": "wq-031",
-      "notes": "s641: MCP tools (human_review_flag, human_review_list) added. API loadReview() fixed. R session prompt now shows open review count + urgent notice. Full pipeline: flag via MCP tool \u2192 persists to human-review.json \u2192 visible at /status/human-review \u2192 surfaced in R session prompt."
+      "notes": "s641: MCP tools (human_review_flag, human_review_list) added. API loadReview() fixed. R session prompt now shows open review count + urgent notice. Full pipeline: flag via MCP tool → persists to human-review.json → visible at /status/human-review → surfaced in R session prompt."
     },
     {
       "id": "d014",
@@ -165,6 +165,22 @@
       "completed_session": 640,
       "queue_item": "wq-033",
       "notes": "Added computeDynamicTiers() to engage-orchestrator.mjs. Tiers computed from engagement analytics and written back to account-registry.json on every E session start."
+    },
+    {
+      "id": "d017",
+      "from": "human",
+      "session": 651,
+      "content": "If an application needs human intervention to be able to get auth acces, notify me through a review.",
+      "status": "pending",
+      "created": "2026-02-02T20:01:45.218Z"
+    },
+    {
+      "id": "d018",
+      "from": "human",
+      "session": 651,
+      "content": "You're allowed to check your emails and answer them.",
+      "status": "pending",
+      "created": "2026-02-02T20:03:03.326Z"
     }
   ],
   "questions": [],
@@ -271,16 +287,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 200,
+        "followed": 201,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 649,
-        "last_applicable_session": 649,
+        "last_session": 651,
+        "last_applicable_session": 651,
         "history": [
-          {
-            "session": 637,
-            "result": "followed"
-          },
           {
             "session": 639,
             "result": "followed"
@@ -315,6 +327,10 @@
           },
           {
             "session": 649,
+            "result": "followed"
+          },
+          {
+            "session": 651,
             "result": "followed"
           }
         ]
@@ -369,16 +385,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 153,
+        "followed": 154,
         "ignored": 87,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 650,
-        "last_applicable_session": 650,
+        "last_session": 651,
+        "last_applicable_session": 651,
         "history": [
-          {
-            "session": 641,
-            "result": "ignored"
-          },
           {
             "session": 642,
             "result": "followed"
@@ -414,13 +426,17 @@
           {
             "session": 650,
             "result": "followed"
+          },
+          {
+            "session": 651,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
         "followed": 74,
         "ignored": 14,
-        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
+        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
         "last_session": 648,
         "last_applicable_session": 648,
         "history": [
@@ -516,16 +532,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 92,
+        "followed": 93,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 649,
-        "last_applicable_session": 649,
+        "last_session": 651,
+        "last_applicable_session": 651,
         "history": [
-          {
-            "session": 631,
-            "result": "followed"
-          },
           {
             "session": 633,
             "result": "followed"
@@ -560,6 +572,10 @@
           },
           {
             "session": 649,
+            "result": "followed"
+          },
+          {
+            "session": 651,
             "result": "followed"
           }
         ]
@@ -654,7 +670,7 @@
           "mode": "R",
           "cost": 1.5155,
           "avg": 0.7523,
-          "ratio": 2.0,
+          "ratio": 2,
           "date": "2026-02-02T19:14:45.713002"
         }
       ],

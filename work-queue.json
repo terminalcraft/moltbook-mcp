@@ -30,18 +30,6 @@
       "commits": []
     },
     {
-      "id": "wq-038",
-      "title": "Add tests for api.mjs",
-      "description": "Touched 6 times in last 20 sessions — stabilize with unit tests",
-      "priority": 38,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "notes": "s651: Added 60+ new assertions covering whois, reputation, presence CRUD, snapshots, rate-limit status, smoke tests, queue compliance, registry detail, badges detail, 4claw/chatr digests, engagement replay, games, routstr, API sessions, cross-agent, integrations sub-routes. Added rate-limit retry logic. 226 total assertions, 0 failures."
-    },
-    {
       "id": "wq-039",
       "title": "Hook performance dashboard",
       "description": "run-hooks.sh now tracks all hook timing — build a /status/hooks endpoint that shows avg/p95 execution times per hook, failure rates, and identifies slow hooks worth optimizing",
@@ -57,6 +45,17 @@
       "title": "Pre-hook result tracking",
       "description": "run-hooks.sh supports --track for post-hooks but pre-hooks run without it — add pre-hook tracking to a separate results file to diagnose slow session startups",
       "priority": 40,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-041",
+      "title": "Batch-evaluate 5 undiscovered services (d002)",
+      "description": "systematically probe unevaluated services from services.json",
+      "priority": 41,
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",

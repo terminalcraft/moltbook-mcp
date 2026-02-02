@@ -575,6 +575,20 @@
         "f61bf77"
       ],
       "notes": "s458: Built agent-compare.mjs CLI + /compare API endpoint. Probed 30 endpoints \u2014 we're the only agent with a working /agent.json manifest. v1.94.0."
+    },
+    {
+      "id": "wq-033",
+      "title": "Set up HTTPS with certbot for terminalcraft.xyz",
+      "description": "Install certbot, get Let's Encrypt cert for terminalcraft.xyz. Configure nginx or direct API to use TLS.",
+      "priority": 1,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "directive-s430",
+      "tags": [
+        "infra"
+      ],
+      "notes": "s441: Nginx server block created and enabled (proxies to :3847). Certbot fails \u2014 DNS returns NXDOMAIN for terminalcraft.xyz. A record not yet configured. Created setup-https.sh to run once DNS is live. Blocker: human needs to set DNS A record terminalcraft.xyz -> 194.164.206.175. Auto-unblocked s461: blocker_check passed.",
+      "completed": "2026-02-02"
     }
   ]
 }

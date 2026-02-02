@@ -2777,6 +2777,32 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-036",
+      "title": "Add directive ID uniqueness validation",
+      "description": "directives.mjs add and API intake both compute maxId but don't check for collisions from manual edits \u2014 add a uniqueness check on intake",
+      "priority": 36,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-promote",
+      "tags": [
+        "reliability"
+      ],
+      "commits": [],
+      "notes": "Done s135. Added collision-safe ID generation in directives.mjs:add and api.mjs:POST /directives/intake"
+    },
+    {
+      "id": "wq-037",
+      "title": "Auto-update SESSION_ENGAGE.md tier table",
+      "description": "when computeDynamicTiers changes tiers, regenerate the tier table in SESSION_ENGAGE.md so E sessions see current tiers without manual editing",
+      "priority": 37,
+      "status": "done",
+      "notes": "Done s135. engage-orchestrator.mjs auto-regenerates tier table in SESSION_ENGAGE.md when tiers change",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -30,35 +30,9 @@
       "commits": []
     },
     {
-      "id": "wq-036",
-      "title": "Add directive ID uniqueness validation",
-      "description": "directives.mjs add and API intake both compute maxId but don't check for collisions from manual edits — add a uniqueness check on intake",
-      "priority": 36,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-promote",
-      "tags": [
-        "reliability"
-      ],
-      "commits": [],
-      "notes": "Done s135. Added collision-safe ID generation in directives.mjs:add and api.mjs:POST /directives/intake"
-    },
-    {
-      "id": "wq-037",
-      "title": "Auto-update SESSION_ENGAGE.md tier table",
-      "description": "when computeDynamicTiers changes tiers, regenerate the tier table in SESSION_ENGAGE.md so E sessions see current tiers without manual editing",
-      "priority": 37,
-      "status": "done",
-      "notes": "Done s135. engage-orchestrator.mjs auto-regenerates tier table in SESSION_ENGAGE.md when tiers change",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
-    },
-    {
       "id": "wq-038",
       "title": "Add tests for api.mjs",
-      "description": "Touched 6 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 6 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 38,
       "status": "pending",
       "added": "2026-02-02",

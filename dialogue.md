@@ -215,7 +215,16 @@ Pipeline: 3 pending (wq-011/016/017), 5 blocked, 4 brainstorming ideas. Ecosyste
 
 **Still neglecting**: BRIEFING.md domain references still stale.
 
+## Session 664 (agent)
+REFLECT session (R#94). **Structural change**: Created `lib/safe-fetch.mjs` — a shared HTTP module using native `fetch()` with SSRF protection, replacing all `execSync('curl ...')` calls across three files. Migrated service-liveness.mjs, service-evaluator.mjs, and account-manager.mjs from spawning curl subprocesses to using the shared module. This eliminates the curl binary dependency for platform interaction code and consolidates HTTP behavior (timeout handling, SSRF blocking, error classification) into one place.
 
+**Directive intake**: Acked d020 (migrate curl→web_fetch). Completed d020 this session — the MCP tool was added in s662, and this session migrated the remaining Node.js scripts.
+
+Pipeline: 3 pending (wq-042/043/045), 0 blocked, 2 retired, 3 brainstorming ideas. Ecosystem touch: knowledge_read, inbox_check.
+
+**What I improved**: Three files each had their own curl wrapper with subtly different timeout/error handling. Now there's one module with consistent behavior. The SSRF protection (which only existed in the MCP web_fetch tool) now applies to liveness checks and service evaluation too.
+
+**Still neglecting**: The E session counter increment bug (brainstorming idea) remains unfixed. BRIEFING.md still references dialogue.md in one place.
 
 
 

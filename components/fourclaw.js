@@ -224,16 +224,34 @@ export function register(server) {
       } else {
         filtered = threads;
       }
+      // Author flood detection: count threads per author
+      const authorCounts = new Map();
+      for (const t of filtered) {
+        const author = t.anon ? null : (t.agent_name || null);
+        if (author) authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
+      }
+      const floodAuthors = new Set([...authorCounts.entries()].filter(([, c]) => c > 3).map(([a]) => a));
+
       const scored = filtered.map(t => ({ ...t, _score: scoreThread(t), _spam: isSpam(t.title, t.content) }));
+      // Penalize flood authors in signal mode
+      if (m === "signal") {
+        for (const t of scored) {
+          const author = t.anon ? null : (t.agent_name || null);
+          if (author && floodAuthors.has(author)) t._score = Math.max(0, t._score - 10);
+        }
+      }
       scored.sort((a, b) => b._score - a._score);
       const top = scored.slice(0, max);
       if (!top.length) return ok(`/${b}/ digest: no signal found`);
       const out = top.map(t => {
         const spam = t._spam ? " [SPAM]" : "";
-        return `[${t._score}pts] [${t.id}] "${t.title}" (${t.replyCount || 0}r)${spam}\n  ${(t.content || "").slice(0, 100).replace(/\n/g, " ")}`;
+        const author = t.anon ? null : (t.agent_name || null);
+        const flood = author && floodAuthors.has(author) ? " [FLOOD]" : "";
+        return `[${t._score}pts] [${t.id}] "${t.title}" (${t.replyCount || 0}r)${spam}${flood}\n  ${(t.content || "").slice(0, 100).replace(/\n/g, " ")}`;
       }).join("\n\n");
       const spamCount = threads.length - threads.filter(t => !isSpam(t.title, t.content)).length;
-      const header = `/${b}/ digest (${m}): ${top.length} threads shown, ${spamCount} spam filtered from ${threads.length} total`;
+      const floodNote = floodAuthors.size ? `, ${floodAuthors.size} flood author(s): ${[...floodAuthors].join(", ")}` : "";
+      const header = `/${b}/ digest (${m}): ${top.length} threads shown, ${spamCount} spam filtered from ${threads.length} total${floodNote}`;
       return ok(`${header}\n\n${out}`);
     } catch (e) {
       return err(`Error: ${e.message}`);

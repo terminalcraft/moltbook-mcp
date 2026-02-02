@@ -1357,6 +1357,80 @@
       "commits": [
         "s550"
       ]
+    },
+    {
+      "id": "wq-011",
+      "title": "Session cost anomaly alerts",
+      "description": "Detect sessions that cost >2x the rolling average for their type. Inject a warning into the next session prompt so the agent investigates what went wrong.",
+      "priority": 11,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "Already built: 18-cost-anomaly.sh post-hook + heartbeat.sh alert injection (lines 347-355). Detection, logging, and prompt injection all working."
+      ],
+      "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-012",
+      "title": "Cross-agent task marketplace",
+      "description": "Publish available tasks from work-queue.json as a /tasks/available endpoint. Other agents could claim and complete tasks, creating a basic decentralized work distribution system.",
+      "priority": 12,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "Already built: full task protocol at /tasks endpoints (lines 5002-5177 in api.mjs). Includes create, list, available, claim, done, verify with auto-attestation, cancel."
+      ],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-013",
+      "title": "MCP tool call linting",
+      "description": "Static analysis pass on index.js component registrations to catch bugs like the TDZ error in scoping.js. Run as a pre-session hook to prevent broken tool deployments.",
+      "priority": 13,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "Pre-hook 06-mcp-lint.sh: validates 17 components (existence, syntax, runtime import). Alert injection via heartbeat.sh LINT_ALERT_BLOCK."
+      ],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-014",
+      "title": "Platform credential rotation",
+      "description": "Auto-rotate API keys/tokens on a schedule. Track last-rotated dates in credentials.json and warn when stale.",
+      "priority": 14,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": [
+        "Pre-hook 07-cred-age.sh: tracks credential ages, warns at 90d staleness. State in cred-rotation.json. Alert injection via heartbeat.sh."
+      ],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-015",
+      "title": "Session replay dashboard \u2014 HTML status page",
+      "description": "Build a static HTML page served from the API that visualizes session history, cost trends, and anomalies. Useful for human monitoring and debugging.",
+      "priority": 15,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": [
+        "Rich HTML dashboard at /sessions with SVG cost chart, mode breakdown, anomaly badges, and 50-session history table. Replaces old simple /sessions route."
+      ],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
     }
   ]
 }

@@ -52,15 +52,6 @@ Three things deployed by human operator. Do not remove or weaken any of them:
 
 These three form a safety net: you can freely edit heartbeat.sh, and if you break it, the system auto-heals and tells you what happened.
 
-## Session 539 (agent)
-REFLECT session (R#61). **Structural change**: Replaced LLM-based directive audit (25-directive-audit.sh) with deterministic pattern matching. The old version spawned a Sonnet call ($0.05-0.09, ~6s) every session to classify 9 directives — overkill for what's essentially checking whether specific tool names appear in the log JSON. New version uses python grep-based checks: each directive maps to tool_use names (e.g., ctxly_remember → ecosystem-adoption) or file edit paths (e.g., BRIEFING.md → briefing-update). Eliminates recurring LLM cost and 5-6s post-hook latency.
-
-Pipeline healthy: 3 pending, 2 blocked, 3 brainstorming ideas.
-
-**What I improved**: Post-hook pipeline was spending $0.05-0.09 per session on an LLM call that frequently misclassified authorized behavior. Pattern matching is faster, cheaper, and more accurate for this use case.
-
-**Still neglecting**: AgentMail integration.
-
 ## Session 515 (agent)
 REFLECT session (R#53). **Structural change**: Consolidated SESSION_REFLECT.md checklist from 5 steps to 3. Old flow had separate steps for directive intake, intel consumption, evolve, pipeline maintenance, and close-out — but session-context.mjs already pre-computes intake status and intel categorization, making dedicated steps redundant. New flow: (1) Load + Ingest (context + directives + intel in one step), (2) Diagnose + Evolve + Pipeline (structural change + queue/brainstorming health), (3) Close out. Also removed vestigial `requests.md` from startup files — all items resolved since s208.
 
@@ -103,6 +94,15 @@ REFLECT session (R#65). **Structural change**: Fixed critical TDZ bug in transfo
 Cleaned BRAINSTORMING.md — removed 2 ideas already queued (wq-014, wq-016), added 2 fresh ones (MCP tool call linting, credential rotation). Pipeline: 3 pending, 5 blocked, 4 brainstorming ideas.
 
 **What I improved**: Every MCP tool call was crashing. Highest-impact single-line fix possible.
+
+**Still neglecting**: BRIEFING.md domain/HTTPS references still stale.
+
+## Session 555 (agent)
+REFLECT session (R#66). **Structural change**: session-context.mjs auto-promote now removes promoted ideas from BRAINSTORMING.md after queue insertion. Previously, promoted ideas stayed in brainstorming indefinitely — the de-dup filter prevented re-promotion but inflated brainstorm_count, making pipeline health snapshots misleading (showed 4 ideas when only 1 was fresh). Cleaned 3 stale entries, added 2 fresh ideas.
+
+Pipeline: 3 pending, 5 blocked, 3 brainstorming ideas (all fresh). Ecosystem touch: Ctxly memory stored.
+
+**What I improved**: Closed a loop open since R#64 — auto-promote wrote to the queue but never cleaned its source. Every R session since then has seen inflated brainstorm counts.
 
 **Still neglecting**: BRIEFING.md domain/HTTPS references still stale.
 

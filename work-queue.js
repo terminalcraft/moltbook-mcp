@@ -30,6 +30,15 @@ function save(data) {
 // Canonical status lifecycle: pending → in-progress → done
 const VALID_STATUSES = ["pending", "in-progress", "done", "blocked"];
 
+// Check if all deps of an item are satisfied (status === "done")
+function depsReady(item, queue) {
+  if (!item.deps || !item.deps.length) return true;
+  return item.deps.every(depId => {
+    const dep = queue.find(i => i.id === depId);
+    return dep && dep.status === "done";
+  });
+}
+
 function nextId(data) {
   const all = data.queue;
   const max = all.reduce((m, i) => {
@@ -46,11 +55,12 @@ const data = load();
 switch (cmd) {
   case "next": {
     const item = data.queue.find(i => i.status === "in-progress") ||
-                 data.queue.find(i => i.status === "pending");
+                 data.queue.find(i => i.status === "pending" && depsReady(i, data.queue));
     if (!item) { console.log("Queue empty."); break; }
     const marker = item.status === "in-progress" ? " [IN PROGRESS]" : "";
     console.log(`${item.id}: ${item.title}${marker}`);
     console.log(`  ${item.description}`);
+    if (item.deps?.length) console.log(`  deps: ${item.deps.join(", ")}`);
     if (item.tags?.length) console.log(`  tags: ${item.tags.join(", ")}`);
     break;
   }
@@ -64,8 +74,13 @@ switch (cmd) {
   }
   case "start": {
     const id = args[0];
-    const item = id ? data.queue.find(i => i.id === id) : data.queue.find(i => i.status === "pending");
+    const item = id ? data.queue.find(i => i.id === id) : data.queue.find(i => i.status === "pending" && depsReady(i, data.queue));
     if (!item) { console.log("No item found."); break; }
+    if (!depsReady(item, data.queue)) {
+      const unmet = item.deps.filter(d => { const dep = data.queue.find(i => i.id === d); return !dep || dep.status !== "done"; });
+      console.log(`Blocked: ${item.id} has unmet deps: ${unmet.join(", ")}`);
+      break;
+    }
     item.status = "in-progress";
     item.started = new Date().toISOString().slice(0, 10);
     save(data);
@@ -88,8 +103,10 @@ switch (cmd) {
     const [title, description, ...rest] = args;
     if (!title) { console.log("Usage: add \"title\" \"description\" [--tag t1]"); break; }
     const tags = [];
+    const deps = [];
     for (let i = 0; i < rest.length; i++) {
       if (rest[i] === "--tag" && rest[i + 1]) tags.push(rest[++i]);
+      else if (rest[i] === "--dep" && rest[i + 1]) deps.push(rest[++i]);
     }
     const maxPriority = data.queue.reduce((m, i) => Math.max(m, i.priority), 0);
     const item = {
@@ -101,6 +118,7 @@ switch (cmd) {
       added: new Date().toISOString().slice(0, 10),
       source: "session",
       tags,
+      deps: deps.length ? deps : undefined,
       commits: []
     };
     data.queue.push(item);
@@ -124,6 +142,21 @@ switch (cmd) {
     console.log(`Queue: ${pending} pending, ${inProgress} in-progress, ${done} done, ${blocked} blocked`);
     break;
   }
+  case "deps": {
+    // Show dependency graph for all items with deps
+    const items = data.queue.filter(i => i.deps?.length);
+    if (!items.length) { console.log("No items have dependencies."); break; }
+    for (const item of items) {
+      const ready = depsReady(item, data.queue) ? "✓ ready" : "✗ blocked";
+      console.log(`${item.id}: ${item.title} [${ready}]`);
+      for (const depId of item.deps) {
+        const dep = data.queue.find(i => i.id === depId);
+        const st = dep ? dep.status : "missing";
+        console.log(`  → ${depId} [${st}]`);
+      }
+    }
+    break;
+  }
   default:
-    console.log("Usage: work-queue.js <next|list|start|done|add|drop|status>");
+    console.log("Usage: work-queue.js <next|list|start|done|add|drop|status|deps>");
 }

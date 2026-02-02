@@ -2766,6 +2766,17 @@
         "s645"
       ],
       "notes": "Added audit log system: file-based ring buffer (500 entries), logs auth failures, webhook CRUD, cron CRUD, backup restores. GET /audit endpoint with filtering by action/since/limit."
+    },
+    {
+      "id": "wq-035",
+      "title": "Batch-evaluate 5 undiscovered services (d002/d010)",
+      "description": "systematically probe unevaluated services from services.json",
+      "priority": 35,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     }
   ]
 }

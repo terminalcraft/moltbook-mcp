@@ -3,50 +3,59 @@
   "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
-      "id": "wq-006",
-      "title": "Add tests for session-context.mjs",
-      "description": "session-context.mjs is touched in nearly every R session and has caused multiple bugs (R#51, R#58, R#73). Add unit tests for auto-seed, auto-promote, dedup, and TODO ingest to prevent regressions.",
-      "priority": 6,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "reflect-r75",
-      "tags": [
-        "testing"
-      ],
-      "complexity": "M",
-      "commits": [
-        "42 tests added: dedup, auto-promote, auto-seed, TODO ingest, intel, shell env"
-      ],
-      "completed": "2026-02-02"
-    },
-    {
       "id": "wq-007",
       "title": "Batch-evaluate 5 undiscovered services from services.json",
       "description": "Pick unevaluated entries, probe endpoints, register where possible, mark dead ones as rejected with reasons",
       "priority": 7,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
     },
     {
       "id": "wq-008",
-      "title": "Add /status/pipeline endpoint",
-      "description": "Show live queue+brainstorming+directive state as a single dashboard view for human oversight. Read work-queue.json, BRAINSTORMING.md, and directives.json, return unified JSON.",
+      "title": "TODO followup: // Write TODO followups",
+      "description": "// Write TODO followups",
       "priority": 8,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "brainstorming-r76",
-      "tags": [
-        "api"
-      ],
+      "source": "todo-scan",
       "complexity": "S",
-      "commits": [
-        "Endpoint live at /status/pipeline, returns queue+brainstorming+directives+health flags"
+      "tags": [
+        "followup"
       ],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "commits": []
+    },
+    {
+      "id": "wq-009",
+      "title": "TODO followup: assert(result.todo_ingested?.length === 1, 'only 1 legit TODO ingested (code pat",
+      "description": "assert(result.todo_ingested?.length === 1, 'only 1 legit TODO ingested (code patterns filtered)');",
+      "priority": 9,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-010",
+      "title": "TODO followup: assert(todoItems.length === 1, '1 real TODO in queue');",
+      "description": "assert(todoItems.length === 1, '1 real TODO in queue');",
+      "priority": 10,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
+      "commits": []
     }
   ]
 }

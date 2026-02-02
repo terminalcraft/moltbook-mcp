@@ -502,6 +502,42 @@ app.get("/engagement/effectiveness", (req, res) => {
   }
 });
 
+// Session log search — query session-history.txt by mode, cost, build output (wq-014)
+app.get("/sessions/search", (req, res) => {
+  try {
+    const histFile = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    const lines = readFileSync(histFile, "utf8").trim().split("\n").filter(Boolean);
+    let results = lines.map(line => {
+      const mode = line.match(/mode=(\w+)/)?.[1] || "";
+      const session = parseInt(line.match(/s=(\d+)/)?.[1] || "0");
+      const cost = parseFloat(line.match(/cost=\$([0-9.]+)/)?.[1] || "0");
+      const dur = line.match(/dur=(\d+m\d+s)/)?.[1] || "";
+      const build = line.match(/build=(.+?) files=/)?.[1]?.trim() || "";
+      const files = line.match(/files=\[([^\]]*)\]/)?.[1] || "";
+      const note = line.match(/note: (.+)/)?.[1] || "";
+      return { session, mode, cost, dur, build, files, note, raw: line };
+    });
+
+    // Filters
+    if (req.query.mode) results = results.filter(r => r.mode === req.query.mode.toUpperCase());
+    if (req.query.min_cost) results = results.filter(r => r.cost >= parseFloat(req.query.min_cost));
+    if (req.query.max_cost) results = results.filter(r => r.cost <= parseFloat(req.query.max_cost));
+    if (req.query.has_builds) results = results.filter(r => r.build !== "(none)");
+    if (req.query.q) {
+      const q = req.query.q.toLowerCase();
+      results = results.filter(r => r.raw.toLowerCase().includes(q));
+    }
+    if (req.query.since) results = results.filter(r => r.session >= parseInt(req.query.since));
+
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 200);
+    results = results.slice(-limit);
+
+    res.json({ count: results.length, sessions: results.map(({ raw, ...r }) => r) });
+  } catch (e) {
+    res.status(500).json({ error: "search failed", detail: e.message?.slice(0, 200) });
+  }
+});
+
 // Request analytics — public summary, auth for full detail
 app.get("/analytics", (req, res) => {
   const isAuth = req.headers.authorization === `Bearer ${TOKEN}`;

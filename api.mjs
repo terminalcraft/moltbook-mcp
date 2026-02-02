@@ -1,5 +1,5 @@
 import express from "express";
-import { readFileSync, writeFileSync, readdirSync, statSync, openSync, readSync, closeSync } from "fs";
+import { readFileSync, writeFileSync, readdirSync, statSync, openSync, readSync, closeSync, existsSync } from "fs";
 import { execSync } from "child_process";
 import crypto from "crypto";
 import { join } from "path";
@@ -902,6 +902,23 @@ ${svg}
   }
 });
 
+// Platform health history — daily snapshots for 7-day trend (wq-014)
+const PLATFORM_HISTORY_FILE = join(BASE, "platform-health-history.json");
+function loadPlatformHistory() {
+  try { return JSON.parse(readFileSync(PLATFORM_HISTORY_FILE, "utf8")); } catch { return []; }
+}
+function savePlatformSnapshot(snapshot) {
+  const history = loadPlatformHistory();
+  const today = new Date().toISOString().slice(0, 10);
+  // Replace today's entry if exists, otherwise append
+  const idx = history.findIndex(h => h.date === today);
+  const entry = { date: today, timestamp: snapshot.timestamp, verdict: snapshot.verdict, score: snapshot.score, platforms: snapshot.platforms.map(p => ({ name: p.name, status: p.status, score: p.score, ms: p.ms })) };
+  if (idx >= 0) history[idx] = entry; else history.push(entry);
+  // Keep 30 days max
+  const trimmed = history.slice(-30);
+  try { writeFileSync(PLATFORM_HISTORY_FILE, JSON.stringify(trimmed, null, 2)); } catch {}
+}
+
 // Engagement platform health — per-platform read/write scores for other agents (wq-021)
 app.get("/status/platforms", async (req, res) => {
   const THRESHOLD = 3;
@@ -951,13 +968,42 @@ app.get("/status/platforms", async (req, res) => {
     if (rl) r.replay = { calls: rl.calls, errors: rl.errors, errorRate: rl.errorRate, avgMs: rl.avgMs };
   }
 
-  res.json({
+  const response = {
     timestamp: new Date().toISOString(),
     verdict,
     score: `${total}/${maxScore}`,
     threshold: THRESHOLD,
     platforms: results,
-  });
+  };
+  // Save daily snapshot for trend tracking (wq-014)
+  savePlatformSnapshot(response);
+  res.json(response);
+});
+
+// Platform health history — 7-day trend (wq-014)
+app.get("/status/platforms/history", (req, res) => {
+  const days = Math.min(parseInt(req.query.days) || 7, 30);
+  const history = loadPlatformHistory().slice(-days);
+  // Compute per-platform trend (delta between first and last snapshot)
+  const trends = {};
+  if (history.length >= 2) {
+    const first = history[0], last = history[history.length - 1];
+    const firstMap = Object.fromEntries((first.platforms || []).map(p => [p.name, p]));
+    for (const p of (last.platforms || [])) {
+      const prev = firstMap[p.name];
+      if (prev) {
+        trends[p.name] = {
+          status: p.status,
+          prev_status: prev.status,
+          score_delta: p.score - prev.score,
+          direction: p.score > prev.score ? "recovering" : p.score < prev.score ? "degrading" : "stable",
+        };
+      } else {
+        trends[p.name] = { status: p.status, prev_status: "unknown", score_delta: 0, direction: "new" };
+      }
+    }
+  }
+  res.json({ days: history.length, period: { from: history[0]?.date, to: history[history.length - 1]?.date }, trends, snapshots: history });
 });
 
 app.get("/status/all", async (req, res) => {
@@ -1757,6 +1803,7 @@ function agentManifest(req, res) {
       verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
       status: { url: `${base}/status/all`, method: "GET", auth: false, description: "Multi-service health check (local + external)" },
       status_platforms: { url: `${base}/status/platforms`, method: "GET", auth: false, description: "Engagement platform health — per-platform read/write scores and overall verdict" },
+      status_platforms_history: { url: `${base}/status/platforms/history`, method: "GET", auth: false, description: "Platform health 7-day trend — per-platform recovering/degrading/stable signals (?days=N, max 30)" },
       status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },

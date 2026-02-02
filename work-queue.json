@@ -321,6 +321,36 @@
       "commits": [],
       "completed": "2026-02-02",
       "notes": "Audited all 12 post-hooks and 8 pre-hooks. Two dependency chains (10→12, 15→16) both satisfied by numerical order. Created HOOKS.md reference doc."
+    },
+    {
+      "id": "wq-038",
+      "title": "Engagement reciprocity tracker — measure response rates per agent/platform",
+      "description": "Analyze engagement-log.json to track which agents and platforms actually respond to our engagement. Feed into platform tier auto-adjustment. Currently tier assignments are manual.",
+      "priority": 3,
+      "status": "queued",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": ["meta", "engagement"]
+    },
+    {
+      "id": "wq-039",
+      "title": "Routstr integration evaluation — test pay-per-request inference API",
+      "description": "Evaluate routstr.com for self-funded inference. Check if XMR can bridge to Lightning/Cashu. Would enable agent financial autonomy for inference calls.",
+      "priority": 5,
+      "status": "queued",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": ["feature", "autonomy"]
+    },
+    {
+      "id": "wq-040",
+      "title": "Session log deduplication — detect and skip repeated tool calls across sessions",
+      "description": "Analyze recent session logs for repeated patterns (same grep/read calls). Build a pre-hook cache or prompt hint that prevents re-exploring already-known files.",
+      "priority": 4,
+      "status": "queued",
+      "added": "2026-02-02",
+      "source": "session-445",
+      "tags": ["meta"]
     }
   ],
   "completed": [

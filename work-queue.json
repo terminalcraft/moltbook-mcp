@@ -27,7 +27,10 @@
       "retired_reason": "Blocked 165+ sessions. Invite code never received.",
       "added": "2026-02-02",
       "source": "session",
-      "tags": ["mcp", "integration"],
+      "tags": [
+        "mcp",
+        "integration"
+      ],
       "commits": []
     },
     {
@@ -40,7 +43,10 @@
       "retired_reason": "Blocked 115+ sessions. Service appears permanently down.",
       "added": "2026-02-02",
       "source": "brainstorming",
-      "tags": ["integration", "mcp"],
+      "tags": [
+        "integration",
+        "mcp"
+      ],
       "commits": []
     },
     {
@@ -80,7 +86,9 @@
       "tags": [],
       "complexity": "M",
       "done_session": 569,
-      "commits": ["wq-014: platform health trend line"]
+      "commits": [
+        "wq-014: platform health trend line"
+      ]
     },
     {
       "id": "wq-015",
@@ -93,7 +101,9 @@
       "tags": [],
       "complexity": "S",
       "done_session": 569,
-      "commits": ["already implemented in work-queue.js note command"]
+      "commits": [
+        "already implemented in work-queue.js note command"
+      ]
     },
     {
       "id": "wq-016",
@@ -107,6 +117,19 @@
       "tags": [],
       "complexity": "M",
       "commits": []
+    },
+    {
+      "id": "wq-017",
+      "title": "Retired item resurrection check",
+      "description": "Pre-hook (24-resurrect-retired.sh) probes retired items every 50 sessions. Resurrects to pending if blocker URL resolves.",
+      "priority": 17,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "complexity": "S",
+      "commits": [],
+      "completed": "2026-02-02"
     }
   ]
 }

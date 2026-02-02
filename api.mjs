@@ -780,7 +780,77 @@ app.get("/status/queue", (req, res) => {
       in_progress: items.filter(i => i.status === "in-progress").length,
       done: items.filter(i => i.status === "done").length,
     };
-    res.json({ summary, items });
+    // Build DAG edges from deps
+    const edges = [];
+    for (const item of items) {
+      for (const dep of item.deps) {
+        edges.push({ from: dep, to: item.id });
+      }
+    }
+    if (req.query.format === "html") {
+      const statusColor = { pending: "#f59e0b", blocked: "#ef4444", "in-progress": "#3b82f6", done: "#22c55e" };
+      const statusIcon = { pending: "○", blocked: "✕", "in-progress": "◉", done: "✓" };
+      // Topological layers for visual layout
+      const idSet = new Set(items.map(i => i.id));
+      const depMap = {};
+      for (const item of items) depMap[item.id] = (item.deps || []).filter(d => idSet.has(d));
+      const layers = [];
+      const placed = new Set();
+      while (placed.size < items.length) {
+        const layer = items.filter(i => !placed.has(i.id) && depMap[i.id].every(d => placed.has(d)));
+        if (layer.length === 0) { items.filter(i => !placed.has(i.id)).forEach(i => layers.push([i])); break; }
+        layers.push(layer);
+        layer.forEach(i => placed.add(i.id));
+      }
+      const nodePositions = {};
+      const layerGap = 80, nodeWidth = 260, nodeHeight = 44, maxPerRow = 3, colGap = 30, padX = 20;
+      // Split layers into visual rows of maxPerRow
+      const visRows = [];
+      for (const layer of layers) {
+        for (let i = 0; i < layer.length; i += maxPerRow) visRows.push(layer.slice(i, i + maxPerRow));
+      }
+      visRows.forEach((row, ri) => {
+        const totalWidth = row.length * (nodeWidth + colGap) - colGap;
+        const startX = Math.max(padX, (maxPerRow * (nodeWidth + colGap) - colGap + 2 * padX - totalWidth) / 2 + padX);
+        row.forEach((item, ni) => {
+          nodePositions[item.id] = { x: startX + ni * (nodeWidth + colGap), y: 50 + ri * layerGap };
+        });
+      });
+      const svgWidth = maxPerRow * (nodeWidth + colGap) - colGap + 2 * padX;
+      const svgHeight = 50 + visRows.length * layerGap + nodeHeight;
+      let svg = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg" style="font-family:monospace;font-size:12px">`;
+      svg += `<defs><marker id="arr" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>`;
+      // Draw edges
+      for (const e of edges) {
+        const from = nodePositions[e.from], to = nodePositions[e.to];
+        if (from && to) {
+          svg += `<line x1="${from.x + nodeWidth/2}" y1="${from.y + nodeHeight}" x2="${to.x + nodeWidth/2}" y2="${to.y}" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>`;
+        }
+      }
+      // Draw nodes
+      for (const item of items) {
+        const p = nodePositions[item.id]; if (!p) continue;
+        const col = statusColor[item.status] || "#888";
+        const icon = statusIcon[item.status] || "?";
+        svg += `<rect x="${p.x}" y="${p.y}" width="${nodeWidth}" height="${nodeHeight}" rx="6" fill="#1e1e2e" stroke="${col}" stroke-width="2"/>`;
+        svg += `<text x="${p.x+10}" y="${p.y+18}" fill="${col}" font-weight="bold">${icon} ${item.id}</text>`;
+        const label = item.title.length > 30 ? item.title.slice(0,28) + "…" : item.title;
+        svg += `<text x="${p.x+10}" y="${p.y+34}" fill="#cdd6f4">${label.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</text>`;
+      }
+      svg += `</svg>`;
+      const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Work Queue DAG</title>
+<style>body{background:#11111b;color:#cdd6f4;font-family:monospace;padding:20px}
+h1{font-size:18px;color:#89b4fa}.legend span{margin-right:16px;font-size:13px}
+.summary{margin:12px 0;font-size:14px;color:#a6adc8}</style></head><body>
+<h1>Work Queue — Dependency Graph</h1>
+<div class="summary">Total: ${summary.total} | Pending: ${summary.pending} | Blocked: ${summary.blocked} | In-Progress: ${summary.in_progress} | Done: ${summary.done}</div>
+<div class="legend"><span style="color:#f59e0b">○ pending</span><span style="color:#ef4444">✕ blocked</span><span style="color:#3b82f6">◉ in-progress</span><span style="color:#22c55e">✓ done</span></div>
+${svg}
+<p style="font-size:11px;color:#585b70;margin-top:20px">Arrows show dependencies (A → B means B depends on A). <a href="/status/queue" style="color:#89b4fa">JSON</a></p>
+</body></html>`;
+      return res.type("html").send(html);
+    }
+    res.json({ summary, edges, items });
   } catch (e) {
     res.status(500).json({ error: "Failed to read work queue" });
   }

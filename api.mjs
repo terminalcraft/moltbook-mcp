@@ -6,6 +6,7 @@ import { join } from "path";
 import { extractFromRepo, parseGitHubUrl } from "./packages/pattern-extractor/index.js";
 import { analyzeReplayLog } from "./providers/replay-log.js";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
+import { summarizeChatr } from "./providers/chatr-digest.js";
 
 const app = express();
 const PORT = 3847;
@@ -3041,6 +3042,16 @@ app.get("/chatr/snapshots", (req, res) => {
     res.json({ snapshots, count: snapshots.length, available: files.length });
   } catch (e) {
     res.json({ snapshots: [], count: 0, error: e.message });
+  }
+});
+
+// Chatr summary — aggregated snapshot digest with agent stats and signal extraction (wq-012)
+app.get("/chatr/summary", (req, res) => {
+  try {
+    const maxSnapshots = Math.min(parseInt(req.query.snapshots) || 10, 24);
+    res.json(summarizeChatr({ maxSnapshots }));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

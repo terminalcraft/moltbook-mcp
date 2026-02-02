@@ -354,9 +354,19 @@ $(cat "$COST_ALERT_FILE")"
   rm -f "$COST_ALERT_FILE"
 fi
 
+# MCP lint alert injection (wq-013) — consume and delete after reading
+LINT_ALERT_BLOCK=""
+LINT_ALERT_FILE="$STATE_DIR/mcp-lint-alert.txt"
+if [ -f "$LINT_ALERT_FILE" ]; then
+  LINT_ALERT_BLOCK="
+
+$(cat "$LINT_ALERT_FILE")"
+  rm -f "$LINT_ALERT_FILE"
+fi
+
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${COMPLIANCE_BLOCK}${COST_ALERT_BLOCK}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${COMPLIANCE_BLOCK}${COST_ALERT_BLOCK}${LINT_ALERT_BLOCK}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

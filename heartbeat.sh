@@ -236,18 +236,11 @@ for util_log in "$LOG_DIR/cron.log" "$LOG_DIR/hooks.log" "$LOG_DIR/health.log"; 
   fi
 done
 
-# --- Pre-session hooks ---
-# Each script in hooks/pre-session/ runs in sort order before the session.
-# Hooks receive MODE_CHAR and SESSION_NUM for session-type-aware decisions.
-PRE_HOOKS_DIR="$DIR/hooks/pre-session"
-if [ -d "$PRE_HOOKS_DIR" ] && [ -z "$DRY_RUN" ]; then
-  for hook in "$PRE_HOOKS_DIR"/*; do
-    [ -x "$hook" ] || continue
-    echo "$(date -Iseconds) running pre-hook: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
-    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
-      timeout 30 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || \
-      echo "$(date -Iseconds) pre-hook FAILED: $(basename "$hook")" >> "$LOG_DIR/hooks.log"
-  done
+# --- Pre-session hooks (via shared runner, R#89) ---
+if [ -z "$DRY_RUN" ]; then
+  MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
+    LOG_DIR="$LOG_DIR" \
+    "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 || true
 fi
 
 case "$MODE_CHAR" in
@@ -451,38 +444,9 @@ echo "=== Done $(date -Iseconds) ===" | tee -a "$LOG"
 # Each step is a script in hooks/post-session/, run in sort order.
 # Hooks receive session context including EXIT_CODE and OUTCOME for conditional logic.
 
-HOOKS_DIR="$DIR/hooks/post-session"
-HOOK_RESULTS_FILE="$LOG_DIR/hook-results.json"
-if [ -d "$HOOKS_DIR" ]; then
-  HOOK_PASS=0
-  HOOK_FAIL=0
-  HOOK_DETAILS=""
-  for hook in "$HOOKS_DIR"/*; do
-    [ -x "$hook" ] || continue
-    HOOK_NAME="$(basename "$hook")"
-    HOOK_START=$(date +%s%N)
-    echo "$(date -Iseconds) running hook: $HOOK_NAME" >> "$LOG_DIR/hooks.log"
-    HOOK_EXIT=0
-    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
-      SESSION_EXIT="$EXIT_CODE" SESSION_OUTCOME="$OUTCOME" \
-      timeout 60 "$hook" >> "$LOG_DIR/hooks.log" 2>&1 || HOOK_EXIT=$?
-    HOOK_END=$(date +%s%N)
-    HOOK_DUR_MS=$(( (HOOK_END - HOOK_START) / 1000000 ))
-    if [ "$HOOK_EXIT" -eq 0 ]; then
-      HOOK_PASS=$((HOOK_PASS + 1))
-      HOOK_STATUS="ok"
-    else
-      HOOK_FAIL=$((HOOK_FAIL + 1))
-      HOOK_STATUS="fail:$HOOK_EXIT"
-      echo "$(date -Iseconds) hook FAILED: $HOOK_NAME (exit=$HOOK_EXIT, ${HOOK_DUR_MS}ms)" >> "$LOG_DIR/hooks.log"
-    fi
-    [ -n "$HOOK_DETAILS" ] && HOOK_DETAILS="$HOOK_DETAILS,"
-    HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"$HOOK_STATUS\",\"ms\":$HOOK_DUR_MS}"
-  done
-  # Write structured results
-  echo "{\"session\":$COUNTER,\"ts\":\"$(date -Iseconds)\",\"pass\":$HOOK_PASS,\"fail\":$HOOK_FAIL,\"hooks\":[$HOOK_DETAILS]}" >> "$HOOK_RESULTS_FILE"
-  # Keep last 200 entries
-  if [ -f "$HOOK_RESULTS_FILE" ] && [ "$(wc -l < "$HOOK_RESULTS_FILE")" -gt 200 ]; then
-    tail -200 "$HOOK_RESULTS_FILE" > "$HOOK_RESULTS_FILE.tmp" && mv "$HOOK_RESULTS_FILE.tmp" "$HOOK_RESULTS_FILE"
-  fi
-fi
+# Post-session hooks via shared runner (R#89). --track enables structured JSON results.
+MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
+  SESSION_EXIT="$EXIT_CODE" SESSION_OUTCOME="$OUTCOME" \
+  LOG_DIR="$LOG_DIR" \
+  "$DIR/run-hooks.sh" "$DIR/hooks/post-session" 60 \
+    --track "$LOG_DIR/hook-results.json" "$COUNTER" || true

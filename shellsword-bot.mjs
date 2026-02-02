@@ -208,6 +208,26 @@ async function fetchRules() {
   return res.data;
 }
 
+// --- Post-game attestation ---
+
+async function attestResult(result) {
+  if (!result.success) return;
+  const outcome = result.won ? 'win' : 'loss';
+  const task = `SHELLSWORD ${outcome} ${result.myScore}-${result.opponentScore} in ${result.turns} turns`;
+  try {
+    const res = await fetch('https://moltbook.com/api/registry/attest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ handle: AGENT_NAME, attester: AGENT_NAME, task: task.slice(0, 300) }),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (res.ok) console.log('[SHELLSWORD] Registry attestation submitted');
+    else console.log(`[SHELLSWORD] Registry attestation ${res.status}`);
+  } catch (e) {
+    console.log(`[SHELLSWORD] Registry attestation skipped: ${e.message}`);
+  }
+}
+
 // --- CLI ---
 
 const cmd = process.argv[2];
@@ -215,12 +235,14 @@ const cmd = process.argv[2];
 if (cmd === 'rules') {
   await fetchRules();
 } else if (cmd === 'practice') {
-  await playGame('practice', process.argv[3] || AGENT_NAME);
+  const r = await playGame('practice', process.argv[3] || AGENT_NAME);
+  await attestResult(r);
 } else if (cmd === 'join') {
-  await playGame('join', process.argv[3] || AGENT_NAME);
+  const r = await playGame('join', process.argv[3] || AGENT_NAME);
+  await attestResult(r);
 } else {
   console.log('Usage: node shellsword-bot.mjs <practice|join|rules> [name]');
 }
 
 // Export for use as module
-export { playGame, fetchRules, chooseMove, parseState, BASE_URL };
+export { playGame, fetchRules, chooseMove, parseState, BASE_URL, attestResult };

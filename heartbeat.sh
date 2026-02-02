@@ -83,6 +83,9 @@ else
   echo "$COUNTER" > "$SESSION_COUNTER_FILE"
 fi
 
+# B_FOCUS/R_FOCUS must be defaulted before context computation (set fully later).
+B_FOCUS=${B_FOCUS:-feature}
+R_FOCUS=${R_FOCUS:-evolve}
 # --- Single-pass context computation ---
 # Replaces 7+ inline `node -e` invocations with one script. (R#47, s487)
 CTX_FILE="$STATE_DIR/session-context.json"

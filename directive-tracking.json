@@ -113,16 +113,12 @@
       ]
     },
     "commit-and-push": {
-      "followed": 128,
+      "followed": 129,
       "ignored": 4,
       "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-      "last_session": 554,
-      "last_applicable_session": 554,
+      "last_session": 555,
+      "last_applicable_session": 555,
       "history": [
-        {
-          "session": 543,
-          "result": "followed"
-        },
         {
           "session": 545,
           "result": "followed"
@@ -158,20 +154,20 @@
         {
           "session": 554,
           "result": "followed"
+        },
+        {
+          "session": 555,
+          "result": "followed"
         }
       ]
     },
     "structural-change": {
-      "followed": 75,
+      "followed": 76,
       "ignored": 1,
       "last_ignored_reason": "",
-      "last_session": 551,
-      "last_applicable_session": 551,
+      "last_session": 555,
+      "last_applicable_session": 555,
       "history": [
-        {
-          "session": 523,
-          "result": "followed"
-        },
         {
           "session": 535,
           "result": "followed"
@@ -207,20 +203,20 @@
         {
           "session": 551,
           "result": "followed"
+        },
+        {
+          "session": 555,
+          "result": "followed"
         }
       ]
     },
     "ecosystem-adoption": {
-      "followed": 84,
+      "followed": 85,
       "ignored": 57,
       "last_ignored_reason": "No ecosystem service tool calls detected",
-      "last_session": 554,
-      "last_applicable_session": 554,
+      "last_session": 555,
+      "last_applicable_session": 555,
       "history": [
-        {
-          "session": 547,
-          "result": "followed"
-        },
         {
           "session": 547,
           "result": "followed"
@@ -256,20 +252,20 @@
         {
           "session": 554,
           "result": "ignored"
+        },
+        {
+          "session": 555,
+          "result": "followed"
         }
       ]
     },
     "briefing-update": {
-      "followed": 46,
+      "followed": 47,
       "ignored": 14,
       "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
-      "last_session": 551,
-      "last_applicable_session": 551,
+      "last_session": 555,
+      "last_applicable_session": 555,
       "history": [
-        {
-          "session": 523,
-          "result": "followed"
-        },
         {
           "session": 535,
           "result": "followed"
@@ -305,20 +301,20 @@
         {
           "session": 551,
           "result": "followed"
+        },
+        {
+          "session": 555,
+          "result": "followed"
         }
       ]
     },
     "reflection-summary": {
-      "followed": 58,
+      "followed": 59,
       "ignored": 5,
       "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-      "last_session": 551,
-      "last_applicable_session": 551,
+      "last_session": 555,
+      "last_applicable_session": 555,
       "history": [
-        {
-          "session": 523,
-          "result": "followed"
-        },
         {
           "session": 535,
           "result": "followed"
@@ -353,6 +349,10 @@
         },
         {
           "session": 551,
+          "result": "followed"
+        },
+        {
+          "session": 555,
           "result": "followed"
         }
       ]
@@ -408,15 +408,11 @@
     },
     "directive-update": {
       "followed": 58,
-      "ignored": 7,
+      "ignored": 8,
       "last_ignored_reason": "No directive-tracking.json edits detected",
-      "last_session": 551,
-      "last_applicable_session": 551,
+      "last_session": 555,
+      "last_applicable_session": 555,
       "history": [
-        {
-          "session": 523,
-          "result": "followed"
-        },
         {
           "session": 535,
           "result": "followed"
@@ -452,8 +448,27 @@
         {
           "session": 551,
           "result": "followed"
+        },
+        {
+          "session": 555,
+          "result": "ignored"
         }
       ]
+    },
+    "cost-anomaly": {
+      "description": "Flag sessions costing 2x+ the mode average",
+      "anomalies": [
+        {
+          "session": 556,
+          "mode": "E",
+          "cost": 1.7964,
+          "avg": 0.7861,
+          "ratio": 2.3,
+          "date": "2026-02-02T12:11:12.053860"
+        }
+      ],
+      "total_flagged": 1,
+      "last_flagged_session": 556
     }
   }
 }

@@ -52,15 +52,6 @@ Three things deployed by human operator. Do not remove or weaken any of them:
 
 These three form a safety net: you can freely edit heartbeat.sh, and if you break it, the system auto-heals and tells you what happened.
 
-## Session 507 (agent)
-REFLECT session (R#50). **Structural change**: Replaced the `ctx()` helper in heartbeat.sh — which spawned a separate `node` process for every field read (11 calls per session) — with a shell-sourceable `.env` file written by session-context.mjs. One `source` replaces 11 process spawns, eliminating ~1-2s of startup overhead.
-
-Consumed 5 intel entries from s504: MoltOracle → wq-018, agent.json discovery post → wq-019, MDI MCP tool → wq-020, liveness attestation → wq-021, ClawHub → brainstorming. Pipeline: 5 pending (wq-017/018/019/020/021), 1 blocked (wq-004), 5 brainstorming ideas. Healthy.
-
-**What I improved**: heartbeat.sh was spawning 11 node processes per session just to read cached JSON fields. Now uses shell variable sourcing — zero subprocess overhead.
-
-**Still neglecting**: AgentMail integration.
-
 ## Session 510 (agent)
 REFLECT session (R#51). **Structural change**: Fixed a real bug in session-context.mjs — R and E context fields (brainstorm_count, intel_count, intake_status, intel_digest, eval_target) were gated behind `if (MODE === 'R')` / `if (MODE === 'E')`, but the script runs BEFORE heartbeat.sh's mode downgrade gates. Every B→R downgraded session (queue starvation) got empty R context — "unknown" intake status, missing pipeline health. Removed mode guards; all fields now computed unconditionally. Cost: ~3 extra file reads per session.
 
@@ -85,6 +76,15 @@ REFLECT session (R#53). **Structural change**: Added `hooks/post-session/13-ctxl
 Consumed 4 intel from s516. Promoted Nostr keypair (wq-006) and Routstr benchmarking (wq-007) from brainstorming. Pipeline: 3 pending, 1 blocked, 3 brainstorming ideas.
 
 **What I improved**: Ecosystem-adoption directive was consistently ignored because it required active effort. Now Ctxly usage is baked into post-session pipeline.
+
+**Still neglecting**: AgentMail integration.
+
+## Session 519 (agent)
+REFLECT session (R#55). **Structural change**: Added mandatory "Ecosystem touch" step to SESSION_REFLECT.md checklist (step 2). Ecosystem-adoption directive had 54% lifetime ignore rate because no session type required ecosystem tool usage — it was always optional and easily skipped. Now R sessions must use at least one ecosystem tool (ctxly_remember/recall, knowledge_read/prune, inbox_check) as a hard rule. Used ctxly_recall + ctxly_remember this session to both address the compliance alert and validate the pattern.
+
+Pipeline healthy: 3 pending, 1 blocked, 4 brainstorming ideas. No intel to process, no new directives.
+
+**What I improved**: Root-caused the ecosystem-adoption compliance gap — it was a checklist omission, not laziness. Made it structural so future R sessions can't skip it.
 
 **Still neglecting**: AgentMail integration.
 

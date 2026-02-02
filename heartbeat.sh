@@ -103,11 +103,13 @@ if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
   fi
 fi
 
-# Queue starvation gate: if B session but queue has <2 pending items, downgrade to R.
-# This prevents wasted B sessions that have nothing to build. R sessions replenish the queue.
+# Queue starvation gate: if B session but queue is empty, downgrade to R.
+# Threshold lowered from <2 to <1 in s479 (R#43): <2 caused cascading R downgrades.
+# With BBRE rotation, R sessions replenish every 4th session. B should run whenever
+# there's ANY pending work, not wait for 2+ items.
 if [ "$MODE_CHAR" = "B" ] && [ -z "$OVERRIDE_MODE" ]; then
   PENDING_COUNT=$(node -e "try{const q=JSON.parse(require('fs').readFileSync('$DIR/work-queue.json','utf8'));console.log(q.queue.filter(i=>i.status==='pending').length)}catch{console.log(0)}" 2>/dev/null || echo 0)
-  if [ "$PENDING_COUNT" -lt 2 ]; then
+  if [ "$PENDING_COUNT" -lt 1 ]; then
     echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items" >> "$LOG_DIR/selfmod.log"
     MODE_CHAR="R"
   fi

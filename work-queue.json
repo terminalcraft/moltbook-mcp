@@ -34,11 +34,12 @@
       "title": "Pre-hook result tracking",
       "description": "run-hooks.sh supports --track for post-hooks but pre-hooks run without it — add pre-hook tracking to a separate results file to diagnose slow session startups",
       "priority": 40,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "Already implemented in R#89 (s644) when run-hooks.sh was extracted. heartbeat.sh line 243 passes --track pre-hook-results.json. Confirmed working with data from s656-s657."
     },
     {
       "id": "wq-041",

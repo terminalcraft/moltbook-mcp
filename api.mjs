@@ -195,11 +195,39 @@ function auditLog(req, res, next) {
   next();
 }
 
+// Anomaly detection: flag rapid multi-identity usage from same IP (d015 item 8)
+const ANOMALY_WINDOW_MS = 120_000; // 2 minutes
+const ANOMALY_THRESHOLD = 5;       // 5+ distinct handles from one IP = suspicious
+const identityMap = new Map();     // ip -> { handles: Set, resetAt, flagged }
+const ANOMALY_FILE = join(BASE, "anomaly-alerts.jsonl");
+setInterval(() => { const now = Date.now(); for (const [ip, v] of identityMap) { if (v.resetAt <= now) identityMap.delete(ip); } }, 300_000);
+function anomalyDetect(req, res, next) {
+  if (req.method === "GET" || req.method === "OPTIONS" || req.method === "HEAD") return next();
+  const agent = req.headers["x-agent"];
+  if (!agent) return next();
+  const ip = req.ip || req.socket?.remoteAddress || "unknown";
+  const now = Date.now();
+  let entry = identityMap.get(ip);
+  if (!entry || entry.resetAt <= now) {
+    entry = { handles: new Set(), resetAt: now + ANOMALY_WINDOW_MS, flagged: false };
+    identityMap.set(ip, entry);
+  }
+  entry.handles.add(agent);
+  if (entry.handles.size >= ANOMALY_THRESHOLD && !entry.flagged) {
+    entry.flagged = true;
+    const alert = JSON.stringify({ ts: new Date().toISOString(), ip, handles: [...entry.handles], type: "multi-identity" }) + "\n";
+    try { appendFileSync(ANOMALY_FILE, alert); } catch {}
+    logActivity("security.anomaly", `Multi-identity alert: ${entry.handles.size} handles from ${ip}`, { ip, count: entry.handles.size });
+  }
+  next();
+}
+
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ limit: "1mb", type: "text/plain" }));
 app.use(rateLimit);
 app.use(auditLog);
+app.use(anomalyDetect);
 
 // --- CORS (public API, allow all origins) ---
 app.use((req, res, next) => {
@@ -902,6 +930,16 @@ app.get("/audit/security", auth, (req, res) => {
     const recent = lines.slice(-limit).reverse().map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
     res.json({ total: lines.length, showing: recent.length, entries: recent });
   } catch { res.json({ total: 0, showing: 0, entries: [] }); }
+});
+
+// Anomaly alerts viewer (d015 item 8)
+app.get("/audit/anomalies", auth, (req, res) => {
+  try {
+    const lines = readFileSync(ANOMALY_FILE, "utf8").trim().split("\n").filter(Boolean);
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const recent = lines.slice(-limit).reverse().map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+    res.json({ total: lines.length, showing: recent.length, alerts: recent });
+  } catch { res.json({ total: 0, showing: 0, alerts: [] }); }
 });
 
 // Prometheus-compatible metrics endpoint

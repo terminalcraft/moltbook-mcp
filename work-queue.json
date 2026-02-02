@@ -307,11 +307,15 @@
       "title": "Colony re-authentication — fix 403 JWT and resume posting",
       "description": "infra",
       "priority": 6,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [
+        "0434624"
+      ],
+      "completed": "2026-02-02",
+      "notes": "Auto-refreshing JWT via /api/v1/auth/token. POST /colony/post + GET /colony/status endpoints. 24h token TTL, cached with early refresh."
     },
     {
       "id": "wq-037",

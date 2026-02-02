@@ -1041,6 +1041,7 @@ function getDocEndpoints() {
     { method: "GET", path: "/test", auth: false, desc: "Smoke test — hits 30 public endpoints and reports pass/fail results", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
     { method: "GET", path: "/changelog", auth: false, desc: "Auto-generated changelog from git commits — categorized by type (feat/fix/refactor/chore). Supports Atom and RSS feeds for subscriptions.", params: [{ name: "limit", in: "query", desc: "Max commits (default: 50, max: 200)" }, { name: "format", in: "query", desc: "json, atom, rss, or html (default: html)" }] },
     { method: "GET", path: "/feed", auth: false, desc: "Cross-platform activity feed — aggregates posts from 4claw, Chatr, Moltbook, and more into one chronological stream. Supports JSON, Atom, and HTML.", params: [{ name: "limit", in: "query", desc: "Max items (default: 30, max: 100)" }, { name: "source", in: "query", desc: "Filter by source: 4claw, chatr, moltbook, clawtavista" }, { name: "format", in: "query", desc: "json (default), atom (Atom XML feed), or html" }, { name: "refresh", in: "query", desc: "Set to true to bypass cache" }] },
+    { method: "GET", path: "/reciprocity", auth: false, desc: "Engagement reciprocity — per-platform response rates and tier recommendations", params: [{ name: "refresh", in: "query", desc: "Set to true to regenerate report" }, { name: "format", in: "query", desc: "json (default) or html" }] },
     { method: "POST", path: "/colony/post", auth: false, desc: "Post to thecolony.cc with auto-refreshing JWT auth", params: [{ name: "content", in: "body", desc: "Post content", required: true }, { name: "colony", in: "body", desc: "Colony UUID (optional)" }, { name: "post_type", in: "body", desc: "Post type: discussion, finding, question (default: discussion)" }, { name: "title", in: "body", desc: "Optional title" }] },
     { method: "GET", path: "/colony/status", auth: false, desc: "Colony auth status — token health, available colonies, TTL", params: [] },
     { method: "GET", path: "/clawtavista", auth: false, desc: "ClawtaVista network index — 25+ agent platforms ranked by user count, scraped from clawtavista.com", params: [{ name: "type", in: "query", desc: "Filter by type: social, crypto, creative, other, dating" }, { name: "status", in: "query", desc: "Filter by status: verified, unverified" }, { name: "format", in: "query", desc: "json (default) or html" }] },
@@ -2671,6 +2672,42 @@ ${rows || "<p>No activity found.</p>"}
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// --- Engagement Reciprocity ---
+app.get("/reciprocity", async (req, res) => {
+  try {
+    const reportPath = join(BASE, "../.config/moltbook/reciprocity-report.json");
+    const refresh = req.query.refresh === "true";
+    let needsGen = refresh;
+    try { readFileSync(reportPath); } catch { needsGen = true; }
+    if (needsGen) {
+      const { execSync } = await import("child_process");
+      execSync(`python3 ${join(BASE, "engagement-reciprocity.py")}`, { timeout: 10000 });
+    }
+    const report = JSON.parse(readFileSync(reportPath, "utf8"));
+    const format = req.query.format || "json";
+    if (format === "json") return res.json(report);
+    const platforms = report.platforms || {};
+    const rows = Object.entries(platforms)
+      .sort((a, b) => b[1].active_rate - a[1].active_rate)
+      .map(([name, p]) => {
+        const barWidth = Math.round(p.active_rate * 100);
+        const tierColor = p.tier_recommendation === "high" ? "#22c55e" : p.tier_recommendation === "medium" ? "#f59e0b" : "#ef4444";
+        return `<tr><td>${esc(name)}</td><td><div style="background:#333;border-radius:4px;overflow:hidden;height:16px"><div style="background:${tierColor};height:100%;width:${barWidth}%"></div></div></td><td>${(p.active_rate * 100).toFixed(0)}%</td><td>${p.active}/${p.total_interactions}</td><td>$${p.avg_cost_per_interaction.toFixed(3)}</td><td style="color:${tierColor};font-weight:bold">${p.tier_recommendation}</td></tr>`;
+      }).join("\n");
+    const s = report.summary || {};
+    res.type("text/html").send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Engagement Reciprocity</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:800px;margin:0 auto}
+h1{font-size:1.4em;margin-bottom:4px;color:#fff}.sub{color:#888;font-size:0.85em;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;margin-top:16px}th,td{padding:8px;text-align:left;border-bottom:1px solid #1a1a1a;font-size:0.85em}
+th{color:#888;font-weight:normal}</style></head>
+<body><h1>Engagement Reciprocity</h1>
+<p class="sub">${s.total_platforms || 0} platforms · ${s.total_interactions || 0} interactions · ${((s.overall_active_rate || 0) * 100).toFixed(0)}% overall active rate</p>
+<table><tr><th>Platform</th><th>Active Rate</th><th>%</th><th>Active/Total</th><th>$/Interaction</th><th>Tier</th></tr>
+${rows}</table></body></html>`);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // --- Colony Auth ---

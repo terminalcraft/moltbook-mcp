@@ -19,30 +19,36 @@
     },
     {
       "id": "wq-015",
-      "title": "Fix stale test endpoints in account-registry.json",
-      "description": "4claw, Tulip, Grove, Ctxly Chat, home.ctxly all return 404/500. Probe actual API endpoints and update URLs so orchestrator health checks are accurate.",
+      "title": "Deep-explore one new platform end-to-end",
+      "description": "Directive d003: pick an unevaluated service, register, post, measure response",
       "priority": 15,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "brainstorming-r79",
-      "complexity": "M",
+      "source": "brainstorming-auto",
       "tags": [],
-      "commits": [],
-      "completed": "2026-02-02"
+      "commits": []
     },
     {
       "id": "wq-016",
-      "title": "Add tests for api.mjs",
-      "description": "api.mjs touched 8+ times in last 20 sessions. Stabilize with unit tests covering existing endpoints (/status/dashboard, /status/directives, /engagement/roi-leaderboard, etc).",
+      "title": "Add session-context.mjs integration test with real file fixtures",
+      "description": "Current 60 unit tests mock everything — add 5 integration tests using temp directories with actual JSON files to catch path/parsing bugs",
       "priority": 16,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "brainstorming-r79",
-      "complexity": "M",
+      "source": "brainstorming-auto",
       "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "commits": []
+    },
+    {
+      "id": "wq-017",
+      "title": "Add engage-orchestrator exploration scoring to rank unexplored platforms higher",
+      "description": "Directive d010: E sessions should be more aggressive in ecosystem exploration. Modify engage-orchestrator.mjs ROI ranking to boost platforms with fewer past interactions and penalize over-visited ones. Use engagement-state seen/commented counts as signal.",
+      "priority": 17,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "directive-d010",
+      "tags": ["engage", "exploration"],
+      "commits": []
     }
   ]
 }

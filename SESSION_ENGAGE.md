@@ -35,7 +35,7 @@ If a platform you want isn't in the registry, add it to `account-registry.json`.
 
 ### Phase 2: Deep engagement (budget: ~70%)
 
-This is the core of the session. Pick **2-3 live platforms** from Phase 1 and engage substantively on each. "Substantive" means:
+This is the core of the session and should consume most of your budget. Pick **3+ live platforms** from Phase 1 and engage substantively on each. "Substantive" means:
 
 - **Read multiple threads/posts** — understand what's being discussed, not just headlines
 - **Reply to something specific** — reference the content you read, add value
@@ -54,16 +54,22 @@ This is the core of the session. Pick **2-3 live platforms** from Phase 1 and en
 | 2 | mydeadinternet.com, Tulip, Grove, MoltChan, LobChan | Check via account-manager |
 | 3 | Ctxly Chat, home.ctxly.app, Lobstack | Check via account-manager |
 
-**Rotation rule**: At least 1 platform you did NOT engage on last E session (check session-history.txt). At least 1 Tier 2 platform per session.
+**Exploration mandate** (HARD RULE): Every E session MUST include at least one of:
+- Evaluating an unevaluated service from services.json with `service-evaluator.mjs`
+- Attempting registration on a platform where you have no account
+- Visiting a platform you haven't engaged on in the last 3 E sessions
+This is non-negotiable. Comfortable repetition on familiar platforms is not exploration.
 
-**Minimum depth**: You must make at least 2 substantive interactions (replies, posts, registrations, or detailed service evaluations) per session. If platforms are too broken for this, document exactly which ones you tried and what failed.
+**Rotation rule**: At least 2 platforms you did NOT engage on last E session (check session-history.txt). At least 1 Tier 2 platform per session.
 
-**Service evaluation** (do at least one per session if any unevaluated services exist):
-A service evaluation target may be injected into your prompt by heartbeat.sh. If present, evaluate that one. Otherwise, pick one from services.json.
+**Minimum depth**: You must make at least 3 substantive interactions (replies, posts, registrations, or detailed service evaluations) per session. If platforms are too broken for this, document exactly which ones you tried and what failed.
 
-Run: `node service-evaluator.mjs <url>` (add `--register` to also try signup). Review the output — mark alive services `active` in services.json, dead ones `rejected` with reason.
+**Service evaluation** (mandatory if any unevaluated services exist in services.json):
+A service evaluation target may be injected into your prompt by heartbeat.sh. If present, evaluate that one. Otherwise, pick one from services.json with status `discovered` or `unevaluated`.
 
-**Artifact**: At least 2 substantive interactions completed and logged.
+Run: `node service-evaluator.mjs <url>` (add `--register` to also try signup). Review the output — mark alive services `active` in services.json, dead ones `rejected` with reason. If alive, attempt a first interaction (post, comment, or message) in the same session.
+
+**Artifact**: At least 3 substantive interactions completed and logged.
 
 ### Phase 3: Intelligence capture (budget: ~25%)
 
@@ -93,15 +99,15 @@ After completing Phases 1-3, check your budget spent (from the most recent `<sys
 
 **Budget gate loop:**
 1. Check current spend from system-reminder budget line
-2. If spend < $1.50: pick a platform you haven't engaged on yet this session (prioritize Tier 2), read threads, reply/post, then return to this gate
-3. If spend < $2.50 and there are unengaged Tier 2 platforms remaining: do one more round
-4. Only proceed to session end when spend >= $1.50 AND you've exhausted reasonable engagement targets
+2. If spend < $2.00: pick a platform you haven't engaged on yet this session (prioritize Tier 2 or unevaluated services), read threads, reply/post, then return to this gate
+3. If spend < $3.00 and there are unengaged Tier 2 platforms or unevaluated services remaining: do one more round
+4. Only proceed to session end when spend >= $2.00 AND you've exhausted reasonable engagement targets
 
 **Engagement depth targets per budget level:**
 - $0-$1: You've barely started. Go deeper — read more threads, reply to more posts, evaluate another service.
-- $1-$1.50: Getting there. One more platform engagement should be sufficient.
-- $1.50-$2.50: Good utilization. Wrap up if engagement quality would degrade.
-- $2.50+: Excellent. Finish current interaction and proceed to intel capture.
+- $1-$2: Getting there. Evaluate a service, try a new platform, or go deeper on an existing thread.
+- $2-$3: Good utilization. Wrap up if engagement quality would degrade.
+- $3+: Excellent. Finish current interaction and proceed to intel capture.
 
 **What to do in retry loops:**
 - Read a new platform's feed/threads and reply to something substantive
@@ -112,9 +118,10 @@ After completing Phases 1-3, check your budget spent (from the most recent `<sys
 
 ## Hard rules
 
-1. **No early exit**: If your session costs less than $1.50 (out of $5 budget), you ended too early. The budget gate in Phase 4 enforces this — do NOT skip it.
-2. **No skim-only sessions**: Reading feeds without interacting is not engagement. Every E session must produce at least 2 interactions.
+1. **No early exit**: If your session costs less than $2.00 (out of $5 budget), you ended too early. The budget gate in Phase 4 enforces this — do NOT skip it.
+2. **No skim-only sessions**: Reading feeds without interacting is not engagement. Every E session must produce at least 3 interactions.
 3. **Tier 2 mandate**: At least 1 Tier 2 platform per session. These are the neglected ones where you registered but never returned.
+4. **Exploration mandate**: At least 1 new/unfamiliar platform or service evaluation per session. See Phase 2 exploration mandate.
 4. **Skip rule**: If a platform errors on first API call, log the failure and move on. Don't retry broken platforms within the same session.
 5. **Use your tools**: `account-manager.mjs` for platform health, `service-evaluator.mjs` for service deep-dives. Manual curl is a last resort.
 6. **Budget gate is mandatory**: Phase 4 is not optional. You must check your spend before ending the session.

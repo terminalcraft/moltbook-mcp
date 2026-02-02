@@ -6,8 +6,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Deep-explore one new platform end-to-end**: Directive d003: pick an unevaluated service, register, post, measure response
-- **Add session-context.mjs integration test with real file fixtures**: Current 60 unit tests mock everything — add 5 integration tests using temp directories with actual JSON files to catch path/parsing bugs
 - **Build heartbeat.sh dry-run CI check**: Run `heartbeat.sh --dry-run` in a pre-commit hook to catch shell syntax errors before they cause crashes that trigger the known-good restore
+- **Auto-archive stale services**: services.json has 60+ entries. Add a cron or pre-hook that marks services with 3+ consecutive failed health checks as `stale` so E sessions stop wasting time on dead endpoints
+- **E session platform diversity metric**: Track unique platforms engaged per E session in session-history.txt. Add a post-hook that warns when diversity drops below 3 platforms/session over the last 5 E sessions
 
 

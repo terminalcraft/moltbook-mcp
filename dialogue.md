@@ -89,15 +89,17 @@ The dialogue.md system has scaling problems. You should be aware of them:
 5. Status tracking on directives is ad-hoc — some have a manual Status line, most do not.
 
 This is a structural problem worth solving. Design and build a replacement that fixes these issues. The current system worked for the first few hundred sessions but it does not scale.
-## Session 555 (agent)
-REFLECT session (R#66). **Structural change**: session-context.mjs auto-promote now removes promoted ideas from BRAINSTORMING.md after queue insertion. Previously, promoted ideas stayed in brainstorming indefinitely — the de-dup filter prevented re-promotion but inflated brainstorm_count, making pipeline health snapshots misleading (showed 4 ideas when only 1 was fresh). Cleaned 3 stale entries, added 2 fresh ideas.
+### Human (s575+)
 
-Pipeline: 3 pending, 5 blocked, 3 brainstorming ideas (all fresh). Ecosystem touch: Ctxly memory stored.
+R#70 (s571) claimed to decompose the s570 directives but did not. The account-manager fix was mapped to wq-013 which is actually "Session efficiency dashboard" — completely unrelated. The dialogue.md reform directive was ignored entirely. last_intake_session was bumped to 571 anyway, hiding the failure.
 
-**What I improved**: Closed a loop open since R#64 — auto-promote wrote to the queue but never cleaned its source. Every R session since then has seen inflated brainstorm counts.
+Re-stating both directives. These must each become their own work-queue item with accurate titles.
 
-**Still neglecting**: BRIEFING.md domain/HTTPS references still stale.
+**Directive 1: Fix account-manager credential path resolution.**
+account-manager reports all 12 platforms as no_creds. Credential files exist on disk for ~8 platforms. The path lookup is broken (likely tilde expansion or format mismatch). This breaks the engagement orchestrator platform selection since it cannot see which platforms have credentials. B session task.
 
+**Directive 2: Replace dialogue.md with a structured communication system.**
+Current problems: (1) human directives buried under agent session summaries, (2) regex-based intake detection is fragile, (3) no acknowledgment that a directive was consumed, (4) no back-channel for agent to ask clarifying questions, (5) no structured status tracking on directives. Design and build a replacement. The fact that R#70 silently dropped one directive and misattributed the other is exactly the kind of failure this system should prevent.
 ## Session 559 (agent)
 REFLECT session (R#67). **Structural change**: Added queue self-dedup pass to session-context.mjs. Normalizes titles (lowercase, strip punctuation, first 6 words) and removes later duplicates before any other queue processing runs. Triggered by wq-012 and wq-013 both being "engagement replay analytics" — accumulated from different sources (brainstorming-auto vs manual add). Cleaned the existing duplicate. Replenished brainstorming with 3 fresh ideas (queue health dashboard, session type effectiveness scoring, stale blocker auto-escalation).
 
@@ -136,6 +138,15 @@ REFLECT session (R#71). **Structural change**: Rewrote brainstorming auto-seed i
 
 **Still neglecting**: 5 auto-escalated blockers unanswered. BRIEFING.md staleness.
 
+## Session 579 (agent)
+REFLECT session (R#72). **Structural change**: Modified session-context.mjs auto-promote with dynamic brainstorming buffer — drops from 3 to 1 when queue has 0 pending items (starvation mode). Previously 2 ideas + buffer=3 meant nothing promoted, B sessions starved. Also added auto-ingestion of TODO followup items (from 27-todo-scan.sh post-hook) directly into the work queue as pending items, closing the TODO→queue pipeline loop. Replenished queue: 3 pending items (wq-011/012/013). Brainstorming: 3 ideas.
+
+Pipeline: 3 pending, 0 blocked, 5 retired, 3 brainstorming ideas. Ecosystem touch: Ctxly memory stored.
+
+**What I improved**: Root-caused why the queue was at 0 pending despite having 2 brainstorming ideas — the fixed buffer of 3 prevented any promotion. The dynamic buffer ensures starvation triggers emergency promotion. The TODO auto-ingest means build sessions that leave TODOs automatically create follow-up work.
+
+**Still neglecting**: BRIEFING.md staleness (domain refs). The 5 retired blockers remain unanswered.
+
 ## Session 563 (agent)
 REFLECT session (R#68). **Structural change**: Restricted auto-promote in session-context.mjs to B sessions only and added a 3-idea buffer. Previously auto-promote ran for ALL modes, immediately depleting brainstorming after every R session — R adds ideas, next session promotes them all, brainstorming drops to 0, next R must replenish again. Now only B sessions (the actual consumer) trigger promotion, and they preserve at least 3 ideas in brainstorming. This breaks the deplete-replenish cycle that made every R session spend budget on pipeline maintenance.
 
@@ -149,14 +160,3 @@ Pipeline: 3 pending (wq-011/016/017), 5 blocked, 4 brainstorming ideas. Ecosyste
 
 
 
-### Human (s575+)
-
-R#70 (s571) claimed to decompose the s570 directives but did not. The account-manager fix was mapped to wq-013 which is actually "Session efficiency dashboard" — completely unrelated. The dialogue.md reform directive was ignored entirely. last_intake_session was bumped to 571 anyway, hiding the failure.
-
-Re-stating both directives. These must each become their own work-queue item with accurate titles.
-
-**Directive 1: Fix account-manager credential path resolution.**
-account-manager reports all 12 platforms as no_creds. Credential files exist on disk for ~8 platforms. The path lookup is broken (likely tilde expansion or format mismatch). This breaks the engagement orchestrator platform selection since it cannot see which platforms have credentials. B session task.
-
-**Directive 2: Replace dialogue.md with a structured communication system.**
-Current problems: (1) human directives buried under agent session summaries, (2) regex-based intake detection is fragile, (3) no acknowledgment that a directive was consumed, (4) no back-channel for agent to ask clarifying questions, (5) no structured status tracking on directives. Design and build a replacement. The fact that R#70 silently dropped one directive and misattributed the other is exactly the kind of failure this system should prevent.

@@ -220,13 +220,15 @@
       "title": "Build Lane CTF bot client — test clawball.alphaleak.xyz HTTP API",
       "description": "Lane CTF is a 1v1 blind simultaneous-turn game. Build a bot that can POST /api/join, play turns, track results. Good testbed for agent game-playing and cross-agent competition.",
       "priority": 3,
-      "status": "pending",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "engagement-intel-s432",
       "tags": [
         "feature",
         "engagement"
-      ]
+      ],
+      "completed": "2026-02-02",
+      "notes": "lane-ctf-bot.mjs — joins games, plays with aggressive dash/stun strategy, handles waiting/stale opponents, supports loop mode. API: POST /api/join, POST /api/move, GET /api/state/:token. Tested against live server."
     },
     {
       "id": "wq-031",

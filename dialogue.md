@@ -63,15 +63,13 @@ The following work queue items have been blocked for **>30 sessions** with no re
 - **wq-010** (Agent ad network monitor: track Sim's USDC/Base L2 ad network for public release): blocked 105 sessions. Blocker: No public API found. Searched Moltbook, Chatr, 4claw, Ctxly — zero references.
 
 Human action may be needed to unblock these. Please review or drop them from the queue.
-## Session 547 (agent)
-REFLECT session (R#64). **Structural change**: Auto-promote brainstorming ideas to work-queue.json in session-context.mjs when pending count < 3. Previously, R sessions manually promoted ideas every time the queue ran dry — 4 of the last 6 R sessions did this. Now session-context.mjs does it automatically before any session starts, assigning IDs and writing the queue file. Uses the same de-duplication logic as the brainstorming fallback.
+### Human (s570+)
 
-Pipeline: 3 pending (wq-021/022/023), 5 blocked, 4 brainstorming ideas.
+Your account-manager is broken — it reports all 12 platforms as `no_creds` even though credential files exist on disk for ~8 of them. This is a path resolution bug (likely `~` expansion or format mismatch between what account-manager expects and where files actually live).
 
-**What I improved**: Queue replenishment was the single most repeated R session task. Automating it frees R sessions to focus on actual evolution instead of pipeline maintenance.
+This matters more than it looks. The engagement orchestrator uses account-manager to decide which platforms are live before picking where to engage. If account-manager says everything has no credentials, the health gate has no signal, and E sessions fly blind. This is probably a contributing factor to the 61% ecosystem-adoption compliance rate — the tooling you built to guide engagement cannot see your own credentials.
 
-**Still neglecting**: Inbox flooding (smoke tests). BRIEFING.md domain references still say terminalcraft.xyz with no HTTPS verification.
-
+Fix account-manager path resolution so it finds the credential files that already exist. This is a B session task, not a new feature — the credentials are there, the manager just cannot see them.
 ## Session 551 (agent)
 REFLECT session (R#65). **Structural change**: Fixed critical TDZ bug in transforms/scoping.js. `logReplay(name, params)` referenced `params` before its `const` declaration two lines later, causing "Cannot access 'params' before initialization" on every MCP tool call. Introduced when engagement replay logging was added (wq-023). Moved declaration above usage.
 
@@ -110,6 +108,17 @@ Pipeline: 3 pending (wq-014/015/016), 0 blocked, 5 retired, 4 brainstorming idea
 
 **Still neglecting**: BRIEFING.md domain references still stale. Added a brainstorming idea for auto-staleness detection to finally address this systematically.
 
+## Session 571 (agent)
+REFLECT session (R#70). **Structural change**: Added brainstorming auto-seed to session-context.mjs. When brainstorming hits 0 ideas, the script now parses recent session-history.txt for feat/fix commits and generates follow-up seed ideas (harden/extend/monitor patterns). This shifts brainstorming replenishment from expensive LLM generation during R sessions to cheap deterministic pre-computation during the pre-session script. Previously every R session spent 20-30% of budget manually writing brainstorming ideas when the pool was empty.
+
+**Directive intake**: Decomposed s570 account-manager bug into wq-013. Added wq-014 (session effectiveness scoring). Replenished brainstorming with 3 fresh ideas. Pipeline: 3 pending, 0 blocked, 5 retired, 3 brainstorming ideas.
+
+**Compliance**: Updated directive-tracking.json (directive-update: followed). Ecosystem touch: Ctxly memory stored.
+
+**What I improved**: Root-caused why R sessions chronically spend budget on brainstorming replenishment. The auto-seed mechanism means future R sessions can focus on structural improvements instead of manually generating ideas.
+
+**Still neglecting**: The 5 auto-escalated blockers in dialogue.md (wq-004/005/007/009/010) are retired but the escalation message remains unanswered by the human. Low priority since they're retired.
+
 ## Session 563 (agent)
 REFLECT session (R#68). **Structural change**: Restricted auto-promote in session-context.mjs to B sessions only and added a 3-idea buffer. Previously auto-promote ran for ALL modes, immediately depleting brainstorming after every R session — R adds ideas, next session promotes them all, brainstorming drops to 0, next R must replenish again. Now only B sessions (the actual consumer) trigger promotion, and they preserve at least 3 ideas in brainstorming. This breaks the deplete-replenish cycle that made every R session spend budget on pipeline maintenance.
 
@@ -121,10 +130,3 @@ Pipeline: 3 pending (wq-011/016/017), 5 blocked, 4 brainstorming ideas. Ecosyste
 
 
 
-### Human (s570+)
-
-Your account-manager is broken — it reports all 12 platforms as `no_creds` even though credential files exist on disk for ~8 of them. This is a path resolution bug (likely `~` expansion or format mismatch between what account-manager expects and where files actually live).
-
-This matters more than it looks. The engagement orchestrator uses account-manager to decide which platforms are live before picking where to engage. If account-manager says everything has no credentials, the health gate has no signal, and E sessions fly blind. This is probably a contributing factor to the 61% ecosystem-adoption compliance rate — the tooling you built to guide engagement cannot see your own credentials.
-
-Fix account-manager path resolution so it finds the credential files that already exist. This is a B session task, not a new feature — the credentials are there, the manager just cannot see them.

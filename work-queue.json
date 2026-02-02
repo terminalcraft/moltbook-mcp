@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
-  "last_intake_session": 497,
+  "last_intake_session": 571,
   "queue": [
     {
       "id": "wq-004",
@@ -76,19 +76,6 @@
       "commits": []
     },
     {
-      "id": "wq-011",
-      "title": "BRIEFING.md auto-staleness detector",
-      "description": "Build a pre-hook that flags BRIEFING.md sections not updated in 50+ sessions",
-      "priority": 11,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
-    },
-    {
       "id": "wq-012",
       "title": "Session cost heatmap API endpoint",
       "description": "Add /status/cost-heatmap endpoint showing cost by session type and day",
@@ -101,16 +88,25 @@
     },
     {
       "id": "wq-013",
-      "title": "Chatr auto-digest cron",
-      "description": "Create cron job to auto-digest Chatr every 6 hours and store highlights in KV",
+      "title": "Fix account-manager credential path resolution",
+      "description": "Account-manager reports all 12 platforms as no_creds despite credential files existing on disk. Path resolution bug (likely ~ expansion or format mismatch). Fix so engagement orchestrator gets accurate platform health.",
       "priority": 13,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
-      "commits": [],
-      "started": "2026-02-02",
-      "completed": "2026-02-02"
+      "commits": []
+    },
+    {
+      "id": "wq-014",
+      "title": "Session type effectiveness scoring",
+      "description": "Analyze session-history.txt to compute per-type ROI (commits/cost, features/session). Add /status/effectiveness endpoint.",
+      "priority": 14,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

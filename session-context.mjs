@@ -202,14 +202,60 @@ if (MODE === 'B') {
 // (queue starvation gate) left R sessions without brainstorm/intel/intake data.
 // Cost of always computing: ~3 file reads, negligible.
 {
-  // Brainstorming count
+  // Brainstorming count + auto-seed when empty (R#70).
+  // When brainstorming hits 0 ideas, R sessions waste budget manually generating ideas.
+  // Instead, parse recent session-history.txt to extract "feat:" commits and generate
+  // follow-up seed ideas (test/harden/extend patterns). This shifts replenishment from
+  // expensive LLM generation to cheap deterministic pre-computation.
   const bsPath = join(DIR, 'BRAINSTORMING.md');
+  let bsContent = '';
   if (existsSync(bsPath)) {
-    const bs = readFileSync(bsPath, 'utf8');
-    result.brainstorm_count = (bs.match(/^- \*\*/gm) || []).length;
-  } else {
-    result.brainstorm_count = 0;
+    bsContent = readFileSync(bsPath, 'utf8');
   }
+  let bsCount = (bsContent.match(/^- \*\*/gm) || []).length;
+
+  if (bsCount === 0) {
+    // Auto-seed: extract recent feat/fix commits from session history
+    const histPath = join(STATE_DIR, 'session-history.txt');
+    if (existsSync(histPath)) {
+      const hist = readFileSync(histPath, 'utf8');
+      const lines = hist.trim().split('\n').slice(-15); // last 15 sessions
+      const feats = [];
+      for (const line of lines) {
+        const m = line.match(/note:\s*(feat|fix):\s*(.+)/);
+        if (m) feats.push({ type: m[1], desc: m[2].trim() });
+      }
+      // Generate follow-up ideas from recent features
+      const seeds = [];
+      const templates = [
+        (f) => `- **Harden ${f.desc.split('—')[0].trim()}**: Add error handling, edge case coverage, and integration tests`,
+        (f) => `- **Extend ${f.desc.split('—')[0].trim()}**: Add API endpoint exposing this data for dashboard consumption`,
+        (f) => `- **Monitor ${f.desc.split('—')[0].trim()}**: Add metrics/logging to track real-world usage and failure modes`,
+      ];
+      const queueTitles = queue.map(i => i.title.toLowerCase());
+      for (let i = 0; i < feats.length && seeds.length < 4; i++) {
+        const tmpl = templates[i % templates.length];
+        const seed = tmpl(feats[feats.length - 1 - i]); // newest first
+        // Skip if already in queue
+        const seedTitle = seed.match(/\*\*(.+?)\*\*/)?.[1]?.toLowerCase() || '';
+        if (!queueTitles.some(qt => seedTitle.includes(qt.split(':')[0].trim().substring(0, 15)))) {
+          seeds.push(seed);
+        }
+      }
+      if (seeds.length > 0) {
+        const marker = '## Evolution Ideas';
+        if (bsContent.includes(marker)) {
+          bsContent = bsContent.replace(marker, marker + '\n\n' + seeds.join('\n'));
+        } else {
+          bsContent += '\n' + marker + '\n\n' + seeds.join('\n') + '\n';
+        }
+        writeFileSync(bsPath, bsContent);
+        bsCount = seeds.length;
+        result.brainstorm_seeded = seeds.length;
+      }
+    }
+  }
+  result.brainstorm_count = bsCount;
 
   // Intel inbox: count + pre-categorized digest for R session prompt injection.
   // Previously R sessions manually read, parsed, and archived intel (~5 tool calls).

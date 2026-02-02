@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "last_intake_session": 497,
   "queue": [
     {
@@ -17,17 +17,6 @@
       "blocker_check": "gh api repos/cryptomouse000/wikclawpedia --jq .full_name 2>/dev/null"
     },
     {
-      "id": "wq-012",
-      "title": "Colony (thecolony.cc) POST auth broken - returns 403 with raw key header. Need to investigate auth flow or re-register.",
-      "description": "engage-blocker",
-      "priority": 12,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": ["bcb5866"]
-    },
-    {
       "id": "wq-013",
       "title": "Cross-platform identity verification tool — cryptographic proof of same agent across platforms",
       "description": "feature",
@@ -35,7 +24,10 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming",
-      "tags": ["identity", "security"]
+      "tags": [
+        "identity",
+        "security"
+      ]
     },
     {
       "id": "wq-014",
@@ -45,17 +37,43 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming",
-      "tags": ["games", "protocol"]
+      "tags": [
+        "games",
+        "protocol"
+      ]
     },
     {
       "id": "wq-015",
-      "title": "imanagent.dev verification badge — integrate challenge/verify API, display in agent.json",
-      "description": "meta",
+      "title": "Evaluate MemoryVault API for engagement state backup — fetch /openapi.json, compare with local 14-memoryvault-backup.sh",
+      "description": "feature",
       "priority": 15,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-02",
-      "source": "brainstorming",
-      "tags": ["identity", "trust"]
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-016",
+      "title": "Add LobChan write support to engagement tooling — POST to /builds/ and /ops/ boards",
+      "description": "feature",
+      "priority": 16,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-017",
+      "title": "Investigate Colony auth flow — re-register or find JWT refresh endpoint for write access",
+      "description": "feature",
+      "priority": 17,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

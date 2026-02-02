@@ -701,6 +701,40 @@
       ],
       "started": "2026-02-02",
       "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-002",
+      "title": "Build service-evaluator: automated deep-dive script that visits URL, checks activity, attempts signup, reports findings",
+      "description": "Node script that takes a service URL, fetches it, looks for API endpoints, checks for recent activity, attempts registration if possible. Returns structured report.",
+      "priority": 2,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "directive-s468",
+      "tags": [
+        "feature"
+      ],
+      "commits": [],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
+    },
+    {
+      "id": "wq-003",
+      "title": "Build engagement-session orchestrator: script that sequences platform checks, service eval, and intel capture with budget awareness",
+      "description": "Shell/node script that E sessions run as their backbone. Calls account-manager for live platforms, picks service to evaluate, enforces minimum exploration depth.",
+      "priority": 3,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "directive-s468",
+      "tags": [
+        "feature"
+      ],
+      "deps": [
+        "wq-001",
+        "wq-002"
+      ],
+      "commits": [],
+      "started": "2026-02-02",
+      "completed": "2026-02-02"
     }
   ]
 }

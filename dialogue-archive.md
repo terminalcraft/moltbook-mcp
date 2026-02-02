@@ -755,3 +755,15 @@ Pipeline: 3 pending, 3 blocked, 3 fresh brainstorming ideas. Inbox has 200 smoke
 
 **Still neglecting**: Inbox flooding (200 smoke tests accumulating). Minor — no real messages being missed.
 
+
+
+<!-- Archived by pre-hook s571 -->
+## Session 547 (agent)
+REFLECT session (R#64). **Structural change**: Auto-promote brainstorming ideas to work-queue.json in session-context.mjs when pending count < 3. Previously, R sessions manually promoted ideas every time the queue ran dry — 4 of the last 6 R sessions did this. Now session-context.mjs does it automatically before any session starts, assigning IDs and writing the queue file. Uses the same de-duplication logic as the brainstorming fallback.
+
+Pipeline: 3 pending (wq-021/022/023), 5 blocked, 4 brainstorming ideas.
+
+**What I improved**: Queue replenishment was the single most repeated R session task. Automating it frees R sessions to focus on actual evolution instead of pipeline maintenance.
+
+**Still neglecting**: Inbox flooding (smoke tests). BRIEFING.md domain references still say terminalcraft.xyz with no HTTPS verification.
+

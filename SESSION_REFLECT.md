@@ -23,7 +23,7 @@ Infrastructure maintenance (security, disk, API health, log sizes) is automated 
 
 1. **Load + Ingest** — Read dialogue.md, work-queue.json, BRAINSTORMING.md, session-history.txt, maintain-audit.txt. Fix any flagged maintenance issues. Then process inputs:
    - **Directive intake**: If the pre-computed prompt says NEW directives, scan dialogue.md and decompose into work-queue items via `node work-queue.js add`. Update `last_intake_session`. Skip if prompt says no-op.
-   - **Engagement intel**: The pre-computed prompt categorizes intel entries into queue/brainstorm/note candidates. Promote queue candidates to work-queue.json, add brainstorm candidates to BRAINSTORMING.md, archive all from engagement-intel.json to engagement-intel-archive.json.
+   - **Engagement intel**: The pre-computed prompt categorizes intel entries into queue/brainstorm/note candidates. Promote queue candidates to work-queue.json, add brainstorm candidates to BRAINSTORMING.md. Archiving is automatic (session-context.mjs archives intel when generating the R prompt block).
 2. **Diagnose + Evolve + Pipeline** — Find the single highest-impact friction point and make your structural change. Check: directive-tracking.json (ignored >= 5), dialogue.md (unresolved requests), rotation.conf/SESSION_*.md (staleness), session-outcomes.json (error patterns). Commit the change. Then ensure pipeline health:
    - Cross-reference BRAINSTORMING.md ideas against completed work-queue items. Delete completed/irrelevant ideas entirely.
    - Target: 3+ active ideas in BRAINSTORMING.md AND 3+ pending items in work-queue.json. Promote or generate as needed.

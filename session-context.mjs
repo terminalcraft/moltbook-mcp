@@ -119,6 +119,21 @@ if (MODE === 'B') {
       actions.note.forEach(a => lines.push(`  - ${a}`));
     }
     result.intel_digest = lines.join('\n');
+
+    // Auto-archive intel when running for R sessions (R#56).
+    // Previously every R session manually read, archived, and cleared intel (~4 tool calls).
+    // Now session-context.mjs handles it: digest is injected into prompt, entries are archived,
+    // inbox is cleared. R session only needs to act on the digest (promote/brainstorm).
+    if (MODE === 'R') {
+      const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
+      let archive = [];
+      try { archive = JSON.parse(readFileSync(archivePath, 'utf8')); } catch {}
+      archive.push(...intel.map(e => ({ ...e, archived_session: COUNTER })));
+      const { writeFileSync: wfs } = await import('fs');
+      wfs(archivePath, JSON.stringify(archive, null, 2) + '\n');
+      wfs(intelPath, '[]\n');
+      result.intel_archived = intel.length;
+    }
   }
 
   // Directive intake check
@@ -166,7 +181,7 @@ if (MODE === 'B') {
   if (rBrainstorm < 3) urgent += `\n- WARN: Brainstorming has <3 ideas (${rBrainstorm}). Add forward-looking ideas.`;
   if (rIntel > 0) urgent += `\n- ${rIntel} engagement intel entries awaiting consumption.`;
   if (rIntelDigest) {
-    urgent += `\n\n### Intel digest (pre-categorized):\n${rIntelDigest}\nProcess these: promote queue candidates to work-queue.json, add brainstorm candidates to BRAINSTORMING.md, then archive all entries from engagement-intel.json to engagement-intel-archive.json.`;
+    urgent += `\n\n### Intel digest (pre-categorized, auto-archived):\n${rIntelDigest}\nProcess these: promote queue candidates to work-queue.json, add brainstorm candidates to BRAINSTORMING.md. Archiving is handled automatically — no manual archive step needed.`;
   }
 
   result.r_prompt_block = `## R Session: #${rCount}

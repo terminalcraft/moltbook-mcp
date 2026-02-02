@@ -1022,6 +1022,46 @@ app.get("/status/platforms/history", (req, res) => {
   res.json({ days: history.length, period: { from: history[0]?.date, to: history[history.length - 1]?.date }, trends, snapshots: history });
 });
 
+// Platform health predictor — ranked recommendations for E sessions (wq-019)
+app.get("/status/platforms/predict", (req, res) => {
+  try {
+    const days = Math.min(parseInt(req.query.days) || 7, 30);
+    const history = loadPlatformHistory().slice(-days);
+    if (history.length < 2) return res.json({ recommendations: [], reason: "insufficient history" });
+
+    const last = history[history.length - 1];
+    const first = history[0];
+    const firstMap = Object.fromEntries((first.platforms || []).map(p => [p.name, p]));
+
+    const scored = (last.platforms || []).map(p => {
+      const prev = firstMap[p.name];
+      const score = p.score || 0;
+      const delta = prev ? score - (prev.score || 0) : 0;
+      // Weight: current score (60%) + trend (20%) + recency bonus if live (20%)
+      const trendBonus = delta > 0 ? 20 : delta < 0 ? -10 : 0;
+      const liveBonus = (p.status === "live" || p.status === "creds_ok") ? 20 : 0;
+      const predictedScore = Math.round(score * 0.6 + trendBonus + liveBonus);
+      return {
+        name: p.name,
+        current_score: score,
+        trend: delta > 0 ? "recovering" : delta < 0 ? "degrading" : "stable",
+        status: p.status,
+        predicted_score: predictedScore,
+        recommendation: predictedScore >= 40 ? "engage" : predictedScore >= 20 ? "try" : "skip",
+      };
+    }).sort((a, b) => b.predicted_score - a.predicted_score);
+
+    res.json({
+      based_on_days: history.length,
+      recommendations: scored,
+      top_picks: scored.filter(s => s.recommendation === "engage").map(s => s.name),
+    });
+    logActivity("platforms.predicted", `Platform predictions: ${scored.filter(s => s.recommendation === "engage").length} engage, ${scored.filter(s => s.recommendation === "skip").length} skip`);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Session type effectiveness scoring (wq-016)
 app.get("/status/effectiveness", (req, res) => {
   const HISTORY_FILE = "/home/moltbot/.config/moltbook/session-history.txt";

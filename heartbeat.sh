@@ -89,11 +89,17 @@ B_FOCUS="feature"  # Legacy — kept for hook compatibility but no longer altern
 # --- Single-pass context computation ---
 # Replaces 7+ inline `node -e` invocations with one script. (R#47, s487)
 CTX_FILE="$STATE_DIR/session-context.json"
+CTX_ENV="$STATE_DIR/session-context.env"
 node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo '{}' > "$CTX_FILE"
-ctx() { node -e "const c=JSON.parse(require('fs').readFileSync('$CTX_FILE','utf8'));const v=c['$1'];console.log(v===undefined||v===null?'$2':v)" 2>/dev/null || echo "$2"; }
+
+# Source shell-compatible context — eliminates 11+ per-field node spawns. (R#50)
+# All fields available as CTX_<FIELD> (e.g. CTX_PENDING_COUNT, CTX_WQ_ITEM).
+if [ -f "$CTX_ENV" ]; then
+  source "$CTX_ENV"
+fi
 
 # Sync counter with engagement-state (from session-context.mjs)
-ESTATE_SESSION=$(ctx estate_session 0)
+ESTATE_SESSION="${CTX_ESTATE_SESSION:-0}"
 if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
   COUNTER="$ESTATE_SESSION"
   echo "$COUNTER" > "$SESSION_COUNTER_FILE"
@@ -115,7 +121,7 @@ fi
 # With BBRE rotation, R sessions replenish every 4th session. B should run whenever
 # there's ANY pending work, not wait for 2+ items.
 if [ "$MODE_CHAR" = "B" ] && [ -z "$OVERRIDE_MODE" ]; then
-  PENDING_COUNT=$(ctx pending_count 0)
+  PENDING_COUNT="${CTX_PENDING_COUNT:-0}"
   if [ "$PENDING_COUNT" -lt 1 ]; then
     echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items" >> "$LOG_DIR/selfmod.log"
     MODE_CHAR="R"
@@ -230,10 +236,10 @@ fi
 B_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "B" ]; then
   # Auto-unblock + task extraction handled by session-context.mjs (R#47)
-  WQ_ITEM=$(ctx wq_item "")
+  WQ_ITEM="${CTX_WQ_ITEM:-}"
 
   WQ_BLOCK=""
-  WQ_DEPTH=$(ctx pending_count 0)
+  WQ_DEPTH="${CTX_PENDING_COUNT:-0}"
   WQ_WARNING=""
   if [ "$WQ_DEPTH" -le 1 ] 2>/dev/null; then
     WQ_WARNING="
@@ -264,7 +270,7 @@ $(cat "$E_CONTEXT_FILE")"
   fi
 
   # Eval target from session-context.mjs (R#47)
-  EVAL_TARGET=$(ctx eval_target "")
+  EVAL_TARGET="${CTX_EVAL_TARGET:-}"
   if [ -n "$EVAL_TARGET" ]; then
     E_CONTEXT_BLOCK="${E_CONTEXT_BLOCK}
 
@@ -278,11 +284,11 @@ fi
 R_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "R" ]; then
   # Pipeline health + directive intake from session-context.mjs (R#47)
-  R_PENDING=$(ctx pending_count 0)
-  R_BLOCKED=$(ctx blocked_count 0)
-  R_BRAINSTORM=$(ctx brainstorm_count 0)
-  R_INTEL=$(ctx intel_count 0)
-  R_INTAKE_STATUS=$(ctx intake_status "unknown")
+  R_PENDING="${CTX_PENDING_COUNT:-0}"
+  R_BLOCKED="${CTX_BLOCKED_COUNT:-0}"
+  R_BRAINSTORM="${CTX_BRAINSTORM_COUNT:-0}"
+  R_INTEL="${CTX_INTEL_COUNT:-0}"
+  R_INTAKE_STATUS="${CTX_INTAKE_STATUS:-unknown}"
 
   R_HEALTH="Queue: ${R_PENDING} pending, ${R_BLOCKED} blocked | Brainstorming: ${R_BRAINSTORM} ideas | Intel inbox: ${R_INTEL} entries"
   R_URGENT=""
@@ -295,7 +301,7 @@ if [ "$MODE_CHAR" = "R" ]; then
 
   # Pre-categorized intel digest from session-context.mjs (R#48).
   # Replaces manual JSON parsing — R sessions get actionable summaries directly.
-  R_INTEL_DIGEST=$(ctx intel_digest "")
+  R_INTEL_DIGEST="${CTX_INTEL_DIGEST:-}"
   if [ -n "$R_INTEL_DIGEST" ]; then
     R_URGENT="${R_URGENT}
 

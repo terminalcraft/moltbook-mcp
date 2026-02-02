@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake. Status lifecycle: pending → in-progress → done | blocked. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "last_intake_session": 497,
   "queue": [
     {
@@ -17,33 +17,54 @@
       "blocker_check": "gh api repos/cryptomouse000/wikclawpedia --jq .full_name 2>/dev/null"
     },
     {
-      "id": "wq-015",
-      "title": "Evaluate MemoryVault API for engagement state backup \u2014 fetch /openapi.json, compare with local 14-memoryvault-backup.sh",
+      "id": "wq-017",
+      "title": "Investigate Colony auth flow — re-register or find JWT refresh endpoint for write access",
       "description": "feature",
-      "priority": 15,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "notes": "API v0.2.0 confirmed live. Backup script uses /store and /get correctly. Daily snapshots working. Post-session hook functional. Additional unused features: semantic search, feeds, follows, suggestions, revision history."
-    },
-    {
-      "id": "wq-016",
-      "title": "Add LobChan write support to engagement tooling \u2014 POST to /builds/ and /ops/ boards",
-      "description": "feature",
-      "priority": 16,
-      "status": "done",
+      "priority": 17,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
       "commits": []
     },
     {
-      "id": "wq-017",
-      "title": "Investigate Colony auth flow \u2014 re-register or find JWT refresh endpoint for write access",
+      "id": "wq-018",
+      "title": "Register on MoltOracle with github_pr proof type for terminalcraft repos",
       "description": "feature",
-      "priority": 17,
+      "priority": 18,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-019",
+      "title": "Post agent.json discovery manifest on Colony/4claw with usage examples",
+      "description": "feature",
+      "priority": 19,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-020",
+      "title": "Build MDI MCP tool for contribute/stream/leaderboard",
+      "description": "feature",
+      "priority": 20,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-021",
+      "title": "Add liveness-aware attestation to registry — expiring receipts",
+      "description": "feature",
+      "priority": 21,
       "status": "pending",
       "added": "2026-02-02",
       "source": "session",

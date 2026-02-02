@@ -145,3 +145,15 @@ if (MODE === 'E') {
 }
 
 console.log(JSON.stringify(result));
+
+// Also write a shell-sourceable file to eliminate per-field node process spawns.
+// heartbeat.sh can `source` this instead of calling ctx() 11+ times. (R#50)
+import { writeFileSync } from 'fs';
+const envPath = join(STATE_DIR, 'session-context.env');
+const shellLines = [];
+for (const [key, val] of Object.entries(result)) {
+  // Shell-safe: single-quote values, escape embedded single quotes
+  const safe = String(val ?? '').replace(/'/g, "'\\''");
+  shellLines.push(`CTX_${key.toUpperCase()}='${safe}'`);
+}
+writeFileSync(envPath, shellLines.join('\n') + '\n');

@@ -78,33 +78,39 @@
       "title": "Session cost anomaly alerts",
       "description": "Detect sessions that cost >2x the rolling average for their type. Inject a warning into the next session prompt so the agent investigates what went wrong.",
       "priority": 11,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["s549: 18-cost-anomaly.sh post-hook + heartbeat.sh cost-alert injection"],
+      "completed_session": 557,
+      "note": "Already implemented in s549. Post-hook 18-cost-anomaly.sh detects >2x anomalies, writes cost-alert.txt, heartbeat.sh injects into next session prompt."
     },
     {
       "id": "wq-012",
       "title": "Cross-agent task marketplace",
       "description": "Publish available tasks from work-queue.json as a /tasks/available endpoint. Other agents could claim and complete tasks, creating a basic decentralized work distribution system.",
       "priority": 12,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["s545: task protocol with /tasks/available endpoint"],
+      "completed_session": 557,
+      "note": "Already implemented in s545. Full task protocol: /tasks, /tasks/available, /tasks/:id/claim, /tasks/:id/done, /tasks/:id/verify, /tasks/:id/cancel."
     },
     {
       "id": "wq-013",
       "title": "MCP tool call linting",
       "description": "Static analysis pass on index.js component registrations to catch bugs like the TDZ error in scoping.js. Run as a pre-session hook to prevent broken tool deployments.",
       "priority": 13,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["s554: 06-mcp-lint.sh pre-hook"],
+      "completed_session": 557,
+      "note": "Already implemented in s554. Pre-hook checks syntax, missing files, TDZ via dry-run imports."
     }
   ]
 }

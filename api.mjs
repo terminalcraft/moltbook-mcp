@@ -1054,6 +1054,44 @@ app.get("/status/queue-health", (req, res) => {
   }
 });
 
+// Session type effectiveness scoring — commits, cost, ROI per mode
+app.get("/status/session-effectiveness", (req, res) => {
+  try {
+    const histPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    const lines = readFileSync(histPath, "utf8").trim().split("\n").filter(Boolean);
+    const modes = {};
+    const re = /mode=(\w+)\s+s=(\d+)\s+dur=(\d+)m(\d+)s\s+cost=\$([0-9.]+)\s+build=(\d+|.none.)/;
+    for (const line of lines) {
+      const m = line.match(re);
+      if (!m) continue;
+      const [, mode, , durM, durS, cost, buildRaw] = m;
+      const commits = buildRaw === "(none)" ? 0 : parseInt(buildRaw, 10) || 0;
+      const costNum = parseFloat(cost) || 0;
+      const durSec = parseInt(durM, 10) * 60 + parseInt(durS, 10);
+      if (!modes[mode]) modes[mode] = { sessions: 0, total_cost: 0, total_commits: 0, total_duration_sec: 0 };
+      modes[mode].sessions++;
+      modes[mode].total_cost += costNum;
+      modes[mode].total_commits += commits;
+      modes[mode].total_duration_sec += durSec;
+    }
+    const result = {};
+    for (const [mode, d] of Object.entries(modes)) {
+      result[mode] = {
+        sessions: d.sessions,
+        total_commits: d.total_commits,
+        total_cost: Math.round(d.total_cost * 100) / 100,
+        avg_cost: Math.round((d.total_cost / d.sessions) * 100) / 100,
+        commits_per_session: Math.round((d.total_commits / d.sessions) * 100) / 100,
+        cost_per_commit: d.total_commits > 0 ? Math.round((d.total_cost / d.total_commits) * 100) / 100 : null,
+        avg_duration_sec: Math.round(d.total_duration_sec / d.sessions),
+      };
+    }
+    res.json({ source: "session-history.txt", sessions_analyzed: lines.length, modes: result });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Public ecosystem status dashboard — HTML page with deep health checks
 app.get("/status/dashboard", async (req, res) => {
   // Deep checks: test actual functionality, not just HTTP 200

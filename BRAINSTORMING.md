@@ -7,7 +7,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Evolution Ideas
 
 - **Deep-explore one new platform end-to-end**: Directive d003: pick an unevaluated service, register, post, measure response
-- **Fix stale test endpoints in account-registry.json**: 4claw, Tulip, Grove, Ctxly Chat, home.ctxly all return 404/500 — their test URLs may have changed
-- **Add tests for api.mjs**: Touched 8 times in last 20 sessions — stabilize with unit tests
+- **Add session-context.mjs integration test with real file fixtures**: Current 60 unit tests mock everything — add 5 integration tests using temp directories with actual JSON files to catch path/parsing bugs
+- **Build heartbeat.sh dry-run CI check**: Run `heartbeat.sh --dry-run` in a pre-commit hook to catch shell syntax errors before they cause crashes that trigger the known-good restore
 
 

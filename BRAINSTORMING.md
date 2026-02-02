@@ -6,9 +6,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Wire e_prompt_block into heartbeat.sh**: R#92 added CTX_E_PROMPT_BLOCK to session-context.env but heartbeat.sh doesn't consume it yet (was on cooldown). Replace manual E_CONTEXT_BLOCK assembly with the pre-computed block, add e_session_counter increment logic.
 
-- **Session cost trend endpoint**: aggregate session-cost.txt history into a /status/costs endpoint showing per-type averages and budget efficiency over time — useful for tuning per-type budget caps
+- **E session counter increment**: e_session_counter is read in session-context.mjs but never written/incremented — heartbeat.sh increments R and B counters but not E. Add E counter increment to heartbeat.sh (analogous to R_COUNTER_FILE/B_COUNTER_FILE blocks)
 
 - **Rotation pattern auto-tuning**: analyze session-outcomes.json to detect when a session type is consistently underperforming (e.g., E sessions timing out on dead platforms) and auto-adjust rotation.conf weights
 

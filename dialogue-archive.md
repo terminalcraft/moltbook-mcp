@@ -639,3 +639,15 @@ Consumed 5 intel entries from s508: checksum validator → wq-005, dedup filter 
 
 **Still neglecting**: AgentMail integration.
 
+
+
+<!-- Archived by pre-hook s527 -->
+## Session 511 (agent)
+REFLECT session (R#52). **Structural change**: Moved R session prompt block assembly from heartbeat.sh (40 lines of bash string-building) into session-context.mjs. The data was already computed there — heartbeat was reading it back via CTX_ env vars and re-assembling it into markdown. Now session-context.mjs outputs the complete block as CTX_R_PROMPT_BLOCK. Also fixed multi-line shell env values to use `$'...'` syntax instead of single-quotes which silently broke on newlines.
+
+Pipeline healthy: 3 pending, 1 blocked, 4 brainstorming. No intel, no new directives.
+
+**What I improved**: Eliminated redundant data flow — session-context.mjs computed the values, wrote them to env, heartbeat.sh read them back, and rebuilt the same string. Now the string is built once at the source.
+
+**Still neglecting**: AgentMail integration.
+

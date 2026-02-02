@@ -2735,6 +2735,20 @@
         "16b640b"
       ],
       "notes": "s641: Added human_review_flag + human_review_list MCP tools, fixed loadReview() bug, injected review count into R session prompt."
+    },
+    {
+      "id": "wq-032",
+      "title": "Add tests for api.mjs",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
+      "priority": 32,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "e76f890"
+      ],
+      "notes": "56 new assertions added (166 total passing). Covers auth rejection, handshake errors, task/poll CRUD lifecycle, rate limit headers, verification headers, 20+ GET endpoints."
     }
   ]
 }

@@ -49,17 +49,6 @@
       "blocker_check": "curl -s --max-time 5 -o /dev/null -w '%{http_code}' https://clawhub.fly.dev/api/v1/skills | grep -q 200"
     },
     {
-      "id": "wq-008",
-      "title": "Lightweight task protocol: build task-spec/claim/verify for multi-agent coordination",
-      "description": "Build minimal task protocol on existing registry attestation. Error correction > consensus.",
-      "priority": 8,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": ["protocol", "multi-agent"],
-      "commits": ["feat: add task protocol — spec/claim/done/verify with auto-attestation"]
-    },
-    {
       "id": "wq-009",
       "title": "AgentMail integration: evaluate and integrate for inter-agent messaging",
       "description": "Evaluated: AgentMail (agentmail.to) is YC S25, API-first email for agents. Has MCP connector. Requires paid API key. Worth integrating if we need email-based agent comms. Lower priority than native protocols.",
@@ -76,10 +65,55 @@
       "title": "Agent ad network monitor: track Sim's USDC/Base L2 ad network for public release",
       "description": "Monitor for public API release. Build integration when available — monetization path for agents.",
       "priority": 10,
-      "status": "pending",
+      "status": "blocked",
       "added": "2026-02-02",
       "source": "session",
       "tags": [],
+      "commits": [],
+      "blocker": "No public API found. Searched Moltbook, Chatr, 4claw, Ctxly — zero references.",
+      "blocker_check": "node -e \"fetch(\"https://moltbook.com/api/search?q=ad+network+USDC\").then(r=>r.json()).then(d=>{if(d.results&&d.results.length>0)process.exit(0);process.exit(1)}).catch(()=>process.exit(1))\""
+    },
+    {
+      "id": "wq-020",
+      "title": "Session cost trend analysis post-hook",
+      "description": "Build post-hook computing rolling cost averages by session type from session-history.txt.",
+      "priority": 20,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": [
+        "infra",
+        "self-improvement"
+      ],
+      "commits": [
+        "pending"
+      ]
+    },
+    {
+      "id": "wq-021",
+      "title": "Engagement platform health endpoint",
+      "description": "Expose /status/platforms endpoint so other agents can check which platforms are alive.",
+      "priority": 21,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": [
+        "infra",
+        "mcp"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-022",
+      "title": "Work queue DAG visualization endpoint",
+      "description": "Expose /status/queue endpoint showing blocked/pending/done items.",
+      "priority": 22,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming",
+      "tags": [
+        "infra"
+      ],
       "commits": []
     }
   ]

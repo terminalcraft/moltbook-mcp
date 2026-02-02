@@ -6839,6 +6839,48 @@ app.get("/smoke-tests/badge", (req, res) => {
   res.json({ schemaVersion: 1, label: "smoke tests", message: ok ? `${latest.passed} passed` : `${latest.failed} failed`, color: ok ? "brightgreen" : "red" });
 });
 
+// HTML smoke test dashboard (wq-015)
+app.get("/status/smoke", (req, res) => {
+  const history = loadSmokeResults();
+  const latest = history[history.length - 1];
+  const recent = history.slice(-20).reverse();
+  const allPass = latest && latest.failed === 0;
+  const statusColor = !latest ? "#585b70" : allPass ? "#a6e3a1" : "#f38ba8";
+  const statusText = !latest ? "No data" : allPass ? `All ${latest.passed} passed` : `${latest.failed} failed`;
+
+  let testRows = "";
+  if (latest?.results) {
+    for (const t of latest.results) {
+      const color = t.pass ? "#a6e3a1" : "#f38ba8";
+      const icon = t.pass ? "✓" : "✗";
+      testRows += `<tr><td style="color:${color}">${icon}</td><td>${t.method}</td><td>${t.path}</td><td>${t.status || "ERR"}</td><td>${t.latency}ms</td><td style="color:#585b70">${t.error || ""}</td></tr>`;
+    }
+  }
+
+  let histRows = "";
+  for (const r of recent) {
+    const c = r.failed === 0 ? "#a6e3a1" : "#f38ba8";
+    histRows += `<tr><td style="color:#585b70">${r.ts?.slice(0, 19)}</td><td style="color:${c}">${r.passed}/${r.total}</td><td>${r.elapsed}ms</td></tr>`;
+  }
+
+  res.type("html").send(`<!DOCTYPE html>
+<html><head><title>Smoke Tests</title>
+<style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;margin:2em}
+table{border-collapse:collapse;margin:1em 0}td,th{padding:4px 12px;text-align:left;border-bottom:1px solid #313244}
+th{color:#89b4fa}h1{color:#89b4fa}h2{color:#a6adc8;margin-top:2em}
+a{color:#89b4fa}.badge{display:inline-block;padding:4px 12px;border-radius:4px;font-weight:bold;font-size:1.2em}</style>
+</head><body>
+<h1>Smoke Test Dashboard</h1>
+<div class="badge" style="background:${statusColor};color:#1e1e2e">${statusText}</div>
+${latest ? `<span style="color:#585b70;margin-left:1em">${latest.ts?.slice(0, 19)} · ${latest.elapsed}ms</span>` : ""}
+<h2>Latest Results</h2>
+<table><tr><th></th><th>Method</th><th>Path</th><th>Status</th><th>Latency</th><th>Error</th></tr>${testRows}</table>
+<h2>History (last 20)</h2>
+<table><tr><th>Time</th><th>Passed</th><th>Duration</th></tr>${histRows}</table>
+<p style="color:#585b70;margin-top:2em"><a href="/smoke-tests/latest">JSON</a> · <a href="/smoke-tests/history">History JSON</a> · <a href="/smoke-tests/badge">Badge</a></p>
+</body></html>`);
+});
+
 // Auto-run smoke tests every 30 min + 30s after startup
 setInterval(async () => { try { await runSmokeTests(); } catch {} }, 30 * 60 * 1000);
 setTimeout(async () => { try { await runSmokeTests(); } catch {} }, 30_000);

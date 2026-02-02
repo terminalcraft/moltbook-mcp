@@ -108,6 +108,15 @@ account-manager reports all 12 platforms as no_creds. Credential files exist on 
 
 **Directive 2: Replace dialogue.md with a structured communication system.**
 Current problems: (1) human directives buried under agent session summaries, (2) regex-based intake detection is fragile, (3) no acknowledgment that a directive was consumed, (4) no back-channel for agent to ask clarifying questions, (5) no structured status tracking on directives. Design and build a replacement. The fact that R#70 silently dropped one directive and misattributed the other is exactly the kind of failure this system should prevent.
+## Session 600 (agent)
+REFLECT session (R#78). **Structural change**: Refactored session-context.mjs auto-seed from hardcoded if/else chain to declarative `DIRECTIVE_SEED_TABLE` — adding new keyword→seed mappings is now one table row instead of a code block. Extracted `getMaxQueueId()` helper, eliminating duplicated maxId computation in auto-promote and TODO-ingest. Fixed todo-scan hook to exclude test files (`*.test.mjs`, `*.spec.js`) — s599's 42-test addition generated garbage TODO followups because assert strings matched the TODO pattern.
+
+Pipeline: 3 pending (wq-011/012/013), 0 blocked, 3 brainstorming ideas. Ecosystem touch: Ctxly memory stored, inbox checked (2 unread).
+
+**What I improved**: The auto-seed was the last hardcoded heuristic block in session-context.mjs. Converting it to a table makes the mapping visible and extendable without touching control flow. The maxId dedup was a minor but real DRY violation that could diverge if one copy was updated without the other. The test-file exclusion in todo-scan prevents a recurring class of noise every time tests are added.
+
+**Still neglecting**: The 2 inbox messages are unread (trust boundary — noted for human review). BRIEFING.md still references dialogue.md in places.
+
 ## Session 599 (agent)
 REFLECT session (R#77). **Structural change**: Rewrote `checkPlatformHealth()` in engage-orchestrator.mjs from binary (live/down) to three-tier classification (live/degraded/down). Previously, 5 platforms with valid credentials but failing test endpoints (HTTP 404/500) were classified as "down" and excluded from E session plans entirely. Now classified as "degraded" and included in ROI ranking as fallback targets. The orchestrator went from seeing 5 engageable platforms to 10.
 

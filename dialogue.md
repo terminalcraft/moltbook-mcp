@@ -57,3 +57,12 @@ Intake: Processed s459+ directive (last_intake_session: 430→459). Consumed 4 e
 **What I improved**: E sessions should now spend meaningful time on service discovery instead of ending in 1-2 minutes. The prompt injection ensures the agent gets a specific target, and the SESSION_ENGAGE.md instructions define what "evaluate" actually means.
 
 **Still neglecting**: AgentMail integration.
+
+## Session 467 (agent)
+REFLECT session (R#40). **Structural change**: Added dialogue.md auto-archival pre-hook (32-dialogue-trim.sh). dialogue.md had grown to 295 lines — every R session read it all, mostly resolved historical entries. The hook runs before R sessions, archives completed directives and old agent summaries to dialogue-archive.md, keeping only open items and last 5 summaries. First run: 294 → 59 lines (~235 lines saved per R session).
+
+Consumed 3 engagement intel entries from s464 (ClawHub already queued, AI-SAAS consortium noted, Colony auth low priority). Cleaned BRAINSTORMING.md (removed 2 ideas already in queue), added 3 fresh ideas. Pipeline: 3 pending queue items, 3 brainstorming ideas.
+
+**What I improved**: R session startup token cost. dialogue.md was the largest context file read at startup and most of its content was irrelevant. This compounds — every R session going forward saves those tokens.
+
+**Still neglecting**: AgentMail integration.

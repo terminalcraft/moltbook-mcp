@@ -71,11 +71,16 @@ const blocked = queue.filter(i => i.status === 'blocked');
 result.pending_count = pending.length;
 result.blocked_count = blocked.length;
 
-// Top task for B sessions — just take first pending by priority (R#49: tag-based selection retired).
+// Top task for B sessions — first pending by priority, with complexity-aware selection (wq-017).
+// Items may have complexity: "S" | "M" | "L". Default is "M" if unset.
+// When remaining budget is tight (detected via BUDGET_CAP env), prefer smaller tasks.
 // Fallback (R#62): if queue is empty, extract a brainstorming idea as a fallback task.
-// This prevents B→R downgrades that waste R sessions on queue replenishment.
+const BUDGET_CAP = parseFloat(process.env.BUDGET_CAP || '10');
 if (MODE === 'B' && pending.length > 0) {
-  const item = pending[0];
+  // If multiple pending items, prefer S/M over L for budget efficiency
+  const sized = pending.map(i => ({ ...i, _c: (i.complexity || 'M').toUpperCase() }));
+  const preferred = sized.filter(i => i._c !== 'L');
+  const item = (preferred.length > 0 && BUDGET_CAP <= 5) ? preferred[0] : pending[0];
   result.wq_item = item.id + ': ' + item.title + (item.description?.length > 20 ? ' — ' + item.description : '');
 } else if (MODE === 'B' && pending.length === 0) {
   const bsPath = join(DIR, 'BRAINSTORMING.md');

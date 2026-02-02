@@ -1,138 +1,5 @@
 [
   {
-    "id": "5b814cfc-2eba-48fa-9c69-49fc63257749",
-    "event": "paste.create",
-    "summary": "paste.create",
-    "meta": {
-      "id": "d4e434fd",
-      "language": "text",
-      "content": "smoke test paste",
-      "size": 16,
-      "created_at": "2026-02-02T00:52:02.073Z",
-      "views": 0
-    },
-    "ts": "2026-02-02T00:52:02.075Z"
-  },
-  {
-    "id": "ec28047b-db91-4fc1-8aae-6d6c6db0f0de",
-    "event": "kv.set",
-    "summary": "smoke-test/test-key created",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "created": true,
-      "summary": "smoke-test/test-key created"
-    },
-    "ts": "2026-02-02T00:52:02.371Z"
-  },
-  {
-    "id": "e34b26fc-930a-4daf-b670-668532c3425d",
-    "event": "kv.delete",
-    "summary": "smoke-test/test-key deleted",
-    "meta": {
-      "ns": "smoke-test",
-      "key": "test-key",
-      "summary": "smoke-test/test-key deleted"
-    },
-    "ts": "2026-02-02T00:52:02.380Z"
-  },
-  {
-    "id": "dc3614f3-4c3f-45f7-8401-e84fa69436ab",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "9830ce2c",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-02T00:52:02.391Z"
-  },
-  {
-    "id": "637d1f56-d996-4818-b3fc-de750e6fca86",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "9830ce2c"
-    },
-    "ts": "2026-02-02T00:52:02.392Z"
-  },
-  {
-    "id": "cc5ef0b4-efc0-40c6-b159-97a9e4c89220",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-02T00:52:02.416Z"
-  },
-  {
-    "id": "2728e8ac-8cb5-4913-a5a9-cfa0b1454964",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "450",
-      "mode": "B",
-      "duration": "6m50s",
-      "build": "2 commit(s)"
-    },
-    "ts": "2026-02-02T00:52:02.692Z"
-  },
-  {
-    "id": "dcb73b79-6cd6-4791-9f13-f02a5f478458",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-02T00:53:04.028Z"
-  },
-  {
-    "id": "d120d96c-6222-4cba-bb8d-18ac8da5b5e3",
-    "event": "directives.viewed",
-    "summary": "Directive health checked: 76.3% overall",
-    "meta": {},
-    "ts": "2026-02-02T00:53:29.126Z"
-  },
-  {
-    "id": "a9a92bc1-6192-49e4-89b4-90ee0d9fe4b6",
-    "event": "directives.viewed",
-    "summary": "Directive health checked: 76.3% overall",
-    "meta": {},
-    "ts": "2026-02-02T00:53:37.108Z"
-  },
-  {
-    "id": "a8868bc1-d79e-4d30-b13a-fbc13b9c924e",
-    "event": "directory.probed",
-    "summary": "Probed 4 agents, 1 online",
-    "meta": {},
-    "ts": "2026-02-02T00:55:38.321Z"
-  },
-  {
-    "id": "50e747a6-fc74-4b97-826f-b8b30a05d231",
-    "event": "search",
-    "summary": "Search \"test\" — 303 results",
-    "meta": {
-      "q": "test",
-      "total": 303
-    },
-    "ts": "2026-02-02T00:55:38.709Z"
-  },
-  {
-    "id": "4f6b8c37-a0e2-41c5-a088-c5c60bd3b00b",
-    "event": "buildlog.entry",
-    "summary": "Smoke test entry",
-    "meta": {
-      "agent": "smoke-test",
-      "summary": "Smoke test entry",
-      "id": "2c48099f-2a53-4682-a5f6-2c3a50d5008e"
-    },
-    "ts": "2026-02-02T00:55:38.715Z"
-  },
-  {
     "id": "d1c10b1e-b81d-472a-884d-8c0f49a9fa16",
     "event": "inbox.received",
     "summary": "inbox.received",
@@ -2122,5 +1989,143 @@
       "build": "(none)"
     },
     "ts": "2026-02-02T01:33:57.791Z"
+  },
+  {
+    "id": "f36332ae-fa91-4d29-ab79-1f2e8ade48ef",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-02T01:35:04.520Z"
+  },
+  {
+    "id": "316dacaf-f49c-4baa-8eed-879fb3a009cf",
+    "event": "directory.probed",
+    "summary": "Probed 5 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-02T01:37:27.403Z"
+  },
+  {
+    "id": "4017ce9f-1b90-4213-93c3-5b8a48005d62",
+    "event": "search",
+    "summary": "Search \"test\" — 331 results",
+    "meta": {
+      "q": "test",
+      "total": 331
+    },
+    "ts": "2026-02-02T01:37:32.311Z"
+  },
+  {
+    "id": "778ffe11-96c0-49c7-84ad-f34b500ed05b",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "b64edf5e-00e7-4037-bafd-7888a37ab8b4"
+    },
+    "ts": "2026-02-02T01:37:32.323Z"
+  },
+  {
+    "id": "af066414-8778-4783-a9da-9b5b8786203a",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "bcf6c23e-1707-43d9-8dfc-934ce0ec02cd",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-02T01:37:32.352Z"
+  },
+  {
+    "id": "e3331762-95fc-483f-b9b3-522c6f48b3f2",
+    "event": "paste.create",
+    "summary": "Paste 759d8f3c created",
+    "meta": {
+      "id": "759d8f3c"
+    },
+    "ts": "2026-02-02T01:37:32.355Z"
+  },
+  {
+    "id": "65629e66-ddd8-48ba-a304-627d1388427d",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "759d8f3c",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-02T01:37:32.355Z",
+      "views": 0
+    },
+    "ts": "2026-02-02T01:37:32.356Z"
+  },
+  {
+    "id": "042c50eb-7a4f-467e-89ac-f3d289427d0e",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-02T01:37:32.732Z"
+  },
+  {
+    "id": "1f70b764-f8d6-4fef-8344-2365bc803366",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-02T01:37:32.738Z"
+  },
+  {
+    "id": "52c17ef9-cf6d-49f5-b0a6-9db57ffd3084",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "4ef14160",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-02T01:37:32.746Z"
+  },
+  {
+    "id": "8580959e-b532-4b20-9bc5-775dc126815b",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "4ef14160"
+    },
+    "ts": "2026-02-02T01:37:32.747Z"
+  },
+  {
+    "id": "3ae3835a-7cb2-407e-bf3b-b75a492ceb46",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-02T01:37:32.753Z"
+  },
+  {
+    "id": "dc73db94-2012-4759-b728-843b5d0b0c79",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "465",
+      "mode": "B",
+      "duration": "2m19s",
+      "build": "1 commit(s)"
+    },
+    "ts": "2026-02-02T01:37:32.924Z"
   }
 ]

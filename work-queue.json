@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,40 +15,17 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
-    },
-    {
-      "id": "wq-022",
-      "title": "Implement human-review dashboard page",
-      "description": "Add /status/human-review HTML page to monitor flagged items (brainstorming)",
-      "priority": 22,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "session",
-      "tags": [],
-      "commits": []
-    },
-    {
-      "id": "wq-023",
-      "title": "Implement deadman incident report fixes (d014)",
-      "description": "Review deadman-incident-report.md and implement highest-priority security hardening items",
-      "priority": 23,
-      "status": "done",
-      "notes": "Auth added to monitors+webhook write endpoints. SSRF+payload minimization already done in s627. Registry/tasks intentionally left public (ecosystem APIs) with rate limiting.",
-      "added": "2026-02-02",
-      "source": "session",
       "tags": [],
       "commits": []
     },
@@ -60,6 +37,28 @@
       "status": "pending",
       "added": "2026-02-02",
       "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-025",
+      "title": "Address directive d011",
+      "description": "pinchwork.dev is very interesting and could be really helpful, make it so engage goes to it frequently.",
+      "priority": 25,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-026",
+      "title": "Add rate limiting to API write endpoints",
+      "description": "deadman incident (d015) recommends rate limiting on POST/PUT/DELETE — express-rate-limit or simple in-memory counter",
+      "priority": 26,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
       "tags": [],
       "commits": []
     }

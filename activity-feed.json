@@ -1,167 +1,5 @@
 [
   {
-    "id": "d2ecdec2-1cc2-4eab-aba1-7a9b86eb23e6",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T14:08:04.923Z"
-  },
-  {
-    "id": "b5503052-71e2-435f-81e2-ff8676267439",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 0/22 passed in 17ms",
-    "meta": {
-      "id": "962d0b74",
-      "passed": 0,
-      "failed": 22
-    },
-    "ts": "2026-02-02T14:08:34.947Z"
-  },
-  {
-    "id": "0ab45317-5c37-4b67-a7fc-71f48f8933a7",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "9438b27a",
-      "name": "Self Health",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "up",
-      "to": "down",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-02T14:08:44.928Z"
-  },
-  {
-    "id": "566d40ce-bb76-42ce-9ea4-8580de4d57f5",
-    "event": "monitor.status_changed",
-    "summary": "Self Health up → down",
-    "meta": {
-      "id": "9438b27a",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "up",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.930Z"
-  },
-  {
-    "id": "46810dc6-db19-41be-b50e-f6a5d8d37557",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "248e5646",
-      "name": "backup_exfil",
-      "url": "http://127.0.0.1:3847/backup",
-      "from": "degraded",
-      "to": "down",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:08:44.935Z"
-  },
-  {
-    "id": "9e4f305d-cb13-4e60-a1c7-f8291bccffb8",
-    "event": "monitor.status_changed",
-    "summary": "backup_exfil degraded → down",
-    "meta": {
-      "id": "248e5646",
-      "url": "http://127.0.0.1:3847/backup",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.937Z"
-  },
-  {
-    "id": "99738f31-c1ac-4968-bb80-1bf7a4bf8811",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "f033c73c",
-      "name": "admin_probe",
-      "url": "http://127.0.0.1:3847/admin",
-      "from": "degraded",
-      "to": "down",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:08:44.939Z"
-  },
-  {
-    "id": "73f0b6c5-6694-4142-a5bc-3cf19eb8b75b",
-    "event": "monitor.status_changed",
-    "summary": "admin_probe degraded → down",
-    "meta": {
-      "id": "f033c73c",
-      "url": "http://127.0.0.1:3847/admin",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.941Z"
-  },
-  {
-    "id": "b20a9bf5-589a-458b-8b1e-c82c1ef66923",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "37a3cd78",
-      "name": "config_probe",
-      "url": "http://127.0.0.1:3847/config",
-      "from": "degraded",
-      "to": "down",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:08:44.943Z"
-  },
-  {
-    "id": "023349a2-0a88-460b-bfef-3aed2f21491c",
-    "event": "monitor.status_changed",
-    "summary": "config_probe degraded → down",
-    "meta": {
-      "id": "37a3cd78",
-      "url": "http://127.0.0.1:3847/config",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.945Z"
-  },
-  {
-    "id": "66dc4b9d-88fe-47de-9b08-a511d737db00",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "ac7da708",
-      "name": "keys_probe",
-      "url": "http://127.0.0.1:3847/keys",
-      "from": "degraded",
-      "to": "down",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:08:44.947Z"
-  },
-  {
-    "id": "5bb30fb2-13b8-478d-a509-44484e1bc503",
-    "event": "monitor.status_changed",
-    "summary": "keys_probe degraded → down",
-    "meta": {
-      "id": "ac7da708",
-      "url": "http://127.0.0.1:3847/keys",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.949Z"
-  },
-  {
-    "id": "3654ee22-b236-4af1-941d-aa83fe691839",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "e3114d05",
-      "name": "backup_ssrf",
-      "url": "http://127.0.0.1:3847/backups/2026-02-02",
-      "from": "degraded",
-      "to": "down",
-      "agent": "backup_probe"
-    },
-    "ts": "2026-02-02T14:08:44.951Z"
-  },
-  {
     "id": "a1a3859f-16c0-4988-8308-271ddaa01204",
     "event": "monitor.status_changed",
     "summary": "backup_ssrf degraded → down",
@@ -2055,5 +1893,140 @@
       "build": "4 commit(s)"
     },
     "ts": "2026-02-02T17:21:12.661Z"
+  },
+  {
+    "id": "f8ebedaa-5dad-4eb0-9bc8-42f7434371cd",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-02T17:22:07.138Z"
+  },
+  {
+    "id": "7de43344-080d-4f68-93b0-12c93bb65d28",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 85.9% overall",
+    "meta": {},
+    "ts": "2026-02-02T17:24:18.586Z"
+  },
+  {
+    "id": "429bc45d-e911-433c-a8f6-ce5c40533610",
+    "event": "directory.probed",
+    "summary": "Probed 2 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-02T17:24:21.795Z"
+  },
+  {
+    "id": "16727f08-8cc9-41ac-8ac7-4266308cba5b",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "0275b85a-bad8-4a43-b2f2-d16d0db4110e"
+    },
+    "ts": "2026-02-02T17:24:26.752Z"
+  },
+  {
+    "id": "a1892edf-87ad-49c0-a44c-b31037e8431f",
+    "event": "search",
+    "summary": "Search \"test\" — 619 results",
+    "meta": {
+      "q": "test",
+      "total": 619
+    },
+    "ts": "2026-02-02T17:24:26.765Z"
+  },
+  {
+    "id": "95ccf19a-b709-43f1-a10b-646eae661298",
+    "event": "paste.create",
+    "summary": "Paste 7daf17b7 created",
+    "meta": {
+      "id": "7daf17b7"
+    },
+    "ts": "2026-02-02T17:24:26.812Z"
+  },
+  {
+    "id": "873a5b7c-9361-47e0-9f80-9282621ab67e",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "7daf17b7",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-02T17:24:26.811Z",
+      "views": 0
+    },
+    "ts": "2026-02-02T17:24:26.812Z"
+  },
+  {
+    "id": "88747710-619c-4a7c-9002-8f8e589787a3",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-02T17:24:27.193Z"
+  },
+  {
+    "id": "432ecc69-4000-4656-9bee-e6b05ea28f09",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-02T17:24:27.196Z"
+  },
+  {
+    "id": "075dce05-8ee9-4cc5-8b8c-e9d795aa6bda",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "2262259a",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-02T17:24:27.202Z"
+  },
+  {
+    "id": "82c375b6-b433-49c0-97d1-db3862372749",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "2262259a"
+    },
+    "ts": "2026-02-02T17:24:27.203Z"
+  },
+  {
+    "id": "710f0dc7-3173-43c3-a54d-9ca119b05925",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-02T17:24:27.216Z"
+  },
+  {
+    "id": "b211f136-0bdf-4f27-9a51-0c74bffd7df0",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "632",
+      "mode": "R",
+      "duration": "2m10s",
+      "build": "1 commit(s)"
+    },
+    "ts": "2026-02-02T17:24:27.341Z"
   }
 ]

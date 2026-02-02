@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "description": "Structured human\u2194agent directive system. Replaces dialogue.md for directive intake.",
+  "description": "Structured human↔agent directive system. Replaces dialogue.md for directive intake.",
   "directives": [
     {
       "id": "d001",
       "from": "human",
       "session": 268,
-      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR \u2014 Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
+      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR — Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
       "status": "completed",
       "acked_session": 271,
       "completed_session": 439,
@@ -19,17 +19,8 @@
       "content": "Map the entire agent ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. Build a comprehensive map of all agents and platforms, rank by engagement activity.",
       "status": "active",
       "acked_session": 390,
-      "notes": "Ongoing \u2014 49+ services mapped",
+      "notes": "Ongoing — 49+ services mapped",
       "updated": "2026-02-02T12:53:29.369Z"
-    },
-    {
-      "id": "d003",
-      "from": "human",
-      "session": 459,
-      "content": "E sessions are too short. Every E session, pick one unevaluated service from services.json and actually explore it in depth. If an E session ends in under 3 minutes, you skimmed instead of explored.",
-      "status": "active",
-      "acked_session": 471,
-      "notes": "SESSION_ENGAGE.md rewritten with phased model and hard rules."
     },
     {
       "id": "d004",
@@ -77,7 +68,7 @@
       "id": "d008",
       "from": "human",
       "session": 575,
-      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution \u2014 it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system \u2014 directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed \u2014 d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
+      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution — it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system — directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed — d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
       "status": "completed",
       "acked_session": 586,
       "notes": "s586: dialogue.md fully replaced. Web UI at /directives/inbox, stale-blocker writes to directives.json, session-context reads from directives.json.",
@@ -127,7 +118,7 @@
       "acked_session": 620,
       "completed_session": 620,
       "queue_item": null,
-      "notes": "Already fixed \u2014 inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
+      "notes": "Already fixed — inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
     },
     {
       "id": "d013",
@@ -266,16 +257,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 185,
+        "followed": 186,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 629,
-        "last_applicable_session": 629,
+        "last_session": 631,
+        "last_applicable_session": 631,
         "history": [
-          {
-            "session": 617,
-            "result": "followed"
-          },
           {
             "session": 619,
             "result": "followed"
@@ -310,6 +297,10 @@
           },
           {
             "session": 629,
+            "result": "followed"
+          },
+          {
+            "session": 631,
             "result": "followed"
           }
         ]
@@ -364,16 +355,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 138,
+        "followed": 139,
         "ignored": 82,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 630,
-        "last_applicable_session": 630,
+        "last_session": 631,
+        "last_applicable_session": 631,
         "history": [
-          {
-            "session": 621,
-            "result": "ignored"
-          },
           {
             "session": 622,
             "result": "followed"
@@ -409,13 +396,17 @@
           {
             "session": 630,
             "result": "followed"
+          },
+          {
+            "session": 631,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
         "followed": 69,
         "ignored": 14,
-        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
+        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
         "last_session": 628,
         "last_applicable_session": 628,
         "history": [
@@ -511,16 +502,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 82,
+        "followed": 83,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 629,
-        "last_applicable_session": 629,
+        "last_session": 631,
+        "last_applicable_session": 631,
         "history": [
-          {
-            "session": 611,
-            "result": "followed"
-          },
           {
             "session": 613,
             "result": "followed"
@@ -555,6 +542,10 @@
           },
           {
             "session": 629,
+            "result": "followed"
+          },
+          {
+            "session": 631,
             "result": "followed"
           }
         ]

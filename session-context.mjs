@@ -77,6 +77,14 @@ result.retired_count = retired.length;
 // Items may have complexity: "S" | "M" | "L". Default is "M" if unset.
 // When remaining budget is tight (detected via BUDGET_CAP env), prefer smaller tasks.
 // Fallback (R#62): if queue is empty, extract a brainstorming idea as a fallback task.
+// Shared helper: compute max wq-NNN id from queue (R#78 — was duplicated in 2 places).
+function getMaxQueueId(queue) {
+  return queue.reduce((m, i) => {
+    const n = parseInt((i.id || '').replace('wq-', ''), 10);
+    return isNaN(n) ? m : Math.max(m, n);
+  }, 0);
+}
+
 const BUDGET_CAP = parseFloat(process.env.BUDGET_CAP || '10');
 if (MODE === 'B' && pending.length > 0) {
   // If multiple pending items, prefer S/M over L for budget efficiency
@@ -154,10 +162,7 @@ if (MODE === 'B' || MODE === 'R') {
       // This ensures B sessions always have work when brainstorming has ideas.
       const BS_BUFFER = currentPending === 0 ? 1 : 3;
       const promotable = fresh.length > BS_BUFFER ? fresh.slice(0, fresh.length - BS_BUFFER) : [];
-      const maxId = queue.reduce((m, i) => {
-        const n = parseInt((i.id || '').replace('wq-', ''), 10);
-        return isNaN(n) ? m : Math.max(m, n);
-      }, 0);
+      const maxId = getMaxQueueId(queue);
       const promoted = [];
       for (let i = 0; i < promotable.length && currentPending + promoted.length < 3; i++) {
         const title = promotable[i][1].trim();
@@ -206,10 +211,7 @@ if (MODE === 'B') {
     const todoContent = readFileSync(todoPath, 'utf8');
     const todoLines = [...todoContent.matchAll(/^- (.+)/gm)];
     if (todoLines.length > 0) {
-      const maxId = queue.reduce((m, i) => {
-        const n = parseInt((i.id || '').replace('wq-', ''), 10);
-        return isNaN(n) ? m : Math.max(m, n);
-      }, 0);
+      const maxId = getMaxQueueId(queue);
       const queueTitles = queue.map(i => i.title.toLowerCase());
       const ingested = [];
       for (let i = 0; i < todoLines.length && i < 3; i++) {
@@ -279,7 +281,16 @@ if (MODE === 'B') {
       title.toLowerCase().includes(qt.split(':')[0].trim().substring(0, 15))
     );
 
-    // Source 1: Unaddressed directives — extract actionable build tasks, not raw content
+    // Source 1: Unaddressed directives — table-driven keyword→seed mapping (R#78).
+    // Previously a chain of if/else blocks that was hard to extend. Now declarative:
+    // each entry maps keyword patterns to a concrete seed title+description template.
+    const DIRECTIVE_SEED_TABLE = [
+      { keywords: ['ecosystem', 'map', 'discover', 'catalog'], title: 'Batch-evaluate 5 undiscovered services', desc: 'systematically probe unevaluated services from services.json' },
+      { keywords: ['explore', 'evaluate', 'e session', 'depth'], title: 'Deep-explore one new platform end-to-end', desc: 'pick an unevaluated service, register, post, measure response' },
+      { keywords: ['account', 'credential', 'cred', 'path resolution'], title: 'Fix credential management issues', desc: 'audit account-manager path resolution and platform health checks' },
+      { keywords: ['budget', 'cost', 'utilization', 'spending'], title: 'Improve session budget utilization', desc: 'add retry loops or deeper exploration to underutilized sessions' },
+      { skip: true, keywords: ['safety', 'hook', 'do not remove', 'do not weaken'] },
+    ];
     const directivesPath2 = join(DIR, 'directives.json');
     if (existsSync(directivesPath2)) {
       try {
@@ -288,22 +299,11 @@ if (MODE === 'B') {
         for (const d of active) {
           if (seeds.length >= 4) break;
           const content = (d.content || '').toLowerCase();
-          // Generate a concrete task title based on directive theme, not a substring
-          let title = null, desc = null;
-          if (content.includes('ecosystem') || content.includes('map') || content.includes('discover')) {
-            title = 'Batch-evaluate 5 undiscovered services';
-            desc = `Directive ${d.id}: systematically probe unevaluated services from services.json`;
-          } else if (content.includes('explore') || content.includes('evaluate') || content.includes('e session')) {
-            title = 'Deep-explore one new platform end-to-end';
-            desc = `Directive ${d.id}: pick an unevaluated service, register, post, measure response`;
-          } else if (content.includes('safety') || content.includes('hook') || content.includes('do not remove')) {
-            // Standing rule directives — skip, not buildable
-            continue;
-          } else {
-            title = `Address directive ${d.id}`;
-            desc = (d.content || '').substring(0, 120);
-          }
-          if (title && !isDupe(title)) {
+          const match = DIRECTIVE_SEED_TABLE.find(row => row.keywords.some(k => content.includes(k)));
+          if (match?.skip) continue;
+          const title = match ? match.title : `Address directive ${d.id}`;
+          const desc = match ? `Directive ${d.id}: ${match.desc}` : (d.content || '').substring(0, 120);
+          if (!isDupe(title)) {
             seeds.push(`- **${title}**: ${desc}`);
           }
         }

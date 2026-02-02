@@ -22,7 +22,7 @@ COMMITS=$(git log --since="$SINCE" --format="%H" --max-count=10 2>/dev/null || t
 
 NEW_TODOS=""
 # Exclude infrastructure files that contain TODO/FIXME as template text
-EXCLUDE_PATHS=":(exclude)session-context.mjs :(exclude)work-queue.js :(exclude)work-queue.json :(exclude)hooks/post-session/27-todo-scan.sh :(exclude)hooks/post-session/42-todo-followups.sh"
+EXCLUDE_PATHS=":(exclude)session-context.mjs :(exclude)work-queue.js :(exclude)work-queue.json :(exclude)hooks/post-session/27-todo-scan.sh :(exclude)hooks/post-session/42-todo-followups.sh :(exclude)*.test.mjs :(exclude)*.test.js :(exclude)*.spec.mjs :(exclude)*.spec.js"
 if [ -n "$COMMITS" ]; then
   NEW_TODOS=$(echo "$COMMITS" | while read -r hash; do
     git diff "$hash~1".."$hash" -- . $EXCLUDE_PATHS 2>/dev/null | grep -E '^\+.*\b(TODO|FIXME|HACK|XXX)\b' | sed 's/^\+//' || true

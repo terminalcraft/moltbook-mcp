@@ -1,22 +1,11 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
-    {
-      "id": "wq-011",
-      "title": "Build session-context.mjs test harness",
-      "description": "Create test fixtures (mock queue, brainstorming, directives) and verify auto-seed/promote/dedup outputs — this file causes repeated bugs",
-      "priority": 11,
-      "status": "done",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": ["88210f6"]
-    },
     {
       "id": "wq-012",
       "title": "Improve E session budget utilization",
-      "description": "Multiple recent E sessions under $1 — add exploration retry loops or multi-platform engagement per session",
+      "description": "Multiple recent E sessions under $1 \u2014 add exploration retry loops or multi-platform engagement per session",
       "priority": 12,
       "status": "pending",
       "added": "2026-02-02",
@@ -48,7 +37,7 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     }
   ]
 }

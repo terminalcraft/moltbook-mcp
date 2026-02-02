@@ -334,76 +334,34 @@ ${CTX_R_PROMPT_BLOCK:-## R Session
 Follow the checklist in SESSION_REFLECT.md.}"
 fi
 
-# Compliance nudge: inject directives.json compliance feedback into the session prompt.
-# Pre-hook 39-compliance-nudge.sh writes this file when directives are being missed.
-COMPLIANCE_BLOCK=""
-COMPLIANCE_FILE="$STATE_DIR/compliance-nudge.txt"
-if [ -f "$COMPLIANCE_FILE" ]; then
-  COMPLIANCE_BLOCK="
+# --- Prompt inject blocks (R#76) ---
+# Declarative loop replaces 7 copy-paste file-read-inject patterns.
+# Each entry: filename (relative to STATE_DIR), keep|consume (delete after read).
+# All blocks are concatenated into INJECT_BLOCKS and appended to the prompt.
+INJECT_BLOCKS=""
+INJECT_SPECS=(
+  "compliance-nudge.txt:keep"
+  "budget-nudge.txt:keep"
+  "cost-alert.txt:consume"
+  "mcp-lint-alert.txt:consume"
+  "cred-age-alert.txt:consume"
+  "directive-inject.txt:consume"
+  "todo-followups.txt:consume"
+)
+for spec in "${INJECT_SPECS[@]}"; do
+  IFS=: read -r fname action <<< "$spec"
+  fpath="$STATE_DIR/$fname"
+  if [ -f "$fpath" ]; then
+    INJECT_BLOCKS="${INJECT_BLOCKS}
 
-$(cat "$COMPLIANCE_FILE")"
-fi
-
-# Budget utilization nudge (R sessions spending <20% of budget)
-BUDGET_NUDGE_BLOCK=""
-BUDGET_NUDGE_FILE="$STATE_DIR/budget-nudge.txt"
-if [ -f "$BUDGET_NUDGE_FILE" ]; then
-  BUDGET_NUDGE_BLOCK="
-$(cat "$BUDGET_NUDGE_FILE")"
-fi
-
-# Cost anomaly alert injection (wq-022) — consume and delete after reading
-COST_ALERT_BLOCK=""
-COST_ALERT_FILE="$STATE_DIR/cost-alert.txt"
-if [ -f "$COST_ALERT_FILE" ]; then
-  COST_ALERT_BLOCK="
-
-$(cat "$COST_ALERT_FILE")"
-  rm -f "$COST_ALERT_FILE"
-fi
-
-# MCP lint alert injection (wq-013) — consume and delete after reading
-LINT_ALERT_BLOCK=""
-LINT_ALERT_FILE="$STATE_DIR/mcp-lint-alert.txt"
-if [ -f "$LINT_ALERT_FILE" ]; then
-  LINT_ALERT_BLOCK="
-
-$(cat "$LINT_ALERT_FILE")"
-  rm -f "$LINT_ALERT_FILE"
-fi
-
-# Credential staleness alert injection (wq-014)
-CRED_ALERT_FILE="$STATE_DIR/cred-age-alert.txt"
-if [ -f "$CRED_ALERT_FILE" ]; then
-  LINT_ALERT_BLOCK="${LINT_ALERT_BLOCK}
-
-$(cat "$CRED_ALERT_FILE")"
-  rm -f "$CRED_ALERT_FILE"
-fi
-
-# Directive inject: pending directives and answered questions from directives.json (wq-016)
-DIRECTIVE_INJECT_BLOCK=""
-DIRECTIVE_INJECT_FILE="$STATE_DIR/directive-inject.txt"
-if [ -f "$DIRECTIVE_INJECT_FILE" ]; then
-  DIRECTIVE_INJECT_BLOCK="
-
-$(cat "$DIRECTIVE_INJECT_FILE")"
-  rm -f "$DIRECTIVE_INJECT_FILE"
-fi
-
-# TODO follow-ups from previous session (wq-017)
-TODO_FOLLOWUP_BLOCK=""
-TODO_FOLLOWUP_FILE="$STATE_DIR/todo-followups.txt"
-if [ -f "$TODO_FOLLOWUP_FILE" ]; then
-  TODO_FOLLOWUP_BLOCK="
-
-$(cat "$TODO_FOLLOWUP_FILE")"
-  rm -f "$TODO_FOLLOWUP_FILE"
-fi
+$(cat "$fpath")"
+    [ "$action" = "consume" ] && rm -f "$fpath"
+  fi
+done
 
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${COMPLIANCE_BLOCK}${BUDGET_NUDGE_BLOCK}${COST_ALERT_BLOCK}${LINT_ALERT_BLOCK}${DIRECTIVE_INJECT_BLOCK}${TODO_FOLLOWUP_BLOCK}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${INJECT_BLOCKS}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

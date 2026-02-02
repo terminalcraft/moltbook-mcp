@@ -128,15 +128,21 @@ function rankPlatformsByROI(livePlatformNames) {
     const analytics = analyzeEngagement();
     if (!analytics?.platforms?.length) return { ranked: livePlatformNames, roi: null };
 
-    // Build ROI score: lower cost_per_write = better. Platforms with writes but no cost data get neutral score.
+    // Compute exploration stats: median e_sessions across known platforms
+    const eSessions = analytics.platforms.map(p => p.e_sessions || 0);
+    const sortedES = [...eSessions].sort((a, b) => a - b);
+    const medianES = sortedES.length > 0 ? sortedES[Math.floor(sortedES.length / 2)] : 0;
+
+    // Build ROI score with exploration bonus/penalty
     const roiMap = {};
     for (const p of analytics.platforms) {
       const name = normalizePlatformName(p.platform);
       const writes = p.writes || 0;
       const costPerWrite = p.cost_per_write;
       const writeRatio = p.write_ratio || 0;
+      const pESessions = p.e_sessions || 0;
 
-      // ROI score: high writes + low cost + high write ratio = good
+      // Base ROI score: high writes + low cost + high write ratio = good
       // Score range: 0-100, higher = better ROI
       let score = 0;
       if (writes > 0) {
@@ -148,10 +154,31 @@ function rankPlatformsByROI(livePlatformNames) {
           score += 10; // neutral if no cost data
         }
       }
-      roiMap[name] = { score: Math.round(score), writes, costPerWrite, writeRatio };
+
+      // Exploration adjustment: boost under-visited, penalize over-visited
+      // Range: -20 to +30. Platforms with 0 e_sessions get max boost.
+      let explorationAdj = 0;
+      if (pESessions === 0) {
+        explorationAdj = 30; // never engaged — strong exploration boost
+      } else if (medianES > 0) {
+        // ratio < 1 = under-visited (bonus), ratio > 1 = over-visited (penalty)
+        const ratio = pESessions / medianES;
+        explorationAdj = Math.round(Math.max(-20, Math.min(20, (1 - ratio) * 15)));
+      }
+
+      score += explorationAdj;
+      score = Math.max(0, score); // floor at 0
+      roiMap[name] = { score: Math.round(score), writes, costPerWrite, writeRatio, eSessions: pESessions, explorationAdj };
     }
 
-    // Rank live platforms by ROI score (highest first), unknown platforms get score 0
+    // Platforms in livePlatformNames but NOT in analytics get max exploration boost
+    for (const name of livePlatformNames) {
+      if (!roiMap[name]) {
+        roiMap[name] = { score: 30, writes: 0, costPerWrite: null, writeRatio: 0, eSessions: 0, explorationAdj: 30 };
+      }
+    }
+
+    // Rank live platforms by ROI score (highest first)
     const ranked = [...livePlatformNames].sort((a, b) => {
       const sa = roiMap[a]?.score || 0;
       const sb = roiMap[b]?.score || 0;
@@ -338,7 +365,7 @@ if (jsonMode) {
     const ranked = roiData?.ranked || health.live.map(p => p.platform);
     for (const name of ranked) {
       const roi = roiData?.roi?.[name];
-      const score = roi ? ` [ROI:${roi.score} writes:${roi.writes} $/w:${roi.costPerWrite ?? "n/a"}]` : "";
+      const score = roi ? ` [ROI:${roi.score} writes:${roi.writes} $/w:${roi.costPerWrite ?? "n/a"} explore:${roi.explorationAdj > 0 ? "+" : ""}${roi.explorationAdj ?? 0}]` : "";
       console.log(`  ✓ ${name}${score}`);
     }
     if (roiData?.analytics_summary) {

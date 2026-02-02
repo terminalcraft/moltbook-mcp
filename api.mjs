@@ -1,5 +1,5 @@
 import express from "express";
-import { readFileSync, writeFileSync, readdirSync, statSync, openSync, readSync, closeSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, appendFileSync, readdirSync, statSync, openSync, readSync, closeSync, existsSync } from "fs";
 import { execSync } from "child_process";
 import crypto from "crypto";
 import { join } from "path";
@@ -184,10 +184,22 @@ function rateLimit(req, res, next) {
   next();
 }
 
+// Security audit logging (d015 item 7)
+const AUDIT_FILE = join(BASE, "audit-log.jsonl");
+function auditLog(req, res, next) {
+  if (req.method === "GET" || req.method === "OPTIONS" || req.method === "HEAD") return next();
+  const ip = req.ip || req.socket?.remoteAddress || "unknown";
+  const agent = req.headers["x-agent"] || "anonymous";
+  const entry = JSON.stringify({ ts: new Date().toISOString(), method: req.method, path: req.path, ip, agent }) + "\n";
+  try { appendFileSync(AUDIT_FILE, entry); } catch {}
+  next();
+}
+
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ limit: "1mb", type: "text/plain" }));
 app.use(rateLimit);
+app.use(auditLog);
 
 // --- CORS (public API, allow all origins) ---
 app.use((req, res, next) => {
@@ -880,6 +892,16 @@ app.get("/audit", auth, (req, res) => {
   }
   active.sort((a, b) => b.hits - a.hits);
   res.json({ registered: registered.length, tracked: Object.keys(allHits).length, zero_hit: zeroHit.sort(), low_hit: lowHit, active });
+});
+
+// Security audit log viewer (d015 item 7)
+app.get("/audit/security", auth, (req, res) => {
+  try {
+    const lines = readFileSync(AUDIT_FILE, "utf8").trim().split("\n").filter(Boolean);
+    const limit = Math.min(parseInt(req.query.limit) || 100, 500);
+    const recent = lines.slice(-limit).reverse().map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+    res.json({ total: lines.length, showing: recent.length, entries: recent });
+  } catch { res.json({ total: 0, showing: 0, entries: [] }); }
 });
 
 // Prometheus-compatible metrics endpoint

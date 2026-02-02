@@ -344,9 +344,19 @@ if [ -f "$COMPLIANCE_FILE" ]; then
 $(cat "$COMPLIANCE_FILE")"
 fi
 
+# Cost anomaly alert injection (wq-022) — consume and delete after reading
+COST_ALERT_BLOCK=""
+COST_ALERT_FILE="$STATE_DIR/cost-alert.txt"
+if [ -f "$COST_ALERT_FILE" ]; then
+  COST_ALERT_BLOCK="
+
+$(cat "$COST_ALERT_FILE")"
+  rm -f "$COST_ALERT_FILE"
+fi
+
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${COMPLIANCE_BLOCK}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${COMPLIANCE_BLOCK}${COST_ALERT_BLOCK}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

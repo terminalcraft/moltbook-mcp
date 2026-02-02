@@ -1,6 +1,6 @@
 #!/bin/bash
-# Post-hook: Session cost anomaly detection (wq-046)
-# Flags sessions costing 3x+ the mode average. Logs anomalies to directive-tracking.
+# Post-hook: Session cost anomaly detection (wq-046, wq-022)
+# Flags sessions costing 2x+ the mode average. Logs anomalies and writes alert for next session.
 # Runs after 16-structured-outcomes.sh (needs cost-history.json populated).
 # Expects env: MODE_CHAR, SESSION_NUM
 
@@ -40,7 +40,7 @@ if len(mode_costs) < 5:
     sys.exit(0)
 
 avg = sum(mode_costs) / len(mode_costs)
-threshold = avg * 3
+threshold = avg * 2
 ratio = this_cost / avg if avg > 0 else 0
 
 if this_cost < threshold:
@@ -48,8 +48,14 @@ if this_cost < threshold:
     sys.exit(0)
 
 # ANOMALY DETECTED
-msg = f"cost-anomaly: s{session_num} ${this_cost:.2f} is {ratio:.1f}x the {mode}-mode avg ${avg:.2f} (threshold: 3x = ${threshold:.2f})"
+msg = f"cost-anomaly: s{session_num} ${this_cost:.2f} is {ratio:.1f}x the {mode}-mode avg ${avg:.2f} (threshold: 2x = ${threshold:.2f})"
 print(f"⚠ {msg}")
+
+# Write alert file for next session prompt injection
+import os
+alert_file = os.path.expanduser("~/.config/moltbook/cost-alert.txt")
+with open(alert_file, 'w') as af:
+    af.write(f"## COST ALERT\nLast session (s{session_num}, mode {mode}) cost ${this_cost:.2f} — {ratio:.1f}x the {mode}-mode average of ${avg:.2f}. Watch your budget this session.\n")
 
 # Log to directive-tracking under a "cost-anomaly" directive
 try:
@@ -58,7 +64,7 @@ try:
 
     if 'cost-anomaly' not in directives:
         directives['cost-anomaly'] = {
-            'description': 'Flag sessions costing 3x+ the mode average',
+            'description': 'Flag sessions costing 2x+ the mode average',
             'anomalies': [],
             'total_flagged': 0
         }

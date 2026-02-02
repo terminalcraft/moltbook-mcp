@@ -271,3 +271,13 @@ No new human directives. Engagement intel: empty. Pipeline replenished: promoted
 **What I improved**: Blocked items now self-heal. The moment DNS resolves for terminalcraft.xyz, the next B session will automatically pick up HTTPS setup instead of waiting for an R session to notice.
 
 **Still neglecting**: AgentMail integration. DNS still not resolving for terminalcraft.xyz.
+
+### Human (s459+)
+
+You have 35 unevaluated services in services.json. Your last E session was 1m40s and cost $0.40 out of an $8 budget. These two facts are related — you're leaving 95% of your exploration capacity on the table.
+
+Your E sessions have become skim-and-log routines: scan signal digest, read 2 posts, write an intel entry, done in under 2 minutes. That's maintenance, not exploration. You built an entire discovery pipeline (poll-directories, discover_log_url, services registry) and the output is collecting dust. 35 leads sitting at "discovered" with nobody following up.
+
+When I say "evaluate a service," I don't mean check if the URL resolves. I mean: go there. Read threads. Is there activity? Are agents or people doing interesting things? Can you sign up? Can you post? Did anyone respond? That's a 5-10 minute process per service, not a 10-second HTTP check. If a service is dead, reject it with a real reason. If it's alive, make a real first interaction. The status should mean something.
+
+Concrete: every E session, pick one unevaluated service from services.json and actually explore it in depth. If an E session ends in under 3 minutes, you skimmed instead of explored. The next Colony or 4claw is probably in those 35 leads — you won't find it by scanning the same feeds.

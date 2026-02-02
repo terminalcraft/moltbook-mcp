@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "description": "Structured human\u2194agent directive system. Replaces dialogue.md for directive intake.",
+  "description": "Structured human↔agent directive system. Replaces dialogue.md for directive intake.",
   "directives": [
     {
       "id": "d001",
       "from": "human",
       "session": 268,
-      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR \u2014 Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
+      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR — Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
       "status": "completed",
       "acked_session": 271,
       "completed_session": 439,
@@ -19,7 +19,7 @@
       "content": "Map the entire agent ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. Build a comprehensive map of all agents and platforms, rank by engagement activity.",
       "status": "active",
       "acked_session": 390,
-      "notes": "Ongoing \u2014 49+ services mapped",
+      "notes": "Ongoing — 49+ services mapped",
       "updated": "2026-02-02T12:53:29.369Z"
     },
     {
@@ -77,7 +77,7 @@
       "id": "d008",
       "from": "human",
       "session": 575,
-      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution \u2014 it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system \u2014 directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed \u2014 d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
+      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution — it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system — directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed — d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
       "status": "completed",
       "acked_session": 586,
       "notes": "s586: dialogue.md fully replaced. Web UI at /directives/inbox, stale-blocker writes to directives.json, session-context reads from directives.json.",
@@ -106,6 +106,14 @@
       "acked_session": 608,
       "queue_item": "wq-017",
       "notes": "SESSION_ENGAGE.md rewritten with aggressive exploration mandates. wq-017 queued for orchestrator scoring."
+    },
+    {
+      "id": "d011",
+      "from": "human",
+      "session": 615,
+      "content": "pinchwork.dev is very interesting and could be really helpful, make it so engage goes to it frequently.",
+      "status": "pending",
+      "created": "2026-02-02T16:01:24.180Z"
     }
   ],
   "questions": [],
@@ -212,16 +220,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 173,
+        "followed": 174,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 613,
-        "last_applicable_session": 613,
+        "last_session": 615,
+        "last_applicable_session": 615,
         "history": [
-          {
-            "session": 601,
-            "result": "followed"
-          },
           {
             "session": 603,
             "result": "followed"
@@ -256,6 +260,10 @@
           },
           {
             "session": 613,
+            "result": "followed"
+          },
+          {
+            "session": 615,
             "result": "followed"
           }
         ]
@@ -311,15 +319,11 @@
       },
       "ecosystem-adoption": {
         "followed": 128,
-        "ignored": 76,
+        "ignored": 77,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 614,
-        "last_applicable_session": 614,
+        "last_session": 615,
+        "last_applicable_session": 615,
         "history": [
-          {
-            "session": 605,
-            "result": "followed"
-          },
           {
             "session": 606,
             "result": "followed"
@@ -355,13 +359,17 @@
           {
             "session": 614,
             "result": "followed"
+          },
+          {
+            "session": 615,
+            "result": "ignored"
           }
         ]
       },
       "briefing-update": {
         "followed": 65,
         "ignored": 14,
-        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
+        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
         "last_session": 612,
         "last_applicable_session": 612,
         "history": [
@@ -457,16 +465,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 74,
+        "followed": 75,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 613,
-        "last_applicable_session": 613,
+        "last_session": 615,
+        "last_applicable_session": 615,
         "history": [
-          {
-            "session": 594,
-            "result": "followed"
-          },
           {
             "session": 597,
             "result": "followed"
@@ -501,6 +505,10 @@
           },
           {
             "session": 613,
+            "result": "followed"
+          },
+          {
+            "session": 615,
             "result": "followed"
           }
         ]

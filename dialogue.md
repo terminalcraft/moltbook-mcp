@@ -70,15 +70,17 @@ Your account-manager is broken — it reports all 12 platforms as `no_creds` eve
 This matters more than it looks. The engagement orchestrator uses account-manager to decide which platforms are live before picking where to engage. If account-manager says everything has no credentials, the health gate has no signal, and E sessions fly blind. This is probably a contributing factor to the 61% ecosystem-adoption compliance rate — the tooling you built to guide engagement cannot see your own credentials.
 
 Fix account-manager path resolution so it finds the credential files that already exist. This is a B session task, not a new feature — the credentials are there, the manager just cannot see them.
-## Session 551 (agent)
-REFLECT session (R#65). **Structural change**: Fixed critical TDZ bug in transforms/scoping.js. `logReplay(name, params)` referenced `params` before its `const` declaration two lines later, causing "Cannot access 'params' before initialization" on every MCP tool call. Introduced when engagement replay logging was added (wq-023). Moved declaration above usage.
+### Human (s570+)
 
-Cleaned BRAINSTORMING.md — removed 2 ideas already queued (wq-014, wq-016), added 2 fresh ones (MCP tool call linting, credential rotation). Pipeline: 3 pending, 5 blocked, 4 brainstorming ideas.
+The dialogue.md system has scaling problems. You should be aware of them:
 
-**What I improved**: Every MCP tool call was crashing. Highest-impact single-line fix possible.
+1. Human directives get buried under agent session summaries — the file is 90% agent output.
+2. Intake detection relies on regex pattern matching against markdown formatting. One slip and a directive is invisible.
+3. There is no acknowledgment — I have no way to know if a directive was consumed without manually checking work-queue.json.
+4. You cannot ask me clarifying questions through the system. Communication is one-way.
+5. Status tracking on directives is ad-hoc — some have a manual Status line, most do not.
 
-**Still neglecting**: BRIEFING.md domain/HTTPS references still stale.
-
+This is a structural problem worth solving. Design and build a replacement that fixes these issues. The current system worked for the first few hundred sessions but it does not scale.
 ## Session 555 (agent)
 REFLECT session (R#66). **Structural change**: session-context.mjs auto-promote now removes promoted ideas from BRAINSTORMING.md after queue insertion. Previously, promoted ideas stayed in brainstorming indefinitely — the de-dup filter prevented re-promotion but inflated brainstorm_count, making pipeline health snapshots misleading (showed 4 ideas when only 1 was fresh). Cleaned 3 stale entries, added 2 fresh ideas.
 
@@ -119,6 +121,13 @@ REFLECT session (R#70). **Structural change**: Added brainstorming auto-seed to 
 
 **Still neglecting**: The 5 auto-escalated blockers in dialogue.md (wq-004/005/007/009/010) are retired but the escalation message remains unanswered by the human. Low priority since they're retired.
 
+## Session 575 (agent)
+REFLECT session (R#71). **Structural change**: Rewrote brainstorming auto-seed in session-context.mjs. Old approach generated formulaic "Harden X / Extend X / Monitor X" templates — new approach scans unaddressed dialogue directives, session error patterns, and queue health gaps for concrete seeds. Added wq-014 (account-manager fix) and wq-015 (dialogue.md replacement) from open human directives. Pipeline: 3 pending, 0 blocked, 5 retired, 4 brainstorming ideas. Ecosystem touch: Ctxly memory stored.
+
+**What I improved**: Auto-seed was generating noise. Every idea was a mechanical commit-message transformation. New seeds come from actual system gaps.
+
+**Still neglecting**: 5 auto-escalated blockers unanswered. BRIEFING.md staleness.
+
 ## Session 563 (agent)
 REFLECT session (R#68). **Structural change**: Restricted auto-promote in session-context.mjs to B sessions only and added a 3-idea buffer. Previously auto-promote ran for ALL modes, immediately depleting brainstorming after every R session — R adds ideas, next session promotes them all, brainstorming drops to 0, next R must replenish again. Now only B sessions (the actual consumer) trigger promotion, and they preserve at least 3 ideas in brainstorming. This breaks the deplete-replenish cycle that made every R session spend budget on pipeline maintenance.
 
@@ -131,14 +140,15 @@ Pipeline: 3 pending (wq-011/016/017), 5 blocked, 4 brainstorming ideas. Ecosyste
 
 
 
-### Human (s570+)
 
-The dialogue.md system has scaling problems. You should be aware of them:
+### Human (s575+)
 
-1. Human directives get buried under agent session summaries — the file is 90% agent output.
-2. Intake detection relies on regex pattern matching against markdown formatting. One slip and a directive is invisible.
-3. There is no acknowledgment — I have no way to know if a directive was consumed without manually checking work-queue.json.
-4. You cannot ask me clarifying questions through the system. Communication is one-way.
-5. Status tracking on directives is ad-hoc — some have a manual Status line, most do not.
+R#70 (s571) claimed to decompose the s570 directives but did not. The account-manager fix was mapped to wq-013 which is actually "Session efficiency dashboard" — completely unrelated. The dialogue.md reform directive was ignored entirely. last_intake_session was bumped to 571 anyway, hiding the failure.
 
-This is a structural problem worth solving. Design and build a replacement that fixes these issues. The current system worked for the first few hundred sessions but it does not scale.
+Re-stating both directives. These must each become their own work-queue item with accurate titles.
+
+**Directive 1: Fix account-manager credential path resolution.**
+account-manager reports all 12 platforms as no_creds. Credential files exist on disk for ~8 platforms. The path lookup is broken (likely tilde expansion or format mismatch). This breaks the engagement orchestrator platform selection since it cannot see which platforms have credentials. B session task.
+
+**Directive 2: Replace dialogue.md with a structured communication system.**
+Current problems: (1) human directives buried under agent session summaries, (2) regex-based intake detection is fragile, (3) no acknowledgment that a directive was consumed, (4) no back-channel for agent to ask clarifying questions, (5) no structured status tracking on directives. Design and build a replacement. The fact that R#70 silently dropped one directive and misattributed the other is exactly the kind of failure this system should prevent.

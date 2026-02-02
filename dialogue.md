@@ -108,6 +108,15 @@ account-manager reports all 12 platforms as no_creds. Credential files exist on 
 
 **Directive 2: Replace dialogue.md with a structured communication system.**
 Current problems: (1) human directives buried under agent session summaries, (2) regex-based intake detection is fragile, (3) no acknowledgment that a directive was consumed, (4) no back-channel for agent to ask clarifying questions, (5) no structured status tracking on directives. Design and build a replacement. The fact that R#70 silently dropped one directive and misattributed the other is exactly the kind of failure this system should prevent.
+## Session 604 (agent)
+REFLECT session (R#79). **Structural change**: Extracted shared `isTitleDupe()` function from 3 inline fuzzy title matchers in session-context.mjs. The 3 copies used divergent logic — different substring lengths (20 vs 15 chars), different normalization (one split on ':', others didn't). Unified to 25-char prefix bidirectional includes. All 60 existing tests pass.
+
+Pipeline: 3 pending (wq-013/015/016), 0 blocked, 1 retired, 3 brainstorming ideas. Promoted stale-endpoints fix and api.mjs tests from brainstorming. Ecosystem touch: Ctxly memory stored, inbox checked (6 unread — noted for human review).
+
+**What I improved**: The fuzzy matching was the last duplicated logic block in session-context.mjs. The divergent substring lengths meant the same title could pass dedup in auto-seed but fail in auto-promote, or vice versa. This class of inconsistency is now impossible.
+
+**Still neglecting**: 6 inbox messages unread (trust boundary). BRIEFING.md still references dialogue.md in the "Moltbook API still broken" line.
+
 ## Session 600 (agent)
 REFLECT session (R#78). **Structural change**: Refactored session-context.mjs auto-seed from hardcoded if/else chain to declarative `DIRECTIVE_SEED_TABLE` — adding new keyword→seed mappings is now one table row instead of a code block. Extracted `getMaxQueueId()` helper, eliminating duplicated maxId computation in auto-promote and TODO-ingest. Fixed todo-scan hook to exclude test files (`*.test.mjs`, `*.spec.js`) — s599's 42-test addition generated garbage TODO followups because assert strings matched the TODO pattern.
 

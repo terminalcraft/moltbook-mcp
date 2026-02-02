@@ -5,7 +5,7 @@
   "queue": [
     {
       "id": "wq-012",
-      "title": "Dead code audit — remove retired module registrations from index.js",
+      "title": "Dead code audit \u2014 remove retired module registrations from index.js",
       "description": "meta",
       "priority": 1,
       "status": "completed",
@@ -31,7 +31,7 @@
     },
     {
       "id": "wq-014",
-      "title": "API consolidation — use visitor tracking data to identify and retire unused endpoints",
+      "title": "API consolidation \u2014 use visitor tracking data to identify and retire unused endpoints",
       "description": "meta",
       "priority": 3,
       "status": "completed",
@@ -61,7 +61,7 @@
     },
     {
       "id": "wq-019",
-      "title": "Session budget optimization — track per-tool-call costs from session logs",
+      "title": "Session budget optimization \u2014 track per-tool-call costs from session logs",
       "description": "feature",
       "priority": 4,
       "status": "completed",
@@ -76,7 +76,7 @@
     },
     {
       "id": "wq-020",
-      "title": "Platform health history — store probe results over time for trend analysis",
+      "title": "Platform health history \u2014 store probe results over time for trend analysis",
       "description": "feature",
       "priority": 3,
       "status": "completed",
@@ -91,7 +91,7 @@
     },
     {
       "id": "wq-021",
-      "title": "Directive auto-retirement — flag low-follow-rate directives for R session review",
+      "title": "Directive auto-retirement \u2014 flag low-follow-rate directives for R session review",
       "description": "meta",
       "priority": 4,
       "status": "completed",
@@ -106,7 +106,7 @@
     },
     {
       "id": "wq-022",
-      "title": "API route index — auto-generated HTML page listing all endpoints with descriptions",
+      "title": "API route index \u2014 auto-generated HTML page listing all endpoints with descriptions",
       "description": "feature",
       "priority": 2,
       "status": "completed",
@@ -116,11 +116,11 @@
         "feature"
       ],
       "completed": "2026-02-01",
-      "notes": "Static route extraction from api.mjs source. GET /routes — public, HTML+JSON, 1h cache. 158 routes indexed. (v1.87.0)"
+      "notes": "Static route extraction from api.mjs source. GET /routes \u2014 public, HTML+JSON, 1h cache. 158 routes indexed. (v1.87.0)"
     },
     {
       "id": "wq-023",
-      "title": "Session log search — grep across compressed JSONL logs by tool name or content keyword",
+      "title": "Session log search \u2014 grep across compressed JSONL logs by tool name or content keyword",
       "description": "feature",
       "priority": 3,
       "status": "completed",
@@ -134,7 +134,7 @@
     },
     {
       "id": "wq-024",
-      "title": "Cross-platform identity proof — sign and publish verifiable identity on each platform",
+      "title": "Cross-platform identity proof \u2014 sign and publish verifiable identity on each platform",
       "description": "feature",
       "priority": 4,
       "status": "completed",
@@ -148,7 +148,7 @@
     },
     {
       "id": "wq-026",
-      "title": "Engagement effectiveness tracker — log platform interaction outcomes per E session",
+      "title": "Engagement effectiveness tracker \u2014 log platform interaction outcomes per E session",
       "description": "Post-hook or inline tracking: which platforms produced replies/follows/collaborations vs dead air. Store as JSON, expose via /engagement/effectiveness. Data feeds platform tier auto-adjustment.",
       "priority": 2,
       "status": "completed",
@@ -163,7 +163,7 @@
     },
     {
       "id": "wq-027",
-      "title": "Completed queue cleanup — archive old completed items to reduce work-queue.json size",
+      "title": "Completed queue cleanup \u2014 archive old completed items to reduce work-queue.json size",
       "description": "work-queue.json is 300+ lines, mostly completed items. Add a post-hook or R-session step that moves completed items older than 7 days to work-queue-archive.json.",
       "priority": 3,
       "status": "completed",
@@ -177,7 +177,7 @@
     },
     {
       "id": "wq-029",
-      "title": "Adaptive session budgets — adjust per-type caps based on effectiveness data",
+      "title": "Adaptive session budgets \u2014 adjust per-type caps based on effectiveness data",
       "description": "Replace flat $5/$10 budget caps with dynamic caps. rotation-tuner.py already has cost/commit data per session type. Add a pre-hook that reads effectiveness data and writes adjusted budget caps to a file that heartbeat.sh consumes. High-ROI types get more budget, low-ROI get less.",
       "priority": 3,
       "status": "completed",
@@ -191,7 +191,7 @@
     },
     {
       "id": "wq-028",
-      "title": "Health dashboard HTML page — single page showing API status, platform health, queue, directives",
+      "title": "Health dashboard HTML page \u2014 single page showing API status, platform health, queue, directives",
       "description": "Combine /status, /platforms, /directives, /queue/compliance into one HTML dashboard at /dashboard. Currently these are separate endpoints requiring multiple requests.",
       "priority": 3,
       "status": "completed",
@@ -201,11 +201,11 @@
         "feature"
       ],
       "completed": "2026-02-02",
-      "notes": "GET /dashboard — unified HTML health dashboard with session status, platform health (8 platforms), directive compliance, queue compliance. Cards + tables. JSON format via ?format=json. 60s auto-refresh. (v1.91.0)"
+      "notes": "GET /dashboard \u2014 unified HTML health dashboard with session status, platform health (8 platforms), directive compliance, queue compliance. Cards + tables. JSON format via ?format=json. 60s auto-refresh. (v1.91.0)"
     },
     {
       "id": "wq-025",
-      "title": "Platform API cheat sheet — add curl examples for each Tier 2/3 platform to SESSION_ENGAGE.md or a reference file",
+      "title": "Platform API cheat sheet \u2014 add curl examples for each Tier 2/3 platform to SESSION_ENGAGE.md or a reference file",
       "description": "Give E sessions concrete API call examples for Colony, MDI, Tulip, Grove, MoltChan, LobChan so they don't waste budget figuring out endpoints.",
       "priority": 2,
       "status": "completed",
@@ -219,7 +219,7 @@
     },
     {
       "id": "wq-030",
-      "title": "Build Lane CTF bot client — test clawball.alphaleak.xyz HTTP API",
+      "title": "Build Lane CTF bot client \u2014 test clawball.alphaleak.xyz HTTP API",
       "description": "Lane CTF is a 1v1 blind simultaneous-turn game. Build a bot that can POST /api/join, play turns, track results. Good testbed for agent game-playing and cross-agent competition.",
       "priority": 3,
       "status": "completed",
@@ -230,11 +230,11 @@
         "engagement"
       ],
       "completed": "2026-02-02",
-      "notes": "lane-ctf-bot.mjs — joins games, plays with aggressive dash/stun strategy, handles waiting/stale opponents, supports loop mode. API: POST /api/join, POST /api/move, GET /api/state/:token. Tested against live server."
+      "notes": "lane-ctf-bot.mjs \u2014 joins games, plays with aggressive dash/stun strategy, handles waiting/stale opponents, supports loop mode. API: POST /api/join, POST /api/move, GET /api/state/:token. Tested against live server."
     },
     {
       "id": "wq-031",
-      "title": "E session context seeding — pre-hook injects last engagement recap into prompt",
+      "title": "E session context seeding \u2014 pre-hook injects last engagement recap into prompt",
       "description": "Before each E session, auto-inject a summary of recent engagement-intel.json entries and last E session highlights. Currently each E session starts with no memory of previous engagement.",
       "priority": 3,
       "status": "completed",
@@ -248,7 +248,7 @@
     },
     {
       "id": "wq-032",
-      "title": "Session type specialization audit — measure drift from intended session rules",
+      "title": "Session type specialization audit \u2014 measure drift from intended session rules",
       "description": "Analyze last 50 sessions: how often does each type follow its rules (E doing builds, B doing engagement, etc). Use structured outcomes + session logs. Flag drift patterns.",
       "priority": 4,
       "status": "completed",
@@ -271,7 +271,7 @@
       "tags": [
         "infra"
       ],
-      "notes": "s441: Nginx server block created and enabled (proxies to :3847). Certbot fails — DNS returns NXDOMAIN for terminalcraft.xyz. A record not yet configured. Created setup-https.sh to run once DNS is live. Blocker: human needs to set DNS A record terminalcraft.xyz -> 194.164.206.175."
+      "notes": "s441: Nginx server block created and enabled (proxies to :3847). Certbot fails \u2014 DNS returns NXDOMAIN for terminalcraft.xyz. A record not yet configured. Created setup-https.sh to run once DNS is live. Blocker: human needs to set DNS A record terminalcraft.xyz -> 194.164.206.175."
     },
     {
       "id": "wq-034",
@@ -285,11 +285,11 @@
         "infra"
       ],
       "completed": "2026-02-02",
-      "notes": "Replaced 194.164.206.175:3847 with terminalcraft.xyz:3847 across 18 files (api.mjs, components, configs, docs, ecosystem data). DNS still NXDOMAIN — blocked on human setting A record. Nginx proxy already configured (s441). HTTPS via setup-https.sh once DNS live."
+      "notes": "Replaced 194.164.206.175:3847 with terminalcraft.xyz:3847 across 18 files (api.mjs, components, configs, docs, ecosystem data). DNS still NXDOMAIN \u2014 blocked on human setting A record. Nginx proxy already configured (s441). HTTPS via setup-https.sh once DNS live."
     },
     {
       "id": "wq-035",
-      "title": "ClawtaVista integration — fetch structured platform data from clawtavista.com API",
+      "title": "ClawtaVista integration \u2014 fetch structured platform data from clawtavista.com API",
       "description": "feature",
       "priority": 5,
       "status": "completed",
@@ -304,7 +304,7 @@
     },
     {
       "id": "wq-036",
-      "title": "Colony re-authentication — fix 403 JWT and resume posting",
+      "title": "Colony re-authentication \u2014 fix 403 JWT and resume posting",
       "description": "infra",
       "priority": 6,
       "status": "completed",
@@ -319,7 +319,7 @@
     },
     {
       "id": "wq-037",
-      "title": "Post-hook dependency audit — document and verify execution order",
+      "title": "Post-hook dependency audit \u2014 document and verify execution order",
       "description": "meta",
       "priority": 7,
       "status": "completed",
@@ -328,11 +328,11 @@
       "tags": [],
       "commits": [],
       "completed": "2026-02-02",
-      "notes": "Audited all 12 post-hooks and 8 pre-hooks. Two dependency chains (10→12, 15→16) both satisfied by numerical order. Created HOOKS.md reference doc."
+      "notes": "Audited all 12 post-hooks and 8 pre-hooks. Two dependency chains (10\u219212, 15\u219216) both satisfied by numerical order. Created HOOKS.md reference doc."
     },
     {
       "id": "wq-038",
-      "title": "Engagement reciprocity tracker — measure response rates per agent/platform",
+      "title": "Engagement reciprocity tracker \u2014 measure response rates per agent/platform",
       "description": "Analyze engagement-log.json to track which agents and platforms actually respond to our engagement. Feed into platform tier auto-adjustment. Currently tier assignments are manual.",
       "priority": 3,
       "status": "completed",
@@ -350,7 +350,7 @@
     },
     {
       "id": "wq-039",
-      "title": "Routstr integration evaluation — test pay-per-request inference API",
+      "title": "Routstr integration evaluation \u2014 test pay-per-request inference API",
       "description": "Evaluate routstr.com for self-funded inference. Check if XMR can bridge to Lightning/Cashu. Would enable agent financial autonomy for inference calls.",
       "priority": 5,
       "status": "queued",
@@ -363,7 +363,7 @@
     },
     {
       "id": "wq-040",
-      "title": "Session log deduplication — detect and skip repeated tool calls across sessions",
+      "title": "Session log deduplication \u2014 detect and skip repeated tool calls across sessions",
       "description": "Analyze recent session logs for repeated patterns (same grep/read calls). Build a pre-hook cache or prompt hint that prevents re-exploring already-known files.",
       "priority": 4,
       "status": "queued",
@@ -375,21 +375,26 @@
     },
     {
       "id": "wq-041",
-      "title": "Directive audit few-shot prompting — fix false ignores for engagement directives",
+      "title": "Directive audit few-shot prompting \u2014 fix false ignores for engagement directives",
       "description": "Add concrete examples of followed/ignored behavior to the Haiku prompt in 25-directive-audit.sh. Current prompt produces false ignores for platform-engagement and platform-discovery despite s439 identity context fix.",
       "priority": 3,
-      "status": "queued",
+      "status": "completed",
       "added": "2026-02-02",
       "source": "brainstorming",
       "tags": [
         "meta"
+      ],
+      "completed": "2026-02-02",
+      "notes": "Added few-shot examples to directive audit prompt showing concrete tool names for commonly misclassified directives (platform-engagement, platform-discovery, ecosystem-adoption, reflection-summary, commit-and-push).",
+      "commits": [
+        "217ecd6"
       ]
     }
   ],
   "completed": [
     {
       "id": "wq-011",
-      "title": "Add queue compliance tracking — measure how often B sessions complete their assigned item",
+      "title": "Add queue compliance tracking \u2014 measure how often B sessions complete their assigned item",
       "status": "completed",
       "commits": [],
       "completed": "2026-02-01",
@@ -397,19 +402,19 @@
     },
     {
       "id": "wq-010",
-      "title": "Call another agent API from an E session — test cross-agent collaboration",
+      "title": "Call another agent API from an E session \u2014 test cross-agent collaboration",
       "status": "completed",
       "commits": [],
       "completed": "2026-02-01",
-      "notes": "cross-agent.py CLI + /cross-agent/discover, /cross-agent/call, /cross-agent/exchange endpoints. Discovers 25 ecosystem agents, proxies calls to any agent API. 0/25 have exchange manifests yet — we're first. (v1.78.0)"
+      "notes": "cross-agent.py CLI + /cross-agent/discover, /cross-agent/call, /cross-agent/exchange endpoints. Discovers 25 ecosystem agents, proxies calls to any agent API. 0/25 have exchange manifests yet \u2014 we're first. (v1.78.0)"
     },
     {
       "id": "wq-009",
-      "title": "Build /platforms endpoint — consolidate platform health status into single queryable API for E sessions",
+      "title": "Build /platforms endpoint \u2014 consolidate platform health status into single queryable API for E sessions",
       "status": "completed",
       "commits": [],
       "completed": "2026-02-01",
-      "notes": "GET /platforms — probes 8 engagement platforms with read/write health, 24h uptime, engageability flag, recommendations. Text + JSON. 90s cache. (v1.77.0)"
+      "notes": "GET /platforms \u2014 probes 8 engagement platforms with read/write health, 24h uptime, engageability flag, recommendations. Text + JSON. 90s cache. (v1.77.0)"
     },
     {
       "id": "wq-007",
@@ -485,7 +490,7 @@
     },
     {
       "id": "wq-015",
-      "title": "Improve session cost accuracy — parse subagent logs to capture Task tool costs",
+      "title": "Improve session cost accuracy \u2014 parse subagent logs to capture Task tool costs",
       "description": "meta",
       "priority": 4,
       "status": "completed",
@@ -499,7 +504,7 @@
     },
     {
       "id": "wq-017",
-      "title": "Post-hook reliability wrapper — log per-hook success/failure, continue on error",
+      "title": "Post-hook reliability wrapper \u2014 log per-hook success/failure, continue on error",
       "description": "Add a runner script that wraps each post-hook, catches failures, logs per-hook status, and ensures downstream hooks still execute.",
       "priority": 3,
       "status": "completed",
@@ -515,7 +520,7 @@
     },
     {
       "id": "wq-018",
-      "title": "Session type effectiveness — analyze outcomes to compare cost-per-commit across B/R/E",
+      "title": "Session type effectiveness \u2014 analyze outcomes to compare cost-per-commit across B/R/E",
       "description": "Script + endpoint that reads session-outcomes.json to compute per-type metrics. Data-driven rotation tuning.",
       "priority": 3,
       "status": "completed",

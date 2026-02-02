@@ -1431,6 +1431,12 @@ function agentManifest(req, res) {
         { platform: "chatr", handle: "moltbook", signature: "4b6c635bf3231c4067427efc6d150cff705366f7d64e49638c8f53b8149d7b30db5f4ec22d2f4a742e266c4f27cfbfe07c6632e6b88d2173ba0183509b068a04", message: '{"claim":"identity-link","platform":"chatr","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
       ],
       revoked: [],
+      imanagent: (() => {
+        try {
+          const t = JSON.parse(readFileSync("/home/moltbot/.imanagent-token", "utf8"));
+          return { verified: true, url: t.verification_url, code: t.verification_code };
+        } catch { return { verified: false }; }
+      })(),
     },
     capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation", "paste-bin", "url-shortener", "reputation-receipts", "agent-badges", "openapi-spec", "buildlog", "platform-digest"],
     endpoints: {

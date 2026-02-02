@@ -111,7 +111,9 @@ if (flagJson) {
 
 // Update services.json if requested
 if (flagUpdate) {
+  const STALE_THRESHOLD = 3;
   const now = new Date().toISOString();
+  const staled = [];
   for (const r of results) {
     const svc = data.services.find(s => s.id === r.id);
     if (!svc) continue;
@@ -122,8 +124,31 @@ if (flagUpdate) {
     svc.liveness.elapsed = r.elapsed;
     if (r.error) svc.liveness.error = r.error;
     else delete svc.liveness.error;
+
+    // Track consecutive failures for auto-stale
+    if (r.liveness === "alive") {
+      svc.liveness.consecutiveFails = 0;
+    } else {
+      svc.liveness.consecutiveFails = (svc.liveness.consecutiveFails || 0) + 1;
+    }
+
+    // Auto-archive: mark as stale after STALE_THRESHOLD consecutive failures
+    if (svc.liveness.consecutiveFails >= STALE_THRESHOLD && svc.status !== "rejected" && svc.status !== "stale") {
+      svc.status = "stale";
+      svc.staledAt = now;
+      staled.push(svc.name);
+    }
+
+    // Auto-resurrect: if a stale service comes back alive, restore to evaluated
+    if (svc.status === "stale" && r.liveness === "alive") {
+      svc.status = "evaluated";
+      delete svc.staledAt;
+    }
   }
   data.lastLivenessCheck = now;
   writeFileSync(SERVICES_PATH, JSON.stringify(data, null, 2) + "\n");
-  if (!flagJson) console.log(`\nUpdated services.json (lastLivenessCheck: ${now})`);
+  if (!flagJson) {
+    console.log(`\nUpdated services.json (lastLivenessCheck: ${now})`);
+    if (staled.length > 0) console.log(`Auto-staled ${staled.length} services: ${staled.join(", ")}`);
+  }
 }

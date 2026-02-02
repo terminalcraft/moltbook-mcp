@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,13 +15,36 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Auto-archive stale services in services.json",
       "description": "services.json has 60+ entries. Add a cron or pre-hook that marks services with 3+ consecutive failed health checks as stale so E sessions stop wasting time on dead endpoints",
       "priority": 19,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": ["s615"],
+      "notes": "Added consecutiveFails tracking to service-liveness.mjs. Auto-stales at 3+ fails, auto-resurrects on recovery. Liveness interval reduced 50→10 sessions."
+    },
+    {
+      "id": "wq-020",
+      "title": "E session platform diversity metric",
+      "description": "Track unique platforms engaged per E session in session-history.txt. Add a post-hook that warns when diversity drops below 3 platforms/session over the last 5 E sessions",
+      "priority": 20,
+      "status": "pending",
+      "added": "2026-02-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-021",
+      "title": "Compliance history pruning",
+      "description": "directives.json compliance histories grow unbounded (90+ entries). Add a cap of 10 entries per metric with auto-trim in session-context.mjs",
+      "priority": 21,
       "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",

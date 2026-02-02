@@ -3,7 +3,7 @@
 # Updates services.json with liveness data
 
 SESSION_NUM="${SESSION_NUM:-0}"
-INTERVAL=50
+INTERVAL=10
 
 # Only run every INTERVAL sessions
 if (( SESSION_NUM % INTERVAL != 0 )); then

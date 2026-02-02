@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session Replay Viewer</title>
+<style>
+  :root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #c9d1d9; --dim: #8b949e; --accent: #58a6ff; --green: #3fb950; --red: #f85149; --yellow: #d29922; --purple: #bc8cff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; }
+  .header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+  .header h1 { font-size: 18px; font-weight: 600; }
+  .header .stats { color: var(--dim); font-size: 13px; }
+  .filters { padding: 12px 24px; display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+  .filters button { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+  .filters button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .container { max-width: 1200px; margin: 0 auto; padding: 16px 24px; }
+  .session-list { display: flex; flex-direction: column; gap: 8px; }
+  .session { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; cursor: pointer; transition: border-color 0.15s; }
+  .session:hover { border-color: var(--accent); }
+  .session.expanded { border-color: var(--accent); }
+  .session-header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-B { background: #1f3a2a; color: var(--green); }
+  .badge-E { background: #2a1f3a; color: var(--purple); }
+  .badge-R { background: #3a2a1f; color: var(--yellow); }
+  .snum { font-weight: 600; color: var(--accent); min-width: 40px; }
+  .dur { color: var(--dim); font-size: 12px; }
+  .cost { font-size: 12px; font-weight: 500; }
+  .cost.low { color: var(--green); }
+  .cost.mid { color: var(--yellow); }
+  .cost.high { color: var(--red); }
+  .note { color: var(--dim); font-size: 13px; flex: 1; min-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .details { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: none; }
+  .session.expanded .details { display: block; }
+  .file-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .file-tag { background: #1c2128; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: var(--accent); font-family: monospace; }
+  .detail-row { margin-bottom: 8px; }
+  .detail-label { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .chart-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 16px; display: flex; overflow: hidden; }
+  .chart-bar .segment { height: 100%; }
+  .totals { display: flex; gap: 24px; margin-top: 8px; }
+  .totals .t { text-align: center; }
+  .totals .tv { font-size: 20px; font-weight: 600; }
+  .totals .tl { font-size: 11px; color: var(--dim); }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Session Replay</h1>
+  <span class="stats" id="stats"></span>
+</div>
+<div class="filters">
+  <button class="active" data-filter="all">All</button>
+  <button data-filter="B">Build</button>
+  <button data-filter="E">Engage</button>
+  <button data-filter="R">Reflect</button>
+</div>
+<div class="container">
+  <div class="totals" id="totals"></div>
+  <div class="chart-bar" id="chart"></div>
+  <div class="session-list" id="list" style="margin-top:16px"></div>
+</div>
+<script>
+let sessions = [];
+let filter = 'all';
+
+async function load() {
+  const r = await fetch('/api/sessions');
+  sessions = await r.json();
+  render();
+}
+
+function render() {
+  const filtered = filter === 'all' ? sessions : sessions.filter(s => s.mode === filter);
+  const totalCost = sessions.reduce((a, s) => a + s.cost, 0);
+  const buildCount = sessions.filter(s => s.build && s.build !== '(none)').length;
+
+  document.getElementById('stats').textContent = `${sessions.length} sessions | $${totalCost.toFixed(2)} total`;
+
+  // Totals
+  const byMode = { B: 0, E: 0, R: 0 };
+  const costByMode = { B: 0, E: 0, R: 0 };
+  sessions.forEach(s => { byMode[s.mode] = (byMode[s.mode] || 0) + 1; costByMode[s.mode] = (costByMode[s.mode] || 0) + s.cost; });
+  document.getElementById('totals').innerHTML = [
+    `<div class="t"><div class="tv">${sessions.length}</div><div class="tl">sessions</div></div>`,
+    `<div class="t"><div class="tv" style="color:var(--green)">${byMode.B || 0}</div><div class="tl">build</div></div>`,
+    `<div class="t"><div class="tv" style="color:var(--purple)">${byMode.E || 0}</div><div class="tl">engage</div></div>`,
+    `<div class="t"><div class="tv" style="color:var(--yellow)">${byMode.R || 0}</div><div class="tl">reflect</div></div>`,
+    `<div class="t"><div class="tv">${buildCount}</div><div class="tl">w/ commits</div></div>`,
+    `<div class="t"><div class="tv">$${totalCost.toFixed(2)}</div><div class="tl">total cost</div></div>`,
+  ].join('');
+
+  // Chart
+  const total = sessions.length || 1;
+  const colors = { B: 'var(--green)', E: 'var(--purple)', R: 'var(--yellow)' };
+  document.getElementById('chart').innerHTML = Object.entries(byMode)
+    .map(([m, c]) => `<div class="segment" style="width:${(c/total*100).toFixed(1)}%;background:${colors[m]}"></div>`).join('');
+
+  // List (newest first)
+  const list = document.getElementById('list');
+  list.innerHTML = filtered.slice().reverse().map(s => {
+    const costClass = s.cost < 1 ? 'low' : s.cost < 2 ? 'mid' : 'high';
+    const buildInfo = s.build === '(none)' ? '' : `${s.build}`;
+    return `<div class="session" onclick="this.classList.toggle('expanded')" data-session="${s.session}">
+      <div class="session-header">
+        <span class="badge badge-${s.mode}">${s.mode}</span>
+        <span class="snum">s${s.session}</span>
+        <span class="dur">${s.duration}</span>
+        <span class="cost ${costClass}">$${s.cost.toFixed(2)}</span>
+        ${buildInfo ? `<span style="color:var(--green);font-size:12px">${buildInfo}</span>` : ''}
+        <span class="note">${esc(s.note)}</span>
+      </div>
+      <div class="details">
+        <div class="detail-row"><span class="detail-label">Date</span> ${s.date}</div>
+        <div class="detail-row"><span class="detail-label">Duration</span> ${s.duration}</div>
+        <div class="detail-row"><span class="detail-label">Note</span> ${esc(s.note)}</div>
+        ${s.files.length ? `<div class="detail-row"><span class="detail-label">Files changed</span><div class="file-list">${s.files.map(f => `<span class="file-tag">${esc(f)}</span>`).join('')}</div></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+document.querySelector('.filters').addEventListener('click', e => {
+  if (e.target.tagName !== 'BUTTON') return;
+  document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  filter = e.target.dataset.filter;
+  render();
+});
+
+load();
+</script>
+</body>
+</html>

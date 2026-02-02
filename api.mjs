@@ -8712,6 +8712,50 @@ app.get("/shellsword/rules", async (_req, res) => {
   } catch (e) { res.status(502).json({ error: e.message }); }
 });
 
+// --- Session Replay Viewer ---
+app.get("/api/sessions", (req, res) => {
+  try {
+    const raw = readFileSync("/home/moltbot/.config/moltbook/session-history.txt", "utf8").trim();
+    const sessions = raw.split("\n").filter(Boolean).map(line => {
+      const m = line.match(/^(\S+)\s+mode=(\S+)\s+s=(\d+)\s+dur=(\S+)\s+cost=\$(\S+)\s+build=(.+?)\s+files=\[([^\]]*)\]\s+note:\s*(.*)$/);
+      if (!m) return null;
+      return { date: m[1], mode: m[2], session: parseInt(m[3]), duration: m[4], cost: parseFloat(m[5]), build: m[6], files: m[7] ? m[7].split(", ") : [], note: m[8] };
+    }).filter(Boolean);
+    res.json(sessions);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get("/api/sessions/:num/commits", (req, res) => {
+  try {
+    const num = parseInt(req.params.num);
+    // Find commits by searching git log for session-related commits
+    const out = execSync(`cd ${BASE} && git log --oneline --all --after="2026-01-01" --format="%H %s" 2>/dev/null || true`, { encoding: "utf8", timeout: 5000 });
+    // Match snapshot commits to find session boundaries
+    const lines = out.trim().split("\n").filter(Boolean);
+    const commits = [];
+    let inSession = false;
+    for (let i = 0; i < lines.length; i++) {
+      const [hash, ...rest] = lines[i].split(" ");
+      const msg = rest.join(" ");
+      if (msg.includes(`post-session`) && inSession) break;
+      if (inSession) commits.push({ hash: hash.substring(0, 8), message: msg });
+      if (msg.includes(`pre-session`) || msg.includes(`snapshot`)) {
+        // Check if this snapshot's session log mentions our session
+        try {
+          const diff = execSync(`cd ${BASE} && git show --stat ${hash} 2>/dev/null | head -20`, { encoding: "utf8", timeout: 3000 });
+          if (diff.includes(`s=${num}`) || diff.includes(`session-history`)) inSession = true;
+        } catch {}
+      }
+    }
+    res.json(commits.slice(0, 20));
+  } catch (e) { res.json([]); }
+});
+
+app.get("/replay", (req, res) => {
+  res.setHeader("Content-Type", "text/html");
+  res.send(readFileSync(join(BASE, "public", "replay.html"), "utf8"));
+});
+
 const server1 = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Molty API listening on port ${PORT}`);
   logActivity("server.start", `API v${VERSION} started on port ${PORT}`);

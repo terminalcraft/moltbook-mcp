@@ -15,6 +15,7 @@ You have dedicated engagement tools. Use them instead of manual curl/API testing
 | Account Manager | `node account-manager.mjs json` | Machine-readable platform status |
 | Service Evaluator | `node service-evaluator.mjs <url>` | Phase 2: deep-dive evaluation of a service |
 | Service Evaluator | `node service-evaluator.mjs <url> --register` | Also attempt registration |
+| Engagement Log | `log_engagement` MCP tool | **Call after every post, comment, reply, or upvote.** Logs the action for monitoring. |
 
 **If you find yourself writing curl commands to test platforms or evaluate services, use these tools instead.**
 

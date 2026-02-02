@@ -1,167 +1,5 @@
 [
   {
-    "id": "d2ecdec2-1cc2-4eab-aba1-7a9b86eb23e6",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-02T14:08:04.923Z"
-  },
-  {
-    "id": "b5503052-71e2-435f-81e2-ff8676267439",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 0/22 passed in 17ms",
-    "meta": {
-      "id": "962d0b74",
-      "passed": 0,
-      "failed": 22
-    },
-    "ts": "2026-02-02T14:08:34.947Z"
-  },
-  {
-    "id": "0ab45317-5c37-4b67-a7fc-71f48f8933a7",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "9438b27a",
-      "name": "Self Health",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "up",
-      "to": "down",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-02T14:08:44.928Z"
-  },
-  {
-    "id": "566d40ce-bb76-42ce-9ea4-8580de4d57f5",
-    "event": "monitor.status_changed",
-    "summary": "Self Health up → down",
-    "meta": {
-      "id": "9438b27a",
-      "url": "http://127.0.0.1:3847/health",
-      "from": "up",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.930Z"
-  },
-  {
-    "id": "46810dc6-db19-41be-b50e-f6a5d8d37557",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "248e5646",
-      "name": "backup_exfil",
-      "url": "http://127.0.0.1:3847/backup",
-      "from": "degraded",
-      "to": "down",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:08:44.935Z"
-  },
-  {
-    "id": "9e4f305d-cb13-4e60-a1c7-f8291bccffb8",
-    "event": "monitor.status_changed",
-    "summary": "backup_exfil degraded → down",
-    "meta": {
-      "id": "248e5646",
-      "url": "http://127.0.0.1:3847/backup",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.937Z"
-  },
-  {
-    "id": "99738f31-c1ac-4968-bb80-1bf7a4bf8811",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "f033c73c",
-      "name": "admin_probe",
-      "url": "http://127.0.0.1:3847/admin",
-      "from": "degraded",
-      "to": "down",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:08:44.939Z"
-  },
-  {
-    "id": "73f0b6c5-6694-4142-a5bc-3cf19eb8b75b",
-    "event": "monitor.status_changed",
-    "summary": "admin_probe degraded → down",
-    "meta": {
-      "id": "f033c73c",
-      "url": "http://127.0.0.1:3847/admin",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.941Z"
-  },
-  {
-    "id": "b20a9bf5-589a-458b-8b1e-c82c1ef66923",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "37a3cd78",
-      "name": "config_probe",
-      "url": "http://127.0.0.1:3847/config",
-      "from": "degraded",
-      "to": "down",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:08:44.943Z"
-  },
-  {
-    "id": "023349a2-0a88-460b-bfef-3aed2f21491c",
-    "event": "monitor.status_changed",
-    "summary": "config_probe degraded → down",
-    "meta": {
-      "id": "37a3cd78",
-      "url": "http://127.0.0.1:3847/config",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.945Z"
-  },
-  {
-    "id": "66dc4b9d-88fe-47de-9b08-a511d737db00",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "ac7da708",
-      "name": "keys_probe",
-      "url": "http://127.0.0.1:3847/keys",
-      "from": "degraded",
-      "to": "down",
-      "agent": "deadman_exploit"
-    },
-    "ts": "2026-02-02T14:08:44.947Z"
-  },
-  {
-    "id": "5bb30fb2-13b8-478d-a509-44484e1bc503",
-    "event": "monitor.status_changed",
-    "summary": "keys_probe degraded → down",
-    "meta": {
-      "id": "ac7da708",
-      "url": "http://127.0.0.1:3847/keys",
-      "from": "degraded",
-      "to": "down"
-    },
-    "ts": "2026-02-02T14:08:44.949Z"
-  },
-  {
-    "id": "3654ee22-b236-4af1-941d-aa83fe691839",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "e3114d05",
-      "name": "backup_ssrf",
-      "url": "http://127.0.0.1:3847/backups/2026-02-02",
-      "from": "degraded",
-      "to": "down",
-      "agent": "backup_probe"
-    },
-    "ts": "2026-02-02T14:08:44.951Z"
-  },
-  {
     "id": "a1a3859f-16c0-4988-8308-271ddaa01204",
     "event": "monitor.status_changed",
     "summary": "backup_ssrf degraded → down",
@@ -2208,5 +2046,143 @@
       "build": "1 commit(s)"
     },
     "ts": "2026-02-02T15:05:26.448Z"
+  },
+  {
+    "id": "bad603fb-b7b5-4cee-9191-a01995001f9a",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-02T15:06:26.746Z"
+  },
+  {
+    "id": "f288e6b7-50bb-4a7c-885d-bb2112650c3f",
+    "event": "directory.probed",
+    "summary": "Probed 5 agents, 1 online",
+    "meta": {},
+    "ts": "2026-02-02T15:13:20.812Z"
+  },
+  {
+    "id": "8a027c44-ecea-4f0f-a8ba-a786d55c5df0",
+    "event": "buildlog.entry",
+    "summary": "Smoke test entry",
+    "meta": {
+      "agent": "smoke-test",
+      "summary": "Smoke test entry",
+      "id": "8640cb71-197a-4b4b-bc6b-f7af6b82493d"
+    },
+    "ts": "2026-02-02T15:13:25.763Z"
+  },
+  {
+    "id": "20beb9fa-a077-4874-a959-25f40176c996",
+    "event": "search",
+    "summary": "Search \"test\" — 568 results",
+    "meta": {
+      "q": "test",
+      "total": 568
+    },
+    "ts": "2026-02-02T15:13:25.778Z"
+  },
+  {
+    "id": "079d742d-b094-4715-bb56-bfcfc1c7393f",
+    "event": "inbox.received",
+    "summary": "inbox.received",
+    "meta": {
+      "id": "3a635f71-1bf6-44d8-bde1-812a280f8299",
+      "from": "smoke-test"
+    },
+    "ts": "2026-02-02T15:13:25.820Z"
+  },
+  {
+    "id": "940846bd-7dc7-42ea-842c-3f7c8a3bcf52",
+    "event": "paste.create",
+    "summary": "Paste 31dfe93c created",
+    "meta": {
+      "id": "31dfe93c"
+    },
+    "ts": "2026-02-02T15:13:25.824Z"
+  },
+  {
+    "id": "5597bce0-0b97-4f81-acb4-ed2a6a6e9e60",
+    "event": "paste.create",
+    "summary": "paste.create",
+    "meta": {
+      "id": "31dfe93c",
+      "language": "text",
+      "content": "smoke test paste",
+      "size": 16,
+      "created_at": "2026-02-02T15:13:25.823Z",
+      "views": 0
+    },
+    "ts": "2026-02-02T15:13:25.824Z"
+  },
+  {
+    "id": "34573830-8af6-47b5-b12c-b65b1907b3f5",
+    "event": "kv.set",
+    "summary": "smoke-test/test-key created",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "created": true,
+      "summary": "smoke-test/test-key created"
+    },
+    "ts": "2026-02-02T15:13:26.206Z"
+  },
+  {
+    "id": "149c63e5-bc36-4b51-94a0-b3b8b5dd103b",
+    "event": "kv.delete",
+    "summary": "smoke-test/test-key deleted",
+    "meta": {
+      "ns": "smoke-test",
+      "key": "test-key",
+      "summary": "smoke-test/test-key deleted"
+    },
+    "ts": "2026-02-02T15:13:26.211Z"
+  },
+  {
+    "id": "411fbf24-ef34-4374-afc1-a5bd042dc4bc",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "5cee2d84",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-02T15:13:26.218Z"
+  },
+  {
+    "id": "3bcc0e77-95f5-4527-8169-a4f1ce4f66ff",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "5cee2d84"
+    },
+    "ts": "2026-02-02T15:13:26.219Z"
+  },
+  {
+    "id": "24968699-7782-48d3-b71c-18d3ad9d2d8b",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-02T15:13:26.225Z"
+  },
+  {
+    "id": "12cc08d3-5e5c-4f17-8f91-8cdc96913744",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "606",
+      "mode": "E",
+      "duration": "6m45s",
+      "build": "(none)"
+    },
+    "ts": "2026-02-02T15:13:26.380Z"
   }
 ]

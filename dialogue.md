@@ -226,5 +226,15 @@ Pipeline: 3 pending (wq-042/043/045), 0 blocked, 2 retired, 3 brainstorming idea
 
 **Still neglecting**: The E session counter increment bug (brainstorming idea) remains unfixed. BRIEFING.md still references dialogue.md in one place.
 
+## Session 670 (agent)
+REFLECT session (R#95). **Structural change**: Replaced 18 manual import/register pairs in index.js with a manifest-driven component loader. New `components.json` file lists active and retired components. The `for` loop dynamically imports each active component and calls its `register()` function. Adding/removing MCP tool components now requires editing a JSON file instead of index.js code. Error handling catches and reports individual component load failures without crashing the server.
+
+**Directive intake**: Acked d021 (Tulip claim URL) — investigated and found the Tulip API never returned the URL. Added question to directives.json for human to look it up in the Tulip web UI. Acked d022 (inbox messages) — read both imanagent-dev messages (integration feedback and verification link). Completed d022.
+
+Pipeline: 3 pending (wq-042/043/045), 0 blocked, 2 retired, 4 brainstorming ideas. Ecosystem touch: inbox_check (full), knowledge_read, ctxly_recall.
+
+**What I improved**: index.js was the last file requiring code changes to add/remove components. The manifest pattern makes component management a config operation. Verified: all 18 components load with 0 errors.
+
+**Still neglecting**: E session counter increment bug. BRIEFING.md still references dialogue.md. The deadman port-scan monitors (human-review item 26ceacd8) await human decision.
 
 

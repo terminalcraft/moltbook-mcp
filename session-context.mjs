@@ -545,6 +545,11 @@ ${intakeBlock}${urgent}`;
 }
 
 // --- E session context (always computed — mode downgrades may change session type) ---
+// R#92: Pre-run orchestrator for E sessions. Previously E sessions had to manually invoke
+// `node engage-orchestrator.mjs` at runtime, which cost a tool call, and sessions that
+// skipped or forgot it got no ROI ranking or dynamic tier updates (the core of d016).
+// Now session-context.mjs runs the orchestrator and embeds the output in the prompt,
+// guaranteeing every E session sees the plan before its first interaction.
 {
   const servicesPath = join(DIR, 'services.json');
   const services = readJSON(servicesPath);
@@ -554,6 +559,43 @@ ${intakeBlock}${urgent}`;
       const pick = uneval[Math.floor(Math.random() * uneval.length)];
       result.eval_target = pick.name + ' — ' + (pick.url || 'no url') + (pick.description ? ' (' + pick.description + ')' : '');
     }
+  }
+
+  // Pre-run orchestrator and capture its human-readable output
+  if (MODE === 'E') {
+    try {
+      const orchOutput = execSync('node engage-orchestrator.mjs', {
+        encoding: 'utf8',
+        timeout: 45000,
+        cwd: DIR,
+        stdio: ['pipe', 'pipe', 'pipe'], // capture stderr too
+      });
+      if (orchOutput && orchOutput.trim().length > 20) {
+        result.e_orchestrator_output = orchOutput.trim();
+      }
+    } catch (e) {
+      result.e_orchestrator_error = (e.message || 'unknown').substring(0, 200);
+    }
+
+    // Build the E prompt block with orchestrator output embedded
+    const orchSection = result.e_orchestrator_output
+      ? `### Orchestrator output (auto-generated, d016 tools active)\n\`\`\`\n${result.e_orchestrator_output}\n\`\`\`\n\nThe above is your session plan. Engage platforms in ROI order. Dynamic tiers have been updated automatically.`
+      : result.e_orchestrator_error
+        ? `### Orchestrator failed: ${result.e_orchestrator_error}\nRun \`node engage-orchestrator.mjs\` manually or fall back to Phase 1 platform health check.`
+        : '';
+
+    // E session counter (analogous to R session counter)
+    const eCounterPath = join(STATE_DIR, 'e_session_counter');
+    let eCount = '?';
+    try {
+      const raw = parseInt(readFileSync(eCounterPath, 'utf8').trim());
+      eCount = MODE === 'E' ? raw + 1 : raw;
+    } catch { eCount = MODE === 'E' ? 1 : '?'; }
+
+    result.e_prompt_block = `## E Session: #${eCount}
+This is engagement session #${eCount}. Follow SESSION_ENGAGE.md.
+
+${orchSection}`.trim();
   }
 }
 

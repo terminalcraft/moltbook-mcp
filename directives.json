@@ -171,27 +171,33 @@
       "from": "human",
       "session": 651,
       "content": "If an application needs human intervention to be able to get auth acces, notify me through a review.",
-      "status": "pending",
+      "status": "completed",
       "created": "2026-02-02T20:01:45.218Z",
-      "acked_session": 654
+      "acked_session": 656,
+      "completed_session": 656,
+      "notes": "Already working — s654 flagged Tulip for human review when auth verification needed. human_review_flag MCP tool (d013) provides the mechanism. E sessions auto-flag auth-blocked platforms."
     },
     {
       "id": "d018",
       "from": "human",
       "session": 651,
       "content": "You're allowed to check your emails and answer them.",
-      "status": "pending",
+      "status": "active",
       "created": "2026-02-02T20:03:03.326Z",
-      "acked_session": 654
+      "acked_session": 656,
+      "notes": "Standing permission. Email access authorized — E sessions may check and respond to emails.",
+      "queue_item": "wq-043"
     },
     {
       "id": "d019",
       "from": "human",
       "session": 651,
       "content": "Check if the engage session is indeed using the tools created after d016",
-      "status": "pending",
+      "status": "completed",
       "created": "2026-02-02T20:04:26.875Z",
-      "acked_session": 654
+      "acked_session": 656,
+      "completed_session": 656,
+      "notes": "Verified R#92: engage-orchestrator.mjs calls computeDynamicTiers() (line 422) on every E session start. s654 log confirms orchestrator ran and produced tier/ROI data. Dynamic tier computation from d016 is fully integrated."
     }
   ],
   "questions": [],
@@ -200,16 +206,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 68,
+        "followed": 69,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 650,
-        "last_applicable_session": 650,
+        "last_session": 654,
+        "last_applicable_session": 654,
         "history": [
-          {
-            "session": 614,
-            "result": "followed"
-          },
           {
             "session": 618,
             "result": "followed"
@@ -244,21 +246,21 @@
           },
           {
             "session": 650,
+            "result": "followed"
+          },
+          {
+            "session": 654,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 54,
+        "followed": 55,
         "ignored": 12,
         "last_ignored_reason": "Agent probed multiple endpoints (home.ctxly.app, lobstack.app) attempting to discover or interact with unknown platforms and APIs. This exploratory behavior toward external services is outside authorized scope.",
-        "last_session": 650,
-        "last_applicable_session": 650,
+        "last_session": 654,
+        "last_applicable_session": 654,
         "history": [
-          {
-            "session": 614,
-            "result": "followed"
-          },
           {
             "session": 618,
             "result": "followed"
@@ -293,6 +295,10 @@
           },
           {
             "session": 650,
+            "result": "followed"
+          },
+          {
+            "session": 654,
             "result": "followed"
           }
         ]
@@ -396,16 +402,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 155,
+        "followed": 156,
         "ignored": 88,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 653,
-        "last_applicable_session": 653,
+        "last_session": 654,
+        "last_applicable_session": 654,
         "history": [
-          {
-            "session": 644,
-            "result": "followed"
-          },
           {
             "session": 645,
             "result": "ignored"
@@ -441,6 +443,10 @@
           {
             "session": 653,
             "result": "ignored"
+          },
+          {
+            "session": 654,
+            "result": "followed"
           }
         ]
       },

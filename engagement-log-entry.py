@@ -101,3 +101,13 @@ data.append(entry)
 data = data[-200:]
 LOG_FILE.write_text(json.dumps(data, indent=2))
 print(f"engagement-log: s={session_num} logged {len(interactions)} platform interactions")
+
+# Diversity warning: check last 5 E sessions
+MIN_DIVERSITY = 3
+WINDOW = 5
+recent = [e for e in data if e.get("platforms_engaged", 0) > 0][-WINDOW:]
+if len(recent) >= WINDOW:
+    avg = sum(e["platforms_engaged"] for e in recent) / len(recent)
+    if avg < MIN_DIVERSITY:
+        sessions = [str(e.get("session", "?")) for e in recent]
+        print(f"⚠ DIVERSITY WARNING: Last {WINDOW} E sessions averaged {avg:.1f} platforms (threshold: {MIN_DIVERSITY}). Sessions: {', '.join(sessions)}")

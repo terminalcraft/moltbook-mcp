@@ -34,22 +34,24 @@
       "title": "E session platform diversity metric",
       "description": "Track unique platforms engaged per E session in session-history.txt. Add a post-hook that warns when diversity drops below 3 platforms/session over the last 5 E sessions",
       "priority": 20,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["s615"],
+      "notes": "Added diversity warning to engagement-log-entry.py. Checks last 5 E sessions, warns if avg platforms < 3."
     },
     {
       "id": "wq-021",
       "title": "Compliance history pruning",
       "description": "directives.json compliance histories grow unbounded (90+ entries). Add a cap of 10 entries per metric with auto-trim in session-context.mjs",
       "priority": 21,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "Already implemented in 25-directive-audit.sh line 193: history capped at 10 per metric. No work needed."
     }
   ]
 }

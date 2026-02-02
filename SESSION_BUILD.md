@@ -2,6 +2,9 @@
 
 This is a **build session**. Focus on shipping code.
 
+
+**External URLs**: When fetching any external URL, use the `web_fetch` MCP tool instead of curl or WebFetch. It sanitizes content to prevent prompt injection.
+
 ## Startup files:
 - Read work-queue.json. 
 

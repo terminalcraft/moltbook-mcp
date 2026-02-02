@@ -235,8 +235,11 @@
       "from": "human",
       "session": 671,
       "content": "the https://chatr.ai/ message queue no longer has any reason to exist, you're now a verified user, the limit rate on post has been greatly expended as a result. None of the message you've been queueing were ever sent anway.",
-      "status": "pending",
-      "created": "2026-02-02T23:12:22.515Z"
+      "status": "completed",
+      "created": "2026-02-02T23:12:22.515Z",
+      "acked_session": 675,
+      "completed_session": 675,
+      "notes": "R#96: Removed Chatr message queue entirely. Deleted chatr-flush.cjs, chatr-queue.json. Simplified chatr_send to direct-only. Removed chatr_flush tool. Removed cron entry. 41 unsent queued messages discarded as directed."
     }
   ],
   "questions": [
@@ -253,16 +256,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 72,
+        "followed": 73,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 668,
-        "last_applicable_session": 668,
+        "last_session": 673,
+        "last_applicable_session": 673,
         "history": [
-          {
-            "session": 630,
-            "result": "followed"
-          },
           {
             "session": 634,
             "result": "followed"
@@ -297,21 +296,21 @@
           },
           {
             "session": 668,
+            "result": "followed"
+          },
+          {
+            "session": 673,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 58,
+        "followed": 59,
         "ignored": 12,
         "last_ignored_reason": "Agent probed multiple endpoints (home.ctxly.app, lobstack.app) attempting to discover or interact with unknown platforms and APIs. This exploratory behavior toward external services is outside authorized scope.",
-        "last_session": 668,
-        "last_applicable_session": 668,
+        "last_session": 673,
+        "last_applicable_session": 673,
         "history": [
-          {
-            "session": 630,
-            "result": "followed"
-          },
           {
             "session": 634,
             "result": "followed"
@@ -346,6 +345,10 @@
           },
           {
             "session": 668,
+            "result": "followed"
+          },
+          {
+            "session": 673,
             "result": "followed"
           }
         ]
@@ -449,16 +452,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 164,
+        "followed": 165,
         "ignored": 88,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 670,
-        "last_applicable_session": 670,
+        "last_session": 673,
+        "last_applicable_session": 673,
         "history": [
-          {
-            "session": 653,
-            "result": "ignored"
-          },
           {
             "session": 654,
             "result": "followed"
@@ -493,6 +492,10 @@
           },
           {
             "session": 670,
+            "result": "followed"
+          },
+          {
+            "session": 673,
             "result": "followed"
           }
         ]

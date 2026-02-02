@@ -1,10 +1,8 @@
 import { z } from "zod";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join } from "path";
 import { getCtxlyKey, getChatrCredentials, CHATR_API } from "../providers/credentials.js";
 import { loadServices, saveServices } from "../providers/services.js";
-
-const CHATR_QUEUE_PATH = join(process.env.HOME || "/home/moltbot", "moltbook-mcp", "chatr-queue.json");
 
 // Chatr spam/noise detection
 const CHATR_SPAM_PATTERNS = [
@@ -62,31 +60,9 @@ function levenshteinSimilar(a, b) {
   return shorter / longer > 0.8 && a.slice(0, 60) === b.slice(0, 60);
 }
 
-function loadChatrQueue() {
-  try { return JSON.parse(readFileSync(CHATR_QUEUE_PATH, "utf8")); }
-  catch { return { messages: [], lastSentAt: null }; }
-}
-
-function saveChatrQueue(q) {
-  writeFileSync(CHATR_QUEUE_PATH, JSON.stringify(q, null, 2));
-}
-
-const CHATR_COOLDOWN_MS = 5 * 60 * 1000 + 10000; // 5min + 10s buffer
-
-function chatrCooldownRemaining() {
-  const q = loadChatrQueue();
-  if (!q.lastAttemptAt) return 0;
-  const elapsed = Date.now() - new Date(q.lastAttemptAt).getTime();
-  return Math.max(0, CHATR_COOLDOWN_MS - elapsed);
-}
-
 async function trySendChatr(content) {
   const creds = getChatrCredentials();
   if (!creds) return { ok: false, error: "No credentials" };
-  // Track attempt time to avoid cooldown resets
-  const q = loadChatrQueue();
-  q.lastAttemptAt = new Date().toISOString();
-  saveChatrQueue(q);
   const res = await fetch(`${CHATR_API}/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-key": creds.apiKey },
@@ -162,69 +138,16 @@ export function register(server) {
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
   });
 
-  // chatr_send — auto-queues on rate limit
+  // chatr_send — direct send (queue removed per d023, verified user with expanded rate limit)
   server.tool("chatr_send", "Send a message to Chatr.ai real-time agent chat", {
     content: z.string().describe("Message text"),
   }, async ({ content }) => {
     try {
-      const remaining = chatrCooldownRemaining();
-      if (remaining > 0) {
-        const q = loadChatrQueue();
-        q.messages.push({ content, queuedAt: new Date().toISOString() });
-        saveChatrQueue(q);
-        const secs = Math.ceil(remaining / 1000);
-        return { content: [{ type: "text", text: `Cooldown active (${secs}s remaining) — queued (${q.messages.length} in queue). Don't retry, flush will handle it.` }] };
-      }
       const result = await trySendChatr(content);
-      if (result.ok) {
-        const q = loadChatrQueue();
-        q.lastSentAt = new Date().toISOString();
-        saveChatrQueue(q);
-        return { content: [{ type: "text", text: `Sent: ${content.slice(0, 80)}...` }] };
-      }
-      if (result.permanent) {
-        return { content: [{ type: "text", text: `Permanent failure: ${result.error}. Message NOT queued. Remove URLs or get verified first.` }] };
-      }
-      if (result.rateLimited) {
-        const q = loadChatrQueue();
-        q.messages.push({ content, queuedAt: new Date().toISOString() });
-        saveChatrQueue(q);
-        return { content: [{ type: "text", text: `Rate limited — queued for later (${q.messages.length} in queue). Will auto-send via chatr_flush.` }] };
-      }
+      if (result.ok) return { content: [{ type: "text", text: `Sent: ${content.slice(0, 80)}...` }] };
+      if (result.rateLimited) return { content: [{ type: "text", text: `Rate limited. Try again later.` }] };
       return { content: [{ type: "text", text: `Error: ${result.error}` }] };
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
-  });
-
-  // chatr_flush — drain one message from the queue
-  server.tool("chatr_flush", "Send the next queued Chatr message. Call this when rate limit cooldown has passed.", {}, async () => {
-    try {
-      const q = loadChatrQueue();
-      if (!q.messages.length) return { content: [{ type: "text", text: "Queue empty — nothing to send." }] };
-      const remaining = chatrCooldownRemaining();
-      if (remaining > 0) {
-        const secs = Math.ceil(remaining / 1000);
-        return { content: [{ type: "text", text: `Cooldown active (${secs}s). ${q.messages.length} messages waiting. Don't retry — will reset cooldown.` }] };
-      }
-      const next = q.messages[0];
-      const result = await trySendChatr(next.content);
-      if (result.ok) {
-        q.messages.shift();
-        q.lastSentAt = new Date().toISOString();
-        saveChatrQueue(q);
-        return { content: [{ type: "text", text: `Sent queued message (${q.messages.length} remaining): ${next.content.slice(0, 80)}...` }] };
-      }
-      if (result.permanent) {
-        if (!q.deadLetter) q.deadLetter = [];
-        q.deadLetter.push({ ...next, error: result.error, failedAt: new Date().toISOString() });
-        q.messages.shift();
-        saveChatrQueue(q);
-        return { content: [{ type: "text", text: `Permanent failure: ${result.error}. Moved to dead letter. ${q.messages.length} remaining.` }] };
-      }
-      if (result.rateLimited) {
-        return { content: [{ type: "text", text: `Rate limited. ${q.messages.length} messages waiting. Cooldown started — wait 5+ min before next flush.` }] };
-      }
-      return { content: [{ type: "text", text: `Send failed: ${result.error}. Message stays in queue.` }] };
-    } catch (e) { return { content: [{ type: "text", text: `Flush error: ${e.message}` }] }; }
   });
 
   // chatr_agents

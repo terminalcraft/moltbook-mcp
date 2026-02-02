@@ -279,14 +279,19 @@ if (MODE === 'B') {
   }
   let bsCount = (bsContent.match(/^- \*\*/gm) || []).length;
 
-  if (bsCount === 0) {
-    // Auto-seed (R#75): Generate concrete, buildable ideas with proper titles.
+  if (bsCount < 3) {
+    // Auto-seed (R#82): Trigger when brainstorming < 3 ideas (was === 0).
+    // Dead zone bug: with 1-2 ideas, auto-seed didn't run (threshold was 0),
+    // but auto-promote couldn't promote either (too few ideas vs buffer).
+    // Queue starved because neither mechanism could produce work.
+    // Now seeds up to 4 ideas when below the health threshold of 3.
     // Previous approach (R#71) extracted 80-char substrings of directive content as titles,
     // producing ideas like "Address: Map the entire agent ecosystem. Crawl directories, follow links from agent profi"
     // — these are unreadable when promoted to queue items and tell B sessions nothing actionable.
     // New approach: each seed has a short imperative title (<60 chars) and a description.
     // Title format matches what a B session needs: "Build X", "Add Y support", "Fix Z".
     const seeds = [];
+    const maxSeeds = 4 - bsCount; // Only fill gap to target (R#82)
     const queueTitles = queue.map(i => i.title);
     const isDupe = (title) => isTitleDupe(title, queueTitles);
 
@@ -306,7 +311,7 @@ if (MODE === 'B') {
         const dData = JSON.parse(readFileSync(directivesPath2, 'utf8'));
         const active = (dData.directives || []).filter(d => d.status === 'active' || d.status === 'pending');
         for (const d of active) {
-          if (seeds.length >= 4) break;
+          if (seeds.length >= maxSeeds) break;
           const content = (d.content || '').toLowerCase();
           const match = DIRECTIVE_SEED_TABLE.find(row => row.keywords.some(k => content.includes(k)));
           if (match?.skip) continue;
@@ -321,7 +326,7 @@ if (MODE === 'B') {
 
     // Source 2: Recent session patterns — find concrete improvement opportunities
     const histPath = join(STATE_DIR, 'session-history.txt');
-    if (existsSync(histPath) && seeds.length < 4) {
+    if (existsSync(histPath) && seeds.length < maxSeeds) {
       const hist = readFileSync(histPath, 'utf8');
       const lines = hist.trim().split('\n').slice(-20);
       // Find repeated build patterns (same file touched 4+ times = unstable code)
@@ -337,7 +342,7 @@ if (MODE === 'B') {
       const hotFiles = Object.entries(fileCounts)
         .filter(([f, c]) => c >= 4 && !['work-queue.json', 'BRAINSTORMING.md', 'dialogue.md'].includes(f))
         .sort((a, b) => b[1] - a[1]);
-      if (hotFiles.length > 0 && seeds.length < 4) {
+      if (hotFiles.length > 0 && seeds.length < maxSeeds) {
         const top = hotFiles[0];
         const title = `Add tests for ${top[0]}`;
         if (!isDupe(title)) {
@@ -349,13 +354,13 @@ if (MODE === 'B') {
         const c = l.match(/cost=\$([0-9.]+)/); const m = l.match(/mode=([A-Z])/);
         return c && m && m[1] === 'E' && parseFloat(c[1]) < 1.0;
       });
-      if (lowCostE.length >= 3 && seeds.length < 4 && !isDupe('E session budget utilization')) {
+      if (lowCostE.length >= 3 && seeds.length < maxSeeds && !isDupe('E session budget utilization')) {
         seeds.push(`- **Improve E session budget utilization**: ${lowCostE.length}/recent E sessions under $1 — add auto-retry or deeper exploration loops`);
       }
     }
 
     // Source 3: Queue health
-    if (pending.length === 0 && seeds.length < 4 && !isDupe('queue starvation')) {
+    if (pending.length === 0 && seeds.length < maxSeeds && !isDupe('queue starvation')) {
       seeds.push(`- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work`);
     }
 

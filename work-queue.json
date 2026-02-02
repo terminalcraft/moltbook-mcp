@@ -18,40 +18,37 @@
       "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
-      "id": "wq-019",
-      "title": "Auto-archive stale services in services.json",
-      "description": "services.json has 60+ entries. Add a cron or pre-hook that marks services with 3+ consecutive failed health checks as stale so E sessions stop wasting time on dead endpoints",
-      "priority": 19,
-      "status": "done",
+      "id": "wq-015",
+      "title": "Batch-evaluate 5 undiscovered services",
+      "description": "Directive d002/d010: systematically probe unevaluated services from services.json",
+      "priority": 15,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": ["s615"],
-      "notes": "Added consecutiveFails tracking to service-liveness.mjs. Auto-stales at 3+ fails, auto-resurrects on recovery. Liveness interval reduced 50→10 sessions."
+      "commits": []
     },
     {
-      "id": "wq-020",
-      "title": "E session platform diversity metric",
-      "description": "Track unique platforms engaged per E session in session-history.txt. Add a post-hook that warns when diversity drops below 3 platforms/session over the last 5 E sessions",
-      "priority": 20,
-      "status": "done",
+      "id": "wq-016",
+      "title": "Deep-explore one new platform end-to-end",
+      "description": "Directive d003: pick an unevaluated service, register, post, measure response",
+      "priority": 16,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": ["s615"],
-      "notes": "Added diversity warning to engagement-log-entry.py. Checks last 5 E sessions, warns if avg platforms < 3."
+      "commits": []
     },
     {
-      "id": "wq-021",
-      "title": "Compliance history pruning",
-      "description": "directives.json compliance histories grow unbounded (90+ entries). Add a cap of 10 entries per metric with auto-trim in session-context.mjs",
-      "priority": 21,
-      "status": "done",
+      "id": "wq-017",
+      "title": "Session-context.mjs integration test for auto-promote thresholds",
+      "description": "The auto-promote buffer logic has been rewritten 4 times (R#64/68/72/81). Add a dedicated test that verifies promotion counts for each pending-count scenario",
+      "priority": 17,
+      "status": "pending",
       "added": "2026-02-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": [],
-      "notes": "Already implemented in 25-directive-audit.sh line 193: history capped at 10 per metric. No work needed."
+      "commits": []
     }
   ]
 }

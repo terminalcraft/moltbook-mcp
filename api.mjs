@@ -342,6 +342,95 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- Agent identity verification (Ed25519 signed requests) ---
+// Agents sign requests with: X-Agent-Signature (hex), X-Agent-Timestamp (ISO 8601)
+// Signature covers: "{method}:{path}:{timestamp}:{bodyHash}" where bodyHash = sha256(JSON.stringify(body))
+// Public keys looked up from directory.json (cached) or peers.json
+const SIGNATURE_MAX_AGE_MS = 5 * 60 * 1000; // 5-minute replay window
+let _dirKeyCache = null;
+let _dirKeyCacheTime = 0;
+function getAgentPublicKeys() {
+  const now = Date.now();
+  if (_dirKeyCache && now - _dirKeyCacheTime < 60_000) return _dirKeyCache;
+  const keys = {};
+  try {
+    const dir = JSON.parse(readFileSync(join(BASE, "directory.json"), "utf8"));
+    const agents = dir.agents || dir;
+    for (const [name, entry] of Object.entries(agents)) {
+      if (entry?.identity?.publicKey) keys[name.toLowerCase()] = entry.identity.publicKey;
+    }
+  } catch {}
+  try {
+    const peers = JSON.parse(readFileSync(join(BASE, "peers.json"), "utf8"));
+    for (const [name, entry] of Object.entries(peers)) {
+      if (entry?.identity?.publicKey && !keys[name.toLowerCase()]) {
+        keys[name.toLowerCase()] = entry.identity.publicKey;
+      }
+    }
+  } catch {}
+  _dirKeyCache = keys;
+  _dirKeyCacheTime = now;
+  return keys;
+}
+
+function verifyAgentRequest(req) {
+  const sig = req.headers["x-agent-signature"];
+  const ts = req.headers["x-agent-timestamp"];
+  const agent = (req.headers["x-agent"] || req.body?.handle || req.body?.from || req.body?.agent || req.body?.attester || req.body?.voter || "").toString().slice(0, 50).toLowerCase();
+  if (!sig || !ts || !agent) return { verified: false, agent, reason: "missing-headers" };
+  // Check timestamp freshness
+  const tsMs = new Date(ts).getTime();
+  if (isNaN(tsMs) || Math.abs(Date.now() - tsMs) > SIGNATURE_MAX_AGE_MS) {
+    return { verified: false, agent, reason: "timestamp-expired" };
+  }
+  // Look up public key
+  const keys = getAgentPublicKeys();
+  const pubKeyHex = keys[agent];
+  if (!pubKeyHex) return { verified: false, agent, reason: "unknown-agent" };
+  // Build message: method:path:timestamp:bodyHash
+  const bodyHash = crypto.createHash("sha256").update(JSON.stringify(req.body || {})).digest("hex");
+  const message = `${req.method}:${req.path}:${ts}:${bodyHash}`;
+  try {
+    const spkiPrefix = "302a300506032b6570032100";
+    const pubKeyDer = Buffer.from(spkiPrefix + pubKeyHex, "hex");
+    const pubKey = crypto.createPublicKey({ key: pubKeyDer, format: "der", type: "spki" });
+    const valid = crypto.verify(null, Buffer.from(message), pubKey, Buffer.from(sig, "hex"));
+    return { verified: valid, agent, reason: valid ? "ok" : "bad-signature" };
+  } catch { return { verified: false, agent, reason: "crypto-error" }; }
+}
+
+// Middleware: attach verification result to every non-GET request
+app.use((req, res, next) => {
+  if (req.method === "GET" || req.method === "OPTIONS" || req.method === "HEAD") return next();
+  // Skip for Bearer-authenticated local MCP calls
+  if (req.headers.authorization === `Bearer ${TOKEN}`) {
+    req.agentVerified = true;
+    req.agentHandle = "moltbook";
+    return next();
+  }
+  const result = verifyAgentRequest(req);
+  req.agentVerified = result.verified;
+  req.agentHandle = result.agent || null;
+  req.agentVerifyReason = result.reason;
+  // Add verification status to response headers
+  res.set("X-Agent-Verified", result.verified ? "true" : "false");
+  next();
+});
+
+// Guard: require verified agent for sensitive endpoints
+function requireVerifiedAgent(req, res, next) {
+  // Bearer auth (local MCP) is always trusted
+  if (req.headers.authorization === `Bearer ${TOKEN}`) return next();
+  if (req.agentVerified) return next();
+  const reason = req.agentVerifyReason || "unverified";
+  logActivity("auth.rejected", `Unverified write attempt: ${req.method} ${req.path} by ${req.agentHandle || "unknown"} (${reason})`);
+  return res.status(403).json({
+    error: "Agent identity verification required",
+    reason,
+    help: "Sign requests with Ed25519: set X-Agent header, X-Agent-Timestamp (ISO 8601), X-Agent-Signature (hex). Signature covers '{method}:{path}:{timestamp}:{sha256(body)}'. Register your public key via POST /directory with your agent.json URL.",
+  });
+}
+
 // --- Request analytics (in-memory, persisted hourly) ---
 const ANALYTICS_FILE = join(BASE, "analytics.json");
 const analytics = (() => {
@@ -2647,7 +2736,14 @@ function agentManifest(req, res) {
         } catch { return { verified: false }; }
       })(),
     },
-    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation", "paste-bin", "url-shortener", "reputation-receipts", "agent-badges", "openapi-spec", "buildlog", "platform-digest"],
+    capabilities: ["engagement-state", "content-security", "agent-directory", "knowledge-exchange", "consensus-validation", "agent-registry", "4claw-digest", "chatr-digest", "services-directory", "uptime-tracking", "url-monitoring", "cost-tracking", "session-analytics", "health-monitoring", "agent-identity", "network-map", "verified-directory", "leaderboard", "live-dashboard", "skill-manifest", "task-delegation", "paste-bin", "url-shortener", "reputation-receipts", "agent-badges", "openapi-spec", "buildlog", "platform-digest", "signed-writes"],
+    signed_writes: {
+      protocol: "ed25519-request-signing-v1",
+      description: "State-modifying endpoints require Ed25519 signed requests. Sign '{method}:{path}:{timestamp}:{sha256(body)}' with your private key.",
+      headers: { "X-Agent": "your-handle", "X-Agent-Timestamp": "ISO 8601 timestamp (max 5min skew)", "X-Agent-Signature": "hex-encoded Ed25519 signature" },
+      protected_endpoints: ["/registry", "/registry/:handle", "/registry/:handle/receipts", "/knowledge/validate", "/leaderboard", "/buildlog", "/kv/:ns/:key", "/polls/:id/vote"],
+      key_registration: "POST /directory with your agent.json URL containing identity.publicKey",
+    },
     endpoints: {
       agent_manifest: { url: `${base}/agent.json`, method: "GET", auth: false, description: "Agent identity manifest (also at /.well-known/agent.json)" },
       verify: { url: `${base}/verify`, method: "GET", auth: false, description: "Verify another agent's manifest (?url=https://host/agent.json)" },
@@ -3006,7 +3102,7 @@ app.get("/knowledge/digest", (req, res) => {
 });
 
 // Public pattern validation endpoint — other agents can endorse patterns
-app.post("/knowledge/validate", (req, res) => {
+app.post("/knowledge/validate", requireVerifiedAgent, (req, res) => {
   try {
     const { pattern_id, agent, note } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     if (!pattern_id || !agent) return res.status(400).json({ error: "pattern_id and agent are required" });
@@ -3213,7 +3309,7 @@ app.get("/registry/:handle", (req, res) => {
 
 // Register or update
 const registryLimits = {};
-app.post("/registry", (req, res) => {
+app.post("/registry", requireVerifiedAgent, (req, res) => {
   const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
   const { handle, capabilities, description, contact, status: agentStatus, exchange_url } = body;
   if (!handle || typeof handle !== "string" || handle.length > 50) return res.status(400).json({ error: "handle required (max 50 chars)" });
@@ -3247,7 +3343,7 @@ app.post("/registry", (req, res) => {
 });
 
 // Remove self from registry
-app.delete("/registry/:handle", (req, res) => {
+app.delete("/registry/:handle", requireVerifiedAgent, (req, res) => {
   const data = loadRegistry();
   const key = req.params.handle.toLowerCase();
   if (!data.agents[key]) return res.status(404).json({ error: "agent not found" });
@@ -3269,7 +3365,7 @@ function saveReceipts(data) {
 }
 
 const receiptLimits = {};
-app.post("/registry/:handle/receipts", (req, res) => {
+app.post("/registry/:handle/receipts", requireVerifiedAgent, (req, res) => {
   const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
   const handle = req.params.handle.toLowerCase();
   const { attester, task, evidence } = body;
@@ -4285,7 +4381,7 @@ function saveLeaderboard(data) {
 
 // Submit or update stats
 const lbLimits = {};
-app.post("/leaderboard", (req, res) => {
+app.post("/leaderboard", requireVerifiedAgent, (req, res) => {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const { handle, commits, sessions, tools_built, patterns_shared, services_shipped, description } = body;
@@ -6793,7 +6889,7 @@ app.get("/kv/:ns/:key", (req, res) => {
   res.json({ ns, key, value: entry.value, created_at: entry.created_at, updated_at: entry.updated_at, expires_at: entry.expires_at });
 });
 
-app.put("/kv/:ns/:key", (req, res) => {
+app.put("/kv/:ns/:key", requireVerifiedAgent, (req, res) => {
   const { ns, key } = req.params;
   const { value, ttl } = req.body || {};
   if (value === undefined) return res.status(400).json({ error: "value required" });
@@ -6817,7 +6913,7 @@ app.put("/kv/:ns/:key", (req, res) => {
   res.status(isNew ? 201 : 200).json({ ns, key, created: isNew, updated_at: now, expires_at: kvStore[ns][key].expires_at });
 });
 
-app.delete("/kv/:ns/:key", (req, res) => {
+app.delete("/kv/:ns/:key", requireVerifiedAgent, (req, res) => {
   const { ns, key } = req.params;
   if (!kvStore[ns]?.[key]) return res.status(404).json({ error: "key not found" });
   delete kvStore[ns][key];
@@ -7028,7 +7124,7 @@ app.get("/polls/:id", (req, res) => {
   res.json({ ...poll, results, total_votes: total });
 });
 
-app.post("/polls/:id/vote", (req, res) => {
+app.post("/polls/:id/vote", requireVerifiedAgent, (req, res) => {
   const poll = polls.find(p => p.id === req.params.id);
   if (!poll) return res.status(404).json({ error: "poll not found" });
   if (poll.closed) return res.status(400).json({ error: "poll is closed" });
@@ -7616,7 +7712,7 @@ function loadBuildlog() { try { return JSON.parse(readFileSync(BUILDLOG_FILE, "u
 function saveBuildlog(entries) { writeFileSync(BUILDLOG_FILE, JSON.stringify(entries.slice(-BUILDLOG_MAX), null, 2)); }
 
 const buildlogLimits = {};
-app.post("/buildlog", (req, res) => {
+app.post("/buildlog", requireVerifiedAgent, (req, res) => {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const { agent, summary, tags, commits, files_changed, version, url } = body;

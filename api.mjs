@@ -1012,6 +1012,48 @@ app.get("/status/creds", (req, res) => {
   }
 });
 
+// Queue health: dedup stats, staleness, blocked-item age
+app.get("/status/queue-health", (req, res) => {
+  try {
+    const wq = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf8"));
+    const items = wq.queue || [];
+    const now = Date.now();
+
+    // Dedup check: find duplicate IDs
+    const idCounts = {};
+    for (const item of items) { idCounts[item.id] = (idCounts[item.id] || 0) + 1; }
+    const duplicates = Object.entries(idCounts).filter(([, c]) => c > 1).map(([id, count]) => ({ id, count }));
+
+    // Staleness: days since any queue item was last modified (use added date as proxy)
+    const dates = items.map(i => i.added).filter(Boolean).map(d => new Date(d).getTime());
+    const lastChange = dates.length ? Math.max(...dates) : null;
+    const staleDays = lastChange ? Math.floor((now - lastChange) / 86400000) : null;
+
+    // Blocked items with age
+    const blocked = items.filter(i => i.status === "blocked").map(i => ({
+      id: i.id,
+      title: i.title,
+      age_days: i.added ? Math.floor((now - new Date(i.added).getTime()) / 86400000) : null,
+      has_auto_check: !!i.blocker_check,
+    }));
+
+    // Status breakdown
+    const byStatus = {};
+    for (const item of items) { byStatus[item.status] = (byStatus[item.status] || 0) + 1; }
+
+    res.json({
+      total: items.length,
+      by_status: byStatus,
+      duplicates,
+      stale_days: staleDays,
+      blocked_items: blocked,
+      health: duplicates.length === 0 && (staleDays === null || staleDays < 7) ? "healthy" : "needs_attention",
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Public ecosystem status dashboard — HTML page with deep health checks
 app.get("/status/dashboard", async (req, res) => {
   // Deep checks: test actual functionality, not just HTTP 200

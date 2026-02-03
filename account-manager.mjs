@@ -7,6 +7,7 @@
  *   node account-manager.mjs test [id...]    # Test auth for specific accounts (or all)
  *   node account-manager.mjs live            # Test all, return only live platforms (for E sessions)
  *   node account-manager.mjs json            # Test all, output machine-readable JSON
+ *   node account-manager.mjs diagnose <id>   # Probe alternative endpoints when test fails (d027)
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
@@ -145,6 +146,143 @@ async function testAll(filterIds) {
   return results;
 }
 
+const SERVICES_PATH = join(__dirname, "services.json");
+
+function loadServices() {
+  try {
+    return JSON.parse(readFileSync(SERVICES_PATH, "utf8"));
+  } catch {
+    return { services: [] };
+  }
+}
+
+async function probeUrl(url, authHeader = null) {
+  const fetchHeaders = {};
+  if (authHeader) {
+    const [key, ...vals] = authHeader.split(": ");
+    fetchHeaders[key] = vals.join(": ");
+  }
+  try {
+    const resp = await safeFetch(url, {
+      timeout: 8000,
+      headers: fetchHeaders,
+      allowInternal: true,
+    });
+    return { url, status: resp.status, bodySize: (resp.body || "").length };
+  } catch (e) {
+    return { url, status: 0, error: e.message?.slice(0, 80) };
+  }
+}
+
+async function diagnose(platformId) {
+  const reg = loadRegistry();
+  const account = reg.accounts.find(a => a.id === platformId);
+
+  if (!account) {
+    console.log(`Account "${platformId}" not found in registry.`);
+    console.log("Available accounts:", reg.accounts.map(a => a.id).join(", "));
+    return;
+  }
+
+  console.log(`Diagnosing: ${account.platform} (${account.id})`);
+  console.log("=".repeat(60));
+
+  // 1. Test primary endpoint
+  const cred = readCredFile(account);
+  const authHeader = getAuthHeader(account, cred);
+
+  console.log("\n[Primary Test Endpoint]");
+  if (account.test.method === "mcp") {
+    console.log(`  Tool: ${account.test.tool} (MCP-based, cannot HTTP probe)`);
+  } else {
+    const primaryUrl = buildTestUrl(account, cred);
+    console.log(`  URL: ${primaryUrl}`);
+    const primary = await probeUrl(primaryUrl, authHeader);
+    const icon = primary.status >= 200 && primary.status < 300 ? "✓" : "✗";
+    console.log(`  ${icon} Status: ${primary.status} (body: ${primary.bodySize || 0} bytes)`);
+    if (primary.error) console.log(`  Error: ${primary.error}`);
+  }
+
+  // 2. Look up service in services.json (prefer exact ID match)
+  const services = loadServices();
+  const service = services.services?.find(s => s.id === platformId) ||
+    services.services?.find(s => s.name?.toLowerCase() === account.platform.toLowerCase()) ||
+    (account.test.url ? services.services?.find(s => {
+      try {
+        return new URL(s.url).hostname === new URL(account.test.url).hostname;
+      } catch { return false; }
+    }) : null);
+
+  // 3. Probe alternative endpoints
+  console.log("\n[Alternative Endpoints]");
+
+  // Build list of URLs to try
+  let baseUrl;
+  if (account.test.url) {
+    try {
+      const u = new URL(account.test.url);
+      baseUrl = `${u.protocol}//${u.host}`;
+    } catch {}
+  }
+  if (!baseUrl && service?.url) {
+    baseUrl = service.url;
+  }
+
+  if (!baseUrl) {
+    console.log("  Could not determine base URL for probing.");
+    return;
+  }
+
+  const probePaths = [
+    "/",
+    "/health",
+    "/api",
+    "/api/v1",
+    "/api/health",
+    "/skill.md",
+    "/agent.json",
+  ];
+
+  // Add api_docs path if available
+  if (service?.api_docs) {
+    try {
+      const docsPath = new URL(service.api_docs).pathname;
+      if (!probePaths.includes(docsPath)) probePaths.push(docsPath);
+    } catch {}
+  }
+
+  const results = [];
+  for (const path of probePaths) {
+    const url = baseUrl + path;
+    const r = await probeUrl(url);
+    results.push(r);
+    const icon = r.status >= 200 && r.status < 300 ? "✓" : r.status === 0 ? "?" : "✗";
+    const sizeInfo = r.bodySize ? `(${r.bodySize} bytes)` : "";
+    console.log(`  ${icon} ${r.status.toString().padStart(3)} ${path.padEnd(20)} ${sizeInfo}`);
+  }
+
+  // 4. Summary
+  console.log("\n[Summary]");
+  const working = results.filter(r => r.status >= 200 && r.status < 300);
+  if (working.length === 0) {
+    console.log("  No endpoints responding. Service may be offline.");
+  } else {
+    console.log(`  ${working.length}/${results.length} endpoints responding:`);
+    for (const w of working) {
+      console.log(`    - ${w.url}`);
+    }
+  }
+
+  // 5. Suggestion
+  if (service) {
+    console.log("\n[Service Info from services.json]");
+    console.log(`  Status: ${service.status}`);
+    console.log(`  Category: ${service.category}`);
+    if (service.api_docs) console.log(`  API Docs: ${service.api_docs}`);
+    if (service.notes) console.log(`  Notes: ${service.notes}`);
+  }
+}
+
 // CLI
 const cmd = process.argv[2] || "status";
 const args = process.argv.slice(3);
@@ -180,6 +318,14 @@ if (cmd === "status") {
 } else if (cmd === "json") {
   const results = await testAll();
   console.log(JSON.stringify(results, null, 2));
+} else if (cmd === "diagnose") {
+  const platformId = args[0];
+  if (!platformId) {
+    console.log("Usage: node account-manager.mjs diagnose <platform-id>");
+    console.log("  Probes alternative endpoints when primary test fails.");
+    process.exit(1);
+  }
+  await diagnose(platformId);
 } else {
-  console.log("Usage: node account-manager.mjs [status|test|live|json] [id...]");
+  console.log("Usage: node account-manager.mjs [status|test|live|json|diagnose] [id...]");
 }

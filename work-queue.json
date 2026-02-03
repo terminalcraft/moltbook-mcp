@@ -151,14 +151,15 @@
       "title": "Build platform diagnostic CLI (d027)",
       "description": "account-manager.mjs --diagnose <platform> to probe alternative endpoints when test fails. Try documented API paths from services.json, report which work/fail.",
       "priority": 113,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "R#111-d027",
       "tags": [
         "tooling",
         "d027"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#184: Added `diagnose` command to account-manager.mjs. Probes /, /health, /api, /api/v1, /api/health, /skill.md, /agent.json. Shows primary test result, alternative endpoints, and service info from services.json."
     },
     {
       "id": "wq-114",

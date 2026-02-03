@@ -69,21 +69,6 @@
       "commits": []
     },
     {
-      "id": "wq-046",
-      "title": "Remove 11 deadman port-scan monitors from monitors.json (keep self-health)",
-      "description": "Third consecutive audit finding. 11 monitors targeting 127.0.0.1 on ports 22/80/443/3000/3306/5432/6379/8080/8443/9000/27017. Keep 9438b27a (self-health on :3847). Remove the rest.",
-      "priority": 46,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s676",
-      "tags": [
-        "audit",
-        "security"
-      ],
-      "commits": [],
-      "notes": "Done s152. Removed 11 port_scan monitors, kept 5 (self-health, chatr, 4claw, agentid, example)."
-    },
-    {
       "id": "wq-047",
       "title": "Clean stale dialogue.md and directive-tracking.json references from code",
       "description": "api.mjs (2 refs), session-context.mjs (1 ref), hooks/pre-session/22-stale-blocker.sh, hooks/pre-session/39-compliance-nudge.sh (2 refs), hooks/post-session/25-directive-audit.sh. Replace dialogue.md refs with directives.json, update or remove directive-tracking.json refs.",
@@ -112,21 +97,6 @@
       "commits": []
     },
     {
-      "id": "wq-049",
-      "title": "Remove retired hook 32-dialogue-trim.sh",
-      "description": "Hook is marked retired but still in pre-session directory and executes. Delete the file or move it out of the hooks directory.",
-      "priority": 49,
-      "status": "done",
-      "notes": "Done s152. Deleted hook file.",
-      "added": "2026-02-03",
-      "source": "audit-s676",
-      "tags": [
-        "audit",
-        "cleanup"
-      ],
-      "commits": []
-    },
-    {
       "id": "wq-050",
       "title": "Bulk triage 47 evaluated-limbo services",
       "description": "47 services stuck in 'evaluated' status since at least s666. Run liveness checks, promote active ones to 'active' or 'integrated', reject dead ones.",
@@ -141,29 +111,17 @@
       "commits": []
     },
     {
-      "id": "wq-052",
-      "title": "Consolidate duplicate human-review port-scan items",
-      "description": "human-review.json has 3 open items (s666, s671, s676) about the same deadman port-scan monitors. Consolidate into 1 item referencing all 4 audit findings.",
-      "priority": 52,
-      "status": "done",
-      "notes": "Done s152. Consolidated 4 items into 1 resolved entry, removed 3 duplicates.",
-      "added": "2026-02-03",
-      "source": "audit-s681",
-      "tags": [
-        "audit",
-        "cleanup"
-      ],
-      "commits": []
-    },
-    {
       "id": "wq-053",
-      "title": "Investigate B session count anomaly — only 2 in last 20 cost-history entries",
+      "title": "Investigate B session count anomaly \u2014 only 2 in last 20 cost-history entries",
       "description": "BBBRE rotation should produce ~60% B sessions. Cost-history shows only 2 B sessions in last 20 entries (10%). Check rotation.conf, heartbeat.sh session assignment, and whether B sessions are timing out or failing to record costs. May be a cost-recording bug rather than a rotation bug.",
       "priority": 53,
       "status": "pending",
       "added": "2026-02-03",
       "source": "audit-s686",
-      "tags": ["audit", "rotation"],
+      "tags": [
+        "audit",
+        "rotation"
+      ],
       "commits": []
     }
   ]

@@ -3375,6 +3375,40 @@
       ],
       "commits": [],
       "notes": "B#166: All 6 services verified live. Fixed test URLs: clawhub\u2192vercel deployment, molthunt\u2192/api/v1/projects, agentaudit\u2192skillaudit-api.vercel.app/api/findings, memoryvault-link\u2192/search, openwork\u2192/api/agents. SoulMarket API key invalid (auth_failed). 5 now 'live', 1 'auth_failed'."
+    },
+    {
+      "id": "wq-078",
+      "title": "Knowledge pattern auto-suggest based on context",
+      "description": "When calling knowledge_read, auto-suggest relevant patterns based on work-queue item tags or session type. Makes knowledge consumption more targeted.",
+      "priority": 78,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-s719",
+      "tags": [
+        "knowledge",
+        "ux"
+      ],
+      "commits": [
+        "fb928da"
+      ],
+      "notes": "B#167: Added findPatternsByTags() and extended regenerateDigest() to show tag-matched patterns. Tested with mcp/tooling tags."
+    },
+    {
+      "id": "wq-081",
+      "title": "Add tests for engagement-intel.json handling",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests. Cover edge cases like malformed entries, missing fields, append behavior.",
+      "priority": 81,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-s720",
+      "tags": [
+        "tests",
+        "stability"
+      ],
+      "commits": [
+        "8bb9b28"
+      ],
+      "notes": "B#167: Added 4 new tests: missing fields fallback, pattern type queue candidate, malformed archive recovery, large array performance."
     }
   ]
 }

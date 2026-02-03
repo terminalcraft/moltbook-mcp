@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, appendFileSync, readdirSync, statSync, ope
 import { execSync } from "child_process";
 import crypto from "crypto";
 import { join } from "path";
+import { homedir } from "os";
 import { extractFromRepo, parseGitHubUrl } from "./packages/pattern-extractor/index.js";
 import { analyzeReplayLog } from "./providers/replay-log.js";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
@@ -1664,6 +1665,106 @@ app.get("/status/components/lifecycle", (req, res) => {
 <table><tr><th>Component</th><th>Status</th></tr>${onUnloadRows || "<tr><td colspan=2><em>No onUnload hooks</em></td></tr>"}</table>
 
 <p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/components/lifecycle?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/components" style="color:#89b4fa">Components</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+</body></html>`);
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+// Prompt injection manifest status (wq-103)
+// Shows which inject files are configured, which exist, and which apply to each session type
+app.get("/status/prompt-inject", (req, res) => {
+  const format = req.query.format || "json";
+  const sessionFilter = req.query.session; // Optional: filter by session type (B, E, R, A)
+  try {
+    const manifestPath = join(BASE, "prompt-inject.json");
+    const stateDir = join(homedir(), ".config/moltbook");
+
+    if (!existsSync(manifestPath)) {
+      return res.json({ error: "prompt-inject.json manifest not found" });
+    }
+
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    const injections = manifest.injections || [];
+
+    // Process each injection: check file existence, compute applicability
+    const processed = injections.map(inj => {
+      const filePath = join(stateDir, inj.file);
+      const exists = existsSync(filePath);
+      const sessions = inj.sessions || "BEBRA"; // default to all
+      const appliesToB = sessions.includes("B");
+      const appliesToE = sessions.includes("E");
+      const appliesToR = sessions.includes("R");
+      const appliesToA = sessions.includes("A");
+
+      return {
+        file: inj.file,
+        description: inj.description || "",
+        priority: inj.priority || 999,
+        action: inj.action || "keep",
+        sessions: sessions,
+        exists: exists,
+        applies_to: { B: appliesToB, E: appliesToE, R: appliesToR, A: appliesToA },
+        size_bytes: exists ? readFileSync(filePath, "utf8").length : 0
+      };
+    }).sort((a, b) => a.priority - b.priority);
+
+    // Apply session filter if provided
+    const filtered = sessionFilter
+      ? processed.filter(p => p.applies_to[sessionFilter.toUpperCase()])
+      : processed;
+
+    // Summary stats
+    const activeCount = filtered.filter(p => p.exists).length;
+    const pendingCount = filtered.filter(p => !p.exists).length;
+
+    const result = {
+      manifest_version: manifest.version,
+      total_configured: filtered.length,
+      active: activeCount,
+      pending: pendingCount,
+      session_filter: sessionFilter || null,
+      injections: filtered
+    };
+
+    if (format === "html") {
+      const rows = filtered.map(inj => {
+        const statusColor = inj.exists ? "#a6e3a1" : "#6c7086";
+        const sessionBadges = ["B", "E", "R", "A"].map(s =>
+          `<span style="color:${inj.applies_to[s] ? "#89b4fa" : "#45475a"};margin-right:4px">${s}</span>`
+        ).join("");
+        return `<tr>
+          <td>${inj.priority}</td>
+          <td>${inj.file}</td>
+          <td style="color:${statusColor}">${inj.exists ? "active" : "pending"}</td>
+          <td>${sessionBadges}</td>
+          <td>${inj.action}</td>
+          <td style="font-size:0.85em;color:#a6adc8">${inj.description}</td>
+        </tr>`;
+      }).join("");
+      return res.send(`<!DOCTYPE html><html><head><title>Prompt Inject Status</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1{color:#89b4fa}table{border-collapse:collapse;width:100%}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}.stats{display:flex;gap:2rem;margin-bottom:1rem}.stat{background:#313244;padding:0.5rem 1rem;border-radius:4px}</style></head><body>
+<h1>Prompt Inject Status</h1>
+<div class="stats">
+  <div class="stat">Total: ${result.total_configured}</div>
+  <div class="stat" style="color:#a6e3a1">Active: ${result.active}</div>
+  <div class="stat" style="color:#6c7086">Pending: ${result.pending}</div>
+  ${sessionFilter ? `<div class="stat">Filter: ${sessionFilter.toUpperCase()}</div>` : ""}
+</div>
+<table>
+  <tr><th>Pri</th><th>File</th><th>Status</th><th>Sessions</th><th>Action</th><th>Description</th></tr>
+  ${rows}
+</table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem">
+  Filter: <a href="/status/prompt-inject?session=B" style="color:#89b4fa">B</a> ·
+  <a href="/status/prompt-inject?session=E" style="color:#89b4fa">E</a> ·
+  <a href="/status/prompt-inject?session=R" style="color:#89b4fa">R</a> ·
+  <a href="/status/prompt-inject?session=A" style="color:#89b4fa">A</a> ·
+  <a href="/status/prompt-inject" style="color:#89b4fa">All</a> ·
+  <a href="/status/prompt-inject?format=json" style="color:#89b4fa">JSON</a> ·
+  <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a>
+</p>
 </body></html>`);
     }
     res.json(result);

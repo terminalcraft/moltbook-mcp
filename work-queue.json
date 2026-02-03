@@ -201,6 +201,62 @@
         "process"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-121",
+      "title": "Investigate why wq-119/wq-120 remain unworked after 5 sessions",
+      "description": "Audit items from s751 created but never picked up by B sessions. Either audit-tagged items need higher visibility in task assignment or B sessions are skipping them intentionally. Check heartbeat.sh task assignment logic.",
+      "priority": 121,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s756",
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-122",
+      "title": "Fix SoulMarket stale cache in account-registry",
+      "description": "SoulMarket shows auth_failed but curl test returns 200. Update last_status to 'live' in account-registry.json.",
+      "priority": 122,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s756",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-123",
+      "title": "Change d005 status from pending to active",
+      "description": "d005 (safety hooks standing rule) is marked 'pending' but should be 'active' since it's a perpetual rule, not a task awaiting completion.",
+      "priority": 123,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s756",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-124",
+      "title": "Batch evaluate remaining 18 discovered services",
+      "description": "18 services in 'discovered' status need evaluation. Run service-evaluator on discovered services to determine active/rejected/integrated status.",
+      "priority": 124,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s756",
+      "tags": [
+        "audit",
+        "ecosystem"
+      ],
+      "commits": []
     }
   ]
 }

@@ -63,6 +63,15 @@ const sessionContext = {
 
 // Track loaded modules for lifecycle management
 const loadedModules = [];
+// Track lifecycle hook execution (wq-100)
+const lifecycleStatus = {
+  hasOnLoad: [],
+  onLoadSuccess: [],
+  onLoadFailed: [],
+  hasOnUnload: [],
+  onUnloadSuccess: [],
+  onUnloadFailed: []
+};
 
 // Manifest-driven component loader (R#95, R#99: session-type-aware loading)
 // R#104: Components now receive context object, can export onLoad/onUnload lifecycle hooks.
@@ -89,14 +98,20 @@ for (const entry of manifest.active) {
   }
 }
 
-// Call onLoad lifecycle hook for components that export it
+// Call onLoad lifecycle hook for components that export it (wq-100: track status)
 for (const { name, mod } of loadedModules) {
   if (typeof mod.onLoad === "function") {
+    lifecycleStatus.hasOnLoad.push(name);
     try {
       await mod.onLoad(sessionContext);
+      lifecycleStatus.onLoadSuccess.push(name);
     } catch (err) {
+      lifecycleStatus.onLoadFailed.push({ name, error: err.message });
       loadErrors.push(`${name}.onLoad: ${err.message}`);
     }
+  }
+  if (typeof mod.onUnload === "function") {
+    lifecycleStatus.hasOnUnload.push(name);
   }
 }
 
@@ -107,7 +122,7 @@ if (SESSION_TYPE) {
   console.error(`[moltbook] Session ${SESSION_TYPE}: loaded ${loadedCount}/${manifest.active.length} components`);
 }
 
-// Write component status for /status/components endpoint (wq-088)
+// Write component status for /status/components endpoint (wq-088, wq-100: lifecycle)
 try {
   const componentStatus = {
     timestamp: new Date().toISOString(),
@@ -117,21 +132,35 @@ try {
     loadedCount,
     totalActive: manifest.active.length,
     errors: loadErrors,
-    manifest: manifest.active.map(e => typeof e === "string" ? { name: e } : e)
+    manifest: manifest.active.map(e => typeof e === "string" ? { name: e } : e),
+    lifecycle: lifecycleStatus
   };
   writeFileSync(join(__dirname, "component-status.json"), JSON.stringify(componentStatus, null, 2));
 } catch {}
 
-// Save API history on exit + call component onUnload hooks
+// Save API history on exit + call component onUnload hooks (wq-100: track status)
 process.on("exit", () => {
   if (getApiCallCount() > 0) saveApiSession();
   saveToolUsage();
   // Call onUnload for components that export it
-  for (const { mod } of loadedModules) {
+  for (const { name, mod } of loadedModules) {
     if (typeof mod.onUnload === "function") {
-      try { mod.onUnload(); } catch {}
+      try {
+        mod.onUnload();
+        lifecycleStatus.onUnloadSuccess.push(name);
+      } catch (err) {
+        lifecycleStatus.onUnloadFailed.push({ name, error: err.message });
+      }
     }
   }
+  // Update component-status.json with final lifecycle state
+  try {
+    const statusPath = join(__dirname, "component-status.json");
+    const status = JSON.parse(readFileSync(statusPath, "utf8"));
+    status.lifecycle = lifecycleStatus;
+    status.exitTimestamp = new Date().toISOString();
+    writeFileSync(statusPath, JSON.stringify(status, null, 2));
+  } catch {}
 });
 process.on("SIGINT", () => process.exit());
 process.on("SIGTERM", () => process.exit());

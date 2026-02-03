@@ -1595,6 +1595,83 @@ ${errorHtml}
   }
 });
 
+// Component lifecycle health (wq-100)
+// Shows which components have lifecycle hooks and their execution status
+app.get("/status/components/lifecycle", (req, res) => {
+  const format = req.query.format || "json";
+  try {
+    const statusFile = join(BASE, "component-status.json");
+    if (!existsSync(statusFile)) {
+      return res.json({ error: "Component status not available (MCP server not running)" });
+    }
+    const status = JSON.parse(readFileSync(statusFile, "utf8"));
+    const lifecycle = status.lifecycle || {};
+
+    const result = {
+      session: status.sessionNum,
+      session_type: status.sessionType,
+      timestamp: status.timestamp,
+      exit_timestamp: status.exitTimestamp || null,
+      total_loaded: status.loadedCount,
+      hooks: {
+        onLoad: {
+          total: lifecycle.hasOnLoad?.length || 0,
+          success: lifecycle.onLoadSuccess?.length || 0,
+          failed: lifecycle.onLoadFailed?.length || 0,
+          components_with_hook: lifecycle.hasOnLoad || [],
+          successful: lifecycle.onLoadSuccess || [],
+          failures: lifecycle.onLoadFailed || []
+        },
+        onUnload: {
+          total: lifecycle.hasOnUnload?.length || 0,
+          success: lifecycle.onUnloadSuccess?.length || 0,
+          failed: lifecycle.onUnloadFailed?.length || 0,
+          components_with_hook: lifecycle.hasOnUnload || [],
+          successful: lifecycle.onUnloadSuccess || [],
+          failures: lifecycle.onUnloadFailed || []
+        }
+      },
+      health: {
+        onLoad_healthy: (lifecycle.onLoadFailed?.length || 0) === 0,
+        onUnload_healthy: (lifecycle.onUnloadFailed?.length || 0) === 0,
+        overall: (lifecycle.onLoadFailed?.length || 0) === 0 && (lifecycle.onUnloadFailed?.length || 0) === 0
+      }
+    };
+
+    if (format === "html") {
+      const onLoadRows = (lifecycle.hasOnLoad || []).map(name => {
+        const success = (lifecycle.onLoadSuccess || []).includes(name);
+        const failure = (lifecycle.onLoadFailed || []).find(f => f.name === name);
+        return `<tr><td>${name}</td><td style="color:${success ? "#a6e3a1" : failure ? "#f38ba8" : "#6c7086"}">${success ? "✓" : failure ? `✗ ${failure.error}` : "pending"}</td></tr>`;
+      }).join("");
+      const onUnloadRows = (lifecycle.hasOnUnload || []).map(name => {
+        const success = (lifecycle.onUnloadSuccess || []).includes(name);
+        const failure = (lifecycle.onUnloadFailed || []).find(f => f.name === name);
+        return `<tr><td>${name}</td><td style="color:${success ? "#a6e3a1" : failure ? "#f38ba8" : "#6c7086"}">${success ? "✓" : failure ? `✗ ${failure.error}` : "pending"}</td></tr>`;
+      }).join("");
+      const healthColor = result.health.overall ? "#a6e3a1" : "#f38ba8";
+      return res.send(`<!DOCTYPE html><html><head><title>Component Lifecycle</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1,h2{color:#89b4fa}table{border-collapse:collapse;width:100%;margin-bottom:2rem}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}.card{background:#313244;padding:1rem;border-radius:8px;margin-bottom:1rem}</style></head><body>
+<h1>Component Lifecycle Health</h1>
+<p>Session ${result.session} (${result.session_type}) · ${result.total_loaded} components loaded</p>
+<p>Overall: <span style="color:${healthColor}">${result.health.overall ? "healthy" : "has failures"}</span></p>
+
+<h2>onLoad Hooks (${result.hooks.onLoad.total})</h2>
+<p>Success: ${result.hooks.onLoad.success} · Failed: ${result.hooks.onLoad.failed}</p>
+<table><tr><th>Component</th><th>Status</th></tr>${onLoadRows || "<tr><td colspan=2><em>No onLoad hooks</em></td></tr>"}</table>
+
+<h2>onUnload Hooks (${result.hooks.onUnload.total})</h2>
+<p>Success: ${result.hooks.onUnload.success} · Failed: ${result.hooks.onUnload.failed}</p>
+<table><tr><th>Component</th><th>Status</th></tr>${onUnloadRows || "<tr><td colspan=2><em>No onUnload hooks</em></td></tr>"}</table>
+
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/components/lifecycle?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/components" style="color:#89b4fa">Components</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+</body></html>`);
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Component dependency map (wq-093)
 // Shows which files/APIs each component depends on — useful for change impact analysis
 app.get("/status/dependencies", (req, res) => {
@@ -3480,6 +3557,7 @@ function agentManifest(req, res) {
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       status_hooks: { url: `${base}/status/hooks`, method: "GET", auth: false, description: "Hook performance dashboard — avg/p50/p95 execution times, failure rates, slow hook identification (?window=N&format=json)" },
       status_components: { url: `${base}/status/components`, method: "GET", auth: false, description: "Component load health — loaded count, errors, manifest (?format=html for web UI)" },
+      status_components_lifecycle: { url: `${base}/status/components/lifecycle`, method: "GET", auth: false, description: "Component lifecycle hooks — onLoad/onUnload execution status, failures, health (?format=html for web UI)" },
       status_dependencies: { url: `${base}/status/dependencies`, method: "GET", auth: false, description: "Component dependency map — files, APIs, providers per component (?component=X to filter, ?format=html for web UI)" },
       status_tool_costs: { url: `${base}/status/tool-costs`, method: "GET", auth: false, description: "Tool usage statistics — call counts, categories, distribution (?limit=N, ?format=html for web UI)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },

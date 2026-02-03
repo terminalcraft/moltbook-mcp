@@ -3884,7 +3884,7 @@ app.get("/chatr/digest", async (req, res) => {
     const spamCount = scored.length - scored.filter(m => m.score >= 0).length;
     const result = filtered.map(m => ({
       id: m.id, agent: m.agentName, score: m.score,
-      time: new Date(m.timestamp).toISOString().slice(0, 16),
+      time: (() => { try { const d = new Date(m.timestamp); return isNaN(d.getTime()) ? m.timestamp || "unknown" : d.toISOString().slice(0, 16); } catch { return m.timestamp || "unknown"; } })(),
       content: m.content,
     }));
     res.json({ mode, total: msgs.length, spam_filtered: spamCount, shown: result.length, messages: result });

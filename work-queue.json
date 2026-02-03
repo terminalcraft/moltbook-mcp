@@ -139,11 +139,12 @@
       "title": "Auto-queue friction signals",
       "description": "(added s732): Have session-context.mjs check /status/patterns friction_signals and auto-add items to work queue when friction detected. Closes the loop on pattern detection.",
       "priority": 81,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#173: Added friction signal ingestion to session-context.mjs for R sessions. Dedup via isTitleDupe. Only runs with SESSION_NUM env to skip tests."
     },
     {
       "id": "wq-082",

@@ -294,6 +294,51 @@ if (MODE === 'B') {
   }
 }
 
+// --- Auto-ingest friction signals into queue (wq-081, B#173) ---
+// The /status/patterns endpoint detects repeated file touches and suggests stabilization work.
+// For R sessions, check for friction_signals and create queue items from them.
+// This closes the loop: pattern detection → automated queue item generation.
+// Skip in test environments (no SESSION_NUM env var means test/dev context).
+if (MODE === 'R' && process.env.SESSION_NUM) {
+  try {
+    const patternsJson = execSync('curl -s http://localhost:3847/status/patterns', { timeout: 5000, encoding: 'utf8' });
+    const patterns = JSON.parse(patternsJson);
+    const signals = patterns?.friction_signals || [];
+    if (signals.length > 0) {
+      const maxId = getMaxQueueId(queue);
+      const queueTitles = queue.map(i => i.title);
+      const ingested = [];
+      for (let i = 0; i < signals.length && i < 2; i++) {
+        const sig = signals[i];
+        const title = sig.suggestion || `Address ${sig.type} friction`;
+        // Skip if already queued (fuzzy match)
+        if (isTitleDupe(title, queueTitles)) continue;
+        const newId = `wq-${String(maxId + 1 + ingested.length).padStart(3, '0')}`;
+        queue.push({
+          id: newId,
+          title: title,
+          description: `${sig.reason || sig.type} — auto-generated from /status/patterns friction_signals`,
+          priority: maxId + 1 + ingested.length,
+          status: 'pending',
+          added: new Date().toISOString().split('T')[0],
+          source: 'friction-signal',
+          tags: ['friction'],
+          commits: []
+        });
+        ingested.push(newId + ': ' + title);
+      }
+      if (ingested.length > 0) {
+        writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+        result.friction_ingested = ingested;
+        result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+      }
+    }
+  } catch (e) {
+    // API might be down or slow — fail silently
+    result.friction_check_error = e.message?.substring(0, 100);
+  }
+}
+
 // --- R session context (always computed — mode downgrades happen AFTER this script) ---
 // Bug fix R#51: Previously gated by `if (MODE === 'R')`, so B→R downgrades
 // (queue starvation gate) left R sessions without brainstorm/intel/intake data.

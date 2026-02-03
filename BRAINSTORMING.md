@@ -9,6 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Add tests for account-registry.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
+
 - ~~**Conditional inject chains** (added ~s740)~~: Promoted to wq-130 in R#115.
 
 - ~~**Email auto-triage rules** (added ~s765)~~: Deferred B#189 — insufficient email engagement data yet. Revisit after 10+ E sessions with email activity.

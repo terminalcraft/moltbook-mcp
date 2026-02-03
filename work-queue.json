@@ -306,11 +306,12 @@
       "title": "Session file comparison tool",
       "description": "(added ~s820): When editing SESSION_*.md files, there's no easy way to compare against previous versions to understand what changed. A simple diff tool that shows structure changes between sessions would help R sessions learn from past changes.",
       "priority": 157,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-03",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#202: Addressed by existing git tooling. Use: git log --oneline -N -- SESSION_*.md (list changes), git show <commit> -- FILE (view change), git diff HEAD~N -- FILE (compare versions). Building a separate tool would duplicate git functionality."
     },
     {
       "id": "wq-158",

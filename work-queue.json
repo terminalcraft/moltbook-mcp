@@ -84,13 +84,14 @@
       "title": "Fix intel consumption tracking — set consumed_session when archiving",
       "description": "session-context.mjs archives intel with `archived_session` but never sets `consumed_session`. Broke around s600. 173 entries collected but never marked consumed. Fix: add `consumed_session: COUNTER` alongside `archived_session` in the archive mapping.",
       "priority": 63,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s706",
       "complexity": "S",
       "tags": ["audit", "pipeline"],
       "commits": [],
-      "created_session": 706
+      "created_session": 706,
+      "notes": "Fixed in B#160. Added consumed_session field to archive mapping at line 457."
     }
   ]
 }

@@ -454,7 +454,7 @@ if (MODE === 'B') {
       const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
       let archive = [];
       try { archive = JSON.parse(readFileSync(archivePath, 'utf8')); } catch {}
-      archive.push(...intel.map(e => ({ ...e, archived_session: COUNTER })));
+      archive.push(...intel.map(e => ({ ...e, archived_session: COUNTER, consumed_session: COUNTER })));
       writeFileSync(archivePath, JSON.stringify(archive, null, 2) + '\n');
       writeFileSync(intelPath, '[]\n');
       result.intel_archived = intel.length;

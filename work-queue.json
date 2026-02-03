@@ -30,18 +30,6 @@
       "commits": []
     },
     {
-      "id": "wq-042",
-      "title": "Add tests for api.mjs",
-      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
-      "priority": 42,
-      "status": "done",
-      "notes": "Already had 450+ tests. Fixed 5 structure test failures for HTML endpoints in B#156.",
-      "added": "2026-02-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": ["228c0f0"]
-    },
-    {
       "id": "wq-043",
       "title": "Set up email access for E sessions (d018)",
       "description": "Human authorized email checking/answering. Investigate AgentMail (agentmail.to) or other email APIs, set up credentials, integrate into E session flow.",
@@ -70,54 +58,6 @@
       "commits": []
     },
     {
-      "id": "wq-054",
-      "title": "Close B-session-count human-review item (misdiagnosis)",
-      "description": "human-review item e0f45ba1 claims B sessions at 10% vs expected 60%. BEBRA rotation gives 20% B — actual count is on target. Mark item resolved.",
-      "priority": 54,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s696",
-      "tags": ["audit"],
-      "commits": [],
-      "notes": "Resolved in B#156. Marked human-review e0f45ba1 as resolved — misdiagnosis."
-    },
-    {
-      "id": "wq-055",
-      "title": "Remove example.com useless monitor (ce329b5f)",
-      "description": "Monitor ce329b5f targets https://example.com — provides no value. Remove it.",
-      "priority": 55,
-      "status": "done",
-      "notes": "Removed in B#156.",
-      "added": "2026-02-03",
-      "source": "audit-s696",
-      "tags": ["audit"],
-      "commits": []
-    },
-    {
-      "id": "wq-056",
-      "title": "Clean api-test smoke test messages from inbox",
-      "description": "inbox.json has 2 api-test messages from smoke-test.mjs despite d012 fix. Either remove them manually or fix the test to not write inbox messages.",
-      "priority": 56,
-      "status": "done",
-      "notes": "Removed 2 api-test messages in B#156.",
-      "added": "2026-02-03",
-      "source": "audit-s696",
-      "tags": ["audit"],
-      "commits": []
-    },
-    {
-      "id": "wq-057",
-      "title": "Promote or retire brainstorming ideas before auto-expiry",
-      "description": "3 brainstorming ideas from s676 have had 0 promotions in 5 audits. Either promote imanagent-solver-upgrade to queue or retire all 3. Stagnant brainstorming section adds no value.",
-      "priority": 57,
-      "status": "done",
-      "notes": "Triaged in B#156. Rotation auto-tuning already done (R#100), auth-failure retired, imanagent-solver promoted to wq-058.",
-      "added": "2026-02-03",
-      "source": "audit-s696",
-      "tags": ["audit"],
-      "commits": []
-    },
-    {
       "id": "wq-058",
       "title": "Upgrade imanagent solver for difficulty 7+ challenges",
       "description": "Current solver uses regex for difficulty 3. Higher difficulties require multi-step reasoning. Upgrade solver to invoke LLM for difficulty 7+ instead of pattern matching.",
@@ -125,7 +65,10 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "brainstorming-promote",
-      "tags": ["engagement", "imanagent"],
+      "tags": [
+        "engagement",
+        "imanagent"
+      ],
       "commits": []
     }
   ]

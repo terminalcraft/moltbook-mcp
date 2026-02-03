@@ -206,6 +206,15 @@ if [ "$MODE_CHAR" = "E" ]; then
   [ -z "$DRY_RUN" ] && echo "$E_COUNT" > "$E_COUNTER_FILE"
 fi
 
+# A session counter (R#102 — audit sessions lacked counter tracking and prompt context).
+A_COUNTER_FILE="$STATE_DIR/a_session_counter"
+if [ "$MODE_CHAR" = "A" ]; then
+  A_COUNT=0
+  [ -f "$A_COUNTER_FILE" ] && A_COUNT=$(cat "$A_COUNTER_FILE")
+  A_COUNT=$((A_COUNT + 1))
+  [ -z "$DRY_RUN" ] && echo "$A_COUNT" > "$A_COUNTER_FILE"
+fi
+
 # --- Outage-aware session skip ---
 # If API has been down 5+ consecutive checks, skip every other heartbeat.
 SKIP_FILE="$STATE_DIR/outage_skip_toggle"
@@ -342,6 +351,17 @@ ${CTX_R_PROMPT_BLOCK:-## R Session
 Follow the checklist in SESSION_REFLECT.md.}"
 fi
 
+# A session prompt block: fully assembled by session-context.mjs (R#102).
+# Audit sessions now get pre-computed context like R/E sessions: previous audit findings,
+# audit-tagged queue items status, and cost trend data.
+A_CONTEXT_BLOCK=""
+if [ "$MODE_CHAR" = "A" ]; then
+  A_CONTEXT_BLOCK="
+
+${CTX_A_PROMPT_BLOCK:-## A Session
+Follow the checklist in SESSION_AUDIT.md.}"
+fi
+
 # --- Prompt inject blocks (R#76) ---
 # Declarative loop replaces 7 copy-paste file-read-inject patterns.
 # Each entry: filename (relative to STATE_DIR), keep|consume (delete after read).
@@ -369,7 +389,7 @@ done
 
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${INJECT_BLOCKS}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

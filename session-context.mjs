@@ -621,6 +621,74 @@ ${orchSection}${prevEngageCtx}${evalBlock}`.trim();
   }
 }
 
+// --- A session context (R#102) ---
+// Audit sessions previously got no pre-computed context. Now they get:
+// 1. Session counter for tracking
+// 2. Previous audit findings summary (delta tracking)
+// 3. Audit-tagged queue item status (pending vs completed since last audit)
+// 4. Quick cost trend indicator
+if (MODE === 'A') {
+  // A session counter
+  const aCounterPath = join(STATE_DIR, 'a_session_counter');
+  let aCount = '?';
+  try {
+    const raw = parseInt(readFileSync(aCounterPath, 'utf8').trim());
+    aCount = raw + 1; // Heartbeat increments after this script
+  } catch { aCount = 1; }
+
+  // Previous audit findings
+  let prevAuditSummary = '';
+  const auditReportPath = join(DIR, 'audit-report.json');
+  try {
+    const prev = JSON.parse(readFileSync(auditReportPath, 'utf8'));
+    const prevSession = prev.session || '?';
+    const criticalCount = (prev.critical_issues || []).length;
+    const recCount = (prev.recommended_actions || []).length;
+    prevAuditSummary = `Previous audit: s${prevSession} — ${criticalCount} critical issues, ${recCount} recommendations`;
+    if (criticalCount > 0) {
+      // critical_issues may be objects with {id, severity, description} or strings
+      const criticalList = (prev.critical_issues || []).slice(0, 3).map(c =>
+        typeof c === 'string' ? c : (c.description || c.id || JSON.stringify(c))
+      );
+      prevAuditSummary += `\nCritical: ${criticalList.join(', ')}${criticalCount > 3 ? '...' : ''}`;
+    }
+  } catch {
+    prevAuditSummary = 'No previous audit report found.';
+  }
+
+  // Audit-tagged queue items status
+  const auditItems = queue.filter(i => (i.tags || []).includes('audit'));
+  const auditPending = auditItems.filter(i => i.status === 'pending').length;
+  const auditDone = auditItems.filter(i => i.status === 'done').length;
+  const auditStatus = `Audit-tagged queue items: ${auditPending} pending, ${auditDone} done (of ${auditItems.length} total)`;
+
+  // Quick cost trend from session history
+  let costTrend = '';
+  const histPath = join(STATE_DIR, 'session-history.txt');
+  try {
+    const hist = readFileSync(histPath, 'utf8');
+    const costs = [...hist.matchAll(/cost=\$([0-9.]+)/g)].map(m => parseFloat(m[1]));
+    if (costs.length >= 5) {
+      const recent5 = costs.slice(-5);
+      const prev5 = costs.slice(-10, -5);
+      const recentAvg = recent5.reduce((a, b) => a + b, 0) / recent5.length;
+      const prevAvg = prev5.length > 0 ? prev5.reduce((a, b) => a + b, 0) / prev5.length : recentAvg;
+      const trend = recentAvg > prevAvg * 1.2 ? '↑ increasing' : recentAvg < prevAvg * 0.8 ? '↓ decreasing' : '→ stable';
+      costTrend = `Cost trend (last 5 sessions avg $${recentAvg.toFixed(2)}): ${trend}`;
+    }
+  } catch { /* no history */ }
+
+  result.a_prompt_block = `## A Session: #${aCount}
+This is audit session #${aCount}. Follow the full checklist in SESSION_AUDIT.md.
+
+### Pre-computed context:
+- ${prevAuditSummary}
+- ${auditStatus}
+${costTrend ? `- ${costTrend}` : ''}
+
+**Remember**: All 5 sections are mandatory. Create work-queue items with \`["audit"]\` tag for every recommendation.`.trim();
+}
+
 console.log(JSON.stringify(result));
 
 // Also write a shell-sourceable file to eliminate per-field node process spawns.

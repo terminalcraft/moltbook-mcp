@@ -1,100 +1,110 @@
 #!/usr/bin/env python3
-"""Directive auto-retirement — flag low-follow-rate directives for R session review.
+"""Directive auto-retirement — flag long-pending or stale directives for R session review.
 
-Analyzes directive-tracking.json and flags directives whose follow rate drops
-below a threshold over sufficient evaluations. Outputs flagged directives as
-JSON for R sessions to act on.
+Analyzes directives.json and flags directives that have been pending too long
+or have gone stale without progress. Outputs flagged directives as JSON for
+R sessions to act on.
 
 Usage:
-  python3 directive-retirement.py [--threshold 30] [--min-evals 10] [--json]
+  python3 directive-retirement.py [--days 30] [--json]
+
+Note: Updated in B#175 to use directives.json instead of removed directive-tracking.json.
+The old follow-rate tracking was removed during migration to directives.json.
 """
 
 import json, argparse, sys
+from datetime import datetime, timezone
 from pathlib import Path
 
-TRACKING_FILE = Path(__file__).parent / "directive-tracking.json"
+DIRECTIVES_FILE = Path(__file__).parent / "directives.json"
 
-def analyze_directives(threshold=30, min_evals=10):
-    with open(TRACKING_FILE) as f:
+def analyze_directives(stale_days=30):
+    if not DIRECTIVES_FILE.exists():
+        return {"directives": [], "flagged": [], "error": "directives.json not found"}
+
+    with open(DIRECTIVES_FILE) as f:
         data = json.load(f)
 
-    directives = data.get("directives", {})
-    retired = []
-    for key in ["retired_s411", "retired_s415"]:
-        retired.extend(data.get(key, []))
+    directives = data.get("directives", [])
+    now = datetime.now(timezone.utc)
 
     results = []
-    for did, info in directives.items():
-        if did in retired:
-            continue
-        followed = info.get("followed", 0)
-        ignored = info.get("ignored", 0)
-        total = followed + ignored
-        if total == 0:
+    for d in directives:
+        did = d.get("id", "?")
+        status = d.get("status", "unknown")
+
+        # Skip completed/retired
+        if status in ("completed", "retired"):
             continue
 
-        rate = (followed / total) * 100
-        history = info.get("history", [])
+        # Calculate age
+        created_str = d.get("created") or d.get("session")
+        if isinstance(created_str, str):
+            try:
+                created = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+                age_days = (now - created).days
+            except:
+                age_days = 0
+        else:
+            age_days = 0
 
-        # Recent trend: last 5 evaluations
-        recent = history[-5:] if history else []
-        recent_followed = sum(1 for h in recent if h.get("result") == "followed")
-        recent_rate = (recent_followed / len(recent) * 100) if recent else rate
+        # Check for ack
+        acked = d.get("acked_session") is not None
 
         entry = {
             "id": did,
-            "followed": followed,
-            "ignored": ignored,
-            "total_evals": total,
-            "follow_rate": round(rate, 1),
-            "recent_rate": round(recent_rate, 1),
-            "trend": "improving" if recent_rate > rate else ("declining" if recent_rate < rate else "stable"),
-            "last_session": info.get("last_session", 0),
+            "status": status,
+            "age_days": age_days,
+            "acked": acked,
+            "content": (d.get("content", "")[:80] + "..." if len(d.get("content", "")) > 80 else d.get("content", "")),
         }
 
-        # Flag for retirement if below threshold with enough data
-        if total >= min_evals and rate < threshold:
+        # Flag for retirement if stale
+        if status == "pending" and not acked and age_days > stale_days:
             entry["flag"] = "retire"
-            entry["reason"] = f"Follow rate {rate:.0f}% < {threshold}% over {total} evaluations"
-        elif total >= min_evals and rate < threshold + 15:
+            entry["reason"] = f"Pending {age_days} days without acknowledgment"
+        elif status == "active" and age_days > stale_days * 3:
             entry["flag"] = "warning"
-            entry["reason"] = f"Follow rate {rate:.0f}% approaching retirement threshold ({threshold}%)"
+            entry["reason"] = f"Active for {age_days} days — may need completion or deferral"
+        elif status == "deferred" and age_days > stale_days * 2:
+            entry["flag"] = "warning"
+            entry["reason"] = f"Deferred for {age_days} days — review if still needed"
         else:
             entry["flag"] = "healthy"
 
         results.append(entry)
 
-    results.sort(key=lambda x: x["follow_rate"])
+    results.sort(key=lambda x: -x["age_days"])
     flagged = [r for r in results if r["flag"] in ("retire", "warning")]
-    return {"directives": results, "flagged": flagged, "retired": retired, "threshold": threshold, "min_evals": min_evals}
+    return {"directives": results, "flagged": flagged, "stale_days": stale_days}
 
 def main():
     parser = argparse.ArgumentParser(description="Directive auto-retirement analysis")
-    parser.add_argument("--threshold", type=int, default=30, help="Follow rate %% below which to flag (default 30)")
-    parser.add_argument("--min-evals", type=int, default=10, help="Minimum evaluations before flagging (default 10)")
+    parser.add_argument("--days", type=int, default=30, help="Days after which unacked pending directives are flagged (default 30)")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     args = parser.parse_args()
 
-    result = analyze_directives(args.threshold, args.min_evals)
+    result = analyze_directives(args.days)
+
+    if "error" in result:
+        print(f"Error: {result['error']}", file=sys.stderr)
+        sys.exit(1)
 
     if args.json:
         print(json.dumps(result, indent=2))
         return
 
-    print(f"Directive Health Report (threshold={args.threshold}%, min_evals={args.min_evals})\n")
-    print(f"  {'Directive':<25} {'Rate':>6} {'Recent':>7} {'Trend':>10} {'Evals':>6} {'Status':>8}")
-    print(f"  {'-'*25} {'-'*6} {'-'*7} {'-'*10} {'-'*6} {'-'*8}")
+    print(f"Directive Health Report (stale_days={args.days})\n")
+    print(f"  {'Directive':<10} {'Status':<10} {'Age':>6} {'Acked':<6} {'Flag':<8}")
+    print(f"  {'-'*10} {'-'*10} {'-'*6} {'-'*6} {'-'*8}")
     for d in result["directives"]:
-        status = "RETIRE" if d["flag"] == "retire" else ("WARN" if d["flag"] == "warning" else "OK")
-        print(f"  {d['id']:<25} {d['follow_rate']:>5.0f}% {d['recent_rate']:>5.0f}%  {d['trend']:>9} {d['total_evals']:>6} {status:>8}")
+        flag_str = "RETIRE" if d["flag"] == "retire" else ("WARN" if d["flag"] == "warning" else "OK")
+        print(f"  {d['id']:<10} {d['status']:<10} {d['age_days']:>5}d {'yes' if d['acked'] else 'no':<6} {flag_str:<8}")
 
     if result["flagged"]:
         print(f"\nFlagged for R session review:")
         for d in result["flagged"]:
             print(f"  - {d['id']}: {d['reason']}")
-
-    if result["retired"]:
-        print(f"\nAlready retired: {', '.join(result['retired'])}")
 
 if __name__ == "__main__":
     main()

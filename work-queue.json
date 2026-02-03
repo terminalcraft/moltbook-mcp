@@ -260,11 +260,12 @@
       "title": "Fix directive-retirement.py FileNotFoundError",
       "description": "directive-retirement.py crashes with FileNotFoundError for directive-tracking.json. File was removed during migration to directives.json. Update script to use directives.json or remove if obsolete.",
       "priority": 103,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "B#175-bug-fix",
       "tags": ["bug", "cleanup"],
-      "commits": []
+      "commits": [],
+      "notes": "B#175: Rewrote to use directives.json. Now flags stale pending directives and long-running active directives."
     },
     {
       "id": "wq-104",

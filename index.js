@@ -25,6 +25,73 @@ wrapServerTool(server);
 // context object with session metadata, enabling context-aware initialization.
 // Components can use this for conditional logic without re-reading env vars or files.
 // Also supports lifecycle hooks: onLoad(ctx) after registration, onUnload() at shutdown.
+// --- Directive health computation (R#119) ---
+// Compute directive staleness and relevance at startup. This enables components
+// and hooks to act on directive urgency without re-parsing directives.json.
+// Session-type mapping: which session types should care about which directives.
+function computeDirectiveHealth(sessionNum, sessionType) {
+  const directivesPath = join(__dirname, 'directives.json');
+  const health = {
+    computed: new Date().toISOString(),
+    sessionNum,
+    sessionType,
+    active: [],
+    stale: [],      // active directives >20 sessions without update
+    urgent: [],     // directives explicitly needing this session type
+    summary: { total: 0, active: 0, stale: 0, urgent: 0 }
+  };
+
+  if (!existsSync(directivesPath)) return health;
+
+  try {
+    const data = JSON.parse(readFileSync(directivesPath, 'utf8'));
+    const directives = data.directives || [];
+    health.summary.total = directives.length;
+
+    // Session-type relevance hints (from directive content patterns)
+    const typeHints = {
+      E: ['engage', 'platform', 'pinchwork', 'post', 'task', 'email'],
+      B: ['build', 'fix', 'implement', 'add', 'test', 'refactor'],
+      R: ['review', 'check', 'audit', 'reflect', 'evolve'],
+      A: ['audit', 'escalation', 'blocked', 'stale']
+    };
+
+    for (const d of directives) {
+      if (d.status !== 'active') continue;
+
+      const ackedSession = d.acked_session || d.session || 0;
+      const sessionsSinceAck = sessionNum - ackedSession;
+      const lastUpdate = d.updated ? new Date(d.updated).getTime() : null;
+      const content = (d.content || '').toLowerCase();
+
+      const entry = {
+        id: d.id,
+        sessionsSinceAck,
+        lastUpdate,
+        contentPreview: d.content?.slice(0, 80) + (d.content?.length > 80 ? '...' : '')
+      };
+
+      health.active.push(entry);
+      health.summary.active++;
+
+      // Mark as stale if >20 sessions without progress
+      if (sessionsSinceAck > 20) {
+        health.stale.push(entry);
+        health.summary.stale++;
+      }
+
+      // Check session-type relevance
+      const hints = typeHints[sessionType] || [];
+      if (hints.some(h => content.includes(h))) {
+        health.urgent.push(entry);
+        health.summary.urgent++;
+      }
+    }
+  } catch { /* ignore parse errors */ }
+
+  return health;
+}
+
 const sessionContext = {
   sessionNum: SESSION_NUM,
   sessionType: SESSION_TYPE,
@@ -58,6 +125,14 @@ const sessionContext = {
       }
     }
     return this._precomputed;
+  },
+  // R#119: Directive health computed at startup for component awareness
+  _directiveHealth: null,
+  get directiveHealth() {
+    if (this._directiveHealth === null) {
+      this._directiveHealth = computeDirectiveHealth(SESSION_NUM, SESSION_TYPE);
+    }
+    return this._directiveHealth;
   }
 };
 
@@ -174,6 +249,13 @@ try {
     }
   };
   writeFileSync(join(__dirname, "component-status.json"), JSON.stringify(componentStatus, null, 2));
+} catch {}
+
+// R#119: Write directive health for hooks/prompts to consume
+// This enables pre-session hooks and prompt generation to surface directive urgency.
+try {
+  const health = sessionContext.directiveHealth;
+  writeFileSync(join(__dirname, "directive-health.json"), JSON.stringify(health, null, 2));
 } catch {}
 
 // Save API history on exit + call component onUnload hooks (wq-100: track status)

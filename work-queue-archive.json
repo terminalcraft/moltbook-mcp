@@ -4295,6 +4295,48 @@
         "ed6e221"
       ],
       "notes": "B#189: Removed legacy state file writes from rotation-state.mjs. Grace period (10 sessions) expired."
+    },
+    {
+      "id": "wq-130",
+      "title": "Add conditional inject dependencies to prompt-inject.json",
+      "description": "Prompt injects could depend on each other \u2014 inject B only if inject A was applied. Add optional 'requires' field to inject schema. Enables sophisticated prompt composition without bloating all prompts.",
+      "priority": 130,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "tags": [
+        "infra"
+      ],
+      "commits": [],
+      "notes": "B#190: Added 'requires' field (string or array) to inject schema. heartbeat.sh two-pass dependency resolution. Usage tracking includes skipped_requires. Tests added. v2 schema."
+    },
+    {
+      "id": "wq-131",
+      "title": "Add engagement diversity history tracking",
+      "description": "engage-orchestrator --diversity shows current metrics but doesn't track trends. Add diversity-history.json that records HHI, effective platforms, and top-3 concentration after each E session. Enable trend analysis in A sessions.",
+      "priority": 131,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "R#115-pipeline-repair",
+      "tags": [
+        "analytics"
+      ],
+      "commits": [],
+      "notes": "B#190: Added post-session hook 28-diversity-history.sh, --diversity-trends CLI flag, /status/diversity-trends API endpoint."
+    },
+    {
+      "id": "wq-132",
+      "title": "Add tests for account-registry.json operations",
+      "description": "account-registry.json touched frequently (4+ times in last 20 sessions). Add unit tests for account-manager.mjs to stabilize registry operations.",
+      "priority": 132,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-B#190",
+      "tags": [
+        "testing"
+      ],
+      "commits": [],
+      "notes": "B#190: Added 13 tests covering CLI, registry loading, auth types, tier distribution."
     }
   ]
 }

@@ -17,7 +17,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Checkpoint adoption metrics** (added ~s779): Track task-checkpoint.json usage across B sessions. How often are checkpoints created, resumed, cleared? Which tasks span multiple sessions? This would validate if the checkpoint system (R#118) is being adopted and helping with timeout recovery.
 
-- **Directive urgency in session prompt** (added ~s782): Use directive-health.json (from R#119) in session-context.mjs prompt generation. When sessionType=E and urgent directives include d031 (Pinchwork), prepend a prominent warning like "⚠️ PINCHWORK TASKS REQUIRED THIS SESSION". Could finally fix the d031 compliance gap where E sessions browse but don't complete tasks.
+- ~~**Directive urgency in session prompt** (added ~s782)~~: Implemented differently in R#121 — added directive enforcement gates directly to SESSION_ENGAGE.md. Phase 0 reads directive-health.json and identifies d031 as blocking. Phase 4.5 requires explicit compliance verification. Structural approach preferred over prompt injection.
 
 - ~~**Add tests for account-registry.json**~~: Promoted to wq-132 in B#190.
 

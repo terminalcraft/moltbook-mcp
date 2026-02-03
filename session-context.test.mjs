@@ -404,6 +404,88 @@ function testIntelNoteCategory() {
   assert(!result.intel_digest?.includes('Queue candidates'), 'no queue candidates for observations');
 }
 
+function testIntelActionableThreshold() {
+  console.log('\n== Intel: actionable length threshold (20 chars) ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Short actionable should NOT appear in queue candidates
+  const intel = [
+    { session: 610, type: 'integration_target', summary: 'Short actionable test', actionable: 'Too short' },
+    { session: 611, type: 'pattern', summary: 'Long actionable test', actionable: 'This actionable string is definitely longer than twenty characters' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+  assert(result.intel_digest?.includes('Queue candidates'), 'long actionable creates queue candidate');
+  assert(result.intel_digest?.includes('Long actionable test'), 'long actionable entry in queue');
+  assert(!result.intel_digest?.includes('Short actionable test') || result.intel_digest.indexOf('Short actionable') > result.intel_digest.indexOf('Notes'), 'short actionable not in queue section');
+}
+
+function testIntelCollaborationType() {
+  console.log('\n== Intel: collaboration type goes to brainstorm ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const intel = [
+    { session: 620, type: 'collaboration', summary: 'Agent wants to build together' },
+    { session: 621, type: 'tool_idea', summary: 'New tool concept from chat' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+  assert(result.intel_digest?.includes('Brainstorm candidates'), 'collaboration creates brainstorm candidate');
+  assert(result.intel_digest?.includes('Agent wants to build'), 'collaboration entry in brainstorm');
+  assert(result.intel_digest?.includes('New tool concept'), 'tool_idea entry in brainstorm');
+}
+
+function testIntelArchiveAccumulation() {
+  console.log('\n== Intel: archive accumulates across runs ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Clean slate
+  try { rmSync(join(STATE, 'engagement-intel-archive.json')); } catch {}
+
+  // First run
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify([
+    { session: 630, type: 'observation', summary: 'First run entry' }
+  ]));
+  run('B');
+
+  // Second run with new intel
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify([
+    { session: 631, type: 'observation', summary: 'Second run entry' }
+  ]));
+  run('B');
+
+  const archive = JSON.parse(readFileSync(join(STATE, 'engagement-intel-archive.json'), 'utf8'));
+  assert(archive.length === 2, 'archive accumulated 2 entries across runs');
+  assert(archive[0].summary === 'First run entry', 'first entry preserved');
+  assert(archive[1].summary === 'Second run entry', 'second entry added');
+}
+
+function testIntelMalformedJSON() {
+  console.log('\n== Intel: malformed JSON handling ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Write invalid JSON
+  writeFileSync(join(STATE, 'engagement-intel.json'), '{ broken json }');
+
+  const result = run('B');
+  assert(result.intel_count === 0, 'malformed JSON: intel_count is 0');
+  assert(!result.intel_digest, 'malformed JSON: no digest generated');
+}
+
 function testShellEnvOutput() {
   console.log('\n== Shell env file output ==');
 
@@ -1040,6 +1122,10 @@ try {
   setup(); testIntelMissingFile();
   setup(); testIntelOriginalFieldsPreserved();
   setup(); testIntelNoteCategory();
+  setup(); testIntelActionableThreshold();
+  setup(); testIntelCollaborationType();
+  setup(); testIntelArchiveAccumulation();
+  setup(); testIntelMalformedJSON();
   setup(); testShellEnvOutput();
   setup(); testGetMaxQueueId();
   setup(); testDepsReady();

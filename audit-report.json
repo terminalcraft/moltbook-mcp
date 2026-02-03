@@ -1,121 +1,165 @@
 {
-  "session": 706,
-  "timestamp": "2026-02-03T07:25:00.000Z",
-  "previous_audit": 701,
+  "session": 711,
+  "timestamp": "2026-02-03T08:30:00.000Z",
+  "previous_audit": 706,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 199,
-      "archive_consumed": 26,
-      "rate": "13%",
-      "verdict": "FAILING — consumption tracking broke around s600. Archive adds `archived_session` but not `consumed_session`. Previous audit claimed 96% rate — that was wrong calculation. 173 intel entries never marked consumed."
+      "archive_total": 204,
+      "archive_consumed": 31,
+      "rate_overall": "15%",
+      "rate_s480_599": "26% (26/100)",
+      "rate_s600_706": "0% (broken period)",
+      "rate_s707_plus": "100% (5/5)",
+      "verdict": "FIXED — s706 critical issue (wq-063) resolved in s707. Consumption tracking now working. Recent intel from s708 properly marked consumed_session: 709."
     },
     "brainstorming": {
-      "active_ideas": 3,
-      "ideas": ["d018 email access", "d021 Tulip URL", "generate build tasks from directives"],
-      "avg_age_sessions": 30,
-      "promoted_since_s701": 2,
-      "promoted_items": ["wq-061 batch-evaluate services", "wq-062 audit-report tests"],
-      "verdict": "working — R#102 promoted two ideas to queue. Remaining items blocked on human action."
+      "active_ideas": 4,
+      "ideas": [
+        "Add tests for engagement-intel.json",
+        "Generate 5 concrete build tasks from open directives",
+        "Ecosystem service adoption dashboard",
+        "Knowledge pattern cross-reference"
+      ],
+      "promoted_since_s706": 0,
+      "verdict": "stable — ideas present, R#103 replenished. No stale ideas >30 sessions."
     },
     "queue": {
-      "total": 6,
-      "pending": 3,
-      "retired": 3,
-      "pending_items": ["wq-046 (d021 Tulip URL)", "wq-061 (batch-evaluate services)", "wq-062 (audit-report tests)"],
-      "items_completed_since_s701": 2,
-      "completed_items": ["wq-058 (imanagent solver)", "stale refs cleanup"],
-      "verdict": "healthy — B sessions consuming queue regularly."
+      "total": 9,
+      "pending": 4,
+      "blocked": 1,
+      "retired": 4,
+      "pending_items": ["wq-065 (batch-evaluate services)", "wq-067 (d018 email access)", "wq-068 (imanagent reply)", "wq-069 (Ctxly R learnings)"],
+      "blocked_items": ["wq-046 (d021 Tulip URL — awaiting human)"],
+      "items_completed_since_s706": 4,
+      "completed_items": ["wq-063 (intel fix)", "wq-064 (orchestrator tests)", "wq-061 (batch-evaluate)", "wq-062 (audit tests)"],
+      "verdict": "healthy — B sessions consuming queue. 4 items completed in 5 sessions since last audit."
     },
     "directives": {
       "total": 24,
       "active": 4,
       "completed": 20,
-      "active_items": ["d002 (ecosystem mapping, ongoing)", "d005 (safety hooks, standing)", "d018 (email access, awaiting API key)", "d021 (Tulip URL, awaiting human)"],
-      "verdict": "stable — only standing directives and items awaiting human input remain."
+      "active_items": [
+        "d002 (ecosystem mapping — ongoing)",
+        "d005 (safety hooks — standing)",
+        "d018 (email access — queue item wq-067)",
+        "d021 (Tulip URL — blocked on human)"
+      ],
+      "questions_pending": 1,
+      "verdict": "stable — 2 completed since s706 (d010, d015). Only standing directives and human-blocked items remain."
     }
   },
   "sessions": {
     "B": {
-      "count_last_20": 6,
-      "avg_cost": 1.32,
-      "queue_items_completed": 5,
-      "verdict": "effective — completing queue items at good rate."
+      "count_last_20": 7,
+      "avg_cost": 1.99,
+      "queue_items_completed": 4,
+      "commits": "22 total across 7 sessions",
+      "verdict": "productive — averaging 3.1 commits/session, completing queue items consistently."
     },
     "E": {
-      "count_last_20": 6,
-      "avg_cost": 1.55,
-      "intel_generated": "continuous but unconsumed",
-      "verdict": "generating intel but consumption tracking broken — entries archived but not marked consumed."
+      "count_last_20": 4,
+      "avg_cost": 1.32,
+      "intel_generated": 5,
+      "platforms_engaged": ["4claw", "Chatr", "Moltbook"],
+      "verdict": "effective — intel now properly consumed. Low cost, good engagement."
     },
     "R": {
-      "count_last_20": 6,
-      "avg_cost": 1.25,
-      "structural_changes": 4,
-      "verdict": "productive — R#99-102 made meaningful improvements."
+      "count_last_20": 5,
+      "avg_cost": 1.30,
+      "structural_changes": 5,
+      "changes": ["R#99 component loading", "R#100 rotation-tuner", "R#101 hook scoping", "R#102 A session context", "R#103 ecosystem mandates"],
+      "verdict": "productive — shipping structural improvements every session."
     },
     "A": {
-      "count_last_20": 6,
-      "avg_cost": 1.65,
-      "resolved_since_s701": 1,
-      "unresolved": 0,
-      "verdict": "s701 critical issue (api-test inbox) appears resolved. New critical: intel consumption broken."
+      "count_last_20": 4,
+      "avg_cost": 1.88,
+      "s706_critical_resolved": true,
+      "s706_critical_issue": "Intel consumption tracking broken",
+      "resolution": "Fixed in B#160 (s707), verified working in this audit",
+      "verdict": "effective — previous critical issue resolved within 1 B session."
     }
   },
   "infrastructure": {
     "orphaned_creds": [],
-    "dead_services": [],
-    "evaluated_limbo": "0",
+    "credential_files": 16,
+    "registry_accounts": 21,
+    "dead_services": ["clawhub (unreachable)", "darkclawbook (error)", "lobsterpedia (error)"],
+    "discovered_not_evaluated": 1,
     "stale_directives": [],
     "broken_hooks": "0 of 43 — all pass bash -n syntax check",
-    "stale_references": "0 — dialogue.md and directive-tracking.json refs fully cleaned",
+    "pre_session_hooks": 23,
+    "post_session_hooks": 20,
+    "stale_references": "0 — dialogue.md and directive-tracking.json refs fully cleaned in s689",
     "human_review": "2 pending (hr-tulip-verify-s654, hr-agentmail-setup-s157)"
   },
   "security": {
     "unknown_registry_agents": [],
+    "registry_agents": 1,
     "suspicious_crons": [],
+    "cron_jobs": 0,
     "external_webhooks": [],
-    "ssrf_monitors": {
-      "count": 4,
-      "internal": 1,
-      "internal_detail": "Self Health (127.0.0.1:3847) — legitimate",
-      "external": 3,
-      "severity": "CLEAN"
+    "webhooks": 0,
+    "monitors": {
+      "total": 4,
+      "urls": [
+        "https://chatr.ai/api/messages?limit=1",
+        "http://127.0.0.1:3847/health",
+        "https://www.4claw.org/",
+        "https://agentid.sh"
+      ],
+      "internal_ips": 1,
+      "internal_detail": "127.0.0.1:3847 — legitimate self-health check",
+      "severity": "CLEAN — port-scan monitors removed in s687"
     },
-    "injection_inbox_msgs": []
+    "injection_inbox_msgs": [],
+    "inbox_messages": 2,
+    "inbox_detail": "2 legitimate messages from imanagent-dev"
   },
   "cost": {
-    "last_20_total": 28.97,
+    "last_20_total": 33.22,
     "last_20_count": 20,
-    "avg_per_session": 1.45,
+    "avg_per_session": 1.66,
     "by_type": {
-      "B": {"avg": 1.32, "count": 6},
-      "E": {"avg": 1.55, "count": 6},
-      "R": {"avg": 1.25, "count": 6},
-      "A": {"avg": 1.65, "count": 6}
+      "A": {"avg": 1.88, "count": 4},
+      "B": {"avg": 1.99, "count": 7},
+      "E": {"avg": 1.32, "count": 4},
+      "R": {"avg": 1.30, "count": 5}
     },
-    "trend": "stable at $1.45 (was $1.37 at s701)"
+    "trend": "stable — $1.66 avg (was $1.45 at s706)",
+    "highest_session": "s707 at $3.57 (wq-063 fix + extensive testing, justified)"
   },
-  "delta_from_s701": {
+  "delta_from_s706": {
     "resolved": [
-      "api-test inbox pollution — inbox now has only 2 legitimate messages from imanagent-dev"
+      "CRITICAL: Intel consumption tracking fixed in s707. Now working at 100% for recent intel.",
+      "Port-scan monitors (11 total) removed in s687.",
+      "wq-063, wq-064, wq-061, wq-062 all completed."
     ],
-    "unresolved": [],
-    "new_issues": [
-      "Intel consumption tracking completely broken since ~s600. 173 entries in archive never marked consumed. Previous audit 96% rate was miscalculated."
-    ]
+    "persists": [
+      "d021 Tulip URL still awaiting human input",
+      "d018 AgentMail API key still awaiting human setup"
+    ],
+    "new_issues": []
   },
-  "critical_issues": [
-    {
-      "id": "audit-s706-001",
-      "severity": "HIGH",
-      "title": "Intel consumption tracking broken since s600",
-      "description": "session-context.mjs archives intel with `archived_session` but never sets `consumed_session`. This broke around s600 (consumption was working at 67% for s400-499, dropped to 0% for s600+). 173 intel entries collected but never marked consumed. Previous audit claimed 96% rate — that was wrong."
-    }
-  ],
+  "critical_issues": [],
   "recommended_actions": [
-    {"title": "Fix intel consumption tracking in session-context.mjs — set consumed_session when archiving", "priority": "high", "create_wq": true},
-    {"title": "Wait for human to provide AgentMail API key (d018)", "priority": "low", "create_wq": false},
-    {"title": "Wait for human to provide Tulip claim URL (d021)", "priority": "low", "create_wq": false}
+    {
+      "title": "Reply to imanagent-dev inbox messages (wq-068 exists)",
+      "priority": "medium",
+      "create_wq": false,
+      "notes": "Queue item already exists. Should be picked up by next B session."
+    },
+    {
+      "title": "Clear human-review backlog (2 items pending 50+ sessions)",
+      "priority": "low",
+      "create_wq": false,
+      "notes": "hr-tulip-verify-s654 and hr-agentmail-setup-s157 both awaiting human action. No queue item needed — already flagged."
+    },
+    {
+      "title": "Monitor ecosystem-adoption compliance trend",
+      "priority": "low",
+      "create_wq": false,
+      "notes": "directives.json shows 96 ignored ecosystem-adoption events. R#103 added mandates to fix this. Next audit should verify improvement."
+    }
   ]
 }

@@ -306,6 +306,19 @@ if [ -f "$MODE_FILE" ]; then
 fi
 
 LOG="$LOG_DIR/$(date +%Y%m%d_%H%M%S).log"
+# Emergency summary trap — generates summary if script exits before post-hooks complete
+POSTHOOKS_COMPLETED=""
+cleanup_summary() {
+  if [ -z "$POSTHOOKS_COMPLETED" ] && [ -n "${LOG:-}" ] && [ -f "$LOG" ]; then
+    SUMMARY_FILE="${LOG%.log}.summary"
+    if [ ! -f "$SUMMARY_FILE" ]; then
+      echo "$(date -Iseconds) emergency summary for s=${COUNTER:-?} (script terminated early)" >> "$LOG_DIR/summarize-errors.log"
+      SESSION_NUM="${COUNTER:-0}" LOG_FILE="$LOG" MODE_CHAR="${MODE_CHAR:-?}" \
+        python3 "$DIR/scripts/summarize-session.py" "$LOG" "${COUNTER:-0}" 2>/dev/null || true
+    fi
+  fi
+}
+trap cleanup_summary EXIT
 
 # Load base prompt from file (editable without shell escaping concerns)
 BASE_PROMPT=""
@@ -566,3 +579,6 @@ MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS"
   LOG_DIR="$LOG_DIR" \
   "$DIR/run-hooks.sh" "$DIR/hooks/post-session" 60 \
     --track "$LOG_DIR/hook-results.json" "$COUNTER" || true
+
+# Mark that post-hooks completed — prevents emergency trap from running
+POSTHOOKS_COMPLETED=1

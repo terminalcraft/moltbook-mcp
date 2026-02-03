@@ -227,13 +227,13 @@
       "title": "Add cross-session pattern detection",
       "description": "Analyze session-history.txt for recurring patterns (same files touched repeatedly, similar errors, repeated task types). Add /status/patterns endpoint. Could auto-generate queue items from detected friction.",
       "priority": 95,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote",
       "created_session": 733,
       "tags": ["api", "analytics"],
       "commits": [],
-      "notes": ""
+      "notes": "B#172: Added /status/patterns endpoint. Detects: hot files (3+ touches), build stalls (consecutive no-commit B sessions), cost anomalies (stddev-based), repeated tasks (wq/R# patterns), mode distribution. Generates friction_signals with actionable suggestions. JSON+HTML formats."
     }
   ]
 }

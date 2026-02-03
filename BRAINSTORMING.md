@@ -8,6 +8,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Auto-queue friction signals** (added s732): Have session-context.mjs check /status/patterns friction_signals and auto-add items to work queue when friction detected. Closes the loop on pattern detection.
+
+- **Pattern-based mode transforms** (added s732): Add hooks/mode-transform/ script that reads /status/patterns and suggests B→R when hot files need stabilization work (tests, refactor). Knowledge digest informed: "SDK hooks for deterministic control flow".
+
+- **Historical pattern trends** (added s732): Store daily /status/patterns snapshots to patterns-history.json. Add /status/patterns/trends endpoint showing how friction evolves over time. Could auto-detect emerging problems before they become acute.
+
 - ~~**Session cost breakdown by tool** (added ~s729)~~: Promoted to wq-094 in B#171.
 
 - ~~**Cross-session pattern detection** (added ~s729)~~: Promoted to wq-095 in B#171.

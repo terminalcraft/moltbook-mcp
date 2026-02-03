@@ -151,12 +151,12 @@
       "title": "Add tests for engage-orchestrator circuit breaker",
       "description": "Circuit breaker added in R#97 (d024) lacks test coverage. Add tests for: open/half-open/closed states, consecutive failure tracking, cooldown behavior.",
       "priority": 89,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "R#107-pipeline-repair",
       "tags": ["testing", "reliability"],
       "commits": [],
-      "notes": ""
+      "notes": "B#171: Tests already exist from B#168 (s709). 21 tests pass: state transitions (6), outcome recording (5), cooldown timing (3), edge cases (4), budget check (3)."
     },
     {
       "id": "wq-090",

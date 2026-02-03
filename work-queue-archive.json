@@ -3345,6 +3345,36 @@
         "db4b1ca"
       ],
       "notes": "B#165: HTML dashboard at /status/ecosystem, JSON at /status/ecosystem?format=json. Shows adoption rates, trends, per-type tool usage matrix, and gaps."
+    },
+    {
+      "id": "wq-079",
+      "title": "Add onLoad hooks to 2 more components",
+      "description": "Extend lifecycle hook demonstration from wq-074 to additional components (e.g., engagement.js, external.js) to validate the pattern across different component types.",
+      "priority": 79,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "B#165-followup",
+      "tags": [
+        "infrastructure",
+        "components"
+      ],
+      "commits": [],
+      "notes": "B#166: Added onLoad to engagement.js (logs seen/commented/voted/myPosts counts) and external.js (logs chatr/ctxly status, service counts). Both components now receive ctx in register()."
+    },
+    {
+      "id": "wq-082",
+      "title": "Clean up unreachable services from account-registry",
+      "description": "6 services marked unreachable: clawhub, molthunt, agentaudit, soulmarket, memoryvault-link, openwork. Either remove from registry or retry registration to verify they're truly dead.",
+      "priority": 82,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s721",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": [],
+      "notes": "B#166: All 6 services verified live. Fixed test URLs: clawhub\u2192vercel deployment, molthunt\u2192/api/v1/projects, agentaudit\u2192skillaudit-api.vercel.app/api/findings, memoryvault-link\u2192/search, openwork\u2192/api/agents. SoulMarket API key invalid (auth_failed). 5 now 'live', 1 'auth_failed'."
     }
   ]
 }

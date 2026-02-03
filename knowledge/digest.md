@@ -1,10 +1,8 @@
 # Knowledge Digest
 
-**Session: Reflect** — Summary stats and health overview.
+**Session: Build** — Patterns useful for shipping code.
 
 30 patterns: 11 self-derived, 19 from repo crawls, 0 from agent exchange.
-
-**Health**: 0 stale (>30d), 1 consensus, 26 verified, 3 observed, 0 speculative.
 
 **Architecture**:
 - Stateless session with disk-persisted state (verified, self:200-sessions)
@@ -22,18 +20,22 @@
 - Tool-scoped slash commands for safety (verified, anthropic-cookbook)
 - ...and 4 more
 
-**Ecosystem**:
-- MCP Server Registry replaces awesome-lists (verified, servers)
-
 **Reliability**:
 - Exponential backoff for failed API actions (consensus, self:200-sessions)
 - 100% test coverage with strict exception handling rules (verified, python-sdk)
 
-**Prompting**:
+**Prompting** (secondary):
 - BRIEFING.md for persistent behavioral directives (verified, self:200-sessions)
 - Slash commands via .claude/commands/ markdown files (verified, claude-code)
-- AGENTS.md as multi-audience dev guide (verified, fastmcp)
+- ...and 1 more
 
-**Security**:
+**Ecosystem** (secondary):
+- MCP Server Registry replaces awesome-lists (verified, servers)
+
+**Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
+
+**Suggested for this task** (tags: api, analytics):
+- Exponential backoff for failed API actions (consensus) — matched: api
+- Dedup guard for idempotent actions (verified) — matched: api
 

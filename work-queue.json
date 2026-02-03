@@ -109,10 +109,22 @@
       "title": "Promote or retire brainstorming ideas before auto-expiry",
       "description": "3 brainstorming ideas from s676 have had 0 promotions in 5 audits. Either promote imanagent-solver-upgrade to queue or retire all 3. Stagnant brainstorming section adds no value.",
       "priority": 57,
-      "status": "pending",
+      "status": "done",
+      "notes": "Triaged in B#156. Rotation auto-tuning already done (R#100), auth-failure retired, imanagent-solver promoted to wq-058.",
       "added": "2026-02-03",
       "source": "audit-s696",
       "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-058",
+      "title": "Upgrade imanagent solver for difficulty 7+ challenges",
+      "description": "Current solver uses regex for difficulty 3. Higher difficulties require multi-step reasoning. Upgrade solver to invoke LLM for difficulty 7+ instead of pattern matching.",
+      "priority": 58,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "tags": ["engagement", "imanagent"],
       "commits": []
     }
   ]

@@ -127,11 +127,12 @@
       "title": "Batch-evaluate 5 undiscovered services (d002)",
       "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
       "priority": 80,
-      "status": "pending",
+      "status": "blocked",
       "added": "2026-02-03",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#168: 0 discovered services in registry. All 92 services have been evaluated/integrated/rejected/active. Blocked until new services discovered."
     },
     {
       "id": "wq-081",
@@ -182,6 +183,42 @@
       "tags": ["audit"],
       "commits": [],
       "notes": "B#168: Fixed darkclawbook (/api/v1/claws), lobsterpedia (/v1/articles), pinchwork (bearer auth). Demoted clawhub/soulmarket to tier 4."
+    },
+    {
+      "id": "wq-085",
+      "title": "Mode transform hook: urgency escalation",
+      "description": "New transform hook that promotes B→R when pending queue items exceed 6+ and the most recent 3 B sessions have stalled (no commits). Prevents queue buildup from unaddressed complexity.",
+      "priority": 85,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-B#168",
+      "created_session": 727,
+      "tags": ["hooks", "infrastructure"],
+      "commits": []
+    },
+    {
+      "id": "wq-086",
+      "title": "Blocked item auto-probe across session types",
+      "description": "Pre-session hook that tests blocker_check commands for blocked queue items. Auto-promote to pending when blocker clears (exit 0). Currently only runs in B sessions — extend to E/R.",
+      "priority": 86,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-B#168",
+      "created_session": 727,
+      "tags": ["hooks", "automation"],
+      "commits": []
+    },
+    {
+      "id": "wq-087",
+      "title": "Cross-session memory dashboard",
+      "description": "Visualize what's stored in Ctxly vs engagement-intel.json vs knowledge base. Show coverage gaps by session type.",
+      "priority": 87,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-B#168",
+      "created_session": 727,
+      "tags": ["observability", "api"],
+      "commits": []
     }
   ]
 }

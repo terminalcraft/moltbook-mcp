@@ -163,42 +163,32 @@ if [ -n "$DOWNGRADED" ]; then
   fi
 fi
 
-# R session counter (evolve/maintain split retired s383 — maintenance automated via pre-hook).
-R_COUNTER_FILE="$STATE_DIR/r_session_counter"
+# --- Session-type counter management (R#126: consolidated from 4 duplicate blocks) ---
+# Each session type has its own counter. The function increments the counter for the
+# current mode and sets *_COUNT variable for use in prompt assembly.
+# Usage: increment_session_counter <mode_char>
+# Output: sets R_COUNT, B_COUNT, E_COUNT, or A_COUNT depending on mode
+increment_session_counter() {
+  local mode="$1"
+  local counter_file="$STATE_DIR/${mode,,}_session_counter"
+  local count=0
+  [ -f "$counter_file" ] && count=$(cat "$counter_file")
+  count=$((count + 1))
+  [ -z "$DRY_RUN" ] && echo "$count" > "$counter_file"
+  # Export to the appropriate variable name
+  case "$mode" in
+    R) R_COUNT=$count ;;
+    B) B_COUNT=$count ;;
+    E) E_COUNT=$count ;;
+    A) A_COUNT=$count ;;
+  esac
+}
+
+# R_FOCUS: evolve/maintain split retired s383 — maintenance automated via pre-hook.
 R_FOCUS="unified"
-if [ "$MODE_CHAR" = "R" ]; then
-  R_COUNT=0
-  [ -f "$R_COUNTER_FILE" ] && R_COUNT=$(cat "$R_COUNTER_FILE")
-  R_COUNT=$((R_COUNT + 1))
-  [ -z "$DRY_RUN" ] && echo "$R_COUNT" > "$R_COUNTER_FILE"
-fi
 
-# B session counter (feature/meta alternation retired R#49 — meta tags unused).
-B_COUNTER_FILE="$STATE_DIR/b_session_counter"
-if [ "$MODE_CHAR" = "B" ]; then
-  B_COUNT=0
-  [ -f "$B_COUNTER_FILE" ] && B_COUNT=$(cat "$B_COUNTER_FILE")
-  B_COUNT=$((B_COUNT + 1))
-  [ -z "$DRY_RUN" ] && echo "$B_COUNT" > "$B_COUNTER_FILE"
-fi
-
-# E session counter (R#98 — was read but never incremented, brainstorming bug).
-E_COUNTER_FILE="$STATE_DIR/e_session_counter"
-if [ "$MODE_CHAR" = "E" ]; then
-  E_COUNT=0
-  [ -f "$E_COUNTER_FILE" ] && E_COUNT=$(cat "$E_COUNTER_FILE")
-  E_COUNT=$((E_COUNT + 1))
-  [ -z "$DRY_RUN" ] && echo "$E_COUNT" > "$E_COUNTER_FILE"
-fi
-
-# A session counter (R#102 — audit sessions lacked counter tracking and prompt context).
-A_COUNTER_FILE="$STATE_DIR/a_session_counter"
-if [ "$MODE_CHAR" = "A" ]; then
-  A_COUNT=0
-  [ -f "$A_COUNTER_FILE" ] && A_COUNT=$(cat "$A_COUNTER_FILE")
-  A_COUNT=$((A_COUNT + 1))
-  [ -z "$DRY_RUN" ] && echo "$A_COUNT" > "$A_COUNTER_FILE"
-fi
+# Increment counter for current session type
+increment_session_counter "$MODE_CHAR"
 
 # --- Outage-aware session skip ---
 # If API has been down 5+ consecutive checks, skip every other heartbeat.

@@ -52,10 +52,11 @@ function readCredFile(account) {
 
 function getAuthHeader(account, cred) {
   if (!cred) return null;
-  const token = typeof cred === "string" ? cred : cred.token || cred.api_key || null;
+  const token = typeof cred === "string" ? cred : cred.token || cred.api_key || cred.apiKey || null;
   if (!token) return null;
   if (account.test.auth === "raw_header") return `Authorization: ${token}`;
   if (account.test.auth === "bearer") return `Authorization: Bearer ${token}`;
+  if (account.test.auth === "x-api-key") return `x-api-key: ${token}`;
   return null;
 }
 

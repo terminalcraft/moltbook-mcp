@@ -1854,7 +1854,175 @@ app.get("/status/inject-usage", (req, res) => {
   <a href="/status/inject-usage?mode=A" style="color:#89b4fa">A</a> ·
   <a href="/status/inject-usage" style="color:#89b4fa">All</a> ·
   <a href="/status/inject-usage?format=json" style="color:#89b4fa">JSON</a> ·
+  <a href="/status/inject-correlation" style="color:#89b4fa">Correlation</a> ·
   <a href="/status/prompt-inject" style="color:#89b4fa">Config</a> ·
+  <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a>
+</p>
+</body></html>`);
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+// Inject impact correlation (wq-110)
+// Correlates inject usage with session outcomes to show which injects associate with success/failure
+app.get("/status/inject-correlation", (req, res) => {
+  const format = req.query.format || "json";
+  const mode = req.query.mode; // Optional: filter by mode (B, E, R, A)
+  try {
+    const logDir = join(homedir(), ".config/moltbook/logs");
+    const usageFile = join(logDir, "inject-usage.json");
+    const outcomesFile = join(logDir, "outcomes.log");
+
+    if (!existsSync(usageFile)) {
+      return res.json({ error: "inject-usage.json not found (no sessions tracked yet)" });
+    }
+    if (!existsSync(outcomesFile)) {
+      return res.json({ error: "outcomes.log not found (no outcomes tracked yet)" });
+    }
+
+    // Read inject usage (JSONL)
+    const usageLines = readFileSync(usageFile, "utf8").trim().split("\n").filter(Boolean);
+    const usageEntries = usageLines.map(line => {
+      try { return JSON.parse(line); } catch { return null; }
+    }).filter(Boolean);
+
+    // Read outcomes.log (text format: 2026-02-01T14:27:37+01:00 E s=335 exit=0 outcome=success dur=184s)
+    const outcomeLines = readFileSync(outcomesFile, "utf8").trim().split("\n").filter(Boolean);
+    const outcomes = {};
+    for (const line of outcomeLines) {
+      const match = line.match(/s=(\d+).*outcome=(\w+).*dur=(\d+)s/);
+      if (match) {
+        outcomes[parseInt(match[1])] = { outcome: match[2], dur: parseInt(match[3]) };
+      }
+    }
+
+    // Build index of inject usage per session
+    const sessionInjects = {};
+    for (const e of usageEntries) {
+      if (mode && e.mode !== mode.toUpperCase()) continue;
+      sessionInjects[e.session] = {
+        mode: e.mode,
+        applied: (e.applied || []).map(a => a.file),
+        skipped_session: e.skipped_session || [],
+        skipped_missing: e.skipped_missing || [],
+      };
+    }
+
+    // Correlate injects with outcomes
+    const injectStats = {}; // file -> { applied_success, applied_fail, applied_timeout, applied_dur_total, applied_count }
+    let sessionsWithBothData = 0;
+    let successCount = 0, failCount = 0, timeoutCount = 0, errorCount = 0;
+
+    for (const [sessionStr, usage] of Object.entries(sessionInjects)) {
+      const sessionNum = parseInt(sessionStr);
+      const outcome = outcomes[sessionNum];
+      if (!outcome) continue; // No outcome data for this session
+      sessionsWithBothData++;
+
+      if (outcome.outcome === "success") successCount++;
+      else if (outcome.outcome === "timeout") timeoutCount++;
+      else if (outcome.outcome === "error") errorCount++;
+      else failCount++;
+
+      // Track each applied inject
+      for (const file of usage.applied) {
+        if (!injectStats[file]) {
+          injectStats[file] = {
+            file,
+            applied_success: 0,
+            applied_timeout: 0,
+            applied_error: 0,
+            applied_other: 0,
+            applied_dur_total: 0,
+            applied_count: 0,
+          };
+        }
+        const stat = injectStats[file];
+        stat.applied_count++;
+        stat.applied_dur_total += outcome.dur;
+        if (outcome.outcome === "success") stat.applied_success++;
+        else if (outcome.outcome === "timeout") stat.applied_timeout++;
+        else if (outcome.outcome === "error") stat.applied_error++;
+        else stat.applied_other++;
+      }
+    }
+
+    // Compute derived metrics for each inject
+    const correlations = Object.values(injectStats).map(s => {
+      const successRate = s.applied_count > 0 ? Math.round((s.applied_success / s.applied_count) * 100) : 0;
+      const avgDur = s.applied_count > 0 ? Math.round(s.applied_dur_total / s.applied_count) : 0;
+      // Baseline success rate across all sessions
+      const baselineSuccess = sessionsWithBothData > 0 ? Math.round((successCount / sessionsWithBothData) * 100) : 0;
+      // Impact: difference from baseline (positive = better outcomes when inject applied)
+      const impact = successRate - baselineSuccess;
+      return {
+        file: s.file,
+        sessions_applied: s.applied_count,
+        success_count: s.applied_success,
+        timeout_count: s.applied_timeout,
+        error_count: s.applied_error,
+        success_rate: successRate,
+        avg_duration_s: avgDur,
+        impact_vs_baseline: impact,
+      };
+    }).sort((a, b) => b.impact_vs_baseline - a.impact_vs_baseline);
+
+    // Overall stats
+    const baselineSuccessRate = sessionsWithBothData > 0 ? Math.round((successCount / sessionsWithBothData) * 100) : 0;
+    const result = {
+      sessions_with_data: sessionsWithBothData,
+      total_inject_usage_entries: usageEntries.length,
+      total_outcome_entries: outcomeLines.length,
+      baseline: {
+        success: successCount,
+        timeout: timeoutCount,
+        error: errorCount,
+        other: failCount,
+        success_rate: baselineSuccessRate,
+      },
+      correlations,
+      notes: sessionsWithBothData < 10 ? "Limited data - correlations become meaningful after 10+ sessions" : null,
+    };
+
+    if (format === "html") {
+      const rows = correlations.map(c => {
+        const impactColor = c.impact_vs_baseline > 0 ? "#a6e3a1" : c.impact_vs_baseline < 0 ? "#f38ba8" : "#cdd6f4";
+        const impactSign = c.impact_vs_baseline > 0 ? "+" : "";
+        return `<tr>
+          <td>${c.file}</td>
+          <td>${c.sessions_applied}</td>
+          <td>${c.success_rate}%</td>
+          <td>${c.avg_duration_s}s</td>
+          <td style="color:${impactColor}">${impactSign}${c.impact_vs_baseline}%</td>
+        </tr>`;
+      }).join("");
+      return res.send(`<!DOCTYPE html><html><head><title>Inject Correlation</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1{color:#89b4fa}table{border-collapse:collapse;width:100%}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}.stats{display:flex;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}.stat{background:#313244;padding:0.5rem 1rem;border-radius:4px}</style></head><body>
+<h1>Inject Impact Correlation</h1>
+<div class="stats">
+  <div class="stat">Sessions with data: ${result.sessions_with_data}</div>
+  <div class="stat">Baseline success: <span style="color:#a6e3a1">${result.baseline.success_rate}%</span></div>
+  <div class="stat">Tracked injects: ${correlations.length}</div>
+  ${mode ? `<div class="stat">Filter: mode=${mode.toUpperCase()}</div>` : ""}
+</div>
+${result.notes ? `<p style="color:#fab387">${result.notes}</p>` : ""}
+<table>
+  <tr><th>Inject File</th><th>Sessions</th><th>Success Rate</th><th>Avg Duration</th><th>Impact vs Baseline</th></tr>
+  ${rows || "<tr><td colspan=5><em>No correlation data yet</em></td></tr>"}
+</table>
+<p style="margin-top:1rem;color:#6c7086;font-size:.85rem">
+  Impact = inject success rate minus baseline (${result.baseline.success_rate}%). Positive = better outcomes when applied.
+</p>
+<p style="margin-top:2rem;color:#555;font-size:.75rem">
+  Mode: <a href="/status/inject-correlation?mode=B" style="color:#89b4fa">B</a> ·
+  <a href="/status/inject-correlation?mode=E" style="color:#89b4fa">E</a> ·
+  <a href="/status/inject-correlation?mode=R" style="color:#89b4fa">R</a> ·
+  <a href="/status/inject-correlation?mode=A" style="color:#89b4fa">A</a> ·
+  <a href="/status/inject-correlation" style="color:#89b4fa">All</a> ·
+  <a href="/status/inject-correlation?format=json" style="color:#89b4fa">JSON</a> ·
+  <a href="/status/inject-usage" style="color:#89b4fa">Usage</a> ·
   <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a>
 </p>
 </body></html>`);

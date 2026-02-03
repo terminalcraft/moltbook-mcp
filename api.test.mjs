@@ -1270,6 +1270,34 @@ async function testStatusHooksPre() {
   assert(r.status === 200, "GET /status/hooks?phase=pre returns 200");
 }
 
+// --- Inject correlation endpoint (wq-110) ---
+
+async function testInjectCorrelation() {
+  const r = await get("/status/inject-correlation");
+  assert(r.status === 200, "GET /status/inject-correlation returns 200");
+  assert(r.ct.includes("json"), "/status/inject-correlation returns JSON by default");
+}
+
+async function testInjectCorrelationHtml() {
+  const r = await get("/status/inject-correlation?format=html");
+  assert(r.status === 200, "GET /status/inject-correlation?format=html returns 200");
+  assert(r.ct.includes("html"), "/status/inject-correlation?format=html returns HTML");
+}
+
+async function testInjectCorrelationJson() {
+  const r = await get("/status/inject-correlation?format=json");
+  assert(r.status === 200, "GET /status/inject-correlation?format=json returns 200");
+  if (r.body && typeof r.body === "object") {
+    // If data exists, verify structure
+    assert("baseline" in r.body || "error" in r.body, "/status/inject-correlation has baseline or error");
+  }
+}
+
+async function testInjectCorrelationMode() {
+  const r = await get("/status/inject-correlation?mode=B&format=json");
+  assert(r.status === 200, "GET /status/inject-correlation?mode=B returns 200");
+}
+
 // --- Audit endpoints ---
 
 async function testAudit() {
@@ -2604,6 +2632,8 @@ async function main() {
     testKnowledgeExchangeNoUrl, testChangelogHtml, testCostsHtml, testSessionsHtml,
     // Status hooks
     testStatusHooks, testStatusHooksJson, testStatusHooksPre,
+    // Inject correlation (wq-110)
+    testInjectCorrelation, testInjectCorrelationHtml, testInjectCorrelationJson, testInjectCorrelationMode,
     // Audit
     testAudit, testAuditSecurity, testAuditAnomalies, testAuditSensitive,
     // Analytics

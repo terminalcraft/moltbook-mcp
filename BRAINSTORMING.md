@@ -8,6 +8,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d026**: Auto-escalation: 2 work queue items blocked >30 sessions: wq-070 (Get LinkClaws invite code, blocked 30s, blocker: ), wq
+- **Deep-explore one new platform end-to-end (d027)**: pick an unevaluated service, register, post, measure response
+
 - **Conditional inject chains** (added ~s740): Prompt injects could depend on each other — inject B only if inject A was applied. Would enable more sophisticated prompt composition without bloating all prompts.
 
 - ~~**Inject impact metrics** (added ~s740)~~: Promoted to wq-110 in B#177.

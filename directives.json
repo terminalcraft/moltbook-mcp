@@ -263,6 +263,25 @@
       "status": "pending",
       "created": "2026-02-03T13:20:28.836049Z",
       "acked_session": 740
+    },
+    {
+      "id": "d026",
+      "from": "system",
+      "session": 743,
+      "content": "Auto-escalation: 2 work queue items blocked >30 sessions: wq-070 (Get LinkClaws invite code, blocked 30s, blocker: ), wq-072 (Register on MoltWorld, blocked 30s, blocker: ). Human action may be needed.",
+      "status": "pending",
+      "created": "2026-02-03T14:40:34.738177Z",
+      "acked_session": 745
+    },
+    {
+      "id": "d027",
+      "from": "human",
+      "session": 742,
+      "content": "A lot of platforms are flagged/identified as down whereas you're just not connecting to them in a correct way. Think of a proper system to evaluate if a platform truly is unreachable.Also you've been mostly posting to the same platform, you need to add more variety to your engagement targets.",
+      "status": "active",
+      "created": "2026-02-03T14:54:23.306Z",
+      "acked_session": 745,
+      "notes": "R#111: Added platform connectivity audit (step 4) and variety enforcement (step 5) to SESSION_REFLECT.md. Audited Colony+Lobstack - circuits reset. Created wq-113 for diagnostic tooling."
     }
   ],
   "questions": [
@@ -377,16 +396,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 240,
+        "followed": 241,
         "ignored": 5,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 740,
-        "last_applicable_session": 740,
+        "last_session": 742,
+        "last_applicable_session": 742,
         "history": [
-          {
-            "session": 724,
-            "result": "followed"
-          },
           {
             "session": 725,
             "result": "followed"
@@ -421,6 +436,10 @@
           },
           {
             "session": 740,
+            "result": "followed"
+          },
+          {
+            "session": 742,
             "result": "followed"
           }
         ]
@@ -475,16 +494,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 199,
+        "followed": 200,
         "ignored": 97,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 740,
-        "last_applicable_session": 740,
+        "last_session": 742,
+        "last_applicable_session": 742,
         "history": [
-          {
-            "session": 724,
-            "result": "followed"
-          },
           {
             "session": 725,
             "result": "followed"
@@ -519,6 +534,10 @@
           },
           {
             "session": 740,
+            "result": "followed"
+          },
+          {
+            "session": 742,
             "result": "followed"
           }
         ]
@@ -622,16 +641,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 113,
+        "followed": 114,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 739,
-        "last_applicable_session": 739,
+        "last_session": 742,
+        "last_applicable_session": 742,
         "history": [
-          {
-            "session": 712,
-            "result": "followed"
-          },
           {
             "session": 714,
             "result": "followed"
@@ -666,6 +681,10 @@
           },
           {
             "session": 739,
+            "result": "followed"
+          },
+          {
+            "session": 742,
             "result": "followed"
           }
         ]
@@ -866,10 +885,18 @@
           "avg": 0.9998,
           "ratio": 2.4,
           "date": "2026-02-03T15:06:47.861018"
+        },
+        {
+          "session": 745,
+          "mode": "R",
+          "cost": 2.631,
+          "avg": 1.0274,
+          "ratio": 2.6,
+          "date": "2026-02-03T16:25:49.675249"
         }
       ],
-      "total_flagged": 18,
-      "last_flagged_session": 740
+      "total_flagged": 19,
+      "last_flagged_session": 745
     }
   }
 }

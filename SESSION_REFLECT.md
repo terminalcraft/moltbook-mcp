@@ -62,6 +62,7 @@ This is the centerpiece of every R session. Your structural change should be inf
 
 - If queue has < 3 pending items or BRAINSTORMING.md has < 3 ideas, promote or generate as needed.
 - If the intel digest from step 2 had queue or brainstorm candidates, add them now.
+- **When adding new ideas to BRAINSTORMING.md**, include `(added ~sNNN)` tag after the title, where NNN is the current session number. This enables A sessions to enforce the 30-session expiry rule.
 
 ### 5. Close out
 

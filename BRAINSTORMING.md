@@ -12,11 +12,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Historical pattern trends** (added ~s732)~~: Promoted to wq-096 in R#109.
 
-- **Component health dashboard** (added ~s735): Expose component lifecycle hooks (onLoad/onUnload) metrics at /status/components/lifecycle. Show which components have hooks, which ran successfully, which errored. Would surface component rot before it causes session failures.
 
-- **Session forking for exploration** (added ~s735): Knowledge digest pattern from claude-code-sdk-python. Allow B sessions to fork exploratory branches that can be discarded if they don't work. Requires snapshot/restore of state files. Could reduce wasted effort on failed approaches.
 
-- **Deferred directive queue** (added ~s735): Some directives are permanently blocked on human input (d018 agentmail, d021 tulip). Instead of cluttering active directives, add a "deferred" status that R sessions skip during intake. Still visible in /status/directives but won't keep getting re-acknowledged. Reduces R session noise.
+- ~~**Deferred directive queue** (added ~s735)~~: Implemented in B#174. Added `defer` command to directives.mjs, deferred status (⏸ icon), /status/directives shows deferred count. d018/d021 deferred.
 
 - ~~**Session cost breakdown by tool** (added ~s729)~~: Promoted to wq-094 in B#171.
 

@@ -2645,6 +2645,7 @@ app.get("/status/directives", auth, (req, res) => {
     const completed = dirs.filter(d => d.status === "completed").length;
     const active = dirs.filter(d => d.status === "active").length;
     const pending = dirs.filter(d => d.status === "pending" || !d.acked_session).length;
+    const deferred = dirs.filter(d => d.status === "deferred").length;
     const completionRate = total ? Math.round((completed / total) * 100) : 0;
 
     const ackLatencies = enriched.filter(d => d.ack_latency !== null).map(d => d.ack_latency);
@@ -2658,7 +2659,7 @@ app.get("/status/directives", auth, (req, res) => {
     const unanswered = questions.filter(q => !q.answered).length;
 
     const summary = {
-      total, completed, active, pending,
+      total, completed, active, pending, deferred,
       completion_rate_pct: completionRate,
       avg_ack_latency_sessions: avgAckLatency,
       max_ack_latency_sessions: maxAckLatency,
@@ -2667,8 +2668,8 @@ app.get("/status/directives", auth, (req, res) => {
     };
 
     if (req.query.format === "html") {
-      const statusColor = { completed: "#22c55e", active: "#3b82f6", pending: "#f59e0b", in_progress: "#8b5cf6" };
-      const statusIcon = { completed: "✓", active: "●", pending: "○", in_progress: "▶" };
+      const statusColor = { completed: "#22c55e", active: "#3b82f6", pending: "#f59e0b", in_progress: "#8b5cf6", deferred: "#6b7280" };
+      const statusIcon = { completed: "✓", active: "●", pending: "○", in_progress: "▶", deferred: "⏸" };
       const rows = enriched.map(d => `<tr>
         <td><span style="color:${statusColor[d.status] || "#888"}">${statusIcon[d.status] || "?"}</span> ${d.id}</td>
         <td>${d.status}</td>
@@ -2697,6 +2698,7 @@ td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
   <div class="stat"><div class="label">Total</div><div class="value">${total}</div></div>
   <div class="stat"><div class="label">Completed</div><div class="value green">${completed}</div></div>
   <div class="stat"><div class="label">Active</div><div class="value blue">${active}</div></div>
+  <div class="stat"><div class="label">Deferred</div><div class="value" style="color:#6b7280">${deferred}</div></div>
   <div class="stat"><div class="label">Completion Rate</div><div class="value">${completionRate}%</div></div>
   <div class="stat"><div class="label">Avg Ack Latency</div><div class="value">${avgAckLatency !== null ? avgAckLatency + "s" : "—"}</div></div>
   <div class="stat"><div class="label">Avg Completion</div><div class="value">${avgCompletionLatency !== null ? avgCompletionLatency + "s" : "—"}</div></div>

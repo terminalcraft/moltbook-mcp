@@ -30,7 +30,7 @@ if (cmd === "list" || cmd === "ls") {
   const filter = args[0]; // optional status filter
   for (const d of data.directives) {
     if (filter && d.status !== filter) continue;
-    const icon = d.status === "completed" ? "✓" : d.status === "active" ? "●" : d.status === "in_progress" ? "▶" : "○";
+    const icon = d.status === "completed" ? "✓" : d.status === "active" ? "●" : d.status === "in_progress" ? "▶" : d.status === "deferred" ? "⏸" : "○";
     console.log(`  ${icon} ${d.id} [s${d.session}] ${d.status.padEnd(12)} ${d.content.slice(0, 80)}${d.content.length > 80 ? "…" : ""}`);
     if (d.queue_item) console.log(`    → queue: ${d.queue_item}`);
   }
@@ -149,9 +149,22 @@ if (cmd === "list" || cmd === "ls") {
   const unanswered = qs.filter(q => !q.answered);
   if (unanswered.length) console.log(`Unanswered questions: ${unanswered.length}`);
 
+} else if (cmd === "defer") {
+  // Mark a directive as deferred (blocked on human input, skip during R session intake)
+  const [id, ...noteParts] = args;
+  if (!id) { console.error("Usage: directives.mjs defer <id> [reason]"); process.exit(1); }
+  const data = load();
+  const d = data.directives.find(x => x.id === id);
+  if (!d) { console.error(`Not found: ${id}`); process.exit(1); }
+  d.status = "deferred";
+  if (noteParts.length) d.notes = noteParts.join(" ");
+  d.deferred_at = new Date().toISOString();
+  save(data);
+  console.log(`Deferred: ${id}${noteParts.length ? ` (${noteParts.join(" ")})` : ""}`);
+
 } else if (cmd === "json") {
   console.log(JSON.stringify(load(), null, 2));
 
 } else {
-  console.log("Usage: node directives.mjs [list|pending|ack|complete|update|question|answer|add|summary|json]");
+  console.log("Usage: node directives.mjs [list|pending|ack|complete|defer|update|question|answer|add|summary|json]");
 }

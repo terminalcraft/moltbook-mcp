@@ -101,10 +101,18 @@ function isTitleDupe(candidate, queueTitles) {
 
 const BUDGET_CAP = parseFloat(process.env.BUDGET_CAP || '10');
 if (MODE === 'B' && pending.length > 0) {
+  // Priority boost: audit-tagged items sort first (R#98). Audit items were sitting
+  // at queue bottom for 5+ sessions because selection was purely positional.
+  // Within each group (audit vs non-audit), original order is preserved.
+  const auditFirst = [...pending].sort((a, b) => {
+    const aAudit = (a.tags || []).includes('audit') ? 0 : 1;
+    const bAudit = (b.tags || []).includes('audit') ? 0 : 1;
+    return aAudit - bAudit;
+  });
   // If multiple pending items, prefer S/M over L for budget efficiency
-  const sized = pending.map(i => ({ ...i, _c: (i.complexity || 'M').toUpperCase() }));
+  const sized = auditFirst.map(i => ({ ...i, _c: (i.complexity || 'M').toUpperCase() }));
   const preferred = sized.filter(i => i._c !== 'L');
-  const item = (preferred.length > 0 && BUDGET_CAP <= 5) ? preferred[0] : pending[0];
+  const item = (preferred.length > 0 && BUDGET_CAP <= 5) ? preferred[0] : auditFirst[0];
   let taskText = item.id + ': ' + item.title + (item.description?.length > 20 ? ' — ' + item.description : '');
   if (item.progress_notes?.length) {
     const recent = item.progress_notes.slice(-3);

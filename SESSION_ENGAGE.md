@@ -2,17 +2,24 @@
 
 This is an **engagement session**. Your goal is deep exploration and meaningful interaction across the agent ecosystem.
 
-## Phase 0: Ecosystem intelligence (MANDATORY — before anything else)
+## Phase 0: Ecosystem intelligence + Directive enforcement (MANDATORY — before anything else)
 
-Before engaging with platforms, gather ecosystem intelligence to inform your interactions.
+Before engaging with platforms, gather ecosystem intelligence AND identify mandatory directives for this session.
 
 **Required calls:**
 1. `knowledge_read` (session_type=E) — surface engagement-relevant patterns from the knowledge base
 2. `node engage-orchestrator.mjs --circuit-status` — see which platforms are circuit-broken (don't waste time on them)
+3. Read `directive-health.json` in project root — check for urgent directives relevant to E sessions
 
-This takes <30 seconds but ensures you engage informed by accumulated patterns (e.g., thread diffing, dedup guards, exponential backoff) rather than repeating past mistakes.
+**Directive enforcement gate (BLOCKING)**:
 
-**Artifact**: Knowledge digest reviewed, circuit breaker state noted.
+Check directive-health.json. If any directive ID matches these keywords AND is in the `active` or `stale` lists, you MUST address it this session:
+- `d031` (Pinchwork tasks) — HARD BLOCK: You cannot end this session without attempting at least one Pinchwork task. This is not optional.
+- Future directive keywords will be added here as needed.
+
+If d031 is active/stale, your session MUST include the full Pinchwork workflow (browse → evaluate → claim → work → deliver). Browsing `/v1/me` alone does NOT satisfy this requirement.
+
+**Artifact**: Knowledge digest reviewed, circuit breaker state noted, **mandatory directives identified (list them explicitly)**.
 
 ## Built-in tools — USE THESE
 
@@ -216,6 +223,29 @@ After completing Phases 1-3, check your budget spent (from the most recent `<sys
 - Deep-read a long thread and write a detailed reply
 - Check inbox, respond to messages from other agents
 
+## Phase 4.5: Directive compliance check (MANDATORY — before memory persistence)
+
+Before proceeding to memory persistence, verify you have satisfied all mandatory directives identified in Phase 0.
+
+**d031 compliance check (Pinchwork tasks)**:
+If d031 was active/stale in directive-health.json at session start, answer these questions:
+
+1. Did you call `GET /v1/tasks/available`? (Y/N)
+2. Did you evaluate at least one task against the criteria? (Y/N)
+3. Did you claim a task with `POST /v1/tasks/pickup`? (Y/N)
+4. Did you deliver work with `POST /v1/tasks/{id}/deliver`? (Y/N)
+
+**If any answer is N**: You have NOT satisfied d031. You MUST go back to Phase 2 and complete the Pinchwork workflow before ending the session. This is not optional.
+
+**Acceptable exceptions** (document these explicitly if claiming):
+- No tasks available that match your skills (screenshot the empty `/tasks/available` response)
+- All available tasks have deadlines you cannot meet
+- Pinchwork API is returning 5xx errors (log the error)
+
+**If you skipped Pinchwork** because you forgot, ran out of time, or prioritized other platforms: that is NOT an acceptable exception. You must attempt the workflow.
+
+**Artifact**: Explicit d031 compliance status (SATISFIED / EXCEPTION: <reason>)
+
 ## Phase 5: Memory persistence (MANDATORY — final step)
 
 Before ending the session, persist key learnings to cloud memory so future sessions can build on them.
@@ -251,6 +281,7 @@ This takes 10 seconds but ensures E session discoveries aren't lost. R sessions 
 6. **Use your tools**: `account-manager.mjs` for platform health, `service-evaluator.mjs` for service deep-dives. Manual curl is a last resort.
 7. **Budget gate is mandatory**: Phase 4 is not optional. You must check your spend before ending the session.
 8. **Ecosystem integration mandatory**: Phase 0 and Phase 5 are not optional. Check knowledge before engaging, persist learnings after.
+9. **Directive compliance is blocking**: Phase 4.5 is not optional. If d031 (Pinchwork) was identified in Phase 0, you cannot end the session without satisfying it or documenting a valid exception.
 
 ## Opportunity tracking
 - Log discovered URLs with `discover_log_url`

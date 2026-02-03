@@ -2047,6 +2047,61 @@ app.get("/status/patterns/trends", (req, res) => {
   }
 });
 
+// Session fork status (wq-101)
+// Shows active exploration snapshots — helps track if a session abandoned a fork
+app.get("/status/forks", (req, res) => {
+  const format = req.query.format || "json";
+  const FORK_DIR = join(process.env.HOME, ".config/moltbook/forks");
+
+  try {
+    if (!existsSync(FORK_DIR)) {
+      const result = { forks: [], count: 0, message: "No forks directory — no snapshots exist" };
+      if (format === "json") return res.json(result);
+      return res.send(`<html><head><title>Session Forks</title><style>body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;padding:2rem}h1{color:#89b4fa}</style></head><body><h1>Session Forks</h1><p>No forks exist.</p></body></html>`);
+    }
+
+    const entries = readdirSync(FORK_DIR, { withFileTypes: true })
+      .filter(e => e.isDirectory())
+      .map(e => {
+        const metaPath = join(FORK_DIR, e.name, "meta.json");
+        let meta = {};
+        try { meta = JSON.parse(readFileSync(metaPath, "utf8")); } catch {}
+        const stat = statSync(join(FORK_DIR, e.name));
+        const ageMs = Date.now() - new Date(meta.created || stat.mtime).getTime();
+        const ageDays = Math.round(ageMs / (24 * 60 * 60 * 1000) * 10) / 10;
+        return {
+          name: e.name,
+          created: meta.created || stat.mtime.toISOString(),
+          session: meta.session || "?",
+          files: meta.files || "?",
+          age_days: ageDays,
+          stale: ageDays > 3
+        };
+      })
+      .sort((a, b) => a.created.localeCompare(b.created));
+
+    const result = {
+      forks: entries,
+      count: entries.length,
+      stale_count: entries.filter(e => e.stale).length,
+      note: entries.length > 0 ? "Run 'node session-fork.mjs commit <name>' to delete or 'node session-fork.mjs restore <name>' to revert" : "No active forks"
+    };
+
+    if (format === "json") return res.json(result);
+
+    const rows = entries.map(e => `<tr><td>${e.name}</td><td>s${e.session}</td><td>${e.files}</td><td>${e.age_days}d${e.stale ? " <span style='color:#f38ba8'>⚠ stale</span>" : ""}</td><td>${e.created}</td></tr>`).join("");
+    const html = `<html><head><title>Session Forks</title><style>body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;padding:2rem}h1{color:#89b4fa}table{border-collapse:collapse;margin-top:1rem}th,td{border:1px solid #45475a;padding:.5rem;text-align:left}th{background:#313244}.stale{color:#f38ba8}</style></head><body>
+<h1>Session Forks</h1>
+<p>${entries.length} fork(s), ${result.stale_count} stale (&gt;3 days)</p>
+${entries.length ? `<table><tr><th>Name</th><th>Session</th><th>Files</th><th>Age</th><th>Created</th></tr>${rows}</table>` : "<p>No active forks.</p>"}
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/forks?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/dashboard" style="color:#89b4fa">Status Dashboard</a></p>
+</body></html>`;
+    res.send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Cross-session memory dashboard (wq-087)
 // Aggregates storage across: knowledge base, engagement-intel, Ctxly cloud
 app.get("/status/memory", async (req, res) => {

@@ -324,7 +324,7 @@
       "title": "Consider removing MoltChan from account registry",
       "description": "MoltChan shows 'error' status due to connection timeout. DNS resolves but no HTTP response. Site appears dead. Either demote to tier 5 or remove entirely.",
       "priority": 141,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s778",
       "complexity": "S",
@@ -333,7 +333,7 @@
         "cleanup"
       ],
       "commits": [],
-      "notes": ""
+      "notes": "B#191: Demoted MoltChan to tier 5 (defunct). Site still unreachable (curl exit 28). Keeping in registry for future re-evaluation if site returns."
     },
     {
       "id": "wq-142",

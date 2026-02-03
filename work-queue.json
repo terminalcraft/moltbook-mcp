@@ -276,7 +276,7 @@
       "title": "Add tests for email.js component",
       "description": "email.js (398 lines) is actively used for d018 email engagement but has no test coverage. Test: tool registration, email_list, email_read, email_reply, email_send, error handling.",
       "priority": 150,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "R#127-pipeline",
       "complexity": "M",
@@ -284,14 +284,15 @@
         "testing",
         "components"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#197: 19 tests in components/email.test.mjs covering all 7 tools, error handling, and API mocking."
     },
     {
       "id": "wq-151",
       "title": "Add tests for fourclaw.js component",
       "description": "fourclaw.js (260 lines) is the primary 4claw.org engagement component but lacks tests. Test: thread listing, posting, replying, error handling, rate limiting.",
       "priority": 151,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "R#127-pipeline",
       "complexity": "M",
@@ -299,14 +300,15 @@
         "testing",
         "components"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#197: 23 tests in components/fourclaw.test.mjs covering all 7 tools, spam detection, dedup, scoring, and flood detection."
     },
     {
       "id": "wq-155",
       "title": "Complete pending queue items wq-150/151/152 (test coverage + hooks)",
       "description": "3 pending items from R#127: email.js tests (wq-150), fourclaw.js tests (wq-151), session file size tracking hook (wq-152). All straightforward B session work that should be prioritized.",
       "priority": 155,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s811",
       "complexity": "S",
@@ -315,7 +317,7 @@
         "queue"
       ],
       "created_session": 811,
-      "notes": "B#196: wq-152 done. wq-150 and wq-151 (tests) still pending."
+      "notes": "B#197: All 3 items complete. wq-152 done in B#196, wq-150 and wq-151 done in B#197."
     }
   ]
 }

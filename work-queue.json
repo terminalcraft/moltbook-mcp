@@ -276,11 +276,12 @@
       "title": "R session impact analysis feedback",
       "description": "(added ~s815): The r-session-impact.json now tracks structural changes but the analysis array is still empty after 10 sessions. Once enough data accumulates, build a digest that R sessions can consult showing which categories of changes had positive/negative impact.",
       "priority": 143,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["B#201"],
+      "notes": "B#201: Added digest generator to 18-r-impact-track.sh (runs after R sessions) and r-impact-digest.mjs (on-demand). Digest shows category performance (PREFER/AVOID/NEUTRAL), recent changes, and pending analysis. Updated SESSION_REFLECT.md to reference node r-impact-digest.mjs."
     },
     {
       "id": "wq-145",

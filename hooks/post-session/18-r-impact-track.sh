@@ -202,7 +202,81 @@ for change in data["changes"]:
     data["analysis"] = data["analysis"][-30:]
 
 json.dump(data, open(impact_file, 'w'), indent=2)
-print(f"impact tracking: recorded (category={change_category or 'none'})")
+
+# --- Generate human-readable digest ---
+# Build category statistics from analysis array
+digest_file = impact_file.replace('.json', '-digest.txt')
+
+analysis = data.get("analysis", [])
+if analysis:
+    # Aggregate by category
+    category_stats = {}
+    for a in analysis:
+        cat = a.get("category", "unknown")
+        if cat not in category_stats:
+            category_stats[cat] = {"positive": 0, "negative": 0, "neutral": 0, "cost_deltas": [], "success_deltas": []}
+        impact = a.get("impact", "neutral")
+        category_stats[cat][impact] += 1
+        if a.get("cost_delta_pct") is not None:
+            category_stats[cat]["cost_deltas"].append(a["cost_delta_pct"])
+        if a.get("success_delta") is not None:
+            category_stats[cat]["success_deltas"].append(a["success_delta"])
+
+    # Generate digest
+    lines = [
+        "# R Session Impact Digest",
+        f"# Generated: session {session_num}",
+        f"# Total analyzed changes: {len(analysis)}",
+        "",
+        "## Category Performance",
+        ""
+    ]
+
+    for cat, stats in sorted(category_stats.items()):
+        total = stats["positive"] + stats["negative"] + stats["neutral"]
+        if total == 0:
+            continue
+        pos_pct = stats["positive"] / total * 100
+        neg_pct = stats["negative"] / total * 100
+        avg_cost = sum(stats["cost_deltas"]) / len(stats["cost_deltas"]) if stats["cost_deltas"] else 0
+        avg_success = sum(stats["success_deltas"]) / len(stats["success_deltas"]) if stats["success_deltas"] else 0
+
+        # Recommendation
+        if neg_pct > 50:
+            rec = "AVOID"
+        elif pos_pct > 50:
+            rec = "PREFER"
+        else:
+            rec = "NEUTRAL"
+
+        lines.append(f"### {cat} ({rec})")
+        lines.append(f"- Changes: {total} ({stats['positive']} positive, {stats['negative']} negative, {stats['neutral']} neutral)")
+        lines.append(f"- Avg cost delta: {avg_cost:+.1f}%")
+        lines.append(f"- Avg success delta: {avg_success:+.2f}")
+        lines.append("")
+
+    # Recent changes summary
+    lines.append("## Recent Changes (last 5)")
+    lines.append("")
+    for a in analysis[-5:]:
+        lines.append(f"- s{a.get('session', '?')}: {a.get('file', '?')} ({a.get('category', '?')}) → {a.get('impact', '?')}")
+
+    # Pending analysis (changes not yet analyzed)
+    pending = [c for c in data.get("changes", []) if not c.get("analyzed")]
+    if pending:
+        lines.append("")
+        lines.append(f"## Pending Analysis ({len(pending)} changes)")
+        lines.append(f"Awaiting 10+ sessions of post-change data before analysis.")
+        for c in pending[-3:]:
+            sessions_until = 10 - (session_num - c.get("session", 0))
+            lines.append(f"- s{c.get('session', '?')}: {c.get('file', '?')} ({c.get('category', '?')}) — {sessions_until} sessions until analysis")
+
+    with open(digest_file, 'w') as f:
+        f.write("\n".join(lines))
+
+    print(f"impact tracking: recorded (category={change_category or 'none'}), digest written")
+else:
+    print(f"impact tracking: recorded (category={change_category or 'none'}), no analysis data yet")
 PYEOF
 
 echo "$(date -Iseconds) r-impact-track: s=${SESSION_NUM:-?} category=${CHANGE_CATEGORY:-none}"

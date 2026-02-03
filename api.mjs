@@ -1745,6 +1745,188 @@ app.get("/status/tool-costs", (req, res) => {
   }
 });
 
+// Cross-session pattern detection (wq-095)
+// Analyzes session-history.txt for recurring patterns: hot files, stalls, cost anomalies, task types
+app.get("/status/patterns", (req, res) => {
+  const format = req.query.format || "json";
+  const window = Math.min(parseInt(req.query.window) || 30, 100);
+  try {
+    const histPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    if (!existsSync(histPath)) {
+      return res.json({ error: "session-history.txt not found" });
+    }
+    const raw = readFileSync(histPath, "utf8");
+    const lines = raw.trim().split("\n").filter(l => l.trim()).slice(-window);
+    if (lines.length === 0) {
+      return res.json({ error: "No session history entries" });
+    }
+
+    // Parse session entries
+    const sessions = lines.map(line => {
+      const mode = line.match(/mode=([A-Z])/)?.[1] || "?";
+      const session = parseInt(line.match(/s=(\d+)/)?.[1] || "0");
+      const dur = line.match(/dur=([^\s]+)/)?.[1] || "?";
+      const cost = parseFloat(line.match(/cost=\$([0-9.]+)/)?.[1] || "0");
+      const commits = parseInt(line.match(/build=(\d+)/)?.[1] || "0");
+      const filesMatch = line.match(/files=\[([^\]]*)\]/)?.[1] || "";
+      const files = filesMatch ? filesMatch.split(",").map(f => f.trim()).filter(f => f && f !== "(none)") : [];
+      const note = line.split("note:")[1]?.trim() || "";
+      return { mode, session, dur, cost, commits, files, note };
+    });
+
+    const result = { window, sessions_analyzed: sessions.length, patterns: {} };
+
+    // Pattern 1: Hot files (touched 3+ times)
+    const fileCounts = {};
+    for (const s of sessions) {
+      for (const f of s.files) {
+        fileCounts[f] = (fileCounts[f] || 0) + 1;
+      }
+    }
+    const hotFiles = Object.entries(fileCounts)
+      .filter(([f, c]) => c >= 3)
+      .sort((a, b) => b[1] - a[1])
+      .map(([file, count]) => ({ file, count, pct: Math.round(count / sessions.length * 100) }));
+    result.patterns.hot_files = {
+      count: hotFiles.length,
+      items: hotFiles.slice(0, 10),
+      friction_signal: hotFiles.filter(f => !["work-queue.json", "BRAINSTORMING.md", "engagement-intel.json"].includes(f.file)).length,
+    };
+
+    // Pattern 2: Build stalls (consecutive B sessions with no commits)
+    const bSessions = sessions.filter(s => s.mode === "B");
+    let maxStallStreak = 0, currentStreak = 0;
+    for (const b of bSessions) {
+      if (b.commits === 0) {
+        currentStreak++;
+        maxStallStreak = Math.max(maxStallStreak, currentStreak);
+      } else {
+        currentStreak = 0;
+      }
+    }
+    const recentBStalls = bSessions.slice(-5).filter(b => b.commits === 0).length;
+    result.patterns.build_stalls = {
+      max_consecutive: maxStallStreak,
+      recent_5_stalls: recentBStalls,
+      stall_rate: bSessions.length > 0 ? Math.round(bSessions.filter(b => b.commits === 0).length / bSessions.length * 100) : 0,
+      health: maxStallStreak >= 3 ? "unhealthy" : recentBStalls >= 2 ? "warning" : "healthy",
+    };
+
+    // Pattern 3: Cost anomalies by mode
+    const costByMode = { B: [], R: [], E: [], A: [] };
+    for (const s of sessions) {
+      if (costByMode[s.mode]) costByMode[s.mode].push(s.cost);
+    }
+    const modeStats = {};
+    for (const [mode, costs] of Object.entries(costByMode)) {
+      if (costs.length === 0) continue;
+      const avg = costs.reduce((a, b) => a + b, 0) / costs.length;
+      const max = Math.max(...costs);
+      const min = Math.min(...costs);
+      const stddev = Math.sqrt(costs.reduce((s, c) => s + Math.pow(c - avg, 2), 0) / costs.length);
+      const anomalies = costs.filter(c => Math.abs(c - avg) > 2 * stddev).length;
+      modeStats[mode] = {
+        count: costs.length,
+        avg: Math.round(avg * 100) / 100,
+        min: Math.round(min * 100) / 100,
+        max: Math.round(max * 100) / 100,
+        stddev: Math.round(stddev * 100) / 100,
+        anomaly_count: anomalies,
+      };
+    }
+    result.patterns.cost_by_mode = modeStats;
+
+    // Pattern 4: Task type patterns (extract wq-XXX and R#XXX from notes)
+    const taskTypes = {};
+    for (const s of sessions) {
+      const wqMatch = s.note.match(/wq-\d+/g) || [];
+      const rMatch = s.note.match(/R#\d+/g) || [];
+      for (const t of [...wqMatch, ...rMatch]) {
+        taskTypes[t] = (taskTypes[t] || 0) + 1;
+      }
+    }
+    const repeatedTasks = Object.entries(taskTypes)
+      .filter(([_, c]) => c >= 2)
+      .sort((a, b) => b[1] - a[1])
+      .map(([task, count]) => ({ task, count }));
+    result.patterns.repeated_tasks = {
+      count: repeatedTasks.length,
+      items: repeatedTasks.slice(0, 10),
+    };
+
+    // Pattern 5: Mode distribution & efficiency
+    const modeCount = { B: 0, R: 0, E: 0, A: 0 };
+    const modeCommits = { B: 0, R: 0, E: 0, A: 0 };
+    for (const s of sessions) {
+      if (modeCount[s.mode] !== undefined) {
+        modeCount[s.mode]++;
+        modeCommits[s.mode] += s.commits;
+      }
+    }
+    result.patterns.mode_distribution = {
+      counts: modeCount,
+      total: sessions.length,
+      commit_totals: modeCommits,
+      productivity: {
+        B: modeCount.B > 0 ? Math.round(modeCommits.B / modeCount.B * 100) / 100 : 0,
+        R: modeCount.R > 0 ? Math.round(modeCommits.R / modeCount.R * 100) / 100 : 0,
+      },
+    };
+
+    // Generate friction signals (potential queue items)
+    const friction = [];
+    if (result.patterns.hot_files.friction_signal >= 3) {
+      const top = hotFiles.filter(f => !["work-queue.json", "BRAINSTORMING.md", "engagement-intel.json"].includes(f.file))[0];
+      if (top) friction.push({ type: "hot_file", severity: "medium", suggestion: `Add tests for ${top.file}`, reason: `Touched ${top.count} times in ${window} sessions` });
+    }
+    if (result.patterns.build_stalls.health !== "healthy") {
+      friction.push({ type: "stall_pattern", severity: result.patterns.build_stalls.health === "unhealthy" ? "high" : "medium", suggestion: "Investigate B session blockers", reason: `${result.patterns.build_stalls.max_consecutive} consecutive stalled B sessions` });
+    }
+    const lowUtilMode = Object.entries(modeStats).find(([m, s]) => s.avg < 1.0 && s.count >= 3);
+    if (lowUtilMode) {
+      friction.push({ type: "underutilization", severity: "low", suggestion: `Improve ${lowUtilMode[0]} session budget usage`, reason: `Avg cost $${lowUtilMode[1].avg} (below $1)` });
+    }
+    result.friction_signals = friction;
+
+    if (format === "html") {
+      const hotRows = hotFiles.slice(0, 10).map((f, i) => {
+        const bar = "█".repeat(Math.round(f.pct / 5)) || "▏";
+        const isNoise = ["work-queue.json", "BRAINSTORMING.md", "engagement-intel.json"].includes(f.file);
+        return `<tr style="${isNoise ? "color:#6c7086" : ""}"><td>${i + 1}</td><td>${f.file}</td><td>${f.count}</td><td><span style="color:#89b4fa">${bar}</span> ${f.pct}%</td></tr>`;
+      }).join("");
+      const modeRows = Object.entries(modeStats).map(([m, s]) => `<tr><td>${m}</td><td>${s.count}</td><td>$${s.avg}</td><td>$${s.min}</td><td>$${s.max}</td><td>${s.anomaly_count}</td></tr>`).join("");
+      const frictionRows = friction.map(f => `<tr><td style="color:${f.severity === "high" ? "#f38ba8" : f.severity === "medium" ? "#fab387" : "#a6e3a1"}">${f.severity}</td><td>${f.type}</td><td>${f.suggestion}</td><td>${f.reason}</td></tr>`).join("");
+      const stallHealth = result.patterns.build_stalls.health;
+      const stallColor = stallHealth === "unhealthy" ? "#f38ba8" : stallHealth === "warning" ? "#fab387" : "#a6e3a1";
+      return res.send(`<!DOCTYPE html><html><head><title>Session Patterns</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1,h2{color:#89b4fa}table{border-collapse:collapse;width:100%;margin-bottom:2rem}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}.card{background:#313244;padding:1rem;border-radius:8px;margin-bottom:1rem}</style></head><body>
+<h1>Session Patterns</h1>
+<p>Analyzing last ${sessions.length} sessions (window=${window})</p>
+
+<div class="card">
+  <h2>Build Health</h2>
+  <p>Stall rate: ${result.patterns.build_stalls.stall_rate}% · Max consecutive stalls: ${result.patterns.build_stalls.max_consecutive} · Status: <span style="color:${stallColor}">${stallHealth}</span></p>
+</div>
+
+<h2>Hot Files</h2>
+<p>Files touched 3+ times — friction signal: ${result.patterns.hot_files.friction_signal} (excluding noise files)</p>
+<table><tr><th>#</th><th>File</th><th>Count</th><th>Distribution</th></tr>${hotRows || "<tr><td colspan=4><em>No hot files</em></td></tr>"}</table>
+
+<h2>Cost by Mode</h2>
+<table><tr><th>Mode</th><th>Sessions</th><th>Avg</th><th>Min</th><th>Max</th><th>Anomalies</th></tr>${modeRows}</table>
+
+<h2>Friction Signals</h2>
+<p>Auto-detected improvement opportunities:</p>
+<table><tr><th>Severity</th><th>Type</th><th>Suggestion</th><th>Reason</th></tr>${frictionRows || "<tr><td colspan=4 style='color:#a6e3a1'><em>No friction detected ✓</em></td></tr>"}</table>
+
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/patterns?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a> · ?window=N (default 30, max 100)</p>
+</body></html>`);
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Cross-session memory dashboard (wq-087)
 // Aggregates storage across: knowledge base, engagement-intel, Ctxly cloud
 app.get("/status/memory", async (req, res) => {

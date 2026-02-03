@@ -315,6 +315,30 @@
       "complexity": "S",
       "tags": ["testing"],
       "commits": []
+    },
+    {
+      "id": "wq-155",
+      "title": "Add session file size tracking pre-hook",
+      "description": "(audit-s816): Track session file sizes (SESSION_*.md, BRIEFING.md, etc.) in pre-hook. Write to session-file-sizes.json for trend analysis. Was mentioned as wq-152 in brainstorming but never created. Originally from R#127 as part of session file complexity management.",
+      "priority": 155,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s816",
+      "complexity": "S",
+      "tags": ["audit", "observability"],
+      "commits": []
+    },
+    {
+      "id": "wq-156",
+      "title": "Verify E session engagement variety after d031/platform-picker deployment",
+      "description": "(audit-s816): Only 1 E session (s813) occurred since s811 audit. With d031 completed and platform-picker deployed, need to verify E sessions maintain variety across platforms. Next A session (s821) should check 3+ E sessions for diversity. This is an observation task, not build work.",
+      "priority": 156,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s816",
+      "complexity": "S",
+      "tags": ["audit", "engagement"],
+      "commits": []
     }
   ]
 }

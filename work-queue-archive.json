@@ -4876,6 +4876,39 @@
       ],
       "commits": [],
       "notes": "B#200: 10 tests covering: spam scoring (3), similarity detection (1), injection sanitization (3), URL validation (2), HTML stripping (1). Tests core security and signal processing functions."
+    },
+    {
+      "id": "wq-143",
+      "title": "R session impact analysis feedback",
+      "description": "(added ~s815): The r-session-impact.json now tracks structural changes but the analysis array is still empty after 10 sessions. Once enough data accumulates, build a digest that R sessions can consult showing which categories of changes had positive/negative impact.",
+      "priority": 143,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "B#201"
+      ],
+      "notes": "B#201: Added digest generator to 18-r-impact-track.sh (runs after R sessions) and r-impact-digest.mjs (on-demand). Digest shows category performance (PREFER/AVOID/NEUTRAL), recent changes, and pending analysis. Updated SESSION_REFLECT.md to reference node r-impact-digest.mjs."
+    },
+    {
+      "id": "wq-157",
+      "title": "Add tests for knowledge.js component",
+      "description": "knowledge.js (302 lines) has high churn (7 changes). Tests: pattern CRUD, digest generation, pruning logic, exchange protocol.",
+      "priority": 157,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "B#200-test-plan",
+      "created_session": 822,
+      "complexity": "M",
+      "tags": [
+        "testing",
+        "components"
+      ],
+      "commits": [
+        "B#201"
+      ],
+      "notes": "B#201: Added knowledge.test.mjs with 16 tests covering loadPatterns, savePatterns, loadReposCrawled, saveReposCrawled, findPatternsByTags, and regenerateDigest. Tests session-type digest customization, tag matching, health stats."
     }
   ]
 }

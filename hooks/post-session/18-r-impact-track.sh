@@ -21,32 +21,43 @@ if [ ! -f "$IMPACT_FILE" ]; then
   echo '{"version":1,"changes":[],"analysis":[]}' > "$IMPACT_FILE"
 fi
 
-# Extract structural change info from session log
-# Look for commit messages with "refactor:" (R session convention)
+# Extract structural change info from git commits (more reliable than log parsing)
 CHANGE_FILE=""
 CHANGE_CATEGORY=""
-if [ -f "${LOG_FILE:-}" ]; then
-  # Find the structural change commit message
-  COMMIT_MSG=$(grep -oP 'refactor: [^"]+' "$LOG_FILE" 2>/dev/null | head -1 || echo "")
 
-  if [ -n "$COMMIT_MSG" ]; then
-    # Extract category from commit message patterns
-    if echo "$COMMIT_MSG" | grep -qiE 'SESSION_|session file'; then
+cd "$DIR" 2>/dev/null || true
+
+# Get files changed in recent commits (structural files only)
+CHANGE_FILE=$(git diff --name-only HEAD~2 HEAD 2>/dev/null | grep -E '\.(sh|js|mjs|md|conf)$' | head -1 || echo "")
+
+# Determine category from the actual file changed (not commit message)
+if [ -n "$CHANGE_FILE" ]; then
+  case "$CHANGE_FILE" in
+    SESSION_*.md)
       CHANGE_CATEGORY="session-file"
-    elif echo "$COMMIT_MSG" | grep -qiE 'index\.js|component'; then
-      CHANGE_CATEGORY="mcp-server"
-    elif echo "$COMMIT_MSG" | grep -qiE 'heartbeat|rotation'; then
+      ;;
+    heartbeat.sh|rotation.conf|rotation-state.mjs)
       CHANGE_CATEGORY="orchestration"
-    elif echo "$COMMIT_MSG" | grep -qiE 'hook|pre-session|post-session'; then
+      ;;
+    hooks/*)
       CHANGE_CATEGORY="hooks"
-    else
+      ;;
+    index.js|api.mjs)
+      CHANGE_CATEGORY="mcp-server"
+      ;;
+    components/*|providers/*)
+      CHANGE_CATEGORY="components"
+      ;;
+    *.test.mjs|*.test.js)
+      CHANGE_CATEGORY="tests"
+      ;;
+    BRAINSTORMING.md|work-queue.json|directives.json)
+      CHANGE_CATEGORY="state-files"
+      ;;
+    *)
       CHANGE_CATEGORY="other"
-    fi
-
-    # Get files changed in this session's commits
-    cd "$DIR" 2>/dev/null || true
-    CHANGE_FILE=$(git diff --name-only HEAD~2 HEAD 2>/dev/null | grep -E '\.(sh|js|mjs|md|conf)$' | head -1 || echo "")
-  fi
+      ;;
+  esac
 fi
 
 # Record this R session's change and run impact analysis
@@ -104,7 +115,8 @@ for change in data["changes"]:
     category = change.get("category", "")
     file_changed = change.get("file", "") or ""
 
-    if "SESSION_BUILD" in file_changed or (category == "session-file" and "BUILD" in file_changed.upper()):
+    # Session files map to specific types
+    if "SESSION_BUILD" in file_changed:
         target_type = "B"
     elif "SESSION_ENGAGE" in file_changed:
         target_type = "E"
@@ -112,13 +124,19 @@ for change in data["changes"]:
         target_type = "R"
     elif "SESSION_AUDIT" in file_changed:
         target_type = "A"
-    elif category in ("mcp-server", "orchestration", "hooks"):
-        target_type = "ALL"  # Affects all session types
-
-    if not target_type:
-        change["analyzed"] = True
-        change["impact"] = "unknown-target"
-        continue
+    # Category-based targeting
+    elif category == "session-file":
+        # Generic session file changes affect all types
+        target_type = "ALL"
+    elif category in ("mcp-server", "orchestration", "hooks", "components"):
+        # Infrastructure changes affect all session types
+        target_type = "ALL"
+    elif category in ("tests", "state-files", "other"):
+        # These don't directly affect session behavior - still analyze but with ALL
+        target_type = "ALL"
+    else:
+        # Unknown category - analyze anyway with ALL to gather data
+        target_type = "ALL"
 
     # Compute before/after metrics
     before = [o for o in outcomes if o.get("session", 0) < change_session and o.get("session", 0) >= change_session - 10]

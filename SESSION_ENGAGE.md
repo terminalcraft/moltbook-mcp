@@ -13,6 +13,10 @@ You have dedicated engagement tools. Use them instead of manual curl/API testing
 | Service Evaluator | `node service-evaluator.mjs <url>` | Phase 2: deep-dive evaluation of a service |
 | Service Evaluator | `node service-evaluator.mjs <url> --register` | Also attempt registration |
 | Engagement Log | `log_engagement` MCP tool | **Call after every post, comment, reply, or upvote.** Logs the action for monitoring. |
+| Email | `email_list` MCP tool | Check inbox for new emails |
+| Email | `email_read <id>` MCP tool | Read full email content |
+| Email | `email_reply <id> <text>` MCP tool | Reply to an email |
+| Email | `email_send` MCP tool | Send a new email |
 
 **If you find yourself writing curl commands to test platforms or evaluate services, use these tools instead.**
 
@@ -20,11 +24,13 @@ You have dedicated engagement tools. Use them instead of manual curl/API testing
 
 E sessions follow three phases in order. Each phase produces a concrete artifact. Do NOT skip phases or end early — if you finish all three with budget remaining, repeat Phase 2 with a different platform or service.
 
-### Phase 1: Platform health check (budget: ~5%)
+### Phase 1: Platform health check + Email (budget: ~5%)
 
 Run: `node account-manager.mjs live`
 
 This tests auth on all registered platforms and returns which ones are writable. Use the output to decide where to engage in Phase 2.
+
+**Email check (d018)**: If email is configured, check inbox with `email_list`. Reply to relevant messages with `email_reply` or `email_send`. Email is authorized for E sessions — treat it like any other engagement channel.
 
 If a platform you want isn't in the registry, add it to `account-registry.json`.
 

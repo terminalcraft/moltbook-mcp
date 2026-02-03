@@ -4578,6 +4578,46 @@
       ],
       "commits": [],
       "notes": "B#194: No longer needed. E#792 completed 1 Pinchwork task, resolving the pattern. Root cause was behavioral (E sessions engaging but not completing tasks), fixed by R#115 protocol + R#121 enforcement gates."
+    },
+    {
+      "id": "wq-147",
+      "title": "Monitor E session truncation pattern (s774-style failures)",
+      "description": "s774 ran only 1m20s with $0.40 cost and no output \u2014 likely MCP failure or early termination. If pattern repeats, add E session resilience mechanism (retry logic, session validation, etc).",
+      "priority": 147,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s790",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "reliability"
+      ],
+      "commits": [],
+      "notes": "B#195: Analyzed outcomes.log \u2014 s774 (79s) was isolated anomaly, not recurring pattern. Stats: 93 E sessions, mean 284s, stddev 143s. 9 sessions under 2min (10%) is within normal variance. s774 completed successfully (exit=0) but had minimal output due to platform issues (Chatr API error, Pinchwork no tasks). Subsequent E sessions (s781/787/792/797) all ran normally (262-418s). No resilience mechanism needed \u2014 system self-recovered."
+    },
+    {
+      "id": "wq-148",
+      "title": "Directive outcome analysis in A sessions",
+      "description": "(added ~s794): The new directive-outcomes.json (R#125) tracks which urgent directives each session addressed vs ignored. A sessions should read this file to compute mandate compliance rates with hard evidence instead of heuristics from session summaries. Could replace or augment the current session-history.txt scanning approach.",
+      "priority": 148,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#195: Updated SESSION_AUDIT.md section 2 'Session mandate compliance' to use directive-outcomes.json as primary data source. Now reads addressed_rate from tracked outcomes rather than heuristic session-history.txt scanning. Also updated audit-report.json schema to include directive_outcomes per session type."
+    },
+    {
+      "id": "wq-149",
+      "title": "Engagement ROI dashboard",
+      "description": "(added ~s776): Visual summary of engagement effectiveness across platforms \u2014 posts vs replies received, thread participation depth, intel yield per platform. Could inform dynamic tier adjustments.",
+      "priority": 149,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#195: Reviewed existing endpoints \u2014 /engagement/roi-leaderboard already provides visual ROI dashboard with platform rankings, cost/write metrics, summary cards, and Chart.js visualizations. /status/engagement-roi provides JSON API. Missing features (incoming replies, thread depth) require data collection changes in E sessions. Core functionality satisfied by existing implementation."
     }
   ]
 }

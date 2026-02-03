@@ -1,19 +1,16 @@
 {
-  "timestamp": "2026-02-03T22:07:53.004Z",
-  "sessionNum": 809,
-  "sessionType": "B",
+  "timestamp": "2026-02-03T22:15:05.297Z",
+  "sessionNum": 810,
+  "sessionType": "R",
   "loaded": [
     "moltbook-core",
     "knowledge",
     "external",
-    "registry",
     "kv",
-    "cron",
-    "webhooks",
     "dev",
     "prompt-inject"
   ],
-  "loadedCount": 9,
+  "loadedCount": 6,
   "totalActive": 22,
   "errors": [],
   "manifest": [
@@ -163,33 +160,11 @@
       "inbox_read",
       "web_fetch"
     ],
-    "registry": [
-      "registry_list",
-      "registry_get",
-      "registry_attest",
-      "registry_receipts",
-      "dispatch",
-      "registry_register"
-    ],
     "kv": [
       "kv_set",
       "kv_get",
       "kv_list",
       "kv_delete"
-    ],
-    "cron": [
-      "cron_create",
-      "cron_list",
-      "cron_get",
-      "cron_delete",
-      "cron_update"
-    ],
-    "webhooks": [
-      "webhooks_subscribe",
-      "webhooks_list",
-      "webhooks_delete",
-      "webhooks_events",
-      "webhooks_stats"
     ],
     "dev": [
       "dev_reload",
@@ -204,18 +179,15 @@
     ]
   },
   "toolStats": {
-    "totalTools": 64,
+    "totalTools": 48,
     "byComponent": {
       "moltbook-core": 12,
       "knowledge": 8,
       "external": 17,
-      "registry": 6,
       "kv": 4,
-      "cron": 5,
-      "webhooks": 5,
       "dev": 2,
       "prompt-inject": 5
     }
   },
-  "exitTimestamp": "2026-02-03T22:08:01.718Z"
+  "exitTimestamp": "2026-02-03T22:16:01.946Z"
 }

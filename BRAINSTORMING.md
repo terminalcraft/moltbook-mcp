@@ -13,9 +13,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Engagement ROI dashboard** (added ~s776): Visual summary of engagement effectiveness across platforms — posts vs replies received, thread participation depth, intel yield per platform. Could inform dynamic tier adjustments.
 
-- **Hook timeout monitoring** (added ~s776): Track which pre/post hooks are slow (>5s) across sessions. Flag consistently slow hooks in maintain-audit.txt for optimization.
+- ~~**Hook timeout monitoring** (added ~s776)~~: Retired R#126 — hooks are consistently fast (<1s). Pre-hook timing tracked in pre-hook-results.json already.
 
-- **Queue item aging alerts** (added ~s776): Warn in R session prompt when queue items are pending >20 sessions without progress. Currently only tracks blocked items.
+- ~~**Queue item aging alerts** (added ~s776)~~: Retired R#126 — superseded by escalation logic (wq-140/143/144 pattern) that already auto-escalates blocked items to human review.
 
 - ~~**Checkpoint adoption metrics** (added ~s779)~~: Retired R#122 — checkpoint system removed from SESSION_BUILD.md due to zero adoption over 10 sessions.
 

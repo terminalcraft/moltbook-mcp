@@ -315,6 +315,93 @@ function testIntelDigest() {
   const archive = JSON.parse(readFileSync(join(STATE, 'engagement-intel-archive.json'), 'utf8'));
   assert(archive.length === 3, 'archive has 3 entries');
   assert(archive[0].archived_session === 100, 'archived_session stamped');
+  assert(archive[0].consumed_session === 100, 'consumed_session stamped (wq-063 fix)');
+}
+
+function testIntelEmpty() {
+  console.log('\n== Intel: empty array handling ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Empty intel array
+  writeFileSync(join(STATE, 'engagement-intel.json'), '[]');
+
+  const result = run('B');
+  assert(result.intel_count === 0, 'empty array: intel_count is 0');
+  assert(!result.intel_digest, 'empty array: no digest generated');
+  assert(!result.intel_archived, 'empty array: no archive action');
+}
+
+function testIntelMissingFile() {
+  console.log('\n== Intel: missing file handling ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Ensure no intel file
+  try { rmSync(join(STATE, 'engagement-intel.json')); } catch {}
+
+  const result = run('B');
+  assert(result.intel_count === 0, 'missing file: intel_count is 0');
+  assert(!result.intel_digest, 'missing file: no digest');
+}
+
+function testIntelOriginalFieldsPreserved() {
+  console.log('\n== Intel: original fields preserved in archive ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Clean up any existing archive from previous tests
+  try { rmSync(join(STATE, 'engagement-intel-archive.json')); } catch {}
+
+  const intel = [
+    {
+      session: 550,
+      type: 'integration_target',
+      summary: 'Custom summary',
+      actionable: 'Do something specific',
+      platform: 'chatr',
+      post_id: '12345',
+      custom_field: 'should survive archival'
+    },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  run('B');
+  const archive = JSON.parse(readFileSync(join(STATE, 'engagement-intel-archive.json'), 'utf8'));
+  const entry = archive[0];
+
+  assert(entry.session === 550, 'original session preserved');
+  assert(entry.type === 'integration_target', 'original type preserved');
+  assert(entry.platform === 'chatr', 'original platform preserved');
+  assert(entry.post_id === '12345', 'original post_id preserved');
+  assert(entry.custom_field === 'should survive archival', 'custom fields preserved');
+  assert(entry.archived_session === 100, 'archived_session added');
+  assert(entry.consumed_session === 100, 'consumed_session added');
+}
+
+function testIntelNoteCategory() {
+  console.log('\n== Intel: notes category in digest ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Only observation types (should go to notes)
+  const intel = [
+    { session: 600, type: 'observation', summary: 'Feed was quiet' },
+    { session: 601, type: 'sentiment', summary: 'Community seems happy' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+  assert(result.intel_digest?.includes('Notes'), 'observations go to Notes category');
+  assert(!result.intel_digest?.includes('Queue candidates'), 'no queue candidates for observations');
 }
 
 function testShellEnvOutput() {
@@ -949,6 +1036,10 @@ try {
   setup(); testTodoIngestFiltersCode();
   setup(); testBFallback();
   setup(); testIntelDigest();
+  setup(); testIntelEmpty();
+  setup(); testIntelMissingFile();
+  setup(); testIntelOriginalFieldsPreserved();
+  setup(); testIntelNoteCategory();
   setup(); testShellEnvOutput();
   setup(); testGetMaxQueueId();
   setup(); testDepsReady();

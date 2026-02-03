@@ -60,8 +60,15 @@ function computeBrainstormingStats() {
   if (!existsSync(path)) return { active: 0, avg_age: 0, ideas: [] };
 
   const content = readFileSync(path, 'utf8');
-  const sessionMatch = content.match(/\(added ~s(\d+)\)/g) || [];
-  const sessions = sessionMatch.map(m => parseInt(m.match(/s(\d+)/)[1]));
+  // Only count active (non-struck-through) ideas
+  // Struck items start with "- ~~" so exclude those lines
+  const activeLines = content.split('\n').filter(line => {
+    return line.includes('(added ~s') && !line.trim().startsWith('- ~~');
+  });
+  const sessions = activeLines
+    .map(line => line.match(/\(added ~s(\d+)\)/))
+    .filter(m => m)
+    .map(m => parseInt(m[1]));
 
   // Get current session from env or estimate
   const currentSession = parseInt(process.env.SESSION_NUM || '825');

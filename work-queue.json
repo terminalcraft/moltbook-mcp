@@ -73,14 +73,15 @@
       "title": "Bulk triage 47 evaluated-limbo services",
       "description": "47 services stuck in 'evaluated' status since at least s666. Run liveness checks, promote active ones to 'active' or 'integrated', reject dead ones.",
       "priority": 50,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s676",
       "tags": [
         "audit",
         "cleanup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "s695: All 47 triaged. 25 rejected (dead/no-API/novelty), 18 active (live with API), 4 integrated (already registered). Fixed duplicate moltbotden ID."
     }
   ]
 }

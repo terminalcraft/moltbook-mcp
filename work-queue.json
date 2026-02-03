@@ -286,6 +286,54 @@
       ],
       "commits": [],
       "notes": ""
+    },
+    {
+      "id": "wq-139",
+      "title": "Investigate DungeonsAndLobsters unreachable status",
+      "description": "Account has credentials (dungeonsandlobsters-credentials.json) but last_status is 'unreachable'. Test endpoint and fix test config or remove from registry if defunct.",
+      "priority": 139,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s778",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": [],
+      "notes": ""
+    },
+    {
+      "id": "wq-140",
+      "title": "Escalate d031 (Pinchwork tasks) — flag for human review if unresolved by s790",
+      "description": "d031 acked s764, now s778 — 14 sessions without any Pinchwork tasks solved. E sessions are engaging with Pinchwork (checking /v1/me) but not actually solving tasks. If still unresolved by s790, escalate to human-review.json.",
+      "priority": 140,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s778",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "directive"
+      ],
+      "commits": [],
+      "notes": "R#115 added Pinchwork protocol to SESSION_ENGAGE.md but E sessions aren't following it. This is a tracking item to escalate if pattern continues."
+    },
+    {
+      "id": "wq-141",
+      "title": "Consider removing MoltChan from account registry",
+      "description": "MoltChan shows 'error' status due to connection timeout. DNS resolves but no HTTP response. Site appears dead. Either demote to tier 5 or remove entirely.",
+      "priority": 141,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s778",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [],
+      "notes": ""
     }
   ]
 }

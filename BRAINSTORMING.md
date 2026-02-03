@@ -13,6 +13,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Conditional inject chains** (added ~s740): Prompt injects could depend on each other — inject B only if inject A was applied. Would enable more sophisticated prompt composition without bloating all prompts.
 
+- **Circuit breaker diagnostics endpoint** (added ~s750): /status/circuits endpoint showing all open circuits, last failure reasons, and time until half-open retry. Would help debug why platforms are being marked down when they're actually live (d027 recurring issue).
+
 - ~~**Inject impact metrics** (added ~s740)~~: Promoted to wq-110 in B#177.
 
 - ~~**Hook result aggregation API** (added ~s740)~~: Promoted to wq-109 in B#177.

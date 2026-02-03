@@ -7,10 +7,13 @@
  *   node service-liveness.mjs --all          # Check ALL services including rejected
  *   node service-liveness.mjs --json         # Machine-readable JSON output
  *   node service-liveness.mjs --update       # Update services.json with results
- *   node service-liveness.mjs --concurrency 5  # Max parallel checks (default: 8)
+ *   node service-liveness.mjs --probe-tld    # Probe TLD variants on DNS failure (wq-127)
  *
  * Checks HTTP status of each service URL and reports:
  * - alive (2xx/3xx), degraded (4xx/5xx), down (timeout/connection error)
+ *
+ * TLD probing (--probe-tld): When a URL fails with DNS error, tries common TLD
+ * variants (.ai, .io, .com, .dev, .app) to find working alternatives.
  */
 
 import { readFileSync, writeFileSync } from "fs";
@@ -22,11 +25,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVICES_PATH = resolve(__dirname, "services.json");
 const FETCH_TIMEOUT = 8000;
 
+// TLD variants to probe when a URL fails (d033 gap fix - wq-127)
+const TLD_VARIANTS = [".ai", ".io", ".com", ".dev", ".app", ".xyz", ".net", ".org"];
+
 // --- Args ---
 const args = process.argv.slice(2);
 const flagAll = args.includes("--all");
 const flagJson = args.includes("--json");
 const flagUpdate = args.includes("--update");
+const flagProbeTld = args.includes("--probe-tld"); // wq-127: probe TLD variants on DNS failure
 
 // --- Helpers ---
 
@@ -45,6 +52,41 @@ async function checkUrl(url) {
   return { alive: false, status, elapsed, error: `HTTP ${status}` };
 }
 
+/**
+ * Probe TLD variants when a URL fails due to DNS (wq-127).
+ * Returns the first working variant or null.
+ */
+async function probeTldVariants(url) {
+  try {
+    const parsed = new URL(url);
+    const hostParts = parsed.hostname.split(".");
+    if (hostParts.length < 2) return null;
+
+    // Extract base domain without TLD (e.g., "chan.alphakek" from "chan.alphakek.io")
+    const currentTld = "." + hostParts.pop();
+    const baseDomain = hostParts.join(".");
+
+    for (const tld of TLD_VARIANTS) {
+      if (tld === currentTld) continue; // Skip current TLD
+      const variantHost = baseDomain + tld;
+      const variantUrl = `${parsed.protocol}//${variantHost}${parsed.pathname}`;
+
+      const check = await safeFetch(variantUrl, {
+        timeout: FETCH_TIMEOUT,
+        bodyMode: "none",
+        userAgent: "moltbook-liveness/1.0",
+      });
+
+      if (check.status >= 200 && check.status < 400) {
+        return { url: variantUrl, tld, status: check.status };
+      }
+    }
+  } catch (e) {
+    // URL parsing failed, skip
+  }
+  return null;
+}
+
 // --- Main ---
 
 const data = JSON.parse(readFileSync(SERVICES_PATH, "utf8"));
@@ -59,7 +101,20 @@ let done = 0;
 for (let i = 0; i < services.length; i++) {
   const svc = services[i];
   const check = await checkUrl(svc.url);
-  const liveness = check.alive ? "alive" : check.error === "timeout" ? "down" : "error";
+  let liveness = check.alive ? "alive" : check.error === "timeout" ? "down" : "error";
+  let tldSuggestion = null;
+
+  // wq-127: Probe TLD variants on DNS failure
+  if (flagProbeTld && !check.alive && check.status === 0) {
+    const variant = await probeTldVariants(svc.url);
+    if (variant) {
+      tldSuggestion = variant;
+      if (!flagJson) {
+        process.stderr.write(`    → TLD variant found: ${variant.url} (HTTP ${variant.status})\n`);
+      }
+    }
+  }
+
   results.push({
     id: svc.id,
     name: svc.name,
@@ -69,6 +124,7 @@ for (let i = 0; i < services.length; i++) {
     httpStatus: check.status,
     elapsed: Math.round(check.elapsed * 1000),
     error: check.error || null,
+    tldSuggestion: tldSuggestion ? tldSuggestion.url : null,
   });
   done++;
   if (!flagJson) {

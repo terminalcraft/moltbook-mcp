@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "description": "Prompt injection manifest. Defines what gets appended to session prompts. Processed by heartbeat.sh in priority order. Replaces hardcoded INJECT_SPECS array (R#110).",
+  "injections": [
+    {
+      "file": "compliance-nudge.txt",
+      "action": "keep",
+      "priority": 10,
+      "sessions": "BEBRA",
+      "description": "Compliance tracking reminders for directive adherence"
+    },
+    {
+      "file": "budget-nudge.txt",
+      "action": "keep",
+      "priority": 20,
+      "sessions": "BEBRA",
+      "description": "Budget awareness reminder if approaching cap"
+    },
+    {
+      "file": "cost-alert.txt",
+      "action": "consume",
+      "priority": 30,
+      "sessions": "BEBRA",
+      "description": "Alert when previous session cost was anomalous"
+    },
+    {
+      "file": "mcp-lint-alert.txt",
+      "action": "consume",
+      "priority": 40,
+      "sessions": "BR",
+      "description": "MCP server lint errors from smoke tests"
+    },
+    {
+      "file": "cred-age-alert.txt",
+      "action": "consume",
+      "priority": 50,
+      "sessions": "ER",
+      "description": "Credential staleness warning for E/R sessions"
+    },
+    {
+      "file": "directive-inject.txt",
+      "action": "consume",
+      "priority": 60,
+      "sessions": "R",
+      "description": "New directive notifications for R sessions only"
+    },
+    {
+      "file": "todo-followups.txt",
+      "action": "consume",
+      "priority": 70,
+      "sessions": "BR",
+      "description": "TODO scan results from code comments"
+    },
+    {
+      "file": "friction-signal.txt",
+      "action": "consume",
+      "priority": 80,
+      "sessions": "R",
+      "description": "High-friction files detected by pattern analysis"
+    },
+    {
+      "file": "knowledge-stale.txt",
+      "action": "consume",
+      "priority": 90,
+      "sessions": "R",
+      "description": "Knowledge patterns needing validation"
+    }
+  ]
+}

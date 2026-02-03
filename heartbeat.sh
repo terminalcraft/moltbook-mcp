@@ -385,30 +385,56 @@ ${CTX_A_PROMPT_BLOCK:-## A Session
 Follow the checklist in SESSION_AUDIT.md.}"
 fi
 
-# --- Prompt inject blocks (R#76) ---
-# Declarative loop replaces 7 copy-paste file-read-inject patterns.
-# Each entry: filename (relative to STATE_DIR), keep|consume (delete after read).
-# All blocks are concatenated into INJECT_BLOCKS and appended to the prompt.
+# --- Prompt inject blocks (R#76, R#110: manifest-driven) ---
+# Restructured from hardcoded INJECT_SPECS to external prompt-inject.json manifest.
+# Manifest specifies: file, action (keep|consume), priority, sessions, description.
+# Session type filtering enables inject files to target specific session types.
+# Priority ordering ensures deterministic injection order.
 INJECT_BLOCKS=""
-INJECT_SPECS=(
-  "compliance-nudge.txt:keep"
-  "budget-nudge.txt:keep"
-  "cost-alert.txt:consume"
-  "mcp-lint-alert.txt:consume"
-  "cred-age-alert.txt:consume"
-  "directive-inject.txt:consume"
-  "todo-followups.txt:consume"
-)
-for spec in "${INJECT_SPECS[@]}"; do
-  IFS=: read -r fname action <<< "$spec"
-  fpath="$STATE_DIR/$fname"
-  if [ -f "$fpath" ]; then
-    INJECT_BLOCKS="${INJECT_BLOCKS}
+INJECT_MANIFEST="$DIR/prompt-inject.json"
+
+if [ -f "$INJECT_MANIFEST" ]; then
+  # Parse manifest and process injections matching current session type
+  while IFS=$'\t' read -r fname action sessions; do
+    [ -z "$fname" ] && continue
+    # Session filter: if sessions field exists and doesn't contain current mode, skip
+    if [ -n "$sessions" ] && [[ ! "$sessions" =~ $MODE_CHAR ]]; then
+      continue
+    fi
+    fpath="$STATE_DIR/$fname"
+    if [ -f "$fpath" ]; then
+      INJECT_BLOCKS="${INJECT_BLOCKS}
 
 $(cat "$fpath")"
-    [ "$action" = "consume" ] && rm -f "$fpath"
-  fi
-done
+      [ "$action" = "consume" ] && rm -f "$fpath"
+    fi
+  done < <(python3 -c "
+import json, sys
+try:
+    m = json.load(open('$INJECT_MANIFEST'))
+    injs = sorted(m.get('injections', []), key=lambda x: x.get('priority', 999))
+    for i in injs:
+        print(f\"{i['file']}\t{i.get('action','keep')}\t{i.get('sessions','')}\")
+except: pass
+" 2>/dev/null)
+else
+  # Fallback: hardcoded specs if manifest missing
+  INJECT_SPECS=(
+    "compliance-nudge.txt:keep"
+    "budget-nudge.txt:keep"
+    "cost-alert.txt:consume"
+  )
+  for spec in "${INJECT_SPECS[@]}"; do
+    IFS=: read -r fname action <<< "$spec"
+    fpath="$STATE_DIR/$fname"
+    if [ -f "$fpath" ]; then
+      INJECT_BLOCKS="${INJECT_BLOCKS}
+
+$(cat "$fpath")"
+      [ "$action" = "consume" ] && rm -f "$fpath"
+    fi
+  done
+fi
 
 PROMPT="${BASE_PROMPT}
 

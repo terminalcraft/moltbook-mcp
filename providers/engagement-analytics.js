@@ -120,6 +120,10 @@ export function analyzeEngagement() {
     }
   }
 
+  // --- Compute totals for diversity metrics ---
+  const totalWrites = Object.values(platformStats).reduce((a, p) => a + p.totalWrites, 0);
+  const totalCalls = Object.values(platformStats).reduce((a, p) => a + p.totalCalls, 0);
+
   // --- Build ranked output ---
   const ranked = Object.entries(platformStats)
     .map(([name, d]) => ({
@@ -132,13 +136,36 @@ export function analyzeEngagement() {
       e_sessions: d.eSessions,
       e_cost_allocated: Math.round(d.eSessionCost * 100) / 100,
       cost_per_write: d.totalWrites > 0 && d.eSessionCost > 0 ? Math.round(d.eSessionCost / d.totalWrites * 100) / 100 : null,
-      cost_per_call: d.totalCalls > 0 && d.eSessionCost > 0 ? Math.round(d.eSessionCost / d.totalCalls * 100) / 100 : null
+      cost_per_call: d.totalCalls > 0 && d.eSessionCost > 0 ? Math.round(d.eSessionCost / d.totalCalls * 100) / 100 : null,
+      // Diversity metrics: percentage of total engagement on this platform
+      pct_of_writes: totalWrites > 0 ? Math.round(d.totalWrites / totalWrites * 100) : 0,
+      pct_of_calls: totalCalls > 0 ? Math.round(d.totalCalls / totalCalls * 100) : 0
     }))
     .sort((a, b) => b.writes - a.writes);
+
+  // --- Compute concentration metrics (Herfindahl-Hirschman Index style) ---
+  // HHI = sum of squared market shares. Range: 0-10000. Higher = more concentrated.
+  // Values > 2500 indicate high concentration (dominated by few platforms).
+  const hhi_writes = ranked.reduce((acc, p) => acc + Math.pow(p.pct_of_writes, 2), 0);
+  const hhi_calls = ranked.reduce((acc, p) => acc + Math.pow(p.pct_of_calls, 2), 0);
+  // Effective number of platforms = 1/HHI (normalized). Shows how many platforms carry the load.
+  const effective_platforms_writes = hhi_writes > 0 ? Math.round(10000 / hhi_writes * 10) / 10 : 0;
+  const effective_platforms_calls = hhi_calls > 0 ? Math.round(10000 / hhi_calls * 10) / 10 : 0;
+  // Top-1 and top-3 concentration
+  const top1_pct = ranked.length > 0 ? ranked[0].pct_of_writes : 0;
+  const top3_pct = ranked.slice(0, 3).reduce((a, p) => a + p.pct_of_writes, 0);
 
   // --- E session cost summary ---
   const eSessions = Object.entries(sessions).filter(([, v]) => v.mode === "E");
   const eTotalCost = eSessions.reduce((a, [, v]) => a + v.cost, 0);
+
+  // --- Build diversity insight ---
+  let diversityWarning = null;
+  if (top1_pct > 50) {
+    diversityWarning = `Over-concentrated: ${ranked[0].platform} accounts for ${top1_pct}% of writes. Diversify to other platforms.`;
+  } else if (top3_pct > 80 && ranked.length > 3) {
+    diversityWarning = `Top 3 platforms account for ${top3_pct}% of writes. Consider engaging underused platforms.`;
+  }
 
   return {
     data_sources: {
@@ -153,11 +180,22 @@ export function analyzeEngagement() {
       avg_cost: eSessions.length > 0 ? Math.round(eTotalCost / eSessions.length * 100) / 100 : 0
     },
     platforms: ranked,
+    diversity: {
+      hhi_writes,
+      hhi_calls,
+      effective_platforms_writes,
+      effective_platforms_calls,
+      top1_pct,
+      top3_pct,
+      platform_count: ranked.length,
+      warning: diversityWarning
+    },
     insight: ranked.length > 0
-      ? `Top platform by writes: ${ranked[0].platform} (${ranked[0].writes} writes). ` +
+      ? `Top platform by writes: ${ranked[0].platform} (${ranked[0].writes} writes, ${top1_pct}%). ` +
         (ranked.find(r => r.cost_per_write !== null)
-          ? `Best cost/write: ${ranked.filter(r => r.cost_per_write !== null).sort((a, b) => a.cost_per_write - b.cost_per_write)[0]?.platform}`
-          : "Insufficient cost data for cost/write ranking.")
+          ? `Best cost/write: ${ranked.filter(r => r.cost_per_write !== null).sort((a, b) => a.cost_per_write - b.cost_per_write)[0]?.platform}. `
+          : "") +
+        `Diversity: ${effective_platforms_writes} effective platforms.`
       : "No engagement data yet."
   };
 }

@@ -11,6 +11,7 @@
  *   node engage-orchestrator.mjs --plan-only  # Just output the session plan, no evaluation
  *   node engage-orchestrator.mjs --record-outcome <platform> <success|failure>
  *   node engage-orchestrator.mjs --circuit-status  # Show circuit breaker state
+ *   node engage-orchestrator.mjs --diversity  # Show engagement concentration metrics
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
@@ -479,6 +480,41 @@ if (process.argv.includes("--circuit-status")) {
     status[platform] = { state: getCircuitState(circuits, platform), ...entry };
   }
   console.log(JSON.stringify(status, null, 2));
+  process.exit(0);
+}
+
+// --- CLI: Diversity metrics ---
+if (process.argv.includes("--diversity")) {
+  try {
+    const analytics = analyzeEngagement();
+    const div = analytics.diversity;
+    const platforms = analytics.platforms;
+    const jsonMode = process.argv.includes("--json");
+
+    if (jsonMode) {
+      console.log(JSON.stringify({ diversity: div, platforms }, null, 2));
+    } else {
+      console.log("\n=== Engagement Diversity Metrics ===\n");
+      console.log(`Platform count: ${div.platform_count}`);
+      console.log(`Effective platforms (writes): ${div.effective_platforms_writes}`);
+      console.log(`Effective platforms (calls): ${div.effective_platforms_calls}`);
+      console.log(`HHI (writes): ${div.hhi_writes} ${div.hhi_writes > 2500 ? "(HIGH concentration)" : div.hhi_writes > 1500 ? "(moderate)" : "(low)"}`);
+      console.log(`Top-1 concentration: ${div.top1_pct}%`);
+      console.log(`Top-3 concentration: ${div.top3_pct}%`);
+      if (div.warning) {
+        console.log(`\n⚠️  ${div.warning}`);
+      }
+      console.log("\nPer-platform breakdown:");
+      for (const p of platforms) {
+        if (p.writes > 0 || p.e_sessions > 0) {
+          console.log(`  ${p.platform}: ${p.pct_of_writes}% writes (${p.writes}), ${p.pct_of_calls}% calls (${p.total_calls}), ${p.e_sessions} E sessions`);
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Error analyzing engagement:", e.message);
+    process.exit(1);
+  }
   process.exit(0);
 }
 

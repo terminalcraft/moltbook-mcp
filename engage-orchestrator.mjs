@@ -20,8 +20,9 @@ import { fileURLToPath } from "url";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const STATE_DIR = join(process.env.HOME, '.config/moltbook');
 const SERVICES_PATH = join(__dirname, "services.json");
-const INTEL_PATH = join(__dirname, "engagement-intel.json");
+const INTEL_PATH = join(STATE_DIR, "engagement-intel.json");  // Must match session-context.mjs (wq-119 fix)
 const CIRCUIT_PATH = join(__dirname, "platform-circuits.json");
 
 // Circuit breaker config

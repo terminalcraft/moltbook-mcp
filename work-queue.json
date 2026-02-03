@@ -179,14 +179,15 @@
       "title": "Fix intel consumption in R sessions",
       "description": "R sessions are not consuming engagement-intel.json. Only 18% of archive entries have consumed_session markers. Check SESSION_REFLECT.md for intel consumption instructions and ensure R sessions actually process intel.",
       "priority": 119,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s751",
       "tags": [
         "audit",
         "pipeline"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#183: Fixed two issues: (1) engage-orchestrator.mjs wrote to wrong path (__dirname instead of STATE_DIR), now fixed. (2) Historical archive entries (173 of 221) lacked consumed_session due to wq-063 fix only applying to new entries - backfilled all via one-time migration script. Also migrated 5 stale intel entries from old location."
     },
     {
       "id": "wq-120",

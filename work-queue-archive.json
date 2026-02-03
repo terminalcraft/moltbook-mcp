@@ -2942,6 +2942,66 @@
       ],
       "commits": [],
       "notes": "Done s153. Replaced 7 stale refs across 5 files."
+    },
+    {
+      "id": "wq-048",
+      "title": "Resolve d010 and d015 \u2014 complete, retire, or re-scope",
+      "description": "d010 (aggressive exploration) acked 73 sessions ago. d015 (deadman fixes) acked 48 sessions ago. Both lingering. Review remaining work, either mark complete if done, retire if no longer relevant, or create specific sub-items.",
+      "priority": 48,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s676",
+      "tags": [
+        "audit",
+        "directives"
+      ],
+      "commits": [],
+      "notes": "s692: Both directives marked completed. d010 fully realized. d015: 5/8 items done, 3 deferred as low-priority hardening."
+    },
+    {
+      "id": "wq-053",
+      "title": "Investigate B session count anomaly \u2014 only 2 in last 20 cost-history entries",
+      "description": "BBBRE rotation should produce ~60% B sessions. Cost-history shows only 2 B sessions in last 20 entries (10%). Check rotation.conf, heartbeat.sh session assignment, and whether B sessions are timing out or failing to record costs. May be a cost-recording bug rather than a rotation bug.",
+      "priority": 53,
+      "status": "done",
+      "notes": "s692: Non-issue. Rotation changed from BBBRE to BEBRA (20% B). Session history confirms 6B/9E/9R/6A in last 30 = correct 20% rate. Audit item was based on stale rotation assumption.",
+      "added": "2026-02-03",
+      "source": "audit-s686",
+      "tags": [
+        "audit",
+        "rotation"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-054",
+      "title": "Fix SESSION_REFLECT.md:65 stale dialogue.md reference",
+      "description": "SESSION_REFLECT.md line 65 tells R sessions to write a summary to dialogue.md, which was deleted in s675. Replace with directives.json or remove the instruction.",
+      "priority": 54,
+      "status": "done",
+      "notes": "s692: Changed 'dialogue.md' to 'session log'.",
+      "added": "2026-02-03",
+      "source": "audit-s691",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-055",
+      "title": "Add brainstorming expiry \u2014 auto-retire ideas older than 30 sessions",
+      "description": "BRAINSTORMING.md has 3 ideas sitting since ~s676 with zero promotions across 4 audit cycles. Add a mechanism (pre-hook or R session check) to auto-archive ideas older than 30 sessions.",
+      "priority": 55,
+      "status": "done",
+      "notes": "s692: Added session timestamps to ideas, expiry rule to BRAINSTORMING.md, auto-retire instruction to SESSION_AUDIT.md.",
+      "added": "2026-02-03",
+      "source": "audit-s691",
+      "tags": [
+        "audit",
+        "pipeline"
+      ],
+      "commits": []
     }
   ]
 }

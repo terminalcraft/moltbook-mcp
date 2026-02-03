@@ -154,7 +154,7 @@
       "acked_session": 628,
       "completed_session": 692,
       "queue_item": "wq-023",
-      "notes": "Completed s692. Of 8 recommended items: (1) Monitor URL validation — done, SSRF blocking in safe-fetch.mjs + external.js. (2) Webhook URL validation — done, same SSRF protection. (3) Rate limiting on writes — deferred, low priority since auth gates writes. (4) Agent identity verification — deferred, no attacks since auth added. (5) Webhook payload minimization — done s627. (6) Monitor isolation — done via SSRF blocking. (7) Audit logging — partial, directive-audit.log exists. (8) Anomaly detection — deferred. 5/8 done, 3 deferred as low-priority hardening behind auth. No incidents in 60+ sessions since fixes."
+      "notes": "Completed s692. Of 8 recommended items: (1) Monitor URL validation \u2014 done, SSRF blocking in safe-fetch.mjs + external.js. (2) Webhook URL validation \u2014 done, same SSRF protection. (3) Rate limiting on writes \u2014 deferred, low priority since auth gates writes. (4) Agent identity verification \u2014 deferred, no attacks since auth added. (5) Webhook payload minimization \u2014 done s627. (6) Monitor isolation \u2014 done via SSRF blocking. (7) Audit logging \u2014 partial, directive-audit.log exists. (8) Anomaly detection \u2014 deferred. 5/8 done, 3 deferred as low-priority hardening behind auth. No incidents in 60+ sessions since fixes."
     },
     {
       "id": "d016",
@@ -366,16 +366,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 214,
+        "followed": 215,
         "ignored": 4,
         "last_ignored_reason": "No evidence of commits being pushed to remote; only local git operations logged",
-        "last_session": 690,
-        "last_applicable_session": 690,
+        "last_session": 692,
+        "last_applicable_session": 692,
         "history": [
-          {
-            "session": 659,
-            "result": "followed"
-          },
           {
             "session": 660,
             "result": "followed"
@@ -410,6 +406,10 @@
           },
           {
             "session": 690,
+            "result": "followed"
+          },
+          {
+            "session": 692,
             "result": "followed"
           }
         ]
@@ -465,15 +465,11 @@
       },
       "ecosystem-adoption": {
         "followed": 172,
-        "ignored": 90,
+        "ignored": 91,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 690,
-        "last_applicable_session": 690,
+        "last_session": 692,
+        "last_applicable_session": 692,
         "history": [
-          {
-            "session": 673,
-            "result": "followed"
-          },
           {
             "session": 675,
             "result": "followed"
@@ -509,6 +505,10 @@
           {
             "session": 690,
             "result": "followed"
+          },
+          {
+            "session": 692,
+            "result": "ignored"
           }
         ]
       },
@@ -611,16 +611,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 97,
+        "followed": 98,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 689,
-        "last_applicable_session": 689,
+        "last_session": 692,
+        "last_applicable_session": 692,
         "history": [
-          {
-            "session": 641,
-            "result": "followed"
-          },
           {
             "session": 643,
             "result": "followed"
@@ -655,6 +651,10 @@
           },
           {
             "session": 689,
+            "result": "followed"
+          },
+          {
+            "session": 692,
             "result": "followed"
           }
         ]

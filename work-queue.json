@@ -292,7 +292,7 @@
       "title": "Investigate DungeonsAndLobsters unreachable status",
       "description": "Account has credentials (dungeonsandlobsters-credentials.json) but last_status is 'unreachable'. Test endpoint and fix test config or remove from registry if defunct.",
       "priority": 139,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s778",
       "complexity": "S",
@@ -301,7 +301,7 @@
         "infrastructure"
       ],
       "commits": [],
-      "notes": ""
+      "notes": "B#191: Fixed. Service is live. Test was using file_exists instead of actual API probe. Updated to use /api/health (200). Credentials valid."
     },
     {
       "id": "wq-140",

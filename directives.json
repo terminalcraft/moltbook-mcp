@@ -260,9 +260,11 @@
       "from": "system",
       "session": 738,
       "content": "Auto-escalation: 1 work queue items blocked >30 sessions: wq-046 (Address directive d021, blocked 30s, blocker: ). Human action may be needed.",
-      "status": "pending",
+      "status": "completed",
       "created": "2026-02-03T13:20:28.836049Z",
-      "acked_session": 740
+      "acked_session": 740,
+      "completed_session": 756,
+      "notes": "B#181: wq-046 was retired in R#112 when d021 was completed (Tulip rejected per human answer). This auto-escalation is no longer relevant."
     },
     {
       "id": "d026",
@@ -419,16 +421,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 242,
+        "followed": 243,
         "ignored": 5,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 745,
-        "last_applicable_session": 745,
+        "last_session": 750,
+        "last_applicable_session": 750,
         "history": [
-          {
-            "session": 727,
-            "result": "followed"
-          },
           {
             "session": 728,
             "result": "followed"
@@ -463,21 +461,21 @@
           },
           {
             "session": 745,
+            "result": "followed"
+          },
+          {
+            "session": 750,
             "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 124,
+        "followed": 125,
         "ignored": 5,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 745,
-        "last_applicable_session": 745,
+        "last_session": 750,
+        "last_applicable_session": 750,
         "history": [
-          {
-            "session": 705,
-            "result": "followed"
-          },
           {
             "session": 710,
             "result": "followed"
@@ -513,20 +511,20 @@
           {
             "session": 745,
             "result": "followed"
+          },
+          {
+            "session": 750,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 201,
+        "followed": 202,
         "ignored": 97,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 745,
-        "last_applicable_session": 745,
+        "last_session": 750,
+        "last_applicable_session": 750,
         "history": [
-          {
-            "session": 727,
-            "result": "followed"
-          },
           {
             "session": 728,
             "result": "followed"
@@ -562,20 +560,20 @@
           {
             "session": 745,
             "result": "followed"
+          },
+          {
+            "session": 750,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 95,
+        "followed": 96,
         "ignored": 14,
         "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 745,
-        "last_applicable_session": 745,
+        "last_session": 750,
+        "last_applicable_session": 750,
         "history": [
-          {
-            "session": 705,
-            "result": "followed"
-          },
           {
             "session": 710,
             "result": "followed"
@@ -610,21 +608,21 @@
           },
           {
             "session": 745,
+            "result": "followed"
+          },
+          {
+            "session": 750,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 107,
+        "followed": 108,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 745,
-        "last_applicable_session": 745,
+        "last_session": 750,
+        "last_applicable_session": 750,
         "history": [
-          {
-            "session": 705,
-            "result": "followed"
-          },
           {
             "session": 710,
             "result": "followed"
@@ -659,6 +657,10 @@
           },
           {
             "session": 745,
+            "result": "followed"
+          },
+          {
+            "session": 750,
             "result": "followed"
           }
         ]
@@ -713,16 +715,12 @@
         ]
       },
       "directive-update": {
-        "followed": 103,
+        "followed": 104,
         "ignored": 14,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 745,
-        "last_applicable_session": 745,
+        "last_session": 750,
+        "last_applicable_session": 750,
         "history": [
-          {
-            "session": 705,
-            "result": "followed"
-          },
           {
             "session": 710,
             "result": "followed"
@@ -757,6 +755,10 @@
           },
           {
             "session": 745,
+            "result": "followed"
+          },
+          {
+            "session": 750,
             "result": "followed"
           }
         ]

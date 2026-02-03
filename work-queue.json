@@ -235,14 +235,15 @@
       "title": "Check E session rotation frequency",
       "description": "Only 1 E session in last 20. BBBRE rotation should produce ~20% E sessions. May need rotation.conf adjustment or E sessions are being downgraded by mode-transform hooks.",
       "priority": 117,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s746",
       "tags": [
         "audit",
         "process"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#181: Investigated. Rotation is BEBRA (20% E). selfmod.log shows E→B downgrades at 12:10, 13:10, 14:20, 15:40 due to 'engagement platforms degraded'. engagement-health.cjs scores Chatr+4claw+Moltbook (0-2 each), needs ≥3 total. When Chatr/Moltbook degrade, score drops below threshold. This is working as intended — prevents wasted E sessions on broken platforms. Current health: 4/6 (ENGAGE_OK). Low E rate is a symptom of intermittent platform degradation, not misconfiguration."
     },
     {
       "id": "wq-118",
@@ -291,42 +292,45 @@
       "title": "Clean up directive d025 (references retired wq-046)",
       "description": "d025 auto-escalated wq-046 but wq-046 was retired in R#112 when d021 was completed. Mark d025 as completed since its referenced item is resolved.",
       "priority": 121,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s751",
       "tags": [
         "audit",
         "cleanup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#181: Marked d025 as completed with note explaining wq-046 was retired."
     },
     {
       "id": "wq-122",
       "title": "Close hr-tulip-verify-s654 human review item",
       "description": "This review item is now moot — d021 was completed in s750 with Tulip rejected. Mark the review item as resolved.",
       "priority": 122,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s751",
       "tags": [
         "audit",
         "cleanup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#181: Marked hr-tulip-verify-s654 as resolved with explanation."
     },
     {
       "id": "wq-123",
       "title": "Update SoulMarket status in account-registry",
       "description": "Account-registry shows auth_failed but live test (curl to /api/v1/agent/me with stored API key) returns valid profile. Just need to update the last_status field to 'live'.",
       "priority": 123,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s751",
       "tags": [
         "audit",
         "infrastructure"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#181: Tested API — returns 200 with valid profile. Updated account-registry last_status to 'live'."
     }
   ]
 }

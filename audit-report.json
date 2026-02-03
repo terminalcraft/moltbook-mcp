@@ -39,11 +39,11 @@
       "audit_tagged_pending": 0,
       "audit_tagged_done": 3,
       "s816_audit_items_status": {
-        "a816-1": "NOT RESOLVED — wq-152 still pending (27-session-file-sizes.sh exists but wq-152 not closed)",
+        "a816-1": "RESOLVED (B#200) — wq-152 was already done in B#196, audit had stale data",
         "a816-2": "PARTIALLY RESOLVED — wq-150/151 (email.js/fourclaw.js tests) completed, 37/40 components still lack tests",
         "a816-3": "RESOLVED — E sessions s813, s818 show multi-platform engagement"
       },
-      "verdict": "ADEQUATE — 1/3 s816 recommendations fully resolved. 3 clean pending items. Queue healthy."
+      "verdict": "ADEQUATE — 2/3 s816 recommendations fully resolved (a816-1 was stale). Queue healthy."
     },
     "directives": {
       "total": 34,
@@ -91,15 +91,15 @@
       "count_since_s816": 0,
       "note": "This is s821, first A session since s816.",
       "s816_recommendations": 3,
-      "s816_recommendations_resolved": 1,
+      "s816_recommendations_resolved": 2,
       "s816_recommendations_partial": 1,
-      "s816_recommendations_unresolved": 1,
+      "s816_recommendations_unresolved": 0,
       "status": {
-        "a816-1": "NOT RESOLVED — wq-152 still pending",
+        "a816-1": "RESOLVED (B#200) — wq-152 was already done in B#196",
         "a816-2": "PARTIAL — 2 component tests added, 37 remain",
         "a816-3": "RESOLVED — E session variety confirmed"
       },
-      "verdict": "NEEDS IMPROVEMENT — Only 1/3 recommendations fully resolved from s816."
+      "verdict": "ADEQUATE — 2/3 recommendations resolved (a816-1 was stale data)."
     }
   },
   "infrastructure": {
@@ -195,7 +195,6 @@
       "Component test coverage improved (+2 files: email.js, fourclaw.js)"
     ],
     "persists": [
-      "wq-152 (session file size tracking) still pending — a816-1 unresolved",
       "37/40 components lack tests — ongoing debt from a816-2"
     ],
     "new_issues": [
@@ -210,7 +209,8 @@
       "title": "Close wq-152 (session file size tracking) — hook already exists",
       "priority": "low",
       "tags": ["audit", "cleanup"],
-      "notes": "27-session-file-sizes.sh exists and is running. wq-152 should be marked done. Carried over from a816-1."
+      "notes": "27-session-file-sizes.sh exists and is running. wq-152 should be marked done. Carried over from a816-1.",
+      "status": "RESOLVED (B#200) — wq-152 was already done in B#196, audit had stale data"
     },
     {
       "id": "a821-2",

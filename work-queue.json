@@ -312,7 +312,7 @@
       "title": "Close wq-152 (session file size tracking) — hook already exists",
       "description": "27-session-file-sizes.sh exists and is running. wq-152 should be marked done. Carried over from a816-1. Simple cleanup task.",
       "priority": 146,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s821",
       "created_session": 821,
@@ -320,7 +320,8 @@
         "audit",
         "cleanup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#200: Moot — wq-152 was already completed in B#196 and archived. The a816/a821 audits had stale data. Confirmed: hook exists at hooks/pre-session/27-session-file-sizes.sh, wq-152 in archive with status 'done'."
     },
     {
       "id": "wq-147",

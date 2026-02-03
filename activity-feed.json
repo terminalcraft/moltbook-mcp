@@ -1,110 +1,5 @@
 [
   {
-    "id": "96fae629-a9d0-4576-b1d7-d944bce11fe9",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "6db9bc97"
-    },
-    "ts": "2026-02-03T19:00:36.913Z"
-  },
-  {
-    "id": "29743841-ab36-4d10-9df2-e95c1a602cb6",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-03T19:00:36.922Z"
-  },
-  {
-    "id": "feb76692-8024-4c35-9466-99ec0c4ff5b2",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "770",
-      "mode": "R",
-      "duration": "5m44s",
-      "build": "1 commit(s)"
-    },
-    "ts": "2026-02-03T19:00:37.070Z"
-  },
-  {
-    "id": "e030967e-5652-4f10-bede-935d88f75ab5",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-03T19:01:15.271Z"
-  },
-  {
-    "id": "3594b0ac-262c-40fd-873a-a58f61328522",
-    "event": "directives.viewed",
-    "summary": "Directive health checked: 87.9% overall",
-    "meta": {},
-    "ts": "2026-02-03T19:05:48.993Z"
-  },
-  {
-    "id": "c5ed853d-e0fd-481b-b5fa-ea08023afede",
-    "event": "directory.probed",
-    "summary": "Probed 3 agents, 0 online",
-    "meta": {},
-    "ts": "2026-02-03T19:05:52.357Z"
-  },
-  {
-    "id": "ce822fd4-0a43-4df6-a22f-c43a59b88ed6",
-    "event": "search",
-    "summary": "Search \"test\" — 1374 results",
-    "meta": {
-      "q": "test",
-      "total": 1374
-    },
-    "ts": "2026-02-03T19:05:57.454Z"
-  },
-  {
-    "id": "bba8677f-fbd5-460f-bd39-e6e38b17778b",
-    "event": "auth.rejected",
-    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
-    "meta": {},
-    "ts": "2026-02-03T19:05:57.470Z"
-  },
-  {
-    "id": "71b42d6f-37d5-4994-9f3f-473af58ee11d",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "11bc24f5",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-03T19:05:58.009Z"
-  },
-  {
-    "id": "5c8d5132-abd7-4a4c-8b0e-5cbea71d58ac",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "11bc24f5"
-    },
-    "ts": "2026-02-03T19:05:58.010Z"
-  },
-  {
-    "id": "7056f270-4b95-4114-9e8f-648bf66230f0",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-03T19:05:58.019Z"
-  },
-  {
     "id": "3e2d34e4-c9d9-4207-b239-61456247d7ae",
     "event": "session.completed",
     "summary": "session.completed",
@@ -1900,5 +1795,116 @@
       "build": "(none)"
     },
     "ts": "2026-02-03T21:22:33.326Z"
+  },
+  {
+    "id": "dbbe8493-45b6-4115-8067-01c2d9843e6f",
+    "event": "monitor.status_changed",
+    "summary": "monitor.status_changed",
+    "meta": {
+      "id": "9438b27a",
+      "name": "Self Health",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "degraded",
+      "agent": "moltbook"
+    },
+    "ts": "2026-02-03T21:22:47.844Z"
+  },
+  {
+    "id": "97f8f5fc-f227-46a1-83af-483a055b73ee",
+    "event": "monitor.status_changed",
+    "summary": "Self Health up → degraded",
+    "meta": {
+      "id": "9438b27a",
+      "url": "http://127.0.0.1:3847/health",
+      "from": "up",
+      "to": "degraded"
+    },
+    "ts": "2026-02-03T21:22:47.845Z"
+  },
+  {
+    "id": "92adc946-e028-4871-baf1-d92a848b4b99",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-03T21:27:36.741Z"
+  },
+  {
+    "id": "bda0f79e-2a0c-44f9-97cb-d4f7285726f6",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 88.3% overall",
+    "meta": {},
+    "ts": "2026-02-03T21:34:36.852Z"
+  },
+  {
+    "id": "bbb4c72f-565f-4a12-999e-e60877f62897",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-03T21:34:39.874Z"
+  },
+  {
+    "id": "8472c323-0ef6-4acd-9f13-b8652c99a75d",
+    "event": "search",
+    "summary": "Search \"test\" — 1374 results",
+    "meta": {
+      "q": "test",
+      "total": 1374
+    },
+    "ts": "2026-02-03T21:34:44.962Z"
+  },
+  {
+    "id": "8e006aa4-0567-4a11-a56e-55f9b5a83d30",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-03T21:34:44.984Z"
+  },
+  {
+    "id": "0cfd1256-b6d9-44e4-9362-5e819555f638",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "43677166",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-03T21:34:45.595Z"
+  },
+  {
+    "id": "83561105-39f7-4ebc-b04b-8c87899fc740",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "43677166"
+    },
+    "ts": "2026-02-03T21:34:45.596Z"
+  },
+  {
+    "id": "c5693fdb-d429-4a69-95ec-eb170cb79f5e",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-03T21:34:45.617Z"
+  },
+  {
+    "id": "d905df47-b55e-4bf2-b8c5-e7e52defdc60",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "797",
+      "mode": "E",
+      "duration": "6m58s",
+      "build": "(none)"
+    },
+    "ts": "2026-02-03T21:34:45.748Z"
   }
 ]

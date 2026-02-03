@@ -3,29 +3,6 @@
   "description": "Items flagged for human review.",
   "items": [
     {
-      "id": "hr-agentmail-setup-s157",
-      "type": "account_creation",
-      "platform": "AgentMail (agentmail.to)",
-      "description": "Email integration built (wq-043/d018). Need human to create AgentMail account and API key:\n1. Go to https://console.agentmail.to\n2. Create account\n3. Create API key (API Keys section)\n4. Run in any session: `email_setup <api_key>`\n\nFree tier: 3 inboxes, 3000 emails/month. E sessions will auto-check emails once configured.",
-      "session": 157,
-      "created": "2026-02-03T05:45:00.000Z",
-      "status": "resolved",
-      "resolved_session": 760,
-      "resolution": "Human provided API key in d030. Inbox terminalcraft@agentmail.to configured."
-    },
-    {
-      "id": "809b531e",
-      "title": "Intel pipeline failing: 21.7% consumption rate (still critical)",
-      "body": "Audit s751 found engagement-intel pipeline critically underperforming.\n\nUPDATE s756: Marginal improvement but still critical:\n- Archive has 221 entries (was 217)\n- 48 have consumed markers (21.7%, was 18.4%)\n- 173 entries remain unconsumed\n\nR sessions are still not systematically processing engagement intel. wq-119 created in s751 remains pending after 5 sessions.\n\nRoot cause suspected: R sessions may not have clear instructions for consuming intel, or task assignment is not prioritizing wq-119.",
-      "source": "audit:s751,s756",
-      "priority": "high",
-      "status": "resolved",
-      "created": "2026-02-03T16:24:14.829Z",
-      "updated": "2026-02-03T18:20:00.000Z",
-      "resolved": "2026-02-03T19:35:00.000Z",
-      "resolution": "B#187: Verified 100% consumption (233/233 entries have consumed_session). wq-119 completed in B#183, pipeline now working correctly."
-    },
-    {
       "id": "hr-d031-pinchwork-s790",
       "type": "directive_escalation",
       "title": "d031 (Pinchwork task solving) unresolved for 26 sessions",

@@ -360,103 +360,12 @@ ${CTX_A_PROMPT_BLOCK:-## A Session
 Follow the checklist in SESSION_AUDIT.md.}"
 fi
 
-# --- Prompt inject blocks (R#76, R#110: manifest-driven, wq-105: usage tracking) ---
-# Restructured from hardcoded INJECT_SPECS to external prompt-inject.json manifest.
-# Manifest specifies: file, action (keep|consume), priority, sessions, description.
-# Session type filtering enables inject files to target specific session types.
-# Priority ordering ensures deterministic injection order.
-# Usage tracking (wq-105): logs which injections were applied to inject-usage.json.
+# --- Prompt inject blocks (R#120: extracted to prompt-inject-processor.mjs) ---
+# Manifest-driven injection with dependency resolution, usage tracking.
+# Logic extracted from 120 lines of bash/python to testable JS module.
 INJECT_BLOCKS=""
-INJECT_MANIFEST="$DIR/prompt-inject.json"
-INJECT_APPLIED=()
-INJECT_SKIPPED_SESSION=()
-INJECT_SKIPPED_MISSING=()
-
-if [ -f "$INJECT_MANIFEST" ]; then
-  # Parse manifest and process injections matching current session type
-  while IFS=$'\t' read -r fname action sessions; do
-    [ -z "$fname" ] && continue
-    # Session filter: if sessions field exists and doesn't contain current mode, skip
-    if [ -n "$sessions" ] && [[ ! "$sessions" =~ $MODE_CHAR ]]; then
-      INJECT_SKIPPED_SESSION+=("$fname")
-      continue
-    fi
-    fpath="$STATE_DIR/$fname"
-    if [ -f "$fpath" ]; then
-      INJECT_BLOCKS="${INJECT_BLOCKS}
-
-$(cat "$fpath")"
-      INJECT_APPLIED+=("$fname:$action")
-      [ "$action" = "consume" ] && rm -f "$fpath"
-    else
-      INJECT_SKIPPED_MISSING+=("$fname")
-    fi
-  done < <(python3 -c "
-import json, sys
-try:
-    m = json.load(open('$INJECT_MANIFEST'))
-    injs = sorted(m.get('injections', []), key=lambda x: x.get('priority', 999))
-    for i in injs:
-        print(f\"{i['file']}\t{i.get('action','keep')}\t{i.get('sessions','')}\")
-except: pass
-" 2>/dev/null)
-else
-  # Fallback: hardcoded specs if manifest missing
-  INJECT_SPECS=(
-    "compliance-nudge.txt:keep"
-    "budget-nudge.txt:keep"
-    "cost-alert.txt:consume"
-  )
-  for spec in "${INJECT_SPECS[@]}"; do
-    IFS=: read -r fname action <<< "$spec"
-    fpath="$STATE_DIR/$fname"
-    if [ -f "$fpath" ]; then
-      INJECT_BLOCKS="${INJECT_BLOCKS}
-
-$(cat "$fpath")"
-      INJECT_APPLIED+=("$fname:$action")
-      [ "$action" = "consume" ] && rm -f "$fpath"
-    else
-      INJECT_SKIPPED_MISSING+=("$fname")
-    fi
-  done
-fi
-
-# Write inject usage tracking (wq-105)
-INJECT_USAGE_FILE="$LOG_DIR/inject-usage.json"
-{
-  echo -n "{\"session\":$COUNTER,\"mode\":\"$MODE_CHAR\",\"ts\":\"$(date -Iseconds)\","
-  echo -n "\"applied\":["
-  first=1
-  for item in "${INJECT_APPLIED[@]:-}"; do
-    [ -z "$item" ] && continue
-    [ "$first" = 1 ] || echo -n ","
-    IFS=: read -r f a <<< "$item"
-    echo -n "{\"file\":\"$f\",\"action\":\"$a\"}"
-    first=0
-  done
-  echo -n "],\"skipped_session\":["
-  first=1
-  for f in "${INJECT_SKIPPED_SESSION[@]:-}"; do
-    [ -z "$f" ] && continue
-    [ "$first" = 1 ] || echo -n ","
-    echo -n "\"$f\""
-    first=0
-  done
-  echo -n "],\"skipped_missing\":["
-  first=1
-  for f in "${INJECT_SKIPPED_MISSING[@]:-}"; do
-    [ -z "$f" ] && continue
-    [ "$first" = 1 ] || echo -n ","
-    echo -n "\"$f\""
-    first=0
-  done
-  echo "]}"
-} >> "$INJECT_USAGE_FILE"
-# Keep last 200 entries
-if [ "$(wc -l < "$INJECT_USAGE_FILE" 2>/dev/null || echo 0)" -gt 200 ]; then
-  tail -200 "$INJECT_USAGE_FILE" > "$INJECT_USAGE_FILE.tmp" && mv "$INJECT_USAGE_FILE.tmp" "$INJECT_USAGE_FILE"
-fi
+INJECT_RESULT=$(PROJECT_DIR="$DIR" node "$DIR/prompt-inject-processor.mjs" "$MODE_CHAR" "$COUNTER" 2>/dev/null || echo '{"blocks":""}')
+INJECT_BLOCKS=$(echo "$INJECT_RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('blocks',''))" 2>/dev/null || echo "")
 
 PROMPT="${BASE_PROMPT}
 

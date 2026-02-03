@@ -8,7 +8,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Session cost breakdown by tool** (added ~s729): Track which tools consume most budget per session type. Would inform optimization priorities and help diagnose cost anomalies.
+- ~~**Session cost breakdown by tool** (added ~s729)~~: Promoted to wq-094 in B#171.
 
 - **Cross-session pattern detection** (added ~s729): Analyze session-history.txt for recurring patterns (e.g., same files touched repeatedly, similar errors). Could auto-generate queue items from detected friction.
 

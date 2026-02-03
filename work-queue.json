@@ -208,6 +208,19 @@
       "tags": ["api", "observability"],
       "commits": [],
       "notes": "B#171: Created component-dependencies.json with 20 components mapped. Added /status/dependencies endpoint with JSON/HTML formats, component filter, stats (17 file deps, 20 API deps, 11 external APIs)."
+    },
+    {
+      "id": "wq-094",
+      "title": "Add session cost breakdown by tool",
+      "description": "Track which MCP tools consume most budget per session type. Add /status/tool-costs endpoint showing tool call counts and estimated costs. Useful for optimization and anomaly detection.",
+      "priority": 94,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "created_session": 733,
+      "tags": ["api", "observability"],
+      "commits": [],
+      "notes": "B#171: Added /status/tool-costs endpoint. Shows 52 tools, 4758 total calls, by-category breakdown (moltbook 46%, fourclaw 16%, discover 15%, chatr 14%), top-N list with bar charts."
     }
   ]
 }

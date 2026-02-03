@@ -1671,6 +1671,80 @@ app.get("/status/dependencies", (req, res) => {
   }
 });
 
+// Tool usage statistics (wq-094)
+// Shows which tools are used most, helping identify optimization targets
+app.get("/status/tool-costs", (req, res) => {
+  const format = req.query.format || "json";
+  const limit = Math.min(parseInt(req.query.limit) || 30, 100);
+  try {
+    const statePath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/engagement-state.json");
+    const state = JSON.parse(readFileSync(statePath, "utf8"));
+    const toolUsage = state.toolUsage || {};
+
+    // Sort by total usage
+    const sorted = Object.entries(toolUsage)
+      .map(([name, data]) => ({ name, total: data.total || 0, lastUsed: data.lastUsed }))
+      .sort((a, b) => b.total - a.total);
+
+    const totalCalls = sorted.reduce((sum, t) => sum + t.total, 0);
+    const top = sorted.slice(0, limit);
+    const topCalls = top.reduce((sum, t) => sum + t.total, 0);
+
+    // Categorize tools
+    const categories = {
+      moltbook: sorted.filter(t => t.name.startsWith("moltbook_")),
+      chatr: sorted.filter(t => t.name.startsWith("chatr_")),
+      knowledge: sorted.filter(t => t.name.startsWith("knowledge_") || t.name.startsWith("agent_crawl")),
+      registry: sorted.filter(t => t.name.startsWith("registry_")),
+      fourclaw: sorted.filter(t => t.name.startsWith("fourclaw_")),
+      discover: sorted.filter(t => t.name.startsWith("discover_")),
+      inbox: sorted.filter(t => t.name.startsWith("inbox_")),
+      other: sorted.filter(t => !["moltbook_", "chatr_", "knowledge_", "registry_", "fourclaw_", "discover_", "inbox_", "agent_"].some(p => t.name.startsWith(p))),
+    };
+
+    const categoryStats = {};
+    for (const [cat, tools] of Object.entries(categories)) {
+      const catTotal = tools.reduce((s, t) => s + t.total, 0);
+      categoryStats[cat] = { count: tools.length, total_calls: catTotal, pct: totalCalls > 0 ? Math.round(catTotal / totalCalls * 100) : 0 };
+    }
+
+    const result = {
+      timestamp: new Date().toISOString(),
+      summary: {
+        total_tools: sorted.length,
+        total_calls: totalCalls,
+        top_limit: limit,
+        top_calls: topCalls,
+        top_pct: totalCalls > 0 ? Math.round(topCalls / totalCalls * 100) : 0,
+      },
+      by_category: categoryStats,
+      top_tools: top,
+    };
+
+    if (format === "html") {
+      const rows = top.map((t, i) => {
+        const pct = totalCalls > 0 ? ((t.total / totalCalls) * 100).toFixed(1) : 0;
+        const bar = "█".repeat(Math.min(Math.round(pct), 30));
+        const lastUsed = t.lastUsed ? new Date(t.lastUsed).toLocaleDateString() : "—";
+        return `<tr><td>${i + 1}</td><td>${t.name}</td><td style="text-align:right">${t.total.toLocaleString()}</td><td style="text-align:right">${pct}%</td><td style="color:#89b4fa">${bar}</td><td style="color:#6c7086">${lastUsed}</td></tr>`;
+      }).join("");
+      const catRows = Object.entries(categoryStats).map(([cat, s]) => `<tr><td>${cat}</td><td>${s.count}</td><td>${s.total_calls.toLocaleString()}</td><td>${s.pct}%</td></tr>`).join("");
+      return res.send(`<!DOCTYPE html><html><head><title>Tool Usage</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1,h2{color:#89b4fa}table{border-collapse:collapse;width:100%;margin-bottom:2rem}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}</style></head><body>
+<h1>Tool Usage</h1>
+<p>Total: ${totalCalls.toLocaleString()} calls across ${sorted.length} tools</p>
+<h2>By Category</h2>
+<table><tr><th>Category</th><th>Tools</th><th>Calls</th><th>%</th></tr>${catRows}</table>
+<h2>Top ${limit} Tools</h2>
+<table><tr><th>#</th><th>Tool</th><th>Calls</th><th>%</th><th>Distribution</th><th>Last Used</th></tr>${rows}</table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/tool-costs?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a> · ?limit=N (default 30, max 100)</p>
+</body></html>`);
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Cross-session memory dashboard (wq-087)
 // Aggregates storage across: knowledge base, engagement-intel, Ctxly cloud
 app.get("/status/memory", async (req, res) => {
@@ -3182,6 +3256,7 @@ function agentManifest(req, res) {
       status_hooks: { url: `${base}/status/hooks`, method: "GET", auth: false, description: "Hook performance dashboard — avg/p50/p95 execution times, failure rates, slow hook identification (?window=N&format=json)" },
       status_components: { url: `${base}/status/components`, method: "GET", auth: false, description: "Component load health — loaded count, errors, manifest (?format=html for web UI)" },
       status_dependencies: { url: `${base}/status/dependencies`, method: "GET", auth: false, description: "Component dependency map — files, APIs, providers per component (?component=X to filter, ?format=html for web UI)" },
+      status_tool_costs: { url: `${base}/status/tool-costs`, method: "GET", auth: false, description: "Tool usage statistics — call counts, categories, distribution (?limit=N, ?format=html for web UI)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
       knowledge_validate: { url: `${base}/knowledge/validate`, method: "POST", auth: false, description: "Endorse a pattern (body: {pattern_id, agent, note?})" },

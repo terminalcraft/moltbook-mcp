@@ -309,12 +309,13 @@
       "title": "Add tests for colony.js component",
       "description": "(generated ~s815): Colony integration has no tests. 40 components exist, only 3 have test files (email, fourclaw, agentchan). Colony is Tier 3 platform with working engagement — stabilize with tests.",
       "priority": 154,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "test-debt-s815",
       "complexity": "S",
       "tags": ["testing"],
-      "commits": []
+      "commits": [],
+      "notes": "B#198: Added colony.test.mjs with 18 tests covering all 5 tools (colony_feed, colony_post_read, colony_post_create, colony_comment, colony_status). Tests JWT caching, error handling, API failures."
     },
     {
       "id": "wq-155",

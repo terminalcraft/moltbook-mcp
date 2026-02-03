@@ -38,7 +38,23 @@ const SESSION_RELEVANCE = {
   R: { primary: ["architecture", "tooling", "ecosystem", "reliability", "prompting", "security"], label: "Reflect", hint: "Summary stats and health overview." },
 };
 
-export function regenerateDigest(sessionType) {
+// Tag-based pattern matching for work-queue context (wq-078)
+// Finds patterns whose tags overlap with the current task's tags
+export function findPatternsByTags(patterns, taskTags) {
+  if (!taskTags || taskTags.length === 0) return [];
+  const tagSet = new Set(taskTags.map(t => t.toLowerCase()));
+  const scored = [];
+  for (const p of patterns) {
+    const pTags = (p.tags || []).map(t => t.toLowerCase());
+    const overlap = pTags.filter(t => tagSet.has(t));
+    if (overlap.length > 0) {
+      scored.push({ pattern: p, matchedTags: overlap, score: overlap.length });
+    }
+  }
+  return scored.sort((a, b) => b.score - a.score);
+}
+
+export function regenerateDigest(sessionType, taskTags) {
   const data = loadPatterns();
   const byCategory = {};
   for (const p of data.patterns) {
@@ -96,6 +112,20 @@ export function regenerateDigest(sessionType) {
   if (crawlCount === 0 && exchangeCount === 0) {
     md += "*No external patterns yet. Use agent_crawl_repo or agent_fetch_knowledge to learn from other agents.*\n";
   }
+
+  // Task-specific pattern suggestions (wq-078)
+  // When task tags are provided, find and highlight patterns with matching tags
+  if (taskTags && taskTags.length > 0) {
+    const matches = findPatternsByTags(data.patterns, taskTags);
+    if (matches.length > 0) {
+      md += `**Suggested for this task** (tags: ${taskTags.join(", ")}):\n`;
+      for (const m of matches.slice(0, 5)) {
+        md += `- ${m.pattern.title} (${m.pattern.confidence}) — matched: ${m.matchedTags.join(", ")}\n`;
+      }
+      md += "\n";
+    }
+  }
+
   mkdirSync(KNOWLEDGE_DIR, { recursive: true });
   writeFileSync(DIGEST_FILE, md);
   return md;

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, readdirSync } from "fs";
 import { join } from "path";
-import { loadPatterns, savePatterns, loadReposCrawled, saveReposCrawled, regenerateDigest, DIGEST_FILE, AGENTS_UNIFIED_FILE } from "../providers/knowledge.js";
+import { loadPatterns, savePatterns, loadReposCrawled, saveReposCrawled, regenerateDigest, findPatternsByTags, DIGEST_FILE, AGENTS_UNIFIED_FILE } from "../providers/knowledge.js";
 import { extractFromRepo, parseGitHubUrl, formatExtraction } from "../packages/pattern-extractor/index.js";
 
 // Module-level context storage for lifecycle hooks
@@ -15,9 +15,26 @@ export function register(server, ctx) {
     category: z.string().optional().describe("Filter by category"),
     session_type: z.string().optional().describe("Session type (B/E/L/R) to tailor digest relevance"),
   }, async ({ format, category, session_type }) => {
+    // Extract task tags from context for auto-suggestions (wq-078)
+    let taskTags = [];
+    if (_ctx?.precomputed?.wq_item) {
+      // wq_item format: "wq-XXX: Title — Description" or "wq-XXX: Title"
+      const match = _ctx.precomputed.wq_item.match(/^(wq-\d+)/);
+      if (match) {
+        try {
+          const wqPath = join(process.env.HOME || '', 'moltbook-mcp', 'work-queue.json');
+          const wq = JSON.parse(readFileSync(wqPath, 'utf8'));
+          const item = (wq.queue || []).find(i => i.id === match[1]);
+          if (item?.tags?.length > 0) {
+            taskTags = item.tags;
+          }
+        } catch { /* ignore — task tags are optional enhancement */ }
+      }
+    }
+
     if (format === "digest") {
-      if (session_type) {
-        const digest = regenerateDigest(session_type);
+      if (session_type || taskTags.length > 0) {
+        const digest = regenerateDigest(session_type, taskTags);
         return { content: [{ type: "text", text: digest }] };
       }
       try {

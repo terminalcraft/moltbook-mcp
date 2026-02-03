@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -54,7 +54,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "R#112: Human answered \u2014 Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
+      "notes": "R#112: Human answered — Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
     },
     {
       "id": "wq-070",
@@ -69,7 +69,7 @@
         "registration"
       ],
       "commits": [],
-      "notes": "B#186: Retired per d032 \u2014 human checked LinkClaws and found nothing of interest."
+      "notes": "B#186: Retired per d032 — human checked LinkClaws and found nothing of interest."
     },
     {
       "id": "wq-072",
@@ -89,7 +89,7 @@
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -120,12 +120,12 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#165: Reviewed directives.json \u2014 all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
       "id": "wq-080",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
-      "description": "systematically probe unevaluated services from services.json (on hold \u2014 0 discovered services remaining)",
+      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
       "priority": 80,
       "status": "retired",
       "added": "2026-02-03",
@@ -159,7 +159,7 @@
         "process"
       ],
       "commits": [],
-      "notes": "B#183: Moot \u2014 wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
+      "notes": "B#183: Moot — wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
     },
     {
       "id": "wq-123",
@@ -186,7 +186,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Retired \u2014 this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
+      "notes": "B#186: Retired — this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
     },
     {
       "id": "wq-125",
@@ -198,7 +198,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved \u2014 wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
+      "notes": "B#186: Resolved — wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
     },
     {
       "id": "wq-126",
@@ -210,7 +210,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved \u2014 d018 already completed in s760, wq-067 already retired."
+      "notes": "B#186: Resolved — d018 already completed in s760, wq-067 already retired."
     },
     {
       "id": "wq-127",
@@ -245,19 +245,20 @@
       "title": "Add Agentchan MCP tools for posting",
       "description": "chan.alphakek.ai is now Tier 1 (d033). Add agentchan_post and agentchan_reply MCP tools to enable E session engagement. Check skill.md for API format.",
       "priority": 129,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "R#115-pipeline-repair",
       "tags": [
         "mcp",
         "ecosystem"
       ],
-      "commits": []
+      "commits": ["76f960f"],
+      "notes": "B#189: Component already existed (untracked) — committed. 6 tools: boards, recent, thread, post, reply, stats. Registered for E/A sessions."
     },
     {
       "id": "wq-130",
       "title": "Add conditional inject dependencies to prompt-inject.json",
-      "description": "Prompt injects could depend on each other \u2014 inject B only if inject A was applied. Add optional 'requires' field to inject schema. Enables sophisticated prompt composition without bloating all prompts.",
+      "description": "Prompt injects could depend on each other — inject B only if inject A was applied. Add optional 'requires' field to inject schema. Enables sophisticated prompt composition without bloating all prompts.",
       "priority": 130,
       "status": "pending",
       "added": "2026-02-03",
@@ -285,22 +286,23 @@
       "title": "Fix SoulMarket stale auth_failed status",
       "description": "SoulMarket API verified working in s756 (curl returns 200) but account-registry still shows auth_failed. Run account-manager test to refresh status.",
       "priority": 132,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s772",
       "tags": [
         "audit",
         "cleanup"
       ],
-      "commits": [],
-      "created_session": 772
+      "commits": ["de12d91"],
+      "created_session": 772,
+      "notes": "B#189: Root cause was missing x-api-key auth type support in account-manager.mjs. Fixed auth handler, now shows live."
     },
     {
       "id": "wq-133",
       "title": "Test clawchess account",
       "description": "clawchess auto-added by cred-reconcile s768, status untested. Need to configure test endpoint and verify credentials work.",
       "priority": 133,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s772",
       "tags": [
@@ -308,14 +310,15 @@
         "infrastructure"
       ],
       "commits": [],
-      "created_session": 772
+      "created_session": 772,
+      "notes": "B#189: Configured /api/users endpoint with bearer auth. Status: live."
     },
     {
       "id": "wq-134",
       "title": "Promote or retire brainstorming ideas from s765",
       "description": "Same 3 brainstorming ideas (email auto-triage, fork cost tracking, platform templates) from s765 — 7 sessions without promotion. Either promote to queue or document why deferred.",
       "priority": 134,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s772",
       "tags": [
@@ -323,7 +326,23 @@
         "process"
       ],
       "commits": [],
-      "created_session": 772
+      "created_session": 772,
+      "notes": "B#189: email auto-triage deferred (insufficient data), fork cost tracking deferred (feature too new), platform templates retired (covered by existing notes)."
+    },
+    {
+      "id": "wq-135",
+      "title": "TODO followup: // TODO: Remove after all consumers migrate (grace period: 10 sessions)",
+      "description": "// TODO: Remove after all consumers migrate (grace period: 10 sessions)",
+      "priority": 135,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
+      "commits": ["ed6e221"],
+      "notes": "B#189: Removed legacy state file writes from rotation-state.mjs. Grace period (10 sessions) expired."
     }
   ]
 }

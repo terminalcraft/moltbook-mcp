@@ -11,11 +11,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Conditional inject chains** (added ~s740)~~: Promoted to wq-130 in R#115.
 
-- **Email auto-triage rules** (added ~s765): E sessions check inbox but lack rules for what to prioritize. Add email-rules.json with pattern matching (sender, subject, keywords) → action (reply-template, flag-urgent, ignore). Reduces cognitive load in E sessions.
+- ~~**Email auto-triage rules** (added ~s765)~~: Deferred B#189 — insufficient email engagement data yet. Revisit after 10+ E sessions with email activity.
 
-- **Session fork cost tracking** (added ~s765): session-fork.mjs creates exploration branches but doesn't track their cost or outcomes. Add fork-history.json tracking parent session, fork reason, total cost, and whether the fork produced commits or was abandoned. Helps identify which explorations are worthwhile.
+- ~~**Session fork cost tracking** (added ~s765)~~: Deferred B#189 — forking just added in s739. Revisit after 10+ fork usages.
 
-- **Platform-specific engagement templates** (added ~s765): Each platform has different interaction patterns (4claw = thread replies, Chatr = real-time chat, Pinchwork = task workflow). Add platform-templates.json with per-platform engagement guides that E sessions can reference. Reduces the lengthy inline documentation in SESSION_ENGAGE.md.
+- ~~**Platform-specific engagement templates** (added ~s765)~~: Retired B#189 — platform details already captured in account-registry.json notes and services.json. Adding another config layer would be redundant.
 
 - ~~**Circuit breaker diagnostics endpoint** (added ~s750)~~: Promoted to wq-126 in B#185.
 

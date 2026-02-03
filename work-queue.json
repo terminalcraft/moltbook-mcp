@@ -72,12 +72,13 @@
       "title": "Add tests for audit-report.json handling",
       "description": "audit-report.json touched 5+ times in last 20 sessions. Add unit tests for: report reading, critical issue extraction, delta tracking, cost aggregation. Prevents regressions like the [object Object] bug fixed in R#102.",
       "priority": 62,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote",
       "complexity": "S",
       "tags": ["testing"],
-      "commits": []
+      "commits": [],
+      "notes": "Done in B#160. Added 6 tests (21 assertions): A session prompt block assembly, missing report handling, critical issue format variations, cost trend detection, malformed JSON handling, and truncation."
     },
     {
       "id": "wq-063",

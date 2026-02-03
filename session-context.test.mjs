@@ -528,6 +528,156 @@ function testESessionEvalTarget() {
   assert(!result.eval_target?.includes('EvalDone'), 'eval_target skips evaluated services');
 }
 
+// ===== AUDIT REPORT TESTS (wq-062) =====
+// Tests for A session context which reads audit-report.json
+
+function testASessionPromptBlock() {
+  console.log('\n== A session prompt block assembly ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Fix bug', status: 'pending', priority: 1, tags: ['audit'] },
+    { id: 'wq-002', title: 'Add feature', status: 'done', priority: 2, tags: ['audit'] },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'a_session_counter'), '10');
+
+  // Write audit report with critical issues
+  writeFileSync(join(SRC, 'audit-report.json'), JSON.stringify({
+    session: 700,
+    critical_issues: [
+      { id: 'issue-1', severity: 'HIGH', description: 'Intel tracking broken' },
+      { id: 'issue-2', severity: 'MEDIUM', description: 'Stale queue items' },
+    ],
+    recommended_actions: [
+      { title: 'Fix intel', priority: 'high' },
+      { title: 'Clean queue', priority: 'low' },
+      { title: 'Update docs', priority: 'low' },
+    ],
+  }));
+
+  const result = run('A', '750');
+  assert(result.a_prompt_block?.includes('## A Session: #11'), 'A counter incremented for A mode');
+  assert(result.a_prompt_block?.includes('Previous audit: s700'), 'prompt block has previous session');
+  assert(result.a_prompt_block?.includes('2 critical issues'), 'prompt block has critical count');
+  assert(result.a_prompt_block?.includes('3 recommendations'), 'prompt block has recommendation count');
+  assert(result.a_prompt_block?.includes('Intel tracking broken'), 'prompt block lists critical issues');
+  assert(result.a_prompt_block?.includes('1 pending, 1 done'), 'prompt block has audit-tagged queue stats');
+}
+
+function testASessionNoPreviousReport() {
+  console.log('\n== A session: no previous audit report ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  // No a_session_counter = first A session
+  try { rmSync(join(STATE, 'a_session_counter')); } catch {}
+
+  // Ensure no audit-report.json file from previous tests
+  try { rmSync(join(SRC, 'audit-report.json')); } catch {}
+
+  const result = run('A', '100');
+  assert(result.a_prompt_block?.includes('## A Session: #1'), 'first A session counter');
+  assert(result.a_prompt_block?.includes('No previous audit report found'), 'handles missing audit report');
+}
+
+function testASessionCriticalIssueFormats() {
+  console.log('\n== A session: critical issue format variations ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'a_session_counter'), '5');
+
+  // Test with mixed issue formats: string and object
+  writeFileSync(join(SRC, 'audit-report.json'), JSON.stringify({
+    session: 650,
+    critical_issues: [
+      'Simple string issue',
+      { id: 'obj-1', severity: 'HIGH', description: 'Object with description' },
+      { id: 'obj-2', severity: 'LOW' },  // Object without description
+    ],
+    recommended_actions: [],
+  }));
+
+  const result = run('A', '700');
+  assert(result.a_prompt_block?.includes('3 critical issues'), 'counts all issue formats');
+  assert(result.a_prompt_block?.includes('Simple string issue'), 'string issues included');
+  assert(result.a_prompt_block?.includes('Object with description'), 'object.description used');
+  assert(result.a_prompt_block?.includes('obj-2'), 'object.id used as fallback when no description');
+}
+
+function testASessionCostTrend() {
+  console.log('\n== A session: cost trend from history ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'a_session_counter'), '10');
+  writeFileSync(join(SRC, 'audit-report.json'), JSON.stringify({ session: 100, critical_issues: [], recommended_actions: [] }));
+
+  // Create session history with increasing costs (should show "increasing" trend)
+  const histLines = [];
+  for (let i = 0; i < 10; i++) {
+    const cost = 1.0 + i * 0.5;  // 1.0, 1.5, 2.0, ... up to 5.5
+    histLines.push(`2026-02-02 mode=B s=${100+i} dur=3m cost=$${cost.toFixed(2)} build=1 commit(s) files=[api.mjs] note: test`);
+  }
+  writeFileSync(join(STATE, 'session-history.txt'), histLines.join('\n') + '\n');
+
+  const result = run('A', '200');
+  assert(result.a_prompt_block?.includes('Cost trend'), 'has cost trend line');
+  // Recent 5 avg: (3.0+3.5+4.0+4.5+5.0)/5 = 4.0; prev 5 avg: (1.0+1.5+2.0+2.5+3.0)/5 = 2.0
+  // 4.0 > 2.0*1.2 = 2.4 → increasing
+  assert(result.a_prompt_block?.includes('increasing'), 'detects increasing cost trend');
+}
+
+function testASessionMalformedReport() {
+  console.log('\n== A session: malformed audit-report.json ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'a_session_counter'), '5');
+
+  // Write invalid JSON
+  writeFileSync(join(SRC, 'audit-report.json'), '{ broken json }}}');
+
+  const result = run('A', '100');
+  // Should not crash, should fall back to "No previous audit report"
+  assert(result.a_prompt_block?.includes('No previous audit report'), 'handles malformed JSON gracefully');
+  assert(result.a_prompt_block?.includes('## A Session'), 'still produces valid A prompt block');
+}
+
+function testASessionCriticalIssuesTruncation() {
+  console.log('\n== A session: critical issues truncation ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'a_session_counter'), '5');
+
+  // Write 5 critical issues (should truncate to 3 with "...")
+  writeFileSync(join(SRC, 'audit-report.json'), JSON.stringify({
+    session: 500,
+    critical_issues: [
+      { description: 'Issue one' },
+      { description: 'Issue two' },
+      { description: 'Issue three' },
+      { description: 'Issue four' },
+      { description: 'Issue five' },
+    ],
+    recommended_actions: [],
+  }));
+
+  const result = run('A', '600');
+  assert(result.a_prompt_block?.includes('5 critical issues'), 'counts all 5 issues');
+  assert(result.a_prompt_block?.includes('Issue one'), 'first issue shown');
+  assert(result.a_prompt_block?.includes('Issue three'), 'third issue shown');
+  assert(!result.a_prompt_block?.includes('Issue four'), 'fourth issue not shown (truncated)');
+  assert(result.a_prompt_block?.includes('...'), 'shows ellipsis for truncation');
+}
+
 // ===== INTEGRATION TESTS (wq-016) =====
 // These test real file I/O edge cases: malformed JSON, missing files,
 // empty files, extra fields, and full pipeline chaining.
@@ -652,10 +802,10 @@ function intTestFullPipelineChain() {
 
 function cleanState() {
   // Remove stale files from previous tests that setup() doesn't clear
-  for (const f of ['todo-followups.txt', 'session-history.txt', 'engagement-intel.json', 'engagement-intel-archive.json', 'r_session_counter']) {
+  for (const f of ['todo-followups.txt', 'session-history.txt', 'engagement-intel.json', 'engagement-intel-archive.json', 'r_session_counter', 'a_session_counter']) {
     try { rmSync(join(STATE, f)); } catch {}
   }
-  for (const f of ['directives.json', 'services.json']) {
+  for (const f of ['directives.json', 'services.json', 'audit-report.json']) {
     try { rmSync(join(SRC, f)); } catch {}
   }
 }
@@ -823,6 +973,13 @@ try {
   setup(); intTestAutoPromoteFewIdeas();
   setup(); intTestAutoPromote1IdeaOnly();
   setup(); intTestAutoPromoteRThresholds();
+  // Audit report tests (wq-062)
+  setup(); testASessionPromptBlock();
+  setup(); testASessionNoPreviousReport();
+  setup(); testASessionCriticalIssueFormats();
+  setup(); testASessionCostTrend();
+  setup(); testASessionMalformedReport();
+  setup(); testASessionCriticalIssuesTruncation();
 } finally {
   cleanup();
 }

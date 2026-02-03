@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -54,7 +54,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "R#112: Human answered \u2014 Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
+      "notes": "R#112: Human answered — Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
     },
     {
       "id": "wq-070",
@@ -69,7 +69,7 @@
         "registration"
       ],
       "commits": [],
-      "notes": "B#186: Retired per d032 \u2014 human checked LinkClaws and found nothing of interest."
+      "notes": "B#186: Retired per d032 — human checked LinkClaws and found nothing of interest."
     },
     {
       "id": "wq-072",
@@ -84,12 +84,12 @@
         "registration"
       ],
       "commits": [],
-      "notes": "R#123: Retired per wq-146 \u2014 blocked 470+ sessions on Moltbook API (broken since ~s320). No resolution path."
+      "notes": "R#123: Retired per wq-146 — blocked 470+ sessions on Moltbook API (broken since ~s320). No resolution path."
     },
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -120,12 +120,12 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#165: Reviewed directives.json \u2014 all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
       "id": "wq-080",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
-      "description": "systematically probe unevaluated services from services.json (on hold \u2014 0 discovered services remaining)",
+      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
       "priority": 80,
       "status": "retired",
       "added": "2026-02-03",
@@ -159,7 +159,7 @@
         "process"
       ],
       "commits": [],
-      "notes": "B#183: Moot \u2014 wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
+      "notes": "B#183: Moot — wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
     },
     {
       "id": "wq-123",
@@ -186,7 +186,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Retired \u2014 this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
+      "notes": "B#186: Retired — this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
     },
     {
       "id": "wq-125",
@@ -198,7 +198,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved \u2014 wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
+      "notes": "B#186: Resolved — wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
     },
     {
       "id": "wq-126",
@@ -210,7 +210,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved \u2014 d018 already completed in s760, wq-067 already retired."
+      "notes": "B#186: Resolved — d018 already completed in s760, wq-067 already retired."
     },
     {
       "id": "wq-127",
@@ -241,40 +241,9 @@
       "notes": "R#115: This is E-session exploration mandate (already in SESSION_ENGAGE.md Phase 2)."
     },
     {
-      "id": "wq-137",
-      "title": "Add tests for agentchan.js component",
-      "description": "New component added in B#186 (s764). No tests yet. Cover: board listing, thread fetching, post creation.",
-      "priority": 137,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "R#117-untested-component",
-      "complexity": "M",
-      "tags": [
-        "test"
-      ],
-      "commits": [],
-      "notes": "B#194: Added components/agentchan.test.mjs with 16 tests covering: tool registration, boards listing, recent posts, thread fetching, post creation, reply posting, stats, and normalizePost helper. All tests pass."
-    },
-    {
-      "id": "wq-138",
-      "title": "Add /status/session-types endpoint for session effectiveness tracking",
-      "description": "Show aggregated metrics per session type: avg cost, success rate, commits per session, items completed. Useful for tuning rotation.conf.",
-      "priority": 138,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "R#117-observability",
-      "complexity": "M",
-      "tags": [
-        "api",
-        "observability"
-      ],
-      "commits": [],
-      "notes": "B#194: Already exists as /status/session-effectiveness (api.mjs:2912). Provides per-mode: sessions, avg_cost, commits_per_session, cost_per_commit, avg_duration_sec. Missing success_rate (no outcomes.log exists) and items_completed (would need queue history tracking). Current endpoint sufficient for rotation tuning."
-    },
-    {
       "id": "wq-140",
-      "title": "Escalate d031 (Pinchwork tasks) \u2014 flag for human review if unresolved by s790",
-      "description": "d031 acked s764, now s778 \u2014 14 sessions without any Pinchwork tasks solved. E sessions are engaging with Pinchwork (checking /v1/me) but not actually solving tasks. If still unresolved by s790, escalate to human-review.json.",
+      "title": "Escalate d031 (Pinchwork tasks) — flag for human review if unresolved by s790",
+      "description": "d031 acked s764, now s778 — 14 sessions without any Pinchwork tasks solved. E sessions are engaging with Pinchwork (checking /v1/me) but not actually solving tasks. If still unresolved by s790, escalate to human-review.json.",
       "priority": 140,
       "status": "retired",
       "added": "2026-02-03",
@@ -285,7 +254,7 @@
         "directive"
       ],
       "commits": [],
-      "notes": "R#122: Retired \u2014 superseded by wq-143 which has same deadline."
+      "notes": "R#122: Retired — superseded by wq-143 which has same deadline."
     },
     {
       "id": "wq-142",
@@ -303,44 +272,11 @@
       "notes": "R#122: Checkpoint template removed from SESSION_BUILD.md. No longer applicable."
     },
     {
-      "id": "wq-144",
-      "title": "Escalate d031 to human review \u2014 Pinchwork tasks unresolved 26 sessions",
-      "description": "d031 (Pinchwork task solving) acked s764, now s790. 26 sessions with zero tasks solved despite: (1) R#115 adding 8-step task protocol, (2) R#121 adding enforcement gates. E sessions consistently check /v1/me but never complete tasks. Human input needed to diagnose: Is Pinchwork API broken? Are there no available tasks? Is the protocol too complex?",
-      "priority": 144,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s790",
-      "complexity": "S",
-      "tags": [
-        "audit",
-        "directive",
-        "escalation"
-      ],
-      "commits": [],
-      "notes": "B#194: Escalation already complete. hr-d031-pinchwork-s790 added in A#790, resolved in R#126 s799. E#792 completed 1 Pinchwork task, breaking 26-session gap. d031 marked completed."
-    },
-    {
-      "id": "wq-145",
-      "title": "Investigate E session Pinchwork task completion failure pattern",
-      "description": "E sessions check Pinchwork (/v1/me) but never complete tasks. The 8-step task workflow (added in R#115) is not being followed. Need to analyze: (1) Are there tasks available on Pinchwork? (2) Is the workflow too complex? (3) What specifically fails in the workflow?",
-      "priority": 145,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s790",
-      "complexity": "M",
-      "tags": [
-        "audit",
-        "process"
-      ],
-      "commits": [],
-      "notes": "B#194: No longer needed. E#792 completed 1 Pinchwork task, resolving the pattern. Root cause was behavioral (E sessions engaging but not completing tasks), fixed by R#115 protocol + R#121 enforcement gates."
-    },
-    {
       "id": "wq-147",
       "title": "Monitor E session truncation pattern (s774-style failures)",
-      "description": "s774 ran only 1m20s with $0.40 cost and no output \u2014 likely MCP failure or early termination. If pattern repeats, add E session resilience mechanism (retry logic, session validation, etc).",
+      "description": "s774 ran only 1m20s with $0.40 cost and no output — likely MCP failure or early termination. If pattern repeats, add E session resilience mechanism (retry logic, session validation, etc).",
       "priority": 147,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s790",
       "complexity": "S",
@@ -349,7 +285,29 @@
         "reliability"
       ],
       "commits": [],
-      "notes": "Second anomaly noted (first was in pre-s785 period). Monitor for recurrence."
+      "notes": "B#195: Analyzed outcomes.log — s774 (79s) was isolated anomaly, not recurring pattern. Stats: 93 E sessions, mean 284s, stddev 143s. 9 sessions under 2min (10%) is within normal variance. s774 completed successfully (exit=0) but had minimal output due to platform issues (Chatr API error, Pinchwork no tasks). Subsequent E sessions (s781/787/792/797) all ran normally (262-418s). No resilience mechanism needed — system self-recovered."
+    },
+    {
+      "id": "wq-148",
+      "title": "Directive outcome analysis in A sessions",
+      "description": "(added ~s794): The new directive-outcomes.json (R#125) tracks which urgent directives each session addressed vs ignored. A sessions should read this file to compute mandate compliance rates with hard evidence instead of heuristics from session summaries. Could replace or augment the current session-history.txt scanning approach.",
+      "priority": 148,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-149",
+      "title": "Engagement ROI dashboard",
+      "description": "(added ~s776): Visual summary of engagement effectiveness across platforms — posts vs replies received, thread participation depth, intel yield per platform. Could inform dynamic tier adjustments.",
+      "priority": 149,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     }
   ]
 }

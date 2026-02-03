@@ -1,10 +1,10 @@
 #!/bin/bash
-# Pre-hook: Read directive-tracking.json history and generate a compliance nudge
+# Pre-hook: Read directives.json compliance history and generate a compliance nudge
 # for the current session mode. Writes to ~/.config/moltbook/compliance-nudge.txt
 # which heartbeat.sh injects into the prompt.
 #
 # This closes the feedback loop: post-session audit → tracking data → pre-session nudge.
-# Without this, directive-tracking.json was write-only data that nobody acted on.
+# Without this, compliance data was write-only data that nobody acted on.
 
 set -euo pipefail
 

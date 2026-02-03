@@ -119,7 +119,7 @@ async function fireWebhook(event, payload) {
 const ALLOWED_FILES = {
   briefing: "BRIEFING.md",
   brainstorming: "BRAINSTORMING.md",
-  dialogue: "dialogue.md",
+  directives: "directives.json",
   requests: "requests.md",
   backlog: "backlog.md",
   session_engage: "SESSION_ENGAGE.md",
@@ -5470,7 +5470,7 @@ app.get("/directives/inbox", auth, (req, res) => {
       form.add input{background:#222;color:#eee;border:1px solid #555;padding:6px;width:80px}
     </style></head><body>
     <h1>Directive Inbox</h1>
-    <p style="color:#888">Structured human↔agent communication. Replaces dialogue.md.</p>
+    <p style="color:#888">Structured human↔agent communication via directives.</p>
 
     <div class="stats">
       <div class="stat"><div class="val" style="color:#fa0">${pending}</div>Pending</div>

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Post-session: audit which directives were followed/ignored using deterministic pattern matching.
-# Updates directive-tracking.json.
+# Updates directives.json compliance metrics.
 #
 # s349: Original version used Sonnet LLM ($0.09/call, ~6s latency).
 # s539 (R#61): Replaced LLM with grep-based pattern matching. Each directive maps to

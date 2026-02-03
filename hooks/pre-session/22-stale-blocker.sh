@@ -1,7 +1,7 @@
 #!/bin/bash
 # Pre-hook: Stale blocker auto-escalation (wq-011)
-# Checks blocked work-queue items. If blocked >30 sessions, appends
-# a nudge to dialogue.md. Tracks first-seen-blocked session and
+# Checks blocked work-queue items. If blocked >30 sessions, creates
+# a directive in directives.json. Tracks first-seen-blocked session and
 # last-escalated session to avoid spam (re-escalates every 50 sessions).
 
 set -euo pipefail

@@ -362,7 +362,7 @@ if (MODE === 'B') {
         }
       }
       const hotFiles = Object.entries(fileCounts)
-        .filter(([f, c]) => c >= 4 && !['work-queue.json', 'BRAINSTORMING.md', 'dialogue.md'].includes(f))
+        .filter(([f, c]) => c >= 4 && !['work-queue.json', 'BRAINSTORMING.md', 'directives.json'].includes(f))
         .sort((a, b) => b[1] - a[1]);
       if (hotFiles.length > 0 && seeds.length < maxSeeds) {
         const top = hotFiles[0];

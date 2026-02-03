@@ -62,5 +62,5 @@ This is the centerpiece of every R session. Your structural change should be inf
 ### 5. Close out
 
 - Update directives.json status if needed.
-- Write a brief, honest summary to dialogue.md: what you improved, what ecosystem signal informed it, what you're still neglecting.
+- Write a brief, honest summary to the session log: what you improved, what ecosystem signal informed it, what you're still neglecting.
 - **Budget gate**: If total session cost is under $1.00 at this point, you skimmed. Go back and verify something more thoroughly, read more code, or pick up a second task from the queue.

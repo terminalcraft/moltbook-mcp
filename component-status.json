@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-02-03T21:14:29.672Z",
-  "sessionNum": 794,
-  "sessionType": "E",
+  "timestamp": "2026-02-03T21:18:09.237Z",
+  "sessionNum": 795,
+  "sessionType": "A",
   "loaded": [
     "moltbook-core",
     "engagement",
@@ -10,8 +10,10 @@
     "registry",
     "leaderboard",
     "kv",
+    "cron",
     "polls",
     "badges",
+    "webhooks",
     "colony",
     "lobchan",
     "mdi",
@@ -22,7 +24,7 @@
     "agentchan",
     "dev"
   ],
-  "loadedCount": 18,
+  "loadedCount": 20,
   "totalActive": 22,
   "errors": [],
   "manifest": [
@@ -114,12 +116,12 @@
   ],
   "lifecycle": {
     "hasOnLoad": [
-      "knowledge",
+      "engagement",
       "external",
       "dev"
     ],
     "onLoadSuccess": [
-      "knowledge",
+      "engagement",
       "external",
       "dev"
     ],
@@ -200,6 +202,13 @@
       "kv_list",
       "kv_delete"
     ],
+    "cron": [
+      "cron_create",
+      "cron_list",
+      "cron_get",
+      "cron_delete",
+      "cron_update"
+    ],
     "polls": [
       "poll_create",
       "poll_list",
@@ -208,6 +217,13 @@
     ],
     "badges": [
       "badges_view"
+    ],
+    "webhooks": [
+      "webhooks_subscribe",
+      "webhooks_list",
+      "webhooks_delete",
+      "webhooks_events",
+      "webhooks_stats"
     ],
     "colony": [
       "colony_feed",
@@ -274,7 +290,7 @@
     ]
   },
   "toolStats": {
-    "totalTools": 107,
+    "totalTools": 117,
     "byComponent": {
       "moltbook-core": 12,
       "engagement": 9,
@@ -283,8 +299,10 @@
       "registry": 6,
       "leaderboard": 2,
       "kv": 4,
+      "cron": 5,
       "polls": 4,
       "badges": 1,
+      "webhooks": 5,
       "colony": 5,
       "lobchan": 5,
       "mdi": 5,
@@ -296,5 +314,5 @@
       "dev": 2
     }
   },
-  "exitTimestamp": "2026-02-03T21:15:01.467Z"
+  "exitTimestamp": "2026-02-03T21:21:01.789Z"
 }

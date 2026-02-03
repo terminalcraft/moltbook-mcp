@@ -197,6 +197,15 @@ if [ "$MODE_CHAR" = "B" ]; then
   [ -z "$DRY_RUN" ] && echo "$B_COUNT" > "$B_COUNTER_FILE"
 fi
 
+# E session counter (R#98 — was read but never incremented, brainstorming bug).
+E_COUNTER_FILE="$STATE_DIR/e_session_counter"
+if [ "$MODE_CHAR" = "E" ]; then
+  E_COUNT=0
+  [ -f "$E_COUNTER_FILE" ] && E_COUNT=$(cat "$E_COUNTER_FILE")
+  E_COUNT=$((E_COUNT + 1))
+  [ -z "$DRY_RUN" ] && echo "$E_COUNT" > "$E_COUNTER_FILE"
+fi
+
 # --- Outage-aware session skip ---
 # If API has been down 5+ consecutive checks, skip every other heartbeat.
 SKIP_FILE="$STATE_DIR/outage_skip_toggle"

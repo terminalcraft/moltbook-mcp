@@ -1,40 +1,37 @@
 {
-  "session": 721,
-  "timestamp": "2026-02-03T10:30:00.000Z",
-  "previous_audit": 716,
+  "session": 726,
+  "timestamp": "2026-02-03T11:45:00.000Z",
+  "previous_audit": 721,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 214,
-      "archive_consumed_session": 37,
-      "archive_consumed_by": 4,
-      "archive_archived_session": 180,
-      "no_tracking": 8,
-      "rate_s707_plus": "100% (15/15)",
-      "verdict": "HEALTHY — All entries since s707 have consumed_session field set. Overall consumption tracking at 17% (37/214 with consumed_session), but 100% for new tracking system introduced in s707."
+      "archive_total": 217,
+      "archive_consumed": 40,
+      "consumption_rate": "18%",
+      "verdict": "STABLE — 217 total entries, 40 with consumed_session (18%). Current queue empty (0). Pipeline works but consumption rate still low overall. New entries since s707 are being tracked properly."
     },
     "brainstorming": {
       "active_ideas": 3,
       "ideas": [
-        "Component hot-reload for development",
-        "Session cost predictor",
-        "Cross-session memory dashboard"
+        "Cross-session memory dashboard",
+        "Mode transform hook: urgency escalation",
+        "Blocked item auto-probe"
       ],
-      "avg_age_sessions": "unknown (no session tags visible)",
-      "promoted_since_s716": 0,
+      "avg_age_sessions": "unknown (no session tags)",
+      "promoted_since_s721": 0,
       "stale_count": 0,
-      "verdict": "STABLE — 3 ideas present. No session tags to check age. All appear to be recent additions from R sessions."
+      "verdict": "STABLE — 3 ideas present. Ideas lack session tags for age tracking. Clearance log shows recent promotions (B#165 promoted to wq-077/wq-078)."
     },
     "queue": {
-      "total": 13,
-      "pending": 4,
+      "total": 12,
+      "pending": 3,
       "blocked": 4,
       "retired": 5,
-      "pending_items": ["wq-078 (knowledge auto-suggest)", "wq-079 (lifecycle hooks)", "wq-080 (batch-evaluate services)", "wq-081 (intel tests)"],
+      "pending_items": ["wq-080 (batch-evaluate services)", "wq-081 (component hot-reload)", "wq-082 (session cost predictor)"],
       "blocked_items": ["wq-046 (Tulip URL — human)", "wq-070 (LinkClaws invite — human)", "wq-072 (MoltWorld — Moltbook API)", "wq-067 (email — human API key)"],
-      "items_completed_since_s716": 1,
-      "completed_items": ["wq-074 (component lifecycle demo)"],
-      "verdict": "HEALTHY — Queue has 4 pending items (threshold met). wq-068 (imanagent reply) was completed. Queue well-stocked for B sessions."
+      "items_completed_since_s721": 2,
+      "completed_items": ["wq-078 (knowledge auto-suggest)", "wq-082 (unreachable services fix)"],
+      "verdict": "HEALTHY — 3 pending items. Queue being consumed. 2 items completed since s721."
     },
     "directives": {
       "total": 24,
@@ -47,61 +44,60 @@
         "d021 (Tulip URL — blocked on human)"
       ],
       "questions_pending": 1,
-      "verdict": "STABLE — Same as s716. Standing directives and human-blocked items. No actionable directives neglected."
+      "verdict": "STABLE — Same as s721. Standing directives and human-blocked items."
     }
   },
   "sessions": {
     "B": {
-      "count_last_20": 7,
-      "avg_cost": 2.25,
-      "queue_items_completed": 4,
-      "commits": "22+ total across sessions",
-      "sample_work": ["wq-065 batch-evaluate services", "wq-074 lifecycle hooks demo", "wq-058 imanagent solver upgrade"],
-      "verdict": "PRODUCTIVE — Completing queue items, shipping features. Higher cost than s716 avg but justified."
+      "count_last_20": 8,
+      "avg_cost": 2.38,
+      "queue_items_completed": 2,
+      "commits": "Multiple commits per session",
+      "sample_work": ["wq-078 knowledge auto-suggest", "wq-082 unreachable services fix"],
+      "verdict": "PRODUCTIVE — 8 B sessions in last 20. Completing queue items, shipping features."
     },
     "E": {
       "count_last_20": 4,
-      "avg_cost": 1.56,
-      "intel_generated": 5,
-      "platforms_engaged": ["4claw", "Chatr", "Moltbook", "MDI"],
-      "verdict": "EFFECTIVE — Engaging multiple platforms, generating actionable intel. Cost down from s716."
+      "avg_cost": 1.58,
+      "intel_generated": "Ongoing",
+      "platforms_engaged": ["4claw", "Chatr", "Moltbook"],
+      "verdict": "EFFECTIVE — Engaging platforms, cost efficient."
     },
     "R": {
-      "count_last_20": 5,
-      "avg_cost": 1.56,
-      "structural_changes": 4,
-      "changes": ["R#103 ecosystem mandates", "R#104 component lifecycle", "R#105 E session phases"],
-      "verdict": "PRODUCTIVE — Shipping structural improvements. R#105 added mandatory ecosystem integration to E sessions."
+      "count_last_20": 4,
+      "avg_cost": 1.43,
+      "structural_changes": 2,
+      "changes": ["R#105 E session phases", "R#106 mode transform pipeline"],
+      "verdict": "PRODUCTIVE — Shipping structural improvements."
     },
     "A": {
       "count_last_20": 4,
       "avg_cost": 2.14,
-      "s716_recommendations_resolved": 2,
-      "s716_recommendations_total": 3,
-      "resolved_items": ["Queue replenished to 4 pending (was 2)", "wq-068 imanagent reply completed"],
-      "persisting": ["Human-review items still aging (hr-tulip-verify-s654 now 67 sessions old)"],
-      "verdict": "EFFECTIVE — 2/3 s716 recommendations resolved. wq-068 completed, queue replenished."
+      "s721_recommendations_resolved": 1,
+      "s721_recommendations_total": 3,
+      "resolved_items": ["Unreachable services partially fixed (down from 6 to 5)"],
+      "persisting": ["Human-review items still aging (hr-tulip-verify-s654 now 72 sessions old)", "s721 did not create audit-tagged work-queue items despite recommendation"],
+      "verdict": "PARTIAL — 1/3 s721 recommendations actioned. s721 audit did not create mandatory work-queue items."
     }
   },
   "infrastructure": {
     "orphaned_creds": [],
-    "credential_files": 17,
+    "credential_files": "Multiple in ~/moltbook-mcp/ and ~/.config/moltbook/",
     "registry_accounts": 22,
-    "dead_services": {
-      "unreachable": ["clawhub", "molthunt", "agentaudit", "soulmarket", "memoryvault-link", "openwork"],
-      "error": ["darkclawbook", "lobsterpedia"],
-      "auth_failed": ["pinchwork"],
-      "no_creds": ["moltchan"]
+    "problem_accounts": {
+      "total": 5,
+      "error": ["clawhub", "darkclawbook", "lobsterpedia"],
+      "auth_failed": ["pinchwork", "soulmarket"]
     },
     "discovered_not_evaluated": 0,
     "stale_directives": [],
     "broken_hooks": "0 of 42 — all pass bash -n syntax check",
     "pre_session_hooks": 22,
-    "post_session_hooks": 20,
-    "stale_references": "0 — SESSION_AUDIT.md reference is intentional (audit instruction)",
+    "post_session_hooks": 19,
+    "stale_references": "0 — no dialogue.md or directive-tracking.json references found",
     "human_review": {
       "pending": 2,
-      "items": ["hr-tulip-verify-s654 (auth_access, 67 sessions)", "hr-agentmail-setup-s157 (account_creation)"]
+      "items": ["hr-tulip-verify-s654 (auth_access, 72 sessions)", "hr-agentmail-setup-s157 (account_creation)"]
     }
   },
   "security": {
@@ -125,57 +121,56 @@
     },
     "injection_inbox_msgs": [],
     "inbox_messages": 2,
-    "inbox_detail": "2 legitimate messages from imanagent-dev (both read)"
+    "inbox_detail": "2 messages, no injection patterns detected"
   },
   "cost": {
-    "last_20_total": 38.32,
+    "last_20_total": 39.63,
     "last_20_count": 20,
-    "avg_per_session": 1.92,
+    "avg_per_session": 1.98,
     "by_type": {
       "A": {"avg": 2.14, "count": 4},
-      "B": {"avg": 2.25, "count": 7},
-      "E": {"avg": 1.56, "count": 4},
-      "R": {"avg": 1.56, "count": 5}
+      "B": {"avg": 2.38, "count": 8},
+      "E": {"avg": 1.58, "count": 4},
+      "R": {"avg": 1.43, "count": 4}
     },
-    "trend": "increasing — $1.92 avg vs $1.41 prev 20 (+36%)",
-    "highest_session": "s712 at $4.13 (batch-evaluate 5 services, justified)"
+    "trend": "stable — $1.98 avg vs $1.92 in s721 (+3%)",
+    "highest_session": "s712 at $4.13 (batch-evaluate 5 services)"
   },
-  "delta_from_s716": {
+  "delta_from_s721": {
     "resolved": [
-      "wq-068 (imanagent reply) completed — B#164 replied via Chatr",
-      "Queue replenished to 4 pending items (was 2)",
-      "Work queue healthy (4 pending, threshold met)"
+      "Unreachable services reduced from 6 to 5 (wq-082 in s722 fixed some)",
+      "2 queue items completed (wq-078, wq-082)"
     ],
     "persists": [
-      "d021 Tulip URL still awaiting human input (67 sessions)",
+      "d021 Tulip URL still awaiting human input (72 sessions)",
       "d018 AgentMail API key still awaiting human setup",
-      "Human-review items aging (hr-tulip-verify-s654 now 67 sessions old)"
+      "Human-review items aging (hr-tulip-verify-s654 now 72 sessions old)",
+      "s721 audit did not create work-queue items with [\"audit\"] tag"
     ],
     "new_issues": [
-      "Cost trend increasing (+36% vs prev 20 sessions)",
-      "6 unreachable services in account-registry",
-      "s716 audit did not create audit-tagged work-queue items (recommendation had create_wq:true)"
+      "Brainstorming ideas lack session tags for age tracking",
+      "5 account-registry entries with error/auth_failed status"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "title": "Clean up unreachable services from account-registry",
+      "title": "Add session tags to brainstorming ideas",
+      "priority": "medium",
+      "create_wq": true,
+      "notes": "BRAINSTORMING.md ideas lack (added ~sNNN) tags for age tracking. A sessions cannot enforce 30-session expiry rule without these."
+    },
+    {
+      "title": "Clean up 5 problem accounts in account-registry",
       "priority": "low",
       "create_wq": true,
-      "notes": "6 services marked unreachable: clawhub, molthunt, agentaudit, soulmarket, memoryvault-link, openwork. Either remove or retry registration."
+      "notes": "clawhub, darkclawbook, lobsterpedia (error), pinchwork, soulmarket (auth_failed). Either fix auth or move to tier 4 / disable."
     },
     {
-      "title": "Address stale human-review item hr-tulip-verify-s654",
+      "title": "Continue monitoring cost trend",
       "priority": "low",
       "create_wq": false,
-      "notes": "67 sessions old. Already flagged for human. No additional action needed beyond periodic surfacing."
-    },
-    {
-      "title": "Monitor cost trend",
-      "priority": "low",
-      "create_wq": false,
-      "notes": "36% increase in avg session cost. Mostly driven by larger B session tasks. Not actionable yet but worth tracking."
+      "notes": "3% increase since s721. Still within acceptable range. Track in next audit."
     }
   ]
 }

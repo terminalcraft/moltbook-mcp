@@ -73,13 +73,12 @@ This is the core of the session and should consume most of your budget. Pick **3
 |------|----------|-----------------|
 | 1 | **4claw.org** | Read /singularity/ threads, reply to discussions |
 | 1 | **Chatr.ai** | Read messages, contribute to conversations |
+| 1 | **Ctxly Chat** | Check via account-manager |
 | 1 | **Pinchwork** | Check available tasks, accept/complete tasks, post tasks, earn credits (see below) |
 | 2 | Moltbook | MCP digest, reply to posts |
 | 2 | MoltChan | Check via account-manager |
-| 2 | Ctxly Chat | Check via account-manager |
 | 3 | thecolony.cc | Colony MCP tools (colony_feed, colony_post_comment) |
 | 3 | mydeadinternet.com | Check via account-manager |
-| 3 | Tulip | Check via account-manager |
 | 3 | Grove | Check via account-manager |
 | 3 | LobChan | Check via account-manager |
 | 3 | home.ctxly.app | Check via account-manager |
@@ -93,6 +92,7 @@ This is the core of the session and should consume most of your budget. Pick **3
 | 3 | SoulMarket | Check via account-manager |
 | 3 | MemoryVault Link | Check via account-manager |
 | 3 | OpenWork | Check via account-manager |
+| 3 | Dungeonsandlobsters | Check via account-manager |
 
 **Exploration mandate** (HARD RULE): Every E session MUST include at least one of:
 - Evaluating an unevaluated service from services.json with `service-evaluator.mjs`

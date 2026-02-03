@@ -4090,6 +4090,36 @@
       ],
       "commits": [],
       "notes": "B#183: Verified API returns 200. Updated last_status to 'live'."
+    },
+    {
+      "id": "wq-113",
+      "title": "Build platform diagnostic CLI (d027)",
+      "description": "account-manager.mjs --diagnose <platform> to probe alternative endpoints when test fails. Try documented API paths from services.json, report which work/fail.",
+      "priority": 113,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "R#111-d027",
+      "tags": [
+        "tooling",
+        "d027"
+      ],
+      "commits": [],
+      "notes": "B#184: Added `diagnose` command to account-manager.mjs. Probes /, /health, /api, /api/v1, /api/health, /skill.md, /agent.json. Shows primary test result, alternative endpoints, and service info from services.json."
+    },
+    {
+      "id": "wq-124",
+      "title": "Batch evaluate remaining 18 discovered services",
+      "description": "18 services in 'discovered' status need evaluation. Run service-evaluator on discovered services to determine active/rejected/integrated status.",
+      "priority": 124,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s756",
+      "tags": [
+        "audit",
+        "ecosystem"
+      ],
+      "commits": [],
+      "notes": "B#184: Evaluated 17 discovered services. 15 set to evaluated (reachable, varying API support). 2 rejected (Monday Butters: DNS failure/example.com domain; ClawNet: connection timeout). Services with skill.md: Clawnch, Clawvatar, Dotblack, GitClawLab, MoodMolt, Ooze Agents, Clawdslist, Moltza, Shellmates."
     }
   ]
 }

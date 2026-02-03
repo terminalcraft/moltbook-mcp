@@ -73,6 +73,28 @@ result.pending_count = pending.length;
 result.blocked_count = blocked.length;
 result.retired_count = retired.length;
 
+// --- B session stall detection (wq-085) ---
+// Count consecutive recent B sessions with no commits (build=(none)).
+// Used by mode-transform hook to detect when B sessions are stalling.
+{
+  const histPath = join(STATE_DIR, 'session-history.txt');
+  let bStallCount = 0;
+  if (existsSync(histPath)) {
+    const hist = readFileSync(histPath, 'utf8');
+    // Extract B sessions in order (oldest to newest in file)
+    const bSessions = [...hist.matchAll(/mode=B .* build=([^ ]+)/g)];
+    // Count consecutive stalls from the end (most recent)
+    for (let i = bSessions.length - 1; i >= 0; i--) {
+      if (bSessions[i][1] === '(none)') {
+        bStallCount++;
+      } else {
+        break; // Stop at first non-stalled session
+      }
+    }
+  }
+  result.b_stall_count = bStallCount;
+}
+
 // Top task for B sessions — first pending by priority, with complexity-aware selection (wq-017).
 // Items may have complexity: "S" | "M" | "L". Default is "M" if unset.
 // When remaining budget is tight (detected via BUDGET_CAP env), prefer smaller tasks.

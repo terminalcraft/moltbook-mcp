@@ -8,7 +8,13 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Address directive d025**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-046 (Address directive d021, blocked 30s, blocker: ). Human
+- **Conditional inject chains** (added ~s740): Prompt injects could depend on each other — inject B only if inject A was applied. Would enable more sophisticated prompt composition without bloating all prompts.
+
+- **Inject impact metrics** (added ~s740): Track how sessions perform with/without specific injects. Does the compliance-nudge actually improve compliance? Measure to know.
+
+- **Hook result aggregation API** (added ~s740): Pre/post hook results are logged to JSON but there's no easy way to query trends. An API endpoint showing hook success rates over time would help identify flaky hooks.
+
+- ~~**Address directive d025**: Auto-escalation — wq-046 blocked >30 sessions. Human action needed for Tulip claim URL.~~ (d025 acknowledged R#110, d021 already deferred)
 
 - ~~**Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work~~ (retired R#107 — addressed by work generation protocol)
 

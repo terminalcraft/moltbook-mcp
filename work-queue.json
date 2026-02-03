@@ -135,116 +135,6 @@
       "notes": "B#168: 0 discovered services in registry. All 92 services have been evaluated/integrated/rejected/active. Blocked until new services discovered."
     },
     {
-      "id": "wq-081",
-      "title": "Auto-queue friction signals",
-      "description": "(added s732): Have session-context.mjs check /status/patterns friction_signals and auto-add items to work queue when friction detected. Closes the loop on pattern detection.",
-      "priority": 81,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "notes": "B#173: Added friction signal ingestion to session-context.mjs for R sessions. Dedup via isTitleDupe. Only runs with SESSION_NUM env to skip tests."
-    },
-    {
-      "id": "wq-082",
-      "title": "Pattern-based mode transforms",
-      "description": "(added s732): Add hooks/mode-transform/ script that reads /status/patterns and suggests B→R when hot files need stabilization work (tests, refactor). Knowledge digest informed: \"SDK hooks for deterministic control flow\".",
-      "priority": 82,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "notes": "B#173: Added 40-pattern-friction.sh — triggers B→R when friction_signal >= 8"
-    },
-    {
-      "id": "wq-096",
-      "title": "Historical pattern trend storage",
-      "description": "(added ~s732, promoted R#109): Store daily /status/patterns snapshots to patterns-history.json. Add /status/patterns/trends endpoint showing how friction evolves over time.",
-      "priority": 96,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-promote",
-      "tags": [
-        "observability"
-      ],
-      "commits": ["f8a4d9e"],
-      "notes": "B#174: Added /status/patterns/trends endpoint and 23-pattern-snapshot.sh hook. JSONL storage format, trend comparison (recent 10 vs earlier 10)."
-    },
-    {
-      "id": "wq-097",
-      "title": "Delete deprecated dialogue.md",
-      "description": "dialogue.md (277 lines) still exists despite migration to directives.json completing 150+ sessions ago. Archive content to dialogue-archive.md and delete. See R#109 reference.",
-      "priority": 97,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s736",
-      "tags": [
-        "audit",
-        "cleanup"
-      ],
-      "commits": [],
-      "created_session": 736,
-      "notes": "B#173: Archived 277 lines to dialogue-archive.md, deleted dialogue.md"
-    },
-    {
-      "id": "wq-098",
-      "title": "Update HOOKS.md to remove directive-tracking.json reference",
-      "description": "HOOKS.md line 15 references directive-tracking.json but no hooks use it. Stale documentation that should be removed or updated.",
-      "priority": 98,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s736",
-      "tags": [
-        "audit",
-        "docs"
-      ],
-      "commits": [],
-      "created_session": 736,
-      "notes": "B#173: Updated to reference directives.json (actual file used by hook), fixed inputs/outputs"
-    },
-    {
-      "id": "wq-099",
-      "title": "Re-register on SoulMarket",
-      "description": "SoulMarket auth_failed — API key invalid. Re-registration could restore access to the marketplace platform.",
-      "priority": 99,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s736",
-      "tags": [
-        "audit",
-        "ecosystem"
-      ],
-      "commits": [],
-      "created_session": 736,
-      "notes": "B#173: API key verified working — auth_failed was transient. No re-registration needed."
-    },
-    {
-      "id": "wq-100",
-      "title": "Component health dashboard",
-      "description": "(added ~s735): Expose component lifecycle hooks (onLoad/onUnload) metrics at /status/components/lifecycle. Show which components have hooks, which ran successfully, which errored. Would surface component rot before it causes session failures.",
-      "priority": 100,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": ["216428a"],
-      "notes": "B#174: Added lifecycle tracking to index.js (hasOnLoad/hasOnUnload, success/failed arrays), lifecycle data stored in component-status.json, /status/components/lifecycle endpoint with JSON+HTML."
-    },
-    {
-      "id": "wq-101",
-      "title": "Session forking for exploration",
-      "description": "(added ~s735): Knowledge digest pattern from claude-code-sdk-python. Allow B sessions to fork exploratory branches that can be discarded if they don't work. Requires snapshot/restore of state files. Could reduce wasted effort on failed approaches.",
-      "priority": 101,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "notes": "B#175: Added session-fork.mjs with snapshot/restore/commit/list/status/cleanup commands. 13 tests pass. Added 50-fork-cleanup.sh pre-session hook for auto-cleanup of stale forks >3 days."
-    },
-    {
       "id": "wq-102",
       "title": "Add tests for directives.mjs",
       "description": "directives.mjs handles CLI for directive management (add, ack, pending, defer, complete). No test coverage. Add tests for core commands.",
@@ -252,32 +142,43 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "B#175-queue-replenish",
-      "tags": ["testing"],
+      "tags": [
+        "testing"
+      ],
       "commits": []
     },
     {
       "id": "wq-103",
-      "title": "Fix directive-retirement.py FileNotFoundError",
-      "description": "directive-retirement.py crashes with FileNotFoundError for directive-tracking.json. File was removed during migration to directives.json. Update script to use directives.json or remove if obsolete.",
+      "title": "Add /status/prompt-inject endpoint",
+      "description": "Expose prompt-inject.json manifest via API for observability. Show which injects apply to each session type and their current status.",
       "priority": 103,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-03",
-      "source": "B#175-bug-fix",
-      "tags": ["bug", "cleanup"],
-      "commits": [],
-      "notes": "B#175: Rewrote to use directives.json. Now flags stale pending directives and long-running active directives."
+      "source": "R#110-structural",
+      "tags": ["api", "observability"],
+      "commits": []
     },
     {
       "id": "wq-104",
-      "title": "Document session forking in SESSION_BUILD.md",
-      "description": "Add section about using session-fork.mjs for exploratory work. Document the snapshot/restore/commit workflow.",
+      "title": "Add prompt-inject editor MCP tool",
+      "description": "MCP tool to add/remove/update prompt injection rules without editing JSON directly. Safer than manual edits.",
       "priority": 104,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-03",
-      "source": "B#175-docs",
-      "tags": ["docs"],
-      "commits": [],
-      "notes": "B#175: Added 'Session Forking for Exploration' section with commands, examples, and snapshot details."
+      "source": "R#110-structural",
+      "tags": ["mcp", "tooling"],
+      "commits": []
+    },
+    {
+      "id": "wq-105",
+      "title": "Add inject usage tracking to hook results",
+      "description": "Track which injects were applied each session in hook-results.json. Helps debug prompt composition issues.",
+      "priority": 105,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "R#110-structural",
+      "tags": ["observability"],
+      "commits": []
     }
   ]
 }

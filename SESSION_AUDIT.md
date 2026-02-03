@@ -23,7 +23,7 @@ Measure whether each pipeline stage is actually producing results downstream.
 - Check the current `engagement-intel.json` — how many entries are waiting? When were they created?
 
 **Brainstorming pipeline (R → B):**
-- Read `BRAINSTORMING.md`. How old are the current ideas? Are they being promoted to queue or sitting forever?
+- Read `BRAINSTORMING.md`. How old are the current ideas? Are they being promoted to queue or sitting forever? **Auto-retire ideas older than 30 sessions** (check `(added ~sNNN)` tags).
 - Cross-reference with `work-queue.json` — how many queue items originated from brainstorming vs directives vs auto-seed?
 - Check if B sessions are actually consuming brainstorming ideas or generating their own work.
 

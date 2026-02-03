@@ -12,7 +12,7 @@
 | 16 | structured-outcomes.sh | LOG_FILE, cost-history.json | session-outcomes.json | **15** |
 | 17 | engagement-log.sh | SESSION_NUM (E-only) | engagement-log.json | — |
 | 20 | auto-commit.sh | git working tree | git commit+push | — |
-| 25 | directive-audit.sh | LOG_FILE, SESSION_*.md, directive-tracking.json | directive-tracking.json | — |
+| 25 | directive-audit.sh | LOG_FILE, MODE_CHAR, SESSION_NUM | directives.json (compliance section) | — |
 | 30 | log-rotate.sh | LOG_DIR contents | deletes/truncates old logs | — |
 | 32 | compress-logs.sh | JSONL session logs | compressed logs | — |
 | 33 | queue-archive.sh | work-queue.json | work-queue-archive.json | — |
@@ -39,4 +39,4 @@ Both are satisfied by numerical execution order. No reordering needed.
 | 36 | engagement-seed.sh | Inject E session context (E-only) |
 | 37 | dns-certbot.sh | Auto-setup HTTPS when DNS resolves |
 
-Last audited: session 445 (2026-02-02)
+Last audited: session 737 (2026-02-03)

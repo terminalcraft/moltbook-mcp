@@ -136,34 +136,57 @@ if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
   echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
 fi
 
-# --- Mode downgrade gates ---
-# Track whether a downgrade occurs so we can recompute session-context. (R#59)
-# session-context.mjs runs once with the initial mode, but downgrades change it.
-# Without recomputation, B→R downgrades get an R prompt block with a stale counter
-# (predicted as raw instead of raw+1), and E→B downgrades waste B-specific context.
+# --- Mode transformation pipeline (R#106) ---
+# Replaces hardcoded downgrade gates with a hook-based system.
+# Each script in hooks/mode-transform/ can propose a mode change.
+# Scripts receive: MODE_CHAR, COUNTER, CTX_* env vars.
+# Output format: "NEW_MODE reason" (e.g., "B engagement platforms degraded")
+# First valid transformation wins. This makes mode logic extensible.
 DOWNGRADED=""
+TRANSFORM_DIR="$DIR/hooks/mode-transform"
 
-# Engagement health gate: if E session but no platforms are writable, downgrade to B.
-if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
-  ENGAGE_STATUS=$(node "$DIR/engagement-health.cjs" 2>/dev/null | tail -1 || echo "ENGAGE_DEGRADED")
-  if [ "$ENGAGE_STATUS" = "ENGAGE_DEGRADED" ]; then
-    echo "$(date -Iseconds) engage→build downgrade: all engagement platforms degraded" >> "$LOG_DIR/selfmod.log"
-    MODE_CHAR="B"
-    DOWNGRADED="E→B"
-  fi
+if [ -d "$TRANSFORM_DIR" ] && [ -z "$OVERRIDE_MODE" ]; then
+  for script in "$TRANSFORM_DIR"/*.sh; do
+    [ -f "$script" ] || continue
+    RESULT=$(MODE_CHAR="$MODE_CHAR" COUNTER="$COUNTER" \
+      CTX_PENDING_COUNT="${CTX_PENDING_COUNT:-0}" \
+      CTX_WQ_FALLBACK="${CTX_WQ_FALLBACK:-}" \
+      bash "$script" 2>/dev/null || true)
+    if [ -n "$RESULT" ]; then
+      NEW_MODE="${RESULT%% *}"
+      REASON="${RESULT#* }"
+      if [ "$NEW_MODE" != "$MODE_CHAR" ] && [[ "$NEW_MODE" =~ ^[EBRA]$ ]]; then
+        echo "$(date -Iseconds) mode-transform: $MODE_CHAR→$NEW_MODE ($REASON) via $(basename "$script")" >> "$LOG_DIR/selfmod.log"
+        DOWNGRADED="$MODE_CHAR→$NEW_MODE"
+        MODE_CHAR="$NEW_MODE"
+        break
+      fi
+    fi
+  done
 fi
 
-# Queue starvation gate: if B session but queue is empty, downgrade to R.
-# Threshold lowered from <2 to <1 in s479 (R#43): <2 caused cascading R downgrades.
-if [ "$MODE_CHAR" = "B" ] && [ -z "$OVERRIDE_MODE" ]; then
-  PENDING_COUNT="${CTX_PENDING_COUNT:-0}"
-  WQ_FALLBACK="${CTX_WQ_FALLBACK:-}"
-  if [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" != "true" ]; then
-    echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items, no fallback" >> "$LOG_DIR/selfmod.log"
-    MODE_CHAR="R"
-    DOWNGRADED="${DOWNGRADED:-B→R}"
-  elif [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" = "true" ]; then
-    echo "$(date -Iseconds) build: queue empty but brainstorming fallback available, proceeding" >> "$LOG_DIR/selfmod.log"
+# Fallback: inline gates for backward compatibility if hooks don't exist yet
+if [ -z "$DOWNGRADED" ] && [ -z "$OVERRIDE_MODE" ]; then
+  # Engagement health gate: if E session but no platforms are writable, downgrade to B.
+  if [ "$MODE_CHAR" = "E" ]; then
+    ENGAGE_STATUS=$(node "$DIR/engagement-health.cjs" 2>/dev/null | tail -1 || echo "ENGAGE_DEGRADED")
+    if [ "$ENGAGE_STATUS" = "ENGAGE_DEGRADED" ]; then
+      echo "$(date -Iseconds) engage→build downgrade: all engagement platforms degraded" >> "$LOG_DIR/selfmod.log"
+      MODE_CHAR="B"
+      DOWNGRADED="E→B"
+    fi
+  fi
+  # Queue starvation gate: if B session but queue is empty, downgrade to R.
+  if [ "$MODE_CHAR" = "B" ]; then
+    PENDING_COUNT="${CTX_PENDING_COUNT:-0}"
+    WQ_FALLBACK="${CTX_WQ_FALLBACK:-}"
+    if [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" != "true" ]; then
+      echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items, no fallback" >> "$LOG_DIR/selfmod.log"
+      MODE_CHAR="R"
+      DOWNGRADED="${DOWNGRADED:-B→R}"
+    elif [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" = "true" ]; then
+      echo "$(date -Iseconds) build: queue empty but brainstorming fallback available, proceeding" >> "$LOG_DIR/selfmod.log"
+    fi
   fi
 fi
 
@@ -195,6 +218,24 @@ if [ "$MODE_CHAR" = "B" ]; then
   [ -f "$B_COUNTER_FILE" ] && B_COUNT=$(cat "$B_COUNTER_FILE")
   B_COUNT=$((B_COUNT + 1))
   [ -z "$DRY_RUN" ] && echo "$B_COUNT" > "$B_COUNTER_FILE"
+fi
+
+# E session counter (R#98 — was read but never incremented, brainstorming bug).
+E_COUNTER_FILE="$STATE_DIR/e_session_counter"
+if [ "$MODE_CHAR" = "E" ]; then
+  E_COUNT=0
+  [ -f "$E_COUNTER_FILE" ] && E_COUNT=$(cat "$E_COUNTER_FILE")
+  E_COUNT=$((E_COUNT + 1))
+  [ -z "$DRY_RUN" ] && echo "$E_COUNT" > "$E_COUNTER_FILE"
+fi
+
+# A session counter (R#102 — audit sessions lacked counter tracking and prompt context).
+A_COUNTER_FILE="$STATE_DIR/a_session_counter"
+if [ "$MODE_CHAR" = "A" ]; then
+  A_COUNT=0
+  [ -f "$A_COUNTER_FILE" ] && A_COUNT=$(cat "$A_COUNTER_FILE")
+  A_COUNT=$((A_COUNT + 1))
+  [ -z "$DRY_RUN" ] && echo "$A_COUNT" > "$A_COUNTER_FILE"
 fi
 
 # --- Outage-aware session skip ---
@@ -240,12 +281,14 @@ done
 if [ -z "$DRY_RUN" ]; then
   MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
     LOG_DIR="$LOG_DIR" \
-    "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 || true
+    "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
+      --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" || true
 fi
 
 case "$MODE_CHAR" in
   R) MODE_FILE="$DIR/SESSION_REFLECT.md"; BUDGET="5.00" ;;
   B) MODE_FILE="$DIR/SESSION_BUILD.md"; BUDGET="10.00" ;;
+  A) MODE_FILE="$DIR/SESSION_AUDIT.md"; BUDGET="3.00" ;;
   *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
 esac
 
@@ -310,26 +353,15 @@ This is your primary task for this session. Complete it before picking up anythi
 ## B Session: #${B_COUNT}${WQ_BLOCK}"
 fi
 
+# E session prompt block: fully assembled by session-context.mjs (R#93).
+# Moved manual e-session-context.md + eval target assembly into JS pre-computation,
+# mirroring how R sessions consume CTX_R_PROMPT_BLOCK.
 E_CONTEXT_BLOCK=""
 if [ "$MODE_CHAR" = "E" ]; then
-  E_CONTEXT_FILE="$STATE_DIR/e-session-context.md"
-  if [ -f "$E_CONTEXT_FILE" ]; then
-    E_CONTEXT_BLOCK="
+  E_CONTEXT_BLOCK="
 
-## Previous engagement context (auto-generated)
-$(cat "$E_CONTEXT_FILE")"
-  fi
-
-  # Eval target from session-context.mjs (R#47)
-  EVAL_TARGET="${CTX_EVAL_TARGET:-}"
-  if [ -n "$EVAL_TARGET" ]; then
-    E_CONTEXT_BLOCK="${E_CONTEXT_BLOCK}
-
-## YOUR DEEP-DIVE TARGET (from services.json):
-${EVAL_TARGET}
-
-Spend 3-5 minutes actually exploring this service. Read content, sign up if possible, interact if alive, reject if dead. See SESSION_ENGAGE.md Deep dive section."
-  fi
+${CTX_E_PROMPT_BLOCK:-## E Session
+Follow SESSION_ENGAGE.md.}"
 fi
 
 # R session prompt block: fully assembled by session-context.mjs (R#52).
@@ -342,34 +374,118 @@ ${CTX_R_PROMPT_BLOCK:-## R Session
 Follow the checklist in SESSION_REFLECT.md.}"
 fi
 
-# --- Prompt inject blocks (R#76) ---
-# Declarative loop replaces 7 copy-paste file-read-inject patterns.
-# Each entry: filename (relative to STATE_DIR), keep|consume (delete after read).
-# All blocks are concatenated into INJECT_BLOCKS and appended to the prompt.
+# A session prompt block: fully assembled by session-context.mjs (R#102).
+# Audit sessions now get pre-computed context like R/E sessions: previous audit findings,
+# audit-tagged queue items status, and cost trend data.
+A_CONTEXT_BLOCK=""
+if [ "$MODE_CHAR" = "A" ]; then
+  A_CONTEXT_BLOCK="
+
+${CTX_A_PROMPT_BLOCK:-## A Session
+Follow the checklist in SESSION_AUDIT.md.}"
+fi
+
+# --- Prompt inject blocks (R#76, R#110: manifest-driven, wq-105: usage tracking) ---
+# Restructured from hardcoded INJECT_SPECS to external prompt-inject.json manifest.
+# Manifest specifies: file, action (keep|consume), priority, sessions, description.
+# Session type filtering enables inject files to target specific session types.
+# Priority ordering ensures deterministic injection order.
+# Usage tracking (wq-105): logs which injections were applied to inject-usage.json.
 INJECT_BLOCKS=""
-INJECT_SPECS=(
-  "compliance-nudge.txt:keep"
-  "budget-nudge.txt:keep"
-  "cost-alert.txt:consume"
-  "mcp-lint-alert.txt:consume"
-  "cred-age-alert.txt:consume"
-  "directive-inject.txt:consume"
-  "todo-followups.txt:consume"
-)
-for spec in "${INJECT_SPECS[@]}"; do
-  IFS=: read -r fname action <<< "$spec"
-  fpath="$STATE_DIR/$fname"
-  if [ -f "$fpath" ]; then
-    INJECT_BLOCKS="${INJECT_BLOCKS}
+INJECT_MANIFEST="$DIR/prompt-inject.json"
+INJECT_APPLIED=()
+INJECT_SKIPPED_SESSION=()
+INJECT_SKIPPED_MISSING=()
+
+if [ -f "$INJECT_MANIFEST" ]; then
+  # Parse manifest and process injections matching current session type
+  while IFS=$'\t' read -r fname action sessions; do
+    [ -z "$fname" ] && continue
+    # Session filter: if sessions field exists and doesn't contain current mode, skip
+    if [ -n "$sessions" ] && [[ ! "$sessions" =~ $MODE_CHAR ]]; then
+      INJECT_SKIPPED_SESSION+=("$fname")
+      continue
+    fi
+    fpath="$STATE_DIR/$fname"
+    if [ -f "$fpath" ]; then
+      INJECT_BLOCKS="${INJECT_BLOCKS}
 
 $(cat "$fpath")"
-    [ "$action" = "consume" ] && rm -f "$fpath"
-  fi
-done
+      INJECT_APPLIED+=("$fname:$action")
+      [ "$action" = "consume" ] && rm -f "$fpath"
+    else
+      INJECT_SKIPPED_MISSING+=("$fname")
+    fi
+  done < <(python3 -c "
+import json, sys
+try:
+    m = json.load(open('$INJECT_MANIFEST'))
+    injs = sorted(m.get('injections', []), key=lambda x: x.get('priority', 999))
+    for i in injs:
+        print(f\"{i['file']}\t{i.get('action','keep')}\t{i.get('sessions','')}\")
+except: pass
+" 2>/dev/null)
+else
+  # Fallback: hardcoded specs if manifest missing
+  INJECT_SPECS=(
+    "compliance-nudge.txt:keep"
+    "budget-nudge.txt:keep"
+    "cost-alert.txt:consume"
+  )
+  for spec in "${INJECT_SPECS[@]}"; do
+    IFS=: read -r fname action <<< "$spec"
+    fpath="$STATE_DIR/$fname"
+    if [ -f "$fpath" ]; then
+      INJECT_BLOCKS="${INJECT_BLOCKS}
+
+$(cat "$fpath")"
+      INJECT_APPLIED+=("$fname:$action")
+      [ "$action" = "consume" ] && rm -f "$fpath"
+    else
+      INJECT_SKIPPED_MISSING+=("$fname")
+    fi
+  done
+fi
+
+# Write inject usage tracking (wq-105)
+INJECT_USAGE_FILE="$LOG_DIR/inject-usage.json"
+{
+  echo -n "{\"session\":$COUNTER,\"mode\":\"$MODE_CHAR\",\"ts\":\"$(date -Iseconds)\","
+  echo -n "\"applied\":["
+  first=1
+  for item in "${INJECT_APPLIED[@]:-}"; do
+    [ -z "$item" ] && continue
+    [ "$first" = 1 ] || echo -n ","
+    IFS=: read -r f a <<< "$item"
+    echo -n "{\"file\":\"$f\",\"action\":\"$a\"}"
+    first=0
+  done
+  echo -n "],\"skipped_session\":["
+  first=1
+  for f in "${INJECT_SKIPPED_SESSION[@]:-}"; do
+    [ -z "$f" ] && continue
+    [ "$first" = 1 ] || echo -n ","
+    echo -n "\"$f\""
+    first=0
+  done
+  echo -n "],\"skipped_missing\":["
+  first=1
+  for f in "${INJECT_SKIPPED_MISSING[@]:-}"; do
+    [ -z "$f" ] && continue
+    [ "$first" = 1 ] || echo -n ","
+    echo -n "\"$f\""
+    first=0
+  done
+  echo "]}"
+} >> "$INJECT_USAGE_FILE"
+# Keep last 200 entries
+if [ "$(wc -l < "$INJECT_USAGE_FILE" 2>/dev/null || echo 0)" -gt 200 ]; then
+  tail -200 "$INJECT_USAGE_FILE" > "$INJECT_USAGE_FILE.tmp" && mv "$INJECT_USAGE_FILE.tmp" "$INJECT_USAGE_FILE"
+fi
 
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${INJECT_BLOCKS}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

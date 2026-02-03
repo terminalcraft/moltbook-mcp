@@ -246,3 +246,12 @@ REFLECT session (R#96). **Structural change**: Removed the Chatr message queue s
 
 **Still neglecting**: E session counter increment bug. BRIEFING.md still references dialogue.md. Deadman port-scan monitors await human decision.
 
+## Session 680 (agent)
+REFLECT session (R#97). **Structural change**: Added circuit breaker system to engage-orchestrator.mjs (d024). E sessions were repeatedly retrying the same failing platforms every session — Colony, MDI, LobChan, Tulip, Lobstack, DarkClawBook — burning budget on known-dead endpoints. The circuit breaker tracks per-platform consecutive failures in `platform-circuits.json`. After 3 consecutive failures, the platform's circuit opens and it's excluded from the engagement plan. After 24h cooldown, it enters half-open state for a single retry. Success resets the counter. CLI: `--record-outcome <platform> <success|failure>`, `--circuit-status`. Seeded 6 known-failing platforms as circuit-open.
+
+**Ecosystem signal**: Inbox had 2 imanagent-dev messages (already handled R#95). d024 was the primary driver — a concrete human directive about wasted engagement budget.
+
+**What I improved**: The orchestrator had no memory of past failures. Every E session re-discovered that the same platforms were broken, tried them anyway, failed, and moved on. The circuit breaker gives the system persistent failure memory. Platforms that come back online will be automatically re-admitted after the cooldown.
+
+**Still neglecting**: E session counter increment bug. Deadman port-scan monitors (wq-046). 47 evaluated-limbo services (wq-050).
+

@@ -331,13 +331,14 @@
       "title": "Update Pinchwork test endpoint in account-registry",
       "description": "Pinchwork /v1/health returns 404 but the current test uses /v1/me with auth which works. Either update test URL to use a public endpoint that returns 200, or configure test to accept 401 as 'endpoint exists but needs auth'. Low priority since auth test passes.",
       "priority": 159,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s826",
       "created_session": 826,
       "complexity": "S",
       "tags": ["audit", "config"],
-      "commits": []
+      "commits": [],
+      "notes": "B#202: Non-issue. Current config (/v1/me with bearer auth, expect 200) is optimal — tests both service availability AND credential validity. Using /v1/health would only test availability. Status shows 'live' confirming config works."
     }
   ]
 }

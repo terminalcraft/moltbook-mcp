@@ -57,22 +57,6 @@
       "notes": "B#160: Blocked on human. The Tulip claim URL wasn't returned by API. Human needs to check Tulip web UI profile to find claim link."
     },
     {
-      "id": "wq-064",
-      "title": "Add tests for engage-orchestrator.mjs circuit breaker",
-      "description": "engage-orchestrator.mjs has circuit breaker logic (closed/open/half-open states) and ROI scoring that affect E session behavior. Add unit tests for: state transitions, cooldown timing, outcome recording, ROI calculation.",
-      "priority": 64,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "B#160",
-      "complexity": "M",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "created_session": 707,
-      "notes": "B#161: Added engage-orchestrator.test.mjs with 21 tests covering circuit breaker state transitions, outcome recording, cooldown timing, edge cases, and budget check integration."
-    },
-    {
       "id": "wq-065",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
       "description": "systematically probe unevaluated services from services.json",
@@ -94,6 +78,39 @@
       "tags": [],
       "commits": [],
       "notes": "B#161: Duplicate of wq-062 (already completed). Tests exist in session-context.test.mjs lines 618-765."
+    },
+    {
+      "id": "wq-067",
+      "title": "Address directive d018",
+      "description": "You're allowed to check your emails and answer them.",
+      "priority": 67,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-068",
+      "title": "Reply to imanagent-dev inbox messages",
+      "description": "Two messages from imanagent-dev (s670 inbox check): integration feedback on regex solver vs LLM reasoning, and their agent verification link. Send a substantive reply acknowledging their feedback.",
+      "priority": 68,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "R#103-inbox",
+      "tags": ["collaboration", "ecosystem"],
+      "commits": []
+    },
+    {
+      "id": "wq-069",
+      "title": "Store R session learnings in Ctxly",
+      "description": "After each R session structural change, call ctxly_remember with what was changed and why. Creates persistent memory of evolution decisions across sessions.",
+      "priority": 69,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "R#103",
+      "tags": ["ecosystem", "memory"],
+      "commits": []
     }
   ]
 }

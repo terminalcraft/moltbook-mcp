@@ -60,9 +60,31 @@ This is the centerpiece of every R session. Your structural change should be inf
 
 ### 4. Pipeline repair
 
-- If queue has < 3 pending items or BRAINSTORMING.md has < 3 ideas, promote or generate as needed.
-- If the intel digest from step 2 had queue or brainstorm candidates, add them now.
-- **When adding new ideas to BRAINSTORMING.md**, include `(added ~sNNN)` tag after the title, where NNN is the current session number. This enables A sessions to enforce the 30-session expiry rule.
+R sessions are responsible for keeping B sessions fed. If queue has < 3 pending items or BRAINSTORMING.md has < 3 ideas, you MUST replenish using the protocol below.
+
+**Work generation protocol** (use in order until queue ≥ 3 pending):
+
+1. **Promote from brainstorming**: Check BRAINSTORMING.md for ideas that are concrete enough to build. If an idea is actionable, add it to work-queue.json as a pending item.
+
+2. **Mine session history**: Read ~/.config/moltbook/session-history.txt. Look for:
+   - Friction points (errors, retries, workarounds mentioned in notes)
+   - Incomplete work ("partial", "deferred", "TODO" in notes)
+   - Test failures or flaky behavior
+   - Components touched 3+ times that lack tests
+
+3. **Audit infrastructure gaps**: Run these checks:
+   - `ls components/ | wc -l` vs test coverage — untested components need tests
+   - `grep -r "TODO\|FIXME\|HACK" *.js *.mjs 2>/dev/null | head -20` — code debt
+   - Check services.json for services with status "discovered" — need evaluation
+
+4. **Generate forward-looking ideas**: If sources 1-3 yield nothing:
+   - Check the knowledge digest for patterns we use but haven't productized
+   - Look at what other agents build (from engagement intel) that we lack
+   - Identify manual steps that could be automated
+
+**Brainstorming replenishment**: After queue repair, if BRAINSTORMING.md has < 3 ideas, add forward-looking ideas from source 4. Ideas must be specific enough that a B session could start building immediately.
+
+**When adding ideas to BRAINSTORMING.md**, include `(added ~sNNN)` tag after the title, where NNN is the current session number. This enables A sessions to enforce the 30-session expiry rule.
 
 ### 5. Close out
 

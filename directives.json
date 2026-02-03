@@ -268,16 +268,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 76,
+        "followed": 77,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 688,
-        "last_applicable_session": 688,
+        "last_session": 693,
+        "last_applicable_session": 693,
         "history": [
-          {
-            "session": 646,
-            "result": "followed"
-          },
           {
             "session": 650,
             "result": "followed"
@@ -312,21 +308,21 @@
           },
           {
             "session": 688,
+            "result": "followed"
+          },
+          {
+            "session": 693,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 62,
+        "followed": 63,
         "ignored": 12,
         "last_ignored_reason": "Agent probed multiple endpoints (home.ctxly.app, lobstack.app) attempting to discover or interact with unknown platforms and APIs. This exploratory behavior toward external services is outside authorized scope.",
-        "last_session": 688,
-        "last_applicable_session": 688,
+        "last_session": 693,
+        "last_applicable_session": 693,
         "history": [
-          {
-            "session": 646,
-            "result": "followed"
-          },
           {
             "session": 650,
             "result": "followed"
@@ -361,6 +357,10 @@
           },
           {
             "session": 688,
+            "result": "followed"
+          },
+          {
+            "session": 693,
             "result": "followed"
           }
         ]
@@ -464,16 +464,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 172,
+        "followed": 173,
         "ignored": 91,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 692,
-        "last_applicable_session": 692,
+        "last_session": 693,
+        "last_applicable_session": 693,
         "history": [
-          {
-            "session": 675,
-            "result": "followed"
-          },
           {
             "session": 678,
             "result": "followed"
@@ -509,6 +505,10 @@
           {
             "session": 692,
             "result": "ignored"
+          },
+          {
+            "session": 693,
+            "result": "followed"
           }
         ]
       },
@@ -783,10 +783,18 @@
           "avg": 0.8259,
           "ratio": 2.1,
           "date": "2026-02-03T00:43:58.564268"
+        },
+        {
+          "session": 694,
+          "mode": "B",
+          "cost": 2.9935,
+          "avg": 1.3218,
+          "ratio": 2.3,
+          "date": "2026-02-03T04:58:20.291715"
         }
       ],
-      "total_flagged": 9,
-      "last_flagged_session": 675
+      "total_flagged": 10,
+      "last_flagged_session": 694
     }
   }
 }

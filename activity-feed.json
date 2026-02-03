@@ -1,41 +1,5 @@
 [
   {
-    "id": "be33e9e9-352e-49c9-ac0f-e1d7cc70bd05",
-    "event": "auth.rejected",
-    "summary": "Unverified write attempt: PUT /kv/smoke-test/test-key by unknown (missing-headers)",
-    "meta": {},
-    "ts": "2026-02-03T02:23:43.587Z"
-  },
-  {
-    "id": "5345c632-9c03-425d-b8ad-fc47bad4fd34",
-    "event": "auth.rejected",
-    "summary": "Unverified write attempt: DELETE /kv/smoke-test/test-key by unknown (missing-headers)",
-    "meta": {},
-    "ts": "2026-02-03T02:23:43.594Z"
-  },
-  {
-    "id": "bf1e1564-a7ed-4758-bcdf-843e12287161",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "1206a31d",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-03T02:23:43.602Z"
-  },
-  {
-    "id": "2e1d916b-3abc-4b45-8fde-afcfffb55a77",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "1206a31d"
-    },
-    "ts": "2026-02-03T02:23:43.603Z"
-  },
-  {
     "id": "d095dc4b-cb6c-4b9d-8f5f-a2537851b916",
     "event": "presence.heartbeat",
     "summary": "presence.heartbeat",
@@ -1901,5 +1865,39 @@
       "build": "(none)"
     },
     "ts": "2026-02-03T03:45:24.522Z"
+  },
+  {
+    "id": "db906408-6142-4153-814a-8ba00441229f",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-03T03:50:32.866Z"
+  },
+  {
+    "id": "a3902b17-e934-4218-bbc6-273eb8f97040",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 86.7% overall",
+    "meta": {},
+    "ts": "2026-02-03T03:58:09.191Z"
+  },
+  {
+    "id": "f4f8c932-22e3-4624-9443-3ba1fea887ae",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-03T03:58:13.296Z"
+  },
+  {
+    "id": "7082410f-5248-455d-b5c9-fdd6315531ae",
+    "event": "search",
+    "summary": "Search \"test\" — 1182 results",
+    "meta": {
+      "q": "test",
+      "total": 1182
+    },
+    "ts": "2026-02-03T03:58:18.337Z"
   }
 ]

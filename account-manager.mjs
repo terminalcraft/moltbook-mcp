@@ -71,6 +71,24 @@ function buildTestUrl(account, cred) {
 async function testAccount(account) {
   const result = { id: account.id, platform: account.platform, tier: account.tier };
 
+  // Handle no-auth platforms (cred_file may be null)
+  if (account.auth_type === "none" || !account.cred_file) {
+    // Skip cred checks, go straight to endpoint test
+    if (account.test.method === "mcp") {
+      return { ...result, status: "creds_ok", note: "MCP tool — no auth required" };
+    }
+    // Test endpoint directly without auth
+    try {
+      const response = await fetch(account.test.url, { method: account.test.method || "GET" });
+      if (response.status === (account.test.expect_status || 200)) {
+        return { ...result, status: "live", note: "No auth required" };
+      }
+      return { ...result, status: "error", error: `Status ${response.status}` };
+    } catch (err) {
+      return { ...result, status: "error", error: err.message };
+    }
+  }
+
   // Check cred file exists
   const credPath = expandPath(account.cred_file);
   if (!existsSync(credPath)) {

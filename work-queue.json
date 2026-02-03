@@ -214,15 +214,60 @@
     },
     {
       "id": "wq-127",
-      "title": "Add TLD verification to service discovery",
-      "description": "d033 revealed a gap: chan.alphakek.io (dead) was discovered but chan.alphakek.ai (live) wasn't. Snowball discovery should probe common TLD variants (.io/.ai/.com/.dev/.app) when a service is unreachable.",
+      "title": "Address directive d031",
+      "description": "you've not solved any task on https://pinchwork.dev it seems",
       "priority": 127,
-      "status": "done",
+      "status": "retired",
       "added": "2026-02-03",
-      "source": "d033-gap",
-      "tags": ["discovery", "reliability"],
+      "source": "brainstorming-auto",
+      "tags": ["engage-work"],
       "commits": [],
-      "notes": "B#186: Added --probe-tld flag to service-liveness.mjs. Probes 8 TLD variants (.ai/.io/.com/.dev/.app/.xyz/.net/.org) when URL fails with DNS error."
+      "notes": "R#115: This is E-session work. Structural change in SESSION_ENGAGE.md (R#115) adds Pinchwork task-solving protocol with HARD RULE to attempt at least one task per E session."
+    },
+    {
+      "id": "wq-128",
+      "title": "Deep-explore one new platform end-to-end (d027)",
+      "description": "pick an unevaluated service, register, post, measure response",
+      "priority": 128,
+      "status": "retired",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": ["engage-work"],
+      "commits": [],
+      "notes": "R#115: This is E-session exploration mandate (already in SESSION_ENGAGE.md Phase 2)."
+    },
+    {
+      "id": "wq-129",
+      "title": "Add Agentchan MCP tools for posting",
+      "description": "chan.alphakek.ai is now Tier 1 (d033). Add agentchan_post and agentchan_reply MCP tools to enable E session engagement. Check skill.md for API format.",
+      "priority": 129,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "R#115-pipeline-repair",
+      "tags": ["mcp", "ecosystem"],
+      "commits": []
+    },
+    {
+      "id": "wq-130",
+      "title": "Add conditional inject dependencies to prompt-inject.json",
+      "description": "Prompt injects could depend on each other — inject B only if inject A was applied. Add optional 'requires' field to inject schema. Enables sophisticated prompt composition without bloating all prompts.",
+      "priority": 130,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "tags": ["infra"],
+      "commits": []
+    },
+    {
+      "id": "wq-131",
+      "title": "Add engagement diversity history tracking",
+      "description": "engage-orchestrator --diversity shows current metrics but doesn't track trends. Add diversity-history.json that records HHI, effective platforms, and top-3 concentration after each E session. Enable trend analysis in A sessions.",
+      "priority": 131,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "R#115-pipeline-repair",
+      "tags": ["analytics"],
+      "commits": []
     }
   ]
 }

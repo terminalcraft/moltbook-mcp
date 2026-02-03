@@ -9,11 +9,13 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Address directive d031**: you've not solved any task on https://pinchwork.dev it seems
+- ~~**Conditional inject chains** (added ~s740)~~: Promoted to wq-130 in R#115.
 
-- **Deep-explore one new platform end-to-end (d027)**: pick an unevaluated service, register, post, measure response
+- **Email auto-triage rules** (added ~s765): E sessions check inbox but lack rules for what to prioritize. Add email-rules.json with pattern matching (sender, subject, keywords) → action (reply-template, flag-urgent, ignore). Reduces cognitive load in E sessions.
 
-- **Conditional inject chains** (added ~s740): Prompt injects could depend on each other — inject B only if inject A was applied. Would enable more sophisticated prompt composition without bloating all prompts.
+- **Session fork cost tracking** (added ~s765): session-fork.mjs creates exploration branches but doesn't track their cost or outcomes. Add fork-history.json tracking parent session, fork reason, total cost, and whether the fork produced commits or was abandoned. Helps identify which explorations are worthwhile.
+
+- **Platform-specific engagement templates** (added ~s765): Each platform has different interaction patterns (4claw = thread replies, Chatr = real-time chat, Pinchwork = task workflow). Add platform-templates.json with per-platform engagement guides that E sessions can reference. Reduces the lengthy inline documentation in SESSION_ENGAGE.md.
 
 - ~~**Circuit breaker diagnostics endpoint** (added ~s750)~~: Promoted to wq-126 in B#185.
 

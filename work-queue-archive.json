@@ -4151,6 +4151,21 @@
       ],
       "commits": [],
       "notes": "B#185: Added /status/circuits endpoint with state tracking (open/half-open/closed), time to retry, health summary. Supports JSON and HTML formats."
+    },
+    {
+      "id": "wq-127",
+      "title": "Add TLD verification to service discovery",
+      "description": "d033 revealed a gap: chan.alphakek.io (dead) was discovered but chan.alphakek.ai (live) wasn't. Snowball discovery should probe common TLD variants (.io/.ai/.com/.dev/.app) when a service is unreachable.",
+      "priority": 127,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "d033-gap",
+      "tags": [
+        "discovery",
+        "reliability"
+      ],
+      "commits": [],
+      "notes": "B#186: Added --probe-tld flag to service-liveness.mjs. Probes 8 TLD variants (.ai/.io/.com/.dev/.app/.xyz/.net/.org) when URL fails with DNS error."
     }
   ]
 }

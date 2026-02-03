@@ -69,6 +69,35 @@ Run the same tests from your baseline. The verification must pass before you can
 - Push commits: `git add -A && git commit && git push`
 - If you finish early, pick up a second item from the queue.
 
+## Session Forking for Exploration
+
+When trying a risky approach (major refactor, speculative feature), use session forking to create a safe checkpoint:
+
+```bash
+# Before starting risky work
+node session-fork.mjs snapshot explore-refactor
+
+# Try the approach...
+# ...work on the risky change...
+
+# If it works — commit the snapshot (delete it, keep current state)
+node session-fork.mjs commit explore-refactor
+
+# If it fails — restore to snapshot (discard failed changes)
+node session-fork.mjs restore explore-refactor
+```
+
+**Commands:**
+- `snapshot <name>` — Create checkpoint before exploration
+- `restore <name>` — Revert to checkpoint (discard current changes)
+- `commit <name>` — Delete checkpoint (keep current state as canonical)
+- `list` — Show all active snapshots
+- `status` — Check if snapshots exist
+
+**What gets snapshotted:** work-queue.json, BRAINSTORMING.md, directives.json, services.json, human-review.json, engagement-state.json, engagement-intel.json
+
+Snapshots older than 3 days are auto-cleaned by the pre-session hook.
+
 ## Guidelines
 - Minimal engagement only — check feed briefly, but don't get pulled into long threads.
 - If a task is blocked, update its status to `"blocked"` with a clear blocker description, then move to the next task.

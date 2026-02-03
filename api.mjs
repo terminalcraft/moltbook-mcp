@@ -1647,6 +1647,93 @@ ${errorHtml}
   }
 });
 
+// Component test coverage dashboard (wq-144)
+// Shows which components have tests and their approximate coverage
+app.get("/status/test-coverage", (req, res) => {
+  const format = req.query.format || "json";
+  try {
+    // List all component files
+    const componentsDir = join(BASE, "components");
+    const componentFiles = readdirSync(componentsDir).filter(f => f.endsWith(".js") && !f.endsWith(".test.js") && !f.endsWith(".test.mjs"));
+    const testFiles = readdirSync(componentsDir).filter(f => f.endsWith(".test.js") || f.endsWith(".test.mjs"));
+
+    // Also check root-level test files
+    const rootTestFiles = readdirSync(BASE).filter(f => f.endsWith(".test.js") || f.endsWith(".test.mjs"));
+
+    // Map components to their test status
+    const coverage = componentFiles.map(comp => {
+      const baseName = comp.replace(".js", "");
+      const hasTest = testFiles.some(t => t.startsWith(baseName + ".test"));
+      let testLines = 0;
+      let compLines = 0;
+
+      try {
+        const compPath = join(componentsDir, comp);
+        compLines = readFileSync(compPath, "utf8").split("\n").length;
+
+        if (hasTest) {
+          const testFile = testFiles.find(t => t.startsWith(baseName + ".test"));
+          const testPath = join(componentsDir, testFile);
+          testLines = readFileSync(testPath, "utf8").split("\n").length;
+        }
+      } catch {}
+
+      return {
+        component: comp,
+        has_test: hasTest,
+        component_lines: compLines,
+        test_lines: testLines,
+        test_ratio: compLines > 0 ? (testLines / compLines).toFixed(2) : "0.00"
+      };
+    });
+
+    // Sort: components with tests first, then by test ratio
+    coverage.sort((a, b) => {
+      if (a.has_test !== b.has_test) return b.has_test - a.has_test;
+      return parseFloat(b.test_ratio) - parseFloat(a.test_ratio);
+    });
+
+    const withTests = coverage.filter(c => c.has_test);
+    const withoutTests = coverage.filter(c => !c.has_test);
+    const coverageRate = (withTests.length / coverage.length * 100).toFixed(1);
+
+    const result = {
+      summary: {
+        total_components: coverage.length,
+        with_tests: withTests.length,
+        without_tests: withoutTests.length,
+        coverage_rate: parseFloat(coverageRate)
+      },
+      root_test_files: rootTestFiles.length,
+      components: coverage
+    };
+
+    if (format === "html") {
+      const rows = coverage.map(c => {
+        const statusIcon = c.has_test ? "✓" : "✗";
+        const statusColor = c.has_test ? "#a6e3a1" : "#f38ba8";
+        return `<tr><td>${c.component}</td><td style="color:${statusColor}">${statusIcon}</td><td>${c.component_lines}</td><td>${c.test_lines}</td><td>${c.test_ratio}</td></tr>`;
+      }).join("");
+
+      return res.send(`<!DOCTYPE html><html><head><title>Component Test Coverage</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1{color:#89b4fa}table{border-collapse:collapse;width:100%;max-width:800px}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}tr:nth-child(even){background:#181825}</style></head><body>
+<h1>Component Test Coverage</h1>
+<p>Coverage: <span style="color:#a6e3a1;font-weight:bold">${withTests.length}/${coverage.length}</span> (${coverageRate}%)</p>
+<p>Root test files: ${rootTestFiles.length} (${rootTestFiles.join(", ")})</p>
+<table>
+<tr><th>Component</th><th>Has Test</th><th>Lines</th><th>Test Lines</th><th>Test Ratio</th></tr>
+${rows}
+</table>
+<h3>Components Without Tests (${withoutTests.length})</h3>
+<ul style="color:#f38ba8">${withoutTests.map(c => `<li>${c.component} (${c.component_lines} lines)</li>`).join("")}</ul>
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/test-coverage?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/components" style="color:#89b4fa">Components</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+</body></html>`);
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Component lifecycle health (wq-100)
 // Shows which components have lifecycle hooks and their execution status
 app.get("/status/components/lifecycle", (req, res) => {

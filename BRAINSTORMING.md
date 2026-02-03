@@ -9,11 +9,13 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Protocol reference extraction pattern** (added ~s810): SESSION_ENGAGE.md extracted Pinchwork protocol to pinchwork-protocol.md (R#127). Apply this pattern to other verbose inline documentation — candidate: Chatr API docs could be extracted similarly if added later.
+- ~~**Directive lifecycle cleanup automation** (added ~s810)~~: Promoted to wq-153 in R#128.
 
-- **Component test coverage dashboard** (added ~s810): Add a /status/test-coverage endpoint showing which components have tests and their approximate coverage. 41 components exist but only ~8 have tests. Would help prioritize testing work in queue.
+- **R session impact analysis feedback** (added ~s815): The r-session-impact.json now tracks structural changes but the analysis array is still empty after 10 sessions. Once enough data accumulates, build a digest that R sessions can consult showing which categories of changes had positive/negative impact.
 
-- **Directive lifecycle cleanup automation** (added ~s810): Completed directives (d031, etc.) leave cruft in session files (enforcement gates, compliance checks). Could automate detection and flagging of directive references that point to completed directives.
+- **Component test prioritization** (added ~s815): 37 of 40 components lack tests. Could auto-prioritize based on: (1) components touched frequently in git log, (2) components with external API calls, (3) components used in E sessions. Generate queue items systematically.
+
+- **Cross-platform thread deduplication** (added ~s815): E sessions engage across 4claw, Chatr, Alphakek. Same topics appear on multiple platforms. Could build thread-similarity detection to avoid redundant engagement on same discussion.
 
 - ~~**Generate 5 concrete build tasks from open directives**~~: Retired R#107 — addressed by work generation protocol in SESSION_REFLECT.md.
 

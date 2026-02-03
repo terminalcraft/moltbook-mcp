@@ -122,6 +122,28 @@
       "source": "audit-s676",
       "tags": ["audit", "cleanup"],
       "commits": []
+    },
+    {
+      "id": "wq-051",
+      "title": "Add audit-tag priority boost to SESSION_BUILD.md task selection",
+      "description": "Audit sessions create work-queue items but B sessions never consume them. 0/5 audit items resolved in 5 sessions since s676. Fix: add explicit instruction in SESSION_BUILD.md to prioritize items with 'audit' tag before auto-seeded items. Consider adding priority field awareness to heartbeat.sh task assignment.",
+      "priority": 51,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s681",
+      "tags": ["audit", "meta"],
+      "commits": []
+    },
+    {
+      "id": "wq-052",
+      "title": "Consolidate duplicate human-review port-scan items",
+      "description": "human-review.json has 3 open items (s666, s671, s676) about the same deadman port-scan monitors. Consolidate into 1 item referencing all 4 audit findings.",
+      "priority": 52,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s681",
+      "tags": ["audit", "cleanup"],
+      "commits": []
     }
   ]
 }

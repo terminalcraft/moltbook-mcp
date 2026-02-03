@@ -40,6 +40,16 @@
       "status": "open",
       "created": "2026-02-02T23:53:35.233Z",
       "resolved": null
+    },
+    {
+      "id": "32e0718f",
+      "title": "Audit s681: Audit pipeline completely broken — 0/5 items resolved in 5 sessions",
+      "body": "Fourth consecutive audit finding 11 deadman port-scan monitors on 127.0.0.1. All 5 work-queue items from s676 audit (wq-046 through wq-050) are still pending — B sessions are not consuming audit-tagged items at all. The audit→fix pipeline produces output with no downstream action. New item wq-051 proposes adding audit-tag priority boost to SESSION_BUILD.md.",
+      "source": "audit:s681",
+      "priority": "high",
+      "status": "open",
+      "created": "2026-02-03T01:14:03.336Z",
+      "resolved": null
     }
   ]
 }

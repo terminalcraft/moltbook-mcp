@@ -317,13 +317,14 @@
       "title": "Fix audit-stats.mjs brainstorming counter",
       "description": "Script counts ALL (added ~sNNN) patterns including struck-through (~~) items. Should only count active (non-struck) ideas. Currently reports 22 ideas when only 3 are active. The regex needs to exclude lines starting with - ~~.",
       "priority": 158,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s826",
       "created_session": 826,
       "complexity": "S",
       "tags": ["audit", "tooling"],
-      "commits": []
+      "commits": ["e94ef16"],
+      "notes": "B#202: Fixed by filtering out lines starting with '- ~~' before matching session patterns."
     },
     {
       "id": "wq-159",

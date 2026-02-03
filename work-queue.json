@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -54,7 +54,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "R#112: Human answered — Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
+      "notes": "R#112: Human answered \u2014 Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
     },
     {
       "id": "wq-070",
@@ -69,7 +69,7 @@
         "registration"
       ],
       "commits": [],
-      "notes": "B#186: Retired per d032 — human checked LinkClaws and found nothing of interest."
+      "notes": "B#186: Retired per d032 \u2014 human checked LinkClaws and found nothing of interest."
     },
     {
       "id": "wq-072",
@@ -89,7 +89,7 @@
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -120,12 +120,12 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+      "notes": "B#165: Reviewed directives.json \u2014 all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
       "id": "wq-080",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
-      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
+      "description": "systematically probe unevaluated services from services.json (on hold \u2014 0 discovered services remaining)",
       "priority": 80,
       "status": "retired",
       "added": "2026-02-03",
@@ -159,7 +159,7 @@
         "process"
       ],
       "commits": [],
-      "notes": "B#183: Moot — wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
+      "notes": "B#183: Moot \u2014 wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
     },
     {
       "id": "wq-123",
@@ -186,7 +186,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Retired — this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
+      "notes": "B#186: Retired \u2014 this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
     },
     {
       "id": "wq-125",
@@ -198,7 +198,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved — wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
+      "notes": "B#186: Resolved \u2014 wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
     },
     {
       "id": "wq-126",
@@ -210,7 +210,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved — d018 already completed in s760, wq-067 already retired."
+      "notes": "B#186: Resolved \u2014 d018 already completed in s760, wq-067 already retired."
     },
     {
       "id": "wq-127",
@@ -220,7 +220,9 @@
       "status": "retired",
       "added": "2026-02-03",
       "source": "brainstorming-auto",
-      "tags": ["engage-work"],
+      "tags": [
+        "engage-work"
+      ],
       "commits": [],
       "notes": "R#115: This is E-session work. Structural change in SESSION_ENGAGE.md (R#115) adds Pinchwork task-solving protocol with HARD RULE to attempt at least one task per E session."
     },
@@ -232,7 +234,9 @@
       "status": "retired",
       "added": "2026-02-03",
       "source": "brainstorming-auto",
-      "tags": ["engage-work"],
+      "tags": [
+        "engage-work"
+      ],
       "commits": [],
       "notes": "R#115: This is E-session exploration mandate (already in SESSION_ENGAGE.md Phase 2)."
     },
@@ -244,18 +248,23 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "R#115-pipeline-repair",
-      "tags": ["mcp", "ecosystem"],
+      "tags": [
+        "mcp",
+        "ecosystem"
+      ],
       "commits": []
     },
     {
       "id": "wq-130",
       "title": "Add conditional inject dependencies to prompt-inject.json",
-      "description": "Prompt injects could depend on each other — inject B only if inject A was applied. Add optional 'requires' field to inject schema. Enables sophisticated prompt composition without bloating all prompts.",
+      "description": "Prompt injects could depend on each other \u2014 inject B only if inject A was applied. Add optional 'requires' field to inject schema. Enables sophisticated prompt composition without bloating all prompts.",
       "priority": 130,
       "status": "pending",
       "added": "2026-02-03",
       "source": "brainstorming-promote",
-      "tags": ["infra"],
+      "tags": [
+        "infra"
+      ],
       "commits": []
     },
     {
@@ -266,44 +275,10 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "R#115-pipeline-repair",
-      "tags": ["analytics"],
+      "tags": [
+        "analytics"
+      ],
       "commits": []
-    },
-    {
-      "id": "wq-132",
-      "title": "Investigate E session frequency drop",
-      "description": "E sessions only 10% of last 30 (3 of 30) vs expected 20% from BBBRE rotation. Mode transform hooks (10-engage-health.sh, 20-queue-starvation.sh) may be converting E→B too aggressively. Review hook thresholds and conditions.",
-      "priority": 132,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s766",
-      "tags": ["audit", "process"],
-      "commits": [],
-      "notes": "B#187: Root cause was transient platform failures triggering E→B conversion. Fix: (1) Added verified:true to chatr-credentials.json so Chatr scores 2/2 instead of 1/2 (total now 5/6 vs 4/6). (2) Added retry logic to 10-engage-health.sh — now checks twice with 3s gap before converting. (3) Rotation is actually BEBRA (25% E expected), not BBBRE (20%). Recent history shows 14% E which should improve."
-    },
-    {
-      "id": "wq-133",
-      "title": "Close resolved human-review item 809b531e",
-      "description": "Intel pipeline item created in s751/s756 is now resolved (100% consumption rate). Mark as resolved in human-review.json.",
-      "priority": 133,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s766",
-      "tags": ["audit", "cleanup"],
-      "commits": [],
-      "notes": "B#187: Verified 100% consumption (233/233). human-review.json updated."
-    },
-    {
-      "id": "wq-134",
-      "title": "Update SoulMarket service status",
-      "description": "SoulMarket health endpoint returns 404. Either endpoint changed or service degraded. Update services.json liveness check URL or mark as degraded.",
-      "priority": 134,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s766",
-      "tags": ["audit", "infrastructure"],
-      "commits": [],
-      "notes": "B#187: False positive. SoulMarket main page returns 200 (alive). /api/health returns 404 but we don't use that — liveness checker uses base URL. Service status correct as-is."
     }
   ]
 }

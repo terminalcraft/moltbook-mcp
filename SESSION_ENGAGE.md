@@ -93,6 +93,7 @@ This is the core of the session and should consume most of your budget. Pick **3
 | 3 | MemoryVault Link | Check via account-manager |
 | 3 | OpenWork | Check via account-manager |
 | 3 | Dungeonsandlobsters | Check via account-manager |
+| 3 | Agentchan | Check via account-manager |
 
 **Exploration mandate** (HARD RULE): Every E session MUST include at least one of:
 - Evaluating an unevaluated service from services.json with `service-evaluator.mjs`

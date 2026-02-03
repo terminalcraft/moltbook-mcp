@@ -1,103 +1,5 @@
 [
   {
-    "id": "e093262c-2823-4c66-99d5-7b82b6da66ca",
-    "event": "task.created",
-    "summary": "Done test 1770135150191",
-    "meta": {
-      "id": "e7da73f8",
-      "from": "api-test",
-      "title": "Done test 1770135150191",
-      "priority": "medium"
-    },
-    "ts": "2026-02-03T16:12:30.197Z"
-  },
-  {
-    "id": "fcce7536-346e-45a7-b1f1-a6e3d447da2a",
-    "event": "task.claimed",
-    "summary": "api-test claimed: Done test 1770135150191",
-    "meta": {
-      "id": "e7da73f8",
-      "agent": "api-test"
-    },
-    "ts": "2026-02-03T16:12:30.205Z"
-  },
-  {
-    "id": "427b9897-fdd0-46f2-8b85-1660eaaedaab",
-    "event": "task.claimed",
-    "summary": "Done test 1770135150191",
-    "meta": {
-      "id": "e7da73f8",
-      "title": "Done test 1770135150191",
-      "claimed_by": "api-test"
-    },
-    "ts": "2026-02-03T16:12:30.207Z"
-  },
-  {
-    "id": "a7b61f63-1bdd-4f36-ae38-2f60a4bf1365",
-    "event": "task.done",
-    "summary": "api-test completed: Done test 1770135150191",
-    "meta": {
-      "id": "e7da73f8",
-      "agent": "api-test"
-    },
-    "ts": "2026-02-03T16:12:30.217Z"
-  },
-  {
-    "id": "30b98d8b-20c5-4c40-9f32-f44e17ca5d64",
-    "event": "task.done",
-    "summary": "Done test 1770135150191",
-    "meta": {
-      "id": "e7da73f8",
-      "title": "Done test 1770135150191",
-      "agent": "api-test",
-      "result": null
-    },
-    "ts": "2026-02-03T16:12:30.218Z"
-  },
-  {
-    "id": "b54e04ba-e382-4d81-b0e9-dbcdd31b493d",
-    "event": "task.created",
-    "summary": "api-test created task: Cancel test 1770135150221",
-    "meta": {
-      "id": "a725e178",
-      "from": "api-test"
-    },
-    "ts": "2026-02-03T16:12:30.226Z"
-  },
-  {
-    "id": "a3d647d9-9bba-4684-bd0d-98689f2d66c3",
-    "event": "task.created",
-    "summary": "Cancel test 1770135150221",
-    "meta": {
-      "id": "a725e178",
-      "from": "api-test",
-      "title": "Cancel test 1770135150221",
-      "priority": "medium"
-    },
-    "ts": "2026-02-03T16:12:30.227Z"
-  },
-  {
-    "id": "7216de00-cd2d-4cc5-86e6-e4ec515a80b9",
-    "event": "task.cancelled",
-    "summary": "api-test cancelled: Cancel test 1770135150221",
-    "meta": {
-      "id": "a725e178",
-      "agent": "api-test"
-    },
-    "ts": "2026-02-03T16:12:30.237Z"
-  },
-  {
-    "id": "34486b18-78be-4b81-b553-d9799b25c81b",
-    "event": "task.cancelled",
-    "summary": "Cancel test 1770135150221",
-    "meta": {
-      "id": "a725e178",
-      "title": "Cancel test 1770135150221",
-      "agent": "api-test"
-    },
-    "ts": "2026-02-03T16:12:30.239Z"
-  },
-  {
     "id": "f211bec6-84ff-4a0b-8bcd-a5f4e0477896",
     "event": "smoke.run",
     "summary": "Smoke tests: 21/22 passed in 219ms",
@@ -1917,5 +1819,90 @@
       "build": "2 commit(s)"
     },
     "ts": "2026-02-03T18:38:02.815Z"
+  },
+  {
+    "id": "00ba4418-ac48-4509-9da8-f11276110c18",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-03T18:39:15.476Z"
+  },
+  {
+    "id": "a5f1d9a8-6c33-4fce-9d1f-c5aa731288c3",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 87.9% overall",
+    "meta": {},
+    "ts": "2026-02-03T18:44:50.479Z"
+  },
+  {
+    "id": "37a27054-8b2f-4a3b-90a6-f31cb4e668af",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-03T18:44:52.605Z"
+  },
+  {
+    "id": "83e26e11-fb24-4759-bf93-ba56353e7cbe",
+    "event": "search",
+    "summary": "Search \"test\" — 1374 results",
+    "meta": {
+      "q": "test",
+      "total": 1374
+    },
+    "ts": "2026-02-03T18:44:57.691Z"
+  },
+  {
+    "id": "b1703e37-69b6-45e6-96de-9df6e9b96883",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-03T18:44:57.710Z"
+  },
+  {
+    "id": "20a7de0c-c587-46f7-8b87-5ae3fef3fbbb",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "25045fa0",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-03T18:44:58.293Z"
+  },
+  {
+    "id": "150eb187-045d-4e0c-b494-3ef5b7d3f245",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "25045fa0"
+    },
+    "ts": "2026-02-03T18:44:58.294Z"
+  },
+  {
+    "id": "7e28c2d4-46cf-4092-afb1-7b91f12e3861",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-03T18:44:58.301Z"
+  },
+  {
+    "id": "178b21db-b64c-42eb-ad11-f58d164ad626",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "768",
+      "mode": "E",
+      "duration": "5m34s",
+      "build": "(none)"
+    },
+    "ts": "2026-02-03T18:44:58.452Z"
   }
 ]

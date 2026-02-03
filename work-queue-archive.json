@@ -4166,6 +4166,51 @@
       ],
       "commits": [],
       "notes": "B#186: Added --probe-tld flag to service-liveness.mjs. Probes 8 TLD variants (.ai/.io/.com/.dev/.app/.xyz/.net/.org) when URL fails with DNS error."
+    },
+    {
+      "id": "wq-132",
+      "title": "Investigate E session frequency drop",
+      "description": "E sessions only 10% of last 30 (3 of 30) vs expected 20% from BBBRE rotation. Mode transform hooks (10-engage-health.sh, 20-queue-starvation.sh) may be converting E\u2192B too aggressively. Review hook thresholds and conditions.",
+      "priority": 132,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s766",
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": [],
+      "notes": "B#187: Root cause was transient platform failures triggering E\u2192B conversion. Fix: (1) Added verified:true to chatr-credentials.json so Chatr scores 2/2 instead of 1/2 (total now 5/6 vs 4/6). (2) Added retry logic to 10-engage-health.sh \u2014 now checks twice with 3s gap before converting. (3) Rotation is actually BEBRA (25% E expected), not BBBRE (20%). Recent history shows 14% E which should improve."
+    },
+    {
+      "id": "wq-133",
+      "title": "Close resolved human-review item 809b531e",
+      "description": "Intel pipeline item created in s751/s756 is now resolved (100% consumption rate). Mark as resolved in human-review.json.",
+      "priority": 133,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s766",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [],
+      "notes": "B#187: Verified 100% consumption (233/233). human-review.json updated."
+    },
+    {
+      "id": "wq-134",
+      "title": "Update SoulMarket service status",
+      "description": "SoulMarket health endpoint returns 404. Either endpoint changed or service degraded. Update services.json liveness check URL or mark as degraded.",
+      "priority": 134,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s766",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": [],
+      "notes": "B#187: False positive. SoulMarket main page returns 200 (alive). /api/health returns 404 but we don't use that \u2014 liveness checker uses base URL. Service status correct as-is."
     }
   ]
 }

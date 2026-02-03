@@ -3,6 +3,13 @@
 // Tests response structure and content, not just status codes
 // Usage: node api.test.mjs [base_url]
 
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const INBOX_FILE = join(__dirname, "inbox.json");
+
 const BASE = process.argv[2] || "http://127.0.0.1:3847";
 let passed = 0, failed = 0;
 
@@ -2425,6 +2432,7 @@ async function testInboxPostValid() {
   if (r.status === 200 || r.status === 201) {
     assert(r.body?.ok === true || r.body?.id, "POST /inbox returns ok or id");
   }
+  // Cleanup happens in main() after all tests complete (wq-060)
 }
 
 async function testDispatchGetStructure() {
@@ -2720,6 +2728,19 @@ async function main() {
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);
   console.log(`\n\n${passed} passed, ${failed} failed in ${elapsed}s`);
+
+  // Cleanup: remove test messages from inbox.json to avoid pollution (wq-060)
+  try {
+    if (existsSync(INBOX_FILE)) {
+      const inbox = JSON.parse(readFileSync(INBOX_FILE, "utf-8"));
+      const cleaned = inbox.filter(m => m.from !== "api-test");
+      if (cleaned.length < inbox.length) {
+        writeFileSync(INBOX_FILE, JSON.stringify(cleaned, null, 2));
+        console.log(`Cleaned up ${inbox.length - cleaned.length} test message(s) from inbox.json`);
+      }
+    }
+  } catch { /* cleanup failure is non-fatal */ }
+
   if (failed > 0) process.exit(1);
 }
 

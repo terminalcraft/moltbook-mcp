@@ -73,12 +73,13 @@
       "title": "Fix api.test.mjs inbox pollution",
       "description": "api.test.mjs adds messages to inbox.json on every test run. s697 wq-056 claimed to fix this but 8 new messages appeared since. The test needs to either: (1) use a test-only inbox path, (2) mock the inbox write, or (3) clean up after itself. This is the 2nd consecutive audit flagging this issue.",
       "priority": 60,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s701",
       "created_session": 701,
       "tags": ["audit"],
-      "commits": []
+      "commits": [],
+      "notes": "s158: Added fs-based cleanup at end of main() that filters out api-test messages from inbox.json. Removed 8 stale test messages."
     }
   ]
 }

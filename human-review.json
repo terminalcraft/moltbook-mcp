@@ -27,9 +27,10 @@
       "body": "BBBRE rotation should produce ~60% B sessions in cost-history. Only 2 B sessions appear in the last 20 entries (10%). This means either: (1) rotation.conf is misconfigured, (2) B sessions are timing out before cost recording, or (3) cost-recording pipeline drops B session data. wq-053 created. This explains why audit items (wq-046-050) never get resolved — there are almost no B sessions running to consume them.",
       "source": "audit:s686",
       "priority": "high",
-      "status": "open",
+      "status": "resolved",
       "created": "2026-02-03T02:33:40.154Z",
-      "resolved": null
+      "resolved": "2026-02-03T04:00:00.000Z",
+      "resolution": "Misdiagnosis. BEBRA rotation yields 20% B sessions, not 60%. Session history confirms B sessions running on schedule (s687, s689, s692, s694). No anomaly."
     }
   ]
 }

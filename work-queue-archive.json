@@ -2927,6 +2927,21 @@
         "cleanup"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-047",
+      "title": "Clean stale dialogue.md and directive-tracking.json references from code",
+      "description": "api.mjs (2 refs), session-context.mjs (1 ref), hooks/pre-session/22-stale-blocker.sh, hooks/pre-session/39-compliance-nudge.sh (2 refs), hooks/post-session/25-directive-audit.sh. Replace dialogue.md refs with directives.json, update or remove directive-tracking.json refs.",
+      "priority": 47,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s676",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [],
+      "notes": "Done s153. Replaced 7 stale refs across 5 files."
     }
   ]
 }

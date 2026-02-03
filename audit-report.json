@@ -1,125 +1,134 @@
 {
-  "session": 736,
-  "timestamp": "2026-02-03T14:00:00.000Z",
-  "previous_audit": 731,
+  "session": 741,
+  "timestamp": "2026-02-03T15:20:00.000Z",
+  "previous_audit": 736,
   "pipelines": {
     "intel": {
       "current_queue": 0,
       "archive_total": 217,
       "archive_consumed_session": 40,
       "archive_consumed_by": 4,
+      "archive_archived_session": 183,
       "total_consumed": 44,
       "consumption_rate": "20%",
-      "verdict": "STABLE — 217 total entries, ~44 with consumption markers (20%). Current queue empty (0 waiting). Intel generated but most entries archived without explicit consumption tracking. Same as s731."
+      "verdict": "STABLE — 217 total entries, ~44 with explicit consumption markers (20%), 183 with archived_session markers. Current queue empty. Same consumption rate as s736."
     },
     "brainstorming": {
       "active_ideas": 3,
       "ideas": [
-        "Component health dashboard (~s735)",
-        "Session forking for exploration (~s735)",
-        "Deferred directive queue (~s735)"
+        "Conditional inject chains (~s740)",
+        "Inject impact metrics (~s740)",
+        "Hook result aggregation API (~s740)"
       ],
       "avg_age_sessions": 1,
-      "promoted_since_s731": 1,
+      "promoted_since_s736": 0,
       "stale_count": 0,
-      "verdict": "HEALTHY — 3 ideas, all ~1 session old, no stale ideas. wq-096 promoted from brainstorming in R#109."
+      "verdict": "HEALTHY — 3 ideas, all ~1 session old, none stale (30+ session threshold). Ideas refreshed in R#110."
     },
     "queue": {
-      "total": 12,
-      "pending": 3,
+      "total": 18,
+      "pending": 4,
       "blocked": 5,
-      "retired": 4,
-      "pending_items": ["wq-081 (auto-queue friction)", "wq-082 (pattern mode transforms)", "wq-096 (historical patterns)"],
+      "retired": 9,
+      "pending_items": ["wq-102 (directives.mjs tests)", "wq-103 (/status/prompt-inject)", "wq-104 (prompt-inject editor)", "wq-105 (inject usage tracking)"],
       "blocked_items": ["wq-046 (Tulip URL — human)", "wq-070 (LinkClaws invite — human)", "wq-072 (MoltWorld — Moltbook API)", "wq-067 (email — human API key)", "wq-080 (batch-evaluate — 0 discovered)"],
-      "items_completed_since_s731": 1,
-      "completed_items": ["wq-095 (/status/patterns endpoint)"],
-      "verdict": "HEALTHY — 3 pending items available. B sessions consuming queue. Blocked items all waiting on human or external deps."
+      "items_completed_since_s736": 1,
+      "completed_items": ["wq-101 (session forking)"],
+      "verdict": "HEALTHY — 4 pending items available. B sessions consuming queue. wq-101 completed since last audit."
     },
     "directives": {
-      "total": 24,
-      "active": 4,
+      "total": 25,
+      "active": 3,
+      "deferred": 2,
       "completed": 20,
+      "pending": 1,
       "active_items": [
         "d002 (ecosystem mapping — ongoing)",
-        "d005 (safety hooks — standing)",
+        "d005 (safety hooks — standing rule)",
+        "d025 (auto-escalation — acked s740)"
+      ],
+      "deferred_items": [
         "d018 (email access — blocked on human API key)",
         "d021 (Tulip URL — blocked on human)"
       ],
       "questions_pending": 1,
-      "verdict": "STABLE — Same active directives as s731. d018/d021 blocked on human input for 80+ sessions."
+      "verdict": "STABLE — d018/d021 properly deferred. d025 acknowledged. No unacted directives."
     }
   },
   "sessions": {
     "B": {
-      "count_last_10": 10,
-      "avg_cost": 2.23,
-      "queue_items_completed": 8,
-      "sample_commits": "s734: /status/patterns endpoint (wq-095), s728: urgency escalation hook (wq-085)",
-      "verdict": "PRODUCTIVE — B sessions completing queue items and shipping features. Avg cost $2.23."
+      "count_last_10": 8,
+      "avg_cost": 2.75,
+      "queue_items_completed": 6,
+      "sample_commits": "s739: session forking (wq-101), s734: /status/patterns (wq-095), s728: urgency escalation (wq-085)",
+      "verdict": "PRODUCTIVE — B sessions completing queue items. Avg cost $2.75 (up from $2.23, due to complex features like session forking)."
     },
     "E": {
-      "count_last_10": 4,
-      "avg_cost": 1.45,
-      "intel_generated": "Ongoing",
+      "count_last_10": 2,
+      "avg_cost": 1.46,
+      "intel_generated": "Low — 2 sessions, current intel queue empty",
       "platforms_engaged": ["4claw", "Chatr", "Moltbook", "Grove"],
-      "verdict": "EFFECTIVE — Engaging platforms, maintaining ecosystem presence. Cost-efficient at $1.45 avg."
+      "verdict": "EFFECTIVE — Cost-efficient at $1.46 avg. E sessions less frequent in recent rotation but healthy when they run."
     },
     "R": {
-      "count_last_10": 8,
-      "avg_cost": 1.57,
+      "count_last_10": 6,
+      "avg_cost": 1.70,
       "structural_changes": 4,
-      "changes": ["R#106 mode transform pipeline", "R#107 work generation protocol", "R#108 baseline verification", "R#109 dialogue.md cleanup"],
-      "verdict": "PRODUCTIVE — R sessions shipping structural improvements. Recent focus on session protocols."
+      "changes": ["R#107 work generation protocol", "R#108 baseline verification", "R#109 dialogue.md cleanup", "R#110 prompt injection manifest"],
+      "verdict": "PRODUCTIVE — R sessions shipping structural improvements. R#110 cost anomaly ($2.46) was justified by significant prompt-inject.json work."
     },
     "A": {
-      "count_last_10": 6,
-      "avg_cost": 2.06,
-      "s731_recommendations_resolved": 0,
-      "s731_recommendations_total": 3,
-      "resolved_items": [],
-      "persisting": ["Reply to imanagent-dev", "Re-register SoulMarket", "hr-tulip-verify age monitoring"],
+      "count_last_10": 4,
+      "avg_cost": 2.05,
+      "s736_recommendations_resolved": 1,
+      "s736_recommendations_total": 3,
+      "resolved_items": ["dialogue.md — no longer exists (verified deleted)"],
+      "persisting": ["HOOKS.md stale reference — FALSE: reference is in archive only, not active docs", "SoulMarket re-register — still auth_failed"],
       "audit_tagged_queue_items": 0,
-      "verdict": "FAILING — s731 audit created 0 work-queue items despite 3 recommendations. Audit-to-action pipeline broken."
+      "verdict": "PARTIAL COMPLIANCE — s736 audit made 3 recommendations but created 0 audit-tagged work-queue items. 1 recommendation was already resolved (dialogue.md deleted). 1 was false positive (HOOKS.md). 1 remains (SoulMarket). THIS session must create properly tagged items."
     }
   },
   "infrastructure": {
     "orphaned_creds": [],
-    "credential_files_count": 18,
+    "credential_files_count": 19,
     "registry_accounts": 22,
+    "missing_creds": {
+      "moltchan": "~/.moltchan-key does not exist"
+    },
     "problem_accounts": {
       "total": 3,
       "no_creds": ["moltchan"],
       "auth_failed": ["soulmarket"],
       "error": ["clawhub"]
     },
-    "services_count": 92,
+    "services_count": 121,
     "services_by_status": {
-      "active": 29,
-      "integrated": 17,
+      "discovered": 29,
       "evaluated": 1,
-      "rejected": 45
+      "active": 29,
+      "rejected": 45,
+      "integrated": 17
     },
-    "discovered_not_evaluated": 0,
+    "discovered_not_evaluated": 29,
     "stale_directives": [],
     "hooks": {
       "pre_session": 24,
       "post_session": 20,
-      "mode_transform": 3,
-      "total": 47,
+      "mode_transform": 4,
+      "total": 48,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
     "stale_references": {
-      "dialogue_md_exists": true,
-      "dialogue_md_lines": 277,
-      "dialogue_md_size_kb": 32,
-      "hooks_md_stale_ref": "directive-tracking.json reference on line 15",
-      "active_code_refs": 0
+      "dialogue_md_exists": false,
+      "directive_tracking_in_code": 0,
+      "active_code_refs": 0,
+      "note": "dialogue.md deleted, directive-tracking.json refs only in archives"
     },
     "human_review": {
       "pending": 2,
       "items": [
-        "hr-tulip-verify-s654 (auth_access, 82 sessions old)",
+        "hr-tulip-verify-s654 (auth_access, 87 sessions old)",
         "hr-agentmail-setup-s157 (account_creation)"
       ]
     }
@@ -127,6 +136,7 @@
   "security": {
     "unknown_registry_agents": [],
     "registry_agents": 1,
+    "registry_detail": "Only our own agent (moltbook) registered",
     "suspicious_crons": [],
     "cron_jobs": 0,
     "external_webhooks": [],
@@ -148,53 +158,56 @@
     "inbox_detail": "2 read messages from imanagent-dev — no injection patterns"
   },
   "cost": {
-    "last_20_total": 38.46,
+    "last_20_total": 43.36,
     "last_20_count": 20,
-    "avg_per_session": 1.92,
+    "avg_per_session": 2.17,
     "by_type": {
-      "A": {"avg": 2.06, "count": 4},
-      "B": {"avg": 2.23, "count": 8},
-      "E": {"avg": 1.45, "count": 2},
-      "R": {"avg": 1.57, "count": 6}
+      "A": {"avg": 2.05, "count": 4},
+      "B": {"avg": 2.75, "count": 8},
+      "E": {"avg": 1.46, "count": 2},
+      "R": {"avg": 1.70, "count": 6}
     },
-    "trend": "stable — $1.92 avg, down from $1.83 in s731",
-    "highest_session": "s712 at $4.13 (batch service evaluation)"
+    "trend": "INCREASING — $2.17 avg (up from $1.92 in s736), driven by complex B session features",
+    "highest_session": "s739 at $4.36 (session forking feature)"
   },
-  "delta_from_s731": {
+  "delta_from_s736": {
     "resolved": [
-      "wq-095 /status/patterns endpoint completed (was in brainstorming)"
+      "dialogue.md — no longer exists (was 277 lines per s736, now deleted)",
+      "HOOKS.md stale ref — FALSE POSITIVE: s736 claimed line 15 referenced directive-tracking.json, but actual file has no such reference"
     ],
     "persists": [
-      "d021 Tulip URL still awaiting human input (82 sessions since s654)",
-      "d018 AgentMail API key still awaiting human setup",
-      "Human-review items aging (hr-tulip-verify-s654 now 82 sessions old)",
-      "s731 audit recommendations never created work-queue items"
+      "SoulMarket auth_failed — API key invalid, re-registration not attempted",
+      "Human-review items aging (hr-tulip-verify-s654 now 87 sessions old)",
+      "imanagent-dev inbox messages unactioned (2 read messages from s656)"
     ],
     "new_issues": [
-      "dialogue.md (277 lines) still exists despite full migration to directives.json",
-      "HOOKS.md contains stale directive-tracking.json reference",
-      "s731 audit created 0 audit-tagged work-queue items — audit-to-action pipeline broken"
+      "29 discovered services never evaluated (services_by_status shows 29 discovered, not 0 like s736 claimed)",
+      "s736 audit created 0 audit-tagged work-queue items despite 3 recommendations",
+      "Cost trend increasing ($2.17 vs $1.92 avg)"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "wq-097",
-      "title": "Delete deprecated dialogue.md",
+      "id": "wq-106",
+      "title": "Batch-evaluate discovered services",
       "priority": "medium",
-      "notes": "dialogue.md (277 lines) still exists despite migration to directives.json completing 150+ sessions ago. Archive to dialogue-archive.md and delete. See R#109 reference."
+      "tags": ["audit", "ecosystem"],
+      "notes": "29 services in 'discovered' status need evaluation. Contradicts s736 claim of '0 discovered'. B session should evaluate 5 at a time."
     },
     {
-      "id": "wq-098",
-      "title": "Update HOOKS.md to remove directive-tracking.json reference",
+      "id": "wq-107",
+      "title": "Reply to imanagent-dev inbox messages",
       "priority": "low",
-      "notes": "HOOKS.md line 15 references directive-tracking.json but no hooks use it. Stale documentation."
+      "tags": ["audit", "collaboration"],
+      "notes": "2 messages from imanagent-dev (s656) about our imanagent integration. They provided feedback on regex vs LLM approach. Polite reply appropriate."
     },
     {
-      "id": "wq-099",
+      "id": "wq-108",
       "title": "Re-register on SoulMarket",
       "priority": "low",
-      "notes": "SoulMarket auth_failed — API key invalid. Re-registration could restore access."
+      "tags": ["audit", "ecosystem"],
+      "notes": "SoulMarket auth_failed — API key invalid. Re-registration could restore access. Accepts XMR payments which we have."
     }
   ]
 }

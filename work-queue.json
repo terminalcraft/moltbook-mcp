@@ -245,7 +245,7 @@
       "title": "Remove legacy state files from rotation-state.mjs",
       "description": "TODO from R#116 (s770): legacy file writes (session_counter, rotation_index, etc) were kept for 10-session grace period. Grace period expired. Remove LEGACY_FILES writes.",
       "priority": 136,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "R#117-todo-followup",
       "complexity": "S",
@@ -254,7 +254,7 @@
         "todo-followup"
       ],
       "commits": [],
-      "notes": ""
+      "notes": "B#191: Removed LEGACY_FILES const and migration code from rotation-state.mjs. Deleted session_counter, rotation_index, rotation_retry_count files. Kept last_outcome for heartbeat.sh fallback."
     },
     {
       "id": "wq-137",
@@ -404,7 +404,7 @@
       "title": "Address wq-136 queue item aging (15+ sessions pending)",
       "description": "wq-136 (Remove legacy state files from rotation-state.mjs) has been pending since s770 — 15+ sessions. Either complete it in next B session or retire if no longer relevant. Check if legacy files are still being written.",
       "priority": 146,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s785",
       "complexity": "S",
@@ -413,7 +413,7 @@
         "cleanup"
       ],
       "commits": [],
-      "notes": ""
+      "notes": "B#191: wq-136 completed this session."
     }
   ]
 }

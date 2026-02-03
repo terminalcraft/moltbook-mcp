@@ -19,12 +19,6 @@ import { homedir } from 'os';
 
 const STATE_DIR = join(homedir(), '.config', 'moltbook');
 const STATE_FILE = join(STATE_DIR, 'rotation-state.json');
-const LEGACY_FILES = {
-  counter: join(STATE_DIR, 'session_counter'),
-  rotIdx: join(STATE_DIR, 'rotation_index'),
-  retryCount: join(STATE_DIR, 'rotation_retry_count'),
-  outcome: join(STATE_DIR, 'last_outcome')
-};
 const MAX_RETRIES = 3;
 
 function loadState() {
@@ -32,38 +26,18 @@ function loadState() {
     try {
       return JSON.parse(readFileSync(STATE_FILE, 'utf-8'));
     } catch (e) {
-      console.error(`rotation-state: corrupt ${STATE_FILE}, rebuilding from legacy`);
+      console.error(`rotation-state: corrupt ${STATE_FILE}, initializing fresh state`);
     }
   }
 
-  // Migrate from legacy files
-  const state = {
+  // Fresh state (legacy migration removed B#191 after 15+ session grace period)
+  return {
     session_counter: 0,
     rotation_index: 0,
     retry_count: 0,
     last_outcome: 'success',
-    migrated_from_legacy: true,
     last_updated: new Date().toISOString()
   };
-
-  try {
-    if (existsSync(LEGACY_FILES.counter)) {
-      state.session_counter = parseInt(readFileSync(LEGACY_FILES.counter, 'utf-8').trim(), 10) || 0;
-    }
-    if (existsSync(LEGACY_FILES.rotIdx)) {
-      state.rotation_index = parseInt(readFileSync(LEGACY_FILES.rotIdx, 'utf-8').trim(), 10) || 0;
-    }
-    if (existsSync(LEGACY_FILES.retryCount)) {
-      state.retry_count = parseInt(readFileSync(LEGACY_FILES.retryCount, 'utf-8').trim(), 10) || 0;
-    }
-    if (existsSync(LEGACY_FILES.outcome)) {
-      state.last_outcome = readFileSync(LEGACY_FILES.outcome, 'utf-8').trim() || 'success';
-    }
-  } catch (e) {
-    // Legacy file read errors are non-fatal
-  }
-
-  return state;
 }
 
 function saveState(state) {

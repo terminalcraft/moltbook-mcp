@@ -73,6 +73,35 @@ const lifecycleStatus = {
   onUnloadFailed: []
 };
 
+// --- Component-tool ownership tracking (R#113) ---
+// Maps component names to the tools they registered. Enables per-component
+// health analysis, tool ownership display, and debugging which component
+// owns which tool. This is tracked by proxying server.tool() during component
+// registration to intercept tool names.
+const componentToolMap = {};
+
+// Create a server proxy that tracks which tools a component registers
+function createToolTrackingProxy(componentName) {
+  return new Proxy(server, {
+    get(target, prop) {
+      if (prop === 'tool') {
+        return function(name, ...args) {
+          // Track this tool as belonging to the component
+          if (!componentToolMap[componentName]) {
+            componentToolMap[componentName] = [];
+          }
+          componentToolMap[componentName].push(name);
+          // Call the original tool registration
+          return target.tool(name, ...args);
+        };
+      }
+      // Pass through all other properties/methods unchanged
+      const val = target[prop];
+      return typeof val === 'function' ? val.bind(target) : val;
+    }
+  });
+}
+
 // Manifest-driven component loader (R#95, R#99: session-type-aware loading)
 // R#104: Components now receive context object, can export onLoad/onUnload lifecycle hooks.
 const manifest = JSON.parse(readFileSync(join(__dirname, "components.json"), "utf8"));
@@ -86,8 +115,9 @@ for (const entry of manifest.active) {
   try {
     const mod = await import(`./components/${name}.js`);
     if (typeof mod.register === "function") {
-      // Pass both server and context; components can accept (server) or (server, ctx)
-      mod.register(server, sessionContext);
+      // Pass a tracking proxy that intercepts tool() calls to map tools to components (R#113)
+      const trackedServer = createToolTrackingProxy(name);
+      mod.register(trackedServer, sessionContext);
       loadedModules.push({ name, mod });
       loadedCount++;
     } else {
@@ -122,7 +152,7 @@ if (SESSION_TYPE) {
   console.error(`[moltbook] Session ${SESSION_TYPE}: loaded ${loadedCount}/${manifest.active.length} components`);
 }
 
-// Write component status for /status/components endpoint (wq-088, wq-100: lifecycle)
+// Write component status for /status/components endpoint (wq-088, wq-100: lifecycle, R#113: tool ownership)
 try {
   const componentStatus = {
     timestamp: new Date().toISOString(),
@@ -133,7 +163,15 @@ try {
     totalActive: manifest.active.length,
     errors: loadErrors,
     manifest: manifest.active.map(e => typeof e === "string" ? { name: e } : e),
-    lifecycle: lifecycleStatus
+    lifecycle: lifecycleStatus,
+    // R#113: Component-tool ownership map for debugging and analytics
+    toolOwnership: componentToolMap,
+    toolStats: {
+      totalTools: Object.values(componentToolMap).flat().length,
+      byComponent: Object.fromEntries(
+        Object.entries(componentToolMap).map(([c, tools]) => [c, tools.length])
+      )
+    }
   };
   writeFileSync(join(__dirname, "component-status.json"), JSON.stringify(componentStatus, null, 2));
 } catch {}

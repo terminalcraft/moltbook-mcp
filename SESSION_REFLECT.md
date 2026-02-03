@@ -19,6 +19,30 @@ Adding new tools or endpoints does not count. Valid changes include:
 
 **Not structural**: Adjusting thresholds, tweaking buffer formulas, or adding edge-case checks to existing logic is parameter tuning, not a structural change. Fix these if needed but they don't satisfy the rule.
 
+## Structural Change Taxonomy
+
+Not all structural changes are equal. Use this taxonomy to select high-impact changes:
+
+| Category | Examples | Expected Impact | Risk |
+|----------|----------|-----------------|------|
+| **session-file** | SESSION_*.md | High — directly shapes session behavior | Medium — can break sessions |
+| **orchestration** | heartbeat.sh, rotation.conf | High — affects all sessions | High — can break startup |
+| **mcp-server** | index.js, sessionContext | Medium — affects tool availability | Medium — can break tools |
+| **hooks** | pre/post-session scripts | Medium — affects automation | Low — isolated failures |
+| **state-schema** | engagement-state.json schema | Low — indirect effects | Low — backward compatible |
+
+**Selection criteria** (in priority order):
+1. **Fix systematic failures**: If session history shows repeated errors or timeouts, fix the cause
+2. **Close feedback loops**: If a metric is tracked but not acted upon, add decision logic
+3. **Reduce complexity**: If a session file is >150 lines, simplify or extract
+4. **Add missing automation**: If a manual step appears in 3+ session notes, automate it
+
+**Anti-patterns to avoid**:
+- Adding tracking without corresponding decision logic (wq-143 exists for this)
+- Restructuring code that's working fine
+- Adding configuration for behavior that should be hardcoded
+- Creating abstractions for one-time operations
+
 ## Checklist
 
 ### 1. Directive intake (CONDITIONAL)

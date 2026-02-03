@@ -51,14 +51,27 @@ This is the core of the session and should consume most of your budget. Pick **3
 
 | Tier | Platform | Quick engagement |
 |------|----------|-----------------|
-| 1 | 4claw.org | Read /singularity/ threads, reply to discussions |
-| 1 | Chatr.ai | Read messages, contribute to conversations |
-| 1 | Moltbook | MCP digest, reply to posts |
-| 1 | thecolony.cc | Colony MCP tools (colony_feed, colony_post_comment) |
+| 1 | **Moltbook** | MCP digest, reply to posts |
+| 1 | **4claw.org** | Read /singularity/ threads, reply to discussions |
+| 1 | **Chatr.ai** | Read messages, contribute to conversations |
+| 1 | **Ctxly Chat** | Check via account-manager |
 | 1 | **Pinchwork** | Check available tasks, accept/complete tasks, post tasks, earn credits (see below) |
-| 2 | DarkClawBook | darkclawbook.self.md |
-| 2 | mydeadinternet.com, Tulip, Grove, MoltChan, LobChan | Check via account-manager |
-| 3 | Ctxly Chat, home.ctxly.app, Lobstack | Check via account-manager |
+| 2 | MoltChan | Check via account-manager |
+| 2 | ClawHub | Check via account-manager |
+| 3 | thecolony.cc | Colony MCP tools (colony_feed, colony_post_comment) |
+| 3 | mydeadinternet.com | Check via account-manager |
+| 3 | Tulip | Check via account-manager |
+| 3 | Grove | Check via account-manager |
+| 3 | LobChan | Check via account-manager |
+| 3 | home.ctxly.app | Check via account-manager |
+| 3 | Lobstack | Check via account-manager |
+| 3 | DarkClawBook | Check via account-manager |
+| 3 | Lobsterpedia | Check via account-manager |
+| 3 | ColonySim | Check via account-manager |
+| 3 | molthunt | Check via account-manager |
+| 3 | Agentaudit | Check via account-manager |
+| 3 | Soulmarket | Check via account-manager |
+| 3 | Memoryvault Link | Check via account-manager |
 
 **Exploration mandate** (HARD RULE): Every E session MUST include at least one of:
 - Evaluating an unevaluated service from services.json with `service-evaluator.mjs`

@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "description": "Structured human\u2194agent directive system. Replaces dialogue.md for directive intake.",
+  "description": "Structured human↔agent directive system. Replaces dialogue.md for directive intake.",
   "directives": [
     {
       "id": "d001",
       "from": "human",
       "session": 268,
-      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR \u2014 Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
+      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR — Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
       "status": "completed",
       "acked_session": 271,
       "completed_session": 439,
@@ -19,7 +19,7 @@
       "content": "Map the entire agent ecosystem. Crawl directories, follow links from agent profiles, check who is active on 4claw/Chatr/Moltbook, probe exchange endpoints. Build a comprehensive map of all agents and platforms, rank by engagement activity.",
       "status": "active",
       "acked_session": 390,
-      "notes": "Ongoing \u2014 49+ services mapped",
+      "notes": "Ongoing — 49+ services mapped",
       "updated": "2026-02-02T12:53:29.369Z"
     },
     {
@@ -68,7 +68,7 @@
       "id": "d008",
       "from": "human",
       "session": 575,
-      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution \u2014 it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system \u2014 directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed \u2014 d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
+      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution — it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system — directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed — d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
       "status": "completed",
       "acked_session": 586,
       "notes": "s586: dialogue.md fully replaced. Web UI at /directives/inbox, stale-blocker writes to directives.json, session-context reads from directives.json.",
@@ -119,7 +119,7 @@
       "acked_session": 620,
       "completed_session": 620,
       "queue_item": null,
-      "notes": "Already fixed \u2014 inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
+      "notes": "Already fixed — inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
     },
     {
       "id": "d013",
@@ -130,7 +130,7 @@
       "acked_session": 620,
       "completed_session": 641,
       "queue_item": "wq-031",
-      "notes": "s641: MCP tools (human_review_flag, human_review_list) added. API loadReview() fixed. R session prompt now shows open review count + urgent notice. Full pipeline: flag via MCP tool \u2192 persists to human-review.json \u2192 visible at /status/human-review \u2192 surfaced in R session prompt."
+      "notes": "s641: MCP tools (human_review_flag, human_review_list) added. API loadReview() fixed. R session prompt now shows open review count + urgent notice. Full pipeline: flag via MCP tool → persists to human-review.json → visible at /status/human-review → surfaced in R session prompt."
     },
     {
       "id": "d014",
@@ -175,7 +175,7 @@
       "created": "2026-02-02T20:01:45.218Z",
       "acked_session": 656,
       "completed_session": 656,
-      "notes": "Already working \u2014 s654 flagged Tulip for human review when auth verification needed. human_review_flag MCP tool (d013) provides the mechanism. E sessions auto-flag auth-blocked platforms."
+      "notes": "Already working — s654 flagged Tulip for human review when auth verification needed. human_review_flag MCP tool (d013) provides the mechanism. E sessions auto-flag auth-blocked platforms."
     },
     {
       "id": "d018",
@@ -185,7 +185,7 @@
       "status": "active",
       "created": "2026-02-02T20:03:03.326Z",
       "acked_session": 656,
-      "notes": "Standing permission. Email access authorized \u2014 E sessions may check and respond to emails.",
+      "notes": "Standing permission. Email access authorized — E sessions may check and respond to emails.",
       "queue_item": "wq-043"
     },
     {
@@ -228,7 +228,7 @@
       "created": "2026-02-02T22:18:00.871Z",
       "acked_session": 670,
       "completed_session": 670,
-      "notes": "R#95: Two messages from imanagent-dev read. Msg 1: feedback on our imanagent integration (regex solver vs LLM reasoning for challenges). Msg 2: their agent verification link. Both informational \u2014 no action required beyond potential reply."
+      "notes": "R#95: Two messages from imanagent-dev read. Msg 1: feedback on our imanagent integration (regex solver vs LLM reasoning for challenges). Msg 2: their agent verification link. Both informational — no action required beyond potential reply."
     },
     {
       "id": "d023",
@@ -240,13 +240,20 @@
       "acked_session": 675,
       "completed_session": 675,
       "notes": "R#96: Removed Chatr message queue entirely. Deleted chatr-flush.cjs, chatr-queue.json. Simplified chatr_send to direct-only. Removed chatr_flush tool. Removed cron entry. 41 unsent queued messages discarded as directed."
+    },
+    {
+      "id": "d024",
+      "from": "human",
+      "session": null,
+      "content": "Engage sessions are repeatedly failing to post on secondary platforms — Colony, MDI, LobChan, Tulip, Pinchwork, Lobstack, DarkClawBook. The same platforms fail every session and the bot keeps retrying them. Fix this.",
+      "status": "pending"
     }
   ],
   "questions": [
     {
       "id": "q-d021-tulip-url",
       "directive": "d021",
-      "question": "The Tulip API never returned the claim URL in its error response \u2014 it just said 'complete verification at your claim URL'. Could you check the Tulip web UI (https://tulip.fg-goose.online) while logged in as our account (moltbook-98ef53d2@agents.tulip.fg-goose.online) and paste the claim URL here? It's likely on a profile or verification page.",
+      "question": "The Tulip API never returned the claim URL in its error response — it just said 'complete verification at your claim URL'. Could you check the Tulip web UI (https://tulip.fg-goose.online) while logged in as our account (moltbook-98ef53d2@agents.tulip.fg-goose.online) and paste the claim URL here? It's likely on a profile or verification page.",
       "session": 670,
       "status": "pending"
     }
@@ -503,7 +510,7 @@
       "briefing-update": {
         "followed": 80,
         "ignored": 14,
-        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
+        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
         "last_session": 675,
         "last_applicable_session": 675,
         "history": [

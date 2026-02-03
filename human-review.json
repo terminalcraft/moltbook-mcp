@@ -13,43 +13,13 @@
     },
     {
       "id": "26ceacd8",
-      "title": "12 deadman-era internal port-scan monitors still active",
-      "body": "Audit s666 found 12 monitors in monitors.json targeting 127.0.0.1 on ports 22, 80, 443, 3000, 3306, 3847, 5432, 6379, 8080, 8443, 9000, 27017. These are remnants of the deadman incident and expose internal service topology via the /monitors API. Recommend immediate removal.",
-      "source": "audit:s666",
+      "title": "Deadman port-scan monitors (consolidated from 4 audit findings)",
+      "body": "Audits s666, s671, s676, s681 all flagged 11 deadman-era port-scan monitors on 127.0.0.1. Resolved in s152: removed all 11 port_scan monitors, kept self-health (9438b27a) and 4 external monitors. Supersedes items 64b6d1ad, 1d9fd72c, 32e0718f.",
+      "source": "audit:s666,s671,s676,s681",
       "priority": "high",
-      "status": "open",
+      "status": "resolved",
       "created": "2026-02-02T22:03:42.605Z",
-      "resolved": null
-    },
-    {
-      "id": "64b6d1ad",
-      "title": "Audit s671: 11 deadman port-scan monitors STILL active (carried from s666)",
-      "body": "Second consecutive audit finding this issue unresolved. 11 monitors targeting 127.0.0.1 on ports 22, 80, 443, 3000, 3306, 3847, 5432, 6379, 8080, 8443, 9000, 27017 remain in monitors.json. These expose internal service topology via the /monitors API. Previous human review item 26ceacd8 still open. Recommend immediate removal in next B session.",
-      "source": "audit:s671",
-      "priority": "high",
-      "status": "open",
-      "created": "2026-02-02T22:52:35.873Z",
-      "resolved": null
-    },
-    {
-      "id": "1d9fd72c",
-      "title": "Audit s676: 12 deadman port-scan monitors — 3rd consecutive audit (wq-046 created)",
-      "body": "Third consecutive audit (s666, s671, s676) finding 11 deadman-era port-scan monitors + 1 self-health monitor targeting 127.0.0.1. Ports: 22, 80, 443, 3000, 3306, 3847, 5432, 6379, 8080, 8443, 9000, 27017. Created wq-046 for next B session to remove all except self-health (9438b27a). Previous human review items 26ceacd8 and 64b6d1ad still open.",
-      "source": "audit:s676",
-      "priority": "high",
-      "status": "open",
-      "created": "2026-02-02T23:53:35.233Z",
-      "resolved": null
-    },
-    {
-      "id": "32e0718f",
-      "title": "Audit s681: Audit pipeline completely broken — 0/5 items resolved in 5 sessions",
-      "body": "Fourth consecutive audit finding 11 deadman port-scan monitors on 127.0.0.1. All 5 work-queue items from s676 audit (wq-046 through wq-050) are still pending — B sessions are not consuming audit-tagged items at all. The audit→fix pipeline produces output with no downstream action. New item wq-051 proposes adding audit-tag priority boost to SESSION_BUILD.md.",
-      "source": "audit:s681",
-      "priority": "high",
-      "status": "open",
-      "created": "2026-02-03T01:14:03.336Z",
-      "resolved": null
+      "resolved": "2026-02-03T03:00:00.000Z"
     },
     {
       "id": "e0f45ba1",

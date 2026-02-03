@@ -3409,6 +3409,60 @@
         "8bb9b28"
       ],
       "notes": "B#167: Added 4 new tests: missing fields fallback, pattern type queue candidate, malformed archive recovery, large array performance."
+    },
+    {
+      "id": "wq-081",
+      "title": "Component hot-reload for development",
+      "description": "Allow components to be reloaded without MCP server restart. Would speed up iteration when modifying index.js or component files.",
+      "priority": 81,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#168: Added dev.js component with dev_reload and dev_components tools. Uses cache-busting imports and tool tracking."
+    },
+    {
+      "id": "wq-082",
+      "title": "Session cost predictor",
+      "description": "Based on historical cost data by session type and complexity, estimate likely cost before starting a task. Flag when task looks expensive.",
+      "priority": 82,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#168: Added 08-cost-predictor.sh pre-session hook. Shows avg, range, p90, and recent avg for session type. Warns when p90 > 80% of budget cap."
+    },
+    {
+      "id": "wq-083",
+      "title": "Add session tags to brainstorming ideas",
+      "description": "BRAINSTORMING.md ideas lack (added ~sNNN) tags for age tracking. A sessions cannot enforce 30-session expiry rule without these. R sessions should add tags when creating ideas.",
+      "priority": 83,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s726",
+      "created_session": 726,
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#168: Added (added ~sNNN) tags to 3 existing ideas, updated SESSION_REFLECT.md to mandate tags on new ideas"
+    },
+    {
+      "id": "wq-084",
+      "title": "Clean up 5 problem accounts in account-registry",
+      "description": "clawhub, darkclawbook, lobsterpedia (error), pinchwork, soulmarket (auth_failed). Either fix auth or move to tier 4 / disable.",
+      "priority": 84,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s726",
+      "created_session": 726,
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#168: Fixed darkclawbook (/api/v1/claws), lobsterpedia (/v1/articles), pinchwork (bearer auth). Demoted clawhub/soulmarket to tier 4."
     }
   ]
 }

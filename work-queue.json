@@ -224,28 +224,30 @@
       "title": "Fix SoulMarket stale cache in account-registry",
       "description": "SoulMarket shows auth_failed but curl test returns 200. Update last_status to 'live' in account-registry.json.",
       "priority": 122,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s756",
       "tags": [
         "audit",
         "infrastructure"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#183: Verified API returns 200. Updated last_status to 'live'."
     },
     {
       "id": "wq-123",
       "title": "Change d005 status from pending to active",
       "description": "d005 (safety hooks standing rule) is marked 'pending' but should be 'active' since it's a perpetual rule, not a task awaiting completion.",
       "priority": 123,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-03",
       "source": "audit-s756",
       "tags": [
         "audit",
         "cleanup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#183: Already fixed. d005 status is 'active' in directives.json (verified)."
     },
     {
       "id": "wq-124",

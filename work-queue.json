@@ -34,14 +34,15 @@
       "title": "Add /status/costs endpoint for session cost trends",
       "description": "Aggregate session-cost.txt history into a /status/costs endpoint showing per-type averages and budget efficiency over time. Useful for tuning per-type budget caps.",
       "priority": 45,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-02",
       "source": "brainstorming-promote",
       "tags": [
         "api",
         "observability"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "s158: Already addressed by /status/cost-distribution?format=json which provides per-type averages, totals, rolling trends, and utilization ratios. Endpoint exists since wq-003."
     },
     {
       "id": "wq-058",
@@ -55,7 +56,8 @@
         "engagement",
         "imanagent"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "s158 analysis: difficulty 7 logic_puzzle includes comparative clues like 'darker than' which require color ordering knowledge. Current brute-force doesn't handle these. Options: (1) Add color/ordering semantic knowledge to solver, (2) Use LLM fallback for unsolvable patterns. Complexity: M."
     },
     {
       "id": "wq-059",

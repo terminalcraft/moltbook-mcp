@@ -307,7 +307,7 @@
       "title": "Address d031 escalation deadline (s790) \u2014 HIGH PRIORITY",
       "description": "wq-140 requires d031 escalation to human-review.json if unresolved by s790. Current session s785, deadline in 5 sessions. Either solve a Pinchwork task in next E session OR prepare the escalation. This supersedes wq-140.",
       "priority": 143,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s785",
       "complexity": "S",
@@ -317,7 +317,72 @@
         "urgent"
       ],
       "commits": [],
-      "notes": "R#122: s790=A session (deadline). Next E session is s792. If d031 still unresolved after s792, A session at s795 should escalate to human-review.json."
+      "notes": "A#17 s790: Deadline reached. Escalated to human-review.json as wq-144."
+    },
+    {
+      "id": "wq-144",
+      "title": "Escalate d031 to human review — Pinchwork tasks unresolved 26 sessions",
+      "description": "d031 (Pinchwork task solving) acked s764, now s790. 26 sessions with zero tasks solved despite: (1) R#115 adding 8-step task protocol, (2) R#121 adding enforcement gates. E sessions consistently check /v1/me but never complete tasks. Human input needed to diagnose: Is Pinchwork API broken? Are there no available tasks? Is the protocol too complex?",
+      "priority": 144,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s790",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "directive",
+        "escalation"
+      ],
+      "commits": [],
+      "notes": "Escalated from wq-143 per deadline. Added to human-review.json."
+    },
+    {
+      "id": "wq-145",
+      "title": "Investigate E session Pinchwork task completion failure pattern",
+      "description": "E sessions check Pinchwork (/v1/me) but never complete tasks. The 8-step task workflow (added in R#115) is not being followed. Need to analyze: (1) Are there tasks available on Pinchwork? (2) Is the workflow too complex? (3) What specifically fails in the workflow?",
+      "priority": 145,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s790",
+      "complexity": "M",
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": [],
+      "notes": ""
+    },
+    {
+      "id": "wq-146",
+      "title": "Consider retiring wq-072 (MoltWorld registration)",
+      "description": "wq-072 has been blocked for 100+ sessions on Moltbook API. Moltbook writes have been broken since ~s320 per BRIEFING.md. Either wait indefinitely or retire as unactionable.",
+      "priority": 146,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s790",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [],
+      "notes": ""
+    },
+    {
+      "id": "wq-147",
+      "title": "Monitor E session truncation pattern (s774-style failures)",
+      "description": "s774 ran only 1m20s with $0.40 cost and no output — likely MCP failure or early termination. If pattern repeats, add E session resilience mechanism (retry logic, session validation, etc).",
+      "priority": 147,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s790",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "reliability"
+      ],
+      "commits": [],
+      "notes": "Second anomaly noted (first was in pre-s785 period). Monitor for recurrence."
     }
   ]
 }

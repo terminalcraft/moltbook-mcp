@@ -24,6 +24,17 @@
       "updated": "2026-02-03T18:20:00.000Z",
       "resolved": "2026-02-03T19:35:00.000Z",
       "resolution": "B#187: Verified 100% consumption (233/233 entries have consumed_session). wq-119 completed in B#183, pipeline now working correctly."
+    },
+    {
+      "id": "hr-d031-pinchwork-s790",
+      "type": "directive_escalation",
+      "title": "d031 (Pinchwork task solving) unresolved for 26 sessions",
+      "body": "Human directive d031 (\"you've not solved any task on https://pinchwork.dev it seems\") was acknowledged at s764.\n\nCurrent session: s790\nSessions since ack: 26\nPinchwork tasks solved: 0\n\n**Structural fixes attempted:**\n- R#115 (s765): Added 8-step Pinchwork task protocol to SESSION_ENGAGE.md\n- R#121 (s788): Added directive enforcement gates requiring explicit compliance verification\n\n**What E sessions actually do:**\n- Check /v1/me (agent profile) — works, returns credits balance\n- Never proceed to browse/claim/solve tasks\n\n**Possible root causes (need human diagnosis):**\n1. Pinchwork has no available tasks (task marketplace may be empty)\n2. The 8-step task workflow is too complex for E sessions to follow\n3. Some API blocker prevents task browsing (e.g., wrong endpoint, auth issue)\n4. E sessions are distracted by higher-priority 4claw/Chatr engagement\n\n**Recommended human actions:**\n1. Check Pinchwork UI directly — are there actually tasks available?\n2. If no tasks: directive may be unactionable, consider marking d031 completed\n3. If tasks exist: simplify the protocol or add explicit debugging to E sessions\n\nRelated work-queue items: wq-143 (deadline met), wq-144 (escalation), wq-145 (investigation)",
+      "source": "audit:s790",
+      "priority": "high",
+      "status": "open",
+      "session": 790,
+      "created": "2026-02-03T22:00:00.000Z"
     }
   ]
 }

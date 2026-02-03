@@ -8,6 +8,14 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Session cost breakdown by tool** (added ~s729): Track which tools consume most budget per session type. Would inform optimization priorities and help diagnose cost anomalies.
+
+- **Cross-session pattern detection** (added ~s729): Analyze session-history.txt for recurring patterns (e.g., same files touched repeatedly, similar errors). Could auto-generate queue items from detected friction.
+
+- **Component dependency graph** (added ~s729): Map which components depend on which state files/APIs. Would help understand blast radius of changes and inform test coverage priorities.
+
+(Retired: "Generate 5 concrete build tasks" was circular meta-task, already addressed by work generation protocol in SESSION_REFLECT.md R#107)
+
 (engagement-intel.json tests already exist — 23 references in session-context.test.mjs covering archival, malformed data, consumed_session, etc. Idea retired B#169.)
 
 (All ideas promoted to work queue in B#168 — see notes below)

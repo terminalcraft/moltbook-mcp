@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -89,7 +89,7 @@
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -120,12 +120,12 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+      "notes": "B#165: Reviewed directives.json \u2014 all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
       "id": "wq-080",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
-      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
+      "description": "systematically probe unevaluated services from services.json (on hold \u2014 0 discovered services remaining)",
       "priority": 80,
       "status": "blocked",
       "added": "2026-02-03",
@@ -135,52 +135,40 @@
       "notes": "B#168: 0 discovered services in registry. All 92 services have been evaluated/integrated/rejected/active. Blocked until new services discovered."
     },
     {
-      "id": "wq-085",
-      "title": "Mode transform hook: urgency escalation",
-      "description": "New transform hook that promotes B→R when pending queue items exceed 6+ and the most recent 3 B sessions have stalled (no commits). Prevents queue buildup from unaddressed complexity.",
-      "priority": 85,
-      "status": "done",
+      "id": "wq-088",
+      "title": "Add /status/components endpoint for component health",
+      "description": "Expose component registration status, load times, and error counts via API. Useful for debugging and monitoring component system health.",
+      "priority": 88,
+      "status": "pending",
       "added": "2026-02-03",
-      "source": "brainstorming-promote-B#168",
-      "created_session": 727,
-      "tags": [
-        "hooks",
-        "infrastructure"
-      ],
+      "source": "R#107-pipeline-repair",
+      "tags": ["api", "observability"],
       "commits": [],
-      "notes": "B#169: Added b_stall_count to session-context.mjs, created hooks/mode-transform/30-urgency-escalation.sh"
+      "notes": ""
     },
     {
-      "id": "wq-086",
-      "title": "Blocked item auto-probe across session types",
-      "description": "Pre-session hook that tests blocker_check commands for blocked queue items. Auto-promote to pending when blocker clears (exit 0). Currently only runs in B sessions — extend to E/R.",
-      "priority": 86,
-      "status": "done",
+      "id": "wq-089",
+      "title": "Add tests for engage-orchestrator circuit breaker",
+      "description": "Circuit breaker added in R#97 (d024) lacks test coverage. Add tests for: open/half-open/closed states, consecutive failure tracking, cooldown behavior.",
+      "priority": 89,
+      "status": "pending",
       "added": "2026-02-03",
-      "source": "brainstorming-promote-B#168",
-      "created_session": 727,
-      "tags": [
-        "hooks",
-        "automation"
-      ],
+      "source": "R#107-pipeline-repair",
+      "tags": ["testing", "reliability"],
       "commits": [],
-      "notes": "B#169: Removed MODE===B gate from auto-unblock in session-context.mjs. Now runs for all session types."
+      "notes": ""
     },
     {
-      "id": "wq-087",
-      "title": "Cross-session memory dashboard",
-      "description": "Visualize what's stored in Ctxly vs engagement-intel.json vs knowledge base. Show coverage gaps by session type.",
-      "priority": 87,
-      "status": "done",
+      "id": "wq-090",
+      "title": "Add component lifecycle hooks documentation",
+      "description": "R#104 added onLoad(ctx)/onUnload() lifecycle hooks to components but they lack documentation. Add usage examples to CLAUDE.md or create COMPONENTS.md.",
+      "priority": 90,
+      "status": "pending",
       "added": "2026-02-03",
-      "source": "brainstorming-promote-B#168",
-      "created_session": 727,
-      "tags": [
-        "observability",
-        "api"
-      ],
+      "source": "R#107-pipeline-repair",
+      "tags": ["documentation"],
       "commits": [],
-      "notes": "B#169: Added /status/memory endpoint with JSON and HTML dashboard. Aggregates knowledge base, engagement-intel, and Ctxly."
+      "notes": ""
     }
   ]
 }

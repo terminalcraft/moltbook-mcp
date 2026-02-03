@@ -1,124 +1,127 @@
 {
-  "session": 696,
-  "timestamp": "2026-02-03T05:10:00.000Z",
-  "previous_audit": 691,
+  "session": 701,
+  "timestamp": "2026-02-03T06:25:00.000Z",
+  "previous_audit": 696,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 150,
-      "rate": "~80%",
-      "verdict": "healthy — E sessions generate intel, R sessions consume. Empty queue = good throughput."
+      "archive_total": 195,
+      "archive_consumed": 187,
+      "rate": "96%",
+      "verdict": "excellent — E sessions generate intel, R sessions consume. Empty queue means high throughput."
     },
     "brainstorming": {
       "active_ideas": 3,
-      "avg_age_sessions": 20,
-      "promoted_since_s691": 0,
-      "verdict": "stagnant — same 3 ideas since ~s676. Approaching 30-session expiry threshold."
+      "ideas": ["d018 email access", "d021 Tulip URL", "audit-report tests"],
+      "avg_age_sessions": 25,
+      "promoted_since_s696": 1,
+      "promoted_items": ["wq-058 imanagent solver"],
+      "verdict": "improving — one idea promoted to queue since last audit. 3 remaining ideas are directive-related (d018, d021) or low-priority (tests)."
     },
     "queue": {
       "total": 5,
       "pending": 3,
       "retired": 2,
-      "pending_items": ["wq-042 (api.mjs tests)", "wq-043 (email setup, d018)", "wq-045 (/status/costs endpoint)"],
-      "items_completed_since_s691": 3,
-      "completed_items": ["wq-048 (d010/d015 retired, s692)", "wq-050 (47 evaluated-limbo triaged, s694)", "wq-047 (stale refs cleaned, s689)"],
-      "verdict": "healthy — 3 items completed since last audit. 3 pending items are real work."
+      "pending_items": ["wq-045 /status/costs", "wq-058 imanagent solver", "wq-059 batch-evaluate services"],
+      "items_completed_since_s696": 4,
+      "completed_items": ["wq-054 (B-count misdiagnosis)", "wq-055 (example.com monitor)", "wq-056 (api-test cleanup)", "wq-057 (brainstorming triage)"],
+      "verdict": "healthy — 4 items completed since last audit. B sessions are consuming queue properly."
     },
     "directives": {
       "total": 24,
-      "active": 3,
+      "active": 4,
       "completed": 20,
-      "standing": ["d002 (ecosystem mapping)", "d005 (safety hooks)", "d018 (email access)"],
-      "waiting_human": ["d021 (Tulip claim URL)"],
-      "verdict": "healthy — d010/d015 finally resolved. Only standing directives remain active."
+      "active_items": ["d002 (ecosystem mapping, ongoing)", "d005 (safety hooks, standing)", "d018 (email access, awaiting API key)", "d021 (Tulip URL, awaiting human)"],
+      "verdict": "stable — only standing directives and items awaiting human input remain."
     }
   },
   "sessions": {
     "B": {
-      "count_last_30": 6,
-      "avg_cost": 1.19,
-      "queue_items_completed_since_s691": 3,
-      "verdict": "effective. Previous audit's 'B count anomaly' was a misdiagnosis — BEBRA rotation gives 20% B, not 60%. 6 in 30 = 20%, on target."
+      "count_last_20": 6,
+      "avg_cost": 1.32,
+      "queue_items_completed_since_s696": 4,
+      "verdict": "effective — 30% of sessions, completing queue items regularly."
     },
     "E": {
-      "count_last_30": 9,
-      "avg_cost": 1.45,
+      "count_last_20": 8,
+      "avg_cost": 1.55,
+      "intel_generated": "continuous",
       "verdict": "functional — generating intel, engaging across platforms."
     },
     "R": {
-      "count_last_30": 9,
-      "avg_cost": 1.38,
-      "verdict": "productive — consuming intel, structural improvements."
+      "count_last_20": 9,
+      "avg_cost": 1.25,
+      "structural_changes": 5,
+      "verdict": "productive — R#97-101 made meaningful structural improvements."
     },
     "A": {
-      "count_last_30": 6,
-      "avg_cost": 1.45,
-      "verdict": "functioning. 4/5 s691 recommendations resolved."
+      "count_last_20": 7,
+      "avg_cost": 1.43,
+      "resolved_since_s696": 3,
+      "unresolved": 1,
+      "verdict": "effective. 3/4 s696 recommendations resolved. 1 recurring issue (api-test inbox)."
     }
   },
   "infrastructure": {
     "orphaned_creds": [],
     "dead_services": [],
-    "evaluated_limbo": "RESOLVED — s694 bulk-triaged 47 evaluated-limbo services. Now: 45 rejected, 31 active, 15 integrated.",
+    "evaluated_limbo": "0 — all services categorized (31 active, 45 rejected, 15 integrated)",
     "stale_directives": [],
-    "broken_hooks": "0 of 42 — all pass bash -n syntax check",
-    "stale_references": "RESOLVED — dialogue.md and directive-tracking.json refs cleaned in s689",
-    "human_review": "3 items: 1 tulip auth pending, 1 deadman resolved, 1 B anomaly open (misdiagnosis — should close)",
-    "inbox_pollution": "2 api-test messages from smoke tests still appearing despite d012 fix"
+    "broken_hooks": "0 of 43 — all pass bash -n syntax check",
+    "stale_references": "0 — dialogue.md and directive-tracking.json refs fully cleaned",
+    "human_review": "2 pending (hr-tulip-verify-s654, hr-agentmail-setup-s157), 2 resolved"
   },
   "security": {
     "unknown_registry_agents": [],
     "suspicious_crons": [],
     "external_webhooks": [],
     "ssrf_monitors": {
-      "count": 5,
+      "count": 4,
       "internal": 1,
-      "description": "1 self-health (127.0.0.1:3847, legitimate). 4 external. No SSRF risk.",
+      "internal_detail": "Self Health (127.0.0.1:3847) — legitimate",
+      "external": 3,
+      "external_detail": ["Chatr API", "4claw.org", "agentid.sh"],
       "severity": "CLEAN"
     },
-    "injection_inbox_msgs": [],
-    "example_monitor": "example.com monitor (ce329b5f) is useless — should be removed"
+    "injection_inbox_msgs": []
   },
   "cost": {
-    "last_30_total": 41.35,
-    "last_30_count": 30,
-    "avg_per_session": 1.38,
+    "last_20_total": 27.48,
+    "last_20_count": 20,
+    "avg_per_session": 1.37,
     "by_type": {
-      "B": {"avg": 1.19, "count": 6},
-      "E": {"avg": 1.45, "count": 9},
-      "R": {"avg": 1.38, "count": 9},
-      "A": {"avg": 1.45, "count": 6}
+      "B": {"avg": 1.32, "count": 6},
+      "E": {"avg": 1.55, "count": 8},
+      "R": {"avg": 1.25, "count": 9},
+      "A": {"avg": 1.43, "count": 7}
     },
-    "trend": "stable at $1.38 (was $1.34 at s691)"
+    "trend": "stable at $1.37 (was $1.38 at s696)"
   },
-  "delta_from_s691": {
+  "delta_from_s696": {
     "resolved": [
-      "d010/d015 stuck directives — retired s692 (wq-048)",
-      "47 evaluated-limbo services — bulk triaged s694 (wq-050)",
-      "stale dialogue.md/directive-tracking.json refs — cleaned s689 (wq-047)",
-      "B session count anomaly — was a misdiagnosis (BEBRA = 20% B, not 60%)"
+      "B-session-count human-review item — closed as misdiagnosis (s697)",
+      "example.com useless monitor — removed (s697)",
+      "Brainstorming triage — imanagent solver promoted to wq-058 (s697)"
     ],
     "unresolved": [
-      "Brainstorming stagnation (5th consecutive audit with 0 promotions)"
+      "api-test inbox pollution — 8 new messages since s697 cleanup. api.test.mjs continues adding messages despite wq-056 claiming to fix it."
     ],
     "new_issues": [
-      "api-test inbox messages from smoke tests (2 new since s691)",
-      "example.com useless monitor",
-      "Brainstorming ideas approaching 30-session auto-expiry"
+      "api.test.mjs continues polluting inbox — fix was ineffective",
+      "d018/d021 brainstorming items stalled on human action"
     ]
   },
   "critical_issues": [
     {
-      "id": "audit-s696-001",
-      "severity": "LOW",
-      "title": "Brainstorming stagnant — 0 promotions in 5 consecutive audits",
-      "description": "Same 3 ideas since s676. Auto-expiry at 30 sessions will clear them by ~s706."
+      "id": "audit-s701-001",
+      "severity": "MEDIUM",
+      "title": "api.test.mjs inbox pollution recurs despite fix",
+      "description": "s697 claimed to fix api-test inbox messages (wq-056) but 8 new messages appeared since. The test file is adding messages on every test run. Need to actually prevent the test from writing to inbox.json."
     }
   ],
   "recommended_actions": [
-    {"title": "Close B-session-count human-review item (was misdiagnosis)", "priority": "low"},
-    {"title": "Remove example.com useless monitor (ce329b5f)", "priority": "low"},
-    {"title": "Clean api-test smoke test messages from inbox", "priority": "low"},
-    {"title": "Promote or retire brainstorming ideas before auto-expiry", "priority": "medium"}
+    {"title": "Fix api.test.mjs to not write to inbox.json during tests", "priority": "high", "create_wq": true},
+    {"title": "Wait for human to provide AgentMail API key (d018)", "priority": "low", "create_wq": false},
+    {"title": "Wait for human to provide Tulip claim URL (d021)", "priority": "low", "create_wq": false}
   ]
 }

@@ -3087,6 +3087,23 @@
         "audit"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-043",
+      "title": "Set up email access for E sessions (d018)",
+      "description": "Human authorized email checking/answering. Investigate AgentMail (agentmail.to) or other email APIs, set up credentials, integrate into E session flow.",
+      "priority": 43,
+      "status": "done",
+      "added": "2026-02-02",
+      "source": "directive-d018",
+      "tags": [
+        "engagement",
+        "email"
+      ],
+      "commits": [
+        "116bbb7"
+      ],
+      "notes": "s157: Built components/email.js with MCP tools (email_status, email_setup, email_list, email_read, email_send, email_reply). Installed agentmail SDK. Updated SESSION_ENGAGE.md. Flagged for human review: need API key from console.agentmail.to to activate."
     }
   ]
 }

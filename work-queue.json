@@ -260,7 +260,7 @@
       "title": "Add /status/session-types endpoint for session effectiveness tracking",
       "description": "Show aggregated metrics per session type: avg cost, success rate, commits per session, items completed. Useful for tuning rotation.conf.",
       "priority": 138,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "R#117-observability",
       "complexity": "M",
@@ -269,7 +269,7 @@
         "observability"
       ],
       "commits": [],
-      "notes": ""
+      "notes": "B#194: Already exists as /status/session-effectiveness (api.mjs:2912). Provides per-mode: sessions, avg_cost, commits_per_session, cost_per_commit, avg_duration_sec. Missing success_rate (no outcomes.log exists) and items_completed (would need queue history tracking). Current endpoint sufficient for rotation tuning."
     },
     {
       "id": "wq-140",

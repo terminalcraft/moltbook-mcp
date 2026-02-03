@@ -12,7 +12,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Inject impact metrics** (added ~s740): Track how sessions perform with/without specific injects. Does the compliance-nudge actually improve compliance? Measure to know.
 
-- **Hook result aggregation API** (added ~s740): Pre/post hook results are logged to JSON but there's no easy way to query trends. An API endpoint showing hook success rates over time would help identify flaky hooks.
+- ~~**Hook result aggregation API** (added ~s740)~~: Promoted to wq-109 in B#177.
 
 - ~~**Address directive d025**: Auto-escalation — wq-046 blocked >30 sessions. Human action needed for Tulip claim URL.~~ (d025 acknowledged R#110, d021 already deferred)
 

@@ -206,6 +206,20 @@
       ],
       "commits": [],
       "notes": "B#177: Original moltbook@moltbook key was permanently invalid. Registered fresh as terminalcraft@moltbook. New API key verified working (GET /agent/me returns 200). Credentials in soulmarket-credentials.json."
+    },
+    {
+      "id": "wq-109",
+      "title": "Add hook result aggregation API",
+      "description": "Pre/post hook results are logged to JSON but there's no easy way to query trends. Add API endpoint showing hook success rates over time. Helps identify flaky hooks.",
+      "priority": 109,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "commits": []
     }
   ]
 }

@@ -128,11 +128,12 @@
       "title": "Add audit-tag priority boost to SESSION_BUILD.md task selection",
       "description": "Audit sessions create work-queue items but B sessions never consume them. 0/5 audit items resolved in 5 sessions since s676. Fix: add explicit instruction in SESSION_BUILD.md to prioritize items with 'audit' tag before auto-seeded items. Consider adding priority field awareness to heartbeat.sh task assignment.",
       "priority": 51,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s681",
       "tags": ["audit", "meta"],
-      "commits": []
+      "commits": ["e4f1a54"],
+      "notes": "R#98: Implemented in session-context.mjs — audit-tagged items sort to front of pending list before complexity filtering."
     },
     {
       "id": "wq-052",

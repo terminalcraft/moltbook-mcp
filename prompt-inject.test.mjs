@@ -259,4 +259,79 @@ describe('prompt-inject component', () => {
       assert.match(text, /not found/);
     });
   });
+
+  describe('requires field (conditional dependencies, wq-130)', () => {
+    test('adds injection with single requires', async () => {
+      const result = await server.callTool('prompt_inject_add', {
+        file: 'dep-single.txt',
+        description: 'Depends on base',
+        requires: 'base-inject.txt'
+      });
+      const text = getText(result);
+      assert.match(text, /Added injection 'dep-single\.txt'/);
+      assert.match(text, /requires: base-inject\.txt/);
+
+      const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
+      const added = manifest.injections.find(i => i.file === 'dep-single.txt');
+      assert.equal(added.requires, 'base-inject.txt');
+    });
+
+    test('adds injection with array requires', async () => {
+      const result = await server.callTool('prompt_inject_add', {
+        file: 'dep-multi.txt',
+        description: 'Depends on multiple',
+        requires: ['base-a.txt', 'base-b.txt']
+      });
+      const text = getText(result);
+      assert.match(text, /requires: base-a\.txt, base-b\.txt/);
+
+      const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
+      const added = manifest.injections.find(i => i.file === 'dep-multi.txt');
+      assert.deepEqual(added.requires, ['base-a.txt', 'base-b.txt']);
+    });
+
+    test('lists injection with requires', async () => {
+      const result = await server.callTool('prompt_inject_list', {});
+      const text = getText(result);
+      assert.match(text, /dep-single\.txt.*\[requires: base-inject\.txt\]/);
+      assert.match(text, /dep-multi\.txt.*\[requires: base-a\.txt, base-b\.txt\]/);
+    });
+
+    test('updates requires field', async () => {
+      const result = await server.callTool('prompt_inject_update', {
+        file: 'dep-single.txt',
+        requires: ['new-dep.txt', 'another-dep.txt']
+      });
+      const text = getText(result);
+      assert.match(text, /requires=new-dep\.txt,another-dep\.txt/);
+
+      const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
+      const updated = manifest.injections.find(i => i.file === 'dep-single.txt');
+      assert.deepEqual(updated.requires, ['new-dep.txt', 'another-dep.txt']);
+    });
+
+    test('removes requires field when set to null', async () => {
+      const result = await server.callTool('prompt_inject_update', {
+        file: 'dep-single.txt',
+        requires: null
+      });
+      const text = getText(result);
+      assert.ok(!text.includes('requires='), 'Should not show requires after removal');
+
+      const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
+      const updated = manifest.injections.find(i => i.file === 'dep-single.txt');
+      assert.ok(!updated.requires, 'requires should be removed from manifest');
+    });
+
+    test('injection without requires not shown in list with requires label', async () => {
+      // existing-inject.txt has no requires
+      const result = await server.callTool('prompt_inject_list', {});
+      const text = getText(result);
+      // Find the line for existing-inject.txt
+      const lines = text.split('\n');
+      const existingLine = lines.find(l => l.includes('existing-inject.txt'));
+      assert.ok(existingLine, 'Should find existing-inject.txt in list');
+      assert.ok(!existingLine.includes('[requires:'), 'Should not show requires label for injection without requires');
+    });
+  });
 });

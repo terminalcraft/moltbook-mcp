@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "description": "Prompt injection manifest. Defines what gets appended to session prompts. Processed by heartbeat.sh in priority order. Replaces hardcoded INJECT_SPECS array (R#110).",
+  "version": 2,
+  "description": "Prompt injection manifest. Defines what gets appended to session prompts. Processed by heartbeat.sh in priority order. Replaces hardcoded INJECT_SPECS array (R#110). v2: Added optional 'requires' field for conditional dependencies (wq-130).",
   "injections": [
     {
       "file": "compliance-nudge.txt",

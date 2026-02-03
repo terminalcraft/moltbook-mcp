@@ -245,13 +245,14 @@
       "title": "Add conditional inject dependencies to prompt-inject.json",
       "description": "Prompt injects could depend on each other \u2014 inject B only if inject A was applied. Add optional 'requires' field to inject schema. Enables sophisticated prompt composition without bloating all prompts.",
       "priority": 130,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote",
       "tags": [
         "infra"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#190: Added 'requires' field (string or array) to inject schema. heartbeat.sh two-pass dependency resolution. Usage tracking includes skipped_requires. Tests added. v2 schema."
     },
     {
       "id": "wq-131",

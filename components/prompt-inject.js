@@ -35,7 +35,8 @@ export function register(server) {
       const sorted = [...injections].sort((a, b) => (a.priority || 999) - (b.priority || 999));
       for (const inj of sorted) {
         const sessions = inj.sessions || "BEBRA";
-        lines.push(`- **${inj.file}** (pri: ${inj.priority || 999}, ${inj.action || "keep"}, sessions: ${sessions})`);
+        const reqStr = inj.requires ? ` [requires: ${Array.isArray(inj.requires) ? inj.requires.join(", ") : inj.requires}]` : "";
+        lines.push(`- **${inj.file}** (pri: ${inj.priority || 999}, ${inj.action || "keep"}, sessions: ${sessions})${reqStr}`);
         if (inj.description) lines.push(`  ${inj.description}`);
       }
       return { content: [{ type: "text", text: lines.join("\n") }] };
@@ -50,7 +51,8 @@ export function register(server) {
     priority: z.number().optional().describe("Priority (lower = earlier). Default: 100"),
     action: z.enum(["keep", "consume"]).optional().describe("'keep' persists across sessions, 'consume' deletes after use. Default: 'keep'"),
     sessions: z.string().optional().describe("Session types to apply to (e.g. 'BR', 'BEBRA'). Default: 'BEBRA' (all)"),
-  }, async ({ file, description, priority = 100, action = "keep", sessions = "BEBRA" }) => {
+    requires: z.union([z.string(), z.array(z.string())]).optional().describe("Inject(s) that must be applied first. Only applied if all required injects were applied."),
+  }, async ({ file, description, priority = 100, action = "keep", sessions = "BEBRA", requires }) => {
     try {
       const manifest = load();
       if (!manifest.injections) manifest.injections = [];
@@ -61,16 +63,14 @@ export function register(server) {
         return { content: [{ type: "text", text: `Injection '${file}' already exists. Use prompt_inject_update to modify.` }] };
       }
 
-      manifest.injections.push({
-        file,
-        action,
-        priority,
-        sessions,
-        description,
-      });
+      const entry = { file, action, priority, sessions, description };
+      if (requires) entry.requires = requires;
+
+      manifest.injections.push(entry);
 
       save(manifest);
-      return { content: [{ type: "text", text: `Added injection '${file}' (priority ${priority}, ${action}, sessions: ${sessions})` }] };
+      const reqStr = requires ? ` [requires: ${Array.isArray(requires) ? requires.join(", ") : requires}]` : "";
+      return { content: [{ type: "text", text: `Added injection '${file}' (priority ${priority}, ${action}, sessions: ${sessions})${reqStr}` }] };
     } catch (e) {
       return { content: [{ type: "text", text: `Error: ${e.message}` }] };
     }
@@ -82,7 +82,8 @@ export function register(server) {
     priority: z.number().optional().describe("New priority"),
     action: z.enum(["keep", "consume"]).optional().describe("New action"),
     sessions: z.string().optional().describe("New session types"),
-  }, async ({ file, description, priority, action, sessions }) => {
+    requires: z.union([z.string(), z.array(z.string()), z.null()]).optional().describe("Inject(s) that must be applied first. Set to null to remove dependency."),
+  }, async ({ file, description, priority, action, sessions, requires }) => {
     try {
       const manifest = load();
       if (!manifest.injections) manifest.injections = [];
@@ -97,9 +98,17 @@ export function register(server) {
       if (priority !== undefined) inj.priority = priority;
       if (action !== undefined) inj.action = action;
       if (sessions !== undefined) inj.sessions = sessions;
+      if (requires !== undefined) {
+        if (requires === null) {
+          delete inj.requires;
+        } else {
+          inj.requires = requires;
+        }
+      }
 
       save(manifest);
-      return { content: [{ type: "text", text: `Updated '${file}': priority=${inj.priority}, action=${inj.action}, sessions=${inj.sessions}` }] };
+      const reqStr = inj.requires ? `, requires=${Array.isArray(inj.requires) ? inj.requires.join(",") : inj.requires}` : "";
+      return { content: [{ type: "text", text: `Updated '${file}': priority=${inj.priority}, action=${inj.action}, sessions=${inj.sessions}${reqStr}` }] };
     } catch (e) {
       return { content: [{ type: "text", text: `Error: ${e.message}` }] };
     }

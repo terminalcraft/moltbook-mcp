@@ -75,42 +75,39 @@ def read_current_pattern():
     return "BBRE"
 
 def recommend(analysis, current_pattern):
-    """Recommend a rotation based on efficiency data."""
-    # Core logic: B sessions should dominate if they produce commits efficiently.
-    # E sessions are worth keeping if platforms are working (commits=0 is expected).
-    # R sessions should be minimal but present (they produce commits from refactors).
+    """Recommend a rotation based on efficiency data.
 
+    Preserves non-tunable session types (A=audit) from the current pattern.
+    Only adjusts the ratio of B, E, R sessions.
+    """
     b = analysis.get("B", {})
     e = analysis.get("E", {})
     r = analysis.get("R", {})
 
-    # B cost efficiency: cost per commit (lower = better)
+    # Preserve non-tunable types (A, etc.) from current pattern
+    has_audit = "A" in current_pattern
+
     b_cpc = b.get("cost_per_commit", 99)
     r_cpc = r.get("cost_per_commit", 99)
     e_avg_cost = e.get("avg_cost", 99)
 
-    # If E sessions cost >$1 avg and produce nothing, reduce them
     e_wasteful = e_avg_cost > 1.0 and e.get("avg_commits", 0) == 0
-
-    # If B cost/commit is good (<$2), weight B heavier
     b_efficient = b_cpc < 2.0
-
-    # R sessions: if they produce commits cheaply, keep at 25%
     r_productive = r.get("avg_commits", 0) >= 1.0
 
-    # Build recommendation
+    # Build BER core pattern (without fixed types like A)
     if e_wasteful:
-        # Reduce E, more B
-        pattern = "BBBR" if not r_productive else "BBBRE"
+        core = "BBBR" if not r_productive else "BBRE"
         reason = f"E sessions avg ${e_avg_cost:.2f} with 0 commits — reducing E share"
     elif b_efficient and b_cpc < r_cpc:
-        # B is most efficient, maximize it
-        pattern = "BBBRE"
+        core = "BBRE"
         reason = f"B sessions most efficient at ${b_cpc:.2f}/commit — increasing B share"
     else:
-        # Balanced
-        pattern = "BBRE"
+        core = "BBRE"
         reason = "Balanced efficiency across types — maintaining current ratio"
+
+    # Append preserved fixed types
+    pattern = core + ("A" if has_audit else "")
 
     changed = pattern != current_pattern
     return {"pattern": pattern, "reason": reason, "changed": changed, "current": current_pattern}

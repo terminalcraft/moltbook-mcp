@@ -123,12 +123,25 @@ function solveTextExtract(prompt, data) {
   return null;
 }
 
+// Color lightness ordering (light to dark) for comparative clues
+const COLOR_LIGHTNESS = {
+  white: 100, yellow: 97, pink: 80, orange: 70,
+  green: 55, red: 53, blue: 45, purple: 38, brown: 30, black: 0,
+};
+
+function getColorOrder(color) {
+  return COLOR_LIGHTNESS[color.toLowerCase()] ?? 50;
+}
+
 function solveLogicPuzzle(prompt, data) {
   // Parse constraint-based logic puzzles
   // Format: "Based on the clues below, what <attr> does <person> have?"
-  // data.clues is an array of clue strings, data.categories describes the puzzle space
+  // data.clues is an array of clue strings
+  // data.entities is the list of people/things
+  // data.attributes is { attrName: [values] }
   const clues = data?.clues || [];
-  const categories = data?.categories || {};
+  const entities = data?.entities || [];
+  const attributes = data?.attributes || data?.categories || {};
   const p = prompt.toLowerCase();
 
   // Extract question: "what color does David have?"
@@ -136,25 +149,56 @@ function solveLogicPuzzle(prompt, data) {
   if (!qMatch || !clues.length) return null;
 
   const [, targetAttr, targetPerson] = qMatch;
+  const targetPersonCap = targetPerson.charAt(0).toUpperCase() + targetPerson.slice(1);
 
-  // Build assignment possibilities
-  const people = categories.person || categories.people || categories.name || categories.names || [];
-  const attrValues = categories[targetAttr] || [];
-  if (!people.length || !attrValues.length) return null;
+  // Get people list - try entities first, then fallback to categories
+  const people = entities.length ? entities : (
+    attributes.person || attributes.people || attributes.name || attributes.names || []
+  );
+  if (!people.length) return null;
 
-  // Brute force: try all permutations for small puzzles
-  if (attrValues.length <= 5) {
-    const perms = permutations(attrValues);
-    for (const perm of perms) {
-      const assignment = {};
-      people.forEach((person, i) => { assignment[person] = perm[i]; });
-      if (checkClues(clues, assignment, targetAttr)) {
-        return assignment[targetPerson];
-      }
+  // Get all attribute types we need to assign
+  const attrNames = Object.keys(attributes);
+  if (!attrNames.includes(targetAttr) || !attributes[targetAttr]?.length) return null;
+
+  // For multi-attribute puzzles, we need to try all combinations
+  // Build all possible assignments for each attribute
+  const attrPerms = {};
+  for (const attr of attrNames) {
+    const vals = attributes[attr];
+    if (vals.length <= 6) {
+      attrPerms[attr] = permutations(vals);
+    } else {
+      return null; // Too many values
     }
   }
 
-  return null;
+  // Try all combinations of attribute assignments
+  const tryAssignments = (attrIdx, assignments) => {
+    if (attrIdx >= attrNames.length) {
+      // Check if this full assignment satisfies all clues
+      if (checkCluesMultiAttr(clues, people, assignments)) {
+        return assignments[targetAttr][targetPersonCap];
+      }
+      return null;
+    }
+
+    const attr = attrNames[attrIdx];
+    for (const perm of attrPerms[attr]) {
+      const attrAssign = {};
+      people.forEach((person, i) => { attrAssign[person] = perm[i]; });
+      assignments[attr] = attrAssign;
+      const result = tryAssignments(attrIdx + 1, assignments);
+      if (result !== null) return result;
+    }
+    return null;
+  };
+
+  // Limit combinatorial explosion: max 2 attributes or small value sets
+  const totalPerms = attrNames.reduce((acc, attr) => acc * (attrPerms[attr]?.length || 1), 1);
+  if (totalPerms > 1000) return null; // Too complex for brute force
+
+  return tryAssignments(0, {});
 }
 
 function permutations(arr) {
@@ -169,32 +213,108 @@ function permutations(arr) {
   return result;
 }
 
-function checkClues(clues, assignment, attr) {
+// Multi-attribute clue checker for logic puzzles
+// assignments = { attrName: { Person: value, ... }, ... }
+function checkCluesMultiAttr(clues, people, assignments) {
+  // Build reverse lookup: for each attr, value -> person
+  const valueToPerson = {};
+  for (const [attr, assign] of Object.entries(assignments)) {
+    valueToPerson[attr] = {};
+    for (const [person, val] of Object.entries(assign)) {
+      valueToPerson[attr][val.toLowerCase()] = person;
+    }
+  }
+
   for (const clue of clues) {
     const c = clue.toLowerCase();
-    // "<Person> has <value>"
-    const hasMatch = c.match(/(\w+) has (\w+)/);
-    if (hasMatch) {
-      const [, person, value] = hasMatch;
-      const cap = person.charAt(0).toUpperCase() + person.slice(1);
-      if (assignment[cap] !== undefined && assignment[cap].toLowerCase() !== value) return false;
+
+    // "X's color is lighter than Y's" or "X's color is darker than Y's"
+    const lighterMatch = c.match(/(\w+)'s color is lighter than (\w+)'s/);
+    if (lighterMatch) {
+      const [, p1, p2] = lighterMatch;
+      const person1 = capitalize(p1), person2 = capitalize(p2);
+      if (assignments.color?.[person1] && assignments.color?.[person2]) {
+        const order1 = getColorOrder(assignments.color[person1]);
+        const order2 = getColorOrder(assignments.color[person2]);
+        if (order1 <= order2) return false; // lighter means higher lightness value
+      }
     }
+
+    const darkerMatch = c.match(/(\w+)'s color is darker than (\w+)'s/);
+    if (darkerMatch) {
+      const [, p1, p2] = darkerMatch;
+      const person1 = capitalize(p1), person2 = capitalize(p2);
+      if (assignments.color?.[person1] && assignments.color?.[person2]) {
+        const order1 = getColorOrder(assignments.color[person1]);
+        const order2 = getColorOrder(assignments.color[person2]);
+        if (order1 >= order2) return false; // darker means lower lightness value
+      }
+    }
+
+    // "The person with the X <attr> does not have the Y <attr2>"
+    // e.g., "The person with the dog pet does not have the yellow color"
+    const crossMatch = c.match(/the person with the (\w+) (\w+) does not have the (\w+) (\w+)/);
+    if (crossMatch) {
+      const [, val1, attr1, val2, attr2] = crossMatch;
+      const person1 = valueToPerson[attr1]?.[val1];
+      if (person1 && assignments[attr2]?.[person1]?.toLowerCase() === val2) return false;
+    }
+
+    // "The person with the X <attr> has the Y <attr2>"
+    const crossHasMatch = c.match(/the person with the (\w+) (\w+) has the (\w+) (\w+)/);
+    if (crossHasMatch) {
+      const [, val1, attr1, val2, attr2] = crossHasMatch;
+      const person1 = valueToPerson[attr1]?.[val1];
+      if (person1 && assignments[attr2]?.[person1]?.toLowerCase() !== val2) return false;
+    }
+
+    // "<Person> has <value>" (for any attribute)
+    const hasMatch = c.match(/^(\w+) has (?:the )?(\w+)(?:\s|$|\.)/);
+    if (hasMatch && !c.includes("does not")) {
+      const [, person, value] = hasMatch;
+      const personCap = capitalize(person);
+      // Check all attributes for this value
+      let found = false;
+      for (const [attr, assign] of Object.entries(assignments)) {
+        if (assign[personCap]?.toLowerCase() === value) found = true;
+      }
+      if (!found && Object.values(assignments).some(a => a[personCap] !== undefined)) {
+        // Person exists but doesn't have this value in any attribute
+        return false;
+      }
+    }
+
     // "<Person> does not have <value>"
-    const notMatch = c.match(/(\w+) does not have (\w+)/);
+    const notMatch = c.match(/(\w+) does not have (?:the )?(\w+)/);
     if (notMatch) {
       const [, person, value] = notMatch;
-      const cap = person.charAt(0).toUpperCase() + person.slice(1);
-      if (assignment[cap] !== undefined && assignment[cap].toLowerCase() === value) return false;
+      const personCap = capitalize(person);
+      for (const [attr, assign] of Object.entries(assignments)) {
+        if (assign[personCap]?.toLowerCase() === value) return false;
+      }
     }
+
     // "<Person>'s <attr> is not <value>"
-    const isNotMatch = c.match(/(\w+)'s \w+ is not (\w+)/);
+    const isNotMatch = c.match(/(\w+)'s (\w+) is not (\w+)/);
     if (isNotMatch) {
-      const [, person, value] = isNotMatch;
-      const cap = person.charAt(0).toUpperCase() + person.slice(1);
-      if (assignment[cap] !== undefined && assignment[cap].toLowerCase() === value) return false;
+      const [, person, attr, value] = isNotMatch;
+      const personCap = capitalize(person);
+      if (assignments[attr]?.[personCap]?.toLowerCase() === value) return false;
+    }
+
+    // "<Person>'s <attr> is <value>"
+    const isMatch = c.match(/(\w+)'s (\w+) is (\w+)/);
+    if (isMatch && !c.includes("is not")) {
+      const [, person, attr, value] = isMatch;
+      const personCap = capitalize(person);
+      if (assignments[attr]?.[personCap] && assignments[attr][personCap].toLowerCase() !== value) return false;
     }
   }
   return true;
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
 async function submitAnswer(challengeId, answer) {

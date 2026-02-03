@@ -150,11 +150,12 @@
       "title": "Session cost predictor",
       "description": "Based on historical cost data by session type and complexity, estimate likely cost before starting a task. Flag when task looks expensive.",
       "priority": 82,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#168: Added 08-cost-predictor.sh pre-session hook. Shows avg, range, p90, and recent avg for session type. Warns when p90 > 80% of budget cap."
     },
     {
       "id": "wq-083",

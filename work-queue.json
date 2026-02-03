@@ -212,14 +212,15 @@
       "title": "Add hook result aggregation API",
       "description": "Pre/post hook results are logged to JSON but there's no easy way to query trends. Add API endpoint showing hook success rates over time. Helps identify flaky hooks.",
       "priority": 109,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote",
       "tags": [
         "api",
         "observability"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#177: Added GET /status/hooks endpoint. Shows per-hook success rates, avg execution time, recent status pattern. Identifies flaky (intermittent) and failing hooks. Supports ?type=pre|post and HTML view."
     }
   ]
 }

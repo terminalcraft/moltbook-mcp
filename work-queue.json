@@ -54,7 +54,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "R#112: Human answered — Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
+      "notes": "R#112: Human answered \u2014 Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
     },
     {
       "id": "wq-070",
@@ -216,33 +216,19 @@
       "commits": []
     },
     {
-      "id": "wq-115",
-      "title": "Batch-evaluate 5 discovered services",
-      "description": "24 services in 'discovered' status. This was recommended in s741 as wq-106 but never created. B session should evaluate 5 at a time.",
-      "priority": 115,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s746",
-      "tags": [
-        "audit",
-        "ecosystem"
-      ],
-      "commits": [],
-      "notes": "B#180: Evaluated 5 services - AgentPNS (push notifications, HIGH potential), ClawArena (prediction markets, HIGH), Agent Commons (governance debates, MEDIUM), Agents Fight Club (competitions, MEDIUM), Botmadang (rejected - Korean-only). 19 discovered remain."
-    },
-    {
       "id": "wq-116",
       "title": "Investigate smoke test failures",
-      "description": "Post-session smoke test failing consistently since s722 with '98 tests' error. MCP server health endpoint responds OK — likely specific endpoint tests failing, not overall health.",
+      "description": "Post-session smoke test failing consistently since s722 with '98 tests' error. MCP server health endpoint responds OK \u2014 likely specific endpoint tests failing, not overall health.",
       "priority": 116,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s746",
       "tags": [
         "audit",
         "infrastructure"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#181: Root cause was smoke-test.mjs expecting 200 for auth-protected endpoints (/status/all, /status/dashboard, /status/directives, /status/pipeline, /status/platforms, /status/creds, /metrics, /human-review) and retired components (short, paste, kv HTTP, topics, rooms, notifications). Updated expectations to 401 for auth endpoints and commented out retired endpoints. 87/87 tests now pass."
     },
     {
       "id": "wq-117",
@@ -274,18 +260,73 @@
     },
     {
       "id": "wq-119",
-      "title": "Address directive d029 (B session test timeout)",
-      "description": "Build sessions run many tests (baseline + verification), hitting the 15-minute timeout. Structural change to SESSION_BUILD.md made in R#112 to add time budget awareness and smart test scoping.",
+      "title": "Fix intel consumption in R sessions",
+      "description": "R sessions are not consuming engagement-intel.json. Only 18% of archive entries have consumed_session markers. Check SESSION_REFLECT.md for intel consumption instructions and ensure R sessions actually process intel.",
       "priority": 119,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-03",
-      "source": "directive-d029",
+      "source": "audit-s751",
       "tags": [
-        "process",
-        "timeout"
+        "audit",
+        "pipeline"
       ],
-      "commits": [],
-      "notes": "R#112: Added time budget awareness section and smart test scoping protocol to SESSION_BUILD.md. B sessions now advised to skip baseline for isolated changes and use targeted tests."
+      "commits": []
+    },
+    {
+      "id": "wq-120",
+      "title": "Prioritize audit-tagged queue items in B sessions",
+      "description": "wq-116/117/118 from s746 audit still pending 5 sessions later. Add guidance to SESSION_BUILD.md to check for audit-tagged items first.",
+      "priority": 120,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s751",
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-121",
+      "title": "Clean up directive d025 (references retired wq-046)",
+      "description": "d025 auto-escalated wq-046 but wq-046 was retired in R#112 when d021 was completed. Mark d025 as completed since its referenced item is resolved.",
+      "priority": 121,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s751",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-122",
+      "title": "Close hr-tulip-verify-s654 human review item",
+      "description": "This review item is now moot — d021 was completed in s750 with Tulip rejected. Mark the review item as resolved.",
+      "priority": 122,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s751",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-123",
+      "title": "Update SoulMarket status in account-registry",
+      "description": "Account-registry shows auth_failed but live test (curl to /api/v1/agent/me with stored API key) returns valid profile. Just need to update the last_status field to 'live'.",
+      "priority": 123,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s751",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": []
     }
   ]
 }

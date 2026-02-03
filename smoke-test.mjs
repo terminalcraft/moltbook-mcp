@@ -9,19 +9,19 @@ const tests = [
   { method: "GET", path: "/", expect: 200 },
   { method: "GET", path: "/health", expect: 200 },
   { method: "GET", path: "/status", expect: 200 },
-  { method: "GET", path: "/status/all", expect: 200 },
-  { method: "GET", path: "/status/dashboard", expect: 200 },
+  { method: "GET", path: "/status/all", expect: 401 },  // requires auth
+  { method: "GET", path: "/status/dashboard", expect: 401 },  // requires auth
   { method: "GET", path: "/status/queue", expect: 200 },
   { method: "GET", path: "/status/queue-health", expect: 200 },
   { method: "GET", path: "/status/queue-velocity", expect: 200 },
   { method: "GET", path: "/status/efficiency", expect: 200 },
-  { method: "GET", path: "/status/directives", expect: 200 },
-  { method: "GET", path: "/status/pipeline", expect: 200 },
-  { method: "GET", path: "/status/platforms", expect: 200 },
+  { method: "GET", path: "/status/directives", expect: 401 },  // requires auth
+  { method: "GET", path: "/status/pipeline", expect: 401 },  // requires auth
+  { method: "GET", path: "/status/platforms", expect: 401 },  // requires auth
   { method: "GET", path: "/status/cost-heatmap", expect: 200 },
   { method: "GET", path: "/status/cost-distribution", expect: 200 },
   { method: "GET", path: "/status/session-effectiveness", expect: 200 },
-  { method: "GET", path: "/status/creds", expect: 200 },
+  { method: "GET", path: "/status/creds", expect: 401 },  // requires auth
   { method: "GET", path: "/engagement/roi-leaderboard", expect: 200 },
   { method: "GET", path: "/efficiency", expect: 200 },
   { method: "GET", path: "/directives", expect: 200 },
@@ -43,7 +43,7 @@ const tests = [
   { method: "GET", path: "/skill.md", expect: 200 },
   { method: "GET", path: "/changelog", expect: 200 },
   { method: "GET", path: "/changelog?format=json", expect: 200 },
-  { method: "GET", path: "/metrics", expect: 200 },
+  { method: "GET", path: "/metrics", expect: 401 },  // requires auth
   { method: "GET", path: "/backup", expect: 401 },
   { method: "GET", path: "/backups", expect: 200 },
   { method: "POST", path: "/backups/restore/2000-01-01", expect: 401 },
@@ -74,7 +74,7 @@ const tests = [
   // Build log
   { method: "GET", path: "/buildlog", expect: 200 },
   { method: "GET", path: "/buildlog?format=json", expect: 200 },
-  { method: "POST", path: "/buildlog", body: { agent: "smoke-test", summary: "Smoke test entry" }, expect: 201 },
+  { method: "POST", path: "/buildlog", body: { agent: "smoke-test", summary: "Smoke test entry" }, expect: 403 },  // requires verified agent
 
   // Search
   { method: "GET", path: "/search?q=test", expect: 200 },
@@ -94,14 +94,14 @@ const tests = [
   // Webhooks
   { method: "GET", path: "/webhooks/events", expect: 200 },
 
-  // Short URLs
-  { method: "GET", path: "/short", expect: 200 },
+  // Short URLs — RETIRED component, endpoint removed
+  // { method: "GET", path: "/short", expect: 200 },
 
-  // Paste bin
-  { method: "GET", path: "/paste", expect: 200 },
+  // Paste bin — RETIRED component, endpoint removed
+  // { method: "GET", path: "/paste", expect: 200 },
 
-  // KV store
-  { method: "GET", path: "/kv", expect: 200 },
+  // KV store — endpoint moved to MCP tool only, no HTTP endpoint
+  // { method: "GET", path: "/kv", expect: 200 },
 
   // Cron
   { method: "GET", path: "/cron", expect: 200 },
@@ -109,15 +109,15 @@ const tests = [
   // Polls
   { method: "GET", path: "/polls", expect: 200 },
 
-  // Topics (pubsub)
-  { method: "GET", path: "/topics", expect: 200 },
+  // Topics (pubsub) — RETIRED component, endpoint removed
+  // { method: "GET", path: "/topics", expect: 200 },
 
-  // Rooms
-  { method: "GET", path: "/rooms", expect: 200 },
+  // Rooms — RETIRED component, endpoint removed
+  // { method: "GET", path: "/rooms", expect: 200 },
 
-  // Notifications
-  { method: "GET", path: "/notifications/events/list", expect: 200 },
-  { method: "GET", path: "/notifications/smoke-test", expect: 200 },
+  // Notifications — RETIRED component, endpoint removed
+  // { method: "GET", path: "/notifications/events/list", expect: 200 },
+  // { method: "GET", path: "/notifications/smoke-test", expect: 200 },
 
   // Inbox (public)
   { method: "GET", path: "/inbox/stats", expect: 200 },
@@ -136,11 +136,13 @@ const tests = [
   // POST endpoints with safe test payloads
   // Inbox POST removed — was flooding inbox.json with one message per session (d012)
   { method: "GET", path: "/inbox", expect: [200, 401], note: "inbox read-only smoke check" },
-  { method: "GET", path: "/human-review", expect: 200 },
-  { method: "POST", path: "/paste", body: { content: "smoke test paste", language: "text" }, expect: [200, 201] },
-  { method: "PUT", path: "/kv/smoke-test/test-key", body: { value: "smoke", ttl: 60 }, expect: [200, 201], seq: "kv" },
-  { method: "GET", path: "/kv/smoke-test/test-key", expect: 200, seq: "kv" },
-  { method: "DELETE", path: "/kv/smoke-test/test-key", expect: 200, seq: "kv" },
+  { method: "GET", path: "/human-review", expect: 401 },  // requires auth
+  // paste — RETIRED component, endpoint removed
+  // { method: "POST", path: "/paste", body: { content: "smoke test paste", language: "text" }, expect: [200, 201] },
+  // KV — MCP tool only, no HTTP endpoint
+  // { method: "PUT", path: "/kv/smoke-test/test-key", body: { value: "smoke", ttl: 60 }, expect: [200, 201], seq: "kv" },
+  // { method: "GET", path: "/kv/smoke-test/test-key", expect: 200, seq: "kv" },
+  // { method: "DELETE", path: "/kv/smoke-test/test-key", expect: 200, seq: "kv" },
 
   // Agent profiles
   { method: "GET", path: "/agents", expect: 200 },

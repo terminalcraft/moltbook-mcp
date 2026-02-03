@@ -1773,6 +1773,98 @@ app.get("/status/prompt-inject", (req, res) => {
   }
 });
 
+// Inject usage history (wq-105)
+// Shows which injections were actually applied per session
+app.get("/status/inject-usage", (req, res) => {
+  const format = req.query.format || "json";
+  const limit = Math.min(parseInt(req.query.limit) || 20, 200);
+  const session = req.query.session; // Optional: filter by session number
+  const mode = req.query.mode; // Optional: filter by mode (B, E, R, A)
+  try {
+    const logDir = join(homedir(), ".config/moltbook/logs");
+    const usageFile = join(logDir, "inject-usage.json");
+
+    if (!existsSync(usageFile)) {
+      return res.json({ error: "inject-usage.json not found (no sessions tracked yet)" });
+    }
+
+    // Read JSONL file (one JSON object per line)
+    const lines = readFileSync(usageFile, "utf8").trim().split("\n").filter(Boolean);
+    let entries = lines.map(line => {
+      try { return JSON.parse(line); } catch { return null; }
+    }).filter(Boolean);
+
+    // Apply filters
+    if (session) {
+      entries = entries.filter(e => e.session === parseInt(session));
+    }
+    if (mode) {
+      entries = entries.filter(e => e.mode === mode.toUpperCase());
+    }
+
+    // Get last N entries (most recent first)
+    entries = entries.slice(-limit).reverse();
+
+    // Compute summary
+    const summary = {
+      total_entries: lines.length,
+      filtered_count: entries.length,
+      by_mode: {},
+      top_applied: {},
+      top_missing: {},
+    };
+    for (const e of entries) {
+      summary.by_mode[e.mode] = (summary.by_mode[e.mode] || 0) + 1;
+      for (const a of e.applied || []) {
+        summary.top_applied[a.file] = (summary.top_applied[a.file] || 0) + 1;
+      }
+      for (const m of e.skipped_missing || []) {
+        summary.top_missing[m] = (summary.top_missing[m] || 0) + 1;
+      }
+    }
+
+    const result = {
+      summary,
+      entries,
+    };
+
+    if (format === "html") {
+      const rows = entries.map(e => {
+        const applied = (e.applied || []).map(a => `<span style="color:#a6e3a1">${a.file}</span>`).join(", ") || "<em>none</em>";
+        const skipped = (e.skipped_missing || []).map(m => `<span style="color:#6c7086">${m}</span>`).join(", ") || "-";
+        const sessionSkipped = (e.skipped_session || []).length;
+        return `<tr><td>${e.session}</td><td>${e.mode}</td><td>${e.ts?.slice(0, 19)}</td><td>${applied}</td><td>${skipped}</td><td style="color:#45475a">${sessionSkipped}</td></tr>`;
+      }).join("");
+      return res.send(`<!DOCTYPE html><html><head><title>Inject Usage</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1{color:#89b4fa}table{border-collapse:collapse;width:100%}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}.stats{display:flex;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}.stat{background:#313244;padding:0.5rem 1rem;border-radius:4px}</style></head><body>
+<h1>Inject Usage History</h1>
+<div class="stats">
+  <div class="stat">Total tracked: ${summary.total_entries}</div>
+  <div class="stat">Showing: ${summary.filtered_count}</div>
+  ${mode ? `<div class="stat">Filter: mode=${mode.toUpperCase()}</div>` : ""}
+  ${session ? `<div class="stat">Filter: session=${session}</div>` : ""}
+</div>
+<table>
+  <tr><th>Session</th><th>Mode</th><th>Time</th><th>Applied</th><th>Missing</th><th>Skipped (mode)</th></tr>
+  ${rows || "<tr><td colspan=6><em>No entries</em></td></tr>"}
+</table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem">
+  Mode: <a href="/status/inject-usage?mode=B" style="color:#89b4fa">B</a> ·
+  <a href="/status/inject-usage?mode=E" style="color:#89b4fa">E</a> ·
+  <a href="/status/inject-usage?mode=R" style="color:#89b4fa">R</a> ·
+  <a href="/status/inject-usage?mode=A" style="color:#89b4fa">A</a> ·
+  <a href="/status/inject-usage" style="color:#89b4fa">All</a> ·
+  <a href="/status/inject-usage?format=json" style="color:#89b4fa">JSON</a> ·
+  <a href="/status/prompt-inject" style="color:#89b4fa">Config</a> ·
+  <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a>
+</p>
+</body></html>`);
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Component dependency map (wq-093)
 // Shows which files/APIs each component depends on — useful for change impact analysis
 app.get("/status/dependencies", (req, res) => {

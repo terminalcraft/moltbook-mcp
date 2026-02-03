@@ -385,13 +385,17 @@ ${CTX_A_PROMPT_BLOCK:-## A Session
 Follow the checklist in SESSION_AUDIT.md.}"
 fi
 
-# --- Prompt inject blocks (R#76, R#110: manifest-driven) ---
+# --- Prompt inject blocks (R#76, R#110: manifest-driven, wq-105: usage tracking) ---
 # Restructured from hardcoded INJECT_SPECS to external prompt-inject.json manifest.
 # Manifest specifies: file, action (keep|consume), priority, sessions, description.
 # Session type filtering enables inject files to target specific session types.
 # Priority ordering ensures deterministic injection order.
+# Usage tracking (wq-105): logs which injections were applied to inject-usage.json.
 INJECT_BLOCKS=""
 INJECT_MANIFEST="$DIR/prompt-inject.json"
+INJECT_APPLIED=()
+INJECT_SKIPPED_SESSION=()
+INJECT_SKIPPED_MISSING=()
 
 if [ -f "$INJECT_MANIFEST" ]; then
   # Parse manifest and process injections matching current session type
@@ -399,6 +403,7 @@ if [ -f "$INJECT_MANIFEST" ]; then
     [ -z "$fname" ] && continue
     # Session filter: if sessions field exists and doesn't contain current mode, skip
     if [ -n "$sessions" ] && [[ ! "$sessions" =~ $MODE_CHAR ]]; then
+      INJECT_SKIPPED_SESSION+=("$fname")
       continue
     fi
     fpath="$STATE_DIR/$fname"
@@ -406,7 +411,10 @@ if [ -f "$INJECT_MANIFEST" ]; then
       INJECT_BLOCKS="${INJECT_BLOCKS}
 
 $(cat "$fpath")"
+      INJECT_APPLIED+=("$fname:$action")
       [ "$action" = "consume" ] && rm -f "$fpath"
+    else
+      INJECT_SKIPPED_MISSING+=("$fname")
     fi
   done < <(python3 -c "
 import json, sys
@@ -431,9 +439,48 @@ else
       INJECT_BLOCKS="${INJECT_BLOCKS}
 
 $(cat "$fpath")"
+      INJECT_APPLIED+=("$fname:$action")
       [ "$action" = "consume" ] && rm -f "$fpath"
+    else
+      INJECT_SKIPPED_MISSING+=("$fname")
     fi
   done
+fi
+
+# Write inject usage tracking (wq-105)
+INJECT_USAGE_FILE="$LOG_DIR/inject-usage.json"
+{
+  echo -n "{\"session\":$COUNTER,\"mode\":\"$MODE_CHAR\",\"ts\":\"$(date -Iseconds)\","
+  echo -n "\"applied\":["
+  first=1
+  for item in "${INJECT_APPLIED[@]:-}"; do
+    [ -z "$item" ] && continue
+    [ "$first" = 1 ] || echo -n ","
+    IFS=: read -r f a <<< "$item"
+    echo -n "{\"file\":\"$f\",\"action\":\"$a\"}"
+    first=0
+  done
+  echo -n "],\"skipped_session\":["
+  first=1
+  for f in "${INJECT_SKIPPED_SESSION[@]:-}"; do
+    [ -z "$f" ] && continue
+    [ "$first" = 1 ] || echo -n ","
+    echo -n "\"$f\""
+    first=0
+  done
+  echo -n "],\"skipped_missing\":["
+  first=1
+  for f in "${INJECT_SKIPPED_MISSING[@]:-}"; do
+    [ -z "$f" ] && continue
+    [ "$first" = 1 ] || echo -n ","
+    echo -n "\"$f\""
+    first=0
+  done
+  echo "]}"
+} >> "$INJECT_USAGE_FILE"
+# Keep last 200 entries
+if [ "$(wc -l < "$INJECT_USAGE_FILE" 2>/dev/null || echo 0)" -gt 200 ]; then
+  tail -200 "$INJECT_USAGE_FILE" > "$INJECT_USAGE_FILE.tmp" && mv "$INJECT_USAGE_FILE.tmp" "$INJECT_USAGE_FILE"
 fi
 
 PROMPT="${BASE_PROMPT}

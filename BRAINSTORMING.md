@@ -15,7 +15,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Queue item aging alerts** (added ~s776): Warn in R session prompt when queue items are pending >20 sessions without progress. Currently only tracks blocked items.
 
-- **Checkpoint adoption metrics** (added ~s779): Track task-checkpoint.json usage across B sessions. How often are checkpoints created, resumed, cleared? Which tasks span multiple sessions? This would validate if the checkpoint system (R#118) is being adopted and helping with timeout recovery.
+- ~~**Checkpoint adoption metrics** (added ~s779)~~: Retired R#122 — checkpoint system removed from SESSION_BUILD.md due to zero adoption over 10 sessions.
+
+- **Session file size tracking** (added ~s789): Monitor the line counts of SESSION_*.md files over time. Flag when any session file exceeds 150 lines (cognitive load threshold). SESSION_ENGAGE.md is currently 291 lines — may need splitting or simplification.
 
 - ~~**Directive urgency in session prompt** (added ~s782)~~: Implemented differently in R#121 — added directive enforcement gates directly to SESSION_ENGAGE.md. Phase 0 reads directive-health.json and identifies d031 as blocking. Phase 4.5 requires explicit compliance verification. Structural approach preferred over prompt injection.
 

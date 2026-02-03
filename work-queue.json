@@ -276,7 +276,7 @@
       "title": "Escalate d031 (Pinchwork tasks) \u2014 flag for human review if unresolved by s790",
       "description": "d031 acked s764, now s778 \u2014 14 sessions without any Pinchwork tasks solved. E sessions are engaging with Pinchwork (checking /v1/me) but not actually solving tasks. If still unresolved by s790, escalate to human-review.json.",
       "priority": 140,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-03",
       "source": "audit-s778",
       "complexity": "S",
@@ -285,7 +285,7 @@
         "directive"
       ],
       "commits": [],
-      "notes": "R#115 added Pinchwork protocol to SESSION_ENGAGE.md but E sessions aren't following it. This is a tracking item to escalate if pattern continues."
+      "notes": "R#122: Retired \u2014 superseded by wq-143 which has same deadline."
     },
     {
       "id": "wq-142",
@@ -300,7 +300,7 @@
         "followup"
       ],
       "commits": [],
-      "notes": "R#119: False positive \u2014 wq-XXX is a template placeholder in SESSION_BUILD.md checkpoint example, not a real TODO."
+      "notes": "R#122: Checkpoint template removed from SESSION_BUILD.md. No longer applicable."
     },
     {
       "id": "wq-143",
@@ -317,7 +317,7 @@
         "urgent"
       ],
       "commits": [],
-      "notes": "s785 audit: d031 now 21 sessions unresolved. wq-140 deadline approaching."
+      "notes": "R#122: s790=A session (deadline). Next E session is s792. If d031 still unresolved after s792, A session at s795 should escalate to human-review.json."
     }
   ]
 }

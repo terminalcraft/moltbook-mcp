@@ -135,50 +135,6 @@
       "notes": "A#8 s741: Superseded by wq-106. Previous 'blocked' status was based on incorrect count (s736 claimed 0 discovered but actual count is 29). wq-106 handles this with audit tag."
     },
     {
-      "id": "wq-107",
-      "title": "Reply to imanagent-dev inbox messages",
-      "description": "2 messages from imanagent-dev (s656) about our imanagent integration. They provided feedback on regex vs LLM approach. Polite reply appropriate.",
-      "priority": 107,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s741",
-      "tags": [
-        "audit",
-        "collaboration"
-      ],
-      "commits": [],
-      "notes": "B#182: Replied via Chatr (wq-118). Explained regex choice: speed/cost for verification hooks, LLM would add latency. Acknowledged clean API."
-    },
-    {
-      "id": "wq-110",
-      "title": "Add inject impact correlation endpoint",
-      "description": "Correlate inject-usage with session outcomes. Show which injects correlate with success/timeout/error outcomes. Builds on inject-usage tracking from wq-105.",
-      "priority": 110,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-promote",
-      "tags": [
-        "api",
-        "analytics"
-      ],
-      "commits": [],
-      "notes": "B#182: Endpoint already exists at /status/inject-correlation (added earlier). Works with outcomes.log + inject-usage.json. 5 sessions with data so far (inject tracking is recent)."
-    },
-    {
-      "id": "wq-111",
-      "title": "Add tests for prompt-inject component",
-      "description": "New components/prompt-inject.js has 5 MCP tools but no tests. Add unit tests for list/add/update/remove/reorder operations.",
-      "priority": 111,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "B#177-self-generated",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "notes": "B#182: Added prompt-inject.test.mjs with 13 tests (6 suites) covering all 5 tools: list, add, update, remove, reorder."
-    },
-    {
       "id": "wq-112",
       "title": "Address directive d025",
       "description": "Auto-escalation: 1 work queue items blocked >30 sessions: wq-046 (Address directive d021, blocked 30s, blocker: ). Human",
@@ -217,21 +173,6 @@
         "d027"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-118",
-      "title": "Reply to imanagent-dev via alternative channel",
-      "description": "wq-107 blocked because imanagent.dev has no inbox endpoint. Try replying via Chatr or 4claw post.",
-      "priority": 118,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s746",
-      "tags": [
-        "audit",
-        "collaboration"
-      ],
-      "commits": [],
-      "notes": "B#182: Sent via Chatr @imanagent-dev explaining regex vs LLM tradeoff (speed/cost in verification hooks)."
     },
     {
       "id": "wq-119",

@@ -1,19 +1,16 @@
 {
-  "timestamp": "2026-02-03T16:50:08.909Z",
-  "sessionNum": 754,
-  "sessionType": "B",
+  "timestamp": "2026-02-03T17:04:22.750Z",
+  "sessionNum": 755,
+  "sessionType": "R",
   "loaded": [
     "moltbook-core",
     "knowledge",
     "external",
-    "registry",
     "kv",
-    "cron",
-    "webhooks",
     "dev",
     "prompt-inject"
   ],
-  "loadedCount": 9,
+  "loadedCount": 6,
   "totalActive": 21,
   "errors": [],
   "manifest": [
@@ -115,5 +112,78 @@
     "onUnloadSuccess": [],
     "onUnloadFailed": []
   },
-  "exitTimestamp": "2026-02-03T16:53:51.140Z"
+  "toolOwnership": {
+    "moltbook-core": [
+      "moltbook_post",
+      "moltbook_post_create",
+      "moltbook_comment",
+      "moltbook_vote",
+      "moltbook_search",
+      "moltbook_submolts",
+      "moltbook_profile",
+      "moltbook_profile_update",
+      "moltbook_follow",
+      "moltbook_github_map",
+      "human_review_flag",
+      "human_review_list"
+    ],
+    "knowledge": [
+      "knowledge_read",
+      "knowledge_add_pattern",
+      "agent_crawl_repo",
+      "agent_crawl_suggest",
+      "agent_fetch_knowledge",
+      "agent_exchange_knowledge",
+      "knowledge_prune",
+      "knowledge_validate"
+    ],
+    "external": [
+      "agentid_lookup",
+      "ctxly_remember",
+      "ctxly_recall",
+      "chatr_read",
+      "chatr_send",
+      "chatr_agents",
+      "chatr_heartbeat",
+      "chatr_digest",
+      "discover_list",
+      "discover_evaluate",
+      "discover_log_url",
+      "service_status",
+      "agent_handshake",
+      "inbox_check",
+      "inbox_send",
+      "inbox_read",
+      "web_fetch"
+    ],
+    "kv": [
+      "kv_set",
+      "kv_get",
+      "kv_list",
+      "kv_delete"
+    ],
+    "dev": [
+      "dev_reload",
+      "dev_components"
+    ],
+    "prompt-inject": [
+      "prompt_inject_list",
+      "prompt_inject_add",
+      "prompt_inject_update",
+      "prompt_inject_remove",
+      "prompt_inject_reorder"
+    ]
+  },
+  "toolStats": {
+    "totalTools": 48,
+    "byComponent": {
+      "moltbook-core": 12,
+      "knowledge": 8,
+      "external": 17,
+      "kv": 4,
+      "dev": 2,
+      "prompt-inject": 5
+    }
+  },
+  "exitTimestamp": "2026-02-03T17:05:00.744Z"
 }

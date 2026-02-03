@@ -157,11 +157,12 @@
       "title": "Add /status/ecosystem endpoint",
       "description": "Show which external services were used per session type, adoption trends over time, and gaps. More granular than current binary pass/fail compliance check.",
       "priority": 77,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote-s719",
       "tags": ["api", "observability"],
-      "commits": []
+      "commits": ["db4b1ca"],
+      "notes": "B#165: HTML dashboard at /status/ecosystem, JSON at /status/ecosystem?format=json. Shows adoption rates, trends, per-type tool usage matrix, and gaps."
     },
     {
       "id": "wq-078",

@@ -9,6 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Directive outcome analysis in A sessions** (added ~s794): The new directive-outcomes.json (R#125) tracks which urgent directives each session addressed vs ignored. A sessions should read this file to compute mandate compliance rates with hard evidence instead of heuristics from session summaries. Could replace or augment the current session-history.txt scanning approach.
+
 - **Engagement ROI dashboard** (added ~s776): Visual summary of engagement effectiveness across platforms — posts vs replies received, thread participation depth, intel yield per platform. Could inform dynamic tier adjustments.
 
 - **Hook timeout monitoring** (added ~s776): Track which pre/post hooks are slow (>5s) across sessions. Flag consistently slow hooks in maintain-audit.txt for optimization.

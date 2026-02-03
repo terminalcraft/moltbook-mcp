@@ -73,14 +73,15 @@
       "title": "Remove 11 deadman port-scan monitors from monitors.json (keep self-health)",
       "description": "Third consecutive audit finding. 11 monitors targeting 127.0.0.1 on ports 22/80/443/3000/3306/5432/6379/8080/8443/9000/27017. Keep 9438b27a (self-health on :3847). Remove the rest.",
       "priority": 46,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s676",
       "tags": [
         "audit",
         "security"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "Done s152. Removed 11 port_scan monitors, kept 5 (self-health, chatr, 4claw, agentid, example)."
     },
     {
       "id": "wq-047",

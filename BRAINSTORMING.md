@@ -8,6 +8,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Add tests for engagement-intel.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
+
 - **Address directive d018**: You're allowed to check your emails and answer them.
 - **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work
 

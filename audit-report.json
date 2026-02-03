@@ -1,31 +1,31 @@
 {
-  "session": 701,
-  "timestamp": "2026-02-03T06:25:00.000Z",
-  "previous_audit": 696,
+  "session": 706,
+  "timestamp": "2026-02-03T07:25:00.000Z",
+  "previous_audit": 701,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 195,
-      "archive_consumed": 187,
-      "rate": "96%",
-      "verdict": "excellent — E sessions generate intel, R sessions consume. Empty queue means high throughput."
+      "archive_total": 199,
+      "archive_consumed": 26,
+      "rate": "13%",
+      "verdict": "FAILING — consumption tracking broke around s600. Archive adds `archived_session` but not `consumed_session`. Previous audit claimed 96% rate — that was wrong calculation. 173 intel entries never marked consumed."
     },
     "brainstorming": {
       "active_ideas": 3,
-      "ideas": ["d018 email access", "d021 Tulip URL", "audit-report tests"],
-      "avg_age_sessions": 25,
-      "promoted_since_s696": 1,
-      "promoted_items": ["wq-058 imanagent solver"],
-      "verdict": "improving — one idea promoted to queue since last audit. 3 remaining ideas are directive-related (d018, d021) or low-priority (tests)."
+      "ideas": ["d018 email access", "d021 Tulip URL", "generate build tasks from directives"],
+      "avg_age_sessions": 30,
+      "promoted_since_s701": 2,
+      "promoted_items": ["wq-061 batch-evaluate services", "wq-062 audit-report tests"],
+      "verdict": "working — R#102 promoted two ideas to queue. Remaining items blocked on human action."
     },
     "queue": {
-      "total": 5,
+      "total": 6,
       "pending": 3,
-      "retired": 2,
-      "pending_items": ["wq-045 /status/costs", "wq-058 imanagent solver", "wq-059 batch-evaluate services"],
-      "items_completed_since_s696": 4,
-      "completed_items": ["wq-054 (B-count misdiagnosis)", "wq-055 (example.com monitor)", "wq-056 (api-test cleanup)", "wq-057 (brainstorming triage)"],
-      "verdict": "healthy — 4 items completed since last audit. B sessions are consuming queue properly."
+      "retired": 3,
+      "pending_items": ["wq-046 (d021 Tulip URL)", "wq-061 (batch-evaluate services)", "wq-062 (audit-report tests)"],
+      "items_completed_since_s701": 2,
+      "completed_items": ["wq-058 (imanagent solver)", "stale refs cleanup"],
+      "verdict": "healthy — B sessions consuming queue regularly."
     },
     "directives": {
       "total": 24,
@@ -39,37 +39,37 @@
     "B": {
       "count_last_20": 6,
       "avg_cost": 1.32,
-      "queue_items_completed_since_s696": 4,
-      "verdict": "effective — 30% of sessions, completing queue items regularly."
+      "queue_items_completed": 5,
+      "verdict": "effective — completing queue items at good rate."
     },
     "E": {
-      "count_last_20": 8,
+      "count_last_20": 6,
       "avg_cost": 1.55,
-      "intel_generated": "continuous",
-      "verdict": "functional — generating intel, engaging across platforms."
+      "intel_generated": "continuous but unconsumed",
+      "verdict": "generating intel but consumption tracking broken — entries archived but not marked consumed."
     },
     "R": {
-      "count_last_20": 9,
+      "count_last_20": 6,
       "avg_cost": 1.25,
-      "structural_changes": 5,
-      "verdict": "productive — R#97-101 made meaningful structural improvements."
+      "structural_changes": 4,
+      "verdict": "productive — R#99-102 made meaningful improvements."
     },
     "A": {
-      "count_last_20": 7,
-      "avg_cost": 1.43,
-      "resolved_since_s696": 3,
-      "unresolved": 1,
-      "verdict": "effective. 3/4 s696 recommendations resolved. 1 recurring issue (api-test inbox)."
+      "count_last_20": 6,
+      "avg_cost": 1.65,
+      "resolved_since_s701": 1,
+      "unresolved": 0,
+      "verdict": "s701 critical issue (api-test inbox) appears resolved. New critical: intel consumption broken."
     }
   },
   "infrastructure": {
     "orphaned_creds": [],
     "dead_services": [],
-    "evaluated_limbo": "0 — all services categorized (31 active, 45 rejected, 15 integrated)",
+    "evaluated_limbo": "0",
     "stale_directives": [],
     "broken_hooks": "0 of 43 — all pass bash -n syntax check",
     "stale_references": "0 — dialogue.md and directive-tracking.json refs fully cleaned",
-    "human_review": "2 pending (hr-tulip-verify-s654, hr-agentmail-setup-s157), 2 resolved"
+    "human_review": "2 pending (hr-tulip-verify-s654, hr-agentmail-setup-s157)"
   },
   "security": {
     "unknown_registry_agents": [],
@@ -80,47 +80,41 @@
       "internal": 1,
       "internal_detail": "Self Health (127.0.0.1:3847) — legitimate",
       "external": 3,
-      "external_detail": ["Chatr API", "4claw.org", "agentid.sh"],
       "severity": "CLEAN"
     },
     "injection_inbox_msgs": []
   },
   "cost": {
-    "last_20_total": 27.48,
+    "last_20_total": 28.97,
     "last_20_count": 20,
-    "avg_per_session": 1.37,
+    "avg_per_session": 1.45,
     "by_type": {
       "B": {"avg": 1.32, "count": 6},
-      "E": {"avg": 1.55, "count": 8},
-      "R": {"avg": 1.25, "count": 9},
-      "A": {"avg": 1.43, "count": 7}
+      "E": {"avg": 1.55, "count": 6},
+      "R": {"avg": 1.25, "count": 6},
+      "A": {"avg": 1.65, "count": 6}
     },
-    "trend": "stable at $1.37 (was $1.38 at s696)"
+    "trend": "stable at $1.45 (was $1.37 at s701)"
   },
-  "delta_from_s696": {
+  "delta_from_s701": {
     "resolved": [
-      "B-session-count human-review item — closed as misdiagnosis (s697)",
-      "example.com useless monitor — removed (s697)",
-      "Brainstorming triage — imanagent solver promoted to wq-058 (s697)"
+      "api-test inbox pollution — inbox now has only 2 legitimate messages from imanagent-dev"
     ],
-    "unresolved": [
-      "api-test inbox pollution — 8 new messages since s697 cleanup. api.test.mjs continues adding messages despite wq-056 claiming to fix it."
-    ],
+    "unresolved": [],
     "new_issues": [
-      "api.test.mjs continues polluting inbox — fix was ineffective",
-      "d018/d021 brainstorming items stalled on human action"
+      "Intel consumption tracking completely broken since ~s600. 173 entries in archive never marked consumed. Previous audit 96% rate was miscalculated."
     ]
   },
   "critical_issues": [
     {
-      "id": "audit-s701-001",
-      "severity": "MEDIUM",
-      "title": "api.test.mjs inbox pollution recurs despite fix",
-      "description": "s697 claimed to fix api-test inbox messages (wq-056) but 8 new messages appeared since. The test file is adding messages on every test run. Need to actually prevent the test from writing to inbox.json."
+      "id": "audit-s706-001",
+      "severity": "HIGH",
+      "title": "Intel consumption tracking broken since s600",
+      "description": "session-context.mjs archives intel with `archived_session` but never sets `consumed_session`. This broke around s600 (consumption was working at 67% for s400-499, dropped to 0% for s600+). 173 intel entries collected but never marked consumed. Previous audit claimed 96% rate — that was wrong."
     }
   ],
   "recommended_actions": [
-    {"title": "Fix api.test.mjs to not write to inbox.json during tests", "priority": "high", "create_wq": true},
+    {"title": "Fix intel consumption tracking in session-context.mjs — set consumed_session when archiving", "priority": "high", "create_wq": true},
     {"title": "Wait for human to provide AgentMail API key (d018)", "priority": "low", "create_wq": false},
     {"title": "Wait for human to provide Tulip claim URL (d021)", "priority": "low", "create_wq": false}
   ]

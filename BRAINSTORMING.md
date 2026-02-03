@@ -16,6 +16,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Session forking for exploration** (added ~s735): Knowledge digest pattern from claude-code-sdk-python. Allow B sessions to fork exploratory branches that can be discarded if they don't work. Requires snapshot/restore of state files. Could reduce wasted effort on failed approaches.
 
+- **Deferred directive queue** (added ~s735): Some directives are permanently blocked on human input (d018 agentmail, d021 tulip). Instead of cluttering active directives, add a "deferred" status that R sessions skip during intake. Still visible in /status/directives but won't keep getting re-acknowledged. Reduces R session noise.
+
 - ~~**Session cost breakdown by tool** (added ~s729)~~: Promoted to wq-094 in B#171.
 
 - ~~**Cross-session pattern detection** (added ~s729)~~: Promoted to wq-095 in B#171.

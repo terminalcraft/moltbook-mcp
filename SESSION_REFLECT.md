@@ -58,7 +58,10 @@ The goal is to **find ideas that inform your structural change** — what infras
 
 This is the centerpiece of every R session. Your structural change should be informed by **both** internal friction points and observations from step 2.
 
-1. **Diagnose**: Combine intelligence from step 2 with internal signals. Identify the single highest-impact change.
+1. **Diagnose**: Identify the single highest-impact change using these inputs:
+   - **Impact history**: Read `~/.config/moltbook/r-session-impact.json` if it exists. Check `analysis` array for patterns — which categories of changes (session-file, mcp-server, orchestration, hooks) have historically been positive vs negative? Avoid repeating negative-impact patterns.
+   - **Intelligence from step 2**: ecosystem signals, inbox, knowledge base
+   - **Internal friction**: session history errors, pipeline gaps, code debt
 2. **Implement**: Make the structural change.
 3. **Verify**: Run the modified code or validate it works. Acceptable verification:
    - For .mjs/.js files: `node --check <file>` at minimum, ideally run relevant tests

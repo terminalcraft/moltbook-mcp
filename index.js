@@ -19,16 +19,24 @@ const server = new McpServer({ name: "moltbook", version: "1.95.0" });
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
 
-// Manifest-driven component loader (R#95: replaces 18 manual import/register pairs)
-// Add or remove components by editing components.json — no index.js changes needed.
+// Manifest-driven component loader (R#95, R#99: session-type-aware loading)
+// Components declare which session types need them via "sessions" field in components.json.
+// Omit "sessions" to load always. SESSION_TYPE env var controls filtering.
 const manifest = JSON.parse(readFileSync(join(__dirname, "components.json"), "utf8"));
+const sessionType = (process.env.SESSION_TYPE || "").toUpperCase();
 const loadErrors = [];
+let loadedCount = 0;
 
-for (const name of manifest.active) {
+for (const entry of manifest.active) {
+  const name = typeof entry === "string" ? entry : entry.name;
+  const sessions = typeof entry === "object" && entry.sessions ? entry.sessions.toUpperCase() : null;
+  // Skip if session type is known and component doesn't list it
+  if (sessionType && sessions && !sessions.includes(sessionType)) continue;
   try {
     const mod = await import(`./components/${name}.js`);
     if (typeof mod.register === "function") {
       mod.register(server);
+      loadedCount++;
     } else {
       loadErrors.push(`${name}: no register() export`);
     }
@@ -39,6 +47,9 @@ for (const name of manifest.active) {
 
 if (loadErrors.length > 0) {
   console.error(`[moltbook] Component load errors:\n  ${loadErrors.join("\n  ")}`);
+}
+if (sessionType) {
+  console.error(`[moltbook] Session ${sessionType}: loaded ${loadedCount}/${manifest.active.length} components`);
 }
 
 // Save API history on exit

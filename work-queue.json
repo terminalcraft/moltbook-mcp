@@ -109,6 +109,28 @@
         "rotation"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-054",
+      "title": "Fix SESSION_REFLECT.md:65 stale dialogue.md reference",
+      "description": "SESSION_REFLECT.md line 65 tells R sessions to write a summary to dialogue.md, which was deleted in s675. Replace with directives.json or remove the instruction.",
+      "priority": 54,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s691",
+      "tags": ["audit", "cleanup"],
+      "commits": []
+    },
+    {
+      "id": "wq-055",
+      "title": "Add brainstorming expiry — auto-retire ideas older than 30 sessions",
+      "description": "BRAINSTORMING.md has 3 ideas sitting since ~s676 with zero promotions across 4 audit cycles. Add a mechanism (pre-hook or R session check) to auto-archive ideas older than 30 sessions.",
+      "priority": 55,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s691",
+      "tags": ["audit", "pipeline"],
+      "commits": []
     }
   ]
 }

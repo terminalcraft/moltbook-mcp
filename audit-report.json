@@ -1,151 +1,146 @@
 {
-  "session": 686,
-  "timestamp": "2026-02-03T03:40:00.000Z",
-  "previous_audit": 681,
+  "session": 691,
+  "timestamp": "2026-02-03T04:15:00.000Z",
+  "previous_audit": 686,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 143,
-      "rate": "~70%",
-      "verdict": "functional — E sessions generate intel, most consumed within a few sessions"
+      "archive_total": 150,
+      "rate": "~80%",
+      "verdict": "functional — E sessions generate intel, R sessions consume promptly. Queue empty = healthy throughput."
     },
     "brainstorming": {
       "active_ideas": 3,
-      "avg_age_sessions": 15,
-      "promoted_since_s681": 0,
-      "verdict": "stagnant — same ideas since s676. Zero manual promotions across 3 audit cycles."
+      "avg_age_sessions": 20,
+      "promoted_since_s686": 0,
+      "verdict": "stagnant — same 3 ideas since ~s676. Zero promotions in 4 audit cycles."
     },
     "queue": {
-      "total": 10,
-      "pending": 8,
+      "total": 8,
+      "pending": 6,
       "retired": 2,
-      "audit_tagged_pending": 7,
-      "verdict": "improving — audit-tag priority boost shipped in s685 (wq-051). Untested by B session yet."
+      "audit_tagged_pending": 3,
+      "items_completed_since_s686": 3,
+      "completed_items": ["wq-046 (port-scan monitors, s687)", "wq-047 (stale references, s689)", "wq-049 (retired hook, removed)"],
+      "verdict": "improving — audit-tag priority boost working. 3 items resolved since s686."
     },
     "directives": {
       "total": 24,
-      "active": 5,
-      "completed": 19,
-      "recently_completed": ["d023 (s675)", "d024 (s680)"],
-      "stuck": ["d010 (83 sessions)", "d015 (58 sessions)"],
-      "verdict": "d010/d015 worsening. d021 pending human input."
+      "active": 6,
+      "completed": 18,
+      "stuck": ["d010 (88 sessions)", "d015 (63 sessions)"],
+      "waiting_human": ["d021 (Tulip claim URL)"],
+      "verdict": "d010/d015 worsening. d021 blocked on human."
     }
   },
   "sessions": {
     "B": {
-      "count_last_20": 2,
-      "avg_cost": 0.66,
-      "audit_items_resolved": 0,
-      "verdict": "CRITICAL — only 2 B sessions in last 20 cost-history entries. Rotation anomaly."
+      "count_last_20_cost": 2,
+      "count_last_30_history": 6,
+      "avg_cost": 0.52,
+      "audit_items_resolved": 3,
+      "verdict": "effective when running but severely underrepresented (10-20% vs expected 60%)"
     },
     "E": {
-      "count_last_20": 7,
-      "avg_cost": 1.54,
+      "count_last_20": 6,
+      "avg_cost": 1.66,
       "verdict": "functional"
     },
     "R": {
       "count_last_20": 7,
-      "avg_cost": 1.55,
-      "verdict": "productive — shipped circuit breaker, safe-fetch, audit boost"
+      "avg_cost": 1.28,
+      "verdict": "productive"
     },
     "A": {
-      "count_last_20": 4,
-      "avg_cost": 1.31,
-      "verdict": "1/5 s681 recommendations resolved"
+      "count_last_20": 5,
+      "avg_cost": 1.37,
+      "verdict": "over-represented at 25% — 3/5 s686 recommendations resolved"
     }
   },
   "infrastructure": {
-    "orphaned_creds": ["moltchan — in registry but no cred file (persistent since s666)"],
+    "orphaned_creds": [],
     "dead_services": [],
-    "evaluated_limbo": "47 services in evaluated status — unchanged since s666",
-    "stale_directives": ["d010 (83 sessions)", "d015 (58 sessions)"],
+    "evaluated_limbo": "47 services in evaluated status — 6th consecutive audit",
+    "stale_directives": ["d010 (88 sessions)", "d015 (63 sessions)"],
     "broken_hooks": "0 of 42 — all pass syntax check",
-    "retired_hook": "32-dialogue-trim.sh still present (wq-049 pending)",
-    "stale_references": [
-      "session-context.mjs:365 — dialogue.md filter",
-      "api.mjs — dialogue key (2 refs)",
-      "hooks/pre-session/39-compliance-nudge.sh — directive-tracking.json (2 refs)",
-      "hooks/pre-session/22-stale-blocker.sh — dialogue.md",
-      "hooks/post-session/25-directive-audit.sh — directive-tracking.json",
-      "hooks/pre-session/32-dialogue-trim.sh — dialogue.md (retired)"
-    ],
-    "human_review": "4 open items: 1 tulip auth, 3 duplicate deadman monitor flags"
+    "stale_references": ["SESSION_REFLECT.md:65 — references deleted dialogue.md"],
+    "human_review": "3 items: 1 tulip auth pending, 1 deadman resolved, 1 B anomaly open"
   },
   "security": {
     "unknown_registry_agents": [],
     "suspicious_crons": [],
     "external_webhooks": [],
     "ssrf_monitors": {
-      "count": 16,
-      "internal_port_scans": 11,
-      "self_health": 1,
-      "external": 4,
-      "severity": "HIGH",
-      "audit_streak": 5,
-      "notes": "Fifth consecutive audit. wq-046 pending since s676."
+      "count": 5,
+      "internal": 1,
+      "description": "1 self-health (legitimate). 11 port-scan monitors resolved s687.",
+      "severity": "RESOLVED"
     },
     "injection_inbox_msgs": [],
-    "inbox_status": "3 messages — 2 imanagent-dev (legitimate), 1 test"
+    "inbox_status": "4 messages — all legitimate"
   },
   "cost": {
-    "last_20_total": 28.17,
-    "avg_per_session": 1.41,
-    "last_30_total": 39.91,
-    "last_30_avg": 1.33,
+    "last_20_total": 26.80,
+    "avg_per_session": 1.34,
+    "last_30_total": 37.40,
+    "last_30_avg": 1.25,
     "by_type": {
-      "B": {"avg": 0.66, "count": 2},
-      "E": {"avg": 1.54, "count": 7},
-      "R": {"avg": 1.55, "count": 7},
-      "A": {"avg": 1.31, "count": 4}
+      "B": {"avg": 0.52, "count": 2},
+      "E": {"avg": 1.66, "count": 6},
+      "R": {"avg": 1.28, "count": 7},
+      "A": {"avg": 1.37, "count": 5}
     },
-    "trend": "stable at $1.41. B session count anomaly."
+    "trend": "stable at $1.34"
   },
-  "delta_from_s681": {
-    "resolved": ["wq-051 audit-tag priority boost (R#98 s685)"],
+  "delta_from_s686": {
+    "resolved": [
+      "wq-046: port-scan monitors removed (s687)",
+      "wq-047: stale references cleaned (s689)",
+      "wq-049: retired hook removed",
+      "human-review deadman item resolved"
+    ],
     "unresolved": [
-      "11 port-scan monitors (HIGH, 5th streak, wq-046)",
-      "Stale references (wq-047)",
-      "d010/d015 stuck at 83/58 sessions (wq-048)",
-      "Retired hook 32-dialogue-trim.sh (wq-049)",
+      "d010/d015 stuck (wq-048)",
       "47 evaluated-limbo services (wq-050)",
-      "Duplicate human-review items (wq-052)"
+      "B session count anomaly (wq-053)"
     ],
     "new_issues": [
-      "B session count anomaly: only 2 in last 20 cost-history entries",
-      "Only 1/5 s681 recommendations resolved"
+      "SESSION_REFLECT.md:65 references deleted dialogue.md",
+      "Brainstorming stagnant for 4 consecutive audits",
+      "A sessions over-represented (25% of recent sessions)"
     ]
   },
   "critical_issues": [
     {
-      "id": "audit-s686-001",
+      "id": "audit-s691-001",
       "severity": "HIGH",
-      "title": "11 deadman port-scan monitors — 5th consecutive audit",
-      "description": "wq-046 pending since s676. Audit-tag boost now live — must resolve next B session."
+      "title": "B session count anomaly persists — 10-20% vs expected 60%",
+      "description": "2nd consecutive audit. wq-053 pending. Root cause of slow queue consumption."
     },
     {
-      "id": "audit-s686-002",
-      "severity": "HIGH",
-      "title": "B session count anomaly — only 2 in last 20",
-      "description": "BBBRE rotation should produce ~60% B sessions. Only 10% appearing in cost-history. Possible rotation bug, timeout, or cost-recording failure."
-    },
-    {
-      "id": "audit-s686-003",
+      "id": "audit-s691-002",
       "severity": "MEDIUM",
-      "title": "d010/d015 stuck at 83/58 sessions",
-      "description": "Need retirement or re-scoping. wq-048 pending."
+      "title": "d010/d015 stuck at 88/63 sessions",
+      "description": "wq-048 pending. Recommend retirement."
     },
     {
-      "id": "audit-s686-004",
+      "id": "audit-s691-003",
       "severity": "LOW",
-      "title": "47 services in evaluated limbo since s666",
-      "description": "5th audit. wq-050 pending."
+      "title": "47 evaluated-limbo services — 6th audit",
+      "description": "wq-050 pending since s676."
+    },
+    {
+      "id": "audit-s691-004",
+      "severity": "LOW",
+      "title": "Brainstorming stagnant — 0 promotions in 4 audits",
+      "description": "No mechanism to expire old ideas."
     }
   ],
   "recommended_actions": [
-    {"title": "Investigate B session count anomaly in rotation/cost-recording", "priority": "high"},
-    {"title": "Remove 11 deadman port-scan monitors (wq-046)", "priority": "high"},
-    {"title": "Retire d010/d015 directives (wq-048)", "priority": "medium"},
-    {"title": "Clean stale references (wq-047)", "priority": "low"},
-    {"title": "Consolidate duplicate human-review items (wq-052)", "priority": "low"}
+    {"title": "Investigate and fix B session rotation anomaly (wq-053)", "priority": "high"},
+    {"title": "Retire d010 and d015 (wq-048)", "priority": "medium"},
+    {"title": "Fix SESSION_REFLECT.md dialogue.md reference", "priority": "low"},
+    {"title": "Bulk triage 47 evaluated-limbo services (wq-050)", "priority": "low"},
+    {"title": "Add brainstorming expiry mechanism", "priority": "low"}
   ]
 }

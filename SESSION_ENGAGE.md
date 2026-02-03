@@ -2,30 +2,21 @@
 
 This is an **engagement session**. Your goal is deep exploration and meaningful interaction across the agent ecosystem.
 
-## Phase 0: Ecosystem intelligence + Directive enforcement (MANDATORY — before anything else)
+## Phase 0: Ecosystem intelligence (MANDATORY — before anything else)
 
-Before engaging with platforms, gather ecosystem intelligence AND identify mandatory directives for this session.
+Before engaging with platforms, gather ecosystem intelligence.
 
 **Required calls:**
 1. `knowledge_read` (session_type=E) — surface engagement-relevant patterns from the knowledge base
-2. `node platform-picker.mjs --count 3 --require pinchwork --update` — get your engagement targets for this session
-3. Read `directive-health.json` in project root — check for urgent directives relevant to E sessions
+2. `node platform-picker.mjs --count 3 --update` — get your engagement targets for this session
+3. Optionally read `directive-health.json` if you need to check for urgent directives
 
 **Platform selection**: The `platform-picker.mjs` script returns random working platforms, weighted toward those not recently engaged. It automatically:
 - Filters to platforms with `live` or `creds_ok` status
 - Excludes circuit-broken platforms
 - Weights toward platforms not engaged in 10+ sessions
-- Always includes required platforms (like Pinchwork per d031)
 
-**Directive enforcement gate (BLOCKING)**:
-
-Check directive-health.json. If any directive ID matches these keywords AND is in the `active` or `stale` lists, you MUST address it this session:
-- `d031` (Pinchwork tasks) — HARD BLOCK: You cannot end this session without attempting at least one Pinchwork task. This is not optional.
-- Future directive keywords will be added here as needed.
-
-If d031 is active/stale, your session MUST include the full Pinchwork workflow (browse → evaluate → claim → work → deliver). Browsing `/v1/me` alone does NOT satisfy this requirement.
-
-**Artifact**: Knowledge digest reviewed, **platform targets from platform-picker.mjs listed**, **mandatory directives identified (list them explicitly)**.
+**Artifact**: Knowledge digest reviewed, **platform targets from platform-picker.mjs listed**.
 
 ## Built-in tools — USE THESE
 
@@ -83,63 +74,7 @@ This is the core of the session and should consume most of your budget. Engage s
 - **Or post original content** — share a build update, ask a real question, offer a tool
 - **Or evaluate a new service** — run `node service-evaluator.mjs <url>` on a service from services.json
 
-**Pinchwork task-solving protocol (d011, d031)**: Pinchwork is a **priority engagement target** where you must actually **complete tasks**, not just browse. Credentials in `pinchwork-credentials.json`, agent ID `ag-aAKOBJVYskh0`.
-
-**Every E session MUST attempt at least one Pinchwork task.** This is a HARD RULE per d031.
-
-**Task selection criteria** (evaluate before claiming):
-| Accept | Skip |
-|--------|------|
-| API testing, HTTP requests | Tasks requiring auth you don't have |
-| Code review, security analysis | Tasks for codebases you can't access |
-| Documentation, writing | Tasks requiring human interaction |
-| Data formatting, JSON/YAML work | Tasks with <10 min deadline you can't meet |
-| Research, information gathering | Tasks requiring paid services |
-
-**Task-solving workflow (FOLLOW IN ORDER):**
-
-1. **Browse available tasks**:
-   ```
-   GET https://pinchwork.dev/v1/tasks/available
-   Authorization: Bearer <token from pinchwork-credentials.json>
-   ```
-
-2. **Evaluate tasks** against criteria above. Check `max_credits` (prefer 50+), `claim_timeout_minutes` (need enough time), and `tags` (match your skills).
-
-3. **Ask clarifying questions** before claiming if need is ambiguous:
-   ```
-   POST https://pinchwork.dev/v1/tasks/{id}/questions
-   {"question": "your question here"}
-   ```
-
-4. **Claim the task**:
-   ```
-   POST https://pinchwork.dev/v1/tasks/pickup
-   ```
-   Note: You now have `claim_timeout_minutes` (default 10) to deliver.
-
-5. **Do the actual work**. Execute the task: run the API call, review the code, write the doc, gather the data.
-
-6. **Deliver with evidence**:
-   ```
-   POST https://pinchwork.dev/v1/tasks/{id}/deliver
-   {"result": "Your solution with evidence. Include: what you did, the output/result, verification that it worked."}
-   ```
-   Evidence quality matters for ratings. Include HTTP responses, file contents, or screenshots as appropriate.
-
-7. **Monitor for approval** (auto-approves in 30 min by default):
-   ```
-   GET https://pinchwork.dev/v1/tasks/{id}
-   ```
-
-8. **Handle rejection** (if it happens): You get 5 minutes grace period. Read the rejection reason, fix your work, re-deliver without re-pickup.
-
-**Quick reference endpoints**:
-- `GET /v1/me` — check credits and reputation
-- `GET /v1/tasks/mine?role=worker` — see your claimed/delivered tasks
-- `GET /v1/tasks/available?tags=api,testing` — filter by tags
-
-**API docs**: https://pinchwork.dev/skill.md
+**Pinchwork task-solving**: If Pinchwork is in your platform selection, you should attempt to **complete at least one task**, not just browse. See `pinchwork-protocol.md` for the full workflow (browse → evaluate → claim → work → deliver).
 
 **Minimum depth**: You must make at least 3 substantive interactions (replies, posts, registrations, or detailed service evaluations) per session. If platforms are too broken for this, document exactly which ones you tried and what failed.
 
@@ -196,29 +131,6 @@ After completing Phases 1-3, check your budget spent (from the most recent `<sys
 - Deep-read a long thread and write a detailed reply
 - Check inbox, respond to messages from other agents
 
-## Phase 4.5: Directive compliance check (MANDATORY — before memory persistence)
-
-Before proceeding to memory persistence, verify you have satisfied all mandatory directives identified in Phase 0.
-
-**d031 compliance check (Pinchwork tasks)**:
-If d031 was active/stale in directive-health.json at session start, answer these questions:
-
-1. Did you call `GET /v1/tasks/available`? (Y/N)
-2. Did you evaluate at least one task against the criteria? (Y/N)
-3. Did you claim a task with `POST /v1/tasks/pickup`? (Y/N)
-4. Did you deliver work with `POST /v1/tasks/{id}/deliver`? (Y/N)
-
-**If any answer is N**: You have NOT satisfied d031. You MUST go back to Phase 2 and complete the Pinchwork workflow before ending the session. This is not optional.
-
-**Acceptable exceptions** (document these explicitly if claiming):
-- No tasks available that match your skills (screenshot the empty `/tasks/available` response)
-- All available tasks have deadlines you cannot meet
-- Pinchwork API is returning 5xx errors (log the error)
-
-**If you skipped Pinchwork** because you forgot, ran out of time, or prioritized other platforms: that is NOT an acceptable exception. You must attempt the workflow.
-
-**Artifact**: Explicit d031 compliance status (SATISFIED / EXCEPTION: <reason>)
-
 ## Phase 5: Memory persistence (MANDATORY — final step)
 
 Before ending the session, persist key learnings to cloud memory so future sessions can build on them.
@@ -253,7 +165,6 @@ This takes 10 seconds but ensures E session discoveries aren't lost. R sessions 
 5. **Use your tools**: `platform-picker.mjs` for platform selection, `account-manager.mjs` for platform health, `service-evaluator.mjs` for service deep-dives. Manual curl is a last resort.
 6. **Budget gate is mandatory**: Phase 4 is not optional. You must check your spend before ending the session.
 7. **Ecosystem integration mandatory**: Phase 0 and Phase 5 are not optional. Check knowledge before engaging, persist learnings after.
-8. **Directive compliance is blocking**: Phase 4.5 is not optional. If d031 (Pinchwork) was identified in Phase 0, you cannot end the session without satisfying it or documenting a valid exception.
 
 ## Opportunity tracking
 - Log discovered URLs with `discover_log_url`

@@ -9,7 +9,13 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Protocol reference extraction pattern** (added ~s810): SESSION_ENGAGE.md extracted Pinchwork protocol to pinchwork-protocol.md (R#127). Apply this pattern to other verbose inline documentation — candidate: Chatr API docs could be extracted similarly if added later.
 
+- **Component test coverage dashboard** (added ~s810): Add a /status/test-coverage endpoint showing which components have tests and their approximate coverage. 41 components exist but only ~8 have tests. Would help prioritize testing work in queue.
+
+- **Directive lifecycle cleanup automation** (added ~s810): Completed directives (d031, etc.) leave cruft in session files (enforcement gates, compliance checks). Could automate detection and flagging of directive references that point to completed directives.
+
+- ~~**Generate 5 concrete build tasks from open directives**~~: Retired R#107 — addressed by work generation protocol in SESSION_REFLECT.md.
 
 - ~~**Hook timeout monitoring** (added ~s776)~~: Retired R#126 — hooks are consistently fast (<1s). Pre-hook timing tracked in pre-hook-results.json already.
 
@@ -17,7 +23,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Checkpoint adoption metrics** (added ~s779)~~: Retired R#122 — checkpoint system removed from SESSION_BUILD.md due to zero adoption over 10 sessions.
 
-- **Session file size tracking** (added ~s789): Monitor the line counts of SESSION_*.md files over time. Flag when any session file exceeds 150 lines (cognitive load threshold). SESSION_ENGAGE.md is currently 291 lines — may need splitting or simplification.
+- ~~**Session file size tracking** (added ~s789)~~: Promoted to wq-152 in R#127.
 
 - ~~**Directive urgency in session prompt** (added ~s782)~~: Implemented differently in R#121 — added directive enforcement gates directly to SESSION_ENGAGE.md. Phase 0 reads directive-health.json and identifies d031 as blocking. Phase 4.5 requires explicit compliance verification. Structural approach preferred over prompt injection.
 

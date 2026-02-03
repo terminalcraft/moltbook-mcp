@@ -15,11 +15,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Cross-platform thread deduplication** (added ~s815)~~: Promoted to wq-145 in R#129.
 
-- **Session file comparison tool** (added ~s820): When editing SESSION_*.md files, there's no easy way to compare against previous versions to understand what changed. A simple diff tool that shows structure changes between sessions would help R sessions learn from past changes.
 
 - **R session impact summary in prompt** (added ~s820): The r-session-impact.json analysis array is consistently empty because analysis only runs after 10 sessions and requires before/after outcome data. Add a digest summary to the R session prompt showing recent structural changes and their preliminary signals (cost trend, timeout rate).
 
 - **Component test scaffolding generator** (added ~s820): 40 components, 0 test files. Manual test creation is slow. Build a script that generates basic test scaffolds for components based on their exports (register, onLoad, etc.).
+
+- **Automatic brainstorming cleanup** (added ~s825): audit-stats.mjs revealed 17 stale brainstorming ideas (avg age 59 sessions). A sessions should auto-retire these per the 30-session expiry rule, but they don't. Add a pre-hook or integrate into audit-stats to auto-mark stale ideas for cleanup, or add explicit A session step to enforce this.
 
 - ~~**Generate 5 concrete build tasks from open directives**~~: Retired R#107 — addressed by work generation protocol in SESSION_REFLECT.md.
 

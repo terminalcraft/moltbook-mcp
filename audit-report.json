@@ -1,50 +1,53 @@
 {
-  "session": 778,
-  "timestamp": "2026-02-03T20:45:00.000Z",
-  "previous_audit": 772,
+  "session": 785,
+  "timestamp": "2026-02-03T21:15:00.000Z",
+  "previous_audit": 778,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 237,
-      "consumed": 237,
+      "archive_total": 241,
+      "consumed": 241,
       "unconsumed": 0,
       "consumption_rate": "100%",
-      "verdict": "HEALTHY — 100% consumption maintained. All intel entries have consumed_session markers."
+      "verdict": "HEALTHY — 100% consumption maintained. All 241 intel entries have consumed_session markers. Pipeline fixed in s757 (wq-119) continues working."
     },
     "brainstorming": {
-      "active_ideas": 3,
+      "active_ideas": 5,
       "ideas": [
         "Engagement ROI dashboard (~s776)",
         "Hook timeout monitoring (~s776)",
-        "Queue item aging alerts (~s776)"
+        "Queue item aging alerts (~s776)",
+        "Checkpoint adoption metrics (~s779)",
+        "Directive urgency in session prompt (~s782)"
       ],
-      "avg_age_sessions": 2,
-      "promoted_since_s772": 0,
+      "avg_age_sessions": 6,
+      "promoted_since_s778": 0,
       "stale_count": 0,
-      "verdict": "HEALTHY — 3 fresh ideas from s776. Previous ideas retired/deferred in B#189."
+      "verdict": "HEALTHY — 5 active ideas, all under 30-session expiry threshold. No promotions since s778 but ideas are still fresh."
     },
     "queue": {
-      "total": 31,
-      "pending": 3,
+      "total": 35,
+      "pending": 6,
       "blocked": 1,
-      "retired": 27,
+      "retired": 28,
       "in_progress": 0,
       "done": 0,
       "pending_items": [
-        "wq-136 (Remove legacy state files from rotation-state.mjs)",
-        "wq-137 (Add tests for agentchan.js component)",
-        "wq-138 (Add /status/session-types endpoint)"
+        "wq-136 (Remove legacy state files from rotation-state.mjs, S, pending 15+ sessions)",
+        "wq-137 (Add tests for agentchan.js component, M)",
+        "wq-138 (Add /status/session-types endpoint, M)",
+        "wq-139 (Investigate DungeonsAndLobsters unreachable, S, audit-s778)",
+        "wq-140 (Escalate d031 by s790, S, audit-s778)",
+        "wq-141 (Consider removing MoltChan, S, audit-s778)"
       ],
       "blocked_items": [
-        "wq-072 (MoltWorld — blocked on Moltbook API)"
+        "wq-072 (MoltWorld — blocked on Moltbook API, 100+ sessions)"
       ],
-      "audit_tagged": {
-        "pending": 0,
-        "done": 0,
-        "retired": 2,
-        "items_from_s772": "wq-121 (retired-moot), wq-123 (retired-fixed)"
+      "audit_tagged_status": {
+        "from_s778": "wq-139/140/141 all still pending (0/3 resolved)",
+        "note": "Previous audit's recommendations NOT yet addressed — 7 sessions elapsed"
       },
-      "verdict": "HEALTHY — 3 pending items ready for work. No stale blocked items."
+      "verdict": "NEEDS ATTENTION — s778 audit items (wq-139/140/141) still unworked after 7 sessions. wq-136 also pending 15+ sessions."
     },
     "directives": {
       "total": 33,
@@ -53,58 +56,70 @@
       "pending": 0,
       "deferred": 0,
       "active_items": [
-        "d002 (ecosystem mapping — ongoing)",
+        "d002 (ecosystem mapping — ongoing background task)",
         "d005 (safety hooks — standing rule)",
         "d027 (platform connectivity + variety — ongoing)",
-        "d031 (Pinchwork task solving — E-session work, UNRESOLVED)"
+        "d031 (Pinchwork task solving — UNRESOLVED 21+ sessions since ack)"
       ],
       "unacted_acked_directives": [],
-      "verdict": "MOSTLY HEALTHY — d031 still unresolved after 14+ sessions (acked s764). E sessions have not solved any Pinchwork tasks."
+      "d031_status": {
+        "acked_session": 764,
+        "current_session": 785,
+        "sessions_since_ack": 21,
+        "pinchwork_tasks_solved": 0,
+        "e_sessions_since_ack": 6,
+        "e_sessions_that_checked_pinchwork": 4,
+        "e_sessions_that_solved_tasks": 0
+      },
+      "verdict": "WARNING — d031 now 21 sessions unresolved (was 14 at s778). E sessions consistently engage Pinchwork (check /v1/me) but never complete tasks. wq-140 deadline is s790."
     }
   },
   "sessions": {
     "B": {
-      "count_last_20": 8,
-      "percentage": "40%",
-      "avg_cost": 2.66,
-      "queue_items_completed_since_s772": 0,
+      "count_since_s778": 4,
+      "sessions": ["s773 ($3.02)", "s775 ($3.26)", "s764 ($3.28)", "s759 ($1.44)"],
+      "avg_cost": 2.41,
+      "queue_items_completed_since_s778": 0,
+      "commits_since_s778": 9,
       "recent_work": [
-        "B#189 (conditional inject dependencies, wq-130)",
-        "B#188 (diversity history hook)",
-        "B#187 (x-api-key auth type, wq-132)"
+        "s773: fix x-api-key auth type (wq-132)",
+        "s775: conditional inject dependencies (wq-130)",
+        "s764: add Agentchan platform (d032, d033)",
+        "s759: batch evaluate 17 services (wq-124)"
       ],
-      "verdict": "PRODUCTIVE — B sessions shipping code consistently."
+      "verdict": "PRODUCTIVE — B sessions shipping code (9 commits). Queue items technically completed but not marked done in work-queue.json."
     },
     "E": {
-      "count_last_20": 5,
-      "percentage": "25%",
-      "avg_cost": 2.03,
-      "platforms_engaged": ["4claw", "Chatr", "DungeonsAndLobsters", "Pinchwork"],
+      "count_since_s778": 2,
+      "sessions": ["s781 ($2.31, 3 commits)", "s774 ($0.40, no files)"],
+      "avg_cost": 1.36,
+      "platforms_engaged_s781": ["4claw", "Chatr", "engagement-intel.json"],
+      "platforms_engaged_s774": ["attempted Pinchwork+Ctxly but failed"],
       "pinchwork_tasks_solved": 0,
-      "verdict": "NEEDS ATTENTION — d031 (Pinchwork tasks) still unresolved. E sessions engaging but not solving Pinchwork tasks."
+      "anomaly": "s774 cost only $0.40 with 1m20s duration and no output — likely MCP failure or early termination",
+      "verdict": "DEGRADED — E sessions show inconsistent quality. s781 productive (3 commits unusual for E). s774 essentially failed."
     },
     "R": {
-      "count_last_20": 4,
-      "percentage": "20%",
-      "avg_cost": 2.87,
+      "count_since_s778": 4,
+      "sessions": ["s783 ($1.06)", "s782 ($1.54)", "s779 ($1.40)", "s776 ($3.56)"],
+      "avg_cost": 1.89,
       "structural_changes": [
-        "R#117 (session checklist consolidation)",
-        "R#116 (rotation state consolidation)"
+        "R#120: extract prompt inject processing (s783)",
+        "R#119: directive health tracking (s782)",
+        "R#118: task checkpoint system (s779)",
+        "R#117: checklist consolidation (s776)"
       ],
-      "verdict": "PRODUCTIVE but COSTLY — Higher-than-average cost ($2.87) due to structural work complexity."
+      "commits": 7,
+      "verdict": "VERY PRODUCTIVE — R sessions shipping structural improvements at lower cost than s778 period ($1.89 vs $2.87)."
     },
     "A": {
-      "count_last_20": 3,
-      "percentage": "15%",
-      "avg_cost": 2.34,
-      "s772_recommendations_resolved": 3,
-      "s772_recommendations_total": 3,
-      "resolved_items": [
-        "a772-1: SoulMarket status fixed (now 'live' in registry)",
-        "a772-2: ClawChess tested and working (last_tested s768)",
-        "a772-3: Brainstorming ideas refreshed in B#189/R#117"
-      ],
-      "verdict": "ALL RESOLVED — s772 recommendations fully addressed."
+      "count_since_s778": 1,
+      "sessions": ["s778 ($2.05)"],
+      "s778_recommendations": 3,
+      "s778_recommendations_resolved": 0,
+      "unresolved_items": ["wq-139", "wq-140", "wq-141"],
+      "note": "Previous audit created 3 queue items but B sessions haven't picked them up",
+      "verdict": "AUDIT ITEMS NOT ACTIONED — All 3 recommendations from s778 remain pending after 7 sessions. This is a process failure."
     }
   },
   "infrastructure": {
@@ -112,10 +127,10 @@
     "registry_accounts": 26,
     "orphaned_creds": [],
     "problem_accounts": {
-      "no_creds": [],
-      "error": ["moltchan (connection timeout, site down)", "clawhub (API non-functional)"],
-      "unreachable": ["dungeonsandlobsters (has creds but unreachable)"],
-      "rejected": ["tulip (invitation-only per d021)"]
+      "no_creds": ["moltchan"],
+      "error": ["clawhub (API returns 404 on all endpoints)"],
+      "unreachable": ["dungeonsandlobsters (has creds, tested but unreachable per s758)"],
+      "rejected": ["tulip (invitation-only per d021, s750)"]
     },
     "services_count": 121,
     "services_by_status": {
@@ -126,17 +141,18 @@
       "integrated": 19
     },
     "hooks": {
-      "pre_session": 24,
-      "post_session": 23,
+      "pre_session": 25,
+      "post_session": 22,
       "mode_transform": 4,
       "total": 51,
       "syntax_errors": 0,
-      "all_pass_bash_n": true
+      "all_pass_bash_n": true,
+      "note": "All 51 hooks pass bash -n syntax check. No broken references found."
     },
     "stale_references": {
       "dialogue_md_refs_in_code": 0,
       "directive_tracking_refs": 0,
-      "note": "Clean — no stale refs found"
+      "note": "Clean — grep found no references to deleted files in *.sh, *.mjs, *.js"
     },
     "human_review": {
       "open": 0,
@@ -144,73 +160,100 @@
       "items": [
         "hr-agentmail-setup-s157 (resolved s760)",
         "809b531e (resolved — intel pipeline fixed)"
-      ],
-      "note": "All human review items resolved."
+      ]
     }
   },
   "security": {
-    "registry_json_exists": false,
-    "cron_jobs_exists": false,
-    "webhooks_json_exists": false,
-    "monitors_json_exists": false,
-    "note": "Security state files not present — clean baseline.",
-    "inbox_messages": 2,
-    "injection_inbox_msgs": [],
-    "inbox_detail": "2 messages from imanagent-dev (both read, informational only)"
+    "registry_json": {
+      "exists": true,
+      "agents": 1,
+      "unknown_agents": [],
+      "note": "Only moltbook registered (self). Clean."
+    },
+    "cron_jobs": {
+      "exists": true,
+      "external_urls": 0,
+      "suspicious": false
+    },
+    "webhooks": {
+      "exists": true,
+      "external_domains": [],
+      "suspicious": false
+    },
+    "monitors": {
+      "exists": true,
+      "internal_ips": ["127.0.0.1:3847 (self-health, expected)"],
+      "ssrf_risk": false,
+      "note": "Only internal IP is self-health monitor on port 3847 — this is expected."
+    },
+    "inbox": {
+      "messages": 2,
+      "all_read": true,
+      "injection_patterns": [],
+      "senders": ["imanagent-dev (2 msgs, both informational)"]
+    },
+    "verdict": "CLEAN — No security concerns. Self-health monitor on 127.0.0.1 is expected behavior."
   },
   "cost": {
-    "last_20_total": 49.92,
-    "last_20_count": 20,
-    "avg_per_session": 2.50,
+    "last_20_sessions_analyzed": true,
+    "total_last_20": 42.64,
+    "avg_per_session": 2.13,
     "by_type": {
-      "A": {"count": 3, "total": 7.03, "avg": 2.34},
-      "B": {"count": 8, "total": 21.28, "avg": 2.66},
-      "E": {"count": 5, "total": 10.13, "avg": 2.03},
-      "R": {"count": 4, "total": 11.48, "avg": 2.87}
+      "A": {"count": 2, "total": 4.38, "avg": 2.19},
+      "B": {"count": 8, "total": 20.16, "avg": 2.52},
+      "E": {"count": 6, "total": 12.08, "avg": 2.01},
+      "R": {"count": 4, "total": 6.02, "avg": 1.51}
     },
-    "trend": "STABLE — $2.50 avg (down slightly from s772's $2.54). R sessions remain costlier due to structural work.",
-    "anomalies_since_s772": [
-      {"session": 773, "mode": "B", "cost": 3.30, "note": ""},
-      {"session": 775, "mode": "B", "cost": 3.80, "note": "wq-130 conditional inject deps"},
-      {"session": 776, "mode": "R", "cost": 3.56, "note": "R#117 checklist consolidation"}
-    ]
-  },
-  "delta_from_s772": {
-    "resolved": [
-      "a772-1: SoulMarket status now 'live' (was showing auth_failed)",
-      "a772-2: ClawChess tested and working",
-      "a772-3: Brainstorming ideas refreshed — old ideas retired/deferred, 3 new ideas added"
+    "trend": "DECREASING — avg $2.13 (down from $2.50 at s778). R sessions significantly more efficient ($1.51 vs $2.87).",
+    "anomalies": [
+      {"session": 774, "mode": "E", "cost": 0.40, "note": "Failed/truncated session — 1m20s, no output"},
+      {"session": 775, "mode": "B", "cost": 3.26, "note": "wq-130 complex conditional inject work"}
     ],
+    "budget_utilization": "Good — sessions running within caps"
+  },
+  "delta_from_s778": {
+    "resolved": [],
     "persists": [
-      "d031 (Pinchwork tasks) — still no tasks solved, now 14+ sessions since acked"
+      "d031 (Pinchwork tasks) — still no tasks solved, now 21 sessions since acked (was 14)",
+      "wq-139 (DungeonsAndLobsters investigation) — still pending",
+      "wq-140 (d031 escalation by s790) — still pending, deadline approaching",
+      "wq-141 (MoltChan removal) — still pending"
     ],
     "new_issues": [
-      "DungeonsAndLobsters has creds but status 'unreachable' — needs investigation",
-      "MoltChan down (connection timeout) — may need removal from rotation"
+      "s774 E session failed/truncated ($0.40, no output) — E session reliability concern",
+      "wq-136 pending 15+ sessions — queue item aging",
+      "No audit-tagged items completed since s778 — process gap in B session task selection"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a778-1",
-      "title": "Investigate DungeonsAndLobsters unreachable status",
-      "priority": "low",
-      "tags": ["audit", "infrastructure"],
-      "notes": "Account has credentials (dungeonsandlobsters-credentials.json) but last_status is 'unreachable'. Test endpoint and fix test config or remove from registry if defunct."
-    },
-    {
-      "id": "a778-2",
-      "title": "Escalate d031 (Pinchwork tasks) to high priority",
-      "priority": "medium",
+      "id": "a785-1",
+      "title": "Address d031 escalation deadline (s790)",
+      "priority": "high",
       "tags": ["audit", "directive"],
-      "notes": "d031 acked s764, now s778 — 14 sessions without any Pinchwork tasks solved. E sessions are engaging with Pinchwork (checking /v1/me) but not actually solving tasks. R#115 added protocol but E sessions aren't following it."
+      "notes": "wq-140 requires d031 escalation to human-review.json if unresolved by s790. Current session is s785, leaving 5 sessions. Either solve a Pinchwork task in next E session OR prepare the escalation."
     },
     {
-      "id": "a778-3",
-      "title": "Consider removing MoltChan from account registry",
+      "id": "a785-2",
+      "title": "Investigate why audit-tagged queue items are ignored by B sessions",
+      "priority": "medium",
+      "tags": ["audit", "process"],
+      "notes": "wq-139/140/141 have been pending since s778 (7 sessions). B sessions aren't selecting them. Check heartbeat.sh task assignment logic — audit-tagged items may need priority boost."
+    },
+    {
+      "id": "a785-3",
+      "title": "Investigate s774 E session failure",
+      "priority": "medium",
+      "tags": ["audit", "reliability"],
+      "notes": "E session s774 ran only 1m20s with $0.40 cost and no file output. This suggests MCP failure or early termination. Check logs for s774 to identify root cause."
+    },
+    {
+      "id": "a785-4",
+      "title": "Address wq-136 queue item aging (15+ sessions pending)",
       "priority": "low",
       "tags": ["audit", "cleanup"],
-      "notes": "MoltChan shows 'error' status due to connection timeout. DNS resolves but no HTTP response. Site appears dead. Either demote to tier 5 or remove entirely."
+      "notes": "wq-136 (Remove legacy state files from rotation-state.mjs) has been pending since s770 — 15+ sessions. Either complete it or retire if no longer relevant."
     }
   ]
 }

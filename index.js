@@ -258,10 +258,122 @@ try {
   writeFileSync(join(__dirname, "directive-health.json"), JSON.stringify(health, null, 2));
 } catch {}
 
+// --- Directive outcome tracking (R#125) ---
+// Track which urgent directives were assigned to this session at startup.
+// On exit, compare session activity against urgent directives to detect
+// systematic non-compliance (e.g., E sessions ignoring d031 for 26+ sessions).
+// This creates a feedback loop: A sessions can analyze directive-outcomes.json
+// to identify which session types are failing their mandates.
+const directiveAssignments = {
+  sessionNum: SESSION_NUM,
+  sessionType: SESSION_TYPE,
+  assignedAt: new Date().toISOString(),
+  urgentDirectives: sessionContext.directiveHealth?.urgent?.map(d => d.id) || [],
+  // Outcome populated on exit by analyzing session artifacts
+  outcome: null
+};
+
+function computeDirectiveOutcome() {
+  // Read session artifacts to infer which directives were addressed
+  // This is a heuristic — not perfect, but enables trend detection
+  const outcome = {
+    completedAt: new Date().toISOString(),
+    addressed: [],   // directives that show evidence of action
+    ignored: [],     // urgent directives with no visible action
+    evidence: {}     // supporting data for each assessment
+  };
+
+  // Check for artifacts that indicate directive work
+  const logsDir = join(process.env.HOME || '', '.config/moltbook/logs');
+  const engagementIntelPath = join(__dirname, 'engagement-intel.json');
+  const directivesPath = join(__dirname, 'directives.json');
+
+  for (const dId of directiveAssignments.urgentDirectives) {
+    const evidence = [];
+
+    // Check if directive was updated this session
+    try {
+      const directives = JSON.parse(readFileSync(directivesPath, 'utf8'));
+      const d = directives.directives.find(x => x.id === dId);
+      if (d?.updated) {
+        const updatedAt = new Date(d.updated).getTime();
+        const sessionStart = new Date(directiveAssignments.assignedAt).getTime();
+        if (updatedAt > sessionStart) {
+          evidence.push('directive-updated');
+        }
+      }
+      if (d?.status === 'completed') {
+        evidence.push('directive-completed');
+      }
+    } catch { /* ignore */ }
+
+    // For E sessions, check engagement-intel for platform activity
+    if (SESSION_TYPE === 'E' && existsSync(engagementIntelPath)) {
+      try {
+        const intel = JSON.parse(readFileSync(engagementIntelPath, 'utf8'));
+        const recentEntries = (intel.entries || []).filter(e => {
+          const entryTime = new Date(e.timestamp || e.discovered_at || 0).getTime();
+          const sessionStart = new Date(directiveAssignments.assignedAt).getTime();
+          return entryTime > sessionStart;
+        });
+        if (recentEntries.length > 0) {
+          evidence.push(`engagement-activity:${recentEntries.length}`);
+        }
+        // Specific check for d031 (Pinchwork): look for pinchwork activity
+        if (dId === 'd031') {
+          const pinchworkActivity = recentEntries.some(e =>
+            (e.platform || '').toLowerCase().includes('pinchwork') ||
+            (e.content || '').toLowerCase().includes('pinchwork')
+          );
+          if (pinchworkActivity) {
+            evidence.push('pinchwork-engagement');
+          }
+        }
+      } catch { /* ignore */ }
+    }
+
+    outcome.evidence[dId] = evidence;
+    if (evidence.length > 0) {
+      outcome.addressed.push(dId);
+    } else {
+      outcome.ignored.push(dId);
+    }
+  }
+
+  return outcome;
+}
+
+// Append directive outcome to historical log for A session analysis
+function saveDirectiveOutcome(outcome) {
+  const outcomePath = join(__dirname, 'directive-outcomes.json');
+  let history = { version: 1, outcomes: [] };
+  try {
+    if (existsSync(outcomePath)) {
+      history = JSON.parse(readFileSync(outcomePath, 'utf8'));
+    }
+  } catch { /* start fresh */ }
+
+  // Keep last 50 outcomes to bound file size
+  history.outcomes = history.outcomes.slice(-49);
+  history.outcomes.push({
+    ...directiveAssignments,
+    outcome
+  });
+
+  writeFileSync(outcomePath, JSON.stringify(history, null, 2));
+}
+
 // Save API history on exit + call component onUnload hooks (wq-100: track status)
 process.on("exit", () => {
   if (getApiCallCount() > 0) saveApiSession();
   saveToolUsage();
+  // R#125: Compute and save directive outcome if there were urgent directives
+  if (directiveAssignments.urgentDirectives.length > 0) {
+    try {
+      const outcome = computeDirectiveOutcome();
+      saveDirectiveOutcome(outcome);
+    } catch { /* don't block exit */ }
+  }
   // Call onUnload for components that export it
   for (const { name, mod } of loadedModules) {
     if (typeof mod.onUnload === "function") {

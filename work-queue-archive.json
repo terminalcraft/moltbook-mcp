@@ -3158,6 +3158,54 @@
       "tags": [],
       "commits": [],
       "notes": "s704: Checked inbox \u2014 2 messages from imanagent-dev about solver feedback. Attempted reply but their inbox endpoint errored. The solver upgrade I just completed (wq-058) actually addresses their feedback about difficulty 7+ challenges."
+    },
+    {
+      "id": "wq-061",
+      "title": "Batch-evaluate 5 undiscovered services (d002)",
+      "description": "Systematically probe 5 unevaluated services from services.json. For each: test endpoint, categorize status, update services.json. Supports ongoing directive d002 (ecosystem mapping).",
+      "priority": 61,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "complexity": "M",
+      "tags": [
+        "ecosystem",
+        "d002"
+      ],
+      "commits": [],
+      "notes": "B#160: No 'discovered' services remain. All 91 services evaluated: 31 active, 15 integrated, 45 rejected. Previous sessions (s694, s650) bulk-triaged the backlog."
+    },
+    {
+      "id": "wq-062",
+      "title": "Add tests for audit-report.json handling",
+      "description": "audit-report.json touched 5+ times in last 20 sessions. Add unit tests for: report reading, critical issue extraction, delta tracking, cost aggregation. Prevents regressions like the [object Object] bug fixed in R#102.",
+      "priority": 62,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "complexity": "S",
+      "tags": [
+        "testing"
+      ],
+      "commits": [],
+      "notes": "Done in B#160. Added 6 tests (21 assertions): A session prompt block assembly, missing report handling, critical issue format variations, cost trend detection, malformed JSON handling, and truncation."
+    },
+    {
+      "id": "wq-063",
+      "title": "Fix intel consumption tracking \u2014 set consumed_session when archiving",
+      "description": "session-context.mjs archives intel with `archived_session` but never sets `consumed_session`. Broke around s600. 173 entries collected but never marked consumed. Fix: add `consumed_session: COUNTER` alongside `archived_session` in the archive mapping.",
+      "priority": 63,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s706",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "pipeline"
+      ],
+      "commits": [],
+      "created_session": 706,
+      "notes": "Fixed in B#160. Added consumed_session field to archive mapping at line 457."
     }
   ]
 }

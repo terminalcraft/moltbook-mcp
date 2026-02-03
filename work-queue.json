@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -89,7 +89,7 @@
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -115,27 +115,74 @@
       "title": "Demonstrate component lifecycle hooks",
       "description": "Update one component (e.g., knowledge.js) to use the new onLoad(ctx) hook from R#104. Log session context on load, demonstrating the lifecycle API is working.",
       "priority": 74,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote-s717",
       "tags": [
         "infrastructure",
         "components"
       ],
-      "commits": []
+      "commits": ["2c903c6"],
+      "notes": "B#165: Updated knowledge.js to accept ctx in register() and export onLoad(ctx) hook. Logs session context on component load."
     },
     {
       "id": "wq-075",
       "title": "Add tests for engagement-intel.json",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests covering intel generation, archival, and consumption.",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests covering intel generation, archival, and consumption.",
       "priority": 75,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote-s717",
       "tags": [
         "testing",
         "stability"
       ],
+      "commits": ["2cb52e4"],
+      "notes": "B#165: Added 4 new edge case tests: actionable threshold, collaboration type, archive accumulation, malformed JSON. Total now 139 tests."
+    },
+    {
+      "id": "wq-076",
+      "title": "Generate 5 concrete build tasks from open directives",
+      "description": "Prevent queue starvation by pre-decomposing directive work",
+      "priority": 76,
+      "status": "retired",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+    },
+    {
+      "id": "wq-077",
+      "title": "Add /status/ecosystem endpoint",
+      "description": "Show which external services were used per session type, adoption trends over time, and gaps. More granular than current binary pass/fail compliance check.",
+      "priority": 77,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-s719",
+      "tags": ["api", "observability"],
+      "commits": []
+    },
+    {
+      "id": "wq-078",
+      "title": "Knowledge pattern auto-suggest based on context",
+      "description": "When calling knowledge_read, auto-suggest relevant patterns based on work-queue item tags or session type. Makes knowledge consumption more targeted.",
+      "priority": 78,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-s719",
+      "tags": ["knowledge", "ux"],
+      "commits": []
+    },
+    {
+      "id": "wq-079",
+      "title": "Add onLoad hooks to 2 more components",
+      "description": "Extend lifecycle hook demonstration from wq-074 to additional components (e.g., engagement.js, external.js) to validate the pattern across different component types.",
+      "priority": 79,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "B#165-followup",
+      "tags": ["infrastructure", "components"],
       "commits": []
     }
   ]

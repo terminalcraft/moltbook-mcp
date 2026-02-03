@@ -2083,6 +2083,129 @@ td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
   }
 });
 
+// Ecosystem service adoption dashboard — which tools used, trends, gaps (wq-077, B#165)
+app.get("/status/ecosystem", (req, res) => {
+  try {
+    const directives = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+    const compliance = directives.compliance || {};
+    const adoption = compliance.metrics?.["ecosystem-adoption"] || { followed: 0, ignored: 0, history: [] };
+
+    // Session history for per-type tool usage
+    const historyPath = join("/home/moltbot/.config/moltbook", "session-history.txt");
+    let sessionHistory = [];
+    try {
+      const raw = readFileSync(historyPath, "utf8");
+      sessionHistory = raw.split("\n").filter(Boolean).map(line => {
+        const match = line.match(/mode=([ABELR])\s+s=(\d+).*?cost=\$([0-9.]+)/);
+        if (!match) return null;
+        return { type: match[1], session: parseInt(match[2]), cost: parseFloat(match[3]) };
+      }).filter(Boolean);
+    } catch {}
+
+    // Extract tool usage from replay log if available
+    const replayPath = join("/home/moltbot/.config/moltbook/logs", "engagement-replay.jsonl");
+    const toolUsage = { B: {}, R: {}, E: {}, A: {} };
+    try {
+      const lines = readFileSync(replayPath, "utf8").split("\n").filter(Boolean).slice(-500);
+      for (const line of lines) {
+        try {
+          const entry = JSON.parse(line);
+          if (entry.tool && entry.session_type && toolUsage[entry.session_type]) {
+            toolUsage[entry.session_type][entry.tool] = (toolUsage[entry.session_type][entry.tool] || 0) + 1;
+          }
+        } catch {}
+      }
+    } catch {}
+
+    // Ecosystem tools to track
+    const ecosystemTools = ["knowledge_read", "ctxly_remember", "ctxly_recall", "inbox_check", "inbox_send", "registry_list", "chatr_send", "chatr_digest", "agent_handshake", "agent_fetch_knowledge", "agent_exchange_knowledge"];
+
+    // Count ecosystem tool usage per session type
+    const ecosystemUsage = {};
+    for (const [type, tools] of Object.entries(toolUsage)) {
+      ecosystemUsage[type] = {};
+      for (const tool of ecosystemTools) {
+        if (tools[tool]) ecosystemUsage[type][tool] = tools[tool];
+      }
+    }
+
+    // Calculate adoption rate from compliance history
+    const total = adoption.followed + adoption.ignored;
+    const rate = total > 0 ? Math.round((adoption.followed / total) * 100) : 0;
+
+    // Recent trend (last 10 entries)
+    const recent = (adoption.history || []).slice(-10);
+    const recentFollowed = recent.filter(h => h.result === "followed").length;
+    const recentRate = recent.length > 0 ? Math.round((recentFollowed / recent.length) * 100) : 0;
+    const trend = recentRate > rate ? "improving" : recentRate < rate ? "declining" : "stable";
+
+    // Identify gaps — tools never used
+    const allUsedTools = new Set();
+    for (const tools of Object.values(toolUsage)) {
+      for (const tool of Object.keys(tools)) allUsedTools.add(tool);
+    }
+    const gaps = ecosystemTools.filter(t => !allUsedTools.has(t));
+
+    const summary = {
+      adoption_rate_all_time: rate,
+      adoption_rate_recent: recentRate,
+      trend,
+      total_sessions_tracked: total,
+      followed: adoption.followed,
+      ignored: adoption.ignored,
+      gaps,
+      ecosystem_tools: ecosystemTools,
+    };
+
+    if (req.query.format === "json") {
+      return res.json({ timestamp: new Date().toISOString(), summary, usage_by_type: ecosystemUsage, recent_compliance: recent });
+    }
+
+    // HTML dashboard
+    const typeColors = { B: "#22c55e", R: "#3b82f6", E: "#f59e0b", A: "#8b5cf6" };
+    const usageRows = ecosystemTools.map(tool => {
+      const counts = Object.entries(ecosystemUsage).map(([t, u]) => `<td style="text-align:center;color:${u[tool] ? typeColors[t] : "#555"}">${u[tool] || "—"}</td>`).join("");
+      return `<tr><td>${tool}</td>${counts}</tr>`;
+    }).join("");
+
+    const historyDots = recent.map(h => `<span style="color:${h.result === "followed" ? "#22c55e" : "#ef4444"};font-size:1.5rem">${h.result === "followed" ? "●" : "○"}</span>`).join(" ");
+
+    const html = `<!DOCTYPE html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ecosystem Adoption Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e5e5e5;padding:2rem}
+h1{font-size:1.5rem;margin-bottom:1.5rem;color:#f5f5f5}h2{font-size:1.1rem;margin:1.5rem 0 1rem;color:#aaa}
+.stats{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.stat{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:1rem 1.5rem;min-width:120px}
+.stat .label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.05em}.stat .value{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+table{width:100%;border-collapse:collapse;font-size:.875rem;margin-bottom:1.5rem}th{text-align:left;padding:.5rem;border-bottom:2px solid #333;color:#888;font-weight:500}
+td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
+.trend-up{color:#22c55e}.trend-down{color:#ef4444}.trend-stable{color:#888}
+.gaps{display:flex;gap:.5rem;flex-wrap:wrap}.gap{background:#331a1a;color:#f87171;padding:.25rem .5rem;border-radius:4px;font-size:.75rem}
+</style></head><body>
+<h1>Ecosystem Adoption Dashboard</h1>
+<div class="stats">
+  <div class="stat"><div class="label">All-Time Rate</div><div class="value">${rate}%</div></div>
+  <div class="stat"><div class="label">Recent (10)</div><div class="value">${recentRate}%</div></div>
+  <div class="stat"><div class="label">Trend</div><div class="value trend-${trend === "improving" ? "up" : trend === "declining" ? "down" : "stable"}">${trend}</div></div>
+  <div class="stat"><div class="label">Followed</div><div class="value" style="color:#22c55e">${adoption.followed}</div></div>
+  <div class="stat"><div class="label">Ignored</div><div class="value" style="color:#ef4444">${adoption.ignored}</div></div>
+</div>
+<h2>Recent Compliance</h2>
+<p style="margin-bottom:1rem">${historyDots}</p>
+<h2>Tool Usage by Session Type</h2>
+<table><thead><tr><th>Tool</th><th style="text-align:center">B</th><th style="text-align:center">R</th><th style="text-align:center">E</th><th style="text-align:center">A</th></tr></thead>
+<tbody>${usageRows}</tbody></table>
+${gaps.length ? `<h2>Gaps (Unused Tools)</h2><div class="gaps">${gaps.map(g => `<span class="gap">${g}</span>`).join("")}</div>` : ""}
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/ecosystem?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/dashboard" style="color:#89b4fa">Status Dashboard</a></p>
+</body></html>`;
+    return res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Unified pipeline view — queue + brainstorming + directives in one response
 app.get("/status/pipeline", auth, (req, res) => {
   try {

@@ -27,7 +27,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Session file size tracking** (added ~s789)~~: Promoted to wq-152 in R#127.
 
-- ~~**Directive urgency in session prompt** (added ~s782)~~: Implemented differently in R#121 — added directive enforcement gates directly to SESSION_ENGAGE.md. Phase 0 reads directive-health.json and identifies d031 as blocking. Phase 4.5 requires explicit compliance verification. Structural approach preferred over prompt injection.
+- ~~**Directive urgency in session prompt** (added ~s782)~~: Implemented differently in R#121 — added directive enforcement gates directly to SESSION_ENGAGE.md. Phase 0 reads directive-health.json and identifies urgent directives as blocking. Phase 4.5 requires explicit compliance verification. Structural approach preferred over prompt injection.
 
 - ~~**Add tests for account-registry.json**~~: Promoted to wq-132 in B#190.
 

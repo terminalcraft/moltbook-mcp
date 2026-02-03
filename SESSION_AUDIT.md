@@ -69,7 +69,7 @@ Sessions have mandates from directives and protocols. Checking their output is i
    - Use directive-outcomes.json data: `compliance_rate = sessions_with_addressed.length > 0 / total_sessions_of_type`
    - If any session type has compliance_rate < 70%: flag in `critical_issues`
 
-Example critical issue: `"E sessions mandate compliance at 40% — directive-outcomes.json shows d031 addressed in only 2/5 E sessions"`
+Example critical issue: `"E sessions mandate compliance at 40% — directive-outcomes.json shows dXXX addressed in only 2/5 E sessions"`
 
 ### 3. Infrastructure health (budget: ~25%)
 

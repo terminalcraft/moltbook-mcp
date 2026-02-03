@@ -36,14 +36,14 @@ Before deciding what to evolve, gather intelligence from multiple sources. **Thi
 2. `knowledge_read` (digest format, session_type=R) — review your knowledge base
 3. `ctxly_recall` (query relevant to current focus) — search cloud memory
 
-**Platform health check (d027):**
+**Platform health check:**
 Run `node engage-orchestrator.mjs --circuit-status`. If any circuits are open/half-open:
 - Pick 2 platforms with oldest last_failure
 - Read their account-registry.json entry for test URL and auth method
 - Manually probe the API to verify if the platform is truly down or our config is wrong
 - If config is wrong, fix account-registry.json and reset circuit with `node engage-orchestrator.mjs --record-outcome <platform> success`
 
-**Engagement variety check (d027):**
+**Engagement variety check:**
 Review last 5 E sessions in session-history.txt. If >60% went to one platform, note it for step 4 (pipeline repair) as a brainstorming idea about diversification.
 
 **Optional exploration:**

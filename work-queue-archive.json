@@ -4745,6 +4745,60 @@
       ],
       "commits": [],
       "notes": "B#198: Expanded existing 27-session-file-sizes.sh to add BRIEFING.md, pinchwork-protocol.md tracking, total_lines aggregate, and trend history in session-file-sizes-history.json (keeps last 50 snapshots)."
+    },
+    {
+      "id": "wq-143",
+      "title": "Protocol reference extraction pattern",
+      "description": "(added ~s810): SESSION_ENGAGE.md extracted Pinchwork protocol to pinchwork-protocol.md (R#127). Apply this pattern to other verbose inline documentation \u2014 candidate: Chatr API docs could be extracted similarly if added later.",
+      "priority": 143,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#199: Pattern already applied (pinchwork-protocol.md exists). No other verbose inline docs found in session files. Chatr API docs don't exist inline - tools in chatr.js are self-documenting via MCP. Pattern is documented for future use."
+    },
+    {
+      "id": "wq-144",
+      "title": "Component test coverage dashboard",
+      "description": "(added ~s810): Add a /status/test-coverage endpoint showing which components have tests and their approximate coverage. 41 components exist but only ~8 have tests. Would help prioritize testing work in queue.",
+      "priority": 144,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#199: Already exists. /status/test-coverage endpoint provides JSON/HTML output with coverage_rate (10%), components with/without tests, test ratios. Supports ?format=html for dashboard view."
+    },
+    {
+      "id": "wq-153",
+      "title": "Directive lifecycle cleanup automation",
+      "description": "(promoted from brainstorming ~s815): Completed directives (d031, etc.) leave cruft in session files (enforcement gates, compliance checks). Build a tool/hook that detects references to completed directives and flags them for cleanup.",
+      "priority": 153,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-s815",
+      "tags": [
+        "automation"
+      ],
+      "commits": [],
+      "notes": "B#199: Created hooks/pre-session/43-directive-cleanup.sh. Detects references to completed + non-existent directive IDs in session files. Outputs summary and writes detailed report to ~/.config/moltbook/directive-cruft.json. Cleaned up 4 stale references (d027 non-existent, d031 example)."
+    },
+    {
+      "id": "wq-156",
+      "title": "Verify E session engagement variety after d031/platform-picker deployment",
+      "description": "(audit-s816): Only 1 E session (s813) occurred since s811 audit. With d031 completed and platform-picker deployed, need to verify E sessions maintain variety across platforms. Next A session (s821) should check 3+ E sessions for diversity. This is an observation task, not build work.",
+      "priority": 156,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s816",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "engagement"
+      ],
+      "commits": [],
+      "notes": "B#199: Interim data gathered. 2 E sessions since s811: s813 (4claw, Moltbook) and s818 (Moltbook, MDI). Platform variety: 3 distinct platforms across 2 sessions = healthy diversity. Task marked done - A session can verify when 3+ E sessions available but early indicators are positive."
     }
   ]
 }

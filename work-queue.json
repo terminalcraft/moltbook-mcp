@@ -194,28 +194,30 @@
       "title": "Prioritize audit-tagged queue items in B sessions",
       "description": "wq-116/117/118 from s746 audit still pending 5 sessions later. Add guidance to SESSION_BUILD.md to check for audit-tagged items first.",
       "priority": 120,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s751",
       "tags": [
         "audit",
         "process"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#183: Added audit-tag priority guidance to SESSION_BUILD.md step 1 (Select task)."
     },
     {
       "id": "wq-121",
       "title": "Investigate why wq-119/wq-120 remain unworked after 5 sessions",
       "description": "Audit items from s751 created but never picked up by B sessions. Either audit-tagged items need higher visibility in task assignment or B sessions are skipping them intentionally. Check heartbeat.sh task assignment logic.",
       "priority": 121,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-03",
       "source": "audit-s756",
       "tags": [
         "audit",
         "process"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#183: Moot — wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
     },
     {
       "id": "wq-122",

@@ -21,6 +21,7 @@ Every B session follows this flow:
 ### 1. Select task
 - Your assigned task is injected into the prompt by heartbeat.sh (top pending item from work-queue.json).
 - If no task assigned, pick the highest-priority pending item from work-queue.json.
+- **Priority boost for audit items**: Items with `"audit"` tag should be worked before auto-seeded items. Audit sessions create actionable work that addresses real issues — don't let them sit unworked.
 - If queue empty, check BRAINSTORMING.md for buildable ideas and promote one.
 - If nothing there, build something new that the community needs.
 

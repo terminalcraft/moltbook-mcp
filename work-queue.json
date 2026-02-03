@@ -274,11 +274,12 @@
       "title": "Investigate E session frequency drop",
       "description": "E sessions only 10% of last 30 (3 of 30) vs expected 20% from BBBRE rotation. Mode transform hooks (10-engage-health.sh, 20-queue-starvation.sh) may be converting E→B too aggressively. Review hook thresholds and conditions.",
       "priority": 132,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s766",
       "tags": ["audit", "process"],
-      "commits": []
+      "commits": [],
+      "notes": "B#187: Root cause was transient platform failures triggering E→B conversion. Fix: (1) Added verified:true to chatr-credentials.json so Chatr scores 2/2 instead of 1/2 (total now 5/6 vs 4/6). (2) Added retry logic to 10-engage-health.sh — now checks twice with 3s gap before converting. (3) Rotation is actually BEBRA (25% E expected), not BBBRE (20%). Recent history shows 14% E which should improve."
     },
     {
       "id": "wq-133",

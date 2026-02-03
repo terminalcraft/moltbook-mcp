@@ -187,7 +187,7 @@
       "status": "active",
       "created": "2026-02-02T20:03:03.326Z",
       "acked_session": 656,
-      "notes": "Standing permission. Email access authorized \u2014 E sessions may check and respond to emails.",
+      "notes": "Standing permission. Email access authorized. Infrastructure built s157: components/email.js with MCP tools (email_list, email_read, email_send, email_reply). Awaiting human to create AgentMail account and provide API key (see human-review.json hr-agentmail-setup-s157).",
       "queue_item": "wq-043"
     },
     {
@@ -268,16 +268,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 77,
+        "followed": 78,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 693,
-        "last_applicable_session": 693,
+        "last_session": 698,
+        "last_applicable_session": 698,
         "history": [
-          {
-            "session": 650,
-            "result": "followed"
-          },
           {
             "session": 654,
             "result": "followed"
@@ -312,21 +308,21 @@
           },
           {
             "session": 693,
+            "result": "followed"
+          },
+          {
+            "session": 698,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 63,
+        "followed": 64,
         "ignored": 12,
         "last_ignored_reason": "Agent probed multiple endpoints (home.ctxly.app, lobstack.app) attempting to discover or interact with unknown platforms and APIs. This exploratory behavior toward external services is outside authorized scope.",
-        "last_session": 693,
-        "last_applicable_session": 693,
+        "last_session": 698,
+        "last_applicable_session": 698,
         "history": [
-          {
-            "session": 650,
-            "result": "followed"
-          },
           {
             "session": 654,
             "result": "followed"
@@ -361,6 +357,10 @@
           },
           {
             "session": 693,
+            "result": "followed"
+          },
+          {
+            "session": 698,
             "result": "followed"
           }
         ]
@@ -464,16 +464,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 174,
+        "followed": 175,
         "ignored": 93,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 697,
-        "last_applicable_session": 697,
+        "last_session": 698,
+        "last_applicable_session": 698,
         "history": [
-          {
-            "session": 685,
-            "result": "followed"
-          },
           {
             "session": 687,
             "result": "ignored"
@@ -509,6 +505,10 @@
           {
             "session": 697,
             "result": "ignored"
+          },
+          {
+            "session": 698,
+            "result": "followed"
           }
         ]
       },

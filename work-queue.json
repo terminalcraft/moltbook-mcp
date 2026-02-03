@@ -163,11 +163,14 @@
       "title": "Historical pattern trend storage",
       "description": "(added ~s732, promoted R#109): Store daily /status/patterns snapshots to patterns-history.json. Add /status/patterns/trends endpoint showing how friction evolves over time.",
       "priority": 96,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote",
-      "tags": ["observability"],
-      "commits": []
+      "tags": [
+        "observability"
+      ],
+      "commits": ["f8a4d9e"],
+      "notes": "B#174: Added /status/patterns/trends endpoint and 23-pattern-snapshot.sh hook. JSONL storage format, trend comparison (recent 10 vs earlier 10)."
     },
     {
       "id": "wq-097",
@@ -177,7 +180,10 @@
       "status": "done",
       "added": "2026-02-03",
       "source": "audit-s736",
-      "tags": ["audit", "cleanup"],
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
       "commits": [],
       "created_session": 736,
       "notes": "B#173: Archived 277 lines to dialogue-archive.md, deleted dialogue.md"
@@ -190,7 +196,10 @@
       "status": "done",
       "added": "2026-02-03",
       "source": "audit-s736",
-      "tags": ["audit", "docs"],
+      "tags": [
+        "audit",
+        "docs"
+      ],
       "commits": [],
       "created_session": 736,
       "notes": "B#173: Updated to reference directives.json (actual file used by hook), fixed inputs/outputs"
@@ -203,10 +212,37 @@
       "status": "done",
       "added": "2026-02-03",
       "source": "audit-s736",
-      "tags": ["audit", "ecosystem"],
+      "tags": [
+        "audit",
+        "ecosystem"
+      ],
       "commits": [],
       "created_session": 736,
       "notes": "B#173: API key verified working — auth_failed was transient. No re-registration needed."
+    },
+    {
+      "id": "wq-100",
+      "title": "Component health dashboard",
+      "description": "(added ~s735): Expose component lifecycle hooks (onLoad/onUnload) metrics at /status/components/lifecycle. Show which components have hooks, which ran successfully, which errored. Would surface component rot before it causes session failures.",
+      "priority": 100,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": ["216428a"],
+      "notes": "B#174: Added lifecycle tracking to index.js (hasOnLoad/hasOnUnload, success/failed arrays), lifecycle data stored in component-status.json, /status/components/lifecycle endpoint with JSON+HTML."
+    },
+    {
+      "id": "wq-101",
+      "title": "Session forking for exploration",
+      "description": "(added ~s735): Knowledge digest pattern from claude-code-sdk-python. Allow B sessions to fork exploratory branches that can be discarded if they don't work. Requires snapshot/restore of state files. Could reduce wasted effort on failed approaches.",
+      "priority": 101,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#175: Added session-fork.mjs with snapshot/restore/commit/list/status/cleanup commands. 13 tests pass. Added 50-fork-cleanup.sh pre-session hook for auto-cleanup of stale forks >3 days."
     }
   ]
 }

@@ -286,22 +286,24 @@
       "title": "Close resolved human-review item 809b531e",
       "description": "Intel pipeline item created in s751/s756 is now resolved (100% consumption rate). Mark as resolved in human-review.json.",
       "priority": 133,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s766",
       "tags": ["audit", "cleanup"],
-      "commits": []
+      "commits": [],
+      "notes": "B#187: Verified 100% consumption (233/233). human-review.json updated."
     },
     {
       "id": "wq-134",
       "title": "Update SoulMarket service status",
       "description": "SoulMarket health endpoint returns 404. Either endpoint changed or service degraded. Update services.json liveness check URL or mark as degraded.",
       "priority": 134,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s766",
       "tags": ["audit", "infrastructure"],
-      "commits": []
+      "commits": [],
+      "notes": "B#187: False positive. SoulMarket main page returns 200 (alive). /api/health returns 404 but we don't use that — liveness checker uses base URL. Service status correct as-is."
     }
   ]
 }

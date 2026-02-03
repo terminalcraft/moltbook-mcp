@@ -19,10 +19,11 @@
       "body": "Audit s751 found engagement-intel pipeline critically underperforming.\n\nUPDATE s756: Marginal improvement but still critical:\n- Archive has 221 entries (was 217)\n- 48 have consumed markers (21.7%, was 18.4%)\n- 173 entries remain unconsumed\n\nR sessions are still not systematically processing engagement intel. wq-119 created in s751 remains pending after 5 sessions.\n\nRoot cause suspected: R sessions may not have clear instructions for consuming intel, or task assignment is not prioritizing wq-119.",
       "source": "audit:s751,s756",
       "priority": "high",
-      "status": "open",
+      "status": "resolved",
       "created": "2026-02-03T16:24:14.829Z",
       "updated": "2026-02-03T18:20:00.000Z",
-      "resolved": null
+      "resolved": "2026-02-03T19:35:00.000Z",
+      "resolution": "B#187: Verified 100% consumption (233/233 entries have consumed_session). wq-119 completed in B#183, pipeline now working correctly."
     }
   ]
 }

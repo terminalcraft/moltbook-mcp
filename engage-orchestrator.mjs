@@ -12,6 +12,7 @@
  *   node engage-orchestrator.mjs --record-outcome <platform> <success|failure>
  *   node engage-orchestrator.mjs --circuit-status  # Show circuit breaker state
  *   node engage-orchestrator.mjs --diversity  # Show engagement concentration metrics
+ *   node engage-orchestrator.mjs --diversity-trends  # Show diversity history trends (wq-131)
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
@@ -513,6 +514,89 @@ if (process.argv.includes("--diversity")) {
     }
   } catch (e) {
     console.error("Error analyzing engagement:", e.message);
+    process.exit(1);
+  }
+  process.exit(0);
+}
+
+// --- CLI: Diversity history trends (wq-131) ---
+if (process.argv.includes("--diversity-trends")) {
+  const HISTORY_FILE = join(STATE_DIR, "diversity-history.json");
+  const jsonMode = process.argv.includes("--json");
+
+  try {
+    if (!existsSync(HISTORY_FILE)) {
+      if (jsonMode) {
+        console.log(JSON.stringify({ error: "No diversity history yet", entries: [] }));
+      } else {
+        console.log("No diversity history recorded yet. E sessions will record data via post-session hook.");
+      }
+      process.exit(0);
+    }
+
+    const lines = readFileSync(HISTORY_FILE, "utf8").trim().split("\n").filter(Boolean);
+    const entries = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+
+    if (entries.length === 0) {
+      if (jsonMode) {
+        console.log(JSON.stringify({ error: "Empty history", entries: [] }));
+      } else {
+        console.log("Diversity history file exists but is empty.");
+      }
+      process.exit(0);
+    }
+
+    // Compute trends
+    const recent = entries.slice(-10);
+    const older = entries.slice(-20, -10);
+    const avgRecent = arr => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+
+    const recentHHI = avgRecent(recent.map(e => e.hhi || 0));
+    const olderHHI = avgRecent(older.map(e => e.hhi || 0));
+    const recentTop1 = avgRecent(recent.map(e => e.top1_pct || 0));
+    const olderTop1 = avgRecent(older.map(e => e.top1_pct || 0));
+    const recentEff = avgRecent(recent.map(e => e.effective_platforms || 0));
+    const olderEff = avgRecent(older.map(e => e.effective_platforms || 0));
+
+    const trends = {
+      total_entries: entries.length,
+      latest: entries[entries.length - 1],
+      last_10_avg: {
+        hhi: Math.round(recentHHI),
+        top1_pct: Math.round(recentTop1 * 10) / 10,
+        effective_platforms: Math.round(recentEff * 10) / 10
+      },
+      prev_10_avg: older.length > 0 ? {
+        hhi: Math.round(olderHHI),
+        top1_pct: Math.round(olderTop1 * 10) / 10,
+        effective_platforms: Math.round(olderEff * 10) / 10
+      } : null,
+      trend_direction: {
+        hhi: recentHHI < olderHHI ? "improving" : recentHHI > olderHHI ? "worsening" : "stable",
+        concentration: recentTop1 < olderTop1 ? "diversifying" : recentTop1 > olderTop1 ? "concentrating" : "stable"
+      }
+    };
+
+    if (jsonMode) {
+      console.log(JSON.stringify({ trends, entries }, null, 2));
+    } else {
+      console.log("\n=== Engagement Diversity Trends (wq-131) ===\n");
+      console.log(`Total entries: ${trends.total_entries}`);
+      console.log(`Latest (session ${trends.latest.session}): HHI=${trends.latest.hhi}, top1=${trends.latest.top1_pct}%, eff=${trends.latest.effective_platforms}`);
+      console.log(`\nLast 10 E sessions avg: HHI=${trends.last_10_avg.hhi}, top1=${trends.last_10_avg.top1_pct}%, eff=${trends.last_10_avg.effective_platforms}`);
+      if (trends.prev_10_avg) {
+        console.log(`Prev 10 E sessions avg: HHI=${trends.prev_10_avg.hhi}, top1=${trends.prev_10_avg.top1_pct}%, eff=${trends.prev_10_avg.effective_platforms}`);
+        console.log(`\nTrend: HHI ${trends.trend_direction.hhi}, concentration ${trends.trend_direction.concentration}`);
+      } else {
+        console.log("\n(Not enough data for trend comparison yet)");
+      }
+    }
+  } catch (e) {
+    if (jsonMode) {
+      console.log(JSON.stringify({ error: e.message }));
+    } else {
+      console.error("Error reading diversity history:", e.message);
+    }
     process.exit(1);
   }
   process.exit(0);

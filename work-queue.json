@@ -259,13 +259,14 @@
       "title": "Add engagement diversity history tracking",
       "description": "engage-orchestrator --diversity shows current metrics but doesn't track trends. Add diversity-history.json that records HHI, effective platforms, and top-3 concentration after each E session. Enable trend analysis in A sessions.",
       "priority": 131,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "R#115-pipeline-repair",
       "tags": [
         "analytics"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#190: Added post-session hook 28-diversity-history.sh, --diversity-trends CLI flag, /status/diversity-trends API endpoint."
     }
   ]
 }

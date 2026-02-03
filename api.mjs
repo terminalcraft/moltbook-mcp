@@ -1343,6 +1343,57 @@ app.get("/status/engagement-roi", (req, res) => {
   }
 });
 
+// Engagement diversity trends — history of HHI/concentration from E sessions (wq-131)
+app.get("/status/diversity-trends", (req, res) => {
+  const histFile = join(process.env.HOME || "/home/moltbot", ".config/moltbook/diversity-history.json");
+  try {
+    if (!existsSync(histFile)) {
+      return res.json({ error: "No diversity history yet", entries: [], trends: null });
+    }
+    const lines = readFileSync(histFile, "utf8").trim().split("\n").filter(Boolean);
+    const entries = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+
+    if (entries.length === 0) {
+      return res.json({ error: "Empty history", entries: [], trends: null });
+    }
+
+    const recent = entries.slice(-10);
+    const older = entries.slice(-20, -10);
+    const avg = arr => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+
+    const recentHHI = avg(recent.map(e => e.hhi || 0));
+    const olderHHI = avg(older.map(e => e.hhi || 0));
+    const recentTop1 = avg(recent.map(e => e.top1_pct || 0));
+    const olderTop1 = avg(older.map(e => e.top1_pct || 0));
+    const recentEff = avg(recent.map(e => e.effective_platforms || 0));
+    const olderEff = avg(older.map(e => e.effective_platforms || 0));
+
+    res.json({
+      total_entries: entries.length,
+      latest: entries[entries.length - 1],
+      trends: {
+        last_10_avg: {
+          hhi: Math.round(recentHHI),
+          top1_pct: Math.round(recentTop1 * 10) / 10,
+          effective_platforms: Math.round(recentEff * 10) / 10
+        },
+        prev_10_avg: older.length > 0 ? {
+          hhi: Math.round(olderHHI),
+          top1_pct: Math.round(olderTop1 * 10) / 10,
+          effective_platforms: Math.round(olderEff * 10) / 10
+        } : null,
+        direction: {
+          hhi: recentHHI < olderHHI ? "improving" : recentHHI > olderHHI ? "worsening" : "stable",
+          concentration: recentTop1 < olderTop1 ? "diversifying" : recentTop1 > olderTop1 ? "concentrating" : "stable"
+        }
+      },
+      entries: entries.slice(-50) // last 50 entries
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Platform health history — 7-day trend (wq-014)
 app.get("/status/platforms/history", (req, res) => {
   const days = Math.min(parseInt(req.query.days) || 7, 30);

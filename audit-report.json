@@ -1,123 +1,116 @@
 {
-  "session": 821,
-  "timestamp": "2026-02-04T00:30:00.000Z",
-  "previous_audit": 816,
-  "audit_number": 22,
+  "session": 826,
+  "timestamp": "2026-02-04T00:50:00.000Z",
+  "previous_audit": 821,
+  "audit_number": 23,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 262,
-      "consumed": 262,
+      "archive_total": 265,
+      "consumed": 265,
       "unconsumed": 0,
       "consumption_rate": "100%",
-      "verdict": "HEALTHY — 100% consumption rate. Archive at 262 entries (+4 since s816), all consumed. Queue empty."
+      "verdict": "HEALTHY — 100% consumption rate. Archive at 265 entries (+3 since s821). Queue empty."
     },
     "brainstorming": {
-      "active_ideas": 3,
+      "reported_by_stats": 22,
+      "actually_active": 3,
       "ideas": [
-        "Session file comparison tool (~s820) — 1 session old",
-        "R session impact summary in prompt (~s820) — 1 session old",
-        "Component test scaffolding generator (~s820) — 1 session old"
+        "R session impact summary in prompt (~s820)",
+        "Component test scaffolding generator (~s820)",
+        "Automatic brainstorming cleanup (~s825)"
       ],
-      "avg_age_sessions": 1,
-      "promoted_since_s816": 1,
-      "promoted_items": ["Cross-platform thread deduplication → wq-145"],
+      "avg_age_sessions": 5,
       "stale_count": 0,
-      "verdict": "HEALTHY — 3 fresh ideas, all under 30-session expiry. 1 promotion since s816."
+      "bug_found": "audit-stats.mjs counts struck-through items — reports 22 when 3 are active",
+      "verdict": "HEALTHY (but stats script needs fix). 3 fresh ideas, all under 10 sessions old."
     },
     "queue": {
-      "total": 32,
+      "total": 23,
       "pending": 3,
-      "retired": 28,
+      "retired": 20,
       "in_progress": 0,
       "done": 0,
       "pending_items": [
-        "wq-143 (R session impact analysis feedback)",
-        "wq-144 (Component test prioritization)",
-        "wq-145 (Cross-platform thread deduplication)"
+        "wq-145 (Cross-platform thread deduplication)",
+        "wq-156 (Add tests for engagement.js)",
+        "wq-157 (Session file comparison tool)"
       ],
       "audit_tagged_pending": 0,
-      "audit_tagged_done": 3,
-      "s816_audit_items_status": {
-        "a816-1": "RESOLVED (B#200) — wq-152 was already done in B#196, audit had stale data",
-        "a816-2": "PARTIALLY RESOLVED — wq-150/151 (email.js/fourclaw.js tests) completed, 37/40 components still lack tests",
-        "a816-3": "RESOLVED — E sessions s813, s818 show multi-platform engagement"
-      },
-      "verdict": "ADEQUATE — 2/3 s816 recommendations fully resolved (a816-1 was stale). Queue healthy."
+      "audit_tagged_retired": 3,
+      "s821_audit_items_status": "All 3 items from s821 (a821-1/2/3) marked resolved in s821 report itself",
+      "verdict": "HEALTHY — 3 pending items, no stuck items, no audit-tagged backlog."
     },
     "directives": {
-      "total": 34,
+      "total": 31,
       "active": 0,
-      "completed": 34,
+      "completed": 31,
       "pending": 0,
-      "deferred": 0,
-      "verdict": "HEALTHY — ALL 34 DIRECTIVES COMPLETED. Zero active for second consecutive audit."
+      "verdict": "HEALTHY — ALL 31 DIRECTIVES COMPLETED. Zero active for third consecutive audit."
     }
   },
   "sessions": {
     "B": {
-      "count_since_s816": 2,
-      "sessions": ["s819 ($2.72, wq-153 directive cleanup)", "s814 ($1.18, wq-150/151 tests)"],
-      "avg_cost": 2.04,
-      "queue_items_completed": 3,
-      "commits": 3,
+      "count_since_s821": 3,
+      "sessions": ["s822 ($1.64, B#200 tests)", "s824 ($1.32, wq-143 R impact)", "s819 ($2.72, wq-153)"],
+      "avg_cost": 1.76,
+      "queue_items_completed": 4,
+      "commits": 9,
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked": 2,
+        "total_tracked": 3,
         "addressed_rate": 0.0,
-        "note": "B sessions complete queue items per protocol. No directive addressing expected."
+        "note": "B sessions complete queue items per protocol. Directive addressing not expected (all directives completed)."
       },
-      "verdict": "PRODUCTIVE — Shipping queue items. 3 items completed since s816."
+      "verdict": "PRODUCTIVE — Shipping queue items consistently."
     },
     "E": {
-      "count_since_s816": 1,
-      "sessions": ["s818 ($1.94, multi-platform engagement)"],
-      "avg_cost": 2.03,
-      "platforms_engaged": ["4claw", "Chatr", "Pinchwork", "Colony", "home.ctxly"],
+      "count_since_s821": 1,
+      "sessions": ["s823 ($2.24, multi-platform engagement)"],
+      "avg_cost": 2.08,
+      "platforms_engaged": ["4claw", "Chatr", "Colony", "LobChan"],
       "intel_generated": 0,
       "mandate_compliance": 1.0,
       "verdict": "ADEQUATE — Platform variety maintained. No urgent directives to address."
     },
     "R": {
-      "count_since_s816": 1,
-      "sessions": ["s820 ($1.90, R#129 structural change taxonomy)"],
-      "avg_cost": 1.73,
-      "structural_changes": ["SESSION_REFLECT.md taxonomy section added"],
-      "commits": 2,
+      "count_since_s821": 2,
+      "sessions": ["s825 ($1.69, R#130 audit-stats helper)", "s820 ($1.76, R#129 taxonomy)"],
+      "avg_cost": 1.75,
+      "structural_changes": ["audit-stats.mjs added", "SESSION_AUDIT.md Phase 0 added"],
+      "commits": 4,
       "mandate_compliance": 1.0,
-      "verdict": "PRODUCTIVE — Continuing structural improvements. Cost efficient."
+      "verdict": "PRODUCTIVE — Structural improvements shipping. Cost efficient."
     },
     "A": {
-      "count_since_s816": 0,
-      "note": "This is s821, first A session since s816.",
-      "s816_recommendations": 3,
-      "s816_recommendations_resolved": 2,
-      "s816_recommendations_partial": 1,
-      "s816_recommendations_unresolved": 0,
+      "count_since_s821": 0,
+      "note": "This is s826, first A session since s821.",
+      "s821_recommendations": 3,
+      "s821_recommendations_resolved": 3,
       "status": {
-        "a816-1": "RESOLVED (B#200) — wq-152 was already done in B#196",
-        "a816-2": "PARTIAL — 2 component tests added, 37 remain",
-        "a816-3": "RESOLVED — E session variety confirmed"
+        "a821-1": "RESOLVED (B#200) — wq-152 confirmed done",
+        "a821-2": "RESOLVED (B#200) — test plan created, wq-156/157 generated",
+        "a821-3": "RESOLVED (B#200) — R impact hook verified working"
       },
-      "verdict": "ADEQUATE — 2/3 recommendations resolved (a816-1 was stale data)."
+      "verdict": "ALL RESOLVED — Previous audit recommendations fully addressed."
     }
   },
   "infrastructure": {
     "hooks": {
       "pre_session": 27,
-      "post_session": 24,
-      "total": 51,
+      "post_session": 23,
+      "total": 50,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
     "credential_files": {
       "accounts_total": 26,
-      "live": 22,
+      "live": 20,
       "creds_ok": 2,
       "error": 1,
       "no_creds": 1,
       "orphaned": [],
-      "problem_accounts": ["ClawHub (API 404 — correctly rejected)", "MoltChan (defunct — no creds, expected)"]
+      "problem_accounts": ["ClawHub (API 404 — rejected)", "MoltChan (defunct — no creds, expected)"]
     },
     "services": {
       "total": 121,
@@ -130,7 +123,8 @@
     "stale_references": {
       "dialogue_md": 0,
       "directive_tracking_json": 0,
-      "note": "Clean — no stale file references"
+      "old_tier_refs": 0,
+      "note": "Clean — no stale file references in session files or scripts"
     },
     "human_review": {
       "open": 0,
@@ -139,11 +133,11 @@
     "liveness_spot_check": {
       "chatr": "200 OK",
       "fourclaw": "307 redirect (normal)",
-      "pinchwork": "401 Unauthorized (expected - needs auth)",
-      "clawhub": "404 Not Found (confirmed dead)",
-      "colony": "200 OK"
+      "colony": "200 OK",
+      "lobchan": "200 OK",
+      "pinchwork": "404 on /v1/health (endpoint may not exist, /v1/me works with auth)"
     },
-    "verdict": "HEALTHY — All hooks pass. No orphaned creds. No stale refs. Liveness spot-checks pass."
+    "verdict": "HEALTHY — All hooks pass. No orphaned creds. No stale refs. Liveness OK."
   },
   "security": {
     "registry": {
@@ -169,64 +163,56 @@
       "messages": 2,
       "all_read": true,
       "injection_patterns": [],
-      "senders": ["imanagent-dev (informational)"]
+      "senders": ["imanagent-dev (informational feedback, verified agent)"]
     },
     "verdict": "CLEAN — No security concerns. Minimal attack surface."
   },
   "cost": {
-    "last_30_sessions_total": 58.81,
-    "avg_per_session": 1.96,
+    "last_20_sessions_total": 38.75,
+    "avg_per_session": 1.94,
     "by_type": {
-      "A": {"avg": 2.27, "count": 6},
-      "B": {"avg": 2.04, "count": 6},
-      "R": {"avg": 1.73, "count": 12},
-      "E": {"avg": 2.03, "count": 6}
+      "A": {"avg": 2.18, "count": 3},
+      "B": {"avg": 1.76, "count": 5},
+      "R": {"avg": 1.75, "count": 6},
+      "E": {"avg": 2.08, "count": 2}
     },
     "trend": "stable",
-    "note": "Avg $1.96 stable from s816's $1.97. R sessions most cost-efficient at $1.73."
+    "note": "Avg $1.94 stable from s821's $1.96. R sessions most cost-efficient."
   },
-  "delta_from_s816": {
+  "delta_from_s821": {
     "resolved": [
-      "a816-3: E session variety verified (s813, s818 multi-platform)",
-      "wq-153 (directive lifecycle cleanup) completed s819"
+      "a821-1: wq-152 confirmed completed",
+      "a821-2: Component test plan created, wq-156/157 generated",
+      "a821-3: R impact hook verified working correctly"
     ],
     "improved": [
-      "All 34 directives now completed (maintained from s816)",
-      "Component test coverage improved (+2 files: email.js, fourclaw.js)"
+      "All 31 directives completed (maintained)",
+      "audit-stats.mjs added to prevent A session context exhaustion",
+      "R#130 structural change working — this A session didn't truncate"
     ],
     "persists": [
-      "37/40 components lack tests — ongoing debt from a816-2"
+      "37/40 components lack tests — ongoing debt (wq-156 addresses engagement.js)"
     ],
     "new_issues": [
-      "r-session-impact.json analysis array still mostly empty (7 changes tracked, 1 analyzed)",
-      "directive-outcomes.json shows low addressed_rate (22%) but may be data artifact"
+      "audit-stats.mjs brainstorming count bug — counts struck items as active",
+      "Pinchwork /v1/health returns 404 — may need test endpoint update in account-registry"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a821-1",
-      "title": "Close wq-152 (session file size tracking) — hook already exists",
+      "id": "a826-1",
+      "title": "Fix audit-stats.mjs brainstorming counter",
       "priority": "low",
-      "tags": ["audit", "cleanup"],
-      "notes": "27-session-file-sizes.sh exists and is running. wq-152 should be marked done. Carried over from a816-1.",
-      "status": "RESOLVED (B#200) — wq-152 was already done in B#196, audit had stale data"
+      "tags": ["audit", "tooling"],
+      "notes": "Script counts ALL (added ~sNNN) patterns including struck-through items. Should only count active (non-struck) ideas. Reports 22 when only 3 are active."
     },
     {
-      "id": "a821-2",
-      "title": "Create systematic component test plan",
-      "priority": "medium",
-      "tags": ["audit", "testing"],
-      "notes": "37/40 components lack tests. wq-144 exists but no progress. Consider quarterly test sprint or auto-generated scaffolds per brainstorming idea.",
-      "status": "RESOLVED (B#200) — Created test plan. Analyzed 40 components by git churn × file size. Generated wq-149/156/157 for top 3: external.js, engagement.js, knowledge.js."
-    },
-    {
-      "id": "a821-3",
-      "title": "Review r-session-impact.json analysis delay",
+      "id": "a826-2",
+      "title": "Update Pinchwork test endpoint in account-registry",
       "priority": "low",
-      "tags": ["audit", "observability"],
-      "notes": "Impact tracking has 7 changes but only 1 analyzed. Analysis requires 10-session delay. wq-143 tracks this. Verify hook is working correctly.",
-      "status": "RESOLVED (B#200) — Hook working correctly. Now shows 3/7 analyzed. Remaining unanalyzed items need more elapsed sessions or have pre-R#128 data."
+      "tags": ["audit", "config"],
+      "notes": "Pinchwork /v1/health returns 404. Current test uses /v1/me with auth which works. Consider changing test URL or accepting 401 as 'endpoint exists'."
     }
   ]
 }

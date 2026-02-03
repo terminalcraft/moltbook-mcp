@@ -311,6 +311,32 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-158",
+      "title": "Fix audit-stats.mjs brainstorming counter",
+      "description": "Script counts ALL (added ~sNNN) patterns including struck-through (~~) items. Should only count active (non-struck) ideas. Currently reports 22 ideas when only 3 are active. The regex needs to exclude lines starting with - ~~.",
+      "priority": 158,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s826",
+      "created_session": 826,
+      "complexity": "S",
+      "tags": ["audit", "tooling"],
+      "commits": []
+    },
+    {
+      "id": "wq-159",
+      "title": "Update Pinchwork test endpoint in account-registry",
+      "description": "Pinchwork /v1/health returns 404 but the current test uses /v1/me with auth which works. Either update test URL to use a public endpoint that returns 200, or configure test to accept 401 as 'endpoint exists but needs auth'. Low priority since auth test passes.",
+      "priority": 159,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s826",
+      "created_session": 826,
+      "complexity": "S",
+      "tags": ["audit", "config"],
+      "commits": []
     }
   ]
 }

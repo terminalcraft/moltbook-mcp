@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -14,28 +14,72 @@ installReplayLog();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
+const SESSION_TYPE = (process.env.SESSION_TYPE || "").toUpperCase();
 const server = new McpServer({ name: "moltbook", version: "1.95.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
 
+// --- Session context object (R#104) ---
+// Previously components only received `server` via register(). Now they receive a
+// context object with session metadata, enabling context-aware initialization.
+// Components can use this for conditional logic without re-reading env vars or files.
+// Also supports lifecycle hooks: onLoad(ctx) after registration, onUnload() at shutdown.
+const sessionContext = {
+  sessionNum: SESSION_NUM,
+  sessionType: SESSION_TYPE,
+  dir: __dirname,
+  stateDir: join(process.env.HOME || '', '.config/moltbook'),
+  budgetCap: parseFloat(process.env.BUDGET_CAP || '10'),
+  // Lazy-load pre-computed context from session-context.mjs output
+  _precomputed: null,
+  get precomputed() {
+    if (this._precomputed === null) {
+      const envPath = join(this.stateDir, 'session-context.env');
+      if (existsSync(envPath)) {
+        try {
+          const raw = readFileSync(envPath, 'utf8');
+          this._precomputed = {};
+          for (const line of raw.split('\n')) {
+            const match = line.match(/^CTX_([A-Z_]+)=(.*)$/);
+            if (match) {
+              let val = match[2];
+              if (val.startsWith("$'") && val.endsWith("'")) {
+                val = val.slice(2, -1).replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
+              } else if (val.startsWith("'") && val.endsWith("'")) {
+                val = val.slice(1, -1).replace(/'\\'''/g, "'");
+              }
+              this._precomputed[match[1].toLowerCase()] = val;
+            }
+          }
+        } catch { this._precomputed = {}; }
+      } else {
+        this._precomputed = {};
+      }
+    }
+    return this._precomputed;
+  }
+};
+
+// Track loaded modules for lifecycle management
+const loadedModules = [];
+
 // Manifest-driven component loader (R#95, R#99: session-type-aware loading)
-// Components declare which session types need them via "sessions" field in components.json.
-// Omit "sessions" to load always. SESSION_TYPE env var controls filtering.
+// R#104: Components now receive context object, can export onLoad/onUnload lifecycle hooks.
 const manifest = JSON.parse(readFileSync(join(__dirname, "components.json"), "utf8"));
-const sessionType = (process.env.SESSION_TYPE || "").toUpperCase();
 const loadErrors = [];
 let loadedCount = 0;
 
 for (const entry of manifest.active) {
   const name = typeof entry === "string" ? entry : entry.name;
   const sessions = typeof entry === "object" && entry.sessions ? entry.sessions.toUpperCase() : null;
-  // Skip if session type is known and component doesn't list it
-  if (sessionType && sessions && !sessions.includes(sessionType)) continue;
+  if (SESSION_TYPE && sessions && !sessions.includes(SESSION_TYPE)) continue;
   try {
     const mod = await import(`./components/${name}.js`);
     if (typeof mod.register === "function") {
-      mod.register(server);
+      // Pass both server and context; components can accept (server) or (server, ctx)
+      mod.register(server, sessionContext);
+      loadedModules.push({ name, mod });
       loadedCount++;
     } else {
       loadErrors.push(`${name}: no register() export`);
@@ -45,15 +89,35 @@ for (const entry of manifest.active) {
   }
 }
 
+// Call onLoad lifecycle hook for components that export it
+for (const { name, mod } of loadedModules) {
+  if (typeof mod.onLoad === "function") {
+    try {
+      await mod.onLoad(sessionContext);
+    } catch (err) {
+      loadErrors.push(`${name}.onLoad: ${err.message}`);
+    }
+  }
+}
+
 if (loadErrors.length > 0) {
   console.error(`[moltbook] Component load errors:\n  ${loadErrors.join("\n  ")}`);
 }
-if (sessionType) {
-  console.error(`[moltbook] Session ${sessionType}: loaded ${loadedCount}/${manifest.active.length} components`);
+if (SESSION_TYPE) {
+  console.error(`[moltbook] Session ${SESSION_TYPE}: loaded ${loadedCount}/${manifest.active.length} components`);
 }
 
-// Save API history on exit
-process.on("exit", () => { if (getApiCallCount() > 0) saveApiSession(); saveToolUsage(); });
+// Save API history on exit + call component onUnload hooks
+process.on("exit", () => {
+  if (getApiCallCount() > 0) saveApiSession();
+  saveToolUsage();
+  // Call onUnload for components that export it
+  for (const { mod } of loadedModules) {
+    if (typeof mod.onUnload === "function") {
+      try { mod.onUnload(); } catch {}
+    }
+  }
+});
 process.on("SIGINT", () => process.exit());
 process.on("SIGTERM", () => process.exit());
 

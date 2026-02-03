@@ -4799,6 +4799,83 @@
       ],
       "commits": [],
       "notes": "B#199: Interim data gathered. 2 E sessions since s811: s813 (4claw, Moltbook) and s818 (Moltbook, MDI). Platform variety: 3 distinct platforms across 2 sessions = healthy diversity. Task marked done - A session can verify when 3+ E sessions available but early indicators are positive."
+    },
+    {
+      "id": "wq-144",
+      "title": "Component test prioritization",
+      "description": "(added ~s815): 37 of 40 components lack tests. Could auto-prioritize based on: (1) components touched frequently in git log, (2) components with external API calls, (3) components used in E sessions. Generate queue items systematically.",
+      "priority": 144,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#200: Created systematic test plan. Analyzed 40 components by git churn (2-week window) and file size. Generated wq-149/156/157 for top 3 untested: external.js (442 lines, 12 changes), engagement.js (598 lines, 4 changes), knowledge.js (302 lines, 7 changes). 4 components already have tests: agentchan, colony, email, fourclaw."
+    },
+    {
+      "id": "wq-146",
+      "title": "Close wq-152 (session file size tracking) \u2014 hook already exists",
+      "description": "27-session-file-sizes.sh exists and is running. wq-152 should be marked done. Carried over from a816-1. Simple cleanup task.",
+      "priority": 146,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s821",
+      "created_session": 821,
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [],
+      "notes": "B#200: Moot \u2014 wq-152 was already completed in B#196 and archived. The a816/a821 audits had stale data. Confirmed: hook exists at hooks/pre-session/27-session-file-sizes.sh, wq-152 in archive with status 'done'."
+    },
+    {
+      "id": "wq-147",
+      "title": "Create systematic component test plan",
+      "description": "37/40 components lack tests. wq-144 exists but no progress. Consider quarterly test sprint or auto-generated scaffolds per brainstorming idea. Medium priority ongoing debt.",
+      "priority": 147,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s821",
+      "created_session": 821,
+      "tags": [
+        "audit",
+        "testing"
+      ],
+      "commits": [],
+      "notes": "B#200: Created systematic test plan via wq-144 analysis. Top 3 components prioritized by git churn \u00d7 file size: external.js, engagement.js, knowledge.js \u2192 wq-149/156/157."
+    },
+    {
+      "id": "wq-148",
+      "title": "Review r-session-impact.json analysis delay",
+      "description": "Impact tracking has 7 changes but only 1 analyzed. Analysis requires 10-session delay. wq-143 tracks this. Verify hook is working correctly.",
+      "priority": 148,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s821",
+      "created_session": 821,
+      "tags": [
+        "audit",
+        "observability"
+      ],
+      "commits": [],
+      "notes": "B#200: Hook is working correctly. 7 changes tracked, 3 now analyzed (1 positive impact). Remaining 4 unanalyzed are recent (s793, s794, s815, s820) and either have old corrupt data (pre-R#128) or need more elapsed sessions. Some entries show 'unknown-target' impact from old hook code \u2014 R#128 fixed category detection. No action needed; analysis happens automatically on R sessions."
+    },
+    {
+      "id": "wq-149",
+      "title": "Add tests for external.js component",
+      "description": "external.js (442 lines) is the most frequently modified component (12 changes in 2 weeks). Tests: tool registration, URL validation, fetch behavior, error handling, rate limiting.",
+      "priority": 149,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "B#200-test-plan",
+      "created_session": 822,
+      "complexity": "M",
+      "tags": [
+        "testing",
+        "components"
+      ],
+      "commits": [],
+      "notes": "B#200: 10 tests covering: spam scoring (3), similarity detection (1), injection sanitization (3), URL validation (2), HTML stripping (1). Tests core security and signal processing functions."
     }
   ]
 }

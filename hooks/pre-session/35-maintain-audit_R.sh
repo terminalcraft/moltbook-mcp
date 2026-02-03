@@ -1,12 +1,10 @@
 #!/bin/bash
 # Pre-session maintenance audit for R sessions.
 # Replaces the manual maintain checklist — runs automatically and logs warnings.
-# Only runs on R sessions. Flags issues for the agent to act on if needed.
+# Only runs on R sessions (enforced by _R.sh filename suffix since R#101).
 # Added s383: retire evolve/maintain split, automate routine checks.
 
 set -euo pipefail
-
-[ "${MODE_CHAR:-}" = "R" ] || exit 0
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 AUDIT_FILE="$HOME/.config/moltbook/maintain-audit.txt"

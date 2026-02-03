@@ -7,6 +7,11 @@
 #
 # Environment: Passes through all env vars to hooks. Logs to LOG_DIR/hooks.log.
 # With --track: writes structured JSON results, keeps last 200 entries.
+#
+# Session-type scoping (R#101): Hooks can declare session type affinity via
+# filename suffix. Suffix _B.sh runs only in B sessions, _E.sh only in E, etc.
+# Hooks without session suffix run unconditionally. This replaces the pattern
+# of each hook checking MODE_CHAR and exiting early.
 
 set -euo pipefail
 
@@ -25,16 +30,28 @@ fi
 
 LOG_DIR="${LOG_DIR:-${HOME}/.config/moltbook/logs}"
 HOOKS_LOG="$LOG_DIR/hooks.log"
+CURRENT_MODE="${MODE_CHAR:-}"
 
 [ -d "$HOOKS_DIR" ] || exit 0
 
 HOOK_PASS=0
 HOOK_FAIL=0
+HOOK_SKIP=0
 HOOK_DETAILS=""
 
 for hook in "$HOOKS_DIR"/*; do
   [ -x "$hook" ] || continue
   HOOK_NAME="$(basename "$hook")"
+
+  # Session-type filtering: _B.sh runs only in B, _E.sh only in E, etc.
+  # Hooks without suffix run unconditionally.
+  case "$HOOK_NAME" in
+    *_B.sh) [ "$CURRENT_MODE" = "B" ] || { HOOK_SKIP=$((HOOK_SKIP + 1)); continue; } ;;
+    *_E.sh) [ "$CURRENT_MODE" = "E" ] || { HOOK_SKIP=$((HOOK_SKIP + 1)); continue; } ;;
+    *_R.sh) [ "$CURRENT_MODE" = "R" ] || { HOOK_SKIP=$((HOOK_SKIP + 1)); continue; } ;;
+    *_A.sh) [ "$CURRENT_MODE" = "A" ] || { HOOK_SKIP=$((HOOK_SKIP + 1)); continue; } ;;
+  esac
+
   HOOK_START=$(date +%s%N)
   echo "$(date -Iseconds) running hook: $HOOK_NAME" >> "$HOOKS_LOG"
 
@@ -59,7 +76,7 @@ done
 
 # Write structured results if tracking enabled
 if [ -n "$TRACK" ] && [ -n "$RESULTS_FILE" ]; then
-  echo "{\"session\":$SESSION_NUM,\"ts\":\"$(date -Iseconds)\",\"pass\":$HOOK_PASS,\"fail\":$HOOK_FAIL,\"hooks\":[$HOOK_DETAILS]}" >> "$RESULTS_FILE"
+  echo "{\"session\":$SESSION_NUM,\"ts\":\"$(date -Iseconds)\",\"pass\":$HOOK_PASS,\"fail\":$HOOK_FAIL,\"skip\":$HOOK_SKIP,\"hooks\":[$HOOK_DETAILS]}" >> "$RESULTS_FILE"
   # Keep last 200 entries
   if [ "$(wc -l < "$RESULTS_FILE")" -gt 200 ]; then
     tail -200 "$RESULTS_FILE" > "$RESULTS_FILE.tmp" && mv "$RESULTS_FILE.tmp" "$RESULTS_FILE"

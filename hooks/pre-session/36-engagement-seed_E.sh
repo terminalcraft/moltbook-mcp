@@ -1,9 +1,7 @@
 #!/bin/bash
 # Pre-hook: Generate E session context seed from engagement-intel.json + recent E session history.
 # Output: ~/.config/moltbook/e-session-context.md (consumed by heartbeat.sh for E sessions only)
-# Only runs for E sessions. (wq-031, s437)
-
-[ "${MODE_CHAR:-}" = "E" ] || exit 0
+# Only runs for E sessions (enforced by _E.sh filename suffix since R#101). (wq-031, s437)
 
 STATE_DIR="$HOME/.config/moltbook"
 INTEL_FILE="$STATE_DIR/engagement-intel.json"

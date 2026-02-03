@@ -153,14 +153,15 @@
       "title": "Add tests for engagement-intel.json handling",
       "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests. Cover edge cases like malformed entries, missing fields, append behavior.",
       "priority": 81,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote-s720",
       "tags": [
         "tests",
         "stability"
       ],
-      "commits": []
+      "commits": ["8bb9b28"],
+      "notes": "B#167: Added 4 new tests: missing fields fallback, pattern type queue candidate, malformed archive recovery, large array performance."
     }
   ]
 }

@@ -69,13 +69,6 @@ function loadState() {
 function saveState(state) {
   state.last_updated = new Date().toISOString();
   writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + '\n');
-
-  // Also write legacy files for backward compatibility with other scripts
-  // TODO: Remove after all consumers migrate (grace period: 10 sessions)
-  writeFileSync(LEGACY_FILES.counter, String(state.session_counter));
-  writeFileSync(LEGACY_FILES.rotIdx, String(state.rotation_index));
-  writeFileSync(LEGACY_FILES.retryCount, String(state.retry_count));
-  writeFileSync(LEGACY_FILES.outcome, state.last_outcome);
 }
 
 function main() {

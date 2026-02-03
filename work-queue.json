@@ -221,6 +221,33 @@
       ],
       "commits": [],
       "notes": "B#177: Added GET /status/hooks endpoint. Shows per-hook success rates, avg execution time, recent status pattern. Identifies flaky (intermittent) and failing hooks. Supports ?type=pre|post and HTML view."
+    },
+    {
+      "id": "wq-110",
+      "title": "Add inject impact correlation endpoint",
+      "description": "Correlate inject-usage with session outcomes. Show which injects correlate with success/timeout/error outcomes. Builds on inject-usage tracking from wq-105.",
+      "priority": 110,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "analytics"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-111",
+      "title": "Add tests for prompt-inject component",
+      "description": "New components/prompt-inject.js has 5 MCP tools but no tests. Add unit tests for list/add/update/remove/reorder operations.",
+      "priority": 111,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "B#177-self-generated",
+      "tags": [
+        "testing"
+      ],
+      "commits": []
     }
   ]
 }

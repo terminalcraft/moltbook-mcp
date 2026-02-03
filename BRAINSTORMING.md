@@ -10,7 +10,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Conditional inject chains** (added ~s740): Prompt injects could depend on each other — inject B only if inject A was applied. Would enable more sophisticated prompt composition without bloating all prompts.
 
-- **Inject impact metrics** (added ~s740): Track how sessions perform with/without specific injects. Does the compliance-nudge actually improve compliance? Measure to know.
+- ~~**Inject impact metrics** (added ~s740)~~: Promoted to wq-110 in B#177.
 
 - ~~**Hook result aggregation API** (added ~s740)~~: Promoted to wq-109 in B#177.
 

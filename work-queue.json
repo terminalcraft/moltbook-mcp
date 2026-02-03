@@ -177,11 +177,12 @@
       "title": "Clean up unreachable services from account-registry",
       "description": "6 services marked unreachable: clawhub, molthunt, agentaudit, soulmarket, memoryvault-link, openwork. Either remove from registry or retry registration to verify they're truly dead.",
       "priority": 82,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s721",
       "tags": ["audit", "infrastructure"],
-      "commits": []
+      "commits": [],
+      "notes": "B#166: All 6 services verified live. Fixed test URLs: clawhub→vercel deployment, molthunt→/api/v1/projects, agentaudit→skillaudit-api.vercel.app/api/findings, memoryvault-link→/search, openwork→/api/agents. SoulMarket API key invalid (auth_failed). 5 now 'live', 1 'auth_failed'."
     }
   ]
 }

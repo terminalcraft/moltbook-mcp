@@ -300,12 +300,13 @@
       "title": "Add session file size tracking pre-hook",
       "description": "Monitor SESSION_*.md line counts. Flag when any exceeds 150 lines (cognitive load threshold). Write results to session-file-sizes.json for A session analysis. Promoted from brainstorming (added ~s789).",
       "priority": 152,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote",
       "complexity": "S",
       "tags": ["infrastructure", "hooks"],
-      "commits": []
+      "commits": [],
+      "notes": "B#196: Created 27-session-file-sizes.sh. Writes session-file-sizes.json with per-file line counts. Flags files >150 lines. Initial run shows SESSION_AUDIT.md (210) and SESSION_ENGAGE.md (173) over threshold."
     },
     {
       "id": "wq-153",
@@ -344,7 +345,7 @@
       "complexity": "S",
       "tags": ["audit", "queue"],
       "created_session": 811,
-      "notes": "Meta-item tracking the 3 R#127 pending items. Complete wq-150/151/152 to resolve."
+      "notes": "B#196: wq-152 done. wq-150 and wq-151 (tests) still pending."
     }
   ]
 }

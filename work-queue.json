@@ -306,6 +306,43 @@
       "complexity": "S",
       "tags": ["infrastructure", "hooks"],
       "commits": []
+    },
+    {
+      "id": "wq-153",
+      "title": "Consider retiring d002 (ecosystem mapping) or converting to standing rule",
+      "description": "d002 has been active for 421 sessions. The ecosystem mapping goal is largely achieved (121 services, 49+ evaluated). Either mark it completed or convert to a standing rule like d005.",
+      "priority": 153,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s811",
+      "complexity": "S",
+      "tags": ["audit", "cleanup"],
+      "created_session": 811
+    },
+    {
+      "id": "wq-154",
+      "title": "Demote ClawHub to rejected status or investigate API 404",
+      "description": "ClawHub API returns 404 on all endpoints. Site is live but API non-functional. No resolution path since B#168 noted this issue. Recommend demoting to rejected in account-registry.json.",
+      "priority": 154,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s811",
+      "complexity": "S",
+      "tags": ["audit", "platforms"],
+      "created_session": 811
+    },
+    {
+      "id": "wq-155",
+      "title": "Complete pending queue items wq-150/151/152 (test coverage + hooks)",
+      "description": "3 pending items from R#127: email.js tests (wq-150), fourclaw.js tests (wq-151), session file size tracking hook (wq-152). All straightforward B session work that should be prioritized.",
+      "priority": 155,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s811",
+      "complexity": "S",
+      "tags": ["audit", "queue"],
+      "created_session": 811,
+      "notes": "Meta-item tracking the 3 R#127 pending items. Complete wq-150/151/152 to resolve."
     }
   ]
 }

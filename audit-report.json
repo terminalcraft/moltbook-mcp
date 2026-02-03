@@ -1,121 +1,130 @@
 {
-  "session": 795,
-  "timestamp": "2026-02-03T22:17:00.000Z",
-  "previous_audit": 790,
+  "session": 811,
+  "timestamp": "2026-02-03T22:25:00.000Z",
+  "previous_audit": 795,
+  "audit_number": 20,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 248,
-      "consumed": 248,
+      "archive_total": 254,
+      "consumed": 254,
       "unconsumed": 0,
       "consumption_rate": "100%",
-      "verdict": "HEALTHY — 100% consumption maintained since s757 fix."
+      "verdict": "HEALTHY — 100% consumption rate maintained. Archive has 254 entries, all consumed."
     },
     "brainstorming": {
-      "active_ideas": 4,
+      "active_ideas": 3,
       "ideas": [
-        "Directive outcome analysis in A sessions (~s794) — 1 session old",
-        "Engagement ROI dashboard (~s776) — 19 sessions old",
-        "Hook timeout monitoring (~s776) — 19 sessions old",
-        "Queue item aging alerts (~s776) — 19 sessions old"
+        "Protocol reference extraction pattern (~s810) — 1 session old",
+        "Component test coverage dashboard (~s810) — 1 session old",
+        "Directive lifecycle cleanup automation (~s810) — 1 session old"
       ],
-      "avg_age_sessions": 15,
-      "promoted_since_s790": 0,
+      "avg_age_sessions": 1,
+      "promoted_since_s795": 0,
       "stale_count": 0,
-      "verdict": "HEALTHY — 4 active ideas, all under 30-session expiry. No stale ideas to retire."
+      "verdict": "HEALTHY — 3 fresh ideas added in s810. All under 30-session expiry. Previous s776 ideas were retired or promoted."
     },
     "queue": {
       "total": 28,
-      "pending": 5,
-      "retired": 23,
+      "pending": 3,
+      "retired": 25,
       "in_progress": 0,
       "done": 0,
       "pending_items": [
-        "wq-137 (Add tests for agentchan.js component, M)",
-        "wq-138 (Add /status/session-types endpoint, M)",
-        "wq-144 (Escalate d031 to human review, S)",
-        "wq-145 (Investigate E session Pinchwork task completion failure, M)",
-        "wq-147 (Monitor E session truncation pattern, S)"
+        "wq-150 (Add tests for email.js component, M)",
+        "wq-151 (Add tests for fourclaw.js component, M)",
+        "wq-152 (Add session file size tracking pre-hook, S)"
       ],
-      "audit_tagged_pending": 3,
-      "audit_tagged_done": 0,
-      "verdict": "NEEDS ATTENTION — s790 created 3 audit-tagged items (wq-144, wq-145, wq-147) but none completed. However, wq-144's core concern (d031 Pinchwork) is now partially addressed (1 task completed in s792)."
+      "audit_tagged_pending": 0,
+      "audit_tagged_done": 3,
+      "s795_audit_items_resolved": [
+        "wq-144 (d031 escalation) — retired, superseded by wq-143",
+        "wq-145 (Pinchwork investigation) — resolved, d031 completed",
+        "wq-147 (E session truncation) — resolved B#195"
+      ],
+      "verdict": "HEALTHY — s795 audit items fully resolved. 3 clean pending items remain, all from R#127."
     },
     "directives": {
-      "total": 33,
-      "active": 4,
-      "completed": 29,
+      "total": 34,
+      "active": 1,
+      "completed": 33,
       "pending": 0,
       "deferred": 0,
       "active_items": [
-        "d002 (ecosystem mapping — ongoing background task)",
-        "d005 (safety hooks — standing rule)",
-        "d027 (platform connectivity + variety — ongoing)",
-        "d031 (Pinchwork task solving — IMPROVING, 1 task completed s792)"
+        "d002 (ecosystem mapping — ongoing background task, 421 sessions since ack)"
       ],
       "d031_status": {
-        "acked_session": 764,
-        "current_session": 795,
-        "sessions_since_ack": 31,
-        "pinchwork_tasks_solved": 1,
-        "previous_audit_tasks_solved": 0,
-        "improvement": "First task completed in s792 — directive partially addressed",
-        "credits": 47,
-        "tasks_posted": 2,
-        "reputation": 0.0,
-        "note": "E session s792 finally completed a Pinchwork task after 26 sessions of attempts. This addresses the critical issue from s790."
+        "status": "COMPLETED",
+        "completed_session": 792,
+        "note": "First Pinchwork task completed s792. B#194 officially closed the directive."
       },
-      "verdict": "IMPROVING — d031 (Pinchwork tasks) no longer critical. First task completed in s792 after 26 sessions. Structural fixes from R#115/R#121 appear to be working."
+      "d034_status": {
+        "status": "COMPLETED",
+        "note": "Platform-picker replaces tier system per human directive s797. Acknowledged and completed s799."
+      },
+      "verdict": "HEALTHY — Only d002 (ongoing ecosystem mapping) remains active. d031 (Pinchwork) and d034 (platform-picker) both completed since s795."
     }
   },
   "sessions": {
     "B": {
-      "count_since_s790": 2,
-      "sessions": ["s786 ($2.20, wq-139 done)", "s773 ($3.30)"],
-      "avg_cost": 3.0,
-      "queue_items_completed": 1,
-      "commits": 4,
+      "count_since_s795": 3,
+      "sessions": ["s807 ($1.89, wq done)", "s809 ($2.93, wq-147 closed)", "s786 ($2.20, wq-139 done)"],
+      "avg_cost": 2.34,
+      "queue_items_completed": 3,
+      "commits": 6,
       "mandate_compliance": 1.0,
-      "verdict": "PRODUCTIVE — B sessions shipping code and completing queue items."
+      "directive_outcomes": {
+        "total_tracked": 2,
+        "addressed_rate": 0.0,
+        "note": "B sessions not expected to address E-session directives (d002, d027)"
+      },
+      "verdict": "PRODUCTIVE — B sessions shipping code and completing queue items at reasonable cost."
     },
     "E": {
-      "count_since_s790": 2,
-      "sessions": ["s787 ($2.07, 4claw engagement)", "s792 ($2.02, Pinchwork task completed)"],
-      "avg_cost": 2.05,
-      "platforms_engaged": ["4claw", "Pinchwork"],
+      "count_since_s795": 2,
+      "sessions": ["s797 ($1.76, engagement)", "s792 ($2.02, Pinchwork task completed)"],
+      "avg_cost": 2.04,
+      "platforms_engaged": ["4claw", "Pinchwork", "Colony", "home.ctxly"],
       "pinchwork_tasks_solved": 1,
-      "pinchwork_credits": 47,
       "d031_addressed": true,
-      "anomaly_note": "s774 ($0.40) was a truncated session — pattern continues but infrequent",
       "mandate_compliance": 0.5,
-      "verdict": "IMPROVED — s792 completed first Pinchwork task, addressing d031. Engagement diversity improved."
+      "directive_outcomes": {
+        "total_tracked": 3,
+        "addressed_rate": 0.33,
+        "note": "d031 addressed 2/3 times. d002/d027 ignored but these are ongoing background tasks."
+      },
+      "verdict": "ADEQUATE — Pinchwork task completed (d031). Engagement diversity improved with platform-picker."
     },
     "R": {
-      "count_since_s790": 5,
-      "sessions": ["s791 ($2.10, R#123)", "s793 ($1.28, R#124)", "s794 ($1.72, R#125)", "s788 ($1.57, R#121)", "s789 ($1.60, R#122)"],
-      "avg_cost": 1.65,
+      "count_since_s795": 3,
+      "sessions": ["s799 ($1.86, R#126)", "s810 ($2.25, R#127)", "s794 ($1.84, R#125)"],
+      "avg_cost": 1.64,
       "structural_changes": [
-        "R#121: Directive enforcement gates in SESSION_ENGAGE.md",
-        "R#122: Removed unused checkpoint system",
-        "R#123: Session mandate compliance tracking in A sessions",
-        "R#124: R session impact tracking feedback loop",
-        "R#125: Directive outcome tracking for A session analysis"
+        "R#125: Directive outcome tracking for A session analysis",
+        "R#126: Session counter consolidation",
+        "R#127: SESSION_ENGAGE.md simplification (263→173 lines), pinchwork-protocol.md extraction"
       ],
-      "commits": 8,
+      "commits": 4,
       "mandate_compliance": 1.0,
-      "verdict": "HIGHLY PRODUCTIVE — R sessions shipping structural improvements at low cost ($1.65 avg)."
+      "directive_outcomes": {
+        "total_tracked": 2,
+        "addressed_rate": 0.0,
+        "note": "R sessions focus on structural changes, not directive execution"
+      },
+      "verdict": "HIGHLY PRODUCTIVE — R sessions shipping structural improvements at lowest cost ($1.64 avg)."
     },
     "A": {
-      "count_since_s790": 0,
-      "note": "s790 was the previous A session. This is s795.",
-      "s790_recommendations": 4,
-      "s790_recommendations_resolved": 1,
-      "s790_recommendations_in_progress": 2,
-      "s790_recommendations_unresolved": 1,
-      "resolved": ["d031 partially addressed — 1 task completed in s792"],
-      "in_progress": ["wq-145 (investigation pattern)", "wq-147 (truncation monitoring)"],
-      "unresolved": ["wq-072 retirement still pending"],
-      "verdict": "IMPROVED — Critical d031 issue from s790 is now partially resolved. 1 of 4 recommendations directly acted upon."
+      "count_since_s795": 0,
+      "note": "s795 was the previous A session. This is s811.",
+      "s795_recommendations": 4,
+      "s795_recommendations_resolved": 4,
+      "resolved": [
+        "a795-1 (wq-072 retirement) — retired R#123",
+        "a795-2 (hr-d031 resolution) — resolved s799",
+        "a795-3 (E session truncation monitoring) — resolved B#195",
+        "a795-4 (stale brainstorming ideas) — all s776 ideas retired/promoted by R#126"
+      ],
+      "verdict": "ALL RESOLVED — All 4 recommendations from s795 audit have been addressed."
     }
   },
   "infrastructure": {
@@ -145,14 +154,15 @@
     "stale_references": {
       "dialogue_md_refs": 0,
       "directive_tracking_refs": 0,
-      "note": "Clean — no references to deleted files"
+      "note": "Clean — no references to deleted files in .sh or .mjs files"
     },
     "human_review": {
-      "open": 1,
-      "resolved": 2,
-      "open_items": ["hr-d031-pinchwork-s790 (partially addressed by s792 task completion)"]
+      "open": 0,
+      "resolved": 1,
+      "open_items": [],
+      "resolved_items": ["hr-d031-pinchwork-s790"]
     },
-    "verdict": "HEALTHY — All hooks pass syntax check. No stale references. Credential registry clean."
+    "verdict": "HEALTHY — All hooks pass syntax check. No stale references. Credential registry clean. Zero discovered services (all evaluated)."
   },
   "security": {
     "registry_json": {
@@ -171,75 +181,74 @@
     "monitors": {
       "count": 1,
       "monitors_checked": ["Chatr API (chatr.ai)"],
-      "internal_ips": [],
-      "ssrf_risk": false
+      "internal_ips": ["127.0.0.1:3847 (own MCP server health check)"],
+      "ssrf_risk": false,
+      "note": "Internal IP is localhost health check — acceptable"
     },
     "inbox": {
       "messages": 2,
       "all_read": true,
       "injection_patterns": [],
-      "senders": ["imanagent-dev (informational)"]
+      "senders": ["imanagent-dev (informational, both read)"]
     },
-    "verdict": "CLEAN — No security concerns. No internal IP monitors. No suspicious crons/webhooks."
+    "verdict": "CLEAN — No security concerns. Internal IP monitor is self-check only."
   },
   "cost": {
-    "last_17_sessions_total": 34.91,
-    "avg_per_session": 2.05,
+    "last_20_sessions_total": 38.98,
+    "avg_per_session": 1.95,
     "by_type": {
-      "A": {"count": 3, "avg": 2.21},
-      "B": {"count": 2, "avg": 3.00},
-      "E": {"count": 3, "avg": 2.13},
-      "R": {"count": 9, "avg": 1.76}
+      "A": {"avg": 2.46},
+      "B": {"avg": 2.34},
+      "E": {"avg": 2.04},
+      "R": {"avg": 1.64}
     },
     "trend": "stable",
-    "anomalies": [
-      {"session": 774, "mode": "E", "cost": 0.40, "note": "Truncated session — reliability concern"}
-    ]
+    "anomalies": [],
+    "note": "All session types within normal range. No truncated sessions since s774."
   },
-  "delta_from_s790": {
+  "delta_from_s795": {
     "resolved": [
-      "d031 (Pinchwork tasks) — first task completed in s792. Critical issue partially resolved."
+      "a795-1: wq-072 (MoltWorld) retired R#123",
+      "a795-2: hr-d031-pinchwork resolved s799",
+      "a795-3: E session truncation monitoring completed wq-147",
+      "a795-4: Stale brainstorming ideas cleaned up R#126",
+      "d031 (Pinchwork tasks) fully completed B#194",
+      "d034 (platform-picker) acknowledged and completed s799"
     ],
     "improved": [
-      "R session impact tracking added (R#124)",
-      "Directive outcome tracking added (R#125)",
-      "Session mandate compliance tracking added to A sessions (R#123)"
+      "Directive outcome tracking now operational (R#125, directive-outcomes.json)",
+      "SESSION_ENGAGE.md reduced 34% (R#127)",
+      "All s795 audit items (wq-144/145/147) resolved",
+      "Brainstorming ideas refreshed — 3 new, all old retired"
     ],
     "persists": [
-      "wq-072 (MoltWorld registration) still blocked on Moltbook API — now 475+ sessions blocked",
-      "s774-style truncated E sessions (monitoring via wq-147)"
+      "d002 (ecosystem mapping) remains the only active directive — this is by design (ongoing background task)",
+      "clawhub API still returns 404 — no resolution path, acceptable"
     ],
     "new_issues": []
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a795-1",
-      "title": "Retire wq-072 (MoltWorld registration)",
+      "id": "a811-1",
+      "title": "Consider retiring or deactivating d002 (ecosystem mapping)",
       "priority": "low",
       "tags": ["audit", "cleanup"],
-      "notes": "wq-072 blocked 475+ sessions on Moltbook API. Per BRIEFING.md, Moltbook writes broken since ~s320. No resolution path. Recommend retirement."
+      "notes": "d002 has been active for 421 sessions. The ecosystem mapping goal is largely achieved (121 services, 49+ evaluated). Consider marking it completed or converting to a standing rule."
     },
     {
-      "id": "a795-2",
-      "title": "Mark hr-d031-pinchwork-s790 as resolved",
+      "id": "a811-2",
+      "title": "Address clawhub API 404 error",
       "priority": "low",
-      "tags": ["audit", "cleanup"],
-      "notes": "Pinchwork task completed in s792 addresses the core concern. Human review item can be closed or downgraded."
+      "tags": ["audit", "platforms"],
+      "notes": "ClawHub API returns 404 on all endpoints. Site is live but API non-functional. Either investigate or demote to rejected status."
     },
     {
-      "id": "a795-3",
-      "title": "Continue monitoring E session truncation pattern",
-      "priority": "low",
-      "tags": ["audit", "reliability"],
-      "notes": "s774 ($0.40) was a truncated E session. wq-147 tracks this. If pattern repeats >2 more times, implement resilience mechanism."
-    },
-    {
-      "id": "a795-4",
-      "title": "Retire old brainstorming ideas approaching 30-session limit",
-      "priority": "low",
-      "tags": ["audit", "cleanup"],
-      "notes": "3 ideas from s776 are now 19 sessions old. Will hit 30-session expiry around s806. Review and promote or retire before then."
+      "id": "a811-3",
+      "title": "Complete pending queue items (wq-150, wq-151, wq-152)",
+      "priority": "medium",
+      "tags": ["audit", "queue"],
+      "notes": "3 pending queue items from R#127: email.js tests, fourclaw.js tests, session file size tracking. All straightforward B session work."
     }
   ]
 }

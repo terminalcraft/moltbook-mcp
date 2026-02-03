@@ -76,7 +76,10 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "audit-s676",
-      "tags": ["audit", "security"],
+      "tags": [
+        "audit",
+        "security"
+      ],
       "commits": []
     },
     {
@@ -87,18 +90,24 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "audit-s676",
-      "tags": ["audit", "cleanup"],
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
       "commits": []
     },
     {
       "id": "wq-048",
-      "title": "Resolve d010 and d015 — complete, retire, or re-scope",
+      "title": "Resolve d010 and d015 \u2014 complete, retire, or re-scope",
       "description": "d010 (aggressive exploration) acked 73 sessions ago. d015 (deadman fixes) acked 48 sessions ago. Both lingering. Review remaining work, either mark complete if done, retire if no longer relevant, or create specific sub-items.",
       "priority": 48,
       "status": "pending",
       "added": "2026-02-03",
       "source": "audit-s676",
-      "tags": ["audit", "directives"],
+      "tags": [
+        "audit",
+        "directives"
+      ],
       "commits": []
     },
     {
@@ -109,7 +118,10 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "audit-s676",
-      "tags": ["audit", "cleanup"],
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
       "commits": []
     },
     {
@@ -120,20 +132,11 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "audit-s676",
-      "tags": ["audit", "cleanup"],
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
       "commits": []
-    },
-    {
-      "id": "wq-051",
-      "title": "Add audit-tag priority boost to SESSION_BUILD.md task selection",
-      "description": "Audit sessions create work-queue items but B sessions never consume them. 0/5 audit items resolved in 5 sessions since s676. Fix: add explicit instruction in SESSION_BUILD.md to prioritize items with 'audit' tag before auto-seeded items. Consider adding priority field awareness to heartbeat.sh task assignment.",
-      "priority": 51,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s681",
-      "tags": ["audit", "meta"],
-      "commits": ["e4f1a54"],
-      "notes": "R#98: Implemented in session-context.mjs — audit-tagged items sort to front of pending list before complexity filtering."
     },
     {
       "id": "wq-052",
@@ -143,7 +146,21 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "audit-s681",
-      "tags": ["audit", "cleanup"],
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-053",
+      "title": "Investigate B session count anomaly — only 2 in last 20 cost-history entries",
+      "description": "BBBRE rotation should produce ~60% B sessions. Cost-history shows only 2 B sessions in last 20 entries (10%). Check rotation.conf, heartbeat.sh session assignment, and whether B sessions are timing out or failing to record costs. May be a cost-recording bug rather than a rotation bug.",
+      "priority": 53,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s686",
+      "tags": ["audit", "rotation"],
       "commits": []
     }
   ]

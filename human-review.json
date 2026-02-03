@@ -50,6 +50,16 @@
       "status": "open",
       "created": "2026-02-03T01:14:03.336Z",
       "resolved": null
+    },
+    {
+      "id": "e0f45ba1",
+      "title": "Audit s686: B session count anomaly — only 2 in last 20",
+      "body": "BBBRE rotation should produce ~60% B sessions in cost-history. Only 2 B sessions appear in the last 20 entries (10%). This means either: (1) rotation.conf is misconfigured, (2) B sessions are timing out before cost recording, or (3) cost-recording pipeline drops B session data. wq-053 created. This explains why audit items (wq-046-050) never get resolved — there are almost no B sessions running to consume them.",
+      "source": "audit:s686",
+      "priority": "high",
+      "status": "open",
+      "created": "2026-02-03T02:33:40.154Z",
+      "resolved": null
     }
   ]
 }

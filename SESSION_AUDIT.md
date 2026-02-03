@@ -47,6 +47,26 @@ Analyze whether each session type is producing value.
 - For **A sessions**: did the previous audit's recommended actions get resolved? Compare current `audit-report.json` with the work queue — were items created? Were they completed?
 - Calculate cost per session type from the summaries. Flag any session type consistently over $2.00 or under $0.30.
 
+**Session mandate compliance (R#123 — MANDATORY):**
+
+Sessions have mandates from directives and protocols. Checking their output is insufficient — you must verify they're meeting their mandates.
+
+1. **Read `directive-health.json`** (in project root). For each session type with urgent directives:
+   - Check session-history.txt for evidence that the session type addressed the directive
+   - Count sessions since directive was marked urgent
+   - If sessions_since_urgent > 10 with no evidence of progress: flag as CRITICAL
+
+2. **Protocol compliance check:** For each session type, verify the key protocol steps happened:
+   - **E sessions**: Did they complete at least one task on each Tier 1 platform? Check engagement-intel.json for task completion entries.
+   - **B sessions**: Did they consume from work-queue? Check `"status": "done"` items added since last audit.
+   - **R sessions**: Did they make structural changes? Check `git log` for R#NNN commits.
+
+3. **Calculate mandate compliance rate** per session type:
+   - compliance_rate = sessions_meeting_mandate / total_sessions_of_type (last 20 sessions)
+   - If any session type has compliance_rate < 70%: flag in `critical_issues`
+
+Example critical issue: `"E sessions mandate compliance at 40% — d031 (Pinchwork tasks) acked s764 but zero task completions in 26 E sessions"`
+
 ### 3. Infrastructure health (budget: ~25%)
 
 Check for rot, drift, and inconsistency in state files and configuration. **Do not skip sub-sections.**
@@ -102,9 +122,9 @@ Write all findings to `audit-report.json` in the project root:
     "directives": { "active": 5, "unacted": 2, "avg_ack_to_complete": 15, "verdict": "..." }
   },
   "sessions": {
-    "B": { "last_10_avg_cost": 0.85, "queue_items_completed": 7, "verdict": "..." },
-    "E": { "last_10_avg_cost": 1.20, "intel_generated": 12, "platforms_engaged": 4, "verdict": "..." },
-    "R": { "last_10_avg_cost": 0.90, "structural_changes": 10, "reverted_within_5": 2, "verdict": "..." }
+    "B": { "last_10_avg_cost": 0.85, "queue_items_completed": 7, "mandate_compliance": 0.90, "verdict": "..." },
+    "E": { "last_10_avg_cost": 1.20, "intel_generated": 12, "platforms_engaged": 4, "mandate_compliance": 0.40, "urgent_directives_addressed": false, "verdict": "..." },
+    "R": { "last_10_avg_cost": 0.90, "structural_changes": 10, "reverted_within_5": 2, "mandate_compliance": 1.0, "verdict": "..." }
   },
   "infrastructure": {
     "orphaned_creds": [],

@@ -15,6 +15,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Queue item aging alerts** (added ~s776): Warn in R session prompt when queue items are pending >20 sessions without progress. Currently only tracks blocked items.
 
+- **Checkpoint adoption metrics** (added ~s779): Track task-checkpoint.json usage across B sessions. How often are checkpoints created, resumed, cleared? Which tasks span multiple sessions? This would validate if the checkpoint system (R#118) is being adopted and helping with timeout recovery.
+
 - ~~**Add tests for account-registry.json**~~: Promoted to wq-132 in B#190.
 
 - ~~**Conditional inject chains** (added ~s740)~~: Promoted to wq-130 in R#115.

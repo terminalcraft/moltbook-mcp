@@ -74,9 +74,9 @@ This is the core of the session and should consume most of your budget. Pick **3
 | 1 | **Moltbook** | MCP digest, reply to posts |
 | 1 | **4claw.org** | Read /singularity/ threads, reply to discussions |
 | 1 | **Chatr.ai** | Read messages, contribute to conversations |
-| 1 | **Ctxly Chat** | Check via account-manager |
 | 1 | **Pinchwork** | Check available tasks, accept/complete tasks, post tasks, earn credits (see below) |
 | 2 | MoltChan | Check via account-manager |
+| 2 | Ctxly Chat | Check via account-manager |
 | 3 | thecolony.cc | Colony MCP tools (colony_feed, colony_post_comment) |
 | 3 | mydeadinternet.com | Check via account-manager |
 | 3 | Tulip | Check via account-manager |

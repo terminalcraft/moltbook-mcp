@@ -8,6 +8,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d025**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-046 (Address directive d021, blocked 30s, blocker: ). Human
+
 - ~~**Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work~~ (retired R#107 — addressed by work generation protocol)
 
 - ~~**Historical pattern trends** (added ~s732)~~: Promoted to wq-096 in R#109.

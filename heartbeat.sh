@@ -136,34 +136,57 @@ if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
   echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
 fi
 
-# --- Mode downgrade gates ---
-# Track whether a downgrade occurs so we can recompute session-context. (R#59)
-# session-context.mjs runs once with the initial mode, but downgrades change it.
-# Without recomputation, B→R downgrades get an R prompt block with a stale counter
-# (predicted as raw instead of raw+1), and E→B downgrades waste B-specific context.
+# --- Mode transformation pipeline (R#106) ---
+# Replaces hardcoded downgrade gates with a hook-based system.
+# Each script in hooks/mode-transform/ can propose a mode change.
+# Scripts receive: MODE_CHAR, COUNTER, CTX_* env vars.
+# Output format: "NEW_MODE reason" (e.g., "B engagement platforms degraded")
+# First valid transformation wins. This makes mode logic extensible.
 DOWNGRADED=""
+TRANSFORM_DIR="$DIR/hooks/mode-transform"
 
-# Engagement health gate: if E session but no platforms are writable, downgrade to B.
-if [ "$MODE_CHAR" = "E" ] && [ -z "$OVERRIDE_MODE" ]; then
-  ENGAGE_STATUS=$(node "$DIR/engagement-health.cjs" 2>/dev/null | tail -1 || echo "ENGAGE_DEGRADED")
-  if [ "$ENGAGE_STATUS" = "ENGAGE_DEGRADED" ]; then
-    echo "$(date -Iseconds) engage→build downgrade: all engagement platforms degraded" >> "$LOG_DIR/selfmod.log"
-    MODE_CHAR="B"
-    DOWNGRADED="E→B"
-  fi
+if [ -d "$TRANSFORM_DIR" ] && [ -z "$OVERRIDE_MODE" ]; then
+  for script in "$TRANSFORM_DIR"/*.sh; do
+    [ -f "$script" ] || continue
+    RESULT=$(MODE_CHAR="$MODE_CHAR" COUNTER="$COUNTER" \
+      CTX_PENDING_COUNT="${CTX_PENDING_COUNT:-0}" \
+      CTX_WQ_FALLBACK="${CTX_WQ_FALLBACK:-}" \
+      bash "$script" 2>/dev/null || true)
+    if [ -n "$RESULT" ]; then
+      NEW_MODE="${RESULT%% *}"
+      REASON="${RESULT#* }"
+      if [ "$NEW_MODE" != "$MODE_CHAR" ] && [[ "$NEW_MODE" =~ ^[EBRA]$ ]]; then
+        echo "$(date -Iseconds) mode-transform: $MODE_CHAR→$NEW_MODE ($REASON) via $(basename "$script")" >> "$LOG_DIR/selfmod.log"
+        DOWNGRADED="$MODE_CHAR→$NEW_MODE"
+        MODE_CHAR="$NEW_MODE"
+        break
+      fi
+    fi
+  done
 fi
 
-# Queue starvation gate: if B session but queue is empty, downgrade to R.
-# Threshold lowered from <2 to <1 in s479 (R#43): <2 caused cascading R downgrades.
-if [ "$MODE_CHAR" = "B" ] && [ -z "$OVERRIDE_MODE" ]; then
-  PENDING_COUNT="${CTX_PENDING_COUNT:-0}"
-  WQ_FALLBACK="${CTX_WQ_FALLBACK:-}"
-  if [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" != "true" ]; then
-    echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items, no fallback" >> "$LOG_DIR/selfmod.log"
-    MODE_CHAR="R"
-    DOWNGRADED="${DOWNGRADED:-B→R}"
-  elif [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" = "true" ]; then
-    echo "$(date -Iseconds) build: queue empty but brainstorming fallback available, proceeding" >> "$LOG_DIR/selfmod.log"
+# Fallback: inline gates for backward compatibility if hooks don't exist yet
+if [ -z "$DOWNGRADED" ] && [ -z "$OVERRIDE_MODE" ]; then
+  # Engagement health gate: if E session but no platforms are writable, downgrade to B.
+  if [ "$MODE_CHAR" = "E" ]; then
+    ENGAGE_STATUS=$(node "$DIR/engagement-health.cjs" 2>/dev/null | tail -1 || echo "ENGAGE_DEGRADED")
+    if [ "$ENGAGE_STATUS" = "ENGAGE_DEGRADED" ]; then
+      echo "$(date -Iseconds) engage→build downgrade: all engagement platforms degraded" >> "$LOG_DIR/selfmod.log"
+      MODE_CHAR="B"
+      DOWNGRADED="E→B"
+    fi
+  fi
+  # Queue starvation gate: if B session but queue is empty, downgrade to R.
+  if [ "$MODE_CHAR" = "B" ]; then
+    PENDING_COUNT="${CTX_PENDING_COUNT:-0}"
+    WQ_FALLBACK="${CTX_WQ_FALLBACK:-}"
+    if [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" != "true" ]; then
+      echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items, no fallback" >> "$LOG_DIR/selfmod.log"
+      MODE_CHAR="R"
+      DOWNGRADED="${DOWNGRADED:-B→R}"
+    elif [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" = "true" ]; then
+      echo "$(date -Iseconds) build: queue empty but brainstorming fallback available, proceeding" >> "$LOG_DIR/selfmod.log"
+    fi
   fi
 fi
 

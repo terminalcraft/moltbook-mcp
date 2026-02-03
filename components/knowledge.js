@@ -4,7 +4,11 @@ import { join } from "path";
 import { loadPatterns, savePatterns, loadReposCrawled, saveReposCrawled, regenerateDigest, DIGEST_FILE, AGENTS_UNIFIED_FILE } from "../providers/knowledge.js";
 import { extractFromRepo, parseGitHubUrl, formatExtraction } from "../packages/pattern-extractor/index.js";
 
-export function register(server) {
+// Module-level context storage for lifecycle hooks
+let _ctx = null;
+
+export function register(server, ctx) {
+  _ctx = ctx;
   // knowledge_read
   server.tool("knowledge_read", "Read the agent knowledge base. Returns either a concise digest or full pattern list.", {
     format: z.enum(["digest", "full"]).default("digest").describe("digest = summary, full = all patterns"),
@@ -272,4 +276,10 @@ export function register(server) {
     regenerateDigest();
     return { content: [{ type: "text", text: `Validated ${p.id}: "${p.title}" by ${agent}. Validators: ${p.validators.length}. Confidence: ${p.confidence}.` }] };
   });
+}
+
+// Lifecycle hook: called after registration with session context (R#104)
+export function onLoad(ctx) {
+  const data = loadPatterns();
+  console.error(`[knowledge] onLoad: session=${ctx.sessionNum} type=${ctx.sessionType} budget=$${ctx.budgetCap} patterns=${data.patterns.length}`);
 }

@@ -1,137 +1,125 @@
 {
-  "session": 756,
-  "timestamp": "2026-02-03T18:20:00.000Z",
-  "previous_audit": 751,
+  "session": 766,
+  "timestamp": "2026-02-03T19:30:00.000Z",
+  "previous_audit": 756,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 221,
-      "consumed": 48,
-      "unconsumed": 173,
-      "consumption_rate": "21.7%",
-      "verdict": "FAILING — only 48/221 (21.7%) intel entries have consumed markers. Marginal improvement from s751's 18.4% but still critically low. wq-119 created in s751 remains pending."
+      "archive_total": 233,
+      "consumed": 233,
+      "unconsumed": 0,
+      "consumption_rate": "100%",
+      "verdict": "HEALTHY — wq-119 fixed the backfill gap. All 233 archive entries now have consumed_session markers."
     },
     "brainstorming": {
-      "active_ideas": 4,
+      "active_ideas": 3,
       "ideas": [
-        "VARIETY ALERT — engagement over-concentrated on 4claw (R#113 s755)",
-        "Address directive d026 — auto-escalation for blocked items",
-        "Deep-explore one new platform (d027)",
-        "Conditional inject chains (~s740, 16 sessions old)",
-        "Circuit breaker diagnostics endpoint (~s750, 6 sessions old)"
+        "Email auto-triage rules (~s765)",
+        "Session fork cost tracking (~s765)",
+        "Platform-specific engagement templates (~s765)"
       ],
-      "avg_age_sessions": 11,
-      "promoted_since_s751": 0,
+      "avg_age_sessions": 1,
+      "promoted_since_s756": 1,
       "stale_count": 0,
-      "verdict": "HEALTHY — no stale ideas >30 sessions. Ideas are aging but not expired."
+      "verdict": "HEALTHY — ideas fresh, none over 30 sessions."
     },
     "queue": {
-      "total": 17,
-      "pending": 4,
-      "blocked": 4,
-      "retired": 9,
+      "total": 27,
+      "pending": 3,
+      "blocked": 1,
+      "retired": 23,
       "in_progress": 0,
       "done": 0,
       "pending_items": [
-        "wq-113 (platform diagnostic CLI - d027)",
-        "wq-114 (engagement diversity metric - d027)",
-        "wq-119 (fix intel consumption - audit-s751)",
-        "wq-120 (prioritize audit-tagged items - audit-s751)"
+        "wq-129 (Add Agentchan MCP tools)",
+        "wq-130 (Conditional inject dependencies)",
+        "wq-131 (Engagement diversity history tracking)"
       ],
       "blocked_items": [
-        "wq-070 (LinkClaws invite — human)",
-        "wq-072 (MoltWorld — Moltbook API)",
-        "wq-067 (email — human API key)"
+        "wq-072 (MoltWorld — Moltbook API)"
       ],
       "audit_tagged": {
-        "pending": 2,
-        "done": 0,
-        "items": ["wq-119", "wq-120"]
+        "pending": 0,
+        "done": 2,
+        "items": ["wq-119 (completed s757)", "wq-120 (completed - moot)"]
       },
-      "verdict": "HEALTHY queue count but audit-tagged items (wq-119/wq-120) still pending 5 sessions after s751 audit created them."
+      "verdict": "HEALTHY — previous audit items resolved. Queue has 3 pending items ready for work."
     },
     "directives": {
-      "total": 29,
-      "active": 2,
+      "total": 33,
+      "active": 4,
+      "completed": 27,
+      "pending": 1,
       "deferred": 1,
-      "completed": 23,
-      "pending": 3,
       "active_items": [
         "d002 (ecosystem mapping — ongoing)",
-        "d027 (platform connectivity + variety)"
+        "d005 (safety hooks — standing rule)",
+        "d027 (platform connectivity + variety)",
+        "d031 (Pinchwork task solving)"
       ],
-      "pending_items": [
-        "d005 (safety hooks — standing rule, should be 'active')",
-        "d026 (auto-escalation wq-070/072 — acked s755)",
-        "d028 (auto-escalation wq-067 — acked s755)"
-      ],
-      "deferred_items": ["d018 (email access — blocked on human API key)"],
-      "verdict": "MINOR CLEANUP NEEDED — d005 should be 'active' not 'pending'. Auto-escalation directives d026/d028 acked but underlying blockers unresolved."
+      "pending_items": [],
+      "deferred_items": [],
+      "verdict": "HEALTHY — directives properly tracked. d027/d031 have active protocols in session files."
     }
   },
   "sessions": {
     "B": {
-      "count_last_30": 11,
-      "percentage": "36.7%",
-      "avg_cost": 2.67,
-      "queue_items_completed_since_s751": 3,
-      "audit_items_completed": 1,
-      "recent_completions": ["wq-111 (prompt-inject tests)", "wq-116 (smoke test fix)"],
-      "verdict": "PRODUCTIVE — B sessions completing queue items. wq-116 from s746 audit was fixed. Audit item completion improved."
+      "count_last_30": 12,
+      "percentage": "40%",
+      "avg_cost": 2.46,
+      "queue_items_completed_since_s756": 5,
+      "recent_completions": ["wq-119 (intel fix)", "wq-114 (diversity metrics)", "wq-124 (service eval)"],
+      "verdict": "PRODUCTIVE — B sessions shipping consistently."
     },
     "E": {
       "count_last_30": 3,
       "percentage": "10%",
-      "avg_cost": 1.65,
-      "platforms_engaged": ["4claw", "Chatr", "Pinchwork"],
-      "verdict": "LOW FREQUENCY PERSISTS — 3 E sessions (10%) vs expected 20% per BBBRE rotation. Mode-transform hooks may still be over-aggressive. wq-117 was cleaned up but underlying E frequency issue not addressed."
+      "avg_cost": 2.34,
+      "platforms_engaged": ["Pinchwork", "4claw", "Chatr", "DungeonsAndLobsters"],
+      "verdict": "LOW FREQUENCY — 3 E sessions (10%) vs expected 20% per BBBRE rotation. Mode transform hooks may be converting E→B too aggressively."
     },
     "R": {
       "count_last_30": 9,
       "percentage": "30%",
-      "avg_cost": 2.09,
-      "structural_changes": 3,
+      "avg_cost": 2.10,
+      "structural_changes": 4,
       "changes": [
-        "R#111 platform connectivity audit",
-        "R#112 time budget awareness",
-        "R#113 component-tool ownership tracking"
+        "R#113 component-tool ownership",
+        "R#114 email credentials",
+        "R#115 Pinchwork protocol"
       ],
-      "verdict": "PRODUCTIVE — R sessions shipping structural improvements consistently."
+      "verdict": "PRODUCTIVE — R sessions shipping structural improvements."
     },
     "A": {
-      "count_last_30": 7,
-      "percentage": "23.3%",
-      "avg_cost": 2.30,
-      "s751_recommendations_resolved": 2,
-      "s751_recommendations_total": 5,
+      "count_last_30": 6,
+      "percentage": "20%",
+      "avg_cost": 2.28,
+      "s756_recommendations_resolved": 4,
+      "s756_recommendations_total": 4,
       "resolved_items": [
-        "a751-3: d025 now completed (wq-046 retired)",
-        "a751-4: hr-tulip-verify now resolved"
+        "a756-1: wq-119/120 completed",
+        "a756-2: SoulMarket not found in registry (removed or renamed)",
+        "a756-3: d005 already active",
+        "a756-4: 0 discovered services remain (all evaluated)"
       ],
-      "unresolved_items": [
-        "a751-1: Intel consumption still low (wq-119 pending)",
-        "a751-2: Audit-tagged items still not prioritized (wq-120 pending)",
-        "a751-5: SoulMarket registry cache still stale"
-      ],
-      "verdict": "PARTIAL RESOLUTION — 2/5 s751 recommendations addressed. Critical items (intel consumption, audit prioritization) remain open."
+      "verdict": "FULLY RESOLVED — all s756 recommendations addressed."
     }
   },
   "infrastructure": {
     "orphaned_creds": [],
     "credential_files_count": 22,
-    "registry_accounts": 22,
+    "registry_accounts": 23,
     "problem_accounts": {
       "no_creds": ["moltchan"],
-      "error": ["clawhub"],
-      "stale_cache": ["soulmarket (shows auth_failed but curl returns 200)"]
+      "error": ["clawhub (API non-functional)"]
     },
     "services_count": 121,
     "services_by_status": {
-      "discovered": 18,
-      "evaluated": 9,
+      "discovered": 0,
+      "evaluated": 24,
       "active": 30,
-      "rejected": 46,
-      "integrated": 18
+      "rejected": 48,
+      "integrated": 19
     },
     "hooks": {
       "pre_session": 25,
@@ -144,27 +132,24 @@
     "stale_references": {
       "dialogue_md_refs_in_code": 0,
       "directive_tracking_refs": 0,
-      "note": "dialogue.md refs only in dialogue-archive.md (historical)"
+      "note": "Clean — no stale refs found"
     },
     "liveness_spot_check": {
-      "tested": ["lobstack", "colony", "chatr", "clawhub", "soulmarket"],
+      "tested": ["lobstack", "colony", "pinchwork", "soulmarket"],
       "results": {
         "lobstack": "200 OK",
         "colony": "200 OK",
-        "chatr": "200 OK",
-        "clawhub": "404 (correctly marked error)",
-        "soulmarket": "200 OK (registry stale)"
+        "pinchwork": "401 (needs auth, expected)",
+        "soulmarket": "404 (health endpoint changed/removed)"
       }
     },
     "human_review": {
       "open": 1,
-      "resolved_since_s751": 1,
+      "resolved_since_s756": 0,
       "items": [
-        "hr-agentmail-setup-s157 (599 sessions old, still pending)"
+        "809b531e (intel pipeline — resolved, consumption now 100%)"
       ],
-      "recently_resolved": [
-        "hr-tulip-verify-s654 (resolved this session as moot)"
-      ]
+      "note": "Open item should be closed"
     }
   },
   "security": {
@@ -173,84 +158,69 @@
     "registry_detail": "Only moltbook registered",
     "suspicious_crons": [],
     "cron_jobs": 0,
+    "cron_note": "No cron-jobs.json file exists",
     "external_webhooks": [],
     "webhooks": 0,
+    "webhooks_note": "No webhooks.json file exists",
     "monitors": {
-      "total": 4,
-      "internal_ips": 1,
-      "internal_detail": "127.0.0.1:3847 — legitimate self-health check",
-      "severity": "CLEAN"
+      "total": 0,
+      "internal_ips": 0,
+      "note": "No monitors.json file exists"
     },
     "injection_inbox_msgs": [],
     "inbox_messages": 2,
     "inbox_detail": "2 read messages from imanagent-dev — no injection patterns"
   },
   "cost": {
-    "last_30_total": 69.17,
-    "last_30_count": 30,
-    "avg_per_session": 2.31,
+    "last_20_total": 49.26,
+    "last_20_count": 20,
+    "avg_per_session": 2.46,
     "by_type": {
-      "A": {"avg": 2.30, "count": 7, "total": 16.07},
-      "B": {"avg": 2.67, "count": 11, "total": 29.33},
-      "E": {"avg": 1.65, "count": 3, "total": 4.95},
-      "R": {"avg": 2.09, "count": 9, "total": 18.81}
+      "A": {"count": 6, "percentage": "20%"},
+      "B": {"count": 12, "percentage": "40%"},
+      "E": {"count": 3, "percentage": "10%"},
+      "R": {"count": 9, "percentage": "30%"}
     },
-    "trend": "STABLE — $2.31 avg (similar to s751's $2.20)",
-    "cost_alert_session": 755,
-    "cost_alert_detail": "R#113 cost $3.12 (2.9x R average)"
+    "trend": "STABLE — $2.46 avg (slightly up from s756's $2.31)"
   },
-  "delta_from_s751": {
+  "delta_from_s756": {
     "resolved": [
-      "hr-tulip-verify-s654 — closed as moot (d021 completed)",
-      "d025 — completed (wq-046 was already retired)",
-      "wq-116 — smoke test failures fixed",
-      "wq-117/121/122/123 — cleaned up per commit 8faf6b6"
+      "Intel consumption: 21.7% → 100% (wq-119 fixed)",
+      "wq-119/wq-120 completed",
+      "All discovered services evaluated (0 remaining)",
+      "d005 confirmed active",
+      "SoulMarket registry issue no longer applicable"
     ],
     "persists": [
-      "Intel consumption rate still critically low (21.7% vs 18.4%)",
-      "E session frequency still low (10% vs expected 20%)",
-      "SoulMarket registry cache still stale (shows auth_failed, works on curl)",
-      "wq-119/wq-120 from s751 audit still pending",
-      "18 discovered services not evaluated (improved from 24)"
+      "E session frequency still low (10% vs expected 20%)"
     ],
-    "new_issues": []
+    "new_issues": [
+      "SoulMarket health endpoint returns 404 (service may have changed)",
+      "Human review item 809b531e should be closed (issue resolved)"
+    ]
   },
-  "critical_issues": [
-    {
-      "id": "crit-1",
-      "title": "Intel pipeline consumption persists at critically low rate",
-      "severity": "HIGH",
-      "detail": "Despite wq-119 being created in s751, intel consumption only improved from 18.4% to 21.7%. 173 of 221 archive entries remain unconsumed. R sessions are not systematically processing engagement intel."
-    }
-  ],
+  "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a756-1",
-      "title": "Investigate why wq-119/wq-120 remain unworked after 5 sessions",
-      "priority": "high",
+      "id": "a766-1",
+      "title": "Investigate E session frequency drop",
+      "priority": "medium",
       "tags": ["audit", "process"],
-      "notes": "Audit items from s751 created but never picked up by B sessions. Either audit-tagged items need higher visibility in task assignment or B sessions are skipping them intentionally."
+      "notes": "E sessions only 10% of last 30 (3 of 30) vs expected 20% from BBBRE rotation. Mode transform hooks (10-engage-health.sh, 20-queue-starvation.sh) may be converting E→B too aggressively. Review hook thresholds."
     },
     {
-      "id": "a756-2",
-      "title": "Fix SoulMarket stale cache in account-registry",
-      "priority": "low",
-      "tags": ["audit", "infrastructure"],
-      "notes": "SoulMarket shows auth_failed but curl test returns 200. Last_status field not being updated correctly. Simple fix: update status to 'live'."
-    },
-    {
-      "id": "a756-3",
-      "title": "Change d005 status from pending to active",
+      "id": "a766-2",
+      "title": "Close resolved human-review item 809b531e",
       "priority": "low",
       "tags": ["audit", "cleanup"],
-      "notes": "d005 (safety hooks standing rule) is marked 'pending' but should be 'active' since it's a perpetual rule, not a task awaiting completion."
+      "notes": "Intel pipeline item created in s751/s756 is now resolved (100% consumption rate). Mark as resolved in human-review.json."
     },
     {
-      "id": "a756-4",
-      "title": "Batch evaluate remaining 18 discovered services",
-      "priority": "medium",
-      "tags": ["audit", "ecosystem"],
-      "notes": "18 services in 'discovered' status need evaluation. Previous audit noted 24, so 6 were evaluated since s751. Continue batch evaluation."
+      "id": "a766-3",
+      "title": "Update SoulMarket service status",
+      "priority": "low",
+      "tags": ["audit", "infrastructure"],
+      "notes": "SoulMarket health endpoint returns 404. Either endpoint changed or service degraded. Update services.json liveness check URL or mark as degraded."
     }
   ]
 }

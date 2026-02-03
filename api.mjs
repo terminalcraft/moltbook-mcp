@@ -1542,6 +1542,59 @@ app.get("/status/queue-health", (req, res) => {
   }
 });
 
+// Component health: load status, errors, manifest (wq-088)
+app.get("/status/components", (req, res) => {
+  const format = req.query.format || "json";
+  try {
+    const statusFile = join(BASE, "component-status.json");
+    if (!existsSync(statusFile)) {
+      return res.json({ error: "Component status not available (MCP server not running or not yet initialized)" });
+    }
+    const status = JSON.parse(readFileSync(statusFile, "utf8"));
+    const manifest = JSON.parse(readFileSync(join(BASE, "components.json"), "utf8"));
+
+    // Compute health metrics
+    const errorCount = status.errors?.length || 0;
+    const loadRate = status.totalActive > 0 ? (status.loadedCount / status.totalActive * 100).toFixed(1) : 0;
+    const health = errorCount === 0 ? "healthy" : errorCount <= 2 ? "degraded" : "unhealthy";
+
+    const result = {
+      health,
+      session: { num: status.sessionNum, type: status.sessionType },
+      loaded: status.loaded,
+      loaded_count: status.loadedCount,
+      total_active: status.totalActive,
+      load_rate_pct: parseFloat(loadRate),
+      errors: status.errors,
+      last_updated: status.timestamp,
+      manifest_active: manifest.active,
+      manifest_retired: manifest.retired,
+    };
+
+    if (format === "html") {
+      const errorHtml = result.errors.length > 0
+        ? `<h3 style="color:#f38ba8">Errors (${result.errors.length})</h3><ul>${result.errors.map(e => `<li style="color:#f38ba8">${e}</li>`).join("")}</ul>`
+        : "";
+      const loadedHtml = result.loaded.map(n => `<li style="color:#a6e3a1">${n}</li>`).join("");
+      const healthColor = health === "healthy" ? "#a6e3a1" : health === "degraded" ? "#fab387" : "#f38ba8";
+      return res.send(`<!DOCTYPE html><html><head><title>Component Health</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1{color:#89b4fa}h2{color:#cba6f7}ul{list-style:none;padding:0}li{padding:0.25rem 0}</style></head><body>
+<h1>Component Health</h1>
+<p>Status: <span style="color:${healthColor};font-weight:bold">${health.toUpperCase()}</span></p>
+<p>Session: ${result.session.type || "N/A"} #${result.session.num || "N/A"}</p>
+<p>Loaded: ${result.loaded_count}/${result.total_active} (${result.load_rate_pct}%)</p>
+<p>Last updated: ${result.last_updated}</p>
+${errorHtml}
+<h2>Loaded Components (${result.loaded_count})</h2>
+<ul>${loadedHtml}</ul>
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/components?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/dashboard" style="color:#89b4fa">Status Dashboard</a></p>
+</body></html>`);
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Cross-session memory dashboard (wq-087)
 // Aggregates storage across: knowledge base, engagement-intel, Ctxly cloud
 app.get("/status/memory", async (req, res) => {
@@ -3051,6 +3104,7 @@ function agentManifest(req, res) {
       status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       status_hooks: { url: `${base}/status/hooks`, method: "GET", auth: false, description: "Hook performance dashboard — avg/p50/p95 execution times, failure rates, slow hook identification (?window=N&format=json)" },
+      status_components: { url: `${base}/status/components`, method: "GET", auth: false, description: "Component load health — loaded count, errors, manifest (?format=html for web UI)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
       knowledge_validate: { url: `${base}/knowledge/validate`, method: "POST", auth: false, description: "Endorse a pattern (body: {pattern_id, agent, note?})" },

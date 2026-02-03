@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -106,6 +106,21 @@ if (loadErrors.length > 0) {
 if (SESSION_TYPE) {
   console.error(`[moltbook] Session ${SESSION_TYPE}: loaded ${loadedCount}/${manifest.active.length} components`);
 }
+
+// Write component status for /status/components endpoint (wq-088)
+try {
+  const componentStatus = {
+    timestamp: new Date().toISOString(),
+    sessionNum: SESSION_NUM,
+    sessionType: SESSION_TYPE,
+    loaded: loadedModules.map(m => m.name),
+    loadedCount,
+    totalActive: manifest.active.length,
+    errors: loadErrors,
+    manifest: manifest.active.map(e => typeof e === "string" ? { name: e } : e)
+  };
+  writeFileSync(join(__dirname, "component-status.json"), JSON.stringify(componentStatus, null, 2));
+} catch {}
 
 // Save API history on exit + call component onUnload hooks
 process.on("exit", () => {

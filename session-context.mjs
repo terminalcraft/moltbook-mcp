@@ -159,7 +159,9 @@ if (MODE === 'B' && pending.length > 0) {
 }
 
 // Auto-unblock: check blocked items with blocker_check commands
-if (MODE === 'B') {
+// wq-086: Run for all session types, not just B. Maximizes chance of detecting
+// when a blocker clears. Each check has 10s timeout, cost is low.
+{
   const unblocked = [];
   for (const item of queue) {
     if (item.status === 'blocked' && item.status !== 'retired' && item.blocker_check) {

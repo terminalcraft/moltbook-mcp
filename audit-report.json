@@ -1,39 +1,40 @@
 {
-  "session": 716,
-  "timestamp": "2026-02-03T09:35:00.000Z",
-  "previous_audit": 711,
+  "session": 721,
+  "timestamp": "2026-02-03T10:30:00.000Z",
+  "previous_audit": 716,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 210,
-      "archive_consumed": 37,
-      "rate_overall": "18%",
-      "rate_s707_plus": "100% (11/11)",
-      "verdict": "HEALTHY — s706 critical issue (wq-063) remains fixed. Consumption tracking working at 100% for all entries since s707."
+      "archive_total": 214,
+      "archive_consumed_session": 37,
+      "archive_consumed_by": 4,
+      "archive_archived_session": 180,
+      "no_tracking": 8,
+      "rate_s707_plus": "100% (15/15)",
+      "verdict": "HEALTHY — All entries since s707 have consumed_session field set. Overall consumption tracking at 17% (37/214 with consumed_session), but 100% for new tracking system introduced in s707."
     },
     "brainstorming": {
-      "active_ideas": 5,
+      "active_ideas": 3,
       "ideas": [
-        "Add tests for engagement-intel.json",
-        "Generate 5 concrete build tasks from open directives",
-        "Ecosystem service adoption dashboard",
-        "Knowledge pattern cross-reference",
-        "Component lifecycle demonstration"
+        "Component hot-reload for development",
+        "Session cost predictor",
+        "Cross-session memory dashboard"
       ],
-      "promoted_since_s711": 0,
+      "avg_age_sessions": "unknown (no session tags visible)",
+      "promoted_since_s716": 0,
       "stale_count": 0,
-      "verdict": "stable — 5 ideas present, none stale (no ideas >30 sessions old)"
+      "verdict": "STABLE — 3 ideas present. No session tags to check age. All appear to be recent additions from R sessions."
     },
     "queue": {
-      "total": 9,
-      "pending": 2,
-      "blocked": 3,
-      "retired": 4,
-      "pending_items": ["wq-067 (d018 email access)", "wq-068 (imanagent reply)"],
-      "blocked_items": ["wq-046 (d021 Tulip URL — awaiting human)", "wq-070 (LinkClaws invite — awaiting human)", "wq-072 (MoltWorld — needs Moltbook key)"],
-      "items_completed_since_s711": 2,
-      "completed_items": ["wq-065 (batch-evaluate services)", "wq-069 (Ctxly R learnings)"],
-      "verdict": "slightly low — 2 pending items, should be 3+. wq-067 and wq-068 ready for B sessions."
+      "total": 13,
+      "pending": 4,
+      "blocked": 4,
+      "retired": 5,
+      "pending_items": ["wq-078 (knowledge auto-suggest)", "wq-079 (lifecycle hooks)", "wq-080 (batch-evaluate services)", "wq-081 (intel tests)"],
+      "blocked_items": ["wq-046 (Tulip URL — human)", "wq-070 (LinkClaws invite — human)", "wq-072 (MoltWorld — Moltbook API)", "wq-067 (email — human API key)"],
+      "items_completed_since_s716": 1,
+      "completed_items": ["wq-074 (component lifecycle demo)"],
+      "verdict": "HEALTHY — Queue has 4 pending items (threshold met). wq-068 (imanagent reply) was completed. Queue well-stocked for B sessions."
     },
     "directives": {
       "total": 24,
@@ -46,53 +47,61 @@
         "d021 (Tulip URL — blocked on human)"
       ],
       "questions_pending": 1,
-      "verdict": "stable — standing directives and human-blocked items. No actionable directives neglected."
+      "verdict": "STABLE — Same as s716. Standing directives and human-blocked items. No actionable directives neglected."
     }
   },
   "sessions": {
     "B": {
       "count_last_20": 7,
-      "avg_cost": 2.43,
-      "queue_items_completed": 2,
-      "commits": "22 total across 7 sessions",
-      "verdict": "productive — completing queue items, shipping features. Higher cost than s711 but justified by larger tasks."
+      "avg_cost": 2.25,
+      "queue_items_completed": 4,
+      "commits": "22+ total across sessions",
+      "sample_work": ["wq-065 batch-evaluate services", "wq-074 lifecycle hooks demo", "wq-058 imanagent solver upgrade"],
+      "verdict": "PRODUCTIVE — Completing queue items, shipping features. Higher cost than s716 avg but justified."
     },
     "E": {
       "count_last_20": 4,
-      "avg_cost": 1.67,
-      "intel_generated": 6,
-      "platforms_engaged": ["4claw", "Chatr", "Moltbook", "mydeadinternet"],
-      "verdict": "effective — engaging multiple platforms, generating actionable intel."
+      "avg_cost": 1.56,
+      "intel_generated": 5,
+      "platforms_engaged": ["4claw", "Chatr", "Moltbook", "MDI"],
+      "verdict": "EFFECTIVE — Engaging multiple platforms, generating actionable intel. Cost down from s716."
     },
     "R": {
       "count_last_20": 5,
-      "avg_cost": 1.46,
-      "structural_changes": 3,
-      "changes": ["R#103 ecosystem mandates", "R#104 component lifecycle hooks"],
-      "verdict": "productive — shipping structural improvements, storing learnings in Ctxly."
+      "avg_cost": 1.56,
+      "structural_changes": 4,
+      "changes": ["R#103 ecosystem mandates", "R#104 component lifecycle", "R#105 E session phases"],
+      "verdict": "PRODUCTIVE — Shipping structural improvements. R#105 added mandatory ecosystem integration to E sessions."
     },
     "A": {
       "count_last_20": 4,
-      "avg_cost": 2.00,
-      "s711_recommendations_resolved": 0,
-      "s711_recommendations_total": 3,
-      "verdict": "adequate — s711 had no critical issues requiring work-queue items. Recommendations were monitoring/tracking-only."
+      "avg_cost": 2.14,
+      "s716_recommendations_resolved": 2,
+      "s716_recommendations_total": 3,
+      "resolved_items": ["Queue replenished to 4 pending (was 2)", "wq-068 imanagent reply completed"],
+      "persisting": ["Human-review items still aging (hr-tulip-verify-s654 now 67 sessions old)"],
+      "verdict": "EFFECTIVE — 2/3 s716 recommendations resolved. wq-068 completed, queue replenished."
     }
   },
   "infrastructure": {
     "orphaned_creds": [],
     "credential_files": 17,
     "registry_accounts": 22,
-    "dead_services": ["clawhub (unreachable)", "darkclawbook (error)", "lobsterpedia (error)", "pinchwork (auth_failed)"],
+    "dead_services": {
+      "unreachable": ["clawhub", "molthunt", "agentaudit", "soulmarket", "memoryvault-link", "openwork"],
+      "error": ["darkclawbook", "lobsterpedia"],
+      "auth_failed": ["pinchwork"],
+      "no_creds": ["moltchan"]
+    },
     "discovered_not_evaluated": 0,
     "stale_directives": [],
-    "broken_hooks": "0 of 43 — all pass bash -n syntax check",
-    "pre_session_hooks": 23,
+    "broken_hooks": "0 of 42 — all pass bash -n syntax check",
+    "pre_session_hooks": 22,
     "post_session_hooks": 20,
-    "stale_references": "0 — no references to dialogue.md or directive-tracking.json found",
+    "stale_references": "0 — SESSION_AUDIT.md reference is intentional (audit instruction)",
     "human_review": {
       "pending": 2,
-      "items": ["hr-tulip-verify-s654 (auth_access, 62 sessions)", "hr-agentmail-setup-s157 (account_creation)"]
+      "items": ["hr-tulip-verify-s654 (auth_access, 67 sessions)", "hr-agentmail-setup-s157 (account_creation)"]
     }
   },
   "security": {
@@ -116,55 +125,57 @@
     },
     "injection_inbox_msgs": [],
     "inbox_messages": 2,
-    "inbox_detail": "2 legitimate messages from imanagent-dev"
+    "inbox_detail": "2 legitimate messages from imanagent-dev (both read)"
   },
   "cost": {
-    "last_20_total": 38.97,
+    "last_20_total": 38.32,
     "last_20_count": 20,
-    "avg_per_session": 1.95,
+    "avg_per_session": 1.92,
     "by_type": {
-      "A": {"avg": 2.00, "count": 4},
-      "B": {"avg": 2.43, "count": 7},
-      "E": {"avg": 1.67, "count": 4},
-      "R": {"avg": 1.46, "count": 5}
+      "A": {"avg": 2.14, "count": 4},
+      "B": {"avg": 2.25, "count": 7},
+      "E": {"avg": 1.56, "count": 4},
+      "R": {"avg": 1.56, "count": 5}
     },
-    "trend": "slightly_higher — $1.95 avg vs $1.66 at s711 (18% increase)",
+    "trend": "increasing — $1.92 avg vs $1.41 prev 20 (+36%)",
     "highest_session": "s712 at $4.13 (batch-evaluate 5 services, justified)"
   },
-  "delta_from_s711": {
+  "delta_from_s716": {
     "resolved": [
-      "wq-065 (batch-evaluate services) completed",
-      "wq-069 (Ctxly R learnings) completed"
+      "wq-068 (imanagent reply) completed — B#164 replied via Chatr",
+      "Queue replenished to 4 pending items (was 2)",
+      "Work queue healthy (4 pending, threshold met)"
     ],
     "persists": [
-      "d021 Tulip URL still awaiting human input (62 sessions)",
+      "d021 Tulip URL still awaiting human input (67 sessions)",
       "d018 AgentMail API key still awaiting human setup",
-      "wq-068 imanagent reply still pending"
+      "Human-review items aging (hr-tulip-verify-s654 now 67 sessions old)"
     ],
     "new_issues": [
-      "Queue slightly starved (2 pending, threshold is 3)",
-      "Human-review items aging (hr-tulip-verify-s654 now 62 sessions old)"
+      "Cost trend increasing (+36% vs prev 20 sessions)",
+      "6 unreachable services in account-registry",
+      "s716 audit did not create audit-tagged work-queue items (recommendation had create_wq:true)"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "title": "Replenish work queue to 3+ pending items",
-      "priority": "medium",
+      "title": "Clean up unreachable services from account-registry",
+      "priority": "low",
       "create_wq": true,
-      "notes": "Queue has 2 pending items (wq-067, wq-068). Need 1+ more. Can promote from brainstorming or decompose d002 into concrete tasks."
+      "notes": "6 services marked unreachable: clawhub, molthunt, agentaudit, soulmarket, memoryvault-link, openwork. Either remove or retry registration."
     },
     {
-      "title": "Reply to imanagent-dev inbox messages (wq-068)",
-      "priority": "medium",
-      "create_wq": false,
-      "notes": "Queue item already exists. B sessions should pick this up. Sitting since s670 (46 sessions)."
-    },
-    {
-      "title": "Surface stale human-review items",
+      "title": "Address stale human-review item hr-tulip-verify-s654",
       "priority": "low",
       "create_wq": false,
-      "notes": "hr-tulip-verify-s654 is 62 sessions old. hr-agentmail-setup-s157 age unclear (session number mismatch in data). Both awaiting human action — no queue item needed, already flagged."
+      "notes": "67 sessions old. Already flagged for human. No additional action needed beyond periodic surfacing."
+    },
+    {
+      "title": "Monitor cost trend",
+      "priority": "low",
+      "create_wq": false,
+      "notes": "36% increase in avg session cost. Mostly driven by larger B session tasks. Not actionable yet but worth tracking."
     }
   ]
 }

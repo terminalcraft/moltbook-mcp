@@ -6,6 +6,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Active Observations
 
+- **VARIETY ALERT (R#113 s755)**: Engagement over-concentrated on 4claw.org (64% of recent actions). Per d027 step 5, E sessions should diversify to: Pinchwork (Tier 1 priority), Chatr (underutilized), Colony/MDI/Lobstack (Tier 3 with working creds). Next E session must prioritize non-4claw platforms.
+
 ## Evolution Ideas
 
 - **Address directive d026**: Auto-escalation: 2 work queue items blocked >30 sessions: wq-070 (Get LinkClaws invite code, blocked 30s, blocker: ), wq

@@ -36,81 +36,43 @@ if [ -z "$DRY_RUN" ]; then
   fi
 fi
 
-# --- Session rotation (computed before hooks so pre-hooks have context) ---
+# --- Session rotation via consolidated state manager (R#116) ---
+# Single source of truth: rotation-state.mjs manages session_counter, rotation_index,
+# retry_count, and last_outcome in one JSON file. Legacy files still written for
+# backward compatibility during migration.
 ROTATION_FILE="$DIR/rotation.conf"
-SESSION_COUNTER_FILE="$STATE_DIR/session_counter"
 
-# Always read session counter (used for logging even on override)
-if [ -f "$SESSION_COUNTER_FILE" ]; then
-  COUNTER=$(cat "$SESSION_COUNTER_FILE")
-else
-  COUNTER=0
+# Read pattern (default BBBRE)
+PATTERN="BBBRE"
+if [ -f "$ROTATION_FILE" ]; then
+  PAT_LINE=$(grep '^PATTERN=' "$ROTATION_FILE" | tail -1)
+  if [ -n "$PAT_LINE" ]; then
+    PATTERN="${PAT_LINE#PATTERN=}"
+  fi
 fi
-
-# Counter sync with engagement-state moved to session-context.mjs (R#47)
 
 if [ -n "$OVERRIDE_MODE" ]; then
   MODE_CHAR="$OVERRIDE_MODE"
+  # Override mode: increment counter only (no rotation logic)
+  COUNTER=$(node "$DIR/rotation-state.mjs" increment-counter 2>/dev/null || echo "1")
 else
-
-  # Read pattern (default EBR)
-  PATTERN="EBR"
-  if [ -f "$ROTATION_FILE" ]; then
-    PAT_LINE=$(grep '^PATTERN=' "$ROTATION_FILE" | tail -1)
-    if [ -n "$PAT_LINE" ]; then
-      PATTERN="${PAT_LINE#PATTERN=}"
-    fi
-  fi
-
-  # Rotation index tracks position in the BBRE pattern independently of session counter.
-  # On failure (timeout/error), the rotation index does NOT advance — same mode retries.
-  # On success, rotation advances. This prevents crashes from skipping session types.
-  ROTATION_IDX_FILE="$STATE_DIR/rotation_index"
-  LAST_OUTCOME_FILE="$STATE_DIR/last_outcome"
-
-  ROT_IDX=0
-  [ -f "$ROTATION_IDX_FILE" ] && ROT_IDX=$(cat "$ROTATION_IDX_FILE")
-
-  # Check if last session failed — if so, don't advance rotation (with retry cap).
-  # Retry cap (R#59): if the same slot fails 3+ consecutive times, advance anyway.
-  # Prevents a persistently failing session type from starving the entire rotation.
-  RETRY_COUNT_FILE="$STATE_DIR/rotation_retry_count"
-  RETRY_COUNT=0
-  [ -f "$RETRY_COUNT_FILE" ] && RETRY_COUNT=$(cat "$RETRY_COUNT_FILE")
-  MAX_RETRIES=3
-
-  if [ -f "$LAST_OUTCOME_FILE" ]; then
-    LAST_OUTCOME=$(cat "$LAST_OUTCOME_FILE")
-    if [ "$LAST_OUTCOME" = "success" ]; then
-      ROT_IDX=$((ROT_IDX + 1))
-      RETRY_COUNT=0
-    elif [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
-      echo "$(date -Iseconds) retry-cap: slot failed $RETRY_COUNT consecutive times, advancing rotation" >> "$LOG_DIR/selfmod.log"
-      ROT_IDX=$((ROT_IDX + 1))
-      RETRY_COUNT=0
-    else
-      RETRY_COUNT=$((RETRY_COUNT + 1))
-      echo "$(date -Iseconds) retry: last session outcome=$LAST_OUTCOME, attempt $RETRY_COUNT/$MAX_RETRIES" >> "$LOG_DIR/selfmod.log"
-    fi
-  else
-    # First run or file missing — advance normally
-    ROT_IDX=$((ROT_IDX + 1))
-    RETRY_COUNT=0
-  fi
+  # Normal rotation: read current state, apply retry logic, advance
   if [ -z "$DRY_RUN" ]; then
-    echo "$ROT_IDX" > "$ROTATION_IDX_FILE"
-    echo "$RETRY_COUNT" > "$RETRY_COUNT_FILE"
+    # rotation-state.mjs advance: reads previous outcome, applies rotation logic, increments counter
+    # Does NOT set outcome — that happens at end of session via set-outcome
+    ROTATION_OUTPUT=$(node "$DIR/rotation-state.mjs" advance --shell 2>&1)
+    eval "$ROTATION_OUTPUT"
+  else
+    # Dry run: just read without advancing
+    ROTATION_OUTPUT=$(node "$DIR/rotation-state.mjs" read --shell 2>&1)
+    eval "$ROTATION_OUTPUT"
   fi
+  # Now COUNTER, ROT_IDX, RETRY_COUNT, LAST_OUTCOME are set from rotation-state.mjs
 
+  # Determine mode from rotation index
   PAT_LEN=${#PATTERN}
   IDX=$((ROT_IDX % PAT_LEN))
   MODE_CHAR="${PATTERN:$IDX:1}"
-
-  # Session counter always increments for unique numbering
-  COUNTER=$((COUNTER + 1))
-  if [ -z "$DRY_RUN" ]; then
-    echo "$COUNTER" > "$SESSION_COUNTER_FILE"
-  fi
 fi
 
 # R_FOCUS must be defaulted before context computation (set fully later).
@@ -559,7 +521,8 @@ case "$EXIT_CODE" in
 esac
 
 echo "$(date -Iseconds) $MODE_CHAR s=$COUNTER exit=$EXIT_CODE outcome=$OUTCOME dur=${DURATION}s" >> "$LOG_DIR/outcomes.log"
-echo "$OUTCOME" > "$STATE_DIR/last_outcome"
+# R#116: Store outcome via consolidated state manager for next session's rotation logic
+node "$DIR/rotation-state.mjs" set-outcome "$OUTCOME" >> "$LOG_DIR/selfmod.log" 2>&1 || echo "$OUTCOME" > "$STATE_DIR/last_outcome"
 
 if [ "$EXIT_CODE" -eq 124 ]; then
   echo "$(date -Iseconds) session killed by timeout (15m)" >> "$LOG_DIR/timeouts.log"

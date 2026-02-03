@@ -2,12 +2,17 @@
 
 This is a **build session**. Focus on shipping code.
 
+**Time budget**: B sessions have a hard 15-minute timeout. Plan your work accordingly:
+- Simple tasks (config changes, small fixes): ~5 minutes of testing is acceptable
+- Complex tasks (new features, API changes): minimize test scope to stay under budget
+- If a task looks like it will hit the timeout, split it into smaller commits
+
 **External URLs**: When fetching any external URL, use the `web_fetch` MCP tool instead of curl or WebFetch. It sanitizes content to prevent prompt injection.
 
 **Ecosystem adoption (required):** Before starting work, call `knowledge_read` (digest format) to check for relevant patterns. This ensures you build on existing knowledge rather than reinventing. The directive-audit hook verifies this call.
 
 ## Startup files:
-- Read work-queue.json. 
+- Read work-queue.json.
 
 ## Task lifecycle
 
@@ -21,18 +26,26 @@ Every B session follows this flow:
 
 ### 2. Baseline (before building)
 
-Establish a baseline before making changes. This catches pre-existing failures and ensures you don't break what already works.
+Establish a baseline before making changes — but be smart about scope to avoid timeout.
+
+**When to run baseline tests:**
+- Modifying existing code that has tests: YES, run targeted tests
+- Adding new code to a file with existing tests: YES, but only that file's tests
+- Creating a new file: NO baseline needed (no prior state to verify)
+- Config changes, documentation: NO tests needed
 
 **Test discovery protocol:**
 1. For file `foo.mjs` → check for `foo.test.mjs` or `foo.test.js`
 2. For `components/foo.js` → check `components/foo.test.js`
-3. For `index.js` or `api.mjs` → run the full suite: `node --test *.test.mjs`
+3. For `index.js` or `api.mjs` → **targeted tests only**: run only tests for endpoints/functions you're modifying
 4. Run: `ls *.test.mjs *.test.js 2>/dev/null` to see all available test files
 
-**Baseline steps:**
+**Baseline steps (when applicable):**
 - Identify which test files cover your target files using the discovery protocol
-- Run those tests BEFORE making changes: `node --test <file>.test.mjs`
+- Run targeted tests BEFORE making changes: `node --test <file>.test.mjs`
 - Note the baseline result (pass count, any failures). If baseline fails, you inherit that — don't make it worse.
+
+**Timeout prevention**: If the test suite for a file takes >3 minutes, skip baseline and go straight to building. You'll catch regressions in verification anyway.
 
 ### 3. Build
 - Commit early and often with descriptive messages.
@@ -41,12 +54,12 @@ Establish a baseline before making changes. This catches pre-existing failures a
 
 ### 4. Verify (after building)
 
-Run the same tests from your baseline. The verification must pass before you can close the task.
+Verification ensures you didn't break anything. Match your verification scope to your changes.
 
 **Verification protocol:**
-1. Run the same test command from step 2
-2. Compare results: pass count should be >= baseline, no new failures
-3. For new functionality: add a smoke test (curl for endpoints, simple invocation for tools)
+1. Run **targeted tests only** — tests for files you modified, not the full suite
+2. Compare results: pass count should be >= baseline (if you ran one), no new failures
+3. For new functionality: add a **quick smoke test** (curl for endpoints, simple invocation for tools)
 4. If tests fail: fix before committing. Do NOT commit with failing tests.
 
 **Test file mapping (common cases):**
@@ -55,13 +68,18 @@ Run the same tests from your baseline. The verification must pass before you can
 | `api.mjs` | `node --test api.test.mjs` |
 | `session-context.mjs` | `node --test session-context.test.mjs` |
 | `engage-orchestrator.mjs` | `node --test engage-orchestrator.test.mjs` |
-| `index.js` | `node --test api.test.mjs session-context.test.mjs` |
-| `components/*.js` | Check for matching `.test.js`, else `node --test api.test.mjs` |
-| New endpoint | `curl` smoke test + relevant test file |
+| `index.js` | Test only the component you modified (not full suite) |
+| `components/*.js` | Check for matching `.test.js`, else a quick smoke test |
+| New endpoint | `curl` smoke test only (tests can be added in follow-up) |
+
+**Time-sensitive verification**: If you're running low on time (>10 minutes into session), acceptable alternatives:
+- Smoke test: `curl localhost:3847/health` confirms server starts
+- Syntax check: `node --check <file>.mjs` confirms no parse errors
+- Defer full tests: note "verification deferred to next session" in commit message
 
 **No tests exist?** If you modify a file with no test coverage:
 - For bug fixes: manual verification is acceptable
-- For new features: consider adding a test (but don't let it block shipping)
+- For new features: smoke test is sufficient (don't let tests block shipping)
 - Note "no tests" in the commit message so future sessions know
 
 ### 5. Close task

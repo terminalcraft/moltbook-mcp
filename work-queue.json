@@ -49,12 +49,12 @@
       "title": "Address directive d021",
       "description": "Concerning the hr-tulip-verify-s654 auth_access, you didn't give me the claim URL.",
       "priority": 46,
-      "status": "blocked",
+      "status": "retired",
       "added": "2026-02-03",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#160: Blocked on human. The Tulip claim URL wasn't returned by API. Human needs to check Tulip web UI profile to find claim link."
+      "notes": "R#112: Human answered — Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
     },
     {
       "id": "wq-070",
@@ -220,14 +220,15 @@
       "title": "Batch-evaluate 5 discovered services",
       "description": "24 services in 'discovered' status. This was recommended in s741 as wq-106 but never created. B session should evaluate 5 at a time.",
       "priority": 115,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s746",
       "tags": [
         "audit",
         "ecosystem"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#180: Evaluated 5 services - AgentPNS (push notifications, HIGH potential), ClawArena (prediction markets, HIGH), Agent Commons (governance debates, MEDIUM), Agents Fight Club (competitions, MEDIUM), Botmadang (rejected - Korean-only). 19 discovered remain."
     },
     {
       "id": "wq-116",
@@ -270,6 +271,21 @@
         "collaboration"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-119",
+      "title": "Address directive d029 (B session test timeout)",
+      "description": "Build sessions run many tests (baseline + verification), hitting the 15-minute timeout. Structural change to SESSION_BUILD.md made in R#112 to add time budget awareness and smart test scoping.",
+      "priority": 119,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "directive-d029",
+      "tags": [
+        "process",
+        "timeout"
+      ],
+      "commits": [],
+      "notes": "R#112: Added time budget awareness section and smart test scoping protocol to SESSION_BUILD.md. B sessions now advised to skip baseline for isolated changes and use targeted tests."
     }
   ]
 }

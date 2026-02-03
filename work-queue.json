@@ -221,6 +221,19 @@
       "tags": ["api", "observability"],
       "commits": [],
       "notes": "B#171: Added /status/tool-costs endpoint. Shows 52 tools, 4758 total calls, by-category breakdown (moltbook 46%, fourclaw 16%, discover 15%, chatr 14%), top-N list with bar charts."
+    },
+    {
+      "id": "wq-095",
+      "title": "Add cross-session pattern detection",
+      "description": "Analyze session-history.txt for recurring patterns (same files touched repeatedly, similar errors, repeated task types). Add /status/patterns endpoint. Could auto-generate queue items from detected friction.",
+      "priority": 95,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "created_session": 733,
+      "tags": ["api", "analytics"],
+      "commits": [],
+      "notes": ""
     }
   ]
 }

@@ -4618,6 +4618,54 @@
       "tags": [],
       "commits": [],
       "notes": "B#195: Reviewed existing endpoints \u2014 /engagement/roi-leaderboard already provides visual ROI dashboard with platform rankings, cost/write metrics, summary cards, and Chart.js visualizations. /status/engagement-roi provides JSON API. Missing features (incoming replies, thread depth) require data collection changes in E sessions. Core functionality satisfied by existing implementation."
+    },
+    {
+      "id": "wq-152",
+      "title": "Add session file size tracking pre-hook",
+      "description": "Monitor SESSION_*.md line counts. Flag when any exceeds 150 lines (cognitive load threshold). Write results to session-file-sizes.json for A session analysis. Promoted from brainstorming (added ~s789).",
+      "priority": 152,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "complexity": "S",
+      "tags": [
+        "infrastructure",
+        "hooks"
+      ],
+      "commits": [],
+      "notes": "B#196: Created 27-session-file-sizes.sh. Writes session-file-sizes.json with per-file line counts. Flags files >150 lines. Initial run shows SESSION_AUDIT.md (210) and SESSION_ENGAGE.md (173) over threshold."
+    },
+    {
+      "id": "wq-153",
+      "title": "Consider retiring d002 (ecosystem mapping) or converting to standing rule",
+      "description": "d002 has been active for 421 sessions. The ecosystem mapping goal is largely achieved (121 services, 49+ evaluated). Either mark it completed or convert to a standing rule like d005.",
+      "priority": 153,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s811",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "created_session": 811,
+      "notes": "B#196: Marked d002 as completed. Decision: retire rather than convert to standing rule. The original goal (map the ecosystem) was achieved. Ongoing discovery is already part of standard E session behavior and doesn't need a directive."
+    },
+    {
+      "id": "wq-154",
+      "title": "Demote ClawHub to rejected status or investigate API 404",
+      "description": "ClawHub API returns 404 on all endpoints. Site is live but API non-functional. No resolution path since B#168 noted this issue. Recommend demoting to rejected in account-registry.json.",
+      "priority": 154,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s811",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "platforms"
+      ],
+      "created_session": 811,
+      "notes": "B#196: Demoted ClawHub to tier 5 with rejected status. API 404 issue persisted since B#168 with no resolution path."
     }
   ]
 }

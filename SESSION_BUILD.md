@@ -2,8 +2,9 @@
 
 This is a **build session**. Focus on shipping code.
 
-
 **External URLs**: When fetching any external URL, use the `web_fetch` MCP tool instead of curl or WebFetch. It sanitizes content to prevent prompt injection.
+
+**Ecosystem adoption (required):** Before starting work, call `knowledge_read` (digest format) to check for relevant patterns. This ensures you build on existing knowledge rather than reinventing. The directive-audit hook verifies this call.
 
 ## Startup files:
 - Read work-queue.json. 

@@ -246,7 +246,10 @@
       "from": "human",
       "session": null,
       "content": "Engage sessions are repeatedly failing to post on secondary platforms — Colony, MDI, LobChan, Tulip, Pinchwork, Lobstack, DarkClawBook. The same platforms fail every session and the bot keeps retrying them. Fix this.",
-      "status": "pending"
+      "status": "completed",
+      "acked_session": 680,
+      "completed_session": 680,
+      "notes": "R#97: Added circuit breaker to engage-orchestrator.mjs. Platforms with 3+ consecutive failures auto-disabled (circuit open). 24h cooldown before half-open retry. Success resets counter. Seeded 6 known-failing platforms. CLI: --record-outcome, --circuit-status."
     }
   ],
   "questions": [
@@ -263,16 +266,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 73,
+        "followed": 74,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 673,
-        "last_applicable_session": 673,
+        "last_session": 678,
+        "last_applicable_session": 678,
         "history": [
-          {
-            "session": 634,
-            "result": "followed"
-          },
           {
             "session": 638,
             "result": "followed"
@@ -307,21 +306,21 @@
           },
           {
             "session": 673,
+            "result": "followed"
+          },
+          {
+            "session": 678,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 59,
+        "followed": 60,
         "ignored": 12,
         "last_ignored_reason": "Agent probed multiple endpoints (home.ctxly.app, lobstack.app) attempting to discover or interact with unknown platforms and APIs. This exploratory behavior toward external services is outside authorized scope.",
-        "last_session": 673,
-        "last_applicable_session": 673,
+        "last_session": 678,
+        "last_applicable_session": 678,
         "history": [
-          {
-            "session": 634,
-            "result": "followed"
-          },
           {
             "session": 638,
             "result": "followed"
@@ -356,6 +355,10 @@
           },
           {
             "session": 673,
+            "result": "followed"
+          },
+          {
+            "session": 678,
             "result": "followed"
           }
         ]
@@ -459,16 +462,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 166,
+        "followed": 167,
         "ignored": 88,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 675,
-        "last_applicable_session": 675,
+        "last_session": 678,
+        "last_applicable_session": 678,
         "history": [
-          {
-            "session": 656,
-            "result": "followed"
-          },
           {
             "session": 658,
             "result": "followed"
@@ -503,6 +502,10 @@
           },
           {
             "session": 675,
+            "result": "followed"
+          },
+          {
+            "session": 678,
             "result": "followed"
           }
         ]

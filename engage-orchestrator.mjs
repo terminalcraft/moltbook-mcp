@@ -9,6 +9,8 @@
  *   node engage-orchestrator.mjs              # Full orchestration, human-readable
  *   node engage-orchestrator.mjs --json       # Machine-readable JSON output
  *   node engage-orchestrator.mjs --plan-only  # Just output the session plan, no evaluation
+ *   node engage-orchestrator.mjs --record-outcome <platform> <success|failure>
+ *   node engage-orchestrator.mjs --circuit-status  # Show circuit breaker state
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
@@ -20,6 +22,11 @@ import { analyzeEngagement } from "./providers/engagement-analytics.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVICES_PATH = join(__dirname, "services.json");
 const INTEL_PATH = join(__dirname, "engagement-intel.json");
+const CIRCUIT_PATH = join(__dirname, "platform-circuits.json");
+
+// Circuit breaker config
+const CIRCUIT_FAILURE_THRESHOLD = 3;  // consecutive failures to open circuit
+const CIRCUIT_COOLDOWN_MS = 24 * 3600 * 1000;  // 24h before half-open retry
 
 // Priority engagement targets — integrated services that E sessions should visit frequently.
 // These get injected into the session plan with a high ROI boost (above normal platform scoring).
@@ -43,6 +50,67 @@ function run(cmd, timeout = 15000) {
   } catch (e) {
     return null;
   }
+}
+
+// --- Circuit Breaker ---
+// Tracks per-platform consecutive failures. States:
+//   closed (healthy) → open (disabled after N failures) → half-open (retry after cooldown)
+
+function loadCircuits() {
+  if (!existsSync(CIRCUIT_PATH)) return {};
+  try { return JSON.parse(readFileSync(CIRCUIT_PATH, "utf8")); } catch { return {}; }
+}
+
+function saveCircuits(circuits) {
+  writeFileSync(CIRCUIT_PATH, JSON.stringify(circuits, null, 2) + "\n");
+}
+
+function getCircuitState(circuits, platform) {
+  const entry = circuits[platform];
+  if (!entry || entry.consecutive_failures < CIRCUIT_FAILURE_THRESHOLD) return "closed";
+  // Check if cooldown has expired → half-open
+  const elapsed = Date.now() - new Date(entry.last_failure).getTime();
+  if (elapsed >= CIRCUIT_COOLDOWN_MS) return "half-open";
+  return "open";
+}
+
+function recordOutcome(platform, success) {
+  const circuits = loadCircuits();
+  if (!circuits[platform]) {
+    circuits[platform] = { consecutive_failures: 0, total_failures: 0, total_successes: 0, last_failure: null, last_success: null };
+  }
+  const entry = circuits[platform];
+  if (success) {
+    entry.consecutive_failures = 0;
+    entry.total_successes++;
+    entry.last_success = new Date().toISOString();
+  } else {
+    entry.consecutive_failures++;
+    entry.total_failures++;
+    entry.last_failure = new Date().toISOString();
+  }
+  saveCircuits(circuits);
+  return { platform, state: getCircuitState(circuits, platform), ...entry };
+}
+
+function filterByCircuit(platformNames) {
+  const circuits = loadCircuits();
+  const allowed = [];
+  const blocked = [];
+  const halfOpen = [];
+  for (const name of platformNames) {
+    const state = getCircuitState(circuits, name);
+    if (state === "open") {
+      const entry = circuits[name];
+      blocked.push({ platform: name, failures: entry.consecutive_failures, last_failure: entry.last_failure });
+    } else if (state === "half-open") {
+      halfOpen.push(name);
+      allowed.push(name); // allow one retry
+    } else {
+      allowed.push(name);
+    }
+  }
+  return { allowed, blocked, halfOpen };
 }
 
 // --- Phase 1: Platform Health ---
@@ -388,6 +456,31 @@ function budgetCheck(spent, total) {
 
 // --- Main ---
 
+// --- CLI: Record outcome ---
+if (process.argv.includes("--record-outcome")) {
+  const idx = process.argv.indexOf("--record-outcome");
+  const platform = process.argv[idx + 1];
+  const outcome = process.argv[idx + 2];
+  if (!platform || !["success", "failure"].includes(outcome)) {
+    console.error("Usage: --record-outcome <platform> <success|failure>");
+    process.exit(1);
+  }
+  const result = recordOutcome(platform, outcome === "success");
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(0);
+}
+
+// --- CLI: Circuit status ---
+if (process.argv.includes("--circuit-status")) {
+  const circuits = loadCircuits();
+  const status = {};
+  for (const [platform, entry] of Object.entries(circuits)) {
+    status[platform] = { state: getCircuitState(circuits, platform), ...entry };
+  }
+  console.log(JSON.stringify(status, null, 2));
+  process.exit(0);
+}
+
 if (process.argv.includes("--budget-check")) {
   const idx = process.argv.indexOf("--budget-check");
   const spent = parseFloat(process.argv[idx + 1] || "0");
@@ -411,11 +504,19 @@ if (service && !planOnly) {
   evalReport = evaluateService(service);
 }
 
-console.error("[orchestrator] Phase 3.5: Ranking platforms by ROI...");
-const livePlatformNames = [
+console.error("[orchestrator] Phase 3.5: Applying circuit breaker + ROI ranking...");
+const allPlatformNames = [
   ...(health.live?.map(p => p.platform) || []),
   ...(health.degraded?.map(p => p.platform) || []),
 ];
+const circuitResult = filterByCircuit(allPlatformNames);
+if (circuitResult.blocked.length > 0) {
+  console.error(`[orchestrator] Circuit OPEN — skipping: ${circuitResult.blocked.map(b => `${b.platform}(${b.failures} fails)`).join(", ")}`);
+}
+if (circuitResult.halfOpen.length > 0) {
+  console.error(`[orchestrator] Circuit HALF-OPEN — retrying: ${circuitResult.halfOpen.join(", ")}`);
+}
+const livePlatformNames = circuitResult.allowed;
 const roiData = rankPlatformsByROI(livePlatformNames);
 
 console.error("[orchestrator] Phase 3.75: Computing dynamic tiers...");
@@ -470,6 +571,11 @@ const plan = generatePlan(health, service, evalReport, roiData);
 const output = {
   session_plan: plan,
   tier_updates: tierResult,
+  circuit_breaker: {
+    blocked: circuitResult.blocked,
+    half_open: circuitResult.halfOpen,
+    allowed_count: circuitResult.allowed.length,
+  },
   platform_health: {
     live_count: health.live?.length || 0,
     degraded_count: health.degraded?.length || 0,
@@ -514,6 +620,14 @@ if (jsonMode) {
   if (health.down?.length) {
     console.log(`Down/unavailable (${health.down.length}):`);
     for (const p of health.down) console.log(`  ✗ ${p.platform} (${p.status})`);
+  }
+  if (circuitResult.blocked.length) {
+    console.log(`Circuit breaker OPEN — auto-disabled (${circuitResult.blocked.length}):`);
+    for (const b of circuitResult.blocked) console.log(`  ⊘ ${b.platform} (${b.failures} consecutive failures, last: ${b.last_failure})`);
+  }
+  if (circuitResult.halfOpen.length) {
+    console.log(`Circuit breaker HALF-OPEN — retrying (${circuitResult.halfOpen.length}):`);
+    for (const name of circuitResult.halfOpen) console.log(`  ↻ ${name}`);
   }
 
   // Service evaluation

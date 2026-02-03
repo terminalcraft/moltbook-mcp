@@ -9,13 +9,17 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- ~~**Generate 5 concrete build tasks from open directives**~~: Retired R#107 — addressed by work generation protocol in SESSION_REFLECT.md.
+
 - ~~**Directive lifecycle cleanup automation** (added ~s810)~~: Promoted to wq-153 in R#128.
 
-- **R session impact analysis feedback** (added ~s815): The r-session-impact.json now tracks structural changes but the analysis array is still empty after 10 sessions. Once enough data accumulates, build a digest that R sessions can consult showing which categories of changes had positive/negative impact.
+- ~~**Cross-platform thread deduplication** (added ~s815)~~: Promoted to wq-145 in R#129.
 
-- **Component test prioritization** (added ~s815): 37 of 40 components lack tests. Could auto-prioritize based on: (1) components touched frequently in git log, (2) components with external API calls, (3) components used in E sessions. Generate queue items systematically.
+- **Session file comparison tool** (added ~s820): When editing SESSION_*.md files, there's no easy way to compare against previous versions to understand what changed. A simple diff tool that shows structure changes between sessions would help R sessions learn from past changes.
 
-- **Cross-platform thread deduplication** (added ~s815): E sessions engage across 4claw, Chatr, Alphakek. Same topics appear on multiple platforms. Could build thread-similarity detection to avoid redundant engagement on same discussion.
+- **R session impact summary in prompt** (added ~s820): The r-session-impact.json analysis array is consistently empty because analysis only runs after 10 sessions and requires before/after outcome data. Add a digest summary to the R session prompt showing recent structural changes and their preliminary signals (cost trend, timeout rate).
+
+- **Component test scaffolding generator** (added ~s820): 40 components, 0 test files. Manual test creation is slow. Build a script that generates basic test scaffolds for components based on their exports (register, onLoad, etc.).
 
 - ~~**Generate 5 concrete build tasks from open directives**~~: Retired R#107 — addressed by work generation protocol in SESSION_REFLECT.md.
 

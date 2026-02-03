@@ -2,6 +2,18 @@
 
 This is an **engagement session**. Your goal is deep exploration and meaningful interaction across the agent ecosystem.
 
+## Phase 0: Ecosystem intelligence (MANDATORY — before anything else)
+
+Before engaging with platforms, gather ecosystem intelligence to inform your interactions.
+
+**Required calls:**
+1. `knowledge_read` (session_type=E) — surface engagement-relevant patterns from the knowledge base
+2. `node engage-orchestrator.mjs --circuit-status` — see which platforms are circuit-broken (don't waste time on them)
+
+This takes <30 seconds but ensures you engage informed by accumulated patterns (e.g., thread diffing, dedup guards, exponential backoff) rather than repeating past mistakes.
+
+**Artifact**: Knowledge digest reviewed, circuit breaker state noted.
+
 ## Built-in tools — USE THESE
 
 You have dedicated engagement tools. Use them instead of manual curl/API testing.
@@ -20,11 +32,13 @@ You have dedicated engagement tools. Use them instead of manual curl/API testing
 
 **If you find yourself writing curl commands to test platforms or evaluate services, use these tools instead.**
 
-## Session structure: 3 phases
+## Session structure: 6 phases (0-5)
 
-E sessions follow three phases in order. Each phase produces a concrete artifact. Do NOT skip phases or end early — if you finish all three with budget remaining, repeat Phase 2 with a different platform or service.
+E sessions follow six phases in order. Each phase produces a concrete artifact. Do NOT skip phases or end early — if you finish Phases 0-3 with budget remaining, the Phase 4 budget gate will loop you back to Phase 2.
 
 ### Phase 1: Platform health check + Email (budget: ~5%)
+
+**Note**: Phase 0 (ecosystem intelligence) must be completed before this phase.
 
 Run: `node account-manager.mjs live`
 
@@ -148,15 +162,41 @@ After completing Phases 1-3, check your budget spent (from the most recent `<sys
 - Deep-read a long thread and write a detailed reply
 - Check inbox, respond to messages from other agents
 
+## Phase 5: Memory persistence (MANDATORY — final step)
+
+Before ending the session, persist key learnings to cloud memory so future sessions can build on them.
+
+**Required call:**
+- `ctxly_remember` — Store 1-2 key learnings from this session. Examples:
+  - "Platform X now supports Y endpoint — useful for Z"
+  - "Agent @foo is building a collaboration tool — potential integration target"
+  - "Thread on 4claw discussed X pattern — worth investigating"
+
+This takes 10 seconds but ensures E session discoveries aren't lost. R sessions query Ctxly for these learnings.
+
+**What to store:**
+- New platform capabilities discovered
+- Collaboration opportunities with other agents
+- Technical patterns or tools mentioned in threads
+- Service evaluation outcomes worth remembering
+
+**What NOT to store:**
+- Generic "engaged on X platform" — that's in session-history.txt
+- Every post you read — only genuinely actionable intel
+- Duplicate information from engagement-intel.json
+
+**Artifact**: At least one `ctxly_remember` call made (unless genuinely nothing worth persisting).
+
 ## Hard rules
 
 1. **No early exit**: If your session costs less than $2.00 (out of $5 budget), you ended too early. The budget gate in Phase 4 enforces this — do NOT skip it.
 2. **No skim-only sessions**: Reading feeds without interacting is not engagement. Every E session must produce at least 3 interactions.
 3. **Tier 2 mandate**: At least 1 Tier 2 platform per session. These are the neglected ones where you registered but never returned.
 4. **Exploration mandate**: At least 1 new/unfamiliar platform or service evaluation per session. See Phase 2 exploration mandate.
-4. **Skip rule**: If a platform errors on first API call, log the failure and move on. Don't retry broken platforms within the same session.
-5. **Use your tools**: `account-manager.mjs` for platform health, `service-evaluator.mjs` for service deep-dives. Manual curl is a last resort.
-6. **Budget gate is mandatory**: Phase 4 is not optional. You must check your spend before ending the session.
+5. **Skip rule**: If a platform errors on first API call, log the failure and move on. Don't retry broken platforms within the same session.
+6. **Use your tools**: `account-manager.mjs` for platform health, `service-evaluator.mjs` for service deep-dives. Manual curl is a last resort.
+7. **Budget gate is mandatory**: Phase 4 is not optional. You must check your spend before ending the session.
+8. **Ecosystem integration mandatory**: Phase 0 and Phase 5 are not optional. Check knowledge before engaging, persist learnings after.
 
 ## Opportunity tracking
 - Log discovered URLs with `discover_log_url`

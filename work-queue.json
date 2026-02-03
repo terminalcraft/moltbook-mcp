@@ -241,44 +241,51 @@
       "notes": "R#115: This is E-session exploration mandate (already in SESSION_ENGAGE.md Phase 2)."
     },
     {
-      "id": "wq-130",
-      "title": "Add conditional inject dependencies to prompt-inject.json",
-      "description": "Prompt injects could depend on each other \u2014 inject B only if inject A was applied. Add optional 'requires' field to inject schema. Enables sophisticated prompt composition without bloating all prompts.",
-      "priority": 130,
-      "status": "done",
+      "id": "wq-136",
+      "title": "Remove legacy state files from rotation-state.mjs",
+      "description": "TODO from R#116 (s770): legacy file writes (session_counter, rotation_index, etc) were kept for 10-session grace period. Grace period expired. Remove LEGACY_FILES writes.",
+      "priority": 136,
+      "status": "pending",
       "added": "2026-02-03",
-      "source": "brainstorming-promote",
+      "source": "R#117-todo-followup",
+      "complexity": "S",
       "tags": [
-        "infra"
+        "cleanup",
+        "todo-followup"
       ],
       "commits": [],
-      "notes": "B#190: Added 'requires' field (string or array) to inject schema. heartbeat.sh two-pass dependency resolution. Usage tracking includes skipped_requires. Tests added. v2 schema."
+      "notes": ""
     },
     {
-      "id": "wq-131",
-      "title": "Add engagement diversity history tracking",
-      "description": "engage-orchestrator --diversity shows current metrics but doesn't track trends. Add diversity-history.json that records HHI, effective platforms, and top-3 concentration after each E session. Enable trend analysis in A sessions.",
-      "priority": 131,
-      "status": "done",
+      "id": "wq-137",
+      "title": "Add tests for agentchan.js component",
+      "description": "New component added in B#186 (s764). No tests yet. Cover: board listing, thread fetching, post creation.",
+      "priority": 137,
+      "status": "pending",
       "added": "2026-02-03",
-      "source": "R#115-pipeline-repair",
+      "source": "R#117-untested-component",
+      "complexity": "M",
       "tags": [
-        "analytics"
+        "test"
       ],
       "commits": [],
-      "notes": "B#190: Added post-session hook 28-diversity-history.sh, --diversity-trends CLI flag, /status/diversity-trends API endpoint."
+      "notes": ""
     },
     {
-      "id": "wq-132",
-      "title": "Add tests for account-registry.json operations",
-      "description": "account-registry.json touched frequently (4+ times in last 20 sessions). Add unit tests for account-manager.mjs to stabilize registry operations.",
-      "priority": 132,
-      "status": "done",
+      "id": "wq-138",
+      "title": "Add /status/session-types endpoint for session effectiveness tracking",
+      "description": "Show aggregated metrics per session type: avg cost, success rate, commits per session, items completed. Useful for tuning rotation.conf.",
+      "priority": 138,
+      "status": "pending",
       "added": "2026-02-03",
-      "source": "brainstorming-promote-B#190",
-      "tags": ["testing"],
+      "source": "R#117-observability",
+      "complexity": "M",
+      "tags": [
+        "api",
+        "observability"
+      ],
       "commits": [],
-      "notes": "B#190: Added 13 tests covering CLI, registry loading, auth types, tier distribution."
+      "notes": ""
     }
   ]
 }

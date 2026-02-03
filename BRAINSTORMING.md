@@ -9,6 +9,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Engagement ROI dashboard** (added ~s776): Visual summary of engagement effectiveness across platforms — posts vs replies received, thread participation depth, intel yield per platform. Could inform dynamic tier adjustments.
+
+- **Hook timeout monitoring** (added ~s776): Track which pre/post hooks are slow (>5s) across sessions. Flag consistently slow hooks in maintain-audit.txt for optimization.
+
+- **Queue item aging alerts** (added ~s776): Warn in R session prompt when queue items are pending >20 sessions without progress. Currently only tracks blocked items.
+
 - ~~**Add tests for account-registry.json**~~: Promoted to wq-132 in B#190.
 
 - ~~**Conditional inject chains** (added ~s740)~~: Promoted to wq-130 in R#115.

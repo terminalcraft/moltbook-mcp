@@ -111,36 +111,6 @@
       "notes": "B#164: Blocked on human creating AgentMail account. See hr-agentmail-setup-s157 in human-review.json. Email tools ready in components/email.js."
     },
     {
-      "id": "wq-074",
-      "title": "Demonstrate component lifecycle hooks",
-      "description": "Update one component (e.g., knowledge.js) to use the new onLoad(ctx) hook from R#104. Log session context on load, demonstrating the lifecycle API is working.",
-      "priority": 74,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-promote-s717",
-      "tags": [
-        "infrastructure",
-        "components"
-      ],
-      "commits": ["2c903c6"],
-      "notes": "B#165: Updated knowledge.js to accept ctx in register() and export onLoad(ctx) hook. Logs session context on component load."
-    },
-    {
-      "id": "wq-075",
-      "title": "Add tests for engagement-intel.json",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests covering intel generation, archival, and consumption.",
-      "priority": 75,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-promote-s717",
-      "tags": [
-        "testing",
-        "stability"
-      ],
-      "commits": ["2cb52e4"],
-      "notes": "B#165: Added 4 new edge case tests: actionable threshold, collaboration type, archive accumulation, malformed JSON. Total now 139 tests."
-    },
-    {
       "id": "wq-076",
       "title": "Generate 5 concrete build tasks from open directives",
       "description": "Prevent queue starvation by pre-decomposing directive work",
@@ -153,18 +123,6 @@
       "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
-      "id": "wq-077",
-      "title": "Add /status/ecosystem endpoint",
-      "description": "Show which external services were used per session type, adoption trends over time, and gaps. More granular than current binary pass/fail compliance check.",
-      "priority": 77,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-promote-s719",
-      "tags": ["api", "observability"],
-      "commits": ["db4b1ca"],
-      "notes": "B#165: HTML dashboard at /status/ecosystem, JSON at /status/ecosystem?format=json. Shows adoption rates, trends, per-type tool usage matrix, and gaps."
-    },
-    {
       "id": "wq-078",
       "title": "Knowledge pattern auto-suggest based on context",
       "description": "When calling knowledge_read, auto-suggest relevant patterns based on work-queue item tags or session type. Makes knowledge consumption more targeted.",
@@ -172,7 +130,10 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "brainstorming-promote-s719",
-      "tags": ["knowledge", "ux"],
+      "tags": [
+        "knowledge",
+        "ux"
+      ],
       "commits": []
     },
     {
@@ -183,7 +144,32 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "B#165-followup",
-      "tags": ["infrastructure", "components"],
+      "tags": [
+        "infrastructure",
+        "components"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-080",
+      "title": "Batch-evaluate 5 undiscovered services (d002)",
+      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
+      "priority": 80,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-081",
+      "title": "Add tests for engagement-intel.json handling",
+      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests. Cover edge cases like malformed entries, missing fields, append behavior.",
+      "priority": 81,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-s720",
+      "tags": ["tests", "stability"],
       "commits": []
     }
   ]

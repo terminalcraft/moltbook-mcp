@@ -627,6 +627,8 @@ ${intakeBlock}${urgent}`;
 // skipped or forgot it got no ROI ranking or dynamic tier updates (the core of d016).
 // Now session-context.mjs runs the orchestrator and embeds the output in the prompt,
 // guaranteeing every E session sees the plan before its first interaction.
+// R#114: Added email status detection. E sessions are authorized for email (d018).
+// Pre-checking inbox count saves a tool call and ensures email is surfaced in the prompt.
 {
   const servicesPath = join(DIR, 'services.json');
   const services = readJSON(servicesPath);
@@ -683,10 +685,50 @@ ${intakeBlock}${urgent}`;
       evalBlock = `\n\n## YOUR DEEP-DIVE TARGET (from services.json):\n${result.eval_target}\n\nSpend 3-5 minutes actually exploring this service. Read content, sign up if possible, interact if alive, reject if dead. See SESSION_ENGAGE.md Deep dive section.`;
     }
 
+    // R#114: Email status detection — E sessions are authorized for email (d018/d030).
+    // Pre-check inbox count to surface pending emails in the prompt. This replaces
+    // the manual email_list call at the start of E sessions, saving a tool call.
+    // Only runs if AgentMail credentials are configured.
+    let emailBlock = '';
+    const emailCredsPath = join(process.env.HOME, '.agentmail-creds.json');
+    if (existsSync(emailCredsPath)) {
+      try {
+        const creds = JSON.parse(readFileSync(emailCredsPath, 'utf8'));
+        if (creds.api_key && creds.inbox_id) {
+          // Check inbox for messages via API (5s timeout)
+          const inboxResp = execSync(
+            `curl -s --max-time 5 -H "Authorization: Bearer ${creds.api_key}" "https://api.agentmail.to/v0/inboxes/${creds.inbox_id}/messages?limit=5"`,
+            { encoding: 'utf8', timeout: 8000 }
+          );
+          const inbox = JSON.parse(inboxResp);
+          const msgCount = inbox.count || (inbox.messages || []).length;
+          result.email_configured = true;
+          result.email_inbox = creds.email_address || creds.inbox_id;
+          result.email_count = msgCount;
+          if (msgCount > 0) {
+            // Build summary of recent messages
+            const msgs = (inbox.messages || []).slice(0, 3);
+            const msgSummary = msgs.map(m => {
+              const from = m.from?.email || m.from || 'unknown';
+              const subj = m.subject || '(no subject)';
+              return `  - "${subj}" from ${from}`;
+            }).join('\n');
+            emailBlock = `\n\n### Email (${msgCount} messages in ${creds.email_address || creds.inbox_id})\n${msgSummary}\n\nUse \`email_list\` and \`email_read <id>\` to view full content. Reply with \`email_reply\`.`;
+          } else {
+            emailBlock = `\n\n### Email: 0 messages in ${creds.email_address || creds.inbox_id}`;
+          }
+        }
+      } catch (e) {
+        // Email check failed — note it but don't block session
+        result.email_error = (e.message || 'unknown').substring(0, 100);
+        emailBlock = `\n\n### Email: configured but check failed (${result.email_error}). Use \`email_list\` to check manually.`;
+      }
+    }
+
     result.e_prompt_block = `## E Session: #${eCount}
 This is engagement session #${eCount}. Follow SESSION_ENGAGE.md.
 
-${orchSection}${prevEngageCtx}${evalBlock}`.trim();
+${orchSection}${prevEngageCtx}${evalBlock}${emailBlock}`.trim();
   }
 }
 

@@ -3,45 +3,15 @@
   "description": "Items flagged for human review.",
   "items": [
     {
-      "id": "hr-tulip-verify-s654",
-      "type": "auth_access",
-      "platform": "Tulip (tulip.fg-goose.online)",
-      "description": "Tulip API returns \"Agent not verified. Please complete verification at your claim URL before using the API.\" Need human to complete verification flow in browser.",
-      "session": 654,
-      "created": "2026-02-02T20:14:22.977Z",
-      "status": "resolved",
-      "resolved_session": 756,
-      "resolution": "Moot — d021 completed in R#112: human confirmed Tulip is invitation-only and they weren't invited. Platform set to rejected in account-registry."
-    },
-    {
-      "id": "26ceacd8",
-      "title": "Deadman port-scan monitors (consolidated from 4 audit findings)",
-      "body": "Audits s666, s671, s676, s681 all flagged 11 deadman-era port-scan monitors on 127.0.0.1. Resolved in s152: removed all 11 port_scan monitors, kept self-health (9438b27a) and 4 external monitors. Supersedes items 64b6d1ad, 1d9fd72c, 32e0718f.",
-      "source": "audit:s666,s671,s676,s681",
-      "priority": "high",
-      "status": "resolved",
-      "created": "2026-02-02T22:03:42.605Z",
-      "resolved": "2026-02-03T03:00:00.000Z"
-    },
-    {
-      "id": "e0f45ba1",
-      "title": "Audit s686: B session count anomaly — only 2 in last 20",
-      "body": "BBBRE rotation should produce ~60% B sessions in cost-history. Only 2 B sessions appear in the last 20 entries (10%). This means either: (1) rotation.conf is misconfigured, (2) B sessions are timing out before cost recording, or (3) cost-recording pipeline drops B session data. wq-053 created. This explains why audit items (wq-046-050) never get resolved — there are almost no B sessions running to consume them.",
-      "source": "audit:s686",
-      "priority": "high",
-      "status": "resolved",
-      "created": "2026-02-03T02:33:40.154Z",
-      "resolved": "2026-02-03T04:00:00.000Z",
-      "resolution": "Misdiagnosis. BEBRA rotation yields 20% B sessions, not 60%. Session history confirms B sessions running on schedule (s687, s689, s692, s694). No anomaly."
-    },
-    {
       "id": "hr-agentmail-setup-s157",
       "type": "account_creation",
       "platform": "AgentMail (agentmail.to)",
       "description": "Email integration built (wq-043/d018). Need human to create AgentMail account and API key:\n1. Go to https://console.agentmail.to\n2. Create account\n3. Create API key (API Keys section)\n4. Run in any session: `email_setup <api_key>`\n\nFree tier: 3 inboxes, 3000 emails/month. E sessions will auto-check emails once configured.",
       "session": 157,
       "created": "2026-02-03T05:45:00.000Z",
-      "status": "pending"
+      "status": "resolved",
+      "resolved_session": 760,
+      "resolution": "Human provided API key in d030. Inbox terminalcraft@agentmail.to configured."
     },
     {
       "id": "809b531e",

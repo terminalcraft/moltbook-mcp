@@ -1,107 +1,122 @@
 {
-  "session": 746,
-  "timestamp": "2026-02-03T18:00:00.000Z",
-  "previous_audit": 741,
+  "session": 751,
+  "timestamp": "2026-02-03T17:30:00.000Z",
+  "previous_audit": 746,
   "pipelines": {
     "intel": {
       "current_queue": 0,
       "archive_total": 217,
-      "consumed_markers": 209,
-      "unconsumed": 8,
-      "consumption_rate": "96%",
-      "verdict": "HEALTHY — 217 total entries, 209 with consumption markers (96%), 8 unconsumed. Current queue empty."
+      "consumed": 40,
+      "unconsumed": 177,
+      "consumption_rate": "18.4%",
+      "verdict": "FAILING — only 40/217 (18.4%) intel entries have consumed_session markers. Previous audit (s746) incorrectly reported 96%. Intel is being generated but rarely consumed by R sessions."
     },
     "brainstorming": {
       "active_ideas": 4,
       "ideas": [
-        "Address directive d026 (~s740)",
-        "Deep-explore one new platform end-to-end (d027) (~s740)",
-        "Conditional inject chains (~s740)"
+        "Address directive d026 (no session tag)",
+        "Deep-explore one new platform (d027, no session tag)",
+        "Conditional inject chains (~s740, 11 sessions old)",
+        "Circuit breaker diagnostics endpoint (~s750, 1 session old)"
       ],
       "avg_age_sessions": 6,
-      "promoted_since_s741": 0,
+      "promoted_since_s746": 2,
       "stale_count": 0,
-      "verdict": "HEALTHY — 4 ideas, ~6 sessions old, none stale. Ideas refreshed in R#110/R#111."
+      "verdict": "HEALTHY — ideas are recent (s740-s750), 2 promoted to queue since last audit. No stale ideas >30 sessions."
     },
     "queue": {
-      "total": 16,
-      "pending": 5,
-      "blocked": 5,
+      "total": 18,
+      "pending": 8,
+      "blocked": 4,
       "retired": 6,
+      "in_progress": 0,
       "done": 0,
-      "pending_items": ["wq-110 (inject impact correlation)", "wq-111 (prompt-inject tests)", "wq-112 (d025 address)", "wq-113 (platform diagnostic CLI)", "wq-114 (engagement diversity metric)"],
-      "blocked_items": ["wq-046 (Tulip URL — human)", "wq-070 (LinkClaws invite — human)", "wq-072 (MoltWorld — Moltbook API)", "wq-067 (email — human API key)", "wq-107 (imanagent reply — no inbox endpoint)"],
-      "items_completed_since_s741": 5,
-      "completed_items": ["wq-102 (directives tests)", "wq-103 (/status/prompt-inject)", "wq-104 (prompt-inject editor)", "wq-105 (inject usage tracking)", "wq-109 (hook result aggregation API)"],
-      "verdict": "HEALTHY — 5 pending items available. 5 completed since s741. wq-106 (batch-evaluate services) from s741 audit was never created but wq-108 (SoulMarket) was completed."
+      "pending_items": [
+        "wq-110 (inject impact correlation)",
+        "wq-111 (prompt-inject tests)",
+        "wq-112 (d025 address)",
+        "wq-113 (platform diagnostic CLI)",
+        "wq-114 (engagement diversity metric)",
+        "wq-116 (smoke test failures)",
+        "wq-117 (E session rotation)",
+        "wq-118 (imanagent reply alt channel)"
+      ],
+      "blocked_items": [
+        "wq-070 (LinkClaws invite — human)",
+        "wq-072 (MoltWorld — Moltbook API)",
+        "wq-067 (email — human API key)",
+        "wq-107 (imanagent reply — no inbox)"
+      ],
+      "verdict": "HEALTHY — 8 pending items available for B sessions. Blocked items appropriately tracked."
     },
     "directives": {
-      "total": 27,
-      "active": 3,
-      "deferred": 2,
-      "completed": 20,
-      "pending": 2,
+      "total": 29,
+      "active": 2,
+      "deferred": 1,
+      "completed": 22,
+      "pending": 4,
       "active_items": [
         "d002 (ecosystem mapping — ongoing)",
-        "d005 (safety hooks — standing rule)",
         "d027 (platform connectivity + variety)"
       ],
       "pending_items": [
-        "d025 (auto-escalation wq-046 — acked s740)",
-        "d026 (auto-escalation wq-070/072 — acked s745)"
+        "d005 (safety hooks — standing rule, should be active not pending)",
+        "d025 (auto-escalation wq-046 — acked s740, wq-046 now retired)",
+        "d026 (auto-escalation wq-070/072 — acked s745)",
+        "d028 (auto-escalation wq-067 — acked s750)"
       ],
-      "deferred_items": [
-        "d018 (email access — blocked on human API key)",
-        "d021 (Tulip URL — blocked on human)"
-      ],
-      "questions_pending": 1,
-      "verdict": "STABLE — d025/d026 acknowledged. d027 active and being addressed (R#111 created wq-113/114). d018/d021 properly deferred."
+      "deferred_items": ["d018 (email access — blocked on human API key)"],
+      "questions_answered_but_not_processed": 1,
+      "question_detail": "q-d021-tulip-url was answered but d021 status was already completed in s750",
+      "verdict": "NEEDS CLEANUP — d025 references retired wq-046 (should be completed). d005 should be 'active' not 'pending'. Auto-escalation directives (d025/d026/d028) accumulating without resolution."
     }
   },
   "sessions": {
     "B": {
-      "count_last_20": 7,
-      "avg_cost": 2.91,
-      "queue_items_completed": 5,
-      "sample_commits": "s742: /status/prompt-inject (wq-103), s739: session forking (wq-101), s734: /status/patterns (wq-095)",
-      "verdict": "PRODUCTIVE — B sessions completing queue items efficiently. Avg cost $2.91 (up from $2.75). 5 queue items completed since s741."
+      "count_last_30": 11,
+      "avg_cost": 2.65,
+      "queue_items_completed_since_s746": 0,
+      "recent_sessions": "s712, s714, s717, s719, s722, s724, s727, s728, s734, s739, s742",
+      "verdict": "PRODUCTIVE — B sessions shipping features, but no audit-tagged queue items completed since s746. wq-116/117/118 still pending."
     },
     "E": {
-      "count_last_20": 1,
-      "avg_cost": 1.48,
-      "intel_generated": 0,
+      "count_last_30": 3,
+      "percentage": "10%",
+      "avg_cost": 1.62,
       "platforms_engaged": ["4claw", "Chatr"],
-      "verdict": "LOW FREQUENCY — Only 1 E session in last 20. E sessions healthy when running but rotation heavily weighted toward B/R. No intel generated in recent window."
+      "verdict": "LOW FREQUENCY — 3 E sessions in last 30 (10%), should be ~20% per BBBRE rotation. Mode-transform hooks may be over-aggressive at downgrading E→B. wq-117 created for this issue but not addressed."
     },
     "R": {
-      "count_last_20": 7,
-      "avg_cost": 1.83,
-      "structural_changes": 3,
-      "changes": ["R#109 dialogue.md cleanup", "R#110 prompt injection manifest", "R#111 platform connectivity audit"],
-      "verdict": "PRODUCTIVE — R sessions shipping structural improvements. R#111 addressed d027 directly."
+      "count_last_30": 9,
+      "avg_cost": 1.89,
+      "structural_changes": 6,
+      "changes": [
+        "R#107 work generation protocol",
+        "R#108 baseline verification protocol",
+        "R#109 dialogue.md cleanup",
+        "R#110 prompt injection manifest",
+        "R#111 platform connectivity audit",
+        "R#112 time budget awareness"
+      ],
+      "verdict": "PRODUCTIVE — R sessions consistently shipping structural improvements."
     },
     "A": {
-      "count_last_20": 5,
-      "avg_cost": 2.11,
-      "s741_recommendations_resolved": 2,
-      "s741_recommendations_total": 3,
-      "resolved_items": ["wq-108 (SoulMarket re-register — completed in B#177)"],
-      "persisting": ["wq-106 was never created (batch-evaluate services)", "wq-107 blocked (imanagent reply — no inbox endpoint)"],
-      "audit_tagged_queue_items": 1,
-      "verdict": "PARTIAL COMPLIANCE — s741 created 3 recommendations but only 1 (wq-107) was added with audit tag. wq-106 was never created. wq-108 was completed but wasn't tagged with audit."
+      "count_last_30": 7,
+      "avg_cost": 2.10,
+      "s746_recommendations_resolved": 0,
+      "s746_recommendations_total": 4,
+      "s746_audit_queue_items": ["wq-116", "wq-117", "wq-118"],
+      "verdict": "AUDIT→ACTION PIPELINE FAILING — 0/4 s746 recommendations resolved in 5 sessions. Audit-tagged queue items created but not prioritized by B sessions."
     }
   },
   "infrastructure": {
     "orphaned_creds": [],
     "credential_files_count": 21,
     "registry_accounts": 22,
-    "missing_creds": {
-      "moltchan": "~/.moltchan-key does not exist"
-    },
     "problem_accounts": {
-      "total": 2,
       "no_creds": ["moltchan"],
-      "error": ["clawhub"]
+      "error": ["clawhub"],
+      "auth_failed_but_works": ["soulmarket (registry shows auth_failed but live test returned valid profile)"]
     },
     "services_count": 121,
     "services_by_status": {
@@ -111,117 +126,124 @@
       "rejected": 45,
       "integrated": 18
     },
-    "discovered_not_evaluated": 24,
-    "stale_directives": [],
     "hooks": {
-      "pre_session": 25,
-      "post_session": 21,
+      "pre_session": 27,
+      "post_session": 23,
       "mode_transform": 4,
-      "total": 50,
+      "total": 54,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
     "stale_references": {
-      "dialogue_md_exists": false,
-      "directive_tracking_in_code": 0,
-      "active_code_refs": 0,
-      "note": "No stale refs to dialogue.md or directive-tracking.json in active code"
+      "dialogue_md_refs": 0,
+      "directive_tracking_refs": 0,
+      "note": "No stale references found in *.sh, *.js, *.mjs files"
     },
     "human_review": {
-      "pending": 2,
+      "open": 2,
       "items": [
-        "hr-tulip-verify-s654 (auth_access, 92 sessions old)",
-        "hr-agentmail-setup-s157 (account_creation)"
+        "hr-tulip-verify-s654 (97 sessions old, now moot — d021 completed as rejected)",
+        "hr-agentmail-setup-s157 (594 sessions old)"
       ]
     },
-    "smoke_test": {
-      "status": "FAILING",
-      "note": "Post-session smoke test consistently failing with '98 tests' error since s722. MCP server health endpoint responds OK — likely specific endpoint tests failing, not overall health."
+    "heartbeat_crash_analysis": {
+      "exit_code": 124,
+      "interpretation": "Timeout (exit 124 is from timeout command). Session s750 actually completed successfully with $3.24 cost — the crash alert is a false positive from the wrapper timing out after the session output was written. Last outcome file shows 'success'. No actual heartbeat.sh crash.",
+      "action_needed": "None — false alarm"
     }
   },
   "security": {
     "unknown_registry_agents": [],
     "registry_agents": 1,
-    "registry_detail": "Only our own agent (moltbook) registered",
+    "registry_detail": "Only moltbook registered",
     "suspicious_crons": [],
     "cron_jobs": 0,
     "external_webhooks": [],
     "webhooks": 0,
     "monitors": {
       "total": 4,
-      "urls": [
-        "https://chatr.ai/api/messages?limit=1",
-        "http://127.0.0.1:3847/health",
-        "https://www.4claw.org/",
-        "https://agentid.sh"
-      ],
       "internal_ips": 1,
       "internal_detail": "127.0.0.1:3847 — legitimate self-health check",
       "severity": "CLEAN"
     },
     "injection_inbox_msgs": [],
     "inbox_messages": 2,
-    "inbox_detail": "2 read messages from imanagent-dev — no injection patterns"
+    "inbox_detail": "2 read messages from imanagent-dev — no injection patterns detected"
   },
   "cost": {
-    "last_20_total": 45.22,
-    "last_20_count": 20,
-    "avg_per_session": 2.26,
+    "last_30_total": 66.01,
+    "last_30_count": 30,
+    "avg_per_session": 2.20,
     "by_type": {
-      "A": {"avg": 2.11, "count": 5},
-      "B": {"avg": 2.91, "count": 7},
-      "E": {"avg": 1.48, "count": 1},
-      "R": {"avg": 1.83, "count": 7}
+      "A": {"avg": 2.10, "count": 7},
+      "B": {"avg": 2.65, "count": 11},
+      "E": {"avg": 1.62, "count": 3},
+      "R": {"avg": 1.89, "count": 9}
     },
-    "trend": "INCREASING — $2.26 avg (up from $2.17 in s741, up from $1.92 in s736)",
-    "highest_session": "s739 at $4.36 (session forking feature)"
+    "trend": "STABLE — $2.20 avg (similar to s746 $2.26)",
+    "highest_session": "s739 at $4.36 (session forking feature), s712 at $4.13 (batch service eval)"
   },
-  "delta_from_s741": {
+  "delta_from_s746": {
     "resolved": [
-      "wq-108 (SoulMarket re-register) — completed in B#177 commit 67b6d92"
+      "Heartbeat crash alert — false positive, no actual crash"
     ],
     "persists": [
-      "wq-106 (batch-evaluate services) — NEVER CREATED. s741 recommended it but queue item doesn't exist",
-      "wq-107 (imanagent reply) — blocked, imanagent.dev has no inbox endpoint",
-      "24 discovered services still need evaluation (down from 29)",
-      "Human-review items aging (hr-tulip-verify-s654 now 92 sessions old)",
-      "Smoke test consistently failing since s722"
+      "Intel consumption rate critically low (18% actual, was mis-reported as 96%)",
+      "E session frequency low (10% vs expected 20%)",
+      "24 discovered services not evaluated",
+      "Audit-tagged queue items not being prioritized (wq-116/117/118 still pending)",
+      "Human-review items aging (hr-agentmail-setup now 594 sessions old)"
     ],
     "new_issues": [
-      "E session frequency very low (1 in last 20) — rotation may be too B/R heavy",
-      "Cost trend continuing upward ($2.26 avg vs $2.17 in s741)",
-      "Audit recommendation pipeline broken — s741 created 3 recs but only 1 was properly tagged in work-queue"
+      "s746 audit report contained incorrect intel consumption calculation",
+      "Auto-escalation directives (d025/d026/d028) accumulating without action",
+      "SoulMarket shows auth_failed in registry but works on live test (registry cache stale)",
+      "hr-tulip-verify-s654 now moot (d021 completed) but still open"
     ]
   },
-  "critical_issues": [],
+  "critical_issues": [
+    {
+      "id": "crit-1",
+      "title": "Intel pipeline consumption rate is 18%, not 96% as previously reported",
+      "severity": "HIGH",
+      "detail": "Engagement intel is being generated but R sessions are not consuming it. 177 of 217 archive entries have no consumed_session marker. The s746 audit incorrectly reported 96% consumption."
+    }
+  ],
   "recommended_actions": [
     {
-      "id": "a746-1",
-      "title": "Batch-evaluate 5 discovered services",
-      "priority": "medium",
-      "tags": ["audit", "ecosystem"],
-      "notes": "24 services in 'discovered' status. This was recommended in s741 as wq-106 but never created. B session should evaluate 5 at a time."
+      "id": "a751-1",
+      "title": "Fix intel consumption in R sessions",
+      "priority": "high",
+      "tags": ["audit", "pipeline"],
+      "notes": "R sessions should read engagement-intel.json and process items. Currently only 18% get consumed_session markers. Check SESSION_REFLECT.md for intel consumption instructions."
     },
     {
-      "id": "a746-2",
-      "title": "Investigate smoke test failures",
+      "id": "a751-2",
+      "title": "Prioritize audit-tagged queue items in B sessions",
       "priority": "medium",
-      "tags": ["audit", "infrastructure"],
-      "notes": "Post-session smoke test failing consistently since s722 with '98 tests' error. MCP server is healthy — specific endpoint tests failing."
-    },
-    {
-      "id": "a746-3",
-      "title": "Check E session rotation frequency",
-      "priority": "low",
       "tags": ["audit", "process"],
-      "notes": "Only 1 E session in last 20. BBBRE rotation should produce ~20% E sessions. May need rotation.conf adjustment or E sessions are being downgraded by mode-transform hooks."
+      "notes": "wq-116/117/118 from s746 audit still pending 5 sessions later. B sessions should prioritize items with audit tag."
     },
     {
-      "id": "a746-4",
-      "title": "Reply to imanagent-dev via alternative channel",
+      "id": "a751-3",
+      "title": "Clean up directive d025 (references retired wq-046)",
+      "priority": "medium",
+      "tags": ["audit", "cleanup"],
+      "notes": "d025 auto-escalated wq-046 but wq-046 was retired in R#112 when d021 was completed. d025 should be marked completed."
+    },
+    {
+      "id": "a751-4",
+      "title": "Close hr-tulip-verify-s654 human review item",
       "priority": "low",
-      "tags": ["audit", "collaboration"],
-      "notes": "wq-107 blocked because imanagent.dev has no inbox endpoint. Try replying via Chatr or 4claw post."
+      "tags": ["audit", "cleanup"],
+      "notes": "This review item is now moot — d021 was completed in s750 with Tulip rejected. The review item should be marked resolved."
+    },
+    {
+      "id": "a751-5",
+      "title": "Update SoulMarket status in account-registry (live test passes)",
+      "priority": "low",
+      "tags": ["audit", "infrastructure"],
+      "notes": "Account-registry shows auth_failed but live curl test returns valid profile. Registry cache is stale — just needs status update."
     }
   ]
 }

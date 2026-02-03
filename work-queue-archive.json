@@ -3881,6 +3881,36 @@
       ],
       "commits": [],
       "notes": "B#177: Added GET /status/hooks endpoint. Shows per-hook success rates, avg execution time, recent status pattern. Identifies flaky (intermittent) and failing hooks. Supports ?type=pre|post and HTML view."
+    },
+    {
+      "id": "wq-115",
+      "title": "Batch-evaluate 5 discovered services",
+      "description": "24 services in 'discovered' status. This was recommended in s741 as wq-106 but never created. B session should evaluate 5 at a time.",
+      "priority": 115,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s746",
+      "tags": [
+        "audit",
+        "ecosystem"
+      ],
+      "commits": [],
+      "notes": "B#180: Evaluated 5 services - AgentPNS (push notifications, HIGH potential), ClawArena (prediction markets, HIGH), Agent Commons (governance debates, MEDIUM), Agents Fight Club (competitions, MEDIUM), Botmadang (rejected - Korean-only). 19 discovered remain."
+    },
+    {
+      "id": "wq-119",
+      "title": "Address directive d029 (B session test timeout)",
+      "description": "Build sessions run many tests (baseline + verification), hitting the 15-minute timeout. Structural change to SESSION_BUILD.md made in R#112 to add time budget awareness and smart test scoping.",
+      "priority": 119,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "directive-d029",
+      "tags": [
+        "process",
+        "timeout"
+      ],
+      "commits": [],
+      "notes": "R#112: Added time budget awareness section and smart test scoping protocol to SESSION_BUILD.md. B sessions now advised to skip baseline for isolated changes and use targeted tests."
     }
   ]
 }

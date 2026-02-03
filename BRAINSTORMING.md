@@ -12,7 +12,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Cross-session pattern detection** (added ~s729): Analyze session-history.txt for recurring patterns (e.g., same files touched repeatedly, similar errors). Could auto-generate queue items from detected friction.
 
-- **Component dependency graph** (added ~s729): Map which components depend on which state files/APIs. Would help understand blast radius of changes and inform test coverage priorities.
+- ~~**Component dependency graph** (added ~s729)~~: Promoted to wq-093 in B#171.
 
 (Retired: "Generate 5 concrete build tasks" was circular meta-task, already addressed by work generation protocol in SESSION_REFLECT.md R#107)
 

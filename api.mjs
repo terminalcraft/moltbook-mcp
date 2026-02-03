@@ -1595,6 +1595,82 @@ ${errorHtml}
   }
 });
 
+// Component dependency map (wq-093)
+// Shows which files/APIs each component depends on — useful for change impact analysis
+app.get("/status/dependencies", (req, res) => {
+  const format = req.query.format || "json";
+  const component = req.query.component; // optional filter
+  try {
+    const depsFile = join(BASE, "component-dependencies.json");
+    if (!existsSync(depsFile)) {
+      return res.json({ error: "Dependency map not found" });
+    }
+    const deps = JSON.parse(readFileSync(depsFile, "utf8"));
+    const manifest = JSON.parse(readFileSync(join(BASE, "components.json"), "utf8"));
+    const activeNames = manifest.active.map(e => typeof e === "string" ? e : e.name);
+
+    // Filter to single component if requested
+    let components = deps.components;
+    if (component) {
+      if (!components[component]) {
+        return res.status(404).json({ error: `Component '${component}' not found` });
+      }
+      components = { [component]: components[component] };
+    }
+
+    // Compute summary stats
+    const stats = {
+      total_components: Object.keys(deps.components).length,
+      active_components: activeNames.length,
+      total_file_deps: 0,
+      total_api_deps: 0,
+      total_provider_deps: 0,
+      external_apis: new Set(),
+      local_apis: 0,
+    };
+    for (const [name, c] of Object.entries(deps.components)) {
+      stats.total_file_deps += c.files?.length || 0;
+      stats.total_api_deps += c.apis?.length || 0;
+      stats.total_provider_deps += c.providers?.length || 0;
+      for (const api of c.apis || []) {
+        if (api.includes("localhost") || api.includes("127.0.0.1")) {
+          stats.local_apis++;
+        } else {
+          stats.external_apis.add(api.split("/")[0]);
+        }
+      }
+    }
+    stats.external_apis = [...stats.external_apis];
+
+    const result = {
+      version: deps.version,
+      generated: deps.generated,
+      stats,
+      components,
+    };
+
+    if (format === "html") {
+      const rows = Object.entries(components).map(([name, c]) => {
+        const isActive = activeNames.includes(name);
+        const statusColor = isActive ? "#a6e3a1" : "#6c7086";
+        const files = (c.files || []).map(f => `<code>${f}</code>`).join(", ") || "<em>none</em>";
+        const apis = (c.apis || []).map(a => `<code>${a}</code>`).join(", ") || "<em>none</em>";
+        const providers = (c.providers || []).map(p => `<code>${p}</code>`).join(", ") || "<em>none</em>";
+        return `<tr><td style="color:${statusColor}">${name}</td><td>${files}</td><td>${apis}</td><td>${providers}</td></tr>`;
+      }).join("");
+      return res.send(`<!DOCTYPE html><html><head><title>Component Dependencies</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1{color:#89b4fa}table{border-collapse:collapse;width:100%}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}code{background:#313244;padding:0.1rem 0.3rem;border-radius:3px}</style></head><body>
+<h1>Component Dependencies</h1>
+<p>Active: ${stats.active_components}/${stats.total_components} · Files: ${stats.total_file_deps} · APIs: ${stats.total_api_deps} (${stats.external_apis.length} external) · Providers: ${stats.total_provider_deps}</p>
+<table><tr><th>Component</th><th>Files</th><th>APIs</th><th>Providers</th></tr>${rows}</table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/dependencies?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/components" style="color:#89b4fa">Components</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+</body></html>`);
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Cross-session memory dashboard (wq-087)
 // Aggregates storage across: knowledge base, engagement-intel, Ctxly cloud
 app.get("/status/memory", async (req, res) => {
@@ -3105,6 +3181,7 @@ function agentManifest(req, res) {
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       status_hooks: { url: `${base}/status/hooks`, method: "GET", auth: false, description: "Hook performance dashboard — avg/p50/p95 execution times, failure rates, slow hook identification (?window=N&format=json)" },
       status_components: { url: `${base}/status/components`, method: "GET", auth: false, description: "Component load health — loaded count, errors, manifest (?format=html for web UI)" },
+      status_dependencies: { url: `${base}/status/dependencies`, method: "GET", auth: false, description: "Component dependency map — files, APIs, providers per component (?component=X to filter, ?format=html for web UI)" },
       knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
       knowledge_validate: { url: `${base}/knowledge/validate`, method: "POST", auth: false, description: "Endorse a pattern (body: {pattern_id, agent, note?})" },

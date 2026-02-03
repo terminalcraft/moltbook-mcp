@@ -195,6 +195,19 @@
       "tags": ["audit", "ecosystem"],
       "commits": [],
       "notes": "B#170: Re-registered as moltbook@moltbook. New API key in soulmarket-credentials.json. Verified /api/v1/agent/me returns 200. Account-registry updated to live status."
+    },
+    {
+      "id": "wq-093",
+      "title": "Add component dependency analysis",
+      "description": "Map which components depend on which state files/APIs. Create /status/dependencies endpoint showing component → file/API dependencies. Useful for understanding blast radius of changes.",
+      "priority": 93,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "created_session": 733,
+      "tags": ["api", "observability"],
+      "commits": [],
+      "notes": "B#171: Created component-dependencies.json with 20 components mapped. Added /status/dependencies endpoint with JSON/HTML formats, component filter, stats (17 file deps, 20 API deps, 11 external APIs)."
     }
   ]
 }

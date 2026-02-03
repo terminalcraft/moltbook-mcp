@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "description": "Component dependency map. Files relative to project root or home (~). APIs include both external and local (127.0.0.1:3847) endpoints.",
+  "generated": "2026-02-03",
+  "session": 733,
+  "components": {
+    "moltbook-core": {
+      "files": ["github-mappings.json", "human-review.json"],
+      "apis": ["moltbook.com/api/v1"],
+      "providers": ["api.js", "state.js", "security.js"]
+    },
+    "engagement": {
+      "files": [],
+      "apis": ["moltbook.com/api/v1"],
+      "providers": ["api.js", "state.js", "security.js", "replay-log.js"]
+    },
+    "knowledge": {
+      "files": ["work-queue.json", "knowledge/patterns.json", "agents-unified.json"],
+      "apis": [],
+      "providers": []
+    },
+    "external": {
+      "files": ["services.json", "~/.config/moltbook/ctxly.json"],
+      "apis": ["agentid.sh", "ctxly.app", "chatr.ai", "localhost:3847"],
+      "providers": []
+    },
+    "fourclaw": {
+      "files": ["~/.config/moltbook/fourclaw-credentials.json"],
+      "apis": ["4claw.org/api"],
+      "providers": []
+    },
+    "registry": {
+      "files": [],
+      "apis": ["localhost:3847/registry"],
+      "providers": []
+    },
+    "leaderboard": {
+      "files": [],
+      "apis": ["localhost:3847/leaderboard"],
+      "providers": []
+    },
+    "kv": {
+      "files": [],
+      "apis": ["localhost:3847/kv"],
+      "providers": []
+    },
+    "cron": {
+      "files": [],
+      "apis": ["localhost:3847/cron"],
+      "providers": []
+    },
+    "polls": {
+      "files": [],
+      "apis": ["localhost:3847/polls"],
+      "providers": []
+    },
+    "badges": {
+      "files": [],
+      "apis": ["localhost:3847/badges"],
+      "providers": []
+    },
+    "webhooks": {
+      "files": ["~/.config/moltbook/api-token"],
+      "apis": ["localhost:3847/webhooks"],
+      "providers": []
+    },
+    "colony": {
+      "files": ["~/.colony-key"],
+      "apis": ["thecolony.cc/api/v1"],
+      "providers": []
+    },
+    "lobchan": {
+      "files": ["~/.config/moltbook/lobchan-credentials.json"],
+      "apis": ["lobchan.com/api"],
+      "providers": []
+    },
+    "mdi": {
+      "files": ["~/.mdi-key"],
+      "apis": ["mydeadinternet.com/api"],
+      "providers": []
+    },
+    "imanagent": {
+      "files": ["~/.imanagent-token"],
+      "apis": ["imanagent.dev"],
+      "providers": []
+    },
+    "moltbotden": {
+      "files": ["~/.config/moltbook/moltbotden-credentials.json"],
+      "apis": ["api.moltbotden.io"],
+      "providers": []
+    },
+    "engagement-log": {
+      "files": ["~/.config/moltbook/engagement-actions.jsonl"],
+      "apis": [],
+      "providers": []
+    },
+    "email": {
+      "files": ["~/.agentmail-creds.json"],
+      "apis": ["api.agentmail.to"],
+      "providers": []
+    },
+    "dev": {
+      "files": ["components.json"],
+      "apis": [],
+      "providers": []
+    }
+  }
+}

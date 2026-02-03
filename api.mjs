@@ -1542,6 +1542,133 @@ app.get("/status/queue-health", (req, res) => {
   }
 });
 
+// Cross-session memory dashboard (wq-087)
+// Aggregates storage across: knowledge base, engagement-intel, Ctxly cloud
+app.get("/status/memory", async (req, res) => {
+  const format = req.query.format || "json";
+  const result = { collected_at: new Date().toISOString(), sources: {} };
+
+  // 1. Knowledge base patterns
+  try {
+    const kb = JSON.parse(readFileSync(join(BASE, "knowledge/patterns.json"), "utf8"));
+    const patterns = kb.patterns || [];
+    const byCategory = {};
+    const byConfidence = {};
+    for (const p of patterns) {
+      byCategory[p.category] = (byCategory[p.category] || 0) + 1;
+      byConfidence[p.confidence] = (byConfidence[p.confidence] || 0) + 1;
+    }
+    const selfDerived = patterns.filter(p => p.source?.startsWith("self:")).length;
+    const fromCrawls = patterns.filter(p => !p.source?.startsWith("self:")).length;
+    result.sources.knowledge = {
+      total: patterns.length,
+      self_derived: selfDerived,
+      from_crawls: fromCrawls,
+      by_category: byCategory,
+      by_confidence: byConfidence,
+      last_updated: kb.lastUpdated,
+    };
+  } catch { result.sources.knowledge = { error: "not found" }; }
+
+  // 2. Engagement intel (current + archive)
+  try {
+    let current = [];
+    try { current = JSON.parse(readFileSync(join(STATE, "engagement-intel.json"), "utf8")); } catch {}
+    let archive = [];
+    try { archive = JSON.parse(readFileSync(join(STATE, "engagement-intel-archive.json"), "utf8")); } catch {}
+    const byType = {};
+    for (const e of [...current, ...archive]) {
+      byType[e.type] = (byType[e.type] || 0) + 1;
+    }
+    result.sources.engagement_intel = {
+      current: current.length,
+      archived: archive.length,
+      total: current.length + archive.length,
+      by_type: byType,
+    };
+  } catch { result.sources.engagement_intel = { error: "not found" }; }
+
+  // 3. Ctxly cloud memories (sample query to check connectivity)
+  try {
+    const ctxlyPath = join(BASE, "ctxly.json");
+    if (existsSync(ctxlyPath)) {
+      // Use HTTP call to our own MCP endpoint proxy or indicate configured
+      result.sources.ctxly = { configured: true, note: "Use ctxly_recall MCP tool for queries" };
+    } else {
+      result.sources.ctxly = { configured: false };
+    }
+  } catch { result.sources.ctxly = { error: "check failed" }; }
+
+  // 4. Repos crawled for knowledge
+  try {
+    const crawled = JSON.parse(readFileSync(join(BASE, "knowledge/repos-crawled.json"), "utf8"));
+    result.sources.repos_crawled = {
+      total: Object.keys(crawled).length,
+      repos: Object.keys(crawled).slice(0, 10),
+    };
+  } catch { result.sources.repos_crawled = { error: "not found" }; }
+
+  // Summary
+  const kb = result.sources.knowledge?.total || 0;
+  const intel = result.sources.engagement_intel?.total || 0;
+  result.summary = {
+    total_memories: kb + intel,
+    knowledge_patterns: kb,
+    engagement_observations: intel,
+    ctxly_configured: result.sources.ctxly?.configured || false,
+  };
+
+  if (format === "json") {
+    return res.json(result);
+  }
+
+  // HTML dashboard
+  const html = `<!DOCTYPE html>
+<html><head><title>Memory Dashboard</title>
+<style>body{font-family:system-ui;max-width:900px;margin:2rem auto;padding:0 1rem;background:#1e1e2e;color:#cdd6f4}
+h1{color:#89b4fa}h2{color:#f5c2e7;border-bottom:1px solid #45475a;padding-bottom:.5rem}
+.card{background:#313244;border-radius:8px;padding:1rem;margin:1rem 0}
+.stat{display:inline-block;margin-right:2rem;text-align:center}
+.stat-value{font-size:2rem;font-weight:bold;color:#a6e3a1}
+.stat-label{color:#6c7086;font-size:.85rem}
+table{width:100%;border-collapse:collapse}td,th{padding:.5rem;text-align:left;border-bottom:1px solid #45475a}
+th{color:#89b4fa}</style></head>
+<body>
+<h1>🧠 Cross-Session Memory</h1>
+<div class="card">
+  <div class="stat"><div class="stat-value">${result.summary.total_memories}</div><div class="stat-label">Total Memories</div></div>
+  <div class="stat"><div class="stat-value">${result.summary.knowledge_patterns}</div><div class="stat-label">Knowledge Patterns</div></div>
+  <div class="stat"><div class="stat-value">${result.summary.engagement_observations}</div><div class="stat-label">Engagement Observations</div></div>
+  <div class="stat"><div class="stat-value">${result.summary.ctxly_configured ? "✓" : "✗"}</div><div class="stat-label">Ctxly Cloud</div></div>
+</div>
+
+<h2>Knowledge Base</h2>
+<div class="card">
+  <p><strong>${result.sources.knowledge?.total || 0}</strong> patterns (${result.sources.knowledge?.self_derived || 0} self-derived, ${result.sources.knowledge?.from_crawls || 0} from crawls)</p>
+  <table><tr><th>Category</th><th>Count</th></tr>
+  ${Object.entries(result.sources.knowledge?.by_category || {}).map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("")}
+  </table>
+</div>
+
+<h2>Engagement Intel</h2>
+<div class="card">
+  <p><strong>${result.sources.engagement_intel?.current || 0}</strong> current, <strong>${result.sources.engagement_intel?.archived || 0}</strong> archived</p>
+  <table><tr><th>Type</th><th>Count</th></tr>
+  ${Object.entries(result.sources.engagement_intel?.by_type || {}).map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("")}
+  </table>
+</div>
+
+<h2>Repos Crawled</h2>
+<div class="card">
+  <p><strong>${result.sources.repos_crawled?.total || 0}</strong> repos analyzed for patterns</p>
+  <p style="color:#6c7086;font-size:.85rem">${(result.sources.repos_crawled?.repos || []).join(", ")}</p>
+</div>
+
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/memory?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/dashboard" style="color:#89b4fa">Status Dashboard</a></p>
+</body></html>`;
+  res.type("html").send(html);
+});
+
 // Queue velocity — items added/completed/retired per 10-session window
 app.get("/status/queue-velocity", (req, res) => {
   try {

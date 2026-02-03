@@ -95,6 +95,19 @@
       "commits": [],
       "created_session": 706,
       "notes": "Fixed in B#160. Added consumed_session field to archive mapping at line 457."
+    },
+    {
+      "id": "wq-064",
+      "title": "Add tests for engage-orchestrator.mjs circuit breaker",
+      "description": "engage-orchestrator.mjs has circuit breaker logic (closed/open/half-open states) and ROI scoring that affect E session behavior. Add unit tests for: state transitions, cooldown timing, outcome recording, ROI calculation.",
+      "priority": 64,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "B#160",
+      "complexity": "M",
+      "tags": ["testing"],
+      "commits": [],
+      "created_session": 707
     }
   ]
 }

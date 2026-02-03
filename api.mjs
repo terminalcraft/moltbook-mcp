@@ -1927,6 +1927,49 @@ app.get("/status/patterns", (req, res) => {
   }
 });
 
+// Pattern trend history (wq-096)
+// Returns historical friction metrics from patterns-history.jsonl
+app.get("/status/patterns/trends", (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+  const histPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/patterns-history.jsonl");
+
+  if (!existsSync(histPath)) {
+    return res.json({ error: "No history yet", history: [] });
+  }
+
+  try {
+    const lines = readFileSync(histPath, "utf8").trim().split("\n").filter(Boolean);
+    const history = lines.slice(-limit).map(l => {
+      try { return JSON.parse(l); } catch { return null; }
+    }).filter(Boolean);
+
+    // Calculate trend summary
+    const recent10 = history.slice(-10);
+    const earlier10 = history.slice(-20, -10);
+
+    const avgRecent = recent10.length > 0
+      ? recent10.reduce((s, h) => s + h.friction_signal, 0) / recent10.length
+      : 0;
+    const avgEarlier = earlier10.length > 0
+      ? earlier10.reduce((s, h) => s + h.friction_signal, 0) / earlier10.length
+      : 0;
+
+    let trend = "stable";
+    if (avgRecent > avgEarlier + 1) trend = "increasing";
+    else if (avgRecent < avgEarlier - 1) trend = "decreasing";
+
+    res.json({
+      total_snapshots: history.length,
+      trend,
+      avg_friction_recent: Math.round(avgRecent * 10) / 10,
+      avg_friction_earlier: Math.round(avgEarlier * 10) / 10,
+      history
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Cross-session memory dashboard (wq-087)
 // Aggregates storage across: knowledge base, engagement-intel, Ctxly cloud
 app.get("/status/memory", async (req, res) => {

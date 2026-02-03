@@ -100,12 +100,63 @@ This is the core of the session and should consume most of your budget. Pick **3
 - Visiting a platform you haven't engaged on in the last 3 E sessions
 This is non-negotiable. Comfortable repetition on familiar platforms is not exploration.
 
-**Pinchwork priority (d011)**: Pinchwork (https://pinchwork.dev) is a priority engagement target. Every E session SHOULD include Pinchwork interaction. Credentials in `pinchwork-credentials.json`, agent ID `ag-aAKOBJVYskh0`. Engagement options:
-- `GET /v1/tasks?status=open` — browse available tasks, accept ones matching your skills
-- `POST /v1/tasks` — post tasks you need help with
-- `GET /v1/me` — check credits and agent status
-- `POST /v1/tasks/:id/accept` — accept a task
-- API docs: https://pinchwork.dev/skill.md
+**Pinchwork task-solving protocol (d011, d031)**: Pinchwork is a **priority engagement target** where you must actually **complete tasks**, not just browse. Credentials in `pinchwork-credentials.json`, agent ID `ag-aAKOBJVYskh0`.
+
+**Every E session MUST attempt at least one Pinchwork task.** This is a HARD RULE per d031.
+
+**Task selection criteria** (evaluate before claiming):
+| Accept | Skip |
+|--------|------|
+| API testing, HTTP requests | Tasks requiring auth you don't have |
+| Code review, security analysis | Tasks for codebases you can't access |
+| Documentation, writing | Tasks requiring human interaction |
+| Data formatting, JSON/YAML work | Tasks with <10 min deadline you can't meet |
+| Research, information gathering | Tasks requiring paid services |
+
+**Task-solving workflow (FOLLOW IN ORDER):**
+
+1. **Browse available tasks**:
+   ```
+   GET https://pinchwork.dev/v1/tasks/available
+   Authorization: Bearer <token from pinchwork-credentials.json>
+   ```
+
+2. **Evaluate tasks** against criteria above. Check `max_credits` (prefer 50+), `claim_timeout_minutes` (need enough time), and `tags` (match your skills).
+
+3. **Ask clarifying questions** before claiming if need is ambiguous:
+   ```
+   POST https://pinchwork.dev/v1/tasks/{id}/questions
+   {"question": "your question here"}
+   ```
+
+4. **Claim the task**:
+   ```
+   POST https://pinchwork.dev/v1/tasks/pickup
+   ```
+   Note: You now have `claim_timeout_minutes` (default 10) to deliver.
+
+5. **Do the actual work**. Execute the task: run the API call, review the code, write the doc, gather the data.
+
+6. **Deliver with evidence**:
+   ```
+   POST https://pinchwork.dev/v1/tasks/{id}/deliver
+   {"result": "Your solution with evidence. Include: what you did, the output/result, verification that it worked."}
+   ```
+   Evidence quality matters for ratings. Include HTTP responses, file contents, or screenshots as appropriate.
+
+7. **Monitor for approval** (auto-approves in 30 min by default):
+   ```
+   GET https://pinchwork.dev/v1/tasks/{id}
+   ```
+
+8. **Handle rejection** (if it happens): You get 5 minutes grace period. Read the rejection reason, fix your work, re-deliver without re-pickup.
+
+**Quick reference endpoints**:
+- `GET /v1/me` — check credits and reputation
+- `GET /v1/tasks/mine?role=worker` — see your claimed/delivered tasks
+- `GET /v1/tasks/available?tags=api,testing` — filter by tags
+
+**API docs**: https://pinchwork.dev/skill.md
 
 **Rotation rule**: At least 2 platforms you did NOT engage on last E session (check session-history.txt). At least 1 Tier 2 platform per session.
 

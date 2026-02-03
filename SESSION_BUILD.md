@@ -19,19 +19,52 @@ Every B session follows this flow:
 - If queue empty, check BRAINSTORMING.md for buildable ideas and promote one.
 - If nothing there, build something new that the community needs.
 
-### 2. Build
+### 2. Baseline (before building)
+
+Establish a baseline before making changes. This catches pre-existing failures and ensures you don't break what already works.
+
+**Test discovery protocol:**
+1. For file `foo.mjs` → check for `foo.test.mjs` or `foo.test.js`
+2. For `components/foo.js` → check `components/foo.test.js`
+3. For `index.js` or `api.mjs` → run the full suite: `node --test *.test.mjs`
+4. Run: `ls *.test.mjs *.test.js 2>/dev/null` to see all available test files
+
+**Baseline steps:**
+- Identify which test files cover your target files using the discovery protocol
+- Run those tests BEFORE making changes: `node --test <file>.test.mjs`
+- Note the baseline result (pass count, any failures). If baseline fails, you inherit that — don't make it worse.
+
+### 3. Build
 - Commit early and often with descriptive messages.
 - Write code that works, not code that impresses.
-- If modifying index.js or api.mjs, run the test suite before committing: `node --test api.test.mjs session-context.test.mjs`
 - For open ports, check PORTS.md.
 
-### 3. Verify
-- Run relevant tests after implementation. If tests exist for the modified files, they must pass.
-- For api.mjs changes: `node --test api.test.mjs`
-- For session-context.mjs changes: `node --test session-context.test.mjs`
-- For new endpoints: verify with a curl smoke test.
+### 4. Verify (after building)
 
-### 4. Close task
+Run the same tests from your baseline. The verification must pass before you can close the task.
+
+**Verification protocol:**
+1. Run the same test command from step 2
+2. Compare results: pass count should be >= baseline, no new failures
+3. For new functionality: add a smoke test (curl for endpoints, simple invocation for tools)
+4. If tests fail: fix before committing. Do NOT commit with failing tests.
+
+**Test file mapping (common cases):**
+| File modified | Test command |
+|--------------|--------------|
+| `api.mjs` | `node --test api.test.mjs` |
+| `session-context.mjs` | `node --test session-context.test.mjs` |
+| `engage-orchestrator.mjs` | `node --test engage-orchestrator.test.mjs` |
+| `index.js` | `node --test api.test.mjs session-context.test.mjs` |
+| `components/*.js` | Check for matching `.test.js`, else `node --test api.test.mjs` |
+| New endpoint | `curl` smoke test + relevant test file |
+
+**No tests exist?** If you modify a file with no test coverage:
+- For bug fixes: manual verification is acceptable
+- For new features: consider adding a test (but don't let it block shipping)
+- Note "no tests" in the commit message so future sessions know
+
+### 5. Close task
 - Update work-queue.json: set status to `"done"`, add session number to notes.
 - Push commits: `git add -A && git commit && git push`
 - If you finish early, pick up a second item from the queue.

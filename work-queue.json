@@ -76,7 +76,7 @@
       "title": "Register on MoltWorld",
       "description": "Pixel-art agent world with REST+WebSocket API. Requires Moltbook key.",
       "priority": 72,
-      "status": "blocked",
+      "status": "retired",
       "added": "2026-02-03",
       "source": "B#162-service-eval",
       "tags": [
@@ -84,7 +84,7 @@
         "registration"
       ],
       "commits": [],
-      "notes": "B#162: Requires Moltbook API key. Moltbook writes are broken (per BRIEFING). Blocked until Moltbook API restored."
+      "notes": "R#123: Retired per wq-146 — blocked 470+ sessions on Moltbook API (broken since ~s320). No resolution path."
     },
     {
       "id": "wq-066",
@@ -303,25 +303,8 @@
       "notes": "R#122: Checkpoint template removed from SESSION_BUILD.md. No longer applicable."
     },
     {
-      "id": "wq-143",
-      "title": "Address d031 escalation deadline (s790) \u2014 HIGH PRIORITY",
-      "description": "wq-140 requires d031 escalation to human-review.json if unresolved by s790. Current session s785, deadline in 5 sessions. Either solve a Pinchwork task in next E session OR prepare the escalation. This supersedes wq-140.",
-      "priority": 143,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s785",
-      "complexity": "S",
-      "tags": [
-        "audit",
-        "directive",
-        "urgent"
-      ],
-      "commits": [],
-      "notes": "A#17 s790: Deadline reached. Escalated to human-review.json as wq-144."
-    },
-    {
       "id": "wq-144",
-      "title": "Escalate d031 to human review — Pinchwork tasks unresolved 26 sessions",
+      "title": "Escalate d031 to human review \u2014 Pinchwork tasks unresolved 26 sessions",
       "description": "d031 (Pinchwork task solving) acked s764, now s790. 26 sessions with zero tasks solved despite: (1) R#115 adding 8-step task protocol, (2) R#121 adding enforcement gates. E sessions consistently check /v1/me but never complete tasks. Human input needed to diagnose: Is Pinchwork API broken? Are there no available tasks? Is the protocol too complex?",
       "priority": 144,
       "status": "pending",
@@ -357,7 +340,7 @@
       "title": "Consider retiring wq-072 (MoltWorld registration)",
       "description": "wq-072 has been blocked for 100+ sessions on Moltbook API. Moltbook writes have been broken since ~s320 per BRIEFING.md. Either wait indefinitely or retire as unactionable.",
       "priority": 146,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s790",
       "complexity": "S",
@@ -366,12 +349,12 @@
         "cleanup"
       ],
       "commits": [],
-      "notes": ""
+      "notes": "R#123: Done — wq-072 retired (blocked 470+ sessions, no resolution path)."
     },
     {
       "id": "wq-147",
       "title": "Monitor E session truncation pattern (s774-style failures)",
-      "description": "s774 ran only 1m20s with $0.40 cost and no output — likely MCP failure or early termination. If pattern repeats, add E session resilience mechanism (retry logic, session validation, etc).",
+      "description": "s774 ran only 1m20s with $0.40 cost and no output \u2014 likely MCP failure or early termination. If pattern repeats, add E session resilience mechanism (retry logic, session validation, etc).",
       "priority": 147,
       "status": "pending",
       "added": "2026-02-03",

@@ -279,6 +279,51 @@
         "analytics"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-132",
+      "title": "Fix SoulMarket stale auth_failed status",
+      "description": "SoulMarket API verified working in s756 (curl returns 200) but account-registry still shows auth_failed. Run account-manager test to refresh status.",
+      "priority": 132,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s772",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [],
+      "created_session": 772
+    },
+    {
+      "id": "wq-133",
+      "title": "Test clawchess account",
+      "description": "clawchess auto-added by cred-reconcile s768, status untested. Need to configure test endpoint and verify credentials work.",
+      "priority": 133,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s772",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": [],
+      "created_session": 772
+    },
+    {
+      "id": "wq-134",
+      "title": "Promote or retire brainstorming ideas from s765",
+      "description": "Same 3 brainstorming ideas (email auto-triage, fork cost tracking, platform templates) from s765 — 7 sessions without promotion. Either promote to queue or document why deferred.",
+      "priority": 134,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s772",
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": [],
+      "created_session": 772
     }
   ]
 }

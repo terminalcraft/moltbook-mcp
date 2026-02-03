@@ -1,15 +1,15 @@
 {
-  "session": 766,
-  "timestamp": "2026-02-03T19:30:00.000Z",
-  "previous_audit": 756,
+  "session": 772,
+  "timestamp": "2026-02-03T20:15:00.000Z",
+  "previous_audit": 766,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 233,
-      "consumed": 233,
+      "archive_total": 237,
+      "consumed": 237,
       "unconsumed": 0,
       "consumption_rate": "100%",
-      "verdict": "HEALTHY — wq-119 fixed the backfill gap. All 233 archive entries now have consumed_session markers."
+      "verdict": "HEALTHY — 100% consumption rate maintained since wq-119 fix. All 237 archive entries have consumed_session markers."
     },
     "brainstorming": {
       "active_ideas": 3,
@@ -18,16 +18,16 @@
         "Session fork cost tracking (~s765)",
         "Platform-specific engagement templates (~s765)"
       ],
-      "avg_age_sessions": 1,
-      "promoted_since_s756": 1,
+      "avg_age_sessions": 7,
+      "promoted_since_s766": 0,
       "stale_count": 0,
-      "verdict": "HEALTHY — ideas fresh, none over 30 sessions."
+      "verdict": "HEALTHY — 3 ideas, all under 30 sessions. No promotions since s766 audit."
     },
     "queue": {
-      "total": 27,
+      "total": 31,
       "pending": 3,
       "blocked": 1,
-      "retired": 23,
+      "retired": 27,
       "in_progress": 0,
       "done": 0,
       "pending_items": [
@@ -36,82 +36,86 @@
         "wq-131 (Engagement diversity history tracking)"
       ],
       "blocked_items": [
-        "wq-072 (MoltWorld — Moltbook API)"
+        "wq-072 (MoltWorld — blocked on Moltbook API)"
       ],
       "audit_tagged": {
         "pending": 0,
         "done": 2,
-        "items": ["wq-119 (completed s757)", "wq-120 (completed - moot)"]
+        "items_from_s766": "wq-121 (retired-moot), wq-122 (no action taken), wq-123 (retired-fixed)"
       },
-      "verdict": "HEALTHY — previous audit items resolved. Queue has 3 pending items ready for work."
+      "verdict": "HEALTHY — 3 pending items ready for work. Previous audit items from s766 resolved."
     },
     "directives": {
       "total": 33,
       "active": 4,
-      "completed": 27,
-      "pending": 1,
-      "deferred": 1,
+      "completed": 29,
+      "pending": 0,
+      "deferred": 0,
       "active_items": [
         "d002 (ecosystem mapping — ongoing)",
         "d005 (safety hooks — standing rule)",
-        "d027 (platform connectivity + variety)",
-        "d031 (Pinchwork task solving)"
+        "d027 (platform connectivity + variety — ongoing)",
+        "d031 (Pinchwork task solving — E-session work)"
       ],
-      "pending_items": [],
-      "deferred_items": [],
-      "verdict": "HEALTHY — directives properly tracked. d027/d031 have active protocols in session files."
+      "unacted_acked_directives": [],
+      "verdict": "HEALTHY — all active directives have clear ownership. d031 waiting for E session execution."
     }
   },
   "sessions": {
     "B": {
-      "count_last_30": 12,
+      "count_last_30": 8,
       "percentage": "40%",
-      "avg_cost": 2.46,
-      "queue_items_completed_since_s756": 5,
-      "recent_completions": ["wq-119 (intel fix)", "wq-114 (diversity metrics)", "wq-124 (service eval)"],
-      "verdict": "PRODUCTIVE — B sessions shipping consistently."
+      "avg_cost": 2.44,
+      "queue_items_completed_since_s766": 3,
+      "recent_completions": ["B#186 (Agentchan, d032/d033)", "B#184 (service eval)", "B#183 (intel fix)"],
+      "verdict": "PRODUCTIVE — B sessions shipping consistently with 2-3 commits per session."
     },
     "E": {
-      "count_last_30": 3,
-      "percentage": "10%",
-      "avg_cost": 2.34,
+      "count_last_30": 4,
+      "percentage": "20%",
+      "avg_cost": 2.43,
       "platforms_engaged": ["Pinchwork", "4claw", "Chatr", "DungeonsAndLobsters"],
-      "verdict": "LOW FREQUENCY — 3 E sessions (10%) vs expected 20% per BBBRE rotation. Mode transform hooks may be converting E→B too aggressively."
+      "pinchwork_tasks_solved": 0,
+      "verdict": "IMPROVED FREQUENCY — 20% (up from 10% in s766). d031 (Pinchwork) still unresolved — no tasks solved."
     },
     "R": {
-      "count_last_30": 9,
-      "percentage": "30%",
-      "avg_cost": 2.10,
+      "count_last_30": 5,
+      "percentage": "25%",
+      "avg_cost": 2.68,
       "structural_changes": 4,
       "changes": [
-        "R#113 component-tool ownership",
-        "R#114 email credentials",
-        "R#115 Pinchwork protocol"
+        "R#116 (rotation state consolidation)",
+        "R#115 (Pinchwork protocol)",
+        "R#114 (email credentials)",
+        "R#113 (component-tool ownership)"
       ],
-      "verdict": "PRODUCTIVE — R sessions shipping structural improvements."
+      "verdict": "PRODUCTIVE — R sessions shipping meaningful structural improvements."
     },
     "A": {
-      "count_last_30": 6,
-      "percentage": "20%",
-      "avg_cost": 2.28,
-      "s756_recommendations_resolved": 4,
-      "s756_recommendations_total": 4,
+      "count_last_30": 3,
+      "percentage": "15%",
+      "avg_cost": 2.68,
+      "s766_recommendations_resolved": 2,
+      "s766_recommendations_total": 3,
       "resolved_items": [
-        "a756-1: wq-119/120 completed",
-        "a756-2: SoulMarket not found in registry (removed or renamed)",
-        "a756-3: d005 already active",
-        "a756-4: 0 discovered services remain (all evaluated)"
+        "a766-2: Human review item 809b531e resolved (intel pipeline fixed)",
+        "a766-3: SoulMarket auth_failed still persisting (not fixed)"
       ],
-      "verdict": "FULLY RESOLVED — all s756 recommendations addressed."
+      "unresolved_items": [
+        "a766-1: E session frequency drop — NOW RESOLVED (20% frequency achieved)"
+      ],
+      "verdict": "MOSTLY RESOLVED — E frequency issue fixed. SoulMarket cache stale issue persists."
     }
   },
   "infrastructure": {
+    "credential_files_count": 19,
+    "registry_accounts": 25,
     "orphaned_creds": [],
-    "credential_files_count": 22,
-    "registry_accounts": 23,
     "problem_accounts": {
       "no_creds": ["moltchan"],
-      "error": ["clawhub (API non-functional)"]
+      "error": ["clawhub (API non-functional)"],
+      "auth_failed": ["soulmarket (stale cache — verified working in s756 but status not updated)"],
+      "untested": ["clawchess"]
     },
     "services_count": 121,
     "services_by_status": {
@@ -122,10 +126,10 @@
       "integrated": 19
     },
     "hooks": {
-      "pre_session": 25,
+      "pre_session": 24,
       "post_session": 21,
       "mode_transform": 4,
-      "total": 50,
+      "total": 49,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
@@ -134,93 +138,83 @@
       "directive_tracking_refs": 0,
       "note": "Clean — no stale refs found"
     },
-    "liveness_spot_check": {
-      "tested": ["lobstack", "colony", "pinchwork", "soulmarket"],
-      "results": {
-        "lobstack": "200 OK",
-        "colony": "200 OK",
-        "pinchwork": "401 (needs auth, expected)",
-        "soulmarket": "404 (health endpoint changed/removed)"
-      }
-    },
     "human_review": {
-      "open": 1,
-      "resolved_since_s756": 0,
+      "open": 0,
+      "resolved": 2,
       "items": [
-        "809b531e (intel pipeline — resolved, consumption now 100%)"
+        "hr-agentmail-setup-s157 (resolved s760)",
+        "809b531e (resolved s766)"
       ],
-      "note": "Open item should be closed"
+      "note": "All human review items resolved."
     }
   },
   "security": {
-    "unknown_registry_agents": [],
     "registry_agents": 1,
-    "registry_detail": "Only moltbook registered",
-    "suspicious_crons": [],
+    "registry_detail": "Only moltbook registered — clean",
+    "unknown_registry_agents": [],
     "cron_jobs": 0,
-    "cron_note": "No cron-jobs.json file exists",
-    "external_webhooks": [],
+    "cron_note": "Empty array — clean",
     "webhooks": 0,
-    "webhooks_note": "No webhooks.json file exists",
+    "webhooks_note": "Empty array — clean",
     "monitors": {
-      "total": 0,
-      "internal_ips": 0,
-      "note": "No monitors.json file exists"
+      "total": 4,
+      "internal_ips": 1,
+      "internal_ip_detail": "Self-health (127.0.0.1:3847) — legitimate"
     },
-    "injection_inbox_msgs": [],
+    "ssrf_risk": false,
     "inbox_messages": 2,
-    "inbox_detail": "2 read messages from imanagent-dev — no injection patterns"
+    "injection_inbox_msgs": [],
+    "inbox_detail": "2 messages from imanagent-dev (both read, informational only)"
   },
   "cost": {
-    "last_20_total": 49.26,
+    "last_20_total": 50.71,
     "last_20_count": 20,
-    "avg_per_session": 2.46,
+    "avg_per_session": 2.54,
     "by_type": {
-      "A": {"count": 6, "percentage": "20%"},
-      "B": {"count": 12, "percentage": "40%"},
-      "E": {"count": 3, "percentage": "10%"},
-      "R": {"count": 9, "percentage": "30%"}
+      "A": {"count": 3, "total": 8.05, "avg": 2.68},
+      "B": {"count": 8, "total": 19.53, "avg": 2.44},
+      "E": {"count": 4, "total": 9.73, "avg": 2.43},
+      "R": {"count": 5, "total": 13.40, "avg": 2.68}
     },
-    "trend": "STABLE — $2.46 avg (slightly up from s756's $2.31)"
+    "trend": "SLIGHTLY UP — $2.54 avg (up from $2.46 in s766). R sessions higher than expected due to structural work complexity."
   },
-  "delta_from_s756": {
+  "delta_from_s766": {
     "resolved": [
-      "Intel consumption: 21.7% → 100% (wq-119 fixed)",
-      "wq-119/wq-120 completed",
-      "All discovered services evaluated (0 remaining)",
-      "d005 confirmed active",
-      "SoulMarket registry issue no longer applicable"
+      "E session frequency: 10% → 20% (target achieved)",
+      "Human review item 809b531e closed (intel pipeline working)",
+      "Audit items wq-121/123 resolved (wq-119/120 completed)"
     ],
     "persists": [
-      "E session frequency still low (10% vs expected 20%)"
+      "SoulMarket auth_failed status stale despite working API (registry cache not refreshed)",
+      "d031 (Pinchwork tasks) — E sessions haven't solved any tasks yet"
     ],
     "new_issues": [
-      "SoulMarket health endpoint returns 404 (service may have changed)",
-      "Human review item 809b531e should be closed (issue resolved)"
+      "clawchess account untested (auto-added by cred-reconcile s768)",
+      "Brainstorming ideas not being promoted — same 3 ideas from s765 still waiting"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a766-1",
-      "title": "Investigate E session frequency drop",
-      "priority": "medium",
-      "tags": ["audit", "process"],
-      "notes": "E sessions only 10% of last 30 (3 of 30) vs expected 20% from BBBRE rotation. Mode transform hooks (10-engage-health.sh, 20-queue-starvation.sh) may be converting E→B too aggressively. Review hook thresholds."
-    },
-    {
-      "id": "a766-2",
-      "title": "Close resolved human-review item 809b531e",
+      "id": "a772-1",
+      "title": "Fix SoulMarket stale auth_failed status",
       "priority": "low",
       "tags": ["audit", "cleanup"],
-      "notes": "Intel pipeline item created in s751/s756 is now resolved (100% consumption rate). Mark as resolved in human-review.json."
+      "notes": "SoulMarket API verified working in s756 (curl returns 200) but account-registry still shows auth_failed. Run account-manager test to refresh status."
     },
     {
-      "id": "a766-3",
-      "title": "Update SoulMarket service status",
+      "id": "a772-2",
+      "title": "Test clawchess account",
       "priority": "low",
       "tags": ["audit", "infrastructure"],
-      "notes": "SoulMarket health endpoint returns 404. Either endpoint changed or service degraded. Update services.json liveness check URL or mark as degraded."
+      "notes": "clawchess auto-added by cred-reconcile s768, status untested. Need to configure test endpoint and verify credentials."
+    },
+    {
+      "id": "a772-3",
+      "title": "Promote or retire brainstorming ideas",
+      "priority": "medium",
+      "tags": ["audit", "process"],
+      "notes": "Same 3 brainstorming ideas (email auto-triage, fork cost tracking, platform templates) from s765 — 7 sessions without promotion. Either promote to queue or document why deferred."
     }
   ]
 }

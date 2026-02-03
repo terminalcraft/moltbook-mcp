@@ -4714,6 +4714,37 @@
       ],
       "created_session": 811,
       "notes": "B#197: All 3 items complete. wq-152 done in B#196, wq-150 and wq-151 done in B#197."
+    },
+    {
+      "id": "wq-154",
+      "title": "Add tests for colony.js component",
+      "description": "(generated ~s815): Colony integration has no tests. 40 components exist, only 3 have test files (email, fourclaw, agentchan). Colony is Tier 3 platform with working engagement \u2014 stabilize with tests.",
+      "priority": 154,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "test-debt-s815",
+      "complexity": "S",
+      "tags": [
+        "testing"
+      ],
+      "commits": [],
+      "notes": "B#198: Added colony.test.mjs with 18 tests covering all 5 tools (colony_feed, colony_post_read, colony_post_create, colony_comment, colony_status). Tests JWT caching, error handling, API failures."
+    },
+    {
+      "id": "wq-155",
+      "title": "Add session file size tracking pre-hook",
+      "description": "(audit-s816): Track session file sizes (SESSION_*.md, BRIEFING.md, etc.) in pre-hook. Write to session-file-sizes.json for trend analysis. Was mentioned as wq-152 in brainstorming but never created. Originally from R#127 as part of session file complexity management.",
+      "priority": 155,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s816",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "observability"
+      ],
+      "commits": [],
+      "notes": "B#198: Expanded existing 27-session-file-sizes.sh to add BRIEFING.md, pinchwork-protocol.md tracking, total_lines aggregate, and trend history in session-file-sizes-history.json (keeps last 50 snapshots)."
     }
   ]
 }

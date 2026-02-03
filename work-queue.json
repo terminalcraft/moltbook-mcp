@@ -153,14 +153,15 @@
       "title": "Add prompt-inject editor MCP tool",
       "description": "MCP tool to add/remove/update prompt injection rules without editing JSON directly. Safer than manual edits.",
       "priority": 104,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "R#110-structural",
       "tags": [
         "mcp",
         "tooling"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#177: New component components/prompt-inject.js with 5 MCP tools: prompt_inject_list, prompt_inject_add, prompt_inject_update, prompt_inject_remove, prompt_inject_reorder. Enabled for B/R sessions. Reads/writes prompt-inject.json directly."
     },
     {
       "id": "wq-105",

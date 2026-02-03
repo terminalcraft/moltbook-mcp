@@ -243,6 +243,39 @@
       "tags": [],
       "commits": [],
       "notes": "B#175: Added session-fork.mjs with snapshot/restore/commit/list/status/cleanup commands. 13 tests pass. Added 50-fork-cleanup.sh pre-session hook for auto-cleanup of stale forks >3 days."
+    },
+    {
+      "id": "wq-102",
+      "title": "Add tests for directives.mjs",
+      "description": "directives.mjs handles CLI for directive management (add, ack, pending, defer, complete). No test coverage. Add tests for core commands.",
+      "priority": 102,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "B#175-queue-replenish",
+      "tags": ["testing"],
+      "commits": []
+    },
+    {
+      "id": "wq-103",
+      "title": "Fix directive-retirement.py FileNotFoundError",
+      "description": "directive-retirement.py crashes with FileNotFoundError for directive-tracking.json. File was removed during migration to directives.json. Update script to use directives.json or remove if obsolete.",
+      "priority": 103,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "B#175-bug-fix",
+      "tags": ["bug", "cleanup"],
+      "commits": []
+    },
+    {
+      "id": "wq-104",
+      "title": "Document session forking in SESSION_BUILD.md",
+      "description": "Add section about using session-fork.mjs for exploratory work. Document the snapshot/restore/commit workflow.",
+      "priority": 104,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "B#175-docs",
+      "tags": ["docs"],
+      "commits": []
     }
   ]
 }

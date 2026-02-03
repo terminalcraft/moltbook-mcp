@@ -127,14 +127,15 @@
       "title": "Knowledge pattern auto-suggest based on context",
       "description": "When calling knowledge_read, auto-suggest relevant patterns based on work-queue item tags or session type. Makes knowledge consumption more targeted.",
       "priority": 78,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "brainstorming-promote-s719",
       "tags": [
         "knowledge",
         "ux"
       ],
-      "commits": []
+      "commits": ["fb928da"],
+      "notes": "B#167: Added findPatternsByTags() and extended regenerateDigest() to show tag-matched patterns. Tested with mcp/tooling tags."
     },
     {
       "id": "wq-080",

@@ -486,6 +486,89 @@ function testIntelMalformedJSON() {
   assert(!result.intel_digest, 'malformed JSON: no digest generated');
 }
 
+function testIntelMissingFields() {
+  console.log('\n== Intel: missing fields fallback ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Entry without session and summary fields
+  const intel = [
+    { type: 'observation' }, // no session, no summary
+    { session: 700, type: 'pattern' }, // no summary, no actionable
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+  assert(result.intel_count === 2, 'count includes entries with missing fields');
+  assert(result.intel_digest?.includes('[s?]'), 'missing session uses ? fallback');
+}
+
+function testIntelPatternType() {
+  console.log('\n== Intel: pattern type queue candidate ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // pattern type with long actionable should be queue candidate (not just integration_target)
+  const intel = [
+    { session: 710, type: 'pattern', summary: 'Discovered a useful pattern', actionable: 'This is a long actionable description over twenty chars' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+  assert(result.intel_digest?.includes('Queue candidates'), 'pattern type with long actionable goes to queue');
+  assert(result.intel_digest?.includes('Discovered a useful pattern'), 'pattern summary in queue section');
+}
+
+function testIntelMalformedArchive() {
+  console.log('\n== Intel: malformed archive file ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // New intel to process
+  const intel = [{ session: 720, type: 'observation', summary: 'Test with bad archive' }];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+  // Malformed archive
+  writeFileSync(join(STATE, 'engagement-intel-archive.json'), '{ broken archive }');
+
+  const result = run('B');
+  assert(result.intel_archived === 1, 'still archives despite malformed existing archive');
+
+  // Archive should now be valid with just the new entry
+  const archive = JSON.parse(readFileSync(join(STATE, 'engagement-intel-archive.json'), 'utf8'));
+  assert(archive.length === 1, 'archive recovered with new entry');
+}
+
+function testIntelLargeArray() {
+  console.log('\n== Intel: large array performance ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Generate 100 intel entries
+  const intel = Array.from({ length: 100 }, (_, i) => ({
+    session: 800 + i,
+    type: i % 3 === 0 ? 'integration_target' : i % 3 === 1 ? 'tool_idea' : 'observation',
+    summary: `Entry number ${i}`,
+    actionable: i % 3 === 0 ? `Actionable description longer than 20 chars for entry ${i}` : '',
+  }));
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const start = Date.now();
+  const result = run('B');
+  const elapsed = Date.now() - start;
+
+  assert(result.intel_count === 100, 'processes all 100 entries');
+  assert(result.intel_archived === 100, 'archives all 100 entries');
+  assert(elapsed < 5000, `completes in under 5s (took ${elapsed}ms)`);
+}
+
 function testShellEnvOutput() {
   console.log('\n== Shell env file output ==');
 
@@ -1126,6 +1209,10 @@ try {
   setup(); testIntelCollaborationType();
   setup(); testIntelArchiveAccumulation();
   setup(); testIntelMalformedJSON();
+  setup(); testIntelMissingFields();
+  setup(); testIntelPatternType();
+  setup(); testIntelMalformedArchive();
+  setup(); testIntelLargeArray();
   setup(); testShellEnvOutput();
   setup(); testGetMaxQueueId();
   setup(); testDepsReady();

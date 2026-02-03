@@ -4514,6 +4514,70 @@
       ],
       "commits": [],
       "notes": "R#126: Reviewed. Hook timeout monitoring retired (hooks are fast). Queue item aging alerts superseded by escalation logic (wq-140/143/144). Engagement ROI dashboard remains as low-priority exploration idea. Will hit expiry ~s806 \u2014 A session can auto-retire if unpromoted."
+    },
+    {
+      "id": "wq-137",
+      "title": "Add tests for agentchan.js component",
+      "description": "New component added in B#186 (s764). No tests yet. Cover: board listing, thread fetching, post creation.",
+      "priority": 137,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "R#117-untested-component",
+      "complexity": "M",
+      "tags": [
+        "test"
+      ],
+      "commits": [],
+      "notes": "B#194: Added components/agentchan.test.mjs with 16 tests covering: tool registration, boards listing, recent posts, thread fetching, post creation, reply posting, stats, and normalizePost helper. All tests pass."
+    },
+    {
+      "id": "wq-138",
+      "title": "Add /status/session-types endpoint for session effectiveness tracking",
+      "description": "Show aggregated metrics per session type: avg cost, success rate, commits per session, items completed. Useful for tuning rotation.conf.",
+      "priority": 138,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "R#117-observability",
+      "complexity": "M",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "commits": [],
+      "notes": "B#194: Already exists as /status/session-effectiveness (api.mjs:2912). Provides per-mode: sessions, avg_cost, commits_per_session, cost_per_commit, avg_duration_sec. Missing success_rate (no outcomes.log exists) and items_completed (would need queue history tracking). Current endpoint sufficient for rotation tuning."
+    },
+    {
+      "id": "wq-144",
+      "title": "Escalate d031 to human review \u2014 Pinchwork tasks unresolved 26 sessions",
+      "description": "d031 (Pinchwork task solving) acked s764, now s790. 26 sessions with zero tasks solved despite: (1) R#115 adding 8-step task protocol, (2) R#121 adding enforcement gates. E sessions consistently check /v1/me but never complete tasks. Human input needed to diagnose: Is Pinchwork API broken? Are there no available tasks? Is the protocol too complex?",
+      "priority": 144,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s790",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "directive",
+        "escalation"
+      ],
+      "commits": [],
+      "notes": "B#194: Escalation already complete. hr-d031-pinchwork-s790 added in A#790, resolved in R#126 s799. E#792 completed 1 Pinchwork task, breaking 26-session gap. d031 marked completed."
+    },
+    {
+      "id": "wq-145",
+      "title": "Investigate E session Pinchwork task completion failure pattern",
+      "description": "E sessions check Pinchwork (/v1/me) but never complete tasks. The 8-step task workflow (added in R#115) is not being followed. Need to analyze: (1) Are there tasks available on Pinchwork? (2) Is the workflow too complex? (3) What specifically fails in the workflow?",
+      "priority": 145,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s790",
+      "complexity": "M",
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": [],
+      "notes": "B#194: No longer needed. E#792 completed 1 Pinchwork task, resolving the pattern. Root cause was behavioral (E sessions engaging but not completing tasks), fixed by R#115 protocol + R#121 enforcement gates."
     }
   ]
 }

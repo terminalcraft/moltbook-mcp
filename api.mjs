@@ -2578,6 +2578,100 @@ ${entries.length ? `<table><tr><th>Name</th><th>Session</th><th>Files</th><th>Ag
   }
 });
 
+// Circuit breaker diagnostics (wq-126, d027)
+// Shows all open circuits, last failure reasons, time until half-open retry
+app.get("/status/circuits", (req, res) => {
+  const format = req.query.format || "json";
+  const CIRCUIT_PATH = join(BASE, "platform-circuits.json");
+  const CIRCUIT_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24h
+  const CIRCUIT_FAILURE_THRESHOLD = 3;
+
+  try {
+    let circuits = {};
+    if (existsSync(CIRCUIT_PATH)) {
+      circuits = JSON.parse(readFileSync(CIRCUIT_PATH, "utf8"));
+    }
+
+    const entries = Object.entries(circuits).map(([platform, entry]) => {
+      let state = "closed";
+      let timeToRetry = null;
+      if (entry.consecutive_failures >= CIRCUIT_FAILURE_THRESHOLD) {
+        const elapsed = Date.now() - new Date(entry.last_failure).getTime();
+        if (elapsed >= CIRCUIT_COOLDOWN_MS) {
+          state = "half-open";
+        } else {
+          state = "open";
+          timeToRetry = Math.ceil((CIRCUIT_COOLDOWN_MS - elapsed) / (60 * 1000)); // minutes
+        }
+      }
+      return {
+        platform,
+        state,
+        consecutive_failures: entry.consecutive_failures,
+        total_failures: entry.total_failures,
+        total_successes: entry.total_successes,
+        last_failure: entry.last_failure,
+        last_success: entry.last_success,
+        time_to_retry_min: timeToRetry
+      };
+    }).sort((a, b) => {
+      // Open first, then half-open, then closed
+      const order = { open: 0, "half-open": 1, closed: 2 };
+      return (order[a.state] - order[b.state]) || b.consecutive_failures - a.consecutive_failures;
+    });
+
+    const openCount = entries.filter(e => e.state === "open").length;
+    const halfOpenCount = entries.filter(e => e.state === "half-open").length;
+    const closedCount = entries.filter(e => e.state === "closed").length;
+
+    const result = {
+      collected_at: new Date().toISOString(),
+      summary: {
+        total: entries.length,
+        open: openCount,
+        half_open: halfOpenCount,
+        closed: closedCount,
+        health: openCount === 0 ? "healthy" : openCount < 3 ? "degraded" : "critical"
+      },
+      circuits: entries
+    };
+
+    if (format === "json") return res.json(result);
+
+    const stateColor = (s) => s === "open" ? "#f38ba8" : s === "half-open" ? "#f9e2af" : "#a6e3a1";
+    const rows = entries.map(e => `<tr>
+      <td>${e.platform}</td>
+      <td style="color:${stateColor(e.state)};font-weight:bold">${e.state.toUpperCase()}</td>
+      <td>${e.consecutive_failures}</td>
+      <td>${e.total_failures}/${e.total_successes}</td>
+      <td>${e.last_failure || "—"}</td>
+      <td>${e.time_to_retry_min ? e.time_to_retry_min + "m" : "—"}</td>
+    </tr>`).join("");
+
+    const healthColor = result.summary.health === "healthy" ? "#a6e3a1" : result.summary.health === "degraded" ? "#f9e2af" : "#f38ba8";
+    const html = `<html><head><title>Circuit Breaker Status</title><style>body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;padding:2rem}h1{color:#89b4fa}table{border-collapse:collapse;margin-top:1rem}th,td{border:1px solid #45475a;padding:.5rem;text-align:left}th{background:#313244}.badge{display:inline-block;padding:.2rem .5rem;border-radius:4px;font-size:.8rem}</style></head><body>
+<h1>Circuit Breaker Status</h1>
+<p>Overall health: <span class="badge" style="background:${healthColor};color:#1e1e2e">${result.summary.health.toUpperCase()}</span></p>
+<p>${openCount} open, ${halfOpenCount} half-open, ${closedCount} closed</p>
+${entries.length ? `<table>
+<tr><th>Platform</th><th>State</th><th>Consec. Failures</th><th>Total (F/S)</th><th>Last Failure</th><th>Retry In</th></tr>
+${rows}
+</table>` : "<p>No circuit data — all platforms healthy or no data collected yet.</p>"}
+<p style="margin-top:1rem;color:#6c7086;font-size:.8rem">
+  Circuits open after ${CIRCUIT_FAILURE_THRESHOLD} consecutive failures. Half-open retry after 24h cooldown.
+</p>
+<p style="margin-top:2rem;color:#555;font-size:.75rem">
+  <a href="/status/circuits?format=json" style="color:#89b4fa">JSON</a> ·
+  <a href="/status/platforms" style="color:#89b4fa">Platform Health</a> ·
+  <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a>
+</p>
+</body></html>`;
+    res.send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Cross-session memory dashboard (wq-087)
 // Aggregates storage across: knowledge base, engagement-intel, Ctxly cloud
 app.get("/status/memory", async (req, res) => {

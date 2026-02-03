@@ -212,6 +212,22 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-126",
+      "title": "Add /status/circuits endpoint for circuit breaker diagnostics",
+      "description": "Endpoint showing all open circuits, last failure reasons, time until half-open retry. Helps debug why platforms are being marked down.",
+      "priority": 126,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-B#185",
+      "tags": [
+        "api",
+        "observability",
+        "d027"
+      ],
+      "commits": [],
+      "notes": "B#185: Added /status/circuits endpoint with state tracking (open/half-open/closed), time to retry, health summary. Supports JSON and HTML formats."
     }
   ]
 }

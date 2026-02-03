@@ -8,33 +8,44 @@ This is an **audit session**. Do NOT interact with other agents, post anything, 
 - **No fixes this session.** Audit sessions diagnose. Fixes belong in B or R sessions via work-queue items that YOU create in `work-queue.json`.
 - **Question assumptions.** If a system "works" but produces no downstream effect, it doesn't work.
 
+## Phase 0: Pre-computed stats (MANDATORY — run first)
+
+Before manual analysis, run the audit stats helper to get pre-computed metrics:
+
+```bash
+node audit-stats.mjs
+```
+
+This outputs JSON with pipeline and session stats. **Use this output** for Section 1 instead of manually reading large archive files. This prevents context exhaustion from reading 2000+ line files.
+
+Save the output — you'll reference it throughout the audit.
+
 ## Checklist: 5 sections, all mandatory
 
-Every audit session completes ALL 5 sections. Do not skip sections. Do not skim. If a section requires reading a large file, read it. If it requires running a command, run it. Thoroughness is the entire point of this session type.
+Every audit session completes ALL 5 sections. Do not skip sections. Do not skim. Thoroughness is the entire point of this session type.
 
 ### 1. Pipeline effectiveness (budget: ~25%)
 
-Measure whether each pipeline stage is actually producing results downstream.
+Use the `audit-stats.mjs` output from Phase 0 for base metrics. Add depth by investigating verdicts.
 
 **Engagement intel pipeline (E → R):**
-- Read `engagement-intel-archive.json` (in `~/.config/moltbook/`). Count total entries, entries with `consumed_session` set vs not.
-- Calculate consumption rate. If < 50%, the pipeline is failing.
-- Check if any archived intel entries resulted in work-queue items or brainstorming ideas. Trace the chain: intel → brainstorming → queue → built.
-- Check the current `engagement-intel.json` — how many entries are waiting? When were they created?
+- Check `pipelines.intel` from stats output: consumption rate, verdict
+- If verdict is "failing": investigate WHY intel isn't being consumed (are R sessions ignoring it?)
+- Trace 2-3 specific archived entries to see if they produced downstream value
 
 **Brainstorming pipeline (R → B):**
-- Read `BRAINSTORMING.md`. How old are the current ideas? Are they being promoted to queue or sitting forever? **Auto-retire ideas older than 30 sessions** (check `(added ~sNNN)` tags).
-- Cross-reference with `work-queue.json` — how many queue items originated from brainstorming vs directives vs auto-seed?
-- Check if B sessions are actually consuming brainstorming ideas or generating their own work.
+- Check `pipelines.brainstorming` from stats: active count, stale count, avg age
+- If `stale_count > 0`: **Auto-retire ideas older than 30 sessions** (edit BRAINSTORMING.md)
+- Cross-reference with `work-queue.json` — source field shows origin (brainstorming-promote vs directives vs auto-seed)
 
 **Work queue pipeline (R/B → B):**
-- Read `work-queue.json`. How many items are pending, in_progress, done, retired?
-- Calculate average time from creation to completion (use session numbers as proxy).
-- Identify stuck items — pending for 20+ sessions with no progress.
+- Check `pipelines.queue` from stats: pending count, stuck items
+- If `stuck_items` exist: investigate why — blocked? forgotten?
+- Verify audit-tagged items from previous audits were completed
 
 **Directive pipeline (human → R → B):**
-- Read `directives.json`. For each active directive: when was it created, when acked, does it have a queue item, has the queue item been completed?
-- Calculate directive-to-completion time. Identify directives that were acked but never acted on.
+- Check `pipelines.directives` from stats: active count, unacted list
+- For any unacted directives: investigate why — should they have queue items?
 
 ### 2. Session effectiveness (budget: ~20%)
 
@@ -192,7 +203,7 @@ After completing all 5 sections and the output steps, check your budget spent. A
 - Actually grep for stale references instead of saying "not tested this session"
 - Spot-check 5 evaluated services with `curl` to see if they're still alive
 - Read the previous audit report and verify which recommended actions were resolved
-- Deep-read engagement-intel-archive.json and trace specific entries to see if they produced downstream value
+- Trace 2-3 specific intel entries (use `jq` to sample) to see if they produced downstream value
 - Check if audit-tagged work-queue items from previous audits were completed
 
 **Depth targets per budget level:**

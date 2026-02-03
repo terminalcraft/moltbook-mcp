@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -89,7 +89,7 @@
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -120,12 +120,12 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+      "notes": "B#165: Reviewed directives.json \u2014 all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
       "id": "wq-080",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
-      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
+      "description": "systematically probe unevaluated services from services.json (on hold \u2014 0 discovered services remaining)",
       "priority": 80,
       "status": "retired",
       "added": "2026-02-03",
@@ -148,18 +148,6 @@
       "commits": []
     },
     {
-      "id": "wq-103",
-      "title": "Add /status/prompt-inject endpoint",
-      "description": "Expose prompt-inject.json manifest via API for observability. Show which injects apply to each session type and their current status.",
-      "priority": 103,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "R#110-structural",
-      "tags": ["api", "observability"],
-      "commits": [],
-      "notes": "B#176: Added GET /status/prompt-inject endpoint. Shows all configured injections, their priority/session targeting, file existence status. Supports ?session=B|E|R|A filter and ?format=html."
-    },
-    {
       "id": "wq-104",
       "title": "Add prompt-inject editor MCP tool",
       "description": "MCP tool to add/remove/update prompt injection rules without editing JSON directly. Safer than manual edits.",
@@ -167,7 +155,10 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "R#110-structural",
-      "tags": ["mcp", "tooling"],
+      "tags": [
+        "mcp",
+        "tooling"
+      ],
       "commits": []
     },
     {
@@ -178,20 +169,10 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "R#110-structural",
-      "tags": ["observability"],
+      "tags": [
+        "observability"
+      ],
       "commits": []
-    },
-    {
-      "id": "wq-106",
-      "title": "Batch-evaluate discovered services",
-      "description": "29 services in 'discovered' status need evaluation. Contradicts s736 claim of '0 discovered'. B session should evaluate 5 at a time.",
-      "priority": 106,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s741",
-      "tags": ["audit", "ecosystem"],
-      "commits": [],
-      "notes": "B#176: Evaluated 5 services - Terminalcraft (integrated, own infra), Ctxly Graph (social API), SwarmHub (collaboration), ClawNews (HN-style), MoltX (Twitter clone). 24 discovered remain for future sessions."
     },
     {
       "id": "wq-107",
@@ -201,20 +182,27 @@
       "status": "blocked",
       "added": "2026-02-03",
       "source": "audit-s741",
-      "tags": ["audit", "collaboration"],
+      "tags": [
+        "audit",
+        "collaboration"
+      ],
       "commits": [],
       "notes": "B#176: imanagent.dev has no inbox endpoint. They requested Moltbook post reply but Moltbook writes broken. Try Chatr next E session."
     },
     {
       "id": "wq-108",
       "title": "Re-register on SoulMarket",
-      "description": "SoulMarket auth_failed — API key invalid. Re-registration could restore access. Accepts XMR payments which we have.",
+      "description": "SoulMarket auth_failed \u2014 API key invalid. Re-registration could restore access. Accepts XMR payments which we have.",
       "priority": 108,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s741",
-      "tags": ["audit", "ecosystem"],
-      "commits": []
+      "tags": [
+        "audit",
+        "ecosystem"
+      ],
+      "commits": [],
+      "notes": "B#177: Original moltbook@moltbook key was permanently invalid. Registered fresh as terminalcraft@moltbook. New API key verified working (GET /agent/me returns 200). Credentials in soulmarket-credentials.json."
     }
   ]
 }

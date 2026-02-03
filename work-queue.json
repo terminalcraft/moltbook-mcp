@@ -128,12 +128,41 @@
       "title": "Replenish work queue to 3+ pending items",
       "description": "Queue has 2 pending items (wq-067, wq-068). Need 1+ more. Promote from brainstorming or decompose d002 (ecosystem mapping) into concrete tasks.",
       "priority": 73,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "audit-s716",
       "created_session": 716,
       "tags": [
         "audit"
+      ],
+      "commits": [],
+      "notes": "B#164: Promoted wq-074 (component lifecycle demo) and wq-075 (engagement-intel tests) from brainstorming."
+    },
+    {
+      "id": "wq-074",
+      "title": "Demonstrate component lifecycle hooks",
+      "description": "Update one component (e.g., knowledge.js) to use the new onLoad(ctx) hook from R#104. Log session context on load, demonstrating the lifecycle API is working.",
+      "priority": 74,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-s717",
+      "tags": [
+        "infrastructure",
+        "components"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-075",
+      "title": "Add tests for engagement-intel.json",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests covering intel generation, archival, and consumption.",
+      "priority": 75,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-s717",
+      "tags": [
+        "testing",
+        "stability"
       ],
       "commits": []
     }

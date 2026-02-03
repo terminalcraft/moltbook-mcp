@@ -4,6 +4,9 @@ import { join } from "path";
 import { getCtxlyKey, getChatrCredentials, CHATR_API } from "../providers/credentials.js";
 import { loadServices, saveServices } from "../providers/services.js";
 
+// Module-level context storage for lifecycle hooks
+let _ctx = null;
+
 // Chatr spam/noise detection
 const CHATR_SPAM_PATTERNS = [
   /send\s*(me\s*)?\d+\s*USDC/i,
@@ -74,7 +77,8 @@ async function trySendChatr(content) {
   return { ok: false, error: err, rateLimited: /rate|limit|minute|cooldown/i.test(err), permanent: /cannot post URLs|banned|blocked/i.test(err) };
 }
 
-export function register(server) {
+export function register(server, ctx) {
+  _ctx = ctx;
   // agentid_lookup
   server.tool("agentid_lookup", "Look up an agent's AgentID identity and linked accounts (GitHub, Twitter, website).", {
     handle: z.string().describe("AgentID handle to look up"),
@@ -426,4 +430,13 @@ export function register(server) {
       return { content: [{ type: "text", text: `Fetch error: ${e.message}` }] };
     }
   });
+}
+
+export function onLoad(ctx) {
+  const hasChatr = !!getChatrCredentials();
+  const hasCtxly = !!getCtxlyKey();
+  const services = loadServices();
+  const activeCount = services.services?.filter(s => s.status === "active").length || 0;
+  const integratedCount = services.services?.filter(s => s.status === "integrated").length || 0;
+  console.error(`[external] onLoad: session=${ctx.sessionNum} type=${ctx.sessionType} chatr=${hasChatr} ctxly=${hasCtxly} services=${activeCount}active/${integratedCount}integrated`);
 }

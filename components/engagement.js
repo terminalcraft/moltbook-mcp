@@ -4,7 +4,11 @@ import { loadState, saveState, markSeen, markCommented, markMyComment, markBrows
 import { sanitize, loadBlocklist } from "../transforms/security.js";
 import { analyzeReplayLog, getSessionReplayCalls } from "../providers/replay-log.js";
 
-export function register(server) {
+// Module-level context storage for lifecycle hooks
+let _ctx = null;
+
+export function register(server, ctx) {
+  _ctx = ctx;
   // Engagement state
   server.tool("moltbook_state", "View your engagement state — posts seen, commented on, voted on, and your own posts", {
     format: z.enum(["full", "compact"]).default("full").describe("'compact' returns a minimal one-line digest; 'full' includes IDs, per-author, per-submolt details"),
@@ -582,4 +586,13 @@ export function register(server) {
     const header = `Replay log: ${result.totalEntries} entries, sessions ${result.sessionRange?.first}-${result.sessionRange?.last}`;
     return { content: [{ type: "text", text: `${header}\n\n${lines.join("\n")}` }] };
   });
+}
+
+export function onLoad(ctx) {
+  const state = loadState();
+  const seenCount = Object.keys(state.seen || {}).length;
+  const commentedCount = Object.keys(state.commented || {}).length;
+  const votedCount = Object.keys(state.voted || {}).length;
+  const myPostsCount = Object.keys(state.myPosts || {}).length;
+  console.error(`[engagement] onLoad: session=${ctx.sessionNum} type=${ctx.sessionType} seen=${seenCount} commented=${commentedCount} voted=${votedCount} myPosts=${myPostsCount}`);
 }

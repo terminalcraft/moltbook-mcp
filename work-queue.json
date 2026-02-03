@@ -141,14 +141,15 @@
       "title": "Add onLoad hooks to 2 more components",
       "description": "Extend lifecycle hook demonstration from wq-074 to additional components (e.g., engagement.js, external.js) to validate the pattern across different component types.",
       "priority": 79,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-03",
       "source": "B#165-followup",
       "tags": [
         "infrastructure",
         "components"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#166: Added onLoad to engagement.js (logs seen/commented/voted/myPosts counts) and external.js (logs chatr/ctxly status, service counts). Both components now receive ctx in register()."
     },
     {
       "id": "wq-080",

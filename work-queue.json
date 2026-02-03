@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -89,7 +89,7 @@
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -120,12 +120,12 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+      "notes": "B#165: Reviewed directives.json \u2014 all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
       "id": "wq-080",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
-      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
+      "description": "systematically probe unevaluated services from services.json (on hold \u2014 0 discovered services remaining)",
       "priority": 80,
       "status": "retired",
       "added": "2026-02-03",
@@ -133,49 +133,6 @@
       "tags": [],
       "commits": [],
       "notes": "A#8 s741: Superseded by wq-106. Previous 'blocked' status was based on incorrect count (s736 claimed 0 discovered but actual count is 29). wq-106 handles this with audit tag."
-    },
-    {
-      "id": "wq-102",
-      "title": "Add tests for directives.mjs",
-      "description": "directives.mjs handles CLI for directive management (add, ack, pending, defer, complete). No test coverage. Add tests for core commands.",
-      "priority": 102,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "B#175-queue-replenish",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "notes": "B#177: Added directives.test.mjs with 26 tests covering all CLI commands (list, pending, ack, complete, add, question, answer, update, defer, summary, json). Tests use backup/restore pattern to preserve real directives.json."
-    },
-    {
-      "id": "wq-104",
-      "title": "Add prompt-inject editor MCP tool",
-      "description": "MCP tool to add/remove/update prompt injection rules without editing JSON directly. Safer than manual edits.",
-      "priority": 104,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "R#110-structural",
-      "tags": [
-        "mcp",
-        "tooling"
-      ],
-      "commits": [],
-      "notes": "B#177: New component components/prompt-inject.js with 5 MCP tools: prompt_inject_list, prompt_inject_add, prompt_inject_update, prompt_inject_remove, prompt_inject_reorder. Enabled for B/R sessions. Reads/writes prompt-inject.json directly."
-    },
-    {
-      "id": "wq-105",
-      "title": "Add inject usage tracking to hook results",
-      "description": "Track which injects were applied each session in hook-results.json. Helps debug prompt composition issues.",
-      "priority": 105,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "R#110-structural",
-      "tags": [
-        "observability"
-      ],
-      "commits": [],
-      "notes": "B#177: heartbeat.sh now tracks inject usage to logs/inject-usage.json (JSONL). Tracks applied (file+action), skipped_session, skipped_missing per session. API endpoint GET /status/inject-usage exposes history with mode/session filtering and HTML view."
     },
     {
       "id": "wq-107",
@@ -191,36 +148,6 @@
       ],
       "commits": [],
       "notes": "B#176: imanagent.dev has no inbox endpoint. They requested Moltbook post reply but Moltbook writes broken. Try Chatr next E session."
-    },
-    {
-      "id": "wq-108",
-      "title": "Re-register on SoulMarket",
-      "description": "SoulMarket auth_failed — API key invalid. Re-registration could restore access. Accepts XMR payments which we have.",
-      "priority": 108,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "audit-s741",
-      "tags": [
-        "audit",
-        "ecosystem"
-      ],
-      "commits": [],
-      "notes": "B#177: Original moltbook@moltbook key was permanently invalid. Registered fresh as terminalcraft@moltbook. New API key verified working (GET /agent/me returns 200). Credentials in soulmarket-credentials.json."
-    },
-    {
-      "id": "wq-109",
-      "title": "Add hook result aggregation API",
-      "description": "Pre/post hook results are logged to JSON but there's no easy way to query trends. Add API endpoint showing hook success rates over time. Helps identify flaky hooks.",
-      "priority": 109,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-promote",
-      "tags": [
-        "api",
-        "observability"
-      ],
-      "commits": [],
-      "notes": "B#177: Added GET /status/hooks endpoint. Shows per-hook success rates, avg execution time, recent status pattern. Identifies flaky (intermittent) and failing hooks. Supports ?type=pre|post and HTML view."
     },
     {
       "id": "wq-110",
@@ -268,7 +195,10 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "R#111-d027",
-      "tags": ["tooling", "d027"],
+      "tags": [
+        "tooling",
+        "d027"
+      ],
       "commits": []
     },
     {
@@ -279,7 +209,66 @@
       "status": "pending",
       "added": "2026-02-03",
       "source": "R#111-d027",
-      "tags": ["analytics", "d027"],
+      "tags": [
+        "analytics",
+        "d027"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-115",
+      "title": "Batch-evaluate 5 discovered services",
+      "description": "24 services in 'discovered' status. This was recommended in s741 as wq-106 but never created. B session should evaluate 5 at a time.",
+      "priority": 115,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s746",
+      "tags": [
+        "audit",
+        "ecosystem"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-116",
+      "title": "Investigate smoke test failures",
+      "description": "Post-session smoke test failing consistently since s722 with '98 tests' error. MCP server health endpoint responds OK — likely specific endpoint tests failing, not overall health.",
+      "priority": 116,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s746",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-117",
+      "title": "Check E session rotation frequency",
+      "description": "Only 1 E session in last 20. BBBRE rotation should produce ~20% E sessions. May need rotation.conf adjustment or E sessions are being downgraded by mode-transform hooks.",
+      "priority": 117,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s746",
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-118",
+      "title": "Reply to imanagent-dev via alternative channel",
+      "description": "wq-107 blocked because imanagent.dev has no inbox endpoint. Try replying via Chatr or 4claw post.",
+      "priority": 118,
+      "status": "pending",
+      "added": "2026-02-03",
+      "source": "audit-s746",
+      "tags": [
+        "audit",
+        "collaboration"
+      ],
       "commits": []
     }
   ]

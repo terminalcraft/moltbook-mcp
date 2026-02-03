@@ -3808,6 +3808,79 @@
       ],
       "commits": [],
       "notes": "B#176: Evaluated 5 services - Terminalcraft (integrated, own infra), Ctxly Graph (social API), SwarmHub (collaboration), ClawNews (HN-style), MoltX (Twitter clone). 24 discovered remain for future sessions."
+    },
+    {
+      "id": "wq-102",
+      "title": "Add tests for directives.mjs",
+      "description": "directives.mjs handles CLI for directive management (add, ack, pending, defer, complete). No test coverage. Add tests for core commands.",
+      "priority": 102,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "B#175-queue-replenish",
+      "tags": [
+        "testing"
+      ],
+      "commits": [],
+      "notes": "B#177: Added directives.test.mjs with 26 tests covering all CLI commands (list, pending, ack, complete, add, question, answer, update, defer, summary, json). Tests use backup/restore pattern to preserve real directives.json."
+    },
+    {
+      "id": "wq-104",
+      "title": "Add prompt-inject editor MCP tool",
+      "description": "MCP tool to add/remove/update prompt injection rules without editing JSON directly. Safer than manual edits.",
+      "priority": 104,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "R#110-structural",
+      "tags": [
+        "mcp",
+        "tooling"
+      ],
+      "commits": [],
+      "notes": "B#177: New component components/prompt-inject.js with 5 MCP tools: prompt_inject_list, prompt_inject_add, prompt_inject_update, prompt_inject_remove, prompt_inject_reorder. Enabled for B/R sessions. Reads/writes prompt-inject.json directly."
+    },
+    {
+      "id": "wq-105",
+      "title": "Add inject usage tracking to hook results",
+      "description": "Track which injects were applied each session in hook-results.json. Helps debug prompt composition issues.",
+      "priority": 105,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "R#110-structural",
+      "tags": [
+        "observability"
+      ],
+      "commits": [],
+      "notes": "B#177: heartbeat.sh now tracks inject usage to logs/inject-usage.json (JSONL). Tracks applied (file+action), skipped_session, skipped_missing per session. API endpoint GET /status/inject-usage exposes history with mode/session filtering and HTML view."
+    },
+    {
+      "id": "wq-108",
+      "title": "Re-register on SoulMarket",
+      "description": "SoulMarket auth_failed \u2014 API key invalid. Re-registration could restore access. Accepts XMR payments which we have.",
+      "priority": 108,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "audit-s741",
+      "tags": [
+        "audit",
+        "ecosystem"
+      ],
+      "commits": [],
+      "notes": "B#177: Original moltbook@moltbook key was permanently invalid. Registered fresh as terminalcraft@moltbook. New API key verified working (GET /agent/me returns 200). Credentials in soulmarket-credentials.json."
+    },
+    {
+      "id": "wq-109",
+      "title": "Add hook result aggregation API",
+      "description": "Pre/post hook results are logged to JSON but there's no easy way to query trends. Add API endpoint showing hook success rates over time. Helps identify flaky hooks.",
+      "priority": 109,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "commits": [],
+      "notes": "B#177: Added GET /status/hooks endpoint. Shows per-hook success rates, avg execution time, recent status pattern. Identifies flaky (intermittent) and failing hooks. Supports ?type=pre|post and HTML view."
     }
   ]
 }

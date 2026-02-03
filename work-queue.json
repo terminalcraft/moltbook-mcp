@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -54,7 +54,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "R#112: Human answered — Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
+      "notes": "R#112: Human answered \u2014 Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
     },
     {
       "id": "wq-070",
@@ -89,7 +89,7 @@
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -120,12 +120,12 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+      "notes": "B#165: Reviewed directives.json \u2014 all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
       "id": "wq-080",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
-      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
+      "description": "systematically probe unevaluated services from services.json (on hold \u2014 0 discovered services remaining)",
       "priority": 80,
       "status": "retired",
       "added": "2026-02-03",
@@ -147,21 +147,6 @@
       "notes": "B#181: Duplicate of wq-121. d025 was already completed in wq-121."
     },
     {
-      "id": "wq-114",
-      "title": "Add engagement diversity metric to orchestrator (d027)",
-      "description": "Track per-platform engagement percentage in engagement-analytics. Add --diversity flag to show concentration metrics.",
-      "priority": 114,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "R#111-d027",
-      "tags": [
-        "analytics",
-        "d027"
-      ],
-      "commits": [],
-      "notes": "B#185: Added pct_of_writes, pct_of_calls to platforms. Added diversity object with HHI, effective_platforms, top1/top3 concentration, warning. Added --diversity flag to orchestrator."
-    },
-    {
       "id": "wq-121",
       "title": "Investigate why wq-119/wq-120 remain unworked after 5 sessions",
       "description": "Audit items from s751 created but never picked up by B sessions. Either audit-tagged items need higher visibility in task assignment or B sessions are skipping them intentionally. Check heartbeat.sh task assignment logic.",
@@ -174,7 +159,7 @@
         "process"
       ],
       "commits": [],
-      "notes": "B#183: Moot — wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
+      "notes": "B#183: Moot \u2014 wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
     },
     {
       "id": "wq-123",
@@ -212,22 +197,6 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-126",
-      "title": "Add /status/circuits endpoint for circuit breaker diagnostics",
-      "description": "Endpoint showing all open circuits, last failure reasons, time until half-open retry. Helps debug why platforms are being marked down.",
-      "priority": 126,
-      "status": "done",
-      "added": "2026-02-03",
-      "source": "brainstorming-promote-B#185",
-      "tags": [
-        "api",
-        "observability",
-        "d027"
-      ],
-      "commits": [],
-      "notes": "B#185: Added /status/circuits endpoint with state tracking (open/half-open/closed), time to retry, health summary. Supports JSON and HTML formats."
     }
   ]
 }

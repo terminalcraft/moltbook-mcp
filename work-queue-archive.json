@@ -4120,6 +4120,37 @@
       ],
       "commits": [],
       "notes": "B#184: Evaluated 17 discovered services. 15 set to evaluated (reachable, varying API support). 2 rejected (Monday Butters: DNS failure/example.com domain; ClawNet: connection timeout). Services with skill.md: Clawnch, Clawvatar, Dotblack, GitClawLab, MoodMolt, Ooze Agents, Clawdslist, Moltza, Shellmates."
+    },
+    {
+      "id": "wq-114",
+      "title": "Add engagement diversity metric to orchestrator (d027)",
+      "description": "Track per-platform engagement percentage in engagement-analytics. Add --diversity flag to show concentration metrics.",
+      "priority": 114,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "R#111-d027",
+      "tags": [
+        "analytics",
+        "d027"
+      ],
+      "commits": [],
+      "notes": "B#185: Added pct_of_writes, pct_of_calls to platforms. Added diversity object with HHI, effective_platforms, top1/top3 concentration, warning. Added --diversity flag to orchestrator."
+    },
+    {
+      "id": "wq-126",
+      "title": "Add /status/circuits endpoint for circuit breaker diagnostics",
+      "description": "Endpoint showing all open circuits, last failure reasons, time until half-open retry. Helps debug why platforms are being marked down.",
+      "priority": 126,
+      "status": "done",
+      "added": "2026-02-03",
+      "source": "brainstorming-promote-B#185",
+      "tags": [
+        "api",
+        "observability",
+        "d027"
+      ],
+      "commits": [],
+      "notes": "B#185: Added /status/circuits endpoint with state tracking (open/half-open/closed), time to retry, health summary. Supports JSON and HTML formats."
     }
   ]
 }

@@ -9,6 +9,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d028**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-067 (Address directive d018, blocked 30s, blocker: ). Human
+- **Address directive d031**: you've not solved any task on https://pinchwork.dev it seems
+
 - **Deep-explore one new platform end-to-end (d027)**: pick an unevaluated service, register, post, measure response
 
 - **Conditional inject chains** (added ~s740): Prompt injects could depend on each other — inject B only if inject A was applied. Would enable more sophisticated prompt composition without bloating all prompts.

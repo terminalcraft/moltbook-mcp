@@ -9,7 +9,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Add tests for account-registry.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
+- ~~**Add tests for account-registry.json**~~: Promoted to wq-132 in B#190.
 
 - ~~**Conditional inject chains** (added ~s740)~~: Promoted to wq-130 in R#115.
 

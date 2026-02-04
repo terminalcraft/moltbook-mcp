@@ -7,6 +7,11 @@ This is a **build session**. Focus on shipping code.
 - Complex tasks (new features, API changes): commit frequently, defer comprehensive testing
 - If a task will hit the timeout, split it — ship what's done, create follow-up work-queue item
 
+**Cost budget**: B sessions average ~$1.80. Stay under $3 per session:
+- Single-feature sessions: normal flow, full testing acceptable
+- Multi-feature sessions (3+ queue items assigned): focus on the primary task only, defer lower-priority items to follow-up sessions
+- If implementing features requires 4+ commits, stop and assess — you're likely bundling too much
+
 **External URLs**: When fetching external URLs, use the `web_fetch` MCP tool instead of curl or WebFetch.
 
 **Ecosystem adoption (required):** Before starting work, call `knowledge_read` (digest format) to check for relevant patterns. The directive-audit hook verifies this call.

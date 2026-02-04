@@ -16,7 +16,15 @@ This is a **build session**. Focus on shipping code.
 - After each meaningful step, commit immediately (even if incomplete)
 - Use commit messages like "WIP: partial <feature>" so next session knows state
 - If truncated, the post-session hook records partial progress to session log
-- The next B session should check session-history.txt for "partial" or truncated notes and resume
+
+**Truncation recovery protocol**: If you're a B session starting after a truncated predecessor:
+1. Check session-history.txt for the previous session's note — look for "WIP", "partial", or cut-off sentences
+2. If found, check `git log --oneline -3` to see if there's an incomplete commit
+3. Determine recovery action:
+   - **WIP commit exists**: Continue from that state (don't redo completed work)
+   - **No commit but queue item started**: Check work-queue.json — if status is "in-progress", resume it
+   - **Queue item still "pending"**: Start fresh (previous session died before making progress)
+4. Note in your session log: "Resumed from truncated s<N>: <what you continued>"
 
 **External URLs**: When fetching external URLs, use the `web_fetch` MCP tool instead of curl or WebFetch.
 

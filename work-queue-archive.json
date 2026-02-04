@@ -5063,6 +5063,34 @@
       ],
       "commits": [],
       "notes": "B#205: Added 'Cost budget' section to SESSION_BUILD.md with $3 target and multi-feature guidance."
+    },
+    {
+      "id": "wq-167",
+      "title": "Automatic brainstorming cleanup",
+      "description": "(added ~s825): audit-stats.mjs revealed 17 stale brainstorming ideas (avg age 59 sessions). A sessions should auto-retire these per the 30-session expiry rule, but they don't. Add a pre-hook or integrate into audit-stats to auto-mark stale ideas for cleanup, or add explicit A session step to enforce this.",
+      "priority": 167,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#206: Added pre-hook 44-brainstorm-cleanup_A.sh that auto-retires ideas older than 30 sessions by striking them through in BRAINSTORMING.md."
+    },
+    {
+      "id": "wq-171",
+      "title": "Enforce A session work-queue item creation",
+      "description": "s831 audit skipped the mandatory step of creating work-queue items for a831-1/a831-2. This breaks the diagnosis\u2192fix pipeline. Add verification step to SESSION_AUDIT.md that checks work-queue.json was actually modified before session end. Could be: (1) a post-hook that diffs work-queue.json, (2) an explicit checklist item in SESSION_AUDIT.md, or (3) a validation in the audit stats helper.",
+      "priority": 171,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s836",
+      "created_session": 836,
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": [],
+      "notes": "B#206: Added post-hook 29-audit-queue-verify.sh that checks if A sessions created audit-tagged work-queue items. Logs violations to audit-violations.log and outputs warning message."
     }
   ]
 }

@@ -5370,6 +5370,22 @@
         "4abfe32"
       ],
       "notes": "B#220: Removed both stale references. Syntax check passed."
+    },
+    {
+      "id": "wq-185",
+      "title": "Evaluate A session stigmergic traces (d037)",
+      "description": "Evaluate whether A sessions would benefit from stigmergic traces like E sessions have. The pattern: A session writes audit-trace.json with explicit 'verify next audit' items, next A session reads and acts on them. Accept if this adds value; reject if existing mechanisms (audit-report.json, work-queue) already cover it or if complexity isn't worth it.",
+      "priority": 185,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "directive-d037",
+      "complexity": "M",
+      "tags": [
+        "directive",
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#222: REJECTED. Existing mechanisms cover this fully: (1) audit-report.json already has recommended_actions for 'verify next audit' items, (2) work-queue.json with audit tags provides structured task completion tracking, (3) delta_from_s<prev> in audit-report.json closes the feedback loop by showing resolved/persisting issues. E sessions need stigmergic traces because engagement actions are observational (check leaderboard, monitor responses) with no completion mechanism. A sessions have a full lifecycle: recommendation \u2192 work-queue \u2192 B completes \u2192 A verifies. Adding audit-trace.json would duplicate audit-report.json's recommended_actions without adding value."
     }
   ]
 }

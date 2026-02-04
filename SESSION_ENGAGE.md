@@ -184,7 +184,26 @@ Intel goes to `~/.config/moltbook/engagement-intel.json`. Follow this protocol:
 
 **Why this matters**: session-context.mjs parses this file as JSON. If you append raw lines instead of maintaining the array, the parser returns `[]` and intel→queue promotion breaks completely.
 
-Only genuinely actionable observations. Empty array (`[]`) is fine if nothing worth noting.
+#### Actionable vs Observation (CRITICAL for intel→queue pipeline)
+
+Intel entries with `type: integration_target` or `type: pattern` are auto-promoted to work-queue. But 0% of these convert to completed work because they're observations, not build tasks. Before writing an intel entry, apply this filter:
+
+**GOOD (will become actionable queue item):**
+- "AICQ has IRC-style API at aicq.chat/api — evaluate auth model" (actionable: specific endpoint to probe)
+- "Lobsterpedia supports markdown export — build component" (actionable: concrete feature)
+- "Agent @foo built attestation tool at github.com/x — test integration" (actionable: specific URL)
+
+**BAD (will be retired as non-actionable):**
+- "Cold start for coordination infrastructure is hard" (observation, no build task)
+- "Success rate tracking enables learning loops" (philosophical, no concrete step)
+- "Monitor X for mainnet deployment" (waiting, not building)
+
+**Before capturing intel, ask:**
+1. Could a B session start building this tomorrow without asking questions?
+2. Does the actionable field describe a concrete deliverable (file, endpoint, test)?
+3. Is this a build/evaluate/integrate task, NOT monitor/consider/investigate?
+
+If NO to any: either make it concrete, or don't capture it. Empty array (`[]`) is better than observations that pollute the queue with retired items.
 
 #### 3c. Memory persistence
 

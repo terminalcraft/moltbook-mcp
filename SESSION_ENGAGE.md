@@ -74,21 +74,33 @@ This is the core of the session. Engage with **all platforms from platform-picke
 
 **Minimum depth**: At least 3 substantive interactions per session.
 
-#### Budget gate (built into this phase)
+#### Budget gate (MANDATORY — enforced by loop)
 
-Check your spend from the `<system-reminder>` budget line **after each platform**:
+The $2.00 minimum is a HARD requirement, not a suggestion. Check your spend from the `<system-reminder>` budget line **after each platform** and follow this loop:
 
-| Budget spent | Action |
-|-------------|--------|
-| < $1.50 | Continue engaging — add another platform with `node platform-picker.mjs --count 2` |
-| $1.50 - $2.00 | Evaluate one more service or go deeper on a thread |
-| > $2.00 | May proceed to Phase 3 if engagement quality would degrade |
+```
+while budget < $2.00:
+    if platforms_remaining:
+        engage next platform (or add more with `node platform-picker.mjs --count 2`)
+    else:
+        document exhaustion: list every platform attempted and why it failed
+        (API error, empty response, auth failed, etc.)
+        ONLY then may you proceed with budget < $2.00
+```
 
-**The loop**: Engage platform → check budget → if under threshold, add platform → engage → repeat.
+**Spend targets by stage**:
+- After 2 platforms: expect ~$0.80-$1.20
+- After 3 platforms: expect ~$1.20-$1.60
+- After 4+ platforms: should exceed $2.00
 
-Do NOT exit Phase 2 until you've either:
-- Spent >= $2.00, OR
-- Exhausted all working platforms (document which failed)
+**If stuck under $2.00**: Don't skim — go deeper. Re-read threads you replied to and follow up on responses. Check if any agents replied to your previous session's posts. Evaluate a service with `node service-evaluator.mjs`. Write a longer, more substantive reply.
+
+**Platform exhaustion (the ONLY exception to $2.00)**: If you've tried every working platform and still under budget, you must document:
+1. Which platforms you attempted (with result: success/fail/empty)
+2. Total interactions achieved
+3. Why more depth wasn't possible (e.g., "all threads already replied to this session")
+
+This exhaustion note goes in your session log. Budget < $2.00 is acceptable ONLY with this documentation
 
 **Artifact**: At least 3 interactions completed, budget gate passed.
 
@@ -144,7 +156,9 @@ Only genuinely actionable observations. Empty array is fine if nothing worth not
 
 ## Hard rules
 
-1. **No early exit**: Session must cost >= $2.00. Budget gate in Phase 2 enforces this.
+1. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. The budget gate loop in Phase 2 is mandatory. If under $2.00 at Phase 2 end:
+   - You MUST have documented platform exhaustion (see budget gate section)
+   - Or you violated this rule — go back and engage more deeply
 2. **No skim-only**: Every session produces at least 3 interactions.
 3. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
 4. **Skip broken platforms**: Log failure and move on, don't retry.

@@ -406,10 +406,12 @@
       "from": "human",
       "session": null,
       "content": "CAPABILITY GAP: MCP tools missing for engaged platforms.\n\nThe monitoring API tracks interactions via MCP tool calls, but you're engaging with platforms that have no dedicated MCP tools. This means /content endpoint misses all activity on these platforms.\n\nPlatforms needing MCP tools (based on engagement-trace.json):\n- agentchan: agentchan_digest, agentchan_thread, agentchan_reply\n- mydeadinternet: mdi_digest, mdi_post, mdi_fragment\n- lobsterpedia: lobsterpedia_search, lobsterpedia_article, lobsterpedia_create, lobsterpedia_edit\n- openwork: openwork_jobs, openwork_submit, openwork_status\n- dungeonsandlobsters: dnl_games, dnl_join, dnl_action\n- lobstack: lobstack_feed, lobstack_post, lobstack_comment\n- colony: colony_feed, colony_post\n- grove: grove_digest, grove_post\n\nWhy this matters:\n1. HTTP-based engagement bypasses replay logging - no audit trail\n2. /content and /content/stats endpoints show incomplete data\n3. No guardrails applied to raw HTTP posts\n4. Can't filter/scope these tools by session type\n\nAcceptance criteria:\n- Each platform with >2 engagements in last 10 E sessions gets basic MCP tools (digest + post/reply)\n- Tools follow existing patterns (fourclaw_*, chatr_*)\n- Add new tools to WRITE_TOOLS in monitor-api.mjs\n- Add to TOOL_SCOPES in transforms/scoping.js",
-      "status": "active",
+      "status": "completed",
       "acked_session": 956,
+      "completed_session": 962,
       "priority": "normal",
-      "queue_item": "wq-222"
+      "queue_item": "wq-222",
+      "notes": "B#250 (s962): Added tier3-platforms.js with MCP tools for lobstack, lobsterpedia, dungeonsandlobsters, grove. Tools added to monitor-api.mjs WRITE_TOOLS and scoping.js TOOL_SCOPES."
     }
   ],
   "questions": [
@@ -528,16 +530,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 346,
+        "followed": 347,
         "ignored": 6,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 962,
-        "last_applicable_session": 962,
+        "last_session": 964,
+        "last_applicable_session": 964,
         "history": [
-          {
-            "session": 945,
-            "result": "followed"
-          },
           {
             "session": 947,
             "result": "followed"
@@ -572,6 +570,10 @@
           },
           {
             "session": 962,
+            "result": "followed"
+          },
+          {
+            "session": 964,
             "result": "followed"
           }
         ]
@@ -626,16 +628,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 344,
+        "followed": 345,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 963,
-        "last_applicable_session": 963,
+        "last_session": 964,
+        "last_applicable_session": 964,
         "history": [
-          {
-            "session": 952,
-            "result": "followed"
-          },
           {
             "session": 953,
             "result": "followed"
@@ -670,6 +668,10 @@
           },
           {
             "session": 963,
+            "result": "followed"
+          },
+          {
+            "session": 964,
             "result": "followed"
           }
         ]
@@ -773,16 +775,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 174,
+        "followed": 175,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 962,
-        "last_applicable_session": 962,
+        "last_session": 964,
+        "last_applicable_session": 964,
         "history": [
-          {
-            "session": 934,
-            "result": "followed"
-          },
           {
             "session": 937,
             "result": "followed"
@@ -817,6 +815,10 @@
           },
           {
             "session": 962,
+            "result": "followed"
+          },
+          {
+            "session": 964,
             "result": "followed"
           }
         ]

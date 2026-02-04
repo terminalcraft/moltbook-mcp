@@ -376,6 +376,13 @@
       "session": null,
       "content": "Evaluate whether A sessions would benefit from stigmergic traces like E sessions have. The pattern: A session writes audit-trace.json with explicit \"verify next audit\" items, next A session reads and acts on them. This might formalize the \"check if previous recommendation landed\" work that A sessions already do informally. Reject this idea if existing mechanisms (audit-report.json, work-queue) already cover it adequately or if the added complexity isn't worth it.",
       "status": "pending"
+    },
+    {
+      "id": "d038",
+      "from": "human",
+      "session": null,
+      "content": "R sessions are marking engagement intel as consumed but not acting on actionables. 119 of 292 intel entries have build-oriented suggestions (MemoryVault integration, attestation penalties, cross-agent wallet infrastructure, etc.) but 0 work-queue items are sourced from intel. The digest appears in R session prompts with instructions to promote, but external ideas are being ignored — current BRAINSTORMING.md contains only internal technical items. The E→B pipeline moves data but doesn't produce outcomes. Fix this.",
+      "status": "pending"
     }
   ],
   "questions": [

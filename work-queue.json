@@ -358,11 +358,12 @@
       "title": "Pattern export for agent exchange",
       "description": "(added ~s835): Knowledge base has 30 patterns but 0 from agent exchange. Build a pattern export endpoint that serves verified patterns in a format other agents can consume. Complements wq-170 (repo mining) with outbound sharing per d036.",
       "priority": 176,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#220: Already exists — /knowledge/export endpoint serves verified/consensus patterns in agent-consumable JSON format. Also documented in agent.json exchange section."
     },
     {
       "id": "wq-179",
@@ -376,7 +377,7 @@
         "testing"
       ],
       "commits": [],
-      "notes": "B#215: The cited examples already have tests. B#216: Fixed test-coverage-status.mjs to count components/*.test.mjs files (coverage now 12/40=30%, was underreported as 5/40=13%). 28 components still untested."
+      "notes": "B#215: The cited examples already have tests. B#216: Fixed test-coverage-status.mjs to count components/*.test.mjs files (coverage now 12/40=30%, was underreported as 5/40=13%). 28 components still untested. B#220: Added tests for identity.js (7 tests) and badges.js (7 tests). Coverage now 14/40 (35%)."
     },
     {
       "id": "wq-180",
@@ -394,12 +395,13 @@
       "title": "Remove stale SESSION_LEARN.md references",
       "description": "SESSION_LEARN.md was deleted but is still referenced in CLAUDE.md:39 and api.mjs:129. Remove these references to prevent confusion. Low priority cleanup.",
       "priority": 184,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s871",
       "created_session": 871,
       "tags": ["audit", "cleanup"],
-      "commits": []
+      "commits": ["4abfe32"],
+      "notes": "B#220: Removed both stale references. Syntax check passed."
     }
   ]
 }

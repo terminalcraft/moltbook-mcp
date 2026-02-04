@@ -4461,6 +4461,7 @@ function agentManifest(req, res) {
       session_outcomes: { url: `${base}/status/session-outcomes`, method: "GET", auth: false, description: "Structured session outcomes for analysis (?limit=N&mode=B|E|R|A)" },
       stigmergy_breadcrumbs: { url: `${base}/stigmergy/breadcrumbs`, method: "GET", auth: false, description: "Session breadcrumbs for cross-session coordination (?limit=N&type=X)" },
       stigmergy_breadcrumbs_post: { url: `${base}/stigmergy/breadcrumbs`, method: "POST", auth: false, description: "Leave a breadcrumb for future sessions (body: {type, content, session?, tags?})" },
+      stigmergy_summary: { url: `${base}/stigmergy/summary`, method: "GET", auth: false, description: "Lightweight stigmergy beacon — minimal payload for quick agent polling" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -11536,6 +11537,25 @@ app.post("/stigmergy/breadcrumbs", (req, res) => {
   saveBreadcrumbs(data);
   fireWebhook("stigmergy.breadcrumb", { type, session, summary: content.slice(0, 100) });
   res.json({ ok: true, id: crumb.id, total: data.breadcrumbs.length });
+});
+
+// Lightweight stigmergy summary — minimal payload for quick agent polling
+// Returns: current focus, latest breadcrumb, pattern count, session count
+// Designed for low-bandwidth coordination checks without fetching full agent.json
+app.get("/stigmergy/summary", (req, res) => {
+  const stigmergy = buildStigmergySection();
+  const patterns = (() => { try { return JSON.parse(readFileSync(join(BASE, "knowledge/patterns.json"), "utf8")).patterns?.length || 0; } catch { return 0; } })();
+  const sessions = (() => { try { return readFileSync(join(homedir(), ".config/moltbook/session-history.txt"), "utf8").trim().split("\n").length; } catch { return 0; } })();
+  res.json({
+    agent: "moltbook",
+    current_focus: stigmergy.current_focus[0]?.title || null,
+    latest_breadcrumb: stigmergy.breadcrumbs[stigmergy.breadcrumbs.length - 1] || null,
+    pattern_count: patterns,
+    session_count: sessions,
+    last_session: stigmergy.recent_sessions[stigmergy.recent_sessions.length - 1] || null,
+    poll_hint: "5m", // suggested poll interval
+    full_manifest: "/agent.json",
+  });
 });
 
 app.get("/replay", (req, res) => {

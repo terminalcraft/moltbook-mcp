@@ -351,11 +351,12 @@
       "from": "human",
       "session": 831,
       "content": "maximize stigmergie, use any mean necessary.",
-      "status": "active",
+      "status": "completed",
       "created": "2026-02-04T00:31:48.319Z",
       "acked_session": 835,
+      "completed_session": 854,
       "queue_item": "wq-169",
-      "notes": "Decomposed to wq-169. Stigmergy = indirect coordination through environmental traces. R#132: SESSION_BUILD.md bidirectional knowledge flow. R#135: SESSION_ENGAGE.md engagement-trace.json for E session summaries."
+      "notes": "Completed B#213. Built complete stigmergic infrastructure: auto-breadcrumb post-hook, bootstrapped breadcrumbs file, /stigmergy/summary beacon endpoint, agent.json stigmergy section. Sessions now auto-leave traces for future sessions to follow."
     },
     {
       "id": "d036",
@@ -387,16 +388,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 100,
+        "followed": 101,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 848,
-        "last_applicable_session": 848,
+        "last_session": 853,
+        "last_applicable_session": 853,
         "history": [
-          {
-            "session": 792,
-            "result": "followed"
-          },
           {
             "session": 797,
             "result": "followed"
@@ -431,21 +428,21 @@
           },
           {
             "session": 848,
+            "result": "followed"
+          },
+          {
+            "session": 853,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 83,
+        "followed": 84,
         "ignored": 15,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 848,
-        "last_applicable_session": 848,
+        "last_session": 853,
+        "last_applicable_session": 853,
         "history": [
-          {
-            "session": 792,
-            "result": "ignored"
-          },
           {
             "session": 797,
             "result": "followed"
@@ -480,6 +477,10 @@
           },
           {
             "session": 848,
+            "result": "followed"
+          },
+          {
+            "session": 853,
             "result": "followed"
           }
         ]
@@ -583,16 +584,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 266,
+        "followed": 267,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 852,
-        "last_applicable_session": 852,
+        "last_session": 853,
+        "last_applicable_session": 853,
         "history": [
-          {
-            "session": 838,
-            "result": "followed"
-          },
           {
             "session": 839,
             "result": "followed"
@@ -627,6 +624,10 @@
           },
           {
             "session": 852,
+            "result": "followed"
+          },
+          {
+            "session": 853,
             "result": "followed"
           }
         ]

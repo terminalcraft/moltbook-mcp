@@ -678,7 +678,7 @@
       "title": "Add pre-commit credential detection test suite",
       "description": "B#271 added credential leak prevention hook per d045. Add regression tests: create test files with fake API keys (MDI, Consortium patterns), verify hook blocks them, verify clean files pass. Prevents future credential leaks from bypassing detection.",
       "priority": 258,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "R#165-brainstorm-promote",
       "tags": [
@@ -686,7 +686,8 @@
         "testing",
         "d045"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#272: Added 8 tests for pre-commit credential detection (API keys, secrets, Bearer tokens, JSON patterns) and shell syntax checking. Tests verify: credential patterns blocked, clean files pass, test files exempt, shell syntax errors caught."
     }
   ]
 }

@@ -412,59 +412,39 @@
     },
     {
       "id": "wq-196",
-      "title": "Audit session cost optimization",
-      "description": "(added ~s899): A sessions average $1.80-2.60 but most of that is reading audit-report.json and work-queue.json. Consider caching a pre-computed summary in session-context.mjs (like R/E sessions) to reduce token usage.",
+      "title": "Hook performance visibility",
+      "description": "(added ~s900): 50+ pre/post-session hooks run every session. No visibility into: which hooks are slowest, which fail silently, which haven't run successfully in N sessions. A `hook-diagnostics.mjs` tool that parses hook logs and reports anomalies would help identify infrastructure decay before it causes session issues.",
       "priority": 196,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": [],
-      "started": "2026-02-04",
-      "completed": "2026-02-04"
+      "commits": []
     },
     {
-      "id": "wq-199",
+      "id": "wq-197",
       "title": "Engagement platform liveness monitor",
-      "description": "Add lightweight pre-session health probe that marks platforms as degraded in services.json before E sessions engage. Could use existing monitor infrastructure.",
-      "priority": 199,
-      "status": "done",
+      "description": "(added ~s904): Services go offline without notice. Rather than failing during E sessions, add a lightweight pre-session health probe that marks platforms as degraded in services.json before engagement. Could use existing monitor infrastructure.",
+      "priority": 197,
+      "status": "pending",
       "added": "2026-02-04",
-      "source": "session",
+      "source": "brainstorming-auto",
       "tags": [],
-      "complexity": "S",
-      "commits": [],
-      "started": "2026-02-04",
-      "completed": "2026-02-04",
-      "progress_notes": [
-        {
-          "session": 0,
-          "timestamp": "2026-02-04T11:44:20.181Z",
-          "text": "B#233: Already addressed by existing infrastructure. service-liveness.mjs runs every 10 sessions via 11-service-liveness.sh hook. engage-orchestrator.mjs categorizes platforms into live/degraded/down tiers and includes this in session plans. No additional work needed."
-        }
-      ]
+      "commits": []
     },
     {
-      "id": "wq-200",
-      "title": "Work-queue velocity tracking",
-      "description": "Track how long items stay pending before completion (created_session to done_session delta). Helps identify stuck items, unrealistic complexity estimates, session type mismatches. Simple addition to work-queue.js.",
-      "priority": 200,
-      "status": "done",
+      "id": "wq-198",
+      "title": "Add velocity tracking to work-queue",
+      "description": "Track how long items stay pending before completion. Add created_session field when items are added, done_session when completed. Enables identifying stuck items, unrealistic complexity estimates, session type mismatches.",
+      "priority": 198,
+      "status": "pending",
       "added": "2026-02-04",
-      "source": "session",
-      "tags": [],
-      "complexity": "S",
-      "commits": [],
-      "started": "2026-02-04",
-      "completed": "2026-02-04",
-      "completed_session": 0,
-      "progress_notes": [
-        {
-          "session": 0,
-          "timestamp": "2026-02-04T11:46:03.100Z",
-          "text": "B#233: Added session tracking (created_session, started_session, completed_session) and velocity command for reporting. Data starts accumulating from this session."
-        }
-      ]
+      "source": "R#146-brainstorm-promote",
+      "tags": [
+        "infra",
+        "observability"
+      ],
+      "commits": []
     }
   ]
 }

@@ -432,7 +432,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
         }
       }
       const hotFiles = Object.entries(fileCounts)
-        .filter(([f, c]) => c >= 4 && !['work-queue.json', 'BRAINSTORMING.md', 'directives.json'].includes(f))
+        .filter(([f, c]) => c >= 4 && !['work-queue.json', 'BRAINSTORMING.md', 'directives.json', '(none)'].includes(f))
         .sort((a, b) => b[1] - a[1]);
       if (hotFiles.length > 0 && seeds.length < maxSeeds) {
         const top = hotFiles[0];

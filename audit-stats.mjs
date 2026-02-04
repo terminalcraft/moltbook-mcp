@@ -26,6 +26,45 @@ function safeRead(path, fallback = null) {
   }
 }
 
+/**
+ * Get current session number from:
+ * 1. SESSION_NUM env var (set by heartbeat.sh)
+ * 2. session-history.txt (last line's s=NNN)
+ * 3. File mtime heuristic (not implemented - rarely needed)
+ */
+function getCurrentSession() {
+  // Priority 1: env var
+  if (process.env.SESSION_NUM) {
+    return parseInt(process.env.SESSION_NUM);
+  }
+
+  // Priority 2: parse session-history.txt
+  const historyPath = join(STATE_DIR, 'session-history.txt');
+  try {
+    const content = readFileSync(historyPath, 'utf8');
+    const lines = content.trim().split('\n').filter(l => l.trim());
+    if (lines.length > 0) {
+      const lastLine = lines[lines.length - 1];
+      const match = lastLine.match(/s=(\d+)/);
+      if (match) {
+        return parseInt(match[1]);
+      }
+    }
+  } catch {
+    // Fall through to default
+  }
+
+  // Priority 3: CLI arg (for manual invocations)
+  if (process.argv[2] && !isNaN(parseInt(process.argv[2]))) {
+    return parseInt(process.argv[2]);
+  }
+
+  // Last resort: estimate based on typical session frequency
+  // This is better than a hardcoded number that will always be stale
+  console.error('Warning: Could not determine session number, using 0');
+  return 0;
+}
+
 function computeIntelStats() {
   const current = safeRead(join(STATE_DIR, 'engagement-intel.json'), []);
   const archive = safeRead(join(STATE_DIR, 'engagement-intel-archive.json'), []);
@@ -70,8 +109,7 @@ function computeBrainstormingStats() {
     .filter(m => m)
     .map(m => parseInt(m[1]));
 
-  // Get current session from env or estimate
-  const currentSession = parseInt(process.env.SESSION_NUM || '825');
+  const currentSession = getCurrentSession();
   const ages = sessions.map(s => currentSession - s);
 
   const stale = ages.filter(a => a > 30).length;
@@ -93,7 +131,7 @@ function computeQueueStats() {
   const statusCounts = {};
   const auditTagged = [];
   const stuck = [];
-  const currentSession = parseInt(process.env.SESSION_NUM || '825');
+  const currentSession = getCurrentSession();
 
   for (const item of items) {
     statusCounts[item.status] = (statusCounts[item.status] || 0) + 1;
@@ -122,7 +160,7 @@ function computeQueueStats() {
 function computeDirectiveStats() {
   const directives = safeRead(join(PROJECT_DIR, 'directives.json'), { directives: [] });
   const items = directives.directives || [];
-  const currentSession = parseInt(process.env.SESSION_NUM || '825');
+  const currentSession = getCurrentSession();
 
   const active = items.filter(d => d.status === 'active');
   const pending = items.filter(d => d.status === 'pending');
@@ -201,7 +239,7 @@ function computeSessionStats() {
 // Main output
 const stats = {
   computed_at: new Date().toISOString(),
-  session: parseInt(process.env.SESSION_NUM || '825'),
+  session: getCurrentSession(),
   pipelines: {
     intel: computeIntelStats(),
     brainstorming: computeBrainstormingStats(),

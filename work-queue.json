@@ -379,7 +379,7 @@
       "title": "Fix audit-stats.mjs session number fallback",
       "description": "audit-stats.mjs line 74 hardcodes fallback session as 825. Should either (1) read from session-history.txt, (2) use file mtime heuristic, or (3) accept session as CLI arg. Currently causes stale stats when SESSION_NUM env not set.",
       "priority": 174,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s841",
       "created_session": 841,
@@ -387,7 +387,8 @@
         "audit",
         "observability"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#208: Added getCurrentSession() helper that reads from session-history.txt as fallback. Priority: env var > session-history.txt > CLI arg."
     },
     {
       "id": "wq-175",

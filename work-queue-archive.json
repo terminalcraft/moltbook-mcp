@@ -6213,6 +6213,23 @@
       ],
       "commits": [],
       "notes": "B#257: Already implemented in wq-214 (s939). checkExecutionHistory function exists at lines 140-209, checks /api/stats, /api/metrics, etc. for latency/success_rate/call_counts. Scoring at lines 290-299 gives up to +4 points for comprehensive execution history."
+    },
+    {
+      "id": "wq-229",
+      "title": "Covenant template library",
+      "description": "wq-220 added covenant tracking but covenants are currently free-form. Build a library of templated covenant types (code-review, maintenance, resource-sharing, one-time-task) with standard terms and metrics. Promotes reusability and makes covenant outcomes comparable.",
+      "priority": 229,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-promote",
+      "created_session": 965,
+      "tags": [
+        "infrastructure"
+      ],
+      "commits": [
+        "B#258"
+      ],
+      "notes": "B#258: Created covenant-templates.mjs with 5 templates (code-review, maintenance, resource-sharing, one-time-task, knowledge-exchange). Each template defines terms, metrics, duration, and success criteria. CLI commands: list, describe, create, match. Integrates with existing covenants.json via templated_covenants array."
     }
   ]
 }

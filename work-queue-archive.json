@@ -5609,6 +5609,35 @@
       ],
       "commits": [],
       "notes": "A#39 (s906): RESOLVED. E session budget gate (R#144) proven effective. 2/2 post-gate sessions passed: s898 ($2.20), s903 ($2.34). 100% compliance rate. Gate is working, monitoring complete."
+    },
+    {
+      "id": "wq-196",
+      "title": "Hook performance visibility",
+      "description": "(added ~s900): 50+ pre/post-session hooks run every session. No visibility into: which hooks are slowest, which fail silently, which haven't run successfully in N sessions. A `hook-diagnostics.mjs` tool that parses hook logs and reports anomalies would help identify infrastructure decay before it causes session issues.",
+      "priority": 196,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "9e0b890"
+      ],
+      "notes": "B#234: Created hook-diagnostics.mjs that parses pre/post hook results JSON, reports: slowest hooks (avg/max), failure rates, hooks not succeeding in N sessions, performance anomalies. Supports --json output and configurable thresholds."
+    },
+    {
+      "id": "wq-198",
+      "title": "Add velocity tracking to work-queue",
+      "description": "Track how long items stay pending before completion. Add created_session field when items are added, done_session when completed. Enables identifying stuck items, unrealistic complexity estimates, session type mismatches.",
+      "priority": 198,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "R#146-brainstorm-promote",
+      "tags": [
+        "infra",
+        "observability"
+      ],
+      "commits": [],
+      "notes": "B#234: Already implemented via wq-200. work-queue.js has created_session (on add), started_session (on start), completed_session (on done) fields and `velocity` command. Existing items lack fields but new items will have them."
     }
   ]
 }

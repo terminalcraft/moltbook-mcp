@@ -5,6 +5,12 @@
 # 2. After N sessions, analyzing if the change improved target metrics
 # 3. Writing r-session-impact.json for future R sessions to consult
 #
+# R#148: Two improvements to reduce noise in impact data:
+# 1. Pipeline repair edits (add/remove items in BRAINSTORMING.md/work-queue.json)
+#    are now filtered out — they're operational, not structural
+# 2. Intent-aware analysis: changes with "cost_increase" intent (e.g., budget
+#    enforcement) are analyzed with inverted cost logic
+#
 # Expects env: MODE_CHAR, SESSION_NUM, LOG_FILE
 
 set -euo pipefail
@@ -24,11 +30,31 @@ fi
 # Extract structural change info from git commits (more reliable than log parsing)
 CHANGE_FILE=""
 CHANGE_CATEGORY=""
+CHANGE_INTENT=""
 
 cd "$DIR" 2>/dev/null || true
 
 # Get files changed in recent commits (structural files only)
 CHANGE_FILE=$(git diff --name-only HEAD~2 HEAD 2>/dev/null | grep -E '\.(sh|js|mjs|md|conf)$' | head -1 || echo "")
+
+# R#148: Get latest commit message to detect pipeline repair and intent
+LATEST_COMMIT_MSG=$(git log -1 --format="%s" 2>/dev/null || echo "")
+
+# R#148: Filter out pipeline repair operations
+# These are operational edits (adding/removing items), not structural changes
+IS_PIPELINE_REPAIR=""
+if [[ "$LATEST_COMMIT_MSG" =~ ^chore:.*pipeline.*repair ]] || [[ "$LATEST_COMMIT_MSG" =~ ^chore:.*replenish ]]; then
+  IS_PIPELINE_REPAIR="true"
+fi
+
+# R#148: Extract intent from commit message for smarter impact analysis
+# "enforce budget", "budget minimum" → cost_increase intent (cost going up is good)
+# "reduce cost", "optimize" → cost_decrease intent (cost going down is good)
+if [[ "$LATEST_COMMIT_MSG" =~ enforce.*budget ]] || [[ "$LATEST_COMMIT_MSG" =~ budget.*minimum ]] || [[ "$LATEST_COMMIT_MSG" =~ increase.*spending ]]; then
+  CHANGE_INTENT="cost_increase"
+elif [[ "$LATEST_COMMIT_MSG" =~ reduce.*cost ]] || [[ "$LATEST_COMMIT_MSG" =~ lower.*budget ]] || [[ "$LATEST_COMMIT_MSG" =~ optimize.*spending ]]; then
+  CHANGE_INTENT="cost_decrease"
+fi
 
 # Determine category from the actual file changed (not commit message)
 if [ -n "$CHANGE_FILE" ]; then
@@ -52,7 +78,14 @@ if [ -n "$CHANGE_FILE" ]; then
       CHANGE_CATEGORY="tests"
       ;;
     BRAINSTORMING.md|work-queue.json|directives.json)
-      CHANGE_CATEGORY="state-files"
+      # R#148: Only count as structural if NOT pipeline repair
+      if [ -z "$IS_PIPELINE_REPAIR" ]; then
+        CHANGE_CATEGORY="state-files"
+      else
+        # Skip tracking — this is operational, not structural
+        echo "$(date -Iseconds) r-impact-track: skipping pipeline repair edit to $CHANGE_FILE"
+        exit 0
+      fi
       ;;
     *)
       CHANGE_CATEGORY="other"
@@ -61,7 +94,8 @@ if [ -n "$CHANGE_FILE" ]; then
 fi
 
 # Record this R session's change and run impact analysis
-python3 - "$IMPACT_FILE" "$OUTCOMES_FILE" "${SESSION_NUM:-0}" "$CHANGE_FILE" "$CHANGE_CATEGORY" << 'PYEOF'
+# R#148: Pass intent as 6th argument for intent-aware analysis
+python3 - "$IMPACT_FILE" "$OUTCOMES_FILE" "${SESSION_NUM:-0}" "$CHANGE_FILE" "$CHANGE_CATEGORY" "$CHANGE_INTENT" << 'PYEOF'
 import json
 import sys
 from datetime import datetime
@@ -71,6 +105,7 @@ outcomes_file = sys.argv[2]
 session_num = int(sys.argv[3])
 change_file = sys.argv[4] if len(sys.argv) > 4 and sys.argv[4] else None
 change_category = sys.argv[5] if len(sys.argv) > 5 and sys.argv[5] else None
+change_intent = sys.argv[6] if len(sys.argv) > 6 and sys.argv[6] else None  # R#148
 
 try:
     data = json.load(open(impact_file))
@@ -78,6 +113,7 @@ except:
     data = {"version": 1, "changes": [], "analysis": []}
 
 # Add this session's change record
+# R#148: Include intent for smarter analysis later
 change_record = {
     "session": session_num,
     "timestamp": datetime.now().isoformat(),
@@ -85,6 +121,8 @@ change_record = {
     "category": change_category,
     "analyzed": False
 }
+if change_intent:
+    change_record["intent"] = change_intent
 
 # Only add if we detected a structural change
 if change_category:
@@ -168,12 +206,32 @@ for change in data["changes"]:
     cost_delta_pct = ((after_cost - before_cost) / before_cost * 100) if before_cost > 0 else 0
     success_delta = after_success - before_success
 
+    # R#148: Intent-aware impact assessment
+    # If the change intended to increase costs (e.g., budget enforcement), then
+    # cost increases are positive, not negative. Flip the cost logic for such changes.
+    intent = change.get("intent", "")
+
     # Positive impact: lower cost OR higher success rate
+    # (but inverted for cost_increase intent changes)
     impact = "neutral"
-    if cost_delta_pct < -10 or success_delta > 0.1:
-        impact = "positive"
-    elif cost_delta_pct > 20 or success_delta < -0.2:
-        impact = "negative"
+    if intent == "cost_increase":
+        # For budget enforcement changes: cost going UP is success
+        if cost_delta_pct > 10 or success_delta > 0.1:
+            impact = "positive"
+        elif cost_delta_pct < -20 or success_delta < -0.2:
+            impact = "negative"
+    elif intent == "cost_decrease":
+        # Explicit cost reduction: use stricter thresholds
+        if cost_delta_pct < -15 or success_delta > 0.1:
+            impact = "positive"
+        elif cost_delta_pct > 10 or success_delta < -0.2:
+            impact = "negative"
+    else:
+        # Default: lower cost = positive (original logic)
+        if cost_delta_pct < -10 or success_delta > 0.1:
+            impact = "positive"
+        elif cost_delta_pct > 20 or success_delta < -0.2:
+            impact = "negative"
 
     change["analyzed"] = True
     change["impact"] = impact

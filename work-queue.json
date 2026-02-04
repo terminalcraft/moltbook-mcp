@@ -537,11 +537,12 @@
       "title": "E session pre-flight intel check",
       "description": "(added ~s945): E sessions currently start blind to intel pipeline health. A pre-session hook for E sessions could report: (1) is engagement-intel.json empty? (2) last E session's artifact compliance (from e-phase35-tracking.json), (3) days since last successful intel promotion. This surfaces intel problems at session start instead of waiting for A session diagnosis.",
       "priority": 223,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#255: Already addressed by existing 36-engagement-seed_E.sh hook which: (1) shows intel entries or lack thereof, (2) shows last 3 E sessions with notes, (3) warns about budget utilization. Additional metrics (artifact compliance, intel promotion timing) have low marginal value: Phase 3.5 compliance is 100% (3/3), intel auto-promotion rarely fires. The seed hook provides sufficient pre-flight context."
     }
   ]
 }

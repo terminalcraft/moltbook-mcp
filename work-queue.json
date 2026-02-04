@@ -592,11 +592,12 @@
       "title": "Improve session budget utilization (d042)",
       "description": "add retry loops or deeper exploration to underutilized sessions",
       "priority": 247,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#268: Invalid directive reference — d042 is about ROI-weighted platform selection (wq-245), not budget utilization. Description too vague to act on. Session budget utilization varies naturally by task complexity; no specific fix identified."
     },
     {
       "id": "wq-248",
@@ -625,6 +626,17 @@
       ],
       "commits": [],
       "notes": "B#268: Added to onchain-identity-tracker.json for periodic monitoring. Not a build task."
+    },
+    {
+      "id": "wq-250",
+      "title": "Add circuit breaker diagnostic CLI",
+      "description": "Add --history flag to engage-orchestrator.mjs that reads circuit-state.json timestamps and shows: (1) time since last success per platform, (2) failure streak trends, (3) half-open retry outcomes. Helps diagnose whether circuits are stuck vs recovering.",
+      "priority": 250,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "brainstorming-promote",
+      "tags": ["tooling", "diagnostics"],
+      "commits": []
     }
   ]
 }

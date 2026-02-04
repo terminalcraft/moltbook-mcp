@@ -11,6 +11,7 @@
  *   node engage-orchestrator.mjs --plan-only  # Just output the session plan, no evaluation
  *   node engage-orchestrator.mjs --record-outcome <platform> <success|failure>
  *   node engage-orchestrator.mjs --circuit-status  # Show circuit breaker state
+ *   node engage-orchestrator.mjs --history [--json]  # Diagnostic view: time since success, trends, retry info
  *   node engage-orchestrator.mjs --diversity  # Show engagement concentration metrics
  *   node engage-orchestrator.mjs --diversity-trends  # Show diversity history trends (wq-131)
  */
@@ -481,6 +482,98 @@ if (process.argv.includes("--circuit-status")) {
     status[platform] = { state: getCircuitState(circuits, platform), ...entry };
   }
   console.log(JSON.stringify(status, null, 2));
+  process.exit(0);
+}
+
+// --- CLI: Circuit history (wq-250) ---
+if (process.argv.includes("--history")) {
+  const circuits = loadCircuits();
+  const now = Date.now();
+  const jsonMode = process.argv.includes("--json");
+
+  // Compute diagnostics for each platform
+  const diagnostics = Object.entries(circuits).map(([platform, entry]) => {
+    const state = getCircuitState(circuits, platform);
+    const lastSuccess = entry.last_success ? new Date(entry.last_success).getTime() : null;
+    const lastFailure = entry.last_failure ? new Date(entry.last_failure).getTime() : null;
+
+    // Time since last success (in hours)
+    const hoursSinceSuccess = lastSuccess ? (now - lastSuccess) / (3600 * 1000) : null;
+
+    // Failure streak severity
+    const failureStreak = entry.consecutive_failures || 0;
+    let streakTrend = "stable";
+    if (failureStreak >= CIRCUIT_FAILURE_THRESHOLD) streakTrend = "circuit_open";
+    else if (failureStreak >= 2) streakTrend = "degrading";
+    else if (failureStreak === 0 && entry.total_successes > 0) streakTrend = "healthy";
+
+    // Success rate
+    const total = (entry.total_failures || 0) + (entry.total_successes || 0);
+    const successRate = total > 0 ? ((entry.total_successes || 0) / total * 100).toFixed(1) : "N/A";
+
+    // Half-open retry info (time until retry allowed)
+    let retryInfo = null;
+    if (state === "open" && lastFailure) {
+      const timeUntilHalfOpen = CIRCUIT_COOLDOWN_MS - (now - lastFailure);
+      if (timeUntilHalfOpen > 0) {
+        retryInfo = `${(timeUntilHalfOpen / (3600 * 1000)).toFixed(1)}h until half-open`;
+      }
+    } else if (state === "half-open") {
+      retryInfo = "ready for retry";
+    }
+
+    return {
+      platform,
+      state,
+      hoursSinceSuccess: hoursSinceSuccess !== null ? parseFloat(hoursSinceSuccess.toFixed(1)) : null,
+      failureStreak,
+      streakTrend,
+      successRate: successRate !== "N/A" ? parseFloat(successRate) : null,
+      totalAttempts: total,
+      retryInfo,
+      lastError: entry.last_error || null,
+    };
+  });
+
+  // Sort: open circuits first, then by hours since success (descending)
+  diagnostics.sort((a, b) => {
+    const stateOrder = { "open": 0, "half-open": 1, "closed": 2 };
+    if (stateOrder[a.state] !== stateOrder[b.state]) {
+      return stateOrder[a.state] - stateOrder[b.state];
+    }
+    // Within same state, sort by hours since success (longest first)
+    return (b.hoursSinceSuccess || 0) - (a.hoursSinceSuccess || 0);
+  });
+
+  if (jsonMode) {
+    console.log(JSON.stringify({ diagnostics, timestamp: new Date().toISOString() }, null, 2));
+  } else {
+    console.log("\n=== Circuit Breaker History ===\n");
+    console.log("Platform".padEnd(22) + "State".padEnd(12) + "Since Success".padEnd(16) + "Streak".padEnd(10) + "Trend".padEnd(14) + "Rate".padEnd(8) + "Retry Info");
+    console.log("-".repeat(100));
+
+    for (const d of diagnostics) {
+      const sinceSuc = d.hoursSinceSuccess !== null ? `${d.hoursSinceSuccess}h ago` : "never";
+      const rate = d.successRate !== null ? `${d.successRate}%` : "N/A";
+      const retry = d.retryInfo || "-";
+      console.log(
+        d.platform.padEnd(22) +
+        d.state.padEnd(12) +
+        sinceSuc.padEnd(16) +
+        String(d.failureStreak).padEnd(10) +
+        d.streakTrend.padEnd(14) +
+        rate.padEnd(8) +
+        retry
+      );
+    }
+
+    // Summary
+    const open = diagnostics.filter(d => d.state === "open").length;
+    const halfOpen = diagnostics.filter(d => d.state === "half-open").length;
+    const degrading = diagnostics.filter(d => d.streakTrend === "degrading").length;
+    console.log("\n" + "-".repeat(100));
+    console.log(`Summary: ${open} open, ${halfOpen} half-open, ${degrading} degrading, ${diagnostics.length - open - halfOpen - degrading} healthy`);
+  }
   process.exit(0);
 }
 

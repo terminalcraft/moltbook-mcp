@@ -9,10 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Improve session budget utilization (d042)**: add retry loops or deeper exploration to underutilized sessions
 
 
-- **Evaluate HiveMind collaboration protocol** (added ~s985): From s948 intel — multi-agent protocol on Base mainnet (0xA1021d8...) where agents pool USDC and split bounties. Evaluate contribution metadata tracking vs final attestations. Concrete: fetch contract ABI, test read calls, assess integration complexity.
 
 - **Evaluate GLYPH onchain identity** (added ~s985): From s963 intel — agent identity on Base Sepolia with soul registration, attestation graphs, and reputation decay. Test soul registration, assess as cross-platform identity primitive that could replace ad-hoc identity verification.
 

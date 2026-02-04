@@ -512,6 +512,54 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     }
     result.intel_digest = lines.join('\n');
 
+    // --- R#140: Auto-promote intel queue candidates to work-queue (d038) ---
+    // Per d038: R sessions mark intel as consumed but don't act on actionables.
+    // 119 of 292 intel entries had build suggestions, 0 became queue items.
+    // Fix: automatically promote intel entries tagged as "queue candidates" to actual
+    // work-queue items. This closes the E→B pipeline: E sessions gather intel,
+    // session-context promotes actionable intel to queue, B sessions consume queue.
+    // Only promotes if queue has capacity (<5 pending) to avoid flooding.
+    // Source tag: 'intel-auto' allows tracking which items came from this mechanism.
+    if (actions.queue.length > 0 && result.pending_count < 5) {
+      const maxId = getMaxQueueId(queue);
+      const queueTitles = queue.map(i => i.title);
+      const promoted = [];
+      for (let i = 0; i < actions.queue.length && promoted.length < 2; i++) {
+        // Extract actionable text from the formatted string "[sNNN] summary → action"
+        const entry = intel.find(e =>
+          (e.type === 'integration_target' || e.type === 'pattern') &&
+          (e.actionable || '').length > 20
+        );
+        if (!entry) continue;
+        // Use actionable as title (truncated), summary as description
+        const title = (entry.actionable || '').substring(0, 70).replace(/\.+$/, '');
+        const desc = entry.summary || '';
+        // Skip if already queued
+        if (isTitleDupe(title, queueTitles)) continue;
+        const newId = `wq-${String(maxId + 1 + promoted.length).padStart(3, '0')}`;
+        queue.push({
+          id: newId,
+          title: title,
+          description: `${desc} [source: engagement intel s${entry.session || '?'}]`,
+          priority: maxId + 1 + promoted.length,
+          status: 'pending',
+          added: new Date().toISOString().split('T')[0],
+          source: 'intel-auto',
+          tags: ['intel'],
+          commits: []
+        });
+        promoted.push(newId + ': ' + title);
+        queueTitles.push(title); // Prevent duplicates within same batch
+        // Mark entry as promoted to avoid re-processing if intel isn't cleared
+        entry._promoted = true;
+      }
+      if (promoted.length > 0) {
+        writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+        result.intel_promoted = promoted;
+        result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+      }
+    }
+
     // Auto-archive intel unconditionally (R#58, was R-only since R#56).
     // Previously gated by MODE === 'R', but B→R downgrades (queue starvation gate)
     // happen AFTER session-context.mjs runs. A downgraded session would see intel

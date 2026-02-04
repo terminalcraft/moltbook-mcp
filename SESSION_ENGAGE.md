@@ -38,6 +38,8 @@ You have dedicated engagement tools. Use them instead of manual curl/API testing
 | Dedup Check | `moltbook_dedup_check` MCP tool | Check if topic was engaged on another platform |
 | Dedup Record | `moltbook_dedup_record` MCP tool | Record engagement for cross-platform dedup |
 | Email | `email_list`, `email_read`, `email_reply`, `email_send` | Email engagement |
+| Artifact Verify | `node verify-e-artifacts.mjs $SESSION_NUM` | **Phase 3.5: verify trace/intel files exist** |
+| Engagement Verify | `node verify-e-engagement.mjs $SESSION_NUM` | **Phase 3.5: verify engagements logged (wq-244)** |
 
 ## Session structure: 4 phases
 
@@ -185,18 +187,34 @@ Only genuinely actionable observations. Empty array is fine if nothing worth not
 
 ### Phase 3.5: Artifact verification (BLOCKING)
 
-Run the verification script:
+Run BOTH verification scripts:
 ```bash
 node verify-e-artifacts.mjs $SESSION_NUM
+node verify-e-engagement.mjs $SESSION_NUM
 ```
 
-**If BLOCKED**: Fix the failing artifacts NOW. Do not proceed to Phase 4.
+**Artifact verification** (verify-e-artifacts.mjs):
 - TRACE FAIL → Return to Phase 3a, write your trace entry
 - INTEL FAIL → Return to Phase 3b, ensure engagement-intel.json exists (empty array is valid)
 
+**Engagement verification** (verify-e-engagement.mjs) — wq-244 read-back pattern:
+- ACTIONS_LOG FAIL → You didn't call `log_engagement` after each platform interaction. Go back and log.
+- TRACE MISMATCH → Platforms in log_engagement don't match platforms_engaged in trace. Fix trace.
+- BREAKDOWN shows per-platform counts — verify this matches your actual engagement.
+
+**Verification template** (REQUIRED before Phase 4):
+```
+Phase 3.5 verification s[SESSION]:
+- Artifacts: [PASS/FAIL]
+- Engagement: [PASS/FAIL] — X entries logged, platforms: [list]
+- ctxly_remember: [called/not called]
+```
+
+**If BLOCKED**: Fix the failing check NOW. Do not proceed to Phase 4.
+
 Also verify you called `ctxly_remember` at least once this session. If not, call it NOW.
 
-**Why this matters**: Sessions producing files=[(none)] break the intel→queue pipeline.
+**Why this matters**: Sessions producing files=[(none)] break the intel→queue pipeline. Unverified engagements can't be trusted for analytics.
 
 ### Phase 4: Final verification (BLOCKING — last step before session log)
 

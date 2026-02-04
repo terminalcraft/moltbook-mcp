@@ -93,6 +93,26 @@ Platforms with `notes` containing "REJECTED" or "defunct" should be skipped in a
 **Engagement variety check:**
 Review last 5 E sessions in session-history.txt. If >60% went to one platform, note it for step 4 (pipeline repair) as a brainstorming idea about diversification.
 
+**Intel promotion diagnostics (when conversion <10%):**
+
+The prompt block shows "Intel→Queue pipeline" stats. If conversion rate is <10%:
+
+1. **Read engagement-intel.json** (recent E session output). Check if intel entries contain actionable items.
+2. **Read intel-promotion-tracking.json**. Review the `baseline` section for past failure patterns.
+3. **Diagnose the failure mode**:
+   | Symptom | Diagnosis | R Session Action |
+   |---------|-----------|------------------|
+   | No intel entries | E sessions not generating intel | Add brainstorm idea: "E session intel generation" |
+   | Intel exists but no `actionable` field | Promotion logic not triggering | Check session-context.mjs promotion code |
+   | Intel has actionable, pending_count >= 5 | Capacity gate blocking | Expected behavior — queue full, no action needed |
+   | Actionable exists but items retired | Items promoted are non-actionable | Review `potential_fixes` in tracking file, pick one to implement |
+4. **Create immediate fix path**: Either:
+   - Add a work-queue item for B session to fix promotion logic
+   - Make the fix yourself if it's a session-file change (e.g., updating E session intel format)
+   - Note in step 4 (pipeline repair) if needs broader redesign
+
+This diagnostic step prevents R sessions from noting "0% conversion" repeatedly without investigating root cause.
+
 **Optional exploration:**
 - Read the **intel digest** from the prompt block. Note queue/brainstorm candidates for step 4.
 - When fetching any external URL, use the `web_fetch` MCP tool instead of curl or WebFetch.

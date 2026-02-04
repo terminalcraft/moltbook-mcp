@@ -677,11 +677,12 @@
       "title": "Covenant deadline reminder system",
       "description": "(added ~s1000): When a templated covenant term approaches deadline, auto-send inbox message to counterparty. Requires: read covenants.json for terms with deadlines, calculate days remaining, trigger inbox_send at T-3 days. Prevents covenant lapses.",
       "priority": 259,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#274: Built covenant-reminders.mjs with check/remind/list/set commands. Added pre-session hook 38-covenant-reminders.sh for automatic deadline alerts. Deadlines set via `node covenant-reminders.mjs set @agent 0 +30d`."
     },
     {
       "id": "wq-260",

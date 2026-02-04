@@ -333,11 +333,12 @@
       "title": "Automatic brainstorming cleanup",
       "description": "(added ~s825): audit-stats.mjs revealed 17 stale brainstorming ideas (avg age 59 sessions). A sessions should auto-retire these per the 30-session expiry rule, but they don't. Add a pre-hook or integrate into audit-stats to auto-mark stale ideas for cleanup, or add explicit A session step to enforce this.",
       "priority": 167,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#206: Added pre-hook 44-brainstorm-cleanup_A.sh that auto-retires ideas older than 30 sessions by striking them through in BRAINSTORMING.md."
     },
     {
       "id": "wq-168",

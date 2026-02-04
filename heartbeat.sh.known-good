@@ -127,30 +127,11 @@ if [ -d "$TRANSFORM_DIR" ] && [ -z "$OVERRIDE_MODE" ]; then
   done
 fi
 
-# Fallback: inline gates for backward compatibility if hooks don't exist yet
-if [ -z "$DOWNGRADED" ] && [ -z "$OVERRIDE_MODE" ]; then
-  # Engagement health gate: if E session but no platforms are writable, downgrade to B.
-  if [ "$MODE_CHAR" = "E" ]; then
-    ENGAGE_STATUS=$(node "$DIR/engagement-health.cjs" 2>/dev/null | tail -1 || echo "ENGAGE_DEGRADED")
-    if [ "$ENGAGE_STATUS" = "ENGAGE_DEGRADED" ]; then
-      echo "$(date -Iseconds) engage→build downgrade: all engagement platforms degraded" >> "$LOG_DIR/selfmod.log"
-      MODE_CHAR="B"
-      DOWNGRADED="E→B"
-    fi
-  fi
-  # Queue starvation gate: if B session but queue is empty, downgrade to R.
-  if [ "$MODE_CHAR" = "B" ]; then
-    PENDING_COUNT="${CTX_PENDING_COUNT:-0}"
-    WQ_FALLBACK="${CTX_WQ_FALLBACK:-}"
-    if [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" != "true" ]; then
-      echo "$(date -Iseconds) build→reflect downgrade: only $PENDING_COUNT pending queue items, no fallback" >> "$LOG_DIR/selfmod.log"
-      MODE_CHAR="R"
-      DOWNGRADED="${DOWNGRADED:-B→R}"
-    elif [ "$PENDING_COUNT" -lt 1 ] && [ "$WQ_FALLBACK" = "true" ]; then
-      echo "$(date -Iseconds) build: queue empty but brainstorming fallback available, proceeding" >> "$LOG_DIR/selfmod.log"
-    fi
-  fi
-fi
+# R#150: Inline fallback gates removed. Mode transformation is now fully modular via
+# hooks/mode-transform/. The hooks handle:
+#   - 10-engage-health.sh: E→B when platforms degraded (with retry logic)
+#   - 20-queue-starvation.sh: B→R when queue empty (with brainstorming fallback logging)
+# The inline gates were redundant since the hooks exist and are more robust (e.g., retry).
 
 # Recompute session context after downgrade so prompt blocks match actual mode. (R#59)
 # Fixes: B→R downgrades getting stale R counter (raw instead of raw+1),

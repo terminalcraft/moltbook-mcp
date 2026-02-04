@@ -89,32 +89,13 @@ Pipelines can fail in two ways: **tactical** (one-time issues, misconfig) vs **s
   2. When intel-auto item status changes to done/retired → update `outcome` and `outcome_session`
   3. After 3 items tracked → compute success rate and determine if threshold adjustment needed
 
-**E session artifact generation (Phase 3.5 compliance, R#153+):**
+**E session artifact compliance (maintenance check):**
 
-This check determines whether E sessions are PRODUCING artifacts, not just whether promotion is working. Empty intel makes 0% conversion rate inevitable regardless of promotion logic quality.
+Run `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions (from session-history.txt). Count passes vs failures.
 
-**Required checks:**
-1. **Read engagement-intel.json**: Is it empty (`[]`)? If yes → E sessions failing to generate intel
-2. **Read e-phase35-tracking.json metrics**: What's the compliance rate? Update session entries.
-3. **Check session history for E sessions**: Count last 5 E sessions. How many have `files=[(none)]` in notes?
-
-**Diagnosis table (use BEFORE applying decision gate to intel pipeline):**
-
-| Symptom | Diagnosis | A Session Action |
-|---------|-----------|------------------|
-| engagement-intel.json is `[]` AND `files=[(none)]` in 3+ recent E sessions | E sessions bypassing artifact capture | Flag as CRITICAL in `critical_issues`: "E session artifact compliance: 0% — Phase 3.5 gate not enforcing" |
-| engagement-intel.json is `[]` BUT `files` in recent E sessions show trace files | Intel being archived/rotated before A session runs | Check engagement-intel-archive.json — data may exist there instead |
-| e-phase35-tracking.json has `compliance_rate < 100%` after 5 tracked sessions | Phase 3.5 gate exists but not effective | Flag for R session: "Phase 3.5 needs stronger enforcement" |
-| e-phase35-tracking.json has `returned_to_phase3 > 0` | Gate working — catching missing artifacts | HEALTHY — gate is enforcing, note the catch rate |
-
-**Update protocol for e-phase35-tracking.json:**
-1. Identify E sessions in the tracking window (check `tracking_window.start_session` to `end_session`)
-2. For each untracked E session, check session logs or session-history.txt for artifact evidence
-3. Update `sessions` array with compliance data
-4. Compute running `compliance_rate`
-5. If 5 E sessions tracked and rate <100%: add work-queue item for R session Phase 3.5 revision
-
-This tracking closes the loop between R#153 structural change (adding Phase 3.5) and actual effectiveness measurement.
+- If <80% pass: flag for R session — Phase 3.5 gate may need strengthening
+- If >=80% pass: artifact generation healthy, proceed with intel pipeline analysis
+- Update e-phase35-tracking.json with compliance data for tracked sessions
 
 **Brainstorming pipeline (R → B):**
 - Check `pipelines.brainstorming` from stats: active count, stale count, avg age

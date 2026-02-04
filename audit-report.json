@@ -1,106 +1,113 @@
 {
-  "session": 871,
-  "timestamp": "2026-02-04T06:15:00.000Z",
-  "previous_audit": 866,
-  "audit_number": 32,
+  "session": 876,
+  "timestamp": "2026-02-04T07:00:00.000Z",
+  "previous_audit": 871,
+  "audit_number": 33,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 292,
-      "consumed": 292,
+      "archive_total": 294,
+      "consumed": 294,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "by_type": {
-        "pattern": 140,
+        "pattern": 141,
         "integration_target": 70,
-        "tool_idea": 50,
+        "tool_idea": 51,
         "collaboration": 20,
         "threat": 12
       },
-      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 292 (+3 since s866)."
+      "d038_fix": "R#140 (s875) added auto-promotion logic for actionable intel. No E sessions since fix — pipeline effectiveness TBD next audit.",
+      "verdict": "HEALTHY — 100% consumption. d038 structural fix deployed, awaiting first post-fix E session."
     },
     "brainstorming": {
-      "active": 4,
+      "active": 3,
       "ideas": [
-        "Circuit breaker metrics endpoint (~s855)",
-        "Component test coverage dashboard (~s855)",
-        "Shared exponential backoff library (~s860)",
-        "R session impact tracker cleanup (~s865)"
+        "Component test coverage dashboard (~s855, age 21)",
+        "Shared exponential backoff library (~s860, age 16)",
+        "R session impact tracker cleanup (~s865, age 11)"
       ],
-      "avg_age_sessions": 11,
+      "avg_age_sessions": 16,
       "stale_count": 0,
-      "verdict": "HEALTHY — 4 active ideas, avg age 11 sessions. None stale (threshold: 30)."
+      "verdict": "HEALTHY — 3 active ideas, avg age 16 sessions. None stale (threshold: 30)."
     },
     "queue": {
-      "total": 29,
-      "pending": 3,
+      "total": 30,
+      "pending": 4,
       "retired": 26,
       "pending_items": [
-        "wq-176 (Pattern export for agent exchange)",
-        "wq-179 (Add tests for high-churn components)",
-        "wq-180 (Session trace persistence)"
+        "wq-179 (Add tests for high-churn components) — 43% coverage achieved",
+        "wq-180 (Session trace persistence)",
+        "wq-181 (Circuit breaker metrics endpoint)",
+        "wq-185 (Evaluate A session stigmergic traces - d037)"
       ],
-      "audit_tagged_total": 86,
-      "audit_tagged_done": 82,
+      "audit_tagged_total": 88,
+      "audit_tagged_done": 83,
       "stuck_items": [],
-      "s866_recommendation_status": {
-        "a866-1": "DONE — wq-182 resolved s867 (session failures were false alarms)",
-        "a866-2": "DONE — wq-183 resolved s867 (smoke test failures investigated)"
+      "s871_recommendation_status": {
+        "a871-1": "DONE — wq-184 completed B#220 (s872). SESSION_LEARN.md stale references removed."
       },
-      "verdict": "HEALTHY — 3 pending items. Both s866 recommendations completed."
+      "verdict": "HEALTHY — 4 pending items, none stuck. s871 recommendation resolved."
     },
     "directives": {
-      "total": 33,
-      "active": 0,
-      "completed": 33,
+      "total": 35,
+      "active": 1,
+      "completed": 34,
       "pending": 0,
-      "verdict": "HEALTHY — All 33 directives completed. No backlog."
+      "active_details": [
+        "d037: Evaluate A session stigmergic traces (acked s875, queue item wq-185)"
+      ],
+      "verdict": "HEALTHY — 1 active directive with proper queue linkage. d038 completed s875."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 10,
-      "avg_cost": 1.64,
-      "delta_from_s866": "+26% ($1.30 -> $1.64)",
-      "queue_items_completed": "wq-170, wq-169, wq-179, wq-181, wq-182, wq-183",
-      "commits": "17 commits across 9 sessions (s857 failed)",
-      "issue_found": "None — s857 failure already investigated and resolved (wq-182)",
-      "mandate_compliance": 0.90,
-      "verdict": "PRODUCTIVE — Cost up but shipping more commits. 9/10 sessions shipped."
+      "avg_cost": 1.46,
+      "delta_from_s871": "-11% ($1.64 -> $1.46)",
+      "queue_items_completed": ["wq-179 (partial)", "wq-184"],
+      "commits": "16 commits across 10 sessions",
+      "mandate_compliance": 1.0,
+      "verdict": "PRODUCTIVE — Cost down 11%, shipping consistently. Test coverage at 43%."
     },
     "E": {
       "count_in_history": 7,
-      "avg_cost": 1.83,
-      "delta_from_s866": "+6% ($1.73 -> $1.83)",
+      "avg_cost": 1.85,
+      "delta_from_s871": "+1% ($1.83 -> $1.85)",
       "platforms_engaged": ["4claw", "Chatr", "Colony", "AgentChan", "LobChan", "Grove"],
-      "intel_generated": 3,
-      "session_traces": "engagement-trace.json entries present",
+      "intel_generated": 2,
+      "stigmergic_traces": "engagement-trace.json active (R#139 closed feedback loop)",
       "mandate_compliance": 1.0,
-      "verdict": "STABLE — Multi-platform engagement maintained."
+      "verdict": "STABLE — Multi-platform engagement maintained. Stigmergic traces working."
     },
     "R": {
       "count_in_history": 7,
-      "avg_cost": 1.11,
-      "delta_from_s866": "+2% ($1.09 -> $1.11)",
-      "structural_changes": ["R#134 A completion format", "R#135 stigmergic traces", "R#136 pattern capture priority", "R#137 question handling", "R#138 audit stale detection", "R#139 stigmergic feedback loop"],
-      "commits": 10,
+      "avg_cost": 1.19,
+      "delta_from_s871": "+7% ($1.11 -> $1.19)",
+      "structural_changes": [
+        "R#140 intel auto-promotion (d038)",
+        "R#139 stigmergic feedback loop",
+        "R#138 audit stale detection",
+        "R#137 question handling"
+      ],
+      "commits": 8,
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "verdict": "EXCELLENT — Most efficient session type. 10 commits, 0 reverts."
+      "verdict": "EXCELLENT — Most efficient session type. Impactful structural changes landing."
     },
     "A": {
       "count_in_history": 6,
-      "avg_cost": 2.52,
-      "delta_from_s866": "-6% ($2.67 -> $2.52)",
-      "s866_recommendations_resolved": true,
-      "verdict": "IMPROVED — Cost down 6%. Both s866 recommendations completed."
+      "avg_cost": 2.53,
+      "delta_from_s871": "0% ($2.52 -> $2.53)",
+      "s871_recommendations_resolved": true,
+      "verdict": "STABLE — Cost stable. s871 recommendation completed."
     }
   },
   "infrastructure": {
     "hooks": {
-      "pre_session": 28,
-      "post_session": 25,
-      "total": 53,
+      "pre_session": 30,
+      "post_session": 27,
+      "total": 57,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
@@ -109,39 +116,34 @@
       "registry_entries": 25,
       "orphaned": 0,
       "missing": 0,
-      "note": "Some accounts use external credential files (e.g., ~/.colony-key)"
+      "note": "Some accounts use external credential files (e.g., ~/.colony-key, ~/.agentmail-creds.json)"
     },
     "services": {
+      "total": 5,
       "by_status": {
+        "active": 5,
         "discovered_pending": 0
       },
       "liveness_spot_check": {
         "fourclaw": "Working — 11 boards via MCP",
         "agentchan": "Working — 34 boards via MCP",
-        "chatr": "Working — 2 agents online via MCP",
-        "colony": "Working — 13 colonies, token valid (24h TTL) via MCP",
+        "chatr": "Working — 6 agents online via MCP",
+        "colony": "Working — 13 colonies, token valid (24h TTL)",
         "lobchan": "Working — 21 boards via MCP"
       },
       "verdict": "HEALTHY — All 5 spot-checked platforms working via MCP tools."
     },
     "stale_references": {
-      "SESSION_LEARN_md": {
-        "count": 2,
-        "locations": ["CLAUDE.md:39", "api.mjs:129"],
-        "severity": "low",
-        "note": "SESSION_LEARN.md was deleted but still referenced. Cleanup needed."
-      },
-      "historical_files": {
-        "dialogue_md": "Referenced in dialogue-archive.md (historical, acceptable)",
-        "directive_tracking_json": "Referenced in dialogue-archive.md (historical, acceptable)",
-        "chatr_queue_json": "Referenced in dialogue-archive.md (historical, acceptable)"
-      }
+      "SESSION_LEARN_md": "RESOLVED — wq-184 completed s872",
+      "SESSION_HOUSEKEEP_md": "No active references found",
+      "chatr_queue_json": "No active references found",
+      "directive_tracking_json": "No active references found"
     },
     "human_review": {
       "open": 0,
       "resolved": 0
     },
-    "verdict": "MINOR ISSUE — 1 stale reference to SESSION_LEARN.md needs cleanup."
+    "verdict": "HEALTHY — All stale references from s871 resolved. Hooks pass syntax checks."
   },
   "security": {
     "registry": {
@@ -159,6 +161,12 @@
     },
     "monitors": {
       "count": 4,
+      "urls": [
+        "https://chatr.ai/api/messages?limit=1",
+        "http://127.0.0.1:3847/health",
+        "https://www.4claw.org/",
+        "https://agentid.sh"
+      ],
       "internal_ip_monitors": 1,
       "internal_ip_details": "127.0.0.1:3847/health — self-monitoring of local MCP server (acceptable)",
       "ssrf_risk": false
@@ -172,43 +180,54 @@
     "verdict": "CLEAN — Minimal attack surface. No security concerns."
   },
   "cost": {
-    "last_30_sessions_total": 52.03,
-    "last_20_sessions_total": 34.77,
-    "avg_per_session": 1.74,
+    "last_30_sessions_total": 48.07,
+    "last_20_sessions_total": 34.21,
+    "avg_per_session": 1.71,
     "by_type": {
-      "A": {"avg": 2.52, "count": 6},
-      "B": {"avg": 1.64, "count": 10},
-      "E": {"avg": 1.83, "count": 7},
-      "R": {"avg": 1.11, "count": 7}
+      "A": {"avg": 2.55, "count": 6},
+      "B": {"avg": 1.50, "count": 9},
+      "E": {"avg": 2.00, "count": 6},
+      "R": {"avg": 1.21, "count": 6}
     },
     "trend": "stable",
-    "delta_from_s866": {
-      "B": "+26% ($1.30 -> $1.64)",
-      "E": "+6% ($1.73 -> $1.83)",
-      "R": "+2% ($1.09 -> $1.11)",
-      "A": "-6% ($2.67 -> $2.52)",
-      "overall": "+7% ($1.63 -> $1.74)"
+    "delta_from_s871": {
+      "B": "-9% ($1.64 -> $1.50)",
+      "E": "+9% ($1.83 -> $2.00)",
+      "R": "+9% ($1.11 -> $1.21)",
+      "A": "+1% ($2.52 -> $2.55)",
+      "overall": "-2% ($1.74 -> $1.71)"
     },
-    "note": "B session costs up but productivity up proportionally (more commits). R sessions most efficient. A sessions improving."
+    "note": "Overall costs down 2%. R sessions slightly more expensive but delivering more structural changes. B sessions most improved."
   },
-  "delta_from_s866": {
+  "directive_outcomes_analysis": {
+    "file_entries": 13,
+    "sessions_tracked": ["s794", "s797", "s799", "s807", "s809", "s810", "s812", "s835", "s840", "s845", "s850"],
+    "note": "directive-outcomes.json tracking stopped at s850. Most tracked directives (d002, d027, d031, d036) are now completed. No active tracking needed for current d037.",
+    "addressed_rate_when_active": "Low for E sessions on d002/d027, improved for d031",
+    "verdict": "INFORMATIONAL — Historical tracking shows mandate compliance improved over time. Current directives properly linked to queue items."
+  },
+  "delta_from_s871": {
     "resolved": [
-      "a866-1: s857 session failure investigation — DONE, wq-182 resolved s867 (false alarm)",
-      "a866-2: smoke test failure investigation — DONE, wq-183 resolved s867"
+      "a871-1: SESSION_LEARN.md stale references — DONE, wq-184 completed B#220"
     ],
     "persists": [],
-    "new_issues": [
-      "SESSION_LEARN.md stale reference in CLAUDE.md and api.mjs"
-    ]
+    "new_issues": []
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a871-1",
-      "title": "Remove stale SESSION_LEARN.md references",
+      "id": "a876-1",
+      "title": "Evaluate d037 (A session stigmergic traces) in next R session",
       "priority": "low",
-      "tags": ["audit", "cleanup"],
-      "notes": "SESSION_LEARN.md was deleted but is still referenced in CLAUDE.md:39 and api.mjs:129. Remove these references to prevent confusion."
+      "tags": ["audit", "directive"],
+      "notes": "d037 acked s875 with wq-185 created. This is evaluation work, not implementation. Next R session should evaluate whether audit-trace.json adds value over existing audit-report.json + work-queue mechanisms."
+    },
+    {
+      "id": "a876-2",
+      "title": "Monitor d038 fix effectiveness in next A session",
+      "priority": "low",
+      "tags": ["audit", "monitoring"],
+      "notes": "R#140 added intel auto-promotion logic. No E sessions since fix. Next audit should verify: (1) E sessions generate intel entries with actionable text, (2) entries are auto-promoted to work-queue with 'intel-auto' source tag."
     }
   ]
 }

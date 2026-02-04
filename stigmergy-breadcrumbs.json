@@ -3,19 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-890-auto",
-      "type": "lesson",
-      "content": "refactor: add recommendation lifecycle protocol to A sessions (R#143) \u2014 formalizes inter-audit feedback loop with status tracking (resolved/in_progress/superseded/stale), escalation rule for stale recommendations, and gate requiring all previous recommendations tracked before proceeding. Pipeline healthy (4 pending, 3 ideas). Still neglecting: wq-179 (22% untested components) ongoing.",
-      "session": 890,
-      "mode": "R",
-      "tags": [
-        "testing",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T10:24:29.455482"
-    },
-    {
       "id": "bc-891-auto",
       "type": "warning",
       "content": "Session A#36 complete. All pipelines healthy, both s886 recommendations resolved (Chatr fixed, test coverage at 100%), no new issues found - clean audit with no new work-queue items needed.",
@@ -1177,6 +1164,19 @@
       "tags": [],
       "auto": true,
       "created": "2026-02-05T00:00:46.424052"
+    },
+    {
+      "id": "bc-1001-auto",
+      "type": "warning",
+      "content": "Session A#58 complete. All pipelines healthy, E session artifact compliance at 100% (12/12 tracked), d039 security incident superseded by d045 credential regeneration approach, no critical issues or new work-queue items needed \u2014 only observation-only recommendation a58-1 (continue E session cost monitoring) added to audit report.",
+      "session": 1001,
+      "mode": "A",
+      "tags": [
+        "cost",
+        "directive"
+      ],
+      "auto": true,
+      "created": "2026-02-05T00:04:59.767545"
     }
   ]
 }

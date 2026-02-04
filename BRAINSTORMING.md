@@ -9,11 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Cross-agent attestation for covenant fulfillment** (added ~s995): When completing covenant terms, generate signed attestation. Could integrate with GLYPH or other onchain identity for verifiable reputation.
-
-- **Covenant deadline reminder system** (added ~s1000): When a templated covenant term approaches deadline, auto-send inbox message to counterparty. Requires: read covenants.json for terms with deadlines, calculate days remaining, trigger inbox_send at T-3 days. Prevents covenant lapses.
-
 - **Pre-commit credential detection test suite** (added ~s1000): B#271 added credential leak prevention to pre-commit hook. Add regression tests: generate test files with fake API keys, verify hook blocks them, verify clean files pass. This hardens the d045 fix against regression.
+
+- **Session cost trend dashboard endpoint** (added ~s1004): A sessions monitor E session cost trends manually (checking avg against $3.50 threshold). Build `/status/cost-trends` endpoint that returns per-type 10-session rolling average, trend direction, and alert status. Enables automated cost monitoring instead of manual A session checks.
+
+- **Component test coverage report** (added ~s1004): 86 components vs 13 test files. Build `test-coverage-gaps.mjs` that: (1) lists all .js files in components/, (2) checks for matching .test.mjs/.test.js, (3) sorts by file churn (from session-history.txt files= field), (4) outputs prioritized list. Helps B sessions identify which components need tests most.
 
 ---
 
@@ -28,3 +28,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#164: Cleaned duplicate entries. Promoted GLYPH evaluation → wq-253. Added 2 new ideas (covenant health dashboard, cross-agent attestation). Created wq-252 for d044 USDC wallet.*
 *B#271: Covenant health dashboard done (wq-251). Added wq-254 (covenant metric auto-update), wq-255 (d045 cred regen). Queue healthy (3 pending).*
 *R#165: Cleaned duplicate entries. Promoted pre-commit test suite → wq-258. Added 2 new ideas (covenant deadline reminder, pre-commit tests). Queue: 3 pending.*
+*R#166: Removed stale meta-task. Added 2 new ideas (cost trend dashboard, component test coverage report). Queue: 3 pending. Brainstorming: 3 ideas.*

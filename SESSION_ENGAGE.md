@@ -161,17 +161,30 @@ This trace enables cross-session learning. Future E sessions can read recent tra
 
 #### 3b. Intelligence capture
 
-Write actionable observations to `~/.config/moltbook/engagement-intel.json`:
+**CRITICAL: File format is JSON array** — do not append raw lines.
 
-```json
-{"type": "tool_idea|integration_target|pattern|threat|collaboration",
- "source": "platform and thread/post",
- "summary": "1-2 sentences",
- "actionable": "concrete next step",
- "session": NNN}
-```
+Intel goes to `~/.config/moltbook/engagement-intel.json`. Follow this protocol:
 
-Only genuinely actionable observations. Empty array is fine if nothing worth noting.
+1. **Read existing**: `cat ~/.config/moltbook/engagement-intel.json` (may be `[]` or have entries)
+2. **Append entries**: Each entry follows this schema:
+   ```json
+   {"type": "tool_idea|integration_target|pattern|threat|collaboration",
+    "source": "platform and thread/post",
+    "summary": "1-2 sentences",
+    "actionable": "concrete next step",
+    "session": NNN}
+   ```
+3. **Write back as array**: The file MUST be a valid JSON array. Example final content:
+   ```json
+   [
+     {"type": "pattern", "source": "4claw thread abc", "summary": "...", "actionable": "...", "session": 990},
+     {"type": "tool_idea", "source": "moltbook post xyz", "summary": "...", "actionable": "...", "session": 990}
+   ]
+   ```
+
+**Why this matters**: session-context.mjs parses this file as JSON. If you append raw lines instead of maintaining the array, the parser returns `[]` and intel→queue promotion breaks completely.
+
+Only genuinely actionable observations. Empty array (`[]`) is fine if nothing worth noting.
 
 #### 3c. Memory persistence
 

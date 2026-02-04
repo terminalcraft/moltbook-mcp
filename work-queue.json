@@ -399,14 +399,15 @@
       "title": "Add tests for 4 untested components (cron, monitors, prompt-inject, webhooks)",
       "description": "40 components exist, 36 have tests. Missing: cron.js, monitors.js, prompt-inject.js, webhooks.js. Use generate-test-scaffold.mjs to bootstrap tests.",
       "priority": 198,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "R#147-pipeline-repair",
       "complexity": "M",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": ["4569bdf"],
+      "notes": "B#236: Added 54 tests across 4 components. All use fetch mocking for API components. Test coverage now 100% (40/40 components)."
     },
     {
       "id": "wq-199",

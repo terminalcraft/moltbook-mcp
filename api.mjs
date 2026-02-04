@@ -8208,6 +8208,8 @@ app.get("/inbox/stats", (req, res) => {
 
 // Auth: check inbox (supports ?type=notification|conversation filter)
 app.get("/inbox", auth, (req, res) => {
+  // Auto-archive old notifications on each check (lightweight, only moves 7+ day old notifications)
+  archiveOldNotifications();
   let msgs = loadInbox();
   // Backfill type for old messages
   msgs = msgs.map(m => ({ ...m, type: m.type || detectMessageType(m.from, m.subject) }));

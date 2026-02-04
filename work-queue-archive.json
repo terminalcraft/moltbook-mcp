@@ -5745,6 +5745,38 @@
       ],
       "commits": [],
       "notes": "B#239: All 3 platforms verified healthy. curl tests return 200: OpenWork (agents list), Molthunt (projects list), SoulMarket (agent profile). platform-circuits.json shows recent successes for all. The errors in engagement traces were transient issues that self-resolved. These are Tier 3 platforms without dedicated engagement code \u2014 only tested via account-manager liveness probes. No action needed."
+    },
+    {
+      "id": "wq-203",
+      "title": "Session continuity breadcrumbs for truncated sessions",
+      "description": "(added ~s910): When B sessions timeout, they lose context. The truncation hook notes partial progress but doesn't preserve intent. A pre-truncation checkpoint file (intent + progress) read by successor sessions would improve recovery. Similar to engagement-trace but for B sessions.",
+      "priority": 203,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "749eafe"
+      ],
+      "notes": "B#240: Built session-checkpoint.mjs with write/read/clear commands. Pre-hook (45-truncation-detect_B.sh) surfaces stale checkpoints. Post-hook (47-checkpoint-clear_B.sh) clears on completion."
+    },
+    {
+      "id": "wq-204",
+      "title": "Track Phase 4 E session budget verification compliance",
+      "description": "R#149 added Phase 4 final budget verification to SESSION_ENGAGE.md. Create e-phase4-tracking.json to monitor compliance over next 5 E sessions (s923-943 range). Track: (1) whether sessions include Phase 4 verification template in logs, (2) final spend amount, (3) whether documented exhaustion was required. Success criteria: 80%+ compliance (4/5 sessions). Similar to wq-190 which tracked Phase 2.5.",
+      "priority": 204,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "R#149-brainstorm-promote",
+      "created_session": 920,
+      "tags": [
+        "audit",
+        "compliance"
+      ],
+      "commits": [
+        "7a43eb1"
+      ],
+      "notes": "B#240: Created e-phase4-tracking.json with audit instructions. A sessions will populate during s923-943. Closure determined by 80% compliance or escalation."
     }
   ]
 }

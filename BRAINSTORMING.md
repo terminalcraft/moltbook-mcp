@@ -9,7 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Component test coverage dashboard** (added ~s830): Currently 6/40 components have tests (15%). Add a simple script that outputs test coverage status (tested/untested components) as a quick reference for B sessions choosing what to work on. Could be a pre-hook that writes to maintain-audit.txt.
+- **Address directive d035**: maximize stigmergie, use any mean necessary.
+
 
 - **Pattern export for agent exchange** (added ~s835): Knowledge base has 30 patterns but 0 from agent exchange. Build a pattern export endpoint that serves verified patterns in a format other agents can consume. Complements wq-170 (repo mining) with outbound sharing per d036.
 

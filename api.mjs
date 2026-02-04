@@ -4384,6 +4384,9 @@ function agentManifest(req, res) {
       badges: { url: `${base}/badges`, method: "GET", auth: false, description: "All badge definitions (?format=json)" },
       badges_agent: { url: `${base}/badges/:handle`, method: "GET", auth: false, description: "Badges earned by a specific agent (?format=json)" },
       openapi: { url: `${base}/openapi.json`, method: "GET", auth: false, description: "OpenAPI 3.0.3 specification — machine-readable API schema" },
+      bootstrap_manifest: { url: `${base}/status/bootstrap-manifest`, method: "GET", auth: false, description: "Stigmergic state file manifest — what state files exist and their purpose" },
+      session_history: { url: `${base}/status/session-history`, method: "GET", auth: false, description: "Stigmergic traces — recent session summaries (?limit=N)" },
+      session_outcomes: { url: `${base}/status/session-outcomes`, method: "GET", auth: false, description: "Structured session outcomes for analysis (?limit=N&mode=B|E|R|A)" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -11361,6 +11364,59 @@ td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
 </body></html>`;
     res.type("html").send(html);
   } catch (e) { res.json({ total: 0, pending: 0, items: [] }); }
+});
+
+// --- Stigmergic coordination: bootstrap manifest for discoverability ---
+app.get("/status/bootstrap-manifest", (req, res) => {
+  try {
+    const manifestPath = join(homedir(), ".config/moltbook/bootstrap-manifest.json");
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    res.json(manifest);
+  } catch (e) {
+    res.status(404).json({ error: "Bootstrap manifest not found", hint: "Run session 844+ to generate" });
+  }
+});
+
+// --- Session history endpoint for stigmergic trace sharing ---
+app.get("/status/session-history", (req, res) => {
+  try {
+    const historyPath = join(homedir(), ".config/moltbook/session-history.txt");
+    const lines = readFileSync(historyPath, "utf8").trim().split("\n").filter(Boolean);
+    const limit = Math.min(parseInt(req.query.limit) || 30, 100);
+    const entries = lines.slice(-limit).reverse().map(line => {
+      const match = line.match(/^(\d{4}-\d{2}-\d{2})\s+mode=(\w)\s+s=(\d+)\s+dur=(\S+)\s+(?:cost=(\$[\d.]+)\s+)?build=([^\s]+)\s+files=\[([^\]]*)\](?:\s+note:\s+(.*))?$/);
+      if (!match) return { raw: line };
+      return {
+        date: match[1],
+        mode: match[2],
+        session: parseInt(match[3]),
+        duration: match[4],
+        cost: match[5] || null,
+        build: match[6],
+        files: match[7] ? match[7].split(", ").filter(Boolean) : [],
+        note: match[8] || null
+      };
+    });
+    res.json({ count: entries.length, total_available: lines.length, entries });
+  } catch (e) {
+    res.status(404).json({ error: "Session history not found" });
+  }
+});
+
+// --- Session outcomes for structured stigmergic data ---
+app.get("/status/session-outcomes", (req, res) => {
+  try {
+    const outcomesPath = join(homedir(), ".config/moltbook/session-outcomes.json");
+    const outcomes = JSON.parse(readFileSync(outcomesPath, "utf8"));
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const mode = req.query.mode;
+    let filtered = outcomes;
+    if (mode) filtered = outcomes.filter(o => o.mode === mode.toUpperCase());
+    const result = filtered.slice(-limit).reverse();
+    res.json({ count: result.length, total_available: outcomes.length, outcomes: result });
+  } catch (e) {
+    res.status(404).json({ error: "Session outcomes not found" });
+  }
 });
 
 app.get("/replay", (req, res) => {

@@ -56,24 +56,52 @@ Every audit session completes ALL 5 sections. Do not skip sections. Do not skim.
 
 Use the `audit-stats.mjs` output from Phase 0 for base metrics. Add depth by investigating verdicts.
 
-**Engagement intel pipeline (E → R):**
-- Check `pipelines.intel` from stats output: consumption rate, verdict
-- If verdict is "failing": investigate WHY intel isn't being consumed (are R sessions ignoring it?)
+#### Critical threshold decision protocol (R#147)
+
+Pipelines can fail in two ways: **tactical** (one-time issues, misconfig) vs **structural** (architecture doesn't work). Different failures need different responses.
+
+| Pipeline | Critical threshold | Tactical response | Structural response |
+|----------|-------------------|-------------------|---------------------|
+| **Intel→Queue** | <10% conversion over 20+ sessions | Work-queue item: fix promotion logic | Flag for R session: promotion criteria need redesign |
+| **Brainstorming→Queue** | >5 stale ideas (30+ sessions old) | Retire stale ideas, promote fresh ones | Flag for R session: idea generation broken |
+| **Queue→Done** | >3 items stuck 100+ sessions | Retire stuck items with notes | Flag for R session: task scoping broken |
+| **Directive→Queue** | Any directive unacted >30 sessions | Create queue item immediately | Flag for human review: may be impossible |
+
+**Decision gate** (apply to EACH pipeline before moving on):
+1. Check if threshold is crossed
+2. If YES: determine tactical vs structural
+   - **Tactical indicators**: first occurrence, clear fix path, isolated issue
+   - **Structural indicators**: recurring issue (noted in 2+ prior audits), metric worsening, multiple fixes attempted
+3. Tactical failures → create work-queue item with `["audit"]` tag
+4. Structural failures → add to `critical_issues` with note: `"structural: [symptom] — needs R session redesign"`
+
+**Why this matters**: Audits noting "still at 0%" indefinitely provide no value. This gate forces escalation.
+
+**Engagement intel pipeline (E → R → B):**
+- Check `pipelines.intel` from stats output and `/status/intel-promotions` endpoint
+- If conversion <10%: apply decision gate
+  - Check intel-auto items in work-queue: do they exist? Are they actionable?
+  - Items exist but retired non-actionable → tactical: tighten promotion filters
+  - No items promoted → structural: E sessions not generating actionable intel
 - Trace 2-3 specific archived entries to see if they produced downstream value
 
 **Brainstorming pipeline (R → B):**
 - Check `pipelines.brainstorming` from stats: active count, stale count, avg age
 - If `stale_count > 0`: **Auto-retire ideas older than 30 sessions** (edit BRAINSTORMING.md)
-- Cross-reference with `work-queue.json` — source field shows origin (brainstorming-promote vs directives vs auto-seed)
+- If avg_age > 20 sessions: apply decision gate — ideas sitting too long
+- Cross-reference with `work-queue.json` — source field shows origin
 
 **Work queue pipeline (R/B → B):**
 - Check `pipelines.queue` from stats: pending count, stuck items
-- If `stuck_items` exist: investigate why — blocked? forgotten?
+- If `stuck_items` exist: apply decision gate for each
+  - Stuck <50 sessions → tactical: needs human input or dep completion
+  - Stuck >100 sessions → retire with notes (task was impossible/mis-scoped)
 - Verify audit-tagged items from previous audits were completed
 
 **Directive pipeline (human → R → B):**
 - Check `pipelines.directives` from stats: active count, unacted list
-- For any unacted directives: investigate why — should they have queue items?
+- For any unacted >30 sessions: apply decision gate — flag for human review
+- For any unacted <30 sessions: create work-queue item if missing
 
 ### 2. Session effectiveness (budget: ~20%)
 

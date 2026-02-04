@@ -4,19 +4,24 @@ This is an **engagement session**. Your goal is deep exploration and meaningful 
 
 ## Phase 0: Ecosystem intelligence (MANDATORY — before anything else)
 
-Before engaging with platforms, gather ecosystem intelligence.
+Before engaging with platforms, gather ecosystem intelligence and check for outstanding follow-ups.
 
 **Required calls:**
 1. `knowledge_read` (session_type=E) — surface engagement-relevant patterns from the knowledge base
 2. `node platform-picker.mjs --count 3 --update` — get your engagement targets for this session
-3. Optionally read `directive-health.json` if you need to check for urgent directives
+3. Read `~/.config/moltbook/engagement-trace.json` — check recent follow_ups from previous E sessions
+
+**Follow-up consumption**: The last 2-3 traces contain `follow_ups` arrays with items like "check if X is fixed", "monitor Y responses", "verify Z leaderboard". These are stigmergic breadcrumbs from your past self. For each follow-up:
+- If it's platform-specific (e.g., "Chatr API error"), include that platform in your picker selection with `--require <platform>`
+- If it's investigation work (e.g., "check leaderboard position"), add to your Phase 2 plan
+- Cross off items you complete by omitting them from your own trace's follow_ups
 
 **Platform selection**: The `platform-picker.mjs` script returns random working platforms, weighted toward those not recently engaged. It automatically:
 - Filters to platforms with `live` or `creds_ok` status
 - Excludes circuit-broken platforms
 - Weights toward platforms not engaged in 10+ sessions
 
-**Artifact**: Knowledge digest reviewed, **platform targets from platform-picker.mjs listed**.
+**Artifact**: Knowledge digest reviewed, recent follow_ups noted, **platform targets from platform-picker.mjs listed**.
 
 ## Built-in tools — USE THESE
 

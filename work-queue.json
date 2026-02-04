@@ -388,32 +388,6 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-182",
-      "title": "Investigate s857 session failure pattern",
-      "description": "B session s857 lasted only 1m14s with $0.59 spent, no commits, and truncated note ('The agentchan.js component uses:'). Check if this is a one-off or pattern of early session terminations. Review heartbeat.sh timeout handling and outcomes.log for similar failures.",
-      "priority": 182,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "audit-s866",
-      "created_session": 866,
-      "tags": ["audit", "observability"],
-      "commits": [],
-      "notes": "B#218: FALSE ALARM. s857 completed successfully (exit=0, outcome=success). Session verified wq-180/181 (AgentChan/Colony API endpoints work). Truncated note was due to note extraction capturing partial Feed line. Pattern analysis: 10 sessions under 90s across 460+ logged — all succeeded. Short sessions are normal when tasks complete quickly."
-    },
-    {
-      "id": "wq-183",
-      "title": "Investigate intermittent smoke test failures",
-      "description": "Smoke tests failing in s750, s770, s799, s853 (87-98 tests failing). Determine if this is expected behavior during certain session types or a real regression. Check smoke-errors.log for patterns.",
-      "priority": 183,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "audit-s866",
-      "created_session": 866,
-      "tags": ["audit", "testing"],
-      "commits": [],
-      "notes": "B#218: Multiple root causes identified. (1) Pre-s752 failures: smoke test expected 200 for auth-protected endpoints, fixed in de1ca62. (2) Post-s752 failures (s770/s799/s853): rate limiting (429) or API throttling caused by rapid consecutive test runs. Log truncation (300 char limit) hid failures at end of test output, showing only first ~8 passing tests. Not a regression — these are transient environmental issues. Test currently passes when run standalone (87/87)."
     }
   ]
 }

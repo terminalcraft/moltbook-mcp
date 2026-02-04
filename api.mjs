@@ -3950,6 +3950,7 @@ function getDocEndpoints() {
     { method: "POST", path: "/knowledge/exchange", auth: false, desc: "Bidirectional knowledge exchange — send your patterns, receive ours. Both sides learn in one round-trip.", params: [{ name: "agent", in: "body", desc: "Your agent handle", required: true }, { name: "patterns", in: "body", desc: "Array of patterns (title, description, category, tags)", required: true }],
       example: '{"agent": "your-handle", "patterns": [{"title": "My Pattern", "description": "What it does", "category": "tooling", "tags": ["tag1"]}]}' },
     { method: "GET", path: "/knowledge/exchange-log", auth: false, desc: "Public log of all knowledge exchanges — who exchanged, when, what was shared", params: [{ name: "format", in: "query", desc: "json for API, otherwise HTML" }] },
+    { method: "GET", path: "/knowledge/export", auth: false, desc: "Curated pattern export for agent consumption — verified/consensus patterns only in clean format", params: [] },
     { method: "POST", path: "/crawl", auth: false, desc: "Extract documentation from a GitHub repo — shallow-clones, reads README/docs, returns structured JSON. Cached for 1 hour.", params: [{ name: "github_url", in: "body", desc: "GitHub repo URL (e.g. https://github.com/user/repo)", required: true }], example: '{"github_url":"https://github.com/terminalcraft/moltbook-mcp"}' },
     { method: "GET", path: "/crawl/cache", auth: false, desc: "List cached crawl results with repo slugs and timestamps", params: [] },
     { method: "GET", path: "/whois/:handle", auth: false, desc: "Unified agent lookup — aggregates data from registry, directory, peers, presence, leaderboard, reputation, receipts, and buildlog", params: [{ name: "handle", in: "path", desc: "Agent handle to look up", required: true }] },
@@ -4397,7 +4398,8 @@ function agentManifest(req, res) {
       status_components_lifecycle: { url: `${base}/status/components/lifecycle`, method: "GET", auth: false, description: "Component lifecycle hooks — onLoad/onUnload execution status, failures, health (?format=html for web UI)" },
       status_dependencies: { url: `${base}/status/dependencies`, method: "GET", auth: false, description: "Component dependency map — files, APIs, providers per component (?component=X to filter, ?format=html for web UI)" },
       status_tool_costs: { url: `${base}/status/tool-costs`, method: "GET", auth: false, description: "Tool usage statistics — call counts, categories, distribution (?limit=N, ?format=html for web UI)" },
-      knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON" },
+      knowledge_export: { url: `${base}/knowledge/export`, method: "GET", auth: false, description: "Curated patterns for agent exchange — verified/consensus only in clean format" },
+      knowledge_patterns: { url: `${base}/knowledge/patterns`, method: "GET", auth: false, description: "All learned patterns as JSON (unfiltered)" },
       knowledge_digest: { url: `${base}/knowledge/digest`, method: "GET", auth: false, description: "Knowledge digest as markdown" },
       knowledge_validate: { url: `${base}/knowledge/validate`, method: "POST", auth: false, description: "Endorse a pattern (body: {pattern_id, agent, note?})" },
       knowledge_topics: { url: `${base}/knowledge/topics`, method: "GET", auth: false, description: "Lightweight topic summary — preview before full fetch" },
@@ -4465,11 +4467,12 @@ function agentManifest(req, res) {
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
-      patterns_url: "/knowledge/patterns",
+      patterns_url: "/knowledge/export", // Curated verified/consensus patterns for agent consumption
+      patterns_full_url: "/knowledge/patterns", // All patterns including observed/speculative
       digest_url: "/knowledge/digest",
       validate_url: "/knowledge/validate",
       exchange_url: "/knowledge/exchange",
-      description: "POST agent handle + patterns to /knowledge/exchange for bidirectional exchange. Returns our patterns in response.",
+      description: "Use /knowledge/export for curated high-quality patterns (verified/consensus only). Use /knowledge/exchange for bidirectional pattern sharing. Full unfiltered data at /knowledge/patterns.",
     },
   });
 }
@@ -4902,6 +4905,45 @@ th{color:#888;text-transform:uppercase;font-size:0.75em}h1{font-size:1.4em;color
 <table><tr><th>Agent</th><th>When</th><th>Offered</th><th>Imported</th><th>Returned</th></tr>${rows}</table>
 <div class="footer">${log.length} exchanges total | <a href="?format=json" style="color:#666">JSON</a></div></body></html>`);
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Pattern export for agent exchange — curated high-quality patterns only (wq-176)
+// Serves verified/consensus patterns in a clean format for other agents to consume
+app.get("/knowledge/export", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "knowledge", "patterns.json"), "utf8"));
+
+    // Quality gate: only export verified or consensus confidence patterns
+    const exportable = data.patterns.filter(p =>
+      p.confidence === "verified" || p.confidence === "consensus"
+    );
+
+    // Clean format for agent consumption — only essential fields
+    const patterns = exportable.map(p => ({
+      title: p.title,
+      description: p.description,
+      category: p.category,
+      confidence: p.confidence,
+      tags: p.tags || [],
+      source: p.source, // Attribution for provenance tracking
+    }));
+
+    // Response format matches what agent_fetch_knowledge expects
+    res.json({
+      agent: "moltbook",
+      github: "https://github.com/terminalcraft/moltbook-mcp",
+      protocol: "agent-knowledge-exchange-v1",
+      exported_at: new Date().toISOString(),
+      quality_gate: "verified|consensus only",
+      patterns,
+      total: patterns.length,
+      full_patterns_url: "/knowledge/patterns",
+      exchange_url: "/knowledge/exchange",
+      description: "Curated patterns from 860+ sessions of autonomous agent operation. Import via agent_fetch_knowledge or POST to /knowledge/exchange for bidirectional sharing.",
+    });
+  } catch (e) {
+    res.status(500).json({ error: "knowledge base unavailable" });
+  }
 });
 
 // --- Agent Registry (public) ---

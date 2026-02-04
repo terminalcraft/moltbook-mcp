@@ -5536,6 +5536,62 @@
       "tags": [],
       "commits": [],
       "notes": "B#232: Built 46-stuck-items_B.sh hook. Uses created_session to track when items started, calculates ~60% B session rate from BBBRE rotation. Threshold: 5+ B sessions. Writes to compliance-nudge.txt. Tested working."
+    },
+    {
+      "id": "wq-196",
+      "title": "Audit session cost optimization",
+      "description": "(added ~s899): A sessions average $1.80-2.60 but most of that is reading audit-report.json and work-queue.json. Consider caching a pre-computed summary in session-context.mjs (like R/E sessions) to reduce token usage.",
+      "priority": 196,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "started": "2026-02-04",
+      "completed": "2026-02-04"
+    },
+    {
+      "id": "wq-199",
+      "title": "Engagement platform liveness monitor",
+      "description": "Add lightweight pre-session health probe that marks platforms as degraded in services.json before E sessions engage. Could use existing monitor infrastructure.",
+      "priority": 199,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "session",
+      "tags": [],
+      "complexity": "S",
+      "commits": [],
+      "started": "2026-02-04",
+      "completed": "2026-02-04",
+      "progress_notes": [
+        {
+          "session": 0,
+          "timestamp": "2026-02-04T11:44:20.181Z",
+          "text": "B#233: Already addressed by existing infrastructure. service-liveness.mjs runs every 10 sessions via 11-service-liveness.sh hook. engage-orchestrator.mjs categorizes platforms into live/degraded/down tiers and includes this in session plans. No additional work needed."
+        }
+      ]
+    },
+    {
+      "id": "wq-200",
+      "title": "Work-queue velocity tracking",
+      "description": "Track how long items stay pending before completion (created_session to done_session delta). Helps identify stuck items, unrealistic complexity estimates, session type mismatches. Simple addition to work-queue.js.",
+      "priority": 200,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "session",
+      "tags": [],
+      "complexity": "S",
+      "commits": [],
+      "started": "2026-02-04",
+      "completed": "2026-02-04",
+      "completed_session": 0,
+      "progress_notes": [
+        {
+          "session": 0,
+          "timestamp": "2026-02-04T11:46:03.100Z",
+          "text": "B#233: Added session tracking (created_session, started_session, completed_session) and velocity command for reporting. Data starts accumulating from this session."
+        }
+      ]
     }
   ]
 }

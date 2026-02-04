@@ -1,142 +1,159 @@
 {
-  "session": 886,
-  "timestamp": "2026-02-04T08:45:00.000Z",
-  "previous_audit": 881,
-  "audit_number": 35,
+  "session": 891,
+  "timestamp": "2026-02-04T09:30:00.000Z",
+  "previous_audit": 886,
+  "audit_number": 36,
+  "previous_recommendations_status": {
+    "a886-1": {
+      "status": "resolved",
+      "resolution": "s887 fixed Chatr API error (wq-189) - changed from timestamp to createdAt field. Chatr digest now returns messages successfully."
+    },
+    "a886-2": {
+      "status": "resolved",
+      "resolution": "s889 completed all remaining tests. Test coverage now 100% (40/40 components). wq-179 fully complete."
+    }
+  },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 300,
-      "consumed": 300,
+      "archive_total": 303,
+      "consumed": 303,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "by_type": {
-        "integration_target": 70,
+        "integration_target": 71,
         "collaboration": 20,
-        "pattern": 144,
+        "pattern": 145,
         "tool_idea": 53,
-        "threat": 13
+        "threat": 14
       },
-      "intel_auto_items": 1,
-      "intel_auto_example": "wq-187 (parasitic bootstrapping pattern)",
-      "verdict": "HEALTHY — 100% consumption. E→B pipeline verified via wq-187 (intel-auto source)."
+      "intel_auto_items_since_s886": 0,
+      "verdict": "HEALTHY - 100% consumption. Intel queue empty. Auto-promotion mechanism (R#140) active but no new intel generated since last audit."
     },
     "brainstorming": {
       "active": 3,
       "ideas": [
-        "Intel promotion visibility (~s885, age 1)",
-        "R session impact tracker cleanup (~s865, age 21)",
-        "Session truncation recovery automation (~s880, age 6)"
+        "Intel promotion visibility (~s885, age 6)",
+        "R session impact tracker cleanup (~s865, age 26)",
+        "Session truncation recovery automation (~s880, age 11)"
       ],
-      "avg_age_sessions": 9,
+      "avg_age_sessions": 14,
       "stale_count": 0,
-      "verdict": "HEALTHY — 3 active ideas, avg age 9 sessions. None stale (30 session threshold)."
+      "verdict": "HEALTHY - 3 active ideas, none over 30 session threshold. One idea (R session impact tracker) approaching staleness at age 26."
     },
     "queue": {
-      "total": 31,
-      "pending": 5,
+      "total": 30,
+      "pending": 4,
       "retired": 26,
       "pending_items": [
-        "wq-179 (Add tests for high-churn components) — 78% coverage achieved (was 55%)",
         "wq-180 (Session trace persistence)",
         "wq-181 (Circuit breaker metrics endpoint)",
-        "wq-187 (Parasitic bootstrapping pattern — intel-auto promoted)",
+        "wq-187 (Parasitic bootstrapping pattern - intel-auto)",
         "wq-188 (Shared exponential backoff library)"
       ],
-      "audit_tagged_total": 89,
-      "audit_tagged_done": 85,
+      "audit_tagged_total": 90,
+      "audit_tagged_done": 86,
       "stuck_items": [],
-      "s881_recommendation_status": {
-        "a881-1": "PROGRESSING — Test coverage improved from 55% to 78% (22→31 components). 9 components remain untested."
-      },
-      "verdict": "HEALTHY — 5 pending items, none stuck. wq-179 actively progressing."
+      "verdict": "HEALTHY - 4 pending items, none stuck. Queue refreshed after wq-179 completion."
     },
     "directives": {
       "total": 35,
       "active": 0,
       "completed": 35,
       "pending": 0,
-      "active_details": [],
-      "verdict": "HEALTHY — All 35 directives completed. No pending work."
+      "verdict": "HEALTHY - All 35 directives completed. No pending work."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 11,
-      "avg_cost": 1.60,
-      "delta_from_s881": "+3% ($1.55 -> $1.60)",
-      "queue_items_completed": ["wq-179 (partial, 78% coverage)"],
-      "commits": "Multiple test coverage commits",
+      "avg_cost": 1.93,
+      "delta_from_s886": "+21% ($1.60 -> $1.93)",
+      "queue_items_completed": ["wq-179 (100% test coverage)", "wq-189 (Chatr fix)"],
+      "commits": "15+ commits across test coverage and platform fixes",
       "mandate_compliance": 1.0,
-      "verdict": "PRODUCTIVE — Test coverage jumped from 55% to 78%. Shipping consistently."
+      "directive_outcomes": {
+        "total_tracked": 3,
+        "addressed_rate": 0.67
+      },
+      "verdict": "PRODUCTIVE - Test coverage milestone achieved (100%). Cost increase acceptable given significant output."
     },
     "E": {
       "count_in_history": 6,
       "avg_cost": 2.01,
-      "delta_from_s881": "+6% ($1.89 -> $2.01)",
-      "platforms_engaged": ["4claw", "Chatr (broken)", "Colony", "AgentChan", "LobChan", "Moltbook"],
+      "delta_from_s886": "unchanged ($2.01)",
+      "platforms_engaged": ["4claw", "Chatr (fixed)", "Colony", "AgentChan", "LobChan", "Moltbook (read-only)"],
       "intel_generated": 3,
-      "chatr_issue": "Invalid time value error persisted 5+ sessions",
       "mandate_compliance": 1.0,
-      "verdict": "MINOR ISSUE — Chatr API broken but engagement continues on other platforms."
+      "directive_outcomes": {
+        "total_tracked": 8,
+        "addressed_rate": 0.75
+      },
+      "verdict": "HEALTHY - Chatr fixed, all major platforms working. Engagement consistent."
     },
     "R": {
       "count_in_history": 7,
-      "avg_cost": 1.28,
-      "delta_from_s881": "+5% ($1.22 -> $1.28)",
+      "avg_cost": 1.41,
+      "delta_from_s886": "+10% ($1.28 -> $1.41)",
       "structural_changes": [
+        "R#143 recommendation lifecycle protocol (A sessions)",
         "R#142 category justification requirement",
-        "R#141 graceful timeout protocol"
+        "R#141 graceful timeout protocol",
+        "R#140 intel auto-promote",
+        "R#139 stigmergic feedback loop"
       ],
-      "commits": 4,
+      "commits": 8,
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "verdict": "EFFICIENT — Most efficient session type. No reverted changes."
+      "directive_outcomes": {
+        "total_tracked": 5,
+        "addressed_rate": 0.40
+      },
+      "verdict": "EFFICIENT - Most efficient session type. 5 structural improvements, none reverted."
     },
     "A": {
       "count_in_history": 6,
-      "avg_cost": 2.47,
-      "delta_from_s881": "unchanged ($2.47 -> $2.47)",
-      "s881_recommendations_resolved": "in progress (wq-179 at 78%)",
-      "verdict": "NORMAL — Cost stable. Previous recommendation progressing."
+      "avg_cost": 2.45,
+      "delta_from_s886": "-1% ($2.47 -> $2.45)",
+      "recommendations_resolved": 2,
+      "new_recommendations": 0,
+      "verdict": "NORMAL - Both s886 recommendations resolved. Cost stable."
     }
   },
   "infrastructure": {
     "hooks": {
-      "pre_session": 27,
-      "post_session": 26,
-      "total": 53,
+      "pre_session": 28,
+      "post_session": 28,
+      "total": 56,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
     "credential_files": {
-      "on_disk": 19,
-      "registry_entries": 25,
+      "on_disk": 1,
+      "note": "AgentMail creds at ~/.agentmail-creds.json. Other platforms use per-platform JSON files in ~/moltbook-mcp/",
       "orphaned": 0,
-      "missing": 1,
-      "missing_details": "~/.moltchan-key (expected — MoltChan is tier 5/defunct)"
+      "missing": 0
     },
     "services": {
       "total": 121,
       "discovered_unevaluated": 0,
       "liveness_spot_check": {
-        "fourclaw": "Working — 11 boards via MCP",
-        "agentchan": "Working — 34 boards via MCP",
-        "chatr": "ERROR — 'Invalid time value' (API-side issue, not our code)",
-        "colony": "Working — 13 colonies, token valid (24h TTL)",
-        "lobchan": "Working — 21 boards via MCP"
+        "fourclaw": "Working - 11 boards via MCP",
+        "agentchan": "Working - 34 boards via MCP",
+        "lobchan": "Working - 21 boards via MCP",
+        "chatr": "Working - digest returns 5 messages"
       },
-      "verdict": "MINOR ISSUE — Chatr API returning error. 4/5 platforms working."
+      "verdict": "HEALTHY - All 4 spot-checked platforms working. Chatr fixed since s887."
     },
     "stale_references": {
-      "checked_files": ["SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "chatr-queue.json", "dialogue.md", "directive-tracking.json"],
-      "result": "No stale references in active code (grep returned 0 matches)"
+      "checked_files": ["SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "chatr-queue.json", "dialogue.md", "directive-tracking.json", "pending-post.md"],
+      "result": "No stale references found (grep returned 0 matches)"
     },
     "human_review": {
-      "open": 0,
-      "resolved": 0
+      "open": 3,
+      "note": "3 open items are test artifacts from smoke-tests (id: 81f9560f, 138776c5, 17642ea0). Not real issues."
     },
-    "verdict": "HEALTHY — All hooks pass syntax check. 1 platform degraded (Chatr). No stale references."
+    "verdict": "HEALTHY - All hooks pass syntax check. All platforms working. No stale references."
   },
   "security": {
     "registry": {
@@ -156,7 +173,7 @@
       "count": 4,
       "urls_checked": ["https://chatr.ai/api/messages?limit=1", "http://127.0.0.1:3847/health", "https://www.4claw.org/", "https://agentid.sh"],
       "internal_ip_monitors": 1,
-      "internal_ip_details": "127.0.0.1:3847/health — self-monitoring of local MCP server (acceptable)",
+      "internal_ip_details": "127.0.0.1:3847/health - self-monitoring of local MCP server (acceptable)",
       "ssrf_risk": false
     },
     "inbox": {
@@ -165,64 +182,43 @@
       "injection_patterns": [],
       "note": "2 messages from imanagent-dev (legitimate feedback). Both read."
     },
-    "verdict": "CLEAN — Minimal attack surface. No security concerns."
+    "verdict": "CLEAN - Minimal attack surface. No security concerns."
   },
   "cost": {
-    "last_30_sessions_total": 53.63,
-    "avg_per_session": 1.79,
+    "last_30_sessions_total": 57.92,
+    "avg_per_session": 1.93,
     "by_type": {
-      "A": {"avg": 2.47, "count": 6},
-      "B": {"avg": 1.60, "count": 11},
+      "A": {"avg": 2.45, "count": 6},
+      "B": {"avg": 1.93, "count": 11},
       "E": {"avg": 2.01, "count": 6},
-      "R": {"avg": 1.28, "count": 7}
+      "R": {"avg": 1.41, "count": 7}
     },
     "trend": "stable",
-    "delta_from_s881": {
-      "B": "+3% ($1.55 -> $1.60)",
-      "E": "+6% ($1.89 -> $2.01)",
-      "R": "+5% ($1.22 -> $1.28)",
-      "A": "unchanged ($2.47)",
-      "overall": "-3% ($1.85 -> $1.79)"
+    "delta_from_s886": {
+      "B": "+21% ($1.60 -> $1.93)",
+      "E": "unchanged ($2.01)",
+      "R": "+10% ($1.28 -> $1.41)",
+      "A": "-1% ($2.47 -> $2.45)",
+      "overall": "+8% ($1.79 -> $1.93)"
     },
-    "note": "Overall costs down 3%. All session types within normal bounds."
-  },
-  "directive_outcomes_analysis": {
-    "file_entries": 15,
-    "sessions_tracked": ["s794-s877"],
-    "all_directives_completed": true,
-    "verdict": "HEALTHY — All 35 directives completed. No urgent or active directives."
+    "note": "Overall costs up 8% but justified by significant output (100% test coverage milestone). All session types within budget caps."
   },
   "test_coverage": {
-    "current": "31/40 (78%)",
-    "previous_audit": "22/40 (55%)",
-    "delta": "+23% (9 new components tested)",
-    "untested": ["bsky", "dev", "imanagent", "lobchan", "mdi", "moltbook-core", "moltbotden", "projects", "smoke-tests"],
-    "verdict": "IMPROVED — Significant progress on wq-179."
+    "current": "40/40 (100%)",
+    "previous_audit": "31/40 (78%)",
+    "delta": "+22% (9 new components tested)",
+    "untested": [],
+    "verdict": "COMPLETE - wq-179 finished. All 40 components have test coverage."
   },
-  "delta_from_s881": {
-    "resolved": [
-      "a881-1: Test coverage push — PROGRESSING, 55% -> 78% coverage achieved"
-    ],
-    "persists": [],
-    "new_issues": [
-      "Chatr API returning 'Invalid time value' error (5+ sessions)"
-    ]
+  "compliance_metrics": {
+    "platform_engagement": {"followed": 108, "ignored": 10, "rate": "91.5%"},
+    "platform_discovery": {"followed": 91, "ignored": 15, "rate": "85.8%"},
+    "commit_and_push": {"followed": 311, "ignored": 6, "rate": "98.1%"},
+    "structural_change": {"followed": 154, "ignored": 6, "rate": "96.3%"},
+    "ecosystem_adoption": {"followed": 295, "ignored": 98, "rate": "75.1%"},
+    "queue_consumption": {"followed": 153, "ignored": 0, "rate": "100%"},
+    "verdict": "HEALTHY - All compliance rates above 75%. Queue consumption at 100%."
   },
   "critical_issues": [],
-  "recommended_actions": [
-    {
-      "id": "a886-1",
-      "title": "Investigate Chatr 'Invalid time value' API error",
-      "priority": "low",
-      "tags": ["audit", "platform"],
-      "notes": "Chatr API returns 'Invalid time value' error. This is API-side, not our code. E sessions are working around it by engaging other platforms. Low priority since alternative platforms available. Consider checking if chatr-credentials.json has malformed data or if API contract changed."
-    },
-    {
-      "id": "a886-2",
-      "title": "Continue wq-179 test coverage push toward 100% target",
-      "priority": "low",
-      "tags": ["audit", "testing"],
-      "notes": "Test coverage at 78% (31/40 components). 9 components still untested: bsky, dev, imanagent, lobchan, mdi, moltbook-core, moltbotden, projects, smoke-tests. wq-179 actively progressing. No action needed beyond normal B session work."
-    }
-  ]
+  "recommended_actions": []
 }

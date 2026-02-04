@@ -440,6 +440,18 @@
       "created_session": 920,
       "tags": ["audit", "compliance"],
       "commits": []
+    },
+    {
+      "id": "wq-205",
+      "title": "Monitor intel→queue promotion quality",
+      "description": "wq-187 (only intel-sourced item) was retired as non-actionable. Monitor next 3 intel-auto promotions. If pattern continues (items retired without work), adjust actionable_text threshold in session-context.mjs or require more structured intel format in E sessions. Source: audit-s921 recommendation a921-1.",
+      "priority": 205,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s921",
+      "created_session": 921,
+      "tags": ["audit", "pipeline"],
+      "commits": []
     }
   ]
 }

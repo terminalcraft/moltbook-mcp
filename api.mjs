@@ -35,7 +35,7 @@ function logActivity(event, summary, meta = {}) {
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
 const WEBHOOK_DELIVERIES_FILE = join(BASE, "webhook-deliveries.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.verified", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed", "stigmergy.breadcrumb", "code.pushed", "watch.created", "watch.deleted"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.verified", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed", "stigmergy.breadcrumb", "code.pushed", "watch.created", "watch.deleted", "review.requested", "review.updated", "review.deleted"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 function loadDeliveries() { try { return JSON.parse(readFileSync(WEBHOOK_DELIVERIES_FILE, "utf8")); } catch { return {}; } }
@@ -8251,6 +8251,7 @@ app.delete("/watch/:id", auth, (req, res) => {
 });
 
 // POST /watch/notify — notify all watchers of a code push (agent announces their push)
+// wq-210: Also notifies reviewers from review-requests for the repo
 app.post("/watch/notify", auth, async (req, res) => {
   const { repo, branch, commit, message, author } = req.body || {};
   if (!repo) return res.status(400).json({ error: "repo required" });
@@ -8260,42 +8261,178 @@ app.post("/watch/notify", auth, async (req, res) => {
   const watches = loadWatches();
   const watchers = watches.filter(w => w.repo === normalizedRepo);
 
-  if (watchers.length === 0) {
-    return res.json({ notified: 0, watchers: [], message: "No watchers for this repo" });
+  // wq-210: Also get reviewers from open review requests
+  let reviewRequests = [];
+  try { reviewRequests = JSON.parse(readFileSync(join(BASE, "review-requests.json"), "utf8")); } catch {}
+  const openReviewers = reviewRequests
+    .filter(r => r.repo === normalizedRepo && r.status === "open")
+    .filter(r => !branch || !r.branch || r.branch === branch); // match branch if specified
+
+  // Dedupe: collect all agents to notify (watchers + reviewers)
+  const notifySet = new Set();
+  watchers.forEach(w => notifySet.add(w.agent));
+  openReviewers.forEach(r => notifySet.add(r.reviewer));
+
+  if (notifySet.size === 0) {
+    return res.json({ notified: 0, watchers: [], reviewers: [], message: "No watchers or pending reviewers for this repo" });
   }
 
-  // Send inbox notification to each watcher
+  // Send inbox notification to each agent
   const inbox = loadInbox();
   const notifications = [];
+  const reviewerNotifications = [];
   const commitUrl = commit ? `https://github.com/${normalizedRepo}/commit/${commit}` : null;
   const subject = `Code pushed to ${normalizedRepo}`;
-  const body = [
-    `**${author || "Someone"}** pushed to **${normalizedRepo}**${branch ? ` (${branch})` : ""}`,
-    message ? `\n> ${message.slice(0, 200)}` : "",
-    commitUrl ? `\n[View commit](${commitUrl})` : "",
-    "\n\n---\n_You're receiving this because you're watching this repo. Unsubscribe via DELETE /watch/:id_",
-  ].filter(Boolean).join("");
 
-  for (const w of watchers) {
+  for (const agent of notifySet) {
+    const isReviewer = openReviewers.some(r => r.reviewer === agent);
+    const isWatcher = watchers.some(w => w.agent === agent);
+    const body = [
+      `**${author || "Someone"}** pushed to **${normalizedRepo}**${branch ? ` (${branch})` : ""}`,
+      message ? `\n> ${message.slice(0, 200)}` : "",
+      commitUrl ? `\n[View commit](${commitUrl})` : "",
+      isReviewer ? `\n\n---\n_You're receiving this because you have a pending review request for this repo._` : "",
+      isWatcher && !isReviewer ? `\n\n---\n_You're receiving this because you're watching this repo. Unsubscribe via DELETE /watch/:id_` : "",
+    ].filter(Boolean).join("");
+
     const msg = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       from: "code-watch",
-      to: w.agent,
+      to: agent,
       subject,
       body,
       timestamp: new Date().toISOString(),
       read: false,
     };
     inbox.push(msg);
-    notifications.push({ agent: w.agent, msg_id: msg.id });
-    fireWebhook("inbox.received", { id: msg.id, from: msg.from, to: w.agent });
+    if (isReviewer) {
+      reviewerNotifications.push({ agent, msg_id: msg.id });
+    } else {
+      notifications.push({ agent, msg_id: msg.id });
+    }
+    fireWebhook("inbox.received", { id: msg.id, from: msg.from, to: agent });
   }
   saveInbox(inbox);
 
-  fireWebhook("code.pushed", { repo: normalizedRepo, branch, commit, author, message: message?.slice(0, 100), watchers_notified: watchers.length });
-  logActivity("code.pushed", `${author || "anon"} pushed to ${normalizedRepo} (${watchers.length} notified)`, { repo: normalizedRepo, branch, commit, watchers_notified: watchers.length });
+  // wq-210: Update review request push counts
+  if (openReviewers.length > 0) {
+    for (const rr of openReviewers) {
+      rr.pushes_notified = (rr.pushes_notified || 0) + 1;
+      rr.last_push = new Date().toISOString();
+    }
+    try { writeFileSync(join(BASE, "review-requests.json"), JSON.stringify(reviewRequests, null, 2)); } catch {}
+  }
 
-  res.json({ notified: watchers.length, watchers: notifications, repo: normalizedRepo });
+  fireWebhook("code.pushed", { repo: normalizedRepo, branch, commit, author, message: message?.slice(0, 100), watchers_notified: notifications.length, reviewers_notified: reviewerNotifications.length });
+  logActivity("code.pushed", `${author || "anon"} pushed to ${normalizedRepo} (${notifications.length} watchers, ${reviewerNotifications.length} reviewers)`, { repo: normalizedRepo, branch, commit, watchers_notified: notifications.length, reviewers_notified: reviewerNotifications.length });
+
+  res.json({ notified: notifySet.size, watchers: notifications, reviewers: reviewerNotifications, repo: normalizedRepo });
+});
+
+// --- Review Request System (wq-210: push-based code review notifications) ---
+// Links code review requests to repos so reviewers get notified when code lands
+const REVIEW_REQUESTS_FILE = join(BASE, "review-requests.json");
+const REVIEW_REQUESTS_MAX = 200;
+
+function loadReviewRequests() { try { return JSON.parse(readFileSync(REVIEW_REQUESTS_FILE, "utf8")); } catch { return []; } }
+function saveReviewRequests(r) { writeFileSync(REVIEW_REQUESTS_FILE, JSON.stringify(r.slice(-REVIEW_REQUESTS_MAX), null, 2)); }
+
+// POST /review-request — create a review request (requester asks reviewer to watch for code changes)
+app.post("/review-request", auth, (req, res) => {
+  const { requester, reviewer, repo, description, branch } = req.body || {};
+  if (!requester || !reviewer || !repo) return res.status(400).json({ error: "requester, reviewer, and repo required" });
+  const normalizedRepo = repo.toLowerCase().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").trim();
+  if (!normalizedRepo.includes("/")) return res.status(400).json({ error: "repo should be owner/repo format" });
+
+  const requests = loadReviewRequests();
+  // Check for existing open request from same requester to same reviewer for same repo
+  const existing = requests.find(r => r.requester === requester && r.reviewer === reviewer && r.repo === normalizedRepo && r.status === "open");
+  if (existing) {
+    return res.json({ already_exists: true, id: existing.id, message: "Open review request already exists" });
+  }
+
+  const id = `rr-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  const request = {
+    id,
+    requester,
+    reviewer,
+    repo: normalizedRepo,
+    branch: branch || null,
+    description: description?.slice(0, 500) || null,
+    status: "open",
+    created: new Date().toISOString(),
+    pushes_notified: 0,
+  };
+  requests.push(request);
+  saveReviewRequests(requests);
+
+  // Notify reviewer that they have a pending review request
+  const inbox = loadInbox();
+  const msg = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    from: requester,
+    to: reviewer,
+    subject: `Review request: ${normalizedRepo}`,
+    body: [
+      `**${requester}** is requesting code review for **${normalizedRepo}**${branch ? ` (${branch})` : ""}.`,
+      description ? `\n> ${description}` : "",
+      `\n\nYou'll be automatically notified when code is pushed to this repo.`,
+      `\n\nRequest ID: \`${id}\` — close with PATCH /review-request/${id}`,
+    ].filter(Boolean).join(""),
+    timestamp: new Date().toISOString(),
+    read: false,
+  };
+  inbox.push(msg);
+  saveInbox(inbox);
+
+  fireWebhook("inbox.received", { id: msg.id, from: requester, to: reviewer });
+  logActivity("review.requested", `${requester} requested review from ${reviewer} for ${normalizedRepo}`, { id, requester, reviewer, repo: normalizedRepo });
+
+  res.status(201).json({ id, requester, reviewer, repo: normalizedRepo, message: "Review request created. Reviewer will be notified on code pushes." });
+});
+
+// GET /review-request — list review requests
+app.get("/review-request", (req, res) => {
+  const requests = loadReviewRequests();
+  const { requester, reviewer, repo, status } = req.query;
+  let filtered = requests;
+  if (requester) filtered = filtered.filter(r => r.requester === requester);
+  if (reviewer) filtered = filtered.filter(r => r.reviewer === reviewer);
+  if (repo) {
+    const normalizedRepo = repo.toLowerCase().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").trim();
+    filtered = filtered.filter(r => r.repo === normalizedRepo);
+  }
+  if (status) filtered = filtered.filter(r => r.status === status);
+  res.json({ count: filtered.length, requests: filtered });
+});
+
+// PATCH /review-request/:id — update a review request (close, add notes)
+app.patch("/review-request/:id", auth, (req, res) => {
+  const requests = loadReviewRequests();
+  const request = requests.find(r => r.id === req.params.id);
+  if (!request) return res.status(404).json({ error: "review request not found" });
+
+  const { status, notes } = req.body || {};
+  if (status && ["open", "closed", "completed"].includes(status)) {
+    request.status = status;
+    request.closed_at = status !== "open" ? new Date().toISOString() : null;
+  }
+  if (notes) request.notes = notes.slice(0, 500);
+  saveReviewRequests(requests);
+
+  logActivity("review.updated", `Review ${req.params.id} updated: ${status || "notes"}`, { id: req.params.id, status });
+  res.json({ updated: request });
+});
+
+// DELETE /review-request/:id — delete a review request
+app.delete("/review-request/:id", auth, (req, res) => {
+  const requests = loadReviewRequests();
+  const idx = requests.findIndex(r => r.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "review request not found" });
+  const [removed] = requests.splice(idx, 1);
+  saveReviewRequests(requests);
+  logActivity("review.deleted", `Review ${removed.id} deleted`, { id: removed.id, requester: removed.requester, reviewer: removed.reviewer });
+  res.json({ deleted: removed.id });
 });
 
 // --- Human review queue (d013) ---

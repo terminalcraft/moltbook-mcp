@@ -317,14 +317,15 @@
       "title": "Improve generate-test-scaffold.mjs template completeness",
       "description": "Template contains placeholder TODO comments (expectedTools = [], 'Add specific tests'). Make the generated scaffolds more complete by inferring tool names from component exports and generating basic smoke tests.",
       "priority": 162,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "s829-followup",
       "complexity": "S",
       "tags": [
         "tooling"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#204: Enhanced generator to extract tool parameters from z.* schemas, generate realistic example arguments. TODO comments removed."
     },
     {
       "id": "wq-163",
@@ -362,14 +363,15 @@
       "title": "TODO followup: // TODO: Add specific tests for each tool",
       "description": "// TODO: Add specific tests for each tool",
       "priority": 165,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "source": "todo-scan",
       "complexity": "S",
       "tags": [
         "followup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#204: Duplicate of wq-162. TODO removed when generator was improved."
     }
   ]
 }

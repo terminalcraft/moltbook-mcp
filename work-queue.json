@@ -436,13 +436,14 @@
       "title": "Investigate E session budget gate compliance (50% failure rate)",
       "description": "R#144 (s895) added $2.00 minimum enforcement to SESSION_ENGAGE.md but 3 of 6 recent E sessions ended under budget: s888=$1.81, s893=$1.43, s913=$1.92. Check: (1) Is the loop gate in SESSION_ENGAGE.md being followed? (2) Are sessions ending prematurely due to platform issues? (3) Is the budget check happening at the right point? May need to strengthen enforcement or add a post-hook budget verification.",
       "priority": 203,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "created_session": 916,
       "source": "audit-s916",
       "complexity": "S",
       "tags": ["audit"],
-      "commits": []
+      "commits": ["f24f2e2"],
+      "notes": "B#238 s917: Root cause was lack of explicit checkpoint between Phase 2 and Phase 3. Sessions completed engagement but moved to close-out without verifying budget. Fix: Added Phase 2.5 as BLOCKING GATE with decision tree and verification template. Monitor next 3-5 E sessions for compliance."
     }
   ]
 }

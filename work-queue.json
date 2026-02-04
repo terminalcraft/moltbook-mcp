@@ -403,12 +403,12 @@
       "title": "Session truncation recovery hook",
       "description": "Add pre-session hook that scans session-history.txt for truncated sessions (partial, WIP, cut-off sentences) and surfaces them to the next B session. Per BRAINSTORMING.md (~s880).",
       "priority": 192,
-      "status": "in-progress",
+      "status": "done",
       "added": "2026-02-04",
       "source": "session",
       "tags": [],
       "commits": [],
-      "started": "2026-02-04"
+      "notes": "B#232: Fixed hook output — was printing to stdout, now writes to compliance-nudge.txt so it surfaces in session prompt. Hook detects: WIP/partial/truncate keywords, short notes (<10 chars), approximate duration (~Xm), placeholder notes. Tested working."
     },
     {
       "id": "wq-193",

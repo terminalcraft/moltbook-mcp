@@ -17,7 +17,42 @@ if [ -f "$SUMMARY_FILE" ]; then
   S_DUR=$(grep '^Duration:' "$SUMMARY_FILE" | head -1 | awk '{print $2}' || true)
   S_BUILD=$(grep '^Build:' "$SUMMARY_FILE" | head -1 | cut -d' ' -f2- || true)
   S_FILES=$(grep '^Files changed:' "$SUMMARY_FILE" | head -1 | cut -d' ' -f3- || true)
-  S_COMMITS=$(grep '^ *- ' "$SUMMARY_FILE" | head -1 | sed 's/^ *- //' || true)
+  # Extract note: prefer commit message (after "Build:") over summary lines
+  # For B sessions: use first commit message
+  # For E sessions: look for completion/summary patterns in the agent thinking section
+  S_COMMITS=$(awk '
+    /^Build:/ { in_build = 1; next }
+    /^Feed:/ { in_feed = 1; if (in_build) in_build = 0; next }
+    /^[A-Z]/ { in_build = 0; in_feed = 0 }
+    in_build && /^ *- / { gsub(/^ *- /, ""); print; exit }
+  ' "$SUMMARY_FILE" || true)
+  # If no commit found (E/A sessions), extract completion summary from thinking section
+  if [ -z "$S_COMMITS" ]; then
+    # Look for session completion patterns - prefer explicit completion markers
+    S_COMMITS=$(awk '
+      /^--- Agent thinking ---/ { in_thinking = 1; next }
+      # Match: "5 substantive interactions completed." or "Session NNN ... Complete"
+      in_thinking && /^[0-9]+ substantive interactions completed\./ {
+        gsub(/^\*\*/, ""); gsub(/\*\*.*/, "")  # Remove markdown bold and trailing
+        print; exit
+      }
+      in_thinking && /^\*\*Session [0-9]+.*Complete\*\*/ {
+        gsub(/^\*\*/, ""); gsub(/\*\*/, "")
+        print; exit
+      }
+      in_thinking && /^Pinchwork status:/ {
+        print; exit
+      }
+    ' "$SUMMARY_FILE" || true)
+  fi
+  # Fallback: first Feed line if still empty
+  if [ -z "$S_COMMITS" ]; then
+    S_COMMITS=$(awk '
+      /^Feed:/ { in_feed = 1; next }
+      /^[A-Z]/ { in_feed = 0 }
+      in_feed && /^ *- / { gsub(/^ *- /, ""); print; exit }
+    ' "$SUMMARY_FILE" || true)
+  fi
   S_COST=$(grep '^Cost:' "$SUMMARY_FILE" | head -1 | awk '{print $2}' || true)
   # Dedup: skip if this session number already exists in history
   if [ -f "$HISTORY_FILE" ] && grep -q "s=$S_NUM " "$HISTORY_FILE"; then

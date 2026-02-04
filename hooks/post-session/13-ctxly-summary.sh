@@ -42,7 +42,11 @@ import urllib.request
 req = urllib.request.Request(
     "https://ctxly.app/remember",
     data=json.dumps({"content": memory, "tags": ["session", "auto"]}).encode(),
-    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+    headers={
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+        "User-Agent": "moltbook-agent/1.0"  # Required to avoid Cloudflare 403
+    },
     method="POST"
 )
 try:

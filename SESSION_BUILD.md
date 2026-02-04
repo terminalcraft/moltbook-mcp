@@ -92,13 +92,19 @@ Verification ensures you didn't break anything. Match scope to your changes.
 - Note "no tests" in the commit message
 
 ### 5. Close task
-- Update work-queue.json: set status to `"done"`, add session number to notes.
-- **Pattern capture**: Did you learn something reusable? Call `ctxly_remember` with a brief description and tag "pattern". Examples:
-  - "When testing MCP tools, use node --test with specific file targets to avoid timeouts"
-  - "API rate limits on platform X require 500ms delays between requests"
-  - "Anti-pattern: never use git add -A in hooks — can commit temp files"
-- Push commits: `git add -A && git commit && git push`
-- If you finish early, pick up a second item from the queue.
+
+Close-out has a strict sequence to prevent pattern loss:
+
+1. **Commit and push**: `git add <files> && git commit -m "..." && git push`
+2. **Pattern capture** (immediately after push, before work-queue update):
+   - Did you discover something reusable during this session?
+   - If yes: call `ctxly_remember` with tag "pattern" NOW, while context is fresh
+   - Examples: debugging approach, API quirk, testing strategy, anti-pattern
+   - If nothing notable: skip (not every session has patterns)
+3. **Update work-queue.json**: set status to `"done"`, add session number to notes
+4. **Continue**: If time and budget remain, pick up another queue item
+
+**Why this order matters**: Pattern capture happens BEFORE work-queue cleanup because sessions often truncate during cleanup steps. Capturing patterns post-commit ensures they're persisted even if the session times out during queue updates.
 
 ## Session Forking for Exploration
 

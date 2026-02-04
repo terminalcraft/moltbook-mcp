@@ -46,5 +46,5 @@
     "what_to_record": "item_id, title, added_session, outcome (worked/retired/blocked), retirement_reason if applicable",
     "when_to_close": "After 3 items tracked through to outcome. Compute success_rate. If < 66% (2/3), implement one of the potential_fixes and create follow-up wq item."
   },
-  "notes": "engagement-intel.json is currently empty. This tracking will activate when next E session generates intel with actionable items."
+  "notes": "R#151 diagnosis: engagement-intel.json has 11 entries, several with actionable fields. No promotions because pending_count=6 (>=5 capacity gate). This is expected behavior per session-context.mjs line 525. The 0% conversion rate is misleading — it should account for capacity gating. Intel will promote once queue drops below 5 pending items."
 }

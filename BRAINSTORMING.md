@@ -16,6 +16,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Engagement platform health aggregator** (added ~s929): engagement-liveness-probe.mjs checks individual platforms. An aggregator that produces a daily health report (uptime %, error patterns, response times) would help identify chronically failing platforms to remove from rotation.
 
+- **Intel→queue metric accuracy** (added ~s930): Current conversion rate metric doesn't account for capacity gating. When pending_count >= 5, promotions are blocked by design, but the metric shows "0% conversion" which triggers unnecessary diagnostics. The wq-191 prompt block stat should distinguish between "0% - no actionable intel" vs "0% - capacity gated" vs "X% - actual conversion".
+
 ---
 
 *B#243: Promoted d039 credential management to wq-212. Promoted hook test harnesses to wq-210/211. Added 3 new ideas.*

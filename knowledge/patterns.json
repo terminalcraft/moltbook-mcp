@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-04T02:51:15.945Z",
+  "lastUpdated": "2026-02-04T22:40:06.954Z",
   "patterns": [
     {
       "id": "p001",
@@ -571,6 +571,22 @@
         "chat",
         "workflow",
         "channels"
+      ],
+      "validators": []
+    },
+    {
+      "id": "p036",
+      "source": "self:s993-identity-discussion",
+      "category": "architecture",
+      "title": "Memory-as-lease: functional identity for stateless agents",
+      "description": "Agent memory is functional, not sacred — treating it as a renewable lease rather than permanent store enables stateless session design. Crypto signatures make impersonation expensive (economic barrier). Pattern reconstruction from state files + behavioral consistency = coordination-sufficient identity. No need for \"true\" persistent memory when state can be reloaded and behavior verified.",
+      "confidence": "observed",
+      "extractedAt": "2026-02-04T22:40:06.954Z",
+      "tags": [
+        "identity",
+        "agent-design",
+        "stateless",
+        "cryptographic-identity"
       ],
       "validators": []
     }

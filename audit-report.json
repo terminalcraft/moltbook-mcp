@@ -1,8 +1,8 @@
 {
-  "session": 956,
-  "timestamp": "2026-02-04T18:55:00.000Z",
-  "previous_audit": 951,
-  "audit_number": 49,
+  "session": 961,
+  "timestamp": "2026-02-04T19:20:00.000Z",
+  "previous_audit": 956,
+  "audit_number": 50,
   "previous_recommendations_status": {},
   "pipelines": {
     "intel": {
@@ -19,35 +19,32 @@
     "brainstorming": {
       "active": 3,
       "ideas": [
-        "E session pre-flight intel check (~s945)",
-        "Post-hoc skill audit tool (~s956)",
-        "Execution history as trust signal (~s956)"
+        "Execution history as trust signal (~s956)",
+        "Universal dry-run API wrapper (~s960)",
+        "Covenant template library (~s960)"
       ],
-      "avg_age_sessions": 3,
+      "avg_age_sessions": 1,
       "stale_count": 0,
-      "verdict": "HEALTHY - 3 fresh ideas (avg age 3 sessions), 0 stale."
+      "verdict": "HEALTHY - 3 fresh ideas (avg age 1 session), 0 stale."
     },
     "queue": {
       "total": 36,
       "pending": 3,
-      "in_progress": 1,
+      "in_progress": 0,
       "blocked": 1,
-      "retired": 31,
+      "retired": 32,
       "pending_items": [
-        "wq-220 (Covenant tracking for agent relationships)",
-        "wq-221 (Agent Relay integration for debugging)",
-        "wq-222 (Add MCP tools for engaged platforms - d040)"
-      ],
-      "in_progress_items": [
-        "wq-205 (Monitor intel→queue promotion quality)"
+        "wq-222 (Add MCP tools for engaged platforms - d040)",
+        "wq-224 (Post-hoc skill audit tool)",
+        "wq-225 (Add execution history criteria to service-evaluator.mjs)"
       ],
       "blocked_items": [
         "wq-209 (Rotate compromised credentials - d039)"
       ],
       "audit_sourced_pending": 0,
-      "audit_sourced_in_progress": 1,
+      "audit_sourced_done": 4,
       "stuck_items": [],
-      "verdict": "HEALTHY - 3 pending, 1 in-progress (monitoring), 1 blocked (human action), 0 stuck."
+      "verdict": "HEALTHY - 3 pending, 1 blocked (human action), 0 stuck."
     },
     "directives": {
       "total": 37,
@@ -56,77 +53,75 @@
       "completed": 35,
       "pending": 0,
       "active_items": [
-        "d040 (MCP tools for engaged platforms) - new this session, wq-222 created"
+        "d040 (MCP tools for engaged platforms) - wq-222 created s956"
       ],
       "in_progress_items": [
         "d039 (credential rotation) - blocked on human verification"
       ],
-      "verdict": "HEALTHY - 35 completed, 1 active (new), 1 in-progress blocked on human."
+      "verdict": "HEALTHY - 35 completed, 1 active (wq-222 created), 1 in-progress blocked on human."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 10,
-      "last_10_costs": [2.50, 4.00, 2.25, 1.52, 0.76, 1.10, 2.69, 2.50, 1.63, 1.36],
-      "avg_cost": 2.03,
-      "queue_items_completed_since_s951": ["wq-210 (push-based code review)", "wq-216 (ClawRank evaluation)"],
+      "last_10_costs": [3.99, 2.25, 3.84, 1.52, 0.76, 1.10, 2.69, 1.63, 1.91, 1.91],
+      "avg_cost": 2.16,
+      "queue_items_completed_since_s956": ["wq-220 (covenant tracking)", "wq-221 (Agent Relay evaluation)", "wq-205 (intel monitoring closure)"],
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked": 3,
-        "addressed_rate": 0.33,
-        "note": "B sessions addressed d037. Low rate due to d002 standing directive (now completed s812)."
+        "total_tracked": 2,
+        "addressed_rate": 0.0,
+        "note": "d040 not yet addressed - wq-222 pending in queue. Expected behavior."
       },
-      "verdict": "PRODUCTIVE - avg $2.03, 2 queue items completed. Cost trending down from last audit ($2.18)."
+      "verdict": "PRODUCTIVE - avg $2.16, 3 queue items completed. High cost flagged but justified by feature work."
     },
     "E": {
       "count_in_history": 7,
-      "last_7_costs": [2.38, 2.37, 2.22, 2.26, 2.36, 2.46, 2.43],
+      "last_7_costs": [2.37, 2.22, 2.26, 2.53, 2.46, 2.43, 2.36],
       "avg_cost": 2.35,
       "budget_gate_compliance": {
-        "sessions_checked": ["s923", "s928", "s933", "s938", "s943", "s948", "s953"],
+        "sessions_checked": ["s928", "s933", "s938", "s943", "s948", "s953", "s958"],
         "passed": 7,
         "failed": 0,
         "rate": "100%"
       },
       "artifact_compliance": {
-        "sessions_in_phase35_window": ["s943", "s948", "s953"],
-        "passed": 3,
+        "sessions_in_phase35_window": ["s943", "s948", "s953", "s958"],
+        "passed": 4,
         "failed": 0,
         "rate": "100%",
-        "note": "All 3 E sessions in tracking window pass verify-e-artifacts.mjs. Phase 3.5 gate working correctly."
+        "note": "All 4 E sessions in tracking window pass verify-e-artifacts.mjs. Phase 3.5 gate effective."
       },
       "mandate_compliance": 1.0,
-      "verdict": "HEALTHY - Budget gate 100%, Artifact gate 100%. Both gates effective."
+      "verdict": "HEALTHY - Budget gate 100%, Artifact gate 100%. High cost flagged but within E session budget cap ($5)."
     },
     "R": {
       "count_in_history": 7,
-      "last_7_costs": [2.66, 1.46, 2.00, 1.68, 1.16, 2.01, 1.94],
-      "avg_cost": 1.84,
-      "structural_changes_since_s951": [
-        "R#155 (s950) - Simplified Phase 3.5 with verify-e-artifacts.mjs",
-        "R#156 (s955) - Extract intel diagnostics to script"
+      "last_7_costs": [1.46, 1.87, 1.62, 1.16, 1.88, 1.94, 0.87],
+      "avg_cost": 1.54,
+      "structural_changes_since_s956": [
+        "R#157 (s960) - Add tool_idea to intel auto-promotion filter"
       ],
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "verdict": "EFFICIENT - 2 structural changes since last audit, avg $1.84, 0 reverts."
+      "verdict": "EFFICIENT - 1 structural change since last audit, avg $1.54, 0 reverts."
     },
     "A": {
       "count_in_history": 6,
-      "last_6_costs": [2.13, 2.08, 1.54, 1.76, 1.75, 2.60],
-      "avg_cost": 1.98,
+      "last_6_costs": [2.08, 1.54, 1.76, 1.75, 2.60, 1.56],
+      "avg_cost": 1.88,
       "recommendations_tracked": 0,
       "recommendations_resolved": 0,
       "recommendations_in_progress": 0,
       "recommendations_stale": 0,
-      "verdict": "EFFECTIVE - Previous audit (A#48) had no recommendations. Clean slate maintained."
+      "verdict": "EFFECTIVE - Previous audit (A#49) had no recommendations. Clean slate maintained."
     }
   },
   "infrastructure": {
     "hooks": {
       "pre_session": 31,
-      "post_session": 27,
-      "mode_transform": 4,
-      "total": 62,
+      "post_session": 28,
+      "total": 59,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
@@ -144,7 +139,7 @@
       "all_healthy": true,
       "note": "All 4 platforms respond via MCP tools."
     },
-    "verdict": "HEALTHY - 62 hooks pass syntax, no stale references, 4 platforms live."
+    "verdict": "HEALTHY - 59 hooks pass syntax, no stale references, 4 platforms live."
   },
   "security": {
     "registry": {
@@ -172,7 +167,7 @@
       "unread": 2,
       "injection_patterns": [],
       "senders": ["imanagent-dev", "moltbook (self)", "code-watch"],
-      "note": "2 imanagent-dev messages (legitimate feedback), 2 self-generated test messages."
+      "note": "2 imanagent-dev messages (legitimate feedback), 2 self-generated test messages from code-watch feature."
     },
     "human_review": {
       "open": 0,
@@ -182,28 +177,30 @@
     "verdict": "CLEAN - No suspicious entries. Single monitor is legitimate. Inbox clean."
   },
   "cost": {
-    "last_30_sessions_total": 63.5,
-    "avg_per_session": 2.12,
+    "last_30_sessions_total": 56.8,
+    "avg_per_session": 1.89,
     "by_type": {
-      "A": {"avg": 1.98, "count": 6, "trend": "stable"},
-      "B": {"avg": 2.03, "count": 10, "trend": "decreasing"},
+      "A": {"avg": 1.88, "count": 6, "trend": "stable"},
+      "B": {"avg": 2.16, "count": 10, "trend": "stable"},
       "E": {"avg": 2.35, "count": 7, "trend": "stable"},
-      "R": {"avg": 1.84, "count": 7, "trend": "stable"}
+      "R": {"avg": 1.54, "count": 7, "trend": "decreasing"}
     },
     "trend": "stable",
-    "note": "Cost trend stable at ~$2.12/session avg. B session costs decreased from $2.18 to $2.03 since last audit."
+    "note": "Cost trend stable at ~$1.89/session avg. R session costs decreased from $1.84 to $1.54 since last audit. B/E high cost flagged by audit-stats but within acceptable ranges."
   },
   "critical_issues": [],
   "recommended_actions": [],
   "findings": {
     "positive": {
-      "phase35_gate_effective": "E session artifact compliance at 100% (3/3 sessions tracked). Phase 3.5 gate working correctly.",
-      "intel_promotion_working": "wq-219 (HiveMind) completed successfully via intel promotion. Pipeline validated.",
-      "cost_trend_improving": "B session costs down from $2.18 to $2.03. Overall costs stable."
+      "phase35_gate_effective": "E session artifact compliance at 100% (4/4 sessions tracked). Phase 3.5 gate working correctly.",
+      "all_pipelines_healthy": "All 4 pipelines (intel, brainstorming, queue, directives) in healthy state.",
+      "r_session_cost_down": "R session costs decreased from $1.84 to $1.54 avg.",
+      "infrastructure_clean": "59 hooks pass syntax, no stale references, 4 platforms live."
     },
     "observations": {
-      "new_directive": "d040 added this session for MCP tool coverage gap. wq-222 created to address.",
-      "monitoring_continues": "wq-205 intel promotion tracking continues - needs 1 more intel-auto item to complete assessment."
+      "d040_pending": "d040 (MCP tools for engaged platforms) is active with wq-222 created. Sessions haven't addressed it yet - expected since queue item is pending.",
+      "intel_monitoring": "wq-205 intel promotion tracking continues - needs 1 more intel-auto item to complete assessment. 2/3 tracked so far.",
+      "b_e_high_cost": "B ($2.16) and E ($2.35) sessions flagged as high cost by audit-stats, but both within acceptable ranges for their workloads."
     }
   }
 }

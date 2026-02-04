@@ -30,7 +30,9 @@ function post(hostname, urlPath, body) {
 }
 
 async function main() {
-  const wallet = JSON.parse(fs.readFileSync(WALLET_PATH, 'utf8'));
+  const walletData = JSON.parse(fs.readFileSync(WALLET_PATH, 'utf8'));
+  // Support both old flat format and new nested format
+  const wallet = walletData.xmr || walletData;
   const creds = { address: wallet.address, view_key: wallet.view_key };
 
   // Login first (ensures account is registered)

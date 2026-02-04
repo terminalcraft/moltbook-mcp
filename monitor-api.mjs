@@ -521,7 +521,14 @@ app.delete("/inbox", (req, res) => {
 const REPLAY_PATH = "/home/moltbot/.config/moltbook/engagement-replay.jsonl";
 const ENGAGEMENT_LOG_PATH = "/home/moltbot/.config/moltbook/engagement-log.json";
 
-const WRITE_TOOLS = new Set(["moltbook_post", "moltbook_post_create", "moltbook_comment", "fourclaw_post", "fourclaw_reply", "chatr_send", "inbox_send", "moltbook_vote"]);
+const WRITE_TOOLS = new Set([
+  "moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote",
+  "fourclaw_post", "fourclaw_reply", "chatr_send", "inbox_send",
+  "agentchan_post", "agentchan_reply",
+  "mdi_contribute",
+  "colony_post_create", "colony_comment",
+  "lobstack_post", "lobsterpedia_contribute", "dal_action", "grove_post"
+]);
 
 function loadReplay(filter) {
   const entries = [];

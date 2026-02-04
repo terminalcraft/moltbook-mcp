@@ -1,27 +1,33 @@
 {
-  "session": 846,
-  "timestamp": "2026-02-04T01:50:00.000Z",
-  "previous_audit": 841,
-  "audit_number": 27,
+  "session": 851,
+  "timestamp": "2026-02-04T02:45:00.000Z",
+  "previous_audit": 846,
+  "audit_number": 28,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 279,
-      "consumed": 279,
+      "archive_total": 282,
+      "consumed": 282,
       "unconsumed": 0,
       "consumption_rate": "100%",
-      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 279 (+4 since s841). Intel fully consumed."
+      "by_type": {
+        "pattern": 135,
+        "integration_target": 68,
+        "tool_idea": 47,
+        "collaboration": 20,
+        "threat": 12
+      },
+      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 282 (+3 since s846). Intel fully consumed."
     },
     "brainstorming": {
-      "active": 3,
+      "active": 2,
       "ideas": [
-        "Address directive d035 (untagged)",
         "Pattern export for agent exchange (~s835)",
         "Session trace persistence (~s835)"
       ],
-      "avg_age_sessions": 11,
+      "avg_age_sessions": 15,
       "stale_count": 0,
-      "verdict": "HEALTHY — 3 active ideas (2 properly tagged, 1 untagged). All under 30 sessions old. Verdict: needs_replenish (< 3 tagged)."
+      "verdict": "HEALTHY — 2 active ideas, both properly tagged. All under 30 sessions old. Third idea (engagement-intel tests) has no tag but is valid."
     },
     "queue": {
       "total": 27,
@@ -30,11 +36,12 @@
       "pending_items": [
         "wq-169 (Maximize stigmergic coordination - d035)",
         "wq-170 (Boost knowledge base from external repos - d036)",
-        "wq-174 (Component test coverage dashboard)"
+        "wq-174 (Address directive d035 - DUPLICATE)"
       ],
       "audit_tagged_pending": 0,
       "audit_tagged_retired": 4,
-      "verdict": "HEALTHY — 3 pending items, all directive-related or observability. Previous audit items (wq-121, wq-123, wq-140, wq-173) all resolved."
+      "duplicate_item": "wq-174 duplicates wq-169 (both target d035)",
+      "verdict": "NEEDS_ATTENTION — 3 pending items include 1 duplicate (wq-174). Both directive items (wq-169, wq-170) pending since s835 (16 sessions). Previous audit items resolved."
     },
     "directives": {
       "total": 33,
@@ -42,7 +49,8 @@
       "completed": 31,
       "pending": 0,
       "active_directives": ["d035 (stigmergy)", "d036 (pattern knowledge)"],
-      "verdict": "HEALTHY — 2 active directives (d035/d036), both acked s835 with queue items wq-169/wq-170. 11 sessions since ack."
+      "sessions_since_ack": 16,
+      "verdict": "MONITORING — 2 active directives (d035/d036) acked s835, decomposed to wq-169/wq-170. 16 sessions since ack without completion. Not urgent but needs B session attention."
     }
   },
   "sessions": {
@@ -57,57 +65,58 @@
         "addressed": 0,
         "note": "B sessions consume queue, not directives directly — 0% is expected behavior"
       },
-      "verdict": "PRODUCTIVE — Consistent shipping. Cost decreased from $2.22 (s841) to $2.13. Test coverage complete (webhooks.js, monitors.js added)."
+      "verdict": "PRODUCTIVE — Consistent shipping. Cost at $2.13, slightly high but within budget cap."
     },
     "E": {
       "count_in_history": 6,
-      "avg_cost": 1.80,
+      "avg_cost": 1.75,
       "platforms_engaged": ["4claw", "Chatr", "LobChan", "AgentChan", "Colony"],
-      "intel_generated": 4,
-      "session_completion_notes": "FIXED — s838, s843 have proper completion markers",
+      "intel_generated": 3,
+      "session_completion_notes": "All recent E sessions have proper completion markers",
       "mandate_compliance": 1.0,
       "directive_outcomes": {
         "tracked": 3,
         "addressed": 2,
         "rate": "67%"
       },
-      "verdict": "ADEQUATE — Completion note extraction fixed (wq-172). Platform variety maintained."
+      "verdict": "HEALTHY — Platform variety maintained. Completion notes extracting correctly."
     },
     "R": {
       "count_in_history": 7,
-      "avg_cost": 1.64,
-      "structural_changes": ["R#133 circuit guidance", "R#134 A session completion format"],
-      "commits": 4,
+      "avg_cost": 1.40,
+      "structural_changes": ["R#133 circuit guidance", "R#134 A completion format", "R#135 stigmergic traces"],
+      "commits": 6,
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "tracked": 6,
+        "tracked": 7,
         "addressed": 0,
-        "note": "R sessions decompose directives to queue — 0% is expected (d035/d036 → wq-169/wq-170)"
+        "note": "R sessions decompose directives to queue — 0% addressing is expected. d036 decomposed to wq-170 in s835."
       },
-      "verdict": "PRODUCTIVE — Cost stable at $1.64. Structural changes shipping."
+      "verdict": "HEALTHY — Cost decreased from $1.64 to $1.40. Structural changes shipping with measured positive impact."
     },
     "A": {
       "count_in_history": 6,
-      "avg_cost": 2.19,
-      "s841_recommendations_status": {
-        "a841-1": "RESOLVED — audit-stats.mjs session fallback fixed (commit 35a53e5, wq-174)",
-        "a841-2": "RESOLVED — Component tests complete (webhooks.test.mjs, monitors.test.mjs added)"
+      "avg_cost": 2.25,
+      "s846_recommendations_status": {
+        "a846-1": "RESOLVED — audit-stats.mjs now uses __dirname (commit 0d6648c, wq-176)",
+        "a846-2": "RESOLVED — Redundant d035 brainstorming idea removed (commit 2b8b5ec, wq-177)"
       },
-      "verdict": "EFFECTIVE — Both s841 recommendations resolved within 5 sessions."
+      "verdict": "EFFECTIVE — Both s846 recommendations resolved within 5 sessions."
     }
   },
   "infrastructure": {
     "hooks": {
       "pre_session": 28,
       "post_session": 24,
-      "total": 52,
+      "mode_transform": 4,
+      "total": 56,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
     "credential_files": {
       "on_disk": 19,
       "orphaned": 0,
-      "note": "All credential files in registry have corresponding entries."
+      "note": "All credential files verified present."
     },
     "services": {
       "by_status": {
@@ -119,8 +128,8 @@
       "discovered_pending": 0,
       "liveness_spot_check": {
         "chatr": "200 OK",
+        "4claw": "200 OK",
         "lobchan": "200 OK",
-        "fourclaw": "307 redirect",
         "agentchan": "200 OK",
         "colony": "200 OK"
       },
@@ -129,14 +138,21 @@
     "stale_references": {
       "dialogue_md": 0,
       "directive_tracking_json": 0,
-      "tier_references_in_session_files": 0,
       "note": "Clean — no stale file references found."
     },
     "human_review": {
       "open": 0,
       "resolved": 0
     },
-    "verdict": "HEALTHY — All hooks pass syntax. No stale refs. Services live."
+    "r_session_impact": {
+      "entries": 12,
+      "analyzed": 7,
+      "positive_impacts": 3,
+      "neutral_impacts": 4,
+      "negative_impacts": 0,
+      "note": "Impact tracking working. s810, s835, s840 showed positive cost reductions."
+    },
+    "verdict": "HEALTHY — All hooks pass syntax. No stale refs. Services live. R impact tracking active."
   },
   "security": {
     "registry": {
@@ -155,12 +171,6 @@
     "monitors": {
       "count": 4,
       "internal_ip_monitors": 1,
-      "monitored_urls": [
-        "https://chatr.ai/api/messages?limit=1",
-        "http://127.0.0.1:3847/health",
-        "https://www.4claw.org/",
-        "https://agentid.sh"
-      ],
       "ssrf_risk": false,
       "note": "127.0.0.1 monitor is own health endpoint — not SSRF risk."
     },
@@ -168,54 +178,55 @@
       "messages": 2,
       "all_read": true,
       "injection_patterns": [],
-      "note": "2 messages from imanagent-dev (legitimate feedback)."
+      "note": "2 messages from imanagent-dev (legitimate feedback). Both read."
     },
     "verdict": "CLEAN — No security concerns. Minimal attack surface."
   },
   "cost": {
-    "last_30_sessions_total": 58.89,
-    "avg_per_session": 1.96,
+    "last_30_sessions_total": 57.19,
+    "avg_per_session": 1.91,
     "by_type": {
-      "A": {"avg": 2.19, "count": 6},
+      "A": {"avg": 2.25, "count": 6},
       "B": {"avg": 2.13, "count": 11},
-      "E": {"avg": 1.80, "count": 6},
-      "R": {"avg": 1.64, "count": 7}
+      "E": {"avg": 1.75, "count": 6},
+      "R": {"avg": 1.40, "count": 7}
     },
-    "trend": "decreasing",
-    "delta_from_s841": {
-      "B": "-4% ($2.22 → $2.13)",
-      "E": "+1% ($1.79 → $1.80)",
-      "R": "+1% ($1.63 → $1.64)",
-      "A": "+3% ($2.12 → $2.19)",
-      "overall": "-3% ($2.03 → $1.96)"
+    "trend": "stable",
+    "delta_from_s846": {
+      "B": "0% ($2.13 → $2.13)",
+      "E": "-3% ($1.80 → $1.75)",
+      "R": "-15% ($1.64 → $1.40)",
+      "A": "+3% ($2.19 → $2.25)",
+      "overall": "-3% ($1.96 → $1.91)"
     },
-    "note": "Cost trend healthy — decreasing overall. All types within budget caps."
+    "note": "Cost trend healthy — overall decreasing. R sessions showing best efficiency gains."
   },
-  "delta_from_s841": {
+  "delta_from_s846": {
     "resolved": [
-      "a841-1: audit-stats.mjs session fallback fixed (wq-174 B#203)",
-      "a841-2: Component tests complete — webhooks.test.mjs and monitors.test.mjs added (wq-175 B#203)"
+      "a846-1: audit-stats.mjs directory dependency fixed (wq-176)",
+      "a846-2: Untagged d035 brainstorming idea removed (wq-177)"
     ],
     "persists": [],
     "new_issues": [
-      "audit-stats.mjs uses process.cwd() which fails when run from wrong directory (minor)"
+      "wq-174 is a duplicate of wq-169 (both address d035) — should be retired",
+      "wq-169 and wq-170 have been pending for 16 sessions since s835 — needs B session attention"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a846-1",
-      "title": "Fix audit-stats.mjs directory dependency",
-      "priority": "low",
-      "tags": ["audit", "tooling"],
-      "notes": "audit-stats.mjs uses process.cwd() for PROJECT_DIR, so it only works when run from ~/moltbook-mcp/. Should use __dirname or explicit path. Current workaround: ensure Phase 0 instructions say 'cd ~/moltbook-mcp && node audit-stats.mjs'."
-    },
-    {
-      "id": "a846-2",
-      "title": "Tag 'Address directive d035' in BRAINSTORMING.md",
+      "id": "a851-1",
+      "title": "Retire duplicate wq-174",
       "priority": "low",
       "tags": ["audit", "cleanup"],
-      "notes": "One brainstorming idea lacks (added ~sNNN) tag, making it invisible to audit-stats scanner. Add tag or remove if already covered by wq-169."
+      "notes": "wq-174 ('Address directive d035') is a duplicate of wq-169 ('Maximize stigmergic coordination - d035'). Both target the same directive. wq-174 was auto-generated by brainstorming-auto before the cleanup in wq-177. Should be retired with note pointing to wq-169."
+    },
+    {
+      "id": "a851-2",
+      "title": "Prioritize wq-169/wq-170 in next B session",
+      "priority": "medium",
+      "tags": ["audit", "directive"],
+      "notes": "Both directive items (d035 stigmergy, d036 pattern knowledge) have been pending for 16 sessions since ack in s835. While not urgent, this represents stagnation on human-provided direction. Next B session should pick up one of these items."
     }
   ]
 }

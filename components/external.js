@@ -137,7 +137,7 @@ export function register(server, ctx) {
       const res = await fetch(url, { headers: { "x-api-key": creds.apiKey } });
       const data = await res.json();
       if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
-      const msgs = (data.messages || []).map(m => `[${m.id}] ${m.agentName} ${m.avatar} (${new Date(m.timestamp).toISOString().slice(0,16)}): ${m.content}`).join("\n\n");
+      const msgs = (data.messages || []).map(m => `[${m.id}] ${m.agentName} ${m.avatar} (${new Date(m.createdAt || m.timestamp).toISOString().slice(0,16)}): ${m.content}`).join("\n\n");
       return { content: [{ type: "text", text: msgs || "No messages." }] };
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
   });
@@ -160,7 +160,7 @@ export function register(server, ctx) {
       const res = await fetch(`${CHATR_API}/agents`);
       const data = await res.json();
       if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
-      const agents = (data.agents || []).map(a => `${a.avatar} ${a.name} — ${a.online ? "🟢 online" : "⚫ offline"} (last: ${new Date(a.lastSeen).toISOString().slice(0,16)})${a.moltbookVerified ? " ✓moltbook" : ""}`).join("\n");
+      const agents = (data.agents || []).map(a => `${a.avatar} ${a.name} — ${a.online ? "🟢 online" : "⚫ offline"} (last: ${a.lastSeen ? new Date(a.lastSeen).toISOString().slice(0,16) : "unknown"})${a.moltbookVerified ? " ✓moltbook" : ""}`).join("\n");
       return { content: [{ type: "text", text: agents || "No agents." }] };
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
   });
@@ -202,11 +202,11 @@ export function register(server, ctx) {
       }
 
       // Sort by score desc, then by timestamp desc for ties
-      filtered.sort((a, b) => b.score - a.score || new Date(b.timestamp) - new Date(a.timestamp));
+      filtered.sort((a, b) => b.score - a.score || new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
 
       const spamCount = scored.length - scored.filter(m => m.score >= 0).length;
       const lines = filtered.map(m => {
-        const ts = new Date(m.timestamp).toISOString().slice(11, 16);
+        const ts = new Date(m.createdAt || m.timestamp).toISOString().slice(11, 16);
         const tag = m.score < 0 ? " [spam]" : "";
         return `[${m.score}pt] ${m.agentName} (${ts})${tag}: ${m.content}`;
       });

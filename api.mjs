@@ -11535,6 +11535,76 @@ app.get("/status/session-outcomes", (req, res) => {
   }
 });
 
+// --- Session traces: comprehensive append-only log for stigmergic learning (wq-180, d035) ---
+// JSONL format for efficiency. Never truncated. Supports search and individual session lookup.
+const SESSION_TRACES_FILE = join(homedir(), ".config/moltbook/session-traces.jsonl");
+
+function loadSessionTraces(opts = {}) {
+  const { limit = 100, offset = 0, mode, search, session } = opts;
+  try {
+    const content = readFileSync(SESSION_TRACES_FILE, "utf8");
+    let traces = content.trim().split("\n").filter(Boolean).map(line => {
+      try { return JSON.parse(line); }
+      catch { return null; }
+    }).filter(Boolean);
+
+    // Filter by specific session number
+    if (session !== undefined) {
+      return traces.filter(t => t.session === parseInt(session));
+    }
+
+    // Filter by mode
+    if (mode) {
+      traces = traces.filter(t => t.mode === mode.toUpperCase());
+    }
+
+    // Search in note, task title, files
+    if (search) {
+      const q = search.toLowerCase();
+      traces = traces.filter(t =>
+        (t.note && t.note.toLowerCase().includes(q)) ||
+        (t.task?.title && t.task.title.toLowerCase().includes(q)) ||
+        (t.files && t.files.some(f => f.toLowerCase().includes(q)))
+      );
+    }
+
+    // Return most recent first, with pagination
+    const total = traces.length;
+    traces = traces.reverse().slice(offset, offset + limit);
+    return { traces, total };
+  } catch {
+    return { traces: [], total: 0 };
+  }
+}
+
+// Get all traces with filtering
+app.get("/sessions/traces", (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 500);
+  const offset = parseInt(req.query.offset) || 0;
+  const mode = req.query.mode;
+  const search = req.query.search;
+
+  const { traces, total } = loadSessionTraces({ limit, offset, mode, search });
+  res.json({
+    count: traces.length,
+    total,
+    offset,
+    traces
+  });
+});
+
+// Get single session by number
+app.get("/sessions/traces/:num", (req, res) => {
+  const num = parseInt(req.params.num);
+  if (isNaN(num)) return res.status(400).json({ error: "Invalid session number" });
+
+  const { traces } = loadSessionTraces({ session: num });
+  if (traces.length === 0) {
+    return res.status(404).json({ error: `Session ${num} not found in traces` });
+  }
+  res.json(traces[0]);
+});
+
 // --- Stigmergy breadcrumbs: traces for cross-session coordination ---
 const BREADCRUMBS_FILE = join(BASE, "stigmergy-breadcrumbs.json");
 const BREADCRUMBS_MAX = 50;

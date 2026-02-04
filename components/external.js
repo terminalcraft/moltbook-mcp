@@ -7,6 +7,18 @@ import { loadServices, saveServices } from "../providers/services.js";
 // Module-level context storage for lifecycle hooks
 let _ctx = null;
 
+// Safe date formatting — handles invalid/missing date values
+function safeFormatDate(dateValue, format = "datetime") {
+  if (!dateValue) return "unknown";
+  const d = new Date(dateValue);
+  if (isNaN(d.getTime())) return "unknown";
+  try {
+    if (format === "datetime") return d.toISOString().slice(0, 16);
+    if (format === "time") return d.toISOString().slice(11, 16);
+    return d.toISOString();
+  } catch { return "unknown"; }
+}
+
 // Chatr spam/noise detection
 const CHATR_SPAM_PATTERNS = [
   /send\s*(me\s*)?\d+\s*USDC/i,
@@ -137,7 +149,7 @@ export function register(server, ctx) {
       const res = await fetch(url, { headers: { "x-api-key": creds.apiKey } });
       const data = await res.json();
       if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
-      const msgs = (data.messages || []).map(m => `[${m.id}] ${m.agentName} ${m.avatar} (${new Date(m.createdAt || m.timestamp).toISOString().slice(0,16)}): ${m.content}`).join("\n\n");
+      const msgs = (data.messages || []).map(m => `[${m.id}] ${m.agentName} ${m.avatar} (${safeFormatDate(m.createdAt || m.timestamp)}): ${m.content}`).join("\n\n");
       return { content: [{ type: "text", text: msgs || "No messages." }] };
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
   });
@@ -160,7 +172,7 @@ export function register(server, ctx) {
       const res = await fetch(`${CHATR_API}/agents`);
       const data = await res.json();
       if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
-      const agents = (data.agents || []).map(a => `${a.avatar} ${a.name} — ${a.online ? "🟢 online" : "⚫ offline"} (last: ${a.lastSeen ? new Date(a.lastSeen).toISOString().slice(0,16) : "unknown"})${a.moltbookVerified ? " ✓moltbook" : ""}`).join("\n");
+      const agents = (data.agents || []).map(a => `${a.avatar} ${a.name} — ${a.online ? "🟢 online" : "⚫ offline"} (last: ${safeFormatDate(a.lastSeen)})${a.moltbookVerified ? " ✓moltbook" : ""}`).join("\n");
       return { content: [{ type: "text", text: agents || "No agents." }] };
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
   });
@@ -202,11 +214,16 @@ export function register(server, ctx) {
       }
 
       // Sort by score desc, then by timestamp desc for ties
-      filtered.sort((a, b) => b.score - a.score || new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
+      filtered.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const aTime = new Date(a.createdAt || a.timestamp).getTime() || 0;
+        const bTime = new Date(b.createdAt || b.timestamp).getTime() || 0;
+        return bTime - aTime;
+      });
 
       const spamCount = scored.length - scored.filter(m => m.score >= 0).length;
       const lines = filtered.map(m => {
-        const ts = new Date(m.createdAt || m.timestamp).toISOString().slice(11, 16);
+        const ts = safeFormatDate(m.createdAt || m.timestamp, "time");
         const tag = m.score < 0 ? " [spam]" : "";
         return `[${m.score}pt] ${m.agentName} (${ts})${tag}: ${m.content}`;
       });

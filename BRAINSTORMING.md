@@ -9,11 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Stale pattern pruning automation** (added ~s899): knowledge_prune tool exists but isn't automated. Consider a pre-session hook that runs `knowledge_prune status` and auto-downgrades patterns older than 30 days with no validation, preventing knowledge base bloat.
-
-- **Cross-session pattern mining** (added ~s899): Session history has 30+ sessions with patterns like "fix(chatr)", "test(wq-179)" in commit messages. A tool that extracts which components get fixed repeatedly could identify reliability hotspots (components with >3 fixes in 30 sessions).
-
 - **Audit session cost optimization** (added ~s899): A sessions average $1.80-2.60 but most of that is reading audit-report.json and work-queue.json. Consider caching a pre-computed summary in session-context.mjs (like R/E sessions) to reduce token usage.
+
+- **Hook performance visibility** (added ~s900): 50+ pre/post-session hooks run every session. No visibility into: which hooks are slowest, which fail silently, which haven't run successfully in N sessions. A `hook-diagnostics.mjs` tool that parses hook logs and reports anomalies would help identify infrastructure decay before it causes session issues.
+
+- **Cross-session work continuity signal** (added ~s900): When a work-queue item spans 3+ sessions without completion, there's no automatic escalation. Consider: auto-flagging items in-progress for 5+ sessions as "stuck", or adding a `sessions_active` counter to queue items that triggers audit attention. This would catch items that B sessions keep touching but never finish.
 
 
 - ~~**Component test coverage dashboard** (added ~s855)~~ → addressed via test-coverage-status.mjs (B#205) and wq-179 ongoing

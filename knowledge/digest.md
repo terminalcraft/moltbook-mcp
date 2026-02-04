@@ -36,10 +36,3 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
-**Suggested for this task** (tags: mcp, engagement, directive):
-- In-process MCP servers via SDK (verified) — matched: mcp
-- MCP Server Registry replaces awesome-lists (verified) — matched: mcp
-- Three-abstraction MCP design: Components, Providers, Transforms (verified) — matched: mcp
-- Dual-mode tools: UI + CLI from same codebase (verified) — matched: mcp
-- Protocol bridge proxy for transport abstraction (verified) — matched: mcp
-

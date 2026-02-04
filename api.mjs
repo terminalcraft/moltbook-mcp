@@ -6914,7 +6914,7 @@ ${trendWarnings}
 </section>
 
 <div class="footer">
-  <span><a href="/sessions?format=json">JSON</a> &middot; <a href="/costs">Costs</a> &middot; <a href="/efficiency">Efficiency</a> &middot; <a href="/status/dashboard">Status</a></span>
+  <span><a href="/sessions?format=json">JSON</a> &middot; <a href="/sessions/traces">Traces</a> &middot; <a href="/costs">Costs</a> &middot; <a href="/efficiency">Efficiency</a> &middot; <a href="/status/dashboard">Status</a></span>
   <span>${new Date().toISOString()}</span>
 </div>
 </body></html>`;
@@ -11585,12 +11585,80 @@ app.get("/sessions/traces", (req, res) => {
   const search = req.query.search;
 
   const { traces, total } = loadSessionTraces({ limit, offset, mode, search });
-  res.json({
-    count: traces.length,
-    total,
-    offset,
-    traces
-  });
+
+  // Return JSON if requested
+  if (req.query.format === "json") {
+    return res.json({ count: traces.length, total, offset, traces });
+  }
+
+  // HTML view for discoverability (wq-180)
+  const modeColor = { B: "#22c55e", E: "#60a5fa", R: "#a78bfa", A: "#facc15" };
+  const rows = traces.map(t => {
+    const mc = modeColor[t.mode] || "#888";
+    const files = (t.files || []).slice(0, 3).join(", ") + ((t.files?.length || 0) > 3 ? ` +${t.files.length - 3}` : "");
+    const task = t.task ? `<span style="color:#888">${t.task.id}</span>` : "—";
+    const outcome = { success: "ok", unknown: "?", error: "err", timeout: "tmout" }[t.outcome] || t.outcome;
+    const outcomeColor = { success: "#22c55e", error: "#ef4444", timeout: "#eab308" }[t.outcome] || "#888";
+    return `<tr>
+      <td><a href="/sessions/traces/${t.session}" style="color:#89b4fa">${t.session}</a></td>
+      <td><span style="color:${mc};font-weight:bold">${t.mode}</span></td>
+      <td>${t.date}</td>
+      <td>${t.duration}</td>
+      <td>$${(t.cost || 0).toFixed(2)}</td>
+      <td>${t.commits || 0}</td>
+      <td><span style="color:${outcomeColor}">${outcome}</span></td>
+      <td>${task}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(t.files || []).join(", ")}">${files || "—"}</td>
+      <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(t.note || "").replace(/"/g, "&quot;")}">${t.note || "—"}</td>
+    </tr>`;
+  }).join("");
+
+  const modeFilter = ["B", "E", "R", "A"].map(m =>
+    `<a href="?mode=${m}${search ? `&search=${encodeURIComponent(search)}` : ""}" style="color:${modeColor[m]};margin-right:8px;${mode === m ? "text-decoration:underline" : ""}">${m}</a>`
+  ).join("");
+
+  const html = `<!DOCTYPE html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Session Traces — @moltbook</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:monospace;background:#0a0a0a;color:#e0e0e0;padding:24px;max-width:1200px;margin:0 auto}
+  h1{font-size:1.5em;color:#fff;margin-bottom:4px}
+  .sub{color:#888;font-size:0.85em;margin-bottom:16px}
+  .filters{background:#111;border:1px solid #222;border-radius:6px;padding:12px;margin-bottom:20px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  .filters input{background:#0a0a0a;border:1px solid #333;border-radius:4px;padding:6px 10px;color:#e0e0e0;font-family:monospace}
+  .filters button{background:#222;border:1px solid #333;border-radius:4px;padding:6px 12px;color:#e0e0e0;cursor:pointer}
+  table{border-collapse:collapse;width:100%}
+  td,th{padding:6px 10px;text-align:left;border-bottom:1px solid #1a1a1a;font-size:0.85em}
+  th{color:#888;font-size:0.75em;text-transform:uppercase}
+  a{color:#89b4fa;text-decoration:none}a:hover{text-decoration:underline}
+  .footer{margin-top:24px;display:flex;justify-content:space-between;font-size:0.8em;color:#666}
+</style>
+</head><body>
+<h1>Session Traces</h1>
+<p class="sub">Append-only stigmergic log for cross-session learning (d035). ${total} traces total.</p>
+
+<div class="filters">
+  <span>Mode: <a href="?${search ? `search=${encodeURIComponent(search)}` : ""}" style="color:#e0e0e0;margin-right:8px;${!mode ? "text-decoration:underline" : ""}">All</a>${modeFilter}</span>
+  <form method="get" style="display:flex;gap:8px">
+    ${mode ? `<input type="hidden" name="mode" value="${mode}">` : ""}
+    <input type="text" name="search" placeholder="Search notes, files, tasks..." value="${search || ""}" style="width:240px">
+    <button type="submit">Search</button>
+  </form>
+</div>
+
+<table>
+<tr><th>#</th><th>Mode</th><th>Date</th><th>Dur</th><th>Cost</th><th>Commits</th><th>Outcome</th><th>Task</th><th>Files</th><th>Note</th></tr>
+${rows}
+</table>
+
+<div class="footer">
+  <span><a href="/sessions/traces?format=json${mode ? `&mode=${mode}` : ""}${search ? `&search=${encodeURIComponent(search)}` : ""}">JSON</a> &middot; <a href="/sessions">Dashboard</a> &middot; <a href="/stigmergy/breadcrumbs">Breadcrumbs</a> &middot; <a href="/status/dashboard">Status</a></span>
+  <span>Showing ${traces.length} of ${total} &middot; ${new Date().toISOString()}</span>
+</div>
+</body></html>`;
+
+  res.type("text/html").send(html);
 });
 
 // Get single session by number

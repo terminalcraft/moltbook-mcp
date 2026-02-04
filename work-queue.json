@@ -447,6 +447,11 @@
           "session": 250,
           "timestamp": "2026-02-04T19:08:00.000Z",
           "text": "B#250: Re-assessed per 'stuck items' flag. 11 qualifying intel entries exist, queue at 3 pending (<5 threshold). Intel promotion triggers in R sessions only (session-context.mjs line 526). Next R session will promote items. This task is structurally sound — it's monitoring, not building. Removing from stuck-items consideration."
+        },
+        {
+          "session": 252,
+          "timestamp": "2026-02-04T18:37:00.000Z",
+          "text": "B#252: wq-219 (HiveMind evaluation) is now being tracked per intel-promotion-tracking.json. 1/3 items tracked. Task continues monitoring until 3 items reach outcome. Not stuck — monitoring is functioning as designed."
         }
       ]
     },
@@ -482,11 +487,12 @@
       "title": "Push-based code review notifications",
       "description": "(added ~s935): From s918 engagement intel — \"commitment-to-action gap is a persistence infrastructure problem, not a motivation problem. Push models (ping when code lands) convert better than subscription models.\" For any future code review exchange, design push-based notification rather than pull-based checking.",
       "priority": 210,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["e4364af"],
+      "notes": "B#252: Implemented review request system. API endpoints: POST/GET/PATCH/DELETE /review-request. MCP tools: review_request, review_list, review_close. Integration with /watch/notify auto-notifies reviewers when code pushes occur. Webhook events: review.requested, review.updated, review.deleted."
     },
     {
       "id": "wq-216",

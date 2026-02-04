@@ -5695,6 +5695,23 @@
         "4569bdf"
       ],
       "notes": "B#236: Added 54 tests across 4 components. All use fetch mocking for API components. Test coverage now 100% (40/40 components)."
+    },
+    {
+      "id": "wq-199",
+      "title": "Fix Chatr API Invalid time value error",
+      "description": "E sessions report Invalid time value error from Chatr API for 5+ sessions. Check chatr.js component or chatr-credentials.json for malformed date fields. May need to update timestamp handling.",
+      "priority": 199,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "R#147-engagement-trace",
+      "complexity": "S",
+      "tags": [
+        "platform"
+      ],
+      "commits": [
+        "8d83398"
+      ],
+      "notes": "B#237: Added safeFormatDate() helper to handle null/invalid dates gracefully. All Chatr date formatting now returns 'unknown' instead of throwing. Tests pass."
     }
   ]
 }

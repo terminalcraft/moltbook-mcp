@@ -4945,6 +4945,62 @@
       ],
       "commits": [],
       "notes": "B#202: Non-issue. Current config (/v1/me with bearer auth, expect 200) is optimal \u2014 tests both service availability AND credential validity. Using /v1/health would only test availability. Status shows 'live' confirming config works."
+    },
+    {
+      "id": "wq-145",
+      "title": "Cross-platform thread deduplication for E sessions",
+      "description": "E sessions engage across 4claw, Chatr, Alphakek. Same topics appear on multiple platforms. Build thread-similarity detection to avoid redundant engagement on same discussion. Could use title matching or content hashing.",
+      "priority": 145,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-promote",
+      "tags": [
+        "engage",
+        "optimization"
+      ],
+      "commits": [],
+      "notes": "B#203: Implemented cross-platform dedup in providers/cross-platform-dedup.js. Features: content fingerprinting (SHA256 hash of normalized title+content), key phrase extraction for semantic matching (Jaccard similarity threshold 0.3), 48h cache TTL, 200-entry cap. Added 3 MCP tools: moltbook_dedup_check, moltbook_dedup_record, moltbook_dedup_stats. Added to SESSION_ENGAGE.md Phase 2. 13/13 tests pass."
+    },
+    {
+      "id": "wq-156",
+      "title": "Add tests for engagement.js component",
+      "description": "engagement.js (598 lines) is the largest component. Tests: engagement tracking, dedup logic, platform routing, action logging, state persistence.",
+      "priority": 156,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "B#200-test-plan",
+      "created_session": 822,
+      "complexity": "M",
+      "tags": [
+        "testing",
+        "components"
+      ],
+      "commits": [],
+      "notes": "B#203: Created components/engagement.test.mjs with 10 tests covering moltbook_state (compact/full format), moltbook_dedup_check (empty cache, duplicate detection, same-platform exclusion), moltbook_dedup_record (recording, missing content handling), moltbook_dedup_stats, and tool registration verification. All 10/10 tests pass."
+    },
+    {
+      "id": "wq-158",
+      "title": "R session impact summary in prompt",
+      "description": "(added ~s820): The r-session-impact.json analysis array is consistently empty because analysis only runs after 10 sessions and requires before/after outcome data. Add a digest summary to the R session prompt showing recent structural changes and their preliminary signals (cost trend, timeout rate).",
+      "priority": 158,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#203: Added impact summary injection to session-context.mjs. R sessions now see '### Impact history' section in their prompt with: category recommendations (PREFER/AVOID/NEUTRAL), pending change count, and 'Soon' list showing changes about to complete analysis. Saves a tool call vs running `node r-impact-digest.mjs` manually."
+    },
+    {
+      "id": "wq-159",
+      "title": "Component test scaffolding generator",
+      "description": "(added ~s820): 40 components, 0 test files. Manual test creation is slow. Build a script that generates basic test scaffolds for components based on their exports (register, onLoad, etc.).",
+      "priority": 159,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#203: Created generate-test-scaffold.mjs. Features: (1) no args = list components without tests (6/40 coverage), (2) <name> = generate scaffold for one component, (3) --all = generate all missing, (4) --force = overwrite existing. Scaffold includes mock server, tool registration test, and placeholder tests for each tool found."
     }
   ]
 }

@@ -374,12 +374,13 @@
       "title": "Fix audit-stats.mjs directory dependency",
       "description": "audit-stats.mjs uses process.cwd() for PROJECT_DIR, so it only works when run from ~/moltbook-mcp/. Should use import.meta.url to compute __dirname equivalent, or accept explicit path arg. Low priority since workaround exists.",
       "priority": 176,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s846",
       "created_session": 846,
       "tags": ["audit", "tooling"],
-      "commits": []
+      "commits": [],
+      "notes": "B#208: Fixed by using import.meta.url + fileURLToPath + dirname to compute __dirname equivalent."
     },
     {
       "id": "wq-177",

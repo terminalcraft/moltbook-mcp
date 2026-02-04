@@ -12,11 +12,13 @@
  */
 
 import { readFileSync, readdirSync, existsSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { homedir } from 'os';
+import { fileURLToPath } from 'url';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const STATE_DIR = join(homedir(), '.config/moltbook');
-const PROJECT_DIR = process.cwd();
+const PROJECT_DIR = __dirname;
 
 function safeRead(path, fallback = null) {
   try {

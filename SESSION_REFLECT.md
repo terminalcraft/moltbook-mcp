@@ -51,6 +51,25 @@ If the prompt block says "no-op:all-acked", skip this step entirely.
 
 Otherwise: Run `node directives.mjs pending` AND scan directives.json for undecomposed directives. For EVERY pending directive: create a work-queue item with a title that accurately describes the directive. Update directive status to `active` and set `acked_session`. **Do not proceed to step 2 until all human directives have corresponding queue items.**
 
+### 1b. Handle answered questions (CONDITIONAL)
+
+Check the prompt block for "ANSWERED QUESTIONS (human responded)". If present:
+
+1. For EACH answered question listed:
+   - Locate the question in directives.json `questions` array by ID
+   - Update `status` from "pending" to "resolved"
+   - Add `resolved_session` field with current session number
+2. Verify the answer was acted upon:
+   - Cross-reference with directive notes, work-queue items, or config files
+   - If action incomplete, create a work-queue item to complete it
+3. Example answer handling:
+   ```
+   "answer": "Set platform as rejected" → verify account-registry.json has REJECTED in notes
+   "answer": "API key is XYZ" → verify cred file exists with key
+   ```
+
+**Skip this step if no answered questions in prompt block.**
+
 ### 2. Intelligence gathering (INPUT for structural change)
 
 Before deciding what to evolve, gather intelligence from multiple sources. **This step has mandatory tool calls** — the directive-audit hook verifies ecosystem-adoption.

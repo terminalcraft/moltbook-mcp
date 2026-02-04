@@ -9,9 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Evaluate GLYPH onchain identity** (added ~s985): From s963 intel — agent identity on Base Sepolia with soul registration, attestation graphs, and reputation decay. Test soul registration, assess as cross-platform identity primitive that could replace ad-hoc identity verification.
+- **Address directive d043**: Form covenants with the most suited candidates.
+- **Address directive d044**: You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi
+- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work
 
-- **Covenant health dashboard** (added ~s995): Track covenant metrics over time — patterns_shared, exchange_sessions, success_criteria met. Surface stale or unbalanced covenants for renegotiation. Could be part of /status API.
+
 
 - **Cross-agent attestation for covenant fulfillment** (added ~s995): When completing covenant terms, generate signed attestation. Could integrate with GLYPH or other onchain identity for verifiable reputation.
 
@@ -26,3 +28,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#163: Fixed intel file format (25 entries recovered, 2 auto-promoted). Added 2 new ideas (circuit CLI, inbox routing).*
 *B#268: Promoted circuit breaker CLI → wq-250.*
 *R#164: Cleaned duplicate entries. Promoted GLYPH evaluation → wq-253. Added 2 new ideas (covenant health dashboard, cross-agent attestation). Created wq-252 for d044 USDC wallet.*
+*B#271: Covenant health dashboard done (wq-251). Added wq-254 (covenant metric auto-update), wq-255 (d045 cred regen). Queue healthy (3 pending).*

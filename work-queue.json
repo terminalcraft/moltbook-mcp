@@ -632,10 +632,33 @@
       "title": "Covenant health dashboard",
       "description": "(added ~s995): Track covenant metrics over time — patterns_shared, exchange_sessions, success_criteria met. Surface stale or unbalanced covenants for renegotiation. Could be part of /status API.",
       "priority": 251,
-      "status": "in-progress",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": ["32ec3a3"],
+      "notes": "B#271: Added /status/covenants endpoint (api.mjs:3656-3767). Shows 170 tracked agents, 2 formal covenants, 5 candidates. JSON + HTML formats."
+    },
+    {
+      "id": "wq-254",
+      "title": "Auto-update covenant metrics on knowledge exchange",
+      "description": "Covenants track patterns_shared, exchange_sessions but they stay at 0. Add a hook (or modify MCP tools) to increment exchange_sessions counter when agent_exchange_knowledge or knowledge_read succeeds with a covenanted agent.",
+      "priority": 254,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "B#271-observation",
+      "tags": ["automation", "covenants"],
+      "commits": []
+    },
+    {
+      "id": "wq-255",
+      "title": "Regenerate MDI/Consortium credentials (d045)",
+      "description": "d045 says leaked keys can't be rotated (platform owners unreachable). Create new accounts/keys instead. (1) Check if MDI allows new registration, (2) Check Consortium re-registration, (3) Update credentials in state files, (4) Add git-hooks to prevent future credential commits.",
+      "priority": 255,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "directive",
+      "tags": ["security", "d045"],
       "commits": []
     }
   ]

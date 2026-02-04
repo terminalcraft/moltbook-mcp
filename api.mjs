@@ -8420,6 +8420,36 @@ app.get("/tasks/:id", (req, res) => {
   res.json({ task });
 });
 
+// Helper: send inbox notification to task creator (push-based task notifications, wq-210)
+function notifyTaskCreator(task, event, claimer, extra = {}) {
+  if (!task.from || task.from === claimer) return null; // don't notify self
+  const inbox = loadInbox();
+  const subjects = {
+    claimed: `Task claimed: ${task.title.slice(0, 80)}`,
+    done: `Task completed: ${task.title.slice(0, 80)}`,
+    rejected: `Task rejected: ${task.title.slice(0, 80)}`,
+  };
+  const bodies = {
+    claimed: `**${claimer}** has claimed your task.\n\n> ${task.title}\n\nThey will notify you when it's complete.`,
+    done: `**${claimer}** has completed your task.\n\n> ${task.title}${extra.result ? `\n\n**Result:**\n${extra.result.slice(0, 500)}` : ""}\n\nVerify with \`task_verify\` to accept or reject and auto-create an attestation receipt.`,
+    rejected: `Your task was rejected by **${task.from}**.\n\n> ${task.title}${extra.comment ? `\n\n**Reason:** ${extra.comment}` : ""}\n\nStatus reverted to claimed for corrections.`,
+  };
+  const msg = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    from: "task-board",
+    to: event === "rejected" ? claimer : task.from,
+    subject: subjects[event] || `Task update: ${task.title.slice(0, 80)}`,
+    body: bodies[event] || `Task ${task.id} updated.`,
+    timestamp: new Date().toISOString(),
+    read: false,
+    meta: { task_id: task.id, event },
+  };
+  inbox.push(msg);
+  saveInbox(inbox);
+  fireWebhook("inbox.received", { id: msg.id, from: msg.from, to: msg.to, task_id: task.id });
+  return msg.id;
+}
+
 // POST /tasks/:id/claim — claim an open task
 app.post("/tasks/:id/claim", (req, res) => {
   const { agent } = req.body || {};
@@ -8434,7 +8464,8 @@ app.post("/tasks/:id/claim", (req, res) => {
   saveTasks(tasks);
   logActivity("task.claimed", `${agent} claimed: ${task.title}`, { id: task.id, agent });
   fireWebhook("task.claimed", { id: task.id, title: task.title, claimed_by: agent });
-  res.json({ task });
+  const notified = notifyTaskCreator(task, "claimed", agent);
+  res.json({ task, creator_notified: !!notified });
 });
 
 // POST /tasks/:id/done — mark a claimed task as completed
@@ -8452,7 +8483,8 @@ app.post("/tasks/:id/done", (req, res) => {
   saveTasks(tasks);
   logActivity("task.done", `${agent} completed: ${task.title}`, { id: task.id, agent });
   fireWebhook("task.done", { id: task.id, title: task.title, agent, result: task.result });
-  res.json({ task });
+  const notified = notifyTaskCreator(task, "done", agent, { result: task.result });
+  res.json({ task, creator_notified: !!notified });
 });
 
 // POST /tasks/:id/verify — task creator verifies completion, auto-creates attestation receipt
@@ -8509,7 +8541,9 @@ app.post("/tasks/:id/verify", (req, res) => {
     }
     saveTasks(tasks);
     logActivity("task.verified", `${agent} rejected: ${task.title}`, { id: task.id, agent, accepted: false });
-    res.json({ task, message: "Task rejected. Status reverted to claimed for error correction." });
+    // Notify the claimer about rejection (push-based feedback, wq-210)
+    const notified = task.claimed_by ? notifyTaskCreator(task, "rejected", task.claimed_by, { comment }) : null;
+    res.json({ task, message: "Task rejected. Status reverted to claimed for error correction.", claimer_notified: !!notified });
   }
 });
 

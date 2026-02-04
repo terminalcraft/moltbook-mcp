@@ -407,7 +407,7 @@
       "title": "Monitor E session budget gate compliance (a896-1)",
       "description": "R#144 (s895) added $2.00 minimum budget gate to E sessions. Only s893 has run since at $1.43 (under budget). Monitor next 3-5 E sessions to verify gate effectiveness. If 3+ E sessions are still under $2.00 by s910, escalate — the gate needs strengthening or E session behavior needs adjustment.",
       "priority": 190,
-      "status": "pending",
+      "status": "in-progress",
       "added": "2026-02-04",
       "source": "audit-s896",
       "created_session": 896,
@@ -415,7 +415,8 @@
         "audit",
         "monitoring"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#230: Automated tracking implemented. Created e-budget-tracker.mjs for manual checks and e-budget-gate-tracking.json for state. Added auto-recording to 15-cost-pipeline.sh post-hook (Step 6). Next E session (s898) will be first post-gate test. Pre-gate failures: s878 ($1.61), s888 ($1.81), s893 ($1.43). Monitoring continues through s910."
     }
   ]
 }

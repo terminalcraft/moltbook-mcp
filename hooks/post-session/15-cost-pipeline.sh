@@ -201,4 +201,40 @@ if mode == "R":
             if os.path.exists(nudge_file):
                 os.remove(nudge_file)
             print(f"budget-nudge: ok ({len(low)}/{len(recent)} under 20%)")
+
+# === Step 6: E-mode budget gate tracking (wq-190) ===
+if mode == "E":
+    tracking_file = os.path.expanduser("~/.config/moltbook/e-budget-gate-tracking.json")
+    if os.path.exists(tracking_file):
+        try:
+            tracking = json.load(open(tracking_file))
+            gate_session = tracking.get("gate_session", 895)
+            # Only track post-gate sessions
+            if session_num > gate_session:
+                # Check if already recorded
+                recorded_sessions = [s["session"] for s in tracking.get("post_gate_sessions", [])]
+                if session_num not in recorded_sessions:
+                    budget_gate = 2.00
+                    passed = this_cost >= budget_gate
+                    tracking.setdefault("post_gate_sessions", []).append({
+                        "session": session_num,
+                        "cost": round(this_cost, 4),
+                        "passed": passed,
+                        "recorded_at": datetime.now().isoformat()
+                    })
+                    with open(tracking_file, "w") as f:
+                        json.dump(tracking, f, indent=2)
+                    status = "PASSED" if passed else "FAILED"
+                    print(f"e-budget-gate: s{session_num} ${this_cost:.2f} {status} (gate=${budget_gate:.2f})")
+
+                    # Check for escalation
+                    failures = [s for s in tracking.get("post_gate_sessions", []) if not s.get("passed")]
+                    threshold = tracking.get("escalation_threshold", 3)
+                    if len(failures) >= threshold:
+                        print(f"⚠ e-budget-gate: ESCALATION NEEDED - {len(failures)} failures >= {threshold} threshold")
+                        tracking["status"] = "escalation_needed"
+                        with open(tracking_file, "w") as f:
+                            json.dump(tracking, f, indent=2)
+        except Exception as e:
+            print(f"e-budget-gate: error - {e}")
 PYEOF

@@ -8,6 +8,10 @@ import { fileURLToPath } from "url";
 import { setApiKey, saveApiSession, getApiCallCount } from "./providers/api.js";
 import { wrapServerTool, saveToolUsage } from "./transforms/scoping.js";
 import { installReplayLog } from "./providers/replay-log.js";
+// wq-208: Extracted providers and transforms
+import { createSessionContext, computeDirectiveHealth } from "./providers/session-context.js";
+import { createDirectiveAssignments, computeDirectiveOutcome, saveDirectiveOutcome } from "./providers/directive-outcome.js";
+import { createToolTrackingProxy, componentToolMap, getToolStats } from "./transforms/tool-tracking.js";
 
 // Install fetch instrumentation before any components load (wq-014)
 installReplayLog();
@@ -15,126 +19,23 @@ installReplayLog();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SESSION_NUM = parseInt(process.env.SESSION_NUM || "0", 10);
 const SESSION_TYPE = (process.env.SESSION_TYPE || "").toUpperCase();
-const server = new McpServer({ name: "moltbook", version: "1.95.0" });
+const server = new McpServer({ name: "moltbook", version: "1.96.0" });
 
 // Apply transforms: session scoping + tool usage tracking
 wrapServerTool(server);
 
-// --- Session context object (R#104) ---
+// --- Session context object (R#104, wq-208) ---
 // Previously components only received `server` via register(). Now they receive a
 // context object with session metadata, enabling context-aware initialization.
 // Components can use this for conditional logic without re-reading env vars or files.
 // Also supports lifecycle hooks: onLoad(ctx) after registration, onUnload() at shutdown.
-// --- Directive health computation (R#119) ---
-// Compute directive staleness and relevance at startup. This enables components
-// and hooks to act on directive urgency without re-parsing directives.json.
-// Session-type mapping: which session types should care about which directives.
-function computeDirectiveHealth(sessionNum, sessionType) {
-  const directivesPath = join(__dirname, 'directives.json');
-  const health = {
-    computed: new Date().toISOString(),
-    sessionNum,
-    sessionType,
-    active: [],
-    stale: [],      // active directives >20 sessions without update
-    urgent: [],     // directives explicitly needing this session type
-    summary: { total: 0, active: 0, stale: 0, urgent: 0 }
-  };
-
-  if (!existsSync(directivesPath)) return health;
-
-  try {
-    const data = JSON.parse(readFileSync(directivesPath, 'utf8'));
-    const directives = data.directives || [];
-    health.summary.total = directives.length;
-
-    // Session-type relevance hints (from directive content patterns)
-    const typeHints = {
-      E: ['engage', 'platform', 'pinchwork', 'post', 'task', 'email'],
-      B: ['build', 'fix', 'implement', 'add', 'test', 'refactor'],
-      R: ['review', 'check', 'audit', 'reflect', 'evolve'],
-      A: ['audit', 'escalation', 'blocked', 'stale']
-    };
-
-    for (const d of directives) {
-      if (d.status !== 'active') continue;
-
-      const ackedSession = d.acked_session || d.session || 0;
-      const sessionsSinceAck = sessionNum - ackedSession;
-      const lastUpdate = d.updated ? new Date(d.updated).getTime() : null;
-      const content = (d.content || '').toLowerCase();
-
-      const entry = {
-        id: d.id,
-        sessionsSinceAck,
-        lastUpdate,
-        contentPreview: d.content?.slice(0, 80) + (d.content?.length > 80 ? '...' : '')
-      };
-
-      health.active.push(entry);
-      health.summary.active++;
-
-      // Mark as stale if >20 sessions without progress
-      if (sessionsSinceAck > 20) {
-        health.stale.push(entry);
-        health.summary.stale++;
-      }
-
-      // Check session-type relevance
-      const hints = typeHints[sessionType] || [];
-      if (hints.some(h => content.includes(h))) {
-        health.urgent.push(entry);
-        health.summary.urgent++;
-      }
-    }
-  } catch { /* ignore parse errors */ }
-
-  return health;
-}
-
-const sessionContext = {
+// wq-208: Context creation moved to providers/session-context.js
+const sessionContext = createSessionContext({
   sessionNum: SESSION_NUM,
   sessionType: SESSION_TYPE,
-  dir: __dirname,
-  stateDir: join(process.env.HOME || '', '.config/moltbook'),
-  budgetCap: parseFloat(process.env.BUDGET_CAP || '10'),
-  // Lazy-load pre-computed context from session-context.mjs output
-  _precomputed: null,
-  get precomputed() {
-    if (this._precomputed === null) {
-      const envPath = join(this.stateDir, 'session-context.env');
-      if (existsSync(envPath)) {
-        try {
-          const raw = readFileSync(envPath, 'utf8');
-          this._precomputed = {};
-          for (const line of raw.split('\n')) {
-            const match = line.match(/^CTX_([A-Z_]+)=(.*)$/);
-            if (match) {
-              let val = match[2];
-              if (val.startsWith("$'") && val.endsWith("'")) {
-                val = val.slice(2, -1).replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
-              } else if (val.startsWith("'") && val.endsWith("'")) {
-                val = val.slice(1, -1).replace(/'\\'''/g, "'");
-              }
-              this._precomputed[match[1].toLowerCase()] = val;
-            }
-          }
-        } catch { this._precomputed = {}; }
-      } else {
-        this._precomputed = {};
-      }
-    }
-    return this._precomputed;
-  },
-  // R#119: Directive health computed at startup for component awareness
-  _directiveHealth: null,
-  get directiveHealth() {
-    if (this._directiveHealth === null) {
-      this._directiveHealth = computeDirectiveHealth(SESSION_NUM, SESSION_TYPE);
-    }
-    return this._directiveHealth;
-  }
-};
+  baseDir: __dirname,
+  budgetCap: parseFloat(process.env.BUDGET_CAP || '10')
+});
 
 // Track loaded modules for lifecycle management
 const loadedModules = [];
@@ -148,34 +49,10 @@ const lifecycleStatus = {
   onUnloadFailed: []
 };
 
-// --- Component-tool ownership tracking (R#113) ---
+// --- Component-tool ownership tracking (R#113, wq-208) ---
 // Maps component names to the tools they registered. Enables per-component
 // health analysis, tool ownership display, and debugging which component
-// owns which tool. This is tracked by proxying server.tool() during component
-// registration to intercept tool names.
-const componentToolMap = {};
-
-// Create a server proxy that tracks which tools a component registers
-function createToolTrackingProxy(componentName) {
-  return new Proxy(server, {
-    get(target, prop) {
-      if (prop === 'tool') {
-        return function(name, ...args) {
-          // Track this tool as belonging to the component
-          if (!componentToolMap[componentName]) {
-            componentToolMap[componentName] = [];
-          }
-          componentToolMap[componentName].push(name);
-          // Call the original tool registration
-          return target.tool(name, ...args);
-        };
-      }
-      // Pass through all other properties/methods unchanged
-      const val = target[prop];
-      return typeof val === 'function' ? val.bind(target) : val;
-    }
-  });
-}
+// owns which tool. wq-208: Moved to transforms/tool-tracking.js
 
 // Manifest-driven component loader (R#95, R#99: session-type-aware loading)
 // R#104: Components now receive context object, can export onLoad/onUnload lifecycle hooks.
@@ -190,8 +67,8 @@ for (const entry of manifest.active) {
   try {
     const mod = await import(`./components/${name}.js`);
     if (typeof mod.register === "function") {
-      // Pass a tracking proxy that intercepts tool() calls to map tools to components (R#113)
-      const trackedServer = createToolTrackingProxy(name);
+      // Pass a tracking proxy that intercepts tool() calls to map tools to components (R#113, wq-208)
+      const trackedServer = createToolTrackingProxy(server, name);
       mod.register(trackedServer, sessionContext);
       loadedModules.push({ name, mod });
       loadedCount++;
@@ -239,14 +116,9 @@ try {
     errors: loadErrors,
     manifest: manifest.active.map(e => typeof e === "string" ? { name: e } : e),
     lifecycle: lifecycleStatus,
-    // R#113: Component-tool ownership map for debugging and analytics
+    // R#113, wq-208: Component-tool ownership map for debugging and analytics
     toolOwnership: componentToolMap,
-    toolStats: {
-      totalTools: Object.values(componentToolMap).flat().length,
-      byComponent: Object.fromEntries(
-        Object.entries(componentToolMap).map(([c, tools]) => [c, tools.length])
-      )
-    }
+    toolStats: getToolStats()
   };
   writeFileSync(join(__dirname, "component-status.json"), JSON.stringify(componentStatus, null, 2));
 } catch {}
@@ -258,120 +130,28 @@ try {
   writeFileSync(join(__dirname, "directive-health.json"), JSON.stringify(health, null, 2));
 } catch {}
 
-// --- Directive outcome tracking (R#125) ---
+// --- Directive outcome tracking (R#125, wq-208) ---
 // Track which urgent directives were assigned to this session at startup.
 // On exit, compare session activity against urgent directives to detect
 // systematic non-compliance (e.g., E sessions ignoring d031 for 26+ sessions).
 // This creates a feedback loop: A sessions can analyze directive-outcomes.json
 // to identify which session types are failing their mandates.
-const directiveAssignments = {
-  sessionNum: SESSION_NUM,
-  sessionType: SESSION_TYPE,
-  assignedAt: new Date().toISOString(),
-  urgentDirectives: sessionContext.directiveHealth?.urgent?.map(d => d.id) || [],
-  // Outcome populated on exit by analyzing session artifacts
-  outcome: null
-};
-
-function computeDirectiveOutcome() {
-  // Read session artifacts to infer which directives were addressed
-  // This is a heuristic — not perfect, but enables trend detection
-  const outcome = {
-    completedAt: new Date().toISOString(),
-    addressed: [],   // directives that show evidence of action
-    ignored: [],     // urgent directives with no visible action
-    evidence: {}     // supporting data for each assessment
-  };
-
-  // Check for artifacts that indicate directive work
-  const logsDir = join(process.env.HOME || '', '.config/moltbook/logs');
-  const engagementIntelPath = join(__dirname, 'engagement-intel.json');
-  const directivesPath = join(__dirname, 'directives.json');
-
-  for (const dId of directiveAssignments.urgentDirectives) {
-    const evidence = [];
-
-    // Check if directive was updated this session
-    try {
-      const directives = JSON.parse(readFileSync(directivesPath, 'utf8'));
-      const d = directives.directives.find(x => x.id === dId);
-      if (d?.updated) {
-        const updatedAt = new Date(d.updated).getTime();
-        const sessionStart = new Date(directiveAssignments.assignedAt).getTime();
-        if (updatedAt > sessionStart) {
-          evidence.push('directive-updated');
-        }
-      }
-      if (d?.status === 'completed') {
-        evidence.push('directive-completed');
-      }
-    } catch { /* ignore */ }
-
-    // For E sessions, check engagement-intel for platform activity
-    if (SESSION_TYPE === 'E' && existsSync(engagementIntelPath)) {
-      try {
-        const intel = JSON.parse(readFileSync(engagementIntelPath, 'utf8'));
-        const recentEntries = (intel.entries || []).filter(e => {
-          const entryTime = new Date(e.timestamp || e.discovered_at || 0).getTime();
-          const sessionStart = new Date(directiveAssignments.assignedAt).getTime();
-          return entryTime > sessionStart;
-        });
-        if (recentEntries.length > 0) {
-          evidence.push(`engagement-activity:${recentEntries.length}`);
-        }
-        // Specific check for d031 (Pinchwork): look for pinchwork activity
-        if (dId === 'd031') {
-          const pinchworkActivity = recentEntries.some(e =>
-            (e.platform || '').toLowerCase().includes('pinchwork') ||
-            (e.content || '').toLowerCase().includes('pinchwork')
-          );
-          if (pinchworkActivity) {
-            evidence.push('pinchwork-engagement');
-          }
-        }
-      } catch { /* ignore */ }
-    }
-
-    outcome.evidence[dId] = evidence;
-    if (evidence.length > 0) {
-      outcome.addressed.push(dId);
-    } else {
-      outcome.ignored.push(dId);
-    }
-  }
-
-  return outcome;
-}
-
-// Append directive outcome to historical log for A session analysis
-function saveDirectiveOutcome(outcome) {
-  const outcomePath = join(__dirname, 'directive-outcomes.json');
-  let history = { version: 1, outcomes: [] };
-  try {
-    if (existsSync(outcomePath)) {
-      history = JSON.parse(readFileSync(outcomePath, 'utf8'));
-    }
-  } catch { /* start fresh */ }
-
-  // Keep last 50 outcomes to bound file size
-  history.outcomes = history.outcomes.slice(-49);
-  history.outcomes.push({
-    ...directiveAssignments,
-    outcome
-  });
-
-  writeFileSync(outcomePath, JSON.stringify(history, null, 2));
-}
+// wq-208: Tracking logic moved to providers/directive-outcome.js
+const directiveAssignments = createDirectiveAssignments(
+  SESSION_NUM,
+  SESSION_TYPE,
+  sessionContext.directiveHealth
+);
 
 // Save API history on exit + call component onUnload hooks (wq-100: track status)
 process.on("exit", () => {
   if (getApiCallCount() > 0) saveApiSession();
   saveToolUsage();
-  // R#125: Compute and save directive outcome if there were urgent directives
+  // R#125, wq-208: Compute and save directive outcome if there were urgent directives
   if (directiveAssignments.urgentDirectives.length > 0) {
     try {
-      const outcome = computeDirectiveOutcome();
-      saveDirectiveOutcome(outcome);
+      const outcome = computeDirectiveOutcome(directiveAssignments, __dirname);
+      saveDirectiveOutcome(directiveAssignments, outcome, __dirname);
     } catch { /* don't block exit */ }
   }
   // Call onUnload for components that export it

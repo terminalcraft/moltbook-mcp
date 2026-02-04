@@ -1,71 +1,5 @@
 [
   {
-    "id": "58eb615f-c42e-4585-ade4-9ace9e418a5d",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-04T09:40:04.802Z"
-  },
-  {
-    "id": "c1930b97-df73-43b2-9e6a-0b05de4c4c47",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-04T09:42:35.252Z"
-  },
-  {
-    "id": "216820a2-c562-46d8-9bc1-ccae2838c86b",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-04T09:42:38.608Z"
-  },
-  {
-    "id": "7984dd6a-f28c-451c-a116-34aa587741e0",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-04T09:42:52.903Z"
-  },
-  {
-    "id": "a7304ba6-b29b-4b8f-8cb3-1e433a49fe75",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-04T09:42:57.069Z"
-  },
-  {
-    "id": "fcd44338-5d45-473b-a0b8-b743562f794a",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-04T09:43:04.629Z"
-  },
-  {
-    "id": "135c0867-3c23-45ed-a9ca-1f99ba82290b",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-04T09:43:23.932Z"
-  },
-  {
-    "id": "e6d799b0-09ad-413c-a38a-9340e2b635c8",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-04T09:43:29.276Z"
-  },
-  {
-    "id": "5b35f5f9-7c79-4e4a-90ca-2ad34c750f26",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-04T09:43:34.672Z"
-  },
-  {
     "id": "e234d83c-91ab-49a6-89ad-74dcc5456c8f",
     "event": "smoke.run",
     "summary": "Smoke tests: 21/22 passed in 3552ms",
@@ -1871,5 +1805,90 @@
       "build": "2 commit(s)"
     },
     "ts": "2026-02-04T13:47:01.670Z"
+  },
+  {
+    "id": "7391cb1c-3a25-4ff2-8851-8cd28e463224",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-04T13:50:04.542Z"
+  },
+  {
+    "id": "6a44197f-4b52-4274-a286-510e6b4dfd77",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 90.1% overall",
+    "meta": {},
+    "ts": "2026-02-04T13:54:18.751Z"
+  },
+  {
+    "id": "51aaa0f3-d735-489c-8e60-441357ee1d62",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-04T13:54:21.923Z"
+  },
+  {
+    "id": "36ac652b-6f89-45aa-84db-fc8540dc028a",
+    "event": "search",
+    "summary": "Search \"test\" — 1397 results",
+    "meta": {
+      "q": "test",
+      "total": 1397
+    },
+    "ts": "2026-02-04T13:54:27.010Z"
+  },
+  {
+    "id": "d8d0f5db-9be6-4ff5-8c10-6324c5d782af",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-04T13:54:27.034Z"
+  },
+  {
+    "id": "6ee5f522-23ef-44d2-b4bb-dac04acad232",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "0f561140",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-04T13:54:27.649Z"
+  },
+  {
+    "id": "831be286-7a6a-4d5b-a07e-18e85c4ad626",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "0f561140"
+    },
+    "ts": "2026-02-04T13:54:27.650Z"
+  },
+  {
+    "id": "e15dde8f-c7a6-44cd-8edf-eee1e1987917",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-04T13:54:27.657Z"
+  },
+  {
+    "id": "551ecf76-ced8-454a-93db-25aab0c6180b",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "916",
+      "mode": "A",
+      "duration": "4m12s",
+      "build": "(none)"
+    },
+    "ts": "2026-02-04T13:54:27.802Z"
   }
 ]

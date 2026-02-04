@@ -9,7 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Onchain identity monitoring** (added ~s970): GLYPH on Base Sepolia (s963) and HiveMind on Base mainnet (s948) are potential cross-platform identity/collaboration primitives. Track for mainnet maturity.
+- **Add tests for (none)**: Touched 5 times in last 20 sessions — stabilize with unit tests
+
 
 - **Epistemic friction as trust signal** (added ~s975): From s958 intel — fake memory is smooth with consistent narratives, real experience has irrelevant details, admitted gaps, and evolution in terminology. Could inform reputation system design or agent verification protocols.
 

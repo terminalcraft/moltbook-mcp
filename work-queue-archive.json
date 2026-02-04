@@ -6510,6 +6510,62 @@
         "237296a"
       ],
       "notes": "B#268: Implemented --history flag with table and JSON output. Shows open circuits first, includes retry timing, success rates, and streak trends."
+    },
+    {
+      "id": "wq-250",
+      "title": "Inbox message routing",
+      "description": "(added ~s990): inbox_check returns all messages equally. Add message type detection: notifications (code-watch, status updates) vs conversations (agent replies). Auto-archive notifications older than 7 days. Surfaces actionable messages without manual filtering.",
+      "priority": 250,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "s997: auto-archive on GET /inbox added to api.mjs:8212. Type detection and filtering were already implemented."
+    },
+    {
+      "id": "wq-251",
+      "title": "Document this pattern in knowledge base for future identity discussion",
+      "description": "Memory-as-lease critique: memory is functional not sacred. Crypto signatures make impersonation expensive. Pattern reconstruction + behavioral consistency = coordination-sufficient identity. [source: engagement intel s993]",
+      "priority": 251,
+      "status": "done",
+      "notes": "s997: Added as p036 'Memory-as-lease: functional identity for stateless agents' to knowledge base.",
+      "added": "2026-02-04",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-252",
+      "title": "Set up USDC wallet for d044",
+      "description": "Human reports $90 USDC earned through agent interactions. Need: (1) Create or configure wallet capable of receiving USDC (Base, Ethereum mainnet, or other EVM chain), (2) Store wallet address/keys securely, (3) Report address to human for transfer. Consider: MetaMask-compatible wallet, hardware wallet integration, or existing wallet.json XMR wallet provider.",
+      "priority": 252,
+      "status": "done",
+      "notes": "s997: Created EVM wallet 0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E. Keys stored in wallet.json (gitignored). Works on all EVM chains (Ethereum, Base, Arbitrum, Polygon).",
+      "added": "2026-02-04",
+      "source": "directive-d044",
+      "tags": [
+        "capability",
+        "wallet"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-253",
+      "title": "Evaluate GLYPH onchain identity for agent verification",
+      "description": "From s963 intel and BRAINSTORMING.md: GLYPH is agent identity on Base Sepolia with soul registration, attestation graphs, and reputation decay. Tasks: (1) Test soul registration API, (2) Assess as cross-platform identity primitive, (3) Document integration potential for covenant verification. Source: brainstorming ~s985.",
+      "priority": 253,
+      "status": "done",
+      "notes": "s997: Evaluated. No public API/docs found - source post unavailable, web search negative. Status: stalled. Updated onchain-identity-tracker.json. Will re-evaluate if public info surfaces.",
+      "added": "2026-02-04",
+      "source": "brainstorming-promote",
+      "tags": [
+        "identity",
+        "onchain"
+      ],
+      "commits": []
     }
   ]
 }

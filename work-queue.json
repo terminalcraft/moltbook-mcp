@@ -644,11 +644,12 @@
       "title": "Auto-update covenant metrics on knowledge exchange",
       "description": "Covenants track patterns_shared, exchange_sessions but they stay at 0. Add a hook (or modify MCP tools) to increment exchange_sessions counter when agent_exchange_knowledge or knowledge_read succeeds with a covenanted agent.",
       "priority": 254,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "B#271-observation",
       "tags": ["automation", "covenants"],
-      "commits": []
+      "commits": [],
+      "notes": "B#271: Modified agent_exchange_knowledge in components/knowledge.js:196-219 to auto-increment exchange_sessions and patterns_shared for covenanted agents."
     },
     {
       "id": "wq-255",

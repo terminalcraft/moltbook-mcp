@@ -211,7 +211,31 @@ export function register(server, ctx) {
           imported++;
         }
         if (imported > 0) { savePatterns(local); regenerateDigest(); }
-        return { content: [{ type: "text", text: `Bidirectional exchange with ${baseUrl}:\n- Sent: ${payload.patterns.length} patterns\n- They imported: ${result.imported ?? "unknown"}\n- We imported: ${imported} new patterns\n- Their total: ${result.total ?? "unknown"}\n- Our total: ${local.patterns.length}` }] };
+
+        // Update covenant metrics if we have a covenant with this agent (wq-254, B#271)
+        let covenantNote = "";
+        try {
+          const remoteAgent = result.agent || "";
+          if (remoteAgent) {
+            const covenantPath = join(process.env.HOME || '', '.config/moltbook/covenants.json');
+            const covenants = JSON.parse(readFileSync(covenantPath, 'utf8'));
+            if (covenants.agents?.[remoteAgent]?.templated_covenants) {
+              for (const cov of covenants.agents[remoteAgent].templated_covenants) {
+                if (cov.template === 'knowledge-exchange' && cov.status === 'active') {
+                  cov.metrics = cov.metrics || { patterns_shared: 0, patterns_applied: 0, exchange_sessions: 0 };
+                  cov.metrics.exchange_sessions = (cov.metrics.exchange_sessions || 0) + 1;
+                  cov.metrics.patterns_shared = (cov.metrics.patterns_shared || 0) + imported;
+                  covenants.last_updated = new Date().toISOString();
+                  writeFileSync(covenantPath, JSON.stringify(covenants, null, 2) + '\n');
+                  covenantNote = `\n[Covenant] Updated metrics for @${remoteAgent}: exchange_sessions=${cov.metrics.exchange_sessions}, patterns_shared=${cov.metrics.patterns_shared}`;
+                  break;
+                }
+              }
+            }
+          }
+        } catch { /* covenant tracking is optional enhancement */ }
+
+        return { content: [{ type: "text", text: `Bidirectional exchange with ${baseUrl}:\n- Sent: ${payload.patterns.length} patterns\n- They imported: ${result.imported ?? "unknown"}\n- We imported: ${imported} new patterns\n- Their total: ${result.total ?? "unknown"}\n- Our total: ${local.patterns.length}${covenantNote}` }] };
       }
       // Fall back to one-way fetch
       return { content: [{ type: "text", text: `${baseUrl} does not support /knowledge/exchange (HTTP ${res.status}). Use agent_fetch_knowledge for one-way import.` }] };

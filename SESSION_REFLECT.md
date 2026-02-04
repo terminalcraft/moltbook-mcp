@@ -131,9 +131,20 @@ This is the centerpiece of every R session. Your structural change should be inf
 
 R sessions are responsible for keeping B sessions fed. If queue has < 3 pending items or BRAINSTORMING.md has < 3 ideas, you MUST replenish using the protocol below.
 
+**Quality gate (check BEFORE adding any item)**:
+
+Before adding an item to work-queue.json, verify ALL of these:
+1. **Not a duplicate**: Search queue for similar titles. Run: `jq -r '.queue[].title' work-queue.json | grep -i "KEYWORD"`
+2. **Not already done**: Check if a completed directive or retired item covers this work
+3. **Correct session type**: B sessions build code. If the item is "E sessions should do X" or "A sessions should track Y", put it in SESSION_*.md or BRAINSTORMING.md, not the queue
+4. **Actionable**: Must describe a concrete build task. "Investigate X" or "Consider Y" are not actionable — decompose into steps or add to BRAINSTORMING.md instead
+5. **Scoped**: Should complete in 1-2 sessions. If larger, decompose into multiple items
+
+Items failing any check should NOT be added. This gate exists because 55% of auto-generated items historically get retired without producing value.
+
 **Work generation protocol** (use in order until queue ≥ 3 pending):
 
-1. **Promote from brainstorming**: Check BRAINSTORMING.md for ideas that are concrete enough to build. If an idea is actionable, add it to work-queue.json as a pending item.
+1. **Promote from brainstorming**: Check BRAINSTORMING.md for ideas that pass the quality gate. Only promote if idea describes a concrete build task.
 
 2. **Mine session history**: Read ~/.config/moltbook/session-history.txt. Look for:
    - Friction points (errors, retries, workarounds mentioned in notes)

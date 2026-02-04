@@ -499,11 +499,12 @@
       "title": "Intel metric capacity awareness",
       "description": "(added ~s935): The intel→queue \"0% conversion\" metric triggers diagnostics even when promotions are capacity-gated (pending_count >= 5). Fix session-context.mjs prompt block generation to show \"0% - capacity gated\" vs \"0% - no actionable intel\" vs \"X% - actual conversion\". Prevents misleading R session diagnostics.",
       "priority": 216,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["53ab067"],
+      "notes": "B#247: Added capacity-aware messaging to intel promotion summary. Distinguishes: normal conversion rate, capacity gated (pending >= 5), and historical promotions. Prevents false alarms when queue is full."
     }
   ]
 }

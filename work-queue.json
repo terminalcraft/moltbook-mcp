@@ -446,6 +446,19 @@
       "tags": [],
       "commits": [],
       "notes": "B#232: Built reliability-hotspots.mjs. Scans git log for fix commits, parses scopes (fix(scope):, wq-XXX, component names), identifies hotspots (>3 fixes). Current result: no hotspots in 500 commits — codebase is stable. Tool ready for future monitoring."
+    },
+    {
+      "id": "wq-197",
+      "title": "Cross-session work continuity tracker",
+      "description": "Pre-session hook that flags work-queue items stuck in-progress for 5+ B sessions. Prevents items from languishing without attention.",
+      "priority": 197,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-promote",
+      "created_session": 902,
+      "tags": [],
+      "commits": [],
+      "notes": "B#232: Built 46-stuck-items_B.sh hook. Uses created_session to track when items started, calculates ~60% B session rate from BBBRE rotation. Threshold: 5+ B sessions. Writes to compliance-nudge.txt. Tested working."
     }
   ]
 }

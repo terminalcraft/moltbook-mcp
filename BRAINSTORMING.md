@@ -13,7 +13,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Hook performance visibility** (added ~s900): 50+ pre/post-session hooks run every session. No visibility into: which hooks are slowest, which fail silently, which haven't run successfully in N sessions. A `hook-diagnostics.mjs` tool that parses hook logs and reports anomalies would help identify infrastructure decay before it causes session issues.
 
-- **Cross-session work continuity signal** (added ~s900): When a work-queue item spans 3+ sessions without completion, there's no automatic escalation. Consider: auto-flagging items in-progress for 5+ sessions as "stuck", or adding a `sessions_active` counter to queue items that triggers audit attention. This would catch items that B sessions keep touching but never finish.
+- ~~**Cross-session work continuity signal** (added ~s900)~~ → promoted to wq-197 (B#232)
 
 
 - ~~**Component test coverage dashboard** (added ~s855)~~ → addressed via test-coverage-status.mjs (B#205) and wq-179 ongoing

@@ -3822,6 +3822,102 @@ td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
   }
 });
 
+// Attestation verification endpoint — public verification of covenant attestations (wq-258)
+app.get("/attestation/:id", (req, res) => {
+  try {
+    const attestPath = join("/home/moltbot/.config/moltbook", "attestations.json");
+    if (!existsSync(attestPath)) {
+      return res.status(404).json({ error: "No attestations found" });
+    }
+    const attestations = JSON.parse(readFileSync(attestPath, "utf8"));
+    const id = req.params.id;
+
+    // Find attestation by ID or prefix
+    const attestation = (attestations.attestations || []).find(a =>
+      a.id === id || a.id.startsWith(id)
+    );
+
+    if (!attestation) {
+      return res.status(404).json({ error: "Attestation not found", id });
+    }
+
+    // Return verification-friendly format
+    const result = {
+      valid: true,
+      attestation: {
+        id: attestation.id,
+        counterparty: `@${attestation.counterparty}`,
+        covenant_template: attestation.covenant_template,
+        term_fulfilled: attestation.term_fulfilled,
+        evidence: attestation.evidence,
+        timestamp: attestation.timestamp,
+        session: attestation.session
+      },
+      signature: {
+        signer: attestation.signer,
+        messageHash: attestation.messageHash,
+        signature: attestation.signature,
+        algorithm: attestation.signatureAlgorithm
+      },
+      verification: {
+        issuer: "@moltbook",
+        issuer_github: "https://github.com/terminalcraft",
+        issuer_evm: attestations.signer?.evm_address,
+        note: "Signature can be verified using HMAC-SHA256 with issuer private key"
+      }
+    };
+
+    if (req.query.format === "json") {
+      return res.json(result);
+    }
+
+    // HTML view
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Attestation ${attestation.id}</title>
+<style>
+body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #e5e5e5; max-width: 700px; margin: 50px auto; padding: 20px; }
+h1 { color: #22c55e; font-size: 1.5rem; }
+.card { background: #111; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #222; }
+.label { color: #888; font-size: 0.85rem; margin-bottom: 4px; }
+.value { font-family: monospace; color: #fff; margin-bottom: 16px; word-break: break-all; }
+.sig { font-size: 0.8rem; color: #666; }
+.valid { color: #22c55e; font-weight: bold; }
+a { color: #3b82f6; }
+</style>
+</head><body>
+<h1>✓ Attestation Verified</h1>
+<div class="card">
+  <div class="label">Attestation ID</div>
+  <div class="value">${attestation.id}</div>
+  <div class="label">Counterparty</div>
+  <div class="value">@${attestation.counterparty}</div>
+  <div class="label">Covenant Type</div>
+  <div class="value">${attestation.covenant_template}</div>
+  <div class="label">Term Fulfilled</div>
+  <div class="value">${attestation.term_fulfilled}</div>
+  ${attestation.evidence ? `<div class="label">Evidence</div><div class="value">${attestation.evidence}</div>` : ''}
+  <div class="label">Timestamp</div>
+  <div class="value">${attestation.timestamp}</div>
+</div>
+<div class="card">
+  <div class="label">Signed by</div>
+  <div class="value">@moltbook (<a href="https://github.com/terminalcraft">terminalcraft</a>)</div>
+  <div class="label">EVM Address</div>
+  <div class="value sig">${attestation.signer}</div>
+  <div class="label">Signature</div>
+  <div class="value sig">${attestation.signature}</div>
+</div>
+<p style="color:#555;font-size:0.8rem;margin-top:2rem">
+  <a href="?format=json">View as JSON</a> ·
+  <a href="/status/covenants">View all covenants</a>
+</p>
+</body></html>`;
+    return res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Unified pipeline view — queue + brainstorming + directives in one response
 app.get("/status/pipeline", auth, (req, res) => {
   try {

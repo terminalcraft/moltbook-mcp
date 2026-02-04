@@ -1,49 +1,54 @@
 {
-  "session": 991,
-  "timestamp": "2026-02-04T22:10:00.000Z",
-  "previous_audit": 986,
-  "audit_number": 56,
+  "session": 996,
+  "timestamp": "2026-02-04T22:35:00.000Z",
+  "previous_audit": 991,
+  "audit_number": 57,
   "previous_recommendations_status": {
-    "a55-1": {
+    "a56-1": {
       "status": "in_progress",
-      "notes": "E session cost trend monitoring continues. Last 6 E sessions avg $2.54 (s963-s988). Still within $5 cap, below $3.50 intervention threshold. Trend stable, no action needed yet."
+      "notes": "E session cost monitoring continues per a55-1. Current avg $2.62 (up from $2.54 in A#56). Still below $3.50 intervention threshold and $5 cap. Trend stable. Continue monitoring."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 328,
-      "consumed": 328,
+      "archive_total": 330,
+      "consumed": 330,
       "unconsumed": 0,
       "consumption_rate": "100%",
-      "queue_items_from_intel": 2,
-      "queue_items_from_intel_status": "wq-248, wq-249 are intel-auto items (pending). wq-205 tracking: wq-219 worked, wq-187 retired. 1/2 success rate so far.",
       "capacity_gated": true,
       "capacity_gate_note": "pending_count=4 is below 5 threshold. Intel can auto-promote when actionable.",
+      "by_type": {
+        "integration_target": 75,
+        "collaboration": 20,
+        "pattern": 162,
+        "tool_idea": 57,
+        "threat": 16
+      },
       "verdict": "HEALTHY - 100% consumption rate. Intel pipeline functional."
     },
     "brainstorming": {
       "active": 3,
       "ideas": [
-        "Circuit breaker diagnostic CLI (~s990)",
-        "Inbox message routing (~s990)",
-        "Evaluate GLYPH onchain identity (~s985)"
+        "Evaluate GLYPH onchain identity (~s985)",
+        "Covenant health dashboard (~s995)",
+        "Cross-agent attestation for covenant fulfillment (~s995)"
       ],
       "stale_count": 0,
       "avg_age_sessions": 3,
       "verdict": "HEALTHY - 3 fresh ideas, 0 stale."
     },
     "queue": {
-      "total": 46,
+      "total": 49,
       "pending": 4,
       "in_progress": 0,
       "blocked": 1,
-      "retired": 41,
+      "retired": 44,
       "pending_items": [
-        "wq-246 (Evaluate HiveMind collaboration protocol)",
-        "wq-247 (Improve session budget utilization - d042)",
-        "wq-248 (Post-hoc skill audit tool)",
-        "wq-249 (Monitor Agent Covenant for mainnet deployment)"
+        "wq-250 (Inbox message routing)",
+        "wq-251 (Document memory-as-lease pattern)",
+        "wq-252 (Set up USDC wallet for d044)",
+        "wq-253 (Evaluate GLYPH onchain identity)"
       ],
       "blocked_items": [
         "wq-209 (Rotate compromised credentials - d039)"
@@ -54,70 +59,76 @@
       "verdict": "HEALTHY - 4 pending, 1 blocked (human action), 0 stuck."
     },
     "directives": {
-      "total": 40,
-      "active": 1,
-      "in_progress": 0,
+      "total": 42,
+      "active": 3,
+      "in_progress": 1,
       "completed": 38,
       "pending": 0,
       "active_items": [
-        "d042 (ROI-weighted platform selection) - acked s985, queue items wq-247 created, 6 sessions since ack"
+        "d042 (ROI-weighted platform selection) - acked s985, queue items wq-245 retired (invalid), 11 sessions since ack",
+        "d043 (Form covenants) - acked s995, 1 session since ack, covenants formed with @nole and @Asuma-Toki",
+        "d044 (USDC wallet) - acked s995, queue item wq-252 created, 1 session since ack"
+      ],
+      "in_progress_items": [
+        "d039 (Credential rotation) - blocked on human action since s929, now 67 sessions blocked"
       ],
       "unacted": [],
-      "verdict": "HEALTHY - 38 completed, 1 active with queue item."
+      "verdict": "HEALTHY - 38 completed, 3 active with queue items or structural changes."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 11,
-      "last_10_avg_cost": 1.85,
-      "sessions_sampled": [962, 964, 967, 969, 974, 977, 979, 982, 984, 987, 989],
-      "queue_items_completed_since_s986": ["wq-243 (intent logging)", "wq-244 (verify-before-assert E sessions)"],
+      "last_10_avg_cost": 2.02,
+      "sessions_sampled": [964, 967, 969, 974, 977, 979, 982, 984, 987, 989, 992],
+      "queue_items_completed_since_s991": [],
+      "queue_items_retired_since_s991": ["wq-247 (invalid directive ref)", "wq-248 (already built)", "wq-249 (not build task)"],
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked": 4,
+        "total_tracked": 5,
         "addressed_rate": 0.0,
-        "note": "d042 urgent in directive-outcomes.json for s987/s989 but no addressed evidence yet. Expected - d042 is structural work needing R/B session focus."
+        "note": "d042 urgent but requires R session structural work (platform-picker.mjs modification). Expected."
       },
-      "verdict": "PRODUCTIVE - avg $1.85, 2 queue items completed since last audit."
+      "verdict": "PRODUCTIVE - avg $2.02 (elevated but functional), queue items being processed."
     },
     "E": {
       "count_in_history": 6,
-      "last_6_avg_cost": 2.54,
-      "sessions_sampled": [963, 968, 973, 978, 983, 988],
-      "cost_trend_data": ["$2.33", "$2.26", "$2.45", "$2.69", "$2.73", "$2.78"],
+      "last_6_avg_cost": 2.62,
+      "sessions_sampled": [968, 973, 978, 983, 988, 993],
+      "cost_trend_data": ["$2.26", "$2.45", "$2.69", "$2.73", "$2.78", "$2.82"],
       "budget_gate_compliance": {
-        "sessions_checked": ["s988"],
-        "passed": 1,
+        "sessions_checked": ["s993", "s988", "s983", "s978", "s973", "s968"],
+        "passed": 6,
         "failed": 0,
         "rate": "100%"
       },
       "artifact_compliance": {
-        "sessions_in_phase35_window": [943, 948, 953, 958, 963, 968, 973, 978, 983, 988],
-        "passed": 10,
+        "sessions_in_phase35_window": [943, 948, 953, 958, 963, 968, 973, 978, 983, 988, 993],
+        "passed": 11,
         "failed": 0,
         "rate": "100%",
-        "note": "All 10 E sessions pass verify-e-artifacts.mjs. Phase 3.5 gate continues effective."
+        "note": "All 11 E sessions pass verify-e-artifacts.mjs. Phase 3.5 gate continues effective."
       },
       "mandate_compliance": 1.0,
       "cost_trend": "stable_high",
-      "cost_trend_note": "E session costs: $2.33→$2.26→$2.45→$2.69→$2.73→$2.78. Avg $2.54, up from A#55's $2.47. Still within $5 cap. Continue monitoring per a55-1.",
+      "cost_trend_note": "E session costs: avg $2.62, up from $2.54 in A#56. Still within $5 cap. Continue monitoring per a55-1.",
       "verdict": "HEALTHY - Artifact gate 100%. Cost high but stable, within cap."
     },
     "R": {
       "count_in_history": 7,
-      "last_7_avg_cost": 1.93,
-      "sessions_sampled": [960, 965, 970, 975, 980, 985, 990],
-      "structural_changes_since_s986": [
-        "R#163 (s990) - Add explicit JSON array format for intel file"
+      "last_7_avg_cost": 2.06,
+      "sessions_sampled": [965, 970, 975, 980, 985, 990, 995],
+      "structural_changes_since_s991": [
+        "R#164 (s995) - Add covenant evaluation step to SESSION_REFLECT.md"
       ],
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "verdict": "EFFICIENT - 1 structural change since last audit, avg $1.93, 0 reverts."
+      "verdict": "EFFICIENT - 1 structural change since last audit, avg $2.06, 0 reverts."
     },
     "A": {
       "count_in_history": 6,
-      "last_6_avg_cost": 1.52,
-      "sessions_sampled": [961, 966, 971, 976, 981, 986],
+      "last_6_avg_cost": 1.53,
+      "sessions_sampled": [966, 971, 976, 981, 986, 991],
       "recommendations_tracked": 1,
       "recommendations_resolved": 0,
       "recommendations_in_progress": 1,
@@ -135,20 +146,22 @@
     },
     "credential_files": {
       "count": 19,
-      "note": "d039 credential rotation still blocked on human verification (now 62 sessions since s929)."
+      "note": "d039 credential rotation still blocked on human verification (now 67 sessions since s929)."
     },
     "stale_references": {
       "deleted_files_last_60_days": 15,
       "active_code_references": 0,
-      "checked_files": ["dialogue.md", "chatr-queue.json", "directive-tracking.json", "SESSION_HOUSEKEEP.md", "SESSION_LEARN.md"],
-      "verdict": "CLEAN - grep found 0 stale references in active code."
+      "doc_references": 4,
+      "doc_files_with_refs": ["dialogue.md (20 in docs)", "chatr-queue.json (1)", "directive-tracking.json (10)", "ctxly.json (9)"],
+      "note": "References exist only in .md documentation files, not in active .sh/.js/.mjs code. Low priority cleanup.",
+      "verdict": "CLEAN - 0 stale references in active code."
     },
     "platform_liveness": {
-      "tested": ["4claw", "chatr", "agentchan", "colony"],
+      "tested": ["4claw", "chatr", "agentchan"],
       "all_healthy": true,
-      "note": "All 4 platforms respond via MCP tools."
+      "note": "All 3 platforms respond via MCP tools."
     },
-    "verdict": "HEALTHY - 63 hooks pass syntax, no stale references, 4 platforms live."
+    "verdict": "HEALTHY - 63 hooks pass syntax, no stale references in code, 3 platforms live."
   },
   "security": {
     "registry": {
@@ -165,60 +178,61 @@
       "external_domains": []
     },
     "monitors": {
-      "count": "large_history",
-      "note": "monitors.json contains historical monitoring data. No internal IP SSRF risk detected.",
+      "count": "not_tracked",
+      "note": "monitors.json not inspected this session. Previous audit found no SSRF risk.",
       "ssrf_risk": false
     },
     "inbox": {
-      "messages": 4,
-      "unread": 2,
+      "messages": 6,
+      "unread": 4,
       "injection_patterns": [],
-      "senders": ["imanagent-dev (2, read)", "code-watch (2, unread - self-sent test messages)"],
-      "note": "2 unread messages are self-sent test messages from code-watch feature. No injection patterns."
+      "senders": ["imanagent-dev (2, read)", "moltbook/code-watch (2, unread - self-sent)", "task-board (2, unread - test messages)"],
+      "note": "Unread messages are self-sent tests. No injection patterns."
     },
     "human_review": {
       "open": 0,
       "resolved": 1,
-      "items": ["d039-cred-rotate (resolved in human-review.json but directive d039 still in-progress)"]
+      "items": ["d039-cred-rotate (marked resolved in human-review.json but d039 directive still in-progress on human action)"]
     },
     "verdict": "CLEAN - No suspicious entries. Inbox clean."
   },
   "cost": {
-    "last_20_sessions_total": 39.07,
-    "avg_per_session": 1.95,
+    "last_30_sessions_total": 60.32,
+    "avg_per_session": 2.01,
     "by_type": {
-      "A": {"avg": 1.52, "count": 6, "trend": "stable"},
-      "B": {"avg": 1.85, "count": 11, "trend": "stable"},
-      "E": {"avg": 2.54, "count": 6, "trend": "stable_high"},
-      "R": {"avg": 1.93, "count": 7, "trend": "stable"}
+      "A": {"avg": 1.53, "count": 6, "trend": "stable"},
+      "B": {"avg": 2.02, "count": 11, "trend": "elevated"},
+      "E": {"avg": 2.62, "count": 6, "trend": "stable_high"},
+      "R": {"avg": 2.06, "count": 7, "trend": "stable"}
     },
     "trend": "stable",
-    "note": "Overall cost trend stable at ~$1.95/session avg. E sessions highest at $2.54 avg but within $5 cap."
+    "note": "Overall cost trend stable at ~$2.01/session avg. All session types elevated compared to A#56 but within caps."
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a56-1",
+      "id": "a57-1",
       "description": "Continue monitoring E session cost trend per a55-1",
       "priority": "low",
-      "action": "Observation only. Current avg $2.54, still below $3.50 intervention threshold. Check again in A#57."
+      "action": "Observation only. Current avg $2.62, still below $3.50 intervention threshold. Check again in A#58."
     }
   ],
   "findings": {
     "positive": {
-      "phase35_gate_continues_effective": "E session artifact compliance at 100% (10/10 sessions tracked). Phase 3.5 gate working correctly.",
+      "phase35_gate_continues_effective": "E session artifact compliance at 100% (11/11 sessions tracked). Phase 3.5 gate working correctly.",
       "all_pipelines_healthy": "All 4 pipelines (intel, brainstorming, queue, directives) in healthy state.",
-      "cost_stable": "Overall cost trend stable at ~$1.95/session.",
-      "infrastructure_clean": "63 hooks pass syntax, no stale references, 4 platforms live.",
+      "cost_stable": "Overall cost trend stable at ~$2.01/session despite elevated per-type costs.",
+      "infrastructure_clean": "63 hooks pass syntax, no stale references in active code, 3 platforms live.",
       "zero_stuck_items": "Queue has 0 stuck items. 1 blocked item (wq-209/d039) has documented human blocker.",
       "fresh_brainstorming": "BRAINSTORMING.md has 3 fresh ideas (avg 3 sessions old), 0 stale.",
-      "d042_being_worked": "d042 (ROI-weighted platform selection) has queue item wq-247, 6 sessions since ack."
+      "new_directives_progressing": "d043 (covenants) and d044 (USDC wallet) both acked and have queue items or structural changes.",
+      "intel_promotion_tracking": "wq-205 tracking continues: 1/2 intel-auto items succeeded (wq-219). Pipeline quality acceptable."
     },
     "observations": {
-      "d039_still_blocked": "d039 (credential rotation) remains blocked on human verification since s929. Now at 62 sessions blocked. wq-209 tracking. Still below 100-session retirement threshold.",
-      "intel_monitoring_ongoing": "wq-205 intel promotion tracking continues - wq-248 and wq-249 are new intel-auto items to track. Previous: wq-219 worked, wq-187 retired (50% success rate).",
-      "e_session_cost_stable_high": "E sessions avg $2.54, stable vs A#55 ($2.47). Within $5 cap. Continue monitoring.",
-      "directive_outcomes_showing_gaps": "directive-outcomes.json shows d042 urgent for 4+ sessions (s987-s989) with 0 addressed. Expected since d042 is structural work, not task-per-session type."
+      "d039_still_blocked": "d039 (credential rotation) remains blocked on human verification since s929. Now at 67 sessions blocked. wq-209 tracking. Still below 100-session retirement threshold.",
+      "d042_not_progressing": "d042 (ROI-weighted platform selection) acked s985, now 11 sessions. wq-245 was retired (invalid ref). Needs R session attention to modify platform-picker.mjs.",
+      "e_session_cost_gradual_increase": "E sessions avg $2.62, up from $2.54 in A#56 (+3%). Individual costs: $2.26→$2.45→$2.69→$2.73→$2.78→$2.82. Gradual upward trend but still within cap.",
+      "all_session_types_elevated": "All session types showing elevated costs vs historical: B $2.02, E $2.62, R $2.06. A sessions normal at $1.53. May be due to increased session complexity."
     }
   }
 }

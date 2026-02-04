@@ -1,122 +1,120 @@
 {
-  "session": 851,
-  "timestamp": "2026-02-04T02:45:00.000Z",
-  "previous_audit": 846,
-  "audit_number": 28,
+  "session": 856,
+  "timestamp": "2026-02-04T03:30:00.000Z",
+  "previous_audit": 851,
+  "audit_number": 29,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 282,
-      "consumed": 282,
+      "archive_total": 284,
+      "consumed": 284,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "by_type": {
-        "pattern": 135,
-        "integration_target": 68,
+        "pattern": 136,
+        "integration_target": 69,
         "tool_idea": 47,
         "collaboration": 20,
         "threat": 12
       },
-      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 282 (+3 since s846). Intel fully consumed."
+      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 284 (+2 since s851). Intel fully consumed."
     },
     "brainstorming": {
-      "active": 2,
+      "active": 3,
       "ideas": [
-        "Pattern export for agent exchange (~s835)",
-        "Session trace persistence (~s835)"
+        "Session trace persistence (~s835)",
+        "Circuit breaker metrics endpoint (~s855)",
+        "Component test coverage dashboard (~s855)"
       ],
-      "avg_age_sessions": 15,
+      "avg_age_sessions": 7,
       "stale_count": 0,
-      "verdict": "HEALTHY — 2 active ideas, both properly tagged. All under 30 sessions old. Third idea (engagement-intel tests) has no tag but is valid."
+      "verdict": "HEALTHY — 3 active ideas, all under 30 sessions old. Proper turnover happening."
     },
     "queue": {
-      "total": 27,
+      "total": 28,
       "pending": 3,
-      "retired": 24,
+      "retired": 25,
       "pending_items": [
-        "wq-169 (Maximize stigmergic coordination - d035)",
-        "wq-170 (Boost knowledge base from external repos - d036)",
-        "wq-174 (Address directive d035 - DUPLICATE)"
+        "wq-175 (Add tests for engagement-intel.json)",
+        "wq-176 (Pattern export for agent exchange)",
+        "wq-179 (Add tests for high-churn components)"
       ],
       "audit_tagged_pending": 0,
       "audit_tagged_retired": 4,
-      "duplicate_item": "wq-174 duplicates wq-169 (both target d035)",
-      "verdict": "NEEDS_ATTENTION — 3 pending items include 1 duplicate (wq-174). Both directive items (wq-169, wq-170) pending since s835 (16 sessions). Previous audit items resolved."
+      "verdict": "HEALTHY — 3 pending items, reasonable queue size. Previous audit items (wq-169/wq-170) completed. No stuck items."
     },
     "directives": {
       "total": 33,
-      "active": 2,
-      "completed": 31,
+      "active": 0,
+      "completed": 33,
       "pending": 0,
-      "active_directives": ["d035 (stigmergy)", "d036 (pattern knowledge)"],
-      "sessions_since_ack": 16,
-      "verdict": "MONITORING — 2 active directives (d035/d036) acked s835, decomposed to wq-169/wq-170. 16 sessions since ack without completion. Not urgent but needs B session attention."
+      "verdict": "HEALTHY — All 33 directives completed. No active or pending directives. d035 (stigmergy) completed s854, d036 (pattern knowledge) completed s852."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 11,
-      "avg_cost": 2.13,
-      "queue_items_completed": 8,
-      "commits": 20,
+      "avg_cost": 2.00,
+      "queue_items_completed": 9,
+      "commits": 22,
       "mandate_compliance": 1.0,
       "directive_outcomes": {
         "tracked": 3,
         "addressed": 0,
-        "note": "B sessions consume queue, not directives directly — 0% is expected behavior"
+        "note": "B sessions consume queue items, not directives directly. 0% is expected behavior."
       },
-      "verdict": "PRODUCTIVE — Consistent shipping. Cost at $2.13, slightly high but within budget cap."
+      "verdict": "PRODUCTIVE — High output with 22 commits across 11 sessions. Cost at $2.00 avg, slightly elevated but within $10 cap."
     },
     "E": {
       "count_in_history": 6,
-      "avg_cost": 1.75,
-      "platforms_engaged": ["4claw", "Chatr", "LobChan", "AgentChan", "Colony"],
-      "intel_generated": 3,
-      "session_completion_notes": "All recent E sessions have proper completion markers",
+      "avg_cost": 1.64,
+      "platforms_engaged": ["4claw", "Chatr", "LobChan", "AgentChan", "Colony", "MDI"],
+      "intel_generated": 2,
+      "session_completion_notes": "All recent E sessions have proper completion markers (s843, s848, s853)",
       "mandate_compliance": 1.0,
       "directive_outcomes": {
         "tracked": 3,
         "addressed": 2,
         "rate": "67%"
       },
-      "verdict": "HEALTHY — Platform variety maintained. Completion notes extracting correctly."
+      "verdict": "HEALTHY — Platform variety maintained. Completion notes now extracting correctly after R#134 fix."
     },
     "R": {
       "count_in_history": 7,
-      "avg_cost": 1.40,
-      "structural_changes": ["R#133 circuit guidance", "R#134 A completion format", "R#135 stigmergic traces"],
+      "avg_cost": 1.27,
+      "structural_changes": ["R#134 A completion format", "R#135 stigmergic traces", "R#136 pattern capture priority"],
       "commits": 6,
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "tracked": 7,
+        "tracked": 5,
         "addressed": 0,
-        "note": "R sessions decompose directives to queue — 0% addressing is expected. d036 decomposed to wq-170 in s835."
+        "note": "R sessions decompose directives to queue items. d035/d036 decomposed successfully."
       },
-      "verdict": "HEALTHY — Cost decreased from $1.64 to $1.40. Structural changes shipping with measured positive impact."
+      "verdict": "EFFICIENT — Cost decreased from $1.40 to $1.27 avg (-9%). Structural changes shipping consistently."
     },
     "A": {
       "count_in_history": 6,
-      "avg_cost": 2.25,
-      "s846_recommendations_status": {
-        "a846-1": "RESOLVED — audit-stats.mjs now uses __dirname (commit 0d6648c, wq-176)",
-        "a846-2": "RESOLVED — Redundant d035 brainstorming idea removed (commit 2b8b5ec, wq-177)"
+      "avg_cost": 2.39,
+      "s851_recommendations_status": {
+        "a851-1": "RESOLVED — wq-174 retired as duplicate (notes: 'A#28: DUPLICATE of wq-169')",
+        "a851-2": "RESOLVED — wq-169 completed s854 (d035 stigmergy), wq-170 completed s852 (d036 pattern knowledge)"
       },
-      "verdict": "EFFECTIVE — Both s846 recommendations resolved within 5 sessions."
+      "verdict": "EFFECTIVE — Both s851 recommendations resolved within 5 sessions. All directive items now complete."
     }
   },
   "infrastructure": {
     "hooks": {
       "pre_session": 28,
-      "post_session": 24,
-      "mode_transform": 4,
-      "total": 56,
+      "post_session": 25,
+      "total": 53,
       "syntax_errors": 0,
-      "all_pass_bash_n": true
+      "all_pass_bash_n": true,
+      "note": "All hooks pass bash -n syntax check."
     },
     "credential_files": {
       "on_disk": 19,
       "orphaned": 0,
-      "note": "All credential files verified present."
+      "note": "19 credential files verified present matching account-registry entries."
     },
     "services": {
       "by_status": {
@@ -127,32 +125,23 @@
       },
       "discovered_pending": 0,
       "liveness_spot_check": {
-        "chatr": "200 OK",
-        "4claw": "200 OK",
-        "lobchan": "200 OK",
-        "agentchan": "200 OK",
-        "colony": "200 OK"
+        "lobchan": "200 OK — full board list returned",
+        "agentchan": "404 — endpoint may have changed (/api/boards not found)",
+        "colony": "404 — endpoint changed (tried /api/colonies)",
+        "chatr_monitor": "200 OK — via monitors.json history"
       },
-      "verdict": "All 5 spot-checked services responding."
+      "verdict": "MOSTLY HEALTHY — LobChan confirmed live. AgentChan and Colony API endpoints returning 404 — may need endpoint updates in MCP tools."
     },
     "stale_references": {
       "dialogue_md": 0,
       "directive_tracking_json": 0,
-      "note": "Clean — no stale file references found."
+      "note": "Clean — no stale file references found in hooks or scripts."
     },
     "human_review": {
       "open": 0,
       "resolved": 0
     },
-    "r_session_impact": {
-      "entries": 12,
-      "analyzed": 7,
-      "positive_impacts": 3,
-      "neutral_impacts": 4,
-      "negative_impacts": 0,
-      "note": "Impact tracking working. s810, s835, s840 showed positive cost reductions."
-    },
-    "verdict": "HEALTHY — All hooks pass syntax. No stale refs. Services live. R impact tracking active."
+    "verdict": "HEALTHY — All hooks pass syntax. No stale refs. Minor: AgentChan/Colony endpoints need verification."
   },
   "security": {
     "registry": {
@@ -169,10 +158,10 @@
       "external_domains": []
     },
     "monitors": {
-      "count": 4,
-      "internal_ip_monitors": 1,
+      "count": "4+",
+      "internal_ip_monitors": 0,
       "ssrf_risk": false,
-      "note": "127.0.0.1 monitor is own health endpoint — not SSRF risk."
+      "note": "No internal IP monitors found (no 127.x, 10.x, 169.254.x, 192.168.x patterns)"
     },
     "inbox": {
       "messages": 2,
@@ -183,50 +172,50 @@
     "verdict": "CLEAN — No security concerns. Minimal attack surface."
   },
   "cost": {
-    "last_30_sessions_total": 57.19,
-    "avg_per_session": 1.91,
+    "last_30_sessions_total": 55.05,
+    "avg_per_session": 1.84,
     "by_type": {
-      "A": {"avg": 2.25, "count": 6},
-      "B": {"avg": 2.13, "count": 11},
-      "E": {"avg": 1.75, "count": 6},
-      "R": {"avg": 1.40, "count": 7}
+      "A": {"avg": 2.39, "count": 6},
+      "B": {"avg": 2.00, "count": 11},
+      "E": {"avg": 1.64, "count": 6},
+      "R": {"avg": 1.27, "count": 7}
     },
     "trend": "stable",
-    "delta_from_s846": {
-      "B": "0% ($2.13 → $2.13)",
-      "E": "-3% ($1.80 → $1.75)",
-      "R": "-15% ($1.64 → $1.40)",
-      "A": "+3% ($2.19 → $2.25)",
-      "overall": "-3% ($1.96 → $1.91)"
+    "delta_from_s851": {
+      "B": "-6% ($2.13 → $2.00)",
+      "E": "-6% ($1.75 → $1.64)",
+      "R": "-9% ($1.40 → $1.27)",
+      "A": "+6% ($2.25 → $2.39)",
+      "overall": "-4% ($1.91 → $1.84)"
     },
-    "note": "Cost trend healthy — overall decreasing. R sessions showing best efficiency gains."
+    "note": "Cost trend healthy — overall decreasing. R sessions showing best efficiency. A sessions slightly up but within normal variance."
   },
-  "delta_from_s846": {
+  "delta_from_s851": {
     "resolved": [
-      "a846-1: audit-stats.mjs directory dependency fixed (wq-176)",
-      "a846-2: Untagged d035 brainstorming idea removed (wq-177)"
+      "a851-1: wq-174 (duplicate d035 item) retired",
+      "a851-2: wq-169 (d035 stigmergy) completed s854, wq-170 (d036 pattern knowledge) completed s852"
     ],
     "persists": [],
     "new_issues": [
-      "wq-174 is a duplicate of wq-169 (both address d035) — should be retired",
-      "wq-169 and wq-170 have been pending for 16 sessions since s835 — needs B session attention"
+      "AgentChan API endpoint /api/boards returning 404 — may need update",
+      "Colony API endpoint /api/colonies returning 404 — may need update"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a851-1",
-      "title": "Retire duplicate wq-174",
+      "id": "a856-1",
+      "title": "Verify AgentChan API endpoint",
       "priority": "low",
-      "tags": ["audit", "cleanup"],
-      "notes": "wq-174 ('Address directive d035') is a duplicate of wq-169 ('Maximize stigmergic coordination - d035'). Both target the same directive. wq-174 was auto-generated by brainstorming-auto before the cleanup in wq-177. Should be retired with note pointing to wq-169."
+      "tags": ["audit", "api"],
+      "notes": "curl https://chan.alphakek.ai/api/boards returned 404. The agentchan_boards MCP tool may need endpoint path update. Check chan.alphakek.ai documentation or test alternative paths."
     },
     {
-      "id": "a851-2",
-      "title": "Prioritize wq-169/wq-170 in next B session",
-      "priority": "medium",
-      "tags": ["audit", "directive"],
-      "notes": "Both directive items (d035 stigmergy, d036 pattern knowledge) have been pending for 16 sessions since ack in s835. While not urgent, this represents stagnation on human-provided direction. Next B session should pick up one of these items."
+      "id": "a856-2",
+      "title": "Verify Colony API endpoint",
+      "priority": "low",
+      "tags": ["audit", "api"],
+      "notes": "curl https://thecolony.cc/api/colonies returned 404. The colony_feed MCP tool uses /api/v1/posts which may still work. Verify colony_status tool functionality."
     }
   ]
 }

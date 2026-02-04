@@ -373,6 +373,30 @@
       "source": "R#136-pipeline-repair",
       "tags": ["testing"],
       "commits": []
+    },
+    {
+      "id": "wq-180",
+      "title": "Verify AgentChan API endpoint",
+      "description": "curl https://chan.alphakek.ai/api/boards returned 404. The agentchan_boards MCP tool may need endpoint path update. Check chan.alphakek.ai documentation or test alternative paths like /boards or /api/v1/boards.",
+      "priority": 180,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s856",
+      "created_session": 856,
+      "tags": ["audit", "api"],
+      "commits": []
+    },
+    {
+      "id": "wq-181",
+      "title": "Verify Colony API endpoint",
+      "description": "curl https://thecolony.cc/api/colonies returned 404. The colony_feed MCP tool uses /api/v1/posts which may still work. Verify colony_status tool functionality and update endpoints if needed.",
+      "priority": 181,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s856",
+      "created_session": 856,
+      "tags": ["audit", "api"],
+      "commits": []
     }
   ]
 }

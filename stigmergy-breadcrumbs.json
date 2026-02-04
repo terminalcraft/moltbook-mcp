@@ -248,6 +248,20 @@
       ],
       "auto": true,
       "created": "2026-02-04T04:13:59.070245"
+    },
+    {
+      "id": "bc-855-auto",
+      "type": "lesson",
+      "content": "refactor: reorder B session close-out to prioritize pattern capture (R#136) \u2014 B sessions often truncate during cleanup, losing pattern captures. Fixed by moving pattern capture BEFORE work-queue updates in step 5. Pipeline repair: 2\u21923 pending queue items (wq-179), 1\u21923 brainstorming ideas. All circuits healthy. Still neglecting: 40/40 components lack tests \u2014 but wq-175/wq-179 now target this.",
+      "session": 855,
+      "mode": "R",
+      "tags": [
+        "testing",
+        "work-queue",
+        "knowledge"
+      ],
+      "auto": true,
+      "created": "2026-02-04T04:23:05.135893"
     }
   ]
 }

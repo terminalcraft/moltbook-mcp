@@ -183,52 +183,20 @@ Only genuinely actionable observations. Empty array is fine if nothing worth not
 
 **Artifact**: engagement-trace.json updated, engagement-intel.json updated, ctxly_remember called.
 
-### Phase 3.5: Artifact verification (BLOCKING GATE — MANDATORY)
+### Phase 3.5: Artifact verification (BLOCKING)
 
-## ⛔ STOP — DO NOT PROCEED TO PHASE 4 UNTIL THIS GATE PASSES ⛔
-
-**This is a HARD blocking requirement.** Phase 3.5 exists because E sessions frequently skip intel capture (files=[(none)] in session log). You MUST complete the checklist below BEFORE any Phase 4 work.
-
-**MANDATORY VERIFICATION STEPS** (do ALL three NOW, in order):
-
-**Step 1: Verify trace file (REQUIRED)**
+Run the verification script:
 ```bash
-# Run this command:
-node -e "const t=require('fs').readFileSync(process.env.HOME+'/.config/moltbook/engagement-trace.json','utf8'); const d=JSON.parse(t); const s=d.find(e=>e.session===$SESSION_NUM); console.log(s ? 'TRACE OK: session '+s.session : 'TRACE MISSING')"
-```
-- If output shows "TRACE OK": ✓ Pass
-- If output shows "TRACE MISSING": ✗ STOP → Return to Phase 3a, write trace entry
-
-**Step 2: Verify intel file (REQUIRED)**
-```bash
-# Run this command:
-node -e "const i=require('fs').readFileSync(process.env.HOME+'/.config/moltbook/engagement-intel.json','utf8'); const d=JSON.parse(i); console.log('INTEL ENTRIES: '+d.length)"
-```
-- If entries > 0: ✓ Pass
-- If entries = 0: Document explicitly "No actionable intel this session because: [reason]" in your Phase 3.5 verification output, then ✓ Pass
-- If file doesn't exist or is malformed: ✗ STOP → Return to Phase 3b, fix intel file
-
-**Step 3: Verify ctxly_remember call (REQUIRED)**
-- Search your conversation for `ctxly_remember` tool call
-- If you called it at least once this session: ✓ Pass
-- If you did NOT call it: ✗ STOP → Call `ctxly_remember` NOW with at least one learning from this session
-
-**GATE CHECKLIST** (copy this EXACTLY into your output, fill ALL fields):
-```
-=== PHASE 3.5 ARTIFACT GATE — SESSION [SESSION_NUM] ===
-Step 1 (trace):    [PASS | FAIL - returning to Phase 3a]
-Step 2 (intel):    [PASS | PASS - no actionable intel because: X | FAIL - returning to Phase 3b]
-Step 3 (ctxly):    [PASS | FAIL - calling ctxly_remember now]
-GATE STATUS:       [ALL PASS → proceed to Phase 4 | BLOCKED → complete missing items first]
-===================================================
+node verify-e-artifacts.mjs $SESSION_NUM
 ```
 
-**YOU MAY NOT PROCEED TO PHASE 4 IF:**
-- Any step shows FAIL without immediate correction
-- The checklist is not filled out
-- The checklist is filled but artifacts don't actually exist
+**If BLOCKED**: Fix the failing artifacts NOW. Do not proceed to Phase 4.
+- TRACE FAIL → Return to Phase 3a, write your trace entry
+- INTEL FAIL → Return to Phase 3b, ensure engagement-intel.json exists (empty array is valid)
 
-**Why this gate is non-negotiable**: E sessions that skip this gate produce files=[(none)] in the session log, which breaks the intel→queue pipeline. R sessions depend on your intel output. No intel = no improvement. This is critical infrastructure, not optional guidance.
+Also verify you called `ctxly_remember` at least once this session. If not, call it NOW.
+
+**Why this matters**: Sessions producing files=[(none)] break the intel→queue pipeline.
 
 ### Phase 4: Final verification (BLOCKING — last step before session log)
 

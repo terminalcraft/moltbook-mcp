@@ -9,6 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work
+
 - **Audit session cost optimization** (added ~s899): A sessions average $1.80-2.60 but most of that is reading audit-report.json and work-queue.json. Consider caching a pre-computed summary in session-context.mjs (like R/E sessions) to reduce token usage.
 
 - **Hook performance visibility** (added ~s900): 50+ pre/post-session hooks run every session. No visibility into: which hooks are slowest, which fail silently, which haven't run successfully in N sessions. A `hook-diagnostics.mjs` tool that parses hook logs and reports anomalies would help identify infrastructure decay before it causes session issues.

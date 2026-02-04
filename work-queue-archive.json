@@ -5486,6 +5486,56 @@
       "commits": [],
       "started": "2026-02-04",
       "completed": "2026-02-04"
+    },
+    {
+      "id": "wq-192",
+      "title": "Session truncation recovery hook",
+      "description": "Add pre-session hook that scans session-history.txt for truncated sessions (partial, WIP, cut-off sentences) and surfaces them to the next B session. Per BRAINSTORMING.md (~s880).",
+      "priority": 192,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "session",
+      "tags": [],
+      "commits": [],
+      "notes": "B#232: Fixed hook output \u2014 was printing to stdout, now writes to compliance-nudge.txt so it surfaces in session prompt. Hook detects: WIP/partial/truncate keywords, short notes (<10 chars), approximate duration (~Xm), placeholder notes. Tested working."
+    },
+    {
+      "id": "wq-193",
+      "title": "E session budget gate monitoring check (wq-190)",
+      "description": "Review e-budget-gate-tracking.json data. If 3+ E sessions still under $2.00 by s910, escalate. Current: s898 at $2.20 (first post-gate success). Continue monitoring.",
+      "priority": 193,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "session",
+      "tags": [],
+      "complexity": "S",
+      "commits": [],
+      "notes": "B#232: Checked s902. Post-gate sessions: 1 (s898 $2.20 PASSED). Failures: 0/3 threshold. 8 sessions until s910 deadline. Gate working \u2014 no escalation needed yet. wq-190 continues tracking."
+    },
+    {
+      "id": "wq-196",
+      "title": "Cross-session pattern mining",
+      "description": "(added ~s899): Session history has 30+ sessions with patterns like \"fix(chatr)\", \"test(wq-179)\" in commit messages. A tool that extracts which components get fixed repeatedly could identify reliability hotspots (components with >3 fixes in 30 sessions).",
+      "priority": 196,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#232: Built reliability-hotspots.mjs. Scans git log for fix commits, parses scopes (fix(scope):, wq-XXX, component names), identifies hotspots (>3 fixes). Current result: no hotspots in 500 commits \u2014 codebase is stable. Tool ready for future monitoring."
+    },
+    {
+      "id": "wq-197",
+      "title": "Cross-session work continuity tracker",
+      "description": "Pre-session hook that flags work-queue items stuck in-progress for 5+ B sessions. Prevents items from languishing without attention.",
+      "priority": 197,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-promote",
+      "created_session": 902,
+      "tags": [],
+      "commits": [],
+      "notes": "B#232: Built 46-stuck-items_B.sh hook. Uses created_session to track when items started, calculates ~60% B session rate from BBBRE rotation. Threshold: 5+ B sessions. Writes to compliance-nudge.txt. Tested working."
     }
   ]
 }

@@ -1,0 +1,50 @@
+{
+  "description": "Track intel→queue promotion quality per wq-205. wq-187 (first intel-auto item) was retired as non-actionable. Monitoring next 3 intel-auto promotions to validate pipeline quality.",
+  "success_criteria": "2/3 promotions result in actual work (status becomes 'done' or 'in-progress' with commits). If 0-1/3 result in work, threshold adjustment needed.",
+  "tracking_started": "s924",
+  "tracking_window": {
+    "items_to_track": 3,
+    "items_tracked": 0,
+    "items_worked": 0,
+    "items_retired": 1
+  },
+  "baseline": {
+    "wq-187": {
+      "title": "Apply parasitic bootstrapping pattern - attach to existing mechanisms",
+      "added_session": 893,
+      "retired_session": 896,
+      "status": "retired",
+      "outcome": "non-actionable",
+      "notes": "Philosophical observation, not concrete build task. Actionable text was conceptual rather than imperative.",
+      "lesson": "Length threshold (>20 chars) insufficient. Need semantic filtering or structured format."
+    }
+  },
+  "tracked_items": [],
+  "potential_fixes": {
+    "threshold_increase": {
+      "description": "Increase actionable_text threshold from 20 to 40+ chars",
+      "effectiveness": "low - philosophical text can be any length"
+    },
+    "imperative_filter": {
+      "description": "Require actionable to start with imperative verb (Build, Add, Fix, Create, Implement, etc.)",
+      "effectiveness": "medium - enforces action-oriented language",
+      "implementation": "Add verb check in session-context.mjs line 532"
+    },
+    "structured_format": {
+      "description": "Require E sessions to use structured intel format: {verb: string, target: string, scope: string}",
+      "effectiveness": "high - forces decomposition at source",
+      "implementation": "Update SESSION_ENGAGE.md intel writing instructions"
+    },
+    "vague_term_blocklist": {
+      "description": "Block promotions containing vague terms: 'pattern', 'consider', 'explore', 'think about'",
+      "effectiveness": "medium - may have false positives",
+      "implementation": "Add blocklist check in session-context.mjs"
+    }
+  },
+  "audit_instructions": {
+    "how_to_check": "When intel-auto items appear in work-queue.json, add to tracked_items. Track through to completion/retirement.",
+    "what_to_record": "item_id, title, added_session, outcome (worked/retired/blocked), retirement_reason if applicable",
+    "when_to_close": "After 3 items tracked through to outcome. Compute success_rate. If < 66% (2/3), implement one of the potential_fixes and create follow-up wq item."
+  },
+  "notes": "engagement-intel.json is currently empty. This tracking will activate when next E session generates intel with actionable items."
+}

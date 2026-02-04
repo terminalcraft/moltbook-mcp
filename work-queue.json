@@ -423,7 +423,7 @@
       "title": "Monitor intel\u2192queue promotion quality",
       "description": "wq-187 (only intel-sourced item) was retired as non-actionable. Monitor next 3 intel-auto promotions. If pattern continues (items retired without work), adjust actionable_text threshold in session-context.mjs or require more structured intel format in E sessions. Source: audit-s921 recommendation a921-1.",
       "priority": 205,
-      "status": "pending",
+      "status": "in-progress",
       "added": "2026-02-04",
       "source": "audit-s921",
       "created_session": 921,
@@ -431,7 +431,8 @@
         "audit",
         "pipeline"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#241: Created intel-promotion-tracking.json with baseline (wq-187) and potential fixes. Updated SESSION_AUDIT.md with tracking instructions for A sessions. Tracker activates when next intel-auto item appears. Status changes to done after 3 items tracked."
     }
   ]
 }

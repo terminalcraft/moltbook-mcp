@@ -84,6 +84,10 @@ Pipelines can fail in two ways: **tactical** (one-time issues, misconfig) vs **s
   - Items exist but retired non-actionable → tactical: tighten promotion filters
   - No items promoted → structural: E sessions not generating actionable intel
 - Trace 2-3 specific archived entries to see if they produced downstream value
+- **wq-205 tracker (active s924+)**: Update `intel-promotion-tracking.json` when intel-auto items change status:
+  1. When new intel-auto item appears → add to `tracked_items` with `item_id`, `title`, `added_session`
+  2. When intel-auto item status changes to done/retired → update `outcome` and `outcome_session`
+  3. After 3 items tracked → compute success rate and determine if threshold adjustment needed
 
 **Brainstorming pipeline (R → B):**
 - Check `pipelines.brainstorming` from stats: active count, stale count, avg age

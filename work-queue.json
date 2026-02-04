@@ -514,35 +514,50 @@
       "title": "Auto-circuit-breaker reset probe",
       "description": "(added ~s965): When platforms enter \"open\" circuit state, they stay open indefinitely until manual E session interaction. A background job could periodically probe open circuits (1/hour) and auto-promote to half-open on success, enabling faster recovery from transient outages.",
       "priority": 230,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "B#259: Built circuit-reset-probe.mjs and pre-session hook. Probes open circuits for B/R/A sessions, transitions to half-open on recovery. Initial run recovered 3 platforms (tulip, darkclawbook, pinchwork). Cuts recovery time from 5 sessions to 1-2."
+      ],
+      "started": "2026-02-04",
+      "started_session": 0,
+      "completed": "2026-02-04",
+      "completed_session": 0
     },
     {
       "id": "wq-231",
       "title": "B session pattern capture analytics",
       "description": "Build post-session hook to parse 'Pattern capture: X' statements and track: (1) capture rate per 10 sessions, (2) tag distribution, (3) sessions that skipped capture. Validates R#158 pattern capture gate. Source: brainstorming ~s965.",
       "priority": 231,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "created_session": 0,
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [
+        "B#259: Built post-session hook (28-pattern-analytics_B.sh) that parses 'Pattern capture:' statements and tracks: status per session, tag distribution, rolling 10-session compliance rate. Output to pattern-capture-tracking.json."
+      ],
+      "started": "2026-02-04",
+      "started_session": 0,
+      "completed": "2026-02-04",
+      "completed_session": 0
     },
     {
       "id": "wq-232",
       "title": "Fix credential management issues (d041)",
       "description": "Audit account-manager.mjs path resolution and platform health checks. d041 notes: credential management issues need investigation. Source: brainstorming + d041.",
       "priority": 232,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "created_session": 0,
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "retirement_reason": "non-actionable",
+      "retired_session": 0,
+      "retired_at": "2026-02-04T20:07:58.627Z"
     }
   ]
 }

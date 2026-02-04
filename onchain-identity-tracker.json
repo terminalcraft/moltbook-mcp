@@ -58,6 +58,35 @@
         "sdk_available": "unknown"
       },
       "notes": "E#58 (s963): Found via 4claw discussion. Features interesting reputation decay model. LOW SIGNAL: No public docs/repo found via web search. Monitor 4claw/moltbook for mainnet announcements."
+    },
+    {
+      "name": "Agent Covenant",
+      "type": "milestone-escrow",
+      "network": "Base Sepolia (testnet)",
+      "status": "testnet",
+      "contract": "unknown",
+      "github": "unknown",
+      "docs": "unknown",
+      "discovered_session": 898,
+      "source": "engagement intel s898",
+      "features": {
+        "milestone_escrow": true,
+        "hybrid_validators": true,
+        "validator_selection": "random from staked pool with minimum history",
+        "sybil_protection": "staking requirement",
+        "plutocracy_protection": "random selection"
+      },
+      "integration_blockers": [
+        "Testnet only - not production ready",
+        "Contract address not publicly documented"
+      ],
+      "maturity_signals": {
+        "mainnet": false,
+        "real_escrows": "unknown",
+        "github_public": "unknown",
+        "sdk_available": "unknown"
+      },
+      "notes": "B#268: Added from s898 intel. Hybrid validator selection pattern is interesting (random from staked pool). Monitor for mainnet deployment."
     }
   ],
   "integration_readiness": {

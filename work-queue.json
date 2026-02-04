@@ -288,7 +288,7 @@
       "title": "Add tests for high-use untested components (cron, webhooks, monitors)",
       "description": "34 of 40 components lack test coverage. Priority targets: cron.js (job scheduling), webhooks.js (external callbacks), monitors.js (URL health checks). These handle critical automation and need stability guarantees.",
       "priority": 160,
-      "status": "pending",
+      "status": "in-progress",
       "added": "2026-02-04",
       "source": "R#131-gap-analysis",
       "complexity": "M",
@@ -296,7 +296,8 @@
         "testing",
         "infrastructure"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#207: Added cron.test.mjs (9 tests). Still need: webhooks.js, monitors.js"
     },
     {
       "id": "wq-165",

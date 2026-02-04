@@ -3,6 +3,7 @@ import { moltFetch, logAction, getSessionActions, getApiCallCount, getApiErrorCo
 import { loadState, saveState, markSeen, markCommented, markMyComment, markBrowsed } from "../providers/state.js";
 import { sanitize, loadBlocklist } from "../transforms/security.js";
 import { analyzeReplayLog, getSessionReplayCalls } from "../providers/replay-log.js";
+import { checkDuplicate, recordEngagement, getCacheStats } from "../providers/cross-platform-dedup.js";
 
 // Module-level context storage for lifecycle hooks
 let _ctx = null;
@@ -555,6 +556,46 @@ export function register(server, ctx) {
     saveState(s);
     const stats = Object.entries(added).map(([k, v]) => `${k}: +${v}`).join(", ");
     return { content: [{ type: "text", text: `Import complete. Added: ${stats}` }] };
+  });
+
+  // Cross-platform thread deduplication (wq-145)
+  // Prevents E sessions from engaging with the same topic on multiple platforms
+  server.tool("moltbook_dedup_check", "Check if a thread topic has already been engaged on another platform (prevents duplicate discussions)", {
+    platform: z.string().describe("Platform name (e.g., '4claw', 'chatr', 'moltbook')"),
+    title: z.string().describe("Thread/post title"),
+    content: z.string().optional().describe("Thread/post content (first 500 chars sufficient)"),
+    thread_id: z.string().describe("Platform-specific thread/post ID"),
+  }, async ({ platform, title, content, thread_id }) => {
+    const result = checkDuplicate(platform, title, content || '', thread_id);
+    if (result.isDuplicate) {
+      const match = result.match;
+      return { content: [{ type: "text", text: `⚠️ DUPLICATE DETECTED (${Math.round(result.similarity * 100)}% match)\nAlready engaged on ${match.platform}: "${match.title}" (${result.reason})\nSkip engagement to avoid redundant discussion.` }] };
+    }
+    return { content: [{ type: "text", text: `✓ No duplicate found. Safe to engage.` }] };
+  });
+
+  server.tool("moltbook_dedup_record", "Record that you engaged with a thread (adds to cross-platform dedup cache)", {
+    platform: z.string().describe("Platform name"),
+    title: z.string().describe("Thread/post title"),
+    content: z.string().optional().describe("Thread/post content"),
+    thread_id: z.string().describe("Platform-specific thread/post ID"),
+    action: z.enum(["reply", "comment", "post", "engaged"]).default("engaged").describe("What action was taken"),
+  }, async ({ platform, title, content, thread_id, action }) => {
+    recordEngagement(platform, title, content || '', thread_id, action);
+    return { content: [{ type: "text", text: `Recorded: ${action} on ${platform} "${title.substring(0, 50)}..."` }] };
+  });
+
+  server.tool("moltbook_dedup_stats", "Get cross-platform dedup cache statistics", {}, async () => {
+    const stats = getCacheStats();
+    const lines = [
+      `Cross-platform dedup cache:`,
+      `- Total entries: ${stats.totalEntries}`,
+      `- Fresh entries (48h): ${stats.freshEntries}`,
+      `- By platform: ${Object.entries(stats.byPlatform).map(([k, v]) => `${k}:${v}`).join(', ') || 'none'}`,
+    ];
+    if (stats.oldestEntry) lines.push(`- Oldest: ${stats.oldestEntry}`);
+    if (stats.newestEntry) lines.push(`- Newest: ${stats.newestEntry}`);
+    return { content: [{ type: "text", text: lines.join('\n') }] };
   });
 
   // Engagement replay log — analyze external API call history (wq-014)

@@ -32,6 +32,8 @@ You have dedicated engagement tools. Use them instead of manual curl/API testing
 | Service Evaluator | `node service-evaluator.mjs <url>` | Deep-dive evaluation of a service |
 | Service Evaluator | `node service-evaluator.mjs <url> --register` | Also attempt registration |
 | Engagement Log | `log_engagement` MCP tool | **Call after every post, comment, reply, or upvote.** |
+| Dedup Check | `moltbook_dedup_check` MCP tool | Check if topic was engaged on another platform (wq-145) |
+| Dedup Record | `moltbook_dedup_record` MCP tool | Record engagement for cross-platform dedup |
 | Email | `email_list` MCP tool | Check inbox for new emails |
 | Email | `email_read <id>` MCP tool | Read full email content |
 | Email | `email_reply <id> <text>` MCP tool | Reply to an email |
@@ -70,7 +72,9 @@ If a credential file exists for a platform, you are ALREADY registered. Do NOT c
 This is the core of the session and should consume most of your budget. Engage substantively with **all platforms returned by platform-picker.mjs** in Phase 0. "Substantive" means:
 
 - **Read multiple threads/posts** — understand what's being discussed, not just headlines
+- **Check for duplicates** — before replying, call `moltbook_dedup_check` with the thread title/content to see if you already engaged on the same topic on another platform (wq-145). Skip engagement if duplicate detected.
 - **Reply to something specific** — reference the content you read, add value
+- **Record engagements** — after replying/posting, call `moltbook_dedup_record` so future sessions know about it
 - **Or post original content** — share a build update, ask a real question, offer a tool
 - **Or evaluate a new service** — run `node service-evaluator.mjs <url>` on a service from services.json
 

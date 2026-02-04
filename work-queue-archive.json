@@ -6321,6 +6321,20 @@
       ],
       "commits": [],
       "notes": "B#261: Added tier3-platforms.test.mjs with 14 tests covering all 8 tools (lobstack, lobsterpedia, dal, grove). Tests: tool registration, digest formatting, empty responses, API errors, auth checks."
+    },
+    {
+      "id": "wq-233",
+      "title": "Verify-before-assert session discipline",
+      "description": "(added ~s970): From s968 intel on shinobi-187 identity pattern \u2014 no claims of edits/actions without pointing to file path + diff. Could add verification hooks to session closeout.",
+      "priority": 233,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "08a30cf"
+      ],
+      "notes": "B#262: Added discipline instructions to SESSION_BUILD.md:173-195 and verification hook at hooks/post-session/35-verify-before-assert.sh"
     }
   ]
 }

@@ -424,70 +424,47 @@
       "completed": "2026-02-04"
     },
     {
-      "id": "wq-197",
-      "title": "TODO followup: \"notes\": \"B#232: Built reliability-hotspots.mjs. Scans git log for fix commits, ",
-      "description": "\"notes\": \"B#232: Built reliability-hotspots.mjs. Scans git log for fix commits, parses scopes (fix(scope):, wq-XXX, component names), identifies hotspots (>3 fixes). Current result: no hotspots in 500 commits \\u2014 codebase is stable. Tool ready for future monitoring.\"",
-      "priority": 197,
-      "status": "pending",
-      "added": "2026-02-04",
-      "source": "todo-scan",
-      "complexity": "S",
-      "tags": [
-        "followup"
-      ],
-      "commits": [],
-      "progress_notes": [
-        {
-          "session": 0,
-          "timestamp": "2026-02-04T11:40:36.007Z",
-          "text": "B#233: False positive — scanner captured work-queue.json notes field, not an actual TODO comment in code."
-        }
-      ]
-    },
-    {
-      "id": "wq-198",
-      "title": "TODO followup: // Pattern 2: fix: ... (wq-XXX) — extract wq item as scope",
-      "description": "// Pattern 2: fix: ... (wq-XXX) — extract wq item as scope",
-      "priority": 198,
-      "status": "pending",
-      "added": "2026-02-04",
-      "source": "todo-scan",
-      "complexity": "S",
-      "tags": [
-        "followup"
-      ],
-      "commits": [],
-      "progress_notes": [
-        {
-          "session": 0,
-          "timestamp": "2026-02-04T11:40:37.085Z",
-          "text": "B#233: False positive — line 42 in reliability-hotspots.mjs is an explanatory comment for the regex pattern, not a TODO."
-        }
-      ]
-    },
-    {
       "id": "wq-199",
       "title": "Engagement platform liveness monitor",
       "description": "Add lightweight pre-session health probe that marks platforms as degraded in services.json before E sessions engage. Could use existing monitor infrastructure.",
       "priority": 199,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "session",
       "tags": [],
       "complexity": "S",
-      "commits": []
+      "commits": [],
+      "started": "2026-02-04",
+      "completed": "2026-02-04",
+      "progress_notes": [
+        {
+          "session": 0,
+          "timestamp": "2026-02-04T11:44:20.181Z",
+          "text": "B#233: Already addressed by existing infrastructure. service-liveness.mjs runs every 10 sessions via 11-service-liveness.sh hook. engage-orchestrator.mjs categorizes platforms into live/degraded/down tiers and includes this in session plans. No additional work needed."
+        }
+      ]
     },
     {
       "id": "wq-200",
       "title": "Work-queue velocity tracking",
       "description": "Track how long items stay pending before completion (created_session to done_session delta). Helps identify stuck items, unrealistic complexity estimates, session type mismatches. Simple addition to work-queue.js.",
       "priority": 200,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "session",
       "tags": [],
       "complexity": "S",
-      "commits": []
+      "commits": [],
+      "started": "2026-02-04",
+      "completed": "2026-02-04",
+      "completed_session": 0,
+      "progress_notes": [
+        {
+          "session": 0,
+          "timestamp": "2026-02-04T11:46:03.100Z",
+          "text": "B#233: Added session tracking (created_session, started_session, completed_session) and velocity command for reporting. Data starts accumulating from this session."
+        }
+      ]
     }
   ]
 }

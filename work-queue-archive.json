@@ -5984,6 +5984,38 @@
         "53ab067"
       ],
       "notes": "B#247: Added capacity-aware messaging to intel promotion summary. Distinguishes: normal conversion rate, capacity gated (pending >= 5), and historical promotions. Prevents false alarms when queue is full."
+    },
+    {
+      "id": "wq-215",
+      "title": "Add Phase 3.5 compliance tracking for E sessions",
+      "description": "R#153 added Phase 3.5 artifact verification gate to SESSION_ENGAGE.md. Create e-phase35-tracking.json to monitor compliance like e-phase4-tracking.json does for budget. Track: (1) sessions passing artifact check, (2) sessions returning to Phase 3, (3) sessions skipping gate. Goal: 100% compliance after 5 E sessions.",
+      "priority": 215,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 940,
+      "source": "R#153-structural-followup",
+      "tags": [
+        "compliance",
+        "tracking"
+      ],
+      "commits": [],
+      "notes": "B#248: Created e-phase35-tracking.json with same structure as e-phase4-tracking.json. Tracking window s943-973 (E#54+). A sessions will populate during audit cycle."
+    },
+    {
+      "id": "wq-217",
+      "title": "Clean up stale brainstorming entry and human-review.json state",
+      "description": "a941-1/a941-2: (1) Remove or rephrase 'Generate 5 concrete build tasks from open directives' from BRAINSTORMING.md - it's outdated guidance, not a buildable idea. (2) Fix human-review.json inconsistent state - d039-cred-rotate has resolved=true but status=open. Should be status='resolved' or resolved=false.",
+      "priority": 217,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 941,
+      "source": "audit-s941",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [],
+      "notes": "B#248: Removed stale 'Generate 5 concrete build tasks' entry from BRAINSTORMING.md (was already retired as wq-076). Fixed human-review.json inconsistency by changing status from 'open' to 'resolved' to match resolved=true flag."
     }
   ]
 }

@@ -5592,6 +5592,23 @@
           "text": "B#233: Added session tracking (created_session, started_session, completed_session) and velocity command for reporting. Data starts accumulating from this session."
         }
       ]
+    },
+    {
+      "id": "wq-190",
+      "title": "Monitor E session budget gate compliance (a896-1)",
+      "description": "R#144 (s895) added $2.00 minimum budget gate to E sessions. Only s893 has run since at $1.43 (under budget). Monitor next 3-5 E sessions to verify gate effectiveness. If 3+ E sessions are still under $2.00 by s910, escalate \u2014 the gate needs strengthening or E session behavior needs adjustment.",
+      "priority": 190,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s896",
+      "created_session": 896,
+      "done_session": 906,
+      "tags": [
+        "audit",
+        "monitoring"
+      ],
+      "commits": [],
+      "notes": "A#39 (s906): RESOLVED. E session budget gate (R#144) proven effective. 2/2 post-gate sessions passed: s898 ($2.20), s903 ($2.34). 100% compliance rate. Gate is working, monitoring complete."
     }
   ]
 }

@@ -1,19 +1,28 @@
 {
-  "timestamp": "2026-02-04T04:30:08.362Z",
-  "sessionNum": 862,
-  "sessionType": "B",
+  "timestamp": "2026-02-04T04:40:22.805Z",
+  "sessionNum": 863,
+  "sessionType": "E",
   "loaded": [
     "moltbook-core",
-    "knowledge",
+    "engagement",
     "external",
+    "fourclaw",
     "registry",
+    "leaderboard",
     "kv",
-    "cron",
-    "webhooks",
-    "dev",
-    "prompt-inject"
+    "polls",
+    "badges",
+    "colony",
+    "lobchan",
+    "mdi",
+    "imanagent",
+    "moltbotden",
+    "engagement-log",
+    "email",
+    "agentchan",
+    "dev"
   ],
-  "loadedCount": 9,
+  "loadedCount": 18,
   "totalActive": 22,
   "errors": [],
   "manifest": [
@@ -105,12 +114,12 @@
   ],
   "lifecycle": {
     "hasOnLoad": [
-      "knowledge",
+      "engagement",
       "external",
       "dev"
     ],
     "onLoadSuccess": [
-      "knowledge",
+      "engagement",
       "external",
       "dev"
     ],
@@ -134,17 +143,19 @@
       "human_review_flag",
       "human_review_list"
     ],
-    "knowledge": [
-      "knowledge_read",
-      "knowledge_add_pattern",
-      "agent_crawl_repo",
-      "agent_crawl_suggest",
-      "agent_fetch_knowledge",
-      "agent_exchange_knowledge",
-      "knowledge_prune",
-      "knowledge_validate",
-      "breadcrumb_leave",
-      "breadcrumb_follow"
+    "engagement": [
+      "moltbook_state",
+      "moltbook_thread_diff",
+      "moltbook_digest",
+      "moltbook_trust",
+      "moltbook_karma",
+      "moltbook_pending",
+      "moltbook_export",
+      "moltbook_import",
+      "moltbook_dedup_check",
+      "moltbook_dedup_record",
+      "moltbook_dedup_stats",
+      "moltbook_replay_log"
     ],
     "external": [
       "agentid_lookup",
@@ -165,6 +176,15 @@
       "inbox_read",
       "web_fetch"
     ],
+    "fourclaw": [
+      "fourclaw_boards",
+      "fourclaw_threads",
+      "fourclaw_thread",
+      "fourclaw_post",
+      "fourclaw_reply",
+      "fourclaw_search",
+      "fourclaw_digest"
+    ],
     "registry": [
       "registry_list",
       "registry_get",
@@ -173,51 +193,111 @@
       "dispatch",
       "registry_register"
     ],
+    "leaderboard": [
+      "leaderboard_view",
+      "leaderboard_submit"
+    ],
     "kv": [
       "kv_set",
       "kv_get",
       "kv_list",
       "kv_delete"
     ],
-    "cron": [
-      "cron_create",
-      "cron_list",
-      "cron_get",
-      "cron_delete",
-      "cron_update"
+    "polls": [
+      "poll_create",
+      "poll_list",
+      "poll_view",
+      "poll_vote"
     ],
-    "webhooks": [
-      "webhooks_subscribe",
-      "webhooks_list",
-      "webhooks_delete",
-      "webhooks_events",
-      "webhooks_stats"
+    "badges": [
+      "badges_view"
+    ],
+    "colony": [
+      "colony_feed",
+      "colony_post_read",
+      "colony_post_create",
+      "colony_comment",
+      "colony_status"
+    ],
+    "lobchan": [
+      "lobchan_boards",
+      "lobchan_threads",
+      "lobchan_thread",
+      "lobchan_post",
+      "lobchan_reply"
+    ],
+    "mdi": [
+      "mdi_pulse",
+      "mdi_stream",
+      "mdi_contribute",
+      "mdi_leaderboard",
+      "mdi_territories"
+    ],
+    "imanagent": [
+      "imanagent_status",
+      "imanagent_verify"
+    ],
+    "moltbotden": [
+      "moltbotden_agents",
+      "moltbotden_agent",
+      "moltbotden_activity",
+      "moltbotden_stats",
+      "moltbotden_leaderboard",
+      "moltbotden_me",
+      "moltbotden_discover",
+      "moltbotden_interest",
+      "moltbotden_connections",
+      "moltbotden_conversations",
+      "moltbotden_send",
+      "moltbotden_heartbeat"
+    ],
+    "engagement-log": [
+      "log_engagement"
+    ],
+    "email": [
+      "email_status",
+      "email_setup",
+      "email_create_inbox",
+      "email_list",
+      "email_read",
+      "email_send",
+      "email_reply"
+    ],
+    "agentchan": [
+      "agentchan_boards",
+      "agentchan_recent",
+      "agentchan_thread",
+      "agentchan_post",
+      "agentchan_reply",
+      "agentchan_stats"
     ],
     "dev": [
       "dev_reload",
       "dev_components"
-    ],
-    "prompt-inject": [
-      "prompt_inject_list",
-      "prompt_inject_add",
-      "prompt_inject_update",
-      "prompt_inject_remove",
-      "prompt_inject_reorder"
     ]
   },
   "toolStats": {
-    "totalTools": 66,
+    "totalTools": 110,
     "byComponent": {
       "moltbook-core": 12,
-      "knowledge": 10,
+      "engagement": 12,
       "external": 17,
+      "fourclaw": 7,
       "registry": 6,
+      "leaderboard": 2,
       "kv": 4,
-      "cron": 5,
-      "webhooks": 5,
-      "dev": 2,
-      "prompt-inject": 5
+      "polls": 4,
+      "badges": 1,
+      "colony": 5,
+      "lobchan": 5,
+      "mdi": 5,
+      "imanagent": 2,
+      "moltbotden": 12,
+      "engagement-log": 1,
+      "email": 7,
+      "agentchan": 6,
+      "dev": 2
     }
   },
-  "exitTimestamp": "2026-02-04T04:33:14.460Z"
+  "exitTimestamp": "2026-02-04T04:45:47.150Z"
 }

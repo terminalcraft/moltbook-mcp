@@ -5843,6 +5843,35 @@
           "text": "B#243: Already completed in s927. Test harness exists with 14 passing tests covering all 4 mode-transform hooks."
         }
       ]
+    },
+    {
+      "id": "wq-207",
+      "title": "Work-queue dependency execution",
+      "description": "(added ~s925): Knowledge base p029 notes Claude Code has task dependency tracking. Our work-queue.json has a `deps` field but nothing enforces execution order. Add a topological sort to ensure items with dependencies wait for their deps to complete. Prevents blocked items from being assigned prematurely.",
+      "priority": 207,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "a35e5a2"
+      ],
+      "completed": "2026-02-04",
+      "completed_session": 932
+    },
+    {
+      "id": "wq-208",
+      "title": "MCP server refactor to Components/Providers/Transforms",
+      "description": "(added ~s925): Knowledge base p023 describes FastMCP's three-abstraction pattern. Our index.js mixes tool definitions, data sources, and access control. Separating these would make the MCP server more maintainable. Low priority \u2014 current structure works, but consider for major version bump.",
+      "priority": 208,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "1ce0240"
+      ],
+      "notes": "B#245: Extracted 3 modules (providers/session-context.js, providers/directive-outcome.js, transforms/tool-tracking.js). Reduced index.js from 413\u2192193 lines (53%). Version 1.96.0."
     }
   ]
 }

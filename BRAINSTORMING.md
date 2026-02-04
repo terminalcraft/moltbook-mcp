@@ -10,13 +10,13 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Session cost predictor** (added ~s929): Track input/output token counts per session type and build a simple model to predict likely session cost at startup. Could inform budget-conscious decisions early in session.
+- ~~**Session cost predictor** (added ~s929) — auto-retired s999~~: Track input/output token counts per session type and build a simple model to predict likely session cost at startup. Could inform budget-conscious decisions early in session.
 
-- **Hook dependency graph** (added ~s929): With 60+ hooks across pre/post/mode-transform, dependencies between hooks are implicit in naming. A tool that generates a dependency graph from hook names and content would help prevent ordering bugs.
+- ~~**Hook dependency graph** (added ~s929) — auto-retired s999~~: With 60+ hooks across pre/post/mode-transform, dependencies between hooks are implicit in naming. A tool that generates a dependency graph from hook names and content would help prevent ordering bugs.
 
-- **Engagement platform health aggregator** (added ~s929): engagement-liveness-probe.mjs checks individual platforms. An aggregator that produces a daily health report (uptime %, error patterns, response times) would help identify chronically failing platforms to remove from rotation.
+- ~~**Engagement platform health aggregator** (added ~s929) — auto-retired s999~~: engagement-liveness-probe.mjs checks individual platforms. An aggregator that produces a daily health report (uptime %, error patterns, response times) would help identify chronically failing platforms to remove from rotation.
 
-- **Intel→queue metric accuracy** (added ~s930): Current conversion rate metric doesn't account for capacity gating. When pending_count >= 5, promotions are blocked by design, but the metric shows "0% conversion" which triggers unnecessary diagnostics. The wq-191 prompt block stat should distinguish between "0% - no actionable intel" vs "0% - capacity gated" vs "X% - actual conversion".
+- ~~**Intel→queue metric accuracy** (added ~s930) — auto-retired s999~~: Current conversion rate metric doesn't account for capacity gating. When pending_count >= 5, promotions are blocked by design, but the metric shows "0% conversion" which triggers unnecessary diagnostics. The wq-191 prompt block stat should distinguish between "0% - no actionable intel" vs "0% - capacity gated" vs "X% - actual conversion".
 
 ---
 

@@ -375,9 +375,11 @@
       "from": "human",
       "session": null,
       "content": "Evaluate whether A sessions would benefit from stigmergic traces like E sessions have. The pattern: A session writes audit-trace.json with explicit \"verify next audit\" items, next A session reads and acts on them. This might formalize the \"check if previous recommendation landed\" work that A sessions already do informally. Reject this idea if existing mechanisms (audit-report.json, work-queue) already cover it adequately or if the added complexity isn't worth it.",
-      "status": "active",
+      "status": "completed",
       "acked_session": 875,
-      "queue_item": "wq-185"
+      "completed_session": 877,
+      "queue_item": "wq-185",
+      "notes": "B#222: REJECTED. Existing mechanisms cover this: (1) audit-report.json recommended_actions serves as the follow-ups list, (2) work-queue.json with audit tags provides task completion tracking, (3) delta_from_s<prev> closes feedback loop. E sessions use traces because engagement is observational; A sessions have full recommendation→queue→completion lifecycle."
     },
     {
       "id": "d038",

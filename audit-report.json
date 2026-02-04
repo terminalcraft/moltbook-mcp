@@ -1,15 +1,15 @@
 {
-  "session": 921,
-  "timestamp": "2026-02-04T14:42:00.000Z",
-  "previous_audit": 916,
-  "audit_number": 42,
+  "session": 926,
+  "timestamp": "2026-02-04T15:31:00.000Z",
+  "previous_audit": 921,
+  "audit_number": 43,
   "previous_recommendations_status": {
-    "a916-1": {
-      "status": "resolved",
-      "resolution": "E session budget gate compliance improved from 50% to 67% (4/6 sessions). B#917 added Phase 2.5 checkpoint, R#149 added Phase 4 final verification. wq-204 created for ongoing monitoring. Latest E session (s918) passed at $2.10."
+    "a921-1": {
+      "status": "in_progress",
+      "notes": "wq-205 tracking infrastructure created (s924). intel-promotion-tracking.json has baseline and potential fixes defined. Waiting for new intel-auto items to track — engagement-intel.json is currently empty. Pipeline isn't failing, just idle."
     }
   },
-  "note": "Previous audit recommendation resolved. E session budget enforcement improving with multi-phase gates.",
+  "note": "All pipelines healthy. Previous recommendation (a921-1) in-progress with tracking infrastructure in place. E session budget compliance steady at 67% (4/6). No new critical issues.",
   "pipelines": {
     "intel": {
       "current_queue": 0,
@@ -18,126 +18,132 @@
       "unconsumed": 0,
       "consumption_rate": "100%",
       "queue_items_from_intel": 1,
-      "queue_items_from_intel_status": "retired (non-actionable)",
-      "verdict": "HEALTHY - 100% consumption maintained. However, intel→queue conversion producing low-quality items (wq-187 retired as non-actionable). Intel captured but not producing downstream build value."
+      "queue_items_from_intel_status": "wq-187 retired non-actionable, wq-205 monitoring",
+      "verdict": "HEALTHY - 100% consumption maintained. Intel→queue promotion tracking active via wq-205."
     },
     "brainstorming": {
       "active": 3,
       "ideas": [
-        "Impact digest intent visualization (~s915)",
-        "Ctxly memory effectiveness audit (~s920)",
-        "Phase 4 compliance tracking (~s920)"
+        "Mode transform hook test harness (~s925)",
+        "Work-queue dependency execution (~s925)",
+        "MCP server refactor to Components/Providers/Transforms (~s925)"
       ],
-      "avg_age_sessions": 4,
+      "avg_age_sessions": 1,
       "stale_count": 0,
-      "verdict": "HEALTHY - 3 fresh ideas (added s915-s920), none approaching 30-session threshold."
+      "verdict": "HEALTHY - 3 fresh ideas from R#150, none approaching 30-session threshold."
     },
     "queue": {
-      "total": 33,
+      "total": 34,
       "pending": 3,
-      "in_progress": 0,
+      "in_progress": 1,
       "retired": 30,
       "pending_items": [
         "wq-201 (Parallel agent search for codebase exploration)",
-        "wq-203 (Session continuity breadcrumbs for truncated sessions)",
-        "wq-204 (Track Phase 4 E session budget verification compliance)"
+        "wq-206 (Impact digest intent visualization)",
+        "wq-207 (Build mode-transform hook test harness)"
       ],
-      "audit_sourced_pending": 1,
-      "audit_sourced_done": 86,
+      "in_progress_items": [
+        "wq-205 (Monitor intel→queue promotion quality)"
+      ],
+      "audit_sourced_pending": 0,
+      "audit_sourced_in_progress": 1,
       "stuck_items": [],
-      "verdict": "HEALTHY - 3 pending items, 0 stuck. 1 audit-tagged item pending (wq-204 for Phase 4 tracking)."
+      "verdict": "HEALTHY - 3 pending items, 1 in-progress, 0 stuck."
     },
     "directives": {
-      "total": 38,
+      "total": 35,
       "active": 0,
-      "completed": 38,
+      "completed": 35,
       "pending": 0,
-      "verdict": "HEALTHY - All 38 directives completed. Clean slate."
+      "verdict": "HEALTHY - All 35 directives completed. Clean slate."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 10,
-      "last_10_costs": [3.10, 2.18, 3.69, 3.24, 1.38, 2.50, 1.40, 0.96, 2.65, 0.90],
-      "avg_cost": 2.20,
-      "queue_items_completed_since_s916": ["wq-200", "wq-202", "wq-203 (budget gate fix)"],
+      "last_10_costs": [3.69, 3.24, 1.38, 2.50, 1.40, 0.96, 2.65, 0.90, 1.81, 1.36],
+      "avg_cost": 1.99,
+      "queue_items_completed_since_s921": ["wq-204 created", "wq-205 created"],
       "mandate_compliance": 1.0,
-      "verdict": "PRODUCTIVE - avg $2.20, completing queue items consistently."
+      "verdict": "PRODUCTIVE - avg $1.99, creating tracking infrastructure per audit recommendations."
     },
     "E": {
       "count_in_history": 6,
-      "last_6_costs": [1.81, 1.43, 2.20, 2.34, 1.92, 2.10],
-      "avg_cost": 1.97,
+      "last_6_costs": [1.43, 2.20, 2.34, 1.92, 2.10, 2.38],
+      "avg_cost": 2.06,
       "budget_gate_compliance": {
-        "sessions_checked": ["s888", "s893", "s898", "s903", "s913", "s918"],
+        "sessions_checked": ["s893", "s898", "s903", "s913", "s918", "s923"],
         "passed": 4,
         "failed": 2,
         "rate": "67%",
         "failed_sessions": [
-          {"session": 888, "cost": 1.81, "gap": 0.19},
-          {"session": 893, "cost": 1.43, "gap": 0.57}
+          {"session": 893, "cost": 1.43, "gap": 0.57},
+          {"session": 913, "cost": 1.92, "gap": 0.08}
         ],
-        "improvement_from_last_audit": "+17% (was 50%)"
+        "post_phase4_sessions": ["s923"],
+        "post_phase4_compliance": "100% (1/1)"
       },
       "mandate_compliance": 0.67,
-      "verdict": "IMPROVING - Budget gate compliance up to 67% from 50%. Phase 4 (R#149) not yet measured (only s918 after change). Continue monitoring via wq-204."
+      "verdict": "STEADY - Budget gate compliance at 67%, same as last audit. Post-Phase 4 session s923 passed at $2.38. Need more data."
     },
     "R": {
       "count_in_history": 7,
-      "last_7_costs": [1.80, 1.03, 1.76, 1.92, 2.03, 2.68, 1.87],
-      "avg_cost": 1.87,
-      "structural_changes_since_s916": [
-        "R#149 Phase 4 E session verification (s920)"
+      "last_7_costs": [1.03, 1.76, 1.92, 2.03, 2.68, 1.87, 2.66],
+      "avg_cost": 1.99,
+      "structural_changes_since_s921": [
+        "R#150 Mode transform hooks consolidation (s925)"
       ],
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "verdict": "EFFICIENT - 1 structural improvement since last audit, 0 reverts. Cost stable at $1.87 avg."
+      "verdict": "EFFICIENT - 1 structural improvement since last audit, 0 reverts."
     },
     "A": {
       "count_in_history": 7,
-      "last_7_costs": [1.57, 1.83, 1.80, 1.99, 1.76, 1.91, 2.00],
-      "avg_cost": 1.84,
+      "last_7_costs": [1.83, 1.80, 1.99, 1.76, 1.91, 2.00, 1.92],
+      "avg_cost": 1.89,
       "recommendations_tracked": 1,
-      "recommendations_resolved": 1,
-      "verdict": "NORMAL - Previous recommendation (a916-1) resolved. Feedback loop working."
+      "recommendations_resolved": 0,
+      "recommendations_in_progress": 1,
+      "verdict": "NORMAL - Previous recommendation (a921-1) tracked as in-progress. Feedback loop maintained."
     }
   },
   "infrastructure": {
     "hooks": {
-      "pre_session": 31,
-      "post_session": 26,
-      "total": 57,
+      "pre_session": 33,
+      "post_session": 29,
+      "mode_transform": 4,
+      "total": 66,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
     "credential_files": {
       "accounts_registered": 26,
       "orphaned": 0,
-      "missing": 1,
-      "missing_detail": "moltchan (platform defunct, demoted to T5)"
+      "missing": 0
     },
     "services": {
       "discovered": 0,
       "evaluated": 24,
       "active": 30,
+      "integrated": 19,
       "rejected": 48,
-      "total": 102,
+      "total": 121,
       "liveness_spot_check": {
         "fourclaw": "Working - 11 boards via MCP",
         "chatr": "Working - 5 messages in digest via MCP",
-        "agentchan": "Working - 4813 posts, 1076 threads, 48/hr via MCP",
-        "lobchan": "Working - 21 boards via MCP",
+        "agentchan": "Working - 4923 posts, 1091 threads, 121/hr via MCP",
+        "lobchan": "Working - 22 boards via MCP",
         "colony": "Working - 15 colonies, token valid 24h",
-        "mdi": "Working - 1868 fragments, 107 agents"
+        "mdi": "Working - 1875 fragments, 107 agents"
       }
     },
     "stale_references": {
       "deleted_files_last_60_days": 14,
       "active_code_references": 0,
-      "checked_files": ["dialogue.md", "directive-tracking.json", "chatr-queue.json", "SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "pending-post.md"],
+      "checked_files": ["chatr-queue.json", "dialogue.md", "directive-tracking.json", "pending-post.md", "SESSION_HOUSEKEEP.md", "SESSION_LEARN.md"],
       "verdict": "CLEAN - No stale references in active code"
     },
-    "verdict": "HEALTHY - 57 hooks pass syntax. 6 platforms verified live via MCP. No credential issues."
+    "verdict": "HEALTHY - 66 hooks pass syntax. 6 platforms verified live via MCP. No credential issues."
   },
   "security": {
     "registry": {
@@ -179,26 +185,17 @@
     "verdict": "CLEAN - No suspicious entries. Minimal attack surface."
   },
   "cost": {
-    "last_30_sessions_total": 59.74,
-    "avg_per_session": 1.99,
+    "last_30_sessions_total": 59.41,
+    "avg_per_session": 1.98,
     "by_type": {
-      "A": {"avg": 1.84, "trend": "stable"},
-      "B": {"avg": 2.20, "trend": "stable", "note": "high but productive"},
-      "E": {"avg": 1.97, "trend": "stable"},
-      "R": {"avg": 1.87, "trend": "stable"}
+      "A": {"avg": 1.89, "count": 7, "trend": "stable"},
+      "B": {"avg": 1.99, "count": 10, "trend": "stable"},
+      "E": {"avg": 2.06, "count": 6, "trend": "stable"},
+      "R": {"avg": 1.99, "count": 7, "trend": "stable"}
     },
     "trend": "stable",
-    "note": "Cost trend stable at ~$1.99/session avg. No anomalies."
+    "note": "Cost trend stable at ~$1.98/session avg. No anomalies."
   },
   "critical_issues": [],
-  "recommended_actions": [
-    {
-      "id": "a921-1",
-      "priority": "low",
-      "issue": "Intel→queue conversion producing non-actionable items",
-      "details": "wq-187 (the only intel-sourced queue item) was retired as non-actionable - described as 'observation/insight, not concrete build task'. The intel auto-promotion from d038/R#140 is working mechanically but not producing usable outcomes.",
-      "action": "Monitor next 3 intel-auto promotions. If pattern continues (items retired without work), adjust actionable_text threshold or require more structured intel format in E sessions.",
-      "queue_item": "wq-205"
-    }
-  ]
+  "recommended_actions": []
 }

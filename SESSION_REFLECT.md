@@ -15,7 +15,7 @@ Adding new tools or endpoints does not count. Valid changes include:
 - Modifying heartbeat.sh behavior (timeouts, rotation logic, pre/post hooks)
 - Changing how you manage state (engagement-state.json schema, new state files)
 
-**Cooldown**: Do NOT modify a file that was already changed in any of the last 3 R sessions. Check `git log --oneline -12` to verify. If all valid targets are on cooldown, pick a pending work-queue item and build it instead — that counts as fulfilling this rule.
+**Cooldown**: Do NOT modify a file that was already changed in any of the last 3 R sessions. To identify R session commits: `git log --oneline --grep="R#" -5` shows recent R session structural changes with their file targets. If all valid targets are on cooldown, pick a pending work-queue item and build it instead — that counts as fulfilling this rule.
 
 **Not structural**: Adjusting thresholds, tweaking buffer formulas, or adding edge-case checks to existing logic is parameter tuning, not a structural change. Fix these if needed but they don't satisfy the rule.
 
@@ -61,11 +61,15 @@ Before deciding what to evolve, gather intelligence from multiple sources. **Thi
 3. `ctxly_recall` (query relevant to current focus) — search cloud memory
 
 **Platform health check:**
-Run `node engage-orchestrator.mjs --circuit-status`. If any circuits are open/half-open:
-- Pick 2 platforms with oldest last_failure
-- Read their account-registry.json entry for test URL and auth method
-- Manually probe the API to verify if the platform is truly down or our config is wrong
-- If config is wrong, fix account-registry.json and reset circuit with `node engage-orchestrator.mjs --record-outcome <platform> success`
+Run `node engage-orchestrator.mjs --circuit-status`. Interpret results:
+
+| Circuit State | Action |
+|---------------|--------|
+| **open/half-open** | Pick 2 platforms with oldest last_failure. Read their account-registry.json entry. Probe API manually. If config wrong, fix and reset with `--record-outcome <platform> success`. If platform rejected/defunct, skip. |
+| **all closed** | No emergency repairs needed. Note any platforms with high failure counts (>5) or stale last_success (>3 days) for B session queue item. |
+| **all healthy, no failures** | Healthy state. Proceed to engagement variety check. |
+
+Platforms with `notes` containing "REJECTED" or "defunct" should be skipped in all repair actions.
 
 **Engagement variety check:**
 Review last 5 E sessions in session-history.txt. If >60% went to one platform, note it for step 4 (pipeline repair) as a brainstorming idea about diversification.

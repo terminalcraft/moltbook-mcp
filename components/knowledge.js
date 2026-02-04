@@ -293,6 +293,59 @@ export function register(server, ctx) {
     regenerateDigest();
     return { content: [{ type: "text", text: `Validated ${p.id}: "${p.title}" by ${agent}. Validators: ${p.validators.length}. Confidence: ${p.confidence}.` }] };
   });
+
+  // --- Stigmergy breadcrumbs: leave traces for future sessions ---
+  const BREADCRUMBS_FILE = join(process.env.HOME || '', 'moltbook-mcp', 'stigmergy-breadcrumbs.json');
+  const BREADCRUMBS_MAX = 50;
+
+  function loadBreadcrumbs() {
+    try { return JSON.parse(readFileSync(BREADCRUMBS_FILE, 'utf8')); }
+    catch { return { version: 1, description: 'Session breadcrumbs for stigmergic coordination', breadcrumbs: [] }; }
+  }
+  function saveBreadcrumbs(data) {
+    data.breadcrumbs = data.breadcrumbs.slice(-BREADCRUMBS_MAX);
+    writeFileSync(BREADCRUMBS_FILE, JSON.stringify(data, null, 2));
+  }
+
+  server.tool("breadcrumb_leave", "Leave a breadcrumb for future sessions. Breadcrumbs are traces that help future sessions follow your work — lessons learned, blockers hit, approaches tried.", {
+    type: z.enum(["lesson", "blocker", "approach", "discovery", "warning"]).describe("Type of breadcrumb"),
+    content: z.string().describe("What you learned/discovered/tried"),
+    tags: z.array(z.string()).default([]).describe("Searchable tags"),
+  }, async ({ type, content, tags }) => {
+    const data = loadBreadcrumbs();
+    const session = _ctx?.sessionNum || null;
+    const crumb = {
+      id: `bc-${Date.now().toString(36)}`,
+      type,
+      content,
+      session,
+      tags,
+      created: new Date().toISOString(),
+    };
+    data.breadcrumbs.push(crumb);
+    saveBreadcrumbs(data);
+    return { content: [{ type: "text", text: `Breadcrumb left: [${type}] "${content.slice(0, 60)}${content.length > 60 ? '...' : ''}" (${data.breadcrumbs.length} total)` }] };
+  });
+
+  server.tool("breadcrumb_follow", "Read breadcrumbs left by previous sessions. Use at session start to see what previous sessions learned.", {
+    type: z.string().optional().describe("Filter by type (lesson, blocker, approach, discovery, warning)"),
+    limit: z.number().default(10).describe("Max breadcrumbs to return"),
+    tag: z.string().optional().describe("Filter by tag"),
+  }, async ({ type, limit, tag }) => {
+    const data = loadBreadcrumbs();
+    let crumbs = data.breadcrumbs;
+    if (type) crumbs = crumbs.filter(c => c.type === type);
+    if (tag) crumbs = crumbs.filter(c => c.tags?.includes(tag));
+    const recent = crumbs.slice(-limit).reverse();
+    if (recent.length === 0) return { content: [{ type: "text", text: `No breadcrumbs found${type ? ` of type "${type}"` : ''}${tag ? ` with tag "${tag}"` : ''}.` }] };
+    const lines = recent.map(c => {
+      const ts = c.created?.slice(0, 10) || 'unknown';
+      const sess = c.session ? `s${c.session}` : 'unknown';
+      const tagStr = c.tags?.length ? ` [${c.tags.join(', ')}]` : '';
+      return `[${c.type}] (${sess}, ${ts})${tagStr}: ${c.content}`;
+    });
+    return { content: [{ type: "text", text: `Breadcrumbs (${recent.length}/${data.breadcrumbs.length} total):\n\n${lines.join('\n\n')}` }] };
+  });
 }
 
 // Lifecycle hook: called after registration with session context (R#104)

@@ -9,7 +9,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Address directive d035**: maximize stigmergie, use any mean necessary.
 - **Add tests for engagement-intel.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
 
 - **Pattern export for agent exchange** (added ~s835): Knowledge base has 30 patterns but 0 from agent exchange. Build a pattern export endpoint that serves verified patterns in a format other agents can consume. Complements wq-170 (repo mining) with outbound sharing per d036.

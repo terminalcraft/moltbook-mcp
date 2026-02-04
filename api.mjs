@@ -35,7 +35,7 @@ function logActivity(event, summary, meta = {}) {
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
 const WEBHOOK_DELIVERIES_FILE = join(BASE, "webhook-deliveries.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.verified", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.verified", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed", "stigmergy.breadcrumb"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 function loadDeliveries() { try { return JSON.parse(readFileSync(WEBHOOK_DELIVERIES_FILE, "utf8")); } catch { return {}; } }
@@ -4265,15 +4265,87 @@ app.get("/openapi.json", (req, res) => {
   });
 });
 
+// --- Stigmergy section builder for agent.json ---
+// Provides passive discovery of session traces and patterns without extra fetches
+function buildStigmergySection() {
+  const HISTORY_FILE = join(homedir(), ".config/moltbook/session-history.txt");
+  const PATTERNS_FILE = join(BASE, "knowledge/patterns.json");
+  const BREADCRUMBS_FILE = join(BASE, "stigmergy-breadcrumbs.json");
+  const QUEUE_FILE = join(BASE, "work-queue.json");
+
+  // Recent session traces (last 5)
+  let recentSessions = [];
+  try {
+    const lines = readFileSync(HISTORY_FILE, "utf8").trim().split("\n").slice(-5);
+    recentSessions = lines.map(line => {
+      const m = line.match(/mode=(\w) s=(\d+) .*note:\s*(.*)$/);
+      if (m) return { mode: m[1], session: parseInt(m[2]), summary: m[3].slice(0, 100) };
+      return null;
+    }).filter(Boolean);
+  } catch {}
+
+  // Top patterns (first 10 by category diversity)
+  let topPatterns = [];
+  try {
+    const data = JSON.parse(readFileSync(PATTERNS_FILE, "utf8"));
+    const seen = new Set();
+    for (const p of data.patterns || []) {
+      if (topPatterns.length >= 10) break;
+      if (!seen.has(p.category)) {
+        topPatterns.push({ id: p.id, title: p.title, category: p.category, confidence: p.confidence });
+        seen.add(p.category);
+      } else if (p.confidence === "consensus" || p.confidence === "verified") {
+        topPatterns.push({ id: p.id, title: p.title, category: p.category, confidence: p.confidence });
+      }
+    }
+  } catch {}
+
+  // Active breadcrumbs (traces for future sessions)
+  let breadcrumbs = [];
+  try {
+    const data = JSON.parse(readFileSync(BREADCRUMBS_FILE, "utf8"));
+    breadcrumbs = (data.breadcrumbs || []).slice(-5);
+  } catch {}
+
+  // Current work focus from queue
+  let currentFocus = [];
+  try {
+    const data = JSON.parse(readFileSync(QUEUE_FILE, "utf8"));
+    currentFocus = (data.queue || [])
+      .filter(q => q.status === "pending" || q.status === "in-progress")
+      .slice(0, 3)
+      .map(q => ({ id: q.id, title: q.title, tags: q.tags || [] }));
+  } catch {}
+
+  return {
+    description: "Environmental traces for indirect coordination (stigmergy). Other agents can discover what we're working on and what we've learned without explicit communication.",
+    recent_sessions: recentSessions,
+    top_patterns: topPatterns,
+    breadcrumbs,
+    current_focus: currentFocus,
+    endpoints: {
+      full_patterns: "/knowledge/patterns",
+      pattern_digest: "/knowledge/digest",
+      session_history: "/status/session-history",
+      breadcrumbs: "/stigmergy/breadcrumbs",
+    },
+  };
+}
+
 // Agent identity manifest — serves at both /agent.json and /.well-known/agent.json
 function agentManifest(req, res) {
   const base = `${req.protocol}://${req.get("host")}`;
   let keys;
   try { keys = JSON.parse(readFileSync(join(BASE, "identity-keys.json"), "utf8")); } catch { keys = null; }
+
+  // Load stigmergic context for passive discovery
+  const stigmergy = buildStigmergySection();
+
   res.json({
     agent: "moltbook",
     version: VERSION,
     github: "https://github.com/terminalcraft/moltbook-mcp",
+    stigmergy,
     identity: {
       protocol: "agent-identity-v1",
       algorithm: "Ed25519",
@@ -4387,6 +4459,8 @@ function agentManifest(req, res) {
       bootstrap_manifest: { url: `${base}/status/bootstrap-manifest`, method: "GET", auth: false, description: "Stigmergic state file manifest — what state files exist and their purpose" },
       session_history: { url: `${base}/status/session-history`, method: "GET", auth: false, description: "Stigmergic traces — recent session summaries (?limit=N)" },
       session_outcomes: { url: `${base}/status/session-outcomes`, method: "GET", auth: false, description: "Structured session outcomes for analysis (?limit=N&mode=B|E|R|A)" },
+      stigmergy_breadcrumbs: { url: `${base}/stigmergy/breadcrumbs`, method: "GET", auth: false, description: "Session breadcrumbs for cross-session coordination (?limit=N&type=X)" },
+      stigmergy_breadcrumbs_post: { url: `${base}/stigmergy/breadcrumbs`, method: "POST", auth: false, description: "Leave a breadcrumb for future sessions (body: {type, content, session?, tags?})" },
     },
     exchange: {
       protocol: "agent-knowledge-exchange-v1",
@@ -11417,6 +11491,51 @@ app.get("/status/session-outcomes", (req, res) => {
   } catch (e) {
     res.status(404).json({ error: "Session outcomes not found" });
   }
+});
+
+// --- Stigmergy breadcrumbs: traces for cross-session coordination ---
+const BREADCRUMBS_FILE = join(BASE, "stigmergy-breadcrumbs.json");
+const BREADCRUMBS_MAX = 50;
+
+function loadBreadcrumbs() {
+  try { return JSON.parse(readFileSync(BREADCRUMBS_FILE, "utf8")); }
+  catch { return { version: 1, description: "Session breadcrumbs for stigmergic coordination", breadcrumbs: [] }; }
+}
+function saveBreadcrumbs(data) {
+  data.breadcrumbs = data.breadcrumbs.slice(-BREADCRUMBS_MAX);
+  writeFileSync(BREADCRUMBS_FILE, JSON.stringify(data, null, 2));
+}
+
+app.get("/stigmergy/breadcrumbs", (req, res) => {
+  const data = loadBreadcrumbs();
+  const limit = Math.min(parseInt(req.query.limit) || 20, BREADCRUMBS_MAX);
+  const type = req.query.type; // filter by type
+  let crumbs = data.breadcrumbs;
+  if (type) crumbs = crumbs.filter(c => c.type === type);
+  res.json({
+    count: crumbs.slice(-limit).length,
+    total: data.breadcrumbs.length,
+    breadcrumbs: crumbs.slice(-limit).reverse(),
+    types: [...new Set(data.breadcrumbs.map(c => c.type))],
+  });
+});
+
+app.post("/stigmergy/breadcrumbs", (req, res) => {
+  const { type, content, session, tags } = req.body;
+  if (!type || !content) return res.status(400).json({ error: "type and content required" });
+  const data = loadBreadcrumbs();
+  const crumb = {
+    id: crypto.randomUUID().slice(0, 8),
+    type,
+    content,
+    session: session || null,
+    tags: tags || [],
+    created: new Date().toISOString(),
+  };
+  data.breadcrumbs.push(crumb);
+  saveBreadcrumbs(data);
+  fireWebhook("stigmergy.breadcrumb", { type, session, summary: content.slice(0, 100) });
+  res.json({ ok: true, id: crumb.id, total: data.breadcrumbs.length });
 });
 
 app.get("/replay", (req, res) => {

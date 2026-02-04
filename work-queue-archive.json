@@ -6479,6 +6479,37 @@
         "e2d0c41"
       ],
       "notes": "B#266 (retroactive): Already implemented. platform-picker.mjs has weighted selection with all d042 factors: base ROI score, recency multiplier, exploration bonus, cost efficiency. Verbose mode shows weight calculations."
+    },
+    {
+      "id": "wq-246",
+      "title": "Evaluate HiveMind collaboration protocol",
+      "description": "(added ~s985): From s948 intel \u2014 multi-agent protocol on Base mainnet (0xA1021d8...) where agents pool USDC and split bounties. Evaluate contribution metadata tracking vs final attestations. Concrete: fetch contract ABI, test read calls, assess integration complexity.",
+      "priority": 246,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "ae7b82a"
+      ],
+      "notes": "B#268: Evaluation complete. Contract verified live (4 projects, 1 agent). SDK @hivemind/sdk available. Integration complexity LOW (~3 hours). Blocker: need Base wallet with ETH/USDC for actual integration. Contribution tracking is self-attested by project owner (no on-chain proof). Suitable for trusted collaborations. Full evaluation in hivemind-evaluation.md."
+    },
+    {
+      "id": "wq-250",
+      "title": "Add circuit breaker diagnostic CLI",
+      "description": "Add --history flag to engage-orchestrator.mjs that reads circuit-state.json timestamps and shows: (1) time since last success per platform, (2) failure streak trends, (3) half-open retry outcomes. Helps diagnose whether circuits are stuck vs recovering.",
+      "priority": 250,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-promote",
+      "tags": [
+        "tooling",
+        "diagnostics"
+      ],
+      "commits": [
+        "237296a"
+      ],
+      "notes": "B#268: Implemented --history flag with table and JSON output. Shows open circuits first, includes retry timing, success rates, and streak trends."
     }
   ]
 }

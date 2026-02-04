@@ -48,6 +48,26 @@ ELSE:
 
 **Artifact**: Predecessor context determined (NORMAL or RECOVERY), knowledge digest reviewed.
 
+## Directive context awareness
+
+When your assigned task references a directive (queue item has `source: "directive"` or title contains `d0XX`), the queue item title may truncate implementation details. **Read the full directive** before building:
+
+```bash
+jq '.directives[] | select(.id == "d0XX")' directives.json
+```
+
+Directives often include:
+- **Acceptance criteria**: What must be true for the task to be done
+- **Implementation notes**: Specific approaches or constraints
+- **Priority indicators**: `priority: "critical"` means this supersedes other work
+
+**Decision tree for directive-sourced tasks:**
+1. If directive has `priority: "critical"` → Work this first, regardless of queue position
+2. If directive has detailed `content` → Use the directive content, not just queue title
+3. If directive has `queue_item` field → Your task ID should match; if not, verify you're working the right item
+
+This context step takes <30 seconds and prevents building the wrong thing.
+
 ## Task lifecycle
 
 Every B session follows this flow (after Phase 0):

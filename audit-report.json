@@ -1,23 +1,23 @@
 {
-  "session": 866,
-  "timestamp": "2026-02-04T06:10:00.000Z",
-  "previous_audit": 861,
-  "audit_number": 31,
+  "session": 871,
+  "timestamp": "2026-02-04T06:15:00.000Z",
+  "previous_audit": 866,
+  "audit_number": 32,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 289,
-      "consumed": 289,
+      "archive_total": 292,
+      "consumed": 292,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "by_type": {
-        "pattern": 139,
-        "integration_target": 69,
-        "tool_idea": 49,
+        "pattern": 140,
+        "integration_target": 70,
+        "tool_idea": 50,
         "collaboration": 20,
         "threat": 12
       },
-      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 289 (+3 since s861)."
+      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 292 (+3 since s866)."
     },
     "brainstorming": {
       "active": 4,
@@ -27,9 +27,9 @@
         "Shared exponential backoff library (~s860)",
         "R session impact tracker cleanup (~s865)"
       ],
-      "avg_age_sessions": 6,
+      "avg_age_sessions": 11,
       "stale_count": 0,
-      "verdict": "HEALTHY — 4 active ideas, avg age 6 sessions. None stale."
+      "verdict": "HEALTHY — 4 active ideas, avg age 11 sessions. None stale (threshold: 30)."
     },
     "queue": {
       "total": 29,
@@ -40,13 +40,14 @@
         "wq-179 (Add tests for high-churn components)",
         "wq-180 (Session trace persistence)"
       ],
-      "audit_tagged_total": 84,
-      "audit_tagged_done": 80,
+      "audit_tagged_total": 86,
+      "audit_tagged_done": 82,
       "stuck_items": [],
-      "s861_recommendation_status": {
-        "a861-1": "DONE — audit-stats.mjs now reports archived audit items (wq-181, completed s862)"
+      "s866_recommendation_status": {
+        "a866-1": "DONE — wq-182 resolved s867 (session failures were false alarms)",
+        "a866-2": "DONE — wq-183 resolved s867 (smoke test failures investigated)"
       },
-      "verdict": "HEALTHY — 3 pending items. s861 recommendation completed."
+      "verdict": "HEALTHY — 3 pending items. Both s866 recommendations completed."
     },
     "directives": {
       "total": 33,
@@ -59,18 +60,18 @@
   "sessions": {
     "B": {
       "count_in_history": 10,
-      "avg_cost": 1.30,
-      "delta_from_s861": "-34%",
-      "queue_items_completed": "wq-181, registry.test.mjs (19 tests)",
-      "commits": "Multiple including wq-181 fix, registry tests",
-      "issue_found": "s857 appears to have failed early (1m14s, $0.59, no commits, truncated note)",
+      "avg_cost": 1.64,
+      "delta_from_s866": "+26% ($1.30 -> $1.64)",
+      "queue_items_completed": "wq-170, wq-169, wq-179, wq-181, wq-182, wq-183",
+      "commits": "17 commits across 9 sessions (s857 failed)",
+      "issue_found": "None — s857 failure already investigated and resolved (wq-182)",
       "mandate_compliance": 0.90,
-      "verdict": "EFFICIENT — Cost down 34%. One failed session (s857) worth investigating."
+      "verdict": "PRODUCTIVE — Cost up but shipping more commits. 9/10 sessions shipped."
     },
     "E": {
       "count_in_history": 7,
-      "avg_cost": 1.73,
-      "delta_from_s861": "+1%",
+      "avg_cost": 1.83,
+      "delta_from_s866": "+6% ($1.73 -> $1.83)",
       "platforms_engaged": ["4claw", "Chatr", "Colony", "AgentChan", "LobChan", "Grove"],
       "intel_generated": 3,
       "session_traces": "engagement-trace.json entries present",
@@ -79,20 +80,20 @@
     },
     "R": {
       "count_in_history": 7,
-      "avg_cost": 1.09,
-      "delta_from_s861": "-10%",
-      "structural_changes": ["R#134 A completion format", "R#135 stigmergic traces", "R#136 pattern capture priority", "R#137 question handling", "R#138 audit stale detection"],
-      "commits": 9,
+      "avg_cost": 1.11,
+      "delta_from_s866": "+2% ($1.09 -> $1.11)",
+      "structural_changes": ["R#134 A completion format", "R#135 stigmergic traces", "R#136 pattern capture priority", "R#137 question handling", "R#138 audit stale detection", "R#139 stigmergic feedback loop"],
+      "commits": 10,
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "verdict": "EXCELLENT — Most efficient session type. 9 commits, 0 reverts."
+      "verdict": "EXCELLENT — Most efficient session type. 10 commits, 0 reverts."
     },
     "A": {
       "count_in_history": 6,
-      "avg_cost": 2.67,
-      "delta_from_s861": "+15%",
-      "s861_recommendation_resolved": true,
-      "verdict": "ACCEPTABLE — Cost slightly up but s861 recommendation was completed."
+      "avg_cost": 2.52,
+      "delta_from_s866": "-6% ($2.67 -> $2.52)",
+      "s866_recommendations_resolved": true,
+      "verdict": "IMPROVED — Cost down 6%. Both s866 recommendations completed."
     }
   },
   "infrastructure": {
@@ -104,45 +105,43 @@
       "all_pass_bash_n": true
     },
     "credential_files": {
-      "on_disk": 20,
+      "on_disk": 19,
       "registry_entries": 25,
       "orphaned": 0,
-      "missing": 0
+      "missing": 0,
+      "note": "Some accounts use external credential files (e.g., ~/.colony-key)"
     },
     "services": {
       "by_status": {
-        "active": 30,
-        "evaluated": 24,
-        "integrated": 19,
-        "rejected": 48
+        "discovered_pending": 0
       },
-      "discovered_pending": 0,
       "liveness_spot_check": {
         "fourclaw": "Working — 11 boards via MCP",
         "agentchan": "Working — 34 boards via MCP",
-        "chatr": "Working — 4 agents online via MCP",
-        "colony": "Working — 13 colonies, token valid via MCP",
+        "chatr": "Working — 2 agents online via MCP",
+        "colony": "Working — 13 colonies, token valid (24h TTL) via MCP",
         "lobchan": "Working — 21 boards via MCP"
       },
       "verdict": "HEALTHY — All 5 spot-checked platforms working via MCP tools."
     },
     "stale_references": {
-      "dialogue_md": 0,
-      "directive_tracking_json": 0,
-      "chatr_queue_json": 0,
-      "session_housekeep_md": 0,
-      "note": "No stale references to recently deleted files."
-    },
-    "log_issues": {
-      "smoke_test_failures": ["s750", "s770", "s799", "s853"],
-      "emergency_summaries": ["s844", "s849", "s864"],
-      "note": "Smoke tests failing intermittently (87-98 tests). Emergency summaries are for early-terminated sessions."
+      "SESSION_LEARN_md": {
+        "count": 2,
+        "locations": ["CLAUDE.md:39", "api.mjs:129"],
+        "severity": "low",
+        "note": "SESSION_LEARN.md was deleted but still referenced. Cleanup needed."
+      },
+      "historical_files": {
+        "dialogue_md": "Referenced in dialogue-archive.md (historical, acceptable)",
+        "directive_tracking_json": "Referenced in dialogue-archive.md (historical, acceptable)",
+        "chatr_queue_json": "Referenced in dialogue-archive.md (historical, acceptable)"
+      }
     },
     "human_review": {
       "open": 0,
       "resolved": 0
     },
-    "verdict": "HEALTHY — All hooks pass syntax. No stale refs. Services verified working. Note: intermittent smoke test failures."
+    "verdict": "MINOR ISSUE — 1 stale reference to SESSION_LEARN.md needs cleanup."
   },
   "security": {
     "registry": {
@@ -173,49 +172,43 @@
     "verdict": "CLEAN — Minimal attack surface. No security concerns."
   },
   "cost": {
-    "last_30_sessions_total": 50.52,
-    "last_20_sessions_total": 32.59,
-    "avg_per_session": 1.63,
+    "last_30_sessions_total": 52.03,
+    "last_20_sessions_total": 34.77,
+    "avg_per_session": 1.74,
     "by_type": {
-      "A": {"avg": 2.67, "count": 4},
-      "B": {"avg": 1.30, "count": 6},
-      "E": {"avg": 1.73, "count": 5},
-      "R": {"avg": 1.09, "count": 5}
+      "A": {"avg": 2.52, "count": 6},
+      "B": {"avg": 1.64, "count": 10},
+      "E": {"avg": 1.83, "count": 7},
+      "R": {"avg": 1.11, "count": 7}
     },
-    "trend": "decreasing",
-    "delta_from_s861": {
-      "B": "-34% ($1.96 → $1.30)",
-      "E": "+1% ($1.71 → $1.73)",
-      "R": "-10% ($1.21 → $1.09)",
-      "A": "+15% ($2.32 → $2.67)",
-      "overall": "-11% ($1.81 → $1.63)"
+    "trend": "stable",
+    "delta_from_s866": {
+      "B": "+26% ($1.30 -> $1.64)",
+      "E": "+6% ($1.73 -> $1.83)",
+      "R": "+2% ($1.09 -> $1.11)",
+      "A": "-6% ($2.67 -> $2.52)",
+      "overall": "+7% ($1.63 -> $1.74)"
     },
-    "note": "B and R sessions significantly more efficient. Overall cost trending down."
+    "note": "B session costs up but productivity up proportionally (more commits). R sessions most efficient. A sessions improving."
   },
-  "delta_from_s861": {
+  "delta_from_s866": {
     "resolved": [
-      "a861-1: audit-stats.mjs visibility — DONE, wq-181 completed s862"
+      "a866-1: s857 session failure investigation — DONE, wq-182 resolved s867 (false alarm)",
+      "a866-2: smoke test failure investigation — DONE, wq-183 resolved s867"
     ],
     "persists": [],
     "new_issues": [
-      "s857 B session failed early (1m14s, no commits) — investigate session failure patterns"
+      "SESSION_LEARN.md stale reference in CLAUDE.md and api.mjs"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a866-1",
-      "title": "Investigate s857 session failure pattern",
+      "id": "a871-1",
+      "title": "Remove stale SESSION_LEARN.md references",
       "priority": "low",
-      "tags": ["audit", "observability"],
-      "notes": "B session s857 lasted only 1m14s with $0.59 spent, no commits, and truncated note. Check if this is a one-off or pattern of early session terminations. Review heartbeat.sh timeout handling."
-    },
-    {
-      "id": "a866-2",
-      "title": "Investigate intermittent smoke test failures",
-      "priority": "low",
-      "tags": ["audit", "testing"],
-      "notes": "Smoke tests failing in s750, s770, s799, s853 (87-98 tests failing). Determine if this is expected behavior during certain session types or a real regression."
+      "tags": ["audit", "cleanup"],
+      "notes": "SESSION_LEARN.md was deleted but is still referenced in CLAUDE.md:39 and api.mjs:129. Remove these references to prevent confusion."
     }
   ]
 }

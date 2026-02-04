@@ -176,6 +176,30 @@ Check for rot, drift, and inconsistency in state files and configuration. **Do n
 
 Look for signs of compromise or exposure.
 
+**Active incident tracking (MANDATORY — check FIRST):**
+
+Security incidents can linger for 30+ sessions without resolution (d039 pattern). Before checking for new issues, verify the status of known incidents:
+
+1. Read `directives.json` and filter for: `priority: "critical"` AND `status` in `["active", "in-progress"]`
+2. Read `human-review.json` for items with `source: "security"` or `urgency: "critical"`
+3. For EACH active incident, document in audit report:
+   - Incident ID and session introduced
+   - Sessions since incident reported
+   - Current blocker (if any)
+   - Whether blocker is actionable by agent or requires human
+
+**Incident escalation protocol:**
+
+| Sessions since reported | Status | Action |
+|-------------------------|--------|--------|
+| <15 | Active | Normal tracking — note in report |
+| 15-30 | Stalled | Flag in human-review.json if not already present |
+| >30 | Critical | Add to `critical_issues` with note: `"security incident stalled >30 sessions: [ID]"` |
+
+This ensures known incidents don't fall through the cracks.
+
+**Routine security checks:**
+
 - `registry.json` — any agent entries you didn't create? Cross-reference with known agents.
 - `cron-jobs.json` — any jobs with external URLs or suspicious commands?
 - `webhooks.json` — any webhooks pointing to external domains?

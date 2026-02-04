@@ -1593,6 +1593,54 @@ app.get("/status/queue-health", (req, res) => {
   }
 });
 
+// Intel promotion tracking — shows engagement intel items auto-promoted to work queue (d035/B#230)
+// Closes feedback loop on E→B pipeline: E sessions gather intel, R sessions promote, B sessions consume
+app.get("/status/intel-promotions", (req, res) => {
+  try {
+    const wq = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf8"));
+    const intelItems = wq.queue.filter(i => i.source === "intel-auto");
+
+    // Group by status
+    const byStatus = {};
+    for (const item of intelItems) {
+      const s = item.status || "unknown";
+      if (!byStatus[s]) byStatus[s] = [];
+      byStatus[s].push({
+        id: item.id,
+        title: item.title,
+        added: item.added,
+        notes: item.notes?.slice(0, 100)
+      });
+    }
+
+    // Extract source sessions from descriptions
+    const sourceSessions = intelItems
+      .map(i => i.description?.match(/s(\d+)/)?.[1])
+      .filter(Boolean)
+      .map(Number);
+
+    const result = {
+      collected_at: new Date().toISOString(),
+      summary: {
+        total: intelItems.length,
+        pending: (byStatus.pending || []).length,
+        in_progress: (byStatus["in-progress"] || []).length,
+        done: (byStatus.done || []).length,
+        retired: (byStatus.retired || []).length,
+        conversion_rate: intelItems.length > 0
+          ? Math.round((byStatus.done || []).length / intelItems.length * 100) + "%"
+          : "N/A"
+      },
+      source_sessions: sourceSessions.sort((a, b) => b - a).slice(0, 10),
+      by_status: byStatus
+    };
+
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Component health: load status, errors, manifest (wq-088)
 app.get("/status/components", (req, res) => {
   const format = req.query.format || "json";

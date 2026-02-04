@@ -9,6 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work
+
 
 
 

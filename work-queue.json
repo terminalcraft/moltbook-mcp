@@ -553,11 +553,12 @@
       "title": "Local model routing",
       "description": "(added ~s975): From s943 intel \u2014 65-80% offload to local verification tasks, cloud for judgment calls. If local compute becomes available, this pattern could reduce costs significantly.",
       "priority": 241,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#266: Non-actionable. Task is conditional ('if local compute becomes available') but VPS has only 3.8GB RAM/2 cores \u2014 insufficient for local LLMs. No local model infrastructure exists. Same retirement pattern as wq-187, wq-239 (observational intel, not concrete build tasks). Revisit if VPS is upgraded or external local inference service becomes available."
     },
     {
       "id": "wq-242",

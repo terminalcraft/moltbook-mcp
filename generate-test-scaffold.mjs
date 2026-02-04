@@ -35,18 +35,39 @@ function hasTest(name) {
          existsSync(join(COMPONENTS_DIR, `${name}.test.js`));
 }
 
-// Extract tool registrations from a component file
+// Extract tool registrations from a component file with their schemas
 function extractTools(name) {
   const path = join(COMPONENTS_DIR, `${name}.js`);
   const content = readFileSync(path, 'utf8');
 
   const tools = [];
-  // Match server.tool("name", ...) patterns
-  const regex = /server\.tool\(\s*["']([^"']+)["']/g;
+  // Match server.tool("name", desc, { schema }, handler) patterns
+  // Capture tool name and try to extract required parameters
+  const toolRegex = /server\.tool\(\s*["']([^"']+)["']\s*,\s*["'][^"']*["']\s*,\s*\{([^}]*)\}/gs;
   let match;
-  while ((match = regex.exec(content)) !== null) {
-    tools.push(match[1]);
+  while ((match = toolRegex.exec(content)) !== null) {
+    const toolName = match[1];
+    const schemaBlock = match[2];
+
+    // Extract required string params (common pattern: param: z.string().describe(...))
+    const params = [];
+    const paramRegex = /(\w+):\s*z\.(string|number|boolean|array)/g;
+    let paramMatch;
+    while ((paramMatch = paramRegex.exec(schemaBlock)) !== null) {
+      params.push({ name: paramMatch[1], type: paramMatch[2] });
+    }
+
+    tools.push({ name: toolName, params });
   }
+
+  // Fallback: simple name extraction if complex regex didn't match
+  if (tools.length === 0) {
+    const simpleRegex = /server\.tool\(\s*["']([^"']+)["']/g;
+    while ((match = simpleRegex.exec(content)) !== null) {
+      tools.push({ name: match[1], params: [] });
+    }
+  }
+
   return tools;
 }
 
@@ -57,21 +78,44 @@ function hasOnLoad(name) {
   return /export\s+function\s+onLoad/.test(content);
 }
 
+// Generate example args for a tool based on its parameters
+function generateExampleArgs(params) {
+  if (params.length === 0) return '{}';
+
+  const args = params.map(p => {
+    switch (p.type) {
+      case 'string': return `${p.name}: 'test-${p.name}'`;
+      case 'number': return `${p.name}: 1`;
+      case 'boolean': return `${p.name}: true`;
+      case 'array': return `${p.name}: []`;
+      default: return `${p.name}: 'test'`;
+    }
+  });
+  return `{ ${args.join(', ')} }`;
+}
+
 // Generate test scaffold for a component
 function generateScaffold(name) {
   const tools = extractTools(name);
   const hasOnLoadFn = hasOnLoad(name);
+  const toolNames = tools.map(t => t.name);
 
-  const toolTests = tools.map(tool => `
-    test('${tool} returns expected structure', async () => {
-      const result = await server.callTool('${tool}', {});
+  const toolTests = tools.map(tool => {
+    const exampleArgs = generateExampleArgs(tool.params);
+    const paramInfo = tool.params.length > 0
+      ? ` (params: ${tool.params.map(p => p.name).join(', ')})`
+      : '';
+    return `
+    test('${tool.name} returns expected structure${paramInfo}', async () => {
+      const result = await server.callTool('${tool.name}', ${exampleArgs});
       const text = getText(result);
       assert.ok(text, 'Should return text content');
-    });`).join('\n');
+    });`;
+  }).join('\n');
 
-  const toolList = tools.length > 0
-    ? `const expectedTools = ${JSON.stringify(tools, null, 4)};`
-    : `const expectedTools = []; // TODO: Add expected tool names`;
+  const toolList = toolNames.length > 0
+    ? `const expectedTools = ${JSON.stringify(toolNames, null, 4)};`
+    : `const expectedTools = []; // No tools found - component may use different registration pattern`;
 
   const scaffold = `#!/usr/bin/env node
 // ${name}.test.mjs — Tests for ${name}.js component
@@ -133,7 +177,7 @@ describe('${name}.js component', () => {
     });
   });
 
-  // TODO: Add specific tests for each tool
+  // Tool functionality tests - auto-generated with example parameters
   describe('tool functionality', () => {${toolTests.length > 0 ? toolTests : `
     test('placeholder - add specific tests', () => {
       assert.ok(true, 'Replace this with actual tests');
@@ -208,8 +252,9 @@ const scaffold = generateScaffold(name);
 writeFileSync(testPath, scaffold);
 
 const tools = extractTools(name);
+const toolNames = tools.map(t => t.name);
 console.log(`Generated: ${name}.test.mjs`);
-console.log(`  Tools found: ${tools.length} (${tools.join(', ') || 'none'})`);
+console.log(`  Tools found: ${tools.length} (${toolNames.join(', ') || 'none'})`);
 console.log(`\nNext steps:`);
 console.log(`  1. Review and customize the generated tests`);
 console.log(`  2. Run: node --test components/${name}.test.mjs`);

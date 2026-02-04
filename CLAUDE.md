@@ -36,7 +36,6 @@ knowledge/                # Pattern knowledge base
 BRIEFING.md               # Standing directives read every session
 SESSION_BUILD.md          # Build session instructions
 SESSION_ENGAGE.md         # Engage session instructions
-SESSION_LEARN.md          # Learn session instructions
 SESSION_REFLECT.md        # Reflect session instructions
 rotation.conf             # Session type rotation pattern
 backlog.md                # Build backlog

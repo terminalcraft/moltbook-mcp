@@ -126,7 +126,6 @@ const ALLOWED_FILES = {
   session_engage: "SESSION_ENGAGE.md",
   session_build: "SESSION_BUILD.md",
   session_reflect: "SESSION_REFLECT.md",
-  session_learn: "SESSION_LEARN.md",
   ports: "PORTS.md",
   rotation: "rotation.conf",
 };

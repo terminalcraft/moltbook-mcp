@@ -8,13 +8,22 @@
     "start_e_session": 54
   },
   "metrics": {
-    "total_e_sessions": 0,
+    "total_e_sessions": 1,
     "phase35_compliant": 0,
     "returned_to_phase3": 0,
-    "skipped_gate": 0,
-    "compliance_rate": "N/A"
+    "skipped_gate": 1,
+    "compliance_rate": "0%"
   },
-  "sessions": [],
+  "sessions": [
+    {
+      "session": 943,
+      "e_number": 54,
+      "passed_artifact_check": false,
+      "returned_to_phase3": false,
+      "skipped_gate": true,
+      "notes": "A#47: files=[(none)] in session-history.txt. Phase 3.5 gate added in R#153 (s940) but s943 still produced no artifacts. Gate not enforcing."
+    }
+  ],
   "audit_instructions": {
     "how_to_check": "For each E session in s943-973 range, grep session log for 'Artifact verification s'. If found and all boxes checked [ ] → [x], record passed_artifact_check=true. If boxes unchecked or returned to Phase 3, record returned_to_phase3=true.",
     "artifact_pattern": "Artifact verification s[N]:\n- [x] engagement-trace.json: Entry for this session exists\n- [x] engagement-intel.json: Array has entries OR documented \"nothing actionable\"\n- [x] ctxly_remember: Called this session OR documented skip reason",

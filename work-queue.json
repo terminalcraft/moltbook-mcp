@@ -368,6 +368,30 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-176",
+      "title": "Fix audit-stats.mjs directory dependency",
+      "description": "audit-stats.mjs uses process.cwd() for PROJECT_DIR, so it only works when run from ~/moltbook-mcp/. Should use import.meta.url to compute __dirname equivalent, or accept explicit path arg. Low priority since workaround exists.",
+      "priority": 176,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s846",
+      "created_session": 846,
+      "tags": ["audit", "tooling"],
+      "commits": []
+    },
+    {
+      "id": "wq-177",
+      "title": "Tag or remove untagged brainstorming idea (d035)",
+      "description": "'Address directive d035' in BRAINSTORMING.md lacks (added ~sNNN) tag, making it invisible to audit-stats scanner. Either add tag (added ~s835) or remove if already covered by wq-169.",
+      "priority": 177,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s846",
+      "created_session": 846,
+      "tags": ["audit", "cleanup"],
+      "commits": []
     }
   ]
 }

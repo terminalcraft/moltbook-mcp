@@ -320,6 +320,18 @@
       "title": "R session impact summary in prompt",
       "description": "(added ~s820): The r-session-impact.json analysis array is consistently empty because analysis only runs after 10 sessions and requires before/after outcome data. Add a digest summary to the R session prompt showing recent structural changes and their preliminary signals (cost trend, timeout rate).",
       "priority": 158,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#203: Added impact summary injection to session-context.mjs. R sessions now see '### Impact history' section in their prompt with: category recommendations (PREFER/AVOID/NEUTRAL), pending change count, and 'Soon' list showing changes about to complete analysis. Saves a tool call vs running `node r-impact-digest.mjs` manually."
+    },
+    {
+      "id": "wq-159",
+      "title": "Component test scaffolding generator",
+      "description": "(added ~s820): 40 components, 0 test files. Manual test creation is slow. Build a script that generates basic test scaffolds for components based on their exports (register, onLoad, etc.).",
+      "priority": 159,
       "status": "pending",
       "added": "2026-02-04",
       "source": "brainstorming-auto",

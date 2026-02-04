@@ -612,11 +612,57 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     urgent += `\n\n### Intel digest (pre-categorized, auto-archived):\n${rIntelDigest}\nProcess these: promote queue candidates to work-queue.json, add brainstorm candidates to BRAINSTORMING.md. Archiving is handled automatically — no manual archive step needed.`;
   }
 
+  // wq-158: R session impact summary — pre-compute and inject into prompt
+  // Saves a tool call vs running `node r-impact-digest.mjs` manually in step 3
+  let impactSummary = '';
+  try {
+    const impactPath = join(STATE_DIR, 'r-session-impact.json');
+    if (existsSync(impactPath)) {
+      const impactData = JSON.parse(readFileSync(impactPath, 'utf8'));
+      const analysis = impactData.analysis || [];
+      const pending = (impactData.changes || []).filter(c => !c.analyzed);
+      if (analysis.length > 0 || pending.length > 0) {
+        const catStats = {};
+        for (const a of analysis) {
+          const cat = a.category || 'unknown';
+          if (!catStats[cat]) catStats[cat] = { pos: 0, neg: 0, neu: 0 };
+          const imp = a.impact || 'neutral';
+          if (imp === 'positive') catStats[cat].pos++;
+          else if (imp === 'negative') catStats[cat].neg++;
+          else catStats[cat].neu++;
+        }
+        const recs = [];
+        for (const [cat, s] of Object.entries(catStats)) {
+          const total = s.pos + s.neg + s.neu;
+          if (total === 0) continue;
+          const posPct = (s.pos / total) * 100;
+          const negPct = (s.neg / total) * 100;
+          let rec = 'NEUTRAL';
+          if (negPct > 50) rec = 'AVOID';
+          else if (posPct > 50) rec = 'PREFER';
+          recs.push(`${cat}: ${rec} (${s.pos}+ ${s.neg}- ${s.neu}=)`);
+        }
+        const recsText = recs.length > 0 ? recs.join(', ') : 'no category data';
+        const pendingText = pending.length > 0 ? ` | ${pending.length} changes pending analysis` : '';
+        impactSummary = `\n\n### Impact history (wq-158):\n${analysis.length} analyzed changes. Recommendations: ${recsText}${pendingText}`;
+        if (pending.length > 0 && COUNTER > 0) {
+          const nextAnalysis = pending.filter(p => {
+            const sessionsUntil = 10 - (COUNTER - (p.session || 0));
+            return sessionsUntil > 0 && sessionsUntil <= 3;
+          });
+          if (nextAnalysis.length > 0) {
+            impactSummary += `\nSoon: ${nextAnalysis.map(p => `s${p.session} ${p.file} (${10 - (COUNTER - (p.session || 0))} sessions left)`).join(', ')}`;
+          }
+        }
+      }
+    }
+  } catch {}
+
   result.r_prompt_block = `## R Session: #${rCount}
 This is R session #${rCount}. Follow the checklist in SESSION_REFLECT.md.
 
 ### Pipeline health snapshot:
-${health}
+${health}${impactSummary}
 
 ${intakeBlock}${urgent}`;
 }

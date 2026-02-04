@@ -22,6 +22,7 @@ const HOME = homedir();
 const MCP_DIR = join(HOME, 'moltbook-mcp');
 
 function expandPath(p) {
+  if (!p) return null;
   return p.replace(/^~/, HOME);
 }
 
@@ -44,13 +45,13 @@ function getRegistryPaths() {
 }
 
 // Provider: what credentials.js actually resolves
+// IDs must match account-registry.json IDs for proper matching
 function getProviderPaths() {
-  // Hardcoded from providers/credentials.js — kept in sync manually
   const home = HOME;
   return [
     { id: 'ctxly', fn: 'getCtxlyKey', env: 'CTXLY_API_KEY', path: join(home, 'moltbook-mcp', 'ctxly.json'), key: 'api_key' },
     { id: 'chatr', fn: 'getChatrCredentials', env: null, path: join(home, 'moltbook-mcp', 'chatr-credentials.json'), key: null },
-    { id: 'fourclaw', fn: 'getFourclawCredentials', env: null, path: join(home, 'moltbook-mcp', 'fourclaw-credentials.json'), key: null },
+    { id: '4claw', fn: 'getFourclawCredentials', env: null, path: join(home, 'moltbook-mcp', 'fourclaw-credentials.json'), key: null },
     { id: 'lobchan', fn: 'getLobchanKey', env: null, path: join(home, 'moltbook-mcp', '.lobchan-key'), key: null },
     { id: 'moltbotden', fn: 'getMoltbotdenKey', env: 'MOLTBOTDEN_API_KEY', path: join(home, 'moltbook-mcp', '.moltbotden-key'), key: null },
   ];

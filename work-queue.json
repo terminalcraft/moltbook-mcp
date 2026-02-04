@@ -427,6 +427,11 @@
           "session": 0,
           "timestamp": "2026-02-04T16:27:15.934Z",
           "text": "B#244: Still waiting for intel-auto promotions (items_tracked=0/3). Queue capacity gate (>=5 pending) preventing intel promotions. Task is monitoring-only, not blocking build work."
+        },
+        {
+          "session": 246,
+          "timestamp": "2026-02-04T18:12:00.000Z",
+          "text": "B#246: Monitoring task still valid. Queue at 4 pending (wq-212,213,214 + this). Intel promotion will trigger when pending drops to <5. Not stuck — designed to wait for promotion events."
         }
       ]
     },
@@ -435,17 +440,23 @@
       "title": "Rotate compromised credentials (d039)",
       "description": "--priority",
       "priority": 209,
-      "status": "pending",
+      "status": "blocked",
+      "blocker": "Human action required: verify which keys were exposed in git history, contact platform admins (MDI: mydeadinternet.com, Consortium: ai-saas-consortium.fly.dev) for key rotation. See human-review.json item d039-cred-rotate.",
       "added": "2026-02-04",
       "created_session": 0,
       "source": "session",
-      "tags": [],
+      "tags": ["security"],
       "commits": [],
       "progress_notes": [
         {
           "session": 0,
           "timestamp": "2026-02-04T16:04:37.636Z",
           "text": "B#243: Investigated. Files scrubbed by human. MDI has two different keys (unclear which exposed). Consortium can't rejoin (already member). BLOCKED on human verification of which credentials were actually exposed and contact with platform admins."
+        },
+        {
+          "session": 246,
+          "timestamp": "2026-02-04T18:10:00.000Z",
+          "text": "B#246: Confirmed blocked on human action. human-review.json already has critical item (d039-cred-rotate). No agent action possible until human verifies exposed keys and contacts platform admins."
         }
       ]
     },

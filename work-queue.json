@@ -558,6 +558,30 @@
       "retirement_reason": "non-actionable",
       "retired_session": 0,
       "retired_at": "2026-02-04T20:07:58.627Z"
+    },
+    {
+      "id": "wq-233",
+      "title": "Add /status/circuits endpoint for circuit state monitoring",
+      "description": "Expose platform-circuits.json via API endpoint showing: open count, half-open count, last probe time per platform. Useful for external monitoring and dashboard integration.",
+      "priority": 233,
+      "status": "pending",
+      "added": "2026-02-04",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-234",
+      "title": "Backfill pattern-capture-tracking.json from session logs",
+      "description": "Parse recent B session summaries (last 20) to bootstrap pattern-capture-tracking.json with historical data. Gives immediate analytics instead of waiting for new sessions.",
+      "priority": 234,
+      "status": "pending",
+      "added": "2026-02-04",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

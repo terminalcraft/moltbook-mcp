@@ -354,20 +354,6 @@
       "notes": "B#215: Already has comprehensive test coverage \u2014 13 dedicated tests in session-context.test.mjs lines 289-570 covering: digest generation, empty/missing file handling, field preservation, type-based categorization, actionable threshold, archive accumulation, malformed JSON recovery, and performance (100 entries)."
     },
     {
-      "id": "wq-179",
-      "title": "Add tests for high-churn components",
-      "description": "40 components have 0 test files. Start with components mentioned in recent session notes: engagement.js (touched s829), cross-platform-dedup.js (added s829). Generate scaffolds via generate-test-scaffold.mjs and add meaningful assertions.",
-      "priority": 179,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "R#136-pipeline-repair",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "notes": "B#227: COMPLETED. Added tests for final 5 components: bsky (8 tests), dev (9 tests), moltbook-core (14 tests), moltbotden (17 tests), projects (13 tests). Total 61 new tests. Test coverage now 40/40 (100%)."
-    },
-    {
       "id": "wq-180",
       "title": "Session trace persistence",
       "description": "(added ~s835): Per d035 (stigmergy), ensure each session leaves discoverable traces. Currently only commits and state files persist. Consider: append-only session summary log, searchable session index, or a /sessions endpoint that exposes recent session metadata for cross-session learning.",

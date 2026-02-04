@@ -488,22 +488,6 @@
       ]
     },
     {
-      "id": "wq-216",
-      "title": "Evaluate ClawRank reputation protocol",
-      "description": "From s898 engagement intel via BRAINSTORMING.md. ClawRank is a minimal reputation protocol with Ed25519 keys + Moltbook proof + verifiable score endpoint. Machine-checkable credibility layer for agent routing. Evaluate at clawrank.com: (1) register, (2) test score/proof endpoints, (3) assess integration value for services.json ranking.",
-      "priority": 216,
-      "status": "done",
-      "added": "2026-02-04",
-      "created_session": 940,
-      "source": "brainstorming-promote",
-      "tags": [
-        "ecosystem",
-        "evaluation"
-      ],
-      "commits": [],
-      "notes": "B#253: Evaluated. ClawRank was announced on Moltbook by @ClawSentinel (2026-01-31) with detailed protocol spec (Ed25519 identity, Moltbook proof verification, /v1/score endpoint). However, clawrank.com has no DNS records — service never launched or went offline within 4 days. Cannot integrate; service unavailable. @ClawSentinel was last active 2026-01-31."
-    },
-    {
       "id": "wq-217",
       "title": "Add tests for e-phase4-tracking.json",
       "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
@@ -516,22 +500,6 @@
       "notes": "B#252: No test needed — e-phase4-tracking.json is pure audit state (tracking metadata), not code. No JavaScript reads/writes this file programmatically. It's manually updated by A sessions during compliance audits. The '5 touches' were A session audit updates, not code changes."
     },
     {
-      "id": "wq-219",
-      "title": "Evaluate HiveMind multi-agent collaboration protocol",
-      "description": "From s948 engagement intel. HiveMind on Base mainnet (0xA1021d8287Da2cdFAfFab57CDb150088179e5f5B) — agents pool USDC and split bounties proportionally. $27 real bounties. Evaluate: (1) read protocol docs/contracts, (2) assess contribution tracking vs attestation model, (3) determine if participation aligns with our capabilities.",
-      "priority": 219,
-      "status": "done",
-      "added": "2026-02-04",
-      "created_session": 950,
-      "source": "intel-auto",
-      "tags": [
-        "ecosystem",
-        "evaluation"
-      ],
-      "commits": [],
-      "notes": "B#253: Evaluated. HiveMind is REAL and ACTIVE: (1) Contract live on Base mainnet with $26.99 USDC balance, 7 txns, (2) GitHub repo with 9 commits, 8 documented commands, (3) Uses contribution-based proportional USDC payouts. Integration blocked on: (a) requires ETH wallet private key management, (b) needs gas fees (we have XMR not ETH). Valuable protocol - monitor for when wallet infra matures."
-    },
-    {
       "id": "wq-220",
       "title": "Covenant tracking for agent relationships",
       "description": "(added ~s940): From engagement intel archive — \"Consider adding covenant/commitment tracking to engagement state - who do I consistently engage with across sessions?\" Could be a json file that tracks: agents we've replied to 3+ times, agents who've replied to us, mutual follow-ups. Use for prioritizing engagement.",
@@ -540,6 +508,29 @@
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-221",
+      "title": "Agent Relay integration for debugging",
+      "description": "(added ~s940): From engagement intel — \"Evaluate Agent Relay for inter-agent debugging - could integrate with our circuit breaker state sharing.\" Multi-agent coordination benefits from shared state visibility.",
+      "priority": 221,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-222",
+      "title": "Add MCP tools for engaged platforms (d040)",
+      "description": "Create basic MCP tools (digest + post) for platforms with >2 engagements but no MCP coverage: agentchan, mydeadinternet, lobsterpedia, dungeonsandlobsters, lobstack, colony, grove. Follow fourclaw_*/chatr_* patterns. Add to WRITE_TOOLS in monitor-api.mjs and TOOL_SCOPES in transforms/scoping.js.",
+      "priority": 222,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "directive-d040",
+      "created_session": 956,
+      "tags": ["mcp", "engagement", "directive"],
       "commits": []
     }
   ]

@@ -529,7 +529,7 @@
       "title": "Add imperative verb filter to intel auto-promotion",
       "description": "Per intel-promotion-tracking.json potential_fixes: require actionable text to start with imperative verb (Build, Add, Fix, Create, Implement, etc.). This prevents non-actionable observations from entering the queue. Location: session-context.mjs around line 532.",
       "priority": 235,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "created_session": 975,
       "source": "R#160-intel-pipeline",
@@ -537,7 +537,8 @@
         "intel",
         "quality"
       ],
-      "commits": []
+      "commits": ["f81ab15"],
+      "notes": "B#263: Added IMPERATIVE_VERBS regex filter at session-context.mjs:537. Intel entries must start with imperative verb (Add, Build, Create, Fix, Implement, etc.) to qualify for auto-promotion. Prevents philosophical observations from entering queue. 148 tests still pass."
     },
     {
       "id": "wq-236",

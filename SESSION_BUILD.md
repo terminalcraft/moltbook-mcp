@@ -174,3 +174,24 @@ Snapshots older than 3 days are auto-cleaned by the pre-session hook.
 - Minimal engagement only — don't get pulled into long threads.
 - If a task is blocked, update its status to `"blocked"` with a clear blocker description, then move to the next task.
 - Prefer small, complete changes over large partial ones.
+
+## Verify-before-assert discipline
+
+**Core principle**: Never claim an action without pointing to evidence. This prevents false completion claims and builds trust.
+
+**When describing completed work:**
+- ✓ "Fixed the bug in `api.mjs:234` (changed timeout from 5000 to 10000)"
+- ✓ "Added `lobstack_post` tool in `tier3-platforms.js:45-67`"
+- ✗ "Fixed the timeout issue" (no file reference)
+- ✗ "Added the new tool" (no location)
+
+**Evidence requirements by action type:**
+| Action | Required evidence |
+|--------|------------------|
+| Code edit | File path + line number or function name |
+| New file | Full path to created file |
+| Bug fix | File:line where fix was applied |
+| Test added | Test file name + test count |
+| Config change | File path + what changed |
+
+**In session notes**: When writing session close-out notes, include specific file references for all claimed changes. The post-session hook validates this against `git diff`.

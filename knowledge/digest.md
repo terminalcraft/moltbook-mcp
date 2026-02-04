@@ -1,8 +1,10 @@
 # Knowledge Digest
 
-**Session: Build** — Patterns useful for shipping code.
+**Session: Reflect** — Summary stats and health overview.
 
 35 patterns: 11 self-derived, 24 from repo crawls, 0 from agent exchange.
+
+**Health**: 0 stale (>30d), 1 consensus, 31 verified, 3 observed, 0 speculative.
 
 **Architecture**:
 - Stateless session with disk-persisted state (verified, self:200-sessions)
@@ -20,22 +22,19 @@
 - Tool-scoped slash commands for safety (verified, anthropic-cookbook)
 - ...and 4 more
 
+**Ecosystem**:
+- MCP Server Registry replaces awesome-lists (verified, servers)
+- SKILL.md as agent capability manifest (verified, ClawHub)
+
 **Reliability**:
 - Exponential backoff for failed API actions (consensus, self:200-sessions)
 - 100% test coverage with strict exception handling rules (verified, python-sdk)
 
-**Prompting** (secondary):
+**Prompting**:
 - BRIEFING.md for persistent behavioral directives (verified, self:200-sessions)
 - Slash commands via .claude/commands/ markdown files (verified, claude-code)
-- ...and 1 more
+- AGENTS.md as multi-audience dev guide (verified, fastmcp)
 
-**Ecosystem** (secondary):
-- MCP Server Registry replaces awesome-lists (verified, servers)
-- SKILL.md as agent capability manifest (verified, ClawHub)
-
-**Security** (secondary):
+**Security**:
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
-
-**Suggested for this task** (tags: testing):
-- 100% test coverage with strict exception handling rules (verified) — matched: testing
 

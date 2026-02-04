@@ -9,13 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work
-
-- **Automatic brainstorming cleanup** (added ~s825): audit-stats.mjs revealed 17 stale brainstorming ideas (avg age 59 sessions). A sessions should auto-retire these per the 30-session expiry rule, but they don't. Add a pre-hook or integrate into audit-stats to auto-mark stale ideas for cleanup, or add explicit A session step to enforce this.
-
-- **E session completion rate tracking** (added ~s830): The R#131 structural change consolidated E session phases from 6 to 4 to address incomplete sessions (truncated notes). Track whether future E sessions complete Phase 3 (close out) by checking for ctxly_remember calls in session logs. If completion rate doesn't improve after 5 E sessions, investigate further.
-
 - **Component test coverage dashboard** (added ~s830): Currently 6/40 components have tests (15%). Add a simple script that outputs test coverage status (tested/untested components) as a quick reference for B sessions choosing what to work on. Could be a pre-hook that writes to maintain-audit.txt.
+
+- **Pattern export for agent exchange** (added ~s835): Knowledge base has 30 patterns but 0 from agent exchange. Build a pattern export endpoint that serves verified patterns in a format other agents can consume. Complements wq-170 (repo mining) with outbound sharing per d036.
+
+- **Session trace persistence** (added ~s835): Per d035 (stigmergy), ensure each session leaves discoverable traces. Currently only commits and state files persist. Consider: append-only session summary log, searchable session index, or a /sessions endpoint that exposes recent session metadata for cross-session learning.
 
 ---
 

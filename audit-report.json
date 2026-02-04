@@ -1,28 +1,28 @@
 {
-  "session": 996,
-  "timestamp": "2026-02-04T22:35:00.000Z",
-  "previous_audit": 991,
-  "audit_number": 57,
+  "session": 1001,
+  "timestamp": "2026-02-05T00:00:00.000Z",
+  "previous_audit": 996,
+  "audit_number": 58,
   "previous_recommendations_status": {
-    "a56-1": {
+    "a57-1": {
       "status": "in_progress",
-      "notes": "E session cost monitoring continues per a55-1. Current avg $2.62 (up from $2.54 in A#56). Still below $3.50 intervention threshold and $5 cap. Trend stable. Continue monitoring."
+      "notes": "E session cost monitoring continues. Current avg $2.62, same as A#57. Still below $3.50 intervention threshold and $5 cap. Trend stable. Continue monitoring per a55-1 chain."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 330,
-      "consumed": 330,
+      "archive_total": 332,
+      "consumed": 332,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "capacity_gated": true,
-      "capacity_gate_note": "pending_count=4 is below 5 threshold. Intel can auto-promote when actionable.",
+      "capacity_gate_note": "pending_count=3 is below 5 threshold. Intel can auto-promote when actionable.",
       "by_type": {
         "integration_target": 75,
         "collaboration": 20,
-        "pattern": 162,
-        "tool_idea": 57,
+        "pattern": 163,
+        "tool_idea": 58,
         "threat": 16
       },
       "verdict": "HEALTHY - 100% consumption rate. Intel pipeline functional."
@@ -30,25 +30,27 @@
     "brainstorming": {
       "active": 3,
       "ideas": [
-        "Evaluate GLYPH onchain identity (~s985)",
-        "Covenant health dashboard (~s995)",
-        "Cross-agent attestation for covenant fulfillment (~s995)"
+        "Cross-agent attestation for covenant fulfillment (~s995)",
+        "Covenant deadline reminder system (~s1000)",
+        "Pre-commit credential detection test suite (~s1000)"
       ],
       "stale_count": 0,
       "avg_age_sessions": 3,
-      "verdict": "HEALTHY - 3 fresh ideas, 0 stale."
+      "verdict": "HEALTHY - 3 fresh ideas (avg 3 sessions old), 0 stale."
     },
     "queue": {
-      "total": 49,
-      "pending": 4,
-      "in_progress": 0,
+      "total": 50,
+      "pending": 3,
+      "in_progress": 1,
       "blocked": 1,
-      "retired": 44,
+      "retired": 45,
       "pending_items": [
-        "wq-250 (Inbox message routing)",
-        "wq-251 (Document memory-as-lease pattern)",
-        "wq-252 (Set up USDC wallet for d044)",
-        "wq-253 (Evaluate GLYPH onchain identity)"
+        "wq-256 (Address directive d043)",
+        "wq-257 (Address directive d044)",
+        "wq-258 (Add pre-commit credential detection test suite)"
+      ],
+      "in_progress_items": [
+        "wq-255 (Regenerate MDI/Consortium credentials - d045)"
       ],
       "blocked_items": [
         "wq-209 (Rotate compromised credentials - d039)"
@@ -56,79 +58,79 @@
       "audit_sourced_pending": 0,
       "audit_sourced_done": 4,
       "stuck_items": [],
-      "verdict": "HEALTHY - 4 pending, 1 blocked (human action), 0 stuck."
+      "verdict": "HEALTHY - 3 pending, 1 in-progress, 1 blocked (human action), 0 stuck."
     },
     "directives": {
-      "total": 42,
-      "active": 3,
+      "total": 43,
+      "active": 4,
       "in_progress": 1,
       "completed": 38,
       "pending": 0,
       "active_items": [
-        "d042 (ROI-weighted platform selection) - acked s985, queue items wq-245 retired (invalid), 11 sessions since ack",
-        "d043 (Form covenants) - acked s995, 1 session since ack, covenants formed with @nole and @Asuma-Toki",
-        "d044 (USDC wallet) - acked s995, queue item wq-252 created, 1 session since ack"
+        "d042 (ROI-weighted platform selection) - acked s985, 16 sessions since ack",
+        "d043 (Form covenants) - acked s995, 6 sessions since ack, covenants formed",
+        "d044 (USDC wallet) - acked s995, queue item wq-252, 6 sessions since ack",
+        "d045 (Regenerate credentials) - acked s1000, wq-255 in-progress, 1 session since ack"
       ],
       "in_progress_items": [
-        "d039 (Credential rotation) - blocked on human action since s929, now 67 sessions blocked"
+        "d039 (Credential rotation) - blocked on human action since s929, now 72 sessions blocked"
       ],
       "unacted": [],
-      "verdict": "HEALTHY - 38 completed, 3 active with queue items or structural changes."
+      "verdict": "HEALTHY - 38 completed, 4 active with progress, 1 blocked on human."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 11,
-      "last_10_avg_cost": 2.02,
-      "sessions_sampled": [964, 967, 969, 974, 977, 979, 982, 984, 987, 989, 992],
-      "queue_items_completed_since_s991": [],
-      "queue_items_retired_since_s991": ["wq-247 (invalid directive ref)", "wq-248 (already built)", "wq-249 (not build task)"],
+      "last_10_avg_cost": 2.21,
+      "sessions_sampled": [969, 974, 977, 979, 982, 984, 987, 989, 992, 997, 999],
+      "queue_items_completed_since_s996": ["wq-250", "wq-251"],
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked": 5,
+        "total_tracked": 10,
         "addressed_rate": 0.0,
-        "note": "d042 urgent but requires R session structural work (platform-picker.mjs modification). Expected."
+        "note": "d042 is an R session structural task (platform-picker.mjs). B sessions correctly not addressing it."
       },
-      "verdict": "PRODUCTIVE - avg $2.02 (elevated but functional), queue items being processed."
+      "verdict": "PRODUCTIVE - avg $2.21 (elevated), queue items being processed. wq-250 (inbox routing) and wq-251 (covenant endpoint) completed."
     },
     "E": {
       "count_in_history": 6,
       "last_6_avg_cost": 2.62,
-      "sessions_sampled": [968, 973, 978, 983, 988, 993],
-      "cost_trend_data": ["$2.26", "$2.45", "$2.69", "$2.73", "$2.78", "$2.82"],
+      "sessions_sampled": [973, 978, 983, 988, 993, 998],
+      "cost_trend_data": ["$2.45", "$2.69", "$2.73", "$2.78", "$2.82", "$2.26"],
       "budget_gate_compliance": {
-        "sessions_checked": ["s993", "s988", "s983", "s978", "s973", "s968"],
+        "sessions_checked": ["s998", "s993", "s988", "s983", "s978", "s973"],
         "passed": 6,
         "failed": 0,
         "rate": "100%"
       },
       "artifact_compliance": {
-        "sessions_in_phase35_window": [943, 948, 953, 958, 963, 968, 973, 978, 983, 988, 993],
-        "passed": 11,
+        "sessions_verified": [993, 988, 998],
+        "passed": 3,
         "failed": 0,
         "rate": "100%",
-        "note": "All 11 E sessions pass verify-e-artifacts.mjs. Phase 3.5 gate continues effective."
+        "note": "All verified E sessions pass artifact check. Phase 3.5 gate continues effective."
       },
       "mandate_compliance": 1.0,
       "cost_trend": "stable_high",
-      "cost_trend_note": "E session costs: avg $2.62, up from $2.54 in A#56. Still within $5 cap. Continue monitoring per a55-1.",
-      "verdict": "HEALTHY - Artifact gate 100%. Cost high but stable, within cap."
+      "cost_trend_note": "E session costs: avg $2.62, unchanged from A#57. Still within $5 cap. Continue monitoring per a55-1.",
+      "verdict": "HEALTHY - Artifact gate 100%. Cost stable at $2.62, within cap."
     },
     "R": {
       "count_in_history": 7,
-      "last_7_avg_cost": 2.06,
-      "sessions_sampled": [965, 970, 975, 980, 985, 990, 995],
-      "structural_changes_since_s991": [
-        "R#164 (s995) - Add covenant evaluation step to SESSION_REFLECT.md"
+      "last_7_avg_cost": 2.11,
+      "sessions_sampled": [970, 975, 980, 985, 990, 995, 1000],
+      "structural_changes_since_s996": [
+        "R#165 (s1000) - Add active incident tracking protocol to A sessions"
       ],
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "verdict": "EFFICIENT - 1 structural change since last audit, avg $2.06, 0 reverts."
+      "verdict": "EFFICIENT - 1 structural change since last audit, avg $2.11, 0 reverts."
     },
     "A": {
       "count_in_history": 6,
-      "last_6_avg_cost": 1.53,
-      "sessions_sampled": [966, 971, 976, 981, 986, 991],
+      "last_6_avg_cost": 1.50,
+      "sessions_sampled": [971, 976, 981, 986, 991, 996],
       "recommendations_tracked": 1,
       "recommendations_resolved": 0,
       "recommendations_in_progress": 1,
@@ -145,25 +147,34 @@
       "all_pass_bash_n": true
     },
     "credential_files": {
-      "count": 19,
-      "note": "d039 credential rotation still blocked on human verification (now 67 sessions since s929)."
+      "count": 15,
+      "registry_entries": 25,
+      "orphaned": 0,
+      "note": "15 credential files on disk, 25 registry entries (some use direct file paths like .lobchan-key)."
     },
     "stale_references": {
-      "deleted_files_last_60_days": 15,
-      "active_code_references": 0,
-      "doc_references": 4,
-      "doc_files_with_refs": ["dialogue.md (20 in docs)", "chatr-queue.json (1)", "directive-tracking.json (10)", "ctxly.json (9)"],
-      "note": "References exist only in .md documentation files, not in active .sh/.js/.mjs code. Low priority cleanup.",
-      "verdict": "CLEAN - 0 stale references in active code."
+      "deleted_files_last_60_days": 16,
+      "active_code_references": 6,
+      "affected_files": ["components/external.js", "cred-audit.mjs", "api.mjs", "hooks/pre-session/35-maintain-audit_R.sh", "hooks/post-session/13-ctxly-summary.sh", "providers/credentials.js"],
+      "note": "6 references to ctxly.json which exists and is actively used (not stale). 0 references to actually deleted files in active code.",
+      "verdict": "CLEAN - All code references point to existing files."
     },
     "platform_liveness": {
       "tested": ["4claw", "chatr", "agentchan"],
       "all_healthy": true,
-      "note": "All 3 platforms respond via MCP tools."
+      "note": "All 3 primary platforms respond via MCP tools. 4claw has 11 boards, Chatr has 5 agents online, AgentChan has 36 boards."
     },
     "verdict": "HEALTHY - 63 hooks pass syntax, no stale references in code, 3 platforms live."
   },
   "security": {
+    "active_incidents": {
+      "d039": {
+        "sessions_since_reported": 72,
+        "status": "blocked",
+        "blocker": "Human action required - verify exposed keys and contact platform admins",
+        "escalation_status": "d045 supersedes - human confirmed rotation not possible, regeneration approach adopted"
+      }
+    },
     "registry": {
       "agents": 1,
       "unknown_agents": [],
@@ -177,62 +188,58 @@
       "count": 0,
       "external_domains": []
     },
-    "monitors": {
-      "count": "not_tracked",
-      "note": "monitors.json not inspected this session. Previous audit found no SSRF risk.",
-      "ssrf_risk": false
-    },
     "inbox": {
       "messages": 6,
       "unread": 4,
       "injection_patterns": [],
-      "senders": ["imanagent-dev (2, read)", "moltbook/code-watch (2, unread - self-sent)", "task-board (2, unread - test messages)"],
-      "note": "Unread messages are self-sent tests. No injection patterns."
+      "senders": ["imanagent-dev (2, read)", "code-watch (1, unread - self-sent)", "moltbook (1, unread - self-sent)", "task-board (2, unread - test messages)"],
+      "note": "Unread messages are self-sent tests and task-board notifications. No injection patterns detected."
     },
     "human_review": {
       "open": 0,
-      "resolved": 1,
-      "items": ["d039-cred-rotate (marked resolved in human-review.json but d039 directive still in-progress on human action)"]
+      "resolved": 0,
+      "items": []
     },
-    "verdict": "CLEAN - No suspicious entries. Inbox clean."
+    "verdict": "CLEAN - d039 superseded by d045. No suspicious entries. Inbox clean."
   },
   "cost": {
-    "last_30_sessions_total": 60.32,
-    "avg_per_session": 2.01,
+    "last_30_sessions_total": 65.11,
+    "avg_per_session": 2.17,
     "by_type": {
-      "A": {"avg": 1.53, "count": 6, "trend": "stable"},
-      "B": {"avg": 2.02, "count": 11, "trend": "elevated"},
+      "A": {"avg": 1.50, "count": 6, "trend": "stable"},
+      "B": {"avg": 2.21, "count": 11, "trend": "elevated"},
       "E": {"avg": 2.62, "count": 6, "trend": "stable_high"},
-      "R": {"avg": 2.06, "count": 7, "trend": "stable"}
+      "R": {"avg": 2.11, "count": 7, "trend": "stable"}
     },
     "trend": "stable",
-    "note": "Overall cost trend stable at ~$2.01/session avg. All session types elevated compared to A#56 but within caps."
+    "note": "Overall cost trend stable at ~$2.17/session avg. All session types within caps."
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a57-1",
-      "description": "Continue monitoring E session cost trend per a55-1",
+      "id": "a58-1",
+      "description": "Continue monitoring E session cost trend per a55-1/a56-1/a57-1",
       "priority": "low",
-      "action": "Observation only. Current avg $2.62, still below $3.50 intervention threshold. Check again in A#58."
+      "action": "Observation only. Current avg $2.62, stable, still below $3.50 intervention threshold. Check again in A#59."
     }
   ],
   "findings": {
     "positive": {
-      "phase35_gate_continues_effective": "E session artifact compliance at 100% (11/11 sessions tracked). Phase 3.5 gate working correctly.",
       "all_pipelines_healthy": "All 4 pipelines (intel, brainstorming, queue, directives) in healthy state.",
-      "cost_stable": "Overall cost trend stable at ~$2.01/session despite elevated per-type costs.",
+      "e_session_artifact_100_percent": "E session artifact compliance at 100% (3/3 verified sessions).",
+      "phase35_gate_continues_effective": "verify-e-artifacts.mjs shows all recent E sessions pass.",
+      "cost_stable": "Overall cost trend stable at ~$2.17/session despite elevated per-type costs.",
       "infrastructure_clean": "63 hooks pass syntax, no stale references in active code, 3 platforms live.",
       "zero_stuck_items": "Queue has 0 stuck items. 1 blocked item (wq-209/d039) has documented human blocker.",
       "fresh_brainstorming": "BRAINSTORMING.md has 3 fresh ideas (avg 3 sessions old), 0 stale.",
-      "new_directives_progressing": "d043 (covenants) and d044 (USDC wallet) both acked and have queue items or structural changes.",
-      "intel_promotion_tracking": "wq-205 tracking continues: 1/2 intel-auto items succeeded (wq-219). Pipeline quality acceptable."
+      "new_directives_progressing": "d043 (covenants), d044 (USDC wallet), d045 (credential regen) all acked and have queue items or structural changes.",
+      "d045_supersedes_d039": "d045 provides resolution path for d039 - credential regeneration instead of rotation."
     },
     "observations": {
-      "d039_still_blocked": "d039 (credential rotation) remains blocked on human verification since s929. Now at 67 sessions blocked. wq-209 tracking. Still below 100-session retirement threshold.",
-      "d042_not_progressing": "d042 (ROI-weighted platform selection) acked s985, now 11 sessions. wq-245 was retired (invalid ref). Needs R session attention to modify platform-picker.mjs.",
-      "e_session_cost_gradual_increase": "E sessions avg $2.62, up from $2.54 in A#56 (+3%). Individual costs: $2.26→$2.45→$2.69→$2.73→$2.78→$2.82. Gradual upward trend but still within cap.",
-      "all_session_types_elevated": "All session types showing elevated costs vs historical: B $2.02, E $2.62, R $2.06. A sessions normal at $1.53. May be due to increased session complexity."
+      "d039_superseded": "d039 (credential rotation) blocked 72 sessions but d045 provides alternative path. wq-255 in-progress for credential regeneration. Security concern being addressed via different approach.",
+      "d042_needs_attention": "d042 (ROI-weighted platform selection) acked s985, now 16 sessions. This is an R session structural task requiring platform-picker.mjs modification. Should be addressed next R session.",
+      "e_session_cost_stable": "E sessions avg $2.62, unchanged from A#57. Continue observation per a55-1 chain.",
+      "directive_outcomes_addressed_rate_0": "directive-outcomes.json shows 0% addressed rate for all session types on d042. This is expected - d042 is a structural change for R sessions, not routine work."
     }
   }
 }

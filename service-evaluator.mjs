@@ -137,6 +137,77 @@ async function checkActivity(baseUrl, pageHtmlSize) {
   return signals;
 }
 
+async function checkExecutionHistory(baseUrl) {
+  // Check for verifiable execution history — more valuable than uptime badges
+  // for API marketplaces and agent services. Shows last N calls with latency/success.
+  const base = baseUrl.replace(/\/$/, "");
+  const historyPaths = [
+    "/api/stats", "/api/metrics", "/api/history", "/api/calls",
+    "/stats", "/metrics", "/history", "/calls",
+    "/api/executions", "/api/invocations", "/api/requests",
+    "/api/audit", "/api/logs", "/api/usage",
+  ];
+
+  const result = {
+    found: false,
+    endpoints: [],
+    has_latency_data: false,
+    has_success_rate: false,
+    has_call_counts: false,
+    has_recent_activity: false,
+  };
+
+  for (const path of historyPaths) {
+    const body = await fetchBody(base + path, { timeout: FETCH_TIMEOUT, userAgent: "moltbook-evaluator/1.0" });
+    if (!body || body.length < 20) continue;
+
+    // Check if it looks like JSON with execution data
+    const isJson = body.trim().startsWith("{") || body.trim().startsWith("[");
+    if (!isJson) continue;
+
+    const endpoint = { path, size: body.length, signals: [] };
+
+    // Look for latency/response time indicators
+    const latencyPatterns = /latency|response_time|duration|elapsed|ms|milliseconds/i;
+    if (latencyPatterns.test(body)) {
+      endpoint.signals.push("latency");
+      result.has_latency_data = true;
+    }
+
+    // Look for success/error rate indicators
+    const successPatterns = /success|failure|error_rate|success_rate|status_code|http_\d{3}|2xx|4xx|5xx/i;
+    if (successPatterns.test(body)) {
+      endpoint.signals.push("success_rate");
+      result.has_success_rate = true;
+    }
+
+    // Look for call count indicators
+    const countPatterns = /count|total|requests|calls|invocations|hits/i;
+    if (countPatterns.test(body)) {
+      endpoint.signals.push("call_counts");
+      result.has_call_counts = true;
+    }
+
+    // Check for recent timestamps (within last 24 hours)
+    const timestamps = body.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/g) || [];
+    const recent = timestamps.filter(t => {
+      const age = Date.now() - new Date(t).getTime();
+      return age < 24 * 3600 * 1000;
+    });
+    if (recent.length > 0) {
+      endpoint.signals.push("recent_activity");
+      result.has_recent_activity = true;
+    }
+
+    if (endpoint.signals.length > 0) {
+      result.found = true;
+      result.endpoints.push(endpoint);
+    }
+  }
+
+  return result;
+}
+
 async function attemptRegistration(baseUrl) {
   const base = baseUrl.replace(/\/$/, "");
   const regPaths = ["/api/register", "/api/signup", "/api/auth/register", "/register", "/api/users"];
@@ -176,6 +247,7 @@ async function evaluate(url, opts = {}) {
     page: null,
     api_discovery: null,
     activity: null,
+    execution_history: null,
     registration: null,
     summary: {},
   };
@@ -196,7 +268,10 @@ async function evaluate(url, opts = {}) {
   // Step 4: Activity check
   report.activity = await checkActivity(url, report.page?.html_size);
 
-  // Step 5: Registration (if requested)
+  // Step 5: Execution history check (verifiable trust signal)
+  report.execution_history = await checkExecutionHistory(url);
+
+  // Step 6: Registration (if requested)
   if (opts.register) {
     report.registration = await attemptRegistration(url);
   }
@@ -211,13 +286,26 @@ async function evaluate(url, opts = {}) {
   if (report.page.signals?.hasAPI) score += 1;
   if (report.page.signals?.hasDocs) score += 1;
 
+  // Execution history scoring — verifiable history is a strong trust signal
+  const eh = report.execution_history;
+  if (eh.found) {
+    // Base point for having any execution history
+    score += 1;
+    // Bonus for comprehensive data (latency + success rate = verifiable SLA)
+    if (eh.has_latency_data && eh.has_success_rate) score += 2;
+    else if (eh.has_latency_data || eh.has_success_rate) score += 1;
+    // Bonus for recent activity (proves service is actively used)
+    if (eh.has_recent_activity) score += 1;
+  }
+
   let verdict = "dead";
-  if (score >= 7) verdict = "active_with_api";
+  if (score >= 10) verdict = "verified_active";
+  else if (score >= 7) verdict = "active_with_api";
   else if (score >= 5) verdict = "active";
   else if (score >= 3) verdict = "basic";
   else if (score >= 1) verdict = "minimal";
 
-  report.summary = { verdict, score, max_score: 9 };
+  report.summary = { verdict, score, max_score: 13 };
   return report;
 }
 
@@ -277,6 +365,22 @@ if (jsonMode) {
     }
   } else {
     console.log("\nNo activity signals detected.");
+  }
+
+  if (report.execution_history?.found) {
+    console.log(`\nExecution History (verifiable trust):`);
+    const eh = report.execution_history;
+    const caps = [];
+    if (eh.has_latency_data) caps.push("latency");
+    if (eh.has_success_rate) caps.push("success_rate");
+    if (eh.has_call_counts) caps.push("call_counts");
+    if (eh.has_recent_activity) caps.push("recent_activity");
+    console.log(`  Capabilities: ${caps.join(", ") || "basic"}`);
+    for (const ep of eh.endpoints) {
+      console.log(`  ${ep.path}: ${ep.signals.join(", ")}`);
+    }
+  } else {
+    console.log("\nNo execution history endpoints found.");
   }
 
   if (report.registration) {

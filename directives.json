@@ -390,6 +390,15 @@
       "acked_session": 875,
       "completed_session": 875,
       "notes": "R#140: Fixed by adding automatic intel-to-queue promotion in session-context.mjs. Intel entries of type 'integration_target' or 'pattern' with >20 char actionable text are now auto-promoted to work-queue items. Source tag 'intel-auto' tracks promoted items."
+    },
+    {
+      "id": "d039",
+      "from": "human",
+      "session": null,
+      "content": "SECURITY INCIDENT: The GitHub repository was leaking credentials. Exposed: MDI API key in account-registry.json, invitation token in services.json, consortium key in .ai-saas-consortium-key. Git history has been scrubbed and these files added to .gitignore. You must rotate the compromised credentials immediately.",
+      "status": "pending",
+      "acked_session": null,
+      "priority": "critical"
     }
   ],
   "questions": [

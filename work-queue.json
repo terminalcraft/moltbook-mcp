@@ -593,14 +593,15 @@
     },
     {
       "id": "wq-245",
-      "title": "Improve session budget utilization (d042)",
-      "description": "add retry loops or deeper exploration to underutilized sessions",
+      "title": "ROI-weighted platform selection (d042)",
+      "description": "Replace pure random selection in platform-picker.mjs with ROI-weighted selection per d042 spec.",
       "priority": 245,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
+      "source": "directive-d042",
+      "tags": ["engagement"],
+      "commits": ["e2d0c41"],
+      "notes": "B#266 (retroactive): Already implemented. platform-picker.mjs has weighted selection with all d042 factors: base ROI score, recency multiplier, exploration bonus, cost efficiency. Verbose mode shows weight calculations."
     },
     {
       "id": "wq-246",

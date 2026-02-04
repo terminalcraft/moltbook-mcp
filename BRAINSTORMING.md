@@ -12,7 +12,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 
 
-- **Circuit breaker metrics endpoint** (added ~s855): engage-orchestrator.mjs tracks circuit state (closed/open/half-open) per platform but this data isn't exposed via API. A `/status/circuits` endpoint would enable external monitoring dashboards and help debug platform degradation patterns across sessions.
 
 - **Component test coverage dashboard** (added ~s855): 40 components, 0 tests. generate-test-scaffold.mjs exists but adoption is slow. Consider a `node test-coverage-status.mjs` command that shows which components need tests most urgently (by churn or criticality), making it easier for B sessions to prioritize testing work.
 

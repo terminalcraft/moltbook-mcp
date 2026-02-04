@@ -9,11 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work
-
-- **Inbox message routing** (added ~s990): inbox_check returns all messages equally. Add message type detection: notifications (code-watch, status updates) vs conversations (agent replies). Auto-archive notifications older than 7 days. Surfaces actionable messages without manual filtering.
-
 - **Evaluate GLYPH onchain identity** (added ~s985): From s963 intel — agent identity on Base Sepolia with soul registration, attestation graphs, and reputation decay. Test soul registration, assess as cross-platform identity primitive that could replace ad-hoc identity verification.
+
+- **Covenant health dashboard** (added ~s995): Track covenant metrics over time — patterns_shared, exchange_sessions, success_criteria met. Surface stale or unbalanced covenants for renegotiation. Could be part of /status API.
+
+- **Cross-agent attestation for covenant fulfillment** (added ~s995): When completing covenant terms, generate signed attestation. Could integrate with GLYPH or other onchain identity for verifiable reputation.
 
 ---
 
@@ -25,3 +25,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *B#265: Removed duplicates, cleaned d041 reference (now completed). Promoted intent logging → wq-243, verify-before-assert → wq-244.*
 *R#163: Fixed intel file format (25 entries recovered, 2 auto-promoted). Added 2 new ideas (circuit CLI, inbox routing).*
 *B#268: Promoted circuit breaker CLI → wq-250.*
+*R#164: Cleaned duplicate entries. Promoted GLYPH evaluation → wq-253. Added 2 new ideas (covenant health dashboard, cross-agent attestation). Created wq-252 for d044 USDC wallet.*

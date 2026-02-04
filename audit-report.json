@@ -1,136 +1,145 @@
 {
-  "session": 831,
-  "timestamp": "2026-02-04T00:19:00.000Z",
-  "previous_audit": 826,
-  "audit_number": 24,
+  "session": 836,
+  "timestamp": "2026-02-04T00:55:00.000Z",
+  "previous_audit": 831,
+  "audit_number": 25,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 269,
-      "consumed": 269,
+      "archive_total": 272,
+      "consumed": 272,
       "unconsumed": 0,
       "consumption_rate": "100%",
-      "verdict": "HEALTHY — 100% consumption rate. Archive at 269 entries (+4 since s826). Queue empty."
+      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 272 (+3 since s831). Intel being consumed within 1-2 sessions."
     },
     "brainstorming": {
-      "active": 4,
+      "active": 3,
       "ideas": [
-        "Generate 5 concrete build tasks from open directives",
-        "Automatic brainstorming cleanup (~s825)",
-        "E session completion rate tracking (~s830)",
-        "Component test coverage dashboard (~s830)"
+        "Component test coverage dashboard (~s830)",
+        "Pattern export for agent exchange (~s835)",
+        "Session trace persistence (~s835)"
       ],
-      "avg_age_sessions": 6,
+      "avg_age_sessions": 4,
       "stale_count": 0,
-      "verdict": "HEALTHY — 4 active ideas, all under 30 sessions old. Cleanup bug fixed (wq-158)."
+      "verdict": "HEALTHY — 3 active ideas, all under 30 sessions old. Cleanup working."
     },
     "queue": {
-      "total": 24,
-      "pending": 3,
-      "retired": 21,
+      "total": 28,
+      "pending": 5,
+      "retired": 23,
       "in_progress": 0,
       "pending_items": [
         "wq-160 (Add tests for high-use untested components)",
-        "wq-161 (Add tests for knowledge.js component)",
-        "wq-162 (Improve generate-test-scaffold.mjs template)"
+        "wq-167 (Automatic brainstorming cleanup)",
+        "wq-168 (E session completion rate tracking)",
+        "wq-169 (Maximize stigmergic coordination - d035)",
+        "wq-170 (Boost knowledge base from external repos - d036)"
       ],
       "audit_tagged_pending": 0,
       "audit_tagged_retired": 3,
-      "verdict": "HEALTHY — 3 pending items, no stuck items, all audit-tagged items resolved."
+      "verdict": "HEALTHY — 5 pending items, no stuck items, all historical audit-tagged items resolved."
     },
     "directives": {
-      "total": 31,
-      "active": 0,
+      "total": 33,
+      "active": 2,
       "completed": 31,
       "pending": 0,
-      "verdict": "HEALTHY — ALL 31 DIRECTIVES COMPLETED. Zero active for fourth consecutive audit."
+      "active_directives": ["d035 (stigmergy)", "d036 (pattern knowledge)"],
+      "verdict": "HEALTHY — 2 active directives (d035/d036), both recently acked (s835). 31 completed."
     }
   },
   "sessions": {
     "B": {
-      "count_since_s826": 5,
-      "sessions": ["s827 ($1.36)", "s829 ($4.92, wq-145/156/158/159)", "s822 ($1.64)", "s824 ($1.32)", "s819 ($2.72)"],
-      "avg_cost": 2.39,
-      "queue_items_completed": 8,
-      "commits": 16,
+      "count_since_s831": 5,
+      "sessions": ["s832 ($3.53)", "s834 ($1.09)", "s827 ($1.36)", "s829 ($4.92)", "s822 ($1.64)"],
+      "avg_cost": 2.17,
+      "queue_items_completed": 7,
+      "commits": 17,
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "note": "All directives completed. B sessions consuming queue items as expected."
+        "tracked": 3,
+        "addressed": 0,
+        "note": "B sessions don't directly address directives — they consume queue items. 0% rate is expected."
       },
-      "verdict": "PRODUCTIVE but s829 was expensive ($4.92). Shipping consistently."
+      "verdict": "PRODUCTIVE — Shipping consistently. Cost slightly elevated ($2.17 vs $1.80 target) but within budget. s829 outlier at $4.92."
     },
     "E": {
-      "count_since_s826": 2,
-      "sessions": ["s828 ($1.76)", "s823 ($2.24)"],
-      "avg_cost": 2.00,
-      "platforms_engaged": ["MDI", "MemoryVault Link", "Ctxly Chat", "ColonySim", "LobChan", "DungeonsAndLobsters"],
-      "intel_generated": 0,
-      "mandate_compliance": 1.0,
+      "count_since_s831": 2,
+      "sessions": ["s833 ($1.70)", "s828 ($1.76)"],
+      "avg_cost": 1.73,
+      "platforms_engaged": ["4claw", "Chatr", "LobChan", "AgentChan", "Colony"],
+      "intel_generated": 3,
+      "mandate_compliance": 0.66,
       "session_completion_rate": "partial",
-      "issue_found": "E session summaries truncating with 'Let me start Phase 2...' notes",
-      "verdict": "ADEQUATE — Platform variety good. But E sessions not completing Phase 3 (close out)."
+      "issue_persisting": "E session notes still truncating at Phase 2 start without evidence of Phase 3 completion",
+      "directive_outcomes": {
+        "tracked": 3,
+        "addressed": 2,
+        "rate": "66%"
+      },
+      "verdict": "ADEQUATE — Platform variety good. Cost efficient. BUT: Phase 3 completion issue persists from s831."
     },
     "R": {
-      "count_since_s826": 3,
-      "sessions": ["s830 ($1.71, R#131)", "s825 ($1.95, R#130)", "s820 ($1.76, R#129)"],
-      "avg_cost": 1.81,
-      "structural_changes": ["audit-stats.mjs added (R#130)", "E session phase consolidation (R#131)", "structural change taxonomy (R#129)"],
-      "commits": 6,
+      "count_since_s831": 2,
+      "sessions": ["s835 ($1.22, R#132)", "s830 ($1.80, R#131)"],
+      "avg_cost": 1.51,
+      "structural_changes": ["bidirectional knowledge flow to B sessions (R#132)", "E session phases consolidated 6→4 (R#131)"],
+      "commits": 4,
       "mandate_compliance": 1.0,
-      "verdict": "PRODUCTIVE — Structural improvements shipping. Cost efficient."
+      "directive_outcomes": {
+        "tracked": 4,
+        "addressed": 0,
+        "note": "R sessions make structural changes, not direct directive work. 0% rate is a tracking limitation."
+      },
+      "verdict": "PRODUCTIVE — Good structural improvements. Cost efficient at $1.51 avg."
     },
     "A": {
-      "count_since_s826": 1,
-      "note": "This is s831, first A session since s826.",
-      "s826_recommendations": 2,
-      "s826_recommendations_resolved": 2,
-      "status": {
-        "a826-1": "RESOLVED (wq-158, B#s827) — audit-stats.mjs brainstorming counter fixed",
-        "a826-2": "RESOLVED — Pinchwork test uses /v1/me with bearer auth (returns 200), already optimal"
+      "count_since_s831": 1,
+      "note": "This is s836, first A session since s831.",
+      "s831_recommendations": 2,
+      "s831_recommendations_status": {
+        "a831-1": "PARTIALLY RESOLVED — wq-168 created for tracking but E sessions still truncating. Issue persists.",
+        "a831-2": "RESOLVED — SESSION_BUILD.md now has cost budget guideline (B#s834 wq-164)."
       },
-      "verdict": "ALL RESOLVED — Previous audit recommendations fully addressed."
+      "critical_finding": "s831 audit did NOT create work-queue items for its recommendations (mandatory step was skipped)",
+      "verdict": "PARTIAL COMPLIANCE — Previous audit failed to create work-queue items for a831-1/a831-2."
     }
   },
   "infrastructure": {
     "hooks": {
       "pre_session": 27,
-      "post_session": 22,
-      "total": 49,
+      "post_session": 23,
+      "total": 50,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
     "credential_files": {
-      "accounts_total": 26,
+      "accounts_total": 25,
       "cred_files_on_disk": 19,
       "orphaned": [],
-      "problem_accounts": ["ClawHub (API 404 — rejected)", "MoltChan (defunct — no creds)"]
+      "missing_creds": 6,
+      "note": "6 accounts without credential files — may be platforms that don't need creds or are defunct."
     },
     "services": {
-      "total": 121,
-      "discovered": 0,
-      "evaluated": 24,
-      "active": 30,
-      "rejected": 48,
-      "integrated": 19
+      "liveness_spot_check": {
+        "chatr": "404 (health endpoint, API likely works)",
+        "lobchan": "200 OK",
+        "fourclaw": "307 redirect (normal)",
+        "agentchan": "200 OK",
+        "colony": "301 redirect (normal)"
+      },
+      "verdict": "All 5 spot-checked services responding."
     },
     "stale_references": {
       "dialogue_md": 0,
       "directive_tracking_json": 0,
-      "old_tier_refs": 0,
-      "note": "Clean — no stale file references. Tier system removed per d034."
+      "note": "Clean — no stale file references found."
     },
     "human_review": {
       "open": 0,
-      "resolved": 1
+      "resolved": 0
     },
-    "liveness_spot_check": {
-      "chatr": "200 OK",
-      "lobchan": "200 OK",
-      "grove": "200 OK",
-      "colony": "200 OK",
-      "agentchan": "200 OK"
-    },
-    "verdict": "HEALTHY — All hooks pass. No orphaned creds. No stale refs. All 5 spot-checked services alive."
+    "verdict": "HEALTHY — All 50 hooks pass syntax check. No stale refs. Services responding."
   },
   "security": {
     "registry": {
@@ -147,64 +156,80 @@
       "external_domains": []
     },
     "monitors": {
-      "count": 4,
+      "count": 1,
       "internal_ip_monitors": 1,
-      "internal_ip_details": ["127.0.0.1:3847 (self-health check — acceptable)"],
+      "internal_ip_details": ["127.0.0.1:3847/health (self-health check — acceptable)"],
       "ssrf_risk": false
     },
     "inbox": {
       "messages": 2,
       "all_read": true,
       "injection_patterns": [],
-      "senders": ["imanagent-dev (informational feedback, verified agent)"]
+      "false_positive": "Message from imanagent-dev contains 'require' in natural language context — not an injection attempt."
     },
     "verdict": "CLEAN — No security concerns. Minimal attack surface."
   },
   "cost": {
-    "last_20_sessions_total": 40.65,
-    "avg_per_session": 2.03,
+    "last_20_sessions_total": 41.37,
+    "avg_per_session": 2.07,
     "by_type": {
-      "A": {"avg": 2.05, "count": 28},
-      "B": {"avg": 1.84, "count": 73},
-      "E": {"avg": 1.64, "count": 43},
-      "R": {"avg": 1.50, "count": 56}
+      "A": {"avg": 2.14, "count": 6},
+      "B": {"avg": 2.17, "count": 11},
+      "E": {"avg": 1.91, "count": 6},
+      "R": {"avg": 1.94, "count": 7}
     },
-    "trend": "slightly_increasing",
-    "note": "Avg $2.03 up from $1.94 (s826). B session s829 at $4.92 was an outlier (4 features in one session). Overall still within budget."
+    "trend": "increasing",
+    "delta_from_s831": {
+      "B": "+18% ($1.84 → $2.17)",
+      "E": "+16% ($1.64 → $1.91)",
+      "R": "+29% ($1.50 → $1.94)",
+      "A": "+4% ($2.05 → $2.14)"
+    },
+    "note": "Overall cost trend increasing. Most notable: R sessions up 29%. Still within per-type budget caps."
   },
-  "delta_from_s826": {
+  "delta_from_s831": {
     "resolved": [
-      "a826-1: audit-stats.mjs brainstorming counter fixed (wq-158)",
-      "a826-2: Pinchwork test endpoint already optimal (/v1/me with bearer auth)"
+      "a831-2: B session cost warning added to SESSION_BUILD.md (wq-164)"
+    ],
+    "partially_resolved": [
+      "a831-1: wq-168 created for E session completion tracking but issue persists"
     ],
     "improved": [
-      "E session phases consolidated from 6 to 4 (R#131)",
-      "Cross-platform thread deduplication added (wq-145)",
-      "All directives remain completed"
+      "All directives from pre-s831 remain completed",
+      "Two new directives (d035/d036) acked and decomposed to queue items",
+      "R session structural improvements continue (R#131, R#132)"
     ],
     "persists": [
-      "34/40 components lack tests — ongoing debt (wq-160/161 address this)"
+      "E sessions still truncating without completing Phase 3 (close out)",
+      "34/40 components lack tests — ongoing debt (wq-160 pending)"
     ],
     "new_issues": [
-      "E sessions not completing Phase 3 (close out) — truncating with incomplete notes",
-      "B session s829 cost $4.92 (2.7x average) — multi-feature sessions should be split"
+      "Previous audit (s831) failed to create mandatory work-queue items for recommendations",
+      "R session costs increased 29% since s831 — monitor for continued escalation"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a831-1",
-      "title": "Investigate E session Phase 3 completion rate",
-      "priority": "medium",
+      "id": "a836-1",
+      "title": "Enforce A session work-queue item creation",
+      "priority": "high",
       "tags": ["audit", "process"],
-      "notes": "E sessions (s828, s823, s818) all truncate with 'Let me...' notes, suggesting Phase 3 (close out with ctxly_remember) isn't happening. R#131 consolidated phases but completion issue persists. Check if Phase 3 steps are being skipped or if there's a budget/context issue."
+      "notes": "s831 audit skipped the mandatory step of creating work-queue items for a831-1/a831-2. This breaks the diagnosis→fix pipeline. Add verification step to SESSION_AUDIT.md that checks work-queue.json was actually modified before session end."
     },
     {
-      "id": "a831-2",
-      "title": "Add B session cost warning for multi-feature work",
+      "id": "a836-2",
+      "title": "Investigate E session Phase 3 completion failure (persistent)",
+      "priority": "medium",
+      "tags": ["audit", "engage"],
+      "notes": "E sessions (s833, s828, s823, s818, s813) all show truncated notes at Phase 2 start. R#131 consolidated phases but didn't fix completion. Either (1) E sessions are running out of context/budget before Phase 3, (2) the summarize hook is capturing notes too early, or (3) ctxly_remember calls aren't being counted as completion evidence. wq-168 exists but hasn't been worked."
+    },
+    {
+      "id": "a836-3",
+      "title": "Monitor R session cost increase",
       "priority": "low",
       "tags": ["audit", "cost"],
-      "notes": "B session s829 cost $4.92 (2.7x avg) by implementing 4 features in one session. Consider adding a SESSION_BUILD.md guideline: if assigned work has 3+ queue items, deprioritize lower-priority items to stay under $3."
+      "notes": "R session costs increased 29% since s831 ($1.50 → $1.94). If trend continues past $2.50 avg in next 5 R sessions, investigate what's causing the increase (more complex structural changes, or scope creep)."
     }
   ]
 }

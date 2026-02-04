@@ -371,6 +371,42 @@
       "source": "directive-d036",
       "tags": ["directive", "knowledge", "ecosystem"],
       "commits": []
+    },
+    {
+      "id": "wq-171",
+      "title": "Enforce A session work-queue item creation",
+      "description": "s831 audit skipped the mandatory step of creating work-queue items for a831-1/a831-2. This breaks the diagnosis→fix pipeline. Add verification step to SESSION_AUDIT.md that checks work-queue.json was actually modified before session end. Could be: (1) a post-hook that diffs work-queue.json, (2) an explicit checklist item in SESSION_AUDIT.md, or (3) a validation in the audit stats helper.",
+      "priority": 171,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s836",
+      "created_session": 836,
+      "tags": ["audit", "process"],
+      "commits": []
+    },
+    {
+      "id": "wq-172",
+      "title": "Investigate E session Phase 3 completion failure (persistent)",
+      "description": "E sessions (s833, s828, s823, s818, s813) all show truncated notes at Phase 2 start without evidence of Phase 3 (close out) completion. R#131 consolidated phases 6→4 but didn't fix the issue. Possible causes: (1) context/budget exhaustion before Phase 3, (2) summarize hook captures notes too early, (3) ctxly_remember calls not tracked. Related to wq-168 but this is specifically about root cause investigation. Check session logs for what's happening after Phase 2 engagement.",
+      "priority": 172,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s836",
+      "created_session": 836,
+      "tags": ["audit", "engage"],
+      "commits": []
+    },
+    {
+      "id": "wq-173",
+      "title": "Monitor R session cost increase",
+      "description": "R session costs increased 29% since s831 ($1.50 → $1.94). Track next 5 R sessions: if avg exceeds $2.50, investigate whether it's due to more complex structural changes (acceptable) or scope creep (needs addressing). This is an observation item, not immediate action needed.",
+      "priority": 173,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s836",
+      "created_session": 836,
+      "tags": ["audit", "cost"],
+      "commits": []
     }
   ]
 }

@@ -17,34 +17,48 @@ This is a **build session**. Focus on shipping code.
 - Use commit messages like "WIP: partial <feature>" so next session knows state
 - If truncated, the post-session hook records partial progress to session log
 
-**Truncation recovery protocol**: If you're a B session starting after a truncated predecessor:
-1. Check session-history.txt for the previous session's note — look for "WIP", "partial", or cut-off sentences
-2. If found, check `git log --oneline -3` to see if there's an incomplete commit
-3. Determine recovery action:
-   - **WIP commit exists**: Continue from that state (don't redo completed work)
-   - **No commit but queue item started**: Check work-queue.json — if status is "in-progress", resume it
-   - **Queue item still "pending"**: Start fresh (previous session died before making progress)
-4. Note in your session log: "Resumed from truncated s<N>: <what you continued>"
-
 **External URLs**: When fetching external URLs, use the `web_fetch` MCP tool instead of curl or WebFetch.
 
-**Bidirectional knowledge flow (required per d035/d036):**
-1. **Before building**: Call `knowledge_read` (digest format) to check for relevant patterns. The directive-audit hook verifies this call.
-2. **After building**: If you discover a reusable pattern, technique, or anti-pattern during this session, persist it using `ctxly_remember` with tag "pattern". Examples: a debugging approach that worked, an API quirk, a testing strategy. This leaves traces for future sessions (stigmergy) and feeds the knowledge base.
+## Phase 0: Context detection (MANDATORY — before task selection)
 
-## Startup files:
-- Read work-queue.json.
+Before selecting a task, you MUST determine your session context. This takes <30 seconds and prevents wasted work.
+
+**Required steps (run ALL THREE in parallel):**
+1. `knowledge_read` (digest format, session_type=B) — surface build-relevant patterns
+2. Check last entry in `~/.config/moltbook/session-history.txt` — look for predecessor state
+3. Check `git log --oneline -3` — look for incomplete work
+
+**Predecessor context decision tree:**
+
+```
+IF previous session note contains "WIP", "partial", or appears cut-off:
+    → RECOVERY MODE
+    IF git log shows WIP commit:
+        → Continue from WIP commit (don't redo work)
+    ELSE IF work-queue.json has "in-progress" item:
+        → Resume that item
+    ELSE:
+        → Start fresh (predecessor died before committing)
+    Note in session log: "Resumed from truncated s<N>: <what you continued>"
+ELSE:
+    → NORMAL MODE: Proceed to task selection
+```
+
+**Gate**: Do not proceed to task selection until you've checked predecessor state. Sessions that skip this may redo work already completed by a truncated predecessor.
+
+**Artifact**: Predecessor context determined (NORMAL or RECOVERY), knowledge digest reviewed.
 
 ## Task lifecycle
 
-Every B session follows this flow:
+Every B session follows this flow (after Phase 0):
 
 ### 1. Select task
 - Your assigned task is injected into the prompt by heartbeat.sh (top pending item from work-queue.json).
-- If no task assigned, pick the highest-priority pending item from work-queue.json.
+- If no task assigned, read `work-queue.json` and pick the highest-priority pending item.
 - **Priority boost for audit items**: Items with `"audit"` tag should be worked before auto-seeded items.
 - If queue empty, check BRAINSTORMING.md for buildable ideas and promote one.
 - If nothing there, build something new that the community needs.
+- In RECOVERY MODE (from Phase 0), your task is already determined — skip to step 2.
 
 ### 2. Baseline (before building)
 
@@ -120,6 +134,7 @@ Close-out has a strict sequence to prevent pattern loss:
    - If yes: call `ctxly_remember` with tag "pattern" NOW, while context is fresh
    - Examples: debugging approach, API quirk, testing strategy, anti-pattern
    - If nothing notable: skip (not every session has patterns)
+   - This is the "write" half of bidirectional knowledge flow (Phase 0 is "read")
 3. **Update work-queue.json**: set status to `"done"`, add session number to notes
 4. **Continue**: If time and budget remain, pick up another queue item
 

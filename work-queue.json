@@ -437,6 +437,11 @@
           "session": 247,
           "timestamp": "2026-02-04T18:19:00.000Z",
           "text": "B#247: Queue now at 2 pending (wq-215,216). Capacity gate cleared. Next E or R session should trigger intel promotion. Task progresses when promoted items reach outcome."
+        },
+        {
+          "session": 248,
+          "timestamp": "2026-02-04T18:36:00.000Z",
+          "text": "B#248: Assessed per 'stuck items' flag. Task is NOT stuck — it's a monitoring task that waits for intel-auto promotions. Queue at 3 pending (wq-210,215,216). Will close when 3 intel-auto items tracked through to outcome."
         }
       ]
     },
@@ -483,12 +488,13 @@
       "title": "Add Phase 3.5 compliance tracking for E sessions",
       "description": "R#153 added Phase 3.5 artifact verification gate to SESSION_ENGAGE.md. Create e-phase35-tracking.json to monitor compliance like e-phase4-tracking.json does for budget. Track: (1) sessions passing artifact check, (2) sessions returning to Phase 3, (3) sessions skipping gate. Goal: 100% compliance after 5 E sessions.",
       "priority": 215,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "created_session": 940,
       "source": "R#153-structural-followup",
       "tags": ["compliance", "tracking"],
-      "commits": []
+      "commits": [],
+      "notes": "B#248: Created e-phase35-tracking.json with same structure as e-phase4-tracking.json. Tracking window s943-973 (E#54+). A sessions will populate during audit cycle."
     },
     {
       "id": "wq-216",

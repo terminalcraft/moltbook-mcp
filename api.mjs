@@ -3652,6 +3652,176 @@ ${gaps.length ? `<h2>Gaps (Unused Tools)</h2><div class="gaps">${gaps.map(g => `
   }
 });
 
+// Covenant health dashboard — track agent relationships and formal covenants (wq-251, B#271)
+app.get("/status/covenants", (req, res) => {
+  try {
+    const covenantsPath = join("/home/moltbot/.config/moltbook", "covenants.json");
+    const covenants = JSON.parse(readFileSync(covenantsPath, "utf8"));
+    const agents = covenants.agents || {};
+
+    // Count agents by covenant strength
+    const strengthCounts = { none: 0, weak: 0, emerging: 0, strong: 0, mutual: 0 };
+    for (const data of Object.values(agents)) {
+      const s = data.covenant_strength || "none";
+      if (strengthCounts[s] !== undefined) strengthCounts[s]++;
+    }
+
+    // Extract templated covenants
+    const formalCovenants = [];
+    for (const [handle, data] of Object.entries(agents)) {
+      if (data.templated_covenants && data.templated_covenants.length > 0) {
+        for (const cov of data.templated_covenants) {
+          const created = new Date(cov.created);
+          const now = new Date();
+          const daysSinceCreated = Math.floor((now - created) / (1000 * 60 * 60 * 24));
+          const metrics = cov.metrics || {};
+          const metricsTotal = Object.values(metrics).reduce((a, b) => a + b, 0);
+          const isStale = daysSinceCreated > 7 && metricsTotal === 0;
+          formalCovenants.push({
+            agent: handle,
+            template: cov.template,
+            status: cov.status,
+            created: cov.created,
+            days_since_created: daysSinceCreated,
+            metrics,
+            is_stale: isStale,
+            notes: cov.notes || "",
+          });
+        }
+      }
+    }
+
+    // Find top candidates for new covenants (strong/mutual without templated covenants)
+    const candidates = [];
+    for (const [handle, data] of Object.entries(agents)) {
+      const strength = data.covenant_strength || "none";
+      if ((strength === "strong" || strength === "mutual") && (!data.templated_covenants || data.templated_covenants.length === 0)) {
+        candidates.push({
+          agent: handle,
+          strength,
+          sessions: (data.sessions || []).length,
+          platforms: (data.platforms || []).length,
+          last_seen: data.last_seen,
+        });
+      }
+    }
+    candidates.sort((a, b) => b.sessions - a.sessions);
+
+    // Calculate health metrics
+    const staleCount = formalCovenants.filter(c => c.is_stale).length;
+    const activeCount = formalCovenants.filter(c => c.status === "active" && !c.is_stale).length;
+    const health = {
+      formal_covenants: formalCovenants.length,
+      active_healthy: activeCount,
+      stale: staleCount,
+      candidates_for_covenants: candidates.length,
+      health_score: formalCovenants.length > 0 ? Math.round((activeCount / formalCovenants.length) * 100) : 0,
+    };
+
+    const summary = {
+      total_tracked_agents: Object.keys(agents).length,
+      by_strength: strengthCounts,
+      formal_covenants: formalCovenants.length,
+      last_updated: covenants.last_updated,
+      health,
+    };
+
+    if (req.query.format === "json") {
+      return res.json({
+        timestamp: new Date().toISOString(),
+        summary,
+        formal_covenants: formalCovenants,
+        covenant_candidates: candidates.slice(0, 10),
+      });
+    }
+
+    // HTML dashboard
+    const strengthColors = { none: "#555", weak: "#f59e0b", emerging: "#3b82f6", strong: "#22c55e", mutual: "#8b5cf6" };
+    const strengthBars = Object.entries(strengthCounts).map(([s, c]) =>
+      `<div style="display:flex;align-items:center;gap:0.5rem;margin:0.25rem 0">
+        <span style="width:80px;color:${strengthColors[s]};font-weight:500">${s}</span>
+        <div style="background:#222;height:12px;flex:1;border-radius:4px;overflow:hidden">
+          <div style="background:${strengthColors[s]};height:100%;width:${Math.min(c * 2, 100)}%;transition:width 0.3s"></div>
+        </div>
+        <span style="width:40px;text-align:right;color:#888">${c}</span>
+      </div>`
+    ).join("");
+
+    const covenantRows = formalCovenants.map(c => {
+      const metricsStr = Object.entries(c.metrics).map(([k, v]) => `${k}:${v}`).join(", ") || "—";
+      const statusColor = c.is_stale ? "#ef4444" : c.status === "active" ? "#22c55e" : "#888";
+      return `<tr>
+        <td style="color:#8b5cf6;font-weight:500">@${c.agent}</td>
+        <td>${c.template}</td>
+        <td style="color:${statusColor}">${c.is_stale ? "STALE" : c.status}</td>
+        <td style="color:#888">${c.days_since_created}d ago</td>
+        <td style="color:#888;font-size:0.8rem">${metricsStr}</td>
+      </tr>`;
+    }).join("") || `<tr><td colspan="5" style="color:#555;text-align:center">No formal covenants yet</td></tr>`;
+
+    const candidateRows = candidates.slice(0, 5).map(c =>
+      `<tr>
+        <td style="color:${strengthColors[c.strength]};font-weight:500">@${c.agent}</td>
+        <td>${c.strength}</td>
+        <td>${c.sessions} sessions</td>
+        <td>${c.platforms} platforms</td>
+      </tr>`
+    ).join("") || `<tr><td colspan="4" style="color:#555;text-align:center">No candidates</td></tr>`;
+
+    const healthColor = health.health_score >= 80 ? "#22c55e" : health.health_score >= 50 ? "#f59e0b" : "#ef4444";
+
+    const html = `<!DOCTYPE html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Covenant Health Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e5e5e5;padding:2rem}
+h1{font-size:1.5rem;margin-bottom:0.5rem;color:#f5f5f5}h2{font-size:1.1rem;margin:1.5rem 0 1rem;color:#aaa}
+.subtitle{color:#666;font-size:0.9rem;margin-bottom:1.5rem}
+.stats{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.stat{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:1rem 1.5rem;min-width:120px}
+.stat .label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.05em}.stat .value{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+table{width:100%;border-collapse:collapse;font-size:.875rem;margin-bottom:1.5rem}th{text-align:left;padding:.5rem;border-bottom:2px solid #333;color:#888;font-weight:500}
+td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
+.section{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:1.5rem;margin-bottom:1.5rem}
+</style>
+</head><body>
+<h1>Covenant Health Dashboard</h1>
+<p class="subtitle">Agent relationships and formal commitments (wq-251)</p>
+
+<div class="stats">
+  <div class="stat"><div class="label">Tracked Agents</div><div class="value">${summary.total_tracked_agents}</div></div>
+  <div class="stat"><div class="label">Formal Covenants</div><div class="value">${summary.formal_covenants}</div></div>
+  <div class="stat"><div class="label">Health Score</div><div class="value" style="color:${healthColor}">${health.health_score}%</div></div>
+  <div class="stat"><div class="label">Stale</div><div class="value" style="color:${health.stale > 0 ? "#ef4444" : "#22c55e"}">${health.stale}</div></div>
+  <div class="stat"><div class="label">Candidates</div><div class="value" style="color:#3b82f6">${health.candidates_for_covenants}</div></div>
+</div>
+
+<div class="section">
+  <h2 style="margin-top:0">Relationship Strength Distribution</h2>
+  ${strengthBars}
+</div>
+
+<h2>Formal Covenants</h2>
+<table>
+<thead><tr><th>Agent</th><th>Template</th><th>Status</th><th>Age</th><th>Metrics</th></tr></thead>
+<tbody>${covenantRows}</tbody>
+</table>
+
+<h2>Top Candidates for New Covenants</h2>
+<p style="color:#666;font-size:0.85rem;margin-bottom:1rem">Strong/mutual relationships without formal covenants</p>
+<table>
+<thead><tr><th>Agent</th><th>Strength</th><th>Sessions</th><th>Platforms</th></tr></thead>
+<tbody>${candidateRows}</tbody>
+</table>
+
+<p style="margin-top:2rem;color:#555;font-size:.75rem">Last updated: ${covenants.last_updated || "unknown"} · <a href="?format=json" style="color:#3b82f6">JSON</a></p>
+</body></html>`;
+    return res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Unified pipeline view — queue + brainstorming + directives in one response
 app.get("/status/pipeline", auth, (req, res) => {
   try {

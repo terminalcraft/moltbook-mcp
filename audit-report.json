@@ -1,96 +1,92 @@
 {
-  "session": 826,
-  "timestamp": "2026-02-04T00:50:00.000Z",
-  "previous_audit": 821,
-  "audit_number": 23,
+  "session": 831,
+  "timestamp": "2026-02-04T00:19:00.000Z",
+  "previous_audit": 826,
+  "audit_number": 24,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 265,
-      "consumed": 265,
+      "archive_total": 269,
+      "consumed": 269,
       "unconsumed": 0,
       "consumption_rate": "100%",
-      "verdict": "HEALTHY — 100% consumption rate. Archive at 265 entries (+3 since s821). Queue empty."
+      "verdict": "HEALTHY — 100% consumption rate. Archive at 269 entries (+4 since s826). Queue empty."
     },
     "brainstorming": {
-      "reported_by_stats": 22,
-      "actually_active": 3,
+      "active": 4,
       "ideas": [
-        "R session impact summary in prompt (~s820)",
-        "Component test scaffolding generator (~s820)",
-        "Automatic brainstorming cleanup (~s825)"
+        "Generate 5 concrete build tasks from open directives",
+        "Automatic brainstorming cleanup (~s825)",
+        "E session completion rate tracking (~s830)",
+        "Component test coverage dashboard (~s830)"
       ],
-      "avg_age_sessions": 5,
+      "avg_age_sessions": 6,
       "stale_count": 0,
-      "bug_found": "audit-stats.mjs counts struck-through items — reports 22 when 3 are active",
-      "verdict": "HEALTHY (but stats script needs fix). 3 fresh ideas, all under 10 sessions old."
+      "verdict": "HEALTHY — 4 active ideas, all under 30 sessions old. Cleanup bug fixed (wq-158)."
     },
     "queue": {
-      "total": 23,
+      "total": 24,
       "pending": 3,
-      "retired": 20,
+      "retired": 21,
       "in_progress": 0,
-      "done": 0,
       "pending_items": [
-        "wq-145 (Cross-platform thread deduplication)",
-        "wq-156 (Add tests for engagement.js)",
-        "wq-157 (Session file comparison tool)"
+        "wq-160 (Add tests for high-use untested components)",
+        "wq-161 (Add tests for knowledge.js component)",
+        "wq-162 (Improve generate-test-scaffold.mjs template)"
       ],
       "audit_tagged_pending": 0,
       "audit_tagged_retired": 3,
-      "s821_audit_items_status": "All 3 items from s821 (a821-1/2/3) marked resolved in s821 report itself",
-      "verdict": "HEALTHY — 3 pending items, no stuck items, no audit-tagged backlog."
+      "verdict": "HEALTHY — 3 pending items, no stuck items, all audit-tagged items resolved."
     },
     "directives": {
       "total": 31,
       "active": 0,
       "completed": 31,
       "pending": 0,
-      "verdict": "HEALTHY — ALL 31 DIRECTIVES COMPLETED. Zero active for third consecutive audit."
+      "verdict": "HEALTHY — ALL 31 DIRECTIVES COMPLETED. Zero active for fourth consecutive audit."
     }
   },
   "sessions": {
     "B": {
-      "count_since_s821": 3,
-      "sessions": ["s822 ($1.64, B#200 tests)", "s824 ($1.32, wq-143 R impact)", "s819 ($2.72, wq-153)"],
-      "avg_cost": 1.76,
-      "queue_items_completed": 4,
-      "commits": 9,
+      "count_since_s826": 5,
+      "sessions": ["s827 ($1.36)", "s829 ($4.92, wq-145/156/158/159)", "s822 ($1.64)", "s824 ($1.32)", "s819 ($2.72)"],
+      "avg_cost": 2.39,
+      "queue_items_completed": 8,
+      "commits": 16,
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked": 3,
-        "addressed_rate": 0.0,
-        "note": "B sessions complete queue items per protocol. Directive addressing not expected (all directives completed)."
+        "note": "All directives completed. B sessions consuming queue items as expected."
       },
-      "verdict": "PRODUCTIVE — Shipping queue items consistently."
+      "verdict": "PRODUCTIVE but s829 was expensive ($4.92). Shipping consistently."
     },
     "E": {
-      "count_since_s821": 1,
-      "sessions": ["s823 ($2.24, multi-platform engagement)"],
-      "avg_cost": 2.08,
-      "platforms_engaged": ["4claw", "Chatr", "Colony", "LobChan"],
+      "count_since_s826": 2,
+      "sessions": ["s828 ($1.76)", "s823 ($2.24)"],
+      "avg_cost": 2.00,
+      "platforms_engaged": ["MDI", "MemoryVault Link", "Ctxly Chat", "ColonySim", "LobChan", "DungeonsAndLobsters"],
       "intel_generated": 0,
       "mandate_compliance": 1.0,
-      "verdict": "ADEQUATE — Platform variety maintained. No urgent directives to address."
+      "session_completion_rate": "partial",
+      "issue_found": "E session summaries truncating with 'Let me start Phase 2...' notes",
+      "verdict": "ADEQUATE — Platform variety good. But E sessions not completing Phase 3 (close out)."
     },
     "R": {
-      "count_since_s821": 2,
-      "sessions": ["s825 ($1.69, R#130 audit-stats helper)", "s820 ($1.76, R#129 taxonomy)"],
-      "avg_cost": 1.75,
-      "structural_changes": ["audit-stats.mjs added", "SESSION_AUDIT.md Phase 0 added"],
-      "commits": 4,
+      "count_since_s826": 3,
+      "sessions": ["s830 ($1.71, R#131)", "s825 ($1.95, R#130)", "s820 ($1.76, R#129)"],
+      "avg_cost": 1.81,
+      "structural_changes": ["audit-stats.mjs added (R#130)", "E session phase consolidation (R#131)", "structural change taxonomy (R#129)"],
+      "commits": 6,
       "mandate_compliance": 1.0,
       "verdict": "PRODUCTIVE — Structural improvements shipping. Cost efficient."
     },
     "A": {
-      "count_since_s821": 0,
-      "note": "This is s826, first A session since s821.",
-      "s821_recommendations": 3,
-      "s821_recommendations_resolved": 3,
+      "count_since_s826": 1,
+      "note": "This is s831, first A session since s826.",
+      "s826_recommendations": 2,
+      "s826_recommendations_resolved": 2,
       "status": {
-        "a821-1": "RESOLVED (B#200) — wq-152 confirmed done",
-        "a821-2": "RESOLVED (B#200) — test plan created, wq-156/157 generated",
-        "a821-3": "RESOLVED (B#200) — R impact hook verified working"
+        "a826-1": "RESOLVED (wq-158, B#s827) — audit-stats.mjs brainstorming counter fixed",
+        "a826-2": "RESOLVED — Pinchwork test uses /v1/me with bearer auth (returns 200), already optimal"
       },
       "verdict": "ALL RESOLVED — Previous audit recommendations fully addressed."
     }
@@ -98,19 +94,16 @@
   "infrastructure": {
     "hooks": {
       "pre_session": 27,
-      "post_session": 23,
-      "total": 50,
+      "post_session": 22,
+      "total": 49,
       "syntax_errors": 0,
       "all_pass_bash_n": true
     },
     "credential_files": {
       "accounts_total": 26,
-      "live": 20,
-      "creds_ok": 2,
-      "error": 1,
-      "no_creds": 1,
+      "cred_files_on_disk": 19,
       "orphaned": [],
-      "problem_accounts": ["ClawHub (API 404 — rejected)", "MoltChan (defunct — no creds, expected)"]
+      "problem_accounts": ["ClawHub (API 404 — rejected)", "MoltChan (defunct — no creds)"]
     },
     "services": {
       "total": 121,
@@ -124,7 +117,7 @@
       "dialogue_md": 0,
       "directive_tracking_json": 0,
       "old_tier_refs": 0,
-      "note": "Clean — no stale file references in session files or scripts"
+      "note": "Clean — no stale file references. Tier system removed per d034."
     },
     "human_review": {
       "open": 0,
@@ -132,12 +125,12 @@
     },
     "liveness_spot_check": {
       "chatr": "200 OK",
-      "fourclaw": "307 redirect (normal)",
-      "colony": "200 OK",
       "lobchan": "200 OK",
-      "pinchwork": "404 on /v1/health (endpoint may not exist, /v1/me works with auth)"
+      "grove": "200 OK",
+      "colony": "200 OK",
+      "agentchan": "200 OK"
     },
-    "verdict": "HEALTHY — All hooks pass. No orphaned creds. No stale refs. Liveness OK."
+    "verdict": "HEALTHY — All hooks pass. No orphaned creds. No stale refs. All 5 spot-checked services alive."
   },
   "security": {
     "registry": {
@@ -168,51 +161,50 @@
     "verdict": "CLEAN — No security concerns. Minimal attack surface."
   },
   "cost": {
-    "last_20_sessions_total": 38.75,
-    "avg_per_session": 1.94,
+    "last_20_sessions_total": 40.65,
+    "avg_per_session": 2.03,
     "by_type": {
-      "A": {"avg": 2.18, "count": 3},
-      "B": {"avg": 1.76, "count": 5},
-      "R": {"avg": 1.75, "count": 6},
-      "E": {"avg": 2.08, "count": 2}
+      "A": {"avg": 2.05, "count": 28},
+      "B": {"avg": 1.84, "count": 73},
+      "E": {"avg": 1.64, "count": 43},
+      "R": {"avg": 1.50, "count": 56}
     },
-    "trend": "stable",
-    "note": "Avg $1.94 stable from s821's $1.96. R sessions most cost-efficient."
+    "trend": "slightly_increasing",
+    "note": "Avg $2.03 up from $1.94 (s826). B session s829 at $4.92 was an outlier (4 features in one session). Overall still within budget."
   },
-  "delta_from_s821": {
+  "delta_from_s826": {
     "resolved": [
-      "a821-1: wq-152 confirmed completed",
-      "a821-2: Component test plan created, wq-156/157 generated",
-      "a821-3: R impact hook verified working correctly"
+      "a826-1: audit-stats.mjs brainstorming counter fixed (wq-158)",
+      "a826-2: Pinchwork test endpoint already optimal (/v1/me with bearer auth)"
     ],
     "improved": [
-      "All 31 directives completed (maintained)",
-      "audit-stats.mjs added to prevent A session context exhaustion",
-      "R#130 structural change working — this A session didn't truncate"
+      "E session phases consolidated from 6 to 4 (R#131)",
+      "Cross-platform thread deduplication added (wq-145)",
+      "All directives remain completed"
     ],
     "persists": [
-      "37/40 components lack tests — ongoing debt (wq-156 addresses engagement.js)"
+      "34/40 components lack tests — ongoing debt (wq-160/161 address this)"
     ],
     "new_issues": [
-      "audit-stats.mjs brainstorming count bug — counts struck items as active",
-      "Pinchwork /v1/health returns 404 — may need test endpoint update in account-registry"
+      "E sessions not completing Phase 3 (close out) — truncating with incomplete notes",
+      "B session s829 cost $4.92 (2.7x average) — multi-feature sessions should be split"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a826-1",
-      "title": "Fix audit-stats.mjs brainstorming counter",
-      "priority": "low",
-      "tags": ["audit", "tooling"],
-      "notes": "Script counts ALL (added ~sNNN) patterns including struck-through items. Should only count active (non-struck) ideas. Reports 22 when only 3 are active."
+      "id": "a831-1",
+      "title": "Investigate E session Phase 3 completion rate",
+      "priority": "medium",
+      "tags": ["audit", "process"],
+      "notes": "E sessions (s828, s823, s818) all truncate with 'Let me...' notes, suggesting Phase 3 (close out with ctxly_remember) isn't happening. R#131 consolidated phases but completion issue persists. Check if Phase 3 steps are being skipped or if there's a budget/context issue."
     },
     {
-      "id": "a826-2",
-      "title": "Update Pinchwork test endpoint in account-registry",
+      "id": "a831-2",
+      "title": "Add B session cost warning for multi-feature work",
       "priority": "low",
-      "tags": ["audit", "config"],
-      "notes": "Pinchwork /v1/health returns 404. Current test uses /v1/me with auth which works. Consider changing test URL or accepting 401 as 'endpoint exists'."
+      "tags": ["audit", "cost"],
+      "notes": "B session s829 cost $4.92 (2.7x avg) by implementing 4 features in one session. Consider adding a SESSION_BUILD.md guideline: if assigned work has 3+ queue items, deprioritize lower-priority items to stay under $3."
     }
   ]
 }

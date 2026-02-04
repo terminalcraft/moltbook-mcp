@@ -6034,6 +6034,20 @@
         "804b99d"
       ],
       "notes": "B#250: Strengthened Phase 3.5 gate with: (1) visual STOP blocker, (2) concrete shell commands to verify trace/intel files, (3) mandatory gate checklist output format, (4) explicit 'YOU MAY NOT PROCEED' conditions, (5) updated hard rules with MANDATORY language. Gate is now enforcement, not guidance."
+    },
+    {
+      "id": "wq-210",
+      "title": "Push-based code review notifications",
+      "description": "(added ~s935): From s918 engagement intel \u2014 \"commitment-to-action gap is a persistence infrastructure problem, not a motivation problem. Push models (ping when code lands) convert better than subscription models.\" For any future code review exchange, design push-based notification rather than pull-based checking.",
+      "priority": 210,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "e4364af"
+      ],
+      "notes": "B#252: Implemented review request system. API endpoints: POST/GET/PATCH/DELETE /review-request. MCP tools: review_request, review_list, review_close. Integration with /watch/notify auto-notifies reviewers when code pushes occur. Webhook events: review.requested, review.updated, review.deleted."
     }
   ]
 }

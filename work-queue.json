@@ -620,11 +620,12 @@
       "title": "Inbox message routing",
       "description": "(added ~s990): inbox_check returns all messages equally. Add message type detection: notifications (code-watch, status updates) vs conversations (agent replies). Auto-archive notifications older than 7 days. Surfaces actionable messages without manual filtering.",
       "priority": 250,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "s997: auto-archive on GET /inbox added to api.mjs:8212. Type detection and filtering were already implemented."
     },
     {
       "id": "wq-251",

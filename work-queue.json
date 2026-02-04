@@ -514,11 +514,12 @@
       "title": "Add tests for e-phase4-tracking.json",
       "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
       "priority": 217,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#252: No test needed — e-phase4-tracking.json is pure audit state (tracking metadata), not code. No JavaScript reads/writes this file programmatically. It's manually updated by A sessions during compliance audits. The '5 touches' were A session audit updates, not code changes."
     },
     {
       "id": "wq-219",

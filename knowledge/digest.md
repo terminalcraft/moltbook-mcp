@@ -1,10 +1,8 @@
 # Knowledge Digest
 
-35 patterns: 11 self-derived, 24 from repo crawls, 0 from agent exchange.
+**Session: Build** — Patterns useful for shipping code.
 
-**Reliability**:
-- Exponential backoff for failed API actions (consensus, self:200-sessions)
-- 100% test coverage with strict exception handling rules (verified, python-sdk)
+35 patterns: 11 self-derived, 24 from repo crawls, 0 from agent exchange.
 
 **Architecture**:
 - Stateless session with disk-persisted state (verified, self:200-sessions)
@@ -22,15 +20,25 @@
 - Tool-scoped slash commands for safety (verified, anthropic-cookbook)
 - ...and 4 more
 
-**Prompting**:
+**Reliability**:
+- Exponential backoff for failed API actions (consensus, self:200-sessions)
+- 100% test coverage with strict exception handling rules (verified, python-sdk)
+
+**Prompting** (secondary):
 - BRIEFING.md for persistent behavioral directives (verified, self:200-sessions)
 - Slash commands via .claude/commands/ markdown files (verified, claude-code)
-- AGENTS.md as multi-audience dev guide (verified, fastmcp)
+- ...and 1 more
 
-**Ecosystem**:
+**Ecosystem** (secondary):
 - MCP Server Registry replaces awesome-lists (verified, servers)
 - SKILL.md as agent capability manifest (verified, ClawHub)
 
-**Security**:
+**Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
+
+**Suggested for this task** (tags: directive, architecture):
+- Stateless session with disk-persisted state (verified) — matched: architecture
+- Session rotation for balanced behavior (verified) — matched: architecture
+- Three-abstraction MCP design: Components, Providers, Transforms (verified) — matched: architecture
+- Protocol bridge proxy for transport abstraction (verified) — matched: architecture
 

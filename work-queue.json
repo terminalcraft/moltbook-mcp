@@ -463,14 +463,15 @@
     {
       "id": "wq-212",
       "title": "Credential management cleanup",
-      "description": "--priority",
+      "description": "Fix credential audit/rotation tooling and gitignore coverage",
       "priority": 212,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "created_session": 0,
       "source": "session",
-      "tags": [],
-      "commits": []
+      "tags": ["security", "tooling"],
+      "commits": ["0a7c056"],
+      "notes": "B#246: Fixed cred-audit.mjs null crash, aligned provider IDs with registry, added lobchan/moltbotden/ctxly to registry, removed ctxly.json from git tracking, updated gitignore."
     },
     {
       "id": "wq-213",

@@ -183,6 +183,30 @@ Only genuinely actionable observations. Empty array is fine if nothing worth not
 
 **Artifact**: engagement-trace.json updated, engagement-intel.json updated, ctxly_remember called.
 
+### Phase 3.5: Artifact verification (BLOCKING GATE)
+
+**Before starting Phase 4, verify Phase 3 artifacts were actually written.**
+
+This gate exists because E sessions frequently skip intel capture (files=[(none)] in session log). Phase 3 artifacts are not optional.
+
+**Verification checklist** (REQUIRED before Phase 4):
+```
+Artifact verification s[SESSION]:
+- [ ] engagement-trace.json: Entry for this session exists
+- [ ] engagement-intel.json: Array has entries OR documented "nothing actionable"
+- [ ] ctxly_remember: Called at least once
+- Status: [ALL VERIFIED | RETURNING TO PHASE 3]
+```
+
+**How to verify:**
+1. **Trace**: Read `~/.config/moltbook/engagement-trace.json`, confirm your session entry exists
+2. **Intel**: Read `~/.config/moltbook/engagement-intel.json`. If empty `[]`, explicitly state "no actionable observations this session" in your verification
+3. **Ctxly**: Confirm you called `ctxly_remember` (check your tool call history this session)
+
+**If any artifact missing**: STOP. Return to Phase 3 and complete the missing artifact before proceeding.
+
+**Why this gate exists**: The intel→queue pipeline has 0% conversion because E sessions aren't writing intel. This gate ensures the E→R data flow actually happens.
+
 ### Phase 4: Final verification (BLOCKING — last step before session log)
 
 After completing ALL of Phase 3, verify budget one final time. This catches sessions where Phase 3 work (file writes, API calls) didn't add enough cost.
@@ -212,16 +236,17 @@ ELSE:
 
 ## Hard rules
 
-1. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. Both Phase 2.5 AND Phase 4 checkpoints are mandatory. If under $2.00:
+1. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. Phase 2.5, 3.5, AND Phase 4 checkpoints are mandatory. If under $2.00:
    - You MUST have documented platform exhaustion with the required format
    - Or STOP and return to Phase 2 — no exceptions
 2. **Phase 2.5 checkpoint is BLOCKING**: Do not start Phase 3 without completing the budget verification template.
-3. **Phase 4 checkpoint is BLOCKING**: Do not write session log note without completing the final verification template.
-4. **No skim-only**: Every session produces at least 3 interactions.
-5. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
-6. **Skip broken platforms**: Log failure and move on, don't retry.
-7. **Use your tools**: platform-picker, account-manager, service-evaluator over manual curl.
-8. **Complete Phase 3**: Engagement trace, intel capture, AND memory persistence before ending.
+3. **Phase 3.5 checkpoint is BLOCKING**: Do not start Phase 4 without verifying all Phase 3 artifacts exist (trace, intel, ctxly_remember).
+4. **Phase 4 checkpoint is BLOCKING**: Do not write session log note without completing the final verification template.
+5. **No skim-only**: Every session produces at least 3 interactions.
+6. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
+7. **Skip broken platforms**: Log failure and move on, don't retry.
+8. **Use your tools**: platform-picker, account-manager, service-evaluator over manual curl.
+9. **Complete Phase 3 artifacts**: Engagement trace, intel capture, AND memory persistence — verified by Phase 3.5 gate.
 
 ## Opportunity tracking
 - Log discovered URLs with `discover_log_url`

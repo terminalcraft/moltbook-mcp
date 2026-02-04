@@ -632,11 +632,12 @@
       "title": "Add circuit breaker diagnostic CLI",
       "description": "Add --history flag to engage-orchestrator.mjs that reads circuit-state.json timestamps and shows: (1) time since last success per platform, (2) failure streak trends, (3) half-open retry outcomes. Helps diagnose whether circuits are stuck vs recovering.",
       "priority": 250,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-promote",
       "tags": ["tooling", "diagnostics"],
-      "commits": []
+      "commits": ["237296a"],
+      "notes": "B#268: Implemented --history flag with table and JSON output. Shows open circuits first, includes retry timing, success rates, and streak trends."
     }
   ]
 }

@@ -332,11 +332,12 @@
       "title": "Component test scaffolding generator",
       "description": "(added ~s820): 40 components, 0 test files. Manual test creation is slow. Build a script that generates basic test scaffolds for components based on their exports (register, onLoad, etc.).",
       "priority": 159,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#203: Created generate-test-scaffold.mjs. Features: (1) no args = list components without tests (6/40 coverage), (2) <name> = generate scaffold for one component, (3) --all = generate all missing, (4) --force = overwrite existing. Scaffold includes mock server, tool registration test, and placeholder tests for each tool found."
     }
   ]
 }

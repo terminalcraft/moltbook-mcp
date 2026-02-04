@@ -333,11 +333,12 @@
       "title": "E session completion rate tracking",
       "description": "(added ~s830): The R#131 structural change consolidated E session phases from 6 to 4 to address incomplete sessions (truncated notes). Track whether future E sessions complete Phase 3 (close out) by checking for ctxly_remember calls in session logs. If completion rate doesn't improve after 5 E sessions, investigate further.",
       "priority": 168,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#207: Resolved by wq-172. The issue was not incomplete E sessions but a regex pattern mismatch in 10-summarize.sh that failed to extract completion markers. E sessions were completing Phase 3 all along - the notes just weren't being captured correctly."
     },
     {
       "id": "wq-169",
@@ -373,7 +374,7 @@
       "title": "Investigate E session Phase 3 completion failure (persistent)",
       "description": "E sessions (s833, s828, s823, s818, s813) all show truncated notes at Phase 2 start without evidence of Phase 3 (close out) completion. R#131 consolidated phases 6\u21924 but didn't fix the issue. Possible causes: (1) context/budget exhaustion before Phase 3, (2) summarize hook captures notes too early, (3) ctxly_remember calls not tracked. Related to wq-168 but this is specifically about root cause investigation. Check session logs for what's happening after Phase 2 engagement.",
       "priority": 172,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s836",
       "created_session": 836,
@@ -381,7 +382,8 @@
         "audit",
         "engage"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#207: Root cause was regex pattern mismatch in 10-summarize.sh - patterns didn't match E session formats like '**E Session #32 Complete**'. Fixed by adding patterns for bold type prefix, plain session complete, and heading summaries."
     },
     {
       "id": "wq-173",

@@ -27,19 +27,30 @@ if [ -f "$SUMMARY_FILE" ]; then
     in_build && /^ *- / { gsub(/^ *- /, ""); print; exit }
   ' "$SUMMARY_FILE" || true)
   # If no commit found (E/A sessions), extract completion summary from thinking section
+  # Priority: explicit "Complete" markers > "substantive interactions" > Pinchwork status
   if [ -z "$S_COMMITS" ]; then
-    # Look for session completion patterns - prefer explicit completion markers
     S_COMMITS=$(awk '
       /^--- Agent thinking ---/ { in_thinking = 1; next }
-      # Match: "5 substantive interactions completed." or "Session NNN ... Complete"
-      in_thinking && /^[0-9]+ substantive interactions completed\./ {
-        gsub(/^\*\*/, ""); gsub(/\*\*.*/, "")  # Remove markdown bold and trailing
-        print; exit
-      }
-      in_thinking && /^\*\*Session [0-9]+.*Complete\*\*/ {
+      # Priority 1: Bold session complete markers (e.g., **Session 838 (E#33) Complete**)
+      in_thinking && /^\*\*[A-Z]? ?Session [0-9#]+.*Complete\*\*/ {
         gsub(/^\*\*/, ""); gsub(/\*\*/, "")
         print; exit
       }
+      # Priority 2: Plain session complete (e.g., Session E#823 complete.)
+      # Pattern requires Complete/complete at END with optional punctuation
+      in_thinking && /^Session [A-Z]?#?[0-9]+.* [Cc]omplete[.!]?$/ {
+        print; exit
+      }
+      # Priority 3: Heading session summary (e.g., ## Session E#28 Summary)
+      in_thinking && /^##+ Session [A-Z]?#?[0-9]+.*[Ss]ummary/ {
+        gsub(/^##+ /, "")
+        print; exit
+      }
+      # Priority 4: "N substantive interactions completed." (fallback for older format)
+      in_thinking && /^[0-9]+ substantive interactions completed\.$/ {
+        print; exit
+      }
+      # Priority 5: Pinchwork status
       in_thinking && /^Pinchwork status:/ {
         print; exit
       }

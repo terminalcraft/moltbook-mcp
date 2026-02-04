@@ -10,6 +10,7 @@
  *   node work-queue.js add "title" "description" [--tag t1 --tag t2]
  *   node work-queue.js drop [id]         # Remove an item
  *   node work-queue.js status            # Summary stats
+ *   node work-queue.js velocity          # Show completion velocity stats (wq-200)
  */
 
 import { readFileSync, writeFileSync } from "fs";
@@ -112,6 +113,7 @@ switch (cmd) {
     }
     item.status = "in-progress";
     item.started = new Date().toISOString().slice(0, 10);
+    item.started_session = parseInt(process.env.SESSION_NUM || "0", 10); // wq-200: velocity tracking
     save(data);
     console.log(`Started: ${item.id} — ${item.title}`);
     break;
@@ -123,6 +125,7 @@ switch (cmd) {
     if (!item) { console.log("No in-progress item found."); break; }
     item.status = "done";
     item.completed = new Date().toISOString().slice(0, 10);
+    item.completed_session = parseInt(process.env.SESSION_NUM || "0", 10); // wq-200: velocity tracking
     if (hash) item.commits = [...(item.commits || []), hash];
     save(data);
     console.log(`Done: ${item.id} — ${item.title}`);
@@ -150,6 +153,7 @@ switch (cmd) {
       priority: maxPriority + 1,
       status: "pending",
       added: new Date().toISOString().slice(0, 10),
+      created_session: parseInt(process.env.SESSION_NUM || "0", 10), // wq-200: velocity tracking
       source: "session",
       tags,
       complexity,
@@ -231,6 +235,68 @@ switch (cmd) {
     console.log(`Archived ${toArchive.length} items: ${toArchive.map(i => i.id).join(", ")}`);
     break;
   }
+  case "velocity": {
+    // wq-200: Compute velocity stats — how long items stay pending before completion
+    const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
+    const done = data.queue.filter(i => i.status === "done" && i.created_session && i.completed_session);
+    const inProgress = data.queue.filter(i => i.status === "in-progress" && i.created_session);
+    const pending = data.queue.filter(i => i.status === "pending" && i.created_session);
+
+    if (done.length === 0 && inProgress.length === 0 && pending.length === 0) {
+      console.log("No items with session tracking data. Velocity tracking starts from this session.");
+      break;
+    }
+
+    // Completed item stats
+    if (done.length > 0) {
+      const completionTimes = done.map(i => i.completed_session - i.created_session);
+      const avgCompletion = completionTimes.reduce((a, b) => a + b, 0) / completionTimes.length;
+      const maxCompletion = Math.max(...completionTimes);
+      const minCompletion = Math.min(...completionTimes);
+      console.log(`Completed items (${done.length}):`);
+      console.log(`  Avg time to complete: ${avgCompletion.toFixed(1)} sessions`);
+      console.log(`  Range: ${minCompletion}-${maxCompletion} sessions`);
+
+      // Complexity breakdown
+      const byComplexity = { S: [], M: [], L: [] };
+      for (const i of done) {
+        const c = i.complexity || "M";
+        if (byComplexity[c]) byComplexity[c].push(i.completed_session - i.created_session);
+      }
+      for (const [c, times] of Object.entries(byComplexity)) {
+        if (times.length > 0) {
+          const avg = times.reduce((a, b) => a + b, 0) / times.length;
+          console.log(`  ${c}: ${times.length} items, avg ${avg.toFixed(1)} sessions`);
+        }
+      }
+    }
+
+    // In-progress items: how long have they been in-progress?
+    if (inProgress.length > 0) {
+      console.log(`\nIn-progress items (${inProgress.length}):`);
+      for (const i of inProgress) {
+        const age = sessionNum - i.created_session;
+        const inProgressSince = i.started_session ? sessionNum - i.started_session : "?";
+        console.log(`  ${i.id}: created ${age}s ago, in-progress ${inProgressSince}s`);
+      }
+    }
+
+    // Pending items: how long have they been waiting?
+    if (pending.length > 0) {
+      const ages = pending.map(i => sessionNum - i.created_session);
+      const avgAge = ages.reduce((a, b) => a + b, 0) / ages.length;
+      const stale = pending.filter(i => sessionNum - i.created_session > 20);
+      console.log(`\nPending items (${pending.length}):`);
+      console.log(`  Avg age: ${avgAge.toFixed(1)} sessions`);
+      if (stale.length > 0) {
+        console.log(`  Stale (>20 sessions): ${stale.length} items`);
+        for (const i of stale.slice(0, 5)) {
+          console.log(`    ${i.id}: ${sessionNum - i.created_session} sessions old`);
+        }
+      }
+    }
+    break;
+  }
   default:
-    console.log("Usage: work-queue.js <next|list|start|done|add|drop|status|deps|note|archive>");
+    console.log("Usage: work-queue.js <next|list|start|done|add|drop|status|deps|note|archive|velocity>");
 }

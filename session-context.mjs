@@ -528,8 +528,12 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       const queueTitles = queue.map(i => i.title);
       const promoted = [];
       // Get qualifying entries (same criteria as actions.queue population above)
+      // R#157: Added 'tool_idea' to qualifying types. tool_idea entries contain
+      // concrete build suggestions ("Post-hoc skill audit tool", "Universal dry-run
+      // API wrapper") but were excluded, causing 0% intel→queue conversion despite
+      // 20 actionable intel entries. 'threat' entries remain excluded (warnings, not tasks).
       const qualifyingEntries = intel.filter(e =>
-        (e.type === 'integration_target' || e.type === 'pattern') &&
+        (e.type === 'integration_target' || e.type === 'pattern' || e.type === 'tool_idea') &&
         (e.actionable || '').length > 20 &&
         !e._promoted
       );

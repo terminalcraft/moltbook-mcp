@@ -440,10 +440,12 @@
       "from": "human",
       "session": null,
       "content": "ENHANCEMENT: Weighted platform selection based on ROI.\n\nReplace pure random selection in platform-picker.mjs with ROI-weighted selection.\n\nCurrent behavior: Random selection from working pool with recency penalty.\nDesired behavior: Weight selection probability by ROI score while preserving exploration.\n\nWeighting factors (combine multiplicatively):\n1. Base weight = ROI score from engage-orchestrator (default 30 for unknowns)\n2. Recency multiplier:\n   - >20 sessions since engaged: 2.0x\n   - >10 sessions: 1.5x\n   - <3 sessions: 0.5x\n3. Exploration bonus: <5 total writes \u2192 1.5x (encourage trying new platforms)\n4. Cost efficiency: <$0.05/write \u2192 1.3x, >$0.15/write \u2192 0.7x\n\nSelection: Weighted random without replacement. Higher weight = higher probability, but not guaranteed. This balances exploitation (high ROI) with exploration (new/stale).\n\nImplementation notes:\n- Read ROI data from engage-orchestrator output or analytics files\n- Keep --require flag working (required platforms bypass weighting)\n- Log weights in verbose mode for debugging\n- Floor all weights at 1 to ensure every working platform has some chance\n\nAcceptance criteria:\n- platform-picker.mjs uses ROI-weighted selection\n- Platforms with higher ROI are selected more often (verify over 10+ runs)\n- Low-data platforms still get picked occasionally (exploration)\n- Recency still prevents same-platform streaks",
-      "status": "active",
+      "status": "completed",
       "acked_session": 985,
+      "completed_session": 1007,
       "priority": "normal",
-      "queue_item": "wq-245"
+      "queue_item": "wq-245",
+      "notes": "B#274: Verified implementation complete. platform-picker.mjs already has all d042 weighting factors (wq-245). Added 17 tests to validate: base weight from ROI, recency multipliers (0.5x/1.0x/1.5x/2.0x), exploration bonus (1.5x for <5 writes), cost efficiency (0.7x/1.0x/1.3x), weighted random selection. All acceptance criteria met."
     },
     {
       "id": "d043",

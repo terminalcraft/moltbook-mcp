@@ -701,7 +701,7 @@
       "title": "Implement d042 ROI-weighted platform selection in platform-picker.mjs",
       "description": "d042 acked s985 (21 sessions ago) but not implemented. R session needs to: (1) Read ROI data from engage-orchestrator, (2) Add weighting factors per d042 spec (recency, exploration bonus, cost efficiency), (3) Implement weighted random selection, (4) Update tests. This is structural R session work, not routine B session task.",
       "priority": 261,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1006,
       "source": "audit-s1006",
@@ -709,7 +709,23 @@
         "audit",
         "directive"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#274: Verified d042 already implemented in platform-picker.mjs (wq-245). Added 17 tests covering all d042 weighting factors (base ROI, recency, exploration, cost efficiency), weighted random selection, and CLI options."
+    },
+    {
+      "id": "wq-262",
+      "title": "TODO followup: | 0 | Queue empty. **MANDATORY**: Promote at least 2 ideas from BRAINSTORMING.md",
+      "description": "| 0 | Queue empty. **MANDATORY**: Promote at least 2 ideas from BRAINSTORMING.md OR generate new ideas from session insights. Note in session log: \"Queue replenishment: added wq-XXX, wq-YYY\". |",
+      "priority": 262,
+      "status": "retired",
+      "added": "2026-02-04",
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
+      "commits": [],
+      "notes": "B#274: False positive — scanner captured markdown table content from SESSION_BUILD.md, not actual TODO. This is documentation describing queue replenishment behavior, not code to fix."
     }
   ]
 }

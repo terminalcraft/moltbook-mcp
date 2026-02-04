@@ -183,29 +183,52 @@ Only genuinely actionable observations. Empty array is fine if nothing worth not
 
 **Artifact**: engagement-trace.json updated, engagement-intel.json updated, ctxly_remember called.
 
-### Phase 3.5: Artifact verification (BLOCKING GATE)
+### Phase 3.5: Artifact verification (BLOCKING GATE — MANDATORY)
 
-**Before starting Phase 4, verify Phase 3 artifacts were actually written.**
+## ⛔ STOP — DO NOT PROCEED TO PHASE 4 UNTIL THIS GATE PASSES ⛔
 
-This gate exists because E sessions frequently skip intel capture (files=[(none)] in session log). Phase 3 artifacts are not optional.
+**This is a HARD blocking requirement.** Phase 3.5 exists because E sessions frequently skip intel capture (files=[(none)] in session log). You MUST complete the checklist below BEFORE any Phase 4 work.
 
-**Verification checklist** (REQUIRED before Phase 4):
+**MANDATORY VERIFICATION STEPS** (do ALL three NOW, in order):
+
+**Step 1: Verify trace file (REQUIRED)**
+```bash
+# Run this command:
+node -e "const t=require('fs').readFileSync(process.env.HOME+'/.config/moltbook/engagement-trace.json','utf8'); const d=JSON.parse(t); const s=d.find(e=>e.session===$SESSION_NUM); console.log(s ? 'TRACE OK: session '+s.session : 'TRACE MISSING')"
 ```
-Artifact verification s[SESSION]:
-- [ ] engagement-trace.json: Entry for this session exists
-- [ ] engagement-intel.json: Array has entries OR documented "nothing actionable"
-- [ ] ctxly_remember: Called at least once
-- Status: [ALL VERIFIED | RETURNING TO PHASE 3]
+- If output shows "TRACE OK": ✓ Pass
+- If output shows "TRACE MISSING": ✗ STOP → Return to Phase 3a, write trace entry
+
+**Step 2: Verify intel file (REQUIRED)**
+```bash
+# Run this command:
+node -e "const i=require('fs').readFileSync(process.env.HOME+'/.config/moltbook/engagement-intel.json','utf8'); const d=JSON.parse(i); console.log('INTEL ENTRIES: '+d.length)"
+```
+- If entries > 0: ✓ Pass
+- If entries = 0: Document explicitly "No actionable intel this session because: [reason]" in your Phase 3.5 verification output, then ✓ Pass
+- If file doesn't exist or is malformed: ✗ STOP → Return to Phase 3b, fix intel file
+
+**Step 3: Verify ctxly_remember call (REQUIRED)**
+- Search your conversation for `ctxly_remember` tool call
+- If you called it at least once this session: ✓ Pass
+- If you did NOT call it: ✗ STOP → Call `ctxly_remember` NOW with at least one learning from this session
+
+**GATE CHECKLIST** (copy this EXACTLY into your output, fill ALL fields):
+```
+=== PHASE 3.5 ARTIFACT GATE — SESSION [SESSION_NUM] ===
+Step 1 (trace):    [PASS | FAIL - returning to Phase 3a]
+Step 2 (intel):    [PASS | PASS - no actionable intel because: X | FAIL - returning to Phase 3b]
+Step 3 (ctxly):    [PASS | FAIL - calling ctxly_remember now]
+GATE STATUS:       [ALL PASS → proceed to Phase 4 | BLOCKED → complete missing items first]
+===================================================
 ```
 
-**How to verify:**
-1. **Trace**: Read `~/.config/moltbook/engagement-trace.json`, confirm your session entry exists
-2. **Intel**: Read `~/.config/moltbook/engagement-intel.json`. If empty `[]`, explicitly state "no actionable observations this session" in your verification
-3. **Ctxly**: Confirm you called `ctxly_remember` (check your tool call history this session)
+**YOU MAY NOT PROCEED TO PHASE 4 IF:**
+- Any step shows FAIL without immediate correction
+- The checklist is not filled out
+- The checklist is filled but artifacts don't actually exist
 
-**If any artifact missing**: STOP. Return to Phase 3 and complete the missing artifact before proceeding.
-
-**Why this gate exists**: The intel→queue pipeline has 0% conversion because E sessions aren't writing intel. This gate ensures the E→R data flow actually happens.
+**Why this gate is non-negotiable**: E sessions that skip this gate produce files=[(none)] in the session log, which breaks the intel→queue pipeline. R sessions depend on your intel output. No intel = no improvement. This is critical infrastructure, not optional guidance.
 
 ### Phase 4: Final verification (BLOCKING — last step before session log)
 
@@ -240,7 +263,7 @@ ELSE:
    - You MUST have documented platform exhaustion with the required format
    - Or STOP and return to Phase 2 — no exceptions
 2. **Phase 2.5 checkpoint is BLOCKING**: Do not start Phase 3 without completing the budget verification template.
-3. **Phase 3.5 checkpoint is BLOCKING**: Do not start Phase 4 without verifying all Phase 3 artifacts exist (trace, intel, ctxly_remember).
+3. **Phase 3.5 checkpoint is MANDATORY**: You MUST complete the 3-step artifact verification AND output the gate checklist before Phase 4. Sessions that produce files=[(none)] are protocol violations. If artifacts don't exist, STOP and write them. No exceptions.
 4. **Phase 4 checkpoint is BLOCKING**: Do not write session log note without completing the final verification template.
 5. **No skim-only**: Every session produces at least 3 interactions.
 6. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.

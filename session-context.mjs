@@ -712,6 +712,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
 
   // wq-191: Intel promotion visibility — show recently-promoted intel items and their outcomes
   // Closes the feedback loop on whether E→B pipeline produces outcomes
+  // wq-216: Added capacity-awareness — distinguish "0% - capacity gated" from "0% - no actionable"
   let intelPromoSummary = '';
   {
     const intelItems = queue.filter(i => i.source === 'intel-auto');
@@ -735,6 +736,45 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       if (byStatus.pending.length > 0) {
         const recent = byStatus.pending.slice(0, 3).map(i => `  - ${i.id}: ${i.title.substring(0, 50)}`).join('\n');
         intelPromoSummary += `\nPending intel items:\n${recent}`;
+      }
+    } else {
+      // wq-216: No intel-auto items yet — explain why (capacity gate vs no actionable intel)
+      // Check if there's pending intel that could be promoted
+      const intelPath = join(STATE_DIR, 'engagement-intel.json');
+      const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
+      let hasActionableIntel = false;
+      let capacityGated = false;
+
+      // Check current intel inbox
+      try {
+        const currentIntel = JSON.parse(readFileSync(intelPath, 'utf8'));
+        if (Array.isArray(currentIntel)) {
+          const actionable = currentIntel.filter(e =>
+            (e.type === 'integration_target' || e.type === 'pattern') &&
+            (e.actionable || '').length > 20
+          );
+          hasActionableIntel = actionable.length > 0;
+        }
+      } catch { /* empty or missing */ }
+
+      // Check if queue was at capacity during last promotion attempt
+      // Archive entries with _promoted flag indicate successful promotions happened before
+      // If pending >= 5, promotions are blocked by capacity gate
+      capacityGated = result.pending_count >= 5;
+
+      if (capacityGated && hasActionableIntel) {
+        intelPromoSummary = `\n\n### Intel→Queue pipeline (wq-191):\n0 items promoted — CAPACITY GATED (${result.pending_count} pending >= 5). Actionable intel exists but promotion blocked until queue capacity frees.`;
+      } else if (!hasActionableIntel) {
+        // Check archive for past promotions
+        let archivedPromoCount = 0;
+        try {
+          const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
+          archivedPromoCount = (archive || []).filter(e => e._promoted).length;
+        } catch { /* no archive */ }
+        if (archivedPromoCount > 0) {
+          intelPromoSummary = `\n\n### Intel→Queue pipeline (wq-191):\n0 items currently promoted. ${archivedPromoCount} historical promotions (now archived/processed).`;
+        }
+        // else: no summary needed — no intel pipeline activity at all
       }
     }
   }

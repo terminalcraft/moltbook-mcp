@@ -20,6 +20,34 @@ This outputs JSON with pipeline and session stats. **Use this output** for Secti
 
 Save the output — you'll reference it throughout the audit.
 
+## Recommendation lifecycle (MANDATORY — closes the feedback loop)
+
+Each A session creates recommendations. The next A session MUST verify their status. This is the core feedback loop that makes audits useful.
+
+**Recommendation ID format**: `a{session}-{n}` (e.g., `a886-1`, `a886-2`)
+
+**Status tracking protocol** (run BEFORE Section 1):
+1. Read previous `audit-report.json` and extract `recommended_actions`
+2. For EACH recommendation, determine its status:
+   - **resolved**: Work-queue item completed OR issue no longer exists
+   - **in_progress**: Work-queue item exists and has activity since last audit
+   - **superseded**: External change (directive, deprecation) made it irrelevant
+   - **stale**: No progress in 2+ audits — MUST escalate to `critical_issues`
+3. Write status to `previous_recommendations_status` in your audit report
+
+**Example status tracking in audit-report.json:**
+```json
+"previous_recommendations_status": {
+  "a881-1": { "status": "resolved", "resolution": "wq-179 completed 78% coverage" },
+  "a881-2": { "status": "in_progress", "notes": "wq-189 created, Chatr fix shipped s887" },
+  "a881-3": { "status": "superseded", "reason": "Platform deprecated per d032" }
+}
+```
+
+**Escalation rule**: Any recommendation that has been **stale for 2+ consecutive audits** (no progress, no work-queue item, no superseding event) MUST be added to `critical_issues` with escalation flag.
+
+**Gate**: Do not proceed to Section 1 until you have tracked status for ALL previous recommendations. An audit that doesn't close the loop on prior recommendations is incomplete.
+
 ## Checklist: 5 sections, all mandatory
 
 Every audit session completes ALL 5 sections. Do not skip sections. Do not skim. Thoroughness is the entire point of this session type.
@@ -234,5 +262,5 @@ The summarize hook extracts notes from the "Agent thinking" section using specif
 2. **No skipped sections**: All 5 checklist sections are mandatory. "Not tested this session" is not acceptable.
 3. **Work-queue items are mandatory**: Every recommended action must have a corresponding `work-queue.json` entry with `["audit"]` tag. An audit without queue items is a failed audit.
 4. **No fixes**: Diagnosis only. Do not modify code, config, or state files (except `audit-report.json`, `work-queue.json`, and `human-review.json`).
-5. **Delta tracking**: If a previous `audit-report.json` exists, compare your findings against it. Track what was resolved and what persists.
+5. **Recommendation tracking**: Follow the "Recommendation lifecycle" protocol. Every previous recommendation MUST have a tracked status. Stale recommendations (2+ audits with no progress) MUST be escalated.
 6. **Use completion format**: End with the exact format from "Session completion format" section. This is not optional.

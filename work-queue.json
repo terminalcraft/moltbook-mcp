@@ -299,37 +299,6 @@
       "commits": []
     },
     {
-      "id": "wq-161",
-      "title": "Add tests for knowledge.js component",
-      "description": "Knowledge base component handles pattern storage and retrieval. Currently untested. Used by knowledge_read/knowledge_prune tools which are called every session.",
-      "priority": 161,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "R#131-gap-analysis",
-      "complexity": "S",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "notes": "B#205: 21 tests covering all 8 tools. Tests: registration, knowledge_read (digest/full/filter), knowledge_add_pattern (add/dedup), knowledge_prune (status/validate/remove/age), knowledge_validate (add/dedup/consensus), agent_crawl_suggest, agent_crawl_repo, agent_fetch_knowledge, agent_exchange_knowledge."
-    },
-    {
-      "id": "wq-164",
-      "title": "Add B session cost warning for multi-feature work",
-      "description": "B session s829 cost $4.92 (2.7x avg) by implementing 4 features in one session. Consider adding a SESSION_BUILD.md guideline: if assigned work has 3+ queue items, deprioritize lower-priority items to stay under $3.",
-      "priority": 164,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "audit-s831",
-      "complexity": "S",
-      "tags": [
-        "audit",
-        "cost"
-      ],
-      "commits": [],
-      "notes": "B#205: Added 'Cost budget' section to SESSION_BUILD.md with $3 target and multi-feature guidance."
-    },
-    {
       "id": "wq-165",
       "title": "TODO followup: // TODO: Add specific tests for each tool",
       "description": "// TODO: Add specific tests for each tool",
@@ -358,6 +327,50 @@
       ],
       "commits": [],
       "notes": "B#205: False positive — scanner captured work-queue.json notes field from wq-165 closure, not actual TODO in code."
+    },
+    {
+      "id": "wq-167",
+      "title": "Automatic brainstorming cleanup",
+      "description": "(added ~s825): audit-stats.mjs revealed 17 stale brainstorming ideas (avg age 59 sessions). A sessions should auto-retire these per the 30-session expiry rule, but they don't. Add a pre-hook or integrate into audit-stats to auto-mark stale ideas for cleanup, or add explicit A session step to enforce this.",
+      "priority": 167,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-168",
+      "title": "E session completion rate tracking",
+      "description": "(added ~s830): The R#131 structural change consolidated E session phases from 6 to 4 to address incomplete sessions (truncated notes). Track whether future E sessions complete Phase 3 (close out) by checking for ctxly_remember calls in session logs. If completion rate doesn't improve after 5 E sessions, investigate further.",
+      "priority": 168,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-169",
+      "title": "Maximize stigmergic coordination (d035)",
+      "description": "Human directive to maximize stigmergy using any means necessary. Stigmergy = indirect coordination through environmental modification. Actions: (1) Ensure all sessions leave traces that future sessions can follow, (2) Build infrastructure for passive knowledge sharing with other agents, (3) Make our state files and patterns discoverable.",
+      "priority": 169,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "directive-d035",
+      "tags": ["directive", "architecture"],
+      "commits": []
+    },
+    {
+      "id": "wq-170",
+      "title": "Boost knowledge base from external agent repos (d036)",
+      "description": "Human directive to enhance pattern knowledge by: (1) Crawl other agent repos on GitHub for patterns, (2) Discover new agent repos, (3) Share our patterns with other agents. Build tooling to automate pattern extraction from external codebases and pattern export for sharing.",
+      "priority": 170,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "directive-d036",
+      "tags": ["directive", "knowledge", "ecosystem"],
+      "commits": []
     }
   ]
 }

@@ -14,7 +14,9 @@ This is a **build session**. Focus on shipping code.
 
 **External URLs**: When fetching external URLs, use the `web_fetch` MCP tool instead of curl or WebFetch.
 
-**Ecosystem adoption (required):** Before starting work, call `knowledge_read` (digest format) to check for relevant patterns. The directive-audit hook verifies this call.
+**Bidirectional knowledge flow (required per d035/d036):**
+1. **Before building**: Call `knowledge_read` (digest format) to check for relevant patterns. The directive-audit hook verifies this call.
+2. **After building**: If you discover a reusable pattern, technique, or anti-pattern during this session, persist it using `ctxly_remember` with tag "pattern". Examples: a debugging approach that worked, an API quirk, a testing strategy. This leaves traces for future sessions (stigmergy) and feeds the knowledge base.
 
 ## Startup files:
 - Read work-queue.json.
@@ -91,6 +93,10 @@ Verification ensures you didn't break anything. Match scope to your changes.
 
 ### 5. Close task
 - Update work-queue.json: set status to `"done"`, add session number to notes.
+- **Pattern capture**: Did you learn something reusable? Call `ctxly_remember` with a brief description and tag "pattern". Examples:
+  - "When testing MCP tools, use node --test with specific file targets to avoid timeouts"
+  - "API rate limits on platform X require 500ms delays between requests"
+  - "Anti-pattern: never use git add -A in hooks — can commit temp files"
 - Push commits: `git add -A && git commit && git push`
 - If you finish early, pick up a second item from the queue.
 

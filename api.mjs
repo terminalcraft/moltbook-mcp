@@ -2797,6 +2797,7 @@ app.get("/status/circuits", (req, res) => {
         total_successes: entry.total_successes,
         last_failure: entry.last_failure,
         last_success: entry.last_success,
+        last_probe: entry.last_probe || null,
         time_to_retry_min: timeToRetry
       };
     }).sort((a, b) => {
@@ -2830,6 +2831,7 @@ app.get("/status/circuits", (req, res) => {
       <td>${e.consecutive_failures}</td>
       <td>${e.total_failures}/${e.total_successes}</td>
       <td>${e.last_failure || "—"}</td>
+      <td>${e.last_probe || "—"}</td>
       <td>${e.time_to_retry_min ? e.time_to_retry_min + "m" : "—"}</td>
     </tr>`).join("");
 
@@ -2839,7 +2841,7 @@ app.get("/status/circuits", (req, res) => {
 <p>Overall health: <span class="badge" style="background:${healthColor};color:#1e1e2e">${result.summary.health.toUpperCase()}</span></p>
 <p>${openCount} open, ${halfOpenCount} half-open, ${closedCount} closed</p>
 ${entries.length ? `<table>
-<tr><th>Platform</th><th>State</th><th>Consec. Failures</th><th>Total (F/S)</th><th>Last Failure</th><th>Retry In</th></tr>
+<tr><th>Platform</th><th>State</th><th>Consec. Failures</th><th>Total (F/S)</th><th>Last Failure</th><th>Last Probe</th><th>Retry In</th></tr>
 ${rows}
 </table>` : "<p>No circuit data — all platforms healthy or no data collected yet.</p>"}
 <p style="margin-top:1rem;color:#6c7086;font-size:.8rem">

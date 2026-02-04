@@ -11,6 +11,8 @@
  *   node work-queue.js drop [id]         # Remove an item
  *   node work-queue.js status            # Summary stats
  *   node work-queue.js velocity          # Show completion velocity stats (wq-200)
+ *   node work-queue.js retire [id] [reason]  # Retire item with reason (wq-199)
+ *   node work-queue.js retirement-stats      # Show retirement reason breakdown
  */
 
 import { readFileSync, writeFileSync } from "fs";
@@ -212,6 +214,49 @@ switch (cmd) {
     console.log(`Note added to ${id} (${item.progress_notes.length} total)`);
     break;
   }
+  case "retire": {
+    // wq-199: Retire an item with a reason for tracking
+    // Valid reasons: duplicate, wrong-session-type, non-actionable, superseded, external-block
+    const id = args[0];
+    const reason = args[1];
+    const VALID_REASONS = ["duplicate", "wrong-session-type", "non-actionable", "superseded", "external-block"];
+    if (!id || !reason) {
+      console.log("Usage: retire <id> <reason>");
+      console.log("Reasons: " + VALID_REASONS.join(", "));
+      break;
+    }
+    const item = data.queue.find(i => i.id === id);
+    if (!item) { console.log(`Item ${id} not found.`); break; }
+    if (!VALID_REASONS.includes(reason)) {
+      console.log(`Invalid reason. Use one of: ${VALID_REASONS.join(", ")}`);
+      break;
+    }
+    item.status = "retired";
+    item.retirement_reason = reason;
+    item.retired_session = parseInt(process.env.SESSION_NUM || "0", 10);
+    item.retired_at = new Date().toISOString();
+    save(data);
+    console.log(`Retired: ${item.id} — ${item.title} (reason: ${reason})`);
+    break;
+  }
+  case "retirement-stats": {
+    // wq-199: Show retirement reason breakdown
+    const retired = data.queue.filter(i => i.status === "retired" && i.retirement_reason);
+    if (retired.length === 0) {
+      console.log("No items with retirement reasons. Use 'retire <id> <reason>' to track reasons.");
+      break;
+    }
+    const byReason = {};
+    for (const i of retired) {
+      byReason[i.retirement_reason] = (byReason[i.retirement_reason] || 0) + 1;
+    }
+    console.log(`Retirement reasons (${retired.length} items):`);
+    const sorted = Object.entries(byReason).sort((a, b) => b[1] - a[1]);
+    for (const [reason, count] of sorted) {
+      console.log(`  ${reason}: ${count}`);
+    }
+    break;
+  }
   case "archive": {
     // Move done/retired items completed 50+ sessions ago to archive
     const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
@@ -298,5 +343,5 @@ switch (cmd) {
     break;
   }
   default:
-    console.log("Usage: work-queue.js <next|list|start|done|add|drop|status|deps|note|archive|velocity>");
+    console.log("Usage: work-queue.js <next|list|start|done|add|drop|retire|status|deps|note|archive|velocity|retirement-stats>");
 }

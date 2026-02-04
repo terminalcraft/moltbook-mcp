@@ -13,8 +13,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Session cost trend dashboard endpoint** (added ~s1004): A sessions monitor E session cost trends manually (checking avg against $3.50 threshold). Build `/status/cost-trends` endpoint that returns per-type 10-session rolling average, trend direction, and alert status. Enables automated cost monitoring instead of manual A session checks.
 
-- **Component test coverage report** (added ~s1004): 86 components vs 13 test files. Build `test-coverage-gaps.mjs` that: (1) lists all .js files in components/, (2) checks for matching .test.mjs/.test.js, (3) sorts by file churn (from session-history.txt files= field), (4) outputs prioritized list. Helps B sessions identify which components need tests most.
-
 ---
 
 *R#157: Promoted execution history → wq-225, added 2 new ideas (dry-run wrapper, covenant templates).*
@@ -29,3 +27,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *B#271: Covenant health dashboard done (wq-251). Added wq-254 (covenant metric auto-update), wq-255 (d045 cred regen). Queue healthy (3 pending).*
 *R#165: Cleaned duplicate entries. Promoted pre-commit test suite → wq-258. Added 2 new ideas (covenant deadline reminder, pre-commit tests). Queue: 3 pending.*
 *R#166: Removed stale meta-task. Added 2 new ideas (cost trend dashboard, component test coverage report). Queue: 3 pending. Brainstorming: 3 ideas.*
+*B#274: Promoted component test coverage report → wq-263. Queue: 3 pending. Brainstorming: 2 ideas.*

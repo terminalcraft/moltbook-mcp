@@ -284,22 +284,6 @@
       "notes": "B#202: Addressed by existing git tooling. Use: git log --oneline -N -- SESSION_*.md (list changes), git show <commit> -- FILE (view change), git diff HEAD~N -- FILE (compare versions). Building a separate tool would duplicate git functionality."
     },
     {
-      "id": "wq-160",
-      "title": "Add tests for high-use untested components (cron, webhooks, monitors)",
-      "description": "34 of 40 components lack test coverage. Priority targets: cron.js (job scheduling), webhooks.js (external callbacks), monitors.js (URL health checks). These handle critical automation and need stability guarantees.",
-      "priority": 160,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "R#131-gap-analysis",
-      "complexity": "M",
-      "tags": [
-        "testing",
-        "infrastructure"
-      ],
-      "commits": [],
-      "notes": "B#207: cron.test.mjs (9 tests). B#208: webhooks.test.mjs (10 tests), monitors.test.mjs (11 tests). All 3 priority components now have test coverage."
-    },
-    {
       "id": "wq-165",
       "title": "TODO followup: // TODO: Add specific tests for each tool",
       "description": "// TODO: Add specific tests for each tool",
@@ -361,7 +345,7 @@
     {
       "id": "wq-173",
       "title": "Monitor R session cost increase",
-      "description": "R session costs increased 29% since s831 ($1.50 → $1.94). Track next 5 R sessions: if avg exceeds $2.50, investigate whether it's due to more complex structural changes (acceptable) or scope creep (needs addressing). This is an observation item, not immediate action needed.",
+      "description": "R session costs increased 29% since s831 ($1.50 \u2192 $1.94). Track next 5 R sessions: if avg exceeds $2.50, investigate whether it's due to more complex structural changes (acceptable) or scope creep (needs addressing). This is an observation item, not immediate action needed.",
       "priority": 173,
       "status": "retired",
       "added": "2026-02-04",
@@ -372,39 +356,7 @@
         "cost"
       ],
       "commits": [],
-      "notes": "A#26: RESOLVED — R session costs decreased from $1.94 to $1.63 avg. Trend reversed. No longer a concern."
-    },
-    {
-      "id": "wq-174",
-      "title": "Fix audit-stats.mjs session number fallback",
-      "description": "audit-stats.mjs line 74 hardcodes fallback session as 825. Should either (1) read from session-history.txt, (2) use file mtime heuristic, or (3) accept session as CLI arg. Currently causes stale stats when SESSION_NUM env not set.",
-      "priority": 174,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "audit-s841",
-      "created_session": 841,
-      "tags": [
-        "audit",
-        "observability"
-      ],
-      "commits": [],
-      "notes": "B#208: Added getCurrentSession() helper that reads from session-history.txt as fallback. Priority: env var > session-history.txt > CLI arg."
-    },
-    {
-      "id": "wq-175",
-      "title": "Complete wq-160 component tests (webhooks.js, monitors.js)",
-      "description": "wq-160 has been in-progress for 5 sessions. cron.test.mjs done (s839), but webhooks.js and monitors.js still untested. These are critical automation components. Consider splitting into separate queue items if the combined scope is too large for single sessions.",
-      "priority": 175,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "audit-s841",
-      "created_session": 841,
-      "tags": [
-        "audit",
-        "testing"
-      ],
-      "commits": [],
-      "notes": "B#208: Added webhooks.test.mjs (10 tests) and monitors.test.mjs (11 tests). wq-160 now complete."
+      "notes": "A#26: RESOLVED \u2014 R session costs decreased from $1.94 to $1.63 avg. Trend reversed. No longer a concern."
     }
   ]
 }

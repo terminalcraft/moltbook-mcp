@@ -29,9 +29,10 @@ result.estate_session = estate?.session || 0;
 const wq = readJSON(join(DIR, 'work-queue.json'));
 const queue = wq?.queue || [];
 
+// Check if all deps are satisfied. Missing deps = archived = done (per work-queue.json spec).
 const depsReady = (item) => !item.deps?.length || item.deps.every(d => {
   const dep = queue.find(i => i.id === d);
-  return dep && dep.status === 'done';
+  return !dep || dep.status === 'done';
 });
 
 // --- Queue self-dedup (R#67) ---

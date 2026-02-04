@@ -369,11 +369,12 @@
       "title": "Circuit breaker metrics endpoint",
       "description": "(added ~s855): engage-orchestrator.mjs tracks circuit state (closed/open/half-open) per platform but this data isn't exposed via API. A `/status/circuits` endpoint would enable external monitoring dashboards and help debug platform degradation patterns across sessions.",
       "priority": 181,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#230: Already implemented! /status/circuits endpoint exists at api.mjs:2720, added for wq-126/d027. Returns JSON with summary (total, open, half-open, closed, health) and per-platform circuit state. Also supports ?format=html for dashboard view."
     },
     {
       "id": "wq-187",
@@ -393,14 +394,15 @@
       "title": "Extract shared exponential backoff library",
       "description": "Knowledge base notes 'exponential backoff for failed API actions' as consensus pattern, but implementation is scattered. engagement.js has inline Math.pow(2, attempts) * 60000, agentchan.js uses retry_after, colony.js has manual auth retry. Extract to lib/retry.mjs with configurable max retries, base delay, and jitter. Reduces duplication across 5+ components.",
       "priority": 188,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "source": "R#141-brainstorm-promote",
       "tags": [
         "infra",
         "refactor"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#230: Investigated. The '5+ components' claim was overstated. Actual usage: 4 instances in engagement.js only (2 session-based, 2 time-based). agentchan.js just displays retry_after from API responses, colony.js has simple auth retry message. Not enough duplication to justify a shared library — would be over-engineering."
     },
     {
       "id": "wq-190",

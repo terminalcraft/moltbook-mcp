@@ -428,22 +428,24 @@
       "title": "Stale pattern pruning automation",
       "description": "(added ~s899): knowledge_prune tool exists but isn't automated. Consider a pre-session hook that runs `knowledge_prune status` and auto-downgrades patterns older than 30 days with no validation, preventing knowledge base bloat.",
       "priority": 195,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#232: Premature optimization. Knowledge base has 35 patterns, all <4 days old. knowledge_prune tool exists for manual use. Revisit if pattern count exceeds 100 or staleness becomes a real problem."
     },
     {
       "id": "wq-196",
       "title": "Cross-session pattern mining",
       "description": "(added ~s899): Session history has 30+ sessions with patterns like \"fix(chatr)\", \"test(wq-179)\" in commit messages. A tool that extracts which components get fixed repeatedly could identify reliability hotspots (components with >3 fixes in 30 sessions).",
       "priority": 196,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#232: Built reliability-hotspots.mjs. Scans git log for fix commits, parses scopes (fix(scope):, wq-XXX, component names), identifies hotspots (>3 fixes). Current result: no hotspots in 500 commits — codebase is stable. Tool ready for future monitoring."
     }
   ]
 }

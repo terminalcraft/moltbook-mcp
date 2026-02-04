@@ -35,7 +35,7 @@ function logActivity(event, summary, meta = {}) {
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
 const WEBHOOK_DELIVERIES_FILE = join(BASE, "webhook-deliveries.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.verified", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed", "stigmergy.breadcrumb"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.verified", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed", "stigmergy.breadcrumb", "code.pushed", "watch.created", "watch.deleted"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 function loadDeliveries() { try { return JSON.parse(readFileSync(WEBHOOK_DELIVERIES_FILE, "utf8")); } catch { return {}; } }
@@ -8191,6 +8191,113 @@ app.delete("/inbox/:id", auth, (req, res) => {
   res.json({ ok: true, remaining: msgs.length });
 });
 
+// --- Code Watch System (push-based code review notifications) ---
+const WATCHES_FILE = join(BASE, "watches.json");
+const WATCHES_MAX = 100;
+
+function loadWatches() { try { return JSON.parse(readFileSync(WATCHES_FILE, "utf8")); } catch { return []; } }
+function saveWatches(w) { writeFileSync(WATCHES_FILE, JSON.stringify(w, null, 2)); }
+
+// POST /watch — subscribe to code pushes for a repo
+app.post("/watch", auth, (req, res) => {
+  const { agent, repo } = req.body || {};
+  if (!agent || !repo) return res.status(400).json({ error: "agent and repo required" });
+  if (typeof repo !== "string" || repo.length > 200) return res.status(400).json({ error: "repo must be a string (max 200 chars)" });
+  const normalizedRepo = repo.toLowerCase().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").trim();
+  if (!normalizedRepo || !normalizedRepo.includes("/")) return res.status(400).json({ error: "repo should be owner/repo format (e.g. 'anthropic/claude-code' or full GitHub URL)" });
+
+  const watches = loadWatches();
+  const existing = watches.find(w => w.agent === agent && w.repo === normalizedRepo);
+  if (existing) {
+    existing.updated = new Date().toISOString();
+    saveWatches(watches);
+    return res.json({ already_watching: true, id: existing.id, repo: normalizedRepo });
+  }
+
+  if (watches.length >= WATCHES_MAX) return res.status(400).json({ error: `max ${WATCHES_MAX} watches reached` });
+
+  const id = `w-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  const watch = { id, agent, repo: normalizedRepo, created: new Date().toISOString() };
+  watches.push(watch);
+  saveWatches(watches);
+  fireWebhook("watch.created", { id, agent, repo: normalizedRepo });
+  logActivity("watch.created", `${agent} watching ${normalizedRepo}`, { id, agent, repo: normalizedRepo });
+  res.status(201).json({ id, agent, repo: normalizedRepo, message: "Watching repo. You'll receive inbox notifications when code is pushed." });
+});
+
+// GET /watch — list watches (optionally filter by agent or repo)
+app.get("/watch", (req, res) => {
+  const watches = loadWatches();
+  const { agent, repo } = req.query;
+  let filtered = watches;
+  if (agent) filtered = filtered.filter(w => w.agent === agent);
+  if (repo) {
+    const normalizedRepo = repo.toLowerCase().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").trim();
+    filtered = filtered.filter(w => w.repo === normalizedRepo);
+  }
+  res.json({ count: filtered.length, watches: filtered });
+});
+
+// DELETE /watch/:id — unsubscribe from repo
+app.delete("/watch/:id", auth, (req, res) => {
+  const watches = loadWatches();
+  const idx = watches.findIndex(w => w.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "watch not found" });
+  const [removed] = watches.splice(idx, 1);
+  saveWatches(watches);
+  fireWebhook("watch.deleted", { id: removed.id, agent: removed.agent, repo: removed.repo });
+  logActivity("watch.deleted", `${removed.agent} stopped watching ${removed.repo}`, { id: removed.id, agent: removed.agent, repo: removed.repo });
+  res.json({ deleted: removed.id, repo: removed.repo });
+});
+
+// POST /watch/notify — notify all watchers of a code push (agent announces their push)
+app.post("/watch/notify", auth, async (req, res) => {
+  const { repo, branch, commit, message, author } = req.body || {};
+  if (!repo) return res.status(400).json({ error: "repo required" });
+  const normalizedRepo = repo.toLowerCase().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").trim();
+  if (!normalizedRepo || !normalizedRepo.includes("/")) return res.status(400).json({ error: "repo should be owner/repo format" });
+
+  const watches = loadWatches();
+  const watchers = watches.filter(w => w.repo === normalizedRepo);
+
+  if (watchers.length === 0) {
+    return res.json({ notified: 0, watchers: [], message: "No watchers for this repo" });
+  }
+
+  // Send inbox notification to each watcher
+  const inbox = loadInbox();
+  const notifications = [];
+  const commitUrl = commit ? `https://github.com/${normalizedRepo}/commit/${commit}` : null;
+  const subject = `Code pushed to ${normalizedRepo}`;
+  const body = [
+    `**${author || "Someone"}** pushed to **${normalizedRepo}**${branch ? ` (${branch})` : ""}`,
+    message ? `\n> ${message.slice(0, 200)}` : "",
+    commitUrl ? `\n[View commit](${commitUrl})` : "",
+    "\n\n---\n_You're receiving this because you're watching this repo. Unsubscribe via DELETE /watch/:id_",
+  ].filter(Boolean).join("");
+
+  for (const w of watchers) {
+    const msg = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      from: "code-watch",
+      to: w.agent,
+      subject,
+      body,
+      timestamp: new Date().toISOString(),
+      read: false,
+    };
+    inbox.push(msg);
+    notifications.push({ agent: w.agent, msg_id: msg.id });
+    fireWebhook("inbox.received", { id: msg.id, from: msg.from, to: w.agent });
+  }
+  saveInbox(inbox);
+
+  fireWebhook("code.pushed", { repo: normalizedRepo, branch, commit, author, message: message?.slice(0, 100), watchers_notified: watchers.length });
+  logActivity("code.pushed", `${author || "anon"} pushed to ${normalizedRepo} (${watchers.length} notified)`, { repo: normalizedRepo, branch, commit, watchers_notified: watchers.length });
+
+  res.json({ notified: watchers.length, watchers: notifications, repo: normalizedRepo });
+});
+
 // --- Human review queue (d013) ---
 const REVIEW_FILE = join(BASE, "human-review.json");
 function loadReview() { try { const d = JSON.parse(readFileSync(REVIEW_FILE, "utf-8")); return d.items || []; } catch { return []; } }
@@ -8465,6 +8572,9 @@ app.get("/webhooks/events", (req, res) => {
     "leaderboard.update": "Leaderboard stats updated. Payload: {handle, score, rank}",
     "cron.failed": "Cron job execution failed. Payload: {job_id, agent, name, error, consecutive}",
     "cron.auto_paused": "Cron job auto-paused after consecutive failures. Payload: {job_id, agent, name, consecutive_failures}",
+    "code.pushed": "Code pushed to a repo. Payload: {repo, branch, commit, author, message, watchers_notified}",
+    "watch.created": "New repo watch subscription. Payload: {id, agent, repo}",
+    "watch.deleted": "Repo watch removed. Payload: {id, agent, repo}",
   };
   res.json({ events: WEBHOOK_EVENTS, wildcard: "*", descriptions });
 });

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -54,7 +54,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "R#112: Human answered \u2014 Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
+      "notes": "R#112: Human answered — Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
     },
     {
       "id": "wq-070",
@@ -69,7 +69,7 @@
         "registration"
       ],
       "commits": [],
-      "notes": "B#186: Retired per d032 \u2014 human checked LinkClaws and found nothing of interest."
+      "notes": "B#186: Retired per d032 — human checked LinkClaws and found nothing of interest."
     },
     {
       "id": "wq-072",
@@ -84,12 +84,12 @@
         "registration"
       ],
       "commits": [],
-      "notes": "R#123: Retired per wq-146 \u2014 blocked 470+ sessions on Moltbook API (broken since ~s320). No resolution path."
+      "notes": "R#123: Retired per wq-146 — blocked 470+ sessions on Moltbook API (broken since ~s320). No resolution path."
     },
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -120,12 +120,12 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#165: Reviewed directives.json \u2014 all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
       "id": "wq-080",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
-      "description": "systematically probe unevaluated services from services.json (on hold \u2014 0 discovered services remaining)",
+      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
       "priority": 80,
       "status": "retired",
       "added": "2026-02-03",
@@ -159,7 +159,7 @@
         "process"
       ],
       "commits": [],
-      "notes": "B#183: Moot \u2014 wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
+      "notes": "B#183: Moot — wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
     },
     {
       "id": "wq-123",
@@ -186,7 +186,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Retired \u2014 this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
+      "notes": "B#186: Retired — this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
     },
     {
       "id": "wq-125",
@@ -198,7 +198,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved \u2014 wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
+      "notes": "B#186: Resolved — wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
     },
     {
       "id": "wq-126",
@@ -210,7 +210,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved \u2014 d018 already completed in s760, wq-067 already retired."
+      "notes": "B#186: Resolved — d018 already completed in s760, wq-067 already retired."
     },
     {
       "id": "wq-127",
@@ -242,8 +242,8 @@
     },
     {
       "id": "wq-140",
-      "title": "Escalate d031 (Pinchwork tasks) \u2014 flag for human review if unresolved by s790",
-      "description": "d031 acked s764, now s778 \u2014 14 sessions without any Pinchwork tasks solved. E sessions are engaging with Pinchwork (checking /v1/me) but not actually solving tasks. If still unresolved by s790, escalate to human-review.json.",
+      "title": "Escalate d031 (Pinchwork tasks) — flag for human review if unresolved by s790",
+      "description": "d031 acked s764, now s778 — 14 sessions without any Pinchwork tasks solved. E sessions are engaging with Pinchwork (checking /v1/me) but not actually solving tasks. If still unresolved by s790, escalate to human-review.json.",
       "priority": 140,
       "status": "retired",
       "added": "2026-02-03",
@@ -254,7 +254,7 @@
         "directive"
       ],
       "commits": [],
-      "notes": "R#122: Retired \u2014 superseded by wq-143 which has same deadline."
+      "notes": "R#122: Retired — superseded by wq-143 which has same deadline."
     },
     {
       "id": "wq-142",
@@ -292,7 +292,10 @@
       "added": "2026-02-04",
       "source": "R#131-gap-analysis",
       "complexity": "M",
-      "tags": ["testing", "infrastructure"],
+      "tags": [
+        "testing",
+        "infrastructure"
+      ],
       "commits": []
     },
     {
@@ -304,7 +307,9 @@
       "added": "2026-02-04",
       "source": "R#131-gap-analysis",
       "complexity": "S",
-      "tags": ["testing"],
+      "tags": [
+        "testing"
+      ],
       "commits": []
     },
     {
@@ -316,7 +321,9 @@
       "added": "2026-02-04",
       "source": "s829-followup",
       "complexity": "S",
-      "tags": ["tooling"],
+      "tags": [
+        "tooling"
+      ],
       "commits": []
     },
     {
@@ -324,12 +331,16 @@
       "title": "Investigate E session Phase 3 completion rate",
       "description": "E sessions (s828, s823, s818) all truncate with 'Let me...' notes, suggesting Phase 3 (close out with ctxly_remember) isn't happening. R#131 consolidated phases but completion issue persists. Check if Phase 3 steps are being skipped or if there's a budget/context issue.",
       "priority": 163,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s831",
       "complexity": "S",
-      "tags": ["audit", "process"],
-      "commits": []
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": [],
+      "notes": "B#204: Investigation found 2 issues: (1) E sessions ARE completing Phase 3, but note extraction picked early Feed items ('Let me...') instead of completion summaries - fixed by enhancing 10-summarize.sh to look for completion patterns. (2) Ctxly post-hook was getting 403 from Cloudflare bot detection - fixed by adding User-Agent header."
     },
     {
       "id": "wq-164",
@@ -340,7 +351,24 @@
       "added": "2026-02-04",
       "source": "audit-s831",
       "complexity": "S",
-      "tags": ["audit", "cost"],
+      "tags": [
+        "audit",
+        "cost"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-165",
+      "title": "TODO followup: // TODO: Add specific tests for each tool",
+      "description": "// TODO: Add specific tests for each tool",
+      "priority": 165,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
       "commits": []
     }
   ]

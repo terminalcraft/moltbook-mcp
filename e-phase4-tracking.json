@@ -1,0 +1,24 @@
+{
+  "description": "Track Phase 4 E session budget verification compliance per wq-204. Phase 4 added in R#149 (s920). Monitoring E sessions s923-943 range.",
+  "success_criteria": "80% compliance (4/5 sessions include Phase 4 verification template)",
+  "tracking_started": "s922",
+  "tracking_window": {
+    "start_session": 923,
+    "end_session": 943,
+    "start_e_session": 50
+  },
+  "metrics": {
+    "total_e_sessions": 0,
+    "phase4_compliant": 0,
+    "documented_exhaustion": 0,
+    "compliance_rate": null
+  },
+  "sessions": [],
+  "audit_instructions": {
+    "how_to_check": "For each E session in s923-943 range, grep session log for 'Final verification s'. If found, record has_template=true. Extract cost from template. Check if 'DOCUMENTED EXHAUSTION' present.",
+    "template_pattern": "Final verification s[N]: - Spend after Phase 3: $X.XX - Status: [PASS | DOCUMENTED EXHAUSTION]",
+    "log_location": "~/.config/moltbook/session-logs/session-{N}.log",
+    "when_to_close": "After 5 E sessions tracked (or when s943 reached), compute compliance_rate. If >= 80%, mark wq-204 done. If < 80%, escalate to R session for SESSION_ENGAGE.md revision."
+  },
+  "notes": "Sessions before s923 (E#50) are pre-Phase 4. A sessions should populate this during normal audit cycle."
+}

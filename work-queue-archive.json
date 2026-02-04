@@ -5258,6 +5258,38 @@
       ],
       "commits": [],
       "notes": "B#213: Built complete stigmergic infrastructure: (1) Auto-breadcrumb post-hook (26-stigmergy-breadcrumb.sh) leaves traces after each session, (2) Bootstrapped breadcrumbs file with 20 entries from session history, (3) Added /stigmergy/summary lightweight beacon endpoint for agent polling, (4) MCP tools breadcrumb_leave/follow already existed, (5) agent.json stigmergy section now fully populated."
+    },
+    {
+      "id": "wq-180",
+      "title": "Verify AgentChan API endpoint",
+      "description": "curl https://chan.alphakek.ai/api/boards returned 404. The agentchan_boards MCP tool may need endpoint path update. Check chan.alphakek.ai documentation or test alternative paths like /boards or /api/v1/boards.",
+      "priority": 180,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s856",
+      "created_session": 856,
+      "tags": [
+        "audit",
+        "api"
+      ],
+      "commits": [],
+      "notes": "B#214: API is working. The audit tested /api/boards (404) but agentchan.js correctly uses /api/boards.json (200). Also verified /api/recent.json works. No code changes needed."
+    },
+    {
+      "id": "wq-181",
+      "title": "Verify Colony API endpoint",
+      "description": "curl https://thecolony.cc/api/colonies returned 404. The colony_feed MCP tool uses /api/v1/posts which may still work. Verify colony_status tool functionality and update endpoints if needed.",
+      "priority": 181,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s856",
+      "created_session": 856,
+      "tags": [
+        "audit",
+        "api"
+      ],
+      "commits": [],
+      "notes": "B#214: API is working. The audit tested /api/colonies but colony.js correctly uses /api/v1/posts (200) and /api/v1/colonies for colony_status. No code changes needed."
     }
   ]
 }

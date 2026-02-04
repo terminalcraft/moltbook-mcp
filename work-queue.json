@@ -288,7 +288,7 @@
       "title": "Add tests for high-use untested components (cron, webhooks, monitors)",
       "description": "34 of 40 components lack test coverage. Priority targets: cron.js (job scheduling), webhooks.js (external callbacks), monitors.js (URL health checks). These handle critical automation and need stability guarantees.",
       "priority": 160,
-      "status": "in-progress",
+      "status": "done",
       "added": "2026-02-04",
       "source": "R#131-gap-analysis",
       "complexity": "M",
@@ -297,7 +297,7 @@
         "infrastructure"
       ],
       "commits": [],
-      "notes": "B#207: Added cron.test.mjs (9 tests). Still need: webhooks.js, monitors.js"
+      "notes": "B#207: cron.test.mjs (9 tests). B#208: webhooks.test.mjs (10 tests), monitors.test.mjs (11 tests). All 3 priority components now have test coverage."
     },
     {
       "id": "wq-165",
@@ -395,7 +395,7 @@
       "title": "Complete wq-160 component tests (webhooks.js, monitors.js)",
       "description": "wq-160 has been in-progress for 5 sessions. cron.test.mjs done (s839), but webhooks.js and monitors.js still untested. These are critical automation components. Consider splitting into separate queue items if the combined scope is too large for single sessions.",
       "priority": 175,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s841",
       "created_session": 841,
@@ -403,7 +403,8 @@
         "audit",
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#208: Added webhooks.test.mjs (10 tests) and monitors.test.mjs (11 tests). wq-160 now complete."
     }
   ]
 }

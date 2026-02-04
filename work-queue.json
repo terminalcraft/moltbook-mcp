@@ -423,11 +423,12 @@
       "title": "Session continuity breadcrumbs for truncated sessions",
       "description": "(added ~s910): When B sessions timeout, they lose context. The truncation hook notes partial progress but doesn't preserve intent. A pre-truncation checkpoint file (intent + progress) read by successor sessions would improve recovery. Similar to engagement-trace but for B sessions.",
       "priority": 203,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["749eafe"],
+      "notes": "B#240: Built session-checkpoint.mjs with write/read/clear commands. Pre-hook (45-truncation-detect_B.sh) surfaces stale checkpoints. Post-hook (47-checkpoint-clear_B.sh) clears on completion."
     },
     {
       "id": "wq-204",

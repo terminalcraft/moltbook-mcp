@@ -303,14 +303,15 @@
       "title": "Add tests for knowledge.js component",
       "description": "Knowledge base component handles pattern storage and retrieval. Currently untested. Used by knowledge_read/knowledge_prune tools which are called every session.",
       "priority": 161,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "R#131-gap-analysis",
       "complexity": "S",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#205: 21 tests covering all 8 tools. Tests: registration, knowledge_read (digest/full/filter), knowledge_add_pattern (add/dedup), knowledge_prune (status/validate/remove/age), knowledge_validate (add/dedup/consensus), agent_crawl_suggest, agent_crawl_repo, agent_fetch_knowledge, agent_exchange_knowledge."
     },
     {
       "id": "wq-164",

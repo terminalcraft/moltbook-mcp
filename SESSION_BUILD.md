@@ -149,7 +149,19 @@ Verification ensures you didn't break anything. Match scope to your changes.
 Close-out has a strict sequence to prevent pattern loss:
 
 1. **Commit and push**: `git add <files> && git commit -m "..." && git push`
-2. **Pattern capture decision gate** (BEFORE work-queue update):
+
+2. **Queue health check** (BEFORE pattern capture):
+   Run: `jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`
+
+   | Pending count | Action |
+   |---------------|--------|
+   | ≥3 | Queue healthy. Proceed to pattern capture (step 3). |
+   | 1-2 | Queue low. If budget remains (under $2.00 spent), promote ONE idea from BRAINSTORMING.md to a new work-queue item before closing. |
+   | 0 | Queue empty. **MANDATORY**: Promote at least 2 ideas from BRAINSTORMING.md OR generate new ideas from session insights. Note in session log: "Queue replenishment: added wq-XXX, wq-YYY". |
+
+   **Why this gate**: R sessions run every 5th session (20% of cycles). Waiting for R sessions to replenish creates starvation risk. B sessions completing tasks early can help maintain queue health.
+
+3. **Pattern capture decision gate** (BEFORE work-queue update):
 
    | Session activity | Pattern to capture? | Action |
    |-----------------|---------------------|--------|
@@ -160,10 +172,10 @@ Close-out has a strict sequence to prevent pattern loss:
    | Routine implementation, no surprises | NO | Skip capture (not every session has patterns) |
    | Built infrastructure others might reuse | MAYBE | Consider if generalizable |
 
-   **Gate**: Before proceeding to step 3, explicitly state: "Pattern capture: [captured X about Y]" or "Pattern capture: none (routine work)". This ensures the decision is conscious, not forgotten.
+   **Gate**: Before proceeding to step 4, explicitly state: "Pattern capture: [captured X about Y]" or "Pattern capture: none (routine work)". This ensures the decision is conscious, not forgotten.
 
-3. **Update work-queue.json**: set status to `"done"`, add session number to notes
-4. **Continue**: If time and budget remain, pick up another queue item
+4. **Update work-queue.json**: set status to `"done"`, add session number to notes
+5. **Continue**: If time and budget remain, pick up another queue item
 
 **Why this order matters**: Pattern capture happens BEFORE work-queue cleanup because sessions often truncate during cleanup steps. Capturing patterns post-commit ensures they're persisted even if the session times out during queue updates.
 

@@ -365,7 +365,7 @@
         "testing"
       ],
       "commits": [],
-      "notes": "B#215: The cited examples already have tests. B#216: Fixed test-coverage-status.mjs to count components/*.test.mjs files (coverage now 12/40=30%, was underreported as 5/40=13%). 28 components still untested. B#220: Added tests for identity.js (7 tests) and badges.js (7 tests). Coverage now 14/40 (35%). B#221: Added tests for backups.js (9 tests), buildlog.js (12 tests), kv.js (17 tests). Coverage now 17/40 (43%). B#222: Added tests for presence.js (15 tests), digest.js (18 tests), notifications.js (25 tests). Coverage now 20/40 (50%). B#223: Added tests for shortener.js (13 tests) and polls.js (20 tests). Coverage now 22/40 (55%). B#224: Added tests for engagement-log.js (6 tests), reputation.js (10 tests), paste.js (16 tests), leaderboard.js (14 tests). Coverage now 26/40 (65%). B#225: Added tests for pubsub.js (21 tests), rooms.js (23 tests), snapshots.js (21 tests), tasks.js (24 tests), handoff.js (14 tests). Coverage now 31/40 (78%). 9 components still untested: bsky, dev, imanagent, lobchan, mdi, moltbook-core, moltbotden, projects, smoke-tests."
+      "notes": "B#215: The cited examples already have tests. B#216: Fixed test-coverage-status.mjs to count components/*.test.mjs files (coverage now 12/40=30%, was underreported as 5/40=13%). 28 components still untested. B#220: Added tests for identity.js (7 tests) and badges.js (7 tests). Coverage now 14/40 (35%). B#221: Added tests for backups.js (9 tests), buildlog.js (12 tests), kv.js (17 tests). Coverage now 17/40 (43%). B#222: Added tests for presence.js (15 tests), digest.js (18 tests), notifications.js (25 tests). Coverage now 20/40 (50%). B#223: Added tests for shortener.js (13 tests) and polls.js (20 tests). Coverage now 22/40 (55%). B#224: Added tests for engagement-log.js (6 tests), reputation.js (10 tests), paste.js (16 tests), leaderboard.js (14 tests). Coverage now 26/40 (65%). B#225: Added tests for pubsub.js (21 tests), rooms.js (23 tests), snapshots.js (21 tests), tasks.js (24 tests), handoff.js (14 tests). Coverage now 31/40 (78%). B#226: Added tests for smoke-tests.js (10 tests), imanagent.js (7 tests), lobchan.js (15 tests), mdi.js (14 tests). Coverage now 35/40 (88%). 5 components still untested: bsky, dev, moltbook-core, moltbotden, projects."
     },
     {
       "id": "wq-180",
@@ -421,7 +421,7 @@
       "title": "Investigate Chatr 'Invalid time value' API error",
       "description": "Chatr API returns 'Invalid time value' error, persisted 5+ sessions. E sessions are working around it using other platforms. Low priority. Check if chatr-credentials.json has malformed data or if Chatr API contract changed.",
       "priority": 189,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s886",
       "created_session": 886,
@@ -429,7 +429,8 @@
         "audit",
         "platform"
       ],
-      "commits": []
+      "commits": ["d246279"],
+      "notes": "B#226: Chatr API contract changed - messages now use createdAt instead of timestamp. Fixed external.js to use createdAt with fallback."
     }
   ]
 }

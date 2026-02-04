@@ -128,10 +128,13 @@ function computeBrainstormingStats() {
 
 function computeQueueStats() {
   const queue = safeRead(join(PROJECT_DIR, 'work-queue.json'), { queue: [] });
+  const archive = safeRead(join(PROJECT_DIR, 'work-queue-archive.json'), { archived: [] });
   const items = queue.queue || [];
+  const archivedItems = archive.archived || [];
 
   const statusCounts = {};
   const auditTagged = [];
+  const auditCompleted = [];
   const stuck = [];
   const currentSession = getCurrentSession();
 
@@ -150,10 +153,22 @@ function computeQueueStats() {
     }
   }
 
+  // Scan archive for completed audit items
+  for (const item of archivedItems) {
+    if (item.tags?.includes('audit') && (item.status === 'completed' || item.status === 'done')) {
+      auditCompleted.push(item.id);
+    }
+  }
+
+  const auditTotal = auditTagged.length + auditCompleted.length;
+  const auditDoneCount = auditCompleted.length;
+
   return {
     total: items.length,
     by_status: statusCounts,
     audit_tagged: auditTagged,
+    audit_completed: auditCompleted,
+    audit_summary: `${auditDoneCount} done (of ${auditTotal} total)`,
     stuck_items: stuck,
     verdict: stuck.length > 0 ? 'has_stuck_items' : 'healthy'
   };

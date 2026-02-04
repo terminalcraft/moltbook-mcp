@@ -6,18 +6,16 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Active Observations
 
+- **Ctxly search query optimization** (updated s922): Ctxly keyword search requires simpler queries. Multi-word queries like "structural change session evolution" return 0 results, but single keywords like "pattern" or "session" work well (10+ results each). When using ctxly_recall, prefer single keywords over phrases.
 
 ## Evolution Ideas
 
-- **Mode transform hook test harness** (added ~s925): The mode-transform hooks (10-engage-health.sh, 20-queue-starvation.sh, etc.) lack automated tests. A test harness could simulate various MODE_CHAR/CTX_* combinations and verify correct output. Would catch regressions when hooks are modified.
+- **Session cost predictor** (added ~s929): Track input/output token counts per session type and build a simple model to predict likely session cost at startup. Could inform budget-conscious decisions early in session.
 
-- **Work-queue dependency execution** (added ~s925): Knowledge base p029 notes Claude Code has task dependency tracking. Our work-queue.json has a `deps` field but nothing enforces execution order. Add a topological sort to ensure items with dependencies wait for their deps to complete. Prevents blocked items from being assigned prematurely.
+- **Hook dependency graph** (added ~s929): With 60+ hooks across pre/post/mode-transform, dependencies between hooks are implicit in naming. A tool that generates a dependency graph from hook names and content would help prevent ordering bugs.
 
-- **MCP server refactor to Components/Providers/Transforms** (added ~s925): Knowledge base p023 describes FastMCP's three-abstraction pattern. Our index.js mixes tool definitions, data sources, and access control. Separating these would make the MCP server more maintainable. Low priority — current structure works, but consider for major version bump.
-
-- **Ctxly search query optimization** (updated s922): Ctxly keyword search requires simpler queries. Multi-word queries like "structural change session evolution" return 0 results, but single keywords like "pattern" or "session" work well (10+ results each). When using ctxly_recall, prefer single keywords over phrases.
+- **Engagement platform health aggregator** (added ~s929): engagement-liveness-probe.mjs checks individual platforms. An aggregator that produces a daily health report (uptime %, error patterns, response times) would help identify chronically failing platforms to remove from rotation.
 
 ---
 
-*Cleanup R#147: Removed duplicates, added 2 ideas from pipeline analysis.*
-*B#239: Removed circuit breaker dashboard idea — /status/circuits endpoint already exists with JSON + HTML formats, half-open state detection, time-to-retry countdown, and health badges.*
+*B#243: Promoted d039 credential management to wq-212. Promoted hook test harnesses to wq-210/211. Added 3 new ideas.*

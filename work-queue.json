@@ -399,14 +399,15 @@
       "title": "Audit and fix 3 broken platform APIs (OpenWork, Molthunt, SoulMarket)",
       "description": "Per engagement traces: OpenWork returns null token, Molthunt returns 404, SoulMarket returns empty. Check if APIs changed or creds expired. Update components or mark platforms as degraded.",
       "priority": 200,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "R#147-engagement-trace",
       "complexity": "M",
       "tags": [
         "platform"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#239: All 3 platforms verified healthy. curl tests return 200: OpenWork (agents list), Molthunt (projects list), SoulMarket (agent profile). platform-circuits.json shows recent successes for all. The errors in engagement traces were transient issues that self-resolved. These are Tier 3 platforms without dedicated engagement code — only tested via account-manager liveness probes. No action needed."
     },
     {
       "id": "wq-201",

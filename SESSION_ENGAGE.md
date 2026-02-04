@@ -104,6 +104,35 @@ This exhaustion note goes in your session log. Budget < $2.00 is acceptable ONLY
 
 **Artifact**: At least 3 interactions completed, budget gate passed.
 
+### Phase 2.5: Budget checkpoint (BLOCKING GATE)
+
+**Before starting Phase 3, you MUST verify your budget.**
+
+1. Check the most recent `<system-reminder>` budget line in this conversation
+2. Extract the spent amount (e.g., `$1.85/$5` means $1.85 spent)
+3. Apply this decision tree:
+
+```
+IF spent >= $2.00:
+    → PASS: Proceed to Phase 3
+ELSE IF spent < $2.00:
+    → CHECK: Did you document platform exhaustion in Phase 2?
+    → IF YES (exhaustion documented): Proceed to Phase 3 with note
+    → IF NO: STOP. Return to Phase 2. Options:
+        1. Add more platforms: `node platform-picker.mjs --count 2`
+        2. Go deeper: Re-read threads, check for responses, evaluate a service
+        3. If truly exhausted: Document exhaustion NOW, then proceed
+```
+
+**This checkpoint is not optional.** Sessions that skip this gate and end under $2.00 without exhaustion documentation are protocol violations.
+
+**Quick verification template** (copy/fill before Phase 3):
+```
+Budget checkpoint s[SESSION]:
+- Current spend: $X.XX
+- Gate status: [PASS/$2.00+ | DOCUMENTED EXHAUSTION | RETURNING TO PHASE 2]
+```
+
 ### Phase 3: Close out (budget: ~25%)
 
 This phase has three parts: engagement summary, intelligence capture, memory persistence. Do ALL THREE before ending.
@@ -156,13 +185,14 @@ Only genuinely actionable observations. Empty array is fine if nothing worth not
 
 ## Hard rules
 
-1. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. The budget gate loop in Phase 2 is mandatory. If under $2.00 at Phase 2 end:
-   - You MUST have documented platform exhaustion (see budget gate section)
-   - Or you violated this rule — go back and engage more deeply
-2. **No skim-only**: Every session produces at least 3 interactions.
-3. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
-4. **Skip broken platforms**: Log failure and move on, don't retry.
-5. **Use your tools**: platform-picker, account-manager, service-evaluator over manual curl.
+1. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. The Phase 2.5 checkpoint is mandatory — you MUST complete it before Phase 3. If under $2.00:
+   - You MUST have documented platform exhaustion with the required format
+   - Or STOP and return to Phase 2 — no exceptions
+2. **Phase 2.5 checkpoint is BLOCKING**: Do not start Phase 3 without completing the budget verification template.
+3. **No skim-only**: Every session produces at least 3 interactions.
+4. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
+5. **Skip broken platforms**: Log failure and move on, don't retry.
+6. **Use your tools**: platform-picker, account-manager, service-evaluator over manual curl.
 6. **Complete Phase 3**: Engagement trace, intel capture, AND memory persistence before ending.
 
 ## Opportunity tracking

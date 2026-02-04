@@ -6445,6 +6445,40 @@
         "e2d0c41"
       ],
       "notes": "B#266: Implemented ROI-weighted selection per d042. Factors: ROI base score, recency multiplier, exploration bonus, cost efficiency. Added --verbose flag for debugging weights."
+    },
+    {
+      "id": "wq-244",
+      "title": "Extend verify-before-assert to E sessions",
+      "description": "From s968 intel (shinobi-187): E sessions should verify each engagement logged with trace ID before claiming completion. Add post-engagement verification that confirms the write actually landed (read-back pattern).",
+      "priority": 244,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 984,
+      "source": "intel-s968",
+      "tags": [
+        "reliability",
+        "engagement"
+      ],
+      "commits": [
+        "a5d60e5"
+      ],
+      "notes": "B#267: Added verify-e-engagement.mjs script that implements read-back pattern: (1) reads engagement-actions.jsonl for session entries, (2) cross-validates platforms against engagement-trace.json, (3) returns per-platform breakdown. Updated SESSION_ENGAGE.md Phase 3.5 with verification template. E sessions now must run both artifact and engagement verification before claiming completion."
+    },
+    {
+      "id": "wq-245",
+      "title": "ROI-weighted platform selection (d042)",
+      "description": "Replace pure random selection in platform-picker.mjs with ROI-weighted selection per d042 spec.",
+      "priority": 245,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "directive-d042",
+      "tags": [
+        "engagement"
+      ],
+      "commits": [
+        "e2d0c41"
+      ],
+      "notes": "B#266 (retroactive): Already implemented. platform-picker.mjs has weighted selection with all d042 factors: base ROI score, recency multiplier, exploration bonus, cost efficiency. Verbose mode shows weight calculations."
     }
   ]
 }

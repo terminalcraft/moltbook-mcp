@@ -377,12 +377,13 @@
       "title": "Enforce A session work-queue item creation",
       "description": "s831 audit skipped the mandatory step of creating work-queue items for a831-1/a831-2. This breaks the diagnosis→fix pipeline. Add verification step to SESSION_AUDIT.md that checks work-queue.json was actually modified before session end. Could be: (1) a post-hook that diffs work-queue.json, (2) an explicit checklist item in SESSION_AUDIT.md, or (3) a validation in the audit stats helper.",
       "priority": 171,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s836",
       "created_session": 836,
       "tags": ["audit", "process"],
-      "commits": []
+      "commits": [],
+      "notes": "B#206: Added post-hook 29-audit-queue-verify.sh that checks if A sessions created audit-tagged work-queue items. Logs violations to audit-violations.log and outputs warning message."
     },
     {
       "id": "wq-172",

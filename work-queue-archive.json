@@ -5823,6 +5823,26 @@
         "734a50d"
       ],
       "notes": "B#242: Created mode-transform.test.mjs with 14 tests covering all 4 hooks. Tests verify mode-specific filtering, threshold logic, and fallback behavior."
+    },
+    {
+      "id": "wq-206",
+      "title": "Mode transform hook test harness",
+      "description": "(added ~s925): The mode-transform hooks (10-engage-health.sh, 20-queue-starvation.sh, etc.) lack automated tests. A test harness could simulate various MODE_CHAR/CTX_* combinations and verify correct output. Would catch regressions when hooks are modified.",
+      "priority": 206,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "completed": "2026-02-04",
+      "completed_session": 0,
+      "progress_notes": [
+        {
+          "session": 0,
+          "timestamp": "2026-02-04T16:01:04.187Z",
+          "text": "B#243: Already completed in s927. Test harness exists with 14 passing tests covering all 4 mode-transform hooks."
+        }
+      ]
     }
   ]
 }

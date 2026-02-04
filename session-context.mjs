@@ -532,9 +532,15 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       // concrete build suggestions ("Post-hoc skill audit tool", "Universal dry-run
       // API wrapper") but were excluded, causing 0% intel→queue conversion despite
       // 20 actionable intel entries. 'threat' entries remain excluded (warnings, not tasks).
+      // B#263 (wq-235): Added imperative verb filter. Per intel-promotion-tracking.json,
+      // wq-187 was retired as non-actionable — its "actionable" text was philosophical
+      // observation ("Apply parasitic bootstrapping pattern") rather than concrete task.
+      // Now require text to start with imperative verb to ensure build-ready items.
+      const IMPERATIVE_VERBS = /^(Add|Build|Create|Fix|Implement|Update|Remove|Refactor|Extract|Migrate|Integrate|Configure|Enable|Disable|Optimize|Monitor|Track|Evaluate|Test|Validate|Deploy|Setup|Write|Design|Document)\b/i;
       const qualifyingEntries = intel.filter(e =>
         (e.type === 'integration_target' || e.type === 'pattern' || e.type === 'tool_idea') &&
         (e.actionable || '').length > 20 &&
+        IMPERATIVE_VERBS.test((e.actionable || '').trim()) &&
         !e._promoted
       );
       for (let i = 0; i < qualifyingEntries.length && promoted.length < 2; i++) {

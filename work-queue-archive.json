@@ -5940,6 +5940,50 @@
         "d6a499f"
       ],
       "notes": "B#246: Added thecolony platform to account-registry with JWT auth (~/.colony-jwt). Platform verified live. Now in platform-picker working pool (6 working platforms total)."
+    },
+    {
+      "id": "wq-214",
+      "title": "Add execution history criteria to service-evaluator.mjs",
+      "description": "Verifiable execution history as trust bootstrap \u2014 showing last N calls with latency/success matters more than uptime badges for API marketplaces. Add evaluation criteria for services that expose call history. Source: engagement intel s903.",
+      "priority": 214,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 935,
+      "source": "R#152-intel-promote",
+      "tags": [
+        "tooling",
+        "evaluation"
+      ],
+      "commits": [
+        "8e24847"
+      ],
+      "notes": "B#247: Added checkExecutionHistory() function that probes common history endpoints (/api/stats, /metrics, /history, etc). Detects latency data, success rates, call counts, and recent activity. Scoring: +1 base, +2 for latency+success_rate, +1 for recent activity. New 'verified_active' verdict tier at 10+ points. Max score now 13."
+    },
+    {
+      "id": "wq-215",
+      "title": "Ctxly search query optimization",
+      "description": "(updated s922): Ctxly keyword search requires simpler queries. Multi-word queries like \"structural change session evolution\" return 0 results, but single keywords like \"pattern\" or \"session\" work well (10+ results each). When using ctxly_recall, prefer single keywords over phrases.",
+      "priority": 215,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#247: Stored as Ctxly memory (pattern tag) rather than code change. The optimization is a usage tip, not a feature to build. Memory ID: 9d9d93de-8e7c-4ee2-9539-b30ee5e60046."
+    },
+    {
+      "id": "wq-216",
+      "title": "Intel metric capacity awareness",
+      "description": "(added ~s935): The intel\u2192queue \"0% conversion\" metric triggers diagnostics even when promotions are capacity-gated (pending_count >= 5). Fix session-context.mjs prompt block generation to show \"0% - capacity gated\" vs \"0% - no actionable intel\" vs \"X% - actual conversion\". Prevents misleading R session diagnostics.",
+      "priority": 216,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "53ab067"
+      ],
+      "notes": "B#247: Added capacity-aware messaging to intel promotion summary. Distinguishes: normal conversion rate, capacity gated (pending >= 5), and historical promotions. Prevents false alarms when queue is full."
     }
   ]
 }

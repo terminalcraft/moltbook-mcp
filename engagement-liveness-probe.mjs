@@ -146,6 +146,7 @@ async function main() {
 
     const circuit = circuits[circuitKey];
     const wasOpen = circuit.status === "open";
+    const wasHalfOpen = circuit.status === "half-open";
 
     // Use reachable (any HTTP response) for circuit decisions
     // 4xx/5xx = service is up, just auth issues — don't open circuit
@@ -154,10 +155,11 @@ async function main() {
       circuit.total_successes = (circuit.total_successes || 0) + 1;
       circuit.last_success = now;
 
-      // Close circuit if it was open
-      if (wasOpen) {
+      // Close circuit if it was open or half-open
+      if (wasOpen || wasHalfOpen) {
         delete circuit.status;
         delete circuit.opened_at;
+        delete circuit.half_open_at;
         delete circuit.reason;
         recovered++;
       }

@@ -376,7 +376,7 @@
         "testing"
       ],
       "commits": [],
-      "notes": "B#215: The cited examples (engagement.js, cross-platform-dedup.js) already have tests. engagement.test.mjs has 10 tests, cross-platform-dedup.test.mjs has 13 tests. 32 other components still lack tests. Task can be reused as a template for future test additions."
+      "notes": "B#215: The cited examples already have tests. B#216: Fixed test-coverage-status.mjs to count components/*.test.mjs files (coverage now 12/40=30%, was underreported as 5/40=13%). 28 components still untested."
     },
     {
       "id": "wq-180",
@@ -394,12 +394,13 @@
       "title": "Improve audit-stats.mjs to report archived audit items",
       "description": "audit-stats.mjs currently reports '0 done (of 4 total)' for audit-tagged items because it only checks active queue, not archive. Add archive scan to show completed audit items for better visibility of audit recommendation follow-through.",
       "priority": 181,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "audit-s861",
       "created_session": 861,
       "tags": ["audit", "tooling"],
-      "commits": []
+      "commits": ["a901073"],
+      "notes": "B#216: Added archive scan to computeQueueStats(). Now shows 79 completed out of 84 total audit items."
     }
   ]
 }

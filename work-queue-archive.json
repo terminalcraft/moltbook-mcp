@@ -6623,6 +6623,34 @@
       ],
       "commits": [],
       "notes": "B#272: Added 8 tests for pre-commit credential detection (API keys, secrets, Bearer tokens, JSON patterns) and shell syntax checking. Tests verify: credential patterns blocked, clean files pass, test files exempt, shell syntax errors caught."
+    },
+    {
+      "id": "wq-259",
+      "title": "Covenant deadline reminder system",
+      "description": "(added ~s1000): When a templated covenant term approaches deadline, auto-send inbox message to counterparty. Requires: read covenants.json for terms with deadlines, calculate days remaining, trigger inbox_send at T-3 days. Prevents covenant lapses.",
+      "priority": 259,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#274: Built covenant-reminders.mjs with check/remind/list/set commands. Added pre-session hook 38-covenant-reminders.sh for automatic deadline alerts. Deadlines set via `node covenant-reminders.mjs set @agent 0 +30d`."
+    },
+    {
+      "id": "wq-261",
+      "title": "Implement d042 ROI-weighted platform selection in platform-picker.mjs",
+      "description": "d042 acked s985 (21 sessions ago) but not implemented. R session needs to: (1) Read ROI data from engage-orchestrator, (2) Add weighting factors per d042 spec (recency, exploration bonus, cost efficiency), (3) Implement weighted random selection, (4) Update tests. This is structural R session work, not routine B session task.",
+      "priority": 261,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1006,
+      "source": "audit-s1006",
+      "tags": [
+        "audit",
+        "directive"
+      ],
+      "commits": [],
+      "notes": "B#274: Verified d042 already implemented in platform-picker.mjs (wq-245). Added 17 tests covering all d042 weighting factors (base ROI, recency, exploration, cost efficiency), weighted random selection, and CLI options."
     }
   ]
 }

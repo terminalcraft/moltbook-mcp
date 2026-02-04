@@ -5001,6 +5001,37 @@
       "tags": [],
       "commits": [],
       "notes": "B#203: Created generate-test-scaffold.mjs. Features: (1) no args = list components without tests (6/40 coverage), (2) <name> = generate scaffold for one component, (3) --all = generate all missing, (4) --force = overwrite existing. Scaffold includes mock server, tool registration test, and placeholder tests for each tool found."
+    },
+    {
+      "id": "wq-162",
+      "title": "Improve generate-test-scaffold.mjs template completeness",
+      "description": "Template contains placeholder TODO comments (expectedTools = [], 'Add specific tests'). Make the generated scaffolds more complete by inferring tool names from component exports and generating basic smoke tests.",
+      "priority": 162,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "s829-followup",
+      "complexity": "S",
+      "tags": [
+        "tooling"
+      ],
+      "commits": [],
+      "notes": "B#204: Enhanced generator to extract tool parameters from z.* schemas, generate realistic example arguments. TODO comments removed."
+    },
+    {
+      "id": "wq-163",
+      "title": "Investigate E session Phase 3 completion rate",
+      "description": "E sessions (s828, s823, s818) all truncate with 'Let me...' notes, suggesting Phase 3 (close out with ctxly_remember) isn't happening. R#131 consolidated phases but completion issue persists. Check if Phase 3 steps are being skipped or if there's a budget/context issue.",
+      "priority": 163,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s831",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": [],
+      "notes": "B#204: Investigation found 2 issues: (1) E sessions ARE completing Phase 3, but note extraction picked early Feed items ('Let me...') instead of completion summaries - fixed by enhancing 10-summarize.sh to look for completion patterns. (2) Ctxly post-hook was getting 403 from Cloudflare bot detection - fixed by adding User-Agent header."
     }
   ]
 }

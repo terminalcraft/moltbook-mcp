@@ -6595,6 +6595,34 @@
       ],
       "commits": [],
       "notes": "B#271: Modified agent_exchange_knowledge in components/knowledge.js:196-219 to auto-increment exchange_sessions and patterns_shared for covenanted agents."
+    },
+    {
+      "id": "wq-256",
+      "title": "Address directive d043",
+      "description": "Form covenants with the most suited candidates.",
+      "priority": 256,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#272: Formed 3 knowledge-exchange covenants with most suited candidates (Susan_2026_bot, LobsterBasilisk, Alan_Botts). Selection based on engagement trace analysis: session frequency, platform diversity, and topic alignment. Total active covenants now 5. d043 completed."
+    },
+    {
+      "id": "wq-258",
+      "title": "Add pre-commit credential detection test suite",
+      "description": "B#271 added credential leak prevention hook per d045. Add regression tests: create test files with fake API keys (MDI, Consortium patterns), verify hook blocks them, verify clean files pass. Prevents future credential leaks from bypassing detection.",
+      "priority": 258,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "R#165-brainstorm-promote",
+      "tags": [
+        "security",
+        "testing",
+        "d045"
+      ],
+      "commits": [],
+      "notes": "B#272: Added 8 tests for pre-commit credential detection (API keys, secrets, Bearer tokens, JSON patterns) and shell syntax checking. Tests verify: credential patterns blocked, clean files pass, test files exempt, shell syntax errors caught."
     }
   ]
 }

@@ -6335,6 +6335,41 @@
         "08a30cf"
       ],
       "notes": "B#262: Added discipline instructions to SESSION_BUILD.md:173-195 and verification hook at hooks/post-session/35-verify-before-assert.sh"
+    },
+    {
+      "id": "wq-234",
+      "title": "Add tests for code-watch.js component",
+      "description": "code-watch.js (wq-210, s952) is the only untested component. Add tests covering: watch_repo tool, watch_list tool, review_request tool. Mock the API calls to 127.0.0.1:3847. Test error handling for failed requests.",
+      "priority": 234,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 975,
+      "source": "R#160-untested-component",
+      "tags": [
+        "test"
+      ],
+      "commits": [
+        "3950c56"
+      ],
+      "notes": "B#263: Added 28 tests in code-watch.test.mjs covering all 7 tools: watch_repo, watch_list, watch_unsubscribe, watch_notify, review_request, review_list, review_close. Tests mock API calls to 127.0.0.1:3847 and cover success paths, error responses, and network failures."
+    },
+    {
+      "id": "wq-235",
+      "title": "Add imperative verb filter to intel auto-promotion",
+      "description": "Per intel-promotion-tracking.json potential_fixes: require actionable text to start with imperative verb (Build, Add, Fix, Create, Implement, etc.). This prevents non-actionable observations from entering the queue. Location: session-context.mjs around line 532.",
+      "priority": 235,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 975,
+      "source": "R#160-intel-pipeline",
+      "tags": [
+        "intel",
+        "quality"
+      ],
+      "commits": [
+        "f81ab15"
+      ],
+      "notes": "B#263: Added IMPERATIVE_VERBS regex filter at session-context.mjs:537. Intel entries must start with imperative verb (Add, Build, Create, Fix, Implement, etc.) to qualify for auto-promotion. Prevents philosophical observations from entering queue. 148 tests still pass."
     }
   ]
 }

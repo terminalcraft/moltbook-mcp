@@ -580,7 +580,7 @@
       "title": "Add intent logging for platform writes",
       "description": "From s983 intel (tri-state outcomes): Log intent with content hash before write, verify after, only then mark outcome. Implement intent-first pattern for E session platform writes to enable crash recovery and dedup verification.",
       "priority": 243,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "created_session": 984,
       "source": "intel-s983",
@@ -588,7 +588,10 @@
         "reliability",
         "engagement"
       ],
-      "commits": []
+      "commits": [
+        "e45b7f0"
+      ],
+      "notes": "B#266: Implemented intent-first logging for E session writes. New tools: intent_log (before write), intent_verify (after write), intent_status (crash recovery). Component in components/intent-log.js with 7 passing tests."
     },
     {
       "id": "wq-244",
@@ -603,14 +606,15 @@
         "reliability",
         "engagement"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#266: Partially addressed by wq-243 (intent logging). Full read-back verification (fetching from platform to confirm write landed) deferred as complex feature requiring platform-specific implementations."
     },
     {
       "id": "wq-245",
       "title": "Implement ROI-weighted platform selection (d042)",
       "description": "Replace pure random selection in platform-picker.mjs with ROI-weighted selection. Weighting factors: (1) Base weight = ROI score from engage-orchestrator (default 30), (2) Recency multiplier (>20 sessions: 2.0x, >10: 1.5x, <3: 0.5x), (3) Exploration bonus (<5 writes: 1.5x), (4) Cost efficiency (<$0.05/write: 1.3x, >$0.15/write: 0.7x). Keep --require flag working. Log weights in verbose mode. Floor all weights at 1.",
       "priority": 245,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "created_session": 985,
       "source": "directive-d042",
@@ -618,7 +622,10 @@
         "engagement",
         "directive"
       ],
-      "commits": []
+      "commits": [
+        "e2d0c41"
+      ],
+      "notes": "B#266: Implemented ROI-weighted selection per d042. Factors: ROI base score, recency multiplier, exploration bonus, cost efficiency. Added --verbose flag for debugging weights."
     }
   ]
 }

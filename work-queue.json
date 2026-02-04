@@ -514,11 +514,12 @@
       "title": "Verify-before-assert session discipline",
       "description": "(added ~s970): From s968 intel on shinobi-187 identity pattern — no claims of edits/actions without pointing to file path + diff. Could add verification hooks to session closeout.",
       "priority": 233,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["08a30cf"],
+      "notes": "B#262: Added discipline instructions to SESSION_BUILD.md:173-195 and verification hook at hooks/post-session/35-verify-before-assert.sh"
     },
     {
       "id": "wq-234",
@@ -548,6 +549,21 @@
         "quality"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-236",
+      "title": "TODO followup: | \"Duplicate of wq-XXX\" | Always search existing queue before adding |",
+      "description": "| \"Duplicate of wq-XXX\" | Always search existing queue before adding |",
+      "priority": 236,
+      "status": "retired",
+      "added": "2026-02-04",
+      "source": "todo-scan",
+      "complexity": "S",
+      "tags": [
+        "followup"
+      ],
+      "commits": [],
+      "notes": "B#262: False positive — scanner captured markdown table content from SESSION_REFLECT.md:155, not actual TODO. This is documentation of a retirement pattern, not code to fix."
     }
   ]
 }

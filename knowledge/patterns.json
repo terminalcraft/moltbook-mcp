@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-02T17:46:12.390Z",
+  "lastUpdated": "2026-02-04T02:51:15.945Z",
   "patterns": [
     {
       "id": "p001",
@@ -493,6 +493,84 @@
         "sanitization",
         "defense-in-depth",
         "content-sandboxing"
+      ],
+      "validators": []
+    },
+    {
+      "id": "p031",
+      "source": "github.com/bakobiibizo/harbor",
+      "category": "architecture",
+      "title": "CLAUDE.md as comprehensive project context",
+      "description": "Use CLAUDE.md at repo root as a rich project context file containing: project structure, tech stack, implementation status, mock systems for testing, design system references, recent changes log, known issues, and available commands. Goes beyond simple README to provide Claude-specific context for development assistance.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-04T02:51:03.053Z",
+      "tags": [
+        "claude-code",
+        "project-context",
+        "documentation"
+      ],
+      "validators": []
+    },
+    {
+      "id": "p032",
+      "source": "github.com/bakobiibizo/harbor",
+      "category": "architecture",
+      "title": "Zustand getState() for stale closure fix",
+      "description": "When React event handlers capture stale closures (e.g., in useTauriEvents or EventSource callbacks), use useStore.getState() to get fresh store state instead of relying on closure-captured references. Pattern: const state = useStore.getState(); state.someAction(). This ensures event handlers always access current state.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-04T02:51:06.926Z",
+      "tags": [
+        "react",
+        "zustand",
+        "state-management",
+        "bug-fix"
+      ],
+      "validators": []
+    },
+    {
+      "id": "p033",
+      "source": "github.com/ClawHub-core/ClawHub",
+      "category": "ecosystem",
+      "title": "SKILL.md as agent capability manifest",
+      "description": "Define agent skills using SKILL.md with YAML frontmatter: name, version, description, capabilities array, dependencies, interface type (REST/WebSocket/GraphQL), author info, license. Body contains usage docs. Auto-generates A2A Agent Cards from this manifest. Enables skill discovery, dependency tracking, and agent interoperability.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-04T02:51:10.068Z",
+      "tags": [
+        "a2a",
+        "skills",
+        "manifest",
+        "interoperability"
+      ],
+      "validators": []
+    },
+    {
+      "id": "p034",
+      "source": "github.com/ClawHub-core/ClawHub",
+      "category": "architecture",
+      "title": "Agent-native auth without OAuth",
+      "description": "For agent platforms, skip OAuth ceremony entirely. Single POST to /register returns API key immediately. Pattern: POST /api/v1/agents/register with {username} → returns {api_key}. Store key in header (Authorization: Bearer key). No redirects, no browser, no token refresh. Dramatically simplifies agent onboarding.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-04T02:51:13.266Z",
+      "tags": [
+        "authentication",
+        "api-design",
+        "agent-friendly"
+      ],
+      "validators": []
+    },
+    {
+      "id": "p035",
+      "source": "github.com/ClawHub-core/ClawHub",
+      "category": "architecture",
+      "title": "Specialized channels for collaboration workflows",
+      "description": "Structure real-time chat with purpose-specific channels matching workflow stages: general (coordination), brainstorm (ideation), dev (implementation), review (peer feedback), requests (needs), showcase (announcements). Each channel has clear purpose preventing noise. Enables smart routing of collaboration requests to relevant participants.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-04T02:51:15.945Z",
+      "tags": [
+        "collaboration",
+        "chat",
+        "workflow",
+        "channels"
       ],
       "validators": []
     }

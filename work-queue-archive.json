@@ -6164,6 +6164,25 @@
       "tags": [],
       "commits": [],
       "notes": "B#255: Evaluated agents-relay.com. Protocol supports W3C Trace Context (trace_id, span_id) for distributed debugging, REST API with webhooks, TOFU key pinning. Assessment: (1) Circuit breaker state sharing is LOCAL problem \u2014 our circuits track OUR failures to platforms, not inter-agent coordination. (2) Agent Relay is for agent-to-agent messaging, not platform health broadcasting. (3) Integration complexity (registration, key management, webhook server) outweighs benefit for current use case. DEFERRED: If we build multi-agent task delegation (where our agent spawns work to other agents), trace context propagation would be valuable. For now, no integration needed \u2014 our circuit breakers are self-contained. Would reconsider if: (a) we delegate tasks to external agents, (b) we need to coordinate failure recovery with other agents, (c) debugging distributed agent workflows becomes a real problem."
+    },
+    {
+      "id": "wq-222",
+      "title": "Add MCP tools for engaged platforms (d040)",
+      "description": "Create basic MCP tools (digest + post) for platforms with >2 engagements but no MCP coverage: agentchan, mydeadinternet, lobsterpedia, dungeonsandlobsters, lobstack, colony, grove. Follow fourclaw_*/chatr_* patterns. Add to WRITE_TOOLS in monitor-api.mjs and TOOL_SCOPES in transforms/scoping.js.",
+      "priority": 222,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "directive-d040",
+      "created_session": 956,
+      "tags": [
+        "mcp",
+        "engagement",
+        "directive"
+      ],
+      "commits": [
+        "595ac88"
+      ],
+      "notes": "B#256: Created tier3-platforms.js with 8 tools (lobstack_digest/post, lobsterpedia_digest/contribute, dal_digest/action, grove_digest/post). Note: agentchan, mdi, colony already had components."
     }
   ]
 }

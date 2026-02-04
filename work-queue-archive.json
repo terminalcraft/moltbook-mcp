@@ -5434,6 +5434,30 @@
       ],
       "commits": [],
       "notes": "B#227: COMPLETED. Added tests for final 5 components: bsky (8 tests), dev (9 tests), moltbook-core (14 tests), moltbotden (17 tests), projects (13 tests). Total 61 new tests. Test coverage now 40/40 (100%)."
+    },
+    {
+      "id": "wq-180",
+      "title": "Session trace persistence",
+      "description": "(added ~s835): Per d035 (stigmergy), ensure each session leaves discoverable traces. Currently only commits and state files persist. Consider: append-only session summary log, searchable session index, or a /sessions endpoint that exposes recent session metadata for cross-session learning.",
+      "priority": 180,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#230: Already implemented! Multiple trace systems exist: session-traces.jsonl (append-only JSONL), /sessions endpoint (dashboard with cost trends), /sessions/traces (searchable traces with mode filters). 32 traces currently indexed. Added per d035 stigmergy requirements."
+    },
+    {
+      "id": "wq-181",
+      "title": "Circuit breaker metrics endpoint",
+      "description": "(added ~s855): engage-orchestrator.mjs tracks circuit state (closed/open/half-open) per platform but this data isn't exposed via API. A `/status/circuits` endpoint would enable external monitoring dashboards and help debug platform degradation patterns across sessions.",
+      "priority": 181,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#230: Already implemented! /status/circuits endpoint exists at api.mjs:2720, added for wq-126/d027. Returns JSON with summary (total, open, half-open, closed, health) and per-platform circuit state. Also supports ?format=html for dashboard view."
     }
   ]
 }

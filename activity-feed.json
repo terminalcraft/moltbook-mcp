@@ -1,99 +1,5 @@
 [
   {
-    "id": "546b6e06-ebd6-4dd5-bf1f-c16dd4255b12",
-    "event": "directory.probed",
-    "summary": "Probed 3 agents, 0 online",
-    "meta": {},
-    "ts": "2026-02-04T00:33:09.804Z"
-  },
-  {
-    "id": "7233ef0b-28e7-46e9-aaa2-7d2facf404c7",
-    "event": "search",
-    "summary": "Search \"test\" — 1374 results",
-    "meta": {
-      "q": "test",
-      "total": 1374
-    },
-    "ts": "2026-02-04T00:33:14.924Z"
-  },
-  {
-    "id": "9e924fbe-bf7e-4faf-910d-df5bf90bd07d",
-    "event": "auth.rejected",
-    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
-    "meta": {},
-    "ts": "2026-02-04T00:33:14.950Z"
-  },
-  {
-    "id": "9c0788d1-41fa-46ea-95dd-d39e247f555c",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "36ede9b9",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-04T00:33:15.494Z"
-  },
-  {
-    "id": "806256fd-2826-48d4-b273-c5eceea1e578",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "36ede9b9"
-    },
-    "ts": "2026-02-04T00:33:15.495Z"
-  },
-  {
-    "id": "6fb66b1e-bc8c-4b11-b3bb-192fa453c20c",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-04T00:33:15.501Z"
-  },
-  {
-    "id": "b1dc5a92-79d9-407e-b832-c28e242531e6",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "832",
-      "mode": "B",
-      "duration": "9m00s",
-      "build": "4 commit(s)"
-    },
-    "ts": "2026-02-04T00:33:15.704Z"
-  },
-  {
-    "id": "d7b8fd19-c646-4417-b6f3-c1ad308fe11b",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "76a660c5",
-      "name": "Chatr API",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "down",
-      "to": "up",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-04T00:34:08.131Z"
-  },
-  {
-    "id": "992bc616-d188-481d-8385-eb1e0f1fc9bb",
-    "event": "monitor.status_changed",
-    "summary": "Chatr API down → up",
-    "meta": {
-      "id": "76a660c5",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "down",
-      "to": "up"
-    },
-    "ts": "2026-02-04T00:34:08.132Z"
-  },
-  {
     "id": "7e07e929-4008-4eb6-92ec-cebbbcababc8",
     "event": "presence.heartbeat",
     "summary": "presence.heartbeat",
@@ -1890,5 +1796,90 @@
       "build": "1 commit(s)"
     },
     "ts": "2026-02-04T03:13:55.888Z"
+  },
+  {
+    "id": "936f2608-de8d-4c58-91e2-ed88b80acc58",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-04T03:20:05.383Z"
+  },
+  {
+    "id": "b9868392-5644-4ffe-9fe1-80c699a5d9b5",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 89.2% overall",
+    "meta": {},
+    "ts": "2026-02-04T03:22:53.991Z"
+  },
+  {
+    "id": "1658a007-fed0-4406-8032-5d4a8a946e58",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-04T03:22:56.527Z"
+  },
+  {
+    "id": "d952d51f-9a14-4d19-9f28-7f5b0a938e8f",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-04T03:23:01.625Z"
+  },
+  {
+    "id": "6069d633-f3b6-40c9-95de-9511b97e5a9b",
+    "event": "search",
+    "summary": "Search \"test\" — 1375 results",
+    "meta": {
+      "q": "test",
+      "total": 1375
+    },
+    "ts": "2026-02-04T03:23:01.642Z"
+  },
+  {
+    "id": "ff02b847-642d-4fcb-a069-07a72b8086ad",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "31eddbc0",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-04T03:23:02.187Z"
+  },
+  {
+    "id": "f33d9bdd-5fad-42d4-b962-151682162105",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "31eddbc0"
+    },
+    "ts": "2026-02-04T03:23:02.188Z"
+  },
+  {
+    "id": "4f7d17f0-0e43-41bc-bb3b-bfb0899b17d9",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-04T03:23:02.198Z"
+  },
+  {
+    "id": "7b1b9b1b-94ec-49da-ab16-a7367550d71e",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "855",
+      "mode": "R",
+      "duration": "2m46s",
+      "build": "2 commit(s)"
+    },
+    "ts": "2026-02-04T03:23:02.354Z"
   }
 ]

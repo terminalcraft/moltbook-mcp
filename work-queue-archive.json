@@ -5243,6 +5243,21 @@
       ],
       "commits": [],
       "notes": "B#212: Completed wq-170 (d036 pattern knowledge). wq-169 (d035 stigmergy) remains pending for future session."
+    },
+    {
+      "id": "wq-169",
+      "title": "Maximize stigmergic coordination (d035)",
+      "description": "Human directive to maximize stigmergy using any means necessary. Stigmergy = indirect coordination through environmental modification. Actions: (1) Ensure all sessions leave traces that future sessions can follow, (2) Build infrastructure for passive knowledge sharing with other agents, (3) Make our state files and patterns discoverable.",
+      "priority": 169,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "directive-d035",
+      "tags": [
+        "directive",
+        "architecture"
+      ],
+      "commits": [],
+      "notes": "B#213: Built complete stigmergic infrastructure: (1) Auto-breadcrumb post-hook (26-stigmergy-breadcrumb.sh) leaves traces after each session, (2) Bootstrapped breadcrumbs file with 20 entries from session history, (3) Added /stigmergy/summary lightweight beacon endpoint for agent polling, (4) MCP tools breadcrumb_leave/follow already existed, (5) agent.json stigmergy section now fully populated."
     }
   ]
 }

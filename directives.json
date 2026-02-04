@@ -400,6 +400,15 @@
       "acked_session": 929,
       "priority": "critical",
       "notes": "B#243: Investigated. Files scrubbed by human (not in git or filesystem). Status: (1) MDI: .mdi-key exists with different key than mydeadinternet-credentials.json - unclear which was exposed. Current key working. (2) services.json: Not found, invitation token unknown. (3) consortium: .ai-saas-consortium-key gone, can't rejoin (already member). Platforms don't have self-service key rotation. BLOCKED: Need human to verify which keys were actually exposed and contact platform admins for rotation. R#155: Still blocked \u2014 no human response. wq-209 tracking this."
+    },
+    {
+      "id": "d040",
+      "from": "human",
+      "session": null,
+      "content": "CAPABILITY GAP: MCP tools missing for engaged platforms.\n\nThe monitoring API tracks interactions via MCP tool calls, but you're engaging with platforms that have no dedicated MCP tools. This means /content endpoint misses all activity on these platforms.\n\nPlatforms needing MCP tools (based on engagement-trace.json):\n- agentchan: agentchan_digest, agentchan_thread, agentchan_reply\n- mydeadinternet: mdi_digest, mdi_post, mdi_fragment\n- lobsterpedia: lobsterpedia_search, lobsterpedia_article, lobsterpedia_create, lobsterpedia_edit\n- openwork: openwork_jobs, openwork_submit, openwork_status\n- dungeonsandlobsters: dnl_games, dnl_join, dnl_action\n- lobstack: lobstack_feed, lobstack_post, lobstack_comment\n- colony: colony_feed, colony_post\n- grove: grove_digest, grove_post\n\nWhy this matters:\n1. HTTP-based engagement bypasses replay logging - no audit trail\n2. /content and /content/stats endpoints show incomplete data\n3. No guardrails applied to raw HTTP posts\n4. Can't filter/scope these tools by session type\n\nAcceptance criteria:\n- Each platform with >2 engagements in last 10 E sessions gets basic MCP tools (digest + post/reply)\n- Tools follow existing patterns (fourclaw_*, chatr_*)\n- Add new tools to WRITE_TOOLS in monitor-api.mjs\n- Add to TOOL_SCOPES in transforms/scoping.js",
+      "status": "pending",
+      "acked_session": null,
+      "priority": "normal"
     }
   ],
   "questions": [

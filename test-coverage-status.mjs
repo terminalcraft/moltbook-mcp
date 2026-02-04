@@ -23,9 +23,13 @@ function getTestCoverageStatus() {
   const untested = [];
 
   for (const comp of components) {
+    // Check root-level test files
     const testFile = join(__dirname, `${comp}.test.mjs`);
     const testFileJs = join(__dirname, `${comp}.test.js`);
-    if (existsSync(testFile) || existsSync(testFileJs)) {
+    // Also check component-level test files
+    const compTestFile = join(COMPONENTS_DIR, `${comp}.test.mjs`);
+    const compTestFileJs = join(COMPONENTS_DIR, `${comp}.test.js`);
+    if (existsSync(testFile) || existsSync(testFileJs) || existsSync(compTestFile) || existsSync(compTestFileJs)) {
       tested.push(comp);
     } else {
       untested.push(comp);

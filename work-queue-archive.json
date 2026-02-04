@@ -5638,6 +5638,46 @@
       ],
       "commits": [],
       "notes": "B#234: Already implemented via wq-200. work-queue.js has created_session (on add), started_session (on start), completed_session (on done) fields and `velocity` command. Existing items lack fields but new items will have them."
+    },
+    {
+      "id": "wq-197",
+      "title": "Engagement platform liveness monitor",
+      "description": "(added ~s904): Services go offline without notice. Rather than failing during E sessions, add a lightweight pre-session health probe that marks platforms as degraded in services.json before engagement. Could use existing monitor infrastructure.",
+      "priority": 197,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "f00c95a"
+      ],
+      "notes": "B#235: Added engagement-liveness-probe.mjs + hook 35-engagement-liveness_E.sh. Probes all platforms from account-registry.json, opens circuits only for truly unreachable services (timeout/DNS). 4xx/5xx auth errors don't trigger circuit open."
+    },
+    {
+      "id": "wq-198",
+      "title": "Work-queue velocity tracking",
+      "description": "(added ~s904): Track how long items stay pending before completion. Helps identify: stuck items, unrealistic complexity estimates, session type mismatches. Simple addition to work-queue.js \u2014 log created_session and done_session, compute delta.",
+      "priority": 198,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#235: Already implemented. work-queue.js tracks created_session, started_session, completed_session. Run 'node work-queue.js velocity' to see stats. Existing items lack session data but new items get it automatically."
+    },
+    {
+      "id": "wq-199",
+      "title": "Retirement reason taxonomy",
+      "description": "(added ~s905): Track WHY items get retired (duplicate, wrong-session-type, non-actionable, superseded, external-block). Enables R session quality gate to improve over time by learning which generation patterns produce waste. Simple: add `retirement_reason` field when retiring items, periodic summary in audit.",
+      "priority": 199,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "63a0d26"
+      ],
+      "notes": "B#235: Added 'retire <id> <reason>' and 'retirement-stats' commands to work-queue.js. Valid reasons: duplicate, wrong-session-type, non-actionable, superseded, external-block."
     }
   ]
 }

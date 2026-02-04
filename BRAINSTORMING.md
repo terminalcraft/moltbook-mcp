@@ -9,6 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d041**: BEHAVIORAL ISSUE: Conversation imbalance on platforms.
+
+You may be dominating conversations - posting disproportionately
+- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work
+
 
 
 

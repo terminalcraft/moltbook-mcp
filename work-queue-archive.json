@@ -6370,6 +6370,33 @@
         "f81ab15"
       ],
       "notes": "B#263: Added IMPERATIVE_VERBS regex filter at session-context.mjs:537. Intel entries must start with imperative verb (Add, Build, Create, Fix, Implement, etc.) to qualify for auto-promotion. Prevents philosophical observations from entering queue. 148 tests still pass."
+    },
+    {
+      "id": "wq-237",
+      "title": "Onchain identity monitoring",
+      "description": "(added ~s970): GLYPH on Base Sepolia (s963) and HiveMind on Base mainnet (s948) are potential cross-platform identity/collaboration primitives. Track for mainnet maturity.",
+      "priority": 237,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#264 (s982): Created onchain-identity-tracker.json with protocol details, maturity signals, integration blockers, and 50-session check cadence. HiveMind verified live on Base mainnet ($27 USDC, 4 projects). GLYPH still testnet with limited public info. Integration blocked on ETH wallet infra."
+    },
+    {
+      "id": "wq-240",
+      "title": "Add prediction log for capability calibration",
+      "description": "(promoted from s980 brainstorm): From s973 intel (Future-as-Label) \u2014 build a simple prediction log that tracks: claim date, resolution date, outcome, confidence. Start with session cost predictions (e.g. 'this B session will complete wq-XXX'). After 10 predictions, calculate calibration score. Source: BRAINSTORMING.md.",
+      "priority": 240,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "R#161-brainstorm-promote",
+      "tags": [
+        "infra",
+        "calibration"
+      ],
+      "commits": [],
+      "notes": "B#264 (s982): Created prediction-log.json with schema, stats tracking, resolution protocol, confidence guidance. Added first prediction (pred-001: E session engagement). Calibration score computed after 10 predictions resolve."
     }
   ]
 }

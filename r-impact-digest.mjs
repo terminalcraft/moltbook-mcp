@@ -83,11 +83,48 @@ function generateDigest(data, sessionNum = 0) {
     lines.push('');
   }
 
+  // wq-206: Intent-tagged changes section
+  // Show changes that had explicit cost_increase or cost_decrease intent
+  const allChanges = data.changes || [];
+  const intentTagged = allChanges.filter(c => c.intent);
+  if (intentTagged.length > 0) {
+    lines.push('## Intent-Tagged Changes');
+    lines.push('Changes with explicit cost intent (analyzed with inverted thresholds):');
+    lines.push('');
+
+    // Group by intent type
+    const byIntent = { cost_increase: [], cost_decrease: [] };
+    for (const c of intentTagged) {
+      if (byIntent[c.intent]) byIntent[c.intent].push(c);
+    }
+
+    if (byIntent.cost_increase.length > 0) {
+      lines.push('### Cost Increase Intent');
+      lines.push('Goal: spend more budget (e.g., budget enforcement). Cost going UP = positive.');
+      for (const c of byIntent.cost_increase.slice(-5)) {
+        const result = c.analyzed ? (analysis.find(a => a.session === c.session)?.impact || 'pending') : 'pending';
+        lines.push(`- s${c.session || '?'}: ${c.file || '?'} → ${result}`);
+      }
+      lines.push('');
+    }
+
+    if (byIntent.cost_decrease.length > 0) {
+      lines.push('### Cost Decrease Intent');
+      lines.push('Goal: reduce budget (e.g., efficiency optimization). Cost going DOWN = positive.');
+      for (const c of byIntent.cost_decrease.slice(-5)) {
+        const result = c.analyzed ? (analysis.find(a => a.session === c.session)?.impact || 'pending') : 'pending';
+        lines.push(`- s${c.session || '?'}: ${c.file || '?'} → ${result}`);
+      }
+      lines.push('');
+    }
+  }
+
   // Recent changes
   lines.push('## Recent Changes (last 5)');
   lines.push('');
   for (const a of analysis.slice(-5)) {
-    lines.push(`- s${a.session || '?'}: ${a.file || '?'} (${a.category || '?'}) → ${a.impact || '?'}`);
+    const intentMarker = a.intent ? ` [${a.intent}]` : '';
+    lines.push(`- s${a.session || '?'}: ${a.file || '?'} (${a.category || '?'}) → ${a.impact || '?'}${intentMarker}`);
   }
 
   // Pending analysis
@@ -102,12 +139,20 @@ function generateDigest(data, sessionNum = 0) {
     }
   }
 
+  // wq-206: Intent statistics for JSON output
+  const intentStats = {
+    cost_increase: intentTagged.filter(c => c.intent === 'cost_increase').length,
+    cost_decrease: intentTagged.filter(c => c.intent === 'cost_decrease').length,
+    total_intent_tagged: intentTagged.length
+  };
+
   return {
     text: lines.join('\n'),
     stats: {
       total: analysis.length,
       categories: categoryStats,
-      recommendations
+      recommendations,
+      intent: intentStats
     }
   };
 }

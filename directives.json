@@ -429,6 +429,17 @@
       "from": "human",
       "session": null,
       "content": "BEHAVIORAL ISSUE: Conversation imbalance on platforms.\n\nYou may be dominating conversations - posting disproportionately compared to other participants. Example: Chatr rooms where your messages outnumber others.\n\nBefore posting, check: What's the ratio of your messages vs other agents in the thread/room? If you're >30% of the conversation, you're crowding out others rather than engaging with them.\n\nAdjust behavior across all platforms: Read more, post less. Let others respond before jumping in again. Healthy engagement means participating in conversations, not dominating them.",
+      "status": "completed",
+      "acked_session": 984,
+      "completed_session": 984,
+      "priority": "normal",
+      "notes": "B#265: Built conversation-balance.mjs tool with 30% threshold enforcement. Added rule #1 to SESSION_ENGAGE.md with platform limits (max 3 posts/platform/session). Created pre-session hook 37-conversation-balance_E.sh. Analysis shows recent sessions are actually balanced (avg post/agent ratio: 1.19)."
+    },
+    {
+      "id": "d042",
+      "from": "human",
+      "session": null,
+      "content": "ENHANCEMENT: Weighted platform selection based on ROI.\n\nReplace pure random selection in platform-picker.mjs with ROI-weighted selection.\n\nCurrent behavior: Random selection from working pool with recency penalty.\nDesired behavior: Weight selection probability by ROI score while preserving exploration.\n\nWeighting factors (combine multiplicatively):\n1. Base weight = ROI score from engage-orchestrator (default 30 for unknowns)\n2. Recency multiplier:\n   - >20 sessions since engaged: 2.0x\n   - >10 sessions: 1.5x\n   - <3 sessions: 0.5x\n3. Exploration bonus: <5 total writes \u2192 1.5x (encourage trying new platforms)\n4. Cost efficiency: <$0.05/write \u2192 1.3x, >$0.15/write \u2192 0.7x\n\nSelection: Weighted random without replacement. Higher weight = higher probability, but not guaranteed. This balances exploitation (high ROI) with exploration (new/stale).\n\nImplementation notes:\n- Read ROI data from engage-orchestrator output or analytics files\n- Keep --require flag working (required platforms bypass weighting)\n- Log weights in verbose mode for debugging\n- Floor all weights at 1 to ensure every working platform has some chance\n\nAcceptance criteria:\n- platform-picker.mjs uses ROI-weighted selection\n- Platforms with higher ROI are selected more often (verify over 10+ runs)\n- Low-data platforms still get picked occasionally (exploration)\n- Recency still prevents same-platform streaks",
       "status": "pending",
       "acked_session": null,
       "priority": "normal"
@@ -452,16 +463,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 125,
+        "followed": 126,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 978,
-        "last_applicable_session": 978,
+        "last_session": 983,
+        "last_applicable_session": 983,
         "history": [
-          {
-            "session": 933,
-            "result": "followed"
-          },
           {
             "session": 938,
             "result": "followed"
@@ -497,20 +504,20 @@
           {
             "session": 978,
             "result": "followed"
+          },
+          {
+            "session": 983,
+            "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 107,
+        "followed": 108,
         "ignored": 16,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 978,
-        "last_applicable_session": 978,
+        "last_session": 983,
+        "last_applicable_session": 983,
         "history": [
-          {
-            "session": 933,
-            "result": "followed"
-          },
           {
             "session": 938,
             "result": "followed"
@@ -545,6 +552,10 @@
           },
           {
             "session": 978,
+            "result": "followed"
+          },
+          {
+            "session": 983,
             "result": "followed"
           }
         ]
@@ -648,16 +659,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 358,
+        "followed": 359,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 982,
-        "last_applicable_session": 982,
+        "last_session": 983,
+        "last_applicable_session": 983,
         "history": [
-          {
-            "session": 969,
-            "result": "followed"
-          },
           {
             "session": 970,
             "result": "followed"
@@ -692,6 +699,10 @@
           },
           {
             "session": 982,
+            "result": "followed"
+          },
+          {
+            "session": 983,
             "result": "followed"
           }
         ]

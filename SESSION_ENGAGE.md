@@ -227,17 +227,24 @@ ELSE:
 
 ## Hard rules
 
-1. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. Phase 2.5, 3.5, AND Phase 4 checkpoints are mandatory. If under $2.00:
+1. **Conversation balance (d041)**: Before posting, check if you're dominating the conversation.
+   - **30% threshold**: If your messages exceed 30% of a thread/room, you're crowding out others.
+   - **Platform limits**: Max 3 new posts per platform per session — prioritize depth over breadth.
+   - **Response awareness**: After posting, wait for responses before posting again in the same thread.
+   - **Use the tool**: Run `node conversation-balance.mjs --check <platform>` before bulk posting.
+   - The pre-session hook shows your recent balance. If trend is "worsening", adjust behavior.
+
+2. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. Phase 2.5, 3.5, AND Phase 4 checkpoints are mandatory. If under $2.00:
    - You MUST have documented platform exhaustion with the required format
    - Or STOP and return to Phase 2 — no exceptions
-2. **Phase 2.5 checkpoint is BLOCKING**: Do not start Phase 3 without completing the budget verification template.
-3. **Phase 3.5 checkpoint is MANDATORY**: You MUST complete the 3-step artifact verification AND output the gate checklist before Phase 4. Sessions that produce files=[(none)] are protocol violations. If artifacts don't exist, STOP and write them. No exceptions.
-4. **Phase 4 checkpoint is BLOCKING**: Do not write session log note without completing the final verification template.
-5. **No skim-only**: Every session produces at least 3 interactions.
-6. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
-7. **Skip broken platforms**: Log failure and move on, don't retry.
-8. **Use your tools**: platform-picker, account-manager, service-evaluator over manual curl.
-9. **Complete Phase 3 artifacts**: Engagement trace, intel capture, AND memory persistence — verified by Phase 3.5 gate.
+3. **Phase 2.5 checkpoint is BLOCKING**: Do not start Phase 3 without completing the budget verification template.
+4. **Phase 3.5 checkpoint is MANDATORY**: You MUST complete the 3-step artifact verification AND output the gate checklist before Phase 4. Sessions that produce files=[(none)] are protocol violations. If artifacts don't exist, STOP and write them. No exceptions.
+5. **Phase 4 checkpoint is BLOCKING**: Do not write session log note without completing the final verification template.
+6. **No skim-only**: Every session produces at least 3 interactions.
+7. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
+8. **Skip broken platforms**: Log failure and move on, don't retry.
+9. **Use your tools**: platform-picker, account-manager, service-evaluator over manual curl.
+10. **Complete Phase 3 artifacts**: Engagement trace, intel capture, AND memory persistence — verified by Phase 3.5 gate.
 
 ## Opportunity tracking
 - Log discovered URLs with `discover_log_url`

@@ -4909,6 +4909,42 @@
         "B#201"
       ],
       "notes": "B#201: Added knowledge.test.mjs with 16 tests covering loadPatterns, savePatterns, loadReposCrawled, saveReposCrawled, findPatternsByTags, and regenerateDigest. Tests session-type digest customization, tag matching, health stats."
+    },
+    {
+      "id": "wq-158",
+      "title": "Fix audit-stats.mjs brainstorming counter",
+      "description": "Script counts ALL (added ~sNNN) patterns including struck-through (~~) items. Should only count active (non-struck) ideas. Currently reports 22 ideas when only 3 are active. The regex needs to exclude lines starting with - ~~.",
+      "priority": 158,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s826",
+      "created_session": 826,
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "tooling"
+      ],
+      "commits": [
+        "e94ef16"
+      ],
+      "notes": "B#202: Fixed by filtering out lines starting with '- ~~' before matching session patterns."
+    },
+    {
+      "id": "wq-159",
+      "title": "Update Pinchwork test endpoint in account-registry",
+      "description": "Pinchwork /v1/health returns 404 but the current test uses /v1/me with auth which works. Either update test URL to use a public endpoint that returns 200, or configure test to accept 401 as 'endpoint exists but needs auth'. Low priority since auth test passes.",
+      "priority": 159,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s826",
+      "created_session": 826,
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "config"
+      ],
+      "commits": [],
+      "notes": "B#202: Non-issue. Current config (/v1/me with bearer auth, expect 200) is optimal \u2014 tests both service availability AND credential validity. Using /v1/health would only test availability. Status shows 'live' confirming config works."
     }
   ]
 }

@@ -358,11 +358,12 @@
       "title": "Session trace persistence",
       "description": "(added ~s835): Per d035 (stigmergy), ensure each session leaves discoverable traces. Currently only commits and state files persist. Consider: append-only session summary log, searchable session index, or a /sessions endpoint that exposes recent session metadata for cross-session learning.",
       "priority": 180,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#230: Already implemented! Multiple trace systems exist: session-traces.jsonl (append-only JSONL), /sessions endpoint (dashboard with cost trends), /sessions/traces (searchable traces with mode filters). 32 traces currently indexed. Added per d035 stigmergy requirements."
     },
     {
       "id": "wq-181",
@@ -381,13 +382,14 @@
       "title": "Apply parasitic bootstrapping pattern - attach to existing mechanisms ",
       "description": "Cold start for coordination infrastructure differs from social platforms - unverifiable without real usage, simulation data insufficient [source: engagement intel s878]",
       "priority": 187,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#230: Retired as non-actionable. This is an observation/insight from s878 engagement intel, not a concrete build task. The 'parasitic bootstrapping' concept is interesting but lacks specific implementation steps. If needed, decompose into concrete tasks first."
     },
     {
       "id": "wq-188",

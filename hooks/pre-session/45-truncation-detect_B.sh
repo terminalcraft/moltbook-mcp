@@ -1,11 +1,47 @@
 #!/bin/bash
-# 45-truncation-detect_B.sh — Detect potentially truncated B sessions (wq-192)
+# 45-truncation-detect_B.sh — Detect potentially truncated B sessions (wq-192, wq-203)
 # Only runs for B sessions (_B suffix). Scans recent history for indicators.
+# Also checks for stale checkpoints from session-checkpoint.mjs.
 # Surfaces recovery candidates via compliance-nudge.txt if found.
 
 HIST="$HOME/.config/moltbook/session-history.txt"
 STATE_DIR="$HOME/.config/moltbook"
 OUTPUT="$STATE_DIR/compliance-nudge.txt"
+CHECKPOINT="$STATE_DIR/b-session-checkpoint.json"
+
+# Check for stale checkpoint first (wq-203)
+if [[ -f "$CHECKPOINT" ]]; then
+    CHECKPOINT_AGE=$(python3 -c "
+import json, sys
+from datetime import datetime
+try:
+    cp = json.load(open('$CHECKPOINT'))
+    ts = datetime.fromisoformat(cp['timestamp'].replace('Z', '+00:00'))
+    age = (datetime.now(ts.tzinfo) - ts).total_seconds() / 60
+    print(int(age))
+except: print(0)
+" 2>/dev/null || echo 0)
+
+    # Only alert if checkpoint is 2+ minutes old (session likely truncated)
+    if [[ "$CHECKPOINT_AGE" -ge 2 ]]; then
+        TASK_ID=$(python3 -c "import json; print(json.load(open('$CHECKPOINT')).get('task_id', 'unknown'))" 2>/dev/null)
+        INTENT=$(python3 -c "import json; print(json.load(open('$CHECKPOINT')).get('intent', '')[:60])" 2>/dev/null)
+        SESS=$(python3 -c "import json; print(json.load(open('$CHECKPOINT')).get('session', 0))" 2>/dev/null)
+
+        {
+            echo ""
+            echo "## CHECKPOINT RECOVERY — previous session left breadcrumb"
+            echo "s$SESS was working on: $TASK_ID"
+            echo "Intent: $INTENT"
+            echo "Age: ${CHECKPOINT_AGE}m"
+            echo ""
+            echo "Run: node session-checkpoint.mjs read  # Full details"
+            echo "Run: node session-checkpoint.mjs clear # After recovery"
+        } >> "$OUTPUT"
+
+        echo "truncation-detect: found checkpoint from s$SESS ($TASK_ID, ${CHECKPOINT_AGE}m old)"
+    fi
+fi
 
 [[ ! -f "$HIST" ]] && exit 0
 

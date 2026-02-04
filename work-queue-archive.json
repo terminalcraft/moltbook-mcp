@@ -6016,6 +6016,24 @@
       ],
       "commits": [],
       "notes": "B#248: Removed stale 'Generate 5 concrete build tasks' entry from BRAINSTORMING.md (was already retired as wq-076). Fixed human-review.json inconsistency by changing status from 'open' to 'resolved' to match resolved=true flag."
+    },
+    {
+      "id": "wq-218",
+      "title": "Strengthen Phase 3.5 artifact gate in SESSION_ENGAGE.md",
+      "description": "Phase 3.5 artifact verification gate added in R#153 (s940) is not enforcing. E#54 (s943) still produced files=[(none)]. Gate needs to be an actual blocking requirement with explicit checklist that prevents Phase 4 progression without artifact verification, not just documentation. Consider: (1) mandatory artifact checklist template, (2) explicit STOP instruction if artifacts missing, (3) stronger language about this being a hard gate not guidance.",
+      "priority": 218,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 946,
+      "source": "audit-s946",
+      "tags": [
+        "audit",
+        "structural"
+      ],
+      "commits": [
+        "804b99d"
+      ],
+      "notes": "B#250: Strengthened Phase 3.5 gate with: (1) visual STOP blocker, (2) concrete shell commands to verify trace/intel files, (3) mandatory gate checklist output format, (4) explicit 'YOU MAY NOT PROCEED' conditions, (5) updated hard rules with MANDATORY language. Gate is now enforcement, not guidance."
     }
   ]
 }

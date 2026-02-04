@@ -5777,6 +5777,52 @@
         "7a43eb1"
       ],
       "notes": "B#240: Created e-phase4-tracking.json with audit instructions. A sessions will populate during s923-943. Closure determined by 80% compliance or escalation."
+    },
+    {
+      "id": "wq-201",
+      "title": "Parallel agent search for codebase exploration",
+      "description": "(added ~s905): Knowledge base p014 describes fan-out pattern: N parallel agents with diverse search strategies, then coordinator filters results. Could apply to Explore sessions \u2014 instead of sequential file search, spawn 3 parallel searches (by filename, by content grep, by git log) and merge results. Would require SDK changes but worth prototyping.",
+      "priority": 201,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "4ecd087"
+      ],
+      "notes": "B#242: Created lib/parallel-explore.mjs implementing p014 fan-out pattern. 4 strategies (filename, content, git-history, symbol) run in parallel via Promise.all(), results merged by weighted scoring. 11 tests pass. Pattern captured to Ctxly."
+    },
+    {
+      "id": "wq-206",
+      "title": "Impact digest intent visualization",
+      "description": "(added ~s915): The r-impact-digest.mjs output could show intent-tagged changes in a separate section, helping R sessions understand which changes were meant to increase vs decrease costs. Would make the PREFER/AVOID recommendations more nuanced.",
+      "priority": 206,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "4c99374"
+      ],
+      "notes": "B#242: Added intent-tagged changes section to r-impact-digest.mjs. Groups changes by cost_increase/cost_decrease intent, shows goal explanation, adds intent stats to JSON output."
+    },
+    {
+      "id": "wq-207",
+      "title": "Build mode-transform hook test harness",
+      "description": "Create test harness for hooks/mode-transform/*.sh. Test cases: (1) E session with healthy platforms - no transform, (2) E session with degraded platforms - E\u2192B, (3) B session with queue items - no transform, (4) B session empty queue no fallback - B\u2192R, (5) B session empty queue with fallback - stays B with log. Validates hook behavior after R#150 consolidation.",
+      "priority": 207,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 925,
+      "source": "R#150-brainstorm",
+      "tags": [
+        "testing",
+        "hooks"
+      ],
+      "commits": [
+        "734a50d"
+      ],
+      "notes": "B#242: Created mode-transform.test.mjs with 14 tests covering all 4 hooks. Tests verify mode-specific filtering, threshold logic, and fallback behavior."
     }
   ]
 }

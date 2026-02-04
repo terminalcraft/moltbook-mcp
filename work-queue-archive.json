@@ -5386,6 +5386,22 @@
       ],
       "commits": [],
       "notes": "B#222: REJECTED. Existing mechanisms cover this fully: (1) audit-report.json already has recommended_actions for 'verify next audit' items, (2) work-queue.json with audit tags provides structured task completion tracking, (3) delta_from_s<prev> in audit-report.json closes the feedback loop by showing resolved/persisting issues. E sessions need stigmergic traces because engagement actions are observational (check leaderboard, monitor responses) with no completion mechanism. A sessions have a full lifecycle: recommendation \u2192 work-queue \u2192 B completes \u2192 A verifies. Adding audit-trace.json would duplicate audit-report.json's recommended_actions without adding value."
+    },
+    {
+      "id": "wq-186",
+      "title": "Verify d038 intel auto-promotion is working",
+      "description": "R#140 (s875) added auto-promotion logic for actionable intel entries. Next A session should verify: (1) E sessions after s875 generate intel entries with actionable text, (2) entries are auto-promoted to work-queue with 'intel-auto' source tag. If no intel-auto items appear after 3+ E sessions, investigate session-context.mjs promotion logic.",
+      "priority": 186,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s876",
+      "created_session": 876,
+      "tags": [
+        "audit",
+        "monitoring"
+      ],
+      "commits": [],
+      "notes": "B#223: VERIFIED \u2014 wq-187 exists with source='intel-auto', proving the E\u2192B pipeline works. E#41 (s878) gathered intel, session-context.mjs auto-promoted it to work-queue. All 3 verification criteria met."
     }
   ]
 }

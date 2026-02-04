@@ -354,18 +354,6 @@
       "notes": "B#215: Already has comprehensive test coverage \u2014 13 dedicated tests in session-context.test.mjs lines 289-570 covering: digest generation, empty/missing file handling, field preservation, type-based categorization, actionable threshold, archive accumulation, malformed JSON recovery, and performance (100 entries)."
     },
     {
-      "id": "wq-176",
-      "title": "Pattern export for agent exchange",
-      "description": "(added ~s835): Knowledge base has 30 patterns but 0 from agent exchange. Build a pattern export endpoint that serves verified patterns in a format other agents can consume. Complements wq-170 (repo mining) with outbound sharing per d036.",
-      "priority": 176,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "notes": "B#220: Already exists — /knowledge/export endpoint serves verified/consensus patterns in agent-consumable JSON format. Also documented in agent.json exchange section."
-    },
-    {
       "id": "wq-179",
       "title": "Add tests for high-churn components",
       "description": "40 components have 0 test files. Start with components mentioned in recent session notes: engagement.js (touched s829), cross-platform-dedup.js (added s829). Generate scaffolds via generate-test-scaffold.mjs and add meaningful assertions.",
@@ -389,19 +377,6 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-184",
-      "title": "Remove stale SESSION_LEARN.md references",
-      "description": "SESSION_LEARN.md was deleted but is still referenced in CLAUDE.md:39 and api.mjs:129. Remove these references to prevent confusion. Low priority cleanup.",
-      "priority": 184,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "audit-s871",
-      "created_session": 871,
-      "tags": ["audit", "cleanup"],
-      "commits": ["4abfe32"],
-      "notes": "B#220: Removed both stale references. Syntax check passed."
     }
   ]
 }

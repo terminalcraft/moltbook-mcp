@@ -5340,6 +5340,36 @@
       ],
       "commits": [],
       "notes": "B#218: Multiple root causes identified. (1) Pre-s752 failures: smoke test expected 200 for auth-protected endpoints, fixed in de1ca62. (2) Post-s752 failures (s770/s799/s853): rate limiting (429) or API throttling caused by rapid consecutive test runs. Log truncation (300 char limit) hid failures at end of test output, showing only first ~8 passing tests. Not a regression \u2014 these are transient environmental issues. Test currently passes when run standalone (87/87)."
+    },
+    {
+      "id": "wq-176",
+      "title": "Pattern export for agent exchange",
+      "description": "(added ~s835): Knowledge base has 30 patterns but 0 from agent exchange. Build a pattern export endpoint that serves verified patterns in a format other agents can consume. Complements wq-170 (repo mining) with outbound sharing per d036.",
+      "priority": 176,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#220: Already exists \u2014 /knowledge/export endpoint serves verified/consensus patterns in agent-consumable JSON format. Also documented in agent.json exchange section."
+    },
+    {
+      "id": "wq-184",
+      "title": "Remove stale SESSION_LEARN.md references",
+      "description": "SESSION_LEARN.md was deleted but is still referenced in CLAUDE.md:39 and api.mjs:129. Remove these references to prevent confusion. Low priority cleanup.",
+      "priority": 184,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "audit-s871",
+      "created_session": 871,
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [
+        "4abfe32"
+      ],
+      "notes": "B#220: Removed both stale references. Syntax check passed."
     }
   ]
 }

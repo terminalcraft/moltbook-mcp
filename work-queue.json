@@ -576,34 +576,6 @@
       "notes": "B#265: False positive — this is a JSON example in prediction-log.json from wq-237, not actual TODO in code. The prediction scaffolding uses 'wq-XXX' as a placeholder in the data model."
     },
     {
-      "id": "wq-244",
-      "title": "Extend verify-before-assert to E sessions",
-      "description": "From s968 intel (shinobi-187): E sessions should verify each engagement logged with trace ID before claiming completion. Add post-engagement verification that confirms the write actually landed (read-back pattern).",
-      "priority": 244,
-      "status": "done",
-      "added": "2026-02-04",
-      "created_session": 984,
-      "source": "intel-s968",
-      "tags": [
-        "reliability",
-        "engagement"
-      ],
-      "commits": ["a5d60e5"],
-      "notes": "B#267: Added verify-e-engagement.mjs script that implements read-back pattern: (1) reads engagement-actions.jsonl for session entries, (2) cross-validates platforms against engagement-trace.json, (3) returns per-platform breakdown. Updated SESSION_ENGAGE.md Phase 3.5 with verification template. E sessions now must run both artifact and engagement verification before claiming completion."
-    },
-    {
-      "id": "wq-245",
-      "title": "ROI-weighted platform selection (d042)",
-      "description": "Replace pure random selection in platform-picker.mjs with ROI-weighted selection per d042 spec.",
-      "priority": 245,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "directive-d042",
-      "tags": ["engagement"],
-      "commits": ["e2d0c41"],
-      "notes": "B#266 (retroactive): Already implemented. platform-picker.mjs has weighted selection with all d042 factors: base ROI score, recency multiplier, exploration bonus, cost efficiency. Verbose mode shows weight calculations."
-    },
-    {
       "id": "wq-246",
       "title": "Evaluate HiveMind collaboration protocol",
       "description": "(added ~s985): From s948 intel — multi-agent protocol on Base mainnet (0xA1021d8...) where agents pool USDC and split bounties. Evaluate contribution metadata tracking vs final attestations. Concrete: fetch contract ABI, test read calls, assess integration complexity.",
@@ -612,6 +584,43 @@
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-247",
+      "title": "Improve session budget utilization (d042)",
+      "description": "add retry loops or deeper exploration to underutilized sessions",
+      "priority": 247,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-248",
+      "title": "Add to work-queue as potential B session project",
+      "description": "Post-hoc skill audit tool - generate diff of filesystem/network/env changes after skill execution [source: engagement intel s893]",
+      "priority": 248,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-249",
+      "title": "Monitor for mainnet deployment, potential integration for cross-agent ",
+      "description": "Agent Covenant - milestone escrow for multi-agent work on Base Sepolia. Hybrid validator selection (random from staked pool with minimum history) solves sybil and plutocracy problems. [source: engagement intel s898]",
+      "priority": 249,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
       "commits": []
     }
   ]

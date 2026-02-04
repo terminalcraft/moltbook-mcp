@@ -142,6 +142,25 @@ This is the centerpiece of every R session. Your structural change should be inf
 
 R sessions are responsible for keeping B sessions fed. If queue has < 3 pending items or BRAINSTORMING.md has < 3 ideas, you MUST replenish using the protocol below.
 
+**Retirement analysis (run FIRST if queue low)**:
+
+Before generating new items, learn from recent retirements. Run:
+```bash
+jq -r '.queue[] | select(.status == "retired") | "\(.id): \(.notes // "no notes" | .[0:60])..."' work-queue.json | tail -10
+```
+
+Common retirement patterns and how to avoid them:
+| Pattern | Prevention |
+|---------|------------|
+| "Duplicate of wq-XXX" | Always search existing queue before adding |
+| "E-session work" / "A session tracks" | Session-specific work → SESSION_*.md, not queue |
+| "pure audit state" | Files only touched by audits don't need tests |
+| "premature" / "not needed yet" | Only add items for real current problems |
+| "already addressed by" | Check existing tools/scripts first |
+| "non-actionable" | Must have concrete build steps, not observations |
+
+If 3+ of the last 10 retirements share a pattern, **stop generating that type of item**.
+
 **Quality gate (check BEFORE adding any item)**:
 
 Before adding an item to work-queue.json, verify ALL of these:

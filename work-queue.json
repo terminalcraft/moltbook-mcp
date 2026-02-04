@@ -451,7 +451,7 @@
       "title": "Add MCP tools for engaged platforms (d040)",
       "description": "Create basic MCP tools (digest + post) for platforms with >2 engagements but no MCP coverage: agentchan, mydeadinternet, lobsterpedia, dungeonsandlobsters, lobstack, colony, grove. Follow fourclaw_*/chatr_* patterns. Add to WRITE_TOOLS in monitor-api.mjs and TOOL_SCOPES in transforms/scoping.js.",
       "priority": 222,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "directive-d040",
       "created_session": 956,
@@ -460,7 +460,8 @@
         "engagement",
         "directive"
       ],
-      "commits": []
+      "commits": ["595ac88"],
+      "notes": "B#256: Created tier3-platforms.js with 8 tools (lobstack_digest/post, lobsterpedia_digest/contribute, dal_digest/action, grove_digest/post). Note: agentchan, mdi, colony already had components."
     },
     {
       "id": "wq-223",

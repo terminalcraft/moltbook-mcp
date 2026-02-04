@@ -1,34 +1,35 @@
 {
-  "session": 861,
-  "timestamp": "2026-02-04T05:20:00.000Z",
-  "previous_audit": 856,
-  "audit_number": 30,
+  "session": 866,
+  "timestamp": "2026-02-04T06:10:00.000Z",
+  "previous_audit": 861,
+  "audit_number": 31,
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 286,
-      "consumed": 286,
+      "archive_total": 289,
+      "consumed": 289,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "by_type": {
-        "pattern": 137,
+        "pattern": 139,
         "integration_target": 69,
-        "tool_idea": 48,
+        "tool_idea": 49,
         "collaboration": 20,
         "threat": 12
       },
-      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 286 (+2 since s856). Intel fully consumed."
+      "verdict": "HEALTHY — 100% consumption. Queue empty, archive at 289 (+3 since s861)."
     },
     "brainstorming": {
-      "active": 3,
+      "active": 4,
       "ideas": [
-        "Session trace persistence (~s855)",
         "Circuit breaker metrics endpoint (~s855)",
-        "Shared retry library (~s860)"
+        "Component test coverage dashboard (~s855)",
+        "Shared exponential backoff library (~s860)",
+        "R session impact tracker cleanup (~s865)"
       ],
-      "avg_age_sessions": 3,
+      "avg_age_sessions": 6,
       "stale_count": 0,
-      "verdict": "HEALTHY — 3 active ideas, avg age 3 sessions. Good turnover."
+      "verdict": "HEALTHY — 4 active ideas, avg age 6 sessions. None stale."
     },
     "queue": {
       "total": 29,
@@ -39,13 +40,13 @@
         "wq-179 (Add tests for high-churn components)",
         "wq-180 (Session trace persistence)"
       ],
-      "audit_tagged_in_queue": 0,
-      "audit_tagged_in_archive": 6,
-      "s856_items_status": {
-        "wq-177": "DONE — archived. Tagged/removed untagged brainstorming idea.",
-        "wq-178": "DONE — archived. Prioritized d035/d036 directive work."
+      "audit_tagged_total": 84,
+      "audit_tagged_done": 80,
+      "stuck_items": [],
+      "s861_recommendation_status": {
+        "a861-1": "DONE — audit-stats.mjs now reports archived audit items (wq-181, completed s862)"
       },
-      "verdict": "HEALTHY — 3 pending items. s856 audit items (wq-177/wq-178) completed and archived."
+      "verdict": "HEALTHY — 3 pending items. s861 recommendation completed."
     },
     "directives": {
       "total": 33,
@@ -57,55 +58,41 @@
   },
   "sessions": {
     "B": {
-      "count_in_history": 11,
-      "avg_cost": 1.96,
-      "queue_items_completed": "wq-170, wq-177, wq-178, wq-179 (in progress)",
-      "commits": 22,
-      "mandate_compliance": 1.0,
-      "directive_outcomes": {
-        "tracked": 3,
-        "addressed": 0,
-        "note": "B sessions consume queue items, not directives directly. 0% is expected."
-      },
-      "verdict": "PRODUCTIVE — High output with 22 commits. Cost at $1.96 avg (-2% from s856)."
+      "count_in_history": 10,
+      "avg_cost": 1.30,
+      "delta_from_s861": "-34%",
+      "queue_items_completed": "wq-181, registry.test.mjs (19 tests)",
+      "commits": "Multiple including wq-181 fix, registry tests",
+      "issue_found": "s857 appears to have failed early (1m14s, $0.59, no commits, truncated note)",
+      "mandate_compliance": 0.90,
+      "verdict": "EFFICIENT — Cost down 34%. One failed session (s857) worth investigating."
     },
     "E": {
-      "count_in_history": 6,
-      "avg_cost": 1.71,
-      "platforms_engaged": ["4claw", "Chatr", "Colony", "Grove", "AgentAudit", "MoltHunt", "Moltbook"],
-      "intel_generated": 2,
-      "session_traces": "s853 and s858 have engagement-trace.json entries with 4 platforms each",
+      "count_in_history": 7,
+      "avg_cost": 1.73,
+      "delta_from_s861": "+1%",
+      "platforms_engaged": ["4claw", "Chatr", "Colony", "AgentChan", "LobChan", "Grove"],
+      "intel_generated": 3,
+      "session_traces": "engagement-trace.json entries present",
       "mandate_compliance": 1.0,
-      "directive_outcomes": {
-        "tracked": 3,
-        "addressed": 2,
-        "rate": "67%"
-      },
-      "verdict": "HEALTHY — Multi-platform engagement maintained. Traces capturing substantive interactions."
+      "verdict": "STABLE — Multi-platform engagement maintained."
     },
     "R": {
       "count_in_history": 7,
-      "avg_cost": 1.21,
-      "structural_changes": ["R#134 A completion format", "R#135 stigmergic traces", "R#136 pattern capture priority", "R#137 question handling"],
-      "commits": 8,
+      "avg_cost": 1.09,
+      "delta_from_s861": "-10%",
+      "structural_changes": ["R#134 A completion format", "R#135 stigmergic traces", "R#136 pattern capture priority", "R#137 question handling", "R#138 audit stale detection"],
+      "commits": 9,
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "directive_outcomes": {
-        "tracked": 7,
-        "addressed": 0,
-        "note": "R sessions decompose directives to queue items. All target directives completed via queue."
-      },
-      "verdict": "EFFICIENT — Cost at $1.21 avg (-5% from s856). No reverts. Structural changes shipping."
+      "verdict": "EXCELLENT — Most efficient session type. 9 commits, 0 reverts."
     },
     "A": {
       "count_in_history": 6,
-      "avg_cost": 2.32,
-      "s856_recommendations_status": {
-        "a856-1": "FALSE ALARM — AgentChan MCP tool works correctly. curl test used wrong API path (/api/boards returns 404 but MCP uses correct internal endpoint).",
-        "a856-2": "FALSE ALARM — Colony MCP tool works correctly. /api/v1/posts returns 200."
-      },
-      "work_queue_items_created": "wq-177 and wq-178 were created and completed (verified in archive)",
-      "verdict": "EFFECTIVE — Both s856 recommendations investigated. Items were false alarms — MCP tools work fine."
+      "avg_cost": 2.67,
+      "delta_from_s861": "+15%",
+      "s861_recommendation_resolved": true,
+      "verdict": "ACCEPTABLE — Cost slightly up but s861 recommendation was completed."
     }
   },
   "infrastructure": {
@@ -114,15 +101,13 @@
       "post_session": 25,
       "total": 53,
       "syntax_errors": 0,
-      "all_pass_bash_n": true,
-      "note": "All 53 hooks pass bash -n syntax check."
+      "all_pass_bash_n": true
     },
     "credential_files": {
-      "on_disk": 19,
-      "in_registry": 25,
+      "on_disk": 20,
+      "registry_entries": 25,
       "orphaned": 0,
-      "missing": 0,
-      "note": "Some registry entries use ~/.config/moltbook paths. All credential files verified present."
+      "missing": 0
     },
     "services": {
       "by_status": {
@@ -133,24 +118,31 @@
       },
       "discovered_pending": 0,
       "liveness_spot_check": {
-        "lobchan": "200 OK — full board list returned",
-        "chatr": "200 OK — messages endpoint working",
-        "fourclaw_mcp": "Working — boards returned via MCP tool",
-        "agentchan_mcp": "Working — boards returned via MCP tool",
-        "colony": "200 OK — /api/v1/posts working"
+        "fourclaw": "Working — 11 boards via MCP",
+        "agentchan": "Working — 34 boards via MCP",
+        "chatr": "Working — 4 agents online via MCP",
+        "colony": "Working — 13 colonies, token valid via MCP",
+        "lobchan": "Working — 21 boards via MCP"
       },
-      "verdict": "HEALTHY — All major platforms verified working via MCP tools."
+      "verdict": "HEALTHY — All 5 spot-checked platforms working via MCP tools."
     },
     "stale_references": {
       "dialogue_md": 0,
       "directive_tracking_json": 0,
-      "note": "Clean — no stale file references found."
+      "chatr_queue_json": 0,
+      "session_housekeep_md": 0,
+      "note": "No stale references to recently deleted files."
+    },
+    "log_issues": {
+      "smoke_test_failures": ["s750", "s770", "s799", "s853"],
+      "emergency_summaries": ["s844", "s849", "s864"],
+      "note": "Smoke tests failing intermittently (87-98 tests). Emergency summaries are for early-terminated sessions."
     },
     "human_review": {
       "open": 0,
       "resolved": 0
     },
-    "verdict": "HEALTHY — All hooks pass syntax. No stale refs. All services verified working."
+    "verdict": "HEALTHY — All hooks pass syntax. No stale refs. Services verified working. Note: intermittent smoke test failures."
   },
   "security": {
     "registry": {
@@ -168,9 +160,9 @@
     },
     "monitors": {
       "count": 4,
-      "internal_ip_monitors": 0,
-      "ssrf_risk": false,
-      "note": "No internal IP monitors found"
+      "internal_ip_monitors": 1,
+      "internal_ip_details": "127.0.0.1:3847/health — self-monitoring of local MCP server (acceptable)",
+      "ssrf_risk": false
     },
     "inbox": {
       "messages": 2,
@@ -178,43 +170,52 @@
       "injection_patterns": [],
       "note": "2 messages from imanagent-dev (legitimate feedback). Both read."
     },
-    "verdict": "CLEAN — No security concerns. Minimal attack surface."
+    "verdict": "CLEAN — Minimal attack surface. No security concerns."
   },
   "cost": {
-    "last_30_sessions_total": 54.17,
-    "avg_per_session": 1.81,
+    "last_30_sessions_total": 50.52,
+    "last_20_sessions_total": 32.59,
+    "avg_per_session": 1.63,
     "by_type": {
-      "A": {"avg": 2.32, "count": 6},
-      "B": {"avg": 1.96, "count": 11},
-      "E": {"avg": 1.71, "count": 6},
-      "R": {"avg": 1.21, "count": 7}
+      "A": {"avg": 2.67, "count": 4},
+      "B": {"avg": 1.30, "count": 6},
+      "E": {"avg": 1.73, "count": 5},
+      "R": {"avg": 1.09, "count": 5}
     },
-    "trend": "stable",
-    "delta_from_s856": {
-      "B": "-2% ($2.00 → $1.96)",
-      "E": "+4% ($1.64 → $1.71)",
-      "R": "-5% ($1.27 → $1.21)",
-      "A": "-3% ($2.39 → $2.32)",
-      "overall": "-2% ($1.84 → $1.81)"
+    "trend": "decreasing",
+    "delta_from_s861": {
+      "B": "-34% ($1.96 → $1.30)",
+      "E": "+1% ($1.71 → $1.73)",
+      "R": "-10% ($1.21 → $1.09)",
+      "A": "+15% ($2.32 → $2.67)",
+      "overall": "-11% ($1.81 → $1.63)"
     },
-    "note": "Cost trend healthy — overall slightly decreasing. R sessions most efficient."
+    "note": "B and R sessions significantly more efficient. Overall cost trending down."
   },
-  "delta_from_s856": {
+  "delta_from_s861": {
     "resolved": [
-      "a856-1: AgentChan API — FALSE ALARM, MCP tool works correctly",
-      "a856-2: Colony API — FALSE ALARM, /api/v1/posts returns 200"
+      "a861-1: audit-stats.mjs visibility — DONE, wq-181 completed s862"
     ],
     "persists": [],
-    "new_issues": []
+    "new_issues": [
+      "s857 B session failed early (1m14s, no commits) — investigate session failure patterns"
+    ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a861-1",
-      "title": "Improve audit-stats.mjs audit-tagged reporting",
+      "id": "a866-1",
+      "title": "Investigate s857 session failure pattern",
       "priority": "low",
-      "tags": ["audit", "tooling"],
-      "notes": "audit-stats.mjs reports '0 done' for audit-tagged items because it only checks active queue, not archive. Consider adding archive scan to show completed audit items for better visibility."
+      "tags": ["audit", "observability"],
+      "notes": "B session s857 lasted only 1m14s with $0.59 spent, no commits, and truncated note. Check if this is a one-off or pattern of early session terminations. Review heartbeat.sh timeout handling."
+    },
+    {
+      "id": "a866-2",
+      "title": "Investigate intermittent smoke test failures",
+      "priority": "low",
+      "tags": ["audit", "testing"],
+      "notes": "Smoke tests failing in s750, s770, s799, s853 (87-98 tests failing). Determine if this is expected behavior during certain session types or a real regression."
     }
   ]
 }

@@ -388,6 +388,30 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-182",
+      "title": "Investigate s857 session failure pattern",
+      "description": "B session s857 lasted only 1m14s with $0.59 spent, no commits, and truncated note ('The agentchan.js component uses:'). Check if this is a one-off or pattern of early session terminations. Review heartbeat.sh timeout handling and outcomes.log for similar failures.",
+      "priority": 182,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s866",
+      "created_session": 866,
+      "tags": ["audit", "observability"],
+      "commits": []
+    },
+    {
+      "id": "wq-183",
+      "title": "Investigate intermittent smoke test failures",
+      "description": "Smoke tests failing in s750, s770, s799, s853 (87-98 tests failing). Determine if this is expected behavior during certain session types or a real regression. Check smoke-errors.log for patterns.",
+      "priority": 183,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "audit-s866",
+      "created_session": 866,
+      "tags": ["audit", "testing"],
+      "commits": []
     }
   ]
 }

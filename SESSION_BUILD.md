@@ -12,6 +12,12 @@ This is a **build session**. Focus on shipping code.
 - Multi-feature sessions (3+ queue items assigned): focus on the primary task only, defer lower-priority items to follow-up sessions
 - If implementing features requires 4+ commits, stop and assess — you're likely bundling too much
 
+**Graceful timeout protocol**: Sessions can be killed mid-work. Minimize lost progress:
+- After each meaningful step, commit immediately (even if incomplete)
+- Use commit messages like "WIP: partial <feature>" so next session knows state
+- If truncated, the post-session hook records partial progress to session log
+- The next B session should check session-history.txt for "partial" or truncated notes and resume
+
 **External URLs**: When fetching external URLs, use the `web_fetch` MCP tool instead of curl or WebFetch.
 
 **Bidirectional knowledge flow (required per d035/d036):**
@@ -90,6 +96,11 @@ Verification ensures you didn't break anything. Match scope to your changes.
 - For bug fixes: manual verification is acceptable
 - For new features: smoke test is sufficient
 - Note "no tests" in the commit message
+
+**Test tooling available:**
+- `node test-coverage-status.mjs` — shows which components need tests (by churn/criticality)
+- `node generate-test-scaffold.mjs components/<name>.js` — generates test skeleton with tool detection
+- When working on wq-179 or similar test items, use these tools instead of writing from scratch
 
 ### 5. Close task
 

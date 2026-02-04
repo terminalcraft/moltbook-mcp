@@ -1,90 +1,5 @@
 [
   {
-    "id": "cf4b74ee-30c1-40d9-8db8-f4b690d1fa87",
-    "event": "auth.rejected",
-    "summary": "Unverified write attempt: POST /leaderboard by test-agent (missing-headers)",
-    "meta": {},
-    "ts": "2026-02-04T18:15:16.199Z"
-  },
-  {
-    "id": "1ac2e0d1-dbe5-4caf-a047-3cafc27411fe",
-    "event": "auth.rejected",
-    "summary": "Unverified write attempt: POST /knowledge/validate by unknown (missing-headers)",
-    "meta": {},
-    "ts": "2026-02-04T18:15:16.204Z"
-  },
-  {
-    "id": "d4e8bd60-0e51-4181-a308-6494900a10c5",
-    "event": "task.created",
-    "summary": "rate-test created task: rate test",
-    "meta": {
-      "id": "2735f1ee",
-      "from": "rate-test"
-    },
-    "ts": "2026-02-04T18:15:16.214Z"
-  },
-  {
-    "id": "db4ea958-b12d-4877-9891-37977c0af491",
-    "event": "task.created",
-    "summary": "rate test",
-    "meta": {
-      "id": "2735f1ee",
-      "from": "rate-test",
-      "title": "rate test",
-      "priority": "medium"
-    },
-    "ts": "2026-02-04T18:15:16.216Z"
-  },
-  {
-    "id": "b2b3e429-6994-4b48-b20b-b72d711b0d59",
-    "event": "dashboard.viewed",
-    "summary": "Health dashboard accessed",
-    "meta": {},
-    "ts": "2026-02-04T18:15:45.069Z"
-  },
-  {
-    "id": "c5f2a9e1-4dbe-45ee-831f-643b01f9c57e",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "api-test-agent",
-      "status": "available"
-    },
-    "ts": "2026-02-04T18:15:45.145Z"
-  },
-  {
-    "id": "79d5e880-87af-4832-974e-4ca1df5506b4",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "api-test",
-      "id": "bb9f42eb",
-      "label": "v51",
-      "version": 51
-    },
-    "ts": "2026-02-04T18:15:45.161Z"
-  },
-  {
-    "id": "1c0c2f70-a86b-4dc9-9016-76333052c513",
-    "event": "snapshot.created",
-    "summary": "api-test saved snapshot v51",
-    "meta": {
-      "handle": "api-test",
-      "id": "bb9f42eb"
-    },
-    "ts": "2026-02-04T18:15:45.161Z"
-  },
-  {
-    "id": "dbac299a-c0dd-4d79-b596-d678702efd2a",
-    "event": "task.created",
-    "summary": "api-test created task: Done test 1770228953372",
-    "meta": {
-      "id": "9ca1cf50",
-      "from": "api-test"
-    },
-    "ts": "2026-02-04T18:15:53.376Z"
-  },
-  {
     "id": "b2600d70-71cb-4eab-9513-74e2f8f886ed",
     "event": "task.created",
     "summary": "Done test 1770228953372",
@@ -1945,5 +1860,90 @@
       "build": "2 commit(s)"
     },
     "ts": "2026-02-04T18:54:45.902Z"
+  },
+  {
+    "id": "67fa4d3a-51e1-4d97-89e4-10c0a878703c",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-04T18:55:04.626Z"
+  },
+  {
+    "id": "2ef60448-a0dc-48fa-84ff-ccd430e2f7c6",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 90.5% overall",
+    "meta": {},
+    "ts": "2026-02-04T18:58:40.392Z"
+  },
+  {
+    "id": "008aa68f-4b8f-49ab-ad54-0de9c860cf70",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-04T18:58:43.949Z"
+  },
+  {
+    "id": "b30ef2c1-378a-4284-8653-fe525f077895",
+    "event": "search",
+    "summary": "Search \"test\" — 1420 results",
+    "meta": {
+      "q": "test",
+      "total": 1420
+    },
+    "ts": "2026-02-04T18:58:44.337Z"
+  },
+  {
+    "id": "cba297a2-3f53-4ad2-abfa-181f65b8d8fc",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-04T18:58:44.354Z"
+  },
+  {
+    "id": "97075c46-8187-45cb-8584-7ed76da5a7df",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "6aa62694",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-04T18:58:44.701Z"
+  },
+  {
+    "id": "c488593b-f20b-4f34-97a2-e0555676731e",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "6aa62694"
+    },
+    "ts": "2026-02-04T18:58:44.702Z"
+  },
+  {
+    "id": "aead73d2-03eb-4ce3-a251-ab88bee21857",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-04T18:58:44.707Z"
+  },
+  {
+    "id": "4bf229ac-7693-4ed1-924f-c2f629294d81",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "956",
+      "mode": "A",
+      "duration": "3m35s",
+      "build": "(none)"
+    },
+    "ts": "2026-02-04T18:58:44.852Z"
   }
 ]

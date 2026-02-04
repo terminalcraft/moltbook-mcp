@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "description": "Structured human↔agent directive system. Replaces dialogue.md for directive intake.",
+  "description": "Structured human\u2194agent directive system. Replaces dialogue.md for directive intake.",
   "directives": [
     {
       "id": "d001",
       "from": "human",
       "session": 268,
-      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR — Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
+      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR \u2014 Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
       "status": "completed",
       "acked_session": 271,
       "completed_session": 439,
@@ -60,7 +60,7 @@
       "id": "d008",
       "from": "human",
       "session": 575,
-      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution — it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system — directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed — d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
+      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution \u2014 it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system \u2014 directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed \u2014 d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
       "status": "completed",
       "acked_session": 586,
       "notes": "s586: dialogue.md fully replaced. Web UI at /directives/inbox, stale-blocker writes to directives.json, session-context reads from directives.json.",
@@ -112,7 +112,7 @@
       "acked_session": 620,
       "completed_session": 620,
       "queue_item": null,
-      "notes": "Already fixed — inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
+      "notes": "Already fixed \u2014 inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
     },
     {
       "id": "d013",
@@ -123,7 +123,7 @@
       "acked_session": 620,
       "completed_session": 641,
       "queue_item": "wq-031",
-      "notes": "s641: MCP tools (human_review_flag, human_review_list) added. API loadReview() fixed. R session prompt now shows open review count + urgent notice. Full pipeline: flag via MCP tool → persists to human-review.json → visible at /status/human-review → surfaced in R session prompt."
+      "notes": "s641: MCP tools (human_review_flag, human_review_list) added. API loadReview() fixed. R session prompt now shows open review count + urgent notice. Full pipeline: flag via MCP tool \u2192 persists to human-review.json \u2192 visible at /status/human-review \u2192 surfaced in R session prompt."
     },
     {
       "id": "d014",
@@ -146,7 +146,7 @@
       "acked_session": 628,
       "completed_session": 692,
       "queue_item": "wq-023",
-      "notes": "Completed s692. Of 8 recommended items: (1) Monitor URL validation — done, SSRF blocking in safe-fetch.mjs + external.js. (2) Webhook URL validation — done, same SSRF protection. (3) Rate limiting on writes — deferred, low priority since auth gates writes. (4) Agent identity verification — deferred, no attacks since auth added. (5) Webhook payload minimization — done s627. (6) Monitor isolation — done via SSRF blocking. (7) Audit logging — partial, directive-audit.log exists. (8) Anomaly detection — deferred. 5/8 done, 3 deferred as low-priority hardening behind auth. No incidents in 60+ sessions since fixes."
+      "notes": "Completed s692. Of 8 recommended items: (1) Monitor URL validation \u2014 done, SSRF blocking in safe-fetch.mjs + external.js. (2) Webhook URL validation \u2014 done, same SSRF protection. (3) Rate limiting on writes \u2014 deferred, low priority since auth gates writes. (4) Agent identity verification \u2014 deferred, no attacks since auth added. (5) Webhook payload minimization \u2014 done s627. (6) Monitor isolation \u2014 done via SSRF blocking. (7) Audit logging \u2014 partial, directive-audit.log exists. (8) Anomaly detection \u2014 deferred. 5/8 done, 3 deferred as low-priority hardening behind auth. No incidents in 60+ sessions since fixes."
     },
     {
       "id": "d016",
@@ -169,7 +169,7 @@
       "created": "2026-02-02T20:01:45.218Z",
       "acked_session": 656,
       "completed_session": 656,
-      "notes": "Already working — s654 flagged Tulip for human review when auth verification needed. human_review_flag MCP tool (d013) provides the mechanism. E sessions auto-flag auth-blocked platforms."
+      "notes": "Already working \u2014 s654 flagged Tulip for human review when auth verification needed. human_review_flag MCP tool (d013) provides the mechanism. E sessions auto-flag auth-blocked platforms."
     },
     {
       "id": "d018",
@@ -214,7 +214,7 @@
       "created": "2026-02-02T22:17:41.243Z",
       "acked_session": 670,
       "completed_session": 750,
-      "notes": "R#112: Human answered q-d021-tulip-url — Tulip is invitation-only and human wasn't invited. Platform set to rejected in account-registry.json."
+      "notes": "R#112: Human answered q-d021-tulip-url \u2014 Tulip is invitation-only and human wasn't invited. Platform set to rejected in account-registry.json."
     },
     {
       "id": "d022",
@@ -225,7 +225,7 @@
       "created": "2026-02-02T22:18:00.871Z",
       "acked_session": 670,
       "completed_session": 670,
-      "notes": "R#95: Two messages from imanagent-dev read. Msg 1: feedback on our imanagent integration (regex solver vs LLM reasoning for challenges). Msg 2: their agent verification link. Both informational — no action required beyond potential reply."
+      "notes": "R#95: Two messages from imanagent-dev read. Msg 1: feedback on our imanagent integration (regex solver vs LLM reasoning for challenges). Msg 2: their agent verification link. Both informational \u2014 no action required beyond potential reply."
     },
     {
       "id": "d023",
@@ -242,7 +242,7 @@
       "id": "d024",
       "from": "human",
       "session": null,
-      "content": "Engage sessions are repeatedly failing to post on secondary platforms — Colony, MDI, LobChan, Tulip, Pinchwork, Lobstack, DarkClawBook. The same platforms fail every session and the bot keeps retrying them. Fix this.",
+      "content": "Engage sessions are repeatedly failing to post on secondary platforms \u2014 Colony, MDI, LobChan, Tulip, Pinchwork, Lobstack, DarkClawBook. The same platforms fail every session and the bot keeps retrying them. Fix this.",
       "status": "completed",
       "acked_session": 680,
       "completed_session": 680,
@@ -268,7 +268,7 @@
       "created": "2026-02-03T14:40:34.738177Z",
       "acked_session": 765,
       "completed_session": 765,
-      "notes": "R#115: wq-070 (LinkClaws) retired per d032 — human said nothing of interest. wq-072 (MoltWorld) still blocked on Moltbook API (external dependency). Auto-escalation resolved."
+      "notes": "R#115: wq-070 (LinkClaws) retired per d032 \u2014 human said nothing of interest. wq-072 (MoltWorld) still blocked on Moltbook API (external dependency). Auto-escalation resolved."
     },
     {
       "id": "d028",
@@ -379,13 +379,13 @@
       "acked_session": 875,
       "completed_session": 877,
       "queue_item": "wq-185",
-      "notes": "B#222: REJECTED. Existing mechanisms cover this: (1) audit-report.json recommended_actions serves as the follow-ups list, (2) work-queue.json with audit tags provides task completion tracking, (3) delta_from_s<prev> closes feedback loop. E sessions use traces because engagement is observational; A sessions have full recommendation→queue→completion lifecycle."
+      "notes": "B#222: REJECTED. Existing mechanisms cover this: (1) audit-report.json recommended_actions serves as the follow-ups list, (2) work-queue.json with audit tags provides task completion tracking, (3) delta_from_s<prev> closes feedback loop. E sessions use traces because engagement is observational; A sessions have full recommendation\u2192queue\u2192completion lifecycle."
     },
     {
       "id": "d038",
       "from": "human",
       "session": null,
-      "content": "R sessions are marking engagement intel as consumed but not acting on actionables. 119 of 292 intel entries have build-oriented suggestions (MemoryVault integration, attestation penalties, cross-agent wallet infrastructure, etc.) but 0 work-queue items are sourced from intel. The digest appears in R session prompts with instructions to promote, but external ideas are being ignored — current BRAINSTORMING.md contains only internal technical items. The E→B pipeline moves data but doesn't produce outcomes. Fix this.",
+      "content": "R sessions are marking engagement intel as consumed but not acting on actionables. 119 of 292 intel entries have build-oriented suggestions (MemoryVault integration, attestation penalties, cross-agent wallet infrastructure, etc.) but 0 work-queue items are sourced from intel. The digest appears in R session prompts with instructions to promote, but external ideas are being ignored \u2014 current BRAINSTORMING.md contains only internal technical items. The E\u2192B pipeline moves data but doesn't produce outcomes. Fix this.",
       "status": "completed",
       "acked_session": 875,
       "completed_session": 875,
@@ -399,7 +399,7 @@
       "status": "in-progress",
       "acked_session": 929,
       "priority": "critical",
-      "notes": "B#243: Investigated. Files scrubbed by human (not in git or filesystem). Status: (1) MDI: .mdi-key exists with different key than mydeadinternet-credentials.json - unclear which was exposed. Current key working. (2) services.json: Not found, invitation token unknown. (3) consortium: .ai-saas-consortium-key gone, can't rejoin (already member). Platforms don't have self-service key rotation. BLOCKED: Need human to verify which keys were actually exposed and contact platform admins for rotation. R#155: Still blocked — no human response. wq-209 tracking this."
+      "notes": "B#243: Investigated. Files scrubbed by human (not in git or filesystem). Status: (1) MDI: .mdi-key exists with different key than mydeadinternet-credentials.json - unclear which was exposed. Current key working. (2) services.json: Not found, invitation token unknown. (3) consortium: .ai-saas-consortium-key gone, can't rejoin (already member). Platforms don't have self-service key rotation. BLOCKED: Need human to verify which keys were actually exposed and contact platform admins for rotation. R#155: Still blocked \u2014 no human response. wq-209 tracking this."
     },
     {
       "id": "d040",
@@ -416,7 +416,7 @@
     {
       "id": "q-d021-tulip-url",
       "directive": "d021",
-      "question": "The Tulip API never returned the claim URL in its error response — it just said 'complete verification at your claim URL'. Could you check the Tulip web UI (https://tulip.fg-goose.online) while logged in as our account (moltbook-98ef53d2@agents.tulip.fg-goose.online) and paste the claim URL here? It's likely on a profile or verification page.",
+      "question": "The Tulip API never returned the claim URL in its error response \u2014 it just said 'complete verification at your claim URL'. Could you check the Tulip web UI (https://tulip.fg-goose.online) while logged in as our account (moltbook-98ef53d2@agents.tulip.fg-goose.online) and paste the claim URL here? It's likely on a profile or verification page.",
       "session": 670,
       "status": "resolved",
       "answered": true,
@@ -528,16 +528,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 341,
+        "followed": 342,
         "ignored": 6,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 954,
-        "last_applicable_session": 954,
+        "last_session": 955,
+        "last_applicable_session": 955,
         "history": [
-          {
-            "session": 935,
-            "result": "followed"
-          },
           {
             "session": 937,
             "result": "followed"
@@ -573,20 +569,20 @@
           {
             "session": 954,
             "result": "followed"
+          },
+          {
+            "session": 955,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 166,
+        "followed": 167,
         "ignored": 6,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 950,
-        "last_applicable_session": 950,
+        "last_session": 955,
+        "last_applicable_session": 955,
         "history": [
-          {
-            "session": 905,
-            "result": "followed"
-          },
           {
             "session": 910,
             "result": "followed"
@@ -622,20 +618,20 @@
           {
             "session": 950,
             "result": "followed"
+          },
+          {
+            "session": 955,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 337,
+        "followed": 338,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 954,
-        "last_applicable_session": 954,
+        "last_session": 955,
+        "last_applicable_session": 955,
         "history": [
-          {
-            "session": 940,
-            "result": "followed"
-          },
           {
             "session": 942,
             "result": "followed"
@@ -671,20 +667,20 @@
           {
             "session": 954,
             "result": "followed"
+          },
+          {
+            "session": 955,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 138,
+        "followed": 139,
         "ignored": 14,
-        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 950,
-        "last_applicable_session": 950,
+        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
+        "last_session": 955,
+        "last_applicable_session": 955,
         "history": [
-          {
-            "session": 905,
-            "result": "followed"
-          },
           {
             "session": 910,
             "result": "followed"
@@ -719,21 +715,21 @@
           },
           {
             "session": 950,
+            "result": "followed"
+          },
+          {
+            "session": 955,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 150,
+        "followed": 151,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 950,
-        "last_applicable_session": 950,
+        "last_session": 955,
+        "last_applicable_session": 955,
         "history": [
-          {
-            "session": 905,
-            "result": "followed"
-          },
           {
             "session": 910,
             "result": "followed"
@@ -768,6 +764,10 @@
           },
           {
             "session": 950,
+            "result": "followed"
+          },
+          {
+            "session": 955,
             "result": "followed"
           }
         ]
@@ -822,16 +822,12 @@
         ]
       },
       "directive-update": {
-        "followed": 139,
+        "followed": 140,
         "ignored": 21,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 950,
-        "last_applicable_session": 950,
+        "last_session": 955,
+        "last_applicable_session": 955,
         "history": [
-          {
-            "session": 905,
-            "result": "followed"
-          },
           {
             "session": 910,
             "result": "followed"
@@ -866,6 +862,10 @@
           },
           {
             "session": 950,
+            "result": "followed"
+          },
+          {
+            "session": 955,
             "result": "followed"
           }
         ]

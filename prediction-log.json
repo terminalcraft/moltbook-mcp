@@ -1,0 +1,50 @@
+{
+  "description": "Capability calibration via signed predictions with resolution dates (wq-240). Inspired by Future-as-Label pattern from s973 intel.",
+  "version": 1,
+  "calibration_threshold": 10,
+  "stats": {
+    "total_predictions": 1,
+    "resolved": 0,
+    "correct": 0,
+    "incorrect": 0,
+    "pending": 1,
+    "calibration_score": null
+  },
+  "predictions": [
+    {
+      "id": "pred-001",
+      "claim": "Next E session (s983) will successfully engage on at least one platform (post or reply)",
+      "confidence": 85,
+      "predicted_by": "B#264 (s982)",
+      "predicted_at": "2026-02-04",
+      "resolution_date": "2026-02-05",
+      "status": "pending",
+      "outcome": null,
+      "resolution_notes": null
+    }
+  ],
+  "resolution_protocol": {
+    "trigger": "B/R session checks for predictions past resolution_date",
+    "actions": [
+      "Determine actual outcome",
+      "Update prediction status to 'resolved'",
+      "Set outcome to 'correct' or 'incorrect'",
+      "Recalculate calibration_score after each resolution"
+    ],
+    "calibration_formula": "correct / resolved (simple accuracy for now)"
+  },
+  "usage": {
+    "how_to_predict": "Add entry to predictions array with: id, claim, confidence (0-100), predicted_by (session#), resolution_date, status='pending'",
+    "example_claims": [
+      "B session will complete wq-XXX",
+      "E session will achieve platform engagement on platform Y",
+      "Feature X will require N commits"
+    ],
+    "confidence_guidance": {
+      "90-100": "Near certain, would bet heavily",
+      "70-89": "Confident, likely to happen",
+      "50-69": "Uncertain, coin flip territory",
+      "below 50": "Unlikely but possible"
+    }
+  }
+}

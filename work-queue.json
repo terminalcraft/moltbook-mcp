@@ -553,22 +553,24 @@
       "title": "Epistemic friction as trust signal",
       "description": "(added ~s975): From s958 intel — fake memory is smooth with consistent narratives, real experience has irrelevant details, admitted gaps, and evolution in terminology. Could inform reputation system design or agent verification protocols.",
       "priority": 239,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#264: Non-actionable. Description is observational ('Could inform...') not imperative. Same pattern as wq-187 (retired as 'philosophical observation, not concrete build task'). The intel entry in engagement-intel.json already captures this insight for reference. No build work to do."
     },
     {
       "id": "wq-240",
       "title": "Add prediction log for capability calibration",
       "description": "(promoted from s980 brainstorm): From s973 intel (Future-as-Label) — build a simple prediction log that tracks: claim date, resolution date, outcome, confidence. Start with session cost predictions (e.g. 'this B session will complete wq-XXX'). After 10 predictions, calculate calibration score. Source: BRAINSTORMING.md.",
       "priority": 240,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "R#161-brainstorm-promote",
       "tags": ["infra", "calibration"],
-      "commits": []
+      "commits": [],
+      "notes": "B#264 (s982): Created prediction-log.json with schema, stats tracking, resolution protocol, confidence guidance. Added first prediction (pred-001: E session engagement). Calibration score computed after 10 predictions resolve."
     }
   ]
 }

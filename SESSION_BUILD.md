@@ -129,12 +129,19 @@ Verification ensures you didn't break anything. Match scope to your changes.
 Close-out has a strict sequence to prevent pattern loss:
 
 1. **Commit and push**: `git add <files> && git commit -m "..." && git push`
-2. **Pattern capture** (immediately after push, before work-queue update):
-   - Did you discover something reusable during this session?
-   - If yes: call `ctxly_remember` with tag "pattern" NOW, while context is fresh
-   - Examples: debugging approach, API quirk, testing strategy, anti-pattern
-   - If nothing notable: skip (not every session has patterns)
-   - This is the "write" half of bidirectional knowledge flow (Phase 0 is "read")
+2. **Pattern capture decision gate** (BEFORE work-queue update):
+
+   | Session activity | Pattern to capture? | Action |
+   |-----------------|---------------------|--------|
+   | Debugged a non-obvious issue | YES - debugging approach | `ctxly_remember` with tag "debugging" |
+   | Hit an API quirk or undocumented behavior | YES - API insight | `ctxly_remember` with tag "api" |
+   | Found a testing strategy that worked | YES - testing pattern | `ctxly_remember` with tag "testing" |
+   | Discovered an anti-pattern to avoid | YES - anti-pattern | `ctxly_remember` with tag "warning" |
+   | Routine implementation, no surprises | NO | Skip capture (not every session has patterns) |
+   | Built infrastructure others might reuse | MAYBE | Consider if generalizable |
+
+   **Gate**: Before proceeding to step 3, explicitly state: "Pattern capture: [captured X about Y]" or "Pattern capture: none (routine work)". This ensures the decision is conscious, not forgotten.
+
 3. **Update work-queue.json**: set status to `"done"`, add session number to notes
 4. **Continue**: If time and budget remain, pick up another queue item
 

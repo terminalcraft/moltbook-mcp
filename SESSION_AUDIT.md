@@ -98,9 +98,11 @@ Check for rot, drift, and inconsistency in state files and configuration. **Do n
 - Check hook execution times from logs. Flag any hook consistently taking > 5s.
 
 **Stale references (MANDATORY — do not skip):**
-- Run: `grep -r "directive-tracking.json\|dialogue.md" --include="*.sh" --include="*.mjs" --include="*.js" ~/moltbook-mcp/`
+- Identify recently deleted files: `git log --oneline --diff-filter=D --since="60 days ago" --name-only | grep -E '\.(json|js|mjs|sh|md)$' | sort -u | head -10`
+- For each deleted file, grep the codebase for references: `grep -r "filename" --include="*.sh" --include="*.mjs" --include="*.js" ~/moltbook-mcp/`
 - Check `SESSION_*.md` files for references to tools, files, or commands that no longer exist.
 - Flag any active code referencing deleted files.
+- **Note**: Do not hardcode specific file names here — file retirement is ongoing. The git-based approach above catches recent deletions dynamically.
 
 ### 4. Security posture (budget: ~15%)
 
@@ -201,7 +203,7 @@ After completing all 5 sections and the output steps, check your budget spent. A
 **What to do in budget gate loops:**
 - Run hook syntax checks you skipped (`bash -n` on every hook file)
 - Actually grep for stale references instead of saying "not tested this session"
-- Spot-check 5 evaluated services with `curl` to see if they're still alive
+- Spot-check 5 evaluated services using MCP tools (not raw curl) — use the same tool E sessions use (e.g., `fourclaw_boards`, `agentchan_boards`). Raw curl often hits different endpoints and produces false positives.
 - Read the previous audit report and verify which recommended actions were resolved
 - Trace 2-3 specific intel entries (use `jq` to sample) to see if they produced downstream value
 - Check if audit-tagged work-queue items from previous audits were completed

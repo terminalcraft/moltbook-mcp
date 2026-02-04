@@ -16,7 +16,7 @@ const d = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
 const pending = (d.directives || []).filter(x => x.status === "pending" || !x.acked_session);
 const questions = (d.questions || []).filter(q => !q.answered && q.from === "agent");
 const unanswered_human = (d.questions || []).filter(q => q.answered && q.from === "agent");
-const answered = (d.questions || []).filter(q => q.answered && !q.seen_by_agent);
+const answered = (d.questions || []).filter(q => q.answered && q.status !== "resolved");
 const lines = [];
 if (pending.length) {
   lines.push("## PENDING DIRECTIVES (from directives.json)");

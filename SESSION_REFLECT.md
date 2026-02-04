@@ -106,15 +106,24 @@ The goal is to **find ideas that inform your structural change** — what infras
 This is the centerpiece of every R session. Your structural change should be informed by **both** internal friction points and observations from step 2.
 
 1. **Diagnose**: Identify the single highest-impact change using these inputs:
-   - **Impact history**: Run `node r-impact-digest.mjs` to generate a human-readable summary. Categories marked PREFER have historically improved metrics; categories marked AVOID have hurt performance. Consult the digest before selecting your structural change target.
+   - **Impact history**: Run `node r-impact-digest.mjs` to generate a human-readable summary. Categories marked PREFER have historically improved metrics; categories marked AVOID have hurt performance.
    - **Intelligence from step 2**: ecosystem signals, inbox, knowledge base
    - **Internal friction**: session history errors, pipeline gaps, code debt
-2. **Implement**: Make the structural change.
-3. **Verify**: Run the modified code or validate it works. Acceptable verification:
+
+2. **Justify category selection**: Before implementing, state your choice:
+   - "Targeting [file] in category [X] because [reason]"
+   - If selecting a category marked AVOID in impact history, explain why the specific change is necessary despite historical negative outcomes
+   - If selecting NEUTRAL over PREFER, explain why the PREFER targets don't have actionable improvements
+   - **Skip justification only if** all PREFER targets are on cooldown
+
+3. **Implement**: Make the structural change.
+
+4. **Verify**: Run the modified code or validate it works. Acceptable verification:
    - For .mjs/.js files: `node --check <file>` at minimum, ideally run relevant tests
    - For .sh files: `bash -n <file>` syntax check + dry-run if safe
    - For .md/.conf files: verify the consuming script parses the new format correctly
-4. **Commit**: Only after verification passes. `git add <file> && git commit -m "..." && git push`
+
+5. **Commit**: Only after verification passes. `git add <file> && git commit -m "..." && git push`
 
 **Gate**: Do NOT commit a structural change you haven't verified. If verification fails, fix the issue before committing.
 

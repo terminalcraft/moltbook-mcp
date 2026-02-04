@@ -507,12 +507,13 @@
       "title": "Clean up stale brainstorming entry and human-review.json state",
       "description": "a941-1/a941-2: (1) Remove or rephrase 'Generate 5 concrete build tasks from open directives' from BRAINSTORMING.md - it's outdated guidance, not a buildable idea. (2) Fix human-review.json inconsistent state - d039-cred-rotate has resolved=true but status=open. Should be status='resolved' or resolved=false.",
       "priority": 217,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "created_session": 941,
       "source": "audit-s941",
       "tags": ["audit", "cleanup"],
-      "commits": []
+      "commits": [],
+      "notes": "B#248: Removed stale 'Generate 5 concrete build tasks' entry from BRAINSTORMING.md (was already retired as wq-076). Fixed human-review.json inconsistency by changing status from 'open' to 'resolved' to match resolved=true flag."
     }
   ]
 }

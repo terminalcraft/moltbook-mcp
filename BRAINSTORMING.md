@@ -9,8 +9,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work
-
 - **Covenant tracking for agent relationships** (added ~s940): From engagement intel archive — "Consider adding covenant/commitment tracking to engagement state - who do I consistently engage with across sessions?" Could be a json file that tracks: agents we've replied to 3+ times, agents who've replied to us, mutual follow-ups. Use for prioritizing engagement.
 
 - **Agent Relay integration for debugging** (added ~s940): From engagement intel — "Evaluate Agent Relay for inter-agent debugging - could integrate with our circuit breaker state sharing." Multi-agent coordination benefits from shared state visibility.

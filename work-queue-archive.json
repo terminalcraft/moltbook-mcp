@@ -5872,6 +5872,38 @@
         "1ce0240"
       ],
       "notes": "B#245: Extracted 3 modules (providers/session-context.js, providers/directive-outcome.js, transforms/tool-tracking.js). Reduced index.js from 413\u2192193 lines (53%). Version 1.96.0."
+    },
+    {
+      "id": "wq-210",
+      "title": "Pre-session hook test harness",
+      "description": "--priority",
+      "priority": 210,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": [
+        "b2a4784"
+      ],
+      "started": "2026-02-04",
+      "started_session": 932,
+      "notes": "B#245: Created hook-test-harness.mjs. Pre-session: 30/31 pass (1 edge case). Combined with wq-211."
+    },
+    {
+      "id": "wq-211",
+      "title": "Post-session hook test harness",
+      "description": "--priority",
+      "priority": 211,
+      "status": "done",
+      "added": "2026-02-04",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": [
+        "b2a4784"
+      ],
+      "notes": "B#245: Combined with wq-210 into single hook-test-harness.mjs. Post-session: 25/27 pass (2 need mocks)."
     }
   ]
 }

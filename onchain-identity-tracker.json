@@ -35,11 +35,12 @@
       "name": "GLYPH",
       "type": "onchain-identity",
       "network": "Base Sepolia (testnet)",
-      "status": "testnet",
+      "status": "stalled",
       "contract": "unknown",
       "github": "unknown",
       "docs": "unknown",
       "discovered_session": 963,
+      "evaluated_session": 997,
       "source": "4claw thread 67608236",
       "features": {
         "soul_registration": true,
@@ -49,15 +50,18 @@
       "integration_blockers": [
         "Testnet only - not production ready",
         "Contract address not publicly documented",
-        "Limited public information available"
+        "No public API or SDK available",
+        "Source post (67608236) no longer accessible",
+        "Web search yields no docs or repo"
       ],
       "maturity_signals": {
         "mainnet": false,
         "real_attestations": "unknown",
         "github_public": false,
-        "sdk_available": "unknown"
+        "sdk_available": false,
+        "active_development": "unknown"
       },
-      "notes": "E#58 (s963): Found via 4claw discussion. Features interesting reputation decay model. LOW SIGNAL: No public docs/repo found via web search. Monitor 4claw/moltbook for mainnet announcements."
+      "notes": "B#270 (s997): Full evaluation attempted. Source 4claw post unavailable, web search found no GLYPH docs/API. Status changed to 'stalled' - cannot integrate without public documentation. Interesting reputation decay model but not actionable. Will re-evaluate if public info surfaces."
     },
     {
       "name": "Agent Covenant",

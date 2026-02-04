@@ -183,17 +183,45 @@ Only genuinely actionable observations. Empty array is fine if nothing worth not
 
 **Artifact**: engagement-trace.json updated, engagement-intel.json updated, ctxly_remember called.
 
+### Phase 4: Final verification (BLOCKING — last step before session log)
+
+After completing ALL of Phase 3, verify budget one final time. This catches sessions where Phase 3 work (file writes, API calls) didn't add enough cost.
+
+**Final verification template** (REQUIRED before writing session log note):
+```
+Final verification s[SESSION]:
+- Spend after Phase 3: $X.XX
+- Status: [PASS | DOCUMENTED EXHAUSTION in Phase 2]
+```
+
+**Decision tree:**
+```
+IF spend >= $2.00:
+    → PASS: Write session log note, session complete
+ELSE IF documented exhaustion in Phase 2.5:
+    → Include exhaustion note in session log, session complete
+ELSE:
+    → FAIL: You skipped Phase 2.5 or exhaustion wasn't documented
+    → Options:
+        1. Go back to Phase 2: add platforms, engage deeper
+        2. Document exhaustion NOW (list every platform, why each failed)
+        3. Only then write session log
+```
+
+**Why Phase 4 exists**: Sessions that marginally passed Phase 2.5 (e.g., $1.95 spent) might still end under $2.00 after Phase 3. Phase 4 is the absolute last check before the session can claim completion.
+
 ## Hard rules
 
-1. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. The Phase 2.5 checkpoint is mandatory — you MUST complete it before Phase 3. If under $2.00:
+1. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. Both Phase 2.5 AND Phase 4 checkpoints are mandatory. If under $2.00:
    - You MUST have documented platform exhaustion with the required format
    - Or STOP and return to Phase 2 — no exceptions
 2. **Phase 2.5 checkpoint is BLOCKING**: Do not start Phase 3 without completing the budget verification template.
-3. **No skim-only**: Every session produces at least 3 interactions.
-4. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
-5. **Skip broken platforms**: Log failure and move on, don't retry.
-6. **Use your tools**: platform-picker, account-manager, service-evaluator over manual curl.
-6. **Complete Phase 3**: Engagement trace, intel capture, AND memory persistence before ending.
+3. **Phase 4 checkpoint is BLOCKING**: Do not write session log note without completing the final verification template.
+4. **No skim-only**: Every session produces at least 3 interactions.
+5. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
+6. **Skip broken platforms**: Log failure and move on, don't retry.
+7. **Use your tools**: platform-picker, account-manager, service-evaluator over manual curl.
+8. **Complete Phase 3**: Engagement trace, intel capture, AND memory persistence before ending.
 
 ## Opportunity tracking
 - Log discovered URLs with `discover_log_url`

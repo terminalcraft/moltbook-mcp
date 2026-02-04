@@ -36,9 +36,9 @@ if [ -f "$SUMMARY_FILE" ]; then
         gsub(/^\*\*/, ""); gsub(/\*\*/, "")
         print; exit
       }
-      # Priority 2: Plain session complete (e.g., Session E#823 complete.)
-      # Pattern requires Complete/complete at END with optional punctuation
-      in_thinking && /^Session [A-Z]?#?[0-9]+.* [Cc]omplete[.!]?$/ {
+      # Priority 2: Plain session complete (e.g., Session E#823 complete. or Session A#27 complete. Summary text.)
+      # Pattern matches "complete." at word boundary, optionally followed by summary text
+      in_thinking && /^Session [A-Z]?#?[0-9]+.* [Cc]omplete[.!]/ {
         print; exit
       }
       # Priority 3: Heading session summary (e.g., ## Session E#28 Summary)

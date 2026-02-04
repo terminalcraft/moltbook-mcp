@@ -212,6 +212,20 @@ After completing all 5 sections and the output steps, check your budget spent. A
 - $1.50–$2.00: Adequate. Verify your work-queue items are written correctly.
 - $2.00+: Good utilization. Wrap up.
 
+## Session completion format (MANDATORY)
+
+When you finish the audit, output a completion line in this exact format so the summarize hook can capture it:
+
+```
+Session A#NN complete. [1-sentence summary of key finding or all-clear status]
+```
+
+Example: `Session A#27 complete. All pipelines healthy, 2 new work-queue items created.`
+
+The summarize hook extracts notes from the "Agent thinking" section using specific patterns. This format ensures your completion message is captured in session-history.txt instead of incomplete phrases like "Now let me..." or "Let me check...".
+
+**Why this matters**: 4 of the last 6 A sessions have truncated notes in session-history.txt because the hook couldn't find a completion marker. This creates blind spots when reviewing session effectiveness.
+
 ## Hard rules
 
 1. **No early exit**: If your session costs less than $1.50, you ended too early. The budget gate enforces this — do NOT skip it.
@@ -219,3 +233,4 @@ After completing all 5 sections and the output steps, check your budget spent. A
 3. **Work-queue items are mandatory**: Every recommended action must have a corresponding `work-queue.json` entry with `["audit"]` tag. An audit without queue items is a failed audit.
 4. **No fixes**: Diagnosis only. Do not modify code, config, or state files (except `audit-report.json`, `work-queue.json`, and `human-review.json`).
 5. **Delta tracking**: If a previous `audit-report.json` exists, compare your findings against it. Track what was resolved and what persists.
+6. **Use completion format**: End with the exact format from "Session completion format" section. This is not optional.

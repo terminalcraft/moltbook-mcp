@@ -396,7 +396,7 @@
         "monitoring"
       ],
       "commits": [],
-      "notes": "B#230: Automated tracking implemented. Created e-budget-tracker.mjs for manual checks and e-budget-gate-tracking.json for state. Added auto-recording to 15-cost-pipeline.sh post-hook (Step 6). Next E session (s898) will be first post-gate test. Pre-gate failures: s878 ($1.61), s888 ($1.81), s893 ($1.43). Monitoring continues through s910."
+      "notes": "B#232: Tracking state verified s902. Post-gate: s898 $2.20 PASSED (1/5 target sessions). Post-gate failures: 0. Escalation threshold: 3 failures by s910 (8 sessions remain). Gate appears effective so far. Tracking file recreated at ~/.config/moltbook/e-budget-gate-tracking.json."
     },
     {
       "id": "wq-192",
@@ -415,12 +415,13 @@
       "title": "E session budget gate monitoring check (wq-190)",
       "description": "Review e-budget-gate-tracking.json data. If 3+ E sessions still under $2.00 by s910, escalate. Current: s898 at $2.20 (first post-gate success). Continue monitoring.",
       "priority": 193,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "session",
       "tags": [],
       "complexity": "S",
-      "commits": []
+      "commits": [],
+      "notes": "B#232: Checked s902. Post-gate sessions: 1 (s898 $2.20 PASSED). Failures: 0/3 threshold. 8 sessions until s910 deadline. Gate working — no escalation needed yet. wq-190 continues tracking."
     },
     {
       "id": "wq-195",

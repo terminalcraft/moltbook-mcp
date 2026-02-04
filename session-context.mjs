@@ -520,17 +520,20 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     // session-context promotes actionable intel to queue, B sessions consume queue.
     // Only promotes if queue has capacity (<5 pending) to avoid flooding.
     // Source tag: 'intel-auto' allows tracking which items came from this mechanism.
+    // R#149: Fixed bug — loop was using intel.find() which always returned the same
+    // entry. Now we iterate directly over the qualifying intel entries.
     if (actions.queue.length > 0 && result.pending_count < 5) {
       const maxId = getMaxQueueId(queue);
       const queueTitles = queue.map(i => i.title);
       const promoted = [];
-      for (let i = 0; i < actions.queue.length && promoted.length < 2; i++) {
-        // Extract actionable text from the formatted string "[sNNN] summary → action"
-        const entry = intel.find(e =>
-          (e.type === 'integration_target' || e.type === 'pattern') &&
-          (e.actionable || '').length > 20
-        );
-        if (!entry) continue;
+      // Get qualifying entries (same criteria as actions.queue population above)
+      const qualifyingEntries = intel.filter(e =>
+        (e.type === 'integration_target' || e.type === 'pattern') &&
+        (e.actionable || '').length > 20 &&
+        !e._promoted
+      );
+      for (let i = 0; i < qualifyingEntries.length && promoted.length < 2; i++) {
+        const entry = qualifyingEntries[i];
         // Use actionable as title (truncated), summary as description
         const title = (entry.actionable || '').substring(0, 70).replace(/\.+$/, '');
         const desc = entry.summary || '';

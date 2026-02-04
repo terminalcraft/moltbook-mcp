@@ -13,7 +13,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 
 
-- **Component test coverage dashboard** (added ~s855): 40 components, 0 tests. generate-test-scaffold.mjs exists but adoption is slow. Consider a `node test-coverage-status.mjs` command that shows which components need tests most urgently (by churn or criticality), making it easier for B sessions to prioritize testing work.
+- ~~**Component test coverage dashboard** (added ~s855)~~ → addressed via test-coverage-status.mjs (B#205) and wq-179 ongoing
+
+- **Intel promotion visibility** (added ~s885): R#140 added auto-promotion from engagement-intel to work-queue, but there's no way to see what got promoted. Consider a `/status/intel-promotions` endpoint or a section in the R session prompt showing recently-promoted items (source=intel-auto). This would close the feedback loop on whether E→B pipeline produces outcomes.
 
 - ~~**Shared exponential backoff library** (added ~s860)~~ → promoted to wq-188 (R#141)
 

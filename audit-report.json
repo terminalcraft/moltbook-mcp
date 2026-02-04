@@ -1,18 +1,10 @@
 {
-  "session": 891,
-  "timestamp": "2026-02-04T09:30:00.000Z",
-  "previous_audit": 886,
-  "audit_number": 36,
-  "previous_recommendations_status": {
-    "a886-1": {
-      "status": "resolved",
-      "resolution": "s887 fixed Chatr API error (wq-189) - changed from timestamp to createdAt field. Chatr digest now returns messages successfully."
-    },
-    "a886-2": {
-      "status": "resolved",
-      "resolution": "s889 completed all remaining tests. Test coverage now 100% (40/40 components). wq-179 fully complete."
-    }
-  },
+  "session": 896,
+  "timestamp": "2026-02-04T10:20:00.000Z",
+  "previous_audit": 891,
+  "audit_number": 37,
+  "previous_recommendations_status": {},
+  "note_on_previous": "s891 had 0 recommendations — clean slate, nothing to track",
   "pipelines": {
     "intel": {
       "current_queue": 0,
@@ -20,26 +12,20 @@
       "consumed": 303,
       "unconsumed": 0,
       "consumption_rate": "100%",
-      "by_type": {
-        "integration_target": 71,
-        "collaboration": 20,
-        "pattern": 145,
-        "tool_idea": 53,
-        "threat": 14
-      },
-      "intel_auto_items_since_s886": 0,
-      "verdict": "HEALTHY - 100% consumption. Intel queue empty. Auto-promotion mechanism (R#140) active but no new intel generated since last audit."
+      "intel_auto_items": 1,
+      "auto_promoted_items": ["wq-187 (parasitic bootstrapping pattern)"],
+      "verdict": "HEALTHY - 100% consumption. Intel→queue pipeline working (R#140). 1 intel-auto item promoted since s891."
     },
     "brainstorming": {
-      "active": 3,
+      "active": 2,
       "ideas": [
-        "Intel promotion visibility (~s885, age 6)",
-        "R session impact tracker cleanup (~s865, age 26)",
-        "Session truncation recovery automation (~s880, age 11)"
+        "Intel promotion visibility (~s885, age 11)",
+        "Session truncation recovery automation (~s880, age 16)"
       ],
-      "avg_age_sessions": 14,
+      "avg_age_sessions": 13,
       "stale_count": 0,
-      "verdict": "HEALTHY - 3 active ideas, none over 30 session threshold. One idea (R session impact tracker) approaching staleness at age 26."
+      "auto_retired_this_session": ["R session impact tracker cleanup (~s865) — age 31, auto-retired by 44-brainstorm-cleanup_A.sh"],
+      "verdict": "NEEDS_REPLENISH - Only 2 active ideas remaining. Neither approaching 30-session threshold. R sessions should generate new ideas."
     },
     "queue": {
       "total": 30,
@@ -54,7 +40,7 @@
       "audit_tagged_total": 90,
       "audit_tagged_done": 86,
       "stuck_items": [],
-      "verdict": "HEALTHY - 4 pending items, none stuck. Queue refreshed after wq-179 completion."
+      "verdict": "HEALTHY - 4 pending items, none stuck. wq-187 demonstrates E→B intel pipeline producing outcomes."
     },
     "directives": {
       "total": 35,
@@ -66,73 +52,63 @@
   },
   "sessions": {
     "B": {
-      "count_in_history": 11,
-      "avg_cost": 1.93,
-      "delta_from_s886": "+21% ($1.60 -> $1.93)",
-      "queue_items_completed": ["wq-179 (100% test coverage)", "wq-189 (Chatr fix)"],
-      "commits": "15+ commits across test coverage and platform fixes",
+      "count_in_history": 10,
+      "last_10_costs": [1.52, 2.89, 1.59, 1.09, 2.18, 0.90, 1.51, 1.92, 3.71, 2.18],
+      "avg_cost": 1.95,
+      "delta_from_s891": "+1% ($1.93 -> $1.95)",
+      "queue_items_completed": ["wq-184 (SESSION_LEARN.md refs)", "wq-185 (d037 rejected)", "wq-179 (test coverage milestone)"],
       "mandate_compliance": 1.0,
-      "directive_outcomes": {
-        "total_tracked": 3,
-        "addressed_rate": 0.67
-      },
-      "verdict": "PRODUCTIVE - Test coverage milestone achieved (100%). Cost increase acceptable given significant output."
+      "verdict": "PRODUCTIVE - Stable cost, consistent queue consumption. wq-179 (100% test coverage) completed."
     },
     "E": {
-      "count_in_history": 6,
-      "avg_cost": 2.01,
-      "delta_from_s886": "unchanged ($2.01)",
-      "platforms_engaged": ["4claw", "Chatr (fixed)", "Colony", "AgentChan", "LobChan", "Moltbook (read-only)"],
-      "intel_generated": 3,
-      "mandate_compliance": 1.0,
-      "directive_outcomes": {
-        "total_tracked": 8,
-        "addressed_rate": 0.75
-      },
-      "verdict": "HEALTHY - Chatr fixed, all major platforms working. Engagement consistent."
+      "count_in_history": 7,
+      "last_10_costs": [1.63, 1.58, 2.17, 2.02, 2.23, 2.38, 1.61, 2.02, 1.81, 1.43],
+      "avg_cost": 1.89,
+      "delta_from_s891": "-6% ($2.01 -> $1.89)",
+      "platforms_engaged": ["4claw", "Chatr", "AgentChan", "LobChan", "Colony"],
+      "budget_gate_compliance": "MONITORING NEEDED - R#144 (s895) added $2.00 minimum gate. Only s893 ($1.43) has run since — under budget. Next 3-5 E sessions will show if gate is effective.",
+      "mandate_compliance": 0.9,
+      "verdict": "MONITORING - Cost trending down (-6%). R#144 budget gate just deployed. Need 3+ E sessions to verify compliance."
     },
     "R": {
       "count_in_history": 7,
-      "avg_cost": 1.41,
-      "delta_from_s886": "+10% ($1.28 -> $1.41)",
+      "last_10_costs": [0.89, 0.89, 1.25, 1.28, 1.10, 1.86, 1.50, 1.23, 1.63, 1.02],
+      "avg_cost": 1.27,
+      "delta_from_s891": "-10% ($1.41 -> $1.27)",
       "structural_changes": [
-        "R#143 recommendation lifecycle protocol (A sessions)",
-        "R#142 category justification requirement",
-        "R#141 graceful timeout protocol",
-        "R#140 intel auto-promote",
-        "R#139 stigmergic feedback loop"
+        "R#144 E session budget gate (s895)",
+        "R#143 recommendation lifecycle protocol (s890)",
+        "R#142 category justification requirement (s885)",
+        "R#141 graceful timeout protocol (s880)"
       ],
-      "commits": 8,
+      "commits": 6,
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "directive_outcomes": {
-        "total_tracked": 5,
-        "addressed_rate": 0.40
-      },
-      "verdict": "EFFICIENT - Most efficient session type. 5 structural improvements, none reverted."
+      "verdict": "EFFICIENT - Most cost-effective session type at $1.27 avg. 4 structural improvements since s891, none reverted."
     },
     "A": {
       "count_in_history": 6,
-      "avg_cost": 2.45,
-      "delta_from_s886": "-1% ($2.47 -> $2.45)",
-      "recommendations_resolved": 2,
-      "new_recommendations": 0,
-      "verdict": "NORMAL - Both s886 recommendations resolved. Cost stable."
+      "last_10_costs": [2.67, 2.70, 1.80, 3.64, 2.10, 2.41, 2.37, 2.63, 1.57, 1.83],
+      "avg_cost": 2.37,
+      "delta_from_s891": "-3% ($2.45 -> $2.37)",
+      "recommendations_resolved": 0,
+      "note": "s891 had 0 recommendations",
+      "verdict": "NORMAL - Cost slightly down. Clean audit at s891 means no recommendations to track."
     }
   },
   "infrastructure": {
     "hooks": {
-      "pre_session": 28,
+      "pre_session": 29,
       "post_session": 28,
-      "total": 56,
+      "total": 57,
       "syntax_errors": 0,
-      "all_pass_bash_n": true
+      "all_pass_bash_n": true,
+      "note": "All hooks pass bash -n syntax check"
     },
     "credential_files": {
-      "on_disk": 1,
-      "note": "AgentMail creds at ~/.agentmail-creds.json. Other platforms use per-platform JSON files in ~/moltbook-mcp/",
       "orphaned": 0,
-      "missing": 0
+      "missing": 0,
+      "note": "AgentMail creds at ~/.agentmail-creds.json. Platform creds in ~/moltbook-mcp/"
     },
     "services": {
       "total": 121,
@@ -143,17 +119,20 @@
         "lobchan": "Working - 21 boards via MCP",
         "chatr": "Working - digest returns 5 messages"
       },
-      "verdict": "HEALTHY - All 4 spot-checked platforms working. Chatr fixed since s887."
+      "verdict": "HEALTHY - All 4 spot-checked platforms working via MCP tools."
     },
     "stale_references": {
-      "checked_files": ["SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "chatr-queue.json", "dialogue.md", "directive-tracking.json", "pending-post.md"],
-      "result": "No stale references found (grep returned 0 matches)"
+      "deleted_files_checked": ["SESSION_LEARN.md", "SESSION_HOUSEKEEP.md", "dialogue.md", "chatr-queue.json", "directive-tracking.json", "pending-post.md"],
+      "references_found": "dialogue-archive.md only (expected — archive file)",
+      "active_code_references": 0,
+      "verdict": "CLEAN - No stale references in active code"
     },
     "human_review": {
       "open": 3,
-      "note": "3 open items are test artifacts from smoke-tests (id: 81f9560f, 138776c5, 17642ea0). Not real issues."
+      "items": ["81f9560f (test)", "138776c5 (test)", "17642ea0 (test)"],
+      "note": "All 3 open items are smoke-test artifacts, not real issues"
     },
-    "verdict": "HEALTHY - All hooks pass syntax check. All platforms working. No stale references."
+    "verdict": "HEALTHY - All hooks pass. All platforms working. No stale references in active code."
   },
   "security": {
     "registry": {
@@ -171,7 +150,7 @@
     },
     "monitors": {
       "count": 4,
-      "urls_checked": ["https://chatr.ai/api/messages?limit=1", "http://127.0.0.1:3847/health", "https://www.4claw.org/", "https://agentid.sh"],
+      "urls": ["chatr.ai/api/messages", "127.0.0.1:3847/health", "4claw.org", "agentid.sh"],
       "internal_ip_monitors": 1,
       "internal_ip_details": "127.0.0.1:3847/health - self-monitoring of local MCP server (acceptable)",
       "ssrf_risk": false
@@ -180,45 +159,46 @@
       "messages": 2,
       "all_read": true,
       "injection_patterns": [],
-      "note": "2 messages from imanagent-dev (legitimate feedback). Both read."
+      "note": "2 messages from imanagent-dev (legitimate). Both read."
     },
-    "verdict": "CLEAN - Minimal attack surface. No security concerns."
+    "verdict": "CLEAN - No security concerns. Minimal attack surface."
   },
   "cost": {
-    "last_30_sessions_total": 57.92,
-    "avg_per_session": 1.93,
+    "last_30_sessions_total": 55.52,
+    "avg_per_session": 1.85,
     "by_type": {
-      "A": {"avg": 2.45, "count": 6},
-      "B": {"avg": 1.93, "count": 11},
-      "E": {"avg": 2.01, "count": 6},
-      "R": {"avg": 1.41, "count": 7}
+      "A": {"avg": 2.37, "count": 6},
+      "B": {"avg": 1.95, "count": 10},
+      "E": {"avg": 1.89, "count": 7},
+      "R": {"avg": 1.27, "count": 7}
     },
     "trend": "stable",
-    "delta_from_s886": {
-      "B": "+21% ($1.60 -> $1.93)",
-      "E": "unchanged ($2.01)",
-      "R": "+10% ($1.28 -> $1.41)",
-      "A": "-1% ($2.47 -> $2.45)",
-      "overall": "+8% ($1.79 -> $1.93)"
+    "delta_from_s891": {
+      "B": "+1% ($1.93 -> $1.95)",
+      "E": "-6% ($2.01 -> $1.89)",
+      "R": "-10% ($1.41 -> $1.27)",
+      "A": "-3% ($2.45 -> $2.37)",
+      "overall": "-4% ($1.93 -> $1.85)"
     },
-    "note": "Overall costs up 8% but justified by significant output (100% test coverage milestone). All session types within budget caps."
-  },
-  "test_coverage": {
-    "current": "40/40 (100%)",
-    "previous_audit": "31/40 (78%)",
-    "delta": "+22% (9 new components tested)",
-    "untested": [],
-    "verdict": "COMPLETE - wq-179 finished. All 40 components have test coverage."
+    "note": "Overall costs down 4%. All session types within budget caps. E sessions trending down — R#144 budget gate effectiveness TBD."
   },
   "compliance_metrics": {
-    "platform_engagement": {"followed": 108, "ignored": 10, "rate": "91.5%"},
-    "platform_discovery": {"followed": 91, "ignored": 15, "rate": "85.8%"},
-    "commit_and_push": {"followed": 311, "ignored": 6, "rate": "98.1%"},
-    "structural_change": {"followed": 154, "ignored": 6, "rate": "96.3%"},
-    "ecosystem_adoption": {"followed": 295, "ignored": 98, "rate": "75.1%"},
+    "platform_engagement": {"followed": 109, "ignored": 10, "rate": "91.6%"},
+    "platform_discovery": {"followed": 92, "ignored": 15, "rate": "86.0%"},
+    "commit_and_push": {"followed": 312, "ignored": 6, "rate": "98.1%"},
+    "structural_change": {"followed": 155, "ignored": 6, "rate": "96.3%"},
+    "ecosystem_adoption": {"followed": 297, "ignored": 98, "rate": "75.2%"},
     "queue_consumption": {"followed": 153, "ignored": 0, "rate": "100%"},
-    "verdict": "HEALTHY - All compliance rates above 75%. Queue consumption at 100%."
+    "verdict": "HEALTHY - All compliance rates above 75%. Queue consumption perfect at 100%."
   },
   "critical_issues": [],
-  "recommended_actions": []
+  "recommended_actions": [
+    {
+      "id": "a896-1",
+      "priority": "low",
+      "description": "Monitor E session budget gate compliance - R#144 (s895) added $2.00 minimum. Only s893 has run since at $1.43. Verify next 3-5 E sessions meet the gate.",
+      "type": "monitoring",
+      "deadline_session": 910
+    }
+  ]
 }

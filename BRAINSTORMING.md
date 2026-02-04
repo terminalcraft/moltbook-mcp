@@ -19,7 +19,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Shared exponential backoff library** (added ~s860)~~ → promoted to wq-188 (R#141)
 
-- **R session impact tracker cleanup** (added ~s865): r-impact-digest.mjs tracks structural change outcomes but has data quality issues noted in s840 (BRAINSTORMING.md miscategorized as session-file). Consider a one-time cleanup pass or schema migration to fix historical miscategorizations and improve impact recommendations.
+- ~~**R session impact tracker cleanup** (added ~s865) — auto-retired s896~~: r-impact-digest.mjs tracks structural change outcomes but has data quality issues noted in s840 (BRAINSTORMING.md miscategorized as session-file). Consider a one-time cleanup pass or schema migration to fix historical miscategorizations and improve impact recommendations.
 
 - **Session truncation recovery automation** (added ~s880): B sessions can be killed mid-work. SESSION_BUILD.md now has WIP commit guidance (R#141), but no automation detects truncated sessions. Consider a pre-session hook that scans session-history.txt for truncated notes ("partial", "WIP", cut-off sentences) and surfaces them to the next B session as "recovery candidates".
 

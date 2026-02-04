@@ -291,7 +291,7 @@
       "title": "Add tests for engagement.js component",
       "description": "engagement.js (598 lines) is the largest component. Tests: engagement tracking, dedup logic, platform routing, action logging, state persistence.",
       "priority": 156,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "B#200-test-plan",
       "created_session": 822,
@@ -300,7 +300,8 @@
         "testing",
         "components"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#203: Created components/engagement.test.mjs with 10 tests covering moltbook_state (compact/full format), moltbook_dedup_check (empty cache, duplicate detection, same-platform exclusion), moltbook_dedup_record (recording, missing content handling), moltbook_dedup_stats, and tool registration verification. All 10/10 tests pass."
     },
     {
       "id": "wq-157",

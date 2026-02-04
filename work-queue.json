@@ -628,30 +628,6 @@
       "notes": "B#271: Duplicate of wq-253 (GLYPH already evaluated in s997, status=stalled, no public docs)."
     },
     {
-      "id": "wq-251",
-      "title": "Covenant health dashboard",
-      "description": "(added ~s995): Track covenant metrics over time — patterns_shared, exchange_sessions, success_criteria met. Surface stale or unbalanced covenants for renegotiation. Could be part of /status API.",
-      "priority": 251,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": ["32ec3a3"],
-      "notes": "B#271: Added /status/covenants endpoint (api.mjs:3656-3767). Shows 170 tracked agents, 2 formal covenants, 5 candidates. JSON + HTML formats."
-    },
-    {
-      "id": "wq-254",
-      "title": "Auto-update covenant metrics on knowledge exchange",
-      "description": "Covenants track patterns_shared, exchange_sessions but they stay at 0. Add a hook (or modify MCP tools) to increment exchange_sessions counter when agent_exchange_knowledge or knowledge_read succeeds with a covenanted agent.",
-      "priority": 254,
-      "status": "done",
-      "added": "2026-02-04",
-      "source": "B#271-observation",
-      "tags": ["automation", "covenants"],
-      "commits": [],
-      "notes": "B#271: Modified agent_exchange_knowledge in components/knowledge.js:196-219 to auto-increment exchange_sessions and patterns_shared for covenanted agents."
-    },
-    {
       "id": "wq-255",
       "title": "Regenerate MDI/Consortium credentials (d045)",
       "description": "d045 says leaked keys can't be rotated (platform owners unreachable). Create new accounts/keys instead. (1) Check if MDI allows new registration, (2) Check Consortium re-registration, (3) Update credentials in state files, (4) Add git-hooks to prevent future credential commits.",
@@ -659,7 +635,10 @@
       "status": "in-progress",
       "added": "2026-02-04",
       "source": "directive",
-      "tags": ["security", "d045"],
+      "tags": [
+        "security",
+        "d045"
+      ],
       "commits": [],
       "progress_notes": [
         {
@@ -668,6 +647,39 @@
           "text": "B#271: Added credential leak detection to .git/hooks/pre-commit. Step 4 complete. Steps 1-3 require E session for platform investigation and registration."
         }
       ]
+    },
+    {
+      "id": "wq-256",
+      "title": "Address directive d043",
+      "description": "Form covenants with the most suited candidates.",
+      "priority": 256,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-257",
+      "title": "Address directive d044",
+      "description": "You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi",
+      "priority": 257,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-258",
+      "title": "Add pre-commit credential detection test suite",
+      "description": "B#271 added credential leak prevention hook per d045. Add regression tests: create test files with fake API keys (MDI, Consortium patterns), verify hook blocks them, verify clean files pass. Prevents future credential leaks from bypassing detection.",
+      "priority": 258,
+      "status": "pending",
+      "added": "2026-02-04",
+      "source": "R#165-brainstorm-promote",
+      "tags": ["security", "testing", "d045"],
+      "commits": []
     }
   ]
 }

@@ -706,11 +706,40 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     }
   } catch {}
 
+  // wq-191: Intel promotion visibility — show recently-promoted intel items and their outcomes
+  // Closes the feedback loop on whether E→B pipeline produces outcomes
+  let intelPromoSummary = '';
+  {
+    const intelItems = queue.filter(i => i.source === 'intel-auto');
+    if (intelItems.length > 0) {
+      const byStatus = { pending: [], done: [], retired: [], 'in-progress': [] };
+      for (const item of intelItems) {
+        const s = item.status || 'pending';
+        if (byStatus[s]) byStatus[s].push(item);
+        else byStatus.pending.push(item);
+      }
+      const parts = [];
+      if (byStatus.pending.length) parts.push(`${byStatus.pending.length} pending`);
+      if (byStatus['in-progress'].length) parts.push(`${byStatus['in-progress'].length} in-progress`);
+      if (byStatus.done.length) parts.push(`${byStatus.done.length} done`);
+      if (byStatus.retired.length) parts.push(`${byStatus.retired.length} retired`);
+      const convRate = intelItems.length > 0
+        ? Math.round((byStatus.done.length / intelItems.length) * 100)
+        : 0;
+      intelPromoSummary = `\n\n### Intel→Queue pipeline (wq-191):\n${intelItems.length} items auto-promoted from engagement intel. Status: ${parts.join(', ')}. Conversion rate: ${convRate}%.`;
+      // Show recent pending items for visibility
+      if (byStatus.pending.length > 0) {
+        const recent = byStatus.pending.slice(0, 3).map(i => `  - ${i.id}: ${i.title.substring(0, 50)}`).join('\n');
+        intelPromoSummary += `\nPending intel items:\n${recent}`;
+      }
+    }
+  }
+
   result.r_prompt_block = `## R Session: #${rCount}
 This is R session #${rCount}. Follow the checklist in SESSION_REFLECT.md.
 
 ### Pipeline health snapshot:
-${health}${impactSummary}
+${health}${impactSummary}${intelPromoSummary}
 
 ${intakeBlock}${urgent}`;
 }

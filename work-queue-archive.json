@@ -5458,6 +5458,34 @@
       "tags": [],
       "commits": [],
       "notes": "B#230: Already implemented! /status/circuits endpoint exists at api.mjs:2720, added for wq-126/d027. Returns JSON with summary (total, open, half-open, closed, health) and per-platform circuit state. Also supports ?format=html for dashboard view."
+    },
+    {
+      "id": "wq-191",
+      "title": "Intel promotion visibility",
+      "description": "(added ~s885): R#140 added auto-promotion from engagement-intel to work-queue, but there's no way to see what got promoted. Consider a `/status/intel-promotions` endpoint or a section in the R session prompt showing recently-promoted items (source=intel-auto). This would close the feedback loop on whether E\u2192B pipeline produces outcomes.",
+      "priority": 191,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "started": "2026-02-04",
+      "completed": "2026-02-04",
+      "notes": "B#231: Added intel promotion visibility to R session prompt block. Shows E\u2192B pipeline stats inline. /status/intel-promotions endpoint already existed."
+    },
+    {
+      "id": "wq-194",
+      "title": "Clean up BRAINSTORMING.md duplicates",
+      "description": "Remove duplicate 'Generate 5 concrete build tasks from open directives' entries in BRAINSTORMING.md. Also verify brainstorm count stays >=3.",
+      "priority": 194,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "session",
+      "tags": [],
+      "complexity": "S",
+      "commits": [],
+      "started": "2026-02-04",
+      "completed": "2026-02-04"
     }
   ]
 }

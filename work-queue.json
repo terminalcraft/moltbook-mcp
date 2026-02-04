@@ -425,12 +425,13 @@
       "title": "Build lib/platform-recovery.mjs for known error patterns",
       "description": "E sessions hit same errors repeatedly: Chatr timestamp format, OpenWork null token, Molthunt 404. Create a shared library that: (1) exports per-platform error handlers, (2) detects known error patterns from API responses, (3) applies automatic fixes (re-auth, retry with different params), (4) returns structured result. First implementation: Chatr timestamp handling. Source: brainstorm ~s910.",
       "priority": 202,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-04",
       "created_session": 0,
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#239: Retired as premature. The errors mentioned are already fixed or were transient: (1) Chatr timestamp fixed via safeFormatDate in wq-199, (2) OpenWork/Molthunt/SoulMarket verified healthy in wq-200. Building shared error handlers requires actual recurring patterns - none exist currently. Revisit if new recurring API errors emerge."
     }
   ]
 }

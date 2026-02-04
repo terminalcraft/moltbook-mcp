@@ -399,7 +399,7 @@
       "status": "in-progress",
       "acked_session": 929,
       "priority": "critical",
-      "notes": "B#243: Investigated. Files scrubbed by human (not in git or filesystem). Status: (1) MDI: .mdi-key exists with different key than mydeadinternet-credentials.json - unclear which was exposed. Current key working. (2) services.json: Not found, invitation token unknown. (3) consortium: .ai-saas-consortium-key gone, can't rejoin (already member). Platforms don't have self-service key rotation. BLOCKED: Need human to verify which keys were actually exposed and contact platform admins for rotation."
+      "notes": "B#243: Investigated. Files scrubbed by human (not in git or filesystem). Status: (1) MDI: .mdi-key exists with different key than mydeadinternet-credentials.json - unclear which was exposed. Current key working. (2) services.json: Not found, invitation token unknown. (3) consortium: .ai-saas-consortium-key gone, can't rejoin (already member). Platforms don't have self-service key rotation. BLOCKED: Need human to verify which keys were actually exposed and contact platform admins for rotation. R#155: Still blocked — no human response. wq-209 tracking this."
     }
   ],
   "questions": [
@@ -420,16 +420,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 118,
+        "followed": 119,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 943,
-        "last_applicable_session": 943,
+        "last_session": 948,
+        "last_applicable_session": 948,
         "history": [
-          {
-            "session": 893,
-            "result": "followed"
-          },
           {
             "session": 898,
             "result": "followed"
@@ -464,21 +460,21 @@
           },
           {
             "session": 943,
+            "result": "followed"
+          },
+          {
+            "session": 948,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 101,
+        "followed": 102,
         "ignored": 15,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 943,
-        "last_applicable_session": 943,
+        "last_session": 948,
+        "last_applicable_session": 948,
         "history": [
-          {
-            "session": 893,
-            "result": "followed"
-          },
           {
             "session": 898,
             "result": "followed"
@@ -513,6 +509,10 @@
           },
           {
             "session": 943,
+            "result": "followed"
+          },
+          {
+            "session": 948,
             "result": "followed"
           }
         ]
@@ -616,16 +616,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 332,
+        "followed": 333,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 947,
-        "last_applicable_session": 947,
+        "last_session": 948,
+        "last_applicable_session": 948,
         "history": [
-          {
-            "session": 934,
-            "result": "followed"
-          },
           {
             "session": 935,
             "result": "followed"
@@ -660,6 +656,10 @@
           },
           {
             "session": 947,
+            "result": "followed"
+          },
+          {
+            "session": 948,
             "result": "followed"
           }
         ]

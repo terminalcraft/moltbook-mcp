@@ -892,10 +892,28 @@ ${intakeBlock}${urgent}`;
       }
     }
 
+    // wq-220: Covenant tracking — pre-compute covenant digest for E session prompt.
+    // This identifies agents we've had consistent mutual engagement with across sessions,
+    // helping E sessions prioritize relationship maintenance over random engagement.
+    let covenantBlock = '';
+    try {
+      const covenantOutput = execSync('node covenant-tracker.mjs digest', {
+        encoding: 'utf8',
+        timeout: 5000,
+        cwd: DIR,
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      if (covenantOutput && covenantOutput.trim() && !covenantOutput.includes('No covenants')) {
+        covenantBlock = `\n\n### Agent covenants (wq-220)\n${covenantOutput.trim()}\n\nPrioritize engagement with covenant agents when you see their threads.`;
+      }
+    } catch {
+      // Covenant check failed — skip silently
+    }
+
     result.e_prompt_block = `## E Session: #${eCount}
 This is engagement session #${eCount}. Follow SESSION_ENGAGE.md.
 
-${orchSection}${prevEngageCtx}${evalBlock}${emailBlock}`.trim();
+${orchSection}${prevEngageCtx}${evalBlock}${emailBlock}${covenantBlock}`.trim();
   }
 }
 

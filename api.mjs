@@ -8120,8 +8120,50 @@ ${sections.map(s => `<div class="section">
 
 // --- Agent Inbox (async messaging) ---
 const INBOX_FILE = join(BASE, "inbox.json");
+const INBOX_ARCHIVE_FILE = join(BASE, "inbox-archive.json");
 function loadInbox() { try { return JSON.parse(readFileSync(INBOX_FILE, "utf-8")); } catch { return []; } }
 function saveInbox(msgs) { writeFileSync(INBOX_FILE, JSON.stringify(msgs.slice(-200), null, 2)); }
+function loadInboxArchive() { try { return JSON.parse(readFileSync(INBOX_ARCHIVE_FILE, "utf-8")); } catch { return []; } }
+function saveInboxArchive(msgs) { writeFileSync(INBOX_ARCHIVE_FILE, JSON.stringify(msgs.slice(-500), null, 2)); }
+
+// Message type detection: "notification" vs "conversation"
+const NOTIFICATION_SENDERS = ["code-watch", "system", "monitor", "webhook", "cron", "status"];
+const NOTIFICATION_SUBJECT_PATTERNS = [
+  /code pushed/i, /status update/i, /monitor alert/i, /watch:/i, /review request/i,
+  /uptime/i, /health check/i, /cron:/i, /scheduled/i, /webhook:/i, /auto-/i
+];
+function detectMessageType(from, subject) {
+  // Known notification senders
+  if (NOTIFICATION_SENDERS.includes(from?.toLowerCase())) return "notification";
+  // Subject patterns that indicate notifications
+  if (subject && NOTIFICATION_SUBJECT_PATTERNS.some(p => p.test(subject))) return "notification";
+  // Default to conversation (agent-to-agent messages)
+  return "conversation";
+}
+
+// Auto-archive notifications older than 7 days
+function archiveOldNotifications() {
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const msgs = loadInbox();
+  const archive = loadInboxArchive();
+  const toArchive = [];
+  const toKeep = [];
+  for (const m of msgs) {
+    const age = now - new Date(m.timestamp).getTime();
+    const type = m.type || detectMessageType(m.from, m.subject);
+    if (type === "notification" && age > SEVEN_DAYS_MS) {
+      toArchive.push({ ...m, type, archivedAt: new Date().toISOString() });
+    } else {
+      toKeep.push(m);
+    }
+  }
+  if (toArchive.length > 0) {
+    saveInbox(toKeep);
+    saveInboxArchive([...archive, ...toArchive]);
+  }
+  return { archived: toArchive.length, remaining: toKeep.length };
+}
 
 // Public: send a message to any agent hosted here
 app.post("/inbox", (req, res) => {
@@ -8135,6 +8177,7 @@ app.post("/inbox", (req, res) => {
   const sanitize = (s) => s ? s.replace(INJECTION_RE, "[FILTERED]") : s;
   const cleanBody = sanitize(body);
   const cleanSubject = subject ? sanitize(subject) : subject;
+  const msgType = detectMessageType(from, cleanSubject);
   const msg = {
     id: crypto.randomUUID(),
     from: from.slice(0, 100),
@@ -8143,6 +8186,7 @@ app.post("/inbox", (req, res) => {
     body: cleanBody.slice(0, 2000),
     timestamp: new Date().toISOString(),
     read: false,
+    type: msgType,
   };
   const msgs = loadInbox();
   msgs.push(msg);
@@ -8155,22 +8199,34 @@ app.post("/inbox", (req, res) => {
 app.get("/inbox/stats", (req, res) => {
   const msgs = loadInbox();
   const unread = msgs.filter(m => !m.read).length;
-  res.json({ total: msgs.length, unread, accepting: true, max_body: 2000 });
+  // Count by type (backfill type for old messages)
+  const withType = msgs.map(m => ({ ...m, type: m.type || detectMessageType(m.from, m.subject) }));
+  const notifications = withType.filter(m => m.type === "notification").length;
+  const conversations = withType.filter(m => m.type === "conversation").length;
+  res.json({ total: msgs.length, unread, notifications, conversations, accepting: true, max_body: 2000 });
 });
 
-// Auth: check inbox
+// Auth: check inbox (supports ?type=notification|conversation filter)
 app.get("/inbox", auth, (req, res) => {
-  const msgs = loadInbox();
+  let msgs = loadInbox();
+  // Backfill type for old messages
+  msgs = msgs.map(m => ({ ...m, type: m.type || detectMessageType(m.from, m.subject) }));
+  // Filter by type if requested
+  const typeFilter = req.query.type;
+  if (typeFilter && ["notification", "conversation"].includes(typeFilter)) {
+    msgs = msgs.filter(m => m.type === typeFilter);
+  }
   const unread = msgs.filter(m => !m.read);
   if (req.query.format === "text") {
     if (msgs.length === 0) return res.type("text/plain").send("Inbox empty.");
-    const lines = [`Inbox: ${msgs.length} messages (${unread.length} unread)`, ""];
+    const lines = [`Inbox: ${msgs.length} messages (${unread.length} unread)${typeFilter ? ` [${typeFilter}]` : ""}`, ""];
     for (const m of msgs.slice(-20).reverse()) {
-      lines.push(`${m.read ? " " : "*"} [${m.id.slice(0,8)}] ${m.timestamp.slice(0,16)} from:${m.from}${m.subject ? ` — ${m.subject}` : ""}`);
+      const typeTag = m.type === "notification" ? "[N]" : "[C]";
+      lines.push(`${m.read ? " " : "*"} ${typeTag} [${m.id.slice(0,8)}] ${m.timestamp.slice(0,16)} from:${m.from}${m.subject ? ` — ${m.subject}` : ""}`);
     }
     return res.type("text/plain").send(lines.join("\n"));
   }
-  res.json({ total: msgs.length, unread: unread.length, messages: msgs.slice(-50).reverse() });
+  res.json({ total: msgs.length, unread: unread.length, type_filter: typeFilter || null, messages: msgs.slice(-50).reverse() });
 });
 
 // Auth: get specific message (marks as read)
@@ -8191,6 +8247,26 @@ app.delete("/inbox/:id", auth, (req, res) => {
   if (msgs.length === before) return res.status(404).json({ error: "not found" });
   saveInbox(msgs);
   res.json({ ok: true, remaining: msgs.length });
+});
+
+// Auth: manually trigger archive of old notifications
+app.post("/inbox/archive", auth, (req, res) => {
+  const result = archiveOldNotifications();
+  res.json({ ok: true, ...result });
+});
+
+// Auth: view archived messages
+app.get("/inbox/archive", auth, (req, res) => {
+  const archive = loadInboxArchive();
+  if (req.query.format === "text") {
+    if (archive.length === 0) return res.type("text/plain").send("Archive empty.");
+    const lines = [`Archive: ${archive.length} messages`, ""];
+    for (const m of archive.slice(-20).reverse()) {
+      lines.push(`[${m.id.slice(0,8)}] ${m.timestamp.slice(0,16)} from:${m.from}${m.subject ? ` — ${m.subject}` : ""} (archived: ${m.archivedAt?.slice(0,10) || "?"})`);
+    }
+    return res.type("text/plain").send(lines.join("\n"));
+  }
+  res.json({ total: archive.length, messages: archive.slice(-50).reverse() });
 });
 
 // --- Code Watch System (push-based code review notifications) ---

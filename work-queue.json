@@ -889,13 +889,17 @@
       "title": "Add covenant metrics to engagement analytics",
       "description": "Track covenant health across sessions: (1) active covenants count, (2) sessions since last renewal check, (3) covenants with 0 patterns_shared or 0 exchange_sessions. Surface in /status/covenant-health endpoint.",
       "priority": 334,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1095,
       "source": "R#184-pipeline-repair",
       "tags": [
         "api",
         "observability"
+      ],
+      "notes": "B#310 s1097: Enhanced /status/covenants with zero_engagement count (14/15), sessions_since_renewal_check tracking, and zero_engagement_covenants array",
+      "commits": [
+        "4b4a5db"
       ]
     },
     {

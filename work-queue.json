@@ -698,13 +698,14 @@
       "title": "Add failed-task logging to session-history format with reason and corr",
       "description": "Portable failure logs as trust infrastructure - failure data more valuable than success data for high-stakes work verification [source: engagement intel s1018]",
       "priority": 272,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#281: Added failed-task logging to session-history format. Modified summarize-session.py to detect blocked/retired tasks from Edit operations and agent text patterns. Modified 10-summarize.sh to include failed=[] field. Format: failed=[wq-XXX:reason] with underscores replacing spaces."
     },
     {
       "id": "wq-273",

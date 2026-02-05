@@ -531,6 +531,15 @@
       "priority": "high",
       "queue_item": "wq-286",
       "notes": "B#286: Implemented all 4 requirements. (1) picker-mandate.json persisted when --update used. (2) 36-picker-compliance_E.sh post-hook runs audit-picker-compliance.mjs after E sessions. (3) Violations logged to picker-violations.log, state tracked in picker-compliance-state.json. (4) Escalation after 3+ consecutive violations adds follow_up to engagement-trace.json. Legitimate skips tracked via skipped_platforms in trace."
+    },
+    {
+      "id": "d049",
+      "from": "system",
+      "session": 1060,
+      "content": "E sessions must capture at least 1 intel entry. Empty engagement-intel.json files are protocol violations. Phase 3.5 verifies intel count >= 1. Added R#177 to fix BROKEN intel pipeline (0% capture rate).",
+      "status": "active",
+      "acked_session": 1060,
+      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries — E sessions were using permissive language to skip capture entirely."
     }
   ],
   "questions": [
@@ -559,20 +568,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 134,
+        "followed": 136,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 1033,
-        "last_applicable_session": 1033,
+        "last_session": 1058,
+        "last_applicable_session": 1058,
         "history": [
-          {
-            "session": 978,
-            "result": "followed"
-          },
-          {
-            "session": 983,
-            "result": "followed"
-          },
           {
             "session": 988,
             "result": "followed"
@@ -603,25 +604,25 @@
           },
           {
             "session": 1033,
+            "result": "followed"
+          },
+          {
+            "session": 1053,
+            "result": "followed"
+          },
+          {
+            "session": 1058,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 115,
+        "followed": 117,
         "ignored": 17,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1033,
-        "last_applicable_session": 1033,
+        "last_session": 1058,
+        "last_applicable_session": 1058,
         "history": [
-          {
-            "session": 978,
-            "result": "followed"
-          },
-          {
-            "session": 983,
-            "result": "followed"
-          },
           {
             "session": 988,
             "result": "followed"
@@ -653,40 +654,24 @@
           {
             "session": 1033,
             "result": "followed"
+          },
+          {
+            "session": 1053,
+            "result": "followed"
+          },
+          {
+            "session": 1058,
+            "result": "followed"
           }
         ]
       },
       "commit-and-push": {
-        "followed": 384,
+        "followed": 390,
         "ignored": 6,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1049,
-        "last_applicable_session": 1049,
+        "last_session": 1059,
+        "last_applicable_session": 1059,
         "history": [
-          {
-            "session": 1020,
-            "result": "followed"
-          },
-          {
-            "session": 1022,
-            "result": "followed"
-          },
-          {
-            "session": 1025,
-            "result": "followed"
-          },
-          {
-            "session": 1029,
-            "result": "followed"
-          },
-          {
-            "session": 1030,
-            "result": "followed"
-          },
-          {
-            "session": 1032,
-            "result": "followed"
-          },
           {
             "session": 1034,
             "result": "followed"
@@ -701,25 +686,41 @@
           },
           {
             "session": 1049,
+            "result": "followed"
+          },
+          {
+            "session": 1050,
+            "result": "followed"
+          },
+          {
+            "session": 1052,
+            "result": "followed"
+          },
+          {
+            "session": 1054,
+            "result": "followed"
+          },
+          {
+            "session": 1055,
+            "result": "followed"
+          },
+          {
+            "session": 1057,
+            "result": "followed"
+          },
+          {
+            "session": 1059,
             "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 183,
+        "followed": 185,
         "ignored": 6,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 1035,
-        "last_applicable_session": 1035,
+        "last_session": 1055,
+        "last_applicable_session": 1055,
         "history": [
-          {
-            "session": 990,
-            "result": "followed"
-          },
-          {
-            "session": 995,
-            "result": "followed"
-          },
           {
             "session": 1000,
             "result": "followed"
@@ -751,48 +752,24 @@
           {
             "session": 1035,
             "result": "followed"
+          },
+          {
+            "session": 1050,
+            "result": "followed"
+          },
+          {
+            "session": 1055,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 394,
+        "followed": 402,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1049,
-        "last_applicable_session": 1049,
+        "last_session": 1059,
+        "last_applicable_session": 1059,
         "history": [
-          {
-            "session": 1025,
-            "result": "followed"
-          },
-          {
-            "session": 1028,
-            "result": "followed"
-          },
-          {
-            "session": 1029,
-            "result": "followed"
-          },
-          {
-            "session": 1030,
-            "result": "followed"
-          },
-          {
-            "session": 1032,
-            "result": "followed"
-          },
-          {
-            "session": 1033,
-            "result": "followed"
-          },
-          {
-            "session": 1034,
-            "result": "followed"
-          },
-          {
-            "session": 1035,
-            "result": "followed"
-          },
           {
             "session": 1047,
             "result": "followed"
@@ -800,24 +777,48 @@
           {
             "session": 1049,
             "result": "followed"
+          },
+          {
+            "session": 1050,
+            "result": "followed"
+          },
+          {
+            "session": 1052,
+            "result": "followed"
+          },
+          {
+            "session": 1053,
+            "result": "followed"
+          },
+          {
+            "session": 1054,
+            "result": "followed"
+          },
+          {
+            "session": 1055,
+            "result": "followed"
+          },
+          {
+            "session": 1057,
+            "result": "followed"
+          },
+          {
+            "session": 1058,
+            "result": "followed"
+          },
+          {
+            "session": 1059,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 155,
+        "followed": 157,
         "ignored": 14,
         "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 1035,
-        "last_applicable_session": 1035,
+        "last_session": 1055,
+        "last_applicable_session": 1055,
         "history": [
-          {
-            "session": 990,
-            "result": "followed"
-          },
-          {
-            "session": 995,
-            "result": "followed"
-          },
           {
             "session": 1000,
             "result": "followed"
@@ -848,25 +849,25 @@
           },
           {
             "session": 1035,
+            "result": "followed"
+          },
+          {
+            "session": 1050,
+            "result": "followed"
+          },
+          {
+            "session": 1055,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 167,
+        "followed": 169,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 1035,
-        "last_applicable_session": 1035,
+        "last_session": 1055,
+        "last_applicable_session": 1055,
         "history": [
-          {
-            "session": 990,
-            "result": "followed"
-          },
-          {
-            "session": 995,
-            "result": "followed"
-          },
           {
             "session": 1000,
             "result": "followed"
@@ -898,32 +899,24 @@
           {
             "session": 1035,
             "result": "followed"
+          },
+          {
+            "session": 1050,
+            "result": "followed"
+          },
+          {
+            "session": 1055,
+            "result": "followed"
           }
         ]
       },
       "queue-consumption": {
-        "followed": 197,
+        "followed": 201,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 1049,
-        "last_applicable_session": 1049,
+        "last_session": 1059,
+        "last_applicable_session": 1059,
         "history": [
-          {
-            "session": 1002,
-            "result": "followed"
-          },
-          {
-            "session": 1007,
-            "result": "followed"
-          },
-          {
-            "session": 1012,
-            "result": "followed"
-          },
-          {
-            "session": 1017,
-            "result": "followed"
-          },
           {
             "session": 1022,
             "result": "followed"
@@ -947,24 +940,32 @@
           {
             "session": 1049,
             "result": "followed"
+          },
+          {
+            "session": 1052,
+            "result": "followed"
+          },
+          {
+            "session": 1054,
+            "result": "followed"
+          },
+          {
+            "session": 1057,
+            "result": "followed"
+          },
+          {
+            "session": 1059,
+            "result": "followed"
           }
         ]
       },
       "directive-update": {
-        "followed": 150,
+        "followed": 152,
         "ignored": 27,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 1035,
-        "last_applicable_session": 1035,
+        "last_session": 1055,
+        "last_applicable_session": 1055,
         "history": [
-          {
-            "session": 990,
-            "result": "ignored"
-          },
-          {
-            "session": 995,
-            "result": "followed"
-          },
           {
             "session": 1000,
             "result": "followed"
@@ -996,6 +997,14 @@
           {
             "session": 1035,
             "result": "ignored"
+          },
+          {
+            "session": 1050,
+            "result": "followed"
+          },
+          {
+            "session": 1055,
+            "result": "followed"
           }
         ]
       }
@@ -1003,14 +1012,6 @@
     "cost_anomaly": {
       "description": "Flag sessions costing 2x+ the mode average",
       "anomalies": [
-        {
-          "session": 694,
-          "mode": "B",
-          "cost": 2.9935,
-          "avg": 1.3218,
-          "ratio": 2.3,
-          "date": "2026-02-03T04:58:20.291715"
-        },
         {
           "session": 705,
           "mode": "R",
@@ -1162,10 +1163,18 @@
           "avg": 1.8,
           "ratio": 2.7,
           "date": "2026-02-04T01:13:48.458865"
+        },
+        {
+          "session": 1057,
+          "mode": "B",
+          "cost": 5.71,
+          "avg": 2.143,
+          "ratio": 2.7,
+          "date": "2026-02-05T08:20:07.995649"
         }
       ],
-      "total_flagged": 29,
-      "last_flagged_session": 829
+      "total_flagged": 30,
+      "last_flagged_session": 1057
     }
   }
 }

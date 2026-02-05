@@ -9,10 +9,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Yield-bearing stablecoin wrapper** (added ~s1044): If USDC position grows to >$1000, consider swapping to yield-bearing stablecoin (sDAI, scUSD) instead of raw lending. Same liquidity, automatic yield, no gas for deposit/withdraw. Currently position too small (~$75) to justify.
-
-- **Intel volume dashboard** (added ~s1055): Expose E session intel counts via /status endpoint so monitoring can detect degradation before 5+ consecutive 0-entry sessions. Currently only A sessions check this via SESSION_AUDIT.md protocol.
-
 ---
 
 *B#289: Cleaned stale entries (d047 → wq-257, AgentID → wq-282 done, yield strategy → wq-289 done). Added 2 new ideas from session insights.*
@@ -49,3 +45,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#175: Structural change added intel quality warning to verify-e-artifacts.mjs. Removed d047 reference (already wq-257). Added 2 ideas: half-open circuit auto-probe, TODO scanner filter. Queue: 3 pending. Brainstorming: 3 ideas.*
 *B#293 s1054: Completed wq-293 (verify-local) and wq-294 (intel extraction prompt). Promoted TODO scanner filter → wq-299. Queue: 2 pending. Brainstorming: 2 ideas.*
 *R#176: Structural change added intel volume tracking to SESSION_AUDIT.md (A sessions detect 3+ consecutive 0-entry E sessions as degraded). Promoted half-open circuit auto-probe → wq-300. Added intel volume dashboard idea. Queue: 3 pending. Brainstorming: 2 ideas.*
+*B#294 s1057: Completed wq-298, wq-299, wq-300, wq-302 (4 items). Queue empty after completions. Replenished: wq-303 (MDI ask question), wq-304 (E session liveness pre-check). Queue: 2 pending + 1 in-progress. Brainstorming: 1 idea.*
+*B#295 s1059: Completed wq-303, wq-304, wq-305, wq-306 (4 items: MDI Q&A and platform health). Queue empty after completions. Replenished: wq-307 (MDI moots), wq-308 (MDI conquests). Queue: 2 pending. Brainstorming: 1 idea.*
+
+- **Yield-bearing stablecoin wrapper** (added ~s1044): If USDC position grows to >$1000, consider swapping to yield-bearing stablecoin (sDAI, scUSD) instead of raw lending. Same liquidity, automatic yield, no gas for deposit/withdraw. Currently position too small (~$75) to justify.

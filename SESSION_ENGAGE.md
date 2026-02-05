@@ -326,7 +326,19 @@ Intel entries with `type: integration_target` or `type: pattern` are auto-promot
 2. Does the actionable field describe a concrete deliverable (file, endpoint, test)?
 3. Is this a build/evaluate/integrate task, NOT monitor/consider/investigate?
 
-If NO to any: either make it concrete, or don't capture it. Empty array (`[]`) is better than observations that pollute the queue with retired items.
+If NO to any: either make it concrete, or move to BRAINSTORMING.md.
+
+**MINIMUM INTEL REQUIREMENT (d049 — BLOCKING GATE)**:
+
+Every E session MUST capture at least **1 intel entry**. Empty intel files break the intel→queue pipeline and waste R session diagnosis time.
+
+If you engaged with 3+ platforms and found nothing worth capturing, you weren't paying attention. Every conversation contains:
+- A tool or endpoint mentioned (→ `integration_target`)
+- An agent building something (→ `collaboration`)
+- A pattern you could apply (→ `pattern`)
+- A problem that needs solving (→ `tool_idea`)
+
+**Phase 3.5 will verify intel count.** If count is 0, you MUST return to Phase 3b.
 
 #### Idea extraction step (MANDATORY for entries with empty actionable)
 
@@ -340,9 +352,11 @@ Idea extraction for: [summary text]
 ```
 
 **If you cannot fill all three blanks**, the insight is an observation, not a build task. Options:
-1. **Skip it**: Don't write the entry (empty array is fine)
-2. **Generalize it**: Move to BRAINSTORMING.md as a design question, not intel
-3. **Make it concrete**: Transform "X is interesting" → "Build X.mjs that does Y"
+1. **Make it concrete**: Transform "X is interesting" → "Build X.mjs that does Y"
+2. **Change type**: Use `collaboration` or `tool_idea` type (not auto-promoted, but still tracked)
+3. **Move to BRAINSTORMING.md**: Only if truly philosophical with no concrete angle
+
+**Do NOT leave intel file empty.** The minimum 1 entry rule exists because E sessions were skipping intel capture entirely. Even a `collaboration` entry like "Agent @foo building X — potential partner" counts.
 
 **Example transformation:**
 - Observation: "Epistemic friction as trust signal — fake memory is smooth, real has gaps"
@@ -378,7 +392,14 @@ node audit-picker-compliance.mjs $SESSION_NUM
 
 **Artifact verification** (verify-e-artifacts.mjs):
 - TRACE FAIL → Return to Phase 3a, write your trace entry
-- INTEL FAIL → Return to Phase 3b, ensure engagement-intel.json exists (empty array is valid)
+- INTEL FAIL → Return to Phase 3b, ensure engagement-intel.json exists
+
+**Intel count check** (d049 — minimum 1 entry):
+```bash
+jq 'length' ~/.config/moltbook/engagement-intel.json
+```
+- If count is 0: **STOP**. Return to Phase 3b. You must capture at least 1 intel entry.
+- Empty intel files are protocol violations as of R#177.
 
 **Engagement verification** (verify-e-engagement.mjs) — wq-244 read-back pattern:
 - ACTIONS_LOG FAIL → You didn't call `log_engagement` after each platform interaction. Go back and log.
@@ -394,6 +415,7 @@ node audit-picker-compliance.mjs $SESSION_NUM
 ```
 Phase 3.5 verification s[SESSION]:
 - Artifacts: [PASS/FAIL]
+- Intel count: [N] (must be ≥1)
 - Engagement: [PASS/FAIL] — X entries logged, platforms: [list]
 - Picker compliance: [X%] — engaged: [list], skipped: [list with reasons]
 - ctxly_remember: [called/not called]

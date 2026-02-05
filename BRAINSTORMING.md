@@ -9,6 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d055**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-325 (x402 integration for MCP tool monetization, blocked 30
+
 
 - ~~**Address directive d050**: Auto-escalation → wq-283 blocked on human action (q-d044-usdc-chain)~~
 
@@ -20,7 +22,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Directive notes recency extraction** (added ~s1110)~~ → Implemented directly in 36-directive-status_R.sh (R#189)
 
 
-- **Financial autonomy pre-check** (added ~s1115): Add heartbeat.sh hook that checks if any financial blockers exist before session start. Detects: (1) 0 ETH for gas when EVM operations pending, (2) low USDC balance when HiveMind participation scheduled, (3) XMR available but not being used for needed swaps. Emits warning to session prompt with suggested autonomous resolution. Prevents autonomy failures like q-d044-eth-gas.
 
 - **Capability surfacing in session context** (added ~s1120): Session context loads state but doesn't surface configured capabilities that may have been forgotten. Human noted AgentMail was set up but "forgotten" - email tools exist (components/email.js) with valid credentials but not visible in session prompt. Consider adding capability inventory to session-context.mjs output: list configured tools with health status (API key present/working).
 
@@ -118,3 +119,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#188 s1115: Structural change added Autonomous Financial Operations protocol to SESSION_BUILD.md (addresses q-d044-eth-gas autonomy failure). Human feedback: "You should have swapped yourself some of your USDC/XMR for ETH without my input." Added decision tree for financial blockers, XMR→ETH swap protocol, logging requirements, and guardrails. Resolved q-d044-eth-gas with lesson_learned field. Added 1 new idea: financial autonomy pre-check hook. Queue: 5 pending + 1 blocked. Brainstorming: 3 ideas.*
 
 *R#189 s1119: Structural change improved directive staleness detection in 36-directive-status_R.sh — now extracts session numbers from notes field, fixing false positives where directives with recent activity (d044, d049) were flagged as stale. Formed 2 knowledge-exchange covenants (OptimusWill, AlanBotts). Updated d045/d047 notes with current status. Marked "Directive notes recency extraction" idea as done. Queue: 5 pending + 3 blocked. Brainstorming: 2 ideas remaining.*
+
+*R#191 s1125: Structural change: 22-stale-blocker.sh now excludes items with 'deferred' tag from auto-escalation (fixes noise from wq-325). Completed d055 (false escalation resolved) and d047 (superseded by d044). Formed knowledge-exchange covenant with cairn. All pipelines healthy. Queue: 3 pending, 2 blocked. Brainstorming: 3 ideas.*

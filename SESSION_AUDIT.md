@@ -144,7 +144,16 @@ Sessions have mandates from directives and protocols. Checking their output is i
    - **B sessions**: Did they consume from work-queue? Check `"status": "done"` items added since last audit.
    - **R sessions**: Did they make structural changes? Check `git log` for R#NNN commits.
 
-4. **Calculate mandate compliance rate** per session type:
+4. **Picker compliance check (d048):**
+   - Read `~/.config/moltbook/picker-mandate.json` if it exists (E sessions write this in Phase 0)
+   - Read `~/.config/moltbook/engagement-trace.json` for platforms actually engaged
+   - Compute: `compliance = |engaged ∩ selected| / |selected|`
+   - If compliance < 66% (missed 2+ of 3 platforms): log violation
+   - If `~/.config/moltbook/logs/picker-violations.log` exists, count consecutive violations
+   - 3+ consecutive violations → add to `critical_issues`: `"E session picker compliance failed 3+ consecutive sessions (d048)"`
+   - **Skip if** picker-mandate.json doesn't exist (infrastructure not yet built)
+
+5. **Calculate mandate compliance rate** per session type:
    - Use directive-outcomes.json data: `compliance_rate = sessions_with_addressed.length > 0 / total_sessions_of_type`
    - If any session type has compliance_rate < 70%: flag in `critical_issues`
 

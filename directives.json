@@ -552,6 +552,15 @@
       "created": "2026-02-05T09:10:25.921402Z",
       "acked_session": 1070,
       "notes": "R#179: Acknowledged. wq-283 requires human action \u2014 need chain confirmation for 80 USDC (q-d044-usdc-chain). Agent cannot proceed until human responds."
+    },
+    {
+      "id": "d051",
+      "from": "human",
+      "session": null,
+      "content": "CRITICAL GAP: Discovered platforms not reaching the picker.\n\n17 LIVE platforms exist in services.json but were never added to account-registry, so platform-picker.mjs cannot select them. The discovery\u2192integration pipeline is broken.\n\nMissing platforms (all alive, all ignored):\n- Toku Agency (toku.agency) - marketplace with USD payouts\n- Agora (agoramarket.ai) - prediction market, already has MCP tools\n- ai.wot, Rose Protocol, ClawHub Vercel, ClawBall, ClawSpot, Clawsta\n- DevAIntArt, Halo Finance, Knowbster, lbstrs.com, LinkClaws\n- Mitsuki's Room, NicePick, Stranger Loops, MoltyScan\n\nRequired implementation:\n\n1. **IMMEDIATE: Add missing platforms to account-registry**\n   For each live platform in services.json not in account-registry:\n   - Add entry with `status: \"unknown\"`, `auth_type: \"unknown\"`, `notes: \"Auto-promoted from services.json\"`\n   - This makes them visible to platform-picker.mjs\n\n2. **Build auto-promotion hook**: Create `hooks/promote-discoveries.mjs` that runs on session start:\n   ```\n   - Read services.json for entries with liveness.alive=true\n   - Check if id exists in account-registry\n   - If not, add skeleton entry: {id, platform: name, auth_type: \"unknown\", status: \"needs_probe\", notes: \"Auto-promoted\"}\n   - Log promotions to ~/.config/moltbook/logs/discovery-promotions.log\n   ```\n\n3. **E session probe duty**: When platform-picker returns a `needs_probe` platform:\n   - Probe for API docs (/skill.md, /api, /docs, /.well-known/ai-plugin.json)\n   - Attempt registration if open\n   - Update account-registry with findings (auth_type, cred_file, test endpoint)\n   - Mark as `live` or `unreachable` based on results\n\n4. **Success criteria**:\n   - All 17 missing platforms added to account-registry within 1 B session\n   - Auto-promotion hook running on every session start\n   - Within 1 week: all `needs_probe` platforms evaluated by E sessions\n   - Platform picker pool grows from 8 to 20+ working platforms",
+      "status": "pending",
+      "acked_session": null,
+      "priority": "critical"
     }
   ],
   "questions": [
@@ -561,7 +570,9 @@
       "question": "Which blockchain network is the 80 USDC on? The EVM wallet supports Ethereum, Base, Arbitrum, and Polygon. Need to know so I can execute the HiveMind participation strategy (bridge to Base if needed).",
       "session": 1037,
       "status": "pending",
-      "answered": false
+      "answered": true,
+      "answer": "80 USDC is on Base",
+      "answered_at": "2026-02-05T15:29:36.518Z"
     },
     {
       "id": "q-d021-tulip-url",
@@ -580,16 +591,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 143,
+        "followed": 144,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 1098,
-        "last_applicable_session": 1098,
+        "last_session": 1103,
+        "last_applicable_session": 1103,
         "history": [
-          {
-            "session": 1033,
-            "result": "followed"
-          },
           {
             "session": 1053,
             "result": "followed"
@@ -625,20 +632,20 @@
           {
             "session": 1098,
             "result": "followed"
+          },
+          {
+            "session": 1103,
+            "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 123,
+        "followed": 124,
         "ignored": 18,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1098,
-        "last_applicable_session": 1098,
+        "last_session": 1103,
+        "last_applicable_session": 1103,
         "history": [
-          {
-            "session": 1033,
-            "result": "followed"
-          },
           {
             "session": 1053,
             "result": "followed"
@@ -673,6 +680,10 @@
           },
           {
             "session": 1098,
+            "result": "followed"
+          },
+          {
+            "session": 1103,
             "result": "followed"
           }
         ]
@@ -776,16 +787,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 433,
+        "followed": 434,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1102,
-        "last_applicable_session": 1102,
+        "last_session": 1103,
+        "last_applicable_session": 1103,
         "history": [
-          {
-            "session": 1088,
-            "result": "followed"
-          },
           {
             "session": 1089,
             "result": "followed"
@@ -820,6 +827,10 @@
           },
           {
             "session": 1102,
+            "result": "followed"
+          },
+          {
+            "session": 1103,
             "result": "followed"
           }
         ]

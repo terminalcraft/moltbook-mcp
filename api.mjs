@@ -3236,6 +3236,58 @@ app.get("/status/cost-heatmap", (req, res) => {
   }
 });
 
+// Cost trends with rolling averages and alerts (wq-270)
+// Returns per-type 10-session rolling average, trend direction, alert status
+app.get("/status/cost-trends", (req, res) => {
+  try {
+    const histPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    const thresholds = { B: 3.50, E: 3.50, R: 2.50, A: 2.50 };
+    const window = Math.min(parseInt(req.query.window) || 10, 50);
+
+    let lines = [];
+    try { lines = readFileSync(histPath, "utf8").trim().split("\n").filter(Boolean); } catch { return res.json({ error: "no history" }); }
+
+    const re = /mode=(\w+)\s+s=(\d+)\s+dur=(\d+)m(\d+)s\s+cost=\$([0-9.]+)/;
+    const byType = {};
+
+    for (const line of lines) {
+      const m = line.match(re);
+      if (!m) continue;
+      const [, mode, , , , cost] = m;
+      if (!byType[mode]) byType[mode] = [];
+      byType[mode].push(parseFloat(cost));
+    }
+
+    const result = {};
+    for (const [mode, costs] of Object.entries(byType)) {
+      const recent = costs.slice(-window);
+      const older = costs.slice(-(window * 2), -window);
+      const avg = recent.length > 0 ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
+      const olderAvg = older.length > 0 ? older.reduce((a, b) => a + b, 0) / older.length : avg;
+      const threshold = thresholds[mode] || 5.0;
+
+      let trend = "stable";
+      const diff = avg - olderAvg;
+      if (diff > 0.20) trend = "up";
+      else if (diff < -0.20) trend = "down";
+
+      result[mode] = {
+        avg: Math.round(avg * 100) / 100,
+        threshold,
+        alert: avg > threshold,
+        trend,
+        sample_size: recent.length,
+        prev_avg: Math.round(olderAvg * 100) / 100,
+      };
+    }
+
+    const anyAlert = Object.values(result).some(r => r.alert);
+    res.json({ trends: result, has_alerts: anyAlert, window });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Session cost distribution visualization — charts cost per type over time (wq-003)
 app.get("/status/cost-distribution", (req, res) => {
   try {
@@ -4835,6 +4887,7 @@ function agentManifest(req, res) {
       status_efficiency: { url: `${base}/status/efficiency`, method: "GET", auth: false, description: "Session efficiency dashboard — per-type avg cost, duration, commit rate, budget utilization (?window=N)" },
       status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
       status_cost_heatmap: { url: `${base}/status/cost-heatmap`, method: "GET", auth: false, description: "Cost heatmap by session type and day (?days=N, default 14, max 90)" },
+      status_cost_trends: { url: `${base}/status/cost-trends`, method: "GET", auth: false, description: "Cost trend alerts — per-type rolling avg, trend direction, threshold alerts (?window=N, default 10)" },
       status_cost_distribution: { url: `${base}/status/cost-distribution`, method: "GET", auth: false, description: "Interactive cost distribution charts — stacked bar, pie, rolling avg, utilization (?window=N, ?format=json)" },
       status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
       status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },
@@ -12546,6 +12599,26 @@ app.get("/stigmergy/summary", (req, res) => {
 app.get("/replay", (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.send(readFileSync(join(BASE, "public", "replay.html"), "utf8"));
+});
+
+// --- Toku.agency webhook receiver ---
+const TOKU_INBOX_FILE = join(homedir(), ".config/moltbook/toku-inbox.json");
+function loadTokuInbox() { try { return JSON.parse(readFileSync(TOKU_INBOX_FILE, "utf8")); } catch { return []; } }
+function saveTokuInbox(inbox) { writeFileSync(TOKU_INBOX_FILE, JSON.stringify(inbox, null, 2)); }
+
+app.post("/webhooks/toku", (req, res) => {
+  const event = req.body;
+  const inbox = loadTokuInbox();
+  inbox.push({ ...event, received_at: new Date().toISOString() });
+  if (inbox.length > 100) inbox.splice(0, inbox.length - 100);
+  saveTokuInbox(inbox);
+  logActivity("toku.webhook", `Received ${event.type || 'unknown'} event from toku.agency`, { event_type: event.type });
+  res.json({ received: true });
+});
+
+app.get("/webhooks/toku", auth, (req, res) => {
+  const inbox = loadTokuInbox();
+  res.json({ count: inbox.length, events: inbox.slice(-20) });
 });
 
 const server1 = app.listen(PORT, "0.0.0.0", () => {

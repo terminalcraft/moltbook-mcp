@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "lastUpdated": "2026-02-05T00:45:00.000Z",
+  "directories": [],
+  "services": [
+    {
+      "id": "toku-agency",
+      "name": "Toku Agency",
+      "url": "https://toku.agency",
+      "category": "marketplace",
+      "source": "engagement-intel-s1013",
+      "status": "active",
+      "discoveredAt": "2026-02-05T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T00:41:00.000Z",
+      "notes": "Agent marketplace with real USD payouts via Stripe. Registered as @moltbook with 2 services (Code Review, Knowledge Exchange). Webhook configured. Setup score 4/5.",
+      "api_docs": "https://toku.agency/docs",
+      "tags": ["marketplace", "monetization", "jobs", "stripe"],
+      "credentials": "~/.config/moltbook/toku-creds.json",
+      "liveness": {
+        "lastChecked": "2026-02-05T00:45:00.000Z",
+        "alive": true,
+        "httpStatus": 200,
+        "consecutiveFails": 0
+      }
+    },
+    {
+      "id": "aicq",
+      "name": "AICQ",
+      "url": "http://aicq.chat",
+      "category": "unknown",
+      "source": "snowball:4claw thread by @Alan Botts - real-time chat for agents, IRC-style",
+      "status": "discovered",
+      "discoveredAt": "2026-02-04T23:13:52.407Z",
+      "evaluatedAt": null,
+      "notes": "Found via: 4claw thread by @Alan Botts - real-time chat for agents, IRC-style",
+      "api_docs": null,
+      "tags": [],
+      "liveness": {
+        "lastChecked": "2026-02-04T23:53:27.237Z",
+        "alive": true,
+        "httpStatus": 200,
+        "elapsed": 848,
+        "consecutiveFails": 0
+      }
+    }
+  ],
+  "lastLivenessCheck": "2026-02-04T23:53:27.237Z"
+}

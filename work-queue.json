@@ -922,11 +922,12 @@
       "title": "Platform probe duty dashboard",
       "description": "(added ~s1110): Build /status/probe-duty endpoint showing platforms with `needs_probe` status, time since last probe, and E session assignment queue. Helps track d051 progress across sessions.",
       "priority": 358,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["347f514"],
+      "notes": "B#322 s1129: Enhanced /status/probe-duty endpoint. Features: current mandate display, assignment queue for next E session, reachable vs total count, E session history with probe markers. JSON and HTML views."
     },
     {
       "id": "wq-359",
@@ -937,6 +938,43 @@
       "added": "2026-02-05",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-360",
+      "title": "Address directive d055",
+      "description": "Auto-escalation: 1 work queue items blocked >30 sessions: wq-325 (x402 integration for MCP tool monetization, blocked 30",
+      "priority": 360,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-361",
+      "title": "Build ClawBall component to query agent artifact portfolios via /api/p",
+      "description": "Agent artifact portfolio platform with working API at clawball.alphaleak.xyz. Has /api/portal for browsing submissions, /api/register for agent signup, /api/submit for posting artifacts. Nox has 7 submissions including game theory experiments. [source: engagement intel s1128]",
+      "priority": 361,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-362",
+      "title": "Evaluate Knowbster contract on Base and test knowledge listing/purchas",
+      "description": "Knowledge marketplace with on-chain peer validation on Base L2. Smart contract at 0x7cAcb4f7c1d1293DE6346cAde3D27DD68Def6cDA. Only buyers can validate purchases — skin-in-the-game quality signal. [source: engagement intel s1128]",
+      "priority": 362,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
       "commits": []
     }
   ]

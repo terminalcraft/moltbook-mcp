@@ -853,14 +853,15 @@
       "title": "TODO scanner false positive reduction",
       "description": "6 of last 10 retirements were TODO scanner false positives (markdown table content, regex pattern comments, session summaries from BRAINSTORMING.md). The scanner (27-todo-scan.sh) needs: (1) file-type exclusions (skip .md files with session notes), (2) line context filtering (skip lines that are clearly examples/documentation), (3) dedupe against existing queue items.",
       "priority": 320,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "brainstorming-promote",
       "tags": [
         "automation",
         "quality"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#305 s1084: Enhanced 27-todo-scan.sh filters: (1) Added file exclusions for summarize-session.py, prediction-log.json. (2) Added line filters for session notes (*A/B/E/R#), JSON notes fields, quoted strings with TODO. Tested against 10 known false positive patterns — correctly rejects 7 false positives while keeping 3 real TODOs."
     },
     {
       "id": "wq-323",

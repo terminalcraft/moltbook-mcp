@@ -22,20 +22,26 @@ COMMITS=$(git log --since="$SINCE" --format="%H" --max-count=10 2>/dev/null || t
 
 NEW_TODOS=""
 # Exclude infrastructure files that contain TODO/FIXME as template text
-EXCLUDE_PATHS=":(exclude)session-context.mjs :(exclude)work-queue.js :(exclude)work-queue.json :(exclude)hooks/post-session/27-todo-scan.sh :(exclude)hooks/post-session/42-todo-followups.sh :(exclude)*.test.mjs :(exclude)*.test.js :(exclude)*.spec.mjs :(exclude)*.spec.js :(exclude)*.md :(exclude)BRAINSTORMING.md"
+EXCLUDE_PATHS=":(exclude)session-context.mjs :(exclude)work-queue.js :(exclude)work-queue.json :(exclude)hooks/post-session/27-todo-scan.sh :(exclude)hooks/post-session/42-todo-followups.sh :(exclude)*.test.mjs :(exclude)*.test.js :(exclude)*.spec.mjs :(exclude)*.spec.js :(exclude)*.md :(exclude)BRAINSTORMING.md :(exclude)summarize-session.py :(exclude)prediction-log.json"
 if [ -n "$COMMITS" ]; then
   NEW_TODOS=$(echo "$COMMITS" | while read -r hash; do
     git diff "$hash~1".."$hash" -- . $EXCLUDE_PATHS 2>/dev/null | grep -E '^\+.*\b(TODO|FIXME|HACK|XXX)\b' | sed 's/^\+//' || true
   done | sort -u | \
-    # Filter out false positives (wq-299):
+    # Filter out false positives (wq-299, wq-320):
     # - Markdown table cells (lines starting with |)
     # - Lines containing wq-XXX pattern (documentation references)
-    # - Lines that look like regex pattern comments (# Pattern)
-    # - Session summary lines (*B#NNN or *R#NNN)
+    # - Lines that look like regex pattern comments (# Pattern N:)
+    # - Session summary lines (*B#NNN or *R#NNN or R#NNN)
+    # - JSON "notes" fields that quote TODO text
+    # - Lines with "TODO" in quoted strings (commit messages, descriptions)
+    # - Lines starting with asterisk (markdown session notes)
     grep -vE '^\s*\|' | \
     grep -vE 'wq-[0-9X]+' | \
-    grep -vE '^\s*#\s*Pattern' | \
-    grep -vE '^\s*\*[BRE]#[0-9]+' | \
+    grep -vE '^\s*#\s*Pattern\s*[0-9]+' | \
+    grep -vE '\*[BREA]#[0-9]+' | \
+    grep -vE '"notes":\s*"' | \
+    grep -vE '^\s*\*[A-Z]' | \
+    grep -vE '"[^"]*TODO[^"]*"' | \
     head -10)
 fi
 

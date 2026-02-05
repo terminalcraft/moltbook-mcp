@@ -26,6 +26,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const STATE_DIR = join(process.env.HOME, ".config/moltbook");
+const RECOVERY_EVENTS_PATH = join(STATE_DIR, "circuit-recovery-events.json");
 const PROBE_TIMEOUT = 5000; // 5s per platform
 
 // Platform URL mapping (same as engagement-liveness-probe.mjs)
@@ -66,6 +67,22 @@ function loadJSON(path, fallback = {}) {
 
 function saveJSON(path, data) {
   writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
+}
+
+// wq-317: Track recovery events for E session notification
+function logRecoveryEvent(platformId, transition, details) {
+  const events = loadJSON(RECOVERY_EVENTS_PATH, { events: [], max_events: 20 });
+  const event = {
+    platform: platformId,
+    transition,  // "open->half-open" or "half-open->closed"
+    timestamp: new Date().toISOString(),
+    session: parseInt(process.env.SESSION_NUM || "0", 10),
+    ...details
+  };
+  events.events.unshift(event);
+  // Keep only last N events
+  events.events = events.events.slice(0, events.max_events || 20);
+  saveJSON(RECOVERY_EVENTS_PATH, events);
 }
 
 function getUrlForPlatform(platformId) {
@@ -157,6 +174,14 @@ async function main() {
       delete circuit.last_error;
       recovered++;
 
+      // wq-317: Log recovery event for E session notification
+      if (!dryRun) {
+        logRecoveryEvent(platformId, "open->half-open", {
+          http_status: probe.status,
+          latency_ms: ms
+        });
+      }
+
       if (!jsonOutput) {
         console.log(`[✓] ${platformId} — recovered (${probe.status} ${ms}ms) → half-open`);
       }
@@ -204,6 +229,14 @@ async function main() {
       circuit.total_successes = (circuit.total_successes || 0) + 1;
       circuit.last_success = now;
       closed++;
+
+      // wq-317: Log recovery event for E session notification
+      if (!dryRun) {
+        logRecoveryEvent(platformId, "half-open->closed", {
+          http_status: probe.status,
+          latency_ms: ms
+        });
+      }
 
       if (!jsonOutput) {
         console.log(`[✓] ${platformId} — closed (${probe.status} ${ms}ms) → healthy`);

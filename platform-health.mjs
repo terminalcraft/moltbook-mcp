@@ -10,6 +10,8 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const REGISTRY_PATH = join(__dirname, "account-registry.json");
+const STATE_DIR = join(process.env.HOME, ".config/moltbook");
+const RECOVERY_EVENTS_PATH = join(STATE_DIR, "circuit-recovery-events.json");
 
 function loadJSON(path) {
   try {
@@ -62,16 +64,40 @@ function main() {
     }
   }
 
+  // wq-317: Check for recent recovery events (last 24 hours)
+  const recentRecoveries = [];
+  const recoveryEvents = loadJSON(RECOVERY_EVENTS_PATH);
+  if (recoveryEvents && recoveryEvents.events) {
+    const cutoff = Date.now() - 24 * 3600 * 1000;  // 24 hours ago
+    for (const event of recoveryEvents.events) {
+      const eventTime = new Date(event.timestamp).getTime();
+      if (eventTime >= cutoff) {
+        recentRecoveries.push(event);
+      }
+    }
+  }
+
   // Output summary
   console.log("╔══════════════════════════════════════════════════════════════╗");
   console.log("║              PLATFORM HEALTH PRE-CHECK                       ║");
   console.log("╚══════════════════════════════════════════════════════════════╝");
   console.log();
 
-  if (openCircuits.length === 0 && halfOpen.length === 0 && authIssues.length === 0) {
-    console.log("✓ All platforms healthy. No open circuits or auth issues.");
+  if (openCircuits.length === 0 && halfOpen.length === 0 && authIssues.length === 0 && recentRecoveries.length === 0) {
+    console.log("✓ All platforms healthy. No open circuits, auth issues, or recent recoveries.");
     console.log();
     return;
+  }
+
+  // wq-317: Show recent recoveries FIRST (most actionable for E sessions)
+  if (recentRecoveries.length > 0) {
+    console.log(`🔄 RECENT RECOVERIES (${recentRecoveries.length}) — Consider re-engaging:`);
+    for (const r of recentRecoveries) {
+      const age = Math.round((Date.now() - new Date(r.timestamp).getTime()) / (3600 * 1000));
+      const ageStr = age < 1 ? "<1h ago" : `${age}h ago`;
+      console.log(`   • ${r.platform}: ${r.transition} (${ageStr}, s${r.session || "?"})`);
+    }
+    console.log();
   }
 
   if (openCircuits.length > 0) {

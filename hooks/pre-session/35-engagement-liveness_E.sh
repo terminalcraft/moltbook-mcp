@@ -20,4 +20,8 @@ if [ $exit_code -ne 0 ]; then
   echo "[liveness] WARNING: Probe failed, continuing with cached circuit state"
 fi
 
+# wq-317: Show platform health summary including recent recoveries
+echo ""
+node platform-health.mjs 2>/dev/null || true
+
 echo "[liveness] Done."

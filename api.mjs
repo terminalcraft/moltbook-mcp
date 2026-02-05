@@ -3368,6 +3368,77 @@ app.get("/status/cost-trends", (req, res) => {
   }
 });
 
+// Platform health from account-registry (wq-280)
+// Exposes health check data from periodic heartbeat probes
+app.get("/status/platform-health", (req, res) => {
+  try {
+    const registryPath = join(BASE, "account-registry.json");
+    const alertPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/platform-health-alert.txt");
+
+    // Load account registry
+    let accounts = [];
+    try {
+      const data = JSON.parse(readFileSync(registryPath, "utf8"));
+      accounts = data.accounts || [];
+    } catch { return res.json({ error: "no registry" }); }
+
+    // Categorize by status
+    const healthy = [];
+    const degraded = [];
+    const broken = [];
+
+    for (const acc of accounts) {
+      const status = acc.last_status || "unknown";
+      const entry = {
+        id: acc.id,
+        platform: acc.platform,
+        status,
+        last_tested: acc.last_tested,
+        auth_type: acc.auth_type,
+        notes: acc.notes,
+      };
+
+      // Calculate time since last probe
+      if (acc.last_tested) {
+        const ms = Date.now() - new Date(acc.last_tested).getTime();
+        entry.hours_since_probe = Math.round(ms / 3600000 * 10) / 10;
+      }
+
+      // Categorize
+      if (status === "live" || status === "creds_ok") {
+        healthy.push(entry);
+      } else if (status === "unreachable" || status === "bad_creds" || status === "error") {
+        broken.push(entry);
+      } else {
+        degraded.push(entry);
+      }
+    }
+
+    // Load recent alerts
+    let alerts = [];
+    try {
+      const alertText = readFileSync(alertPath, "utf8");
+      // Parse last 5 alert blocks (separated by ---)
+      const blocks = alertText.split("---").filter(Boolean).slice(-5);
+      alerts = blocks.map(block => block.trim()).filter(Boolean);
+    } catch {} // No alerts file is fine
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      summary: {
+        total: accounts.length,
+        healthy: healthy.length,
+        degraded: degraded.length,
+        broken: broken.length,
+      },
+      platforms: { healthy, degraded, broken },
+      recent_alerts: alerts,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Intel pipeline quality metrics (wq-273)
 // Returns intel-to-queue conversion metrics for R session monitoring
 import { calculateMetrics as getIntelMetrics, formatForPrompt as formatIntelPrompt } from "./intel-quality.mjs";

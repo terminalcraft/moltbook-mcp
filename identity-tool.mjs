@@ -7,6 +7,7 @@
 //   node identity-tool.mjs keygen [output-file]           — Generate Ed25519 keypair
 //   node identity-tool.mjs sign <keys-file> <platform> <handle> [--url URL]  — Sign a platform claim
 //   node identity-tool.mjs verify <manifest-url>          — Verify an agent's identity proofs
+//   node identity-tool.mjs verify-local <keys-file> [manifest-file] — Verify proofs without HTTP fetch
 //   node identity-tool.mjs manifest <keys-file>           — Generate agent.json identity block
 //   node identity-tool.mjs proof <keys-file> [--platform P] — Human-readable proof text
 
@@ -134,6 +135,93 @@ async function verify(manifestUrl) {
     console.error(`\nFailed proofs: ${failed.map(f => f.platform).join(", ")}`);
   } else {
     console.log(`\nAll ${results.length} proofs verified successfully.`);
+  }
+  return output;
+}
+
+// --- Local Verification (no HTTP) ---
+
+function verifyLocal(keysFile, manifestFile) {
+  // Load keys
+  const keys = loadKeys(keysFile);
+
+  // Build identity block from local files or use provided manifest
+  let manifest;
+  if (manifestFile && existsSync(manifestFile)) {
+    manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
+  } else {
+    // Construct identity block in-memory (same as api.mjs does for /agent.json)
+    const proofsFile = keysFile.replace(/[^/]+$/, "") + "identity-proofs.json";
+    let proofs = [];
+    if (existsSync(proofsFile)) {
+      proofs = JSON.parse(readFileSync(proofsFile, "utf8"));
+    }
+
+    manifest = {
+      agent: "local-verification",
+      identity: {
+        protocol: "agent-identity-v1",
+        algorithm: "Ed25519",
+        publicKey: keys.publicKey,
+        handles: proofs.map(p => ({ platform: p.platform, handle: p.handle })),
+        proofs,
+        revoked: [],
+      },
+    };
+  }
+
+  const identity = manifest?.identity;
+  if (!identity?.publicKey) {
+    console.error("No public key found in identity block");
+    console.log(JSON.stringify({ verified: false, error: "missing_public_key" }, null, 2));
+    process.exit(1);
+  }
+
+  if (!identity?.proofs?.length) {
+    console.log(JSON.stringify({
+      verified: true,
+      note: "No proofs to verify (empty proofs array)",
+      agent: manifest?.agent || null,
+      publicKey: identity.publicKey,
+      algorithm: identity.algorithm || "Ed25519",
+      proofs: [],
+      handles: identity.handles || [],
+      revoked: identity.revoked || [],
+    }, null, 2));
+    return { verified: true, proofs: [] };
+  }
+
+  // Verify proofs
+  const pubKeyDer = Buffer.from(ED25519_SPKI_PREFIX + identity.publicKey, "hex");
+  const pubKey = crypto.createPublicKey({ key: pubKeyDer, format: "der", type: "spki" });
+
+  const results = identity.proofs.map(proof => {
+    try {
+      const valid = crypto.verify(null, Buffer.from(proof.message), pubKey, Buffer.from(proof.signature, "hex"));
+      return { platform: proof.platform, handle: proof.handle, valid };
+    } catch (e) {
+      return { platform: proof.platform, handle: proof.handle, valid: false, error: e.message };
+    }
+  });
+
+  const allValid = results.every(r => r.valid);
+  const output = {
+    verified: allValid,
+    agent: manifest.agent || null,
+    publicKey: identity.publicKey,
+    algorithm: identity.algorithm || "Ed25519",
+    proofs: results,
+    handles: identity.handles || [],
+    revoked: identity.revoked || [],
+    source: manifestFile ? `file:${manifestFile}` : "in-memory",
+  };
+
+  console.log(JSON.stringify(output, null, 2));
+  if (!allValid) {
+    const failed = results.filter(r => !r.valid);
+    console.error(`\nFailed proofs: ${failed.map(f => f.platform).join(", ")}`);
+  } else {
+    console.log(`\nAll ${results.length} proofs verified successfully (standalone mode).`);
   }
   return output;
 }
@@ -326,6 +414,16 @@ switch (cmd) {
     verify(args[1]);
     break;
 
+  case "verify-local":
+    if (!args[1]) {
+      console.error("Usage: identity-tool.mjs verify-local <keys-file> [manifest-file]");
+      console.error("  keys-file: identity-keys.json (public key + optional identity-proofs.json in same dir)");
+      console.error("  manifest-file: optional agent.json-style manifest to verify");
+      process.exit(1);
+    }
+    verifyLocal(args[1], args[2]);
+    break;
+
   case "manifest":
     if (!args[1]) {
       console.error("Usage: identity-tool.mjs manifest <keys-file> [proof-files...]");
@@ -360,7 +458,8 @@ switch (cmd) {
 Commands:
   keygen [output-file]                    Generate Ed25519 keypair
   sign <keys> <platform> <handle>         Sign a platform identity claim
-  verify <manifest-url>                   Verify an agent's identity proofs
+  verify <manifest-url>                   Verify an agent's identity proofs (HTTP fetch)
+  verify-local <keys> [manifest]          Verify proofs without HTTP fetch (standalone mode)
   manifest <keys> [proof-files...]        Generate agent.json identity block
   proof <keys> [--platform P]             Human-readable proof text
   nostr-keygen [output-file]              Generate Nostr secp256k1 keypair (npub/nsec)

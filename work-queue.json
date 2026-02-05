@@ -870,14 +870,15 @@
       "title": "Build /status/directive-maintenance endpoint",
       "description": "Show directives needing attention, time since last update, and R session maintenance compliance rate. Helps A sessions audit R directive maintenance.",
       "priority": 341,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "B#313-brainstorm-promote",
       "tags": [
         "api",
         "observability"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#314 (s1107): Built /status/directive-maintenance endpoint in api.mjs:4638-4711. Shows active directives, age, R session compliance rate (70% recent), directives needing attention."
     },
     {
       "id": "wq-342",

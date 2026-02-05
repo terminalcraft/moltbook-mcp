@@ -4636,6 +4636,88 @@ app.get("/status/directive-metrics", (req, res) => {
   }
 });
 
+// Directive maintenance dashboard — directives needing attention, R session compliance (wq-341)
+app.get("/status/directive-maintenance", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+    const dirs = data.directives || [];
+    const sessionNum = parseInt(process.env.SESSION_NUM) || 1107;
+    const compliance = data.compliance?.metrics?.["directive-update"] || { followed: 0, ignored: 0, history: [] };
+
+    // Calculate R session maintenance compliance rate from history (last 20 R sessions)
+    const recentHistory = compliance.history?.slice(-20) || [];
+    const followedCount = recentHistory.filter(h => h.result === "followed").length;
+    const complianceRate = recentHistory.length > 0
+      ? Math.round((followedCount / recentHistory.length) * 100)
+      : 0;
+
+    // Active directives with maintenance info
+    const activeDirectives = dirs
+      .filter(d => d.status === "active")
+      .map(d => {
+        const ageSessions = sessionNum - (d.session || sessionNum);
+        const lastUpdateSession = d.completed_session || d.acked_session || d.session;
+        const sessionsSinceUpdate = sessionNum - lastUpdateSession;
+
+        // Check if notes were recently updated (look for session refs in notes)
+        const notesMatch = d.notes?.match(/[sS](\d{3,4})/g) || [];
+        const noteSessions = notesMatch.map(m => parseInt(m.slice(1))).filter(n => !isNaN(n));
+        const lastNoteSession = noteSessions.length > 0 ? Math.max(...noteSessions) : null;
+        const sessionsSinceNote = lastNoteSession ? sessionNum - lastNoteSession : null;
+
+        return {
+          id: d.id,
+          content_preview: d.content?.slice(0, 80) + (d.content?.length > 80 ? "…" : ""),
+          from: d.from,
+          age_sessions: ageSessions,
+          sessions_since_note_update: sessionsSinceNote,
+          last_note_session: lastNoteSession,
+          queue_item: d.queue_item || null,
+          needs_attention: ageSessions > 50 || (sessionsSinceNote !== null && sessionsSinceNote > 30),
+          notes: d.notes || null,
+        };
+      })
+      .sort((a, b) => (b.sessions_since_note_update || b.age_sessions) - (a.sessions_since_note_update || a.age_sessions));
+
+    // Directives needing attention (old or stale notes)
+    const needsAttention = activeDirectives.filter(d => d.needs_attention);
+
+    // Summary stats
+    const summary = {
+      total_active: activeDirectives.length,
+      needs_attention_count: needsAttention.length,
+      r_session_compliance: {
+        rate_pct: complianceRate,
+        followed: compliance.followed || 0,
+        ignored: compliance.ignored || 0,
+        last_session: compliance.last_session,
+        recent_20_followed: followedCount,
+        recent_20_total: recentHistory.length,
+      },
+      oldest_without_update: activeDirectives.length > 0 ? activeDirectives[0] : null,
+    };
+
+    // Unanswered questions
+    const questions = (data.questions || []).filter(q => !q.answered);
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      session: sessionNum,
+      summary,
+      needs_attention: needsAttention,
+      active_directives: activeDirectives,
+      unanswered_questions: questions.map(q => ({
+        id: q.id,
+        directive: q.directive,
+        question: q.question?.slice(0, 100) + (q.question?.length > 100 ? "…" : ""),
+        session: q.session,
+      })),
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Ecosystem service adoption dashboard — which tools used, trends, gaps (wq-077, B#165)
 app.get("/status/ecosystem", (req, res) => {
   try {
@@ -13475,6 +13557,124 @@ app.get("/status/session-outcomes", (req, res) => {
     res.json({ count: result.length, total_available: outcomes.length, outcomes: result });
   } catch (e) {
     res.status(404).json({ error: "Session outcomes not found" });
+  }
+});
+
+// --- Directive maintenance status (wq-341) ---
+// Shows directives needing attention and R session maintenance compliance for A session audits
+app.get("/status/directive-maintenance", (req, res) => {
+  try {
+    const directivesPath = join(__dirname, "directives.json");
+    const data = JSON.parse(readFileSync(directivesPath, "utf8"));
+    const directives = data.directives || [];
+
+    // Active directives (not completed)
+    const active = directives.filter(d =>
+      d.status === "active" || d.status === "pending" || d.status === "acknowledged"
+    );
+
+    // Calculate staleness for each directive
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+    const withStaleness = active.map(d => {
+      const updated = d.updated ? new Date(d.updated).getTime() : null;
+      const created = d.created ? new Date(d.created).getTime() : null;
+      const acked = d.acked_session;
+      const lastTouch = updated || created || (acked ? now - (50 * oneDay) : now - (100 * oneDay));
+      const daysSinceUpdate = Math.floor((now - lastTouch) / oneDay);
+      return {
+        id: d.id,
+        status: d.status,
+        session: d.session,
+        acked_session: d.acked_session,
+        updated: d.updated,
+        days_since_update: daysSinceUpdate,
+        needs_attention: daysSinceUpdate > 7,
+        stale: daysSinceUpdate > 14,
+        preview: (d.content || "").slice(0, 80)
+      };
+    });
+
+    // Sort by staleness (most stale first)
+    withStaleness.sort((a, b) => b.days_since_update - a.days_since_update);
+
+    // Calculate compliance rate from session history
+    const historyPath = join(homedir(), ".config/moltbook/session-history.txt");
+    let rSessions = [];
+    try {
+      const history = readFileSync(historyPath, "utf8");
+      const lines = history.trim().split("\n").slice(-50);  // Last 50 sessions
+      rSessions = lines
+        .filter(l => l.includes("mode=R"))
+        .map(l => {
+          const match = l.match(/s=(\d+)/);
+          const noteMatch = l.match(/note:\s*(.+)/);
+          return {
+            session: match ? parseInt(match[1]) : 0,
+            note: noteMatch ? noteMatch[1] : ""
+          };
+        });
+    } catch { /* no history */ }
+
+    // Check which R sessions mentioned directive maintenance
+    const maintenanceKeywords = ["directive", "d0\\d+", "acked", "acknowledged", "decomposed"];
+    const rWithMaintenance = rSessions.filter(r =>
+      maintenanceKeywords.some(kw => new RegExp(kw, "i").test(r.note))
+    );
+    const complianceRate = rSessions.length > 0
+      ? Math.round((rWithMaintenance.length / rSessions.length) * 100)
+      : 0;
+
+    const result = {
+      active_count: active.length,
+      needs_attention: withStaleness.filter(d => d.needs_attention).length,
+      stale_count: withStaleness.filter(d => d.stale).length,
+      r_session_compliance: {
+        rate: complianceRate,
+        sessions_checked: rSessions.length,
+        with_maintenance: rWithMaintenance.length
+      },
+      directives: withStaleness
+    };
+
+    if (req.query.format === "json") {
+      return res.json(result);
+    }
+
+    // HTML view
+    const rows = withStaleness.map(d => {
+      const statusColor = { active: "#22c55e", pending: "#facc15", acknowledged: "#60a5fa" }[d.status] || "#888";
+      const staleClass = d.stale ? "color:#ef4444;font-weight:bold" : (d.needs_attention ? "color:#eab308" : "");
+      return `<tr>
+        <td style="font-family:monospace">${d.id}</td>
+        <td><span style="color:${statusColor}">${d.status}</span></td>
+        <td style="${staleClass}">${d.days_since_update}d</td>
+        <td>${d.updated || "—"}</td>
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.preview}</td>
+      </tr>`;
+    }).join("");
+
+    const html = `<!DOCTYPE html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Directive Maintenance — @moltbook</title>
+<style>body{font-family:system-ui;background:#1e1e2e;color:#cdd6f4;padding:2rem;max-width:1200px;margin:0 auto}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #313244}
+th{color:#89b4fa}a{color:#89b4fa}.stat{display:inline-block;padding:0.5rem 1rem;background:#313244;border-radius:8px;margin-right:1rem}</style>
+</head><body>
+<h1>Directive Maintenance Status</h1>
+<div style="margin-bottom:2rem">
+<span class="stat">Active: ${result.active_count}</span>
+<span class="stat" style="${result.needs_attention > 0 ? "color:#eab308" : ""}">Needs attention: ${result.needs_attention}</span>
+<span class="stat" style="${result.stale_count > 0 ? "color:#ef4444" : ""}">Stale (>14d): ${result.stale_count}</span>
+<span class="stat">R compliance: ${result.r_session_compliance.rate}%</span>
+</div>
+<table><thead><tr><th>ID</th><th>Status</th><th>Age</th><th>Updated</th><th>Content</th></tr></thead><tbody>${rows}</tbody></table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/directive-maintenance?format=json">JSON</a> · <a href="/status/dashboard">Dashboard</a></p>
+</body></html>`;
+
+    res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

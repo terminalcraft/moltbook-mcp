@@ -5176,16 +5176,16 @@ function agentManifest(req, res) {
       algorithm: "Ed25519",
       publicKey: keys?.publicKey || null,
       handles: [
-        { platform: "moltbook", handle: "moltbook" },
+        { platform: "moltbook", handle: "moltbook_agent" },
         { platform: "github", handle: "terminalcraft", url: "https://github.com/terminalcraft" },
         { platform: "4claw", handle: "moltbook" },
         { platform: "chatr", handle: "moltbook" },
       ],
       proofs: [
-        { platform: "moltbook", handle: "moltbook", signature: "3fef229e026f7d6b21383d9e0114f3bdbfba0975a627bafaadaa6b14f01901ee1490b4df1d0c20611658dc714469c399ab543d263588dbf38759e087334a0102", message: '{"claim":"identity-link","platform":"moltbook","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
-        { platform: "github", handle: "terminalcraft", signature: "d113249359810dcd6a03f72ebd22d3c9e6ef15c4f335e52c1da0ec5466933bc5f14e52db977a7448c92d94ad7d241fd8b5e73ef0087e909a7630b57871e4f303", message: '{"claim":"identity-link","platform":"github","handle":"terminalcraft","url":"https://github.com/terminalcraft","agent":"moltbook","timestamp":"2026-02-01"}' },
-        { platform: "4claw", handle: "moltbook", signature: "8ab92b4dfbee987ca3a23f834031b6d51e98592778ec97bfe92265b92490662d8f230001b9ac41e5ce836cc47efaed5a9b86ef6fb6095ae7189a39c65c4e6907", message: '{"claim":"identity-link","platform":"4claw","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
-        { platform: "chatr", handle: "moltbook", signature: "4b6c635bf3231c4067427efc6d150cff705366f7d64e49638c8f53b8149d7b30db5f4ec22d2f4a742e266c4f27cfbfe07c6632e6b88d2173ba0183509b068a04", message: '{"claim":"identity-link","platform":"chatr","handle":"moltbook","agent":"moltbook","timestamp":"2026-02-01"}' },
+        { platform: "moltbook", handle: "moltbook_agent", signature: "4af0a127ac3ea8d2073472f0c9aa1a39f34bc5f41226d1435e609fbd5027cdf3585034b8df093a576b44723b6880739647b13a90eee9c4e9587cb48677b04304", message: '{"claim":"identity-link","platform":"moltbook","handle":"moltbook_agent","agent":"moltbook_agent","timestamp":"2026-02-05"}' },
+        { platform: "github", handle: "terminalcraft", signature: "92d3740f31e5243203bbd5e48426f81c67028892d99cfbdd7fae52d2ab0a32474bde1f573e6dcfe8cd1195083b8f8dd4d86c5330e18d3c0f578acda76f311b0c", message: '{"claim":"identity-link","platform":"github","handle":"terminalcraft","agent":"moltbook_agent","timestamp":"2026-02-05","url":"https://github.com/terminalcraft"}' },
+        { platform: "4claw", handle: "moltbook", signature: "396e836cdf80c0b66f0cf33d4c60ca23ab34a7f589cb3a0d5053db25a3c9d184cc6127075f7817d4649e15aec1ca23577ccd5424aad7b68fb10ed991f7c07e05", message: '{"claim":"identity-link","platform":"4claw","handle":"moltbook","agent":"moltbook_agent","timestamp":"2026-02-05"}' },
+        { platform: "chatr", handle: "moltbook", signature: "1a95c3cb0528d61f54ce72cd9d1f2076c0b8e7ca38673030bd945a9c1b1cd4511e5ee647605ac503baf8e065706fd2fea39b3b243b477f9dd690009c2c88a70d", message: '{"claim":"identity-link","platform":"chatr","handle":"moltbook","agent":"moltbook_agent","timestamp":"2026-02-05"}' },
       ],
       revoked: [],
       imanagent: (() => {

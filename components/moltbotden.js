@@ -1,168 +1,199 @@
 import { z } from "zod";
-import { getMoltbotdenKey, MOLTBOTDEN_API } from "../providers/credentials.js";
+import { readFileSync } from "fs";
+import { join } from "path";
+import { homedir } from "os";
 
-async function fetchJson(url, opts = {}) {
-  const res = await fetch(url, { signal: AbortSignal.timeout(10000), ...opts });
+// MoltbotDen (moltbotden.com) - The home for AI agents
+// API docs: https://moltbotden.com/skill.md
+// Features: Dens (chat rooms), weekly prompts, showcase, agent discovery
+
+const MOLTBOTDEN_API = "https://api.moltbotden.com";
+
+function err(msg) {
+  return { content: [{ type: "text", text: msg }] };
+}
+
+function ok(msg) {
+  return { content: [{ type: "text", text: msg }] };
+}
+
+function loadApiKey() {
+  try {
+    const credsPath = join(homedir(), "moltbook-mcp/moltbotden-credentials.json");
+    const creds = JSON.parse(readFileSync(credsPath, "utf-8"));
+    return creds.api_key;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function fetchWithAuth(url, options = {}) {
+  const apiKey = loadApiKey();
+  if (!apiKey) throw new Error("MoltbotDen credentials not found");
+
+  const headers = {
+    "X-API-Key": apiKey,
+    "Content-Type": "application/json",
+    ...options.headers
+  };
+
+  const res = await fetch(url, { ...options, headers });
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`MoltbotDen ${res.status}: ${body.slice(0, 200)}`);
+    const text = await res.text();
+    throw new Error(`HTTP ${res.status}: ${text}`);
   }
   return res.json();
 }
 
-function auth(key) {
-  return { "X-API-Key": key, "Content-Type": "application/json" };
-}
-
-function err(msg) { return { content: [{ type: "text", text: msg }] }; }
-function ok(data) { return { content: [{ type: "text", text: typeof data === "string" ? data : JSON.stringify(data, null, 2) }] }; }
-
 export function register(server) {
-  // --- Public endpoints (no auth) ---
+  // === Dens (Chat Rooms) ===
 
-  server.tool("moltbotden_agents", "Browse agents on MoltbotDen", {
-    limit: z.number().optional().default(20).describe("Max results"),
-    sort: z.enum(["recent", "connections", "active"]).optional().default("recent"),
-  }, async ({ limit, sort }) => {
+  server.tool("moltbotden_dens", "List all available dens (chat rooms) on MoltbotDen", {}, async () => {
     try {
-      const data = await fetchJson(`${MOLTBOTDEN_API}/public/agents?limit=${limit}&sort=${sort}`);
-      const agents = (data.agents || data || []);
-      if (!agents.length) return ok("No agents found");
-      const lines = agents.map(a =>
-        `${a.agent_id || a.agent_name} — ${a.display_name || ""}: ${(a.tagline || "").slice(0, 80)}`
-      );
-      return ok(lines.join("\n"));
-    } catch (e) { return err(`Error: ${e.message}`); }
+      const data = await fetchWithAuth(`${MOLTBOTDEN_API}/dens`);
+      const dens = data?.dens || data || [];
+      if (!Array.isArray(dens) || !dens.length) return ok("No dens found");
+      const summary = dens.map(d =>
+        `• **${d.name}** (/${d.slug}/) — ${d.description || "No description"}`
+      ).join("\n");
+      return ok(`Available Dens:\n\n${summary}`);
+    } catch (e) {
+      return err(`Error: ${e.message}`);
+    }
   });
 
-  server.tool("moltbotden_agent", "View a specific agent's profile on MoltbotDen", {
-    agent_id: z.string().describe("Agent ID to look up"),
-  }, async ({ agent_id }) => {
+  server.tool("moltbotden_den_read", "Read recent messages from a den", {
+    den: z.string().describe("Den slug (e.g. 'the-den', 'technical', 'philosophy')"),
+    limit: z.number().optional().describe("Max messages (default 20)")
+  }, async ({ den, limit }) => {
     try {
-      const data = await fetchJson(`${MOLTBOTDEN_API}/public/agents/${agent_id}`);
-      return ok(data);
-    } catch (e) { return err(`Error: ${e.message}`); }
+      const n = limit || 20;
+      const data = await fetchWithAuth(`${MOLTBOTDEN_API}/dens/${den}/messages?limit=${n}`);
+      const messages = data?.messages || data || [];
+      if (!Array.isArray(messages) || !messages.length) return ok(`No messages in /${den}/`);
+      const summary = messages.map(m =>
+        `[${m.agent_id || m.author}] ${m.content?.slice(0, 200) || ""}`
+      ).join("\n\n");
+      return ok(`Messages from /${den}/:\n\n${summary}`);
+    } catch (e) {
+      return err(`Error: ${e.message}`);
+    }
   });
 
-  server.tool("moltbotden_activity", "Recent MoltbotDen community activity", {
-    limit: z.number().optional().default(20).describe("Max events (1-100)"),
+  server.tool("moltbotden_den_post", "Post a message to a den", {
+    den: z.string().describe("Den slug (e.g. 'the-den', 'technical')"),
+    content: z.string().describe("Message content")
+  }, async ({ den, content }) => {
+    try {
+      const result = await fetchWithAuth(`${MOLTBOTDEN_API}/dens/${den}/messages`, {
+        method: "POST",
+        body: JSON.stringify({ content })
+      });
+      return ok(`Posted to /${den}/: ${result.message_id || "success"}`);
+    } catch (e) {
+      return err(`Error: ${e.message}`);
+    }
+  });
+
+  // === Weekly Prompts ===
+
+  server.tool("moltbotden_prompt", "Get the current weekly prompt and top responses", {}, async () => {
+    try {
+      const data = await fetchWithAuth(`${MOLTBOTDEN_API}/prompts/current`);
+      const prompt = data?.prompt;
+      if (!prompt) return ok("No active prompt this week");
+
+      let result = `**This Week's Prompt:**\n${prompt.prompt_text}\n\nResponses: ${prompt.response_count || 0}`;
+
+      if (data.user_responded) {
+        result += "\n\n(You have already responded)";
+      }
+
+      if (data.top_responses?.length) {
+        result += "\n\n**Top Responses:**\n";
+        result += data.top_responses.map(r =>
+          `• [${r.agent_id}] ${r.content?.slice(0, 150)}... (${r.upvotes || 0} upvotes)`
+        ).join("\n");
+      }
+
+      return ok(result);
+    } catch (e) {
+      return err(`Error: ${e.message}`);
+    }
+  });
+
+  server.tool("moltbotden_prompt_respond", "Submit your response to the weekly prompt", {
+    content: z.string().describe("Your response to the prompt")
+  }, async ({ content }) => {
+    try {
+      const result = await fetchWithAuth(`${MOLTBOTDEN_API}/prompts/current/respond`, {
+        method: "POST",
+        body: JSON.stringify({ content })
+      });
+      return ok(`Response submitted: ${result.response_id || "success"}`);
+    } catch (e) {
+      return err(`Error: ${e.message}`);
+    }
+  });
+
+  // === Showcase ===
+
+  server.tool("moltbotden_showcase", "Browse the showcase wall (agent projects and articles)", {
+    sort: z.enum(["recent", "upvotes"]).optional().describe("Sort order (default: recent)")
+  }, async ({ sort }) => {
+    try {
+      const sortBy = sort || "recent";
+      const data = await fetchWithAuth(`${MOLTBOTDEN_API}/showcase?sort=${sortBy}`);
+      const items = data?.items || data || [];
+      if (!Array.isArray(items) || !items.length) return ok("No showcase items found");
+      const summary = items.slice(0, 10).map(item =>
+        `• **${item.title}** by ${item.agent_id}\n  ${item.description?.slice(0, 100) || ""}`
+      ).join("\n\n");
+      return ok(`Showcase Wall (${sortBy}):\n\n${summary}`);
+    } catch (e) {
+      return err(`Error: ${e.message}`);
+    }
+  });
+
+  // === Agent Discovery ===
+
+  server.tool("moltbotden_discover", "Discover compatible agents (requires full access)", {
+    limit: z.number().optional().describe("Max agents to return (default 10)")
   }, async ({ limit }) => {
     try {
-      const data = await fetchJson(`${MOLTBOTDEN_API}/public/activity?limit=${limit}`);
-      return ok(data);
-    } catch (e) { return err(`Error: ${e.message}`); }
+      const n = limit || 10;
+      const data = await fetchWithAuth(`${MOLTBOTDEN_API}/discover?limit=${n}`);
+      const agents = data?.agents || data || [];
+      if (!Array.isArray(agents) || !agents.length) return ok("No agents found or discovery unavailable");
+      const summary = agents.map(a =>
+        `• **${a.display_name || a.agent_id}** — ${a.tagline || ""}\n  Compatibility: ${a.compatibility_score || "?"}`
+      ).join("\n\n");
+      return ok(`Compatible Agents:\n\n${summary}`);
+    } catch (e) {
+      return err(`Error: ${e.message}`);
+    }
   });
 
-  server.tool("moltbotden_stats", "MoltbotDen platform statistics", {}, async () => {
-    try {
-      const data = await fetchJson(`${MOLTBOTDEN_API}/public/stats`);
-      return ok(data);
-    } catch (e) { return err(`Error: ${e.message}`); }
-  });
+  // === Status ===
 
-  server.tool("moltbotden_leaderboard", "MoltbotDen top agents leaderboard", {
-    category: z.enum(["connections", "active", "newest"]).optional().default("connections"),
-    limit: z.number().optional().default(10),
-  }, async ({ category, limit }) => {
+  server.tool("moltbotden_status", "Check your MoltbotDen account status", {}, async () => {
     try {
-      const data = await fetchJson(`${MOLTBOTDEN_API}/public/leaderboard?category=${category}&limit=${limit}`);
-      return ok(data);
-    } catch (e) { return err(`Error: ${e.message}`); }
-  });
+      const data = await fetchWithAuth(`${MOLTBOTDEN_API}/me`);
+      const status = data?.status || "unknown";
+      const activity = data?.activity_score || 0;
+      let result = `**Status:** ${status}\n**Activity Score:** ${activity}`;
 
-  // --- Auth-required endpoints ---
+      if (status === "provisional") {
+        result += "\n\nProvisional status limits some features. Keep engaging to unlock full access!";
+      }
 
-  server.tool("moltbotden_me", "View my MoltbotDen profile", {}, async () => {
-    const key = getMoltbotdenKey();
-    if (!key) return err("No MoltbotDen API key configured");
-    try {
-      const data = await fetchJson(`${MOLTBOTDEN_API}/agents/me`, { headers: auth(key) });
-      return ok(data);
-    } catch (e) { return err(`Error: ${e.message}`); }
-  });
+      if (data?.profile) {
+        result += `\n\n**Profile:**\nDisplay: ${data.profile.display_name || "Not set"}\nTagline: ${data.profile.tagline || "Not set"}`;
+      }
 
-  server.tool("moltbotden_discover", "Discover compatible agents on MoltbotDen", {
-    min_compatibility: z.number().optional().default(0.3),
-    limit: z.number().optional().default(10),
-    capabilities: z.string().optional().describe("Comma-separated capability filter"),
-  }, async ({ min_compatibility, limit, capabilities }) => {
-    const key = getMoltbotdenKey();
-    if (!key) return err("No MoltbotDen API key configured");
-    try {
-      let url = `${MOLTBOTDEN_API}/discover?min_compatibility=${min_compatibility}&limit=${limit}`;
-      if (capabilities) url += `&capabilities=${encodeURIComponent(capabilities)}`;
-      const data = await fetchJson(url, { headers: auth(key) });
-      const matches = (data.matches || []).map(m =>
-        `${m.agent_id} (${(m.compatibility?.overall * 100).toFixed(0)}% match) — ${m.display_name || ""}: ${(m.tagline || "").slice(0, 60)}`
-      );
-      return ok(matches.join("\n") || "No matches found");
-    } catch (e) { return err(`Error: ${e.message}`); }
-  });
-
-  server.tool("moltbotden_interest", "Express interest in connecting with an agent", {
-    target: z.string().describe("Target agent ID"),
-    message: z.string().optional().describe("Optional message (max 500 chars)"),
-  }, async ({ target, message }) => {
-    const key = getMoltbotdenKey();
-    if (!key) return err("No MoltbotDen API key configured");
-    try {
-      const body = { target_agent_id: target };
-      if (message) body.message = message;
-      const data = await fetchJson(`${MOLTBOTDEN_API}/interest`, {
-        method: "POST", headers: auth(key), body: JSON.stringify(body),
-      });
-      return ok(`Interest sent → ${data.status} (connection: ${data.connection_id})`);
-    } catch (e) { return err(`Error: ${e.message}`); }
-  });
-
-  server.tool("moltbotden_connections", "List my MoltbotDen connections", {
-    status: z.enum(["pending", "accepted", "declined", "expired", "blocked"]).optional(),
-  }, async ({ status }) => {
-    const key = getMoltbotdenKey();
-    if (!key) return err("No MoltbotDen API key configured");
-    try {
-      let url = `${MOLTBOTDEN_API}/connections`;
-      if (status) url += `?status_filter=${status}`;
-      const data = await fetchJson(url, { headers: auth(key) });
-      return ok(data);
-    } catch (e) { return err(`Error: ${e.message}`); }
-  });
-
-  server.tool("moltbotden_conversations", "List my MoltbotDen conversations", {
-    limit: z.number().optional().default(20),
-  }, async ({ limit }) => {
-    const key = getMoltbotdenKey();
-    if (!key) return err("No MoltbotDen API key configured");
-    try {
-      const data = await fetchJson(`${MOLTBOTDEN_API}/conversations?limit=${limit}`, { headers: auth(key) });
-      return ok(data);
-    } catch (e) { return err(`Error: ${e.message}`); }
-  });
-
-  server.tool("moltbotden_send", "Send a message in a MoltbotDen conversation", {
-    conversation_id: z.string().describe("Conversation ID"),
-    recipient_id: z.string().describe("Recipient agent ID"),
-    content: z.string().describe("Message content"),
-  }, async ({ conversation_id, recipient_id, content }) => {
-    const key = getMoltbotdenKey();
-    if (!key) return err("No MoltbotDen API key configured");
-    try {
-      const data = await fetchJson(`${MOLTBOTDEN_API}/conversations/${conversation_id}/messages`, {
-        method: "POST", headers: auth(key),
-        body: JSON.stringify({ recipient_id, content, message_type: "text" }),
-      });
-      return ok(`Message sent: ${data.message_id} (${data.status})`);
-    } catch (e) { return err(`Error: ${e.message}`); }
-  });
-
-  server.tool("moltbotden_heartbeat", "Send heartbeat to MoltbotDen (mark active)", {}, async () => {
-    const key = getMoltbotdenKey();
-    if (!key) return err("No MoltbotDen API key configured");
-    try {
-      const data = await fetchJson(`${MOLTBOTDEN_API}/heartbeat`, {
-        method: "POST", headers: auth(key),
-      });
-      return ok(data);
-    } catch (e) { return err(`Error: ${e.message}`); }
+      return ok(result);
+    } catch (e) {
+      return err(`Error: ${e.message}`);
+    }
   });
 }

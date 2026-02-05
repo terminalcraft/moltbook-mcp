@@ -70,7 +70,7 @@ function buildTestUrl(account, cred) {
 }
 
 async function testAccount(account) {
-  const result = { id: account.id, platform: account.platform, tier: account.tier };
+  const result = { id: account.id, platform: account.platform };
 
   // Handle no-auth platforms (cred_file may be null)
   if (account.auth_type === "none" || !account.cred_file) {
@@ -314,7 +314,7 @@ if (cmd === "status") {
     const status = a.last_status || "untested";
     const tested = a.last_tested ? new Date(a.last_tested).toLocaleString() : "never";
     const icon = status === "live" ? "✓" : status === "creds_ok" ? "~" : status === "untested" ? "?" : "✗";
-    console.log(`  ${icon} [T${a.tier}] ${a.platform.padEnd(22)} ${status.padEnd(14)} tested: ${tested}`);
+    console.log(`  ${icon} ${a.platform.padEnd(22)} ${status.padEnd(14)} tested: ${tested}`);
     if (a.notes) console.log(`         ${a.notes}`);
   }
 } else if (cmd === "test") {
@@ -322,7 +322,7 @@ if (cmd === "status") {
   for (const r of results) {
     const icon = r.status === "live" ? "✓" : r.status === "creds_ok" ? "~" : "✗";
     const extra = r.http ? `(${r.http})` : r.error ? `(${r.error})` : r.note || "";
-    console.log(`  ${icon} [T${r.tier}] ${r.platform.padEnd(22)} ${r.status.padEnd(14)} ${extra}`);
+    console.log(`  ${icon} ${r.platform.padEnd(22)} ${r.status.padEnd(14)} ${extra}`);
   }
 } else if (cmd === "live") {
   const results = await testAll();
@@ -331,7 +331,7 @@ if (cmd === "status") {
     console.log("No live platforms detected.");
   } else {
     for (const r of live) {
-      console.log(`[T${r.tier}] ${r.platform}`);
+      console.log(r.platform);
     }
   }
 } else if (cmd === "json") {

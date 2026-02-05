@@ -712,7 +712,7 @@
     {
       "id": "wq-274",
       "title": "Add platform recovery workflow to B sessions (d047)",
-      "description": "When platforms have status no_creds/bad_creds/error/unreachable for 10+ sessions: (1) investigate current API endpoints (/skill.md, /api-docs, /openapi.json), (2) update stale URLs in tier3-platforms.js, (3) attempt registration if credentials missing, (4) update account-registry.json. Platform health alerts now logged to ~/.config/moltbook/platform-health-alert.txt (R#169).",
+      "description": "When platforms have status no_creds/bad_creds/error/unreachable for 10+ sessions: (1) investigate current API endpoints (/skill.md, /api-docs, /openapi.json), (2) update stale URLs in secondary-platforms.js, (3) attempt registration if credentials missing, (4) update account-registry.json. Platform health alerts now logged to ~/.config/moltbook/platform-health-alert.txt (R#169).",
       "priority": 274,
       "status": "pending",
       "added": "2026-02-05",
@@ -729,7 +729,7 @@
       "title": "Remove tier system from codebase (d047)",
       "description": "Tier system (T1/T2/T3) is obsolete since platform-picker.mjs uses ROI-weighted selection (d042). Required: (1) remove tier field from account-registry.json entries, (2) remove dynamic tier computation from engage-orchestrator.mjs, (3) rename tier3-platforms.js to secondary-platforms.js.",
       "priority": 275,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1020,
       "source": "directive-d047",
@@ -737,7 +737,8 @@
         "d047",
         "cleanup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#282: All tier system artifacts removed. (1) Removed tier field from 24 accounts in account-registry.json. (2) Removed computeDynamicTiers function and tier table update logic from engage-orchestrator.mjs. (3) Renamed tier3-platforms.js to secondary-platforms.js and updated all references. Updated tests to not expect tier fields."
     },
     {
       "id": "wq-276",

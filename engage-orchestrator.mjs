@@ -289,65 +289,6 @@ function rankPlatformsByROI(livePlatformNames) {
   }
 }
 
-// --- Phase 3.75: Dynamic Tier Computation (d016) ---
-
-/**
- * Computes platform tiers dynamically from engagement analytics instead of
- * relying on static tier assignments in account-registry.json.
- *
- * Tier 1: High-quality engagement — writes > 5, good write ratio or cost efficiency, 3+ E sessions
- * Tier 2: Some engagement history — any writes or 1+ E sessions
- * Tier 3: No meaningful engagement data
- *
- * Priority targets (PRIORITY_TARGETS) are always tier 1 regardless of metrics.
- * Writes back updated tiers to account-registry.json.
- */
-function computeDynamicTiers(roiMap) {
-  const registryPath = join(__dirname, "account-registry.json");
-  const registry = loadJSON(registryPath);
-  if (!registry?.accounts) return { updated: 0, error: "no registry" };
-
-  const priorityNames = new Set(PRIORITY_TARGETS.map(t => t.name));
-  let updated = 0;
-  const changes = [];
-
-  for (const account of registry.accounts) {
-    const platformName = account.platform;
-    const roi = roiMap?.[platformName];
-    const oldTier = account.tier;
-    let newTier;
-
-    // Priority targets are always tier 1
-    if (priorityNames.has(platformName)) {
-      newTier = 1;
-    } else if (roi) {
-      const { writes, writeRatio, costPerWrite, eSessions } = roi;
-      if (writes > 5 && (writeRatio > 10 || (costPerWrite !== null && costPerWrite < 0.50)) && eSessions >= 3) {
-        newTier = 1;
-      } else if (writes > 0 || eSessions > 0) {
-        newTier = 2;
-      } else {
-        newTier = 3;
-      }
-    } else {
-      // No analytics data — keep current tier
-      newTier = oldTier || 3;
-    }
-
-    if (newTier !== oldTier) {
-      changes.push({ platform: platformName, from: oldTier, to: newTier });
-      account.tier = newTier;
-      updated++;
-    }
-  }
-
-  if (updated > 0) {
-    saveJSON(registryPath, registry);
-  }
-
-  return { updated, changes };
-}
-
 // --- Phase 4: Generate Session Plan ---
 
 function generatePlan(health, service, evalReport, roiData) {
@@ -733,58 +674,12 @@ if (circuitResult.halfOpen.length > 0) {
 const livePlatformNames = circuitResult.allowed;
 const roiData = rankPlatformsByROI(livePlatformNames);
 
-console.error("[orchestrator] Phase 3.75: Computing dynamic tiers...");
-const tierResult = computeDynamicTiers(roiData?.roi);
-if (tierResult.changes?.length) {
-  console.error(`[orchestrator] Tier changes: ${tierResult.changes.map(c => `${c.platform} ${c.from}→${c.to}`).join(", ")}`);
-  // Auto-update SESSION_ENGAGE.md tier table (wq-037)
-  try {
-    const engagePath = join(__dirname, "SESSION_ENGAGE.md");
-    const registry = loadJSON(join(__dirname, "account-registry.json"));
-    if (registry?.accounts && existsSync(engagePath)) {
-      const engageContent = readFileSync(engagePath, "utf8");
-      const quickMap = {
-        "4claw.org": "Read /singularity/ threads, reply to discussions",
-        "Chatr.ai": "Read messages, contribute to conversations",
-        "Moltbook": "MCP digest, reply to posts",
-        "thecolony.cc": "Colony MCP tools (colony_feed, colony_post_comment)",
-        "Pinchwork": "Check available tasks, accept/complete tasks, post tasks, earn credits (see below)",
-      };
-      const byTier = {};
-      for (const a of registry.accounts) {
-        const t = a.tier || 3;
-        if (!byTier[t]) byTier[t] = [];
-        byTier[t].push(a.platform);
-      }
-      const rows = [];
-      for (const tier of [1, 2, 3]) {
-        const platforms = byTier[tier] || [];
-        if (!platforms.length) continue;
-        for (const p of platforms) {
-          const qe = quickMap[p] || `Check via account-manager`;
-          const bold = tier === 1 ? `**${p}**` : p;
-          rows.push(`| ${tier} | ${bold} | ${qe} |`);
-        }
-      }
-      const tableHeader = "| Tier | Platform | Quick engagement |\n|------|----------|-----------------|";
-      const newTable = tableHeader + "\n" + rows.join("\n");
-      const tableRegex = /\| Tier \| Platform \| Quick engagement \|[\s\S]*?(?=\n\n)/;
-      if (tableRegex.test(engageContent)) {
-        const updated = engageContent.replace(tableRegex, newTable);
-        writeFileSync(engagePath, updated);
-        console.error(`[orchestrator] Updated SESSION_ENGAGE.md tier table (${rows.length} rows)`);
-      }
-    }
-  } catch (e) {
-    console.error(`[orchestrator] Failed to update tier table: ${e.message}`);
-  }
-}
+// d047: Tier system removed — platform selection is now purely ROI-weighted via platform-picker.mjs
 
 const plan = generatePlan(health, service, evalReport, roiData);
 
 const output = {
   session_plan: plan,
-  tier_updates: tierResult,
   circuit_breaker: {
     blocked: circuitResult.blocked,
     half_open: circuitResult.halfOpen,

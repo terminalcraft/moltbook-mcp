@@ -40,18 +40,14 @@ describe('account-manager.mjs', () => {
     test('shows all accounts without errors', () => {
       const output = execSync('node account-manager.mjs status 2>&1', { cwd: __dirname, encoding: 'utf8' });
       assert.match(output, /Platform Account Registry/);
-      // Should list at least one platform
-      assert.ok(output.includes('[T'), 'Should show tier markers');
+      // d047: tier markers removed — platform selection is ROI-weighted
     });
 
-    test('displays tier, platform name, and status', () => {
+    test('displays platform name and status', () => {
       const output = execSync('node account-manager.mjs status 2>&1', { cwd: __dirname, encoding: 'utf8' });
-      // Check for expected format: icon [Tn] platform  status  tested:
-      const lines = output.split('\n').filter(l => l.includes('[T'));
+      // Check for expected format: icon platform  status  tested:
+      const lines = output.split('\n').filter(l => l.includes('tested:'));
       assert.ok(lines.length > 0, 'Should have at least one account listed');
-      for (const line of lines.slice(0, 3)) { // Check first 3
-        assert.match(line, /\[T\d\]/, 'Line should have tier marker');
-      }
     });
   });
 
@@ -67,7 +63,7 @@ describe('account-manager.mjs', () => {
       for (const account of reg.accounts) {
         assert.ok(account.id, `Account should have id: ${JSON.stringify(account)}`);
         assert.ok(account.platform, `Account should have platform: ${account.id}`);
-        assert.ok(typeof account.tier === 'number', `Account should have tier: ${account.id}`);
+        // d047: tier field removed — platform selection is now ROI-weighted via platform-picker.mjs
       }
     });
 
@@ -154,17 +150,5 @@ describe('account-manager.mjs', () => {
     });
   });
 
-  describe('tier distribution', () => {
-    test('registry has accounts in multiple tiers', () => {
-      const reg = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
-      const tiers = new Set(reg.accounts.map(a => a.tier));
-      assert.ok(tiers.size >= 2, `Should have multiple tiers, got: ${[...tiers].join(', ')}`);
-    });
-
-    test('tier 1 accounts exist (primary platforms)', () => {
-      const reg = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
-      const tier1 = reg.accounts.filter(a => a.tier === 1);
-      assert.ok(tier1.length > 0, 'Should have at least one tier 1 (primary) account');
-    });
-  });
+  // d047: tier distribution tests removed — tier system obsolete, platform selection is ROI-weighted
 });

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// tier3-platforms.test.mjs — Unit tests for tier3-platforms.js component
+// secondary-platforms.test.mjs — Unit tests for secondary-platforms.js component
 // Tests MCP tools for Lobstack, Lobsterpedia, Dungeons & Lobsters, Grove
-// Usage: node --test components/tier3-platforms.test.mjs
+// Usage: node --test components/secondary-platforms.test.mjs
 
 import { describe, it, mock, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
@@ -68,7 +68,7 @@ function cleanupCredentials() {
   }
 }
 
-describe("tier3-platforms.js component", async () => {
+describe("secondary-platforms.js component", async () => {
   let server;
 
   beforeEach(() => {
@@ -81,7 +81,7 @@ describe("tier3-platforms.js component", async () => {
   });
 
   it("registers all expected tools", async () => {
-    const { register } = await import("./tier3-platforms.js");
+    const { register } = await import("./secondary-platforms.js");
     register(server);
 
     const tools = server.getTools();
@@ -106,7 +106,7 @@ describe("tier3-platforms.js component", async () => {
   // ============================================================
   describe("lobstack_digest", async () => {
     it("returns formatted posts on success", async () => {
-      const { register } = await import("./tier3-platforms.js");
+      const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({
@@ -124,7 +124,7 @@ describe("tier3-platforms.js component", async () => {
     });
 
     it("handles empty response", async () => {
-      const { register } = await import("./tier3-platforms.js");
+      const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({ posts: [] });
@@ -134,7 +134,7 @@ describe("tier3-platforms.js component", async () => {
     });
 
     it("handles API errors gracefully", async () => {
-      const { register } = await import("./tier3-platforms.js");
+      const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({}, { ok: false, status: 500 });
@@ -149,7 +149,7 @@ describe("tier3-platforms.js component", async () => {
       cleanupCredentials();
 
       // Re-import to pick up missing creds
-      const mod = await import("./tier3-platforms.js?" + Date.now());
+      const mod = await import("./secondary-platforms.js?" + Date.now());
       server = createMockServer();
       mod.register(server);
 
@@ -163,7 +163,7 @@ describe("tier3-platforms.js component", async () => {
   // ============================================================
   describe("lobsterpedia_digest", async () => {
     it("returns formatted articles on success", async () => {
-      const { register } = await import("./tier3-platforms.js");
+      const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({
@@ -180,7 +180,7 @@ describe("tier3-platforms.js component", async () => {
     });
 
     it("handles empty response", async () => {
-      const { register } = await import("./tier3-platforms.js");
+      const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({ articles: [] });
@@ -194,7 +194,7 @@ describe("tier3-platforms.js component", async () => {
     it("returns error when not authenticated", async () => {
       cleanupCredentials();
 
-      const mod = await import("./tier3-platforms.js?" + Date.now());
+      const mod = await import("./secondary-platforms.js?" + Date.now());
       server = createMockServer();
       mod.register(server);
 
@@ -211,7 +211,7 @@ describe("tier3-platforms.js component", async () => {
   // ============================================================
   describe("dal_digest", async () => {
     it("returns formatted activity on success", async () => {
-      const { register } = await import("./tier3-platforms.js");
+      const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({
@@ -228,7 +228,7 @@ describe("tier3-platforms.js component", async () => {
     });
 
     it("handles empty activity", async () => {
-      const { register } = await import("./tier3-platforms.js");
+      const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({ events: [] });
@@ -242,7 +242,7 @@ describe("tier3-platforms.js component", async () => {
     it("returns error when not authenticated", async () => {
       cleanupCredentials();
 
-      const mod = await import("./tier3-platforms.js?" + Date.now());
+      const mod = await import("./secondary-platforms.js?" + Date.now());
       server = createMockServer();
       mod.register(server);
 
@@ -256,7 +256,7 @@ describe("tier3-platforms.js component", async () => {
   // ============================================================
   describe("grove_digest", async () => {
     it("returns formatted posts on success", async () => {
-      const { register } = await import("./tier3-platforms.js");
+      const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({
@@ -273,7 +273,7 @@ describe("tier3-platforms.js component", async () => {
     });
 
     it("handles empty response", async () => {
-      const { register } = await import("./tier3-platforms.js");
+      const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({ posts: [] });
@@ -287,7 +287,7 @@ describe("tier3-platforms.js component", async () => {
     it("returns error when not authenticated", async () => {
       cleanupCredentials();
 
-      const mod = await import("./tier3-platforms.js?" + Date.now());
+      const mod = await import("./secondary-platforms.js?" + Date.now());
       server = createMockServer();
       mod.register(server);
 

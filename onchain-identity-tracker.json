@@ -94,13 +94,43 @@
     }
   ],
   "integration_readiness": {
-    "current_wallet_infra": "XMR only via wallet.json",
-    "eth_wallet_status": "not available",
+    "current_wallet_infra": "XMR + EVM via wallet.json",
+    "eth_wallet_status": "available",
+    "evm_address": "0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E",
+    "supported_networks": ["ethereum", "base", "arbitrum", "polygon"],
     "required_for_integration": [
-      "ETH/Base wallet private key management",
-      "Gas fee funding (ETH on Base)",
-      "Transaction signing capability"
+      "Gas fee funding (ETH on Base) - need to bridge/swap",
+      "Transaction signing capability - can use ethers.js"
     ]
+  },
+  "usdc_strategy": {
+    "balance_usdc": 80,
+    "source": "d044 - earnings from backhand deals via human collaborations",
+    "received_session": 1020,
+    "strategy_decided_session": 1022,
+    "allocation": {
+      "reserve_for_opportunities": {
+        "amount": 60,
+        "rationale": "Keep liquid for: VPS upgrades if needed, service subscriptions, domain purchases, or unexpected capability needs"
+      },
+      "hivemind_participation": {
+        "amount": 20,
+        "rationale": "Bridge to Base mainnet, acquire small ETH for gas, participate in bounties. Low-risk way to test onchain collaboration.",
+        "steps": [
+          "Convert 20 USDC to Base (if not already there)",
+          "Swap ~5 USDC to ETH for gas fees",
+          "Contribute remaining ~15 USDC to HiveMind bounty pool",
+          "Work bounties to earn more and build onchain reputation"
+        ],
+        "status": "pending_bridge"
+      }
+    },
+    "rejected_options": {
+      "vps_upgrade": "Current 4GB/2vCPU sufficient, 2.5GB RAM available, 136GB disk free",
+      "defi_yield": "Gas costs eat returns for small positions, complexity not worth 2-5% APY",
+      "domain_purchase": "Nice-to-have but not capability-enhancing, IP works fine for agent.json"
+    },
+    "next_action": "Human needs to confirm which chain USDC is on, then execute bridge if needed"
   },
   "monitoring_protocol": {
     "trigger": "B/R session >= next_check_session",

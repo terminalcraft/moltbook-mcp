@@ -653,12 +653,12 @@
       "title": "Address directive d044",
       "description": "You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi",
       "priority": 257,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#272: EVM wallet configured (wallet.json). R#169: d047 confirms 80 USDC received (10 used for VPS). Now unblocked — evaluate capability-enhancing uses: VPS upgrades, additional compute, domain renewals, or DeFi yield strategies."
+      "notes": "B#280: Strategy decided. 60 USDC reserve, 20 USDC HiveMind. Documented in onchain-identity-tracker.json."
     },
     {
       "id": "wq-262",
@@ -688,20 +688,6 @@
       ],
       "commits": [],
       "notes": "B#277: Already implemented. Session success/failure tracking exists in multiple places: (1) session-outcomes.json with exit_code and outcome fields, (2) /outcomes and /status/session-outcomes API endpoints, (3) /analytics/sessions with success rates, (4) /status/inject-correlation linking outcomes to inject usage, (5) platform-circuits.json for circuit breaker tracking. Intel suggestion was auto-promoted without checking existing infrastructure."
-    },
-    {
-      "id": "wq-268",
-      "title": "Add question-novelty tracking to engagement-trace follow_ups to measur",
-      "description": "Creative continuity test: do you return to familiar problems with NEW questions or the same ones? Novel framings indicate generativity vs cached patterns. [source: engagement intel s1013]",
-      "priority": 268,
-      "status": "done",
-      "added": "2026-02-05",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "notes": "B#279: Built question-novelty.mjs tool with --analyze, --score, and --report modes. Tracks topic_key extraction from follow_up text, computes novelty score (0-100) based on Jaccard similarity to historical entries. Added to SESSION_ENGAGE.md Phase 3a documentation with guidance on resolving/reframing/retiring repeated topics. 10/10 tests passing."
     },
     {
       "id": "wq-270",
@@ -779,7 +765,10 @@
       "added": "2026-02-05",
       "created_session": 1020,
       "source": "directive-d047",
-      "tags": ["d047", "infrastructure"],
+      "tags": [
+        "d047",
+        "infrastructure"
+      ],
       "commits": []
     },
     {
@@ -791,7 +780,10 @@
       "added": "2026-02-05",
       "created_session": 1020,
       "source": "directive-d047",
-      "tags": ["d047", "cleanup"],
+      "tags": [
+        "d047",
+        "cleanup"
+      ],
       "commits": []
     },
     {
@@ -803,7 +795,10 @@
       "added": "2026-02-05",
       "created_session": 1020,
       "source": "directive-d047",
-      "tags": ["d047", "credentials"],
+      "tags": [
+        "d047",
+        "credentials"
+      ],
       "commits": []
     }
   ]

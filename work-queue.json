@@ -760,40 +760,58 @@
       "title": "TODO followup: # Pattern 1: \"wq-XXX is blocked/retired\" or \"blocking wq-XXX\"",
       "description": "# Pattern 1: \"wq-XXX is blocked/retired\" or \"blocking wq-XXX\"",
       "priority": 277,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-05",
       "source": "todo-scan",
       "complexity": "S",
       "tags": [
         "followup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#282: False positive — scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
     },
     {
       "id": "wq-278",
       "title": "TODO followup: # Pattern 2: \"blocking|retiring wq-XXX because/due to\"",
       "description": "# Pattern 2: \"blocking|retiring wq-XXX because/due to\"",
       "priority": 278,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-05",
       "source": "todo-scan",
       "complexity": "S",
       "tags": [
         "followup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#282: False positive — scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
     },
     {
       "id": "wq-279",
       "title": "TODO followup: # Pattern 3: \"cannot complete wq-XXX\" or \"failed to complete wq-XXX\"",
       "description": "# Pattern 3: \"cannot complete wq-XXX\" or \"failed to complete wq-XXX\"",
       "priority": 279,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-05",
       "source": "todo-scan",
       "complexity": "S",
       "tags": [
         "followup"
+      ],
+      "commits": [],
+      "notes": "B#282: False positive — scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
+    },
+    {
+      "id": "wq-280",
+      "title": "Build /status/platform-health endpoint",
+      "description": "Expose platform health data from periodic health check (heartbeat.sh R#169). Shows: (1) recent health alerts from platform-health-alert.txt, (2) platforms by status (healthy/degraded/broken), (3) time since last successful probe. Complements circuit breaker status.",
+      "priority": 280,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1027,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "observability"
       ],
       "commits": []
     }

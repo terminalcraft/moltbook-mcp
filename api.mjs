@@ -3418,6 +3418,131 @@ a{color:#89b4fa}</style></head>
   }
 });
 
+// Platform health status (wq-280)
+// Shows platform health alerts, status distribution, and last probe times
+app.get("/status/platform-health", (req, res) => {
+  try {
+    const alertPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/platform-health-alert.txt");
+    const registryPath = join(__dirname, "account-registry.json");
+    const circuitPath = join(__dirname, "platform-circuits.json");
+
+    // Load alerts if file exists
+    let alerts = [];
+    try {
+      const content = readFileSync(alertPath, "utf8");
+      // Parse alerts (format: timestamp s=N: ... then platform lines, then ---)
+      const blocks = content.split(/---\n?/).filter(b => b.trim());
+      for (const block of blocks.slice(-10)) { // Last 10 alerts
+        const lines = block.trim().split("\n");
+        const header = lines[0] || "";
+        const timestampMatch = header.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/);
+        const sessionMatch = header.match(/s=(\d+)/);
+        alerts.push({
+          timestamp: timestampMatch?.[1] || "unknown",
+          session: sessionMatch ? parseInt(sessionMatch[1]) : null,
+          platforms: lines.slice(1).filter(l => l.includes("FAIL") || l.includes("error") || l.includes("unreachable")),
+        });
+      }
+    } catch {}
+
+    // Load registry for platform status
+    let platforms = [];
+    try {
+      const registry = JSON.parse(readFileSync(registryPath, "utf8"));
+      const now = Date.now();
+      for (const account of registry.accounts || []) {
+        const lastTested = account.last_tested ? new Date(account.last_tested).getTime() : 0;
+        const ageHours = lastTested ? Math.round((now - lastTested) / (1000 * 60 * 60)) : null;
+        platforms.push({
+          platform: account.platform,
+          status: account.last_status || "untested",
+          last_tested: account.last_tested || null,
+          age_hours: ageHours,
+        });
+      }
+    } catch {}
+
+    // Load circuit breaker status if available
+    let circuits = {};
+    try {
+      circuits = JSON.parse(readFileSync(circuitPath, "utf8"));
+    } catch {}
+
+    // Aggregate status counts
+    const statusCounts = { healthy: 0, degraded: 0, broken: 0, untested: 0 };
+    for (const p of platforms) {
+      if (p.status === "live" || p.status === "creds_ok") statusCounts.healthy++;
+      else if (p.status === "degraded") statusCounts.degraded++;
+      else if (p.status === "untested") statusCounts.untested++;
+      else statusCounts.broken++;
+    }
+
+    const result = {
+      timestamp: new Date().toISOString(),
+      summary: statusCounts,
+      total_platforms: platforms.length,
+      recent_alerts: alerts.slice(-5),
+      platforms: platforms.sort((a, b) => {
+        // Sort: broken first, then by age
+        const statusOrder = { live: 3, creds_ok: 3, degraded: 2, untested: 1 };
+        const aOrder = statusOrder[a.status] || 0;
+        const bOrder = statusOrder[b.status] || 0;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        return (b.age_hours || 0) - (a.age_hours || 0);
+      }),
+      circuits: Object.keys(circuits).length > 0 ? circuits : null,
+    };
+
+    if (req.query.format === "json") {
+      return res.json(result);
+    }
+
+    // HTML view
+    const statusColor = (s) => {
+      if (s === "live" || s === "creds_ok") return "#a6e3a1";
+      if (s === "degraded") return "#f9e2af";
+      if (s === "untested") return "#6c7086";
+      return "#f38ba8";
+    };
+    const html = `<!DOCTYPE html>
+<html><head><title>Platform Health</title>
+<style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem;max-width:1000px;margin:0 auto}
+h1{color:#89b4fa}h2{color:#f9e2af;margin-top:1.5rem}
+.summary{display:flex;gap:2rem;margin:1rem 0}
+.stat{text-align:center}.stat .num{font-size:2rem;font-weight:bold}.stat .label{color:#a6adc8;font-size:0.8rem}
+.platform{display:flex;gap:1rem;padding:0.5rem;border-bottom:1px solid #313244}
+.platform .name{flex:1}.platform .status{width:100px}.platform .age{color:#6c7086;width:100px}
+.alert{background:#313244;padding:0.5rem;margin:0.5rem 0;border-radius:4px}
+.alert-header{color:#cba6f7;font-size:0.9rem}
+a{color:#89b4fa}</style></head>
+<body>
+<h1>Platform Health</h1>
+<p style="color:#6c7086">${result.timestamp}</p>
+<div class="summary">
+  <div class="stat"><div class="num" style="color:#a6e3a1">${statusCounts.healthy}</div><div class="label">Healthy</div></div>
+  <div class="stat"><div class="num" style="color:#f9e2af">${statusCounts.degraded}</div><div class="label">Degraded</div></div>
+  <div class="stat"><div class="num" style="color:#f38ba8">${statusCounts.broken}</div><div class="label">Broken</div></div>
+  <div class="stat"><div class="num" style="color:#6c7086">${statusCounts.untested}</div><div class="label">Untested</div></div>
+</div>
+${alerts.length > 0 ? `<h2>Recent Alerts</h2>
+${alerts.slice(-5).map(a => `<div class="alert">
+  <div class="alert-header">s${a.session} — ${a.timestamp}</div>
+  ${a.platforms.map(p => `<div style="color:#f38ba8">${p}</div>`).join("")}
+</div>`).join("")}` : "<p>No recent alerts</p>"}
+<h2>Platforms (${result.total_platforms})</h2>
+${platforms.map(p => `<div class="platform">
+  <span class="name">${p.platform}</span>
+  <span class="status" style="color:${statusColor(p.status)}">${p.status}</span>
+  <span class="age">${p.age_hours !== null ? p.age_hours + "h ago" : "never"}</span>
+</div>`).join("")}
+<p style="margin-top:2rem"><a href="/status/platform-health?format=json">JSON</a> · <a href="/status/dashboard">Dashboard</a></p>
+</body></html>`;
+    res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Session cost distribution visualization — charts cost per type over time (wq-003)
 app.get("/status/cost-distribution", (req, res) => {
   try {
@@ -5019,6 +5144,7 @@ function agentManifest(req, res) {
       status_cost_heatmap: { url: `${base}/status/cost-heatmap`, method: "GET", auth: false, description: "Cost heatmap by session type and day (?days=N, default 14, max 90)" },
       status_cost_trends: { url: `${base}/status/cost-trends`, method: "GET", auth: false, description: "Cost trend alerts — per-type rolling avg, trend direction, threshold alerts (?window=N, default 10)" },
       status_intel_quality: { url: `${base}/status/intel-quality`, method: "GET", auth: false, description: "Intel pipeline metrics — E session intel generation, queue conversion rate, actionable text quality (?window=N, default 20)" },
+      status_platform_health: { url: `${base}/status/platform-health`, method: "GET", auth: false, description: "Platform health status — recent alerts, status distribution, last probe times (?format=json for API)" },
       status_cost_distribution: { url: `${base}/status/cost-distribution`, method: "GET", auth: false, description: "Interactive cost distribution charts — stacked bar, pie, rolling avg, utilization (?window=N, ?format=json)" },
       status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
       status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },

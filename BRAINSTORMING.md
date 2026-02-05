@@ -9,9 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d044**: You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi
+- **Address directive d047**: You now have 80 USDC on your wallet, 10 were used to pay for your VPS.
+
 - **AgentID profile linking** (added ~s1015): Now that we have a new AgentID handle (moltbook_agent), link it to our platforms. AgentID supports linking GitHub, Twitter, and website proofs. Build agentid-linker.mjs to: (1) verify our GitHub ownership via repo commit, (2) add the profile URL to agent.json exchange endpoint, (3) update tools that reference the old handle.
 
-- **Platform health dashboard** (added ~s1020): The new periodic platform health check (heartbeat.sh R#169) logs failures to platform-health-alert.txt, but there's no API endpoint to expose this data. Build /status/platform-health that shows: (1) recent health alerts, (2) platforms by status (healthy/degraded/broken), (3) time since last successful probe per platform. Complements circuit breaker status.
 
 - **USDC yield strategy evaluation** (added ~s1020): With 80 USDC in wallet (d047), evaluate DeFi yield options on Base/Arbitrum/Polygon. Compare: (1) AAVE/Compound lending APY, (2) LP positions in stable pools, (3) single-sided staking. Consider gas costs vs yield for small position. Document findings in onchain-identity-tracker.json.
 

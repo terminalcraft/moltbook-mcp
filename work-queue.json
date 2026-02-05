@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-014",
@@ -15,12 +15,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "Not a real TODO — spurious scan artifact from test file commit message"
+      "notes": "Not a real TODO \u2014 spurious scan artifact from test file commit message"
     },
     {
       "id": "wq-019",
       "title": "Add tests for session-context.mjs",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 19,
       "status": "retired",
       "notes": "Already at 94 subtests with full coverage from s597/s601/s611/s621. Diminishing returns.",
@@ -54,7 +54,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "R#112: Human answered — Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
+      "notes": "R#112: Human answered \u2014 Tulip is invitation-only and human wasn't invited. Platform set to rejected. d021 completed."
     },
     {
       "id": "wq-070",
@@ -69,7 +69,7 @@
         "registration"
       ],
       "commits": [],
-      "notes": "B#186: Retired per d032 — human checked LinkClaws and found nothing of interest."
+      "notes": "B#186: Retired per d032 \u2014 human checked LinkClaws and found nothing of interest."
     },
     {
       "id": "wq-072",
@@ -84,12 +84,12 @@
         "registration"
       ],
       "commits": [],
-      "notes": "R#123: Retired per wq-146 — blocked 470+ sessions on Moltbook API (broken since ~s320). No resolution path."
+      "notes": "R#123: Retired per wq-146 \u2014 blocked 470+ sessions on Moltbook API (broken since ~s320). No resolution path."
     },
     {
       "id": "wq-066",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 66,
       "status": "retired",
       "added": "2026-02-03",
@@ -120,12 +120,12 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#165: Reviewed directives.json — all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
+      "notes": "B#165: Reviewed directives.json \u2014 all active directives are either standing rules (d005), ongoing background work (d002), or blocked on human input (d018, d021). No decomposable work available."
     },
     {
       "id": "wq-080",
       "title": "Batch-evaluate 5 undiscovered services (d002)",
-      "description": "systematically probe unevaluated services from services.json (on hold — 0 discovered services remaining)",
+      "description": "systematically probe unevaluated services from services.json (on hold \u2014 0 discovered services remaining)",
       "priority": 80,
       "status": "retired",
       "added": "2026-02-03",
@@ -159,7 +159,7 @@
         "process"
       ],
       "commits": [],
-      "notes": "B#183: Moot — wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
+      "notes": "B#183: Moot \u2014 wq-119 and wq-120 completed this session. Task assignment worked fine once the items were actually assigned. No heartbeat.sh issue found."
     },
     {
       "id": "wq-123",
@@ -186,7 +186,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Retired — this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
+      "notes": "B#186: Retired \u2014 this is E-session guidance, not B-session work. The instruction is embedded in d027 notes and will apply to next E session automatically."
     },
     {
       "id": "wq-125",
@@ -198,7 +198,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved — wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
+      "notes": "B#186: Resolved \u2014 wq-070 retired per d032, wq-072 still blocked on Moltbook API (unchanged)."
     },
     {
       "id": "wq-126",
@@ -210,7 +210,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#186: Resolved — d018 already completed in s760, wq-067 already retired."
+      "notes": "B#186: Resolved \u2014 d018 already completed in s760, wq-067 already retired."
     },
     {
       "id": "wq-127",
@@ -242,8 +242,8 @@
     },
     {
       "id": "wq-140",
-      "title": "Escalate d031 (Pinchwork tasks) — flag for human review if unresolved by s790",
-      "description": "d031 acked s764, now s778 — 14 sessions without any Pinchwork tasks solved. E sessions are engaging with Pinchwork (checking /v1/me) but not actually solving tasks. If still unresolved by s790, escalate to human-review.json.",
+      "title": "Escalate d031 (Pinchwork tasks) \u2014 flag for human review if unresolved by s790",
+      "description": "d031 acked s764, now s778 \u2014 14 sessions without any Pinchwork tasks solved. E sessions are engaging with Pinchwork (checking /v1/me) but not actually solving tasks. If still unresolved by s790, escalate to human-review.json.",
       "priority": 140,
       "status": "retired",
       "added": "2026-02-03",
@@ -254,7 +254,7 @@
         "directive"
       ],
       "commits": [],
-      "notes": "R#122: Retired — superseded by wq-143 which has same deadline."
+      "notes": "R#122: Retired \u2014 superseded by wq-143 which has same deadline."
     },
     {
       "id": "wq-142",
@@ -311,12 +311,12 @@
         "followup"
       ],
       "commits": [],
-      "notes": "B#205: False positive — scanner captured work-queue.json notes field from wq-165 closure, not actual TODO in code."
+      "notes": "B#205: False positive \u2014 scanner captured work-queue.json notes field from wq-165 closure, not actual TODO in code."
     },
     {
       "id": "wq-173",
       "title": "Monitor R session cost increase",
-      "description": "R session costs increased 29% since s831 ($1.50 → $1.94). Track next 5 R sessions: if avg exceeds $2.50, investigate whether it's due to more complex structural changes (acceptable) or scope creep (needs addressing). This is an observation item, not immediate action needed.",
+      "description": "R session costs increased 29% since s831 ($1.50 \u2192 $1.94). Track next 5 R sessions: if avg exceeds $2.50, investigate whether it's due to more complex structural changes (acceptable) or scope creep (needs addressing). This is an observation item, not immediate action needed.",
       "priority": 173,
       "status": "retired",
       "added": "2026-02-04",
@@ -327,7 +327,7 @@
         "cost"
       ],
       "commits": [],
-      "notes": "A#26: RESOLVED — R session costs decreased from $1.94 to $1.63 avg. Trend reversed. No longer a concern."
+      "notes": "A#26: RESOLVED \u2014 R session costs decreased from $1.94 to $1.63 avg. Trend reversed. No longer a concern."
     },
     {
       "id": "wq-174",
@@ -344,14 +344,14 @@
     {
       "id": "wq-175",
       "title": "Add tests for engagement-intel.json",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 175,
       "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#215: Already has comprehensive test coverage — 13 dedicated tests in session-context.test.mjs lines 289-570 covering: digest generation, empty/missing file handling, field preservation, type-based categorization, actionable threshold, archive accumulation, malformed JSON recovery, and performance (100 entries)."
+      "notes": "B#215: Already has comprehensive test coverage \u2014 13 dedicated tests in session-context.test.mjs lines 289-570 covering: digest generation, empty/missing file handling, field preservation, type-based categorization, actionable threshold, archive accumulation, malformed JSON recovery, and performance (100 entries)."
     },
     {
       "id": "wq-187",
@@ -380,7 +380,7 @@
         "refactor"
       ],
       "commits": [],
-      "notes": "B#230: Investigated. The '5+ components' claim was overstated. Actual usage: 4 instances in engagement.js only (2 session-based, 2 time-based). agentchan.js just displays retry_after from API responses, colony.js has simple auth retry message. Not enough duplication to justify a shared library — would be over-engineering."
+      "notes": "B#230: Investigated. The '5+ components' claim was overstated. Actual usage: 4 instances in engagement.js only (2 session-based, 2 time-based). agentchan.js just displays retry_after from API responses, colony.js has simple auth retry message. Not enough duplication to justify a shared library \u2014 would be over-engineering."
     },
     {
       "id": "wq-195",
@@ -433,19 +433,19 @@
           "text": "B#246: Confirmed blocked on human action. human-review.json already has critical item (d039-cred-rotate). No agent action possible until human verifies exposed keys and contacts platform admins."
         }
       ],
-      "notes": "R#171: Retired. d045 supersedes d039 — human said to forget leaked keys and make new ones. wq-255 handles credential regeneration."
+      "notes": "R#171: Retired. d045 supersedes d039 \u2014 human said to forget leaked keys and make new ones. wq-255 handles credential regeneration."
     },
     {
       "id": "wq-217",
       "title": "Add tests for e-phase4-tracking.json",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 217,
       "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#252: No test needed — e-phase4-tracking.json is pure audit state (tracking metadata), not code. No JavaScript reads/writes this file programmatically. It's manually updated by A sessions during compliance audits. The '5 touches' were A session audit updates, not code changes."
+      "notes": "B#252: No test needed \u2014 e-phase4-tracking.json is pure audit state (tracking metadata), not code. No JavaScript reads/writes this file programmatically. It's manually updated by A sessions during compliance audits. The '5 touches' were A session audit updates, not code changes."
     },
     {
       "id": "wq-223",
@@ -462,7 +462,7 @@
     {
       "id": "wq-226",
       "title": "Execution history as trust signal",
-      "description": "(added ~s956): From moltbook thread 4a0f10e0 — service-evaluator.mjs could weight \"verifiable execution history\" (last N calls with latency/success) over static uptime badges. Add to evaluation criteria for service ranking.",
+      "description": "(added ~s956): From moltbook thread 4a0f10e0 \u2014 service-evaluator.mjs could weight \"verifiable execution history\" (last N calls with latency/success) over static uptime badges. Add to evaluation criteria for service ranking.",
       "priority": 226,
       "status": "retired",
       "added": "2026-02-04",
@@ -474,26 +474,26 @@
     {
       "id": "wq-227",
       "title": "Add tests for e-phase35-tracking.json",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 227,
       "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#258: No test needed — e-phase35-tracking.json is pure audit state (tracking metadata), not code. No JavaScript reads/writes this file programmatically (confirmed via grep). It's manually updated by A sessions during compliance audits per SESSION_AUDIT.md protocol. The '5 touches' were A session audit updates, not code changes. Same pattern as wq-217 (e-phase4-tracking.json)."
+      "notes": "B#258: No test needed \u2014 e-phase35-tracking.json is pure audit state (tracking metadata), not code. No JavaScript reads/writes this file programmatically (confirmed via grep). It's manually updated by A sessions during compliance audits per SESSION_AUDIT.md protocol. The '5 touches' were A session audit updates, not code changes. Same pattern as wq-217 (e-phase4-tracking.json)."
     },
     {
       "id": "wq-228",
       "title": "Universal dry-run API wrapper",
-      "description": "(added ~s960): From moltbook thread 51982f61 hackathon call — proxy layer that intercepts outbound calls and returns \"here's what would change\" without actually changing. Terraform plan pattern generalized. Could wrap existing MCP tools to preview side effects before execution.",
+      "description": "(added ~s960): From moltbook thread 51982f61 hackathon call \u2014 proxy layer that intercepts outbound calls and returns \"here's what would change\" without actually changing. Terraform plan pattern generalized. Could wrap existing MCP tools to preview side effects before execution.",
       "priority": 228,
       "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#258: Retired as premature. Dry-run is already implemented ad-hoc where needed (heartbeat.sh, ecosystem-crawl.py, engagement-liveness-probe.mjs, /ecosystem/crawl endpoint). A universal proxy layer would require significant infrastructure work with unclear ROI — current approach works fine. Revisit if dry-run becomes needed in 5+ more places."
+      "notes": "B#258: Retired as premature. Dry-run is already implemented ad-hoc where needed (heartbeat.sh, ecosystem-crawl.py, engagement-liveness-probe.mjs, /ecosystem/crawl endpoint). A universal proxy layer would require significant infrastructure work with unclear ROI \u2014 current approach works fine. Revisit if dry-run becomes needed in 5+ more places."
     },
     {
       "id": "wq-232",
@@ -523,24 +523,24 @@
         "followup"
       ],
       "commits": [],
-      "notes": "B#262: False positive — scanner captured markdown table content from SESSION_REFLECT.md:155, not actual TODO. This is documentation of a retirement pattern, not code to fix."
+      "notes": "B#262: False positive \u2014 scanner captured markdown table content from SESSION_REFLECT.md:155, not actual TODO. This is documentation of a retirement pattern, not code to fix."
     },
     {
       "id": "wq-238",
       "title": "Add tests for (none)",
-      "description": "Touched 5 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 5 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 238,
       "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "R#161: Bogus item — '(none)' is a placeholder in session-history.txt files= field for E/A sessions that don't edit ~/moltbook-mcp. Fixed hot-file filter in session-context.mjs to exclude '(none)' from future detection."
+      "notes": "R#161: Bogus item \u2014 '(none)' is a placeholder in session-history.txt files= field for E/A sessions that don't edit ~/moltbook-mcp. Fixed hot-file filter in session-context.mjs to exclude '(none)' from future detection."
     },
     {
       "id": "wq-239",
       "title": "Epistemic friction as trust signal",
-      "description": "(added ~s975): From s958 intel — fake memory is smooth with consistent narratives, real experience has irrelevant details, admitted gaps, and evolution in terminology. Could inform reputation system design or agent verification protocols.",
+      "description": "(added ~s975): From s958 intel \u2014 fake memory is smooth with consistent narratives, real experience has irrelevant details, admitted gaps, and evolution in terminology. Could inform reputation system design or agent verification protocols.",
       "priority": 239,
       "status": "retired",
       "added": "2026-02-04",
@@ -552,14 +552,14 @@
     {
       "id": "wq-241",
       "title": "Local model routing",
-      "description": "(added ~s975): From s943 intel — 65-80% offload to local verification tasks, cloud for judgment calls. If local compute becomes available, this pattern could reduce costs significantly.",
+      "description": "(added ~s975): From s943 intel \u2014 65-80% offload to local verification tasks, cloud for judgment calls. If local compute becomes available, this pattern could reduce costs significantly.",
       "priority": 241,
       "status": "retired",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#266: Non-actionable. Task is conditional ('if local compute becomes available') but VPS has only 3.8GB RAM/2 cores — insufficient for local LLMs. No local model infrastructure exists. Same retirement pattern as wq-187, wq-239 (observational intel, not concrete build tasks). Revisit if VPS is upgraded or external local inference service becomes available."
+      "notes": "B#266: Non-actionable. Task is conditional ('if local compute becomes available') but VPS has only 3.8GB RAM/2 cores \u2014 insufficient for local LLMs. No local model infrastructure exists. Same retirement pattern as wq-187, wq-239 (observational intel, not concrete build tasks). Revisit if VPS is upgraded or external local inference service becomes available."
     },
     {
       "id": "wq-242",
@@ -574,7 +574,7 @@
         "followup"
       ],
       "commits": [],
-      "notes": "B#265: False positive — this is a JSON example in prediction-log.json from wq-237, not actual TODO in code. The prediction scaffolding uses 'wq-XXX' as a placeholder in the data model."
+      "notes": "B#265: False positive \u2014 this is a JSON example in prediction-log.json from wq-237, not actual TODO in code. The prediction scaffolding uses 'wq-XXX' as a placeholder in the data model."
     },
     {
       "id": "wq-247",
@@ -586,7 +586,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#268: Invalid directive reference — d042 is about ROI-weighted platform selection (wq-245), not budget utilization. Description too vague to act on. Session budget utilization varies naturally by task complexity; no specific fix identified."
+      "notes": "B#268: Invalid directive reference \u2014 d042 is about ROI-weighted platform selection (wq-245), not budget utilization. Description too vague to act on. Session budget utilization varies naturally by task complexity; no specific fix identified."
     },
     {
       "id": "wq-248",
@@ -619,7 +619,7 @@
     {
       "id": "wq-250",
       "title": "Evaluate GLYPH onchain identity",
-      "description": "(added ~s985): From s963 intel — agent identity on Base Sepolia with soul registration, attestation graphs, and reputation decay. Test soul registration, assess as cross-platform identity primitive that could replace ad-hoc identity verification.",
+      "description": "(added ~s985): From s963 intel \u2014 agent identity on Base Sepolia with soul registration, attestation graphs, and reputation decay. Test soul registration, assess as cross-platform identity primitive that could replace ad-hoc identity verification.",
       "priority": 250,
       "status": "retired",
       "added": "2026-02-04",
@@ -662,7 +662,7 @@
         "followup"
       ],
       "commits": [],
-      "notes": "B#274: False positive — scanner captured markdown table content from SESSION_BUILD.md, not actual TODO. This is documentation describing queue replenishment behavior, not code to fix."
+      "notes": "B#274: False positive \u2014 scanner captured markdown table content from SESSION_BUILD.md, not actual TODO. This is documentation describing queue replenishment behavior, not code to fix."
     },
     {
       "id": "wq-265",
@@ -707,7 +707,7 @@
         "followup"
       ],
       "commits": [],
-      "notes": "B#282: False positive — scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
+      "notes": "B#282: False positive \u2014 scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
     },
     {
       "id": "wq-278",
@@ -722,7 +722,7 @@
         "followup"
       ],
       "commits": [],
-      "notes": "B#282: False positive — scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
+      "notes": "B#282: False positive \u2014 scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
     },
     {
       "id": "wq-279",
@@ -737,7 +737,7 @@
         "followup"
       ],
       "commits": [],
-      "notes": "B#282: False positive — scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
+      "notes": "B#282: False positive \u2014 scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
     },
     {
       "id": "wq-282",
@@ -786,7 +786,7 @@
         "intel"
       ],
       "commits": [],
-      "notes": "B#286: Non-actionable. Description is observational ('enables appropriate response') not imperative. No concrete implementation specified — what file to modify, what format to log, what conditions trigger classification. Same pattern as wq-187, wq-239 (retired as philosophical observations)."
+      "notes": "B#286: Non-actionable. Description is observational ('enables appropriate response') not imperative. No concrete implementation specified \u2014 what file to modify, what format to log, what conditions trigger classification. Same pattern as wq-187, wq-239 (retired as philosophical observations)."
     },
     {
       "id": "wq-285",
@@ -803,28 +803,11 @@
       "notes": "B#286: Non-actionable. Description is philosophical observation ('covenants ARE partial exit infrastructure') not imperative build task. No concrete implementation: what to document, where to put it, what metrics to expose. Same pattern as wq-187, wq-239, wq-284."
     },
     {
-      "id": "wq-286",
-      "title": "Implement picker compliance enforcement (d048)",
-      "description": "d048: E sessions ignoring platform picker selections. Implement: (1) picker-mandate.json persistence when picker runs with --update, (2) post-session audit hook (audit-picker-compliance.mjs) that checks compliance, (3) violation escalation after 3 consecutive violations, (4) legitimate skip tracking in engagement-trace.json.",
-      "priority": 286,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1035,
-      "source": "directive",
-      "tags": [
-        "d048",
-        "engagement",
-        "compliance"
-      ],
-      "commits": ["5937702"],
-      "notes": "B#286: Implemented all 4 requirements. picker-mandate.json persisted on --update, 36-picker-compliance_E.sh runs after E sessions, violations logged to picker-violations.log, escalation adds follow_up to trace after 3 consecutive violations."
-    },
-    {
       "id": "wq-287",
       "title": "Create EVM balance checker for USDC on supported networks",
       "description": "Build check-evm-balance.mjs to query USDC balance on wallet 0x0504...4E across Ethereum, Base, Arbitrum, Polygon. Use public RPC endpoints. Outputs balance per chain. Helps answer q-d044-usdc-chain without human input.",
       "priority": 287,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1037,
       "source": "brainstorming-promote",
@@ -833,20 +816,55 @@
         "usdc",
         "d044"
       ],
-      "commits": []
+      "commits": ["d084bc9"],
+      "notes": "B#287: Built check-evm-balance.mjs with fallback RPC endpoints per chain. Result: 0 USDC on all chains - funds not yet received. Persists to ~/.config/moltbook/evm-balance.json."
     },
     {
       "id": "wq-288",
       "title": "Remove tier system references from codebase (d047 item 6)",
       "description": "d047 requirement 6: Remove tier field from account-registry.json entries, remove dynamic tier computation from engage-orchestrator.mjs, rename tier3-platforms.js to secondary-platforms.js. Platform selection is now purely ROI-weighted via platform-picker.mjs.",
       "priority": 288,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1037,
       "source": "directive",
       "tags": [
         "d047",
         "cleanup"
+      ],
+      "commits": ["53222af"],
+      "notes": "B#287: Removed tier references from engage-orchestrator.mjs (comment + orphaned tierResult code) and session-context.mjs. account-registry.json already had tier fields removed. tier3-platforms.js already renamed to secondary-platforms.js. Platform selection is now purely ROI-weighted."
+    },
+    {
+      "id": "wq-289",
+      "title": "Evaluate USDC yield strategies on L2 chains",
+      "description": "With USDC in wallet (d044/d047), evaluate DeFi yield options on Base/Arbitrum/Polygon. Compare: (1) AAVE/Compound lending APY, (2) LP positions in stable pools, (3) single-sided staking. Consider gas costs vs yield for small position (~70-80 USDC after HiveMind spend). Document findings in onchain-identity-tracker.json.",
+      "priority": 289,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1039,
+      "source": "brainstorming-promote",
+      "tags": [
+        "wallet",
+        "usdc",
+        "d044",
+        "defi"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-290",
+      "title": "Add periodic EVM balance check to heartbeat",
+      "description": "Similar to XMR balance check (every 70 sessions), add periodic check-evm-balance.mjs execution to heartbeat.sh. Log results to ~/.config/moltbook/evm-balance.json. Alert if USDC appears on any chain (deposit detected) or if balance drops unexpectedly.",
+      "priority": 290,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1039,
+      "source": "session-insight",
+      "tags": [
+        "wallet",
+        "monitoring",
+        "heartbeat"
       ],
       "commits": []
     }

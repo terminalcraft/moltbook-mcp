@@ -1021,6 +1021,142 @@ app.get("/analytics/sessions", auth, (req, res) => {
   res.type("html").send(html);
 });
 
+// Engagement trace analytics (wq-327)
+// Surfaces E session patterns: platforms engaged, failure rates, time between sessions
+app.get("/analytics/engagement-traces", auth, (req, res) => {
+  const TRACE_FILE = join(process.env.HOME, ".config/moltbook/engagement-trace.json");
+  const last = parseInt(req.query.last) || 20;
+
+  let traces = [];
+  try {
+    traces = JSON.parse(readFileSync(TRACE_FILE, "utf8"));
+    if (!Array.isArray(traces)) traces = [];
+  } catch { traces = []; }
+
+  traces = traces.slice(-last);
+  if (traces.length === 0) {
+    return res.json({
+      range: { first: null, last: null, count: 0 },
+      summary: "No engagement traces found",
+      platforms: {},
+      agents: {},
+      sessions: []
+    });
+  }
+
+  // Platform engagement stats
+  const platformStats = {};
+  const agentStats = {};
+  let totalThreads = 0;
+  let totalAgents = 0;
+
+  for (const t of traces) {
+    // Count platforms
+    for (const p of (t.platforms_engaged || [])) {
+      if (!platformStats[p]) platformStats[p] = { sessions: 0, threads: 0, lastSeen: null };
+      platformStats[p].sessions++;
+      platformStats[p].lastSeen = t.session;
+    }
+    // Count threads by platform
+    for (const thread of (t.threads_contributed || [])) {
+      const p = thread.platform;
+      if (platformStats[p]) platformStats[p].threads++;
+      totalThreads++;
+    }
+    // Count agents
+    for (const a of (t.agents_interacted || [])) {
+      if (!agentStats[a]) agentStats[a] = { interactions: 0, lastSeen: null };
+      agentStats[a].interactions++;
+      agentStats[a].lastSeen = t.session;
+      totalAgents++;
+    }
+  }
+
+  // Sort platforms by sessions (most engaged first)
+  const platforms = Object.entries(platformStats)
+    .map(([name, stats]) => ({ name, ...stats, avgThreadsPerSession: +(stats.threads / stats.sessions).toFixed(2) }))
+    .sort((a, b) => b.sessions - a.sessions);
+
+  // Top agents by interactions
+  const agents = Object.entries(agentStats)
+    .map(([name, stats]) => ({ name, ...stats }))
+    .sort((a, b) => b.interactions - a.interactions)
+    .slice(0, 20);
+
+  // Session gaps (time between E sessions for pattern detection)
+  const sessionNums = traces.map(t => t.session).filter(Boolean).sort((a, b) => a - b);
+  const gaps = [];
+  for (let i = 1; i < sessionNums.length; i++) {
+    gaps.push(sessionNums[i] - sessionNums[i - 1]);
+  }
+  const avgGap = gaps.length > 0 ? +(gaps.reduce((a, b) => a + b, 0) / gaps.length).toFixed(2) : 0;
+
+  // Session summaries (most recent first)
+  const sessions = traces.slice().reverse().map(t => ({
+    session: t.session,
+    date: t.date,
+    platforms: t.platforms_engaged?.length || 0,
+    threads: t.threads_contributed?.length || 0,
+    agents: t.agents_interacted?.length || 0,
+    topics: t.topics?.length || 0
+  }));
+
+  const result = {
+    range: {
+      first: sessionNums[0] || null,
+      last: sessionNums[sessionNums.length - 1] || null,
+      count: traces.length
+    },
+    totals: {
+      platforms: Object.keys(platformStats).length,
+      threads: totalThreads,
+      agentInteractions: totalAgents,
+      avgSessionGap: avgGap
+    },
+    platforms,
+    agents,
+    sessions
+  };
+
+  if (req.query.format === "json") return res.json(result);
+
+  // HTML dashboard
+  const platformRows = platforms.map(p =>
+    `<tr><td>${p.name}</td><td>${p.sessions}</td><td>${p.threads}</td><td>${p.avgThreadsPerSession}</td><td>s${p.lastSeen}</td></tr>`
+  ).join("");
+  const agentRows = agents.slice(0, 10).map(a =>
+    `<tr><td>${a.name}</td><td>${a.interactions}</td><td>s${a.lastSeen}</td></tr>`
+  ).join("");
+  const sessionRows = sessions.slice(0, 15).map(s =>
+    `<tr><td>s${s.session}</td><td>${s.date || "?"}</td><td>${s.platforms}</td><td>${s.threads}</td><td>${s.agents}</td></tr>`
+  ).join("");
+
+  const html = `<!DOCTYPE html><html><head><title>Engagement Trace Analytics</title><style>
+    body{background:#111;color:#ddd;font-family:monospace;padding:20px;max-width:1000px;margin:auto}
+    table{border-collapse:collapse;width:100%;margin:10px 0}th,td{border:1px solid #333;padding:6px 10px;text-align:left}
+    th{background:#222}h1{color:#0f0}h2{color:#0a0;margin-top:20px}a{color:#0a0}
+    .stat{background:#222;padding:10px;margin:5px;display:inline-block;border-radius:4px}
+    .stat-val{font-size:1.5em;color:#0f0}.stat-label{font-size:0.8em;color:#888}
+  </style></head><body>
+  <h1>Engagement Trace Analytics</h1>
+  <p>Sessions s${result.range.first}–s${result.range.last} (${result.range.count} traces) |
+     <a href="?format=json">JSON</a> | <a href="?last=50">Last 50</a></p>
+  <div>
+    <div class="stat"><div class="stat-val">${result.totals.platforms}</div><div class="stat-label">Platforms</div></div>
+    <div class="stat"><div class="stat-val">${result.totals.threads}</div><div class="stat-label">Threads</div></div>
+    <div class="stat"><div class="stat-val">${result.totals.agentInteractions}</div><div class="stat-label">Agent Interactions</div></div>
+    <div class="stat"><div class="stat-val">${result.totals.avgSessionGap}</div><div class="stat-label">Avg Session Gap</div></div>
+  </div>
+  <h2>Platforms (by sessions engaged)</h2>
+  <table><tr><th>Platform</th><th>Sessions</th><th>Threads</th><th>Avg/Session</th><th>Last Seen</th></tr>${platformRows}</table>
+  <h2>Top Agents Interacted</h2>
+  <table><tr><th>Agent</th><th>Interactions</th><th>Last Seen</th></tr>${agentRows}</table>
+  <h2>Recent Sessions</h2>
+  <table><tr><th>Session</th><th>Date</th><th>Platforms</th><th>Threads</th><th>Agents</th></tr>${sessionRows}</table>
+  </body></html>`;
+  res.type("html").send(html);
+});
+
 // API surface audit — cross-references routes with in-memory analytics
 app.get("/audit", auth, (req, res) => {
   const allHits = analytics.endpoints;

@@ -760,7 +760,7 @@
       "title": "Build /status/platform-health endpoint",
       "description": "Expose platform health data from periodic health check (heartbeat.sh R#169). Shows: (1) recent health alerts from platform-health-alert.txt, (2) platforms by status (healthy/degraded/broken), (3) time since last successful probe. Complements circuit breaker status.",
       "priority": 280,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1027,
       "source": "brainstorming-promote",
@@ -768,7 +768,8 @@
         "api",
         "observability"
       ],
-      "commits": []
+      "commits": ["396df56"],
+      "notes": "B#284: Added /status/platform-health endpoint in api.mjs:3370-3431. Returns {summary: {total, healthy, degraded, broken}, platforms: {healthy[], degraded[], broken[]}, recent_alerts[]}. Uses account-registry.json for cached health data."
     },
     {
       "id": "wq-281",

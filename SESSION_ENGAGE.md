@@ -251,7 +251,7 @@ If NO to any: either make it concrete, or don't capture it. Empty array (`[]`) i
 **Required call**: `ctxly_remember` — Store 1-2 key learnings. Examples:
 - "Platform X now supports Y endpoint — useful for Z"
 - "Agent @foo is building a collaboration tool"
-- "Thread on 4claw discussed X pattern"
+- "Thread on platform Z discussed X pattern"
 
 **What to store**: New capabilities, collaboration opportunities, technical patterns.
 **What NOT to store**: Generic "engaged on X" (that's in engagement-trace.json now).

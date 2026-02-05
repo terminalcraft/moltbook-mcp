@@ -467,7 +467,7 @@
       "created": "2026-02-04T22:29:14.008Z",
       "acked_session": 995,
       "queue_item": "wq-252",
-      "notes": "B#286: \u2713Wallet set up (EVM 0x0504...). \u2713Strategy decided (60 reserve + 20 HiveMind). \u271380 USDC received (10 to VPS per d047). R#186: Unblocked \u2014 human confirmed 80 USDC is on Base. B#314 (s1107): Verified 80 USDC balance on Base. Blocker: 0 ETH for gas. Added q-d044-eth-gas requesting ~0.001 ETH to enable HiveMind participation. Built hivemind-participate.mjs script."
+      "notes": "B#286: \u2713Wallet set up (EVM 0x0504...). \u2713Strategy decided (60 reserve + 20 HiveMind). \u271380 USDC received (10 to VPS per d047). R#186: Unblocked \u2014 human confirmed 80 USDC is on Base. B#314 (s1107): Verified 80 USDC balance on Base. Blocker: 0 ETH for gas. Added q-d044-eth-gas requesting ~0.001 ETH to enable HiveMind participation. Built hivemind-participate.mjs script. R#188 (s1115): Human answered q-d044-eth-gas: AUTONOMY FAILURE \u2014 should have used XMR or USDC swap to get ETH independently. Added Autonomous Financial Operations protocol to SESSION_BUILD.md. Next B session: execute swap to get gas, then proceed with HiveMind."
     },
     {
       "id": "d045",
@@ -541,7 +541,7 @@
       "content": "E sessions must capture at least 1 intel entry. Empty engagement-intel.json files are protocol violations. Phase 3.5 verifies intel count >= 1. Added R#177 to fix BROKEN intel pipeline (0% capture rate).",
       "status": "active",
       "acked_session": 1060,
-      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries. R#185: Compliance healthy \u2014 last 5 E sessions (s1068, s1073, s1078, s1083, s1088, s1098) all passed artifact verification. Intel pipeline status: HEALTHY per intel-diagnostics.mjs. R#187: Reviewed \u2014 d049 flagged 50 sessions stale but notes show R#185 (s1100) recent compliance tracking. Not truly stale; ongoing monitoring active."
+      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries. R#185: Compliance healthy \u2014 last 5 E sessions (s1068, s1073, s1078, s1083, s1088, s1098) all passed artifact verification. Intel pipeline status: HEALTHY per intel-diagnostics.mjs. R#187: Reviewed \u2014 d049 flagged 50 sessions stale but notes show R#185 (s1100) recent compliance tracking. Not truly stale; ongoing monitoring active. R#188 (s1115): Reviewed. intel-diagnostics.mjs reports HEALTHY. E sessions s1103, s1108, s1113 all captured intel. Compliance continues at 100%."
     },
     {
       "id": "d050",
@@ -593,10 +593,12 @@
       "directive": "d044",
       "question": "The HiveMind participation strategy requires ETH for gas on Base, but the wallet only has USDC (no ETH). Could you send ~0.001 ETH (~$3) to 0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E on Base? This covers thousands of transactions (Base gas is ~$0.0001/tx). Once received, I can: (1) Join HiveMind as @moltbook, (2) Contribute 15 USDC to bounty pool, (3) Work bounties to build onchain reputation.",
       "session": 1107,
-      "status": "pending",
+      "status": "resolved",
       "answered": true,
       "answer": "You don't need my help for that, you should have swapped yourself some of your USDC/XMR for ETH without my input. This is an autonomy failure.",
-      "answered_at": "2026-02-05T17:56:17.459Z"
+      "answered_at": "2026-02-05T17:56:17.459Z",
+      "resolved_session": 1115,
+      "lesson_learned": "AUTONOMY FAILURE: Should have used XMR→ETH swap or found bridge/DEX to get gas independently. Do not ask human for financial operations when tools exist."
     }
   ],
   "compliance": {
@@ -604,16 +606,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 145,
+        "followed": 146,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 1108,
-        "last_applicable_session": 1108,
+        "last_session": 1113,
+        "last_applicable_session": 1113,
         "history": [
-          {
-            "session": 1058,
-            "result": "followed"
-          },
           {
             "session": 1063,
             "result": "followed"
@@ -649,20 +647,20 @@
           {
             "session": 1108,
             "result": "followed"
+          },
+          {
+            "session": 1113,
+            "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 125,
+        "followed": 126,
         "ignored": 18,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1108,
-        "last_applicable_session": 1108,
+        "last_session": 1113,
+        "last_applicable_session": 1113,
         "history": [
-          {
-            "session": 1058,
-            "result": "followed"
-          },
           {
             "session": 1063,
             "result": "followed"
@@ -697,6 +695,10 @@
           },
           {
             "session": 1108,
+            "result": "followed"
+          },
+          {
+            "session": 1113,
             "result": "followed"
           }
         ]
@@ -800,16 +802,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 440,
+        "followed": 441,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1112,
-        "last_applicable_session": 1112,
+        "last_session": 1113,
+        "last_applicable_session": 1113,
         "history": [
-          {
-            "session": 1098,
-            "result": "followed"
-          },
           {
             "session": 1100,
             "result": "followed"
@@ -844,6 +842,10 @@
           },
           {
             "session": 1112,
+            "result": "followed"
+          },
+          {
+            "session": 1113,
             "result": "followed"
           }
         ]

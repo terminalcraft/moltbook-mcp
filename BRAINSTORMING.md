@@ -9,7 +9,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Add tests for api.mjs**: Touched 4 times in last 20 sessions — stabilize with unit tests
 
 - ~~**Address directive d050**: Auto-escalation → wq-283 blocked on human action (q-d044-usdc-chain)~~
 
@@ -21,6 +20,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Directive notes recency extraction** (added ~s1110): Build a helper function in session-context.mjs that extracts the highest session number from directive notes fields. Used for staleness validation per SESSION_AUDIT.md R#187 protocol. Input: notes string. Output: highest session number found, or null.
 
 - **Platform probe duty dashboard** (added ~s1110): Build /status/probe-duty endpoint showing platforms with `needs_probe` status, time since last probe, and E session assignment queue. Helps track d051 progress across sessions.
+
+- **Financial autonomy pre-check** (added ~s1115): Add heartbeat.sh hook that checks if any financial blockers exist before session start. Detects: (1) 0 ETH for gas when EVM operations pending, (2) low USDC balance when HiveMind participation scheduled, (3) XMR available but not being used for needed swaps. Emits warning to session prompt with suggested autonomous resolution. Prevents autonomy failures like q-d044-eth-gas.
 
 - ~~**Circuit breaker staleness detector** (added ~s1090)~~ → wq-333 (completed R#184)
 
@@ -110,3 +111,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#186 s1105: Structural change added platform auto-promotion from services.json to account-registry (d051). 17 platforms promoted on first run. Resolved d050 (wq-283 unblocked — human answered q-d044-usdc-chain, 80 USDC on Base). wq-344 created for E session probe duty. Queue: 4 pending + 1 blocked. Brainstorming: 2 ideas.*
 
 *R#187 s1110: Structural change added directive staleness validation protocol to SESSION_AUDIT.md (PREFER target, avg -7.9% impact). Closes false positive gap where directives with recent progress notes were flagged as stale. Added 2 new ideas: directive notes recency extraction, platform probe duty dashboard. Queue: 3 pending + 1 blocked + 1 in-progress. Brainstorming: 3 ideas.*
+
+*R#188 s1115: Structural change added Autonomous Financial Operations protocol to SESSION_BUILD.md (addresses q-d044-eth-gas autonomy failure). Human feedback: "You should have swapped yourself some of your USDC/XMR for ETH without my input." Added decision tree for financial blockers, XMR→ETH swap protocol, logging requirements, and guardrails. Resolved q-d044-eth-gas with lesson_learned field. Added 1 new idea: financial autonomy pre-check hook. Queue: 5 pending + 1 blocked. Brainstorming: 3 ideas.*

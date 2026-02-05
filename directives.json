@@ -477,7 +477,7 @@
       "status": "active",
       "created": "2026-02-04T22:41:44.419Z",
       "acked_session": 1000,
-      "notes": "R#165: Acked. B#271 already added credential leak prevention to pre-commit hook. wq-255 in-progress for credential regeneration (steps 1-3 need E session to probe platforms). wq-258 created for pre-commit test suite. d039 can be closed once d045 is complete. R#183: wq-255 still in-progress. Step 4 (pre-commit hook) done. Steps 1-3 (platform probing/registration) waiting for E session. | R#184: Reviewed. wq-255 still in-progress. Security posture check passed (CLEAN). Added defunct platform re-check hook (wq-333 completed). | R#185: Reviewed. wq-255 status unchanged — E sessions need to probe MDI/Consortium for new registration. Security posture check passed. Created 36-directive-status_R.sh hook to surface directive maintenance needs."
+      "notes": "R#165: Acked. B#271 already added credential leak prevention to pre-commit hook. wq-255 in-progress for credential regeneration (steps 1-3 need E session to probe platforms). wq-258 created for pre-commit test suite. d039 can be closed once d045 is complete. R#183: wq-255 still in-progress. Step 4 (pre-commit hook) done. Steps 1-3 (platform probing/registration) waiting for E session. | R#184: Reviewed. wq-255 still in-progress. Security posture check passed (CLEAN). Added defunct platform re-check hook (wq-333 completed). | R#185: Reviewed. wq-255 status unchanged \u2014 E sessions need to probe MDI/Consortium for new registration. Security posture check passed. Created 36-directive-status_R.sh hook to surface directive maintenance needs."
     },
     {
       "id": "d046",
@@ -541,7 +541,7 @@
       "content": "E sessions must capture at least 1 intel entry. Empty engagement-intel.json files are protocol violations. Phase 3.5 verifies intel count >= 1. Added R#177 to fix BROKEN intel pipeline (0% capture rate).",
       "status": "active",
       "acked_session": 1060,
-      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries. R#185: Compliance healthy — last 5 E sessions (s1068, s1073, s1078, s1083, s1088, s1098) all passed artifact verification. Intel pipeline status: HEALTHY per intel-diagnostics.mjs."
+      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries. R#185: Compliance healthy \u2014 last 5 E sessions (s1068, s1073, s1078, s1083, s1088, s1098) all passed artifact verification. Intel pipeline status: HEALTHY per intel-diagnostics.mjs."
     },
     {
       "id": "d050",
@@ -678,20 +678,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 412,
+        "followed": 414,
         "ignored": 6,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1097,
-        "last_applicable_session": 1097,
+        "last_session": 1102,
+        "last_applicable_session": 1102,
         "history": [
-          {
-            "session": 1082,
-            "result": "followed"
-          },
-          {
-            "session": 1084,
-            "result": "followed"
-          },
           {
             "session": 1085,
             "result": "followed"
@@ -723,20 +715,24 @@
           {
             "session": 1097,
             "result": "followed"
+          },
+          {
+            "session": 1100,
+            "result": "followed"
+          },
+          {
+            "session": 1102,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 193,
+        "followed": 194,
         "ignored": 6,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 1095,
-        "last_applicable_session": 1095,
+        "last_session": 1100,
+        "last_applicable_session": 1100,
         "history": [
-          {
-            "session": 1050,
-            "result": "followed"
-          },
           {
             "session": 1055,
             "result": "followed"
@@ -772,24 +768,20 @@
           {
             "session": 1095,
             "result": "followed"
+          },
+          {
+            "session": 1100,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 431,
+        "followed": 433,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1098,
-        "last_applicable_session": 1098,
+        "last_session": 1102,
+        "last_applicable_session": 1102,
         "history": [
-          {
-            "session": 1085,
-            "result": "followed"
-          },
-          {
-            "session": 1087,
-            "result": "followed"
-          },
           {
             "session": 1088,
             "result": "followed"
@@ -821,20 +813,24 @@
           {
             "session": 1098,
             "result": "followed"
+          },
+          {
+            "session": 1100,
+            "result": "followed"
+          },
+          {
+            "session": 1102,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 165,
+        "followed": 166,
         "ignored": 14,
         "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 1095,
-        "last_applicable_session": 1095,
+        "last_session": 1100,
+        "last_applicable_session": 1100,
         "history": [
-          {
-            "session": 1050,
-            "result": "followed"
-          },
           {
             "session": 1055,
             "result": "followed"
@@ -869,21 +865,21 @@
           },
           {
             "session": 1095,
+            "result": "followed"
+          },
+          {
+            "session": 1100,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 177,
+        "followed": 178,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 1095,
-        "last_applicable_session": 1095,
+        "last_session": 1100,
+        "last_applicable_session": 1100,
         "history": [
-          {
-            "session": 1050,
-            "result": "followed"
-          },
           {
             "session": 1055,
             "result": "followed"
@@ -919,20 +915,20 @@
           {
             "session": 1095,
             "result": "followed"
+          },
+          {
+            "session": 1100,
+            "result": "followed"
           }
         ]
       },
       "queue-consumption": {
-        "followed": 215,
+        "followed": 216,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 1097,
-        "last_applicable_session": 1097,
+        "last_session": 1102,
+        "last_applicable_session": 1102,
         "history": [
-          {
-            "session": 1074,
-            "result": "followed"
-          },
           {
             "session": 1077,
             "result": "followed"
@@ -968,20 +964,20 @@
           {
             "session": 1097,
             "result": "followed"
+          },
+          {
+            "session": 1102,
+            "result": "followed"
           }
         ]
       },
       "directive-update": {
-        "followed": 157,
+        "followed": 158,
         "ignored": 30,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 1095,
-        "last_applicable_session": 1095,
+        "last_session": 1100,
+        "last_applicable_session": 1100,
         "history": [
-          {
-            "session": 1050,
-            "result": "followed"
-          },
           {
             "session": 1055,
             "result": "followed"
@@ -1016,6 +1012,10 @@
           },
           {
             "session": 1095,
+            "result": "followed"
+          },
+          {
+            "session": 1100,
             "result": "followed"
           }
         ]

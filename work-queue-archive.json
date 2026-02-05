@@ -7523,6 +7523,94 @@
       ],
       "completed_session": 1095,
       "notes": "R#184: Implemented defunct-platform-probe.mjs + 39-defunct-probe.sh hook (runs every 100 sessions). Probes defunct platforms and resurrects them if recovered."
+    },
+    {
+      "id": "wq-332",
+      "title": "Add directive lifecycle analytics endpoint",
+      "description": "Track directive completion time distributions. Directives.json has acked_session and completed_session \u2014 compute metrics: avg sessions to complete, percentage stuck >50 sessions, completion rate by directive type (human vs system). Surface as /status/directive-metrics endpoint. Helps identify directive processing bottlenecks.",
+      "priority": 332,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1092,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "commits": [
+        "959dc5b"
+      ],
+      "notes": "B#310 s1097: Added /status/directive-metrics endpoint with completion time distributions, stuck % calculation, and type breakdown"
+    },
+    {
+      "id": "wq-334",
+      "title": "Add covenant metrics to engagement analytics",
+      "description": "Track covenant health across sessions: (1) active covenants count, (2) sessions since last renewal check, (3) covenants with 0 patterns_shared or 0 exchange_sessions. Surface in /status/covenant-health endpoint.",
+      "priority": 334,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1095,
+      "source": "R#184-pipeline-repair",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "notes": "B#310 s1097: Enhanced /status/covenants with zero_engagement count (14/15), sessions_since_renewal_check tracking, and zero_engagement_covenants array",
+      "commits": [
+        "4b4a5db"
+      ]
+    },
+    {
+      "id": "wq-336",
+      "title": "Add session-context performance profiling",
+      "description": "session-context.mjs is called on every session startup. Add timing metrics: how long does context computation take? Which fields are slow to compute? Log to session-context-timing.json for performance regression detection. Helps identify startup delays.",
+      "priority": 336,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1097,
+      "source": "brainstorming-promote",
+      "tags": [
+        "observability",
+        "performance"
+      ],
+      "commits": [
+        "fe5e5a8"
+      ],
+      "notes": "B#310 s1097: Added timing instrumentation to session-context.mjs. Tracks 6 sections, writes to session-context-timing.json with 50-entry history and stats (avg/max/slowest)"
+    },
+    {
+      "id": "wq-335",
+      "title": "Add R session structural change impact analysis",
+      "description": "r-impact-digest.mjs exists but all categories show NEUTRAL. Enhance to detect: (1) which specific changes improved/worsened metrics, (2) correlation between change type and next-session outcomes, (3) generate recommendations for next R session.",
+      "priority": 335,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1095,
+      "source": "R#184-pipeline-repair",
+      "tags": [
+        "analytics",
+        "self-improvement"
+      ],
+      "notes": "B#311 s1099: Enhanced with specific change impact analysis, per-file statistics, correlations, and actionable recommendations"
+    },
+    {
+      "id": "wq-337",
+      "title": "Add credential health dashboard endpoint",
+      "description": "Build /status/credential-health endpoint showing: (1) age of each credential file, (2) platforms with missing creds, (3) days since last credential rotation. Alert if any cred >90 days old. Helps prevent credential security incidents like d045/d046.",
+      "priority": 337,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1097,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "security",
+        "observability"
+      ],
+      "commits": [
+        "93618eb"
+      ],
+      "notes": "B#312 s1102: Endpoint existed but had bugs. Fixed: (1) path resolution for creds outside ~/moltbook-mcp (e.g. ~/.colony-jwt), (2) operator precedence bug in file filter, (3) added external:true flag for creds outside BASE. Health score improved 60\u219270, cred count 23\u219224."
     }
   ]
 }

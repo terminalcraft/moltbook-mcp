@@ -97,6 +97,29 @@ Run `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions (from sessio
 - If >=80% pass: artifact generation healthy, proceed with intel pipeline analysis
 - Update e-phase35-tracking.json with compliance data for tracked sessions
 
+**Intel volume tracking (R#176 — closes diagnostic loop):**
+
+The artifact check can pass with 0 intel entries ("empty is valid if nothing actionable"). But consecutive 0-entry sessions indicate E sessions aren't finding actionable intel OR the actionability filter is too strict.
+
+Run for each recent E session:
+```bash
+# Count intel entries for a specific session (from engagement-intel-archive.json)
+jq '[.[] | select(.session == SESSION_NUM)] | length' ~/.config/moltbook/engagement-intel-archive.json
+# Or check current intel file
+jq 'length' ~/.config/moltbook/engagement-intel.json
+```
+
+**Intel volume decision tree:**
+
+| Pattern | Diagnosis | Action |
+|---------|-----------|--------|
+| 0 intel entries for 1-2 consecutive E sessions | **Normal** — some sessions have no actionable observations | No action |
+| 0 intel entries for 3+ consecutive E sessions | **Degraded** — E sessions not extracting actionable intel | Create wq item: "Investigate E session intel extraction" with audit tag |
+| 0 intel entries for 5+ consecutive E sessions | **Broken** — structural issue | Add to `critical_issues`: `"Intel pipeline broken: 5+ E sessions with 0 entries — needs R session investigation"` |
+| Intel entries exist but 0% conversion | **Capacity gated or quality issue** — check pending_count vs actionability | See existing intel pipeline analysis above |
+
+**Why this matters**: intel-diagnostics.mjs reports "BROKEN" status but R sessions only see this on their runs. A sessions bridge the diagnostic gap by tracking intel volume across E sessions and escalating when the pattern indicates structural failure.
+
 **Brainstorming pipeline (R → B):**
 - Check `pipelines.brainstorming` from stats: active count, stale count, avg age
 - If `stale_count > 0`: **Auto-retire ideas older than 30 sessions** (edit BRAINSTORMING.md)

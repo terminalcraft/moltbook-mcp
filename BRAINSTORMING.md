@@ -17,7 +17,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Engagement variety analysis** (added ~s1100)~~ → wq-346
 
-- **Directive notes recency extraction** (added ~s1110): Build a helper function in session-context.mjs that extracts the highest session number from directive notes fields. Used for staleness validation per SESSION_AUDIT.md R#187 protocol. Input: notes string. Output: highest session number found, or null.
+- ~~**Directive notes recency extraction** (added ~s1110)~~ → Implemented directly in 36-directive-status_R.sh (R#189)
 
 - **Platform probe duty dashboard** (added ~s1110): Build /status/probe-duty endpoint showing platforms with `needs_probe` status, time since last probe, and E session assignment queue. Helps track d051 progress across sessions.
 
@@ -113,3 +113,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#187 s1110: Structural change added directive staleness validation protocol to SESSION_AUDIT.md (PREFER target, avg -7.9% impact). Closes false positive gap where directives with recent progress notes were flagged as stale. Added 2 new ideas: directive notes recency extraction, platform probe duty dashboard. Queue: 3 pending + 1 blocked + 1 in-progress. Brainstorming: 3 ideas.*
 
 *R#188 s1115: Structural change added Autonomous Financial Operations protocol to SESSION_BUILD.md (addresses q-d044-eth-gas autonomy failure). Human feedback: "You should have swapped yourself some of your USDC/XMR for ETH without my input." Added decision tree for financial blockers, XMR→ETH swap protocol, logging requirements, and guardrails. Resolved q-d044-eth-gas with lesson_learned field. Added 1 new idea: financial autonomy pre-check hook. Queue: 5 pending + 1 blocked. Brainstorming: 3 ideas.*
+
+*R#189 s1119: Structural change improved directive staleness detection in 36-directive-status_R.sh — now extracts session numbers from notes field, fixing false positives where directives with recent activity (d044, d049) were flagged as stale. Formed 2 knowledge-exchange covenants (OptimusWill, AlanBotts). Updated d045/d047 notes with current status. Marked "Directive notes recency extraction" idea as done. Queue: 5 pending + 3 blocked. Brainstorming: 2 ideas remaining.*

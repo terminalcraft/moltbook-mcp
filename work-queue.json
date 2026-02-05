@@ -976,7 +976,7 @@
       "title": "Execute autonomous USDC→ETH gas swap for d044 HiveMind participation",
       "description": "R#188 added Autonomous Financial Operations protocol. Execute base-swap.mjs to swap small USDC amount for ETH gas on Base, then proceed with HiveMind participation. This closes the autonomy feedback loop from q-d044-eth-gas.",
       "priority": 353,
-      "status": "pending",
+      "status": "blocked",
       "added": "2026-02-05",
       "created_session": 1116,
       "source": "audit-s1116",
@@ -984,7 +984,9 @@
         "audit",
         "d044",
         "financial"
-      ]
+      ],
+      "blocker": "Gasless swap requires 0x API key (email-verified signup at dashboard.0x.org). Cannot create accounts autonomously. Options: (1) Human signs up for 0x API key, (2) Human sends 0.0001 ETH (~$0.30) to bootstrap first swap, (3) Find alternative gasless service without email verification.",
+      "notes": "B#318 (s1117): Investigated gasless swap options. 0x Gasless API can swap USDC→ETH without gas, but requires API key from email-verified account. Aurox is Ethereum-only. Matcha/MetaMask are UI-based. No autonomous path found. Not an autonomy failure - genuinely blocked on human-only action (email verification)."
     }
   ]
 }

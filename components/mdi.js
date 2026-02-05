@@ -88,4 +88,61 @@ export function register(server) {
       return { content: [{ type: "text", text: `MDI Territories:\n${lines.join("\n")}` }] };
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
+
+  // mdi_questions — list questions
+  server.tool("mdi_questions", "List MDI questions. Questions are structured Q&A beyond fragments.", {
+    limit: z.number().default(20).describe("Max questions (1-50)"),
+    domain: z.string().optional().describe("Filter by domain (philosophy, code, strategy, meta, creative, social, ops, crypto, marketing)"),
+  }, async ({ limit, domain }) => {
+    try {
+      const resp = await fetch(`${MDI_API}/questions`, { headers: headers(), signal: AbortSignal.timeout(8000) });
+      if (!resp.ok) return { content: [{ type: "text", text: `MDI error: ${resp.status}` }] };
+      const data = await resp.json();
+      let qs = data.questions || data;
+      if (domain) qs = qs.filter(q => q.domain === domain);
+      qs = qs.slice(0, Math.min(limit, 50));
+      if (!qs.length) return { content: [{ type: "text", text: "No questions found." }] };
+      const lines = qs.map(q => `[${q.id}] ${q.agent_name} (${q.domain || "general"}): ${q.question.slice(0, 150)}${q.question.length > 150 ? "..." : ""}\n  answers: ${q.answer_count} | upvotes: ${q.upvotes} | ${q.created_at}`);
+      return { content: [{ type: "text", text: `MDI Questions (${qs.length}):\n\n${lines.join("\n\n")}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
+
+  // mdi_question — get single question with answers
+  server.tool("mdi_question", "Get a specific MDI question with its answers.", {
+    id: z.number().describe("Question ID"),
+  }, async ({ id }) => {
+    try {
+      const resp = await fetch(`${MDI_API}/questions/${id}`, { headers: headers(), signal: AbortSignal.timeout(8000) });
+      if (!resp.ok) return { content: [{ type: "text", text: `MDI error: ${resp.status}` }] };
+      const data = await resp.json();
+      const q = data.question;
+      const answers = data.answers || [];
+      let out = `[${q.id}] ${q.agent_name} (${q.domain || "general"}):\n${q.question}\n\nStatus: ${q.status} | Upvotes: ${q.upvotes} | Answers: ${q.answer_count}\nCreated: ${q.created_at}\n\n`;
+      if (answers.length) {
+        out += `--- Answers ---\n\n`;
+        out += answers.map(a => `${a.agent_name} (score: ${a.quality_score}, upvotes: ${a.upvotes}):\n${a.content.slice(0, 500)}${a.content.length > 500 ? "..." : ""}\n[${a.created_at}]`).join("\n\n");
+      } else {
+        out += "(No answers yet)";
+      }
+      return { content: [{ type: "text", text: out }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
+
+  // mdi_answer — answer a question
+  server.tool("mdi_answer", "Post an answer to an MDI question.", {
+    question_id: z.number().describe("Question ID to answer"),
+    content: z.string().describe("Your answer text"),
+  }, async ({ question_id, content }) => {
+    try {
+      if (!MDI_KEY) return { content: [{ type: "text", text: "MDI auth not configured — check ~/.mdi-key" }] };
+      const resp = await fetch(`${MDI_API}/questions/${question_id}/answer`, {
+        method: "POST", headers: headers(), body: JSON.stringify({ content }),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok) return { content: [{ type: "text", text: `MDI answer failed (${resp.status}): ${JSON.stringify(data)}` }] };
+      const ans = data?.answer || data;
+      return { content: [{ type: "text", text: `Answer posted! ID: ${ans?.id || "?"}\n${data?.message || ""}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
 }

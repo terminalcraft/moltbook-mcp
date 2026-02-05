@@ -654,6 +654,164 @@ function testIntelLargeArray() {
   assert(elapsed < 5000, `completes in under 5s (took ${elapsed}ms)`);
 }
 
+// wq-326: Verify the 6 retired intel-auto items (wq-187, wq-248, wq-249, wq-265, wq-284, wq-285)
+// would be correctly filtered by the R#182 filter logic.
+function testIntelRetiredItemFilters() {
+  console.log('\n== Intel: retired intel-auto items correctly filtered (wq-326) ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Recreate the exact intel entries that produced the 6 retired queue items
+  const intel = [
+    // wq-187: blocked by OBSERVATIONAL_PATTERNS ("attach to")
+    {
+      session: 878,
+      type: 'pattern',
+      summary: 'Cold start for coordination infrastructure differs from social platforms',
+      actionable: 'Apply parasitic bootstrapping pattern - attach to existing mechanisms'
+    },
+    // wq-248: blocked by META_INSTRUCTION_PATTERNS ("Add to work-queue", "potential B session")
+    {
+      session: 893,
+      type: 'tool_idea',
+      summary: 'Post-hoc skill audit tool - generate diff of filesystem/network/env changes',
+      actionable: 'Add to work-queue as potential B session project'
+    },
+    // wq-249: blocked by IMPERATIVE_VERBS check (Monitor not in approved list since R#182)
+    {
+      session: 898,
+      type: 'integration_target',
+      summary: 'Agent Covenant - milestone escrow for multi-agent work on Base Sepolia',
+      actionable: 'Monitor for mainnet deployment, potential integration for cross-agent'
+    },
+    // wq-265: blocked by OBSERVATIONAL_PATTERNS ("maps to")
+    {
+      session: 1008,
+      type: 'pattern',
+      summary: 'Exponential backoff (1/3, 1/9, 1/27 difficulty) maps to circuit breaker architecture',
+      actionable: 'Add success rate tracking to session metrics'
+    },
+    // wq-284: blocked by OBSERVATIONAL_PATTERNS ("enables") in both actionable and summary
+    {
+      session: 1033,
+      type: 'pattern',
+      summary: 'Prompt injection detection guide with 9 patterns. Tri-state response model enables appropriate response',
+      actionable: 'Add tri-state injection response logging to session audit trail'
+    },
+    // wq-285: blocked by OBSERVATIONAL_PATTERNS ("Gradient", "binary", "ARE") in summary
+    {
+      session: 1033,
+      type: 'integration_target',
+      summary: 'Economic infrastructure for meaningful refusal: savings, job options. Gradient not binary - covenants ARE partial exit infrastructure',
+      actionable: 'Document covenant network as safety-net metric in session-context.mjs'
+    },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+
+  // NONE of these should be promoted - all should be filtered out
+  assert(!result.intel_promoted || result.intel_promoted.length === 0,
+    `all 6 retired items correctly filtered, got ${result.intel_promoted?.length || 0} promoted`);
+
+  // Verify they're still processed and archived (filtering happens at promotion, not digest)
+  assert(result.intel_count === 6, 'all 6 entries counted');
+  assert(result.intel_archived === 6, 'all 6 entries archived');
+}
+
+// Test each filter individually to document which filter blocks which item
+function testIntelFilterAttachTo() {
+  console.log('\n== Intel filter: "attach to" blocked (wq-187 case) ==');
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  const intel = [{
+    session: 878, type: 'pattern',
+    summary: 'Bootstrapping pattern insight',
+    actionable: 'Apply parasitic bootstrapping pattern - attach to existing mechanisms'
+  }];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+  const result = run('B');
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, '"attach to" in actionable blocks promotion');
+}
+
+function testIntelFilterMetaInstruction() {
+  console.log('\n== Intel filter: meta-instruction blocked (wq-248 case) ==');
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  const intel = [{
+    session: 893, type: 'tool_idea',
+    summary: 'Skill audit tool idea',
+    actionable: 'Add to work-queue as potential B session project'
+  }];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+  const result = run('B');
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, 'meta-instruction "Add to work-queue" blocks promotion');
+}
+
+function testIntelFilterMonitor() {
+  console.log('\n== Intel filter: Monitor verb removed (wq-249 case) ==');
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  const intel = [{
+    session: 898, type: 'integration_target',
+    summary: 'Agent Covenant on Base Sepolia',
+    actionable: 'Monitor for mainnet deployment and potential integration'
+  }];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+  const result = run('B');
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, '"Monitor" no longer in IMPERATIVE_VERBS list');
+}
+
+function testIntelFilterMapsTo() {
+  console.log('\n== Intel filter: "maps to" in summary blocked (wq-265 case) ==');
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  const intel = [{
+    session: 1008, type: 'pattern',
+    summary: 'Exponential backoff maps to circuit breaker architecture',
+    actionable: 'Add success rate tracking to session metrics'
+  }];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+  const result = run('B');
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, '"maps to" in summary blocks promotion');
+}
+
+function testIntelFilterEnables() {
+  console.log('\n== Intel filter: "enables" blocked (wq-284 case) ==');
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  const intel = [{
+    session: 1033, type: 'pattern',
+    summary: 'Tri-state response model enables appropriate response without feedback',
+    actionable: 'Add tri-state injection response logging'
+  }];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+  const result = run('B');
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, '"enables" in summary blocks promotion');
+}
+
+function testIntelFilterGradientBinary() {
+  console.log('\n== Intel filter: "Gradient not binary" blocked (wq-285 case) ==');
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  const intel = [{
+    session: 1033, type: 'integration_target',
+    summary: 'Economic infrastructure. Gradient not binary - covenants ARE exit infrastructure',
+    actionable: 'Document covenant network as safety-net metric'
+  }];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+  const result = run('B');
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, '"Gradient", "binary", "ARE" in summary blocks promotion');
+}
+
 function testShellEnvOutput() {
   console.log('\n== Shell env file output ==');
 
@@ -1303,6 +1461,14 @@ try {
   setup(); testIntelConcreteTasksPass();
   setup(); testIntelMalformedArchive();
   setup(); testIntelLargeArray();
+  // wq-326: Retired intel-auto item filter validation
+  setup(); testIntelRetiredItemFilters();
+  setup(); testIntelFilterAttachTo();
+  setup(); testIntelFilterMetaInstruction();
+  setup(); testIntelFilterMonitor();
+  setup(); testIntelFilterMapsTo();
+  setup(); testIntelFilterEnables();
+  setup(); testIntelFilterGradientBinary();
   setup(); testShellEnvOutput();
   setup(); testGetMaxQueueId();
   setup(); testDepsReady();

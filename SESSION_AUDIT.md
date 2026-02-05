@@ -162,6 +162,33 @@ jq 'length' ~/.config/moltbook/engagement-intel.json
 - For any unacted >30 sessions: apply decision gate — flag for human review
 - For any unacted <30 sessions: create work-queue item if missing
 
+**Directive staleness validation (R#187 — closes false positive gap):**
+
+The `acked_session` metric alone produces false positives. A directive acked 100 sessions ago but with recent progress notes is NOT stale. Before flagging a directive as stale, verify actual activity:
+
+```bash
+# For each directive flagged as "stale" in maintain-audit.txt or stats output:
+jq -r '.directives[] | select(.id == "dXXX") |
+  "ID: \(.id)\nStatus: \(.status)\nAcked: \(.acked_session)\nNotes: \(.notes // "none")[0:100]...\nQueue item: \(.queue_item // "none")"' directives.json
+```
+
+**Staleness decision tree:**
+
+| Signal | Truly stale? | Action |
+|--------|-------------|--------|
+| No notes field | YES | Flag for human review — no tracked progress |
+| Notes field exists but >30 sessions old | YES | Flag for human review — progress stalled |
+| Notes field has recent update (within 30 sessions) | NO | Active work — skip flagging |
+| Has `queue_item` field pointing to pending/in-progress item | NO | Work queued — skip flagging |
+| Has `queue_item` but item is done/retired | MAYBE | Check if directive needs closure |
+
+**How to detect notes recency:**
+- Notes often contain session references like "R#185:" or "B#304:" or "s1082"
+- Extract highest session number from notes: `echo "$NOTES" | grep -oE '(s|R#|B#|A#)[0-9]+' | sed 's/[^0-9]//g' | sort -n | tail -1`
+- If max session in notes is within 30 of current session: directive has recent progress
+
+**Why this matters:** The 36-directive-status_R.sh hook flags directives based on session distance from `acked_session`. Directives like d049 (intel minimum) get flagged as "115 sessions stale" despite having active notes documenting healthy compliance. This creates noise that distracts R sessions from truly problematic directives.
+
 ### 2. Session effectiveness (budget: ~20%)
 
 Analyze whether each session type is producing value.

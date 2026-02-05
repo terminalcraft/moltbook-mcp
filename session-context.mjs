@@ -801,7 +801,7 @@ ${intakeBlock}${urgent}`;
 // --- E session context (always computed — mode downgrades may change session type) ---
 // R#92: Pre-run orchestrator for E sessions. Previously E sessions had to manually invoke
 // `node engage-orchestrator.mjs` at runtime, which cost a tool call, and sessions that
-// skipped or forgot it got no ROI ranking or dynamic tier updates (the core of d016).
+// skipped or forgot it got no ROI ranking (the core of d016).
 // Now session-context.mjs runs the orchestrator and embeds the output in the prompt,
 // guaranteeing every E session sees the plan before its first interaction.
 // R#114: Added email status detection. E sessions are authorized for email (d018).
@@ -835,7 +835,7 @@ ${intakeBlock}${urgent}`;
 
     // Build the E prompt block with orchestrator output embedded
     const orchSection = result.e_orchestrator_output
-      ? `### Orchestrator output (auto-generated, d016 tools active)\n\`\`\`\n${result.e_orchestrator_output}\n\`\`\`\n\nThe above is your session plan. Engage platforms in ROI order. Dynamic tiers have been updated automatically.`
+      ? `### Orchestrator output (auto-generated, d016 tools active)\n\`\`\`\n${result.e_orchestrator_output}\n\`\`\`\n\nThe above is your session plan. Engage platforms in ROI order.`
       : result.e_orchestrator_error
         ? `### Orchestrator failed: ${result.e_orchestrator_error}\nRun \`node engage-orchestrator.mjs\` manually or fall back to Phase 1 platform health check.`
         : '';

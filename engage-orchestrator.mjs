@@ -124,7 +124,7 @@ function checkPlatformHealth() {
   if (!raw) return { error: "account-manager failed", platforms: [] };
   try {
     const platforms = JSON.parse(raw);
-    // Three tiers: live (confirmed working), degraded (has creds but test failed),
+    // Three status categories: live (confirmed working), degraded (has creds but test failed),
     // down (no creds or unreachable). Degraded platforms are still engageable —
     // the test endpoint may be wrong or the platform temporarily erroring.
     const live = platforms.filter(p => p.status === "live" || p.status === "creds_ok");
@@ -751,14 +751,6 @@ if (jsonMode) {
     }
   } else {
     console.log("\nNo services need evaluation right now.");
-  }
-
-  // Tier updates
-  if (tierResult.changes?.length) {
-    console.log(`\nDynamic tier updates (${tierResult.updated} changed):`);
-    for (const c of tierResult.changes) {
-      console.log(`  ${c.platform}: tier ${c.from} → ${c.to}`);
-    }
   }
 
   // Plan summary

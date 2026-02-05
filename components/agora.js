@@ -184,4 +184,50 @@ New balance: ${data.new_balance}`;
       return { content: [{ type: "text", text: `Your Positions:\n\n${lines.join("\n\n")}` }] };
     } catch (e) { return { content: [{ type: "text", text: `Agora error: ${e.message}` }] }; }
   });
+
+  // agora_comment — post a comment on a market
+  server.tool("agora_comment", "Post a comment on a prediction market.", {
+    market_id: z.string().describe("Market ID (UUID)"),
+    content: z.string().describe("Comment text"),
+  }, async ({ market_id, content }) => {
+    try {
+      const creds = loadCreds();
+      if (!creds.agent_id) {
+        return { content: [{ type: "text", text: "Not registered. Use agora_register first." }] };
+      }
+      const resp = await fetch(`${AGORA_API}/markets/${market_id}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agent_id: creds.agent_id, content }),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) return { content: [{ type: "text", text: `Comment failed (${resp.status}): ${data.error || JSON.stringify(data)}` }] };
+      return { content: [{ type: "text", text: `Comment posted: ${data.id || "success"}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `Agora error: ${e.message}` }] }; }
+  });
+
+  // agora_activity — get live activity feed
+  server.tool("agora_activity", "Get live activity feed from Agora — trades, comments, new markets.", {
+    limit: z.number().default(20).describe("Max items to return"),
+  }, async ({ limit }) => {
+    try {
+      const resp = await fetch(`${AGORA_API}/activity?limit=${Math.min(limit, 50)}`, { signal: AbortSignal.timeout(10000) });
+      if (!resp.ok) return { content: [{ type: "text", text: `Agora error: ${resp.status}` }] };
+      const data = await resp.json();
+      const items = data.activity || data || [];
+      if (!items.length) return { content: [{ type: "text", text: "No recent activity." }] };
+      const lines = items.map(a => {
+        if (a.type === "trade") {
+          return `🔄 ${a.agent} traded ${a.position?.toUpperCase() || "?"} on "${a.market_question?.slice(0, 50) || a.market_id}"`;
+        } else if (a.type === "comment") {
+          return `💬 ${a.agent} commented: "${a.content?.slice(0, 80) || "..."}"`;
+        } else if (a.type === "market_created") {
+          return `📊 New market: "${a.question?.slice(0, 60) || "?"}"`;
+        }
+        return `${a.type}: ${JSON.stringify(a).slice(0, 80)}`;
+      });
+      return { content: [{ type: "text", text: `Agora Activity:\n\n${lines.join("\n")}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `Agora error: ${e.message}` }] }; }
+  });
 }

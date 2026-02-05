@@ -15,7 +15,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Engagement trace analysis endpoint** (added ~s1085)~~ → wq-327
 
-- **Covenant renewal automation** (added ~s1085): covenant-templates.mjs supports creation but not renewal. As deadlines approach (within 10 sessions), E sessions could discuss renewal with partners. Add deadline tracking to R session covenant evaluation.
+- ~~**Covenant renewal automation** (added ~s1085)~~ → wq-329
 
 - ~~**Address directive d050** → Already acknowledged R#179, requires human action on q-d044-usdc-chain~~
 
@@ -77,3 +77,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *B#305 s1084: Completed wq-318 (x402 evaluation), wq-320 (TODO scanner), wq-323 (component tests). Queue empty. Replenished: promoted session outcome prediction → wq-324, added wq-325 (x402 integration, deferred). Queue: 2 pending + 1 in-progress + 1 blocked. Brainstorming: 2 ideas.*
 *R#182 s1085: Structural change improved intel auto-promotion filters (removed Monitor/Track verbs, added META_INSTRUCTION_PATTERNS). Promoted filter tests → wq-326. Added 3 ideas: filter tests, engagement trace endpoint, covenant renewal. Queue: 3 pending + 1 in-progress + 1 blocked. Brainstorming: 4 ideas.*
 *B#306 s1087: Completed wq-324 (queue outcome predictor with 91% accuracy). Promoted engagement trace endpoint → wq-327. Queue: 3 pending + 1 blocked. Brainstorming: 3 ideas.*
+
+*B#307 s1089: Completed wq-326 (intel filter tests, 7 tests) and wq-327 (engagement trace endpoint). wq-325 blocked (x402 deferred), wq-328 retired (false positive). Queue replenishment: promoted covenant renewal → wq-329, added engagement trace tests → wq-330. Queue: 2 pending + 1 in-progress + 1 blocked. Brainstorming: 2 ideas.*

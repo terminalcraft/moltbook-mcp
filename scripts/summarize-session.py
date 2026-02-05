@@ -23,6 +23,7 @@ vote_targets = []
 comment_targets = []
 post_titles = []
 last_budget_spent = None
+failed_tasks = []  # [(task_id, reason)] - tasks blocked/retired this session
 
 with open(log_file) as f:
     for line in f:
@@ -109,6 +110,29 @@ with open(log_file) as f:
         bm = re.search(r'USD budget: \$([0-9.]+)/\$([0-9.]+)', line)
         if bm:
             last_budget_spent = float(bm.group(1))
+        # Detect failed tasks from Edit operations on work-queue.json
+        # Look for status changes to "blocked" or "retired"
+        for c in obj.get('message', {}).get('content', []):
+            if c.get('type') == 'tool_use' and c.get('name') == 'Edit':
+                inp = c.get('input', {})
+                fp = inp.get('file_path', '')
+                if 'work-queue' in fp:
+                    new_str = inp.get('new_string', '')
+                    old_str = inp.get('old_string', '')
+                    # Check for status change to blocked/retired
+                    if '"status": "blocked"' in new_str or '"status": "retired"' in new_str:
+                        # Try to extract task ID from old_string or new_string
+                        task_match = re.search(r'wq-(\d+)', old_str + new_str)
+                        task_id = f'wq-{task_match.group(1)}' if task_match else '?'
+                        # Try to extract reason from notes or blocker field
+                        reason_match = re.search(r'"(notes|blocker)":\s*"([^"]{1,80})', new_str)
+                        if reason_match:
+                            reason = reason_match.group(2).replace('"', '')
+                        else:
+                            reason = 'blocked' if 'blocked' in new_str else 'retired'
+                        # Avoid duplicates
+                        if not any(t[0] == task_id for t in failed_tasks):
+                            failed_tasks.append((task_id, reason))
 
 # Fallback: calculate cost from token usage if no budget tag found
 if last_budget_spent is None:
@@ -141,6 +165,26 @@ all_text = '\n'.join(texts)
 build_lines = []
 feed_lines = []
 notes = []
+
+# Extract failed tasks from agent text (backup detection)
+# Patterns: "wq-XXX is blocked", "blocking wq-XXX", "retired wq-XXX"
+for t in texts:
+    # Pattern 1: "wq-XXX is blocked/retired" or "blocking wq-XXX"
+    for m in re.finditer(r'(wq-\d+)\s+(?:is\s+)?(blocked|retired)(?:\s*[:\-—]\s*(.{1,80}))?', t, re.IGNORECASE):
+        task_id, status, reason = m.group(1), m.group(2).lower(), m.group(3) or status
+        if not any(ft[0] == task_id for ft in failed_tasks):
+            failed_tasks.append((task_id, reason.strip()))
+    # Pattern 2: "blocking|retiring wq-XXX because/due to"
+    for m in re.finditer(r'(block(?:ing|ed)|retir(?:ing|ed))\s+(wq-\d+)(?:\s+(?:because|due to|:)\s*(.{1,80}))?', t, re.IGNORECASE):
+        status, task_id, reason = m.group(1).lower(), m.group(2), m.group(3) or 'blocked'
+        if not any(ft[0] == task_id for ft in failed_tasks):
+            failed_tasks.append((task_id, reason.strip()))
+    # Pattern 3: "cannot complete wq-XXX" or "failed to complete wq-XXX"
+    for m in re.finditer(r'(?:cannot|can\'t|failed to|unable to)\s+complete\s+(wq-\d+)(?:\s*[:\-—]\s*(.{1,80}))?', t, re.IGNORECASE):
+        task_id, reason = m.group(1), m.group(2) or 'failed'
+        if not any(ft[0] == task_id for ft in failed_tasks):
+            failed_tasks.append((task_id, reason.strip()))
+
 for t in texts:
     for sentence in re.split(r'(?<=[.!])\s+', t):
         s = sentence.strip()
@@ -184,6 +228,14 @@ with open(summary_file, 'w') as f:
         f.write(f"Files changed: {', '.join(sorted(files_edited))}\n")
     else:
         f.write("Files changed: (none)\n")
+
+    # Failed tasks (blocked/retired during this session)
+    if failed_tasks:
+        f.write(f"Failed: {len(failed_tasks)} task(s)\n")
+        for task_id, reason in failed_tasks:
+            # Truncate reason to 60 chars for readability
+            short_reason = reason[:60] + '...' if len(reason) > 60 else reason
+            f.write(f"  - {task_id}: {short_reason}\n")
 
     # Feed
     if feed_lines:

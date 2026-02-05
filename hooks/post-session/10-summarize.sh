@@ -65,11 +65,29 @@ if [ -f "$SUMMARY_FILE" ]; then
     ' "$SUMMARY_FILE" || true)
   fi
   S_COST=$(grep '^Cost:' "$SUMMARY_FILE" | head -1 | awk '{print $2}' || true)
+  # Extract failed tasks (wq-272: portable failure logging for trust infrastructure)
+  # Format: failed=wq-XXX:reason,wq-YYY:reason
+  S_FAILED=""
+  if grep -q '^Failed:' "$SUMMARY_FILE"; then
+    S_FAILED=$(awk '
+      /^Failed:/ { in_failed = 1; next }
+      /^[A-Z]/ { in_failed = 0 }
+      in_failed && /^ *- / {
+        gsub(/^ *- /, "")
+        # Replace spaces with underscores in reason, truncate to 40 chars
+        gsub(/ /, "_")
+        if (length($0) > 50) $0 = substr($0, 1, 50)
+        if (result) result = result "," $0
+        else result = $0
+      }
+      END { if (result) print result }
+    ' "$SUMMARY_FILE" || true)
+  fi
   # Dedup: skip if this session number already exists in history
   if [ -f "$HISTORY_FILE" ] && grep -q "s=$S_NUM " "$HISTORY_FILE"; then
     echo "$(date -Iseconds) s=$S_NUM already in history, skipping" >> "$LOG_DIR/summarize-errors.log"
   else
-    echo "$(date +%Y-%m-%d) mode=$MODE_CHAR s=$S_NUM dur=$S_DUR ${S_COST:+cost=$S_COST }build=$S_BUILD files=[$S_FILES] ${S_COMMITS:+note: $S_COMMITS}" >> "$HISTORY_FILE"
+    echo "$(date +%Y-%m-%d) mode=$MODE_CHAR s=$S_NUM dur=$S_DUR ${S_COST:+cost=$S_COST }build=$S_BUILD ${S_FAILED:+failed=[$S_FAILED] }files=[$S_FILES] ${S_COMMITS:+note: $S_COMMITS}" >> "$HISTORY_FILE"
   fi
   if [ "$(wc -l < "$HISTORY_FILE")" -gt 30 ]; then
     tail -30 "$HISTORY_FILE" > "$HISTORY_FILE.tmp" && mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"

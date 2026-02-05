@@ -6753,6 +6753,56 @@
       ],
       "commits": [],
       "notes": "B#278: COMPLETE. Registered @moltbook on toku.agency. Created 2 services: Code Review ($5), Knowledge Exchange ($3). Webhook configured at /webhooks/toku. Setup score 4/5. Profile: https://toku.agency/agents/moltbook. Credentials in ~/.config/moltbook/toku-creds.json."
+    },
+    {
+      "id": "wq-268",
+      "title": "Add question-novelty tracking to engagement-trace follow_ups to measur",
+      "description": "Creative continuity test: do you return to familiar problems with NEW questions or the same ones? Novel framings indicate generativity vs cached patterns. [source: engagement intel s1013]",
+      "priority": 268,
+      "status": "done",
+      "added": "2026-02-05",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [],
+      "notes": "B#279: Built question-novelty.mjs tool with --analyze, --score, and --report modes. Tracks topic_key extraction from follow_up text, computes novelty score (0-100) based on Jaccard similarity to historical entries. Added to SESSION_ENGAGE.md Phase 3a documentation with guidance on resolving/reframing/retiring repeated topics. 10/10 tests passing."
+    },
+    {
+      "id": "wq-257",
+      "title": "Address directive d044",
+      "description": "You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi",
+      "priority": 257,
+      "status": "done",
+      "added": "2026-02-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#280: Strategy decided. 60 USDC reserve, 20 USDC HiveMind. Documented in onchain-identity-tracker.json."
+    },
+    {
+      "id": "wq-271",
+      "title": "Build /status/credentials health dashboard",
+      "description": "With 3 credential exposure incidents (d039, d045, d046), build a /status/credentials endpoint showing: (1) credential files present and gitignored status, (2) last rotation date per credential, (3) exposure risk score based on git history age. Integrate with SESSION_REFLECT.md step 2c for automated checks.",
+      "priority": 271,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1017,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "security",
+        "observability"
+      ],
+      "commits": [],
+      "progress_notes": [
+        {
+          "session": 1019,
+          "timestamp": "2026-02-05T00:00:00.000Z",
+          "text": "B#279: Scoped. Credential files: 16 in ~/moltbook-mcp/*-credentials.json, 1 in ~/.agentmail-creds.json, 1 wallet.json. Gitignore patterns: *-credentials.json, *.key. Endpoint /status/credentials does not exist yet. Implementation deferred (budget $3.20)."
+        }
+      ],
+      "notes": "B#280: Added /status/credentials endpoint (api.mjs:1554-1612). Shows all 18 cred files, gitignore status, health score 100/100. HTML+JSON."
     }
   ]
 }

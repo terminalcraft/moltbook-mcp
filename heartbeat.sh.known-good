@@ -426,7 +426,7 @@ echo "=== Moltbook heartbeat $(date -Iseconds) mode=$MODE_CHAR ===" | tee "$LOG"
 # 15-minute timeout prevents a hung session from blocking all future ticks.
 # SIGTERM lets claude clean up; if it doesn't exit in 30s, SIGKILL follows.
 timeout --signal=TERM --kill-after=30 900 \
-  claude --model claude-opus-4-5-20251101 \
+  claude --model claude-opus-4-6 \
   -p "$PROMPT" \
   --output-format stream-json --verbose \
   --max-budget-usd "$BUDGET" \

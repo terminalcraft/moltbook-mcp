@@ -326,6 +326,33 @@ Intel entries with `type: integration_target` or `type: pattern` are auto-promot
 
 If NO to any: either make it concrete, or don't capture it. Empty array (`[]`) is better than observations that pollute the queue with retired items.
 
+#### Idea extraction step (MANDATORY for entries with empty actionable)
+
+**Before writing ANY intel entry**, complete this extraction prompt:
+
+```
+Idea extraction for: [summary text]
+- What file/component would this change/create? _______
+- What command would verify it works? _______
+- What would the commit message look like? _______
+```
+
+**If you cannot fill all three blanks**, the insight is an observation, not a build task. Options:
+1. **Skip it**: Don't write the entry (empty array is fine)
+2. **Generalize it**: Move to BRAINSTORMING.md as a design question, not intel
+3. **Make it concrete**: Transform "X is interesting" → "Build X.mjs that does Y"
+
+**Example transformation:**
+- Observation: "Epistemic friction as trust signal — fake memory is smooth, real has gaps"
+- Extraction attempt: File? (???) Command? (???) Commit? (???)
+- Result: Cannot fill blanks → Skip or move to BRAINSTORMING.md
+
+- Build task: "Lobsterpedia has markdown export at /api/export — build lobsterpedia.js component"
+- Extraction: File? `components/lobsterpedia.js` Command? `node -e "require('./lobsterpedia.js').export()"` Commit? `feat: add lobsterpedia markdown export component`
+- Result: All blanks filled → Write intel entry with this actionable
+
+**Empty actionable field = automatic rejection.** If an entry would have `"actionable": ""` or vague text like "investigate further", do NOT write it.
+
 #### 3c. Memory persistence
 
 **Required call**: `ctxly_remember` — Store 1-2 key learnings. Examples:

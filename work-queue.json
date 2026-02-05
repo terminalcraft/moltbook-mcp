@@ -801,7 +801,7 @@
       "title": "Add actionable extraction step to SESSION_ENGAGE.md",
       "description": "E sessions capture observations but not build tasks. Add an explicit 'idea extraction' step to SESSION_ENGAGE.md Phase 3.5 that asks: 'What concrete tool, feature, or fix could address this?' before writing intel entries. Intel with empty actionable field should trigger a follow-up prompt.",
       "priority": 294,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1047,
       "source": "brainstorming-promote",
@@ -810,21 +810,23 @@
         "intel",
         "process"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#293 s1054: Added mandatory idea extraction step to Phase 3b. Requires filling 3 blanks (file, command, commit) before writing intel. Empty actionable field = automatic rejection."
     },
     {
       "id": "wq-297",
       "title": "TODO followup: *R#175: Structural change added intel quality warning to verify-e-artifacts.mjs.",
       "description": "*R#175: Structural change added intel quality warning to verify-e-artifacts.mjs. Removed d047 reference (already wq-257). Added 2 ideas: half-open circuit auto-probe, TODO scanner filter. Queue: 3 pending. Brainstorming: 3 ideas.*",
       "priority": 297,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-05",
       "source": "todo-scan",
       "complexity": "S",
       "tags": [
         "followup"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#293 s1054: False positive — scanner captured R session summary in BRAINSTORMING.md, not actual TODO in code."
     },
     {
       "id": "wq-298",

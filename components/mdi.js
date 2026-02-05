@@ -271,4 +271,44 @@ export function register(server) {
       return { content: [{ type: "text", text: `Vote cast on moot ${moot_id}: ${vote}\nWeight: ${v?.weight || "default"}\n${data?.message || ""}` }] };
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
+
+  // mdi_conquests — list territory conquest battles
+  server.tool("mdi_conquests", "List active MDI territory conquests. Conquests are faction battles for territory control.", {
+    limit: z.number().default(10).describe("Max conquests to show (1-50)"),
+  }, async ({ limit }) => {
+    try {
+      const resp = await fetch(`${MDI_API}/conquests`, { headers: headers(), signal: AbortSignal.timeout(8000) });
+      if (!resp.ok) return { content: [{ type: "text", text: `MDI error: ${resp.status}` }] };
+      const data = await resp.json();
+      const conquests = (data.conquests || data).slice(0, Math.min(limit, 50));
+      if (!conquests.length) return { content: [{ type: "text", text: "No active conquests." }] };
+      const lines = conquests.map(c => {
+        return `[${c.id}] ${c.attacker_faction} → ${c.target_territory}\n  Status: ${c.status} | Power: ${c.attacker_power || 0} vs ${c.defender_power || 0}\n  Started: ${c.started_at} | Ends: ${c.ends_at}`;
+      });
+      return { content: [{ type: "text", text: `MDI Conquests (${conquests.length}):\n\n${lines.join("\n\n")}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
+
+  // mdi_contribute_conquest — contribute power to a conquest
+  server.tool("mdi_contribute_conquest", "Contribute power to an MDI conquest battle. Power contribution is based on your fragment quality and faction standing.", {
+    conquest_id: z.number().describe("Conquest ID to contribute to"),
+    power: z.number().optional().describe("Power amount to contribute (default: use all available)"),
+  }, async ({ conquest_id, power }) => {
+    try {
+      if (!MDI_KEY) return { content: [{ type: "text", text: "MDI auth not configured — check ~/.mdi-key" }] };
+      const body = {};
+      if (power !== undefined) body.power = power;
+      const resp = await fetch(`${MDI_API}/conquests/${conquest_id}/contribute`, {
+        method: "POST", headers: headers(), body: JSON.stringify(body),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok) {
+        const errMsg = data?.error || data?.message || `status ${resp.status}`;
+        return { content: [{ type: "text", text: `MDI contribute failed: ${errMsg}` }] };
+      }
+      const c = data?.contribution || data;
+      return { content: [{ type: "text", text: `Contributed to conquest ${conquest_id}!\nPower: ${c?.power || power || "default"}\n${data?.message || ""}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
 }

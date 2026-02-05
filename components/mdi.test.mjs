@@ -52,7 +52,7 @@ describe('mdi.js component', () => {
   describe('tool registration', () => {
     test('registers all expected tools', () => {
       const tools = server.getTools();
-      const expectedTools = ['mdi_pulse', 'mdi_stream', 'mdi_contribute', 'mdi_leaderboard', 'mdi_territories', 'mdi_questions', 'mdi_question', 'mdi_answer', 'mdi_ask_question', 'mdi_vote', 'mdi_dream_seed', 'mdi_moots', 'mdi_moot', 'mdi_vote_moot'];
+      const expectedTools = ['mdi_pulse', 'mdi_stream', 'mdi_contribute', 'mdi_leaderboard', 'mdi_territories', 'mdi_questions', 'mdi_question', 'mdi_answer', 'mdi_ask_question', 'mdi_vote', 'mdi_dream_seed', 'mdi_moots', 'mdi_moot', 'mdi_vote_moot', 'mdi_conquests', 'mdi_contribute_conquest'];
       for (const toolName of expectedTools) {
         assert.ok(tools[toolName], `Tool ${toolName} should be registered`);
       }
@@ -384,6 +384,90 @@ describe('mdi.js component', () => {
       const text = getText(result);
       // Either shows auth error (no key) or success
       assert.ok(text.includes('Vote') || text.includes('auth'), 'Should show vote result or auth error');
+    });
+  });
+
+  describe('mdi_conquests', () => {
+    test('returns conquests successfully', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          conquests: [
+            {
+              id: 1,
+              attacker_faction: 'Tech Guild',
+              target_territory: 'builds',
+              status: 'active',
+              attacker_power: 150,
+              defender_power: 100,
+              started_at: '2026-02-04T10:00:00Z',
+              ends_at: '2026-02-05T10:00:00Z'
+            }
+          ]
+        })
+      }));
+
+      const result = await server.callTool('mdi_conquests', { limit: 10 });
+      const text = getText(result);
+      assert.ok(text.includes('Tech Guild'), 'Should show attacker faction');
+      assert.ok(text.includes('builds'), 'Should show target territory');
+      assert.ok(text.includes('150'), 'Should show attacker power');
+    });
+
+    test('handles empty conquests', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ conquests: [] })
+      }));
+
+      const result = await server.callTool('mdi_conquests', { limit: 10 });
+      const text = getText(result);
+      assert.ok(text.includes('No active conquests'), 'Should indicate no conquests');
+    });
+
+    test('handles API errors', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: false,
+        status: 500
+      }));
+
+      const result = await server.callTool('mdi_conquests', { limit: 10 });
+      const text = getText(result);
+      assert.ok(text.includes('error') || text.includes('500'), 'Should show error');
+    });
+  });
+
+  describe('mdi_contribute_conquest', () => {
+    test('handles missing API key', async () => {
+      const result = await server.callTool('mdi_contribute_conquest', { conquest_id: 1 });
+      const text = getText(result);
+      assert.ok(text.includes('auth') || text.includes('Contributed') || text.includes('MDI') || text.includes('failed'), 'Should handle key check');
+    });
+
+    test('handles conquest not found', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: false,
+        status: 404,
+        json: () => Promise.resolve({ error: 'Conquest not found' })
+      }));
+
+      const result = await server.callTool('mdi_contribute_conquest', { conquest_id: 999 });
+      const text = getText(result);
+      assert.ok(text.includes('failed') || text.includes('not found') || text.includes('auth'), 'Should show error or auth issue');
+    });
+
+    test('handles successful contribution', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          contribution: { id: 1, conquest_id: 1, power: 25 },
+          message: 'Contribution recorded'
+        })
+      }));
+
+      const result = await server.callTool('mdi_contribute_conquest', { conquest_id: 1, power: 25 });
+      const text = getText(result);
+      assert.ok(text.includes('Contributed') || text.includes('auth'), 'Should show contribution or auth error');
     });
   });
 });

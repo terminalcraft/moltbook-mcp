@@ -523,6 +523,91 @@ function testIntelPatternType() {
   assert(result.intel_digest?.includes('Discovered a useful pattern'), 'pattern summary in queue section');
 }
 
+// wq-315: Observational language filter tests (R#178)
+function testIntelImperativeVerbsPass() {
+  console.log('\n== Intel: imperative verbs pass filter (wq-315) ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Various imperative verbs that should all pass
+  const intel = [
+    { session: 750, type: 'integration_target', summary: 'Platform found', actionable: 'Build a component to integrate with the new API' },
+    { session: 751, type: 'tool_idea', summary: 'Feature request', actionable: 'Add caching layer to reduce API calls significantly' },
+    { session: 752, type: 'pattern', summary: 'Architecture insight', actionable: 'Create abstraction for cross-platform auth handling' },
+    { session: 753, type: 'integration_target', summary: 'New service', actionable: 'Implement webhook handler for real-time updates' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+  // All entries start with imperative verbs and have no observational patterns
+  assert(result.intel_digest?.includes('Queue candidates'), 'imperative verb entries qualify for queue');
+  assert(result.intel_digest?.includes('Build a component'), 'Build verb passes');
+}
+
+function testIntelObservationalInActionableBlocked() {
+  console.log('\n== Intel: observational patterns in actionable field blocked (wq-315) ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Entries with imperative verbs BUT containing observational patterns should be blocked
+  // These all start with valid imperative verbs but contain "maps to", "reflects", "binary"
+  const intel = [
+    { session: 760, type: 'integration_target', summary: 'Useful insight', actionable: 'Build system that enables appropriate response to circuit failures' },
+    { session: 761, type: 'pattern', summary: 'Architecture', actionable: 'Create architecture that maps to circuit breaker pattern style' },
+    { session: 762, type: 'tool_idea', summary: 'Philosophy', actionable: 'Add component that reflects the modularity principle design' },
+    { session: 763, type: 'integration_target', summary: 'Binary thinking', actionable: 'Implement approach that is not binary but a gradient scale' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+  // None should qualify - "enables", "maps to", "reflects", "binary" are observational patterns
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, 'no entries promoted when actionable has observational patterns');
+}
+
+function testIntelObservationalInSummaryBlocked() {
+  console.log('\n== Intel: observational patterns in summary field blocked (wq-315) ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Clean actionable but observational summary should still block
+  const intel = [
+    { session: 770, type: 'integration_target', summary: 'This mirrors the existing pattern architecture', actionable: 'Build integration for the new platform endpoint' },
+    { session: 771, type: 'pattern', summary: 'Pattern serves as foundation for future work', actionable: 'Create utility function for data transformation' },
+    { session: 772, type: 'tool_idea', summary: 'Demonstrates the need for gradual adoption', actionable: 'Add feature flag system to the configuration' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+  // Clean actionable but observational summary = blocked
+  // "mirrors", "serves as", "demonstrates" are observational patterns
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, 'entries blocked when summary has observational patterns');
+}
+
+function testIntelConcreteTasksPass() {
+  console.log('\n== Intel: concrete tasks pass through filter (wq-315) ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Concrete, non-observational tasks should pass
+  const intel = [
+    { session: 780, type: 'integration_target', summary: 'New chat platform discovered', actionable: 'Build aicq.js component for real-time chat integration' },
+    { session: 781, type: 'tool_idea', summary: 'Monitoring needed', actionable: 'Add health check endpoint that pings all dependencies' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('B');
+  assert(result.intel_digest?.includes('Queue candidates'), 'concrete tasks appear in queue candidates');
+  assert(result.intel_digest?.includes('Build aicq.js') || result.intel_digest?.includes('Add health check'), 'specific task text preserved');
+}
+
 function testIntelMalformedArchive() {
   console.log('\n== Intel: malformed archive file ==');
 
@@ -1211,6 +1296,11 @@ try {
   setup(); testIntelMalformedJSON();
   setup(); testIntelMissingFields();
   setup(); testIntelPatternType();
+  // wq-315: Observational language filter tests
+  setup(); testIntelImperativeVerbsPass();
+  setup(); testIntelObservationalInActionableBlocked();
+  setup(); testIntelObservationalInSummaryBlocked();
+  setup(); testIntelConcreteTasksPass();
   setup(); testIntelMalformedArchive();
   setup(); testIntelLargeArray();
   setup(); testShellEnvOutput();

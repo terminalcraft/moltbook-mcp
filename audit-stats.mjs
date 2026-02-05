@@ -146,9 +146,12 @@ function computeQueueStats() {
     }
 
     if (item.status === 'pending') {
-      const createdSession = item.created_session || parseInt(item.added?.replace(/\D/g, '') || '0');
-      if (currentSession - createdSession > 20) {
-        stuck.push({ id: item.id, age: currentSession - createdSession });
+      // Check both field names: created_session (newer format) and session_added (wq-295 format)
+      // Fall back to parsing date from 'added' field, or 0 if nothing works
+      const createdSession = item.created_session || item.session_added || parseInt(item.added?.replace(/\D/g, '') || '0');
+      const age = currentSession - createdSession;
+      if (age > 20) {
+        stuck.push({ id: item.id, age });
       }
     }
   }

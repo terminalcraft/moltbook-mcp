@@ -7923,6 +7923,24 @@
         "33197bb"
       ],
       "notes": "Completed in B#324 (s1136). Added trace archiving in session-context.mjs and archive-aware verification in verify-e-artifacts.mjs. Also updated R#173 intel capture rate diagnostic to use trace archive."
+    },
+    {
+      "id": "wq-365",
+      "title": "Enforce brainstorming replenishment in R sessions",
+      "description": "BRAINSTORMING.md has only 2 active ideas for 11+ sessions (since s1120). R sessions have a mandate to generate 2-3 new ideas per session but have not been doing so. Either add a post-session hook that warns when brainstorming is low, or add a brainstorming gate check to SESSION_REFLECT.md.",
+      "priority": 365,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1131,
+      "source": "audit-s1131",
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": [
+        "6a65d33"
+      ],
+      "notes": "B#325 s1138: Added pre-session hook (44-brainstorm-gate_R.sh), post-session compliance check (26-brainstorm-compliance_R.sh), and mandatory gates in SESSION_REFLECT.md steps 4 and 6."
     }
   ]
 }

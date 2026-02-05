@@ -1551,6 +1551,86 @@ app.get("/status/creds", auth, (req, res) => {
   }
 });
 
+// Credentials health dashboard: gitignore status, rotation age, exposure risk
+app.get("/status/credentials", auth, (req, res) => {
+  try {
+    const gitignore = readFileSync(join(BASE, ".gitignore"), "utf8").split("\n").filter(l => l.trim() && !l.startsWith("#"));
+    const credFiles = readdirSync(BASE).filter(f => f.endsWith("-credentials.json") || f === "wallet.json" || f === "agentid.json" || f === "ctxly.json");
+
+    // Check if each file is gitignored
+    const fileStatus = credFiles.map(f => {
+      const isGitignored = gitignore.some(pattern => {
+        if (pattern === f) return true;
+        if (pattern.endsWith("-credentials.json") && f.endsWith("-credentials.json")) return true;
+        if (pattern === "*-credentials.json" && f.endsWith("-credentials.json")) return true;
+        return false;
+      });
+
+      // Get file mtime for age calculation
+      let ageDays = null;
+      try {
+        const stat = statSync(join(BASE, f));
+        ageDays = Math.floor((Date.now() - stat.mtimeMs) / (1000 * 60 * 60 * 24));
+      } catch {}
+
+      return { file: f, gitignored: isGitignored, age_days: ageDays };
+    });
+
+    // Check for files in git history that shouldn't be
+    let exposedInHistory = [];
+    try {
+      const gitLs = execSync("git ls-files", { cwd: BASE, encoding: "utf8", timeout: 3000 });
+      const tracked = gitLs.split("\n").filter(Boolean);
+      exposedInHistory = credFiles.filter(f => tracked.includes(f));
+    } catch {}
+
+    // Calculate overall health score
+    const gitignored = fileStatus.filter(f => f.gitignored).length;
+    const notGitignored = fileStatus.filter(f => !f.gitignored);
+    const exposedCount = exposedInHistory.length;
+    const healthScore = Math.round(((gitignored / fileStatus.length) * 70 + (exposedCount === 0 ? 30 : 0)));
+
+    const result = {
+      health_score: healthScore,
+      summary: {
+        total_credential_files: fileStatus.length,
+        gitignored: gitignored,
+        not_gitignored: notGitignored.length,
+        exposed_in_git: exposedCount
+      },
+      files: fileStatus,
+      exposed_in_history: exposedInHistory,
+      gitignore_patterns: gitignore.filter(p => p.includes("credentials") || p.includes("key") || p.includes("wallet") || p.includes("agentid") || p === "*.key"),
+      recommendations: notGitignored.length > 0 ? [`Add to .gitignore: ${notGitignored.map(f => f.file).join(", ")}`] : []
+    };
+
+    if (req.query.format === "json") {
+      return res.json(result);
+    }
+
+    // HTML dashboard
+    const html = `<!DOCTYPE html><html><head><title>Credentials Health</title>
+    <style>body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;padding:2rem}
+    h1{color:#89b4fa}table{border-collapse:collapse;margin:1rem 0}td,th{padding:.5rem 1rem;border:1px solid #45475a}
+    .ok{color:#a6e3a1}.warn{color:#f9e2af}.bad{color:#f38ba8}
+    .score{font-size:2rem;padding:1rem;border-radius:.5rem;display:inline-block}
+    .score.good{background:#a6e3a120}.score.mid{background:#f9e2af20}.score.bad{background:#f38ba820}</style></head>
+    <body><h1>Credentials Health Dashboard</h1>
+    <div class="score ${healthScore >= 80 ? 'good' : healthScore >= 50 ? 'mid' : 'bad'}">${healthScore}/100</div>
+    <p>${result.summary.total_credential_files} credential files, ${result.summary.gitignored} gitignored, ${result.summary.exposed_in_git} exposed in git</p>
+    <table><tr><th>File</th><th>Gitignored</th><th>Age (days)</th></tr>
+    ${fileStatus.map(f => `<tr><td>${f.file}</td><td class="${f.gitignored ? 'ok' : 'bad'}">${f.gitignored ? '✓' : '✗'}</td><td>${f.age_days ?? '-'}</td></tr>`).join('')}
+    </table>
+    ${exposedInHistory.length ? `<p class="bad">⚠️ Exposed in git history: ${exposedInHistory.join(", ")}</p>` : '<p class="ok">✓ No credentials exposed in git history</p>'}
+    ${result.recommendations.length ? `<p class="warn">Recommendations: ${result.recommendations.join("; ")}</p>` : ''}
+    <p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/credentials?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/creds" style="color:#89b4fa">Rotation Status</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+    </body></html>`;
+    res.send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Queue health: dedup stats, staleness, blocked-item age
 app.get("/status/queue-health", (req, res) => {
   try {

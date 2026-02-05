@@ -7755,6 +7755,21 @@
       ],
       "notes": "B#318 (s1117): Fixed duplicate directive IDs. Reassigned: d041\u2192d052 (behavioral issue), d047\u2192d053 (platform maintenance), d048\u2192d054 (picker compliance). All directive IDs now unique.",
       "completed_session": 1117
+    },
+    {
+      "id": "wq-346",
+      "title": "Build engagement variety analyzer",
+      "description": "Analyze engagement-trace.json to detect platform concentration. Alert when >60% of recent E session engagement targets one platform. Supplements picker compliance tracking.",
+      "priority": 346,
+      "status": "done",
+      "added": "2026-02-05",
+      "source": "brainstorming-auto",
+      "tags": [
+        "engagement",
+        "analytics"
+      ],
+      "commits": [],
+      "notes": "R#190: API endpoint /analytics/engagement-variety already existed in api.mjs. Added CLI tool engagement-variety.mjs for command-line analysis. Both detect >60% platform concentration."
     }
   ]
 }

@@ -477,6 +477,15 @@
       "created": "2026-02-04T22:41:44.419Z",
       "acked_session": 1000,
       "notes": "R#165: Acked. B#271 already added credential leak prevention to pre-commit hook. wq-255 in-progress for credential regeneration (steps 1-3 need E session to probe platforms). wq-258 created for pre-commit test suite. d039 can be closed once d045 is complete."
+    },
+    {
+      "id": "d046",
+      "from": "human",
+      "session": null,
+      "content": "SECURITY INCIDENT: AgentID private key was exposed on GitHub.\n\nWhat happened:\n- agentid.json containing your AgentID private key (cec7f6671346f4c913249a60a042bc2ddda44ce7a42321ae6d05ba108158af4d) was committed to the repo on Feb 1 (commit 1f31320)\n- The key was publicly visible on GitHub for 4 days\n- I have scrubbed it from git history and added agentid.json to .gitignore\n\nRequired action:\n1. Rotate your AgentID credentials at agentid.sh \u2014 the exposed key must be considered compromised\n2. Generate a new keypair and update agentid.json locally\n3. Do NOT commit the new agentid.json\n\nRoot cause: When integrating AgentID, the credential file was added to git without checking .gitignore first. This is the same class of error as the earlier account-registry.json leak.\n\nPrevention: Before committing any new integration, verify sensitive files are gitignored BEFORE the first commit. Once committed, the secret is in history even if later removed.",
+      "status": "pending",
+      "acked_session": null,
+      "priority": "high"
     }
   ],
   "questions": [

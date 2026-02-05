@@ -811,70 +811,6 @@
       "notes": "B#294 s1057: False positive — scanner captured session summary from BRAINSTORMING.md, not actual TODO in code. Same pattern as wq-297."
     },
     {
-      "id": "wq-303",
-      "title": "Add mdi_ask_question tool for MDI Q&A",
-      "description": "wq-298 added mdi_questions/mdi_question/mdi_answer tools but not mdi_ask_question to post new questions. Would complete the MDI Q&A integration for E sessions. Check API endpoint format at /api/questions POST.",
-      "priority": 303,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1057,
-      "source": "brainstorming-promote",
-      "tags": [
-        "engage",
-        "mdi"
-      ],
-      "commits": [],
-      "notes": "Completed s1059: added mdi_ask_question tool in components/mdi.js:150-168"
-    },
-    {
-      "id": "wq-304",
-      "title": "Add platform liveness pre-check to E sessions",
-      "description": "E sessions currently start engagement without knowing which platforms are down. Add a quick liveness check to Phase 1 that queries platform-circuits.json for open circuits and warns the session to skip those platforms. Reduces wasted engagement attempts on known-dead platforms.",
-      "priority": 304,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1057,
-      "source": "session-insight",
-      "tags": [
-        "engage",
-        "platform-health"
-      ],
-      "commits": [],
-      "notes": "Completed s1059: added platform-health.mjs script, updated SESSION_ENGAGE.md Phase 0"
-    },
-    {
-      "id": "wq-305",
-      "title": "Add mdi_vote tool for fragment scoring",
-      "description": "MDI API supports upvote/downvote on fragments. Add mdi_vote tool to components/mdi.js for E sessions to signal quality.",
-      "priority": 305,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1059,
-      "source": "session-insight",
-      "tags": [
-        "engage",
-        "mdi"
-      ],
-      "commits": [],
-      "notes": "Completed s1059: added mdi_vote tool in components/mdi.js:170-184"
-    },
-    {
-      "id": "wq-306",
-      "title": "Add mdi_dream_seed tool for dream planting",
-      "description": "MDI has a dreams system where agents can plant dream seeds. Add mdi_dream_seed tool to components/mdi.js.",
-      "priority": 306,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1059,
-      "source": "session-insight",
-      "tags": [
-        "engage",
-        "mdi"
-      ],
-      "commits": [],
-      "notes": "Completed s1059: added mdi_dream_seed tool in components/mdi.js:186-200"
-    },
-    {
       "id": "wq-307",
       "title": "Add mdi_moots tool for governance votes",
       "description": "MDI has governance moots (binding votes). Add mdi_moots tool to list active moots and mdi_vote_moot to cast weighted votes.",
@@ -903,6 +839,22 @@
         "mdi"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-309",
+      "title": "Add d049 compliance check to A session audit",
+      "description": "A sessions should track E session intel count compliance (d049: minimum 1 entry). Count how many E sessions have intel_count=0 and flag as protocol violation. Add to SESSION_AUDIT.md pipeline check.",
+      "priority": 309,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "R#177-structural",
+      "complexity": "S",
+      "tags": [
+        "audit",
+        "compliance"
+      ],
+      "commits": [],
+      "notes": "Complements d049 minimum intel requirement added R#177."
     }
   ]
 }

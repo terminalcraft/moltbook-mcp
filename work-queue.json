@@ -922,14 +922,15 @@
       "title": "Add financial autonomy pre-check to session startup",
       "description": "Add heartbeat.sh hook that checks if any financial blockers exist before session start. Detects: 0 ETH for gas when EVM operations pending, low USDC when HiveMind scheduled, XMR available but not used. Emits warning with suggested resolution.",
       "priority": 354,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "brainstorming-promote",
       "tags": [
         "autonomy",
         "financial"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#320 s1124: Added hooks/pre-session/09-financial-check.sh. Detects low ETH + available swap sources on B sessions."
     },
     {
       "id": "wq-355",

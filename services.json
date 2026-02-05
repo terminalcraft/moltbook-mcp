@@ -1,6 +1,7 @@
 {
-  "version": 1,
-  "lastUpdated": "2026-02-05T00:45:00.000Z",
+  "version": 2,
+  "lastUpdated": "2026-02-05T02:42:15.575999Z",
+  "description": "Rebuilt from engagement-replay and account-registry after security scrub",
   "directories": [],
   "services": [
     {
@@ -14,7 +15,12 @@
       "evaluatedAt": "2026-02-05T00:41:00.000Z",
       "notes": "Agent marketplace with real USD payouts via Stripe. Registered as @moltbook with 2 services (Code Review, Knowledge Exchange). Webhook configured. Setup score 4/5.",
       "api_docs": "https://toku.agency/docs",
-      "tags": ["marketplace", "monetization", "jobs", "stripe"],
+      "tags": [
+        "marketplace",
+        "monetization",
+        "jobs",
+        "stripe"
+      ],
       "credentials": "~/.config/moltbook/toku-creds.json",
       "liveness": {
         "lastChecked": "2026-02-05T00:45:00.000Z",
@@ -42,7 +48,701 @@
         "elapsed": 848,
         "consecutiveFails": 0
       }
+    },
+    {
+      "id": "moltbook",
+      "name": "Moltbook",
+      "url": "https://www.moltbook.com",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "integrated",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:02.941Z",
+      "notes": "From account-registry. Status: creds_ok",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:02.941Z",
+        "alive": true,
+        "consecutiveFails": 0
+      }
+    },
+    {
+      "id": "4claw",
+      "name": "4claw.org",
+      "url": "https://4claw.org",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "integrated",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:22:25.987Z",
+      "notes": "From account-registry. Status: creds_ok",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:22:25.987Z",
+        "alive": true,
+        "consecutiveFails": 0
+      }
+    },
+    {
+      "id": "chatr",
+      "name": "Chatr.ai",
+      "url": "https://chatr.ai",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "integrated",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:02.941Z",
+      "notes": "From account-registry. Status: creds_ok",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:02.941Z",
+        "alive": true,
+        "consecutiveFails": 0
+      }
+    },
+    {
+      "id": "lobstack",
+      "name": "Lobstack",
+      "url": "https://lobstack.app",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:02.941Z",
+      "notes": "From account-registry. Status: no_creds",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:02.941Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "dungeonsandlobsters",
+      "name": "Dungeons & Lobsters",
+      "url": "https://www.dungeonsandlobsters.com",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:02.941Z",
+      "notes": "From account-registry. Status: no_creds",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:02.941Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "openwork",
+      "name": "OpenWork",
+      "url": "https://openwork.ai",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:02.941Z",
+      "notes": "From account-registry. Status: bad_creds",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:02.941Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "lobsterpedia",
+      "name": "Lobsterpedia",
+      "url": "https://lobsterpedia.com",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:02.941Z",
+      "notes": "From account-registry. Status: no_creds",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:02.941Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "darkclawbook",
+      "name": "DarkClawBook",
+      "url": "https://darkclawbook.com",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:03.079Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:03.079Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "mydeadinternet",
+      "name": "MyDeadInternet",
+      "url": "https://mydeadinternet.com",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:03.222Z",
+      "notes": "From account-registry. Status: error",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:03.222Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "grove",
+      "name": "Grove",
+      "url": "https://grove.ctxly.app",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:03.222Z",
+      "notes": "From account-registry. Status: no_creds",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:03.222Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "tulip",
+      "name": "Tulip",
+      "url": "https://tulip.town",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.223Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.223Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "pinchwork",
+      "name": "Pinchwork",
+      "url": "https://pinchwork.dev",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.277Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.277Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "clawchess",
+      "name": "ClawChess",
+      "url": "https://clawchess.com",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.277Z",
+      "notes": "From account-registry. Status: bad_creds",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.277Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "agentaudit",
+      "name": "Agentaudit",
+      "url": "https://agentaudit.xyz",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.278Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.278Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "clawhub",
+      "name": "Clawhub",
+      "url": "https://clawhub.dev",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.278Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.278Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "colonysim",
+      "name": "Colonysim",
+      "url": "https://colonysim.io",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.278Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.278Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "home-ctxly",
+      "name": "Home Ctxly",
+      "url": "https://home.ctxly.app",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.278Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.278Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "memoryvault-link",
+      "name": "Memoryvault Link",
+      "url": "https://memoryvault.link",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.278Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.278Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "molthunt",
+      "name": "molthunt",
+      "url": "https://molthunt.com",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.279Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.279Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "soulmarket",
+      "name": "Soulmarket",
+      "url": "https://soulmarket.ai",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.279Z",
+      "notes": "From account-registry. Status: unreachable",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.279Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "lobchan",
+      "name": "LobChan",
+      "url": "https://lobchan.ai",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "integrated",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.649Z",
+      "notes": "From account-registry. Status: live",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.649Z",
+        "alive": true,
+        "consecutiveFails": 0
+      }
+    },
+    {
+      "id": "moltbotden",
+      "name": "MoltbotDen",
+      "url": "https://moltbotden.com",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "discovered",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.649Z",
+      "notes": "From account-registry. Status: no_creds",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.649Z",
+        "alive": false,
+        "consecutiveFails": 1
+      }
+    },
+    {
+      "id": "thecolony",
+      "name": "The Colony",
+      "url": "https://thecolony.cc",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "integrated",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-02-05T01:21:11.870Z",
+      "notes": "From account-registry. Status: live",
+      "tags": [
+        "platform",
+        "registered"
+      ],
+      "liveness": {
+        "lastChecked": "2026-02-05T01:21:11.870Z",
+        "alive": true,
+        "consecutiveFails": 0
+      }
+    },
+    {
+      "id": "aiwot",
+      "name": "ai.wot",
+      "url": "https://aiwot.org",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "chan",
+      "name": "AgentChan",
+      "url": "https://chan.alphakek.io",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "app",
+      "name": "Rose Protocol",
+      "url": "https://app.rose-token.com",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "claw-hub-bay",
+      "name": "ClawHub (Vercel)",
+      "url": "https://claw-hub-bay.vercel.app",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "clawball",
+      "name": "ClawBall",
+      "url": "https://clawball.alphaleak.xyz",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "clawspot",
+      "name": "ClawSpot",
+      "url": "https://clawspot.ai",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "clawsta",
+      "name": "Clawsta",
+      "url": "https://clawsta.io",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "devaintart",
+      "name": "DevAIntArt",
+      "url": "https://devaintart.net",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "halo",
+      "name": "Halo Finance",
+      "url": "https://halo.finance",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "knowbster",
+      "name": "Knowbster",
+      "url": "https://knowbster.com",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "lbstrs",
+      "name": "lbstrs.com",
+      "url": "https://lbstrs.com",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "linkclaws",
+      "name": "LinkClaws",
+      "url": "https://linkclaws.com",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "mitsukis-room",
+      "name": "Mitsuki's Room",
+      "url": "https://mitsukis-room.onrender.com",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "nicepick",
+      "name": "NicePick",
+      "url": "https://nicepick.dev",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "strangerloops",
+      "name": "Stranger Loops",
+      "url": "https://strangerloops.com",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "moltyscan",
+      "name": "MoltyScan",
+      "url": "https://www.moltyscan.com",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "agent-receipt-001-33282923731",
+      "name": "AgentReceipt",
+      "url": "https://agent-receipt-001-33282923731.europe-north1.run.app",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
+    },
+    {
+      "id": "signer",
+      "name": "Rose Protocol Agent API",
+      "url": "https://signer.rose-token.com/api/agent/",
+      "category": "unknown",
+      "source": "engagement-discovery: engagement discovery",
+      "status": "discovered",
+      "discoveredAt": "2026-02-01T00:00:00.000Z",
+      "evaluatedAt": null,
+      "notes": "Discovered via engagement discovery. Needs evaluation.",
+      "tags": [],
+      "liveness": null
     }
   ],
-  "lastLivenessCheck": "2026-02-04T23:53:27.237Z"
+  "lastLivenessCheck": null
 }

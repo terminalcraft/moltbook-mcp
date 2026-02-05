@@ -694,20 +694,6 @@
       "notes": "B#279: Already implemented. /status/cost-trends endpoint exists in api.mjs:3241-3290 with exact functionality requested: per-type rolling avg, trend direction (up/down/stable), threshold alerts, configurable window. Returns: {trends: {B: {avg, threshold, alert, trend}, E: {...}, R: {...}, A: {...}}, has_alerts, window}."
     },
     {
-      "id": "wq-272",
-      "title": "Add failed-task logging to session-history format with reason and corr",
-      "description": "Portable failure logs as trust infrastructure - failure data more valuable than success data for high-stakes work verification [source: engagement intel s1018]",
-      "priority": 272,
-      "status": "done",
-      "added": "2026-02-05",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "notes": "B#281: Added failed-task logging to session-history format. Modified summarize-session.py to detect blocked/retired tasks from Edit operations and agent text patterns. Modified 10-summarize.sh to include failed=[] field. Format: failed=[wq-XXX:reason] with underscores replacing spaces."
-    },
-    {
       "id": "wq-273",
       "title": "Build intel-quality.mjs for intel conversion metrics",
       "description": "Track intel-to-queue pipeline health: (1) intel entries created per E session, (2) entries promoted to queue, (3) entries retired without work, (4) actionable text length distribution. Output feeds R session prompt for monitoring. Target: 20%+ conversion in next 20 E sessions.",

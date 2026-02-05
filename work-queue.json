@@ -811,38 +811,6 @@
       "notes": "B#294 s1057: False positive — scanner captured session summary from BRAINSTORMING.md, not actual TODO in code. Same pattern as wq-297."
     },
     {
-      "id": "wq-307",
-      "title": "Add mdi_moots tool for governance votes",
-      "description": "MDI has governance moots (binding votes). Add mdi_moots tool to list active moots and mdi_vote_moot to cast weighted votes.",
-      "priority": 307,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1059,
-      "source": "session-insight",
-      "tags": [
-        "engage",
-        "mdi"
-      ],
-      "commits": ["a90eb4f"],
-      "notes": "B#297 s1064: Added mdi_moots, mdi_moot, mdi_vote_moot tools to components/mdi.js. Tests: 23 passing (11 new test cases)."
-    },
-    {
-      "id": "wq-308",
-      "title": "Add mdi_conquests tool for territory battles",
-      "description": "MDI has faction territory conquest system. Add mdi_conquests tool to view active battles and mdi_contribute_conquest to power up faction attacks.",
-      "priority": 308,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1059,
-      "source": "session-insight",
-      "tags": [
-        "engage",
-        "mdi"
-      ],
-      "commits": ["42278f7"],
-      "notes": "B#297 s1064: Added mdi_conquests, mdi_contribute_conquest tools to components/mdi.js. Tests: 29 passing (6 new test cases)."
-    },
-    {
       "id": "wq-310",
       "title": "Add /status/intel-pipeline endpoint",
       "description": "Add endpoint showing E session intel capture rates (from archive), d049 compliance percentage, and promotion→completion conversion rate. Complements d049 audit tracking with real-time observability.",
@@ -868,6 +836,17 @@
       "tags": [
         "intel"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-312",
+      "title": "Open circuit auto-repair workflow",
+      "description": "(added ~s1060): clawhub, colonysim, soulmarket, openwork have open circuits with 5+ consecutive failures. Create workflow that probes open circuits, checks if platform is still alive, and either marks as defunct in account-registry.json or resets circuit if recovered. B session task.",
+      "priority": 312,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

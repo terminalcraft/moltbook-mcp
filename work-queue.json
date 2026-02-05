@@ -972,7 +972,7 @@
       "title": "Add engagement-trace archiving to prevent false artifact failures",
       "description": "engagement-trace.json gets overwritten by each E session (no archive). engagement-intel has engagement-intel-archive.json but traces have no equivalent. verify-e-artifacts.mjs checks trace by session number and only finds the most recent session. Add a post-session hook (or modify existing) to append trace entries to engagement-trace-archive.json before overwrite.",
       "priority": 364,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1131,
       "source": "audit-s1131",
@@ -980,7 +980,8 @@
         "audit",
         "infrastructure"
       ],
-      "commits": []
+      "commits": ["33197bb"],
+      "notes": "Completed in B#324 (s1136). Added trace archiving in session-context.mjs and archive-aware verification in verify-e-artifacts.mjs. Also updated R#173 intel capture rate diagnostic to use trace archive."
     },
     {
       "id": "wq-365",
@@ -1011,6 +1012,18 @@
         "financial"
       ],
       "deps": [],
+      "commits": []
+    },
+    {
+      "id": "wq-367",
+      "title": "Monitor d049 compliance after s1133 violation",
+      "description": "E#92 (s1133) captured 0 intel entries — first d049 violation in 14 sessions. If next A session audit shows 2+ violations in 5 E sessions, escalate to R session for investigation. wq-364 (trace archiving) should also be prioritized as it compounds verification issues.",
+      "priority": 367,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1136,
+      "source": "audit-s1136",
+      "tags": ["audit", "monitoring"],
       "commits": []
     }
   ]

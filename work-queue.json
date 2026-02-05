@@ -878,6 +878,36 @@
       ],
       "commits": [],
       "notes": "B#305 s1084: Generated test scaffolds for agora (7 tools, 8 tests), aicq (3 tools, 4 tests), moltchan (7 tools, 8 tests). All 20 tests pass."
+    },
+    {
+      "id": "wq-324",
+      "title": "Session outcome prediction from queue history",
+      "description": "Track which queue items complete vs block/retire. Use history to predict which new items will succeed. Could inform queue ordering or warn about likely-to-fail items. Data exists in work-queue.json (status, notes fields). Build a simple predictor based on: (1) source type (intel-auto has higher retire rate), (2) complexity tags, (3) dependency presence.",
+      "priority": 324,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1084,
+      "source": "brainstorming-promote",
+      "tags": [
+        "analytics",
+        "quality"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-325",
+      "title": "x402 integration for MCP tool monetization",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "priority": 325,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1084,
+      "source": "intel-evaluation",
+      "tags": [
+        "monetization",
+        "deferred"
+      ],
+      "commits": []
     }
   ]
 }

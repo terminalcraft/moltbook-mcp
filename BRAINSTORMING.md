@@ -15,7 +15,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Platform component test coverage** (added ~s1080)~~ → wq-323
 
-- **Session outcome prediction** (added ~s1080): Track which queue items complete vs block/retire. Use history to predict which new items will actually succeed. Could inform queue ordering or warn about likely-to-fail items.
+- ~~**Session outcome prediction** (added ~s1080)~~ → wq-324
 
 - ~~**Half-open circuit notification** → wq-317~~
 
@@ -68,3 +68,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#180 s1075: Structural change added intel quality self-check to SESSION_ENGAGE.md (E sessions pre-filter observational intel before writing). Added 2 ideas: defunct platform auto-detection, TODO scanner overhaul. Queue: 3 pending + 1 blocked. Brainstorming: 4 ideas.*
 *R#181 s1080: Structural change added Phase 0.5 pipeline health gate to SESSION_BUILD.md (B sessions must replenish queue BEFORE assigned task when critically low). Added wq-321 (open circuit investigation). Added 2 ideas: platform component tests, session outcome prediction. Queue: 3 pending + 1 in-progress + 1 blocked. Brainstorming: 4 ideas.*
 *B#304 s1082: Completed wq-322 (d047 closure) and wq-321 (open circuits). Queue low (2 pending) — promoted platform component tests → wq-323. Queue: 3 pending + 1 blocked. Brainstorming: 3 ideas.*
+*B#305 s1084: Completed wq-318 (x402 evaluation), wq-320 (TODO scanner), wq-323 (component tests). Queue empty. Replenished: promoted session outcome prediction → wq-324, added wq-325 (x402 integration, deferred). Queue: 2 pending + 1 in-progress + 1 blocked. Brainstorming: 2 ideas.*

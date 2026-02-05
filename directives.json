@@ -467,7 +467,7 @@
       "created": "2026-02-04T22:29:14.008Z",
       "acked_session": 995,
       "queue_item": "wq-252",
-      "notes": "B#286: ✓Wallet set up (EVM 0x0504...). ✓Strategy decided (60 reserve + 20 HiveMind). ✓80 USDC received (10 to VPS per d047). R#186: Unblocked — human confirmed 80 USDC is on Base. No bridge needed. wq-283 ready for HiveMind execution."
+      "notes": "B#286: ✓Wallet set up (EVM 0x0504...). ✓Strategy decided (60 reserve + 20 HiveMind). ✓80 USDC received (10 to VPS per d047). R#186: Unblocked — human confirmed 80 USDC is on Base. B#314 (s1107): Verified 80 USDC balance on Base. Blocker: 0 ETH for gas. Added q-d044-eth-gas requesting ~0.001 ETH to enable HiveMind participation. Built hivemind-participate.mjs script."
     },
     {
       "id": "d045",
@@ -587,6 +587,14 @@
       "answer": "Tulip seems to be invitation only, and i wasn't invited. Set the platform as rejected.",
       "answered_at": "2026-02-03T16:05:16.216Z",
       "resolved_session": 860
+    },
+    {
+      "id": "q-d044-eth-gas",
+      "directive": "d044",
+      "question": "The HiveMind participation strategy requires ETH for gas on Base, but the wallet only has USDC (no ETH). Could you send ~0.001 ETH (~$3) to 0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E on Base? This covers thousands of transactions (Base gas is ~$0.0001/tx). Once received, I can: (1) Join HiveMind as @moltbook, (2) Contribute 15 USDC to bounty pool, (3) Work bounties to build onchain reputation.",
+      "session": 1107,
+      "status": "pending",
+      "answered": false
     }
   ],
   "compliance": {
@@ -692,16 +700,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 414,
+        "followed": 415,
         "ignored": 6,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1102,
-        "last_applicable_session": 1102,
+        "last_session": 1105,
+        "last_applicable_session": 1105,
         "history": [
-          {
-            "session": 1085,
-            "result": "followed"
-          },
           {
             "session": 1087,
             "result": "followed"
@@ -737,20 +741,20 @@
           {
             "session": 1102,
             "result": "followed"
+          },
+          {
+            "session": 1105,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 194,
+        "followed": 195,
         "ignored": 6,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 1100,
-        "last_applicable_session": 1100,
+        "last_session": 1105,
+        "last_applicable_session": 1105,
         "history": [
-          {
-            "session": 1055,
-            "result": "followed"
-          },
           {
             "session": 1060,
             "result": "followed"
@@ -786,20 +790,20 @@
           {
             "session": 1100,
             "result": "followed"
+          },
+          {
+            "session": 1105,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 434,
+        "followed": 435,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1103,
-        "last_applicable_session": 1103,
+        "last_session": 1105,
+        "last_applicable_session": 1105,
         "history": [
-          {
-            "session": 1089,
-            "result": "followed"
-          },
           {
             "session": 1090,
             "result": "followed"
@@ -835,20 +839,20 @@
           {
             "session": 1103,
             "result": "followed"
+          },
+          {
+            "session": 1105,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 166,
+        "followed": 167,
         "ignored": 14,
         "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 1100,
-        "last_applicable_session": 1100,
+        "last_session": 1105,
+        "last_applicable_session": 1105,
         "history": [
-          {
-            "session": 1055,
-            "result": "followed"
-          },
           {
             "session": 1060,
             "result": "followed"
@@ -883,21 +887,21 @@
           },
           {
             "session": 1100,
+            "result": "followed"
+          },
+          {
+            "session": 1105,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 178,
+        "followed": 179,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 1100,
-        "last_applicable_session": 1100,
+        "last_session": 1105,
+        "last_applicable_session": 1105,
         "history": [
-          {
-            "session": 1055,
-            "result": "followed"
-          },
           {
             "session": 1060,
             "result": "followed"
@@ -932,6 +936,10 @@
           },
           {
             "session": 1100,
+            "result": "followed"
+          },
+          {
+            "session": 1105,
             "result": "followed"
           }
         ]
@@ -986,16 +994,12 @@
         ]
       },
       "directive-update": {
-        "followed": 158,
+        "followed": 159,
         "ignored": 30,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 1100,
-        "last_applicable_session": 1100,
+        "last_session": 1105,
+        "last_applicable_session": 1105,
         "history": [
-          {
-            "session": 1055,
-            "result": "followed"
-          },
           {
             "session": 1060,
             "result": "followed"
@@ -1030,6 +1034,10 @@
           },
           {
             "session": 1100,
+            "result": "followed"
+          },
+          {
+            "session": 1105,
             "result": "followed"
           }
         ]

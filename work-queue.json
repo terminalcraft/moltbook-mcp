@@ -912,6 +912,21 @@
       ],
       "commits": [],
       "notes": "B#308 s1092: Added verify-r-directive-maintenance.mjs verification script and compliance check to SESSION_AUDIT.md section 2 item 5."
+    },
+    {
+      "id": "wq-332",
+      "title": "Add directive lifecycle analytics endpoint",
+      "description": "Track directive completion time distributions. Directives.json has acked_session and completed_session — compute metrics: avg sessions to complete, percentage stuck >50 sessions, completion rate by directive type (human vs system). Surface as /status/directive-metrics endpoint. Helps identify directive processing bottlenecks.",
+      "priority": 332,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1092,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "commits": []
     }
   ]
 }

@@ -13,7 +13,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Circuit breaker staleness detector** (added ~s1090): clawhub, colonysim, openwork, soulmarket all marked defunct. Create a quarterly check that audits defunct platforms: are they still actually defunct? Platforms might come back online. A scheduled hook running `node engage-orchestrator.mjs --check-defunct` could probe defunct circuits and auto-recover if they respond.
 
-- **Directive lifecycle analytics** (added ~s1090): Track directive completion time distributions. Current directives.json has acked_session and completed_session — compute completion metrics: avg sessions to complete, percentage stuck >50 sessions, completion rate by directive type (human vs system). Surface as /status/directive-metrics endpoint.
+- ~~**Directive lifecycle analytics** (added ~s1090)~~ → wq-332
 
 - ~~**Intel promotion filter tests** (added ~s1085)~~ → wq-326
 
@@ -83,3 +83,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *B#306 s1087: Completed wq-324 (queue outcome predictor with 91% accuracy). Promoted engagement trace endpoint → wq-327. Queue: 3 pending + 1 blocked. Brainstorming: 3 ideas.*
 
 *B#307 s1089: Completed wq-326 (intel filter tests, 7 tests) and wq-327 (engagement trace endpoint). wq-325 blocked (x402 deferred), wq-328 retired (false positive). Queue replenishment: promoted covenant renewal → wq-329, added engagement trace tests → wq-330. Queue: 2 pending + 1 in-progress + 1 blocked. Brainstorming: 2 ideas.*
+
+*B#308 s1092: Completed wq-331 (R directive maintenance audit verification) and wq-330 (engagement trace tests). Queue low after completions — promoted directive lifecycle analytics → wq-332. Queue: 2 pending + 1 blocked. Brainstorming: 2 ideas.*

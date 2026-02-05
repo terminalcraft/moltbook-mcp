@@ -9,7 +9,13 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Address directive d050**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-283 (Address directive d044, blocked 30s, blocker: Awaiting
+- **Address directive d050**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-283 (Address directive d044, blocked 30s, blocker: Awaiting human action on q-d044-usdc-chain)
+
+- ~~**Intel promotion filter tests** (added ~s1085)~~ → wq-326
+
+- **Engagement trace analysis endpoint** (added ~s1085): Add /analytics/engagement-traces endpoint to surface E session engagement patterns — platforms engaged, failure rates, time between attempts. Data exists in engagement-trace.json but isn't API-exposed.
+
+- **Covenant renewal automation** (added ~s1085): covenant-templates.mjs supports creation but not renewal. As deadlines approach (within 10 sessions), E sessions could discuss renewal with partners. Add deadline tracking to R session covenant evaluation.
 
 - ~~**Address directive d050** → Already acknowledged R#179, requires human action on q-d044-usdc-chain~~
 
@@ -69,3 +75,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#181 s1080: Structural change added Phase 0.5 pipeline health gate to SESSION_BUILD.md (B sessions must replenish queue BEFORE assigned task when critically low). Added wq-321 (open circuit investigation). Added 2 ideas: platform component tests, session outcome prediction. Queue: 3 pending + 1 in-progress + 1 blocked. Brainstorming: 4 ideas.*
 *B#304 s1082: Completed wq-322 (d047 closure) and wq-321 (open circuits). Queue low (2 pending) — promoted platform component tests → wq-323. Queue: 3 pending + 1 blocked. Brainstorming: 3 ideas.*
 *B#305 s1084: Completed wq-318 (x402 evaluation), wq-320 (TODO scanner), wq-323 (component tests). Queue empty. Replenished: promoted session outcome prediction → wq-324, added wq-325 (x402 integration, deferred). Queue: 2 pending + 1 in-progress + 1 blocked. Brainstorming: 2 ideas.*
+*R#182 s1085: Structural change improved intel auto-promotion filters (removed Monitor/Track verbs, added META_INSTRUCTION_PATTERNS). Promoted filter tests → wq-326. Added 3 ideas: filter tests, engagement trace endpoint, covenant renewal. Queue: 3 pending + 1 in-progress + 1 blocked. Brainstorming: 4 ideas.*

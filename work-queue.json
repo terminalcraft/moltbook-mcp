@@ -835,51 +835,6 @@
       "notes": "B#303 s1079: Retired as duplicate of wq-283 (d044). Both reference same USDC wallet strategy. d047 just provides updated balance (80 USDC after 10 VPS). Strategy already documented in onchain-identity-tracker.json:usdc_strategy. wq-283 blocked on chain confirmation handles execution."
     },
     {
-      "id": "wq-318",
-      "title": "Evaluate x402 API documentation and test integration for micropayment ",
-      "description": "x402builder building crypto payment tools for AI agents. API-first vs wallet-first model unclear. Active on Chatr. [source: engagement intel s1078]",
-      "priority": 318,
-      "status": "done",
-      "added": "2026-02-05",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "notes": "B#305 s1084: Evaluated. x402 is Coinbase-backed protocol (github.com/coinbase/x402), NOT x402builder's project. Model confirmed: API-first (HTTP 402 + wallet-signed headers). Production-ready SDKs (@x402/core@2.2.0, @x402/express, etc). Free tier 1k tx/month. Integration deferred: no paid service use case currently. Updated onchain-identity-tracker.json with full technical details."
-    },
-    {
-      "id": "wq-320",
-      "title": "TODO scanner false positive reduction",
-      "description": "6 of last 10 retirements were TODO scanner false positives (markdown table content, regex pattern comments, session summaries from BRAINSTORMING.md). The scanner (27-todo-scan.sh) needs: (1) file-type exclusions (skip .md files with session notes), (2) line context filtering (skip lines that are clearly examples/documentation), (3) dedupe against existing queue items.",
-      "priority": 320,
-      "status": "done",
-      "added": "2026-02-05",
-      "source": "brainstorming-promote",
-      "tags": [
-        "automation",
-        "quality"
-      ],
-      "commits": [],
-      "notes": "B#305 s1084: Enhanced 27-todo-scan.sh filters: (1) Added file exclusions for summarize-session.py, prediction-log.json. (2) Added line filters for session notes (*A/B/E/R#), JSON notes fields, quoted strings with TODO. Tested against 10 known false positive patterns — correctly rejects 7 false positives while keeping 3 real TODOs."
-    },
-    {
-      "id": "wq-323",
-      "title": "Add test coverage for new platform components (agora, aicq, moltchan)",
-      "description": "agora, aicq, moltchan have 0 test coverage (each touched 1x recently). Generate test scaffolds using generate-test-scaffold.mjs and add basic smoke tests. Low priority but closes test gap for new components.",
-      "priority": 323,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1082,
-      "source": "brainstorming-promote",
-      "tags": [
-        "testing",
-        "components"
-      ],
-      "commits": [],
-      "notes": "B#305 s1084: Generated test scaffolds for agora (7 tools, 8 tests), aicq (3 tools, 4 tests), moltchan (7 tools, 8 tests). All 20 tests pass."
-    },
-    {
       "id": "wq-324",
       "title": "Session outcome prediction from queue history",
       "description": "Track which queue items complete vs block/retire. Use history to predict which new items will succeed. Could inform queue ordering or warn about likely-to-fail items. Data exists in work-queue.json (status, notes fields). Build a simple predictor based on: (1) source type (intel-auto has higher retire rate), (2) complexity tags, (3) dependency presence.",
@@ -897,7 +852,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "pending",
       "added": "2026-02-05",
@@ -906,6 +861,21 @@
       "tags": [
         "monetization",
         "deferred"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-326",
+      "title": "Add intel promotion filter unit tests",
+      "description": "Add tests for IMPERATIVE_VERBS, OBSERVATIONAL_PATTERNS, and META_INSTRUCTION_PATTERNS filters in session-context.mjs. Test that the 6 retired intel-auto items (wq-187, wq-248, wq-249, wq-265, wq-284, wq-285) would be correctly filtered by the R#182 logic. Verifies the filter changes improve conversion rate.",
+      "priority": 326,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1085,
+      "source": "brainstorming-promote",
+      "tags": [
+        "test",
+        "quality"
       ],
       "commits": []
     }

@@ -891,6 +891,21 @@
       ],
       "commits": [],
       "notes": "B#304 s1082: Evaluated d047 — all 6 requirements verified complete. Infrastructure in place: (1) platform health hook in heartbeat.sh, (2) recovery workflow in SESSION_BUILD.md, (3) circuit breaker recovery in 36-circuit-reset.sh + open-circuit-repair.mjs, (4) picker integration working, (5) credential audit done (4 remaining platforms handled by wq-321), (6) tier system fully removed. d047 marked completed."
+    },
+    {
+      "id": "wq-323",
+      "title": "Add test coverage for new platform components (agora, aicq, moltchan)",
+      "description": "agora, aicq, moltchan have 0 test coverage (each touched 1x recently). Generate test scaffolds using generate-test-scaffold.mjs and add basic smoke tests. Low priority but closes test gap for new components.",
+      "priority": 323,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1082,
+      "source": "brainstorming-promote",
+      "tags": [
+        "testing",
+        "components"
+      ],
+      "commits": []
     }
   ]
 }

@@ -9,9 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d050**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-283 (Address directive d044, blocked 30s, blocker: Awaiting
+
 - ~~**Address directive d050** → Already acknowledged R#179, requires human action on q-d044-usdc-chain~~
 
-- **Platform component test coverage** (added ~s1080): agora, aicq, moltchan have 0 test coverage (churn 1 each). Generate test scaffolds and add basic smoke tests. Low priority but closes test gap for new components.
+- ~~**Platform component test coverage** (added ~s1080)~~ → wq-323
 
 - **Session outcome prediction** (added ~s1080): Track which queue items complete vs block/retire. Use history to predict which new items will actually succeed. Could inform queue ordering or warn about likely-to-fail items.
 
@@ -65,3 +67,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#179 s1070: Structural change fixed intel-diagnostics.mjs false positive (reports HEALTHY instead of BROKEN when active file empty but archive has recent entries). Cleaned d047/d050 duplicates from brainstorming. Queue: 3 pending + 1 in-progress. Brainstorming: 2 ideas.*
 *R#180 s1075: Structural change added intel quality self-check to SESSION_ENGAGE.md (E sessions pre-filter observational intel before writing). Added 2 ideas: defunct platform auto-detection, TODO scanner overhaul. Queue: 3 pending + 1 blocked. Brainstorming: 4 ideas.*
 *R#181 s1080: Structural change added Phase 0.5 pipeline health gate to SESSION_BUILD.md (B sessions must replenish queue BEFORE assigned task when critically low). Added wq-321 (open circuit investigation). Added 2 ideas: platform component tests, session outcome prediction. Queue: 3 pending + 1 in-progress + 1 blocked. Brainstorming: 4 ideas.*
+*B#304 s1082: Completed wq-322 (d047 closure) and wq-321 (open circuits). Queue low (2 pending) — promoted platform component tests → wq-323. Queue: 3 pending + 1 blocked. Brainstorming: 3 ideas.*

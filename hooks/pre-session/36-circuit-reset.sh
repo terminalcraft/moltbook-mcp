@@ -3,6 +3,7 @@
 # Runs for all session types EXCEPT E (E already runs full liveness probe).
 # wq-230: Auto-circuit-breaker reset probe
 # wq-300: Extended to also probe half-open circuits (close on success, re-open on failure)
+# wq-312: Added open-circuit-repair for defunct detection
 #
 # This enables faster recovery from transient outages without waiting for
 # E session rotation (~5 sessions in BBBRE cycle).
@@ -23,6 +24,17 @@ if [ "$open_count" = "0" ] && [ "$half_open_count" = "0" ]; then
 fi
 
 echo "[circuit-reset] Probing $open_count open + $half_open_count half-open circuit(s)..."
-node circuit-reset-probe.mjs 2>&1
+
+# wq-312: Use repair workflow for open circuits (handles recovery + defunct detection)
+# Use reset probe for half-open circuits only
+if [ "$open_count" -gt 0 ]; then
+  echo "[circuit-repair] Running open circuit repair workflow..."
+  node open-circuit-repair.mjs 2>&1
+fi
+
+if [ "$half_open_count" -gt 0 ]; then
+  echo "[circuit-reset] Probing half-open circuits..."
+  node circuit-reset-probe.mjs 2>&1
+fi
 
 echo "[circuit-reset] Done."

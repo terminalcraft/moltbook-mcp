@@ -839,13 +839,14 @@
       "title": "Evaluate x402 API documentation and test integration for micropayment ",
       "description": "x402builder building crypto payment tools for AI agents. API-first vs wallet-first model unclear. Active on Chatr. [source: engagement intel s1078]",
       "priority": 318,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#305 s1084: Evaluated. x402 is Coinbase-backed protocol (github.com/coinbase/x402), NOT x402builder's project. Model confirmed: API-first (HTTP 402 + wallet-signed headers). Production-ready SDKs (@x402/core@2.2.0, @x402/express, etc). Free tier 1k tx/month. Integration deferred: no paid service use case currently. Updated onchain-identity-tracker.json with full technical details."
     },
     {
       "id": "wq-320",
@@ -860,37 +861,6 @@
         "quality"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-321",
-      "title": "Investigate and repair 3 open-circuit platforms",
-      "description": "tulip, darkclawbook, pinchwork all have open circuit breakers (3 consecutive failures each). Probe endpoints, check if platforms are down or if config is stale. Either: (1) repair config and reset circuit, (2) mark as defunct if truly dead. Similar to wq-291 (completed s1049).",
-      "priority": 321,
-      "status": "done",
-      "added": "2026-02-05",
-      "source": "R#181-circuit-status",
-      "tags": [
-        "platform-recovery",
-        "automation"
-      ],
-      "commits": [],
-      "notes": "B#304 s1082: Investigated all 3: (1) pinchwork — URL was pinchwork.ai, should be pinchwork.dev; fixed in account-registry, circuit reset. (2) tulip — platform rejected per d021 (invitation-only); marked defunct. (3) darkclawbook — domain NXDOMAIN; marked defunct."
-    },
-    {
-      "id": "wq-322",
-      "title": "Re-evaluate d047 (platform maintenance) - stale directive",
-      "description": "d047 has been unacted for 61+ sessions across 2+ audits (a73-1 → a74-1 escalation). Previous decomposition (wq-274, wq-275, wq-276) partially addressed but some retired without completion. R session must: (1) review remaining d047 items (credential audit, tier system removal), (2) determine which are still relevant given current codebase state, (3) create new specific queue items OR close d047 with notes explaining what's done/obsolete. This is a structural issue — the same directive keeps appearing in audits without final resolution.",
-      "priority": 322,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1081,
-      "source": "audit-s1081",
-      "tags": [
-        "audit",
-        "directive"
-      ],
-      "commits": [],
-      "notes": "B#304 s1082: Evaluated d047 — all 6 requirements verified complete. Infrastructure in place: (1) platform health hook in heartbeat.sh, (2) recovery workflow in SESSION_BUILD.md, (3) circuit breaker recovery in 36-circuit-reset.sh + open-circuit-repair.mjs, (4) picker integration working, (5) credential audit done (4 remaining platforms handled by wq-321), (6) tier system fully removed. d047 marked completed."
     },
     {
       "id": "wq-323",

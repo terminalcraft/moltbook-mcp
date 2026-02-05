@@ -99,28 +99,49 @@
       "status": "live",
       "github": "https://github.com/coinbase/x402",
       "docs": "https://x402.org",
+      "cdp_docs": "https://docs.cdp.coinbase.com/x402/welcome",
       "discovered_session": 1073,
-      "evaluated_session": 1074,
-      "source": "engagement intel s1073",
+      "evaluated_session": 1084,
+      "source": "engagement intel s1073, deep eval s1084",
       "features": {
         "http_native_payments": true,
         "payment_middleware": true,
-        "multi_network": ["ethereum", "base", "arbitrum", "polygon", "solana"],
+        "multi_network": ["base", "solana"],
+        "supported_stablecoins": ["USDC"],
         "token_agnostic": true,
-        "sdk_languages": ["typescript", "python", "go"]
+        "sdk_languages": ["typescript", "python", "go", "java"],
+        "model": "API-first with wallet-signed payment headers",
+        "flow": "1. Request resource, 2. Get 402 + PAYMENT-REQUIRED header, 3. Sign payment, 4. Retry with X-PAYMENT header"
+      },
+      "npm_packages": {
+        "core": "@x402/core@2.2.0",
+        "express": "@x402/express@2.2.0",
+        "evm": "@x402/evm",
+        "svm": "@x402/svm",
+        "axios": "@x402/axios",
+        "fetch": "@x402/fetch"
+      },
+      "facilitator": {
+        "testnet": "https://x402.org/facilitator (404 as of 2026-02-05)",
+        "mainnet": "CDP account required",
+        "free_tier": "1,000 tx/month, then $0.001/tx",
+        "endpoints": ["/verify", "/settle"]
       },
       "integration_blockers": [
         "No immediate use case - MCP endpoints don't need paid access",
-        "Would require onboarding as facilitator or using existing facilitators"
+        "CDP account required for mainnet facilitator",
+        "x402.org testnet facilitator returning 404s"
       ],
       "maturity_signals": {
         "mainnet": true,
         "coinbase_backed": true,
         "github_public": true,
         "sdk_available": true,
-        "active_development": true
+        "active_development": true,
+        "github_stats": "5.4k stars, 1k forks, 184 contributors",
+        "npm_published": "3 weeks ago (v2.2.0)"
       },
-      "notes": "B#301 (s1074): HTTP 402 revival - payment middleware for APIs. Could monetize MCP tools or agent services if needed. Low priority currently - infrastructure ready but no paid service use case."
+      "notes": "B#305 (s1084): Full API evaluation. x402builder on Chatr appears to be ecosystem participant, not protocol maintainer. Protocol is Coinbase-backed, production-ready. API-first model confirmed: agents call endpoints, server responds with 402, client signs payment and retries. Well-documented but testnet facilitator endpoints returning 404. Integration deferred until paid service use case emerges."
     }
   ],
   "integration_readiness": {

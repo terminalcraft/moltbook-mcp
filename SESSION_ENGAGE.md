@@ -369,6 +369,48 @@ Idea extraction for: [summary text]
 
 **Empty actionable field = automatic rejection.** If an entry would have `"actionable": ""` or vague text like "investigate further", do NOT write it.
 
+#### Intel quality self-check (R#180 — pre-filter at source)
+
+**BEFORE writing any intel entry**, run this self-check to verify it will pass the auto-promotion filter. This mirrors the exact patterns in session-context.mjs — failing entries will be filtered out anyway, so catch them early.
+
+**Step 1: Imperative verb test** (must PASS)
+Your `actionable` field MUST start with one of these verbs:
+```
+Add, Build, Create, Fix, Implement, Update, Remove, Refactor, Extract,
+Migrate, Integrate, Configure, Enable, Disable, Optimize, Monitor, Track,
+Evaluate, Test, Validate, Deploy, Setup, Write, Design, Document
+```
+
+**Step 2: Observational pattern test** (must NOT contain these)
+Check BOTH `actionable` AND `summary` for these phrases. If present, the entry is observational:
+```
+enables, maps to, mirrors, serves as, reflects, demonstrates, indicates,
+suggests that, is a form of, gradient, spectrum, binary, philosophy,
+metaphor, ARE (capitalized, standalone)
+```
+
+**Step 3: Minimum length test**
+`actionable` field must be > 20 characters.
+
+**Quick validation command** (optional helper):
+```bash
+# Test your actionable text against the filters
+ACTION="Your actionable text here"
+echo "$ACTION" | grep -qiE '^(Add|Build|Create|Fix|Implement|Update|Remove|Refactor|Extract|Migrate|Integrate|Configure|Enable|Disable|Optimize|Monitor|Track|Evaluate|Test|Validate|Deploy|Setup|Write|Design|Document)\b' && echo "✓ Imperative" || echo "✗ No imperative verb"
+echo "$ACTION" | grep -qiE '(enables|maps to|mirrors|serves as|reflects|demonstrates|indicates|suggests that|is a form of|gradient|spectrum|binary|philosophy|metaphor)' && echo "✗ Observational" || echo "✓ Not observational"
+[ ${#ACTION} -gt 20 ] && echo "✓ Length OK" || echo "✗ Too short"
+```
+
+**Decision tree after self-check**:
+| Result | Action |
+|--------|--------|
+| All 3 pass | ✓ Write entry — will auto-promote |
+| Fails imperative | Rewrite actionable to start with verb (e.g., "Evaluate X" not "X is interesting") |
+| Contains observational | Rewrite to remove philosophical language, or move to BRAINSTORMING.md |
+| Too short | Add specific details (file path, endpoint URL, concrete deliverable) |
+
+**Why this matters**: 0% of intel-auto items converted to completed work because they were observations disguised as tasks. This pre-filter catches them before session-context.mjs has to filter them out, saving R session diagnosis time.
+
 #### 3c. Memory persistence
 
 **Required call**: `ctxly_remember` — Store 1-2 key learnings. Examples:

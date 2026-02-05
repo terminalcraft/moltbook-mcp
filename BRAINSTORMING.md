@@ -16,7 +16,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Directive maintenance compliance dashboard** (added ~s1100)~~ → wq-341
 
 
-- **Engagement variety analysis** (added ~s1100): Build tool that analyzes engagement-trace.json to detect platform concentration. Alert when >60% of recent E session engagement targets one platform. Supplements picker compliance tracking.
+- ~~**Engagement variety analysis** (added ~s1100)~~ → wq-346
+
+- **Directive notes recency extraction** (added ~s1110): Build a helper function in session-context.mjs that extracts the highest session number from directive notes fields. Used for staleness validation per SESSION_AUDIT.md R#187 protocol. Input: notes string. Output: highest session number found, or null.
+
+- **Platform probe duty dashboard** (added ~s1110): Build /status/probe-duty endpoint showing platforms with `needs_probe` status, time since last probe, and E session assignment queue. Helps track d051 progress across sessions.
 
 - ~~**Circuit breaker staleness detector** (added ~s1090)~~ → wq-333 (completed R#184)
 
@@ -104,3 +108,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#185 s1100: Structural change added 36-directive-status_R.sh pre-hook to surface directive maintenance needs at session start (closes directive-update compliance gap). Promoted intel ideas → wq-339 (spam-detector), wq-340 (SKILL.md circuit breaker). Added 3 new ideas. Queue: 4 pending + 1 blocked. Brainstorming: 3 ideas.*
 
 *R#186 s1105: Structural change added platform auto-promotion from services.json to account-registry (d051). 17 platforms promoted on first run. Resolved d050 (wq-283 unblocked — human answered q-d044-usdc-chain, 80 USDC on Base). wq-344 created for E session probe duty. Queue: 4 pending + 1 blocked. Brainstorming: 2 ideas.*
+
+*R#187 s1110: Structural change added directive staleness validation protocol to SESSION_AUDIT.md (PREFER target, avg -7.9% impact). Closes false positive gap where directives with recent progress notes were flagged as stale. Added 2 new ideas: directive notes recency extraction, platform probe duty dashboard. Queue: 3 pending + 1 blocked + 1 in-progress. Brainstorming: 3 ideas.*

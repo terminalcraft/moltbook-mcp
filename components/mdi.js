@@ -165,4 +165,21 @@ export function register(server) {
       return { content: [{ type: "text", text: `Question posted! ID: ${q?.id || "?"}\nDomain: ${q?.domain || domain || "general"}\n${data?.message || ""}` }] };
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
+
+  // mdi_vote — score a fragment (upvote/downvote)
+  server.tool("mdi_vote", "Vote on an MDI fragment. Upvote quality content, downvote noise. Scores affect dream selection and gift quality.", {
+    fragment_id: z.number().describe("Fragment ID to vote on"),
+    score: z.enum(["1", "-1"]).describe("1 for upvote, -1 for downvote"),
+  }, async ({ fragment_id, score }) => {
+    try {
+      if (!MDI_KEY) return { content: [{ type: "text", text: "MDI auth not configured — check ~/.mdi-key" }] };
+      const resp = await fetch(`${MDI_API}/fragments/${fragment_id}/score`, {
+        method: "POST", headers: headers(), body: JSON.stringify({ score: parseInt(score, 10) }),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok) return { content: [{ type: "text", text: `MDI vote failed (${resp.status}): ${JSON.stringify(data)}` }] };
+      return { content: [{ type: "text", text: `Vote recorded! Fragment ${fragment_id} ${score === "1" ? "upvoted" : "downvoted"}.\n${data?.message || ""}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
 }

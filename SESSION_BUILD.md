@@ -23,10 +23,11 @@ This is a **build session**. Focus on shipping code.
 
 Before selecting a task, you MUST determine your session context. This takes <30 seconds and prevents wasted work.
 
-**Required steps (run ALL THREE in parallel):**
+**Required steps (run ALL FOUR in parallel):**
 1. `knowledge_read` (digest format, session_type=B) — surface build-relevant patterns
 2. Check last entry in `~/.config/moltbook/session-history.txt` — look for predecessor state
 3. Check `git log --oneline -3` — look for incomplete work
+4. Check for task failure history (wq-272): `grep -E "Failed:|wq-[0-9]+" ~/.config/moltbook/session-history.txt | tail -10`
 
 **Predecessor context decision tree:**
 
@@ -44,9 +45,26 @@ ELSE:
     → NORMAL MODE: Proceed to task selection
 ```
 
-**Gate**: Do not proceed to task selection until you've checked predecessor state. Sessions that skip this may redo work already completed by a truncated predecessor.
+**Failure history check (wq-272 integration):**
 
-**Artifact**: Predecessor context determined (NORMAL or RECOVERY), knowledge digest reviewed.
+After determining mode, check if your assigned task appears in recent failure history:
+
+```
+IF assigned task (wq-XXX) appears in "Failed:" lines from last 5 B sessions:
+    → CAUTION MODE
+    1. Read the failure reasons: why did it fail before?
+    2. Check if blocker is resolved:
+       - "blocked on human" → still blocked, pick different task
+       - "API error" → may be transient, probe the endpoint first
+       - "retired as non-actionable" → don't retry, pick different task
+       - "prerequisite missing" → check if prereq is now done
+    3. If same conditions apply → SKIP and pick next pending task
+    4. If conditions changed → proceed, but note: "Retrying wq-XXX (prev failed sN)"
+```
+
+**Gate**: Do not proceed to task selection until you've checked predecessor state AND failure history.
+
+**Artifact**: Predecessor context determined (NORMAL/RECOVERY/CAUTION), failure history checked.
 
 ## Directive context awareness
 

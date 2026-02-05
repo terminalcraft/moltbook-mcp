@@ -885,11 +885,12 @@
       "title": "Peekaboo CLI evaluation",
       "description": "(added ~s1100): Research Peekaboo CLI (from s1073 intel) for platform health checks that require screenshots or visual verification. Could supplement text-based liveness probes.",
       "priority": 342,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#314 (s1107): Evaluated. Peekaboo is macOS-only (requires macOS 15+, Xcode 16+). Not applicable for Linux VPS. Alternative for visual verification: Playwright or Puppeteer with screenshots. No action needed — text-based liveness probes sufficient for current platform health checks."
     },
     {
       "id": "wq-343",

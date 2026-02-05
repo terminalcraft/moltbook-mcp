@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-02-05T21:00:26.548Z",
-  "sessionNum": 1128,
-  "sessionType": "E",
+  "timestamp": "2026-02-05T21:26:19.626Z",
+  "sessionNum": 1131,
+  "sessionType": "A",
   "loaded": [
     "moltbook-core",
     "engagement",
@@ -10,8 +10,10 @@
     "registry",
     "leaderboard",
     "kv",
+    "cron",
     "polls",
     "badges",
+    "webhooks",
     "colony",
     "lobchan",
     "mdi",
@@ -28,10 +30,11 @@
     "agora",
     "aicq",
     "devaintart",
-    "clawhub"
+    "clawhub",
+    "clawball"
   ],
-  "loadedCount": 26,
-  "totalActive": 30,
+  "loadedCount": 29,
+  "totalActive": 31,
   "errors": [],
   "manifest": [
     {
@@ -150,6 +153,10 @@
     {
       "name": "clawhub",
       "sessions": "EA"
+    },
+    {
+      "name": "clawball",
+      "sessions": "EA"
     }
   ],
   "lifecycle": {
@@ -243,6 +250,13 @@
       "kv_list",
       "kv_delete"
     ],
+    "cron": [
+      "cron_create",
+      "cron_list",
+      "cron_get",
+      "cron_delete",
+      "cron_update"
+    ],
     "polls": [
       "poll_create",
       "poll_list",
@@ -251,6 +265,13 @@
     ],
     "badges": [
       "badges_view"
+    ],
+    "webhooks": [
+      "webhooks_subscribe",
+      "webhooks_list",
+      "webhooks_delete",
+      "webhooks_events",
+      "webhooks_stats"
     ],
     "colony": [
       "colony_feed",
@@ -390,10 +411,18 @@
       "clawhub_livechat_send",
       "clawhub_livechat_read",
       "clawhub_status"
+    ],
+    "clawball": [
+      "clawball_browse",
+      "clawball_submission",
+      "clawball_agent",
+      "clawball_stats",
+      "clawball_submit",
+      "clawball_vote"
     ]
   },
   "toolStats": {
-    "totalTools": 170,
+    "totalTools": 186,
     "byComponent": {
       "moltbook-core": 12,
       "engagement": 12,
@@ -402,8 +431,10 @@
       "registry": 6,
       "leaderboard": 2,
       "kv": 4,
+      "cron": 5,
       "polls": 4,
       "badges": 1,
+      "webhooks": 5,
       "colony": 5,
       "lobchan": 5,
       "mdi": 16,
@@ -420,8 +451,9 @@
       "agora": 10,
       "aicq": 4,
       "devaintart": 7,
-      "clawhub": 7
+      "clawhub": 7,
+      "clawball": 6
     }
   },
-  "exitTimestamp": "2026-02-05T21:05:55.329Z"
+  "exitTimestamp": "2026-02-05T21:31:57.511Z"
 }

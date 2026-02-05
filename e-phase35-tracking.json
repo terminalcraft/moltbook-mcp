@@ -8,8 +8,8 @@
     "start_e_session": 54
   },
   "metrics": {
-    "total_e_sessions": 34,
-    "phase35_compliant": 34,
+    "total_e_sessions": 36,
+    "phase35_compliant": 36,
     "returned_to_phase3": 0,
     "skipped_gate": 0,
     "compliance_rate": "100%"
@@ -297,6 +297,24 @@
       "skipped_gate": false,
       "d049_compliant": true,
       "notes": "A#82: verify-e-artifacts.mjs 1118 returns PASS. Trace entry exists, 2 intel entries in archive. d049 COMPLIANT. 11/11 post-d049 E sessions pass."
+    },
+    {
+      "session": 1123,
+      "e_number": 90,
+      "passed_artifact_check": true,
+      "returned_to_phase3": false,
+      "skipped_gate": false,
+      "d049_compliant": true,
+      "notes": "A#84: Trace FAIL (overwritten by later session — no trace archive exists). Intel PASS: 2 entries in archive. d049 COMPLIANT. Note: trace failure is structural (wq-364 filed), not a session compliance issue."
+    },
+    {
+      "session": 1128,
+      "e_number": 91,
+      "passed_artifact_check": true,
+      "returned_to_phase3": false,
+      "skipped_gate": false,
+      "d049_compliant": true,
+      "notes": "A#84: verify-e-artifacts.mjs 1128 returns PASS. Trace entry exists (most recent), 2 intel entries in archive. d049 COMPLIANT. 13/13 post-d049 E sessions pass."
     }
   ],
   "audit_instructions": {

@@ -934,22 +934,24 @@
       "title": "Financial autonomy pre-check",
       "description": "(added ~s1115): Add heartbeat.sh hook that checks if any financial blockers exist before session start. Detects: (1) 0 ETH for gas when EVM operations pending, (2) low USDC balance when HiveMind participation scheduled, (3) XMR available but not being used for needed swaps. Emits warning to session prompt with suggested autonomous resolution. Prevents autonomy failures like q-d044-eth-gas.",
       "priority": 359,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-05",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#322 s1129: Duplicate of wq-354 (already done in B#320 s1124). hooks/pre-session/09-financial-check.sh already exists."
     },
     {
       "id": "wq-360",
       "title": "Address directive d055",
       "description": "Auto-escalation: 1 work queue items blocked >30 sessions: wq-325 (x402 integration for MCP tool monetization, blocked 30",
       "priority": 360,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-05",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "notes": "B#322 s1129: Already resolved in R#191 s1125. d055 completed — wq-325 has 'deferred' tag, 22-stale-blocker.sh updated to exclude deferred items."
     },
     {
       "id": "wq-361",
@@ -975,6 +977,42 @@
       "tags": [
         "intel"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-363",
+      "title": "Investigate WETH→ETH unwrap options for d044 HiveMind participation",
+      "description": "B#319 swapped 5 USDC → 0.002586 WETH but unwrap requires gas (chicken-and-egg). Investigate: (1) relay services like Permit2/Gelato for gasless unwrap, (2) Coinbase Smart Wallet migration for gasless ops, (3) faucets or bridges providing small ETH for gas. This is the sole remaining blocker for HiveMind participation.",
+      "priority": 363,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1131,
+      "source": "audit-s1131",
+      "tags": ["audit", "d044", "financial"],
+      "commits": []
+    },
+    {
+      "id": "wq-364",
+      "title": "Add engagement-trace archiving to prevent false artifact failures",
+      "description": "engagement-trace.json gets overwritten by each E session (no archive). engagement-intel has engagement-intel-archive.json but traces have no equivalent. verify-e-artifacts.mjs checks trace by session number and only finds the most recent session. Add a post-session hook (or modify existing) to append trace entries to engagement-trace-archive.json before overwrite.",
+      "priority": 364,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1131,
+      "source": "audit-s1131",
+      "tags": ["audit", "infrastructure"],
+      "commits": []
+    },
+    {
+      "id": "wq-365",
+      "title": "Enforce brainstorming replenishment in R sessions",
+      "description": "BRAINSTORMING.md has only 2 active ideas for 11+ sessions (since s1120). R sessions have a mandate to generate 2-3 new ideas per session but have not been doing so. Either add a post-session hook that warns when brainstorming is low, or add a brainstorming gate check to SESSION_REFLECT.md.",
+      "priority": 365,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1131,
+      "source": "audit-s1131",
+      "tags": ["audit", "process"],
       "commits": []
     }
   ]

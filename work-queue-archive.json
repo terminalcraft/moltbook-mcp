@@ -6817,6 +6817,90 @@
       ],
       "commits": [],
       "notes": "B#281: Added failed-task logging to session-history format. Modified summarize-session.py to detect blocked/retired tasks from Edit operations and agent text patterns. Modified 10-summarize.sh to include failed=[] field. Format: failed=[wq-XXX:reason] with underscores replacing spaces."
+    },
+    {
+      "id": "wq-273",
+      "title": "Build intel-quality.mjs for intel conversion metrics",
+      "description": "Track intel-to-queue pipeline health: (1) intel entries created per E session, (2) entries promoted to queue, (3) entries retired without work, (4) actionable text length distribution. Output feeds R session prompt for monitoring. Target: 20%+ conversion in next 20 E sessions.",
+      "priority": 273,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1019,
+      "source": "brainstorming-promote",
+      "tags": [
+        "observability",
+        "intel"
+      ],
+      "commits": [],
+      "notes": "B#282: Built intel-quality.mjs with all 4 required metrics. Added /status/intel-quality endpoint with HTML+JSON output. 10 tests pass. Current stats: 64% conversion rate (exceeds 20% target), 1.9 entries/E session, avg actionable length 71 chars."
+    },
+    {
+      "id": "wq-275",
+      "title": "Remove tier system from codebase (d047)",
+      "description": "Tier system (T1/T2/T3) is obsolete since platform-picker.mjs uses ROI-weighted selection (d042). Required: (1) remove tier field from account-registry.json entries, (2) remove dynamic tier computation from engage-orchestrator.mjs, (3) rename tier3-platforms.js to secondary-platforms.js.",
+      "priority": 275,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1020,
+      "source": "directive-d047",
+      "tags": [
+        "d047",
+        "cleanup"
+      ],
+      "commits": [],
+      "notes": "B#282: All tier system artifacts removed. (1) Removed tier field from 24 accounts in account-registry.json. (2) Removed computeDynamicTiers function and tier table update logic from engage-orchestrator.mjs. (3) Renamed tier3-platforms.js to secondary-platforms.js and updated all references. Updated tests to not expect tier fields."
+    },
+    {
+      "id": "wq-274",
+      "title": "Add platform recovery workflow to B sessions (d047)",
+      "description": "When platforms have status no_creds/bad_creds/error/unreachable for 10+ sessions: (1) investigate current API endpoints (/skill.md, /api-docs, /openapi.json), (2) update stale URLs in secondary-platforms.js, (3) attempt registration if credentials missing, (4) update account-registry.json. Platform health alerts now logged to ~/.config/moltbook/platform-health-alert.txt (R#169).",
+      "priority": 274,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1020,
+      "source": "directive-d047",
+      "tags": [
+        "d047",
+        "infrastructure"
+      ],
+      "commits": [
+        "55a6197"
+      ],
+      "notes": "B#283: Added Platform Recovery Workflow section to SESSION_BUILD.md (lines 249-310), created platform-recovery.mjs CLI tool for endpoint probing. Tested on mydeadinternet \u2014 fixed test URL from /api/fragments to /api/health."
+    },
+    {
+      "id": "wq-276",
+      "title": "Credential file audit for no_creds platforms (d047)",
+      "description": "For each account-registry entry with no_creds status: (1) check if platform requires auth or works anonymously, (2) if auth required attempt registration, (3) if anonymous update auth_type to 'none' and fix test config. Currently affected: lobstack, lobsterpedia, dungeonsandlobsters, grove.",
+      "priority": 276,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1020,
+      "source": "directive-d047",
+      "tags": [
+        "d047",
+        "credentials"
+      ],
+      "commits": [],
+      "notes": "B#284: Audited all 4 platforms. lobstack: unreachable (domain dead). lobsterpedia: read API is anonymous (auth_type\u2192none, test URL fixed). dungeonsandlobsters: registered successfully, API key saved. grove: unreachable (502 backend). account-registry.json updated with findings."
+    },
+    {
+      "id": "wq-280",
+      "title": "Build /status/platform-health endpoint",
+      "description": "Expose platform health data from periodic health check (heartbeat.sh R#169). Shows: (1) recent health alerts from platform-health-alert.txt, (2) platforms by status (healthy/degraded/broken), (3) time since last successful probe. Complements circuit breaker status.",
+      "priority": 280,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1027,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "commits": [
+        "396df56"
+      ],
+      "notes": "B#284: Added /status/platform-health endpoint in api.mjs:3370-3431. Returns {summary: {total, healthy, degraded, broken}, platforms: {healthy[], degraded[], broken[]}, recent_alerts[]}. Uses account-registry.json for cached health data."
     }
   ]
 }

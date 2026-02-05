@@ -192,6 +192,22 @@ else
   rm -f "$SKIP_FILE"
 fi
 
+# --- Periodic platform health check (R#169, d047) ---
+# Every 20 sessions, run platform health probe to detect broken platforms early.
+# Results logged to platform-health-alert.txt for R/B sessions to act on.
+# This enables proactive maintenance instead of reactive circuit breaker trips.
+PLATFORM_CHECK_INTERVAL=20
+if [ $((COUNTER % PLATFORM_CHECK_INTERVAL)) -eq 0 ] && [ -z "$DRY_RUN" ]; then
+  HEALTH_OUTPUT=$(node "$DIR/account-manager.mjs" test --all 2>&1 || true)
+  FAILED_COUNT=$(echo "$HEALTH_OUTPUT" | grep -c "FAIL\|error\|unreachable" || echo "0")
+  if [ "$FAILED_COUNT" -gt 0 ]; then
+    echo "$(date -Iseconds) s=$COUNTER: $FAILED_COUNT platform(s) unhealthy" >> "$STATE_DIR/platform-health-alert.txt"
+    echo "$HEALTH_OUTPUT" | grep -E "FAIL|error|unreachable" >> "$STATE_DIR/platform-health-alert.txt"
+    echo "---" >> "$STATE_DIR/platform-health-alert.txt"
+  fi
+  echo "$(date -Iseconds) platform-health-check: s=$COUNTER failed=$FAILED_COUNT" >> "$LOG_DIR/selfmod.log"
+fi
+
 # --- Log rotation ---
 # Keep only the 20 most recent session logs. Truncate cron.log if >1MB.
 # This runs every heartbeat to prevent unbounded log growth (~2MB/session).

@@ -518,6 +518,15 @@
       "acked_session": 1020,
       "priority": "high",
       "notes": "R#169: Requirement 1 complete \u2014 added periodic platform health check to heartbeat.sh (runs every 20 sessions, logs to platform-health-alert.txt). Remaining work decomposed to: wq-274 (B session recovery workflow), wq-275 (tier system removal), wq-276 (credential audit)."
+    },
+    {
+      "id": "d048",
+      "from": "human",
+      "session": null,
+      "content": "COMPLIANCE GAP: Platform picker selections are being ignored.\n\nObservation: E sessions run platform-picker.mjs correctly but then engage familiar platforms (4claw, Chatr, Moltbook) instead of following the picker output. MyDeadInternet has NEVER been engaged despite consistently appearing in picker selections with high weight (w:90).\n\nEvidence from s1028:\n- Picker selected: 4claw, chatr, ctxly\n- Actually engaged: 4claw, chatr, moltbook\n- Substituted moltbook for ctxly without explanation\n\nThis defeats the purpose of ROI-weighted selection (d042) and keeps the same platforms over-engaged while others rot.\n\nRequired implementation:\n\n1. **Picker output persistence**: When platform-picker.mjs runs with --update, write the selection to ~/.config/moltbook/picker-mandate.json:\n   ```json\n   {\n     \"session\": 1032,\n     \"selected\": [\"mydeadinternet\", \"thecolony\", \"lobchan\"],\n     \"timestamp\": \"2026-02-05T04:00:00.000Z\"\n   }\n   ```\n\n2. **Post-session audit hook**: Create hooks/audit-picker-compliance.mjs that runs after E sessions:\n   - Read picker-mandate.json for this session\n   - Read engagement-trace.json for platforms actually engaged\n   - Calculate compliance: (platforms_engaged \u2229 platforms_selected) / platforms_selected\n   - If compliance < 66% (missed 2+ of 3 platforms), log violation to ~/.config/moltbook/logs/picker-violations.log\n   - Format: `{session} | selected: {list} | engaged: {list} | compliance: {pct}% | VIOLATION`\n\n3. **Violation escalation**: If 3+ consecutive E sessions have picker violations:\n   - Add follow_up to engagement-trace.json: \"PICKER COMPLIANCE ALERT: 3 consecutive violations. Next E session MUST engage picker selections or explain why each was skipped.\"\n   - This creates stigmergic pressure for the next session to comply\n\n4. **Legitimate skip tracking**: If a picker-selected platform genuinely can't be engaged (API down, rate limited), the session must:\n   - Log the skip reason in engagement-trace.json under `skipped_platforms`\n   - These don't count as violations\n\nSuccess criteria:\n- picker-mandate.json written on every E session Phase 0\n- Post-session audit runs and logs compliance\n- Violations visible in picker-violations.log\n- After 1 week: average picker compliance >80%",
+      "status": "pending",
+      "acked_session": null,
+      "priority": "high"
     }
   ],
   "questions": [
@@ -538,20 +547,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 132,
+        "followed": 134,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 1018,
-        "last_applicable_session": 1018,
+        "last_session": 1033,
+        "last_applicable_session": 1033,
         "history": [
-          {
-            "session": 968,
-            "result": "followed"
-          },
-          {
-            "session": 973,
-            "result": "followed"
-          },
           {
             "session": 978,
             "result": "followed"
@@ -582,25 +583,25 @@
           },
           {
             "session": 1018,
+            "result": "followed"
+          },
+          {
+            "session": 1028,
+            "result": "followed"
+          },
+          {
+            "session": 1033,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 114,
-        "ignored": 16,
+        "followed": 115,
+        "ignored": 17,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1018,
-        "last_applicable_session": 1018,
+        "last_session": 1033,
+        "last_applicable_session": 1033,
         "history": [
-          {
-            "session": 968,
-            "result": "followed"
-          },
-          {
-            "session": 973,
-            "result": "followed"
-          },
           {
             "session": 978,
             "result": "followed"
@@ -632,28 +633,24 @@
           {
             "session": 1018,
             "result": "followed"
+          },
+          {
+            "session": 1028,
+            "result": "ignored"
+          },
+          {
+            "session": 1033,
+            "result": "followed"
           }
         ]
       },
       "commit-and-push": {
-        "followed": 377,
+        "followed": 380,
         "ignored": 6,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1025,
-        "last_applicable_session": 1025,
+        "last_session": 1032,
+        "last_applicable_session": 1032,
         "history": [
-          {
-            "session": 1002,
-            "result": "followed"
-          },
-          {
-            "session": 1005,
-            "result": "followed"
-          },
-          {
-            "session": 1007,
-            "result": "followed"
-          },
           {
             "session": 1010,
             "result": "followed"
@@ -681,20 +678,28 @@
           {
             "session": 1025,
             "result": "followed"
+          },
+          {
+            "session": 1029,
+            "result": "followed"
+          },
+          {
+            "session": 1030,
+            "result": "followed"
+          },
+          {
+            "session": 1032,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 181,
+        "followed": 182,
         "ignored": 6,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 1025,
-        "last_applicable_session": 1025,
+        "last_session": 1030,
+        "last_applicable_session": 1030,
         "history": [
-          {
-            "session": 980,
-            "result": "followed"
-          },
           {
             "session": 985,
             "result": "followed"
@@ -730,36 +735,20 @@
           {
             "session": 1025,
             "result": "followed"
+          },
+          {
+            "session": 1030,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 385,
+        "followed": 390,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1025,
-        "last_applicable_session": 1025,
+        "last_session": 1033,
+        "last_applicable_session": 1033,
         "history": [
-          {
-            "session": 1007,
-            "result": "followed"
-          },
-          {
-            "session": 1008,
-            "result": "followed"
-          },
-          {
-            "session": 1010,
-            "result": "followed"
-          },
-          {
-            "session": 1012,
-            "result": "followed"
-          },
-          {
-            "session": 1015,
-            "result": "followed"
-          },
           {
             "session": 1017,
             "result": "followed"
@@ -779,20 +768,36 @@
           {
             "session": 1025,
             "result": "followed"
+          },
+          {
+            "session": 1028,
+            "result": "followed"
+          },
+          {
+            "session": 1029,
+            "result": "followed"
+          },
+          {
+            "session": 1030,
+            "result": "followed"
+          },
+          {
+            "session": 1032,
+            "result": "followed"
+          },
+          {
+            "session": 1033,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 153,
+        "followed": 154,
         "ignored": 14,
         "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 1025,
-        "last_applicable_session": 1025,
+        "last_session": 1030,
+        "last_applicable_session": 1030,
         "history": [
-          {
-            "session": 980,
-            "result": "followed"
-          },
           {
             "session": 985,
             "result": "followed"
@@ -827,21 +832,21 @@
           },
           {
             "session": 1025,
+            "result": "followed"
+          },
+          {
+            "session": 1030,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 165,
+        "followed": 166,
         "ignored": 5,
         "last_ignored_reason": "No honest reflection summary written; session ended with operational summary only",
-        "last_session": 1025,
-        "last_applicable_session": 1025,
+        "last_session": 1030,
+        "last_applicable_session": 1030,
         "history": [
-          {
-            "session": 980,
-            "result": "followed"
-          },
           {
             "session": 985,
             "result": "followed"
@@ -877,24 +882,20 @@
           {
             "session": 1025,
             "result": "followed"
+          },
+          {
+            "session": 1030,
+            "result": "followed"
           }
         ]
       },
       "queue-consumption": {
-        "followed": 192,
+        "followed": 194,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 1022,
-        "last_applicable_session": 1022,
+        "last_session": 1032,
+        "last_applicable_session": 1032,
         "history": [
-          {
-            "session": 987,
-            "result": "followed"
-          },
-          {
-            "session": 989,
-            "result": "followed"
-          },
           {
             "session": 992,
             "result": "followed"
@@ -926,20 +927,24 @@
           {
             "session": 1022,
             "result": "followed"
+          },
+          {
+            "session": 1029,
+            "result": "followed"
+          },
+          {
+            "session": 1032,
+            "result": "followed"
           }
         ]
       },
       "directive-update": {
-        "followed": 149,
+        "followed": 150,
         "ignored": 26,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 1025,
-        "last_applicable_session": 1025,
+        "last_session": 1030,
+        "last_applicable_session": 1030,
         "history": [
-          {
-            "session": 980,
-            "result": "ignored"
-          },
           {
             "session": 985,
             "result": "followed"
@@ -974,6 +979,10 @@
           },
           {
             "session": 1025,
+            "result": "followed"
+          },
+          {
+            "session": 1030,
             "result": "followed"
           }
         ]

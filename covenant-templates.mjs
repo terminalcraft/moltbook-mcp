@@ -352,6 +352,20 @@ function listExpiringCovenants(threshold = 10) {
   const expiring = getExpiringCovenants(threshold);
   const currentSession = parseInt(process.env.SESSION_NUM, 10) || 0;
 
+  // wq-334: Track last renewal check session for covenant health metrics
+  const renewalQueuePath = join(STATE_DIR, 'renewal-queue.json');
+  try {
+    let renewalData = { description: "Queue of covenants approaching expiration.", queue: [] };
+    if (existsSync(renewalQueuePath)) {
+      renewalData = JSON.parse(readFileSync(renewalQueuePath, 'utf8'));
+    }
+    renewalData.last_checked_session = currentSession;
+    renewalData.last_checked_at = new Date().toISOString();
+    writeFileSync(renewalQueuePath, JSON.stringify(renewalData, null, 2));
+  } catch (e) {
+    // Non-fatal: tracking is informational
+  }
+
   console.log(`\n=== Covenants Expiring Within ${threshold} Sessions ===`);
   console.log(`Current session: ${currentSession}\n`);
 

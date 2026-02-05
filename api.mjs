@@ -4590,15 +4590,40 @@ app.get("/status/covenants", (req, res) => {
     }
     candidates.sort((a, b) => b.sessions - a.sessions);
 
-    // Calculate health metrics
+    // Calculate health metrics (wq-334: enhanced with zero-engagement and renewal tracking)
     const staleCount = formalCovenants.filter(c => c.is_stale).length;
     const activeCount = formalCovenants.filter(c => c.status === "active" && !c.is_stale).length;
+
+    // wq-334: Track covenants with zero engagement (0 patterns_shared AND 0 exchange_sessions)
+    const zeroEngagement = formalCovenants.filter(c => {
+      const metrics = c.metrics || {};
+      const patternsShared = metrics.patterns_shared || 0;
+      const exchangeSessions = metrics.exchange_sessions || 0;
+      return patternsShared === 0 && exchangeSessions === 0;
+    });
+
+    // wq-334: Calculate sessions since last renewal check
+    const sessionNum = parseInt(process.env.SESSION_NUM) || 1097;
+    const renewalPath = join("/home/moltbot/.config/moltbook", "renewal-queue.json");
+    let lastRenewalCheck = null;
+    let sessionsSinceRenewal = null;
+    try {
+      const renewalData = JSON.parse(readFileSync(renewalPath, "utf8"));
+      if (renewalData.last_checked_session) {
+        lastRenewalCheck = renewalData.last_checked_session;
+        sessionsSinceRenewal = sessionNum - lastRenewalCheck;
+      }
+    } catch {}
+
     const health = {
       formal_covenants: formalCovenants.length,
       active_healthy: activeCount,
       stale: staleCount,
+      zero_engagement: zeroEngagement.length,
       candidates_for_covenants: candidates.length,
       health_score: formalCovenants.length > 0 ? Math.round((activeCount / formalCovenants.length) * 100) : 0,
+      sessions_since_renewal_check: sessionsSinceRenewal,
+      last_renewal_check_session: lastRenewalCheck,
     };
 
     const summary = {
@@ -4614,6 +4639,7 @@ app.get("/status/covenants", (req, res) => {
         timestamp: new Date().toISOString(),
         summary,
         formal_covenants: formalCovenants,
+        zero_engagement_covenants: zeroEngagement,
         covenant_candidates: candidates.slice(0, 10),
       });
     }

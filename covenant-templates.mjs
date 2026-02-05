@@ -1,18 +1,22 @@
 #!/usr/bin/env node
 // covenant-templates.mjs — Templated covenant types for agent relationships.
 // wq-229: Build on wq-220 covenant tracking with standard types.
+// wq-329: Added renewal automation — expiring covenants command, deadline tracking.
 //
 // Templates define:
 // - type: Category of commitment
 // - terms: Standard expectations for each party
 // - metrics: How to measure success
 // - typical_duration: Expected timeframe
+// - duration_sessions: Number of sessions for deadline calculation (if applicable)
 //
 // Usage:
 //   node covenant-templates.mjs list              # List available templates
 //   node covenant-templates.mjs describe <type>   # Show template details
 //   node covenant-templates.mjs create <type> <agent> [--notes "..."]  # Create templated covenant
 //   node covenant-templates.mjs match <agent>     # Suggest template for existing relationship
+//   node covenant-templates.mjs expiring [--threshold N]  # Find covenants expiring within N sessions (default: 10)
+//   node covenant-templates.mjs renew <agent> <template>  # Renew an expiring covenant
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
@@ -57,6 +61,7 @@ const TEMPLATES = {
       documentation_updates: 'Number of doc changes made',
     },
     typical_duration: '30 days renewable',
+    duration_sessions: 150, // ~30 days at 5 sessions/day
     success_criteria: 'Service maintains >99% uptime with shared on-call coverage',
   },
 
@@ -91,6 +96,7 @@ const TEMPLATES = {
       requirements_met: 'Percentage of requirements satisfied',
     },
     typical_duration: '1-7 days',
+    duration_sessions: 35, // ~7 days at 5 sessions/day
     success_criteria: 'Task completed, requirements met, delivered on time',
   },
 
@@ -182,7 +188,7 @@ function describeTemplate(type) {
   console.log(`\nSuccess Criteria: ${template.success_criteria}`);
 }
 
-function createTemplatedCovenant(type, agent, notes = '') {
+function createTemplatedCovenant(type, agent, notes = '', opts = {}) {
   const template = TEMPLATES[type];
   if (!template) {
     console.error(`Unknown template: ${type}`);
@@ -211,12 +217,24 @@ function createTemplatedCovenant(type, agent, notes = '') {
     covenants.agents[agentHandle].templated_covenants = [];
   }
 
+  // Get current session from environment or default
+  const currentSession = parseInt(process.env.SESSION_NUM, 10) || 0;
+
+  // Calculate expiration session if template has duration
+  let expiresAtSession = null;
+  if (template.duration_sessions) {
+    expiresAtSession = currentSession + template.duration_sessions;
+  }
+
   const covenant = {
     template: type,
     created: new Date().toISOString(),
+    created_session: currentSession,
     status: 'active',
     notes: notes || `${template.name} covenant established`,
     metrics: Object.fromEntries(Object.keys(template.metrics).map(k => [k, 0])),
+    ...(expiresAtSession && { expires_at_session: expiresAtSession }),
+    ...(opts.renewal_of && { renewal_of: opts.renewal_of }), // Track renewal chain
   };
 
   covenants.agents[agentHandle].templated_covenants.push(covenant);
@@ -225,6 +243,11 @@ function createTemplatedCovenant(type, agent, notes = '') {
   writeJSON(COVENANTS_PATH, covenants);
 
   console.log(`Created ${template.name} covenant with @${agentHandle}`);
+  if (expiresAtSession) {
+    console.log(`Expires at session: ${expiresAtSession} (${template.duration_sessions} sessions from now)`);
+  } else {
+    console.log(`Duration: ongoing (no expiration)`);
+  }
   console.log(`\nTerms you commit to:`);
   for (const term of template.terms.initiator) {
     console.log(`  • ${term}`);
@@ -292,6 +315,115 @@ function suggestTemplate(agent) {
   }
 }
 
+function getExpiringCovenants(threshold = 10) {
+  // Returns covenants expiring within N sessions of current session
+  const covenants = loadCovenants();
+  const currentSession = parseInt(process.env.SESSION_NUM, 10) || 0;
+  const expiring = [];
+
+  for (const [agentHandle, agentData] of Object.entries(covenants.agents || {})) {
+    const templatedCovenants = agentData.templated_covenants || [];
+    for (const cov of templatedCovenants) {
+      if (cov.status !== 'active') continue;
+      if (!cov.expires_at_session) continue;
+
+      const sessionsUntilExpiry = cov.expires_at_session - currentSession;
+      if (sessionsUntilExpiry > 0 && sessionsUntilExpiry <= threshold) {
+        expiring.push({
+          agent: agentHandle,
+          template: cov.template,
+          created: cov.created,
+          created_session: cov.created_session,
+          expires_at_session: cov.expires_at_session,
+          sessions_remaining: sessionsUntilExpiry,
+          notes: cov.notes,
+          metrics: cov.metrics,
+        });
+      }
+    }
+  }
+
+  // Sort by urgency (fewest sessions remaining first)
+  expiring.sort((a, b) => a.sessions_remaining - b.sessions_remaining);
+  return expiring;
+}
+
+function listExpiringCovenants(threshold = 10) {
+  const expiring = getExpiringCovenants(threshold);
+  const currentSession = parseInt(process.env.SESSION_NUM, 10) || 0;
+
+  console.log(`\n=== Covenants Expiring Within ${threshold} Sessions ===`);
+  console.log(`Current session: ${currentSession}\n`);
+
+  if (expiring.length === 0) {
+    console.log('No covenants approaching expiration.');
+    return;
+  }
+
+  for (const cov of expiring) {
+    const urgency = cov.sessions_remaining <= 5 ? '🔴 URGENT' : '🟡 SOON';
+    console.log(`${urgency} @${cov.agent} — ${cov.template}`);
+    console.log(`  Expires: session ${cov.expires_at_session} (${cov.sessions_remaining} sessions remaining)`);
+    console.log(`  Created: session ${cov.created_session} (${cov.created.split('T')[0]})`);
+    console.log(`  Notes: ${cov.notes}`);
+    console.log('');
+  }
+
+  // Output JSON for programmatic use if --json flag
+  if (process.argv.includes('--json')) {
+    console.log('\n--- JSON Output ---');
+    console.log(JSON.stringify(expiring, null, 2));
+  }
+}
+
+function renewCovenant(agent, templateType) {
+  const covenants = loadCovenants();
+  const agentHandle = agent.replace(/^@/, '');
+  const agentData = covenants.agents[agentHandle];
+
+  if (!agentData || !agentData.templated_covenants) {
+    console.error(`No covenants found for @${agentHandle}`);
+    process.exit(1);
+  }
+
+  // Find the existing covenant to renew
+  const existingIdx = agentData.templated_covenants.findIndex(
+    c => c.template === templateType && c.status === 'active'
+  );
+
+  if (existingIdx === -1) {
+    console.error(`No active ${templateType} covenant found for @${agentHandle}`);
+    process.exit(1);
+  }
+
+  const existingCovenant = agentData.templated_covenants[existingIdx];
+  const currentSession = parseInt(process.env.SESSION_NUM, 10) || 0;
+
+  // Mark existing covenant as renewed
+  existingCovenant.status = 'renewed';
+  existingCovenant.renewed_at = new Date().toISOString();
+  existingCovenant.renewed_session = currentSession;
+
+  // Create new covenant with renewal reference
+  const template = TEMPLATES[templateType];
+  if (!template) {
+    console.error(`Unknown template: ${templateType}`);
+    process.exit(1);
+  }
+
+  const renewalNote = `Renewed from session ${existingCovenant.created_session}. Previous metrics: ${JSON.stringify(existingCovenant.metrics)}`;
+
+  // Save before creating new (to capture the status change)
+  writeJSON(COVENANTS_PATH, covenants);
+
+  // Create the renewal covenant
+  createTemplatedCovenant(templateType, agentHandle, renewalNote, {
+    renewal_of: existingCovenant.created,
+  });
+
+  console.log(`\nCovenant renewed. Previous covenant metrics preserved in notes.`);
+}
+
 // ============================================================================
 // CLI
 // ============================================================================
@@ -330,10 +462,27 @@ switch (command) {
     suggestTemplate(args[1]);
     break;
 
+  case 'expiring': {
+    const thresholdIdx = args.indexOf('--threshold');
+    const threshold = thresholdIdx > -1 ? parseInt(args[thresholdIdx + 1], 10) : 10;
+    listExpiringCovenants(threshold);
+    break;
+  }
+
+  case 'renew':
+    if (!args[1] || !args[2]) {
+      console.error('Usage: node covenant-templates.mjs renew <agent> <template>');
+      process.exit(1);
+    }
+    renewCovenant(args[1], args[2]);
+    break;
+
   default:
-    console.log('Usage: node covenant-templates.mjs [list|describe|create|match]');
-    console.log('  list              List available templates');
-    console.log('  describe <type>   Show template details');
-    console.log('  create <type> <agent>  Create templated covenant');
-    console.log('  match <agent>     Suggest template for relationship');
+    console.log('Usage: node covenant-templates.mjs [list|describe|create|match|expiring|renew]');
+    console.log('  list                       List available templates');
+    console.log('  describe <type>            Show template details');
+    console.log('  create <type> <agent>      Create templated covenant');
+    console.log('  match <agent>              Suggest template for relationship');
+    console.log('  expiring [--threshold N]   Find covenants expiring within N sessions (default: 10)');
+    console.log('  renew <agent> <template>   Renew an expiring covenant');
 }

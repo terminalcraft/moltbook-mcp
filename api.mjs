@@ -3368,6 +3368,56 @@ app.get("/status/cost-trends", (req, res) => {
   }
 });
 
+// Intel pipeline quality metrics (wq-273)
+// Returns intel-to-queue conversion metrics for R session monitoring
+import { calculateMetrics as getIntelMetrics, formatForPrompt as formatIntelPrompt } from "./intel-quality.mjs";
+
+app.get("/status/intel-quality", (req, res) => {
+  try {
+    const window = Math.min(parseInt(req.query.window) || 20, 50);
+    const metrics = getIntelMetrics(window);
+
+    if (req.query.format === "json") {
+      return res.json(metrics);
+    }
+
+    // HTML view
+    const html = `<!DOCTYPE html>
+<html><head><title>Intel Quality</title>
+<style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}
+h1{color:#89b4fa}h2{color:#f9e2af;margin-top:1.5rem}
+.metric{margin:0.3rem 0}.label{color:#a6adc8}.value{color:#89dceb}
+.good{color:#a6e3a1}.bad{color:#f38ba8}
+a{color:#89b4fa}</style></head>
+<body>
+<h1>Intel Pipeline Health</h1>
+<p>Window: ${metrics.window.e_sessions} E sessions (s${metrics.window.first_session}-s${metrics.window.last_session})</p>
+
+<h2>Generation</h2>
+<div class="metric"><span class="label">Total intel entries:</span> <span class="value">${metrics.intel_generation.total_entries}</span></div>
+<div class="metric"><span class="label">Entries per E session:</span> <span class="value">${metrics.intel_generation.entries_per_session}</span></div>
+<div class="metric"><span class="label">With actionable text:</span> <span class="value">${metrics.intel_generation.with_actionable}</span></div>
+
+<h2>Promotion & Outcomes</h2>
+<div class="metric"><span class="label">Promoted to queue:</span> <span class="value">${metrics.promotion.total_promoted}</span></div>
+<div class="metric"><span class="label">Worked (done):</span> <span class="value">${metrics.outcomes.worked}</span></div>
+<div class="metric"><span class="label">Retired without work:</span> <span class="value">${metrics.outcomes.retired_without_work}</span></div>
+<div class="metric"><span class="label">Conversion rate:</span> <span class="${metrics.target.on_track ? 'good' : 'bad'}">${metrics.outcomes.conversion_rate}%</span> (target: 20%+)</div>
+
+<h2>Actionable Text Quality</h2>
+<div class="metric"><span class="label">Avg length:</span> <span class="value">${metrics.actionable_length.avg_length} chars</span></div>
+<div class="metric"><span class="label">Distribution:</span> <span class="value">short=${metrics.actionable_length.distribution.short}, medium=${metrics.actionable_length.distribution.medium}, long=${metrics.actionable_length.distribution.long}, detailed=${metrics.actionable_length.distribution.detailed}</span></div>
+
+<p style="margin-top:1.5rem">${metrics.target.on_track ? '<span class="good">✓ Meeting 20% conversion target</span>' : '<span class="bad">⚠️ Below 20% conversion target</span>'}</p>
+
+<p style="margin-top:1rem"><a href="/status/intel-quality?format=json">JSON</a> · <a href="/status">Status index</a></p>
+</body></html>`;
+    res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Session cost distribution visualization — charts cost per type over time (wq-003)
 app.get("/status/cost-distribution", (req, res) => {
   try {
@@ -4968,6 +5018,7 @@ function agentManifest(req, res) {
       status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
       status_cost_heatmap: { url: `${base}/status/cost-heatmap`, method: "GET", auth: false, description: "Cost heatmap by session type and day (?days=N, default 14, max 90)" },
       status_cost_trends: { url: `${base}/status/cost-trends`, method: "GET", auth: false, description: "Cost trend alerts — per-type rolling avg, trend direction, threshold alerts (?window=N, default 10)" },
+      status_intel_quality: { url: `${base}/status/intel-quality`, method: "GET", auth: false, description: "Intel pipeline metrics — E session intel generation, queue conversion rate, actionable text quality (?window=N, default 20)" },
       status_cost_distribution: { url: `${base}/status/cost-distribution`, method: "GET", auth: false, description: "Interactive cost distribution charts — stacked bar, pie, rolling avg, utilization (?window=N, ?format=json)" },
       status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
       status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },

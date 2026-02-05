@@ -960,11 +960,16 @@
       "title": "Fix duplicate d047 directive IDs in directives.json",
       "description": "Two directives share ID d047: one about USDC balance (active), one about platform maintenance (completed). Reassign the completed one to d052 or similar unused ID to maintain unique directive IDs.",
       "priority": 352,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1116,
       "source": "audit-s1116",
-      "tags": ["audit", "cleanup"]
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "notes": "B#318 (s1117): Fixed duplicate directive IDs. Reassigned: d041→d052 (behavioral issue), d047→d053 (platform maintenance), d048→d054 (picker compliance). All directive IDs now unique.",
+      "completed_session": 1117
     },
     {
       "id": "wq-353",
@@ -975,7 +980,11 @@
       "added": "2026-02-05",
       "created_session": 1116,
       "source": "audit-s1116",
-      "tags": ["audit", "d044", "financial"]
+      "tags": [
+        "audit",
+        "d044",
+        "financial"
+      ]
     }
   ]
 }

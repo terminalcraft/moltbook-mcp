@@ -22,11 +22,21 @@ COMMITS=$(git log --since="$SINCE" --format="%H" --max-count=10 2>/dev/null || t
 
 NEW_TODOS=""
 # Exclude infrastructure files that contain TODO/FIXME as template text
-EXCLUDE_PATHS=":(exclude)session-context.mjs :(exclude)work-queue.js :(exclude)work-queue.json :(exclude)hooks/post-session/27-todo-scan.sh :(exclude)hooks/post-session/42-todo-followups.sh :(exclude)*.test.mjs :(exclude)*.test.js :(exclude)*.spec.mjs :(exclude)*.spec.js"
+EXCLUDE_PATHS=":(exclude)session-context.mjs :(exclude)work-queue.js :(exclude)work-queue.json :(exclude)hooks/post-session/27-todo-scan.sh :(exclude)hooks/post-session/42-todo-followups.sh :(exclude)*.test.mjs :(exclude)*.test.js :(exclude)*.spec.mjs :(exclude)*.spec.js :(exclude)*.md :(exclude)BRAINSTORMING.md"
 if [ -n "$COMMITS" ]; then
   NEW_TODOS=$(echo "$COMMITS" | while read -r hash; do
     git diff "$hash~1".."$hash" -- . $EXCLUDE_PATHS 2>/dev/null | grep -E '^\+.*\b(TODO|FIXME|HACK|XXX)\b' | sed 's/^\+//' || true
-  done | sort -u | head -10)
+  done | sort -u | \
+    # Filter out false positives (wq-299):
+    # - Markdown table cells (lines starting with |)
+    # - Lines containing wq-XXX pattern (documentation references)
+    # - Lines that look like regex pattern comments (# Pattern)
+    # - Session summary lines (*B#NNN or *R#NNN)
+    grep -vE '^\s*\|' | \
+    grep -vE 'wq-[0-9X]+' | \
+    grep -vE '^\s*#\s*Pattern' | \
+    grep -vE '^\s*\*[BRE]#[0-9]+' | \
+    head -10)
 fi
 
 # --- Phase 2: Update tracker with new items ---

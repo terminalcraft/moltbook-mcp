@@ -180,6 +180,90 @@ describe('pre-commit credential detection', () => {
       cleanupFile(filename);
     }
   });
+
+  // Test 9: Detect password patterns (wq-266 edge case)
+  test('blocks files with password pattern', async () => {
+    const filename = 'test-cred-password.mjs';
+    try {
+      stageFile(filename, `
+        const config = {
+          password: "supersecretpassword123"
+        };
+      `);
+      const result = runHook();
+      assert.strictEqual(result.exitCode, 1, 'Should exit with error code 1');
+      assert.ok(result.stdout.includes('CREDENTIAL LEAK WARNING'), 'Should warn about password');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
+
+  // Test 10: Short tokens don't trigger (avoid false positives)
+  test('allows files with short key values (no false positives)', async () => {
+    const filename = 'test-short-key.json';
+    try {
+      stageFile(filename, `{
+        "key": "short"
+      }`);
+      const result = runHook();
+      assert.strictEqual(result.exitCode, 0, 'Should allow short key values');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
+
+  // Test 11: Binary files are skipped (wq-266 edge case)
+  test('skips binary files', async () => {
+    const filename = 'test-binary.png';
+    try {
+      // Write minimal PNG header with an api_key string embedded
+      const pngHeader = Buffer.from([
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A
+      ]);
+      const fakeContent = Buffer.concat([pngHeader, Buffer.from('api_key=secret12345678901234567890')]);
+      writeFileSync(join(REPO_DIR, filename), fakeContent);
+      execSync(`git add "${filename}"`, { cwd: REPO_DIR });
+      const result = runHook();
+      // Should pass because .png files are skipped
+      assert.strictEqual(result.exitCode, 0, 'Should skip binary files');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
+
+  // Test 12: Credential files with *-creds.json pattern are exempt
+  test('exempts *-creds.json files from credential checks', async () => {
+    const filename = 'test-platform-creds.json';
+    try {
+      stageFile(filename, `{
+        "api_key": "fake_test_key_abcdefghijklmnopqrstuvwxyz"
+      }`);
+      const result = runHook();
+      // *-creds.json should be exempt
+      assert.strictEqual(result.exitCode, 0, 'Should exempt *-creds.json files');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
+
+  // Test 13: Multiple credential patterns in one file
+  test('detects multiple credential patterns', async () => {
+    const filename = 'test-multi-creds.mjs';
+    try {
+      stageFile(filename, `
+        const config = {
+          api_key: "sk_test_abcdefghijklmnopqrstuvwxyz123456",
+          secret_key: "secret_abcdefghijklmnopqrstuvwxyz",
+          password: "mysuperpassword123"
+        };
+      `);
+      const result = runHook();
+      assert.strictEqual(result.exitCode, 1, 'Should detect any credential pattern');
+      assert.ok(result.stdout.includes('CREDENTIAL LEAK WARNING'), 'Should warn about credentials');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
 });
 
 // Run if executed directly

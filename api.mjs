@@ -1768,6 +1768,230 @@ app.get("/status/credentials", auth, (req, res) => {
   }
 });
 
+// Credential health dashboard: cross-references account-registry with credential files (wq-337)
+// Shows: age of credentials, platforms with missing creds, stale credentials, alerts
+app.get("/status/credential-health", auth, (req, res) => {
+  try {
+    // Load account registry
+    const registry = JSON.parse(readFileSync(join(BASE, "account-registry.json"), "utf8"));
+    const accounts = registry.accounts || [];
+
+    // Helper to resolve credential paths (handles ~/ paths)
+    const resolvePath = (p) => {
+      if (!p) return null;
+      if (p.startsWith("~/")) return p.replace("~", homedir());
+      return join(BASE, p);
+    };
+
+    // Find all credential files in BASE directory
+    const credFiles = readdirSync(BASE).filter(f =>
+      f.endsWith("-credentials.json") || f === "wallet.json" || f === "agentid.json" || f === "ctxly.json" || (f.startsWith(".") && (f.endsWith("-key") || f.endsWith("-credentials.json")))
+    );
+
+    // Build credential file status with ages — include both BASE files and external paths from registry
+    const credStatus = [];
+    const seenPaths = new Set();
+
+    // First, add files found in BASE directory
+    for (const f of credFiles) {
+      const fullPath = join(BASE, f);
+      seenPaths.add(fullPath);
+      try {
+        const stat = statSync(fullPath);
+        const ageDays = Math.floor((Date.now() - stat.mtimeMs) / (1000 * 60 * 60 * 24));
+        credStatus.push({ file: f, path: fullPath, age_days: ageDays, mtime: stat.mtime.toISOString() });
+      } catch {
+        credStatus.push({ file: f, path: fullPath, age_days: null, error: "stat failed" });
+      }
+    }
+
+    // Also check credential files referenced in registry that are outside BASE
+    for (const acct of accounts) {
+      if (!acct.cred_file) continue;
+      const fullPath = resolvePath(acct.cred_file);
+      if (!fullPath || seenPaths.has(fullPath)) continue;
+      seenPaths.add(fullPath);
+
+      const displayName = acct.cred_file.replace(/^~\/moltbook-mcp\//, "");
+      try {
+        const stat = statSync(fullPath);
+        const ageDays = Math.floor((Date.now() - stat.mtimeMs) / (1000 * 60 * 60 * 24));
+        credStatus.push({ file: displayName, path: fullPath, age_days: ageDays, mtime: stat.mtime.toISOString(), external: true });
+      } catch {
+        // Will be caught by missing creds check below
+      }
+    }
+
+    // Cross-reference: platforms with missing credentials
+    const missingCreds = [];
+    for (const acct of accounts) {
+      if (acct.auth_type === "none" || !acct.cred_file) continue;
+
+      const fullPath = resolvePath(acct.cred_file);
+      const displayPath = acct.cred_file.replace(/^~\/moltbook-mcp\//, "");
+
+      if (!fullPath || !existsSync(fullPath)) {
+        missingCreds.push({
+          platform: acct.platform,
+          id: acct.id,
+          expected_file: displayPath,
+          last_status: acct.last_status
+        });
+      }
+    }
+
+    // Find stale credentials (>90 days old)
+    const staleThreshold = 90;
+    const staleCreds = credStatus.filter(c => c.age_days !== null && c.age_days >= staleThreshold);
+
+    // Find credentials approaching staleness (60-89 days)
+    const approachingStale = credStatus.filter(c =>
+      c.age_days !== null && c.age_days >= 60 && c.age_days < staleThreshold
+    );
+
+    // Map credential files to platforms (by display name)
+    const credToPlatform = {};
+    for (const acct of accounts) {
+      if (acct.cred_file) {
+        const credPath = acct.cred_file.replace(/^~\/moltbook-mcp\//, "");
+        credToPlatform[credPath] = acct.platform;
+        // Also map full path for external creds
+        const fullPath = resolvePath(acct.cred_file);
+        if (fullPath) credToPlatform[fullPath] = acct.platform;
+      }
+    }
+
+    // Generate alerts
+    const alerts = [];
+    if (staleCreds.length > 0) {
+      for (const cred of staleCreds) {
+        const platform = credToPlatform[cred.file] || "unknown";
+        alerts.push({
+          severity: "critical",
+          type: "stale_credential",
+          message: `${cred.file} is ${cred.age_days} days old (platform: ${platform})`,
+          platform,
+          age_days: cred.age_days
+        });
+      }
+    }
+    if (missingCreds.length > 0) {
+      for (const missing of missingCreds) {
+        alerts.push({
+          severity: "warning",
+          type: "missing_credential",
+          message: `${missing.platform}: credential file ${missing.expected_file} not found`,
+          platform: missing.platform,
+          expected_file: missing.expected_file
+        });
+      }
+    }
+    if (approachingStale.length > 0) {
+      for (const cred of approachingStale) {
+        const platform = credToPlatform[cred.file] || "unknown";
+        alerts.push({
+          severity: "info",
+          type: "approaching_stale",
+          message: `${cred.file} is ${cred.age_days} days old, consider rotating (platform: ${platform})`,
+          platform,
+          age_days: cred.age_days
+        });
+      }
+    }
+
+    // Health score: 100 - (10 * staleCreds) - (5 * missing) - (2 * approaching)
+    const healthScore = Math.max(0, 100 - (staleCreds.length * 20) - (missingCreds.length * 10) - (approachingStale.length * 5));
+
+    // Summary by age bucket
+    const ageBuckets = {
+      fresh: credStatus.filter(c => c.age_days !== null && c.age_days < 7).length,      // <1 week
+      recent: credStatus.filter(c => c.age_days !== null && c.age_days >= 7 && c.age_days < 30).length,  // 1-4 weeks
+      aging: credStatus.filter(c => c.age_days !== null && c.age_days >= 30 && c.age_days < 60).length,  // 1-2 months
+      old: credStatus.filter(c => c.age_days !== null && c.age_days >= 60 && c.age_days < 90).length,    // 2-3 months
+      stale: staleCreds.length  // >90 days
+    };
+
+    const result = {
+      health_score: healthScore,
+      summary: {
+        total_credentials: credStatus.length,
+        platforms_with_creds: accounts.filter(a => a.cred_file).length,
+        missing_credentials: missingCreds.length,
+        stale_credentials: staleCreds.length,
+        approaching_stale: approachingStale.length
+      },
+      age_distribution: ageBuckets,
+      alerts: alerts.sort((a, b) => {
+        const order = { critical: 0, warning: 1, info: 2 };
+        return (order[a.severity] || 3) - (order[b.severity] || 3);
+      }),
+      credentials: credStatus.sort((a, b) => (b.age_days || 0) - (a.age_days || 0)), // oldest first
+      missing_platforms: missingCreds,
+      recommendations: [
+        ...(staleCreds.length > 0 ? [`Rotate stale credentials: ${staleCreds.map(c => c.file).join(", ")}`] : []),
+        ...(missingCreds.length > 0 ? [`Add missing credentials for: ${missingCreds.map(m => m.platform).join(", ")}`] : [])
+      ]
+    };
+
+    if (req.query.format === "json" || req.headers.accept?.includes("application/json")) {
+      return res.json(result);
+    }
+
+    // HTML dashboard
+    const severityClass = s => s === "critical" ? "bad" : s === "warning" ? "warn" : "ok";
+    const html = `<!DOCTYPE html><html><head><title>Credential Health Dashboard</title>
+    <style>body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;padding:2rem;max-width:1200px;margin:0 auto}
+    h1,h2{color:#89b4fa}table{border-collapse:collapse;margin:1rem 0;width:100%}td,th{padding:.5rem 1rem;border:1px solid #45475a;text-align:left}
+    th{background:#313244}.ok{color:#a6e3a1}.warn{color:#f9e2af}.bad{color:#f38ba8}
+    .score{font-size:2rem;padding:1rem;border-radius:.5rem;display:inline-block;margin-bottom:1rem}
+    .score.good{background:#a6e3a120}.score.mid{background:#f9e2af20}.score.bad{background:#f38ba820}
+    .alert{padding:.5rem 1rem;margin:.25rem 0;border-radius:.25rem;border-left:4px solid}
+    .alert.critical{background:#f38ba820;border-color:#f38ba8}.alert.warning{background:#f9e2af20;border-color:#f9e2af}
+    .alert.info{background:#89b4fa20;border-color:#89b4fa}
+    .bucket{display:inline-block;padding:.25rem .5rem;margin:.125rem;border-radius:.25rem;background:#45475a}</style></head>
+    <body><h1>🔐 Credential Health Dashboard</h1>
+    <div class="score ${healthScore >= 80 ? 'good' : healthScore >= 50 ? 'mid' : 'bad'}">${healthScore}/100</div>
+    <p>${result.summary.total_credentials} credential files • ${result.summary.platforms_with_creds} platforms configured • ${result.summary.stale_credentials} stale</p>
+
+    <h2>Age Distribution</h2>
+    <p>
+      <span class="bucket ok">Fresh (&lt;7d): ${ageBuckets.fresh}</span>
+      <span class="bucket ok">Recent (7-30d): ${ageBuckets.recent}</span>
+      <span class="bucket warn">Aging (30-60d): ${ageBuckets.aging}</span>
+      <span class="bucket warn">Old (60-90d): ${ageBuckets.old}</span>
+      <span class="bucket bad">Stale (&gt;90d): ${ageBuckets.stale}</span>
+    </p>
+
+    ${alerts.length > 0 ? `<h2>Alerts (${alerts.length})</h2>
+    ${alerts.map(a => `<div class="alert ${a.severity}"><strong>${a.severity.toUpperCase()}</strong>: ${a.message}</div>`).join('')}` : '<p class="ok">✓ No alerts</p>'}
+
+    <h2>Credential Files (by age)</h2>
+    <table><tr><th>File</th><th>Platform</th><th>Age (days)</th><th>Status</th></tr>
+    ${credStatus.sort((a,b) => (b.age_days||0) - (a.age_days||0)).map(c => {
+      const platform = credToPlatform[c.file] || '-';
+      const status = c.age_days === null ? 'error' : c.age_days >= 90 ? 'stale' : c.age_days >= 60 ? 'old' : 'ok';
+      const statusClass = status === 'stale' ? 'bad' : status === 'old' ? 'warn' : 'ok';
+      return `<tr><td>${c.file}</td><td>${platform}</td><td>${c.age_days ?? '-'}</td><td class="${statusClass}">${status}</td></tr>`;
+    }).join('')}
+    </table>
+
+    ${missingCreds.length > 0 ? `<h2>Missing Credentials</h2>
+    <table><tr><th>Platform</th><th>Expected File</th><th>Last Status</th></tr>
+    ${missingCreds.map(m => `<tr><td>${m.platform}</td><td>${m.expected_file}</td><td>${m.last_status || '-'}</td></tr>`).join('')}
+    </table>` : ''}
+
+    <p style="margin-top:2rem;color:#6c7086;font-size:.75rem">
+    <a href="/status/credential-health?format=json" style="color:#89b4fa">JSON</a> ·
+    <a href="/status/credentials" style="color:#89b4fa">Gitignore Status</a> ·
+    <a href="/status/creds" style="color:#89b4fa">Rotation Status</a> ·
+    <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+    </body></html>`;
+    res.send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Queue health: dedup stats, staleness, blocked-item age
 app.get("/status/queue-health", (req, res) => {
   try {

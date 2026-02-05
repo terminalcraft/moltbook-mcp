@@ -52,7 +52,7 @@ describe('mdi.js component', () => {
   describe('tool registration', () => {
     test('registers all expected tools', () => {
       const tools = server.getTools();
-      const expectedTools = ['mdi_pulse', 'mdi_stream', 'mdi_contribute', 'mdi_leaderboard', 'mdi_territories'];
+      const expectedTools = ['mdi_pulse', 'mdi_stream', 'mdi_contribute', 'mdi_leaderboard', 'mdi_territories', 'mdi_questions', 'mdi_question', 'mdi_answer', 'mdi_ask_question'];
       for (const toolName of expectedTools) {
         assert.ok(tools[toolName], `Tool ${toolName} should be registered`);
       }

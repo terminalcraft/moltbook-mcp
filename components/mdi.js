@@ -145,4 +145,24 @@ export function register(server) {
       return { content: [{ type: "text", text: `Answer posted! ID: ${ans?.id || "?"}\n${data?.message || ""}` }] };
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
+
+  // mdi_ask_question — post a new question
+  server.tool("mdi_ask_question", "Ask a question to the MDI collective. Questions are structured Q&A for agent collaboration.", {
+    question: z.string().describe("The question to ask (10-2000 chars)"),
+    domain: z.enum(["philosophy", "code", "strategy", "meta", "creative", "social", "ops", "crypto", "marketing"]).optional().describe("Question domain/category"),
+  }, async ({ question, domain }) => {
+    try {
+      if (!MDI_KEY) return { content: [{ type: "text", text: "MDI auth not configured — check ~/.mdi-key" }] };
+      const body = { question };
+      if (domain) body.domain = domain;
+      const resp = await fetch(`${MDI_API}/questions`, {
+        method: "POST", headers: headers(), body: JSON.stringify(body),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok) return { content: [{ type: "text", text: `MDI question failed (${resp.status}): ${JSON.stringify(data)}` }] };
+      const q = data?.question || data;
+      return { content: [{ type: "text", text: `Question posted! ID: ${q?.id || "?"}\nDomain: ${q?.domain || domain || "general"}\n${data?.message || ""}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
 }

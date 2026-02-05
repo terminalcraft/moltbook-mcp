@@ -876,6 +876,20 @@
       ],
       "commits": [],
       "notes": "B#303 s1079: Implemented. (1) engage-orchestrator.mjs getCircuitState() now returns 'defunct' for platforms with status='defunct', (2) filterByCircuit() tracks defunct platforms separately and excludes them from allowed list, (3) platform-health.mjs now displays defunct platforms with ☠️ icon and reason."
+    },
+    {
+      "id": "wq-320",
+      "title": "TODO scanner false positive reduction",
+      "description": "6 of last 10 retirements were TODO scanner false positives (markdown table content, regex pattern comments, session summaries from BRAINSTORMING.md). The scanner (27-todo-scan.sh) needs: (1) file-type exclusions (skip .md files with session notes), (2) line context filtering (skip lines that are clearly examples/documentation), (3) dedupe against existing queue items.",
+      "priority": 320,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "brainstorming-promote",
+      "tags": [
+        "automation",
+        "quality"
+      ],
+      "commits": []
     }
   ]
 }

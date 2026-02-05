@@ -44,8 +44,8 @@ if (!existsSync(traceFile)) {
   }
 }
 
-// Check intel (existence only - empty is valid)
-// Format: NDJSON (newline-delimited JSON objects) or JSON array
+// Check intel (existence + quality check)
+// Format: JSON array (legacy NDJSON no longer used)
 if (!existsSync(intelFile)) {
   results.push('INTEL: ❌ FAIL — file missing');
   passed = false;
@@ -53,18 +53,35 @@ if (!existsSync(intelFile)) {
   try {
     const content = readFileSync(intelFile, 'utf8').trim();
     if (!content || content === '[]') {
-      results.push('INTEL: ✓ PASS — 0 entries (empty is valid)');
+      results.push('INTEL: ✓ PASS — 0 entries (empty is valid if nothing actionable observed)');
     } else {
-      // Try JSON array first, then NDJSON
-      let count = 0;
+      // Parse as JSON array
+      let entries = [];
       try {
-        const arr = JSON.parse(content);
-        count = Array.isArray(arr) ? arr.length : 1;
+        const parsed = JSON.parse(content);
+        entries = Array.isArray(parsed) ? parsed : [];
       } catch {
-        // NDJSON format - count non-empty lines
-        count = content.split('\n').filter(l => l.trim() && l.trim() !== '[]').length;
+        results.push('INTEL: ⚠ WARN — parse error, treating as empty');
+        entries = [];
       }
-      results.push(`INTEL: ✓ PASS — ${count} entries`);
+
+      const count = entries.length;
+      // Quality check: entries with meaningful actionable field (>20 chars)
+      const actionableCount = entries.filter(e =>
+        e && e.actionable && typeof e.actionable === 'string' && e.actionable.length > 20
+      ).length;
+
+      if (count === 0) {
+        results.push('INTEL: ✓ PASS — 0 entries');
+      } else if (actionableCount === 0) {
+        // Entries exist but none have actionable fields — warn but don't block
+        results.push(`INTEL: ⚠ QUALITY WARNING — ${count} entries but 0 have actionable text`);
+        results.push('  → Intel entries should have concrete actionable fields');
+        results.push('  → See SESSION_ENGAGE.md Phase 3b "Actionable vs Observation"');
+        // Don't set passed=false — advisory only. But surface the problem.
+      } else {
+        results.push(`INTEL: ✓ PASS — ${count} entries, ${actionableCount} actionable`);
+      }
     }
   } catch (e) {
     results.push(`INTEL: ❌ FAIL — read error: ${e.message}`);

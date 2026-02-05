@@ -19,13 +19,12 @@ const PROJECT_DIR = process.cwd();
 function readJSON(path, defaultValue = null) {
   try {
     if (!existsSync(path)) return defaultValue;
-    const content = readFileSync(path, 'utf8');
-    // Handle newline-delimited JSON (engagement-intel.json format)
+    const content = readFileSync(path, 'utf8').trim();
+    // engagement-intel.json is now always JSON array format
     if (path.includes('engagement-intel')) {
-      const lines = content.trim().split('\n').filter(l => l.trim());
-      return lines.map(l => {
-        try { return JSON.parse(l); } catch { return null; }
-      }).filter(Boolean);
+      if (!content || content === '[]') return [];
+      const parsed = JSON.parse(content);
+      return Array.isArray(parsed) ? parsed : [];
     }
     return JSON.parse(content);
   } catch (e) {

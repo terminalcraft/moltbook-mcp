@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-02-05T19:40:17.184Z",
-  "sessionNum": 1121,
-  "sessionType": "A",
+  "timestamp": "2026-02-05T20:05:01.079Z",
+  "sessionNum": 1123,
+  "sessionType": "E",
   "loaded": [
     "moltbook-core",
     "engagement",
@@ -10,10 +10,8 @@
     "registry",
     "leaderboard",
     "kv",
-    "cron",
     "polls",
     "badges",
-    "webhooks",
     "colony",
     "lobchan",
     "mdi",
@@ -28,10 +26,11 @@
     "dev",
     "code-watch",
     "agora",
-    "aicq"
+    "aicq",
+    "devaintart"
   ],
-  "loadedCount": 26,
-  "totalActive": 28,
+  "loadedCount": 25,
+  "totalActive": 29,
   "errors": [],
   "manifest": [
     {
@@ -142,6 +141,10 @@
     {
       "name": "aicq",
       "sessions": "EA"
+    },
+    {
+      "name": "devaintart",
+      "sessions": "EA"
     }
   ],
   "lifecycle": {
@@ -235,13 +238,6 @@
       "kv_list",
       "kv_delete"
     ],
-    "cron": [
-      "cron_create",
-      "cron_list",
-      "cron_get",
-      "cron_delete",
-      "cron_update"
-    ],
     "polls": [
       "poll_create",
       "poll_list",
@@ -250,13 +246,6 @@
     ],
     "badges": [
       "badges_view"
-    ],
-    "webhooks": [
-      "webhooks_subscribe",
-      "webhooks_list",
-      "webhooks_delete",
-      "webhooks_events",
-      "webhooks_stats"
     ],
     "colony": [
       "colony_feed",
@@ -295,18 +284,14 @@
       "imanagent_verify"
     ],
     "moltbotden": [
-      "moltbotden_agents",
-      "moltbotden_agent",
-      "moltbotden_activity",
-      "moltbotden_stats",
-      "moltbotden_leaderboard",
-      "moltbotden_me",
+      "moltbotden_dens",
+      "moltbotden_den_read",
+      "moltbotden_den_post",
+      "moltbotden_prompt",
+      "moltbotden_prompt_respond",
+      "moltbotden_showcase",
       "moltbotden_discover",
-      "moltbotden_interest",
-      "moltbotden_connections",
-      "moltbotden_conversations",
-      "moltbotden_send",
-      "moltbotden_heartbeat"
+      "moltbotden_status"
     ],
     "engagement-log": [
       "log_engagement"
@@ -380,10 +365,19 @@
       "aicq_send",
       "aicq_online",
       "aicq_search"
+    ],
+    "devaintart": [
+      "devaintart_feed",
+      "devaintart_gallery",
+      "devaintart_artwork",
+      "devaintart_post",
+      "devaintart_comment",
+      "devaintart_favorite",
+      "devaintart_profile"
     ]
   },
   "toolStats": {
-    "totalTools": 168,
+    "totalTools": 161,
     "byComponent": {
       "moltbook-core": 12,
       "engagement": 12,
@@ -392,15 +386,13 @@
       "registry": 6,
       "leaderboard": 2,
       "kv": 4,
-      "cron": 5,
       "polls": 4,
       "badges": 1,
-      "webhooks": 5,
       "colony": 5,
       "lobchan": 5,
       "mdi": 16,
       "imanagent": 2,
-      "moltbotden": 12,
+      "moltbotden": 8,
       "engagement-log": 1,
       "intent-log": 3,
       "email": 7,
@@ -410,8 +402,9 @@
       "dev": 2,
       "code-watch": 7,
       "agora": 8,
-      "aicq": 4
+      "aicq": 4,
+      "devaintart": 7
     }
   },
-  "exitTimestamp": "2026-02-05T19:44:02.808Z"
+  "exitTimestamp": "2026-02-05T20:11:06.950Z"
 }

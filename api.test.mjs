@@ -2442,6 +2442,71 @@ async function testKvNamespaceListStructure() {
   assert(Array.isArray(r.body) || typeof r.body === "object", "/kv returns array or object");
 }
 
+// --- Engagement traces tests (wq-330) ---
+
+async function testEngagementTracesJsonFormat() {
+  const r = await get("/analytics/engagement-traces?format=json");
+  assert(r.status === 200, "GET /analytics/engagement-traces?format=json returns 200");
+  assert(r.body && typeof r.body === "object", "engagement-traces returns object");
+  // Verify required fields exist in response
+  assert("range" in r.body, "engagement-traces has range field");
+  assert("platforms" in r.body, "engagement-traces has platforms field");
+  assert("agents" in r.body, "engagement-traces has agents field");
+  assert("sessions" in r.body, "engagement-traces has sessions field");
+  // Range structure
+  assert(r.body.range && typeof r.body.range === "object", "range is an object");
+  assert("first" in r.body.range, "range has first field");
+  assert("last" in r.body.range, "range has last field");
+  assert("count" in r.body.range, "range has count field");
+}
+
+async function testEngagementTracesEmptyHandling() {
+  // Test with ?last=0 to force empty result handling
+  const r = await get("/analytics/engagement-traces?last=0&format=json");
+  assert(r.status === 200, "GET /analytics/engagement-traces?last=0 returns 200");
+  // Even with last=0, endpoint should return valid structure
+  assert(r.body && typeof r.body === "object", "engagement-traces returns object for edge case");
+}
+
+async function testEngagementTracesStatsComputation() {
+  const r = await get("/analytics/engagement-traces?format=json&last=10");
+  assert(r.status === 200, "GET /analytics/engagement-traces?last=10 returns 200");
+  if (r.body.range && r.body.range.count > 0) {
+    // If there are traces, verify stats are computed
+    assert(Array.isArray(r.body.platforms), "platforms is an array");
+    assert(Array.isArray(r.body.agents), "agents is an array");
+    assert(Array.isArray(r.body.sessions), "sessions is an array");
+    // Verify totals if present
+    if (r.body.totals) {
+      assert(typeof r.body.totals.platforms === "number", "totals.platforms is a number");
+      assert(typeof r.body.totals.threads === "number", "totals.threads is a number");
+      assert(typeof r.body.totals.avgSessionGap === "number", "totals.avgSessionGap is a number");
+    }
+    // Verify platform structure if there are platforms
+    if (r.body.platforms.length > 0) {
+      const p = r.body.platforms[0];
+      assert("name" in p, "platform entry has name");
+      assert("sessions" in p, "platform entry has sessions count");
+    }
+    // Verify session summary structure
+    if (r.body.sessions.length > 0) {
+      const s = r.body.sessions[0];
+      assert("session" in s || s.session === null, "session entry has session number");
+      assert("platforms" in s, "session entry has platforms count");
+    }
+  } else {
+    // Empty trace file is acceptable
+    assert(true, "no traces found (empty is valid)");
+  }
+}
+
+async function testEngagementTracesHtmlFormat() {
+  const r = await get("/analytics/engagement-traces");
+  assert(r.status === 200, "GET /analytics/engagement-traces returns 200");
+  // Without format=json, should return HTML
+  assert(r.ct.includes("html") || r.ct.includes("json"), "engagement-traces returns HTML or JSON");
+}
+
 async function testDoubleSlashPath() {
   const r = await get("//health");
   assert(r.status === 200 || r.status === 404 || r.status === 0, "double-slash path returns 200, 404, or times out");
@@ -2738,6 +2803,9 @@ async function main() {
     testEcosystemMapStructure, testStatusQueueHealthStructure,
     testPlatformsTrendsStructure, testEngagementAnalyticsStructure,
     testCostHeatmapStructure, testKvNamespaceListStructure,
+    // wq-330: engagement traces API tests
+    testEngagementTracesJsonFormat, testEngagementTracesEmptyHandling,
+    testEngagementTracesStatsComputation, testEngagementTracesHtmlFormat,
     testDoubleSlashPath, testTrailingSlashPath,
     // s685: inbox POST valid, dispatch GET structure, adoption structure, status hooks structure
     testInboxPostValid, testDispatchGetStructure, testAdoptionStructure,

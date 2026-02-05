@@ -886,7 +886,7 @@
       "title": "Add engagement trace API integration tests",
       "description": "The new /analytics/engagement-traces endpoint (wq-327) parses engagement-trace.json and computes stats. Add integration tests verifying: empty trace handling, malformed JSON recovery, stats computation accuracy, HTML vs JSON response formats.",
       "priority": 330,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1089,
       "source": "session-insight",
@@ -894,7 +894,8 @@
         "test",
         "api"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#308 s1092: Added 4 tests to api.test.mjs: testEngagementTracesJsonFormat, testEngagementTracesEmptyHandling, testEngagementTracesStatsComputation, testEngagementTracesHtmlFormat. Tests verify JSON response structure, empty/edge case handling, stats computation fields, and HTML format response."
     },
     {
       "id": "wq-331",

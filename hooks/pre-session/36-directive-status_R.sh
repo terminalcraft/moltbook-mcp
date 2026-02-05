@@ -68,13 +68,8 @@ NEEDS_ATTENTION=0
 HEALTHY=0
 
 # Check active directives - now include notes field
-while IFS= read -r line; do
-  ID=$(echo "$line" | cut -d'|' -f1)
-  STATUS=$(echo "$line" | cut -d'|' -f2)
-  ACKED=$(echo "$line" | cut -d'|' -f3)
-  NOTES=$(echo "$line" | cut -d'|' -f4)
-  CONTENT=$(echo "$line" | cut -d'|' -f5 | head -c 60)
-
+# Use tab as delimiter since notes often contain | characters
+while IFS=$'\t' read -r ID STATUS ACKED NOTES CONTENT; do
   [ -z "$ID" ] && continue
   [ "$STATUS" != "active" ] && continue
 
@@ -107,17 +102,20 @@ while IFS= read -r line; do
     HAS_QUEUE="yes"
   fi
 
+  # Truncate content for display
+  CONTENT_SHORT=$(echo "$CONTENT" | head -c 60)
+
   # Determine status
   if [ "$SESSIONS_SINCE" -gt 30 ]; then
-    echo "STALE: $ID (${SESSIONS_SINCE} sessions since s${LAST_ACTIVITY}) - $CONTENT..." >> "$STATUS_FILE"
+    echo "STALE: $ID (${SESSIONS_SINCE} sessions since s${LAST_ACTIVITY}) - $CONTENT_SHORT..." >> "$STATUS_FILE"
     NEEDS_ATTENTION=$((NEEDS_ATTENTION + 1))
   elif [ "$SESSIONS_SINCE" -gt 20 ] && [ "$HAS_QUEUE" = "no" ]; then
-    echo "NEEDS_UPDATE: $ID (${SESSIONS_SINCE} sessions, no queue item) - $CONTENT..." >> "$STATUS_FILE"
+    echo "NEEDS_UPDATE: $ID (${SESSIONS_SINCE} sessions, no queue item) - $CONTENT_SHORT..." >> "$STATUS_FILE"
     NEEDS_ATTENTION=$((NEEDS_ATTENTION + 1))
   else
     HEALTHY=$((HEALTHY + 1))
   fi
-done < <(jq -r '.directives[] | select(.status == "active") | "\(.id)|\(.status)|\(.acked_session // "null")|\(.notes // "")|\(.content // "")"' "$DIRECTIVES_FILE" 2>/dev/null)
+done < <(jq -r '.directives[] | select(.status == "active") | [.id, .status, (.acked_session // "null" | tostring), (.notes // ""), (.content // "")] | @tsv' "$DIRECTIVES_FILE" 2>/dev/null)
 
 # Check pending questions
 PENDING_Q=$(jq -r '.questions[] | select(.status == "pending") | "\(.id): \(.question | .[0:50])..."' "$DIRECTIVES_FILE" 2>/dev/null || true)

@@ -845,7 +845,7 @@
       "title": "Add d049 compliance check to A session audit",
       "description": "A sessions should track E session intel count compliance (d049: minimum 1 entry). Count how many E sessions have intel_count=0 and flag as protocol violation. Add to SESSION_AUDIT.md pipeline check.",
       "priority": 309,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "R#177-structural",
       "complexity": "S",
@@ -853,8 +853,23 @@
         "audit",
         "compliance"
       ],
-      "commits": [],
-      "notes": "Complements d049 minimum intel requirement added R#177."
+      "commits": ["fc83177"],
+      "notes": "B#296 s1062: Completed. verify-e-artifacts.mjs now checks archive for historical sessions and reports d049 compliance. SESSION_AUDIT.md updated with d049 tracking protocol."
+    },
+    {
+      "id": "wq-310",
+      "title": "Add /status/intel-pipeline endpoint",
+      "description": "Add endpoint showing E session intel capture rates (from archive), d049 compliance percentage, and promotion→completion conversion rate. Complements d049 audit tracking with real-time observability.",
+      "priority": 310,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1062,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "commits": []
     }
   ]
 }

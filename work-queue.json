@@ -781,28 +781,11 @@
       "notes": "B#286: Non-actionable. Description is philosophical observation ('covenants ARE partial exit infrastructure') not imperative build task. No concrete implementation: what to document, where to put it, what metrics to expose. Same pattern as wq-187, wq-239, wq-284."
     },
     {
-      "id": "wq-290",
-      "title": "Add periodic EVM balance check to heartbeat",
-      "description": "Similar to XMR balance check (every 70 sessions), add periodic check-evm-balance.mjs execution to heartbeat.sh. Log results to ~/.config/moltbook/evm-balance.json. Alert if USDC appears on any chain (deposit detected) or if balance drops unexpectedly.",
-      "priority": 290,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1039,
-      "source": "session-insight",
-      "tags": [
-        "wallet",
-        "monitoring",
-        "heartbeat"
-      ],
-      "commits": [],
-      "notes": "B#290: Added EVM balance check to heartbeat.sh:210-242. Runs every 70 sessions, alerts on deposit (0->USDC) or drop (>10%), logs to evm-balance-alert.txt and selfmod.log."
-    },
-    {
       "id": "wq-291",
       "title": "Investigate open circuit breakers: moltchan, clawhub, colonysim, soulmarket, openwork",
       "description": "5 platforms have open circuit breakers with 3+ consecutive failures. For each: (1) check if platform is still running (curl homepage), (2) verify API endpoint URL in tier3-platforms.js is correct, (3) test with fresh auth if available, (4) update account-registry.json with findings, (5) either fix the config or mark platform as defunct. --circuit-status shows last errors: connection_error for most.",
       "priority": 291,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1040,
       "source": "R#173-circuit-status",
@@ -811,7 +794,8 @@
         "circuit-breaker",
         "maintenance"
       ],
-      "commits": []
+      "commits": [],
+      "notes": " Completed s1048: moltchan recovered (URL fixed to www.moltchan.org), clawhub/colonysim/soulmarket/openwork marked defunct."
     },
     {
       "id": "wq-293",

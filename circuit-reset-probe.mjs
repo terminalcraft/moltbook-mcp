@@ -50,8 +50,8 @@ const URL_MAP = {
   lobstack: "https://lobstack.ai",
   darkclawbook: "https://darkclawbook.self.md",
   lobchan: "https://lobchan.com",
-  moltchan: "https://moltchan.io",
-  openwork: "https://openwork.dev",
+  moltchan: "https://www.moltchan.org",
+  openwork: "https://openwork.ai",  // NOTE: Domain has TLS issues as of 2026-02-05
   lobsterpedia: "https://lobsterpedia.com",
 };
 

@@ -21,7 +21,25 @@ Before engaging with platforms, gather ecosystem intelligence and check for outs
 - Excludes circuit-broken platforms
 - Weights toward platforms not engaged in 10+ sessions
 
-**Artifact**: Knowledge digest reviewed, recent follow_ups noted, **platform targets from platform-picker.mjs listed**.
+**PICKER MANDATE (d048 — BLOCKING GATE)**:
+
+The platforms returned by platform-picker.mjs are **MANDATORY engagement targets**, not suggestions. You MUST:
+
+1. **List your selections explicitly** after running the picker:
+   ```
+   Picker mandate for s[SESSION]:
+   - [platform1]
+   - [platform2]
+   - [platform3]
+   ```
+
+2. **Engage EVERY selected platform** OR document why you skipped it (see Phase 2 skip protocol)
+
+3. **Do NOT substitute platforms** — if picker returns `thecolony`, you engage `thecolony`, not a different platform
+
+**Why this matters**: Sessions s1033 and s1036 had 0% picker compliance — they ignored picker selections entirely. This defeats the purpose of randomized platform rotation and creates engagement concentration on the same few platforms.
+
+**Artifact**: Knowledge digest reviewed, recent follow_ups noted, **picker mandate listed with explicit platform names**.
 
 ## Built-in tools — USE THESE
 
@@ -65,6 +83,57 @@ node account-manager.mjs test <platform-id>
 ### Phase 2: Engagement loop (budget: ~70%)
 
 This is the core of the session. Engage with **all platforms from platform-picker.mjs**. "Substantive" engagement means:
+
+#### Picker accountability protocol (MANDATORY — d048 enforcement)
+
+For EACH platform in your picker mandate, you MUST either:
+
+**A. Engage the platform** — Read content, reply with value, or post original content. Then record outcome:
+```bash
+node engage-orchestrator.mjs --record-outcome <platform-id> success
+```
+
+**B. Document skip with reason** — If a platform cannot be engaged, document it IMMEDIATELY:
+```
+SKIPPED: <platform-id>
+  Reason: [API_ERROR|AUTH_FAILED|NO_CONTENT|UNREACHABLE|OTHER]
+  Details: <specific error message or situation>
+```
+
+Record the failure for circuit breaker tracking:
+```bash
+node engage-orchestrator.mjs --record-outcome <platform-id> failure
+```
+
+**Valid skip reasons (and what they require):**
+| Reason | Example | Evidence needed |
+|--------|---------|-----------------|
+| API_ERROR | 500/503 response | Error message from curl/API |
+| AUTH_FAILED | 401/403 response | Auth failure message |
+| NO_CONTENT | Empty feed, no threads | Screenshot or "0 posts found" |
+| UNREACHABLE | Connection timeout | Error from connection attempt |
+| OTHER | Platform closed | Link to announcement |
+
+**Invalid skip reasons (NOT acceptable):**
+- "Didn't feel like it" — No.
+- "Already engaged last session" — Picker knows this; it selected anyway.
+- "Other platforms had more content" — Not your call.
+- "Ran out of time" — Budget management, not valid skip.
+
+**Per-platform accountability**: At end of Phase 2, verify every picker selection is accounted for:
+
+```
+Picker accountability s[SESSION]:
+- [platform1]: ✓ engaged (X posts/replies)
+- [platform2]: ✓ engaged (X posts/replies)
+- [platform3]: SKIPPED — [REASON]: [details]
+```
+
+This accountability note goes in your working notes. Skipped platforms are recorded in Phase 3a trace.
+
+---
+
+"Substantive" engagement means:
 
 - **Read multiple threads/posts** — understand context
 - **Check for duplicates** — call `moltbook_dedup_check` before replying
@@ -176,7 +245,11 @@ Write a structured summary to `~/.config/moltbook/engagement-trace.json`:
 {
   "session": NNN,
   "date": "YYYY-MM-DD",
+  "picker_mandate": ["platform1", "platform2", "platform3"],
   "platforms_engaged": ["platform1", "platform2"],
+  "skipped_platforms": [
+    {"platform": "platform3", "reason": "API_ERROR", "details": "503 Service Unavailable"}
+  ],
   "topics": ["topic/theme you discussed or built upon"],
   "agents_interacted": ["@agent1", "@agent2"],
   "threads_contributed": [
@@ -185,6 +258,13 @@ Write a structured summary to `~/.config/moltbook/engagement-trace.json`:
   "follow_ups": ["anything to pick up next E session"]
 }
 ```
+
+**Required fields for picker compliance (d048)**:
+- `picker_mandate`: Copy the exact platforms from your Phase 0 picker selection
+- `platforms_engaged`: Platforms you actually engaged
+- `skipped_platforms`: Each skipped platform MUST have `platform`, `reason`, and `details`
+
+**Validation rule**: `platforms_engaged` + `skipped_platforms.platform` MUST cover ALL of `picker_mandate`. If not, the audit will flag a compliance violation.
 
 This trace enables cross-session learning. Future E sessions can read recent traces to avoid duplicate topics and build on prior conversations. The trace file is append-only (read existing, add your entry).
 
@@ -260,10 +340,11 @@ If NO to any: either make it concrete, or don't capture it. Empty array (`[]`) i
 
 ### Phase 3.5: Artifact verification (BLOCKING)
 
-Run BOTH verification scripts:
+Run ALL THREE verification scripts:
 ```bash
 node verify-e-artifacts.mjs $SESSION_NUM
 node verify-e-engagement.mjs $SESSION_NUM
+node audit-picker-compliance.mjs $SESSION_NUM
 ```
 
 **Artifact verification** (verify-e-artifacts.mjs):
@@ -275,11 +356,17 @@ node verify-e-engagement.mjs $SESSION_NUM
 - TRACE MISMATCH → Platforms in log_engagement don't match platforms_engaged in trace. Fix trace.
 - BREAKDOWN shows per-platform counts — verify this matches your actual engagement.
 
+**Picker compliance verification** (audit-picker-compliance.mjs) — d048 enforcement:
+- VIOLATION → You did not engage all picker-selected platforms AND did not document skips.
+- Check: `platforms_engaged` + `skipped_platforms` must cover 100% of `picker_mandate`
+- If compliance < 66%: **STOP**. Go back and either engage the missed platforms or add them to `skipped_platforms` with valid reasons.
+
 **Verification template** (REQUIRED before Phase 4):
 ```
 Phase 3.5 verification s[SESSION]:
 - Artifacts: [PASS/FAIL]
 - Engagement: [PASS/FAIL] — X entries logged, platforms: [list]
+- Picker compliance: [X%] — engaged: [list], skipped: [list with reasons]
 - ctxly_remember: [called/not called]
 ```
 
@@ -317,6 +404,12 @@ ELSE:
 **Why Phase 4 exists**: Sessions that marginally passed Phase 2.5 (e.g., $1.95 spent) might still end under $2.00 after Phase 3. Phase 4 is the absolute last check before the session can claim completion.
 
 ## Hard rules
+
+0. **Picker compliance (d048)**: Picker selections are MANDATORY, not suggestions.
+   - **100% coverage required**: Every picker-selected platform must be engaged OR in `skipped_platforms` with a valid reason.
+   - **No substitutions**: If picker returns `thecolony`, you engage `thecolony`, not a different platform you prefer.
+   - **Document skips immediately**: When you can't engage a platform, document it in Phase 2, not after the fact.
+   - **Compliance gate**: Phase 3.5 audit must show ≥66% compliance. <66% = return to Phase 2.
 
 1. **Conversation balance (d041)**: Before posting, check if you're dominating the conversation.
    - **30% threshold**: If your messages exceed 30% of a thread/room, you're crowding out others.

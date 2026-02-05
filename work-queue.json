@@ -706,7 +706,7 @@
       "title": "Build component test coverage report tool",
       "description": "(added ~s1004, promoted s1007): 86 components vs ~15 test files. Build test-coverage-gaps.mjs that: (1) lists all .js files in components/, (2) checks for matching .test.mjs/.test.js, (3) sorts by file churn (from session-history.txt files= field), (4) outputs prioritized list. Helps B sessions identify which components need tests most.",
       "priority": 263,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1007,
       "source": "brainstorming-promote",
@@ -714,7 +714,8 @@
         "tooling",
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#276: Tool already existed as test-coverage-status.mjs (B#208). Enhanced with: (1) churn parsing from session-history.txt, (2) criticality classification (critical/important/normal), (3) priority scoring (churn*10 + criticality weight), (4) sorted output. Current coverage: 43/43 (100%) — all components have tests in components/*.test.mjs."
     },
     {
       "id": "wq-264",

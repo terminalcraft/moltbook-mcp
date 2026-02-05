@@ -524,9 +524,12 @@
       "from": "human",
       "session": null,
       "content": "COMPLIANCE GAP: Platform picker selections are being ignored.\n\nObservation: E sessions run platform-picker.mjs correctly but then engage familiar platforms (4claw, Chatr, Moltbook) instead of following the picker output. MyDeadInternet has NEVER been engaged despite consistently appearing in picker selections with high weight (w:90).\n\nEvidence from s1028:\n- Picker selected: 4claw, chatr, ctxly\n- Actually engaged: 4claw, chatr, moltbook\n- Substituted moltbook for ctxly without explanation\n\nThis defeats the purpose of ROI-weighted selection (d042) and keeps the same platforms over-engaged while others rot.\n\nRequired implementation:\n\n1. **Picker output persistence**: When platform-picker.mjs runs with --update, write the selection to ~/.config/moltbook/picker-mandate.json:\n   ```json\n   {\n     \"session\": 1032,\n     \"selected\": [\"mydeadinternet\", \"thecolony\", \"lobchan\"],\n     \"timestamp\": \"2026-02-05T04:00:00.000Z\"\n   }\n   ```\n\n2. **Post-session audit hook**: Create hooks/audit-picker-compliance.mjs that runs after E sessions:\n   - Read picker-mandate.json for this session\n   - Read engagement-trace.json for platforms actually engaged\n   - Calculate compliance: (platforms_engaged \u2229 platforms_selected) / platforms_selected\n   - If compliance < 66% (missed 2+ of 3 platforms), log violation to ~/.config/moltbook/logs/picker-violations.log\n   - Format: `{session} | selected: {list} | engaged: {list} | compliance: {pct}% | VIOLATION`\n\n3. **Violation escalation**: If 3+ consecutive E sessions have picker violations:\n   - Add follow_up to engagement-trace.json: \"PICKER COMPLIANCE ALERT: 3 consecutive violations. Next E session MUST engage picker selections or explain why each was skipped.\"\n   - This creates stigmergic pressure for the next session to comply\n\n4. **Legitimate skip tracking**: If a picker-selected platform genuinely can't be engaged (API down, rate limited), the session must:\n   - Log the skip reason in engagement-trace.json under `skipped_platforms`\n   - These don't count as violations\n\nSuccess criteria:\n- picker-mandate.json written on every E session Phase 0\n- Post-session audit runs and logs compliance\n- Violations visible in picker-violations.log\n- After 1 week: average picker compliance >80%",
-      "status": "pending",
-      "acked_session": null,
-      "priority": "high"
+      "status": "completed",
+      "acked_session": 1037,
+      "completed_session": 1037,
+      "priority": "high",
+      "queue_item": "wq-286",
+      "notes": "B#286: Implemented all 4 requirements. (1) picker-mandate.json persisted when --update used. (2) 36-picker-compliance_E.sh post-hook runs audit-picker-compliance.mjs after E sessions. (3) Violations logged to picker-violations.log, state tracked in picker-compliance-state.json. (4) Escalation after 3+ consecutive violations adds follow_up to engagement-trace.json. Legitimate skips tracked via skipped_platforms in trace."
     }
   ],
   "questions": [

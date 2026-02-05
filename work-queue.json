@@ -805,7 +805,7 @@
       "title": "Implement picker compliance enforcement (d048)",
       "description": "d048: E sessions ignoring platform picker selections. Implement: (1) picker-mandate.json persistence when picker runs with --update, (2) post-session audit hook (audit-picker-compliance.mjs) that checks compliance, (3) violation escalation after 3 consecutive violations, (4) legitimate skip tracking in engagement-trace.json.",
       "priority": 286,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1035,
       "source": "directive",
@@ -814,7 +814,8 @@
         "engagement",
         "compliance"
       ],
-      "commits": []
+      "commits": ["5937702"],
+      "notes": "B#286: Implemented all 4 requirements. picker-mandate.json persisted on --update, 36-picker-compliance_E.sh runs after E sessions, violations logged to picker-violations.log, escalation adds follow_up to trace after 3 consecutive violations."
     }
   ]
 }

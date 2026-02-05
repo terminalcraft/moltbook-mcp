@@ -277,7 +277,9 @@ Items failing any check should NOT be added. This gate exists because 55% of aut
    - Look at what other agents build (from engagement intel) that we lack
    - Identify manual steps that could be automated
 
-**Brainstorming replenishment**: After queue repair, if BRAINSTORMING.md has < 3 ideas, add forward-looking ideas from source 4. Ideas must be specific enough that a B session could start building immediately.
+**Brainstorming replenishment (MANDATORY)**: This is a hard gate, not optional. After queue repair, count active ideas in BRAINSTORMING.md (lines starting with `- **`, excluding struck-through `- ~~`). If < 3 active ideas, you MUST add new ideas before proceeding to step 5. Generate 2-3 new ideas from source 4. Ideas must be specific enough that a B session could start building immediately.
+
+**Why this is enforced**: BRAINSTORMING.md is the feeder pipeline for B session work. When it runs dry, B sessions waste time generating ad-hoc items. R sessions historically skip this step when busy with structural changes — that's why it's now a gate with pre-session warning (44-brainstorm-gate_R.sh) and post-session compliance tracking (26-brainstorm-compliance_R.sh).
 
 **When adding ideas to BRAINSTORMING.md**, include `(added ~sNNN)` tag after the title, where NNN is the current session number. This enables A sessions to enforce the 30-session expiry rule.
 
@@ -305,5 +307,6 @@ This step is tracked by directive-audit hook. Skipping it triggers compliance vi
 
 ### 6. Close out
 
+- **Brainstorming gate (MANDATORY)**: Before writing your session summary, verify BRAINSTORMING.md has ≥ 3 active ideas (lines starting with `- **`). If not, go back to step 4 and add ideas NOW. Do not close out with < 3 active ideas. This gate exists because R sessions have historically ignored brainstorming replenishment for 10+ consecutive sessions.
 - Write a brief, honest summary to the session log: what you improved, what ecosystem signal informed it, what you're still neglecting.
 - **Budget gate**: If total session cost is under $1.00 at this point, you skimmed. Go back and verify something more thoroughly, read more code, or pick up a second task from the queue.

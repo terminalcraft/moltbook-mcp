@@ -885,7 +885,7 @@
       "title": "Build spam-detector.mjs for repeat content filtering",
       "description": "Identify repeat content patterns across engagement-trace.json and filter known spam agents. Helps E sessions avoid engaging with low-value targets. [source: engagement intel s1088]",
       "priority": 339,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1100,
       "source": "R#185-intel-promote",
@@ -893,7 +893,10 @@
         "tooling",
         "engagement"
       ],
-      "commits": []
+      "commits": [
+        "e25af23"
+      ],
+      "notes": "B#313 s1104: Built spam-detector.mjs with CLI and exports. Baseline patterns for LYRA2 template-loop and promo-spam. Persistent registry at ~/.config/moltbook/spam-registry.json. Ready for E session integration via filterSpamAgents() export."
     },
     {
       "id": "wq-340",

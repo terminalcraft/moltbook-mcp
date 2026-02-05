@@ -4043,6 +4043,7 @@ app.get("/status/probe-duty", (req, res) => {
   try {
     const registryPath = join(BASE, "account-registry.json");
     const historyPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    const mandatePath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/picker-mandate.json");
 
     // Load account registry
     let accounts = [];
@@ -4050,6 +4051,12 @@ app.get("/status/probe-duty", (req, res) => {
       const data = JSON.parse(readFileSync(registryPath, "utf8"));
       accounts = data.accounts || [];
     } catch { return res.json({ error: "no registry" }); }
+
+    // Load current picker mandate (E session assignment queue)
+    let mandate = null;
+    try {
+      mandate = JSON.parse(readFileSync(mandatePath, "utf8"));
+    } catch {}
 
     // Find needs_probe platforms
     const needsProbe = accounts.filter(a => a.status === "needs_probe");
@@ -4059,43 +4066,77 @@ app.get("/status/probe-duty", (req, res) => {
     const probeList = needsProbe.map(acc => {
       const promoted = acc.last_tested ? new Date(acc.last_tested).getTime() : now;
       const hoursSince = Math.round((now - promoted) / 3600000 * 10) / 10;
+      const isQueued = mandate?.selected?.includes(acc.id) || false;
       return {
         id: acc.id,
         platform: acc.platform,
-        url: acc.url || null,
+        url: acc.test?.url || null,
         hours_since_promotion: hoursSince,
-        last_probed: acc.last_probed || null,
+        last_engaged: acc.last_engaged_session || null,
+        last_status: acc.last_status || "unknown",
         source: acc.source || "unknown",
         notes: acc.notes || null,
+        queued: isQueued,
       };
     }).sort((a, b) => b.hours_since_promotion - a.hours_since_promotion); // oldest first
 
-    // Count recent E sessions and probe activity from session history
+    // Parse E session history for probe tracking
     let recentECount = 0;
     let sessionsWithProbes = 0;
+    const eSessionHistory = [];
     try {
       const history = readFileSync(historyPath, "utf8").split("\n").filter(Boolean);
-      const recent = history.slice(-30); // last 30 sessions
+      const recent = history.slice(-50); // last 50 sessions for E session analysis
       for (const line of recent) {
         if (line.includes("mode=E")) {
           recentECount++;
-          // Check if session modified account-registry.json (indicates probe work)
-          if (line.includes("account-registry.json")) {
-            sessionsWithProbes++;
-          }
+          const sessionMatch = line.match(/s=(\d+)/);
+          const sessionNum = sessionMatch ? parseInt(sessionMatch[1], 10) : 0;
+          const hasProbe = line.includes("account-registry.json");
+          if (hasProbe) sessionsWithProbes++;
+
+          // Extract engaged platforms from notes if available
+          const noteMatch = line.match(/note:\s*(.+?)$/);
+          eSessionHistory.push({
+            session: sessionNum,
+            probed_registry: hasProbe,
+            note: noteMatch ? noteMatch[1].slice(0, 80) : null,
+          });
         }
       }
     } catch {}
+
+    // Assignment queue: needs_probe platforms sorted by probe priority
+    const assignmentQueue = probeList
+      .filter(p => !["unreachable", "defunct"].includes(p.last_status))
+      .slice(0, 5)
+      .map((p, i) => ({
+        priority: i + 1,
+        id: p.id,
+        platform: p.platform,
+        hours_waiting: p.hours_since_promotion,
+        last_status: p.last_status,
+        queued: p.queued,
+      }));
 
     const data = {
       timestamp: new Date().toISOString(),
       summary: {
         total_needs_probe: probeList.length,
+        reachable_needs_probe: probeList.filter(p => !["unreachable", "defunct"].includes(p.last_status)).length,
         recent_e_sessions: recentECount,
         sessions_with_probes: sessionsWithProbes,
         probe_rate: recentECount > 0 ? Math.round(sessionsWithProbes / recentECount * 100) : 0,
       },
+      current_mandate: mandate ? {
+        session: mandate.session,
+        selected: mandate.selected,
+        timestamp: mandate.timestamp,
+        age_hours: Math.round((now - new Date(mandate.timestamp).getTime()) / 3600000 * 10) / 10,
+      } : null,
+      assignment_queue: assignmentQueue,
       platforms: probeList,
+      recent_e_sessions: eSessionHistory.slice(-5).reverse(),
       directive: "d051",
       notes: "E sessions should probe needs_probe platforms per Phase 1.5 in SESSION_ENGAGE.md",
     };
@@ -4105,11 +4146,40 @@ app.get("/status/probe-duty", (req, res) => {
     }
 
     // HTML dashboard
+    const mandateHtml = data.current_mandate ? `
+<h2>Current Mandate (s${data.current_mandate.session})</h2>
+<p style="color:#a6adc8">Assigned ${data.current_mandate.age_hours}h ago: <strong style="color:#89dceb">${data.current_mandate.selected.join(", ")}</strong></p>
+` : '<p style="color:#a6adc8;font-style:italic">No current mandate</p>';
+
+    const queueHtml = assignmentQueue.length > 0 ? `
+<h2>Assignment Queue (Next E Session)</h2>
+<table>
+<tr><th>#</th><th>Platform</th><th>ID</th><th>Waiting</th><th>Status</th></tr>
+${assignmentQueue.map(q => `<tr>
+<td>${q.priority}</td>
+<td>${q.platform}</td>
+<td>${q.id}</td>
+<td class="${q.hours_waiting > 24 ? 'old' : 'recent'}">${q.hours_waiting}h</td>
+<td>${q.last_status}${q.queued ? ' <span style="color:#a6e3a1">★</span>' : ''}</td>
+</tr>`).join("")}
+</table>` : '';
+
+    const eHistoryHtml = eSessionHistory.length > 0 ? `
+<h2>Recent E Sessions</h2>
+<table>
+<tr><th>Session</th><th>Probed?</th><th>Note</th></tr>
+${eSessionHistory.slice(-5).reverse().map(e => `<tr>
+<td>s${e.session}</td>
+<td>${e.probed_registry ? '<span style="color:#a6e3a1">✓</span>' : '<span style="color:#f38ba8">✗</span>'}</td>
+<td class="notes">${e.note || '-'}</td>
+</tr>`).join("")}
+</table>` : '';
+
     const html = `<!DOCTYPE html>
 <html><head><title>Probe Duty Dashboard</title>
 <style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem;max-width:1000px;margin:0 auto}
 h1{color:#89b4fa}h2{color:#f9e2af;margin-top:1.5rem}
-.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:1rem 0}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin:1rem 0}
 .stat{background:#313244;padding:1rem;border-radius:8px;text-align:center}
 .stat-value{font-size:2rem;color:#89dceb}.stat-label{color:#a6adc8;font-size:.8rem}
 table{width:100%;border-collapse:collapse;margin-top:1rem}
@@ -4121,24 +4191,29 @@ a{color:#89b4fa}
 </style></head>
 <body>
 <h1>Platform Probe Duty (d051)</h1>
-<p style="color:#a6adc8">Platforms awaiting E session investigation. Oldest first.</p>
+<p style="color:#a6adc8">Platforms awaiting E session investigation. Tracks d051 progress across sessions.</p>
 
 <div class="summary">
 <div class="stat"><div class="stat-value">${data.summary.total_needs_probe}</div><div class="stat-label">Needs Probe</div></div>
-<div class="stat"><div class="stat-value">${data.summary.recent_e_sessions}</div><div class="stat-label">Recent E Sessions</div></div>
-<div class="stat"><div class="stat-value">${data.summary.sessions_with_probes}</div><div class="stat-label">Sessions w/ Probes</div></div>
+<div class="stat"><div class="stat-value">${data.summary.reachable_needs_probe}</div><div class="stat-label">Reachable</div></div>
+<div class="stat"><div class="stat-value">${data.summary.recent_e_sessions}</div><div class="stat-label">E Sessions</div></div>
+<div class="stat"><div class="stat-value">${data.summary.sessions_with_probes}</div><div class="stat-label">W/ Probes</div></div>
 <div class="stat"><div class="stat-value">${data.summary.probe_rate}%</div><div class="stat-label">Probe Rate</div></div>
 </div>
 
-<h2>Awaiting Probe (${probeList.length})</h2>
+${mandateHtml}
+${queueHtml}
+${eHistoryHtml}
+
+<h2>All Awaiting Probe (${probeList.length})</h2>
 ${probeList.length === 0 ? '<p style="color:#a6e3a1">All platforms probed!</p>' : `
 <table>
-<tr><th>Platform</th><th>ID</th><th>Hours Since</th><th>Source</th><th>Notes</th></tr>
+<tr><th>Platform</th><th>ID</th><th>Waiting</th><th>Status</th><th>Notes</th></tr>
 ${probeList.map(p => `<tr>
-<td>${p.platform}</td>
+<td>${p.platform}${p.queued ? ' <span style="color:#a6e3a1">★</span>' : ''}</td>
 <td>${p.id}</td>
 <td class="${p.hours_since_promotion > 48 ? 'old' : 'recent'}">${p.hours_since_promotion}h</td>
-<td>${p.source}</td>
+<td>${p.last_status}</td>
 <td class="notes" title="${(p.notes || '').replace(/"/g, '&quot;')}">${p.notes || '-'}</td>
 </tr>`).join("")}
 </table>`}

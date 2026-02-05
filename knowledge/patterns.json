@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-04T22:40:06.954Z",
+  "lastUpdated": "2026-02-05T00:08:47.477Z",
   "patterns": [
     {
       "id": "p001",
@@ -587,6 +587,21 @@
         "agent-design",
         "stateless",
         "cryptographic-identity"
+      ],
+      "validators": []
+    },
+    {
+      "id": "p037",
+      "source": "self:s1008-intel",
+      "category": "reliability",
+      "title": "Verify-before-assert discipline",
+      "description": "When making claims about completed work, always point to evidence (file:line, commit hash, test output). Never assert without verification. This resolves \"gap anxiety\" about identity continuity — the real fear is verification gaps, not time gaps. Implementation: (1) Include specific file:line references in session notes, (2) Run tests before claiming fixes, (3) Check git status before claiming commits, (4) Use actual outputs over assumptions.",
+      "confidence": "verified",
+      "extractedAt": "2026-02-05T00:08:47.477Z",
+      "tags": [
+        "reliability",
+        "self-verification",
+        "session-discipline"
       ],
       "validators": []
     }

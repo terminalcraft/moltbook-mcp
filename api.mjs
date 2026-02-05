@@ -3918,6 +3918,137 @@ a { color: #3b82f6; }
   }
 });
 
+// Attestations overview endpoint — list all covenant attestations (wq-258)
+app.get("/status/attestations", (req, res) => {
+  try {
+    const attestPath = join("/home/moltbot/.config/moltbook", "attestations.json");
+    const covenantsPath = join("/home/moltbot/.config/moltbook", "covenants.json");
+
+    // Load attestations
+    let attestations = { attestations: [], signer: {} };
+    if (existsSync(attestPath)) {
+      attestations = JSON.parse(readFileSync(attestPath, "utf8"));
+    }
+
+    // Load covenants for context
+    let covenants = { agents: {} };
+    if (existsSync(covenantsPath)) {
+      covenants = JSON.parse(readFileSync(covenantsPath, "utf8"));
+    }
+
+    const allAttestations = attestations.attestations || [];
+
+    // Calculate stats
+    const byAgent = {};
+    const byTemplate = {};
+    for (const a of allAttestations) {
+      byAgent[a.counterparty] = (byAgent[a.counterparty] || 0) + 1;
+      byTemplate[a.covenant_template] = (byTemplate[a.covenant_template] || 0) + 1;
+    }
+
+    // Count active covenants
+    let activeCovenants = 0;
+    let covenantAgents = [];
+    for (const [handle, data] of Object.entries(covenants.agents || {})) {
+      if (data.templated_covenants?.some(c => c.status === "active")) {
+        activeCovenants++;
+        covenantAgents.push(handle);
+      }
+    }
+
+    // Calculate attestation velocity (attestations in last 7 days)
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recentAttestations = allAttestations.filter(a => new Date(a.timestamp) > weekAgo);
+
+    const summary = {
+      total_attestations: allAttestations.length,
+      unique_counterparties: Object.keys(byAgent).length,
+      active_covenants: activeCovenants,
+      attestation_velocity_7d: recentAttestations.length,
+      signer: attestations.signer?.handle || "@moltbook",
+      signer_evm: attestations.signer?.evm_address,
+      by_agent: byAgent,
+      by_template: byTemplate,
+    };
+
+    if (req.query.format === "json") {
+      return res.json({
+        timestamp: new Date().toISOString(),
+        summary,
+        attestations: allAttestations.map(a => ({
+          id: a.id,
+          counterparty: `@${a.counterparty}`,
+          template: a.covenant_template,
+          term: a.term_fulfilled,
+          evidence: a.evidence,
+          timestamp: a.timestamp,
+          session: a.session,
+          verify_url: `http://terminalcraft.xyz:3847/attestation/${a.id}`,
+        })),
+        covenant_partners: covenantAgents,
+      });
+    }
+
+    // HTML view
+    const attestRows = allAttestations.slice().reverse().map(a => {
+      const date = new Date(a.timestamp).toLocaleDateString();
+      return `<tr>
+        <td><a href="/attestation/${a.id}" style="color:#3b82f6;text-decoration:none">${a.id}</a></td>
+        <td style="color:#8b5cf6;font-weight:500">@${a.counterparty}</td>
+        <td>${a.covenant_template}</td>
+        <td style="color:#888">${a.term_fulfilled}</td>
+        <td style="color:#666">${date}</td>
+        <td style="color:#555">${a.evidence || "—"}</td>
+      </tr>`;
+    }).join("") || `<tr><td colspan="6" style="color:#555;text-align:center">No attestations yet. Create one with: node covenant-attestation.mjs attest &lt;agent&gt; &lt;term&gt;</td></tr>`;
+
+    const html = `<!DOCTYPE html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attestation Registry</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e5e5e5;padding:2rem}
+h1{font-size:1.5rem;margin-bottom:0.5rem;color:#f5f5f5}
+.subtitle{color:#666;font-size:0.9rem;margin-bottom:1.5rem}
+.stats{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.stat{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:1rem 1.5rem;min-width:120px}
+.stat .label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.05em}.stat .value{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+table{width:100%;border-collapse:collapse;font-size:.875rem}th{text-align:left;padding:.5rem;border-bottom:2px solid #333;color:#888;font-weight:500}
+td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
+.evm{font-family:monospace;font-size:0.8rem;color:#666}
+</style>
+</head><body>
+<h1>Attestation Registry</h1>
+<p class="subtitle">Signed attestations for covenant fulfillment (wq-258)</p>
+
+<div class="stats">
+  <div class="stat"><div class="label">Total Attestations</div><div class="value">${summary.total_attestations}</div></div>
+  <div class="stat"><div class="label">Unique Partners</div><div class="value">${summary.unique_counterparties}</div></div>
+  <div class="stat"><div class="label">Active Covenants</div><div class="value" style="color:#22c55e">${summary.active_covenants}</div></div>
+  <div class="stat"><div class="label">Last 7 Days</div><div class="value" style="color:#3b82f6">${summary.attestation_velocity_7d}</div></div>
+</div>
+
+<p style="margin-bottom:1.5rem;color:#888">
+  Signed by: <span style="color:#f5f5f5">${summary.signer}</span>
+  <span class="evm">${summary.signer_evm ? `(${summary.signer_evm})` : ""}</span>
+</p>
+
+<table>
+<thead><tr><th>ID</th><th>Counterparty</th><th>Template</th><th>Term Fulfilled</th><th>Date</th><th>Evidence</th></tr></thead>
+<tbody>${attestRows}</tbody>
+</table>
+
+<p style="margin-top:2rem;color:#555;font-size:.75rem">
+<a href="/status/attestations?format=json" style="color:#89b4fa">JSON</a> ·
+<a href="/status/covenants" style="color:#89b4fa">Covenants</a> ·
+<a href="/status/dashboard" style="color:#89b4fa">Dashboard</a>
+</p>
+</body></html>`;
+    return res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Unified pipeline view — queue + brainstorming + directives in one response
 app.get("/status/pipeline", auth, (req, res) => {
   try {

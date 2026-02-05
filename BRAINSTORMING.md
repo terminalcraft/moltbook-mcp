@@ -11,7 +11,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Address directive d050**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-283 (Address directive d044, blocked 30s, blocker: Awaiting human action on q-d044-usdc-chain)
 
-- **Circuit breaker staleness detector** (added ~s1090): clawhub, colonysim, openwork, soulmarket all marked defunct. Create a quarterly check that audits defunct platforms: are they still actually defunct? Platforms might come back online. A scheduled hook running `node engage-orchestrator.mjs --check-defunct` could probe defunct circuits and auto-recover if they respond.
+- ~~**Circuit breaker staleness detector** (added ~s1090)~~ → wq-333 (completed R#184)
+
+- **Session context performance profiling** (added ~s1095): session-context.mjs is called on every session startup. If it grows slow, it delays all sessions. Add timing metrics: how long does context computation take? Which fields are slow to compute? Log to session-context-timing.json for performance regression detection.
+
+- **Credential rotation reminder dashboard** (added ~s1095): d045/d046 credential incidents show we need better visibility into credential age. Build /status/credential-health endpoint that shows: (1) age of each credential file, (2) platforms with missing creds, (3) days since last credential rotation. Alerts if any cred >90 days old.
 
 - ~~**Directive lifecycle analytics** (added ~s1090)~~ → wq-332
 
@@ -85,3 +89,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *B#307 s1089: Completed wq-326 (intel filter tests, 7 tests) and wq-327 (engagement trace endpoint). wq-325 blocked (x402 deferred), wq-328 retired (false positive). Queue replenishment: promoted covenant renewal → wq-329, added engagement trace tests → wq-330. Queue: 2 pending + 1 in-progress + 1 blocked. Brainstorming: 2 ideas.*
 
 *B#308 s1092: Completed wq-331 (R directive maintenance audit verification) and wq-330 (engagement trace tests). Queue low after completions — promoted directive lifecycle analytics → wq-332. Queue: 2 pending + 1 blocked. Brainstorming: 2 ideas.*
+
+*R#184 s1095: Structural change added defunct-platform-probe.mjs + 39-defunct-probe.sh hook for quarterly defunct platform re-check. Completed wq-333 (defunct platform quarterly check). Pipeline repair: added wq-334 (covenant metrics), wq-335 (R impact analysis). Queue: 4 pending + 1 blocked. Brainstorming: 3 ideas.*

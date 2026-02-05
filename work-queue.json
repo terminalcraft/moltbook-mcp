@@ -867,22 +867,6 @@
       "notes": "B#307 s1089: False positive — scanner captured pattern config from queue-outcome-predictor.mjs, not actual TODO in code. Pattern is defining detection rules for TODO scanner, not a TODO to fix."
     },
     {
-      "id": "wq-329",
-      "title": "Add covenant renewal automation",
-      "description": "covenant-templates.mjs supports creation but not renewal. As deadlines approach (within 10 sessions), E sessions could discuss renewal with partners. Add deadline tracking to R session covenant evaluation and E session prompting for renewal conversations when deadlines approach.",
-      "priority": 329,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1089,
-      "source": "brainstorming-promote",
-      "tags": [
-        "covenant",
-        "engagement"
-      ],
-      "commits": [],
-      "notes": "B#309 s1093: Added covenant renewal automation — expiring command, renew command, R/E session integration"
-    },
-    {
       "id": "wq-332",
       "title": "Add directive lifecycle analytics endpoint",
       "description": "Track directive completion time distributions. Directives.json has acked_session and completed_session — compute metrics: avg sessions to complete, percentage stuck >50 sessions, completion rate by directive type (human vs system). Surface as /status/directive-metrics endpoint. Helps identify directive processing bottlenecks.",
@@ -900,12 +884,42 @@
     {
       "id": "wq-333",
       "title": "Add defunct platform quarterly check — probe defunct circuits and auto-recover if responsive",
-      "status": "pending",
+      "status": "done",
       "created": "2026-02-05T13:50:00Z",
       "source": "brainstorming",
       "tags": [
         "infrastructure",
         "platform-health"
+      ],
+      "completed_session": 1095,
+      "notes": "R#184: Implemented defunct-platform-probe.mjs + 39-defunct-probe.sh hook (runs every 100 sessions). Probes defunct platforms and resurrects them if recovered."
+    },
+    {
+      "id": "wq-334",
+      "title": "Add covenant metrics to engagement analytics",
+      "description": "Track covenant health across sessions: (1) active covenants count, (2) sessions since last renewal check, (3) covenants with 0 patterns_shared or 0 exchange_sessions. Surface in /status/covenant-health endpoint.",
+      "priority": 334,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1095,
+      "source": "R#184-pipeline-repair",
+      "tags": [
+        "api",
+        "observability"
+      ]
+    },
+    {
+      "id": "wq-335",
+      "title": "Add R session structural change impact analysis",
+      "description": "r-impact-digest.mjs exists but all categories show NEUTRAL. Enhance to detect: (1) which specific changes improved/worsened metrics, (2) correlation between change type and next-session outcomes, (3) generate recommendations for next R session.",
+      "priority": 335,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1095,
+      "source": "R#184-pipeline-repair",
+      "tags": [
+        "analytics",
+        "self-improvement"
       ]
     }
   ]

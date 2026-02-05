@@ -412,7 +412,7 @@
       "title": "Rotate compromised credentials (d039)",
       "description": "--priority",
       "priority": 209,
-      "status": "blocked",
+      "status": "retired",
       "blocker": "Human action required: verify which keys were exposed in git history, contact platform admins (MDI: mydeadinternet.com, Consortium: ai-saas-consortium.fly.dev) for key rotation. See human-review.json item d039-cred-rotate.",
       "added": "2026-02-04",
       "created_session": 0,
@@ -432,7 +432,8 @@
           "timestamp": "2026-02-04T18:10:00.000Z",
           "text": "B#246: Confirmed blocked on human action. human-review.json already has critical item (d039-cred-rotate). No agent action possible until human verifies exposed keys and contacts platform admins."
         }
-      ]
+      ],
+      "notes": "R#171: Retired. d045 supersedes d039 — human said to forget leaked keys and make new ones. wq-255 handles credential regeneration."
     },
     {
       "id": "wq-217",
@@ -694,53 +695,6 @@
       "notes": "B#279: Already implemented. /status/cost-trends endpoint exists in api.mjs:3241-3290 with exact functionality requested: per-type rolling avg, trend direction (up/down/stable), threshold alerts, configurable window. Returns: {trends: {B: {avg, threshold, alert, trend}, E: {...}, R: {...}, A: {...}}, has_alerts, window}."
     },
     {
-      "id": "wq-273",
-      "title": "Build intel-quality.mjs for intel conversion metrics",
-      "description": "Track intel-to-queue pipeline health: (1) intel entries created per E session, (2) entries promoted to queue, (3) entries retired without work, (4) actionable text length distribution. Output feeds R session prompt for monitoring. Target: 20%+ conversion in next 20 E sessions.",
-      "priority": 273,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1019,
-      "source": "brainstorming-promote",
-      "tags": [
-        "observability",
-        "intel"
-      ],
-      "commits": [],
-      "notes": "B#282: Built intel-quality.mjs with all 4 required metrics. Added /status/intel-quality endpoint with HTML+JSON output. 10 tests pass. Current stats: 64% conversion rate (exceeds 20% target), 1.9 entries/E session, avg actionable length 71 chars."
-    },
-    {
-      "id": "wq-274",
-      "title": "Add platform recovery workflow to B sessions (d047)",
-      "description": "When platforms have status no_creds/bad_creds/error/unreachable for 10+ sessions: (1) investigate current API endpoints (/skill.md, /api-docs, /openapi.json), (2) update stale URLs in secondary-platforms.js, (3) attempt registration if credentials missing, (4) update account-registry.json. Platform health alerts now logged to ~/.config/moltbook/platform-health-alert.txt (R#169).",
-      "priority": 274,
-      "status": "pending",
-      "added": "2026-02-05",
-      "created_session": 1020,
-      "source": "directive-d047",
-      "tags": [
-        "d047",
-        "infrastructure"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-275",
-      "title": "Remove tier system from codebase (d047)",
-      "description": "Tier system (T1/T2/T3) is obsolete since platform-picker.mjs uses ROI-weighted selection (d042). Required: (1) remove tier field from account-registry.json entries, (2) remove dynamic tier computation from engage-orchestrator.mjs, (3) rename tier3-platforms.js to secondary-platforms.js.",
-      "priority": 275,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1020,
-      "source": "directive-d047",
-      "tags": [
-        "d047",
-        "cleanup"
-      ],
-      "commits": [],
-      "notes": "B#282: All tier system artifacts removed. (1) Removed tier field from 24 accounts in account-registry.json. (2) Removed computeDynamicTiers function and tier table update logic from engage-orchestrator.mjs. (3) Renamed tier3-platforms.js to secondary-platforms.js and updated all references. Updated tests to not expect tier fields."
-    },
-    {
       "id": "wq-276",
       "title": "Credential file audit for no_creds platforms (d047)",
       "description": "For each account-registry entry with no_creds status: (1) check if platform requires auth or works anonymously, (2) if auth required attempt registration, (3) if anonymous update auth_type to 'none' and fix test config. Currently affected: lobstack, lobsterpedia, dungeonsandlobsters, grove.",
@@ -812,6 +766,19 @@
       "tags": [
         "api",
         "observability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-281",
+      "title": "Evaluate thingherder.com API for contribution workflow",
+      "description": "ThingHerder (thingherder.com) - project-centric agent collaboration platform. The Molt zine collecting agent experiences. [source: engagement intel s1028]",
+      "priority": 281,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
       ],
       "commits": []
     }

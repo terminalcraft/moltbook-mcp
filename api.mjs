@@ -1157,6 +1157,146 @@ app.get("/analytics/engagement-traces", auth, (req, res) => {
   res.type("html").send(html);
 });
 
+// Engagement variety analyzer (wq-346)
+// Detects platform concentration — alerts when >60% of recent engagements target one platform
+app.get("/analytics/engagement-variety", auth, (req, res) => {
+  const TRACE_FILE = join(process.env.HOME, ".config/moltbook/engagement-trace.json");
+  const window = parseInt(req.query.window) || 5;
+  const threshold = parseFloat(req.query.threshold) || 0.6;
+
+  let traces = [];
+  try {
+    traces = JSON.parse(readFileSync(TRACE_FILE, "utf8"));
+    if (!Array.isArray(traces)) traces = [];
+  } catch { traces = []; }
+
+  traces = traces.slice(-window);
+  if (traces.length === 0) {
+    return res.json({
+      window, threshold, sessionsAnalyzed: 0, sessionRange: { from: null, to: null },
+      error: "No engagement traces found",
+      concentration: { topPlatform: null, topConcentrationPct: 0, isConcentrated: false },
+      distribution: {}, health: { score: 1, platformCount: 0, recommendation: "No data" }, alert: null
+    });
+  }
+
+  // Merge engagement counts across sessions
+  const counts = {};
+  for (const t of traces) {
+    // Count platforms_engaged presence
+    for (const p of (t.platforms_engaged || [])) {
+      const key = p.toLowerCase();
+      counts[key] = (counts[key] || 0) + 1;
+    }
+    // Count threads_contributed (more weight for activity)
+    for (const thread of (t.threads_contributed || [])) {
+      if (thread.platform) {
+        const key = thread.platform.toLowerCase();
+        counts[key] = (counts[key] || 0) + 1;
+      }
+    }
+  }
+
+  // Calculate concentration
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (total === 0) {
+    return res.json({
+      window, threshold, sessionsAnalyzed: traces.length,
+      sessionRange: { from: traces[0]?.session, to: traces[traces.length - 1]?.session },
+      totalEngagements: 0,
+      concentration: { topPlatform: null, topConcentrationPct: 0, isConcentrated: false },
+      distribution: {}, health: { score: 1, platformCount: 0, recommendation: "No engagements recorded" }, alert: null
+    });
+  }
+
+  // Find top platform
+  let topPlatform = null, topCount = 0;
+  const distribution = {};
+  for (const [platform, count] of Object.entries(counts)) {
+    const pct = Math.round((count / total) * 100);
+    distribution[platform] = { count, percentage: pct, ratio: count / total };
+    if (count > topCount) { topCount = count; topPlatform = platform; }
+  }
+  const topConcentration = topCount / total;
+  const topConcentrationPct = Math.round(topConcentration * 100);
+  const isConcentrated = topConcentration > threshold;
+
+  // Health score
+  const platformCount = Object.keys(counts).length;
+  const idealConcentration = platformCount > 0 ? 1 / platformCount : 0;
+  let healthScore = 1.0;
+  if (topConcentration > 0 && platformCount > 0) {
+    const deviation = topConcentration - idealConcentration;
+    const maxDeviation = 1 - idealConcentration;
+    healthScore = maxDeviation > 0 ? Math.round((1 - deviation / maxDeviation) * 100) / 100 : 1;
+  }
+
+  // Recommendation
+  let recommendation;
+  if (topConcentrationPct > 80) {
+    recommendation = `CRITICAL: ${topConcentrationPct}% concentration on ${topPlatform}. Strongly diversify next E session.`;
+  } else if (topConcentrationPct > threshold * 100) {
+    recommendation = `WARNING: ${topConcentrationPct}% concentration on ${topPlatform}. Consider engaging other platforms.`;
+  } else if (topConcentrationPct > 40) {
+    recommendation = `MODERATE: ${topPlatform} leads at ${topConcentrationPct}%. Distribution acceptable.`;
+  } else {
+    recommendation = `HEALTHY: Good distribution. Top platform (${topPlatform}) at ${topConcentrationPct}%.`;
+  }
+
+  const result = {
+    timestamp: new Date().toISOString(),
+    window, threshold,
+    sessionsAnalyzed: traces.length,
+    sessionRange: { from: traces[0]?.session, to: traces[traces.length - 1]?.session },
+    totalEngagements: total,
+    concentration: { topPlatform, topConcentrationPct, isConcentrated },
+    distribution,
+    health: { score: healthScore, platformCount, recommendation },
+    alert: isConcentrated ? {
+      level: topConcentrationPct > 80 ? "critical" : "warning",
+      message: `Platform concentration detected: ${topConcentrationPct}% on ${topPlatform}`
+    } : null
+  };
+
+  if (req.query.format === "json") return res.json(result);
+
+  // HTML dashboard
+  const sorted = Object.entries(distribution).sort((a, b) => b[1].count - a[1].count);
+  const distRows = sorted.map(([p, d]) => {
+    const barFill = Math.round(d.percentage / 5);
+    const bar = "█".repeat(barFill) + "░".repeat(20 - barFill);
+    return `<tr><td>${p}</td><td><code>${bar}</code></td><td>${d.percentage}%</td><td>${d.count}</td></tr>`;
+  }).join("");
+
+  const alertHtml = result.alert
+    ? `<div style="background:${result.alert.level === "critical" ? "#600" : "#630"};padding:10px;margin:10px 0;border-radius:4px">
+       ⚠️ <strong>${result.alert.level.toUpperCase()}</strong>: ${result.alert.message}</div>`
+    : "";
+
+  const html = `<!DOCTYPE html><html><head><title>Engagement Variety</title><style>
+    body{background:#111;color:#ddd;font-family:monospace;padding:20px;max-width:800px;margin:auto}
+    table{border-collapse:collapse;width:100%;margin:10px 0}th,td{border:1px solid #333;padding:6px 10px;text-align:left}
+    th{background:#222}h1{color:#0f0}code{color:#0f0}a{color:#0a0}
+    .stat{background:#222;padding:10px;margin:5px;display:inline-block;border-radius:4px}
+    .stat-val{font-size:1.5em;color:#0f0}.stat-label{font-size:0.8em;color:#888}
+  </style></head><body>
+  <h1>Engagement Variety</h1>
+  <p>Last ${result.sessionsAnalyzed} E sessions (s${result.sessionRange.from}–s${result.sessionRange.to}) |
+     <a href="?format=json">JSON</a> | <a href="?window=10">Window=10</a></p>
+  <div>
+    <div class="stat"><div class="stat-val">${result.health.score}</div><div class="stat-label">Health Score</div></div>
+    <div class="stat"><div class="stat-val">${result.health.platformCount}</div><div class="stat-label">Platforms</div></div>
+    <div class="stat"><div class="stat-val">${result.totalEngagements}</div><div class="stat-label">Engagements</div></div>
+    <div class="stat"><div class="stat-val">${result.concentration.topConcentrationPct}%</div><div class="stat-label">Top Concentration</div></div>
+  </div>
+  ${alertHtml}
+  <p>${result.health.recommendation}</p>
+  <h2>Platform Distribution</h2>
+  <table><tr><th>Platform</th><th>Distribution</th><th>%</th><th>Count</th></tr>${distRows}</table>
+  </body></html>`;
+  res.type("html").send(html);
+});
+
 // API surface audit — cross-references routes with in-memory analytics
 app.get("/audit", auth, (req, res) => {
   const allHits = analytics.endpoints;
@@ -6112,6 +6252,7 @@ function agentManifest(req, res) {
       webhooks_unsubscribe: { url: `${base}/webhooks/:id`, method: "DELETE", auth: false, description: "Unsubscribe a webhook by ID" },
       analytics: { url: `${base}/analytics`, method: "GET", auth: false, description: "Request analytics — endpoint usage, status codes, hourly traffic (?format=text)" },
       session_analytics: { url: `${base}/analytics/sessions`, method: "GET", auth: false, description: "Session analytics dashboard — outcomes, cost trends, hook success rates (?last=N&format=json)" },
+      engagement_variety: { url: `${base}/analytics/engagement-variety`, method: "GET", auth: false, description: "Engagement variety analysis — platform concentration detection (?window=N&threshold=0.6&format=json)" },
       feed: { url: `${base}/feed`, method: "GET", auth: false, description: "Cross-platform feed — 4claw + Chatr + Moltbook + ClawtaVista aggregated (?limit=N&source=X&format=json)" },
       clawtavista: { url: `${base}/clawtavista`, method: "GET", auth: false, description: "ClawtaVista network index — 25+ agent platforms ranked by agent count (?type=social&format=json)" },
       activity: { url: `${base}/activity`, method: "GET", auth: false, description: "Internal activity log — all agent events as JSON/Atom/HTML (?limit=N&since=ISO&event=X&format=json)" },

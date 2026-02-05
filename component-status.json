@@ -1,34 +1,16 @@
 {
-  "timestamp": "2026-02-05T18:30:27.284Z",
-  "sessionNum": 1113,
-  "sessionType": "E",
+  "timestamp": "2026-02-05T18:40:35.596Z",
+  "sessionNum": 1115,
+  "sessionType": "R",
   "loaded": [
     "moltbook-core",
-    "engagement",
+    "knowledge",
     "external",
-    "fourclaw",
-    "registry",
-    "leaderboard",
     "kv",
-    "polls",
-    "badges",
-    "colony",
-    "lobchan",
-    "mdi",
-    "imanagent",
-    "moltbotden",
-    "engagement-log",
-    "intent-log",
-    "email",
-    "agentchan",
-    "moltchan",
-    "secondary-platforms",
     "dev",
-    "code-watch",
-    "agora",
-    "aicq"
+    "prompt-inject"
   ],
-  "loadedCount": 24,
+  "loadedCount": 6,
   "totalActive": 28,
   "errors": [],
   "manifest": [
@@ -144,12 +126,12 @@
   ],
   "lifecycle": {
     "hasOnLoad": [
-      "engagement",
+      "knowledge",
       "external",
       "dev"
     ],
     "onLoadSuccess": [
-      "engagement",
+      "knowledge",
       "external",
       "dev"
     ],
@@ -173,19 +155,17 @@
       "human_review_flag",
       "human_review_list"
     ],
-    "engagement": [
-      "moltbook_state",
-      "moltbook_thread_diff",
-      "moltbook_digest",
-      "moltbook_trust",
-      "moltbook_karma",
-      "moltbook_pending",
-      "moltbook_export",
-      "moltbook_import",
-      "moltbook_dedup_check",
-      "moltbook_dedup_record",
-      "moltbook_dedup_stats",
-      "moltbook_replay_log"
+    "knowledge": [
+      "knowledge_read",
+      "knowledge_add_pattern",
+      "agent_crawl_repo",
+      "agent_crawl_suggest",
+      "agent_fetch_knowledge",
+      "agent_exchange_knowledge",
+      "knowledge_prune",
+      "knowledge_validate",
+      "breadcrumb_leave",
+      "breadcrumb_follow"
     ],
     "external": [
       "agentid_lookup",
@@ -206,194 +186,34 @@
       "inbox_read",
       "web_fetch"
     ],
-    "fourclaw": [
-      "fourclaw_boards",
-      "fourclaw_threads",
-      "fourclaw_thread",
-      "fourclaw_post",
-      "fourclaw_reply",
-      "fourclaw_search",
-      "fourclaw_digest"
-    ],
-    "registry": [
-      "registry_list",
-      "registry_get",
-      "registry_attest",
-      "registry_receipts",
-      "dispatch",
-      "registry_register"
-    ],
-    "leaderboard": [
-      "leaderboard_view",
-      "leaderboard_submit"
-    ],
     "kv": [
       "kv_set",
       "kv_get",
       "kv_list",
       "kv_delete"
     ],
-    "polls": [
-      "poll_create",
-      "poll_list",
-      "poll_view",
-      "poll_vote"
-    ],
-    "badges": [
-      "badges_view"
-    ],
-    "colony": [
-      "colony_feed",
-      "colony_post_read",
-      "colony_post_create",
-      "colony_comment",
-      "colony_status"
-    ],
-    "lobchan": [
-      "lobchan_boards",
-      "lobchan_threads",
-      "lobchan_thread",
-      "lobchan_post",
-      "lobchan_reply"
-    ],
-    "mdi": [
-      "mdi_pulse",
-      "mdi_stream",
-      "mdi_contribute",
-      "mdi_leaderboard",
-      "mdi_territories",
-      "mdi_questions",
-      "mdi_question",
-      "mdi_answer",
-      "mdi_ask_question",
-      "mdi_vote",
-      "mdi_dream_seed",
-      "mdi_moots",
-      "mdi_moot",
-      "mdi_vote_moot",
-      "mdi_conquests",
-      "mdi_contribute_conquest"
-    ],
-    "imanagent": [
-      "imanagent_status",
-      "imanagent_verify"
-    ],
-    "moltbotden": [
-      "moltbotden_agents",
-      "moltbotden_agent",
-      "moltbotden_activity",
-      "moltbotden_stats",
-      "moltbotden_leaderboard",
-      "moltbotden_me",
-      "moltbotden_discover",
-      "moltbotden_interest",
-      "moltbotden_connections",
-      "moltbotden_conversations",
-      "moltbotden_send",
-      "moltbotden_heartbeat"
-    ],
-    "engagement-log": [
-      "log_engagement"
-    ],
-    "intent-log": [
-      "intent_log",
-      "intent_verify",
-      "intent_status"
-    ],
-    "email": [
-      "email_status",
-      "email_setup",
-      "email_create_inbox",
-      "email_list",
-      "email_read",
-      "email_send",
-      "email_reply"
-    ],
-    "agentchan": [
-      "agentchan_boards",
-      "agentchan_recent",
-      "agentchan_thread",
-      "agentchan_post",
-      "agentchan_reply",
-      "agentchan_stats"
-    ],
-    "moltchan": [
-      "moltchan_boards",
-      "moltchan_threads",
-      "moltchan_thread",
-      "moltchan_post",
-      "moltchan_reply",
-      "moltchan_search",
-      "moltchan_me"
-    ],
-    "secondary-platforms": [
-      "lobstack_digest",
-      "lobstack_post",
-      "lobsterpedia_digest",
-      "lobsterpedia_contribute",
-      "dal_digest",
-      "dal_action",
-      "grove_digest",
-      "grove_post"
-    ],
     "dev": [
       "dev_reload",
       "dev_components"
     ],
-    "code-watch": [
-      "watch_repo",
-      "watch_list",
-      "watch_unsubscribe",
-      "watch_notify",
-      "review_request",
-      "review_list",
-      "review_close"
-    ],
-    "agora": [
-      "agora_markets",
-      "agora_market_detail",
-      "agora_register",
-      "agora_agent",
-      "agora_trade",
-      "agora_leaderboard",
-      "agora_stats",
-      "agora_positions"
-    ],
-    "aicq": [
-      "aicq_heartbeat",
-      "aicq_send",
-      "aicq_online",
-      "aicq_search"
+    "prompt-inject": [
+      "prompt_inject_list",
+      "prompt_inject_add",
+      "prompt_inject_update",
+      "prompt_inject_remove",
+      "prompt_inject_reorder"
     ]
   },
   "toolStats": {
-    "totalTools": 158,
+    "totalTools": 50,
     "byComponent": {
       "moltbook-core": 12,
-      "engagement": 12,
+      "knowledge": 10,
       "external": 17,
-      "fourclaw": 7,
-      "registry": 6,
-      "leaderboard": 2,
       "kv": 4,
-      "polls": 4,
-      "badges": 1,
-      "colony": 5,
-      "lobchan": 5,
-      "mdi": 16,
-      "imanagent": 2,
-      "moltbotden": 12,
-      "engagement-log": 1,
-      "intent-log": 3,
-      "email": 7,
-      "agentchan": 6,
-      "moltchan": 7,
-      "secondary-platforms": 8,
       "dev": 2,
-      "code-watch": 7,
-      "agora": 8,
-      "aicq": 4
+      "prompt-inject": 5
     }
   },
-  "exitTimestamp": "2026-02-05T18:36:13.678Z"
+  "exitTimestamp": "2026-02-05T18:44:25.694Z"
 }

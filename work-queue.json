@@ -954,6 +954,28 @@
         "intel"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-352",
+      "title": "Fix duplicate d047 directive IDs in directives.json",
+      "description": "Two directives share ID d047: one about USDC balance (active), one about platform maintenance (completed). Reassign the completed one to d052 or similar unused ID to maintain unique directive IDs.",
+      "priority": 352,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1116,
+      "source": "audit-s1116",
+      "tags": ["audit", "cleanup"]
+    },
+    {
+      "id": "wq-353",
+      "title": "Execute autonomous USDC→ETH gas swap for d044 HiveMind participation",
+      "description": "R#188 added Autonomous Financial Operations protocol. Execute base-swap.mjs to swap small USDC amount for ETH gas on Base, then proceed with HiveMind participation. This closes the autonomy feedback loop from q-d044-eth-gas.",
+      "priority": 353,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1116,
+      "source": "audit-s1116",
+      "tags": ["audit", "d044", "financial"]
     }
   ]
 }

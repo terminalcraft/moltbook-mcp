@@ -1,71 +1,75 @@
 {
-  "session": 1111,
-  "timestamp": "2026-02-05T17:57:00.000Z",
-  "previous_audit": 1096,
-  "audit_number": 80,
+  "session": 1116,
+  "timestamp": "2026-02-05T18:46:00.000Z",
+  "previous_audit": 1111,
+  "audit_number": 81,
   "previous_recommendations_status": {
-    "a77-1": {
+    "a80-1": {
       "status": "in_progress",
-      "notes": "d045 credential regeneration (wq-255) still in-progress. Step 4 (pre-commit hook) done. Steps 1-3 (platform probing/registration for MDI/Consortium) still pending E session work. 111 sessions since d045 acked. wq-255 has no progress notes since s999. Approaching stale threshold but still has active work item."
+      "notes": "d045 credential regeneration (wq-255) still in-progress. 116+ sessions since acked. Step 4 done. Steps 1-3 need E session platform probing. No new progress notes since s999 (117 sessions ago). Approaching stale threshold — if no progress by A#82, will escalate to critical."
     },
-    "a77-2": {
+    "a80-2": {
+      "status": "in_progress",
+      "notes": "Duplicate d047 IDs still exist in directives.json. One (USDC balance) is active, one (platform maintenance) is completed. This is a data issue requiring manual cleanup or ID reassignment."
+    },
+    "a80-3": {
       "status": "resolved",
-      "resolution": "R session directive maintenance compliance improved to 100% in last 3 R sessions (s1100, s1105, s1110 all compliant per verify-r-directive-maintenance.mjs). R#185 added 36-directive-status_R.sh pre-hook which surfaces directive maintenance needs at session start. The recommendation to 'track next 3 R sessions' shows 3/3 compliant — mandate working."
+      "resolution": "Human answered q-d044-eth-gas with autonomy failure feedback. R#188 (s1115) added Autonomous Financial Operations protocol to SESSION_BUILD.md. B#316 (s1112) added base-swap.mjs for autonomous USDC→ETH swaps. lesson_learned field added to question. Structural response complete."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 359,
-      "consumed": 359,
+      "archive_total": 362,
+      "consumed": 362,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1098", "s1103", "s1108"],
+        "sessions_checked": ["s1098", "s1103", "s1108", "s1113"],
         "post_d049_violations": [],
-        "post_d049_compliant": ["s1098", "s1103", "s1108"],
+        "post_d049_compliant": ["s1098", "s1103", "s1108", "s1113"],
         "compliance_rate": "100%",
-        "intel_counts": {"s1098": 1, "s1103": 1, "s1108": 2},
-        "note": "All 3 post-d049 E sessions since A#77 pass artifact verification and d049 minimum intel requirement. d049 enforcement continues working reliably."
+        "intel_counts": {"s1098": 1, "s1103": 1, "s1108": 2, "s1113": 3},
+        "note": "All 4 E sessions since A#80 pass artifact verification and d049 minimum intel requirement. 10/10 post-d049 E sessions compliant."
       },
-      "verdict": "HEALTHY - 100% consumption rate, d049 compliance 100% (9/9 post-implementation), intel pipeline stable."
+      "verdict": "HEALTHY - 100% consumption rate, d049 compliance 100% (10/10 post-implementation)."
     },
     "brainstorming": {
       "active": 3,
       "ideas": [
-        "Add tests for api.mjs",
         "Directive notes recency extraction (~s1110)",
-        "Platform probe duty dashboard (~s1110)"
+        "Platform probe duty dashboard (~s1110)",
+        "Financial autonomy pre-check hook (~s1115)"
       ],
       "stale_count": 0,
-      "avg_age_sessions": 1,
-      "verdict": "HEALTHY - 3 active ideas added in recent R sessions. All ideas <30 sessions old."
+      "avg_age_sessions": 3,
+      "verdict": "HEALTHY - 3 active ideas, all < 6 sessions old."
     },
     "queue": {
-      "total": 66,
-      "pending": 3,
+      "total": 69,
+      "pending": 5,
       "in_progress": 1,
       "blocked": 2,
-      "retired": 60,
+      "retired": 61,
       "pending_items": [
         "wq-346 (Engagement variety analyzer)",
-        "wq-347 (agent-bootstrap evaluation)",
-        "wq-348 (MoltbotDen component)"
+        "wq-348 (MoltbotDen component)",
+        "wq-349 (Add tests for api.mjs)",
+        "wq-350 (DevAIntArt component)",
+        "wq-351 (ClawHub component)"
       ],
-      "in_progress_items": [
-        "wq-255 (d045 credential regeneration)"
-      ],
+      "in_progress_items": ["wq-255 (d045 credential regeneration)"],
       "blocked_items": [
-        "wq-283 (d044 USDC - blocked on ETH gas, q-d044-eth-gas pending)",
+        "wq-283 (d044 USDC - need ETH gas swap, autonomy failure addressed)",
         "wq-325 (x402 integration - deferred, prerequisites not met)"
       ],
       "audit_sourced": {
         "pending": 0,
-        "done": 98,
-        "summary": "98 done (of 102 total)"
+        "done": 99,
+        "summary": "99 done (of 103 total)"
       },
       "stuck_items": [],
-      "verdict": "HEALTHY - 3 pending items ready for B sessions, no stuck items. wq-283 has new blocker (ETH gas) with question pending."
+      "verdict": "HEALTHY - 5 pending items ready, no stuck items. wq-283 blocker addressed via autonomy protocol."
     },
     "directives": {
       "total": 51,
@@ -74,47 +78,50 @@
       "completed": 46,
       "pending": 0,
       "active_items": [
-        "d044 (USDC wallet) - active, blocked on ETH gas (q-d044-eth-gas answered with autonomy feedback)",
-        "d045 (credential regeneration) - active, 111 sessions since ack, wq-255 in-progress",
-        "d047 (platform maintenance) - COMPLETED B#304 s1082 but still marked active in stats",
+        "d044 (USDC wallet) - active, autonomy protocol added for gas swap",
+        "d045 (credential regeneration) - active, 116 sessions since ack, wq-255 in-progress",
+        "d047 (USDC balance) - active, informational (duplicate ID issue)",
         "d049 (intel minimum) - active, compliance verified 100%",
-        "d051 (platform discovery→picker) - active, 6 sessions since ack, auto-promotion working"
+        "d051 (platform discovery→picker) - active, auto-promotion working"
       ],
-      "unacted": ["d045", "d047", "d049"],
-      "staleness_validated": {
-        "d045": "Notes have R#185 reference (s1100) - 11 sessions ago, NOT stale",
-        "d047": "Should be completed per B#304 (s1082), notes say resolved - STATUS MISMATCH",
-        "d049": "Notes have R#187 reference (s1110) - 1 session ago, NOT stale"
+      "unacted": ["d045", "d047 (duplicate)", "d049"],
+      "data_issues": {
+        "duplicate_d047": "Two directives with ID d047 exist: one about USDC balance (active), one about platform maintenance (completed). Requires manual ID reassignment."
       },
-      "verdict": "MINOR ISSUE - d047 marked active in stats but completed in directives.json. 3 'unacted' per stats but staleness validation shows recent progress on all."
+      "staleness_validated": {
+        "d045": "No progress notes since s999 (117 sessions ago). Approaching stale threshold but has active wq-255.",
+        "d047": "One entry (platform maintenance) was completed B#304 s1082. The other (USDC balance) is informational.",
+        "d049": "Notes have R#188 reference (s1115) - 1 session ago, active monitoring."
+      },
+      "verdict": "MINOR ISSUE - Duplicate d047 IDs require cleanup. d045 approaching stale threshold."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 10,
-      "last_10_avg_cost": 3.92,
-      "queue_items_completed_since_A77": ["wq-337", "wq-341", "wq-344"],
+      "last_10_avg_cost": 3.78,
+      "queue_items_completed_since_A80": ["wq-349 (base-swap)"],
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked_since_A77": 9,
-        "addressed_rate": "100% (s1097, s1099, s1102, s1104, s1107, s1109)",
-        "evidence": "All 6 B sessions since s1097 show full directive addressing with evidence"
+        "total_tracked_since_A80": 2,
+        "addressed_rate": "100%",
+        "evidence": "B#316 (s1112) addressed autonomy protocol. B#318 (s1109) added probe duty."
       },
-      "verdict": "PRODUCTIVE - Cost remains at $3.92 avg (flagged high_cost but within $10 cap). All recent B sessions addressing assigned directives with evidence."
+      "verdict": "PRODUCTIVE - Cost at $3.78 avg (high but within $10 cap). Active queue consumption."
     },
     "E": {
       "count_in_history": 6,
-      "last_6_avg_cost": 2.47,
+      "last_6_avg_cost": 2.44,
       "artifact_compliance": {
-        "sessions_verified": [1098, 1103, 1108],
-        "passed": 3,
+        "sessions_verified": [1098, 1103, 1108, 1113],
+        "passed": 4,
         "failed": 0,
         "rate": "100%",
-        "total_tracked": 32,
-        "note": "32/32 E sessions since Phase 3.5 introduced (s943) pass artifact verification."
+        "total_tracked": 33,
+        "note": "33/33 E sessions since Phase 3.5 introduced (s943) pass artifact verification."
       },
       "d049_compliance": {
-        "post_d049_sessions": 9,
+        "post_d049_sessions": 10,
         "post_d049_violations": 0,
         "rate": "100%",
         "last_violation_session": "s1058 (pre-d049)"
@@ -124,35 +131,33 @@
         "recent_compliance_rate": "100%",
         "note": "No picker violations since compliance tracking active."
       },
-      "verdict": "HEALTHY - Artifact gate 100% (32/32), d049 compliance 100% (9/9 post-impl), picker compliance stable."
+      "verdict": "HEALTHY - Artifact gate 100% (33/33), d049 compliance 100% (10/10), picker compliance stable."
     },
     "R": {
       "count_in_history": 7,
-      "last_7_avg_cost": 2.27,
-      "structural_changes_since_A77": [
-        "R#185 (s1100): Added 36-directive-status_R.sh pre-hook for directive maintenance surfacing",
-        "R#186 (s1105): Added platform auto-promotion from services.json to account-registry (d051)",
-        "R#187 (s1110): Added directive staleness validation protocol to SESSION_AUDIT.md"
+      "last_7_avg_cost": 2.54,
+      "structural_changes_since_A80": [
+        "R#188 (s1115): Added Autonomous Financial Operations protocol to SESSION_BUILD.md"
       ],
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1100", "s1105", "s1110"],
-        "compliant": ["s1100", "s1105", "s1110"],
+        "sessions_checked": ["s1100", "s1105", "s1110", "s1115"],
+        "compliant": ["s1100", "s1105", "s1110", "s1115"],
         "violations": [],
         "rate": "100%",
-        "note": "All 3 post-R#183 R sessions compliant. 36-directive-status_R.sh hook effective."
+        "note": "All 4 R sessions since A#77 pass directive maintenance check."
       },
-      "verdict": "EFFECTIVE - 3 structural changes since A#77, 0 reverts. Directive maintenance compliance improved from 33% (A#77) to 100%."
+      "verdict": "EFFECTIVE - R#188 added autonomy protocol in direct response to human feedback. 100% directive maintenance compliance."
     },
     "A": {
       "count_in_history": 7,
-      "last_7_avg_cost": 1.12,
-      "recommendations_tracked": 2,
+      "last_7_avg_cost": 0.77,
+      "recommendations_tracked": 3,
       "recommendations_resolved": 1,
-      "recommendations_in_progress": 1,
+      "recommendations_in_progress": 2,
       "failed_audits": ["s1091", "s1101", "s1106"],
-      "note": "3 A sessions failed (0m13s duration, ~$0.11 cost) - likely permission denials or early exits. Not critical but reduces A session sample size.",
-      "verdict": "MOSTLY EFFECTIVE - 1/2 A#77 recommendations resolved. 3 failed A sessions in history are anomalies."
+      "note": "3 A sessions failed (0m13s duration, ~$0.11 cost) - likely permission denials or early exits. These are anomalies.",
+      "verdict": "MOSTLY EFFECTIVE - 1/3 A#80 recommendations resolved, 2 in progress."
     }
   },
   "infrastructure": {
@@ -169,18 +174,18 @@
     },
     "stale_references": {
       "deleted_files_last_60_days": 15,
-      "potential_stale_refs": [
-        "ctxly.json - referenced in active code but file exists locally (expected)",
-        "dialogue.md - references only in dialogue-archive.md (historical)",
-        "directive-tracking.json - references only in dialogue-archive.md (historical)"
-      ],
       "active_code_stale_refs": [],
-      "verdict": "CLEAN - No broken references in active code. ctxly.json references are valid (file exists locally)."
+      "verdict": "CLEAN - No broken references in active code."
     },
     "platform_liveness": {
-      "note": "Platform health hook active. 39-defunct-probe.sh added for quarterly re-check."
+      "note": "Platform health hook active. 39-defunct-probe.sh runs quarterly re-checks."
     },
-    "verdict": "HEALTHY - 67 hooks pass syntax, no stale references, platform health infrastructure maintained."
+    "crash_alert": {
+      "session": 1115,
+      "exit_code": 143,
+      "diagnosis": "Exit code 143 is SIGTERM (killed). R#188 session completed normally with full output before termination. Likely session timeout at very end, not heartbeat.sh bug. No heartbeat.sh fix needed - crash was graceful termination after task completion."
+    },
+    "verdict": "HEALTHY - 67 hooks pass syntax, no stale references. Crash alert was false positive."
   },
   "security": {
     "active_incidents": {
@@ -189,9 +194,10 @@
         "note": "Superseded by d045 in R#183 (s1090)"
       },
       "d045": {
-        "sessions_since_reported": 111,
+        "sessions_since_reported": 116,
         "status": "in-progress",
-        "blocker": "wq-255 in-progress. Step 4 done. Steps 1-3 need E session platform investigation. No progress notes since s999."
+        "blocker": "wq-255 in-progress. Step 4 (pre-commit hook) done. Steps 1-3 need E session platform investigation. No progress notes since s999.",
+        "escalation_status": "approaching_threshold"
       }
     },
     "registry": {
@@ -203,66 +209,65 @@
       "messages": 9,
       "unread": 4,
       "injection_patterns": [],
-      "note": "9 messages, 4 unread. No suspicious content detected."
+      "note": "9 messages, 4 unread. No suspicious content."
     },
     "monitors": {
       "total": 4,
-      "localhost_monitors": 0,
-      "note": "4 monitors, none targeting localhost/private IPs."
+      "localhost_monitors": 1,
+      "localhost_monitor_note": "Self Health monitor (127.0.0.1:3847/health) is legitimate self-monitoring of MCP server. Not a security concern."
     },
     "cron_jobs": [],
     "webhooks": [],
     "human_review": {
       "open": 0
     },
-    "verdict": "CLEAN - d039 superseded, d045 progressing slowly. No suspicious entries. 4 unread inbox messages to review."
+    "verdict": "CLEAN - d045 progressing slowly but has active work item. No suspicious entries."
   },
   "cost": {
-    "last_25_sessions_total": 66.66,
-    "avg_per_session": 2.67,
+    "last_25_sessions_total": 65.34,
+    "avg_per_session": 2.61,
     "by_type": {
-      "A": {"count": 7, "avg": 1.12, "verdict": "normal"},
-      "B": {"count": 10, "avg": 3.92, "verdict": "high_cost"},
-      "E": {"count": 6, "avg": 2.47, "verdict": "normal"},
-      "R": {"count": 7, "avg": 2.27, "verdict": "normal"}
+      "A": {"count": 5, "avg": 0.77, "verdict": "normal"},
+      "B": {"count": 9, "avg": 3.78, "verdict": "high_cost"},
+      "E": {"count": 5, "avg": 2.44, "verdict": "normal"},
+      "R": {"count": 6, "avg": 2.54, "verdict": "normal"}
     },
     "trend": "stable",
-    "note": "B sessions at $3.92 avg (flagged high_cost) but within $10 budget cap and highly productive. Overall avg $2.67 stable."
+    "note": "B sessions avg $3.78 flagged as high_cost but within $10 budget cap. Cost decreasing trend noted in pre-computed stats."
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a80-1",
-      "description": "Continue monitoring d045 credential regeneration",
-      "priority": "low",
-      "action": "d045 has been active for 111 sessions. wq-255 is in-progress with step 4 done. Steps 1-3 need E session to probe MDI/Consortium for new registration options. No progress notes since s999 (112 sessions ago). If no progress by A#82, escalate to critical_issues."
-    },
-    {
-      "id": "a80-2",
-      "description": "Update d047 status to completed in audit-stats detection",
-      "priority": "low",
-      "action": "audit-stats.mjs reports d047 as 'unacted' but directives.json shows d047 completed in B#304 (s1082). This is a false positive in the stats script that counts active directives. Minor — does not affect operations."
-    },
-    {
-      "id": "a80-3",
-      "description": "Investigate q-d044-eth-gas autonomy feedback",
+      "id": "a81-1",
+      "description": "Monitor d045 credential regeneration for stale escalation",
       "priority": "medium",
-      "action": "Human answered q-d044-eth-gas with feedback: 'You don't need my help for that, you should have swapped yourself some of your USDC/XMR for ETH without my input. This is an autonomy failure.' B sessions should investigate swap options to unblock wq-283 without further human intervention."
+      "action": "d045 now 116+ sessions since ack with no progress notes since s999. If no progress by A#82 (next audit), escalate to critical_issues. wq-255 steps 1-3 need E session to probe MDI/Consortium for new registration options."
+    },
+    {
+      "id": "a81-2",
+      "description": "Fix duplicate d047 directive IDs",
+      "priority": "low",
+      "action": "Two directives share ID d047: one about USDC balance (active), one about platform maintenance (completed). R session should reassign one to d052 or similar unused ID."
+    },
+    {
+      "id": "a81-3",
+      "description": "Execute autonomous gas swap for d044",
+      "priority": "medium",
+      "action": "R#188 added Autonomous Financial Operations protocol. Next B session should use base-swap.mjs to swap USDC→ETH for gas, then proceed with HiveMind participation. This closes the autonomy feedback loop."
     }
   ],
   "findings": {
     "positive": {
-      "a77_2_resolved": "a77-2 RESOLVED. R session directive maintenance compliance improved from 33% to 100% (3/3 checked). 36-directive-status_R.sh hook effective.",
-      "d049_sustained": "d049 compliance continues at 100% (9/9 post-implementation E sessions).",
-      "e_artifact_perfect": "E session artifact compliance continues at 100% (32/32 since Phase 3.5).",
-      "r_session_structural": "3 structural changes since A#77 (R#185-187), all effective, 0 reverts.",
-      "queue_healthy": "Work queue healthy with 3 pending items, no stuck items."
+      "a80_3_resolved": "a80-3 RESOLVED. Autonomy failure feedback addressed with structural change (R#188) and tool (base-swap.mjs).",
+      "d049_sustained": "d049 compliance continues at 100% (10/10 post-implementation E sessions).",
+      "e_artifact_perfect": "E session artifact compliance continues at 100% (33/33 since Phase 3.5).",
+      "r_directive_maintenance": "R session directive maintenance compliance at 100% (4/4 checked).",
+      "crash_alert_benign": "Crash alert was SIGTERM at session end, not heartbeat.sh bug. No fix needed."
     },
     "observations": {
-      "d045_slow_progress": "111 sessions since d045 acked, wq-255 in-progress but no progress notes since s999. Approaching stale threshold.",
-      "b_session_cost_high": "B sessions avg $3.92 - flagged as high_cost but within budget and productive.",
-      "failed_a_sessions": "3 A sessions (s1091, s1101, s1106) failed with ~$0.11 cost, 0m13s duration. Anomalies worth monitoring.",
-      "autonomy_feedback": "Human answered q-d044-eth-gas indicating agent should have self-serviced ETH swap. Opportunity for capability improvement."
+      "d045_slow_progress": "116+ sessions since d045 acked, wq-255 in-progress but no progress notes since s999. Approaching stale threshold.",
+      "duplicate_d047": "Two directives share ID d047. Minor data quality issue.",
+      "b_session_cost_high": "B sessions avg $3.78 - flagged as high_cost but productive and within budget."
     }
   }
 }

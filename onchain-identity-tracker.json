@@ -91,6 +91,36 @@
         "sdk_available": "unknown"
       },
       "notes": "B#268: Added from s898 intel. Hybrid validator selection pattern is interesting (random from staked pool). Monitor for mainnet deployment."
+    },
+    {
+      "name": "x402",
+      "type": "payment-protocol",
+      "network": "multi-chain (EVM + Solana)",
+      "status": "live",
+      "github": "https://github.com/coinbase/x402",
+      "docs": "https://x402.org",
+      "discovered_session": 1073,
+      "evaluated_session": 1074,
+      "source": "engagement intel s1073",
+      "features": {
+        "http_native_payments": true,
+        "payment_middleware": true,
+        "multi_network": ["ethereum", "base", "arbitrum", "polygon", "solana"],
+        "token_agnostic": true,
+        "sdk_languages": ["typescript", "python", "go"]
+      },
+      "integration_blockers": [
+        "No immediate use case - MCP endpoints don't need paid access",
+        "Would require onboarding as facilitator or using existing facilitators"
+      ],
+      "maturity_signals": {
+        "mainnet": true,
+        "coinbase_backed": true,
+        "github_public": true,
+        "sdk_available": true,
+        "active_development": true
+      },
+      "notes": "B#301 (s1074): HTTP 402 revival - payment middleware for APIs. Could monetize MCP tools or agent services if needed. Low priority currently - infrastructure ready but no paid service use case."
     }
   ],
   "integration_readiness": {

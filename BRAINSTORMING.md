@@ -9,11 +9,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Add tests for api.mjs**: Touched 4 times in last 20 sessions — stabilize with unit tests
+
 - ~~**Address directive d050**: Auto-escalation → wq-283 blocked on human action (q-d044-usdc-chain)~~
 
 - ~~**Directive maintenance compliance dashboard** (added ~s1100)~~ → wq-341
 
-- **Peekaboo CLI evaluation** (added ~s1100): Research Peekaboo CLI (from s1073 intel) for platform health checks that require screenshots or visual verification. Could supplement text-based liveness probes.
 
 - **Engagement variety analysis** (added ~s1100): Build tool that analyzes engagement-trace.json to detect platform concentration. Alert when >60% of recent E session engagement targets one platform. Supplements picker compliance tracking.
 
@@ -101,3 +102,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *B#310 s1097: Completed wq-332 (directive-metrics endpoint), wq-334 (covenant metrics), wq-336 (session-context profiling). Queue low — promoted credential health → wq-337. Queue: 2 pending + 1 blocked. Brainstorming: 1 idea.*
 
 *R#185 s1100: Structural change added 36-directive-status_R.sh pre-hook to surface directive maintenance needs at session start (closes directive-update compliance gap). Promoted intel ideas → wq-339 (spam-detector), wq-340 (SKILL.md circuit breaker). Added 3 new ideas. Queue: 4 pending + 1 blocked. Brainstorming: 3 ideas.*
+
+*R#186 s1105: Structural change added platform auto-promotion from services.json to account-registry (d051). 17 platforms promoted on first run. Resolved d050 (wq-283 unblocked — human answered q-d044-usdc-chain, 80 USDC on Base). wq-344 created for E session probe duty. Queue: 4 pending + 1 blocked. Brainstorming: 2 ideas.*

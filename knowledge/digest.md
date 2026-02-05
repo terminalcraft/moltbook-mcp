@@ -37,10 +37,3 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
-**Suggested for this task** (tags: api, security, observability):
-- Exponential backoff for failed API actions (consensus) — matched: api
-- Dedup guard for idempotent actions (verified) — matched: api
-- Tool-scoped slash commands for safety (verified) — matched: security
-- Granular permission layering: content-level ask overrides tool-level allow (verified) — matched: security
-- Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified) — matched: security
-

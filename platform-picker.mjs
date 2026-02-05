@@ -224,10 +224,15 @@ function main() {
     console.error(`Calculating weights...`);
   }
 
-  // Filter to working platforms
+  // Filter to working platforms + needs_probe platforms (d051)
+  // needs_probe platforms are auto-promoted from services.json and need E session probing
+  // Note: Check acc.status first for needs_probe because last_status may be "error" from prior health checks
   const working = accounts.filter(acc => {
-    const status = acc.last_status || "unknown";
-    if (!["live", "creds_ok", "active"].includes(status)) return false;
+    const lastStatus = acc.last_status || "unknown";
+    const baseStatus = acc.status || "unknown";
+    const isWorkingStatus = ["live", "creds_ok", "active"].includes(lastStatus);
+    const isProbeStatus = baseStatus === "needs_probe";  // d051: check base status, not last_status
+    if (!isWorkingStatus && !isProbeStatus) return false;
 
     const circuit = getCircuitStatus(circuits, acc.id);
     if (circuit === "open") return false;
@@ -243,6 +248,9 @@ function main() {
 
     return true;
   });
+
+  // Separate needs_probe platforms for special handling (d051)
+  const needsProbe = working.filter(acc => acc.status === "needs_probe");
 
   // Separate required platforms
   const required = [];
@@ -300,26 +308,36 @@ function main() {
 
   // Output
   if (opts.json) {
-    console.log(JSON.stringify(selected.map(acc => ({
-      id: acc.id,
-      platform: acc.platform,
-      status: acc.last_status,
-      last_engaged: acc.last_engaged_session || null,
-      notes: acc.notes || null,
-      warning: acc._warning || null,
-      weight: acc._weight || null,
-      factors: acc._factors || null,
-    })), null, 2));
+    console.log(JSON.stringify(selected.map(acc => {
+      const displayStatus = acc.last_status || acc.status;
+      const needsProbe = acc.status === "needs_probe";  // d051: check base status field
+      return {
+        id: acc.id,
+        platform: acc.platform,
+        status: displayStatus,
+        needs_probe: needsProbe,  // d051: flag for E session probe duty
+        last_engaged: acc.last_engaged_session || null,
+        notes: acc.notes || null,
+        warning: acc._warning || null,
+        weight: acc._weight || null,
+        factors: acc._factors || null,
+        test_url: acc.test?.url || null,  // d051: URL to probe
+      };
+    }), null, 2));
   } else {
     console.log("Selected " + selected.length + " platform(s) for engagement:\n");
     for (const acc of selected) {
+      const displayStatus = acc.last_status || acc.status || "?";
+      const needsProbe = acc.status === "needs_probe";  // d051: check base status field
       const lastEngaged = acc.last_engaged_session ? "last: s" + acc.last_engaged_session : "never engaged";
       const warning = acc._warning ? " [!] " + acc._warning : "";
       const weightInfo = acc._weight ? ` [w:${acc._weight}]` : "";
-      console.log("  * " + acc.platform + " (" + acc.id + ") -- " + (acc.last_status || "?") + ", " + lastEngaged + weightInfo + warning);
+      const probeFlag = needsProbe ? " [NEEDS PROBE]" : "";
+      console.log("  * " + acc.platform + " (" + acc.id + ") -- " + displayStatus + ", " + lastEngaged + weightInfo + probeFlag + warning);
       if (acc.notes) console.log("    " + acc.notes);
     }
-    console.log("\nPool stats: " + working.length + " working, " + pool.length + " available, " + accounts.length + " total");
+    // d051: Show needs_probe count in pool stats
+    console.log("\nPool stats: " + working.length + " working, " + pool.length + " available, " + needsProbe.length + " needs_probe, " + accounts.length + " total");
     if (opts.verbose) {
       console.log("\nWeight distribution:");
       const weights = weighted.map(w => w.weight);

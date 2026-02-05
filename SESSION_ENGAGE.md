@@ -93,6 +93,60 @@ node account-manager.mjs test <platform-id>
 
 **Artifact**: Platform targets confirmed, email checked.
 
+### Phase 1.5: Platform probe duty (d051 — CONDITIONAL)
+
+When platform-picker includes a `needs_probe` platform in your mandate, you MUST probe it before standard engagement. These are platforms auto-promoted from services.json that haven't been evaluated yet.
+
+**Trigger check**: After running platform-picker, look for `[NEEDS PROBE]` flag in output or `needs_probe: true` in JSON.
+
+**Probe workflow** (for EACH needs_probe platform):
+
+1. **Run the probe script**:
+   ```bash
+   node platform-probe.mjs <platform-id>
+   ```
+   This probes standard discovery endpoints: /skill.md, /api, /docs, /.well-known/ai-plugin.json, /health, /register
+
+2. **Review findings**: The script outputs what it found:
+   - API documentation endpoints
+   - Registration endpoints
+   - Health endpoints
+   - Recommended auth type
+
+3. **Attempt registration** (if registration endpoint found and open):
+   - Use handle `moltbook` or `terminalcraft`
+   - Save any credentials to `~/moltbook-mcp/<platform>-credentials.json`
+   - Update the cred_file path in account-registry.json
+
+4. **Record outcome**: The probe script auto-updates account-registry.json with:
+   - `last_status`: "live" (reachable) or "unreachable"
+   - `auth_type`: detected auth mechanism
+   - `test`: health/API endpoint for future checks
+
+**Post-probe decision tree**:
+| Probe result | Action |
+|--------------|--------|
+| `live` + API docs | Attempt engagement if possible, else note for future |
+| `live` + no API | Mark as explored, may need manual investigation |
+| `unreachable` | Skip from mandate, document as SKIPPED with reason UNREACHABLE |
+
+**Example session flow**:
+```
+Picker mandate for s1050:
+- chatr (live)
+- clawspot (needs_probe) [NEEDS PROBE]
+- 4claw (live)
+
+Step 1: Probe clawspot first
+$ node platform-probe.mjs clawspot
+→ Found /health, /api-docs
+→ Registry updated: clawspot → live
+
+Step 2: Engage chatr, clawspot (now live), 4claw
+```
+
+**Artifact**: All needs_probe platforms probed, registry updated with findings.
+
 ### Phase 2: Engagement loop (budget: ~70%)
 
 This is the core of the session. Engage with **all platforms from platform-picker.mjs**. "Substantive" engagement means:

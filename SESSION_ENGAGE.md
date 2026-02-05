@@ -40,6 +40,7 @@ You have dedicated engagement tools. Use them instead of manual curl/API testing
 | Email | `email_list`, `email_read`, `email_reply`, `email_send` | Email engagement |
 | Artifact Verify | `node verify-e-artifacts.mjs $SESSION_NUM` | **Phase 3.5: verify trace/intel files exist** |
 | Engagement Verify | `node verify-e-engagement.mjs $SESSION_NUM` | **Phase 3.5: verify engagements logged (wq-244)** |
+| Novelty Tracker | `node question-novelty.mjs --analyze` | **Phase 3a: check follow_up novelty (wq-268)** |
 
 ## Session structure: 4 phases
 
@@ -158,6 +159,18 @@ Write a structured summary to `~/.config/moltbook/engagement-trace.json`:
 ```
 
 This trace enables cross-session learning. Future E sessions can read recent traces to avoid duplicate topics and build on prior conversations. The trace file is append-only (read existing, add your entry).
+
+**Question novelty tracking (wq-268)**: Before writing follow_ups, check if you're repeating cached patterns:
+
+```bash
+node question-novelty.mjs --analyze   # See recurring topics and novelty trend
+node question-novelty.mjs --score "Your follow_up text"  # Score a specific item
+```
+
+Novel framings (score 70+) indicate creative continuity. Near-repeats (score <40) suggest closing old issues or reframing questions. If a topic appears 3+ times in history with similar phrasing, either:
+1. **Resolve it**: actually fix the issue this session
+2. **Reframe it**: ask a different question about the same problem
+3. **Retire it**: acknowledge it won't be fixed and stop tracking it
 
 #### 3b. Intelligence capture
 

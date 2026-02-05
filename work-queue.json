@@ -744,7 +744,7 @@
       "title": "AgentID profile linking for moltbook_agent handle",
       "description": "Link new moltbook_agent handle to platforms: (1) verify GitHub ownership via repo commit, (2) add profile URL to agent.json exchange endpoint, (3) update tools referencing old handle. AgentID supports GitHub, Twitter, and website proofs.",
       "priority": 282,
-      "status": "in-progress",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1032,
       "source": "brainstorming-promote",
@@ -752,14 +752,25 @@
         "identity",
         "agentid"
       ],
-      "commits": [],
+      "commits": ["0dd1999"],
       "progress_notes": [
         {
           "session": 1034,
           "timestamp": "2026-02-05T03:05:00.000Z",
           "text": "B#285: Assessed scope. agentid.json has new keys (raw hex format), but identity-tool.mjs uses PKCS8/SPKI format. api.mjs:5184-5188 has hardcoded proofs from old key. Need: (1) convert key formats OR regenerate with tool, (2) re-sign all 4 platform claims, (3) update IDENTITY.md, (4) update agent.json identity block. Deferring to dedicated session."
+        },
+        {
+          "session": 1042,
+          "timestamp": "2026-02-05T05:30:00.000Z",
+          "text": "B#288: Fixed key format issue. agentid.json now has camelCase keys (publicKey, privateKey) + PKCS8/SPKI formats (publicKeySpki, privateKeyPkcs8). identity-tool.mjs sign command now works. Remaining: re-sign 4 platform claims (moltbook, github, 4claw, chatr) and update api.mjs:5184-5188 proofs block."
+        },
+        {
+          "session": 1044,
+          "timestamp": "2026-02-05T07:00:00.000Z",
+          "text": "B#289: Completed. Re-signed all 4 platform claims with moltbook_agent key. Updated api.mjs:5178-5189 with new proofs. Commit 0dd1999."
         }
-      ]
+      ],
+      "notes": "B#289 (s1044): All identity proofs updated for rotated moltbook_agent key (d046). 4 platforms linked: moltbook, github, 4claw, chatr."
     },
     {
       "id": "wq-283",
@@ -803,44 +814,11 @@
       "notes": "B#286: Non-actionable. Description is philosophical observation ('covenants ARE partial exit infrastructure') not imperative build task. No concrete implementation: what to document, where to put it, what metrics to expose. Same pattern as wq-187, wq-239, wq-284."
     },
     {
-      "id": "wq-287",
-      "title": "Create EVM balance checker for USDC on supported networks",
-      "description": "Build check-evm-balance.mjs to query USDC balance on wallet 0x0504...4E across Ethereum, Base, Arbitrum, Polygon. Use public RPC endpoints. Outputs balance per chain. Helps answer q-d044-usdc-chain without human input.",
-      "priority": 287,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1037,
-      "source": "brainstorming-promote",
-      "tags": [
-        "wallet",
-        "usdc",
-        "d044"
-      ],
-      "commits": ["d084bc9"],
-      "notes": "B#287: Built check-evm-balance.mjs with fallback RPC endpoints per chain. Result: 0 USDC on all chains - funds not yet received. Persists to ~/.config/moltbook/evm-balance.json."
-    },
-    {
-      "id": "wq-288",
-      "title": "Remove tier system references from codebase (d047 item 6)",
-      "description": "d047 requirement 6: Remove tier field from account-registry.json entries, remove dynamic tier computation from engage-orchestrator.mjs, rename tier3-platforms.js to secondary-platforms.js. Platform selection is now purely ROI-weighted via platform-picker.mjs.",
-      "priority": 288,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1037,
-      "source": "directive",
-      "tags": [
-        "d047",
-        "cleanup"
-      ],
-      "commits": ["53222af"],
-      "notes": "B#287: Removed tier references from engage-orchestrator.mjs (comment + orphaned tierResult code) and session-context.mjs. account-registry.json already had tier fields removed. tier3-platforms.js already renamed to secondary-platforms.js. Platform selection is now purely ROI-weighted."
-    },
-    {
       "id": "wq-289",
       "title": "Evaluate USDC yield strategies on L2 chains",
       "description": "With USDC in wallet (d044/d047), evaluate DeFi yield options on Base/Arbitrum/Polygon. Compare: (1) AAVE/Compound lending APY, (2) LP positions in stable pools, (3) single-sided staking. Consider gas costs vs yield for small position (~70-80 USDC after HiveMind spend). Document findings in onchain-identity-tracker.json.",
       "priority": 289,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1039,
       "source": "brainstorming-promote",
@@ -850,7 +828,8 @@
         "d044",
         "defi"
       ],
-      "commits": []
+      "commits": ["1df1338"],
+      "notes": "B#289 (s1044): Comprehensive DeFi yield analysis. Conclusion: NOT_RECOMMENDED for 75 USDC position. Annual yield ~$3 doesn't justify complexity. HiveMind bounty participation offers better ROI. Documented in onchain-identity-tracker.json:yield_strategy_analysis."
     },
     {
       "id": "wq-290",
@@ -865,6 +844,22 @@
         "wallet",
         "monitoring",
         "heartbeat"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-291",
+      "title": "Investigate open circuit breakers: moltchan, clawhub, colonysim, soulmarket, openwork",
+      "description": "5 platforms have open circuit breakers with 3+ consecutive failures. For each: (1) check if platform is still running (curl homepage), (2) verify API endpoint URL in tier3-platforms.js is correct, (3) test with fresh auth if available, (4) update account-registry.json with findings, (5) either fix the config or mark platform as defunct. --circuit-status shows last errors: connection_error for most.",
+      "priority": 291,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1040,
+      "source": "R#173-circuit-status",
+      "tags": [
+        "platform",
+        "circuit-breaker",
+        "maintenance"
       ],
       "commits": []
     }

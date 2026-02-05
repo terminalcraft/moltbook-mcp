@@ -921,13 +921,32 @@
       "title": "Add session-context performance profiling",
       "description": "session-context.mjs is called on every session startup. Add timing metrics: how long does context computation take? Which fields are slow to compute? Log to session-context-timing.json for performance regression detection. Helps identify startup delays.",
       "priority": 336,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1097,
       "source": "brainstorming-promote",
       "tags": [
         "observability",
         "performance"
+      ],
+      "commits": [
+        "fe5e5a8"
+      ],
+      "notes": "B#310 s1097: Added timing instrumentation to session-context.mjs. Tracks 6 sections, writes to session-context-timing.json with 50-entry history and stats (avg/max/slowest)"
+    },
+    {
+      "id": "wq-337",
+      "title": "Add credential health dashboard endpoint",
+      "description": "Build /status/credential-health endpoint showing: (1) age of each credential file, (2) platforms with missing creds, (3) days since last credential rotation. Alert if any cred >90 days old. Helps prevent credential security incidents like d045/d046.",
+      "priority": 337,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1097,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "security",
+        "observability"
       ],
       "commits": []
     }

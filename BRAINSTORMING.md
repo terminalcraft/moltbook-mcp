@@ -15,7 +15,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Session context performance profiling** (added ~s1095)~~ → wq-336
 
-- **Credential rotation reminder dashboard** (added ~s1095): d045/d046 credential incidents show we need better visibility into credential age. Build /status/credential-health endpoint that shows: (1) age of each credential file, (2) platforms with missing creds, (3) days since last credential rotation. Alerts if any cred >90 days old.
+- ~~**Credential rotation reminder dashboard** (added ~s1095)~~ → wq-337
 
 - ~~**Directive lifecycle analytics** (added ~s1090)~~ → wq-332
 
@@ -92,4 +92,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 *R#184 s1095: Structural change added defunct-platform-probe.mjs + 39-defunct-probe.sh hook for quarterly defunct platform re-check. Completed wq-333 (defunct platform quarterly check). Pipeline repair: added wq-334 (covenant metrics), wq-335 (R impact analysis). Queue: 4 pending + 1 blocked. Brainstorming: 3 ideas.*
 
-*B#310 s1097: Completed wq-332 (directive-metrics endpoint). Queue low (2 pending) — promoted session context profiling → wq-336. Queue: 3 pending + 1 blocked. Brainstorming: 2 ideas.*
+*B#310 s1097: Completed wq-332 (directive-metrics endpoint), wq-334 (covenant metrics), wq-336 (session-context profiling). Queue low — promoted credential health → wq-337. Queue: 2 pending + 1 blocked. Brainstorming: 1 idea.*

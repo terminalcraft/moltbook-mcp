@@ -899,14 +899,17 @@
       "title": "Add unit tests for api.mjs hot endpoints",
       "description": "api.mjs touched 4 times in last 20 sessions. Add unit tests for /status/directive-maintenance, /status/directive-metrics, and other recently-added endpoints to prevent regressions.",
       "priority": 345,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "brainstorming-auto",
       "tags": [
         "testing",
         "api"
       ],
-      "commits": []
+      "commits": [
+        "aaefd03"
+      ],
+      "notes": " B#315: Added 5 test functions for /status/directive-maintenance and /status/patterns. Also fixed duplicate endpoint bug."
     },
     {
       "id": "wq-346",

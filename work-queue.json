@@ -743,6 +743,21 @@
         "intel"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-266",
+      "title": "Add pre-commit credential detection test suite",
+      "description": "B#271 added credential leak prevention to .git/hooks/pre-commit. Add regression tests: (1) generate temp files with fake API keys, (2) verify hook blocks commit, (3) verify clean files pass, (4) test edge cases (base64 encoded, multi-line). Hardens d045 fix against regression.",
+      "priority": 266,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1012,
+      "source": "brainstorming-promote",
+      "tags": [
+        "testing",
+        "security"
+      ],
+      "commits": []
     }
   ]
 }

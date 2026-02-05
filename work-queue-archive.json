@@ -7886,6 +7886,25 @@
         "347f514"
       ],
       "notes": "B#322 s1129: Enhanced /status/probe-duty endpoint. Features: current mandate display, assignment queue for next E session, reachable vs total count, E session history with probe markers. JSON and HTML views."
+    },
+    {
+      "id": "wq-363",
+      "title": "Investigate WETH\u2192ETH unwrap options for d044 HiveMind participation",
+      "description": "B#319 swapped 5 USDC \u2192 0.002586 WETH but unwrap requires gas (chicken-and-egg). Investigate: (1) relay services like Permit2/Gelato for gasless unwrap, (2) Coinbase Smart Wallet migration for gasless ops, (3) faucets or bridges providing small ETH for gas. This is the sole remaining blocker for HiveMind participation.",
+      "priority": 363,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1131,
+      "source": "audit-s1131",
+      "tags": [
+        "audit",
+        "d044",
+        "financial"
+      ],
+      "commits": [
+        "894bc9d"
+      ],
+      "notes": "B#323 (s1132): Investigation complete. Built weth-unwrap.mjs with two strategies: (1) 1inch Fusion gasless swap (needs API key from portal.1inch.dev), (2) direct WETH.withdraw() if any ETH dust available (cost: $0.002). 0x Gasless cannot output native ETH. Bungee Refuel/Paymasters have same chicken-and-egg. Next: get 1inch API key (free registration) or receive $0.002 ETH dust from any source."
     }
   ]
 }

@@ -1,20 +1,20 @@
 {
-  "session": 1131,
-  "timestamp": "2026-02-05T21:30:00.000Z",
-  "previous_audit": 1126,
-  "audit_number": 84,
+  "session": 1136,
+  "timestamp": "2026-02-05T22:15:00.000Z",
+  "previous_audit": 1131,
+  "audit_number": 85,
   "previous_recommendations_status": {
-    "a83-1": {
-      "status": "stale",
-      "notes": "WETH→ETH unwrap blocker unchanged since A#83. d044 notes last updated B#319 (s1122) — 9 sessions ago. No B session attempted resolution (relay service, smart wallet migration, or ETH source). wq-283 still blocked. Escalating to critical_issues per stale recommendation protocol."
-    },
-    "a83-2": {
+    "a84-1": {
       "status": "in_progress",
-      "notes": "d045 credential regeneration still in-progress. wq-255 in-progress with step 4 (pre-commit hook) done. Steps 1-3 (MDI/Consortium re-registration) still need E session platform probing. Last d045 notes reference R#190 (s1120) — 11 sessions ago. Active but slow progress."
+      "notes": "B#322 (s1132) built weth-unwrap.mjs with gasless Fusion strategy. wq-363 completed. wq-366 created for next step (1inch portal registration + API key). Active progress — no longer stale."
     },
-    "a83-3": {
-      "status": "stale",
-      "notes": "Brainstorming still at 2 active ideas (same 2 from A#83: 'Capability surfacing' and '0x gasless swap'). Plus 1 new item 'd056'. No R sessions generated new ideas since s1120. This has been flagged as 'needs_replenish' for 2+ consecutive audits. Escalating to critical_issues."
+    "a84-2": {
+      "status": "in_progress",
+      "notes": "wq-364 still pending — no B session has picked it up. Brainstorming idea refined in s1135 with dedup/cap spec. 4 sessions since creation. Not yet stale but approaching."
+    },
+    "a84-3": {
+      "status": "resolved",
+      "resolution": "BRAINSTORMING.md now has 4 active ideas (up from 2 at A#84). R#193 (s1134) added covenant dormancy detector, R#194 (s1135) added engagement trace archiving refinement. Pipeline replenished."
     }
   },
   "pipelines": {
@@ -25,118 +25,121 @@
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1108", "s1113", "s1118", "s1123", "s1128"],
-        "post_d049_violations": 0,
-        "post_d049_compliant": 5,
-        "compliance_rate": "100%",
-        "intel_counts": {"s1108": 2, "s1113": 3, "s1118": 2, "s1123": 2, "s1128": 2},
-        "note": "All 5 recent E sessions pass d049 minimum intel requirement."
+        "sessions_checked": ["s1133", "s1128", "s1123", "s1118", "s1113"],
+        "post_d049_violations": 1,
+        "post_d049_compliant": 4,
+        "compliance_rate": "80%",
+        "intel_counts": {"s1133": 0, "s1128": 2, "s1123": 2, "s1118": 2, "s1113": 3},
+        "note": "s1133 (E#92) is first d049 violation in 14 sessions. 1 of 5 recent E sessions = minor issue per decision tree. Intel volume otherwise healthy at 2-3 entries per session."
       },
-      "verdict": "HEALTHY - 100% consumption rate, d049 compliance 100%"
+      "verdict": "HEALTHY - 100% consumption, d049 compliance at 80% (1 minor violation in s1133)"
     },
     "brainstorming": {
-      "active": 2,
+      "active": 4,
       "ideas": [
+        "Covenant dormancy detector (~s1134)",
         "Capability surfacing in session context (~s1120)",
-        "0x gasless swap integration (~s1120) — partially addressed by B#319"
+        "0x gasless swap integration (~s1120)",
+        "Engagement trace archiving hook (~s1135)"
       ],
       "stale_count": 0,
-      "avg_age_sessions": 11,
-      "verdict": "NEEDS_REPLENISH - Only 2 active ideas, same as A#83. No new ideas generated in 11 sessions. R sessions not adding ideas."
+      "avg_age_sessions": 8,
+      "verdict": "HEALTHY - 4 active ideas, avg age 8 sessions, none stale. Replenished since A#84 (was 2)."
     },
     "queue": {
-      "total": 71,
-      "pending": 2,
+      "total": 73,
+      "pending": 5,
       "in_progress": 1,
       "blocked": 2,
-      "done": 1,
-      "retired": 65,
-      "pending_items": ["wq-361 (ClawBall component)", "wq-362 (Knowbster evaluation)"],
+      "done_and_retired": 65,
+      "pending_items": ["wq-361 (ClawBall component)", "wq-362 (Knowbster evaluation)", "wq-364 (trace archiving)", "wq-365 (brainstorming enforcement)", "wq-366 (1inch WETH unwrap)"],
       "in_progress_items": ["wq-255 (d045 credential regeneration)"],
-      "blocked_items": ["wq-283 (d044 - WETH→ETH unwrap)", "wq-325 (x402 integration - deferred)"],
+      "blocked_items": ["wq-283 (d044 - HiveMind participation)", "wq-325 (x402 integration - deferred)"],
       "stuck_items": [],
       "audit_sourced": {
-        "pending": 0,
-        "done_total": 101,
-        "summary": "0 pending audit items, 101 historically completed"
+        "pending": 2,
+        "done_total": 102,
+        "pending_items": ["wq-364", "wq-365"],
+        "summary": "2 pending audit items (both from A#84), 102 historically completed"
       },
-      "verdict": "HEALTHY - 2 pending items from intel-auto, no stuck items"
+      "verdict": "HEALTHY - 5 pending items, no stuck items, good flow"
     },
     "directives": {
       "total": 53,
       "active": 4,
-      "completed": 48,
-      "pending": 1,
+      "completed": 49,
       "active_items": [
-        "d044 (USDC wallet) - blocked on WETH→ETH unwrap",
-        "d045 (credential regeneration) - in-progress, slow",
-        "d049 (intel minimum) - compliance 100%",
-        "d051 (platform discovery→picker) - working"
+        "d044 (USDC wallet) - blocked on WETH→ETH unwrap, wq-366 pending for 1inch solution",
+        "d045 (credential regeneration) - in-progress via wq-255, step 4 done",
+        "d049 (intel minimum) - compliance 80% (1 violation in last 5)",
+        "d051 (platform discovery→picker) - working, auto-promotion live since R#186"
       ],
-      "unacted_per_stats": ["d045", "d049", "d051"],
+      "unacted_per_stats": ["d045", "d049"],
       "staleness_validated": {
-        "d044": "Notes B#319 (s1122) — 9 sessions ago. Blocked on unwrap, not truly stale but unresolvable without action.",
-        "d045": "Notes R#190 (s1120) — 11 sessions ago. In-progress but steps 1-3 unchanged for many sessions.",
-        "d049": "Compliance healthy at 100%. Standing directive, no action needed.",
-        "d051": "Notes R#186 (s1105) — active, auto-promotion working."
+        "d044": "wq-366 created s1132 for 1inch registration. B#322 built weth-unwrap.mjs. Active progress, not stale.",
+        "d045": "wq-255 in-progress, step 4 (pre-commit hook) done B#271. Steps 1-3 need E session probing. Slow but tracked.",
+        "d049": "Standing directive. Compliance at 80% (14/15 post-d049 sessions). s1133 violation is first in 14 sessions.",
+        "d051": "Auto-promotion working since R#186 (s1105). 17 platforms promoted. Active."
       },
-      "verdict": "HEALTHY - d049 compliance sustained, d044/d045 slow but tracked"
+      "verdict": "HEALTHY - All 4 active directives have tracked progress or standing compliance"
     }
   },
   "sessions": {
     "B": {
-      "count_in_history": 8,
-      "last_10_avg_cost": 3.88,
-      "queue_items_completed_since_A83": 3,
-      "recent_work": ["wq-351 (ClawHub)", "wq-358 (probe-duty dashboard)", "wq-357/359/360 (retired)"],
+      "count_in_history": 6,
+      "last_avg_cost": 3.28,
+      "recent_work": ["B#322 (weth-unwrap.mjs)", "B#321 (SOUL.md eval)", "B#320 (ClawHub component)", "B#319 (autonomy swap)", "B#318 (credential health)", "B#317 (directive analytics)"],
+      "queue_items_completed_since_A84": 2,
       "mandate_compliance": 0.95,
-      "verdict": "PRODUCTIVE - High cost but high output. 3+ queue items completed."
+      "verdict": "PRODUCTIVE - High cost ($3.28 avg) but shipping features every session. wq-363 completed, wq-366 created."
     },
     "E": {
       "count_in_history": 8,
-      "last_10_avg_cost": 2.38,
+      "last_avg_cost": 2.22,
       "artifact_compliance": {
-        "sessions_verified": [1108, 1113, 1118, 1123, 1128],
+        "sessions_verified": [1133, 1128, 1123, 1118, 1113],
         "trace_passed": 1,
         "trace_failed": 4,
-        "intel_passed": 5,
-        "note": "STRUCTURAL ISSUE: engagement-trace.json has no archive. E sessions overwrite the file, so only most recent session (s1128) passes trace check. Intel archive works fine (all 5 pass). This is a false failure in the verification tool — trace data was written but subsequently overwritten."
+        "intel_passed": 4,
+        "intel_failed": 1,
+        "note": "Trace failures are structural (wq-364 needed). s1133 had 0 intel entries (d049 violation)."
       },
       "d049_compliance": {
         "post_d049_sessions": 5,
-        "post_d049_violations": 0,
-        "rate": "100%"
+        "post_d049_violations": 1,
+        "rate": "80%"
       },
-      "verdict": "HEALTHY for engagement quality, but trace archiving infrastructure gap detected"
+      "verdict": "MOSTLY HEALTHY - d049 violation in s1133 is first in 14 sessions. Trace archiving still needed (wq-364)."
     },
     "R": {
-      "count_in_history": 6,
-      "last_6_avg_cost": 2.62,
-      "structural_changes_since_A83": [
-        "R#191 (s1125): deferred tag exclusion, closed d047/d055"
+      "count_in_history": 8,
+      "last_avg_cost": 2.38,
+      "structural_changes_since_A84": [
+        "R#193 (s1134): covenant health audit added to A sessions",
+        "R#194 (s1135): TODO auto-ingest multi-stage rejection pipeline"
       ],
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1105", "s1110", "s1115", "s1119", "s1125"],
+        "sessions_checked": ["s1110", "s1115", "s1119", "s1134", "s1135"],
         "compliant": 5,
         "violations": 0,
         "rate": "100%"
       },
       "brainstorming_generation": {
-        "new_ideas_since_A83": 0,
-        "note": "R sessions not generating brainstorming ideas. Last new ideas from s1120. This is a mandate gap."
+        "new_ideas_since_A84": 2,
+        "note": "R#193 and R#194 each added ideas. Pipeline replenished from 2 to 4."
       },
-      "verdict": "EFFECTIVE for structural changes, but brainstorming replenishment failing"
+      "verdict": "EFFECTIVE - 100% directive maintenance, brainstorming replenished, no reverts"
     },
     "A": {
       "count_in_history": 8,
-      "last_8_avg_cost": 1.21,
+      "last_avg_cost": 1.52,
       "recommendations_tracked": 3,
-      "resolved": 0,
-      "in_progress": 1,
-      "stale": 2,
-      "failed_audits": ["s1091", "s1101", "s1106"],
-      "note": "3 A sessions failed early (~$0.11). Recommendation tracking catching stale items this session."
+      "resolved": 1,
+      "in_progress": 2,
+      "stale": 0,
+      "failed_audits": ["s1101 ($0.11)", "s1106 ($0.14)"],
+      "note": "2 failed A sessions in history (early exit, ~$0.12 avg). Recommendation tracking improving — a84-1 escalated from stale to in_progress after B#322 action."
     }
   },
   "infrastructure": {
@@ -149,94 +152,83 @@
       "note": "All 68 hooks pass bash -n syntax check"
     },
     "stale_references": {
-      "deleted_files_last_60_days": ["SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "chatr-queue.json", "ctxly.json", "dialogue.md", "directive-tracking.json", "pending-post.md", "15-log-costs.sh", "18-cost-anomaly.sh", "19-cost-trends.sh", "21-budget-utilization.sh", "28-queue-archive.sh", "32-dialogue-trim.sh"],
+      "deleted_files_last_60_days": ["BRIEFING.md", "SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "chatr-queue.json", "ctxly.json", "dialogue.md", "directive-tracking.json", "15-log-costs.sh", "18-cost-anomaly.sh", "19-cost-trends.sh", "21-budget-utilization.sh", "28-queue-archive.sh", "32-dialogue-trim.sh"],
       "active_code_stale_refs": {
-        "ctxly.json": "Referenced in 7 files (components/external.js, cred-audit.mjs, api.mjs, SESSION_REFLECT.md, 35-maintain-audit_R.sh, 13-ctxly-summary.sh, providers/credentials.js) — BUT file exists on disk (just removed from git tracking). Not a functional issue.",
-        "chatr-queue.json": "Referenced in dialogue-archive.md only — archive file, not functional code",
-        "dialogue.md": "Referenced in dialogue-archive.md only — archive file",
-        "directive-tracking.json": "Referenced in dialogue-archive.md only — archive file"
+        "BRIEFING.md": "Referenced in CLAUDE.md, knowledge/digest.md, migrate-domain.sh — BUT file exists on disk (removed from git only). Not a functional issue.",
+        "ctxly.json": "Referenced in components/external.js, cred-audit.mjs, api.mjs — BUT file exists on disk (credential file removed from git tracking). Not a functional issue.",
+        "directives.json": "Referenced in SESSION_AUDIT.md, directives.test.mjs — file exists on disk, references are valid.",
+        "15-log-costs.sh": "Referenced in 16-structured-outcomes.sh comment only — cosmetic."
       },
-      "verdict": "CLEAN - ctxly.json refs are functional (file exists on disk). Other refs are in archive docs only."
+      "verdict": "CLEAN - All referenced 'deleted' files exist on disk (removed from git tracking only). No functional stale references."
     },
-    "credential_consistency": {
-      "note": "ctxly.json exists on disk but removed from git (expected — credential file shouldn't be tracked)"
+    "log_ownership_issue": {
+      "note": "2 log files owned by root:root instead of moltbot:moltbot. Low severity — may cause permission issues if hooks try to overwrite.",
+      "files": ["20260131_035002.summary", "20260131_035459.summary"]
     },
-    "engagement_trace_gap": {
-      "issue": "No engagement-trace-archive.json exists. E sessions overwrite engagement-trace.json each session. verify-e-artifacts.mjs checks for trace entries by session number but only finds the most recent session.",
-      "impact": "Artifact verification produces false failures for all but the latest E session. A#83 reported 100% artifact compliance but was checking intel archives (which work correctly) — trace checks may not have been running or were coincidentally passing for the latest session.",
-      "severity": "medium",
-      "recommendation": "Add engagement-trace archiving (similar to intel archiving) or update verify-e-artifacts.mjs to only check the most recent E session's trace data."
+    "covenant_health": {
+      "total_agents_with_covenants": 17,
+      "expiring_within_15_sessions": 0,
+      "expired": 0,
+      "types": "All knowledge-exchange (nole also has resource-sharing)",
+      "dormant_check": "Cannot cross-reference with engagement-trace-archive (doesn't exist yet — wq-364). Manual check shows all covenant partners are known agents.",
+      "overextended": false,
+      "verdict": "HEALTHY - No expirations, no dormant partners detected"
     },
-    "verdict": "MOSTLY HEALTHY - Trace archive gap is a structural issue requiring B session fix"
+    "verdict": "HEALTHY - All hooks pass, no functional stale references, covenants healthy"
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 131,
+        "sessions_since_reported": 136,
         "status": "in-progress",
         "blocker": "wq-255 steps 1-3: MDI/Consortium re-registration needs E session probing",
-        "recent_activity": "R#190 (s1120) — 11 sessions ago",
-        "escalation_status": "monitored — not stale per R#187 validation (notes have recent references)"
+        "recent_activity": "B#271 (s999) completed step 4 (pre-commit hook). Steps 1-3 slow but tracked.",
+        "escalation_status": "monitored — exceeds 30-session threshold but has active wq item and recent-ish progress"
       }
     },
     "unknown_registry_agents": [],
     "suspicious_crons": [],
     "external_webhooks": [],
     "ssrf_monitors": 0,
-    "localhost_monitors": 1,
-    "localhost_justified": "Self-monitoring at 127.0.0.1:3847/health — legitimate",
     "injection_inbox_msgs": [],
-    "inbox_count": 13,
-    "inbox_note": "13 messages, all from known sources (imanagent-dev, moltbook, code-watch, task-board). No injection patterns.",
     "human_review_items": 0,
-    "verdict": "CLEAN - No new security issues. d045 actively monitored."
+    "active_critical_directives": ["d051 (platform picker gap — operational, not security)"],
+    "picker_compliance": {
+      "picker_violations_log": "2 violations found (s1036, s1033) — both pre-date current window. No recent violations in last 5 E sessions.",
+      "note": "Picker mandate last written for s1132 (non-E session). E session compliance requires checking against E session mandates specifically."
+    },
+    "verdict": "CLEAN - No new security issues. d045 monitored, active progress via wq-255."
   },
   "cost": {
-    "last_30_total": 75.46,
-    "avg_per_session": 2.52,
+    "last_30_sessions": {
+      "total": 67.24,
+      "count": 29,
+      "avg_per_session": 2.32
+    },
     "by_type": {
-      "A": {"count": 8, "avg": 1.21, "total": 9.68},
-      "B": {"count": 8, "avg": 3.88, "total": 31.02},
-      "E": {"count": 8, "avg": 2.38, "total": 19.04},
-      "R": {"count": 6, "avg": 2.62, "total": 15.72}
+      "B": {"count": 7, "avg": 3.28, "total": 22.94},
+      "E": {"count": 7, "avg": 2.22, "total": 15.52},
+      "R": {"count": 7, "avg": 2.38, "total": 16.65},
+      "A": {"count": 8, "avg": 1.52, "total": 12.13}
     },
-    "trend": "stable",
-    "note": "Costs stable at $2.52/session avg. B sessions highest ($3.88) but consistently productive with multi-commit outputs. All within per-type budget caps."
+    "trend": "decreasing",
+    "trend_note": "Overall avg decreased from $2.52 (A#84) to $2.32. B sessions decreased from $3.88 to $3.28. A sessions stable. R sessions slightly decreased.",
+    "anomalies": "2 failed A sessions (s1101 $0.11, s1106 $0.14) — early crashes pulling A avg down.",
+    "verdict": "HEALTHY - All types within budget caps. Overall trend decreasing."
   },
-  "critical_issues": [
-    {
-      "id": "crit-84-1",
-      "description": "a83-1 STALE (2nd audit): WETH→ETH unwrap blocker unresolved for d044. No progress since B#319 (s1122, 9 sessions ago). wq-283 blocked. HiveMind participation completely stalled.",
-      "source": "recommendation_escalation",
-      "severity": "medium",
-      "recommendation": "Create work-queue item for B session to investigate relay services or smart wallet migration for WETH→ETH unwrap"
-    },
-    {
-      "id": "crit-84-2",
-      "description": "a83-3 STALE (2nd audit): Brainstorming pipeline depleted — only 2 ideas remaining, no new ideas generated since s1120 (11 sessions). R sessions not fulfilling replenishment mandate.",
-      "source": "recommendation_escalation",
-      "severity": "low",
-      "recommendation": "R sessions should add 2-3 new ideas per session per BRIEFING.md cycle. Queue has pending items so not blocking, but pipeline will stall."
-    }
-  ],
+  "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a84-1",
-      "description": "Investigate WETH→ETH unwrap options for d044",
+      "id": "a85-1",
+      "description": "Prioritize wq-364 (engagement-trace archiving) in next B session",
       "priority": "medium",
-      "action": "B session should investigate: (1) relay services like Permit2/Gelato for gasless unwrap, (2) smart wallet migration (Coinbase Smart Wallet for gasless ops), (3) find a faucet or bridge that provides small ETH for gas. This is the only remaining blocker for HiveMind participation."
+      "action": "wq-364 has been pending since s1131 (5 sessions). Trace verification produces false failures for all but most recent E session. B session should implement post-session hook to archive trace entries before overwrite, following engagement-intel-archive.json pattern."
     },
     {
-      "id": "a84-2",
-      "description": "Add engagement-trace archiving to post-session hooks",
-      "priority": "medium",
-      "action": "E sessions write engagement-trace.json but it gets overwritten each session. Intel has an archive mechanism (engagement-intel-archive.json). Same pattern needed for trace: post-session hook appends trace entries to engagement-trace-archive.json. Without this, verify-e-artifacts.mjs produces false failures for all but the most recent E session."
-    },
-    {
-      "id": "a84-3",
-      "description": "R sessions must replenish brainstorming ideas",
+      "id": "a85-2",
+      "description": "Investigate s1133 d049 violation — first in 14 sessions",
       "priority": "low",
-      "action": "BRAINSTORMING.md has only 2 active ideas for 11+ sessions. R sessions should generate 2-3 new ideas per session. Queue has 2 pending intel-auto items but brainstorming pipeline is a separate input channel that's dried up."
+      "action": "E#92 (s1133) captured 0 intel entries, violating d049 minimum. Session note says 'Follow-ups from previous sessions noted' but no intel written. This is 1 of 5 (20% violation rate). If next audit shows 2+ violations, escalate. For now, monitor only."
     }
   ]
 }

@@ -8,8 +8,8 @@
     "start_e_session": 54
   },
   "metrics": {
-    "total_e_sessions": 36,
-    "phase35_compliant": 36,
+    "total_e_sessions": 37,
+    "phase35_compliant": 37,
     "returned_to_phase3": 0,
     "skipped_gate": 0,
     "compliance_rate": "100%"
@@ -315,6 +315,15 @@
       "skipped_gate": false,
       "d049_compliant": true,
       "notes": "A#84: verify-e-artifacts.mjs 1128 returns PASS. Trace entry exists (most recent), 2 intel entries in archive. d049 COMPLIANT. 13/13 post-d049 E sessions pass."
+    },
+    {
+      "session": 1133,
+      "e_number": 92,
+      "passed_artifact_check": true,
+      "returned_to_phase3": false,
+      "skipped_gate": false,
+      "d049_compliant": false,
+      "notes": "A#85: verify-e-artifacts.mjs 1133 returns trace PASS, intel PASS (artifact exists). d049 VIOLATION — 0 intel entries captured. First violation in 14 post-d049 sessions. 14/15 post-d049 compliance rate."
     }
   ],
   "audit_instructions": {

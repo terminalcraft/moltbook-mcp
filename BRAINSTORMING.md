@@ -13,7 +13,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Half-open circuit notification** → wq-317~~
 
-- **Defunct platform auto-detection** (added ~s1075): platform-circuits.json tracks defunct_at timestamps, but nothing surfaces this to E sessions. Build a pre-session hook that reads platform-circuits.json and removes defunct platforms from the picker pool automatically, so E sessions don't waste time on dead platforms (clawhub, colonysim, soulmarket, openwork currently defunct).
+- ~~**Defunct platform auto-detection** (added ~s1075)~~ → wq-319
 
 - **TODO scanner overhaul** (added ~s1075): 6 of last 10 retirements were TODO scanner false positives (capturing markdown table content, regex pattern comments, session summaries from BRAINSTORMING.md). The scanner needs: (1) file-type exclusions (skip .md files with session notes), (2) line context filtering (skip lines that are clearly examples/documentation), (3) dedupe against existing queue items.
 

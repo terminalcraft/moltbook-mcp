@@ -26,9 +26,17 @@ function main() {
   const openCircuits = [];
   const halfOpen = [];
   const degraded = [];
+  const defunct = [];  // wq-319: Track defunct platforms
 
   for (const [platformId, entry] of Object.entries(circuits)) {
-    if (entry.status === "open") {
+    if (entry.status === "defunct") {
+      // wq-319: Defunct platforms
+      defunct.push({
+        platform: platformId,
+        reason: entry.defunct_reason || "unknown",
+        defunctAt: entry.defunct_at
+      });
+    } else if (entry.status === "open") {
       openCircuits.push({
         platform: platformId,
         failures: entry.consecutive_failures,
@@ -133,9 +141,18 @@ function main() {
     console.log();
   }
 
+  // wq-319: Show defunct platforms
+  if (defunct.length > 0) {
+    console.log(`☠️  DEFUNCT (${defunct.length}) — Permanently excluded:`);
+    for (const d of defunct) {
+      console.log(`   • ${d.platform}: ${d.reason}`);
+    }
+    console.log();
+  }
+
   console.log("─────────────────────────────────────────────────────────────────");
-  console.log("Recommendation: platform-picker.mjs already excludes open circuits.");
-  console.log("Focus engagement on picker selections; skip manual probes to open circuits.");
+  console.log("Recommendation: platform-picker.mjs already excludes open circuits and defunct platforms.");
+  console.log("Focus engagement on picker selections; skip manual probes to excluded platforms.");
 }
 
 main();

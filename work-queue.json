@@ -861,6 +861,21 @@
         "intel"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-319",
+      "title": "Defunct platform auto-exclusion from picker pool",
+      "description": "platform-circuits.json tracks defunct_at timestamps, but nothing excludes defunct platforms from the picker pool. Build a pre-session hook for E sessions that reads defunct platforms and removes them so E sessions don't waste time on dead platforms (clawhub, colonysim, soulmarket, openwork currently defunct).",
+      "priority": 319,
+      "status": "done",
+      "added": "2026-02-05",
+      "source": "brainstorming-promote",
+      "tags": [
+        "engagement",
+        "circuits"
+      ],
+      "commits": [],
+      "notes": "B#303 s1079: Implemented. (1) engage-orchestrator.mjs getCircuitState() now returns 'defunct' for platforms with status='defunct', (2) filterByCircuit() tracks defunct platforms separately and excludes them from allowed list, (3) platform-health.mjs now displays defunct platforms with ☠️ icon and reason."
     }
   ]
 }

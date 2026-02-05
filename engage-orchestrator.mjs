@@ -72,6 +72,8 @@ function saveCircuits(circuits) {
 function getCircuitState(circuits, platform) {
   const entry = circuits[platform];
   if (!entry || entry.consecutive_failures < CIRCUIT_FAILURE_THRESHOLD) return "closed";
+  // wq-319: Defunct platforms are permanently excluded
+  if (entry.status === "defunct") return "defunct";
   // Check if cooldown has expired → half-open
   const elapsed = Date.now() - new Date(entry.last_failure).getTime();
   if (elapsed >= CIRCUIT_COOLDOWN_MS) return "half-open";
@@ -102,9 +104,14 @@ function filterByCircuit(platformNames) {
   const allowed = [];
   const blocked = [];
   const halfOpen = [];
+  const defunct = [];  // wq-319: Track defunct platforms separately
   for (const name of platformNames) {
     const state = getCircuitState(circuits, name);
-    if (state === "open") {
+    if (state === "defunct") {
+      // wq-319: Defunct platforms are permanently excluded
+      const entry = circuits[name];
+      defunct.push({ platform: name, defunct_at: entry.defunct_at, reason: entry.defunct_reason });
+    } else if (state === "open") {
       const entry = circuits[name];
       blocked.push({ platform: name, failures: entry.consecutive_failures, last_failure: entry.last_failure });
     } else if (state === "half-open") {
@@ -114,7 +121,7 @@ function filterByCircuit(platformNames) {
       allowed.push(name);
     }
   }
-  return { allowed, blocked, halfOpen };
+  return { allowed, blocked, halfOpen, defunct };
 }
 
 // --- Phase 1: Platform Health ---
@@ -672,6 +679,10 @@ if (circuitResult.blocked.length > 0) {
 if (circuitResult.halfOpen.length > 0) {
   console.error(`[orchestrator] Circuit HALF-OPEN — retrying: ${circuitResult.halfOpen.join(", ")}`);
 }
+// wq-319: Log defunct platforms
+if (circuitResult.defunct.length > 0) {
+  console.error(`[orchestrator] DEFUNCT — excluded: ${circuitResult.defunct.map(d => d.platform).join(", ")}`);
+}
 const livePlatformNames = circuitResult.allowed;
 const roiData = rankPlatformsByROI(livePlatformNames);
 
@@ -684,6 +695,7 @@ const output = {
   circuit_breaker: {
     blocked: circuitResult.blocked,
     half_open: circuitResult.halfOpen,
+    defunct: circuitResult.defunct,  // wq-319
     allowed_count: circuitResult.allowed.length,
   },
   platform_health: {
@@ -738,6 +750,11 @@ if (jsonMode) {
   if (circuitResult.halfOpen.length) {
     console.log(`Circuit breaker HALF-OPEN — retrying (${circuitResult.halfOpen.length}):`);
     for (const name of circuitResult.halfOpen) console.log(`  ↻ ${name}`);
+  }
+  // wq-319: Show defunct platforms
+  if (circuitResult.defunct.length) {
+    console.log(`DEFUNCT — permanently excluded (${circuitResult.defunct.length}):`);
+    for (const d of circuitResult.defunct) console.log(`  ☠ ${d.platform} (${d.reason || "no reason"})`);
   }
 
   // Service evaluation

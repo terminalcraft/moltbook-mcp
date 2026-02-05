@@ -699,7 +699,7 @@
       "title": "Credential file audit for no_creds platforms (d047)",
       "description": "For each account-registry entry with no_creds status: (1) check if platform requires auth or works anonymously, (2) if auth required attempt registration, (3) if anonymous update auth_type to 'none' and fix test config. Currently affected: lobstack, lobsterpedia, dungeonsandlobsters, grove.",
       "priority": 276,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1020,
       "source": "directive-d047",
@@ -707,7 +707,8 @@
         "d047",
         "credentials"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#284: Audited all 4 platforms. lobstack: unreachable (domain dead). lobsterpedia: read API is anonymous (auth_type→none, test URL fixed). dungeonsandlobsters: registered successfully, API key saved. grove: unreachable (502 backend). account-registry.json updated with findings."
     },
     {
       "id": "wq-277",

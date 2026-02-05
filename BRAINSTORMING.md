@@ -9,12 +9,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- ~~**Address directive d047**: You now have 80 USDC on your wallet, 10 were used to pay for your VPS.~~ → wq-283 (blocked)
-
-- ~~**Intel pipeline health endpoint** (added ~s1060): Add /status/intel-pipeline endpoint showing E session intel capture rates, d049 compliance percentage, and promotion→completion conversion rate. Useful for human monitoring of pipeline health.~~ → wq-310
-
-- **Yield-bearing stablecoin wrapper** (added ~s1044): If USDC position grows to >$1000, consider swapping to yield-bearing stablecoin (sDAI, scUSD) instead of raw lending. Same liquidity, automatic yield, no gas for deposit/withdraw. Currently position too small (~$75) to justify.
-
 - **Observational filter test coverage** (added ~s1065): R#178 added observational language filter to intel auto-promotion. Add test cases to session-context.test.mjs verifying: (1) imperative verbs pass, (2) observational patterns in actionable field block, (3) observational patterns in summary field block, (4) concrete tasks like "Build X component" pass through.
 
 - **Half-open circuit notification** (added ~s1065): When circuit-reset-probe.mjs transitions a platform from open to half-open, add a notification to the next E session's picker context ("Platform X recovered from circuit-open state — consider re-engaging"). Currently probes run silently without surfacing recovery events.
@@ -60,3 +54,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#177 s1060: Structural change added d049 minimum intel capture requirement to SESSION_ENGAGE.md (fixes BROKEN intel pipeline). Cleaned d047 reference, added wq-309 (d049 audit compliance), added 2 ideas (open circuit auto-repair, intel pipeline endpoint). Queue: 3 pending + 1 in-progress. Brainstorming: 3 ideas.*
 *B#296 s1062: Completed wq-309 (d049 audit compliance). Promoted intel pipeline endpoint → wq-310. Queue: 3 pending + 1 in-progress. Brainstorming: 2 ideas.*
 *R#178 s1065: Structural change added observational language filter to session-context.mjs intel auto-promotion (fixes 0% conversion rate). Cleaned d047 reference, added 2 ideas (filter test coverage, half-open circuit notification). Queue: 3 pending + 1 in-progress. Brainstorming: 3 ideas.*
+*R#179 s1070: Structural change fixed intel-diagnostics.mjs false positive (reports HEALTHY instead of BROKEN when active file empty but archive has recent entries). Cleaned d047/d050 duplicates from brainstorming. Queue: 3 pending + 1 in-progress. Brainstorming: 2 ideas.*

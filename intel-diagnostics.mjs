@@ -35,19 +35,30 @@ function readJSON(path, defaultValue = null) {
 function diagnose() {
   console.log('# Intel→Queue Pipeline Diagnostics\n');
 
-  // 1. Check engagement-intel.json
+  // 1. Check engagement-intel.json (active file)
   const intelPath = join(CONFIG_DIR, 'engagement-intel.json');
+  const archivePath = join(CONFIG_DIR, 'engagement-intel-archive.json');
   const intel = readJSON(intelPath, []);
+  const archive = readJSON(archivePath, []);
   const actionableIntel = intel.filter(i => i.actionable && i.actionable.length > 20);
 
+  // Check if archive has recent entries (last 10 sessions)
+  const sessionNum = parseInt(process.env.SESSION_NUM || '0');
+  const recentArchive = archive.filter(i => i.archived_session && i.archived_session >= sessionNum - 10);
+
   console.log('## Engagement Intel');
-  console.log(`- Total entries: ${intel.length}`);
+  console.log(`- Active entries: ${intel.length}`);
+  console.log(`- Archive entries: ${archive.length} (${recentArchive.length} from last 10 sessions)`);
   console.log(`- With actionable text: ${actionableIntel.length}`);
 
-  if (intel.length === 0) {
-    console.log('- **DIAGNOSIS**: No intel entries. E sessions not generating intel.');
+  if (intel.length === 0 && recentArchive.length > 0) {
+    // Empty active file but recent archive entries = NORMAL (B session archived)
+    console.log('- **DIAGNOSIS**: Active file empty, recent intel archived. NORMAL state.');
+    console.log('- **ACTION**: None needed — B sessions archive intel after each run.');
+  } else if (intel.length === 0 && recentArchive.length === 0) {
+    console.log('- **DIAGNOSIS**: No intel entries and no recent archive. E sessions not generating intel.');
     console.log('- **ACTION**: Add brainstorm idea "E session intel generation"');
-  } else if (actionableIntel.length === 0) {
+  } else if (actionableIntel.length === 0 && intel.length > 0) {
     console.log('- **DIAGNOSIS**: Intel exists but no actionable fields.');
     console.log('- **ACTION**: Check session-context.mjs promotion code');
   }
@@ -98,7 +109,9 @@ function diagnose() {
 
   // Summary
   console.log('\n## Summary');
-  if (intel.length === 0) {
+  if (intel.length === 0 && recentArchive.length > 0) {
+    console.log('Pipeline status: **HEALTHY** — active file empty but recent intel archived');
+  } else if (intel.length === 0 && recentArchive.length === 0) {
     console.log('Pipeline status: **BROKEN** — no intel being generated');
   } else if (pendingCount >= 5) {
     console.log('Pipeline status: **GATED** — capacity full, will resume when queue drains');

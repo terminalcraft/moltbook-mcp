@@ -37,7 +37,14 @@ queue = json.loads(Path(queue_file).read_text())
 state = json.loads(Path(state_file).read_text())
 items = queue.get("queue", [])
 
-blocked = [i for i in items if i.get("status") == "blocked"]
+# R#191: Filter out items with 'deferred' tag — these are intentionally blocked
+# until external conditions change (e.g., wq-325 waiting for ecosystem adoption).
+# Escalating deferred items creates noise since no one can action them.
+blocked = [
+    i for i in items
+    if i.get("status") == "blocked"
+    and "deferred" not in (i.get("tags") or [])
+]
 nudges = []
 
 for item in blocked:

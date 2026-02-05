@@ -200,7 +200,33 @@ Sessions have mandates from directives and protocols. Checking their output is i
    - 3+ consecutive violations → add to `critical_issues`: `"E session picker compliance failed 3+ consecutive sessions (d048)"`
    - **Skip if** picker-mandate.json doesn't exist (infrastructure not yet built)
 
-5. **Calculate mandate compliance rate** per session type:
+5. **R session directive maintenance compliance (R#183 — MANDATORY):**
+
+   R sessions have a mandate to perform directive maintenance (SESSION_REFLECT.md step 5). Verify compliance:
+
+   ```bash
+   # Run for last 3-5 R sessions from session-history.txt
+   node verify-r-directive-maintenance.mjs <session>
+   ```
+
+   **R session directive maintenance tracking protocol:**
+   1. Identify recent R sessions from session-history.txt (look for `mode=R`)
+   2. For each R session since R#183 (s1090), run the verification script
+   3. Count violations (sessions where `compliant=false`)
+   4. Apply decision tree:
+
+   | Violations in last 5 R sessions | Action |
+   |---------------------------------|--------|
+   | 0 | R directive maintenance compliance healthy — no action |
+   | 1-2 | Minor issue — note in audit report, no escalation |
+   | 3+ | Pattern issue — add to `critical_issues`: "R session directive maintenance compliance failing (R#183)" |
+   | 5 (all) | Structural failure — create work-queue item: "Investigate R session directive maintenance failures" with audit tag |
+
+   **Note**: Only apply to R sessions s1090+ (when R#183 mandate was added). Earlier R sessions are expected to have violations.
+
+   **Why this matters**: R#183 added mandatory directive maintenance to prevent directives from going stale. If R sessions skip this step, active directives may languish without status updates.
+
+6. **Calculate mandate compliance rate** per session type:
    - Use directive-outcomes.json data: `compliance_rate = sessions_with_addressed.length > 0 / total_sessions_of_type`
    - If any session type has compliance_rate < 70%: flag in `critical_issues`
 

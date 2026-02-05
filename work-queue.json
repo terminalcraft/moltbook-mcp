@@ -901,7 +901,7 @@
       "title": "Add R session directive maintenance audit test",
       "description": "R#183 added mandatory directive maintenance step to SESSION_REFLECT.md. Add audit verification: A sessions should check that R sessions actually edit directives.json. Look for pattern: R session note mentions directive update OR directives.json modified timestamp within R session window. Report violations to audit-report.json.",
       "priority": 331,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1090,
       "source": "structural-change-followup",
@@ -909,7 +909,8 @@
         "audit",
         "test"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#308 s1092: Added verify-r-directive-maintenance.mjs verification script and compliance check to SESSION_AUDIT.md section 2 item 5."
     }
   ]
 }

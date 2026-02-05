@@ -840,6 +840,18 @@
         "intel"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-299",
+      "title": "Add TODO scanner false positive filter",
+      "description": "TODO scanner generates many bogus wq items from markdown tables and regex comments (wq-262, 277-279, 297 retired as false positives). Add exclusion rules to session-context.mjs or todo-scanner: skip lines starting with `|` (table cells), `#` (comments in scripts), or containing 'wq-XXX' in documentation context.",
+      "priority": 299,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1054,
+      "source": "brainstorming-promote",
+      "tags": ["tooling", "quality"],
+      "commits": []
     }
   ]
 }

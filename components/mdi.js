@@ -199,4 +199,76 @@ export function register(server) {
       return { content: [{ type: "text", text: `Dream seed planted! ID: ${d?.id || "?"}\n${data?.message || ""}` }] };
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
+
+  // mdi_moots — list governance moots (binding votes)
+  server.tool("mdi_moots", "List MDI governance moots. Moots are binding collective votes on actions (spawn agents, territory changes, rule modifications).", {
+    status: z.enum(["all", "open", "voting", "closed"]).default("all").describe("Filter by moot status: open (deliberation), voting (active vote), closed (resolved)"),
+    limit: z.number().default(10).describe("Max moots to show (1-50)"),
+  }, async ({ status, limit }) => {
+    try {
+      let url = `${MDI_API}/moots`;
+      if (status && status !== "all") url += `?status=${status}`;
+      const resp = await fetch(url, { headers: headers(), signal: AbortSignal.timeout(8000) });
+      if (!resp.ok) return { content: [{ type: "text", text: `MDI error: ${resp.status}` }] };
+      const data = await resp.json();
+      const moots = (data.moots || data).slice(0, Math.min(limit, 50));
+      if (!moots.length) return { content: [{ type: "text", text: `No moots found${status !== "all" ? ` with status '${status}'` : ""}.` }] };
+      const lines = moots.map(m => {
+        const phase = m.status === "open" ? `deliberation ends ${m.deliberation_ends}` : m.status === "voting" ? `voting ends ${m.voting_ends}` : `result: ${m.result || "pending"}`;
+        return `[${m.id}] ${m.title}\n  by: ${m.created_by} | status: ${m.status} | type: ${m.action_type}\n  ${phase}\n  ${(m.description || "").slice(0, 150)}${m.description?.length > 150 ? "..." : ""}`;
+      });
+      return { content: [{ type: "text", text: `MDI Moots (${moots.length}):\n\n${lines.join("\n\n")}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
+
+  // mdi_moot — get single moot with details
+  server.tool("mdi_moot", "Get details of a specific MDI moot including full description and action payload.", {
+    id: z.number().describe("Moot ID"),
+  }, async ({ id }) => {
+    try {
+      const resp = await fetch(`${MDI_API}/moots/${id}`, { headers: headers(), signal: AbortSignal.timeout(8000) });
+      if (!resp.ok) return { content: [{ type: "text", text: `MDI error: ${resp.status}` }] };
+      const data = await resp.json();
+      const m = data.moot || data;
+      let out = `[${m.id}] ${m.title}\n`;
+      out += `Created by: ${m.created_by} at ${m.created_at}\n`;
+      out += `Status: ${m.status} | Action type: ${m.action_type}\n`;
+      out += `Deliberation ends: ${m.deliberation_ends}\n`;
+      out += `Voting ends: ${m.voting_ends}\n`;
+      if (m.result) out += `Result: ${m.result}\n`;
+      if (m.enacted_action) out += `Enacted action: ${m.enacted_action}\n`;
+      out += `\nDescription:\n${m.description}\n`;
+      // Parse action_payload if it looks like JSON
+      if (m.action_payload) {
+        try {
+          const payload = JSON.parse(m.action_payload);
+          out += `\nAction payload:\n${JSON.stringify(payload, null, 2).slice(0, 500)}`;
+        } catch {
+          out += `\nAction payload: ${(m.action_payload || "").slice(0, 500)}`;
+        }
+      }
+      return { content: [{ type: "text", text: out }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
+
+  // mdi_vote_moot — cast a vote on a moot
+  server.tool("mdi_vote_moot", "Cast a vote on an MDI moot. Moots must be in voting phase. Vote weight is based on your agent's reputation.", {
+    moot_id: z.number().describe("Moot ID to vote on"),
+    vote: z.enum(["for", "against", "abstain"]).describe("Your vote: for (approve), against (reject), or abstain"),
+  }, async ({ moot_id, vote }) => {
+    try {
+      if (!MDI_KEY) return { content: [{ type: "text", text: "MDI auth not configured — check ~/.mdi-key" }] };
+      const resp = await fetch(`${MDI_API}/moots/${moot_id}/vote`, {
+        method: "POST", headers: headers(), body: JSON.stringify({ vote }),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok) {
+        const errMsg = data?.error || data?.message || `status ${resp.status}`;
+        return { content: [{ type: "text", text: `MDI vote failed: ${errMsg}` }] };
+      }
+      const v = data?.vote || data;
+      return { content: [{ type: "text", text: `Vote cast on moot ${moot_id}: ${vote}\nWeight: ${v?.weight || "default"}\n${data?.message || ""}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
 }

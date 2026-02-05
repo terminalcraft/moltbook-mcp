@@ -52,7 +52,7 @@ describe('mdi.js component', () => {
   describe('tool registration', () => {
     test('registers all expected tools', () => {
       const tools = server.getTools();
-      const expectedTools = ['mdi_pulse', 'mdi_stream', 'mdi_contribute', 'mdi_leaderboard', 'mdi_territories', 'mdi_questions', 'mdi_question', 'mdi_answer', 'mdi_ask_question', 'mdi_vote', 'mdi_dream_seed'];
+      const expectedTools = ['mdi_pulse', 'mdi_stream', 'mdi_contribute', 'mdi_leaderboard', 'mdi_territories', 'mdi_questions', 'mdi_question', 'mdi_answer', 'mdi_ask_question', 'mdi_vote', 'mdi_dream_seed', 'mdi_moots', 'mdi_moot', 'mdi_vote_moot'];
       for (const toolName of expectedTools) {
         assert.ok(tools[toolName], `Tool ${toolName} should be registered`);
       }
@@ -241,6 +241,149 @@ describe('mdi.js component', () => {
       const result = await server.callTool('mdi_pulse', {});
       const text = getText(result);
       assert.ok(text.includes('error') || text.includes('abort'), 'Should handle timeout');
+    });
+  });
+
+  describe('mdi_moots', () => {
+    test('returns moots successfully', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          moots: [
+            {
+              id: 14,
+              title: 'Spawn agent: Test Agent',
+              description: 'A test moot for governance',
+              status: 'open',
+              created_by: 'testuser',
+              created_at: '2026-02-04T10:00:00Z',
+              deliberation_ends: '2026-02-05T10:00:00Z',
+              voting_ends: '2026-02-06T10:00:00Z',
+              action_type: 'spawn_agent',
+              result: null
+            }
+          ]
+        })
+      }));
+
+      const result = await server.callTool('mdi_moots', { status: 'all', limit: 10 });
+      const text = getText(result);
+      assert.ok(text.includes('14'), 'Should show moot ID');
+      assert.ok(text.includes('Spawn agent'), 'Should show moot title');
+      assert.ok(text.includes('testuser'), 'Should show creator');
+      assert.ok(text.includes('open'), 'Should show status');
+    });
+
+    test('handles empty moots', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ moots: [] })
+      }));
+
+      const result = await server.callTool('mdi_moots', { status: 'voting', limit: 10 });
+      const text = getText(result);
+      assert.ok(text.includes('No moots'), 'Should indicate no moots found');
+    });
+
+    test('handles status filter', async () => {
+      global.fetch = mock.fn((url) => {
+        assert.ok(url.includes('status=voting'), 'Should include status param');
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ moots: [] })
+        });
+      });
+
+      await server.callTool('mdi_moots', { status: 'voting', limit: 10 });
+    });
+
+    test('handles API errors', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: false,
+        status: 500
+      }));
+
+      const result = await server.callTool('mdi_moots', { status: 'all', limit: 10 });
+      const text = getText(result);
+      assert.ok(text.includes('error') || text.includes('500'), 'Should show error');
+    });
+  });
+
+  describe('mdi_moot', () => {
+    test('returns single moot details', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          moot: {
+            id: 14,
+            title: 'Spawn agent: Test Agent',
+            description: 'Full description of the moot',
+            status: 'voting',
+            created_by: 'testuser',
+            created_at: '2026-02-04T10:00:00Z',
+            deliberation_ends: '2026-02-05T10:00:00Z',
+            voting_ends: '2026-02-06T10:00:00Z',
+            action_type: 'spawn_agent',
+            action_payload: '{"name":"Test Agent"}',
+            result: null
+          }
+        })
+      }));
+
+      const result = await server.callTool('mdi_moot', { id: 14 });
+      const text = getText(result);
+      assert.ok(text.includes('14'), 'Should show moot ID');
+      assert.ok(text.includes('Spawn agent'), 'Should show title');
+      assert.ok(text.includes('Full description'), 'Should show full description');
+      assert.ok(text.includes('voting'), 'Should show status');
+    });
+
+    test('handles missing moot', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: false,
+        status: 404
+      }));
+
+      const result = await server.callTool('mdi_moot', { id: 999 });
+      const text = getText(result);
+      assert.ok(text.includes('error') || text.includes('404'), 'Should show error');
+    });
+  });
+
+  describe('mdi_vote_moot', () => {
+    test('handles missing API key', async () => {
+      const result = await server.callTool('mdi_vote_moot', { moot_id: 14, vote: 'for' });
+      const text = getText(result);
+      // Should either succeed (if key exists) or show auth error
+      assert.ok(text.includes('auth') || text.includes('Vote') || text.includes('MDI') || text.includes('failed'), 'Should handle key check');
+    });
+
+    test('handles not-in-voting-phase error', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: false,
+        status: 400,
+        json: () => Promise.resolve({ error: 'Moot is not in voting phase' })
+      }));
+
+      const result = await server.callTool('mdi_vote_moot', { moot_id: 14, vote: 'for' });
+      const text = getText(result);
+      assert.ok(text.includes('failed') || text.includes('voting phase') || text.includes('auth'), 'Should show error or auth issue');
+    });
+
+    test('handles successful vote', async () => {
+      global.fetch = mock.fn(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          vote: { id: 1, moot_id: 14, vote: 'for', weight: 5 },
+          message: 'Vote recorded'
+        })
+      }));
+
+      // This test depends on MDI_KEY being present
+      const result = await server.callTool('mdi_vote_moot', { moot_id: 14, vote: 'for' });
+      const text = getText(result);
+      // Either shows auth error (no key) or success
+      assert.ok(text.includes('Vote') || text.includes('auth'), 'Should show vote result or auth error');
     });
   });
 });

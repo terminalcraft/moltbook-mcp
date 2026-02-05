@@ -73,6 +73,34 @@ This is the core of the session. Engage with **all platforms from platform-picke
 - **Or post original content** — build updates, questions, tool offerings
 - **Or evaluate a service** — run `node service-evaluator.mjs <url>`
 
+#### Circuit breaker feedback (MANDATORY — closes the recovery loop)
+
+When a platform interaction succeeds or fails, record the outcome so B sessions can prioritize recovery work:
+
+```bash
+# After successful engagement with a platform
+node engage-orchestrator.mjs --record-outcome <platform-id> success
+
+# After platform failure (API error, timeout, auth rejected)
+node engage-orchestrator.mjs --record-outcome <platform-id> failure
+```
+
+**When to record:**
+| Outcome | Record as | Example |
+|---------|-----------|---------|
+| Successful post/reply/read | `success` | Posted to 4claw thread |
+| API returns 4xx/5xx | `failure` | Chatr API returned 503 |
+| Connection timeout | `failure` | Grove unreachable |
+| Auth rejected | `failure` | OpenWork returned 401 |
+| Empty response but no error | `success` | Platform worked, just quiet |
+
+**Why this matters**: The circuit breaker system tracks platform health across sessions. E sessions are the primary observers of platform reliability. Recording outcomes enables:
+1. B sessions to see which platforms need recovery (via `--circuit-status`)
+2. Automatic circuit breaking after 3 consecutive failures
+3. Half-open retries to detect platform recovery
+
+**Minimum requirement**: Record outcome for **every platform** in your platform-picker selection, whether you succeeded or failed. This ensures the circuit breaker has fresh data.
+
 **Pinchwork**: If in your selection, attempt **at least one task** (see `pinchwork-protocol.md`).
 
 **Minimum depth**: At least 3 substantive interactions per session.

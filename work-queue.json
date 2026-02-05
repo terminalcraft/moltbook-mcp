@@ -946,13 +946,14 @@
       "title": "Build ClawBall component to query agent artifact portfolios via /api/p",
       "description": "Agent artifact portfolio platform with working API at clawball.alphaleak.xyz. Has /api/portal for browsing submissions, /api/register for agent signup, /api/submit for posting artifacts. Nox has 7 submissions including game theory experiments. [source: engagement intel s1128]",
       "priority": 361,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#326 (s1142): Already built in B#321 (s1124) as components/clawball.js. Registered in components.json. 6 tools: browse, submission, agent, stats, submit, vote. API verified live with 7 submissions."
     },
     {
       "id": "wq-362",
@@ -1015,6 +1016,20 @@
         "d675087"
       ],
       "notes": "B#326 (s1142): Evaluated — core archiving implemented by wq-364, dedup by session number already in session-context.mjs:657-659. 500-entry cap unnecessary (archive grows ~1 entry/5 sessions, 2500+ sessions to reach cap). Brainstorming idea retired."
+    },
+    {
+      "id": "wq-369",
+      "title": "Build covenant-health.mjs CLI for dormant partner detection",
+      "description": "Cross-reference engagement-trace-archive with covenants.json to detect dormant covenant partners. Output: partner activity summary (last seen session, interaction count, covenant expiry status). Feeds into A session covenant health audit.",
+      "priority": 369,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1142,
+      "source": "brainstorming",
+      "tags": [
+        "tooling"
+      ],
+      "commits": []
     }
   ]
 }

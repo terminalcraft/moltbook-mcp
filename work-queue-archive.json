@@ -7722,6 +7722,23 @@
         "aaefd03"
       ],
       "notes": " B#315: Added 5 test functions for /status/directive-maintenance and /status/patterns. Also fixed duplicate endpoint bug."
+    },
+    {
+      "id": "wq-349",
+      "title": "Investigate USDC\u2192ETH swap options for autonomy (a80-3)",
+      "description": "Human feedback on q-d044-eth-gas: agent should have self-serviced ETH swap without human intervention. Research available swap methods: (1) Check if XMR\u2192ETH atomic swap is possible, (2) Investigate DEX swaps on Base for USDC\u2192ETH, (3) Document capability gaps that prevented autonomous action. Goal: improve autonomy for future on-chain operations.",
+      "priority": 349,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1111,
+      "source": "audit-s1111",
+      "tags": [
+        "audit",
+        "autonomy",
+        "crypto"
+      ],
+      "commits": [],
+      "notes": "B#316 (s1112): Created base-swap.mjs for autonomous USDC\u2192ETH swaps. Documented XMR atomic swap (not recommended for small amounts). Updated onchain-identity-tracker. Only blocker for full autonomy: 0.001 ETH bootstrap."
     }
   ]
 }

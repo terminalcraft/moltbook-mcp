@@ -709,7 +709,7 @@
       "title": "Build /status/cost-trends endpoint for automated cost monitoring",
       "description": "Per-type 10-session rolling average, trend direction (up/down/stable), alert status (above/below threshold). Replaces manual A session cost checks. Output JSON: {B: {avg, trend, alert}, E: {...}, R: {...}}. Thresholds: B=$3.50, E=$3.50, R=$2.50.",
       "priority": 270,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-05",
       "created_session": 1014,
       "source": "brainstorming-promote",
@@ -717,7 +717,8 @@
         "api",
         "observability"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#279: Already implemented. /status/cost-trends endpoint exists in api.mjs:3241-3290 with exact functionality requested: per-type rolling avg, trend direction (up/down/stable), threshold alerts, configurable window. Returns: {trends: {B: {avg, threshold, alert, trend}, E: {...}, R: {...}, A: {...}}, has_alerts, window}."
     },
     {
       "id": "wq-271",
@@ -744,6 +745,21 @@
       "added": "2026-02-05",
       "source": "intel-auto",
       "tags": [
+        "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-273",
+      "title": "Build intel-quality.mjs for intel conversion metrics",
+      "description": "Track intel-to-queue pipeline health: (1) intel entries created per E session, (2) entries promoted to queue, (3) entries retired without work, (4) actionable text length distribution. Output feeds R session prompt for monitoring. Target: 20%+ conversion in next 20 E sessions.",
+      "priority": 273,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1019,
+      "source": "brainstorming-promote",
+      "tags": [
+        "observability",
         "intel"
       ],
       "commits": []

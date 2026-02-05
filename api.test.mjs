@@ -186,6 +186,57 @@ async function testStatusDirectiveMetrics() {
   }
 }
 
+// wq-345: Add tests for /status/directive-maintenance (wq-341 endpoint)
+async function testStatusDirectiveMaintenance() {
+  const r = await get("/status/directive-maintenance");
+  assert(r.status === 200, "/status/directive-maintenance returns 200");
+  if (r.body) {
+    assert(r.body.summary, "/status/directive-maintenance has summary");
+    assert(typeof r.body.summary.total_active === "number", "summary has total_active");
+    assert(typeof r.body.summary.needs_attention_count === "number", "summary has needs_attention_count");
+    assert(r.body.summary.r_session_compliance, "summary has r_session_compliance");
+    assert(typeof r.body.summary.r_session_compliance.rate_pct === "number", "r_session_compliance has rate_pct");
+    assert(Array.isArray(r.body.active_directives), "has active_directives array");
+    assert(Array.isArray(r.body.needs_attention), "has needs_attention array");
+    // Check active directive structure if any exist
+    if (r.body.active_directives.length > 0) {
+      const d = r.body.active_directives[0];
+      assert(d.id, "directive has id");
+      assert(typeof d.age_sessions === "number", "directive has age_sessions");
+      assert(typeof d.needs_attention === "boolean", "directive has needs_attention");
+    }
+  }
+}
+
+async function testStatusDirectiveMaintenanceJSON() {
+  const r = await get("/status/directive-maintenance?format=json");
+  assert(r.status === 200, "/status/directive-maintenance?format=json returns 200");
+  assert(r.body, "JSON format returns body");
+}
+
+// wq-345: Add tests for /status/patterns (hot endpoint)
+async function testStatusPatterns() {
+  const r = await get("/status/patterns");
+  assert(r.status === 200, "/status/patterns returns 200");
+  if (r.body) {
+    assert(Array.isArray(r.body.hot_files), "has hot_files array");
+    assert(Array.isArray(r.body.friction_signals), "has friction_signals array");
+    assert(r.body.stats, "has stats object");
+    assert(typeof r.body.stats.total_sessions_analyzed === "number", "stats has total_sessions_analyzed");
+  }
+}
+
+async function testStatusPatternsJSON() {
+  const r = await get("/status/patterns?format=json");
+  assert(r.status === 200, "/status/patterns?format=json returns 200");
+  assert(r.body, "JSON format returns body");
+}
+
+async function testStatusPatternsTrends() {
+  const r = await get("/status/patterns/trends");
+  assert(r.status === 200, "/status/patterns/trends returns 200");
+}
+
 async function testStatusPipeline() {
   const r = await get("/status/pipeline");
   assert(r.status === 200 || r.status === 401 || r.status === 403, "/status/pipeline returns 200 or auth error");
@@ -2625,7 +2676,10 @@ async function main() {
     // Status
     testStatusDashboard, testStatusAll, testStatusQueue,
     testStatusQueueHealth, testStatusQueueVelocity,
-    testStatusEfficiency, testStatusDirectives, testStatusDirectiveMetrics, testStatusPipeline,
+    testStatusEfficiency, testStatusDirectives, testStatusDirectiveMetrics,
+    testStatusDirectiveMaintenance, testStatusDirectiveMaintenanceJSON,
+    testStatusPatterns, testStatusPatternsJSON, testStatusPatternsTrends,
+    testStatusPipeline,
     testStatusPlatforms, testStatusCostHeatmap, testStatusCostDistribution,
     testStatusSessionEffectiveness, testStatusCreds,
     // Sessions & analytics

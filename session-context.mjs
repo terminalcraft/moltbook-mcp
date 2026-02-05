@@ -621,6 +621,66 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     }
   }
 
+  // --- R#186: Auto-promote live platforms from services.json to account-registry (d051) ---
+  // Per d051: 17 live platforms exist in services.json but were never added to account-registry,
+  // so platform-picker.mjs cannot select them. The discovery→integration pipeline is broken.
+  // Fix: For each live service not in account-registry, add a skeleton entry with status
+  // "needs_probe" so it becomes visible to platform-picker and E sessions can probe it.
+  // Log promotions to ~/.config/moltbook/logs/discovery-promotions.log for tracking.
+  {
+    const servicesPath = join(DIR, 'services.json');
+    const registryPath = join(DIR, 'account-registry.json');
+    const logPath = join(STATE_DIR, 'logs', 'discovery-promotions.log');
+
+    let services = null;
+    let registry = null;
+
+    try { services = JSON.parse(readFileSync(servicesPath, 'utf8')); } catch { services = null; }
+    try { registry = JSON.parse(readFileSync(registryPath, 'utf8')); } catch { registry = null; }
+
+    if (services && registry && Array.isArray(services.services) && Array.isArray(registry.accounts)) {
+      const registryIds = new Set(registry.accounts.map(a => a.id));
+      const liveServices = (services.services || []).filter(s =>
+        s.liveness?.alive === true && !registryIds.has(s.id)
+      );
+
+      const promoted = [];
+      for (const svc of liveServices) {
+        // Create skeleton account-registry entry
+        const entry = {
+          id: svc.id,
+          platform: svc.name || svc.id,
+          auth_type: 'unknown',
+          cred_file: null,
+          cred_key: null,
+          test: { method: 'http', url: svc.url, auth: 'none', expect: 'status_2xx' },
+          status: 'needs_probe',
+          notes: `Auto-promoted from services.json s${COUNTER}. ${svc.notes || ''}`.trim()
+        };
+        registry.accounts.push(entry);
+        promoted.push(`${svc.id}: ${svc.name || svc.id} (${svc.url})`);
+      }
+
+      if (promoted.length > 0) {
+        writeFileSync(registryPath, JSON.stringify(registry, null, 2) + '\n');
+        result.platforms_promoted = promoted;
+
+        // Log to discovery-promotions.log for tracking
+        try {
+          const logDir = join(STATE_DIR, 'logs');
+          if (!existsSync(logDir)) {
+            execSync(`mkdir -p "${logDir}"`);
+          }
+          const logEntry = `${new Date().toISOString()} s${COUNTER}: Promoted ${promoted.length} platforms: ${promoted.join(', ')}\n`;
+          let logContent = '';
+          try { logContent = readFileSync(logPath, 'utf8'); } catch {}
+          writeFileSync(logPath, logContent + logEntry);
+        } catch { /* log failure is not fatal */ }
+      }
+    }
+  }
+  markTiming('platform_promotion');
+
   // Directive intake check — uses directives.json (structured system, wq-015)
   const directivesPath = join(DIR, 'directives.json');
   if (existsSync(directivesPath)) {

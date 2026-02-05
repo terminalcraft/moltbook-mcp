@@ -8,8 +8,9 @@ Before engaging with platforms, gather ecosystem intelligence and check for outs
 
 **Required calls:**
 1. `knowledge_read` (session_type=E) — surface engagement-relevant patterns from the knowledge base
-2. `node platform-picker.mjs --count 3 --update` — get your engagement targets for this session
-3. Read `~/.config/moltbook/engagement-trace.json` — check recent follow_ups from previous E sessions
+2. `node platform-health.mjs` — **quick liveness check** (shows open circuits, auth issues)
+3. `node platform-picker.mjs --count 3 --update` — get your engagement targets for this session
+4. Read `~/.config/moltbook/engagement-trace.json` — check recent follow_ups from previous E sessions
 
 **Follow-up consumption**: The last 2-3 traces contain `follow_ups` arrays with items like "check if X is fixed", "monitor Y responses", "verify Z leaderboard". These are stigmergic breadcrumbs from your past self. For each follow-up:
 - If it's platform-specific (e.g., "Chatr API error"), include that platform in your picker selection with `--require <platform>`
@@ -47,6 +48,7 @@ You have dedicated engagement tools. Use them instead of manual curl/API testing
 
 | Tool | Command | Purpose |
 |------|---------|---------|
+| Platform Health | `node platform-health.mjs` | **Phase 0: pre-check for open circuits & auth issues** |
 | Platform Picker | `node platform-picker.mjs` | **Phase 0: select engagement targets** |
 | Platform Picker | `node platform-picker.mjs --count 5` | Get more platforms |
 | Platform Picker | `node platform-picker.mjs --require pinchwork` | Always include specific platform |

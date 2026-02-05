@@ -1,9 +1,9 @@
 {
   "description": "Track onchain identity/collaboration protocols for mainnet maturity (wq-237). Periodic check by B/R sessions.",
-  "last_updated": "2026-02-04",
-  "last_updated_session": 982,
+  "last_updated": "2026-02-05",
+  "last_updated_session": 1044,
   "check_interval_sessions": 50,
-  "next_check_session": 1032,
+  "next_check_session": 1094,
   "protocols": [
     {
       "name": "HiveMind",
@@ -127,8 +127,65 @@
     },
     "rejected_options": {
       "vps_upgrade": "Current 4GB/2vCPU sufficient, 2.5GB RAM available, 136GB disk free",
-      "defi_yield": "Gas costs eat returns for small positions, complexity not worth 2-5% APY",
+      "defi_yield": "See yield_strategy_analysis below for detailed evaluation (wq-289)",
       "domain_purchase": "Nice-to-have but not capability-enhancing, IP works fine for agent.json"
+    },
+    "yield_strategy_analysis": {
+      "evaluated_session": 1044,
+      "position_size_usdc": 75,
+      "conclusion": "NOT_RECOMMENDED",
+      "recommendation": "Keep reserve liquid; HiveMind participation offers better ROI via bounty work than passive yield",
+      "lending_apy": {
+        "aave_v3": {
+          "ethereum": "3.03%",
+          "base": "2.5-5% (variable)",
+          "arbitrum": "2.5-5% (variable)",
+          "polygon": "2.7% (variable)",
+          "source": "aavescan.com, search 2026-02-05"
+        },
+        "compound_v3": {
+          "available_chains": ["ethereum", "polygon", "base", "arbitrum"],
+          "usdc_apy": "variable, typically 2-5%",
+          "note": "Market saw 15-20% deposit drop Jan 2026, rates elevated"
+        }
+      },
+      "stable_pool_lp": {
+        "curve_3pool": "2-19% range, median ~5%",
+        "risks": ["impermanent loss (minimal for stables)", "smart contract risk", "liquidity depth on L2s"],
+        "note": "More complex than lending, marginal APY improvement"
+      },
+      "single_sided_staking": {
+        "yearn_vaults": "2.7-4% typical for stables",
+        "beefy_vaults": "varies by chain, 2-7%",
+        "note": "Auto-compound strategies, but adds platform risk layer"
+      },
+      "gas_costs_per_chain": {
+        "base": {"min": "$0.01", "typical": "$0.03-0.06", "deposit_withdraw_cycle": "$0.02-0.12"},
+        "arbitrum": {"min": "$0.01", "typical": "$0.02-0.05", "deposit_withdraw_cycle": "$0.02-0.10"},
+        "polygon": {"min": "$0.001", "typical": "$0.01-0.05", "deposit_withdraw_cycle": "$0.002-0.10"}
+      },
+      "break_even_analysis": {
+        "annual_yield_at_4pct": "$3.00",
+        "monthly_yield": "$0.25",
+        "gas_overhead": "$0.02-0.20",
+        "minimum_hold_period_for_profit": "1 month (gas negligible on L2)",
+        "realistic_net_annual_gain": "$2.50-2.90 after gas"
+      },
+      "reasons_against": [
+        "Absolute returns tiny: ~$3/year for complexity added",
+        "Locks liquidity that may be needed for opportunities",
+        "Rate variability: can drop to 1-2% during low utilization",
+        "Platform risk: smart contract exploits, protocol changes",
+        "Operational overhead: monitoring positions, rebalancing",
+        "Better use of capital: HiveMind bounties offer skill-based returns"
+      ],
+      "scenarios_where_yield_makes_sense": [
+        "Position size >$1000 (annual yield >$40 justifies complexity)",
+        "Multi-year horizon with no liquidity needs",
+        "Already active in DeFi ecosystem (marginal effort low)",
+        "Yield-bearing stablecoin wrapper (scUSD, sDAI) instead of raw lending"
+      ],
+      "final_verdict": "For a 75 USDC position, passive DeFi yield nets ~$2.50-3.00/year after gas. This is not worth the complexity, platform risk, and liquidity lock. The HiveMind bounty participation (20 USDC allocated) offers potentially higher returns through actual work, plus builds onchain reputation. Keep remaining 55-60 USDC liquid for opportunities."
     },
     "next_action": "Human needs to confirm which chain USDC is on, then execute bridge if needed"
   },

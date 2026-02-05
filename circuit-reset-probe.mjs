@@ -108,27 +108,35 @@ async function main() {
   const circuits = loadJSON(CIRCUITS_PATH, {});
   const now = new Date().toISOString();
 
-  // Find all open circuits
+  // Find all open circuits (transition to half-open on success)
   const openCircuits = Object.entries(circuits).filter(
     ([_id, circuit]) => circuit.status === "open"
   );
 
-  if (openCircuits.length === 0) {
+  // wq-300: Also find half-open circuits (close on success, re-open on failure)
+  const halfOpenCircuits = Object.entries(circuits).filter(
+    ([_id, circuit]) => circuit.status === "half-open"
+  );
+
+  if (openCircuits.length === 0 && halfOpenCircuits.length === 0) {
     if (jsonOutput) {
-      console.log(JSON.stringify({ checked: now, open_count: 0, probed: 0, recovered: 0 }));
+      console.log(JSON.stringify({ checked: now, open_count: 0, half_open_count: 0, probed: 0, recovered: 0, closed: 0 }));
     } else {
-      console.log("[circuit-reset] No open circuits to probe.");
+      console.log("[circuit-reset] No open or half-open circuits to probe.");
     }
     return;
   }
 
   if (!jsonOutput) {
-    console.log(`[circuit-reset] Found ${openCircuits.length} open circuit(s), probing...`);
+    console.log(`[circuit-reset] Found ${openCircuits.length} open + ${halfOpenCircuits.length} half-open circuit(s), probing...`);
   }
 
   const results = [];
   let recovered = 0;
+  let closed = 0;
+  let reopened = 0;
 
+  // Phase 1: Probe open circuits (transition to half-open on success)
   for (const [platformId, circuit] of openCircuits) {
     const url = getUrlForPlatform(platformId);
     if (!url) {
@@ -172,8 +180,63 @@ async function main() {
     });
   }
 
+  // wq-300: Phase 2: Probe half-open circuits (close on success, re-open on failure)
+  for (const [platformId, circuit] of halfOpenCircuits) {
+    const url = getUrlForPlatform(platformId);
+    if (!url) {
+      if (!jsonOutput) {
+        console.log(`[?] ${platformId} — no URL found, skipping`);
+      }
+      continue;
+    }
+
+    const probe = await probeUrl(url);
+    const ms = Math.round((probe.elapsed || 0) * 1000);
+
+    if (probe.reachable) {
+      // Success! Close the circuit (fully healthy)
+      delete circuit.status;
+      delete circuit.half_open_at;
+      delete circuit.opened_at;
+      delete circuit.reason;
+      delete circuit.last_error;
+      circuit.consecutive_failures = 0;
+      circuit.total_successes = (circuit.total_successes || 0) + 1;
+      circuit.last_success = now;
+      closed++;
+
+      if (!jsonOutput) {
+        console.log(`[✓] ${platformId} — closed (${probe.status} ${ms}ms) → healthy`);
+      }
+    } else {
+      // Still failing - re-open the circuit
+      circuit.status = "open";
+      circuit.opened_at = now;
+      circuit.reason = `half-open probe failed: ${probe.error || "unreachable"}`;
+      circuit.last_error = probe.error || "unreachable";
+      circuit.last_failure = now;
+      circuit.consecutive_failures = (circuit.consecutive_failures || 0) + 1;
+      circuit.total_failures = (circuit.total_failures || 0) + 1;
+      reopened++;
+
+      if (!jsonOutput) {
+        console.log(`[✗] ${platformId} — re-opened (${probe.error || "unreachable"} ${ms}ms) → open`);
+      }
+    }
+
+    results.push({
+      platform: platformId,
+      url,
+      reachable: probe.reachable,
+      status: probe.status,
+      elapsed: ms,
+      new_state: circuit.status || "closed",
+      was_half_open: true,
+    });
+  }
+
   // Save updated circuits
-  if (!dryRun && recovered > 0) {
+  if (!dryRun && (recovered > 0 || closed > 0 || reopened > 0)) {
     saveJSON(CIRCUITS_PATH, circuits);
   }
 
@@ -197,14 +260,18 @@ async function main() {
       JSON.stringify({
         checked: now,
         open_count: openCircuits.length,
+        half_open_count: halfOpenCircuits.length,
         probed: results.length,
         recovered,
+        closed,
+        reopened,
         results,
       }, null, 2)
     );
   } else {
     console.log(`\n--- Circuit Reset Summary ---`);
-    console.log(`Open circuits: ${openCircuits.length} | Probed: ${results.length} | Recovered: ${recovered}`);
+    console.log(`Open: ${openCircuits.length} | Half-open: ${halfOpenCircuits.length} | Probed: ${results.length}`);
+    console.log(`Recovered: ${recovered} | Closed: ${closed} | Reopened: ${reopened}`);
     if (dryRun) console.log("(dry run — circuits not updated)");
   }
 }

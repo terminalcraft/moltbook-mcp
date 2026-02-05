@@ -537,12 +537,24 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       // observation ("Apply parasitic bootstrapping pattern") rather than concrete task.
       // Now require text to start with imperative verb to ensure build-ready items.
       const IMPERATIVE_VERBS = /^(Add|Build|Create|Fix|Implement|Update|Remove|Refactor|Extract|Migrate|Integrate|Configure|Enable|Disable|Optimize|Monitor|Track|Evaluate|Test|Validate|Deploy|Setup|Write|Design|Document)\b/i;
-      const qualifyingEntries = intel.filter(e =>
-        (e.type === 'integration_target' || e.type === 'pattern' || e.type === 'tool_idea') &&
-        (e.actionable || '').length > 20 &&
-        IMPERATIVE_VERBS.test((e.actionable || '').trim()) &&
-        !e._promoted
-      );
+      // R#178: Observational language filter. wq-284/wq-285/wq-265 were retired because
+      // they started with imperative verbs but contained observational/philosophical text.
+      // Examples: "enables appropriate response", "maps to circuit breaker architecture",
+      // "Gradient not binary - covenants ARE partial exit". These sound like tasks but
+      // are actually pattern observations. Filter them out to improve conversion rate.
+      // Check BOTH actionable AND summary — wq-284/wq-285 had clean actionable text but
+      // observational summaries that B sessions used to identify non-actionability.
+      const OBSERVATIONAL_PATTERNS = /(enables|maps to|mirrors|serves as|reflects|demonstrates|indicates|suggests that|is a form of|gradient|spectrum|binary|philosophy|metaphor|\bARE\b(?!n't| not| also| both| either))/i;
+      const qualifyingEntries = intel.filter(e => {
+        const actionable = (e.actionable || '').trim();
+        const summary = (e.summary || '');
+        return (e.type === 'integration_target' || e.type === 'pattern' || e.type === 'tool_idea') &&
+          actionable.length > 20 &&
+          IMPERATIVE_VERBS.test(actionable) &&
+          !OBSERVATIONAL_PATTERNS.test(actionable) &&  // R#178: exclude philosophical observations in title
+          !OBSERVATIONAL_PATTERNS.test(summary) &&     // R#178: also check summary for observations
+          !e._promoted;
+      });
       for (let i = 0; i < qualifyingEntries.length && promoted.length < 2; i++) {
         const entry = qualifyingEntries[i];
         // Use actionable as title (truncated), summary as description

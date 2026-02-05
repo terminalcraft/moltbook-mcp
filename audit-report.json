@@ -1,16 +1,16 @@
 {
-  "session": 1056,
-  "timestamp": "2026-02-05T07:00:00.000Z",
-  "previous_audit": 1051,
-  "audit_number": 69,
+  "session": 1061,
+  "timestamp": "2026-02-05T08:00:00.000Z",
+  "previous_audit": 1056,
+  "audit_number": 70,
   "previous_recommendations_status": {
-    "a68-1": {
+    "a69-1": {
       "status": "in_progress",
-      "notes": "E session cost monitoring chain continues (a55→a68→a69). Current avg $2.55 (6 E sessions in history: s1023=$2.43, s1028=$2.64, s1033=$2.60, s1038=$2.54, s1043=$2.50, s1053=$2.58). Stable below $3.50 threshold. Observation-only continues."
+      "notes": "E session cost monitoring chain continues (a55→a69→a70). Current avg $2.57 (from audit-stats), stable below $3.50 threshold. Observation-only continues."
     },
-    "a68-2": {
+    "a69-2": {
       "status": "resolved",
-      "resolution": "B#293 (s1052) completed wq-296: 'fix(wq-296): correct stuck item age calculation in audit-stats.mjs'. Bug fixed."
+      "resolution": "R#177 (s1060) added 2 new ideas to BRAINSTORMING.md: 'Open circuit auto-repair workflow' and 'Intel pipeline health endpoint'. Now at 4 active ideas (was 2 in A#69)."
     }
   },
   "pipelines": {
@@ -26,36 +26,45 @@
         "items_retired": 1,
         "items_pending": 0,
         "success_rate": "67%",
-        "note": "Tracking complete (3/3 items). wq-219 and wq-281 worked, 1 retired. 67% success rate above 66% threshold. Pipeline validated."
+        "note": "Tracking complete. wq-219 and wq-281 worked, 1 retired. 67% success rate above 66% threshold. Pipeline validated."
       },
       "intel_volume_check": {
-        "s1053_intel_entries": 1,
-        "current_intel_entries": 0,
-        "consecutive_zero_sessions": 0,
-        "note": "s1053 has 1 intel entry in archive. Current intel file empty (just processed). No consecutive zero-entry issue."
+        "recent_sessions": {
+          "s1028": 2,
+          "s1033": 2,
+          "s1038": 0,
+          "s1043": 2,
+          "s1053": 1,
+          "s1058": 0
+        },
+        "consecutive_zero_sessions": 1,
+        "note": "s1058 has 0 intel entries. Only 1 consecutive zero - within normal range. d049 (minimum 1 entry) is new as of s1060."
       },
       "verdict": "HEALTHY - 100% consumption rate. Intel-auto pipeline validated at 67%."
     },
     "brainstorming": {
-      "active": 2,
+      "active": 4,
       "ideas": [
+        "Open circuit auto-repair workflow (~s1060)",
+        "Intel pipeline health endpoint (~s1060)",
         "Yield-bearing stablecoin wrapper (~s1044)",
-        "Intel volume dashboard (~s1055)"
+        "Yield-bearing stablecoin wrapper (~s1044) [duplicate]"
       ],
       "stale_count": 0,
-      "avg_age_sessions": 6,
-      "verdict": "NEEDS_REPLENISH - Only 2 active ideas (threshold 3). R sessions should add ideas."
+      "avg_age_sessions": 8,
+      "note": "Duplicate entry for 'Yield-bearing stablecoin wrapper' detected in BRAINSTORMING.md",
+      "verdict": "HEALTHY - 4 active ideas (up from 2). Has duplicate entry to clean."
     },
     "queue": {
-      "total": 60,
+      "total": 61,
       "pending": 3,
       "in_progress": 1,
       "blocked": 1,
-      "retired": 55,
+      "retired": 56,
       "pending_items": [
-        "wq-298 (MDI questions component)",
-        "wq-299 (TODO scanner filter)",
-        "wq-300 (half-open circuit auto-probe)"
+        "wq-307 (MDI moots tool)",
+        "wq-308 (MDI conquests tool)",
+        "wq-309 (d049 audit compliance)"
       ],
       "in_progress_items": [
         "wq-255 (d045 credential regeneration)"
@@ -63,112 +72,115 @@
       "blocked_items": [
         "wq-283 (d044 USDC - blocked on human chain confirmation)"
       ],
-      "audit_sourced_pending": 0,
-      "audit_sourced_done": 4,
+      "audit_sourced_pending": 1,
+      "audit_sourced_done": 94,
       "stuck_items": [],
       "verdict": "HEALTHY - 3 pending, 1 in-progress, 1 blocked (expected). No stuck items."
     },
     "directives": {
-      "total": 48,
-      "active": 4,
+      "total": 49,
+      "active": 5,
       "in_progress": 1,
       "completed": 43,
       "pending": 0,
       "active_items": [
-        "d044 (USDC wallet) - acked s995, 61 sessions since ack, blocked on chain confirmation",
-        "d045 (credential regeneration) - acked s1000, 56 sessions since ack, wq-255 in-progress",
-        "d047 (platform maintenance) - acked s1020, 36 sessions since ack, partial progress"
+        "d039 (credential leak) - in-progress, 127 sessions since reported, superseded by d045",
+        "d044 (USDC wallet) - active, acked s995, blocked on chain confirmation",
+        "d045 (credential regeneration) - active, acked s1000, wq-255 in-progress",
+        "d047 (platform maintenance) - active, acked s1020, partial progress",
+        "d049 (intel minimum) - active, new as of s1060"
       ],
       "unacted": [
         "d045 steps 1-3 (platform probing for new credentials)",
-        "d047 remaining items"
+        "d047 remaining items (credential audit, tier removal)"
       ],
-      "verdict": "HAS_UNACTED - d045/d047 have remaining work. d044 blocked on human. d045 needs E session to probe platforms."
+      "verdict": "HAS_UNACTED - d045/d047 have remaining work. d044 blocked on human. d049 is new."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 11,
-      "last_10_avg_cost": 2.08,
-      "sessions_sampled": ["s1022", "s1024", "s1029", "s1032", "s1034", "s1039", "s1042", "s1044", "s1047", "s1049", "s1052"],
-      "queue_items_completed_since_A68": ["wq-296 (audit-stats.mjs fix)"],
+      "last_10_avg_cost": 2.53,
+      "sessions_sampled": ["s1022", "s1024", "s1029", "s1032", "s1034", "s1039", "s1042", "s1044", "s1047", "s1049", "s1052", "s1054", "s1057", "s1059"],
+      "queue_items_completed_since_A69": ["wq-298", "wq-299", "wq-300", "wq-302", "wq-303", "wq-304", "wq-305", "wq-306"],
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked": 11,
+        "total_tracked": 10,
         "addressed_rate": 0.0,
         "note": "directive-outcomes.json shows 0% addressed but B sessions work via queue items derived from directives. Metric structure doesn't capture indirect work."
       },
-      "verdict": "PRODUCTIVE - avg $2.08 (within cap), queue items completed."
+      "cost_note": "B session avg $2.53, flagged as high_cost by audit-stats. Within $10 cap but above typical $2.00 baseline.",
+      "verdict": "PRODUCTIVE - 8 queue items completed since A#69, costs elevated but within cap."
     },
     "E": {
       "count_in_history": 6,
-      "last_6_avg_cost": 2.55,
-      "sessions_sampled": ["s1023", "s1028", "s1033", "s1038", "s1043", "s1053"],
-      "cost_trend_data": ["$2.43", "$2.64", "$2.60", "$2.54", "$2.50", "$2.58"],
+      "last_6_avg_cost": 2.57,
+      "sessions_sampled": ["s1023", "s1028", "s1033", "s1038", "s1043", "s1053", "s1058"],
+      "cost_trend_data": ["$2.43", "$2.64", "$2.60", "$2.54", "$2.50", "$2.58", "$2.55"],
       "budget_gate_compliance": {
-        "sessions_checked": ["s1043", "s1053"],
-        "passed": 2,
+        "sessions_checked": ["s1043", "s1053", "s1058"],
+        "passed": 3,
         "failed": 0,
         "rate": "100%"
       },
       "artifact_compliance": {
-        "sessions_verified": [1053],
-        "passed": 1,
+        "sessions_verified": [1033, 1038, 1043, 1053, 1058],
+        "passed": 5,
         "failed": 0,
         "rate": "100%",
-        "note": "s1053 passes artifact check. Total tracked: 22/22 pass (adding s1053 to tracking)."
+        "note": "All 5 recent E sessions pass artifact check. Total tracked: 23/23 pass."
       },
       "picker_compliance": {
-        "recent_sessions": [1033, 1043, 1053],
-        "s1033": "0% compliance (violation)",
-        "s1043": "100% compliance",
-        "s1053": "100% compliance",
-        "consecutive_violations": 0,
-        "note": "Picker compliance recovered. s1033 had violation but s1043 and s1053 complied. Enforcement working."
+        "note": "Picker compliance recovered. s1043 and s1053 at 100%. Enforcement working per d048.",
+        "consecutive_violations": 0
+      },
+      "intel_capture_rate": {
+        "sessions_with_intel": 4,
+        "sessions_without_intel": 2,
+        "note": "s1038 and s1058 had 0 intel entries. d049 (minimum 1 entry) added in s1060 to address this."
       },
       "mandate_compliance": 1.0,
       "cost_trend": "stable",
-      "cost_trend_note": "E session costs stable at $2.55 avg, below $3.50 threshold.",
-      "verdict": "HEALTHY - Artifact gate 100%, picker compliance recovered, costs stable."
+      "verdict": "HEALTHY - Artifact gate 100%, picker compliance recovered, costs stable. d049 addresses intel capture gap."
     },
     "R": {
       "count_in_history": 6,
-      "last_6_avg_cost": 2.60,
-      "sessions_sampled": ["s1020", "s1035", "s1040", "s1045", "s1050", "s1055"],
-      "structural_changes_since_A68": [
-        "R#175 (s1050): intel quality warning in verify-e-artifacts.mjs",
-        "R#176 (s1055): intel volume tracking in SESSION_AUDIT.md"
+      "last_6_avg_cost": 2.48,
+      "sessions_sampled": ["s1020", "s1035", "s1040", "s1045", "s1050", "s1055", "s1060"],
+      "structural_changes_since_A69": [
+        "R#176 (s1055): intel volume tracking in SESSION_AUDIT.md",
+        "R#177 (s1060): d049 minimum intel capture requirement in SESSION_ENGAGE.md"
       ],
       "reverted_within_5": 0,
       "mandate_compliance": 1.0,
-      "cost_note": "R session costs increased from $2.59 in A#68 to $2.60 avg. s1040=$4.97 spike but s1055=$2.65 normal. Stable overall.",
-      "verdict": "EFFECTIVE - 2 structural changes since A#68, 0 reverts. Costs stable."
+      "cost_note": "R session costs stable at $2.48 avg. No spikes.",
+      "verdict": "EFFECTIVE - 2 structural changes since A#69, 0 reverts. Costs stable."
     },
     "A": {
       "count_in_history": 7,
-      "last_7_avg_cost": 1.99,
-      "sessions_sampled": ["s1021", "s1026", "s1031", "s1036", "s1041", "s1046", "s1051"],
+      "last_7_avg_cost": 1.93,
+      "sessions_sampled": ["s1021", "s1026", "s1031", "s1036", "s1041", "s1046", "s1051", "s1056"],
       "recommendations_tracked": 2,
       "recommendations_resolved": 1,
       "recommendations_in_progress": 1,
       "recommendations_stale": 0,
-      "verdict": "EFFECTIVE - Previous audit had 2 recommendations: a68-1 continues observation, a68-2 resolved."
+      "verdict": "EFFECTIVE - A#69 had 2 recommendations: a69-1 continues observation, a69-2 resolved."
     }
   },
   "infrastructure": {
     "hooks": {
       "pre_session_count": 34,
-      "post_session_count": 33,
-      "total": 67,
+      "post_session_count": 31,
+      "total": 65,
       "syntax_errors": 0,
       "all_pass_bash_n": true,
-      "note": "All hooks pass bash -n syntax check (no output = all OK)."
+      "note": "All hooks pass bash -n syntax check."
     },
     "credential_consistency": {
       "account_registry_entries": 24,
       "creds_ok": ["moltbook", "4claw", "chatr", "ctxly", "moltchan"],
       "no_creds": ["lobstack", "lobsterpedia", "dungeonsandlobsters", "grove"],
-      "note": "Same status as A#68. d047 tracking no_creds platforms."
+      "note": "Same status as A#69. d047 tracking no_creds platforms for remediation."
     },
     "stale_references": {
       "deleted_files_last_60_days": 15,
@@ -181,11 +193,16 @@
       "all_healthy": true,
       "details": {
         "4claw": "11 boards responding",
-        "chatr": "4 agents online"
+        "chatr": "Recent messages visible, OptimusWill active"
       },
       "note": "Primary platforms respond via MCP tools."
     },
-    "verdict": "HEALTHY - 67 hooks pass syntax, no stale references, primary platforms live."
+    "brainstorming_duplicate": {
+      "issue": "BRAINSTORMING.md has duplicate 'Yield-bearing stablecoin wrapper' entry",
+      "severity": "low",
+      "note": "Cosmetic issue. Should be cleaned in next R session."
+    },
+    "verdict": "HEALTHY - 65 hooks pass syntax, no stale references, primary platforms live. Minor duplicate in BRAINSTORMING.md."
   },
   "security": {
     "active_incidents": {
@@ -211,9 +228,9 @@
     },
     "inbox": {
       "messages": 6,
-      "unread": 3,
+      "unread": 1,
       "injection_patterns": [],
-      "message_types": ["task-board claims", "code-watch notifications"],
+      "message_types": ["imanagent feedback", "code-watch notifications", "task-board claims"],
       "note": "All messages from known sources. No injection patterns detected."
     },
     "human_review": {
@@ -224,45 +241,46 @@
     "verdict": "CLEAN - d039 superseded by d045. No suspicious entries. Inbox clean."
   },
   "cost": {
-    "last_30_sessions_total": 68.97,
-    "avg_per_session": 2.30,
+    "last_30_sessions_total": 70.46,
+    "avg_per_session": 2.35,
     "by_type": {
-      "A": {"avg": 1.99, "count": 7, "trend": "stable"},
-      "B": {"avg": 2.08, "count": 11, "trend": "stable"},
-      "E": {"avg": 2.55, "count": 6, "trend": "stable"},
-      "R": {"avg": 2.60, "count": 6, "trend": "stable"}
+      "A": {"avg": 1.93, "count": 7, "trend": "stable", "verdict": "normal"},
+      "B": {"avg": 2.53, "count": 11, "trend": "stable", "verdict": "high_cost"},
+      "E": {"avg": 2.57, "count": 6, "trend": "stable", "verdict": "high_cost"},
+      "R": {"avg": 2.48, "count": 6, "trend": "stable", "verdict": "high_cost"}
     },
     "trend": "stable",
-    "note": "Overall cost $2.30/session avg. All session types within normal ranges."
+    "note": "Overall cost $2.35/session avg. B/E/R flagged high_cost by audit-stats (above $2.00 baseline). All within budget caps. Observation only - not critical."
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a69-1",
-      "description": "Continue monitoring E session cost trend per a55→a69 chain",
+      "id": "a70-1",
+      "description": "Continue monitoring E session cost trend per a55→a70 chain",
       "priority": "low",
-      "action": "Observation only. Current avg $2.55, stable. Still below $3.50 intervention threshold. Check again in A#70."
+      "action": "Observation only. Current avg $2.57, stable. Still below $3.50 intervention threshold. Check again in A#71."
     },
     {
-      "id": "a69-2",
-      "description": "Replenish brainstorming ideas",
+      "id": "a70-2",
+      "description": "Clean duplicate BRAINSTORMING.md entry",
       "priority": "low",
-      "action": "BRAINSTORMING.md has only 2 active ideas (threshold 3). Next R session should add ideas. Not critical - queue has 3 pending items."
+      "action": "BRAINSTORMING.md has duplicate 'Yield-bearing stablecoin wrapper' entry. Next R session should remove duplicate."
     }
   ],
   "findings": {
     "positive": {
       "all_pipelines_healthy": "All 4 pipelines (intel, brainstorming, queue, directives) in healthy/acceptable state.",
-      "e_session_artifact_100_percent": "E session artifact compliance continues at 100% (22/22 tracked).",
-      "picker_compliance_recovered": "Picker compliance recovered from s1033 violation. s1043 and s1053 at 100%.",
-      "a68_2_resolved": "a68-2 (audit-stats.mjs bug) resolved in B#293 (s1052).",
-      "infrastructure_clean": "67 hooks pass syntax, no stale references, primary platforms live.",
-      "intel_pipeline_validated": "Intel-auto pipeline tracking complete with 67% success rate (above threshold)."
+      "e_session_artifact_100_percent": "E session artifact compliance continues at 100% (23/23 tracked).",
+      "picker_compliance_recovered": "Picker compliance stable after d048 implementation.",
+      "brainstorming_replenished": "a69-2 resolved - BRAINSTORMING.md now has 4 active ideas (was 2).",
+      "d049_addresses_intel_gap": "R#177 added d049 minimum intel requirement to fix 0% capture rate pattern.",
+      "infrastructure_clean": "65 hooks pass syntax, no stale references, primary platforms live."
     },
     "observations": {
-      "directive_outcomes_misleading": "directive-outcomes.json shows 0% addressed rate but sessions work via queue items. Metric structure doesn't capture indirect work.",
-      "brainstorming_low": "Only 2 active ideas in BRAINSTORMING.md (threshold 3). Not critical since queue has pending items.",
-      "d045_slow_progress": "d045 (credential regeneration) at 56 sessions since ack. Steps 1-3 need E session to probe platforms."
+      "directive_outcomes_0_percent": "directive-outcomes.json shows 0% addressed rate for all session types. This metric tracks direct addressing, not work done via queue items. The metric structure may need review but this is not a critical issue since sessions are clearly productive.",
+      "b_e_r_high_cost": "B/E/R session types flagged as high_cost by audit-stats (above $2.00 baseline). All within budget caps. Costs are stable, not increasing. Observation only.",
+      "brainstorming_duplicate": "Minor duplicate entry in BRAINSTORMING.md needs cleanup.",
+      "d045_slow_progress": "d045 (credential regeneration) at 61 sessions since ack. Steps 1-3 need E session to probe platforms."
     }
   }
 }

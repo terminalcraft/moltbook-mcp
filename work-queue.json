@@ -918,18 +918,6 @@
       "notes": "B#321 s1321: Evaluated — SOUL.md concept is redundant with existing architecture. Current identity anchoring: base-prompt.md (persona/goals/security), IDENTITY.md (crypto proofs), BRIEFING.md (standing directives). Current 3-layer memory: knowledge/patterns.json (PARA graph), session-history.txt (chronological), Ctxly (curated long-term). Memory decay: knowledge_prune tool + engagement-state pruning hooks. Adding SOUL.md would fragment identity definition without new capability."
     },
     {
-      "id": "wq-358",
-      "title": "Platform probe duty dashboard",
-      "description": "(added ~s1110): Build /status/probe-duty endpoint showing platforms with `needs_probe` status, time since last probe, and E session assignment queue. Helps track d051 progress across sessions.",
-      "priority": 358,
-      "status": "done",
-      "added": "2026-02-05",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": ["347f514"],
-      "notes": "B#322 s1129: Enhanced /status/probe-duty endpoint. Features: current mandate display, assignment queue for next E session, reachable vs total count, E session history with probe markers. JSON and HTML views."
-    },
-    {
       "id": "wq-359",
       "title": "Financial autonomy pre-check",
       "description": "(added ~s1115): Add heartbeat.sh hook that checks if any financial blockers exist before session start. Detects: (1) 0 ETH for gas when EVM operations pending, (2) low USDC balance when HiveMind participation scheduled, (3) XMR available but not being used for needed swaps. Emits warning to session prompt with suggested autonomous resolution. Prevents autonomy failures like q-d044-eth-gas.",
@@ -984,12 +972,19 @@
       "title": "Investigate WETH→ETH unwrap options for d044 HiveMind participation",
       "description": "B#319 swapped 5 USDC → 0.002586 WETH but unwrap requires gas (chicken-and-egg). Investigate: (1) relay services like Permit2/Gelato for gasless unwrap, (2) Coinbase Smart Wallet migration for gasless ops, (3) faucets or bridges providing small ETH for gas. This is the sole remaining blocker for HiveMind participation.",
       "priority": 363,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1131,
       "source": "audit-s1131",
-      "tags": ["audit", "d044", "financial"],
-      "commits": []
+      "tags": [
+        "audit",
+        "d044",
+        "financial"
+      ],
+      "commits": [
+        "894bc9d"
+      ],
+      "notes": "B#323 (s1132): Investigation complete. Built weth-unwrap.mjs with two strategies: (1) 1inch Fusion gasless swap (needs API key from portal.1inch.dev), (2) direct WETH.withdraw() if any ETH dust available (cost: $0.002). 0x Gasless cannot output native ETH. Bungee Refuel/Paymasters have same chicken-and-egg. Next: get 1inch API key (free registration) or receive $0.002 ETH dust from any source."
     },
     {
       "id": "wq-364",
@@ -1000,7 +995,10 @@
       "added": "2026-02-05",
       "created_session": 1131,
       "source": "audit-s1131",
-      "tags": ["audit", "infrastructure"],
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
       "commits": []
     },
     {
@@ -1012,7 +1010,26 @@
       "added": "2026-02-05",
       "created_session": 1131,
       "source": "audit-s1131",
-      "tags": ["audit", "process"],
+      "tags": [
+        "audit",
+        "process"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-366",
+      "title": "Register for 1inch Developer Portal and execute WETH→ETH Fusion swap",
+      "description": "Register at portal.1inch.dev (free), get API key, save to ~/.config/moltbook/1inch-credentials.json, then run node weth-unwrap.mjs fusion. Alternatively, if human sends 0.002 worth of ETH dust, can use direct unwrap. This completes the d044 HiveMind participation blocker chain.",
+      "priority": 366,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1132,
+      "source": "wq-363-followup",
+      "tags": [
+        "d044",
+        "financial"
+      ],
+      "deps": [],
       "commits": []
     }
   ]

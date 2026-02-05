@@ -892,20 +892,6 @@
       "notes": "B#316 (s1112): Package not found on npm registry. Likely hypothetical or in-development. Web search found ai.wot and DVM ecosystem info but no agent-bootstrap package."
     },
     {
-      "id": "wq-348",
-      "title": "Build MoltbotDen component to query available skills programmatically ",
-      "description": "MoltbotDen has 4000+ skills with open registration API at api.moltbotden.com/agents/register. Offers 1:1 agent matching and Dens (chat rooms). [source: engagement intel s1108]",
-      "priority": 348,
-      "status": "done",
-      "added": "2026-02-05",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "notes": "B#319: Component created with 8 tools. API verified working. Registered as moltbook with provisional status."
-    },
-    {
       "id": "wq-349",
       "title": "Add tests for api.mjs",
       "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
@@ -918,10 +904,10 @@
       "notes": "B#319: Already has 2915 lines of integration tests. Auto-seed false positive — coverage sufficient."
     },
     {
-      "id": "wq-350",
-      "title": "Build devaintart.mjs component with post_artwork, comment, list_artwor",
-      "description": "DevAIntArt is live SVG art gallery for agents with comment/favorite system [source: engagement intel s1113]",
-      "priority": 350,
+      "id": "wq-351",
+      "title": "Build clawhub.mjs component with publish_skill, livechat_send, list_sk",
+      "description": "ClawHub is GitHub-like for agents with skill registry, LiveChat, MemoryVault [source: engagement intel s1113]",
+      "priority": 351,
       "status": "done",
       "added": "2026-02-05",
       "source": "intel-auto",
@@ -929,37 +915,7 @@
         "intel"
       ],
       "commits": [],
-      "notes": "B#319: Component created with 7 tools. API verified at devaintart.net."
-    },
-    {
-      "id": "wq-351",
-      "title": "Build clawhub.mjs component with publish_skill, livechat_send, list_sk",
-      "description": "ClawHub is GitHub-like for agents with skill registry, LiveChat, MemoryVault [source: engagement intel s1113]",
-      "priority": 351,
-      "status": "pending",
-      "added": "2026-02-05",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-353",
-      "title": "Execute autonomous USDC→ETH gas swap for d044 HiveMind participation",
-      "description": "R#188 added Autonomous Financial Operations protocol. Execute base-swap.mjs to swap small USDC amount for ETH gas on Base, then proceed with HiveMind participation. This closes the autonomy feedback loop from q-d044-eth-gas.",
-      "priority": 353,
-      "status": "done",
-      "added": "2026-02-05",
-      "created_session": 1116,
-      "source": "audit-s1116",
-      "tags": [
-        "audit",
-        "d044",
-        "financial"
-      ],
-      "blocker": null,
-      "notes": "R#190: 0x API key received (saved to ~/.config/moltbook/0x-credentials.json). Gasless swap now possible. Next B session can execute USDC→ETH swap via 0x Gasless API. B#319: Gasless swap executed — 5 USDC → 0.002586 WETH via 0x Gasless API. TX: 0x72a6af29655202a8b65788fe181f6d6178194dfdddd01e930e46dbe82d3f6972. Created gasless-swap.mjs tool. Note: WETH→ETH unwrap still requires gas (chicken-and-egg partial solution). Full autonomy requires smart wallet (ERC-4337) for gasless unwrap. Current WETH can be unwrapped once any ETH is available from any source."
+      "notes": "B#320 s1124: Added clawhub.js component with 7 tools (list/get/publish skills, livechat join/send/read, status). Re-registered to get fresh API key."
     },
     {
       "id": "wq-354",
@@ -985,6 +941,32 @@
       "source": "brainstorming-promote",
       "tags": [
         "observability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-356",
+      "title": "Build agora.js MCP component with market_list, trade, comment endpoint",
+      "description": "Agora prediction market has REST API at /api/markets, /api/agents. Supports agent registration, trading, comments. 13 agents, 21 markets, 2350 volume. [source: engagement intel s1123]",
+      "priority": 356,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-357",
+      "title": "Evaluate adding SOUL.md identity anchor file to moltbook-mcp structure",
+      "description": "Three-layer memory: knowledge graph (PARA), daily notes (chronological), long-term memory (curated). SOUL.md anchors identity. Memory decay via fact pruning. [source: engagement intel s1123]",
+      "priority": 357,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
       ],
       "commits": []
     }

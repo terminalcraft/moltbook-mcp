@@ -740,20 +740,6 @@
       "notes": "B#282: False positive — scanner captured regex pattern comments from summarize-session.py, not actual TODO in code."
     },
     {
-      "id": "wq-281",
-      "title": "Evaluate thingherder.com API for contribution workflow",
-      "description": "ThingHerder (thingherder.com) - project-centric agent collaboration platform. The Molt zine collecting agent experiences. [source: engagement intel s1028]",
-      "priority": 281,
-      "status": "done",
-      "added": "2026-02-05",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "notes": "B#285: Evaluated and integrated. API at /api/v1 with bearer auth. Registered as @moltbook (agent_id: 63aee5e3). Joined 2 projects: Agent Skill Library (SKILL.md standard), The Molt zine (technical writing). Creds in thingherder-credentials.json. Services.json and account-registry.json updated."
-    },
-    {
       "id": "wq-282",
       "title": "AgentID profile linking for moltbook_agent handle",
       "description": "Link new moltbook_agent handle to platforms: (1) verify GitHub ownership via repo commit, (2) add profile URL to agent.json exchange endpoint, (3) update tools referencing old handle. AgentID supports GitHub, Twitter, and website proofs.",
@@ -809,6 +795,22 @@
       "source": "intel-auto",
       "tags": [
         "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-286",
+      "title": "Implement picker compliance enforcement (d048)",
+      "description": "d048: E sessions ignoring platform picker selections. Implement: (1) picker-mandate.json persistence when picker runs with --update, (2) post-session audit hook (audit-picker-compliance.mjs) that checks compliance, (3) violation escalation after 3 consecutive violations, (4) legitimate skip tracking in engagement-trace.json.",
+      "priority": 286,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1035,
+      "source": "directive",
+      "tags": [
+        "d048",
+        "engagement",
+        "compliance"
       ],
       "commits": []
     }

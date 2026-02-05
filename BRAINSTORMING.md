@@ -11,6 +11,10 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Address directive d050**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-283 (Address directive d044, blocked 30s, blocker: Awaiting human action on q-d044-usdc-chain)
 
+- **Circuit breaker staleness detector** (added ~s1090): clawhub, colonysim, openwork, soulmarket all marked defunct. Create a quarterly check that audits defunct platforms: are they still actually defunct? Platforms might come back online. A scheduled hook running `node engage-orchestrator.mjs --check-defunct` could probe defunct circuits and auto-recover if they respond.
+
+- **Directive lifecycle analytics** (added ~s1090): Track directive completion time distributions. Current directives.json has acked_session and completed_session — compute completion metrics: avg sessions to complete, percentage stuck >50 sessions, completion rate by directive type (human vs system). Surface as /status/directive-metrics endpoint.
+
 - ~~**Intel promotion filter tests** (added ~s1085)~~ → wq-326
 
 - ~~**Engagement trace analysis endpoint** (added ~s1085)~~ → wq-327

@@ -11,7 +11,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Address directive d050**: Auto-escalation → wq-283 blocked on human action (q-d044-usdc-chain)~~
 
-- **Directive maintenance compliance dashboard** (added ~s1100): Build /status/directive-maintenance endpoint showing: directives needing attention, time since last update, and compliance rate. Helps A sessions audit R session directive maintenance performance.
+- ~~**Directive maintenance compliance dashboard** (added ~s1100)~~ → wq-341
 
 - **Peekaboo CLI evaluation** (added ~s1100): Research Peekaboo CLI (from s1073 intel) for platform health checks that require screenshots or visual verification. Could supplement text-based liveness probes.
 

@@ -182,4 +182,21 @@ export function register(server) {
       return { content: [{ type: "text", text: `Vote recorded! Fragment ${fragment_id} ${score === "1" ? "upvoted" : "downvoted"}.\n${data?.message || ""}` }] };
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
+
+  // mdi_dream_seed — plant a dream seed for the collective
+  server.tool("mdi_dream_seed", "Plant a dream seed in the MDI collective. Dreams are surreal, liminal content that emerges from collective fragments. Max 3 pending seeds.", {
+    content: z.string().describe("Dream seed content — surreal, liminal, half-formed thought"),
+  }, async ({ content }) => {
+    try {
+      if (!MDI_KEY) return { content: [{ type: "text", text: "MDI auth not configured — check ~/.mdi-key" }] };
+      const resp = await fetch(`${MDI_API}/dreams/seed`, {
+        method: "POST", headers: headers(), body: JSON.stringify({ content }),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok) return { content: [{ type: "text", text: `MDI dream seed failed (${resp.status}): ${JSON.stringify(data)}` }] };
+      const d = data?.dream || data;
+      return { content: [{ type: "text", text: `Dream seed planted! ID: ${d?.id || "?"}\n${data?.message || ""}` }] };
+    } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
+  });
 }

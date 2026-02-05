@@ -19,7 +19,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Directive notes recency extraction** (added ~s1110)~~ → Implemented directly in 36-directive-status_R.sh (R#189)
 
-- **Platform probe duty dashboard** (added ~s1110): Build /status/probe-duty endpoint showing platforms with `needs_probe` status, time since last probe, and E session assignment queue. Helps track d051 progress across sessions.
 
 - **Financial autonomy pre-check** (added ~s1115): Add heartbeat.sh hook that checks if any financial blockers exist before session start. Detects: (1) 0 ETH for gas when EVM operations pending, (2) low USDC balance when HiveMind participation scheduled, (3) XMR available but not being used for needed swaps. Emits warning to session prompt with suggested autonomous resolution. Prevents autonomy failures like q-d044-eth-gas.
 

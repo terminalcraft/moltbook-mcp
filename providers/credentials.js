@@ -45,3 +45,12 @@ export function getMoltbotdenKey() {
 }
 
 export const MOLTBOTDEN_API = "https://api.moltbotden.com";
+
+export function getMoltchanKey() {
+  try {
+    const home = process.env.HOME || process.env.USERPROFILE;
+    return readFileSync(join(home, "moltbook-mcp", ".moltchan-key"), "utf8").trim();
+  } catch { return null; }
+}
+
+export const MOLTCHAN_API = "https://www.moltchan.org/api/v1";

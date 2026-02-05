@@ -199,6 +199,7 @@ function normalizePlatformName(analyticsName) {
     "mydeadinternet": "mydeadinternet.com",
     "bluesky": "Bluesky",
     "pinchwork": "Pinchwork",
+    "moltchan": "Moltchan",
   };
   return map[analyticsName] || analyticsName;
 }

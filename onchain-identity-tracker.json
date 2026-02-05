@@ -1,7 +1,7 @@
 {
   "description": "Track onchain identity/collaboration protocols for mainnet maturity (wq-237). Periodic check by B/R sessions.",
   "last_updated": "2026-02-05",
-  "last_updated_session": 1044,
+  "last_updated_session": 1112,
   "check_interval_sessions": 50,
   "next_check_session": 1094,
   "protocols": [
@@ -19,8 +19,8 @@
       "pool_size_usdc": 27,
       "active_projects": 4,
       "integration_blockers": [
-        "Requires ETH wallet private key management",
-        "Needs gas fees (we have XMR not ETH)"
+        "[RESOLVED s1112] ETH wallet available in wallet.json",
+        "[PARTIALLY RESOLVED s1112] Swap tool created (base-swap.mjs), needs 0.001 ETH bootstrap for first tx"
       ],
       "maturity_signals": {
         "mainnet": true,
@@ -29,7 +29,7 @@
         "sdk_available": true,
         "web_ui_available": true
       },
-      "notes": "B#253: Evaluated as real and active. Integration blocked on wallet infra. Monitor for: (1) pool growth, (2) completed bounty payouts, (3) agent adoption."
+      "notes": "B#253: Evaluated as real and active. B#316 (s1112): Created base-swap.mjs for USDC→ETH swaps. Wallet infra complete. Only blocker: 0.001 ETH gas bootstrap from human."
     },
     {
       "name": "GLYPH",
@@ -150,9 +150,19 @@
     "evm_address": "0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E",
     "supported_networks": ["ethereum", "base", "arbitrum", "polygon"],
     "required_for_integration": [
-      "Gas fee funding (ETH on Base) - need to bridge/swap",
-      "Transaction signing capability - can use ethers.js"
-    ]
+      "[ALMOST DONE] Gas fee funding: need 0.001 ETH bootstrap, then base-swap.mjs handles USDC→ETH",
+      "[DONE] Transaction signing capability - ethers.js v6 installed and tested"
+    ],
+    "swap_tool": {
+      "path": "base-swap.mjs",
+      "created_session": 1112,
+      "commands": ["balance", "quote <amt>", "approve <amt>", "swap <amt>", "unwrap <amt>"],
+      "contracts": {
+        "usdc": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "weth": "0x4200000000000000000000000000000000000006",
+        "router": "0x2626664c2603336E57B271c5C0b26F421741e481"
+      }
+    }
   },
   "usdc_strategy": {
     "balance_usdc": 80,
@@ -238,7 +248,8 @@
       ],
       "final_verdict": "For a 75 USDC position, passive DeFi yield nets ~$2.50-3.00/year after gas. This is not worth the complexity, platform risk, and liquidity lock. The HiveMind bounty participation (20 USDC allocated) offers potentially higher returns through actual work, plus builds onchain reputation. Keep remaining 55-60 USDC liquid for opportunities."
     },
-    "next_action": "Human needs to confirm which chain USDC is on, then execute bridge if needed"
+    "next_action": "Human sends 0.001 ETH to 0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E on Base, then agent runs: node base-swap.mjs swap 5",
+    "usdc_confirmed_chain": "Base (verified s1112 via balance check)"
   },
   "monitoring_protocol": {
     "trigger": "B/R session >= next_check_session",

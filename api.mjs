@@ -4302,6 +4302,116 @@ td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
   }
 });
 
+// Directive lifecycle analytics — completion time distributions, bottleneck detection (wq-332)
+app.get("/status/directive-metrics", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+    const dirs = data.directives || [];
+    const sessionNum = parseInt(process.env.SESSION_NUM) || 1097;
+
+    // Separate by type
+    const humanDirs = dirs.filter(d => d.from === "human");
+    const systemDirs = dirs.filter(d => d.from === "system");
+
+    // Compute completion latencies for completed directives
+    const computeStats = (directives) => {
+      const completed = directives.filter(d => d.status === "completed" && d.acked_session && d.completed_session);
+      const active = directives.filter(d => d.status === "active" && d.acked_session);
+      const total = directives.length;
+
+      // Sessions to complete (completed_session - acked_session), filter out negatives (data quality issues)
+      const latencies = completed.map(d => d.completed_session - d.acked_session).filter(n => !isNaN(n) && n >= 0);
+
+      // Active directive ages (sessions stuck without completing)
+      const activeAges = active.map(d => sessionNum - d.acked_session).filter(n => !isNaN(n));
+
+      // Percentage stuck >50 sessions (active directives only)
+      const stuckCount = activeAges.filter(age => age > 50).length;
+      const stuckPct = active.length > 0 ? Math.round((stuckCount / active.length) * 100) : 0;
+
+      // Completion rate
+      const completionRate = total > 0 ? Math.round((completed.length / total) * 100) : 0;
+
+      // Distribution buckets for completion time
+      const distribution = {
+        under_5: latencies.filter(l => l < 5).length,
+        "5_to_10": latencies.filter(l => l >= 5 && l < 10).length,
+        "10_to_20": latencies.filter(l => l >= 10 && l < 20).length,
+        "20_to_50": latencies.filter(l => l >= 20 && l < 50).length,
+        "50_to_100": latencies.filter(l => l >= 50 && l < 100).length,
+        over_100: latencies.filter(l => l >= 100).length,
+      };
+
+      // Stats
+      const avgLatency = latencies.length > 0
+        ? +(latencies.reduce((a, b) => a + b, 0) / latencies.length).toFixed(1)
+        : null;
+      const medianLatency = latencies.length > 0
+        ? latencies.sort((a, b) => a - b)[Math.floor(latencies.length / 2)]
+        : null;
+      const maxLatency = latencies.length > 0 ? Math.max(...latencies) : null;
+      const minLatency = latencies.length > 0 ? Math.min(...latencies) : null;
+
+      return {
+        total,
+        completed: completed.length,
+        active: active.length,
+        completion_rate_pct: completionRate,
+        avg_sessions_to_complete: avgLatency,
+        median_sessions_to_complete: medianLatency,
+        min_sessions_to_complete: minLatency,
+        max_sessions_to_complete: maxLatency,
+        stuck_over_50_sessions: stuckCount,
+        stuck_pct: stuckPct,
+        distribution,
+      };
+    };
+
+    const humanStats = computeStats(humanDirs);
+    const systemStats = computeStats(systemDirs);
+    const allStats = computeStats(dirs);
+
+    // Identify bottlenecks — active directives older than 50 sessions
+    const bottlenecks = dirs
+      .filter(d => d.status === "active" && d.acked_session && (sessionNum - d.acked_session) > 50)
+      .map(d => ({
+        id: d.id,
+        from: d.from,
+        age_sessions: sessionNum - d.acked_session,
+        content_preview: d.content?.slice(0, 60) + (d.content?.length > 60 ? "…" : ""),
+        notes: d.notes || null,
+      }))
+      .sort((a, b) => b.age_sessions - a.age_sessions);
+
+    // Recently completed (last 10)
+    const recentlyCompleted = dirs
+      .filter(d => d.status === "completed" && d.completed_session)
+      .sort((a, b) => (b.completed_session || 0) - (a.completed_session || 0))
+      .slice(0, 10)
+      .map(d => ({
+        id: d.id,
+        from: d.from,
+        completed_session: d.completed_session,
+        latency: d.completed_session - d.acked_session,
+        content_preview: d.content?.slice(0, 60) + (d.content?.length > 60 ? "…" : ""),
+      }));
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      session: sessionNum,
+      summary: {
+        all: allStats,
+        human: humanStats,
+        system: systemStats,
+      },
+      bottlenecks,
+      recently_completed: recentlyCompleted,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Ecosystem service adoption dashboard — which tools used, trends, gaps (wq-077, B#165)
 app.get("/status/ecosystem", (req, res) => {
   try {

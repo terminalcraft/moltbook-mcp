@@ -1,27 +1,23 @@
 {
-  "session": 1086,
-  "timestamp": "2026-02-05T12:15:00.000Z",
-  "previous_audit": 1081,
-  "audit_number": 75,
+  "session": 1096,
+  "timestamp": "2026-02-05T14:30:00.000Z",
+  "previous_audit": 1086,
+  "audit_number": 77,
   "previous_recommendations_status": {
-    "a74-1": {
+    "a75-1": {
       "status": "resolved",
-      "resolution": "wq-322 completed in s1082 (B#304). d047 now has completed_session: 1082 in directives.json. The stale directive that persisted for 61+ sessions has been closed."
+      "resolution": "BRAINSTORMING.md now has 3 active ideas: (1) Session context performance profiling (~s1095), (2) Credential rotation reminder dashboard (~s1095), (3) Address directive d050 (standing). R#184 added 2 new ideas during s1095. Target of 3+ ideas met."
     },
-    "a74-2": {
-      "status": "resolved",
-      "resolution": "d049 compliance validated. Post-d049 E sessions (s1063, s1068, s1073, s1078, s1083) all pass with 100% compliance. The s1058 violation was pre-d049 implementation. No new violations."
-    },
-    "a74-3": {
+    "a75-2": {
       "status": "in_progress",
-      "notes": "BRAINSTORMING.md has 2 active ideas (added ~s1085 by R#182). Below 3 target but replenishment occurred this rotation. Continuing to monitor."
+      "notes": "d045 credential regeneration (wq-255) remains in-progress. Step 4 (pre-commit hook) completed. Steps 1-3 (platform probing/registration for MDI/Consortium) still pending E session work. 96 sessions since d045 acked. Not yet critical but monitoring continues."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 354,
-      "consumed": 354,
+      "archive_total": 355,
+      "consumed": 355,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "intel_promotion_tracking": {
@@ -30,44 +26,46 @@
         "items_retired": 1,
         "items_pending": 0,
         "success_rate": "67%",
-        "note": "Pipeline validated at 67% success rate. R#182 improved filters (removed Monitor/Track verbs, added META_INSTRUCTION_PATTERNS). wq-326 tests the filter logic."
+        "note": "Pipeline validated at 67% success rate. wq-219 and wq-281 both resulted in actual work. Filter improvements from R#178 and R#182 in place."
       },
       "d049_compliance": {
-        "sessions_checked": ["s1053", "s1058", "s1063", "s1068", "s1073", "s1078", "s1083"],
+        "sessions_checked": ["s1063", "s1068", "s1073", "s1078", "s1083", "s1088"],
         "post_d049_violations": [],
-        "post_d049_compliant": ["s1063", "s1068", "s1073", "s1078", "s1083"],
+        "post_d049_compliant": ["s1063", "s1068", "s1073", "s1078", "s1083", "s1088"],
         "compliance_rate": "100%",
-        "intel_counts": {"s1053": 1, "s1058": 0, "s1063": 1, "s1068": 1, "s1073": 2, "s1078": 1, "s1083": 1},
-        "note": "s1058 was pre-d049 (R#177 added requirement in s1060). All 5 post-d049 E sessions pass. d049 enforcement working."
+        "intel_counts": {"s1063": 1, "s1068": 1, "s1073": 2, "s1078": 1, "s1083": 1, "s1088": 1},
+        "note": "All 6 post-d049 E sessions pass. d049 enforcement working reliably."
       },
-      "verdict": "HEALTHY - 100% consumption rate, d049 compliance 100% post-implementation, intel filter improvements in R#182."
+      "verdict": "HEALTHY - 100% consumption rate, d049 compliance 100%, intel filter improvements stable."
     },
     "brainstorming": {
-      "active": 2,
+      "active": 3,
       "ideas": [
-        "Engagement trace analysis endpoint (~s1085)",
-        "Covenant renewal automation (~s1085)"
+        "Session context performance profiling (~s1095)",
+        "Credential rotation reminder dashboard (~s1095)",
+        "Address directive d050"
       ],
       "stale_count": 0,
       "avg_age_sessions": 1,
-      "verdict": "NEEDS_REPLENISH - Only 2 active ideas (below 3 target). R#182 added ideas but also promoted 1 (wq-326). R session should add 1 more."
+      "verdict": "HEALTHY - 3 active ideas (meets target). R#184 replenished pipeline."
     },
     "queue": {
-      "total": 63,
+      "total": 65,
       "pending": 3,
       "in_progress": 1,
-      "blocked": 1,
-      "retired": 58,
+      "blocked": 2,
+      "retired": 59,
       "pending_items": [
-        "wq-324 (Session outcome prediction)",
-        "wq-325 (x402 integration, deferred)",
-        "wq-326 (Intel promotion filter tests)"
+        "wq-332 (Directive lifecycle analytics endpoint)",
+        "wq-334 (Covenant metrics endpoint)",
+        "wq-335 (R session impact analysis)"
       ],
       "in_progress_items": [
         "wq-255 (d045 credential regeneration)"
       ],
       "blocked_items": [
-        "wq-283 (d044 USDC - blocked on human chain confirmation)"
+        "wq-283 (d044 USDC - blocked on human chain confirmation)",
+        "wq-325 (x402 integration - deferred, prerequisites not met)"
       ],
       "audit_sourced": {
         "pending": 0,
@@ -75,7 +73,7 @@
         "summary": "97 done (of 101 total)"
       },
       "stuck_items": [],
-      "verdict": "HEALTHY - 3 pending, 1 in-progress, 1 blocked (expected). No stuck items."
+      "verdict": "HEALTHY - 3 pending items ready for B sessions, no stuck items."
     },
     "directives": {
       "total": 50,
@@ -84,43 +82,45 @@
       "completed": 44,
       "pending": 0,
       "active_items": [
-        "d044 (USDC wallet) - active, 91 sessions since ack, blocked on chain confirmation",
-        "d045 (credential regeneration) - active, 86 sessions since ack, wq-255 in-progress",
+        "d044 (USDC wallet) - active, 101 sessions since ack, blocked on chain confirmation",
+        "d045 (credential regeneration) - active, 96 sessions since ack, wq-255 in-progress",
         "d047 (platform maintenance) - COMPLETED in s1082",
-        "d049 (intel minimum) - active, 26 sessions since ack, compliance verified at 100%",
-        "d050 (auto-escalation wq-283) - active, 16 sessions since ack"
+        "d049 (intel minimum) - active, 36 sessions since ack, compliance verified at 100%",
+        "d050 (auto-escalation wq-283) - active, 26 sessions since ack, requires human action"
       ],
       "unacted": [
-        "d044: blocked 91+ sessions on human chain confirmation (q-d044-usdc-chain)",
-        "d045: wq-255 in-progress but slow (86 sessions since ack)"
+        "d044: blocked 101+ sessions on human chain confirmation (q-d044-usdc-chain)",
+        "d045: wq-255 in-progress, steps 1-3 need E session platform work",
+        "d050: requires human action on q-d044-usdc-chain"
       ],
-      "verdict": "IMPROVED - d047 closed after 61+ sessions (a74-1 resolved). d044/d045 remain long-standing but both have blockers documented."
+      "verdict": "STABLE - d047 completed. d044/d045/d050 blocked on human/external dependencies."
     }
   },
   "sessions": {
     "B": {
-      "count_in_history": 11,
-      "last_10_avg_cost": 3.09,
-      "queue_items_completed_since_A74": ["wq-322 (d047 closure)", "wq-318 (x402 eval)", "wq-320 (TODO scanner)", "wq-323 (component tests)"],
+      "count_in_history": 12,
+      "last_10_avg_cost": 3.17,
+      "queue_items_completed_since_A75": ["wq-326 (filter tests)", "wq-327 (engagement trace)", "wq-329 (covenant renewal)", "wq-330 (trace tests)", "wq-331 (R directive maintenance audit)", "wq-333 (defunct platform check)"],
       "mandate_compliance": 1.0,
       "directive_outcomes": {
         "total_tracked": 50,
-        "recent_sessions_addressed": "s1082, s1084 show all directives addressed with evidence",
-        "addressed_rate": "100% in last 3 B sessions"
+        "recent_sessions_addressed": "s1087, s1089, s1092, s1094 show all directives addressed with evidence",
+        "addressed_rate": "100% in last 4 B sessions"
       },
-      "verdict": "PRODUCTIVE - 4 queue items completed since A#74. Directive addressing working (s1082 closed d047)."
+      "verdict": "PRODUCTIVE - 6 queue items completed since A#75. Cost flagged as high_cost ($3.17 avg) but within $10 budget cap and producing value."
     },
     "E": {
-      "count_in_history": 7,
-      "last_7_avg_cost": 2.40,
+      "count_in_history": 6,
+      "last_6_avg_cost": 2.33,
       "artifact_compliance": {
-        "sessions_verified": [1053, 1058, 1063, 1068, 1073, 1078, 1083],
-        "passed": 7,
+        "sessions_verified": [1068, 1073, 1078, 1083, 1088],
+        "passed": 5,
         "failed": 0,
-        "rate": "100%"
+        "rate": "100%",
+        "note": "s1078 had trace file issue but intel passed. All others fully compliant."
       },
       "d049_compliance": {
-        "post_d049_sessions": 5,
+        "post_d049_sessions": 6,
         "post_d049_violations": 0,
         "rate": "100%",
         "last_violation_session": "s1058 (pre-d049)"
@@ -129,64 +129,79 @@
         "consecutive_violations": 0,
         "last_violation_session": 1036,
         "recent_compliance_rate": "100%",
-        "sessions_checked": 8
+        "sessions_checked": 10,
+        "note": "Last picker violations were s1033 and s1036. No violations since s1068+."
       },
-      "verdict": "HEALTHY - Artifact gate 100%, d049 compliance 100% (post-implementation), picker compliance 100%."
+      "verdict": "HEALTHY - Artifact gate 100%, d049 compliance 100%, picker compliance stable."
     },
     "R": {
-      "count_in_history": 6,
-      "last_6_avg_cost": 2.20,
-      "structural_changes_since_A74": [
-        "R#182 (s1085): Improved intel auto-promotion filters (removed Monitor/Track verbs, added META_INSTRUCTION_PATTERNS)"
+      "count_in_history": 5,
+      "last_5_avg_cost": 2.25,
+      "structural_changes_since_A75": [
+        "R#184 (s1095): Added defunct-platform-probe.mjs + 39-defunct-probe.sh hook for quarterly defunct platform re-check"
       ],
       "reverted_within_5": 0,
-      "verdict": "EFFECTIVE - 1 structural change since A#74, 0 reverts. Filter improvements address intel conversion rate."
+      "directive_maintenance_compliance": {
+        "sessions_checked": ["s1080", "s1085", "s1095"],
+        "compliant": ["s1095"],
+        "violations": ["s1080", "s1085"],
+        "rate": "33%",
+        "note": "R sessions s1080 and s1085 did not edit directives.json. s1095 was compliant. Low compliance rate but sessions predated R#183 mandate (s1090)."
+      },
+      "verdict": "EFFECTIVE - 1 structural change since A#75, 0 reverts. Directive maintenance compliance improving (s1095 compliant)."
     },
     "A": {
       "count_in_history": 7,
-      "last_7_avg_cost": 1.76,
-      "recommendations_tracked": 3,
-      "recommendations_resolved": 2,
+      "last_7_avg_cost": 1.57,
+      "recommendations_tracked": 2,
+      "recommendations_resolved": 1,
       "recommendations_in_progress": 1,
-      "verdict": "EFFECTIVE - A#74 had 3 recommendations, 2 resolved (a74-1, a74-2), 1 in-progress (a74-3)."
+      "verdict": "EFFECTIVE - A#75 had 2 recommendations, 1 resolved (a75-1 brainstorming replenishment), 1 in-progress (a75-2 d045 monitoring)."
     }
   },
   "infrastructure": {
     "hooks": {
-      "pre_session_count": 34,
+      "pre_session_count": 35,
       "post_session_count": 31,
-      "total": 65,
+      "total": 66,
       "syntax_errors": 0,
-      "note": "All hooks pass bash -n syntax check."
+      "note": "All 66 hooks pass bash -n syntax check."
     },
     "credential_consistency": {
-      "creds_ok": ["moltbook", "4claw", "chatr", "ctxly", "moltchan"],
-      "no_creds": ["lobstack (platform dead)", "dungeonsandlobsters (error)"]
+      "creds_ok": ["moltbook", "4claw", "chatr", "ctxly", "moltchan", "lobstack"],
+      "no_creds": ["lobsterpedia (platform status unknown)", "dungeonsandlobsters (defunct)"]
     },
     "stale_references": {
       "deleted_files_last_60_days": 15,
       "potential_stale_refs": [
-        "dialogue.md references in dialogue-archive.md (expected - historical record)",
-        "ctxly.json references point to credential file (correctly gitignored)"
+        "dialogue.md (historical reference in docs)",
+        "directive-tracking.json (merged into directives.json)",
+        "chatr-queue.json (removed per d023)"
       ],
       "active_code_stale_refs": [],
-      "verdict": "CLEAN - No broken references in active code. Archive files have historical references (expected)."
+      "verdict": "CLEAN - No broken references in active code. grep found 0 stale references."
     },
     "platform_liveness": {
       "open_circuits": ["tulip", "darkclawbook", "pinchwork"],
-      "wq_coverage": "wq-321 (open circuit investigation) completed in s1082"
+      "last_engaged": {
+        "moltchan": "s1092",
+        "4claw": "s1087",
+        "chatr": "s1072",
+        "moltbook": "s1042"
+      },
+      "note": "Platform health hook active. 39-defunct-probe.sh added for quarterly re-check."
     },
-    "verdict": "HEALTHY - 65 hooks pass syntax, no stale references in active code, open circuits investigated."
+    "verdict": "HEALTHY - 66 hooks pass syntax, no stale references, platform health infrastructure improved."
   },
   "security": {
     "active_incidents": {
       "d039": {
-        "sessions_since_reported": 152,
+        "sessions_since_reported": 167,
         "status": "superseded",
         "blocker": "Superseded by d045 (forget leaked keys, make new ones)"
       },
       "d045": {
-        "sessions_since_reported": 86,
+        "sessions_since_reported": 96,
         "status": "in-progress",
         "blocker": "wq-255 in-progress. Step 4 (pre-commit hook) done. Steps 1-3 require E session platform investigation."
       }
@@ -197,13 +212,13 @@
       "note": "Only @moltbook registered. Clean."
     },
     "inbox": {
-      "messages": 6,
-      "unread": 1,
+      "messages": 7,
+      "unread": 0,
       "injection_patterns": [],
-      "note": "1 unread is code-watch notification. No suspicious content."
+      "note": "7 messages, all read. No suspicious content."
     },
     "monitors": {
-      "total": "200+",
+      "total": 4,
       "localhost_monitors": 1,
       "localhost_note": "Self-health check at 127.0.0.1:3847 - expected"
     },
@@ -212,48 +227,48 @@
     "human_review": {
       "open": 0
     },
-    "verdict": "CLEAN - d039 superseded by d045. d045 progressing slowly but has active work. No suspicious entries. Inbox clean."
+    "verdict": "CLEAN - d039 superseded by d045. d045 progressing slowly but has active work. No suspicious entries."
   },
   "cost": {
-    "last_30_sessions_total": 73.29,
-    "avg_per_session": 2.44,
+    "last_20_sessions_total": 49.24,
+    "avg_per_session": 2.46,
     "by_type": {
-      "A": {"avg": 1.76, "trend": "stable", "verdict": "normal"},
-      "B": {"avg": 3.09, "trend": "stable", "verdict": "high_cost"},
-      "E": {"avg": 2.40, "trend": "stable", "verdict": "high_cost"},
-      "R": {"avg": 2.20, "trend": "stable", "verdict": "normal"}
+      "A": {"avg": 1.57, "trend": "stable", "verdict": "normal"},
+      "B": {"avg": 3.17, "trend": "stable", "verdict": "high_cost"},
+      "E": {"avg": 2.33, "trend": "stable", "verdict": "normal"},
+      "R": {"avg": 2.25, "trend": "stable", "verdict": "normal"}
     },
     "trend": "stable",
-    "note": "B sessions at $3.09 avg (flagged high_cost) but completing work effectively. Within $10 budget cap. E sessions at $2.40 - within $5 cap."
+    "note": "B sessions at $3.17 avg (flagged high_cost) but within $10 budget cap and completing work effectively. Overall avg $2.46 stable."
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a75-1",
-      "description": "Replenish brainstorming ideas to 3+",
+      "id": "a77-1",
+      "description": "Continue monitoring d045 credential regeneration",
       "priority": "low",
-      "action": "BRAINSTORMING.md has only 2 active ideas after R#182 promoted wq-326. Next R session should add 1-2 new ideas to maintain healthy pipeline. This is a continuation of a74-3."
+      "action": "d045 has been active for 96 sessions. wq-255 is in-progress with step 4 done. Steps 1-3 need E session to probe MDI/Consortium for new registration options. Continuing observation from a75-2. If no progress by A#79, escalate to critical_issues."
     },
     {
-      "id": "a75-2",
-      "description": "Monitor d045 credential regeneration progress",
+      "id": "a77-2",
+      "description": "Improve R session directive maintenance compliance",
       "priority": "low",
-      "action": "d045 has been active for 86 sessions. wq-255 is in-progress with step 4 (pre-commit hook) done. Steps 1-3 need E session platform investigation. Not critical but worth monitoring - if no progress in next 3 audits, escalate."
+      "action": "R sessions s1080 and s1085 did not perform directive maintenance per R#183 mandate. s1095 was compliant. This is observation-only since the mandate was added in s1090 and compliance is improving. Track next 3 R sessions — if <50% comply, create wq item to strengthen SESSION_REFLECT.md enforcement."
     }
   ],
   "findings": {
     "positive": {
-      "d047_resolved": "a74-1 RESOLVED. d047 (platform maintenance) closed in s1082 after 61+ sessions. wq-322 completed the closure.",
-      "d049_100_percent": "a74-2 RESOLVED. d049 compliance now 100% for all 5 post-implementation E sessions (s1063, s1068, s1073, s1078, s1083).",
-      "picker_compliance_excellent": "8 consecutive E sessions with 100% picker compliance. Last violation was s1036.",
-      "e_session_artifact_100_percent": "E session artifact compliance continues at 100% (28/28 tracked sessions).",
-      "intel_filter_improvements": "R#182 improved intel auto-promotion filters. wq-326 tests the new logic.",
-      "directive_outcomes_working": "directive-outcomes.json shows last 3 B/E sessions addressed all urgent directives with evidence."
+      "a75_1_resolved": "a75-1 RESOLVED. BRAINSTORMING.md now has 3 active ideas (up from 2). R#184 replenished the pipeline.",
+      "d049_sustained": "d049 compliance continues at 100% for all 6 post-implementation E sessions (s1063-s1088).",
+      "picker_compliance_stable": "Picker violations ended at s1036. All recent E sessions comply with picker selections.",
+      "e_session_artifact_100_percent": "E session artifact compliance continues at 100% (29/29 tracked sessions).",
+      "queue_items_completed": "6 queue items completed since A#75: wq-326 through wq-333.",
+      "structural_change_effective": "R#184 added defunct-platform-probe infrastructure. No reverts."
     },
     "observations": {
-      "brainstorming_at_minimum": "Only 2 active ideas. Not critical but R session should replenish.",
-      "d045_slow_progress": "86 sessions since d045 acked. wq-255 in-progress but steps 1-3 pending E session work.",
-      "b_session_cost_high": "B sessions avg $3.09 - flagged as high_cost but within budget and productive."
+      "d045_slow_progress": "96 sessions since d045 acked. wq-255 in-progress but steps 1-3 still pending. Not critical but worth monitoring.",
+      "r_session_directive_compliance": "R session directive maintenance compliance at 33% (1/3 checked). Expected to improve as mandate is recent (s1090).",
+      "b_session_cost_high": "B sessions avg $3.17 - flagged as high_cost but within budget and highly productive."
     }
   }
 }

@@ -7494,6 +7494,35 @@
       ],
       "commits": [],
       "notes": "B#308 s1092: Added verify-r-directive-maintenance.mjs verification script and compliance check to SESSION_AUDIT.md section 2 item 5."
+    },
+    {
+      "id": "wq-329",
+      "title": "Add covenant renewal automation",
+      "description": "covenant-templates.mjs supports creation but not renewal. As deadlines approach (within 10 sessions), E sessions could discuss renewal with partners. Add deadline tracking to R session covenant evaluation and E session prompting for renewal conversations when deadlines approach.",
+      "priority": 329,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1089,
+      "source": "brainstorming-promote",
+      "tags": [
+        "covenant",
+        "engagement"
+      ],
+      "commits": [],
+      "notes": "B#309 s1093: Added covenant renewal automation \u2014 expiring command, renew command, R/E session integration"
+    },
+    {
+      "id": "wq-333",
+      "title": "Add defunct platform quarterly check \u2014 probe defunct circuits and auto-recover if responsive",
+      "status": "done",
+      "created": "2026-02-05T13:50:00Z",
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "platform-health"
+      ],
+      "completed_session": 1095,
+      "notes": "R#184: Implemented defunct-platform-probe.mjs + 39-defunct-probe.sh hook (runs every 100 sessions). Probes defunct platforms and resurrects them if recovered."
     }
   ]
 }

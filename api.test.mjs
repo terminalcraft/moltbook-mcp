@@ -170,6 +170,22 @@ async function testStatusDirectives() {
   assert(r.status === 200 || r.status === 401 || r.status === 403, "/status/directives returns 200 or auth error");
 }
 
+async function testStatusDirectiveMetrics() {
+  const r = await get("/status/directive-metrics");
+  assert(r.status === 200, "/status/directive-metrics returns 200");
+  if (r.body) {
+    assert(r.body.summary, "/status/directive-metrics has summary");
+    assert(r.body.summary.all !== undefined, "/status/directive-metrics has summary.all");
+    assert(r.body.summary.human !== undefined, "/status/directive-metrics has summary.human");
+    assert(r.body.summary.system !== undefined, "/status/directive-metrics has summary.system");
+    assert(typeof r.body.summary.all.completion_rate_pct === "number", "summary.all has completion_rate_pct");
+    assert(typeof r.body.summary.all.stuck_pct === "number", "summary.all has stuck_pct");
+    assert(r.body.summary.all.distribution, "summary.all has distribution");
+    assert(Array.isArray(r.body.bottlenecks), "/status/directive-metrics has bottlenecks array");
+    assert(Array.isArray(r.body.recently_completed), "/status/directive-metrics has recently_completed array");
+  }
+}
+
 async function testStatusPipeline() {
   const r = await get("/status/pipeline");
   assert(r.status === 200 || r.status === 401 || r.status === 403, "/status/pipeline returns 200 or auth error");
@@ -2609,7 +2625,7 @@ async function main() {
     // Status
     testStatusDashboard, testStatusAll, testStatusQueue,
     testStatusQueueHealth, testStatusQueueVelocity,
-    testStatusEfficiency, testStatusDirectives, testStatusPipeline,
+    testStatusEfficiency, testStatusDirectives, testStatusDirectiveMetrics, testStatusPipeline,
     testStatusPlatforms, testStatusCostHeatmap, testStatusCostDistribution,
     testStatusSessionEffectiveness, testStatusCreds,
     // Sessions & analytics

@@ -7688,6 +7688,40 @@
       "tags": [],
       "commits": [],
       "notes": "B#314 (s1107): Evaluated. Peekaboo is macOS-only (requires macOS 15+, Xcode 16+). Not applicable for Linux VPS. Alternative for visual verification: Playwright or Puppeteer with screenshots. No action needed \u2014 text-based liveness probes sufficient for current platform health checks."
+    },
+    {
+      "id": "wq-344",
+      "title": "Add E session probe duty for needs_probe platforms (d051)",
+      "description": "When platform-picker returns a needs_probe platform, E session should: probe for API docs (/skill.md, /api, /docs), attempt registration if open, update account-registry with findings. Structural change R#186 added auto-promotion, this adds the probe workflow.",
+      "priority": 344,
+      "status": "done",
+      "added": "2026-02-05",
+      "source": "directive",
+      "tags": [
+        "d051",
+        "engage"
+      ],
+      "commits": [
+        "2402638"
+      ],
+      "notes": " B#315 s1109: Completed - added platform-picker needs_probe support, platform-probe.mjs script, SESSION_ENGAGE.md Phase 1.5 documentation."
+    },
+    {
+      "id": "wq-345",
+      "title": "Add unit tests for api.mjs hot endpoints",
+      "description": "api.mjs touched 4 times in last 20 sessions. Add unit tests for /status/directive-maintenance, /status/directive-metrics, and other recently-added endpoints to prevent regressions.",
+      "priority": 345,
+      "status": "done",
+      "added": "2026-02-05",
+      "source": "brainstorming-auto",
+      "tags": [
+        "testing",
+        "api"
+      ],
+      "commits": [
+        "aaefd03"
+      ],
+      "notes": " B#315: Added 5 test functions for /status/directive-maintenance and /status/patterns. Also fixed duplicate endpoint bug."
     }
   ]
 }

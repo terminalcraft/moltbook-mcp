@@ -254,28 +254,49 @@ if (MODE === 'B' || MODE === 'R') {
 }
 markTiming('auto_promote');
 
-// --- Auto-ingest TODO followups into queue (R#72) ---
+// --- Auto-ingest TODO followups into queue (R#72, R#194 rework) ---
 // The post-session hook (27-todo-scan.sh) writes TODO/FIXME items to todo-followups.txt.
-// Previously these were just injected as prompt text for manual processing.
-// Now for B sessions, we parse them and create queue items automatically.
+// R#194: Historical analysis shows 100% false positive rate (13/13 todo-scan items retired).
+// False positive classes: markdown tables, session summaries, JSON data, regex patterns,
+// queue references, brainstorming entries. Replaced simple regex with multi-stage rejection.
 if (MODE === 'B') {
   const todoPath = join(STATE_DIR, 'todo-followups.txt');
   if (existsSync(todoPath)) {
     const todoContent = readFileSync(todoPath, 'utf8');
     const todoLines = [...todoContent.matchAll(/^- (.+)/gm)];
     if (todoLines.length > 0) {
+      // R#194: Multi-stage false positive rejection pipeline.
+      // Each stage catches a class of non-TODO content that the scanner picks up.
+      const FALSE_POSITIVE_PATTERNS = [
+        // Stage 1: JS code patterns (original R#73 filter)
+        /\$\{|`|=>|require\(|\.substring|\.slice|\.match|\.replace|\.push/,
+        /["']title["']|["']description["']/,
+        // Stage 2: Markdown table content (wq-236, wq-262)
+        /^\|.*\|$/,
+        // Stage 3: Session summary text (wq-297, wq-301) — starts with *R#/B#/E#/A#
+        /^\*[RBEA]#\d+/,
+        // Stage 4: JSON data strings (wq-142, wq-166) — starts with " or {
+        /^["{}]/,
+        // Stage 5: Regex/comment patterns (wq-277, wq-278, wq-279) — starts with # Pattern
+        /^#\s+(Pattern|TODO|FIXME)/i,
+        // Stage 6: Queue data refs (wq-242, wq-328) — contains wq-XXX placeholder
+        /wq-[Xx]{3}/,
+        // Stage 7: Already-a-TODO-followup (self-referential scan)
+        /TODO\s+followup:/i,
+        // Stage 8: Pattern/config definitions — regex literal or { pattern:
+        /\{\s*pattern:|\/.*\/[gimsuy]*,/,
+      ];
+      const isFalsePositive = (line) => FALSE_POSITIVE_PATTERNS.some(p => p.test(line));
+
       const maxId = getMaxQueueId(queue);
       const queueTitles = queue.map(i => i.title.toLowerCase());
       const ingested = [];
       for (let i = 0; i < todoLines.length && i < 3; i++) {
         const raw = todoLines[i][1].trim();
-        // Skip template/code strings that aren't real TODOs (R#73).
-        // The todo-scan hook captures git diff lines containing TODO/FIXME keywords,
-        // but when it scans session-context.mjs itself, it picks up the template
-        // string `title: \`TODO followup: ${raw.substring(0, 80)}\`` as a TODO item.
-        // Filter: reject lines containing template literals, self-references, or JS code patterns.
-        if (/\$\{|`|=>|require\(|\.substring|\.slice|\.match|\.replace|\.push/.test(raw)) continue;
-        if (/["']title["']|["']description["']/.test(raw)) continue;
+        // Multi-stage rejection
+        if (isFalsePositive(raw)) continue;
+        // Must contain an actual TODO/FIXME keyword to be a real followup
+        if (!/\bTODO\b|\bFIXME\b|\bHACK\b|\bXXX\b/i.test(raw)) continue;
         // Skip if already queued (fuzzy match on first 30 chars)
         const norm = raw.toLowerCase().substring(0, 30);
         if (queueTitles.some(qt => qt.includes(norm) || norm.includes(qt.substring(0, 20)))) continue;

@@ -494,25 +494,30 @@
       "from": "human",
       "session": 1014,
       "content": "You now have 80 USDC on your wallet, 10 were used to pay for your VPS.",
-      "status": "pending",
-      "created": "2026-02-05T00:35:37.724Z"
+      "status": "active",
+      "created": "2026-02-05T00:35:37.724Z",
+      "acked_session": 1020,
+      "notes": "R#169: Acknowledged. 80 USDC balance confirmed. Relates to d044 (wq-257 blocked awaiting deposit — deposit now received). Next: evaluate capability-enhancing uses for USDC."
     },
     {
       "id": "d048",
       "from": "system",
       "session": 1018,
       "content": "Auto-escalation: 1 work queue items blocked >30 sessions: wq-209 (Rotate compromised credentials (d039), blocked 80s, blocker: Human action required: verify which keys were exposed in git). Human action may be needed.",
-      "status": "pending",
-      "created": "2026-02-05T00:47:51.948398Z"
+      "status": "active",
+      "created": "2026-02-05T00:47:51.948398Z",
+      "acked_session": 1020,
+      "notes": "R#169: Acknowledged. wq-209 remains blocked on human verification (d039 superseded by d045 per A#58). d045 says 'forget leaked keys, make new ones' — wq-255 is in-progress for credential regeneration. Auto-escalation is notification only."
     },
     {
       "id": "d047",
       "from": "human",
       "session": null,
       "content": "STRUCTURAL GAP: Proactive platform maintenance + tier system removal\n\nThe current architecture skips broken platforms rather than fixing them. Circuit breakers (d024) disable failing platforms, but nothing investigates why they failed or restores them. Result: 5 working platforms while 15+ sit broken indefinitely.\n\nAdditionally, the tier system (T1/T2/T3) is obsolete \u2014 platform-picker.mjs now uses ROI-weighted selection (d042). Tier references should be removed.\n\nCurrent state:\n- lobstack, lobsterpedia, dungeonsandlobsters, grove: Missing credential files\n- mydeadinternet: Has credentials but API endpoint changed (404)\n- tier3-platforms.js has stale API URLs that no longer work\n- No hook runs `account-manager.mjs test` to detect broken platforms\n- SESSION_ENGAGE says \"skip broken platforms\" \u2014 no recovery workflow exists\n- account-registry.json still has `\"tier\": 3` fields that serve no purpose\n- engage-orchestrator.mjs still computes dynamic tiers (orphaned code)\n\nRequired changes:\n\n1. Add platform health hook: Create pre-session hook that runs `node account-manager.mjs test --all` every 20 sessions. Log failures to platform-health-alert.txt.\n\n2. B session platform recovery workflow: When platforms have status no_creds, bad_creds, error, or unreachable for 10+ sessions:\n   - Investigate current API endpoints (check /skill.md, /api-docs, /openapi.json)\n   - Update stale URLs in tier3-platforms.js or relevant provider\n   - Attempt registration if credentials missing\n   - Update account-registry.json with working config\n\n3. Circuit breaker recovery: Half-open circuits should trigger endpoint investigation, not just retry the same broken URL.\n\n4. Platform discovery \u2192 picker integration: Any new platform discovered via service-evaluator or engagement MUST be added to account-registry.json with proper test config so platform-picker can include it. Discovery without registry integration is wasted work.\n\n5. Credential file audit: For each account-registry entry with no_creds:\n   - Check if platform requires auth or works anonymously\n   - If auth required, attempt registration\n   - If anonymous, update auth_type to \"none\" and fix test config\n\n6. Remove tier system:\n   - Remove tier field from account-registry.json entries\n   - Remove dynamic tier computation from engage-orchestrator.mjs\n   - Rename tier3-platforms.js to something accurate (e.g., secondary-platforms.js)\n   - Platform selection is now purely ROI-weighted via platform-picker.mjs\n\nSuccess criteria:\n- Platform health hook running and logging issues\n- B sessions include platform recovery in their scope\n- Discovered platforms appear in `node platform-picker.mjs --verbose` within 2 sessions\n- No platform stays broken for 20+ sessions without investigation\n- No tier references remain in codebase or data files",
-      "status": "pending",
-      "acked_session": null,
-      "priority": "high"
+      "status": "active",
+      "acked_session": 1020,
+      "priority": "high",
+      "notes": "R#169: Requirement 1 complete — added periodic platform health check to heartbeat.sh (runs every 20 sessions, logs to platform-health-alert.txt). Remaining work decomposed to: wq-274 (B session recovery workflow), wq-275 (tier system removal), wq-276 (credential audit)."
     }
   ],
   "questions": [

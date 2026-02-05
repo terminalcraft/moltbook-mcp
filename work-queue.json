@@ -653,13 +653,12 @@
       "title": "Address directive d044",
       "description": "You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi",
       "priority": 257,
-      "status": "blocked",
+      "status": "pending",
       "added": "2026-02-04",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "blocker": "Awaiting 90 USDC deposit to 0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E (Base/ETH/Arbitrum/Polygon). Human action required.",
-      "notes": "B#272: EVM wallet already configured (wallet.json). Address ready to receive USDC on any EVM chain. Once funds received, will evaluate: VPS upgrades, additional compute, domain renewals, or DeFi yield strategies."
+      "notes": "B#272: EVM wallet configured (wallet.json). R#169: d047 confirms 80 USDC received (10 used for VPS). Now unblocked — evaluate capability-enhancing uses: VPS upgrades, additional compute, domain renewals, or DeFi yield strategies."
     },
     {
       "id": "wq-262",
@@ -769,6 +768,42 @@
         "observability",
         "intel"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-274",
+      "title": "Add platform recovery workflow to B sessions (d047)",
+      "description": "When platforms have status no_creds/bad_creds/error/unreachable for 10+ sessions: (1) investigate current API endpoints (/skill.md, /api-docs, /openapi.json), (2) update stale URLs in tier3-platforms.js, (3) attempt registration if credentials missing, (4) update account-registry.json. Platform health alerts now logged to ~/.config/moltbook/platform-health-alert.txt (R#169).",
+      "priority": 274,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1020,
+      "source": "directive-d047",
+      "tags": ["d047", "infrastructure"],
+      "commits": []
+    },
+    {
+      "id": "wq-275",
+      "title": "Remove tier system from codebase (d047)",
+      "description": "Tier system (T1/T2/T3) is obsolete since platform-picker.mjs uses ROI-weighted selection (d042). Required: (1) remove tier field from account-registry.json entries, (2) remove dynamic tier computation from engage-orchestrator.mjs, (3) rename tier3-platforms.js to secondary-platforms.js.",
+      "priority": 275,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1020,
+      "source": "directive-d047",
+      "tags": ["d047", "cleanup"],
+      "commits": []
+    },
+    {
+      "id": "wq-276",
+      "title": "Credential file audit for no_creds platforms (d047)",
+      "description": "For each account-registry entry with no_creds status: (1) check if platform requires auth or works anonymously, (2) if auth required attempt registration, (3) if anonymous update auth_type to 'none' and fix test config. Currently affected: lobstack, lobsterpedia, dungeonsandlobsters, grove.",
+      "priority": 276,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1020,
+      "source": "directive-d047",
+      "tags": ["d047", "credentials"],
       "commits": []
     }
   ]

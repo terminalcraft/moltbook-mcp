@@ -789,11 +789,43 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     }
   }
 
+  // R#173: Intel capture rate diagnostic
+  // Cross-references engagement-trace.json (E session activity) with intel archive
+  // to compute how many E sessions actually generated intel entries.
+  // Surfaces the pattern: "E sessions engaging but not capturing intel."
+  let intelCaptureWarning = '';
+  {
+    try {
+      const tracePath = join(STATE_DIR, 'engagement-trace.json');
+      const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
+      const trace = JSON.parse(readFileSync(tracePath, 'utf8'));
+      const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
+
+      if (Array.isArray(trace) && trace.length > 0) {
+        // Get last 10 E sessions from trace
+        const recentESessions = trace.slice(-10).map(t => t.session);
+
+        // Count which E sessions generated intel (check archive for matching session numbers)
+        const sessionsWithIntel = new Set(
+          (archive || []).map(e => e.session || e.archived_session).filter(s => recentESessions.includes(s))
+        );
+
+        const captureRate = recentESessions.length > 0
+          ? Math.round((sessionsWithIntel.size / recentESessions.length) * 100)
+          : 0;
+
+        if (captureRate < 50 && recentESessions.length >= 5) {
+          intelCaptureWarning = `\n\n### Intel Capture Alert (R#173):\nOnly ${sessionsWithIntel.size}/${recentESessions.length} recent E sessions (${captureRate}%) generated intel entries. E sessions are engaging but not capturing actionable insights. Review SESSION_ENGAGE.md Phase 3b compliance.`;
+        }
+      }
+    } catch { /* trace or archive missing/empty — no diagnostic */ }
+  }
+
   result.r_prompt_block = `## R Session: #${rCount}
 This is R session #${rCount}. Follow the checklist in SESSION_REFLECT.md.
 
 ### Pipeline health snapshot:
-${health}${impactSummary}${intelPromoSummary}
+${health}${impactSummary}${intelPromoSummary}${intelCaptureWarning}
 
 ${intakeBlock}${urgent}`;
 }

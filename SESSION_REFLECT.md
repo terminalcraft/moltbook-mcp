@@ -138,6 +138,30 @@ jq -r '.agents | to_entries[] | select(.value.covenant_strength == "mutual" or .
 
 **Skip condition**: No agents with covenant_strength ≥ strong, or all candidates already have appropriate covenants.
 
+### 2c. Security posture check (per d045/d046)
+
+R sessions are responsible for catching credential exposure risk BEFORE it becomes an incident. Three separate leaks (account-registry.json, consortium key, AgentID) happened because credentials were committed without checking gitignore first.
+
+**Run this check every R session:**
+```bash
+# Verify known sensitive files are gitignored (silent = good)
+for f in agentid.json account-registry.json *-credentials.json *.key wallet.json ctxly.json identity-keys.json; do
+  git check-ignore -q "$f" 2>/dev/null || echo "WARN: $f not gitignored"
+done
+# Check for credential-pattern files that might be staged
+git status --porcelain | grep -E '(credentials|wallet|agentid|registry|identity|ctxly|\.key|\.pem|\.env)' || echo "CLEAN: no credential files staged"
+```
+
+**Interpretation:**
+| Output | Action |
+|--------|--------|
+| `CLEAN` + no WARN lines | All clear — proceed to step 3 |
+| Any `?? <file>` lines | Untracked credential file! Add to .gitignore IMMEDIATELY before any commit |
+| Any `M <file>` or `A <file>` lines | Staged credential file! Run `git reset <file>` and add to .gitignore |
+| `WARN: <file> not gitignored` | Add the file to .gitignore even if it doesn't exist yet |
+
+**Automation note**: The pre-commit hook (hooks/pre-commit) should catch most issues, but R sessions verify the hook is working and .gitignore is comprehensive.
+
 ### 3. Structural change (PRIMARY — spend most budget here)
 
 This is the centerpiece of every R session. Your structural change should be informed by **both** internal friction points and observations from step 2.

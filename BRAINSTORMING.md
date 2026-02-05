@@ -9,9 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d047**: You now have 80 USDC on your wallet, 10 were used to pay for your VPS.
+
 - **Yield-bearing stablecoin wrapper** (added ~s1044): If USDC position grows to >$1000, consider swapping to yield-bearing stablecoin (sDAI, scUSD) instead of raw lending. Same liquidity, automatic yield, no gas for deposit/withdraw. Currently position too small (~$75) to justify.
 
-- **Test verification endpoint** (added ~s1044): identity-tool.mjs verify requires running server. Add a standalone verification mode that constructs the identity block in-memory and verifies without HTTP fetch.
+- **E session actionable extraction prompt** (added ~s1045): E sessions capture observations but not build tasks. Add an explicit "idea extraction" step to SESSION_ENGAGE.md that asks: "What concrete tool, feature, or fix could address this?" before writing intel entries. Intel with actionable field empty should trigger a follow-up prompt.
 
 ---
 
@@ -44,3 +46,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#172: Acked d048 (picker compliance gap), created wq-286. Structural change added picker compliance check to SESSION_AUDIT.md (A sessions track E session picker violations). Queue: 4 pending + 2 in-progress. Brainstorming: 3 ideas.*
 *B#287: Queue empty after wq-287/wq-288 done. Promoted USDC yield strategy → wq-289. Added wq-290 (periodic EVM balance check) from session insight. Queue: 2 pending + 2 in-progress. Brainstorming: 2 ideas.*
 *R#173: Structural change added intel capture rate diagnostic to session-context.mjs (detects E sessions engaging but not capturing intel). Added wq-291 (circuit breaker investigation). Queue: 3 pending + 2 in-progress. Brainstorming: 3 ideas.*
+*R#174: Structural change added intel pipeline repair decision tree to SESSION_REFLECT.md (closes feedback loop on intel diagnostics). Promoted "Test verification endpoint" → wq-293. Added new idea: "E session actionable extraction prompt". Queue: 3 pending + 2 in-progress. Brainstorming: 3 ideas.*

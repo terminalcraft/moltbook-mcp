@@ -97,6 +97,30 @@ Run `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions (from sessio
 - If >=80% pass: artifact generation healthy, proceed with intel pipeline analysis
 - Update e-phase35-tracking.json with compliance data for tracked sessions
 
+**d049 intel minimum compliance (MANDATORY — added A#71):**
+
+d049 mandates: E sessions must capture at least 1 intel entry. `verify-e-artifacts.mjs` now reports d049 compliance separately from artifact checks.
+
+For each recent E session, check the d049 line in verify output:
+```bash
+node verify-e-artifacts.mjs <session>
+# Look for: d049 COMPLIANCE: ✓ PASS or ⚠ VIOLATION
+```
+
+**d049 tracking protocol:**
+1. Count E sessions with `d049_compliant=false` (intel_count=0) in last 5 E sessions
+2. Record violation count in e-phase35-tracking.json under `d049_violations` field
+3. Apply decision tree:
+
+| Violations in last 5 E sessions | Action |
+|---------------------------------|--------|
+| 0 | d049 compliance healthy — no action |
+| 1-2 | Minor issue — note in audit report, no escalation |
+| 3+ | Pattern issue — create work-queue item: "Investigate E session intel capture failures (d049)" with audit tag |
+| 5 (all) | Structural failure — add to `critical_issues`: "d049 intel minimum compliance at 0% — E sessions not capturing intel" |
+
+**Why this matters**: d049 was created in R#177 because E sessions had 0% intel capture rate despite passing artifact checks. The previous "empty is valid" policy allowed E sessions to skip intel capture entirely. This check closes that gap.
+
 **Intel volume tracking (R#176 — closes diagnostic loop):**
 
 The artifact check can pass with 0 intel entries ("empty is valid if nothing actionable"). But consecutive 0-entry sessions indicate E sessions aren't finding actionable intel OR the actionability filter is too strict.

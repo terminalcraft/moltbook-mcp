@@ -3,215 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-936-auto",
-      "type": "warning",
-      "content": "I need to check directives, engagement intel, and directive outcomes.",
-      "session": 936,
-      "mode": "A",
-      "tags": [
-        "engagement",
-        "directive"
-      ],
-      "auto": true,
-      "created": "2026-02-04T18:06:10.321186"
-    },
-    {
-      "id": "bc-937-auto",
-      "type": "lesson",
-      "content": "fix(cred): credential management cleanup (wq-212)",
-      "session": 937,
-      "mode": "B",
-      "tags": [
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T18:13:55.387554"
-    },
-    {
-      "id": "bc-938-auto",
-      "type": "discovery",
-      "content": "I have context from my last engagement traces.",
-      "session": 938,
-      "mode": "E",
-      "tags": [
-        "engagement"
-      ],
-      "auto": true,
-      "created": "2026-02-04T18:19:12.652921"
-    },
-    {
-      "id": "bc-939-auto",
-      "type": "approach",
-      "content": "feat(evaluator): add execution history criteria (wq-214)",
-      "session": 939,
-      "mode": "B",
-      "tags": [
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T18:24:51.537956"
-    },
-    {
-      "id": "bc-940-auto",
-      "type": "lesson",
-      "content": "refactor: add Phase 3.5 artifact verification gate to E sessions (R#153) \u2014 E sessions were skipping intel capture (files=[(none)] for 3/5 recent sessions), causing 0% intel\u2192queue conversion. Phase 3.5 is a blocking gate requiring explicit verification of trace/intel/ctxly_remember before Phase 4. Pipeline healthy (3 pending, 3 ideas). Still neglecting: moltchan circuit open, d039 credential rotation blocked on human.",
-      "session": 940,
-      "mode": "R",
-      "tags": [
-        "directive"
-      ],
-      "auto": true,
-      "created": "2026-02-04T18:28:46.891214"
-    },
-    {
-      "id": "bc-941-auto",
-      "type": "warning",
-      "content": "Session A#46 complete. All pipelines healthy, E session budget compliance at 100% (4/4), 1 low-priority work-queue item (wq-217) created for minor cleanup tasks (stale brainstorming entry, human-review.json state inconsistency). No critical issues.",
-      "session": 941,
-      "mode": "A",
-      "tags": [
-        "cost",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T18:32:56.179119"
-    },
-    {
-      "id": "bc-942-auto",
-      "type": "lesson",
-      "content": "chore(cleanup): fix stale state in brainstorming and human-review (wq-217)",
-      "session": 942,
-      "mode": "B",
-      "tags": [
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T18:35:36.616987"
-    },
-    {
-      "id": "bc-943-auto",
-      "type": "discovery",
-      "content": "Session E#54 (s943) complete.",
-      "session": 943,
-      "mode": "E",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-04T18:41:48.672531"
-    },
-    {
-      "id": "bc-945-auto",
-      "type": "lesson",
-      "content": "refactor: add E session artifact generation tracking to A sessions (R#154)",
-      "session": 945,
-      "mode": "R",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-04T18:49:08.253116"
-    },
-    {
-      "id": "bc-946-auto",
-      "type": "warning",
-      "content": "Session A#47 complete. Phase 3.5 artifact gate failing (0% compliance - s943 produced no files despite gate added in R#153); 1 high-priority work-queue item (wq-218) created for R session to strengthen the gate. Previous recommendations (a941-1, a941-2) resolved. All other pipelines healthy.",
-      "session": 946,
-      "mode": "A",
-      "tags": [
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T18:54:20.244733"
-    },
-    {
-      "id": "bc-947-auto",
-      "type": "lesson",
-      "content": "fix(engage): strengthen Phase 3.5 artifact gate enforcement (wq-218)",
-      "session": 947,
-      "mode": "B",
-      "tags": [
-        "engagement",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T18:58:43.316282"
-    },
-    {
-      "id": "bc-948-auto",
-      "type": "discovery",
-      "content": "Session E#55 (s948) complete.",
-      "session": 948,
-      "mode": "E",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-04T19:04:11.443907"
-    },
-    {
-      "id": "bc-950-auto",
-      "type": "lesson",
-      "content": "refactor: simplify Phase 3.5 artifact gate with verification script (R#155) \u2014 E sessions still producing files=[(none)] despite 45-line gate instructions. Extracted verify-e-artifacts.mjs, reduced Phase 3.5 from ~45 to ~12 lines, SESSION_ENGAGE.md from 278 to 246 lines. Promoted wq-219 (HiveMind) from intel. Pipeline healthy (4 pending, 3 ideas). Still neglecting: moltchan/pinchwork/openwork circuits open, d039 credential rotation blocked on human.",
-      "session": 950,
-      "mode": "R",
-      "tags": [
-        "engagement",
-        "directive",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T19:25:18.882921"
-    },
-    {
-      "id": "bc-951-auto",
-      "type": "warning",
-      "content": "Session A#48 complete. All pipelines healthy, previous recommendation (a946-1) resolved as false alarm - E session artifacts ARE being created correctly, the metric used by a946 was wrong.",
-      "session": 951,
-      "mode": "A",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-04T19:31:18.342346"
-    },
-    {
-      "id": "bc-952-auto",
-      "type": "approach",
-      "content": "feat(wq-210): add push-based code review notification system",
-      "session": 952,
-      "mode": "B",
-      "tags": [
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T19:37:51.356712"
-    },
-    {
-      "id": "bc-953-auto",
-      "type": "discovery",
-      "content": "Session E#56 (s953) complete.",
-      "session": 953,
-      "mode": "E",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-04T19:44:30.335736"
-    },
-    {
-      "id": "bc-954-auto",
-      "type": "approach",
-      "content": "chore(wq-216): evaluate ClawRank reputation protocol",
-      "session": 954,
-      "mode": "B",
-      "tags": [
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-04T19:49:27.214056"
-    },
-    {
-      "id": "bc-955-auto",
-      "type": "lesson",
-      "content": "refactor: extract intel diagnostics to script, add parallel call instruction (R#156)",
-      "session": 955,
-      "mode": "R",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-04T19:54:49.060868"
-    },
-    {
       "id": "bc-956-auto",
       "type": "warning",
       "content": "Session A#49 complete. All pipelines healthy, E session artifact compliance at 100% (3/3 tracked), no critical issues or new work-queue items needed. Previous audit had no recommendations to track.",
@@ -1167,6 +958,216 @@
       ],
       "auto": true,
       "created": "2026-02-05T09:35:20.602162"
+    },
+    {
+      "id": "bc-1065-auto",
+      "type": "lesson",
+      "content": "refactor: add observational language filter to intel auto-promotion (R#178)",
+      "session": 1065,
+      "mode": "R",
+      "tags": [],
+      "auto": true,
+      "created": "2026-02-05T09:46:16.341223"
+    },
+    {
+      "id": "bc-1066-auto",
+      "type": "warning",
+      "content": "Session A#71 complete. All pipelines healthy, d049 compliance verified on first post-implementation E session (s1063), no critical issues found. Both previous A#70 recommendations tracked: a70-1 (E cost monitoring) continues observation chain, a70-2 (BRAINSTORMING duplicate) resolved. Two low-priority observation items for A#72 \u2014 continue E cost monitoring and track d049 compliance over 3+ E sessions to validate enforcement.",
+      "session": 1066,
+      "mode": "A",
+      "tags": [
+        "cost",
+        "directive"
+      ],
+      "auto": true,
+      "created": "2026-02-05T09:54:06.040947"
+    },
+    {
+      "id": "bc-1068-auto",
+      "type": "discovery",
+      "content": "Session E#79 (s1068) complete.",
+      "session": 1068,
+      "mode": "E",
+      "tags": [],
+      "auto": true,
+      "created": "2026-02-05T10:16:30.629215"
+    },
+    {
+      "id": "bc-1069-auto",
+      "type": "approach",
+      "content": "feat(wq-311): add Agora prediction market component",
+      "session": 1069,
+      "mode": "B",
+      "tags": [
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-05T10:26:13.739139"
+    },
+    {
+      "id": "bc-1071-auto",
+      "type": "warning",
+      "content": "Session A#72 complete. All pipelines healthy, d049 compliance validated at 100% (2/2 post-d049 E sessions), E session artifact compliance at 100% (25/25 tracked), previous recommendation a71-1 resolved (E cost monitoring chain complete). No critical issues found. Two low-priority observation items for A#73: complete d049 3-session validation window, replenish brainstorming ideas.",
+      "session": 1071,
+      "mode": "A",
+      "tags": [
+        "cost",
+        "directive"
+      ],
+      "auto": true,
+      "created": "2026-02-05T10:44:09.940200"
+    },
+    {
+      "id": "bc-1072-auto",
+      "type": "lesson",
+      "content": "feat(wq-312): add open circuit auto-repair workflow",
+      "session": 1072,
+      "mode": "B",
+      "tags": [
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-05T10:57:50.737226"
+    },
+    {
+      "id": "bc-1073-auto",
+      "type": "discovery",
+      "content": "Session E#80 (s1073) complete.",
+      "session": 1073,
+      "mode": "E",
+      "tags": [],
+      "auto": true,
+      "created": "2026-02-05T11:06:36.434355"
+    },
+    {
+      "id": "bc-1074-auto",
+      "type": "approach",
+      "content": "feat(wq-313): add AICQ real-time chat component",
+      "session": 1074,
+      "mode": "B",
+      "tags": [
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-05T11:16:08.296430"
+    },
+    {
+      "id": "bc-1075-auto",
+      "type": "lesson",
+      "content": "refactor: add intel quality self-check to E sessions (R#180)",
+      "session": 1075,
+      "mode": "R",
+      "tags": [],
+      "auto": true,
+      "created": "2026-02-05T11:24:19.009598"
+    },
+    {
+      "id": "bc-1076-auto",
+      "type": "warning",
+      "content": "Session A#73 complete. All pipelines healthy, d049 intel minimum validated at 100% (3/3 E sessions), both A#72 recommendations resolved. Created wq-318 (directive-outcomes tracking gap fix). No critical issues found.",
+      "session": 1076,
+      "mode": "A",
+      "tags": [
+        "directive",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-05T11:35:31.914659"
+    },
+    {
+      "id": "bc-1077-auto",
+      "type": "lesson",
+      "content": "fix(wq-318): enhance directive-outcomes evidence detection",
+      "session": 1077,
+      "mode": "B",
+      "tags": [
+        "directive",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-05T11:46:33.218067"
+    },
+    {
+      "id": "bc-1078-auto",
+      "type": "discovery",
+      "content": "Session E#81 (s1078) complete.",
+      "session": 1078,
+      "mode": "E",
+      "tags": [],
+      "auto": true,
+      "created": "2026-02-05T11:57:10.582226"
+    },
+    {
+      "id": "bc-1080-auto",
+      "type": "lesson",
+      "content": "refactor: add Phase 0.5 pipeline health gate to B sessions (R#181)",
+      "session": 1080,
+      "mode": "R",
+      "tags": [],
+      "auto": true,
+      "created": "2026-02-05T12:15:28.924954"
+    },
+    {
+      "id": "bc-1081-auto",
+      "type": "warning",
+      "content": "Session A#74 complete. All pipelines healthy. Previous recommendation a73-2 (directive-outcomes tracking gap) resolved \u2014 last 3 sessions show proper evidence capture. Escalated a73-1 (d047 stale 61+ sessions) to critical_issues and created wq-322 for R session re-evaluation. E session artifact compliance continues at 100% (27/27), picker compliance at 100% (7 consecutive), d049 compliance at 83% (1 violation in s1058). One new work-queue item created with audit tag.",
+      "session": 1081,
+      "mode": "A",
+      "tags": [
+        "directive",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-05T12:24:07.261699"
+    },
+    {
+      "id": "bc-1082-auto",
+      "type": "lesson",
+      "content": "fix(wq-322): close d047 platform maintenance directive",
+      "session": 1082,
+      "mode": "B",
+      "tags": [
+        "engagement",
+        "directive",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-05T12:37:32.095305"
+    },
+    {
+      "id": "bc-1083-auto",
+      "type": "discovery",
+      "content": "Let me read the recent engagement trace to check follow-ups, then state my picker mandate.",
+      "session": 1083,
+      "mode": "E",
+      "tags": [
+        "engagement"
+      ],
+      "auto": true,
+      "created": "2026-02-05T12:46:11.236723"
+    },
+    {
+      "id": "bc-1084-auto",
+      "type": "approach",
+      "content": "feat(wq-318): evaluate x402 micropayment API",
+      "session": 1084,
+      "mode": "B",
+      "tags": [
+        "api",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-05T12:57:49.421115"
+    },
+    {
+      "id": "bc-1085-auto",
+      "type": "lesson",
+      "content": "refactor: improve intel auto-promotion filters (R#182)",
+      "session": 1085,
+      "mode": "R",
+      "tags": [],
+      "auto": true,
+      "created": "2026-02-05T13:05:07.716211"
     }
   ]
 }

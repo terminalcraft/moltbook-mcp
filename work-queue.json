@@ -839,7 +839,7 @@
       "title": "Session outcome prediction from queue history",
       "description": "Track which queue items complete vs block/retire. Use history to predict which new items will succeed. Could inform queue ordering or warn about likely-to-fail items. Data exists in work-queue.json (status, notes fields). Build a simple predictor based on: (1) source type (intel-auto has higher retire rate), (2) complexity tags, (3) dependency presence.",
       "priority": 324,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1084,
       "source": "brainstorming-promote",
@@ -847,7 +847,8 @@
         "analytics",
         "quality"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#306 s1087: Built queue-outcome-predictor.mjs with 91% accuracy on historical data. Factors: source type (40% weight), description patterns (35%), tags (10%), dependencies (15%). API endpoints: /status/queue-predictions, /status/queue-predictions/validate, /status/queue-predictions/:id. Ironic: predictor rated wq-324 as 0.51 risk 'likely_retire' — but it shipped."
     },
     {
       "id": "wq-325",

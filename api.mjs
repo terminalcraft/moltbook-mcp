@@ -8,6 +8,7 @@ import { extractFromRepo, parseGitHubUrl } from "./packages/pattern-extractor/in
 import { analyzeReplayLog } from "./providers/replay-log.js";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 import { summarizeChatr } from "./providers/chatr-digest.js";
+import { predictQueue, predictOutcome, validatePredictor } from "./queue-outcome-predictor.mjs";
 
 const app = express();
 const PORT = 3847;
@@ -1668,6 +1669,39 @@ app.get("/status/queue-health", (req, res) => {
       blocked_items: blocked,
       health: duplicates.length === 0 && (staleDays === null || staleDays < 7) ? "healthy" : "needs_attention",
     });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+// Queue outcome prediction — predicts which items will complete vs retire (wq-324)
+// Uses source type, description patterns, dependencies, and tags to score risk
+app.get("/status/queue-predictions", (req, res) => {
+  try {
+    const result = predictQueue();
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+app.get("/status/queue-predictions/validate", (req, res) => {
+  try {
+    const result = validatePredictor();
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+app.get("/status/queue-predictions/:id", (req, res) => {
+  try {
+    const wq = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf8"));
+    const item = wq.queue.find(i => i.id === req.params.id);
+    if (!item) {
+      return res.status(404).json({ error: `Item ${req.params.id} not found` });
+    }
+    res.json(predictOutcome(item));
   } catch (e) {
     res.status(500).json({ error: e.message?.slice(0, 100) });
   }
@@ -3546,6 +3580,167 @@ a{color:#89b4fa}</style></head>
 <p style="margin-top:1.5rem">${metrics.target.on_track ? '<span class="good">✓ Meeting 20% conversion target</span>' : '<span class="bad">⚠️ Below 20% conversion target</span>'}</p>
 
 <p style="margin-top:1rem"><a href="/status/intel-quality?format=json">JSON</a> · <a href="/status">Status index</a></p>
+</body></html>`;
+    res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+// Intel pipeline observability (wq-310)
+// Unified view: E session capture rates, d049 compliance, promotion conversion
+app.get("/status/intel-pipeline", (req, res) => {
+  try {
+    const window = Math.min(parseInt(req.query.window) || 10, 30);
+    const configDir = process.env.HOME + "/.config/moltbook";
+    const histPath = join(configDir, "session-history.txt");
+    const archivePath = join(configDir, "engagement-intel-archive.json");
+    const intelPath = join(configDir, "engagement-intel.json");
+    const d049Path = join(BASE, "e-phase35-tracking.json");
+    const promotionPath = join(BASE, "intel-promotion-tracking.json");
+
+    // 1. E session intel capture rates from archive
+    let archive = [];
+    try { archive = JSON.parse(readFileSync(archivePath, "utf8")); } catch {}
+    let currentIntel = [];
+    try { currentIntel = JSON.parse(readFileSync(intelPath, "utf8")); } catch {}
+
+    // Get recent E sessions from history
+    let histLines = [];
+    try { histLines = readFileSync(histPath, "utf8").trim().split("\n").filter(Boolean); } catch {}
+    const eSessionRe = /mode=E\s+s=(\d+)/;
+    const eSessions = [];
+    for (const line of histLines) {
+      const m = line.match(eSessionRe);
+      if (m) eSessions.push({ session: parseInt(m[1]), line });
+    }
+    const recentESessions = eSessions.slice(-window);
+
+    // Count intel per session
+    const capturePerSession = {};
+    for (const e of recentESessions) {
+      const count = archive.filter(i => i.session === e.session || i.consumed_session === e.session).length;
+      capturePerSession[e.session] = count;
+    }
+    const captureRates = Object.values(capturePerSession);
+    const avgCapture = captureRates.length > 0
+      ? Math.round((captureRates.reduce((a, b) => a + b, 0) / captureRates.length) * 10) / 10
+      : 0;
+    const sessionsWithIntel = captureRates.filter(c => c > 0).length;
+    const captureRate = recentESessions.length > 0
+      ? Math.round((sessionsWithIntel / recentESessions.length) * 100)
+      : 0;
+
+    // 2. d049 compliance from e-phase35-tracking.json
+    let d049 = { metrics: { compliance_rate: "N/A", total_e_sessions: 0, phase35_compliant: 0 }, sessions: [] };
+    try { d049 = JSON.parse(readFileSync(d049Path, "utf8")); } catch {}
+    const complianceRate = d049.metrics?.compliance_rate || "N/A";
+    const complianceNum = typeof complianceRate === "string" && complianceRate.includes("%")
+      ? parseInt(complianceRate)
+      : (d049.metrics?.total_e_sessions > 0
+        ? Math.round((d049.metrics.phase35_compliant / d049.metrics.total_e_sessions) * 100)
+        : 0);
+    const recentCompliance = (d049.sessions || []).slice(-5).map(s => ({
+      session: s.session,
+      passed: s.passed_artifact_check
+    }));
+
+    // 3. Promotion→completion conversion from intel quality metrics
+    const qualityMetrics = getIntelMetrics(window);
+    const conversionRate = qualityMetrics.outcomes?.conversion_rate || 0;
+    const totalPromoted = qualityMetrics.promotion?.total_promoted || 0;
+    const totalWorked = qualityMetrics.outcomes?.worked || 0;
+    const totalRetired = qualityMetrics.outcomes?.retired_without_work || 0;
+
+    // 4. Load promotion tracking for detailed breakdown
+    let promotionTracking = { tracking_window: {} };
+    try { promotionTracking = JSON.parse(readFileSync(promotionPath, "utf8")); } catch {}
+
+    // Pipeline health assessment
+    const alerts = [];
+    if (captureRate < 50) alerts.push(`Low capture rate: ${captureRate}% of E sessions producing intel`);
+    if (complianceNum < 100) alerts.push(`d049 compliance: ${complianceNum}% (target: 100%)`);
+    if (conversionRate < 20) alerts.push(`Low conversion: ${conversionRate}% of promoted intel completed`);
+
+    const result = {
+      timestamp: new Date().toISOString(),
+      window: {
+        e_sessions_analyzed: recentESessions.length,
+        first_session: recentESessions[0]?.session || 0,
+        last_session: recentESessions[recentESessions.length - 1]?.session || 0,
+      },
+      capture: {
+        rate: captureRate + "%",
+        sessions_with_intel: sessionsWithIntel,
+        avg_entries_per_session: avgCapture,
+        current_intel_count: currentIntel.length,
+        archived_intel_count: archive.length,
+        recent_sessions: recentESessions.slice(-5).map(e => ({
+          s: e.session,
+          intel: capturePerSession[e.session] || 0
+        })),
+      },
+      d049_compliance: {
+        rate: complianceNum + "%",
+        total_tracked: d049.metrics?.total_e_sessions || 0,
+        compliant: d049.metrics?.phase35_compliant || 0,
+        recent_sessions: recentCompliance,
+      },
+      promotion: {
+        conversion_rate: conversionRate + "%",
+        total_promoted: totalPromoted,
+        completed: totalWorked,
+        retired_without_work: totalRetired,
+        tracking: {
+          items_tracked: promotionTracking.tracking_window?.items_tracked || 0,
+          items_worked: promotionTracking.tracking_window?.items_worked || 0,
+          success_rate: promotionTracking.tracking_window?.items_tracked > 0
+            ? Math.round((promotionTracking.tracking_window.items_worked / promotionTracking.tracking_window.items_tracked) * 100) + "%"
+            : "N/A"
+        }
+      },
+      health: {
+        status: alerts.length === 0 ? "healthy" : (alerts.length <= 1 ? "degraded" : "unhealthy"),
+        alerts,
+      },
+    };
+
+    if (req.query.format === "json") {
+      return res.json(result);
+    }
+
+    // HTML view
+    const statusColor = result.health.status === "healthy" ? "a6e3a1" : (result.health.status === "degraded" ? "f9e2af" : "f38ba8");
+    const html = `<!DOCTYPE html>
+<html><head><title>Intel Pipeline</title>
+<style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}
+h1{color:#89b4fa}h2{color:#f9e2af;margin-top:1.5rem}
+.metric{margin:0.3rem 0}.label{color:#a6adc8}.value{color:#89dceb}
+.good{color:#a6e3a1}.warn{color:#f9e2af}.bad{color:#f38ba8}
+.status{padding:0.3rem 0.6rem;border-radius:4px;display:inline-block}
+a{color:#89b4fa}table{border-collapse:collapse;margin:0.5rem 0}
+td,th{padding:0.3rem 0.8rem;text-align:left;border-bottom:1px solid #45475a}</style></head>
+<body>
+<h1>Intel Pipeline</h1>
+<p style="margin-bottom:1.5rem"><span class="status" style="background:#${statusColor}33;color:#${statusColor}">${result.health.status.toUpperCase()}</span></p>
+
+<h2>Capture (E Sessions)</h2>
+<div class="metric"><span class="label">Capture rate:</span> <span class="value ${captureRate >= 50 ? 'good' : 'warn'}">${result.capture.rate}</span> <span class="label">(${sessionsWithIntel}/${recentESessions.length} sessions)</span></div>
+<div class="metric"><span class="label">Avg entries/session:</span> <span class="value">${avgCapture}</span></div>
+<div class="metric"><span class="label">Total archived:</span> <span class="value">${archive.length}</span> <span class="label">Current:</span> <span class="value">${currentIntel.length}</span></div>
+
+<h2>d049 Compliance</h2>
+<div class="metric"><span class="label">Compliance rate:</span> <span class="value ${complianceNum >= 100 ? 'good' : 'warn'}">${result.d049_compliance.rate}</span> <span class="label">(${d049.metrics?.phase35_compliant}/${d049.metrics?.total_e_sessions} sessions)</span></div>
+
+<h2>Promotion Pipeline</h2>
+<div class="metric"><span class="label">Conversion rate:</span> <span class="value ${conversionRate >= 20 ? 'good' : 'bad'}">${result.promotion.conversion_rate}</span> <span class="label">(target: 20%+)</span></div>
+<div class="metric"><span class="label">Promoted→Completed:</span> <span class="value">${totalWorked}/${totalPromoted}</span></div>
+<div class="metric"><span class="label">Retired without work:</span> <span class="value">${totalRetired}</span></div>
+<div class="metric"><span class="label">Tracked success rate:</span> <span class="value">${result.promotion.tracking.success_rate}</span> <span class="label">(${promotionTracking.tracking_window?.items_worked}/${promotionTracking.tracking_window?.items_tracked})</span></div>
+
+${alerts.length > 0 ? `<h2>Alerts</h2><ul>${alerts.map(a => `<li class="warn">${a}</li>`).join('')}</ul>` : ''}
+
+<p style="margin-top:1.5rem"><a href="/status/intel-pipeline?format=json">JSON</a> · <a href="/status/intel-quality">Quality</a> · <a href="/status/intel-volume">Volume</a> · <a href="/status">Index</a></p>
 </body></html>`;
     res.type("html").send(html);
   } catch (e) {

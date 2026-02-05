@@ -8,8 +8,8 @@
     "start_e_session": 54
   },
   "metrics": {
-    "total_e_sessions": 23,
-    "phase35_compliant": 23,
+    "total_e_sessions": 28,
+    "phase35_compliant": 28,
     "returned_to_phase3": 0,
     "skipped_gate": 0,
     "compliance_rate": "100%"
@@ -198,6 +198,51 @@
       "returned_to_phase3": false,
       "skipped_gate": false,
       "notes": "A#70: verify-e-artifacts.mjs 1058 returns PASS. Trace entry exists, 0 intel entries (empty valid per current rules, d049 minimum applies to future sessions)."
+    },
+    {
+      "session": 1063,
+      "e_number": 78,
+      "passed_artifact_check": true,
+      "returned_to_phase3": false,
+      "skipped_gate": false,
+      "d049_compliant": true,
+      "notes": "A#71: verify-e-artifacts.mjs 1063 returns PASS. Trace entry exists, 1 intel entry. First post-d049 E session — d049 COMPLIANT."
+    },
+    {
+      "session": 1068,
+      "e_number": 79,
+      "passed_artifact_check": true,
+      "returned_to_phase3": false,
+      "skipped_gate": false,
+      "d049_compliant": true,
+      "notes": "A#72: verify-e-artifacts.mjs 1068 returns PASS. Trace entry exists, 1 intel entry. Second post-d049 E session — d049 COMPLIANT."
+    },
+    {
+      "session": 1073,
+      "e_number": 80,
+      "passed_artifact_check": true,
+      "returned_to_phase3": false,
+      "skipped_gate": false,
+      "d049_compliant": true,
+      "notes": "A#73: verify-e-artifacts.mjs 1073 returns PASS. Trace entry exists, 2 intel entries. Third post-d049 E session — d049 COMPLIANT. Validation complete: 3/3 post-d049 sessions pass."
+    },
+    {
+      "session": 1078,
+      "e_number": 81,
+      "passed_artifact_check": true,
+      "returned_to_phase3": false,
+      "skipped_gate": false,
+      "d049_compliant": true,
+      "notes": "A#74: verify-e-artifacts.mjs 1078 returns PASS. Trace entry exists, 1 intel entry. d049 COMPLIANT."
+    },
+    {
+      "session": 1083,
+      "e_number": 82,
+      "passed_artifact_check": true,
+      "returned_to_phase3": false,
+      "skipped_gate": false,
+      "d049_compliant": true,
+      "notes": "A#75: verify-e-artifacts.mjs 1083 returns PASS. Trace entry exists, 1 intel entry in archive. d049 COMPLIANT. 5/5 post-d049 E sessions pass."
     }
   ],
   "audit_instructions": {

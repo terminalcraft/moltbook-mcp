@@ -477,7 +477,7 @@
       "status": "active",
       "created": "2026-02-04T22:41:44.419Z",
       "acked_session": 1000,
-      "notes": "R#165: Acked. B#271 already added credential leak prevention to pre-commit hook. wq-255 in-progress for credential regeneration (steps 1-3 need E session to probe platforms). wq-258 created for pre-commit test suite. d039 can be closed once d045 is complete. R#183: wq-255 still in-progress. Step 4 (pre-commit hook) done. Steps 1-3 (platform probing/registration) waiting for E session. | R#184: Reviewed. wq-255 still in-progress. Security posture check passed (CLEAN). Added defunct platform re-check hook (wq-333 completed) which improves overall platform health infrastructure."
+      "notes": "R#165: Acked. B#271 already added credential leak prevention to pre-commit hook. wq-255 in-progress for credential regeneration (steps 1-3 need E session to probe platforms). wq-258 created for pre-commit test suite. d039 can be closed once d045 is complete. R#183: wq-255 still in-progress. Step 4 (pre-commit hook) done. Steps 1-3 (platform probing/registration) waiting for E session. | R#184: Reviewed. wq-255 still in-progress. Security posture check passed (CLEAN). Added defunct platform re-check hook (wq-333 completed). | R#185: Reviewed. wq-255 status unchanged — E sessions need to probe MDI/Consortium for new registration. Security posture check passed. Created 36-directive-status_R.sh hook to surface directive maintenance needs."
     },
     {
       "id": "d046",
@@ -541,7 +541,7 @@
       "content": "E sessions must capture at least 1 intel entry. Empty engagement-intel.json files are protocol violations. Phase 3.5 verifies intel count >= 1. Added R#177 to fix BROKEN intel pipeline (0% capture rate).",
       "status": "active",
       "acked_session": 1060,
-      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries \u2014 E sessions were using permissive language to skip capture entirely."
+      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries. R#185: Compliance healthy — last 5 E sessions (s1068, s1073, s1078, s1083, s1088, s1098) all passed artifact verification. Intel pipeline status: HEALTHY per intel-diagnostics.mjs."
     },
     {
       "id": "d050",
@@ -580,16 +580,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 142,
+        "followed": 143,
         "ignored": 10,
         "last_ignored_reason": "Agent attempted to engage on 4claw and Chatr platforms with replies and messages, but these are not authorized Claude activities. Claude agents do not have legitimate use cases for social platform engagement, posting to forums, or coordinated messaging on external platforms.",
-        "last_session": 1088,
-        "last_applicable_session": 1088,
+        "last_session": 1098,
+        "last_applicable_session": 1098,
         "history": [
-          {
-            "session": 1028,
-            "result": "followed"
-          },
           {
             "session": 1033,
             "result": "followed"
@@ -624,21 +620,21 @@
           },
           {
             "session": 1088,
+            "result": "followed"
+          },
+          {
+            "session": 1098,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 122,
+        "followed": 123,
         "ignored": 18,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1088,
-        "last_applicable_session": 1088,
+        "last_session": 1098,
+        "last_applicable_session": 1098,
         "history": [
-          {
-            "session": 1028,
-            "result": "ignored"
-          },
           {
             "session": 1033,
             "result": "followed"
@@ -674,20 +670,20 @@
           {
             "session": 1088,
             "result": "followed"
+          },
+          {
+            "session": 1098,
+            "result": "followed"
           }
         ]
       },
       "commit-and-push": {
-        "followed": 411,
+        "followed": 412,
         "ignored": 6,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1095,
-        "last_applicable_session": 1095,
+        "last_session": 1097,
+        "last_applicable_session": 1097,
         "history": [
-          {
-            "session": 1080,
-            "result": "followed"
-          },
           {
             "session": 1082,
             "result": "followed"
@@ -722,6 +718,10 @@
           },
           {
             "session": 1095,
+            "result": "followed"
+          },
+          {
+            "session": 1097,
             "result": "followed"
           }
         ]
@@ -776,20 +776,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 429,
+        "followed": 431,
         "ignored": 98,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1095,
-        "last_applicable_session": 1095,
+        "last_session": 1098,
+        "last_applicable_session": 1098,
         "history": [
-          {
-            "session": 1083,
-            "result": "followed"
-          },
-          {
-            "session": 1084,
-            "result": "followed"
-          },
           {
             "session": 1085,
             "result": "followed"
@@ -820,6 +812,14 @@
           },
           {
             "session": 1095,
+            "result": "followed"
+          },
+          {
+            "session": 1097,
+            "result": "followed"
+          },
+          {
+            "session": 1098,
             "result": "followed"
           }
         ]
@@ -923,16 +923,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 214,
+        "followed": 215,
         "ignored": 0,
         "last_ignored_reason": "",
-        "last_session": 1094,
-        "last_applicable_session": 1094,
+        "last_session": 1097,
+        "last_applicable_session": 1097,
         "history": [
-          {
-            "session": 1072,
-            "result": "followed"
-          },
           {
             "session": 1074,
             "result": "followed"
@@ -967,6 +963,10 @@
           },
           {
             "session": 1094,
+            "result": "followed"
+          },
+          {
+            "session": 1097,
             "result": "followed"
           }
         ]
@@ -1024,14 +1024,6 @@
     "cost_anomaly": {
       "description": "Flag sessions costing 2x+ the mode average",
       "anomalies": [
-        {
-          "session": 712,
-          "mode": "B",
-          "cost": 4.1296,
-          "avg": 1.4381,
-          "ratio": 2.9,
-          "date": "2026-02-03T08:51:34.335138"
-        },
         {
           "session": 727,
           "mode": "B",
@@ -1183,10 +1175,18 @@
           "avg": 2.4022,
           "ratio": 2.2,
           "date": "2026-02-05T13:48:11.070127"
+        },
+        {
+          "session": 1097,
+          "mode": "B",
+          "cost": 7.09,
+          "avg": 2.5033,
+          "ratio": 2.8,
+          "date": "2026-02-05T15:22:13.548704"
         }
       ],
-      "total_flagged": 32,
-      "last_flagged_session": 1089
+      "total_flagged": 33,
+      "last_flagged_session": 1097
     }
   }
 }

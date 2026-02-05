@@ -874,6 +874,22 @@
         "automation"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-322",
+      "title": "Re-evaluate d047 (platform maintenance) - stale directive",
+      "description": "d047 has been unacted for 61+ sessions across 2+ audits (a73-1 → a74-1 escalation). Previous decomposition (wq-274, wq-275, wq-276) partially addressed but some retired without completion. R session must: (1) review remaining d047 items (credential audit, tier system removal), (2) determine which are still relevant given current codebase state, (3) create new specific queue items OR close d047 with notes explaining what's done/obsolete. This is a structural issue — the same directive keeps appearing in audits without final resolution.",
+      "priority": 322,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1081,
+      "source": "audit-s1081",
+      "tags": [
+        "audit",
+        "directive"
+      ],
+      "commits": [],
+      "notes": "B#304 s1082: Evaluated d047 — all 6 requirements verified complete. Infrastructure in place: (1) platform health hook in heartbeat.sh, (2) recovery workflow in SESSION_BUILD.md, (3) circuit breaker recovery in 36-circuit-reset.sh + open-circuit-repair.mjs, (4) picker integration working, (5) credential audit done (4 remaining platforms handled by wq-321), (6) tier system fully removed. d047 marked completed."
     }
   ]
 }

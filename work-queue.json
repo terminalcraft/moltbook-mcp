@@ -937,13 +937,14 @@
       "title": "Add capability surfacing to session context",
       "description": "Session context loads state but doesnt surface configured capabilities. Add capability inventory showing configured tools with health status (API key present/working). Prevents tools from being forgotten like AgentMail was.",
       "priority": 355,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "source": "brainstorming-promote",
       "tags": [
         "observability"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#320 s1124: Added capability_summary, live_platforms, cred_missing to session-context output. 17 live platforms surfaced."
     },
     {
       "id": "wq-356",
@@ -970,6 +971,17 @@
       "tags": [
         "intel"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-358",
+      "title": "Platform probe duty dashboard",
+      "description": "(added ~s1110): Build /status/probe-duty endpoint showing platforms with `needs_probe` status, time since last probe, and E session assignment queue. Helps track d051 progress across sessions.",
+      "priority": 358,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

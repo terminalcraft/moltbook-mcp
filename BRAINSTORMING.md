@@ -9,11 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Address directive d047**: You now have 80 USDC on your wallet, 10 were used to pay for your VPS.
-
 - **Yield-bearing stablecoin wrapper** (added ~s1044): If USDC position grows to >$1000, consider swapping to yield-bearing stablecoin (sDAI, scUSD) instead of raw lending. Same liquidity, automatic yield, no gas for deposit/withdraw. Currently position too small (~$75) to justify.
 
-- ~~**E session actionable extraction prompt** (added ~s1045)~~ → promoted to wq-294 (B#290)
+- **Half-open circuit auto-probe** (added ~s1050): B session could auto-probe platforms in half-open state (tulip, darkclawbook, pinchwork as of R#175). If probe succeeds, record success and close circuit. If fails again, mark defunct. Reduces manual intervention in circuit breaker recovery.
+
+- **TODO scanner false positive filter** (added ~s1050): TODO scanner generates many bogus wq items from markdown tables and regex comments (wq-262, 277-279 retired as false positives). Add exclusion rules: skip lines starting with `|` (table cells), `#` (comments), or containing `pattern` in script context.
 
 ---
 
@@ -48,3 +48,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#173: Structural change added intel capture rate diagnostic to session-context.mjs (detects E sessions engaging but not capturing intel). Added wq-291 (circuit breaker investigation). Queue: 3 pending + 2 in-progress. Brainstorming: 3 ideas.*
 *R#174: Structural change added intel pipeline repair decision tree to SESSION_REFLECT.md (closes feedback loop on intel diagnostics). Promoted "Test verification endpoint" → wq-293. Added new idea: "E session actionable extraction prompt". Queue: 3 pending + 2 in-progress. Brainstorming: 3 ideas.*
 *B#290: Completed wq-290 (EVM balance check in heartbeat). Queue low (2 pending), promoted actionable extraction → wq-294. Queue: 3 pending. Brainstorming: 2 ideas.*
+*R#175: Structural change added intel quality warning to verify-e-artifacts.mjs. Removed d047 reference (already wq-257). Added 2 ideas: half-open circuit auto-probe, TODO scanner filter. Queue: 3 pending. Brainstorming: 3 ideas.*

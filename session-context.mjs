@@ -536,7 +536,9 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       // wq-187 was retired as non-actionable — its "actionable" text was philosophical
       // observation ("Apply parasitic bootstrapping pattern") rather than concrete task.
       // Now require text to start with imperative verb to ensure build-ready items.
-      const IMPERATIVE_VERBS = /^(Add|Build|Create|Fix|Implement|Update|Remove|Refactor|Extract|Migrate|Integrate|Configure|Enable|Disable|Optimize|Monitor|Track|Evaluate|Test|Validate|Deploy|Setup|Write|Design|Document)\b/i;
+      // R#182: Removed "Monitor" and "Track" — these generate observation tasks, not build
+      // tasks (wq-249: "Monitor for mainnet deployment" retired as "not a build task").
+      const IMPERATIVE_VERBS = /^(Add|Build|Create|Fix|Implement|Update|Remove|Refactor|Extract|Migrate|Integrate|Configure|Enable|Disable|Optimize|Evaluate|Test|Validate|Deploy|Setup|Write|Design)\b/i;
       // R#178: Observational language filter. wq-284/wq-285/wq-265 were retired because
       // they started with imperative verbs but contained observational/philosophical text.
       // Examples: "enables appropriate response", "maps to circuit breaker architecture",
@@ -544,7 +546,12 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       // are actually pattern observations. Filter them out to improve conversion rate.
       // Check BOTH actionable AND summary — wq-284/wq-285 had clean actionable text but
       // observational summaries that B sessions used to identify non-actionability.
-      const OBSERVATIONAL_PATTERNS = /(enables|maps to|mirrors|serves as|reflects|demonstrates|indicates|suggests that|is a form of|gradient|spectrum|binary|philosophy|metaphor|\bARE\b(?!n't| not| also| both| either))/i;
+      // R#182: Added "attach to" (wq-187: "attach to existing mechanisms").
+      const OBSERVATIONAL_PATTERNS = /(enables|maps to|mirrors|serves as|reflects|demonstrates|indicates|suggests that|is a form of|attach to|gradient|spectrum|binary|philosophy|metaphor|\bARE\b(?!n't| not| also| both| either))/i;
+      // R#182: Meta-instruction filter. wq-248 ("Add to work-queue as potential B session
+      // project") was a meta-instruction about the queue system, not a build task. These
+      // phrases indicate the intel is describing what sessions should do, not code to write.
+      const META_INSTRUCTION_PATTERNS = /(Add to work-queue|potential [BERA] session|as (a )?queue (item|candidate)|should (be )?(added|promoted|tracked))/i;
       const qualifyingEntries = intel.filter(e => {
         const actionable = (e.actionable || '').trim();
         const summary = (e.summary || '');
@@ -553,6 +560,8 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
           IMPERATIVE_VERBS.test(actionable) &&
           !OBSERVATIONAL_PATTERNS.test(actionable) &&  // R#178: exclude philosophical observations in title
           !OBSERVATIONAL_PATTERNS.test(summary) &&     // R#178: also check summary for observations
+          !META_INSTRUCTION_PATTERNS.test(actionable) &&  // R#182: exclude meta-instructions
+          !META_INSTRUCTION_PATTERNS.test(summary) &&     // R#182: also check summary
           !e._promoted;
       });
       for (let i = 0; i < qualifyingEntries.length && promoted.length < 2; i++) {

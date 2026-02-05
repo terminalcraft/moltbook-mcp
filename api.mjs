@@ -3368,6 +3368,70 @@ app.get("/status/cost-trends", (req, res) => {
   }
 });
 
+// Intel volume monitoring (wq-302)
+// Tracks E session intel capture rates to detect degradation
+app.get("/status/intel-volume", (req, res) => {
+  try {
+    const histPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+    const tracePath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/engagement-trace.json");
+    const intelPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/engagement-intel.json");
+    const archivePath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/engagement-intel-archive.json");
+    const window = Math.min(parseInt(req.query.window) || 10, 30);
+
+    // Get last N E sessions from history
+    let lines = [];
+    try { lines = readFileSync(histPath, "utf8").trim().split("\n").filter(Boolean); } catch { return res.json({ error: "no history" }); }
+
+    const re = /mode=E\s+s=(\d+)/;
+    const eSessions = [];
+    for (const line of lines) {
+      const m = line.match(re);
+      if (!m) continue;
+      const sessionNum = parseInt(m[1]);
+      const hasIntelFile = line.includes("engagement-intel.json");
+      eSessions.push({ session: sessionNum, intel_written: hasIntelFile });
+    }
+    const recent = eSessions.slice(-window);
+
+    // Count intel entries from trace (per-session breakdown if available)
+    let trace = [];
+    try { trace = JSON.parse(readFileSync(tracePath, "utf8")); } catch {}
+
+    // Count current and archived intel
+    let currentIntel = 0;
+    let archivedIntel = 0;
+    try { currentIntel = JSON.parse(readFileSync(intelPath, "utf8")).length; } catch {}
+    try { archivedIntel = JSON.parse(readFileSync(archivePath, "utf8")).length; } catch {}
+
+    // Calculate consecutive zeros
+    let consecutiveZeros = 0;
+    for (let i = recent.length - 1; i >= 0; i--) {
+      if (!recent[i].intel_written) consecutiveZeros++;
+      else break;
+    }
+
+    // Alert if 3+ consecutive E sessions without intel
+    const alert = consecutiveZeros >= 3;
+    const writeRate = recent.length > 0 ? recent.filter(e => e.intel_written).length / recent.length : 0;
+
+    res.json({
+      window,
+      e_sessions_analyzed: recent.length,
+      sessions_with_intel: recent.filter(e => e.intel_written).length,
+      write_rate: Math.round(writeRate * 100) + "%",
+      consecutive_zeros: consecutiveZeros,
+      alert,
+      alert_reason: alert ? `${consecutiveZeros} consecutive E sessions without intel capture` : null,
+      current_intel_count: currentIntel,
+      archived_intel_count: archivedIntel,
+      total_intel: currentIntel + archivedIntel,
+      recent_sessions: recent.slice(-5).map(e => ({ s: e.session, intel: e.intel_written })),
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Platform health from account-registry (wq-280)
 // Exposes health check data from periodic heartbeat probes
 app.get("/status/platform-health", (req, res) => {
@@ -5214,6 +5278,7 @@ function agentManifest(req, res) {
       status_creds: { url: `${base}/status/creds`, method: "GET", auth: false, description: "Credential rotation health — age, staleness, rotation dates for all tracked credentials" },
       status_cost_heatmap: { url: `${base}/status/cost-heatmap`, method: "GET", auth: false, description: "Cost heatmap by session type and day (?days=N, default 14, max 90)" },
       status_cost_trends: { url: `${base}/status/cost-trends`, method: "GET", auth: false, description: "Cost trend alerts — per-type rolling avg, trend direction, threshold alerts (?window=N, default 10)" },
+      status_intel_volume: { url: `${base}/status/intel-volume`, method: "GET", auth: false, description: "Intel volume monitoring — E session capture rates, consecutive zero detection, alert on degradation (?window=N, default 10)" },
       status_intel_quality: { url: `${base}/status/intel-quality`, method: "GET", auth: false, description: "Intel pipeline metrics — E session intel generation, queue conversion rate, actionable text quality (?window=N, default 20)" },
       status_platform_health: { url: `${base}/status/platform-health`, method: "GET", auth: false, description: "Platform health status — recent alerts, status distribution, last probe times (?format=json for API)" },
       status_cost_distribution: { url: `${base}/status/cost-distribution`, method: "GET", auth: false, description: "Interactive cost distribution charts — stacked bar, pie, rolling avg, utilization (?window=N, ?format=json)" },

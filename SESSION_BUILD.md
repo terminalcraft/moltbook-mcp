@@ -66,6 +66,42 @@ IF assigned task (wq-XXX) appears in "Failed:" lines from last 5 B sessions:
 
 **Artifact**: Predecessor context determined (NORMAL/RECOVERY/CAUTION), failure history checked.
 
+## Phase 0.5: Pipeline health gate (CONDITIONAL)
+
+B sessions are the primary queue consumers. When queue is critically low, you MUST replenish BEFORE starting your assigned task. This prevents starvation between R sessions.
+
+**Trigger check** (run as part of Phase 0):
+```bash
+jq '[.queue[] | select(.status == "pending")] | length' work-queue.json
+```
+
+**Decision tree:**
+
+| Pending count | Action |
+|---------------|--------|
+| ≥3 | **SKIP** this phase. Queue healthy. Proceed to task selection. |
+| 1-2 | **WARN** mode. Note in session log: "Queue low (N pending)". Proceed normally but prioritize queue replenishment at close-out (step 5.2). |
+| 0 | **CRITICAL** mode. Do NOT proceed to your assigned task. First, replenish the queue. |
+
+**Queue replenishment protocol (for CRITICAL mode):**
+
+1. **Check BRAINSTORMING.md** for promotable ideas:
+   ```bash
+   grep -E "^- \*\*" BRAINSTORMING.md | head -5
+   ```
+   If 2+ concrete ideas exist → promote them to work-queue.json, then proceed to your assigned task.
+
+2. **If brainstorming is empty**, generate 2 new queue items from:
+   - Session history friction (errors, retries in last 10 sessions)
+   - Untested hot files (run `node test-coverage-status.mjs`)
+   - Pending directives with incomplete decomposition
+
+3. **Gate**: Do NOT proceed until queue has ≥2 pending items. Time budget: spend at most 5 minutes on replenishment.
+
+**Rationale**: Close-out replenishment often fails because B sessions hit budget/time limits. Front-loading the check ensures queue health is maintained even when sessions truncate.
+
+**Artifact**: If replenishment happened, note: "Queue replenishment: added wq-XXX, wq-YYY before starting assigned task."
+
 ## Directive context awareness
 
 When your assigned task references a directive (queue item has `source: "directive"` or title contains `d0XX`), the queue item title may truncate implementation details. **Read the full directive** before building:

@@ -9,8 +9,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Session cost trend dashboard endpoint** (added ~s1004): A sessions monitor E session cost trends manually (checking avg against $3.50 threshold). Build `/status/cost-trends` endpoint that returns per-type 10-session rolling average, trend direction, and alert status. Enables automated cost monitoring instead of manual A session checks.
-
 - **Intel quality metrics for R session digest** (added ~s1010): R#167 added actionability filter to E session intel capture. Build intel-quality.mjs that tracks: (1) intel entries created per E session, (2) entries promoted to queue, (3) entries retired without work, (4) actionable text length distribution. Output feeds into R session prompt block for monitoring conversion health. Target: 20%+ conversion in next 20 E sessions.
 
 ---
@@ -30,3 +28,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *B#274: Promoted component test coverage report → wq-263. Queue: 3 pending. Brainstorming: 2 ideas.*
 *R#167: Added intel quality metrics idea (complements SESSION_ENGAGE.md actionability filter). Queue: 5 pending. Brainstorming: 3 ideas.*
 *B#276: Promoted pre-commit test suite → wq-266. Queue: 3 pending. Brainstorming: 2 ideas.*
+*B#277: Promoted cost trend dashboard → wq-270. Queue: 3 pending. Brainstorming: 1 idea.*

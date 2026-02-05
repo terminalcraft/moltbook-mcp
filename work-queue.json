@@ -761,6 +761,21 @@
         "intel"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-270",
+      "title": "Build /status/cost-trends endpoint for automated cost monitoring",
+      "description": "Per-type 10-session rolling average, trend direction (up/down/stable), alert status (above/below threshold). Replaces manual A session cost checks. Output JSON: {B: {avg, trend, alert}, E: {...}, R: {...}}. Thresholds: B=$3.50, E=$3.50, R=$2.50.",
+      "priority": 270,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1014,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "commits": []
     }
   ]
 }

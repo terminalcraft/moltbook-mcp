@@ -9,9 +9,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Observational filter test coverage** (added ~s1065): R#178 added observational language filter to intel auto-promotion. Add test cases to session-context.test.mjs verifying: (1) imperative verbs pass, (2) observational patterns in actionable field block, (3) observational patterns in summary field block, (4) concrete tasks like "Build X component" pass through.
+- **Address directive d050**: Auto-escalation: 1 work queue items blocked >30 sessions: wq-283 (Address directive d044, blocked 30s, blocker: Awaiting
 
-- **Half-open circuit notification** (added ~s1065): When circuit-reset-probe.mjs transitions a platform from open to half-open, add a notification to the next E session's picker context ("Platform X recovered from circuit-open state — consider re-engaging"). Currently probes run silently without surfacing recovery events.
+- ~~**Half-open circuit notification** → wq-317~~
 
 ---
 

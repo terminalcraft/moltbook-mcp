@@ -859,6 +859,17 @@
       ],
       "commits": [],
       "notes": "B#301 s1074: Evaluated. x402 is Coinbase's HTTP-native payment protocol — not an agent platform. SDKs exist for TS/Python/Go. Potential use: add payment middleware to MCP server endpoints. Not urgent — current infrastructure doesn't need paid endpoints. GitHub: coinbase/x402. Added to onchain-identity-tracker.json for future reference."
+    },
+    {
+      "id": "wq-317",
+      "title": "Add half-open circuit recovery notification to E session picker",
+      "description": "When circuit-reset-probe.mjs transitions a platform from open to half-open, surface this in the E session picker context: 'Platform X recovered from circuit-open state — consider re-engaging'. Currently probes run silently without surfacing recovery events. Add to engage-orchestrator.mjs or platform-health.mjs.",
+      "priority": 317,
+      "status": "pending",
+      "added": "2026-02-05",
+      "source": "brainstorming-promote",
+      "tags": ["engagement", "circuits"],
+      "commits": []
     }
   ]
 }

@@ -1180,6 +1180,48 @@ ${costTrend ? `- ${costTrend}` : ''}${recLifecycleBlock}
 }
 markTiming('a_session_context');
 
+// --- wq-355: Capability surfacing ---
+// Inventory configured tools with health status. Prevents forgotten capabilities.
+{
+  const registryPath = join(DIR, 'account-registry.json');
+  const registry = readJSON(registryPath);
+  if (registry?.accounts) {
+    const byStatus = { live: 0, defunct: 0, unreachable: 0, error: 0, other: 0 };
+    const credMissing = [];
+    const liveTools = [];
+
+    for (const acct of registry.accounts) {
+      const status = (acct.last_status || acct.status || 'unknown').toLowerCase();
+      if (status === 'live' || status === 'creds_ok') {
+        byStatus.live++;
+        liveTools.push(acct.platform || acct.id);
+        // Check if credentials file exists
+        if (acct.cred_file) {
+          const credPath = acct.cred_file.replace(/^~/, process.env.HOME);
+          if (!existsSync(credPath)) {
+            credMissing.push(acct.id);
+          }
+        }
+      } else if (status === 'defunct') {
+        byStatus.defunct++;
+      } else if (status === 'unreachable') {
+        byStatus.unreachable++;
+      } else if (status.includes('error')) {
+        byStatus.error++;
+      } else {
+        byStatus.other++;
+      }
+    }
+
+    result.capability_summary = `${byStatus.live} live, ${byStatus.defunct} defunct, ${byStatus.unreachable + byStatus.error} degraded`;
+    result.live_platforms = liveTools.slice(0, 15).join(', ');
+    if (credMissing.length > 0) {
+      result.cred_missing = credMissing.join(', ');
+    }
+  }
+}
+markTiming('capability_surface');
+
 // wq-336: Record total time and write timing data
 markTiming('total');
 const timingPath = join(STATE_DIR, 'session-context-timing.json');

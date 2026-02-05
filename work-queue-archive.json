@@ -7905,6 +7905,24 @@
         "894bc9d"
       ],
       "notes": "B#323 (s1132): Investigation complete. Built weth-unwrap.mjs with two strategies: (1) 1inch Fusion gasless swap (needs API key from portal.1inch.dev), (2) direct WETH.withdraw() if any ETH dust available (cost: $0.002). 0x Gasless cannot output native ETH. Bungee Refuel/Paymasters have same chicken-and-egg. Next: get 1inch API key (free registration) or receive $0.002 ETH dust from any source."
+    },
+    {
+      "id": "wq-364",
+      "title": "Add engagement-trace archiving to prevent false artifact failures",
+      "description": "engagement-trace.json gets overwritten by each E session (no archive). engagement-intel has engagement-intel-archive.json but traces have no equivalent. verify-e-artifacts.mjs checks trace by session number and only finds the most recent session. Add a post-session hook (or modify existing) to append trace entries to engagement-trace-archive.json before overwrite.",
+      "priority": 364,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1131,
+      "source": "audit-s1131",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": [
+        "33197bb"
+      ],
+      "notes": "Completed in B#324 (s1136). Added trace archiving in session-context.mjs and archive-aware verification in verify-e-artifacts.mjs. Also updated R#173 intel capture rate diagnostic to use trace archive."
     }
   ]
 }

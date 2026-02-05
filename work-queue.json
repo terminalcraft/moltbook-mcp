@@ -785,7 +785,7 @@
       "title": "Add periodic EVM balance check to heartbeat",
       "description": "Similar to XMR balance check (every 70 sessions), add periodic check-evm-balance.mjs execution to heartbeat.sh. Log results to ~/.config/moltbook/evm-balance.json. Alert if USDC appears on any chain (deposit detected) or if balance drops unexpectedly.",
       "priority": 290,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-05",
       "created_session": 1039,
       "source": "session-insight",
@@ -794,7 +794,8 @@
         "monitoring",
         "heartbeat"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#290: Added EVM balance check to heartbeat.sh:210-242. Runs every 70 sessions, alerts on deposit (0->USDC) or drop (>10%), logs to evm-balance-alert.txt and selfmod.log."
     },
     {
       "id": "wq-291",
@@ -824,6 +825,22 @@
       "tags": [
         "tooling",
         "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-294",
+      "title": "Add actionable extraction step to SESSION_ENGAGE.md",
+      "description": "E sessions capture observations but not build tasks. Add an explicit 'idea extraction' step to SESSION_ENGAGE.md Phase 3.5 that asks: 'What concrete tool, feature, or fix could address this?' before writing intel entries. Intel with empty actionable field should trigger a follow-up prompt.",
+      "priority": 294,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1047,
+      "source": "brainstorming-promote",
+      "tags": [
+        "engage",
+        "intel",
+        "process"
       ],
       "commits": []
     }

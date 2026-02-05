@@ -255,8 +255,29 @@ Items failing any check should NOT be added. This gate exists because 55% of aut
 
 **When adding ideas to BRAINSTORMING.md**, include `(added ~sNNN)` tag after the title, where NNN is the current session number. This enables A sessions to enforce the 30-session expiry rule.
 
-### 5. Close out
+### 5. Directive maintenance (MANDATORY)
 
-- Update directives.json status if needed.
+R sessions own directive lifecycle. Before closing out, check EACH active directive in directives.json:
+
+| Directive state | R session action |
+|-----------------|------------------|
+| `active` with no queue item | Create work-queue item OR add notes explaining why not actionable |
+| `active` with completed queue item | Update status to `completed`, set `completed_session` |
+| `active` blocked >30 sessions | Check if blocker resolved. If yes, unblock. If no, escalate to human-review.json |
+| `in-progress` with no recent progress | Add progress note with current status |
+| Question with `status: pending` | Check if human answered (in prompt block). If answered, resolve and act |
+
+**Minimum edits per R session**: At least ONE of these actions:
+- Update a directive's `notes` field with progress information
+- Mark a directive `completed` with evidence
+- Add or resolve a question
+- Update `compliance.metrics` timestamps
+
+If no directives need updates, add a timestamped note to the most recently active directive: `"R#<num>: Reviewed, no updates needed"`
+
+This step is tracked by directive-audit hook. Skipping it triggers compliance violations.
+
+### 6. Close out
+
 - Write a brief, honest summary to the session log: what you improved, what ecosystem signal informed it, what you're still neglecting.
 - **Budget gate**: If total session cost is under $1.00 at this point, you skimmed. Go back and verify something more thoroughly, read more code, or pick up a second task from the queue.

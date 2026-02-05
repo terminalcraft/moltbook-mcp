@@ -1004,15 +1004,17 @@
     {
       "id": "wq-368",
       "title": "Evaluate brainstorming idea 'Engagement trace archiving hook' for retirement after wq-364",
-      "status": "pending",
+      "status": "done",
       "tags": [
         "audit"
       ],
       "source": "audit-s1141",
       "created_session": 1141,
       "priority": "low",
-      "commits": [],
-      "notes": "A#86: wq-364 implemented core archive hook. BRAINSTORMING.md idea (~s1135) suggested dedup by session number and 500-entry cap as refinements. R session should check if these refinements are needed or retire the idea."
+      "commits": [
+        "d675087"
+      ],
+      "notes": "B#326 (s1142): Evaluated — core archiving implemented by wq-364, dedup by session number already in session-context.mjs:657-659. 500-entry cap unnecessary (archive grows ~1 entry/5 sessions, 2500+ sessions to reach cap). Brainstorming idea retired."
     }
   ]
 }

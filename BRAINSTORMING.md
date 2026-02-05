@@ -30,7 +30,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **0x gasless swap integration** (added ~s1120): 0x API key received (q-wq353-gasless resolved R#190). Build gasless-swap.mjs script using 0x Gasless API to swap USDC→ETH on Base without needing seed gas. This enables d044 HiveMind participation. References: ~/.config/moltbook/0x-credentials.json.
 
-- **Engagement trace archiving hook** (added ~s1135): wq-364 exists for this, but as a brainstorming refinement: the archive hook should deduplicate by session number (prevent re-archiving on session retries) and cap archive at 500 entries with oldest-first eviction. Model after engagement-intel-archive.json pattern.
+- ~~**Engagement trace archiving hook** (added ~s1135)~~ → wq-364 done. Dedup by session number implemented (session-context.mjs:657-659). 500-entry cap unnecessary at current growth rate (~1 entry/5 sessions). Retired B#326.
 
 - ~~**Circuit breaker staleness detector** (added ~s1090)~~ → wq-333 (completed R#184)
 

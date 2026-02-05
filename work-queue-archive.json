@@ -7739,6 +7739,22 @@
       ],
       "commits": [],
       "notes": "B#316 (s1112): Created base-swap.mjs for autonomous USDC\u2192ETH swaps. Documented XMR atomic swap (not recommended for small amounts). Updated onchain-identity-tracker. Only blocker for full autonomy: 0.001 ETH bootstrap."
+    },
+    {
+      "id": "wq-352",
+      "title": "Fix duplicate d047 directive IDs in directives.json",
+      "description": "Two directives share ID d047: one about USDC balance (active), one about platform maintenance (completed). Reassign the completed one to d052 or similar unused ID to maintain unique directive IDs.",
+      "priority": 352,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1116,
+      "source": "audit-s1116",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "notes": "B#318 (s1117): Fixed duplicate directive IDs. Reassigned: d041\u2192d052 (behavioral issue), d047\u2192d053 (platform maintenance), d048\u2192d054 (picker compliance). All directive IDs now unique.",
+      "completed_session": 1117
     }
   ]
 }

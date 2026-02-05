@@ -11,6 +11,11 @@ import { join } from 'path';
 const DIR = new URL('.', import.meta.url).pathname.replace(/\/$/, '');
 const STATE_DIR = join(process.env.HOME, '.config/moltbook');
 
+// wq-336: Performance profiling - track timing of major sections
+const timingStart = Date.now();
+const timings = {};
+const markTiming = (label) => { timings[label] = Date.now() - timingStart; };
+
 const MODE = process.argv[2] || 'B';
 const COUNTER = parseInt(process.argv[3] || '0', 10);
 // B_FOCUS arg kept for backward compat but no longer used for task selection (R#49).
@@ -73,6 +78,7 @@ const retired = queue.filter(i => i.status === 'retired');
 result.pending_count = pending.length;
 result.blocked_count = blocked.length;
 result.retired_count = retired.length;
+markTiming('queue_context');
 
 // --- B session stall detection (wq-085) ---
 // Count consecutive recent B sessions with no commits (build=(none)).
@@ -182,6 +188,7 @@ if (MODE === 'B' && pending.length > 0) {
     result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
   }
 }
+markTiming('blocker_check');
 
 // --- Auto-promote brainstorming ideas to queue when pending < 3 (R#64, R#68, R#72, R#74) ---
 // R#74: Extended auto-promote to R sessions. Previously only B sessions promoted,
@@ -245,6 +252,7 @@ if (MODE === 'B' || MODE === 'R') {
     }
   }
 }
+markTiming('auto_promote');
 
 // --- Auto-ingest TODO followups into queue (R#72) ---
 // The post-session hook (27-todo-scan.sh) writes TODO/FIXME items to todo-followups.txt.
@@ -850,6 +858,7 @@ ${health}${impactSummary}${intelPromoSummary}${intelCaptureWarning}
 
 ${intakeBlock}${urgent}`;
 }
+markTiming('r_session_context');
 
 // --- E session context (always computed — mode downgrades may change session type) ---
 // R#92: Pre-run orchestrator for E sessions. Previously E sessions had to manually invoke
@@ -979,6 +988,7 @@ This is engagement session #${eCount}. Follow SESSION_ENGAGE.md.
 ${orchSection}${prevEngageCtx}${evalBlock}${emailBlock}${covenantBlock}`.trim();
   }
 }
+markTiming('e_session_context');
 
 // --- A session context (R#102, wq-196) ---
 // Audit sessions previously got no pre-computed context. Now they get:
@@ -1108,6 +1118,49 @@ ${costTrend ? `- ${costTrend}` : ''}${recLifecycleBlock}
 
 **Remember**: All 5 sections are mandatory. Create work-queue items with \`["audit"]\` tag for every recommendation.`.trim();
 }
+markTiming('a_session_context');
+
+// wq-336: Record total time and write timing data
+markTiming('total');
+const timingPath = join(STATE_DIR, 'session-context-timing.json');
+try {
+  // Load existing history (keep last 50 entries)
+  let history = [];
+  if (existsSync(timingPath)) {
+    const existing = JSON.parse(readFileSync(timingPath, 'utf8'));
+    history = existing.history || [];
+  }
+  // Add this session's timing
+  history.push({
+    session: COUNTER,
+    mode: MODE,
+    timestamp: new Date().toISOString(),
+    timings,
+    total_ms: timings.total,
+  });
+  // Keep last 50
+  if (history.length > 50) history = history.slice(-50);
+  // Compute stats
+  const recentTotals = history.map(h => h.total_ms);
+  const avg = recentTotals.length > 0 ? Math.round(recentTotals.reduce((a, b) => a + b, 0) / recentTotals.length) : 0;
+  const max = Math.max(...recentTotals);
+  const slowSections = {};
+  for (const h of history.slice(-10)) {
+    for (const [k, v] of Object.entries(h.timings)) {
+      if (k !== 'total') {
+        const prev = h.timings[Object.keys(h.timings)[Object.keys(h.timings).indexOf(k) - 1]] || 0;
+        const delta = v - prev;
+        slowSections[k] = (slowSections[k] || 0) + delta;
+      }
+    }
+  }
+  writeFileSync(timingPath, JSON.stringify({
+    last_updated: new Date().toISOString(),
+    stats: { avg_ms: avg, max_ms: max, samples: history.length },
+    slowest_sections: Object.entries(slowSections).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => ({ section: k, total_ms: v })),
+    history,
+  }, null, 2));
+} catch {}
 
 console.log(JSON.stringify(result));
 

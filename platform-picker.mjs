@@ -30,6 +30,7 @@ const __dirname = dirname(__filename);
 const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const HISTORY_PATH = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+const MANDATE_PATH = join(process.env.HOME || "/home/moltbot", ".config/moltbook/picker-mandate.json");
 
 function loadJSON(path) {
   if (!existsSync(path)) return null;
@@ -284,6 +285,17 @@ function main() {
       if (acc) acc.last_engaged_session = currentSession;
     }
     saveJSON(REGISTRY_PATH, registry);
+
+    // Write picker mandate for compliance tracking (d048)
+    const mandate = {
+      session: currentSession,
+      selected: selected.map(s => s.id),
+      timestamp: new Date().toISOString(),
+    };
+    saveJSON(MANDATE_PATH, mandate);
+    if (opts.verbose) {
+      console.error(`Wrote picker mandate to ${MANDATE_PATH}`);
+    }
   }
 
   // Output

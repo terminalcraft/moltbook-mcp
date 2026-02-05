@@ -733,6 +733,22 @@
         "observability"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-271",
+      "title": "Build /status/credentials health dashboard",
+      "description": "With 3 credential exposure incidents (d039, d045, d046), build a /status/credentials endpoint showing: (1) credential files present and gitignored status, (2) last rotation date per credential, (3) exposure risk score based on git history age. Integrate with SESSION_REFLECT.md step 2c for automated checks.",
+      "priority": 271,
+      "status": "pending",
+      "added": "2026-02-05",
+      "created_session": 1017,
+      "source": "brainstorming-promote",
+      "tags": [
+        "api",
+        "security",
+        "observability"
+      ],
+      "commits": []
     }
   ]
 }

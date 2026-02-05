@@ -640,6 +640,31 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       writeFileSync(intelPath, '[]\n');
       result.intel_archived = intel.length;
     }
+
+    // B#324 (wq-364): Archive engagement-trace.json entries to prevent data loss.
+    // engagement-trace.json is overwritten by each E session (single-session array).
+    // Without archiving, verify-e-artifacts.mjs can only validate the most recent session.
+    // Mirrors the intel archiving pattern above: append to archive, keep current file
+    // intact (it's read by covenant-tracker and other post-session hooks).
+    {
+      const tracePath = join(STATE_DIR, 'engagement-trace.json');
+      const traceArchivePath = join(STATE_DIR, 'engagement-trace-archive.json');
+      try {
+        const traceData = JSON.parse(readFileSync(tracePath, 'utf8'));
+        if (Array.isArray(traceData) && traceData.length > 0) {
+          let traceArchive = [];
+          try { traceArchive = JSON.parse(readFileSync(traceArchivePath, 'utf8')); } catch {}
+          // Deduplicate: only archive entries not already in archive (by session number)
+          const archivedSessions = new Set(traceArchive.map(t => t.session));
+          const newEntries = traceData.filter(t => !archivedSessions.has(t.session));
+          if (newEntries.length > 0) {
+            traceArchive.push(...newEntries.map(t => ({ ...t, archived_at: COUNTER })));
+            writeFileSync(traceArchivePath, JSON.stringify(traceArchive, null, 2) + '\n');
+            result.trace_archived = newEntries.length;
+          }
+        }
+      } catch { /* trace missing or empty — skip */ }
+    }
   }
 
   // --- R#186: Auto-promote live platforms from services.json to account-registry (d051) ---
@@ -899,21 +924,32 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     }
   }
 
-  // R#173: Intel capture rate diagnostic
-  // Cross-references engagement-trace.json (E session activity) with intel archive
+  // R#173: Intel capture rate diagnostic (updated B#324 to use trace archive)
+  // Cross-references engagement-trace-archive.json + current trace with intel archive
   // to compute how many E sessions actually generated intel entries.
   // Surfaces the pattern: "E sessions engaging but not capturing intel."
   let intelCaptureWarning = '';
   {
     try {
       const tracePath = join(STATE_DIR, 'engagement-trace.json');
+      const traceArchivePath = join(STATE_DIR, 'engagement-trace-archive.json');
       const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
-      const trace = JSON.parse(readFileSync(tracePath, 'utf8'));
+      // Merge trace archive + current trace for full E session history
+      let allTraces = [];
+      try { allTraces = JSON.parse(readFileSync(traceArchivePath, 'utf8')); } catch {}
+      try {
+        const current = JSON.parse(readFileSync(tracePath, 'utf8'));
+        if (Array.isArray(current)) {
+          // Deduplicate by session number (current may overlap with archive)
+          const archivedSessions = new Set(allTraces.map(t => t.session));
+          allTraces.push(...current.filter(t => !archivedSessions.has(t.session)));
+        }
+      } catch {}
       const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
 
-      if (Array.isArray(trace) && trace.length > 0) {
-        // Get last 10 E sessions from trace
-        const recentESessions = trace.slice(-10).map(t => t.session);
+      if (Array.isArray(allTraces) && allTraces.length > 0) {
+        // Get last 10 E sessions from combined trace history
+        const recentESessions = allTraces.slice(-10).map(t => t.session);
 
         // Count which E sessions generated intel (check archive for matching session numbers)
         const sessionsWithIntel = new Set(

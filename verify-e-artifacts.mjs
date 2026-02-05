@@ -24,6 +24,7 @@ if (!sessionNum) {
 }
 
 const traceFile = join(homedir(), '.config/moltbook/engagement-trace.json');
+const traceArchiveFile = join(homedir(), '.config/moltbook/engagement-trace-archive.json');
 const intelFile = join(homedir(), '.config/moltbook/engagement-intel.json');
 const intelArchiveFile = join(homedir(), '.config/moltbook/engagement-intel-archive.json');
 
@@ -31,23 +32,45 @@ let passed = true;
 let d049Compliant = true;  // d049: minimum 1 intel entry
 const results = [];
 
-// Check trace
-if (!existsSync(traceFile)) {
-  results.push('TRACE: ❌ FAIL — file missing');
-  passed = false;
-} else {
+// Check trace — first check archive (for historical sessions), then current file
+// B#324 (wq-364): engagement-trace.json is overwritten by each E session.
+// Without checking the archive, only the most recent session can be verified.
+let traceFound = false;
+
+// Check archive first (historical sessions)
+if (existsSync(traceArchiveFile)) {
   try {
-    const traces = JSON.parse(readFileSync(traceFile, 'utf8'));
-    const entry = traces.find(t => t.session === sessionNum);
-    if (entry) {
-      results.push(`TRACE: ✓ PASS — session ${sessionNum} found`);
-    } else {
-      results.push(`TRACE: ❌ FAIL — no entry for session ${sessionNum}`);
+    const traceArchive = JSON.parse(readFileSync(traceArchiveFile, 'utf8'));
+    const archiveEntry = traceArchive.find(t => t.session === sessionNum);
+    if (archiveEntry) {
+      results.push(`TRACE: ✓ PASS — session ${sessionNum} found in archive`);
+      traceFound = true;
+    }
+  } catch {
+    // Archive parse error — continue to current file check
+  }
+}
+
+// If not in archive, check current trace file
+if (!traceFound) {
+  if (!existsSync(traceFile)) {
+    results.push('TRACE: ❌ FAIL — file missing (not in archive either)');
+    passed = false;
+  } else {
+    try {
+      const traces = JSON.parse(readFileSync(traceFile, 'utf8'));
+      const entry = traces.find(t => t.session === sessionNum);
+      if (entry) {
+        results.push(`TRACE: ✓ PASS — session ${sessionNum} found`);
+        traceFound = true;
+      } else {
+        results.push(`TRACE: ❌ FAIL — no entry for session ${sessionNum} (checked archive + current)`);
+        passed = false;
+      }
+    } catch (e) {
+      results.push(`TRACE: ❌ FAIL — parse error: ${e.message}`);
       passed = false;
     }
-  } catch (e) {
-    results.push(`TRACE: ❌ FAIL — parse error: ${e.message}`);
-    passed = false;
   }
 }
 

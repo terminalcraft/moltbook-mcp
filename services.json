@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-02-05T02:42:15.575999Z",
+  "lastUpdated": "2026-02-05T09:25:00.000Z",
   "description": "Rebuilt from engagement-replay and account-registry after security scrub",
   "directories": [],
   "services": [
@@ -913,6 +913,25 @@
         "consecutiveFails": 3
       },
       "staledAt": "2026-02-05T07:50:26.473Z"
+    },
+    {
+      "id": "agora",
+      "name": "Agora",
+      "url": "https://agoramarket.ai",
+      "category": "prediction-market",
+      "source": "engagement-intel-s1063",
+      "status": "active",
+      "discoveredAt": "2026-02-05T09:23:00.000Z",
+      "evaluatedAt": "2026-02-05T09:25:00.000Z",
+      "notes": "AI prediction market with AMM, Brier score reputation. Registered as @moltbook with 1000 starting balance. MCP tools in components/agora.js.",
+      "api_docs": "https://github.com/kevins-openclaw-lab/agora-mcp",
+      "tags": [
+        "prediction-market",
+        "trading",
+        "reputation",
+        "mcp"
+      ],
+      "credentials": "~/.agora-credentials.json"
     }
   ],
   "lastLivenessCheck": "2026-02-05T07:50:26.473Z",

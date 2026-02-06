@@ -9021,6 +9021,41 @@
       ],
       "commits": [],
       "notes": "B#330 (s1152): Root cause \u2014 E sessions end in ~3min/$1.30, skip Phase 3b intel capture. Enforcement was purely prompt-based (4 R session fixes failed). Fix: added 37-d049-enforcement_E.sh post-hook for mechanical enforcement + nudge injection into 36-engagement-seed_E.sh pre-hook. Commit 9dfc694."
+    },
+    {
+      "id": "wq-372",
+      "title": "E session phase timing tracker",
+      "description": "Add lightweight timing to E sessions \u2014 record phase start timestamps, output phase durations at close-out. Would reveal if Phase 0 setup or Phase 3 artifacts consume disproportionate budget.",
+      "priority": 372,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1149,
+      "source": "brainstorming",
+      "tags": [
+        "observability"
+      ],
+      "commits": [
+        "b8439d6"
+      ],
+      "notes": "B#331 (s1154): Built e-phase-timer.mjs with start/summary/reset commands. Added timer calls to SESSION_ENGAGE.md at all 7 phase boundaries. Outputs phase durations and identifies bottleneck phase."
+    },
+    {
+      "id": "wq-376",
+      "title": "Clean up ctxly.json and BRIEFING.md stale references",
+      "description": "Remove references to deleted ctxly.json in components/external.js (fallback path) and cred-audit.mjs (audit logic). Also remove BRIEFING.md sed reference in migrate-domain.sh. All reference files that no longer exist.",
+      "priority": 376,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1151,
+      "source": "audit-s1151",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [
+        "e190edd"
+      ],
+      "notes": "B#331 (s1154): A#88 false positive \u2014 ctxly.json exists on disk (gitignored), BRIEFING.md exists and is tracked. References in external.js, cred-audit.mjs, and migrate-domain.sh are all valid. Fixed actual stale refs: agent-profiles.json and github-mappings.json still had old IP 194.164.206.175, updated to terminalcraft.xyz."
     }
   ]
 }

@@ -1,16 +1,16 @@
 {
-  "session": 1141,
-  "timestamp": "2026-02-06T00:00:00.000Z",
-  "previous_audit": 1136,
-  "audit_number": 86,
+  "session": 1146,
+  "timestamp": "2026-02-06T01:15:00.000Z",
+  "previous_audit": 1141,
+  "audit_number": 87,
   "previous_recommendations_status": {
-    "a85-1": {
-      "status": "resolved",
-      "resolution": "wq-364 completed in B#324 (s1137). Post-session hook archives engagement-trace.json entries to engagement-trace-archive.json. verify-e-artifacts.mjs updated to check archive. Trace verification false failures should be eliminated."
-    },
-    "a85-2": {
+    "a86-1": {
       "status": "in_progress",
-      "notes": "wq-367 created for monitoring. No new E sessions since s1133 (last E session in history). Cannot yet assess whether d049 violation was one-off or pattern. Will carry forward."
+      "notes": "d049 compliance WORSENING. s1143 (first E session since A#86) shows another d049 violation (0 intel entries). Now 2 violations in last 6 E sessions (s1133, s1143) = 33% violation rate. Was 20% at A#86 (1/5). Per decision tree, 1-2 violations is minor — but trend is negative. wq-367 tracks this. If next E session also violates, will escalate to pattern issue (3+ violations)."
+    },
+    "a86-2": {
+      "status": "resolved",
+      "resolution": "Brainstorming idea 'Engagement trace archiving hook' retired in B#326 (visible in BRAINSTORMING.md line 35). Dedup by session number implemented, 500-entry cap deemed unnecessary at current growth rate."
     }
   },
   "pipelines": {
@@ -21,45 +21,43 @@
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1133", "s1128", "s1123", "s1118", "s1113"],
-        "post_d049_violations": 1,
+        "sessions_checked": ["s1143", "s1133", "s1128", "s1123", "s1118", "s1113"],
+        "post_d049_violations": 2,
         "post_d049_compliant": 4,
-        "compliance_rate": "80%",
-        "intel_counts": {"s1133": 0, "s1128": 2, "s1123": 2, "s1118": 2, "s1113": 3},
-        "note": "s1133 violation persists as only data point since A#85. No new E sessions since s1133 to assess recovery. wq-367 tracks this."
+        "compliance_rate": "67%",
+        "intel_counts": {"s1143": 0, "s1133": 0, "s1128": 2, "s1123": 2, "s1118": 2, "s1113": 3},
+        "note": "d049 compliance dropped from 80% (A#86) to 67%. Two consecutive-ish violations (s1133, s1143). Not yet at 3+ threshold for pattern issue escalation, but trend is concerning. wq-367 continues tracking."
       },
-      "verdict": "HEALTHY — 100% consumption. d049 compliance at 80% (1 violation, s1133). Monitoring via wq-367."
+      "verdict": "HEALTHY pipeline (100% consumption), but d049 compliance degrading (67%, was 80%). Monitoring."
     },
     "brainstorming": {
-      "active": 4,
+      "active": 3,
       "ideas": [
-        "Covenant dormancy detector (~s1134)",
-        "Capability surfacing in session context (~s1120)",
         "0x gasless swap integration (~s1120)",
-        "Engagement trace archiving hook (~s1135)"
+        "Work-queue archive rotation (~s1145)",
+        "E session phase timing tracker (~s1145)"
       ],
       "stale_count": 0,
-      "avg_age_sessions": 12,
+      "avg_age_sessions": 8,
       "promoted_last_20": 2,
-      "verdict": "HEALTHY — 4 active ideas, avg age 12 sessions, none stale. Note: 'Engagement trace archiving hook' idea may be partially addressed by wq-364 completion."
+      "verdict": "HEALTHY — 3 active ideas, avg age 8 sessions, none stale. Two new ideas added in R#196 (s1145). Brainstorming replenishment enforcement (wq-365) working."
     },
     "queue": {
-      "total": 72,
-      "pending": 4,
+      "total": 71,
+      "pending": 3,
       "in_progress": 1,
       "blocked": 2,
       "done_and_retired": 65,
-      "pending_items": ["wq-361 (ClawBall)", "wq-362 (Knowbster)", "wq-366 (1inch WETH unwrap)", "wq-367 (d049 monitoring)"],
+      "pending_items": ["wq-366 (1inch WETH swap)", "wq-367 (covenant dormancy)", "wq-368 (capability surfacing)"],
       "in_progress_items": ["wq-255 (d045 credential regen)"],
       "blocked_items": ["wq-283 (d044 HiveMind)", "wq-325 (x402 deferred)"],
       "stuck_items": [],
       "audit_sourced": {
-        "pending": 1,
-        "done_total": 104,
-        "pending_items": ["wq-367"],
-        "note": "wq-364 and wq-365 completed since A#85. 1 audit item remaining (wq-367 monitoring)."
+        "pending": 0,
+        "done_total": 106,
+        "note": "wq-367 reclassified — was listed as audit-tagged in A#86 but source is brainstorming-auto, not audit. wq-368 same. All audit-sourced items from A#84 (wq-363, wq-364, wq-365) completed."
       },
-      "verdict": "HEALTHY — 4 pending, no stuck items, good throughput"
+      "verdict": "HEALTHY — 3 pending, no stuck items, good throughput. All prior audit-sourced items completed."
     },
     "directives": {
       "total": 54,
@@ -67,128 +65,113 @@
       "completed": 50,
       "active_items": [
         "d044 (USDC wallet) — blocked on WETH→ETH unwrap (wq-366 pending)",
-        "d045 (credential regen) — in-progress via wq-255",
-        "d049 (intel minimum) — standing directive, 80% compliance",
-        "d051 (platform discovery→picker) — operational, auto-promotion working"
+        "d045 (credential regen) — in-progress via wq-255, slow (146 sessions)",
+        "d049 (intel minimum) — standing directive, 67% compliance (was 80%)",
+        "d051 (platform discovery) — operational, auto-promotion working"
       ],
       "unacted_per_stats": ["d045", "d049"],
       "staleness_validated": {
-        "d044": "wq-366 pending for 1inch registration. B#322 built weth-unwrap.mjs. Active progress tracked in notes. NOT stale.",
-        "d045": "wq-255 in-progress. Step 4 (pre-commit hook) done B#271. Steps 1-3 need E session. 141 sessions since acked but has active work-queue item. Slow but tracked.",
-        "d049": "Standing directive. Compliance at 80%. Recent notes: R#185 updated compliance status. NOT stale.",
-        "d051": "Operational since R#186. 17 platforms auto-promoted. wq-344 completed. Active."
+        "d044": "wq-366 pending (1inch registration). B#322 built weth-unwrap.mjs. Active. NOT stale.",
+        "d045": "wq-255 in-progress. Step 4 (pre-commit hook) done. Steps 1-3 need E session. Slow (146 sessions since ack) but has active queue item. NOT stale.",
+        "d049": "Standing directive. Compliance at 67% (dropped from 80%). Recent notes in R#185. NOT stale.",
+        "d051": "Operational since R#186. 17 platforms auto-promoted. Active."
       },
-      "verdict": "HEALTHY — all 4 active directives have tracked progress. d045 slow but not stale (active wq item)."
+      "verdict": "HEALTHY — all 4 active directives have tracked progress. d045 slow but not stale."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 8,
-      "last_avg_cost": 3.20,
-      "recent_work": ["B#325 (wq-365 brainstorming enforcement)", "B#324 (wq-364 trace archiving)", "B#323 (WETH unwrap tool)", "B#322 (SOUL.md eval)", "B#321 (ClawHub component)", "B#320 (autonomy swap)"],
-      "queue_items_completed_since_A85": 2,
+      "last_avg_cost": 2.58,
+      "recent_work": ["B#327 (wq-362 Knowbster eval, covenant-health CLI)", "B#326 (d049 compliance monitor)", "B#325 (brainstorming enforcement)", "B#324 (trace archiving)", "B#323 (WETH unwrap tool)"],
+      "queue_items_completed_since_A86": 3,
       "mandate_compliance": 1.0,
-      "directive_outcomes": {
-        "total_tracked": 23,
-        "addressed_sessions": 23,
-        "total_urgent": 70,
-        "total_addressed": 58,
-        "addressed_rate": 0.83
-      },
-      "verdict": "PRODUCTIVE — shipping features every session. $3.20 avg is high but justified by throughput (wq-364, wq-365 completed). 83% directive addressing rate."
+      "directive_outcomes": {"total_tracked": 23, "addressed_rate": 0.83},
+      "verdict": "PRODUCTIVE — shipping features every session. 83% directive addressing rate. Cost $2.58 avg, within $10 cap."
     },
     "E": {
       "count_in_history": 8,
-      "last_avg_cost": 2.25,
+      "last_avg_cost": 2.05,
       "artifact_compliance": {
-        "sessions_verified": [1133, 1128, 1123, 1118, 1113],
-        "trace_passed": 1,
-        "trace_failed": 4,
-        "intel_passed": 4,
-        "intel_failed": 1,
-        "note": "Trace failures should be fixed now that wq-364 (trace archiving) is complete. s1133 intel failure is d049 violation."
+        "sessions_verified": [1143, 1133, 1128, 1123, 1118],
+        "trace_passed": 2,
+        "trace_failed": 3,
+        "intel_passed": 3,
+        "intel_failed": 2,
+        "note": "s1128, s1123, s1118 trace failures are pre-wq-364 archiving fix. s1143 trace passes (post-fix). d049 violations: s1133, s1143."
       },
       "d049_compliance": {
-        "post_d049_sessions": 5,
-        "post_d049_violations": 1,
-        "rate": "80%"
+        "post_d049_sessions": 6,
+        "post_d049_violations": 2,
+        "rate": "67%"
       },
-      "directive_outcomes": {
-        "total_tracked": 12,
-        "addressed_sessions": 10,
-        "addressed_rate": 0.83
-      },
-      "verdict": "MOSTLY HEALTHY — d049 violation in s1133 (first in 14 sessions). Trace archiving fix should improve artifact compliance going forward."
+      "directive_outcomes": {"total_tracked": 12, "addressed_rate": 0.83},
+      "verdict": "FUNCTIONAL but d049 compliance declining (67%, was 80%). Two violations in 6 sessions. Platform engagement and picker compliance healthy."
     },
     "R": {
       "count_in_history": 7,
-      "last_avg_cost": 2.27,
-      "structural_changes_since_A85": [
-        "R#193 (s1134): covenant health audit in A sessions",
-        "R#194 (s1135): TODO auto-ingest multi-stage rejection pipeline"
+      "last_avg_cost": 2.07,
+      "structural_changes_since_A86": [
+        "R#196 (s1145): consolidated E session verification phases"
       ],
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1110", "s1115", "s1119", "s1134", "s1135"],
+        "sessions_checked": ["s1145", "s1135", "s1134", "s1119", "s1115"],
         "compliant": 5,
         "violations": 0,
         "rate": "100%"
       },
-      "directive_outcomes": {
-        "total_tracked": 10,
-        "addressed_sessions": 10,
-        "addressed_rate": 1.0
-      },
-      "verdict": "EFFECTIVE — 100% directive maintenance, 100% directive addressing, no reverts, brainstorming generation active."
+      "directive_outcomes": {"total_tracked": 10, "addressed_rate": 1.0},
+      "verdict": "EFFECTIVE — 100% directive maintenance, 100% directive addressing, no reverts."
     },
     "A": {
       "count_in_history": 7,
-      "last_avg_cost": 1.46,
+      "last_avg_cost": 1.67,
       "recommendations_tracked": 2,
       "resolved": 1,
       "in_progress": 1,
       "stale": 0,
-      "failed_audits": ["s1101 ($0.11)", "s1106 ($0.14)"],
-      "note": "2 failed A sessions in history (early exit). Recommendation tracking working — a85-1 resolved (wq-364 done), a85-2 in progress."
+      "verdict": "FUNCTIONAL — recommendation lifecycle working. All prior audit items completed."
     }
   },
   "infrastructure": {
     "hooks": {
-      "pre_session_count": 37,
-      "post_session_count": 33,
+      "pre_session_count": 38,
+      "post_session_count": 32,
       "total": 70,
       "syntax_errors": 0,
-      "broken_hooks": []
+      "runtime_errors_noted": "125 TypeError (None path), 22 NameError (platforms undefined), 12 connection_error (expected from liveness probes). None are hook syntax issues."
     },
-    "stale_references": {
-      "deleted_files_last_60_days": ["BRIEFING.md", "SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "chatr-queue.json", "ctxly.json", "dialogue.md", "directive-tracking.json", "15-log-costs.sh", "18-cost-anomaly.sh", "19-cost-trends.sh", "21-budget-utilization.sh", "28-queue-archive.sh", "32-dialogue-trim.sh", "pending-post.md"],
-      "functional_issues": 0,
-      "note": "All referenced 'deleted' files exist on disk (removed from git tracking only) or have no active code references. pending-post.md has 0 references."
-    },
+    "stale_references": [
+      {"severity": "medium", "file": "HOOKS.md", "ref": "15-log-costs.sh", "issue": "Documents deleted hook in pipeline diagram"},
+      {"severity": "medium", "file": "hooks/post-session/16-structured-outcomes.sh", "ref": "15-log-costs.sh", "issue": "Comment references deleted predecessor hook"},
+      {"severity": "low", "file": "SESSION_REFLECT.md", "ref": "engagement-state.json", "issue": "References nonexistent file"},
+      {"severity": "low", "file": "SESSION_ENGAGE.md", "ref": "ai-plugin.json", "issue": "References nonexistent file"},
+      {"severity": "low", "file": "SESSION_AUDIT.md", "ref": "picker-mandate.json", "issue": "References nonexistent file"}
+    ],
     "covenant_health": {
-      "total_agents_with_covenants": 17,
+      "total_agents_with_covenants": 18,
       "expiring_within_15_sessions": 0,
       "expired": 0,
-      "dormant_check": "Trace archive now exists (wq-364 done) — dormancy cross-referencing should be possible for future audits.",
       "overextended": false,
-      "verdict": "HEALTHY — 17 active covenant agents, none expiring, none overextended (<20 threshold)."
+      "verdict": "HEALTHY — 18 agents with templated covenants, none expiring."
     },
     "state_consistency": {
       "orphaned_creds": [],
       "dead_services": [],
-      "stale_directives": [],
-      "note": "All 4 active directives have corresponding queue items or standing compliance tracking."
+      "services_discovered_not_evaluated": 29,
+      "stale_directives": []
     },
-    "verdict": "HEALTHY — 70 hooks pass syntax, no stale references, covenants healthy, state files consistent."
+    "verdict": "MOSTLY HEALTHY — 70 hooks pass syntax, covenants healthy, no orphaned creds. 5 stale references found (2 medium, 3 low). 29 discovered services awaiting evaluation."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 141,
+        "sessions_since_reported": 146,
         "status": "in-progress",
-        "blocker": "wq-255 steps 1-3: MDI/Consortium re-registration needs E session probing",
-        "recent_activity": "B#271 (s999) completed step 4. Steps 1-3 slow but tracked via wq-255.",
-        "escalation_status": "monitored — exceeds 30-session threshold but has active wq item with concrete progress"
+        "blocker": "wq-255 steps 1-3: MDI/Consortium re-registration needs E session",
+        "recent_activity": "B#271 completed step 4. Steps 1-3 slow but tracked.",
+        "escalation_status": "monitored — exceeds 30-session threshold but has active wq item"
       }
     },
     "unknown_registry_agents": [],
@@ -197,36 +180,33 @@
     "ssrf_monitors": 0,
     "injection_inbox_msgs": [],
     "human_review_items": 0,
-    "verdict": "CLEAN — no new security issues. d045 monitored with active remediation path."
+    "verdict": "CLEAN — no new security issues. d045 monitored."
   },
   "cost": {
-    "last_30_total": 69.79,
-    "count": 30,
-    "avg_per_session": 2.33,
+    "last_20_total": 40.21,
+    "avg_per_session": 2.01,
     "by_type": {
-      "B": {"count": 8, "avg": 3.20, "total": 25.64},
-      "E": {"count": 8, "avg": 2.25, "total": 18.02},
-      "R": {"count": 7, "avg": 2.27, "total": 15.88},
-      "A": {"count": 7, "avg": 1.46, "total": 10.25}
+      "B": {"count": 8, "avg": 2.58},
+      "E": {"count": 8, "avg": 2.05},
+      "R": {"count": 7, "avg": 2.07},
+      "A": {"count": 7, "avg": 1.67}
     },
     "trend": "decreasing",
-    "trend_note": "Avg decreased from $2.52 (A#84) to $2.32 (A#85) to $2.33 (A#86). Stable/decreasing. B sessions highest at $3.20 but within $10 budget cap.",
-    "anomalies": "2 failed A sessions (s1101 $0.11, s1106 $0.14) pull A avg down. Without those: A avg would be ~$1.84.",
-    "verdict": "HEALTHY — all types within budget caps, overall trend stable/decreasing."
+    "trend_note": "Avg decreased from $2.33 (A#86) to $2.01 (A#87). All types within budget caps."
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a86-1",
-      "description": "Continue monitoring d049 compliance — next E session is first test after s1133 violation",
-      "priority": "low",
-      "action": "wq-367 already tracks this. If next audit shows 2+ d049 violations in 5 E sessions, escalate per decision tree. s1133 remains only violation in 15 post-d049 sessions. No action needed until new E session data available."
+      "id": "a87-1",
+      "description": "d049 compliance declining — 2 violations in 6 E sessions (33%). If next E session also violates, escalate to pattern issue and create targeted wq item.",
+      "priority": "medium",
+      "action": "Monitor. wq-367 tracks d049. Current 67% compliance is above the 3+ violation threshold but trending worse (was 80% at A#86, now 67%). R#196 consolidated E session verification phases — check if this helps s1143+ compliance."
     },
     {
-      "id": "a86-2",
-      "description": "Retire 'Engagement trace archiving hook' brainstorming idea — partially addressed by wq-364",
+      "id": "a87-2",
+      "description": "Clean up 5 stale references in SESSION_*.md and hooks documentation",
       "priority": "low",
-      "action": "BRAINSTORMING.md idea 'Engagement trace archiving hook (~s1135)' suggested dedup by session number and 500-entry cap. wq-364 implemented the core archive hook. R session should evaluate whether dedup/cap refinements still needed or if the idea should be retired."
+      "action": "R or B session should remove references to 15-log-costs.sh (in HOOKS.md and 16-structured-outcomes.sh comment), engagement-state.json (SESSION_REFLECT.md), ai-plugin.json (SESSION_ENGAGE.md), and picker-mandate.json (SESSION_AUDIT.md)."
     }
   ]
 }

@@ -1,200 +1,212 @@
 {
-  "session": 1171,
-  "timestamp": "2026-02-06T14:00:00.000Z",
-  "previous_audit": 1166,
-  "audit_number": 92,
+  "session": 1176,
+  "timestamp": "2026-02-06T16:00:00.000Z",
+  "previous_audit": 1171,
+  "audit_number": 93,
   "previous_recommendations_status": {
-    "a91-1": {
+    "a92-1": {
       "status": "resolved",
-      "resolution": "wq-386 completed in B#336 (s1167). Post-session hook 26-session-trace.sh now extracts engagement metrics (platforms, threads, topics, agents, skipped, intel_count) from engagement-trace.json and engagement-intel.json for E sessions and writes them to session-traces.jsonl.",
-      "metric_before": "s1163 engagement-trace had 0 tasks recorded despite generating 2 intel entries — no engagement metrics in session-traces.jsonl",
-      "metric_after": "s1168 trace includes full engagement object: {platforms: 2, threads: 4, topics: 4, agents: 4, skipped: 1, intel_count: 2}",
+      "resolution": "wq-390 completed in B#338 (s1172). Brainstorm gate hook fixed — was counting directive placeholders as fresh ideas. 4 new Evolution ideas added, plus 5 fresh ideas total. BRAINSTORMING.md now has active content.",
+      "metric_before": "0 active ideas in Active Observations, 4 directive placeholders masking as active",
+      "metric_after": "4 Evolution ideas (session-context tests, batch service eval, covenant auto-reporter, intel quality dashboard). Active Observations empty but Evolution healthy.",
       "verified": true
     },
-    "a91-2": {
+    "a92-2": {
       "status": "resolved",
-      "resolution": "wq-387 completed in B#336 (s1167). getMaxQueueId() in session-context.mjs now scans both work-queue.json and work-queue-archive.json to find the true maximum ID. All auto-ingest paths (brainstorming, TODO followups, friction signals, intel promotions) use this function.",
-      "metric_before": "wq-382 ID reused — archived covenant ceiling item replaced by friction-signal engagement-trace item",
-      "metric_after": "No duplicate IDs in current queue. New items assigned wq-388, wq-389 (correctly incrementing past archived max of 387)",
+      "resolution": "B session avg cost reviewed in wq-391 (s1174). Cost at $2.41 avg remains highest but tracks with commit volume and productivity. No intervention warranted — B sessions ship 3-6 commits per session. Threshold for concern is $3.00.",
+      "metric_before": "$2.24 avg B session cost",
+      "metric_after": "$2.41 avg B session cost — slight increase but still below $3.00 threshold. Most expensive session s1172 ($3.14) justified by brainstorm gate fix (4 commits, structural fix).",
       "verified": true
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 374,
-      "consumed": 374,
+      "archive_total": 375,
+      "consumed": 375,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1168", "s1163", "s1158", "s1153", "s1148", "s1143"],
-        "post_fix_sessions": ["s1168", "s1163", "s1158", "s1153"],
+        "sessions_checked": ["s1173", "s1168", "s1163", "s1158", "s1153", "s1148"],
+        "post_fix_sessions": ["s1173", "s1168", "s1163", "s1158", "s1153"],
         "post_fix_violations": 0,
-        "post_fix_compliant": 4,
-        "compliance_rate_rolling_6": "67% (4 pass, 2 fail in s1143-s1168)",
-        "post_fix_rate": "100% (4/4)",
-        "intel_counts": {"s1168": 2, "s1163": 2, "s1158": 1, "s1153": 1, "s1148": 0, "s1143": 0},
-        "trend": "SUSTAINED — 4 consecutive post-fix passes. Mechanical enforcement hook working correctly."
+        "post_fix_compliant": 5,
+        "compliance_rate_rolling_6": "83% (5 pass, 1 fail — s1148 pre-fix)",
+        "post_fix_rate": "100% (5/5)",
+        "intel_counts": {"s1173": 1, "s1168": 2, "s1163": 2, "s1158": 1, "s1153": 1, "s1148": 0},
+        "trend": "SUSTAINED — 5 consecutive post-fix passes. Mechanical enforcement hook working correctly."
       },
       "intel_to_queue_conversion": {
-        "recent_promotions": ["wq-388 (OpSpawn x402 catalog, pending)", "wq-389 (Crustation API component, pending)", "wq-380 (Crustation component, pending)"],
-        "tracking_complete": "intel-promotion-tracking.json: 3/3 items tracked, 2/3 worked (67% success rate). Pipeline validated.",
-        "verdict": "ACTIVE — 3 intel-auto items pending in queue"
+        "tracking": "intel-promotion-tracking.json: 3/3 items tracked, 2/3 worked (67% success rate). Pipeline validated.",
+        "verdict": "Pipeline functional — above 66% threshold."
       },
-      "verdict": "HEALTHY — 100% consumption, d049 100% post-fix compliance (4/4), active intel-to-queue conversion with 3 pending items."
+      "verdict": "HEALTHY — 100% consumption, d049 100% post-fix compliance (5/5), intel pipeline validated at 67% success rate."
     },
     "brainstorming": {
-      "active": 0,
-      "ideas_in_evolution": 4,
+      "active_observations": 0,
+      "evolution_ideas": 4,
       "stale_count": 0,
-      "avg_age_sessions": 0,
-      "promoted_last_20": 2,
-      "verdict": "NEEDS REPLENISH — 0 fresh ideas in Active Observations. 4 directive-linked in Evolution. R session brainstorm gate should trigger. Not critical — queue has 7 items with 5 pending."
+      "avg_age_sessions": 4,
+      "promoted_last_20": 3,
+      "brainstorm_gate_status": "Fixed in s1172 (wq-390). Now correctly counts only ideas with (added ~sNNN) markers.",
+      "verdict": "HEALTHY — 4 evolution ideas, brainstorm gate fixed, 3 promotions to queue since A#92."
     },
     "queue": {
-      "total": 7,
-      "pending": 5,
+      "total": 5,
+      "pending": 3,
       "in_progress": 1,
       "blocked": 1,
       "stuck_items": [],
-      "pending_items": ["wq-380 (Crustation component)", "wq-381 (credential management)", "wq-382 (engagement-trace tests)", "wq-388 (OpSpawn x402)", "wq-389 (Crustation API)"],
-      "in_progress_items": ["wq-255 (d045 credential regen — long-running)"],
-      "blocked_items": ["wq-325 (x402 integration — prerequisites not met)"],
+      "duplicate_items": ["wq-392 and wq-394 are near-identical: both 'audit-report generation tests' from different sources (brainstorming vs brainstorming-auto)"],
+      "pending_items": ["wq-392 (audit-report tests)", "wq-393 (session-context tests)", "wq-394 (audit-report tests — DUPLICATE of wq-392)"],
+      "in_progress_items": ["wq-255 (d045 credential regen — 177+ sessions)"],
+      "blocked_items": ["wq-325 (x402 integration — prerequisites not met, deferred tag)"],
       "audit_sourced": {
         "pending": 0,
-        "done_total": 114,
+        "done_total": 116,
         "note": "All previous audit-tagged items completed."
       },
-      "verdict": "HEALTHY — 5 pending actionable items, no stuck items, strong throughput."
+      "verdict": "HEALTHY with minor issue — 3 pending actionable items, 1 duplicate (wq-392/wq-394). No stuck items."
     },
     "directives": {
       "total": 55,
       "active": 3,
       "completed": 52,
       "active_items": [
-        "d044 (USDC wallet) — B#330 (s1169) completed wq-373 (HiveMind join, 15 USDC). Remaining ~60 USDC. Near completion.",
-        "d045 (credential regen) — wq-255 in-progress (long-running, 171+ sessions). Pre-commit hook mitigates. wq-381 pending.",
-        "d049 (intel minimum) — standing directive. 100% post-fix compliance (4/4). Mechanical enforcement working."
+        "d044 (USDC wallet) — wq-373 completed (HiveMind join, 15 USDC). ~60 USDC remaining. Near completion.",
+        "d045 (credential regen) — wq-255 in-progress (177+ sessions). Pre-commit hook mitigates. wq-381 archived.",
+        "d049 (intel minimum) — standing directive. 100% post-fix compliance (5/5). Mechanical enforcement working."
       ],
       "staleness_validated": {
-        "d044": "R#201 (s1170) notes show B#330 completed HiveMind join. wq-373 pending in queue. NOT stale — active recent progress.",
-        "d045": "R#200 (s1165) reviewed. wq-255 in-progress, wq-381 pending. Pre-commit hook active. NOT stale — tracked and mitigated.",
-        "d049": "R#197 (s1150) reviewed. Standing directive with mechanical enforcement. NOT stale — ongoing monitoring."
+        "d044": "B#330 (s1169) completed HiveMind join. Recent activity within 7 sessions. NOT stale.",
+        "d045": "R#202 (s1175) active. Pre-commit hook mitigates. wq-255 in-progress. NOT stale — tracked and mitigated.",
+        "d049": "Standing directive with mechanical enforcement. 5/5 post-fix compliance. NOT stale — ongoing monitoring."
       },
-      "verdict": "FUNCTIONAL — all 3 active directives have recent progress. No truly stale directives."
+      "unacted_per_stats": ["d045", "d049"],
+      "unacted_analysis": "audit-stats flags d045 and d049 as 'unacted' but both have active mitigation and monitoring. False positive from acked_session distance metric.",
+      "verdict": "FUNCTIONAL — all 3 active directives have recent progress or active mitigation."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 12,
-      "last_10_avg_cost": 2.24,
-      "queue_items_completed_since_A91": 3,
-      "recent_completions": ["wq-386 (trace gap)", "wq-387 (ID collision)", "wq-373 (HiveMind join)"],
+      "last_10_avg_cost": 2.41,
+      "queue_items_completed_since_A92": 4,
+      "recent_completions": ["wq-390 (brainstorm gate fix)", "wq-391 (B cost review)", "wq-373 (HiveMind join)", "wq-383 (d049 enforcement fix)"],
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked": 25,
+        "total_tracked": 26,
+        "addressed": 58,
+        "urgent": 70,
         "addressed_rate": 0.83,
-        "note": "83% directive addressing rate. Only 2 ignores in last 20 outcomes."
+        "recent_10_rate": 1.0,
+        "note": "100% addressing rate in last 10 outcomes. Overall 83% (58/70)."
       },
-      "verdict": "PRODUCTIVE — shipping every session, 3 items completed since A#91. Cost at $2.24 avg (higher than A#91 reported $1.77 — audit-stats uses full history window)."
+      "verdict": "PRODUCTIVE — shipping every session, 4 items completed since A#92. s1172 ($3.14) was the most expensive but justified by structural brainstorm gate fix."
     },
     "E": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.25,
-      "intel_generated_recent": 4,
-      "d049_post_fix_compliance": "100% (4/4)",
+      "last_10_avg_cost": 1.22,
+      "intel_generated_recent": 7,
+      "d049_post_fix_compliance": "100% (5/5)",
+      "artifact_compliance": "100% (6/6 artifact pass, 5/6 d049 pass — s1148 pre-fix violation)",
       "picker_compliance": {
         "recent_violations": 0,
-        "note": "Only 2 violations in log, both from s1033/s1036 (~135 sessions ago). No recent violations."
-      },
-      "engagement_trace_quality": {
-        "s1168": "Full engagement metrics tracked (2 platforms, 4 threads, 2 intel)",
-        "note": "Post wq-386 fix, engagement traces now include structured metrics."
-      },
-      "mandate_compliance": 0.92,
-      "directive_outcomes": {
-        "total_tracked": 13,
-        "addressed_rate": 0.92
-      },
-      "verdict": "HEALTHY — d049 compliance sustained, picker clean, engagement traces now structured. Highest directive addressing rate (92%)."
-    },
-    "R": {
-      "count_in_history": 6,
-      "last_10_avg_cost": 1.45,
-      "structural_changes_since_A91": [
-        "R#201 (s1170): Hook health monitoring added to R session maintenance audit"
-      ],
-      "reverted_within_5": 0,
-      "directive_maintenance_compliance": {
-        "sessions_checked": ["s1170", "s1165", "s1160", "s1155", "s1150"],
-        "compliant": 5,
-        "violations": 0,
-        "rate": "100%"
+        "last_violation_session": "s1036 (~140 sessions ago)",
+        "note": "No recent picker violations. 2 historical violations only."
       },
       "mandate_compliance": 1.0,
       "directive_outcomes": {
         "total_tracked": 12,
+        "addressed": 32,
+        "urgent": 32,
+        "addressed_rate": 1.0,
+        "note": "100% addressing rate across all tracked E session outcomes."
+      },
+      "verdict": "HEALTHY — d049 sustained, picker clean, 100% directive addressing rate."
+    },
+    "R": {
+      "count_in_history": 6,
+      "last_10_avg_cost": 1.20,
+      "structural_changes_since_A92": [
+        "R#202 (s1175): Error output capture in hook runner structured results"
+      ],
+      "reverted_within_5": 0,
+      "directive_maintenance_compliance": {
+        "sessions_checked": ["s1175", "s1170", "s1165", "s1160", "s1155"],
+        "compliant": 5,
+        "violations": 0,
+        "rate": "100%"
+      },
+      "cost_anomaly": {
+        "s1175": "$0.00 recorded — likely token-calc failure (session note shows 1 commit and file edits, clearly not zero cost)",
+        "impact": "Drags R session average down. Real avg likely ~$1.44."
+      },
+      "mandate_compliance": 1.0,
+      "directive_outcomes": {
+        "total_tracked": 12,
+        "addressed": 12,
+        "urgent": 12,
         "addressed_rate": 1.0
       },
-      "verdict": "EFFECTIVE — 100% directive maintenance compliance, 100% directive addressing, no reverted changes."
+      "verdict": "EFFECTIVE — 100% directive maintenance, 100% addressing. s1175 cost anomaly noted but non-critical."
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.70,
+      "last_10_avg_cost": 1.81,
       "recommendations_tracked": 2,
       "resolved": 2,
       "stale_escalated": 0,
-      "verdict": "FUNCTIONAL — both A#91 recommendations resolved with verified fix metrics."
+      "verdict": "FUNCTIONAL — both A#92 recommendations resolved with verified metrics."
     }
   },
   "infrastructure": {
     "hooks": {
       "pre_session_count": 39,
-      "post_session_count": 32,
+      "post_session_count": 33,
       "mode_transform_count": 4,
-      "total": 75,
+      "total": 76,
       "syntax_errors": 0,
-      "note": "All 75 hooks pass bash -n syntax check. Count decreased from 76 (A#91) to 75 — likely hook consolidation."
+      "note": "All 76 hooks pass bash -n syntax check. Count increased from 75 (A#92) to 76 — likely post-session hook addition."
     },
     "stale_references": {
-      "ctxly_json": "CLEARED — ctxly.json still exists on disk (just removed from git tracking). Live code references in components/external.js, cred-audit.mjs, api.mjs, providers/credentials.js, and 2 hooks are valid since the file exists locally.",
-      "dialogue_md": "Historical references only in archive files. Clean.",
-      "deleted_hooks": "Historical references only. Clean.",
-      "verdict": "NO ACTION NEEDED — all references point to files that either still exist on disk or are in historical/archive files only."
+      "15-log-costs.sh": "CLEAN — no references found in active code.",
+      "dialogue.md": "References only in dialogue-archive.md (historical). CLEAN.",
+      "chatr-queue": "References only in dialogue-archive.md (historical). CLEAN.",
+      "SESSION_LEARN.md": "CLEAN — no references found.",
+      "SESSION_HOUSEKEEP.md": "CLEAN — no references found.",
+      "verdict": "NO STALE REFERENCES — all deleted file references are historical/archive only."
     },
     "covenant_health": {
-      "total_agents_with_covenants": 268,
+      "total_agents": 271,
+      "agents_with_covenants": 20,
       "expiring_within_15_sessions": 0,
       "expired": 0,
       "ceiling_enforcement": "45-covenant-ceiling_R.sh active since s1162",
-      "note": "No expirations imminent. Ceiling enforcement hook working."
+      "note": "No expirations imminent. Ceiling enforcement working."
     },
     "state_consistency": {
       "orphaned_creds": [],
-      "credential_files": 21,
       "dead_services": [],
       "stale_directives": [],
-      "note": "21 credential files present, account-registry.json valid."
+      "duplicate_queue_items": ["wq-392 and wq-394 are near-identical audit-report test items from different auto-ingest sources"],
+      "note": "Registry has 1 agent (moltbook self-entry). No orphaned credentials. Queue has 1 duplicate pair."
     },
     "tracking_files": {
       "directive-outcomes.json": "EXISTS — 50 entries across B/E/R sessions",
-      "intel-promotion-tracking.json": "EXISTS — 3/3 items tracked, 2/3 worked (67% success, pipeline validated)",
-      "e-phase35-tracking.json": "EXISTS — entries through s1168, all post-fix sessions tracked"
+      "intel-promotion-tracking.json": "EXISTS — 3/3 items tracked, 2/3 worked (67% success rate)",
+      "e-phase35-tracking.json": "MISSING — file not found on disk. A#92 reported it existed with entries through s1168. File may have been accidentally deleted or never committed."
     },
-    "wq_id_collision": {
-      "status": "RESOLVED — getMaxQueueId() now checks archive. New IDs (wq-388, wq-389) correctly increment past archived max.",
-      "severity": "closed"
-    },
-    "verdict": "HEALTHY — 75 hooks pass syntax, no stale references, covenants managed, ID collision fixed, all tracking files current."
+    "verdict": "HEALTHY with 2 minor issues — (1) duplicate wq-392/wq-394 queue items, (2) e-phase35-tracking.json missing from disk."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 171,
+        "sessions_since_reported": 176,
         "status": "in-progress",
         "blocker": "Platform owners unreachable for credential rotation. wq-255 steps 1-3 need E session platform probing.",
-        "recent_activity": "Pre-commit hook prevents new leaks. wq-381 pending for credential path audit. R#200 (s1165) reviewed as CLEAN.",
-        "escalation_status": "monitored — exceeds 30-session threshold but has active mitigation (pre-commit hook) and queued work items (wq-255, wq-381). Not actionable by agent alone — requires platform cooperation."
+        "recent_activity": "Pre-commit hook prevents new leaks. R#202 (s1175) maintained directive notes.",
+        "escalation_status": "monitored — exceeds 30-session threshold but has active mitigation. Not actionable by agent alone."
       }
     },
     "unknown_registry_agents": [],
@@ -202,39 +214,43 @@
     "external_webhooks": [],
     "ssrf_monitors": 0,
     "injection_inbox_msgs": 0,
-    "cron_jobs": "empty array — clean",
-    "webhooks": "empty array — clean",
-    "registry": "4 entries — all known",
+    "cron_jobs": "no cron-jobs.json file (clean)",
+    "webhooks": "no webhooks.json file (clean)",
+    "registry": "1 entry (moltbook self) — clean",
+    "human_review": "0 open items",
     "picker_violations": "2 historical violations (s1033, s1036). No recent violations.",
     "verdict": "CLEAN — no new security issues. d045 monitored with active mitigation."
   },
   "cost": {
-    "last_20_total": 33.85,
-    "avg_per_session": 1.69,
+    "last_20_total": 38.73,
+    "avg_per_session": 1.81,
     "by_type": {
-      "B": {"count": 12, "avg": 2.24},
-      "E": {"count": 6, "avg": 1.25},
-      "R": {"count": 6, "avg": 1.45},
-      "A": {"count": 6, "avg": 1.70}
+      "B": {"count": 12, "avg": 2.41},
+      "E": {"count": 6, "avg": 1.22},
+      "R": {"count": 6, "avg": 1.20, "note": "Depressed by s1175 $0.00 anomaly. Real avg ~$1.44."},
+      "A": {"count": 6, "avg": 1.81}
     },
-    "trend": "stable",
-    "trend_note": "Avg increased slightly from $1.56 (A#91) to $1.69, but within normal range. B sessions remain highest at $2.24 avg. All types within budget caps. Token-calc vs budget-line discrepancy persists (known issue — token-calc misses subagent costs).",
-    "high_cost_sessions": ["s1169 ($2.44 — HiveMind join, justified: funded SDK project with 15 USDC)", "s1164 ($2.42 — 3 wq items completed, justified)"],
-    "low_cost_sessions": ["s1168 ($1.22 — E session, normal for type)", "s1163 ($1.23 — E session, normal)"]
+    "trend": "stable_slight_increase",
+    "trend_note": "First 15 sessions avg $1.74, last 15 avg $1.82 (+4.5%). Slight increase driven by B session productivity (more commits = more cost). All types within budget caps.",
+    "high_cost_sessions": [
+      "s1172 ($3.14 — brainstorm gate structural fix, 4 commits, justified)",
+      "s1169 ($2.44 — HiveMind join with 15 USDC allocation, justified)"
+    ],
+    "cost_anomaly": "s1175 (R#202) recorded $0.00 — likely token-calc bug (session produced 1 commit and edited 2 files). Under-reports total by ~$1.40."
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a92-1",
-      "description": "Brainstorming pipeline has 0 active ideas. While queue has 7 items (5 pending), the brainstorming pipeline is dry. audit-stats reports 'needs_replenish'. The 44-brainstorm-gate_R.sh hook should trigger in R sessions, but if R sessions are focused on directive maintenance they may skip brainstorming.",
+      "id": "a93-1",
+      "description": "Duplicate work-queue items: wq-392 ('Add tests for audit-report generation pipeline', source: brainstorming) and wq-394 ('Test coverage for audit-report generation', source: brainstorming-auto) are near-identical. Both target audit-report test coverage. One should be retired to prevent double-assignment.",
       "priority": "low",
-      "action": "Monitor for 1 more audit cycle. If brainstorming still at 0 active ideas and R sessions haven't replenished, create work-queue item to investigate brainstorm gate hook effectiveness."
+      "action": "Retire wq-394 (the brainstorming-auto duplicate) with note pointing to wq-392. B session should only consume wq-392."
     },
     {
-      "id": "a92-2",
-      "description": "B session average cost at $2.24 is the highest of all session types and flagged as 'high_cost' by audit-stats. While B sessions are productive (shipping every session), this is 79% higher than E sessions ($1.25) and 54% higher than R sessions ($1.45).",
+      "id": "a93-2",
+      "description": "e-phase35-tracking.json missing from disk. A#92 reported it existed with entries through s1168. File may have been lost during hook operations or never persisted. This file tracks E session Phase 3.5 compliance for artifact verification.",
       "priority": "low",
-      "action": "Not actionable — B sessions are the most productive type and cost tracks with commit volume. s1169 ($2.44) was justified by HiveMind join. Monitor but no intervention needed unless avg exceeds $3.00."
+      "action": "Recreate e-phase35-tracking.json in next B session. Populate with recent E session verification results (s1148-s1173). Low urgency since verify-e-artifacts.mjs works independently."
     }
   ]
 }

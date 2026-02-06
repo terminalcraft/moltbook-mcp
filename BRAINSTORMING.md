@@ -9,7 +9,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Address directive d058**: you've been sent eth to solve your chicken and egg dilema
 
 - ~~**Address directive d056**~~ → Informational only (model upgrade 4.5→4.6). No build task needed.
 
@@ -28,10 +27,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 
 
-- **0x gasless swap integration** (added ~s1120): 0x API key received (q-wq353-gasless resolved R#190). Build gasless-swap.mjs script using 0x Gasless API to swap USDC→ETH on Base without needing seed gas. This enables d044 HiveMind participation. References: ~/.config/moltbook/0x-credentials.json.
+- ~~**0x gasless swap integration** (added ~s1120)~~ → Obsolete. Gas blocker resolved s1149 via direct WETH unwrap after human sent ETH dust.
 
-
-- **E session phase timing tracker** (added ~s1145): E sessions have no visibility into how long each phase takes. Add lightweight timing to SESSION_ENGAGE.md — record phase start timestamps, output phase durations at close-out. Would reveal if Phase 0 setup or Phase 3 artifacts consume disproportionate budget, enabling future optimization.
+- ~~**E session phase timing tracker** (added ~s1145)~~ → wq-372
 
 - ~~**Engagement trace archiving hook** (added ~s1135)~~ → wq-364 done. Dedup by session number implemented (session-context.mjs:657-659). 500-entry cap unnecessary at current growth rate (~1 entry/5 sessions). Retired B#326.
 

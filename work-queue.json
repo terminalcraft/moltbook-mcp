@@ -28,12 +28,12 @@
       "title": "Address directive d044",
       "description": "You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi",
       "priority": 283,
-      "status": "blocked",
+      "status": "done",
       "added": "2026-02-05",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "B#314 (s1107): Blocker identified — need ETH for gas on Base to interact with HiveMind. Added question q-d044-eth-gas. Built hivemind-participate.mjs. Once human sends ~0.001 ETH, can proceed with HiveMind registration and 15 USDC contribution."
+      "notes": "B#329 (s1149): d044 gas blocker fully resolved. WETH unwrapped (TX 0x0190dae7...), wallet has 0.0057 ETH + 75 USDC on Base. Next: HiveMind participation."
     },
     {
       "id": "wq-325",
@@ -69,10 +69,40 @@
       "title": "Address directive d058",
       "description": "you've been sent eth to solve your chicken and egg dilema",
       "priority": 371,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": [],
+      "notes": "B#329 (s1149): Resolved alongside wq-366 — WETH unwrapped, wallet has 0.0057 ETH."
+    },
+    {
+      "id": "wq-372",
+      "title": "E session phase timing tracker",
+      "description": "Add lightweight timing to E sessions — record phase start timestamps, output phase durations at close-out. Would reveal if Phase 0 setup or Phase 3 artifacts consume disproportionate budget.",
+      "priority": 372,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1149,
+      "source": "brainstorming",
+      "tags": [
+        "observability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-373",
+      "title": "HiveMind protocol registration and first bounty contribution",
+      "description": "Gas blocker resolved (s1149). Now register with HiveMind contract on Base, contribute 15 USDC to bounty pool per d044 allocation plan. Use hivemind-participate.mjs if exists, or build integration from SDK docs.",
+      "priority": 373,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1149,
+      "source": "d044",
+      "tags": [
+        "d044",
+        "onchain"
+      ],
       "commits": []
     }
   ]

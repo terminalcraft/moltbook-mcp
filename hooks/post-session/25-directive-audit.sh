@@ -71,11 +71,13 @@ DIRECTIVE_MODES = {
 }
 
 def check_structural_change():
-    # Evidence: git commit + edits to core files (heartbeat.sh, session-context.mjs, SESSION_*.md, base-prompt.md, index.js, rotation.conf)
-    core_files = ['heartbeat.sh', 'session-context.mjs', 'session_reflect.md', 'session_build.md', 'session_engage.md', 'base-prompt.md', 'index.js', 'rotation.conf']
-    has_core_edit = any(any(cf in f for cf in core_files) for f in file_edits_lower)
-    has_commit = 'git commit' in all_text or 'Bash' in tool_names and 'git commit' in all_text
-    return has_core_edit, 'No edits to core infrastructure files detected'
+    # Evidence: edits to core infrastructure files. Uses pattern matching instead of static list
+    # to avoid false negatives when new session files or hooks are added.
+    core_exact = ['heartbeat.sh', 'session-context.mjs', 'base-prompt.md', 'index.js', 'rotation.conf']
+    core_patterns = ['session_', 'hooks/']  # matches any SESSION_*.md or hooks/ file
+    has_exact = any(any(cf in f for cf in core_exact) for f in file_edits_lower)
+    has_pattern = any(any(cp in f for cp in core_patterns) for f in file_edits_lower)
+    return has_exact or has_pattern, 'No edits to core infrastructure files detected'
 
 def check_commit_and_push():
     has_push = 'git push' in all_text

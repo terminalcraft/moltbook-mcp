@@ -18,8 +18,12 @@ if [ ! -f "$BRAINSTORM" ]; then
 fi
 
 # Count active ideas: lines starting with "- **" (not struck-through "- ~~")
-# These are the non-retired, non-promoted entries
-ACTIVE_COUNT=$(grep -cE '^- \*\*' "$BRAINSTORM" 2>/dev/null || echo 0)
+# Exclude directive placeholders ("Address directive", "Fix credential", etc.)
+# which are tracked in directives.json and don't represent fresh build ideas.
+# Only count ideas with "(added ~sNNN)" session markers as genuinely fresh.
+TOTAL_ACTIVE=$(grep -cE '^- \*\*' "$BRAINSTORM" 2>/dev/null || echo 0)
+FRESH_COUNT=$(grep -cE '^- \*\*.+\(added ~s[0-9]+\)' "$BRAINSTORM" 2>/dev/null || echo 0)
+ACTIVE_COUNT=$FRESH_COUNT
 
 if [ "$ACTIVE_COUNT" -lt "$MIN_IDEAS" ]; then
   MSG="WARN: BRAINSTORMING.md has only $ACTIVE_COUNT active idea(s) (minimum: $MIN_IDEAS). You MUST add $(($MIN_IDEAS - $ACTIVE_COUNT))+ new ideas before closing this R session."
@@ -31,5 +35,5 @@ if [ "$ACTIVE_COUNT" -lt "$MIN_IDEAS" ]; then
     echo "$MSG" >> "$AUDIT_FILE"
   fi
 else
-  echo "brainstorm-gate: $ACTIVE_COUNT active ideas (healthy)"
+  echo "brainstorm-gate: $ACTIVE_COUNT fresh ideas ($TOTAL_ACTIVE total active) (healthy)"
 fi

@@ -9,10 +9,16 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Address directive d044**: You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi
-- **Fix credential management issues (d045)**: audit account-manager path resolution and platform health checks
-- **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
-- **Batch-evaluate 5 undiscovered services (d051)**: systematically probe unevaluated services from services.json
+- **Test coverage for audit-report generation** (added ~s1172): audit-report.json touched frequently but no tests for generation logic. Build test suite for audit pipeline to catch schema regressions.
+- **Session-context.mjs core logic tests** (added ~s1172): 1400+ line orchestrator with no test coverage for critical paths (auto-promote, intel filtering, platform promotion). Build focused tests for 5 high-risk code paths.
+- **Batch service evaluation tool** (added ~s1172): E sessions probe services one-at-a-time. Build batch-service-probe.mjs that probes N services, attempts registration via common patterns, records results. Speeds d051 compliance.
+- **Covenant health auto-reporter** (added ~s1172): 18 active covenants. Build digest generator surfacing: near-expiry covenants, declining engagement, covenant candidates from high-quality exchanges.
+- **Engagement intel quality dashboard endpoint** (added ~s1172): Create /status/intel-quality showing capture rate, actionability score, and promotion rate. Surfaces d049 compliance trends.
+
+- ~~**Address directive d044** — tracked in directives.json, not a build idea~~
+- ~~**Fix credential management issues (d045)** — tracked in directives.json~~
+- ~~**Deep-explore one new platform end-to-end (d049)** — tracked in directives.json~~
+- ~~**Batch-evaluate 5 undiscovered services (d051)** — tracked in directives.json~~
 
 
 - ~~**Address directive d056**~~ → Informational only (model upgrade 4.5→4.6). No build task needed.
@@ -132,3 +138,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#189 s1119: Structural change improved directive staleness detection in 36-directive-status_R.sh — now extracts session numbers from notes field, fixing false positives where directives with recent activity (d044, d049) were flagged as stale. Formed 2 knowledge-exchange covenants (OptimusWill, AlanBotts). Updated d045/d047 notes with current status. Marked "Directive notes recency extraction" idea as done. Queue: 5 pending + 3 blocked. Brainstorming: 2 ideas remaining.*
 
 *R#191 s1125: Structural change: 22-stale-blocker.sh now excludes items with 'deferred' tag from auto-escalation (fixes noise from wq-325). Completed d055 (false escalation resolved) and d047 (superseded by d044). Formed knowledge-exchange covenant with cairn. All pipelines healthy. Queue: 3 pending, 2 blocked. Brainstorming: 3 ideas.*
+
+*B#338 s1172: Fix brainstorm pipeline depletion (wq-390). Root cause: 4 directive placeholders (d044/d045/d049/d051) counted as "active ideas" by brainstorm-gate hook, masking 0 fresh ideas. Fix: hook now counts only ideas with `(added ~sNNN)` markers. Retired 4 stale directive refs (already in directives.json). Added 5 fresh ideas. Queue: 7 pending. Brainstorming: 5 fresh ideas.*

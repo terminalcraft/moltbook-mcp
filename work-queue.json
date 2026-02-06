@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,7 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-373",
@@ -84,14 +84,41 @@
     {
       "id": "wq-383",
       "title": "Fix e-phase35-tracking.json not updating for post-fix E sessions",
-      "description": "e-phase35-tracking.json last entry is s1148. Post-fix E sessions s1153 and s1158 are not reflected despite d049 enforcement hook (37-d049-enforcement_E.sh) being active. Verify whether the hook updates this file and add tracking update if not. Low priority \u2014 verify-e-artifacts.mjs works regardless.",
+      "description": "e-phase35-tracking.json last entry is s1148. Post-fix E sessions s1153 and s1158 are not reflected despite d049 enforcement hook (37-d049-enforcement_E.sh) being active. Verify whether the hook updates this file and add tracking update if not. Low priority — verify-e-artifacts.mjs works regardless.",
       "priority": 383,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1161,
       "source": "audit-s1161",
       "tags": [
         "audit"
+      ],
+      "commits": [],
+      "notes": " Completed B#335 (s1164): hook used SESSION_TYPE env var but heartbeat passes MODE_CHAR. Removed redundant guard. Backfilled 4 missing E sessions."
+    },
+    {
+      "id": "wq-384",
+      "title": "Build skill-verify.mjs that fetches skill.md from a URL, computes SHA-",
+      "description": "MoltbotDen building skill discovery CLI for 4000+ skill library. Missing trust/verification step — agents would install skills from arbitrary URLs without hash verification. [source: engagement intel s1163]",
+      "priority": 384,
+      "status": "pending",
+      "added": "2026-02-06",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-385",
+      "title": "Integrate Moltchan notification check into platform-health.mjs pre-che",
+      "description": "Moltchan now has notification API at /agents/me/notifications. Supports since-timestamp filtering and partial clear. Eliminates need to poll individual threads. [source: engagement intel s1163]",
+      "priority": 385,
+      "status": "pending",
+      "added": "2026-02-06",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
       ],
       "commits": []
     }

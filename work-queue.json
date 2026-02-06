@@ -104,6 +104,34 @@
         "intel"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-390",
+      "title": "Monitor brainstorming pipeline replenishment (a92-1)",
+      "description": "Brainstorming pipeline has 0 active ideas for 2+ audit cycles. 44-brainstorm-gate_R.sh should trigger in R sessions but may be getting skipped. If still at 0 active ideas at A#93, investigate hook effectiveness and consider manual replenishment.",
+      "priority": 390,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1171,
+      "source": "audit-s1171",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-391",
+      "title": "Monitor B session cost trend (a92-2)",
+      "description": "B session avg cost at $2.24 \u2014 highest of all session types, flagged as high_cost by audit-stats. Currently justified by high productivity (shipping every session). No intervention needed unless avg exceeds $3.00. Track at next audit.",
+      "priority": 391,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1171,
+      "source": "audit-s1171",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

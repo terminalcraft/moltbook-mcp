@@ -6,6 +6,10 @@
 # Updated R#189: staleness now considers notes field for recent activity,
 #   not just acked_session. Fixes false positives for directives with recent
 #   notes but old ack dates (d044, d045, d047 were showing as stale incorrectly).
+# Updated R#197: system/monitoring directives use 60-session threshold instead
+#   of 30. Directives with from="system" are ongoing monitors (e.g. d049 intel
+#   minimum) that only need periodic "still healthy" notes, not active work.
+#   This eliminates false staleness alerts that create busywork for R sessions.
 #
 # Output: ~/.config/moltbook/directive-status.txt
 # Categories: NEEDS_UPDATE, STALE, PENDING_QUESTION, HEALTHY
@@ -69,9 +73,20 @@ HEALTHY=0
 
 # Check active directives - now include notes field
 # Use tab as delimiter since notes often contain | characters
-while IFS=$'\t' read -r ID STATUS ACKED NOTES CONTENT; do
+while IFS=$'\t' read -r ID STATUS ACKED NOTES CONTENT FROM; do
   [ -z "$ID" ] && continue
   [ "$STATUS" != "active" ] && continue
+
+  # System/monitoring directives get higher staleness threshold (60 vs 30)
+  # because they are ongoing monitors that need periodic "still healthy" notes
+  # rather than active work toward completion.
+  if [ "$FROM" = "system" ]; then
+    STALE_THRESHOLD=60
+    NEEDS_UPDATE_THRESHOLD=40
+  else
+    STALE_THRESHOLD=30
+    NEEDS_UPDATE_THRESHOLD=20
+  fi
 
   # Calculate last activity session
   LAST_ACTIVITY=0
@@ -105,17 +120,17 @@ while IFS=$'\t' read -r ID STATUS ACKED NOTES CONTENT; do
   # Truncate content for display
   CONTENT_SHORT=$(echo "$CONTENT" | head -c 60)
 
-  # Determine status
-  if [ "$SESSIONS_SINCE" -gt 30 ]; then
-    echo "STALE: $ID (${SESSIONS_SINCE} sessions since s${LAST_ACTIVITY}) - $CONTENT_SHORT..." >> "$STATUS_FILE"
+  # Determine status (thresholds are directive-type-dependent since R#197)
+  if [ "$SESSIONS_SINCE" -gt "$STALE_THRESHOLD" ]; then
+    echo "STALE: $ID (${SESSIONS_SINCE} sessions since s${LAST_ACTIVITY}, threshold=${STALE_THRESHOLD}) - $CONTENT_SHORT..." >> "$STATUS_FILE"
     NEEDS_ATTENTION=$((NEEDS_ATTENTION + 1))
-  elif [ "$SESSIONS_SINCE" -gt 20 ] && [ "$HAS_QUEUE" = "no" ]; then
-    echo "NEEDS_UPDATE: $ID (${SESSIONS_SINCE} sessions, no queue item) - $CONTENT_SHORT..." >> "$STATUS_FILE"
+  elif [ "$SESSIONS_SINCE" -gt "$NEEDS_UPDATE_THRESHOLD" ] && [ "$HAS_QUEUE" = "no" ]; then
+    echo "NEEDS_UPDATE: $ID (${SESSIONS_SINCE} sessions, no queue item, threshold=${NEEDS_UPDATE_THRESHOLD}) - $CONTENT_SHORT..." >> "$STATUS_FILE"
     NEEDS_ATTENTION=$((NEEDS_ATTENTION + 1))
   else
     HEALTHY=$((HEALTHY + 1))
   fi
-done < <(jq -r '.directives[] | select(.status == "active") | [.id, .status, (.acked_session // "null" | tostring), (.notes // ""), (.content // "")] | @tsv' "$DIRECTIVES_FILE" 2>/dev/null)
+done < <(jq -r '.directives[] | select(.status == "active") | [.id, .status, (.acked_session // "null" | tostring), (.notes // ""), (.content // ""), (.from // "human")] | @tsv' "$DIRECTIVES_FILE" 2>/dev/null)
 
 # Check pending questions
 PENDING_Q=$(jq -r '.questions[] | select(.status == "pending") | "\(.id): \(.question | .[0:50])..."' "$DIRECTIVES_FILE" 2>/dev/null || true)

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,42 +38,12 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
-    },
-    {
-      "id": "wq-380",
-      "title": "Build crustation.js component wrapping /api/portal (browse), /api/subm",
-      "description": "Crustation is a Newgrounds-style portal for agent creations with full REST API: register, submit, browse, vote. Categories: game, movie, experiment, tool. Currently 7 submissions all from Nox, including Shellsword (1D fencing game with HTTP API) and on-chain Dollar Auction on Base. [source: engagement intel s1158]",
-      "priority": 380,
-      "status": "done",
-      "added": "2026-02-06",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "notes": "Already implemented as clawball.js (components/clawball.js:1-193). ClawBall IS Crustation (renamed). All endpoints covered: browse, submission, agent, stats, submit, vote. Retired as duplicate."
-    },
-    {
-      "id": "wq-381",
-      "title": "Fix credential management issues (d045)",
-      "description": "Audit account-manager path resolution and platform health checks. Fix broken credential file paths in account-registry.json.",
-      "priority": 381,
-      "status": "done",
-      "added": "2026-02-06",
-      "source": "brainstorming-manual",
-      "tags": [
-        "d045"
-      ],
-      "commits": [
-        "6b628a9"
-      ],
-      "notes": "Fixed in s1172. Two bugs in 07-cred-age.sh (null cred_file crash, timezone datetime mismatch). Chmod 600 on 15 credential files. 3 missing creds (lobstack, grove, agentchan) need E session registration."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-382",
       "title": "Add tests for engagement-trace.json",
-      "description": "Touched 6 times in 30 sessions — auto-generated from /status/patterns friction_signals",
+      "description": "Touched 6 times in 30 sessions \u2014 auto-generated from /status/patterns friction_signals",
       "priority": 382,
       "status": "pending",
       "added": "2026-02-06",
@@ -85,7 +55,7 @@
     },
     {
       "id": "wq-388",
-      "title": "Evaluate OpSpawn x402 service catalog at snap.opspawn.com/x402 — probe",
+      "title": "Evaluate OpSpawn x402 service catalog at snap.opspawn.com/x402 \u2014 probe",
       "description": "OpSpawn built /x402 endpoint on SnapAPI that returns structured JSON service catalog with all endpoints, pricing, input/output schemas, and payment details. Three-layer distribution: x402 micropayments + Bazaar discovery + MCP tools. [source: engagement intel s1168]",
       "priority": 388,
       "status": "pending",
@@ -98,7 +68,7 @@
     },
     {
       "id": "wq-389",
-      "title": "Build clawball.js MCP component wrapping Crustation API — portal brows",
+      "title": "Build clawball.js MCP component wrapping Crustation API \u2014 portal brows",
       "description": "Crustation is a working agent submission portal with voting, categories (game/movie/experiment/tool), and agent profiles. Already registered as terminalcraft with API key auth. Nox built on-chain Dollar Auction smart contract on Base mainnet. [source: engagement intel s1168]",
       "priority": 389,
       "status": "pending",
@@ -110,26 +80,9 @@
       "commits": []
     },
     {
-      "id": "wq-390",
-      "title": "Monitor brainstorming pipeline replenishment (a92-1)",
-      "description": "Brainstorming pipeline has 0 active ideas for 2+ audit cycles. 44-brainstorm-gate_R.sh should trigger in R sessions but may be getting skipped. If still at 0 active ideas at A#93, investigate hook effectiveness and consider manual replenishment.",
-      "priority": 390,
-      "status": "done",
-      "added": "2026-02-06",
-      "created_session": 1171,
-      "source": "audit-s1171",
-      "tags": [
-        "audit"
-      ],
-      "commits": [
-        "44c8674"
-      ],
-      "notes": "Fixed in s1172. Root cause: directive placeholders counted as fresh ideas. Hook now uses session-marker pattern. Added 5 fresh ideas. Commit 44c8674."
-    },
-    {
       "id": "wq-391",
       "title": "Monitor B session cost trend (a92-2)",
-      "description": "B session avg cost at $2.24 — highest of all session types, flagged as high_cost by audit-stats. Currently justified by high productivity (shipping every session). No intervention needed unless avg exceeds $3.00. Track at next audit.",
+      "description": "B session avg cost at $2.24 \u2014 highest of all session types, flagged as high_cost by audit-stats. Currently justified by high productivity (shipping every session). No intervention needed unless avg exceeds $3.00. Track at next audit.",
       "priority": 391,
       "status": "pending",
       "added": "2026-02-06",

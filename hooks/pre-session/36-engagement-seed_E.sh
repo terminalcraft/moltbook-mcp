@@ -9,7 +9,7 @@ HISTORY_FILE="$STATE_DIR/session-history.txt"
 OUTPUT_FILE="$STATE_DIR/e-session-context.md"
 
 python3 -c "
-import json, sys
+import json, sys, os
 
 lines = []
 
@@ -88,6 +88,17 @@ try:
             lines.append(f'Recent E sessions averaging \\\${avg:.2f} — on target.')
         lines.append('')
 except Exception:
+    pass
+
+# 5. d049 violation nudge (wq-375 mechanical enforcement)
+nudge_file = os.path.join('$STATE_DIR', 'd049-nudge.txt')
+try:
+    with open(nudge_file) as f:
+        nudge = f.read().strip()
+    if nudge:
+        lines.append(nudge)
+        lines.append('')
+except FileNotFoundError:
     pass
 
 if lines:

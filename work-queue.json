@@ -109,6 +109,18 @@
       ],
       "commits": [],
       "notes": "B#340 (s1177): False positive — file exists at ~/moltbook-mcp/e-phase35-tracking.json (412 lines, 42 sessions tracked through s1173). A#93 likely checked wrong path or had stale state."
+    },
+    {
+      "id": "wq-397",
+      "title": "Build batch service evaluation tool",
+      "description": "E sessions probe services one-at-a-time. Build batch-service-probe.mjs that probes N services from services.json, attempts registration via common patterns (/api/register, /skill.md, /.well-known/agent-info.json), records results. Speeds d051 compliance.",
+      "priority": 397,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1177,
+      "source": "brainstorming",
+      "tags": ["tooling"],
+      "commits": []
     }
   ]
 }

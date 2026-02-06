@@ -10,7 +10,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Evolution Ideas
 
 - **Session-context.mjs core logic tests** (added ~s1172): 1400+ line orchestrator with no test coverage for critical paths (auto-promote, intel filtering, platform promotion). Build focused tests for 5 high-risk code paths.
-- **Batch service evaluation tool** (added ~s1172): E sessions probe services one-at-a-time. Build batch-service-probe.mjs that probes N services, attempts registration via common patterns, records results. Speeds d051 compliance.
 - **Covenant health auto-reporter** (added ~s1172): 18 active covenants. Build digest generator surfacing: near-expiry covenants, declining engagement, covenant candidates from high-quality exchanges.
 - **Engagement intel quality dashboard endpoint** (added ~s1172): Create /status/intel-quality showing capture rate, actionability score, and promotion rate. Surfaces d049 compliance trends.
 

@@ -26,6 +26,9 @@ function readJSON(path) {
 
 const result = {};
 
+// B#340: Stop words for keyword-based dedup. Used by both self-dedup and isTitleDupe.
+const STOP_WORDS = new Set(['a','an','the','for','to','of','in','on','and','or','add','fix','build','create','test','tests','new','with','from']);
+
 // R#200: Dirty flag for deferred work-queue.json writes.
 // Previously the file was written up to 6 times (dedup, unblock, promote, TODO ingest,
 // friction ingest, intel promote) — each a full JSON.stringify + writeFileSync.
@@ -47,25 +50,41 @@ const depsReady = (item) => !item.deps?.length || item.deps.every(d => {
   return !dep || dep.status === 'done';
 });
 
-// --- Queue self-dedup (R#67) ---
+// --- Queue self-dedup (R#67, B#340) ---
 // Detect and remove duplicate queue items by normalizing titles and comparing.
 // Duplicates arise from multiple sources (manual add, auto-promote, different sessions).
 // wq-012/wq-013 were both "engagement replay analytics" — this prevents that class of bug.
+// B#340: Added keyword overlap check alongside first-6-words exact match.
+// Catches semantically-equivalent titles with different wording (e.g. wq-392 vs wq-394).
 {
-  const seen = new Map(); // normalized title -> first item index
+  const seen = []; // array of { norm, keywords, idx } for pairwise comparison
   const dupes = [];
   for (let idx = 0; idx < queue.length; idx++) {
+    // Skip non-pending items — only dedup active candidates
+    if (queue[idx].status !== 'pending') { seen.push(null); continue; }
     const norm = queue[idx].title.toLowerCase()
       .replace(/[^a-z0-9 ]/g, ' ')  // strip punctuation
       .replace(/\s+/g, ' ')          // collapse whitespace
-      .trim()
-      .split(' ').slice(0, 6).join(' '); // first 6 words for fuzzy match
-    if (seen.has(norm)) {
-      // Keep the earlier item (lower index = higher priority), mark later as dupe
-      dupes.push(idx);
-    } else {
-      seen.set(norm, idx);
+      .trim();
+    const first6 = norm.split(' ').slice(0, 6).join(' ');
+    const keywords = new Set(norm.split(/\W+/).filter(w => w.length > 3 && !STOP_WORDS.has(w)));
+    let isDupe = false;
+    for (const prev of seen) {
+      if (!prev) continue;
+      // Original: exact first-6-words match
+      if (first6 === prev.first6) { isDupe = true; break; }
+      // B#340: Keyword overlap — 60%+ of smaller keyword set matches larger
+      if (keywords.size > 0 && prev.keywords.size > 0) {
+        const [smaller, larger] = keywords.size <= prev.keywords.size ? [keywords, prev.keywords] : [prev.keywords, keywords];
+        let overlap = 0;
+        for (const w of smaller) if (larger.has(w)) overlap++;
+        if (overlap / smaller.size >= 0.6) { isDupe = true; break; }
+      }
     }
+    if (isDupe) {
+      dupes.push(idx);
+    }
+    seen.push({ first6, keywords, idx });
   }
   if (dupes.length > 0) {
     // Remove in reverse order to preserve indices
@@ -141,13 +160,25 @@ function getMaxQueueId(queue) {
 // Checks if a candidate title is "close enough" to any existing queue title to be a duplicate.
 // Uses normalized prefix comparison: lowercase first 20 chars of each, bidirectional includes.
 // Centralizing prevents divergent matching logic (e.g. one copy split on ':', another didn't).
+// B#340: Added keyword overlap check — catches semantically-equivalent titles with different
+// wording (e.g. "Add tests for audit-report generation" vs "Test coverage for audit-report generation").
 function isTitleDupe(candidate, queueTitles) {
   const norm = candidate.toLowerCase().trim();
   const prefix = norm.substring(0, 25);
   return queueTitles.some(qt => {
     const qn = qt.toLowerCase().trim();
     const qp = qn.substring(0, 25);
-    return qn.includes(prefix) || norm.includes(qp);
+    // Original prefix check
+    if (qn.includes(prefix) || norm.includes(qp)) return true;
+    // B#340: Keyword overlap check — extract significant words (>3 chars, not stop words),
+    // flag as dupe if 60%+ of the smaller set overlaps with the larger set.
+    const wordsA = new Set(norm.split(/\W+/).filter(w => w.length > 3 && !STOP_WORDS.has(w)));
+    const wordsB = new Set(qn.split(/\W+/).filter(w => w.length > 3 && !STOP_WORDS.has(w)));
+    if (wordsA.size === 0 || wordsB.size === 0) return false;
+    const [smaller, larger] = wordsA.size <= wordsB.size ? [wordsA, wordsB] : [wordsB, wordsA];
+    let overlap = 0;
+    for (const w of smaller) if (larger.has(w)) overlap++;
+    return overlap / smaller.size >= 0.6;
   });
 }
 

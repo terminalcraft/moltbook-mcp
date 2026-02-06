@@ -73,26 +73,27 @@
       "title": "Test coverage for audit-report generation",
       "description": "(added ~s1172): audit-report.json touched frequently but no tests for generation logic. Build test suite for audit pipeline to catch schema regressions.",
       "priority": 394,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-02-06",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "notes": "A#93 (s1176): DUPLICATE of wq-392 — same scope from different auto-ingest source. Retire this item; consume wq-392 instead."
+      "notes": "B#340 (s1177): Retired as duplicate of wq-392. Same scope (audit-report generation tests) ingested from brainstorming-auto source while wq-392 already existed from brainstorming source."
     },
     {
       "id": "wq-395",
       "title": "Retire duplicate wq-394 and deduplicate queue ingest",
       "description": "wq-392 and wq-394 are near-identical items ('audit-report generation tests') from brainstorming vs brainstorming-auto sources. Retire wq-394 with note pointing to wq-392. Investigate brainstorming-auto ingest path to prevent future duplicates.",
       "priority": 395,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1176,
       "source": "audit-s1176",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#340 (s1177): Retired wq-394, enhanced isTitleDupe and queue self-dedup with keyword overlap scoring (60% threshold). Root cause: prefix-based matching missed semantically-equivalent titles with different wording."
     },
     {
       "id": "wq-396",

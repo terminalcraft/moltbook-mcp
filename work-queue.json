@@ -984,14 +984,15 @@
       "title": "Clean up 5 stale references in SESSION_*.md and hooks documentation",
       "description": "Remove references to: 15-log-costs.sh (HOOKS.md + 16-structured-outcomes.sh comment), engagement-state.json (SESSION_REFLECT.md), ai-plugin.json (SESSION_ENGAGE.md), picker-mandate.json (SESSION_AUDIT.md). All reference deleted or nonexistent files.",
       "priority": 369,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "source": "audit-s1146",
       "created_session": 1146,
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": ["c52b312"],
+      "notes": "B#328 s1147: Fixed 2 of 5 flagged refs (15-log-costs.sh→15-cost-pipeline.sh in HOOKS.md and 16-structured-outcomes.sh). 3 refs were false positives: engagement-state.json exists, .well-known/ai-plugin.json is a standard web endpoint, picker-mandate.json exists."
     }
   ]
 }

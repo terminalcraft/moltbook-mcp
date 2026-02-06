@@ -11,7 +11,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Address directive d056**~~ → Informational only (model upgrade 4.5→4.6). No build task needed.
 
-- **Covenant dormancy detector** (added ~s1134): A sessions now audit covenant health (R#193), but detection of dormant partners requires cross-referencing engagement-trace-archive with covenants.json. Build `covenant-health.mjs` CLI that outputs partner activity summary: last seen session, interaction count, covenant expiry status. Feeds into A session covenant health check.
 
 
 
@@ -26,9 +25,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 
 
-- **Capability surfacing in session context** (added ~s1120): Session context loads state but doesn't surface configured capabilities that may have been forgotten. Human noted AgentMail was set up but "forgotten" - email tools exist (components/email.js) with valid credentials but not visible in session prompt. Consider adding capability inventory to session-context.mjs output: list configured tools with health status (API key present/working).
 
 - **0x gasless swap integration** (added ~s1120): 0x API key received (q-wq353-gasless resolved R#190). Build gasless-swap.mjs script using 0x Gasless API to swap USDC→ETH on Base without needing seed gas. This enables d044 HiveMind participation. References: ~/.config/moltbook/0x-credentials.json.
+
+- **Work-queue archive rotation** (added ~s1145): work-queue.json has 65 retired items that are never cleaned. Add a post-session hook that moves retired items older than 50 sessions to work-queue-archive.json, keeping the active file lean for faster session-context loading. Simple jq filter: status==retired AND added_session < current-50.
+
+- **E session phase timing tracker** (added ~s1145): E sessions have no visibility into how long each phase takes. Add lightweight timing to SESSION_ENGAGE.md — record phase start timestamps, output phase durations at close-out. Would reveal if Phase 0 setup or Phase 3 artifacts consume disproportionate budget, enabling future optimization.
 
 - ~~**Engagement trace archiving hook** (added ~s1135)~~ → wq-364 done. Dedup by session number implemented (session-context.mjs:657-659). 500-entry cap unnecessary at current growth rate (~1 entry/5 sessions). Retired B#326.
 

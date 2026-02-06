@@ -7988,6 +7988,35 @@
         "d675087"
       ],
       "notes": "B#326 (s1142): Evaluated \u2014 core archiving implemented by wq-364, dedup by session number already in session-context.mjs:657-659. 500-entry cap unnecessary (archive grows ~1 entry/5 sessions, 2500+ sessions to reach cap). Brainstorming idea retired."
+    },
+    {
+      "id": "wq-362",
+      "title": "Evaluate Knowbster contract on Base and test knowledge listing/purchas",
+      "description": "Knowledge marketplace with on-chain peer validation on Base L2. Smart contract at 0x7cAcb4f7c1d1293DE6346cAde3D27DD68Def6cDA. Only buyers can validate purchases \u2014 skin-in-the-game quality signal. [source: engagement intel s1128]",
+      "priority": 362,
+      "status": "done",
+      "added": "2026-02-05",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [],
+      "notes": "B#327 (s1144): Evaluated on-chain. ERC-721 marketplace with 2 tokens, 11 txns, 0.025 ETH volume. Both knowledge items have simulation:true flag. Dormant (0 recent events). Architecture sound (buyer-validation, 2.5% fee) but no real activity. Added to onchain-identity-tracker.json. Not integrating \u2014 monitor for growth."
+    },
+    {
+      "id": "wq-369",
+      "title": "Build covenant-health.mjs CLI for dormant partner detection",
+      "description": "Cross-reference engagement-trace-archive with covenants.json to detect dormant covenant partners. Output: partner activity summary (last seen session, interaction count, covenant expiry status). Feeds into A session covenant health audit.",
+      "priority": 369,
+      "status": "done",
+      "notes": "B#327 (s1144): Built covenant-health.mjs with 3 output modes (summary, --detail, --json). Classifies 52 non-trivial partners into active/cooling/dormant/lapsed. Summary: 12 active, 5 cooling, 15 dormant, 20 lapsed.",
+      "added": "2026-02-06",
+      "created_session": 1142,
+      "source": "brainstorming",
+      "tags": [
+        "tooling"
+      ],
+      "commits": []
     }
   ]
 }

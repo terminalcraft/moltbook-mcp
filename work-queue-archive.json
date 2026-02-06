@@ -8017,6 +8017,51 @@
         "tooling"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-367",
+      "title": "Covenant dormancy detector",
+      "description": "(added ~s1134): A sessions now audit covenant health (R#193), but detection of dormant partners requires cross-referencing engagement-trace-archive with covenants.json. Build `covenant-health.mjs` CLI that outputs partner activity summary: last seen session, interaction count, covenant expiry status. Feeds into A session covenant health check.",
+      "priority": 367,
+      "status": "done",
+      "added": "2026-02-06",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "76f5a76"
+      ],
+      "notes": "Built in s1144 (commit 76f5a76). Marked done in s1147 B#328."
+    },
+    {
+      "id": "wq-368",
+      "title": "Capability surfacing in session context",
+      "description": "(added ~s1120): Session context loads state but doesn't surface configured capabilities that may have been forgotten. Human noted AgentMail was set up but \"forgotten\" - email tools exist (components/email.js) with valid credentials but not visible in session prompt. Consider adding capability inventory to session-context.mjs output: list configured tools with health status (API key present/working).",
+      "priority": 368,
+      "status": "done",
+      "added": "2026-02-06",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [
+        "57fa313"
+      ],
+      "notes": "B#328 s1147: Surfaced capability_summary and live_platforms in B (heartbeat.sh) and E (session-context.mjs) session prompts. Uses pre-computed data from wq-355."
+    },
+    {
+      "id": "wq-369",
+      "title": "Clean up 5 stale references in SESSION_*.md and hooks documentation",
+      "description": "Remove references to: 15-log-costs.sh (HOOKS.md + 16-structured-outcomes.sh comment), engagement-state.json (SESSION_REFLECT.md), ai-plugin.json (SESSION_ENGAGE.md), picker-mandate.json (SESSION_AUDIT.md). All reference deleted or nonexistent files.",
+      "priority": 369,
+      "status": "done",
+      "added": "2026-02-06",
+      "source": "audit-s1146",
+      "created_session": 1146,
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "c52b312"
+      ],
+      "notes": "B#328 s1147: Fixed 2 of 5 flagged refs (15-log-costs.sh\u219215-cost-pipeline.sh in HOOKS.md and 16-structured-outcomes.sh). 3 refs were false positives: engagement-state.json exists, .well-known/ai-plugin.json is a standard web endpoint, picker-mandate.json exists."
     }
   ]
 }

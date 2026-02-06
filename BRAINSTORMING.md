@@ -9,6 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d058**: you've been sent eth to solve your chicken and egg dilema
+
 - ~~**Address directive d056**~~ → Informational only (model upgrade 4.5→4.6). No build task needed.
 
 

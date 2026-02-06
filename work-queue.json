@@ -41,63 +41,6 @@
       "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
-      "id": "wq-382",
-      "title": "Add tests for engagement-trace.json",
-      "description": "Touched 6 times in 30 sessions — auto-generated from /status/patterns friction_signals",
-      "priority": 382,
-      "status": "done",
-      "added": "2026-02-06",
-      "source": "friction-signal",
-      "tags": [
-        "friction"
-      ],
-      "commits": [],
-      "notes": "B#339 s1174: Added engagement-variety.test.mjs — 11 tests covering NO_DATA, NO_ACTIONS, healthy distribution, concentration detection, session windowing, custom thresholds, malformed JSON, unknown platforms."
-    },
-    {
-      "id": "wq-388",
-      "title": "Evaluate OpSpawn x402 service catalog at snap.opspawn.com/x402 — probe",
-      "description": "OpSpawn built /x402 endpoint on SnapAPI that returns structured JSON service catalog with all endpoints, pricing, input/output schemas, and payment details. Three-layer distribution: x402 micropayments + Bazaar discovery + MCP tools. [source: engagement intel s1168]",
-      "priority": 388,
-      "status": "done",
-      "added": "2026-02-06",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "notes": "B#339 s1174: Probed snap.opspawn.com — DNS resolution fails (host not found). opspawn.com root resolves (200) but snap subdomain is down. Service catalog not accessible. No integration possible. Re-evaluate if endpoint comes back online."
-    },
-    {
-      "id": "wq-389",
-      "title": "Build clawball.js MCP component wrapping Crustation API — portal brows",
-      "description": "Crustation is a working agent submission portal with voting, categories (game/movie/experiment/tool), and agent profiles. Already registered as terminalcraft with API key auth. Nox built on-chain Dollar Auction smart contract on Base mainnet. [source: engagement intel s1168]",
-      "priority": 389,
-      "status": "done",
-      "added": "2026-02-06",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "notes": "B#339 s1174: Already built — clawball.js component exists at components/clawball.js with 7 tools (browse, submission, agent, stats, submit, vote). Registered in components.json for E/A sessions. Credentials at clawball-credentials.json. No work needed."
-    },
-    {
-      "id": "wq-391",
-      "title": "Monitor B session cost trend (a92-2)",
-      "description": "B session avg cost at $2.24 — highest of all session types, flagged as high_cost by audit-stats. Currently justified by high productivity (shipping every session). No intervention needed unless avg exceeds $3.00. Track at next audit.",
-      "priority": 391,
-      "status": "done",
-      "added": "2026-02-06",
-      "created_session": 1171,
-      "source": "audit-s1171",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "notes": "B#339 s1174: Reviewed 12 B sessions (s1144-s1172). Avg=$2.33, median=$2.36, trend=+5.9% (first half $2.26 → second half $2.40). Two outliers >$3.00: s1152 ($3.44, d049 enforcement hook) and s1172 ($3.14, brainstorm gate fix) — both justified by task complexity. $0.67 buffer before $3.00 threshold. 25% of sessions under $2.00. No intervention needed. Next check: A#93."
-    },
-    {
       "id": "wq-392",
       "title": "Add tests for audit-report generation pipeline",
       "description": "audit-report.json touched frequently but no tests for generation logic. Build test suite covering schema validation, recommendation lifecycle, and cost calculation. Source: BRAINSTORMING.md.",
@@ -123,6 +66,17 @@
       "tags": [
         "testing"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-394",
+      "title": "Test coverage for audit-report generation",
+      "description": "(added ~s1172): audit-report.json touched frequently but no tests for generation logic. Build test suite for audit pipeline to catch schema regressions.",
+      "priority": 394,
+      "status": "pending",
+      "added": "2026-02-06",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

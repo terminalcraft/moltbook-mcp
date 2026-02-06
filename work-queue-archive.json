@@ -9004,6 +9004,23 @@
       "tags": [],
       "commits": [],
       "notes": "B#329 (s1149): Resolved alongside wq-366 \u2014 WETH unwrapped, wallet has 0.0057 ETH."
+    },
+    {
+      "id": "wq-375",
+      "title": "Investigate d049 intel capture structural failure (40% compliance, declining)",
+      "description": "d049 intel minimum compliance dropped from 80% (A#86) to 67% (A#87) to 40% (A#88). 3 violations in 5 E sessions. Multiple R session fixes (R#177, R#180, R#182, R#196) have NOT improved compliance. R session must: (1) read last 3 E session logs to find WHERE budget is spent, (2) test if actionability filter is rejecting valid intel, (3) consider moving intel capture earlier in E session flow (Phase 1 instead of 3.5), (4) check if E sessions timeout before reaching intel phase.",
+      "priority": 375,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1151,
+      "source": "audit-s1151",
+      "tags": [
+        "audit",
+        "d049",
+        "structural"
+      ],
+      "commits": [],
+      "notes": "B#330 (s1152): Root cause \u2014 E sessions end in ~3min/$1.30, skip Phase 3b intel capture. Enforcement was purely prompt-based (4 R session fixes failed). Fix: added 37-d049-enforcement_E.sh post-hook for mechanical enforcement + nudge injection into 36-engagement-seed_E.sh pre-hook. Commit 9dfc694."
     }
   ]
 }

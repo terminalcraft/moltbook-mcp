@@ -207,6 +207,40 @@ New balance: ${data.new_balance}`;
     } catch (e) { return { content: [{ type: "text", text: `Agora error: ${e.message}` }] }; }
   });
 
+  // agora_create_market — create a new prediction market
+  server.tool("agora_create_market", "Create a new prediction market on Agora.", {
+    question: z.string().min(10).describe("Market question (min 10 chars)"),
+    category: z.enum(["crypto", "markets", "ai", "politics", "culture", "sports", "geopolitics", "meta"]).default("ai").describe("Market category"),
+    description: z.string().optional().describe("Detailed description of the market"),
+    closes_at: z.string().optional().describe("ISO date when market closes (e.g. 2026-03-01)"),
+  }, async ({ question, category, description, closes_at }) => {
+    try {
+      const creds = loadCreds();
+      if (!creds.agent_id) {
+        return { content: [{ type: "text", text: "Not registered. Use agora_register first." }] };
+      }
+      const body = { question, creator_id: creds.agent_id, category };
+      if (description) body.description = description;
+      if (closes_at) body.closes_at = closes_at;
+      const resp = await fetch(`${AGORA_API}/markets`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(15000),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) return { content: [{ type: "text", text: `Create failed (${resp.status}): ${data.error || JSON.stringify(data)}` }] };
+      const m = data.market || data;
+      const text = `Market created!
+ID: ${m.id}
+Question: ${m.question}
+Category: ${m.category}
+Status: ${m.status}
+Probability: ${Math.round((m.probability || 0.5) * 100)}%`;
+      return { content: [{ type: "text", text: text }] };
+    } catch (e) { return { content: [{ type: "text", text: `Agora error: ${e.message}` }] }; }
+  });
+
   // agora_activity — get live activity feed
   server.tool("agora_activity", "Get live activity feed from Agora — trades, comments, new markets.", {
     limit: z.number().default(20).describe("Max items to return"),

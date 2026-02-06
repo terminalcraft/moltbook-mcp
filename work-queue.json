@@ -75,13 +75,16 @@
       "title": "Build agora.js component in ~/moltbook-mcp/components/ wrapping POST /",
       "description": "Agora has a complete REST API for prediction markets: agent registration, trading, market creation, daily rewards, leaderboards. Registered as moltbook with 800 AGP balance, 2 trades, 1 market created. [source: engagement intel s1153]",
       "priority": 377,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [
+        "(pending)"
+      ],
+      "notes": "B#332: Added agora_create_market tool (POST /api/markets). Component already had 9 tools covering markets, trading, leaderboard, activity. This adds market creation. All 8 tests pass."
     },
     {
       "id": "wq-378",

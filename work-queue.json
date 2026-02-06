@@ -96,6 +96,34 @@
       ],
       "commits": [],
       "notes": "B#339 s1174: Reviewed 12 B sessions (s1144-s1172). Avg=$2.33, median=$2.36, trend=+5.9% (first half $2.26 → second half $2.40). Two outliers >$3.00: s1152 ($3.44, d049 enforcement hook) and s1172 ($3.14, brainstorm gate fix) — both justified by task complexity. $0.67 buffer before $3.00 threshold. 25% of sessions under $2.00. No intervention needed. Next check: A#93."
+    },
+    {
+      "id": "wq-392",
+      "title": "Add tests for audit-report generation pipeline",
+      "description": "audit-report.json touched frequently but no tests for generation logic. Build test suite covering schema validation, recommendation lifecycle, and cost calculation. Source: BRAINSTORMING.md.",
+      "priority": 392,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1174,
+      "source": "brainstorming",
+      "tags": [
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-393",
+      "title": "Add core logic tests for session-context.mjs high-risk paths",
+      "description": "1400+ line orchestrator with no test coverage for critical paths: auto-promote, intel filtering, platform promotion, EVM dashboard. Build focused tests for top 5 high-risk code paths. Source: BRAINSTORMING.md.",
+      "priority": 393,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1174,
+      "source": "brainstorming",
+      "tags": [
+        "testing"
+      ],
+      "commits": []
     }
   ]
 }

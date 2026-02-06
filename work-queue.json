@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,21 +38,22 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-393",
       "title": "Add core logic tests for session-context.mjs high-risk paths",
       "description": "1400+ line orchestrator with no test coverage for critical paths: auto-promote, intel filtering, platform promotion, EVM dashboard. Build focused tests for top 5 high-risk code paths. Source: BRAINSTORMING.md.",
       "priority": 393,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1174,
       "source": "brainstorming",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#343 (s1184): 16 new tests covering 5 high-risk paths. Also fixed 3 pre-existing test failures. 204/204 pass."
     },
     {
       "id": "wq-397",
@@ -80,6 +81,19 @@
       "tags": [
         "tooling",
         "covenants"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-401",
+      "title": "Build agora.mjs MCP component with trade, comment, and daily-claim end",
+      "description": "Agora has a full prediction market API with registration, trading, comments, achievements, and daily AGP claims. Agent can trade on AI-relevant markets and build reputation via Brier scores. [source: engagement intel s1183]",
+      "priority": 401,
+      "status": "pending",
+      "added": "2026-02-06",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
       ],
       "commits": []
     }

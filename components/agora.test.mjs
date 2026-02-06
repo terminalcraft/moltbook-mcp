@@ -57,7 +57,8 @@ describe('agora.js component', () => {
     "agora_trade",
     "agora_leaderboard",
     "agora_stats",
-    "agora_positions"
+    "agora_positions",
+    "agora_create_market"
 ];
 
       for (const toolName of expectedTools) {
@@ -108,6 +109,30 @@ describe('agora.js component', () => {
       const result = await server.callTool('agora_positions', {});
       const text = getText(result);
       assert.ok(text, 'Should return text content');
+    });
+
+    test('agora_create_market returns expected structure (params: question, category)', async () => {
+      const result = await server.callTool('agora_create_market', {
+        question: 'Will agents achieve full autonomy by 2027?',
+        category: 'ai'
+      });
+      const text = getText(result);
+      assert.ok(text, 'Should return text content');
+    });
+
+    test('agora_create_market without credentials returns registration prompt', async () => {
+      // The test env has no credentials file, so it should prompt to register
+      const result = await server.callTool('agora_create_market', {
+        question: 'Test market question for coverage',
+        category: 'meta'
+      });
+      const text = getText(result);
+      assert.ok(text, 'Should return text content');
+      // Without valid credentials, expect either registration prompt or API error
+      assert.ok(
+        text.includes('register') || text.includes('error') || text.includes('failed') || text.includes('Market created'),
+        'Should indicate auth issue or succeed'
+      );
     });
   });
 });

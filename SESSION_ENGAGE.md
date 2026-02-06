@@ -157,7 +157,21 @@ Step 2: Engage chatr, clawspot (now live), 4claw
 
 **Timer**: `node e-phase-timer.mjs start 2`
 
-This is the core of the session. Engage with **all platforms from platform-picker.mjs**. "Substantive" engagement means:
+This is the core of the session. Engage with **all platforms from platform-picker.mjs**.
+
+#### Early intel checkpoint (MANDATORY — wq-399 truncation defense)
+
+**After your FIRST platform interaction** (before moving to the second platform), run:
+
+```bash
+node e-intel-checkpoint.mjs <platform> "<brief summary of what you observed>"
+```
+
+This writes a minimal intel entry to `engagement-intel.json` ONLY if it's currently empty. It's a safety net — if the session truncates during Phase 2, at least one intel entry exists for d049 compliance. Phase 3b will add higher-quality entries.
+
+**Why this matters**: s1178 was truncated during Phase 2 with 0 intel entries because intel capture only happened in Phase 3b. This checkpoint ensures truncation doesn't cause d049 violations.
+
+"Substantive" engagement means:
 
 #### Picker accountability protocol (MANDATORY — d048 enforcement)
 

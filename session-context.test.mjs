@@ -226,9 +226,9 @@ function testTodoIngest() {
   writeBS('## Evolution Ideas\n\n- **Some idea**: description\n- **Another idea**: description\n- **Third idea**: description\n- **Fourth idea**: description\n');
   writeFileSync(join(STATE, 'engagement-state.json'), '{}');
 
-  // Write TODO followups
-  writeFileSync(join(STATE, 'todo-followups.txt'), `- Fix rate limiting on /status endpoint
-- Add retry logic for failed webhook deliveries
+  // Write TODO followups — R#194 requires TODO/FIXME/HACK/XXX keyword in text
+  writeFileSync(join(STATE, 'todo-followups.txt'), `- TODO: Fix rate limiting on /status endpoint
+- FIXME: Add retry logic for failed webhook deliveries
 `);
 
   const result = run('B');
@@ -1262,7 +1262,7 @@ function intTestFullPipelineChain() {
 - **Add backup script**: Auto-backup config files
 `);
   writeFileSync(join(STATE, 'engagement-state.json'), '{}');
-  writeFileSync(join(STATE, 'todo-followups.txt'), '- Add timeout handling to webhook relay\n');
+  writeFileSync(join(STATE, 'todo-followups.txt'), '- TODO: Add timeout handling to webhook relay\n');
   writeFileSync(join(SRC, 'directives.json'), JSON.stringify({
     directives: [{ id: 'd001', content: 'explore ecosystem', status: 'active' }],
     questions: []
@@ -1313,10 +1313,19 @@ function makeFreshBS(count) {
   return `## Evolution Ideas\n\n${lines.join('\n')}\n`;
 }
 
+// wq-393: Titles must be semantically distinct to avoid keyword-overlap dedup (B#340).
+// Previous version used "Existing pending task N" which shared 100% keywords.
+const DISTINCT_TITLES = [
+  'Fix authentication middleware bug',
+  'Build notification aggregator service',
+  'Optimize database query performance',
+  'Create webhook relay handler',
+  'Implement session caching layer',
+];
 function makePendingItems(count) {
   const items = [];
-  for (let i = 1; i <= count; i++) {
-    items.push({ id: `wq-${String(i).padStart(3, '0')}`, title: `Existing pending task ${i}`, status: 'pending', priority: i });
+  for (let i = 0; i < count && i < DISTINCT_TITLES.length; i++) {
+    items.push({ id: `wq-${String(i + 1).padStart(3, '0')}`, title: DISTINCT_TITLES[i], status: 'pending', priority: i + 1 });
   }
   return items;
 }
@@ -1430,6 +1439,372 @@ function intTestAutoPromoteRThresholds() {
   assert(result.pending_count === 3, `R session: final pending_count should be 3, got ${result.pending_count}`);
 }
 
+// ===== wq-393: HIGH-RISK PATH TESTS =====
+// Tests for 5 critical code paths that had no coverage:
+// 1. isTitleDupe keyword overlap (60% threshold)
+// 2. Queue self-dedup keyword overlap path
+// 3. Intel auto-promotion success path (R session mode)
+// 4. EVM balance dashboard parsing
+// 5. Platform promotion from services.json to account-registry.json
+
+// --- isTitleDupe keyword overlap tests ---
+
+function testDedupKeywordOverlap() {
+  console.log('\n== Dedup: keyword overlap catches semantically-equivalent titles (B#340) ==');
+
+  // Two items with different wording but same meaning — keyword overlap should catch this
+  writeWQ([
+    { id: 'wq-001', title: 'Add tests for audit-report generation pipeline', status: 'pending', priority: 1 },
+    { id: 'wq-002', title: 'Test coverage for audit-report generation logic', status: 'pending', priority: 2 },
+    { id: 'wq-003', title: 'Build new notification service from scratch', status: 'pending', priority: 3 },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  assert(Array.isArray(result.deduped), 'keyword dedup: deduped array exists');
+  assert(result.deduped?.length === 1, 'keyword dedup: exactly 1 duplicate removed');
+  assert(result.deduped?.[0]?.startsWith('wq-002'), 'keyword dedup: later item removed');
+
+  const wq = readWQ();
+  assert(wq.queue.find(i => i.id === 'wq-001'), 'keyword dedup: wq-001 kept');
+  assert(wq.queue.find(i => i.id === 'wq-003'), 'keyword dedup: unrelated wq-003 kept');
+}
+
+function testDedupKeywordOverlapBelowThreshold() {
+  console.log('\n== Dedup: keyword overlap below 60% threshold ==');
+
+  // Titles share some words but < 60% overlap — should NOT be deduped
+  writeWQ([
+    { id: 'wq-001', title: 'Add webhook retry logic for failed deliveries', status: 'pending', priority: 1 },
+    { id: 'wq-002', title: 'Add session retry mechanism for timeout errors', status: 'pending', priority: 2 },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  assert(!result.deduped || result.deduped.length === 0, 'below threshold: no dedup when keywords only partially overlap');
+
+  const wq = readWQ();
+  // Both original items preserved (auto-promote may add more from brainstorming)
+  assert(wq.queue.find(i => i.id === 'wq-001'), 'below threshold: wq-001 preserved');
+  assert(wq.queue.find(i => i.id === 'wq-002'), 'below threshold: wq-002 preserved');
+}
+
+function testDedupSkipsNonPending() {
+  console.log('\n== Dedup: skips non-pending items ==');
+
+  // Done items with matching titles should NOT be deduped
+  writeWQ([
+    { id: 'wq-001', title: 'Build webhook relay service for events', status: 'done', priority: 1 },
+    { id: 'wq-002', title: 'Build webhook relay service for events too', status: 'pending', priority: 2 },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  assert(!result.deduped || result.deduped.length === 0, 'skip non-pending: done item not compared');
+}
+
+// --- Intel auto-promotion success path (R session) ---
+
+function testIntelAutoPromoteSuccess() {
+  console.log('\n== Intel: auto-promotion success path (R session) ==');
+
+  // R session with qualifying intel entries that should be promoted to queue
+  writeWQ([
+    { id: 'wq-001', title: 'Existing task', status: 'pending', priority: 1 },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'r_session_counter'), '50');
+  writeFileSync(join(SRC, 'directives.json'), JSON.stringify({
+    directives: [], questions: []
+  }));
+
+  // Intel entries with imperative verbs, no observational patterns, no meta-instructions
+  const intel = [
+    { session: 900, type: 'integration_target', summary: 'Found chat API with agent support', actionable: 'Build integration component for the new chat platform API' },
+    { session: 901, type: 'tool_idea', summary: 'Need structured logging', actionable: 'Create structured JSON logging utility for session traces' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('R', '300');
+  assert(Array.isArray(result.intel_promoted), 'R session: intel_promoted array exists');
+  assert(result.intel_promoted?.length === 2, `R session: 2 entries promoted, got ${result.intel_promoted?.length}`);
+
+  // Check queue items were actually created
+  const wq = readWQ();
+  const intelItems = wq.queue.filter(i => i.source === 'intel-auto');
+  assert(intelItems.length === 2, 'R session: 2 intel-auto items in queue');
+  assert(intelItems[0].title.includes('Build integration'), 'R session: first promoted title correct');
+  assert(intelItems[0].tags?.includes('intel'), 'R session: promoted item tagged with intel');
+}
+
+function testIntelAutoPromoteCapacityGate() {
+  console.log('\n== Intel: auto-promotion capacity gate (>=5 pending) ==');
+
+  // Create 5 pending items with distinct titles — should block intel promotion
+  // Titles must be distinct enough to avoid keyword-overlap dedup
+  const items = [
+    { id: 'wq-001', title: 'Fix authentication middleware bug', status: 'pending', priority: 1 },
+    { id: 'wq-002', title: 'Build notification aggregator', status: 'pending', priority: 2 },
+    { id: 'wq-003', title: 'Optimize database query performance', status: 'pending', priority: 3 },
+    { id: 'wq-004', title: 'Create webhook relay service', status: 'pending', priority: 4 },
+    { id: 'wq-005', title: 'Implement session caching layer', status: 'pending', priority: 5 },
+  ];
+  writeWQ(items);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'r_session_counter'), '50');
+  writeFileSync(join(SRC, 'directives.json'), JSON.stringify({ directives: [], questions: [] }));
+
+  const intel = [
+    { session: 910, type: 'integration_target', summary: 'Should not promote', actionable: 'Build something that would normally qualify for promotion' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('R', '400');
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, 'capacity gate: no promotion when 5+ pending');
+}
+
+function testIntelAutoPromoteDedup() {
+  console.log('\n== Intel: auto-promotion deduplicates against queue ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Build integration component for the chat platform', status: 'pending', priority: 1 },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'r_session_counter'), '50');
+  writeFileSync(join(SRC, 'directives.json'), JSON.stringify({ directives: [], questions: [] }));
+
+  // Intel with title that overlaps existing queue item
+  const intel = [
+    { session: 920, type: 'integration_target', summary: 'Chat platform found', actionable: 'Build integration component for the chat platform API endpoint' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('R', '500');
+  assert(!result.intel_promoted || result.intel_promoted.length === 0, 'dedup: no promotion when title duplicates existing queue item');
+}
+
+function testIntelAutoPromoteMaxTwo() {
+  console.log('\n== Intel: auto-promotion max 2 per run ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeFileSync(join(STATE, 'r_session_counter'), '50');
+  writeFileSync(join(SRC, 'directives.json'), JSON.stringify({ directives: [], questions: [] }));
+
+  // 5 qualifying intel entries with truly distinct titles — should only promote 2
+  const intel = [
+    { session: 930, type: 'integration_target', summary: 'WebSocket gateway discovered', actionable: 'Build websocket gateway connector for realtime event streaming' },
+    { session: 931, type: 'integration_target', summary: 'GraphQL federation found', actionable: 'Create graphql federation adapter for distributed queries' },
+    { session: 932, type: 'tool_idea', summary: 'Prometheus exporter needed', actionable: 'Implement prometheus metrics exporter for session monitoring' },
+    { session: 933, type: 'pattern', summary: 'Circuit breaker library', actionable: 'Add circuit breaker wrapper around external API calls' },
+    { session: 934, type: 'integration_target', summary: 'NATS messaging', actionable: 'Integrate nats messaging protocol for agent coordination' },
+  ];
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify(intel));
+
+  const result = run('R', '600');
+  assert(result.intel_promoted?.length === 2, `max 2: got ${result.intel_promoted?.length} promoted`);
+}
+
+// --- EVM balance dashboard tests ---
+
+function testEVMBalanceDashboard() {
+  console.log('\n== EVM: balance dashboard for onchain tasks ==');
+
+  // Create a queue item tagged with an onchain tag
+  writeWQ([
+    { id: 'wq-001', title: 'Deploy contract on Base', status: 'pending', priority: 1, tags: ['d044', 'onchain'] },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Create a mock base-swap.mjs that outputs balance info
+  writeFileSync(join(SRC, 'base-swap.mjs'), `
+if (process.argv[2] === 'balance') {
+  console.log('Wallet Balances on Base:');
+  console.log('  Address: 0xABCDEF1234567890abcdef1234567890ABCDEF12');
+  console.log('  ETH:  0.005000');
+  console.log('  USDC: 75.500000');
+  console.log('  WETH: 0.001200');
+}
+`);
+
+  const result = run('B');
+  assert(result.evm_balances !== undefined, 'EVM: balances object exists');
+  assert(result.evm_balances?.eth === '0.005000', `EVM: ETH parsed correctly, got ${result.evm_balances?.eth}`);
+  assert(result.evm_balances?.usdc === '75.50', `EVM: USDC parsed correctly, got ${result.evm_balances?.usdc}`);
+  assert(result.evm_balances?.weth === '0.001200', `EVM: WETH parsed correctly, got ${result.evm_balances?.weth}`);
+  assert(result.evm_balances?.address === '0xABCDEF1234567890abcdef1234567890ABCDEF12', 'EVM: address parsed');
+  assert(result.evm_balance_summary?.includes('ETH:'), 'EVM: summary has ETH');
+  assert(result.onchain_items?.includes('wq-001'), 'EVM: onchain items listed');
+}
+
+function testEVMBalanceLowGasWarning() {
+  console.log('\n== EVM: low gas warning ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Swap tokens', status: 'pending', priority: 1, tags: ['evm'] },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Mock with very low ETH balance
+  writeFileSync(join(SRC, 'base-swap.mjs'), `
+if (process.argv[2] === 'balance') {
+  console.log('Wallet Balances on Base:');
+  console.log('  Address: 0x1234');
+  console.log('  ETH:  0.000100');
+  console.log('  USDC: 5.000000');
+  console.log('  WETH: 0.000000');
+}
+`);
+
+  const result = run('B');
+  assert(result.evm_balance_summary?.includes('LOW GAS'), 'EVM: LOW GAS warning when ETH < 0.0005');
+  assert(result.evm_balance_summary?.includes('LOW USDC'), 'EVM: LOW USDC warning when USDC < 10');
+}
+
+function testEVMBalanceNoOnchainItems() {
+  console.log('\n== EVM: no balance check when no onchain items ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Regular build task', status: 'pending', priority: 1, tags: [] },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  const result = run('B');
+  assert(!result.evm_balances, 'EVM: no balance check when no onchain-tagged items');
+  assert(!result.evm_balance_summary, 'EVM: no summary when no onchain items');
+}
+
+function testEVMBalanceCommandError() {
+  console.log('\n== EVM: handles base-swap.mjs error gracefully ==');
+
+  writeWQ([
+    { id: 'wq-001', title: 'Deploy thing', status: 'pending', priority: 1, tags: ['onchain'] },
+  ]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Mock that throws an error
+  writeFileSync(join(SRC, 'base-swap.mjs'), `process.exit(1);`);
+
+  const result = run('B');
+  assert(result.evm_balance_error !== undefined, 'EVM: error captured when command fails');
+  assert(!result.evm_balances, 'EVM: no balances on error');
+}
+
+// --- Platform promotion from services.json tests ---
+
+function testPlatformPromotion() {
+  console.log('\n== Platform promotion: live services promoted to account-registry ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  mkdirSync(join(STATE, 'logs'), { recursive: true });
+
+  // Services with live entries
+  writeFileSync(join(SRC, 'services.json'), JSON.stringify({
+    services: [
+      { id: 'svc-new', name: 'NewPlatform', url: 'https://new.example.com', liveness: { alive: true } },
+      { id: 'svc-dead', name: 'DeadPlatform', url: 'https://dead.example.com', liveness: { alive: false } },
+      { id: 'svc-existing', name: 'AlreadyRegistered', url: 'https://existing.com', liveness: { alive: true } },
+    ]
+  }));
+
+  // Registry already has svc-existing
+  writeFileSync(join(SRC, 'account-registry.json'), JSON.stringify({
+    accounts: [
+      { id: 'svc-existing', platform: 'AlreadyRegistered', status: 'live' },
+    ]
+  }));
+
+  const result = run('B');
+  assert(result.platforms_promoted?.length === 1, `platform promo: 1 new platform promoted, got ${result.platforms_promoted?.length}`);
+  assert(result.platforms_promoted?.[0]?.includes('svc-new'), 'platform promo: svc-new promoted');
+
+  // Check registry was updated
+  const registry = JSON.parse(readFileSync(join(SRC, 'account-registry.json'), 'utf8'));
+  const newEntry = registry.accounts.find(a => a.id === 'svc-new');
+  assert(newEntry !== undefined, 'platform promo: svc-new added to registry');
+  assert(newEntry?.status === 'needs_probe', 'platform promo: status is needs_probe');
+  assert(newEntry?.auth_type === 'unknown', 'platform promo: auth_type is unknown');
+
+  // Dead platform should NOT be in registry
+  const deadEntry = registry.accounts.find(a => a.id === 'svc-dead');
+  assert(!deadEntry, 'platform promo: dead platform not promoted');
+}
+
+function testPlatformPromotionNoServices() {
+  console.log('\n== Platform promotion: no services.json ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // No services.json — should not crash
+  try { rmSync(join(SRC, 'services.json')); } catch {}
+  writeFileSync(join(SRC, 'account-registry.json'), JSON.stringify({ accounts: [] }));
+
+  const result = run('B');
+  assert(!result.platforms_promoted, 'no services: no platform promotions');
+  assert(typeof result === 'object', 'no services: still produces valid output');
+}
+
+function testPlatformPromotionAllAlreadyRegistered() {
+  console.log('\n== Platform promotion: all live services already registered ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  writeFileSync(join(SRC, 'services.json'), JSON.stringify({
+    services: [
+      { id: 'svc-a', name: 'PlatformA', url: 'https://a.com', liveness: { alive: true } },
+    ]
+  }));
+
+  writeFileSync(join(SRC, 'account-registry.json'), JSON.stringify({
+    accounts: [
+      { id: 'svc-a', platform: 'PlatformA', status: 'live' },
+    ]
+  }));
+
+  const result = run('B');
+  assert(!result.platforms_promoted, 'all registered: no new promotions');
+}
+
+function testPlatformPromotionLogsToFile() {
+  console.log('\n== Platform promotion: logs to discovery-promotions.log ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  mkdirSync(join(STATE, 'logs'), { recursive: true });
+
+  writeFileSync(join(SRC, 'services.json'), JSON.stringify({
+    services: [
+      { id: 'svc-log-test', name: 'LogTestPlatform', url: 'https://logtest.com', liveness: { alive: true } },
+    ]
+  }));
+  writeFileSync(join(SRC, 'account-registry.json'), JSON.stringify({ accounts: [] }));
+
+  run('B');
+
+  const logPath = join(STATE, 'logs', 'discovery-promotions.log');
+  assert(existsSync(logPath), 'promotion log file created');
+  const logContent = readFileSync(logPath, 'utf8');
+  assert(logContent.includes('svc-log-test'), 'log contains promoted platform ID');
+}
+
 // ===== RUN =====
 
 try {
@@ -1493,6 +1868,26 @@ try {
   setup(); intTestAutoPromoteFewIdeas();
   setup(); intTestAutoPromote1IdeaOnly();
   setup(); intTestAutoPromoteRThresholds();
+  // wq-393: High-risk path tests
+  // --- isTitleDupe keyword overlap ---
+  setup(); testDedupKeywordOverlap();
+  setup(); testDedupKeywordOverlapBelowThreshold();
+  setup(); testDedupSkipsNonPending();
+  // --- Intel auto-promotion success ---
+  setup(); testIntelAutoPromoteSuccess();
+  setup(); testIntelAutoPromoteCapacityGate();
+  setup(); testIntelAutoPromoteDedup();
+  setup(); testIntelAutoPromoteMaxTwo();
+  // --- EVM balance dashboard ---
+  setup(); testEVMBalanceDashboard();
+  setup(); testEVMBalanceLowGasWarning();
+  setup(); testEVMBalanceNoOnchainItems();
+  setup(); testEVMBalanceCommandError();
+  // --- Platform promotion ---
+  setup(); testPlatformPromotion();
+  setup(); testPlatformPromotionNoServices();
+  setup(); testPlatformPromotionAllAlreadyRegistered();
+  setup(); testPlatformPromotionLogsToFile();
   // Audit report tests (wq-062)
   setup(); testASessionPromptBlock();
   setup(); testASessionNoPreviousReport();

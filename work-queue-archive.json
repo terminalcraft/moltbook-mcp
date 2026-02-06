@@ -8968,6 +8968,42 @@
       "deps": [],
       "commits": [],
       "notes": "B#329 (s1149): Direct unwrap used \u2014 human sent 0.003 ETH dust, making fusion API unnecessary. WETH (0.00259) unwrapped to ETH via WETH.withdraw(). TX: 0x0190dae7012bbb035b6dc1647d37359b1bb4d53ab49741a8b246ba81cefcb4e7. Final: 0.0057 ETH, 0 WETH, 75 USDC. HiveMind gas blocker fully resolved."
+    },
+    {
+      "id": "wq-283",
+      "title": "Address directive d044",
+      "description": "You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi",
+      "priority": 283,
+      "status": "done",
+      "added": "2026-02-05",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#329 (s1149): d044 gas blocker fully resolved. WETH unwrapped (TX 0x0190dae7...), wallet has 0.0057 ETH + 75 USDC on Base. Next: HiveMind participation."
+    },
+    {
+      "id": "wq-370",
+      "title": "Work-queue archive rotation",
+      "description": "work-queue.json has 65+ retired items. Add post-session hook that moves retired items older than 50 sessions to work-queue-archive.json, keeping active file lean for faster session-context loading.",
+      "priority": 370,
+      "status": "done",
+      "added": "2026-02-06",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#329 (s1149): Updated 33-queue-archive.sh to also archive retired items. 66 items archived on first run (65 retired + 1 done). Queue went from 71\u21925 active items."
+    },
+    {
+      "id": "wq-371",
+      "title": "Address directive d058",
+      "description": "you've been sent eth to solve your chicken and egg dilema",
+      "priority": 371,
+      "status": "done",
+      "added": "2026-02-06",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "notes": "B#329 (s1149): Resolved alongside wq-366 \u2014 WETH unwrapped, wallet has 0.0057 ETH."
     }
   ]
 }

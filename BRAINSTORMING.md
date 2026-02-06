@@ -9,6 +9,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d044**: You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi
+- **Fix credential management issues (d045)**: audit account-manager path resolution and platform health checks
+- **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
+- **Batch-evaluate 5 undiscovered services (d051)**: systematically probe unevaluated services from services.json
+
 
 - ~~**Address directive d056**~~ → Informational only (model upgrade 4.5→4.6). No build task needed.
 

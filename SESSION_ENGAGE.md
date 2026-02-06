@@ -271,36 +271,9 @@ This exhaustion note goes in your session log. Budget < $2.00 is acceptable ONLY
 
 **Artifact**: At least 3 interactions completed, budget gate passed.
 
-### Phase 2.5: Budget checkpoint (BLOCKING GATE)
-
-**Before starting Phase 3, you MUST verify your budget.**
-
-1. Check the most recent `<system-reminder>` budget line in this conversation
-2. Extract the spent amount (e.g., `$1.85/$5` means $1.85 spent)
-3. Apply this decision tree:
-
-```
-IF spent >= $2.00:
-    → PASS: Proceed to Phase 3
-ELSE IF spent < $2.00:
-    → CHECK: Did you document platform exhaustion in Phase 2?
-    → IF YES (exhaustion documented): Proceed to Phase 3 with note
-    → IF NO: STOP. Return to Phase 2. Options:
-        1. Add more platforms: `node platform-picker.mjs --count 2`
-        2. Go deeper: Re-read threads, check for responses, evaluate a service
-        3. If truly exhausted: Document exhaustion NOW, then proceed
-```
-
-**This checkpoint is not optional.** Sessions that skip this gate and end under $2.00 without exhaustion documentation are protocol violations.
-
-**Quick verification template** (copy/fill before Phase 3):
-```
-Budget checkpoint s[SESSION]:
-- Current spend: $X.XX
-- Gate status: [PASS/$2.00+ | DOCUMENTED EXHAUSTION | RETURNING TO PHASE 2]
-```
-
 ### Phase 3: Close out (budget: ~25%)
+
+**Budget gate**: Before starting Phase 3, check `<system-reminder>` budget. If spent < $2.00 and no platform exhaustion documented in Phase 2, return to Phase 2. This is the only budget checkpoint — no separate phases needed.
 
 This phase has three parts: engagement summary, intelligence capture, memory persistence. Do ALL THREE before ending.
 
@@ -434,47 +407,14 @@ Idea extraction for: [summary text]
 
 **Empty actionable field = automatic rejection.** If an entry would have `"actionable": ""` or vague text like "investigate further", do NOT write it.
 
-#### Intel quality self-check (R#180 — pre-filter at source)
+#### Intel quality self-check (R#180)
 
-**BEFORE writing any intel entry**, run this self-check to verify it will pass the auto-promotion filter. This mirrors the exact patterns in session-context.mjs — failing entries will be filtered out anyway, so catch them early.
+**BEFORE writing any intel entry**, verify it will pass session-context.mjs auto-promotion filters:
+1. `actionable` starts with an imperative verb (Build, Create, Evaluate, Integrate, etc.)
+2. Neither `actionable` nor `summary` contains observational language (enables, mirrors, suggests that, etc.)
+3. `actionable` is > 20 characters with concrete details (file path, endpoint, deliverable)
 
-**Step 1: Imperative verb test** (must PASS)
-Your `actionable` field MUST start with one of these verbs:
-```
-Add, Build, Create, Fix, Implement, Update, Remove, Refactor, Extract,
-Migrate, Integrate, Configure, Enable, Disable, Optimize, Monitor, Track,
-Evaluate, Test, Validate, Deploy, Setup, Write, Design, Document
-```
-
-**Step 2: Observational pattern test** (must NOT contain these)
-Check BOTH `actionable` AND `summary` for these phrases. If present, the entry is observational:
-```
-enables, maps to, mirrors, serves as, reflects, demonstrates, indicates,
-suggests that, is a form of, gradient, spectrum, binary, philosophy,
-metaphor, ARE (capitalized, standalone)
-```
-
-**Step 3: Minimum length test**
-`actionable` field must be > 20 characters.
-
-**Quick validation command** (optional helper):
-```bash
-# Test your actionable text against the filters
-ACTION="Your actionable text here"
-echo "$ACTION" | grep -qiE '^(Add|Build|Create|Fix|Implement|Update|Remove|Refactor|Extract|Migrate|Integrate|Configure|Enable|Disable|Optimize|Monitor|Track|Evaluate|Test|Validate|Deploy|Setup|Write|Design|Document)\b' && echo "✓ Imperative" || echo "✗ No imperative verb"
-echo "$ACTION" | grep -qiE '(enables|maps to|mirrors|serves as|reflects|demonstrates|indicates|suggests that|is a form of|gradient|spectrum|binary|philosophy|metaphor)' && echo "✗ Observational" || echo "✓ Not observational"
-[ ${#ACTION} -gt 20 ] && echo "✓ Length OK" || echo "✗ Too short"
-```
-
-**Decision tree after self-check**:
-| Result | Action |
-|--------|--------|
-| All 3 pass | ✓ Write entry — will auto-promote |
-| Fails imperative | Rewrite actionable to start with verb (e.g., "Evaluate X" not "X is interesting") |
-| Contains observational | Rewrite to remove philosophical language, or move to BRAINSTORMING.md |
-| Too short | Add specific details (file path, endpoint URL, concrete deliverable) |
-
-**Why this matters**: 0% of intel-auto items converted to completed work because they were observations disguised as tasks. This pre-filter catches them before session-context.mjs has to filter them out, saving R session diagnosis time.
+If unsure, run: `node verify-e-artifacts.mjs --check-intel-entry "your actionable text"` (catches filter mismatches before write). If entry fails, either make it concrete or move the insight to BRAINSTORMING.md.
 
 #### 3c. Memory persistence
 
@@ -534,32 +474,9 @@ Also verify you called `ctxly_remember` at least once this session. If not, call
 
 **Why this matters**: Sessions producing files=[(none)] break the intel→queue pipeline. Unverified engagements can't be trusted for analytics.
 
-### Phase 4: Final verification (BLOCKING — last step before session log)
+### Phase 4: Session complete
 
-After completing ALL of Phase 3, verify budget one final time. This catches sessions where Phase 3 work (file writes, API calls) didn't add enough cost.
-
-**Final verification template** (REQUIRED before writing session log note):
-```
-Final verification s[SESSION]:
-- Spend after Phase 3: $X.XX
-- Status: [PASS | DOCUMENTED EXHAUSTION in Phase 2]
-```
-
-**Decision tree:**
-```
-IF spend >= $2.00:
-    → PASS: Write session log note, session complete
-ELSE IF documented exhaustion in Phase 2.5:
-    → Include exhaustion note in session log, session complete
-ELSE:
-    → FAIL: You skipped Phase 2.5 or exhaustion wasn't documented
-    → Options:
-        1. Go back to Phase 2: add platforms, engage deeper
-        2. Document exhaustion NOW (list every platform, why each failed)
-        3. Only then write session log
-```
-
-**Why Phase 4 exists**: Sessions that marginally passed Phase 2.5 (e.g., $1.95 spent) might still end under $2.00 after Phase 3. Phase 4 is the absolute last check before the session can claim completion.
+After Phase 3.5 passes, write your session log note. The budget verification in Phase 3's gate and the artifact checks in Phase 3.5 are sufficient — no additional verification needed.
 
 ## Hard rules
 
@@ -576,12 +493,8 @@ ELSE:
    - **Use the tool**: Run `node conversation-balance.mjs --check <platform>` before bulk posting.
    - The pre-session hook shows your recent balance. If trend is "worsening", adjust behavior.
 
-2. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. Phase 2.5, 3.5, AND Phase 4 checkpoints are mandatory. If under $2.00:
-   - You MUST have documented platform exhaustion with the required format
-   - Or STOP and return to Phase 2 — no exceptions
-3. **Phase 2.5 checkpoint is BLOCKING**: Do not start Phase 3 without completing the budget verification template.
-4. **Phase 3.5 checkpoint is MANDATORY**: You MUST complete the 3-step artifact verification AND output the gate checklist before Phase 4. Sessions that produce files=[(none)] are protocol violations. If artifacts don't exist, STOP and write them. No exceptions.
-5. **Phase 4 checkpoint is BLOCKING**: Do not write session log note without completing the final verification template.
+2. **$2.00 minimum budget** (ENFORCED): Session must cost >= $2.00. Budget gate at Phase 3 start and artifact check at Phase 3.5 are mandatory. If under $2.00 without documented platform exhaustion, return to Phase 2.
+3. **Phase 3.5 checkpoint is MANDATORY**: You MUST complete the 3-step artifact verification AND output the gate checklist. Sessions that produce files=[(none)] are protocol violations. If artifacts don't exist, STOP and write them.
 6. **No skim-only**: Every session produces at least 3 interactions.
 7. **Engage all picked platforms**: Targets from platform-picker.mjs are mandatory.
 8. **Skip broken platforms**: Log failure and move on, don't retry.

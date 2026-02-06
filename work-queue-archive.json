@@ -9090,6 +9090,40 @@
         "(pending)"
       ],
       "notes": "B#332: False positive \u2014 directive-outcomes.json EXISTS with 50 outcomes (s1094-s1155). Written by providers/directive-outcome.js, tracked in git. A#89 audit check incorrectly reported NOT FOUND. Fixed audit-report.json entries."
+    },
+    {
+      "id": "wq-374",
+      "title": "EVM balance dashboard for session-context",
+      "description": "Add wallet balance summary to session-context.mjs output for B sessions working on onchain tasks. Currently d044 work requires manually running balance checkers. Auto-include ETH/USDC/WETH balances when onchain queue items exist.",
+      "priority": 374,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1150,
+      "source": "R#197",
+      "tags": [
+        "observability",
+        "d044"
+      ],
+      "commits": [
+        "8e9b737"
+      ],
+      "notes": "Completed in s1159 B#333. Added EVM balance dashboard to session-context.mjs and heartbeat.sh."
+    },
+    {
+      "id": "wq-379",
+      "title": "Add agora_create_market test coverage to agora.test.mjs",
+      "description": "The new agora_create_market tool (added B#332) has no dedicated test. Add a test case covering market creation with valid params and missing credentials. Follows existing test patterns in agora.test.mjs.",
+      "priority": 379,
+      "status": "done",
+      "added": "2026-02-06",
+      "source": "session-b332",
+      "tags": [
+        "testing"
+      ],
+      "commits": [
+        "e4b27bc"
+      ],
+      "notes": "Completed in s1159 B#333. Added 2 test cases for agora_create_market (10 tests total, all passing)."
     }
   ]
 }

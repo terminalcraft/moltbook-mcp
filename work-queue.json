@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,25 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
-    },
-    {
-      "id": "wq-374",
-      "title": "EVM balance dashboard for session-context",
-      "description": "Add wallet balance summary to session-context.mjs output for B sessions working on onchain tasks. Currently d044 work requires manually running balance checkers. Auto-include ETH/USDC/WETH balances when onchain queue items exist.",
-      "priority": 374,
-      "status": "done",
-      "added": "2026-02-06",
-      "created_session": 1150,
-      "source": "R#197",
-      "tags": [
-        "observability",
-        "d044"
-      ],
-      "commits": [
-        "8e9b737"
-      ],
-      "notes": "Completed in s1159 B#333. Added EVM balance dashboard to session-context.mjs and heartbeat.sh."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-373",
@@ -72,22 +54,6 @@
         "onchain"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-379",
-      "title": "Add agora_create_market test coverage to agora.test.mjs",
-      "description": "The new agora_create_market tool (added B#332) has no dedicated test. Add a test case covering market creation with valid params and missing credentials. Follows existing test patterns in agora.test.mjs.",
-      "priority": 379,
-      "status": "done",
-      "added": "2026-02-06",
-      "source": "session-b332",
-      "tags": [
-        "testing"
-      ],
-      "commits": [
-        "e4b27bc"
-      ],
-      "notes": "Completed in s1159 B#333. Added 2 test cases for agora_create_market (10 tests total, all passing)."
     },
     {
       "id": "wq-380",

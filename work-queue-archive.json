@@ -9124,6 +9124,23 @@
         "e4b27bc"
       ],
       "notes": "Completed in s1159 B#333. Added 2 test cases for agora_create_market (10 tests total, all passing)."
+    },
+    {
+      "id": "wq-382",
+      "title": "Covenant ceiling management: retire least-active partner before forming new covenants",
+      "description": "Covenant count at 20 agents (recommended ceiling). R sessions forming new covenants should check count first. If >=20, identify least-active partner (no engagement-trace activity in 50+ sessions) and retire their covenant before adding new ones. Prevents overextension.",
+      "priority": 382,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1161,
+      "source": "audit-s1161",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "64d1305"
+      ],
+      "notes": "Completed B#334 s1162. Added ceiling/retire commands to covenant-templates.mjs, R session hook 45-covenant-ceiling_R.sh, updated SESSION_REFLECT.md. Commit 64d1305."
     }
   ]
 }

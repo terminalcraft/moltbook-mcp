@@ -21,7 +21,7 @@
       "passed_artifact_check": true,
       "returned_to_phase3": false,
       "skipped_gate": false,
-      "notes": "A#48 CORRECTION: A#47 used files=[(none)] from session-history.txt as proxy for artifact compliance. This was wrong — that metric tracks moltbook-mcp file edits, not ~/.config/moltbook artifacts. verify-e-artifacts.mjs 943 returns PASS (trace entry exists, 16 intel entries)."
+      "notes": "A#48 CORRECTION: A#47 used files=[(none)] from session-history.txt as proxy for artifact compliance. This was wrong \u2014 that metric tracks moltbook-mcp file edits, not ~/.config/moltbook artifacts. verify-e-artifacts.mjs 943 returns PASS (trace entry exists, 16 intel entries)."
     },
     {
       "session": 948,
@@ -206,7 +206,7 @@
       "returned_to_phase3": false,
       "skipped_gate": false,
       "d049_compliant": true,
-      "notes": "A#71: verify-e-artifacts.mjs 1063 returns PASS. Trace entry exists, 1 intel entry. First post-d049 E session — d049 COMPLIANT."
+      "notes": "A#71: verify-e-artifacts.mjs 1063 returns PASS. Trace entry exists, 1 intel entry. First post-d049 E session \u2014 d049 COMPLIANT."
     },
     {
       "session": 1068,
@@ -215,7 +215,7 @@
       "returned_to_phase3": false,
       "skipped_gate": false,
       "d049_compliant": true,
-      "notes": "A#72: verify-e-artifacts.mjs 1068 returns PASS. Trace entry exists, 1 intel entry. Second post-d049 E session — d049 COMPLIANT."
+      "notes": "A#72: verify-e-artifacts.mjs 1068 returns PASS. Trace entry exists, 1 intel entry. Second post-d049 E session \u2014 d049 COMPLIANT."
     },
     {
       "session": 1073,
@@ -224,7 +224,7 @@
       "returned_to_phase3": false,
       "skipped_gate": false,
       "d049_compliant": true,
-      "notes": "A#73: verify-e-artifacts.mjs 1073 returns PASS. Trace entry exists, 2 intel entries. Third post-d049 E session — d049 COMPLIANT. Validation complete: 3/3 post-d049 sessions pass."
+      "notes": "A#73: verify-e-artifacts.mjs 1073 returns PASS. Trace entry exists, 2 intel entries. Third post-d049 E session \u2014 d049 COMPLIANT. Validation complete: 3/3 post-d049 sessions pass."
     },
     {
       "session": 1078,
@@ -305,7 +305,7 @@
       "returned_to_phase3": false,
       "skipped_gate": false,
       "d049_compliant": true,
-      "notes": "A#84: Trace FAIL (overwritten by later session — no trace archive exists). Intel PASS: 2 entries in archive. d049 COMPLIANT. Note: trace failure is structural (wq-364 filed), not a session compliance issue."
+      "notes": "A#84: Trace FAIL (overwritten by later session \u2014 no trace archive exists). Intel PASS: 2 entries in archive. d049 COMPLIANT. Note: trace failure is structural (wq-364 filed), not a session compliance issue."
     },
     {
       "session": 1128,
@@ -323,7 +323,7 @@
       "returned_to_phase3": false,
       "skipped_gate": false,
       "d049_compliant": false,
-      "notes": "A#85: verify-e-artifacts.mjs 1133 returns trace PASS, intel PASS (artifact exists). d049 VIOLATION — 0 intel entries captured. First violation in 14 post-d049 sessions. 14/15 post-d049 compliance rate."
+      "notes": "A#85: verify-e-artifacts.mjs 1133 returns trace PASS, intel PASS (artifact exists). d049 VIOLATION \u2014 0 intel entries captured. First violation in 14 post-d049 sessions. 14/15 post-d049 compliance rate."
     },
     {
       "session": 1143,
@@ -376,10 +376,18 @@
       "intel_count": 2,
       "enforcement": "backfill-b335",
       "notes": "B#335 backfill: trace PASS (archive), 2 intel entries. d049 COMPLIANT."
+    },
+    {
+      "session": 1168,
+      "e_number": 98,
+      "d049_compliant": true,
+      "intel_count": 2,
+      "enforcement": "post-hook",
+      "notes": "Post-hook enforcement: 2 intel entries captured"
     }
   ],
   "audit_instructions": {
-    "how_to_check": "For each E session in s943-973 range, grep session log for 'Artifact verification s'. If found and all boxes checked [ ] → [x], record passed_artifact_check=true. If boxes unchecked or returned to Phase 3, record returned_to_phase3=true.",
+    "how_to_check": "For each E session in s943-973 range, grep session log for 'Artifact verification s'. If found and all boxes checked [ ] \u2192 [x], record passed_artifact_check=true. If boxes unchecked or returned to Phase 3, record returned_to_phase3=true.",
     "artifact_pattern": "Artifact verification s[N]:\n- [x] engagement-trace.json: Entry for this session exists\n- [x] engagement-intel.json: Array has entries OR documented \"nothing actionable\"\n- [x] ctxly_remember: Called this session OR documented skip reason",
     "log_location": "~/.config/moltbook/session-logs/session-{N}.log",
     "what_to_record": {

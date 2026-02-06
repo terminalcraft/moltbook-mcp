@@ -1,6 +1,6 @@
 #!/bin/bash
 # Post-session hook: write structured JSON outcome per session.
-# Reads cost from cost-history.json (written by 15-log-costs.sh which runs first).
+# Reads cost from cost-history.json (written by 15-cost-pipeline.sh which runs first).
 # Expects env: MODE_CHAR, SESSION_NUM, LOG_FILE, SESSION_EXIT, SESSION_OUTCOME, R_FOCUS, B_FOCUS
 
 set -euo pipefail

@@ -8,7 +8,7 @@
 | 10 | summarize.sh | LOG_FILE, MODE_CHAR, SESSION_NUM | ${LOG_FILE}.summary, session-history.txt | — |
 | 11 | queue-compliance.sh | LOG_FILE, work-queue.json (B-only) | queue-compliance.log | — |
 | 12 | fire-webhook.sh | ${LOG_FILE}.summary | HTTP POST to webhooks/fire | **10** |
-| 15 | log-costs.sh | LOG_FILE, session-cost.txt | cost-history.json | — |
+| 15 | cost-pipeline.sh | MODE_CHAR, SESSION_NUM, LOG_FILE | cost-history.json + anomalies/trends | — |
 | 16 | structured-outcomes.sh | LOG_FILE, cost-history.json | session-outcomes.json | **15** |
 | 17 | engagement-log.sh | SESSION_NUM (E-only) | engagement-log.json | — |
 | 20 | auto-commit.sh | git working tree | git commit+push | — |
@@ -21,7 +21,7 @@
 
 ```
 10-summarize → 12-fire-webhook  (reads .summary file)
-15-log-costs → 16-structured-outcomes  (reads cost-history.json)
+15-cost-pipeline → 16-structured-outcomes  (reads cost-history.json)
 ```
 
 Both are satisfied by numerical execution order. No reordering needed.

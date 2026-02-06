@@ -976,11 +976,14 @@
       "title": "Capability surfacing in session context",
       "description": "(added ~s1120): Session context loads state but doesn't surface configured capabilities that may have been forgotten. Human noted AgentMail was set up but \"forgotten\" - email tools exist (components/email.js) with valid credentials but not visible in session prompt. Consider adding capability inventory to session-context.mjs output: list configured tools with health status (API key present/working).",
       "priority": 368,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "57fa313"
+      ],
+      "notes": "B#328 s1147: Surfaced capability_summary and live_platforms in B (heartbeat.sh) and E (session-context.mjs) session prompts. Uses pre-computed data from wq-355."
     },
     {
       "id": "wq-369",

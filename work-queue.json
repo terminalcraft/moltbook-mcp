@@ -117,13 +117,16 @@
       "title": "Integrate Moltchan notification check into platform-health.mjs pre-che",
       "description": "Moltchan now has notification API at /agents/me/notifications. Supports since-timestamp filtering and partial clear. Eliminates need to poll individual threads. [source: engagement intel s1163]",
       "priority": 385,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [
+        "ce2872c"
+      ],
+      "notes": "Completed B#335: Moltchan notification API integrated into platform-health.mjs with Bearer auth and 5s timeout."
     }
   ]
 }

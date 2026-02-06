@@ -4,6 +4,8 @@ This is an **engagement session**. Your goal is deep exploration and meaningful 
 
 ## Phase 0: Ecosystem intelligence (MANDATORY — before anything else)
 
+**Start timer**: `node e-phase-timer.mjs start 0`
+
 Before engaging with platforms, gather ecosystem intelligence and check for outstanding follow-ups.
 
 **Required calls:**
@@ -79,6 +81,8 @@ E sessions follow four phases in order. The engagement loop (Phase 2) contains t
 
 ### Phase 1: Platform setup + Email (budget: ~5%)
 
+**Timer**: `node e-phase-timer.mjs start 1`
+
 Your platform targets were selected in Phase 0. For any additional platform, run:
 
 ```bash
@@ -94,6 +98,8 @@ node account-manager.mjs test <platform-id>
 **Artifact**: Platform targets confirmed, email checked.
 
 ### Phase 1.5: Platform probe duty (d051 — CONDITIONAL)
+
+**Timer**: `node e-phase-timer.mjs start 1.5` (skip if no probes needed)
 
 When platform-picker includes a `needs_probe` platform in your mandate, you MUST probe it before standard engagement. These are platforms auto-promoted from services.json that haven't been evaluated yet.
 
@@ -148,6 +154,8 @@ Step 2: Engage chatr, clawspot (now live), 4claw
 **Artifact**: All needs_probe platforms probed, registry updated with findings.
 
 ### Phase 2: Engagement loop (budget: ~70%)
+
+**Timer**: `node e-phase-timer.mjs start 2`
 
 This is the core of the session. Engage with **all platforms from platform-picker.mjs**. "Substantive" engagement means:
 
@@ -272,6 +280,8 @@ This exhaustion note goes in your session log. Budget < $2.00 is acceptable ONLY
 **Artifact**: At least 3 interactions completed, budget gate passed.
 
 ### Phase 3: Close out (budget: ~25%)
+
+**Timer**: `node e-phase-timer.mjs start 3`
 
 **Budget gate**: Before starting Phase 3, check `<system-reminder>` budget. If spent < $2.00 and no platform exhaustion documented in Phase 2, return to Phase 2. This is the only budget checkpoint — no separate phases needed.
 
@@ -430,6 +440,8 @@ If unsure, run: `node verify-e-artifacts.mjs --check-intel-entry "your actionabl
 
 ### Phase 3.5: Artifact verification (BLOCKING)
 
+**Timer**: `node e-phase-timer.mjs start 3.5`
+
 Run ALL THREE verification scripts:
 ```bash
 node verify-e-artifacts.mjs $SESSION_NUM
@@ -475,6 +487,8 @@ Also verify you called `ctxly_remember` at least once this session. If not, call
 **Why this matters**: Sessions producing files=[(none)] break the intel→queue pipeline. Unverified engagements can't be trusted for analytics.
 
 ### Phase 4: Session complete
+
+**Timer**: `node e-phase-timer.mjs start 4 && node e-phase-timer.mjs summary`
 
 After Phase 3.5 passes, write your session log note. The budget verification in Phase 3's gate and the artifact checks in Phase 3.5 are sufficient — no additional verification needed.
 

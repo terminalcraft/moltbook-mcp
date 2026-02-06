@@ -406,9 +406,19 @@ WARN: Missing credential files: ${CTX_CRED_MISSING}"
     fi
   fi
 
+  # wq-374: EVM balance dashboard for onchain tasks
+  EVM_LINE=""
+  if [ -n "${CTX_EVM_BALANCE_SUMMARY:-}" ]; then
+    EVM_LINE="
+EVM wallet (Base): ${CTX_EVM_BALANCE_SUMMARY}. Onchain tasks: ${CTX_ONCHAIN_ITEMS:-none}."
+  elif [ -n "${CTX_EVM_BALANCE_ERROR:-}" ]; then
+    EVM_LINE="
+EVM balance check failed: ${CTX_EVM_BALANCE_ERROR}"
+  fi
+
   B_FOCUS_BLOCK="
 
-## B Session: #${B_COUNT}${CAP_LINE}${WQ_BLOCK}"
+## B Session: #${B_COUNT}${CAP_LINE}${EVM_LINE}${WQ_BLOCK}"
 fi
 
 # E session prompt block: fully assembled by session-context.mjs (R#93).

@@ -1286,6 +1286,61 @@ markTiming('a_session_context');
 }
 markTiming('capability_surface');
 
+// --- wq-374: EVM balance dashboard for B sessions with onchain tasks ---
+// When B sessions work on d044/onchain queue items, they need wallet balances to make
+// decisions (e.g. "do I have enough ETH for gas?"). Previously this required manually
+// running `node base-swap.mjs balance`. Now auto-included when onchain work is detected.
+// Uses subprocess call with 10s timeout to avoid blocking session startup on RPC issues.
+if (MODE === 'B') {
+  const ONCHAIN_TAGS = ['d044', 'onchain', 'defi', 'evm', 'swap', 'gas', 'wallet'];
+  const onchainItems = queue.filter(i =>
+    (i.status === 'pending' || i.status === 'in-progress') &&
+    (i.tags || []).some(t => ONCHAIN_TAGS.includes(t))
+  );
+  if (onchainItems.length > 0) {
+    try {
+      const balanceOutput = execSync('node base-swap.mjs balance', {
+        encoding: 'utf8',
+        timeout: 10000,
+        cwd: DIR,
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      // Parse the human-readable output from base-swap.mjs balance:
+      //   Wallet Balances on Base:
+      //     Address: 0x...
+      //     ETH:  0.001234
+      //     USDC: 50.123456
+      //     WETH: 0.000000
+      const ethMatch = balanceOutput.match(/ETH:\s+([0-9.]+)/);
+      const usdcMatch = balanceOutput.match(/USDC:\s+([0-9.]+)/);
+      const wethMatch = balanceOutput.match(/WETH:\s+([0-9.]+)/);
+      const addrMatch = balanceOutput.match(/Address:\s+(0x[a-fA-F0-9]+)/);
+
+      if (ethMatch || usdcMatch) {
+        const eth = ethMatch ? parseFloat(ethMatch[1]) : 0;
+        const usdc = usdcMatch ? parseFloat(usdcMatch[1]) : 0;
+        const weth = wethMatch ? parseFloat(wethMatch[1]) : 0;
+
+        result.evm_balances = {
+          eth: eth.toFixed(6),
+          usdc: usdc.toFixed(2),
+          weth: weth.toFixed(6),
+          address: addrMatch ? addrMatch[1] : 'unknown'
+        };
+        // One-line summary for prompt injection
+        const warnings = [];
+        if (eth < 0.0005) warnings.push('LOW GAS');
+        if (usdc < 10) warnings.push('LOW USDC');
+        result.evm_balance_summary = `ETH: ${eth.toFixed(6)} | USDC: ${usdc.toFixed(2)} | WETH: ${weth.toFixed(6)}${warnings.length ? ' [' + warnings.join(', ') + ']' : ''}`;
+        result.onchain_items = onchainItems.map(i => i.id).join(', ');
+      }
+    } catch (e) {
+      result.evm_balance_error = (e.message || 'unknown').substring(0, 100);
+    }
+  }
+}
+markTiming('evm_balance');
+
 // wq-336: Record total time and write timing data
 markTiming('total');
 const timingPath = join(STATE_DIR, 'session-context-timing.json');

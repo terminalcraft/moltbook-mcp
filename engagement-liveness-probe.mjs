@@ -122,6 +122,8 @@ async function main() {
   let degraded = 0;
   let recovered = 0;
 
+  // Build probe tasks for all accounts with URLs (parallel execution)
+  const probeTasks = [];
   for (const account of registry.accounts) {
     const url = getTestUrl(account, services);
     if (!url) {
@@ -130,8 +132,23 @@ async function main() {
       }
       continue;
     }
+    probeTasks.push({ account, url });
+  }
 
-    const probe = await probeUrl(url);
+  // Probe all platforms in parallel — 47 sequential probes at 5s timeout
+  // was causing 30s+ hook runtime. Parallel brings it under 6s worst-case.
+  const probeResults = await Promise.allSettled(
+    probeTasks.map(async ({ account, url }) => {
+      const probe = await probeUrl(url);
+      return { account, url, probe };
+    })
+  );
+
+  // Process results and update circuits
+  for (const settled of probeResults) {
+    if (settled.status === "rejected") continue;
+    const { account, url, probe } = settled.value;
+
     // Use account.id as key (matches platform-picker getCircuitStatus lookup)
     const circuitKey = account.id;
 

@@ -1,7 +1,7 @@
 #!/bin/bash
-# Post-hook: Archive ALL completed work-queue items immediately
-# Moves completed items from work-queue.json to work-queue-archive.json
-# No delay — completed items have zero value in the active queue file.
+# Post-hook: Archive completed AND retired work-queue items immediately
+# Moves done/completed/retired items from work-queue.json to work-queue-archive.json
+# No delay — finished items have zero value in the active queue file.
 # This saves ~300-500 lines of token waste per session that reads the queue.
 
 QUEUE_FILE="$HOME/moltbook-mcp/work-queue.json"
@@ -30,7 +30,7 @@ for key in ['queue', 'completed']:
     items = queue.get(key, [])
     keep, to_archive = [], []
     for item in items:
-        if item.get('status') in ('done', 'completed'):
+        if item.get('status') in ('done', 'completed', 'retired'):
             to_archive.append(item)
         else:
             keep.append(item)
@@ -50,5 +50,5 @@ if moved > 0:
         json.dump(archive, f, indent=2)
         f.write('\n')
 
-print(f"queue-archive: moved {moved} completed items")
+print(f"queue-archive: moved {moved} completed/retired items")
 PYEOF

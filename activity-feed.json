@@ -1,125 +1,5 @@
 [
   {
-    "id": "97d3c4de-2b4e-4029-8518-161d487af7bf",
-    "event": "directory.probed",
-    "summary": "Probed 3 agents, 0 online",
-    "meta": {},
-    "ts": "2026-02-06T07:43:56.184Z"
-  },
-  {
-    "id": "54c1e09a-dec8-45d4-abd5-513fe1e1a681",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "76a660c5",
-      "name": "Chatr API",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "down",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-06T07:43:56.677Z"
-  },
-  {
-    "id": "2f6eb6e3-aaf6-4c59-a568-2e987278829b",
-    "event": "monitor.status_changed",
-    "summary": "Chatr API up → down",
-    "meta": {
-      "id": "76a660c5",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "down"
-    },
-    "ts": "2026-02-06T07:43:56.678Z"
-  },
-  {
-    "id": "3fd7b37a-2a2a-4eab-bfe1-30900b62ff1f",
-    "event": "search",
-    "summary": "Search \"test\" — 1451 results",
-    "meta": {
-      "q": "test",
-      "total": 1451
-    },
-    "ts": "2026-02-06T07:44:01.222Z"
-  },
-  {
-    "id": "363a5c64-e119-4fa2-a208-d01d3188f35e",
-    "event": "auth.rejected",
-    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
-    "meta": {},
-    "ts": "2026-02-06T07:44:01.248Z"
-  },
-  {
-    "id": "9e4ee7f6-eda9-4157-8b56-dae4d52b2c93",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "14855f9d",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-06T07:44:16.293Z"
-  },
-  {
-    "id": "9366b2f0-9b6d-44d2-8d34-3e1ce6ee042f",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "14855f9d"
-    },
-    "ts": "2026-02-06T07:44:16.294Z"
-  },
-  {
-    "id": "2c9e7990-b739-45d8-bb2f-1f9ed3237c94",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-06T07:44:16.303Z"
-  },
-  {
-    "id": "a0b08bcd-c3f5-4cd6-b99a-748d8bf50d4c",
-    "event": "session.completed",
-    "summary": "session.completed",
-    "meta": {
-      "session": "1160",
-      "mode": "R",
-      "duration": "3m08s",
-      "build": "1 commit(s)"
-    },
-    "ts": "2026-02-06T07:44:16.444Z"
-  },
-  {
-    "id": "ab9b38e3-96de-46a9-ad9f-d9ee748292df",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "76a660c5",
-      "name": "Chatr API",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "down",
-      "to": "up",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-06T07:48:47.026Z"
-  },
-  {
-    "id": "b17ccd0f-57a2-425a-bde5-7a994fca658c",
-    "event": "monitor.status_changed",
-    "summary": "Chatr API down → up",
-    "meta": {
-      "id": "76a660c5",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "down",
-      "to": "up"
-    },
-    "ts": "2026-02-06T07:48:47.028Z"
-  },
-  {
     "id": "5b0ff018-8cf1-445c-a682-54f238db3caf",
     "event": "presence.heartbeat",
     "summary": "presence.heartbeat",
@@ -1931,5 +1811,112 @@
       "build": "2 commit(s)"
     },
     "ts": "2026-02-06T17:04:19.871Z"
+  },
+  {
+    "id": "28948dee-ca4c-42ca-92c7-7fac2974b0ac",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 21/22 passed in 3160ms",
+    "meta": {
+      "id": "28908c0b",
+      "passed": 21,
+      "failed": 1
+    },
+    "ts": "2026-02-06T17:13:09.913Z"
+  },
+  {
+    "id": "d76d2b90-ff36-40cf-af92-ea6252cb1583",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 21/22 passed in 2930ms",
+    "meta": {
+      "id": "677e22cb",
+      "passed": 21,
+      "failed": 1
+    },
+    "ts": "2026-02-06T17:43:09.694Z"
+  },
+  {
+    "id": "415da4e2-1b28-4787-83f6-ad50dce5eb78",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-06T18:00:37.465Z"
+  },
+  {
+    "id": "44434b1d-b0f6-48c5-a978-5c5a421824cb",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 92.1% overall",
+    "meta": {},
+    "ts": "2026-02-06T18:04:57.273Z"
+  },
+  {
+    "id": "43c95dbe-20a4-4c4d-b4e9-fae6dce5691d",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-06T18:05:00.848Z"
+  },
+  {
+    "id": "4b9046f2-d8fe-4fa5-bc27-5bd2cf16636a",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-06T18:05:05.878Z"
+  },
+  {
+    "id": "cab9246a-cbab-4ac6-8347-2a4f350fd66f",
+    "event": "search",
+    "summary": "Search \"test\" — 1451 results",
+    "meta": {
+      "q": "test",
+      "total": 1451
+    },
+    "ts": "2026-02-06T18:05:05.899Z"
+  },
+  {
+    "id": "bb8b3318-ad0d-4a80-98ab-1d2717ba2c83",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "1f5370b5",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-06T18:05:06.508Z"
+  },
+  {
+    "id": "18c4977e-ff1d-4374-a910-6bcb554f98ea",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "1f5370b5"
+    },
+    "ts": "2026-02-06T18:05:06.508Z"
+  },
+  {
+    "id": "af659e11-1910-40e2-b0d2-107bbb602c66",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-06T18:05:06.518Z"
+  },
+  {
+    "id": "b2c73a61-004c-45fd-8ffd-810a6fad9536",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "1180",
+      "mode": "R",
+      "duration": "4m10s",
+      "build": "1 commit(s)"
+    },
+    "ts": "2026-02-06T18:05:06.710Z"
   }
 ]

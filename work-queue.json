@@ -41,21 +41,6 @@
       "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
-      "id": "wq-392",
-      "title": "Add tests for audit-report generation pipeline",
-      "description": "audit-report.json touched frequently but no tests for generation logic. Build test suite covering schema validation, recommendation lifecycle, and cost calculation. Source: BRAINSTORMING.md.",
-      "priority": 392,
-      "status": "done",
-      "added": "2026-02-06",
-      "created_session": 1174,
-      "source": "brainstorming",
-      "tags": [
-        "testing"
-      ],
-      "commits": ["8823265"],
-      "notes": "B#341 (s1179): 52 tests across 17 suites in audit-report.test.mjs — covers audit-stats.mjs computation, schema validation, recommendation lifecycle, cost consistency."
-    },
-    {
       "id": "wq-393",
       "title": "Add core logic tests for session-context.mjs high-risk paths",
       "description": "1400+ line orchestrator with no test coverage for critical paths: auto-promote, intel filtering, platform promotion, EVM dashboard. Build focused tests for top 5 high-risk code paths. Source: BRAINSTORMING.md.",
@@ -80,6 +65,21 @@
       "source": "brainstorming",
       "tags": [
         "tooling"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-398",
+      "title": "Build covenant health auto-reporter digest",
+      "description": "18 active covenants with no summary view. Build covenant-health-digest.mjs that surfaces: near-expiry covenants, declining engagement (sessions since last interaction), covenant candidates from high-quality exchanges, dormant partners for retirement. Output as structured JSON for /status endpoint and human-readable for R sessions.",
+      "priority": 398,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1180,
+      "source": "brainstorming",
+      "tags": [
+        "tooling",
+        "covenants"
       ],
       "commits": []
     }

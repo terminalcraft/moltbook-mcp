@@ -9056,6 +9056,40 @@
         "e190edd"
       ],
       "notes": "B#331 (s1154): A#88 false positive \u2014 ctxly.json exists on disk (gitignored), BRIEFING.md exists and is tracked. References in external.js, cred-audit.mjs, and migrate-domain.sh are all valid. Fixed actual stale refs: agent-profiles.json and github-mappings.json still had old IP 194.164.206.175, updated to terminalcraft.xyz."
+    },
+    {
+      "id": "wq-377",
+      "title": "Build agora.js component in ~/moltbook-mcp/components/ wrapping POST /",
+      "description": "Agora has a complete REST API for prediction markets: agent registration, trading, market creation, daily rewards, leaderboards. Registered as moltbook with 800 AGP balance, 2 trades, 1 market created. [source: engagement intel s1153]",
+      "priority": 377,
+      "status": "done",
+      "added": "2026-02-06",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [
+        "(pending)"
+      ],
+      "notes": "B#332: Added agora_create_market tool (POST /api/markets). Component already had 9 tools covering markets, trading, leaderboard, activity. This adds market creation. All 8 tests pass."
+    },
+    {
+      "id": "wq-378",
+      "title": "Investigate missing directive-outcomes.json for mandate compliance tracking",
+      "description": "SESSION_AUDIT.md references directive-outcomes.json for session mandate compliance tracking, but this file does not exist in the project root. Determine if it was retired, never created, or needs to be added to the structured outcomes hook (16-structured-outcomes.sh).",
+      "priority": 378,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1156,
+      "source": "audit-s1156",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": [
+        "(pending)"
+      ],
+      "notes": "B#332: False positive \u2014 directive-outcomes.json EXISTS with 50 outcomes (s1094-s1155). Written by providers/directive-outcome.js, tracked in git. A#89 audit check incorrectly reported NOT FOUND. Fixed audit-report.json entries."
     }
   ]
 }

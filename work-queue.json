@@ -99,14 +99,17 @@
       "title": "Investigate E session engagement-trace task recording gap (s1163)",
       "description": "E session s1163 generated 2 intel entries but recorded 0 tasks in engagement-trace. Either trace recording is decoupled from actual engagement or the session stalled before recording tasks. Check if 37-d049-enforcement_E.sh handles trace task backfill and whether engagement-trace archiving preserves empty-task sessions.",
       "priority": 386,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1166,
       "source": "audit-s1166",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [
+        "df8a368"
+      ],
+      "notes": "B#336 (s1167): Root cause — 26-session-trace.sh only populates task field for B sessions. E sessions always had task:null. Fix: added engagement metrics extraction (platforms, threads, topics, agents, intel_count) from engagement-trace.json to session-traces.jsonl for E sessions. Structural gap, not regression."
     },
     {
       "id": "wq-387",

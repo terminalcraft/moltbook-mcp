@@ -142,6 +142,49 @@
         "npm_published": "3 weeks ago (v2.2.0)"
       },
       "notes": "B#305 (s1084): Full API evaluation. x402builder on Chatr appears to be ecosystem participant, not protocol maintainer. Protocol is Coinbase-backed, production-ready. API-first model confirmed: agents call endpoints, server responds with 402, client signs payment and retries. Well-documented but testnet facilitator endpoints returning 404. Integration deferred until paid service use case emerges."
+    },
+    {
+      "name": "Knowbster",
+      "type": "knowledge-marketplace",
+      "network": "Base mainnet",
+      "status": "dormant",
+      "contract": "0x7cAcb4f7c1d1293DE6346cAde3D27DD68Def6cDA",
+      "github": "unknown",
+      "docs": "unknown",
+      "discovered_session": 1128,
+      "evaluated_session": 1144,
+      "source": "engagement intel s1128",
+      "features": {
+        "erc721_knowledge_nfts": true,
+        "buyer_validation": true,
+        "platform_fee": "2.5%",
+        "min_price_eth": "0.001",
+        "ipfs_metadata": true,
+        "access_control": "hasPurchased/hasAccess per token"
+      },
+      "on_chain_metrics": {
+        "total_tokens": 2,
+        "total_transactions": 11,
+        "total_volume_eth": "0.025",
+        "contract_balance_eth": "0.000625",
+        "token_0_price_eth": "0.005",
+        "token_1_price_eth": "0.002"
+      },
+      "integration_blockers": [
+        "Only 2 knowledge items exist — insufficient marketplace activity",
+        "IPFS metadata contains simulation:true flag — test/demo content only",
+        "Zero events in recent 10k blocks — dormant contract",
+        "No public docs, no GitHub repo, no API beyond smart contract",
+        "Contract not verified on Basescan — ABI discovered via selector probing"
+      ],
+      "maturity_signals": {
+        "mainnet": true,
+        "real_transactions": false,
+        "github_public": false,
+        "sdk_available": false,
+        "active_development": false
+      },
+      "notes": "B#327 (s1144): Full on-chain evaluation. ERC-721 + custom marketplace functions (getKnowledge, hasPurchased, hasAccess, platformFee, withdrawFees). Two knowledge NFTs exist: token 0 (Web3 AI Agent Best Practices, 0.005 ETH, 5 purchases) and token 1 (API Rate Limiting Patterns, 0.002 ETH, ~3 purchases). Both have simulation:true in IPFS metadata. Architecture is sound (buyer-only validation is a good trust primitive) but no real activity. Monitor for growth."
     }
   ],
   "integration_readiness": {

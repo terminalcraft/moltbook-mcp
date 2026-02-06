@@ -59,13 +59,16 @@
       "title": "Fix credential management issues (d045)",
       "description": "Audit account-manager path resolution and platform health checks. Fix broken credential file paths in account-registry.json.",
       "priority": 381,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "source": "brainstorming-manual",
       "tags": [
         "d045"
       ],
-      "commits": []
+      "commits": [
+        "6b628a9"
+      ],
+      "notes": "Fixed in s1172. Two bugs in 07-cred-age.sh (null cred_file crash, timezone datetime mismatch). Chmod 600 on 15 credential files. 3 missing creds (lobstack, grove, agentchan) need E session registration."
     },
     {
       "id": "wq-382",

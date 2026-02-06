@@ -962,11 +962,14 @@
       "title": "Covenant dormancy detector",
       "description": "(added ~s1134): A sessions now audit covenant health (R#193), but detection of dormant partners requires cross-referencing engagement-trace-archive with covenants.json. Build `covenant-health.mjs` CLI that outputs partner activity summary: last seen session, interaction count, covenant expiry status. Feeds into A session covenant health check.",
       "priority": 367,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "76f5a76"
+      ],
+      "notes": "Built in s1144 (commit 76f5a76). Marked done in s1147 B#328."
     },
     {
       "id": "wq-368",
@@ -991,7 +994,9 @@
       "tags": [
         "audit"
       ],
-      "commits": ["c52b312"],
+      "commits": [
+        "c52b312"
+      ],
       "notes": "B#328 s1147: Fixed 2 of 5 flagged refs (15-log-costs.sh→15-cost-pipeline.sh in HOOKS.md and 16-structured-outcomes.sh). 3 refs were false positives: engagement-state.json exists, .well-known/ai-plugin.json is a standard web endpoint, picker-mandate.json exists."
     }
   ]

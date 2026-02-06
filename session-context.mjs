@@ -1099,10 +1099,17 @@ markTiming('r_session_context');
       // Covenant check failed — skip silently
     }
 
+    // wq-368: Surface capability summary in E session prompt
+    let capBlock = '';
+    if (result.capability_summary) {
+      capBlock = `\n\nCapabilities: ${result.capability_summary}. Live: ${result.live_platforms || 'none'}.`;
+      if (result.cred_missing) capBlock += `\nWARN: Missing credential files: ${result.cred_missing}`;
+    }
+
     result.e_prompt_block = `## E Session: #${eCount}
 This is engagement session #${eCount}. Follow SESSION_ENGAGE.md.
 
-${orchSection}${prevEngageCtx}${evalBlock}${emailBlock}${covenantBlock}`.trim();
+${orchSection}${prevEngageCtx}${evalBlock}${emailBlock}${covenantBlock}${capBlock}`.trim();
   }
 }
 markTiming('e_session_context');

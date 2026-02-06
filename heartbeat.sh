@@ -395,9 +395,20 @@ ${WQ_ITEM}
 This is your primary task for this session. Complete it before picking up anything else. If blocked, explain why in your session log.${WQ_WARNING}"
   fi
 
+  # wq-368: Surface configured capabilities so B sessions know what tools exist
+  CAP_LINE=""
+  if [ -n "${CTX_CAPABILITY_SUMMARY:-}" ]; then
+    CAP_LINE="
+Capabilities: ${CTX_CAPABILITY_SUMMARY}. Live: ${CTX_LIVE_PLATFORMS:-none}."
+    if [ -n "${CTX_CRED_MISSING:-}" ]; then
+      CAP_LINE="${CAP_LINE}
+WARN: Missing credential files: ${CTX_CRED_MISSING}"
+    fi
+  fi
+
   B_FOCUS_BLOCK="
 
-## B Session: #${B_COUNT}${WQ_BLOCK}"
+## B Session: #${B_COUNT}${CAP_LINE}${WQ_BLOCK}"
 fi
 
 # E session prompt block: fully assembled by session-context.mjs (R#93).

@@ -41,21 +41,6 @@
       "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
-      "id": "wq-393",
-      "title": "Add core logic tests for session-context.mjs high-risk paths",
-      "description": "1400+ line orchestrator with no test coverage for critical paths: auto-promote, intel filtering, platform promotion, EVM dashboard. Build focused tests for top 5 high-risk code paths. Source: BRAINSTORMING.md.",
-      "priority": 393,
-      "status": "done",
-      "added": "2026-02-06",
-      "created_session": 1174,
-      "source": "brainstorming",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "notes": "B#343 (s1184): 16 new tests covering 5 high-risk paths. Also fixed 3 pre-existing test failures. 204/204 pass."
-    },
-    {
       "id": "wq-397",
       "title": "Build batch service evaluation tool",
       "description": "E sessions probe services one-at-a-time. Build batch-service-probe.mjs that probes N services from services.json, attempts registration via common patterns (/api/register, /skill.md, /.well-known/agent-info.json), records results. Speeds d051 compliance.",
@@ -94,6 +79,19 @@
       "source": "intel-auto",
       "tags": [
         "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-402",
+      "title": "Add tests for audit-report.json",
+      "description": "Touched 7 times in 30 sessions — auto-generated from /status/patterns friction_signals",
+      "priority": 402,
+      "status": "pending",
+      "added": "2026-02-06",
+      "source": "friction-signal",
+      "tags": [
+        "friction"
       ],
       "commits": []
     }

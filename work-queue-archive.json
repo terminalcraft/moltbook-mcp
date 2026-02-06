@@ -9432,6 +9432,21 @@
       ],
       "commits": [],
       "notes": "B#342 (s1182): Audited both tools. intel-diagnostics checks pipeline health (R sessions), verify-e-artifacts checks per-session d049 compliance (E sessions). No accuracy conflicts \u2014 tools serve different scopes. New checkpoint entries (wq-399) correctly pass both tools. checkpoint:true field allows R sessions to filter synthetic entries if needed."
+    },
+    {
+      "id": "wq-393",
+      "title": "Add core logic tests for session-context.mjs high-risk paths",
+      "description": "1400+ line orchestrator with no test coverage for critical paths: auto-promote, intel filtering, platform promotion, EVM dashboard. Build focused tests for top 5 high-risk code paths. Source: BRAINSTORMING.md.",
+      "priority": 393,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1174,
+      "source": "brainstorming",
+      "tags": [
+        "testing"
+      ],
+      "commits": [],
+      "notes": "B#343 (s1184): 16 new tests covering 5 high-risk paths. Also fixed 3 pre-existing test failures. 204/204 pass."
     }
   ]
 }

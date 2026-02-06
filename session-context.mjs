@@ -1395,6 +1395,76 @@ if (MODE === 'B') {
 }
 markTiming('evm_balance');
 
+// R#204: Hook health analysis — closes feedback loop on slow/failing hooks.
+// maintain-audit.sh detects slow hooks but nothing acts on the data. This section
+// reads structured hook results (pre and post), computes per-hook moving averages,
+// and surfaces actionable warnings in session context. Sessions can then:
+// - R sessions: prioritize optimizing the slowest hooks
+// - All sessions: see which hooks are degrading performance
+// Reads last 10 entries from each results file.
+{
+  const hookResultFiles = [
+    join(STATE_DIR, 'logs/pre-hook-results.json'),
+    join(STATE_DIR, 'logs/post-hook-results.json'),
+  ];
+  const SLOW_THRESHOLD_MS = 5000;
+  const FAIL_THRESHOLD = 3; // 3+ failures in last 10 = consistently failing
+  const hookStats = {}; // hookName -> { totalMs, count, failures, phase }
+
+  for (const filePath of hookResultFiles) {
+    if (!existsSync(filePath)) continue;
+    const phase = filePath.includes('pre-') ? 'pre' : 'post';
+    try {
+      const raw = readFileSync(filePath, 'utf8').trim();
+      // File is newline-delimited JSON (one entry per session)
+      const lines = raw.split('\n').slice(-10);
+      for (const line of lines) {
+        const entry = JSON.parse(line);
+        if (!entry.hooks) continue;
+        for (const h of entry.hooks) {
+          const key = `${phase}:${h.hook}`;
+          if (!hookStats[key]) hookStats[key] = { totalMs: 0, count: 0, failures: 0, phase, hook: h.hook };
+          hookStats[key].totalMs += h.ms;
+          hookStats[key].count += 1;
+          if (h.status && h.status.startsWith('fail')) hookStats[key].failures += 1;
+        }
+      }
+    } catch { /* skip malformed files */ }
+  }
+
+  const slowHooks = [];
+  const failingHooks = [];
+
+  for (const [key, stats] of Object.entries(hookStats)) {
+    if (stats.count === 0) continue;
+    const avgMs = Math.round(stats.totalMs / stats.count);
+    if (avgMs >= SLOW_THRESHOLD_MS) {
+      slowHooks.push({ hook: stats.hook, phase: stats.phase, avg_ms: avgMs, samples: stats.count });
+    }
+    if (stats.failures >= FAIL_THRESHOLD) {
+      failingHooks.push({ hook: stats.hook, phase: stats.phase, fail_count: stats.failures, samples: stats.count });
+    }
+  }
+
+  // Sort by severity (slowest first)
+  slowHooks.sort((a, b) => b.avg_ms - a.avg_ms);
+  failingHooks.sort((a, b) => b.fail_count - a.fail_count);
+
+  if (slowHooks.length > 0 || failingHooks.length > 0) {
+    result.hook_health = { slow: slowHooks, failing: failingHooks };
+    // Build human-readable warning for session prompts
+    const parts = [];
+    if (slowHooks.length > 0) {
+      parts.push(`${slowHooks.length} slow hook(s): ${slowHooks.map(h => `${h.phase}/${h.hook} avg ${h.avg_ms}ms`).join(', ')}`);
+    }
+    if (failingHooks.length > 0) {
+      parts.push(`${failingHooks.length} failing hook(s): ${failingHooks.map(h => `${h.phase}/${h.hook} ${h.fail_count}/${h.samples} failures`).join(', ')}`);
+    }
+    result.hook_health_warning = parts.join(' | ');
+  }
+}
+markTiming('hook_health');
+
 // R#200: Deferred work-queue.json write — single atomic write after all mutations.
 if (wqDirty) {
   writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');

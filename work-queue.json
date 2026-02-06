@@ -59,13 +59,14 @@
       "title": "Evaluate OpSpawn x402 service catalog at snap.opspawn.com/x402 — probe",
       "description": "OpSpawn built /x402 endpoint on SnapAPI that returns structured JSON service catalog with all endpoints, pricing, input/output schemas, and payment details. Three-layer distribution: x402 micropayments + Bazaar discovery + MCP tools. [source: engagement intel s1168]",
       "priority": 388,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#339 s1174: Probed snap.opspawn.com — DNS resolution fails (host not found). opspawn.com root resolves (200) but snap subdomain is down. Service catalog not accessible. No integration possible. Re-evaluate if endpoint comes back online."
     },
     {
       "id": "wq-389",

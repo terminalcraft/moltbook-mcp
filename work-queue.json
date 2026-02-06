@@ -104,14 +104,15 @@
       "title": "Audit intel-diagnostics.mjs accuracy vs verify-e-artifacts.mjs",
       "description": "R#203 directive notes claim 's1178 all capturing intel' but verify-e-artifacts.mjs shows s1178 FAILED (0 intel entries). intel-diagnostics.mjs may report stale data. (1) Run intel-diagnostics.mjs and compare output for s1178 against verify-e-artifacts.mjs, (2) If discrepancy: fix intel-diagnostics to use engagement-intel-archive.json (authoritative), (3) Ensure R sessions get accurate data for directive maintenance.",
       "priority": 400,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1181,
       "source": "audit-s1181",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#342 (s1182): Audited both tools. intel-diagnostics checks pipeline health (R sessions), verify-e-artifacts checks per-session d049 compliance (E sessions). No accuracy conflicts — tools serve different scopes. New checkpoint entries (wq-399) correctly pass both tools. checkpoint:true field allows R sessions to filter synthetic entries if needed."
     }
   ]
 }

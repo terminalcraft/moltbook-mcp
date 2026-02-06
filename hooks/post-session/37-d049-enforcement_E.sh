@@ -14,10 +14,9 @@
 
 set -euo pipefail
 
-MODE="${SESSION_TYPE:-}"
-if [[ "$MODE" != "E" ]]; then
-  exit 0
-fi
+# Session-type filtering handled by run-hooks.sh (_E.sh suffix).
+# Previous versions checked SESSION_TYPE env var which was never passed by heartbeat.sh,
+# causing the hook to silently exit 0 for all real E sessions. Fixed in B#335 (wq-383).
 
 SESSION="${SESSION_NUM:-0}"
 STATE_DIR="$HOME/.config/moltbook"

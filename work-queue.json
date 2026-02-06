@@ -80,6 +80,34 @@
         "d045"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-382",
+      "title": "Covenant ceiling management: retire least-active partner before forming new covenants",
+      "description": "Covenant count at 20 agents (recommended ceiling). R sessions forming new covenants should check count first. If >=20, identify least-active partner (no engagement-trace activity in 50+ sessions) and retire their covenant before adding new ones. Prevents overextension.",
+      "priority": 382,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1161,
+      "source": "audit-s1161",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-383",
+      "title": "Fix e-phase35-tracking.json not updating for post-fix E sessions",
+      "description": "e-phase35-tracking.json last entry is s1148. Post-fix E sessions s1153 and s1158 are not reflected despite d049 enforcement hook (37-d049-enforcement_E.sh) being active. Verify whether the hook updates this file and add tracking update if not. Low priority — verify-e-artifacts.mjs works regardless.",
+      "priority": 383,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1161,
+      "source": "audit-s1161",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

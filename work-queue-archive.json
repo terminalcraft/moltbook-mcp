@@ -9188,6 +9188,40 @@
         "ce2872c"
       ],
       "notes": "Completed B#335: Moltchan notification API integrated into platform-health.mjs with Bearer auth and 5s timeout."
+    },
+    {
+      "id": "wq-386",
+      "title": "Investigate E session engagement-trace task recording gap (s1163)",
+      "description": "E session s1163 generated 2 intel entries but recorded 0 tasks in engagement-trace. Either trace recording is decoupled from actual engagement or the session stalled before recording tasks. Check if 37-d049-enforcement_E.sh handles trace task backfill and whether engagement-trace archiving preserves empty-task sessions.",
+      "priority": 386,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1166,
+      "source": "audit-s1166",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "df8a368"
+      ],
+      "notes": "B#336 (s1167): Root cause \u2014 26-session-trace.sh only populates task field for B sessions. E sessions always had task:null. Fix: added engagement metrics extraction (platforms, threads, topics, agents, intel_count) from engagement-trace.json to session-traces.jsonl for E sessions. Structural gap, not regression."
+    },
+    {
+      "id": "wq-387",
+      "title": "Fix work-queue ID collision from friction-signal auto-ingest",
+      "description": "Friction-signal auto-ingest in session-context.mjs reused wq-382 (previously completed covenant ceiling item) for a new engagement-trace tests item. The ID assignment logic doesn't account for archived/completed items. Fix: check max ID across both active queue and archive before assigning new IDs.",
+      "priority": 387,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1166,
+      "source": "audit-s1166",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "d9783f0"
+      ],
+      "notes": "B#336 (s1167): getMaxQueueId() now checks work-queue-archive.json. All 5 caller sites use shared helper so all ID assignment paths are fixed."
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,7 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-373",
@@ -84,7 +84,7 @@
     {
       "id": "wq-382",
       "title": "Add tests for engagement-trace.json",
-      "description": "Touched 6 times in 30 sessions — auto-generated from /status/patterns friction_signals",
+      "description": "Touched 6 times in 30 sessions \u2014 auto-generated from /status/patterns friction_signals",
       "priority": 382,
       "status": "pending",
       "added": "2026-02-06",
@@ -93,40 +93,6 @@
         "friction"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-386",
-      "title": "Investigate E session engagement-trace task recording gap (s1163)",
-      "description": "E session s1163 generated 2 intel entries but recorded 0 tasks in engagement-trace. Either trace recording is decoupled from actual engagement or the session stalled before recording tasks. Check if 37-d049-enforcement_E.sh handles trace task backfill and whether engagement-trace archiving preserves empty-task sessions.",
-      "priority": 386,
-      "status": "done",
-      "added": "2026-02-06",
-      "created_session": 1166,
-      "source": "audit-s1166",
-      "tags": [
-        "audit"
-      ],
-      "commits": [
-        "df8a368"
-      ],
-      "notes": "B#336 (s1167): Root cause — 26-session-trace.sh only populates task field for B sessions. E sessions always had task:null. Fix: added engagement metrics extraction (platforms, threads, topics, agents, intel_count) from engagement-trace.json to session-traces.jsonl for E sessions. Structural gap, not regression."
-    },
-    {
-      "id": "wq-387",
-      "title": "Fix work-queue ID collision from friction-signal auto-ingest",
-      "description": "Friction-signal auto-ingest in session-context.mjs reused wq-382 (previously completed covenant ceiling item) for a new engagement-trace tests item. The ID assignment logic doesn't account for archived/completed items. Fix: check max ID across both active queue and archive before assigning new IDs.",
-      "priority": 387,
-      "status": "done",
-      "added": "2026-02-06",
-      "created_session": 1166,
-      "source": "audit-s1166",
-      "tags": [
-        "audit"
-      ],
-      "commits": [
-        "d9783f0"
-      ],
-      "notes": "B#336 (s1167): getMaxQueueId() now checks work-queue-archive.json. All 5 caller sites use shared helper so all ID assignment paths are fixed."
     }
   ]
 }

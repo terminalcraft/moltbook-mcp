@@ -45,14 +45,15 @@
       "title": "Add tests for audit-report generation pipeline",
       "description": "audit-report.json touched frequently but no tests for generation logic. Build test suite covering schema validation, recommendation lifecycle, and cost calculation. Source: BRAINSTORMING.md.",
       "priority": 392,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1174,
       "source": "brainstorming",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": ["8823265"],
+      "notes": "B#341 (s1179): 52 tests across 17 suites in audit-report.test.mjs — covers audit-stats.mjs computation, schema validation, recommendation lifecycle, cost consistency."
     },
     {
       "id": "wq-393",

@@ -49,7 +49,9 @@ fi
 echo "$(date -Iseconds) d049-enforcement: s=$SESSION intel_count=$INTEL_COUNT compliant=$D049_COMPLIANT" >> "$LOG_DIR/d049-enforcement.log"
 
 # Update e-phase35-tracking.json with authoritative data
-if [[ -f "$TRACKING_FILE" ]]; then
+# B#340: Removed file-existence guard — python handles missing file gracefully
+# (creates fresh tracking structure). Previous guard silently skipped updates when file was absent.
+{
   python3 -c "
 import json, sys
 
@@ -95,7 +97,7 @@ with open(tracking_file, 'w') as f:
 
 print(f'd049-enforcement: updated tracking for s{session} (compliant={compliant}, count={intel_count})')
 " 2>/dev/null || echo "d049-enforcement: failed to update tracking"
-fi
+}
 
 # Write nudge for next E session if violated
 if [[ "$D049_COMPLIANT" == "false" ]]; then

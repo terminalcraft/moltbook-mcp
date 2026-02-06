@@ -100,14 +100,15 @@
       "title": "Recreate missing e-phase35-tracking.json",
       "description": "e-phase35-tracking.json missing from disk despite A#92 reporting it existed with entries through s1168. Recreate the file and populate with recent E session verification results (s1148-s1173). Low urgency — verify-e-artifacts.mjs works independently.",
       "priority": 396,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1176,
       "source": "audit-s1176",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#340 (s1177): False positive — file exists at ~/moltbook-mcp/e-phase35-tracking.json (412 lines, 42 sessions tracked through s1173). A#93 likely checked wrong path or had stale state."
     }
   ]
 }

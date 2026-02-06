@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,12 +38,12 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-372",
       "title": "E session phase timing tracker",
-      "description": "Add lightweight timing to E sessions \u2014 record phase start timestamps, output phase durations at close-out. Would reveal if Phase 0 setup or Phase 3 artifacts consume disproportionate budget.",
+      "description": "Add lightweight timing to E sessions — record phase start timestamps, output phase durations at close-out. Would reveal if Phase 0 setup or Phase 3 artifacts consume disproportionate budget.",
       "priority": 372,
       "status": "pending",
       "added": "2026-02-06",
@@ -63,7 +63,10 @@
       "added": "2026-02-06",
       "created_session": 1150,
       "source": "R#197",
-      "tags": ["observability", "d044"],
+      "tags": [
+        "observability",
+        "d044"
+      ],
       "commits": []
     },
     {
@@ -86,12 +89,17 @@
       "title": "Investigate d049 intel capture structural failure (40% compliance, declining)",
       "description": "d049 intel minimum compliance dropped from 80% (A#86) to 67% (A#87) to 40% (A#88). 3 violations in 5 E sessions. Multiple R session fixes (R#177, R#180, R#182, R#196) have NOT improved compliance. R session must: (1) read last 3 E session logs to find WHERE budget is spent, (2) test if actionability filter is rejecting valid intel, (3) consider moving intel capture earlier in E session flow (Phase 1 instead of 3.5), (4) check if E sessions timeout before reaching intel phase.",
       "priority": 375,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1151,
       "source": "audit-s1151",
-      "tags": ["audit", "d049", "structural"],
-      "commits": []
+      "tags": [
+        "audit",
+        "d049",
+        "structural"
+      ],
+      "commits": [],
+      "notes": "B#330 (s1152): Root cause — E sessions end in ~3min/$1.30, skip Phase 3b intel capture. Enforcement was purely prompt-based (4 R session fixes failed). Fix: added 37-d049-enforcement_E.sh post-hook for mechanical enforcement + nudge injection into 36-engagement-seed_E.sh pre-hook. Commit 9dfc694."
     },
     {
       "id": "wq-376",
@@ -102,7 +110,10 @@
       "added": "2026-02-06",
       "created_session": 1151,
       "source": "audit-s1151",
-      "tags": ["audit", "cleanup"],
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
       "commits": []
     }
   ]

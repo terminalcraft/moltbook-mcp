@@ -177,7 +177,7 @@
       "note": "State files consistent. ctxly.json exists (gitignored). BRIEFING.md exists. No orphaned credentials."
     },
     "missing_tracking_files": {
-      "directive-outcomes.json": "NOT FOUND — was expected for session mandate compliance tracking",
+      "directive-outcomes.json": "EXISTS — 50 outcomes tracked (s1094-s1155), actively written by providers/directive-outcome.js. A#89 false positive corrected in B#332.",
       "intel-promotion-tracking.json": "NOT FOUND — expected for wq-205 intel tracking",
       "e-phase35-tracking.json": "EXISTS — but last entry is s1148 (pre-fix). Post-hook (37-d049-enforcement_E.sh) should be updating this."
     },
@@ -187,7 +187,7 @@
       "recent_compliance": "No recent violations logged",
       "verdict": "HEALTHY — old violations from early picker days, no recent issues."
     },
-    "verdict": "HEALTHY — 71 hooks pass syntax, covenants healthy, no orphaned creds. directive-outcomes.json missing (minor — tracking infrastructure gap). No actionable stale references."
+    "verdict": "HEALTHY — 71 hooks pass syntax, covenants healthy, no orphaned creds. directive-outcomes.json confirmed present (A#89 false positive). No actionable stale references."
   },
   "security": {
     "active_incidents": {
@@ -235,9 +235,9 @@
     },
     {
       "id": "a89-2",
-      "description": "directive-outcomes.json is missing from project root. This file is referenced by SESSION_AUDIT.md for session mandate compliance tracking but does not exist.",
-      "priority": "low",
-      "action": "B session should investigate whether directive-outcomes.json was retired or never created. If needed, add it to the structured outcomes hook (16-structured-outcomes.sh) output."
+      "description": "FALSE POSITIVE (resolved B#332): directive-outcomes.json EXISTS in project root with 50 tracked outcomes (s1094-s1155). Written by providers/directive-outcome.js, not by 16-structured-outcomes.sh. A#89 audit incorrectly reported it as missing.",
+      "priority": "resolved",
+      "action": "No action needed. File confirmed present and actively used. A sessions should read it per SESSION_AUDIT.md section 2."
     }
   ]
 }

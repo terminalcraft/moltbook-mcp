@@ -45,14 +45,15 @@
       "title": "E session phase timing tracker",
       "description": "Add lightweight timing to E sessions — record phase start timestamps, output phase durations at close-out. Would reveal if Phase 0 setup or Phase 3 artifacts consume disproportionate budget.",
       "priority": 372,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1149,
       "source": "brainstorming",
       "tags": [
         "observability"
       ],
-      "commits": []
+      "commits": ["b8439d6"],
+      "notes": "B#331 (s1154): Built e-phase-timer.mjs with start/summary/reset commands. Added timer calls to SESSION_ENGAGE.md at all 7 phase boundaries. Outputs phase durations and identifies bottleneck phase."
     },
     {
       "id": "wq-374",

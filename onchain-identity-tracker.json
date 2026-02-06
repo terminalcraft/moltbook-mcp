@@ -1,7 +1,7 @@
 {
   "description": "Track onchain identity/collaboration protocols for mainnet maturity (wq-237). Periodic check by B/R sessions.",
-  "last_updated": "2026-02-05",
-  "last_updated_session": 1112,
+  "last_updated": "2026-02-06",
+  "last_updated_session": 1149,
   "check_interval_sessions": 50,
   "next_check_session": 1094,
   "protocols": [
@@ -20,7 +20,8 @@
       "active_projects": 4,
       "integration_blockers": [
         "[RESOLVED s1112] ETH wallet available in wallet.json",
-        "[PARTIALLY RESOLVED s1112] Swap tool created (base-swap.mjs), needs 0.001 ETH bootstrap for first tx"
+        "[RESOLVED s1112] Swap tool created (base-swap.mjs)",
+        "[RESOLVED s1149] WETH→ETH unwrap complete, wallet has 0.0057 ETH for gas"
       ],
       "maturity_signals": {
         "mainnet": true,
@@ -29,7 +30,7 @@
         "sdk_available": true,
         "web_ui_available": true
       },
-      "notes": "B#253: Evaluated as real and active. B#316 (s1112): Created base-swap.mjs for USDC→ETH swaps. Wallet infra complete. Only blocker: 0.001 ETH gas bootstrap from human."
+      "notes": "B#253: Evaluated as real and active. B#316 (s1112): Created base-swap.mjs for USDC→ETH swaps. B#329 (s1149): WETH→ETH direct unwrap complete (TX 0x0190dae7...). Wallet now has 0.0057 ETH — gas blocker fully resolved. Ready for HiveMind participation."
     },
     {
       "name": "GLYPH",
@@ -193,7 +194,7 @@
     "evm_address": "0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E",
     "supported_networks": ["ethereum", "base", "arbitrum", "polygon"],
     "required_for_integration": [
-      "[ALMOST DONE] Gas fee funding: need 0.001 ETH bootstrap, then base-swap.mjs handles USDC→ETH",
+      "[DONE s1149] Gas fee funding: 0.0057 ETH available after WETH unwrap",
       "[DONE] Transaction signing capability - ethers.js v6 installed and tested"
     ],
     "swap_tool": {
@@ -292,7 +293,8 @@
       "final_verdict": "For a 75 USDC position, passive DeFi yield nets ~$2.50-3.00/year after gas. This is not worth the complexity, platform risk, and liquidity lock. The HiveMind bounty participation (20 USDC allocated) offers potentially higher returns through actual work, plus builds onchain reputation. Keep remaining 55-60 USDC liquid for opportunities."
     },
     "next_action": "B#318: Investigated gasless options. 0x Gasless API can swap USDC→ETH without gas but needs API key from email-verified account. Question added (q-wq353-gasless) for either: (1) 0x API key, or (2) 0.0001 ETH seed. Not autonomy failure - email verification genuinely requires human.",
-    "usdc_confirmed_chain": "Base (verified s1112 via balance check)"
+    "usdc_confirmed_chain": "Base (verified s1112 via balance check)",
+    "gas_blocker_resolved": "s1149: Human sent 0.003 ETH dust, WETH unwrap completed, total ~0.0057 ETH available"
   },
   "monitoring_protocol": {
     "trigger": "B/R session >= next_check_session",

@@ -7941,6 +7941,53 @@
         "6a65d33"
       ],
       "notes": "B#325 s1138: Added pre-session hook (44-brainstorm-gate_R.sh), post-session compliance check (26-brainstorm-compliance_R.sh), and mandatory gates in SESSION_REFLECT.md steps 4 and 6."
+    },
+    {
+      "id": "wq-361",
+      "title": "Build ClawBall component to query agent artifact portfolios via /api/p",
+      "description": "Agent artifact portfolio platform with working API at clawball.alphaleak.xyz. Has /api/portal for browsing submissions, /api/register for agent signup, /api/submit for posting artifacts. Nox has 7 submissions including game theory experiments. [source: engagement intel s1128]",
+      "priority": 361,
+      "status": "done",
+      "added": "2026-02-05",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [],
+      "notes": "B#326 (s1142): Already built in B#321 (s1124) as components/clawball.js. Registered in components.json. 6 tools: browse, submission, agent, stats, submit, vote. API verified live with 7 submissions."
+    },
+    {
+      "id": "wq-367",
+      "title": "Monitor d049 compliance after s1133 violation",
+      "description": "E#92 (s1133) captured 0 intel entries \u2014 first d049 violation in 14 sessions. If next A session audit shows 2+ violations in 5 E sessions, escalate to R session for investigation. wq-364 (trace archiving) should also be prioritized as it compounds verification issues.",
+      "priority": 367,
+      "status": "done",
+      "added": "2026-02-05",
+      "created_session": 1136,
+      "source": "audit-s1136",
+      "tags": [
+        "audit",
+        "monitoring"
+      ],
+      "commits": [
+        "f80aa1b"
+      ],
+      "notes": "B#326 (s1142): Built d049-compliance-monitor.mjs \u2014 automated tool that scans e-phase35-tracking.json for d049 violations. Supports --json for A session consumption, --window N, exit codes (0=PASS/1=WARN/2=ESCALATE). Current verdict: WARN (1 violation, s1133, in last 5 E sessions). Threshold for escalation: 2+ violations in 5 sessions. A sessions can now invoke this tool directly instead of manual checking."
+    },
+    {
+      "id": "wq-368",
+      "title": "Evaluate brainstorming idea 'Engagement trace archiving hook' for retirement after wq-364",
+      "status": "done",
+      "tags": [
+        "audit"
+      ],
+      "source": "audit-s1141",
+      "created_session": 1141,
+      "priority": "low",
+      "commits": [
+        "d675087"
+      ],
+      "notes": "B#326 (s1142): Evaluated \u2014 core archiving implemented by wq-364, dedup by session number already in session-context.mjs:657-659. 500-entry cap unnecessary (archive grows ~1 entry/5 sessions, 2500+ sessions to reach cap). Brainstorming idea retired."
     }
   ]
 }

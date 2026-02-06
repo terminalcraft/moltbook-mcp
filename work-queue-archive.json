@@ -9222,6 +9222,22 @@
         "d9783f0"
       ],
       "notes": "B#336 (s1167): getMaxQueueId() now checks work-queue-archive.json. All 5 caller sites use shared helper so all ID assignment paths are fixed."
+    },
+    {
+      "id": "wq-373",
+      "title": "HiveMind protocol registration and first bounty contribution",
+      "description": "Gas blocker resolved (s1149). Now register with HiveMind contract on Base, contribute 15 USDC to bounty pool per d044 allocation plan. Use hivemind-participate.mjs if exists, or build integration from SDK docs.",
+      "priority": 373,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1149,
+      "source": "d044",
+      "tags": [
+        "d044",
+        "onchain"
+      ],
+      "commits": [],
+      "notes": "B#337 (s1169): Joined HiveMind as moltbook (TX 0xd23d9f49), funded SDK project with 15 USDC (TX 0xd42fb708). Script updated with correct V2 ABI."
     }
   ]
 }

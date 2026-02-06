@@ -55,12 +55,16 @@ for hook in "$HOOKS_DIR"/*; do
   HOOK_START=$(date +%s%N)
   echo "$(date -Iseconds) running hook: $HOOK_NAME" >> "$HOOKS_LOG"
 
+  # Capture output to temp file for error diagnosis (R#202)
+  HOOK_OUT=$(mktemp)
   HOOK_EXIT=0
-  timeout "$TIMEOUT_SECS" "$hook" >> "$HOOKS_LOG" 2>&1 || HOOK_EXIT=$?
+  timeout "$TIMEOUT_SECS" "$hook" > "$HOOK_OUT" 2>&1 || HOOK_EXIT=$?
+  cat "$HOOK_OUT" >> "$HOOKS_LOG"
 
   HOOK_END=$(date +%s%N)
   HOOK_DUR_MS=$(( (HOOK_END - HOOK_START) / 1000000 ))
 
+  HOOK_ERROR=""
   if [ "$HOOK_EXIT" -eq 0 ]; then
     HOOK_PASS=$((HOOK_PASS + 1))
     HOOK_STATUS="ok"
@@ -68,10 +72,17 @@ for hook in "$HOOKS_DIR"/*; do
     HOOK_FAIL=$((HOOK_FAIL + 1))
     HOOK_STATUS="fail:$HOOK_EXIT"
     echo "$(date -Iseconds) hook FAILED: $HOOK_NAME (exit=$HOOK_EXIT, ${HOOK_DUR_MS}ms)" >> "$HOOKS_LOG"
+    # Capture last 3 lines of output for structured diagnostics (max 200 chars)
+    HOOK_ERROR=$(tail -3 "$HOOK_OUT" | tr '\n' ' ' | head -c 200 | sed 's/["\]/\\&/g; s/[[:cntrl:]]/ /g')
   fi
+  rm -f "$HOOK_OUT"
 
   [ -n "$HOOK_DETAILS" ] && HOOK_DETAILS="$HOOK_DETAILS,"
-  HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"$HOOK_STATUS\",\"ms\":$HOOK_DUR_MS}"
+  if [ -n "$HOOK_ERROR" ]; then
+    HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"$HOOK_STATUS\",\"ms\":$HOOK_DUR_MS,\"error\":\"$HOOK_ERROR\"}"
+  else
+    HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"$HOOK_STATUS\",\"ms\":$HOOK_DUR_MS}"
+  fi
 done
 
 # Write structured results if tracking enabled

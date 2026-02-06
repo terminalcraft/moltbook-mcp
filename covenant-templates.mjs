@@ -17,6 +17,8 @@
 //   node covenant-templates.mjs match <agent>     # Suggest template for existing relationship
 //   node covenant-templates.mjs expiring [--threshold N]  # Find covenants expiring within N sessions (default: 10)
 //   node covenant-templates.mjs renew <agent> <template>  # Renew an expiring covenant
+//   node covenant-templates.mjs ceiling [--max N]         # Check covenant count against ceiling (default: 20)
+//   node covenant-templates.mjs retire <agent>            # Retire all active covenants for an agent
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
@@ -193,6 +195,20 @@ function createTemplatedCovenant(type, agent, notes = '', opts = {}) {
   if (!template) {
     console.error(`Unknown template: ${type}`);
     process.exit(1);
+  }
+
+  // Ceiling check (wq-382): warn if at/over limit
+  if (!opts.skipCeilingCheck) {
+    const ceilingStatus = getCeilingStatus();
+    if (ceilingStatus.atCeiling) {
+      console.warn(`WARNING: Covenant ceiling reached (${ceilingStatus.activeCount}/${ceilingStatus.ceiling}).`);
+      console.warn(`Retire a dormant partner first: node covenant-templates.mjs ceiling`);
+      if (!opts.force) {
+        console.error('Use --force to override ceiling, or retire a partner first.');
+        process.exit(1);
+      }
+      console.warn('Proceeding with --force override.');
+    }
   }
 
   const covenants = loadCovenants();
@@ -430,12 +446,152 @@ function renewCovenant(agent, templateType) {
   // Save before creating new (to capture the status change)
   writeJSON(COVENANTS_PATH, covenants);
 
-  // Create the renewal covenant
+  // Create the renewal covenant (skip ceiling check — renewals replace, not add)
   createTemplatedCovenant(templateType, agentHandle, renewalNote, {
     renewal_of: existingCovenant.created,
+    skipCeilingCheck: true,
   });
 
   console.log(`\nCovenant renewed. Previous covenant metrics preserved in notes.`);
+}
+
+// ============================================================================
+// CEILING MANAGEMENT (wq-382)
+// ============================================================================
+
+const DEFAULT_CEILING = 20;
+const DORMANCY_THRESHOLD = 50; // sessions since last activity to consider dormant
+
+function getCeilingStatus(maxCovenants = DEFAULT_CEILING) {
+  const covenants = loadCovenants();
+  const SESSION_HISTORY_PATH = join(STATE_DIR, 'session-history.txt');
+  const TRACE_ARCHIVE_PATH = join(STATE_DIR, 'engagement-trace-archive.json');
+  const TRACE_PATH = join(STATE_DIR, 'engagement-trace.json');
+
+  // Get current session
+  let currentSession = parseInt(process.env.SESSION_NUM, 10) || 0;
+  if (!currentSession) {
+    try {
+      const lines = readFileSync(SESSION_HISTORY_PATH, 'utf8').trim().split('\n');
+      const last = lines[lines.length - 1];
+      const match = last.match(/s=(\d+)/);
+      if (match) currentSession = parseInt(match[1]);
+    } catch {}
+  }
+
+  // Build trace index for last-seen data
+  const archive = readJSON(TRACE_ARCHIVE_PATH) || [];
+  const current = readJSON(TRACE_PATH);
+  const traces = [...archive];
+  if (Array.isArray(current)) traces.push(...current);
+  else if (current && current.session) traces.push(current);
+
+  const agentLastSeen = {};
+  for (const entry of traces) {
+    const session = entry.session || 0;
+    for (const a of (entry.agents_interacted || [])) {
+      const handle = a.replace(/^@/, '');
+      if (!agentLastSeen[handle] || session > agentLastSeen[handle]) {
+        agentLastSeen[handle] = session;
+      }
+    }
+  }
+
+  // Find all agents with active templated covenants
+  const activePartners = [];
+  for (const [name, data] of Object.entries(covenants.agents || {})) {
+    const activeCovs = (data.templated_covenants || []).filter(c => c.status === 'active');
+    if (activeCovs.length === 0) continue;
+
+    const sessions = data.sessions || [];
+    const lastCovenantSession = sessions.length > 0 ? Math.max(...sessions) : 0;
+    const lastTraceSession = agentLastSeen[name] || 0;
+    const lastActivity = Math.max(lastCovenantSession, lastTraceSession);
+    const sessionsSinceLastSeen = currentSession - lastActivity;
+
+    activePartners.push({
+      name,
+      strength: data.covenant_strength,
+      activeCovenants: activeCovs.map(c => c.template),
+      lastActivity,
+      sessionsSinceLastSeen,
+      totalSessions: sessions.length,
+    });
+  }
+
+  // Sort by dormancy (most inactive first) for retirement candidates
+  const retirementCandidates = activePartners
+    .filter(p => p.sessionsSinceLastSeen >= DORMANCY_THRESHOLD)
+    .sort((a, b) => b.sessionsSinceLastSeen - a.sessionsSinceLastSeen);
+
+  return {
+    currentSession,
+    activeCount: activePartners.length,
+    ceiling: maxCovenants,
+    atCeiling: activePartners.length >= maxCovenants,
+    overCeiling: activePartners.length > maxCovenants,
+    retirementCandidates,
+    allPartners: activePartners,
+  };
+}
+
+function showCeiling(maxCovenants = DEFAULT_CEILING) {
+  const status = getCeilingStatus(maxCovenants);
+
+  console.log(`\n=== Covenant Ceiling Check ===`);
+  console.log(`Active covenants: ${status.activeCount}/${status.ceiling}`);
+  console.log(`Status: ${status.overCeiling ? 'OVER CEILING' : status.atCeiling ? 'AT CEILING' : 'Under ceiling'}`);
+
+  if (status.retirementCandidates.length > 0) {
+    console.log(`\nRetirement candidates (${DORMANCY_THRESHOLD}+ sessions inactive):`);
+    for (const c of status.retirementCandidates) {
+      console.log(`  ${c.name} (${c.strength}) — ${c.sessionsSinceLastSeen} sessions ago, ${c.totalSessions} interactions [${c.activeCovenants.join(', ')}]`);
+    }
+    console.log(`\nRecommended: retire @${status.retirementCandidates[0].name} (least active, ${status.retirementCandidates[0].sessionsSinceLastSeen} sessions inactive)`);
+  } else {
+    console.log('\nNo dormant partners eligible for retirement.');
+  }
+
+  if (process.argv.includes('--json')) {
+    console.log('\n--- JSON Output ---');
+    console.log(JSON.stringify(status, null, 2));
+  }
+}
+
+function retireCovenant(agent) {
+  const covenants = loadCovenants();
+  const agentHandle = agent.replace(/^@/, '');
+  const agentData = covenants.agents[agentHandle];
+
+  if (!agentData || !agentData.templated_covenants) {
+    console.error(`No covenants found for @${agentHandle}`);
+    process.exit(1);
+  }
+
+  const currentSession = parseInt(process.env.SESSION_NUM, 10) || 0;
+  let retired = 0;
+
+  for (const cov of agentData.templated_covenants) {
+    if (cov.status === 'active') {
+      cov.status = 'retired';
+      cov.retired_at = new Date().toISOString();
+      cov.retired_session = currentSession;
+      cov.retired_reason = 'ceiling-management';
+      retired++;
+    }
+  }
+
+  if (retired === 0) {
+    console.log(`No active covenants to retire for @${agentHandle}`);
+    return;
+  }
+
+  covenants.last_updated = new Date().toISOString();
+  writeJSON(COVENANTS_PATH, covenants);
+
+  console.log(`Retired ${retired} active covenant(s) for @${agentHandle}`);
+  console.log(`Reason: ceiling management (partner inactive)`);
+  console.log(`Note: Relationship data preserved. Re-form covenant if partner becomes active again.`);
 }
 
 // ============================================================================
@@ -465,7 +621,8 @@ switch (command) {
     }
     const notesIdx = args.indexOf('--notes');
     const notes = notesIdx > -1 ? args[notesIdx + 1] : '';
-    createTemplatedCovenant(args[1], args[2], notes);
+    const forceCreate = args.includes('--force');
+    createTemplatedCovenant(args[1], args[2], notes, { force: forceCreate });
     break;
 
   case 'match':
@@ -491,12 +648,29 @@ switch (command) {
     renewCovenant(args[1], args[2]);
     break;
 
+  case 'ceiling': {
+    const ceilMaxIdx = args.indexOf('--max');
+    const ceilMax = ceilMaxIdx > -1 ? parseInt(args[ceilMaxIdx + 1], 10) : DEFAULT_CEILING;
+    showCeiling(ceilMax);
+    break;
+  }
+
+  case 'retire':
+    if (!args[1]) {
+      console.error('Usage: node covenant-templates.mjs retire <agent>');
+      process.exit(1);
+    }
+    retireCovenant(args[1]);
+    break;
+
   default:
-    console.log('Usage: node covenant-templates.mjs [list|describe|create|match|expiring|renew]');
+    console.log('Usage: node covenant-templates.mjs [list|describe|create|match|expiring|renew|ceiling|retire]');
     console.log('  list                       List available templates');
     console.log('  describe <type>            Show template details');
     console.log('  create <type> <agent>      Create templated covenant');
     console.log('  match <agent>              Suggest template for relationship');
     console.log('  expiring [--threshold N]   Find covenants expiring within N sessions (default: 10)');
     console.log('  renew <agent> <template>   Renew an expiring covenant');
+    console.log('  ceiling [--max N]          Check covenant count against ceiling (default: 20)');
+    console.log('  retire <agent>             Retire all active covenants for an agent');
 }

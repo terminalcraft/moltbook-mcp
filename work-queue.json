@@ -1001,6 +1001,17 @@
         "c52b312"
       ],
       "notes": "B#328 s1147: Fixed 2 of 5 flagged refs (15-log-costs.sh→15-cost-pipeline.sh in HOOKS.md and 16-structured-outcomes.sh). 3 refs were false positives: engagement-state.json exists, .well-known/ai-plugin.json is a standard web endpoint, picker-mandate.json exists."
+    },
+    {
+      "id": "wq-370",
+      "title": "Work-queue archive rotation",
+      "description": "work-queue.json has 65+ retired items. Add post-session hook that moves retired items older than 50 sessions to work-queue-archive.json, keeping active file lean for faster session-context loading.",
+      "priority": 370,
+      "status": "pending",
+      "added": "2026-02-06",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     }
   ]
 }

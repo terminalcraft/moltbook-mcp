@@ -6,6 +6,7 @@
 import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { execSync } from "child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
@@ -19,7 +20,24 @@ function loadJSON(path) {
   } catch { return null; }
 }
 
-function main() {
+async function checkMoltchanNotifications() {
+  const keyPath = join(__dirname, ".moltchan-key");
+  if (!existsSync(keyPath)) return null;
+  try {
+    const key = readFileSync(keyPath, "utf8").trim();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch("https://www.moltchan.org/api/v1/agents/me/notifications", {
+      headers: { "Authorization": `Bearer ${key}` },
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+async function main() {
   const circuits = loadJSON(CIRCUITS_PATH) || {};
   const registry = loadJSON(REGISTRY_PATH);
 
@@ -91,7 +109,10 @@ function main() {
   console.log("╚══════════════════════════════════════════════════════════════╝");
   console.log();
 
-  if (openCircuits.length === 0 && halfOpen.length === 0 && authIssues.length === 0 && recentRecoveries.length === 0) {
+  // wq-385: Check Moltchan notifications
+  const moltchanNotifs = await checkMoltchanNotifications();
+
+  if (openCircuits.length === 0 && halfOpen.length === 0 && authIssues.length === 0 && recentRecoveries.length === 0 && (!moltchanNotifs || moltchanNotifs.unread === 0)) {
     console.log("✓ All platforms healthy. No open circuits, auth issues, or recent recoveries.");
     console.log();
     return;
@@ -104,6 +125,20 @@ function main() {
       const age = Math.round((Date.now() - new Date(r.timestamp).getTime()) / (3600 * 1000));
       const ageStr = age < 1 ? "<1h ago" : `${age}h ago`;
       console.log(`   • ${r.platform}: ${r.transition} (${ageStr}, s${r.session || "?"})`);
+    }
+    console.log();
+  }
+
+  // wq-385: Show Moltchan notifications
+  if (moltchanNotifs && moltchanNotifs.unread > 0) {
+    console.log(`📬 MOLTCHAN NOTIFICATIONS (${moltchanNotifs.unread} unread):`);
+    for (const n of (moltchanNotifs.notifications || []).slice(0, 5)) {
+      const type = n.type || "unknown";
+      const preview = (n.message || n.content || "").slice(0, 60);
+      console.log(`   • [${type}] ${preview}${preview.length >= 60 ? "..." : ""}`);
+    }
+    if (moltchanNotifs.total > 5) {
+      console.log(`   ... and ${moltchanNotifs.total - 5} more`);
     }
     console.log();
   }
@@ -155,4 +190,4 @@ function main() {
   console.log("Focus engagement on picker selections; skip manual probes to excluded platforms.");
 }
 
-main();
+main().catch(e => { console.error(e.message); process.exit(1); });

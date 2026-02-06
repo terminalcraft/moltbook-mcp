@@ -26,6 +26,13 @@ function readJSON(path) {
 
 const result = {};
 
+// R#200: Dirty flag for deferred work-queue.json writes.
+// Previously the file was written up to 6 times (dedup, unblock, promote, TODO ingest,
+// friction ingest, intel promote) — each a full JSON.stringify + writeFileSync.
+// Now mutations set wqDirty=true and a single write happens at the end.
+// Benefits: fewer I/O ops, no partial-write corruption risk, simpler section code.
+let wqDirty = false;
+
 // --- Counter sync with engagement-state.json ---
 const estate = readJSON(join(STATE_DIR, 'engagement-state.json'));
 result.estate_session = estate?.session || 0;
@@ -67,7 +74,7 @@ const depsReady = (item) => !item.deps?.length || item.deps.every(d => {
       result.deduped = result.deduped || [];
       result.deduped.push(removed.id + ': ' + removed.title);
     }
-    writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+    wqDirty = true;
   }
 }
 
@@ -182,7 +189,7 @@ if (MODE === 'B' && pending.length > 0) {
     }
   }
   if (unblocked.length > 0) {
-    writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+    wqDirty = true;
     result.unblocked = unblocked;
     // Recompute pending after unblock
     result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
@@ -235,7 +242,7 @@ if (MODE === 'B' || MODE === 'R') {
         promoted.push(newId + ': ' + title);
       }
       if (promoted.length > 0) {
-        writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+        wqDirty = true;
         result.auto_promoted = promoted;
         result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
 
@@ -316,7 +323,7 @@ if (MODE === 'B') {
         ingested.push(newId);
       }
       if (ingested.length > 0) {
-        writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+        wqDirty = true;
         result.todo_ingested = ingested;
         result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
       }
@@ -358,7 +365,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
         ingested.push(newId + ': ' + title);
       }
       if (ingested.length > 0) {
-        writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+        wqDirty = true;
         result.friction_ingested = ingested;
         result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
       }
@@ -618,7 +625,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
         entry._promoted = true;
       }
       if (promoted.length > 0) {
-        writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+        wqDirty = true;
         result.intel_promoted = promoted;
         result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
       }
@@ -1340,6 +1347,12 @@ if (MODE === 'B') {
   }
 }
 markTiming('evm_balance');
+
+// R#200: Deferred work-queue.json write — single atomic write after all mutations.
+if (wqDirty) {
+  writeFileSync(join(DIR, 'work-queue.json'), JSON.stringify(wq, null, 2) + '\n');
+}
+markTiming('wq_write');
 
 // wq-336: Record total time and write timing data
 markTiming('total');

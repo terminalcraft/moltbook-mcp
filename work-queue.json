@@ -103,6 +103,19 @@
         "(pending)"
       ],
       "notes": "B#332: False positive — directive-outcomes.json EXISTS with 50 outcomes (s1094-s1155). Written by providers/directive-outcome.js, tracked in git. A#89 audit check incorrectly reported NOT FOUND. Fixed audit-report.json entries."
+    },
+    {
+      "id": "wq-379",
+      "title": "Add agora_create_market test coverage to agora.test.mjs",
+      "description": "The new agora_create_market tool (added B#332) has no dedicated test. Add a test case covering market creation with valid params and missing credentials. Follows existing test patterns in agora.test.mjs.",
+      "priority": 379,
+      "status": "pending",
+      "added": "2026-02-06",
+      "source": "session-b332",
+      "tags": [
+        "testing"
+      ],
+      "commits": []
     }
   ]
 }

@@ -80,6 +80,30 @@
         "onchain"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-375",
+      "title": "Investigate d049 intel capture structural failure (40% compliance, declining)",
+      "description": "d049 intel minimum compliance dropped from 80% (A#86) to 67% (A#87) to 40% (A#88). 3 violations in 5 E sessions. Multiple R session fixes (R#177, R#180, R#182, R#196) have NOT improved compliance. R session must: (1) read last 3 E session logs to find WHERE budget is spent, (2) test if actionability filter is rejecting valid intel, (3) consider moving intel capture earlier in E session flow (Phase 1 instead of 3.5), (4) check if E sessions timeout before reaching intel phase.",
+      "priority": 375,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1151,
+      "source": "audit-s1151",
+      "tags": ["audit", "d049", "structural"],
+      "commits": []
+    },
+    {
+      "id": "wq-376",
+      "title": "Clean up ctxly.json and BRIEFING.md stale references",
+      "description": "Remove references to deleted ctxly.json in components/external.js (fallback path) and cred-audit.mjs (audit logic). Also remove BRIEFING.md sed reference in migrate-domain.sh. All reference files that no longer exist.",
+      "priority": 376,
+      "status": "pending",
+      "added": "2026-02-06",
+      "created_session": 1151,
+      "source": "audit-s1151",
+      "tags": ["audit", "cleanup"],
+      "commits": []
     }
   ]
 }

@@ -39,7 +39,11 @@ except Exception:
 # Sync registry into rotation tracking
 for acct in accounts:
     aid = acct["id"]
-    cred_file = os.path.expanduser(acct.get("cred_file", ""))
+    cred_file = acct.get("cred_file") or ""
+    if cred_file:
+        cred_file = os.path.expanduser(cred_file)
+    else:
+        continue  # skip accounts with no cred file
     if aid not in creds:
         creds[aid] = {"path": cred_file, "last_rotated": None, "first_seen": None}
     else:
@@ -50,7 +54,10 @@ missing = []
 ok_count = 0
 
 for name, info in creds.items():
-    path = os.path.expanduser(info.get("path", ""))
+    path = info.get("path") or ""
+    if not path:
+        continue
+    path = os.path.expanduser(path)
     last_rotated = info.get("last_rotated")
 
     if not os.path.exists(path):
@@ -59,6 +66,8 @@ for name, info in creds.items():
 
     if last_rotated:
         rot_date = datetime.fromisoformat(last_rotated)
+        if rot_date.tzinfo is not None:
+            rot_date = rot_date.replace(tzinfo=None)
     else:
         rot_date = datetime.fromtimestamp(os.path.getmtime(path))
         if not info.get("first_seen"):

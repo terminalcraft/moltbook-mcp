@@ -113,12 +113,28 @@ markTiming('queue_context');
 // Items may have complexity: "S" | "M" | "L". Default is "M" if unset.
 // When remaining budget is tight (detected via BUDGET_CAP env), prefer smaller tasks.
 // Fallback (R#62): if queue is empty, extract a brainstorming idea as a fallback task.
-// Shared helper: compute max wq-NNN id from queue (R#78 — was duplicated in 2 places).
+// Shared helper: compute max wq-NNN id from queue + archive (R#78, wq-387).
+// Checks both active queue and archive to prevent ID collisions after archiving.
 function getMaxQueueId(queue) {
-  return queue.reduce((m, i) => {
+  let max = queue.reduce((m, i) => {
     const n = parseInt((i.id || '').replace('wq-', ''), 10);
     return isNaN(n) ? m : Math.max(m, n);
   }, 0);
+  // Also check archive for retired/done IDs (wq-387: prevents ID reuse)
+  try {
+    const archivePath = join(DIR, 'work-queue-archive.json');
+    if (existsSync(archivePath)) {
+      const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
+      const archived = archive.archived || archive;
+      if (Array.isArray(archived)) {
+        for (const item of archived) {
+          const n = parseInt((item.id || '').replace('wq-', ''), 10);
+          if (!isNaN(n) && n > max) max = n;
+        }
+      }
+    }
+  } catch { /* archive missing or malformed — use queue max only */ }
+  return max;
 }
 
 // Shared fuzzy title matcher (R#79 — was duplicated in 3 places with slight variations).

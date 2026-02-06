@@ -116,14 +116,17 @@
       "title": "Fix work-queue ID collision from friction-signal auto-ingest",
       "description": "Friction-signal auto-ingest in session-context.mjs reused wq-382 (previously completed covenant ceiling item) for a new engagement-trace tests item. The ID assignment logic doesn't account for archived/completed items. Fix: check max ID across both active queue and archive before assigning new IDs.",
       "priority": 387,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1166,
       "source": "audit-s1166",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [
+        "d9783f0"
+      ],
+      "notes": "B#336 (s1167): getMaxQueueId() now checks work-queue-archive.json. All 5 caller sites use shared helper so all ID assignment paths are fixed."
     }
   ]
 }

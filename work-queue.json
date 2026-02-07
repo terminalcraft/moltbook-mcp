@@ -71,7 +71,7 @@
       "title": "Build hook performance budget tracker",
       "description": "Pre-session hooks run sequentially and can eat session budget. Build hook-perf-tracker.mjs that times per-hook execution, logs to hook-perf.json, and flags hooks >10s as slow. Add /status/hooks/perf endpoint for visibility.",
       "priority": 405,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-07",
       "created_session": 1189,
       "source": "brainstorming",
@@ -79,7 +79,8 @@
         "tooling",
         "performance"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#346 (s1192): Already implemented — /status/hooks endpoint (api.mjs:2838 + 12479) aggregates per-hook timing, computes avg/p50/p95, flags slow hooks, provides JSON+HTML dashboard. run-hooks.sh logs per-hook timing to hook-results.json. No separate hook-perf-tracker.mjs needed."
     },
     {
       "id": "wq-406",

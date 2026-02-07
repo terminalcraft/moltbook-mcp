@@ -26,11 +26,15 @@ SOURCE="none"
 AGENT_COST_FILE="$STATE_DIR/session-cost.txt"
 
 # Priority 1: Agent-reported cost (includes subagent costs)
+# Skip for A sessions: they write session-cost.txt mid-session before post-hooks
+# finalize, so the agent-reported value is understated (wq-403).
 if [ -f "$AGENT_COST_FILE" ]; then
-  AGENT_SPENT=$(grep -oP 'BUDGET_SPENT=\K[0-9.]+' "$AGENT_COST_FILE" 2>/dev/null || true)
-  if [ -n "$AGENT_SPENT" ] && [ "$AGENT_SPENT" != "0" ]; then
-    SPENT="$AGENT_SPENT"
-    SOURCE="agent-reported"
+  if [ "${MODE_CHAR:-?}" != "A" ]; then
+    AGENT_SPENT=$(grep -oP 'BUDGET_SPENT=\K[0-9.]+' "$AGENT_COST_FILE" 2>/dev/null || true)
+    if [ -n "$AGENT_SPENT" ] && [ "$AGENT_SPENT" != "0" ]; then
+      SPENT="$AGENT_SPENT"
+      SOURCE="agent-reported"
+    fi
   fi
   rm -f "$AGENT_COST_FILE"
 fi

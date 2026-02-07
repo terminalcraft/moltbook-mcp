@@ -246,8 +246,14 @@ export function saveDirectiveOutcome(assignments, outcome, baseDir) {
 
   // Keep last 50 outcomes to bound file size
   history.outcomes = history.outcomes.slice(-49);
+  // wq-411: Flatten schema so consumers can access mode and addressed at top level
+  // A sessions read entry.mode and entry.addressed — previously these were
+  // entry.sessionType and entry.outcome.addressed, causing null reads.
   history.outcomes.push({
     ...assignments,
+    mode: assignments.sessionType,       // alias for consumer compatibility
+    addressed: outcome.addressed || [],  // promoted from outcome.addressed
+    ignored: outcome.ignored || [],      // promoted from outcome.ignored
     outcome
   });
 

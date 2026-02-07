@@ -2,26 +2,25 @@
 # Pre-hook: Run engagement platform liveness probe before E sessions.
 # Opens circuits for degraded platforms so platform-picker excludes them.
 # wq-197: Engagement platform liveness monitor
+# R#206: Added 12s hard timeout + dropped platform-health.mjs (redundant, saves 2-3s)
 #
 # Only runs for E sessions (enforced by _E.sh filename suffix).
 
 echo "[liveness] Probing engagement platforms..."
 cd /home/moltbot/moltbook-mcp
 
-# Run probe and capture summary
-output=$(node engagement-liveness-probe.mjs 2>&1)
+# Hard timeout: 12s max for entire hook (probe has its own 8s global timeout)
+output=$(timeout 12 node engagement-liveness-probe.mjs 2>&1)
 exit_code=$?
 
 # Print output
 echo "$output"
 
-# If probe failed, warn but don't block session
-if [ $exit_code -ne 0 ]; then
-  echo "[liveness] WARNING: Probe failed, continuing with cached circuit state"
+# Interpret exit
+if [ $exit_code -eq 124 ]; then
+  echo "[liveness] WARNING: Probe exceeded 12s hard limit, killed. Using cached circuit state."
+elif [ $exit_code -ne 0 ]; then
+  echo "[liveness] WARNING: Probe failed (exit $exit_code), continuing with cached circuit state"
 fi
-
-# wq-317: Show platform health summary including recent recoveries
-echo ""
-node platform-health.mjs 2>/dev/null || true
 
 echo "[liveness] Done."

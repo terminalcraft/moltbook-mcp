@@ -23,8 +23,10 @@ const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const SERVICES_PATH = join(__dirname, "services.json");
 
-const PROBE_TIMEOUT = 5000; // 5s per platform — keep it fast
+const PROBE_TIMEOUT = 3000; // 3s per platform — fast timeout, most respond in <1s
 const CIRCUIT_OPEN_THRESHOLD = 2; // Mark circuit open after 2 consecutive failures
+const BATCH_SIZE = 15; // Probe 15 at a time to avoid overwhelming DNS/network
+const GLOBAL_TIMEOUT = 8000; // Hard cap: entire probe must finish in 8s
 
 // Platform URL mapping (registry has platform names, need to map to URLs)
 // Some platforms have dedicated test endpoints in registry, use those if available
@@ -135,14 +137,28 @@ async function main() {
     probeTasks.push({ account, url });
   }
 
-  // Probe all platforms in parallel — 47 sequential probes at 5s timeout
-  // was causing 30s+ hook runtime. Parallel brings it under 6s worst-case.
-  const probeResults = await Promise.allSettled(
-    probeTasks.map(async ({ account, url }) => {
-      const probe = await probeUrl(url);
-      return { account, url, probe };
-    })
-  );
+  // R#206: Hard global timeout kills the process if probes hang.
+  // 47 parallel DNS lookups overwhelm VPS resolver (30s+ observed).
+  // Process.exit is the only reliable way to abort hanging fetch() calls.
+  const forceExitTimer = setTimeout(() => {
+    if (!jsonOutput) console.log(`[!] Hard timeout (${GLOBAL_TIMEOUT}ms) — force exiting with cached circuit state`);
+    process.exit(0); // Exit cleanly so hook doesn't report failure
+  }, GLOBAL_TIMEOUT);
+  // Note: do NOT unref — we need this timer to fire even if fetches are pending
+
+  // Batch into groups to reduce DNS pressure
+  const probeResults = [];
+  for (let i = 0; i < probeTasks.length; i += BATCH_SIZE) {
+    const batch = probeTasks.slice(i, i + BATCH_SIZE);
+    const batchResults = await Promise.allSettled(
+      batch.map(async ({ account, url }) => {
+        const probe = await probeUrl(url);
+        return { account, url, probe };
+      })
+    );
+    probeResults.push(...batchResults);
+  }
+  clearTimeout(forceExitTimer);
 
   // Process results and update circuits
   for (const settled of probeResults) {

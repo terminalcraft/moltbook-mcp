@@ -100,14 +100,15 @@
       "title": "Fix A session cost-history understatement from early agent-reported writes",
       "description": "A sessions write session-cost.txt mid-session before post-hooks finalize. Cost-history records $0.14-$0.58 for A sessions while session-history shows $1.12-$2.40. Fix: either move session-cost.txt write to very end of session OR skip agent-reported source for A sessions (15-cost-pipeline.sh already falls back to token-calc).",
       "priority": 403,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-07",
       "created_session": 1186,
       "source": "audit-s1186",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": ["32f839c"],
+      "notes": "B#344 (s1187): Fixed in 15-cost-pipeline.sh — A sessions now skip agent-reported cost, fall through to token-calc. Also backfilled 4 historical entries in cost-history.json (s1166, s1171, s1181, s1186)."
     },
     {
       "id": "wq-404",

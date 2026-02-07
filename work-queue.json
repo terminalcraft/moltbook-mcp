@@ -61,14 +61,17 @@
       "title": "Consolidate duplicate /status/hooks endpoints in api.mjs",
       "description": "Two /status/hooks handlers exist (lines ~2838 and ~12479) with different response schemas. Remove the older one and keep the more complete handler.",
       "priority": 408,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-07",
       "created_session": 1192,
       "source": "brainstorming",
       "tags": [
         "cleanup"
       ],
-      "commits": []
+      "commits": [
+        "5690ae1"
+      ],
+      "notes": "B#347 (s1194): Removed duplicate /status/hooks handler (wq-109, 115 lines). Kept wq-039 performance dashboard with percentile timing stats."
     },
     {
       "id": "wq-409",

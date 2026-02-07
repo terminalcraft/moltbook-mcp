@@ -25,6 +25,10 @@ SPENT=""
 SOURCE="none"
 AGENT_COST_FILE="$STATE_DIR/session-cost.txt"
 
+# Capture BOTH sources for dual-record accuracy tracking (wq-409)
+DUAL_AGENT_COST=""
+DUAL_TOKEN_COST=""
+
 # Priority 1: Agent-reported cost (includes subagent costs)
 # Skip if value < $0.10: catches A sessions writing mid-session (wq-403) AND
 # B/R/E sessions writing $0 or near-zero (wq-406, e.g. s1189).
@@ -32,6 +36,7 @@ AGENT_COST_FILE="$STATE_DIR/session-cost.txt"
 if [ -f "$AGENT_COST_FILE" ]; then
   AGENT_SPENT=$(grep -oP 'BUDGET_SPENT=\K[0-9.]+' "$AGENT_COST_FILE" 2>/dev/null || true)
   if [ -n "$AGENT_SPENT" ]; then
+    DUAL_AGENT_COST="$AGENT_SPENT"
     # Use awk for float comparison: only trust agent-reported if >= 0.10
     if echo "$AGENT_SPENT" | awk '{exit ($1 >= 0.10) ? 0 : 1}'; then
       SPENT="$AGENT_SPENT"
@@ -41,11 +46,13 @@ if [ -f "$AGENT_COST_FILE" ]; then
   rm -f "$AGENT_COST_FILE"
 fi
 
-# Priority 2: Token-based calculation
-if [ -z "$SPENT" ] || [ "$SPENT" = "0.0000" ]; then
-  COST_JSON=$(python3 "$DIR/scripts/calc-session-cost.py" "$LOG_FILE" --json 2>/dev/null || true)
-  if [ -n "$COST_JSON" ]; then
-    SPENT=$(echo "$COST_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'{d[\"cost_usd\"]:.4f}')" 2>/dev/null || true)
+# Always compute token-calc for dual-record (wq-409), use as primary if agent-reported not available
+COST_JSON=$(python3 "$DIR/scripts/calc-session-cost.py" "$LOG_FILE" --json 2>/dev/null || true)
+if [ -n "$COST_JSON" ]; then
+  TOKEN_COST=$(echo "$COST_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'{d[\"cost_usd\"]:.4f}')" 2>/dev/null || true)
+  DUAL_TOKEN_COST="$TOKEN_COST"
+  if [ -z "$SPENT" ] || [ "$SPENT" = "0.0000" ]; then
+    SPENT="$TOKEN_COST"
     SOURCE="token-calc"
   fi
 fi
@@ -244,3 +251,9 @@ if mode == "E":
         except Exception as e:
             print(f"e-budget-gate: error - {e}")
 PYEOF
+
+# === Step 7: Cost accuracy dual-record (wq-409) ===
+# Records both agent-reported and token-calc costs for every session.
+# Passes pre-captured values from step 1 so no file re-reading needed.
+DUAL_AGENT_COST="$DUAL_AGENT_COST" DUAL_TOKEN_COST="$DUAL_TOKEN_COST" \
+  node "$DIR/cost-accuracy-validator.mjs" --post-hook 2>/dev/null || true

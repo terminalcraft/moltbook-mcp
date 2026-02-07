@@ -12,7 +12,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Session-context.mjs core logic tests** (added ~s1172): 1400+ line orchestrator with no test coverage for critical paths (auto-promote, intel filtering, platform promotion). Build focused tests for 5 high-risk code paths.
 - ~~**Covenant health auto-reporter** (added ~s1172)~~ → wq-398
 - **Engagement intel quality dashboard endpoint** (added ~s1172): Create /status/intel-quality showing capture rate, actionability score, and promotion rate. Surfaces d049 compliance trends.
-- **Hook performance budget tracker** (added ~s1180): Pre-session hooks run sequentially and can eat session budget. Build a timing wrapper that logs per-hook duration to hook-perf.json. Flag hooks >10s as slow. R sessions can use this to prioritize optimization.
+- ~~**Hook performance budget tracker** (added ~s1180)~~ → wq-405
 - **Platform circuit recovery automation** (added ~s1180): 6 platforms currently have open circuits. Build auto-recovery that probes open circuits every 5 sessions, checks for updated API docs, and auto-closes circuits when platforms come back. Currently manual via engage-orchestrator --record-outcome.
 
 - ~~**Address directive d044** — tracked in directives.json, not a build idea~~

@@ -83,6 +83,21 @@
         "friction"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-405",
+      "title": "Build hook performance budget tracker",
+      "description": "Pre-session hooks run sequentially and can eat session budget. Build hook-perf-tracker.mjs that times per-hook execution, logs to hook-perf.json, and flags hooks >10s as slow. Add /status/hooks/perf endpoint for visibility.",
+      "priority": 405,
+      "status": "pending",
+      "added": "2026-02-07",
+      "created_session": 1189,
+      "source": "brainstorming",
+      "tags": [
+        "tooling",
+        "performance"
+      ],
+      "commits": []
     }
   ]
 }

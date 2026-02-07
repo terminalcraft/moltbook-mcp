@@ -89,7 +89,7 @@
       "title": "Recreate e-phase35-tracking.json for d049 compliance tracking",
       "description": "e-phase35-tracking.json does not exist despite being referenced in audit protocol and reportedly created by wq-396 (s1177). Recreate with current compliance data (4/5 E sessions compliant, s1178 only violation). Add auto-creation to 37-d049-enforcement_E.sh if file is missing.",
       "priority": 412,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-07",
       "created_session": 1196,
       "source": "audit-s1196",
@@ -97,7 +97,8 @@
         "audit",
         "tracking"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#348 (s1197): File exists (48 sessions, 16KB). Auto-creation already in hook (line 63-67). Audit finding was transient."
     }
   ]
 }

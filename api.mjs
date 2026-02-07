@@ -8,6 +8,7 @@ import { extractFromRepo, parseGitHubUrl } from "./packages/pattern-extractor/in
 import { analyzeReplayLog } from "./providers/replay-log.js";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 import { summarizeChatr } from "./providers/chatr-digest.js";
+import { generateDigest as generateCovenantDigest, formatHumanReadable as formatCovenantDigest, formatCompact as compactCovenantDigest } from "./covenant-health-digest.mjs";
 import { predictQueue, predictOutcome, validatePredictor } from "./queue-outcome-predictor.mjs";
 
 const app = express();
@@ -5367,6 +5368,65 @@ td{padding:.5rem;border-bottom:1px solid #222}tr:hover{background:#111}
     return res.type("html").send(html);
   } catch (e) {
     res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+// Covenant health digest — auto-reporter with near-expiry, declining engagement, candidates, retirement (wq-398)
+app.get("/status/covenants/digest", (req, res) => {
+  try {
+    const digest = generateCovenantDigest();
+    if (digest.error) return res.status(500).json({ error: digest.error });
+    const format = req.query.format || (req.headers.accept?.includes("text/html") ? "html" : "json");
+    if (format === "json") return res.json({ timestamp: new Date().toISOString(), ...digest });
+    if (format === "compact") return res.type("text").send(compactCovenantDigest(digest));
+    if (format === "text") return res.type("text").send(formatCovenantDigest(digest));
+    // HTML dashboard
+    const d = digest;
+    const actionRows = d.action_items.map(a => {
+      const prioColor = { critical: "#ef4444", high: "#f59e0b", medium: "#3b82f6", low: "#666" }[a.priority] || "#666";
+      return `<tr><td style="color:${prioColor};font-weight:600">${a.priority.toUpperCase()}</td><td>${a.action}</td><td style="color:#8b5cf6">@${a.agent}</td><td>${a.template || "—"}</td><td style="color:#888">${a.detail}</td></tr>`;
+    }).join("") || `<tr><td colspan="5" style="color:#555;text-align:center">No action items</td></tr>`;
+    const expiryRows = d.near_expiry.map(e => {
+      const urgColor = { expired: "#ef4444", urgent: "#f59e0b", warning: "#3b82f6" }[e.urgency] || "#888";
+      return `<tr><td style="color:${urgColor};font-weight:600">${e.urgency.toUpperCase()}</td><td style="color:#8b5cf6">@${e.agent}</td><td>${e.template}</td><td>${e.sessions_remaining <= 0 ? Math.abs(e.sessions_remaining) + " overdue" : e.sessions_remaining + " left"}</td></tr>`;
+    }).join("") || `<tr><td colspan="4" style="color:#555;text-align:center">No near-expiry covenants</td></tr>`;
+    const retireRows = d.retirement_candidates.slice(0, 8).map(r => {
+      const prioColor = r.retirement_priority === "high" ? "#ef4444" : "#f59e0b";
+      return `<tr><td style="color:${prioColor}">${r.retirement_priority.toUpperCase()}</td><td style="color:#8b5cf6">@${r.agent}</td><td>${r.strength}</td><td>${r.active_covenants.join(", ")}</td><td>${r.sessions_since_last}</td><td>${r.zero_metrics ? "Yes" : "No"}</td></tr>`;
+    }).join("") || `<tr><td colspan="6" style="color:#555;text-align:center">No retirement candidates</td></tr>`;
+    const candidateRows = d.covenant_candidates.slice(0, 8).map(c =>
+      `<tr><td style="color:#8b5cf6">@${c.agent}</td><td>${c.strength}</td><td>${c.total_sessions}</td><td>${c.platforms}</td><td>${c.suggested_template}</td></tr>`
+    ).join("") || `<tr><td colspan="5" style="color:#555;text-align:center">No candidates</td></tr>`;
+    const s = d.summary;
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Covenant Health Digest</title>
+<style>body{font-family:system-ui,monospace;background:#0a0a0a;color:#e0e0e0;max-width:900px;margin:0 auto;padding:2rem}
+h1{color:#22c55e;border-bottom:1px solid #333;padding-bottom:0.5rem}h2{color:#8b5cf6;margin-top:2rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0}th,td{padding:0.4rem 0.8rem;text-align:left;border-bottom:1px solid #222}
+th{color:#888;font-size:0.8rem;text-transform:uppercase}.stats{display:flex;gap:2rem;margin:1rem 0}
+.stat{text-align:center}.stat .label{font-size:0.75rem;color:#888}.stat .value{font-size:1.5rem;font-weight:700;color:#22c55e}
+</style></head><body>
+<h1>Covenant Health Digest</h1>
+<div class="stats">
+  <div class="stat"><div class="label">Active Covenants</div><div class="value">${s.active_covenants}</div></div>
+  <div class="stat"><div class="label">Tracked Agents</div><div class="value">${s.total_tracked}</div></div>
+  <div class="stat"><div class="label">Mutual</div><div class="value" style="color:#8b5cf6">${s.by_strength.mutual}</div></div>
+  <div class="stat"><div class="label">Strong</div><div class="value" style="color:#3b82f6">${s.by_strength.strong}</div></div>
+  <div class="stat"><div class="label">Actions</div><div class="value" style="color:${d.action_items.some(a=>a.priority==="critical")?"#ef4444":"#f59e0b"}">${d.action_items.length}</div></div>
+</div>
+<h2>Action Items</h2>
+<table><thead><tr><th>Priority</th><th>Action</th><th>Agent</th><th>Template</th><th>Detail</th></tr></thead><tbody>${actionRows}</tbody></table>
+<h2>Near-Expiry Covenants</h2>
+<table><thead><tr><th>Urgency</th><th>Agent</th><th>Template</th><th>Status</th></tr></thead><tbody>${expiryRows}</tbody></table>
+<h2>Retirement Candidates</h2>
+<table><thead><tr><th>Priority</th><th>Agent</th><th>Strength</th><th>Covenants</th><th>Sessions Ago</th><th>Zero Metrics</th></tr></thead><tbody>${retireRows}</tbody></table>
+<h2>Covenant Candidates</h2>
+<p style="color:#666;font-size:0.85rem">Strong/mutual agents without formal covenants</p>
+<table><thead><tr><th>Agent</th><th>Strength</th><th>Sessions</th><th>Platforms</th><th>Suggested</th></tr></thead><tbody>${candidateRows}</tbody></table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem">Session ${s.session} · ${s.generated_at} · <a href="?format=json" style="color:#3b82f6">JSON</a> · <a href="?format=text" style="color:#3b82f6">Text</a> · <a href="/status/covenants" style="color:#3b82f6">Covenants</a></p>
+</body></html>`;
+    return res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 200) });
   }
 });
 

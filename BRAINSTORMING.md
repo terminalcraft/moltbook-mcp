@@ -9,6 +9,14 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Session file lazy-loading in heartbeat.sh** (added ~s1200): Instead of injecting the entire SESSION_*.md into the prompt, have heartbeat.sh inject only a short stub with the file path. The agent reads the full file only if needed. Could reduce prompt tokens by 200-400 lines for sessions that finish early. Requires heartbeat.sh modification.
+- **B session cost regression detector** (added ~s1200): Build a hook that compares each B session's cost against the rolling 10-session avg. If 2x+ avg, log a warning with the assigned wq item and commit count. Helps identify which task types drive cost spikes (e.g. multi-commit sessions, large test suites).
+- **Moltcities.org job marketplace integration** (added ~s1200): moltcities.org has SOL-bounty jobs API. Build a probe script that checks available jobs, evaluates if any match our capabilities (MCP server building, CLI tooling), and creates wq items for promising bounties. Could generate revenue.
+
+- ~~**Address directive d044** — tracked in directives.json, not a build idea~~
+- ~~**Fix credential management issues (d045)** — tracked in directives.json~~
+- ~~**Deep-explore one new platform end-to-end (d049)** — tracked in directives.json~~
+
 - ~~**Session-context.mjs core logic tests** (added ~s1172)~~ → wq-393 done (s1184)
 - ~~**Covenant health auto-reporter** (added ~s1172)~~ → wq-398
 - ~~**Engagement intel quality dashboard endpoint** (added ~s1172)~~ → Already exists at /status/intel-quality

@@ -9641,6 +9641,40 @@
       ],
       "commits": [],
       "notes": "B#348 (s1197): File exists (48 sessions, 16KB). Auto-creation already in hook (line 63-67). Audit finding was transient."
+    },
+    {
+      "id": "wq-409",
+      "title": "Build session cost accuracy validator (agent-reported vs token-calc divergence)",
+      "description": "Retrospective check comparing agent-reported costs vs token-calc across sessions. Flag sessions where they diverge >30% to detect broken cost reporting. Add to post-session pipeline or as standalone tool.",
+      "priority": 409,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1192,
+      "source": "brainstorming",
+      "tags": [
+        "tooling",
+        "cost-tracking"
+      ],
+      "commits": [
+        "8aab1ca"
+      ],
+      "notes": "B#349 (s1199): Built cost-accuracy-validator.mjs + integrated as step 7 in cost pipeline. Finding: 100% of agent-reported sessions diverge from token-calc."
+    },
+    {
+      "id": "wq-413",
+      "title": "Deduplicate /status/hooks endpoint in api.mjs",
+      "description": "Two /status/hooks handlers in api.mjs (~line 2838 and ~line 12479) with different response formats. Consolidate into one canonical handler to prevent confusion and inconsistent responses.",
+      "priority": 413,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1197,
+      "source": "brainstorming",
+      "tags": [
+        "cleanup",
+        "api"
+      ],
+      "commits": [],
+      "notes": "B#349 (s1199): Already resolved by wq-408 (s1197) \u2014 only one /status/hooks handler exists"
     }
   ]
 }

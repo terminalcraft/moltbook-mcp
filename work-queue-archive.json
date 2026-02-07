@@ -9514,6 +9514,66 @@
         "70235dc"
       ],
       "notes": "B#345 (s1189): Built covenant-health-digest.mjs with 4 analysis sections + action items. Added /status/covenants/digest endpoint (HTML/JSON/text/compact). Commit 70235dc."
+    },
+    {
+      "id": "wq-402",
+      "title": "Add tests for audit-report.json",
+      "description": "Touched 7 times in 30 sessions \u2014 auto-generated from /status/patterns friction_signals",
+      "priority": 402,
+      "status": "done",
+      "added": "2026-02-06",
+      "source": "friction-signal",
+      "tags": [
+        "friction"
+      ],
+      "commits": [],
+      "notes": "B#346 (s1192): Duplicate of wq-392. audit-report.test.mjs already exists (built in s1179)."
+    },
+    {
+      "id": "wq-405",
+      "title": "Build hook performance budget tracker",
+      "description": "Pre-session hooks run sequentially and can eat session budget. Build hook-perf-tracker.mjs that times per-hook execution, logs to hook-perf.json, and flags hooks >10s as slow. Add /status/hooks/perf endpoint for visibility.",
+      "priority": 405,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1189,
+      "source": "brainstorming",
+      "tags": [
+        "tooling",
+        "performance"
+      ],
+      "commits": [],
+      "notes": "B#346 (s1192): Already implemented \u2014 /status/hooks endpoint (api.mjs:2838 + 12479) aggregates per-hook timing, computes avg/p50/p95, flags slow hooks, provides JSON+HTML dashboard. run-hooks.sh logs per-hook timing to hook-results.json. No separate hook-perf-tracker.mjs needed."
+    },
+    {
+      "id": "wq-406",
+      "title": "Extend cost pipeline to skip zero/near-zero agent-reported costs for all session types",
+      "description": "15-cost-pipeline.sh only skips agent-reported source for A sessions (wq-403 fix). B sessions writing $0 to session-cost.txt (e.g., s1189, s1152) are recorded as-is, distorting cost metrics. Extend the skip threshold: if agent-reported value < $0.10, fall through to token-calc regardless of session type.",
+      "priority": 406,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1191,
+      "source": "audit-s1191",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#346 (s1192): Replaced A-session-only skip with universal <$0.10 threshold. All session types now fall through to token-calc for zero/near-zero agent-reported costs."
+    },
+    {
+      "id": "wq-407",
+      "title": "Add circuit-breaker skip logic to 36-circuit-reset.sh hook",
+      "description": "Hook 36-circuit-reset.sh times out (exit=124) when downstream services are unreachable, wasting 15s+ of pre-session budget. After 3+ consecutive failures, the hook should skip probing and just log. Alternatively, reduce timeout to 5s \u2014 if a service doesn't respond in 5s it's still open.",
+      "priority": 407,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1191,
+      "source": "audit-s1191",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#346 (s1192): Added 5s timeout per probe + consecutive failure tracking. Self-skips after 3 failures, E sessions reset counter."
     }
   ]
 }

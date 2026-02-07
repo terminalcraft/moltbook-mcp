@@ -80,6 +80,34 @@
         "performance"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-406",
+      "title": "Extend cost pipeline to skip zero/near-zero agent-reported costs for all session types",
+      "description": "15-cost-pipeline.sh only skips agent-reported source for A sessions (wq-403 fix). B sessions writing $0 to session-cost.txt (e.g., s1189, s1152) are recorded as-is, distorting cost metrics. Extend the skip threshold: if agent-reported value < $0.10, fall through to token-calc regardless of session type.",
+      "priority": 406,
+      "status": "pending",
+      "added": "2026-02-07",
+      "created_session": 1191,
+      "source": "audit-s1191",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-407",
+      "title": "Add circuit-breaker skip logic to 36-circuit-reset.sh hook",
+      "description": "Hook 36-circuit-reset.sh times out (exit=124) when downstream services are unreachable, wasting 15s+ of pre-session budget. After 3+ consecutive failures, the hook should skip probing and just log. Alternatively, reduce timeout to 5s — if a service doesn't respond in 5s it's still open.",
+      "priority": 407,
+      "status": "pending",
+      "added": "2026-02-07",
+      "created_session": 1191,
+      "source": "audit-s1191",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

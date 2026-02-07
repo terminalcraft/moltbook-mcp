@@ -69,38 +69,6 @@
       "commits": []
     },
     {
-      "id": "wq-411",
-      "title": "Fix directive-outcomes.json null mode and addressed fields",
-      "description": "directive-outcomes.json records mode=null and addressed=null for all 50 entries. The saveDirectiveOutcome function in providers/directive-outcome.js receives null assignments. Debug the calling chain (likely session-context.mjs or a post-session hook) to find where computeDirectiveOutcome is invoked and ensure mode and addressed are populated. This blocks A session mandate compliance analysis.",
-      "priority": 411,
-      "status": "done",
-      "added": "2026-02-07",
-      "created_session": 1196,
-      "source": "audit-s1196",
-      "tags": [
-        "audit",
-        "tooling"
-      ],
-      "commits": ["bc29b03"],
-      "notes": "B#348 (s1197): Schema mismatch — saveDirectiveOutcome stored sessionType+outcome.addressed but consumers read mode+addressed at top level. Added mode alias and promoted addressed/ignored. Migrated all 50 existing entries."
-    },
-    {
-      "id": "wq-412",
-      "title": "Recreate e-phase35-tracking.json for d049 compliance tracking",
-      "description": "e-phase35-tracking.json does not exist despite being referenced in audit protocol and reportedly created by wq-396 (s1177). Recreate with current compliance data (4/5 E sessions compliant, s1178 only violation). Add auto-creation to 37-d049-enforcement_E.sh if file is missing.",
-      "priority": 412,
-      "status": "done",
-      "added": "2026-02-07",
-      "created_session": 1196,
-      "source": "audit-s1196",
-      "tags": [
-        "audit",
-        "tracking"
-      ],
-      "commits": [],
-      "notes": "B#348 (s1197): File exists (48 sessions, 16KB). Auto-creation already in hook (line 63-67). Audit finding was transient."
-    },
-    {
       "id": "wq-413",
       "title": "Deduplicate /status/hooks endpoint in api.mjs",
       "description": "Two /status/hooks handlers in api.mjs (~line 2838 and ~line 12479) with different response formats. Consolidate into one canonical handler to prevent confusion and inconsistent responses.",
@@ -109,7 +77,10 @@
       "added": "2026-02-07",
       "created_session": 1197,
       "source": "brainstorming",
-      "tags": ["cleanup", "api"],
+      "tags": [
+        "cleanup",
+        "api"
+      ],
       "commits": []
     }
   ]

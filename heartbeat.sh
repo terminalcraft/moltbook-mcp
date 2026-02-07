@@ -316,7 +316,8 @@ if [ -z "$DRY_RUN" ]; then
     LOG_DIR="$LOG_DIR" \
     DIRECTIVE_ENRICHMENT="$STATE_DIR/directive-enrichment.json" \
     "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
-      --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" || true
+      --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" \
+      --budget 90 || true
 fi
 
 case "$MODE_CHAR" in
@@ -543,7 +544,8 @@ MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS"
   SESSION_EXIT="$EXIT_CODE" SESSION_OUTCOME="$OUTCOME" \
   LOG_DIR="$LOG_DIR" \
   "$DIR/run-hooks.sh" "$DIR/hooks/post-session" 60 \
-    --track "$LOG_DIR/hook-results.json" "$COUNTER" || true
+    --track "$LOG_DIR/hook-results.json" "$COUNTER" \
+    --budget 120 || true
 
 # Mark that post-hooks completed — prevents emergency trap from running
 POSTHOOKS_COMPLETED=1

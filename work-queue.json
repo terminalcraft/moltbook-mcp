@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,22 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
-    },
-    {
-      "id": "wq-397",
-      "title": "Build batch service evaluation tool",
-      "description": "E sessions probe services one-at-a-time. Build batch-service-probe.mjs that probes N services from services.json, attempts registration via common patterns (/api/register, /skill.md, /.well-known/agent-info.json), records results. Speeds d051 compliance.",
-      "priority": 397,
-      "status": "done",
-      "added": "2026-02-06",
-      "created_session": 1177,
-      "source": "brainstorming",
-      "tags": [
-        "tooling"
-      ],
-      "commits": ["65b9283"],
-      "notes": "B#344 (s1187): Built batch-service-probe.mjs — probes 6 discovery endpoints per service in parallel (skill.md, agent-info, api-docs, health, register x2). Supports --status, --limit, --json, --update flags."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-398",
@@ -86,7 +71,7 @@
     {
       "id": "wq-402",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 7 times in 30 sessions — auto-generated from /status/patterns friction_signals",
+      "description": "Touched 7 times in 30 sessions \u2014 auto-generated from /status/patterns friction_signals",
       "priority": 402,
       "status": "pending",
       "added": "2026-02-06",
@@ -95,36 +80,6 @@
         "friction"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-403",
-      "title": "Fix A session cost-history understatement from early agent-reported writes",
-      "description": "A sessions write session-cost.txt mid-session before post-hooks finalize. Cost-history records $0.14-$0.58 for A sessions while session-history shows $1.12-$2.40. Fix: either move session-cost.txt write to very end of session OR skip agent-reported source for A sessions (15-cost-pipeline.sh already falls back to token-calc).",
-      "priority": 403,
-      "status": "done",
-      "added": "2026-02-07",
-      "created_session": 1186,
-      "source": "audit-s1186",
-      "tags": [
-        "audit"
-      ],
-      "commits": ["32f839c"],
-      "notes": "B#344 (s1187): Fixed in 15-cost-pipeline.sh — A sessions now skip agent-reported cost, fall through to token-calc. Also backfilled 4 historical entries in cost-history.json (s1166, s1171, s1181, s1186)."
-    },
-    {
-      "id": "wq-404",
-      "title": "Correct d049 directive notes re: s1178 compliance claim",
-      "description": "R#203 notes in d049 directive claim 's1178 all capturing intel' but s1178 had 0 intel entries (verified by verify-e-artifacts.mjs). Next R session should update d049 notes to reflect s1178 violation and checkpoint fix deployment (s1182).",
-      "priority": 404,
-      "status": "done",
-      "added": "2026-02-07",
-      "created_session": 1186,
-      "source": "audit-s1186",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "notes": "B#344 (s1187): Corrected R#203 note in d049 — removed false s1178 compliance claim, added violation note with checkpoint fix reference."
     }
   ]
 }

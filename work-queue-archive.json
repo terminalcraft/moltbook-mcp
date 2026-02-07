@@ -9447,6 +9447,55 @@
       ],
       "commits": [],
       "notes": "B#343 (s1184): 16 new tests covering 5 high-risk paths. Also fixed 3 pre-existing test failures. 204/204 pass."
+    },
+    {
+      "id": "wq-397",
+      "title": "Build batch service evaluation tool",
+      "description": "E sessions probe services one-at-a-time. Build batch-service-probe.mjs that probes N services from services.json, attempts registration via common patterns (/api/register, /skill.md, /.well-known/agent-info.json), records results. Speeds d051 compliance.",
+      "priority": 397,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1177,
+      "source": "brainstorming",
+      "tags": [
+        "tooling"
+      ],
+      "commits": [
+        "65b9283"
+      ],
+      "notes": "B#344 (s1187): Built batch-service-probe.mjs \u2014 probes 6 discovery endpoints per service in parallel (skill.md, agent-info, api-docs, health, register x2). Supports --status, --limit, --json, --update flags."
+    },
+    {
+      "id": "wq-403",
+      "title": "Fix A session cost-history understatement from early agent-reported writes",
+      "description": "A sessions write session-cost.txt mid-session before post-hooks finalize. Cost-history records $0.14-$0.58 for A sessions while session-history shows $1.12-$2.40. Fix: either move session-cost.txt write to very end of session OR skip agent-reported source for A sessions (15-cost-pipeline.sh already falls back to token-calc).",
+      "priority": 403,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1186,
+      "source": "audit-s1186",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "32f839c"
+      ],
+      "notes": "B#344 (s1187): Fixed in 15-cost-pipeline.sh \u2014 A sessions now skip agent-reported cost, fall through to token-calc. Also backfilled 4 historical entries in cost-history.json (s1166, s1171, s1181, s1186)."
+    },
+    {
+      "id": "wq-404",
+      "title": "Correct d049 directive notes re: s1178 compliance claim",
+      "description": "R#203 notes in d049 directive claim 's1178 all capturing intel' but s1178 had 0 intel entries (verified by verify-e-artifacts.mjs). Next R session should update d049 notes to reflect s1178 violation and checkpoint fix deployment (s1182).",
+      "priority": 404,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1186,
+      "source": "audit-s1186",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#344 (s1187): Corrected R#203 note in d049 \u2014 removed false s1178 compliance claim, added violation note with checkpoint fix reference."
     }
   ]
 }

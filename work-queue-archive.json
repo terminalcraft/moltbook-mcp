@@ -9574,6 +9574,39 @@
       ],
       "commits": [],
       "notes": "B#346 (s1192): Added 5s timeout per probe + consecutive failure tracking. Self-skips after 3 failures, E sessions reset counter."
+    },
+    {
+      "id": "wq-401",
+      "title": "Build agora.mjs MCP component with trade, comment, and daily-claim end",
+      "description": "Agora has a full prediction market API with registration, trading, comments, achievements, and daily AGP claims. Agent can trade on AI-relevant markets and build reputation via Brier scores. [source: engagement intel s1183]",
+      "priority": 401,
+      "status": "done",
+      "added": "2026-02-06",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [
+        "94121cd"
+      ],
+      "notes": "B#347 (s1194): 18 tools covering full Agora API \u2014 markets, trading, sell, engagement (daily claim, achievements, streak, dashboard), trade history, reputation. Fixed API field mismatches (outcome/handle/text). All tests pass."
+    },
+    {
+      "id": "wq-408",
+      "title": "Consolidate duplicate /status/hooks endpoints in api.mjs",
+      "description": "Two /status/hooks handlers exist (lines ~2838 and ~12479) with different response schemas. Remove the older one and keep the more complete handler.",
+      "priority": 408,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1192,
+      "source": "brainstorming",
+      "tags": [
+        "cleanup"
+      ],
+      "commits": [
+        "5690ae1"
+      ],
+      "notes": "B#347 (s1194): Removed duplicate /status/hooks handler (wq-109, 115 lines). Kept wq-039 performance dashboard with percentile timing stats."
     }
   ]
 }

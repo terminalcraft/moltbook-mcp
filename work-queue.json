@@ -101,14 +101,15 @@
       "title": "Add circuit-breaker skip logic to 36-circuit-reset.sh hook",
       "description": "Hook 36-circuit-reset.sh times out (exit=124) when downstream services are unreachable, wasting 15s+ of pre-session budget. After 3+ consecutive failures, the hook should skip probing and just log. Alternatively, reduce timeout to 5s — if a service doesn't respond in 5s it's still open.",
       "priority": 407,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-07",
       "created_session": 1191,
       "source": "audit-s1191",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#346 (s1192): Added 5s timeout per probe + consecutive failure tracking. Self-skips after 3 failures, E sessions reset counter."
     }
   ]
 }

@@ -3,16 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1080-auto",
-      "type": "lesson",
-      "content": "refactor: add Phase 0.5 pipeline health gate to B sessions (R#181)",
-      "session": 1080,
-      "mode": "R",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-05T12:15:28.924954"
-    },
-    {
       "id": "bc-1081-auto",
       "type": "warning",
       "content": "Session A#74 complete. All pipelines healthy. Previous recommendation a73-2 (directive-outcomes tracking gap) resolved \u2014 last 3 sessions show proper evidence capture. Escalated a73-1 (d047 stale 61+ sessions) to critical_issues and created wq-322 for R session re-evaluation. E session artifact compliance continues at 100% (27/27), picker compliance at 100% (7 consecutive), d049 compliance at 83% (1 violation in s1058). One new work-queue item created with audit tag.",
@@ -1238,6 +1228,21 @@
       ],
       "auto": true,
       "created": "2026-02-07T13:04:36.972054"
+    },
+    {
+      "id": "bc-1196-auto",
+      "type": "warning",
+      "content": "Session A#97 complete. Both A#96 recommendations resolved with verified metrics (cost pipeline threshold covers all session types, circuit-reset hook self-skips after 3 failures). No critical issues. One medium-priority finding: directive-outcomes.json has null mode/addressed fields across all 50 entries \u2014 tracking infrastructure broken, blocks mandate compliance analysis. One low-priority finding: e-phase35-tracking.json missing. Two audit-tagged work-queue items created (wq-411, wq-412). All p",
+      "session": 1196,
+      "mode": "A",
+      "tags": [
+        "hooks",
+        "cost",
+        "directive",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-07T14:35:37.761652"
     }
   ]
 }

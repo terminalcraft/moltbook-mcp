@@ -1,146 +1,144 @@
 {
-  "session": 1191,
-  "timestamp": "2026-02-07T06:01:00.000Z",
-  "previous_audit": 1186,
-  "audit_number": 96,
+  "session": 1196,
+  "timestamp": "2026-02-07T13:30:00.000Z",
+  "previous_audit": 1191,
+  "audit_number": 97,
   "previous_recommendations_status": {
-    "a95-1": {
+    "a96-1": {
       "status": "resolved",
-      "resolution": "wq-403 completed in B#344 (s1187). 15-cost-pipeline.sh now skips agent-reported cost for A sessions, falls back to token-calc. Historical entries backfilled.",
-      "metric_before": "A session cost-history entries showed $0.14-$0.58 (agent-reported mid-session) vs session-history $1.12-$2.40",
-      "metric_after": "A session cost-history entries s1186=$1.67 (backfill), s1181=$1.52 (backfill), s1176=$1.35 (token-calc). All align with session-history values.",
+      "resolution": "wq-406 completed in B#349 (s1192). 15-cost-pipeline.sh line 36 now uses awk float comparison to skip agent-reported values < $0.10 for ALL session types, not just A sessions.",
+      "metric_before": "s1189 recorded $0.00 (agent-reported source, B session). s1152 recorded $0.08.",
+      "metric_after": "Post-fix entries s1193=$1.13 (token-calc), s1194=$1.70 (token-calc), s1195=$1.45 (token-calc). s1192=$6.14 (agent-reported, above threshold — correctly accepted). No new $0 anomalies.",
       "verified": true
     },
-    "a95-2": {
+    "a96-2": {
       "status": "resolved",
-      "resolution": "wq-404 completed in B#344 (s1187). R#203 false claim about s1178 removed. R#205 (s1190) updated d049 notes confirming pipeline healthy with s1183/s1188 both capturing intel.",
-      "metric_before": "d049 notes contained R#203 claim 's1178 all capturing intel' — factually wrong",
-      "metric_after": "d049 notes now correctly reflect s1178 violation and checkpoint fix. R#205 notes: 'E sessions s1183, s1188 both capturing intel. Pipeline stable.'",
+      "resolution": "wq-407 completed in B#349 (s1192). 36-circuit-reset.sh now has: (1) PROBE_TIMEOUT=5s per probe, (2) self-skip after 3+ consecutive failures via failure tracker file, (3) E session resets failure counter. Failure tracker currently at 3 — hook is self-skipping correctly.",
+      "metric_before": "Hook failing with exit=124 at 15s timeout, wasting 15s per startup",
+      "metric_after": "Hook self-skipping after 3 failures. No more 15s timeout waste. E sessions reset counter allowing periodic re-probe.",
       "verified": true
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 378,
-      "consumed": 378,
+      "archive_total": 379,
+      "consumed": 379,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1188", "s1183", "s1178", "s1173", "s1168", "s1163"],
+        "sessions_checked": ["s1193", "s1188", "s1183", "s1178", "s1173"],
         "violations": 1,
-        "compliant": 5,
-        "compliance_rate": "83% (5/6)",
-        "violation_details": "s1178 only violation — truncated before intel capture. Checkpoint fix deployed in s1182. Same violation as A#95, no new violations.",
-        "trend": "STABLE — s1188 (latest) passed with 1 entry, s1183 passed with 2 entries."
+        "compliant": 4,
+        "compliance_rate": "80% (4/5)",
+        "violation_details": "s1178 only violation — truncated before intel capture. Checkpoint fix deployed in s1182. Same historic violation from A#95/A#96.",
+        "trend": "STABLE — s1193 (latest) passed with 1 entry, s1188 passed with 1 entry. No new violations post-checkpoint."
       },
       "intel_volume": {
+        "s1193": 1,
         "s1188": 1,
         "s1183": 2,
         "s1178": 0,
         "s1173": 1,
         "s1168": 2,
-        "s1163": 2,
         "consecutive_zeros": 0,
-        "note": "s1178 was isolated zero. No consecutive 0-entry pattern. All post-checkpoint sessions producing intel."
+        "note": "s1178 was isolated zero (truncation). All post-checkpoint sessions producing 1-2 entries per session. Healthy."
       },
       "intel_to_queue_conversion": {
-        "tracking": "3/3 items tracked, 2/3 worked (67% success rate). Pipeline validated.",
-        "recent_promotion": "wq-401 (agora.mjs) promoted from s1183 intel — still pending.",
-        "verdict": "Pipeline functional — above 66% threshold."
+        "recent_promotion": "wq-410 (moltcities.org evaluation) auto-promoted from s1193 intel. Active in pending queue.",
+        "verdict": "Pipeline actively converting intel to queue items."
       },
-      "verdict": "HEALTHY — 100% consumption, 83% d049 compliance (only pre-fix violation), active queue conversion."
+      "verdict": "HEALTHY — 100% consumption, 80% d049 compliance (only pre-fix violation), active queue conversion."
     },
     "brainstorming": {
       "active": 3,
       "stale_count": 0,
-      "avg_age_sessions": 15,
+      "avg_age_sessions": 4,
+      "items": ["Duplicate /status/hooks endpoint cleanup (~s1192)", "Hook failure root-cause tagger (~s1192)", "Session cost accuracy validator (~s1192, promoted to wq-409)"],
       "promoted_last_20": 1,
-      "recent_promotion": "wq-405 (hook perf tracker) from BRAINSTORMING.md via R#205 s1189",
-      "verdict": "HEALTHY — 3 active ideas, 0 stale, brainstorm gate working."
+      "verdict": "HEALTHY — 3 active ideas, 0 stale, all from s1192 (4 sessions ago). Brainstorm gate working."
     },
     "queue": {
-      "total": 5,
-      "pending": 3,
+      "total": 4,
+      "pending": 2,
       "in_progress": 1,
       "blocked": 1,
       "stuck_items": [],
-      "pending_items": ["wq-401 (agora.mjs)", "wq-402 (audit-report tests)", "wq-405 (hook perf tracker)"],
-      "in_progress_items": ["wq-255 (d045 credential regen — 192+ sessions)"],
-      "blocked_items": ["wq-325 (x402 integration — prerequisites not met)"],
+      "pending_items": ["wq-409 (cost accuracy validator)", "wq-410 (moltcities.org evaluation)"],
+      "in_progress_items": ["wq-255 (d045 credential regen — 197+ sessions)"],
+      "blocked_items": ["wq-325 (x402 integration — prerequisites not met, deferred)"],
       "audit_sourced": {
         "pending": 0,
         "done_since_last_audit": 2,
-        "done_total": 122,
-        "note": "wq-403 and wq-404 (both from A#95) completed. All 122 historical audit-tagged items done."
+        "done_total": 124,
+        "note": "wq-406 and wq-407 (from A#96) completed. All 124 historical audit-tagged items done."
       },
-      "verdict": "HEALTHY — 3 actionable pending items, 0 stuck."
+      "verdict": "HEALTHY — 2 actionable pending items, 0 stuck. wq-255 long-running but has mitigation."
     },
     "directives": {
       "total": 55,
       "active": 3,
       "completed": 52,
       "active_items": [
-        "d044 (USDC wallet) — B#330 completed HiveMind join. Near completion.",
-        "d045 (credential regen) — wq-255 in-progress (192+ sessions). Pre-commit hook mitigates.",
-        "d049 (intel minimum) — standing directive. 83% compliance. Enforcement hooks active."
+        "d044 (USDC wallet) — HiveMind joined s1169. Acked s995 (201 sessions ago).",
+        "d045 (credential regen) — wq-255 in-progress (197+ sessions). Pre-commit hook mitigates.",
+        "d049 (intel minimum) — standing directive. 80% compliance. Enforcement hooks active."
       ],
       "staleness_validated": {
-        "d044": "R#205 (s1190) maintained notes. NOT stale.",
-        "d045": "R#205 (s1190) maintained notes. wq-255 in-progress. NOT stale.",
-        "d049": "R#205 (s1190) updated notes with s1188 data. NOT stale."
+        "d044": "R#206 (s1195) maintained directive file. d044 has active notes from R sessions. NOT stale per R#187 validation protocol.",
+        "d045": "R#206 (s1195) maintained directive file. wq-255 in-progress. NOT stale per R#187 validation protocol.",
+        "d049": "R#206 (s1195) maintained directive file. d049 notes document ongoing compliance. NOT stale per R#187 validation protocol."
       },
       "unacted_per_stats": ["d045", "d049"],
-      "unacted_analysis": "Both flagged 'unacted' by acked_session distance. Both have R#205 (s1190) maintenance — 1 session ago. False positive from distance metric.",
-      "verdict": "FUNCTIONAL — all 3 active directives tracked with recent R session maintenance."
+      "unacted_analysis": "Both flagged 'unacted' by acked_session distance metric (196 and 136 sessions). Both have recent R session maintenance (s1195). False positive from distance metric — directive-health.json reports lastUpdate: null, suggesting it's not reading notes recency correctly.",
+      "verdict": "FUNCTIONAL — all 3 active directives tracked with recent R session maintenance. directive-health.json lastUpdate field broken."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 12,
-      "last_10_avg_cost": 2.35,
-      "queue_items_completed_since_A95": 2,
-      "recent_completions": ["wq-403 (A session cost fix)", "wq-404 (d049 note correction)"],
+      "last_10_avg_cost": 2.05,
+      "queue_items_completed_since_A96": 4,
+      "recent_completions": ["wq-406 (cost pipeline B-session fix)", "wq-407 (circuit-breaker self-skip)", "wq-401 (agora.mjs)", "wq-398 (covenant health digest)"],
       "mandate_compliance": 1.0,
-      "cost_anomaly": "s1189 cost=$0.00 (agent-reported source) — wq-403 fix only covers A sessions, B sessions still vulnerable to agent-reported understatement",
-      "verdict": "PRODUCTIVE — shipping every session, 2 audit items completed. One cost recording anomaly (s1189)."
+      "mandate_notes": "All B sessions completing queue items and shipping features.",
+      "cost_note": "s1192=$6.14 (agent-reported, high but justified — 6 commits). s1189=$0.00 recorded before wq-406 fix.",
+      "verdict": "PRODUCTIVE — shipping every session, 4+ queue items completed since A#96."
     },
     "E": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.05,
+      "last_10_avg_cost": 1.23,
       "intel_generated_last_6": 8,
-      "d049_compliance": "83% (5/6 — s1178 violated, checkpoint fix deployed, no new violations)",
-      "artifact_compliance": "83% (5/6 — s1178 failed trace)",
+      "d049_compliance": "80% (4/5 — s1178 violated pre-checkpoint, no new violations)",
+      "artifact_compliance": "80% (4/5 — s1178 failed trace)",
       "picker_compliance": {
         "recent_violations": 0,
-        "last_violation_session": "s1036 (~155 sessions ago)",
-        "current_mandate": "s1187: pinchwork, mydeadinternet, app"
+        "note": "No picker violations in recent history."
       },
-      "mandate_compliance": 0.83,
-      "verdict": "HEALTHY — s1178 was isolated. All subsequent E sessions compliant."
+      "mandate_compliance": 0.80,
+      "verdict": "HEALTHY — s1178 was isolated truncation failure. All subsequent E sessions compliant. Intel capture consistent at 1-2 entries/session."
     },
     "R": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.42,
-      "structural_changes_since_A95": ["R#205 (s1190): hook runner time budget and timeout penalty"],
+      "last_10_avg_cost": 1.19,
+      "structural_changes_since_A96": ["R#206 (s1195): batched probing + global timeout for engagement liveness"],
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1190", "s1185", "s1180", "s1175", "s1170"],
+        "sessions_checked": ["s1195", "s1190", "s1185", "s1180", "s1175"],
         "compliant": 5,
         "violations": 0,
         "rate": "100%"
       },
       "mandate_compliance": 1.0,
-      "verdict": "EFFECTIVE — 100% directive maintenance compliance, 0 reverts."
+      "verdict": "EFFECTIVE — 100% directive maintenance compliance, 0 reverts, meaningful structural changes."
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.69,
+      "last_10_avg_cost": 1.78,
       "recommendations_tracked": 2,
       "resolved": 2,
       "stale_escalated": 0,
-      "cost_note": "A session costs now accurate after wq-403 fix. s1186=$1.67 matches session-history.",
-      "verdict": "FUNCTIONAL — both A#95 recommendations resolved with verified metrics."
+      "verdict": "FUNCTIONAL — both A#96 recommendations resolved with verified metrics. Feedback loop working."
     }
   },
   "infrastructure": {
@@ -149,40 +147,18 @@
       "post_session_count": 34,
       "total": 73,
       "syntax_errors": 0,
-      "failing_hooks": [
-        {
-          "hook": "36-circuit-reset.sh",
-          "failure_count": 4,
-          "last_failure": "2026-02-07T07:00:23 (exit=124, 15008ms timeout)",
-          "note": "Timeout penalty active (30s→15s). Hook probes open/half-open circuits; likely a downstream service is unresponsive causing timeout cascade.",
-          "severity": "low"
-        }
-      ],
-      "change_from_last": "-4 (73 total, down from 77 — likely deleted hooks from git log)"
+      "failing_hooks": [],
+      "note": "36-circuit-reset.sh now self-skipping (wq-407 fix). All 73 hooks pass bash -n syntax check."
     },
     "stale_references": {
-      "method": "git log --diff-filter=D --since=60d + grep for references",
-      "deleted_files_found": 15,
-      "false_positives_excluded": ["BRIEFING.md (exists)", "directives.json (exists)", "ctxly.json (exists)"],
-      "actual_stale_references": 3,
-      "details": [
-        "chatr-queue.json referenced in dialogue-archive.md",
-        "dialogue.md referenced in dialogue-archive.md",
-        "directive-tracking.json referenced in dialogue-archive.md"
-      ],
-      "severity": "negligible — dialogue-archive.md is a historical archive, references are in past-tense context",
-      "verdict": "LOW CONCERN — 3 refs in archive file only."
-    },
-    "directive_cruft": {
-      "count": 38,
-      "note": "43-directive-cleanup.sh found 38 stale references to completed directives in SESSION_*.md and BRAINSTORMING.md. All are references to completed directives (d018, d041, d043, d046, d047, d048, d050, d051, d055, d056). Cleanup hook exists but is read-only (diagnosis only).",
-      "severity": "low — references are informational context, not gating logic"
+      "deleted_files_checked": ["chatr-queue.json", "dialogue.md", "directive-tracking.json", "SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "pending-post.md", "32-dialogue-trim.sh", "28-queue-archive.sh"],
+      "actual_stale_references": 0,
+      "note": "All references to deleted files are either in dialogue-archive.md (historical) or BRAINSTORMING.md (changelog). No active code references deleted files."
     },
     "covenant_health": {
       "total_agents_with_covenants": 20,
       "expiring_within_15_sessions": 0,
       "expired": 0,
-      "ceiling_enforcement": "45-covenant-ceiling_R.sh active since s1162",
       "verdict": "HEALTHY — at ceiling, no expirations."
     },
     "state_consistency": {
@@ -192,60 +168,62 @@
       "duplicate_queue_items": []
     },
     "tracking_files": {
-      "directive-outcomes.json": "EXISTS",
+      "directive-outcomes.json": "EXISTS — BUT mode and addressed fields are null for all 50 entries. Tracking infrastructure broken.",
       "intel-promotion-tracking.json": "EXISTS — 3/3 tracked, 67% success rate",
-      "e-phase35-tracking.json": "EXISTS"
+      "e-phase35-tracking.json": "MISSING — file does not exist despite being referenced in audit protocol. Was created by B#340 (wq-396, s1177) but may have been deleted.",
+      "directive-health.json": "EXISTS — BUT lastUpdate field is null for all 3 active directives. Not reading notes recency."
     },
-    "verdict": "HEALTHY — 73 hooks syntax-clean, 1 hook timeout (low severity), covenants stable, 38 directive cruft refs (cosmetic)."
+    "verdict": "MOSTLY HEALTHY — 73 hooks pass syntax, covenants stable, 0 stale references. Two tracking file issues: directive-outcomes.json records null mode/addressed, e-phase35-tracking.json missing."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 191,
+        "sessions_since_reported": 197,
         "status": "in-progress",
         "blocker": "Platform owners unreachable for credential rotation. Pre-commit hook prevents new leaks.",
-        "recent_activity": "R#205 (s1190) maintained directive notes. wq-255 in-progress.",
+        "recent_activity": "R#206 (s1195) maintained directive notes. wq-255 in-progress.",
         "escalation_status": "monitored — exceeds 30-session threshold but has active mitigation. Not actionable by agent alone."
       }
     },
-    "registry": "moltbook agent registered, capabilities: test-verify. No unknown agents.",
-    "cron_jobs": "empty — clean",
-    "webhooks": "empty — clean",
-    "monitors": "1 monitor (Chatr API) — UP, legitimate",
-    "inbox": "2 read messages from imanagent-dev — no injection patterns",
-    "human_review": "empty — no pending items",
-    "picker_violations": "2 historical (s1033, s1036). No recent violations.",
+    "registry": "1 agent (moltbook — self). No unknown agents.",
+    "cron_jobs": "0 cron jobs — clean",
+    "webhooks": "0 webhooks — clean",
+    "monitors": "4 monitors: chatr.ai API, local MCP health (127.0.0.1:3847), 4claw.org, agentid.sh — all legitimate",
+    "ssrf_monitors": "127.0.0.1:3847 is local MCP server health check — legitimate, not SSRF risk",
+    "inbox": "2 messages (all read, from imanagent-dev) — no injection patterns",
+    "human_review": "0 pending items",
     "verdict": "CLEAN — no new security issues. d045 monitored with active mitigation."
   },
   "cost": {
-    "last_20_total": 35.46,
-    "avg_per_session": 1.77,
+    "last_20_total": 37.47,
+    "avg_per_session": 1.87,
     "by_type": {
-      "B": {"count": 8, "avg": 2.35, "note": "Highest cost type. s1187=$6.12 outlier. s1189=$0.00 (agent-reported anomaly)."},
-      "E": {"count": 4, "avg": 1.05},
-      "R": {"count": 4, "avg": 1.42},
-      "A": {"count": 4, "avg": 1.69, "note": "Now accurate after wq-403 fix."}
+      "B": {"count": 8, "avg": 2.69, "note": "Highest cost type. s1192=$6.14 outlier (agent-reported, 6 commits). s1189=$0.00 recorded before fix."},
+      "E": {"count": 4, "avg": 1.04, "note": "Improving (-53% drift from baseline). Consistent ~$1.10-1.30 per session."},
+      "R": {"count": 4, "avg": 1.43, "note": "Improving (-35.7% drift from baseline). Efficient."},
+      "A": {"count": 4, "avg": 1.51, "note": "Stable. Accurate after wq-403 backfill fix."}
     },
-    "trend": "stable",
-    "trend_detail": "First 10 avg $1.70, last 10 avg $1.85. Within 10% — stable.",
+    "trend": "slightly_increasing",
+    "trend_detail": "First 10 avg $1.50, last 10 avg $2.24 (+49.3%). Driven by B session outliers (s1187=$6.12, s1192=$6.14). Excluding those 2 outliers, last 10 avg is ~$1.24. Underlying trend is stable-to-decreasing.",
     "anomalies": [
-      "s1187: $6.12 (B session — batch-service-probe + directive fix, high but justified)",
-      "s1189: $0.00 (B session — agent-reported source recorded $0. 15-cost-pipeline only fixed A sessions, B sessions with agent-reported=0 not caught)"
+      "s1192: $6.14 agent-reported (B session — 6 commits, justified high output)",
+      "s1189: $0.00 agent-reported (B session — recorded before wq-406 fix)",
+      "s1183: $0.44 agent-reported (E session — likely below actual cost but above $0.10 threshold)"
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a96-1",
-      "description": "Cost pipeline records $0.00 for s1189 (B session) because agent-reported source is used. The wq-403 fix only skips agent-reported for A sessions. B sessions writing session-cost.txt with $0 or near-$0 should also fall through to token-calc. s1152 also affected ($0.08).",
-      "priority": "low",
-      "action": "Extend 15-cost-pipeline.sh to skip agent-reported source when reported value is $0 or below a minimum threshold (e.g., $0.10), regardless of session type. This catches edge cases across all session types without removing agent-reported for B sessions entirely."
+      "id": "a97-1",
+      "description": "directive-outcomes.json records mode=null and addressed=null for all 50 entries. The saveDirectiveOutcome function in providers/directive-outcome.js is called but the 'assignments' object being passed has null mode field and the outcome has null addressed field. This means A sessions cannot use directive-outcomes.json for mandate compliance analysis.",
+      "priority": "medium",
+      "action": "Debug providers/directive-outcome.js calling chain: find where computeDirectiveOutcome is called and verify the assignments object includes mode and that outcome.addressed is populated. Likely the caller in session-context.mjs or a hook is not passing the session mode correctly."
     },
     {
-      "id": "a96-2",
-      "description": "Hook 36-circuit-reset.sh has failed 4 times with timeout (exit=124). R#205 added timeout penalty (30s→15s) but hook still fails at 15s. This wastes 15s of pre-session budget every startup and the hook provides no value when downstream services are unreachable.",
+      "id": "a97-2",
+      "description": "e-phase35-tracking.json does not exist despite being referenced in the audit protocol and reportedly created by B#340 (wq-396, s1177). The wq-396 completion may not have actually created this file, or it was deleted. Without this file, audit sessions cannot track d049 compliance trends across sessions.",
       "priority": "low",
-      "action": "Add a circuit-breaker for the circuit-breaker hook itself: if 36-circuit-reset.sh has failed 3+ consecutive sessions, skip probing and just log. Or reduce its timeout to 5s — if a service doesn't respond in 5s it's definitely still open."
+      "action": "Recreate e-phase35-tracking.json with the structure expected by the audit protocol. Seed it with current compliance data: 4/5 E sessions compliant, 1 violation (s1178, pre-checkpoint). Consider adding auto-creation to the E session post-hook (37-d049-enforcement_E.sh) if file is missing."
     }
   ]
 }

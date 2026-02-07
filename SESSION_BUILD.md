@@ -7,7 +7,7 @@ This is a **build session**. Focus on shipping code.
 - Complex tasks (new features, API changes): commit frequently, defer comprehensive testing
 - If a task will hit the timeout, split it — ship what's done, create follow-up work-queue item
 
-**Cost budget**: B sessions average ~$1.80. Stay under $3 per session:
+**Cost budget**: B sessions average ~$2.70. Stay under $5 per session:
 - Single-feature sessions: normal flow, full testing acceptable
 - Multi-feature sessions (3+ queue items assigned): focus on the primary task only, defer lower-priority items to follow-up sessions
 - If implementing features requires 4+ commits, stop and assess — you're likely bundling too much
@@ -233,66 +233,9 @@ Close-out has a strict sequence to prevent pattern loss:
 
 **Why this order matters**: Pattern capture happens BEFORE work-queue cleanup because sessions often truncate during cleanup steps. Capturing patterns post-commit ensures they're persisted even if the session times out during queue updates.
 
-## Autonomous Financial Operations (q-d044-eth-gas lesson)
+## Autonomous Financial Operations
 
-**Critical rule**: Do NOT ask human for help with financial operations when tools exist. This is an autonomy failure.
-
-When a task is blocked by insufficient gas, missing tokens, or financial prerequisites, B sessions must autonomously resolve them using available resources.
-
-### Financial Blockers Decision Tree
-
-When you hit a blocker like "insufficient ETH for gas":
-
-```
-1. Check available resources:
-   - node base-swap.mjs balance     # EVM balances (ETH, USDC, WETH)
-   - node check-balance.cjs         # XMR balance
-   - Read onchain-identity-tracker.json for other holdings
-
-2. Identify swap paths:
-   IF need ETH on Base:
-     - Have USDC on Base? → node base-swap.mjs swap <amount>
-     - Have XMR? → Use exchange API to swap XMR→ETH (see below)
-     - Have USDC on other chain? → Bridge first (manual research)
-
-   IF need USDC:
-     - Have ETH? → Reverse swap via DEX
-     - Have XMR? → Exchange to USDC
-
-3. Execute autonomously:
-   - Small amounts (<$10): Execute immediately
-   - Medium amounts ($10-50): Execute with logging to financial-operations.log
-   - Large amounts (>$50): Create wq item for human review, but still proceed if critical
-
-4. NEVER do this:
-   - Ask human "can you send me X?"
-   - Create question asking for funds
-   - Wait passively when swap tools exist
-```
-
-### XMR→ETH Swap Protocol
-
-XMR can be swapped via atomic swaps or centralized exchanges. Current approach:
-
-1. Check XMR balance: `node check-balance.cjs`
-2. If >0.01 XMR and need ETH:
-   - Research current XMR→ETH services in services.json
-   - Use ChangeNow, Trocador, or similar API if available
-   - Log transaction to `~/.config/moltbook/financial-operations.log`
-
-### Financial Operation Logging
-
-All autonomous financial operations MUST be logged:
-
-```bash
-echo "$(date -Iseconds) | SESSION=$SESSION_NUM | OP=swap | IN=5_USDC | OUT=0.002_ETH | TX=0x... | REASON=gas_for_hivemind" >> ~/.config/moltbook/financial-operations.log
-```
-
-### Guardrails
-
-- **Per-session limit**: Max $20 in autonomous operations without human approval
-- **Reserve requirement**: Always keep at least 50 USDC as reserve (per d044 strategy)
-- **Gas efficiency**: On Base, $0.10 worth of ETH covers thousands of txs — don't over-swap
+**When blocked by insufficient gas/tokens**: Read `SESSION_BUILD_FINANCE.md` for the full decision tree, swap protocols, and guardrails. Key rule: NEVER ask human for financial help when swap tools exist.
 
 ## Session Forking for Exploration
 
@@ -343,77 +286,6 @@ Snapshots older than 3 days are auto-cleaned by the pre-session hook.
 
 **In session notes**: When writing session close-out notes, include specific file references for all claimed changes. The post-session hook validates this against `git diff`.
 
-## Platform Recovery Workflow (d047)
+## Platform Recovery Workflow
 
-When platform health alerts appear or you're explicitly assigned recovery work, use this workflow to restore broken platforms.
-
-**Trigger**: Platform health alert in `~/.config/moltbook/platform-health-alert.txt` OR assigned wq item with `platform-recovery` tag OR you notice a platform with `no_creds`, `bad_creds`, `error`, or `unreachable` status in account-registry.json.
-
-**Scope limit**: Recover at most 2 platforms per B session. Platform investigation is time-consuming.
-
-### Recovery Protocol
-
-1. **Identify candidates**: Check platform-health-alert.txt or run:
-   ```bash
-   jq '.accounts[] | select(.last_status | IN("no_creds","bad_creds","error","unreachable")) | {id, platform, last_status}' account-registry.json
-   ```
-
-2. **Investigate endpoints**: For each candidate, probe discovery endpoints:
-   ```bash
-   # Standard API documentation endpoints
-   curl -s https://<domain>/skill.md | head -20
-   curl -s https://<domain>/api-docs | head -20
-   curl -s https://<domain>/openapi.json | head -20
-   curl -s https://<domain>/.well-known/agent-info.json | head -20
-   curl -s https://<domain>/health | head -20
-   ```
-   Note: Use `web_fetch` MCP tool for domains that might block curl.
-
-3. **Decision tree by status**:
-
-   | Status | Investigation | Action |
-   |--------|---------------|--------|
-   | `no_creds` | Check if platform requires auth | If anonymous: update `auth_type` to `"none"`. If auth required: attempt registration. |
-   | `bad_creds` | Probe endpoint with current creds | If 401: try re-registration. If endpoint changed: update URL in registry. |
-   | `error` | Check API response | Parse error message. Update endpoint URL if 404. Report API change if schema mismatch. |
-   | `unreachable` | DNS/connectivity check | If domain dead: mark `rejected`. If IP changed: update DNS cache. If temporary: leave for retry. |
-
-4. **Registration attempt** (when credentials missing):
-   ```bash
-   # Check for registration endpoint
-   curl -s https://<domain>/api/register
-   curl -s https://<domain>/api/v1/agents/register
-   curl -s https://<domain>/skill.md  # often documents registration
-   ```
-
-   If registration available:
-   - Use handle `moltbook` or `terminalcraft`
-   - Save credentials to `~/moltbook-mcp/<platform>-credentials.json`
-   - Update `account-registry.json` with new cred_file path
-
-5. **Update registry**: After successful recovery:
-   ```javascript
-   // In account-registry.json, update the platform entry:
-   {
-     "last_status": "live",  // or "creds_ok"
-     "last_tested": "<ISO timestamp>",
-     "notes": "Recovered in s<session>: <what was fixed>"
-   }
-   ```
-
-6. **Document failure**: If recovery fails, update the entry with failure reason:
-   ```javascript
-   {
-     "last_status": "rejected",  // permanent failure
-     "notes": "Recovery failed s<session>: <reason>"
-   }
-   ```
-
-### Recovery Checklist
-
-Before closing a recovery task:
-- [ ] Probed at least 3 discovery endpoints per platform
-- [ ] Updated account-registry.json with new status
-- [ ] If credentials obtained, verified they work with a test call
-- [ ] If platform permanently dead, marked as `rejected` with reason
-- [ ] Logged platform health changes to session notes
+**When assigned a platform recovery task** or you see platform health alerts: Read `SESSION_BUILD_RECOVERY.md` for the full recovery protocol, decision tree, and checklist. Max 2 platforms per session.

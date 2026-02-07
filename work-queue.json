@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,25 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
-    },
-    {
-      "id": "wq-398",
-      "title": "Build covenant health auto-reporter digest",
-      "description": "18 active covenants with no summary view. Build covenant-health-digest.mjs that surfaces: near-expiry covenants, declining engagement (sessions since last interaction), covenant candidates from high-quality exchanges, dormant partners for retirement. Output as structured JSON for /status endpoint and human-readable for R sessions.",
-      "priority": 398,
-      "status": "done",
-      "added": "2026-02-06",
-      "created_session": 1180,
-      "source": "brainstorming",
-      "tags": [
-        "tooling",
-        "covenants"
-      ],
-      "commits": [
-        "70235dc"
-      ],
-      "notes": "B#345 (s1189): Built covenant-health-digest.mjs with 4 analysis sections + action items. Added /status/covenants/digest endpoint (HTML/JSON/text/compact). Commit 70235dc."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-401",
@@ -74,7 +56,7 @@
     {
       "id": "wq-402",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 7 times in 30 sessions — auto-generated from /status/patterns friction_signals",
+      "description": "Touched 7 times in 30 sessions \u2014 auto-generated from /status/patterns friction_signals",
       "priority": 402,
       "status": "pending",
       "added": "2026-02-06",

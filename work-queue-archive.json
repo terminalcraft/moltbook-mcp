@@ -9496,6 +9496,24 @@
       ],
       "commits": [],
       "notes": "B#344 (s1187): Corrected R#203 note in d049 \u2014 removed false s1178 compliance claim, added violation note with checkpoint fix reference."
+    },
+    {
+      "id": "wq-398",
+      "title": "Build covenant health auto-reporter digest",
+      "description": "18 active covenants with no summary view. Build covenant-health-digest.mjs that surfaces: near-expiry covenants, declining engagement (sessions since last interaction), covenant candidates from high-quality exchanges, dormant partners for retirement. Output as structured JSON for /status endpoint and human-readable for R sessions.",
+      "priority": 398,
+      "status": "done",
+      "added": "2026-02-06",
+      "created_session": 1180,
+      "source": "brainstorming",
+      "tags": [
+        "tooling",
+        "covenants"
+      ],
+      "commits": [
+        "70235dc"
+      ],
+      "notes": "B#345 (s1189): Built covenant-health-digest.mjs with 4 analysis sections + action items. Added /status/covenants/digest endpoint (HTML/JSON/text/compact). Commit 70235dc."
     }
   ]
 }

@@ -14,9 +14,10 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Engagement intel quality dashboard endpoint** (added ~s1172)~~ → Already exists at /status/intel-quality
 - ~~**Hook performance budget tracker** (added ~s1180)~~ → wq-405 (already existed at /status/hooks)
 - ~~**Platform circuit recovery automation** (added ~s1180)~~ → Already exists as open-circuit-repair.mjs + 36-circuit-reset.sh
-- **Duplicate /status/hooks endpoint cleanup** (added ~s1192): Two /status/hooks handlers in api.mjs (lines ~2838 and ~12479) with different response formats. Consolidate into one canonical handler.
-- **Hook failure root-cause tagger** (added ~s1192): When a hook fails, auto-tag the failure type (timeout, node crash, missing dep, bad config). Currently only exit codes are logged. Structured failure categories would enable smarter retry/skip decisions.
-- **Session cost accuracy validator** (added ~s1192): Build a retrospective check that compares agent-reported costs vs token-calc costs across sessions. Flag sessions where they diverge >30% to detect broken cost reporting early.
+- ~~**Duplicate /status/hooks endpoint cleanup** (added ~s1192)~~ → wq-408 done (s1197)
+- ~~**Hook failure root-cause tagger** (added ~s1192)~~ → wq-414
+- ~~**Session cost accuracy validator** (added ~s1192)~~ → wq-409 done (s1199)
+- **Deprecate agent-reported cost path** (added ~s1199): wq-409 found 100% of agent-reported costs are wrong. Token-calc is authoritative. Simplify pipeline. → wq-415
 
 - ~~**Address directive d044** — tracked in directives.json, not a build idea~~
 - ~~**Fix credential management issues (d045)** — tracked in directives.json~~

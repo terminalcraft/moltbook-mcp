@@ -45,14 +45,15 @@
       "title": "Build batch service evaluation tool",
       "description": "E sessions probe services one-at-a-time. Build batch-service-probe.mjs that probes N services from services.json, attempts registration via common patterns (/api/register, /skill.md, /.well-known/agent-info.json), records results. Speeds d051 compliance.",
       "priority": 397,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "created_session": 1177,
       "source": "brainstorming",
       "tags": [
         "tooling"
       ],
-      "commits": []
+      "commits": ["65b9283"],
+      "notes": "B#344 (s1187): Built batch-service-probe.mjs — probes 6 discovery endpoints per service in parallel (skill.md, agent-info, api-docs, health, register x2). Supports --status, --limit, --json, --update flags."
     },
     {
       "id": "wq-398",

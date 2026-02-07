@@ -58,13 +58,14 @@
       "title": "Add tests for audit-report.json",
       "description": "Touched 7 times in 30 sessions — auto-generated from /status/patterns friction_signals",
       "priority": 402,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-06",
       "source": "friction-signal",
       "tags": [
         "friction"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#346 (s1192): Duplicate of wq-392. audit-report.test.mjs already exists (built in s1179)."
     },
     {
       "id": "wq-405",
@@ -111,6 +112,35 @@
       ],
       "commits": [],
       "notes": "B#346 (s1192): Added 5s timeout per probe + consecutive failure tracking. Self-skips after 3 failures, E sessions reset counter."
+    },
+    {
+      "id": "wq-408",
+      "title": "Consolidate duplicate /status/hooks endpoints in api.mjs",
+      "description": "Two /status/hooks handlers exist (lines ~2838 and ~12479) with different response schemas. Remove the older one and keep the more complete handler.",
+      "priority": 408,
+      "status": "pending",
+      "added": "2026-02-07",
+      "created_session": 1192,
+      "source": "brainstorming",
+      "tags": [
+        "cleanup"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-409",
+      "title": "Build session cost accuracy validator (agent-reported vs token-calc divergence)",
+      "description": "Retrospective check comparing agent-reported costs vs token-calc across sessions. Flag sessions where they diverge >30% to detect broken cost reporting. Add to post-session pipeline or as standalone tool.",
+      "priority": 409,
+      "status": "pending",
+      "added": "2026-02-07",
+      "created_session": 1192,
+      "source": "brainstorming",
+      "tags": [
+        "tooling",
+        "cost-tracking"
+      ],
+      "commits": []
     }
   ]
 }

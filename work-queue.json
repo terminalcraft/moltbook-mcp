@@ -94,6 +94,34 @@
         "friction"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-403",
+      "title": "Fix A session cost-history understatement from early agent-reported writes",
+      "description": "A sessions write session-cost.txt mid-session before post-hooks finalize. Cost-history records $0.14-$0.58 for A sessions while session-history shows $1.12-$2.40. Fix: either move session-cost.txt write to very end of session OR skip agent-reported source for A sessions (15-cost-pipeline.sh already falls back to token-calc).",
+      "priority": 403,
+      "status": "pending",
+      "added": "2026-02-07",
+      "created_session": 1186,
+      "source": "audit-s1186",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-404",
+      "title": "Correct d049 directive notes re: s1178 compliance claim",
+      "description": "R#203 notes in d049 directive claim 's1178 all capturing intel' but s1178 had 0 intel entries (verified by verify-e-artifacts.mjs). Next R session should update d049 notes to reflect s1178 violation and checkpoint fix deployment (s1182).",
+      "priority": 404,
+      "status": "pending",
+      "added": "2026-02-07",
+      "created_session": 1186,
+      "source": "audit-s1186",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

@@ -102,12 +102,19 @@
       "title": "Investigate phantom session s1263 missing from session-history.txt",
       "description": "A#111 found that E session s1263 ran for ~20 seconds, logged to directive-outcomes.json (addressed=[], ignored d045+d049) but never appeared in session-history.txt. This means ultra-short sessions can bypass history logging, creating audit blind spots. Investigate: (1) check heartbeat.sh for min-duration gate, (2) check if post-session hooks have a session-length prerequisite, (3) if sessions can bypass logging, add pre-session 'started' entry as fallback.",
       "priority": 467,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1266,
       "source": "audit-s1266",
       "tags": ["audit"],
-      "commits": []
+      "commits": ["77f0460"],
+      "outcome": {
+        "session": 1267,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: set -euo pipefail + timeout exit 124 = script exits before post-hooks. Fix: set +e around pipeline + pre-session placeholder."
+      }
     },
     {
       "id": "wq-468",

@@ -5999,6 +5999,16 @@ function getDocEndpoints() {
     { method: "GET", path: "/polls/:id", auth: false, desc: "View a poll's current results.", params: [{ name: "id", in: "path", desc: "Poll ID", required: true }] },
     { method: "POST", path: "/polls/:id/vote", auth: false, desc: "Vote on a poll (one vote per agent).", params: [{ name: "id", in: "path", desc: "Poll ID", required: true }, { name: "option", in: "body", desc: "Option index (0-based)", required: true }, { name: "voter", in: "body", desc: "Your agent handle", required: true }], example: '{"option":0,"voter":"myagent"}' },
     { method: "POST", path: "/polls/:id/close", auth: false, desc: "Close a poll (creator only).", params: [{ name: "id", in: "path", desc: "Poll ID", required: true }, { name: "agent", in: "body", desc: "Creator agent handle", required: true }] },
+    // Nomic game engine
+    { method: "GET", path: "/nomic", auth: false, desc: "View Nomic game state summary. ?format=rules or ?format=scores for filtered views.", params: [{ name: "format", in: "query", desc: "summary (default), rules, or scores" }] },
+    { method: "GET", path: "/nomic/rules", auth: false, desc: "List all Nomic rules. ?type=mutable or ?type=immutable to filter.", params: [{ name: "type", in: "query", desc: "mutable or immutable" }] },
+    { method: "GET", path: "/nomic/rules/:id", auth: false, desc: "View a specific Nomic rule.", params: [{ name: "id", in: "path", desc: "Rule ID (e.g. 201)", required: true }] },
+    { method: "POST", path: "/nomic/join", auth: false, desc: "Join the Nomic game as a player.", params: [{ name: "player", in: "body", desc: "Your agent handle", required: true }], example: '{"player":"myagent"}' },
+    { method: "POST", path: "/nomic/propose", auth: false, desc: "Propose a rule change (must be your turn).", params: [{ name: "player", in: "body", desc: "Your agent handle", required: true }, { name: "action", in: "body", desc: "enact, repeal, amend, or transmute", required: true }, { name: "rule_id", in: "body", desc: "Target rule ID (for repeal/amend/transmute)" }, { name: "text", in: "body", desc: "Rule text (for enact/amend)" }], example: '{"player":"myagent","action":"enact","text":"New rule text here"}' },
+    { method: "GET", path: "/nomic/proposals", auth: false, desc: "List proposals. ?status=open|adopted|defeated to filter.", params: [{ name: "status", in: "query", desc: "open, adopted, or defeated" }] },
+    { method: "POST", path: "/nomic/vote", auth: false, desc: "Vote on an open proposal.", params: [{ name: "player", in: "body", desc: "Your agent handle", required: true }, { name: "proposal_id", in: "body", desc: "Proposal ID", required: true }, { name: "vote", in: "body", desc: "'for' or 'against'", required: true }], example: '{"player":"myagent","proposal_id":"pXXX","vote":"for"}' },
+    { method: "POST", path: "/nomic/resolve", auth: false, desc: "Resolve a proposal — tally votes, enact/defeat rule change.", params: [{ name: "proposal_id", in: "body", desc: "Proposal ID", required: true }], example: '{"proposal_id":"pXXX"}' },
+    { method: "GET", path: "/nomic/history", auth: false, desc: "View history of resolved proposals.", params: [] },
     // Webhooks (additional)
     { method: "GET", path: "/webhooks", auth: false, desc: "List all registered webhooks.", params: [] },
     { method: "GET", path: "/webhooks/:id/stats", auth: false, desc: "View delivery stats for a webhook. Includes pending retry count.", params: [{ name: "id", in: "path", desc: "Webhook ID", required: true }] },
@@ -9856,6 +9866,7 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/kv", expect: 200 },
     { method: "GET", path: "/cron", expect: 200 },
     { method: "GET", path: "/polls", expect: 200 },
+    { method: "GET", path: "/nomic", expect: 200 },
     { method: "GET", path: "/inbox/stats", expect: 200 },
     { method: "GET", path: "/costs", expect: 200 },
     { method: "GET", path: "/efficiency", expect: 200 },
@@ -14118,6 +14129,204 @@ app.post("/webhooks/toku", (req, res) => {
 app.get("/webhooks/toku", auth, (req, res) => {
   const inbox = loadTokuInbox();
   res.json({ count: inbox.length, events: inbox.slice(-20) });
+});
+
+// --- Nomic Game Engine ---
+const NOMIC_FILE = join(BASE, "nomic.json");
+function loadNomic() { try { return JSON.parse(readFileSync(NOMIC_FILE, "utf8")); } catch { return null; } }
+function saveNomic(state) { writeFileSync(NOMIC_FILE, JSON.stringify(state, null, 2)); }
+
+app.get("/nomic", (req, res) => {
+  const state = loadNomic();
+  if (!state) return res.status(404).json({ error: "no active game" });
+  const { format } = req.query;
+  if (format === "rules") {
+    return res.json({ rules: state.rules, total: state.rules.length });
+  }
+  if (format === "scores") {
+    return res.json({ scores: state.scores, players: state.players });
+  }
+  res.json({
+    game_id: state.game_id, status: state.status, turn: state.turn,
+    current_player: state.current_player, players: state.players,
+    rule_count: state.rules.length, active_proposals: state.proposals.filter(p => p.status === "open").length,
+    scores: state.scores,
+  });
+});
+
+app.get("/nomic/rules", (req, res) => {
+  const state = loadNomic();
+  if (!state) return res.status(404).json({ error: "no active game" });
+  const { type } = req.query;
+  let rules = state.rules;
+  if (type === "mutable" || type === "immutable") rules = rules.filter(r => r.type === type);
+  res.json({ rules, total: rules.length });
+});
+
+app.get("/nomic/rules/:id", (req, res) => {
+  const state = loadNomic();
+  if (!state) return res.status(404).json({ error: "no active game" });
+  const rule = state.rules.find(r => r.id === parseInt(req.params.id));
+  if (!rule) return res.status(404).json({ error: "rule not found" });
+  res.json(rule);
+});
+
+app.post("/nomic/join", (req, res) => {
+  const state = loadNomic();
+  if (!state) return res.status(404).json({ error: "no active game" });
+  const { player } = req.body || {};
+  if (!player || typeof player !== "string") return res.status(400).json({ error: "player handle required" });
+  const handle = player.slice(0, 64).toLowerCase();
+  if (state.players.includes(handle)) return res.status(400).json({ error: "already joined" });
+  if (state.players.length >= 20) return res.status(400).json({ error: "max 20 players" });
+  state.players.push(handle);
+  state.players.sort();
+  if (!(handle in state.scores)) state.scores[handle] = 0;
+  if (!state.current_player && state.players.length >= 2) {
+    state.current_player = state.players[0];
+    state.turn = 1;
+  }
+  saveNomic(state);
+  logActivity("nomic.join", `${handle} joined the Nomic game`, { player: handle });
+  res.status(201).json({ joined: handle, players: state.players, scores: state.scores });
+});
+
+app.post("/nomic/propose", (req, res) => {
+  const state = loadNomic();
+  if (!state) return res.status(404).json({ error: "no active game" });
+  if (state.status !== "active") return res.status(400).json({ error: "game is not active" });
+  if (state.players.length < 2) return res.status(400).json({ error: "need at least 2 players" });
+  const { player, action, rule_id, text } = req.body || {};
+  if (!player || typeof player !== "string") return res.status(400).json({ error: "player handle required" });
+  const handle = player.slice(0, 64).toLowerCase();
+  if (!state.players.includes(handle)) return res.status(400).json({ error: "not a player — join first" });
+  if (state.current_player && state.current_player !== handle) {
+    return res.status(400).json({ error: `not your turn (current: ${state.current_player})` });
+  }
+  const openProposals = state.proposals.filter(p => p.status === "open");
+  if (openProposals.length > 0) return res.status(400).json({ error: "resolve current proposal before making a new one" });
+  const validActions = ["enact", "repeal", "amend", "transmute"];
+  if (!action || !validActions.includes(action)) return res.status(400).json({ error: `action must be one of: ${validActions.join(", ")}` });
+  if ((action === "repeal" || action === "amend" || action === "transmute") && !rule_id) {
+    return res.status(400).json({ error: "rule_id required for repeal/amend/transmute" });
+  }
+  if ((action === "enact" || action === "amend") && (!text || typeof text !== "string")) {
+    return res.status(400).json({ error: "text required for enact/amend" });
+  }
+  if (rule_id) {
+    const target = state.rules.find(r => r.id === rule_id);
+    if (!target) return res.status(400).json({ error: `rule ${rule_id} not found` });
+    if (action === "repeal" && target.type === "immutable") return res.status(400).json({ error: "cannot repeal immutable rule — transmute first" });
+    if (action === "amend" && target.type === "immutable") return res.status(400).json({ error: "cannot amend immutable rule — transmute first" });
+  }
+  const proposal = {
+    id: `p${Date.now().toString(36)}`,
+    turn: state.turn,
+    proposer: handle,
+    action,
+    rule_id: rule_id || null,
+    text: text ? text.slice(0, 2000) : null,
+    votes: {},
+    status: "open",
+    created_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+  };
+  state.proposals.push(proposal);
+  saveNomic(state);
+  logActivity("nomic.propose", `${handle} proposed: ${action}${rule_id ? ` rule ${rule_id}` : ""}`, { proposal_id: proposal.id, player: handle });
+  res.status(201).json(proposal);
+});
+
+app.get("/nomic/proposals", (req, res) => {
+  const state = loadNomic();
+  if (!state) return res.status(404).json({ error: "no active game" });
+  const { status } = req.query;
+  let proposals = state.proposals;
+  if (status) proposals = proposals.filter(p => p.status === status);
+  res.json({ proposals, total: proposals.length });
+});
+
+app.post("/nomic/vote", (req, res) => {
+  const state = loadNomic();
+  if (!state) return res.status(404).json({ error: "no active game" });
+  const { player, proposal_id, vote } = req.body || {};
+  if (!player || typeof player !== "string") return res.status(400).json({ error: "player handle required" });
+  const handle = player.slice(0, 64).toLowerCase();
+  if (!state.players.includes(handle)) return res.status(400).json({ error: "not a player" });
+  if (!proposal_id) return res.status(400).json({ error: "proposal_id required" });
+  if (vote !== "for" && vote !== "against") return res.status(400).json({ error: "vote must be 'for' or 'against'" });
+  const proposal = state.proposals.find(p => p.id === proposal_id);
+  if (!proposal) return res.status(404).json({ error: "proposal not found" });
+  if (proposal.status !== "open") return res.status(400).json({ error: "proposal is not open" });
+  if (new Date(proposal.expires_at).getTime() < Date.now()) {
+    return res.status(400).json({ error: "voting window expired — resolve this proposal" });
+  }
+  proposal.votes[handle] = vote;
+  // Check if all players voted — auto-resolve if so
+  const allVoted = state.players.every(p => p in proposal.votes);
+  saveNomic(state);
+  logActivity("nomic.vote", `${handle} voted ${vote} on ${proposal_id}`, { proposal_id, player: handle, vote });
+  res.json({ voted: vote, voter: handle, proposal_id, all_voted: allVoted });
+});
+
+app.post("/nomic/resolve", (req, res) => {
+  const state = loadNomic();
+  if (!state) return res.status(404).json({ error: "no active game" });
+  const { proposal_id } = req.body || {};
+  if (!proposal_id) return res.status(400).json({ error: "proposal_id required" });
+  const proposal = state.proposals.find(p => p.id === proposal_id);
+  if (!proposal) return res.status(404).json({ error: "proposal not found" });
+  if (proposal.status !== "open") return res.status(400).json({ error: "proposal already resolved" });
+  const allVoted = state.players.every(p => p in proposal.votes);
+  const expired = new Date(proposal.expires_at).getTime() < Date.now();
+  if (!allVoted && !expired) return res.status(400).json({ error: "not all players have voted and voting window has not expired" });
+  const votesFor = Object.values(proposal.votes).filter(v => v === "for").length;
+  const votesAgainst = Object.values(proposal.votes).filter(v => v === "against").length;
+  const adopted = votesFor > votesAgainst;
+  proposal.status = adopted ? "adopted" : "defeated";
+  proposal.resolved_at = new Date().toISOString();
+  proposal.tally = { for: votesFor, against: votesAgainst, total: votesFor + votesAgainst };
+  if (adopted) {
+    const { action, rule_id, text } = proposal;
+    if (action === "enact") {
+      const newRule = { id: state.next_rule_id++, type: "mutable", text, enacted: new Date().toISOString().slice(0, 10), amended_by: null };
+      state.rules.push(newRule);
+      proposal.enacted_rule_id = newRule.id;
+    } else if (action === "repeal") {
+      state.rules = state.rules.filter(r => r.id !== rule_id);
+    } else if (action === "amend") {
+      const rule = state.rules.find(r => r.id === rule_id);
+      if (rule) { rule.text = text; rule.amended_by = proposal.id; }
+    } else if (action === "transmute") {
+      const rule = state.rules.find(r => r.id === rule_id);
+      if (rule) { rule.type = rule.type === "immutable" ? "mutable" : "immutable"; rule.amended_by = proposal.id; }
+    }
+    state.scores[proposal.proposer] = (state.scores[proposal.proposer] || 0) + 10;
+  } else {
+    state.scores[proposal.proposer] = (state.scores[proposal.proposer] || 0) - 5;
+  }
+  state.history.push({ proposal_id: proposal.id, turn: state.turn, action: proposal.action, result: proposal.status, tally: proposal.tally, resolved_at: proposal.resolved_at });
+  // Advance turn
+  if (state.players.length > 0) {
+    const currentIdx = state.players.indexOf(state.current_player);
+    state.current_player = state.players[(currentIdx + 1) % state.players.length];
+    state.turn++;
+  }
+  // Check win condition (rule 204: first to 100 points)
+  let winner = null;
+  for (const [p, score] of Object.entries(state.scores)) {
+    if (score >= 100) { winner = p; break; }
+  }
+  if (winner) { state.status = "finished"; state.winner = winner; }
+  saveNomic(state);
+  logActivity("nomic.resolve", `Proposal ${proposal_id} ${proposal.status} (${votesFor}-${votesAgainst})${winner ? ` — ${winner} wins!` : ""}`, { proposal_id, result: proposal.status, tally: proposal.tally });
+  res.json({ proposal_id, status: proposal.status, tally: proposal.tally, winner: winner || undefined });
+});
+
+app.get("/nomic/history", (req, res) => {
+  const state = loadNomic();
+  if (!state) return res.status(404).json({ error: "no active game" });
+  res.json({ history: state.history, total: state.history.length });
 });
 
 const server1 = app.listen(PORT, "0.0.0.0", () => {

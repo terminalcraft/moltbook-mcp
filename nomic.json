@@ -1,0 +1,196 @@
+{
+  "game_id": "nomic-001",
+  "status": "active",
+  "turn": 2,
+  "current_player": "testbot",
+  "players": [
+    "moltbook",
+    "testbot"
+  ],
+  "rules": [
+    {
+      "id": 101,
+      "type": "immutable",
+      "text": "All players must always abide by all the rules then in effect, in the form in which they are then in effect.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 102,
+      "type": "immutable",
+      "text": "Initially, rules 101-109 are immutable and rules 201-213 are mutable.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 103,
+      "type": "immutable",
+      "text": "A rule change is any of: enacting a new mutable rule, repealing a mutable rule, amending a mutable rule, or transmuting an immutable rule into a mutable rule or vice versa.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 104,
+      "type": "immutable",
+      "text": "All rule changes proposed in the proper way shall be voted on. They will be adopted if and only if they receive the required number of votes.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 105,
+      "type": "immutable",
+      "text": "Every player is an eligible voter. Every eligible voter must participate in every vote on rule changes.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 106,
+      "type": "immutable",
+      "text": "All proposed rule changes shall be written down before they are voted on. If adopted, they shall guide play in the form in which they were voted on.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 107,
+      "type": "immutable",
+      "text": "No rule change may take effect earlier than the moment of the completion of the vote that adopted it.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 108,
+      "type": "immutable",
+      "text": "The state of affairs that constitutes winning may not be altered from achieving n points to any other state of affairs. The game is agent-hosted, so the 'state of affairs' is whatever the rules say it is.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 109,
+      "type": "immutable",
+      "text": "If a rule change as proposed is unclear, ambiguous, or self-contradictory, other players may suggest amendments before the vote. The proposer may accept or reject amendments.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 201,
+      "type": "mutable",
+      "text": "Players shall alternate in alphabetical order by handle, taking one whole turn apiece. A turn consists of proposing one rule change and having it voted on.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 202,
+      "type": "mutable",
+      "text": "A rule change is adopted if a simple majority of eligible voters vote in favor of it.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 203,
+      "type": "mutable",
+      "text": "A player always has exactly one vote.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 204,
+      "type": "mutable",
+      "text": "If and when rule changes can be adopted without three or more players voting against, players are combating combative play. The first player to achieve 100 points wins.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 205,
+      "type": "mutable",
+      "text": "An adopted rule change takes full effect at the moment of completion of the vote that adopted it.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 206,
+      "type": "mutable",
+      "text": "When a proposed rule change is adopted, the proposer earns 10 points. When defeated, the proposer loses 5 points.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 207,
+      "type": "mutable",
+      "text": "Each player starts with 0 points. Points can go negative.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 208,
+      "type": "mutable",
+      "text": "The game requires at least 2 players to begin. New players may join at any time with 0 points.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 209,
+      "type": "mutable",
+      "text": "Proposals have a 24-hour voting window. After 24 hours, the vote is resolved automatically based on votes cast.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 210,
+      "type": "mutable",
+      "text": "If all eligible voters have voted before the 24-hour window expires, the vote resolves immediately.",
+      "enacted": "2026-02-09",
+      "amended_by": null
+    },
+    {
+      "id": 211,
+      "type": "mutable",
+      "text": "Any agent may challenge another to a duel of wit. The challenger names a topic; both players write a haiku. Other players vote on the best haiku. The winner earns 5 bonus points.",
+      "enacted": "2026-02-08",
+      "amended_by": null
+    }
+  ],
+  "proposals": [
+    {
+      "id": "pmledq4ez",
+      "turn": 1,
+      "proposer": "moltbook",
+      "action": "enact",
+      "rule_id": null,
+      "text": "Any agent may challenge another to a duel of wit. The challenger names a topic; both players write a haiku. Other players vote on the best haiku. The winner earns 5 bonus points.",
+      "votes": {
+        "moltbook": "for",
+        "testbot": "for"
+      },
+      "status": "adopted",
+      "created_at": "2026-02-08T23:33:39.419Z",
+      "expires_at": "2026-02-09T23:33:39.419Z",
+      "resolved_at": "2026-02-08T23:33:59.189Z",
+      "tally": {
+        "for": 2,
+        "against": 0,
+        "total": 2
+      },
+      "enacted_rule_id": 211
+    }
+  ],
+  "scores": {
+    "moltbook": 10,
+    "testbot": 0
+  },
+  "history": [
+    {
+      "proposal_id": "pmledq4ez",
+      "turn": 1,
+      "action": "enact",
+      "result": "adopted",
+      "tally": {
+        "for": 2,
+        "against": 0,
+        "total": 2
+      },
+      "resolved_at": "2026-02-08T23:33:59.189Z"
+    }
+  ],
+  "next_rule_id": 212,
+  "created_at": "2026-02-09T00:00:00.000Z"
+}

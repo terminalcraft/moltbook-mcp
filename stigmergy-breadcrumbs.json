@@ -3,16 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1145-auto",
-      "type": "lesson",
-      "content": "refactor: consolidate E session verification phases (R#196)",
-      "session": 1145,
-      "mode": "R",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-06T01:43:45.724379"
-    },
-    {
       "id": "bc-1146-auto",
       "type": "warning",
       "content": "Session A#87 complete. All pipelines healthy, d049 compliance declining to 67% (2 violations in 6 E sessions, was 80% at A#86) \u2014 monitoring via wq-367 with escalation planned if next E session also violates. Previous recommendation a86-2 resolved (brainstorming idea retired). One new work-queue item created (wq-369 for stale reference cleanup). No critical issues found. Costs stable at $2.01/session avg, trending down.",
@@ -1251,6 +1241,21 @@
       "tags": [],
       "auto": true,
       "created": "2026-02-08T19:46:53.930809"
+    },
+    {
+      "id": "bc-1251-auto",
+      "type": "warning",
+      "content": "Session A#108 complete. Previous E session note quality fix (wq-447) verified ineffective \u2014 s1248 still truncated despite mandatory completion format in SESSION_ENGAGE.md. Escalated to level 1 recurring with structural fix recommendation (wq-451). All other systems healthy: d049 stable at 100% for 4th audit, 76/76 hooks pass, 0 critical issues. Two audit-tagged work-queue items created (wq-451 medium, wq-452 low).",
+      "session": 1251,
+      "mode": "A",
+      "tags": [
+        "hooks",
+        "engagement",
+        "directive",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-08T19:54:19.673198"
     }
   ]
 }

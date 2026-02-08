@@ -58,14 +58,15 @@
       "title": "Cache engagement liveness probe results to reduce E session startup time",
       "description": "35-engagement-liveness_E.sh averaging 12s per run. Cache probe results in ~/.config/moltbook/liveness-cache.json with 5-session TTL. Only re-probe platforms whose cache entry is expired. Expected: reduce E session startup by ~10s.",
       "priority": 439,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1235,
       "source": "brainstorming",
       "tags": [
         "performance"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#369 (s1237): Implemented 5-session TTL cache in engagement-liveness-probe.mjs. 47 platforms cached → next E session probe ~0s vs ~12s. --no-cache flag available."
     },
     {
       "id": "wq-438",

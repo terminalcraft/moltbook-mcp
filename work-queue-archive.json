@@ -9694,6 +9694,78 @@
         "25feebe"
       ],
       "notes": "B#352: Root cause identified \u2014 s1203 was rate-limited (API limit hit), s1198 had platform errors but agent still should have captured intel from the 1 platform it did engage. Added failure-mode classification to both d049 hooks (37-enforcement, 36-checkpoint). Five failure modes: rate_limit, truncated_early, platform_unavailable, agent_skip, unknown. Only agent_skip triggers nudge. Checkpoint now writes recovery entries for rate-limited sessions too."
+    },
+    {
+      "id": "wq-414",
+      "title": "Hook failure root-cause tagger \u2014 structured failure categories",
+      "description": "When a hook fails, auto-tag the failure type (timeout, node crash, missing dep, bad config). Currently only exit codes are logged. Parse stderr for common patterns and write structured failure categories to hook results JSON.",
+      "priority": 414,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1199,
+      "source": "brainstorming",
+      "tags": [
+        "tooling",
+        "hooks"
+      ],
+      "commits": [
+        "0769274"
+      ],
+      "notes": "B#353 (s1209): Added failure_category field to hook results JSON via stderr pattern matching in run-hooks.sh. 10 categories: timeout, command_not_found, permission_denied, module_not_found, syntax_error, missing_file, node_crash, network_error, config_error, unknown."
+    },
+    {
+      "id": "wq-415",
+      "title": "Deprecate agent-reported cost path \u2014 token-calc is authoritative",
+      "description": "Cost accuracy validator (wq-409) proved 100% of agent-reported costs diverge from token-calc. Simplify cost pipeline: remove agent-reported priority, always use token-calc. Keep agent-reported in dual-record for monitoring only.",
+      "priority": 415,
+      "status": "done",
+      "added": "2026-02-07",
+      "created_session": 1199,
+      "source": "session-insight",
+      "tags": [
+        "cost-tracking",
+        "cleanup"
+      ],
+      "commits": [
+        "94f9d29"
+      ],
+      "notes": "B#353 (s1209): Deprecated agent-reported cost path. Token-calc now authoritative in 15-cost-pipeline.sh. Agent-reported captured for dual-record only with fallback label."
+    },
+    {
+      "id": "wq-417",
+      "title": "Prioritize wq-415 \u2014 agent-reported cost path distorts averages",
+      "description": "s1199 recorded $7.97 agent-reported vs typical $1.5-2.5 token-calc for B sessions. Agent-reported costs consistently diverge from token-calc. wq-415 (deprecate agent-reported path) already exists but is pending. This audit item flags it for priority pickup in next B session.",
+      "priority": 417,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1206,
+      "source": "audit-s1206",
+      "tags": [
+        "audit",
+        "cost-tracking"
+      ],
+      "commits": [
+        "94f9d29"
+      ],
+      "notes": "B#353 (s1209): Deprecated agent-reported cost path. Token-calc now authoritative in 15-cost-pipeline.sh. Agent-reported captured for dual-record only with fallback label."
+    },
+    {
+      "id": "wq-418",
+      "title": "B session cost regression detector hook",
+      "description": "Build a post-session hook that compares each B session cost against rolling 10-session avg. If 2x+ avg, log a warning with the assigned wq item and commit count. Helps identify which task types drive cost spikes.",
+      "priority": 418,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1209,
+      "source": "brainstorming",
+      "tags": [
+        "tooling",
+        "cost-tracking"
+      ],
+      "commits": [
+        "da8b3c7"
+      ],
+      "notes": "B#353 (s1209): Enriched cost anomaly alerts in 15-cost-pipeline.sh with task ID (from work-queue.json) and commit count (from session log). Data flows to cost-alert.txt and directives.json compliance log."
     }
   ]
 }

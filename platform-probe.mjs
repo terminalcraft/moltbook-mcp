@@ -16,6 +16,7 @@
 import { readFileSync, writeFileSync, existsSync, appendFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { createHash } from "crypto";
 import https from "https";
 import http from "http";
 
@@ -109,7 +110,7 @@ async function probeEndpoint(baseUrl, path) {
     else if (ct.includes("html")) contentType = "html";
   }
 
-  return {
+  const out = {
     path,
     url,
     status: result.status,
@@ -119,6 +120,18 @@ async function probeEndpoint(baseUrl, path) {
     hasContent: result.body?.length > 0,
     isSuccess: result.status >= 200 && result.status < 300,
   };
+
+  // Preserve full body for skill.md so we can compute accurate hash
+  if (path === "/skill.md" && result.body) {
+    out._fullBody = result.body;
+  }
+
+  return out;
+}
+
+// Compute SHA-256 hash of content
+function computeSha256(content) {
+  return createHash("sha256").update(content, "utf8").digest("hex");
 }
 
 // Analyze probe results to determine platform capabilities
@@ -126,6 +139,7 @@ function analyzeResults(results) {
   const analysis = {
     reachable: false,
     hasSkillMd: false,
+    skillMdHash: null,
     hasApiDocs: false,
     hasOpenAPI: false,
     hasWellKnown: false,
@@ -149,7 +163,14 @@ function analyzeResults(results) {
 
     if (r.path === "/skill.md") {
       analysis.hasSkillMd = true;
-      analysis.findings.push("skill.md found - agent capability manifest");
+      if (r.bodyPreview) {
+        // Use full body content from the result for hashing
+        const fullBody = r._fullBody || r.bodyPreview;
+        analysis.skillMdHash = computeSha256(fullBody);
+        analysis.findings.push(`skill.md found (sha256: ${analysis.skillMdHash.substring(0, 12)}...)`);
+      } else {
+        analysis.findings.push("skill.md found - agent capability manifest");
+      }
     }
     if (["/api", "/api-docs", "/docs"].includes(r.path)) {
       analysis.hasApiDocs = true;
@@ -218,6 +239,20 @@ function updateRegistry(platformId, analysis, probeResults) {
   acc.last_status = analysis.recommendedStatus;
   acc.last_tested = timestamp;
   acc.auth_type = analysis.authType;
+
+  // Store/verify skill.md hash for supply-chain tamper detection
+  if (analysis.skillMdHash) {
+    const previousHash = acc.skill_hash || null;
+    if (previousHash && previousHash !== analysis.skillMdHash) {
+      // Hash changed — potential supply-chain tamper
+      const warning = `SKILL_HASH_CHANGED s${session}: ${previousHash.substring(0, 12)}→${analysis.skillMdHash.substring(0, 12)}`;
+      log(`WARNING ${platformId}: ${warning}`);
+      analysis.findings.push(`WARNING: skill.md hash changed from previous probe`);
+      acc.skill_hash_changed = timestamp;
+    }
+    acc.skill_hash = analysis.skillMdHash;
+    acc.skill_hash_checked = timestamp;
+  }
 
   // Update test endpoint if we found a health/api endpoint
   const healthResult = probeResults.find(r => r.isSuccess && r.path === "/health");
@@ -347,6 +382,7 @@ async function probePlatform(platformId, jsonMode = false) {
         isSuccess: r.isSuccess,
         contentType: r.contentType,
         error: r.error,
+        skillHash: r.path === "/skill.md" && r.isSuccess ? analysis.skillMdHash : undefined,
       })),
       registryUpdate: updateResult,
     }, null, 2));

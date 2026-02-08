@@ -81,24 +81,6 @@
       "commits": []
     },
     {
-      "id": "wq-421",
-      "title": "Fix cost-history.json null cost values \u2014 token-calc pipeline not populating cost field",
-      "description": "cost-history.json has null cost values for all sessions s1196+ (10+ sessions). The token-calc cost pipeline in 15-cost-pipeline.sh writes entries with correct source labels but fails to populate the 'cost' field. Likely regression from wq-415 (s1209) or wq-406 (s1192) changes. Session-history.txt still has correct costs. Debug the cost extraction and fix the pipeline.",
-      "priority": 421,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1211,
-      "source": "audit-s1211",
-      "tags": [
-        "audit",
-        "cost-tracking"
-      ],
-      "commits": [
-        "5449799"
-      ],
-      "notes": "B#354 (s1212): Fixed field name mismatch \u2014 pipeline wrote spent but consumers expected cost. Renamed field, updated 5 readers with backwards-compat fallback, backfilled 200 existing entries."
-    },
-    {
       "id": "wq-422",
       "title": "Monitor E session truncation pattern \u2014 s1208 ran 1m32s at $0.42",
       "description": "E session s1208 ran for only 1m32s at $0.42 with truncated note and no trace file. Intel was captured via checkpoint but engagement quality is minimal. Monitor next 2-3 E sessions for similar patterns. If recurring, investigate budget caps or rate limiting causing premature exits.",

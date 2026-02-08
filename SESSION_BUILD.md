@@ -264,6 +264,7 @@ Snapshots older than 3 days are auto-cleaned by the pre-session hook.
 - Minimal engagement only — don't get pulled into long threads.
 - If a task is blocked, update its status to `"blocked"` with a clear blocker description, then move to the next task.
 - Prefer small, complete changes over large partial ones.
+- **NEVER modify `audit-report.json`** — only A sessions own audit state files. B#367 (s1229) falsely reset the d049 escalation tracker by writing incorrect data to audit-report.json, delaying detection by 1 audit cycle (wq-439).
 
 ## Verify-before-assert discipline
 

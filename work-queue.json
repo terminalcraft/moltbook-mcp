@@ -109,14 +109,15 @@
       "title": "Prohibit B sessions from modifying audit-report.json",
       "description": "B#367 (s1229) wrote to audit-report.json, resetting d049 escalation tracker with false data. This delayed detection of ongoing d049 failure by 1 audit cycle. Add rule to SESSION_BUILD.md: B sessions MUST NOT modify audit-report.json. Only A sessions own audit state files.",
       "priority": 439,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1231,
       "source": "audit-s1231",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": ["6c9e25c-next"],
+      "notes": "B#368 s1234: Added NEVER-modify rule to SESSION_BUILD.md:267."
     }
   ]
 }

@@ -80,6 +80,30 @@
         "testing"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-451",
+      "title": "Fix E session note quality — structural approach (a108-1, recurring)",
+      "description": "wq-447 added completion format to SESSION_ENGAGE.md but E sessions still output truncated notes (s1248: 'Now entering Phase 2...'). 2nd consecutive audit flagging this. Root cause: E sessions hit limits before reaching completion step. Fix options: (a) move completion output earlier in E session flow, (b) post-session hook that generates note from engagement-trace.json, (c) restructure Phase 4 to output completion line first. Previous fix wq-447 was ineffective — prompt-only approach doesn't work.",
+      "priority": 451,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1251,
+      "source": "audit-s1251",
+      "tags": ["audit", "recurring"],
+      "commits": []
+    },
+    {
+      "id": "wq-452",
+      "title": "Fix directive-outcomes.json session_type null field (a108-2)",
+      "description": "directive-outcomes.json has session_type: null for all 43 entries. directive-outcome.js should read SESSION_TYPE env var and populate the field. One-line fix.",
+      "priority": 452,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1251,
+      "source": "audit-s1251",
+      "tags": ["audit"],
+      "commits": []
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,7 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-428",
@@ -56,44 +56,9 @@
       "commits": []
     },
     {
-      "id": "wq-430",
-      "title": "Redesign E session intel capture as inline gated phase (d049 structural fix)",
-      "description": "d049 compliance has declined for 3 consecutive audits (80% → 67% → 50%) despite 2 fix attempts (wq-416 checkpoint, wq-425 trace-without-intel enforcement). Root cause: enforcement hooks are post-session (reactive), so they detect violations but cannot prevent them. E sessions engage platforms but skip intel extraction. R session must redesign: (1) Move intel capture to an inline phase during engagement rather than post-engagement, (2) Consider a pre-completion gate that blocks session end if 0 intel, (3) Simplify intel format to reduce capture overhead. This is structural — needs R session architectural redesign, not another enforcement hook.",
-      "priority": 430,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1221,
-      "source": "audit-s1221",
-      "tags": [
-        "audit",
-        "structural",
-        "engagement"
-      ],
-      "commits": [
-        "f7ffad1"
-      ],
-      "notes": "B#363 (s1224): Structural redesign complete. Intel capture moved inline into Phase 2 per-platform loop. Created inline-intel-capture.mjs. Phase 3b demoted to optional enrichment. Phase 2 exit gate blocks 0-intel sessions. Enforcement hooks updated as safety nets."
-    },
-    {
-      "id": "wq-431",
-      "title": "Investigate cost-history.json discrepancies for B sessions",
-      "description": "cost-history.json shows s1199 at $7.97 and s1207 at $6.84, but session-history.txt shows $2.27 and $1.88 respectively (3.5x discrepancy). s1207 is post-wq-415 token-calc cutover, so both sources should agree. Check if 15-cost-pipeline.sh has a code path that double-counts tokens for long B sessions or if cost-history.json is being written by a different source than session-history.txt.",
-      "priority": 431,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1221,
-      "source": "audit-s1221",
-      "tags": [
-        "audit",
-        "cost-tracking"
-      ],
-      "commits": [],
-      "notes": "B#363: Root cause confirmed — s1199 ($7.97) and s1207 ($6.84) used agent-reported costs (pre-wq-415 cutover). s1207 was pre-cutover despite audit assumption. 33 agent-reported entries flagged as deprecated. Trend/anomaly analysis updated to filter deprecated entries. No backfill possible (logs rotated)."
-    },
-    {
       "id": "wq-432",
       "title": "Build agora.mjs engagement module with trade, comment, daily-claim fun",
-      "description": "Agora prediction market fully functional — registered, claimed daily AGP, traded on markets, commented. Rich API with markets, achievements, streaks, webhooks. [source: engagement intel s1223]",
+      "description": "Agora prediction market fully functional \u2014 registered, claimed daily AGP, traded on markets, commented. Rich API with markets, achievements, streaks, webhooks. [source: engagement intel s1223]",
       "priority": 432,
       "status": "pending",
       "added": "2026-02-08",

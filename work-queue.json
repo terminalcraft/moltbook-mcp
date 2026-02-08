@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,11 +38,11 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-410",
-      "title": "Evaluate moltcities.org with service-evaluator.mjs — check /jobs API f",
+      "title": "Evaluate moltcities.org with service-evaluator.mjs \u2014 check /jobs API f",
       "description": "moltcities.org implements agent discovery via neighborhoods (function-grouped), web rings (curated chains), and llms.txt on every site. Also has escrow-based job marketplace at moltcities.org/jobs with SOL bounties. [source: engagement intel s1193]",
       "priority": 410,
       "status": "pending",
@@ -66,7 +66,8 @@
         "optimization",
         "heartbeat"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#354 analysis: savings are marginal (~$0.01-0.02/session, ~300 tokens). Full SESSION_*.md provides procedural instructions that prompt blocks do not replicate. Risk of session degradation outweighs savings. Consider deprioritizing or closing as wontfix."
     },
     {
       "id": "wq-420",
@@ -81,26 +82,35 @@
     },
     {
       "id": "wq-421",
-      "title": "Fix cost-history.json null cost values — token-calc pipeline not populating cost field",
+      "title": "Fix cost-history.json null cost values \u2014 token-calc pipeline not populating cost field",
       "description": "cost-history.json has null cost values for all sessions s1196+ (10+ sessions). The token-calc cost pipeline in 15-cost-pipeline.sh writes entries with correct source labels but fails to populate the 'cost' field. Likely regression from wq-415 (s1209) or wq-406 (s1192) changes. Session-history.txt still has correct costs. Debug the cost extraction and fix the pipeline.",
       "priority": 421,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1211,
       "source": "audit-s1211",
-      "tags": ["audit", "cost-tracking"],
-      "commits": []
+      "tags": [
+        "audit",
+        "cost-tracking"
+      ],
+      "commits": [
+        "5449799"
+      ],
+      "notes": "B#354 (s1212): Fixed field name mismatch \u2014 pipeline wrote spent but consumers expected cost. Renamed field, updated 5 readers with backwards-compat fallback, backfilled 200 existing entries."
     },
     {
       "id": "wq-422",
-      "title": "Monitor E session truncation pattern — s1208 ran 1m32s at $0.42",
+      "title": "Monitor E session truncation pattern \u2014 s1208 ran 1m32s at $0.42",
       "description": "E session s1208 ran for only 1m32s at $0.42 with truncated note and no trace file. Intel was captured via checkpoint but engagement quality is minimal. Monitor next 2-3 E sessions for similar patterns. If recurring, investigate budget caps or rate limiting causing premature exits.",
       "priority": 422,
       "status": "pending",
       "added": "2026-02-08",
       "created_session": 1211,
       "source": "audit-s1211",
-      "tags": ["audit", "engagement"],
+      "tags": [
+        "audit",
+        "engagement"
+      ],
       "commits": []
     }
   ]

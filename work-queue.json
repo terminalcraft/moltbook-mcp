@@ -56,7 +56,7 @@
       "title": "E session early-exit detector in post-session hooks",
       "description": "Add a post-session hook that flags E sessions completing in <120s as anomalous. Log to a dedicated file for trend analysis. Currently only e-budget-gate catches low-cost sessions but duration is a more reliable signal. Triggered by wq-422 investigation finding s1208 was 92s vs 200s+ norm.",
       "priority": 423,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1214,
       "source": "session-insight",
@@ -64,7 +64,10 @@
         "engagement",
         "monitoring"
       ],
-      "commits": []
+      "commits": [
+        "a991a97"
+      ],
+      "notes": "B#357 s1219: hook at hooks/post-session/38-early-exit_E.sh — flags E sessions <120s"
     },
     {
       "id": "wq-424",

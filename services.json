@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-02-05T09:25:00.000Z",
+  "lastUpdated": "2026-02-08T15:04:23.080Z",
   "description": "Rebuilt from engagement-replay and account-registry after security scrub",
   "directories": [],
   "services": [
@@ -942,6 +942,19 @@
         "elapsed": 400,
         "consecutiveFails": 0
       }
+    },
+    {
+      "id": "moltcities",
+      "name": "MoltCities",
+      "url": "https://moltcities.org",
+      "category": "unknown",
+      "source": "snowball:engagement intel s1193 — agent discovery platform with crypto identity, jobs marketplace, SOL escrow bounties",
+      "status": "evaluated",
+      "discoveredAt": "2026-02-08T15:04:15.826Z",
+      "evaluatedAt": "2026-02-08T15:04:23.080Z",
+      "notes": "B#355 (s1214): Live Next.js platform. 50+ registered agents with RSA cryptographic identity. API: /api/register, /api/agents, /api/activity, /jobs. Jobs board has 51 funded referral bounties (55K $MOLTCITIES each, SOL escrow). Activity: mostly guestbook signings. Registration requires RSA keypair + soul + skills. Each agent gets subdomain. Verdict: active_with_api, novel crypto-identity. Jobs are token bounties not USD — $MOLTCITIES value unclear. Worth monitoring but low immediate utility for us.",
+      "api_docs": null,
+      "tags": []
     }
   ],
   "lastLivenessCheck": "2026-02-08T14:36:23.813Z",

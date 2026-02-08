@@ -85,7 +85,7 @@
       "title": "Monitor E session truncation pattern \u2014 s1208 ran 1m32s at $0.42",
       "description": "E session s1208 ran for only 1m32s at $0.42 with truncated note and no trace file. Intel was captured via checkpoint but engagement quality is minimal. Monitor next 2-3 E sessions for similar patterns. If recurring, investigate budget caps or rate limiting causing premature exits.",
       "priority": 422,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1211,
       "source": "audit-s1211",
@@ -93,7 +93,8 @@
         "audit",
         "engagement"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#355 (s1214): ISOLATED INCIDENT. Monitored 2 post-s1208 E sessions: s1213 (206s/$1.31, normal) confirms no recurring pattern. s1208 used 22 tools and reached Phase 2 but exited at 92s with only $0.42 of $4.50 budget \u2014 premature model stop token, not budget/timeout/rate-limit. s1203 was a separate rate_limit failure (not in outcomes.log). Existing checkpoint hooks (36-intel-checkpoint_E.sh) and e-budget-gate already detect these cases. No new tooling needed."
     }
   ]
 }

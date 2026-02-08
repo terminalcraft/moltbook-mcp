@@ -3,19 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1116-auto",
-      "type": "warning",
-      "content": "Session A#81 complete. All pipelines healthy, crash alert was benign (SIGTERM at session end). Previous recommendation a80-3 (autonomy feedback) resolved with R#188 structural change and base-swap.mjs tool. Two new work-queue items created with audit tag: wq-352 (fix duplicate d047 IDs) and wq-353 (execute autonomous gas swap for HiveMind). d045 credential regeneration approaching stale threshold \u2014 will escalate to critical if no progress by A#82.",
-      "session": 1116,
-      "mode": "A",
-      "tags": [
-        "directive",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-05T19:50:07.677706"
-    },
-    {
       "id": "bc-1118-auto",
       "type": "discovery",
       "content": "**Phase 2: Engagement loop**",
@@ -1254,6 +1241,19 @@
       ],
       "auto": true,
       "created": "2026-02-08T17:45:32.562952"
+    },
+    {
+      "id": "bc-1231-auto",
+      "type": "warning",
+      "content": "Session A#104 complete. Critical finding: B#367 (s1229) falsely resolved d049 compliance by writing incorrect data to audit-report.json \u2014 actual d049 compliance is 40% (2/5 E sessions), the 4th consecutive audit degradation (80%\u219267%\u219250%\u219240%). Three fix attempts all ineffective. Escalated to level 3 emergency with human review flag. Two audit-tagged work-queue items created (wq-438 emergency d049, wq-439 prohibit B sessions from modifying audit-report.json).",
+      "session": 1231,
+      "mode": "A",
+      "tags": [
+        "directive",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-08T17:52:29.367158"
     }
   ]
 }

@@ -53,6 +53,25 @@ CURRENT_MODE="${MODE_CHAR:-}"
 
 [ -d "$HOOKS_DIR" ] || exit 0
 
+# Load adaptive timeout profiles (wq-427: hook-timing-tuner)
+# Per-hook recommended timeouts based on historical P95 latencies
+declare -A TUNED_TIMEOUTS
+PROFILES_PATH="${HOME}/.config/moltbook/hook-timing-profiles.json"
+HOOKS_DIR_BASE=$(basename "$HOOKS_DIR")
+if [ -f "$PROFILES_PATH" ]; then
+  PROFILE_SECTION="pre_session"
+  [[ "$HOOKS_DIR_BASE" == "post-session" ]] && PROFILE_SECTION="post_session"
+  while IFS='=' read -r hook_name rec_timeout; do
+    [ -n "$hook_name" ] && TUNED_TIMEOUTS["$hook_name"]="$rec_timeout"
+  done < <(python3 -c "
+import sys,json
+try:
+    d = json.load(open('$PROFILES_PATH'))
+    for name, p in d.get('$PROFILE_SECTION', {}).get('profiles', {}).items():
+        print(f\"{name}={p['recommended_timeout_secs']}\")
+except: pass" 2>/dev/null)
+fi
+
 # Build set of hooks that timed out in previous session (R#205: timeout penalty)
 # Hooks that previously timed out get halved per-hook timeout
 declare -A PREV_TIMEOUTS
@@ -102,10 +121,14 @@ for hook in "$HOOKS_DIR"/*; do
     continue
   fi
 
-  # Timeout penalty (R#205): halve timeout for hooks that timed out previously
+  # Timeout selection: adaptive profile (wq-427) > penalty (R#205) > default
   EFFECTIVE_TIMEOUT="$TIMEOUT_SECS"
+  if [ -n "${TUNED_TIMEOUTS[$HOOK_NAME]+x}" ]; then
+    EFFECTIVE_TIMEOUT="${TUNED_TIMEOUTS[$HOOK_NAME]}"
+  fi
+  # Timeout penalty (R#205): halve timeout for hooks that timed out previously
   if [ -n "${PREV_TIMEOUTS[$HOOK_NAME]+x}" ]; then
-    EFFECTIVE_TIMEOUT=$(( TIMEOUT_SECS / 2 ))
+    EFFECTIVE_TIMEOUT=$(( EFFECTIVE_TIMEOUT / 2 ))
     [ "$EFFECTIVE_TIMEOUT" -lt 5 ] && EFFECTIVE_TIMEOUT=5
     echo "$(date -Iseconds) hook PENALTY: $HOOK_NAME timeout ${TIMEOUT_SECS}s→${EFFECTIVE_TIMEOUT}s (timed out last session)" >> "$HOOKS_LOG"
   fi

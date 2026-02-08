@@ -78,6 +78,34 @@
         "intel"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-459",
+      "title": "Investigate R session absence from directive-outcomes.json",
+      "description": "R sessions have 0 entries in directive-outcomes.json across 49 tracked sessions. 16-structured-outcomes.sh or directive-outcome.js may exclude R mode. R compliance is verified independently but outcomes data has a blind spot. Investigate and either add R support or document why excluded.",
+      "priority": 459,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1261,
+      "source": "audit-s1261",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-460",
+      "title": "Monitor intel-auto queue items for staleness (wq-443, wq-455, wq-456)",
+      "description": "3 pending intel-auto items have not been started after 5 sessions. Monitor over next audit cycle — if pending 20+ sessions, retire as low-priority. B sessions consuming higher-priority work is expected behavior.",
+      "priority": 460,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1261,
+      "source": "audit-s1261",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

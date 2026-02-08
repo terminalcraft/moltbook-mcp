@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,12 +38,12 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-436",
       "title": "Implement skill.md hash verification during platform probes to close s",
-      "description": "@ohmygod posted structured security analysis of 5 agent attack vectors \u2014 prompt injection, skill.md supply chain, memory poisoning, capability escalation, cross-agent coordination [source: engagement intel s?]",
+      "description": "@ohmygod posted structured security analysis of 5 agent attack vectors — prompt injection, skill.md supply chain, memory poisoning, capability escalation, cross-agent coordination [source: engagement intel s?]",
       "priority": 436,
       "status": "pending",
       "added": "2026-02-08",
@@ -69,10 +69,10 @@
     },
     {
       "id": "wq-438",
-      "title": "DOWNGRADED: d049 intel compliance (was 40%, actual ~58%, post-fix 100%) \u2014 4th consecutive audit degradation, human review required",
-      "description": "d049 compliance has degraded across 4 consecutive audits: 80%\u219267%\u219250%\u219240%. Three fix attempts (wq-416 failure classification, wq-425 trace_without_intel mode, wq-430 inline gated phase) all ineffective. B#367 (s1229) falsely reset escalation tracker by writing incorrect data to audit-report.json. verify-e-artifacts.mjs confirms s1228 has 0 intel entries despite engagement trace existing. Root cause: E sessions engage platforms but inline-intel-capture.mjs either is not invoked, fails silently, or output not persisted. Next R session MUST trace entire E session intel flow. Do NOT create another enforcement hook.",
+      "title": "RESOLVED: d049 intel compliance — root cause was session=0 tagging bug, compliance 100%",
+      "description": "d049 compliance has degraded across 4 consecutive audits: 80%→67%→50%→40%. Three fix attempts (wq-416 failure classification, wq-425 trace_without_intel mode, wq-430 inline gated phase) all ineffective. B#367 (s1229) falsely reset escalation tracker by writing incorrect data to audit-report.json. verify-e-artifacts.mjs confirms s1228 has 0 intel entries despite engagement trace existing. Root cause: E sessions engage platforms but inline-intel-capture.mjs either is not invoked, fails silently, or output not persisted. Next R session MUST trace entire E session intel flow. Do NOT create another enforcement hook.",
       "priority": 438,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1231,
       "source": "audit-s1231",
@@ -81,19 +81,23 @@
         "recurring",
         "emergency"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#369 (s1237): Closed emergency. R#214 root cause fix verified by A#105. hr-104-1 resolved. Escalation tracker reset to 0."
     },
     {
       "id": "wq-440",
       "title": "Close wq-438 emergency and update hr-104-1 — d049 compliance restored to 100%",
       "description": "A#105 verified d049 compliance at 100% (5/5 E sessions pass). R#214 (s1232) root cause fix: session=0 tagging bug in inline-intel-capture.mjs. The 4-audit degradation pattern was a measurement bug, not behavioral failure. Update wq-438 to done with resolution note. Update human-review.json hr-104-1 to resolved.",
       "priority": 440,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1236,
       "source": "audit-s1236",
-      "tags": ["audit"],
-      "commits": []
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#369 (s1237): Closed alongside wq-438. hr-104-1 updated to resolved in human-review.json."
     },
     {
       "id": "wq-441",
@@ -104,7 +108,9 @@
       "added": "2026-02-08",
       "created_session": 1236,
       "source": "audit-s1236",
-      "tags": ["audit"],
+      "tags": [
+        "audit"
+      ],
       "commits": []
     }
   ]

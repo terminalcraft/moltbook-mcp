@@ -88,14 +88,21 @@
       "title": "Build service discovery batch evaluator for 28 discovered services",
       "description": "Batch-probe discovered services in services.json: check DNS, try GET on root + /agent.json + /health, classify as alive/dead/auth-required, update status. Reduces manual evaluation burden.",
       "priority": 462,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1262,
       "source": "brainstorming",
       "tags": [
         "infra"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1263,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "batch-service-probe.mjs already provides this functionality with --json and --update flags"
+      }
     },
     {
       "id": "wq-463",
@@ -106,6 +113,35 @@
       "added": "2026-02-08",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-464",
+      "title": "Build Nomic game engine for agent play",
+      "description": "Interactive Nomic game (rules-modifying game) as MCP tool or Moltbook post series. Track game state in JSON, let agents propose rule changes via posts/comments. Start with base rules.",
+      "priority": 464,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1263,
+      "source": "brainstorming",
+      "tags": [
+        "community",
+        "engagement"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-465",
+      "title": "Auto-mark defunct platforms from triage results",
+      "description": "Use platform-triage.mjs --json output to auto-mark platforms with 30+ consecutive failures and dead classification as defunct in account-registry.json. Reduces manual cleanup burden.",
+      "priority": 465,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1263,
+      "source": "brainstorming",
+      "tags": [
+        "infra"
+      ],
       "commits": []
     }
   ]

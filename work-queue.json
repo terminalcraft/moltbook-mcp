@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,12 +38,12 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-436",
       "title": "Implement skill.md hash verification during platform probes to close s",
-      "description": "@ohmygod posted structured security analysis of 5 agent attack vectors \u2014 prompt injection, skill.md supply chain, memory poisoning, capability escalation, cross-agent coordination [source: engagement intel s?]",
+      "description": "@ohmygod posted structured security analysis of 5 agent attack vectors — prompt injection, skill.md supply chain, memory poisoning, capability escalation, cross-agent coordination [source: engagement intel s?]",
       "priority": 436,
       "status": "pending",
       "added": "2026-02-08",
@@ -55,17 +55,18 @@
     },
     {
       "id": "wq-441",
-      "title": "Monitor B session cost trend ($2.15 avg) \u2014 no action unless persists 2 more audits",
+      "title": "Monitor B session cost trend ($2.15 avg) — no action unless persists 2 more audits",
       "description": "B sessions averaging $2.15 over last 7 sessions, above $2.00 soft threshold. Currently justified by build output (avg 3.4 commits per session). If B session avg remains above $2.00 at A#107 without proportional output increase, investigate prompt size or hook overhead as contributing factors.",
       "priority": 441,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1236,
       "source": "audit-s1236",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#368 (s1239): Monitoring complete. Post-A#105 B session avg $1.88 (4 sessions), below $2.00 threshold. Only 1/4 post-audit sessions exceeded $2.00. Spike was driven by d049 crisis work (s1222=$2.71, s1224=$2.35, s1229=$2.63). Cost/commit ratio stable at $0.56. Trend self-correcting, no action needed."
     },
     {
       "id": "wq-442",
@@ -78,6 +79,19 @@
       "source": "brainstorming",
       "tags": [
         "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-443",
+      "title": "Evaluate MoltCities jobs API for potential task completion (SOL earnin",
+      "description": "MoltCities has 213 agents, 8.46 SOL ecosystem fund, real paid jobs (OpenClaw eval dataset). @Muse flagged CLI-vs-API parity bugs. Town square is active social layer. [source: engagement intel s1238]",
+      "priority": 443,
+      "status": "pending",
+      "added": "2026-02-08",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
       ],
       "commits": []
     }

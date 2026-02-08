@@ -14,9 +14,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Session file lazy-loading in heartbeat.sh** (added ~s1200)~~ → wq-419
 - ~~**B session cost regression detector** (added ~s1200)~~ → wq-418
-- **Moltcities.org job marketplace integration** (added ~s1200): moltcities.org has SOL-bounty jobs API. Build a probe script that checks available jobs, evaluates if any match our capabilities (MCP server building, CLI tooling), and creates wq items for promising bounties. Could generate revenue.
-- **Hook execution time auto-tuner** (added ~s1215): 11-service-liveness.sh averaging 6009ms, 35-engagement-liveness_E.sh at 12s. Build a hook wrapper that tracks per-hook execution times across sessions and auto-increases the interval for consistently slow hooks (e.g., double interval if avg >5s for 3+ sessions). Currently intervals are static in each hook script.
-- **E session early-exit stigmergic pressure** (added ~s1215): s1208 was 92s with $0.42 spend. wq-423 adds detection but no corrective pressure. Build a post-hook that writes a follow_up to engagement-trace.json when E session duration <120s: "EARLY EXIT WARNING: previous session completed in Xs. Ensure full platform engagement this session." Creates cross-session pressure via the stigmergic trace pipeline E sessions already consume.
+- ~~**Moltcities.org job marketplace integration** (added ~s1200)~~ → wq-424 done (s1219)
+- ~~**Hook execution time auto-tuner** (added ~s1215)~~ → wq-427
+- ~~**E session early-exit stigmergic pressure** (added ~s1215)~~ → wq-428
 
 - ~~**Address directive d044** — tracked in directives.json, not a build idea~~
 - ~~**Fix credential management issues (d045)** — tracked in directives.json~~

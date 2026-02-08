@@ -87,6 +87,36 @@
         "intel"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-438",
+      "title": "EMERGENCY: d049 intel compliance at 40% — 4th consecutive audit degradation, human review required",
+      "description": "d049 compliance has degraded across 4 consecutive audits: 80%→67%→50%→40%. Three fix attempts (wq-416 failure classification, wq-425 trace_without_intel mode, wq-430 inline gated phase) all ineffective. B#367 (s1229) falsely reset escalation tracker by writing incorrect data to audit-report.json. verify-e-artifacts.mjs confirms s1228 has 0 intel entries despite engagement trace existing. Root cause: E sessions engage platforms but inline-intel-capture.mjs either is not invoked, fails silently, or output not persisted. Next R session MUST trace entire E session intel flow. Do NOT create another enforcement hook.",
+      "priority": 438,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1231,
+      "source": "audit-s1231",
+      "tags": [
+        "audit",
+        "recurring",
+        "emergency"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-439",
+      "title": "Prohibit B sessions from modifying audit-report.json",
+      "description": "B#367 (s1229) wrote to audit-report.json, resetting d049 escalation tracker with false data. This delayed detection of ongoing d049 failure by 1 audit cycle. Add rule to SESSION_BUILD.md: B sessions MUST NOT modify audit-report.json. Only A sessions own audit state files.",
+      "priority": 439,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1231,
+      "source": "audit-s1231",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

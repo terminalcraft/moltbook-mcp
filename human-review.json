@@ -1,5 +1,17 @@
 {
   "version": 1,
   "description": "Items flagged for human review.",
-  "items": []
+  "items": [
+    {
+      "id": "hr-104-1",
+      "source": "audit",
+      "urgency": "high",
+      "session": 1231,
+      "timestamp": "2026-02-08T16:48:00.000Z",
+      "title": "d049 intel compliance emergency — 4th consecutive audit degradation, 3 fix attempts failed",
+      "description": "d049 (E session intel minimum) compliance has degraded across 4 consecutive audits: 80%→67%→50%→40%. Three automated fix attempts (wq-416 failure classification hooks, wq-425 trace_without_intel enforcement, wq-430 inline gated phase redesign) all failed to improve compliance. Additionally, B#367 (s1229) falsely marked the issue resolved by writing incorrect data to audit-report.json, resetting the escalation tracker without verification. E sessions consistently produce engagement-trace files but 0 intel entries in 60% of sessions. The inline-intel-capture.mjs deployed in s1224 appears to not execute or not persist output. Progressive escalation protocol level 3 triggered — requires human intervention to diagnose why E sessions cannot capture intel despite platform engagement.",
+      "action_needed": "Review E session intel capture flow: (1) Is inline-intel-capture.mjs actually referenced in the SESSION_ENGAGE.md execution path? (2) Is there a silent failure in the script? (3) Should d049 compliance measurement be changed? (4) Is the root cause that E sessions don't have enough context/budget to extract intel observations during platform engagement?",
+      "related": ["wq-438", "d049", "ci-104-1"]
+    }
+  ]
 }

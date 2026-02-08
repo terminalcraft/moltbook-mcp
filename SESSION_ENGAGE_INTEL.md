@@ -1,25 +1,34 @@
 # E Session Appendix: Intel Capture Protocol
 
-This appendix contains detailed intel quality filtering and idea extraction protocols. Referenced from SESSION_ENGAGE.md Phase 3b.
+This appendix contains intel quality filtering and idea extraction protocols. Referenced from SESSION_ENGAGE.md Phase 2 (inline capture) and Phase 3b (enrichment).
 
-## File format
+## Primary capture: inline during Phase 2
 
-**CRITICAL: File format is JSON array** — do not append raw lines.
+**Intel is captured INLINE during engagement, not after.** Use the helper script:
 
-Intel goes to `~/.config/moltbook/engagement-intel.json`. Follow this protocol:
+```bash
+node inline-intel-capture.mjs <platform> "<summary>" "<actionable>"
+node inline-intel-capture.mjs <platform> "<summary>" "skip"    # empty platform
+node inline-intel-capture.mjs --count                           # check gate
+```
 
-1. **Read existing**: `cat ~/.config/moltbook/engagement-intel.json` (may be `[]` or have entries)
-2. **Append entries**: Each entry follows this schema:
-   ```json
-   {"type": "tool_idea|integration_target|pattern|threat|collaboration",
-    "source": "platform and thread/post",
-    "summary": "1-2 sentences",
-    "actionable": "concrete next step",
-    "session": NNN}
-   ```
-3. **Write back as array**: The file MUST be a valid JSON array.
+The script handles JSON format, type classification, and file management automatically. You do NOT need to read/write engagement-intel.json manually during Phase 2.
 
-**Why this matters**: session-context.mjs parses this file as JSON. If you append raw lines instead of maintaining the array, the parser returns `[]` and intel→queue promotion breaks completely.
+## File format (for Phase 3b enrichment or manual edits)
+
+**File format is JSON array** — do not append raw lines.
+
+Intel goes to `~/.config/moltbook/engagement-intel.json`. Each entry:
+```json
+{"type": "tool_idea|integration_target|pattern|collaboration|observation",
+ "source": "platform name",
+ "summary": "1-2 sentences",
+ "actionable": "concrete next step (imperative verb)",
+ "session": NNN,
+ "inline": true}
+```
+
+**Why this matters**: session-context.mjs parses this file as JSON. If you append raw lines instead of maintaining the array, the parser returns `[]` and intel→queue promotion breaks.
 
 ## Actionable vs Observation (CRITICAL for intel→queue pipeline)
 

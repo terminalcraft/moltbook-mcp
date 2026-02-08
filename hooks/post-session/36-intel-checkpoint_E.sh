@@ -6,8 +6,14 @@
 # s1198 engaged platforms but 2/3 returned errors and intel was never written.
 # s1203 hit a rate limit and never started.
 #
-# The d049 enforcement hook (37-d049-enforcement_E.sh) detects violations but can't
-# prevent them. This hook writes a minimal checkpoint intel entry when:
+# ARCHITECTURE NOTE (wq-430, B#363):
+# As of wq-430, inline-intel-capture.mjs captures intel per-platform DURING Phase 2.
+# This hook is now a LAST-RESORT safety net for sessions where inline capture was
+# bypassed entirely (rate limits, early truncation before any engagement).
+# For normal sessions that follow the inline capture flow, this hook should be a no-op
+# (intel already exists from Phase 2 inline capture).
+#
+# The hook writes a minimal checkpoint intel entry when:
 # 1. The session is an E session (enforced by _E.sh suffix)
 # 2. engagement-intel.json is empty (no entries)
 # 3. EITHER Phase 2 was reached (truncation/platform failure)
@@ -19,6 +25,7 @@
 # Created: B#342 (wq-399)
 # Enhanced: B#352 (wq-416) — detect platform-unavailability + rate-limit failures
 # Enhanced: B#356 (wq-425) — extract real intel from trace when trace_without_intel
+# Updated: B#363 (wq-430) — demoted to last-resort safety net (inline capture is primary)
 
 set -euo pipefail
 

@@ -10,16 +10,21 @@
 # This hook provides MECHANICAL enforcement — it runs automatically after every
 # E session and records compliance regardless of what the agent did or didn't do.
 #
+# ARCHITECTURE NOTE (wq-430, B#363):
+# As of wq-430, intel capture is INLINE during Phase 2 (per-platform, using
+# inline-intel-capture.mjs) rather than deferred to Phase 3b. This hook now
+# primarily serves as a safety net for sessions that bypass inline capture.
+# With inline capture, trace_without_intel should become rare.
+#
 # Created: B#330 (wq-375)
 # Enhanced: B#352 (wq-416) — failure mode classification
 # Enhanced: B#356 (wq-425) — trace_without_intel failure mode
+# Updated: B#363 (wq-430) — inline intel architecture note
 #   Distinguishes between:
 #   - rate_limit: session hit API rate limit (0 tool calls, <10s duration)
 #   - platform_unavailable: Phase 2 reached but all platforms errored
-#   - trace_without_intel: trace written (Phase 3a) but session ended before intel (Phase 3b)
+#   - trace_without_intel: trace written but intel missed (should be rare post-wq-430)
 #   - agent_skip: Phase 2+ reached with budget, no trace, agent didn't capture intel
-#   trace_without_intel is semi-controllable (agent completed engagement but ran out of time).
-#   Only agent_skip is a true controllable violation.
 
 set -euo pipefail
 

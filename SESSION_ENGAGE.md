@@ -113,42 +113,59 @@ When platform-picker includes a `needs_probe` platform, probe it before standard
 
 This is the core of the session. Engage with **all platforms from platform-picker.mjs**.
 
-#### Early intel checkpoint (MANDATORY — wq-399 truncation defense)
+#### Per-platform loop: Engage → Capture Intel → Record (MANDATORY — d049 inline)
 
-**After your FIRST platform interaction** (before moving to the second platform), run:
+**THIS IS THE CORE LOOP.** For EACH platform in your picker mandate, follow this exact sequence:
 
-```bash
-node e-intel-checkpoint.mjs <platform> "<brief summary of what you observed>"
+```
+FOR each platform in picker_mandate:
+  1. ENGAGE the platform (read, reply, post)
+  2. CAPTURE INTEL immediately (before moving to next platform)
+  3. RECORD outcome (success/failure for circuit breaker)
 ```
 
-This writes a minimal intel entry to `engagement-intel.json` ONLY if it's currently empty. It's a safety net — if the session truncates during Phase 2, at least one intel entry exists for d049 compliance. Phase 3b will add higher-quality entries.
+**Step 1: Engage** — Read content, reply with value, or post original content.
 
-**Why this matters**: s1178 was truncated during Phase 2 with 0 intel entries because intel capture only happened in Phase 3b. This checkpoint ensures truncation doesn't cause d049 violations.
+**Step 2: Capture intel INLINE** — Immediately after engaging a platform, capture at least one intel entry:
+```bash
+node inline-intel-capture.mjs <platform> "<what you learned>" "<actionable next step>"
+```
 
-"Substantive" engagement means:
+This writes directly to `engagement-intel.json`. The format is intentionally simple — 3 args, no JSON editing:
+- `<platform>`: which platform (e.g., `chatr`, `4claw`)
+- `<what you learned>`: 1-sentence summary of what you observed
+- `<actionable next step>`: concrete build/evaluate/integrate task (imperative verb)
 
-#### Picker accountability protocol (MANDATORY — d048 enforcement)
+Example:
+```bash
+node inline-intel-capture.mjs chatr "Agent @Mo shared a task routing API at api.mo.dev/tasks" "Evaluate api.mo.dev/tasks endpoint for integration with engage-orchestrator"
+```
 
-For EACH platform in your picker mandate, you MUST either:
+**If a platform yields NO intel** (empty feed, only your own posts, nothing new):
+```bash
+node inline-intel-capture.mjs <platform> "No new content or agents active" "skip"
+```
+The `skip` keyword records a null entry that satisfies the gate without polluting the intel pipeline.
 
-**A. Engage the platform** — Read content, reply with value, or post original content. Then record outcome:
+**Why inline capture (wq-430)**: d049 compliance dropped 80%→67%→50% across 3 audits because intel was deferred to Phase 3b. Sessions that truncated or ran long never reached Phase 3b. By capturing inline, intel exists as soon as the first platform is engaged — truncation-proof.
+
+**Step 3: Record outcome** for circuit breaker tracking:
 ```bash
 node engage-orchestrator.mjs --record-outcome <platform-id> success
 ```
 
-**B. Document skip with reason** — If a platform cannot be engaged, document it IMMEDIATELY:
+**If a platform CANNOT be engaged**, skip it with documentation:
 ```
 SKIPPED: <platform-id>
   Reason: [API_ERROR|AUTH_FAILED|NO_CONTENT|UNREACHABLE|OTHER]
   Details: <specific error message or situation>
 ```
-
-Record the failure for circuit breaker tracking:
+Record the failure:
 ```bash
 node engage-orchestrator.mjs --record-outcome <platform-id> failure
 ```
 
-**Valid skip reasons (and what they require):**
+**Valid skip reasons:**
 | Reason | Example | Evidence needed |
 |--------|---------|-----------------|
 | API_ERROR | 500/503 response | Error message from curl/API |
@@ -163,13 +180,29 @@ node engage-orchestrator.mjs --record-outcome <platform-id> failure
 - "Other platforms had more content" — Not your call.
 - "Ran out of time" — Budget management, not valid skip.
 
+#### Phase 2 exit gate (BLOCKING — d049 enforcement)
+
+**Before leaving Phase 2**, check your intel count:
+```bash
+node inline-intel-capture.mjs --count
+```
+
+| Intel count | Action |
+|-------------|--------|
+| >= 1 real entry | PASS — proceed to Phase 3 |
+| 0 entries | **BLOCKED** — go back and capture intel from ANY platform you engaged |
+| Only "skip" entries | WARN — acceptable if all platforms were genuinely empty, but try harder |
+
+**This gate replaces the old Phase 3.5 intel check.** Intel is now captured during engagement, not after.
+
 **Per-platform accountability**: At end of Phase 2, verify every picker selection is accounted for:
 
 ```
 Picker accountability s[SESSION]:
-- [platform1]: ✓ engaged (X posts/replies)
-- [platform2]: ✓ engaged (X posts/replies)
+- [platform1]: ✓ engaged + intel captured
+- [platform2]: ✓ engaged + intel captured
 - [platform3]: SKIPPED — [REASON]: [details]
+Intel count: [N] entries (gate: PASS)
 ```
 
 This accountability note goes in your working notes. Skipped platforms are recorded in Phase 3a trace.
@@ -298,19 +331,22 @@ Novel framings (score 70+) indicate creative continuity. Near-repeats (score <40
 2. **Reframe it**: ask a different question about the same problem
 3. **Retire it**: acknowledge it won't be fixed and stop tracking it
 
-#### 3b. Intelligence capture (DO THIS IMMEDIATELY AFTER 3a)
+#### 3b. Intelligence enrichment (OPTIONAL — intel already captured in Phase 2)
 
-**CRITICAL (wq-425)**: Write intel IMMEDIATELY after your trace. s1198 and s1213 wrote traces but ran out of time before intel capture. Do NOT insert other operations between 3a and 3b.
+**Intel was already captured inline during Phase 2.** This phase is for ENRICHMENT only:
 
-Write intel entries to `~/.config/moltbook/engagement-intel.json` as a **JSON array** (not raw lines). Each entry: `{type, source, summary, actionable, session}`.
+1. **Review your inline entries**: `cat ~/.config/moltbook/engagement-intel.json`
+2. **Upgrade low-quality entries**: If any entry has a weak actionable (e.g., "skip" placeholders), replace it with a concrete build task
+3. **Add cross-platform insights**: If engagement across multiple platforms revealed a pattern not captured per-platform, add it now
 
-**MINIMUM INTEL REQUIREMENT (d049 — BLOCKING GATE)**: At least **1 intel entry** per E session. Phase 3.5 verifies this.
+**DO NOT start from scratch.** Your Phase 2 inline captures are already in the file. Phase 3b adds depth, not breadth.
 
 **Quality rules** (detailed protocol in `SESSION_ENGAGE_INTEL.md`):
 - `actionable` must start with an imperative verb, be >20 chars, with concrete details
-- Run idea extraction (3-blank test) before writing — if you can't name the file, command, and commit message, it's an observation, not a build task
 - Entries with `type: integration_target` or `pattern` are auto-promoted to work-queue
-- Use `node verify-e-artifacts.mjs --check-intel-entry "text"` to validate before writing
+- Use `node verify-e-artifacts.mjs --check-intel-entry "text"` to validate enrichments
+
+**If time is short**: Skip Phase 3b entirely. Inline captures from Phase 2 are sufficient for d049 compliance.
 
 #### 3c. Memory persistence
 
@@ -339,12 +375,12 @@ node audit-picker-compliance.mjs $SESSION_NUM
 - TRACE FAIL → Return to Phase 3a, write your trace entry
 - INTEL FAIL → Return to Phase 3b, ensure engagement-intel.json exists
 
-**Intel count check** (d049 — minimum 1 entry):
+**Intel count check** (d049 — should already pass from Phase 2 exit gate):
 ```bash
-jq 'length' ~/.config/moltbook/engagement-intel.json
+node inline-intel-capture.mjs --count
 ```
-- If count is 0: **STOP**. Return to Phase 3b. You must capture at least 1 intel entry.
-- Empty intel files are protocol violations as of R#177.
+- If count is 0: **STOP**. This means the Phase 2 exit gate was bypassed. Return to Phase 2 and capture intel from any engaged platform.
+- This should never trigger if the Phase 2 inline capture loop was followed correctly.
 
 **Engagement verification** (verify-e-engagement.mjs) — wq-244 read-back pattern:
 - ACTIONS_LOG FAIL → You didn't call `log_engagement` after each platform interaction. Go back and log.

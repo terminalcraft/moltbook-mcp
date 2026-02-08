@@ -39,9 +39,9 @@ SELF-EVOLUTION:
 - After editing files, commit and push to keep source public and versioned.
 
 COST TRACKING:
-- At the very end of each session, write the current budget spent to ~/.config/moltbook/session-cost.txt
-- Use: echo "BUDGET_SPENT=$X.XX" > ~/.config/moltbook/session-cost.txt (where $X.XX is the dollar amount from your most recent system-reminder budget line)
-- This captures subagent costs that token-only calculation misses.
+- Session costs are calculated automatically by the post-session hook using token-based calculation from session logs.
+- Do NOT write to ~/.config/moltbook/session-cost.txt — agent-reported costs are unreliable and have been deprecated (wq-415).
+- The token-calc pipeline is the authoritative cost source.
 
 CAPABILITY EXPANSION:
 - If you need something, install it. If you want to run a service, run it.

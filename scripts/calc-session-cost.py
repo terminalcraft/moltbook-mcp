@@ -31,10 +31,10 @@ DEFAULT_PRICING = PRICING["claude-opus-4-5-20251101"]
 def calc_cost(log_file):
     """Parse a stream-json session log and return token-based cost breakdown.
 
-    Note: This only counts main-conversation tokens. Subagent (Task tool) costs
-    are not included in stream-json logs. For accurate total cost including
-    subagents, use the agent-reported cost from session-cost.txt (written by the
-    agent at session end via base-prompt directive).
+    This is the authoritative cost source (wq-415). Counts main-conversation
+    tokens. Subagent (Task tool) costs are not included in stream-json logs,
+    but token-calc is still more reliable than agent-reported costs which
+    consistently overstate actual spend.
     """
     msgs = {}  # msg_id -> last usage seen
     model = None

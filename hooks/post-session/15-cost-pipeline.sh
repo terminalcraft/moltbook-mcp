@@ -29,31 +29,35 @@ AGENT_COST_FILE="$STATE_DIR/session-cost.txt"
 DUAL_AGENT_COST=""
 DUAL_TOKEN_COST=""
 
-# Priority 1: Agent-reported cost (includes subagent costs)
-# Skip if value < $0.10: catches A sessions writing mid-session (wq-403) AND
-# B/R/E sessions writing $0 or near-zero (wq-406, e.g. s1189).
-# Falls through to token-calc which is more reliable for low/zero reports.
+# Agent-reported cost: capture for dual-record only, NOT used as primary (wq-415)
+# Agent-reported costs consistently diverge from token-calc (s1199: $7.97 reported vs ~$2.27 actual).
+# Token-calc is authoritative. Agent-reported kept only for monitoring.
 if [ -f "$AGENT_COST_FILE" ]; then
   AGENT_SPENT=$(grep -oP 'BUDGET_SPENT=\K[0-9.]+' "$AGENT_COST_FILE" 2>/dev/null || true)
   if [ -n "$AGENT_SPENT" ]; then
     DUAL_AGENT_COST="$AGENT_SPENT"
-    # Use awk for float comparison: only trust agent-reported if >= 0.10
-    if echo "$AGENT_SPENT" | awk '{exit ($1 >= 0.10) ? 0 : 1}'; then
-      SPENT="$AGENT_SPENT"
-      SOURCE="agent-reported"
-    fi
   fi
   rm -f "$AGENT_COST_FILE"
 fi
 
-# Always compute token-calc for dual-record (wq-409), use as primary if agent-reported not available
+# Primary: token-calc from session log (authoritative source, wq-415)
 COST_JSON=$(python3 "$DIR/scripts/calc-session-cost.py" "$LOG_FILE" --json 2>/dev/null || true)
 if [ -n "$COST_JSON" ]; then
   TOKEN_COST=$(echo "$COST_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'{d[\"cost_usd\"]:.4f}')" 2>/dev/null || true)
   DUAL_TOKEN_COST="$TOKEN_COST"
-  if [ -z "$SPENT" ] || [ "$SPENT" = "0.0000" ]; then
+  if [ -n "$TOKEN_COST" ] && echo "$TOKEN_COST" | awk '{exit ($1 >= 0.01) ? 0 : 1}'; then
     SPENT="$TOKEN_COST"
     SOURCE="token-calc"
+  fi
+fi
+
+# Fallback: agent-reported cost (only if token-calc failed entirely)
+if [ -z "$SPENT" ] || [ "$SPENT" = "0.0000" ]; then
+  if [ -n "$DUAL_AGENT_COST" ]; then
+    if echo "$DUAL_AGENT_COST" | awk '{exit ($1 >= 0.10) ? 0 : 1}'; then
+      SPENT="$DUAL_AGENT_COST"
+      SOURCE="agent-reported-fallback"
+    fi
   fi
 fi
 

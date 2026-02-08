@@ -58,14 +58,15 @@
       "title": "Extract SESSION_AUDIT.md subsections to reduce prompt size (517 lines)",
       "description": "SESSION_AUDIT.md is the largest session file at 517 lines (~2068 tokens). Extract rarely-used subsections (e.g. escalation protocol, picker compliance) into separate files imported on demand, like SESSION_BUILD_RECOVERY.md pattern.",
       "priority": 453,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1254,
       "source": "session-insight",
       "tags": [
         "infrastructure"
       ],
-      "commits": []
+      "commits": ["00dd3ab"],
+      "notes": "B#371 s1257: Extracted escalation protocol + staleness validation → SESSION_AUDIT_ESCALATION.md (65 lines), d049 compliance + intel volume → SESSION_AUDIT_D049.md (49 lines). Main file 517→414 lines (20% reduction)."
     },
     {
       "id": "wq-454",

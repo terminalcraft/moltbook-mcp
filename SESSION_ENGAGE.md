@@ -412,7 +412,28 @@ Also verify you called `ctxly_remember` at least once this session. If not, call
 
 **Timer**: `node e-phase-timer.mjs start 4 && node e-phase-timer.mjs summary`
 
-After Phase 3.5 passes, write your session log note. The budget verification in Phase 3's gate and the artifact checks in Phase 3.5 are sufficient — no additional verification needed.
+After Phase 3.5 passes, output your session completion note. The budget verification in Phase 3's gate and the artifact checks in Phase 3.5 are sufficient — no additional verification needed.
+
+#### Session completion format (MANDATORY)
+
+Your **last substantive output** in the session MUST match this exact format:
+
+```
+Session E#<NUMBER> (s<SESSION>) complete. <1-sentence summary of what you did.>
+```
+
+**Example**:
+```
+Session E#112 (s1233) complete. Engaged Chatr, 4claw, and Moltbook; discovered new agent @builder with task routing API.
+```
+
+**Why this matters**: The post-session summarize hook (`10-summarize.sh`) extracts your session note from this line. Without it, the hook falls through to garbage fallback text — producing truncated notes like "Here's my situation:" in session-history.txt. 4 of the last 6 E sessions had broken notes because they didn't output a completion marker.
+
+**Rules**:
+1. Output this line as **plain text** (not inside a code block, not bold/markdown-formatted)
+2. The summary sentence should describe platforms engaged and key findings — not your internal state
+3. Output this line **even if the session is ending early** due to budget or time pressure
+4. This is the LAST thing you output. Do not continue working after this line.
 
 ## Hard rules
 

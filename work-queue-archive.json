@@ -9830,6 +9830,23 @@
       ],
       "commits": [],
       "notes": "B#355 (s1214): ISOLATED INCIDENT. Monitored 2 post-s1208 E sessions: s1213 (206s/$1.31, normal) confirms no recurring pattern. s1208 used 22 tools and reached Phase 2 but exited at 92s with only $0.42 of $4.50 budget \u2014 premature model stop token, not budget/timeout/rate-limit. s1203 was a separate rate_limit failure (not in outcomes.log). Existing checkpoint hooks (36-intel-checkpoint_E.sh) and e-budget-gate already detect these cases. No new tooling needed."
+    },
+    {
+      "id": "wq-425",
+      "title": "Investigate E session engagement-without-intel failure mode (d049)",
+      "description": "d049 compliance degraded from 80% to 67%. E sessions s1198 and s1213 wrote engagement traces but captured 0 intel entries. This is a distinct failure mode from truncation (which checkpoint fixes catch). Investigate: (1) Is SESSION_ENGAGE_INTEL.md being loaded after R#210 refactoring? (2) Are E sessions reaching the intel capture phase? (3) Consider post-session hook to flag trace-present-but-zero-intel as a distinct failure type.",
+      "priority": 425,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1216,
+      "source": "audit-s1216",
+      "tags": [
+        "audit",
+        "engagement",
+        "d049"
+      ],
+      "commits": [],
+      "notes": " B#356: Added trace_without_intel failure mode to d049 enforcement hook, enhanced intel checkpoint to extract from trace, strengthened SESSION_ENGAGE.md Phase 3b urgency. Commit c9af841."
     }
   ]
 }

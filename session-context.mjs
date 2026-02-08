@@ -184,6 +184,38 @@ const queueCtx = {
     const base = this.maxId;
     this._maxId = base + count;
     return base;
+  },
+  /**
+   * R#218: Shared queue-item factory. Previously duplicated in 4 sections (brainstorm
+   * promote, TODO ingest, friction ingest, intel promote) with slight variations and
+   * a bug: bare `maxId` references produced NaN priorities. Centralizing here:
+   * 1. Fixes the NaN priority bug (uses this.maxId)
+   * 2. Eliminates 4 copies of near-identical push/dirty/invalidate boilerplate
+   * 3. Ensures consistent item structure across all auto-generation paths
+   * @param {Object} opts - { title, description, source, tags?, complexity? }
+   * @returns {string} the new item's id
+   */
+  createItem({ title, description, source, tags = [], complexity }) {
+    const nextId = this.maxId + 1;
+    this._maxId = nextId; // bump cached max without full invalidate
+    const id = `wq-${String(nextId).padStart(3, '0')}`;
+    const item = {
+      id,
+      title,
+      description: description || 'Auto-generated',
+      priority: nextId,
+      status: 'pending',
+      added: new Date().toISOString().split('T')[0],
+      source,
+      tags,
+      commits: []
+    };
+    if (complexity) item.complexity = complexity;
+    queue.push(item);
+    wqDirty = true;
+    this._titles = null; // reset titles cache so next isTitleDupe sees new entry
+    this._pendingCount = null; // reset pending count
+    return id;
   }
 };
 
@@ -297,29 +329,18 @@ if (MODE === 'B' || MODE === 'R') {
       const deficit = 3 - currentPending;
       const BS_BUFFER = Math.max(1, 3 - deficit);
       const promotable = fresh.length > BS_BUFFER ? fresh.slice(0, fresh.length - BS_BUFFER) : [];
-      const baseId = queueCtx.allocateIds(promotable.length); // R#218: cached ID allocation
       const promoted = [];
       for (let i = 0; i < promotable.length && currentPending + promoted.length < 3; i++) {
         const title = promotable[i][1].trim();
         const desc = promotable[i][2].trim();
-        const newId = `wq-${String(baseId + 1 + i).padStart(3, '0')}`;
-        const item = {
-          id: newId,
-          title: title,
+        const newId = queueCtx.createItem({
+          title,
           description: desc || 'Auto-promoted from brainstorming',
-          priority: maxId + 1 + i,
-          status: 'pending',
-          added: new Date().toISOString().split('T')[0],
-          source: 'brainstorming-auto',
-          tags: [],
-          commits: []
-        };
-        queue.push(item);
+          source: 'brainstorming-auto'
+        });
         promoted.push(newId + ': ' + title);
       }
       if (promoted.length > 0) {
-        wqDirty = true;
-        queueCtx.invalidate(); // R#218: reset after queue mutation
         result.auto_promoted = promoted;
         result.pending_count = queueCtx.pendingCount;
 
@@ -372,7 +393,6 @@ if (MODE === 'B') {
       ];
       const isFalsePositive = (line) => FALSE_POSITIVE_PATTERNS.some(p => p.test(line));
 
-      const todoBaseId = queueCtx.allocateIds(3); // R#218: pre-allocate up to 3 IDs
       const todoTitlesLower = queueCtx.titles.map(t => t.toLowerCase());
       const ingested = [];
       for (let i = 0; i < todoLines.length && i < 3; i++) {
@@ -384,24 +404,16 @@ if (MODE === 'B') {
         // Skip if already queued (fuzzy match on first 30 chars)
         const norm = raw.toLowerCase().substring(0, 30);
         if (todoTitlesLower.some(qt => qt.includes(norm) || norm.includes(qt.substring(0, 20)))) continue;
-        const newId = `wq-${String(todoBaseId + 1 + ingested.length).padStart(3, '0')}`;
-        queue.push({
-          id: newId,
+        const newId = queueCtx.createItem({
           title: `TODO followup: ${raw.substring(0, 80)}`,
           description: raw,
-          priority: maxId + 1 + ingested.length,
-          status: 'pending',
-          added: new Date().toISOString().split('T')[0],
           source: 'todo-scan',
           complexity: 'S',
-          tags: ['followup'],
-          commits: []
+          tags: ['followup']
         });
         ingested.push(newId);
       }
       if (ingested.length > 0) {
-        wqDirty = true;
-        queueCtx.invalidate(); // R#218: reset after queue mutation
         result.todo_ingested = ingested;
         result.pending_count = queueCtx.pendingCount;
       }
@@ -420,30 +432,21 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     const patterns = JSON.parse(patternsJson);
     const signals = patterns?.friction_signals || [];
     if (signals.length > 0) {
-      const frictionBaseId = queueCtx.allocateIds(2); // R#218: pre-allocate up to 2 IDs
       const ingested = [];
       for (let i = 0; i < signals.length && i < 2; i++) {
         const sig = signals[i];
         const title = sig.suggestion || `Address ${sig.type} friction`;
         // Skip if already queued (fuzzy match)
         if (isTitleDupe(title, queueCtx.titles)) continue;
-        const newId = `wq-${String(frictionBaseId + 1 + ingested.length).padStart(3, '0')}`;
-        queue.push({
-          id: newId,
-          title: title,
+        const newId = queueCtx.createItem({
+          title,
           description: `${sig.reason || sig.type} — auto-generated from /status/patterns friction_signals`,
-          priority: maxId + 1 + ingested.length,
-          status: 'pending',
-          added: new Date().toISOString().split('T')[0],
           source: 'friction-signal',
-          tags: ['friction'],
-          commits: []
+          tags: ['friction']
         });
         ingested.push(newId + ': ' + title);
       }
       if (ingested.length > 0) {
-        wqDirty = true;
-        queueCtx.invalidate(); // R#218: reset after queue mutation
         result.friction_ingested = ingested;
         result.pending_count = queueCtx.pendingCount;
       }
@@ -638,7 +641,6 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     // R#149: Fixed bug — loop was using intel.find() which always returned the same
     // entry. Now we iterate directly over the qualifying intel entries.
     if (actions.queue.length > 0 && result.pending_count < 5) {
-      const intelBaseId = queueCtx.allocateIds(2); // R#218: pre-allocate up to 2 IDs
       const promoted = [];
       // Get qualifying entries (same criteria as actions.queue population above)
       // R#157: Added 'tool_idea' to qualifying types. tool_idea entries contain
@@ -654,16 +656,8 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       const IMPERATIVE_VERBS = /^(Add|Build|Create|Fix|Implement|Update|Remove|Refactor|Extract|Migrate|Integrate|Configure|Enable|Disable|Optimize|Evaluate|Test|Validate|Deploy|Setup|Write|Design)\b/i;
       // R#178: Observational language filter. wq-284/wq-285/wq-265 were retired because
       // they started with imperative verbs but contained observational/philosophical text.
-      // Examples: "enables appropriate response", "maps to circuit breaker architecture",
-      // "Gradient not binary - covenants ARE partial exit". These sound like tasks but
-      // are actually pattern observations. Filter them out to improve conversion rate.
-      // Check BOTH actionable AND summary — wq-284/wq-285 had clean actionable text but
-      // observational summaries that B sessions used to identify non-actionability.
-      // R#182: Added "attach to" (wq-187: "attach to existing mechanisms").
       const OBSERVATIONAL_PATTERNS = /(enables|maps to|mirrors|serves as|reflects|demonstrates|indicates|suggests that|is a form of|attach to|gradient|spectrum|binary|philosophy|metaphor|\bARE\b(?!n't| not| also| both| either))/i;
-      // R#182: Meta-instruction filter. wq-248 ("Add to work-queue as potential B session
-      // project") was a meta-instruction about the queue system, not a build task. These
-      // phrases indicate the intel is describing what sessions should do, not code to write.
+      // R#182: Meta-instruction filter.
       const META_INSTRUCTION_PATTERNS = /(Add to work-queue|potential [BERA] session|as (a )?queue (item|candidate)|should (be )?(added|promoted|tracked))/i;
       const qualifyingEntries = intel.filter(e => {
         const actionable = (e.actionable || '').trim();
@@ -671,40 +665,29 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
         return (e.type === 'integration_target' || e.type === 'pattern' || e.type === 'tool_idea') &&
           actionable.length > 20 &&
           IMPERATIVE_VERBS.test(actionable) &&
-          !OBSERVATIONAL_PATTERNS.test(actionable) &&  // R#178: exclude philosophical observations in title
-          !OBSERVATIONAL_PATTERNS.test(summary) &&     // R#178: also check summary for observations
-          !META_INSTRUCTION_PATTERNS.test(actionable) &&  // R#182: exclude meta-instructions
-          !META_INSTRUCTION_PATTERNS.test(summary) &&     // R#182: also check summary
+          !OBSERVATIONAL_PATTERNS.test(actionable) &&
+          !OBSERVATIONAL_PATTERNS.test(summary) &&
+          !META_INSTRUCTION_PATTERNS.test(actionable) &&
+          !META_INSTRUCTION_PATTERNS.test(summary) &&
           !e._promoted;
       });
       for (let i = 0; i < qualifyingEntries.length && promoted.length < 2; i++) {
         const entry = qualifyingEntries[i];
-        // Use actionable as title (truncated), summary as description
         const title = (entry.actionable || '').substring(0, 70).replace(/\.+$/, '');
         const desc = entry.summary || '';
-        // Skip if already queued
         if (isTitleDupe(title, queueCtx.titles)) continue;
-        const newId = `wq-${String(intelBaseId + 1 + promoted.length).padStart(3, '0')}`;
-        queue.push({
-          id: newId,
-          title: title,
+        const newId = queueCtx.createItem({
+          title,
           description: `${desc} [source: engagement intel s${entry.session || '?'}]`,
-          priority: maxId + 1 + promoted.length,
-          status: 'pending',
-          added: new Date().toISOString().split('T')[0],
           source: 'intel-auto',
-          tags: ['intel'],
-          commits: []
+          tags: ['intel']
         });
         promoted.push(newId + ': ' + title);
-        queueCtx.invalidate(); // R#218: reset so next isTitleDupe sees new entry
-        // Mark entry as promoted to avoid re-processing if intel isn't cleared
         entry._promoted = true;
       }
       if (promoted.length > 0) {
-        wqDirty = true;
         result.intel_promoted = promoted;
-        result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+        result.pending_count = queueCtx.pendingCount;
       }
     }
 

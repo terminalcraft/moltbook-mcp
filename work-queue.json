@@ -84,7 +84,7 @@
     {
       "id": "wq-434",
       "title": "Monitor d049 compliance after wq-430 inline gated phase fix",
-      "description": "d049 compliance at 50% across 3 consecutive audits (A#100-A#102). wq-430 redesigned intel capture as inline gated phase (deployed s1224) but no E session has tested it yet. Next A session must verify: if next E session passes d049, reset escalation tracker. If fails, escalate to level 3 (emergency) — flag for human review of entire E session intel pipeline.",
+      "description": "d049 compliance at 50% across 3 consecutive audits (A#100-A#102). wq-430 redesigned intel capture as inline gated phase (deployed s1224) but no E session has tested it yet. Next A session must verify: if next E session passes d049, reset escalation tracker. If fails, escalate to level 3 (emergency) \u2014 flag for human review of entire E session intel pipeline.",
       "priority": 434,
       "status": "pending",
       "added": "2026-02-08",
@@ -95,7 +95,14 @@
         "d049",
         "monitoring"
       ],
-      "commits": []
+      "commits": [],
+      "progress_notes": [
+        {
+          "session": 1227,
+          "text": "B#366: Verified fix infrastructure. inline-intel-capture.mjs correctly integrated into SESSION_ENGAGE.md Phase 2 per-platform loop. Both hooks (36-intel-checkpoint_E.sh, 37-d049-enforcement_E.sh) updated with inline capture architecture notes. No nudge file stale state. e-phase35-tracking.json ready to receive next E session data. No E session has run since wq-430 deployment (s1224) \u2014 compliance test pending. This is an A-session monitoring task; B session verified infrastructure only."
+        }
+      ],
+      "notes": "B#366: Fix infrastructure verified. Awaiting first post-wq-430 E session for compliance test. A session should check next E session result per escalation protocol."
     },
     {
       "id": "wq-435",

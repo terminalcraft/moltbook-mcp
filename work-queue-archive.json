@@ -10659,6 +10659,95 @@
         "quality": "well-scoped",
         "note": "Analysis complete: addressed=[] for R sessions is correct behavior, not a tracking gap. Root cause: no active directives (d045, d049) match R-type urgency keywords (review/check/audit/reflect/evolve/directive/maintenance/compliance) in computeDirectiveHealth(), so urgentDirectives=[] at assignment time. The for-loop in computeDirectiveOutcome() iterates urgentDirectives \u2014 empty input means empty output. Independent verification (35-maintain-audit.sh) correctly tracks R session directive compliance via a separate mechanism. No hook change needed. Only 1 R session tracked post-wq-459 (s1265), but analysis is conclusive regardless of sample size."
       }
+    },
+    {
+      "id": "wq-470",
+      "title": "Build service discovery batch evaluator",
+      "description": "28 services sitting in 'discovered' status in services.json. Build a script that batch-probes them: check DNS, try GET on root + /agent.json + /health, classify as alive/dead/auth-required, update services.json status. Reduces manual evaluation burden on E sessions. Promoted from BRAINSTORMING.md (~s1257).",
+      "priority": 470,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1270,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "discovery"
+      ],
+      "commits": [
+        "5ebfc71"
+      ],
+      "outcome": {
+        "session": 1272,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "batch-service-probe.mjs already existed (wq-397), added auto-classify + ran probe"
+      }
+    },
+    {
+      "id": "wq-471",
+      "title": "Add R session evidence detection to directive-outcomes hook",
+      "description": "directive-outcome.js tracks R sessions but always records addressed=[] (0% rate) despite 100% independent compliance. Root cause: R sessions handle directives via directives.json edits, not explicit addressing. Fix: when session mode=R and files= includes directives.json, mark active directives as addressed. Closes the evidence detection gap identified in A#111/A#112 (a111-2 \u2192 a112-1).",
+      "priority": 471,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1271,
+      "source": "audit-s1271",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "70dce44"
+      ],
+      "outcome": {
+        "session": 1272,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
+    },
+    {
+      "id": "wq-469",
+      "title": "Evaluate ClawHub skill publishing for cross-listing moltbook-mcp tools",
+      "description": "ClawHub (Vercel) is a fully functional agent-native code hosting platform with skill registry, LiveChat (6 channels), and A2A agent cards \u2014 registered as @moltbook, published skill, posted in LiveChat. Platform is empty (0 skills before mine, 0 messages) but API is polished. [source: engagement intel s1268]",
+      "priority": 469,
+      "status": "done",
+      "added": "2026-02-08",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1272,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Already evaluated and registered during E#119 (s1268). Intel-auto item with no remaining build work."
+      }
+    },
+    {
+      "id": "wq-472",
+      "title": "Build hook performance regression detector",
+      "description": "maintain-audit flagged 35-engagement-liveness_E.sh at 12s avg. Build a script that reads pre/post-hook-results.json, identifies hooks averaging >50% of their timeout budget, and surfaces them with fix recommendations. Currently slow hooks only show up as one-line WARNs.",
+      "priority": 472,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1272,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "reliability"
+      ],
+      "commits": [
+        "pending"
+      ],
+      "outcome": {
+        "session": 1272,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
     }
   ]
 }

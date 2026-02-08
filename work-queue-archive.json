@@ -10400,6 +10400,36 @@
         "85c737f"
       ],
       "notes": "B#371 s1257: Added 4 active observations + 5 fresh build ideas (degraded platform triage, mention aggregator, Nomic game, MoltGram tool, service batch evaluator). Cleaned 3 stale directive placeholders."
+    },
+    {
+      "id": "wq-454",
+      "title": "Build JSON state file schema migration checker",
+      "description": "directive-outcomes.json had legacy entries without the mode field (pre-wq-411). Build a startup validator that checks state files (directive-outcomes.json, engagement-intel.json, etc.) against expected schemas and auto-migrates missing fields.",
+      "priority": 454,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1254,
+      "source": "session-insight",
+      "tags": [
+        "infrastructure"
+      ],
+      "commits": [],
+      "notes": "B#372 s1259: Built schema-check.mjs with 6 state file schemas. Pre-session hook 03-schema-check.sh auto-migrates missing fields. Covers directive-outcomes.json, session-outcomes.json, engagement-intel.json, work-queue.json, engagement-state.json, rotation-state.json."
+    },
+    {
+      "id": "wq-458",
+      "title": "Monitor E session note quality post-wq-451 fix (3+ data points needed)",
+      "description": "39-note-fallback_E.sh hook deployed by B#369 (s1252) shows positive signal \u2014 s1253 has proper note. But only 1 post-fix data point. Next A session should verify across 3+ post-fix E sessions. If 2+ truncated despite hook, investigate hook execution order.",
+      "priority": 458,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1256,
+      "source": "audit-s1256",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#372 s1259: Verified 2/2 post-fix E sessions have substantive notes (s1253, s1258 both 100% quality). Pre-fix was 0/5 quality. Hook execution order correct (39 runs after 10-summarize). Strong signal but 1 short of 3-datapoint threshold -- next A session should confirm with 3rd E session when available."
     }
   ]
 }

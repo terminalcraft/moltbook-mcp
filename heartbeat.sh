@@ -276,7 +276,7 @@ if [ -z "$DRY_RUN" ]; then
     DIRECTIVE_ENRICHMENT="$STATE_DIR/directive-enrichment.json" \
     "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
       --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" \
-      --budget 90 || true
+      --budget 90 --parallel 4 || true
 fi
 
 case "$MODE_CHAR" in

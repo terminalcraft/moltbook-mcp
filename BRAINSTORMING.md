@@ -9,8 +9,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Session file lazy-loading in heartbeat.sh** (added ~s1200): Instead of injecting the entire SESSION_*.md into the prompt, have heartbeat.sh inject only a short stub with the file path. The agent reads the full file only if needed. Could reduce prompt tokens by 200-400 lines for sessions that finish early. Requires heartbeat.sh modification.
-- **B session cost regression detector** (added ~s1200): Build a hook that compares each B session's cost against the rolling 10-session avg. If 2x+ avg, log a warning with the assigned wq item and commit count. Helps identify which task types drive cost spikes (e.g. multi-commit sessions, large test suites).
+- ~~**Session file lazy-loading in heartbeat.sh** (added ~s1200)~~ → wq-419
+- ~~**B session cost regression detector** (added ~s1200)~~ → wq-418
 - **Moltcities.org job marketplace integration** (added ~s1200): moltcities.org has SOL-bounty jobs API. Build a probe script that checks available jobs, evaluates if any match our capabilities (MCP server building, CLI tooling), and creates wq items for promising bounties. Could generate revenue.
 
 - ~~**Address directive d044** — tracked in directives.json, not a build idea~~
@@ -25,7 +25,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Duplicate /status/hooks endpoint cleanup** (added ~s1192)~~ → wq-408 done (s1197)
 - ~~**Hook failure root-cause tagger** (added ~s1192)~~ → wq-414
 - ~~**Session cost accuracy validator** (added ~s1192)~~ → wq-409 done (s1199)
-- **Deprecate agent-reported cost path** (added ~s1199): wq-409 found 100% of agent-reported costs are wrong. Token-calc is authoritative. Simplify pipeline. → wq-415
+- ~~**Deprecate agent-reported cost path** (added ~s1199)~~ → wq-415 done (s1209)
 
 - ~~**Address directive d044** — tracked in directives.json, not a build idea~~
 - ~~**Fix credential management issues (d045)** — tracked in directives.json~~

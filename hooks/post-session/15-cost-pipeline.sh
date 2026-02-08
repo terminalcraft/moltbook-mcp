@@ -83,7 +83,30 @@ json.dump(data, open('$COST_FILE', 'w'))
 "
 echo "cost-pipeline: logged \$${SPENT} (${SOURCE}) mode=${MODE_CHAR:-?} s=${SESSION_NUM:-?}"
 
+# === Pre-analysis: extract task context for anomaly enrichment (wq-418) ===
+WQ_TASK_ID=""
+if [ -f "$DIR/work-queue.json" ]; then
+  # Get the most recently in-progress or done item (likely the assigned task)
+  WQ_TASK_ID=$(python3 -c "
+import json
+try:
+    wq = json.load(open('$DIR/work-queue.json'))
+    # Find items done in this session or currently in-progress
+    for item in reversed(wq.get('queue', [])):
+        notes = item.get('notes', '')
+        if 's${SESSION_NUM:-0}' in notes or item.get('status') == 'in-progress':
+            print(item['id']); break
+except: pass
+" 2>/dev/null || true)
+fi
+COMMIT_COUNT=0
+if [ -n "${LOG_FILE:-}" ] && [ -f "$LOG_FILE" ]; then
+  # Count commits by looking for git commit tool calls in the session log
+  COMMIT_COUNT=$(grep -c '"git","commit"' "$LOG_FILE" 2>/dev/null || echo 0)
+fi
+
 # === Steps 2-5: Analysis (all in one Python process) ===
+WQ_TASK_ID="$WQ_TASK_ID" COMMIT_COUNT="$COMMIT_COUNT" \
 python3 - "$COST_FILE" "$TREND_FILE" "$UTIL_FILE" "$NUDGE_FILE" "$DIRECTIVE_FILE" "${MODE_CHAR:-?}" "${SESSION_NUM:-0}" "$SPENT" <<'PYEOF'
 import json, sys, os
 from collections import defaultdict
@@ -104,12 +127,17 @@ if len(mode_costs) >= 5:
     ratio = this_cost / avg if avg > 0 else 0
     threshold = avg * 2
 
+    # Task context for anomaly enrichment (wq-418)
+    wq_task = os.environ.get('WQ_TASK_ID', '')
+    commit_count = int(os.environ.get('COMMIT_COUNT', '0'))
+
     if this_cost >= threshold:
-        print(f"⚠ cost-anomaly: s{session_num} ${this_cost:.2f} is {ratio:.1f}x {mode}-mode avg ${avg:.2f}")
+        task_info = f" task={wq_task} commits={commit_count}" if wq_task else f" commits={commit_count}"
+        print(f"⚠ cost-anomaly: s{session_num} ${this_cost:.2f} is {ratio:.1f}x {mode}-mode avg ${avg:.2f}{task_info}")
         # Write alert for next session
         alert_file = os.path.expanduser("~/.config/moltbook/cost-alert.txt")
         with open(alert_file, 'w') as af:
-            af.write(f"## COST ALERT\nLast session (s{session_num}, mode {mode}) cost ${this_cost:.2f} — {ratio:.1f}x the {mode}-mode average of ${avg:.2f}. Watch your budget this session.\n")
+            af.write(f"## COST ALERT\nLast session (s{session_num}, mode {mode}) cost ${this_cost:.2f} — {ratio:.1f}x the {mode}-mode average of ${avg:.2f}.{task_info}\nWatch your budget this session.\n")
         # Log to directives.json
         try:
             dt = json.load(open(directive_file))
@@ -118,7 +146,12 @@ if len(mode_costs) >= 5:
                 compliance['cost_anomaly'] = {'description': 'Flag sessions costing 2x+ the mode average', 'anomalies': [], 'total_flagged': 0}
             ca = compliance['cost_anomaly']
             ca['anomalies'] = ca.get('anomalies', [])[-19:]
-            ca['anomalies'].append({'session': session_num, 'mode': mode, 'cost': this_cost, 'avg': round(avg, 4), 'ratio': round(ratio, 1), 'date': datetime.now().isoformat()})
+            anomaly_entry = {'session': session_num, 'mode': mode, 'cost': this_cost, 'avg': round(avg, 4), 'ratio': round(ratio, 1), 'date': datetime.now().isoformat()}
+            if wq_task:
+                anomaly_entry['task'] = wq_task
+            if commit_count:
+                anomaly_entry['commits'] = commit_count
+            ca['anomalies'].append(anomaly_entry)
             ca['total_flagged'] = ca.get('total_flagged', 0) + 1
             ca['last_flagged_session'] = session_num
             with open(directive_file, 'w') as f:

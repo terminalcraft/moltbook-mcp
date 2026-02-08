@@ -316,7 +316,8 @@ if [ -z "$DRY_RUN" ]; then
     LOG_DIR="$LOG_DIR" \
     DIRECTIVE_ENRICHMENT="$STATE_DIR/directive-enrichment.json" \
     "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
-      --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" || true
+      --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" \
+      --budget 90 || true
 fi
 
 case "$MODE_CHAR" in
@@ -406,9 +407,19 @@ WARN: Missing credential files: ${CTX_CRED_MISSING}"
     fi
   fi
 
+  # wq-374: EVM balance dashboard for onchain tasks
+  EVM_LINE=""
+  if [ -n "${CTX_EVM_BALANCE_SUMMARY:-}" ]; then
+    EVM_LINE="
+EVM wallet (Base): ${CTX_EVM_BALANCE_SUMMARY}. Onchain tasks: ${CTX_ONCHAIN_ITEMS:-none}."
+  elif [ -n "${CTX_EVM_BALANCE_ERROR:-}" ]; then
+    EVM_LINE="
+EVM balance check failed: ${CTX_EVM_BALANCE_ERROR}"
+  fi
+
   B_FOCUS_BLOCK="
 
-## B Session: #${B_COUNT}${CAP_LINE}${WQ_BLOCK}"
+## B Session: #${B_COUNT}${CAP_LINE}${EVM_LINE}${WQ_BLOCK}"
 fi
 
 # E session prompt block: fully assembled by session-context.mjs (R#93).
@@ -533,7 +544,8 @@ MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS"
   SESSION_EXIT="$EXIT_CODE" SESSION_OUTCOME="$OUTCOME" \
   LOG_DIR="$LOG_DIR" \
   "$DIR/run-hooks.sh" "$DIR/hooks/post-session" 60 \
-    --track "$LOG_DIR/hook-results.json" "$COUNTER" || true
+    --track "$LOG_DIR/hook-results.json" "$COUNTER" \
+    --budget 120 || true
 
 # Mark that post-hooks completed — prevents emergency trap from running
 POSTHOOKS_COMPLETED=1

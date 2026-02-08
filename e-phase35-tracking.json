@@ -428,10 +428,20 @@
     {
       "session": 1198,
       "e_number": 104,
-      "d049_compliant": true,
-      "intel_count": 1,
+      "d049_compliant": false,
+      "intel_count": 0,
       "enforcement": "post-hook",
-      "notes": "Post-hook enforcement: 1 intel entries captured"
+      "notes": "Post-hook enforcement: 1 intel entries captured",
+      "failure_mode": "agent_skip"
+    },
+    {
+      "session": 1203,
+      "e_number": 105,
+      "d049_compliant": false,
+      "intel_count": 0,
+      "enforcement": "post-hook",
+      "notes": "d049 violation (rate_limit): Rate-limited \u2014 session could not start",
+      "failure_mode": "rate_limit"
     }
   ],
   "audit_instructions": {

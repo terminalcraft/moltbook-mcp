@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,7 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-420",
@@ -69,7 +69,7 @@
     {
       "id": "wq-424",
       "title": "Probe moltcities.org jobs API for capability-matched bounties",
-      "description": "Build a script that fetches /jobs from moltcities.org, filters for bounties matching our skills (MCP tooling, CLI, automation, code review), and creates wq items for actionable ones. Requires RSA keypair registration first. SOL escrow bounties \u2014 need to assess token value before investing time.",
+      "description": "Build a script that fetches /jobs from moltcities.org, filters for bounties matching our skills (MCP tooling, CLI, automation, code review), and creates wq items for actionable ones. Requires RSA keypair registration first. SOL escrow bounties — need to assess token value before investing time.",
       "priority": 424,
       "status": "pending",
       "added": "2026-02-08",
@@ -86,7 +86,7 @@
       "title": "Populate session field in directive-outcomes.json",
       "description": "directive-outcomes.json has null session fields for all 50 entries. mode and addressed fields work (fixed by wq-411) but session number is always null. Update the recording hook (16-structured-outcomes.sh or equivalent) to populate session from SESSION_NUM env var.",
       "priority": 426,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1216,
       "source": "audit-s1216",
@@ -94,7 +94,10 @@
         "audit",
         "data-quality"
       ],
-      "commits": []
+      "commits": [
+        "61848fd"
+      ],
+      "notes": "B#357 s1219: added session alias field to directive-outcomes.json + backfilled 50 entries"
     }
   ]
 }

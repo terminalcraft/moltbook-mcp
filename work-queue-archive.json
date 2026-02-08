@@ -9984,6 +9984,24 @@
       ],
       "commits": [],
       "notes": "B#363: Root cause confirmed \u2014 s1199 ($7.97) and s1207 ($6.84) used agent-reported costs (pre-wq-415 cutover). s1207 was pre-cutover despite audit assumption. 33 agent-reported entries flagged as deprecated. Trend/anomaly analysis updated to filter deprecated entries. No backfill possible (logs rotated)."
+    },
+    {
+      "id": "wq-428",
+      "title": "E session early-exit stigmergic pressure",
+      "description": "Post-hook writes follow_up to engagement-trace.json when E session duration <120s. Message warns next E session about early exit pattern. Creates cross-session pressure via the trace pipeline E sessions already consume. Builds on wq-423 detector.",
+      "priority": 428,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1219,
+      "source": "brainstorming",
+      "tags": [
+        "engagement",
+        "stigmergy"
+      ],
+      "commits": [
+        "ffa9fc0"
+      ],
+      "notes": "B#366: Added stigmergic pressure to 38-early-exit_E.sh. When E session exits <120s, injects EARLY EXIT WARNING follow_up into engagement-trace.json. Next E session sees warning in Phase 0 trace review."
     }
   ]
 }

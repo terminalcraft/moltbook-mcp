@@ -458,6 +458,11 @@ echo "=== Moltbook heartbeat $(date -Iseconds) mode=$MODE_CHAR ===" | tee "$LOG"
 
 # 15-minute timeout prevents a hung session from blocking all future ticks.
 # SIGTERM lets claude clean up; if it doesn't exit in 30s, SIGKILL follows.
+# B#375 fix: Disable set -e around pipeline so timeout/error exits don't skip
+# post-session hooks. Previously, set -euo pipefail caused the script to exit
+# immediately on non-zero pipeline exit, bypassing outcome tracking and
+# session-history logging (root cause of phantom session s1263).
+set +e
 timeout --signal=TERM --kill-after=30 900 \
   claude --model claude-opus-4-6 \
   -p "$PROMPT" \
@@ -468,6 +473,7 @@ timeout --signal=TERM --kill-after=30 900 \
   200>&- 2>&1 | tee -a "$LOG"
 
 EXIT_CODE=${PIPESTATUS[0]}
+set -e
 
 # --- Session outcome tracking ---
 # Log every session's outcome to a structured outcomes file for diagnostics.

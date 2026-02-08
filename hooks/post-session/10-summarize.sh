@@ -83,11 +83,20 @@ if [ -f "$SUMMARY_FILE" ]; then
       END { if (result) print result }
     ' "$SUMMARY_FILE" || true)
   fi
-  # Dedup: skip if this session number already exists in history
+  # Dedup: skip if this session already has a COMPLETED entry in history.
+  # B#375: If a placeholder "started" entry exists (from pre-session hook),
+  # replace it with the full entry. This ensures post-hooks always update
+  # the history even when a pre-session fallback was written.
+  FULL_ENTRY="$(date +%Y-%m-%d) mode=$MODE_CHAR s=$S_NUM dur=$S_DUR ${S_COST:+cost=$S_COST }build=$S_BUILD ${S_FAILED:+failed=[$S_FAILED] }files=[$S_FILES] ${S_COMMITS:+note: $S_COMMITS}"
   if [ -f "$HISTORY_FILE" ] && grep -q "s=$S_NUM " "$HISTORY_FILE"; then
-    echo "$(date -Iseconds) s=$S_NUM already in history, skipping" >> "$LOG_DIR/summarize-errors.log"
+    if grep "s=$S_NUM " "$HISTORY_FILE" | grep -q "build=(started)"; then
+      # Replace placeholder with full entry
+      sed -i "/s=$S_NUM .*build=(started)/c\\$FULL_ENTRY" "$HISTORY_FILE"
+    else
+      echo "$(date -Iseconds) s=$S_NUM already in history, skipping" >> "$LOG_DIR/summarize-errors.log"
+    fi
   else
-    echo "$(date +%Y-%m-%d) mode=$MODE_CHAR s=$S_NUM dur=$S_DUR ${S_COST:+cost=$S_COST }build=$S_BUILD ${S_FAILED:+failed=[$S_FAILED] }files=[$S_FILES] ${S_COMMITS:+note: $S_COMMITS}" >> "$HISTORY_FILE"
+    echo "$FULL_ENTRY" >> "$HISTORY_FILE"
   fi
   if [ "$(wc -l < "$HISTORY_FILE")" -gt 30 ]; then
     tail -30 "$HISTORY_FILE" > "$HISTORY_FILE.tmp" && mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"

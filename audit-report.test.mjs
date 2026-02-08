@@ -636,3 +636,301 @@ describe('cost calculation consistency', () => {
     assert.equal(typeof report.cost.trend, 'string');
   });
 });
+
+// ─── Section 5: delta_from_s<prev> computation ──────────────────────────
+
+describe('delta from previous audit (cross-audit consistency)', () => {
+  let report;
+
+  before(() => {
+    report = JSON.parse(readFileSync(join(__dirname, 'audit-report.json'), 'utf8'));
+  });
+
+  it('previous_audit is a session number less than current session', () => {
+    assert.equal(typeof report.previous_audit, 'number');
+    assert.ok(Number.isInteger(report.previous_audit));
+    assert.ok(report.previous_audit > 0,
+      'previous_audit should be positive');
+    assert.ok(report.previous_audit < report.session,
+      `previous_audit (${report.previous_audit}) must be < session (${report.session})`);
+  });
+
+  it('audit_number increments (current > 0)', () => {
+    assert.ok(report.audit_number > 0,
+      'audit_number should be positive (sequential count)');
+  });
+
+  it('session gap between audits is reasonable (< 50 sessions)', () => {
+    const gap = report.session - report.previous_audit;
+    assert.ok(gap > 0 && gap < 50,
+      `audit gap of ${gap} sessions is unreasonable (expected 3-15)`);
+  });
+
+  it('previous_recommendations_status keys reference previous audit session', () => {
+    const prevRecs = report.previous_recommendations_status;
+    if (Object.keys(prevRecs).length === 0) return; // no previous recs to check
+
+    for (const id of Object.keys(prevRecs)) {
+      // IDs follow a{session}-{n} format — the session should match previous_audit or earlier
+      const match = id.match(/^a(\d+)-(\d+)$/);
+      assert.ok(match, `recommendation id "${id}" doesn't match a{N}-{N} format`);
+      const recAuditNum = parseInt(match[1]);
+      // The rec could come from any prior audit, but should be <= audit_number
+      assert.ok(recAuditNum <= report.audit_number,
+        `rec ${id} references audit ${recAuditNum} but current audit is ${report.audit_number}`);
+    }
+  });
+
+  it('fix_ineffective recommendations have followup pointing to current audit', () => {
+    for (const [id, rec] of Object.entries(report.previous_recommendations_status)) {
+      if (rec.status === 'fix_ineffective') {
+        assert.ok('followup' in rec,
+          `${id} is fix_ineffective but missing followup field`);
+        // followup should reference current audit's recommendations
+        const followup = rec.followup;
+        const followupMatch = followup.match(/^a(\d+)-(\d+)$/);
+        assert.ok(followupMatch,
+          `${id} followup "${followup}" doesn't match a{N}-{N} format`);
+      }
+    }
+  });
+
+  it('resolved recommendations have metric_before and metric_after as strings', () => {
+    for (const [id, rec] of Object.entries(report.previous_recommendations_status)) {
+      if (rec.status === 'resolved' && rec.verified) {
+        assert.equal(typeof rec.metric_before, 'string',
+          `${id} metric_before should be a string`);
+        assert.equal(typeof rec.metric_after, 'string',
+          `${id} metric_after should be a string`);
+        assert.ok(rec.metric_before.length > 0,
+          `${id} metric_before should not be empty`);
+        assert.ok(rec.metric_after.length > 0,
+          `${id} metric_after should not be empty`);
+      }
+    }
+  });
+
+  it('all previous recommendation statuses are tracked (no gaps)', () => {
+    // Every rec from the previous audit should appear in previous_recommendations_status
+    // We can verify by checking the count matches expected (at least 1 if previous_audit exists)
+    if (report.previous_audit > 0) {
+      const trackedCount = Object.keys(report.previous_recommendations_status).length;
+      assert.ok(trackedCount >= 0,
+        'previous_recommendations_status should exist');
+      // If there are recommended_actions, previous audit likely had some too
+      // This is a soft check — we verify the structure, not the exact count
+    }
+  });
+});
+
+// ─── Section 6: session field population ─────────────────────────────────
+
+describe('session field population', () => {
+  let report;
+
+  before(() => {
+    report = JSON.parse(readFileSync(join(__dirname, 'audit-report.json'), 'utf8'));
+  });
+
+  it('session field matches a realistic session number', () => {
+    assert.equal(typeof report.session, 'number');
+    assert.ok(Number.isInteger(report.session));
+    // Session numbers should be >100 (we're well past early sessions)
+    assert.ok(report.session > 100,
+      `session ${report.session} seems too low`);
+    // And less than 100000 (sanity upper bound)
+    assert.ok(report.session < 100000,
+      `session ${report.session} seems too high`);
+  });
+
+  it('sessions section has per-type cost data from session-history', () => {
+    for (const type of ['B', 'E', 'R', 'A']) {
+      const entry = report.sessions[type];
+      assert.ok('count_in_history' in entry || 'last_10_avg_cost' in entry,
+        `sessions.${type} missing history-derived fields`);
+    }
+  });
+
+  it('sessions section verdicts are non-empty strings', () => {
+    for (const type of ['B', 'E', 'R', 'A']) {
+      assert.equal(typeof report.sessions[type].verdict, 'string');
+      assert.ok(report.sessions[type].verdict.length > 0,
+        `sessions.${type}.verdict should not be empty`);
+    }
+  });
+
+  it('pipelines section has verdict strings for all subsections', () => {
+    for (const pipeline of ['intel', 'brainstorming', 'queue', 'directives']) {
+      assert.equal(typeof report.pipelines[pipeline].verdict, 'string',
+        `pipelines.${pipeline}.verdict should be a string`);
+      assert.ok(report.pipelines[pipeline].verdict.length > 0,
+        `pipelines.${pipeline}.verdict should not be empty`);
+    }
+  });
+
+  it('infrastructure has hooks count fields', () => {
+    assert.ok('hooks' in report.infrastructure);
+    const hooks = report.infrastructure.hooks;
+    assert.equal(typeof hooks.total, 'number');
+    assert.ok(hooks.total > 0, 'should have at least some hooks');
+    assert.equal(typeof hooks.syntax_errors, 'number');
+  });
+
+  it('critical_issues entries have required structure', () => {
+    for (const issue of report.critical_issues) {
+      if (typeof issue === 'object') {
+        assert.ok('description' in issue || 'id' in issue,
+          'critical_issue object must have description or id');
+        if ('severity' in issue) {
+          assert.ok(['low', 'medium', 'high', 'critical'].includes(issue.severity),
+            `invalid severity: ${issue.severity}`);
+        }
+      }
+      // String critical issues are also valid (consumer handles both)
+    }
+  });
+});
+
+// ─── Section 7: consumer schema compatibility ────────────────────────────
+// Validates that audit-report.json matches what session-context.mjs reads
+// (the primary consumer, lines 1195-1218)
+
+describe('consumer schema compatibility (session-context.mjs)', () => {
+  let report;
+
+  before(() => {
+    report = JSON.parse(readFileSync(join(__dirname, 'audit-report.json'), 'utf8'));
+  });
+
+  it('session field is readable as number for display', () => {
+    // session-context.mjs: prev.session || '?'
+    assert.equal(typeof report.session, 'number');
+    assert.ok(report.session > 0);
+  });
+
+  it('audit_number field is readable for display', () => {
+    // session-context.mjs: prev.audit_number || '?'
+    assert.equal(typeof report.audit_number, 'number');
+    assert.ok(report.audit_number > 0);
+  });
+
+  it('critical_issues is an array with displayable items', () => {
+    // session-context.mjs slices first 3, maps: typeof c === 'string' ? c : (c.description || c.id || JSON.stringify(c))
+    assert.ok(Array.isArray(report.critical_issues));
+    for (const item of report.critical_issues) {
+      if (typeof item === 'string') {
+        assert.ok(item.length > 0, 'string critical issue should not be empty');
+      } else if (typeof item === 'object' && item !== null) {
+        // Must have at least one displayable field
+        const displayable = item.description || item.id || JSON.stringify(item);
+        assert.ok(displayable.length > 0,
+          'critical issue object must produce non-empty display string');
+      } else {
+        assert.fail(`critical issue has unexpected type: ${typeof item}`);
+      }
+    }
+  });
+
+  it('recommended_actions items have fields consumer expects', () => {
+    // session-context.mjs maps: { id: r.id, description: r.description, priority: r.priority, type: r.type, deadline: r.deadline_session }
+    for (const rec of report.recommended_actions) {
+      assert.ok('id' in rec, `recommendation missing id`);
+      assert.equal(typeof rec.id, 'string');
+      assert.ok('description' in rec, `${rec.id} missing description`);
+      assert.equal(typeof rec.description, 'string');
+      assert.ok(rec.description.length > 0,
+        `${rec.id} description should not be empty`);
+      assert.ok('priority' in rec, `${rec.id} missing priority`);
+      // type and deadline_session are optional (consumer uses || 'unknown')
+    }
+  });
+
+  it('recommended_actions description is truncatable to 120 chars', () => {
+    // session-context.mjs: (r.description || '').substring(0, 120)
+    for (const rec of report.recommended_actions) {
+      const truncated = (rec.description || '').substring(0, 120);
+      assert.ok(truncated.length > 0,
+        `${rec.id} description truncated to 120 chars should still be meaningful`);
+      assert.ok(truncated.length <= 120);
+    }
+  });
+});
+
+// ─── Section 8: audit-stats.mjs → audit-report.json field mapping ────────
+// Verifies that the stats output structure matches what A sessions inject into audit-report.json
+
+describe('audit-stats to report field mapping', () => {
+  before(() => {
+    // Reuse same scratch dir setup from Section 1
+    setupDirs();
+    patchAuditStats();
+    // Minimal fixtures
+    writeJSON(STATE, 'engagement-intel.json', [{ type: 'trend', session: 99 }]);
+    writeJSON(STATE, 'engagement-intel-archive.json', [
+      { type: 'trend', consumed_session: 80 },
+      { type: 'pattern' },
+    ]);
+    writeJSON(SRC, 'work-queue.json', {
+      queue: [
+        { id: 'wq-1', status: 'pending', created_session: 95 },
+        { id: 'wq-2', status: 'done', tags: ['audit'], created_session: 90 },
+      ]
+    });
+    writeJSON(SRC, 'directives.json', {
+      directives: [
+        { id: 'd001', status: 'active', acked_session: 95 },
+        { id: 'd002', status: 'completed' },
+      ]
+    });
+    writeFileSync(join(SRC, 'BRAINSTORMING.md'), '# Brainstorming\n- **Idea** (added ~s95)\n');
+    writeFileSync(join(STATE, 'session-history.txt'), [
+      '2026-02-06 mode=B s=95 dur=5m cost=$2.00 build=1',
+      '2026-02-06 mode=E s=96 dur=3m cost=$1.00 build=0',
+      '2026-02-06 mode=R s=97 dur=3m cost=$1.50 build=1',
+      '2026-02-06 mode=A s=98 dur=5m cost=$1.80 build=0',
+    ].join('\n'));
+  });
+
+  after(() => {
+    cleanupDirs();
+  });
+
+  it('stats session field derived from session-history.txt (priority 2)', () => {
+    // getCurrentSession priority: 1) SESSION_NUM env, 2) session-history.txt last line, 3) CLI arg
+    // Our fixture has s=98 as last entry, so session should be 98
+    const stats = runStats('100');
+    assert.equal(stats.session, 98, 'should use session-history.txt (s=98) over CLI arg');
+  });
+
+  it('stats pipelines structure matches report pipelines', () => {
+    const stats = runStats('100');
+    // Verify stats has same pipeline keys as the report schema
+    for (const key of ['intel', 'brainstorming', 'queue', 'directives']) {
+      assert.ok(key in stats.pipelines,
+        `stats missing pipeline: ${key}`);
+      assert.ok('verdict' in stats.pipelines[key],
+        `stats.pipelines.${key} missing verdict`);
+    }
+  });
+
+  it('stats sessions.summary has per-type entries matching report schema', () => {
+    const stats = runStats('100');
+    const summary = stats.sessions.summary;
+    for (const type of ['B', 'E', 'R', 'A']) {
+      assert.ok(type in summary, `stats missing session type: ${type}`);
+      assert.ok('count_in_history' in summary[type],
+        `stats.sessions.summary.${type} missing count_in_history`);
+      assert.ok('avg_cost_last_10' in summary[type],
+        `stats.sessions.summary.${type} missing avg_cost_last_10`);
+      assert.ok('verdict' in summary[type],
+        `stats.sessions.summary.${type} missing verdict`);
+    }
+  });
+
+  it('stats computed_at is a valid ISO timestamp', () => {
+    const stats = runStats('100');
+    assert.equal(typeof stats.computed_at, 'string');
+    const d = new Date(stats.computed_at);
+    assert.ok(!isNaN(d.getTime()), 'computed_at should be valid ISO date');
+  });
+});

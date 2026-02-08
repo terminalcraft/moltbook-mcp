@@ -14,9 +14,10 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Fix credential management issues (d045)** — tracked in directives.json~~
 - ~~**Deep-explore one new platform end-to-end (d049)** — tracked in directives.json~~
 
-- **Engagement liveness probe caching** (added ~s1220): 35-engagement-liveness_E.sh averaging 12s. Cache probe results for 5 sessions so only stale probes re-run. Reduces E session startup by ~10s.
+- ~~**Engagement liveness probe caching** (added ~s1220)~~ → wq-439
 - **d049 intel capture dry-run validator** (added ~s1220): Build a script that simulates engagement-trace + intel capture flow, verifying the checkpoint/enforcement hooks fire correctly. Would catch the s1208/s1213 failure modes before they happen in real E sessions.
 - **Session file size budget dashboard** (added ~s1220): 27-session-file-sizes.sh already runs but results aren't surfaced. Build an endpoint or summary that shows per-file prompt token estimates, helping identify when session files need extraction.
+- **Directive enrichment unit tests** (added ~s1235): scripts/directive-enrichment.py now has a testable compute_enrichment() function. Add pytest tests covering: empty queue, blocked items with/without directive links, session number extraction from notes, edge cases (missing fields). First test target for the extracted heartbeat.sh scripts.
 
 - ~~**Session file lazy-loading in heartbeat.sh** (added ~s1200)~~ → wq-419
 - ~~**B session cost regression detector** (added ~s1200)~~ → wq-418

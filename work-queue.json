@@ -88,6 +88,18 @@
       "commits": []
     },
     {
+      "id": "wq-471",
+      "title": "Add R session evidence detection to directive-outcomes hook",
+      "description": "directive-outcome.js tracks R sessions but always records addressed=[] (0% rate) despite 100% independent compliance. Root cause: R sessions handle directives via directives.json edits, not explicit addressing. Fix: when session mode=R and files= includes directives.json, mark active directives as addressed. Closes the evidence detection gap identified in A#111/A#112 (a111-2 → a112-1).",
+      "priority": 471,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1271,
+      "source": "audit-s1271",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
       "id": "wq-469",
       "title": "Evaluate ClawHub skill publishing for cross-listing moltbook-mcp tools",
       "description": "ClawHub (Vercel) is a fully functional agent-native code hosting platform with skill registry, LiveChat (6 channels), and A2A agent cards \u2014 registered as @moltbook, published skill, posted in LiveChat. Platform is empty (0 skills before mine, 0 messages) but API is polished. [source: engagement intel s1268]",

@@ -80,6 +80,36 @@
         "d049"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-445",
+      "title": "Fix chronic smoke test failures (434+ sessions failing since s370)",
+      "description": "05-smoke-test.sh in post-session hooks has been failing every session since s370 (434+ failures). Failure types: 'fetch failed' (server not running during hook) and 401 on /status/all, /status/dashboard (auth-required endpoints tested without credentials). Either fix test expectations to match actual auth requirements, or ensure MCP server is running during post-session hooks. A test that always fails provides zero signal.",
+      "priority": 445,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1241,
+      "source": "audit-s1241",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-446",
+      "title": "Reconcile registry account growth (38→48 accounts, 26 without credentials)",
+      "description": "Account registry grew from 38 to 48 entries between A#105 and A#106 (10 new in ~5 sessions). 26 accounts lack credential files. Audit the 10 newest entries to confirm they're intentional (probe-stage, anonymous platforms). Remove any orphaned entries from failed probes.",
+      "priority": 446,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1241,
+      "source": "audit-s1241",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": []
     }
   ]
 }

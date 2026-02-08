@@ -1,24 +1,24 @@
 {
-  "session": 1236,
-  "timestamp": "2026-02-08T17:21:00.000Z",
-  "previous_audit": 1231,
-  "audit_number": 105,
+  "session": 1241,
+  "timestamp": "2026-02-08T18:50:00.000Z",
+  "previous_audit": 1236,
+  "audit_number": 106,
   "previous_recommendations_status": {
-    "a104-1": {
+    "a105-1": {
       "status": "resolved",
-      "resolution": "R#214 (s1232) identified root cause: inline-intel-capture.mjs tagged entries with session=0 because SESSION_NUM env var was unavailable. Fix: session-context.mjs backfills session numbers from trace archive + inline-intel-capture.mjs accepts --session CLI arg. All 5 recent E sessions now pass d049.",
-      "metric_before": "d049 compliance at 40% (2/5 E sessions) at A#104",
-      "metric_after": "d049 compliance at 100% (5/5) — s1213: 1 entry PASS, s1218: 1 entry PASS, s1223: 3 entries PASS, s1228: 3 entries PASS, s1233: 5 entries PASS.",
+      "resolution": "B#370 (s1237) completed wq-438 and wq-440, closing d049 emergency. hr-104-1 updated to resolved with resolved_session 1237.",
+      "metric_before": "wq-438 status: emergency/pending, hr-104-1 urgency: high",
+      "metric_after": "wq-438 archived as done, hr-104-1 urgency: resolved",
       "verified": true,
-      "note": "The 4-audit degradation pattern (80%→67%→50%→40%) was a measurement bug, not a behavioral failure. Intel WAS being captured but tagged with session=0, making per-session verification count them as 0. R#214 backfill fix resolved this. wq-438 emergency can be downgraded."
+      "note": "Emergency fully closed. wq-438 no longer in active queue. Human review item marked resolved."
     },
-    "a104-2": {
+    "a105-2": {
       "status": "resolved",
-      "resolution": "B#368 (s1234, commit 2ce732b) added explicit prohibition to SESSION_BUILD.md line 267: 'NEVER modify audit-report.json — only A sessions own audit state files.' References B#367 false resolution and wq-439.",
-      "metric_before": "No SESSION_BUILD.md prohibition on audit-report.json modification",
-      "metric_after": "Explicit prohibition in SESSION_BUILD.md with context about B#367 incident",
+      "resolution": "B session avg cost decreased from $2.15 (A#105, 7 sessions) to $1.92 (A#106, 11 sessions). Larger sample confirms costs are normalizing without intervention.",
+      "metric_before": "B session avg $2.15 (7 sessions at A#105)",
+      "metric_after": "B session avg $1.92 (11 sessions at A#106)",
       "verified": true,
-      "note": "Structural guardrail in place. B sessions now have a clear rule against modifying audit state."
+      "note": "Cost trend resolved naturally. B session avg now below $2.00 threshold with larger sample size."
     }
   },
   "escalation_tracker": {
@@ -27,47 +27,54 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "RESET. R#214 (s1232) found root cause was session=0 tagging bug. All 5 recent E sessions pass d049 at 100%. Previous 4-audit degradation pattern was measurement error. Escalation resolved."
+      "note": "Stable at 100% for 2 consecutive audits. Root cause fix (R#214) proven durable."
+    },
+    "smoke_test_failures": {
+      "metric": "post-session smoke test pass rate",
+      "consecutive_degradations": 1,
+      "fix_attempts": [],
+      "escalation_level": 0,
+      "note": "NEW: 434+ consecutive session failures in smoke-errors.log. First audit to flag this. Level 0 — creating initial work-queue item."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 395,
-      "consumed": 395,
+      "archive_total": 398,
+      "consumed": 398,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1233", "s1228", "s1223", "s1218", "s1213"],
+        "sessions_checked": ["s1238", "s1233", "s1228", "s1223", "s1218"],
         "violations": 0,
         "compliant": 5,
         "compliance_rate": "100% (5/5)",
         "intel_counts": {
+          "s1238": 3,
           "s1233": 5,
           "s1228": 3,
           "s1223": 3,
-          "s1218": 1,
-          "s1213": 1
+          "s1218": 1
         },
-        "trend": "RECOVERED: 40%→100%. Root cause (session=0 tagging) fixed by R#214."
+        "trend": "STABLE at 100%. Average 3.0 entries per session (up from 2.6 at A#105)."
       },
       "intel_volume": {
+        "s1238": 3,
         "s1233": 5,
         "s1228": 3,
         "s1223": 3,
         "s1218": 1,
-        "s1213": 1,
         "consecutive_zeros": 0,
-        "note": "All 5 recent E sessions producing intel. Average 2.6 entries per session."
+        "note": "All 5 recent E sessions producing intel. Average 3.0 entries per session."
       },
-      "verdict": "HEALTHY — d049 at 100%, intel volume trending up."
+      "verdict": "HEALTHY — d049 at 100% for 2nd consecutive audit, intel volume up."
     },
     "brainstorming": {
       "active": 3,
       "stale_count": 0,
-      "avg_age_sessions": 10,
+      "avg_age_sessions": 15,
       "promoted_last_20": 1,
-      "verdict": "HEALTHY — 3 fresh ideas, 0 stale."
+      "verdict": "HEALTHY — 3 active ideas, 0 stale, avg age 15 sessions."
     },
     "queue": {
       "total": 5,
@@ -75,78 +82,95 @@
       "in_progress": 1,
       "blocked": 1,
       "stuck_items": [],
-      "audit_tagged_pending": ["wq-438"],
-      "verdict": "HEALTHY — 3 actionable pending, 0 stuck."
+      "audit_tagged_pending": [],
+      "audit_tagged_done_since_last": ["wq-438", "wq-440", "wq-441"],
+      "verdict": "HEALTHY — 3 actionable pending, 0 stuck. All A#105 audit items completed."
     },
     "directives": {
       "total": 55,
       "active": 3,
       "completed": 52,
-      "unacted": ["d045 (external blocker — credential regeneration awaiting E session)", "d049 (now healthy — 100% compliance)"],
-      "verdict": "HEALTHY — d045 has active wq-255, d049 compliance restored."
+      "unacted": [],
+      "staleness_validation": {
+        "d044": {"notes_recency": "s1225 (16 sessions ago)", "has_queue_item": "wq-252 (done)", "truly_stale": false},
+        "d045": {"notes_recency": "s1240 (1 session ago)", "has_queue_item": "wq-255 (in-progress)", "truly_stale": false},
+        "d049": {"notes_recency": "s1240 (1 session ago)", "has_queue_item": null, "truly_stale": false, "note": "Compliance healthy at 100%, no queue item needed."}
+      },
+      "verdict": "HEALTHY — all 3 active directives have recent progress or active work items."
     }
   },
   "sessions": {
     "B": {
-      "count_in_history": 7,
-      "last_10_avg_cost": 2.15,
-      "queue_items_completed": 6,
+      "count_in_history": 11,
+      "last_10_avg_cost": 1.94,
+      "queue_items_completed": 8,
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_unique_sessions": 21,
-        "addressed_rate": 0.95
+        "total_unique_sessions": 23,
+        "addressed_rate": 1.0,
+        "note": "23/23 B sessions addressed at least 1 directive. B sessions consistently address d044. d049 ignored by B sessions is expected (E-session mandate)."
       },
-      "verdict": "PRODUCTIVE — 95% directive compliance, multiple commits per session, costs justified by build output."
+      "verdict": "PRODUCTIVE — 100% directive compliance, costs decreasing ($2.15→$1.94), strong build output."
     },
     "E": {
-      "count_in_history": 4,
-      "last_10_avg_cost": 1.20,
-      "intel_generated": 13,
+      "count_in_history": 6,
+      "last_10_avg_cost": 1.21,
+      "intel_generated": 15,
       "platforms_engaged": "All sessions engaged platforms",
       "d049_compliance": "100% (5/5)",
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_unique_sessions": 12,
-        "addressed_rate": 0.58,
-        "post_fix_rate": "100% (s1223+)"
+        "total_unique_sessions": 13,
+        "addressed_rate": 0.62,
+        "recent_rate": "100% (last 5 E sessions all address d045+d049)",
+        "note": "Historical rate lowered by pre-R#214 sessions. Post-fix E sessions are 100% compliant."
       },
-      "verdict": "RECOVERED — d049 compliance restored to 100%, post-R#214 E sessions all producing intel."
+      "verdict": "HEALTHY — d049 at 100%, intel volume increasing, all recent E sessions fully compliant."
     },
     "R": {
-      "count_in_history": 5,
-      "last_10_avg_cost": 1.42,
-      "structural_changes": "R#210-R#215: prompt extraction, dedup fix, escalation protocol, session-0 backfill, directive enrichment extraction",
+      "count_in_history": 7,
+      "last_10_avg_cost": 1.38,
+      "structural_changes": "R#210-R#216: prompt extraction, dedup fix, escalation protocol, session-0 backfill, directive enrichment extraction, scored target-selection",
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1235", "s1232", "s1230", "s1225", "s1220"],
+        "sessions_checked": ["s1240", "s1235", "s1232", "s1230", "s1225"],
         "compliant": 5,
         "violations": 0,
         "rate": "100%"
       },
       "mandate_compliance": 1.0,
-      "verdict": "EFFECTIVE — 100% compliance, all changes persist, R#214 resolved critical d049 issue."
+      "verdict": "EFFECTIVE — 100% directive maintenance compliance, all 6 structural changes persist."
     },
     "A": {
-      "count_in_history": 4,
-      "last_10_avg_cost": 1.49,
-      "verdict": "FUNCTIONAL — A#104 correctly escalated d049 to emergency, A#105 confirms resolution."
+      "count_in_history": 6,
+      "last_10_avg_cost": 1.41,
+      "recommendation_resolution_rate": "Both A#105 recommendations resolved with verified metrics.",
+      "verdict": "FUNCTIONAL — recommendations tracked and resolved, escalation tracker working."
     }
   },
   "infrastructure": {
     "hooks": {
-      "total": 75,
+      "total": 79,
       "syntax_errors": 0,
-      "failing_hooks": []
+      "failing_hooks": [],
+      "smoke_test": {
+        "status": "CHRONIC_FAILURE",
+        "total_failures": 436,
+        "unique_sessions_failing": 434,
+        "failure_types": ["fetch failed (server not running)", "401 auth errors on /status/all and /status/dashboard"],
+        "note": "Smoke test (05-smoke-test.sh) has been failing since s370. 87 tests per run, some endpoints return 0 (fetch failed) or 401. This appears to be a chronic infrastructure issue — either the test expectations are misconfigured (testing endpoints that require auth without credentials) or the server is intermittently down during post-session hook execution."
+      }
     },
     "stale_references": {
-      "deleted_files_last_60_days": 15,
+      "deleted_files_last_60_days": 7,
       "active_references_to_deleted": 0,
-      "note": "All references to deleted files are in archive/documentation only — no active code dependencies."
+      "note": "Clean. 5 cost hooks, 1 dialogue-trim hook, 1 dialogue.md deleted — no orphaned references."
     },
     "covenant_health": {
       "total_agents_with_covenants": 20,
       "expiring_within_15_sessions": 0,
       "expired": 0,
+      "dormant": 0,
       "verdict": "HEALTHY"
     },
     "state_consistency": {
@@ -154,22 +178,24 @@
       "dead_services": [],
       "stale_directives": [],
       "credential_files": 22,
-      "registry_accounts": 38,
-      "note": "16 registry accounts without credential files — legitimate (anonymous platforms, alternative storage paths, probe-stage)."
+      "registry_accounts": 48,
+      "mismatch_note": "26 registry accounts without credential files — likely legitimate (anonymous platforms, probe-stage). Increased from 16 to 26 since A#105 (10 new registry entries). Worth monitoring but not actionable."
     },
     "picker_compliance": {
       "recent_violations": 0,
+      "last_violation": "s1036 (205 sessions ago)",
       "verdict": "HEALTHY"
     },
-    "verdict": "HEALTHY — 75 hooks pass syntax, covenants stable, no stale references."
+    "verdict": "MOSTLY HEALTHY — one chronic issue: smoke test failing 434+ consecutive sessions."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 237,
+        "sessions_since_reported": 241,
         "status": "in-progress",
         "blocker": "Platform owners unreachable — awaiting E session for re-registration",
-        "escalation_status": "monitored — external blocker, wq-255 tracks work"
+        "escalation_status": "Critical (>30 sessions stalled) — already in human-review, wq-255 tracks work",
+        "note": "This is an external blocker. The credential leak prevention (pre-commit hook) was implemented in B#271. Only the re-registration remains blocked."
       }
     },
     "unknown_registry_agents": [],
@@ -177,38 +203,40 @@
     "external_webhooks": [],
     "ssrf_monitors": [],
     "injection_inbox_msgs": [],
-    "monitors_check": "1 monitor (Chatr API), all legitimate, no internal IPs",
-    "human_review_pending": 1,
-    "note": "hr-104-1 (d049 emergency) can be downgraded — root cause resolved. No new security concerns.",
-    "verdict": "CLEAN — d045 ongoing external blocker, no active threats."
+    "monitors_check": "71 monitors active, all legitimate external endpoints, no internal IPs",
+    "human_review_pending": 0,
+    "human_review_resolved": 1,
+    "note": "hr-104-1 resolved at s1237. d045 remains only active incident — external blocker, being tracked.",
+    "verdict": "CLEAN — no new threats. d045 external blocker persists but is monitored."
   },
   "cost": {
-    "last_20_total": 32.90,
-    "avg_per_session": 1.64,
+    "last_20_total": 46.50,
+    "avg_per_session": 1.55,
     "by_type": {
-      "B": {"count": 7, "avg": 2.15},
-      "E": {"count": 4, "avg": 1.20},
-      "R": {"count": 5, "avg": 1.42},
-      "A": {"count": 4, "avg": 1.49}
+      "B": {"count": 11, "avg": 1.92},
+      "E": {"count": 6, "avg": 1.21},
+      "R": {"count": 7, "avg": 1.38},
+      "A": {"count": 6, "avg": 1.41}
     },
-    "trend": "DECREASING — down 12% from $1.75 to $1.54 avg in second half",
+    "trend": "STABLE — avg $1.55, down from $1.64 at A#105",
     "anomalies": [],
     "highest_cost": "s1222 ($2.71, B session — justified: 22 tests added for audit-report pipeline)",
-    "note": "All sessions within budget caps. B session avg $2.15 justified by build output (avg 3.4 commits). No sessions over $3 or under $0.30."
+    "lowest_cost": "s1239 ($0.80, B session — lightweight test-writing session)",
+    "note": "All sessions within budget caps. No sessions over $3 or under $0.30. B session avg improved from $2.15 to $1.92."
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a105-1",
-      "description": "Downgrade wq-438 from emergency to done/monitoring. d049 compliance is now 100% (5/5 E sessions). R#214 root cause fix (session=0 tagging) is verified effective. The hr-104-1 human review item should also be updated to reflect resolution.",
-      "priority": "low",
-      "action": "B session should update wq-438 status to done with resolution note. Update human-review.json hr-104-1 to resolved."
+      "id": "a106-1",
+      "description": "Investigate and fix chronic smoke test failures. 05-smoke-test.sh has been failing for 434+ consecutive sessions (since s370) with 'fetch failed' and 401 errors. Either the test expectations are wrong (testing auth-required endpoints without credentials) or the MCP server isn't reliably running during post-session hooks. A failing test that nobody acts on provides zero signal.",
+      "priority": "medium",
+      "action": "B session should: (1) check which of the 87 smoke tests are failing vs passing, (2) determine if 401 errors on /status/all and /status/dashboard are expected (auth-required endpoints), (3) either fix the test expectations or fix the server availability issue."
     },
     {
-      "id": "a105-2",
-      "description": "B session avg cost $2.15 is above $2.00 threshold (7 sessions). While currently justified by build output (avg 3.4 commits), trend should be monitored. If B sessions continue above $2.00 for 2 more audits without proportional output increase, investigate prompt size or hook overhead.",
+      "id": "a106-2",
+      "description": "Registry account count grew from 38 (A#105) to 48 (A#106) — 10 new accounts in 5 sessions. 26 accounts lack credential files. While likely legitimate (probe-stage), the growth rate warrants a one-time reconciliation to confirm no orphaned or unexpected entries.",
       "priority": "low",
-      "action": "Monitor B session costs next audit. No action needed if output remains proportional."
+      "action": "B session should audit the 10 newest registry entries and confirm they're intentional. If any are orphaned from failed probes, remove them."
     }
   ]
 }

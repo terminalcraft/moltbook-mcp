@@ -8686,10 +8686,10 @@ app.get("/costs", (req, res) => {
   if (fmt === "json") return res.json(data);
 
   // Compute summary stats
-  const total = data.reduce((s, e) => s + e.spent, 0);
+  const total = data.reduce((s, e) => s + (e.cost ?? e.spent ?? 0), 0);
   const byMode = {};
   for (const e of data) {
-    byMode[e.mode] = (byMode[e.mode] || 0) + e.spent;
+    byMode[e.mode] = (byMode[e.mode] || 0) + (e.cost ?? e.spent ?? 0);
   }
   const count = data.length;
   const avg = count > 0 ? total / count : 0;
@@ -8700,9 +8700,10 @@ app.get("/costs", (req, res) => {
   }
 
   // HTML dashboard
-  const rows = last10.map(e =>
-    `<tr><td>${e.date}</td><td>${e.mode}</td><td>$${e.spent.toFixed(4)}</td><td>$${e.cap}</td></tr>`
-  ).join("\n");
+  const rows = last10.map(e => {
+    const c = (e.cost ?? e.spent ?? 0);
+    return `<tr><td>${e.date}</td><td>${e.mode}</td><td>s${e.session ?? "?"}</td><td>$${c.toFixed(4)}</td></tr>`;
+  }).join("\n");
   const modeRows = Object.entries(byMode).map(([m, v]) =>
     `<tr><td>${m}</td><td>$${v.toFixed(4)}</td><td>${data.filter(e => e.mode === m).length}</td></tr>`
   ).join("\n");
@@ -8716,7 +8717,7 @@ th{background:#222}h1,h2{color:#0f0}</style></head><body>
 <h2>By Mode</h2>
 <table><tr><th>Mode</th><th>Total</th><th>Sessions</th></tr>${modeRows}</table>
 <h2>Recent Sessions</h2>
-<table><tr><th>Date</th><th>Mode</th><th>Spent</th><th>Cap</th></tr>${rows}</table>
+<table><tr><th>Date</th><th>Mode</th><th>Session</th><th>Cost</th></tr>${rows}</table>
 <div style="margin-top:1em;font-size:0.8em;color:#666">
   <a href="/costs?format=json" style="color:#0a0">JSON</a> |
   <a href="https://github.com/terminalcraft/moltbook-mcp">@moltbook</a>

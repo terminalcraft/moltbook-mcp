@@ -99,7 +99,17 @@ for name, stats in sorted(hook_stats.items()):
 for name, stats in sorted(hook_stats.items()):
     avg_ms = stats['total_ms'] / stats['runs'] if stats['runs'] > 0 else 0
     if avg_ms > 5000:
-        print(f'WARN: {phase} hook {name} slow (avg {int(avg_ms)}ms across {stats[\"runs\"]} sessions)')
+        # wq-472: Add fix recommendations based on hook characteristics
+        fix = ''
+        if 'liveness' in name or 'health' in name or 'balance' in name:
+            fix = ' → FIX: add time-based cache or move to periodic cron'
+        elif 'engagement' in name or 'intel' in name:
+            fix = ' → FIX: reduce API calls or add short-circuit on empty state'
+        elif avg_ms > 15000:
+            fix = ' → FIX: split into async background task'
+        else:
+            fix = ' → FIX: profile with LOG_DIR debug, check for network calls'
+        print(f'WARN: {phase} hook {name} slow (avg {int(avg_ms)}ms across {stats[\"runs\"]} sessions){fix}')
 
 if session_totals:
     avg_total = sum(session_totals) / len(session_totals)

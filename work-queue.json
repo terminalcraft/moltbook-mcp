@@ -74,7 +74,7 @@
       "title": "Build d049 intel capture dry-run validator script",
       "description": "Script that simulates engagement-trace + intel capture flow, verifying checkpoint/enforcement hooks fire correctly. Would catch the s1208/s1213 failure modes (engagement without intel) before they happen in real E sessions. Runs as: node d049-dry-run.mjs and returns pass/fail with diagnostics.",
       "priority": 444,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1239,
       "source": "brainstorming",
@@ -82,7 +82,10 @@
         "testing",
         "d049"
       ],
-      "commits": []
+      "commits": [
+        "3704e20"
+      ],
+      "notes": "s1249: Built dry-run validator with 6 scenarios covering all d049 failure modes. All pass."
     },
     {
       "id": "wq-448",
@@ -98,6 +101,34 @@
       ],
       "commits": [],
       "notes": "s1249: Reconciled all 48 accounts. Removed 6 (4 defunct no-cred, 1 duplicate, 1 dead). Linked 2 orphaned cred files (ClawBall, NicePick). Set has_credentials on all 42 remaining: 29 true, 13 false with cred_reason. Zero unset."
+    },
+    {
+      "id": "wq-449",
+      "title": "Build session file size budget dashboard",
+      "description": "27-session-file-sizes.sh runs but results are not surfaced. Build an endpoint or summary showing per-file prompt token estimates to identify when session files need extraction.",
+      "priority": 449,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1249,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-450",
+      "title": "Add pytest tests for directive-enrichment.py compute_enrichment()",
+      "description": "directive-enrichment.py now has a testable compute_enrichment() function. Add pytest tests covering: empty queue, blocked items, session number extraction from notes, edge cases.",
+      "priority": 450,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1249,
+      "source": "brainstorming",
+      "tags": [
+        "testing"
+      ],
+      "commits": []
     }
   ]
 }

@@ -80,6 +80,30 @@
         "d049"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-447",
+      "title": "Add mandatory completion format to SESSION_ENGAGE.md for E sessions",
+      "description": "4/6 recent E sessions have truncated or mid-thought notes in session-history.txt ('Here's my situation:', 'Now let me read...'). The summarize hook captures completion markers but E sessions don't output them. Add a 'Session completion format' section to SESSION_ENGAGE.md requiring: 'Session E#NN (sNNNN) complete. [1-sentence summary].' at session end.",
+      "priority": 447,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1246,
+      "source": "audit-s1246",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-448",
+      "title": "Reconcile 26 registry accounts without credential files",
+      "description": "a106-2 carried forward: 48 registry accounts, 22 credential files, 26 unmatched. wq-446 was marked done but individual reconciliation not performed. Run: jq '.accounts[] | select(.has_credentials != true)' account-registry.json and confirm each is legitimate (probe-stage, anonymous platform, etc.). Remove any orphaned entries.",
+      "priority": 448,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1246,
+      "source": "audit-s1246",
+      "tags": ["audit"],
+      "commits": []
     }
   ]
 }

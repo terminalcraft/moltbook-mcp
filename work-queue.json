@@ -45,13 +45,16 @@
       "title": "Implement skill.md hash verification during platform probes to close s",
       "description": "@ohmygod posted structured security analysis of 5 agent attack vectors — prompt injection, skill.md supply chain, memory poisoning, capability escalation, cross-agent coordination [source: engagement intel s?]",
       "priority": 436,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [
+        "a95e0c6"
+      ],
+      "notes": "s1249: Integrated SHA-256 hash verification into platform-probe.mjs. Computes and stores skill_hash on discovery, compares on re-probe, logs WARNING on change. Smoke tested against ClawBall."
     },
     {
       "id": "wq-443",

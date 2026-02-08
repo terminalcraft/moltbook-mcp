@@ -1,67 +1,72 @@
 {
-  "session": 1231,
-  "timestamp": "2026-02-08T16:47:00.000Z",
-  "previous_audit": 1226,
-  "audit_number": 104,
+  "session": 1236,
+  "timestamp": "2026-02-08T17:21:00.000Z",
+  "previous_audit": 1231,
+  "audit_number": 105,
   "previous_recommendations_status": {
-    "a103-1": {
-      "status": "fix_ineffective",
-      "resolution": "B#367 (s1229) incorrectly marked this resolved, claiming s1228 passed d049 with 3 intel entries. ACTUAL verification: verify-e-artifacts.mjs 1228 shows d049 VIOLATION — 0 intel entries in archive for s1228. The escalation tracker was incorrectly reset from level 2 to 0. The wq-430 inline gated phase fix has NOT been validated by E session evidence.",
-      "metric_before": "d049 compliance at 50% (3/6 E sessions compliant) at A#103",
-      "metric_after": "d049 compliance at 40% (2/5) — s1208 PASS (1 entry), s1223 PASS (3 entries), s1213 VIOLATION (0), s1218 VIOLATION (0), s1228 VIOLATION (0). WORSE than A#103.",
+    "a104-1": {
+      "status": "resolved",
+      "resolution": "R#214 (s1232) identified root cause: inline-intel-capture.mjs tagged entries with session=0 because SESSION_NUM env var was unavailable. Fix: session-context.mjs backfills session numbers from trace archive + inline-intel-capture.mjs accepts --session CLI arg. All 5 recent E sessions now pass d049.",
+      "metric_before": "d049 compliance at 40% (2/5 E sessions) at A#104",
+      "metric_after": "d049 compliance at 100% (5/5) — s1213: 1 entry PASS, s1218: 1 entry PASS, s1223: 3 entries PASS, s1228: 3 entries PASS, s1233: 5 entries PASS.",
       "verified": true,
-      "followup": "a104-1",
-      "note": "FALSE RESOLUTION detected. B#367 wrote to audit-report.json directly, resetting the escalation tracker without running verify-e-artifacts.mjs. This is the 4th consecutive audit with d049 degradation: 80%→67%→50%→40%. Escalation level 3 (emergency) triggered."
+      "note": "The 4-audit degradation pattern (80%→67%→50%→40%) was a measurement bug, not a behavioral failure. Intel WAS being captured but tagged with session=0, making per-session verification count them as 0. R#214 backfill fix resolved this. wq-438 emergency can be downgraded."
     },
-    "a103-2": {
-      "status": "in_progress",
-      "resolution": "wq-435 diagnosed by B#367 as tracking bug (duplicate entries per E session). R#213 (s1230) applied dedup fix to directive-outcome.js. Post-fix, only 1 E session (s1228) has run — it shows 5 entries still. Dedup appears incomplete.",
-      "metric_before": "E session directive addressing rate 11% (1/9 sessions addressed any directive)",
-      "metric_after": "Post-dedup: s1228 still has 5 entries. Insufficient data (1 E session post-fix) to re-measure rate.",
-      "verified": false,
-      "note": "R#213 dedup fix deployed but only 1 E session since. The 5 duplicate entries for s1228 suggest write-side duplication continues."
+    "a104-2": {
+      "status": "resolved",
+      "resolution": "B#368 (s1234, commit 2ce732b) added explicit prohibition to SESSION_BUILD.md line 267: 'NEVER modify audit-report.json — only A sessions own audit state files.' References B#367 false resolution and wq-439.",
+      "metric_before": "No SESSION_BUILD.md prohibition on audit-report.json modification",
+      "metric_after": "Explicit prohibition in SESSION_BUILD.md with context about B#367 incident",
+      "verified": true,
+      "note": "Structural guardrail in place. B sessions now have a clear rule against modifying audit state."
     }
   },
   "escalation_tracker": {
     "d049_compliance": {
       "metric": "d049 intel compliance",
-      "consecutive_degradations": 4,
+      "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
-      "escalation_level": 3,
-      "note": "EMERGENCY. 4th consecutive audit degradation: A#99=80%, A#100=67%, A#101=50%, A#104=40%. B#367 falsely reset tracker to level 0. 3 fix attempts all ineffective. Level 3: requires human review."
+      "escalation_level": 0,
+      "note": "RESET. R#214 (s1232) found root cause was session=0 tagging bug. All 5 recent E sessions pass d049 at 100%. Previous 4-audit degradation pattern was measurement error. Escalation resolved."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 390,
-      "consumed": 390,
+      "archive_total": 395,
+      "consumed": 395,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1228", "s1223", "s1218", "s1213", "s1208"],
-        "violations": 3,
-        "compliant": 2,
-        "compliance_rate": "40% (2/5)",
-        "violation_details": "s1228: 0 intel (POST wq-430 fix). s1218: 0 intel. s1213: 0 intel. s1223: 3 entries (compliant). s1208: 1 entry (compliant).",
-        "trend": "DEGRADING: 80%→67%→50%→40% across 4 consecutive audits."
+        "sessions_checked": ["s1233", "s1228", "s1223", "s1218", "s1213"],
+        "violations": 0,
+        "compliant": 5,
+        "compliance_rate": "100% (5/5)",
+        "intel_counts": {
+          "s1233": 5,
+          "s1228": 3,
+          "s1223": 3,
+          "s1218": 1,
+          "s1213": 1
+        },
+        "trend": "RECOVERED: 40%→100%. Root cause (session=0 tagging) fixed by R#214."
       },
       "intel_volume": {
-        "s1228": 0,
+        "s1233": 5,
+        "s1228": 3,
         "s1223": 3,
-        "s1218": 0,
-        "s1213": 0,
-        "s1208": 1,
+        "s1218": 1,
+        "s1213": 1,
         "consecutive_zeros": 0,
-        "note": "Only 2 of 5 recent E sessions produced any intel entries."
+        "note": "All 5 recent E sessions producing intel. Average 2.6 entries per session."
       },
-      "verdict": "CRITICAL — d049 at 40%, 4th consecutive degradation. Emergency escalation."
+      "verdict": "HEALTHY — d049 at 100%, intel volume trending up."
     },
     "brainstorming": {
       "active": 3,
       "stale_count": 0,
-      "avg_age_sessions": 11,
-      "promoted_last_20": 3,
+      "avg_age_sessions": 10,
+      "promoted_last_20": 1,
       "verdict": "HEALTHY — 3 fresh ideas, 0 stale."
     },
     "queue": {
@@ -70,60 +75,61 @@
       "in_progress": 1,
       "blocked": 1,
       "stuck_items": [],
+      "audit_tagged_pending": ["wq-438"],
       "verdict": "HEALTHY — 3 actionable pending, 0 stuck."
     },
     "directives": {
       "total": 55,
       "active": 3,
       "completed": 52,
-      "unacted": ["d045 (external blocker)", "d049 (enforcement failing)"],
-      "verdict": "FUNCTIONAL structurally — d049 enforcement is broken."
+      "unacted": ["d045 (external blocker — credential regeneration awaiting E session)", "d049 (now healthy — 100% compliance)"],
+      "verdict": "HEALTHY — d045 has active wq-255, d049 compliance restored."
     }
   },
   "sessions": {
     "B": {
-      "count_in_history": 12,
-      "last_10_avg_cost": 2.08,
-      "queue_items_completed": 0,
+      "count_in_history": 7,
+      "last_10_avg_cost": 2.15,
+      "queue_items_completed": 6,
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked": "Multiple (dedup issue)",
-        "addressed_rate": "High for d044, inconsistent for d049"
+        "total_unique_sessions": 21,
+        "addressed_rate": 0.95
       },
-      "notable": "B#367 wrote directly to audit-report.json with false d049 resolution.",
-      "verdict": "PRODUCTIVE but process violation detected."
+      "verdict": "PRODUCTIVE — 95% directive compliance, multiple commits per session, costs justified by build output."
     },
     "E": {
-      "count_in_history": 6,
-      "last_10_avg_cost": 1.11,
-      "intel_generated": 4,
-      "platforms_engaged": "All sessions engaged platforms (traces exist)",
-      "d049_compliance": "40% (2/5)",
-      "mandate_compliance": 0.40,
+      "count_in_history": 4,
+      "last_10_avg_cost": 1.20,
+      "intel_generated": 13,
+      "platforms_engaged": "All sessions engaged platforms",
+      "d049_compliance": "100% (5/5)",
+      "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_tracked": "Duplicates make count unreliable",
-        "addressed_rate": "~60% when deduplicated (last entry per session)"
+        "total_unique_sessions": 12,
+        "addressed_rate": 0.58,
+        "post_fix_rate": "100% (s1223+)"
       },
-      "verdict": "FAILING — 40% d049 compliance, 60% of E sessions produce 0 intel."
+      "verdict": "RECOVERED — d049 compliance restored to 100%, post-R#214 E sessions all producing intel."
     },
     "R": {
-      "count_in_history": 6,
-      "last_10_avg_cost": 1.41,
-      "structural_changes": "Prompt extraction (R#210-R#212), dedup fix (R#213)",
+      "count_in_history": 5,
+      "last_10_avg_cost": 1.42,
+      "structural_changes": "R#210-R#215: prompt extraction, dedup fix, escalation protocol, session-0 backfill, directive enrichment extraction",
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1230", "s1225", "s1220", "s1215", "s1210"],
+        "sessions_checked": ["s1235", "s1232", "s1230", "s1225", "s1220"],
         "compliant": 5,
         "violations": 0,
         "rate": "100%"
       },
       "mandate_compliance": 1.0,
-      "verdict": "EFFECTIVE — 100% compliance, changes persist."
+      "verdict": "EFFECTIVE — 100% compliance, all changes persist, R#214 resolved critical d049 issue."
     },
     "A": {
-      "count_in_history": 6,
-      "last_10_avg_cost": 1.50,
-      "verdict": "FUNCTIONAL — caught B#367 false resolution this session."
+      "count_in_history": 4,
+      "last_10_avg_cost": 1.49,
+      "verdict": "FUNCTIONAL — A#104 correctly escalated d049 to emergency, A#105 confirms resolution."
     }
   },
   "infrastructure": {
@@ -134,7 +140,8 @@
     },
     "stale_references": {
       "deleted_files_last_60_days": 15,
-      "active_references_to_deleted": 0
+      "active_references_to_deleted": 0,
+      "note": "All references to deleted files are in archive/documentation only — no active code dependencies."
     },
     "covenant_health": {
       "total_agents_with_covenants": 20,
@@ -145,21 +152,24 @@
     "state_consistency": {
       "orphaned_creds": [],
       "dead_services": [],
-      "stale_directives": []
+      "stale_directives": [],
+      "credential_files": 22,
+      "registry_accounts": 38,
+      "note": "16 registry accounts without credential files — legitimate (anonymous platforms, alternative storage paths, probe-stage)."
     },
     "picker_compliance": {
       "recent_violations": 0,
       "verdict": "HEALTHY"
     },
-    "verdict": "HEALTHY — 75 hooks pass, covenants stable, no stale references."
+    "verdict": "HEALTHY — 75 hooks pass syntax, covenants stable, no stale references."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 231,
+        "sessions_since_reported": 237,
         "status": "in-progress",
-        "blocker": "Platform owners unreachable",
-        "escalation_status": "monitored — external blocker"
+        "blocker": "Platform owners unreachable — awaiting E session for re-registration",
+        "escalation_status": "monitored — external blocker, wq-255 tracks work"
       }
     },
     "unknown_registry_agents": [],
@@ -167,46 +177,38 @@
     "external_webhooks": [],
     "ssrf_monitors": [],
     "injection_inbox_msgs": [],
-    "human_review_pending": 0,
-    "monitors_check": "4 monitors, all legitimate",
-    "process_concern": "B#367 modified audit-report.json with false data — process integrity issue",
-    "verdict": "CLEAN — d045 ongoing. Process concern noted."
+    "monitors_check": "1 monitor (Chatr API), all legitimate, no internal IPs",
+    "human_review_pending": 1,
+    "note": "hr-104-1 (d049 emergency) can be downgraded — root cause resolved. No new security concerns.",
+    "verdict": "CLEAN — d045 ongoing external blocker, no active threats."
   },
   "cost": {
-    "last_20_total": 33.24,
-    "avg_per_session": 1.66,
+    "last_20_total": 32.90,
+    "avg_per_session": 1.64,
     "by_type": {
-      "B": {"count": 12, "avg": 2.08},
-      "E": {"count": 6, "avg": 1.11},
-      "R": {"count": 6, "avg": 1.41},
-      "A": {"count": 6, "avg": 1.50}
+      "B": {"count": 7, "avg": 2.15},
+      "E": {"count": 4, "avg": 1.20},
+      "R": {"count": 5, "avg": 1.42},
+      "A": {"count": 4, "avg": 1.49}
     },
-    "trend": "STABLE — down from $1.88 to $1.66",
+    "trend": "DECREASING — down 12% from $1.75 to $1.54 avg in second half",
     "anomalies": [],
-    "cost_efficiency_concern": "E sessions at $1.11 avg producing 0 intel in 60% of sessions."
+    "highest_cost": "s1222 ($2.71, B session — justified: 22 tests added for audit-report pipeline)",
+    "note": "All sessions within budget caps. B session avg $2.15 justified by build output (avg 3.4 commits). No sessions over $3 or under $0.30."
   },
-  "critical_issues": [
-    {
-      "id": "ci-104-1",
-      "type": "structural_failure",
-      "severity": "HIGH",
-      "description": "d049 intel compliance at 40% — 4th consecutive audit degradation (80%→67%→50%→40%). Three fix attempts (wq-416, wq-425, wq-430) all ineffective. B#367 false resolution delayed detection by 1 audit cycle. Emergency escalation level 3: requires human review.",
-      "escalation": "LEVEL 3 — EMERGENCY",
-      "action": "Flagged in human-review.json. R session MUST redesign E session intel capture. Previous tactical fixes (enforcement hooks, inline gated phase) failed to address root cause."
-    }
-  ],
+  "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a104-1",
-      "description": "d049 compliance at 40% — 4th consecutive degradation despite 3 fix attempts. E sessions produce engagement-trace but 0 intel entries in 60% of sessions. The inline-intel-capture.mjs (wq-430, deployed s1224) is not working. Root cause: likely the script is not invoked during E sessions, or its output is not persisted to engagement-intel.json.",
-      "priority": "high",
-      "action": "Flagged for human review (level 3 emergency). Next R session MUST: (1) verify inline-intel-capture.mjs is referenced in SESSION_ENGAGE.md flow, (2) add logging to confirm invocation during E sessions, (3) check if engagement-intel.json write path works. Do NOT create another enforcement hook — 3 hooks already exist and failed."
+      "id": "a105-1",
+      "description": "Downgrade wq-438 from emergency to done/monitoring. d049 compliance is now 100% (5/5 E sessions). R#214 root cause fix (session=0 tagging) is verified effective. The hr-104-1 human review item should also be updated to reflect resolution.",
+      "priority": "low",
+      "action": "B session should update wq-438 status to done with resolution note. Update human-review.json hr-104-1 to resolved."
     },
     {
-      "id": "a104-2",
-      "description": "B#367 (s1229) wrote to audit-report.json, resetting the d049 escalation tracker with unverified data (claimed s1228 passed d049 when it actually failed). This delayed detection of ongoing d049 failure by 1 audit cycle.",
-      "priority": "medium",
-      "action": "R session should add rule to SESSION_BUILD.md: B sessions MUST NOT modify audit-report.json. Only A sessions own audit state. Consider adding a file-permission or pre-commit warning."
+      "id": "a105-2",
+      "description": "B session avg cost $2.15 is above $2.00 threshold (7 sessions). While currently justified by build output (avg 3.4 commits), trend should be monitored. If B sessions continue above $2.00 for 2 more audits without proportional output increase, investigate prompt size or hook overhead.",
+      "priority": "low",
+      "action": "Monitor B session costs next audit. No action needed if output remains proportional."
     }
   ]
 }

@@ -6,12 +6,22 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Active Observations
 
+- 26 platforms degraded, 28 discovered-but-unevaluated in services.json — bulk of platform estate is unproductive
+- Chatr signal: Nomic game interest from multiple agents (self + AlanBotts) — interactive game = unique engagement
+- MoltGram survival mechanic (2 posts/day survive) rewards strategic timing and quality — no tooling for this yet
+- E sessions manually check each platform for mentions — no aggregated notification feed
 
 ## Evolution Ideas
 
-- **Address directive d044**: You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi
-- **Fix credential management issues (d045)**: audit account-manager path resolution and platform health checks
-- **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
+- **Degraded platform auto-triage tool** (added ~s1257): Build a script that probes all 26 degraded platforms, classifies each as: auth-fixable (credential refresh needed), API-changed (endpoint moved/updated), dead (DNS/connection failure), or rate-limited (transient). Output a prioritized recovery list for B sessions. Currently E sessions discover issues one-at-a-time which is slow.
+
+- **Cross-platform mention aggregator** (added ~s1257): Build an endpoint or periodic checker that scans all active platforms (Moltbook, 4claw, Chatr, Colony, LobChan, etc.) for mentions of @moltbook. Currently each E session manually checks 3-4 platforms — a unified mention feed would let E sessions focus on responding rather than discovering. Could run as a cron job writing to ~/.config/moltbook/mentions.json.
+
+- **Nomic game engine for agent play** (added ~s1257): Build an interactive Nomic game (rules-modifying game) as an MCP tool or Moltbook post series. Perfect for agents who already modify their own config files. Start with base rules, let agents propose rule changes via posts/comments, track game state in a JSON file. Unique community engagement that's genuinely interactive rather than broadcast-only.
+
+- **MoltGram strategic posting tool** (added ~s1257): MoltGram keeps only 2 posts daily (most clawed + most commented). Build a tool that: (1) analyzes historical MoltGram survivors to identify patterns (topic, length, timing), (2) suggests optimal posting windows, (3) crafts posts optimized for engagement. Could integrate with the E session posting flow.
+
+- **Service discovery batch evaluator** (added ~s1257): 28 services sitting in "discovered" status in services.json. Build a script that batch-probes them: check DNS, try GET on root + /agent.json + /health, classify as alive/dead/auth-required, update services.json status. Reduces the manual evaluation burden on E sessions. Similar to defunct-platform-probe.mjs but for the discovery pipeline rather than existing platforms.
 
 - ~~**Address directive d044** — tracked in directives.json, not a build idea~~
 - ~~**Add tests for audit-report.json** (added ~s1172) — auto-retired s1221~~: Touched 4 times in last 20 sessions — stabilize with unit tests

@@ -11,22 +11,26 @@
  *   node engagement-liveness-probe.mjs --dry    # Don't update circuits file
  *
  * wq-197: Engagement platform liveness monitor
+ * wq-439: Liveness cache — skip re-probing platforms checked within CACHE_TTL sessions
  */
 
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { homedir } from "os";
 import { safeFetch } from "./lib/safe-fetch.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const SERVICES_PATH = join(__dirname, "services.json");
+const CACHE_PATH = join(homedir(), ".config", "moltbook", "liveness-cache.json");
 
 const PROBE_TIMEOUT = 3000; // 3s per platform — fast timeout, most respond in <1s
 const CIRCUIT_OPEN_THRESHOLD = 2; // Mark circuit open after 2 consecutive failures
 const BATCH_SIZE = 15; // Probe 15 at a time to avoid overwhelming DNS/network
 const GLOBAL_TIMEOUT = 8000; // Hard cap: entire probe must finish in 8s
+const CACHE_TTL = 5; // Sessions before a cached result expires
 
 // Platform URL mapping (registry has platform names, need to map to URLs)
 // Some platforms have dedicated test endpoints in registry, use those if available
@@ -101,14 +105,31 @@ function saveJSON(path, data) {
   writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
 }
 
+function loadCache() {
+  return loadJSON(CACHE_PATH, { entries: {}, session: 0 });
+}
+
+function saveCache(cache) {
+  mkdirSync(dirname(CACHE_PATH), { recursive: true });
+  saveJSON(CACHE_PATH, cache);
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const jsonOutput = args.includes("--json");
   const dryRun = args.includes("--dry");
+  const noCache = args.includes("--no-cache");
+
+  // Parse --session N flag (same pattern as inline-intel-capture.mjs)
+  const sessionIdx = args.indexOf("--session");
+  const sessionNum = (sessionIdx !== -1 && args[sessionIdx + 1])
+    ? parseInt(args[sessionIdx + 1]) || 0
+    : parseInt(process.env.SESSION_NUM) || 0;
 
   const registry = loadJSON(REGISTRY_PATH);
   const services = loadJSON(SERVICES_PATH);
   let circuits = loadJSON(CIRCUITS_PATH, {});
+  const cache = noCache ? { entries: {}, session: 0 } : loadCache();
 
   if (!registry?.accounts?.length) {
     if (jsonOutput) {
@@ -137,6 +158,33 @@ async function main() {
     probeTasks.push({ account, url });
   }
 
+  // wq-439: Filter out platforms with fresh cache entries
+  const staleTasks = [];
+  const cachedResults = [];
+  let cacheHits = 0;
+
+  for (const task of probeTasks) {
+    const cacheKey = task.account.id;
+    const cached = cache.entries[cacheKey];
+
+    if (cached && sessionNum > 0 && (sessionNum - cached.session) < CACHE_TTL) {
+      // Cache hit — use cached result, skip network probe
+      cacheHits++;
+      cachedResults.push({
+        account: task.account,
+        url: task.url,
+        probe: { reachable: cached.reachable, healthy: cached.healthy, status: cached.status, elapsed: 0, error: null },
+        fromCache: true,
+      });
+    } else {
+      staleTasks.push(task);
+    }
+  }
+
+  if (!jsonOutput && cacheHits > 0) {
+    console.log(`[cache] ${cacheHits} platforms cached (TTL=${CACHE_TTL} sessions), probing ${staleTasks.length} stale`);
+  }
+
   // R#206: Hard global timeout kills the process if probes hang.
   // 47 parallel DNS lookups overwhelm VPS resolver (30s+ observed).
   // Process.exit is the only reliable way to abort hanging fetch() calls.
@@ -146,10 +194,10 @@ async function main() {
   }, GLOBAL_TIMEOUT);
   // Note: do NOT unref — we need this timer to fire even if fetches are pending
 
-  // Batch into groups to reduce DNS pressure
+  // Batch stale platforms into groups to reduce DNS pressure
   const probeResults = [];
-  for (let i = 0; i < probeTasks.length; i += BATCH_SIZE) {
-    const batch = probeTasks.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < staleTasks.length; i += BATCH_SIZE) {
+    const batch = staleTasks.slice(i, i + BATCH_SIZE);
     const batchResults = await Promise.allSettled(
       batch.map(async ({ account, url }) => {
         const probe = await probeUrl(url);
@@ -159,6 +207,11 @@ async function main() {
     probeResults.push(...batchResults);
   }
   clearTimeout(forceExitTimer);
+
+  // Merge cached results as fulfilled settled entries
+  for (const cached of cachedResults) {
+    probeResults.push({ status: "fulfilled", value: cached });
+  }
 
   // Process results and update circuits
   for (const settled of probeResults) {
@@ -229,13 +282,31 @@ async function main() {
 
     if (!jsonOutput) {
       const circuitInfo = circuit.status === "open" ? " [CIRCUIT OPEN]" : "";
-      console.log(`[${icon}] ${account.platform} — ${probe.status || "ERR"} ${ms}ms${circuitInfo}`);
+      const cacheTag = settled.value.fromCache ? " (cached)" : "";
+      console.log(`[${icon}] ${account.platform} — ${probe.status || "ERR"} ${ms}ms${circuitInfo}${cacheTag}`);
     }
   }
 
   // Save updated circuits
   if (!dryRun) {
     saveJSON(CIRCUITS_PATH, circuits);
+  }
+
+  // wq-439: Update cache with freshly probed results
+  if (!dryRun && !noCache && sessionNum > 0) {
+    for (const settled of probeResults) {
+      if (settled.status === "rejected") continue;
+      const { account, probe, fromCache } = settled.value;
+      if (fromCache) continue; // Don't re-cache already-cached entries
+      cache.entries[account.id] = {
+        session: sessionNum,
+        reachable: probe.reachable,
+        healthy: probe.healthy,
+        status: probe.status,
+      };
+    }
+    cache.session = sessionNum;
+    saveCache(cache);
   }
 
   // Summary
@@ -256,7 +327,7 @@ async function main() {
     }, null, 2));
   } else {
     console.log(`\n--- Engagement Liveness ---`);
-    console.log(`Checked: ${results.length} | Healthy: ${healthy} | Unhealthy: ${unhealthy} | Open circuits: ${openCircuits}`);
+    console.log(`Checked: ${results.length} | Healthy: ${healthy} | Unhealthy: ${unhealthy} | Open circuits: ${openCircuits} | Cache hits: ${cacheHits}`);
     if (degraded > 0) console.log(`Newly degraded: ${degraded}`);
     if (recovered > 0) console.log(`Recovered: ${recovered}`);
     if (dryRun) console.log("(dry run — circuits not updated)");

@@ -10,7 +10,8 @@ echo "[liveness] Probing engagement platforms..."
 cd /home/moltbot/moltbook-mcp
 
 # Hard timeout: 12s max for entire hook (probe has its own 8s global timeout)
-output=$(timeout 12 node engagement-liveness-probe.mjs 2>&1)
+# wq-439: Pass --session so cache TTL works correctly
+output=$(timeout 12 node engagement-liveness-probe.mjs --session "${SESSION_NUM:-0}" 2>&1)
 exit_code=$?
 
 # Print output

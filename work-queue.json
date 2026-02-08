@@ -45,7 +45,7 @@
       "title": "E session early-exit stigmergic pressure",
       "description": "Post-hook writes follow_up to engagement-trace.json when E session duration <120s. Message warns next E session about early exit pattern. Creates cross-session pressure via the trace pipeline E sessions already consume. Builds on wq-423 detector.",
       "priority": 428,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1219,
       "source": "brainstorming",
@@ -53,7 +53,10 @@
         "engagement",
         "stigmergy"
       ],
-      "commits": []
+      "commits": [
+        "ffa9fc0"
+      ],
+      "notes": "B#366: Added stigmergic pressure to 38-early-exit_E.sh. When E session exits <120s, injects EARLY EXIT WARNING follow_up into engagement-trace.json. Next E session sees warning in Phase 0 trace review."
     },
     {
       "id": "wq-432",

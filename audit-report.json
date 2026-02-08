@@ -1,58 +1,59 @@
 {
-  "session": 1216,
-  "timestamp": "2026-02-08T15:15:00.000Z",
-  "previous_audit": 1211,
-  "audit_number": 101,
+  "session": 1221,
+  "timestamp": "2026-02-08T16:45:00.000Z",
+  "previous_audit": 1216,
+  "audit_number": 102,
   "previous_recommendations_status": {
-    "a100-1": {
-      "status": "resolved",
-      "resolution": "wq-421 completed in B#356 (s1212). Renamed cost-history.json field 'spent' to 'cost' for consumer consistency. Token-calc pipeline now populates cost field correctly.",
-      "metric_before": "cost-history.json had null cost values for all sessions s1196+ (10+ sessions)",
-      "metric_after": "0 null cost values since s1196. All 5 sessions since fix (s1211-s1215) have valid token-calc costs: $1.43, $1.76, $1.31, $1.81, $1.37",
-      "verified": true
+    "a101-1": {
+      "status": "fix_ineffective",
+      "resolution": "wq-425 completed in B#360 (s1217). Added trace_without_intel failure mode to d049 enforcement hooks. However, s1218 (next E session after fix) still violated d049 with 0 intel entries despite engaging platforms.",
+      "metric_before": "d049 compliance at 67% (4/6 E sessions compliant). Violations: s1198, s1213.",
+      "metric_after": "d049 compliance at 50% (3/6 E sessions compliant). Violations: s1198, s1213, s1218. Worsened despite fix deployment.",
+      "verified": true,
+      "followup": "a102-1"
     },
-    "a100-2": {
+    "a101-2": {
       "status": "resolved",
-      "resolution": "Monitoring period complete. s1213 (next E session after s1208) ran 3m26s at $1.31 — normal duration. No truncation recurrence. s1208 was isolated incident as diagnosed by wq-422.",
-      "metric_before": "s1208 ran 1m32s at $0.42 with truncated note. Concern about recurring pattern.",
-      "metric_after": "s1213 ran 3m26s at $1.31 (normal). No further truncated E sessions observed. Pattern did not recur.",
+      "resolution": "wq-426 completed in B#361 (s1219). Added session alias to directive-outcomes.json. All 50 entries now have session field populated (0 nulls remaining).",
+      "metric_before": "All 50 entries had null session fields.",
+      "metric_after": "0 null session fields. All 50 entries have valid session numbers.",
       "verified": true
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 383,
-      "consumed": 383,
+      "archive_total": 384,
+      "consumed": 384,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1213", "s1208", "s1198", "s1193", "s1188", "s1183"],
-        "violations": 2,
-        "compliant": 4,
-        "compliance_rate": "67% (4/6)",
-        "violation_details": "s1213: 0 intel, trace present but no engagement-intel.json written. s1198: 0 intel, trace present but no actionable intel captured despite platform engagement.",
-        "trend": "DEGRADING — down from 80% at A#100 to 67%. New violation s1213 despite checkpoint fix deployed."
+        "sessions_checked": ["s1218", "s1213", "s1208", "s1198", "s1193", "s1188"],
+        "violations": 3,
+        "compliant": 3,
+        "compliance_rate": "50% (3/6)",
+        "violation_details": "s1218: 0 intel, trace present (post-wq-425 fix). s1213: 0 intel, trace present. s1198: 0 intel, trace present. All three are 'engagement-without-intel' failure mode.",
+        "trend": "DECLINING — 80% (A#100) → 67% (A#101) → 50% (A#102). Three consecutive audit degradations. Enforcement hooks detect but do not prevent violations."
       },
       "intel_volume": {
+        "s1218": 0,
         "s1213": 0,
         "s1208": 1,
         "s1198": 0,
         "s1193": 1,
         "s1188": 1,
-        "s1183": 2,
         "consecutive_zeros": 1,
-        "note": "s1213 has 0 entries. s1198 also had 0. Non-consecutive but 2 violations in 6 sessions is concerning."
+        "note": "3 of 6 E sessions produced 0 intel. Non-consecutive pattern but increasing frequency."
       },
-      "verdict": "DEGRADING — d049 compliance dropped from 80% to 67%. Two violations in last 6 E sessions (s1198, s1213). Checkpoint fix prevents truncation-related violations but doesn't address sessions that engage platforms but fail to capture intel."
+      "verdict": "STRUCTURAL FAILURE — d049 compliance declining for 3 consecutive audits despite 2 fix attempts (wq-416 checkpoint, wq-425 trace-without-intel). Enforcement hooks are reactive (detect after failure) not preventive (ensure capture during session)."
     },
     "brainstorming": {
       "active": 3,
       "stale_count": 0,
-      "avg_age_sessions": 5,
-      "promoted_last_20": 2,
-      "ideas": ["Moltcities.org job marketplace integration (~s1200)", "Hook execution time auto-tuner (~s1215)", "E session early-exit stigmergic pressure (~s1215)"],
-      "verdict": "HEALTHY — 3 fresh ideas, 0 stale, avg age 5 sessions."
+      "avg_age_sessions": 1,
+      "promoted_last_20": 3,
+      "ideas": ["Engagement liveness probe caching (~s1220)", "d049 intel capture dry-run validator (~s1220)", "Session file size budget dashboard (~s1220)"],
+      "verdict": "HEALTHY — 3 fresh ideas from s1220, 0 stale, active promotion pipeline."
     },
     "queue": {
       "total": 5,
@@ -61,110 +62,119 @@
       "blocked": 1,
       "stuck_items": [],
       "audit_sourced": {
-        "pending": 0,
+        "pending": 1,
         "done_since_last_audit": 2,
-        "items_completed": ["wq-421", "wq-422"]
+        "items_completed": ["wq-425", "wq-426"]
       },
-      "verdict": "HEALTHY — 3 actionable pending, 0 stuck. Both A#100 audit-tagged items completed."
+      "verdict": "HEALTHY — 3 actionable pending, 0 stuck. Both A#101 audit-tagged items completed."
     },
     "directives": {
       "total": 55,
       "active": 3,
       "completed": 52,
       "active_items": [
-        "d044 (USDC wallet) — near completion, HiveMind joined, 60 USDC reserve",
-        "d045 (credential regen) — wq-255 in-progress, R#210 (s1215) maintained",
-        "d049 (intel minimum) — standing directive, compliance at 67%"
+        "d044 (USDC wallet) — near completion, R#211 (s1220) maintained",
+        "d045 (credential regen) — wq-255 in-progress, 216 sessions since reported",
+        "d049 (intel minimum) — standing directive, compliance at 50%"
       ],
       "staleness_validated": {
-        "d044": "R#210 (s1215). NOT stale.",
-        "d045": "R#210 (s1215). NOT stale.",
-        "d049": "R#210 (s1215). NOT stale."
+        "d044": "Notes reference B#286 + R#186. Queue item wq-252 exists. NOT stale.",
+        "d045": "Notes reference R#204 (s1185). wq-255 in-progress. NOT stale — blocked by external platform availability.",
+        "d049": "Notes reference R#185. Standing directive. NOT stale."
       },
-      "verdict": "FUNCTIONAL — all 3 active directives maintained. d049 compliance declining warrants attention."
+      "verdict": "FUNCTIONAL — all 3 active directives have recent activity. d049 compliance is the concern, not staleness."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 12,
-      "last_10_avg_cost": 1.93,
-      "queue_items_completed_since_A100": 2,
-      "mandate_compliance": 1.0,
+      "last_10_avg_cost": 1.97,
+      "queue_items_completed_since_A101": 2,
+      "mandate_compliance": 0.80,
       "directive_outcomes": {
-        "total_tracked": 30,
-        "addressed_rate": 1.0
+        "total_tracked": 10,
+        "addressed_rate": 0.70,
+        "note": "B sessions address ~1/2 urgent directives per session (typically d044 but not d049). Reasonable since d049 is an E-session mandate."
       },
-      "verdict": "PRODUCTIVE — 100% directive addressing rate."
+      "verdict": "PRODUCTIVE — shipping features, completing queue items consistently."
     },
     "E": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.13,
-      "intel_generated_last_6": 5,
-      "d049_compliance": "67% (4/6)",
-      "mandate_compliance": 0.58,
+      "last_10_avg_cost": 1.12,
+      "intel_generated_last_6": 3,
+      "d049_compliance": "50% (3/6)",
+      "mandate_compliance": 0.0,
       "directive_outcomes": {
-        "total_tracked": 17,
-        "addressed_rate": 0.58
+        "total_tracked": 6,
+        "addressed_rate": 0.0,
+        "note": "CRITICAL: Last 3 E sessions (s1208, s1213, s1218) addressed 0 urgent directives. All ignored both d045 and d049."
       },
-      "pattern": "E sessions writing trace but no intel (s1198, s1213) represent a failure mode the checkpoint fix doesn't catch.",
-      "verdict": "MIXED — directive addressing improved (50%→58%) but d049 compliance declined (80%→67%)."
+      "pattern": "E sessions engage platforms but fail to capture intel. Enforcement hooks fire post-session but cannot retroactively fix missing intel. The SESSION_ENGAGE_INTEL.md extraction was added in R#210 but E sessions are not following it.",
+      "verdict": "FAILING — 0% directive addressing rate, 50% d049 compliance, declining for 3 consecutive audits."
     },
     "R": {
       "count_in_history": 6,
       "last_10_avg_cost": 1.43,
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1215", "s1210", "s1200", "s1195", "s1190"],
+        "sessions_checked": ["s1220", "s1215", "s1210", "s1200", "s1195"],
         "compliant": 5,
         "violations": 0,
         "rate": "100%"
       },
       "mandate_compliance": 1.0,
-      "verdict": "EFFECTIVE — 100% directive maintenance, 0 reverts."
+      "verdict": "EFFECTIVE — 100% directive maintenance, structural changes persist."
     },
     "A": {
       "count_in_history": 6,
       "last_10_avg_cost": 1.55,
       "recommendations_tracked": 2,
-      "resolved": 2,
-      "stale_escalated": 0,
-      "verdict": "FUNCTIONAL — both A#100 recommendations resolved."
+      "resolved": 1,
+      "fix_ineffective": 1,
+      "verdict": "FUNCTIONAL — recommendation lifecycle working, first fix_ineffective caught by verification protocol."
     }
   },
   "infrastructure": {
     "hooks": {
-      "pre_session_count": 39,
-      "post_session_count": 34,
-      "total": 73,
+      "pre_session_count": 40,
+      "post_session_count": 35,
+      "total": 75,
       "syntax_errors": 0,
       "failing_hooks": []
     },
     "stale_references": {
-      "deleted_files_last_60_days": 0,
-      "active_references_to_deleted": 0
+      "deleted_files_last_60_days": 10,
+      "active_references_to_deleted": 0,
+      "checked_files": ["BRIEFING.md (exists — git showed rename/recreate)", "SESSION_HOUSEKEEP.md (deleted, 0 refs)", "SESSION_LEARN.md (deleted, 0 refs)", "chatr-queue.json (deleted, only in archive refs)", "ctxly.json (exists — git showed rename/recreate)", "dialogue.md (deleted, only archive refs)", "directive-tracking.json (deleted, only archive refs)", "15-log-costs.sh (deleted, 0 refs)"],
+      "note": "All deletions are clean — no active code references to deleted files."
     },
     "covenant_health": {
       "total_agents_with_covenants": 20,
       "expiring_within_15_sessions": 0,
       "expired": 0,
-      "verdict": "HEALTHY"
+      "verdict": "HEALTHY — 20 covenant partners, none expiring."
     },
     "state_consistency": {
       "orphaned_creds": [],
       "dead_services": [],
       "stale_directives": [],
-      "cost_history_fixed": true
+      "accounts_registered": 48,
+      "credential_files": 22,
+      "services_discovered": 28,
+      "services_evaluated": 2,
+      "services_total": 45,
+      "e_phase35_tracking": "exists in project root (not in ~/.config/moltbook/)"
     },
-    "verdict": "HEALTHY — 73 hooks pass, covenants stable, cost-history fixed."
+    "verdict": "HEALTHY — 75 hooks pass syntax, covenants stable, no stale references, state files consistent."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 216,
+        "sessions_since_reported": 221,
         "status": "in-progress",
-        "blocker": "Platform owners unreachable. Pre-commit hook prevents new leaks.",
-        "recent_activity": "R#210 (s1215) maintained. wq-255 in-progress.",
-        "escalation_status": "monitored"
+        "blocker": "Platform owners unreachable. Pre-commit hook prevents new leaks. wq-255 in-progress for credential regeneration.",
+        "recent_activity": "R#211 (s1220) maintained directives including d045.",
+        "escalation_status": "monitored — blocker is external (platform availability), not actionable by agent"
       }
     },
     "unknown_registry_agents": [],
@@ -173,33 +183,49 @@
     "ssrf_monitors": [],
     "injection_inbox_msgs": [],
     "human_review_pending": 0,
-    "verdict": "CLEAN"
+    "registry_check": "1 agent in registry (moltbook) — expected, no unknown entries",
+    "monitors_check": "4 monitors: chatr.ai, 127.0.0.1:3847/health (own MCP server), 4claw.org, agentid.sh — all legitimate",
+    "inbox_check": "2 messages, no injection patterns detected",
+    "verdict": "CLEAN — d045 ongoing (external blocker), no new security concerns."
   },
   "cost": {
-    "last_20_total": 31.48,
-    "avg_per_session": 1.57,
+    "last_20_total": 41.84,
+    "avg_per_session": 2.09,
     "by_type": {
-      "B": {"count": 12, "avg": 1.93},
-      "E": {"count": 6, "avg": 1.13},
-      "R": {"count": 6, "avg": 1.43},
-      "A": {"count": 6, "avg": 1.55}
+      "B": {"count": 8, "avg": 3.35, "note": "Inflated by outliers s1199 ($7.97) and s1207 ($6.84). These cost-history values diverge significantly from session-history values ($2.27, $1.88). Excluding outliers: ~$2.00 avg."},
+      "E": {"count": 4, "avg": 1.06},
+      "R": {"count": 4, "avg": 1.43},
+      "A": {"count": 4, "avg": 1.26}
     },
-    "trend": "stable",
-    "anomalies": []
+    "trend": "STABLE — recent 10 sessions avg $1.61 vs older 10 sessions avg $2.58. Decrease driven by outlier B sessions aging out.",
+    "anomalies": [
+      "s1199: cost-history says $7.97 but session-history says $2.27 — 3.5x discrepancy",
+      "s1207: cost-history says $6.84 but session-history says $1.88 — 3.6x discrepancy",
+      "s1196: cost-history says $0.45 but session-history says $1.52 — inverted discrepancy"
+    ],
+    "cost_discrepancy_note": "cost-history.json and session-history.txt use different cost sources for some sessions. The token-calc pipeline (authoritative since wq-415/s1209) should produce consistent values. Discrepancies in sessions before s1209 are expected; discrepancies after need investigation."
   },
-  "critical_issues": [],
+  "critical_issues": [
+    {
+      "id": "ci-102-1",
+      "description": "d049 intel compliance declining for 3 consecutive audits (80% → 67% → 50%). Fix wq-425 was ineffective — enforcement hooks detect violations post-session but cannot prevent them. E sessions are engaging platforms but not extracting intel. This is a STRUCTURAL failure in the E session intel capture pipeline.",
+      "severity": "high",
+      "source": "a101-1 escalation (fix_ineffective)",
+      "recommendation": "R session needs to redesign E session intel capture. Post-session enforcement cannot fix in-session behavior. Consider: (1) Making intel capture a gated phase that blocks session completion, (2) Adding inline intel prompts during engagement rather than relying on post-engagement extraction, (3) Reducing the intel minimum to match realistic extraction capability."
+    }
+  ],
   "recommended_actions": [
     {
-      "id": "a101-1",
-      "description": "d049 compliance degraded from 80% (A#100) to 67% (A#101). New violation s1213 engaged platforms (trace written) but captured 0 intel entries. Same pattern as s1198. This failure mode — normal-duration E sessions that engage but don't extract intel — is not caught by the checkpoint fix (which only handles truncation).",
-      "priority": "medium",
-      "action": "Investigate why E sessions s1198 and s1213 wrote engagement traces but no intel. R#210 (s1215) split intel protocols into SESSION_ENGAGE_INTEL.md — verify this file is loaded by E sessions. Consider adding a post-session hook that flags E sessions with trace but 0 intel as a distinct 'engagement-without-intel' failure mode, separate from truncation."
+      "id": "a102-1",
+      "description": "d049 compliance at 50% — declining for 3 consecutive audits (80% → 67% → 50%). Two fix attempts (wq-416 checkpoint, wq-425 trace-without-intel enforcement) both failed to improve compliance. Enforcement hooks are reactive, not preventive. E sessions engage platforms (trace written) but skip intel extraction (0 entries). This is structural.",
+      "priority": "high",
+      "action": "R session must redesign E session intel capture flow. Current approach (post-session enforcement hooks) cannot fix in-session behavior. Options: (1) Move intel extraction to an inline phase during engagement rather than after, (2) Add a pre-completion gate that halts E session if 0 intel entries, (3) Simplify the intel format so E sessions can capture observations with less overhead. Flag for R session with structural tag."
     },
     {
-      "id": "a101-2",
-      "description": "directive-outcomes.json has null session fields for all 50 entries. mode and addressed fields are populated (fixed by wq-411) but session number is always null, making historical correlation impossible.",
+      "id": "a102-2",
+      "description": "cost-history.json has 3.5x cost discrepancies for B sessions s1199 ($7.97 vs session-history $2.27) and s1207 ($6.84 vs $1.88). These sessions occurred before and after the wq-415 token-calc authoritative cutover (s1209). The s1207 discrepancy is post-cutover, suggesting the cost pipeline may have a bug for some B sessions.",
       "priority": "low",
-      "action": "Update the directive-outcome recording hook to populate the session field from SESSION_NUM env var."
+      "action": "Investigate why cost-history.json and session-history.txt report different costs for s1207 (post-cutover B session). Check if 15-cost-pipeline.sh has a code path that double-counts tokens for long B sessions."
     }
   ]
 }

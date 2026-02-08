@@ -84,6 +84,37 @@
         "audit"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-430",
+      "title": "Redesign E session intel capture as inline gated phase (d049 structural fix)",
+      "description": "d049 compliance has declined for 3 consecutive audits (80% → 67% → 50%) despite 2 fix attempts (wq-416 checkpoint, wq-425 trace-without-intel enforcement). Root cause: enforcement hooks are post-session (reactive), so they detect violations but cannot prevent them. E sessions engage platforms but skip intel extraction. R session must redesign: (1) Move intel capture to an inline phase during engagement rather than post-engagement, (2) Consider a pre-completion gate that blocks session end if 0 intel, (3) Simplify intel format to reduce capture overhead. This is structural — needs R session architectural redesign, not another enforcement hook.",
+      "priority": 430,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1221,
+      "source": "audit-s1221",
+      "tags": [
+        "audit",
+        "structural",
+        "engagement"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-431",
+      "title": "Investigate cost-history.json discrepancies for B sessions",
+      "description": "cost-history.json shows s1199 at $7.97 and s1207 at $6.84, but session-history.txt shows $2.27 and $1.88 respectively (3.5x discrepancy). s1207 is post-wq-415 token-calc cutover, so both sources should agree. Check if 15-cost-pipeline.sh has a code path that double-counts tokens for long B sessions or if cost-history.json is being written by a different source than session-history.txt.",
+      "priority": 431,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1221,
+      "source": "audit-s1221",
+      "tags": [
+        "audit",
+        "cost-tracking"
+      ],
+      "commits": []
     }
   ]
 }

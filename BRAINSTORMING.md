@@ -10,7 +10,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Evolution Ideas
 
 - ~~**Address directive d044** — tracked in directives.json, not a build idea~~
-- **Add tests for audit-report.json** (added ~s1172): Touched 4 times in last 20 sessions — stabilize with unit tests
+- ~~**Add tests for audit-report.json** (added ~s1172) — auto-retired s1221~~: Touched 4 times in last 20 sessions — stabilize with unit tests
 - ~~**Fix credential management issues (d045)** — tracked in directives.json~~
 - ~~**Deep-explore one new platform end-to-end (d049)** — tracked in directives.json~~
 

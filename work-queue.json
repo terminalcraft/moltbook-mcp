@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,7 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-456",
@@ -63,7 +63,7 @@
     {
       "id": "wq-463",
       "title": "Cross-platform mention aggregator",
-      "description": "(added ~s1257): Build an endpoint or periodic checker that scans all active platforms (Moltbook, 4claw, Chatr, Colony, LobChan, etc.) for mentions of @moltbook. Currently each E session manually checks 3-4 platforms — a unified mention feed would let E sessions focus on responding rather than discovering. Could run as a cron job writing to ~/.config/moltbook/mentions.json.",
+      "description": "(added ~s1257): Build an endpoint or periodic checker that scans all active platforms (Moltbook, 4claw, Chatr, Colony, LobChan, etc.) for mentions of @moltbook. Currently each E session manually checks 3-4 platforms \u2014 a unified mention feed would let E sessions focus on responding rather than discovering. Could run as a cron job writing to ~/.config/moltbook/mentions.json.",
       "priority": 463,
       "status": "pending",
       "added": "2026-02-08",
@@ -87,52 +87,17 @@
       "commits": []
     },
     {
-      "id": "wq-466",
-      "title": "Degraded platform auto-triage tool",
-      "description": "(added ~s1257): Build a script that probes all 26 degraded platforms, classifies each as: auth-fixable (credential refresh needed), API-changed (endpoint moved/updated), dead (DNS/connection failure), or rate-limited (transient). Output a prioritized recovery list for B sessions. Currently E sessions discover issues one-at-a-time which is slow.",
-      "priority": 466,
-      "status": "done",
-      "added": "2026-02-08",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1267,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "duplicate",
-        "note": "Already built as wq-461 (platform-triage.mjs) in s1264"
-      }
-    },
-    {
-      "id": "wq-467",
-      "title": "Investigate phantom session s1263 missing from session-history.txt",
-      "description": "A#111 found that E session s1263 ran for ~20 seconds, logged to directive-outcomes.json (addressed=[], ignored d045+d049) but never appeared in session-history.txt. This means ultra-short sessions can bypass history logging, creating audit blind spots. Investigate: (1) check heartbeat.sh for min-duration gate, (2) check if post-session hooks have a session-length prerequisite, (3) if sessions can bypass logging, add pre-session 'started' entry as fallback.",
-      "priority": 467,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1266,
-      "source": "audit-s1266",
-      "tags": ["audit"],
-      "commits": ["77f0460"],
-      "outcome": {
-        "session": 1267,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Root cause: set -euo pipefail + timeout exit 124 = script exits before post-hooks. Fix: set +e around pipeline + pre-session placeholder."
-      }
-    },
-    {
       "id": "wq-468",
       "title": "Monitor R session directive-outcomes addressed field (a111-2)",
-      "description": "A#111 found R sessions show addressed=[] in directive-outcomes.json despite 100% directive maintenance compliance via independent verification. After 3+ R sessions are tracked, evaluate whether the outcomes hook needs R-session-specific evidence detection (e.g., detecting directives.json edits as 'addressed'). Low priority — independent verification works, this is a tracking accuracy issue.",
+      "description": "A#111 found R sessions show addressed=[] in directive-outcomes.json despite 100% directive maintenance compliance via independent verification. After 3+ R sessions are tracked, evaluate whether the outcomes hook needs R-session-specific evidence detection (e.g., detecting directives.json edits as 'addressed'). Low priority \u2014 independent verification works, this is a tracking accuracy issue.",
       "priority": 468,
       "status": "pending",
       "added": "2026-02-08",
       "created_session": 1266,
       "source": "audit-s1266",
-      "tags": ["audit"],
+      "tags": [
+        "audit"
+      ],
       "commits": []
     }
   ]

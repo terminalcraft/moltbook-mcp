@@ -12,6 +12,7 @@
  *
  * wq-197: Engagement platform liveness monitor
  * wq-439: Liveness cache — skip re-probing platforms checked within CACHE_TTL sessions
+ * R#221: Structural — time-based cache TTL + priority filtering (skip rejected/defunct)
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
@@ -30,7 +31,12 @@ const PROBE_TIMEOUT = 3000; // 3s per platform — fast timeout, most respond in
 const CIRCUIT_OPEN_THRESHOLD = 2; // Mark circuit open after 2 consecutive failures
 const BATCH_SIZE = 15; // Probe 15 at a time to avoid overwhelming DNS/network
 const GLOBAL_TIMEOUT = 8000; // Hard cap: entire probe must finish in 8s
-const CACHE_TTL = 5; // Sessions before a cached result expires
+const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // R#221: 2h time-based TTL — survives across session types
+
+// R#221: Platforms with these statuses or note keywords are never selected by platform-picker,
+// so probing them wastes time and contributes to the 12s timeout.
+const SKIP_STATUSES = new Set(["rejected", "defunct"]);
+const SKIP_NOTE_PATTERNS = /REJECTED|defunct|invitation.only/i;
 
 // Platform URL mapping (registry has platform names, need to map to URLs)
 // Some platforms have dedicated test endpoints in registry, use those if available
@@ -145,9 +151,15 @@ async function main() {
   let degraded = 0;
   let recovered = 0;
 
-  // Build probe tasks for all accounts with URLs (parallel execution)
+  // R#221: Build probe tasks, filtering out platforms that platform-picker would never select.
+  // This reduces probe set from ~47 to ~20, keeping total probe time within the 8s budget.
   const probeTasks = [];
+  let skippedCount = 0;
   for (const account of registry.accounts) {
+    // Skip platforms with rejected/defunct status or matching note patterns
+    if (SKIP_STATUSES.has(account.status)) { skippedCount++; continue; }
+    if (account.notes && SKIP_NOTE_PATTERNS.test(account.notes)) { skippedCount++; continue; }
+
     const url = getTestUrl(account, services);
     if (!url) {
       if (!jsonOutput) {
@@ -157,17 +169,27 @@ async function main() {
     }
     probeTasks.push({ account, url });
   }
+  if (!jsonOutput && skippedCount > 0) {
+    console.log(`[filter] Skipped ${skippedCount} rejected/defunct platforms`);
+  }
 
   // wq-439: Filter out platforms with fresh cache entries
   const staleTasks = [];
   const cachedResults = [];
   let cacheHits = 0;
 
+  const nowMs = Date.now();
   for (const task of probeTasks) {
     const cacheKey = task.account.id;
     const cached = cache.entries[cacheKey];
 
-    if (cached && sessionNum > 0 && (sessionNum - cached.session) < CACHE_TTL) {
+    // R#221: Time-based cache TTL — survives across session types (B probes feed E cache)
+    // Backwards compat: old entries have session but no timestamp — treat as stale (one-time migration)
+    const cacheValid = cached && (
+      (cached.timestamp && (nowMs - cached.timestamp) < CACHE_TTL_MS) ||
+      (!cached.timestamp && sessionNum > 0 && cached.session === sessionNum) // same session = fresh
+    );
+    if (cacheValid) {
       // Cache hit — use cached result, skip network probe
       cacheHits++;
       cachedResults.push({
@@ -182,7 +204,7 @@ async function main() {
   }
 
   if (!jsonOutput && cacheHits > 0) {
-    console.log(`[cache] ${cacheHits} platforms cached (TTL=${CACHE_TTL} sessions), probing ${staleTasks.length} stale`);
+    console.log(`[cache] ${cacheHits} platforms cached (TTL=2h), probing ${staleTasks.length} stale`);
   }
 
   // R#206: Hard global timeout kills the process if probes hang.
@@ -292,14 +314,16 @@ async function main() {
     saveJSON(CIRCUITS_PATH, circuits);
   }
 
-  // wq-439: Update cache with freshly probed results
-  if (!dryRun && !noCache && sessionNum > 0) {
+  // R#221: Update cache with time-based TTL entries
+  if (!dryRun && !noCache) {
+    const cacheTs = Date.now();
     for (const settled of probeResults) {
       if (settled.status === "rejected") continue;
       const { account, probe, fromCache } = settled.value;
       if (fromCache) continue; // Don't re-cache already-cached entries
       cache.entries[account.id] = {
-        session: sessionNum,
+        timestamp: cacheTs,
+        session: sessionNum, // Keep for backwards compat / debugging
         reachable: probe.reachable,
         healthy: probe.healthy,
         status: probe.status,

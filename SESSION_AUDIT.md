@@ -63,6 +63,41 @@ Completing a work-queue item is not the same as fixing the problem. When marking
 
 **Escalation rule**: Any recommendation that has been **stale for 2+ consecutive audits** (no progress, no work-queue item, no superseding event) MUST be added to `critical_issues` with escalation flag. Recommendations with status `fix_ineffective` MUST be escalated to `critical_issues` immediately — the fix was attempted and failed.
 
+**Progressive escalation protocol (R#212 — breaks ineffective fix loops):**
+
+When the same metric degrades across multiple consecutive audits despite B session fixes being applied, the response must escalate — not repeat the same action.
+
+Track in `audit-report.json` under a new `escalation_tracker` field:
+
+```json
+"escalation_tracker": {
+  "d049_compliance": {
+    "metric": "d049 intel compliance",
+    "consecutive_degradations": 3,
+    "fix_attempts": ["wq-416", "wq-425", "wq-430"],
+    "escalation_level": 2
+  }
+}
+```
+
+**Escalation levels:**
+
+| Level | Trigger | A session action |
+|-------|---------|------------------|
+| 0 (normal) | First occurrence | Create work-queue item with `["audit"]` tag (existing behavior) |
+| 1 (recurring) | Same metric degrades in 2 consecutive audits | Create wq item tagged `["audit", "recurring"]` AND add note: "Previous fix wq-NNN was ineffective" |
+| 2 (structural) | Same metric degrades in 3+ consecutive audits | Do NOT create another wq item. Instead: (1) Add to `critical_issues` with `"type": "structural_failure"`, (2) Write follow_up to engagement-trace.json: "AUDIT ESCALATION: [metric] failed 3+ consecutive audits despite fixes [list]. Next R session MUST redesign the underlying mechanism." |
+| 3 (emergency) | Same metric degrades in 5+ consecutive audits | Level 2 actions PLUS flag for human review in human-review.json with urgency "high" |
+
+**How to detect consecutive degradations:**
+1. Read previous `audit-report.json` for `escalation_tracker`
+2. For each metric you're measuring this session, check if it existed in the tracker
+3. If metric worsened or stayed below threshold: increment `consecutive_degradations`
+4. If metric improved past threshold: reset tracker entry to level 0
+5. Apply the escalation level table above
+
+**Why this matters**: The d049 pattern demonstrated that A sessions can loop indefinitely — creating work-queue items for the same declining metric across 4+ audits (A#99→A#100→A#101→A#102) while B sessions build enforcement hooks that don't address the root cause. Progressive escalation breaks this loop by changing the response type at each level, ultimately forcing R session architectural intervention instead of more tactical fixes.
+
 **Gate**: Do not proceed to Section 1 until you have tracked status for ALL previous recommendations. An audit that doesn't close the loop on prior recommendations is incomplete.
 
 ## Checklist: 5 sections, all mandatory
@@ -90,7 +125,7 @@ Pipelines can fail in two ways: **tactical** (one-time issues, misconfig) vs **s
    - **Tactical indicators**: first occurrence, clear fix path, isolated issue
    - **Structural indicators**: recurring issue (noted in 2+ prior audits), metric worsening, multiple fixes attempted
 3. Tactical failures → create work-queue item with `["audit"]` tag
-4. Structural failures → add to `critical_issues` with note: `"structural: [symptom] — needs R session redesign"`
+4. Structural failures → apply **progressive escalation protocol** (check `escalation_tracker` in previous audit-report.json for current level, then escalate accordingly)
 
 **Why this matters**: Audits noting "still at 0%" indefinitely provide no value. This gate forces escalation.
 
@@ -404,6 +439,7 @@ Write all findings to `audit-report.json` in the project root:
     "avg_per_session": 0.92,
     "trend": "stable"
   },
+  "escalation_tracker": {},
   "critical_issues": [],
   "recommended_actions": []
 }

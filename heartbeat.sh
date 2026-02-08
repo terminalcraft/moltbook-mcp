@@ -259,55 +259,14 @@ for util_log in "$LOG_DIR/cron.log" "$LOG_DIR/hooks.log" "$LOG_DIR/health.log"; 
   fi
 done
 
-# --- Directive enrichment for hooks (R#195) ---
+# --- Directive enrichment for hooks (R#195, extracted R#215) ---
 # Blocked queue items often reference directives (via queue_item field in directives.json).
 # Hooks like stale-blocker need to know if the linked directive has recent progress,
 # but they only see work-queue.json. This pre-step enriches the hook environment by
 # writing directive-enrichment.json: a map of wq-id → last directive activity session.
-# Hooks can read this to suppress false escalations for items with active directive progress.
+# Logic extracted from inline heredoc to scripts/directive-enrichment.py for testability.
 if [ -z "$DRY_RUN" ]; then
-  python3 - "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" <<'ENRICH_EOF' 2>/dev/null || true
-import json, re, sys
-from pathlib import Path
-
-directives_file, queue_file, out_file = sys.argv[1], sys.argv[2], sys.argv[3]
-directives = json.loads(Path(directives_file).read_text())
-queue = json.loads(Path(queue_file).read_text())
-
-# Build reverse map: queue_item → directive
-qi_to_directive = {}
-for d in directives.get("directives", []):
-    qi = d.get("queue_item")
-    if qi:
-        qi_to_directive[qi] = d
-    # Also match items whose title contains the directive id
-    did = d.get("id", "")
-    for item in queue.get("queue", []):
-        if item.get("status") == "blocked" and did in item.get("title", ""):
-            qi_to_directive[item["id"]] = d
-
-enrichment = {}
-for item in queue.get("queue", []):
-    if item.get("status") != "blocked":
-        continue
-    wid = item["id"]
-    directive = qi_to_directive.get(wid)
-    if not directive:
-        continue
-    # Extract most recent session number from directive notes
-    notes = directive.get("notes", "")
-    sessions = [int(m) for m in re.findall(r's(\d{3,4})', notes)]
-    sessions += [int(m) for m in re.findall(r'R#(\d+)', notes)]
-    last_activity = max(sessions) if sessions else directive.get("acked_session", 0)
-    enrichment[wid] = {
-        "directive_id": directive.get("id"),
-        "directive_status": directive.get("status"),
-        "last_activity_session": last_activity,
-        "has_recent_notes": len(notes) > 50
-    }
-
-Path(out_file).write_text(json.dumps(enrichment, indent=2) + "\n")
-ENRICH_EOF
+  python3 "$DIR/scripts/directive-enrichment.py" "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" 2>/dev/null || true
 fi
 
 # --- Pre-session hooks (via shared runner, R#89) ---

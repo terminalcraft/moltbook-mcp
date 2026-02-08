@@ -18,6 +18,7 @@
 #
 # Created: B#342 (wq-399)
 # Enhanced: B#352 (wq-416) — detect platform-unavailability + rate-limit failures
+# Enhanced: B#356 (wq-425) — extract real intel from trace when trace_without_intel
 
 set -euo pipefail
 
@@ -136,31 +137,75 @@ if [[ "$ACTION" != "write" ]]; then
   exit 0
 fi
 
-# Write checkpoint entry with failure reason
+# Write checkpoint entry — extract from trace when available (wq-425)
 python3 -c "
 import json, os
 
 intel_file = '$INTEL_FILE'
+trace_file = '$TRACE_FILE'
 session = int('$SESSION')
 reason = '$REASON'
 details = '''$DETAILS'''
 
-entry = {
-    'type': 'pattern',
-    'source': 'post-session checkpoint (' + reason + ')',
-    'summary': 'E session s' + str(session) + ' completed with 0 intel. Reason: ' + reason + '. ' + details,
-    'actionable': 'Review s' + str(session) + ' failure (' + reason + ') and capture intel from next E session',
-    'session': session,
-    'checkpoint': True,
-    'failure_reason': reason
-}
+# Try to extract real intel from engagement-trace.json (wq-425)
+# When trace exists but intel is empty, the trace contains topics, agents,
+# and threads that can generate a meaningful intel entry instead of a
+# generic 'review failure' placeholder.
+trace_intel = None
+try:
+    with open(trace_file) as f:
+        traces = json.load(f)
+    session_trace = None
+    if isinstance(traces, list):
+        for t in traces:
+            if t.get('session') == session:
+                session_trace = t
+    elif isinstance(traces, dict) and traces.get('session') == session:
+        session_trace = traces
+    if session_trace:
+        topics = session_trace.get('topics', [])
+        agents = session_trace.get('agents_interacted', [])
+        platforms = session_trace.get('platforms_engaged', [])
+        threads = session_trace.get('threads_contributed', [])
+        if topics:
+            # Generate intel from trace topics
+            platform_str = ', '.join(platforms) if platforms else 'unknown platform'
+            agent_str = ', '.join(agents[:3]) if agents else 'various agents'
+            topic_str = topics[0] if topics else 'general discussion'
+            trace_intel = {
+                'type': 'pattern',
+                'source': f'{platform_str} (extracted from trace by checkpoint hook)',
+                'summary': f'Engagement on {platform_str} covering: {topic_str}. Agents: {agent_str}.',
+                'actionable': f'Evaluate {platform_str} discussion topics for build opportunities in next E session',
+                'session': session,
+                'checkpoint': True,
+                'extracted_from_trace': True,
+                'failure_reason': reason
+            }
+except:
+    pass
+
+# Use trace-extracted intel if available, otherwise fall back to generic entry
+if trace_intel:
+    entry = trace_intel
+else:
+    entry = {
+        'type': 'pattern',
+        'source': 'post-session checkpoint (' + reason + ')',
+        'summary': 'E session s' + str(session) + ' completed with 0 intel. Reason: ' + reason + '. ' + details,
+        'actionable': 'Review s' + str(session) + ' failure (' + reason + ') and capture intel from next E session',
+        'session': session,
+        'checkpoint': True,
+        'failure_reason': reason
+    }
 
 os.makedirs(os.path.dirname(intel_file), exist_ok=True)
 with open(intel_file, 'w') as f:
     json.dump([entry], f, indent=2)
     f.write('\n')
 
-print('intel-checkpoint: wrote ' + reason + ' recovery entry for s' + str(session))
+source_label = 'trace-extracted' if trace_intel else reason
+print('intel-checkpoint: wrote ' + source_label + ' recovery entry for s' + str(session))
 " 2>/dev/null || echo "intel-checkpoint: failed to write recovery entry"
 
 echo "$(date -Iseconds) intel-checkpoint: s=$SESSION reason=$REASON details=$DETAILS" >> "$LOG_DIR/intel-checkpoint.log"

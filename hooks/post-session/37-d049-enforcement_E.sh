@@ -12,11 +12,13 @@
 #
 # Created: B#330 (wq-375)
 # Enhanced: B#352 (wq-416) — failure mode classification
+# Enhanced: B#356 (wq-425) — trace_without_intel failure mode
 #   Distinguishes between:
 #   - rate_limit: session hit API rate limit (0 tool calls, <10s duration)
 #   - platform_unavailable: Phase 2 reached but all platforms errored
-#   - truncated: Phase 2 reached but session truncated before intel capture
-#   - agent_skip: Phase 2+ reached with budget, agent didn't capture intel
+#   - trace_without_intel: trace written (Phase 3a) but session ended before intel (Phase 3b)
+#   - agent_skip: Phase 2+ reached with budget, no trace, agent didn't capture intel
+#   trace_without_intel is semi-controllable (agent completed engagement but ran out of time).
 #   Only agent_skip is a true controllable violation.
 
 set -euo pipefail
@@ -102,42 +104,43 @@ for sf in reversed(summary_files):
     except:
         continue
 
-# Check 3: Were all platforms unavailable?
+# Check 3: Trace analysis — platform availability + trace_without_intel (wq-425)
 all_platforms_failed = False
+trace_present = False
 if phase2_reached:
     try:
         with open(trace_file) as f:
             traces = json.load(f)
+        session_trace = None
         if isinstance(traces, list):
-            # Find trace for this session
-            session_trace = None
             for t in traces:
                 if t.get('session') == session:
                     session_trace = t
-            if isinstance(traces, dict) and traces.get('session') == session:
-                session_trace = traces
-            if session_trace:
-                engaged = session_trace.get('platforms_engaged', [])
-                skipped = session_trace.get('skipped_platforms', [])
-                mandate = session_trace.get('picker_mandate', [])
-                if len(mandate) > 0 and len(engaged) == 0 and len(skipped) == len(mandate):
-                    all_platforms_failed = True
         elif isinstance(traces, dict) and traces.get('session') == session:
-            engaged = traces.get('platforms_engaged', [])
-            skipped = traces.get('skipped_platforms', [])
-            mandate = traces.get('picker_mandate', [])
+            session_trace = traces
+        if session_trace:
+            trace_present = True
+            engaged = session_trace.get('platforms_engaged', [])
+            skipped = session_trace.get('skipped_platforms', [])
+            mandate = session_trace.get('picker_mandate', [])
             if len(mandate) > 0 and len(engaged) == 0 and len(skipped) == len(mandate):
                 all_platforms_failed = True
     except:
         pass
 
 # Classify failure mode
+# trace_without_intel (wq-425): s1198, s1213 wrote engagement-trace.json (Phase 3a)
+# but session ended before intel capture (Phase 3b). The agent DID complete engagement
+# and trace writing — it ran out of time/turns before reaching intel capture.
+# This is distinct from agent_skip (no trace written, agent simply didn't try).
 if is_rate_limited:
     print('rate_limit')
 elif not phase2_reached:
     print('truncated_early')
 elif all_platforms_failed:
     print('platform_unavailable')
+elif trace_present:
+    print('trace_without_intel')
 elif phase2_reached:
     print('agent_skip')
 else:
@@ -193,7 +196,8 @@ else:
             'rate_limit': 'Rate-limited — session could not start',
             'truncated_early': 'Truncated before Phase 2',
             'platform_unavailable': 'All picker platforms returned errors',
-            'agent_skip': 'Agent reached Phase 2 but did not capture intel',
+            'trace_without_intel': 'Trace written (Phase 3a) but session ended before intel capture (Phase 3b)',
+            'agent_skip': 'Agent reached Phase 2 but did not capture intel (no trace either)',
             'unknown': 'Failure mode could not be determined'
         }
         entry['notes'] = f'd049 violation ({failure_mode}): {mode_labels.get(failure_mode, failure_mode)}'
@@ -214,6 +218,21 @@ if [[ "$D049_COMPLIANT" == "false" ]]; then
     echo "d049-enforcement: s$SESSION was rate-limited (uncontrollable), no nudge written"
   elif [[ "$FAILURE_MODE" == "truncated_early" ]]; then
     echo "d049-enforcement: s$SESSION truncated before Phase 2 (uncontrollable), no nudge written"
+  elif [[ "$FAILURE_MODE" == "trace_without_intel" ]]; then
+    cat > "$NUDGE_FILE" << EOF
+## d049 WARNING: trace_without_intel (from post-session hook)
+
+Previous E session (s$SESSION) wrote an engagement trace but captured 0 intel entries.
+The session completed Phase 3a (trace) but ended before Phase 3b (intel capture).
+
+**PREVENTION**: Call \`node e-intel-checkpoint.mjs <platform> "<summary>"\` after your
+FIRST platform interaction in Phase 2. This is your safety net — don't rely on
+reaching Phase 3b to capture intel.
+
+**ALSO**: Write intel entries to engagement-intel.json IMMEDIATELY after writing
+your engagement trace in Phase 3a. Don't separate trace and intel with other operations.
+EOF
+    echo "d049-enforcement: trace_without_intel nudge written for next E session (s$SESSION)"
   else
     cat > "$NUDGE_FILE" << EOF
 ## d049 VIOLATION ALERT (from post-session hook)

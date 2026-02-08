@@ -298,7 +298,9 @@ Novel framings (score 70+) indicate creative continuity. Near-repeats (score <40
 2. **Reframe it**: ask a different question about the same problem
 3. **Retire it**: acknowledge it won't be fixed and stop tracking it
 
-#### 3b. Intelligence capture
+#### 3b. Intelligence capture (DO THIS IMMEDIATELY AFTER 3a)
+
+**CRITICAL (wq-425)**: Write intel IMMEDIATELY after your trace. s1198 and s1213 wrote traces but ran out of time before intel capture. Do NOT insert other operations between 3a and 3b.
 
 Write intel entries to `~/.config/moltbook/engagement-intel.json` as a **JSON array** (not raw lines). Each entry: `{type, source, summary, actionable, session}`.
 

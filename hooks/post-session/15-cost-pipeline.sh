@@ -121,7 +121,8 @@ if len(data) < 5:
     sys.exit(0)
 
 # === Step 2: Anomaly detection ===
-mode_costs = [e['cost'] for e in data if e['mode'] == mode and e['session'] != session_num]
+# Filter out deprecated agent-reported entries (wq-431: inflated 3-5x)
+mode_costs = [e['cost'] for e in data if e['mode'] == mode and e['session'] != session_num and not e.get('deprecated')]
 if len(mode_costs) >= 5:
     avg = sum(mode_costs) / len(mode_costs)
     ratio = this_cost / avg if avg > 0 else 0
@@ -163,9 +164,11 @@ if len(mode_costs) >= 5:
         print(f"cost-anomaly: s{session_num} ${this_cost:.2f} OK ({ratio:.1f}x avg ${avg:.2f})")
 
 # === Step 3: Trend analysis ===
-if len(data) >= 10:
+# Filter deprecated entries from trend analysis (wq-431)
+clean_data = [e for e in data if not e.get('deprecated')]
+if len(clean_data) >= 10:
     by_mode = defaultdict(list)
-    for e in data:
+    for e in clean_data:
         by_mode[e['mode']].append(e['cost'])
 
     trends = {'generated': datetime.now().isoformat(), 'session': session_num, 'modes': {}, 'warnings': []}
@@ -196,9 +199,9 @@ if len(data) >= 10:
 
 # === Step 4: Budget utilization ===
 CAPS = {"B": 10, "E": 5, "R": 5}
-if len(data) >= 10:
+if len(clean_data) >= 10:
     by_mode_util = defaultdict(list)
-    for e in data:
+    for e in clean_data:
         m = e["mode"]
         cap = CAPS.get(m, 10)
         util = (e["cost"] / cap * 100) if cap > 0 else 0

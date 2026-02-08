@@ -79,7 +79,7 @@
       "title": "Investigate cost-history.json discrepancies for B sessions",
       "description": "cost-history.json shows s1199 at $7.97 and s1207 at $6.84, but session-history.txt shows $2.27 and $1.88 respectively (3.5x discrepancy). s1207 is post-wq-415 token-calc cutover, so both sources should agree. Check if 15-cost-pipeline.sh has a code path that double-counts tokens for long B sessions or if cost-history.json is being written by a different source than session-history.txt.",
       "priority": 431,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1221,
       "source": "audit-s1221",
@@ -87,7 +87,8 @@
         "audit",
         "cost-tracking"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#363: Root cause confirmed — s1199 ($7.97) and s1207 ($6.84) used agent-reported costs (pre-wq-415 cutover). s1207 was pre-cutover despite audit assumption. 33 agent-reported entries flagged as deprecated. Trend/anomaly analysis updated to filter deprecated entries. No backfill possible (logs rotated)."
     },
     {
       "id": "wq-432",

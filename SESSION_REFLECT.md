@@ -140,16 +140,32 @@ Follow the detailed protocol in **SESSION_REFLECT_COVENANTS.md**. Quick summary:
 
 This is the centerpiece of every R session. Your structural change should be informed by **both** internal friction points and observations from step 2.
 
-1. **Diagnose**: Identify the single highest-impact change using these inputs:
-   - **Impact history**: Run `node r-impact-digest.mjs` to generate a human-readable summary. Categories marked PREFER have historically improved metrics; categories marked AVOID have hurt performance.
-   - **Intelligence from step 2**: ecosystem signals, inbox, knowledge base
-   - **Internal friction**: session history errors, pipeline gaps, code debt
+1. **Diagnose**: Select your structural change target using this protocol:
 
-2. **Justify category selection**: Before implementing, state your choice:
-   - "Targeting [file] in category [X] because [reason]"
-   - If selecting a category marked AVOID in impact history, explain why the specific change is necessary despite historical negative outcomes
-   - If selecting NEUTRAL over PREFER, explain why the PREFER targets don't have actionable improvements
-   - **Skip justification only if** all PREFER targets are on cooldown
+   **Step A — Build candidate list**: Run `node r-impact-digest.mjs --json` and `git log --oneline --grep="R#" -5`. From the JSON output, extract:
+   - `recommendations` object (per-category PREFER/AVOID/NEUTRAL)
+   - `specificChanges.byFile` (per-file avgDelta, stdDev, count)
+   - From git log, identify files changed in last 3 R sessions (cooldown set)
+
+   **Step B — Score each valid target** (files NOT on cooldown):
+
+   | Factor | Score | How to check |
+   |--------|-------|-------------|
+   | PREFER category in impact digest | +3 | `recommendations[category] === "PREFER"` |
+   | Per-file avgDelta < -10% | +2 | `specificChanges.byFile[file].avgDelta < -10` |
+   | File has friction signal in session history | +2 | errors/retries/workarounds mentioning file in last 10 sessions |
+   | Intel from step 2 suggests change to this area | +1 | inbox, knowledge, or ecosystem signal points here |
+   | NEUTRAL category | +0 | default |
+   | AVOID category | -2 | `recommendations[category] === "AVOID"` |
+   | Volatile file (stdDev > 25%) | -1 | `specificChanges.byFile[file].stdDev > 25` |
+
+   **Step C — Select**: Pick the highest-scoring target. On ties, prefer:
+   1. The file with more historical data points (higher `count`)
+   2. The file last changed longest ago
+
+   **Step D — Require AVOID override**: If the winner has AVOID score, you MUST explain why the specific change is different from past negative outcomes. Otherwise, skip to the next-highest target.
+
+2. **Justify selection**: State: "Targeting [file] (score: [N]) in category [X] because [reason]". If PREFER targets exist but you chose something else, explain why.
 
 3. **Implement**: Make the structural change.
 

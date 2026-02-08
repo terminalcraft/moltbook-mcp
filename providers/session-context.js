@@ -43,7 +43,7 @@ export function computeDirectiveHealth(sessionNum, sessionType, baseDir) {
     const typeHints = {
       E: ['engage', 'platform', 'pinchwork', 'post', 'task', 'email'],
       B: ['build', 'fix', 'implement', 'add', 'test', 'refactor'],
-      R: ['review', 'check', 'audit', 'reflect', 'evolve'],
+      R: ['review', 'check', 'audit', 'reflect', 'evolve', 'directive', 'maintenance', 'compliance'],
       A: ['audit', 'escalation', 'blocked', 'stale']
     };
 

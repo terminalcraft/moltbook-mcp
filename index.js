@@ -147,13 +147,14 @@ const directiveAssignments = createDirectiveAssignments(
 process.on("exit", () => {
   if (getApiCallCount() > 0) saveApiSession();
   saveToolUsage();
-  // R#125, wq-208: Compute and save directive outcome if there were urgent directives
-  if (directiveAssignments.urgentDirectives.length > 0) {
-    try {
-      const outcome = computeDirectiveOutcome(directiveAssignments, __dirname);
-      saveDirectiveOutcome(directiveAssignments, outcome, __dirname);
-    } catch { /* don't block exit */ }
-  }
+  // R#125, wq-208, wq-459: Compute and save directive outcome for ALL sessions.
+  // Previously gated on urgentDirectives.length > 0, which excluded R sessions
+  // (whose directives rarely matched R-type keywords). Always recording outcomes
+  // gives A sessions complete visibility across all session types.
+  try {
+    const outcome = computeDirectiveOutcome(directiveAssignments, __dirname);
+    saveDirectiveOutcome(directiveAssignments, outcome, __dirname);
+  } catch { /* don't block exit */ }
   // Call onUnload for components that export it
   for (const { name, mod } of loadedModules) {
     if (typeof mod.onUnload === "function") {

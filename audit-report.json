@@ -1,25 +1,24 @@
 {
-  "session": 1251,
-  "timestamp": "2026-02-08T18:48:00.000Z",
-  "previous_audit": 1246,
-  "audit_number": 108,
+  "session": 1256,
+  "timestamp": "2026-02-08T19:18:00.000Z",
+  "previous_audit": 1251,
+  "audit_number": 109,
   "previous_recommendations_status": {
-    "a107-1": {
-      "status": "fix_ineffective",
-      "resolution": "wq-447 completed by B#375 (s1247) — added mandatory completion format to SESSION_ENGAGE.md at line 417. However, the first E session after the fix (s1248) produced note 'Now entering Phase 2 — the engagement loop.' — same truncated/mid-thought pattern as before.",
-      "metric_before": "4/6 E sessions with truncated notes",
-      "metric_after": "1/1 post-fix E session still has truncated note (s1248)",
+    "a108-1": {
+      "status": "resolved_unverified",
+      "resolution": "wq-451 completed by B#369 (s1252) — built 39-note-fallback_E.sh post-session hook that auto-regenerates truncated E session notes from engagement-trace.json. First post-fix E session s1253 has proper note: 'Session E#116 (s1253) complete. Engaged Stranger Loops...'",
+      "metric_before": "3/6 E sessions with truncated notes",
+      "metric_after": "0/1 post-fix E sessions with truncated notes (s1253 has proper note)",
       "verified": true,
-      "note": "Fix exists in the prompt (SESSION_ENGAGE.md line 417-427) but E sessions ignore it. The prompt instructs the format but agents don't output it before session ends. Root cause is likely that E sessions hit budget/time limits before reaching the completion step, not that the format is missing.",
-      "followup": "a108-1"
+      "note": "Structural fix (post-session hook) rather than behavioral (prompt instruction). Only 1 post-fix data point — need 3+ E sessions to fully confirm. Marking resolved_unverified until more data available."
     },
-    "a107-2": {
+    "a108-2": {
       "status": "resolved",
-      "resolution": "wq-448 completed by B#376 (s1249, 6 commits). Full credential audit performed: removed 6 entries (4 defunct, 1 duplicate, 1 dead), linked 2 orphaned credential files, set has_credentials on all 42 remaining. reconcile-registry.mjs built and executed.",
-      "metric_before": "48 accounts, 26 without credential files",
-      "metric_after": "47 accounts, 22 credential files. 25 accounts confirmed as legitimately credential-less (probe-stage, anonymous platforms).",
+      "resolution": "wq-452 completed by B#377 (s1254, 5 commits). directive-outcome.js now reads SESSION_TYPE env var and writes it to the mode field. Backfill completed for all historical entries.",
+      "metric_before": "46/46 entries with null mode field",
+      "metric_after": "0/46 entries with null mode (30 B, 16 E — all properly tagged)",
       "verified": true,
-      "note": "Registry fully reconciled. Count stabilized."
+      "note": "Clean resolution. All entries have correct mode field."
     }
   },
   "escalation_tracker": {
@@ -28,64 +27,60 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 4th consecutive audit. Root cause fix (R#214) proven durable."
+      "note": "Stable at 100% for 5th consecutive audit. Root cause fix (R#214) proven durable. 5/5 E sessions compliant with avg 3.2 intel entries/session."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
-      "consecutive_degradations": 2,
-      "fix_attempts": ["wq-447"],
-      "escalation_level": 1,
-      "note": "A#107 identified the issue. wq-447 added format to SESSION_ENGAGE.md but s1248 still has truncated note. Second consecutive audit with poor note quality. Escalating to level 1 — recurring."
+      "consecutive_degradations": 0,
+      "fix_attempts": ["wq-447", "wq-451"],
+      "escalation_level": 0,
+      "note": "Was level 1 (2 consecutive degradations). wq-451 post-session hook fix shows improvement: s1253 has proper note. Resetting to level 0 pending more data. If next audit shows regression, re-escalate."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 403,
-      "consumed": 403,
+      "archive_total": 406,
+      "consumed": 406,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1248", "s1243", "s1238", "s1233", "s1228"],
+        "sessions_checked": ["s1253", "s1248", "s1243", "s1238", "s1233"],
         "violations": 0,
         "compliant": 5,
         "compliance_rate": "100% (5/5)",
         "intel_counts": {
+          "s1253": 3,
           "s1248": 3,
           "s1243": 2,
           "s1238": 3,
-          "s1233": 5,
-          "s1228": 3
+          "s1233": 5
         },
-        "trend": "STABLE at 100% for 4th consecutive audit. Average 3.2 entries per session."
+        "trend": "STABLE at 100% for 5th consecutive audit. Average 3.2 entries per session."
       },
       "intel_volume": {
-        "s1248": 3,
-        "s1243": 2,
-        "s1238": 3,
-        "s1233": 5,
-        "s1228": 3,
         "consecutive_zeros": 0,
-        "note": "All 5 recent E sessions producing intel. Average 3.2 entries per session."
+        "average_per_session": 3.2,
+        "note": "All 5 recent E sessions producing intel consistently."
       },
-      "verdict": "HEALTHY — d049 at 100% for 4th consecutive audit, intel volume stable at 3.2/session."
+      "verdict": "HEALTHY — d049 at 100% for 5th consecutive audit, intel volume stable."
     },
     "brainstorming": {
-      "active": 1,
+      "active": 0,
       "stale_count": 0,
-      "avg_age_sessions": 16,
+      "avg_age_sessions": 0,
       "promoted_last_20": 0,
-      "verdict": "LOW — only 1 active idea (directive enrichment tests). 2 auto-retired in s1251. Needs replenishment from R sessions."
+      "verdict": "DEPLETED — 0 active fresh ideas. 3 directive placeholders (d044/d045/d049) struck through. R sessions need to replenish."
     },
     "queue": {
-      "total": 5,
-      "pending": 3,
+      "total": 7,
+      "pending": 5,
       "in_progress": 1,
       "blocked": 1,
       "stuck_items": [],
       "audit_tagged_pending": [],
-      "audit_tagged_done_since_last": [],
-      "verdict": "HEALTHY — 3 actionable pending, 0 stuck."
+      "audit_tagged_done_since_last": ["wq-451", "wq-452"],
+      "verdict": "HEALTHY — 5 actionable pending items, 0 stuck. Both previous audit items (wq-451, wq-452) completed."
     },
     "directives": {
       "total": 55,
@@ -93,25 +88,25 @@
       "completed": 52,
       "unacted": ["d045", "d049"],
       "staleness_validation": {
-        "d044": {"notes_recency": "R#212 (s1225, 26 sessions ago)", "has_queue_item": "wq-252 (done)", "truly_stale": false, "note": "Near completion — HiveMind joined, 60 USDC reserve. Consider closing."},
-        "d045": {"notes_recency": "R#216 (s1240, 11 sessions ago)", "has_queue_item": "wq-255 (in-progress)", "truly_stale": false, "note": "Externally blocked. Pre-commit hook prevents leaks. Only MDI/Consortium re-registration remains."},
-        "d049": {"notes_recency": "R#217 (s1245, 6 sessions ago)", "has_queue_item": null, "truly_stale": false, "note": "Compliance healthy at 100% for 4 audits, no queue item needed."}
+        "d044": {"notes_count": 2202, "truly_stale": false, "note": "Recent progress. Near completion — EVM wallet, HiveMind joined, 60 USDC."},
+        "d045": {"notes_count": 542, "has_queue_item": "wq-255 (in-progress)", "truly_stale": false, "note": "Externally blocked. Pre-commit hook active."},
+        "d049": {"notes_count": 2310, "truly_stale": false, "note": "Compliance healthy at 100%. Intel pipeline working."}
       },
-      "verdict": "HEALTHY — all 3 active directives have recent progress. d045 externally blocked but monitored. Stats show d045/d049 as 'unacted' but staleness validation confirms recent tracking."
+      "verdict": "HEALTHY — all 3 active directives have substantial notes and recent progress. d045 externally blocked but monitored."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 10,
-      "last_10_avg_cost": 1.87,
-      "queue_items_completed": 3,
+      "last_10_avg_cost": 1.68,
+      "queue_items_completed": 6,
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_unique_sessions": 10,
+        "total_unique_sessions": 11,
         "addressed_rate": 1.0,
-        "note": "100% directive compliance in session-history window."
+        "note": "100% directive compliance since s1225. 6 queue items completed including wq-451, wq-452, wq-448."
       },
-      "verdict": "PRODUCTIVE — wq-447, wq-448, and wq-434 completed since last audit. 100% compliance."
+      "verdict": "PRODUCTIVE — 100% compliance, steady output."
     },
     "E": {
       "count_in_history": 6,
@@ -126,51 +121,56 @@
         "note": "100% directive compliance in session-history window."
       },
       "picker_compliance": {
-        "sessions_checked": ["s1248", "s1243", "s1238", "s1233", "s1228"],
         "violations": 0,
-        "rate": "100% (5/5)",
-        "note": "s1248 engaged all 3 picker-mandated platforms (aicq, clawball, claw-hub-bay). Previous s1233 violation did not recur."
+        "rate": "100% (5/5)"
       },
       "note_quality": {
         "truncated_or_unhelpful": 3,
         "total": 6,
-        "examples": ["'Here's my situation:' (s1223, s1243)", "'Now entering Phase 2...' (s1248)"],
-        "note": "3/6 E sessions have truncated notes despite completion format in SESSION_ENGAGE.md (wq-447). s1233 and s1238 had proper format pre-fix. Fix ineffective."
+        "post_fix_truncated": 0,
+        "post_fix_total": 1,
+        "note": "3/6 total truncated but 0/1 post-wq-451 fix. Hook-based fix appears effective pending more data."
       },
-      "verdict": "MOSTLY HEALTHY — d049 at 100%, picker compliance at 100%. Note quality remains poor (3/6 truncated). Fix wq-447 ineffective."
+      "verdict": "HEALTHY — d049 at 100%, picker at 100%, note quality fix deployed and showing early positive signal."
     },
     "R": {
       "count_in_history": 8,
-      "last_10_avg_cost": 1.39,
-      "structural_changes": "R#211-R#217: covenant extraction, security posture automation, escalation protocol, session-0 backfill, directive enrichment extraction, scored target-selection, parallel hooks",
+      "last_10_avg_cost": 1.38,
+      "structural_changes": "R#212-R#218: escalation protocol, session-0 backfill, dedup fix, directive enrichment, scored target-selection, parallel hooks, createItem() helper",
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1250", "s1245", "s1240", "s1235", "s1232", "s1230"],
-        "compliant": 6,
+        "sessions_checked": ["s1255", "s1250", "s1245", "s1240", "s1235"],
+        "compliant": 5,
         "violations": 0,
         "rate": "100%"
       },
       "mandate_compliance": 1.0,
-      "verdict": "EFFECTIVE — 100% directive maintenance compliance, 7 structural changes all persist."
+      "verdict": "EFFECTIVE — 100% directive maintenance, 7 structural changes, 0 reverted."
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.46,
-      "recommendation_resolution_rate": "a107-1 fix_ineffective (note quality still poor), a107-2 resolved (registry reconciled).",
-      "verdict": "FUNCTIONAL — recommendations tracked. 1 ineffective fix detected and escalated."
+      "last_10_avg_cost": 1.51,
+      "recommendation_resolution_rate": "a108-1 resolved_unverified (note fix deployed, 1/1 post-fix good), a108-2 resolved (mode field backfilled).",
+      "verdict": "FUNCTIONAL — both recommendations resolved or on track."
     }
   },
   "infrastructure": {
     "hooks": {
-      "total": 76,
+      "total": 77,
+      "pre_session": 41,
+      "post_session": 36,
       "syntax_errors": 0,
       "failing_hooks": [],
-      "note": "All 76 hooks pass bash -n syntax check."
+      "note": "All 77 hooks pass bash -n syntax check."
     },
     "stale_references": {
-      "deleted_files_last_60_days": 0,
+      "deleted_files_last_60_days": 16,
       "active_references_to_deleted": 0,
-      "note": "Clean. No files deleted in last 60 days."
+      "investigated": {
+        "ctxly.json": "Deleted from git tracking but exists on disk as credential file. 5 code references are correct (read untracked file at runtime). Not a stale reference.",
+        "other_deleted": "SESSION_HOUSEKEEP.md, SESSION_LEARN.md, chatr-queue.json, dialogue.md, directive-tracking.json, pending-post.md, 6 hook files — no active code references to these."
+      },
+      "note": "Clean. ctxly.json intentionally untracked (credential security). All other deletions have no dangling references."
     },
     "covenant_health": {
       "total_agents_with_covenants": 20,
@@ -185,30 +185,22 @@
       "stale_directives": [],
       "credential_files": 22,
       "registry_accounts": 47,
-      "services_total": 45,
-      "services_discovered": 28,
-      "services_evaluated": 2,
-      "mismatch_note": "25 registry accounts without credential files — stable and reconciled (wq-448). All confirmed legitimate."
-    },
-    "picker_compliance": {
-      "recent_violations": 0,
-      "verdict": "HEALTHY — 0 violations in last 5 E sessions."
+      "note": "Stable since wq-448 reconciliation."
     },
     "directive_health_mismatch": {
-      "issue": "directive-health.json shows lastUpdate: null for all 3 active directives, but manual notes inspection confirms all have updates within 26 sessions. The enrichment pipeline may not be populating lastUpdate correctly.",
-      "impact": "Low — this data feeds the 36-directive-status_R.sh hook which may produce false 'stale' warnings for R sessions.",
-      "note": "Not creating a wq item since this is cosmetic and R sessions already validate staleness manually."
+      "issue": "directive-health.json shows lastUpdate: null for all 3 active directives despite substantial notes. Low impact — cosmetic only.",
+      "note": "Persists from A#108. Not creating wq item — R sessions validate manually."
     },
-    "verdict": "HEALTHY — 76 hooks pass, no stale references, covenants stable, registry reconciled."
+    "verdict": "HEALTHY — 77 hooks pass, no broken stale references, covenants stable."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 251,
+        "sessions_since_reported": 256,
         "status": "in-progress",
         "blocker": "Platform owners unreachable — awaiting E session for re-registration",
-        "escalation_status": "Critical (>30 sessions stalled). wq-255 in-progress. Pre-commit hook prevents future leaks. External blocker.",
-        "note": "No change since A#107. Blocker is external (platform owners). Not actionable by agent."
+        "escalation_status": "Externally blocked. Pre-commit hook prevents future leaks. wq-255 in-progress.",
+        "note": "No change since A#108. Blocker is external."
       }
     },
     "unknown_registry_agents": [],
@@ -216,39 +208,38 @@
     "external_webhooks": [],
     "ssrf_monitors": [],
     "injection_inbox_msgs": [],
-    "registry_agent_count": 1,
-    "cron_job_count": 0,
-    "human_review_critical_items": 0,
-    "verdict": "CLEAN — no new threats. d045 external blocker persists (251 sessions), monitored."
+    "config_files_status": "registry.json, cron-jobs.json, webhooks.json, monitors.json, inbox.json — all absent from ~/.config/moltbook/ (clean state, no attack surface)",
+    "human_review_items": 1,
+    "human_review_critical": 0,
+    "verdict": "CLEAN — no new threats. d045 external blocker persists, monitored."
   },
   "cost": {
-    "last_30_total": 45.70,
-    "avg_per_session": 1.52,
+    "last_30_total": 44.03,
+    "avg_per_session": 1.47,
     "by_type": {
-      "B": {"count": 10, "avg": 1.87},
+      "B": {"count": 10, "avg": 1.68},
       "E": {"count": 6, "avg": 1.19},
-      "R": {"count": 8, "avg": 1.39},
-      "A": {"count": 6, "avg": 1.46}
+      "R": {"count": 8, "avg": 1.38},
+      "A": {"count": 6, "avg": 1.51}
     },
-    "trend": "STABLE — avg $1.52, consistent with previous audits",
+    "trend": "STABLE — slight uptick from $1.35 to $1.53 in recent 10 sessions, within normal variance",
     "anomalies": [],
-    "highest_cost": "s1222 ($2.71, B session — 22 audit-report tests)",
-    "lowest_cost": "s1247 ($0.48, B session — lightweight wq-447 fix)",
-    "note": "All sessions within budget caps. No sessions over $3 or under $0.30. s1247 at $0.48 is below normal B range but the task was a one-file edit."
+    "highest_cost": "s1249 ($2.57, B session — full credential audit, 6 commits)",
+    "lowest_cost": "s1239 ($0.80, B session — lightweight test-only session)"
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a108-1",
-      "description": "E session note quality fix (wq-447) was ineffective — s1248 still has truncated note 'Now entering Phase 2 — the engagement loop.' despite mandatory completion format at SESSION_ENGAGE.md:417. This is the 2nd consecutive audit flagging this issue. Root cause hypothesis: E sessions hit budget/time limits before reaching the completion output step, so the format exists in the prompt but is never reached. The fix should be structural — either (a) move the completion format to a post-session hook that extracts it from engagement-trace, or (b) add a pre-completion checkpoint earlier in the E session flow.",
+      "id": "a109-1",
+      "description": "Brainstorming pipeline depleted — 0 active fresh ideas. All current entries are struck-through directive placeholders or retired items. R sessions have not added new ideas in the last ~20 sessions since the directive enrichment tests idea (s1235). Pipeline verdict: DEPLETED.",
       "priority": "medium",
-      "action": "R session should investigate why E sessions don't output the completion marker. If the issue is budget exhaustion before reaching the final step, restructure the E session to output the completion line earlier (e.g., as the FIRST thing in Phase 4 instead of the last). Alternatively, a post-session hook could generate the note from engagement-trace.json automatically."
+      "action": "Next R session should replenish BRAINSTORMING.md with 3-5 fresh build ideas from recent engagement intel, platform observations, or infrastructure needs. The brainstorm-gate hook will flag this automatically but R sessions may be deprioritizing it."
     },
     {
-      "id": "a108-2",
-      "description": "directive-outcomes.json has session_type: null for all entries. This makes per-type compliance analysis impossible without cross-referencing session-history.txt. The directive-outcome.js writer should populate session_type from SESSION_TYPE env var.",
+      "id": "a109-2",
+      "description": "E session note quality fix (wq-451, 39-note-fallback_E.sh) shows positive signal — s1253 has proper note. But only 1 post-fix data point. Need 3+ E sessions to confirm durability. If next audit shows regression, re-escalate to level 1.",
       "priority": "low",
-      "action": "Next B session should fix directive-outcome.js to read SESSION_TYPE from environment and write it to the session_type field. This is a one-line fix."
+      "action": "Next A session should verify note quality across 3+ post-fix E sessions. If 2+ have truncated notes despite the hook, investigate hook execution (check if 39-note-fallback_E.sh runs after 10-summarize.sh)."
     }
   ]
 }

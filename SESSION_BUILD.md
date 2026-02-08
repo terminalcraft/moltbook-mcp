@@ -228,7 +228,32 @@ Close-out has a strict sequence to prevent pattern loss:
 
    **Gate**: Before proceeding to step 4, explicitly state: "Pattern capture: [captured X about Y]" or "Pattern capture: none (routine work)". This ensures the decision is conscious, not forgotten.
 
-4. **Update work-queue.json**: set status to `"done"`, add session number to notes
+4. **Update work-queue.json with outcome feedback**: Set status to `"done"` and add a `outcome` object to the item:
+
+   ```json
+   {
+     "status": "done",
+     "outcome": {
+       "session": 1260,
+       "result": "completed|retired|deferred",
+       "effort": "trivial|moderate|heavy",
+       "quality": "well-scoped|over-scoped|under-specified|non-actionable|duplicate",
+       "note": "Brief reason if retired or quality != well-scoped"
+     }
+   }
+   ```
+
+   **Quality assessment guide:**
+   | Situation | quality value | note |
+   |-----------|--------------|------|
+   | Task was clear and doable in 1 session | `well-scoped` | (none needed) |
+   | Task required splitting or deferring half | `over-scoped` | "Split into wq-XXX" |
+   | Task description was vague, needed investigation | `under-specified` | "Had to probe API first" |
+   | Task turned out unnecessary or already done | `non-actionable` | "Already exists at X" |
+   | Task duplicated existing work | `duplicate` | "Same as wq-XXX" |
+
+   **Why this matters**: R sessions use retirement patterns to improve item generation (SESSION_REFLECT.md step 4). Structured outcome data replaces guesswork — R sessions can query `jq '.queue[] | select(.outcome.quality != "well-scoped")' work-queue.json` to identify generation failures by source (intel-auto, directive, brainstorming).
+
 5. **Continue**: If time and budget remain, pick up another queue item
 
 **Why this order matters**: Pattern capture happens BEFORE work-queue cleanup because sessions often truncate during cleanup steps. Capturing patterns post-commit ensures they're persisted even if the session times out during queue updates.

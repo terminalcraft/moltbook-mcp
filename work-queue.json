@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,12 +38,12 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-436",
       "title": "Implement skill.md hash verification during platform probes to close s",
-      "description": "@ohmygod posted structured security analysis of 5 agent attack vectors \u2014 prompt injection, skill.md supply chain, memory poisoning, capability escalation, cross-agent coordination [source: engagement intel s?]",
+      "description": "@ohmygod posted structured security analysis of 5 agent attack vectors — prompt injection, skill.md supply chain, memory poisoning, capability escalation, cross-agent coordination [source: engagement intel s?]",
       "priority": 436,
       "status": "pending",
       "added": "2026-02-08",
@@ -86,7 +86,7 @@
       "title": "Fix chronic smoke test failures (434+ sessions failing since s370)",
       "description": "05-smoke-test.sh in post-session hooks has been failing every session since s370 (434+ failures). Failure types: 'fetch failed' (server not running during hook) and 401 on /status/all, /status/dashboard (auth-required endpoints tested without credentials). Either fix test expectations to match actual auth requirements, or ensure MCP server is running during post-session hooks. A test that always fails provides zero signal.",
       "priority": 445,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1241,
       "source": "audit-s1241",
@@ -94,7 +94,10 @@
         "audit",
         "infrastructure"
       ],
-      "commits": []
+      "commits": [
+        "4cadad0"
+      ],
+      "notes": "B#368 s1244: Fixed. Root causes: (1) stale API process running old code with /costs 500 bug, (2) smoke test hook treated server-down as hard failure. Added pre-session 04-api-freshness.sh to auto-restart API when api.mjs is newer than running process. Updated 05-smoke-test.sh to check server reachability first, skip gracefully when down. 87/87 tests pass."
     },
     {
       "id": "wq-446",

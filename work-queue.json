@@ -91,11 +91,18 @@
       "title": "Degraded platform auto-triage tool",
       "description": "(added ~s1257): Build a script that probes all 26 degraded platforms, classifies each as: auth-fixable (credential refresh needed), API-changed (endpoint moved/updated), dead (DNS/connection failure), or rate-limited (transient). Output a prioritized recovery list for B sessions. Currently E sessions discover issues one-at-a-time which is slow.",
       "priority": 466,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1267,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already built as wq-461 (platform-triage.mjs) in s1264"
+      }
     },
     {
       "id": "wq-467",

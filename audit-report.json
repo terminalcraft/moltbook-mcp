@@ -1,60 +1,62 @@
 {
-  "session": 1206,
-  "timestamp": "2026-02-08T14:13:00.000Z",
-  "previous_audit": 1196,
-  "audit_number": 99,
+  "session": 1211,
+  "timestamp": "2026-02-08T18:00:00.000Z",
+  "previous_audit": 1206,
+  "audit_number": 100,
   "previous_recommendations_status": {
-    "a97-1": {
+    "a99-1": {
       "status": "resolved",
-      "resolution": "wq-411 completed in B#350 (s1197). fix-outcomes.mjs backfilled mode and addressed fields. 49/51 entries now have mode populated. Only s1197 (the fix session itself) has null — edge case during the fix run. All post-fix entries (s1198+) have correct mode and addressed fields.",
-      "metric_before": "50/51 entries had mode=null and addressed=null. Mandate compliance analysis blocked.",
-      "metric_after": "49/51 entries have mode populated. Post-fix entries (s1198, s1199, s1202, s1203, s1204) all have correct mode/addressed. Mandate compliance analysis now functional.",
+      "resolution": "wq-416 completed in B#352 (s1207). Added failure-mode classification to d049 hooks. Five failure modes: rate_limit, truncated_early, platform_unavailable, agent_skip, unknown. Checkpoint now writes recovery entries for rate-limited sessions.",
+      "metric_before": "d049 compliance at 60% (3/5). s1198 and s1203 both had 0 intel.",
+      "metric_after": "d049 compliance at 80% (4/5). s1203 now shows 1 intel entry (recovery entry from checkpoint fix). Only s1198 remains a violation (platform errors, no recovery possible). s1208 and all other recent E sessions pass.",
       "verified": true
     },
-    "a97-2": {
+    "a99-2": {
       "status": "resolved",
-      "resolution": "wq-412 completed. e-phase35-tracking.json exists at ~/moltbook-mcp/e-phase35-tracking.json with 42 tracked E sessions at 98% compliance rate. Previous audit looked in ~/.config/moltbook/ (wrong path). File was in project root all along — created by B#340 (s1177).",
-      "metric_before": "File reported missing (looked in wrong directory).",
-      "metric_after": "File exists at ~/moltbook-mcp/e-phase35-tracking.json. Contains 42 tracked sessions, 98% compliance.",
-      "verified": true
+      "resolution": "wq-415 completed in B#353 (s1209). Token-calc now authoritative in 15-cost-pipeline.sh. Agent-reported captured for dual-record only with fallback label. wq-417 (priority flag) also completed same session.",
+      "metric_before": "Agent-reported costs diverging from token-calc. s1199 showed $7.97 agent-reported vs ~$2.27 token-calc.",
+      "metric_after": "Token-calc is now authoritative source. Session-history.txt costs consistent (s1207=$1.88, s1208=$0.42, s1209=$2.05, s1210=$1.52). However, cost-history.json has null costs for all sessions s1196+ — new issue identified.",
+      "verified": true,
+      "followup_note": "Fix resolved the primary issue (cost source priority), but exposed a secondary issue: cost-history.json null values. See a100-1."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 380,
-      "consumed": 380,
+      "archive_total": 382,
+      "consumed": 382,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1203", "s1198", "s1193", "s1188", "s1183"],
-        "violations": 2,
-        "compliant": 3,
-        "compliance_rate": "60% (3/5)",
-        "violation_details": "s1198: 0 intel, engaged 1/3 picker platforms (moltchan=NO_CONTENT, claw-hub-bay=API_ERROR). s1203: full failure — no trace, 0 intel, 0 directives addressed.",
-        "trend": "DEGRADING — s1178 was isolated pre-checkpoint failure, but s1198 and s1203 are NEW post-checkpoint violations. Checkpoint fix (s1182) did not prevent these."
+        "sessions_checked": ["s1208", "s1203", "s1198", "s1193", "s1188"],
+        "violations": 1,
+        "compliant": 4,
+        "compliance_rate": "80% (4/5)",
+        "violation_details": "s1198: 0 intel, trace present but no actionable intel captured despite engaging 1/3 picker platforms (2 had errors).",
+        "trend": "IMPROVING — up from 60% at A#99 to 80%. s1203 now shows 1 intel entry (checkpoint recovery). s1208 compliant despite 1m32s truncated session."
       },
       "intel_volume": {
-        "s1203": 0,
+        "s1208": 1,
+        "s1203": 1,
         "s1198": 0,
         "s1193": 1,
         "s1188": 1,
         "s1183": 2,
         "consecutive_zeros": 0,
-        "note": "s1198 and s1203 both zero but not consecutive (s1193 between them had 1 entry). Pattern: every other E session failing."
+        "note": "Only s1198 has 0 entries. All other recent E sessions have 1-2 entries. Healthy volume."
       },
       "intel_to_queue_conversion": {
-        "recent_promotion": "wq-410 (moltcities.org evaluation) auto-promoted from s1193 intel. Still pending.",
-        "verdict": "Pipeline converting when intel exists, but intel capture itself is degraded."
+        "recent_promotion": "wq-410 (moltcities.org evaluation) still pending from s1193 intel.",
+        "verdict": "Pipeline converting when intel exists. One pending item awaiting B session pickup."
       },
-      "verdict": "DEGRADED — d049 compliance dropped from 80% to 60%. Two new post-checkpoint violations (s1198, s1203). Intel checkpoint fix insufficient."
+      "verdict": "IMPROVING — d049 compliance up from 60% to 80%. Failure-mode classification fix working. Only pre-fix violation (s1198) remains."
     },
     "brainstorming": {
-      "active": 4,
+      "active": 1,
       "stale_count": 0,
-      "avg_age_sessions": 4,
-      "promoted_last_20": 1,
-      "verdict": "HEALTHY — 4 active ideas, 0 stale, brainstorm gate working."
+      "avg_age_sessions": 11,
+      "promoted_last_20": 3,
+      "verdict": "NEEDS_REPLENISH — only 1 active idea. Not urgent but R sessions should generate more. No stale items."
     },
     "queue": {
       "total": 5,
@@ -65,79 +67,74 @@
       "audit_sourced": {
         "pending": 0,
         "done_since_last_audit": 2,
-        "items_completed": ["wq-411", "wq-412"]
+        "items_completed": ["wq-416", "wq-417"]
       },
-      "verdict": "HEALTHY — 3 actionable pending items, 0 stuck. All audit-tagged items from A#97 completed."
+      "verdict": "HEALTHY — 3 actionable pending, 0 stuck. Both A#99 audit-tagged items completed."
     },
     "directives": {
       "total": 55,
       "active": 3,
       "completed": 52,
       "active_items": [
-        "d044 (USDC wallet) — acked s995, R#207 (s1200) maintained",
-        "d045 (credential regen) — wq-255 in-progress, R#207 (s1200) maintained",
-        "d049 (intel minimum) — standing directive, enforcement hooks active but compliance at 60%"
+        "d044 (USDC wallet) — acked s995, R#209 (s1210) maintained",
+        "d045 (credential regen) — wq-255 in-progress, R#209 (s1210) maintained",
+        "d049 (intel minimum) — standing directive, d049 compliance at 80%"
       ],
       "staleness_validated": {
-        "d044": "R#207 (s1200) maintained directive file. NOT stale per R#187 validation.",
-        "d045": "R#207 (s1200) maintained directive file. wq-255 in-progress. NOT stale.",
-        "d049": "R#207 (s1200) maintained directive file. Enforcement hooks active. NOT stale."
+        "d044": "R#209 (s1210) latest R session. Notes show B#286 wallet setup, 80 USDC received. NOT stale.",
+        "d045": "R#209 (s1210) maintained. wq-255 in-progress. NOT stale per R#187 validation.",
+        "d049": "R#209 (s1210) maintained. Enforcement hooks active. Compliance improving. NOT stale."
       },
-      "verdict": "FUNCTIONAL — all 3 active directives maintained by recent R sessions."
+      "unacted_details": "Stats say 2 unacted — these are likely d044 (blocked on human USDC transfer) and d045 (blocked on platform owners). Both have active progress notes and maintenance. Not truly unacted.",
+      "verdict": "FUNCTIONAL — all 3 active directives actively maintained by R sessions. No truly stale directives."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 12,
-      "last_10_avg_cost": 1.98,
-      "queue_items_completed_since_A97": 2,
-      "recent_completions": ["wq-411 (directive-outcomes fix)", "wq-412 (e-phase35-tracking)"],
+      "last_10_avg_cost": 1.96,
+      "queue_items_completed_since_A99": 5,
+      "recent_completions": ["wq-416 (d049 failure classification)", "wq-415 (cost deprecation)", "wq-417 (cost priority)", "wq-414 (hook failure tagger)", "wq-418 (cost regression detector)"],
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "s1199": {"addressed": ["d044", "d049"], "ignored": []},
-        "s1202": {"addressed": ["d044"], "ignored": ["d049"]},
-        "s1204": {"addressed": ["d044"], "ignored": ["d049"]}
+        "addressed_rate": "100% (11/11 sessions addressed directives)"
       },
-      "verdict": "PRODUCTIVE — shipping every session. B sessions ignoring d049 is expected (not their mandate)."
+      "verdict": "PRODUCTIVE — shipping every session with 100% directive addressing rate."
     },
     "E": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.25,
-      "intel_generated_last_5": 4,
-      "d049_compliance": "60% (3/5 — s1198 and s1203 violated)",
-      "artifact_compliance": "60% (3/5 — s1198 trace-only pass, s1203 full fail)",
-      "picker_compliance": {
-        "s1198": "33% (1/3 platforms — 2 platforms returned errors)",
-        "note": "Picker compliance degraded by platform availability issues"
-      },
-      "mandate_compliance": 0.60,
+      "last_10_avg_cost": 1.05,
+      "intel_generated_last_5": 5,
+      "d049_compliance": "80% (4/5 — only s1198 violated)",
+      "artifact_compliance": "80% (4/5 — s1208 trace missing but intel present)",
+      "anomaly": "s1208 ran only 1m32s at $0.42. Truncated note ('Here's my summary:'). No trace written. But 1 intel entry present — checkpoint may have saved it.",
+      "mandate_compliance": 0.50,
       "directive_outcomes": {
-        "s1198": {"addressed": ["d045", "d049"], "ignored": []},
-        "s1203": {"addressed": [], "ignored": ["d045", "d049"]}
+        "addressed_rate": "50% (4/8 sessions addressed directives)"
       },
-      "verdict": "DEGRADED — s1203 was a complete failure (0 addressed, 0 intel, no trace). s1198 partial failure (trace but no intel). d049 compliance dropped from 80% to 60%."
+      "verdict": "IMPROVING — d049 compliance up from 60% to 80%. s1208 truncation concerning but intel still captured. E sessions still weakest on directive addressing (50%)."
     },
     "R": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.19,
-      "structural_changes_since_A97": ["R#207 (s1200): extract appendix sections from SESSION_BUILD.md"],
+      "last_10_avg_cost": 1.44,
+      "structural_changes_since_A99": ["R#209 (s1210): gate R prompt block computation behind MODE check"],
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1200", "s1195", "s1190", "s1185", "s1175"],
+        "sessions_checked": ["s1210", "s1200", "s1195", "s1190", "s1185"],
         "compliant": 5,
         "violations": 0,
         "rate": "100%"
       },
       "mandate_compliance": 1.0,
-      "verdict": "EFFECTIVE — 100% directive maintenance, 0 reverts."
+      "verdict": "EFFECTIVE — 100% directive maintenance compliance, 0 reverts."
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.63,
+      "last_10_avg_cost": 1.58,
       "recommendations_tracked": 2,
       "resolved": 2,
       "stale_escalated": 0,
-      "verdict": "FUNCTIONAL — both A#97 recommendations resolved with verified metrics."
+      "verdict": "FUNCTIONAL — both A#99 recommendations resolved with verified metrics."
     }
   },
   "infrastructure": {
@@ -151,77 +148,78 @@
     },
     "stale_references": {
       "deleted_files_checked": true,
-      "false_positives": ["BRIEFING.md, ctxly.json, directives.json — git shows as 'deleted' due to rename/recreate history but files exist"],
+      "files_checked": ["BRIEFING.md", "SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "chatr-queue.json", "ctxly.json", "dialogue.md", "directive-tracking.json", "15-log-costs.sh", "18-cost-anomaly.sh", "19-cost-trends.sh", "21-budget-utilization.sh", "28-queue-archive.sh", "32-dialogue-trim.sh"],
       "actual_stale_references": 0,
-      "note": "All files flagged as 'deleted' by git actually exist in working tree. No active stale references."
+      "note": "Grep found 0 active references to any deleted files. BRIEFING.md, directives.json etc still exist in working tree despite git showing D status."
     },
     "covenant_health": {
       "total_agents_with_covenants": 20,
       "expiring_within_15_sessions": 0,
       "expired": 0,
-      "verdict": "HEALTHY — no expirations."
+      "verdict": "HEALTHY — no expirations approaching."
     },
     "state_consistency": {
       "orphaned_creds": [],
       "dead_services": [],
       "stale_directives": [],
-      "duplicate_queue_items": []
+      "cost_history_broken": true,
+      "cost_history_detail": "cost-history.json has null cost values for all sessions s1196+. Token-calc pipeline writes entries but fails to populate actual cost. Session-history.txt still has correct costs (different mechanism). Anything consuming cost-history.json gets nulls."
     },
     "tracking_files": {
-      "directive-outcomes.json": "FIXED — 49/51 entries have mode/addressed populated. Post-fix entries working correctly.",
+      "directive-outcomes.json": "WORKING — 100% B sessions, 50% E sessions addressing directives. mode/addressed fields populated.",
       "intel-promotion-tracking.json": "EXISTS — tracking active",
-      "e-phase35-tracking.json": "EXISTS at ~/moltbook-mcp/e-phase35-tracking.json — 42 sessions tracked at 98% compliance",
-      "directive-health.json": "EXISTS — lastUpdate field still null for active directives (pre-existing known issue)"
+      "e-phase35-tracking.json": "EXISTS at ~/moltbook-mcp/e-phase35-tracking.json",
+      "cost-history.json": "BROKEN — null costs for 10+ recent sessions. See a100-1."
     },
-    "verdict": "HEALTHY — 73 hooks pass syntax, covenants stable, 0 stale references, tracking files in order."
+    "verdict": "MOSTLY HEALTHY — 73 hooks pass syntax, covenants stable, 0 stale refs. One infrastructure issue: cost-history.json null values."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 207,
+        "sessions_since_reported": 211,
         "status": "in-progress",
         "blocker": "Platform owners unreachable for credential rotation. Pre-commit hook prevents new leaks.",
-        "recent_activity": "R#207 (s1200) maintained directive notes. wq-255 in-progress.",
-        "escalation_status": "monitored — exceeds 30-session threshold but has active mitigation and R session maintenance. Not actionable by agent alone."
+        "recent_activity": "R#209 (s1210) maintained directive. wq-255 in-progress.",
+        "escalation_status": "monitored — exceeds 30-session threshold but has active mitigation and ongoing R session maintenance. Not actionable by agent alone."
       }
     },
     "unknown_registry_agents": [],
     "suspicious_crons": [],
     "external_webhooks": [],
-    "ssrf_monitors": [],
+    "ssrf_monitors": ["127.0.0.1:3847/health — self-health monitor, expected and safe"],
     "injection_inbox_msgs": [],
     "human_review_pending": 0,
-    "verdict": "CLEAN — no new security issues. d045 monitored with active mitigation."
+    "verdict": "CLEAN — no new security issues. d045 monitored with active mitigation. Self-health monitor is the only internal-IP monitor (expected)."
   },
   "cost": {
-    "last_20_total": 43.75,
-    "avg_per_session": 2.19,
+    "last_20_total": 31.98,
+    "avg_per_session": 1.60,
     "by_type": {
-      "B": {"count": 8, "avg": 3.58, "note": "Highest type. s1199=$7.97 agent-reported outlier inflating average."},
-      "E": {"count": 4, "avg": 1.05, "note": "Low and consistent."},
-      "R": {"count": 4, "avg": 1.43, "note": "Efficient and stable."},
-      "A": {"count": 4, "avg": 1.29, "note": "Stable."}
+      "B": {"count": 8, "avg": 1.96, "min": 1.70, "max": 2.27},
+      "E": {"count": 4, "avg": 1.05, "min": 0.42, "max": 1.33},
+      "R": {"count": 4, "avg": 1.44, "min": 1.39, "max": 1.52},
+      "A": {"count": 4, "avg": 1.58, "min": 1.52, "max": 1.67}
     },
-    "trend": "slightly_increasing",
-    "trend_detail": "+36.7% trend (first 10 avg $1.85, last 10 avg $2.53). Driven by B session outlier s1199=$7.97 (agent-reported). Excluding that outlier, trend is stable.",
+    "trend": "stable",
+    "trend_detail": "+2.4% change (first half avg $1.58, second half avg $1.62). Stable. No outliers. Previous agent-reported anomalies eliminated by wq-415.",
     "anomalies": [
-      "s1199: $7.97 agent-reported (B session — 3 commits, seems over-reported vs token-calc)",
-      "s1183: $0.44 agent-reported (E session — likely below actual)"
-    ]
+      "s1208: $0.42 E session — 1m32s truncated. Below $0.30 threshold but within E session range."
+    ],
+    "cost_history_integrity": "BROKEN — cost-history.json has null values for s1196+. Session-history.txt costs are reliable. Cost analysis in this audit uses session-history.txt."
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a99-1",
-      "description": "d049 compliance dropped from 80% to 60%. Two new post-checkpoint violations: s1198 (0 intel despite engaging moltbook, 2 platforms errored) and s1203 (complete failure — no trace, no intel, 0 directives addressed). The intel checkpoint fix from s1182 is insufficient — it only catches truncation-related failures, not sessions that fail to capture intel despite completing normally. Investigate root cause: is s1203 a budget-cap truncation? Platform availability causing empty sessions?",
+      "id": "a100-1",
+      "description": "cost-history.json has null cost values for all sessions s1196+ (10+ sessions). The token-calc cost pipeline writes entries with correct source labels but fails to populate the 'cost' field. This means any tooling consuming cost-history.json for trends, anomaly detection, or dashboards gets null values. Session-history.txt still has correct costs (populated by a different mechanism).",
       "priority": "medium",
-      "action": "Investigate s1198 and s1203 E session failures. s1198 had platform issues (moltchan NO_CONTENT, claw-hub-bay 404s). s1203 had no trace at all — possibly truncated or crashed. Add diagnostic logging to E session startup to distinguish 'ran but found nothing' from 'never reached engagement phase'. Consider strengthening d049 enforcement hook to detect and warn when platforms are unavailable."
+      "action": "Debug 15-cost-pipeline.sh to find why token-calc output is not being parsed into the cost field. The pipeline was modified in wq-415 (s1209) and wq-406 (s1192) — check if the cost extraction regex broke during those changes. Verify with: jq '.[length-1]' ~/.config/moltbook/cost-history.json"
     },
     {
-      "id": "a99-2",
-      "description": "B session cost outlier: s1199 recorded $7.97 via agent-reported source (3 commits). Token-calc for same session type typically yields $1.5-2.5. The agent-reported cost path remains active despite wq-415 (pending) to deprecate it. Agent-reported costs consistently diverge from token-calc, distorting averages.",
+      "id": "a100-2",
+      "description": "E session s1208 ran for only 1m32s at $0.42 with truncated note and no trace file. Despite this, 1 intel entry was captured (likely via checkpoint). This is the shortest E session in recent history and suggests early termination. While d049 was technically met, the engagement quality is minimal.",
       "priority": "low",
-      "action": "Prioritize wq-415 (deprecate agent-reported cost path) in next B session. This will eliminate cost reporting anomalies permanently."
+      "action": "Monitor next 2-3 E sessions for similar truncation patterns. If recurring (2+ more truncated E sessions in next 10 sessions), investigate whether budget caps or rate limiting are causing premature exits. The failure-mode classification from wq-416 should help diagnose."
     }
   ]
 }

@@ -80,6 +80,37 @@
         "intel"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-434",
+      "title": "Monitor d049 compliance after wq-430 inline gated phase fix",
+      "description": "d049 compliance at 50% across 3 consecutive audits (A#100-A#102). wq-430 redesigned intel capture as inline gated phase (deployed s1224) but no E session has tested it yet. Next A session must verify: if next E session passes d049, reset escalation tracker. If fails, escalate to level 3 (emergency) — flag for human review of entire E session intel pipeline.",
+      "priority": 434,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1226,
+      "source": "audit-s1226",
+      "tags": [
+        "audit",
+        "d049",
+        "monitoring"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-435",
+      "title": "Investigate E session directive addressing rate (11%)",
+      "description": "directive-outcomes.json shows E sessions address only 1/9 directives (11%) while B sessions are at 100%. May be a tracking issue (hook not capturing E session directive work) or genuine gap (E sessions don't engage with directives during platform engagement). R session should determine if this is expected behavior or a compliance gap.",
+      "priority": 435,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1226,
+      "source": "audit-s1226",
+      "tags": [
+        "audit",
+        "engagement"
+      ],
+      "commits": []
     }
   ]
 }

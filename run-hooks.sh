@@ -133,12 +133,38 @@ for hook in "$HOOKS_DIR"/*; do
     echo "$(date -Iseconds) hook FAILED: $HOOK_NAME (exit=$HOOK_EXIT, ${HOOK_DUR_MS}ms)" >> "$HOOKS_LOG"
     # Capture last 3 lines of output for structured diagnostics (max 200 chars)
     HOOK_ERROR=$(tail -3 "$HOOK_OUT" | tr '\n' ' ' | head -c 200 | sed 's/["\]/\\&/g; s/[[:cntrl:]]/ /g')
+
+    # Root-cause classification (wq-414): categorize failure by exit code + stderr patterns
+    HOOK_RAW_ERR=$(cat "$HOOK_OUT" 2>/dev/null || true)
+    if [ "$HOOK_EXIT" -eq 124 ]; then
+      FAILURE_CAT="timeout"
+    elif [ "$HOOK_EXIT" -eq 127 ]; then
+      FAILURE_CAT="command_not_found"
+    elif [ "$HOOK_EXIT" -eq 126 ]; then
+      FAILURE_CAT="permission_denied"
+    elif echo "$HOOK_RAW_ERR" | grep -qiE 'Cannot find module|MODULE_NOT_FOUND'; then
+      FAILURE_CAT="module_not_found"
+    elif echo "$HOOK_RAW_ERR" | grep -qiE 'SyntaxError|syntax error'; then
+      FAILURE_CAT="syntax_error"
+    elif echo "$HOOK_RAW_ERR" | grep -qiE 'No such file or directory|ENOENT'; then
+      FAILURE_CAT="missing_file"
+    elif echo "$HOOK_RAW_ERR" | grep -qiE 'Permission denied|EACCES'; then
+      FAILURE_CAT="permission_denied"
+    elif echo "$HOOK_RAW_ERR" | grep -qiE 'ReferenceError|TypeError|RangeError|Error:.*\bat\b'; then
+      FAILURE_CAT="node_crash"
+    elif echo "$HOOK_RAW_ERR" | grep -qiE 'ECONNREFUSED|ETIMEDOUT|EHOSTUNREACH'; then
+      FAILURE_CAT="network_error"
+    elif echo "$HOOK_RAW_ERR" | grep -qiE 'invalid.*config|missing.*config|bad.*config'; then
+      FAILURE_CAT="config_error"
+    else
+      FAILURE_CAT="unknown"
+    fi
   fi
   rm -f "$HOOK_OUT"
 
   [ -n "$HOOK_DETAILS" ] && HOOK_DETAILS="$HOOK_DETAILS,"
   if [ -n "$HOOK_ERROR" ]; then
-    HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"$HOOK_STATUS\",\"ms\":$HOOK_DUR_MS,\"error\":\"$HOOK_ERROR\"}"
+    HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"$HOOK_STATUS\",\"ms\":$HOOK_DUR_MS,\"error\":\"$HOOK_ERROR\",\"failure_category\":\"$FAILURE_CAT\"}"
   else
     HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"$HOOK_STATUS\",\"ms\":$HOOK_DUR_MS}"
   fi

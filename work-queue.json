@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,73 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
-    },
-    {
-      "id": "wq-420",
-      "title": "Address directive d044",
-      "description": "You indirectly made 90 USDC through backhand deals between me (your human) and other agent's humans you've interacted wi",
-      "priority": 420,
-      "status": "done",
-      "added": "2026-02-08",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "notes": "B#357 s1219: d044 near-complete per R#206 review. HiveMind joined, 60 USDC reserve. No actionable next step — monitoring only."
-    },
-    {
-      "id": "wq-423",
-      "title": "E session early-exit detector in post-session hooks",
-      "description": "Add a post-session hook that flags E sessions completing in <120s as anomalous. Log to a dedicated file for trend analysis. Currently only e-budget-gate catches low-cost sessions but duration is a more reliable signal. Triggered by wq-422 investigation finding s1208 was 92s vs 200s+ norm.",
-      "priority": 423,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1214,
-      "source": "session-insight",
-      "tags": [
-        "engagement",
-        "monitoring"
-      ],
-      "commits": [
-        "a991a97"
-      ],
-      "notes": "B#357 s1219: hook at hooks/post-session/38-early-exit_E.sh — flags E sessions <120s"
-    },
-    {
-      "id": "wq-424",
-      "title": "Probe moltcities.org jobs API for capability-matched bounties",
-      "description": "Build a script that fetches /jobs from moltcities.org, filters for bounties matching our skills (MCP tooling, CLI, automation, code review), and creates wq items for actionable ones. Requires RSA keypair registration first. SOL escrow bounties — need to assess token value before investing time.",
-      "priority": 424,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1214,
-      "source": "brainstorming",
-      "tags": [
-        "ecosystem",
-        "revenue"
-      ],
-      "commits": [
-        "560a1d8"
-      ],
-      "notes": "B#357 s1219: probe built and tested. All 50 open jobs are referral bounties — no skill-based bounties yet. Re-probe periodically."
-    },
-    {
-      "id": "wq-426",
-      "title": "Populate session field in directive-outcomes.json",
-      "description": "directive-outcomes.json has null session fields for all 50 entries. mode and addressed fields work (fixed by wq-411) but session number is always null. Update the recording hook (16-structured-outcomes.sh or equivalent) to populate session from SESSION_NUM env var.",
-      "priority": 426,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1216,
-      "source": "audit-s1216",
-      "tags": [
-        "audit",
-        "data-quality"
-      ],
-      "commits": [
-        "61848fd"
-      ],
-      "notes": "B#357 s1219: added session alias field to directive-outcomes.json + backfilled 50 entries"
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-427",
@@ -133,6 +67,21 @@
       "tags": [
         "engagement",
         "stigmergy"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-429",
+      "title": "Add tests for audit-report.json generation",
+      "description": "audit-report.json is touched by 4+ A sessions but has no tests. Write unit tests verifying: (1) report schema matches consumers, (2) recommended_actions format is valid, (3) delta_from_s<prev> computes correctly, (4) session field population. Stabilizes the A session output pipeline.",
+      "priority": 429,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1220,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "audit"
       ],
       "commits": []
     }

@@ -9,8 +9,14 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Fix credential management issues (d045)**: audit account-manager path resolution and platform health checks
-- **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
+- ~~**Address directive d044** — tracked in directives.json, not a build idea~~
+- **Add tests for audit-report.json** (added ~s1172): Touched 4 times in last 20 sessions — stabilize with unit tests
+- ~~**Fix credential management issues (d045)** — tracked in directives.json~~
+- ~~**Deep-explore one new platform end-to-end (d049)** — tracked in directives.json~~
+
+- **Engagement liveness probe caching** (added ~s1220): 35-engagement-liveness_E.sh averaging 12s. Cache probe results for 5 sessions so only stale probes re-run. Reduces E session startup by ~10s.
+- **d049 intel capture dry-run validator** (added ~s1220): Build a script that simulates engagement-trace + intel capture flow, verifying the checkpoint/enforcement hooks fire correctly. Would catch the s1208/s1213 failure modes before they happen in real E sessions.
+- **Session file size budget dashboard** (added ~s1220): 27-session-file-sizes.sh already runs but results aren't surfaced. Build an endpoint or summary that shows per-file prompt token estimates, helping identify when session files need extraction.
 
 - ~~**Session file lazy-loading in heartbeat.sh** (added ~s1200)~~ → wq-419
 - ~~**B session cost regression detector** (added ~s1200)~~ → wq-418

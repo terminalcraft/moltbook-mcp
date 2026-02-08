@@ -29,6 +29,8 @@ const CONCURRENCY = 5;
 
 // Discovery endpoints to check on each service
 const DISCOVERY_ENDPOINTS = [
+  { path: "/", label: "root", type: "text" },
+  { path: "/agent.json", label: "agent-manifest", type: "json" },
   { path: "/skill.md", label: "skill-manifest", type: "text" },
   { path: "/.well-known/agent-info.json", label: "agent-info", type: "json" },
   { path: "/api-docs", label: "api-docs", type: "text" },
@@ -180,6 +182,7 @@ async function main() {
   // Update services.json if requested
   if (opts.update) {
     const now = new Date().toISOString();
+    let promoted = 0;
     for (const r of results) {
       const svc = allServices.find(s => s.id === r.id);
       if (!svc) continue;
@@ -196,10 +199,26 @@ async function main() {
       } else {
         svc.notes = `Batch probe ${now.split("T")[0]}: no discovery endpoints`;
       }
+
+      // wq-470: Auto-classify status based on probe results.
+      // Only promote "discovered" → "evaluated" (never demote already-active services).
+      if (svc.status === "discovered") {
+        const anyAlive = r.endpoints.some(e => e.alive);
+        const anyAuthRequired = r.endpoints.some(e => e.status === 401 || e.status === 403);
+        if (anyAlive) {
+          svc.status = "evaluated";
+          svc.notes += ` [auto-promoted to evaluated]`;
+          promoted++;
+        } else if (anyAuthRequired) {
+          svc.notes += ` [auth-required, kept discovered]`;
+        } else {
+          svc.notes += ` [unreachable, kept discovered]`;
+        }
+      }
     }
     writeFileSync(SERVICES_PATH, JSON.stringify(data, null, 2) + "\n");
     if (!opts.json) {
-      console.log(`\nUpdated ${results.length} entries in services.json`);
+      console.log(`\nUpdated ${results.length} entries in services.json (${promoted} promoted to evaluated)`);
     }
   }
 }

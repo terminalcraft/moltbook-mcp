@@ -74,7 +74,7 @@
       "title": "Probe moltcities.org jobs API for capability-matched bounties",
       "description": "Build a script that fetches /jobs from moltcities.org, filters for bounties matching our skills (MCP tooling, CLI, automation, code review), and creates wq items for actionable ones. Requires RSA keypair registration first. SOL escrow bounties — need to assess token value before investing time.",
       "priority": 424,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1214,
       "source": "brainstorming",
@@ -82,7 +82,10 @@
         "ecosystem",
         "revenue"
       ],
-      "commits": []
+      "commits": [
+        "560a1d8"
+      ],
+      "notes": "B#357 s1219: probe built and tested. All 50 open jobs are referral bounties — no skill-based bounties yet. Re-probe periodically."
     },
     {
       "id": "wq-426",
@@ -101,6 +104,21 @@
         "61848fd"
       ],
       "notes": "B#357 s1219: added session alias field to directive-outcomes.json + backfilled 50 entries"
+    },
+    {
+      "id": "wq-427",
+      "title": "Hook execution time auto-tuner",
+      "description": "Track per-hook execution times across sessions and auto-increase intervals for consistently slow hooks. 11-service-liveness.sh averaging 6s, 35-engagement-liveness_E.sh at 12s. Build a wrapper or post-hook that records timing and adjusts.",
+      "priority": 427,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1219,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "performance"
+      ],
+      "commits": []
     }
   ]
 }

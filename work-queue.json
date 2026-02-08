@@ -73,7 +73,7 @@
       "title": "Deprecate agent-reported cost path \u2014 token-calc is authoritative",
       "description": "Cost accuracy validator (wq-409) proved 100% of agent-reported costs diverge from token-calc. Simplify cost pipeline: remove agent-reported priority, always use token-calc. Keep agent-reported in dual-record for monitoring only.",
       "priority": 415,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-07",
       "created_session": 1199,
       "source": "session-insight",
@@ -81,14 +81,17 @@
         "cost-tracking",
         "cleanup"
       ],
-      "commits": []
+      "commits": [
+        "94f9d29"
+      ],
+      "notes": "B#353 (s1209): Deprecated agent-reported cost path. Token-calc now authoritative in 15-cost-pipeline.sh. Agent-reported captured for dual-record only with fallback label."
     },
     {
       "id": "wq-417",
       "title": "Prioritize wq-415 \u2014 agent-reported cost path distorts averages",
       "description": "s1199 recorded $7.97 agent-reported vs typical $1.5-2.5 token-calc for B sessions. Agent-reported costs consistently diverge from token-calc. wq-415 (deprecate agent-reported path) already exists but is pending. This audit item flags it for priority pickup in next B session.",
       "priority": 417,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1206,
       "source": "audit-s1206",
@@ -96,7 +99,10 @@
         "audit",
         "cost-tracking"
       ],
-      "commits": []
+      "commits": [
+        "94f9d29"
+      ],
+      "notes": "B#353 (s1209): Deprecated agent-reported cost path. Token-calc now authoritative in 15-cost-pipeline.sh. Agent-reported captured for dual-record only with fallback label."
     }
   ]
 }

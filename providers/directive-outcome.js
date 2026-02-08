@@ -262,7 +262,7 @@ export function saveDirectiveOutcome(assignments, outcome, baseDir) {
   history.outcomes.push({
     ...assignments,
     session: assignments.sessionNum,     // wq-426: alias for consumer compatibility
-    mode: assignments.sessionType,       // alias for consumer compatibility
+    mode: assignments.sessionType || process.env.SESSION_TYPE || null,  // wq-452: fallback to env var
     addressed: outcome.addressed || [],  // promoted from outcome.addressed
     ignored: outcome.ignored || [],      // promoted from outcome.ignored
     outcome

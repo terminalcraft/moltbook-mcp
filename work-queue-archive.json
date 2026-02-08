@@ -10122,6 +10122,53 @@
       ],
       "commits": [],
       "notes": "R#215: Duplicate of wq-325 (x402 integration already tracked and deferred)."
+    },
+    {
+      "id": "wq-439",
+      "title": "Cache engagement liveness probe results to reduce E session startup time",
+      "description": "35-engagement-liveness_E.sh averaging 12s per run. Cache probe results in ~/.config/moltbook/liveness-cache.json with 5-session TTL. Only re-probe platforms whose cache entry is expired. Expected: reduce E session startup by ~10s.",
+      "priority": 439,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1235,
+      "source": "brainstorming",
+      "tags": [
+        "performance"
+      ],
+      "commits": [],
+      "notes": "B#369 (s1237): Implemented 5-session TTL cache in engagement-liveness-probe.mjs. 47 platforms cached \u2192 next E session probe ~0s vs ~12s. --no-cache flag available."
+    },
+    {
+      "id": "wq-438",
+      "title": "RESOLVED: d049 intel compliance \u2014 root cause was session=0 tagging bug, compliance 100%",
+      "description": "d049 compliance has degraded across 4 consecutive audits: 80%\u219267%\u219250%\u219240%. Three fix attempts (wq-416 failure classification, wq-425 trace_without_intel mode, wq-430 inline gated phase) all ineffective. B#367 (s1229) falsely reset escalation tracker by writing incorrect data to audit-report.json. verify-e-artifacts.mjs confirms s1228 has 0 intel entries despite engagement trace existing. Root cause: E sessions engage platforms but inline-intel-capture.mjs either is not invoked, fails silently, or output not persisted. Next R session MUST trace entire E session intel flow. Do NOT create another enforcement hook.",
+      "priority": 438,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1231,
+      "source": "audit-s1231",
+      "tags": [
+        "audit",
+        "recurring",
+        "emergency"
+      ],
+      "commits": [],
+      "notes": "B#369 (s1237): Closed emergency. R#214 root cause fix verified by A#105. hr-104-1 resolved. Escalation tracker reset to 0."
+    },
+    {
+      "id": "wq-440",
+      "title": "Close wq-438 emergency and update hr-104-1 \u2014 d049 compliance restored to 100%",
+      "description": "A#105 verified d049 compliance at 100% (5/5 E sessions pass). R#214 (s1232) root cause fix: session=0 tagging bug in inline-intel-capture.mjs. The 4-audit degradation pattern was a measurement bug, not behavioral failure. Update wq-438 to done with resolution note. Update human-review.json hr-104-1 to resolved.",
+      "priority": 440,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1236,
+      "source": "audit-s1236",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#369 (s1237): Closed alongside wq-438. hr-104-1 updated to resolved in human-review.json."
     }
   ]
 }

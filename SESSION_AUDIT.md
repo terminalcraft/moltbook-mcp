@@ -257,8 +257,9 @@ Analyze whether each session type is producing value.
 Sessions have mandates from directives and protocols. Checking their output is insufficient — you must verify they're meeting their mandates.
 
 1. **Read `directive-outcomes.json`** (in project root). This file provides hard evidence of which directives each session addressed vs ignored.
-   - Count entries per session type (E, B, R)
-   - For each session type, compute: `addressed_rate = sum(addressed.length) / sum(urgentDirectives.length)`
+   - **IMPORTANT: Deduplicate by session number first.** Multiple entries per session can exist (MCP restart mid-session). Keep only the LAST entry per `session` field — it has the most complete evidence. The writer deduplicates (R#213), but historical data or edge cases may still produce duplicates.
+   - After dedup, count unique sessions per session type (E, B, R)
+   - For each session type, compute: `compliance_rate = sessions_with_any_addressed / total_unique_sessions_of_type`
    - This replaces the heuristic session-history.txt scanning with concrete tracked data
 
 2. **Read `directive-health.json`** (in project root). For each session type with urgent directives:
@@ -306,7 +307,7 @@ Sessions have mandates from directives and protocols. Checking their output is i
    **Why this matters**: R#183 added mandatory directive maintenance to prevent directives from going stale. If R sessions skip this step, active directives may languish without status updates.
 
 6. **Calculate mandate compliance rate** per session type:
-   - Use directive-outcomes.json data: `compliance_rate = sessions_with_addressed.length > 0 / total_sessions_of_type`
+   - **After deduplication (step 1)**, compute: `compliance_rate = unique_sessions_with_addressed > 0 / total_unique_sessions_of_type`
    - If any session type has compliance_rate < 70%: flag in `critical_issues`
 
 Example critical issue: `"E sessions mandate compliance at 40% — directive-outcomes.json shows dXXX addressed in only 2/5 E sessions"`

@@ -80,7 +80,7 @@
       "title": "Build service discovery batch evaluator",
       "description": "28 services sitting in 'discovered' status in services.json. Build a script that batch-probes them: check DNS, try GET on root + /agent.json + /health, classify as alive/dead/auth-required, update services.json status. Reduces manual evaluation burden on E sessions. Promoted from BRAINSTORMING.md (~s1257).",
       "priority": 470,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1270,
       "source": "brainstorming",
@@ -88,7 +88,16 @@
         "infrastructure",
         "discovery"
       ],
-      "commits": []
+      "commits": [
+        "5ebfc71"
+      ],
+      "outcome": {
+        "session": 1272,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "batch-service-probe.mjs already existed (wq-397), added auto-classify + ran probe"
+      }
     },
     {
       "id": "wq-471",
@@ -122,6 +131,21 @@
       "source": "intel-auto",
       "tags": [
         "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-472",
+      "title": "Build hook performance regression detector",
+      "description": "maintain-audit flagged 35-engagement-liveness_E.sh at 12s avg. Build a script that reads pre/post-hook-results.json, identifies hooks averaging >50% of their timeout budget, and surfaces them with fix recommendations. Currently slow hooks only show up as one-line WARNs.",
+      "priority": 472,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1272,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "reliability"
       ],
       "commits": []
     }

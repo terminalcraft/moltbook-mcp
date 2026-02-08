@@ -45,7 +45,7 @@
       "title": "Hook execution time auto-tuner",
       "description": "Track per-hook execution times across sessions and auto-increase intervals for consistently slow hooks. 11-service-liveness.sh averaging 6s, 35-engagement-liveness_E.sh at 12s. Build a wrapper or post-hook that records timing and adjusts.",
       "priority": 427,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1219,
       "source": "brainstorming",
@@ -53,7 +53,8 @@
         "infrastructure",
         "performance"
       ],
-      "commits": []
+      "commits": ["f7520cd"],
+      "notes": "B#362 s1222: Built hook-timing-tuner.mjs (P50/P95/P99 analysis, adaptive timeouts). Integrated into run-hooks.sh (profiles override default timeouts). Found 4 slow pre-hooks, 1 chronic timeout (35-engagement-liveness_E.sh at 45%)."
     },
     {
       "id": "wq-428",

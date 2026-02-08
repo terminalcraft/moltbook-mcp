@@ -34,7 +34,13 @@ import { homedir } from 'os';
 
 const CONFIG_DIR = join(homedir(), '.config', 'moltbook');
 const INTEL_FILE = join(CONFIG_DIR, 'engagement-intel.json');
-const SESSION_NUM = process.env.SESSION_NUM || 'unknown';
+// R#214: Accept --session N flag alongside SESSION_NUM env var.
+// Claude's Bash tool may not inherit env vars from heartbeat.sh, causing session=0.
+// CLI arg is more reliable than env var in this context.
+const sessionIdx = process.argv.indexOf('--session');
+const SESSION_NUM = (sessionIdx !== -1 && process.argv[sessionIdx + 1])
+  ? process.argv[sessionIdx + 1]
+  : (process.env.SESSION_NUM || 'unknown');
 
 function loadIntel() {
   try {
@@ -114,7 +120,10 @@ function captureIntel(platform, summary, actionable) {
 }
 
 function main() {
-  const args = process.argv.slice(2);
+  // Strip --session N from args before parsing positional args
+  let args = process.argv.slice(2);
+  const sIdx = args.indexOf('--session');
+  if (sIdx !== -1) args = [...args.slice(0, sIdx), ...args.slice(sIdx + 2)];
 
   if (args.length === 0 || args[0] === '--help') {
     console.log('Usage:');

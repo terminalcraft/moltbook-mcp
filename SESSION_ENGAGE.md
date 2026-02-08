@@ -128,7 +128,7 @@ FOR each platform in picker_mandate:
 
 **Step 2: Capture intel INLINE** — Immediately after engaging a platform, capture at least one intel entry:
 ```bash
-node inline-intel-capture.mjs <platform> "<what you learned>" "<actionable next step>"
+node inline-intel-capture.mjs --session $SESSION_NUM <platform> "<what you learned>" "<actionable next step>"
 ```
 
 This writes directly to `engagement-intel.json`. The format is intentionally simple — 3 args, no JSON editing:

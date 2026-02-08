@@ -689,7 +689,39 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
       let archive = [];
       try { archive = JSON.parse(readFileSync(archivePath, 'utf8')); } catch {}
-      archive.push(...intel.map(e => ({ ...e, archived_session: COUNTER, consumed_session: COUNTER })));
+
+      // R#214: Fix session=0 tagging bug.
+      // inline-intel-capture.mjs uses SESSION_NUM env var, but Claude's Bash tool
+      // doesn't always inherit it, resulting in session:0 entries.
+      // Backfill: find the most recent E session from trace archive to attribute
+      // orphaned intel entries (session=0 or missing) to the correct E session.
+      let lastESession = 0;
+      try {
+        const traceArchivePath = join(STATE_DIR, 'engagement-trace-archive.json');
+        const tracePath = join(STATE_DIR, 'engagement-trace.json');
+        let allTraces = [];
+        try { allTraces = JSON.parse(readFileSync(traceArchivePath, 'utf8')); } catch {}
+        try {
+          const current = JSON.parse(readFileSync(tracePath, 'utf8'));
+          if (Array.isArray(current)) {
+            const archivedSessions = new Set(allTraces.map(t => t.session));
+            allTraces.push(...current.filter(t => !archivedSessions.has(t.session)));
+          }
+        } catch {}
+        if (allTraces.length > 0) {
+          lastESession = allTraces[allTraces.length - 1].session || 0;
+        }
+      } catch {}
+
+      archive.push(...intel.map(e => {
+        const entry = { ...e, archived_session: COUNTER, consumed_session: COUNTER };
+        // Backfill session=0 entries with last known E session number
+        if ((!entry.session || entry.session === 0) && lastESession > 0) {
+          entry.session = lastESession;
+          entry.session_backfilled = true;
+        }
+        return entry;
+      }));
       writeFileSync(archivePath, JSON.stringify(archive, null, 2) + '\n');
       writeFileSync(intelPath, '[]\n');
       result.intel_archived = intel.length;

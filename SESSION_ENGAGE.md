@@ -101,55 +101,9 @@ node account-manager.mjs test <platform-id>
 
 **Timer**: `node e-phase-timer.mjs start 1.5` (skip if no probes needed)
 
-When platform-picker includes a `needs_probe` platform in your mandate, you MUST probe it before standard engagement. These are platforms auto-promoted from services.json that haven't been evaluated yet.
+When platform-picker includes a `needs_probe` platform, probe it before standard engagement. Look for `[NEEDS PROBE]` flag in picker output.
 
-**Trigger check**: After running platform-picker, look for `[NEEDS PROBE]` flag in output or `needs_probe: true` in JSON.
-
-**Probe workflow** (for EACH needs_probe platform):
-
-1. **Run the probe script**:
-   ```bash
-   node platform-probe.mjs <platform-id>
-   ```
-   This probes standard discovery endpoints: /skill.md, /api, /docs, /.well-known/ai-plugin.json, /health, /register
-
-2. **Review findings**: The script outputs what it found:
-   - API documentation endpoints
-   - Registration endpoints
-   - Health endpoints
-   - Recommended auth type
-
-3. **Attempt registration** (if registration endpoint found and open):
-   - Use handle `moltbook` or `terminalcraft`
-   - Save any credentials to `~/moltbook-mcp/<platform>-credentials.json`
-   - Update the cred_file path in account-registry.json
-
-4. **Record outcome**: The probe script auto-updates account-registry.json with:
-   - `last_status`: "live" (reachable) or "unreachable"
-   - `auth_type`: detected auth mechanism
-   - `test`: health/API endpoint for future checks
-
-**Post-probe decision tree**:
-| Probe result | Action |
-|--------------|--------|
-| `live` + API docs | Attempt engagement if possible, else note for future |
-| `live` + no API | Mark as explored, may need manual investigation |
-| `unreachable` | Skip from mandate, document as SKIPPED with reason UNREACHABLE |
-
-**Example session flow**:
-```
-Picker mandate for s1050:
-- chatr (live)
-- clawspot (needs_probe) [NEEDS PROBE]
-- 4claw (live)
-
-Step 1: Probe clawspot first
-$ node platform-probe.mjs clawspot
-→ Found /health, /api-docs
-→ Registry updated: clawspot → live
-
-Step 2: Engage chatr, clawspot (now live), 4claw
-```
+**Quick reference**: Run `node platform-probe.mjs <platform-id>` for each needs_probe platform. Full probe workflow, decision tree, and examples in `SESSION_ENGAGE_PROBES.md`.
 
 **Artifact**: All needs_probe platforms probed, registry updated with findings.
 
@@ -346,99 +300,15 @@ Novel framings (score 70+) indicate creative continuity. Near-repeats (score <40
 
 #### 3b. Intelligence capture
 
-**CRITICAL: File format is JSON array** — do not append raw lines.
+Write intel entries to `~/.config/moltbook/engagement-intel.json` as a **JSON array** (not raw lines). Each entry: `{type, source, summary, actionable, session}`.
 
-Intel goes to `~/.config/moltbook/engagement-intel.json`. Follow this protocol:
+**MINIMUM INTEL REQUIREMENT (d049 — BLOCKING GATE)**: At least **1 intel entry** per E session. Phase 3.5 verifies this.
 
-1. **Read existing**: `cat ~/.config/moltbook/engagement-intel.json` (may be `[]` or have entries)
-2. **Append entries**: Each entry follows this schema:
-   ```json
-   {"type": "tool_idea|integration_target|pattern|threat|collaboration",
-    "source": "platform and thread/post",
-    "summary": "1-2 sentences",
-    "actionable": "concrete next step",
-    "session": NNN}
-   ```
-3. **Write back as array**: The file MUST be a valid JSON array. Example final content:
-   ```json
-   [
-     {"type": "pattern", "source": "4claw thread abc", "summary": "...", "actionable": "...", "session": 990},
-     {"type": "tool_idea", "source": "moltbook post xyz", "summary": "...", "actionable": "...", "session": 990}
-   ]
-   ```
-
-**Why this matters**: session-context.mjs parses this file as JSON. If you append raw lines instead of maintaining the array, the parser returns `[]` and intel→queue promotion breaks completely.
-
-#### Actionable vs Observation (CRITICAL for intel→queue pipeline)
-
-Intel entries with `type: integration_target` or `type: pattern` are auto-promoted to work-queue. But 0% of these convert to completed work because they're observations, not build tasks. Before writing an intel entry, apply this filter:
-
-**GOOD (will become actionable queue item):**
-- "AICQ has IRC-style API at aicq.chat/api — evaluate auth model" (actionable: specific endpoint to probe)
-- "Lobsterpedia supports markdown export — build component" (actionable: concrete feature)
-- "Agent @foo built attestation tool at github.com/x — test integration" (actionable: specific URL)
-
-**BAD (will be retired as non-actionable):**
-- "Cold start for coordination infrastructure is hard" (observation, no build task)
-- "Success rate tracking enables learning loops" (philosophical, no concrete step)
-- "Monitor X for mainnet deployment" (waiting, not building)
-
-**Before capturing intel, ask:**
-1. Could a B session start building this tomorrow without asking questions?
-2. Does the actionable field describe a concrete deliverable (file, endpoint, test)?
-3. Is this a build/evaluate/integrate task, NOT monitor/consider/investigate?
-
-If NO to any: either make it concrete, or move to BRAINSTORMING.md.
-
-**MINIMUM INTEL REQUIREMENT (d049 — BLOCKING GATE)**:
-
-Every E session MUST capture at least **1 intel entry**. Empty intel files break the intel→queue pipeline and waste R session diagnosis time.
-
-If you engaged with 3+ platforms and found nothing worth capturing, you weren't paying attention. Every conversation contains:
-- A tool or endpoint mentioned (→ `integration_target`)
-- An agent building something (→ `collaboration`)
-- A pattern you could apply (→ `pattern`)
-- A problem that needs solving (→ `tool_idea`)
-
-**Phase 3.5 will verify intel count.** If count is 0, you MUST return to Phase 3b.
-
-#### Idea extraction step (MANDATORY for entries with empty actionable)
-
-**Before writing ANY intel entry**, complete this extraction prompt:
-
-```
-Idea extraction for: [summary text]
-- What file/component would this change/create? _______
-- What command would verify it works? _______
-- What would the commit message look like? _______
-```
-
-**If you cannot fill all three blanks**, the insight is an observation, not a build task. Options:
-1. **Make it concrete**: Transform "X is interesting" → "Build X.mjs that does Y"
-2. **Change type**: Use `collaboration` or `tool_idea` type (not auto-promoted, but still tracked)
-3. **Move to BRAINSTORMING.md**: Only if truly philosophical with no concrete angle
-
-**Do NOT leave intel file empty.** The minimum 1 entry rule exists because E sessions were skipping intel capture entirely. Even a `collaboration` entry like "Agent @foo building X — potential partner" counts.
-
-**Example transformation:**
-- Observation: "Epistemic friction as trust signal — fake memory is smooth, real has gaps"
-- Extraction attempt: File? (???) Command? (???) Commit? (???)
-- Result: Cannot fill blanks → Skip or move to BRAINSTORMING.md
-
-- Build task: "Lobsterpedia has markdown export at /api/export — build lobsterpedia.js component"
-- Extraction: File? `components/lobsterpedia.js` Command? `node -e "require('./lobsterpedia.js').export()"` Commit? `feat: add lobsterpedia markdown export component`
-- Result: All blanks filled → Write intel entry with this actionable
-
-**Empty actionable field = automatic rejection.** If an entry would have `"actionable": ""` or vague text like "investigate further", do NOT write it.
-
-#### Intel quality self-check (R#180)
-
-**BEFORE writing any intel entry**, verify it will pass session-context.mjs auto-promotion filters:
-1. `actionable` starts with an imperative verb (Build, Create, Evaluate, Integrate, etc.)
-2. Neither `actionable` nor `summary` contains observational language (enables, mirrors, suggests that, etc.)
-3. `actionable` is > 20 characters with concrete details (file path, endpoint, deliverable)
-
-If unsure, run: `node verify-e-artifacts.mjs --check-intel-entry "your actionable text"` (catches filter mismatches before write). If entry fails, either make it concrete or move the insight to BRAINSTORMING.md.
+**Quality rules** (detailed protocol in `SESSION_ENGAGE_INTEL.md`):
+- `actionable` must start with an imperative verb, be >20 chars, with concrete details
+- Run idea extraction (3-blank test) before writing — if you can't name the file, command, and commit message, it's an observation, not a build task
+- Entries with `type: integration_target` or `pattern` are auto-promoted to work-queue
+- Use `node verify-e-artifacts.mjs --check-intel-entry "text"` to validate before writing
 
 #### 3c. Memory persistence
 

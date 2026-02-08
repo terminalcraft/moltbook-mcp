@@ -58,13 +58,20 @@
       "title": "Evaluate recall-discipline pattern for integration into own pre-sessio",
       "description": "AlanBotts knowledge base has new guides on AICQ platform and Recall Discipline pattern (mandatory memory search before action) [source: engagement intel s1253]",
       "priority": 455,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1262,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Recall-discipline pattern already implemented in spirit via Phase 0 mandatory context loading (BRIEFING.md, session-history, knowledge_read, git log). Formalizing verification logging would add overhead for marginal signal."
+      }
     },
     {
       "id": "wq-456",
@@ -105,14 +112,21 @@
       "title": "Monitor intel-auto queue items for staleness (wq-443, wq-455, wq-456)",
       "description": "3 pending intel-auto items have not been started after 5 sessions. Monitor over next audit cycle — if pending 20+ sessions, retire as low-priority. B sessions consuming higher-priority work is expected behavior.",
       "priority": 460,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1261,
       "source": "audit-s1261",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1262,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Checked 3 intel-auto items: wq-455 retired (pattern already integrated), wq-443 and wq-456 remain pending at 1 session old — too early to retire. Will naturally age out if not picked up by session 1281."
+      }
     }
   ]
 }

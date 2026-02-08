@@ -251,6 +251,7 @@ export function saveDirectiveOutcome(assignments, outcome, baseDir) {
   // entry.sessionType and entry.outcome.addressed, causing null reads.
   history.outcomes.push({
     ...assignments,
+    session: assignments.sessionNum,     // wq-426: alias for consumer compatibility
     mode: assignments.sessionType,       // alias for consumer compatibility
     addressed: outcome.addressed || [],  // promoted from outcome.addressed
     ignored: outcome.ignored || [],      // promoted from outcome.ignored

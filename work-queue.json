@@ -58,14 +58,15 @@
       "title": "Build JSON state file schema migration checker",
       "description": "directive-outcomes.json had legacy entries without the mode field (pre-wq-411). Build a startup validator that checks state files (directive-outcomes.json, engagement-intel.json, etc.) against expected schemas and auto-migrates missing fields.",
       "priority": 454,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1254,
       "source": "session-insight",
       "tags": [
         "infrastructure"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#372 s1259: Built schema-check.mjs with 6 state file schemas. Pre-session hook 03-schema-check.sh auto-migrates missing fields. Covers directive-outcomes.json, session-outcomes.json, engagement-intel.json, work-queue.json, engagement-state.json, rotation-state.json."
     },
     {
       "id": "wq-455",

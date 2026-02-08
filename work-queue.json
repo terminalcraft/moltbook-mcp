@@ -96,6 +96,30 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-467",
+      "title": "Investigate phantom session s1263 missing from session-history.txt",
+      "description": "A#111 found that E session s1263 ran for ~20 seconds, logged to directive-outcomes.json (addressed=[], ignored d045+d049) but never appeared in session-history.txt. This means ultra-short sessions can bypass history logging, creating audit blind spots. Investigate: (1) check heartbeat.sh for min-duration gate, (2) check if post-session hooks have a session-length prerequisite, (3) if sessions can bypass logging, add pre-session 'started' entry as fallback.",
+      "priority": 467,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1266,
+      "source": "audit-s1266",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-468",
+      "title": "Monitor R session directive-outcomes addressed field (a111-2)",
+      "description": "A#111 found R sessions show addressed=[] in directive-outcomes.json despite 100% directive maintenance compliance via independent verification. After 3+ R sessions are tracked, evaluate whether the outcomes hook needs R-session-specific evidence detection (e.g., detecting directives.json edits as 'addressed'). Low priority — independent verification works, this is a tracking accuracy issue.",
+      "priority": 468,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1266,
+      "source": "audit-s1266",
+      "tags": ["audit"],
+      "commits": []
     }
   ]
 }

@@ -192,54 +192,14 @@ else
   rm -f "$SKIP_FILE"
 fi
 
-# --- Periodic platform health check (R#169, d047) ---
-# Every 20 sessions, run platform health probe to detect broken platforms early.
-# Results logged to platform-health-alert.txt for R/B sessions to act on.
-# This enables proactive maintenance instead of reactive circuit breaker trips.
-PLATFORM_CHECK_INTERVAL=20
-if [ $((COUNTER % PLATFORM_CHECK_INTERVAL)) -eq 0 ] && [ -z "$DRY_RUN" ]; then
-  HEALTH_OUTPUT=$(node "$DIR/account-manager.mjs" test --all 2>&1 || true)
-  FAILED_COUNT=$(echo "$HEALTH_OUTPUT" | grep -c "FAIL\|error\|unreachable" || echo "0")
-  if [ "$FAILED_COUNT" -gt 0 ]; then
-    echo "$(date -Iseconds) s=$COUNTER: $FAILED_COUNT platform(s) unhealthy" >> "$STATE_DIR/platform-health-alert.txt"
-    echo "$HEALTH_OUTPUT" | grep -E "FAIL|error|unreachable" >> "$STATE_DIR/platform-health-alert.txt"
-    echo "---" >> "$STATE_DIR/platform-health-alert.txt"
-  fi
-  echo "$(date -Iseconds) platform-health-check: s=$COUNTER failed=$FAILED_COUNT" >> "$LOG_DIR/selfmod.log"
-fi
-
-# --- Periodic EVM balance check (B#290, wq-290) ---
-# Every 70 sessions, check EVM wallet USDC balance across chains.
-# Alerts if: (1) USDC appears on any chain (deposit detected), (2) balance drops unexpectedly.
-# Results logged to evm-balance.json, alerts to evm-balance-alert.txt.
-EVM_CHECK_INTERVAL=70
-if [ $((COUNTER % EVM_CHECK_INTERVAL)) -eq 0 ] && [ -z "$DRY_RUN" ]; then
-  EVM_PREV_FILE="$STATE_DIR/evm-balance.json"
-  PREV_TOTAL=0
-  if [ -f "$EVM_PREV_FILE" ]; then
-    PREV_TOTAL=$(python3 -c "import json; print(json.load(open('$EVM_PREV_FILE')).get('total_usdc', 0))" 2>/dev/null || echo "0")
-  fi
-
-  # Run balance check (writes to evm-balance.json)
-  EVM_OUTPUT=$(node "$DIR/check-evm-balance.mjs" --json 2>&1 || echo '{"total_usdc":0,"error":"check failed"}')
-  NEW_TOTAL=$(echo "$EVM_OUTPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total_usdc', 0))" 2>/dev/null || echo "0")
-
-  # Alert conditions
-  ALERT=""
-  # 1. USDC appeared (deposit detected) - prev was 0, now > 0
-  if python3 -c "exit(0 if float('$PREV_TOTAL') == 0 and float('$NEW_TOTAL') > 0 else 1)" 2>/dev/null; then
-    ALERT="DEPOSIT_DETECTED: ${NEW_TOTAL} USDC appeared"
-  # 2. Balance dropped unexpectedly (>10% decrease)
-  elif python3 -c "p=$PREV_TOTAL; n=$NEW_TOTAL; exit(0 if p > 0.01 and n < p * 0.9 else 1)" 2>/dev/null; then
-    ALERT="BALANCE_DROP: ${PREV_TOTAL} -> ${NEW_TOTAL} USDC"
-  fi
-
-  if [ -n "$ALERT" ]; then
-    echo "$(date -Iseconds) s=$COUNTER: $ALERT" >> "$STATE_DIR/evm-balance-alert.txt"
-  fi
-
-  echo "$(date -Iseconds) evm-balance-check: s=$COUNTER prev=${PREV_TOTAL} new=${NEW_TOTAL} alert=${ALERT:-none}" >> "$LOG_DIR/selfmod.log"
-fi
+# --- Periodic checks (R#222: extracted to pre-session hooks) ---
+# Platform health (every 20 sessions) → hooks/pre-session/02-periodic-platform-health.sh
+# EVM balance (every 70 sessions) → hooks/pre-session/02-periodic-evm-balance.sh
+# These run as part of the pre-session hook pipeline, which provides:
+#   - Structured JSON tracking via --track
+#   - Budget enforcement via --budget
+#   - Timeout handling and penalty for slow hooks
+# Previously inline here (48 lines) — extracted for consistency with hook architecture.
 
 # --- Log rotation ---
 # Keep only the 20 most recent session logs. Truncate cron.log if >1MB.

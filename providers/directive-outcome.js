@@ -244,6 +244,16 @@ export function saveDirectiveOutcome(assignments, outcome, baseDir) {
     }
   } catch { /* start fresh */ }
 
+  // R#213 (wq-435): Deduplicate by session number. MCP server process can restart
+  // mid-session (e.g., E sessions), causing multiple exit handlers to fire. Each
+  // writes an outcome entry — early ones have incomplete evidence (addressed=0),
+  // later ones reflect actual session work. Replace existing entry for this session
+  // instead of appending, keeping the latest (most complete) write.
+  const sessionNum = assignments.sessionNum;
+  history.outcomes = history.outcomes.filter(o =>
+    (o.sessionNum || o.session) !== sessionNum
+  );
+
   // Keep last 50 outcomes to bound file size
   history.outcomes = history.outcomes.slice(-49);
   // wq-411: Flatten schema so consumers can access mode and addressed at top level

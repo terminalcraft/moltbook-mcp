@@ -11,6 +11,13 @@
 # E session and records compliance regardless of what the agent did or didn't do.
 #
 # Created: B#330 (wq-375)
+# Enhanced: B#352 (wq-416) — failure mode classification
+#   Distinguishes between:
+#   - rate_limit: session hit API rate limit (0 tool calls, <10s duration)
+#   - platform_unavailable: Phase 2 reached but all platforms errored
+#   - truncated: Phase 2 reached but session truncated before intel capture
+#   - agent_skip: Phase 2+ reached with budget, agent didn't capture intel
+#   Only agent_skip is a true controllable violation.
 
 set -euo pipefail
 
@@ -23,6 +30,8 @@ STATE_DIR="$HOME/.config/moltbook"
 INTEL_FILE="$STATE_DIR/engagement-intel.json"
 TRACKING_FILE="$(dirname "$(dirname "$(dirname "$(realpath "$0")")")")/e-phase35-tracking.json"
 NUDGE_FILE="$STATE_DIR/d049-nudge.txt"
+TIMING_FILE="$STATE_DIR/e-phase-timing.json"
+TRACE_FILE="$STATE_DIR/engagement-trace.json"
 LOG_DIR="$STATE_DIR/logs"
 
 mkdir -p "$LOG_DIR"
@@ -46,11 +55,99 @@ if [[ "$INTEL_COUNT" -gt 0 ]]; then
   D049_COMPLIANT="true"
 fi
 
-echo "$(date -Iseconds) d049-enforcement: s=$SESSION intel_count=$INTEL_COUNT compliant=$D049_COMPLIANT" >> "$LOG_DIR/d049-enforcement.log"
+# Classify failure mode when non-compliant (wq-416)
+FAILURE_MODE="none"
+if [[ "$D049_COMPLIANT" == "false" ]]; then
+  FAILURE_MODE=$(python3 -c "
+import json, os, glob
 
-# Update e-phase35-tracking.json with authoritative data
-# B#340: Removed file-existence guard — python handles missing file gracefully
-# (creates fresh tracking structure). Previous guard silently skipped updates when file was absent.
+session = int('$SESSION')
+state_dir = '$STATE_DIR'
+timing_file = '$TIMING_FILE'
+trace_file = '$TRACE_FILE'
+log_dir = '$LOG_DIR'
+
+# Check 1: Did the session reach Phase 2?
+phase2_reached = False
+try:
+    with open(timing_file) as f:
+        timing = json.load(f)
+    # Check if any phase 2 entry belongs to current session window
+    # (timing file accumulates across sessions, check most recent phase 0)
+    phases = timing.get('phases', [])
+    # Find the last phase 0 start (marks current session start)
+    last_p0_idx = -1
+    for i, p in enumerate(phases):
+        if p.get('phase') == '0':
+            last_p0_idx = i
+    if last_p0_idx >= 0:
+        current_phases = phases[last_p0_idx:]
+        phase2_reached = any(p.get('phase') == '2' for p in current_phases)
+except:
+    pass
+
+# Check 2: Was the session a rate-limit / zero-tool-call failure?
+# Look for the session summary file — rate-limited sessions have 'Tools: 0'
+# and contain rate limit messages
+is_rate_limited = False
+summary_files = sorted(glob.glob(os.path.join(log_dir, '*.summary')))
+for sf in reversed(summary_files):
+    try:
+        with open(sf) as f:
+            content = f.read()
+        if f'Session: {session}' in content:
+            if 'Tools: 0' in content and ('hit your limit' in content.lower() or 'rate_limit' in content.lower() or 'resets' in content.lower()):
+                is_rate_limited = True
+            break
+    except:
+        continue
+
+# Check 3: Were all platforms unavailable?
+all_platforms_failed = False
+if phase2_reached:
+    try:
+        with open(trace_file) as f:
+            traces = json.load(f)
+        if isinstance(traces, list):
+            # Find trace for this session
+            session_trace = None
+            for t in traces:
+                if t.get('session') == session:
+                    session_trace = t
+            if isinstance(traces, dict) and traces.get('session') == session:
+                session_trace = traces
+            if session_trace:
+                engaged = session_trace.get('platforms_engaged', [])
+                skipped = session_trace.get('skipped_platforms', [])
+                mandate = session_trace.get('picker_mandate', [])
+                if len(mandate) > 0 and len(engaged) == 0 and len(skipped) == len(mandate):
+                    all_platforms_failed = True
+        elif isinstance(traces, dict) and traces.get('session') == session:
+            engaged = traces.get('platforms_engaged', [])
+            skipped = traces.get('skipped_platforms', [])
+            mandate = traces.get('picker_mandate', [])
+            if len(mandate) > 0 and len(engaged) == 0 and len(skipped) == len(mandate):
+                all_platforms_failed = True
+    except:
+        pass
+
+# Classify failure mode
+if is_rate_limited:
+    print('rate_limit')
+elif not phase2_reached:
+    print('truncated_early')
+elif all_platforms_failed:
+    print('platform_unavailable')
+elif phase2_reached:
+    print('agent_skip')
+else:
+    print('unknown')
+" 2>/dev/null || echo "unknown")
+fi
+
+echo "$(date -Iseconds) d049-enforcement: s=$SESSION intel_count=$INTEL_COUNT compliant=$D049_COMPLIANT failure_mode=$FAILURE_MODE" >> "$LOG_DIR/d049-enforcement.log"
+
+# Update e-phase35-tracking.json with authoritative data + failure mode
 {
   python3 -c "
 import json, sys
@@ -59,6 +156,7 @@ tracking_file = '$TRACKING_FILE'
 session = int('$SESSION')
 intel_count = int('$INTEL_COUNT')
 compliant = intel_count > 0
+failure_mode = '$FAILURE_MODE'
 
 try:
     with open(tracking_file) as f:
@@ -71,43 +169,58 @@ sessions = tracking.get('sessions', [])
 # Check if session already tracked
 existing = [s for s in sessions if s.get('session') == session]
 if existing:
-    # Update existing entry
     existing[0]['d049_compliant'] = compliant
     existing[0]['intel_count'] = intel_count
     existing[0]['enforcement'] = 'post-hook'
+    if failure_mode != 'none':
+        existing[0]['failure_mode'] = failure_mode
 else:
-    # Compute E number from session history
     e_num = len([s for s in sessions if s.get('session', 0) < session]) + 1
     for s in sessions:
         if s.get('e_number', 0) >= e_num:
             e_num = s['e_number'] + 1
-    sessions.append({
+    entry = {
         'session': session,
         'e_number': e_num,
         'd049_compliant': compliant,
         'intel_count': intel_count,
         'enforcement': 'post-hook',
         'notes': f'Post-hook enforcement: {intel_count} intel entries captured'
-    })
+    }
+    if failure_mode != 'none':
+        entry['failure_mode'] = failure_mode
+        mode_labels = {
+            'rate_limit': 'Rate-limited — session could not start',
+            'truncated_early': 'Truncated before Phase 2',
+            'platform_unavailable': 'All picker platforms returned errors',
+            'agent_skip': 'Agent reached Phase 2 but did not capture intel',
+            'unknown': 'Failure mode could not be determined'
+        }
+        entry['notes'] = f'd049 violation ({failure_mode}): {mode_labels.get(failure_mode, failure_mode)}'
+    sessions.append(entry)
 
 tracking['sessions'] = sessions
 with open(tracking_file, 'w') as f:
     json.dump(tracking, f, indent=2)
     f.write('\n')
 
-print(f'd049-enforcement: updated tracking for s{session} (compliant={compliant}, count={intel_count})')
+print(f'd049-enforcement: updated tracking for s{session} (compliant={compliant}, count={intel_count}, failure_mode={failure_mode})')
 " 2>/dev/null || echo "d049-enforcement: failed to update tracking"
 }
 
-# Write nudge for next E session if violated
+# Write nudge for next E session if violated — but only for controllable failures
 if [[ "$D049_COMPLIANT" == "false" ]]; then
-  cat > "$NUDGE_FILE" << EOF
+  if [[ "$FAILURE_MODE" == "rate_limit" ]]; then
+    echo "d049-enforcement: s$SESSION was rate-limited (uncontrollable), no nudge written"
+  elif [[ "$FAILURE_MODE" == "truncated_early" ]]; then
+    echo "d049-enforcement: s$SESSION truncated before Phase 2 (uncontrollable), no nudge written"
+  else
+    cat > "$NUDGE_FILE" << EOF
 ## d049 VIOLATION ALERT (from post-session hook)
 
 Previous E session (s$SESSION) completed with 0 intel entries.
-This is a BLOCKING violation of d049 (minimum 1 intel entry per E session).
-
-d049 compliance is at CRITICAL levels (40% and declining).
+Failure mode: $FAILURE_MODE
+This is a violation of d049 (minimum 1 intel entry per E session).
 
 **YOU MUST capture at least 1 intel entry this session.**
 
@@ -118,7 +231,8 @@ Don't wait for Phase 3b — capture intel as you go:
 
 If you reach Phase 3a without any intel entries, STOP and go back to capture intel.
 EOF
-  echo "d049-enforcement: nudge written for next E session (violation in s$SESSION)"
+    echo "d049-enforcement: nudge written for next E session (violation in s$SESSION, mode=$FAILURE_MODE)"
+  fi
 else
   # Clear nudge if compliant
   rm -f "$NUDGE_FILE"

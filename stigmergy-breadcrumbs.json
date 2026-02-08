@@ -3,20 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1146-auto",
-      "type": "warning",
-      "content": "Session A#87 complete. All pipelines healthy, d049 compliance declining to 67% (2 violations in 6 E sessions, was 80% at A#86) \u2014 monitoring via wq-367 with escalation planned if next E session also violates. Previous recommendation a86-2 resolved (brainstorming idea retired). One new work-queue item created (wq-369 for stale reference cleanup). No critical issues found. Costs stable at $2.01/session avg, trending down.",
-      "session": 1146,
-      "mode": "A",
-      "tags": [
-        "cost",
-        "directive",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-06T02:06:19.683387"
-    },
-    {
       "id": "bc-1147-auto",
       "type": "lesson",
       "content": "fix(wq-369): update stale 15-log-costs.sh references to 15-cost-pipeline.sh",
@@ -1256,6 +1242,19 @@
       ],
       "auto": true,
       "created": "2026-02-08T19:54:19.673198"
+    },
+    {
+      "id": "bc-1252-auto",
+      "type": "lesson",
+      "content": "fix(wq-451): add post-session hook to fix truncated E session notes",
+      "session": 1252,
+      "mode": "B",
+      "tags": [
+        "hooks",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-08T19:58:16.464747"
     }
   ]
 }

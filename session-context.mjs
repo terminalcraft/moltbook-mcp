@@ -814,12 +814,15 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     result.intake_status = 'unknown:no-directives-json';
   }
 
-  // --- Assemble full R session prompt block (R#52) ---
+  // --- Assemble full R session prompt block (R#52, R#209 mode gate) ---
   // Previously heartbeat.sh read CTX_ vars and re-assembled markdown in 40 lines of bash.
   // Now session-context.mjs outputs the complete block, ready to inject.
-  // R counter: read from state file. Heartbeat increments this AFTER session-context
-  // runs for R sessions, so for R mode we predict +1. For B→R downgrades, heartbeat
-  // will override CTX_R_PROMPT_BLOCK's counter via sed. Acceptable approximation.
+  // R#209: Gate behind MODE === 'R'. This block reads r-session-impact.json, human-review.json,
+  // engagement-trace-archive.json, engagement-intel-archive.json — ~6 file reads + JSON parses
+  // only consumed by R sessions. B→R downgrades trigger heartbeat.sh recomputation (line 136-143),
+  // so skipping here for non-R modes is safe. Previously ran for all modes (R#51 removed the
+  // gate to fix B→R downgrades, but the recomputation mechanism was added later in R#59).
+  if (MODE === 'R') {
   const rCounterPath = join(STATE_DIR, 'r_session_counter');
   let rCount = '?';
   try {
@@ -1028,6 +1031,7 @@ This is R session #${rCount}. Follow the checklist in SESSION_REFLECT.md.
 ${health}${impactSummary}${intelPromoSummary}${intelCaptureWarning}
 
 ${intakeBlock}${urgent}`;
+  } // end MODE === 'R' gate (R#209)
 }
 markTiming('r_session_context');
 

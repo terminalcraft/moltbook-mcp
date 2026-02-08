@@ -75,7 +75,7 @@
       "title": "Add tests for audit-report.json generation",
       "description": "audit-report.json is touched by 4+ A sessions but has no tests. Write unit tests verifying: (1) report schema matches consumers, (2) recommended_actions format is valid, (3) delta_from_s<prev> computes correctly, (4) session field population. Stabilizes the A session output pipeline.",
       "priority": 429,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1220,
       "source": "brainstorming",
@@ -83,7 +83,8 @@
         "testing",
         "audit"
       ],
-      "commits": []
+      "commits": ["a6a9d69"],
+      "notes": "B#362 s1222: Added 22 tests (52→74 total) in 4 new sections: delta computation, session field population, consumer schema compatibility, audit-stats→report field mapping. All 4 requirements covered."
     },
     {
       "id": "wq-430",

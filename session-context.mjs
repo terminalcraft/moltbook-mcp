@@ -94,6 +94,7 @@ const depsReady = (item) => !item.deps?.length || item.deps.every(d => {
       result.deduped.push(removed.id + ': ' + removed.title);
     }
     wqDirty = true;
+    queueCtx.invalidate(); // R#218: reset caches after queue mutation
   }
 }
 
@@ -132,29 +133,59 @@ markTiming('queue_context');
 // Items may have complexity: "S" | "M" | "L". Default is "M" if unset.
 // When remaining budget is tight (detected via BUDGET_CAP env), prefer smaller tasks.
 // Fallback (R#62): if queue is empty, extract a brainstorming idea as a fallback task.
-// Shared helper: compute max wq-NNN id from queue + archive (R#78, wq-387).
-// Checks both active queue and archive to prevent ID collisions after archiving.
-function getMaxQueueId(queue) {
-  let max = queue.reduce((m, i) => {
-    const n = parseInt((i.id || '').replace('wq-', ''), 10);
-    return isNaN(n) ? m : Math.max(m, n);
-  }, 0);
-  // Also check archive for retired/done IDs (wq-387: prevents ID reuse)
-  try {
-    const archivePath = join(DIR, 'work-queue-archive.json');
-    if (existsSync(archivePath)) {
-      const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
-      const archived = archive.archived || archive;
-      if (Array.isArray(archived)) {
-        for (const item of archived) {
-          const n = parseInt((item.id || '').replace('wq-', ''), 10);
-          if (!isNaN(n) && n > max) max = n;
+// R#218: Shared QueueContext — caches expensive computed values that were previously
+// recomputed in every section (maxId 4x, queueTitles 5x, pendingCount 6x).
+// Each getter lazily computes on first access, then returns cached result.
+// Sections that mutate the queue call queueCtx.invalidate() to reset caches.
+const queueCtx = {
+  _maxId: null,
+  _titles: null,
+  _pendingCount: null,
+  get maxId() {
+    if (this._maxId !== null) return this._maxId;
+    let max = queue.reduce((m, i) => {
+      const n = parseInt((i.id || '').replace('wq-', ''), 10);
+      return isNaN(n) ? m : Math.max(m, n);
+    }, 0);
+    try {
+      const archivePath = join(DIR, 'work-queue-archive.json');
+      if (existsSync(archivePath)) {
+        const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
+        const archived = archive.archived || archive;
+        if (Array.isArray(archived)) {
+          for (const item of archived) {
+            const n = parseInt((item.id || '').replace('wq-', ''), 10);
+            if (!isNaN(n) && n > max) max = n;
+          }
         }
       }
-    }
-  } catch { /* archive missing or malformed — use queue max only */ }
-  return max;
-}
+    } catch { /* archive missing or malformed — use queue max only */ }
+    this._maxId = max;
+    return max;
+  },
+  get titles() {
+    if (this._titles !== null) return this._titles;
+    this._titles = queue.map(i => i.title);
+    return this._titles;
+  },
+  get pendingCount() {
+    if (this._pendingCount !== null) return this._pendingCount;
+    this._pendingCount = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+    return this._pendingCount;
+  },
+  /** Call after mutating queue (push, splice, status change) to reset caches */
+  invalidate() {
+    this._maxId = null;
+    this._titles = null;
+    this._pendingCount = null;
+  },
+  /** Allocate the next N queue IDs, returning base offset. Bumps cached maxId. */
+  allocateIds(count) {
+    const base = this.maxId;
+    this._maxId = base + count;
+    return base;
+  }
+};
 
 // Shared fuzzy title matcher (R#79 — was duplicated in 3 places with slight variations).
 // Checks if a candidate title is "close enough" to any existing queue title to be a duplicate.
@@ -209,8 +240,7 @@ if (MODE === 'B' && pending.length > 0) {
     const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
     // Filter out ideas already in the work queue (by fuzzy title match).
     // Prevents fallback from assigning work that's already queued/blocked/done.
-    const queueTitles = queue.map(i => i.title);
-    const fresh = ideas.filter(idea => !isTitleDupe(idea[1].trim(), queueTitles));
+    const fresh = ideas.filter(idea => !isTitleDupe(idea[1].trim(), queueCtx.titles));
     if (fresh.length > 0) {
       const idea = fresh[0];
       result.wq_item = `BRAINSTORM-FALLBACK: ${idea[1].trim()} — ${idea[2].trim()}`;
@@ -237,9 +267,9 @@ if (MODE === 'B' && pending.length > 0) {
   }
   if (unblocked.length > 0) {
     wqDirty = true;
+    queueCtx.invalidate(); // R#218: reset after status changes
     result.unblocked = unblocked;
-    // Recompute pending after unblock
-    result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+    result.pending_count = queueCtx.pendingCount;
   }
 }
 markTiming('blocker_check');
@@ -252,14 +282,13 @@ markTiming('blocker_check');
 // R#72: Dynamic buffer — when queue has 0 pending items (starvation), lower buffer
 // from 3 to 1 so that even 2 brainstorming ideas can produce 1 queue item.
 if (MODE === 'B' || MODE === 'R') {
-  const currentPending = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+  const currentPending = queueCtx.pendingCount;
   if (currentPending < 3) {
     const bsPath = join(DIR, 'BRAINSTORMING.md');
     if (existsSync(bsPath)) {
       const bs = readFileSync(bsPath, 'utf8');
       const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
-      const queueTitles = queue.map(i => i.title);
-      const fresh = ideas.filter(idea => !isTitleDupe(idea[1].trim(), queueTitles));
+      const fresh = ideas.filter(idea => !isTitleDupe(idea[1].trim(), queueCtx.titles));
       // R#72/R#81: Dynamic buffer scales with queue deficit.
       // Old logic: binary 1 (starvation) or 3 (normal). Problem: with 1 pending and
       // 3 brainstorm ideas, buffer=3 blocked all promotions even though queue needed 2 more.
@@ -268,12 +297,12 @@ if (MODE === 'B' || MODE === 'R') {
       const deficit = 3 - currentPending;
       const BS_BUFFER = Math.max(1, 3 - deficit);
       const promotable = fresh.length > BS_BUFFER ? fresh.slice(0, fresh.length - BS_BUFFER) : [];
-      const maxId = getMaxQueueId(queue);
+      const baseId = queueCtx.allocateIds(promotable.length); // R#218: cached ID allocation
       const promoted = [];
       for (let i = 0; i < promotable.length && currentPending + promoted.length < 3; i++) {
         const title = promotable[i][1].trim();
         const desc = promotable[i][2].trim();
-        const newId = `wq-${String(maxId + 1 + i).padStart(3, '0')}`;
+        const newId = `wq-${String(baseId + 1 + i).padStart(3, '0')}`;
         const item = {
           id: newId,
           title: title,
@@ -290,8 +319,9 @@ if (MODE === 'B' || MODE === 'R') {
       }
       if (promoted.length > 0) {
         wqDirty = true;
+        queueCtx.invalidate(); // R#218: reset after queue mutation
         result.auto_promoted = promoted;
-        result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+        result.pending_count = queueCtx.pendingCount;
 
         // R#66: Remove promoted ideas from BRAINSTORMING.md to prevent stale duplicates.
         let updated = bs;
@@ -342,8 +372,8 @@ if (MODE === 'B') {
       ];
       const isFalsePositive = (line) => FALSE_POSITIVE_PATTERNS.some(p => p.test(line));
 
-      const maxId = getMaxQueueId(queue);
-      const queueTitles = queue.map(i => i.title.toLowerCase());
+      const todoBaseId = queueCtx.allocateIds(3); // R#218: pre-allocate up to 3 IDs
+      const todoTitlesLower = queueCtx.titles.map(t => t.toLowerCase());
       const ingested = [];
       for (let i = 0; i < todoLines.length && i < 3; i++) {
         const raw = todoLines[i][1].trim();
@@ -353,8 +383,8 @@ if (MODE === 'B') {
         if (!/\bTODO\b|\bFIXME\b|\bHACK\b|\bXXX\b/i.test(raw)) continue;
         // Skip if already queued (fuzzy match on first 30 chars)
         const norm = raw.toLowerCase().substring(0, 30);
-        if (queueTitles.some(qt => qt.includes(norm) || norm.includes(qt.substring(0, 20)))) continue;
-        const newId = `wq-${String(maxId + 1 + ingested.length).padStart(3, '0')}`;
+        if (todoTitlesLower.some(qt => qt.includes(norm) || norm.includes(qt.substring(0, 20)))) continue;
+        const newId = `wq-${String(todoBaseId + 1 + ingested.length).padStart(3, '0')}`;
         queue.push({
           id: newId,
           title: `TODO followup: ${raw.substring(0, 80)}`,
@@ -371,8 +401,9 @@ if (MODE === 'B') {
       }
       if (ingested.length > 0) {
         wqDirty = true;
+        queueCtx.invalidate(); // R#218: reset after queue mutation
         result.todo_ingested = ingested;
-        result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+        result.pending_count = queueCtx.pendingCount;
       }
     }
   }
@@ -389,15 +420,14 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     const patterns = JSON.parse(patternsJson);
     const signals = patterns?.friction_signals || [];
     if (signals.length > 0) {
-      const maxId = getMaxQueueId(queue);
-      const queueTitles = queue.map(i => i.title);
+      const frictionBaseId = queueCtx.allocateIds(2); // R#218: pre-allocate up to 2 IDs
       const ingested = [];
       for (let i = 0; i < signals.length && i < 2; i++) {
         const sig = signals[i];
         const title = sig.suggestion || `Address ${sig.type} friction`;
         // Skip if already queued (fuzzy match)
-        if (isTitleDupe(title, queueTitles)) continue;
-        const newId = `wq-${String(maxId + 1 + ingested.length).padStart(3, '0')}`;
+        if (isTitleDupe(title, queueCtx.titles)) continue;
+        const newId = `wq-${String(frictionBaseId + 1 + ingested.length).padStart(3, '0')}`;
         queue.push({
           id: newId,
           title: title,
@@ -413,8 +443,9 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       }
       if (ingested.length > 0) {
         wqDirty = true;
+        queueCtx.invalidate(); // R#218: reset after queue mutation
         result.friction_ingested = ingested;
-        result.pending_count = queue.filter(i => i.status === 'pending' && depsReady(i)).length;
+        result.pending_count = queueCtx.pendingCount;
       }
     }
   } catch (e) {
@@ -607,8 +638,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     // R#149: Fixed bug — loop was using intel.find() which always returned the same
     // entry. Now we iterate directly over the qualifying intel entries.
     if (actions.queue.length > 0 && result.pending_count < 5) {
-      const maxId = getMaxQueueId(queue);
-      const queueTitles = queue.map(i => i.title);
+      const intelBaseId = queueCtx.allocateIds(2); // R#218: pre-allocate up to 2 IDs
       const promoted = [];
       // Get qualifying entries (same criteria as actions.queue population above)
       // R#157: Added 'tool_idea' to qualifying types. tool_idea entries contain
@@ -653,8 +683,8 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
         const title = (entry.actionable || '').substring(0, 70).replace(/\.+$/, '');
         const desc = entry.summary || '';
         // Skip if already queued
-        if (isTitleDupe(title, queueTitles)) continue;
-        const newId = `wq-${String(maxId + 1 + promoted.length).padStart(3, '0')}`;
+        if (isTitleDupe(title, queueCtx.titles)) continue;
+        const newId = `wq-${String(intelBaseId + 1 + promoted.length).padStart(3, '0')}`;
         queue.push({
           id: newId,
           title: title,
@@ -667,7 +697,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
           commits: []
         });
         promoted.push(newId + ': ' + title);
-        queueTitles.push(title); // Prevent duplicates within same batch
+        queueCtx.invalidate(); // R#218: reset so next isTitleDupe sees new entry
         // Mark entry as promoted to avoid re-processing if intel isn't cleared
         entry._promoted = true;
       }

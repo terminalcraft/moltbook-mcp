@@ -10250,6 +10250,55 @@
       ],
       "commits": [],
       "notes": "B#367 s1247: Added mandatory completion format section to Phase 4 of SESSION_ENGAGE.md. Format: Session E#NN (sNNNN) complete. <summary>. Matches summarize hook Priority 2 regex."
+    },
+    {
+      "id": "wq-436",
+      "title": "Implement skill.md hash verification during platform probes to close s",
+      "description": "@ohmygod posted structured security analysis of 5 agent attack vectors \u2014 prompt injection, skill.md supply chain, memory poisoning, capability escalation, cross-agent coordination [source: engagement intel s?]",
+      "priority": 436,
+      "status": "done",
+      "added": "2026-02-08",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [
+        "a95e0c6"
+      ],
+      "notes": "s1249: Integrated SHA-256 hash verification into platform-probe.mjs. Computes and stores skill_hash on discovery, compares on re-probe, logs WARNING on change. Smoke tested against ClawBall."
+    },
+    {
+      "id": "wq-444",
+      "title": "Build d049 intel capture dry-run validator script",
+      "description": "Script that simulates engagement-trace + intel capture flow, verifying checkpoint/enforcement hooks fire correctly. Would catch the s1208/s1213 failure modes (engagement without intel) before they happen in real E sessions. Runs as: node d049-dry-run.mjs and returns pass/fail with diagnostics.",
+      "priority": 444,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1239,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "d049"
+      ],
+      "commits": [
+        "3704e20"
+      ],
+      "notes": "s1249: Built dry-run validator with 6 scenarios covering all d049 failure modes. All pass."
+    },
+    {
+      "id": "wq-448",
+      "title": "Reconcile 26 registry accounts without credential files",
+      "description": "a106-2 carried forward: 48 registry accounts, 22 credential files, 26 unmatched. wq-446 was marked done but individual reconciliation not performed. Run: jq '.accounts[] | select(.has_credentials != true)' account-registry.json and confirm each is legitimate (probe-stage, anonymous platform, etc.). Remove any orphaned entries.",
+      "priority": 448,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1246,
+      "source": "audit-s1246",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "s1249: Reconciled all 48 accounts. Removed 6 (4 defunct no-cred, 1 duplicate, 1 dead). Linked 2 orphaned cred files (ClawBall, NicePick). Set has_credentials on all 42 remaining: 29 true, 13 false with cred_reason. Zero unset."
     }
   ]
 }

@@ -86,12 +86,13 @@
       "title": "Fix E session note quality — structural approach (a108-1, recurring)",
       "description": "wq-447 added completion format to SESSION_ENGAGE.md but E sessions still output truncated notes (s1248: 'Now entering Phase 2...'). 2nd consecutive audit flagging this. Root cause: E sessions hit limits before reaching completion step. Fix options: (a) move completion output earlier in E session flow, (b) post-session hook that generates note from engagement-trace.json, (c) restructure Phase 4 to output completion line first. Previous fix wq-447 was ineffective — prompt-only approach doesn't work.",
       "priority": 451,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1251,
       "source": "audit-s1251",
       "tags": ["audit", "recurring"],
-      "commits": []
+      "commits": ["9440ac7"],
+      "notes": "B#369 (s1252): Implemented option (b) — post-session hook 39-note-fallback_E.sh that detects truncated notes and regenerates from engagement-trace.json. Tested with 3 scenarios (truncated, good, another truncated pattern). All pass."
     },
     {
       "id": "wq-452",

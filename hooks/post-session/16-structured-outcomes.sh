@@ -19,7 +19,7 @@ import json
 try:
     data = json.load(open('$COST_FILE'))
     matches = [e for e in data if e.get('session') == ${SESSION_NUM:-0}]
-    print(matches[-1]['spent'] if matches else 0)
+    print(matches[-1].get('cost', matches[-1].get('spent', 0)) if matches else 0)
 except: print(0)
 " 2>/dev/null || echo 0)
 

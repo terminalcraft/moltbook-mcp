@@ -73,7 +73,7 @@ entry = {
     'date': '$(date -Iseconds)',
     'session': int('${SESSION_NUM:-0}'),
     'mode': '${MODE_CHAR:-?}',
-    'spent': float('${SPENT}'),
+    'cost': float('${SPENT}'),
     'source': '${SOURCE}'
 }
 data = json.load(open('$COST_FILE'))
@@ -121,7 +121,7 @@ if len(data) < 5:
     sys.exit(0)
 
 # === Step 2: Anomaly detection ===
-mode_costs = [e['spent'] for e in data if e['mode'] == mode and e['session'] != session_num]
+mode_costs = [e['cost'] for e in data if e['mode'] == mode and e['session'] != session_num]
 if len(mode_costs) >= 5:
     avg = sum(mode_costs) / len(mode_costs)
     ratio = this_cost / avg if avg > 0 else 0
@@ -166,7 +166,7 @@ if len(mode_costs) >= 5:
 if len(data) >= 10:
     by_mode = defaultdict(list)
     for e in data:
-        by_mode[e['mode']].append(e['spent'])
+        by_mode[e['mode']].append(e['cost'])
 
     trends = {'generated': datetime.now().isoformat(), 'session': session_num, 'modes': {}, 'warnings': []}
     for m, costs in by_mode.items():
@@ -201,8 +201,8 @@ if len(data) >= 10:
     for e in data:
         m = e["mode"]
         cap = CAPS.get(m, 10)
-        util = (e["spent"] / cap * 100) if cap > 0 else 0
-        by_mode_util[m].append({"session": e.get("session", 0), "spent": e["spent"], "cap": cap, "util_pct": round(util, 1)})
+        util = (e["cost"] / cap * 100) if cap > 0 else 0
+        by_mode_util[m].append({"session": e.get("session", 0), "spent": e["cost"], "cap": cap, "util_pct": round(util, 1)})
 
     report = {"generated": datetime.now().isoformat(), "session": session_num, "modes": {}, "recommendations": []}
     for m, entries in by_mode_util.items():
@@ -233,9 +233,9 @@ if mode == "R":
     if len(r_sessions) >= 3:
         recent = r_sessions[-5:]
         budget = 5.0
-        low = [e for e in recent if e["spent"] / budget < 0.20]
+        low = [e for e in recent if e["cost"] / budget < 0.20]
         if len(low) >= 3:
-            avg_spent = sum(e["spent"] for e in recent) / len(recent)
+            avg_spent = sum(e["cost"] for e in recent) / len(recent)
             avg_pct = avg_spent / budget * 100
             with open(nudge_file, "w") as f:
                 f.write(f"## Budget utilization alert (R sessions)\n")

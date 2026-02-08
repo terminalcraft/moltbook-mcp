@@ -24,7 +24,7 @@ def load_data():
             if s:
                 sessions.setdefault(s, {})
                 sessions[s]["mode"] = e.get("mode", "?")
-                sessions[s]["cost"] = e.get("spent", 0)
+                sessions[s]["cost"] = e.get("cost", e.get("spent", 0))
                 sessions[s]["cost_source"] = e.get("source", "unknown")
 
     # Session history (has commit counts)

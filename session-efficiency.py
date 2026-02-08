@@ -62,7 +62,7 @@ def load_costs():
     if not COST_FILE.exists():
         return {}
     data = json.loads(COST_FILE.read_text())
-    return {e["session"]: e["spent"] for e in data if "session" in e}
+    return {e["session"]: e.get("cost", e.get("spent", 0)) for e in data if "session" in e}
 
 
 def main():

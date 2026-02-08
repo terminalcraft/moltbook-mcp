@@ -144,8 +144,8 @@ def analyze():
     # Recent trend (last 20 sessions)
     print("\n--- Recent Trend (last 20) ---")
     recent = costs[-20:]
-    first_half = [e['spent'] for e in recent[:10]]
-    second_half = [e['spent'] for e in recent[10:]]
+    first_half = [e.get('cost', e.get('spent', 0)) for e in recent[:10]]
+    second_half = [e.get('cost', e.get('spent', 0)) for e in recent[10:]]
     avg1 = statistics.mean(first_half)
     avg2 = statistics.mean(second_half)
     direction = "↑" if avg2 > avg1 else "↓"

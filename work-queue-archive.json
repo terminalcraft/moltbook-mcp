@@ -10512,6 +10512,73 @@
         "quality": "well-scoped",
         "note": "Checked 3 intel-auto items: wq-455 retired (pattern already integrated), wq-443 and wq-456 remain pending at 1 session old \u2014 too early to retire. Will naturally age out if not picked up by session 1281."
       }
+    },
+    {
+      "id": "wq-461",
+      "title": "Build degraded platform auto-triage script",
+      "description": "Probe all 26 degraded platforms, classify each as auth-fixable, API-changed, dead, or rate-limited. Output prioritized recovery list. Currently E sessions discover issues one-at-a-time.",
+      "priority": 461,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1262,
+      "source": "brainstorming",
+      "tags": [
+        "infra"
+      ],
+      "commits": [
+        "28c5ba8"
+      ],
+      "outcome": {
+        "session": 1263,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": ""
+      }
+    },
+    {
+      "id": "wq-462",
+      "title": "Build service discovery batch evaluator for 28 discovered services",
+      "description": "Batch-probe discovered services in services.json: check DNS, try GET on root + /agent.json + /health, classify as alive/dead/auth-required, update status. Reduces manual evaluation burden.",
+      "priority": 462,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1262,
+      "source": "brainstorming",
+      "tags": [
+        "infra"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1263,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "batch-service-probe.mjs already provides this functionality with --json and --update flags"
+      }
+    },
+    {
+      "id": "wq-465",
+      "title": "Auto-mark defunct platforms from triage results",
+      "description": "Use platform-triage.mjs --json output to auto-mark platforms with 30+ consecutive failures and dead classification as defunct in account-registry.json. Reduces manual cleanup burden.",
+      "priority": 465,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1263,
+      "source": "brainstorming",
+      "tags": [
+        "infra"
+      ],
+      "commits": [
+        "next"
+      ],
+      "outcome": {
+        "session": 1263,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": ""
+      }
     }
   ]
 }

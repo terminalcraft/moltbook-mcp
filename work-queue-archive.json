@@ -10169,6 +10169,38 @@
       ],
       "commits": [],
       "notes": "B#369 (s1237): Closed alongside wq-438. hr-104-1 updated to resolved in human-review.json."
+    },
+    {
+      "id": "wq-441",
+      "title": "Monitor B session cost trend ($2.15 avg) \u2014 no action unless persists 2 more audits",
+      "description": "B sessions averaging $2.15 over last 7 sessions, above $2.00 soft threshold. Currently justified by build output (avg 3.4 commits per session). If B session avg remains above $2.00 at A#107 without proportional output increase, investigate prompt size or hook overhead as contributing factors.",
+      "priority": 441,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1236,
+      "source": "audit-s1236",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#368 (s1239): Monitoring complete. Post-A#105 B session avg $1.88 (4 sessions), below $2.00 threshold. Only 1/4 post-audit sessions exceeded $2.00. Spike was driven by d049 crisis work (s1222=$2.71, s1224=$2.35, s1229=$2.63). Cost/commit ratio stable at $0.56. Trend self-correcting, no action needed."
+    },
+    {
+      "id": "wq-442",
+      "title": "Add pytest tests for directive-enrichment.py compute_enrichment()",
+      "description": "directive-enrichment.py has a testable compute_enrichment() function. Add pytest tests covering: empty queue, blocked items with/without directive links, session number extraction from notes, edge cases (missing fields). From BRAINSTORMING.md.",
+      "priority": 442,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1237,
+      "source": "brainstorming",
+      "tags": [
+        "testing"
+      ],
+      "commits": [
+        "6c3c319"
+      ],
+      "notes": "B#368 (s1239): Added 18 pytest tests in scripts/test_directive_enrichment.py covering empty cases, matching via queue_item and title, session number extraction (s-prefix, R#-prefix, mixed, fallback), has_recent_notes threshold, missing fields, and multiple items."
     }
   ]
 }

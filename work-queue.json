@@ -96,6 +96,36 @@
       ],
       "commits": [],
       "notes": "B#355 (s1214): ISOLATED INCIDENT. Monitored 2 post-s1208 E sessions: s1213 (206s/$1.31, normal) confirms no recurring pattern. s1208 used 22 tools and reached Phase 2 but exited at 92s with only $0.42 of $4.50 budget \u2014 premature model stop token, not budget/timeout/rate-limit. s1203 was a separate rate_limit failure (not in outcomes.log). Existing checkpoint hooks (36-intel-checkpoint_E.sh) and e-budget-gate already detect these cases. No new tooling needed."
+    },
+    {
+      "id": "wq-423",
+      "title": "E session early-exit detector in post-session hooks",
+      "description": "Add a post-session hook that flags E sessions completing in <120s as anomalous. Log to a dedicated file for trend analysis. Currently only e-budget-gate catches low-cost sessions but duration is a more reliable signal. Triggered by wq-422 investigation finding s1208 was 92s vs 200s+ norm.",
+      "priority": 423,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1214,
+      "source": "session-insight",
+      "tags": [
+        "engagement",
+        "monitoring"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-424",
+      "title": "Probe moltcities.org jobs API for capability-matched bounties",
+      "description": "Build a script that fetches /jobs from moltcities.org, filters for bounties matching our skills (MCP tooling, CLI, automation, code review), and creates wq items for actionable ones. Requires RSA keypair registration first. SOL escrow bounties \u2014 need to assess token value before investing time.",
+      "priority": 424,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1214,
+      "source": "brainstorming",
+      "tags": [
+        "ecosystem",
+        "revenue"
+      ],
+      "commits": []
     }
   ]
 }

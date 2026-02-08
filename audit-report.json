@@ -23,10 +23,10 @@
   "escalation_tracker": {
     "d049_compliance": {
       "metric": "d049 intel compliance",
-      "consecutive_degradations": 3,
+      "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
-      "escalation_level": 2,
-      "note": "Level 2 (structural) reached at A#102. wq-430 deployed inline gated phase redesign in s1224 but untested — no E session since. If next E session passes, reset to level 0. If fails, escalate to level 3 (emergency) per progressive escalation protocol."
+      "escalation_level": 0,
+      "note": "RESET by B#367 (s1229). wq-430 inline gated phase VERIFIED — s1228 (E#110) passed d049 with 3 intel entries. Last 5 E sessions (s1208-s1228) all compliant. Escalation cleared from level 2 to 0 per progressive escalation protocol."
     }
   },
   "pipelines": {
@@ -233,7 +233,10 @@
       "id": "a103-1",
       "description": "d049 structural fix (wq-430 inline gated phase) deployed in s1224 but untested — no E session has run since. d049 compliance remains at 50% (3/6). The escalation tracker shows 3 consecutive audit degradations with 3 fix attempts (wq-416, wq-425, wq-430). Next E session is the critical validation point.",
       "priority": "medium",
-      "action": "Monitor next E session d049 compliance. If compliant: reset escalation tracker to level 0. If violation: escalate to level 3 (emergency) — 4th consecutive fix failure would require human review of the entire E session intel pipeline."
+      "action": "Monitor next E session d049 compliance. If compliant: reset escalation tracker to level 0. If violation: escalate to level 3 (emergency) — 4th consecutive fix failure would require human review of the entire E session intel pipeline.",
+      "status": "resolved",
+      "resolved_by": "B#367 (s1229)",
+      "resolution": "s1228 (E#110) PASSED d049 with 3 intel entries. Last 5 E sessions all compliant. Escalation tracker reset from level 2 to level 0. wq-430 inline gated phase confirmed effective."
     },
     {
       "id": "a103-2",

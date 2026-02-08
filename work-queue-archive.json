@@ -10317,6 +10317,55 @@
         "9440ac7"
       ],
       "notes": "B#369 (s1252): Implemented option (b) \u2014 post-session hook 39-note-fallback_E.sh that detects truncated notes and regenerates from engagement-trace.json. Tested with 3 scenarios (truncated, good, another truncated pattern). All pass."
+    },
+    {
+      "id": "wq-449",
+      "title": "Build session file size budget dashboard",
+      "description": "27-session-file-sizes.sh runs but results are not surfaced. Build an endpoint or summary showing per-file prompt token estimates to identify when session files need extraction.",
+      "priority": 449,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1249,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure"
+      ],
+      "commits": [
+        "abc028e"
+      ],
+      "notes": "B#370 s1254: added /status/file-sizes endpoint in api.mjs"
+    },
+    {
+      "id": "wq-450",
+      "title": "Add pytest tests for directive-enrichment.py compute_enrichment()",
+      "description": "directive-enrichment.py now has a testable compute_enrichment() function. Add pytest tests covering: empty queue, blocked items, session number extraction from notes, edge cases.",
+      "priority": 450,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1249,
+      "source": "brainstorming",
+      "tags": [
+        "testing"
+      ],
+      "commits": [],
+      "notes": "B#370 s1254: already covered by wq-442 (18 tests, all passing)"
+    },
+    {
+      "id": "wq-452",
+      "title": "Fix directive-outcomes.json session_type null field (a108-2)",
+      "description": "directive-outcomes.json has session_type: null for all 43 entries. directive-outcome.js should read SESSION_TYPE env var and populate the field. One-line fix.",
+      "priority": 452,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1251,
+      "source": "audit-s1251",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "b191553"
+      ],
+      "notes": "B#370 s1254: backfilled 1 null mode entry, added env var fallback in saveDirectiveOutcome"
     }
   ]
 }

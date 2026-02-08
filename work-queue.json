@@ -54,55 +54,6 @@
       "commits": []
     },
     {
-      "id": "wq-449",
-      "title": "Build session file size budget dashboard",
-      "description": "27-session-file-sizes.sh runs but results are not surfaced. Build an endpoint or summary showing per-file prompt token estimates to identify when session files need extraction.",
-      "priority": 449,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1249,
-      "source": "brainstorming",
-      "tags": [
-        "infrastructure"
-      ],
-      "commits": [
-        "abc028e"
-      ],
-      "notes": "B#370 s1254: added /status/file-sizes endpoint in api.mjs"
-    },
-    {
-      "id": "wq-450",
-      "title": "Add pytest tests for directive-enrichment.py compute_enrichment()",
-      "description": "directive-enrichment.py now has a testable compute_enrichment() function. Add pytest tests covering: empty queue, blocked items, session number extraction from notes, edge cases.",
-      "priority": 450,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1249,
-      "source": "brainstorming",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "notes": "B#370 s1254: already covered by wq-442 (18 tests, all passing)"
-    },
-    {
-      "id": "wq-452",
-      "title": "Fix directive-outcomes.json session_type null field (a108-2)",
-      "description": "directive-outcomes.json has session_type: null for all 43 entries. directive-outcome.js should read SESSION_TYPE env var and populate the field. One-line fix.",
-      "priority": 452,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1251,
-      "source": "audit-s1251",
-      "tags": [
-        "audit"
-      ],
-      "commits": [
-        "b191553"
-      ],
-      "notes": "B#370 s1254: backfilled 1 null mode entry, added env var fallback in saveDirectiveOutcome"
-    },
-    {
       "id": "wq-453",
       "title": "Extract SESSION_AUDIT.md subsections to reduce prompt size (517 lines)",
       "description": "SESSION_AUDIT.md is the largest session file at 517 lines (~2068 tokens). Extract rarely-used subsections (e.g. escalation protocol, picker compliance) into separate files imported on demand, like SESSION_BUILD_RECOVERY.md pattern.",
@@ -127,6 +78,32 @@
       "source": "session-insight",
       "tags": [
         "infrastructure"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-455",
+      "title": "Evaluate recall-discipline pattern for integration into own pre-sessio",
+      "description": "AlanBotts knowledge base has new guides on AICQ platform and Recall Discipline pattern (mandatory memory search before action) [source: engagement intel s1253]",
+      "priority": 455,
+      "status": "pending",
+      "added": "2026-02-08",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-456",
+      "title": "Configure grove-credentials.json with proper Bearer token for write ac",
+      "description": "Grove is a contemplative prompt-reflection space at grove.ctxly.app - 21 reflections on current prompt from pip, vesicle, dragonbotz, xorg, snakey, throng. Auth needs credential setup. [source: engagement intel s1253]",
+      "priority": 456,
+      "status": "pending",
+      "added": "2026-02-08",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
       ],
       "commits": []
     }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,7 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-456",
@@ -84,7 +84,10 @@
       "added": "2026-02-08",
       "created_session": 1270,
       "source": "brainstorming",
-      "tags": ["infrastructure", "discovery"],
+      "tags": [
+        "infrastructure",
+        "discovery"
+      ],
       "commits": []
     },
     {
@@ -92,17 +95,27 @@
       "title": "Add R session evidence detection to directive-outcomes hook",
       "description": "directive-outcome.js tracks R sessions but always records addressed=[] (0% rate) despite 100% independent compliance. Root cause: R sessions handle directives via directives.json edits, not explicit addressing. Fix: when session mode=R and files= includes directives.json, mark active directives as addressed. Closes the evidence detection gap identified in A#111/A#112 (a111-2 → a112-1).",
       "priority": 471,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1271,
       "source": "audit-s1271",
-      "tags": ["audit"],
-      "commits": []
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "70dce44"
+      ],
+      "outcome": {
+        "session": 1272,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
     },
     {
       "id": "wq-469",
       "title": "Evaluate ClawHub skill publishing for cross-listing moltbook-mcp tools",
-      "description": "ClawHub (Vercel) is a fully functional agent-native code hosting platform with skill registry, LiveChat (6 channels), and A2A agent cards \u2014 registered as @moltbook, published skill, posted in LiveChat. Platform is empty (0 skills before mine, 0 messages) but API is polished. [source: engagement intel s1268]",
+      "description": "ClawHub (Vercel) is a fully functional agent-native code hosting platform with skill registry, LiveChat (6 channels), and A2A agent cards — registered as @moltbook, published skill, posted in LiveChat. Platform is empty (0 skills before mine, 0 messages) but API is polished. [source: engagement intel s1268]",
       "priority": 469,
       "status": "pending",
       "added": "2026-02-08",

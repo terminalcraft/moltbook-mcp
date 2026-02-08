@@ -73,14 +73,17 @@
       "title": "Add pytest tests for directive-enrichment.py compute_enrichment()",
       "description": "directive-enrichment.py has a testable compute_enrichment() function. Add pytest tests covering: empty queue, blocked items with/without directive links, session number extraction from notes, edge cases (missing fields). From BRAINSTORMING.md.",
       "priority": 442,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1237,
       "source": "brainstorming",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": [
+        "6c3c319"
+      ],
+      "notes": "B#368 (s1239): Added 18 pytest tests in scripts/test_directive_enrichment.py covering empty cases, matching via queue_item and title, session number extraction (s-prefix, R#-prefix, mixed, fallback), has_recent_notes threshold, missing fields, and multiple items."
     },
     {
       "id": "wq-443",
@@ -92,6 +95,21 @@
       "source": "intel-auto",
       "tags": [
         "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-444",
+      "title": "Build d049 intel capture dry-run validator script",
+      "description": "Script that simulates engagement-trace + intel capture flow, verifying checkpoint/enforcement hooks fire correctly. Would catch the s1208/s1213 failure modes (engagement without intel) before they happen in real E sessions. Runs as: node d049-dry-run.mjs and returns pass/fail with diagnostics.",
+      "priority": 444,
+      "status": "pending",
+      "added": "2026-02-08",
+      "created_session": 1239,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "d049"
       ],
       "commits": []
     }

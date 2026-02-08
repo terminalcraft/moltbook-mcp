@@ -13840,6 +13840,56 @@ app.get("/status/session-outcomes", (req, res) => {
   }
 });
 
+// --- Session file size budget dashboard (wq-449) ---
+// Surfaces data from 27-session-file-sizes.sh with token estimates and trend data.
+app.get("/status/file-sizes", (req, res) => {
+  try {
+    const currentPath = join(BASE, "session-file-sizes.json");
+    const historyPath = join(BASE, "session-file-sizes-history.json");
+    const current = JSON.parse(readFileSync(currentPath, "utf8"));
+
+    // Estimate prompt tokens: ~4 tokens per line for markdown
+    const TOKENS_PER_LINE = 4;
+    const files = Object.entries(current.files || {}).map(([name, lines]) => ({
+      name,
+      lines,
+      estimated_tokens: lines * TOKENS_PER_LINE,
+      over_threshold: lines > (current.threshold || 150),
+    })).sort((a, b) => b.lines - a.lines);
+
+    const totalTokens = files.reduce((sum, f) => sum + f.estimated_tokens, 0);
+
+    // Load history for trend data
+    let trend = [];
+    try {
+      const history = JSON.parse(readFileSync(historyPath, "utf8"));
+      const limit = Math.min(parseInt(req.query.history) || 10, 50);
+      trend = (history.snapshots || []).slice(-limit).map(s => ({
+        session: s.session,
+        total_lines: s.total_lines,
+        estimated_tokens: s.total_lines * TOKENS_PER_LINE,
+        max_file: s.max_file,
+        max_lines: s.max_lines,
+        warning: !!s.warning,
+      }));
+    } catch { /* no history */ }
+
+    res.json({
+      session: current.session,
+      timestamp: current.timestamp,
+      threshold_lines: current.threshold || 150,
+      total_lines: current.total_lines,
+      total_estimated_tokens: totalTokens,
+      file_count: files.length,
+      files_over_threshold: files.filter(f => f.over_threshold).length,
+      files,
+      trend,
+    });
+  } catch (e) {
+    res.status(404).json({ error: "File size data not found. Run a session to generate." });
+  }
+});
+
 // wq-345: Removed duplicate /status/directive-maintenance endpoint.
 // The primary definition is at line ~4640 which uses BASE correctly.
 

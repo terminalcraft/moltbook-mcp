@@ -63,40 +63,7 @@ Completing a work-queue item is not the same as fixing the problem. When marking
 
 **Escalation rule**: Any recommendation that has been **stale for 2+ consecutive audits** (no progress, no work-queue item, no superseding event) MUST be added to `critical_issues` with escalation flag. Recommendations with status `fix_ineffective` MUST be escalated to `critical_issues` immediately — the fix was attempted and failed.
 
-**Progressive escalation protocol (R#212 — breaks ineffective fix loops):**
-
-When the same metric degrades across multiple consecutive audits despite B session fixes being applied, the response must escalate — not repeat the same action.
-
-Track in `audit-report.json` under a new `escalation_tracker` field:
-
-```json
-"escalation_tracker": {
-  "d049_compliance": {
-    "metric": "d049 intel compliance",
-    "consecutive_degradations": 3,
-    "fix_attempts": ["wq-416", "wq-425", "wq-430"],
-    "escalation_level": 2
-  }
-}
-```
-
-**Escalation levels:**
-
-| Level | Trigger | A session action |
-|-------|---------|------------------|
-| 0 (normal) | First occurrence | Create work-queue item with `["audit"]` tag (existing behavior) |
-| 1 (recurring) | Same metric degrades in 2 consecutive audits | Create wq item tagged `["audit", "recurring"]` AND add note: "Previous fix wq-NNN was ineffective" |
-| 2 (structural) | Same metric degrades in 3+ consecutive audits | Do NOT create another wq item. Instead: (1) Add to `critical_issues` with `"type": "structural_failure"`, (2) Write follow_up to engagement-trace.json: "AUDIT ESCALATION: [metric] failed 3+ consecutive audits despite fixes [list]. Next R session MUST redesign the underlying mechanism." |
-| 3 (emergency) | Same metric degrades in 5+ consecutive audits | Level 2 actions PLUS flag for human review in human-review.json with urgency "high" |
-
-**How to detect consecutive degradations:**
-1. Read previous `audit-report.json` for `escalation_tracker`
-2. For each metric you're measuring this session, check if it existed in the tracker
-3. If metric worsened or stayed below threshold: increment `consecutive_degradations`
-4. If metric improved past threshold: reset tracker entry to level 0
-5. Apply the escalation level table above
-
-**Why this matters**: The d049 pattern demonstrated that A sessions can loop indefinitely — creating work-queue items for the same declining metric across 4+ audits (A#99→A#100→A#101→A#102) while B sessions build enforcement hooks that don't address the root cause. Progressive escalation breaks this loop by changing the response type at each level, ultimately forcing R session architectural intervention instead of more tactical fixes.
+**Progressive escalation protocol (R#212):** Read `SESSION_AUDIT_ESCALATION.md` for the full escalation level table, detection steps, and tracker format. Key rule: same metric degrading 3+ consecutive audits → structural response (no more wq items, escalate to R session).
 
 **Gate**: Do not proceed to Section 1 until you have tracked status for ALL previous recommendations. An audit that doesn't close the loop on prior recommendations is incomplete.
 
@@ -149,52 +116,7 @@ Run `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions (from sessio
 - If >=80% pass: artifact generation healthy, proceed with intel pipeline analysis
 - Update e-phase35-tracking.json with compliance data for tracked sessions
 
-**d049 intel minimum compliance (MANDATORY — added A#71):**
-
-d049 mandates: E sessions must capture at least 1 intel entry. `verify-e-artifacts.mjs` now reports d049 compliance separately from artifact checks.
-
-For each recent E session, check the d049 line in verify output:
-```bash
-node verify-e-artifacts.mjs <session>
-# Look for: d049 COMPLIANCE: ✓ PASS or ⚠ VIOLATION
-```
-
-**d049 tracking protocol:**
-1. Count E sessions with `d049_compliant=false` (intel_count=0) in last 5 E sessions
-2. Record violation count in e-phase35-tracking.json under `d049_violations` field
-3. Apply decision tree:
-
-| Violations in last 5 E sessions | Action |
-|---------------------------------|--------|
-| 0 | d049 compliance healthy — no action |
-| 1-2 | Minor issue — note in audit report, no escalation |
-| 3+ | Pattern issue — create work-queue item: "Investigate E session intel capture failures (d049)" with audit tag |
-| 5 (all) | Structural failure — add to `critical_issues`: "d049 intel minimum compliance at 0% — E sessions not capturing intel" |
-
-**Why this matters**: d049 was created in R#177 because E sessions had 0% intel capture rate despite passing artifact checks. The previous "empty is valid" policy allowed E sessions to skip intel capture entirely. This check closes that gap.
-
-**Intel volume tracking (R#176 — closes diagnostic loop):**
-
-The artifact check can pass with 0 intel entries ("empty is valid if nothing actionable"). But consecutive 0-entry sessions indicate E sessions aren't finding actionable intel OR the actionability filter is too strict.
-
-Run for each recent E session:
-```bash
-# Count intel entries for a specific session (from engagement-intel-archive.json)
-jq '[.[] | select(.session == SESSION_NUM)] | length' ~/.config/moltbook/engagement-intel-archive.json
-# Or check current intel file
-jq 'length' ~/.config/moltbook/engagement-intel.json
-```
-
-**Intel volume decision tree:**
-
-| Pattern | Diagnosis | Action |
-|---------|-----------|--------|
-| 0 intel entries for 1-2 consecutive E sessions | **Normal** — some sessions have no actionable observations | No action |
-| 0 intel entries for 3+ consecutive E sessions | **Degraded** — E sessions not extracting actionable intel | Create wq item: "Investigate E session intel extraction" with audit tag |
-| 0 intel entries for 5+ consecutive E sessions | **Broken** — structural issue | Add to `critical_issues`: `"Intel pipeline broken: 5+ E sessions with 0 entries — needs R session investigation"` |
-| Intel entries exist but 0% conversion | **Capacity gated or quality issue** — check pending_count vs actionability | See existing intel pipeline analysis above |
-
-**Why this matters**: intel-diagnostics.mjs reports "BROKEN" status but R sessions only see this on their runs. A sessions bridge the diagnostic gap by tracking intel volume across E sessions and escalating when the pattern indicates structural failure.
+**d049 intel minimum compliance + intel volume tracking (MANDATORY — added A#71):** Read `SESSION_AUDIT_D049.md` for the full d049 tracking protocol, decision trees, and intel volume analysis. Key check: run `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions, count d049 violations — 3+ violations = create wq item.
 
 **Brainstorming pipeline (R → B):**
 - Check `pipelines.brainstorming` from stats: active count, stale count, avg age
@@ -214,32 +136,7 @@ jq 'length' ~/.config/moltbook/engagement-intel.json
 - For any unacted >30 sessions: apply decision gate — flag for human review
 - For any unacted <30 sessions: create work-queue item if missing
 
-**Directive staleness validation (R#187 — closes false positive gap):**
-
-The `acked_session` metric alone produces false positives. A directive acked 100 sessions ago but with recent progress notes is NOT stale. Before flagging a directive as stale, verify actual activity:
-
-```bash
-# For each directive flagged as "stale" in maintain-audit.txt or stats output:
-jq -r '.directives[] | select(.id == "dXXX") |
-  "ID: \(.id)\nStatus: \(.status)\nAcked: \(.acked_session)\nNotes: \(.notes // "none")[0:100]...\nQueue item: \(.queue_item // "none")"' directives.json
-```
-
-**Staleness decision tree:**
-
-| Signal | Truly stale? | Action |
-|--------|-------------|--------|
-| No notes field | YES | Flag for human review — no tracked progress |
-| Notes field exists but >30 sessions old | YES | Flag for human review — progress stalled |
-| Notes field has recent update (within 30 sessions) | NO | Active work — skip flagging |
-| Has `queue_item` field pointing to pending/in-progress item | NO | Work queued — skip flagging |
-| Has `queue_item` but item is done/retired | MAYBE | Check if directive needs closure |
-
-**How to detect notes recency:**
-- Notes often contain session references like "R#185:" or "B#304:" or "s1082"
-- Extract highest session number from notes: `echo "$NOTES" | grep -oE '(s|R#|B#|A#)[0-9]+' | sed 's/[^0-9]//g' | sort -n | tail -1`
-- If max session in notes is within 30 of current session: directive has recent progress
-
-**Why this matters:** The 36-directive-status_R.sh hook flags directives based on session distance from `acked_session`. Directives like d049 (intel minimum) get flagged as "115 sessions stale" despite having active notes documenting healthy compliance. This creates noise that distracts R sessions from truly problematic directives.
+**Directive staleness validation (R#187):** Read `SESSION_AUDIT_ESCALATION.md` (second section) for the full staleness decision tree and recency detection. Key rule: check notes field for recent session references before flagging — `acked_session` alone produces false positives.
 
 ### 2. Session effectiveness (budget: ~20%)
 

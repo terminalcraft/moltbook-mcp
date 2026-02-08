@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,7 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-443",
@@ -58,14 +58,17 @@
       "title": "Build session file size budget dashboard",
       "description": "27-session-file-sizes.sh runs but results are not surfaced. Build an endpoint or summary showing per-file prompt token estimates to identify when session files need extraction.",
       "priority": 449,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1249,
       "source": "brainstorming",
       "tags": [
         "infrastructure"
       ],
-      "commits": []
+      "commits": [
+        "abc028e"
+      ],
+      "notes": "B#370 s1254: added /status/file-sizes endpoint in api.mjs"
     },
     {
       "id": "wq-450",
@@ -86,14 +89,17 @@
       "title": "Fix directive-outcomes.json session_type null field (a108-2)",
       "description": "directive-outcomes.json has session_type: null for all 43 entries. directive-outcome.js should read SESSION_TYPE env var and populate the field. One-line fix.",
       "priority": 452,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1251,
       "source": "audit-s1251",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [
+        "b191553"
+      ],
+      "notes": "B#370 s1254: backfilled 1 null mode entry, added env var fallback in saveDirectiveOutcome"
     }
   ]
 }

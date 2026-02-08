@@ -15,8 +15,10 @@
  *   node platform-triage.mjs              # Human-readable output
  *   node platform-triage.mjs --json       # JSON output for scripts
  *   node platform-triage.mjs --save       # Write results to platform-triage-results.json
+ *   node platform-triage.mjs --mark-defunct  # Auto-mark dead platforms (30+ fails) as defunct
  *
  * wq-461: Degraded platform auto-triage
+ * wq-465: Auto-mark defunct from triage results
  */
 
 import { readFileSync, writeFileSync } from 'fs';
@@ -53,6 +55,7 @@ function parseArgs() {
   return {
     json: args.includes('--json'),
     save: args.includes('--save'),
+    markDefunct: args.includes('--mark-defunct'),
   };
 }
 
@@ -451,6 +454,53 @@ async function main() {
     }
     writeFileSync(RESULTS_PATH, JSON.stringify(output, null, 2) + '\n');
     if (!opts.json) console.log(`Results saved to ${RESULTS_PATH}`);
+  }
+
+  if (opts.markDefunct) {
+    const defunctCandidates = prioritized.filter(
+      r => r.category === 'dead' && r.consecutive_failures > 30
+    );
+
+    if (defunctCandidates.length === 0) {
+      if (!opts.json) console.log('\nNo platforms qualify for defunct marking (need dead + 30+ failures).');
+    } else {
+      // Reload fresh copies for safe mutation
+      const freshRegistry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
+      let freshCircuits = {};
+      try {
+        freshCircuits = JSON.parse(readFileSync(CIRCUITS_PATH, 'utf8'));
+      } catch { /* no file */ }
+
+      const now = new Date().toISOString();
+      const marked = [];
+
+      for (const candidate of defunctCandidates) {
+        // Update account-registry
+        const acc = freshRegistry.accounts.find(a => a.id === candidate.id);
+        if (acc) {
+          acc.last_status = 'defunct';
+          acc.last_tested = now;
+          acc.notes = (acc.notes || '') + ` Auto-defunct by triage (${candidate.consecutive_failures} failures, ${now.slice(0, 10)}).`;
+        }
+
+        // Update circuit breaker
+        if (!freshCircuits[candidate.id]) {
+          freshCircuits[candidate.id] = { consecutive_failures: candidate.consecutive_failures, total_failures: candidate.consecutive_failures, total_successes: 0 };
+        }
+        freshCircuits[candidate.id].status = 'defunct';
+        freshCircuits[candidate.id].defunct_at = now;
+        freshCircuits[candidate.id].defunct_reason = `Auto-defunct: ${candidate.consecutive_failures} consecutive failures, classified dead by triage`;
+
+        marked.push(candidate.id);
+      }
+
+      writeFileSync(REGISTRY_PATH, JSON.stringify(freshRegistry, null, 2) + '\n');
+      writeFileSync(CIRCUITS_PATH, JSON.stringify(freshCircuits, null, 2) + '\n');
+
+      if (!opts.json) {
+        console.log(`\nMarked ${marked.length} platform(s) as defunct: ${marked.join(', ')}`);
+      }
+    }
   }
 }
 

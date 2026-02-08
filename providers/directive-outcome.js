@@ -9,7 +9,7 @@
  * Extracted from index.js as part of Components/Providers/Transforms refactor.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, statSync } from 'fs';
 import { join } from 'path';
 
 /**
@@ -193,6 +193,18 @@ export function computeDirectiveOutcome(assignments, baseDir) {
       if (derivedItems.length > 0) {
         evidence.push(`queue-decomposition:${derivedItems.length}`);
       }
+
+      // wq-471: R sessions handle directives via directives.json edits (status
+      // updates, notes, decomposition) but the above checks often miss this because
+      // R sessions don't always set per-directive timestamps. Detect directives.json
+      // modification as evidence that R session performed directive maintenance.
+      try {
+        const djPath = join(baseDir, 'directives.json');
+        const djMtime = statSync(djPath).mtimeMs;
+        if (djMtime > sessionStart) {
+          evidence.push('directives-json-modified');
+        }
+      } catch { /* ignore stat errors */ }
     }
 
     if (assignments.sessionType === 'A') {

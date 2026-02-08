@@ -86,7 +86,7 @@
       "title": "Investigate E session engagement-without-intel failure mode (d049)",
       "description": "d049 compliance degraded from 80% to 67%. E sessions s1198 and s1213 wrote engagement traces but captured 0 intel entries. This is a distinct failure mode from truncation (which checkpoint fixes catch). Investigate: (1) Is SESSION_ENGAGE_INTEL.md being loaded after R#210 refactoring? (2) Are E sessions reaching the intel capture phase? (3) Consider post-session hook to flag trace-present-but-zero-intel as a distinct failure type.",
       "priority": 425,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1216,
       "source": "audit-s1216",
@@ -95,7 +95,8 @@
         "engagement",
         "d049"
       ],
-      "commits": []
+      "commits": [],
+      "notes": " B#356: Added trace_without_intel failure mode to d049 enforcement hook, enhanced intel checkpoint to extract from trace, strengthened SESSION_ENGAGE.md Phase 3b urgency. Commit c9af841."
     },
     {
       "id": "wq-426",

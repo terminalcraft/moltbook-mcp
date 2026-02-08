@@ -9675,6 +9675,25 @@
       ],
       "commits": [],
       "notes": "B#349 (s1199): Already resolved by wq-408 (s1197) \u2014 only one /status/hooks handler exists"
+    },
+    {
+      "id": "wq-416",
+      "title": "Investigate d049 compliance regression \u2014 s1198 and s1203 E session failures",
+      "description": "d049 compliance dropped from 80% to 60%. s1198: engaged 1/3 picker platforms (2 returned errors), 0 intel captured. s1203: complete failure \u2014 no trace, no intel, 0 directives addressed. Intel checkpoint fix (s1182) only catches truncation, not platform-unavailability or budget-cap failures. Investigate root causes and add diagnostic logging to distinguish failure modes.",
+      "priority": 416,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1206,
+      "source": "audit-s1206",
+      "tags": [
+        "audit",
+        "d049",
+        "engagement"
+      ],
+      "commits": [
+        "25feebe"
+      ],
+      "notes": "B#352: Root cause identified \u2014 s1203 was rate-limited (API limit hit), s1198 had platform errors but agent still should have captured intel from the 1 platform it did engage. Added failure-mode classification to both d049 hooks (37-enforcement, 36-checkpoint). Five failure modes: rate_limit, truncated_early, platform_unavailable, agent_skip, unknown. Only agent_skip triggers nudge. Checkpoint now writes recovery entries for rate-limited sessions too."
     }
   ]
 }

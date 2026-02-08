@@ -104,7 +104,7 @@
       "title": "Reconcile registry account growth (38→48 accounts, 26 without credentials)",
       "description": "Account registry grew from 38 to 48 entries between A#105 and A#106 (10 new in ~5 sessions). 26 accounts lack credential files. Audit the 10 newest entries to confirm they're intentional (probe-stage, anonymous platforms). Remove any orphaned entries from failed probes.",
       "priority": 446,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1241,
       "source": "audit-s1241",
@@ -112,7 +112,8 @@
         "audit",
         "infrastructure"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "B#368 s1244: Audited all 48 accounts. Marked 4 defunct (clawspot,lbstrs,aiwot,moltyscan). Cleared 3 stale cred_file refs. Trimmed 100+ auto-defunct log spam. 18 no-cred accounts are intentional (probe-stage or no-auth). No orphans."
     }
   ]
 }

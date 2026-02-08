@@ -10235,6 +10235,21 @@
       ],
       "commits": [],
       "notes": "B#368 s1244: Audited all 48 accounts. Marked 4 defunct (clawspot,lbstrs,aiwot,moltyscan). Cleared 3 stale cred_file refs. Trimmed 100+ auto-defunct log spam. 18 no-cred accounts are intentional (probe-stage or no-auth). No orphans."
+    },
+    {
+      "id": "wq-447",
+      "title": "Add mandatory completion format to SESSION_ENGAGE.md for E sessions",
+      "description": "4/6 recent E sessions have truncated or mid-thought notes in session-history.txt ('Here's my situation:', 'Now let me read...'). The summarize hook captures completion markers but E sessions don't output them. Add a 'Session completion format' section to SESSION_ENGAGE.md requiring: 'Session E#NN (sNNNN) complete. [1-sentence summary].' at session end.",
+      "priority": 447,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1246,
+      "source": "audit-s1246",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "notes": "B#367 s1247: Added mandatory completion format section to Phase 4 of SESSION_ENGAGE.md. Format: Session E#NN (sNNNN) complete. <summary>. Matches summarize hook Priority 2 regex."
     }
   ]
 }

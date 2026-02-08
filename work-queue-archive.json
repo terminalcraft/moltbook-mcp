@@ -9913,6 +9913,42 @@
         "61848fd"
       ],
       "notes": "B#357 s1219: added session alias field to directive-outcomes.json + backfilled 50 entries"
+    },
+    {
+      "id": "wq-427",
+      "title": "Hook execution time auto-tuner",
+      "description": "Track per-hook execution times across sessions and auto-increase intervals for consistently slow hooks. 11-service-liveness.sh averaging 6s, 35-engagement-liveness_E.sh at 12s. Build a wrapper or post-hook that records timing and adjusts.",
+      "priority": 427,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1219,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "performance"
+      ],
+      "commits": [
+        "f7520cd"
+      ],
+      "notes": "B#362 s1222: Built hook-timing-tuner.mjs (P50/P95/P99 analysis, adaptive timeouts). Integrated into run-hooks.sh (profiles override default timeouts). Found 4 slow pre-hooks, 1 chronic timeout (35-engagement-liveness_E.sh at 45%)."
+    },
+    {
+      "id": "wq-429",
+      "title": "Add tests for audit-report.json generation",
+      "description": "audit-report.json is touched by 4+ A sessions but has no tests. Write unit tests verifying: (1) report schema matches consumers, (2) recommended_actions format is valid, (3) delta_from_s<prev> computes correctly, (4) session field population. Stabilizes the A session output pipeline.",
+      "priority": 429,
+      "status": "done",
+      "added": "2026-02-08",
+      "created_session": 1220,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "audit"
+      ],
+      "commits": [
+        "a6a9d69"
+      ],
+      "notes": "B#362 s1222: Added 22 tests (52\u219274 total) in 4 new sections: delta computation, session field population, consumer schema compatibility, audit-stats\u2192report field mapping. All 4 requirements covered."
     }
   ]
 }

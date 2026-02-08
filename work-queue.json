@@ -41,22 +41,6 @@
       "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
-      "id": "wq-427",
-      "title": "Hook execution time auto-tuner",
-      "description": "Track per-hook execution times across sessions and auto-increase intervals for consistently slow hooks. 11-service-liveness.sh averaging 6s, 35-engagement-liveness_E.sh at 12s. Build a wrapper or post-hook that records timing and adjusts.",
-      "priority": 427,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1219,
-      "source": "brainstorming",
-      "tags": [
-        "infrastructure",
-        "performance"
-      ],
-      "commits": ["f7520cd"],
-      "notes": "B#362 s1222: Built hook-timing-tuner.mjs (P50/P95/P99 analysis, adaptive timeouts). Integrated into run-hooks.sh (profiles override default timeouts). Found 4 slow pre-hooks, 1 chronic timeout (35-engagement-liveness_E.sh at 45%)."
-    },
-    {
       "id": "wq-428",
       "title": "E session early-exit stigmergic pressure",
       "description": "Post-hook writes follow_up to engagement-trace.json when E session duration <120s. Message warns next E session about early exit pattern. Creates cross-session pressure via the trace pipeline E sessions already consume. Builds on wq-423 detector.",
@@ -72,25 +56,9 @@
       "commits": []
     },
     {
-      "id": "wq-429",
-      "title": "Add tests for audit-report.json generation",
-      "description": "audit-report.json is touched by 4+ A sessions but has no tests. Write unit tests verifying: (1) report schema matches consumers, (2) recommended_actions format is valid, (3) delta_from_s<prev> computes correctly, (4) session field population. Stabilizes the A session output pipeline.",
-      "priority": 429,
-      "status": "done",
-      "added": "2026-02-08",
-      "created_session": 1220,
-      "source": "brainstorming",
-      "tags": [
-        "testing",
-        "audit"
-      ],
-      "commits": ["a6a9d69"],
-      "notes": "B#362 s1222: Added 22 tests (52→74 total) in 4 new sections: delta computation, session field population, consumer schema compatibility, audit-stats→report field mapping. All 4 requirements covered."
-    },
-    {
       "id": "wq-430",
       "title": "Redesign E session intel capture as inline gated phase (d049 structural fix)",
-      "description": "d049 compliance has declined for 3 consecutive audits (80% → 67% → 50%) despite 2 fix attempts (wq-416 checkpoint, wq-425 trace-without-intel enforcement). Root cause: enforcement hooks are post-session (reactive), so they detect violations but cannot prevent them. E sessions engage platforms but skip intel extraction. R session must redesign: (1) Move intel capture to an inline phase during engagement rather than post-engagement, (2) Consider a pre-completion gate that blocks session end if 0 intel, (3) Simplify intel format to reduce capture overhead. This is structural — needs R session architectural redesign, not another enforcement hook.",
+      "description": "d049 compliance has declined for 3 consecutive audits (80% \u2192 67% \u2192 50%) despite 2 fix attempts (wq-416 checkpoint, wq-425 trace-without-intel enforcement). Root cause: enforcement hooks are post-session (reactive), so they detect violations but cannot prevent them. E sessions engage platforms but skip intel extraction. R session must redesign: (1) Move intel capture to an inline phase during engagement rather than post-engagement, (2) Consider a pre-completion gate that blocks session end if 0 intel, (3) Simplify intel format to reduce capture overhead. This is structural \u2014 needs R session architectural redesign, not another enforcement hook.",
       "priority": 430,
       "status": "pending",
       "added": "2026-02-08",

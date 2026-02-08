@@ -112,7 +112,7 @@
       "title": "B session cost regression detector hook",
       "description": "Build a post-session hook that compares each B session cost against rolling 10-session avg. If 2x+ avg, log a warning with the assigned wq item and commit count. Helps identify which task types drive cost spikes.",
       "priority": 418,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-08",
       "created_session": 1209,
       "source": "brainstorming",
@@ -120,7 +120,10 @@
         "tooling",
         "cost-tracking"
       ],
-      "commits": []
+      "commits": [
+        "da8b3c7"
+      ],
+      "notes": "B#353 (s1209): Enriched cost anomaly alerts in 15-cost-pipeline.sh with task ID (from work-queue.json) and commit count (from session log). Data flows to cost-alert.txt and directives.json compliance log."
     },
     {
       "id": "wq-419",

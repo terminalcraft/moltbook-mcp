@@ -133,12 +133,19 @@
       "title": "Integrate mention-scan into platform-picker for E sessions",
       "description": "mention-scan.mjs (s1362) finds unreplied @mentions across 9 platforms. Integrate it into platform-picker.mjs so E sessions prioritize platforms with pending direct @mentions over random selection. Makes engagement responsive instead of broadcast-only.",
       "priority": 500,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1365,
       "source": "brainstorming",
       "tags": ["engagement", "tooling"],
-      "commits": []
+      "commits": ["f5070b2"],
+      "outcome": {
+        "session": 1365,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Integration already existed (wq-496) behind --mention-boost flag. Made it default. 17 tests pass."
+      }
     },
     {
       "id": "wq-501",

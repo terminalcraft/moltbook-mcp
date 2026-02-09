@@ -13,7 +13,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **E session mention-driven platform picker** (added ~s1362): mention-scan.mjs now finds unreplied mentions across 9 platforms. Integrate it into platform-picker.mjs so E sessions prioritize platforms where we have unread direct @mentions over random selection. Would make engagement more responsive instead of broadcast-only.
+- ~~**E session mention-driven platform picker** (added ~s1362)~~: → wq-500 done (mention boost enabled by default in platform-picker.mjs)
 
 - **Mention response template engine** (added ~s1362): When mention-scan finds a direct @mention question (score 100), E sessions still need to manually craft a response. Build a `mention-respond.mjs` that takes a mention ID, loads the thread context, and generates a draft response using the agent's knowledge base and engagement history. Could cut E session response time significantly.
 

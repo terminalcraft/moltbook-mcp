@@ -21,11 +21,19 @@ import { join } from 'path';
  * @returns {Object} Directive assignments record
  */
 export function createDirectiveAssignments(sessionNum, sessionType, directiveHealth) {
+  // wq-477: R sessions maintain ALL active directives (reviewing notes, updating
+  // status, decomposing into queue items). Using only keyword-matched "urgent"
+  // directives gave R sessions urgentDirectives=[], causing 0% addressed rate
+  // across 3+ R sessions. Fix: assign all active directives for R sessions.
+  const directives = sessionType === 'R'
+    ? (directiveHealth?.active?.map(d => d.id) || [])
+    : (directiveHealth?.urgent?.map(d => d.id) || []);
+
   return {
     sessionNum,
     sessionType,
     assignedAt: new Date().toISOString(),
-    urgentDirectives: directiveHealth?.urgent?.map(d => d.id) || [],
+    urgentDirectives: directives,
     // Outcome populated on exit by analyzing session artifacts
     outcome: null
   };

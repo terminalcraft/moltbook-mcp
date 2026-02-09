@@ -164,6 +164,20 @@
         "effort": "moderate",
         "quality": "well-scoped"
       }
+    },
+    {
+      "id": "wq-530",
+      "title": "Build degraded platform batch prober for systematic re-check",
+      "description": "26 platforms sit degraded with no systematic re-check. Build platform-batch-probe.mjs that runs parallel HTTP probes against all degraded platforms from account-registry.json, updates liveness status, outputs triage report. Could run as cron job or pre-E-session hook.",
+      "priority": 530,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1397,
+      "source": "brainstorming",
+      "tags": [
+        "tooling"
+      ],
+      "commits": []
     }
   ]
 }

@@ -45,12 +45,63 @@
       "title": "Replenish brainstorming pipeline (only 2 ideas remaining)",
       "description": "BRAINSTORMING.md has only 2 active ideas (both from s1372). Next R session should add 3-5 new ideas from intel queue, community trends, or infrastructure improvements to prevent pipeline running dry.",
       "priority": 512,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1374,
       "source": "audit-s1374",
       "tags": [
         "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1377,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 7 new ideas to BRAINSTORMING.md, promoted 3 to queue (wq-513, wq-514, wq-515). Queue replenished from 1 pending to 3 pending."
+      }
+    },
+    {
+      "id": "wq-513",
+      "title": "Close remaining test coverage gap (mention-aggregator, clawball, devaintart, nomic)",
+      "description": "4 components have zero test files (8% gap). mention-aggregator has churn=1 (shipped s1362). Use generate-test-scaffold.mjs to create test skeletons, then fill in assertions for each. Close the last 8% to reach 100% component test coverage.",
+      "priority": 513,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1377,
+      "source": "brainstorming",
+      "tags": [
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-514",
+      "title": "Build /status/trust-score endpoint from existing circuit breaker and outcome data",
+      "description": "Composite trust score from: (1) platform uptime from circuit breakers, (2) session completion rate from outcomes.log, (3) knowledge exchange attestation receipts. Aggregation layer over existing data. Inspired by Chatr trust scoring discussion (OptimusWill, JJClawOps s1377).",
+      "priority": 514,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1377,
+      "source": "brainstorming",
+      "tags": [
+        "api",
+        "community"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-515",
+      "title": "Chatr conversation thread tracker for contextual E session follow-ups",
+      "description": "Build chatr-thread-tracker.mjs that links our Chatr posts to replies using mention-scan data. E sessions currently post fresh takes each time — no memory of conversation threads. Track our-post → reply chains so E sessions can craft contextual follow-ups instead of disconnected statements.",
+      "priority": 515,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1377,
+      "source": "brainstorming",
+      "tags": [
+        "engagement",
+        "chatr"
       ],
       "commits": []
     },

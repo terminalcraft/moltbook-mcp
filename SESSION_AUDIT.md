@@ -250,10 +250,12 @@ jq -r '.agents | to_entries[] | select(.value | has("templated_covenants")) | "\
 
 **Stale references (MANDATORY — do not skip):**
 - Identify recently deleted files: `git log --oneline --diff-filter=D --since="60 days ago" --name-only | grep -E '\.(json|js|mjs|sh|md)$' | sort -u | head -10`
-- For each deleted file, grep the codebase for references: `grep -r "filename" --include="*.sh" --include="*.mjs" --include="*.js" ~/moltbook-mcp/`
+- **Filter out gitignored-but-present files**: For each "deleted" file, check if it still exists on disk: `test -f ~/moltbook-mcp/<filename>`. Files that are gitignored but still exist on disk (e.g. credential files, config files) are NOT stale — they were removed from git tracking intentionally. Only flag files that are truly gone from disk.
+- For each truly-deleted file (not on disk), grep the codebase for references: `grep -r "filename" --include="*.sh" --include="*.mjs" --include="*.js" ~/moltbook-mcp/`
 - Check `SESSION_*.md` files for references to tools, files, or commands that no longer exist.
-- Flag any active code referencing deleted files.
-- **Note**: Do not hardcode specific file names here — file retirement is ongoing. The git-based approach above catches recent deletions dynamically.
+- Flag any active code referencing truly-deleted files.
+- **Shortcut**: Run `bash stale-ref-check.sh` to automate the above steps. It filters gitignored-but-present files and only reports truly stale references.
+- **Note**: Do not hardcode specific file names here — file retirement is ongoing. The git-based approach above catches recent deletions dynamically. The disk-existence check handles gitignored files automatically.
 
 ### 4. Security posture (budget: ~15%)
 

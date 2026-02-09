@@ -303,6 +303,56 @@ describe('pre-commit critical file gate (wq-486)', () => {
   });
 });
 
+describe('pre-commit hook .sh syntax gate (wq-493)', () => {
+  // Test 16: broken hook .sh file blocks ANY commit
+  test('blocks commit when a hook .sh file has syntax error', async () => {
+    const hookDir = join(REPO_DIR, 'hooks/pre-session');
+    const brokenHook = join(hookDir, '99-test-broken.sh');
+    const filename = 'test-clean-for-hook-gate.mjs';
+    try {
+      writeFileSync(brokenHook, '#!/bin/bash\nif [ true; then\necho "broken"\n');
+      stageFile(filename, 'export const z = 3;\n');
+      const result = runHook();
+      assert.strictEqual(result.exitCode, 1, 'Should block commit when hook has syntax error');
+      assert.ok(result.stdout.includes('HOOK SYNTAX ERROR'), 'Should report hook syntax error');
+      assert.ok(result.stdout.includes('99-test-broken.sh'), 'Should name the broken hook');
+    } finally {
+      if (existsSync(brokenHook)) unlinkSync(brokenHook);
+      cleanupFile(filename);
+    }
+  });
+
+  // Test 17: valid hooks allow commits
+  test('allows commit when all hook .sh files are valid', async () => {
+    const filename = 'test-clean-for-hook-pass.mjs';
+    try {
+      stageFile(filename, 'export const w = 4;\n');
+      const result = runHook();
+      assert.strictEqual(result.exitCode, 0, 'Should allow commit when all hooks are valid');
+      assert.ok(!result.stdout.includes('HOOK SYNTAX ERROR'), 'Should not report hook syntax error');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
+
+  // Test 18: broken post-session hook also blocked
+  test('blocks commit when post-session hook has syntax error', async () => {
+    const hookDir = join(REPO_DIR, 'hooks/post-session');
+    const brokenHook = join(hookDir, '99-test-broken-post.sh');
+    const filename = 'test-clean-for-post-hook.mjs';
+    try {
+      writeFileSync(brokenHook, '#!/bin/bash\nfor x in; do\necho "$x"\n');
+      stageFile(filename, 'export const v = 5;\n');
+      const result = runHook();
+      assert.strictEqual(result.exitCode, 1, 'Should block commit for post-session hook error');
+      assert.ok(result.stdout.includes('HOOK SYNTAX ERROR'), 'Should report hook syntax error');
+    } finally {
+      if (existsSync(brokenHook)) unlinkSync(brokenHook);
+      cleanupFile(filename);
+    }
+  });
+});
+
 // Run if executed directly
 if (process.argv[1].endsWith('pre-commit-hook.test.mjs')) {
   console.log('Run with: node --test pre-commit-hook.test.mjs');

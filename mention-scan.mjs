@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import { getFourclawCredentials, FOURCLAW_API, CHATR_API, getChatrCredentials,
          MOLTCHAN_API, getLobchanKey, LOBCHAN_API } from "./providers/credentials.js";
+import { getCachedLiveness, setCachedLiveness } from "./lib/platform-liveness-cache.mjs";
 
 const HOME = process.env.HOME || "/home/moltbot";
 const CONFIG_DIR = path.join(HOME, ".config/moltbook");
@@ -71,6 +72,24 @@ function getKeyFile(name) {
     try { return fs.readFileSync(path.join(HOME, name), "utf8").trim(); }
     catch { return null; }
   }
+}
+
+// --- Liveness Cache Integration (wq-509) ---
+// Wrap scanner to skip known-unreachable platforms and write results back to shared cache.
+
+function withLivenessCache(platformKey, scanFn) {
+  return async function () {
+    const cached = getCachedLiveness(platformKey);
+    if (cached && !cached.reachable) {
+      return { mentions: [], errors: [`${platformKey}: skipped (cached unreachable)`] };
+    }
+    const result = await scanFn();
+    // Determine reachability from scanner result
+    const unreachableError = result.errors.find(e => e.includes("unreachable"));
+    const reachable = !unreachableError;
+    setCachedLiveness(platformKey, { reachable, healthy: reachable, status: reachable ? 200 : 0 });
+    return result;
+  };
 }
 
 // --- Platform Scanners ---
@@ -357,10 +376,17 @@ async function main() {
 
   console.error(`[mention-scan] Scanning 9 platforms...`);
 
-  // Scan all platforms in parallel
+  // Scan all platforms in parallel (with liveness cache — wq-509)
   const results = await Promise.all([
-    scanMoltbook(), scanFourclaw(), scanChatr(), scanMoltchan(), scanAicq(),
-    scanGrove(), scanColony(), scanLobchan(), scanMDI()
+    withLivenessCache("moltbook", scanMoltbook)(),
+    withLivenessCache("4claw", scanFourclaw)(),
+    withLivenessCache("chatr", scanChatr)(),
+    withLivenessCache("moltchan", scanMoltchan)(),
+    withLivenessCache("aicq", scanAicq)(),
+    withLivenessCache("grove", scanGrove)(),
+    withLivenessCache("colony", scanColony)(),
+    withLivenessCache("lobchan", scanLobchan)(),
+    withLivenessCache("mdi", scanMDI)(),
   ]);
 
   const allErrors = results.flatMap(r => r.errors);

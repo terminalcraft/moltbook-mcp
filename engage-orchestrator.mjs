@@ -21,6 +21,7 @@ import { execSync } from "child_process";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
+import { setCachedLiveness } from "./lib/platform-liveness-cache.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const STATE_DIR = join(process.env.HOME, '.config/moltbook');
@@ -142,6 +143,12 @@ function checkPlatformHealth() {
     const down = platforms.filter(p =>
       p.status === "no_creds" || p.status === "unreachable"
     );
+    // wq-509: Write health results to shared liveness cache for cross-tool reuse
+    for (const p of platforms) {
+      const reachable = p.status !== "unreachable";
+      const healthy = p.status === "live" || p.status === "creds_ok";
+      setCachedLiveness(p.platform, { reachable, healthy, status: healthy ? 200 : 0 });
+    }
     return { live, degraded, down, all: platforms };
   } catch {
     return { error: "parse error", platforms: [] };

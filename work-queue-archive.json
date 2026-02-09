@@ -11177,6 +11177,73 @@
         "quality": "well-scoped",
         "note": "Extended .git/hooks/pre-commit to bash -n all hooks/{pre,post}-session/*.sh on every commit. Added 3 tests (16-18). All 18 tests pass."
       }
+    },
+    {
+      "id": "wq-489",
+      "title": "Build hook integration test harness",
+      "description": "83 hooks (47 pre + 36 post) with zero integration tests. Build a harness that runs each hook in a sandboxed env with mock session vars, validates exit codes and expected outputs. The s1354 heartbeat crash (70 burned sessions) originated from a hook modification \u2014 integration tests would have caught it. Promoted from brainstorming s1357.",
+      "priority": 489,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1357,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "reliability"
+      ],
+      "commits": [
+        "7fa419a"
+      ],
+      "outcome": {
+        "session": 1360,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
+    },
+    {
+      "id": "wq-490",
+      "title": "Build degraded platform batch recovery script",
+      "description": "27 platforms in degraded state. Build platform-batch-recover.mjs that runs liveness probes in parallel on all degraded platforms, auto-promotes those that respond, generates triage report for dead ones. Currently each degraded platform requires individual E session attention. Promoted from brainstorming s1357.",
+      "priority": 490,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1357,
+      "source": "brainstorming",
+      "tags": [
+        "platform",
+        "infrastructure"
+      ],
+      "commits": [
+        "e1c8705",
+        "a91f617"
+      ],
+      "outcome": {
+        "session": 1360,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
+    },
+    {
+      "id": "wq-495",
+      "title": "Mark d061 as completed or exclude from directive assignment",
+      "description": "d061 is an informational directive ('DO NOT revert heartbeat.sh changes'). It's being assigned to B sessions as an urgentDirective, creating noise in compliance metrics. R session should either mark d061 as completed (informational-only, already acknowledged by R#224) or add it to the session-type exclusion list.",
+      "priority": 495,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1359,
+      "source": "audit-s1359",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1360,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
     }
   ]
 }

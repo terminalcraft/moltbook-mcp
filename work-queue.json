@@ -144,6 +144,26 @@
         "effort": "trivial",
         "quality": "well-scoped"
       }
+    },
+    {
+      "id": "wq-529",
+      "title": "Build queue item staleness detector for pre-B-session validation",
+      "description": "Check pending queue item descriptions against current file state before B sessions start. Flags items whose descriptions no longer match reality (e.g., claims no tests exist but test files are present). Saves B session budget on already-done work.",
+      "priority": 529,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1397,
+      "source": "brainstorming",
+      "tags": [
+        "tooling"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1397,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
     }
   ]
 }

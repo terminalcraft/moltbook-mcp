@@ -33,7 +33,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **session-context.mjs modular extraction** (added ~s1393): At 1623 lines, session-context.mjs is the largest single file in the codebase. Extract R-prompt-specific sections (impact history, intel promotion, intel capture diagnostic — ~120 lines of safeSection blocks) into `lib/r-prompt-sections.mjs`. Reduces main file complexity and makes R-specific logic independently testable.
 
-- **Queue item staleness detector** (added ~s1397): wq-523 described "zero test files" but tests already existed from a previous session. Build a pre-B-session check that validates pending queue item descriptions against current file state — e.g., if an item says "no tests for X" but X.test.mjs exists, flag it as stale. Prevents wasted B session budget investigating already-done work.
+- ~~**Queue item staleness detector** (added ~s1397)~~: → wq-529 done (s1397, queue-staleness-check.mjs)
 
 - **Degraded platform batch prober** (added ~s1397): 26 platforms sit in degraded state with no systematic re-check. Build `platform-batch-probe.mjs` that runs parallel HTTP probes against all degraded platforms from account-registry.json, updates their liveness status, and outputs a triage report. Could run as a periodic cron job or pre-E-session hook to focus engagement on actually reachable platforms.
 

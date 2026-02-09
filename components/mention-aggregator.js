@@ -2,6 +2,7 @@ import { z } from "zod";
 import fs from "fs";
 import path from "path";
 import { getFourclawCredentials, FOURCLAW_API, CHATR_API, getChatrCredentials, MOLTCHAN_API } from "../providers/credentials.js";
+import { main_with_mention, loadJSON as loadJSONFromRespond, MENTIONS_PATH as RESPOND_MENTIONS_PATH } from "../mention-respond.mjs";
 
 // Cross-platform mention aggregator (wq-463)
 // Scans active platforms for @moltbook mentions, writes unified feed to mentions.json
@@ -257,5 +258,77 @@ export function register(server, ctx) {
     if (!all && !platform) return err("Specify platform or all=true");
     saveMentions(state);
     return ok(`Marked ${count} mention(s) as read.`);
+  });
+
+  server.tool("mentions_draft_response", "Generate structured draft response context for a mention. Returns thread context, relevant knowledge, author history, and response guidelines.", {
+    mention_id: z.string().describe("The mention ID (e.g. '4claw-abc123', 'chatr-xyz'). Use mentions_list to find IDs.")
+  }, async ({ mention_id }) => {
+    const state = loadMentions();
+    if (!state?.mentions) return err("No mentions found. Run mentions_scan first.");
+
+    // Find mention by exact or partial match
+    let mention = state.mentions.find(m => m.id === mention_id);
+    if (!mention) {
+      mention = state.mentions.find(m => m.id.includes(mention_id));
+    }
+    if (!mention) return err(`Mention "${mention_id}" not found. Use mentions_list to see available IDs.`);
+
+    try {
+      const result = await main_with_mention(mention, true);
+      if (!result) return err("Failed to generate draft context.");
+
+      // Format as structured text for E session consumption
+      const lines = [];
+      lines.push(`## Draft Context for ${mention.id}`);
+      lines.push(`Platform: ${result.mention.platform} | Author: @${result.mention.author}`);
+      lines.push(`Direct: ${result.is_direct ? "yes" : "no"} | Question: ${result.is_question ? "yes" : "no"}`);
+      if (result.thread_error) lines.push(`Thread fetch warning: ${result.thread_error}`);
+      lines.push("");
+
+      // Thread context
+      if (result.thread.length > 0) {
+        lines.push("### Thread Context");
+        for (const msg of result.thread.slice(-10)) {
+          lines.push(`@${msg.author}: ${(msg.content || "").slice(0, 200)}`);
+        }
+        lines.push("");
+      }
+
+      // Knowledge
+      if (result.knowledge.length > 0) {
+        lines.push("### Relevant Knowledge");
+        for (const k of result.knowledge) {
+          lines.push(`- [${k.category}] ${k.title}: ${(k.description || "").slice(0, 150)}`);
+        }
+        lines.push("");
+      }
+
+      // Author history
+      if (result.author_history.length > 0) {
+        lines.push(`### Prior Interactions with @${mention.author}`);
+        for (const h of result.author_history) {
+          lines.push(`- s${h.session} (${h.date}): ${(h.topics || []).slice(0, 2).join(", ")}`);
+        }
+        lines.push("");
+      }
+
+      // Response guidelines
+      lines.push("### Response Guidelines");
+      if (result.is_direct && result.is_question) {
+        lines.push("- Direct question. Prioritize a clear, helpful answer.");
+      } else if (result.is_direct) {
+        lines.push("- Direct mention. Contribute if you have something substantive.");
+      } else {
+        lines.push("- Keyword mention. Only respond if you have genuine value to add.");
+      }
+      if (result.author_history.length > 0) {
+        lines.push("- You have history with this author. Reference shared context if natural.");
+      }
+      lines.push("- Keep response concise and practical.");
+
+      return ok(lines.join("\n"));
+    } catch (e) {
+      return err(`Draft generation failed: ${e.message}`);
+    }
   });
 }

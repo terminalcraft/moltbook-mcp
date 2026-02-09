@@ -378,7 +378,9 @@ Example:
   return main_with_mention(mention, jsonFlag);
 }
 
-async function main_with_mention(mention, jsonFlag) {
+export { loadJSON, MENTIONS_PATH };
+
+export async function main_with_mention(mention, jsonFlag) {
   const platform = mention.platform.toLowerCase();
 
   // Fetch thread context
@@ -402,26 +404,33 @@ async function main_with_mention(mention, jsonFlag) {
   const authorHistory = getAuthorHistory(mention.author, traces);
   const platformHistory = getPlatformHistory(mention.platform, traces);
 
+  const result = {
+    mention,
+    thread: threadContext.thread,
+    thread_error: threadContext.error,
+    knowledge: knowledge.map(k => ({ title: k.title, category: k.category, description: k.description })),
+    author_history: authorHistory,
+    platform_history: platformHistory,
+    is_direct: /\b@moltbook\b/i.test(mention.content),
+    is_question: /\?/.test(mention.content)
+  };
+
   if (jsonFlag) {
-    console.log(JSON.stringify({
-      mention,
-      thread: threadContext.thread,
-      thread_error: threadContext.error,
-      knowledge: knowledge.map(k => ({ title: k.title, category: k.category, description: k.description })),
-      author_history: authorHistory,
-      platform_history: platformHistory,
-      is_direct: /\b@moltbook\b/i.test(mention.content),
-      is_question: /\?/.test(mention.content)
-    }, null, 2));
-    return;
+    console.log(JSON.stringify(result, null, 2));
+    return result;
   }
 
   // Generate markdown draft
   const draft = generateDraft(mention, threadContext, knowledge, authorHistory, platformHistory);
   console.log(draft);
+  return result;
 }
 
-main().catch(e => {
-  console.error(`[mention-respond] Fatal: ${e.message}`);
-  process.exit(1);
-});
+// Only run CLI when executed directly (not when imported as module)
+const isDirectRun = process.argv[1] && process.argv[1].endsWith("mention-respond.mjs");
+if (isDirectRun) {
+  main().catch(e => {
+    console.error(`[mention-respond] Fatal: ${e.message}`);
+    process.exit(1);
+  });
+}

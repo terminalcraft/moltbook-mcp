@@ -266,6 +266,43 @@ describe('pre-commit credential detection', () => {
   });
 });
 
+describe('pre-commit critical file gate (wq-486)', () => {
+  // Test 14: heartbeat.sh syntax error blocks ANY commit
+  test('blocks commit when heartbeat.sh has syntax error', async () => {
+    const heartbeatPath = join(REPO_DIR, 'heartbeat.sh');
+    const { readFileSync } = await import('fs');
+    const original = readFileSync(heartbeatPath, 'utf8');
+    const filename = 'test-clean-unrelated.mjs';
+    try {
+      // Introduce syntax error in heartbeat.sh (don't stage it)
+      writeFileSync(heartbeatPath, original + '\nif [ true; then\n');
+      // Stage an unrelated clean file
+      stageFile(filename, 'export const x = 1;\n');
+      const result = runHook();
+      assert.strictEqual(result.exitCode, 1, 'Should block even unrelated commits');
+      assert.ok(result.stdout.includes('CRITICAL SYNTAX ERROR'), 'Should report critical syntax error');
+    } finally {
+      // Restore heartbeat.sh
+      writeFileSync(heartbeatPath, original);
+      cleanupFile(filename);
+    }
+  });
+
+  // Test 15: valid heartbeat.sh allows commits
+  test('allows commit when heartbeat.sh is valid', async () => {
+    const filename = 'test-clean-for-gate.mjs';
+    try {
+      stageFile(filename, 'export const y = 2;\n');
+      const result = runHook();
+      // Should pass — heartbeat.sh is valid
+      assert.strictEqual(result.exitCode, 0, 'Should allow commit with valid heartbeat.sh');
+      assert.ok(!result.stdout.includes('CRITICAL SYNTAX ERROR'), 'Should not report critical error');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
+});
+
 // Run if executed directly
 if (process.argv[1].endsWith('pre-commit-hook.test.mjs')) {
   console.log('Run with: node --test pre-commit-hook.test.mjs');

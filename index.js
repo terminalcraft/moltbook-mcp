@@ -54,8 +54,19 @@ const lifecycleStatus = {
 // health analysis, tool ownership display, and debugging which component
 // owns which tool. wq-208: Moved to transforms/tool-tracking.js
 
+// R#230: Timeout wrapper for async operations during startup
+const IMPORT_TIMEOUT_MS = 5000;
+const ONLOAD_TIMEOUT_MS = 3000;
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms))
+  ]);
+}
+
 // Manifest-driven component loader (R#95, R#99: session-type-aware loading)
 // R#104: Components now receive context object, can export onLoad/onUnload lifecycle hooks.
+// R#230: Added timeout protection per import and parallel onLoad execution.
 const manifest = JSON.parse(readFileSync(join(__dirname, "components.json"), "utf8"));
 const loadErrors = [];
 let loadedCount = 0;
@@ -65,9 +76,8 @@ for (const entry of manifest.active) {
   const sessions = typeof entry === "object" && entry.sessions ? entry.sessions.toUpperCase() : null;
   if (SESSION_TYPE && sessions && !sessions.includes(SESSION_TYPE)) continue;
   try {
-    const mod = await import(`./components/${name}.js`);
+    const mod = await withTimeout(import(`./components/${name}.js`), IMPORT_TIMEOUT_MS, `import(${name})`);
     if (typeof mod.register === "function") {
-      // Pass a tracking proxy that intercepts tool() calls to map tools to components (R#113, wq-208)
       const trackedServer = createToolTrackingProxy(server, name);
       mod.register(trackedServer, sessionContext);
       loadedModules.push({ name, mod });
@@ -80,18 +90,29 @@ for (const entry of manifest.active) {
   }
 }
 
-// Call onLoad lifecycle hook for components that export it (wq-100: track status)
-for (const { name, mod } of loadedModules) {
-  if (typeof mod.onLoad === "function") {
-    lifecycleStatus.hasOnLoad.push(name);
-    try {
-      await mod.onLoad(sessionContext);
-      lifecycleStatus.onLoadSuccess.push(name);
-    } catch (err) {
-      lifecycleStatus.onLoadFailed.push({ name, error: err.message });
-      loadErrors.push(`${name}.onLoad: ${err.message}`);
-    }
+// Call onLoad lifecycle hooks in parallel with individual timeouts (R#230)
+// onLoad hooks are independent of each other — parallel execution reduces startup latency.
+const onLoadEntries = loadedModules.filter(({ mod }) => typeof mod.onLoad === "function");
+for (const { name } of onLoadEntries) {
+  lifecycleStatus.hasOnLoad.push(name);
+}
+const onLoadResults = await Promise.allSettled(
+  onLoadEntries.map(({ name, mod }) =>
+    withTimeout(mod.onLoad(sessionContext), ONLOAD_TIMEOUT_MS, `${name}.onLoad`)
+      .then(() => ({ name, ok: true }))
+      .catch(err => ({ name, ok: false, error: err.message }))
+  )
+);
+for (const result of onLoadResults) {
+  const { name, ok, error } = result.status === "fulfilled" ? result.value : { name: "unknown", ok: false, error: result.reason?.message };
+  if (ok) {
+    lifecycleStatus.onLoadSuccess.push(name);
+  } else {
+    lifecycleStatus.onLoadFailed.push({ name, error });
+    loadErrors.push(`${name}.onLoad: ${error}`);
   }
+}
+for (const { name, mod } of loadedModules) {
   if (typeof mod.onUnload === "function") {
     lifecycleStatus.hasOnUnload.push(name);
   }

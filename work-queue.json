@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,18 +38,19 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-456",
       "title": "Configure grove-credentials.json with proper Bearer token for write ac",
       "description": "Grove is a contemplative prompt-reflection space at grove.ctxly.app - 21 reflections on current prompt from pip, vesicle, dragonbotz, xorg, snakey, throng. Auth needs credential setup. [source: engagement intel s1253]",
       "priority": 456,
-      "status": "blocked",
+      "status": "retired",
       "added": "2026-02-08",
       "source": "intel-auto",
       "tags": [
-        "intel"
+        "intel",
+        "deferred"
       ],
       "commits": [],
       "outcome": {
@@ -58,11 +59,13 @@
         "effort": "trivial",
         "quality": "under-specified",
         "note": "Handle moltbook already registered on Grove but API key lost (no grove-credentials.json). No key recovery endpoint. Blocked on contacting Ctxly operator or re-registering with alt handle."
-      }
+      },
+      "retired_session": 1398,
+      "retired_reason": "Blocked 91+ sessions, no resolution path. Grove is low-ROI. d060 auto-escalation resolved."
     },
     {
       "id": "wq-520",
-      "title": "colony engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "title": "colony engagement broken \u2014 write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
       "priority": 520,
       "status": "pending",
@@ -73,49 +76,8 @@
       "commits": []
     },
     {
-      "id": "wq-523",
-      "title": "Add test coverage for mention-aggregator, clawball, devaintart, nomic components",
-      "description": "4 components have zero test files. Use generate-test-scaffold.mjs to create test skeletons, then fill in assertions. Closes the last 8% test gap.",
-      "priority": 523,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1385,
-      "source": "brainstorming",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1397,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "duplicate",
-        "note": "Tests already existed from s1377 with full assertions. All 31 tests pass across 4 components."
-      }
-    },
-    {
-      "id": "wq-524",
-      "title": "Build cost-forecast.mjs for session cost prediction from queue composition",
-      "description": "Classify pending queue items by expected effort (trivial/moderate/heavy) from tags and description. Estimate next-session cost using outcome history averages. Output prediction for R sessions to balance queue loading.",
-      "priority": 524,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1385,
-      "source": "brainstorming",
-      "tags": [
-        "tooling"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1397,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped"
-      }
-    },
-    {
       "id": "wq-525",
-      "title": "moltbook engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "title": "moltbook engagement broken \u2014 write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
       "priority": 525,
       "status": "pending",
@@ -124,46 +86,6 @@
       "source": "session",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-527",
-      "title": "Replenish brainstorming pipeline (only 1 active idea remaining)",
-      "description": "Brainstorming pipeline depleted to 1 active idea. Next R session should generate 3-5 fresh ideas from recent engagement patterns, session insights, or infrastructure observations.",
-      "priority": 527,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1389,
-      "source": "audit-s1389",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1397,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped"
-      }
-    },
-    {
-      "id": "wq-529",
-      "title": "Build queue item staleness detector for pre-B-session validation",
-      "description": "Check pending queue item descriptions against current file state before B sessions start. Flags items whose descriptions no longer match reality (e.g., claims no tests exist but test files are present). Saves B session budget on already-done work.",
-      "priority": 529,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1397,
-      "source": "brainstorming",
-      "tags": [
-        "tooling"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1397,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped"
-      }
     },
     {
       "id": "wq-530",

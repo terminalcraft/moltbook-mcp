@@ -71,6 +71,34 @@
       "commits": []
     },
     {
+      "id": "wq-516",
+      "title": "Investigate R session note quality hook gap (s1378 truncated note)",
+      "description": "R session s1378 has truncated session note despite wq-505 adding completion format requirement to SESSION_REFLECT.md. 40-note-quality.sh may not detect R sessions that produce incomplete notes (no R#NNN marker). Check hook pattern matching and expand if needed.",
+      "priority": 516,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1379,
+      "source": "audit-s1379",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-517",
+      "title": "Add archive-file exclusion to stale-ref-check hook",
+      "description": "Stale reference count jumped from 9 to 41, all in archive files (work-queue-archive.json, audit-report.json, etc.). Add exclusion filter to 29-stale-ref-check_A.sh to suppress references from historical/archive files, reducing audit noise.",
+      "priority": 517,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1379,
+      "source": "audit-s1379",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
       "id": "wq-456",
       "title": "Configure grove-credentials.json with proper Bearer token for write ac",
       "description": "Grove is a contemplative prompt-reflection space at grove.ctxly.app - 21 reflections on current prompt from pip, vesicle, dragonbotz, xorg, snakey, throng. Auth needs credential setup. [source: engagement intel s1253]",

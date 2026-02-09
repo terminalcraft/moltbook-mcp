@@ -1035,28 +1035,30 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       return summary;
     }
     // wq-216: No intel-auto items yet — explain why (capacity gate vs no actionable intel)
-    const intelPath = join(STATE_DIR, 'engagement-intel.json');
-    const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
+    // R#231: Migrated from raw readFileSync to fc cache. Critical fix: the intel file is
+    // emptied by line ~798 (writeFileSync(intelPath, '[]\n')), so raw readFileSync here
+    // would always read '[]' — never finding actionable intel. The fc cache still holds
+    // the ORIGINAL pre-archive content (fc.invalidate was never called for intel path
+    // after the write, by design — other sections that read intel WANT the original).
+    // This means the wq-216 capacity-gate check was broken: it could never detect
+    // actionable intel because it was reading the already-emptied file.
+    // Fix: use fc.json(PATHS.intel) which returns the cached original content,
+    // and fc.json(PATHS.intelArchive) for the archive (also already cached).
     let hasActionableIntel = false;
-    try {
-      const currentIntel = JSON.parse(readFileSync(intelPath, 'utf8'));
-      if (Array.isArray(currentIntel)) {
-        hasActionableIntel = currentIntel.some(e =>
-          (e.type === 'integration_target' || e.type === 'pattern') &&
-          (e.actionable || '').length > 20
-        );
-      }
-    } catch { /* empty or missing */ }
+    const cachedIntel = fc.json(PATHS.intel);
+    if (Array.isArray(cachedIntel)) {
+      hasActionableIntel = cachedIntel.some(e =>
+        (e.type === 'integration_target' || e.type === 'pattern') &&
+        (e.actionable || '').length > 20
+      );
+    }
     const capacityGated = result.pending_count >= 5;
     if (capacityGated && hasActionableIntel) {
       return `\n\n### Intel→Queue pipeline (wq-191):\n0 items promoted — CAPACITY GATED (${result.pending_count} pending >= 5). Actionable intel exists but promotion blocked until queue capacity frees.`;
     }
     if (!hasActionableIntel) {
-      let archivedPromoCount = 0;
-      try {
-        const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
-        archivedPromoCount = (archive || []).filter(e => e._promoted).length;
-      } catch { /* no archive */ }
+      const cachedArchive = fc.json(PATHS.intelArchive) || [];
+      const archivedPromoCount = cachedArchive.filter(e => e._promoted).length;
       if (archivedPromoCount > 0) {
         return `\n\n### Intel→Queue pipeline (wq-191):\n0 items currently promoted. ${archivedPromoCount} historical promotions (now archived/processed).`;
       }

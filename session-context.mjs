@@ -567,10 +567,11 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       { keywords: ['budget', 'cost', 'utilization', 'spending'], title: 'Improve session budget utilization', desc: 'add retry loops or deeper exploration to underutilized sessions' },
       { skip: true, keywords: ['safety', 'hook', 'do not remove', 'do not weaken'] },
     ];
-    const directivesPath2 = join(DIR, 'directives.json');
-    if (existsSync(directivesPath2)) {
-      try {
-        const dData = JSON.parse(readFileSync(directivesPath2, 'utf8'));
+    // R#230: Use fc.json(PATHS.directives) instead of raw readFileSync.
+    // directives.json is read again at line ~889 for intake check — fc ensures single read.
+    {
+      const dData = fc.json(PATHS.directives);
+      if (dData) {
         const active = (dData.directives || []).filter(d => d.status === 'active' || d.status === 'pending');
         for (const d of active) {
           if (seeds.length >= maxSeeds) break;
@@ -590,13 +591,13 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
             seeds.push(`- **${title}**: ${desc}`);
           }
         }
-      } catch {}
+      }
     }
 
     // Source 2: Recent session patterns — find concrete improvement opportunities
-    const histPath = join(STATE_DIR, 'session-history.txt');
-    if (existsSync(histPath) && seeds.length < maxSeeds) {
-      const hist = readFileSync(histPath, 'utf8');
+    // R#230: Use fc.text(PATHS.history) instead of raw readFileSync — already cached from stall detection.
+    if (seeds.length < maxSeeds) {
+      const hist = fc.text(PATHS.history);
       const lines = hist.trim().split('\n').slice(-20);
       // Find repeated build patterns (same file touched 4+ times = unstable code)
       const fileCounts = {};
@@ -833,11 +834,10 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     const registryPath = join(DIR, 'account-registry.json');
     const logPath = join(STATE_DIR, 'logs', 'discovery-promotions.log');
 
-    let services = null;
-    let registry = null;
-
-    try { services = JSON.parse(readFileSync(servicesPath, 'utf8')); } catch { services = null; }
-    try { registry = JSON.parse(readFileSync(registryPath, 'utf8')); } catch { registry = null; }
+    // R#230: Use fc.json() instead of raw readFileSync — services.json and account-registry.json
+    // are in PATHS and may be read by other sections (registry used in E session context).
+    const services = fc.json(PATHS.services);
+    const registry = fc.json(PATHS.registry);
 
     if (services && registry && Array.isArray(services.services) && Array.isArray(registry.accounts)) {
       const registryIds = new Set(registry.accounts.map(a => a.id));
@@ -883,21 +883,17 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
   markTiming('platform_promotion');
 
   // Directive intake check — uses directives.json (structured system, wq-015)
-  const directivesPath = join(DIR, 'directives.json');
-  if (existsSync(directivesPath)) {
-    try {
-      const dData = JSON.parse(readFileSync(directivesPath, 'utf8'));
+  // R#230: Use fc.json(PATHS.directives) — already cached from brainstorming seed section above.
+  // Eliminates second readFileSync + JSON.parse of the same file.
+  {
+    const dData = fc.json(PATHS.directives);
+    if (dData) {
       // R#85: Only show truly pending directives. Previously `!d.acked_session` included
       // completed directives that were never formally acked (e.g. d014 completed but acked_session=null).
       const pendingDirectives = (dData.directives || []).filter(d => d.status === 'pending' || (d.status === 'active' && !d.acked_session));
       const unanswered = (dData.questions || []).filter(q => !q.answered && q.from === 'agent');
       if (pendingDirectives.length > 0) {
         result.intake_status = `NEW:${pendingDirectives.length} pending directive(s)`;
-        // R#85: Embed pending directive summaries directly in the prompt block.
-        // Previously R sessions had to spend a tool call running `node directives.mjs pending`
-        // just to read directive content they could already see. Now the R prompt block includes
-        // each pending directive's ID, session, and content inline. This saves 1 tool call per
-        // R session and eliminates a blocking step in the directive intake flow.
         result.pending_directives = pendingDirectives.map(d => {
           const sess = d.session ? `[s${d.session}]` : '';
           const content = (d.content || '').length > 200 ? d.content.substring(0, 200) + '...' : d.content;
@@ -908,11 +904,9 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       } else {
         result.intake_status = 'no-op:all-acked';
       }
-    } catch {
-      result.intake_status = 'error:parse';
+    } else {
+      result.intake_status = 'unknown:no-directives-json';
     }
-  } else {
-    result.intake_status = 'unknown:no-directives-json';
   }
 
   // --- Assemble full R session prompt block (R#52, R#209 mode gate) ---

@@ -22,6 +22,7 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { execSync } from "child_process";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -98,6 +99,8 @@ function parseArgs(args) {
       opts.verbose = true;
     } else if (arg === "--recency" && args[i + 1]) {
       opts.recencyWindow = parseInt(args[++i], 10) || 3;
+    } else if (arg === "--mention-boost") {
+      opts.mentionBoost = true;
     }
   }
   return opts;
@@ -172,6 +175,33 @@ function calculateWeight(acc, roiData, currentSession, verbose) {
       costPerWrite: roi.costPerWrite,
     }
   };
+}
+
+// Load unread mention counts per platform from mention-scan.mjs (wq-496)
+function getMentionBoosts(verbose) {
+  try {
+    const scanPath = join(__dirname, "mention-scan.mjs");
+    if (!existsSync(scanPath)) return {};
+    const out = execSync(`node ${scanPath} --json`, { timeout: 15000, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] });
+    const data = JSON.parse(out);
+    const boosts = {};
+    for (const m of (data.mentions || [])) {
+      const platform = m.platform.toLowerCase();
+      if (!boosts[platform]) boosts[platform] = { count: 0, directCount: 0, maxScore: 0 };
+      boosts[platform].count++;
+      if (m.direct) boosts[platform].directCount++;
+      if (m.score > boosts[platform].maxScore) boosts[platform].maxScore = m.score;
+    }
+    if (verbose) {
+      const entries = Object.entries(boosts).filter(([, v]) => v.count > 0);
+      if (entries.length > 0) {
+        console.error(`Mention boosts: ${entries.map(([k, v]) => `${k}=${v.count} (${v.directCount} direct)`).join(", ")}`);
+      }
+    }
+    return boosts;
+  } catch {
+    return {};
+  }
 }
 
 // Weighted random selection without replacement
@@ -275,10 +305,24 @@ function main() {
     }
   }
 
+  // Load mention boosts if requested (wq-496)
+  const mentionBoosts = opts.mentionBoost ? getMentionBoosts(opts.verbose) : {};
+
   // Calculate weights for pool
   const weighted = pool.map(acc => {
     const { weight, factors } = calculateWeight(acc, roiData, currentSession, opts.verbose);
-    return { acc, weight, factors };
+    // Apply mention boost: direct @mentions get 3x, any mentions get 1.5x (wq-496)
+    const id = acc.id.toLowerCase();
+    const platform = acc.platform?.toLowerCase() || id;
+    const boost = mentionBoosts[id] || mentionBoosts[platform];
+    let mentionMultiplier = 1.0;
+    if (boost) {
+      if (boost.directCount > 0) mentionMultiplier = 3.0;
+      else if (boost.count > 0) mentionMultiplier = 1.5;
+      factors.mentionBoost = { count: boost.count, direct: boost.directCount, multiplier: mentionMultiplier };
+    }
+    const boostedWeight = Math.max(1, Math.round(weight * mentionMultiplier));
+    return { acc, weight: boostedWeight, factors };
   });
 
   // Weighted random selection

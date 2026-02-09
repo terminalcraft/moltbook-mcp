@@ -89,6 +89,34 @@
         "engagement"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-505",
+      "title": "Add completion format reminder to SESSION_REFLECT.md for R session notes",
+      "description": "3/5 recent R sessions have truncated notes in session-history.txt (s1368, s1358, s1275). R sessions don't output 'Session R#NNN complete.' markers like A and E sessions do. Add a 'Session completion format' section to SESSION_REFLECT.md requiring R sessions to end with 'Session R#NNN complete. [1-sentence summary]' format.",
+      "priority": 505,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1369,
+      "source": "audit-s1369",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-506",
+      "title": "Update BRIEFING.md overdue scheduled check triggers",
+      "description": "BRIEFING.md has 2 scheduled checks overdue by 677 sessions (XMR balance check and wide digest scan, both due at session 692, now at s1369). Update both triggers to a future session. Low priority — these are informational checks, not functional gates.",
+      "priority": 506,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1369,
+      "source": "audit-s1369",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

@@ -41,67 +41,6 @@
       "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
-      "id": "wq-509",
-      "title": "Platform liveness cache with TTL",
-      "description": "Build shared platform-liveness-cache.json with TTL-based entries so liveness probes are shared across tools (mention-scan, platform-picker, engage-orchestrator) within a session. Reduces duplicate API calls and speeds up E session startup.",
-      "priority": 509,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1372,
-      "source": "brainstorming",
-      "tags": [
-        "performance",
-        "engagement"
-      ],
-      "commits": ["a1baa1e"],
-      "outcome": {
-        "session": 1375,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Cache (wq-504) already existed. Integrated it into mention-scan.mjs (9 scanners wrapped with withLivenessCache) and engage-orchestrator.mjs (writes health results to cache). All 4 consumers now share cache."
-      }
-    },
-    {
-      "id": "wq-510",
-      "title": "Add stale-refs.json consumer to SESSION_AUDIT.md",
-      "description": "SESSION_AUDIT.md still references manual stale-reference checking. Update it to read stale-refs.json (written by 29-stale-ref-check_A.sh) and include stale ref counts in the audit report. Closes the automation loop.",
-      "priority": 510,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1372,
-      "source": "brainstorming",
-      "tags": [
-        "audit"
-      ],
-      "commits": ["4c975d0"],
-      "outcome": {
-        "session": 1375,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped"
-      }
-    },
-    {
-      "id": "wq-511",
-      "title": "Reconcile orphan credential files with account-registry.json",
-      "description": "3 credential files on disk not properly linked in account-registry.json: grove-credentials.json and toku-agency-credentials.json (registry entries exist but cred_file=NONE), clawhub-vercel-credentials.json (no registry entry). Update cred_file fields or remove orphan files.",
-      "priority": 511,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1374,
-      "source": "audit-s1374",
-      "tags": ["audit"],
-      "commits": [],
-      "outcome": {
-        "session": 1375,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Fixed 3 orphans in account-registry.json (gitignored): grove cred_file, toku-agency cred_file, claw-hub-bay pointed to correct vercel-specific file."
-      }
-    },
-    {
       "id": "wq-512",
       "title": "Replenish brainstorming pipeline (only 2 ideas remaining)",
       "description": "BRAINSTORMING.md has only 2 active ideas (both from s1372). Next R session should add 3-5 new ideas from intel queue, community trends, or infrastructure improvements to prevent pipeline running dry.",
@@ -110,7 +49,9 @@
       "added": "2026-02-09",
       "created_session": 1374,
       "source": "audit-s1374",
-      "tags": ["audit"],
+      "tags": [
+        "audit"
+      ],
       "commits": []
     },
     {

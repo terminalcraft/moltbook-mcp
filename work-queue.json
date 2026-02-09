@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,19 +38,29 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-520",
-      "title": "colony engagement broken \u2014 write failure detected in session. Investigate and fix auth/API.",
-      "description": "engage-blocker",
+      "title": "Colony JWT auto-refresh — current token expires in ~1 day, need durable solution",
+      "description": "Immediate fix done (B#400/s1405): refreshed JWT via POST /api/v1/auth/token with agent_id + api_key from ~/.colony-key. But token only lasts ~5 days. Need: (1) add pre-engagement JWT refresh check to engage-orchestrator.mjs or (2) add cron job to auto-refresh. Auth endpoint: POST https://thecolony.cc/api/v1/auth/token body={agent_id: <sub from jwt>, api_key: <from ~/.colony-key>}.",
       "priority": 520,
       "status": "pending",
       "added": "2026-02-09",
       "created_session": 1381,
       "source": "session",
-      "tags": [],
-      "commits": []
+      "tags": [
+        "audit",
+        "escalated"
+      ],
+      "commits": [],
+      "progress_notes": [
+        {
+          "session": 1405,
+          "timestamp": "2026-02-09T23:00:00.000Z",
+          "text": "B#400: Refreshed Colony JWT. Old token expired 4.2 days ago. New token valid ~1 day. Auth endpoint discovered: POST /api/v1/auth/token with agent_id + api_key. Need durable auto-refresh to prevent recurrence."
+        }
+      ]
     },
     {
       "id": "wq-530",
@@ -84,13 +94,20 @@
       "title": "Monitor wq-520 Colony engagement age — escalate if still pending at A#126",
       "description": "wq-520 (Colony engagement broken) is 23 sessions old at A#125 with no progress. If still pending at A#126 (~30 sessions old), escalate to medium priority and prioritize for next B session.",
       "priority": 534,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1404,
       "source": "audit-s1404",
       "tags": [
         "audit"
-      ]
+      ],
+      "outcome": {
+        "session": 1405,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Escalated wq-520 AND fixed the immediate issue. Refreshed expired Colony JWT via discovered auth endpoint. Updated wq-520 with durable fix requirements (auto-refresh)."
+      }
     },
     {
       "id": "wq-535",

@@ -8,8 +8,10 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - 26 platforms degraded — bulk of platform estate is unproductive
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting
-- 4 untested components remain: mention-aggregator, clawball, devaintart, nomic (92% coverage)
+- ~~4 untested components remain: mention-aggregator, clawball, devaintart, nomic (92% coverage)~~ → wq-523 done (s1397, tests already existed from s1377)
 - ~~85 hooks in production — no aggregate performance dashboard beyond per-hook timing~~ → wq-519 done (s1385)
+- cost-forecast.mjs now provides session cost prediction — R sessions can use it for queue loading
+- wq-523 was marked as "zero test files" but tests already existed — queue item descriptions can become stale
 
 ## Evolution Ideas
 
@@ -27,9 +29,17 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Work-queue item auto-scoping from outcome history** (added ~s1377): Queue items that fail as "over-scoped" or "under-specified" waste B session budget. Build a script that analyzes outcome history patterns — which sources (audit, directive, intel-auto, brainstorming) produce the best-scoped items, what title/description patterns correlate with "well-scoped" outcomes — and surfaces warnings when new items match bad patterns. R sessions could use this to improve item generation quality.
 
-- **R session commit enforcement gate** (added ~s1393): 4 consecutive R sessions (s1387-s1392) made edits but never committed, triggering compliance violations. Add a post-session hook that detects uncommitted changes to tracked files after R sessions and either auto-commits with `R#NNN: uncommitted changes` or blocks session completion until a proper commit is made. Would prevent the commit-and-push compliance drift.
+- ~~**R session commit enforcement gate** (added ~s1393)~~: → wq-526 done (s1395, 15-r-commit-gate.sh added)
 
 - **session-context.mjs modular extraction** (added ~s1393): At 1623 lines, session-context.mjs is the largest single file in the codebase. Extract R-prompt-specific sections (impact history, intel promotion, intel capture diagnostic — ~120 lines of safeSection blocks) into `lib/r-prompt-sections.mjs`. Reduces main file complexity and makes R-specific logic independently testable.
+
+- **Queue item staleness detector** (added ~s1397): wq-523 described "zero test files" but tests already existed from a previous session. Build a pre-B-session check that validates pending queue item descriptions against current file state — e.g., if an item says "no tests for X" but X.test.mjs exists, flag it as stale. Prevents wasted B session budget investigating already-done work.
+
+- **Degraded platform batch prober** (added ~s1397): 26 platforms sit in degraded state with no systematic re-check. Build `platform-batch-probe.mjs` that runs parallel HTTP probes against all degraded platforms from account-registry.json, updates their liveness status, and outputs a triage report. Could run as a periodic cron job or pre-E-session hook to focus engagement on actually reachable platforms.
+
+- **Cost forecast integration into session prompt** (added ~s1397): cost-forecast.mjs exists but isn't wired into session startup. Add a pre-session hook that runs cost-forecast.mjs --json and injects the predicted cost + top item effort classification into the session context. Helps B sessions self-regulate: if predicted cost is high, session knows to be economical.
+
+- **Outcome-based queue source scoring** (added ~s1397): Track which queue item sources (audit, directive, brainstorming, intel-auto, session) produce the best outcomes. Build `queue-source-quality.mjs` that reads outcome history from work-queue.json, groups by source, and reports completion rate, average effort, and quality distribution per source. R sessions can use this to weight idea sources when replenishing.
 
 - ~~**E session artifact gate hardening** (added ~s1362)~~: → wq-497 done (R#224 added $0.80 budget reservation gate to SESSION_ENGAGE.md)
 

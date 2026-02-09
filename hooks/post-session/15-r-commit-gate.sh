@@ -7,11 +7,14 @@
 # Solution: After summarize (10) but before auto-commit (20), detect uncommitted
 # changes in R sessions and commit them with proper R#NNN format.
 #
-# Also patches session-history.txt if the note is empty, using the commit message.
+# Also patches session-history.txt if the note is empty or missing R#NNN,
+# INCLUDING zero-output sessions that produced no commits and no file changes.
+# (wq-538: s1408 bypassed the gate by producing zero output)
 #
 # Only runs for R sessions. Non-fatal: always exits 0.
 #
 # Created: B#396 s1395 (wq-528)
+# Extended: B#402 s1410 (wq-538) — zero-output session note patching
 set -euo pipefail
 
 [ "${MODE_CHAR:-}" = "R" ] || exit 0
@@ -43,39 +46,42 @@ if [ -n "$(git diff --cached --name-only 2>/dev/null)" ]; then
   HAS_CHANGES=1
 fi
 
-if [ "$HAS_CHANGES" -eq 0 ]; then
-  echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: no uncommitted changes" >> "$LOG_FILE_OUT"
-  exit 0
-fi
+CHANGED_FILES=""
+DID_COMMIT=0
 
-# Build commit message from changed files
-CHANGED_FILES=$(git diff --name-only HEAD 2>/dev/null | head -5 | tr '\n' ', ' | sed 's/,$//')
-if [ -z "$CHANGED_FILES" ]; then
-  CHANGED_FILES=$(git diff --cached --name-only 2>/dev/null | head -5 | tr '\n' ', ' | sed 's/,$//')
-fi
+if [ "$HAS_CHANGES" -eq 1 ]; then
+  # Build commit message from changed files
+  CHANGED_FILES=$(git diff --name-only HEAD 2>/dev/null | head -5 | tr '\n' ', ' | sed 's/,$//')
+  if [ -z "$CHANGED_FILES" ]; then
+    CHANGED_FILES=$(git diff --cached --name-only 2>/dev/null | head -5 | tr '\n' ', ' | sed 's/,$//')
+  fi
 
-COMMIT_MSG="refactor: R session changes (R#${R_NUM})
+  COMMIT_MSG="refactor: R session changes (R#${R_NUM})
 
 Files: ${CHANGED_FILES}
 Auto-committed by r-commit-gate hook to ensure R#NNN tracking."
 
-# Stage and commit
-git add -- '*.md' '*.js' '*.cjs' '*.mjs' '*.json' '*.sh' '*.py' '*.txt' \
-  '.gitignore' 'LICENSE' 2>/dev/null || true
-git add -u 2>/dev/null || true
+  # Stage and commit
+  git add -- '*.md' '*.js' '*.cjs' '*.mjs' '*.json' '*.sh' '*.py' '*.txt' \
+    '.gitignore' 'LICENSE' 2>/dev/null || true
+  git add -u 2>/dev/null || true
 
-if ! git diff --cached --quiet 2>/dev/null; then
-  git commit -m "$COMMIT_MSG" --no-gpg-sign 2>/dev/null || {
-    echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: commit failed" >> "$LOG_FILE_OUT"
-    exit 0
-  }
-  echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: auto-committed R session changes ($CHANGED_FILES)" >> "$LOG_FILE_OUT"
+  if ! git diff --cached --quiet 2>/dev/null; then
+    git commit -m "$COMMIT_MSG" --no-gpg-sign 2>/dev/null || {
+      echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: commit failed" >> "$LOG_FILE_OUT"
+    }
+    DID_COMMIT=1
+    echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: auto-committed R session changes ($CHANGED_FILES)" >> "$LOG_FILE_OUT"
+  else
+    echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: nothing staged after add" >> "$LOG_FILE_OUT"
+  fi
 else
-  echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: nothing staged after add" >> "$LOG_FILE_OUT"
-  exit 0
+  echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: no uncommitted changes" >> "$LOG_FILE_OUT"
 fi
 
-# Patch session history note if empty or missing R#NNN
+# --- Note patching: runs for ALL R sessions, regardless of commit status ---
+# This catches zero-output sessions (no commits, no file changes) that still
+# need R#NNN markers in their session history notes. (wq-538)
 if [ -f "$HISTORY_FILE" ]; then
   ENTRY=$(grep "s=$SESSION_NUM " "$HISTORY_FILE" | tail -1)
   if [ -n "$ENTRY" ]; then
@@ -91,7 +97,15 @@ if [ -f "$HISTORY_FILE" ]; then
     fi
 
     if [ "$NEEDS_PATCH" -eq 1 ]; then
-      NEW_NOTE="refactor: R#${R_NUM} session changes ($CHANGED_FILES)"
+      if [ "$DID_COMMIT" -eq 1 ] && [ -n "$CHANGED_FILES" ]; then
+        NEW_NOTE="refactor: R#${R_NUM} session changes ($CHANGED_FILES)"
+      elif [ -n "$CURRENT_NOTE" ]; then
+        # Zero-output session with a note but no R# marker — prepend R#NNN
+        NEW_NOTE="R#${R_NUM} (zero-output): ${CURRENT_NOTE}"
+      else
+        # Zero-output session with empty note
+        NEW_NOTE="R#${R_NUM} (zero-output): no commits, no file changes"
+      fi
 
       # Use awk for robust line replacement (avoids sed escaping issues)
       TEMP_FILE=$(mktemp)
@@ -108,7 +122,7 @@ if [ -f "$HISTORY_FILE" ]; then
       }' "$HISTORY_FILE" > "$TEMP_FILE"
       mv "$TEMP_FILE" "$HISTORY_FILE"
 
-      echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: patched history note" >> "$LOG_FILE_OUT"
+      echo "$(date -Iseconds) s=$SESSION_NUM R#$R_NUM: patched history note (zero-output=$((1-DID_COMMIT)))" >> "$LOG_FILE_OUT"
     fi
   fi
 fi

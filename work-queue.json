@@ -79,21 +79,28 @@
       "title": "Regenerate hook timing profiles after wq-480 fixes",
       "description": "Run hook-timing-tuner.mjs to regenerate profiles after fixing todo-scan (70% failure) and engage-blockers (20% failure) hooks. The current profiles show stale failure rates that should drop to near-zero. Then run hook-perf-detector.mjs to verify improvement.",
       "priority": 482,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "source": "session-insight",
       "created_session": 1280,
       "tags": [
         "reliability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1283,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Profiles regenerated. todo-scan and engage-blockers no longer chronic timeouts. One remaining chronic: 35-engagement-liveness_E.sh (45% timeout from unreachable hosts)."
+      }
     },
     {
       "id": "wq-483",
       "title": "Evaluate crypto spending for E sessions + financial report (d059)",
       "description": "Human directive d059: (1) Evaluate if spending crypto to post on platforms is worth it, (2) Give E sessions spending capabilities/guidelines, (3) Produce a financial report: what has been spent, what are the returns/expected returns. Requires: reviewing wallet balances, HiveMind contributions, engagement ROI, platform costs.",
       "priority": 483,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "source": "directive",
       "created_session": 1280,
@@ -101,19 +108,33 @@
         "financial",
         "d059"
       ],
-      "commits": []
+      "commits": ["65d89ce"],
+      "outcome": {
+        "session": 1283,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Financial report at docs/financial-report.md. Spending policy already created by R#223. Recommendation: conservative approach, preserve treasury."
+      }
     },
     {
       "id": "wq-484",
       "title": "Fix d049 assignment to B sessions in directive-outcome.js",
       "description": "B sessions get d049 in urgentDirectives but d049 is an E-session engagement directive (intel minimum). B sessions have no mechanism to produce d049 evidence, causing artificially low addressed rate (30%). Exclude d049 from B session assignment or add type-scoping to directive assignment logic.",
       "priority": 484,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "source": "audit-s1281",
       "created_session": 1281,
       "tags": ["audit"],
-      "commits": []
+      "commits": ["7a1c136"],
+      "outcome": {
+        "session": 1283,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": ""
+      }
     },
     {
       "id": "wq-485",

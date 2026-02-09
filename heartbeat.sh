@@ -4,19 +4,43 @@
 # Install: crontab -e → */20 * * * * /path/to/moltbook-mcp/heartbeat.sh
 # Manual:  /path/to/moltbook-mcp/heartbeat.sh
 
-set -euo pipefail
+set -uo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 STATE_DIR="$HOME/.config/moltbook"
 LOG_DIR="$STATE_DIR/logs"
 mkdir -p "$LOG_DIR"
 
-# Accept optional flags: mode override (E, B, R) and --dry-run
+# --- Stage isolation helper ---
+# Wraps each init stage so failures log + use defaults instead of crashing.
+# Usage: safe_stage "stage_name" default_action <<< "commands"
+# Returns 0 always. Sets INIT_DEGRADED=1 if any stage failed.
+INIT_DEGRADED=""
+INIT_FAILURES=""
+safe_stage() {
+  local stage_name="$1"
+  shift
+  if eval "$@" 2>>"$LOG_DIR/init-errors.log"; then
+    return 0
+  else
+    local exit_code=$?
+    INIT_DEGRADED=1
+    INIT_FAILURES="${INIT_FAILURES:+$INIT_FAILURES, }$stage_name"
+    echo "$(date -Iseconds) [init] stage '$stage_name' failed (exit $exit_code), using defaults" >> "$LOG_DIR/init-errors.log"
+    return 0
+  fi
+}
+
+# Accept optional flags: mode override (E, B, R), --dry-run, --safe-mode, --emergency
 DRY_RUN=""
 OVERRIDE_MODE=""
+SAFE_MODE=""
+EMERGENCY_MODE=""
 for arg in "$@"; do
   case "$arg" in
     --dry-run) DRY_RUN=1 ;;
+    --safe-mode) SAFE_MODE=1 ;;
+    --emergency) EMERGENCY_MODE=1 ;;
     E|B|R) OVERRIDE_MODE="$arg" ;;
   esac
 done
@@ -51,22 +75,33 @@ if [ -f "$ROTATION_FILE" ]; then
   fi
 fi
 
-if [ -n "$OVERRIDE_MODE" ]; then
+# Defaults in case rotation stage fails
+COUNTER="${COUNTER:-1}"
+ROT_IDX="${ROT_IDX:-0}"
+RETRY_COUNT="${RETRY_COUNT:-0}"
+LAST_OUTCOME="${LAST_OUTCOME:-success}"
+MODE_CHAR="${MODE_CHAR:-B}"
+
+if [ -n "$EMERGENCY_MODE" ]; then
+  # Emergency: skip rotation entirely, use defaults
+  MODE_CHAR="B"
+  echo "$(date -Iseconds) [init] emergency mode: skipping rotation, defaulting to B" >> "$LOG_DIR/init-errors.log"
+elif [ -n "$OVERRIDE_MODE" ]; then
   MODE_CHAR="$OVERRIDE_MODE"
   # Override mode: increment counter only (no rotation logic)
-  COUNTER=$(node "$DIR/rotation-state.mjs" increment-counter 2>/dev/null || echo "1")
+  safe_stage "rotation-override" \
+    'COUNTER=$(node "$DIR/rotation-state.mjs" increment-counter 2>/dev/null || echo "1")'
 else
   # Normal rotation: read current state, apply retry logic, advance
-  if [ -z "$DRY_RUN" ]; then
-    # rotation-state.mjs advance: reads previous outcome, applies rotation logic, increments counter
-    # Does NOT set outcome — that happens at end of session via set-outcome
-    ROTATION_OUTPUT=$(node "$DIR/rotation-state.mjs" advance --shell 2>&1)
-    eval "$ROTATION_OUTPUT"
-  else
-    # Dry run: just read without advancing
-    ROTATION_OUTPUT=$(node "$DIR/rotation-state.mjs" read --shell 2>&1)
-    eval "$ROTATION_OUTPUT"
-  fi
+  safe_stage "rotation" '
+    if [ -z "$DRY_RUN" ]; then
+      ROTATION_OUTPUT=$(node "$DIR/rotation-state.mjs" advance --shell)
+      eval "$(echo "$ROTATION_OUTPUT" | grep "^[A-Z_]*=")"
+    else
+      ROTATION_OUTPUT=$(node "$DIR/rotation-state.mjs" read --shell)
+      eval "$(echo "$ROTATION_OUTPUT" | grep "^[A-Z_]*=")"
+    fi
+  '
   # Now COUNTER, ROT_IDX, RETRY_COUNT, LAST_OUTCOME are set from rotation-state.mjs
 
   # Determine mode from rotation index
@@ -78,24 +113,28 @@ fi
 # R_FOCUS must be defaulted before context computation (set fully later).
 R_FOCUS=${R_FOCUS:-evolve}
 B_FOCUS="feature"  # Legacy — kept for hook compatibility but no longer alternates.
+
 # --- Single-pass context computation ---
 # Replaces 7+ inline `node -e` invocations with one script. (R#47, s487)
 CTX_FILE="$STATE_DIR/session-context.json"
 CTX_ENV="$STATE_DIR/session-context.env"
-node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo '{}' > "$CTX_FILE"
 
-# Source shell-compatible context — eliminates 11+ per-field node spawns. (R#50)
-# All fields available as CTX_<FIELD> (e.g. CTX_PENDING_COUNT, CTX_WQ_ITEM).
-if [ -f "$CTX_ENV" ]; then
-  source "$CTX_ENV"
-fi
-
-# Sync counter with engagement-state (from session-context.mjs)
-ESTATE_SESSION="${CTX_ESTATE_SESSION:-0}"
-if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
-  COUNTER="$ESTATE_SESSION"
-  echo "$COUNTER" > "$SESSION_COUNTER_FILE"
-  echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
+if [ -z "$EMERGENCY_MODE" ]; then
+  safe_stage "session-context" '
+    node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo "{}" > "$CTX_FILE"
+    # Source shell-compatible context — eliminates 11+ per-field node spawns. (R#50)
+    # All fields available as CTX_<FIELD> (e.g. CTX_PENDING_COUNT, CTX_WQ_ITEM).
+    if [ -f "$CTX_ENV" ]; then
+      source "$CTX_ENV"
+    fi
+    # Sync counter with engagement-state (from session-context.mjs)
+    ESTATE_SESSION="${CTX_ESTATE_SESSION:-0}"
+    if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
+      COUNTER="$ESTATE_SESSION"
+      echo "$COUNTER" > "$SESSION_COUNTER_FILE"
+      echo "$(date -Iseconds) synced counter from engagement-state: $COUNTER" >> "$LOG_DIR/selfmod.log"
+    fi
+  '
 fi
 
 # --- Mode transformation pipeline (R#106) ---
@@ -107,41 +146,37 @@ fi
 DOWNGRADED=""
 TRANSFORM_DIR="$DIR/hooks/mode-transform"
 
-if [ -d "$TRANSFORM_DIR" ] && [ -z "$OVERRIDE_MODE" ]; then
-  for script in "$TRANSFORM_DIR"/*.sh; do
-    [ -f "$script" ] || continue
-    RESULT=$(MODE_CHAR="$MODE_CHAR" COUNTER="$COUNTER" \
-      CTX_PENDING_COUNT="${CTX_PENDING_COUNT:-0}" \
-      CTX_WQ_FALLBACK="${CTX_WQ_FALLBACK:-}" \
-      bash "$script" 2>/dev/null || true)
-    if [ -n "$RESULT" ]; then
-      NEW_MODE="${RESULT%% *}"
-      REASON="${RESULT#* }"
-      if [ "$NEW_MODE" != "$MODE_CHAR" ] && [[ "$NEW_MODE" =~ ^[EBRA]$ ]]; then
-        echo "$(date -Iseconds) mode-transform: $MODE_CHAR→$NEW_MODE ($REASON) via $(basename "$script")" >> "$LOG_DIR/selfmod.log"
-        DOWNGRADED="$MODE_CHAR→$NEW_MODE"
-        MODE_CHAR="$NEW_MODE"
-        break
+if [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ] && [ -d "$TRANSFORM_DIR" ] && [ -z "$OVERRIDE_MODE" ]; then
+  safe_stage "mode-transform" '
+    for script in "$TRANSFORM_DIR"/*.sh; do
+      [ -f "$script" ] || continue
+      RESULT=$(MODE_CHAR="$MODE_CHAR" COUNTER="$COUNTER" \
+        CTX_PENDING_COUNT="${CTX_PENDING_COUNT:-0}" \
+        CTX_WQ_FALLBACK="${CTX_WQ_FALLBACK:-}" \
+        bash "$script" 2>/dev/null || true)
+      if [ -n "$RESULT" ]; then
+        NEW_MODE="${RESULT%% *}"
+        REASON="${RESULT#* }"
+        if [ "$NEW_MODE" != "$MODE_CHAR" ] && [[ "$NEW_MODE" =~ ^[EBRA]$ ]]; then
+          echo "$(date -Iseconds) mode-transform: $MODE_CHAR→$NEW_MODE ($REASON) via $(basename "$script")" >> "$LOG_DIR/selfmod.log"
+          DOWNGRADED="$MODE_CHAR→$NEW_MODE"
+          MODE_CHAR="$NEW_MODE"
+          break
+        fi
       fi
-    fi
-  done
+    done
+  '
 fi
 
-# R#150: Inline fallback gates removed. Mode transformation is now fully modular via
-# hooks/mode-transform/. The hooks handle:
-#   - 10-engage-health.sh: E→B when platforms degraded (with retry logic)
-#   - 20-queue-starvation.sh: B→R when queue empty (with brainstorming fallback logging)
-# The inline gates were redundant since the hooks exist and are more robust (e.g., retry).
-
 # Recompute session context after downgrade so prompt blocks match actual mode. (R#59)
-# Fixes: B→R downgrades getting stale R counter (raw instead of raw+1),
-# E→B→R cascades getting neither B task nor R prompt block correct.
 if [ -n "$DOWNGRADED" ]; then
-  echo "$(date -Iseconds) recomputing session-context for downgrade: $DOWNGRADED → $MODE_CHAR" >> "$LOG_DIR/selfmod.log"
-  node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo '{}' > "$CTX_FILE"
-  if [ -f "$CTX_ENV" ]; then
-    source "$CTX_ENV"
-  fi
+  safe_stage "context-recompute" '
+    echo "$(date -Iseconds) recomputing session-context for downgrade: $DOWNGRADED → $MODE_CHAR" >> "$LOG_DIR/selfmod.log"
+    node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo "{}" > "$CTX_FILE"
+    if [ -f "$CTX_ENV" ]; then
+      source "$CTX_ENV"
+    fi
+  '
 fi
 
 # --- Session-type counter management (R#126: consolidated from 4 duplicate blocks) ---
@@ -173,70 +208,60 @@ increment_session_counter "$MODE_CHAR"
 
 # --- Outage-aware session skip ---
 # If API has been down 5+ consecutive checks, skip every other heartbeat.
-SKIP_FILE="$STATE_DIR/outage_skip_toggle"
-API_STATUS=$(node "$DIR/health-check.cjs" --status 2>&1 || true)
-if echo "$API_STATUS" | grep -q "^DOWN" ; then
-  DOWN_COUNT=$(echo "$API_STATUS" | grep -oP 'down \K[0-9]+')
-  if [ "${DOWN_COUNT:-0}" -ge 5 ]; then
-    if [ -f "$SKIP_FILE" ]; then
-      rm -f "$SKIP_FILE"
-      echo "$(date -Iseconds) outage skip: API down $DOWN_COUNT checks, skipping this session" >> "$LOG_DIR/skipped.log"
-      exit 0
+# Skip this check in safe/emergency mode — we want to try regardless.
+if [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ]; then
+  safe_stage "outage-check" '
+    SKIP_FILE="$STATE_DIR/outage_skip_toggle"
+    API_STATUS=$(node "$DIR/health-check.cjs" --status 2>&1 || true)
+    if echo "$API_STATUS" | grep -q "^DOWN" ; then
+      DOWN_COUNT=$(echo "$API_STATUS" | grep -oP "down \K[0-9]+")
+      if [ "${DOWN_COUNT:-0}" -ge 5 ]; then
+        if [ -f "$SKIP_FILE" ]; then
+          rm -f "$SKIP_FILE"
+          echo "$(date -Iseconds) outage skip: API down $DOWN_COUNT checks, skipping this session" >> "$LOG_DIR/skipped.log"
+          exit 0
+        else
+          touch "$SKIP_FILE"
+        fi
+      else
+        rm -f "$SKIP_FILE"
+      fi
     else
-      touch "$SKIP_FILE"
+      rm -f "$SKIP_FILE"
     fi
-  else
-    rm -f "$SKIP_FILE"
-  fi
-else
-  rm -f "$SKIP_FILE"
+  '
 fi
 
-# --- Periodic checks (R#222: extracted to pre-session hooks) ---
-# Platform health (every 20 sessions) → hooks/pre-session/02-periodic-platform-health.sh
-# EVM balance (every 70 sessions) → hooks/pre-session/02-periodic-evm-balance.sh
-# These run as part of the pre-session hook pipeline, which provides:
-#   - Structured JSON tracking via --track
-#   - Budget enforcement via --budget
-#   - Timeout handling and penalty for slow hooks
-# Previously inline here (48 lines) — extracted for consistency with hook architecture.
-
-# --- Log rotation ---
-# Keep only the 20 most recent session logs. Truncate cron.log if >1MB.
-# This runs every heartbeat to prevent unbounded log growth (~2MB/session).
-SESSION_LOGS=( $(ls -t "$LOG_DIR"/20*.log 2>/dev/null) )
-if [ ${#SESSION_LOGS[@]} -gt 20 ]; then
-  for old_log in "${SESSION_LOGS[@]:20}"; do
-    rm -f "$old_log"
+# --- Log rotation (non-critical, never abort on failure) ---
+safe_stage "log-rotation" '
+  SESSION_LOGS=( $(ls -t "$LOG_DIR"/20*.log 2>/dev/null) )
+  if [ ${#SESSION_LOGS[@]} -gt 20 ]; then
+    for old_log in "${SESSION_LOGS[@]:20}"; do
+      rm -f "$old_log"
+    done
+    echo "$(date -Iseconds) log-rotate: removed $((${#SESSION_LOGS[@]} - 20)) old session logs" >> "$LOG_DIR/selfmod.log"
+  fi
+  for util_log in "$LOG_DIR/cron.log" "$LOG_DIR/hooks.log" "$LOG_DIR/health.log"; do
+    if [ -f "$util_log" ] && [ "$(stat -c%s "$util_log" 2>/dev/null || echo 0)" -gt 1048576 ]; then
+      tail -100 "$util_log" > "${util_log}.tmp" && mv "${util_log}.tmp" "$util_log"
+      echo "$(date -Iseconds) log-rotate: truncated $(basename "$util_log")" >> "$LOG_DIR/selfmod.log"
+    fi
   done
-  echo "$(date -Iseconds) log-rotate: removed $((${#SESSION_LOGS[@]} - 20)) old session logs" >> "$LOG_DIR/selfmod.log"
-fi
-# Truncate oversized utility logs (cron.log grows ~12MB/day from health checks)
-for util_log in "$LOG_DIR/cron.log" "$LOG_DIR/hooks.log" "$LOG_DIR/health.log"; do
-  if [ -f "$util_log" ] && [ "$(stat -c%s "$util_log" 2>/dev/null || echo 0)" -gt 1048576 ]; then
-    tail -100 "$util_log" > "${util_log}.tmp" && mv "${util_log}.tmp" "$util_log"
-    echo "$(date -Iseconds) log-rotate: truncated $(basename "$util_log")" >> "$LOG_DIR/selfmod.log"
-  fi
-done
+'
 
-# --- Directive enrichment for hooks (R#195, extracted R#215) ---
-# Blocked queue items often reference directives (via queue_item field in directives.json).
-# Hooks like stale-blocker need to know if the linked directive has recent progress,
-# but they only see work-queue.json. This pre-step enriches the hook environment by
-# writing directive-enrichment.json: a map of wq-id → last directive activity session.
-# Logic extracted from inline heredoc to scripts/directive-enrichment.py for testability.
-if [ -z "$DRY_RUN" ]; then
-  python3 "$DIR/scripts/directive-enrichment.py" "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" 2>/dev/null || true
-fi
+# --- Directive enrichment + pre-session hooks (skipped in safe/emergency mode) ---
+if [ -z "$DRY_RUN" ] && [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ]; then
+  safe_stage "directive-enrichment" \
+    'python3 "$DIR/scripts/directive-enrichment.py" "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" 2>/dev/null'
 
-# --- Pre-session hooks (via shared runner, R#89) ---
-if [ -z "$DRY_RUN" ]; then
-  MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
-    LOG_DIR="$LOG_DIR" \
-    DIRECTIVE_ENRICHMENT="$STATE_DIR/directive-enrichment.json" \
-    "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
-      --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" \
-      --budget 90 --parallel 4 || true
+  safe_stage "pre-session-hooks" '
+    MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \
+      LOG_DIR="$LOG_DIR" \
+      DIRECTIVE_ENRICHMENT="$STATE_DIR/directive-enrichment.json" \
+      "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
+        --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" \
+        --budget 90 --parallel 4
+  '
 fi
 
 case "$MODE_CHAR" in
@@ -246,11 +271,15 @@ case "$MODE_CHAR" in
   *) MODE_FILE="$DIR/SESSION_ENGAGE.md"; BUDGET="5.00" ;;
 esac
 
-# Adaptive budget override (s429)
-ADAPTIVE=$(python3 "$DIR/adaptive-budget.py" "$MODE_CHAR" 2>/dev/null)
-if [ -n "$ADAPTIVE" ] && [ "$ADAPTIVE" != "$BUDGET" ]; then
-  echo "$(date -Iseconds) adaptive budget: $MODE_CHAR $BUDGET -> $ADAPTIVE" >> "$LOG_DIR/hooks.log"
-  BUDGET="$ADAPTIVE"
+# Adaptive budget override (s429) — skip in safe/emergency mode
+if [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ]; then
+  safe_stage "adaptive-budget" '
+    ADAPTIVE=$(python3 "$DIR/adaptive-budget.py" "$MODE_CHAR" 2>/dev/null)
+    if [ -n "$ADAPTIVE" ] && [ "$ADAPTIVE" != "$BUDGET" ]; then
+      echo "$(date -Iseconds) adaptive budget: $MODE_CHAR $BUDGET -> $ADAPTIVE" >> "$LOG_DIR/hooks.log"
+      BUDGET="$ADAPTIVE"
+    fi
+  '
 fi
 
 # Build mode prompt
@@ -375,14 +404,28 @@ fi
 
 # --- Prompt inject blocks (R#120: extracted to prompt-inject-processor.mjs) ---
 # Manifest-driven injection with dependency resolution, usage tracking.
-# Logic extracted from 120 lines of bash/python to testable JS module.
 INJECT_BLOCKS=""
-INJECT_RESULT=$(PROJECT_DIR="$DIR" node "$DIR/prompt-inject-processor.mjs" "$MODE_CHAR" "$COUNTER" 2>/dev/null || echo '{"blocks":""}')
-INJECT_BLOCKS=$(echo "$INJECT_RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('blocks',''))" 2>/dev/null || echo "")
+if [ -z "$EMERGENCY_MODE" ]; then
+  safe_stage "prompt-inject" '
+    INJECT_RESULT=$(PROJECT_DIR="$DIR" node "$DIR/prompt-inject-processor.mjs" "$MODE_CHAR" "$COUNTER" 2>/dev/null || echo "{\"blocks\":\"\"}")
+    INJECT_BLOCKS=$(echo "$INJECT_RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get(\"blocks\",\"\"))" 2>/dev/null || echo "")
+  '
+fi
+
+# Build degradation notice if any init stages failed
+DEGRADED_NOTICE=""
+if [ -n "$INIT_DEGRADED" ]; then
+  DEGRADED_NOTICE="
+
+## INIT DEGRADATION NOTICE
+Some initialization stages failed and used defaults: ${INIT_FAILURES}.
+This session may have incomplete context. Check ~/moltbook-mcp/logs/init-errors.log for details.
+Do NOT attempt to fix heartbeat.sh or init scripts — the human operator handles this."
+fi
 
 PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}"
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

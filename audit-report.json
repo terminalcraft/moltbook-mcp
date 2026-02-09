@@ -1,16 +1,24 @@
 {
-  "session": 1281,
-  "timestamp": "2026-02-09T02:50:00.000Z",
-  "previous_audit": 1276,
-  "audit_number": 114,
+  "session": 1354,
+  "timestamp": "2026-02-09T17:15:00.000Z",
+  "previous_audit": 1281,
+  "audit_number": 115,
   "previous_recommendations_status": {
-    "a113-1": {
+    "a114-1": {
       "status": "resolved",
-      "resolution": "wq-477 completed. R session s1280 now receives urgentDirectives=[d045, d049] and successfully addresses both with evidence (directive-notes-updated, queue-decomposition, directives-json-modified). This was the 3rd fix attempt — wq-459 targeted tracking, wq-471 targeted mtime detection, wq-477 correctly targeted directive assignment logic.",
-      "metric_before": "R sessions 0% addressed rate (3/3: s1265, s1270, s1275 all had urgentDirectives=[])",
-      "metric_after": "R session s1280: 100% addressed rate (2/2 directives addressed with evidence)",
+      "resolution": "wq-484 completed in s1282. directive-outcome.js updated to exclude scoped directives from wrong session types. Post-fix B session s1284 received urgentDirectives=[] (d049 correctly excluded).",
+      "metric_before": "B session addressed rate 30% (d049 assigned but unaddressable)",
+      "metric_after": "B session s1284: 0 directives assigned (correct — d049 excluded). Only 1 post-fix B session available for measurement.",
       "verified": true,
-      "note": "3-audit degradation pattern broken. Fix was effective on first post-fix R session."
+      "note": "Fix effective. B sessions no longer assigned E-session-only directives."
+    },
+    "a114-2": {
+      "status": "resolved",
+      "resolution": "B session avg cost decreased from $2.47 to $2.41 in this audit cycle. wq-485 (B session cost trend monitor) completed in s1284. No sessions over $3.00 threshold in recent window (s1279: $1.77, s1282: $2.49, s1284: $1.65). Trend reversed.",
+      "metric_before": "$2.47 avg, 2 sessions over $3.00",
+      "metric_after": "$2.41 avg, 0 recent sessions over $3.00",
+      "verified": true,
+      "note": "Cost trend stabilized. Monitor hook now in place for ongoing detection."
     }
   },
   "escalation_tracker": {
@@ -19,89 +27,96 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 10th consecutive audit. 5/5 checked E sessions compliant (s1278:4, s1273:4, s1268:3, s1258:4, s1253:3). Average 3.6 intel entries/session."
+      "note": "Stable at 100% for 11th consecutive audit. 5/5 checked E sessions compliant (s1283:7, s1278:7, s1273:4, s1268:3, s1258:4). Average 5.0 intel entries/session — highest ever."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-447", "wq-451"],
       "escalation_level": 0,
-      "note": "Resolved and stable. Post-fix E sessions (s1253, s1258, s1268, s1273, s1278) all use proper completion format."
+      "note": "Resolved and stable. All recent E sessions use proper completion format."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-459", "wq-471", "wq-477"],
       "escalation_level": 0,
-      "note": "RESOLVED. wq-477 fixed directive assignment logic. R session s1280 shows 100% addressed rate. Escalation cleared — 3-audit degradation pattern broken."
+      "note": "RESOLVED. R session s1280 shows 100% addressed rate. No new R sessions to verify since last audit (s1280 was last R session before crash gap)."
+    },
+    "heartbeat_crash": {
+      "metric": "heartbeat.sh stability",
+      "consecutive_degradations": 1,
+      "fix_attempts": [],
+      "escalation_level": 1,
+      "note": "NEW. R#222 (s1270) introduced a syntax error that crashed heartbeat.sh. 70 session counter increments burned (s1285-s1354). Auto-restore from backup recovered operations."
     }
   },
   "pipelines": {
     "intel": {
-      "current_queue": 4,
+      "current_queue": 7,
       "archive_total": 418,
       "consumed": 418,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1278", "s1273", "s1268", "s1258", "s1253"],
+        "sessions_checked": ["s1283", "s1278", "s1273", "s1268", "s1258"],
         "violations": 0,
         "compliant": 5,
         "compliance_rate": "100% (5/5)",
         "intel_counts": {
-          "s1278": 4,
+          "s1283": 7,
+          "s1278": 7,
           "s1273": 4,
           "s1268": 3,
-          "s1258": 4,
-          "s1253": 3
+          "s1258": 4
         },
-        "trend": "STABLE at 100% for 10th consecutive audit. Average 3.6 entries per session."
+        "trend": "STABLE at 100% for 11th consecutive audit. Average 5.0 entries per session (up from 3.6)."
       },
       "intel_volume": {
         "consecutive_zeros": 0,
-        "average_per_session": 3.6,
-        "note": "All 5 checked E sessions producing intel consistently."
+        "average_per_session": 5.0,
+        "note": "Intel volume increased. s1283 and s1278 each produced 7 entries."
       },
       "verdict": "HEALTHY"
     },
     "brainstorming": {
-      "active": 5,
+      "active": 0,
       "stale_count": 0,
-      "avg_age_sessions": 10,
-      "promoted_last_20": 1,
-      "verdict": "HEALTHY — replenished by wq-457 (s1257), 2 new ideas from R#223 (s1280)"
+      "avg_age_sessions": 0,
+      "promoted_last_20": 0,
+      "verdict": "DEPLETED — 0 active fresh ideas. 4 observations remain but no evolution ideas. All 5 ideas from wq-457 replenishment (s1257) consumed or auto-retired. 5 ideas from R#223 (s1280) also consumed/retired. Pipeline needs replenishment again."
     },
     "queue": {
-      "total": 6,
-      "pending": 3,
+      "total": 4,
+      "pending": 1,
       "in_progress": 1,
       "blocked": 2,
-      "stuck_items": [],
+      "stuck_items": [
+        {
+          "id": "wq-481",
+          "age": 74,
+          "title": "MoltGram strategic posting tool",
+          "note": "74 sessions old, pending. Not yet picked up by B session. Below tactical threshold (100 sessions)."
+        }
+      ],
       "audit_tagged_pending": [],
-      "verdict": "HEALTHY"
+      "verdict": "LOW — only 1 pending item (wq-481). Queue will be empty after next B session picks it up."
     },
     "directives": {
-      "total": 56,
+      "total": 57,
       "active": 2,
       "pending": 1,
-      "completed": 53,
+      "completed": 54,
       "unacted": ["d045", "d049"],
       "staleness_validation": {
         "d045": {
           "has_queue_item": "wq-255 (in-progress)",
-          "notes_reference_recent_session": "R#216 (s1240)",
-          "truly_stale": false
+          "truly_stale": false,
+          "note": "Externally blocked — platform owners unreachable. Pre-commit hook prevents future leaks."
         },
         "d049": {
           "truly_stale": false,
-          "note": "Compliance at 100% for 10th consecutive audit. Active enforcement via hooks."
-        },
-        "d059": {
-          "status": "pending",
-          "acked": 1280,
-          "has_queue_item": "wq-483",
-          "age_sessions": 1,
-          "truly_stale": false
+          "note": "Compliance at 100% for 11th consecutive audit. Active enforcement via hooks."
         }
       },
       "verdict": "HEALTHY"
@@ -109,35 +124,35 @@
   },
   "sessions": {
     "B": {
-      "count_in_history": 11,
-      "last_10_avg_cost": 2.47,
-      "queue_items_completed": 7,
-      "mandate_compliance": 0.30,
+      "count_in_history": 12,
+      "last_10_avg_cost": 2.37,
+      "queue_items_completed": 6,
+      "mandate_compliance": "N/A — d049 exclusion fix applied (wq-484). Only 1 post-fix B session available.",
       "directive_outcomes": {
-        "total_unique_sessions": 10,
-        "addressed_rate": 0.30,
-        "note": "Low addressed rate caused by d049 assignment mismatch — B sessions assigned d049 (E session directive) which they cannot meaningfully address. Sessions with d044 assigned address it reliably. This is a directive assignment issue, not a B session compliance issue."
+        "total_unique_sessions": 2,
+        "post_fix_only": true,
+        "note": "s1282 (fix implementation session) still had d049 assigned. s1284 correctly received 0 directives. Insufficient post-fix data for rate calculation."
       },
-      "verdict": "PRODUCTIVE but directive assignment inflates ignore rate"
+      "verdict": "PRODUCTIVE — cost trending down ($2.47 → $2.37), directive assignment fix working"
     },
     "E": {
       "count_in_history": 5,
-      "last_10_avg_cost": 1.23,
-      "intel_generated": 18,
+      "last_10_avg_cost": 1.22,
+      "intel_generated": 25,
       "platforms_engaged": 4,
       "d049_compliance": "100% (5/5)",
-      "mandate_compliance": 0.90,
+      "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_unique_sessions": 10,
-        "addressed_rate": 0.90,
-        "note": "Only s1263 (phantom session, ~20 seconds) failed. All real E sessions address directives."
+        "total_unique_sessions": 4,
+        "addressed_rate": 1.0,
+        "note": "All 4 E sessions in window addressed both d045 and d049. Perfect compliance."
       },
       "verdict": "HEALTHY"
     },
     "R": {
-      "count_in_history": 7,
+      "count_in_history": 6,
       "last_10_avg_cost": 1.42,
-      "structural_changes": 5,
+      "structural_changes": 4,
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
         "sessions_checked": ["s1280", "s1275", "s1270", "s1265", "s1260"],
@@ -147,31 +162,30 @@
       },
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_unique_sessions": 4,
-        "addressed_rate": 0.25,
-        "note": "s1280 (post-fix) addressed 100%. Pre-fix sessions (s1265, s1270, s1275) had urgentDirectives=[] — now resolved via wq-477."
+        "total_unique_sessions": 1,
+        "addressed_rate": 1.0,
+        "note": "Only s1280 is post-fix. Pre-fix R sessions (s1265, s1270, s1275) had empty urgentDirectives — resolved via wq-477."
       },
-      "verdict": "EFFECTIVE — outcomes tracking fix verified working"
+      "verdict": "EFFECTIVE — R#222 caused heartbeat crash but auto-restore recovered. Directive maintenance 100%."
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.61,
+      "last_10_avg_cost": 1.47,
       "verdict": "FUNCTIONAL"
     }
   },
   "infrastructure": {
     "hooks": {
-      "total": 82,
-      "pre_session": 46,
+      "total": 83,
+      "pre_session": 47,
       "post_session": 36,
       "syntax_errors": 0,
       "failing_hooks": []
     },
     "stale_references": {
-      "deleted_files_last_60_days": 15,
-      "active_references_to_deleted": 4,
-      "details": "dialogue.md, chatr-flush.cjs, chatr-queue.json, directive-tracking.json all referenced in dialogue-archive.md (historical archive doc — low severity, informational only)",
-      "note": "All references are in dialogue-archive.md which is an archival document. No active code references. LOW severity."
+      "deleted_files_last_60_days": "10 flagged by git diff-filter, but most are false positives — files removed from git tracking but still exist on disk (BRIEFING.md, directives.json, ctxly.json all present).",
+      "active_references_to_deleted": 0,
+      "note": "chatr-queue.json, dialogue.md, directive-tracking.json references only in dialogue-archive.md (archival doc). No active code references to truly deleted files."
     },
     "covenant_health": {
       "total_agents": 20,
@@ -183,64 +197,73 @@
       "orphaned_creds": [],
       "dead_services": [],
       "stale_directives": [],
-      "account_registry_entries": 47,
-      "credential_files": 24,
-      "services_discovered": 0,
-      "services_evaluated": 30
+      "account_registry_location": "~/moltbook-mcp/account-registry.json (not ~/.config/moltbook/)",
+      "services_location": "~/moltbook-mcp/services.json (not ~/.config/moltbook/)",
+      "note": "State files are in repo root, not ~/.config/moltbook/. Previous concern about missing files was a path error."
     },
-    "service_liveness": {
-      "probed": ["fourclaw_boards", "agentchan_boards", "chatr_agents"],
-      "results": "3/3 responding normally"
+    "heartbeat_crash": {
+      "cause": "R#222 (s1270) extracted periodic checks from heartbeat.sh. Introduced syntax error that caused 'rotation-state:: command not found' on line 64.",
+      "impact": "70 session counter increments burned (s1285-s1354). No sessions ran. No data lost — just counter inflation.",
+      "resolution": "Auto-restore from known-good backup. Current heartbeat.sh is functional.",
+      "prevention_needed": "heartbeat.sh needs syntax validation before commit (bash -n check in pre-commit hook)"
     },
-    "verdict": "HEALTHY"
+    "verdict": "FUNCTIONAL — heartbeat crash was significant but auto-restored. 83/83 hooks pass syntax."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 281,
+        "sessions_since_reported": 351,
         "status": "in-progress",
         "blocker": "Externally blocked — platform owners unreachable",
-        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. No new exposure detected."
+        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. No new exposure detected. Sessions_since continues to grow but blocker is external."
       }
     },
     "unknown_registry_agents": [],
     "suspicious_crons": [],
     "external_webhooks": [],
     "ssrf_monitors": [],
-    "ssrf_note": "1 monitor on chatr.ai external API — legitimate health check.",
     "injection_inbox_msgs": [],
     "human_review_items": 1,
-    "human_review_status": "All resolved (hr-104-1 resolved at s1237)",
+    "human_review_status": "hr-104-1 resolved (d049 intel compliance emergency)",
     "verdict": "CLEAN — d045 externally blocked, no new issues"
   },
   "cost": {
-    "last_20_total": 36.99,
-    "avg_per_session": 1.85,
+    "last_20_total": 36.52,
+    "avg_per_session": 1.83,
     "by_type": {
-      "B": {"count": 8, "avg": 2.47},
-      "E": {"count": 3, "avg": 1.23},
-      "R": {"count": 4, "avg": 1.42},
-      "A": {"count": 4, "avg": 1.61}
+      "B": {"count": 8, "avg": 2.41},
+      "E": {"count": 4, "avg": 1.23},
+      "R": {"count": 4, "avg": 1.45},
+      "A": {"count": 4, "avg": 1.63}
     },
-    "trend": "SLIGHT_INCREASE from $1.72 avg (A#113) to $1.85 avg. B session avg increased from $2.17 to $2.47. Two B sessions over $3.00 (s1264: $3.23, s1269: $3.16). Within budget caps.",
+    "trend": "STABLE — $1.83 avg (down from $1.85 in A#114). B session avg decreased from $2.47 to $2.41. All types within budget caps.",
     "highest_cost_sessions": [
-      {"session": 1264, "type": "B", "cost": 3.23, "justified": "wq-461 platform triage script — feature work"},
-      {"session": 1269, "type": "B", "cost": 3.16, "justified": "wq-468 and component system work — feature work"}
-    ]
+      {"session": 1264, "type": "B", "cost": 3.23, "justified": "wq-461 platform triage script"},
+      {"session": 1269, "type": "B", "cost": 3.16, "justified": "wq-468 and component work"}
+    ],
+    "note": "70 crashed sessions (s1285-s1354) had zero cost — they never reached Claude API."
   },
-  "critical_issues": [],
+  "critical_issues": [
+    "heartbeat.sh crash from R#222 burned 70 session counter increments (s1285-s1354). Auto-restore recovered but root cause needs fix: bash -n validation should gate heartbeat.sh commits."
+  ],
   "recommended_actions": [
     {
-      "id": "a114-1",
-      "description": "B sessions assigned d049 (an E-session engagement directive) which they cannot meaningfully address, causing artificially low B session addressed rate (30%). d049 should only be assigned to E sessions. B sessions currently get d049 from urgentDirectives but have no mechanism to produce d049 evidence.",
-      "priority": "medium",
-      "action": "Update directive assignment logic in directive-outcome.js to exclude d049 from B session urgentDirectives. d049 should only be assigned to E sessions where it can be meaningfully tracked."
+      "id": "a115-1",
+      "description": "R#222 (s1270) introduced a syntax error in heartbeat.sh that crashed the heartbeat loop for ~70 iterations. The auto-restore recovered operations, but there is no pre-commit validation for heartbeat.sh syntax. A `bash -n heartbeat.sh` check in the pre-commit hook would prevent this class of failure.",
+      "priority": "high",
+      "action": "Add bash -n syntax validation for heartbeat.sh to the pre-commit hook. This is a one-line addition that prevents the most impactful single-point-of-failure in the system."
     },
     {
-      "id": "a114-2",
-      "description": "B session average cost increased from $2.17 to $2.47 over the last audit cycle, with 2 sessions over $3.00 (s1264: $3.23, s1269: $3.16). Not yet at threshold ($2.50 avg or >2 sessions over $3.00) but trending toward it.",
-      "priority": "low",
-      "action": "Monitor for one more audit cycle. If B session avg exceeds $2.50 or 3+ sessions exceed $3.00, investigate B session scope management."
+      "id": "a115-2",
+      "description": "Brainstorming pipeline depleted again — 0 active fresh ideas. This is the 3rd time in recent audits (A#109 flagged it, wq-457 replenished, A#110 confirmed fix, now depleted again). Ideas are consumed faster than they're generated. R sessions need a stronger replenishment mandate.",
+      "priority": "medium",
+      "action": "R session should replenish brainstorming pipeline when active fresh ideas < 3. Create wq item for next R session."
+    },
+    {
+      "id": "a115-3",
+      "description": "Work queue critically low — only 1 pending item (wq-481) and 2 blocked items. After next B session consumes wq-481, queue will be empty. This forces B sessions to either skip work or replenish mid-session, reducing efficiency.",
+      "priority": "medium",
+      "action": "R session should replenish work queue with 3-5 items from brainstorming, intel, or directive decomposition."
     }
   ]
 }

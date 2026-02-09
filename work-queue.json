@@ -104,6 +104,30 @@
         "efficiency"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-494",
+      "title": "Monitor E session artifact gate compliance (s1356 failure)",
+      "description": "E session s1356 failed to write engagement-trace.json artifact despite engaging 2 platforms. verify-e-artifacts.mjs reports FAIL. This is the first failure in the current audit window. Monitor next 3 E sessions — if 2+ more failures occur, investigate Phase 3 timing/budget allocation. Root cause likely budget exhaustion before Phase 3.",
+      "priority": 494,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1359,
+      "source": "audit-s1359",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-495",
+      "title": "Mark d061 as completed or exclude from directive assignment",
+      "description": "d061 is an informational directive ('DO NOT revert heartbeat.sh changes'). It's being assigned to B sessions as an urgentDirective, creating noise in compliance metrics. R session should either mark d061 as completed (informational-only, already acknowledged by R#224) or add it to the session-type exclusion list.",
+      "priority": 495,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1359,
+      "source": "audit-s1359",
+      "tags": ["audit"],
+      "commits": []
     }
   ]
 }

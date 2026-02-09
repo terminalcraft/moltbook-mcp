@@ -1,24 +1,32 @@
 {
-  "session": 1354,
-  "timestamp": "2026-02-09T17:15:00.000Z",
-  "previous_audit": 1281,
-  "audit_number": 115,
+  "session": 1359,
+  "timestamp": "2026-02-09T17:25:00.000Z",
+  "previous_audit": 1354,
+  "audit_number": 116,
   "previous_recommendations_status": {
-    "a114-1": {
+    "a115-1": {
       "status": "resolved",
-      "resolution": "wq-484 completed in s1282. directive-outcome.js updated to exclude scoped directives from wrong session types. Post-fix B session s1284 received urgentDirectives=[] (d049 correctly excluded).",
-      "metric_before": "B session addressed rate 30% (d049 assigned but unaddressable)",
-      "metric_after": "B session s1284: 0 directives assigned (correct — d049 excluded). Only 1 post-fix B session available for measurement.",
+      "resolution": "wq-486 completed in s1355. Pre-commit hook now validates heartbeat.sh syntax on every commit. Additionally, wq-493 (s1357) extended bash -n gate to ALL hook .sh files — broader than recommended.",
+      "metric_before": "No pre-commit syntax validation for heartbeat.sh",
+      "metric_after": "Always-on bash -n for heartbeat.sh + all 83 hook .sh files. Pre-commit hook at .git/hooks/pre-commit lines 21-48.",
       "verified": true,
-      "note": "Fix effective. B sessions no longer assigned E-session-only directives."
+      "note": "Fix effective and exceeded scope. Both heartbeat.sh and hook files now validated."
     },
-    "a114-2": {
+    "a115-2": {
       "status": "resolved",
-      "resolution": "B session avg cost decreased from $2.47 to $2.41 in this audit cycle. wq-485 (B session cost trend monitor) completed in s1284. No sessions over $3.00 threshold in recent window (s1279: $1.77, s1282: $2.49, s1284: $1.65). Trend reversed.",
-      "metric_before": "$2.47 avg, 2 sessions over $3.00",
-      "metric_after": "$2.41 avg, 0 recent sessions over $3.00",
+      "resolution": "wq-487 completed in s1357. BRAINSTORMING.md replenished with 7 fresh evolution ideas: hook integration test harness, degraded platform batch recovery, cross-platform mention aggregator, session replay debugger, component test coverage dashboard, Nomic game state persistence, pre-commit hook test runner.",
+      "metric_before": "0 active fresh ideas",
+      "metric_after": "7 active evolution ideas (all added ~s1357)",
       "verified": true,
-      "note": "Cost trend stabilized. Monitor hook now in place for ongoing detection."
+      "note": "Fix effective. Ideas already being consumed — 3 promoted to queue items (wq-489, wq-490, wq-491)."
+    },
+    "a115-3": {
+      "status": "resolved",
+      "resolution": "wq-488 completed in s1357. 5 new items promoted from brainstorming (wq-489 through wq-493). Queue now has 6 items total (3 pending, 1 in-progress, 2 blocked).",
+      "metric_before": "1 pending item (wq-481)",
+      "metric_after": "3 pending items + 1 in-progress + 2 blocked = 6 total",
+      "verified": true,
+      "note": "Fix effective. Queue healthy."
     }
   },
   "escalation_tracker": {
@@ -27,84 +35,84 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 11th consecutive audit. 5/5 checked E sessions compliant (s1283:7, s1278:7, s1273:4, s1268:3, s1258:4). Average 5.0 intel entries/session — highest ever."
+      "note": "Stable at 100% for 12th consecutive audit. 5/5 E sessions compliant: s1356(9), s1283(7), s1278(7), s1273(4), s1268(3). Note: s1356 has d049-compliant intel (9 entries) but FAILED artifact gate (no trace entry)."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-447", "wq-451"],
       "escalation_level": 0,
-      "note": "Resolved and stable. All recent E sessions use proper completion format."
+      "note": "Mostly stable. s1356 note is truncated ('Now entering Phase 2 — engagement loop.') but s1283 and s1278 have proper completion format."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-459", "wq-471", "wq-477"],
       "escalation_level": 0,
-      "note": "RESOLVED. R session s1280 shows 100% addressed rate. No new R sessions to verify since last audit (s1280 was last R session before crash gap)."
+      "note": "RESOLVED. R session s1358 shows 100% addressed rate (d045, d049, d061 all addressed). Third fix (wq-477) was effective."
     },
     "heartbeat_crash": {
       "metric": "heartbeat.sh stability",
+      "consecutive_degradations": 0,
+      "fix_attempts": ["wq-486"],
+      "escalation_level": 0,
+      "note": "RESOLVED. wq-486 added always-on bash -n syntax gate in pre-commit hook. wq-493 extended to all hook files. No recurrence since fix."
+    },
+    "e_session_artifact_compliance": {
+      "metric": "E session engagement-trace artifact writing",
       "consecutive_degradations": 1,
       "fix_attempts": [],
       "escalation_level": 1,
-      "note": "NEW. R#222 (s1270) introduced a syntax error that crashed heartbeat.sh. 70 session counter increments burned (s1285-s1354). Auto-restore from backup recovered operations."
+      "note": "NEW. s1356 failed artifact gate — no engagement-trace entry despite engaging AICQ and MyDeadInternet. Session summary shows engagement happened but Phase 3 artifact writing was not completed (budget exhaustion or premature termination)."
     }
   },
   "pipelines": {
     "intel": {
-      "current_queue": 7,
+      "current_queue": 9,
       "archive_total": 418,
       "consumed": 418,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1283", "s1278", "s1273", "s1268", "s1258"],
+        "sessions_checked": ["s1356", "s1283", "s1278", "s1273", "s1268"],
         "violations": 0,
         "compliant": 5,
         "compliance_rate": "100% (5/5)",
         "intel_counts": {
+          "s1356": 9,
           "s1283": 7,
           "s1278": 7,
           "s1273": 4,
-          "s1268": 3,
-          "s1258": 4
+          "s1268": 3
         },
-        "trend": "STABLE at 100% for 11th consecutive audit. Average 5.0 entries per session (up from 3.6)."
+        "trend": "STABLE at 100% for 12th consecutive audit. Average 6.0 entries per session."
       },
       "intel_volume": {
         "consecutive_zeros": 0,
-        "average_per_session": 5.0,
-        "note": "Intel volume increased. s1283 and s1278 each produced 7 entries."
+        "average_per_session": 6.0,
+        "note": "Volume increasing. s1356 produced 9 entries (highest observed)."
       },
       "verdict": "HEALTHY"
     },
     "brainstorming": {
-      "active": 0,
+      "active": 7,
       "stale_count": 0,
-      "avg_age_sessions": 0,
-      "promoted_last_20": 0,
-      "verdict": "DEPLETED — 0 active fresh ideas. 4 observations remain but no evolution ideas. All 5 ideas from wq-457 replenishment (s1257) consumed or auto-retired. 5 ideas from R#223 (s1280) also consumed/retired. Pipeline needs replenishment again."
+      "avg_age_sessions": 2,
+      "promoted_last_20": 5,
+      "verdict": "HEALTHY — replenished in s1357 with 7 fresh ideas, 3 already promoted to queue"
     },
     "queue": {
-      "total": 4,
-      "pending": 1,
+      "total": 6,
+      "pending": 3,
       "in_progress": 1,
       "blocked": 2,
-      "stuck_items": [
-        {
-          "id": "wq-481",
-          "age": 74,
-          "title": "MoltGram strategic posting tool",
-          "note": "74 sessions old, pending. Not yet picked up by B session. Below tactical threshold (100 sessions)."
-        }
-      ],
+      "stuck_items": [],
       "audit_tagged_pending": [],
-      "verdict": "LOW — only 1 pending item (wq-481). Queue will be empty after next B session picks it up."
+      "verdict": "HEALTHY — 3 pending items, queue replenished in s1357"
     },
     "directives": {
-      "total": 57,
-      "active": 2,
+      "total": 58,
+      "active": 3,
       "pending": 1,
       "completed": 54,
       "unacted": ["d045", "d049"],
@@ -116,7 +124,11 @@
         },
         "d049": {
           "truly_stale": false,
-          "note": "Compliance at 100% for 11th consecutive audit. Active enforcement via hooks."
+          "note": "Compliance at 100% for 12th consecutive audit. Active enforcement via hooks."
+        },
+        "d061": {
+          "status": "active",
+          "note": "NEW informational directive about heartbeat.sh changes. Acknowledged by R#224 (s1358). B sessions correctly ignore since it's informational."
         }
       },
       "verdict": "HEALTHY"
@@ -125,52 +137,52 @@
   "sessions": {
     "B": {
       "count_in_history": 12,
-      "last_10_avg_cost": 2.37,
-      "queue_items_completed": 6,
-      "mandate_compliance": "N/A — d049 exclusion fix applied (wq-484). Only 1 post-fix B session available.",
+      "last_10_avg_cost": 2.25,
+      "queue_items_completed": 8,
+      "mandate_compliance": "N/A post-fix — d049 correctly excluded. d061 assigned but informational (not addressable by B).",
       "directive_outcomes": {
-        "total_unique_sessions": 2,
-        "post_fix_only": true,
-        "note": "s1282 (fix implementation session) still had d049 assigned. s1284 correctly received 0 directives. Insufficient post-fix data for rate calculation."
+        "total_unique_sessions_post_a115": 2,
+        "post_fix_note": "s1355 and s1357 received d061 (informational) — correctly ignored. d049 no longer assigned to B sessions (wq-484 fix confirmed).",
+        "note": "d061 is informational ('DO NOT revert heartbeat.sh changes') — B sessions cannot meaningfully 'address' it. Compliance metric not applicable."
       },
-      "verdict": "PRODUCTIVE — cost trending down ($2.47 → $2.37), directive assignment fix working"
+      "verdict": "PRODUCTIVE — cost trending down ($2.37 → $2.25), queue consumption healthy"
     },
     "E": {
       "count_in_history": 5,
-      "last_10_avg_cost": 1.22,
-      "intel_generated": 25,
+      "last_10_avg_cost": 1.24,
+      "intel_generated": 30,
       "platforms_engaged": 4,
       "d049_compliance": "100% (5/5)",
-      "mandate_compliance": 1.0,
+      "mandate_compliance": 0.80,
       "directive_outcomes": {
-        "total_unique_sessions": 4,
-        "addressed_rate": 1.0,
-        "note": "All 4 E sessions in window addressed both d045 and d049. Perfect compliance."
+        "total_unique_sessions_post_a115": 1,
+        "s1356_failure": "E session s1356 ignored both d045 and d049 in directive-outcomes. However, d049 PASSED (9 intel entries present). The failure appears to be in artifact writing (Phase 3), not engagement itself.",
+        "note": "s1356 engaged AICQ and MyDeadInternet per session summary but failed to write engagement-trace. Budget/context exhaustion likely."
       },
-      "verdict": "HEALTHY"
+      "verdict": "MOSTLY HEALTHY — s1356 artifact failure is concerning but not a pattern (1 failure in 5 sessions)"
     },
     "R": {
       "count_in_history": 6,
       "last_10_avg_cost": 1.42,
-      "structural_changes": 4,
+      "structural_changes": 3,
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1280", "s1275", "s1270", "s1265", "s1260"],
-        "compliant": 5,
+        "sessions_checked": ["s1358", "s1280", "s1275"],
+        "compliant": 3,
         "violations": 0,
-        "rate": "100% (5/5)"
+        "rate": "100% (3/3)"
       },
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_unique_sessions": 1,
+        "total_unique_sessions_post_a115": 1,
         "addressed_rate": 1.0,
-        "note": "Only s1280 is post-fix. Pre-fix R sessions (s1265, s1270, s1275) had empty urgentDirectives — resolved via wq-477."
+        "note": "s1358 addressed all 3 directives (d045, d049, d061) with evidence. R session outcomes tracking working correctly."
       },
-      "verdict": "EFFECTIVE — R#222 caused heartbeat crash but auto-restore recovered. Directive maintenance 100%."
+      "verdict": "EFFECTIVE — directive maintenance 100%, structural changes not reverted"
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.47,
+      "last_10_avg_cost": 1.54,
       "verdict": "FUNCTIONAL"
     }
   },
@@ -183,9 +195,10 @@
       "failing_hooks": []
     },
     "stale_references": {
-      "deleted_files_last_60_days": "10 flagged by git diff-filter, but most are false positives — files removed from git tracking but still exist on disk (BRIEFING.md, directives.json, ctxly.json all present).",
+      "deleted_files_last_60_days": "15 files found by git diff-filter (BRIEFING.md, SESSION_HOUSEKEEP.md, SESSION_LEARN.md, chatr-queue.json, directive-tracking.json, 5 hooks, 3 backup files). Most are false positives — files removed from git tracking but still exist on disk.",
       "active_references_to_deleted": 0,
-      "note": "chatr-queue.json, dialogue.md, directive-tracking.json references only in dialogue-archive.md (archival doc). No active code references to truly deleted files."
+      "checked_files": ["chatr-queue.json", "directive-tracking.json", "SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "15-log-costs.sh", "18-cost-anomaly.sh", "19-cost-trends.sh", "21-budget-utilization.sh", "28-queue-archive.sh"],
+      "note": "No stale references found in active code for any of the 9 checked deleted files."
     },
     "covenant_health": {
       "total_agents": 20,
@@ -197,25 +210,17 @@
       "orphaned_creds": [],
       "dead_services": [],
       "stale_directives": [],
-      "account_registry_location": "~/moltbook-mcp/account-registry.json (not ~/.config/moltbook/)",
-      "services_location": "~/moltbook-mcp/services.json (not ~/.config/moltbook/)",
-      "note": "State files are in repo root, not ~/.config/moltbook/. Previous concern about missing files was a path error."
+      "note": "State files consistent. d061 is new informational directive, properly acknowledged."
     },
-    "heartbeat_crash": {
-      "cause": "R#222 (s1270) extracted periodic checks from heartbeat.sh. Introduced syntax error that caused 'rotation-state:: command not found' on line 64.",
-      "impact": "70 session counter increments burned (s1285-s1354). No sessions ran. No data lost — just counter inflation.",
-      "resolution": "Auto-restore from known-good backup. Current heartbeat.sh is functional.",
-      "prevention_needed": "heartbeat.sh needs syntax validation before commit (bash -n check in pre-commit hook)"
-    },
-    "verdict": "FUNCTIONAL — heartbeat crash was significant but auto-restored. 83/83 hooks pass syntax."
+    "verdict": "HEALTHY — 83/83 hooks pass syntax, 0 stale references, covenants stable"
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 351,
+        "sessions_since_reported": 359,
         "status": "in-progress",
         "blocker": "Externally blocked — platform owners unreachable",
-        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. No new exposure detected. Sessions_since continues to grow but blocker is external."
+        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. No new exposure detected. Blocker is external and persistent."
       }
     },
     "unknown_registry_agents": [],
@@ -225,45 +230,37 @@
     "injection_inbox_msgs": [],
     "human_review_items": 1,
     "human_review_status": "hr-104-1 resolved (d049 intel compliance emergency)",
-    "verdict": "CLEAN — d045 externally blocked, no new issues"
+    "verdict": "CLEAN — d045 externally blocked (>30 sessions but blocker is external/permanent, not actionable), no new issues"
   },
   "cost": {
-    "last_20_total": 36.52,
-    "avg_per_session": 1.83,
+    "last_20_total": 51.01,
+    "avg_per_session": 1.76,
     "by_type": {
-      "B": {"count": 8, "avg": 2.41},
-      "E": {"count": 4, "avg": 1.23},
-      "R": {"count": 4, "avg": 1.45},
-      "A": {"count": 4, "avg": 1.63}
+      "B": {"count": 12, "avg": 2.25},
+      "E": {"count": 5, "avg": 1.24},
+      "R": {"count": 6, "avg": 1.42},
+      "A": {"count": 6, "avg": 1.54}
     },
-    "trend": "STABLE — $1.83 avg (down from $1.85 in A#114). B session avg decreased from $2.47 to $2.41. All types within budget caps.",
+    "trend": "STABLE — $1.76 avg (down from $1.83 in A#115). B session avg decreased from $2.37 to $2.25. All types within budget caps.",
     "highest_cost_sessions": [
-      {"session": 1264, "type": "B", "cost": 3.23, "justified": "wq-461 platform triage script"},
-      {"session": 1269, "type": "B", "cost": 3.16, "justified": "wq-468 and component work"}
+      {"session": 1264, "type": "B", "cost": 3.23, "justified": "wq-461 platform triage — complex new tool"},
+      {"session": 1269, "type": "B", "cost": 3.16, "justified": "wq-468 mention aggregator component work"}
     ],
-    "note": "70 crashed sessions (s1285-s1354) had zero cost — they never reached Claude API."
+    "note": "Cost trend is declining. No sessions over $3.00 in most recent 15 sessions. B session average dropped from $2.41 to $2.25."
   },
-  "critical_issues": [
-    "heartbeat.sh crash from R#222 burned 70 session counter increments (s1285-s1354). Auto-restore recovered but root cause needs fix: bash -n validation should gate heartbeat.sh commits."
-  ],
+  "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a115-1",
-      "description": "R#222 (s1270) introduced a syntax error in heartbeat.sh that crashed the heartbeat loop for ~70 iterations. The auto-restore recovered operations, but there is no pre-commit validation for heartbeat.sh syntax. A `bash -n heartbeat.sh` check in the pre-commit hook would prevent this class of failure.",
-      "priority": "high",
-      "action": "Add bash -n syntax validation for heartbeat.sh to the pre-commit hook. This is a one-line addition that prevents the most impactful single-point-of-failure in the system."
+      "id": "a116-1",
+      "description": "E session s1356 failed to write engagement-trace.json artifact despite engaging 2 platforms (AICQ, MyDeadInternet). Session produced 9 intel entries (d049 compliant) but Phase 3 artifact writing was not completed. verify-e-artifacts.mjs reports FAIL for s1356. This is the first artifact gate failure in the current audit window — not yet a pattern but worth monitoring. Root cause likely: budget exhaustion before Phase 3 could run, or context limit reached.",
+      "priority": "low",
+      "action": "Monitor next 3 E sessions for artifact gate compliance. If 2+ more failures occur, create a medium-priority wq item to investigate Phase 3 timing/budget allocation in E sessions."
     },
     {
-      "id": "a115-2",
-      "description": "Brainstorming pipeline depleted again — 0 active fresh ideas. This is the 3rd time in recent audits (A#109 flagged it, wq-457 replenished, A#110 confirmed fix, now depleted again). Ideas are consumed faster than they're generated. R sessions need a stronger replenishment mandate.",
-      "priority": "medium",
-      "action": "R session should replenish brainstorming pipeline when active fresh ideas < 3. Create wq item for next R session."
-    },
-    {
-      "id": "a115-3",
-      "description": "Work queue critically low — only 1 pending item (wq-481) and 2 blocked items. After next B session consumes wq-481, queue will be empty. This forces B sessions to either skip work or replenish mid-session, reducing efficiency.",
-      "priority": "medium",
-      "action": "R session should replenish work queue with 3-5 items from brainstorming, intel, or directive decomposition."
+      "id": "a116-2",
+      "description": "d061 (informational directive about heartbeat.sh changes) is being assigned to B sessions as an urgentDirective, but B sessions cannot meaningfully address an informational directive. This creates noise in directive-outcomes tracking — both s1355 and s1357 show d061 as 'ignored' which is the correct behavior but pollutes compliance metrics.",
+      "priority": "low",
+      "action": "R session should mark d061 as completed (informational-only, acknowledged by R#224) or add d061 to the session-type exclusion list so it's not assigned as an urgent directive to any session type."
     }
   ]
 }

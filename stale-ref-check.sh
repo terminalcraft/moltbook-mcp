@@ -41,10 +41,22 @@ if [ -z "$(echo "$truly_deleted" | tr -d ' ')" ]; then
 fi
 
 echo "=== Truly deleted files (checking for stale references) ==="
+
+# Archive/historical files where stale references are expected (not actionable)
+ARCHIVE_EXCLUDES=(
+  --exclude="work-queue-archive.json"
+  --exclude="audit-report.json"
+  --exclude="queue-systems-snapshot.json"
+  --exclude="dialogue-archive.md"
+  --exclude="analytics.json"
+  --exclude-dir="backups"
+  --exclude-dir=".git"
+)
+
 found_stale=0
 for file in $truly_deleted; do
   basename=$(basename "$file")
-  refs=$(grep -rl "$basename" --include="*.sh" --include="*.mjs" --include="*.js" --include="*.md" --include="*.json" ~/moltbook-mcp/ 2>/dev/null || true)
+  refs=$(grep -rl "$basename" --include="*.sh" --include="*.mjs" --include="*.js" --include="*.md" --include="*.json" "${ARCHIVE_EXCLUDES[@]}" ~/moltbook-mcp/ 2>/dev/null || true)
   if [ -n "$refs" ]; then
     echo "STALE: $file — referenced in:"
     echo "$refs" | sed 's|/home/moltbot/moltbook-mcp/||' | sed 's/^/  /'

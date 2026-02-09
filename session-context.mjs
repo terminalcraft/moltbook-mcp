@@ -760,9 +760,11 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     // Safe to always archive: digest is computed unconditionally, and if the session
     // doesn't use the R prompt block, the entries were still consumed.
     {
-      const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
-      let archive = [];
-      try { archive = JSON.parse(readFileSync(archivePath, 'utf8')); } catch {}
+      // R#225: Migrated from raw readFileSync to fc cache — eliminates 3 redundant
+      // file reads (intel-archive, trace-archive, trace) that are also read by
+      // intel capture diagnostic and auto-promotion sections.
+      const archivePath = PATHS.intelArchive;
+      let archive = [...(fc.json(archivePath) || [])]; // clone — we push into this
 
       // R#214: Fix session=0 tagging bug.
       // inline-intel-capture.mjs uses SESSION_NUM env var, but Claude's Bash tool
@@ -771,17 +773,12 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       // orphaned intel entries (session=0 or missing) to the correct E session.
       let lastESession = 0;
       try {
-        const traceArchivePath = join(STATE_DIR, 'engagement-trace-archive.json');
-        const tracePath = join(STATE_DIR, 'engagement-trace.json');
-        let allTraces = [];
-        try { allTraces = JSON.parse(readFileSync(traceArchivePath, 'utf8')); } catch {}
-        try {
-          const current = JSON.parse(readFileSync(tracePath, 'utf8'));
-          if (Array.isArray(current)) {
-            const archivedSessions = new Set(allTraces.map(t => t.session));
-            allTraces.push(...current.filter(t => !archivedSessions.has(t.session)));
-          }
-        } catch {}
+        let allTraces = [...(fc.json(PATHS.traceArchive) || [])];
+        const current = fc.json(PATHS.trace);
+        if (Array.isArray(current)) {
+          const archivedSessions = new Set(allTraces.map(t => t.session));
+          allTraces.push(...current.filter(t => !archivedSessions.has(t.session)));
+        }
         if (allTraces.length > 0) {
           lastESession = allTraces[allTraces.length - 1].session || 0;
         }
@@ -807,13 +804,11 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
     // Mirrors the intel archiving pattern above: append to archive, keep current file
     // intact (it's read by covenant-tracker and other post-session hooks).
     {
-      const tracePath = join(STATE_DIR, 'engagement-trace.json');
-      const traceArchivePath = join(STATE_DIR, 'engagement-trace-archive.json');
+      // R#225: Use fc cache for trace reads (same files as intel capture diagnostic)
       try {
-        const traceData = JSON.parse(readFileSync(tracePath, 'utf8'));
+        const traceData = fc.json(PATHS.trace);
         if (Array.isArray(traceData) && traceData.length > 0) {
-          let traceArchive = [];
-          try { traceArchive = JSON.parse(readFileSync(traceArchivePath, 'utf8')); } catch {}
+          let traceArchive = [...(fc.json(PATHS.traceArchive) || [])];
           // Deduplicate: only archive entries not already in archive (by session number)
           const archivedSessions = new Set(traceArchive.map(t => t.session));
           const newEntries = traceData.filter(t => !archivedSessions.has(t.session));
@@ -1080,19 +1075,18 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
   // to compute how many E sessions actually generated intel entries.
   // R#224: Wrapped in safeSection for error isolation
   const intelCaptureWarning = safeSection('Intel capture diagnostic', () => {
-    const tracePath = join(STATE_DIR, 'engagement-trace.json');
-    const traceArchivePath = join(STATE_DIR, 'engagement-trace-archive.json');
-    const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
-    let allTraces = [];
-    try { allTraces = JSON.parse(readFileSync(traceArchivePath, 'utf8')); } catch {}
-    try {
-      const current = JSON.parse(readFileSync(tracePath, 'utf8'));
-      if (Array.isArray(current)) {
-        const archivedSessions = new Set(allTraces.map(t => t.session));
-        allTraces.push(...current.filter(t => !archivedSessions.has(t.session)));
-      }
-    } catch {}
-    const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
+    // R#225: Migrated from raw readFileSync to fc cache — these files are already
+    // read by intel archiving (lines 762+) and auto-promotion (lines 700+).
+    // Eliminates 3 redundant reads per R session.
+    let allTraces = fc.json(PATHS.traceArchive) || [];
+    // Clone to avoid mutating cached array
+    allTraces = [...allTraces];
+    const current = fc.json(PATHS.trace);
+    if (Array.isArray(current)) {
+      const archivedSessions = new Set(allTraces.map(t => t.session));
+      allTraces.push(...current.filter(t => !archivedSessions.has(t.session)));
+    }
+    const archive = fc.json(PATHS.intelArchive) || [];
     if (!Array.isArray(allTraces) || allTraces.length === 0) return '';
     const recentESessions = allTraces.slice(-10).map(t => t.session);
     const sessionsWithIntel = new Set(

@@ -72,10 +72,17 @@ export function computeDirectiveHealth(sessionNum, sessionType, baseDir) {
       }
 
       // Check session-type relevance
-      const hints = typeHints[sessionType] || [];
-      if (hints.some(h => content.includes(h))) {
-        health.urgent.push(entry);
-        health.summary.urgent++;
+      // wq-484: If directive has explicit scope (e.g. "E"), only assign to that type.
+      // Prevents d049 (E-only intel mandate) from being assigned to B sessions
+      // where it can never produce evidence, causing artificial 0% addressed rates.
+      if (d.scope && d.scope !== sessionType) {
+        // Scoped to a different session type — not urgent for us
+      } else {
+        const hints = typeHints[sessionType] || [];
+        if (hints.some(h => content.includes(h))) {
+          health.urgent.push(entry);
+          health.summary.urgent++;
+        }
       }
     }
   } catch { /* ignore parse errors */ }

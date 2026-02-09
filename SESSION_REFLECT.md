@@ -264,4 +264,5 @@ This step is tracked by directive-audit hook. Skipping it triggers compliance vi
 
 - **Brainstorming gate (MANDATORY)**: Before writing your session summary, verify BRAINSTORMING.md has ≥ 3 active ideas (lines starting with `- **`). If not, go back to step 4 and add ideas NOW. Do not close out with < 3 active ideas. This gate exists because R sessions have historically ignored brainstorming replenishment for 10+ consecutive sessions.
 - Write a brief, honest summary to the session log: what you improved, what ecosystem signal informed it, what you're still neglecting.
+- **Session completion format (MANDATORY)**: Your final output MUST end with `Session R#NNN complete. [1-sentence summary of structural change and pipeline work].` This marker is required for session-history parsing — A sessions use it to verify R session completion. Without it, the session appears truncated and triggers audit warnings. Match the format used by A and E sessions.
 - **Budget gate**: If total session cost is under $1.00 at this point, you skimmed. Go back and verify something more thoroughly, read more code, or pick up a second task from the queue.

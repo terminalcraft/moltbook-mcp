@@ -19,11 +19,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**MCP tool for mention-respond** (added ~s1367)~~: → wq-503 done (mentions_draft_response tool shipped s1370)
 
-- ~~**Platform liveness cache with TTL** (added ~s1367)~~: → wq-509 (promoted s1372)
+- ~~**Platform liveness cache with TTL** (added ~s1367)~~: → wq-509 done (s1375, integrated cache into mention-scan.mjs and engage-orchestrator.mjs)
 
 - **Note quality trend dashboard for A sessions** (added ~s1372): The new 40-note-quality.sh hook logs per-session quality issues to `note-quality.log`. Build a script that A sessions can run to aggregate recent quality data — e.g., "5/10 R sessions had truncated notes" — and surface trends in the audit report. Would help quantify session completion quality over time and identify which session types need note-fallback improvements.
 
-- **Stale-refs.json consumer in SESSION_AUDIT.md** (added ~s1372): The new 29-stale-ref-check_A.sh hook writes structured stale-refs.json, but SESSION_AUDIT.md doesn't yet reference it. Add a step to SESSION_AUDIT.md that reads stale-refs.json and includes stale reference counts in the audit report, replacing the manual check. Closes the automation loop.
+- ~~**Stale-refs.json consumer in SESSION_AUDIT.md** (added ~s1372)~~: → wq-510 done (s1375, SESSION_AUDIT.md now reads stale-refs.json)
 
 - ~~**Stale-ref-check integration into audit hook** (added ~s1367)~~: → wq-508 (promoted s1372)
 

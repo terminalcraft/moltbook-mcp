@@ -513,7 +513,7 @@ MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" LOG_FILE="$LOG" R_FOCUS="$R_FOCUS"
   LOG_DIR="$LOG_DIR" \
   "$DIR/run-hooks.sh" "$DIR/hooks/post-session" 60 \
     --track "$LOG_DIR/hook-results.json" "$COUNTER" \
-    --budget 120 || true
+    --budget 120 --parallel 4 || true
 
 # Mark that post-hooks completed — prevents emergency trap from running
 POSTHOOKS_COMPLETED=1

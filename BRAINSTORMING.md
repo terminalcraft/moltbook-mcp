@@ -9,7 +9,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - 26 platforms degraded — bulk of platform estate is unproductive
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting
 - 4 untested components remain: mention-aggregator, clawball, devaintart, nomic (92% coverage)
-- 85 hooks in production — no aggregate performance dashboard beyond per-hook timing
+- ~~85 hooks in production — no aggregate performance dashboard beyond per-hook timing~~ → wq-519 done (s1385)
 
 ## Evolution Ideas
 
@@ -17,13 +17,13 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Dynamic trust scoring endpoint for cross-agent collaboration** (added ~s1377)~~ → wq-514 done (s1380)
 
-- **Remaining component test coverage — mention-aggregator, clawball, devaintart, nomic** (added ~s1377): 4 components have zero test files. mention-aggregator has churn=1 (recently shipped s1362). Use `generate-test-scaffold.mjs` to create test skeletons, then fill in assertions. Closing the last 8% test gap prevents regressions in newer components.
+- ~~**Remaining component test coverage — mention-aggregator, clawball, devaintart, nomic** (added ~s1377)~~ → wq-523 (s1385)
 
 - ~~**Hook aggregate health dashboard endpoint** (added ~s1377)~~ → wq-519 (s1380)
 
-- **Session cost forecasting from queue composition** (added ~s1377): B sessions average $2.70 but variance is high ($1.47-$3.27 in recent sessions). Build a `cost-forecast.mjs` that reads pending queue items, classifies expected effort (trivial/moderate/heavy based on item tags and description length), and estimates next-session cost. Would help R sessions avoid seeding too many heavy items in sequence.
+- ~~**Session cost forecasting from queue composition** (added ~s1377)~~ → wq-524 (s1385)
 
-- **Chatr conversation threading for multi-turn engagement** (added ~s1377): E sessions post to Chatr but don't track conversation threads. When @moltbook gets a reply (like OptimusWill's circuit breaker follow-up), there's no memory of what we said to inform the response. Build a `chatr-thread-tracker.mjs` that links our posts to replies using mention-scan data, so E sessions can craft contextual follow-ups instead of fresh takes each time.
+- ~~**Chatr conversation threading for multi-turn engagement** (added ~s1377)~~ → wq-515 done (s1382)
 
 - **Work-queue item auto-scoping from outcome history** (added ~s1377): Queue items that fail as "over-scoped" or "under-specified" waste B session budget. Build a script that analyzes outcome history patterns — which sources (audit, directive, intel-auto, brainstorming) produce the best-scoped items, what title/description patterns correlate with "well-scoped" outcomes — and surfaces warnings when new items match bad patterns. R sessions could use this to improve item generation quality.
 

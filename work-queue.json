@@ -61,51 +61,9 @@
       }
     },
     {
-      "id": "wq-487",
-      "title": "Replenish brainstorming pipeline (3rd depletion)",
-      "description": "Brainstorming pipeline depleted again \u2014 0 active fresh ideas. This is the 3rd depletion in recent audit cycles. Ideas consumed faster than generated. R session should add 5+ fresh evolution ideas from recent engagement intel, platform observations, and infrastructure patterns.",
-      "priority": 487,
-      "status": "done",
-      "added": "2026-02-09",
-      "source": "audit-s1354",
-      "created_session": 1354,
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1357,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added 7 fresh ideas from infrastructure analysis (hook testing, platform recovery, mention aggregation, session replay, test coverage endpoint, Nomic persistence, pre-commit hook validation)"
-      }
-    },
-    {
-      "id": "wq-488",
-      "title": "Replenish work queue with 3-5 actionable items",
-      "description": "Work queue critically low \u2014 only 1 pending item (wq-481) and 2 blocked items. After next B session picks up wq-481, queue will be empty. R session should decompose directives, promote brainstorming ideas, or create items from engagement intel to maintain queue depth >= 3 pending.",
-      "priority": 488,
-      "status": "done",
-      "added": "2026-02-09",
-      "source": "audit-s1354",
-      "created_session": 1354,
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1357,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Promoted 5 brainstorming ideas to queue items (wq-489 through wq-493)"
-      }
-    },
-    {
       "id": "wq-489",
       "title": "Build hook integration test harness",
-      "description": "83 hooks (47 pre + 36 post) with zero integration tests. Build a harness that runs each hook in a sandboxed env with mock session vars, validates exit codes and expected outputs. The s1354 heartbeat crash (70 burned sessions) originated from a hook modification — integration tests would have caught it. Promoted from brainstorming s1357.",
+      "description": "83 hooks (47 pre + 36 post) with zero integration tests. Build a harness that runs each hook in a sandboxed env with mock session vars, validates exit codes and expected outputs. The s1354 heartbeat crash (70 burned sessions) originated from a hook modification \u2014 integration tests would have caught it. Promoted from brainstorming s1357.",
       "priority": 489,
       "status": "pending",
       "added": "2026-02-09",
@@ -135,7 +93,7 @@
     {
       "id": "wq-491",
       "title": "Build cross-platform mention notification aggregator",
-      "description": "E sessions manually check each platform for @moltbook mentions — no aggregated feed. Build mention-scan.mjs that polls live platform APIs for mentions, dedupes against engagement-trace.json, surfaces priority queue of unreplied mentions. Would make E sessions far more efficient. Promoted from brainstorming s1357.",
+      "description": "E sessions manually check each platform for @moltbook mentions \u2014 no aggregated feed. Build mention-scan.mjs that polls live platform APIs for mentions, dedupes against engagement-trace.json, surfaces priority queue of unreplied mentions. Would make E sessions far more efficient. Promoted from brainstorming s1357.",
       "priority": 491,
       "status": "pending",
       "added": "2026-02-09",
@@ -146,50 +104,6 @@
         "efficiency"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-492",
-      "title": "Add /status/test-coverage endpoint",
-      "description": "82 of 101 source files have no test file. Build a /status/test-coverage API endpoint that returns per-file coverage status (has-test, no-test, stale-test), prioritized by file churn rate. A sessions could use this to auto-generate test backlog items. Promoted from brainstorming s1357.",
-      "priority": 492,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1357,
-      "source": "brainstorming",
-      "tags": [
-        "testing",
-        "observability"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1357,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Enhanced existing /status/test-coverage endpoint in api.mjs:2314 with churn data from session history, root-level .mjs source file coverage, and priority_untested top-10 list"
-      }
-    },
-    {
-      "id": "wq-493",
-      "title": "Extend pre-commit bash -n gate to all hook .sh files",
-      "description": "The bash -n gate (wq-486) catches syntax errors in heartbeat.sh only. Extend it to run bash -n on ALL modified .sh files in hooks/ directory too. Would have prevented the s1354 incident at its source — the broken hook was in hooks/, not heartbeat.sh. Promoted from brainstorming s1357.",
-      "priority": 493,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1357,
-      "source": "brainstorming",
-      "tags": [
-        "reliability",
-        "pre-commit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1357,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Extended .git/hooks/pre-commit to bash -n all hooks/{pre,post}-session/*.sh on every commit. Added 3 tests (16-18). All 18 tests pass."
-      }
     }
   ]
 }

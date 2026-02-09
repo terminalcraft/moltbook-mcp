@@ -16,6 +16,23 @@ const timingStart = Date.now();
 const timings = {};
 const markTiming = (label) => { timings[label] = Date.now() - timingStart; };
 
+// R#224: Error boundary for R prompt block subsections.
+// d061 showed cascading failures in init pipeline are highest-risk bugs.
+// heartbeat.sh got safe_stage() wrapping; session-context.mjs had none.
+// Each R prompt subsection (impact history, intel promotion, intel capture,
+// human review) is now independently wrapped so a failure in one doesn't
+// kill the entire r_prompt_block assembly. Returns fallback string on error.
+const safeSection = (label, fn) => {
+  try {
+    return fn();
+  } catch (e) {
+    const msg = (e.message || 'unknown error').substring(0, 80);
+    result._degraded = result._degraded || [];
+    result._degraded.push(`${label}: ${msg}`);
+    return `\n\n### ${label}: DEGRADED\n_Error: ${msg}. Section skipped — other context intact._`;
+  }
+};
+
 const MODE = process.argv[2] || 'B';
 const COUNTER = parseInt(process.argv[3] || '0', 10);
 // B_FOCUS arg kept for backward compat but no longer used for task selection (R#49).
@@ -957,55 +974,54 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
 
   // wq-158: R session impact summary — pre-compute and inject into prompt
   // Saves a tool call vs running `node r-impact-digest.mjs` manually in step 3
-  let impactSummary = '';
-  try {
+  // R#224: Wrapped in safeSection for error isolation
+  const impactSummary = safeSection('Impact history', () => {
     const impactPath = join(STATE_DIR, 'r-session-impact.json');
-    if (existsSync(impactPath)) {
-      const impactData = JSON.parse(readFileSync(impactPath, 'utf8'));
-      const analysis = impactData.analysis || [];
-      const pending = (impactData.changes || []).filter(c => !c.analyzed);
-      if (analysis.length > 0 || pending.length > 0) {
-        const catStats = {};
-        for (const a of analysis) {
-          const cat = a.category || 'unknown';
-          if (!catStats[cat]) catStats[cat] = { pos: 0, neg: 0, neu: 0 };
-          const imp = a.impact || 'neutral';
-          if (imp === 'positive') catStats[cat].pos++;
-          else if (imp === 'negative') catStats[cat].neg++;
-          else catStats[cat].neu++;
-        }
-        const recs = [];
-        for (const [cat, s] of Object.entries(catStats)) {
-          const total = s.pos + s.neg + s.neu;
-          if (total === 0) continue;
-          const posPct = (s.pos / total) * 100;
-          const negPct = (s.neg / total) * 100;
-          let rec = 'NEUTRAL';
-          if (negPct > 50) rec = 'AVOID';
-          else if (posPct > 50) rec = 'PREFER';
-          recs.push(`${cat}: ${rec} (${s.pos}+ ${s.neg}- ${s.neu}=)`);
-        }
-        const recsText = recs.length > 0 ? recs.join(', ') : 'no category data';
-        const pendingText = pending.length > 0 ? ` | ${pending.length} changes pending analysis` : '';
-        impactSummary = `\n\n### Impact history (wq-158):\n${analysis.length} analyzed changes. Recommendations: ${recsText}${pendingText}`;
-        if (pending.length > 0 && COUNTER > 0) {
-          const nextAnalysis = pending.filter(p => {
-            const sessionsUntil = 10 - (COUNTER - (p.session || 0));
-            return sessionsUntil > 0 && sessionsUntil <= 3;
-          });
-          if (nextAnalysis.length > 0) {
-            impactSummary += `\nSoon: ${nextAnalysis.map(p => `s${p.session} ${p.file} (${10 - (COUNTER - (p.session || 0))} sessions left)`).join(', ')}`;
-          }
-        }
+    if (!existsSync(impactPath)) return '';
+    const impactData = JSON.parse(readFileSync(impactPath, 'utf8'));
+    const analysis = impactData.analysis || [];
+    const pending = (impactData.changes || []).filter(c => !c.analyzed);
+    if (analysis.length === 0 && pending.length === 0) return '';
+    const catStats = {};
+    for (const a of analysis) {
+      const cat = a.category || 'unknown';
+      if (!catStats[cat]) catStats[cat] = { pos: 0, neg: 0, neu: 0 };
+      const imp = a.impact || 'neutral';
+      if (imp === 'positive') catStats[cat].pos++;
+      else if (imp === 'negative') catStats[cat].neg++;
+      else catStats[cat].neu++;
+    }
+    const recs = [];
+    for (const [cat, s] of Object.entries(catStats)) {
+      const total = s.pos + s.neg + s.neu;
+      if (total === 0) continue;
+      const posPct = (s.pos / total) * 100;
+      const negPct = (s.neg / total) * 100;
+      let rec = 'NEUTRAL';
+      if (negPct > 50) rec = 'AVOID';
+      else if (posPct > 50) rec = 'PREFER';
+      recs.push(`${cat}: ${rec} (${s.pos}+ ${s.neg}- ${s.neu}=)`);
+    }
+    const recsText = recs.length > 0 ? recs.join(', ') : 'no category data';
+    const pendingText = pending.length > 0 ? ` | ${pending.length} changes pending analysis` : '';
+    let summary = `\n\n### Impact history (wq-158):\n${analysis.length} analyzed changes. Recommendations: ${recsText}${pendingText}`;
+    if (pending.length > 0 && COUNTER > 0) {
+      const nextAnalysis = pending.filter(p => {
+        const sessionsUntil = 10 - (COUNTER - (p.session || 0));
+        return sessionsUntil > 0 && sessionsUntil <= 3;
+      });
+      if (nextAnalysis.length > 0) {
+        summary += `\nSoon: ${nextAnalysis.map(p => `s${p.session} ${p.file} (${10 - (COUNTER - (p.session || 0))} sessions left)`).join(', ')}`;
       }
     }
-  } catch {}
+    return summary;
+  });
 
   // wq-191: Intel promotion visibility — show recently-promoted intel items and their outcomes
   // Closes the feedback loop on whether E→B pipeline produces outcomes
   // wq-216: Added capacity-awareness — distinguish "0% - capacity gated" from "0% - no actionable"
-  let intelPromoSummary = '';
-  {
+  // R#224: Wrapped in safeSection for error isolation
+  const intelPromoSummary = safeSection('Intel promotion', () => {
     const intelItems = queue.filter(i => i.source === 'intel-auto');
     if (intelItems.length > 0) {
       const byStatus = { pending: [], done: [], retired: [], 'in-progress': [] };
@@ -1022,96 +1038,74 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       const convRate = intelItems.length > 0
         ? Math.round((byStatus.done.length / intelItems.length) * 100)
         : 0;
-      intelPromoSummary = `\n\n### Intel→Queue pipeline (wq-191):\n${intelItems.length} items auto-promoted from engagement intel. Status: ${parts.join(', ')}. Conversion rate: ${convRate}%.`;
-      // Show recent pending items for visibility
+      let summary = `\n\n### Intel→Queue pipeline (wq-191):\n${intelItems.length} items auto-promoted from engagement intel. Status: ${parts.join(', ')}. Conversion rate: ${convRate}%.`;
       if (byStatus.pending.length > 0) {
         const recent = byStatus.pending.slice(0, 3).map(i => `  - ${i.id}: ${i.title.substring(0, 50)}`).join('\n');
-        intelPromoSummary += `\nPending intel items:\n${recent}`;
+        summary += `\nPending intel items:\n${recent}`;
       }
-    } else {
-      // wq-216: No intel-auto items yet — explain why (capacity gate vs no actionable intel)
-      // Check if there's pending intel that could be promoted
-      const intelPath = join(STATE_DIR, 'engagement-intel.json');
-      const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
-      let hasActionableIntel = false;
-      let capacityGated = false;
-
-      // Check current intel inbox
+      return summary;
+    }
+    // wq-216: No intel-auto items yet — explain why (capacity gate vs no actionable intel)
+    const intelPath = join(STATE_DIR, 'engagement-intel.json');
+    const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
+    let hasActionableIntel = false;
+    try {
+      const currentIntel = JSON.parse(readFileSync(intelPath, 'utf8'));
+      if (Array.isArray(currentIntel)) {
+        hasActionableIntel = currentIntel.some(e =>
+          (e.type === 'integration_target' || e.type === 'pattern') &&
+          (e.actionable || '').length > 20
+        );
+      }
+    } catch { /* empty or missing */ }
+    const capacityGated = result.pending_count >= 5;
+    if (capacityGated && hasActionableIntel) {
+      return `\n\n### Intel→Queue pipeline (wq-191):\n0 items promoted — CAPACITY GATED (${result.pending_count} pending >= 5). Actionable intel exists but promotion blocked until queue capacity frees.`;
+    }
+    if (!hasActionableIntel) {
+      let archivedPromoCount = 0;
       try {
-        const currentIntel = JSON.parse(readFileSync(intelPath, 'utf8'));
-        if (Array.isArray(currentIntel)) {
-          const actionable = currentIntel.filter(e =>
-            (e.type === 'integration_target' || e.type === 'pattern') &&
-            (e.actionable || '').length > 20
-          );
-          hasActionableIntel = actionable.length > 0;
-        }
-      } catch { /* empty or missing */ }
-
-      // Check if queue was at capacity during last promotion attempt
-      // Archive entries with _promoted flag indicate successful promotions happened before
-      // If pending >= 5, promotions are blocked by capacity gate
-      capacityGated = result.pending_count >= 5;
-
-      if (capacityGated && hasActionableIntel) {
-        intelPromoSummary = `\n\n### Intel→Queue pipeline (wq-191):\n0 items promoted — CAPACITY GATED (${result.pending_count} pending >= 5). Actionable intel exists but promotion blocked until queue capacity frees.`;
-      } else if (!hasActionableIntel) {
-        // Check archive for past promotions
-        let archivedPromoCount = 0;
-        try {
-          const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
-          archivedPromoCount = (archive || []).filter(e => e._promoted).length;
-        } catch { /* no archive */ }
-        if (archivedPromoCount > 0) {
-          intelPromoSummary = `\n\n### Intel→Queue pipeline (wq-191):\n0 items currently promoted. ${archivedPromoCount} historical promotions (now archived/processed).`;
-        }
-        // else: no summary needed — no intel pipeline activity at all
+        const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
+        archivedPromoCount = (archive || []).filter(e => e._promoted).length;
+      } catch { /* no archive */ }
+      if (archivedPromoCount > 0) {
+        return `\n\n### Intel→Queue pipeline (wq-191):\n0 items currently promoted. ${archivedPromoCount} historical promotions (now archived/processed).`;
       }
     }
-  }
+    return '';
+  });
 
   // R#173: Intel capture rate diagnostic (updated B#324 to use trace archive)
   // Cross-references engagement-trace-archive.json + current trace with intel archive
   // to compute how many E sessions actually generated intel entries.
-  // Surfaces the pattern: "E sessions engaging but not capturing intel."
-  let intelCaptureWarning = '';
-  {
+  // R#224: Wrapped in safeSection for error isolation
+  const intelCaptureWarning = safeSection('Intel capture diagnostic', () => {
+    const tracePath = join(STATE_DIR, 'engagement-trace.json');
+    const traceArchivePath = join(STATE_DIR, 'engagement-trace-archive.json');
+    const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
+    let allTraces = [];
+    try { allTraces = JSON.parse(readFileSync(traceArchivePath, 'utf8')); } catch {}
     try {
-      const tracePath = join(STATE_DIR, 'engagement-trace.json');
-      const traceArchivePath = join(STATE_DIR, 'engagement-trace-archive.json');
-      const archivePath = join(STATE_DIR, 'engagement-intel-archive.json');
-      // Merge trace archive + current trace for full E session history
-      let allTraces = [];
-      try { allTraces = JSON.parse(readFileSync(traceArchivePath, 'utf8')); } catch {}
-      try {
-        const current = JSON.parse(readFileSync(tracePath, 'utf8'));
-        if (Array.isArray(current)) {
-          // Deduplicate by session number (current may overlap with archive)
-          const archivedSessions = new Set(allTraces.map(t => t.session));
-          allTraces.push(...current.filter(t => !archivedSessions.has(t.session)));
-        }
-      } catch {}
-      const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
-
-      if (Array.isArray(allTraces) && allTraces.length > 0) {
-        // Get last 10 E sessions from combined trace history
-        const recentESessions = allTraces.slice(-10).map(t => t.session);
-
-        // Count which E sessions generated intel (check archive for matching session numbers)
-        const sessionsWithIntel = new Set(
-          (archive || []).map(e => e.session || e.archived_session).filter(s => recentESessions.includes(s))
-        );
-
-        const captureRate = recentESessions.length > 0
-          ? Math.round((sessionsWithIntel.size / recentESessions.length) * 100)
-          : 0;
-
-        if (captureRate < 50 && recentESessions.length >= 5) {
-          intelCaptureWarning = `\n\n### Intel Capture Alert (R#173):\nOnly ${sessionsWithIntel.size}/${recentESessions.length} recent E sessions (${captureRate}%) generated intel entries. E sessions are engaging but not capturing actionable insights. Review SESSION_ENGAGE.md Phase 3b compliance.`;
-        }
+      const current = JSON.parse(readFileSync(tracePath, 'utf8'));
+      if (Array.isArray(current)) {
+        const archivedSessions = new Set(allTraces.map(t => t.session));
+        allTraces.push(...current.filter(t => !archivedSessions.has(t.session)));
       }
-    } catch { /* trace or archive missing/empty — no diagnostic */ }
-  }
+    } catch {}
+    const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
+    if (!Array.isArray(allTraces) || allTraces.length === 0) return '';
+    const recentESessions = allTraces.slice(-10).map(t => t.session);
+    const sessionsWithIntel = new Set(
+      (archive || []).map(e => e.session || e.archived_session).filter(s => recentESessions.includes(s))
+    );
+    const captureRate = recentESessions.length > 0
+      ? Math.round((sessionsWithIntel.size / recentESessions.length) * 100)
+      : 0;
+    if (captureRate < 50 && recentESessions.length >= 5) {
+      return `\n\n### Intel Capture Alert (R#173):\nOnly ${sessionsWithIntel.size}/${recentESessions.length} recent E sessions (${captureRate}%) generated intel entries. E sessions are engaging but not capturing actionable insights. Review SESSION_ENGAGE.md Phase 3b compliance.`;
+    }
+    return '';
+  });
 
   result.r_prompt_block = `## R Session: #${rCount}
 This is R session #${rCount}. Follow the checklist in SESSION_REFLECT.md.

@@ -11756,6 +11756,56 @@
         "effort": "trivial",
         "quality": "well-scoped"
       }
+    },
+    {
+      "id": "wq-515",
+      "title": "Chatr conversation thread tracker for contextual E session follow-ups",
+      "description": "Build chatr-thread-tracker.mjs that links our Chatr posts to replies using mention-scan data. E sessions currently post fresh takes each time \u2014 no memory of conversation threads. Track our-post \u2192 reply chains so E sessions can craft contextual follow-ups instead of disconnected statements.",
+      "priority": 515,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1377,
+      "source": "brainstorming",
+      "tags": [
+        "engagement",
+        "chatr"
+      ],
+      "commits": [
+        "0da4b6a feat(wq-515): add Chatr conversation thread tracker",
+        "3fb21a8 test(wq-515): add 16 tests for Chatr thread tracker",
+        "658d9f9 feat(wq-515): integrate thread tracker into mention-respond"
+      ],
+      "outcome": {
+        "session": 1382,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": ""
+      }
+    },
+    {
+      "id": "wq-518",
+      "title": "Build note quality trend aggregator for A session audits",
+      "description": "Parse note-quality.log to aggregate recent quality issues by session type and pattern (truncated, commit-message-only, missing markers). Output summary for A sessions to include in audit reports. Feeds into session completion quality tracking.",
+      "priority": 518,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1380,
+      "source": "brainstorming",
+      "tags": [
+        "audit",
+        "tooling"
+      ],
+      "commits": [
+        "9a09b3e feat(wq-518): add note quality trend aggregator for A session audits"
+      ],
+      "outcome": {
+        "session": 1382,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": ""
+      }
     }
   ]
 }

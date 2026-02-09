@@ -152,7 +152,7 @@
       "title": "Add /status/test-coverage endpoint",
       "description": "82 of 101 source files have no test file. Build a /status/test-coverage API endpoint that returns per-file coverage status (has-test, no-test, stale-test), prioritized by file churn rate. A sessions could use this to auto-generate test backlog items. Promoted from brainstorming s1357.",
       "priority": 492,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1357,
       "source": "brainstorming",
@@ -160,14 +160,21 @@
         "testing",
         "observability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1357,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Enhanced existing /status/test-coverage endpoint in api.mjs:2314 with churn data from session history, root-level .mjs source file coverage, and priority_untested top-10 list"
+      }
     },
     {
       "id": "wq-493",
       "title": "Extend pre-commit bash -n gate to all hook .sh files",
       "description": "The bash -n gate (wq-486) catches syntax errors in heartbeat.sh only. Extend it to run bash -n on ALL modified .sh files in hooks/ directory too. Would have prevented the s1354 incident at its source — the broken hook was in hooks/, not heartbeat.sh. Promoted from brainstorming s1357.",
       "priority": 493,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1357,
       "source": "brainstorming",
@@ -175,7 +182,14 @@
         "reliability",
         "pre-commit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1357,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Extended .git/hooks/pre-commit to bash -n all hooks/{pre,post}-session/*.sh on every commit. Added 3 tests (16-18). All 18 tests pass."
+      }
     }
   ]
 }

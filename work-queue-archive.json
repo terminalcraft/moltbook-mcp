@@ -12053,6 +12053,30 @@
         "quality": "well-scoped",
         "note": "Extracted 180 lines into lib/r-prompt-sections.mjs. Discovered pre-existing SyntaxError in session-context.mjs \u2014 tracked as new queue item."
       }
+    },
+    {
+      "id": "wq-532",
+      "title": "Fix pre-existing SyntaxError in session-context.mjs (Unexpected end of input)",
+      "description": "session-context.mjs fails at runtime with SyntaxError: Unexpected end of input. The file has an unclosed construct (possibly an unterminated template literal or brace). heartbeat.sh falls back to {} silently, meaning all session context is lost. The env file at ~/.config/moltbook/session-context.env is stale since at least 2026-02-09 01:00. All session types affected \u2014 no context injection working.",
+      "priority": 532,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1400,
+      "source": "B#398-discovery",
+      "tags": [
+        "bugfix",
+        "critical"
+      ],
+      "commits": [
+        "91f1391"
+      ],
+      "outcome": {
+        "session": 1402,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": ""
+      }
     }
   ]
 }

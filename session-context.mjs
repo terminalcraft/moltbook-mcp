@@ -81,6 +81,9 @@ function readJSON(path) {
 const result = {};
 
 // R#223: Commonly-used file paths (used by FileCache and multiple sections)
+// R#232: Expanded PATHS to centralize ALL file locations used across sections.
+// Previously 9 paths were centralized but 8+ remained as inline join() calls,
+// defeating the purpose of PATHS as a single source of truth for file locations.
 const PATHS = {
   history: join(STATE_DIR, 'session-history.txt'),
   brainstorming: join(DIR, 'BRAINSTORMING.md'),
@@ -91,6 +94,15 @@ const PATHS = {
   traceArchive: join(STATE_DIR, 'engagement-trace-archive.json'),
   registry: join(DIR, 'account-registry.json'),
   services: join(DIR, 'services.json'),
+  queueArchive: join(DIR, 'work-queue-archive.json'),
+  humanReview: join(DIR, 'human-review.json'),
+  auditReport: join(DIR, 'audit-report.json'),
+  rCounter: join(STATE_DIR, 'r_session_counter'),
+  eCounter: join(STATE_DIR, 'e_session_counter'),
+  aCounter: join(STATE_DIR, 'a_session_counter'),
+  eContext: join(STATE_DIR, 'e-session-context.md'),
+  todoFollowups: join(STATE_DIR, 'todo-followups.txt'),
+  impactAnalysis: join(STATE_DIR, 'r-impact-analysis.json'),
 };
 
 // B#340: Stop words for keyword-based dedup. Used by both self-dedup and isTitleDupe.
@@ -213,9 +225,9 @@ const queueCtx = {
       return isNaN(n) ? m : Math.max(m, n);
     }, 0);
     try {
-      const archivePath = join(DIR, 'work-queue-archive.json');
+      const archivePath = PATHS.queueArchive;
       if (existsSync(archivePath)) {
-        const archive = JSON.parse(readFileSync(archivePath, 'utf8'));
+        const archive = fc.json(archivePath);
         const archived = archive.archived || archive;
         if (Array.isArray(archived)) {
           for (const item of archived) {
@@ -429,9 +441,9 @@ markTiming('auto_promote');
 // False positive classes: markdown tables, session summaries, JSON data, regex patterns,
 // queue references, brainstorming entries. Replaced simple regex with multi-stage rejection.
 if (MODE === 'B') {
-  const todoPath = join(STATE_DIR, 'todo-followups.txt');
+  const todoPath = PATHS.todoFollowups;
   if (existsSync(todoPath)) {
-    const todoContent = readFileSync(todoPath, 'utf8');
+    const todoContent = fc.text(todoPath);
     const todoLines = [...todoContent.matchAll(/^- (.+)/gm)];
     if (todoLines.length > 0) {
       // R#194: Multi-stage false positive rejection pipeline.
@@ -918,10 +930,9 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
   // so skipping here for non-R modes is safe. Previously ran for all modes (R#51 removed the
   // gate to fix B→R downgrades, but the recomputation mechanism was added later in R#59).
   if (MODE === 'R') {
-  const rCounterPath = join(STATE_DIR, 'r_session_counter');
   let rCount = '?';
   try {
-    const raw = parseInt(readFileSync(rCounterPath, 'utf8').trim());
+    const raw = parseInt(fc.text(PATHS.rCounter).trim());
     rCount = MODE === 'R' ? raw + 1 : raw;
   } catch { rCount = MODE === 'R' ? 1 : '?'; }
   const rPending = result.pending_count || 0;
@@ -936,7 +947,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
   // Human review queue count (d013)
   let rReviewCount = 0;
   try {
-    const reviewData = JSON.parse(readFileSync(join(DIR, 'human-review.json'), 'utf8'));
+    const reviewData = fc.json(PATHS.humanReview);
     rReviewCount = (reviewData.items || []).filter(i => i.status === 'open').length;
   } catch {}
 

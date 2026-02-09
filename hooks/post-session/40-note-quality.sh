@@ -84,6 +84,11 @@ if echo "$ENTRY" | grep -q 'build=(started)'; then
   ISSUES="${ISSUES}build=(started) placeholder not replaced; "
 fi
 
+# Check 8: "session started, awaiting completion" is a default placeholder note
+if [ -n "$NOTE" ] && echo "$NOTE" | grep -qi 'session started, awaiting completion'; then
+  ISSUES="${ISSUES}placeholder note (session started, awaiting completion); "
+fi
+
 # Report
 if [ -n "$ISSUES" ]; then
   # Trim trailing "; "

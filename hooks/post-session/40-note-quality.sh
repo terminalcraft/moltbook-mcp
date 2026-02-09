@@ -32,6 +32,7 @@ ENTRY=$(grep "s=$SESSION_NUM " "$HISTORY_FILE" | tail -1)
 }
 
 ISSUES=""
+SEVERITY="normal"
 
 # Check 1: Duration should not be "?"
 if echo "$ENTRY" | grep -q 'dur=?'; then
@@ -42,6 +43,10 @@ fi
 NOTE=$(echo "$ENTRY" | sed -n 's/.*note: //p')
 if [ -z "$NOTE" ]; then
   ISSUES="${ISSUES}empty note; "
+  # Empty R notes are critical — R sessions must always produce summaries
+  if [ "$MODE_CHAR" = "R" ]; then
+    SEVERITY="critical"
+  fi
 elif [ "${#NOTE}" -lt 15 ]; then
   ISSUES="${ISSUES}short note (${#NOTE} chars); "
 fi
@@ -63,12 +68,20 @@ fi
 
 # Check 5: R session completion marker
 if [ "$MODE_CHAR" = "R" ] && [ -n "$NOTE" ]; then
-  if ! echo "$NOTE" | grep -qiE 'Session R#|structural|R#[0-9]+|reflect'; then
-    ISSUES="${ISSUES}R session note missing session marker; "
+  # R sessions MUST include R#NNN marker — "reflect"/"structural" alone insufficient
+  if ! echo "$NOTE" | grep -qE 'R#[0-9]+'; then
+    ISSUES="${ISSUES}R session note missing R#NNN marker; "
+    SEVERITY="high"
   fi
   # R notes that are just git commit messages (e.g. "refactor: foo (R#229)") lack session context
   if echo "$NOTE" | grep -qE '^(feat|fix|refactor|chore|docs|test|ci|style|perf)\(?.*:' && [ "${#NOTE}" -lt 100 ]; then
     ISSUES="${ISSUES}R session note is commit-message-only (missing session summary); "
+  fi
+  # R notes that are raw diagnostic/analysis content without summary structure
+  if ! echo "$NOTE" | grep -qiE 'R#[0-9]+|complete|session summary'; then
+    if [ "${#NOTE}" -gt 50 ] && echo "$NOTE" | grep -qiE '^The |^This |^I found|^Looking|^After|^Session history'; then
+      ISSUES="${ISSUES}R session note is diagnostic content without session summary; "
+    fi
   fi
 fi
 
@@ -93,10 +106,24 @@ fi
 if [ -n "$ISSUES" ]; then
   # Trim trailing "; "
   ISSUES="${ISSUES%; }"
-  echo "$(date -Iseconds) s=$SESSION_NUM mode=$MODE_CHAR QUALITY: $ISSUES" >> "$LOG_FILE"
-  echo "note-quality: s$SESSION_NUM issues: $ISSUES" >&2
+  echo "$(date -Iseconds) s=$SESSION_NUM mode=$MODE_CHAR severity=$SEVERITY QUALITY: $ISSUES" >> "$LOG_FILE"
+  echo "note-quality: s$SESSION_NUM [$SEVERITY] issues: $ISSUES" >&2
 else
   echo "$(date -Iseconds) s=$SESSION_NUM mode=$MODE_CHAR OK" >> "$LOG_FILE"
+fi
+
+# R session rolling quality metric (last 10 R sessions)
+# Writes pass/fail ratio to a file audits can consume directly
+if [ "$MODE_CHAR" = "R" ]; then
+  R_QUALITY_FILE="$LOG_DIR/r-session-quality.txt"
+  # Count recent R session quality from log
+  R_TOTAL=$(grep -c "mode=R " "$LOG_FILE" 2>/dev/null || echo 0)
+  R_PASS=$(grep "mode=R OK" "$LOG_FILE" | tail -10 | wc -l)
+  R_RECENT=$(grep "mode=R " "$LOG_FILE" | tail -10 | wc -l)
+  if [ "$R_RECENT" -gt 0 ]; then
+    R_PCT=$((R_PASS * 100 / R_RECENT))
+    echo "r_quality_pct=$R_PCT r_pass=$R_PASS r_recent=$R_RECENT updated=$(date -Iseconds)" > "$R_QUALITY_FILE"
+  fi
 fi
 
 exit 0

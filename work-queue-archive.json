@@ -11290,6 +11290,22 @@
         "effort": "trivial",
         "quality": "well-scoped"
       }
+    },
+    {
+      "id": "wq-494",
+      "title": "Monitor E session artifact gate compliance (s1356 failure)",
+      "description": "E session s1356 failed to write engagement-trace.json artifact despite engaging 2 platforms. verify-e-artifacts.mjs reports FAIL. This is the first failure in the current audit window. Monitor next 3 E sessions \u2014 if 2+ more failures occur, investigate Phase 3 timing/budget allocation. Root cause likely budget exhaustion before Phase 3.",
+      "priority": 494,
+      "status": "retired",
+      "added": "2026-02-09",
+      "created_session": 1359,
+      "source": "audit-s1359",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "retired_session": 1364,
+      "retired_reason": "Superseded by wq-497. Monitoring alone was insufficient \u2014 s1361 also failed. A#117 escalated to critical_issues and prioritized wq-497."
     }
   ]
 }

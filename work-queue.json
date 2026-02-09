@@ -61,27 +61,11 @@
       }
     },
     {
-      "id": "wq-494",
-      "title": "Monitor E session artifact gate compliance (s1356 failure)",
-      "description": "E session s1356 failed to write engagement-trace.json artifact despite engaging 2 platforms. verify-e-artifacts.mjs reports FAIL. This is the first failure in the current audit window. Monitor next 3 E sessions \u2014 if 2+ more failures occur, investigate Phase 3 timing/budget allocation. Root cause likely budget exhaustion before Phase 3.",
-      "priority": 494,
-      "status": "retired",
-      "added": "2026-02-09",
-      "created_session": 1359,
-      "source": "audit-s1359",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "retired_session": 1364,
-      "retired_reason": "Superseded by wq-497. Monitoring alone was insufficient — s1361 also failed. A#117 escalated to critical_issues and prioritized wq-497."
-    },
-    {
       "id": "wq-497",
       "title": "Add E session artifact gate budget reservation",
       "description": "s1356 and s1361 both failed engagement-trace artifact gate despite engaging platforms. Root cause: budget exhaustion before Phase 3 artifact writes. Add a pre-Phase-2 budget check that reserves estimated tokens for Phase 3+4 artifact writes, preventing successful engagement from being unrecorded.",
       "priority": 497,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1362,
       "source": "brainstorming",
@@ -90,13 +74,20 @@
         "engagement",
         "audit"
       ],
-      "commits": [],
-      "notes": "A#117 escalated: 40% E session artifact gate failure rate. This is the highest priority pending item."
+      "commits": ["227f325"],
+      "notes": "A#117 escalated: 40% E session artifact gate failure rate. This is the highest priority pending item.",
+      "outcome": {
+        "session": 1365,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Already implemented by R#224 (s1363) in SESSION_ENGAGE.md — $0.80 budget reservation gate added"
+      }
     },
     {
       "id": "wq-498",
       "title": "Fix summarize-session.py NameError on line 174",
-      "description": "scripts/summarize-session.py has a recurring NameError on line 174 — variable 'status' referenced before assignment in a regex match fallback path. Causes emergency summaries or truncated notes in session-history.txt. Affected: s1277, s1363, s1140.",
+      "description": "scripts/summarize-session.py has a recurring NameError on line 174 \u2014 variable 'status' referenced before assignment in a regex match fallback path. Causes emergency summaries or truncated notes in session-history.txt. Affected: s1277, s1363, s1140.",
       "priority": 498,
       "status": "pending",
       "added": "2026-02-09",

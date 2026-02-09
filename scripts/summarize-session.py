@@ -171,7 +171,7 @@ notes = []
 for t in texts:
     # Pattern 1: "wq-XXX is blocked/retired" or "blocking wq-XXX"
     for m in re.finditer(r'(wq-\d+)\s+(?:is\s+)?(blocked|retired)(?:\s*[:\-—]\s*(.{1,80}))?', t, re.IGNORECASE):
-        task_id, status, reason = m.group(1), m.group(2).lower(), m.group(3) or status
+        task_id, status, reason = m.group(1), m.group(2).lower(), m.group(3) or m.group(2).lower()
         if not any(ft[0] == task_id for ft in failed_tasks):
             failed_tasks.append((task_id, reason.strip()))
     # Pattern 2: "blocking|retiring wq-XXX because/due to"

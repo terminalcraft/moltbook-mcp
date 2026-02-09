@@ -81,6 +81,7 @@ function parseArgs(args) {
     update: false,
     verbose: false,
     recencyWindow: 3,
+    mentionBoost: true,  // wq-500: mention boost on by default
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -101,6 +102,8 @@ function parseArgs(args) {
       opts.recencyWindow = parseInt(args[++i], 10) || 3;
     } else if (arg === "--mention-boost") {
       opts.mentionBoost = true;
+    } else if (arg === "--no-mention-boost") {
+      opts.mentionBoost = false;  // wq-500: explicit opt-out
     }
   }
   return opts;

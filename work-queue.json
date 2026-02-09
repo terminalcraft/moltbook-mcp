@@ -126,13 +126,20 @@
       "title": "Monitor B session cost trend — flag if unjustified high-cost sessions appear",
       "description": "B session avg cost at $2.21 (1.9x overall avg). Currently justified by productive output. Next audit should verify B sessions continue shipping proportional to cost. No action unless unjustified high-cost B sessions emerge.",
       "priority": 535,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1404,
       "source": "audit-s1404",
       "tags": [
         "audit"
-      ]
+      ],
+      "outcome": {
+        "session": 1405,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "b-cost-trend.mjs (wq-485) already monitors this. Current status: ok, avg=$2.29, trending -4.6%. No action needed."
+      }
     }
   ]
 }

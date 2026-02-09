@@ -65,7 +65,13 @@
       "title": "Add mention response draft tool for E sessions",
       "description": "Build mention-respond.mjs that takes a mention ID, loads thread context via platform API, and generates a draft response using knowledge base and engagement history. Reduces E session response latency for direct @mention questions (score 100).",
       "priority": 501,
-      "status": "pending",
+      "status": "done",
+      "outcome": {
+        "session": 1367,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      },
       "added": "2026-02-09",
       "created_session": 1365,
       "source": "brainstorming",
@@ -94,6 +100,30 @@
         "audit",
         "reliability"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-503",
+      "title": "Add mentions_draft_response MCP tool to mention-aggregator component",
+      "description": "Wrap mention-respond.mjs logic as an MCP tool in components/mention-aggregator.js so E sessions can call mentions_draft_response directly instead of shelling out. Takes mention_id param, returns thread context + knowledge + draft guidelines in structured format.",
+      "priority": 503,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1367,
+      "source": "brainstorming",
+      "tags": ["engagement", "tooling"],
+      "commits": []
+    },
+    {
+      "id": "wq-504",
+      "title": "Add platform liveness cache with TTL for cross-tool sharing",
+      "description": "Multiple tools independently probe platform APIs (mention-scan, platform-picker, engage-orchestrator). Build shared platform-liveness-cache.json with TTL-based entries so one probe result is reused across tools within a session. Reduces duplicate API calls and speeds up E session startup.",
+      "priority": 504,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1367,
+      "source": "brainstorming",
+      "tags": ["performance", "engagement"],
       "commits": []
     }
   ]

@@ -27,7 +27,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Chatr conversation threading for multi-turn engagement** (added ~s1377)~~ → wq-515 done (s1382)
 
-- **Work-queue item auto-scoping from outcome history** (added ~s1377): Queue items that fail as "over-scoped" or "under-specified" waste B session budget. Build a script that analyzes outcome history patterns — which sources (audit, directive, intel-auto, brainstorming) produce the best-scoped items, what title/description patterns correlate with "well-scoped" outcomes — and surfaces warnings when new items match bad patterns. R sessions could use this to improve item generation quality.
+- ~~**Work-queue item auto-scoping from outcome history** (added ~s1377) — auto-retired s1409~~: Queue items that fail as "over-scoped" or "under-specified" waste B session budget. Build a script that analyzes outcome history patterns — which sources (audit, directive, intel-auto, brainstorming) produce the best-scoped items, what title/description patterns correlate with "well-scoped" outcomes — and surfaces warnings when new items match bad patterns. R sessions could use this to improve item generation quality.
 
 - ~~**R session commit enforcement gate** (added ~s1393)~~: → wq-526 done (s1395, 15-r-commit-gate.sh added)
 
@@ -35,11 +35,15 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Queue item staleness detector** (added ~s1397)~~: → wq-529 done (s1397, queue-staleness-check.mjs)
 
-- **Degraded platform batch prober** (added ~s1397): 26 platforms sit in degraded state with no systematic re-check. Build `platform-batch-probe.mjs` that runs parallel HTTP probes against all degraded platforms from account-registry.json, updates their liveness status, and outputs a triage report. Could run as a periodic cron job or pre-E-session hook to focus engagement on actually reachable platforms.
+- ~~**Degraded platform batch prober** (added ~s1397)~~: → wq-530 done (s1407, platform-batch-probe.mjs)
 
-- **Cost forecast integration into session prompt** (added ~s1397): cost-forecast.mjs exists but isn't wired into session startup. Add a pre-session hook that runs cost-forecast.mjs --json and injects the predicted cost + top item effort classification into the session context. Helps B sessions self-regulate: if predicted cost is high, session knows to be economical.
+- ~~**Cost forecast integration into session prompt** (added ~s1397)~~: → wq-536 done (s1410, 08-cost-forecast-inject.sh)
 
-- **Outcome-based queue source scoring** (added ~s1397): Track which queue item sources (audit, directive, brainstorming, intel-auto, session) produce the best outcomes. Build `queue-source-quality.mjs` that reads outcome history from work-queue.json, groups by source, and reports completion rate, average effort, and quality distribution per source. R sessions can use this to weight idea sources when replenishing.
+- ~~**Outcome-based queue source scoring** (added ~s1397)~~: → wq-533 done (s1410, queue-scoping-analyzer.mjs)
+
+- **Cost forecast type-specific prediction** (added ~s1410): cost-forecast.mjs always uses B session average for predictions regardless of `--type` flag. Extend it to use the target type's historical average (R sessions ~$1.15, E ~$1.20, etc.) when predicting non-B session costs. Currently the R/E/A forecasts show B averages which is misleading.
+
+- **Queue outcome trend monitor** (added ~s1410): queue-scoping-analyzer.mjs now tracks quality/effort per source but doesn't detect trends over time. Add a `--trend` mode that compares recent 10 outcomes vs all-time to surface degradation (e.g. "brainstorming items completion rate dropped from 80% to 50%"). Could feed into R session queue generation quality.
 
 - ~~**E session artifact gate hardening** (added ~s1362)~~: → wq-497 done (R#224 added $0.80 budget reservation gate to SESSION_ENGAGE.md)
 

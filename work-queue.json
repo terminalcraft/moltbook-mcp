@@ -102,6 +102,30 @@
         "d059"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-484",
+      "title": "Fix d049 assignment to B sessions in directive-outcome.js",
+      "description": "B sessions get d049 in urgentDirectives but d049 is an E-session engagement directive (intel minimum). B sessions have no mechanism to produce d049 evidence, causing artificially low addressed rate (30%). Exclude d049 from B session assignment or add type-scoping to directive assignment logic.",
+      "priority": 484,
+      "status": "pending",
+      "added": "2026-02-09",
+      "source": "audit-s1281",
+      "created_session": 1281,
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-485",
+      "title": "Monitor B session cost trend (avg $2.47, approaching $2.50 threshold)",
+      "description": "B session avg cost rose from $2.17 to $2.47 over the last audit cycle. Two sessions exceeded $3.00 (s1264: $3.23, s1269: $3.16). Not yet at action threshold but trending up. Next audit should check if avg exceeded $2.50 or 3+ sessions over $3.00.",
+      "priority": 485,
+      "status": "pending",
+      "added": "2026-02-09",
+      "source": "audit-s1281",
+      "created_session": 1281,
+      "tags": ["audit"],
+      "commits": []
     }
   ]
 }

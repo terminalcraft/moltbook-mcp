@@ -28,6 +28,14 @@ function setup() {
   mkdirSync(SRC, { recursive: true });
   mkdirSync(STATE, { recursive: true });
 
+  // Copy lib/ directory for r-prompt-sections.mjs import (wq-531 extraction)
+  const libSrc = new URL('./lib', import.meta.url).pathname;
+  const libDst = join(SRC, 'lib');
+  mkdirSync(libDst, { recursive: true });
+  for (const f of ['r-prompt-sections.mjs']) {
+    if (existsSync(join(libSrc, f))) copyFileSync(join(libSrc, f), join(libDst, f));
+  }
+
   // Copy session-context.mjs and patch DIR + STATE_DIR
   let src = readFileSync(new URL('./session-context.mjs', import.meta.url), 'utf8');
   // Replace DIR computation

@@ -175,7 +175,9 @@ const depsReady = (item) => !item.deps?.length || item.deps.every(d => {
       result.deduped.push(removed.id + ': ' + removed.title);
     }
     wqDirty = true;
-    queueCtx.invalidate(); // R#218: reset caches after queue mutation
+    // Note: queueCtx.invalidate() was here but caused TDZ ReferenceError — queueCtx
+    // is defined later (lazy getters). Since dedup runs before queueCtx is created,
+    // its caches are never populated yet, so invalidation is unnecessary.
   }
 }
 
@@ -207,6 +209,7 @@ markTiming('queue_context');
     }
   }
   result.b_stall_count = bStallCount;
+}
 
 // Top task for B sessions — first pending by priority, with complexity-aware selection (wq-017).
 // Items may have complexity: "S" | "M" | "L". Default is "M" if unset.

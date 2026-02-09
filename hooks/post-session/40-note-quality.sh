@@ -66,6 +66,10 @@ if [ "$MODE_CHAR" = "R" ] && [ -n "$NOTE" ]; then
   if ! echo "$NOTE" | grep -qiE 'Session R#|structural|R#[0-9]+|reflect'; then
     ISSUES="${ISSUES}R session note missing session marker; "
   fi
+  # R notes that are just git commit messages (e.g. "refactor: foo (R#229)") lack session context
+  if echo "$NOTE" | grep -qE '^(feat|fix|refactor|chore|docs|test|ci|style|perf)\(?.*:' && [ "${#NOTE}" -lt 100 ]; then
+    ISSUES="${ISSUES}R session note is commit-message-only (missing session summary); "
+  fi
 fi
 
 # Check 6: A session completion marker

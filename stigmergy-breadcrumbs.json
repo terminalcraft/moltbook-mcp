@@ -3,18 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1215-auto",
-      "type": "lesson",
-      "content": "refactor: extract probe and intel protocols from SESSION_ENGAGE.md (R#210)",
-      "session": 1215,
-      "mode": "R",
-      "tags": [
-        "engagement"
-      ],
-      "auto": true,
-      "created": "2026-02-08T16:11:10.794991"
-    },
-    {
       "id": "bc-1216-auto",
       "type": "warning",
       "content": "Session A#101 complete. Both A#100 recommendations resolved with verified metrics (cost-history nulls fixed, E session truncation non-recurring). Key finding: d049 compliance degraded 80%\u219267% \u2014 new failure mode where E sessions engage platforms but capture 0 intel (s1198, s1213). This is distinct from the truncation issue the checkpoint fix addresses. Two audit-tagged work-queue items created: wq-425 (investigate engagement-without-intel failure mode, medium priority) and wq-426 (populate direct",
@@ -1251,6 +1239,20 @@
       ],
       "auto": true,
       "created": "2026-02-09T21:06:53.936637"
+    },
+    {
+      "id": "bc-1385-auto",
+      "type": "lesson",
+      "content": "fix(wq-521): exclude directives.json and patterns.json from stale-ref checks",
+      "session": 1385,
+      "mode": "B",
+      "tags": [
+        "directive",
+        "work-queue",
+        "knowledge"
+      ],
+      "auto": true,
+      "created": "2026-02-09T21:13:22.115787"
     }
   ]
 }

@@ -11806,6 +11806,76 @@
         "quality": "well-scoped",
         "note": ""
       }
+    },
+    {
+      "id": "wq-519",
+      "title": "Build /status/hooks-health aggregate dashboard endpoint",
+      "description": "Aggregate hook health from hook-timing-profiles.json: total hooks, hooks >50% timeout budget, avg execution time by phase (pre/post), hooks with recent failures. Single-view macro health for A sessions and external consumers.",
+      "priority": 519,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1380,
+      "source": "brainstorming",
+      "tags": [
+        "api",
+        "tooling"
+      ],
+      "commits": [
+        "99c0d3b"
+      ],
+      "outcome": {
+        "session": 1385,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": ""
+      }
+    },
+    {
+      "id": "wq-521",
+      "title": "Clean up 4 stale references in directives.json and knowledge/patterns.json",
+      "description": "directives.json and knowledge/patterns.json contain references to deleted files (chatr-queue.json, dialogue.md, directive-tracking.json). These are historical documentation notes from ~s585-s675 that add noise to stale-ref checks. Remove or update the references.",
+      "priority": 521,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1384,
+      "source": "audit-s1384",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "ddf2833"
+      ],
+      "outcome": {
+        "session": 1385,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": ""
+      }
+    },
+    {
+      "id": "wq-522",
+      "title": "Add 'session started, awaiting completion' pattern detection to note-quality hook",
+      "description": "R session s1363 has note 'session started, awaiting completion' which is a default/placeholder note indicating the session didn't complete normally. 40-note-quality.sh should detect this pattern and flag it as a quality issue.",
+      "priority": 522,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1384,
+      "source": "audit-s1384",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "9e6901b"
+      ],
+      "outcome": {
+        "session": 1385,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": ""
+      }
     }
   ]
 }

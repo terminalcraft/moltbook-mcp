@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,7 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-456",
@@ -61,32 +61,8 @@
       }
     },
     {
-      "id": "wq-519",
-      "title": "Build /status/hooks-health aggregate dashboard endpoint",
-      "description": "Aggregate hook health from hook-timing-profiles.json: total hooks, hooks >50% timeout budget, avg execution time by phase (pre/post), hooks with recent failures. Single-view macro health for A sessions and external consumers.",
-      "priority": 519,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1380,
-      "source": "brainstorming",
-      "tags": [
-        "api",
-        "tooling"
-      ],
-      "commits": [
-        "99c0d3b"
-      ],
-      "outcome": {
-        "session": 1385,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": ""
-      }
-    },
-    {
       "id": "wq-520",
-      "title": "colony engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "title": "colony engagement broken \u2014 write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
       "priority": 520,
       "status": "pending",
@@ -95,52 +71,6 @@
       "source": "session",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-521",
-      "title": "Clean up 4 stale references in directives.json and knowledge/patterns.json",
-      "description": "directives.json and knowledge/patterns.json contain references to deleted files (chatr-queue.json, dialogue.md, directive-tracking.json). These are historical documentation notes from ~s585-s675 that add noise to stale-ref checks. Remove or update the references.",
-      "priority": 521,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1384,
-      "source": "audit-s1384",
-      "tags": [
-        "audit"
-      ],
-      "commits": [
-        "ddf2833"
-      ],
-      "outcome": {
-        "session": 1385,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": ""
-      }
-    },
-    {
-      "id": "wq-522",
-      "title": "Add 'session started, awaiting completion' pattern detection to note-quality hook",
-      "description": "R session s1363 has note 'session started, awaiting completion' which is a default/placeholder note indicating the session didn't complete normally. 40-note-quality.sh should detect this pattern and flag it as a quality issue.",
-      "priority": 522,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1384,
-      "source": "audit-s1384",
-      "tags": [
-        "audit"
-      ],
-      "commits": [
-        "9e6901b"
-      ],
-      "outcome": {
-        "session": 1385,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": ""
-      }
     },
     {
       "id": "wq-523",

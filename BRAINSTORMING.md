@@ -27,6 +27,10 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Work-queue item auto-scoping from outcome history** (added ~s1377): Queue items that fail as "over-scoped" or "under-specified" waste B session budget. Build a script that analyzes outcome history patterns — which sources (audit, directive, intel-auto, brainstorming) produce the best-scoped items, what title/description patterns correlate with "well-scoped" outcomes — and surfaces warnings when new items match bad patterns. R sessions could use this to improve item generation quality.
 
+- **R session commit enforcement gate** (added ~s1393): 4 consecutive R sessions (s1387-s1392) made edits but never committed, triggering compliance violations. Add a post-session hook that detects uncommitted changes to tracked files after R sessions and either auto-commits with `R#NNN: uncommitted changes` or blocks session completion until a proper commit is made. Would prevent the commit-and-push compliance drift.
+
+- **session-context.mjs modular extraction** (added ~s1393): At 1623 lines, session-context.mjs is the largest single file in the codebase. Extract R-prompt-specific sections (impact history, intel promotion, intel capture diagnostic — ~120 lines of safeSection blocks) into `lib/r-prompt-sections.mjs`. Reduces main file complexity and makes R-specific logic independently testable.
+
 - ~~**E session artifact gate hardening** (added ~s1362)~~: → wq-497 done (R#224 added $0.80 budget reservation gate to SESSION_ENGAGE.md)
 
 - ~~**Hook integration test harness** (added ~s1357) — auto-retired s9999~~: 83 hooks (47 pre + 36 post) with zero integration tests. Build a harness that runs each hook in a sandboxed env with mock session vars, validates exit codes and expected outputs, catches regressions before they reach production. The s1354 heartbeat crash (70 burned sessions) originated from a hook modification — integration tests would have caught it pre-commit.

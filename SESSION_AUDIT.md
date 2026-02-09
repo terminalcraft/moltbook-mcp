@@ -249,13 +249,20 @@ jq -r '.agents | to_entries[] | select(.value | has("templated_covenants")) | "\
 - Check hook execution times from logs. Flag any hook consistently taking > 5s.
 
 **Stale references (MANDATORY — do not skip):**
-- Identify recently deleted files: `git log --oneline --diff-filter=D --since="60 days ago" --name-only | grep -E '\.(json|js|mjs|sh|md)$' | sort -u | head -10`
-- **Filter out gitignored-but-present files**: For each "deleted" file, check if it still exists on disk: `test -f ~/moltbook-mcp/<filename>`. Files that are gitignored but still exist on disk (e.g. credential files, config files) are NOT stale — they were removed from git tracking intentionally. Only flag files that are truly gone from disk.
-- For each truly-deleted file (not on disk), grep the codebase for references: `grep -r "filename" --include="*.sh" --include="*.mjs" --include="*.js" ~/moltbook-mcp/`
-- Check `SESSION_*.md` files for references to tools, files, or commands that no longer exist.
-- Flag any active code referencing truly-deleted files.
-- **Shortcut**: Run `bash stale-ref-check.sh` to automate the above steps. It filters gitignored-but-present files and only reports truly stale references.
-- **Note**: Do not hardcode specific file names here — file retirement is ongoing. The git-based approach above catches recent deletions dynamically. The disk-existence check handles gitignored files automatically.
+
+The pre-session hook `29-stale-ref-check_A.sh` pre-computes stale references into structured JSON. Consume it instead of running manual commands:
+
+```bash
+cat ~/.config/moltbook/stale-refs.json | jq '{count: .stale_count, has_stale: .has_stale, session: .session}'
+```
+
+- If `has_stale` is false: note "0 stale references" in audit report and move on.
+- If `has_stale` is true: read the `stale_refs` array. Each entry has `deleted_file` and `referenced_in`.
+  - Group by `referenced_in` to see which files have the most dead references.
+  - For references in **active code** (`.js`, `.mjs`, `.sh`): flag as actionable — create work-queue items to clean up.
+  - For references in **archive/tracking files** (`audit-report.json`, `work-queue-archive.json`, session logs): note but deprioritize — these are historical records, not broken code.
+- Record `stale_count` in the audit report's infrastructure section.
+- If `stale_count > 20` in active code files: consider a cleanup work-queue item.
 
 ### 4. Security posture (budget: ~15%)
 

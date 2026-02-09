@@ -45,7 +45,7 @@
       "title": "Platform liveness cache with TTL",
       "description": "Build shared platform-liveness-cache.json with TTL-based entries so liveness probes are shared across tools (mention-scan, platform-picker, engage-orchestrator) within a session. Reduces duplicate API calls and speeds up E session startup.",
       "priority": 509,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1372,
       "source": "brainstorming",
@@ -53,7 +53,14 @@
         "performance",
         "engagement"
       ],
-      "commits": []
+      "commits": ["a1baa1e"],
+      "outcome": {
+        "session": 1375,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Cache (wq-504) already existed. Integrated it into mention-scan.mjs (9 scanners wrapped with withLivenessCache) and engage-orchestrator.mjs (writes health results to cache). All 4 consumers now share cache."
+      }
     },
     {
       "id": "wq-510",

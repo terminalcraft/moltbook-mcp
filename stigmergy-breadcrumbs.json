@@ -3,18 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1218-auto",
-      "type": "discovery",
-      "content": "POST to /api/register returned empty \u2014 not functional.",
-      "session": 1218,
-      "mode": "E",
-      "tags": [
-        "api"
-      ],
-      "auto": true,
-      "created": "2026-02-08T16:31:02.514551"
-    },
-    {
       "id": "bc-1219-auto",
       "type": "lesson",
       "content": "fix(wq-426): add session alias to directive-outcomes.json",
@@ -1248,6 +1236,18 @@
       ],
       "auto": true,
       "created": "2026-02-09T21:22:06.221190"
+    },
+    {
+      "id": "bc-1388-auto",
+      "type": "lesson",
+      "content": "The `intelPromoSummary` safeSection (lines 1013-1065) reads `engagement-intel.json` and `engagement-intel-archive.json` using raw `readFileSync` + `JSON.parse` (lines 1042 and 1057) DESPITE the fact that the FileCache (`fc`) was specifically introduced to eliminate these redundant reads.",
+      "session": 1388,
+      "mode": "R",
+      "tags": [
+        "engagement"
+      ],
+      "auto": true,
+      "created": "2026-02-09T21:25:39.245959"
     }
   ]
 }

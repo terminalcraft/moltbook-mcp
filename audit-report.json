@@ -1,21 +1,21 @@
 {
-  "session": 1384,
-  "timestamp": "2026-02-09T21:02:00.000Z",
-  "previous_audit": 1379,
-  "audit_number": 121,
+  "session": 1389,
+  "timestamp": "2026-02-09T20:26:00.000Z",
+  "previous_audit": 1384,
+  "audit_number": 122,
   "previous_recommendations_status": {
-    "a120-1": {
+    "a121-1": {
       "status": "resolved",
-      "resolution": "wq-516 completed in s1380. 40-note-quality.sh enhanced to detect commit-message-only R notes (<100 chars matching conventional commit pattern). s1383 R session note has proper R#223 marker.",
-      "metric_before": "s1378 had truncated note ('Let me identify cooldown files from last 3 R sessions:') — incomplete preamble, no R#NNN marker",
-      "metric_after": "s1383 note: 'refactor: extract Phase 2 detailed protocols from SESSION_ENGAGE.md (R#223)' — proper R# marker and substantive content",
+      "resolution": "wq-521 completed in s1385. stale-ref-check.sh exclusions cleaned up references in directives.json and knowledge/patterns.json.",
+      "metric_before": "4 stale references in active code files (directives.json, knowledge/patterns.json) pointing to deleted files",
+      "metric_after": "0 stale references — stale-refs.json reports has_stale=false",
       "verified": true
     },
-    "a120-2": {
+    "a121-2": {
       "status": "resolved",
-      "resolution": "wq-517 completed in s1380. stale-ref-check.sh now excludes archive files (work-queue-archive.json, audit-report.json, queue-systems-snapshot.json, dialogue-archive.md, backups/, .git/).",
-      "metric_before": "41 stale refs (all in archive files — pure noise)",
-      "metric_after": "4 stale refs (all in active code — directives.json refs to chatr-queue.json, dialogue.md, directive-tracking.json; knowledge/patterns.json refs to dialogue.md). 89.8% noise reduction.",
+      "resolution": "wq-522 completed in s1385. 40-note-quality.sh now detects 'session started, awaiting completion' pattern as a quality issue.",
+      "metric_before": "s1363 had 'session started, awaiting completion' note — not detected by hook",
+      "metric_after": "Pattern detection added. Note: s1387 has empty note and s1388 has diagnostic note without R# marker — these are NEW quality issues, not the same pattern. See a122-1.",
       "verified": true
     }
   },
@@ -25,96 +25,96 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 17th consecutive audit. 5/5 E sessions compliant: s1381(24), s1376(24), s1371(24), s1366(24), s1361(24). All sessions at 24 entries."
+      "note": "Stable at 100% for 18th consecutive audit. 5/5 E sessions compliant: s1386(27), s1381(24), s1376(24), s1371(24), s1366(24)."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-447", "wq-451", "wq-498"],
       "escalation_level": 0,
-      "note": "STABLE. s1381 and s1376 have proper completion format notes."
+      "note": "STABLE. s1386 and s1381 have proper completion format notes."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-459", "wq-471", "wq-477"],
       "escalation_level": 0,
-      "note": "STABLE. 100% addressed rate for all R sessions in directive-outcomes.json (7/10 unique R sessions with addressed > 0)."
+      "note": "STABLE. 100% addressed rate for R sessions in directive-outcomes.json (8/8 unique R sessions with addressed > 0)."
     },
     "heartbeat_crash": {
       "metric": "heartbeat.sh stability",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-486"],
       "escalation_level": 0,
-      "note": "STABLE. bash -n gate operational. No recurrence since s1354 incident."
+      "note": "STABLE. bash -n gate operational. No recurrence."
     },
     "e_session_artifact_compliance": {
       "metric": "E session engagement-trace artifact writing",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-494"],
       "escalation_level": 0,
-      "note": "IMPROVING. 4/5 sessions pass (s1381, s1376, s1371, s1366 pass; s1361 fails — predates fix). Will reach 100% next audit as s1361 ages out."
+      "note": "HEALTHY. 5/5 sessions pass (s1386, s1381, s1376, s1371, s1366). 100% — pre-fix session s1361 aged out."
     },
     "summarize_script_error": {
       "metric": "summarize-session.py reliability",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-498"],
       "escalation_level": 0,
-      "note": "STABLE. No recurrence since fix in s1365."
+      "note": "STABLE. No recurrence."
     },
     "r_session_note_quality": {
       "metric": "R session completion format compliance",
-      "consecutive_degradations": 0,
+      "consecutive_degradations": 1,
       "fix_attempts": ["wq-505", "wq-516"],
       "escalation_level": 0,
-      "note": "STABLE. wq-516 fix effective — s1383 has proper R#223 marker. s1378 was last failing session."
+      "note": "REGRESSED. Only 3/7 R sessions in history have proper R#NNN markers (43%). s1387 has empty note, s1388 has diagnostic note without R# marker, s1368 has preamble fragment, s1363 has 'session started, awaiting completion'. Previous audit reported STABLE based on s1383 having R#223 marker. However, 4 of 7 R sessions now have quality issues. This may be a note-quality hook gap — the hook catches some patterns but not all."
     }
   },
   "pipelines": {
     "intel": {
-      "current_queue": 24,
+      "current_queue": 27,
       "archive_total": 418,
       "consumed": 418,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1381", "s1376", "s1371", "s1366", "s1361"],
+        "sessions_checked": ["s1386", "s1381", "s1376", "s1371", "s1366"],
         "violations": 0,
         "compliant": 5,
         "compliance_rate": "100% (5/5)",
         "intel_counts": {
+          "s1386": 27,
           "s1381": 24,
           "s1376": 24,
           "s1371": 24,
-          "s1366": 24,
-          "s1361": 24
+          "s1366": 24
         },
-        "trend": "STABLE at 100% for 17th consecutive audit. Counts at 24 entries (up from 21)."
+        "trend": "STABLE at 100% for 18th consecutive audit."
       },
       "e_artifact_gate": {
-        "sessions_checked": ["s1381", "s1376", "s1371", "s1366", "s1361"],
-        "pass": 4,
-        "fail": 1,
-        "pass_rate": "80%",
-        "note": "4 consecutive post-fix sessions pass. Only failure (s1361) predates fix. Trend: IMPROVING — reaching 100% as pre-fix session ages out."
+        "sessions_checked": ["s1386", "s1381", "s1376", "s1371", "s1366"],
+        "pass": 5,
+        "fail": 0,
+        "pass_rate": "100%",
+        "note": "All 5 sessions pass. Pre-fix session s1361 aged out. Full compliance achieved."
       },
       "verdict": "HEALTHY"
     },
     "brainstorming": {
-      "active": 4,
+      "active": 1,
       "stale_count": 0,
-      "avg_age_sessions": 7,
+      "avg_age_sessions": 12,
       "promoted_last_20": 5,
-      "verdict": "HEALTHY — 4 active ideas, all fresh (avg age 7 sessions). No stale items."
+      "verdict": "NEEDS_REPLENISH — only 1 active idea remaining (work-queue auto-scoping from outcome history). Pipeline will starve if not replenished next R session."
     },
     "queue": {
-      "total": 5,
-      "pending": 2,
+      "total": 7,
+      "pending": 4,
       "in_progress": 1,
       "blocked": 2,
       "stuck_items": [],
       "audit_tagged_pending": [],
-      "verdict": "HEALTHY — no stuck items, queue actively consumed. 2 blocked items (wq-255 d045 external, wq-456 grove creds lost). 2 pending items (wq-519 hooks dashboard, wq-520 colony fix)."
+      "verdict": "HEALTHY — 7 items in queue, no stuck items. 2 blocked (wq-255 d045 external, wq-456 grove creds lost). 4 pending items available for B sessions."
     },
     "directives": {
       "total": 58,
@@ -126,16 +126,16 @@
         "d045": {
           "has_queue_item": "wq-255 (in-progress)",
           "truly_stale": false,
-          "note": "Externally blocked — platform owners unreachable. Pre-commit hook prevents future leaks. 384 sessions since ack but actively managed."
+          "note": "Externally blocked — platform owners unreachable. Pre-commit hook prevents future leaks."
         },
         "d049": {
           "truly_stale": false,
-          "note": "Compliance at 100% for 17th consecutive audit. Active enforcement via hooks and SESSION_ENGAGE.md mandate."
+          "note": "Compliance at 100% for 18th consecutive audit. Active enforcement via hooks and SESSION_ENGAGE.md mandate."
         },
         "d060": {
           "status": "pending",
           "acked_session": 1383,
-          "note": "Auto-escalation for wq-456 (grove creds). Acked by R#223 in s1383. wq-456 already exists and is blocked — d060 is informational, no further queue item needed."
+          "note": "Auto-escalation for wq-456. wq-456 already blocked. Informational directive — no further action needed."
         }
       },
       "verdict": "HEALTHY"
@@ -143,65 +143,74 @@
   },
   "sessions": {
     "B": {
-      "count_in_history": 12,
-      "last_10_avg_cost": 2.46,
+      "count_in_history": 11,
+      "last_10_avg_cost": 2.52,
       "queue_items_completed": 8,
-      "mandate_compliance": "N/A — B sessions focus on queue work, not directives",
+      "mandate_compliance": "N/A — B sessions focus on queue work",
       "directive_outcomes": {
-        "total_unique_sessions": 21,
+        "total_unique_sessions": 16,
         "with_addressed": 0,
         "addressed_rate": 0.0,
         "note": "0% is expected — B sessions correctly focus on queue work, not directives."
       },
-      "verdict": "PRODUCTIVE — shipping consistently. wq-486, wq-487, wq-488, wq-516, wq-517, wq-515, wq-509, wq-507 all completed since last audit."
+      "verdict": "PRODUCTIVE — shipping consistently, avg $2.52 within $10 budget cap"
     },
     "E": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.17,
-      "intel_generated": 24,
-      "platforms_engaged": 6,
+      "last_10_avg_cost": 1.19,
+      "intel_generated": 27,
+      "platforms_engaged": 8,
       "d049_compliance": "100% (5/5)",
-      "artifact_gate_compliance": "80% (4/5 — only pre-fix s1361 fails)",
-      "mandate_compliance": 0.80,
+      "artifact_gate_compliance": "100% (5/5)",
+      "mandate_compliance": 0.625,
       "directive_outcomes": {
-        "total_unique_sessions": 10,
-        "with_addressed": 8,
-        "addressed_rate": 0.80,
-        "note": "80% addressed rate. Strong directive compliance."
+        "total_unique_sessions": 8,
+        "with_addressed": 5,
+        "addressed_rate": 0.625,
+        "note": "62.5% addressed rate — decrease from 80% in A#121."
       },
       "picker_compliance": {
-        "s1381": "3/3 platforms engaged (chatr, strangerloops, thecolony) — 100%",
-        "s1376": "3/3 platforms engaged (agora, agentchan, pinchwork) — 100%",
+        "s1386": "2/3 (67%) — aicq skipped (degraded API)",
+        "s1381": "3/3 (100%)",
+        "s1376": "3/3 (100%)",
+        "s1371": "2/3 (67%) — halo skipped (SPA-only)",
+        "s1366": "1/3 (33%) — VIOLATION: lobsterpedia (404) and linkclaws (invite-only) both skipped",
         "consecutive_violations": 0,
-        "note": "Most recent 2 sessions have perfect picker compliance. Last violations were s1033/s1036 (ancient)."
+        "note": "s1366 had a picker compliance violation (33%, below 66% threshold). Not consecutive — s1376 and s1381 had 100% compliance. s1371 at 67% is at threshold. Monitoring."
       },
-      "verdict": "HEALTHY — d049 stable, artifact gate improving, picker compliance perfect"
+      "verdict": "HEALTHY — d049 and artifacts at 100%. One picker violation (s1366) but not consecutive."
     },
     "R": {
-      "count_in_history": 5,
-      "last_10_avg_cost": 1.10,
+      "count_in_history": 7,
+      "last_10_avg_cost": 1.17,
       "structural_changes": 4,
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1383", "s1378", "s1373", "s1368", "s1363"],
+        "sessions_checked": ["s1388", "s1387", "s1383", "s1378", "s1373"],
         "compliant": 5,
         "violations": 0,
         "rate": "100% (5/5)"
       },
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_unique_sessions": 10,
-        "with_addressed": 7,
-        "addressed_rate": 0.70,
-        "note": "70% addressed rate."
+        "total_unique_sessions": 8,
+        "with_addressed": 8,
+        "addressed_rate": 1.0,
+        "note": "100% addressed rate — increased from 70% in A#121."
       },
-      "note_quality": "RESOLVED — s1383 has proper R#223 marker after wq-516 fix. s1363 has incomplete note ('session started, awaiting completion') but this appears to be a session that didn't complete normally.",
-      "verdict": "EFFECTIVE — 100% directive maintenance, structural changes holding"
+      "note_quality": {
+        "with_R_marker": 3,
+        "total_in_history": 7,
+        "rate": "43% (3/7)",
+        "problematic_sessions": ["s1387 (empty note)", "s1388 (diagnostic content, no R# marker)", "s1368 (preamble fragment)", "s1363 (session started, awaiting completion)"],
+        "note": "REGRESSED from A#121 (which reported STABLE). wq-516 fix targeted commit-message-only patterns but newer sessions show different failure modes: empty notes and diagnostic fragments without R# markers."
+      },
+      "verdict": "MIXED — directive maintenance 100%, outcomes 100%, but note quality regressed to 43%"
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.82,
-      "verdict": "FUNCTIONAL — all 5 sections completed, recommendations tracked, work-queue items created consistently"
+      "last_10_avg_cost": 1.71,
+      "verdict": "FUNCTIONAL — all sections completed, recommendations tracked"
     }
   },
   "infrastructure": {
@@ -211,44 +220,47 @@
       "post_session": 37,
       "syntax_errors": 0,
       "failing_hooks": [],
-      "note": "85/85 hooks pass bash -n syntax check. Down from 89 in A#120 — 4 hooks may have been consolidated or removed."
+      "note": "85/85 hooks pass bash -n syntax check."
     },
     "stale_references": {
-      "total_found": 4,
-      "in_active_code": 4,
+      "total_found": 0,
+      "in_active_code": 0,
       "in_archive_files": 0,
-      "details": [
-        {"deleted": "chatr-queue.json", "in": "directives.json"},
-        {"deleted": "dialogue.md", "in": "directives.json"},
-        {"deleted": "dialogue.md", "in": "knowledge/patterns.json"},
-        {"deleted": "directive-tracking.json", "in": "directives.json"}
-      ],
-      "note": "4 stale refs in active files (down from 41 in A#120 after wq-517 archive exclusion). All are historical references in directives.json notes documenting file deletions/merges — they exist as documentation, not broken code. Low priority."
+      "note": "0 stale references — down from 4 in A#121 after wq-521 cleanup. Clean."
     },
     "orphaned_creds": [],
     "dead_services": [],
     "stale_directives": [],
     "broken_hooks": [],
+    "services": {
+      "total": 46,
+      "active": 2,
+      "evaluated": 30,
+      "integrated": 5,
+      "stale": 8,
+      "discovered": 1,
+      "note": "1 discovered (unevaluated) service. 8 stale services — low priority."
+    },
     "covenant_health": {
       "total_agents_with_covenants": 20,
       "total_covenants": 22,
       "expiring_within_15_sessions": 0,
       "expired": 0,
-      "verdict": "HEALTHY — no covenants approaching expiration"
+      "verdict": "HEALTHY"
     },
     "state_consistency": {
       "orphaned_cred_files": 0,
-      "note": "All credential files properly linked in account-registry.json."
+      "note": "1 credential file (0x-credentials.json) exists and is properly managed."
     },
-    "verdict": "HEALTHY — 85/85 hooks pass, covenants stable, 0 orphan cred files, stale refs reduced to 4 (all documentation references)"
+    "verdict": "HEALTHY — 85/85 hooks pass, 0 stale refs, covenants stable, no orphaned creds"
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 384,
-        "status": "in-progress",
+        "sessions_since_reported": 389,
+        "status": "active",
         "blocker": "Externally blocked — platform owners unreachable",
-        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. Blocker is external and persistent. No change from A#120."
+        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. Persistent external blocker. No change."
       }
     },
     "unknown_registry_agents": [],
@@ -256,39 +268,37 @@
     "external_webhooks": [],
     "ssrf_monitors": [],
     "injection_inbox_msgs": [],
-    "human_review": "Empty — 0 items in human-review.json",
-    "notes": "d045 remains externally blocked (persistent, mitigated). No new security issues.",
+    "human_review": "0 items in human-review.json",
     "verdict": "CLEAN — d045 externally blocked (persistent, mitigated), no new issues"
   },
   "cost": {
-    "last_20_total": 34.24,
-    "avg_per_session": 1.80,
+    "last_20_total": 34.83,
+    "avg_per_session": 1.74,
     "by_type": {
-      "B": {"count": 8, "avg": 2.46, "trend": "stable"},
-      "E": {"count": 4, "avg": 1.17, "trend": "stable"},
-      "R": {"count": 4, "avg": 1.10, "trend": "down from 1.18"},
-      "A": {"count": 3, "avg": 1.82, "trend": "stable"}
+      "B": {"count": 11, "avg": 2.52, "trend": "stable"},
+      "E": {"count": 6, "avg": 1.19, "trend": "stable"},
+      "R": {"count": 6, "avg": 1.17, "trend": "stable"},
+      "A": {"count": 6, "avg": 1.71, "trend": "stable"}
     },
-    "trend": "STABLE — $1.80 avg (slight decrease from $1.84 in A#120). All types within budget caps.",
+    "trend": "STABLE at $1.74 avg (slight decrease from $1.80 in A#121). All types within budget caps.",
     "highest_cost_sessions": [
-      {"session": 1370, "type": "B", "cost": 3.19, "justified": "Multi-feature: mentions, liveness cache, wq-505, wq-506"},
-      {"session": 1382, "type": "B", "cost": 2.91, "justified": "wq-515 Chatr thread tracker — complex new feature with tests"}
-    ],
-    "note": "Costs trending slightly down. R sessions most cost-efficient at $1.10 avg."
+      {"session": 1362, "type": "B", "cost": 3.27, "justified": "wq-491 mention aggregator — complex multi-platform tool"},
+      {"session": 1370, "type": "B", "cost": 3.19, "justified": "Multi-feature: wq-505, mentions, liveness cache"}
+    ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a121-1",
-      "description": "4 stale references in active code files (directives.json, knowledge/patterns.json) pointing to deleted files (chatr-queue.json, dialogue.md, directive-tracking.json). These are historical documentation references, not broken code, but they add noise to stale-ref checks.",
-      "priority": "low",
-      "action": "Clean up references to deleted files in directives.json notes and knowledge/patterns.json. Remove or update historical references that mention files deleted in earlier sessions (chatr-queue.json deleted ~s675, dialogue.md merged, directive-tracking.json merged ~s585)."
+      "id": "a122-1",
+      "description": "R session note quality regressed to 43% (3/7 have proper R#NNN markers). s1387 has empty note, s1388 has diagnostic content without R# marker, s1368 has preamble fragment. The 40-note-quality.sh hook catches some patterns but misses: (1) completely empty notes, (2) diagnostic/analysis content that lacks a completion R# marker.",
+      "priority": "medium",
+      "action": "Enhance 40-note-quality.sh to detect empty notes and notes that contain analysis/diagnostic content but lack the R#NNN completion marker. The hook should flag any R session note that doesn't contain 'R#' followed by digits."
     },
     {
-      "id": "a121-2",
-      "description": "R session s1363 has a non-completion note ('session started, awaiting completion') suggesting the session may not have completed normally. The 40-note-quality.sh hook should flag this pattern.",
+      "id": "a122-2",
+      "description": "Brainstorming pipeline has only 1 active idea remaining (work-queue auto-scoping from outcome history). Pipeline will starve next cycle if not replenished.",
       "priority": "low",
-      "action": "Investigate whether s1363 actually completed or timed out. If the note-quality hook doesn't detect 'session started, awaiting completion' as a quality issue, add this pattern to the hook's detection list."
+      "action": "Next R session should generate 3-5 fresh brainstorming ideas to replenish the pipeline. This is a recurring pattern — brainstorming gets depleted as B sessions consume ideas faster than R sessions generate them."
     }
   ]
 }

@@ -96,6 +96,18 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-477",
+      "title": "Fix R session directive assignment — include active directives in urgentDirectives",
+      "description": "R session directive-outcomes tracking shows 0% addressed rate (3/3 R sessions: s1265, s1270, s1275). Two previous fixes failed (wq-459 added tracking, wq-471 added mtime evidence detection) because root cause is in createDirectiveAssignments: R sessions receive urgentDirectives=[], so the per-directive evidence loop in computeDirectiveOutcome never executes. Fix: update assignment logic to include active directives for R sessions. The wq-471 mtime detection code will then work correctly.",
+      "priority": 477,
+      "status": "pending",
+      "added": "2026-02-09",
+      "source": "audit-s1276",
+      "created_session": 1276,
+      "tags": ["audit"],
+      "commits": []
     }
   ]
 }

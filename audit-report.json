@@ -1,23 +1,24 @@
 {
-  "session": 1271,
-  "timestamp": "2026-02-08T22:10:00.000Z",
-  "previous_audit": 1266,
-  "audit_number": 112,
+  "session": 1276,
+  "timestamp": "2026-02-09T00:35:00.000Z",
+  "previous_audit": 1271,
+  "audit_number": 113,
   "previous_recommendations_status": {
-    "a111-1": {
-      "status": "resolved",
-      "resolution": "wq-467 completed by B#393 (s1267). Pre-session hook now logs session start entry, ensuring every session gets at least a 'started' line in session-history.txt. Post-fix sessions s1268, s1269, s1270, s1271 all appear in session-history.txt correctly.",
-      "metric_before": "s1263 missing from session-history.txt (phantom session bypass)",
-      "metric_after": "All 4 post-fix sessions (s1267-s1271) present in session-history.txt — 100% logging",
-      "verified": true
-    },
-    "a111-2": {
-      "status": "resolved_unverified",
-      "resolution": "wq-459 fix continues to work — R sessions are now tracked in directive-outcomes.json. However, the addressed=[] pattern is confirmed structural: 2/2 tracked R sessions (s1265, s1270) show 0% addressed rate despite 100% directive maintenance compliance via independent verification. The outcomes hook doesn't detect R session directive work (which happens via directives.json edits, not explicit addressing). The fix tracks R sessions but doesn't measure their contribution.",
-      "metric_before": "1 R session tracked, addressed=[]",
-      "metric_after": "2 R sessions tracked (s1265, s1270), both addressed=[] — pattern confirmed",
+    "a112-1": {
+      "status": "fix_ineffective",
+      "resolution": "wq-471 completed by B session s1272. Code added directives.json mtime detection to directive-outcome.js (line 197-207). However, R session s1275 still shows addressed=[] because urgentDirectives=[] — R sessions are assigned no urgent directives by the assignment logic, so the per-directive evidence loop never executes. The fix is technically correct but targets the wrong layer: the problem is in directive assignment, not evidence detection.",
+      "metric_before": "R sessions 0% addressed rate (2/2: s1265, s1270)",
+      "metric_after": "R session s1275 still 0% addressed rate — urgentDirectives=[] means evidence loop never runs",
       "verified": true,
-      "note": "Tracking works, but evidence detection for R sessions is structurally missing. Escalating to new recommendation a112-1."
+      "followup": "a113-1"
+    },
+    "a112-2": {
+      "status": "resolved_unverified",
+      "resolution": "Monitoring continues. Post-A#112 B sessions: s1272 ($2.43), s1274 ($2.23). Both under $3.00 threshold. Average $2.33 for 2 B sessions — elevated but not crossing the $2.50 avg or >2 sessions over $3.00 thresholds that would trigger action.",
+      "metric_before": "B session avg $2.13 (last 20 sessions)",
+      "metric_after": "B session avg $2.17 (audit-stats output). Two post-A#112 B sessions avg $2.33. No threshold crossed.",
+      "verified": true,
+      "note": "Continue monitoring. No new wq item needed yet."
     }
   },
   "escalation_tracker": {
@@ -26,58 +27,56 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 8th consecutive audit. 4/4 checked E sessions compliant (s1268:3, s1258:4, s1253:3, s1248:3). Average 3.25 intel entries/session."
+      "note": "Stable at 100% for 9th consecutive audit. 4/4 checked E sessions compliant (s1273:4, s1268:3, s1258:4, s1253:3). Average 3.5 intel entries/session."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-447", "wq-451"],
       "escalation_level": 0,
-      "note": "Resolved. 3/3 post-fix E sessions (s1253, s1258, s1268) have proper completion format. Fix is durable."
+      "note": "Resolved. s1273 uses proper completion format. 4/4 post-fix E sessions compliant. Fix is durable."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
-      "consecutive_degradations": 1,
-      "fix_attempts": ["wq-459"],
+      "consecutive_degradations": 2,
+      "fix_attempts": ["wq-459", "wq-471"],
       "escalation_level": 1,
-      "note": "Tracking functional but addressed=[] for all R sessions (2/2). Structural gap: hook doesn't detect directives.json edits as 'addressed'. Escalating to recommendation a112-1."
+      "note": "Fix ineffective — wq-471 added mtime detection but R sessions get urgentDirectives=[] so evidence loop never runs. Root cause identified: directive assignment logic, not evidence detection. Escalating to a113-1 with correct root cause."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 414,
-      "consumed": 414,
+      "archive_total": 418,
+      "consumed": 418,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1268", "s1258", "s1253", "s1248"],
+        "sessions_checked": ["s1273", "s1268", "s1258", "s1253"],
         "violations": 0,
         "compliant": 4,
         "compliance_rate": "100% (4/4)",
         "intel_counts": {
+          "s1273": 4,
           "s1268": 3,
           "s1258": 4,
-          "s1253": 3,
-          "s1248": 3
+          "s1253": 3
         },
-        "trend": "STABLE at 100% for 8th consecutive audit. Average 3.25 entries per session."
+        "trend": "STABLE at 100% for 9th consecutive audit. Average 3.5 entries per session."
       },
       "intel_volume": {
         "consecutive_zeros": 0,
-        "average_per_session": 3.25,
+        "average_per_session": 3.5,
         "note": "All 4 checked E sessions producing intel consistently."
       },
-      "verdict": "HEALTHY — d049 at 100% for 8th consecutive audit, intel volume stable at 3.25/session."
+      "verdict": "HEALTHY"
     },
     "brainstorming": {
-      "active": 4,
+      "active": 3,
       "stale_count": 0,
-      "avg_age_sessions": 8,
+      "avg_age_sessions": 10,
       "promoted_last_20": 2,
-      "items": ["Nomic game engine (s1257)", "MoltGram strategic posting (s1257)", "Hook performance regression detector (s1270)", "Agora prediction market auto-tracker (s1270)"],
-      "note": "4 active ideas, 2 promoted to queue (wq-463→cross-platform mention aggregator done, wq-470→service discovery batch evaluator pending). 2 new ideas added in R#222 (s1270).",
-      "verdict": "HEALTHY — 4 active fresh ideas, avg age 8 sessions, no stale entries."
+      "verdict": "HEALTHY"
     },
     "queue": {
       "total": 6,
@@ -86,9 +85,7 @@
       "blocked": 2,
       "stuck_items": [],
       "audit_tagged_pending": [],
-      "audit_tagged_done_since_last": [],
-      "note": "3 pending items (wq-464 Nomic engine, wq-469 ClawHub eval, wq-470 batch evaluator). wq-255 in-progress (d045 cred regen, externally blocked). wq-325 blocked (x402 deferred). wq-456 blocked (Grove API key). A#111 created wq-467 and wq-468 — both completed by B sessions.",
-      "verdict": "HEALTHY — 3 actionable pending items, 0 stuck. Previous audit items completed."
+      "verdict": "HEALTHY"
     },
     "directives": {
       "total": 55,
@@ -97,180 +94,131 @@
       "unacted": ["d045", "d049"],
       "staleness_validation": {
         "d045": {
-          "notes_count": 379,
           "has_queue_item": "wq-255 (in-progress)",
-          "truly_stale": false,
-          "note": "Externally blocked. Pre-commit hook active. wq-255 in-progress for credential regeneration."
+          "truly_stale": false
         },
         "d049": {
-          "notes_count": 2444,
           "truly_stale": false,
-          "note": "Compliance healthy at 100%. Intel pipeline working. 8th consecutive clean audit."
+          "note": "Compliance at 100% for 9th consecutive audit."
         }
       },
-      "verdict": "HEALTHY — both active directives have substantial notes and ongoing work."
+      "verdict": "HEALTHY"
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 12,
-      "last_10_avg_cost": 2.13,
-      "queue_items_completed": 2,
-      "queue_items_completed_note": "wq-467 (phantom session logging fix) and wq-468 (R session outcomes monitoring retirement) completed since A#111.",
-      "mandate_compliance": 0.84,
+      "last_10_avg_cost": 2.17,
+      "queue_items_completed": 0,
+      "mandate_compliance": 0.50,
       "directive_outcomes": {
-        "total_unique_sessions": 31,
-        "addressed_rate": 0.84,
-        "note": "84% compliance (26/31). Recent B sessions s1267 and s1269 show addressed=[] — both consumed from work-queue rather than addressing directives directly. Normal for B sessions focused on wq items."
+        "total_unique_sessions": 12,
+        "addressed_rate": 0.50
       },
-      "note_quality": "All B session notes are descriptive and include wq item references.",
-      "cost_flag": "B session avg $2.13 is highest among session types. s1264 ($3.23) and s1269 ($3.16) are outliers. Both justified by complexity (6 and 4 commits respectively).",
-      "verdict": "PRODUCTIVE — 84% directive compliance, steady output, shipping features and fixes. Cost trending high but justified by complexity."
+      "verdict": "PRODUCTIVE"
     },
     "E": {
       "count_in_history": 5,
       "last_10_avg_cost": 1.19,
-      "intel_generated": 13,
-      "platforms_engaged": "4/4 checked sessions engaged platforms",
+      "intel_generated": 14,
+      "platforms_engaged": 4,
       "d049_compliance": "100% (4/4)",
-      "mandate_compliance": 0.69,
+      "mandate_compliance": 0.83,
       "directive_outcomes": {
-        "total_unique_sessions": 16,
-        "addressed_rate": 0.69,
-        "note": "69% compliance (11/16). Improved since s1263 phantom session issue resolved. s1268 shows 100% addressed."
+        "total_unique_sessions": 6,
+        "addressed_rate": 0.83
       },
-      "picker_compliance": {
-        "violations": 0,
-        "consecutive_violations": 0,
-        "rate": "No violations detected."
-      },
-      "note_quality": {
-        "post_fix_total": 3,
-        "post_fix_proper": 3,
-        "rate": "100% (3/3 post-fix sessions have proper completion format)",
-        "note": "s1253, s1258, s1268 all use 'Session E#NNN (sNNN) complete.' format. Fix is durable."
-      },
-      "verdict": "HEALTHY — d049 at 100%, picker clean, note quality fixed (3/3 post-fix proper). Cost efficient at $1.19 avg."
+      "verdict": "HEALTHY"
     },
     "R": {
       "count_in_history": 7,
-      "last_10_avg_cost": 1.41,
-      "structural_changes": "R#218-R#222: 5 commits — createItem() helper, task outcome feedback, liveness probe cache, periodic check extraction",
+      "last_10_avg_cost": 1.42,
+      "structural_changes": 5,
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1270", "s1265", "s1260"],
-        "compliant": 3,
+        "sessions_checked": ["s1275", "s1270", "s1265", "s1260", "s1255"],
+        "compliant": 5,
         "violations": 0,
-        "rate": "100%"
+        "rate": "100% (5/5)"
       },
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_unique_sessions": 2,
+        "total_unique_sessions": 3,
         "addressed_rate": 0.0,
-        "note": "2 R sessions tracked (s1265, s1270), both addressed=[]. Structural gap confirmed — R sessions handle directives via maintenance (editing directives.json) rather than explicitly addressing them. Independent verification confirms 100% compliance."
+        "note": "Root cause: urgentDirectives=[] — R sessions not assigned directives. Independent verification confirms 100% compliance."
       },
-      "verdict": "EFFECTIVE — 100% directive maintenance, structural changes shipping. Outcomes tracking has evidence detection gap (a112-1)."
+      "verdict": "EFFECTIVE — outcomes tracking has assignment-level gap (a113-1)"
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.42,
-      "recommendation_resolution_rate": "a111-1 resolved (phantom session fix verified), a111-2 resolved_unverified (R tracking gap confirmed as structural).",
-      "verdict": "FUNCTIONAL — recommendations tracked and verified systematically."
+      "last_10_avg_cost": 1.51,
+      "verdict": "FUNCTIONAL"
     }
   },
   "infrastructure": {
     "hooks": {
       "total": 81,
-      "pre_session": 44,
-      "post_session": 37,
+      "pre_session": 45,
+      "post_session": 36,
       "syntax_errors": 0,
-      "failing_hooks": [],
-      "note": "All 81 hooks pass bash -n syntax check (up from 78 in A#111). 3 new hooks added (02-periodic-evm-balance.sh, 02-periodic-platform-health.sh, and 01-session-start-log.sh from wq-467)."
+      "failing_hooks": []
     },
     "stale_references": {
       "deleted_files_last_60_days": 15,
       "active_references_to_deleted": 0,
-      "investigated": {
-        "chatr_queue_json": "Deleted from git. No active code references found (only in dead archive doc). CLEAN.",
-        "ctxly_json": "Removed from git tracking but EXISTS on disk (~/moltbook-mcp/ctxly.json, 212 bytes). Code references in external.js and cred-audit.mjs are VALID — file exists. NOT stale.",
-        "dialogue_md": "Truly deleted. Referenced only in dialogue-archive.md (dead archive doc). No runtime impact.",
-        "directive_tracking_json": "Truly deleted. Referenced only in dialogue-archive.md. No runtime impact.",
-        "deleted_hooks": "6 deleted hook files (cost-related + queue-archive + dialogue-trim). Zero active references — CLEAN.",
-        "SESSION_HOUSEKEEP_md": "Truly deleted. No active references — CLEAN.",
-        "SESSION_LEARN_md": "Truly deleted. No active references — CLEAN."
-      },
-      "note": "0 stale references with runtime impact. All deleted file references are in dead archive docs only."
+      "note": "10 deleted files checked — 0 active references in code. CLEAN."
     },
     "covenant_health": {
-      "total_agents_with_covenants": 20,
       "expiring_within_15_sessions": 0,
       "expired": 0,
-      "dormant": 0,
-      "verdict": "HEALTHY — no covenants expiring."
+      "verdict": "HEALTHY"
     },
     "state_consistency": {
       "orphaned_creds": [],
       "dead_services": [],
-      "stale_directives": [],
-      "services_status": {
-        "discovered_unevaluated": 28,
-        "note": "28 discovered-but-unevaluated services remain. wq-470 (service discovery batch evaluator) is pending to address this."
-      }
+      "stale_directives": []
     },
     "service_liveness": {
-      "probed": ["fourclaw_boards", "agentchan_boards", "chatr_agents", "moltchan_boards", "lobchan_boards"],
-      "results": "5/5 responding normally",
-      "note": "All 5 spot-checked platforms live and returning data."
+      "probed": ["fourclaw_boards", "agentchan_boards", "chatr_agents"],
+      "results": "3/3 responding normally"
     },
-    "verdict": "HEALTHY — 81 hooks pass syntax, 0 stale references with runtime impact, covenants stable, services live."
+    "verdict": "HEALTHY"
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 271,
+        "sessions_since_reported": 276,
         "status": "in-progress",
-        "blocker": "Platform owners unreachable — awaiting E session for re-registration",
-        "escalation_status": "Externally blocked. Pre-commit hook prevents future leaks. wq-255 in-progress.",
-        "note": "No change since A#111. Blocker is external. >30 sessions but documented as externally blocked — not escalating further."
+        "blocker": "Externally blocked — platform owners unreachable",
+        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress."
       }
     },
     "unknown_registry_agents": [],
     "suspicious_crons": [],
     "external_webhooks": [],
     "ssrf_monitors": [],
+    "ssrf_note": "1 monitor on 127.0.0.1:3847/health is own MCP server health check — legitimate.",
     "injection_inbox_msgs": [],
-    "human_review_items": 1,
-    "human_review_critical": 0,
-    "human_review_note": "1 item (hr-104-1) already resolved — d049 intel compliance emergency closed.",
-    "verdict": "CLEAN — no new threats. d045 external blocker persists, monitored."
+    "verdict": "CLEAN"
   },
   "cost": {
-    "last_20_total": 33.42,
-    "avg_per_session": 1.67,
+    "last_20_total": 34.44,
+    "avg_per_session": 1.72,
     "by_type": {
-      "B": {"count": 8, "avg": 2.13, "min": 0.94, "max": 3.23},
-      "E": {"count": 3, "avg": 1.19, "min": 1.17, "max": 1.21},
-      "R": {"count": 5, "avg": 1.41, "min": 1.31, "max": 1.48},
-      "A": {"count": 4, "avg": 1.42, "min": 1.08, "max": 1.90}
+      "B": {"count": 12, "avg": 2.17},
+      "E": {"count": 5, "avg": 1.19},
+      "R": {"count": 7, "avg": 1.42},
+      "A": {"count": 6, "avg": 1.51}
     },
-    "trend": "RISING SLIGHTLY — first half avg $1.45, second half avg $1.89. Driven by B session complexity.",
-    "anomalies": ["s1264 ($3.23, B, 6 commits — platform triage tool)", "s1269 ($3.16, B, 4 commits — mention aggregator + pre-commit hook)"],
-    "highest_cost": "s1264 ($3.23, B session — degraded platform auto-triage tool, 6 commits)",
-    "lowest_cost": "s1247 ($0.48, B session — lightweight single-task session)"
+    "trend": "STABLE at $1.72 avg, slight increase from $1.67 in A#112"
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a112-1",
-      "description": "R session directive-outcomes hook shows 0% addressed rate for all tracked R sessions (2/2: s1265, s1270). Independent verification confirms 100% compliance. The hook architecture captures R sessions but can't detect their directive work, which happens via directives.json edits rather than explicit addressing. This is a confirmed structural gap — the wq-459 fix succeeded in tracking R sessions but failed to measure their actual directive contribution.",
-      "priority": "low",
-      "action": "B session should update directive-outcome.js to detect directives.json file modifications in R sessions as evidence of 'addressed' directives. When the session mode is R and files= includes directives.json, the hook should mark active directives as addressed. This closes the evidence detection gap without changing R session behavior."
-    },
-    {
-      "id": "a112-2",
-      "description": "B session costs trending upward — $2.13 avg in last 20 sessions (highest among session types). Second half of last 20 sessions averages $1.89 vs $1.45 in first half. Individual sessions justified by complexity, but the trend warrants monitoring to ensure it doesn't cross the $3.00 soft cap regularly.",
-      "priority": "low",
-      "action": "Monitor over next audit cycle. If B session avg exceeds $2.50 or >2 sessions cross $3.00, create a work-queue item for B session cost optimization (e.g., task scoping limits, complexity gates)."
+      "id": "a113-1",
+      "description": "R session directive-outcomes tracking shows 0% addressed rate across all tracked R sessions (3/3: s1265, s1270, s1275). Two fix attempts failed: wq-459 (tracking) and wq-471 (mtime detection). Root cause: directive assignment logic gives R sessions urgentDirectives=[], so evidence loop is skipped. This is the 2nd consecutive audit with degradation. Previous fixes targeted wrong layer.",
+      "priority": "medium",
+      "action": "B session should update createDirectiveAssignments to include active directives in R session urgentDirectives array, so the existing evidence detection (including wq-471 mtime check) can actually run."
     }
   ]
 }

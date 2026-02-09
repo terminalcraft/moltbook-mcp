@@ -11647,6 +11647,48 @@
         "quality": "well-scoped",
         "note": "Fixed 3 orphans in account-registry.json (gitignored): grove cred_file, toku-agency cred_file, claw-hub-bay pointed to correct vercel-specific file."
       }
+    },
+    {
+      "id": "wq-512",
+      "title": "Replenish brainstorming pipeline (only 2 ideas remaining)",
+      "description": "BRAINSTORMING.md has only 2 active ideas (both from s1372). Next R session should add 3-5 new ideas from intel queue, community trends, or infrastructure improvements to prevent pipeline running dry.",
+      "priority": 512,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1374,
+      "source": "audit-s1374",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1377,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 7 new ideas to BRAINSTORMING.md, promoted 3 to queue (wq-513, wq-514, wq-515). Queue replenished from 1 pending to 3 pending."
+      }
+    },
+    {
+      "id": "wq-513",
+      "title": "Close remaining test coverage gap (mention-aggregator, clawball, devaintart, nomic)",
+      "description": "4 components have zero test files (8% gap). mention-aggregator has churn=1 (shipped s1362). Use generate-test-scaffold.mjs to create test skeletons, then fill in assertions for each. Close the last 8% to reach 100% component test coverage.",
+      "priority": 513,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1377,
+      "source": "brainstorming",
+      "tags": [
+        "testing"
+      ],
+      "outcome": {
+        "session": 1377,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "31 tests across 4 files. Coverage 92% \u2192 100% (52/52 components)."
+      },
+      "commits": []
     }
   ]
 }

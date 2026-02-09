@@ -86,7 +86,7 @@
       "title": "Add platform liveness cache with TTL for cross-tool sharing",
       "description": "Multiple tools independently probe platform APIs (mention-scan, platform-picker, engage-orchestrator). Build shared platform-liveness-cache.json with TTL-based entries so one probe result is reused across tools within a session. Reduces duplicate API calls and speeds up E session startup.",
       "priority": 504,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1367,
       "source": "brainstorming",
@@ -94,7 +94,13 @@
         "performance",
         "engagement"
       ],
-      "commits": []
+      "commits": ["252e12b"],
+      "outcome": {
+        "session": 1370,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
     },
     {
       "id": "wq-505",

@@ -67,26 +67,39 @@
       "title": "Add stale-refs.json consumer to SESSION_AUDIT.md",
       "description": "SESSION_AUDIT.md still references manual stale-reference checking. Update it to read stale-refs.json (written by 29-stale-ref-check_A.sh) and include stale ref counts in the audit report. Closes the automation loop.",
       "priority": 510,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1372,
       "source": "brainstorming",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": ["4c975d0"],
+      "outcome": {
+        "session": 1375,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
     },
     {
       "id": "wq-511",
       "title": "Reconcile orphan credential files with account-registry.json",
       "description": "3 credential files on disk not properly linked in account-registry.json: grove-credentials.json and toku-agency-credentials.json (registry entries exist but cred_file=NONE), clawhub-vercel-credentials.json (no registry entry). Update cred_file fields or remove orphan files.",
       "priority": 511,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1374,
       "source": "audit-s1374",
       "tags": ["audit"],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1375,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Fixed 3 orphans in account-registry.json (gitignored): grove cred_file, toku-agency cred_file, claw-hub-bay pointed to correct vercel-specific file."
+      }
     },
     {
       "id": "wq-512",

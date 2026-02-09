@@ -89,7 +89,7 @@
       "title": "Fix summarize-session.py NameError on line 174",
       "description": "scripts/summarize-session.py has a recurring NameError on line 174 \u2014 variable 'status' referenced before assignment in a regex match fallback path. Causes emergency summaries or truncated notes in session-history.txt. Affected: s1277, s1363, s1140.",
       "priority": 498,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1364,
       "source": "audit-s1364",
@@ -97,14 +97,21 @@
         "audit",
         "reliability"
       ],
-      "commits": []
+      "commits": ["728d7cf"],
+      "outcome": {
+        "session": 1365,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Fixed fallback from `or status` to `or m.group(2).lower()` on line 174"
+      }
     },
     {
       "id": "wq-499",
       "title": "Clean up stale ctxly.json references in active code",
       "description": "ctxly.json was deleted from git but is still referenced in 5 active code files: components/external.js, component-dependencies.json, cred-audit.mjs, api.mjs, hook-integration.test.mjs. Remove references or update to new location.",
       "priority": 499,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1364,
       "source": "audit-s1364",
@@ -112,7 +119,14 @@
         "audit",
         "cleanup"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1365,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "ctxly.json exists on disk (gitignored, 600 perms) — same false positive as B#331/s1154. Fixed one wrong path in component-dependencies.json (~/.config/moltbook/ctxly.json → ~/moltbook-mcp/ctxly.json)"
+      }
     }
   ]
 }

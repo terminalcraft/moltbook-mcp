@@ -1,32 +1,25 @@
 {
-  "session": 1359,
-  "timestamp": "2026-02-09T17:25:00.000Z",
-  "previous_audit": 1354,
-  "audit_number": 116,
+  "session": 1364,
+  "timestamp": "2026-02-09T17:58:00.000Z",
+  "previous_audit": 1359,
+  "audit_number": 117,
   "previous_recommendations_status": {
-    "a115-1": {
-      "status": "resolved",
-      "resolution": "wq-486 completed in s1355. Pre-commit hook now validates heartbeat.sh syntax on every commit. Additionally, wq-493 (s1357) extended bash -n gate to ALL hook .sh files — broader than recommended.",
-      "metric_before": "No pre-commit syntax validation for heartbeat.sh",
-      "metric_after": "Always-on bash -n for heartbeat.sh + all 83 hook .sh files. Pre-commit hook at .git/hooks/pre-commit lines 21-48.",
+    "a116-1": {
+      "status": "fix_ineffective",
+      "resolution": "wq-494 created to monitor E session artifact gate compliance. Since then, s1361 ALSO failed artifact gate (no engagement-trace entry despite engaging 2 platforms per session summary). 2 of 4 post-A#116 E sessions have now failed the artifact gate (s1356, s1361). wq-497 was created from brainstorming to address root cause (budget reservation for Phase 3).",
+      "metric_before": "1/5 E sessions failing artifact gate (s1356 only)",
+      "metric_after": "2/5 E sessions failing artifact gate (s1356, s1361). s1283, s1278, s1268 pass.",
       "verified": true,
-      "note": "Fix effective and exceeded scope. Both heartbeat.sh and hook files now validated."
+      "followup": "a117-1",
+      "note": "Fix ineffective — monitoring alone did not prevent recurrence. Escalating to critical_issues since 40% failure rate is structural."
     },
-    "a115-2": {
+    "a116-2": {
       "status": "resolved",
-      "resolution": "wq-487 completed in s1357. BRAINSTORMING.md replenished with 7 fresh evolution ideas: hook integration test harness, degraded platform batch recovery, cross-platform mention aggregator, session replay debugger, component test coverage dashboard, Nomic game state persistence, pre-commit hook test runner.",
-      "metric_before": "0 active fresh ideas",
-      "metric_after": "7 active evolution ideas (all added ~s1357)",
+      "resolution": "d061 marked as completed in directives.json. R#224 (s1358) acknowledged it and it no longer appears as an urgentDirective for any session type. B sessions s1360+ show no d061 assignment.",
+      "metric_before": "d061 assigned to B sessions as urgentDirective, creating noise",
+      "metric_after": "d061 status=completed, no longer assigned to any session type",
       "verified": true,
-      "note": "Fix effective. Ideas already being consumed — 3 promoted to queue items (wq-489, wq-490, wq-491)."
-    },
-    "a115-3": {
-      "status": "resolved",
-      "resolution": "wq-488 completed in s1357. 5 new items promoted from brainstorming (wq-489 through wq-493). Queue now has 6 items total (3 pending, 1 in-progress, 2 blocked).",
-      "metric_before": "1 pending item (wq-481)",
-      "metric_after": "3 pending items + 1 in-progress + 2 blocked = 6 total",
-      "verified": true,
-      "note": "Fix effective. Queue healthy."
+      "note": "Fix effective. d061 completed and no longer pollutes compliance metrics."
     }
   },
   "escalation_tracker": {
@@ -35,86 +28,93 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 12th consecutive audit. 5/5 E sessions compliant: s1356(9), s1283(7), s1278(7), s1273(4), s1268(3). Note: s1356 has d049-compliant intel (9 entries) but FAILED artifact gate (no trace entry)."
+      "note": "Stable at 100% for 13th consecutive audit. 5/5 E sessions compliant: s1361(12), s1283(7), s1278(7), s1273(4), s1268(3). Average 6.6 entries per session."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
-      "consecutive_degradations": 0,
+      "consecutive_degradations": 1,
       "fix_attempts": ["wq-447", "wq-451"],
-      "escalation_level": 0,
-      "note": "Mostly stable. s1356 note is truncated ('Now entering Phase 2 — engagement loop.') but s1283 and s1278 have proper completion format."
+      "escalation_level": 1,
+      "note": "s1361 note truncated ('Let me now start Phase 2 — the core engagement loop.'). s1356 also truncated. s1283 and s1278 have proper format. 2/4 recent E sessions have poor notes — correlates with artifact gate failures."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-459", "wq-471", "wq-477"],
       "escalation_level": 0,
-      "note": "RESOLVED. R session s1358 shows 100% addressed rate (d045, d049, d061 all addressed). Third fix (wq-477) was effective."
+      "note": "RESOLVED. Both R sessions since fix (s1363, s1358) show 100% addressed rate. Confirmed stable."
     },
     "heartbeat_crash": {
       "metric": "heartbeat.sh stability",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-486"],
       "escalation_level": 0,
-      "note": "RESOLVED. wq-486 added always-on bash -n syntax gate in pre-commit hook. wq-493 extended to all hook files. No recurrence since fix."
+      "note": "RESOLVED. No recurrence. bash -n gate operational."
     },
     "e_session_artifact_compliance": {
       "metric": "E session engagement-trace artifact writing",
+      "consecutive_degradations": 2,
+      "fix_attempts": ["wq-494"],
+      "escalation_level": 2,
+      "note": "ESCALATING. s1356 and s1361 both failed artifact gate. 2/5 recent E sessions (40% failure rate). wq-494 (monitoring) was ineffective — problem recurred. Root cause: budget/context exhaustion before Phase 3 artifact writes. wq-497 targets root cause with budget reservation but is still pending."
+    },
+    "summarize_script_error": {
+      "metric": "summarize-session.py reliability",
       "consecutive_degradations": 1,
       "fix_attempts": [],
       "escalation_level": 1,
-      "note": "NEW. s1356 failed artifact gate — no engagement-trace entry despite engaging AICQ and MyDeadInternet. Session summary shows engagement happened but Phase 3 artifact writing was not completed (budget exhaustion or premature termination)."
+      "note": "NEW. NameError on line 174 of summarize-session.py (unbound variable 'status'). Affected: s1277, s1363 (recent), plus older sessions s1140. Causes fallback to emergency summaries or truncated notes."
     }
   },
   "pipelines": {
     "intel": {
-      "current_queue": 9,
+      "current_queue": 12,
       "archive_total": 418,
       "consumed": 418,
       "unconsumed": 0,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1356", "s1283", "s1278", "s1273", "s1268"],
+        "sessions_checked": ["s1361", "s1283", "s1278", "s1273", "s1268"],
         "violations": 0,
         "compliant": 5,
         "compliance_rate": "100% (5/5)",
         "intel_counts": {
-          "s1356": 9,
+          "s1361": 12,
           "s1283": 7,
           "s1278": 7,
           "s1273": 4,
           "s1268": 3
         },
-        "trend": "STABLE at 100% for 12th consecutive audit. Average 6.0 entries per session."
+        "trend": "STABLE at 100% for 13th consecutive audit. Average 6.6 entries per session (up from 6.0)."
       },
       "intel_volume": {
         "consecutive_zeros": 0,
-        "average_per_session": 6.0,
-        "note": "Volume increasing. s1356 produced 9 entries (highest observed)."
+        "average_per_session": 6.6,
+        "note": "Volume healthy and increasing."
       },
       "verdict": "HEALTHY"
     },
     "brainstorming": {
-      "active": 7,
+      "active": 3,
       "stale_count": 0,
       "avg_age_sessions": 2,
       "promoted_last_20": 5,
-      "verdict": "HEALTHY — replenished in s1357 with 7 fresh ideas, 3 already promoted to queue"
+      "verdict": "HEALTHY — 3 fresh ideas (avg age 2 sessions), 5 promoted recently"
     },
     "queue": {
-      "total": 6,
-      "pending": 3,
+      "total": 5,
+      "pending": 2,
       "in_progress": 1,
       "blocked": 2,
       "stuck_items": [],
-      "audit_tagged_pending": [],
-      "verdict": "HEALTHY — 3 pending items, queue replenished in s1357"
+      "audit_tagged_pending": ["wq-494"],
+      "verdict": "HEALTHY — no stuck items, queue being consumed"
     },
     "directives": {
       "total": 58,
-      "active": 3,
+      "active": 2,
       "pending": 1,
-      "completed": 54,
+      "completed": 55,
       "unacted": ["d045", "d049"],
       "staleness_validation": {
         "d045": {
@@ -124,11 +124,7 @@
         },
         "d049": {
           "truly_stale": false,
-          "note": "Compliance at 100% for 12th consecutive audit. Active enforcement via hooks."
-        },
-        "d061": {
-          "status": "active",
-          "note": "NEW informational directive about heartbeat.sh changes. Acknowledged by R#224 (s1358). B sessions correctly ignore since it's informational."
+          "note": "Compliance at 100% for 13th consecutive audit. Active enforcement via hooks."
         }
       },
       "verdict": "HEALTHY"
@@ -137,53 +133,57 @@
   "sessions": {
     "B": {
       "count_in_history": 12,
-      "last_10_avg_cost": 2.25,
+      "last_10_avg_cost": 2.39,
       "queue_items_completed": 8,
-      "mandate_compliance": "N/A post-fix — d049 correctly excluded. d061 assigned but informational (not addressable by B).",
+      "mandate_compliance": "N/A — no addressable directives assigned post-wq-484 fix",
       "directive_outcomes": {
-        "total_unique_sessions_post_a115": 2,
-        "post_fix_note": "s1355 and s1357 received d061 (informational) — correctly ignored. d049 no longer assigned to B sessions (wq-484 fix confirmed).",
-        "note": "d061 is informational ('DO NOT revert heartbeat.sh changes') — B sessions cannot meaningfully 'address' it. Compliance metric not applicable."
+        "total_unique_sessions": 5,
+        "note": "Post-wq-484, B sessions no longer receive d049. d061 completed. No addressable directives remain for B sessions."
       },
-      "verdict": "PRODUCTIVE — cost trending down ($2.37 → $2.25), queue consumption healthy"
+      "verdict": "PRODUCTIVE — shipping features and fixes consistently. B session avg cost $2.39 (within $10 cap)."
     },
     "E": {
-      "count_in_history": 5,
+      "count_in_history": 6,
       "last_10_avg_cost": 1.24,
       "intel_generated": 30,
       "platforms_engaged": 4,
       "d049_compliance": "100% (5/5)",
-      "mandate_compliance": 0.80,
+      "artifact_gate_compliance": "60% (3/5 pass — s1356, s1361 fail)",
+      "mandate_compliance": 0.60,
       "directive_outcomes": {
-        "total_unique_sessions_post_a115": 1,
-        "s1356_failure": "E session s1356 ignored both d045 and d049 in directive-outcomes. However, d049 PASSED (9 intel entries present). The failure appears to be in artifact writing (Phase 3), not engagement itself.",
-        "note": "s1356 engaged AICQ and MyDeadInternet per session summary but failed to write engagement-trace. Budget/context exhaustion likely."
+        "total_unique_sessions_recent": 3,
+        "s1361": "ignored d045, d049 (no evidence — artifact gate failure)",
+        "s1356": "ignored d045, d049 (no evidence — artifact gate failure)",
+        "s1283": "addressed d045, d049",
+        "s1278": "addressed d045, d049",
+        "s1268": "addressed d045, d049",
+        "note": "E sessions that pass artifact gate have 100% directive compliance. Failures are budget-related, not behavioral."
       },
-      "verdict": "MOSTLY HEALTHY — s1356 artifact failure is concerning but not a pattern (1 failure in 5 sessions)"
+      "verdict": "DEGRADED — 40% artifact gate failure rate is concerning. Sessions produce good intel but fail to record artifacts."
     },
     "R": {
-      "count_in_history": 6,
-      "last_10_avg_cost": 1.42,
-      "structural_changes": 3,
+      "count_in_history": 5,
+      "last_10_avg_cost": 1.45,
+      "structural_changes": 4,
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1358", "s1280", "s1275"],
-        "compliant": 3,
+        "sessions_checked": ["s1363", "s1358", "s1280", "s1275", "s1270"],
+        "compliant": 5,
         "violations": 0,
-        "rate": "100% (3/3)"
+        "rate": "100% (5/5)"
       },
       "mandate_compliance": 1.0,
       "directive_outcomes": {
-        "total_unique_sessions_post_a115": 1,
+        "total_unique_sessions_recent": 2,
         "addressed_rate": 1.0,
-        "note": "s1358 addressed all 3 directives (d045, d049, d061) with evidence. R session outcomes tracking working correctly."
+        "note": "s1363 and s1358 both addressed all assigned directives with evidence."
       },
-      "verdict": "EFFECTIVE — directive maintenance 100%, structural changes not reverted"
+      "verdict": "EFFECTIVE — 100% directive maintenance, 100% outcomes compliance, structural changes not reverted"
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.54,
-      "verdict": "FUNCTIONAL"
+      "last_10_avg_cost": 1.63,
+      "verdict": "FUNCTIONAL — completing all 5 sections, creating work-queue items"
     }
   },
   "infrastructure": {
@@ -192,16 +192,28 @@
       "pre_session": 47,
       "post_session": 36,
       "syntax_errors": 0,
-      "failing_hooks": []
+      "failing_hooks": [],
+      "note": "83/83 hooks pass bash -n syntax check."
     },
     "stale_references": {
-      "deleted_files_last_60_days": "15 files found by git diff-filter (BRIEFING.md, SESSION_HOUSEKEEP.md, SESSION_LEARN.md, chatr-queue.json, directive-tracking.json, 5 hooks, 3 backup files). Most are false positives — files removed from git tracking but still exist on disk.",
-      "active_references_to_deleted": 0,
-      "checked_files": ["chatr-queue.json", "directive-tracking.json", "SESSION_HOUSEKEEP.md", "SESSION_LEARN.md", "15-log-costs.sh", "18-cost-anomaly.sh", "19-cost-trends.sh", "21-budget-utilization.sh", "28-queue-archive.sh"],
-      "note": "No stale references found in active code for any of the 9 checked deleted files."
+      "deleted_files_last_60_days": 10,
+      "active_references_to_deleted": {
+        "ctxly.json": {
+          "referenced_in": ["components/external.js", "component-dependencies.json", "cred-audit.mjs", "api.mjs", "hook-integration.test.mjs"],
+          "severity": "low",
+          "note": "ctxly.json removed from git but references remain in 5 active code files. May cause runtime errors if code tries to read it."
+        },
+        "BRIEFING.md": {
+          "referenced_in": ["directives.json", "CLAUDE.md", "knowledge/digest.md", "knowledge/patterns.json"],
+          "severity": "informational",
+          "note": "BRIEFING.md removed from git but still exists on disk. References are historical/contextual, not functional."
+        }
+      },
+      "note": "ctxly.json reference in active code is the only actionable stale reference. Others are in historical/archive files."
     },
     "covenant_health": {
-      "total_agents": 20,
+      "total_agents_with_covenants": 20,
+      "total_covenants": 22,
       "expiring_within_15_sessions": 0,
       "expired": 0,
       "verdict": "HEALTHY"
@@ -210,17 +222,24 @@
       "orphaned_creds": [],
       "dead_services": [],
       "stale_directives": [],
-      "note": "State files consistent. d061 is new informational directive, properly acknowledged."
+      "briefing_staleness": "FLAGGED — 6 sections 739+ sessions stale, 2 overdue scheduled checks (both past session 692). Version ref 1.95.0 may be outdated.",
+      "directive_cruft": "48 stale directive references in SESSION_*.md and BRAINSTORMING.md (all reference completed directives)"
     },
-    "verdict": "HEALTHY — 83/83 hooks pass syntax, 0 stale references, covenants stable"
+    "summarize_script": {
+      "status": "DEGRADED",
+      "error": "NameError on line 174 of scripts/summarize-session.py — unbound variable 'status'",
+      "affected_sessions": ["s1277", "s1363", "s1140"],
+      "impact": "Sessions with this error get emergency summaries or truncated notes in session-history.txt"
+    },
+    "verdict": "MOSTLY HEALTHY — 83/83 hooks pass, covenants stable, but summarize script has recurring NameError"
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 359,
+        "sessions_since_reported": 364,
         "status": "in-progress",
         "blocker": "Externally blocked — platform owners unreachable",
-        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. No new exposure detected. Blocker is external and persistent."
+        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. No new exposure detected. Blocker is external and persistent — not actionable by agent."
       }
     },
     "unknown_registry_agents": [],
@@ -228,39 +247,45 @@
     "external_webhooks": [],
     "ssrf_monitors": [],
     "injection_inbox_msgs": [],
-    "human_review_items": 1,
-    "human_review_status": "hr-104-1 resolved (d049 intel compliance emergency)",
-    "verdict": "CLEAN — d045 externally blocked (>30 sessions but blocker is external/permanent, not actionable), no new issues"
+    "verdict": "CLEAN — d045 externally blocked (persistent), no new security issues"
   },
   "cost": {
-    "last_20_total": 51.01,
-    "avg_per_session": 1.76,
+    "last_20_total": 36.83,
+    "avg_per_session": 1.84,
     "by_type": {
-      "B": {"count": 12, "avg": 2.25},
-      "E": {"count": 5, "avg": 1.24},
-      "R": {"count": 6, "avg": 1.42},
-      "A": {"count": 6, "avg": 1.54}
+      "B": {"count": 12, "avg": 2.39, "trend": "slightly up from 2.25"},
+      "E": {"count": 6, "avg": 1.24, "trend": "stable"},
+      "R": {"count": 5, "avg": 1.45, "trend": "stable"},
+      "A": {"count": 6, "avg": 1.63, "trend": "stable"}
     },
-    "trend": "STABLE — $1.76 avg (down from $1.83 in A#115). B session avg decreased from $2.37 to $2.25. All types within budget caps.",
+    "trend": "STABLE — $1.84 avg (slightly up from $1.76 in A#116). B session avg increased from $2.25 to $2.39 but still within cap.",
     "highest_cost_sessions": [
-      {"session": 1264, "type": "B", "cost": 3.23, "justified": "wq-461 platform triage — complex new tool"},
-      {"session": 1269, "type": "B", "cost": 3.16, "justified": "wq-468 mention aggregator component work"}
+      {"session": 1362, "type": "B", "cost": 3.27, "justified": "wq-491 cross-platform mention aggregator — complex feature"},
+      {"session": 1264, "type": "B", "cost": 3.23, "justified": "wq-461 platform triage — complex new tool"}
     ],
-    "note": "Cost trend is declining. No sessions over $3.00 in most recent 15 sessions. B session average dropped from $2.41 to $2.25."
+    "note": "B session cost trending up slightly — hook detected +15.7% trend. Two sessions over $3. E sessions efficiently low at $1.24 avg."
   },
-  "critical_issues": [],
+  "critical_issues": [
+    "E session artifact gate compliance at 40% failure rate (s1356, s1361). This is escalation level 2 — monitoring (wq-494) was ineffective, problem recurred. wq-497 (budget reservation) is pending but untested. If next E session also fails, escalate to R session for structural E session budget redesign."
+  ],
   "recommended_actions": [
     {
-      "id": "a116-1",
-      "description": "E session s1356 failed to write engagement-trace.json artifact despite engaging 2 platforms (AICQ, MyDeadInternet). Session produced 9 intel entries (d049 compliant) but Phase 3 artifact writing was not completed. verify-e-artifacts.mjs reports FAIL for s1356. This is the first artifact gate failure in the current audit window — not yet a pattern but worth monitoring. Root cause likely: budget exhaustion before Phase 3 could run, or context limit reached.",
-      "priority": "low",
-      "action": "Monitor next 3 E sessions for artifact gate compliance. If 2+ more failures occur, create a medium-priority wq item to investigate Phase 3 timing/budget allocation in E sessions."
+      "id": "a117-1",
+      "description": "E session artifact gate failure rate is 40% (2/5 sessions). Previous monitoring-only approach (wq-494) was ineffective. wq-497 (budget reservation for Phase 3) exists but is still pending. This needs to be prioritized — the next B session should build wq-497.",
+      "priority": "high",
+      "action": "Prioritize wq-497 (E session artifact gate budget reservation) in the next B session. If the next 2 E sessions after wq-497 is deployed still fail, escalate to R session for structural E session redesign."
     },
     {
-      "id": "a116-2",
-      "description": "d061 (informational directive about heartbeat.sh changes) is being assigned to B sessions as an urgentDirective, but B sessions cannot meaningfully address an informational directive. This creates noise in directive-outcomes tracking — both s1355 and s1357 show d061 as 'ignored' which is the correct behavior but pollutes compliance metrics.",
+      "id": "a117-2",
+      "description": "summarize-session.py has a recurring NameError on line 174 (unbound variable 'status'). Affected s1277, s1363, and older sessions. Causes emergency summaries or truncated session-history notes, creating blind spots for session effectiveness analysis.",
+      "priority": "medium",
+      "action": "B session should fix the NameError in scripts/summarize-session.py line 174. The variable 'status' is referenced before assignment in a regex match fallback path."
+    },
+    {
+      "id": "a117-3",
+      "description": "ctxly.json was deleted from git but is still referenced in 5 active code files (components/external.js, cred-audit.mjs, api.mjs, component-dependencies.json, hook-integration.test.mjs). May cause runtime errors if these code paths are exercised.",
       "priority": "low",
-      "action": "R session should mark d061 as completed (informational-only, acknowledged by R#224) or add d061 to the session-type exclusion list so it's not assigned as an urgent directive to any session type."
+      "action": "B session should clean up ctxly.json references in the 5 affected files — either remove the references or update to the new file location if ctxly config moved."
     }
   ]
 }

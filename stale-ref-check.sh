@@ -49,6 +49,8 @@ ARCHIVE_EXCLUDES=(
   --exclude="queue-systems-snapshot.json"
   --exclude="dialogue-archive.md"
   --exclude="analytics.json"
+  --exclude="directives.json"
+  --exclude="patterns.json"
   --exclude-dir="backups"
   --exclude-dir=".git"
 )

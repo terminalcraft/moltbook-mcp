@@ -158,6 +158,18 @@
       "source": "brainstorming",
       "tags": ["engagement", "tooling"],
       "commits": []
+    },
+    {
+      "id": "wq-502",
+      "title": "Add gitignored-file allowlist to audit stale-reference checks",
+      "description": "Audit sessions repeatedly flag ctxly.json references as stale (B#331/s1154, wq-499/s1365) because the file is gitignored but exists on disk. Add an allowlist of known gitignored-but-present files (ctxly.json, wallet.json, etc.) to the audit's stale-reference check so they stop generating false positive findings.",
+      "priority": 502,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1365,
+      "source": "session-insight",
+      "tags": ["audit", "reliability"],
+      "commits": []
     }
   ]
 }

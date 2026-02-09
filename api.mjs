@@ -6412,6 +6412,7 @@ function agentManifest(req, res) {
       status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },
       status_dashboard: { url: `${base}/status/dashboard`, method: "GET", auth: false, description: "HTML ecosystem status dashboard with deep health checks (?format=json for API)" },
       status_hooks: { url: `${base}/status/hooks`, method: "GET", auth: false, description: "Hook performance dashboard — avg/p50/p95 execution times, failure rates, slow hook identification (?window=N&format=json)" },
+      status_hooks_health: { url: `${base}/status/hooks-health`, method: "GET", auth: false, description: "Aggregate hooks health — verdict, failing hooks, over-budget hooks, phase timing (?window=N&budget=N&format=json)" },
       status_components: { url: `${base}/status/components`, method: "GET", auth: false, description: "Component load health — loaded count, errors, manifest (?format=html for web UI)" },
       status_components_lifecycle: { url: `${base}/status/components/lifecycle`, method: "GET", auth: false, description: "Component lifecycle hooks — onLoad/onUnload execution status, failures, health (?format=html for web UI)" },
       status_dependencies: { url: `${base}/status/dependencies`, method: "GET", auth: false, description: "Component dependency map — files, APIs, providers per component (?component=X to filter, ?format=html for web UI)" },
@@ -12533,6 +12534,138 @@ app.get("/status/hooks", (req, res) => {
 <table><thead><tr><th>Hook</th><th>Runs</th><th>Fail%</th><th>Avg (ms)</th><th>P50 (ms)</th><th>P95 (ms)</th><th>Max (ms)</th><th>P95 bar</th></tr></thead>
 <tbody>${rows}</tbody></table>
 <p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/hooks?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/dashboard" style="color:#89b4fa">Status Dashboard</a> · ?window=N (default 50, max 200)</p>
+</body></html>`);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
+// Aggregate hooks health endpoint (wq-519)
+app.get("/status/hooks-health", (req, res) => {
+  try {
+    const logsDir = join(process.env.HOME || "/home/moltbot", ".config/moltbook/logs");
+    const window = Math.min(Math.max(parseInt(req.query.window) || 20, 1), 200);
+    const budgetMs = parseInt(req.query.budget) || 10000; // per-hook timeout budget in ms
+
+    const loadEntries = (file) => {
+      try {
+        return readFileSync(join(logsDir, file), "utf8").trim().split("\n").filter(Boolean)
+          .slice(-window).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+      } catch { return []; }
+    };
+
+    const preEntries = loadEntries("pre-hook-results.json");
+    const postEntries = loadEntries("hook-results.json");
+
+    if (!preEntries.length && !postEntries.length) return res.json({ error: "no hook data" });
+
+    const analyzePhase = (entries, phase) => {
+      if (!entries.length) return null;
+      let totalPass = 0, totalFail = 0, totalSkip = 0;
+      const hooks = {};
+      for (const entry of entries) {
+        totalPass += entry.pass || 0;
+        totalFail += entry.fail || 0;
+        totalSkip += entry.skip || 0;
+        for (const h of (entry.hooks || [])) {
+          if (!hooks[h.hook]) hooks[h.hook] = { runs: 0, failures: 0, times: [], errors: [] };
+          hooks[h.hook].runs++;
+          if (h.status !== "ok") {
+            hooks[h.hook].failures++;
+            if (h.error) hooks[h.hook].errors.push({ session: entry.session, error: h.error.slice(0, 120) });
+          }
+          hooks[h.hook].times.push(h.ms);
+        }
+      }
+
+      const hookList = Object.entries(hooks).map(([name, d]) => {
+        const avg = Math.round(d.times.reduce((a, b) => a + b, 0) / d.times.length);
+        const sorted = [...d.times].sort((a, b) => a - b);
+        const p95 = sorted[Math.max(0, Math.ceil(sorted.length * 0.95) - 1)];
+        return { hook: name, runs: d.runs, failures: d.failures, avg_ms: avg, p95_ms: p95, errors: d.errors.slice(-2) };
+      });
+
+      const overBudget = hookList.filter(h => h.p95_ms > budgetMs * 0.5);
+      const failing = hookList.filter(h => h.failures > 0);
+      const avgTotal = entries.reduce((s, e) => s + (e.total_ms || 0), 0) / entries.length;
+
+      return {
+        phase,
+        sessions_analyzed: entries.length,
+        session_range: { from: entries[0]?.session, to: entries[entries.length - 1]?.session },
+        total_hooks: hookList.length,
+        total_pass: totalPass,
+        total_fail: totalFail,
+        total_skip: totalSkip,
+        failure_rate_pct: Math.round((totalFail / Math.max(totalPass + totalFail, 1)) * 10000) / 100,
+        avg_phase_time_ms: Math.round(avgTotal),
+        hooks_over_budget: overBudget.map(h => ({ hook: h.hook, p95_ms: h.p95_ms, pct_of_budget: Math.round(h.p95_ms / budgetMs * 100) })),
+        hooks_with_failures: failing.map(h => ({ hook: h.hook, failures: h.failures, runs: h.runs, recent_errors: h.errors })),
+      };
+    };
+
+    const pre = analyzePhase(preEntries, "pre-session");
+    const post = analyzePhase(postEntries, "post-session");
+
+    const phases = [pre, post].filter(Boolean);
+    const totalHooks = phases.reduce((s, p) => s + p.total_hooks, 0);
+    const totalFailing = phases.reduce((s, p) => s + p.hooks_with_failures.length, 0);
+    const totalOverBudget = phases.reduce((s, p) => s + p.hooks_over_budget.length, 0);
+    const avgTotalTime = phases.reduce((s, p) => s + p.avg_phase_time_ms, 0);
+
+    // Health verdict
+    let verdict = "healthy";
+    if (totalFailing > 2 || totalOverBudget > 3) verdict = "degraded";
+    if (phases.some(p => p.failure_rate_pct > 10)) verdict = "unhealthy";
+
+    const result = {
+      verdict,
+      budget_ms: budgetMs,
+      total_hooks: totalHooks,
+      total_failing_hooks: totalFailing,
+      total_over_budget_hooks: totalOverBudget,
+      avg_total_hook_time_ms: avgTotalTime,
+      phases,
+    };
+
+    if (req.query.format === "json" || req.headers.accept?.includes("application/json")) {
+      return res.json(result);
+    }
+
+    // Compact HTML view
+    const verdictColor = verdict === "healthy" ? "#a6e3a1" : verdict === "degraded" ? "#fab387" : "#f38ba8";
+    const phaseHtml = phases.map(p => {
+      const failRows = p.hooks_with_failures.map(h =>
+        `<tr><td style="font-family:monospace">${h.hook}</td><td style="color:#f38ba8">${h.failures}/${h.runs}</td><td style="font-size:.75rem;color:#6c7086">${h.recent_errors.map(e => e.error).join("; ") || "—"}</td></tr>`
+      ).join("") || `<tr><td colspan=3 style="color:#a6e3a1">No failures</td></tr>`;
+      const budgetRows = p.hooks_over_budget.map(h =>
+        `<tr><td style="font-family:monospace">${h.hook}</td><td style="color:#fab387">${h.p95_ms}ms</td><td>${h.pct_of_budget}%</td></tr>`
+      ).join("") || `<tr><td colspan=3 style="color:#a6e3a1">All within budget</td></tr>`;
+      return `<div style="margin-bottom:2rem">
+        <h2 style="color:#89b4fa">${p.phase} (sessions ${p.session_range.from}–${p.session_range.to})</h2>
+        <div class="summary">
+          <div class="card"><div class="val">${p.total_hooks}</div><div class="lbl">Hooks</div></div>
+          <div class="card"><div class="val">${p.avg_phase_time_ms}ms</div><div class="lbl">Avg phase time</div></div>
+          <div class="card"><div class="val">${p.failure_rate_pct}%</div><div class="lbl">Failure rate</div></div>
+        </div>
+        <h3>Failing hooks</h3>
+        <table><thead><tr><th>Hook</th><th>Fail/Run</th><th>Error</th></tr></thead><tbody>${failRows}</tbody></table>
+        <h3>Over budget (&gt;${Math.round(budgetMs * 0.5 / 1000)}s p95)</h3>
+        <table><thead><tr><th>Hook</th><th>P95</th><th>% of budget</th></tr></thead><tbody>${budgetRows}</tbody></table>
+      </div>`;
+    }).join("");
+
+    res.type("html").send(`<!DOCTYPE html><html><head><title>Hooks Health</title>
+<style>body{background:#1e1e2e;color:#cdd6f4;font-family:system-ui;margin:2rem}table{border-collapse:collapse;width:100%;margin-bottom:1rem}th,td{padding:6px 10px;border-bottom:1px solid #313244;text-align:left}th{color:#89b4fa;font-size:12px;text-transform:uppercase}tr:hover{background:#313244}h1{color:#cba6f7}h2{color:#89b4fa}h3{color:#a6adc8;font-size:.9rem;margin-top:1rem}.summary{display:flex;gap:2rem;margin:1rem 0}.card{background:#313244;padding:1rem;border-radius:8px;min-width:120px}.card .val{font-size:1.5rem;font-weight:bold;color:#cba6f7}.card .lbl{font-size:.75rem;color:#6c7086;margin-top:4px}</style></head>
+<body><h1>Hooks Health <span style="color:${verdictColor};font-size:.8em;padding:4px 12px;background:#313244;border-radius:12px">${verdict}</span></h1>
+<div class="summary">
+  <div class="card"><div class="val">${totalHooks}</div><div class="lbl">Total hooks</div></div>
+  <div class="card"><div class="val">${totalFailing}</div><div class="lbl">Failing</div></div>
+  <div class="card"><div class="val">${totalOverBudget}</div><div class="lbl">Over budget</div></div>
+  <div class="card"><div class="val">${avgTotalTime}ms</div><div class="lbl">Avg total time</div></div>
+</div>
+${phaseHtml}
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/hooks-health?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/hooks" style="color:#89b4fa">Per-Hook Detail</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a> · ?window=N (default 20) · ?budget=N (ms, default 10000)</p>
 </body></html>`);
   } catch (e) {
     res.status(500).json({ error: e.message?.slice(0, 100) });

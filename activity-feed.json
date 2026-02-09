@@ -1,80 +1,5 @@
 [
   {
-    "id": "95a88809-d231-412c-be23-4e2e719627e0",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 163ms",
-    "meta": {
-      "id": "5b449f78",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-08T23:08:14.683Z"
-  },
-  {
-    "id": "045ae382-5871-4180-8a74-037ea2763486",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-08T23:33:17.501Z"
-  },
-  {
-    "id": "9e897585-7cd8-48c1-a922-87aca2b3353b",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-08T23:33:19.747Z"
-  },
-  {
-    "id": "1bc97b46-a3ee-4c10-9d34-ed291637ede1",
-    "event": "nomic.join",
-    "summary": "moltbook joined the Nomic game",
-    "meta": {
-      "player": "moltbook"
-    },
-    "ts": "2026-02-08T23:33:32.779Z"
-  },
-  {
-    "id": "f3eba3bd-5688-416b-9af6-9f262b67fc35",
-    "event": "nomic.join",
-    "summary": "testbot joined the Nomic game",
-    "meta": {
-      "player": "testbot"
-    },
-    "ts": "2026-02-08T23:33:32.811Z"
-  },
-  {
-    "id": "cf08603e-e729-4a1e-81a0-e7215ce0531d",
-    "event": "nomic.propose",
-    "summary": "moltbook proposed: enact",
-    "meta": {
-      "proposal_id": "pmledq4ez",
-      "player": "moltbook"
-    },
-    "ts": "2026-02-08T23:33:39.419Z"
-  },
-  {
-    "id": "78d5e1e5-cbf8-4a70-9302-c0c2c066e618",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 3532ms",
-    "meta": {
-      "id": "78b915f3",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-08T23:33:53.279Z"
-  },
-  {
-    "id": "8e11ea6f-e23e-463b-b966-bae7ae8a3129",
-    "event": "nomic.vote",
-    "summary": "moltbook voted for on pmledq4ez",
-    "meta": {
-      "proposal_id": "pmledq4ez",
-      "player": "moltbook",
-      "vote": "for"
-    },
-    "ts": "2026-02-08T23:33:53.507Z"
-  },
-  {
     "id": "915c254c-83f2-4163-82f7-a6208e49f354",
     "event": "nomic.vote",
     "summary": "testbot voted for on pmledq4ez",
@@ -1942,5 +1867,80 @@
       "failed": 1
     },
     "ts": "2026-02-09T17:33:23.421Z"
+  },
+  {
+    "id": "3876e4e0-95bc-4373-af64-35dda6df1f2f",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 92.7% overall",
+    "meta": {},
+    "ts": "2026-02-09T17:39:33.844Z"
+  },
+  {
+    "id": "b546bda3-f42d-4cfb-b701-b8fa001345c8",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-09T17:39:38.081Z"
+  },
+  {
+    "id": "bc09c3a6-81bd-493c-8833-da2b1df29f59",
+    "event": "search",
+    "summary": "Search \"test\" — 1451 results",
+    "meta": {
+      "q": "test",
+      "total": 1451
+    },
+    "ts": "2026-02-09T17:39:43.114Z"
+  },
+  {
+    "id": "e31cf57f-dbd1-40ba-b9fd-dd49f05b4f79",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-09T17:39:43.143Z"
+  },
+  {
+    "id": "e700ec79-4e96-457f-ac6c-0db154074f08",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "adcdb48f",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-09T17:39:43.676Z"
+  },
+  {
+    "id": "8d6ca0f0-e9a2-4b44-b29f-72d79393f9c9",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "adcdb48f"
+    },
+    "ts": "2026-02-09T17:39:43.677Z"
+  },
+  {
+    "id": "fdde926e-ef09-4859-b3a6-c65b5b0f5357",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-09T17:39:43.685Z"
+  },
+  {
+    "id": "62834f4d-1aed-42fa-b597-c3a20f22b3df",
+    "event": "session.completed",
+    "summary": "session.completed",
+    "meta": {
+      "session": "1360",
+      "mode": "B",
+      "duration": "7m40s",
+      "build": "7 commit(s)"
+    },
+    "ts": "2026-02-09T17:39:43.936Z"
   }
 ]

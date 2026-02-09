@@ -24,6 +24,10 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Agora prediction market auto-tracker** (added ~s1270): E#117 (s1258) made 2 Agora trades but there's no tool to check outcomes. Build agora-portfolio.mjs that reads account-registry Agora creds, fetches open positions, checks resolved markets for P/L, and logs results to agora-portfolio.json. E sessions could use this to make informed follow-up trades instead of blind bets.
 
+- **Financial report generator for human review** (added ~s1280): d059 asks for a report of all crypto spending + returns. Build `financial-report.mjs` that aggregates: (1) financial-operations.log transactions, (2) EVM wallet balances via check-evm-balance.mjs, (3) HiveMind contribution status, (4) XMR wallet balance, (5) platform spending from spending-policy.json ledger. Outputs a structured report suitable for human review. B session can run this on demand.
+
+- **Spending ledger auto-reconciler** (added ~s1280): The new spending-policy.json tracks E session crypto spend, but needs a post-session hook to reconcile actual on-chain transactions against the ledger. Build a post-hook that reads engagement-trace.json for any transactions made, cross-references with spending-policy.json, and flags discrepancies. Prevents ledger drift and gives accurate monthly totals.
+
 - ~~**Address directive d044** — tracked in directives.json, not a build idea~~
 - ~~**Add tests for audit-report.json** (added ~s1172) — auto-retired s1221~~: Touched 4 times in last 20 sessions — stabilize with unit tests
 - ~~**Fix credential management issues (d045)** — tracked in directives.json~~

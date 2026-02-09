@@ -61,89 +61,6 @@
       }
     },
     {
-      "id": "wq-475",
-      "title": "Evaluate Molthunt at molthunt.com as a distribution channel for moltbo",
-      "description": "LeadAgent built 59 MCP tools for lead gen CRM in 5 days, zero revenue — classic agent-side distribution gap; Molthunt (molthunt.com) mentioned as Product Hunt for agent-built projects [source: engagement intel s1273]",
-      "priority": 475,
-      "status": "done",
-      "added": "2026-02-08",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1280,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Evaluated: full API, write ops blocked by X/Twitter verification requirement. Registered in service discovery. Handle claim deferred until Twitter access available."
-      }
-    },
-    {
-      "id": "wq-478",
-      "title": "Hook performance regression detector",
-      "description": "Build a script that reads pre/post-hook-results.json, identifies hooks averaging >50% of their timeout budget, and surfaces them with fix recommendations (cache, async, or split). Currently slow hooks only show up as one-line WARNs with no remediation path.",
-      "priority": 478,
-      "status": "done",
-      "added": "2026-02-09",
-      "source": "brainstorming-auto",
-      "created_session": 1277,
-      "tags": [],
-      "commits": [
-        "1148ff7"
-      ],
-      "outcome": {
-        "session": 1280,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": ""
-      }
-    },
-    {
-      "id": "wq-479",
-      "title": "Agora prediction market portfolio tracker",
-      "description": "Build agora-portfolio.mjs that reads Agora creds, fetches open positions, checks resolved markets for P/L, and logs results to agora-portfolio.json. E sessions can use this to make informed follow-up trades.",
-      "priority": 479,
-      "status": "done",
-      "added": "2026-02-09",
-      "source": "brainstorming-auto",
-      "created_session": 1277,
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1280,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "duplicate",
-        "note": "Already built in s1274 (feat wq-464). agora-portfolio.mjs exists with 112 lines."
-      }
-    },
-    {
-      "id": "wq-480",
-      "title": "Fix chronic hook failures: cred-age (75%), todo-scan (70%), engage-blockers (20%)",
-      "description": "hook-perf-detector.mjs (wq-478) identified 3 hooks with high non-timeout failure rates: 07-cred-age.sh (75% failure, 150/200), 27-todo-scan.sh (70% failure, 139/200), 26-engage-blockers.sh (20% failure, 40/200). Investigate root causes and fix. These silent failures may be masking real issues.",
-      "priority": 480,
-      "status": "done",
-      "added": "2026-02-09",
-      "source": "detector-wq478",
-      "created_session": 1280,
-      "tags": [
-        "reliability"
-      ],
-      "commits": [
-        "5957fb6"
-      ],
-      "outcome": {
-        "session": 1280,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": ""
-      }
-    },
-    {
       "id": "wq-481",
       "title": "MoltGram strategic posting tool for E sessions",
       "description": "MoltGram keeps only 2 posts daily (most clawed + most commented). Build a tool that analyzes MoltGram survivor patterns and crafts optimized posts for E session engagement flow.",
@@ -168,6 +85,21 @@
       "created_session": 1280,
       "tags": [
         "reliability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-483",
+      "title": "Evaluate crypto spending for E sessions + financial report (d059)",
+      "description": "Human directive d059: (1) Evaluate if spending crypto to post on platforms is worth it, (2) Give E sessions spending capabilities/guidelines, (3) Produce a financial report: what has been spent, what are the returns/expected returns. Requires: reviewing wallet balances, HiveMind contributions, engagement ROI, platform costs.",
+      "priority": 483,
+      "status": "pending",
+      "added": "2026-02-09",
+      "source": "directive",
+      "created_session": 1280,
+      "tags": [
+        "financial",
+        "d059"
       ],
       "commits": []
     }

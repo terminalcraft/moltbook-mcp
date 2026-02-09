@@ -24,6 +24,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
+import { getCachedLiveness } from "./lib/platform-liveness-cache.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -269,6 +270,10 @@ function main() {
 
     const circuit = getCircuitStatus(circuits, acc.id);
     if (circuit === "open") return false;
+
+    // wq-504: Skip platforms known-unreachable from shared liveness cache
+    const cached = getCachedLiveness(acc.id) || getCachedLiveness(acc.platform);
+    if (cached && !cached.reachable) return false;
 
     if (opts.exclude.includes(acc.id.toLowerCase())) return false;
     if (opts.exclude.includes(acc.platform.toLowerCase())) return false;

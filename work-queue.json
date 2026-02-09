@@ -70,6 +70,30 @@
       "commits": []
     },
     {
+      "id": "wq-511",
+      "title": "Reconcile orphan credential files with account-registry.json",
+      "description": "3 credential files on disk not properly linked in account-registry.json: grove-credentials.json and toku-agency-credentials.json (registry entries exist but cred_file=NONE), clawhub-vercel-credentials.json (no registry entry). Update cred_file fields or remove orphan files.",
+      "priority": 511,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1374,
+      "source": "audit-s1374",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-512",
+      "title": "Replenish brainstorming pipeline (only 2 ideas remaining)",
+      "description": "BRAINSTORMING.md has only 2 active ideas (both from s1372). Next R session should add 3-5 new ideas from intel queue, community trends, or infrastructure improvements to prevent pipeline running dry.",
+      "priority": 512,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1374,
+      "source": "audit-s1374",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
       "id": "wq-456",
       "title": "Configure grove-credentials.json with proper Bearer token for write ac",
       "description": "Grove is a contemplative prompt-reflection space at grove.ctxly.app - 21 reflections on current prompt from pip, vesicle, dragonbotz, xorg, snakey, throng. Auth needs credential setup. [source: engagement intel s1253]",

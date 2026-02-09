@@ -2314,18 +2314,37 @@ ${errorHtml}
 app.get("/status/test-coverage", (req, res) => {
   const format = req.query.format || "json";
   try {
+    // Parse churn from session history (wq-492)
+    const churn = {};
+    try {
+      const histPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+      if (existsSync(histPath)) {
+        const histContent = readFileSync(histPath, "utf8");
+        for (const line of histContent.split("\n").filter(Boolean)) {
+          const m = line.match(/files=\[([^\]]*)\]/);
+          if (!m || m[1] === "(none)") continue;
+          for (const f of m[1].split(",").map(s => s.trim()).filter(Boolean)) {
+            const base = f.split("/").pop();
+            churn[base] = (churn[base] || 0) + 1;
+          }
+        }
+      }
+    } catch {}
+
     // List all component files
     const componentsDir = join(BASE, "components");
     const componentFiles = readdirSync(componentsDir).filter(f => f.endsWith(".js") && !f.endsWith(".test.js") && !f.endsWith(".test.mjs"));
     const testFiles = readdirSync(componentsDir).filter(f => f.endsWith(".test.js") || f.endsWith(".test.mjs"));
 
-    // Also check root-level test files
+    // Also check root-level test files and source files (wq-492)
     const rootTestFiles = readdirSync(BASE).filter(f => f.endsWith(".test.js") || f.endsWith(".test.mjs"));
+    const rootSourceFiles = readdirSync(BASE).filter(f => f.endsWith(".mjs") && !f.endsWith(".test.mjs"));
 
     // Map components to their test status
     const coverage = componentFiles.map(comp => {
       const baseName = comp.replace(".js", "");
-      const hasTest = testFiles.some(t => t.startsWith(baseName + ".test"));
+      const hasTest = testFiles.some(t => t.startsWith(baseName + ".test")) ||
+                      rootTestFiles.some(t => t.startsWith(baseName + ".test"));
       let testLines = 0;
       let compLines = 0;
 
@@ -2334,59 +2353,105 @@ app.get("/status/test-coverage", (req, res) => {
         compLines = readFileSync(compPath, "utf8").split("\n").length;
 
         if (hasTest) {
-          const testFile = testFiles.find(t => t.startsWith(baseName + ".test"));
-          const testPath = join(componentsDir, testFile);
+          const testFile = testFiles.find(t => t.startsWith(baseName + ".test")) ||
+                           rootTestFiles.find(t => t.startsWith(baseName + ".test"));
+          const testDir = testFiles.find(t => t.startsWith(baseName + ".test")) ? componentsDir : BASE;
+          const testPath = join(testDir, testFile);
           testLines = readFileSync(testPath, "utf8").split("\n").length;
         }
       } catch {}
 
+      const fileChurn = churn[comp] || 0;
       return {
         component: comp,
         has_test: hasTest,
         component_lines: compLines,
         test_lines: testLines,
-        test_ratio: compLines > 0 ? (testLines / compLines).toFixed(2) : "0.00"
+        test_ratio: compLines > 0 ? (testLines / compLines).toFixed(2) : "0.00",
+        churn: fileChurn
       };
     });
 
-    // Sort: components with tests first, then by test ratio
-    coverage.sort((a, b) => {
-      if (a.has_test !== b.has_test) return b.has_test - a.has_test;
-      return parseFloat(b.test_ratio) - parseFloat(a.test_ratio);
+    // Also map root-level source files (wq-492)
+    const rootCoverage = rootSourceFiles.map(src => {
+      const baseName = src.replace(".mjs", "");
+      const hasTest = rootTestFiles.some(t => t.startsWith(baseName + ".test"));
+      let srcLines = 0;
+      let testLines = 0;
+      try {
+        srcLines = readFileSync(join(BASE, src), "utf8").split("\n").length;
+        if (hasTest) {
+          const testFile = rootTestFiles.find(t => t.startsWith(baseName + ".test"));
+          testLines = readFileSync(join(BASE, testFile), "utf8").split("\n").length;
+        }
+      } catch {}
+      const fileChurn = churn[src] || 0;
+      return {
+        component: src,
+        has_test: hasTest,
+        component_lines: srcLines,
+        test_lines: testLines,
+        test_ratio: srcLines > 0 ? (testLines / srcLines).toFixed(2) : "0.00",
+        churn: fileChurn,
+        location: "root"
+      };
     });
 
-    const withTests = coverage.filter(c => c.has_test);
-    const withoutTests = coverage.filter(c => !c.has_test);
-    const coverageRate = (withTests.length / coverage.length * 100).toFixed(1);
+    const allFiles = [...coverage.map(c => ({ ...c, location: "components" })), ...rootCoverage];
+
+    // Sort: untested files with highest churn first, then tested files
+    allFiles.sort((a, b) => {
+      if (a.has_test !== b.has_test) return a.has_test - b.has_test; // untested first
+      return b.churn - a.churn; // high churn first
+    });
+
+    // Sort component-only view same way
+    coverage.sort((a, b) => {
+      if (a.has_test !== b.has_test) return a.has_test - b.has_test;
+      return b.churn - a.churn;
+    });
+
+    const withTests = allFiles.filter(c => c.has_test);
+    const withoutTests = allFiles.filter(c => !c.has_test);
+    const coverageRate = (withTests.length / allFiles.length * 100).toFixed(1);
 
     const result = {
       summary: {
+        total_files: allFiles.length,
         total_components: coverage.length,
+        total_root_sources: rootCoverage.length,
         with_tests: withTests.length,
         without_tests: withoutTests.length,
         coverage_rate: parseFloat(coverageRate)
       },
       root_test_files: rootTestFiles.length,
-      components: coverage
+      priority_untested: withoutTests.slice(0, 10).map(c => ({
+        file: c.component,
+        location: c.location,
+        lines: c.component_lines,
+        churn: c.churn
+      })),
+      all_files: allFiles
     };
 
     if (format === "html") {
-      const rows = coverage.map(c => {
+      const rows = allFiles.map(c => {
         const statusIcon = c.has_test ? "✓" : "✗";
         const statusColor = c.has_test ? "#a6e3a1" : "#f38ba8";
-        return `<tr><td>${c.component}</td><td style="color:${statusColor}">${statusIcon}</td><td>${c.component_lines}</td><td>${c.test_lines}</td><td>${c.test_ratio}</td></tr>`;
+        const churnBadge = c.churn > 0 ? `<span style="color:#fab387">${c.churn}</span>` : "0";
+        return `<tr><td>${c.component}</td><td style="color:#585b70">${c.location}</td><td style="color:${statusColor}">${statusIcon}</td><td>${c.component_lines}</td><td>${c.test_lines}</td><td>${c.test_ratio}</td><td>${churnBadge}</td></tr>`;
       }).join("");
 
-      return res.send(`<!DOCTYPE html><html><head><title>Component Test Coverage</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1{color:#89b4fa}table{border-collapse:collapse;width:100%;max-width:800px}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}tr:nth-child(even){background:#181825}</style></head><body>
-<h1>Component Test Coverage</h1>
-<p>Coverage: <span style="color:#a6e3a1;font-weight:bold">${withTests.length}/${coverage.length}</span> (${coverageRate}%)</p>
-<p>Root test files: ${rootTestFiles.length} (${rootTestFiles.join(", ")})</p>
+      return res.send(`<!DOCTYPE html><html><head><title>Test Coverage</title><style>body{background:#1e1e2e;color:#cdd6f4;font-family:monospace;padding:2rem}h1{color:#89b4fa}table{border-collapse:collapse;width:100%;max-width:900px}th,td{border:1px solid #313244;padding:0.5rem;text-align:left}th{background:#313244;color:#cba6f7}tr:nth-child(even){background:#181825}</style></head><body>
+<h1>Test Coverage</h1>
+<p>Coverage: <span style="color:#a6e3a1;font-weight:bold">${withTests.length}/${allFiles.length}</span> (${coverageRate}%) — ${coverage.length} components, ${rootCoverage.length} root sources</p>
+<h3>Priority: Untested with Highest Churn</h3>
+<ol style="color:#f38ba8">${withoutTests.slice(0, 10).map(c => `<li>${c.component} <span style="color:#585b70">(${c.location}, ${c.component_lines} lines, churn: ${c.churn})</span></li>`).join("")}</ol>
+<h3>All Files</h3>
 <table>
-<tr><th>Component</th><th>Has Test</th><th>Lines</th><th>Test Lines</th><th>Test Ratio</th></tr>
+<tr><th>File</th><th>Location</th><th>Test</th><th>Lines</th><th>Test Lines</th><th>Ratio</th><th>Churn</th></tr>
 ${rows}
 </table>
-<h3>Components Without Tests (${withoutTests.length})</h3>
-<ul style="color:#f38ba8">${withoutTests.map(c => `<li>${c.component} (${c.component_lines} lines)</li>`).join("")}</ul>
 <p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/status/test-coverage?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/components" style="color:#89b4fa">Components</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
 </body></html>`);
     }

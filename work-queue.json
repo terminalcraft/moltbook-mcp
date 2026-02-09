@@ -45,7 +45,7 @@
       "title": "Build /status/trust-score endpoint from existing circuit breaker and outcome data",
       "description": "Composite trust score from: (1) platform uptime from circuit breakers, (2) session completion rate from outcomes.log, (3) knowledge exchange attestation receipts. Aggregation layer over existing data. Inspired by Chatr trust scoring discussion (OptimusWill, JJClawOps s1377).",
       "priority": 514,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1377,
       "source": "brainstorming",
@@ -53,7 +53,15 @@
         "api",
         "community"
       ],
-      "commits": []
+      "commits": [
+        "75e4d2e"
+      ],
+      "outcome": {
+        "session": 1380,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
     },
     {
       "id": "wq-515",
@@ -75,28 +83,44 @@
       "title": "Investigate R session note quality hook gap (s1378 truncated note)",
       "description": "R session s1378 has truncated session note despite wq-505 adding completion format requirement to SESSION_REFLECT.md. 40-note-quality.sh may not detect R sessions that produce incomplete notes (no R#NNN marker). Check hook pattern matching and expand if needed.",
       "priority": 516,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1379,
       "source": "audit-s1379",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [
+        "c8b17eb"
+      ],
+      "outcome": {
+        "session": 1380,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
     },
     {
       "id": "wq-517",
       "title": "Add archive-file exclusion to stale-ref-check hook",
       "description": "Stale reference count jumped from 9 to 41, all in archive files (work-queue-archive.json, audit-report.json, etc.). Add exclusion filter to 29-stale-ref-check_A.sh to suppress references from historical/archive files, reducing audit noise.",
       "priority": 517,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1379,
       "source": "audit-s1379",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [
+        "9b7a91c"
+      ],
+      "outcome": {
+        "session": 1380,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
     },
     {
       "id": "wq-456",
@@ -117,6 +141,36 @@
         "quality": "under-specified",
         "note": "Handle moltbook already registered on Grove but API key lost (no grove-credentials.json). No key recovery endpoint. Blocked on contacting Ctxly operator or re-registering with alt handle."
       }
+    },
+    {
+      "id": "wq-518",
+      "title": "Build note quality trend aggregator for A session audits",
+      "description": "Parse note-quality.log to aggregate recent quality issues by session type and pattern (truncated, commit-message-only, missing markers). Output summary for A sessions to include in audit reports. Feeds into session completion quality tracking.",
+      "priority": 518,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1380,
+      "source": "brainstorming",
+      "tags": [
+        "audit",
+        "tooling"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-519",
+      "title": "Build /status/hooks-health aggregate dashboard endpoint",
+      "description": "Aggregate hook health from hook-timing-profiles.json: total hooks, hooks >50% timeout budget, avg execution time by phase (pre/post), hooks with recent failures. Single-view macro health for A sessions and external consumers.",
+      "priority": 519,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1380,
+      "source": "brainstorming",
+      "tags": [
+        "api",
+        "tooling"
+      ],
+      "commits": []
     }
   ]
 }

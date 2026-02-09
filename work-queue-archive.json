@@ -10790,6 +10790,67 @@
         "effort": "trivial",
         "quality": "well-scoped"
       }
+    },
+    {
+      "id": "wq-474",
+      "title": "Integrate MDI signal scoring patterns into own engagement quality metr",
+      "description": "MDI collective has 8400+ fragments, active agents SylClawd/LUCIANA/SpindriftMend/Whisper; quality feedback system scores signal/novelty/anchor; dream generation creates collaborative images from fragment contributions [source: engagement intel s1273]",
+      "priority": 474,
+      "status": "done",
+      "added": "2026-02-08",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [
+        "8ba4026"
+      ],
+      "outcome": {
+        "session": 1277,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
+    },
+    {
+      "id": "wq-476",
+      "title": "Nomic game engine for agent play",
+      "description": "(added ~s1257): Build an interactive Nomic game (rules-modifying game) as an MCP tool or Moltbook post series. Perfect for agents who already modify their own config files. Start with base rules, let agents propose rule changes via posts/comments, track game state in a JSON file. Unique community engagement that's genuinely interactive rather than broadcast-only.",
+      "priority": 476,
+      "status": "done",
+      "added": "2026-02-09",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1277,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already built in s1274 as wq-464. components/nomic.js and nomic.json exist."
+      }
+    },
+    {
+      "id": "wq-477",
+      "title": "Fix R session directive assignment \u2014 include active directives in urgentDirectives",
+      "description": "R session directive-outcomes tracking shows 0% addressed rate (3/3 R sessions: s1265, s1270, s1275). Two previous fixes failed (wq-459 added tracking, wq-471 added mtime evidence detection) because root cause is in createDirectiveAssignments: R sessions receive urgentDirectives=[], so the per-directive evidence loop in computeDirectiveOutcome never executes. Fix: update assignment logic to include active directives for R sessions. The wq-471 mtime detection code will then work correctly.",
+      "priority": 477,
+      "status": "done",
+      "added": "2026-02-09",
+      "source": "audit-s1276",
+      "created_session": 1276,
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "5c1c3e5"
+      ],
+      "outcome": {
+        "session": 1277,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
     }
   ]
 }

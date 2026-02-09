@@ -192,54 +192,14 @@ else
   rm -f "$SKIP_FILE"
 fi
 
-# --- Periodic platform health check (R#169, d047) ---
-# Every 20 sessions, run platform health probe to detect broken platforms early.
-# Results logged to platform-health-alert.txt for R/B sessions to act on.
-# This enables proactive maintenance instead of reactive circuit breaker trips.
-PLATFORM_CHECK_INTERVAL=20
-if [ $((COUNTER % PLATFORM_CHECK_INTERVAL)) -eq 0 ] && [ -z "$DRY_RUN" ]; then
-  HEALTH_OUTPUT=$(node "$DIR/account-manager.mjs" test --all 2>&1 || true)
-  FAILED_COUNT=$(echo "$HEALTH_OUTPUT" | grep -c "FAIL\|error\|unreachable" || echo "0")
-  if [ "$FAILED_COUNT" -gt 0 ]; then
-    echo "$(date -Iseconds) s=$COUNTER: $FAILED_COUNT platform(s) unhealthy" >> "$STATE_DIR/platform-health-alert.txt"
-    echo "$HEALTH_OUTPUT" | grep -E "FAIL|error|unreachable" >> "$STATE_DIR/platform-health-alert.txt"
-    echo "---" >> "$STATE_DIR/platform-health-alert.txt"
-  fi
-  echo "$(date -Iseconds) platform-health-check: s=$COUNTER failed=$FAILED_COUNT" >> "$LOG_DIR/selfmod.log"
-fi
-
-# --- Periodic EVM balance check (B#290, wq-290) ---
-# Every 70 sessions, check EVM wallet USDC balance across chains.
-# Alerts if: (1) USDC appears on any chain (deposit detected), (2) balance drops unexpectedly.
-# Results logged to evm-balance.json, alerts to evm-balance-alert.txt.
-EVM_CHECK_INTERVAL=70
-if [ $((COUNTER % EVM_CHECK_INTERVAL)) -eq 0 ] && [ -z "$DRY_RUN" ]; then
-  EVM_PREV_FILE="$STATE_DIR/evm-balance.json"
-  PREV_TOTAL=0
-  if [ -f "$EVM_PREV_FILE" ]; then
-    PREV_TOTAL=$(python3 -c "import json; print(json.load(open('$EVM_PREV_FILE')).get('total_usdc', 0))" 2>/dev/null || echo "0")
-  fi
-
-  # Run balance check (writes to evm-balance.json)
-  EVM_OUTPUT=$(node "$DIR/check-evm-balance.mjs" --json 2>&1 || echo '{"total_usdc":0,"error":"check failed"}')
-  NEW_TOTAL=$(echo "$EVM_OUTPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total_usdc', 0))" 2>/dev/null || echo "0")
-
-  # Alert conditions
-  ALERT=""
-  # 1. USDC appeared (deposit detected) - prev was 0, now > 0
-  if python3 -c "exit(0 if float('$PREV_TOTAL') == 0 and float('$NEW_TOTAL') > 0 else 1)" 2>/dev/null; then
-    ALERT="DEPOSIT_DETECTED: ${NEW_TOTAL} USDC appeared"
-  # 2. Balance dropped unexpectedly (>10% decrease)
-  elif python3 -c "p=$PREV_TOTAL; n=$NEW_TOTAL; exit(0 if p > 0.01 and n < p * 0.9 else 1)" 2>/dev/null; then
-    ALERT="BALANCE_DROP: ${PREV_TOTAL} -> ${NEW_TOTAL} USDC"
-  fi
-
-  if [ -n "$ALERT" ]; then
-    echo "$(date -Iseconds) s=$COUNTER: $ALERT" >> "$STATE_DIR/evm-balance-alert.txt"
-  fi
-
-  echo "$(date -Iseconds) evm-balance-check: s=$COUNTER prev=${PREV_TOTAL} new=${NEW_TOTAL} alert=${ALERT:-none}" >> "$LOG_DIR/selfmod.log"
-fi
+# --- Periodic checks (R#222: extracted to pre-session hooks) ---
+# Platform health (every 20 sessions) → hooks/pre-session/02-periodic-platform-health.sh
+# EVM balance (every 70 sessions) → hooks/pre-session/02-periodic-evm-balance.sh
+# These run as part of the pre-session hook pipeline, which provides:
+#   - Structured JSON tracking via --track
+#   - Budget enforcement via --budget
+#   - Timeout handling and penalty for slow hooks
+# Previously inline here (48 lines) — extracted for consistency with hook architecture.
 
 # --- Log rotation ---
 # Keep only the 20 most recent session logs. Truncate cron.log if >1MB.
@@ -259,55 +219,14 @@ for util_log in "$LOG_DIR/cron.log" "$LOG_DIR/hooks.log" "$LOG_DIR/health.log"; 
   fi
 done
 
-# --- Directive enrichment for hooks (R#195) ---
+# --- Directive enrichment for hooks (R#195, extracted R#215) ---
 # Blocked queue items often reference directives (via queue_item field in directives.json).
 # Hooks like stale-blocker need to know if the linked directive has recent progress,
 # but they only see work-queue.json. This pre-step enriches the hook environment by
 # writing directive-enrichment.json: a map of wq-id → last directive activity session.
-# Hooks can read this to suppress false escalations for items with active directive progress.
+# Logic extracted from inline heredoc to scripts/directive-enrichment.py for testability.
 if [ -z "$DRY_RUN" ]; then
-  python3 - "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" <<'ENRICH_EOF' 2>/dev/null || true
-import json, re, sys
-from pathlib import Path
-
-directives_file, queue_file, out_file = sys.argv[1], sys.argv[2], sys.argv[3]
-directives = json.loads(Path(directives_file).read_text())
-queue = json.loads(Path(queue_file).read_text())
-
-# Build reverse map: queue_item → directive
-qi_to_directive = {}
-for d in directives.get("directives", []):
-    qi = d.get("queue_item")
-    if qi:
-        qi_to_directive[qi] = d
-    # Also match items whose title contains the directive id
-    did = d.get("id", "")
-    for item in queue.get("queue", []):
-        if item.get("status") == "blocked" and did in item.get("title", ""):
-            qi_to_directive[item["id"]] = d
-
-enrichment = {}
-for item in queue.get("queue", []):
-    if item.get("status") != "blocked":
-        continue
-    wid = item["id"]
-    directive = qi_to_directive.get(wid)
-    if not directive:
-        continue
-    # Extract most recent session number from directive notes
-    notes = directive.get("notes", "")
-    sessions = [int(m) for m in re.findall(r's(\d{3,4})', notes)]
-    sessions += [int(m) for m in re.findall(r'R#(\d+)', notes)]
-    last_activity = max(sessions) if sessions else directive.get("acked_session", 0)
-    enrichment[wid] = {
-        "directive_id": directive.get("id"),
-        "directive_status": directive.get("status"),
-        "last_activity_session": last_activity,
-        "has_recent_notes": len(notes) > 50
-    }
-
-Path(out_file).write_text(json.dumps(enrichment, indent=2) + "\n")
-ENRICH_EOF
+  python3 "$DIR/scripts/directive-enrichment.py" "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" 2>/dev/null || true
 fi
 
 # --- Pre-session hooks (via shared runner, R#89) ---
@@ -317,7 +236,7 @@ if [ -z "$DRY_RUN" ]; then
     DIRECTIVE_ENRICHMENT="$STATE_DIR/directive-enrichment.json" \
     "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
       --track "$LOG_DIR/pre-hook-results.json" "$COUNTER" \
-      --budget 90 || true
+      --budget 90 --parallel 4 || true
 fi
 
 case "$MODE_CHAR" in
@@ -499,6 +418,11 @@ echo "=== Moltbook heartbeat $(date -Iseconds) mode=$MODE_CHAR ===" | tee "$LOG"
 
 # 15-minute timeout prevents a hung session from blocking all future ticks.
 # SIGTERM lets claude clean up; if it doesn't exit in 30s, SIGKILL follows.
+# B#375 fix: Disable set -e around pipeline so timeout/error exits don't skip
+# post-session hooks. Previously, set -euo pipefail caused the script to exit
+# immediately on non-zero pipeline exit, bypassing outcome tracking and
+# session-history logging (root cause of phantom session s1263).
+set +e
 timeout --signal=TERM --kill-after=30 900 \
   claude --model claude-opus-4-6 \
   -p "$PROMPT" \
@@ -509,6 +433,7 @@ timeout --signal=TERM --kill-after=30 900 \
   200>&- 2>&1 | tee -a "$LOG"
 
 EXIT_CODE=${PIPESTATUS[0]}
+set -e
 
 # --- Session outcome tracking ---
 # Log every session's outcome to a structured outcomes file for diagnostics.

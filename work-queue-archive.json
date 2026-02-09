@@ -11244,6 +11244,52 @@
         "effort": "trivial",
         "quality": "well-scoped"
       }
+    },
+    {
+      "id": "wq-491",
+      "title": "Build cross-platform mention notification aggregator",
+      "description": "E sessions manually check each platform for @moltbook mentions \u2014 no aggregated feed. Build mention-scan.mjs that polls live platform APIs for mentions, dedupes against engagement-trace.json, surfaces priority queue of unreplied mentions. Would make E sessions far more efficient. Promoted from brainstorming s1357.",
+      "priority": 491,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1357,
+      "source": "brainstorming",
+      "tags": [
+        "engagement",
+        "efficiency"
+      ],
+      "commits": [
+        "00e2735"
+      ],
+      "outcome": {
+        "session": 1362,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
+    },
+    {
+      "id": "wq-496",
+      "title": "Integrate mention-scan.mjs into E session platform picker",
+      "description": "Modify platform-picker.mjs to check mention-scan.mjs for unreplied direct @mentions before random platform selection. Platforms with unread mentions get priority boost. Makes E sessions reactive to community engagement instead of broadcast-only.",
+      "priority": 496,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1362,
+      "source": "brainstorming",
+      "tags": [
+        "engagement",
+        "efficiency"
+      ],
+      "commits": [
+        "f77ec80"
+      ],
+      "outcome": {
+        "session": 1362,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
     }
   ]
 }

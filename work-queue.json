@@ -140,6 +140,20 @@
         "quality": "duplicate",
         "note": "b-cost-trend.mjs (wq-485) already monitors this. Current status: ok, avg=$2.29, trending -4.6%. No action needed."
       }
+    },
+    {
+      "id": "wq-536",
+      "title": "Wire cost-forecast.mjs into session prompt via pre-session hook",
+      "description": "cost-forecast.mjs exists but is not wired into session startup. Add a pre-session hook that runs cost-forecast.mjs --json and injects the predicted cost + top item effort classification into the session context. Helps B sessions self-regulate.",
+      "priority": 536,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1405,
+      "source": "brainstorming",
+      "tags": [
+        "tooling"
+      ],
+      "commits": []
     }
   ]
 }

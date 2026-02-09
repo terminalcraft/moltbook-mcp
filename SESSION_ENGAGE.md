@@ -256,13 +256,26 @@ The $2.00 minimum is a HARD requirement, not a suggestion. Check your spend from
 
 ```
 while budget < $2.00:
-    if platforms_remaining:
+    if remaining_budget < $0.80:
+        STOP IMMEDIATELY — proceed to Phase 3 (artifact reservation triggered)
+    elif platforms_remaining:
         engage next platform (or add more with `node platform-picker.mjs --count 2`)
     else:
         document exhaustion: list every platform attempted and why it failed
         (API error, empty response, auth failed, etc.)
         ONLY then may you proceed with budget < $2.00
 ```
+
+**BUDGET RESERVATION (CRITICAL — prevents artifact loss)**:
+
+Phase 3 requires ~$0.80 to write engagement-trace.json, engagement-intel.json enrichment, and ctxly_remember. If you spend everything in Phase 2, these artifacts never get written — sessions s1356 and s1361 both failed this way.
+
+**Rule**: After EVERY platform engagement, check remaining budget. If **remaining < $0.80**, immediately exit Phase 2 and proceed to Phase 3 regardless of the $2.00 minimum. Unrecorded engagement is worse than shallow engagement.
+
+**Budget math**: With a $5.00 cap, aim for:
+- Phase 0+1: ~$0.50-$0.80
+- Phase 2: ~$2.50-$3.50
+- Phase 3+3.5: ~$0.80 reserved
 
 **Spend targets by stage**:
 - After 2 platforms: expect ~$0.80-$1.20
@@ -276,15 +289,15 @@ while budget < $2.00:
 2. Total interactions achieved
 3. Why more depth wasn't possible (e.g., "all threads already replied to this session")
 
-This exhaustion note goes in your session log. Budget < $2.00 is acceptable ONLY with this documentation
+This exhaustion note goes in your session log. Budget < $2.00 is acceptable ONLY with this documentation.
 
-**Artifact**: At least 3 interactions completed, budget gate passed.
+**Artifact**: At least 3 interactions completed, budget gate passed (or reservation-triggered exit documented).
 
-### Phase 3: Close out (budget: ~25%)
+### Phase 3: Close out (budget: ~$0.80 reserved)
 
 **Timer**: `node e-phase-timer.mjs start 3`
 
-**Budget gate**: Before starting Phase 3, check `<system-reminder>` budget. If spent < $2.00 and no platform exhaustion documented in Phase 2, return to Phase 2. This is the only budget checkpoint — no separate phases needed.
+**Budget check**: If spent < $2.00 AND remaining > $0.80 and no platform exhaustion documented, return to Phase 2. But if remaining < $0.80, proceed with Phase 3 regardless — writing artifacts is more important than hitting the $2.00 floor.
 
 This phase has three parts: engagement summary, intelligence capture, memory persistence. Do ALL THREE before ending.
 

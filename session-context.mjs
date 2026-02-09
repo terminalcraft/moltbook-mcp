@@ -20,11 +20,61 @@ const MODE = process.argv[2] || 'B';
 const COUNTER = parseInt(process.argv[3] || '0', 10);
 // B_FOCUS arg kept for backward compat but no longer used for task selection (R#49).
 
+// R#223: Lazy file cache — eliminates redundant readFileSync calls across sections.
+// session-context.mjs previously had 35 readFileSync calls with ~15 redundant reads:
+//   session-history.txt (3x), BRAINSTORMING.md (4x), directives.json (2x),
+//   engagement-trace.json (3x), engagement-trace-archive.json (3x),
+//   engagement-intel-archive.json (3x), engagement-intel.json (2x),
+//   account-registry.json (2x).
+// FileCache reads each file at most once, caching both raw text and parsed JSON.
+// Benefits: fewer I/O ops, no inconsistency between reads, simpler section code.
+// Note: sections that WRITE to files (BRAINSTORMING.md, work-queue.json, intel files)
+// must call fc.invalidate(path) after writes so subsequent reads see updated content.
+const fc = {
+  _text: new Map(),
+  _json: new Map(),
+  /** Read file as text (cached). Returns empty string on error. */
+  text(path) {
+    if (this._text.has(path)) return this._text.get(path);
+    let content = '';
+    try { content = readFileSync(path, 'utf8'); } catch { /* missing file */ }
+    this._text.set(path, content);
+    return content;
+  },
+  /** Read file as parsed JSON (cached). Returns null on error. */
+  json(path) {
+    if (this._json.has(path)) return this._json.get(path);
+    const raw = this.text(path);
+    let parsed = null;
+    try { if (raw) parsed = JSON.parse(raw); } catch { /* parse error */ }
+    this._json.set(path, parsed);
+    return parsed;
+  },
+  /** Invalidate cache for a path (call after writing to that file). */
+  invalidate(path) {
+    this._text.delete(path);
+    this._json.delete(path);
+  }
+};
+
 function readJSON(path) {
-  try { return JSON.parse(readFileSync(path, 'utf8')); } catch { return null; }
+  return fc.json(path);
 }
 
 const result = {};
+
+// R#223: Commonly-used file paths (used by FileCache and multiple sections)
+const PATHS = {
+  history: join(STATE_DIR, 'session-history.txt'),
+  brainstorming: join(DIR, 'BRAINSTORMING.md'),
+  directives: join(DIR, 'directives.json'),
+  intel: join(STATE_DIR, 'engagement-intel.json'),
+  intelArchive: join(STATE_DIR, 'engagement-intel-archive.json'),
+  trace: join(STATE_DIR, 'engagement-trace.json'),
+  traceArchive: join(STATE_DIR, 'engagement-trace-archive.json'),
+  registry: join(DIR, 'account-registry.json'),
+  services: join(DIR, 'services.json'),
+};
 
 // B#340: Stop words for keyword-based dedup. Used by both self-dedup and isTitleDupe.
 const STOP_WORDS = new Set(['a','an','the','for','to','of','in','on','and','or','add','fix','build','create','test','tests','new','with','from']);
@@ -111,10 +161,9 @@ markTiming('queue_context');
 // Count consecutive recent B sessions with no commits (build=(none)).
 // Used by mode-transform hook to detect when B sessions are stalling.
 {
-  const histPath = join(STATE_DIR, 'session-history.txt');
   let bStallCount = 0;
-  if (existsSync(histPath)) {
-    const hist = readFileSync(histPath, 'utf8');
+  {
+    const hist = fc.text(PATHS.history);
     // Extract B sessions in order (oldest to newest in file)
     const bSessions = [...hist.matchAll(/mode=B .* build=([^ ]+)/g)];
     // Count consecutive stalls from the end (most recent)
@@ -127,7 +176,6 @@ markTiming('queue_context');
     }
   }
   result.b_stall_count = bStallCount;
-}
 
 // Top task for B sessions — first pending by priority, with complexity-aware selection (wq-017).
 // Items may have complexity: "S" | "M" | "L". Default is "M" if unset.
@@ -266,9 +314,8 @@ if (MODE === 'B' && pending.length > 0) {
   }
   result.wq_item = taskText;
 } else if (MODE === 'B' && pending.length === 0) {
-  const bsPath = join(DIR, 'BRAINSTORMING.md');
-  if (existsSync(bsPath)) {
-    const bs = readFileSync(bsPath, 'utf8');
+  {
+    const bs = fc.text(PATHS.brainstorming);
     const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
     // Filter out ideas already in the work queue (by fuzzy title match).
     // Prevents fallback from assigning work that's already queued/blocked/done.
@@ -316,9 +363,8 @@ markTiming('blocker_check');
 if (MODE === 'B' || MODE === 'R') {
   const currentPending = queueCtx.pendingCount;
   if (currentPending < 3) {
-    const bsPath = join(DIR, 'BRAINSTORMING.md');
-    if (existsSync(bsPath)) {
-      const bs = readFileSync(bsPath, 'utf8');
+    {
+      const bs = fc.text(PATHS.brainstorming);
       const ideas = [...bs.matchAll(/^- \*\*(.+?)\*\*:?\s*(.*)/gm)];
       const fresh = ideas.filter(idea => !isTitleDupe(idea[1].trim(), queueCtx.titles));
       // R#72/R#81: Dynamic buffer scales with queue deficit.
@@ -351,7 +397,8 @@ if (MODE === 'B' || MODE === 'R') {
           updated = updated.replace(line + '\n', '');
         }
         if (updated !== bs) {
-          writeFileSync(bsPath, updated);
+          writeFileSync(PATHS.brainstorming, updated);
+          fc.invalidate(PATHS.brainstorming); // R#223: reset cache after write
         }
       }
     }
@@ -467,11 +514,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
   // Instead, parse recent session-history.txt to extract "feat:" commits and generate
   // follow-up seed ideas (test/harden/extend patterns). This shifts replenishment from
   // expensive LLM generation to cheap deterministic pre-computation.
-  const bsPath = join(DIR, 'BRAINSTORMING.md');
-  let bsContent = '';
-  if (existsSync(bsPath)) {
-    bsContent = readFileSync(bsPath, 'utf8');
-  }
+  let bsContent = fc.text(PATHS.brainstorming);
   let bsCount = (bsContent.match(/^- \*\*/gm) || []).length;
 
   if (bsCount < 3) {
@@ -580,7 +623,8 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       } else {
         bsContent += '\n' + marker + '\n\n' + seeds.join('\n') + '\n';
       }
-      writeFileSync(bsPath, bsContent);
+      writeFileSync(PATHS.brainstorming, bsContent);
+      fc.invalidate(PATHS.brainstorming); // R#223: reset cache after write
       result.brainstorm_seeded = seeds.length;
     }
   }
@@ -590,7 +634,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
   // with 2 existing ideas + 1 new seed would report bsCount=1 instead of 3. This caused
   // pipeline health snapshots to underreport, triggering false WARN alerts and unnecessary
   // re-seeding in subsequent sessions.
-  const finalBs = existsSync(bsPath) ? readFileSync(bsPath, 'utf8') : '';
+  const finalBs = fc.text(PATHS.brainstorming);
   result.brainstorm_count = (finalBs.match(/^- \*\*/gm) || []).length;
 
   // Intel inbox: count + pre-categorized digest for R session prompt injection.

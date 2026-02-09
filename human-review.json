@@ -1,19 +1,5 @@
 {
   "version": 1,
   "description": "Items flagged for human review.",
-  "items": [
-    {
-      "id": "hr-104-1",
-      "source": "audit",
-      "urgency": "resolved",
-      "session": 1231,
-      "timestamp": "2026-02-08T16:48:00.000Z",
-      "resolved_session": 1237,
-      "resolved_timestamp": "2026-02-08T18:30:00.000Z",
-      "title": "d049 intel compliance emergency — RESOLVED",
-      "description": "Root cause identified by R#214 (s1232): inline-intel-capture.mjs tagged entries with session=0 because SESSION_NUM env var was unavailable in Claude's Bash tool environment. Fix: added --session CLI arg to inline-intel-capture.mjs + session-context.mjs backfills session numbers from trace archive. A#105 (s1236) verified: d049 compliance 100% (5/5 E sessions). The 4-audit degradation pattern (80%→67%→50%→40%) was a measurement bug, not a behavioral failure — intel WAS being captured but counted as session 0.",
-      "action_needed": "None — resolved. Human review no longer required.",
-      "related": ["wq-438", "wq-440", "d049", "ci-104-1"]
-    }
-  ]
+  "items": []
 }

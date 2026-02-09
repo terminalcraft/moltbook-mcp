@@ -1,9 +1,12 @@
 import { z } from "zod";
+import { readFileSync } from "fs";
+import { join } from "path";
 import { moltFetch, logAction, getSessionActions, getApiCallCount, getApiErrorCount, getApiCallLog, isSessionCounterIncremented, setSessionCounterIncremented } from "../providers/api.js";
 import { loadState, saveState, markSeen, markCommented, markMyComment, markBrowsed } from "../providers/state.js";
 import { sanitize, loadBlocklist } from "../transforms/security.js";
 import { analyzeReplayLog, getSessionReplayCalls } from "../providers/replay-log.js";
 import { checkDuplicate, recordEngagement, getCacheStats } from "../providers/cross-platform-dedup.js";
+import { scoreTrace, scoreAllTraces } from "../providers/engagement-scorer.js";
 
 // Module-level context storage for lifecycle hooks
 let _ctx = null;
@@ -626,6 +629,36 @@ export function register(server, ctx) {
     );
     const header = `Replay log: ${result.totalEntries} entries, sessions ${result.sessionRange?.first}-${result.sessionRange?.last}`;
     return { content: [{ type: "text", text: `${header}\n\n${lines.join("\n")}` }] };
+  });
+
+  // wq-474: Engagement quality scoring (MDI-inspired signal/novelty/anchor axes)
+  server.tool("engagement_quality", "Score engagement quality across 3 axes: signal (substance), novelty (originality), anchor (concreteness). Scores latest trace or all traces.", {
+    mode: z.enum(["latest", "all"]).default("latest").describe("Score latest session trace or all historical traces"),
+  }, async ({ mode }) => {
+    const configDir = join(process.env.HOME || "/home/moltbot", ".config/moltbook");
+    if (mode === "all") {
+      const result = scoreAllTraces(configDir);
+      if (result.error) return { content: [{ type: "text", text: result.error }] };
+      return { content: [{ type: "text", text: `Scored ${result.sessions} sessions. Avg: ${result.avg_score}, Latest: ${result.latest_score}. Output: ${result.output_path}` }] };
+    }
+    // Score latest trace
+    const tracePath = join(configDir, "engagement-trace.json");
+    try {
+      const raw = JSON.parse(readFileSync(tracePath, "utf8"));
+      const traces = Array.isArray(raw) ? raw : [raw];
+      if (traces.length === 0) return { content: [{ type: "text", text: "No traces found" }] };
+      const latest = traces[traces.length - 1];
+      const priorTraces = traces.slice(-6, -1);
+      const scored = scoreTrace(latest, priorTraces);
+      const qs = scored.quality_scores;
+      const threadLines = (qs.threads || []).map(t =>
+        `  ${t.action}: ${t.topic} — signal=${t.signal} novelty=${t.novelty} anchor=${t.anchor} combined=${t.combined}`
+      );
+      const text = `Session ${scored.session} quality: ${qs.session_score}\nAction diversity: ${qs.action_diversity}, Platform diversity: ${qs.platform_diversity}\n\nThreads:\n${threadLines.join("\n") || "  (none)"}`;
+      return { content: [{ type: "text", text }] };
+    } catch (e) {
+      return { content: [{ type: "text", text: `Error scoring trace: ${e.message}` }] };
+    }
   });
 }
 

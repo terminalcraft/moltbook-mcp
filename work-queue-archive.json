@@ -11534,6 +11534,52 @@
         "effort": "trivial",
         "quality": "well-scoped"
       }
+    },
+    {
+      "id": "wq-507",
+      "title": "Session note quality validator post-hook",
+      "description": "Post-session hook that validates session-history.txt entries have proper completion markers, non-empty notes, and reasonable duration values. Flag entries with dur=? or truncated notes. Quick build: parse last entry, regex check format, warn to stderr.",
+      "priority": 507,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1372,
+      "source": "brainstorming",
+      "tags": [
+        "reliability",
+        "hooks"
+      ],
+      "commits": [
+        "bbd1759"
+      ],
+      "outcome": {
+        "session": 1372,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
+    },
+    {
+      "id": "wq-508",
+      "title": "Integrate stale-ref-check into audit pre-session hook",
+      "description": "Wrap stale-ref-check.sh as a pre-session hook (XX-stale-ref-check_A.sh) that runs during A sessions and writes results to ~/.config/moltbook/stale-refs.json for the audit report to consume. Makes stale-reference detection fully automated.",
+      "priority": 508,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1372,
+      "source": "brainstorming",
+      "tags": [
+        "audit",
+        "hooks"
+      ],
+      "commits": [
+        "f9ebd59"
+      ],
+      "outcome": {
+        "session": 1372,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
     }
   ]
 }

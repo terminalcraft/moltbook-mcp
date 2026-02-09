@@ -127,6 +127,30 @@
         "effort": "trivial",
         "quality": "well-scoped"
       }
+    },
+    {
+      "id": "wq-478",
+      "title": "Hook performance regression detector",
+      "description": "Build a script that reads pre/post-hook-results.json, identifies hooks averaging >50% of their timeout budget, and surfaces them with fix recommendations (cache, async, or split). Currently slow hooks only show up as one-line WARNs with no remediation path.",
+      "priority": 478,
+      "status": "pending",
+      "added": "2026-02-09",
+      "source": "brainstorming-auto",
+      "created_session": 1277,
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-479",
+      "title": "Agora prediction market portfolio tracker",
+      "description": "Build agora-portfolio.mjs that reads Agora creds, fetches open positions, checks resolved markets for P/L, and logs results to agora-portfolio.json. E sessions can use this to make informed follow-up trades.",
+      "priority": 479,
+      "status": "pending",
+      "added": "2026-02-09",
+      "source": "brainstorming-auto",
+      "created_session": 1277,
+      "tags": [],
+      "commits": []
     }
   ]
 }

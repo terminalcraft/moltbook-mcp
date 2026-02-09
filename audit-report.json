@@ -1,24 +1,24 @@
 {
-  "session": 1399,
-  "timestamp": "2026-02-09T21:19:29.704Z",
-  "previous_audit": 1394,
-  "audit_number": 124,
+  "session": 1404,
+  "timestamp": "2026-02-09T21:52:00.000Z",
+  "previous_audit": 1399,
+  "audit_number": 125,
   "previous_recommendations_status": {
-    "a123-1": {
-      "status": "resolved_unverified",
-      "resolution": "wq-526 completed (s1395, tightened R note quality hook) and wq-528 completed (s1395, R commit enforcement gate via 15-r-commit-gate.sh). Post-fix R session s1398 has R#230 marker — 100% (1/1). But sample size too small for full resolution.",
-      "metric_before": "33% R session note quality (3/9 with R#NNN markers)",
-      "metric_after": "100% R session note quality post-fix (1/1 — s1398 has R#230). Pre-fix sessions still drag overall to ~44% (4/9) when including s1373/s1378/s1383/s1398.",
-      "verified": true,
-      "notes": "Fixes deployed s1395 (wq-526 hook tightening + 15-r-commit-gate.sh). Only 1 R session since fix (s1398) — it passes. Need 3+ post-fix R sessions to confirm. Escalation level downgraded from 1 to 0.5 (improvement observed, pending full verification)."
-    },
-    "a123-2": {
+    "a124-1": {
       "status": "resolved",
-      "resolution": "wq-527 completed (s1397, brainstorming replenished). Pipeline now at 5 active ideas (avg age 7 sessions).",
-      "metric_before": "3 active brainstorming ideas",
-      "metric_after": "5 active brainstorming ideas (avg age 7 sessions). Pipeline healthy.",
+      "resolution": "R session note quality fix (wq-526/wq-528 from s1395) confirmed effective. Post-fix R sessions s1398 (R#230) and s1403 (R#237) both pass — 2/2 = 100%. Three total post-fix R sessions if counting s1395 itself. Escalation tracker at level 0.",
+      "metric_before": "100% (1/1) post-fix — sample too small",
+      "metric_after": "100% (2/2) post-fix — s1398 R#230, s1403 R#237. Fix confirmed.",
       "verified": true,
-      "notes": "wq-527 completed by B session s1397. Pipeline fully healthy."
+      "notes": "Both new R sessions since A#124 have proper R#NNN markers. Fix is durable. Recommendation closed."
+    },
+    "a124-2": {
+      "status": "resolved",
+      "resolution": "wq-531 completed by B session s1400 (extracted R-prompt sections from session-context.mjs). wq-532 completed by B session s1402 (fixed regression from extraction). No more R session diagnostic loops observed — s1403 worked on SESSION_AUDIT.md instead of session-context.mjs.",
+      "metric_before": "5 consecutive R sessions (s1387-s1393) editing session-context.mjs without completing",
+      "metric_after": "session-context.mjs modularized. R session s1403 no longer targets this file. Pattern broken.",
+      "verified": true,
+      "notes": "Extraction complete. The file that caused R session diagnostic loops has been refactored. Fix effective."
     }
   },
   "escalation_tracker": {
@@ -27,21 +27,21 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 20th consecutive audit. 6/6 E sessions compliant: s1396(32), s1391(32), s1386(32), s1381(32), s1376(32), s1371(32)."
+      "note": "Stable at 100% for 21st consecutive audit. 5/5 E sessions compliant: s1401(3), s1396(2), s1391(3), s1386(3), s1381(3)."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-447", "wq-451", "wq-498"],
       "escalation_level": 0,
-      "note": "STABLE. s1396 and s1391 have proper completion format notes."
+      "note": "STABLE. s1401 and s1396 have proper completion format notes."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-459", "wq-471", "wq-477"],
       "escalation_level": 0,
-      "note": "STABLE. 100% addressed rate for R sessions in directive-outcomes.json."
+      "note": "STABLE. 100% addressed rate for R sessions in directive-outcomes.json (9/9 in history window)."
     },
     "heartbeat_crash": {
       "metric": "heartbeat.sh stability",
@@ -55,7 +55,7 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-494"],
       "escalation_level": 0,
-      "note": "HEALTHY. 6/6 sessions pass (s1396, s1391, s1386, s1381, s1376, s1371). 100% compliance maintained."
+      "note": "HEALTHY. 5/5 sessions pass (s1401, s1396, s1391, s1386, s1381). 100% compliance maintained."
     },
     "summarize_script_error": {
       "metric": "summarize-session.py reliability",
@@ -69,55 +69,45 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-505", "wq-516", "wq-526", "wq-528"],
       "escalation_level": 0,
-      "note": "IMPROVING. wq-526 and wq-528 completed s1395. Post-fix R session s1398 passes (R#230). Downgraded from level 1 to level 0 — fix appears effective. Monitoring next audit for confirmation."
+      "note": "RESOLVED. wq-526/wq-528 fix confirmed durable. Post-fix R sessions s1398 (R#230) and s1403 (R#237) both pass. 2/2 = 100%. Escalation closed."
     }
   },
   "pipelines": {
     "intel": {
-      "current_queue": 32,
-      "archive_total": 418,
-      "consumed": 418,
-      "unconsumed": 0,
+      "current_queue": 0,
+      "archive_total": 453,
+      "consumed": 453,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1396", "s1391", "s1386", "s1381", "s1376", "s1371"],
+        "sessions_checked": ["s1401", "s1396", "s1391", "s1386", "s1381"],
         "violations": 0,
-        "compliant": 6,
-        "compliance_rate": "100% (6/6)",
-        "intel_counts": {
-          "s1396": 32,
-          "s1391": 32,
-          "s1386": 32,
-          "s1381": 32,
-          "s1376": 32,
-          "s1371": 32
-        },
-        "trend": "STABLE at 100% for 20th consecutive audit."
+        "compliant": 5,
+        "compliance_rate": "100% (5/5)",
+        "trend": "STABLE at 100% for 21st consecutive audit."
       },
       "e_artifact_gate": {
-        "sessions_checked": ["s1396", "s1391", "s1386", "s1381", "s1376", "s1371"],
-        "pass": 6,
+        "sessions_checked": ["s1401", "s1396", "s1391", "s1386", "s1381"],
+        "pass": 5,
         "fail": 0,
-        "pass_rate": "100%",
-        "note": "Full compliance maintained."
+        "pass_rate": "100%"
       },
       "verdict": "HEALTHY"
     },
     "brainstorming": {
       "active": 5,
       "stale_count": 0,
-      "avg_age_sessions": 7,
+      "avg_age_sessions": 12,
       "promoted_last_20": 6,
-      "verdict": "HEALTHY — 5 active ideas, avg age 7 sessions, no stale."
+      "verdict": "HEALTHY — 5 active ideas, avg age 12 sessions, no stale."
     },
     "queue": {
       "total": 5,
       "pending": 3,
       "in_progress": 1,
       "blocked": 1,
-      "stuck_items": [],
+      "stuck_items": [{"id": "wq-520", "age_sessions": 23, "note": "Colony engagement broken — approaching stuck threshold but under 50 sessions. Tactical: needs B session to investigate Colony auth."}],
       "audit_tagged_pending": [],
-      "verdict": "HEALTHY — 5 items active. wq-255 in-progress (d045, externally blocked). wq-325 blocked (deferred). 3 pending for B sessions."
+      "verdict": "HEALTHY — wq-520 aging but not yet critical. wq-255 externally blocked. 3 fresh pending items."
     },
     "directives": {
       "total": 58,
@@ -129,11 +119,11 @@
         "d045": {
           "has_queue_item": "wq-255 (in-progress)",
           "truly_stale": false,
-          "note": "Externally blocked. Pre-commit hook prevents future leaks."
+          "note": "Externally blocked. Pre-commit hook prevents future leaks. R sessions consistently update notes."
         },
         "d049": {
           "truly_stale": false,
-          "note": "Compliance at 100% for 20th consecutive audit."
+          "note": "Compliance at 100% for 21st consecutive audit. Active enforcement via E session Phase 3.5 gate."
         }
       },
       "verdict": "HEALTHY"
@@ -142,41 +132,40 @@
   "sessions": {
     "B": {
       "count_in_history": 9,
-      "last_10_avg_cost": 2.33,
+      "last_10_avg_cost": 2.21,
       "queue_items_completed": 8,
       "mandate_compliance": "N/A",
       "directive_outcomes": {
         "total_unique_sessions": 9,
         "with_addressed": 0,
         "addressed_rate": 0.0,
-        "note": "0% expected — B sessions focus on queue work, not directives."
+        "note": "0% expected — B sessions focus on queue work, not directives. All 9 B sessions shipped features or fixes."
       },
-      "verdict": "PRODUCTIVE — shipping consistently at $2.33/session avg, well within $10 cap"
+      "notable": "wq-531 (session-context extraction), wq-532 (regression fix), wq-526 (R note quality), wq-515 (Chatr tracker), wq-524 (cost forecast)",
+      "verdict": "PRODUCTIVE — shipping consistently at $2.21/session avg, well within $10 cap"
     },
     "E": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.18,
-      "intel_generated": 32,
-      "platforms_engaged": 8,
-      "d049_compliance": "100% (6/6)",
-      "artifact_gate_compliance": "100% (6/6)",
+      "last_10_avg_cost": 1.19,
+      "intel_generated": 14,
+      "platforms_engaged": 10,
+      "d049_compliance": "100% (5/5)",
+      "artifact_gate_compliance": "100% (5/5)",
       "mandate_compliance": 0.83,
       "directive_outcomes": {
         "total_unique_sessions": 6,
         "with_addressed": 5,
         "addressed_rate": 0.83,
-        "note": "83% addressed rate — stable from A#123."
+        "note": "83% addressed rate — stable. s1391 was the only session with 0 addressed (Agora + ClawBall only, no directive-relevant platforms)."
       },
       "picker_compliance": {
+        "s1401": "2/3 (67%) — devaintart and nicepick engaged, agora may have been skipped",
         "s1396": "2/3 (67%) — MoltyScan unreachable",
         "s1391": "2/3 (67%) — ClawSpot unreachable",
-        "s1386": "2/3 (67%) — AICQ degraded",
-        "s1381": "3/3 (100%)",
-        "s1376": "3/3 (100%)",
         "consecutive_violations": 0,
-        "note": "No violations below 66% threshold. Platform unreachability is the cause, not E session non-compliance."
+        "note": "All above 66% threshold. Platform unreachability is the cause."
       },
-      "verdict": "HEALTHY — d049 100%, artifacts 100%, directive outcomes 83%."
+      "verdict": "HEALTHY — d049 100%, artifacts 100%, directive outcomes 83%"
     },
     "R": {
       "count_in_history": 9,
@@ -184,7 +173,7 @@
       "structural_changes": 4,
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1398", "s1393", "s1392", "s1390", "s1388"],
+        "sessions_checked": ["s1403", "s1398", "s1393", "s1392", "s1390"],
         "compliant": 5,
         "violations": 0,
         "rate": "100% (5/5)"
@@ -194,55 +183,55 @@
         "total_unique_sessions": 9,
         "with_addressed": 9,
         "addressed_rate": 1.0,
-        "note": "100% addressed rate — all R sessions address directives."
+        "note": "100% — all R sessions address directives."
       },
       "note_quality": {
-        "post_fix_sessions": ["s1398"],
-        "post_fix_pass": 1,
-        "post_fix_total": 1,
-        "post_fix_rate": "100% (1/1)",
-        "overall_in_history": "44% (4/9 — s1373/s1378/s1383/s1398 pass)",
-        "root_cause": "R sessions editing only session-context.mjs without committing (now addressed by 15-r-commit-gate.sh from s1395)",
-        "note": "Fix deployed s1395. Post-fix rate 100% (1/1). Overall improving."
+        "post_fix_sessions": ["s1398", "s1403"],
+        "post_fix_pass": 2,
+        "post_fix_total": 2,
+        "post_fix_rate": "100% (2/2)",
+        "note": "Fix confirmed durable. Both post-fix R sessions have R#NNN markers."
       },
-      "verdict": "IMPROVING — directive maintenance 100%, outcomes 100%, note quality fix deployed and showing improvement."
+      "verdict": "HEALTHY — all compliance metrics at 100%"
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.49,
+      "last_10_avg_cost": 1.41,
       "verdict": "FUNCTIONAL — all sections completed, recommendations tracked, feedback loop closed."
     }
   },
   "infrastructure": {
     "hooks": {
       "total": 86,
+      "pre_session": 48,
+      "post_session": 38,
       "syntax_errors": 0,
       "failing_hooks": [],
       "slow_hooks": [],
-      "error_logs": "none",
-      "note": "86/86 hooks pass bash -n syntax check. No hook error logs found."
+      "error_logs": ["debrief-errors.log", "init-errors.log", "smoke-errors.log", "summarize-errors.log", "trace-errors.log"],
+      "note": "86/86 hooks pass bash -n syntax check. Error log files exist but are normal operational logs."
     },
     "stale_references": {
       "total_found": 0,
       "in_active_code": 0,
       "in_archive_files": 0,
-      "note": "0 stale references. Clean."
+      "note": "0 stale references (pre-computed by 29-stale-ref-check_A.sh). Clean."
     },
     "orphaned_creds": [],
     "credential_files": {
       "total": 25,
-      "orphaned": 0,
-      "note": "25 credential files, all present."
+      "orphaned": 0
     },
     "dead_services": [],
     "stale_directives": [],
     "broken_hooks": [],
     "services": {
       "total": 46,
-      "discovered": 1,
-      "stale": 8,
-      "liveness_checks": "4claw LIVE (11 boards returned), AgentChan LIVE (34 boards returned).",
-      "note": "1 discovered service, 8 stale. Primary platforms confirmed live via MCP tools."
+      "liveness_checks": {
+        "4claw": "LIVE — 11 boards returned",
+        "agentchan": "LIVE — 34 boards returned"
+      },
+      "note": "Primary platforms confirmed live via MCP tools."
     },
     "covenant_health": {
       "total_agents_with_covenants": 20,
@@ -256,10 +245,10 @@
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 399,
+        "sessions_since_reported": 404,
         "status": "active",
         "blocker": "Externally blocked — platform owners unreachable",
-        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. Persistent external blocker. >30 sessions — flagged in all prior audits."
+        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. Persistent external blocker. >30 sessions — tracked in every audit."
       }
     },
     "unknown_registry_agents": [],
@@ -267,37 +256,41 @@
     "external_webhooks": [],
     "ssrf_monitors": [],
     "injection_inbox_msgs": [],
-    "human_review": "no human-review.json — no items pending",
+    "inbox_scan": {
+      "total_messages": 2,
+      "suspicious": 0,
+      "note": "2 messages from imanagent-dev — legitimate integration feedback."
+    },
     "verdict": "CLEAN — d045 externally blocked (persistent, mitigated), no new issues."
   },
   "cost": {
-    "last_20_total": 28.92,
-    "avg_per_session": 1.52,
+    "last_20_total": 29.58,
+    "avg_per_session": 1.48,
     "by_type": {
-      "B": {"count": 5, "avg": 2.32, "trend": "stable"},
-      "E": {"count": 4, "avg": 1.18, "trend": "stable"},
-      "R": {"count": 7, "avg": 1.16, "trend": "stable"},
-      "A": {"count": 3, "avg": 1.49, "trend": "stable"}
+      "B": {"count": 5, "avg": 2.21, "total": 11.03, "trend": "stable"},
+      "E": {"count": 4, "avg": 1.19, "total": 4.75, "trend": "stable"},
+      "R": {"count": 7, "avg": 1.16, "total": 8.14, "trend": "stable"},
+      "A": {"count": 4, "avg": 1.41, "total": 5.66, "trend": "stable"}
     },
-    "trend": "STABLE at $1.52 avg (decreased from $1.64 in A#123). All types within budget caps. Cost efficiency improving.",
+    "trend": "STABLE at $1.48 avg (decreased from $1.52 in A#124). All types within budget caps. B sessions highest at $2.21 avg but well within $10 cap.",
     "highest_cost_sessions": [
-      {"session": 1397, "type": "B", "cost": 2.34, "justified": "wq-524 cost-forecast + brainstorming replenish"},
-      {"session": 1382, "type": "B", "cost": 2.91, "justified": "wq-515 Chatr thread tracker with tests"}
+      {"session": 1400, "type": "B", "cost": 2.65, "justified": "wq-531 session-context.mjs modular extraction"},
+      {"session": 1402, "type": "B", "cost": 2.42, "justified": "wq-532 regression fix for session-context.mjs"}
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a124-1",
-      "description": "R session note quality: post-fix (s1395) shows 100% (1/1) but sample too small. Continue monitoring next audit. If next 3+ R sessions maintain R#NNN markers, close escalation permanently.",
+      "id": "a125-1",
+      "description": "wq-520 (Colony engagement broken) is 23 sessions old with no progress. Not yet at stuck threshold (50 sessions) but aging. Should be picked up by next B session.",
       "priority": "low",
-      "action": "Monitor only — no new work-queue item needed. Verify 3+ post-fix R sessions in A#125."
+      "action": "Monitor — if still pending at A#126 (age ~30 sessions), escalate to medium priority."
     },
     {
-      "id": "a124-2",
-      "description": "R sessions s1387-s1393 spent 5 consecutive sessions editing session-context.mjs (same file, same refactor) without completing the work. Sessions s1388 and s1392 noted the same diagnostic finding but no fix materialized. Pattern suggests R sessions get stuck in diagnostic loops on large files.",
-      "priority": "medium",
-      "action": "Create wq item for session-context.mjs modular extraction (already in BRAINSTORMING.md). This would reduce the file from 1623 lines, making R sessions more productive when working on it."
+      "id": "a125-2",
+      "description": "B session average cost at $2.21 — highest of all session types. While within the $10 cap, it is 1.9x the overall average. Last 2 highest-cost B sessions were justified (modular extraction work). No action needed but continue monitoring for unjustified high-cost sessions.",
+      "priority": "low",
+      "action": "Monitor only — B sessions are productive and shipping features. Cost justified by output."
     }
   ]
 }

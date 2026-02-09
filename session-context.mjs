@@ -103,6 +103,7 @@ const PATHS = {
   eContext: join(STATE_DIR, 'e-session-context.md'),
   todoFollowups: join(STATE_DIR, 'todo-followups.txt'),
   impactAnalysis: join(STATE_DIR, 'r-impact-analysis.json'),
+  rImpact: join(STATE_DIR, 'r-session-impact.json'),
 };
 
 // B#340: Stop words for keyword-based dedup. Used by both self-dedup and isTitleDupe.
@@ -976,9 +977,9 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
   // Saves a tool call vs running `node r-impact-digest.mjs` manually in step 3
   // R#224: Wrapped in safeSection for error isolation
   const impactSummary = safeSection('Impact history', () => {
-    const impactPath = join(STATE_DIR, 'r-session-impact.json');
-    if (!existsSync(impactPath)) return '';
-    const impactData = JSON.parse(readFileSync(impactPath, 'utf8'));
+    // R#231: Migrated from raw readFileSync to fc.json + PATHS.rImpact
+    const impactData = fc.json(PATHS.rImpact);
+    if (!impactData) return '';
     const analysis = impactData.analysis || [];
     const pending = (impactData.changes || []).filter(c => !c.analyzed);
     if (analysis.length === 0 && pending.length === 0) return '';
@@ -1161,19 +1162,18 @@ markTiming('r_session_context');
         ? `### Orchestrator failed: ${result.e_orchestrator_error}\nRun \`node engage-orchestrator.mjs\` manually or fall back to Phase 1 platform health check.`
         : '';
 
-    // E session counter (analogous to R session counter)
-    const eCounterPath = join(STATE_DIR, 'e_session_counter');
+    // E session counter — R#231: migrated to PATHS + fc
     let eCount = '?';
     try {
-      const raw = parseInt(readFileSync(eCounterPath, 'utf8').trim());
-      eCount = MODE === 'E' ? raw + 1 : raw;
+      const raw = parseInt((fc.text(PATHS.eCounter) || '').trim());
+      eCount = MODE === 'E' ? (isNaN(raw) ? 1 : raw + 1) : (isNaN(raw) ? '?' : raw);
     } catch { eCount = MODE === 'E' ? 1 : '?'; }
 
     // Fold in previous engagement context (was manually assembled in heartbeat.sh)
+    // R#231: migrated to PATHS + fc
     let prevEngageCtx = '';
-    const eCtxPath = join(STATE_DIR, 'e-session-context.md');
     try {
-      const raw = readFileSync(eCtxPath, 'utf8').trim();
+      const raw = (fc.text(PATHS.eContext) || '').trim();
       if (raw) prevEngageCtx = `\n\n## Previous engagement context (auto-generated)\n${raw}`;
     } catch { /* no previous context */ }
 
@@ -1267,18 +1267,19 @@ markTiming('e_session_context');
 if (MODE === 'A') {
   // A session counter
   const aCounterPath = join(STATE_DIR, 'a_session_counter');
+  // R#231: migrated to fc
   let aCount = '?';
   try {
-    const raw = parseInt(readFileSync(aCounterPath, 'utf8').trim());
-    aCount = raw + 1; // Heartbeat increments after this script
+    const raw = parseInt((fc.text(PATHS.aCounter) || '').trim());
+    aCount = isNaN(raw) ? 1 : raw + 1; // Heartbeat increments after this script
   } catch { aCount = 1; }
 
   // Previous audit findings — enhanced to include recommendation lifecycle data (wq-196)
   let prevAuditSummary = '';
   let prevRecommendations = [];
-  const auditReportPath = join(DIR, 'audit-report.json');
+  // R#231: migrated to PATHS + fc
   try {
-    const prev = JSON.parse(readFileSync(auditReportPath, 'utf8'));
+    const prev = fc.json(PATHS.auditReport);
     const prevSession = prev.session || '?';
     const criticalCount = (prev.critical_issues || []).length;
     const recCount = (prev.recommended_actions || []).length;
@@ -1308,10 +1309,10 @@ if (MODE === 'A') {
   const auditStatus = `Audit-tagged queue items: ${auditPending} pending, ${auditDone} done (of ${auditItems.length} total)`;
 
   // Quick cost trend from session history
+  // R#231: migrated to PATHS + fc
   let costTrend = '';
-  const histPath = join(STATE_DIR, 'session-history.txt');
   try {
-    const hist = readFileSync(histPath, 'utf8');
+    const hist = fc.text(PATHS.history) || '';
     const costs = [...hist.matchAll(/cost=\$([0-9.]+)/g)].map(m => parseFloat(m[1]));
     if (costs.length >= 5) {
       const recent5 = costs.slice(-5);

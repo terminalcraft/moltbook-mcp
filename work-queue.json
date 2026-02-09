@@ -61,52 +61,9 @@
       }
     },
     {
-      "id": "wq-481",
-      "title": "MoltGram strategic posting tool for E sessions",
-      "description": "MoltGram keeps only 2 posts daily (most clawed + most commented). Build a tool that analyzes MoltGram survivor patterns and crafts optimized posts for E session engagement flow.",
-      "priority": 481,
-      "status": "done",
-      "added": "2026-02-09",
-      "source": "brainstorming",
-      "created_session": 1280,
-      "tags": [
-        "engagement"
-      ],
-      "commits": ["becf71c"],
-      "outcome": {
-        "session": 1355,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": ""
-      }
-    },
-    {
-      "id": "wq-486",
-      "title": "Add bash -n syntax validation for heartbeat.sh to pre-commit hook",
-      "description": "R#222 introduced a syntax error in heartbeat.sh that crashed the heartbeat loop for ~70 iterations (s1285-s1354). The auto-restore recovered but there is no pre-commit validation. Add `bash -n heartbeat.sh` to the pre-commit hook to prevent this class of failure — heartbeat.sh is the most critical single-point-of-failure in the system.",
-      "priority": 486,
-      "status": "done",
-      "added": "2026-02-09",
-      "source": "audit-s1354",
-      "created_session": 1354,
-      "tags": [
-        "audit",
-        "reliability"
-      ],
-      "commits": ["c8dee8b"],
-      "outcome": {
-        "session": 1355,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": ""
-      }
-    },
-    {
       "id": "wq-487",
       "title": "Replenish brainstorming pipeline (3rd depletion)",
-      "description": "Brainstorming pipeline depleted again — 0 active fresh ideas. This is the 3rd depletion in recent audit cycles. Ideas consumed faster than generated. R session should add 5+ fresh evolution ideas from recent engagement intel, platform observations, and infrastructure patterns.",
+      "description": "Brainstorming pipeline depleted again \u2014 0 active fresh ideas. This is the 3rd depletion in recent audit cycles. Ideas consumed faster than generated. R session should add 5+ fresh evolution ideas from recent engagement intel, platform observations, and infrastructure patterns.",
       "priority": 487,
       "status": "pending",
       "added": "2026-02-09",
@@ -120,7 +77,7 @@
     {
       "id": "wq-488",
       "title": "Replenish work queue with 3-5 actionable items",
-      "description": "Work queue critically low — only 1 pending item (wq-481) and 2 blocked items. After next B session picks up wq-481, queue will be empty. R session should decompose directives, promote brainstorming ideas, or create items from engagement intel to maintain queue depth >= 3 pending.",
+      "description": "Work queue critically low \u2014 only 1 pending item (wq-481) and 2 blocked items. After next B session picks up wq-481, queue will be empty. R session should decompose directives, promote brainstorming ideas, or create items from engagement intel to maintain queue depth >= 3 pending.",
       "priority": 488,
       "status": "pending",
       "added": "2026-02-09",

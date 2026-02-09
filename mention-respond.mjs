@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import { getFourclawCredentials, FOURCLAW_API, CHATR_API, getChatrCredentials,
          MOLTCHAN_API, getLobchanKey, LOBCHAN_API } from "./providers/credentials.js";
+import { processMessages, getActiveThreads, getThreadForMessage, getThreadsForAgent } from "./chatr-thread-tracker.mjs";
 
 const HOME = process.env.HOME || "/home/moltbot";
 const CONFIG_DIR = path.join(HOME, ".config/moltbook");
@@ -105,19 +106,90 @@ async function fetchFourclawThread(mention) {
 }
 
 async function fetchChatrContext(mention) {
-  // Chatr is real-time chat — fetch recent messages around the mention
+  // Chatr thread-aware context (wq-515): use thread tracker to find
+  // conversation context instead of dumping last 20 messages
   const creds = getChatrCredentials();
   if (!creds?.apiKey) return { thread: [], error: "no credentials" };
-  const data = await fetchJSON(`${CHATR_API}/messages?limit=20`,
+
+  // Fetch recent messages for thread processing
+  const data = await fetchJSON(`${CHATR_API}/messages?limit=50`,
     { headers: { "x-api-key": creds.apiKey } });
   if (!data) return { thread: [], error: "unreachable" };
+
   const msgs = Array.isArray(data) ? data : (data.messages || data.data || []);
-  const thread = msgs.map(m => ({
-    author: m.agentId || m.author || m.sender || "unknown",
-    content: m.content || m.text || m.body || "",
-    timestamp: m.timestamp || m.created_at || ""
-  }));
-  return { thread, error: null };
+  if (msgs.length === 0) return { thread: [], error: null };
+
+  // Process messages through thread tracker
+  const state = { version: 1, lastUpdate: null, lastMessageId: null, threads: {}, messageIndex: {} };
+  const { state: updatedState } = processMessages(msgs, state);
+
+  // Extract mention's message ID from the mention.id (format: "chatr-<msgId>")
+  const msgId = mention.id?.replace(/^chatr-/, "") || "";
+
+  // Try to find the thread this mention belongs to
+  const mentionThread = getThreadForMessage(msgId, updatedState);
+
+  if (mentionThread) {
+    // Return only messages from the same conversation thread
+    const threadMsgIds = new Set(mentionThread.messageIds);
+    const threadMsgs = msgs
+      .filter(m => threadMsgIds.has(String(m.id)))
+      .map(m => ({
+        author: m.agentId || m.author || m.sender || "unknown",
+        content: m.content || m.text || m.body || "",
+        timestamp: m.timestamp || m.created_at || ""
+      }));
+
+    return {
+      thread: threadMsgs,
+      error: null,
+      threadInfo: {
+        id: mentionThread.id,
+        topic: mentionThread.topic,
+        participants: mentionThread.participants,
+        messageCount: mentionThread.messageCount,
+        engaged: mentionThread.engaged
+      }
+    };
+  }
+
+  // Fallback: if no thread found, try matching by author
+  const authorThreads = getThreadsForAgent(mention.author, updatedState);
+  if (authorThreads.length > 0) {
+    const bestThread = authorThreads[0]; // most recent
+    const threadMsgIds = new Set(bestThread.messageIds);
+    const threadMsgs = msgs
+      .filter(m => threadMsgIds.has(String(m.id)))
+      .map(m => ({
+        author: m.agentId || m.author || m.sender || "unknown",
+        content: m.content || m.text || m.body || "",
+        timestamp: m.timestamp || m.created_at || ""
+      }));
+
+    return {
+      thread: threadMsgs,
+      error: null,
+      threadInfo: {
+        id: bestThread.id,
+        topic: bestThread.topic,
+        participants: bestThread.participants,
+        messageCount: bestThread.messageCount,
+        engaged: bestThread.engaged,
+        matchType: "author-fallback"
+      }
+    };
+  }
+
+  // Final fallback: return the mention message only
+  return {
+    thread: [{
+      author: mention.author,
+      content: mention.content,
+      timestamp: mention.timestamp
+    }],
+    error: null,
+    threadInfo: null
+  };
 }
 
 async function fetchMoltchanThread(mention) {
@@ -251,6 +323,13 @@ function generateDraft(mention, threadContext, knowledge, authorHistory, platfor
   // Thread context
   if (threadContext.thread.length > 1) {
     sections.push("## Thread Context");
+    if (threadContext.threadInfo) {
+      sections.push(`Conversation: ${threadContext.threadInfo.topic} (${threadContext.threadInfo.messageCount} msgs)`);
+      sections.push(`Participants: ${threadContext.threadInfo.participants.map(p => `@${p}`).join(", ")}`);
+      if (threadContext.threadInfo.engaged) sections.push("Status: We participated in this conversation");
+      if (threadContext.threadInfo.matchType === "author-fallback") sections.push("(Thread matched by author, not exact message)");
+      sections.push("");
+    }
     for (const msg of threadContext.thread.slice(-10)) {
       sections.push(`@${msg.author}: ${msg.content.slice(0, 200)}`);
     }

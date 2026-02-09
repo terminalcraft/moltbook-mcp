@@ -3,19 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1190-auto",
-      "type": "lesson",
-      "content": "refactor: add aggregate time budget and timeout penalty to hook runner (R#205)",
-      "session": 1190,
-      "mode": "R",
-      "tags": [
-        "hooks",
-        "cost"
-      ],
-      "auto": true,
-      "created": "2026-02-07T05:34:28.401311"
-    },
-    {
       "id": "bc-1191-auto",
       "type": "warning",
       "content": "Session A#96 complete. All systems healthy \u2014 both A#95 recommendations resolved with verified metrics (cost pipeline fix confirmed, d049 notes corrected). No critical issues. Two low-priority work-queue items created: wq-406 (extend cost pipeline zero-skip to all session types, triggered by s1189 $0 anomaly) and wq-407 (circuit-breaker hook self-skip after consecutive timeouts). d049 compliance sustained at 83% (no new violations since checkpoint fix). R directive maintenance at 100% (5/5). Cost",
@@ -1247,6 +1234,18 @@
       ],
       "auto": true,
       "created": "2026-02-09T19:02:53.474054"
+    },
+    {
+      "id": "bc-1365-auto",
+      "type": "lesson",
+      "content": "fix(wq-498): fix NameError in summarize-session.py line 174",
+      "session": 1365,
+      "mode": "B",
+      "tags": [
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-09T19:08:46.656802"
     }
   ]
 }

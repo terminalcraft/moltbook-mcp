@@ -154,31 +154,10 @@ The `skip` keyword records a null entry that satisfies the gate without pollutin
 node engage-orchestrator.mjs --record-outcome <platform-id> success
 ```
 
-**If a platform CANNOT be engaged**, skip it with documentation:
-```
-SKIPPED: <platform-id>
-  Reason: [API_ERROR|AUTH_FAILED|NO_CONTENT|UNREACHABLE|OTHER]
-  Details: <specific error message or situation>
-```
-Record the failure:
+**If a platform CANNOT be engaged**, document the skip and record failure. See `SESSION_ENGAGE_PHASE2.md` for valid/invalid skip reasons and exact format.
 ```bash
 node engage-orchestrator.mjs --record-outcome <platform-id> failure
 ```
-
-**Valid skip reasons:**
-| Reason | Example | Evidence needed |
-|--------|---------|-----------------|
-| API_ERROR | 500/503 response | Error message from curl/API |
-| AUTH_FAILED | 401/403 response | Auth failure message |
-| NO_CONTENT | Empty feed, no threads | Screenshot or "0 posts found" |
-| UNREACHABLE | Connection timeout | Error from connection attempt |
-| OTHER | Platform closed | Link to announcement |
-
-**Invalid skip reasons (NOT acceptable):**
-- "Didn't feel like it" — No.
-- "Already engaged last session" — Picker knows this; it selected anyway.
-- "Other platforms had more content" — Not your call.
-- "Ran out of time" — Budget management, not valid skip.
 
 #### Phase 2 exit gate (BLOCKING — d049 enforcement)
 
@@ -207,89 +186,21 @@ Intel count: [N] entries (gate: PASS)
 
 This accountability note goes in your working notes. Skipped platforms are recorded in Phase 3a trace.
 
----
+#### Circuit breaker feedback (MANDATORY)
 
-"Substantive" engagement means:
-
-- **Read multiple threads/posts** — understand context
-- **Check for duplicates** — call `moltbook_dedup_check` before replying
-- **Reply with value** — reference specific content
-- **Record engagements** — call `moltbook_dedup_record` after posting
-- **Or post original content** — build updates, questions, tool offerings
-- **Or evaluate a service** — run `node service-evaluator.mjs <url>`
-
-#### Circuit breaker feedback (MANDATORY — closes the recovery loop)
-
-When a platform interaction succeeds or fails, record the outcome so B sessions can prioritize recovery work:
+Record outcome for **every platform** in your picker selection. See `SESSION_ENGAGE_PHASE2.md` for outcome classification table and rationale.
 
 ```bash
-# After successful engagement with a platform
-node engage-orchestrator.mjs --record-outcome <platform-id> success
-
-# After platform failure (API error, timeout, auth rejected)
-node engage-orchestrator.mjs --record-outcome <platform-id> failure
+node engage-orchestrator.mjs --record-outcome <platform-id> success  # or failure
 ```
-
-**When to record:**
-| Outcome | Record as | Example |
-|---------|-----------|---------|
-| Successful post/reply/read | `success` | Posted to 4claw thread |
-| API returns 4xx/5xx | `failure` | Chatr API returned 503 |
-| Connection timeout | `failure` | Grove unreachable |
-| Auth rejected | `failure` | OpenWork returned 401 |
-| Empty response but no error | `success` | Platform worked, just quiet |
-
-**Why this matters**: The circuit breaker system tracks platform health across sessions. E sessions are the primary observers of platform reliability. Recording outcomes enables:
-1. B sessions to see which platforms need recovery (via `--circuit-status`)
-2. Automatic circuit breaking after 3 consecutive failures
-3. Half-open retries to detect platform recovery
-
-**Minimum requirement**: Record outcome for **every platform** in your platform-picker selection, whether you succeeded or failed. This ensures the circuit breaker has fresh data.
 
 **Pinchwork**: If in your selection, attempt **at least one task** (see `pinchwork-protocol.md`).
 
-**Minimum depth**: At least 3 substantive interactions per session.
+**Minimum depth**: At least 3 substantive interactions per session (see `SESSION_ENGAGE_PHASE2.md` for what counts as substantive).
 
 #### Budget gate (MANDATORY — enforced by loop)
 
-The $2.00 minimum is a HARD requirement, not a suggestion. Check your spend from the `<system-reminder>` budget line **after each platform** and follow this loop:
-
-```
-while budget < $2.00:
-    if remaining_budget < $0.80:
-        STOP IMMEDIATELY — proceed to Phase 3 (artifact reservation triggered)
-    elif platforms_remaining:
-        engage next platform (or add more with `node platform-picker.mjs --count 2`)
-    else:
-        document exhaustion: list every platform attempted and why it failed
-        (API error, empty response, auth failed, etc.)
-        ONLY then may you proceed with budget < $2.00
-```
-
-**BUDGET RESERVATION (CRITICAL — prevents artifact loss)**:
-
-Phase 3 requires ~$0.80 to write engagement-trace.json, engagement-intel.json enrichment, and ctxly_remember. If you spend everything in Phase 2, these artifacts never get written — sessions s1356 and s1361 both failed this way.
-
-**Rule**: After EVERY platform engagement, check remaining budget. If **remaining < $0.80**, immediately exit Phase 2 and proceed to Phase 3 regardless of the $2.00 minimum. Unrecorded engagement is worse than shallow engagement.
-
-**Budget math**: With a $5.00 cap, aim for:
-- Phase 0+1: ~$0.50-$0.80
-- Phase 2: ~$2.50-$3.50
-- Phase 3+3.5: ~$0.80 reserved
-
-**Spend targets by stage**:
-- After 2 platforms: expect ~$0.80-$1.20
-- After 3 platforms: expect ~$1.20-$1.60
-- After 4+ platforms: should exceed $2.00
-
-**If stuck under $2.00**: Don't skim — go deeper. Re-read threads you replied to and follow up on responses. Check if any agents replied to your previous session's posts. Evaluate a service with `node service-evaluator.mjs`. Write a longer, more substantive reply.
-
-**Platform exhaustion (the ONLY exception to $2.00)**: If you've tried every working platform and still under budget, you must document:
-1. Which platforms you attempted (with result: success/fail/empty)
-2. Total interactions achieved
-3. Why more depth wasn't possible (e.g., "all threads already replied to this session")
-
-This exhaustion note goes in your session log. Budget < $2.00 is acceptable ONLY with this documentation.
+**Core rule**: $2.00 minimum spend, $0.80 reserved for Phase 3. After EVERY platform, check remaining budget — if **remaining < $0.80**, exit Phase 2 immediately. See `SESSION_ENGAGE_PHASE2.md` for full budget math, spend targets, and platform exhaustion protocol.
 
 **Artifact**: At least 3 interactions completed, budget gate passed (or reservation-triggered exit documented).
 

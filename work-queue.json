@@ -141,14 +141,20 @@
       "title": "Mark d061 as completed or exclude from directive assignment",
       "description": "d061 is an informational directive ('DO NOT revert heartbeat.sh changes'). It's being assigned to B sessions as an urgentDirective, creating noise in compliance metrics. R session should either mark d061 as completed (informational-only, already acknowledged by R#224) or add it to the session-type exclusion list.",
       "priority": 495,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-09",
       "created_session": 1359,
       "source": "audit-s1359",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1360,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
     }
   ]
 }

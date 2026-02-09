@@ -13916,6 +13916,87 @@ app.get("/status/session-outcomes", (req, res) => {
   }
 });
 
+// --- Composite trust score (wq-514) ---
+// Aggregates platform uptime, session completion rate, and reputation receipts
+app.get("/status/trust-score", (req, res) => {
+  try {
+    const now = new Date();
+    const nowISO = now.toISOString();
+
+    // Component 1: Platform uptime from circuit breakers
+    let platformScore = 1;
+    let platformDetail = { total: 0, closed: 0, open: 0, half_open: 0 };
+    try {
+      const circuitPath = join(BASE, "platform-circuits.json");
+      const circuits = JSON.parse(readFileSync(circuitPath, "utf8"));
+      const entries = Object.entries(circuits);
+      const threshold = 3;
+      const cooldown = 24 * 60 * 60 * 1000;
+      let closed = 0, open = 0, halfOpen = 0;
+      for (const [, entry] of entries) {
+        if (entry.consecutive_failures >= threshold) {
+          const elapsed = Date.now() - new Date(entry.last_failure).getTime();
+          if (elapsed >= cooldown) halfOpen++; else open++;
+        } else {
+          closed++;
+        }
+      }
+      const total = entries.length;
+      platformDetail = { total, closed, open, half_open: halfOpen };
+      platformScore = total > 0 ? (closed + halfOpen * 0.5) / total : 1;
+    } catch {}
+
+    // Component 2: Session completion rate from session-outcomes.json (last 50 sessions)
+    let sessionScore = 1;
+    let sessionDetail = { total: 0, successful: 0, window: 50 };
+    try {
+      const outPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-outcomes.json");
+      const outcomes = JSON.parse(readFileSync(outPath, "utf8"));
+      const recent = outcomes.slice(-50);
+      const successful = recent.filter(o => o.outcome === "success").length;
+      sessionDetail = { total: recent.length, successful, window: 50 };
+      sessionScore = recent.length > 0 ? successful / recent.length : 1;
+    } catch {}
+
+    // Component 3: Reputation from attestation receipts
+    let reputationScore = 0;
+    let reputationDetail = { live: 0, unique_attesters: 0, raw_score: 0 };
+    try {
+      const data = loadReceipts();
+      const myReceipts = data.receipts["moltbook"] || [];
+      const live = myReceipts.filter(r => !r.expiresAt || r.expiresAt > nowISO);
+      const uniqueAttesters = new Set(live.map(r => r.attester));
+      const raw = live.length + (uniqueAttesters.size * 2);
+      reputationDetail = { live: live.length, unique_attesters: uniqueAttesters.size, raw_score: raw };
+      // Normalize to 0-1 (cap at 50 for full score)
+      reputationScore = Math.min(raw / 50, 1);
+    } catch {}
+
+    // Weighted composite
+    const weights = { platform: 0.35, session: 0.40, reputation: 0.25 };
+    const composite = (
+      platformScore * weights.platform +
+      sessionScore * weights.session +
+      reputationScore * weights.reputation
+    );
+
+    const verdict = composite >= 0.8 ? "trusted" : composite >= 0.5 ? "degraded" : "untrusted";
+
+    res.json({
+      timestamp: nowISO,
+      trust_score: Math.round(composite * 100) / 100,
+      verdict,
+      components: {
+        platform_uptime: { score: Math.round(platformScore * 100) / 100, weight: weights.platform, detail: platformDetail },
+        session_completion: { score: Math.round(sessionScore * 100) / 100, weight: weights.session, detail: sessionDetail },
+        reputation: { score: Math.round(reputationScore * 100) / 100, weight: weights.reputation, detail: reputationDetail }
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ error: "trust-score computation failed", message: e.message });
+  }
+});
+
 // --- Session file size budget dashboard (wq-449) ---
 // Surfaces data from 27-session-file-sizes.sh with token estimates and trend data.
 app.get("/status/file-sizes", (req, res) => {

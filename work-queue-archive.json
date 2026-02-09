@@ -12031,6 +12031,28 @@
       },
       "retired_session": 1398,
       "retired_reason": "Blocked 91+ sessions, no resolution path. Grove is low-ROI. d060 auto-escalation resolved."
+    },
+    {
+      "id": "wq-531",
+      "title": "Extract R-prompt sections from session-context.mjs into lib/r-prompt-sections.mjs",
+      "description": "session-context.mjs is 1623 lines. R sessions s1387-s1393 spent 5 consecutive sessions stuck editing it without completing work. Extract ~120 lines of R-specific safeSection blocks (impact history, intel promotion, intel capture diagnostic) into lib/r-prompt-sections.mjs. Makes R-specific logic independently testable and reduces main file complexity.",
+      "priority": 531,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1399,
+      "source": "audit-s1399",
+      "tags": [
+        "audit",
+        "refactor"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1400,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Extracted 180 lines into lib/r-prompt-sections.mjs. Discovered pre-existing SyntaxError in session-context.mjs \u2014 tracked as new queue item."
+      }
     }
   ]
 }

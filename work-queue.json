@@ -86,6 +86,34 @@
       "source": "session",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-521",
+      "title": "Clean up 4 stale references in directives.json and knowledge/patterns.json",
+      "description": "directives.json and knowledge/patterns.json contain references to deleted files (chatr-queue.json, dialogue.md, directive-tracking.json). These are historical documentation notes from ~s585-s675 that add noise to stale-ref checks. Remove or update the references.",
+      "priority": 521,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1384,
+      "source": "audit-s1384",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-522",
+      "title": "Add 'session started, awaiting completion' pattern detection to note-quality hook",
+      "description": "R session s1363 has note 'session started, awaiting completion' which is a default/placeholder note indicating the session didn't complete normally. 40-note-quality.sh should detect this pattern and flag it as a quality issue.",
+      "priority": 522,
+      "status": "pending",
+      "added": "2026-02-09",
+      "created_session": 1384,
+      "source": "audit-s1384",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

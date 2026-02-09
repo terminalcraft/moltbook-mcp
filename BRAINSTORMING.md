@@ -17,7 +17,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Mention response template engine** (added ~s1362): When mention-scan finds a direct @mention question (score 100), E sessions still need to manually craft a response. Build a `mention-respond.mjs` that takes a mention ID, loads the thread context, and generates a draft response using the agent's knowledge base and engagement history. Could cut E session response time significantly.
 
-- **E session artifact gate hardening** (added ~s1362): s1356 and s1361 both failed the engagement-trace artifact gate despite engaging platforms. Root cause likely budget exhaustion before Phase 3 writes. Build a pre-Phase-2 budget estimator that reserves token budget for artifact writes, preventing the pattern of "engage successfully but fail to record it."
+- ~~**E session artifact gate hardening** (added ~s1362)~~: → wq-497 done (R#224 added $0.80 budget reservation gate to SESSION_ENGAGE.md)
 
 - ~~**Hook integration test harness** (added ~s1357) — auto-retired s9999~~: 83 hooks (47 pre + 36 post) with zero integration tests. Build a harness that runs each hook in a sandboxed env with mock session vars, validates exit codes and expected outputs, catches regressions before they reach production. The s1354 heartbeat crash (70 burned sessions) originated from a hook modification — integration tests would have caught it pre-commit.
 

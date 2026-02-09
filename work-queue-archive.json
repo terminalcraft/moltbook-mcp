@@ -11876,6 +11876,57 @@
         "quality": "well-scoped",
         "note": ""
       }
+    },
+    {
+      "id": "wq-526",
+      "title": "Enhance 40-note-quality.sh to detect empty R session notes and missing R#NNN markers",
+      "description": "R session note quality at 43% (3/7 with proper R#NNN markers). Hook misses: (1) completely empty notes, (2) diagnostic/analysis content without R# completion marker. Add detection for R sessions where note is empty or lacks R#NNN pattern.",
+      "priority": 1,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1389,
+      "source": "audit-s1389",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "progress_notes": [
+        {
+          "session": 1394,
+          "text": "A#123: Upgraded priority from 526 to 1 (high). R session note quality worsened to 33% \u2014 stale for 2 consecutive audits. Must be addressed next B session."
+        }
+      ],
+      "outcome": {
+        "session": 1395,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": ""
+      }
+    },
+    {
+      "id": "wq-528",
+      "title": "Add R session commit enforcement gate to prevent note quality degradation",
+      "description": "R session note quality at 33% because sessions editing session-context.mjs never commit. Build a post-session hook that detects uncommitted changes to tracked files after R sessions and either auto-commits with 'R#NNN: uncommitted changes' format or blocks session completion until a proper commit with R#NNN marker is made. Root cause: 5 consecutive R sessions (s1387-s1393) edited files without committing, producing no R# marker. wq-526 (hook detection) is complementary but this gate addresses the structural root cause.",
+      "priority": 2,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1394,
+      "source": "audit-s1394",
+      "tags": [
+        "audit"
+      ],
+      "deps": [
+        "wq-526"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1395,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": ""
+      }
     }
   ]
 }

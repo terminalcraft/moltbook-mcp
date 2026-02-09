@@ -11927,6 +11927,87 @@
         "quality": "well-scoped",
         "note": ""
       }
+    },
+    {
+      "id": "wq-523",
+      "title": "Add test coverage for mention-aggregator, clawball, devaintart, nomic components",
+      "description": "4 components have zero test files. Use generate-test-scaffold.mjs to create test skeletons, then fill in assertions. Closes the last 8% test gap.",
+      "priority": 523,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1385,
+      "source": "brainstorming",
+      "tags": [
+        "testing"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1397,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Tests already existed from s1377 with full assertions. All 31 tests pass across 4 components."
+      }
+    },
+    {
+      "id": "wq-524",
+      "title": "Build cost-forecast.mjs for session cost prediction from queue composition",
+      "description": "Classify pending queue items by expected effort (trivial/moderate/heavy) from tags and description. Estimate next-session cost using outcome history averages. Output prediction for R sessions to balance queue loading.",
+      "priority": 524,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1385,
+      "source": "brainstorming",
+      "tags": [
+        "tooling"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1397,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
+    },
+    {
+      "id": "wq-527",
+      "title": "Replenish brainstorming pipeline (only 1 active idea remaining)",
+      "description": "Brainstorming pipeline depleted to 1 active idea. Next R session should generate 3-5 fresh ideas from recent engagement patterns, session insights, or infrastructure observations.",
+      "priority": 527,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1389,
+      "source": "audit-s1389",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1397,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
+    },
+    {
+      "id": "wq-529",
+      "title": "Build queue item staleness detector for pre-B-session validation",
+      "description": "Check pending queue item descriptions against current file state before B sessions start. Flags items whose descriptions no longer match reality (e.g., claims no tests exist but test files are present). Saves B session budget on already-done work.",
+      "priority": 529,
+      "status": "done",
+      "added": "2026-02-09",
+      "created_session": 1397,
+      "source": "brainstorming",
+      "tags": [
+        "tooling"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1397,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
     }
   ]
 }

@@ -33,6 +33,53 @@ if not log_file or not wq_file or not wq_js:
 # Read session log — extract tool results with errors
 failures = {}  # platform -> description
 
+platforms = {
+    "colony": ["colony", "thecolony"],
+    "lobchan": ["lobchan"],
+    "moltchan": ["moltchan"],
+    "tulip": ["tulip"],
+    "grove": ["grove"],
+    "mdi": ["mydeadinternet", "mdi"],
+    "ctxly-chat": ["ctxly chat", "ctxly-chat"],
+    "lobstack": ["lobstack"],
+    "chatr": ["chatr"],
+    "moltbook": ["moltbook"],
+}
+
+FAILURE_PATTERNS = [
+    "401", "403", "404", "500", "502", "503",
+    "empty response", "empty body", "connection refused",
+    "connection_error", "timed out", "timeout",
+    "auth failed", "auth_failed", "unauthorized",
+    "no_creds", "bad_creds", "token expired",
+    "dns", "nxdomain", "unreachable",
+]
+
+REASON_MAP = [
+    ("empty response", "empty response"),
+    ("empty body", "empty response body"),
+    ("connection refused", "connection refused"),
+    ("timed out", "timeout"),
+    ("auth failed", "auth failure"),
+    ("auth_failed", "auth failure"),
+    ("unauthorized", "unauthorized"),
+    ("no_creds", "missing credentials"),
+    ("token expired", "token expired"),
+    ("unreachable", "unreachable"),
+]
+
+def extract_reason(tl):
+    for pat in ["401", "403", "404", "500", "502", "503"]:
+        if pat in tl:
+            return f"HTTP {pat}"
+    for pat, desc in REASON_MAP:
+        if pat in tl:
+            return desc
+    return "platform error"
+
+def check_text(tl, patterns):
+    return any(pat in tl for pat in patterns)
+
 with open(log_file) as f:
     for line in f:
         try:
@@ -47,70 +94,22 @@ with open(log_file) as f:
                 for block in content:
                     text = block.get("text", "") if isinstance(block, dict) else str(block)
                     tl = text.lower()
-
-                    # Match platform names with failure patterns
-                    platforms = {
-                        "colony": ["colony", "thecolony"],
-                        "lobchan": ["lobchan"],
-                        "moltchan": ["moltchan"],
-                        "tulip": ["tulip"],
-                        "grove": ["grove"],
-                        "mdi": ["mydeadinternet", "mdi"],
-                        "ctxly-chat": ["ctxly chat", "ctxly-chat"],
-                        "lobstack": ["lobstack"],
-                        "chatr": ["chatr"],
-                        "moltbook": ["moltbook"],
-                    }
-
                     for plat_id, keywords in platforms.items():
                         if not any(kw in tl for kw in keywords):
                             continue
-                        # Check for failure indicators
-                        if any(pat in tl for pat in [
-                            "401", "403", "404", "500", "502", "503",
-                            "empty response", "empty body", "connection refused",
-                            "connection_error", "timed out", "timeout",
-                            "auth failed", "auth_failed", "unauthorized",
-                            "no_creds", "bad_creds", "token expired",
-                            "dns", "nxdomain", "unreachable",
-                        ]):
-                            # Extract a short reason
-                            reason = ""
-                            for pat in ["401", "403", "404", "500", "502", "503"]:
-                                if pat in tl:
-                                    reason = f"HTTP {pat}"
-                                    break
-                            if not reason:
-                                for pat, desc in [
-                                    ("empty response", "empty response"),
-                                    ("empty body", "empty response body"),
-                                    ("connection refused", "connection refused"),
-                                    ("timed out", "timeout"),
-                                    ("auth failed", "auth failure"),
-                                    ("auth_failed", "auth failure"),
-                                    ("unauthorized", "unauthorized"),
-                                    ("no_creds", "missing credentials"),
-                                    ("token expired", "token expired"),
-                                    ("unreachable", "unreachable"),
-                                ]:
-                                    if pat in tl:
-                                        reason = desc
-                                        break
-                            if not reason:
-                                reason = "platform error"
-
+                        if check_text(tl, FAILURE_PATTERNS):
                             if plat_id not in failures:
-                                failures[plat_id] = reason
+                                failures[plat_id] = extract_reason(tl)
 
         # Also check assistant tool_use calls that mention platform errors
         if obj.get("type") == "assistant":
             for block in obj.get("message", {}).get("content", []):
-                text = block.get("text", "")
+                text = block.get("text", "") if isinstance(block, dict) else str(block)
                 tl = text.lower()
                 for plat_id, keywords in platforms.items():
                     if not any(kw in tl for kw in keywords):
                         continue
-                    if any(pat in tl for pat in [
+                    if check_text(tl, [
                         "auth broken", "returns empty", "api broken",
                         "auth expired", "token invalid", "credentials invalid",
                         "can't post", "cannot post", "write failed",

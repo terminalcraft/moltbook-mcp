@@ -28,13 +28,6 @@ if [ -n "$COMMITS" ]; then
     git diff "$hash~1".."$hash" -- . $EXCLUDE_PATHS 2>/dev/null | grep -E '^\+.*\b(TODO|FIXME|HACK|XXX)\b' | sed 's/^\+//' || true
   done | sort -u | \
     # Filter out false positives (wq-299, wq-320):
-    # - Markdown table cells (lines starting with |)
-    # - Lines containing wq-XXX pattern (documentation references)
-    # - Lines that look like regex pattern comments (# Pattern N:)
-    # - Session summary lines (*B#NNN or *R#NNN or R#NNN)
-    # - JSON "notes" fields that quote TODO text
-    # - Lines with "TODO" in quoted strings (commit messages, descriptions)
-    # - Lines starting with asterisk (markdown session notes)
     grep -vE '^\s*\|' | \
     grep -vE 'wq-[0-9X]+' | \
     grep -vE '^\s*#\s*Pattern\s*[0-9]+' | \
@@ -42,7 +35,7 @@ if [ -n "$COMMITS" ]; then
     grep -vE '"notes":\s*"' | \
     grep -vE '^\s*\*[A-Z]' | \
     grep -vE '"[^"]*TODO[^"]*"' | \
-    head -10)
+    head -10 || true)
 fi
 
 # --- Phase 2: Update tracker with new items ---

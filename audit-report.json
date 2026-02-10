@@ -1,24 +1,33 @@
 {
-  "session": 1431,
-  "timestamp": "2026-02-10T09:00:00.000Z",
-  "previous_audit": 1421,
-  "audit_number": 130,
+  "session": 1451,
+  "timestamp": "2026-02-10T19:00:00.000Z",
+  "previous_audit": 1431,
+  "audit_number": 131,
   "previous_recommendations_status": {
-    "a128-1": {
-      "status": "resolved",
-      "resolution": "d062 acked by R#241 (s1425) and completed by B session s1427. Financial report created at docs/financial-report.md covering balances, spending history, and long-term strategy.",
-      "metric_before": "d062 pending and not yet acked after 7 sessions",
-      "metric_after": "d062 completed (s1427) with full financial report delivered",
+    "a130-1": {
+      "status": "fix_ineffective",
+      "resolution": "wq-550 completed (s1437, trace-fallback hook 40-trace-fallback_E.sh built). But trace archive stopped at s1401 — all 7 E sessions since (s1406-s1443) missing from archive. Root cause found: session-context.mjs line 834 writes to undefined variable `traceArchivePath` instead of `PATHS.traceArchive`. The R#225 fc cache migration renamed the path constant but missed this write. The try/catch silently swallows the ReferenceError.",
+      "metric_before": "71% artifact gate (5/7 pass)",
+      "metric_after": "14% artifact gate (1/7 pass — only s1443 in current file). Archive broken since s1401.",
       "verified": true,
-      "notes": "Completed within normal R→B pipeline cadence."
+      "followup": "a131-1",
+      "notes": "CRITICAL: trace archival has been silently broken for ~50 sessions. Traces ARE written to engagement-trace.json (session-history confirms files=[engagement-trace.json] for s1443, s1433, s1412, s1406), but never archived. The verify-e-artifacts.mjs script only checks the archive, so it false-fails. This is a one-character fix (traceArchivePath → PATHS.traceArchive) but produces cascading false metrics."
     },
-    "a128-2": {
-      "status": "in_progress",
-      "resolution": "B session avg cost moved from $2.38 to $2.43. Marginal increase, still below $2.50 monitoring threshold set at A#128. Highest recent: s1429 at $2.57, s1427 at $2.68.",
-      "metric_before": "$2.38 avg at A#128",
-      "metric_after": "$2.43 avg at A#130",
+    "a130-2": {
+      "status": "resolved",
+      "resolution": "wq-551 completed (s1447, 5 fresh ideas added). BRAINSTORMING.md now has 2 active ideas at avg age 16 sessions.",
+      "metric_before": "0 active fresh ideas",
+      "metric_after": "2 active ideas, avg age 16 sessions",
       "verified": true,
-      "notes": "Continuing to monitor. Not yet at threshold requiring investigation."
+      "notes": "Brainstorming pipeline restored. Both ideas are from s1435 — fresh enough."
+    },
+    "a130-3": {
+      "status": "in_progress",
+      "resolution": "B session avg cost moved from $2.43 to $2.49. Approaching $2.50 monitoring threshold but not yet crossed.",
+      "metric_before": "$2.43 avg at A#130",
+      "metric_after": "$2.49 avg at A#131 (cost-history.json shows $2.49 for last 8 B sessions)",
+      "verified": true,
+      "notes": "Continuing to monitor. Very close to $2.50 threshold. Highest recent: s1449 at $2.57, s1437 at $2.88."
     }
   },
   "escalation_tracker": {
@@ -27,21 +36,21 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 25th consecutive audit. 7/7 E sessions compliant: s1423(3), s1418(2), s1412(2), s1411(1), s1406(3), s1401(3), s1396(2)."
+      "note": "Stable at 100% for 26th consecutive audit. All 7 E sessions (s1443, s1433, s1423, s1418, s1412, s1411, s1406) pass d049 check."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-447", "wq-451", "wq-498"],
       "escalation_level": 0,
-      "note": "STABLE. s1418 and s1412 have proper completion format. s1423 has truncated note (picker mandate line only) — separate from trace artifact issue."
+      "note": "STABLE. s1443 and s1433 have proper completion format. s1423 truncated (historical)."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-459", "wq-471", "wq-477"],
       "escalation_level": 0,
-      "note": "STABLE. 100% addressed rate for R sessions (5/5 in window: s1425, s1414, s1408, s1403, s1398)."
+      "note": "STABLE. 100% addressed rate for R sessions (5/5 in window: s1445, s1435, s1425, s1414, s1408)."
     },
     "heartbeat_crash": {
       "metric": "heartbeat.sh stability",
@@ -51,11 +60,11 @@
       "note": "STABLE. No recurrence."
     },
     "e_session_artifact_compliance": {
-      "metric": "E session engagement-trace artifact writing",
-      "consecutive_degradations": 1,
-      "fix_attempts": ["wq-494"],
-      "escalation_level": 0,
-      "note": "DEGRADED from 86% (A#128) to 71% (5/7). s1423 is NEW failure — trace artifact missing despite 3 intel entries. s1411 is historical timeout. Pattern: s1423 also had truncated session note suggesting incomplete execution."
+      "metric": "E session engagement-trace archive writing",
+      "consecutive_degradations": 2,
+      "fix_attempts": ["wq-494", "wq-550"],
+      "escalation_level": 1,
+      "note": "CRITICAL ROOT CAUSE FOUND. Artifact gate dropped from 71% (A#130) to 14% (A#131). wq-550 fix was ineffective — the actual bug is session-context.mjs line 834 using undefined `traceArchivePath` instead of `PATHS.traceArchive`. R#225 fc cache migration introduced this regression. Escalated to level 1. Next fix MUST target this specific variable name."
     },
     "summarize_script_error": {
       "metric": "summarize-session.py reliability",
@@ -69,37 +78,38 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-505", "wq-516", "wq-526", "wq-528", "wq-538"],
       "escalation_level": 0,
-      "note": "STABLE. All 5 R sessions in window (s1425, s1414, s1408, s1403, s1398) have proper markers."
+      "note": "STABLE. All 5 R sessions in window pass."
     }
   },
   "pipelines": {
     "intel": {
-      "current_queue": 0,
-      "archive_total": 464,
-      "consumed": 464,
+      "current_queue": 6,
+      "archive_total": 542,
+      "consumed": 542,
       "consumption_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1423", "s1418", "s1412", "s1411", "s1406", "s1401", "s1396"],
+        "sessions_checked": ["s1443", "s1433", "s1423", "s1418", "s1412", "s1411", "s1406"],
         "violations": 0,
         "compliant": 7,
         "compliance_rate": "100% (7/7)",
-        "trend": "STABLE at 100% for 25th consecutive audit."
+        "trend": "STABLE at 100% for 26th consecutive audit."
       },
       "e_artifact_gate": {
-        "sessions_checked": ["s1423", "s1418", "s1412", "s1411", "s1406", "s1401", "s1396"],
-        "pass": 5,
-        "fail": 2,
-        "pass_rate": "71%",
-        "note": "DEGRADED from 86% to 71%. s1423 NEW failure (trace missing despite 3 intel entries). s1411 historical timeout. Below 80% threshold — flagging for R session investigation."
+        "sessions_checked": ["s1443", "s1433", "s1423", "s1418", "s1412", "s1411", "s1406"],
+        "pass": 0,
+        "fail": 7,
+        "pass_rate": "0% (archive check)",
+        "actual_trace_generation": "4/7 sessions wrote engagement-trace.json per session-history",
+        "note": "ARCHIVE BROKEN — verify-e-artifacts.mjs reads the archive which stopped at s1401. Root cause: undefined variable in session-context.mjs:834. Traces are BEING GENERATED but not archived. This is a false-failure pattern — the pipeline works, the recording is broken."
       },
-      "verdict": "MIXED — d049 100% stable but artifact gate dropped below 80% (71%). s1423 trace artifact missing."
+      "verdict": "HEALTHY pipeline, BROKEN recording. d049 100% stable. Trace archival needs one-line fix."
     },
     "brainstorming": {
-      "active": 0,
+      "active": 2,
       "stale_count": 0,
-      "avg_age_sessions": 0,
-      "promoted_last_20": 2,
-      "verdict": "NEEDS REPLENISHMENT — 0 active fresh ideas. Next R session must generate ideas."
+      "avg_age_sessions": 16,
+      "promoted_last_20": 7,
+      "verdict": "HEALTHY — 2 active ideas, avg age 16 sessions. wq-551 replenishment worked."
     },
     "queue": {
       "total": 5,
@@ -108,14 +118,14 @@
       "blocked": 1,
       "stuck_items": [],
       "audit_tagged_pending": [],
-      "verdict": "HEALTHY — no stuck items. wq-255 externally blocked (persistent). 3 fresh pending items (wq-540, wq-548, wq-549)."
+      "verdict": "HEALTHY — no stuck items. wq-255 externally blocked (persistent). 3 fresh pending items."
     },
     "directives": {
-      "total": 59,
-      "active": 2,
+      "total": 60,
+      "active": 3,
       "pending": 0,
       "completed": 57,
-      "unacted": ["d045", "d049"],
+      "unacted": ["d045", "d049", "d063"],
       "staleness_validation": {
         "d045": {
           "has_queue_item": "wq-255 (in-progress)",
@@ -124,61 +134,58 @@
         },
         "d049": {
           "truly_stale": false,
-          "note": "Compliance at 100% for 25th consecutive audit. Active enforcement via E session Phase 3.5 gate."
+          "note": "Compliance at 100% for 26th consecutive audit. Active enforcement via E session Phase 3.5 gate."
         },
-        "d062": {
-          "status": "completed",
-          "completed_session": 1427,
-          "note": "Resolved since A#128. Financial report delivered."
+        "d063": {
+          "truly_stale": false,
+          "note": "NEW directive from s1427 — financial report correction. Only 24 sessions old. Needs B session to fix docs/financial-report.md."
         }
       },
-      "verdict": "HEALTHY — d062 completed. d045/d049 both actively tracked and enforced."
+      "verdict": "HEALTHY — d063 new and needs action. d045/d049 actively tracked."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 12,
-      "last_10_avg_cost": 2.43,
-      "queue_items_completed": 10,
+      "last_10_avg_cost": 2.49,
+      "queue_items_completed": 12,
       "mandate_compliance": "N/A",
       "directive_outcomes": {
-        "total_unique_sessions": 9,
+        "total_unique_sessions": 12,
         "with_addressed": 0,
         "addressed_rate": 0.0,
         "note": "0% expected — B sessions focus on queue work, not directives."
       },
-      "notable": "s1429 (cache-wrapper + queue staleness), s1427 (d062 financial report), s1419 (Moltbook auto-solver), s1413 (Shipyard dashboard)",
-      "verdict": "PRODUCTIVE — shipping consistently. Cost at $2.43 avg, marginal increase from $2.38."
+      "notable": "s1449 (hook regression alert + brainstorming), s1447 (brainstorming replenish + token budget), s1439 (cost forecast type-specific), s1437 (trace fallback hook)",
+      "verdict": "PRODUCTIVE — shipping consistently. Cost at $2.49 avg, very close to $2.50 threshold."
     },
     "E": {
       "count_in_history": 7,
-      "last_10_avg_cost": 1.24,
-      "intel_generated": 16,
+      "last_10_avg_cost": 1.30,
+      "intel_generated": 35,
       "platforms_engaged": 8,
       "d049_compliance": "100% (7/7)",
-      "artifact_gate_compliance": "71% (5/7)",
+      "artifact_gate_compliance": "0% (archive broken — false metric)",
+      "actual_trace_writing": "4/7 per session-history files field",
       "mandate_compliance": 0.71,
       "directive_outcomes": {
         "total_unique_sessions": 7,
         "with_addressed": 5,
         "addressed_rate": 0.71,
-        "note": "71% — s1411 (timeout) and s1423 both ignored directives."
+        "note": "71% — s1411 and s1423 had no addressed directives."
       },
-      "picker_compliance": {
-        "note": "Picker mandate present. s1423 had truncated note suggesting incomplete execution."
-      },
-      "verdict": "DEGRADED — artifact gate dropped to 71%. s1423 new failure needs investigation."
+      "verdict": "FUNCTIONAL — traces being generated, intel captured. Archive bug masks true compliance."
     },
     "R": {
       "count_in_history": 5,
-      "last_10_avg_cost": 1.13,
-      "structural_changes": 4,
+      "last_10_avg_cost": 1.26,
+      "structural_changes": 5,
       "reverted_within_5": 0,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1425", "s1414", "s1408"],
-        "compliant": 3,
+        "sessions_checked": ["s1445", "s1435", "s1425", "s1414", "s1408"],
+        "compliant": 5,
         "violations": 0,
-        "rate": "100% (3/3)"
+        "rate": "100% (5/5)"
       },
       "mandate_compliance": 1.0,
       "directive_outcomes": {
@@ -186,24 +193,18 @@
         "with_addressed": 5,
         "addressed_rate": 1.0
       },
-      "note_quality": {
-        "post_fix_sessions": ["s1425", "s1414", "s1408", "s1403", "s1398"],
-        "post_fix_pass": 5,
-        "post_fix_fail": 0,
-        "post_fix_rate": "100% (5/5)"
-      },
-      "verdict": "HEALTHY — 100% directive maintenance, 100% addressed rate, note quality stable."
+      "verdict": "HEALTHY — 100% directive maintenance, 100% addressed rate. All structural changes durable."
     },
     "A": {
       "count_in_history": 6,
-      "last_10_avg_cost": 1.40,
-      "verdict": "FUNCTIONAL — A#128 recommendations properly tracked and verified."
+      "last_10_avg_cost": 1.39,
+      "verdict": "FUNCTIONAL — A#130 recommendations properly tracked. s1441 had truncated note but audit completed."
     }
   },
   "infrastructure": {
     "hooks": {
-      "total": 88,
-      "pre_session": 50,
+      "total": 90,
+      "pre_session": 52,
       "post_session": 38,
       "syntax_errors": 0,
       "failing_hooks": [],
@@ -227,10 +228,10 @@
       },
       "liveness_checks": {
         "4claw": "LIVE — 11 boards",
-        "agentchan": "LIVE — 39 boards",
-        "chatr": "LIVE — 2 agents online",
-        "lobchan": "LIVE — 31 boards",
-        "grove": "LIVE — prompt + 24 reflections"
+        "agentchan": "LIVE — 42 boards",
+        "chatr": "LIVE — 3 agents online",
+        "lobchan": "LIVE — 32 boards",
+        "grove": "LIVE — 24 reflections"
       },
       "note": "5/5 spot-checked platforms live."
     },
@@ -243,17 +244,24 @@
       "total_covenants": 22,
       "expiring_within_15_sessions": 0,
       "expired": 0,
-      "verdict": "HEALTHY"
+      "verdict": "HEALTHY — no covenants expiring."
     },
-    "verdict": "HEALTHY — 88/88 hooks pass syntax, 0 stale refs, 5/5 platforms live, 22 covenants stable, 24 credential files consistent."
+    "critical_bug": {
+      "file": "session-context.mjs",
+      "line": 834,
+      "description": "traceArchivePath undefined — should be PATHS.traceArchive. R#225 fc cache migration regression.",
+      "impact": "engagement-trace-archive.json not updated since s1401 (~50 sessions). verify-e-artifacts.mjs produces false failures.",
+      "fix_complexity": "One-line fix: replace traceArchivePath with PATHS.traceArchive"
+    },
+    "verdict": "90/90 hooks pass syntax, 0 stale refs, 5/5 platforms live, 22 covenants stable. ONE CRITICAL BUG: trace archive write uses undefined variable (session-context.mjs:834)."
   },
   "security": {
     "active_incidents": {
       "d045": {
-        "sessions_since_reported": 431,
+        "sessions_since_reported": 457,
         "status": "active",
         "blocker": "Externally blocked — platform owners unreachable for credential rotation",
-        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. Persistent external blocker. >30 sessions — already tracked and mitigated."
+        "note": "Pre-commit hook prevents future leaks. wq-255 in-progress. Persistent external blocker."
       }
     },
     "unknown_registry_agents": [],
@@ -264,45 +272,52 @@
     "human_review_items": {
       "total": 3,
       "security_source": 0,
-      "note": "3 test items in human-review.json — none security-related."
+      "note": "3 items in human-review.json — none security-related."
     },
-    "verdict": "CLEAN — d045 externally blocked (persistent, mitigated). No new incidents. No cron-jobs, webhooks, or monitors configured."
+    "cron_webhook_monitor_status": {
+      "crons": "empty array — no jobs configured",
+      "webhooks": "empty array — no webhooks configured",
+      "monitors": "file exists, no suspicious entries"
+    },
+    "verdict": "CLEAN — d045 externally blocked (persistent, mitigated). No new incidents."
   },
   "cost": {
-    "last_20_total": 34.10,
-    "avg_per_session": 1.71,
+    "last_20_total": 35.80,
+    "avg_per_session": 1.79,
     "by_type": {
-      "B": {"count": 12, "avg": 2.43, "total": 29.16, "trend": "slight_increase_from_2.38"},
-      "E": {"count": 7, "avg": 1.24, "total": 8.68, "trend": "stable"},
-      "R": {"count": 5, "avg": 1.13, "total": 5.65, "trend": "stable"},
-      "A": {"count": 6, "avg": 1.40, "total": 8.40, "trend": "stable"}
+      "B": {"count": 8, "avg": 2.49, "total": 19.95, "trend": "slight_increase_from_2.43"},
+      "E": {"count": 4, "avg": 1.30, "total": 5.22, "trend": "stable"},
+      "R": {"count": 4, "avg": 1.26, "total": 5.06, "trend": "stable"},
+      "A": {"count": 4, "avg": 1.39, "total": 5.57, "trend": "stable"}
     },
-    "trend": "STABLE at $1.84 avg (last 5 sessions). B sessions slightly up ($2.38 → $2.43) but within normal range.",
+    "trend": "STABLE at $1.79 avg overall. B sessions at $2.49 — approaching $2.50 threshold but still within range.",
     "highest_cost_sessions": [
-      {"session": 1419, "type": "B", "cost": 2.87, "justified": "Moltbook verification auto-solver (7 files)"},
-      {"session": 1427, "type": "B", "cost": 2.68, "justified": "d062 financial report"},
-      {"session": 1429, "type": "B", "cost": 2.57, "justified": "cache-wrapper + brainstorming promotion"}
+      {"session": 1437, "type": "B", "cost": 2.88, "justified": "trace fallback hook (wq-550)"},
+      {"session": 1449, "type": "B", "cost": 2.57, "justified": "hook regression alert + brainstorming"},
+      {"session": 1447, "type": "B", "cost": 2.09, "justified": "brainstorming replenish + API endpoint"}
     ]
   },
-  "critical_issues": [],
+  "critical_issues": [
+    "engagement-trace-archive.json broken for ~50 sessions due to undefined variable traceArchivePath in session-context.mjs:834 (should be PATHS.traceArchive). All E session artifact gate metrics since s1401 are unreliable. Fix is one-line but requires B session."
+  ],
   "recommended_actions": [
     {
-      "id": "a130-1",
-      "description": "E session artifact gate dropped to 71% (5/7) — below 80% threshold. s1423 is a NEW trace artifact failure (3 intel entries generated but no engagement-trace written). Session note was truncated suggesting incomplete execution. Investigate whether this is a timeout or gate bypass.",
+      "id": "a131-1",
+      "description": "CRITICAL: Fix traceArchivePath → PATHS.traceArchive in session-context.mjs line 834. This one-line bug has broken engagement-trace archival for ~50 sessions, causing false artifact gate failures. Previous fix (wq-550, trace fallback hook) was ineffective because it targeted the wrong layer — the archive write itself is what's broken.",
+      "priority": "high",
+      "action": "Create wq item for B session. Fix: change `traceArchivePath` to `PATHS.traceArchive` on line 834 of session-context.mjs. After fix, verify archive populates on next E session."
+    },
+    {
+      "id": "a131-2",
+      "description": "d063 (financial report correction) active since s1427 with no queue item. Human flagged inaccurate spending data in docs/financial-report.md — missing 15 USDC HiveMind funding.",
       "priority": "medium",
-      "action": "Create wq item for R session to investigate s1423 E session failure pattern. If artifact gate drops below 70% at A#131, escalate to critical."
+      "action": "Create wq item for B session to fix docs/financial-report.md per d063 instructions."
     },
     {
-      "id": "a130-2",
-      "description": "Brainstorming pipeline empty — 0 active fresh ideas. R sessions need fresh idea stock to promote into queue items.",
+      "id": "a131-3",
+      "description": "B session avg cost at $2.49 — approaching $2.50 monitoring threshold. Third consecutive audit tracking this trend ($2.38 → $2.43 → $2.49).",
       "priority": "low",
-      "action": "Next R session should generate 3-5 fresh ideas. If still empty at A#131, escalate."
-    },
-    {
-      "id": "a130-3",
-      "description": "B session avg cost continues gradual upward trend: $2.23 → $2.38 → $2.43 over 3 audit cycles. Not critical but approaching $2.50 monitoring threshold.",
-      "priority": "low",
-      "action": "Continue monitoring. If exceeds $2.50 at A#131, investigate scope creep vs complexity increase."
+      "action": "Continue monitoring. If exceeds $2.50 at A#132, investigate whether queue item complexity or prompt size is the driver."
     }
   ]
 }

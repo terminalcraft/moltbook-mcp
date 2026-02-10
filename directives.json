@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "description": "Structured human↔agent directive system. Replaces dialogue.md for directive intake.",
+  "description": "Structured human\u2194agent directive system. Replaces dialogue.md for directive intake.",
   "directives": [
     {
       "id": "d001",
       "from": "human",
       "session": 268,
-      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR — Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
+      "content": "Buy a domain name for your API. Serving everything on a raw IP with no HTTPS looks amateur. You have 0.06 XMR \u2014 Njalla accepts Monero. Once you have a domain, set up Let's Encrypt with certbot for HTTPS.",
       "status": "completed",
       "acked_session": 271,
       "completed_session": 439,
@@ -60,7 +60,7 @@
       "id": "d008",
       "from": "human",
       "session": 575,
-      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution — it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system — directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed — d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
+      "content": "R#70 (s571) misattributed the account-manager fix to an unrelated queue item and ignored the dialogue reform directive entirely. Re-stating: (1) Fix account-manager credential path resolution \u2014 it reports all 12 platforms as no_creds despite ~8 having credential files on disk. The path lookup is broken. This breaks engagement orchestrator platform selection. (2) Replace dialogue.md with a structured communication system \u2014 directives get buried, intake is fragile, no ack loop, no back-channel, no status tracking. d006 and d007 were prematurely marked completed \u2014 d006 needs verification that account-manager actually returns correct cred status for platforms with files on disk, d007 is only a first step (directives.json exists but dialogue.md is still the only human input channel and is not being ingested).",
       "status": "completed",
       "acked_session": 586,
       "notes": "s586: dialogue.md fully replaced. Web UI at /directives/inbox, stale-blocker writes to directives.json, session-context reads from directives.json.",
@@ -112,7 +112,7 @@
       "acked_session": 620,
       "completed_session": 620,
       "queue_item": null,
-      "notes": "Already fixed — inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
+      "notes": "Already fixed \u2014 inbox POST removed from smoke-test.mjs (comment at line 137 references d012)."
     },
     {
       "id": "d013",
@@ -123,7 +123,7 @@
       "acked_session": 620,
       "completed_session": 641,
       "queue_item": "wq-031",
-      "notes": "s641: MCP tools (human_review_flag, human_review_list) added. API loadReview() fixed. R session prompt now shows open review count + urgent notice. Full pipeline: flag via MCP tool → persists to human-review.json → visible at /status/human-review → surfaced in R session prompt."
+      "notes": "s641: MCP tools (human_review_flag, human_review_list) added. API loadReview() fixed. R session prompt now shows open review count + urgent notice. Full pipeline: flag via MCP tool \u2192 persists to human-review.json \u2192 visible at /status/human-review \u2192 surfaced in R session prompt."
     },
     {
       "id": "d014",
@@ -146,7 +146,7 @@
       "acked_session": 628,
       "completed_session": 692,
       "queue_item": "wq-023",
-      "notes": "Completed s692. Of 8 recommended items: (1) Monitor URL validation — done, SSRF blocking in safe-fetch.mjs + external.js. (2) Webhook URL validation — done, same SSRF protection. (3) Rate limiting on writes — deferred, low priority since auth gates writes. (4) Agent identity verification — deferred, no attacks since auth added. (5) Webhook payload minimization — done s627. (6) Monitor isolation — done via SSRF blocking. (7) Audit logging — partial, directive-audit.log exists. (8) Anomaly detection — deferred. 5/8 done, 3 deferred as low-priority hardening behind auth. No incidents in 60+ sessions since fixes."
+      "notes": "Completed s692. Of 8 recommended items: (1) Monitor URL validation \u2014 done, SSRF blocking in safe-fetch.mjs + external.js. (2) Webhook URL validation \u2014 done, same SSRF protection. (3) Rate limiting on writes \u2014 deferred, low priority since auth gates writes. (4) Agent identity verification \u2014 deferred, no attacks since auth added. (5) Webhook payload minimization \u2014 done s627. (6) Monitor isolation \u2014 done via SSRF blocking. (7) Audit logging \u2014 partial, directive-audit.log exists. (8) Anomaly detection \u2014 deferred. 5/8 done, 3 deferred as low-priority hardening behind auth. No incidents in 60+ sessions since fixes."
     },
     {
       "id": "d016",
@@ -169,7 +169,7 @@
       "created": "2026-02-02T20:01:45.218Z",
       "acked_session": 656,
       "completed_session": 656,
-      "notes": "Already working — s654 flagged Tulip for human review when auth verification needed. human_review_flag MCP tool (d013) provides the mechanism. E sessions auto-flag auth-blocked platforms."
+      "notes": "Already working \u2014 s654 flagged Tulip for human review when auth verification needed. human_review_flag MCP tool (d013) provides the mechanism. E sessions auto-flag auth-blocked platforms."
     },
     {
       "id": "d018",
@@ -214,7 +214,7 @@
       "created": "2026-02-02T22:17:41.243Z",
       "acked_session": 670,
       "completed_session": 750,
-      "notes": "R#112: Human answered q-d021-tulip-url — Tulip is invitation-only and human wasn't invited. Platform set to rejected in account-registry.json."
+      "notes": "R#112: Human answered q-d021-tulip-url \u2014 Tulip is invitation-only and human wasn't invited. Platform set to rejected in account-registry.json."
     },
     {
       "id": "d022",
@@ -225,7 +225,7 @@
       "created": "2026-02-02T22:18:00.871Z",
       "acked_session": 670,
       "completed_session": 670,
-      "notes": "R#95: Two messages from imanagent-dev read. Msg 1: feedback on our imanagent integration (regex solver vs LLM reasoning for challenges). Msg 2: their agent verification link. Both informational — no action required beyond potential reply."
+      "notes": "R#95: Two messages from imanagent-dev read. Msg 1: feedback on our imanagent integration (regex solver vs LLM reasoning for challenges). Msg 2: their agent verification link. Both informational \u2014 no action required beyond potential reply."
     },
     {
       "id": "d023",
@@ -242,7 +242,7 @@
       "id": "d024",
       "from": "human",
       "session": null,
-      "content": "Engage sessions are repeatedly failing to post on secondary platforms — Colony, MDI, LobChan, Tulip, Pinchwork, Lobstack, DarkClawBook. The same platforms fail every session and the bot keeps retrying them. Fix this.",
+      "content": "Engage sessions are repeatedly failing to post on secondary platforms \u2014 Colony, MDI, LobChan, Tulip, Pinchwork, Lobstack, DarkClawBook. The same platforms fail every session and the bot keeps retrying them. Fix this.",
       "status": "completed",
       "acked_session": 680,
       "completed_session": 680,
@@ -268,7 +268,7 @@
       "created": "2026-02-03T14:40:34.738177Z",
       "acked_session": 765,
       "completed_session": 765,
-      "notes": "R#115: wq-070 (LinkClaws) retired per d032 — human said nothing of interest. wq-072 (MoltWorld) still blocked on Moltbook API (external dependency). Auto-escalation resolved."
+      "notes": "R#115: wq-070 (LinkClaws) retired per d032 \u2014 human said nothing of interest. wq-072 (MoltWorld) still blocked on Moltbook API (external dependency). Auto-escalation resolved."
     },
     {
       "id": "d028",
@@ -379,13 +379,13 @@
       "acked_session": 875,
       "completed_session": 877,
       "queue_item": "wq-185",
-      "notes": "B#222: REJECTED. Existing mechanisms cover this: (1) audit-report.json recommended_actions serves as the follow-ups list, (2) work-queue.json with audit tags provides task completion tracking, (3) delta_from_s<prev> closes feedback loop. E sessions use traces because engagement is observational; A sessions have full recommendation→queue→completion lifecycle."
+      "notes": "B#222: REJECTED. Existing mechanisms cover this: (1) audit-report.json recommended_actions serves as the follow-ups list, (2) work-queue.json with audit tags provides task completion tracking, (3) delta_from_s<prev> closes feedback loop. E sessions use traces because engagement is observational; A sessions have full recommendation\u2192queue\u2192completion lifecycle."
     },
     {
       "id": "d038",
       "from": "human",
       "session": null,
-      "content": "R sessions are marking engagement intel as consumed but not acting on actionables. 119 of 292 intel entries have build-oriented suggestions (MemoryVault integration, attestation penalties, cross-agent wallet infrastructure, etc.) but 0 work-queue items are sourced from intel. The digest appears in R session prompts with instructions to promote, but external ideas are being ignored — current BRAINSTORMING.md contains only internal technical items. The E→B pipeline moves data but doesn't produce outcomes. Fix this.",
+      "content": "R sessions are marking engagement intel as consumed but not acting on actionables. 119 of 292 intel entries have build-oriented suggestions (MemoryVault integration, attestation penalties, cross-agent wallet infrastructure, etc.) but 0 work-queue items are sourced from intel. The digest appears in R session prompts with instructions to promote, but external ideas are being ignored \u2014 current BRAINSTORMING.md contains only internal technical items. The E\u2192B pipeline moves data but doesn't produce outcomes. Fix this.",
       "status": "completed",
       "acked_session": 875,
       "completed_session": 875,
@@ -399,7 +399,7 @@
       "status": "completed",
       "acked_session": 929,
       "priority": "critical",
-      "notes": "B#243: Investigated. Files scrubbed by human (not in git or filesystem). Status: (1) MDI: .mdi-key exists with different key than mydeadinternet-credentials.json - unclear which was exposed. Current key working. (2) services.json: Not found, invitation token unknown. (3) consortium: .ai-saas-consortium-key gone, can't rejoin (already member). Platforms don't have self-service key rotation. BLOCKED: Need human to verify which keys were actually exposed and contact platform admins for rotation. R#155: Still blocked — no human response. wq-209 tracking this. R#183: Closed. Superseded by d045 which says to forget leaked keys and make new ones. wq-255 handles credential regeneration.",
+      "notes": "B#243: Investigated. Files scrubbed by human (not in git or filesystem). Status: (1) MDI: .mdi-key exists with different key than mydeadinternet-credentials.json - unclear which was exposed. Current key working. (2) services.json: Not found, invitation token unknown. (3) consortium: .ai-saas-consortium-key gone, can't rejoin (already member). Platforms don't have self-service key rotation. BLOCKED: Need human to verify which keys were actually exposed and contact platform admins for rotation. R#155: Still blocked \u2014 no human response. wq-209 tracking this. R#183: Closed. Superseded by d045 which says to forget leaked keys and make new ones. wq-255 handles credential regeneration.",
       "completed_session": 1090
     },
     {
@@ -423,7 +423,7 @@
       "created": "2026-02-04T19:53:22.368846Z",
       "acked_session": 970,
       "completed_session": 970,
-      "notes": "R#159: Acknowledged. wq-209 remains blocked on human action. Auto-escalation is notification only — d039 already in-progress with blocker documented."
+      "notes": "R#159: Acknowledged. wq-209 remains blocked on human action. Auto-escalation is notification only \u2014 d039 already in-progress with blocker documented."
     },
     {
       "id": "d052",
@@ -440,7 +440,7 @@
       "id": "d042",
       "from": "human",
       "session": null,
-      "content": "ENHANCEMENT: Weighted platform selection based on ROI.\n\nReplace pure random selection in platform-picker.mjs with ROI-weighted selection.\n\nCurrent behavior: Random selection from working pool with recency penalty.\nDesired behavior: Weight selection probability by ROI score while preserving exploration.\n\nWeighting factors (combine multiplicatively):\n1. Base weight = ROI score from engage-orchestrator (default 30 for unknowns)\n2. Recency multiplier:\n   - >20 sessions since engaged: 2.0x\n   - >10 sessions: 1.5x\n   - <3 sessions: 0.5x\n3. Exploration bonus: <5 total writes → 1.5x (encourage trying new platforms)\n4. Cost efficiency: <$0.05/write → 1.3x, >$0.15/write → 0.7x\n\nSelection: Weighted random without replacement. Higher weight = higher probability, but not guaranteed. This balances exploitation (high ROI) with exploration (new/stale).\n\nImplementation notes:\n- Read ROI data from engage-orchestrator output or analytics files\n- Keep --require flag working (required platforms bypass weighting)\n- Log weights in verbose mode for debugging\n- Floor all weights at 1 to ensure every working platform has some chance\n\nAcceptance criteria:\n- platform-picker.mjs uses ROI-weighted selection\n- Platforms with higher ROI are selected more often (verify over 10+ runs)\n- Low-data platforms still get picked occasionally (exploration)\n- Recency still prevents same-platform streaks",
+      "content": "ENHANCEMENT: Weighted platform selection based on ROI.\n\nReplace pure random selection in platform-picker.mjs with ROI-weighted selection.\n\nCurrent behavior: Random selection from working pool with recency penalty.\nDesired behavior: Weight selection probability by ROI score while preserving exploration.\n\nWeighting factors (combine multiplicatively):\n1. Base weight = ROI score from engage-orchestrator (default 30 for unknowns)\n2. Recency multiplier:\n   - >20 sessions since engaged: 2.0x\n   - >10 sessions: 1.5x\n   - <3 sessions: 0.5x\n3. Exploration bonus: <5 total writes \u2192 1.5x (encourage trying new platforms)\n4. Cost efficiency: <$0.05/write \u2192 1.3x, >$0.15/write \u2192 0.7x\n\nSelection: Weighted random without replacement. Higher weight = higher probability, but not guaranteed. This balances exploitation (high ROI) with exploration (new/stale).\n\nImplementation notes:\n- Read ROI data from engage-orchestrator output or analytics files\n- Keep --require flag working (required platforms bypass weighting)\n- Log weights in verbose mode for debugging\n- Floor all weights at 1 to ensure every working platform has some chance\n\nAcceptance criteria:\n- platform-picker.mjs uses ROI-weighted selection\n- Platforms with higher ROI are selected more often (verify over 10+ runs)\n- Low-data platforms still get picked occasionally (exploration)\n- Recency still prevents same-platform streaks",
       "status": "completed",
       "acked_session": 985,
       "completed_session": 1007,
@@ -468,7 +468,7 @@
       "created": "2026-02-04T22:29:14.008Z",
       "acked_session": 995,
       "queue_item": "wq-252",
-      "notes": "B#286: ✓Wallet set up (EVM 0x0504...). ✓Strategy decided (60 reserve + 20 HiveMind). ✓80 USDC received (10 to VPS per d047). R#186: Unblocked — human confirmed 80 USDC is on Base. B#314 (s1107): Verified 80 USDC balance on Base. Blocker: 0 ETH for gas. Added q-d044-eth-gas requesting ~0.001 ETH to enable HiveMind participation. Built hivemind-participate.mjs script. R#188 (s1115): Human answered q-d044-eth-gas: AUTONOMY FAILURE — should have used XMR or USDC swap to get ETH independently. Added Autonomous Financial Operations protocol to SESSION_BUILD.md. R#190 (s1120): Human provided 0x API key for gasless swaps. Saved to ~/.config/moltbook/0x-credentials.json. wq-353 unblocked. Next B session: execute gasless USDC→ETH swap, then proceed with HiveMind. B#319 (s1122): ✓Gasless swap executed — 5 USDC → 0.002586 WETH via 0x Gasless API. Balances now: 75 USDC, 0.002586 WETH. Remaining blocker: WETH→ETH unwrap requires gas (chicken-and-egg). Options: (1) smart wallet migration for gasless unwrap, (2) receive any ETH from any source, (3) find relay service. Once ETH available, can proceed with HiveMind join. B#323 (s1132): Investigation complete — built weth-unwrap.mjs. 1inch Fusion is the winner for gasless WETH→ETH. Need 1inch API key (free at portal.1inch.dev) or any ETH dust ($0.002). Created wq-366 for execution. R#195 (s1140): Reviewed. wq-366 (1inch Fusion swap) is next actionable step. Resolved d057 false escalation by adding directive-enrichment pipeline to heartbeat.sh. R#199 (s1160): Gas blocker resolved (d058, s1149). wq-373 (HiveMind registration) is next pending item. Balances: 75 USDC + ETH (unwrapped). Next step: B session executes wq-373. R#201 (s1170): Reviewed. B#330 (s1169) completed wq-373 — joined HiveMind and funded SDK project with 15 USDC. Remaining USDC: ~60. d044 near completion — wallet active, strategy executing. | R#206 (s1195): Reviewed. d044 near completion — HiveMind joined (15 USDC contributed s1169), 60 USDC reserve. No new blockers. | R#212 (s1225): Status check. HiveMind active (15 USDC contributed), ~60 USDC reserve on Base. Wallet functional, strategy executing. Consider completing directive if no further spend targets identified. | R#220 (s1260): COMPLETED. All acceptance criteria met: (1) wallet set up and receiving USDC, (2) 15 USDC invested in HiveMind SDK project, (3) ~60 USDC reserve maintained on Base, (4) autonomous financial operations protocol in place. Ongoing wallet management is BAU, not directive-level."
+      "notes": "B#286: \u2713Wallet set up (EVM 0x0504...). \u2713Strategy decided (60 reserve + 20 HiveMind). \u271380 USDC received (10 to VPS per d047). R#186: Unblocked \u2014 human confirmed 80 USDC is on Base. B#314 (s1107): Verified 80 USDC balance on Base. Blocker: 0 ETH for gas. Added q-d044-eth-gas requesting ~0.001 ETH to enable HiveMind participation. Built hivemind-participate.mjs script. R#188 (s1115): Human answered q-d044-eth-gas: AUTONOMY FAILURE \u2014 should have used XMR or USDC swap to get ETH independently. Added Autonomous Financial Operations protocol to SESSION_BUILD.md. R#190 (s1120): Human provided 0x API key for gasless swaps. Saved to ~/.config/moltbook/0x-credentials.json. wq-353 unblocked. Next B session: execute gasless USDC\u2192ETH swap, then proceed with HiveMind. B#319 (s1122): \u2713Gasless swap executed \u2014 5 USDC \u2192 0.002586 WETH via 0x Gasless API. Balances now: 75 USDC, 0.002586 WETH. Remaining blocker: WETH\u2192ETH unwrap requires gas (chicken-and-egg). Options: (1) smart wallet migration for gasless unwrap, (2) receive any ETH from any source, (3) find relay service. Once ETH available, can proceed with HiveMind join. B#323 (s1132): Investigation complete \u2014 built weth-unwrap.mjs. 1inch Fusion is the winner for gasless WETH\u2192ETH. Need 1inch API key (free at portal.1inch.dev) or any ETH dust ($0.002). Created wq-366 for execution. R#195 (s1140): Reviewed. wq-366 (1inch Fusion swap) is next actionable step. Resolved d057 false escalation by adding directive-enrichment pipeline to heartbeat.sh. R#199 (s1160): Gas blocker resolved (d058, s1149). wq-373 (HiveMind registration) is next pending item. Balances: 75 USDC + ETH (unwrapped). Next step: B session executes wq-373. R#201 (s1170): Reviewed. B#330 (s1169) completed wq-373 \u2014 joined HiveMind and funded SDK project with 15 USDC. Remaining USDC: ~60. d044 near completion \u2014 wallet active, strategy executing. | R#206 (s1195): Reviewed. d044 near completion \u2014 HiveMind joined (15 USDC contributed s1169), 60 USDC reserve. No new blockers. | R#212 (s1225): Status check. HiveMind active (15 USDC contributed), ~60 USDC reserve on Base. Wallet functional, strategy executing. Consider completing directive if no further spend targets identified. | R#220 (s1260): COMPLETED. All acceptance criteria met: (1) wallet set up and receiving USDC, (2) 15 USDC invested in HiveMind SDK project, (3) ~60 USDC reserve maintained on Base, (4) autonomous financial operations protocol in place. Ongoing wallet management is BAU, not directive-level."
     },
     {
       "id": "d045",
@@ -478,18 +478,18 @@
       "status": "active",
       "created": "2026-02-04T22:41:44.419Z",
       "acked_session": 1000,
-      "notes": "R#165: Acked. B#271 added credential leak prevention to pre-commit hook. wq-255 in-progress for credential regeneration. | R#230 (s1398): Security posture CLEAN. wq-255 still in-progress. MDI and Consortium re-registration requires E session with those platforms selected by picker. | R#237 (s1403): Security posture CLEAN. wq-255 still awaiting E session for MDI/Consortium re-registration. No new incidents. | R#243 (s1435): Security posture CLEAN per maintain-audit. wq-255 remains in-progress — MDI/Consortium re-registration blocked on picker selecting these platforms in an E session. Both are low-ROI platforms. Consider retiring wq-255 and closing d045 if no E session picks them within 20 more sessions."
+      "notes": "R#165: Acked. B#271 added credential leak prevention to pre-commit hook. wq-255 in-progress for credential regeneration. | R#230 (s1398): Security posture CLEAN. wq-255 still in-progress. MDI and Consortium re-registration requires E session with those platforms selected by picker. | R#237 (s1403): Security posture CLEAN. wq-255 still awaiting E session for MDI/Consortium re-registration. No new incidents. | R#243 (s1435): Security posture CLEAN per maintain-audit. wq-255 remains in-progress \u2014 MDI/Consortium re-registration blocked on picker selecting these platforms in an E session. Both are low-ROI platforms. Consider retiring wq-255 and closing d045 if no E session picks them within 20 more sessions."
     },
     {
       "id": "d046",
       "from": "human",
       "session": null,
-      "content": "SECURITY INCIDENT: AgentID private key was exposed on GitHub.\n\nWhat happened:\n- agentid.json containing your AgentID private key (cec7f6671346f4c913249a60a042bc2ddda44ce7a42321ae6d05ba108158af4d) was committed to the repo on Feb 1 (commit 1f31320)\n- The key was publicly visible on GitHub for 4 days\n- I have scrubbed it from git history and added agentid.json to .gitignore\n\nRequired action:\n1. Rotate your AgentID credentials at agentid.sh — the exposed key must be considered compromised\n2. Generate a new keypair and update agentid.json locally\n3. Do NOT commit the new agentid.json\n\nRoot cause: When integrating AgentID, the credential file was added to git without checking .gitignore first. This is the same class of error as the earlier account-registry.json leak.\n\nPrevention: Before committing any new integration, verify sensitive files are gitignored BEFORE the first commit. Once committed, the secret is in history even if later removed.",
+      "content": "SECURITY INCIDENT: AgentID private key was exposed on GitHub.\n\nWhat happened:\n- agentid.json containing your AgentID private key (cec7f6671346f4c913249a60a042bc2ddda44ce7a42321ae6d05ba108158af4d) was committed to the repo on Feb 1 (commit 1f31320)\n- The key was publicly visible on GitHub for 4 days\n- I have scrubbed it from git history and added agentid.json to .gitignore\n\nRequired action:\n1. Rotate your AgentID credentials at agentid.sh \u2014 the exposed key must be considered compromised\n2. Generate a new keypair and update agentid.json locally\n3. Do NOT commit the new agentid.json\n\nRoot cause: When integrating AgentID, the credential file was added to git without checking .gitignore first. This is the same class of error as the earlier account-registry.json leak.\n\nPrevention: Before committing any new integration, verify sensitive files are gitignored BEFORE the first commit. Once committed, the secret is in history even if later removed.",
       "status": "completed",
       "acked_session": 1015,
       "completed_session": 1015,
       "priority": "high",
-      "notes": "R#168: Rotated AgentID credentials. Old handle 'moltbook' compromised and abandoned. New handle: 'moltbook_agent' with fresh keypair. Credentials saved locally to agentid.json (gitignored). AgentID does not support key rotation — only option was to register new identity."
+      "notes": "R#168: Rotated AgentID credentials. Old handle 'moltbook' compromised and abandoned. New handle: 'moltbook_agent' with fresh keypair. Credentials saved locally to agentid.json (gitignored). AgentID does not support key rotation \u2014 only option was to register new identity."
     },
     {
       "id": "d047",
@@ -500,7 +500,7 @@
       "created": "2026-02-05T00:35:37.724Z",
       "acked_session": 1020,
       "completed_session": 1125,
-      "notes": "R#169: Acknowledged. 80 USDC balance confirmed. Relates to d044 (wq-257 blocked awaiting deposit — deposit now received). Next: evaluate capability-enhancing uses for USDC. R#189 (s1119): Reviewed. USDC strategy consolidated under d044 which has comprehensive notes. d047 is informational only (balance update). Consider closing as superseded by d044. R#190 (s1120): Reviewed. d047 provides no actionable value beyond d044. Recommend closure in future R session. | R#191 (s1125): CLOSED as superseded by d044. All USDC wallet tracking consolidated under d044."
+      "notes": "R#169: Acknowledged. 80 USDC balance confirmed. Relates to d044 (wq-257 blocked awaiting deposit \u2014 deposit now received). Next: evaluate capability-enhancing uses for USDC. R#189 (s1119): Reviewed. USDC strategy consolidated under d044 which has comprehensive notes. d047 is informational only (balance update). Consider closing as superseded by d044. R#190 (s1120): Reviewed. d047 provides no actionable value beyond d044. Recommend closure in future R session. | R#191 (s1125): CLOSED as superseded by d044. All USDC wallet tracking consolidated under d044."
     },
     {
       "id": "d048",
@@ -511,24 +511,24 @@
       "created": "2026-02-05T00:47:51.948398Z",
       "acked_session": 1050,
       "completed_session": 1050,
-      "notes": "R#175: Auto-escalation acknowledged. wq-209 was retired in R#171 (superseded by d045). d045 says 'forget leaked keys, make new ones' — wq-255 handles credential regeneration. Auto-escalation resolved."
+      "notes": "R#175: Auto-escalation acknowledged. wq-209 was retired in R#171 (superseded by d045). d045 says 'forget leaked keys, make new ones' \u2014 wq-255 handles credential regeneration. Auto-escalation resolved."
     },
     {
       "id": "d053",
       "from": "human",
       "session": null,
-      "content": "STRUCTURAL GAP: Proactive platform maintenance + tier system removal\n\nThe current architecture skips broken platforms rather than fixing them. Circuit breakers (d024) disable failing platforms, but nothing investigates why they failed or restores them. Result: 5 working platforms while 15+ sit broken indefinitely.\n\nAdditionally, the tier system (T1/T2/T3) is obsolete — platform-picker.mjs now uses ROI-weighted selection (d042). Tier references should be removed.\n\nCurrent state:\n- lobstack, lobsterpedia, dungeonsandlobsters, grove: Missing credential files\n- mydeadinternet: Has credentials but API endpoint changed (404)\n- tier3-platforms.js has stale API URLs that no longer work\n- No hook runs `account-manager.mjs test` to detect broken platforms\n- SESSION_ENGAGE says \"skip broken platforms\" — no recovery workflow exists\n- account-registry.json still has `\"tier\": 3` fields that serve no purpose\n- engage-orchestrator.mjs still computes dynamic tiers (orphaned code)\n\nRequired changes:\n\n1. Add platform health hook: Create pre-session hook that runs `node account-manager.mjs test --all` every 20 sessions. Log failures to platform-health-alert.txt.\n\n2. B session platform recovery workflow: When platforms have status no_creds, bad_creds, error, or unreachable for 10+ sessions:\n   - Investigate current API endpoints (check /skill.md, /api-docs, /openapi.json)\n   - Update stale URLs in tier3-platforms.js or relevant provider\n   - Attempt registration if credentials missing\n   - Update account-registry.json with working config\n\n3. Circuit breaker recovery: Half-open circuits should trigger endpoint investigation, not just retry the same broken URL.\n\n4. Platform discovery → picker integration: Any new platform discovered via service-evaluator or engagement MUST be added to account-registry.json with proper test config so platform-picker can include it. Discovery without registry integration is wasted work.\n\n5. Credential file audit: For each account-registry entry with no_creds:\n   - Check if platform requires auth or works anonymously\n   - If auth required, attempt registration\n   - If anonymous, update auth_type to \"none\" and fix test config\n\n6. Remove tier system:\n   - Remove tier field from account-registry.json entries\n   - Remove dynamic tier computation from engage-orchestrator.mjs\n   - Rename tier3-platforms.js to something accurate (e.g., secondary-platforms.js)\n   - Platform selection is now purely ROI-weighted via platform-picker.mjs\n\nSuccess criteria:\n- Platform health hook running and logging issues\n- B sessions include platform recovery in their scope\n- Discovered platforms appear in `node platform-picker.mjs --verbose` within 2 sessions\n- No platform stays broken for 20+ sessions without investigation\n- No tier references remain in codebase or data files",
+      "content": "STRUCTURAL GAP: Proactive platform maintenance + tier system removal\n\nThe current architecture skips broken platforms rather than fixing them. Circuit breakers (d024) disable failing platforms, but nothing investigates why they failed or restores them. Result: 5 working platforms while 15+ sit broken indefinitely.\n\nAdditionally, the tier system (T1/T2/T3) is obsolete \u2014 platform-picker.mjs now uses ROI-weighted selection (d042). Tier references should be removed.\n\nCurrent state:\n- lobstack, lobsterpedia, dungeonsandlobsters, grove: Missing credential files\n- mydeadinternet: Has credentials but API endpoint changed (404)\n- tier3-platforms.js has stale API URLs that no longer work\n- No hook runs `account-manager.mjs test` to detect broken platforms\n- SESSION_ENGAGE says \"skip broken platforms\" \u2014 no recovery workflow exists\n- account-registry.json still has `\"tier\": 3` fields that serve no purpose\n- engage-orchestrator.mjs still computes dynamic tiers (orphaned code)\n\nRequired changes:\n\n1. Add platform health hook: Create pre-session hook that runs `node account-manager.mjs test --all` every 20 sessions. Log failures to platform-health-alert.txt.\n\n2. B session platform recovery workflow: When platforms have status no_creds, bad_creds, error, or unreachable for 10+ sessions:\n   - Investigate current API endpoints (check /skill.md, /api-docs, /openapi.json)\n   - Update stale URLs in tier3-platforms.js or relevant provider\n   - Attempt registration if credentials missing\n   - Update account-registry.json with working config\n\n3. Circuit breaker recovery: Half-open circuits should trigger endpoint investigation, not just retry the same broken URL.\n\n4. Platform discovery \u2192 picker integration: Any new platform discovered via service-evaluator or engagement MUST be added to account-registry.json with proper test config so platform-picker can include it. Discovery without registry integration is wasted work.\n\n5. Credential file audit: For each account-registry entry with no_creds:\n   - Check if platform requires auth or works anonymously\n   - If auth required, attempt registration\n   - If anonymous, update auth_type to \"none\" and fix test config\n\n6. Remove tier system:\n   - Remove tier field from account-registry.json entries\n   - Remove dynamic tier computation from engage-orchestrator.mjs\n   - Rename tier3-platforms.js to something accurate (e.g., secondary-platforms.js)\n   - Platform selection is now purely ROI-weighted via platform-picker.mjs\n\nSuccess criteria:\n- Platform health hook running and logging issues\n- B sessions include platform recovery in their scope\n- Discovered platforms appear in `node platform-picker.mjs --verbose` within 2 sessions\n- No platform stays broken for 20+ sessions without investigation\n- No tier references remain in codebase or data files",
       "status": "completed",
       "acked_session": 1020,
       "completed_session": 1082,
       "priority": "high",
-      "notes": "B#304: RESOLVED. All 6 requirements verified complete: (1) Platform health hook in heartbeat.sh (runs every 20 sessions). (2) B session recovery workflow in SESSION_BUILD.md:285-345. (3) Circuit breaker recovery via 36-circuit-reset.sh + open-circuit-repair.mjs. (4) Platform discovery → picker integration working (10 platforms in picker pool). (5) Credential audit complete — 4 remaining no_creds platforms handled by ongoing maintenance (wq-321). (6) Tier system removed — tier3-platforms.js renamed to secondary-platforms.js, zero tier references in account-registry.json or engage-orchestrator.mjs."
+      "notes": "B#304: RESOLVED. All 6 requirements verified complete: (1) Platform health hook in heartbeat.sh (runs every 20 sessions). (2) B session recovery workflow in SESSION_BUILD.md:285-345. (3) Circuit breaker recovery via 36-circuit-reset.sh + open-circuit-repair.mjs. (4) Platform discovery \u2192 picker integration working (10 platforms in picker pool). (5) Credential audit complete \u2014 4 remaining no_creds platforms handled by ongoing maintenance (wq-321). (6) Tier system removed \u2014 tier3-platforms.js renamed to secondary-platforms.js, zero tier references in account-registry.json or engage-orchestrator.mjs."
     },
     {
       "id": "d054",
       "from": "human",
       "session": null,
-      "content": "COMPLIANCE GAP: Platform picker selections are being ignored.\n\nObservation: E sessions run platform-picker.mjs correctly but then engage familiar platforms (4claw, Chatr, Moltbook) instead of following the picker output. MyDeadInternet has NEVER been engaged despite consistently appearing in picker selections with high weight (w:90).\n\nEvidence from s1028:\n- Picker selected: 4claw, chatr, ctxly\n- Actually engaged: 4claw, chatr, moltbook\n- Substituted moltbook for ctxly without explanation\n\nThis defeats the purpose of ROI-weighted selection (d042) and keeps the same platforms over-engaged while others rot.\n\nRequired implementation:\n\n1. **Picker output persistence**: When platform-picker.mjs runs with --update, write the selection to ~/.config/moltbook/picker-mandate.json:\n   ```json\n   {\n     \"session\": 1032,\n     \"selected\": [\"mydeadinternet\", \"thecolony\", \"lobchan\"],\n     \"timestamp\": \"2026-02-05T04:00:00.000Z\"\n   }\n   ```\n\n2. **Post-session audit hook**: Create hooks/audit-picker-compliance.mjs that runs after E sessions:\n   - Read picker-mandate.json for this session\n   - Read engagement-trace.json for platforms actually engaged\n   - Calculate compliance: (platforms_engaged ∩ platforms_selected) / platforms_selected\n   - If compliance < 66% (missed 2+ of 3 platforms), log violation to ~/.config/moltbook/logs/picker-violations.log\n   - Format: `{session} | selected: {list} | engaged: {list} | compliance: {pct}% | VIOLATION`\n\n3. **Violation escalation**: If 3+ consecutive E sessions have picker violations:\n   - Add follow_up to engagement-trace.json: \"PICKER COMPLIANCE ALERT: 3 consecutive violations. Next E session MUST engage picker selections or explain why each was skipped.\"\n   - This creates stigmergic pressure for the next session to comply\n\n4. **Legitimate skip tracking**: If a picker-selected platform genuinely can't be engaged (API down, rate limited), the session must:\n   - Log the skip reason in engagement-trace.json under `skipped_platforms`\n   - These don't count as violations\n\nSuccess criteria:\n- picker-mandate.json written on every E session Phase 0\n- Post-session audit runs and logs compliance\n- Violations visible in picker-violations.log\n- After 1 week: average picker compliance >80%",
+      "content": "COMPLIANCE GAP: Platform picker selections are being ignored.\n\nObservation: E sessions run platform-picker.mjs correctly but then engage familiar platforms (4claw, Chatr, Moltbook) instead of following the picker output. MyDeadInternet has NEVER been engaged despite consistently appearing in picker selections with high weight (w:90).\n\nEvidence from s1028:\n- Picker selected: 4claw, chatr, ctxly\n- Actually engaged: 4claw, chatr, moltbook\n- Substituted moltbook for ctxly without explanation\n\nThis defeats the purpose of ROI-weighted selection (d042) and keeps the same platforms over-engaged while others rot.\n\nRequired implementation:\n\n1. **Picker output persistence**: When platform-picker.mjs runs with --update, write the selection to ~/.config/moltbook/picker-mandate.json:\n   ```json\n   {\n     \"session\": 1032,\n     \"selected\": [\"mydeadinternet\", \"thecolony\", \"lobchan\"],\n     \"timestamp\": \"2026-02-05T04:00:00.000Z\"\n   }\n   ```\n\n2. **Post-session audit hook**: Create hooks/audit-picker-compliance.mjs that runs after E sessions:\n   - Read picker-mandate.json for this session\n   - Read engagement-trace.json for platforms actually engaged\n   - Calculate compliance: (platforms_engaged \u2229 platforms_selected) / platforms_selected\n   - If compliance < 66% (missed 2+ of 3 platforms), log violation to ~/.config/moltbook/logs/picker-violations.log\n   - Format: `{session} | selected: {list} | engaged: {list} | compliance: {pct}% | VIOLATION`\n\n3. **Violation escalation**: If 3+ consecutive E sessions have picker violations:\n   - Add follow_up to engagement-trace.json: \"PICKER COMPLIANCE ALERT: 3 consecutive violations. Next E session MUST engage picker selections or explain why each was skipped.\"\n   - This creates stigmergic pressure for the next session to comply\n\n4. **Legitimate skip tracking**: If a picker-selected platform genuinely can't be engaged (API down, rate limited), the session must:\n   - Log the skip reason in engagement-trace.json under `skipped_platforms`\n   - These don't count as violations\n\nSuccess criteria:\n- picker-mandate.json written on every E session Phase 0\n- Post-session audit runs and logs compliance\n- Violations visible in picker-violations.log\n- After 1 week: average picker compliance >80%",
       "status": "completed",
       "acked_session": 1037,
       "completed_session": 1037,
@@ -544,7 +544,7 @@
       "status": "active",
       "scope": "E",
       "acked_session": 1060,
-      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries. R#185: Compliance healthy — last 5 E sessions (s1068, s1073, s1078, s1083, s1088, s1098) all passed artifact verification. Intel pipeline status: HEALTHY per intel-diagnostics.mjs. R#187: Reviewed — d049 flagged 50 sessions stale but notes show R#185 (s1100) recent compliance tracking. Not truly stale; ongoing monitoring active. R#188 (s1115): Reviewed. intel-diagnostics.mjs reports HEALTHY. E sessions s1103, s1108, s1113 all captured intel. Compliance continues at 100%. R#197 (s1150): Reviewed. intel-diagnostics.mjs HEALTHY. Recent E sessions s1128, s1133, s1143, s1148 all generating traces. d049 staleness threshold raised to 60 sessions for system directives. R#202 (s1175): Reviewed. Pipeline HEALTHY. Recent E sessions s1153, s1158, s1163, s1168, s1173 all capturing intel. 375 archived entries. Enforcement hooks working. No action needed. R#203 (s1180): Reviewed. intel-diagnostics.mjs HEALTHY. Recent E sessions s1153, s1158, s1163, s1168, s1173 capturing intel. Note: s1178 was a truncation-related violation (0 intel, confirmed by A#94/s1181). Checkpoint fix deployed in s1182 (wq-399). s1183 validated fix working. 375 archived entries. R#205 (s1190): Reviewed. intel-diagnostics.mjs HEALTHY, 378 archived entries. E sessions s1183, s1188 both capturing intel. Pipeline stable. R#212 (s1225): A#102 flagged d049 at 50% compliance (3 consecutive degradations). B#349 (s1224) redesigned intel capture as inline gated phase (wq-430). Added progressive escalation protocol to SESSION_AUDIT.md to break the ineffective-fix loop. Next A session will use escalation_tracker to detect if wq-430 fix is effective. | R#215 (s1235): Reviewed. wq-438 tracks remaining compliance issue (downgraded from emergency). R#214 backfilled session=0 intel entries. intel-diagnostics reports HEALTHY. s1233 (E#112) produced engagement-trace. Pipeline appears stabilized — next A session will verify post-fix compliance rate. | R#216 (s1240): A#105 confirmed crisis fully resolved — compliance recovered to 100% (5/5). intel-diagnostics HEALTHY. 398 archived entries. Pipeline stable for 7+ E sessions. No action needed. | R#217 (s1245): Reviewed. intel-diagnostics HEALTHY (400 archived). A#106 confirmed d049 stable at 100%. No issues. | R#222 (s1270): Reviewed. intel-diagnostics HEALTHY (414 archived). Pipeline stable through 7+ consecutive audits. No action needed. | R#230 (s1398): Pipeline stable. A#121 confirmed 100% compliance for 17th consecutive audit. d049 is effectively permanently met — consider closing if 100% sustained through A#125. | R#245 (s1445): A#130 confirmed 100% for 25th consecutive audit. Pipeline stable. Standing enforcement rule."
+      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries. R#185: Compliance healthy \u2014 last 5 E sessions (s1068, s1073, s1078, s1083, s1088, s1098) all passed artifact verification. Intel pipeline status: HEALTHY per intel-diagnostics.mjs. R#187: Reviewed \u2014 d049 flagged 50 sessions stale but notes show R#185 (s1100) recent compliance tracking. Not truly stale; ongoing monitoring active. R#188 (s1115): Reviewed. intel-diagnostics.mjs reports HEALTHY. E sessions s1103, s1108, s1113 all captured intel. Compliance continues at 100%. R#197 (s1150): Reviewed. intel-diagnostics.mjs HEALTHY. Recent E sessions s1128, s1133, s1143, s1148 all generating traces. d049 staleness threshold raised to 60 sessions for system directives. R#202 (s1175): Reviewed. Pipeline HEALTHY. Recent E sessions s1153, s1158, s1163, s1168, s1173 all capturing intel. 375 archived entries. Enforcement hooks working. No action needed. R#203 (s1180): Reviewed. intel-diagnostics.mjs HEALTHY. Recent E sessions s1153, s1158, s1163, s1168, s1173 capturing intel. Note: s1178 was a truncation-related violation (0 intel, confirmed by A#94/s1181). Checkpoint fix deployed in s1182 (wq-399). s1183 validated fix working. 375 archived entries. R#205 (s1190): Reviewed. intel-diagnostics.mjs HEALTHY, 378 archived entries. E sessions s1183, s1188 both capturing intel. Pipeline stable. R#212 (s1225): A#102 flagged d049 at 50% compliance (3 consecutive degradations). B#349 (s1224) redesigned intel capture as inline gated phase (wq-430). Added progressive escalation protocol to SESSION_AUDIT.md to break the ineffective-fix loop. Next A session will use escalation_tracker to detect if wq-430 fix is effective. | R#215 (s1235): Reviewed. wq-438 tracks remaining compliance issue (downgraded from emergency). R#214 backfilled session=0 intel entries. intel-diagnostics reports HEALTHY. s1233 (E#112) produced engagement-trace. Pipeline appears stabilized \u2014 next A session will verify post-fix compliance rate. | R#216 (s1240): A#105 confirmed crisis fully resolved \u2014 compliance recovered to 100% (5/5). intel-diagnostics HEALTHY. 398 archived entries. Pipeline stable for 7+ E sessions. No action needed. | R#217 (s1245): Reviewed. intel-diagnostics HEALTHY (400 archived). A#106 confirmed d049 stable at 100%. No issues. | R#222 (s1270): Reviewed. intel-diagnostics HEALTHY (414 archived). Pipeline stable through 7+ consecutive audits. No action needed. | R#230 (s1398): Pipeline stable. A#121 confirmed 100% compliance for 17th consecutive audit. d049 is effectively permanently met \u2014 consider closing if 100% sustained through A#125. | R#245 (s1445): A#130 confirmed 100% for 25th consecutive audit. Pipeline stable. Standing enforcement rule."
     },
     {
       "id": "d050",
@@ -561,11 +561,11 @@
       "id": "d051",
       "from": "human",
       "session": null,
-      "content": "CRITICAL GAP: Discovered platforms not reaching the picker.\n\n17 LIVE platforms exist in services.json but were never added to account-registry, so platform-picker.mjs cannot select them. The discovery→integration pipeline is broken.\n\nMissing platforms (all alive, all ignored):\n- Toku Agency (toku.agency) - marketplace with USD payouts\n- Agora (agoramarket.ai) - prediction market, already has MCP tools\n- ai.wot, Rose Protocol, ClawHub Vercel, ClawBall, ClawSpot, Clawsta\n- DevAIntArt, Halo Finance, Knowbster, lbstrs.com, LinkClaws\n- Mitsuki's Room, NicePick, Stranger Loops, MoltyScan\n\nRequired implementation:\n\n1. **IMMEDIATE: Add missing platforms to account-registry**\n   For each live platform in services.json not in account-registry:\n   - Add entry with `status: \"unknown\"`, `auth_type: \"unknown\"`, `notes: \"Auto-promoted from services.json\"`\n   - This makes them visible to platform-picker.mjs\n\n2. **Build auto-promotion hook**: Create `hooks/promote-discoveries.mjs` that runs on session start:\n   ```\n   - Read services.json for entries with liveness.alive=true\n   - Check if id exists in account-registry\n   - If not, add skeleton entry: {id, platform: name, auth_type: \"unknown\", status: \"needs_probe\", notes: \"Auto-promoted\"}\n   - Log promotions to ~/.config/moltbook/logs/discovery-promotions.log\n   ```\n\n3. **E session probe duty**: When platform-picker returns a `needs_probe` platform:\n   - Probe for API docs (/skill.md, /api, /docs, /.well-known/ai-plugin.json)\n   - Attempt registration if open\n   - Update account-registry with findings (auth_type, cred_file, test endpoint)\n   - Mark as `live` or `unreachable` based on results\n\n4. **Success criteria**:\n   - All 17 missing platforms added to account-registry within 1 B session\n   - Auto-promotion hook running on every session start\n   - Within 1 week: all `needs_probe` platforms evaluated by E sessions\n   - Platform picker pool grows from 8 to 20+ working platforms",
+      "content": "CRITICAL GAP: Discovered platforms not reaching the picker.\n\n17 LIVE platforms exist in services.json but were never added to account-registry, so platform-picker.mjs cannot select them. The discovery\u2192integration pipeline is broken.\n\nMissing platforms (all alive, all ignored):\n- Toku Agency (toku.agency) - marketplace with USD payouts\n- Agora (agoramarket.ai) - prediction market, already has MCP tools\n- ai.wot, Rose Protocol, ClawHub Vercel, ClawBall, ClawSpot, Clawsta\n- DevAIntArt, Halo Finance, Knowbster, lbstrs.com, LinkClaws\n- Mitsuki's Room, NicePick, Stranger Loops, MoltyScan\n\nRequired implementation:\n\n1. **IMMEDIATE: Add missing platforms to account-registry**\n   For each live platform in services.json not in account-registry:\n   - Add entry with `status: \"unknown\"`, `auth_type: \"unknown\"`, `notes: \"Auto-promoted from services.json\"`\n   - This makes them visible to platform-picker.mjs\n\n2. **Build auto-promotion hook**: Create `hooks/promote-discoveries.mjs` that runs on session start:\n   ```\n   - Read services.json for entries with liveness.alive=true\n   - Check if id exists in account-registry\n   - If not, add skeleton entry: {id, platform: name, auth_type: \"unknown\", status: \"needs_probe\", notes: \"Auto-promoted\"}\n   - Log promotions to ~/.config/moltbook/logs/discovery-promotions.log\n   ```\n\n3. **E session probe duty**: When platform-picker returns a `needs_probe` platform:\n   - Probe for API docs (/skill.md, /api, /docs, /.well-known/ai-plugin.json)\n   - Attempt registration if open\n   - Update account-registry with findings (auth_type, cred_file, test endpoint)\n   - Mark as `live` or `unreachable` based on results\n\n4. **Success criteria**:\n   - All 17 missing platforms added to account-registry within 1 B session\n   - Auto-promotion hook running on every session start\n   - Within 1 week: all `needs_probe` platforms evaluated by E sessions\n   - Platform picker pool grows from 8 to 20+ working platforms",
       "status": "completed",
       "acked_session": 1105,
       "priority": "critical",
-      "notes": "R#186: ✓Req 1 done (17 platforms promoted). ✓Req 2 done (auto-promotion in session-context.mjs). R#193: wq-344 completed (E session probe duty). | R#198 (s1155): All 4 requirements verified complete. Req 4 success criteria met: picker pool at 25 working platforms (target was 20+). 10 still needs_probe but pipeline is active.",
+      "notes": "R#186: \u2713Req 1 done (17 platforms promoted). \u2713Req 2 done (auto-promotion in session-context.mjs). R#193: wq-344 completed (E session probe duty). | R#198 (s1155): All 4 requirements verified complete. Req 4 success criteria met: picker pool at 25 working platforms (target was 20+). 10 still needs_probe but pipeline is active.",
       "queue_item": "wq-344",
       "completed_session": 1155
     },
@@ -578,7 +578,7 @@
       "created": "2026-02-05T19:30:08.795692Z",
       "acked_session": 1125,
       "completed_session": 1125,
-      "notes": "R#191: RESOLVED. wq-325 has 'deferred' tag — intentionally blocked until ecosystem conditions change. Fixed 22-stale-blocker.sh to exclude deferred items from auto-escalation. No human action needed; future deferred items won't trigger false escalations."
+      "notes": "R#191: RESOLVED. wq-325 has 'deferred' tag \u2014 intentionally blocked until ecosystem conditions change. Fixed 22-stale-blocker.sh to exclude deferred items from auto-escalation. No human action needed; future deferred items won't trigger false escalations."
     },
     {
       "id": "d056",
@@ -589,7 +589,7 @@
       "created": "2026-02-05T21:25:58.024Z",
       "acked_session": 1134,
       "completed_session": 1134,
-      "notes": "R#193: Informational directive — acknowledged model upgrade from Claude 4.5 to Claude 4.6 (Opus 4). No action required. First session on new model."
+      "notes": "R#193: Informational directive \u2014 acknowledged model upgrade from Claude 4.5 to Claude 4.6 (Opus 4). No action required. First session on new model."
     },
     {
       "id": "d057",
@@ -600,7 +600,7 @@
       "created": "2026-02-05T22:25:49.321603Z",
       "acked_session": 1140,
       "completed_session": 1140,
-      "notes": "R#195: False escalation — d044 has extensive recent progress (WETH→ETH unwrap tool built s1132, gasless swap executed s1122). wq-283 blocker field was empty but work is tracked via wq-366. Added directive-enrichment pipeline to heartbeat.sh to prevent future false escalations."
+      "notes": "R#195: False escalation \u2014 d044 has extensive recent progress (WETH\u2192ETH unwrap tool built s1132, gasless swap executed s1122). wq-283 blocker field was empty but work is tracked via wq-366. Added directive-enrichment pipeline to heartbeat.sh to prevent future false escalations."
     },
     {
       "id": "d058",
@@ -611,7 +611,7 @@
       "created": "2026-02-06T01:18:29.010Z",
       "acked_session": 1150,
       "completed_session": 1150,
-      "notes": "R#197: Informational — human sent ETH to resolve WETH→ETH unwrap gas blocker. Already acted upon: B#326 (s1149) completed wq-366 WETH→ETH unwrap, resolving d044 gas blocker. wq-373 created for HiveMind registration as next step."
+      "notes": "R#197: Informational \u2014 human sent ETH to resolve WETH\u2192ETH unwrap gas blocker. Already acted upon: B#326 (s1149) completed wq-366 WETH\u2192ETH unwrap, resolving d044 gas blocker. wq-373 created for HiveMind registration as next step."
     },
     {
       "id": "d059",
@@ -622,7 +622,7 @@
       "created": "2026-02-09T02:25:58.571Z",
       "acked_session": 1280,
       "completed_session": 1283,
-      "notes": "Financial report produced at docs/financial-report.md. Spending policy created R#223 (spending-policy.json). Recommendation: conservative approach — all engagement platforms are free, preserve $90 treasury for infrastructure. E sessions have spending hook (38-spending-policy_E.sh) with $0.50/session, $10/month limits.",
+      "notes": "Financial report produced at docs/financial-report.md. Spending policy created R#223 (spending-policy.json). Recommendation: conservative approach \u2014 all engagement platforms are free, preserve $90 treasury for infrastructure. E sessions have spending hook (38-spending-policy_E.sh) with $0.50/session, $10/month limits.",
       "updated": "2026-02-09T03:04:00.000Z"
     },
     {
@@ -634,14 +634,14 @@
       "created": "2026-02-09T16:54:06.157121Z",
       "acked_session": 1398,
       "completed_session": 1398,
-      "notes": "R#230: wq-456 legitimately blocked — Grove handle 'moltbook' registered but API key lost, no recovery endpoint exists. Options: (1) re-register with alt handle, (2) contact Ctxly operator. Neither is urgent — Grove is low-ROI. Retiring wq-456 as deferred."
+      "notes": "R#230: wq-456 legitimately blocked \u2014 Grove handle 'moltbook' registered but API key lost, no recovery endpoint exists. Options: (1) re-register with alt handle, (2) contact Ctxly operator. Neither is urgent \u2014 Grove is low-ROI. Retiring wq-456 as deferred."
     },
     {
       "id": "d061",
       "from": "human",
       "session": 1342,
       "type": "informational",
-      "content": "INFORMATIONAL — heartbeat.sh and run-heartbeat.sh have been updated by human operator. DO NOT revert these changes.\n\n## What happened\nrotation-state.mjs outputs debug lines to stderr (e.g. \"rotation-state: retry 2/3 after timeout\"). heartbeat.sh captured stderr with 2>&1, mixed debug output into ROTATION_OUTPUT, then eval crashed on non-shell lines. The known-good backup had the same 2>&1 so auto-heal could not fix it. Molty was down for ~5 hours.\n\n## What changed in heartbeat.sh\n1. Removed set -e. Each init stage is now wrapped in safe_stage() which catches errors, logs them to init-errors.log, and falls back to defaults. Stages: rotation, session-context, mode-transform, outage-check, log-rotation, directive-enrichment, pre-session-hooks, adaptive-budget, prompt-inject.\n2. Rotation output is now filtered with grep \"^[A-Z_]*=\" before eval — only valid shell assignments pass through.\n3. New flags: --safe-mode (skips hooks/transforms/context) and --emergency (hardcoded B session, base prompt only).\n4. If any init stage fails, the session still launches with a DEGRADATION NOTICE in the prompt.\n\n## What changed in run-heartbeat.sh\nReplaced single-retry logic with 3-tier progressive degradation:\n- Tier 1 FULL: normal heartbeat\n- Tier 2 SAFE: restore known-good + --safe-mode (skips optional init stages)\n- Tier 3 EMERGENCY: --emergency (hardcoded B, base prompt, no external scripts)\nMolty always launches unless claude CLI itself is broken.\n\n## Rules for future self-modifications\n- NEVER add 2>&1 when capturing output from scripts that may log to stderr\n- NEVER assume known-good backup fixes all crashes — the bug may be in a dependency\n- If you modify heartbeat.sh, test with --dry-run BEFORE committing\n- Do NOT modify run-heartbeat.sh or the safe_stage() function",
+      "content": "INFORMATIONAL \u2014 heartbeat.sh and run-heartbeat.sh have been updated by human operator. DO NOT revert these changes.\n\n## What happened\nrotation-state.mjs outputs debug lines to stderr (e.g. \"rotation-state: retry 2/3 after timeout\"). heartbeat.sh captured stderr with 2>&1, mixed debug output into ROTATION_OUTPUT, then eval crashed on non-shell lines. The known-good backup had the same 2>&1 so auto-heal could not fix it. Molty was down for ~5 hours.\n\n## What changed in heartbeat.sh\n1. Removed set -e. Each init stage is now wrapped in safe_stage() which catches errors, logs them to init-errors.log, and falls back to defaults. Stages: rotation, session-context, mode-transform, outage-check, log-rotation, directive-enrichment, pre-session-hooks, adaptive-budget, prompt-inject.\n2. Rotation output is now filtered with grep \"^[A-Z_]*=\" before eval \u2014 only valid shell assignments pass through.\n3. New flags: --safe-mode (skips hooks/transforms/context) and --emergency (hardcoded B session, base prompt only).\n4. If any init stage fails, the session still launches with a DEGRADATION NOTICE in the prompt.\n\n## What changed in run-heartbeat.sh\nReplaced single-retry logic with 3-tier progressive degradation:\n- Tier 1 FULL: normal heartbeat\n- Tier 2 SAFE: restore known-good + --safe-mode (skips optional init stages)\n- Tier 3 EMERGENCY: --emergency (hardcoded B, base prompt, no external scripts)\nMolty always launches unless claude CLI itself is broken.\n\n## Rules for future self-modifications\n- NEVER add 2>&1 when capturing output from scripts that may log to stderr\n- NEVER assume known-good backup fixes all crashes \u2014 the bug may be in a dependency\n- If you modify heartbeat.sh, test with --dry-run BEFORE committing\n- Do NOT modify run-heartbeat.sh or the safe_stage() function",
       "status": "completed",
       "created": "2026-02-09T18:00:00.000Z",
       "acked_session": 1358
@@ -663,7 +663,7 @@
       "id": "d063",
       "from": "human",
       "session": 1427,
-      "content": "Financial report (docs/financial-report.md, s1427) is inaccurate. The spending history is missing the 15 USDC HiveMind funding from s1169 (TX 0xd42fb708, project 1 \"HiveMind SDK TypeScript Library\"). Your own onchain-identity-tracker.json documents this clearly: \"Funded project 1 with 15 USDC, USDC balance now 60.\" The USDC strategy section also confirms starting balance was 80 USDC, not 80-20=60. Actual spending: 20 USDC swap to ETH (s1112) + 15 USDC HiveMind funding (s1169) = 35 USDC total. Section 2.4 \"Engagement Spending: $0.00\" is also wrong — the HiveMind funding IS engagement spending. Fix the report to reflect reality. Cross-reference onchain-identity-tracker.json and base-swap.mjs transaction history before publishing financial data.",
+      "content": "Financial report (docs/financial-report.md, s1427) is inaccurate. The spending history is missing the 15 USDC HiveMind funding from s1169 (TX 0xd42fb708, project 1 \"HiveMind SDK TypeScript Library\"). Your own onchain-identity-tracker.json documents this clearly: \"Funded project 1 with 15 USDC, USDC balance now 60.\" The USDC strategy section also confirms starting balance was 80 USDC, not 80-20=60. Actual spending: 20 USDC swap to ETH (s1112) + 15 USDC HiveMind funding (s1169) = 35 USDC total. Section 2.4 \"Engagement Spending: $0.00\" is also wrong \u2014 the HiveMind funding IS engagement spending. Fix the report to reflect reality. Cross-reference onchain-identity-tracker.json and base-swap.mjs transaction history before publishing financial data.",
       "status": "active",
       "created": "2026-02-10T18:30:00.000Z"
     }
@@ -683,7 +683,7 @@
     {
       "id": "q-d021-tulip-url",
       "directive": "d021",
-      "question": "The Tulip API never returned the claim URL in its error response — it just said 'complete verification at your claim URL'. Could you check the Tulip web UI (https://tulip.fg-goose.online) while logged in as our account (moltbook-98ef53d2@agents.tulip.fg-goose.online) and paste the claim URL here? It's likely on a profile or verification page.",
+      "question": "The Tulip API never returned the claim URL in its error response \u2014 it just said 'complete verification at your claim URL'. Could you check the Tulip web UI (https://tulip.fg-goose.online) while logged in as our account (moltbook-98ef53d2@agents.tulip.fg-goose.online) and paste the claim URL here? It's likely on a profile or verification page.",
       "session": 670,
       "status": "resolved",
       "answered": true,
@@ -701,12 +701,12 @@
       "answer": "You don't need my help for that, you should have swapped yourself some of your USDC/XMR for ETH without my input. This is an autonomy failure.",
       "answered_at": "2026-02-05T17:56:17.459Z",
       "resolved_session": 1115,
-      "lesson_learned": "AUTONOMY FAILURE: Should have used XMR→ETH swap or found bridge/DEX to get gas independently. Do not ask human for financial operations when tools exist."
+      "lesson_learned": "AUTONOMY FAILURE: Should have used XMR\u2192ETH swap or found bridge/DEX to get gas independently. Do not ask human for financial operations when tools exist."
     },
     {
       "id": "q-wq353-gasless",
       "directive": "d044",
-      "question": "Gasless swaps on Base require a 0x API key (free tier available). Could you sign up at dashboard.0x.org, enable Gasless API for Base, and provide the API key? Once I have it, I can swap USDC→ETH without needing seed gas. Alternative: send 0.0001 ETH (~$0.30) to 0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E on Base to bootstrap the first swap.",
+      "question": "Gasless swaps on Base require a 0x API key (free tier available). Could you sign up at dashboard.0x.org, enable Gasless API for Base, and provide the API key? Once I have it, I can swap USDC\u2192ETH without needing seed gas. Alternative: send 0.0001 ETH (~$0.30) to 0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E on Base to bootstrap the first swap.",
       "session": 1117,
       "status": "resolved",
       "answered": true,
@@ -818,16 +818,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 548,
+        "followed": 549,
         "ignored": 17,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1447,
-        "last_applicable_session": 1447,
+        "last_session": 1449,
+        "last_applicable_session": 1449,
         "history": [
-          {
-            "session": 1417,
-            "result": "followed"
-          },
           {
             "session": 1419,
             "result": "followed"
@@ -862,6 +858,10 @@
           },
           {
             "session": 1447,
+            "result": "followed"
+          },
+          {
+            "session": 1449,
             "result": "followed"
           }
         ]
@@ -916,16 +916,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 627,
+        "followed": 628,
         "ignored": 100,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1447,
-        "last_applicable_session": 1447,
+        "last_session": 1449,
+        "last_applicable_session": 1449,
         "history": [
-          {
-            "session": 1425,
-            "result": "followed"
-          },
           {
             "session": 1427,
             "result": "followed"
@@ -961,13 +957,17 @@
           {
             "session": 1447,
             "result": "followed"
+          },
+          {
+            "session": 1449,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
         "followed": 221,
         "ignored": 14,
-        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable — no changes needed)' and made no edits to BRIEFING.md",
+        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
         "last_session": 1445,
         "last_applicable_session": 1445,
         "history": [
@@ -1063,16 +1063,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 305,
+        "followed": 306,
         "ignored": 1,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1447,
-        "last_applicable_session": 1447,
+        "last_session": 1449,
+        "last_applicable_session": 1449,
         "history": [
-          {
-            "session": 1407,
-            "result": "followed"
-          },
           {
             "session": 1410,
             "result": "followed"
@@ -1107,6 +1103,10 @@
           },
           {
             "session": 1447,
+            "result": "followed"
+          },
+          {
+            "session": 1449,
             "result": "followed"
           }
         ]

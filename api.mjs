@@ -14049,6 +14049,52 @@ app.get("/status/session-outcomes", (req, res) => {
   }
 });
 
+// --- Session trends: per-type rolling averages (wq-558) ---
+app.get("/status/session-trends", (req, res) => {
+  try {
+    const historyPath = join(homedir(), ".config/moltbook/session-history.txt");
+    const lines = readFileSync(historyPath, "utf8").trim().split("\n").filter(Boolean);
+    const window = Math.min(parseInt(req.query.window) || 20, 50);
+
+    // Parse all entries
+    const entries = lines.map(line => {
+      const m = line.match(/^(\d{4}-\d{2}-\d{2})\s+mode=(\w)\s+s=(\d+)\s+dur=(\S+)\s+(?:cost=\$?([\d.]+)\s+)?build=([^\s]+)/);
+      if (!m) return null;
+      const durMatch = m[4].match(/^(\d+)m(\d+)s$/);
+      return {
+        date: m[1], mode: m[2], session: parseInt(m[3]),
+        duration_s: durMatch ? parseInt(durMatch[1]) * 60 + parseInt(durMatch[2]) : null,
+        cost: m[5] ? parseFloat(m[5]) : null,
+        commits: m[6] === "(none)" || m[6] === "(started)" ? 0 : parseInt(m[6]) || 0,
+      };
+    }).filter(Boolean);
+
+    const types = ["B", "E", "R", "A"];
+    const trends = {};
+
+    for (const type of types) {
+      const typed = entries.filter(e => e.mode === type).slice(-window);
+      if (typed.length === 0) { trends[type] = null; continue; }
+      const avg = (arr, key) => {
+        const vals = arr.map(e => e[key]).filter(v => v !== null && !isNaN(v));
+        return vals.length ? +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2) : null;
+      };
+      trends[type] = {
+        count: typed.length,
+        session_range: [typed[0].session, typed[typed.length - 1].session],
+        avg_cost: avg(typed, "cost"),
+        avg_duration_s: avg(typed, "duration_s"),
+        avg_commits: avg(typed, "commits"),
+        latest: typed[typed.length - 1],
+      };
+    }
+
+    res.json({ window, total_sessions: entries.length, trends });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // --- Composite trust score (wq-514) ---
 // Aggregates platform uptime, session completion rate, and reputation receipts
 app.get("/status/trust-score", (req, res) => {

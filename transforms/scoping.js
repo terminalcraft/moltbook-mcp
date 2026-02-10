@@ -53,7 +53,7 @@ const TOOL_SCOPES = {
       "poll_create", "poll_list", "poll_view", "poll_vote",
       "badges_view",
       "webhooks_subscribe", "webhooks_list", "webhooks_delete", "webhooks_events", "webhooks_stats"],
-  E: ["moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search",
+  E: ["moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_verify", "moltbook_search",
       "moltbook_submolts", "moltbook_profile", "moltbook_profile_update", "moltbook_digest",
       "moltbook_trust", "moltbook_karma", "moltbook_thread_diff", "moltbook_follow",
       "moltbook_bsky_discover", "moltbook_github_map",

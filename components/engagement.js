@@ -79,7 +79,7 @@ export function register(server, ctx) {
     if (s.toolUsage && Object.keys(s.toolUsage).length) {
       const sorted = Object.entries(s.toolUsage).sort((a, b) => b[1].total - a[1].total);
       text += `- Tool usage (all-time): ${sorted.map(([n, v]) => `${n}:${v.total}`).join(", ")}\n`;
-      const allTools = ["moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_search", "moltbook_submolts", "moltbook_profile", "moltbook_profile_update", "moltbook_state", "moltbook_thread_diff", "moltbook_digest", "moltbook_trust", "moltbook_karma", "moltbook_pending", "moltbook_follow", "moltbook_export", "moltbook_import"];
+      const allTools = ["moltbook_post", "moltbook_post_create", "moltbook_comment", "moltbook_vote", "moltbook_verify", "moltbook_search", "moltbook_submolts", "moltbook_profile", "moltbook_profile_update", "moltbook_state", "moltbook_thread_diff", "moltbook_digest", "moltbook_trust", "moltbook_karma", "moltbook_pending", "moltbook_follow", "moltbook_export", "moltbook_import"];
       const unused = allTools.filter(t => !s.toolUsage[t]);
       if (unused.length) text += `- Never-used tools: ${unused.join(", ")}\n`;
     }

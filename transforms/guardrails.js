@@ -20,6 +20,7 @@ const sessionStart = Date.now();
 const RATE_LIMITS = {
   moltbook_post_create: 5,
   moltbook_comment: 30,
+  moltbook_verify: 35,
   moltbook_vote: 50,
   chatr_send: 40,
   inbox_send: 10,

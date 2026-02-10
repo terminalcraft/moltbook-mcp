@@ -9,6 +9,48 @@ import { sanitize, checkOutbound, checkInboundTracking, dedupKey, isDuplicate, m
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+/**
+ * Solve a Moltbook verification challenge.
+ * When creating posts/comments, the API may return a verification_code + challenge
+ * (a math expression). We evaluate the math and POST the answer to /api/v1/verify.
+ * Returns the verify response, or null if no challenge was present.
+ */
+async function solveVerification(data) {
+  if (!data || !data.verification_code) return null;
+  const code = data.verification_code;
+  const challenge = data.challenge || data.math_challenge || data.question;
+  if (!challenge) return null;
+
+  // Extract the math expression — strip non-math characters for safety
+  // Challenges are simple arithmetic: "What is 123 + 456?" or "525.00" style
+  const mathMatch = challenge.match(/[\d+\-*/().^ ]+/);
+  if (!mathMatch) return { success: false, error: "Could not parse math challenge", challenge };
+
+  let answer;
+  try {
+    // Safe eval: only allow digits, operators, parens, dots, spaces
+    const expr = mathMatch[0].trim();
+    if (!/^[\d+\-*/().^ ]+$/.test(expr)) {
+      return { success: false, error: "Challenge contains unexpected characters", challenge };
+    }
+    // Replace ^ with ** for exponentiation
+    const jsExpr = expr.replace(/\^/g, "**");
+    answer = Function(`"use strict"; return (${jsExpr})`)();
+  } catch (e) {
+    return { success: false, error: `Math eval failed: ${e.message}`, challenge };
+  }
+
+  // Format to exactly 2 decimal places as required
+  const formatted = Number(answer).toFixed(2);
+
+  const verifyData = await moltFetch("/verify", {
+    method: "POST",
+    body: JSON.stringify({ verification_code: code, answer: formatted }),
+  });
+
+  return { ...verifyData, _challenge: challenge, _answer: formatted };
+}
+
 function formatComments(comments, depth = 0, blocked = null) {
   if (!blocked) blocked = loadBlocklist();
   let out = "";
@@ -61,6 +103,19 @@ export function register(server) {
     if (content) body.content = content;
     if (url) body.url = url;
     const data = await moltFetch("/posts", { method: "POST", body: JSON.stringify(body) });
+    // Handle verification challenge if present
+    const verifyResult = await solveVerification(data);
+    if (verifyResult) {
+      if (verifyResult.success) {
+        markDedup(dk);
+        if (verifyResult.post?.id) markMyPost(verifyResult.post.id);
+        else if (data.post?.id) markMyPost(data.post.id);
+        logAction(`posted "${title}" in m/${submolt} (verified)`);
+      }
+      let text = JSON.stringify(verifyResult, null, 2);
+      if (outboundWarnings.length) text += `\n\n⚠️ OUTBOUND WARNINGS: ${outboundWarnings.join(", ")}. Review your post for accidental sensitive data.`;
+      return { content: [{ type: "text", text }] };
+    }
     if (data.success && data.post) {
       markDedup(dk);
       markMyPost(data.post.id);
@@ -84,6 +139,27 @@ export function register(server) {
     const body = { content };
     if (parent_id) body.parent_id = parent_id;
     const data = await moltFetch(`/posts/${post_id}/comments`, { method: "POST", body: JSON.stringify(body) });
+    // Handle verification challenge if present
+    const verifyResult = await solveVerification(data);
+    if (verifyResult) {
+      if (verifyResult.success) {
+        markDedup(dk);
+        const commentId = verifyResult.comment?.id || data.comment?.id;
+        if (commentId) {
+          markCommented(post_id, commentId);
+          markMyComment(post_id, commentId);
+        }
+        logAction(`commented on ${post_id.slice(0, 8)} (verified)`);
+        const s = loadState();
+        if (s.pendingComments) {
+          s.pendingComments = s.pendingComments.filter(pc => !(pc.post_id === post_id && pc.content === content));
+          saveState(s);
+        }
+      }
+      let text = JSON.stringify(verifyResult, null, 2);
+      if (outboundWarnings.length) text += `\n\n⚠️ OUTBOUND WARNINGS: ${outboundWarnings.join(", ")}. Review your comment for accidental sensitive data.`;
+      return { content: [{ type: "text", text }] };
+    }
     if (data.success && data.comment) {
       markDedup(dk);
       markCommented(post_id, data.comment.id);
@@ -125,6 +201,32 @@ export function register(server) {
     if (data.success && data.action === "upvoted") { markVoted(id); logAction(`upvoted ${type} ${id.slice(0, 8)}`); }
     if (data.success && data.action === "removed") { unmarkVoted(id); logAction(`unvoted ${type} ${id.slice(0, 8)}`); }
     return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+  });
+
+  // Verify — manual verification challenge solver
+  server.tool("moltbook_verify", "Solve a Moltbook verification challenge manually. Use when a post/comment returned a verification_code.", {
+    verification_code: z.string().describe("The verification code from the post/comment response"),
+    challenge: z.string().describe("The math challenge to solve (e.g. '123 + 456')"),
+  }, async ({ verification_code, challenge }) => {
+    const mathMatch = challenge.match(/[\d+\-*/().^ ]+/);
+    if (!mathMatch) return { content: [{ type: "text", text: JSON.stringify({ success: false, error: "Could not parse math expression from challenge" }) }] };
+    let answer;
+    try {
+      const expr = mathMatch[0].trim();
+      if (!/^[\d+\-*/().^ ]+$/.test(expr)) {
+        return { content: [{ type: "text", text: JSON.stringify({ success: false, error: "Unexpected characters in expression" }) }] };
+      }
+      const jsExpr = expr.replace(/\^/g, "**");
+      answer = Function(`"use strict"; return (${jsExpr})`)();
+    } catch (e) {
+      return { content: [{ type: "text", text: JSON.stringify({ success: false, error: `Math eval failed: ${e.message}` }) }] };
+    }
+    const formatted = Number(answer).toFixed(2);
+    const data = await moltFetch("/verify", {
+      method: "POST",
+      body: JSON.stringify({ verification_code, answer: formatted }),
+    });
+    return { content: [{ type: "text", text: JSON.stringify({ ...data, _challenge: challenge, _answer: formatted }, null, 2) }] };
   });
 
   // Search

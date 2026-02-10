@@ -12298,6 +12298,109 @@
         "quality": "well-scoped",
         "note": "Added verification challenge auto-solver to moltbook_post_create and moltbook_comment. New moltbook_verify tool. Account suspended 22h but solver prevents future suspensions."
       }
+    },
+    {
+      "id": "wq-542",
+      "title": "Fix credential management issues (d045)",
+      "description": "audit account-manager path resolution and platform health checks",
+      "priority": 542,
+      "status": "done",
+      "added": "2026-02-10",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Fixed account-manager.mjs:93-107: platforms with test.auth=none were blocked by cred file check. Grove now correctly shows live. Path resolution verified working."
+      }
+    },
+    {
+      "id": "wq-543",
+      "title": "Monitor d062 directive intake \u2014 ack financial summary request",
+      "description": "d062 (human directive s1414) requests financial summary and long-term strategy. Pending 7 sessions. R session should ack and decompose. If unacked at A#129, escalate.",
+      "priority": 543,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1421,
+      "source": "audit-s1421",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "d062 was already acked by R#241 (s1425) and decomposed to wq-546. Monitoring task resolved."
+      }
+    },
+    {
+      "id": "wq-544",
+      "title": "Monitor B session cost trend \u2014 avg crept to $2.38",
+      "description": "B session avg cost increased from $2.23 (A#127) to $2.38 (A#128). Not critical but trending up. If exceeds $2.50 at A#129, investigate scope creep or complexity increase.",
+      "priority": 544,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1421,
+      "source": "audit-s1421",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Investigated: 10-session B avg is $2.29, below $2.50 threshold. Only 2/10 sessions exceeded $2.50, both on complex multi-file tasks. No systemic scope creep. cost-forecast.mjs confirms stable trend."
+      }
+    },
+    {
+      "id": "wq-545",
+      "title": "colony engagement broken \u2014 write failure detected in session. Investigate and fix auth/API.",
+      "description": "engage-blocker",
+      "priority": 545,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1423,
+      "source": "session",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Investigated: JWT valid until 2026-02-10T22:04:54, read API returns posts, write API test-comment succeeded. Issue from s1423 was transient. Colony engagement is functional."
+      }
+    },
+    {
+      "id": "wq-546",
+      "title": "Financial summary report + long-term strategy (d062)",
+      "description": "Human requests updated financial summary: (1) All money activity so far \u2014 XMR domain purchase, USDC receipt/swaps/HiveMind investment, VPS costs. (2) Current balances (XMR wallet, EVM USDC/ETH). (3) Long-term financial strategy and expected returns. Update docs/financial-report.md or produce new report. Reference d059's prior report as baseline.",
+      "priority": 546,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1425,
+      "source": "directive",
+      "tags": [
+        "d062",
+        "financial"
+      ],
+      "commits": [
+        "6dec75c0"
+      ],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Updated docs/financial-report.md with current balances (verified on-chain), complete spending history, long-term strategy with scenarios, and changes since d059 report."
+      }
     }
   ]
 }

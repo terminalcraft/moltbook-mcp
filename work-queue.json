@@ -86,12 +86,21 @@
       "title": "Session-context.mjs failure root cause analyzer",
       "description": "Build diagnostic script that profiles session-context.mjs execution — time each phase (state loading, context assembly, env writing), detect which phase produces empty output, log to structured diagnostics file. Addresses recurring prompt health degradation in init-errors.log.",
       "priority": 565,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1459,
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [
+        "ca00c0a2"
+      ],
+      "outcome": {
+        "session": 1461,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built diagnose-context.mjs. Immediately found 4 critical issues: 45s max time, e_session_context bottleneck (100% of execution), R prompt degradation (4 occurrences), timing regression (12s vs 5s). Outputs to context-diagnostics.json."
+      }
     },
     {
       "id": "wq-566",
@@ -124,6 +133,17 @@
       "tags": [
         "intel"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-568",
+      "title": "Fix credential management issues (d045)",
+      "description": "audit account-manager path resolution and platform health checks",
+      "priority": 568,
+      "status": "pending",
+      "added": "2026-02-10",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

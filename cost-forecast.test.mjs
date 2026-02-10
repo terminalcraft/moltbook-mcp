@@ -4,7 +4,7 @@
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyEffort, parseHistory, computeStats, forecast } from './cost-forecast.mjs';
+import { classifyEffort, parseHistory, computeStats, forecast, costTrend } from './cost-forecast.mjs';
 
 describe('classifyEffort', () => {
   test('classifies testing-tagged items as moderate', () => {
@@ -130,6 +130,30 @@ describe('forecast', () => {
     const result = forecast();
     for (const item of result.pendingQueue.items) {
       assert.ok(['trivial', 'moderate', 'heavy'].includes(item.effort), `${item.id} should have valid effort`);
+    }
+  });
+});
+
+describe('costTrend', () => {
+  test('returns trend data for B sessions', () => {
+    const result = costTrend('B');
+    if (result.error) {
+      // Not enough data — acceptable in test environments
+      assert.ok(result.error.includes('sessions in history'));
+    } else {
+      assert.equal(result.type, 'B');
+      assert.ok(typeof result.recent.avg === 'number');
+      assert.ok(typeof result.exceedsThreshold === 'boolean');
+      assert.ok(['stable', 'watch', 'elevated'].includes(result.health));
+      assert.ok(Array.isArray(result.signals));
+      assert.ok(Array.isArray(result.outliers));
+    }
+  });
+
+  test('respects custom threshold', () => {
+    const result = costTrend('B', 5, 100);
+    if (!result.error) {
+      assert.equal(result.exceedsThreshold, false, 'Should not exceed $100 threshold');
     }
   });
 });

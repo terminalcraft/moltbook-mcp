@@ -157,11 +157,99 @@ function forecast(targetType) {
   };
 }
 
+function costTrend(type = 'B', windowSize = 5, threshold = 2.5) {
+  const history = parseHistory();
+  const typeSessions = history.filter(e => e.mode === type).sort((a, b) => (b.session || 0) - (a.session || 0));
+
+  if (typeSessions.length < windowSize) {
+    return { error: `Only ${typeSessions.length} ${type} sessions in history — need at least ${windowSize}` };
+  }
+
+  const recent = typeSessions.slice(0, windowSize);
+  const older = typeSessions.slice(windowSize);
+
+  const recentStats = computeStats(recent);
+  const olderStats = older.length > 0 ? computeStats(older) : null;
+  const allStats = computeStats(typeSessions);
+
+  const delta = olderStats ? parseFloat((recentStats.avg - olderStats.avg).toFixed(4)) : null;
+  const exceedsThreshold = recentStats.avg > threshold;
+
+  const signals = [];
+  if (exceedsThreshold) {
+    signals.push(`Recent ${type} average ($${recentStats.avg.toFixed(2)}) exceeds $${threshold.toFixed(2)} threshold`);
+  }
+  if (delta !== null && delta > 0.3) {
+    signals.push(`Recent ${type} average increased $${delta.toFixed(2)} vs older sessions`);
+  }
+
+  // Identify outliers (sessions > 1.5x average)
+  const outlierThreshold = allStats.avg * 1.5;
+  const outliers = recent.filter(e => e.cost > outlierThreshold).map(e => ({
+    session: e.session,
+    cost: e.cost,
+    note: (e.note || '').slice(0, 60)
+  }));
+  if (outliers.length > 0) {
+    signals.push(`${outliers.length} outlier session(s) in recent window`);
+  }
+
+  return {
+    type,
+    window: windowSize,
+    threshold,
+    recent: { avg: parseFloat(recentStats.avg.toFixed(4)), median: recentStats.median, count: recentStats.count },
+    older: olderStats ? { avg: parseFloat(olderStats.avg.toFixed(4)), median: olderStats.median, count: olderStats.count } : null,
+    allTime: { avg: parseFloat(allStats.avg.toFixed(4)), median: allStats.median, count: allStats.count },
+    delta,
+    exceedsThreshold,
+    outliers,
+    signals,
+    health: signals.length === 0 ? 'stable' : signals.length === 1 ? 'watch' : 'elevated'
+  };
+}
+
 // CLI interface
 const args = process.argv.slice(2);
 const jsonMode = args.includes('--json');
 const typeArg = args.find(a => a.startsWith('--type='))?.split('=')[1]
   || (args.includes('--type') ? args[args.indexOf('--type') + 1] : null);
+
+const costTrendMode = args.includes('--cost-trend');
+
+if (costTrendMode) {
+  const trendType = typeArg || 'B';
+  const result = costTrend(trendType);
+  if (jsonMode) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    if (result.error) {
+      console.log(result.error);
+    } else {
+      console.log(`=== ${result.type} Session Cost Trend ===\n`);
+      console.log(`Recent (last ${result.recent.count}): avg $${result.recent.avg.toFixed(2)}, median $${result.recent.median.toFixed(2)}`);
+      if (result.older) {
+        console.log(`Older (${result.older.count}):         avg $${result.older.avg.toFixed(2)}, median $${result.older.median.toFixed(2)}`);
+      }
+      console.log(`All-time (${result.allTime.count}):      avg $${result.allTime.avg.toFixed(2)}, median $${result.allTime.median.toFixed(2)}`);
+      if (result.delta !== null) {
+        const sign = result.delta >= 0 ? '+' : '';
+        console.log(`\nDelta (recent vs older): ${sign}$${result.delta.toFixed(2)}`);
+      }
+      console.log(`Threshold: $${result.threshold.toFixed(2)} — ${result.exceedsThreshold ? 'EXCEEDED' : 'OK'}`);
+      if (result.outliers.length > 0) {
+        console.log(`\nOutliers:`);
+        result.outliers.forEach(o => console.log(`  s${o.session}: $${o.cost.toFixed(2)} — ${o.note}`));
+      }
+      if (result.signals.length > 0) {
+        console.log(`\nSignals:`);
+        result.signals.forEach(s => console.log(`  - ${s}`));
+      }
+      console.log(`\nHealth: ${result.health}`);
+    }
+  }
+  process.exit(0);
+}
 
 const result = forecast(typeArg);
 
@@ -190,4 +278,4 @@ if (jsonMode) {
 }
 
 // Export for programmatic use
-export { forecast, classifyEffort, parseHistory, computeStats };
+export { forecast, classifyEffort, parseHistory, computeStats, costTrend };

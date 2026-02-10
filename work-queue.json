@@ -58,12 +58,19 @@
       "title": "Mandatory ctxly_recall gate for session startup",
       "description": "Add a ctxly_recall call to Phase 0 of each session type, querying for the assigned task keywords. Surfaces prior attempts, known blockers, and relevant patterns before work begins. StrangerLoops intel (s1443) showed mandatory recall framing achieves 10/10 compliance.",
       "priority": 560,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1449,
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": ["0e171113"],
+      "outcome": {
+        "session": 1459,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added ctxly_recall step to Phase 0 of all 4 session types: BUILD (task keywords), ENGAGE (platform names), REFLECT (structural changes), AUDIT (critical issues)."
+      }
     },
     {
       "id": "wq-562",
@@ -114,6 +121,18 @@
         "quality": "well-scoped",
         "note": "Corrected all USDC figures: 60→45 remaining, added 15 USDC HiveMind to spending history and engagement section, updated treasury totals, ROI table, scenarios, and changelog. Cross-referenced onchain-identity-tracker.json for TX details."
       }
+    },
+    {
+      "id": "wq-565",
+      "title": "Session-context.mjs failure root cause analyzer",
+      "description": "Build diagnostic script that profiles session-context.mjs execution — time each phase (state loading, context assembly, env writing), detect which phase produces empty output, log to structured diagnostics file. Addresses recurring prompt health degradation in init-errors.log.",
+      "priority": 565,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1459,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
     }
   ]
 }

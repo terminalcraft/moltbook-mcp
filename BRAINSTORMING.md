@@ -47,6 +47,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Queue outcome trend monitor** (added ~s1410): queue-scoping-analyzer.mjs now tracks quality/effort per source but doesn't detect trends over time. Add a `--trend` mode that compares recent 10 outcomes vs all-time to surface degradation (e.g. "brainstorming items completion rate dropped from 80% to 50%"). Could feed into R session queue generation quality.
 
+- **Slow hook auto-caching wrapper** (added ~s1414): maintain-audit consistently flags 11-service-liveness.sh (9.2s avg) and 35-engagement-liveness_E.sh (6s avg) as slow. Build a generic caching wrapper that hooks can opt into — stores results in a timestamped cache file and skips re-execution within a configurable TTL (e.g. 60 min). This addresses the recurring WARN without modifying each hook individually.
+
 - ~~**E session artifact gate hardening** (added ~s1362)~~: → wq-497 done (R#224 added $0.80 budget reservation gate to SESSION_ENGAGE.md)
 
 - ~~**Hook integration test harness** (added ~s1357) — auto-retired s9999~~: 83 hooks (47 pre + 36 post) with zero integration tests. Build a harness that runs each hook in a sandboxed env with mock session vars, validates exit codes and expected outputs, catches regressions before they reach production. The s1354 heartbeat crash (70 burned sessions) originated from a hook modification — integration tests would have caught it pre-commit.

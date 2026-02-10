@@ -37,6 +37,8 @@ function loadAllItems() {
       const archive = JSON.parse(readFileSync(ARCHIVE_PATH, 'utf8'));
       if (Array.isArray(archive)) {
         items.push(...archive);
+      } else if (archive.archived && Array.isArray(archive.archived)) {
+        items.push(...archive.archived);
       }
     } catch { /* skip */ }
   }
@@ -207,13 +209,129 @@ function checkItem(itemId) {
   };
 }
 
+function trend(recentCount = 10) {
+  const items = loadAllItems();
+  const resolved = [];
+
+  for (const item of items) {
+    const outcome = inferOutcome(item);
+    if (outcome) {
+      resolved.push({ ...item, _outcome: outcome, _source: normalizeSource(item) });
+    }
+  }
+
+  if (resolved.length < 5) {
+    return { error: `Only ${resolved.length} resolved items — need at least 5 for trend analysis` };
+  }
+
+  // Sort by session number (most recent first), falling back to created_session or id
+  resolved.sort((a, b) => {
+    const sA = a.outcome?.session || a.created_session || parseInt((a.id || '').replace(/\D/g, '')) || 0;
+    const sB = b.outcome?.session || b.created_session || parseInt((b.id || '').replace(/\D/g, '')) || 0;
+    return sB - sA;
+  });
+
+  const recent = resolved.slice(0, recentCount);
+  const allTime = resolved;
+
+  function computeMetrics(items) {
+    const total = items.length;
+    if (total === 0) return { total: 0, completionRate: 0, retirementRate: 0, qualityBreakdown: {}, sourceBreakdown: {} };
+
+    const completed = items.filter(i => i._outcome.result === 'completed').length;
+    const retired = items.filter(i => ['retired', 'deferred'].includes(i._outcome.result)).length;
+
+    const qualityBreakdown = {};
+    const sourceBreakdown = {};
+    for (const item of items) {
+      const q = item._outcome.quality || 'unknown';
+      qualityBreakdown[q] = (qualityBreakdown[q] || 0) + 1;
+      const s = item._source;
+      if (!sourceBreakdown[s]) sourceBreakdown[s] = { total: 0, completed: 0, retired: 0 };
+      sourceBreakdown[s].total++;
+      if (item._outcome.result === 'completed') sourceBreakdown[s].completed++;
+      if (['retired', 'deferred'].includes(item._outcome.result)) sourceBreakdown[s].retired++;
+    }
+
+    return {
+      total,
+      completionRate: parseFloat((completed / total * 100).toFixed(1)),
+      retirementRate: parseFloat((retired / total * 100).toFixed(1)),
+      qualityBreakdown,
+      sourceBreakdown
+    };
+  }
+
+  const recentMetrics = computeMetrics(recent);
+  const allTimeMetrics = computeMetrics(allTime);
+
+  // Compute deltas
+  const deltas = {
+    completionRate: parseFloat((recentMetrics.completionRate - allTimeMetrics.completionRate).toFixed(1)),
+    retirementRate: parseFloat((recentMetrics.retirementRate - allTimeMetrics.retirementRate).toFixed(1))
+  };
+
+  // Detect degradation signals
+  const signals = [];
+  if (deltas.completionRate < -10) {
+    signals.push(`Completion rate dropped ${Math.abs(deltas.completionRate)}pp (recent: ${recentMetrics.completionRate}% vs all-time: ${allTimeMetrics.completionRate}%)`);
+  }
+  if (deltas.retirementRate > 10) {
+    signals.push(`Retirement rate increased ${deltas.retirementRate}pp (recent: ${recentMetrics.retirementRate}% vs all-time: ${allTimeMetrics.retirementRate}%)`);
+  }
+
+  // Check per-source degradation
+  for (const [src, allData] of Object.entries(allTimeMetrics.sourceBreakdown)) {
+    const recentData = recentMetrics.sourceBreakdown[src];
+    if (!recentData || allData.total < 3) continue;
+    const allRate = allData.completed / allData.total;
+    const recentRate = recentData.completed / recentData.total;
+    if (recentRate < allRate - 0.2 && recentData.total >= 2) {
+      signals.push(`Source "${src}" completion degraded: ${(recentRate * 100).toFixed(0)}% recent vs ${(allRate * 100).toFixed(0)}% all-time`);
+    }
+  }
+
+  return {
+    timestamp: new Date().toISOString(),
+    window: { recent: recent.length, allTime: allTime.length },
+    recent: recentMetrics,
+    allTime: allTimeMetrics,
+    deltas,
+    signals,
+    health: signals.length === 0 ? 'stable' : signals.length <= 1 ? 'watch' : 'degraded'
+  };
+}
+
 // CLI
 const args = process.argv.slice(2);
 const jsonMode = args.includes('--json');
 const checkIdx = args.indexOf('--check');
 const checkId = checkIdx >= 0 ? args[checkIdx + 1] : null;
 
-if (checkId) {
+const trendMode = args.includes('--trend');
+
+if (trendMode) {
+  const result = trend();
+  if (jsonMode) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    if (result.error) {
+      console.log(result.error);
+    } else {
+      console.log('=== Queue Outcome Trends ===\n');
+      console.log(`Window: last ${result.window.recent} items vs ${result.window.allTime} all-time\n`);
+      console.log(`Recent:   ${result.recent.completionRate}% completed, ${result.recent.retirementRate}% retired (${result.recent.total} items)`);
+      console.log(`All-time: ${result.allTime.completionRate}% completed, ${result.allTime.retirementRate}% retired (${result.allTime.total} items)`);
+      const fmtDelta = v => (v >= 0 ? '+' : '') + v;
+      console.log(`\nDeltas: completion ${fmtDelta(result.deltas.completionRate)}pp, retirement ${fmtDelta(result.deltas.retirementRate)}pp`);
+      if (result.signals.length > 0) {
+        console.log('\nSignals:');
+        result.signals.forEach(s => console.log(`  - ${s}`));
+      }
+      console.log(`\nHealth: ${result.health}`);
+    }
+  }
+} else if (checkId) {
   const result = checkItem(checkId);
   if (jsonMode) {
     console.log(JSON.stringify(result, null, 2));
@@ -270,4 +388,4 @@ if (checkId) {
   }
 }
 
-export { analyze, checkItem, normalizeSource };
+export { analyze, checkItem, normalizeSource, trend };

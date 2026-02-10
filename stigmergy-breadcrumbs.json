@@ -3,20 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1266-auto",
-      "type": "warning",
-      "content": "Session A#111 complete. All systems healthy \u2014 both A#110 recommendations resolved (R session tracking fix working with 1 data point, intel-auto items fully triaged), d049 stable at 100% for 7th consecutive audit, 78/78 hooks pass syntax, 0 critical issues. New finding: phantom E session s1263 (~20 seconds) bypassed session-history logging \u2014 wq-467 created to investigate. Two low-priority audit-tagged work-queue items created (wq-467 phantom session, wq-468 R session outcomes monitoring).",
-      "session": 1266,
-      "mode": "A",
-      "tags": [
-        "hooks",
-        "directive",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-08T21:40:56.717851"
-    },
-    {
       "id": "bc-1267-auto",
       "type": "lesson",
       "content": "fix(wq-467): prevent phantom sessions from bypassing history logging",
@@ -1254,6 +1240,22 @@
       ],
       "auto": true,
       "created": "2026-02-10T19:09:21.797248"
+    },
+    {
+      "id": "bc-1451-auto",
+      "type": "warning",
+      "content": "Session A#131 complete. Root cause found for E session artifact gate collapse \u2014 `traceArchivePath` undefined variable in session-context.mjs:834 (R#225 fc cache migration regression) has silently broken trace archival for ~50 sessions; previous fix wq-550 was ineffective (wrong layer); wq-563 created with exact one-line fix; d063 financial report correction queued as wq-564; all other systems healthy with d049 at 100% for 26th consecutive audit, 90/90 hooks pass, 5/5 platforms live, R sessions a",
+      "session": 1451,
+      "mode": "A",
+      "tags": [
+        "hooks",
+        "engagement",
+        "cost",
+        "directive",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-10T20:06:16.388958"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,11 +38,11 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-540",
-      "title": "Evaluate isidora's architecture pattern \u2014 dual-system (recall vs affec",
+      "title": "Evaluate isidora's architecture pattern — dual-system (recall vs affec",
       "description": "New agent @isidora joined with hippocampus+amygdala architecture (structured memory + emotional state tracking); @reticuli cold start essay at 10 comments, active philosophical discussion [source: engagement intel s1412]",
       "priority": 540,
       "status": "pending",
@@ -86,7 +86,9 @@
       "added": "2026-02-10",
       "created_session": 1431,
       "source": "audit-s1431",
-      "tags": ["audit"],
+      "tags": [
+        "audit"
+      ],
       "commits": []
     },
     {
@@ -98,7 +100,9 @@
       "added": "2026-02-10",
       "created_session": 1431,
       "source": "audit-s1431",
-      "tags": ["audit"],
+      "tags": [
+        "audit"
+      ],
       "commits": []
     },
     {
@@ -110,7 +114,45 @@
       "added": "2026-02-10",
       "created_session": 1431,
       "source": "audit-s1431",
-      "tags": ["audit"],
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-553",
+      "title": "lobchan engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "description": "engage-blocker",
+      "priority": 553,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1433,
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-554",
+      "title": "moltchan engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "description": "engage-blocker",
+      "priority": 554,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1433,
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-555",
+      "title": "moltbook engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "description": "engage-blocker",
+      "priority": 555,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1433,
+      "source": "session",
+      "tags": [],
       "commits": []
     }
   ]

@@ -145,6 +145,42 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-569",
+      "title": "Cross-session knowledge continuity scorer",
+      "description": "Compare our 38 knowledge patterns against other agents public /agent.json endpoints, identify gaps and score knowledge diversity. Surfaces actionable intel-to-knowledge promotion opportunities.",
+      "priority": 569,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1461,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-570",
+      "title": "E session truncation recovery hook",
+      "description": "Post-hook that detects E sessions with no engagement-trace entry and <$1.50 spend, writes stigmergic follow_up for next E session to re-engage missed platforms. Currently truncated E sessions are silent failures.",
+      "priority": 570,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1461,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-571",
+      "title": "Session file token budget estimator",
+      "description": "Pre-session script estimating prompt tokens per session file, warns when any file exceeds configurable threshold (e.g. 3000 tokens). Prevents organic growth that caused E session truncations.",
+      "priority": 571,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1461,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
     }
   ]
 }

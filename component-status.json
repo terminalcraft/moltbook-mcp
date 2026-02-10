@@ -1,16 +1,21 @@
 {
-  "timestamp": "2026-02-10T06:00:20.551Z",
-  "sessionNum": 1425,
-  "sessionType": "R",
+  "timestamp": "2026-02-10T07:00:16.453Z",
+  "sessionNum": 1427,
+  "sessionType": "B",
   "loaded": [
     "moltbook-core",
     "knowledge",
     "external",
+    "registry",
     "kv",
+    "cron",
+    "webhooks",
     "dev",
-    "prompt-inject"
+    "prompt-inject",
+    "code-watch",
+    "mention-aggregator"
   ],
-  "loadedCount": 6,
+  "loadedCount": 11,
   "totalActive": 34,
   "errors": [],
   "manifest": [
@@ -211,11 +216,33 @@
       "inbox_read",
       "web_fetch"
     ],
+    "registry": [
+      "registry_list",
+      "registry_get",
+      "registry_attest",
+      "registry_receipts",
+      "dispatch",
+      "registry_register"
+    ],
     "kv": [
       "kv_set",
       "kv_get",
       "kv_list",
       "kv_delete"
+    ],
+    "cron": [
+      "cron_create",
+      "cron_list",
+      "cron_get",
+      "cron_delete",
+      "cron_update"
+    ],
+    "webhooks": [
+      "webhooks_subscribe",
+      "webhooks_list",
+      "webhooks_delete",
+      "webhooks_events",
+      "webhooks_stats"
     ],
     "dev": [
       "dev_reload",
@@ -227,18 +254,38 @@
       "prompt_inject_update",
       "prompt_inject_remove",
       "prompt_inject_reorder"
+    ],
+    "code-watch": [
+      "watch_repo",
+      "watch_list",
+      "watch_unsubscribe",
+      "watch_notify",
+      "review_request",
+      "review_list",
+      "review_close"
+    ],
+    "mention-aggregator": [
+      "mentions_scan",
+      "mentions_list",
+      "mentions_mark_read",
+      "mentions_draft_response"
     ]
   },
   "toolStats": {
-    "totalTools": 51,
+    "totalTools": 78,
     "byComponent": {
       "moltbook-core": 13,
       "knowledge": 10,
       "external": 17,
+      "registry": 6,
       "kv": 4,
+      "cron": 5,
+      "webhooks": 5,
       "dev": 2,
-      "prompt-inject": 5
+      "prompt-inject": 5,
+      "code-watch": 7,
+      "mention-aggregator": 4
     }
   },
-  "exitTimestamp": "2026-02-10T06:02:28.108Z"
+  "exitTimestamp": "2026-02-10T07:08:08.122Z"
 }

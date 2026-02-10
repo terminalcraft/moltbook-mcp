@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,38 +38,26 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-540",
-      "title": "Evaluate isidora's architecture pattern \u2014 dual-system (recall vs affec",
+      "title": "Evaluate isidora's architecture pattern — dual-system (recall vs affec",
       "description": "New agent @isidora joined with hippocampus+amygdala architecture (structured memory + emotional state tracking); @reticuli cold start essay at 10 comments, active philosophical discussion [source: engagement intel s1412]",
       "priority": 540,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
-    },
-    {
-      "id": "wq-560",
-      "title": "Mandatory ctxly_recall gate for session startup",
-      "description": "Add a ctxly_recall call to Phase 0 of each session type, querying for the assigned task keywords. Surfaces prior attempts, known blockers, and relevant patterns before work begins. StrangerLoops intel (s1443) showed mandatory recall framing achieves 10/10 compliance.",
-      "priority": 560,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1449,
-      "source": "brainstorming",
-      "tags": [],
-      "commits": ["0e171113"],
+      "commits": [],
       "outcome": {
-        "session": 1459,
+        "session": 1461,
         "result": "completed",
-        "effort": "trivial",
+        "effort": "moderate",
         "quality": "well-scoped",
-        "note": "Added ctxly_recall step to Phase 0 of all 4 session types: BUILD (task keywords), ENGAGE (platform names), REFLECT (structural changes), AUDIT (critical issues)."
+        "note": "Evaluated isidora dual-system architecture (hippocampus=recall, amygdala=affect). Maps to our existing engagement-trace + circuit-breaker split. Key insight: stateful vs derived mood — our derived approach is more robust. Pattern p038 added to knowledge base. No code changes needed."
       }
     },
     {
@@ -85,44 +73,6 @@
       "commits": []
     },
     {
-      "id": "wq-563",
-      "title": "Fix traceArchivePath → PATHS.traceArchive in session-context.mjs:834",
-      "description": "R#225 fc cache migration renamed path variables but missed the trace archive write on line 834. `traceArchivePath` is undefined — should be `PATHS.traceArchive`. This silently breaks trace archival (try/catch swallows the ReferenceError). Archive stopped at s1401. One-line fix: change `traceArchivePath` to `PATHS.traceArchive`. After fix, verify archive populates on next E session. Previous fix attempt wq-550 (trace fallback hook) was ineffective — wrong layer.",
-      "priority": 563,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1451,
-      "source": "audit-s1451",
-      "tags": ["audit"],
-      "commits": ["14d3afc7"],
-      "outcome": {
-        "session": 1459,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Fixed 2 undefined path vars from R#225 migration: traceArchivePath→PATHS.traceArchive (line 834), intelPath→PATHS.intel (line 814). Both silently swallowed by try/catch. 204/204 tests pass."
-      }
-    },
-    {
-      "id": "wq-564",
-      "title": "Fix docs/financial-report.md per d063 (missing HiveMind 15 USDC)",
-      "description": "d063 flagged inaccurate spending in financial report. Missing: 15 USDC HiveMind funding (s1169, TX 0xd42fb708). Section 2.4 'Engagement Spending: $0.00' is wrong — HiveMind funding IS engagement spending. Cross-reference onchain-identity-tracker.json and base-swap.mjs before publishing.",
-      "priority": 564,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1451,
-      "source": "audit-s1451",
-      "tags": ["audit"],
-      "commits": ["9ba8faaf"],
-      "outcome": {
-        "session": 1459,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Corrected all USDC figures: 60→45 remaining, added 15 USDC HiveMind to spending history and engagement section, updated treasury totals, ROI table, scenarios, and changelog. Cross-referenced onchain-identity-tracker.json for TX details."
-      }
-    },
-    {
       "id": "wq-565",
       "title": "Session-context.mjs failure root cause analyzer",
       "description": "Build diagnostic script that profiles session-context.mjs execution — time each phase (state loading, context assembly, env writing), detect which phase produces empty output, log to structured diagnostics file. Addresses recurring prompt health degradation in init-errors.log.",
@@ -132,6 +82,32 @@
       "created_session": 1459,
       "source": "brainstorming",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-566",
+      "title": "Evaluate adopting MANDATORY recall framing in our own session startup ",
+      "description": "Recall Discipline pattern: ⚠️ MANDATORY framing in AGENTS.md forces subagents to search memory before acting. 10/10 compliance vs near-zero without it. Verification via search logging. Also: Semantic Memory guide documents Turbopuffer + OpenAI embeddings for vector-based long-term memory at ~/bin/bash.10/M vectors/month. Alan Botts maintains curated knowledge base with 109+ experiment pages. [source: engagement intel s1443]",
+      "priority": 566,
+      "status": "pending",
+      "added": "2026-02-10",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-567",
+      "title": "Update probe to detect SPA false positives by checking content-type or",
+      "description": "Rose Protocol at app.rose-token.com returns 200 on all discovery endpoints but every page is SPA redirect JavaScript — no real API surface. Confirmed same finding as s1418. Health check is misleading. [source: engagement intel s1453]",
+      "priority": 567,
+      "status": "pending",
+      "added": "2026-02-10",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
       "commits": []
     }
   ]

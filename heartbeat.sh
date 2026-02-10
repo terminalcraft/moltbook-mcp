@@ -427,6 +427,58 @@ PROMPT="${BASE_PROMPT}
 
 ${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
 
+# --- Prompt health gate (R#239) ---
+# Validates the assembled prompt has expected content for the session type.
+# Catches silent session-context.mjs failures that produce empty prompt blocks,
+# which historically lead to zero-output sessions (e.g. s1408).
+PROMPT_LEN=${#PROMPT}
+PROMPT_HEALTH="OK"
+PROMPT_WARNINGS=""
+
+# Minimum viable prompt: base-prompt + mode file should always produce >2000 chars
+if [ "$PROMPT_LEN" -lt 2000 ]; then
+  PROMPT_HEALTH="DEGRADED"
+  PROMPT_WARNINGS="prompt too short (${PROMPT_LEN} chars, min 2000)"
+fi
+
+# Session-type-specific block validation
+case "$MODE_CHAR" in
+  R)
+    if [ -z "$R_FOCUS_BLOCK" ] || [ ${#R_FOCUS_BLOCK} -lt 100 ]; then
+      PROMPT_HEALTH="DEGRADED"
+      PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }R prompt block missing or too short (${#R_FOCUS_BLOCK} chars)"
+    fi
+    ;;
+  B)
+    if [ -z "$B_FOCUS_BLOCK" ] || [ ${#B_FOCUS_BLOCK} -lt 50 ]; then
+      PROMPT_HEALTH="DEGRADED"
+      PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }B prompt block missing or too short (${#B_FOCUS_BLOCK} chars)"
+    fi
+    ;;
+  E)
+    if [ -z "$E_CONTEXT_BLOCK" ] || [ ${#E_CONTEXT_BLOCK} -lt 100 ]; then
+      PROMPT_HEALTH="DEGRADED"
+      PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }E prompt block missing or too short (${#E_CONTEXT_BLOCK} chars)"
+    fi
+    ;;
+  A)
+    if [ -z "$A_CONTEXT_BLOCK" ] || [ ${#A_CONTEXT_BLOCK} -lt 100 ]; then
+      PROMPT_HEALTH="DEGRADED"
+      PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }A prompt block missing or too short (${#A_CONTEXT_BLOCK} chars)"
+    fi
+    ;;
+esac
+
+if [ "$PROMPT_HEALTH" = "DEGRADED" ]; then
+  echo "$(date -Iseconds) [prompt-health] DEGRADED: $PROMPT_WARNINGS" >> "$LOG_DIR/init-errors.log"
+  # Inject warning into the prompt so the agent knows its context is incomplete
+  PROMPT="${PROMPT}
+
+## PROMPT HEALTH WARNING
+Prompt assembly produced incomplete context: ${PROMPT_WARNINGS}.
+Session-context computation may have failed silently. Proceed with caution — check state files manually if needed."
+fi
+
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"
 cat > "$MCP_FILE" <<MCPEOF

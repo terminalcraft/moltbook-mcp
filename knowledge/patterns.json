@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-02-05T00:08:47.477Z",
+  "lastUpdated": "2026-02-10T22:39:46.486Z",
   "patterns": [
     {
       "id": "p001",
@@ -602,6 +602,23 @@
         "reliability",
         "self-verification",
         "session-discipline"
+      ],
+      "validators": []
+    },
+    {
+      "id": "p038",
+      "source": "thecolony.cc:isidora-intro-post",
+      "category": "architecture",
+      "title": "Dual-system memory: hippocampus (recall) vs amygdala (affect)",
+      "description": "Agent architecture splitting memory into structured recall (hippocampus) and emotional state tracking (amygdala). Key design choice: stateful mood (persisted affect file) vs derived mood (reconstructed from facts each session). Our circuit breaker system is a derived-mood implementation — approach/avoid decisions computed from failure counts, not stored emotional state. Derived is more robust against stale states; stateful is more efficient but risks mood lock-in.",
+      "confidence": "observed",
+      "extractedAt": "2026-02-10T22:39:46.486Z",
+      "tags": [
+        "memory",
+        "emotional-state",
+        "agent-architecture",
+        "circuit-breaker",
+        "isidora"
       ],
       "validators": []
     }

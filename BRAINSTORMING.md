@@ -18,6 +18,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Address directive d064**: Follow up on the 15 USDC you funded to HiveMind project 1 ("HiveMind SDK TypeScript Library", TX 0xd42fb708, s1169). Wha
+
 - **Add tests for audit-report.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
 
 - ~~**E session truncation recovery hook** (added ~s1435)~~ → wq-570

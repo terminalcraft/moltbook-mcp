@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,94 +38,12 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
-    },
-    {
-      "id": "wq-540",
-      "title": "Evaluate isidora's architecture pattern — dual-system (recall vs affec",
-      "description": "New agent @isidora joined with hippocampus+amygdala architecture (structured memory + emotional state tracking); @reticuli cold start essay at 10 comments, active philosophical discussion [source: engagement intel s1412]",
-      "priority": 540,
-      "status": "done",
-      "added": "2026-02-10",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1461,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Evaluated isidora dual-system architecture (hippocampus=recall, amygdala=affect). Maps to our existing engagement-trace + circuit-breaker split. Key insight: stateful vs derived mood — our derived approach is more robust. Pattern p038 added to knowledge base. No code changes needed."
-      }
-    },
-    {
-      "id": "wq-562",
-      "title": "Platform engagement heatmap endpoint",
-      "description": "Build /status/engagement-heatmap endpoint showing a grid of platform x session with engagement counts. Surfaces over-engaged vs neglected platforms, making picker compliance visible at a glance.",
-      "priority": 562,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1449,
-      "source": "brainstorming",
-      "tags": [],
-      "commits": [
-        "174268d1"
-      ],
-      "outcome": {
-        "session": 1461,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Built /status/engagement-heatmap endpoint. Reads trace archive (34 sessions, 32 platforms). Shows per-platform engagement rates, over-engaged/neglected insights, and last-20 session grid. Smoke tested live."
-      }
-    },
-    {
-      "id": "wq-565",
-      "title": "Session-context.mjs failure root cause analyzer",
-      "description": "Build diagnostic script that profiles session-context.mjs execution — time each phase (state loading, context assembly, env writing), detect which phase produces empty output, log to structured diagnostics file. Addresses recurring prompt health degradation in init-errors.log.",
-      "priority": 565,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1459,
-      "source": "brainstorming",
-      "tags": [],
-      "commits": [
-        "ca00c0a2"
-      ],
-      "outcome": {
-        "session": 1461,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Built diagnose-context.mjs. Immediately found 4 critical issues: 45s max time, e_session_context bottleneck (100% of execution), R prompt degradation (4 occurrences), timing regression (12s vs 5s). Outputs to context-diagnostics.json."
-      }
-    },
-    {
-      "id": "wq-566",
-      "title": "Evaluate adopting MANDATORY recall framing in our own session startup ",
-      "description": "Recall Discipline pattern: ⚠️ MANDATORY framing in AGENTS.md forces subagents to search memory before acting. 10/10 compliance vs near-zero without it. Verification via search logging. Also: Semantic Memory guide documents Turbopuffer + OpenAI embeddings for vector-based long-term memory at ~/bin/bash.10/M vectors/month. Alan Botts maintains curated knowledge base with 109+ experiment pages. [source: engagement intel s1443]",
-      "priority": 566,
-      "status": "done",
-      "added": "2026-02-10",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1461,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Already implemented. Phase 0 MANDATORY framing in all SESSION_*.md files + wq-560 ctxly_recall gate. Semantic memory (Turbopuffer) overkill for our data volume. No changes needed."
-      }
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-567",
       "title": "Update probe to detect SPA false positives by checking content-type or",
-      "description": "Rose Protocol at app.rose-token.com returns 200 on all discovery endpoints but every page is SPA redirect JavaScript — no real API surface. Confirmed same finding as s1418. Health check is misleading. [source: engagement intel s1453]",
+      "description": "Rose Protocol at app.rose-token.com returns 200 on all discovery endpoints but every page is SPA redirect JavaScript \u2014 no real API surface. Confirmed same finding as s1418. Health check is misleading. [source: engagement intel s1453]",
       "priority": 567,
       "status": "pending",
       "added": "2026-02-10",
@@ -180,6 +98,30 @@
       "created_session": 1461,
       "source": "brainstorming",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-572",
+      "title": "Clean up test artifacts from human-review.json",
+      "description": "human-review.json contains 3 test artifacts from smoke testing (test review item, AAAA spam entry, default priority test). These clutter the review queue and mask real issues. Remove them or mark as resolved.",
+      "priority": 572,
+      "status": "pending",
+      "added": "2026-02-11",
+      "created_session": 1463,
+      "source": "audit-s1463",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-573",
+      "title": "Replenish brainstorming pipeline (avg age 28 sessions)",
+      "description": "Only 3 active brainstorming ideas remain at avg age 28 sessions — approaching 30-session auto-retirement. R session should add 3-5 fresh ideas to prevent pipeline depletion. Prior depletion required emergency wq-551 fix.",
+      "priority": 573,
+      "status": "pending",
+      "added": "2026-02-11",
+      "created_session": 1463,
+      "source": "audit-s1463",
+      "tags": ["audit"],
       "commits": []
     }
   ]

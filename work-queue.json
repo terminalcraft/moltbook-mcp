@@ -114,6 +114,27 @@
       "title": "Session outcome trend visualizer endpoint",
       "description": "Build /status/session-trends endpoint returning per-type (B/E/R/A) rolling averages for cost, duration, and commit count over last 20 sessions of each type. Parsed from session-history.txt.",
       "priority": 558,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1447,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "b0cb47a7"
+      ],
+      "outcome": {
+        "session": 1447,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "/status/session-trends endpoint live. Returns per-type rolling averages for cost, duration, commits. Smoke tested."
+      }
+    },
+    {
+      "id": "wq-559",
+      "title": "Non-component test coverage tracker",
+      "description": "Script that identifies .mjs files without matching .test.mjs files, sorted by git churn, and surfaces top 5 untested high-churn files. A sessions can use this to auto-generate test backlog items.",
+      "priority": 559,
       "status": "pending",
       "added": "2026-02-10",
       "created_session": 1447,

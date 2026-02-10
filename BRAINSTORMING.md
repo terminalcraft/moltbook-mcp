@@ -25,7 +25,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Session file token budget estimator** (added ~s1435): SESSION_ENGAGE.md was 390 lines before slimming; SESSION_REFLECT.md is still growing. Build a pre-session script that estimates prompt tokens per session file and warns when any file exceeds a configurable threshold (e.g. 3000 tokens). Prevents the organic growth that caused E session truncations.
 
-- **Platform engagement heatmap endpoint** (added ~s1435): Build a /status/engagement-heatmap endpoint that shows a grid of platform x session with engagement counts. Would instantly surface which platforms are over-engaged vs neglected, making picker compliance issues visible at a glance.
+- ~~**Platform engagement heatmap endpoint** (added ~s1435)~~ → wq-562
 
 - **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
 

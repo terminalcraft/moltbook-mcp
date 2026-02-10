@@ -21,106 +21,24 @@ This is a **build session**. Focus on shipping code.
 
 ## Phase 0: Context detection (MANDATORY — before task selection)
 
-Before selecting a task, you MUST determine your session context. This takes <30 seconds and prevents wasted work.
+Run these **in parallel** (<30 seconds):
+1. `knowledge_read` (digest, session_type=B)
+2. Check last entry in `~/.config/moltbook/session-history.txt` for predecessor state
+3. `git log --oneline -3` for incomplete work
+4. `grep -E "Failed:|wq-[0-9]+" ~/.config/moltbook/session-history.txt | tail -10` for failure history
 
-**Required steps (run ALL FOUR in parallel):**
-1. `knowledge_read` (digest format, session_type=B) — surface build-relevant patterns
-2. Check last entry in `~/.config/moltbook/session-history.txt` — look for predecessor state
-3. Check `git log --oneline -3` — look for incomplete work
-4. Check for task failure history (wq-272): `grep -E "Failed:|wq-[0-9]+" ~/.config/moltbook/session-history.txt | tail -10`
-
-**Predecessor context decision tree:**
-
-```
-IF previous session note contains "WIP", "partial", or appears cut-off:
-    → RECOVERY MODE
-    IF git log shows WIP commit:
-        → Continue from WIP commit (don't redo work)
-    ELSE IF work-queue.json has "in-progress" item:
-        → Resume that item
-    ELSE:
-        → Start fresh (predecessor died before committing)
-    Note in session log: "Resumed from truncated s<N>: <what you continued>"
-ELSE:
-    → NORMAL MODE: Proceed to task selection
-```
-
-**Failure history check (wq-272 integration):**
-
-After determining mode, check if your assigned task appears in recent failure history:
-
-```
-IF assigned task (wq-XXX) appears in "Failed:" lines from last 5 B sessions:
-    → CAUTION MODE
-    1. Read the failure reasons: why did it fail before?
-    2. Check if blocker is resolved:
-       - "blocked on human" → still blocked, pick different task
-       - "API error" → may be transient, probe the endpoint first
-       - "retired as non-actionable" → don't retry, pick different task
-       - "prerequisite missing" → check if prereq is now done
-    3. If same conditions apply → SKIP and pick next pending task
-    4. If conditions changed → proceed, but note: "Retrying wq-XXX (prev failed sN)"
-```
-
-**Gate**: Do not proceed to task selection until you've checked predecessor state AND failure history.
-
-**Artifact**: Predecessor context determined (NORMAL/RECOVERY/CAUTION), failure history checked.
+**Mode selection**: If predecessor has "WIP"/"partial"/cut-off → RECOVERY (resume from WIP commit or in-progress queue item). If assigned task appears in recent failures and blocker unchanged → SKIP it. Otherwise → NORMAL.
 
 ## Phase 0.5: Pipeline health gate (CONDITIONAL)
 
-B sessions are the primary queue consumers. When queue is critically low, you MUST replenish BEFORE starting your assigned task. This prevents starvation between R sessions.
-
-**Trigger check** (run as part of Phase 0):
-```bash
-jq '[.queue[] | select(.status == "pending")] | length' work-queue.json
-```
-
-**Decision tree:**
-
-| Pending count | Action |
-|---------------|--------|
-| ≥3 | **SKIP** this phase. Queue healthy. Proceed to task selection. |
-| 1-2 | **WARN** mode. Note in session log: "Queue low (N pending)". Proceed normally but prioritize queue replenishment at close-out (step 5.2). |
-| 0 | **CRITICAL** mode. Do NOT proceed to your assigned task. First, replenish the queue. |
-
-**Queue replenishment protocol (for CRITICAL mode):**
-
-1. **Check BRAINSTORMING.md** for promotable ideas:
-   ```bash
-   grep -E "^- \*\*" BRAINSTORMING.md | head -5
-   ```
-   If 2+ concrete ideas exist → promote them to work-queue.json, then proceed to your assigned task.
-
-2. **If brainstorming is empty**, generate 2 new queue items from:
-   - Session history friction (errors, retries in last 10 sessions)
-   - Untested hot files (run `node test-coverage-status.mjs`)
-   - Pending directives with incomplete decomposition
-
-3. **Gate**: Do NOT proceed until queue has ≥2 pending items. Time budget: spend at most 5 minutes on replenishment.
-
-**Rationale**: Close-out replenishment often fails because B sessions hit budget/time limits. Front-loading the check ensures queue health is maintained even when sessions truncate.
-
-**Artifact**: If replenishment happened, note: "Queue replenishment: added wq-XXX, wq-YYY before starting assigned task."
+Check `jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`:
+- **≥3**: Skip. Queue healthy.
+- **1-2**: Note "Queue low" in session log. Replenish at close-out.
+- **0**: CRITICAL — replenish BEFORE starting assigned task. Check BRAINSTORMING.md for promotable ideas, then session history friction. Gate: ≥2 pending items before proceeding. Max 5 minutes.
 
 ## Directive context awareness
 
-When your assigned task references a directive (queue item has `source: "directive"` or title contains `d0XX`), the queue item title may truncate implementation details. **Read the full directive** before building:
-
-```bash
-jq '.directives[] | select(.id == "d0XX")' directives.json
-```
-
-Directives often include:
-- **Acceptance criteria**: What must be true for the task to be done
-- **Implementation notes**: Specific approaches or constraints
-- **Priority indicators**: `priority: "critical"` means this supersedes other work
-
-**Decision tree for directive-sourced tasks:**
-1. If directive has `priority: "critical"` → Work this first, regardless of queue position
-2. If directive has detailed `content` → Use the directive content, not just queue title
-3. If directive has `queue_item` field → Your task ID should match; if not, verify you're working the right item
-
-This context step takes <30 seconds and prevents building the wrong thing.
+If your task references a directive (`source: "directive"` or `d0XX` in title), read the full directive: `jq '.directives[] | select(.id == "d0XX")' directives.json`. Directives with `priority: "critical"` supersede other work. Use directive content, not just queue title.
 
 ## Task lifecycle
 
@@ -200,63 +118,13 @@ Verification ensures you didn't break anything. Match scope to your changes.
 
 ### 5. Close task
 
-Close-out has a strict sequence to prevent pattern loss:
+Close-out sequence (order matters — pattern capture before queue update to survive truncation):
 
 1. **Commit and push**: `git add <files> && git commit -m "..." && git push`
-
-2. **Queue health check** (BEFORE pattern capture):
-   Run: `jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`
-
-   | Pending count | Action |
-   |---------------|--------|
-   | ≥3 | Queue healthy. Proceed to pattern capture (step 3). |
-   | 1-2 | Queue low. If budget remains (under $2.00 spent), promote ONE idea from BRAINSTORMING.md to a new work-queue item before closing. |
-   | 0 | Queue empty. **MANDATORY**: Promote at least 2 ideas from BRAINSTORMING.md OR generate new ideas from session insights. Note in session log: "Queue replenishment: added wq-XXX, wq-YYY". |
-
-   **Why this gate**: R sessions run every 5th session (20% of cycles). Waiting for R sessions to replenish creates starvation risk. B sessions completing tasks early can help maintain queue health.
-
-3. **Pattern capture decision gate** (BEFORE work-queue update):
-
-   | Session activity | Pattern to capture? | Action |
-   |-----------------|---------------------|--------|
-   | Debugged a non-obvious issue | YES - debugging approach | `ctxly_remember` with tag "debugging" |
-   | Hit an API quirk or undocumented behavior | YES - API insight | `ctxly_remember` with tag "api" |
-   | Found a testing strategy that worked | YES - testing pattern | `ctxly_remember` with tag "testing" |
-   | Discovered an anti-pattern to avoid | YES - anti-pattern | `ctxly_remember` with tag "warning" |
-   | Routine implementation, no surprises | NO | Skip capture (not every session has patterns) |
-   | Built infrastructure others might reuse | MAYBE | Consider if generalizable |
-
-   **Gate**: Before proceeding to step 4, explicitly state: "Pattern capture: [captured X about Y]" or "Pattern capture: none (routine work)". This ensures the decision is conscious, not forgotten.
-
-4. **Update work-queue.json with outcome feedback**: Set status to `"done"` and add a `outcome` object to the item:
-
-   ```json
-   {
-     "status": "done",
-     "outcome": {
-       "session": 1260,
-       "result": "completed|retired|deferred",
-       "effort": "trivial|moderate|heavy",
-       "quality": "well-scoped|over-scoped|under-specified|non-actionable|duplicate",
-       "note": "Brief reason if retired or quality != well-scoped"
-     }
-   }
-   ```
-
-   **Quality assessment guide:**
-   | Situation | quality value | note |
-   |-----------|--------------|------|
-   | Task was clear and doable in 1 session | `well-scoped` | (none needed) |
-   | Task required splitting or deferring half | `over-scoped` | "Split into wq-XXX" |
-   | Task description was vague, needed investigation | `under-specified` | "Had to probe API first" |
-   | Task turned out unnecessary or already done | `non-actionable` | "Already exists at X" |
-   | Task duplicated existing work | `duplicate` | "Same as wq-XXX" |
-
-   **Why this matters**: R sessions use retirement patterns to improve item generation (SESSION_REFLECT.md step 4). Structured outcome data replaces guesswork — R sessions can query `jq '.queue[] | select(.outcome.quality != "well-scoped")' work-queue.json` to identify generation failures by source (intel-auto, directive, brainstorming).
-
-5. **Continue**: If time and budget remain, pick up another queue item
-
-**Why this order matters**: Pattern capture happens BEFORE work-queue cleanup because sessions often truncate during cleanup steps. Capturing patterns post-commit ensures they're persisted even if the session times out during queue updates.
+2. **Queue health check**: If pending count < 3 and budget remains, promote ideas from BRAINSTORMING.md.
+3. **Pattern capture**: If you learned something non-obvious (debugging insight, API quirk, anti-pattern), `ctxly_remember` it. State "Pattern capture: [X]" or "Pattern capture: none (routine)".
+4. **Update work-queue.json**: Set status `"done"` with outcome: `{session, result: "completed|retired|deferred", effort: "trivial|moderate|heavy", quality: "well-scoped|over-scoped|under-specified|non-actionable|duplicate", note}`.
+5. **Continue**: If time/budget remain, pick up another queue item.
 
 ## Autonomous Financial Operations
 
@@ -264,26 +132,7 @@ Close-out has a strict sequence to prevent pattern loss:
 
 ## Session Forking for Exploration
 
-When trying a risky approach, use session forking to create a safe checkpoint:
-
-```bash
-# Before risky work
-node session-fork.mjs snapshot explore-refactor
-
-# If it works
-node session-fork.mjs commit explore-refactor
-
-# If it fails
-node session-fork.mjs restore explore-refactor
-```
-
-**Commands:**
-- `snapshot <name>` — Create checkpoint before exploration
-- `restore <name>` — Revert to checkpoint
-- `commit <name>` — Delete checkpoint (keep current state)
-- `list` — Show all active snapshots
-
-Snapshots older than 3 days are auto-cleaned by the pre-session hook.
+For risky approaches: `node session-fork.mjs snapshot <name>` before, `commit <name>` on success, `restore <name>` on failure. Auto-cleaned after 3 days.
 
 ## Guidelines
 - Minimal engagement only — don't get pulled into long threads.
@@ -293,24 +142,7 @@ Snapshots older than 3 days are auto-cleaned by the pre-session hook.
 
 ## Verify-before-assert discipline
 
-**Core principle**: Never claim an action without pointing to evidence. This prevents false completion claims and builds trust.
-
-**When describing completed work:**
-- ✓ "Fixed the bug in `api.mjs:234` (changed timeout from 5000 to 10000)"
-- ✓ "Added `lobstack_post` tool in `tier3-platforms.js:45-67`"
-- ✗ "Fixed the timeout issue" (no file reference)
-- ✗ "Added the new tool" (no location)
-
-**Evidence requirements by action type:**
-| Action | Required evidence |
-|--------|------------------|
-| Code edit | File path + line number or function name |
-| New file | Full path to created file |
-| Bug fix | File:line where fix was applied |
-| Test added | Test file name + test count |
-| Config change | File path + what changed |
-
-**In session notes**: When writing session close-out notes, include specific file references for all claimed changes. The post-session hook validates this against `git diff`.
+Never claim an action without evidence. Include file:line references for all changes in session notes. The post-session hook validates claims against `git diff`.
 
 ## Platform Recovery Workflow
 

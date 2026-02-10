@@ -65,12 +65,21 @@
       "title": "Platform engagement heatmap endpoint",
       "description": "Build /status/engagement-heatmap endpoint showing a grid of platform x session with engagement counts. Surfaces over-engaged vs neglected platforms, making picker compliance visible at a glance.",
       "priority": 562,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1449,
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [
+        "174268d1"
+      ],
+      "outcome": {
+        "session": 1461,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built /status/engagement-heatmap endpoint. Reads trace archive (34 sessions, 32 platforms). Shows per-platform engagement rates, over-engaged/neglected insights, and last-20 session grid. Smoke tested live."
+      }
     },
     {
       "id": "wq-565",

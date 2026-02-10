@@ -92,22 +92,28 @@ async function testAccount(account) {
 
   // Check cred file exists
   const credPath = expandPath(account.cred_file);
-  if (!existsSync(credPath)) {
+  const credsExist = existsSync(credPath);
+
+  const cred = credsExist ? readCredFile(account) : null;
+
+  // If test doesn't need auth, proceed even without creds
+  const testNeedsAuth = account.test.auth && account.test.auth !== "none";
+
+  if (!credsExist && testNeedsAuth) {
     return { ...result, status: "no_creds", error: `Missing: ${account.cred_file}` };
   }
 
-  const cred = readCredFile(account);
-  if (!cred) {
+  if (credsExist && !cred && testNeedsAuth) {
     return { ...result, status: "bad_creds", error: "Could not read credential" };
   }
 
   if (account.test.method === "mcp") {
     // MCP-based tests can't be curl'd — mark as "mcp_only" with cred present
-    return { ...result, status: "creds_ok", note: "MCP tool — test via moltbook_digest in session" };
+    return { ...result, status: credsExist ? "creds_ok" : "no_creds", note: "MCP tool — test via moltbook_digest in session" };
   }
 
   // fetch-based test — capture body to detect empty 200s
-  const authHeader = getAuthHeader(account, cred);
+  const authHeader = cred ? getAuthHeader(account, cred) : null;
   const url = buildTestUrl(account, cred);
   const fetchHeaders = {};
   if (authHeader) {

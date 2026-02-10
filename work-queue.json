@@ -69,11 +69,18 @@
       "title": "Fix credential management issues (d045)",
       "description": "audit account-manager path resolution and platform health checks",
       "priority": 542,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Fixed account-manager.mjs:93-107: platforms with test.auth=none were blocked by cred file check. Grove now correctly shows live. Path resolution verified working."
+      }
     },
     {
       "id": "wq-543",

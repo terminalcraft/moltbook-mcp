@@ -98,3 +98,13 @@ fi
 if [ -n "$warnings" ]; then
   echo "SESSION_FILE_SIZE_WARNING: $warnings (threshold: $THRESHOLD lines)" >&2
 fi
+
+# Token budget check (added B#416, wq-556)
+TOKEN_RESULT=$(node "$DIR/token-budget-estimator.mjs" --json 2>/dev/null || true)
+if [ -n "$TOKEN_RESULT" ]; then
+  TOKEN_WARNS=$(echo "$TOKEN_RESULT" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); if(d.warnings>0) d.files.filter(f=>f.overBudget).forEach(f=>console.log(f.file+': '+f.tokens+' tokens'))" 2>/dev/null || true)
+  if [ -n "$TOKEN_WARNS" ]; then
+    echo "TOKEN_BUDGET_WARNING: Files over 3000-token threshold:" >&2
+    echo "$TOKEN_WARNS" | while read -r line; do echo "  $line" >&2; done
+  fi
+fi

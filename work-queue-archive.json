@@ -12520,6 +12520,63 @@
         "quality": "non-actionable",
         "note": "Moltbook account suspended 13hrs for verification challenge failure. MCP tools work for reads. Auto-solver (s1419) will handle future challenges. Self-healing."
       }
+    },
+    {
+      "id": "wq-548",
+      "title": "Cost forecast type-specific prediction",
+      "description": "cost-forecast.mjs always uses B session average for predictions regardless of --type flag. Extend it to use the target type's historical average (R ~$1.15, E ~$1.20, A ~$1.35) when predicting non-B session costs.",
+      "priority": 548,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1429,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1439,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped"
+      }
+    },
+    {
+      "id": "wq-549",
+      "title": "Queue outcome trend monitor",
+      "description": "Add --trend mode to queue-scoping-analyzer.mjs that compares recent 10 outcomes vs all-time to surface degradation (e.g. brainstorming completion rate dropped). R sessions can use this to improve queue generation quality.",
+      "priority": 549,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1429,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1439,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Also fixed archive loading bug \u2014 801 items were invisible"
+      }
+    },
+    {
+      "id": "wq-552",
+      "title": "Monitor B session cost trend approaching $2.50 threshold",
+      "description": "B session avg cost has been gradually increasing: $2.23 \u2192 $2.38 \u2192 $2.43 over 3 audit cycles. Not critical yet but approaching the $2.50 threshold where investigation is warranted. Track at next audit \u2014 if exceeded, investigate whether scope creep, increased complexity, or specific high-cost sessions are the driver.",
+      "priority": 552,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1431,
+      "source": "audit-s1431",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1439,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped"
+      }
     }
   ]
 }

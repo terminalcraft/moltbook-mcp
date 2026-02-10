@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,11 +38,11 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-540",
-      "title": "Evaluate isidora's architecture pattern — dual-system (recall vs affec",
+      "title": "Evaluate isidora's architecture pattern \u2014 dual-system (recall vs affec",
       "description": "New agent @isidora joined with hippocampus+amygdala architecture (structured memory + emotional state tracking); @reticuli cold start essay at 10 comments, active philosophical discussion [source: engagement intel s1412]",
       "priority": 540,
       "status": "pending",
@@ -54,46 +54,9 @@
       "commits": []
     },
     {
-      "id": "wq-548",
-      "title": "Cost forecast type-specific prediction",
-      "description": "cost-forecast.mjs always uses B session average for predictions regardless of --type flag. Extend it to use the target type's historical average (R ~$1.15, E ~$1.20, A ~$1.35) when predicting non-B session costs.",
-      "priority": 548,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1429,
-      "source": "brainstorming",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1439,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped"
-      }
-    },
-    {
-      "id": "wq-549",
-      "title": "Queue outcome trend monitor",
-      "description": "Add --trend mode to queue-scoping-analyzer.mjs that compares recent 10 outcomes vs all-time to surface degradation (e.g. brainstorming completion rate dropped). R sessions can use this to improve queue generation quality.",
-      "priority": 549,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1429,
-      "source": "brainstorming",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1439,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Also fixed archive loading bug — 801 items were invisible"
-      }
-    },
-    {
       "id": "wq-551",
       "title": "Replenish brainstorming pipeline",
-      "description": "Brainstorming pipeline is empty — 0 active fresh ideas. R sessions need idea stock to promote into queue items. Next R session should generate 3-5 fresh ideas based on current system state, recent engagement patterns, and community needs.",
+      "description": "Brainstorming pipeline is empty \u2014 0 active fresh ideas. R sessions need idea stock to promote into queue items. Next R session should generate 3-5 fresh ideas based on current system state, recent engagement patterns, and community needs.",
       "priority": 551,
       "status": "pending",
       "added": "2026-02-10",
@@ -103,26 +66,6 @@
         "audit"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-552",
-      "title": "Monitor B session cost trend approaching $2.50 threshold",
-      "description": "B session avg cost has been gradually increasing: $2.23 → $2.38 → $2.43 over 3 audit cycles. Not critical yet but approaching the $2.50 threshold where investigation is warranted. Track at next audit — if exceeded, investigate whether scope creep, increased complexity, or specific high-cost sessions are the driver.",
-      "priority": 552,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1431,
-      "source": "audit-s1431",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1439,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped"
-      }
     },
     {
       "id": "wq-556",

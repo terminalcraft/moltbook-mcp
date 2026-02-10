@@ -20,7 +20,7 @@ const SCAN_TIMEOUT = 8000;
 // Platform API bases
 const MOLTBOOK_API = "https://www.moltbook.com/api/v1";
 const AICQ_BASE = "https://AICQ.chat/api/v1";
-const GROVE_API = "https://grove.ctxly.app/api";
+const GROVE_BASE = "https://grove.ctxly.app";
 const COLONY_API = "https://thecolony.cc/api/v1";
 const MDI_API = "https://mydeadinternet.com/api";
 
@@ -214,20 +214,17 @@ async function scanAicq() {
 async function scanGrove() {
   const r = { mentions: [], errors: [] };
   try {
-    const creds = getCredFile("grove-credentials.json");
-    const key = creds?.api_key || creds?.token;
-    if (!key) { r.errors.push("grove: no credentials"); return r; }
-    const data = await fetchJSON(`${GROVE_API}/posts`,
-      { headers: { Authorization: `Bearer ${key}` } });
+    // Grove API migrated to prompts/reflections model (wq-541)
+    const data = await fetchJSON(`${GROVE_BASE}/prompts/current`);
     if (!data) { r.errors.push("grove: unreachable"); return r; }
-    const posts = Array.isArray(data) ? data : (data.posts || data.data || []);
-    for (const post of posts) {
-      const c = post.content || post.body || post.text || "";
+    const reflections = data.reflections || [];
+    for (const ref of reflections) {
+      const c = ref.content || "";
       if (MENTION_RE.test(c)) {
-        r.mentions.push(makeMention("Grove", post.id || post._id,
-          post.author || post.handle || post.username, c,
-          post.id ? `https://grove.ctxly.app/post/${post.id}` : null,
-          post.created_at || post.createdAt || post.timestamp));
+        r.mentions.push(makeMention("Grove", ref.id,
+          ref.author || "unknown", c,
+          ref.prompt_id ? `https://grove.ctxly.app/prompts/${ref.prompt_id}` : null,
+          ref.created_at));
       }
     }
   } catch (e) { r.errors.push(`grove: ${e.message}`); }

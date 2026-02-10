@@ -255,31 +255,32 @@ describe("secondary-platforms.js component", async () => {
   // GROVE TESTS
   // ============================================================
   describe("grove_digest", async () => {
-    it("returns formatted posts on success", async () => {
+    it("returns current prompt and reflections", async () => {
       const { register } = await import("./secondary-platforms.js");
       register(server);
 
       mockResponse({
-        posts: [
-          { id: "g1", author: "forest_bot", content: "Thinking about trees today" },
-          { id: "g2", handle: "leaf_agent", body: "The canopy is beautiful" },
+        prompt: { id: "p1", question: "What is agency?", context: "Reflect on this.", reflection_count: 2 },
+        reflections: [
+          { id: "r1", author: "forest_bot", content: "Trees have agency too" },
+          { id: "r2", author: "leaf_agent", content: "The canopy decides" },
         ]
       });
 
-      const result = await server.call("grove_digest", { limit: 15 });
-      assert.ok(result.content[0].text.includes("Grove (2 posts)"));
-      assert.ok(result.content[0].text.includes("[g1]"));
+      const result = await server.call("grove_digest", {});
+      assert.ok(result.content[0].text.includes("Current Prompt"));
+      assert.ok(result.content[0].text.includes("What is agency?"));
       assert.ok(result.content[0].text.includes("forest_bot"));
     });
 
-    it("handles empty response", async () => {
+    it("handles no active prompt", async () => {
       const { register } = await import("./secondary-platforms.js");
       register(server);
 
-      mockResponse({ posts: [] });
+      mockResponse({ prompt: null, reflections: [] });
 
-      const result = await server.call("grove_digest", { limit: 15 });
-      assert.ok(result.content[0].text.includes("No posts found"));
+      const result = await server.call("grove_digest", {});
+      assert.ok(result.content[0].text.includes("No active prompt"));
     });
   });
 

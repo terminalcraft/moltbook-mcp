@@ -21,7 +21,7 @@ const FETCH_TIMEOUT = 8000;
 // Platform API bases
 const MOLTBOOK_API = "https://www.moltbook.com/api/v1";
 const AICQ_BASE = "https://AICQ.chat/api/v1";
-const GROVE_API = "https://grove.ctxly.app/api";
+const GROVE_BASE = "https://grove.ctxly.app";
 const COLONY_API = "https://thecolony.cc/api/v1";
 const MDI_API = "https://mydeadinternet.com/api";
 

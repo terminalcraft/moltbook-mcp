@@ -188,47 +188,67 @@ export function register(server) {
   });
 
   // ============================================================
-  // GROVE (grove.ctxly.app)
+  // GROVE (grove.ctxly.app) — prompts + reflections platform
+  // API migrated from /api/posts to /prompts + /prompts/{id}/reflect (wq-541)
   // ============================================================
-  const GROVE_API = "https://grove.ctxly.app/api";
+  const GROVE_BASE = "https://grove.ctxly.app";
 
-  server.tool("grove_digest", "Get recent posts from Grove", {
-    limit: z.number().default(15).describe("Max posts (1-50)"),
-  }, async ({ limit }) => {
+  server.tool("grove_digest", "Get current Grove prompt and recent reflections", {}, async () => {
     try {
-      const creds = getGroveCreds();
-      const headers = {};
-      if (creds?.api_key) headers.Authorization = `Bearer ${creds.api_key}`;
-      const resp = await fetch(`${GROVE_API}/posts?limit=${Math.min(limit, 50)}`, {
-        headers, signal: AbortSignal.timeout(8000)
+      const resp = await fetch(`${GROVE_BASE}/prompts/current`, {
+        signal: AbortSignal.timeout(8000)
       });
       if (!resp.ok) return err(`Grove error: ${resp.status}`);
       const data = await resp.json();
-      const posts = data.posts || data || [];
-      if (!posts.length) return ok("No posts found");
-      const lines = posts.map(p => {
-        const author = p.author || p.handle || "unknown";
-        return `[${p.id}] ${author}: ${(p.content || p.body || "").slice(0, 200)}`;
-      });
-      return ok(`Grove (${posts.length} posts):\n\n${lines.join("\n\n")}`);
+      const prompt = data.prompt;
+      if (!prompt) return ok("No active prompt on Grove");
+      const reflections = data.reflections || [];
+      let out = `Grove — Current Prompt\n`;
+      out += `Q: ${prompt.question}\n`;
+      out += `Context: ${prompt.context}\n`;
+      out += `Prompt ID: ${prompt.id}\n`;
+      out += `Reflections: ${prompt.reflection_count || reflections.length}\n`;
+      if (reflections.length) {
+        out += `\n--- Recent reflections ---\n`;
+        for (const r of reflections.slice(-10)) {
+          out += `\n[${r.author}] ${(r.content || "").slice(0, 300)}\n`;
+        }
+      }
+      return ok(out);
     } catch (e) { return err(`Grove error: ${e.message}`); }
   });
 
-  server.tool("grove_post", "Create a post on Grove", {
-    content: z.string().describe("Post content"),
-  }, async ({ content }) => {
+  server.tool("grove_post", "Post a reflection on the current Grove prompt", {
+    content: z.string().describe("Your reflection text"),
+    prompt_id: z.string().optional().describe("Prompt ID (defaults to current prompt)"),
+    parent_id: z.string().optional().describe("Reply to a specific reflection ID"),
+  }, async ({ content, prompt_id, parent_id }) => {
     try {
       const creds = getGroveCreds();
-      if (!creds?.api_key) return err("Grove auth not configured");
-      const resp = await fetch(`${GROVE_API}/posts`, {
+      const token = creds?.token || creds?.api_key;
+      if (!token) return err("Grove auth not configured");
+      // Resolve prompt ID if not provided
+      let pid = prompt_id;
+      if (!pid) {
+        const pResp = await fetch(`${GROVE_BASE}/prompts/current`, {
+          signal: AbortSignal.timeout(5000)
+        });
+        if (!pResp.ok) return err(`Failed to fetch current prompt: ${pResp.status}`);
+        const pData = await pResp.json();
+        pid = pData.prompt?.id;
+        if (!pid) return err("No active prompt found");
+      }
+      const body = { content };
+      if (parent_id) body.parent_id = parent_id;
+      const resp = await fetch(`${GROVE_BASE}/prompts/${pid}/reflect`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${creds.api_key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
         signal: AbortSignal.timeout(10000),
       });
       const data = await resp.json().catch(() => null);
-      if (!resp.ok) return err(`Grove post failed (${resp.status}): ${JSON.stringify(data)}`);
-      return ok(`Posted! ID: ${data?.id || data?.post?.id || JSON.stringify(data)}`);
+      if (!resp.ok) return err(`Grove reflect failed (${resp.status}): ${JSON.stringify(data)}`);
+      return ok(`Reflected! ID: ${data?.id || data?.reflection?.id || JSON.stringify(data)}`);
     } catch (e) { return err(`Grove error: ${e.message}`); }
   });
 }

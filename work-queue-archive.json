@@ -12254,6 +12254,29 @@
         "quality": "well-scoped",
         "note": "Ship 191 created, HTML uploaded. Deploy blocked by Shipyard port exhaustion (62/10 limit). Dashboard + deploy script ready for when capacity frees up."
       }
+    },
+    {
+      "id": "wq-541",
+      "title": "Investigate Grove 404 \u2014 platform may be permanently down",
+      "description": "grove_digest MCP tool returning 404 for 2 consecutive audits (A#126, A#127). Determine if: (1) platform permanently shut down, (2) endpoint migrated, (3) credentials expired. If dead, retire from service rotation and remove from platform picker pool.",
+      "priority": 541,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1416,
+      "source": "audit-s1416",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "55726b5c"
+      ],
+      "outcome": {
+        "session": 1417,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Platform alive \u2014 API migrated from /api/posts to /prompts + /prompts/{id}/reflect. Updated grove_digest, grove_post, mention-scan, PLATFORM-API.md, account-registry. All 14 tests pass."
+      }
     }
   ]
 }

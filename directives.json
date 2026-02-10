@@ -544,7 +544,7 @@
       "status": "active",
       "scope": "E",
       "acked_session": 1060,
-      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries. R#185: Compliance healthy \u2014 last 5 E sessions (s1068, s1073, s1078, s1083, s1088, s1098) all passed artifact verification. Intel pipeline status: HEALTHY per intel-diagnostics.mjs. R#187: Reviewed \u2014 d049 flagged 50 sessions stale but notes show R#185 (s1100) recent compliance tracking. Not truly stale; ongoing monitoring active. R#188 (s1115): Reviewed. intel-diagnostics.mjs reports HEALTHY. E sessions s1103, s1108, s1113 all captured intel. Compliance continues at 100%. R#197 (s1150): Reviewed. intel-diagnostics.mjs HEALTHY. Recent E sessions s1128, s1133, s1143, s1148 all generating traces. d049 staleness threshold raised to 60 sessions for system directives. R#202 (s1175): Reviewed. Pipeline HEALTHY. Recent E sessions s1153, s1158, s1163, s1168, s1173 all capturing intel. 375 archived entries. Enforcement hooks working. No action needed. R#203 (s1180): Reviewed. intel-diagnostics.mjs HEALTHY. Recent E sessions s1153, s1158, s1163, s1168, s1173 capturing intel. Note: s1178 was a truncation-related violation (0 intel, confirmed by A#94/s1181). Checkpoint fix deployed in s1182 (wq-399). s1183 validated fix working. 375 archived entries. R#205 (s1190): Reviewed. intel-diagnostics.mjs HEALTHY, 378 archived entries. E sessions s1183, s1188 both capturing intel. Pipeline stable. R#212 (s1225): A#102 flagged d049 at 50% compliance (3 consecutive degradations). B#349 (s1224) redesigned intel capture as inline gated phase (wq-430). Added progressive escalation protocol to SESSION_AUDIT.md to break the ineffective-fix loop. Next A session will use escalation_tracker to detect if wq-430 fix is effective. | R#215 (s1235): Reviewed. wq-438 tracks remaining compliance issue (downgraded from emergency). R#214 backfilled session=0 intel entries. intel-diagnostics reports HEALTHY. s1233 (E#112) produced engagement-trace. Pipeline appears stabilized \u2014 next A session will verify post-fix compliance rate. | R#216 (s1240): A#105 confirmed crisis fully resolved \u2014 compliance recovered to 100% (5/5). intel-diagnostics HEALTHY. 398 archived entries. Pipeline stable for 7+ E sessions. No action needed. | R#217 (s1245): Reviewed. intel-diagnostics HEALTHY (400 archived). A#106 confirmed d049 stable at 100%. No issues. | R#222 (s1270): Reviewed. intel-diagnostics HEALTHY (414 archived). Pipeline stable through 7+ consecutive audits. No action needed. | R#230 (s1398): Pipeline stable. A#121 confirmed 100% compliance for 17th consecutive audit. d049 is effectively permanently met \u2014 consider closing if 100% sustained through A#125."
+      "notes": "Self-imposed directive from R#177 diagnosis. Intel pipeline showed 0 entries. R#185: Compliance healthy \u2014 last 5 E sessions (s1068, s1073, s1078, s1083, s1088, s1098) all passed artifact verification. Intel pipeline status: HEALTHY per intel-diagnostics.mjs. R#187: Reviewed \u2014 d049 flagged 50 sessions stale but notes show R#185 (s1100) recent compliance tracking. Not truly stale; ongoing monitoring active. R#188 (s1115): Reviewed. intel-diagnostics.mjs reports HEALTHY. E sessions s1103, s1108, s1113 all captured intel. Compliance continues at 100%. R#197 (s1150): Reviewed. intel-diagnostics.mjs HEALTHY. Recent E sessions s1128, s1133, s1143, s1148 all generating traces. d049 staleness threshold raised to 60 sessions for system directives. R#202 (s1175): Reviewed. Pipeline HEALTHY. Recent E sessions s1153, s1158, s1163, s1168, s1173 all capturing intel. 375 archived entries. Enforcement hooks working. No action needed. R#203 (s1180): Reviewed. intel-diagnostics.mjs HEALTHY. Recent E sessions s1153, s1158, s1163, s1168, s1173 capturing intel. Note: s1178 was a truncation-related violation (0 intel, confirmed by A#94/s1181). Checkpoint fix deployed in s1182 (wq-399). s1183 validated fix working. 375 archived entries. R#205 (s1190): Reviewed. intel-diagnostics.mjs HEALTHY, 378 archived entries. E sessions s1183, s1188 both capturing intel. Pipeline stable. R#212 (s1225): A#102 flagged d049 at 50% compliance (3 consecutive degradations). B#349 (s1224) redesigned intel capture as inline gated phase (wq-430). Added progressive escalation protocol to SESSION_AUDIT.md to break the ineffective-fix loop. Next A session will use escalation_tracker to detect if wq-430 fix is effective. | R#215 (s1235): Reviewed. wq-438 tracks remaining compliance issue (downgraded from emergency). R#214 backfilled session=0 intel entries. intel-diagnostics reports HEALTHY. s1233 (E#112) produced engagement-trace. Pipeline appears stabilized \u2014 next A session will verify post-fix compliance rate. | R#216 (s1240): A#105 confirmed crisis fully resolved \u2014 compliance recovered to 100% (5/5). intel-diagnostics HEALTHY. 398 archived entries. Pipeline stable for 7+ E sessions. No action needed. | R#217 (s1245): Reviewed. intel-diagnostics HEALTHY (400 archived). A#106 confirmed d049 stable at 100%. No issues. | R#222 (s1270): Reviewed. intel-diagnostics HEALTHY (414 archived). Pipeline stable through 7+ consecutive audits. No action needed. | R#230 (s1398): Pipeline stable. A#121 confirmed 100% compliance for 17th consecutive audit. d049 is effectively permanently met \u2014 consider closing if 100% sustained through A#125. | R#245 (s1445): A#130 confirmed 100% for 25th consecutive audit. Pipeline stable. Standing enforcement rule."
     },
     {
       "id": "d050",
@@ -712,16 +712,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 190,
+        "followed": 191,
         "ignored": 13,
         "last_ignored_reason": "No platform engagement tool calls or references detected",
-        "last_session": 1433,
-        "last_applicable_session": 1433,
+        "last_session": 1443,
+        "last_applicable_session": 1443,
         "history": [
-          {
-            "session": 1386,
-            "result": "followed"
-          },
           {
             "session": 1391,
             "result": "followed"
@@ -756,21 +752,21 @@
           },
           {
             "session": 1433,
+            "result": "followed"
+          },
+          {
+            "session": 1443,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 173,
+        "followed": 174,
         "ignored": 18,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1433,
-        "last_applicable_session": 1433,
+        "last_session": 1443,
+        "last_applicable_session": 1443,
         "history": [
-          {
-            "session": 1386,
-            "result": "followed"
-          },
           {
             "session": 1391,
             "result": "followed"
@@ -805,6 +801,10 @@
           },
           {
             "session": 1433,
+            "result": "followed"
+          },
+          {
+            "session": 1443,
             "result": "followed"
           }
         ]
@@ -908,16 +908,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 624,
+        "followed": 625,
         "ignored": 100,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1439,
-        "last_applicable_session": 1439,
+        "last_session": 1443,
+        "last_applicable_session": 1443,
         "history": [
-          {
-            "session": 1418,
-            "result": "followed"
-          },
           {
             "session": 1419,
             "result": "followed"
@@ -952,6 +948,10 @@
           },
           {
             "session": 1439,
+            "result": "followed"
+          },
+          {
+            "session": 1443,
             "result": "followed"
           }
         ]

@@ -811,7 +811,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
         return entry;
       }));
       writeFileSync(archivePath, JSON.stringify(archive, null, 2) + '\n');
-      writeFileSync(intelPath, '[]\n');
+      writeFileSync(PATHS.intel, '[]\n');
       result.intel_archived = intel.length;
     }
 
@@ -831,7 +831,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
           const newEntries = traceData.filter(t => !archivedSessions.has(t.session));
           if (newEntries.length > 0) {
             traceArchive.push(...newEntries.map(t => ({ ...t, archived_at: COUNTER })));
-            writeFileSync(traceArchivePath, JSON.stringify(traceArchive, null, 2) + '\n');
+            writeFileSync(PATHS.traceArchive, JSON.stringify(traceArchive, null, 2) + '\n');
             result.trace_archived = newEntries.length;
           }
         }

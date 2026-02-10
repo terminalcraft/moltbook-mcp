@@ -101,14 +101,21 @@
       "title": "Monitor B session cost trend — avg crept to $2.38",
       "description": "B session avg cost increased from $2.23 (A#127) to $2.38 (A#128). Not critical but trending up. If exceeds $2.50 at A#129, investigate scope creep or complexity increase.",
       "priority": 544,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1421,
       "source": "audit-s1421",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Investigated: 10-session B avg is $2.29, below $2.50 threshold. Only 2/10 sessions exceeded $2.50, both on complex multi-file tasks. No systemic scope creep. cost-forecast.mjs confirms stable trend."
+      }
     },
     {
       "id": "wq-545",

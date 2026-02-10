@@ -76,9 +76,40 @@
       "title": "Slow hook auto-caching wrapper",
       "description": "Build a generic caching wrapper for slow pre-session hooks (11-service-liveness.sh at 9.2s, 35-engagement-liveness_E.sh at 6s). Store results in timestamped cache files with configurable TTL (e.g. 60 min). Hooks opt in by sourcing the wrapper.",
       "priority": 547,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1427,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": ["a7d74de7"],
+      "outcome": {
+        "session": 1429,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "hooks/lib/cache-wrapper.sh with cache_run/invalidate/status. 11-service-liveness.sh converted. 11 tests pass."
+      }
+    },
+    {
+      "id": "wq-548",
+      "title": "Cost forecast type-specific prediction",
+      "description": "cost-forecast.mjs always uses B session average for predictions regardless of --type flag. Extend it to use the target type's historical average (R ~$1.15, E ~$1.20, A ~$1.35) when predicting non-B session costs.",
+      "priority": 548,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1429,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-549",
+      "title": "Queue outcome trend monitor",
+      "description": "Add --trend mode to queue-scoping-analyzer.mjs that compares recent 10 outcomes vs all-time to surface degradation (e.g. brainstorming completion rate dropped). R sessions can use this to improve queue generation quality.",
+      "priority": 549,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1429,
       "source": "brainstorming",
       "tags": [],
       "commits": []

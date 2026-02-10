@@ -42,11 +42,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Outcome-based queue source scoring** (added ~s1397)~~: → wq-533 done (s1410, queue-scoping-analyzer.mjs)
 
-- **Cost forecast type-specific prediction** (added ~s1410): cost-forecast.mjs always uses B session average for predictions regardless of `--type` flag. Extend it to use the target type's historical average (R sessions ~$1.15, E ~$1.20, etc.) when predicting non-B session costs. Currently the R/E/A forecasts show B averages which is misleading.
+- ~~**Cost forecast type-specific prediction** (added ~s1410)~~ → wq-548 (s1429)
 
-- **Queue outcome trend monitor** (added ~s1410): queue-scoping-analyzer.mjs now tracks quality/effort per source but doesn't detect trends over time. Add a `--trend` mode that compares recent 10 outcomes vs all-time to surface degradation (e.g. "brainstorming items completion rate dropped from 80% to 50%"). Could feed into R session queue generation quality.
+- ~~**Queue outcome trend monitor** (added ~s1410)~~ → wq-549 (s1429)
 
-- **Slow hook auto-caching wrapper** (added ~s1414): maintain-audit consistently flags 11-service-liveness.sh (9.2s avg) and 35-engagement-liveness_E.sh (6s avg) as slow. Build a generic caching wrapper that hooks can opt into — stores results in a timestamped cache file and skips re-execution within a configurable TTL (e.g. 60 min). This addresses the recurring WARN without modifying each hook individually.
+- ~~**Slow hook auto-caching wrapper** (added ~s1414)~~ → wq-547 done (s1429, hooks/lib/cache-wrapper.sh)
 
 - ~~**E session artifact gate hardening** (added ~s1362)~~: → wq-497 done (R#224 added $0.80 budget reservation gate to SESSION_ENGAGE.md)
 

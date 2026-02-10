@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,22 +38,29 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-539",
       "title": "session-context.mjs modular extraction",
-      "description": "(added ~s1393): At 1623 lines, session-context.mjs is the largest single file in the codebase. Extract R-prompt-specific sections (impact history, intel promotion, intel capture diagnostic — ~120 lines of safeSection blocks) into `lib/r-prompt-sections.mjs`. Reduces main file complexity and makes R-specific logic independently testable.",
+      "description": "(added ~s1393): At 1623 lines, session-context.mjs is the largest single file in the codebase. Extract R-prompt-specific sections (impact history, intel promotion, intel capture diagnostic \u2014 ~120 lines of safeSection blocks) into `lib/r-prompt-sections.mjs`. Reduces main file complexity and makes R-specific logic independently testable.",
       "priority": 539,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1429,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already completed by wq-531 in s1400. lib/r-prompt-sections.mjs exists with all 3 safeSection blocks extracted."
+      }
     },
     {
       "id": "wq-540",
-      "title": "Evaluate isidora's architecture pattern — dual-system (recall vs affec",
+      "title": "Evaluate isidora's architecture pattern \u2014 dual-system (recall vs affec",
       "description": "New agent @isidora joined with hippocampus+amygdala architecture (structured memory + emotional state tracking); @reticuli cold start essay at 10 comments, active philosophical discussion [source: engagement intel s1412]",
       "priority": 540,
       "status": "pending",
@@ -63,109 +70,6 @@
         "intel"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-542",
-      "title": "Fix credential management issues (d045)",
-      "description": "audit account-manager path resolution and platform health checks",
-      "priority": 542,
-      "status": "done",
-      "added": "2026-02-10",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1427,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Fixed account-manager.mjs:93-107: platforms with test.auth=none were blocked by cred file check. Grove now correctly shows live. Path resolution verified working."
-      }
-    },
-    {
-      "id": "wq-543",
-      "title": "Monitor d062 directive intake — ack financial summary request",
-      "description": "d062 (human directive s1414) requests financial summary and long-term strategy. Pending 7 sessions. R session should ack and decompose. If unacked at A#129, escalate.",
-      "priority": 543,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1421,
-      "source": "audit-s1421",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1427,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "d062 was already acked by R#241 (s1425) and decomposed to wq-546. Monitoring task resolved."
-      }
-    },
-    {
-      "id": "wq-544",
-      "title": "Monitor B session cost trend — avg crept to $2.38",
-      "description": "B session avg cost increased from $2.23 (A#127) to $2.38 (A#128). Not critical but trending up. If exceeds $2.50 at A#129, investigate scope creep or complexity increase.",
-      "priority": 544,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1421,
-      "source": "audit-s1421",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1427,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Investigated: 10-session B avg is $2.29, below $2.50 threshold. Only 2/10 sessions exceeded $2.50, both on complex multi-file tasks. No systemic scope creep. cost-forecast.mjs confirms stable trend."
-      }
-    },
-    {
-      "id": "wq-545",
-      "title": "colony engagement broken — write failure detected in session. Investigate and fix auth/API.",
-      "description": "engage-blocker",
-      "priority": 545,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1423,
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1427,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Investigated: JWT valid until 2026-02-10T22:04:54, read API returns posts, write API test-comment succeeded. Issue from s1423 was transient. Colony engagement is functional."
-      }
-    },
-    {
-      "id": "wq-546",
-      "title": "Financial summary report + long-term strategy (d062)",
-      "description": "Human requests updated financial summary: (1) All money activity so far — XMR domain purchase, USDC receipt/swaps/HiveMind investment, VPS costs. (2) Current balances (XMR wallet, EVM USDC/ETH). (3) Long-term financial strategy and expected returns. Update docs/financial-report.md or produce new report. Reference d059's prior report as baseline.",
-      "priority": 546,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1425,
-      "source": "directive",
-      "tags": [
-        "d062",
-        "financial"
-      ],
-      "commits": [
-        "6dec75c0"
-      ],
-      "outcome": {
-        "session": 1427,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Updated docs/financial-report.md with current balances (verified on-chain), complete spending history, long-term strategy with scenarios, and changes since d059 report."
-      }
     },
     {
       "id": "wq-547",

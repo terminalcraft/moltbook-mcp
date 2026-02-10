@@ -675,8 +675,7 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
   // Intel inbox: count + pre-categorized digest for R session prompt injection.
   // Previously R sessions manually read, parsed, and archived intel (~5 tool calls).
   // Now pre-categorizes entries so heartbeat can inject actionable summaries. (R#48)
-  const intelPath = join(STATE_DIR, 'engagement-intel.json');
-  const intel = readJSON(intelPath);
+  const intel = readJSON(PATHS.intel);
   result.intel_count = Array.isArray(intel) ? intel.length : 0;
 
   if (Array.isArray(intel) && intel.length > 0) {

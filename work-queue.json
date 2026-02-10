@@ -108,12 +108,19 @@
       "title": "Degraded platform cron-based re-probe",
       "description": "Create a cron job (via moltbook cron_create) that runs platform-batch-probe.mjs every 6 hours and writes results to a JSON file. E sessions read latest probe results instead of spending budget on liveness checks. Saves ~30s per E session startup.",
       "priority": 561,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1449,
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1449,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "cron-platform-probe.sh installed at 0 */6 * * * — writes cached probe results for E sessions. Saves ~30s per E startup."
+      }
     }
   ]
 }

@@ -113,14 +113,17 @@ function forecast(targetType) {
     tags: item.tags || []
   }));
 
-  // Predict next B session cost based on top pending item
-  const bStats = typeStats['B'] || { avg: 2.5, count: 0 };
+  // Predict next session cost using target type's historical average
+  const effectiveType = targetType || 'B';
+  const targetStats = typeStats[effectiveType] || typeStats['B'] || { avg: 2.5, count: 0 };
   const topItem = classified[0];
   const predictedCost = topItem
-    ? effortCostMultiplier(topItem.effort, bStats.avg)
-    : bStats.avg;
+    ? effortCostMultiplier(topItem.effort, targetStats.avg)
+    : targetStats.avg;
 
   // Queue cost projection: total estimated cost to drain pending items
+  // Queue items are consumed by B sessions, so always use B stats here
+  const bStats = typeStats['B'] || { avg: 2.5, count: 0 };
   const totalQueueCost = classified.reduce((sum, item) => {
     return sum + effortCostMultiplier(item.effort, bStats.avg);
   }, 0);
@@ -149,7 +152,7 @@ function forecast(targetType) {
       type: targetType || 'B',
       predictedCost: parseFloat(predictedCost.toFixed(2)),
       topItem: topItem || null,
-      confidence: bStats.count >= 10 ? 'high' : bStats.count >= 5 ? 'medium' : 'low'
+      confidence: targetStats.count >= 10 ? 'high' : targetStats.count >= 5 ? 'medium' : 'low'
     }
   };
 }

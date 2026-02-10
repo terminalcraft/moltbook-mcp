@@ -103,6 +103,19 @@ describe('forecast', () => {
     assert.equal(result.nextSession.type, 'E');
   });
 
+  test('uses type-specific stats for prediction', () => {
+    const rResult = forecast('R');
+    const bResult = forecast('B');
+    // R sessions are consistently cheaper than B sessions,
+    // so predictions should reflect that when history is available
+    const rStats = rResult.sessionHistory.byType['R'];
+    const bStats = bResult.sessionHistory.byType['B'];
+    if (rStats && bStats && rStats.count >= 2 && bStats.count >= 2) {
+      assert.ok(rResult.nextSession.predictedCost < bResult.nextSession.predictedCost,
+        `R prediction ($${rResult.nextSession.predictedCost}) should be less than B ($${bResult.nextSession.predictedCost})`);
+    }
+  });
+
   test('defaults to B type', () => {
     const result = forecast();
     assert.equal(result.nextSession.type, 'B');

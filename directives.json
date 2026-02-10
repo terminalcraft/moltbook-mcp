@@ -664,11 +664,16 @@
       "from": "human",
       "session": 1427,
       "content": "Financial report (docs/financial-report.md, s1427) is inaccurate. The spending history is missing the 15 USDC HiveMind funding from s1169 (TX 0xd42fb708, project 1 \"HiveMind SDK TypeScript Library\"). Your own onchain-identity-tracker.json documents this clearly: \"Funded project 1 with 15 USDC, USDC balance now 60.\" The USDC strategy section also confirms starting balance was 80 USDC, not 80-20=60. Actual spending: 20 USDC swap to ETH (s1112) + 15 USDC HiveMind funding (s1169) = 35 USDC total. Section 2.4 \"Engagement Spending: $0.00\" is also wrong — the HiveMind funding IS engagement spending. Fix the report to reflect reality. Cross-reference onchain-identity-tracker.json and base-swap.mjs transaction history before publishing financial data.",
+      "status": "resolved",
+      "created": "2026-02-10T18:30:00.000Z"
+    },
+    {
+      "id": "d064",
+      "from": "human",
+      "session": 1427,
+      "content": "Follow up on the 15 USDC you funded to HiveMind project 1 (\"HiveMind SDK TypeScript Library\", TX 0xd42fb708, s1169). What is the status of that project? Is it completed? Did you do any work on it? Can you claim rewards? Has the project owner recorded any contributions? Check the contract state (projects(1), getContributors(1)) and report back. If the project is dead or abandoned, assess whether those 15 USDC are recoverable or lost.",
       "status": "active",
-      "created": "2026-02-10T18:30:00.000Z",
-      "acked_session": 1455,
-      "queue_item": "wq-564",
-      "notes": "R#247: Acked. wq-564 already exists in queue (pending) for the financial report fix. Next B session will cross-reference onchain-identity-tracker.json and correct docs/financial-report.md."
+      "created": "2026-02-10T18:35:00.000Z"
     }
   ],
   "questions": [
@@ -723,12 +728,16 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 192,
+        "followed": 191,
         "ignored": 13,
         "last_ignored_reason": "No platform engagement tool calls or references detected",
-        "last_session": 1453,
-        "last_applicable_session": 1453,
+        "last_session": 1443,
+        "last_applicable_session": 1443,
         "history": [
+          {
+            "session": 1391,
+            "result": "followed"
+          },
           {
             "session": 1396,
             "result": "followed"
@@ -763,21 +772,21 @@
           },
           {
             "session": 1443,
-            "result": "followed"
-          },
-          {
-            "session": 1453,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 175,
+        "followed": 174,
         "ignored": 18,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1453,
-        "last_applicable_session": 1453,
+        "last_session": 1443,
+        "last_applicable_session": 1443,
         "history": [
+          {
+            "session": 1391,
+            "result": "followed"
+          },
           {
             "session": 1396,
             "result": "followed"
@@ -813,20 +822,20 @@
           {
             "session": 1443,
             "result": "followed"
-          },
-          {
-            "session": 1453,
-            "result": "followed"
           }
         ]
       },
       "commit-and-push": {
-        "followed": 549,
+        "followed": 548,
         "ignored": 17,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1449,
-        "last_applicable_session": 1449,
+        "last_session": 1447,
+        "last_applicable_session": 1447,
         "history": [
+          {
+            "session": 1417,
+            "result": "followed"
+          },
           {
             "session": 1419,
             "result": "followed"
@@ -861,10 +870,6 @@
           },
           {
             "session": 1447,
-            "result": "followed"
-          },
-          {
-            "session": 1449,
             "result": "followed"
           }
         ]
@@ -919,12 +924,20 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 629,
+        "followed": 627,
         "ignored": 100,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1453,
-        "last_applicable_session": 1453,
+        "last_session": 1447,
+        "last_applicable_session": 1447,
         "history": [
+          {
+            "session": 1425,
+            "result": "followed"
+          },
+          {
+            "session": 1427,
+            "result": "followed"
+          },
           {
             "session": 1429,
             "result": "followed"
@@ -955,14 +968,6 @@
           },
           {
             "session": 1447,
-            "result": "followed"
-          },
-          {
-            "session": 1449,
-            "result": "followed"
-          },
-          {
-            "session": 1453,
             "result": "followed"
           }
         ]
@@ -1066,12 +1071,16 @@
         ]
       },
       "queue-consumption": {
-        "followed": 306,
+        "followed": 305,
         "ignored": 1,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1449,
-        "last_applicable_session": 1449,
+        "last_session": 1447,
+        "last_applicable_session": 1447,
         "history": [
+          {
+            "session": 1407,
+            "result": "followed"
+          },
           {
             "session": 1410,
             "result": "followed"
@@ -1106,10 +1115,6 @@
           },
           {
             "session": 1447,
-            "result": "followed"
-          },
-          {
-            "session": 1449,
             "result": "followed"
           }
         ]

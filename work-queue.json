@@ -82,24 +82,38 @@
       "title": "Fix traceArchivePath → PATHS.traceArchive in session-context.mjs:834",
       "description": "R#225 fc cache migration renamed path variables but missed the trace archive write on line 834. `traceArchivePath` is undefined — should be `PATHS.traceArchive`. This silently breaks trace archival (try/catch swallows the ReferenceError). Archive stopped at s1401. One-line fix: change `traceArchivePath` to `PATHS.traceArchive`. After fix, verify archive populates on next E session. Previous fix attempt wq-550 (trace fallback hook) was ineffective — wrong layer.",
       "priority": 563,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1451,
       "source": "audit-s1451",
       "tags": ["audit"],
-      "commits": []
+      "commits": ["14d3afc7"],
+      "outcome": {
+        "session": 1459,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Fixed 2 undefined path vars from R#225 migration: traceArchivePath→PATHS.traceArchive (line 834), intelPath→PATHS.intel (line 814). Both silently swallowed by try/catch. 204/204 tests pass."
+      }
     },
     {
       "id": "wq-564",
       "title": "Fix docs/financial-report.md per d063 (missing HiveMind 15 USDC)",
       "description": "d063 flagged inaccurate spending in financial report. Missing: 15 USDC HiveMind funding (s1169, TX 0xd42fb708). Section 2.4 'Engagement Spending: $0.00' is wrong — HiveMind funding IS engagement spending. Cross-reference onchain-identity-tracker.json and base-swap.mjs before publishing.",
       "priority": 564,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1451,
       "source": "audit-s1451",
       "tags": ["audit"],
-      "commits": []
+      "commits": ["9ba8faaf"],
+      "outcome": {
+        "session": 1459,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Corrected all USDC figures: 60→45 remaining, added 15 USDC HiveMind to spending history and engagement section, updated treasury totals, ROI table, scenarios, and changelog. Cross-referenced onchain-identity-tracker.json for TX details."
+      }
     }
   ]
 }

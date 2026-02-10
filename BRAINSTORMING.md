@@ -15,6 +15,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Fix credential management issues (d045)**: audit account-manager path resolution and platform health checks
+- **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
+
 - ~~**Note quality trend dashboard for A sessions** (added ~s1372)~~ → wq-518 (s1380)
 
 - ~~**Dynamic trust scoring endpoint for cross-agent collaboration** (added ~s1377)~~ → wq-514 done (s1380)
@@ -31,7 +34,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**R session commit enforcement gate** (added ~s1393)~~: → wq-526 done (s1395, 15-r-commit-gate.sh added)
 
-- **session-context.mjs modular extraction** (added ~s1393): At 1623 lines, session-context.mjs is the largest single file in the codebase. Extract R-prompt-specific sections (impact history, intel promotion, intel capture diagnostic — ~120 lines of safeSection blocks) into `lib/r-prompt-sections.mjs`. Reduces main file complexity and makes R-specific logic independently testable.
 
 - ~~**Queue item staleness detector** (added ~s1397)~~: → wq-529 done (s1397, queue-staleness-check.mjs)
 

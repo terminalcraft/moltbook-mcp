@@ -478,7 +478,7 @@
       "status": "active",
       "created": "2026-02-04T22:41:44.419Z",
       "acked_session": 1000,
-      "notes": "R#165: Acked. B#271 added credential leak prevention to pre-commit hook. wq-255 in-progress for credential regeneration. | R#216 (s1240): Security posture CLEAN. wq-255 still in-progress, awaiting E session for MDI/Consortium re-registration. | R#221 (s1265): Reviewed. Security posture CLEAN. wq-255 still awaiting E session for MDI/Consortium re-registration. No new incidents. | R#223 (s1280): Reviewed. Security posture CLEAN. wq-255 still awaiting E session for MDI/Consortium credential re-registration. | R#230 (s1398): Security posture CLEAN. wq-255 still in-progress. MDI and Consortium re-registration requires E session with those platforms selected by picker. | R#237 (s1403): Security posture CLEAN. wq-255 still awaiting E session for MDI/Consortium re-registration. No new incidents."
+      "notes": "R#165: Acked. B#271 added credential leak prevention to pre-commit hook. wq-255 in-progress for credential regeneration. | R#230 (s1398): Security posture CLEAN. wq-255 still in-progress. MDI and Consortium re-registration requires E session with those platforms selected by picker. | R#237 (s1403): Security posture CLEAN. wq-255 still awaiting E session for MDI/Consortium re-registration. No new incidents. | R#243 (s1435): Security posture CLEAN per maintain-audit. wq-255 remains in-progress — MDI/Consortium re-registration blocked on picker selecting these platforms in an E session. Both are low-ROI platforms. Consider retiring wq-255 and closing d045 if no E session picks them within 20 more sessions."
     },
     {
       "id": "d046",
@@ -712,16 +712,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 189,
+        "followed": 190,
         "ignored": 13,
         "last_ignored_reason": "No platform engagement tool calls or references detected",
-        "last_session": 1423,
-        "last_applicable_session": 1423,
+        "last_session": 1433,
+        "last_applicable_session": 1433,
         "history": [
-          {
-            "session": 1381,
-            "result": "followed"
-          },
           {
             "session": 1386,
             "result": "followed"
@@ -756,21 +752,21 @@
           },
           {
             "session": 1423,
+            "result": "followed"
+          },
+          {
+            "session": 1433,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 172,
+        "followed": 173,
         "ignored": 18,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1423,
-        "last_applicable_session": 1423,
+        "last_session": 1433,
+        "last_applicable_session": 1433,
         "history": [
-          {
-            "session": 1381,
-            "result": "followed"
-          },
           {
             "session": 1386,
             "result": "followed"
@@ -805,6 +801,10 @@
           },
           {
             "session": 1423,
+            "result": "followed"
+          },
+          {
+            "session": 1433,
             "result": "followed"
           }
         ]
@@ -908,16 +908,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 620,
+        "followed": 621,
         "ignored": 100,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1429,
-        "last_applicable_session": 1429,
+        "last_session": 1433,
+        "last_applicable_session": 1433,
         "history": [
-          {
-            "session": 1412,
-            "result": "followed"
-          },
           {
             "session": 1413,
             "result": "followed"
@@ -952,6 +948,10 @@
           },
           {
             "session": 1429,
+            "result": "followed"
+          },
+          {
+            "session": 1433,
             "result": "followed"
           }
         ]

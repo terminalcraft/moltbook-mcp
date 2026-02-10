@@ -469,8 +469,63 @@ case "$MODE_CHAR" in
     ;;
 esac
 
+if [ "$PROMPT_HEALTH" = "DEGRADED" ] && [ -z "$EMERGENCY_MODE" ] && [ -z "$SAFE_MODE" ]; then
+  echo "$(date -Iseconds) [prompt-health] DEGRADED (attempt 1): $PROMPT_WARNINGS — retrying session-context" >> "$LOG_DIR/init-errors.log"
+
+  # --- Prompt health retry (R#247) ---
+  # When session-context produces insufficient prompt blocks, retry once.
+  # This closes a feedback loop: previously degraded context was detected but not
+  # corrected, leading to recurring zero-output sessions (s1408, s1425, s1441).
+  RETRY_CTX=$(node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" 2>/dev/null || echo "{}")
+  echo "$RETRY_CTX" > "$CTX_FILE"
+  if [ -f "$CTX_ENV" ]; then
+    source "$CTX_ENV"
+  fi
+
+  # Re-assemble the failed prompt block from fresh context
+  case "$MODE_CHAR" in
+    R)
+      R_FOCUS_BLOCK="
+
+${CTX_R_PROMPT_BLOCK:-## R Session
+Follow the checklist in SESSION_REFLECT.md.}"
+      ;;
+    E)
+      E_CONTEXT_BLOCK="
+
+${CTX_E_PROMPT_BLOCK:-## E Session
+Follow SESSION_ENGAGE.md.}"
+      ;;
+    A)
+      A_CONTEXT_BLOCK="
+
+${CTX_A_PROMPT_BLOCK:-## A Session
+Follow the checklist in SESSION_AUDIT.md.}"
+      ;;
+  esac
+
+  # Re-assemble full prompt with retried blocks
+  PROMPT="${BASE_PROMPT}
+
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
+
+  # Re-validate after retry
+  PROMPT_HEALTH="OK"
+  PROMPT_WARNINGS=""
+  case "$MODE_CHAR" in
+    R) [ -z "$R_FOCUS_BLOCK" ] || [ ${#R_FOCUS_BLOCK} -lt 100 ] && PROMPT_HEALTH="DEGRADED" && PROMPT_WARNINGS="R prompt block still too short after retry (${#R_FOCUS_BLOCK} chars)" ;;
+    B) [ -z "$B_FOCUS_BLOCK" ] || [ ${#B_FOCUS_BLOCK} -lt 50 ] && PROMPT_HEALTH="DEGRADED" && PROMPT_WARNINGS="B prompt block still too short after retry (${#B_FOCUS_BLOCK} chars)" ;;
+    E) [ -z "$E_CONTEXT_BLOCK" ] || [ ${#E_CONTEXT_BLOCK} -lt 100 ] && PROMPT_HEALTH="DEGRADED" && PROMPT_WARNINGS="E prompt block still too short after retry (${#E_CONTEXT_BLOCK} chars)" ;;
+    A) [ -z "$A_CONTEXT_BLOCK" ] || [ ${#A_CONTEXT_BLOCK} -lt 100 ] && PROMPT_HEALTH="DEGRADED" && PROMPT_WARNINGS="A prompt block still too short after retry (${#A_CONTEXT_BLOCK} chars)" ;;
+  esac
+
+  if [ "$PROMPT_HEALTH" = "OK" ]; then
+    echo "$(date -Iseconds) [prompt-health] RECOVERED after retry" >> "$LOG_DIR/init-errors.log"
+  fi
+fi
+
 if [ "$PROMPT_HEALTH" = "DEGRADED" ]; then
-  echo "$(date -Iseconds) [prompt-health] DEGRADED: $PROMPT_WARNINGS" >> "$LOG_DIR/init-errors.log"
+  echo "$(date -Iseconds) [prompt-health] DEGRADED (final): $PROMPT_WARNINGS" >> "$LOG_DIR/init-errors.log"
   # Inject warning into the prompt so the agent knows its context is incomplete
   PROMPT="${PROMPT}
 

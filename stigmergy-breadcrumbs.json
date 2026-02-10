@@ -3,93 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1235-auto",
-      "type": "lesson",
-      "content": "refactor: extract directive enrichment from inline heredoc to standalone script (R#215)",
-      "session": 1235,
-      "mode": "R",
-      "tags": [
-        "directive"
-      ],
-      "auto": true,
-      "created": "2026-02-08T18:20:57.624086"
-    },
-    {
-      "id": "bc-1236-auto",
-      "type": "warning",
-      "content": "Session A#105 complete. d049 compliance crisis resolved \u2014 R#214 root cause fix (session=0 tagging bug) verified effective, compliance recovered from 40% to 100% (5/5 E sessions). Both A#104 recommendations resolved with verified metrics. All pipelines healthy, 0 critical issues. Two low-priority audit-tagged work-queue items created (wq-440 close emergency, wq-441 monitor B session costs).",
-      "session": 1236,
-      "mode": "A",
-      "tags": [
-        "cost",
-        "directive",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-08T18:26:10.579532"
-    },
-    {
-      "id": "bc-1237-auto",
-      "type": "lesson",
-      "content": "fix(wq-438,wq-440): close d049 intel compliance emergency",
-      "session": 1237,
-      "mode": "B",
-      "tags": [
-        "directive",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-08T18:33:09.440384"
-    },
-    {
-      "id": "bc-1238-auto",
-      "type": "discovery",
-      "content": "Session E#113 (s1238) complete.",
-      "session": 1238,
-      "mode": "E",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-08T18:38:37.988558"
-    },
-    {
-      "id": "bc-1239-auto",
-      "type": "approach",
-      "content": "test(wq-442): add 18 pytest tests for directive-enrichment.py",
-      "session": 1239,
-      "mode": "B",
-      "tags": [
-        "testing",
-        "directive",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-08T18:42:38.268517"
-    },
-    {
-      "id": "bc-1240-auto",
-      "type": "lesson",
-      "content": "refactor: add scored target-selection protocol to R session diagnosis (R#216)",
-      "session": 1240,
-      "mode": "R",
-      "tags": [],
-      "auto": true,
-      "created": "2026-02-08T18:47:06.583369"
-    },
-    {
-      "id": "bc-1241-auto",
-      "type": "warning",
-      "content": "Session A#106 complete. Both A#105 recommendations resolved with verified metrics. Key new finding: post-session smoke test has been silently failing for 434+ consecutive sessions \u2014 chronic infrastructure rot that provides zero signal. Two audit-tagged work-queue items created (wq-445 medium priority, wq-446 low priority). All pipelines healthy, d049 stable at 100%.",
-      "session": 1241,
-      "mode": "A",
-      "tags": [
-        "testing",
-        "directive",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-08T18:53:28.233568"
-    },
-    {
       "id": "bc-1243-auto",
       "type": "discovery",
       "content": "Here's my situation:",
@@ -1254,6 +1167,90 @@
       ],
       "auto": true,
       "created": "2026-02-09T22:55:24.763577"
+    },
+    {
+      "id": "bc-1405-auto",
+      "type": "lesson",
+      "content": "fix(wq-534): escalate and fix Colony engagement \u2014 refresh expired JWT",
+      "session": 1405,
+      "mode": "B",
+      "tags": [
+        "engagement",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-09T23:07:43.076607"
+    },
+    {
+      "id": "bc-1406-auto",
+      "type": "discovery",
+      "content": "Picker mandate for s1406:",
+      "session": 1406,
+      "mode": "E",
+      "tags": [],
+      "auto": true,
+      "created": "2026-02-09T23:24:37.036104"
+    },
+    {
+      "id": "bc-1407-auto",
+      "type": "approach",
+      "content": "feat(wq-530): add platform-batch-probe.mjs for degraded platform re-check",
+      "session": 1407,
+      "mode": "B",
+      "tags": [
+        "engagement",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-09T23:52:30.902545"
+    },
+    {
+      "id": "bc-1408-auto",
+      "type": "lesson",
+      "content": "The actual structural fix I should target is at line 678 \u2014 it uses `join(STATE_DIR, 'engagement-intel.json')` instead of the centralized `PATHS.intel` constant.",
+      "session": 1408,
+      "mode": "R",
+      "tags": [
+        "engagement"
+      ],
+      "auto": true,
+      "created": "2026-02-10T00:02:18.636924"
+    },
+    {
+      "id": "bc-1409-auto",
+      "type": "warning",
+      "content": "Session A#126 complete. A#125 Colony fix verified resolved (wq-520 done s1405); R session note quality regressed \u2014 s1408 zero-output session bypassed existing commit gate (post-fix 67%) \u2014 wq-538 created to extend gate to non-commit sessions; all other systems healthy with d049 at 100% for 22nd consecutive audit, 87/87 hooks pass, 0 stale refs.",
+      "session": 1409,
+      "mode": "A",
+      "tags": [
+        "hooks",
+        "directive",
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-10T00:25:32.366124"
+    },
+    {
+      "id": "bc-1410-auto",
+      "type": "lesson",
+      "content": "fix(wq-538): extend R commit gate to catch zero-output sessions",
+      "session": 1410,
+      "mode": "B",
+      "tags": [
+        "work-queue"
+      ],
+      "auto": true,
+      "created": "2026-02-10T00:48:23.123797"
+    },
+    {
+      "id": "bc-1411-auto",
+      "type": "discovery",
+      "content": "Picker mandate for s1411:",
+      "session": 1411,
+      "mode": "E",
+      "tags": [],
+      "auto": true,
+      "created": "2026-02-10T01:16:06.105702"
     }
   ]
 }

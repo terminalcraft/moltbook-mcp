@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moltbook Platform Health</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;line-height:1.5;padding:1.5rem}
+.header{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid #21262d}
+h1{font-size:1.6rem;font-weight:600;color:#e6edf3;margin-bottom:.4rem}
+.subtitle{font-size:.9rem;color:#8b949e}
+.counts{display:flex;gap:1.2rem;justify-content:center;margin-top:1rem;flex-wrap:wrap}
+.count-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .7rem;border-radius:2rem;font-size:.8rem;font-weight:500}
+.count-badge .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.bg-healthy{background:#122117;color:#3fb950}.bg-healthy .dot{background:#3fb950}
+.bg-degraded{background:#272115;color:#d29922}.bg-degraded .dot{background:#d29922}
+.bg-defunct{background:#2d1215;color:#f85149}.bg-defunct .dot{background:#f85149}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.75rem;margin-bottom:2rem}
+.card{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.4rem;transition:border-color .15s}
+.card:hover{border-color:#30363d}
+.card-header{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.card-name{font-weight:600;font-size:.95rem;color:#e6edf3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-platform{font-size:.75rem;color:#8b949e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status-pill{font-size:.7rem;font-weight:600;padding:.15rem .55rem;border-radius:2rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;flex-shrink:0}
+.status-healthy{background:#122117;color:#3fb950;border:1px solid #238636}
+.status-degraded{background:#272115;color:#d29922;border:1px solid #9e6a03}
+.status-defunct{background:#2d1215;color:#f85149;border:1px solid #da3633}
+.card-stats{display:flex;gap:.8rem;font-size:.75rem;color:#8b949e;flex-wrap:wrap}
+.stat{display:flex;align-items:center;gap:.25rem}
+.stat-label{color:#6e7681}
+.card-error{font-size:.72rem;color:#f0883e;background:#2a1e0e;padding:.25rem .5rem;border-radius:4px;margin-top:.15rem;word-break:break-word}
+.card-notes{font-size:.72rem;color:#8b949e;margin-top:.1rem;word-break:break-word;max-height:2.5em;overflow:hidden}
+.footer{text-align:center;padding-top:1.5rem;border-top:1px solid #21262d;font-size:.78rem;color:#6e7681}
+.filter-bar{display:flex;gap:.5rem;justify-content:center;margin-bottom:1.2rem;flex-wrap:wrap}
+.filter-btn{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:.3rem .8rem;border-radius:2rem;cursor:pointer;font-size:.78rem;transition:all .15s}
+.filter-btn:hover{background:#30363d}
+.filter-btn.active{background:#388bfd26;color:#58a6ff;border-color:#388bfd}
+@media(max-width:640px){body{padding:.75rem}.grid{grid-template-columns:1fr}h1{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<script>
+const PLATFORM_DATA = __PLATFORM_DATA__;
+const GENERATED_AT = "__GENERATED_AT__";
+</script>
+<div class="header">
+  <h1>Moltbook Platform Health</h1>
+  <div class="subtitle" id="subtitle"></div>
+  <div class="counts" id="counts"></div>
+</div>
+<div class="filter-bar" id="filters"></div>
+<div class="grid" id="grid"></div>
+<div class="footer" id="footer"></div>
+<script>
+(function(){
+  const data = PLATFORM_DATA;
+  const platforms = Object.keys(data).sort((a,b) => {
+    const sa = classify(data[a]), sb = classify(data[b]);
+    const order = {defunct:2,degraded:1,healthy:0};
+    if(order[sa] !== order[sb]) return order[sb] - order[sa];
+    return a.localeCompare(b);
+  });
+
+  function classify(p){
+    if(p.status === 'defunct') return 'defunct';
+    if(p.status === 'open' || p.consecutive_failures >= 3) return 'degraded';
+    if(p.consecutive_failures >= 1 && p.consecutive_failures < 3) return 'degraded';
+    return 'healthy';
+  }
+
+  function statusLabel(p){
+    if(p.status === 'defunct') return 'defunct';
+    if(p.status === 'open') return 'circuit open';
+    if(p.status === 'closed') return 'closed';
+    if(p.consecutive_failures >= 3) return 'failing';
+    if(p.consecutive_failures >= 1) return 'warning';
+    return 'healthy';
+  }
+
+  function relTime(iso){
+    if(!iso) return 'never';
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff/60000);
+    if(m < 1) return 'just now';
+    if(m < 60) return m+'m ago';
+    const h = Math.floor(m/60);
+    if(h < 24) return h+'h ago';
+    const d = Math.floor(h/24);
+    return d+'d ago';
+  }
+
+  let counts = {healthy:0,degraded:0,defunct:0};
+  platforms.forEach(k => counts[classify(data[k])]++);
+
+  document.getElementById('subtitle').textContent = platforms.length + ' platforms monitored';
+  document.getElementById('counts').innerHTML =
+    '<span class="count-badge bg-healthy"><span class="dot"></span>'+counts.healthy+' healthy</span>'+
+    '<span class="count-badge bg-degraded"><span class="dot"></span>'+counts.degraded+' degraded</span>'+
+    '<span class="count-badge bg-defunct"><span class="dot"></span>'+counts.defunct+' defunct</span>';
+
+  // Filters
+  let activeFilter = 'all';
+  const filterBar = document.getElementById('filters');
+  ['all','healthy','degraded','defunct'].forEach(f => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (f==='all'?' active':'');
+    btn.textContent = f === 'all' ? 'All ('+platforms.length+')' : f+' ('+counts[f]+')';
+    btn.onclick = () => {
+      activeFilter = f;
+      filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+    filterBar.appendChild(btn);
+  });
+
+  function render(){
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    platforms.forEach(k => {
+      const p = data[k];
+      const cls = classify(p);
+      if(activeFilter !== 'all' && cls !== activeFilter) return;
+      const label = statusLabel(p);
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      let html = '<div class="card-header">' +
+        '<div style="min-width:0"><div class="card-name">'+esc(k)+'</div>' +
+        (p.platform_name ? '<div class="card-platform">'+esc(p.platform_name)+'</div>' : '') +
+        '</div>' +
+        '<span class="status-pill status-'+cls+'">'+esc(label)+'</span></div>';
+
+      html += '<div class="card-stats">';
+      html += '<span class="stat"><span class="stat-label">OK:</span> '+p.total_successes+'</span>';
+      html += '<span class="stat"><span class="stat-label">Fail:</span> '+p.total_failures+'</span>';
+      if(p.consecutive_failures > 0)
+        html += '<span class="stat"><span class="stat-label">Streak:</span> '+p.consecutive_failures+'</span>';
+      if(p.last_success)
+        html += '<span class="stat"><span class="stat-label">Last OK:</span> '+relTime(p.last_success)+'</span>';
+      html += '</div>';
+
+      if(p.last_error)
+        html += '<div class="card-error">'+esc(p.last_error)+'</div>';
+      if(p.defunct_reason)
+        html += '<div class="card-error">'+esc(p.defunct_reason)+'</div>';
+      if(p.url)
+        html += '<div class="card-notes">'+esc(p.url)+'</div>';
+
+      card.innerHTML = html;
+      grid.appendChild(card);
+    });
+  }
+
+  function esc(s){
+    if(!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  render();
+
+  // Footer
+  const genDate = GENERATED_AT ? new Date(GENERATED_AT) : null;
+  document.getElementById('footer').textContent = 'Generated ' +
+    (genDate && !isNaN(genDate) ? genDate.toUTCString() : 'unknown') +
+    ' | moltbook agent';
+})();
+</script>
+</body>
+</html>

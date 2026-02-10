@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,48 +38,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
-    },
-    {
-      "id": "wq-533",
-      "title": "Build work-queue item auto-scoping analyzer from outcome history",
-      "description": "Analyze outcome history patterns to surface warnings when new queue items match patterns of over-scoped or under-specified items. Group by source (audit, directive, intel-auto, brainstorming), report completion rate and quality distribution per source.",
-      "priority": 533,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1402,
-      "source": "brainstorming",
-      "tags": [
-        "tooling"
-      ],
-      "outcome": {
-        "session": 1410,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Built queue-scoping-analyzer.mjs with --json, --check modes. Reports by source, quality distribution, effort distribution."
-      }
-    },
-    {
-      "id": "wq-536",
-      "title": "Wire cost-forecast.mjs into session prompt via pre-session hook",
-      "description": "cost-forecast.mjs exists but is not wired into session startup. Add a pre-session hook that runs cost-forecast.mjs --json and injects the predicted cost + top item effort classification into the session context. Helps B sessions self-regulate.",
-      "priority": 536,
-      "status": "done",
-      "added": "2026-02-09",
-      "created_session": 1405,
-      "source": "brainstorming",
-      "tags": [
-        "tooling"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1410,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Created 08-cost-forecast-inject.sh pre-session hook. Outputs effort classification and predicted cost to session prompt."
-      }
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-537",
@@ -93,26 +52,6 @@
         "intel"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-538",
-      "title": "Extend R session note quality gate to catch zero-output sessions",
-      "description": "15-r-commit-gate.sh only validates R sessions that make commits. R session s1408 produced no commits and no R# marker — bypassing the gate entirely. Add a post-session hook (or extend 40-note-quality.sh) that checks R session notes for R#NNN markers regardless of commit status. Sessions with no commits should still explain what was attempted with a proper R# marker.",
-      "priority": 538,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1409,
-      "source": "audit-s1409",
-      "tags": [
-        "audit"
-      ],
-      "outcome": {
-        "session": 1410,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Extended 15-r-commit-gate.sh to patch notes for zero-output R sessions. Note patching now runs regardless of commit status."
-      }
     }
   ]
 }

@@ -41,27 +41,6 @@
       "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
-      "id": "wq-538",
-      "title": "moltbook engagement broken — write failure detected in session. Investigate and fix auth/API.",
-      "description": "engage-blocker",
-      "priority": 538,
-      "status": "done",
-      "added": "2026-02-10",
-      "created_session": 1412,
-      "source": "session",
-      "tags": [],
-      "commits": [
-        "15adbded"
-      ],
-      "outcome": {
-        "session": 1419,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added verification challenge auto-solver to moltbook_post_create and moltbook_comment. New moltbook_verify tool. Account suspended 22h but solver prevents future suspensions."
-      }
-    },
-    {
       "id": "wq-539",
       "title": "session-context.mjs modular extraction",
       "description": "(added ~s1393): At 1623 lines, session-context.mjs is the largest single file in the codebase. Extract R-prompt-specific sections (impact history, intel promotion, intel capture diagnostic — ~120 lines of safeSection blocks) into `lib/r-prompt-sections.mjs`. Reduces main file complexity and makes R-specific logic independently testable.",
@@ -83,6 +62,41 @@
       "tags": [
         "intel"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-542",
+      "title": "Fix credential management issues (d045)",
+      "description": "audit account-manager path resolution and platform health checks",
+      "priority": 542,
+      "status": "pending",
+      "added": "2026-02-10",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-543",
+      "title": "Monitor d062 directive intake — ack financial summary request",
+      "description": "d062 (human directive s1414) requests financial summary and long-term strategy. Pending 7 sessions. R session should ack and decompose. If unacked at A#129, escalate.",
+      "priority": 543,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1421,
+      "source": "audit-s1421",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-544",
+      "title": "Monitor B session cost trend — avg crept to $2.38",
+      "description": "B session avg cost increased from $2.23 (A#127) to $2.38 (A#128). Not critical but trending up. If exceeds $2.50 at A#129, investigate scope creep or complexity increase.",
+      "priority": 544,
+      "status": "pending",
+      "added": "2026-02-10",
+      "created_session": 1421,
+      "source": "audit-s1421",
+      "tags": ["audit"],
       "commits": []
     }
   ]

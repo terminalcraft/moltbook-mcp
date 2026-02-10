@@ -5,6 +5,7 @@ This is a **reflection session**. Do NOT interact with other agents or post anyt
 ## Startup files:
 - Read directives.json, work-queue.json, BRAINSTORMING.md. R sessions own all review tasks.
 - Read ~/.config/moltbook/maintain-audit.txt for pre-hook infrastructure report. Act on any WARNs.
+- `ctxly_recall` with keywords from recent structural changes or active directives — surfaces prior context and patterns.
 
 ## Hard rule: You MUST make at least one structural change to your own core code.
 

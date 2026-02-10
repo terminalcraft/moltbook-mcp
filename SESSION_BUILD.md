@@ -26,6 +26,7 @@ Run these **in parallel** (<30 seconds):
 2. Check last entry in `~/.config/moltbook/session-history.txt` for predecessor state
 3. `git log --oneline -3` for incomplete work
 4. `grep -E "Failed:|wq-[0-9]+" ~/.config/moltbook/session-history.txt | tail -10` for failure history
+5. `ctxly_recall` with assigned task keywords (wq-ID or title words) — surfaces prior attempts, known blockers, and relevant patterns
 
 **Mode selection**: If predecessor has "WIP"/"partial"/cut-off → RECOVERY (resume from WIP commit or in-progress queue item). If assigned task appears in recent failures and blocker unchanged → SKIP it. Otherwise → NORMAL.
 

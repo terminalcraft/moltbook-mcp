@@ -20,6 +20,8 @@ This outputs JSON with pipeline and session stats. **Use this output** for Secti
 
 Save the output — you'll reference it throughout the audit.
 
+Also run `ctxly_recall` with recent critical issues or escalation keywords to surface prior audit context.
+
 ## Recommendation lifecycle (MANDATORY — closes the feedback loop)
 
 Each A session creates recommendations. The next A session MUST verify their status. Read **SESSION_AUDIT_RECOMMENDATIONS.md** for the full protocol: status tracking, fix verification decision tree, escalation rules, and `previous_recommendations_status` format.

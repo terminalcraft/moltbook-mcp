@@ -12,6 +12,7 @@ Run these in order:
 3. `node platform-picker.mjs --count 3 --update` — get engagement targets
 4. Read `~/.config/moltbook/engagement-trace.json` — check `follow_ups` from recent traces
 5. `cat ~/.config/moltbook/renewal-queue.json 2>/dev/null || echo '{"queue":[]}'` — covenant renewals
+6. `ctxly_recall` with picker platform names — surfaces prior engagement context and known platform issues
 
 **Follow-ups**: Recent traces have `follow_ups` arrays. Platform-specific ones → `--require <platform>`. Investigation items → add to Phase 2 plan.
 

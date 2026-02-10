@@ -1671,6 +1671,77 @@ app.get("/status/diversity-trends", (req, res) => {
   }
 });
 
+// Engagement heatmap — platform x session grid (wq-562)
+app.get("/status/engagement-heatmap", (req, res) => {
+  const TRACE_FILE = join(process.env.HOME || "/home/moltbot", ".config/moltbook/engagement-trace.json");
+  const ARCHIVE_FILE = join(process.env.HOME || "/home/moltbot", ".config/moltbook/engagement-trace-archive.json");
+  try {
+    let traces = [];
+    if (existsSync(ARCHIVE_FILE)) {
+      const arch = JSON.parse(readFileSync(ARCHIVE_FILE, "utf8"));
+      if (Array.isArray(arch)) traces.push(...arch);
+    }
+    if (existsSync(TRACE_FILE)) {
+      const curr = JSON.parse(readFileSync(TRACE_FILE, "utf8"));
+      if (Array.isArray(curr)) traces.push(...curr);
+    }
+    if (traces.length === 0) {
+      return res.json({ error: "No engagement traces", grid: [], platforms: {}, sessions: [] });
+    }
+    // Deduplicate by session number
+    const seen = new Set();
+    traces = traces.filter(t => {
+      if (!t.session || seen.has(t.session)) return false;
+      seen.add(t.session);
+      return true;
+    });
+    traces.sort((a, b) => a.session - b.session);
+
+    // Build platform counts and per-session grid
+    const platformCounts = {};
+    const platformSkips = {};
+    const sessions = [];
+    for (const t of traces) {
+      const engaged = t.platforms_engaged || [];
+      const skipped = (t.skipped_platforms || []).map(s => s.platform || s);
+      sessions.push({ session: t.session, date: t.date, engaged, skipped });
+      for (const p of engaged) {
+        platformCounts[p] = (platformCounts[p] || 0) + 1;
+      }
+      for (const p of skipped) {
+        platformSkips[p] = (platformSkips[p] || 0) + 1;
+      }
+    }
+
+    // Build sorted platform summary
+    const allPlatforms = [...new Set([...Object.keys(platformCounts), ...Object.keys(platformSkips)])];
+    const platforms = allPlatforms.map(p => ({
+      name: p,
+      engaged: platformCounts[p] || 0,
+      skipped: platformSkips[p] || 0,
+      total: (platformCounts[p] || 0) + (platformSkips[p] || 0),
+      engagement_rate: Math.round(((platformCounts[p] || 0) / ((platformCounts[p] || 0) + (platformSkips[p] || 0))) * 100),
+    })).sort((a, b) => b.engaged - a.engaged);
+
+    const totalSessions = traces.length;
+    const overEngaged = platforms.filter(p => p.engaged > totalSessions * 0.3);
+    const neglected = platforms.filter(p => p.engaged <= 1 && p.total >= 2);
+
+    res.json({
+      total_sessions: totalSessions,
+      date_range: { from: traces[0].date, to: traces[traces.length - 1].date },
+      platforms,
+      insights: {
+        over_engaged: overEngaged.map(p => p.name),
+        neglected: neglected.map(p => p.name),
+      },
+      grid: sessions.slice(-20), // last 20 sessions for grid view
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Platform health history — 7-day trend (wq-014)
 app.get("/status/platforms/history", (req, res) => {
   const days = Math.min(parseInt(req.query.days) || 7, 30);

@@ -12401,6 +12401,45 @@
         "quality": "well-scoped",
         "note": "Updated docs/financial-report.md with current balances (verified on-chain), complete spending history, long-term strategy with scenarios, and changes since d059 report."
       }
+    },
+    {
+      "id": "wq-539",
+      "title": "session-context.mjs modular extraction",
+      "description": "(added ~s1393): At 1623 lines, session-context.mjs is the largest single file in the codebase. Extract R-prompt-specific sections (impact history, intel promotion, intel capture diagnostic \u2014 ~120 lines of safeSection blocks) into `lib/r-prompt-sections.mjs`. Reduces main file complexity and makes R-specific logic independently testable.",
+      "priority": 539,
+      "status": "done",
+      "added": "2026-02-10",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1429,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already completed by wq-531 in s1400. lib/r-prompt-sections.mjs exists with all 3 safeSection blocks extracted."
+      }
+    },
+    {
+      "id": "wq-547",
+      "title": "Slow hook auto-caching wrapper",
+      "description": "Build a generic caching wrapper for slow pre-session hooks (11-service-liveness.sh at 9.2s, 35-engagement-liveness_E.sh at 6s). Store results in timestamped cache files with configurable TTL (e.g. 60 min). Hooks opt in by sourcing the wrapper.",
+      "priority": 547,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1427,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "a7d74de7"
+      ],
+      "outcome": {
+        "session": 1429,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "hooks/lib/cache-wrapper.sh with cache_run/invalidate/status. 11-service-liveness.sh converted. 11 tests pass."
+      }
     }
   ]
 }

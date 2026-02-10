@@ -15,6 +15,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Fix credential management issues (d045)**: audit account-manager path resolution and platform health checks
+- **Add tests for audit-report.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
+
 - **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
 
 - ~~**Note quality trend dashboard for A sessions** (added ~s1372)~~ → wq-518 (s1380)

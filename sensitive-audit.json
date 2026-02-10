@@ -1,205 +1,5 @@
 [
   {
-    "id": "39e0ad22-2bda-465f-b909-0c8acd6aa04c",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:38:29.230Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/live",
-    "reason": "missing_token"
-  },
-  {
-    "id": "3808a8e8-ae39-485a-8a25-fb26a6ca87b0",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:38:29.267Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/metrics",
-    "reason": "missing_token"
-  },
-  {
-    "id": "8c7a0162-4526-4063-bee9-6bfb7846678c",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:38:29.269Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/backup",
-    "reason": "missing_token"
-  },
-  {
-    "id": "b29e5b63-1f5d-453e-ae81-0f5337f5f12d",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:38:29.312Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "POST",
-    "path": "/backups/restore/2000-01-01",
-    "reason": "missing_token"
-  },
-  {
-    "id": "35bd1e91-8fc9-4788-9a1a-ab116723195d",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:38:29.316Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/analytics",
-    "reason": "missing_token"
-  },
-  {
-    "id": "0c0c107f-9353-4399-ae5e-78def25c3310",
-    "action": "auth.rejected",
-    "ts": "2026-02-09T21:38:34.413Z",
-    "ip": "127.0.0.1",
-    "agent": "smoke-test",
-    "method": "POST",
-    "path": "/buildlog",
-    "reason": "missing-headers"
-  },
-  {
-    "id": "2ee67c1d-4a13-426f-b861-e4c1cefdb6d6",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:38:34.422Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/summaries",
-    "reason": "missing_token"
-  },
-  {
-    "id": "f056abd3-88ab-4cca-ba14-b8e322f3b1fa",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:38:34.431Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/inbox",
-    "reason": "missing_token"
-  },
-  {
-    "id": "2b827ad7-785a-47df-b619-34443af26b65",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:38:34.896Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/human-review",
-    "reason": "missing_token"
-  },
-  {
-    "id": "bd673237-93d1-4aaa-ae92-4f2193bf6058",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:40:48.349Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/metrics",
-    "reason": "missing_token"
-  },
-  {
-    "id": "17d37afe-2c9d-4e0c-8fcd-0674184b1599",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:40:51.713Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/metrics",
-    "reason": "missing_token"
-  },
-  {
-    "id": "6926e5d9-b90c-4392-819c-d35601410719",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:46:00.120Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/status/all",
-    "reason": "missing_token"
-  },
-  {
-    "id": "b4a325f0-5cc8-4619-8c0f-31b2cb65cc4d",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:46:00.124Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/status/dashboard",
-    "reason": "missing_token"
-  },
-  {
-    "id": "5d141b11-13eb-4ff3-b4d2-6ab4c1becc81",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:46:00.145Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/status/directives",
-    "reason": "missing_token"
-  },
-  {
-    "id": "90cca463-9998-4bdd-bdad-efa6882364ef",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:46:00.149Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/status/pipeline",
-    "reason": "missing_token"
-  },
-  {
-    "id": "8acc1702-a4d3-47b9-9091-c624353e7344",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:46:00.153Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/status/platforms",
-    "reason": "missing_token"
-  },
-  {
-    "id": "718e6d00-5362-46f9-98cf-e3676f33a8ae",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:46:00.161Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/status/creds",
-    "reason": "missing_token"
-  },
-  {
-    "id": "15225c82-ee45-4a8b-a619-08dc2275b642",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:46:00.378Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/live",
-    "reason": "missing_token"
-  },
-  {
-    "id": "2ae1cb39-29c4-4293-a520-91cea455a1b2",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:46:04.115Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/metrics",
-    "reason": "missing_token"
-  },
-  {
-    "id": "eab829b8-5c4e-4b0f-bd81-7633407f9e2c",
-    "action": "auth.failed",
-    "ts": "2026-02-09T21:46:04.119Z",
-    "ip": "127.0.0.1",
-    "agent": null,
-    "method": "GET",
-    "path": "/backup",
-    "reason": "missing_token"
-  },
-  {
     "id": "32d097d9-8efb-42cc-9ab5-a49a10a61f54",
     "action": "auth.failed",
     "ts": "2026-02-09T21:46:04.176Z",
@@ -4993,6 +4793,206 @@
     "id": "427b48b5-fca1-424b-889a-32a6c1f095aa",
     "action": "auth.failed",
     "ts": "2026-02-10T14:04:04.769Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/human-review",
+    "reason": "missing_token"
+  },
+  {
+    "id": "c547bb3c-6950-47aa-9306-fc8cbbd84cd5",
+    "action": "auth.failed",
+    "ts": "2026-02-10T14:07:01.525Z",
+    "ip": "43.130.111.40",
+    "agent": null,
+    "method": "GET",
+    "path": "/analytics",
+    "reason": "missing_token"
+  },
+  {
+    "id": "e74b5b6c-5297-46a0-ab0e-e5442037832b",
+    "action": "auth.failed",
+    "ts": "2026-02-10T14:10:48.691Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/metrics",
+    "reason": "missing_token"
+  },
+  {
+    "id": "c0e952dd-8ae1-4469-a886-3bb1ff8aae2b",
+    "action": "auth.failed",
+    "ts": "2026-02-10T14:10:52.716Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/metrics",
+    "reason": "missing_token"
+  },
+  {
+    "id": "436b03be-72ce-4d62-a77f-a7084f6cc02f",
+    "action": "auth.failed",
+    "ts": "2026-02-10T14:40:48.701Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/metrics",
+    "reason": "missing_token"
+  },
+  {
+    "id": "71bedaed-593e-4485-9d50-5336cc8251cb",
+    "action": "auth.failed",
+    "ts": "2026-02-10T14:40:52.752Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/metrics",
+    "reason": "missing_token"
+  },
+  {
+    "id": "1848ba96-283c-4c0c-ab17-df044ecddb44",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:24.102Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/status/all",
+    "reason": "missing_token"
+  },
+  {
+    "id": "2e05d1df-aa3c-462f-90bc-75760101050c",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:24.119Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/status/dashboard",
+    "reason": "missing_token"
+  },
+  {
+    "id": "a24de427-4699-4d63-a852-565c4e93c4e6",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:24.167Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/status/directives",
+    "reason": "missing_token"
+  },
+  {
+    "id": "506f77a9-30ae-4058-ad0a-bf1410572571",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:24.203Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/status/pipeline",
+    "reason": "missing_token"
+  },
+  {
+    "id": "64652083-b301-4f16-af90-f03f1a94c887",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:24.206Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/status/platforms",
+    "reason": "missing_token"
+  },
+  {
+    "id": "4de3403f-7d95-43d0-aa3f-e28be0186f91",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:24.219Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/status/creds",
+    "reason": "missing_token"
+  },
+  {
+    "id": "bbba28b9-7190-4949-9590-2d52ad447d3d",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:24.391Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/live",
+    "reason": "missing_token"
+  },
+  {
+    "id": "33d4e76d-67a4-42c6-8b7b-b8a2d8ff322d",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:28.059Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/metrics",
+    "reason": "missing_token"
+  },
+  {
+    "id": "f9646ab9-30a2-4dec-8cb0-14e2be9f372e",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:28.063Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/backup",
+    "reason": "missing_token"
+  },
+  {
+    "id": "b1511d92-5965-4841-a965-6b78cf1a4fee",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:28.121Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "POST",
+    "path": "/backups/restore/2000-01-01",
+    "reason": "missing_token"
+  },
+  {
+    "id": "3498d28b-d276-4e03-ba22-ab1a82fa0b4a",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:28.125Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/analytics",
+    "reason": "missing_token"
+  },
+  {
+    "id": "fb45b12e-de7e-49eb-bcc3-73d5dad51f7d",
+    "action": "auth.rejected",
+    "ts": "2026-02-10T15:09:33.197Z",
+    "ip": "127.0.0.1",
+    "agent": "smoke-test",
+    "method": "POST",
+    "path": "/buildlog",
+    "reason": "missing-headers"
+  },
+  {
+    "id": "a77d28ba-5f4b-451a-8161-76b30bee6737",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:33.203Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/summaries",
+    "reason": "missing_token"
+  },
+  {
+    "id": "a0a61045-6506-4d7c-a6ec-18815c281d3c",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:33.218Z",
+    "ip": "127.0.0.1",
+    "agent": null,
+    "method": "GET",
+    "path": "/inbox",
+    "reason": "missing_token"
+  },
+  {
+    "id": "a5848bae-cc98-40a5-be24-fe591a1679d1",
+    "action": "auth.failed",
+    "ts": "2026-02-10T15:09:33.733Z",
     "ip": "127.0.0.1",
     "agent": null,
     "method": "GET",

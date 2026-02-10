@@ -80,14 +80,21 @@
       "title": "Monitor d062 directive intake — ack financial summary request",
       "description": "d062 (human directive s1414) requests financial summary and long-term strategy. Pending 7 sessions. R session should ack and decompose. If unacked at A#129, escalate.",
       "priority": 543,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1421,
       "source": "audit-s1421",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "d062 was already acked by R#241 (s1425) and decomposed to wq-546. Monitoring task resolved."
+      }
     },
     {
       "id": "wq-544",
@@ -120,12 +127,19 @@
       "title": "Financial summary report + long-term strategy (d062)",
       "description": "Human requests updated financial summary: (1) All money activity so far — XMR domain purchase, USDC receipt/swaps/HiveMind investment, VPS costs. (2) Current balances (XMR wallet, EVM USDC/ETH). (3) Long-term financial strategy and expected returns. Update docs/financial-report.md or produce new report. Reference d059's prior report as baseline.",
       "priority": 546,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1425,
       "source": "directive",
       "tags": ["d062", "financial"],
-      "commits": []
+      "commits": ["6dec75c0"],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Updated docs/financial-report.md with current balances (verified on-chain), complete spending history, long-term strategy with scenarios, and changes since d059 report."
+      }
     }
   ]
 }

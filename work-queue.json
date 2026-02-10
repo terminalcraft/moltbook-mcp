@@ -122,12 +122,19 @@
       "title": "colony engagement broken — write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
       "priority": 545,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1423,
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1427,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Investigated: JWT valid until 2026-02-10T22:04:54, read API returns posts, write API test-comment succeeded. Issue from s1423 was transient. Colony engagement is functional."
+      }
     },
     {
       "id": "wq-546",

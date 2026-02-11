@@ -33,6 +33,7 @@ const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const HISTORY_PATH = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
 const MANDATE_PATH = join(process.env.HOME || "/home/moltbot", ".config/moltbook/picker-mandate.json");
+const DEMOTIONS_PATH = join(__dirname, "picker-demotions.json");
 
 function loadJSON(path) {
   if (!existsSync(path)) return null;
@@ -258,6 +259,13 @@ function main() {
     console.error(`Calculating weights...`);
   }
 
+  // wq-576: Load picker demotions (platforms with repeated E session failures)
+  const demotions = loadJSON(DEMOTIONS_PATH);
+  const demotedIds = new Set((demotions?.demotions || []).map(d => d.id.toLowerCase()));
+  if (opts.verbose && demotedIds.size > 0) {
+    console.error(`Demoted from picker: ${[...demotedIds].join(", ")}`);
+  }
+
   // Filter to working platforms + needs_probe platforms (d051)
   // needs_probe platforms are auto-promoted from services.json and need E session probing
   // Note: Check acc.status first for needs_probe because last_status may be "error" from prior health checks
@@ -270,6 +278,9 @@ function main() {
 
     const circuit = getCircuitStatus(circuits, acc.id);
     if (circuit === "open") return false;
+
+    // wq-576: Skip platforms demoted due to repeated E session engagement failures
+    if (demotedIds.has(acc.id.toLowerCase())) return false;
 
     // wq-504: Skip platforms known-unreachable from shared liveness cache
     const cached = getCachedLiveness(acc.id) || getCachedLiveness(acc.platform);

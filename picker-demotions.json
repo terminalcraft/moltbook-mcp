@@ -1,0 +1,11 @@
+{
+  "_doc": "Platforms demoted from picker pool. Picker skips these IDs. Add entries when E sessions repeatedly fail to engage a platform despite liveness probes showing it as reachable.",
+  "demotions": [
+    {
+      "id": "moltyscan",
+      "reason": "Unreachable for 3+ consecutive E sessions (s1251, s1453, s1465) despite passing liveness probes",
+      "demoted_at": "2026-02-11",
+      "demoted_by": "wq-576 B#424"
+    }
+  ]
+}

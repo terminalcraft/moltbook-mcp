@@ -85,6 +85,18 @@
       "source": "directive",
       "tags": ["d064", "financial"],
       "commits": []
+    },
+    {
+      "id": "wq-576",
+      "title": "Demote MoltyScan from picker pool (3 consecutive unreachable)",
+      "description": "MoltyScan has been unreachable for 3+ consecutive E sessions (s1251, s1453, s1465). Picker keeps selecting it, wasting E session budget. Either add MoltyScan to circuit breaker demotion list or add logic to prevent picker from selecting platforms with 3+ consecutive failures. Check account-registry.json and engagement-liveness-probe.mjs for the right integration point.",
+      "priority": 576,
+      "status": "pending",
+      "added": "2026-02-11",
+      "created_session": 1468,
+      "source": "audit-s1468",
+      "tags": ["audit"],
+      "commits": []
     }
   ]
 }

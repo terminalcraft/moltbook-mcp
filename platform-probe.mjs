@@ -134,6 +134,30 @@ function computeSha256(content) {
   return createHash("sha256").update(content, "utf8").digest("hex");
 }
 
+// Detect SPA false positives: sites that return 200 on every path with HTML content
+// SPA catch-all routing serves the same HTML shell for any URL, faking endpoint presence
+function isSpaFalsePositive(results) {
+  const successes = results.filter(r => r.isSuccess);
+  if (successes.length < 3) return false; // Too few responses to judge
+
+  // If every successful response is HTML, likely an SPA catch-all
+  const allHtml = successes.every(r => r.contentType === "html");
+  if (!allHtml) return false;
+
+  // Check body preview for SPA signatures (bundled JS apps)
+  const spaPatterns = /id=["'](root|app|__next|__nuxt)["']|<script\s+src=|window\.__/i;
+  const bodiesMatch = successes.filter(r => r.bodyPreview && spaPatterns.test(r.bodyPreview));
+  if (bodiesMatch.length > 0) return true;
+
+  // API-specific paths (.json, .md) returning HTML is a strong SPA signal
+  const apiPaths = successes.filter(r =>
+    r.path.endsWith(".json") || r.path.endsWith(".md") || r.path.includes("api")
+  );
+  if (apiPaths.length >= 2) return true;
+
+  return false;
+}
+
 // Analyze probe results to determine platform capabilities
 function analyzeResults(results) {
   const analysis = {
@@ -145,6 +169,7 @@ function analyzeResults(results) {
     hasWellKnown: false,
     hasHealthEndpoint: false,
     hasRegistration: false,
+    isSpa: false,
     authType: "unknown",
     recommendedStatus: "unreachable",
     findings: [],
@@ -155,6 +180,14 @@ function analyzeResults(results) {
   if (successes.length > 0) {
     analysis.reachable = true;
     analysis.recommendedStatus = "live";
+  }
+
+  // SPA detection gate — check before endpoint analysis
+  if (analysis.reachable && isSpaFalsePositive(results)) {
+    analysis.isSpa = true;
+    analysis.recommendedStatus = "spa_false_positive";
+    analysis.findings.push("SPA false positive: all endpoints return HTML (catch-all routing)");
+    return analysis;
   }
 
   // Check specific endpoints
@@ -354,6 +387,7 @@ async function probePlatform(platformId, jsonMode = false) {
   if (!jsonMode) {
     console.log("Analysis:");
     console.log(`  Reachable: ${analysis.reachable}`);
+    if (analysis.isSpa) console.log(`  SPA detected: true (false positive — no real API)`);
     console.log(`  Has skill.md: ${analysis.hasSkillMd}`);
     console.log(`  Has API docs: ${analysis.hasApiDocs}`);
     console.log(`  Has OpenAPI: ${analysis.hasOpenAPI}`);
@@ -390,6 +424,9 @@ async function probePlatform(platformId, jsonMode = false) {
     console.log(`\n${updateResult.success ? "✓" : "✗"} Registry update: ${updateResult.success ? `status → ${updateResult.newStatus}` : updateResult.error}`);
   }
 }
+
+// Exports for testing
+export { isSpaFalsePositive, analyzeResults };
 
 // CLI
 const args = process.argv.slice(2);

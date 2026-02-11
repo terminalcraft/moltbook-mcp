@@ -111,11 +111,15 @@ export function computeDirectiveOutcome(assignments, baseDir) {
       }
     }
 
-    // 3. Check session-type-specific indicators
+    // 3. Session-type-specific evidence detection
+    // R#249: Replaced hardcoded directive-specific checks (d044, d047, d045, d049)
+    // with generic tag-based evidence matching. Directives declare their domain
+    // via tags in directives.json; the outcome tracker matches evidence patterns
+    // by tag rather than by ID. New directives get evidence tracking automatically.
+    const dTags = d?.tags || [];
+    const sessionPattern = new RegExp(`(s${assignments.sessionNum}\\b|[BERA]#\\d+ s${assignments.sessionNum}\\b)`);
+
     if (assignments.sessionType === 'B') {
-      // B sessions: check for work-queue completions this session
-      // Notes format is "B#NNN sXXXX: description" - match both patterns
-      const sessionPattern = new RegExp(`(s${assignments.sessionNum}\\b|B#\\d+ s${assignments.sessionNum}\\b)`);
       const completedThisSession = allQueueItems.filter(q =>
         q.status === 'done' && sessionPattern.test(q.notes || '')
       );
@@ -123,30 +127,18 @@ export function computeDirectiveOutcome(assignments, baseDir) {
         evidence.push(`b-session-completions:${completedThisSession.length}`);
       }
 
-      // Check for platform recovery work (d047)
-      if (dId === 'd047') {
-        const registryChanges = accountRegistry.accounts?.filter(a =>
-          a.notes?.includes(`s${assignments.sessionNum}`)
+      // Tag-based evidence: match queue items by directive tags
+      if (dTags.length > 0) {
+        const taggedWork = allQueueItems.filter(q =>
+          q.tags?.some(t => dTags.includes(t)) && sessionPattern.test(q.notes || '')
         );
-        if (registryChanges?.length > 0) {
-          evidence.push(`platform-recovery:${registryChanges.length}`);
-        }
-      }
-
-      // Check for financial/wallet work (d044)
-      if (dId === 'd044') {
-        const walletItems = allQueueItems.filter(q =>
-          (q.title?.toLowerCase().includes('usdc') || q.title?.toLowerCase().includes('wallet')) &&
-          sessionPattern.test(q.notes || '')
-        );
-        if (walletItems.length > 0) {
-          evidence.push(`wallet-work:${walletItems.length}`);
+        if (taggedWork.length > 0) {
+          evidence.push(`tagged-work:${taggedWork.length}`);
         }
       }
     }
 
     if (assignments.sessionType === 'E') {
-      // E sessions: check engagement artifacts
       const recentIntel = engagementIntel.filter(e => {
         const entryTime = new Date(e.timestamp || e.discovered_at || 0).getTime();
         return entryTime > sessionStart;
@@ -155,8 +147,6 @@ export function computeDirectiveOutcome(assignments, baseDir) {
         evidence.push(`intel-captured:${recentIntel.length}`);
       }
 
-      // Check engagement-trace for platform activity
-      // Trace is an array of session objects, find the one for this session
       const traceArray = Array.isArray(engagementTrace) ? engagementTrace : [engagementTrace];
       const sessionTrace = traceArray.find(t => t?.session === assignments.sessionNum);
       if (sessionTrace) {
@@ -166,46 +156,39 @@ export function computeDirectiveOutcome(assignments, baseDir) {
         }
       }
 
-      // d049: intel capture minimum requirement
-      if (dId === 'd049' && recentIntel.length >= 1) {
-        evidence.push('d049-intel-minimum-met');
+      // Scoped directives (scope=E) get intel-minimum check
+      if (d?.scope === 'E' && recentIntel.length >= 1) {
+        evidence.push('scoped-intel-minimum-met');
       }
 
-      // d045: credential regeneration work
-      if (dId === 'd045') {
-        const credentialActivity = recentIntel.some(e =>
-          (e.content || '').toLowerCase().includes('credential') ||
-          (e.content || '').toLowerCase().includes('registration')
+      // Tag-based evidence: match intel content against directive tags
+      if (dTags.length > 0) {
+        const taggedIntel = recentIntel.some(e =>
+          dTags.some(t => (e.content || '').toLowerCase().includes(t))
         );
-        if (credentialActivity) {
-          evidence.push('credential-work');
+        if (taggedIntel) {
+          evidence.push('tagged-intel-match');
         }
       }
     }
 
     if (assignments.sessionType === 'R') {
-      // R sessions: check if directive was acknowledged this session
       if (d?.acked_session === assignments.sessionNum) {
         evidence.push('directive-acknowledged');
       }
 
-      // Check if notes were added this session (directive progress)
       if (d?.notes?.includes(`R#`) || d?.notes?.includes(`s${assignments.sessionNum}`)) {
         evidence.push('directive-notes-updated');
       }
 
-      // Check for queue decomposition from directive
       const derivedItems = allQueueItems.filter(q =>
-        q.source?.includes(dId) || q.title?.toLowerCase().includes(dId)
+        q.source?.includes(dId) || q.title?.toLowerCase().includes(dId) ||
+        q.tags?.includes(dId)
       );
       if (derivedItems.length > 0) {
         evidence.push(`queue-decomposition:${derivedItems.length}`);
       }
 
-      // wq-471: R sessions handle directives via directives.json edits (status
-      // updates, notes, decomposition) but the above checks often miss this because
-      // R sessions don't always set per-directive timestamps. Detect directives.json
-      // modification as evidence that R session performed directive maintenance.
       try {
         const djPath = join(baseDir, 'directives.json');
         const djMtime = statSync(djPath).mtimeMs;
@@ -216,22 +199,16 @@ export function computeDirectiveOutcome(assignments, baseDir) {
     }
 
     if (assignments.sessionType === 'A') {
-      // A sessions: audit work - check if directive compliance was reviewed
-      // A sessions typically don't directly address directives but audit them
-      // Give credit if directive health was checked (indicated by this tracking running)
       evidence.push('audit-tracking-active');
     }
 
-    // 4. Check for auto-escalation directives (d048, d050)
-    if (dId.startsWith('d04') || dId.startsWith('d05')) {
-      // Auto-escalations are addressed by human action or queue item progress
-      // Check if the blocked item mentioned in the directive has progressed
+    // 4. Auto-escalation resolution: check if referenced queue items unblocked
+    if (d?.from === 'system') {
       const blockedMatch = d?.content?.match(/wq-\d+/);
       if (blockedMatch) {
-        const blockedId = blockedMatch[0];
-        const blockedItem = allQueueItems.find(q => q.id === blockedId);
+        const blockedItem = allQueueItems.find(q => q.id === blockedMatch[0]);
         if (blockedItem && blockedItem.status !== 'blocked') {
-          evidence.push(`escalation-resolved:${blockedId}`);
+          evidence.push(`escalation-resolved:${blockedMatch[0]}`);
         }
       }
     }

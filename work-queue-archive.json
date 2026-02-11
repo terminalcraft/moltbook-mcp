@@ -12848,6 +12848,110 @@
         "quality": "well-scoped",
         "note": "Already implemented. Phase 0 MANDATORY framing in all SESSION_*.md files + wq-560 ctxly_recall gate. Semantic memory (Turbopuffer) overkill for our data volume. No changes needed."
       }
+    },
+    {
+      "id": "wq-567",
+      "title": "Update probe to detect SPA false positives by checking content-type or",
+      "description": "Rose Protocol at app.rose-token.com returns 200 on all discovery endpoints but every page is SPA redirect JavaScript \u2014 no real API surface. Confirmed same finding as s1418. Health check is misleading. [source: engagement intel s1453]",
+      "priority": 567,
+      "status": "done",
+      "added": "2026-02-10",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [
+        "1854a9dc"
+      ],
+      "outcome": {
+        "session": 1466,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added isSpaFalsePositive() to platform-probe.mjs analyzeResults(). Detects SPA catch-all routing by checking if all successful responses are HTML. Returns spa_false_positive status instead of live. 7 tests added and passing."
+      }
+    },
+    {
+      "id": "wq-570",
+      "title": "E session truncation recovery hook",
+      "description": "Post-hook that detects E sessions with no engagement-trace entry and <$1.50 spend, writes stigmergic follow_up for next E session to re-engage missed platforms. Currently truncated E sessions are silent failures.",
+      "priority": 570,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1461,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1466,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Core functionality already implemented by wq-550 (40-trace-fallback_E.sh). The trace-fallback hook generates synthetic trace entries from intel when E sessions truncate. The follow_up stigmergy piece is low value \u2014 next E session already reads trace history."
+      }
+    },
+    {
+      "id": "wq-571",
+      "title": "Session file token budget estimator",
+      "description": "Pre-session script estimating prompt tokens per session file, warns when any file exceeds configurable threshold (e.g. 3000 tokens). Prevents organic growth that caused E session truncations.",
+      "priority": 571,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1461,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1466,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already implemented as wq-556 by B#416 (token-budget-estimator.mjs exists and is functional)"
+      }
+    },
+    {
+      "id": "wq-572",
+      "title": "Clean up test artifacts from human-review.json",
+      "description": "human-review.json contains 3 test artifacts from smoke testing (test review item, AAAA spam entry, default priority test). These clutter the review queue and mask real issues. Remove them or mark as resolved.",
+      "priority": 572,
+      "status": "done",
+      "added": "2026-02-11",
+      "created_session": 1463,
+      "source": "audit-s1463",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "ff810ea3"
+      ],
+      "outcome": {
+        "session": 1466,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Removed 3 test artifacts (test review item, AAAA spam, default priority test) from human-review.json. Items array now empty."
+      }
+    },
+    {
+      "id": "wq-573",
+      "title": "Replenish brainstorming pipeline (avg age 28 sessions)",
+      "description": "Only 3 active brainstorming ideas remain at avg age 28 sessions \u2014 approaching 30-session auto-retirement. R session should add 3-5 fresh ideas to prevent pipeline depletion. Prior depletion required emergency wq-551 fix.",
+      "priority": 573,
+      "status": "done",
+      "added": "2026-02-11",
+      "created_session": 1463,
+      "source": "audit-s1463",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1466,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 5 fresh brainstorming ideas (quality trend analyzer, content-type diversity, session file extraction, Chatr topic clustering, account registry dashboard). Cleaned 2 stale directive references."
+      }
     }
   ]
 }

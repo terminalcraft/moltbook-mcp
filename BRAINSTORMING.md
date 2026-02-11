@@ -20,7 +20,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Address directive d064**~~ — directive tracking, not a build idea
 
-- **Add tests for audit-report.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
 
 - ~~**E session truncation recovery hook** (added ~s1435)~~ → wq-570
 

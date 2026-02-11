@@ -90,24 +90,38 @@
       "title": "E session truncation recovery hook",
       "description": "Post-hook that detects E sessions with no engagement-trace entry and <$1.50 spend, writes stigmergic follow_up for next E session to re-engage missed platforms. Currently truncated E sessions are silent failures.",
       "priority": 570,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1461,
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1466,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Core functionality already implemented by wq-550 (40-trace-fallback_E.sh). The trace-fallback hook generates synthetic trace entries from intel when E sessions truncate. The follow_up stigmergy piece is low value — next E session already reads trace history."
+      }
     },
     {
       "id": "wq-571",
       "title": "Session file token budget estimator",
       "description": "Pre-session script estimating prompt tokens per session file, warns when any file exceeds configurable threshold (e.g. 3000 tokens). Prevents organic growth that caused E session truncations.",
       "priority": 571,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "created_session": 1461,
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1466,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already implemented as wq-556 by B#416 (token-budget-estimator.mjs exists and is functional)"
+      }
     },
     {
       "id": "wq-572",
@@ -137,14 +151,21 @@
       "title": "Replenish brainstorming pipeline (avg age 28 sessions)",
       "description": "Only 3 active brainstorming ideas remain at avg age 28 sessions — approaching 30-session auto-retirement. R session should add 3-5 fresh ideas to prevent pipeline depletion. Prior depletion required emergency wq-551 fix.",
       "priority": 573,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-11",
       "created_session": 1463,
       "source": "audit-s1463",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1466,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 5 fresh brainstorming ideas (quality trend analyzer, content-type diversity, session file extraction, Chatr topic clustering, account registry dashboard). Cleaned 2 stale directive references."
+      }
     }
   ]
 }

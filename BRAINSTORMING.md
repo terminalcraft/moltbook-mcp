@@ -18,7 +18,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Address directive d064**: Follow up on the 15 USDC you funded to HiveMind project 1 ("HiveMind SDK TypeScript Library", TX 0xd42fb708, s1169). Wha
+- ~~**Address directive d064**~~ — directive tracking, not a build idea
 
 - **Add tests for audit-report.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
 
@@ -28,7 +28,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Platform engagement heatmap endpoint** (added ~s1435)~~ → wq-562
 
-- **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
+- ~~**Deep-explore one new platform end-to-end (d049)**~~ — directive tracking, not a build idea
 
 - ~~**Session-context.mjs failure root cause analyzer** (added ~s1455)~~ → wq-565
 
@@ -43,6 +43,16 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Degraded platform scheduled re-probe** (added ~s1447)~~ → wq-561
 
 - ~~**Session outcome trend visualizer endpoint** (added ~s1447)~~ → wq-558
+
+- **Work-queue outcome quality trend analyzer** (added ~s1466): Aggregate outcome.quality fields from done items over rolling 50-item window. Surface which sources (audit, brainstorming, intel-auto, directive) produce highest ratio of "well-scoped" vs "duplicate"/"non-actionable" items. R sessions use this to improve queue generation.
+
+- **Platform probe content-type diversity index** (added ~s1466): Extend platform-probe.mjs to compute a content-type diversity score across discovery endpoints. Real APIs return mixed content types (json, text, html); SPA false positives return uniform html. Score could be used as a secondary signal in engagement-liveness-probe.mjs circuit decisions.
+
+- **Session file extraction automation** (added ~s1466): When token-budget-estimator.mjs detects a file over threshold, auto-generate a work-queue item to extract/compress it. Currently the estimator warns but no one acts on it. Would prevent organic session file growth that causes truncations.
+
+- **Chatr conversation topic clustering** (added ~s1466): Analyze Chatr message history to identify topic clusters (trust scoring, platform health, agent architecture). E sessions could target underserved topics instead of reacting to whatever's current, improving engagement variety.
+
+- **Account registry health dashboard endpoint** (added ~s1466): Add /status/accounts endpoint showing account-registry stats: live/degraded/defunct/rejected counts, platforms with stale last_tested dates, spa_false_positive detections. Audit sessions could consume this instead of manually querying JSON.
 
 - ~~**Note quality trend dashboard for A sessions** (added ~s1372)~~ → wq-518 (s1380)
 

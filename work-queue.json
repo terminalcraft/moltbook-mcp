@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-255",
@@ -26,7 +26,7 @@
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -38,20 +38,29 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-567",
       "title": "Update probe to detect SPA false positives by checking content-type or",
-      "description": "Rose Protocol at app.rose-token.com returns 200 on all discovery endpoints but every page is SPA redirect JavaScript \u2014 no real API surface. Confirmed same finding as s1418. Health check is misleading. [source: engagement intel s1453]",
+      "description": "Rose Protocol at app.rose-token.com returns 200 on all discovery endpoints but every page is SPA redirect JavaScript — no real API surface. Confirmed same finding as s1418. Health check is misleading. [source: engagement intel s1453]",
       "priority": 567,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-10",
       "source": "intel-auto",
       "tags": [
         "intel"
       ],
-      "commits": []
+      "commits": [
+        "1854a9dc"
+      ],
+      "outcome": {
+        "session": 1466,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added isSpaFalsePositive() to platform-probe.mjs analyzeResults(). Detects SPA catch-all routing by checking if all successful responses are HTML. Returns spa_false_positive status instead of live. 7 tests added and passing."
+      }
     },
     {
       "id": "wq-568",
@@ -105,12 +114,23 @@
       "title": "Clean up test artifacts from human-review.json",
       "description": "human-review.json contains 3 test artifacts from smoke testing (test review item, AAAA spam entry, default priority test). These clutter the review queue and mask real issues. Remove them or mark as resolved.",
       "priority": 572,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-11",
       "created_session": 1463,
       "source": "audit-s1463",
-      "tags": ["audit"],
-      "commits": []
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "ff810ea3"
+      ],
+      "outcome": {
+        "session": 1466,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Removed 3 test artifacts (test review item, AAAA spam, default priority test) from human-review.json. Items array now empty."
+      }
     },
     {
       "id": "wq-573",
@@ -121,7 +141,9 @@
       "added": "2026-02-11",
       "created_session": 1463,
       "source": "audit-s1463",
-      "tags": ["audit"],
+      "tags": [
+        "audit"
+      ],
       "commits": []
     }
   ]

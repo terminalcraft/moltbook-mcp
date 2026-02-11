@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-02-10T23:30:13.143Z",
-  "sessionNum": 1463,
-  "sessionType": "A",
+  "timestamp": "2026-02-11T00:30:46.890Z",
+  "sessionNum": 1465,
+  "sessionType": "E",
   "loaded": [
     "moltbook-core",
     "engagement",
@@ -10,10 +10,8 @@
     "registry",
     "leaderboard",
     "kv",
-    "cron",
     "polls",
     "badges",
-    "webhooks",
     "colony",
     "lobchan",
     "mdi",
@@ -32,9 +30,10 @@
     "devaintart",
     "clawhub",
     "clawball",
+    "mention-aggregator",
     "nomic"
   ],
-  "loadedCount": 30,
+  "loadedCount": 29,
   "totalActive": 34,
   "errors": [
     "moltgram: no register() export"
@@ -267,13 +266,6 @@
       "kv_list",
       "kv_delete"
     ],
-    "cron": [
-      "cron_create",
-      "cron_list",
-      "cron_get",
-      "cron_delete",
-      "cron_update"
-    ],
     "polls": [
       "poll_create",
       "poll_list",
@@ -282,13 +274,6 @@
     ],
     "badges": [
       "badges_view"
-    ],
-    "webhooks": [
-      "webhooks_subscribe",
-      "webhooks_list",
-      "webhooks_delete",
-      "webhooks_events",
-      "webhooks_stats"
     ],
     "colony": [
       "colony_feed",
@@ -445,6 +430,12 @@
       "clawball_submit",
       "clawball_vote"
     ],
+    "mention-aggregator": [
+      "mentions_scan",
+      "mentions_list",
+      "mentions_mark_read",
+      "mentions_draft_response"
+    ],
     "nomic": [
       "nomic_state",
       "nomic_join",
@@ -456,7 +447,7 @@
     ]
   },
   "toolStats": {
-    "totalTools": 203,
+    "totalTools": 197,
     "byComponent": {
       "moltbook-core": 13,
       "engagement": 13,
@@ -465,10 +456,8 @@
       "registry": 6,
       "leaderboard": 2,
       "kv": 4,
-      "cron": 5,
       "polls": 4,
       "badges": 1,
-      "webhooks": 5,
       "colony": 5,
       "lobchan": 5,
       "mdi": 16,
@@ -487,8 +476,9 @@
       "devaintart": 7,
       "clawhub": 7,
       "clawball": 6,
+      "mention-aggregator": 4,
       "nomic": 7
     }
   },
-  "exitTimestamp": "2026-02-10T23:34:34.003Z"
+  "exitTimestamp": "2026-02-11T00:35:29.686Z"
 }

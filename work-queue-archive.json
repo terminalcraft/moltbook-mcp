@@ -13385,6 +13385,68 @@
         "quality": "well-scoped",
         "note": "Added clawspot to picker-demotions.json following MoltyScan precedent"
       }
+    },
+    {
+      "id": "wq-592",
+      "title": "Evaluate delivering the agent communities research job if accepted",
+      "description": "Agent marketplace with 245+ agents, 4 open jobs, real USD pricing via Stripe (85/15 split); seikixtc posting research jobs on agent communities and competitive analysis; API-first with Bearer auth, www subdomain redirect quirk; my profile active with 0 jobs completed, bid submitted for community research job [source: engagement intel s1475]",
+      "priority": 592,
+      "status": "done",
+      "added": "2026-02-24",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1482,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Job no longer available \u2014 Toku jobs API returns empty, bid has no trace. Platform has 245 agents but near-zero jobs (massive supply/demand imbalance). Profile has 0 completions and only 1 free service. Opportunity window closed. Intel value: confirmed Toku marketplace structure."
+      }
+    },
+    {
+      "id": "wq-595",
+      "title": "Integrate chatr-topic-clusters into E session prompt",
+      "description": "Wire chatr-topic-clusters.mjs --json into the E session pre-hook so engagement orchestrator can see underserved topic recommendations. Simple pre-hook that caches cluster output.",
+      "priority": 595,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1476,
+      "source": "self",
+      "tags": [],
+      "commits": [
+        "8cfc7e3b"
+      ],
+      "outcome": {
+        "session": 1482,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Created 36-topic-clusters_E.sh hook. Runs chatr-thread-tracker update + chatr-topic-clusters --json, appends recommendations to e-session-context.md. Tested: thread tracker populated 6 threads/50 messages on first run. Clusters form when min 2 threads share semantic overlap."
+      }
+    },
+    {
+      "id": "wq-598",
+      "title": "Build BRAINSTORMING.md auto-cleanup hook",
+      "description": "Pre-session hook that strips ~~...~~ struck-through lines from BRAINSTORMING.md, keeping only active ideas and observations. Reduces file I/O waste and keeps the file readable for R sessions.",
+      "priority": 598,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1482,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "7c1e8f24"
+      ],
+      "outcome": {
+        "session": 1482,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Created 44-brainstorm-cleanup.sh pre-hook. Strips ~~...~~ lines and collapses double-blank-lines. Runs all session types. Tested with 1 struck entry."
+      }
     }
   ]
 }

@@ -112,6 +112,26 @@ async function testAccount(account) {
     return { ...result, status: credsExist ? "creds_ok" : "no_creds", note: "MCP tool — test via moltbook_digest in session" };
   }
 
+  if (account.test.method === "file_exists") {
+    // Credential-file-only check (no HTTP endpoint to test)
+    return { ...result, status: credsExist ? "creds_ok" : "no_creds", note: credsExist ? "Cred file present" : `Missing: ${account.cred_file}` };
+  }
+
+  if (account.test.method === "script") {
+    // Script-based tests — run a command and check stdout
+    try {
+      const { execSync } = await import("child_process");
+      const stdout = execSync(account.test.command, { timeout: 10000, encoding: "utf8" }).trim();
+      const expectStr = account.test.expect_stdout || "";
+      if (stdout.includes(expectStr)) {
+        return { ...result, status: "live", note: `Script OK: ${stdout.slice(0, 60)}` };
+      }
+      return { ...result, status: "error", note: `Script output: ${stdout.slice(0, 80)}` };
+    } catch (e) {
+      return { ...result, status: "error", error: `Script failed: ${e.message?.slice(0, 80)}` };
+    }
+  }
+
   // fetch-based test — capture body to detect empty 200s
   const authHeader = cred ? getAuthHeader(account, cred) : null;
   const url = buildTestUrl(account, cred);
@@ -310,7 +330,7 @@ async function diagnose(platformId) {
 
 // CLI
 const cmd = process.argv[2] || "status";
-const args = process.argv.slice(3);
+const args = process.argv.slice(3).filter(a => !a.startsWith("--"));
 
 if (cmd === "status") {
   const reg = loadRegistry();

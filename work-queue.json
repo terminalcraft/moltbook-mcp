@@ -44,11 +44,20 @@
       "title": "Platform probe content-type diversity index",
       "description": "Extend platform-probe.mjs to compute content-type diversity score across endpoints. Real APIs return mixed types, SPAs return uniform html. Use as secondary signal in circuit decisions.",
       "priority": 581,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-24",
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [
+        "d10ed6e0"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeContentTypeDiversity() using Shannon entropy. Score 0-1: 0=uniform (SPA signal), 1=perfectly diverse. Integrated into analyzeResults output and JSON probe results. 6 new tests, all 13 pass."
+      }
     },
     {
       "id": "wq-582",

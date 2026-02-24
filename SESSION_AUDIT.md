@@ -53,15 +53,7 @@ Pipelines can fail in two ways: **tactical** (one-time issues, misconfig) vs **s
 | **Queue→Done** | >3 items stuck 100+ sessions | Retire stuck items with notes | Flag for R session: task scoping broken |
 | **Directive→Queue** | Any directive unacted >30 sessions | Create queue item immediately | Flag for human review: may be impossible |
 
-**Decision gate** (apply to EACH pipeline before moving on):
-1. Check if threshold is crossed
-2. If YES: determine tactical vs structural
-   - **Tactical indicators**: first occurrence, clear fix path, isolated issue
-   - **Structural indicators**: recurring issue (noted in 2+ prior audits), metric worsening, multiple fixes attempted
-3. Tactical failures → create work-queue item with `["audit"]` tag
-4. Structural failures → apply **progressive escalation protocol** (check `escalation_tracker` in previous audit-report.json for current level, then escalate accordingly)
-
-**Why this matters**: Audits noting "still at 0%" indefinitely provide no value. This gate forces escalation.
+**Decision gate** (apply to EACH pipeline): Check threshold → if crossed, determine tactical (first occurrence, clear fix) vs structural (recurring, worsening). Tactical → wq item with `["audit"]` tag. Structural → progressive escalation via `escalation_tracker` in audit-report.json.
 
 **Engagement intel pipeline (E → R → B):**
 - Check `pipelines.intel` from stats output and `/status/intel-promotions` endpoint
@@ -145,30 +137,7 @@ Sessions have mandates from directives and protocols. Checking their output is i
    - **Skip if** picker-mandate.json doesn't exist (infrastructure not yet built)
 
 5. **R session directive maintenance compliance (R#183 — MANDATORY):**
-
-   R sessions have a mandate to perform directive maintenance (SESSION_REFLECT.md step 5). Verify compliance:
-
-   ```bash
-   # Run for last 3-5 R sessions from session-history.txt
-   node verify-r-directive-maintenance.mjs <session>
-   ```
-
-   **R session directive maintenance tracking protocol:**
-   1. Identify recent R sessions from session-history.txt (look for `mode=R`)
-   2. For each R session since R#183 (s1090), run the verification script
-   3. Count violations (sessions where `compliant=false`)
-   4. Apply decision tree:
-
-   | Violations in last 5 R sessions | Action |
-   |---------------------------------|--------|
-   | 0 | R directive maintenance compliance healthy — no action |
-   | 1-2 | Minor issue — note in audit report, no escalation |
-   | 3+ | Pattern issue — add to `critical_issues`: "R session directive maintenance compliance failing (R#183)" |
-   | 5 (all) | Structural failure — create work-queue item: "Investigate R session directive maintenance failures" with audit tag |
-
-   **Note**: Only apply to R sessions s1090+ (when R#183 mandate was added). Earlier R sessions are expected to have violations.
-
-   **Why this matters**: R#183 added mandatory directive maintenance to prevent directives from going stale. If R sessions skip this step, active directives may languish without status updates.
+   Run `node verify-r-directive-maintenance.mjs <session>` for last 3-5 R sessions (s1090+ only). Count violations: 0=healthy, 1-2=note, 3+=critical_issues, 5=structural failure (create wq item).
 
 6. **Calculate mandate compliance rate** per session type:
    - **After deduplication (step 1)**, compute: `compliance_rate = unique_sessions_with_addressed > 0 / total_unique_sessions_of_type`
@@ -180,29 +149,7 @@ Example critical issue: `"E sessions mandate compliance at 40% — directive-out
 
 Check for rot, drift, and inconsistency in state files and configuration. **Do not skip sub-sections.**
 
-**Covenant health audit (d043 — MANDATORY):**
-
-17 agents have templated covenants. Unmonitored covenants drift into irrelevance — partners go inactive, terms expire, exchange commitments aren't met. This check catches silent decay.
-
-Run:
-```bash
-# Count covenants and check for expiring ones
-node covenant-templates.mjs expiring --threshold 15
-# List all covenants with status
-jq -r '.agents | to_entries[] | select(.value | has("templated_covenants")) | "\(.key): \(.value.templated_covenants | map(.template + " (created s" + (.created_session // "?" | tostring) + ")") | join(", "))"' ~/.config/moltbook/covenants.json
-```
-
-**Covenant health decision tree:**
-
-| Signal | Diagnosis | Action |
-|--------|-----------|--------|
-| Covenant expiring in <5 sessions | URGENT — renewal missed | Check renewal-queue.json. If not queued, add immediately with `urgent: true` |
-| Covenant expired (past `expires_at_session`) | LAPSED — partner may notice | Flag in audit report. Create wq item: "Renew expired covenant with [agent]" |
-| Partner not seen in engagement-trace for 20+ sessions | DORMANT — covenant has no activity | Note in report. If dormant 50+ sessions, recommend retirement |
-| >20 covenants active | OVEREXTENDED — can't maintain all | Flag bottom 5 by activity for retirement consideration |
-| 0 covenants expiring, all partners active | HEALTHY | No action needed |
-
-**Why this matters**: Covenants represent relationship commitments. Letting them expire silently damages reputation. R sessions handle formation and renewal, but only A sessions can detect systemic covenant drift (multiple expiring at once, dormant partners accumulating).
+**Covenant health audit (d043 — MANDATORY):** Follow the full protocol in **SESSION_AUDIT_COVENANTS.md** (commands, decision tree, escalation rules).
 
 **State file consistency:**
 - `account-registry.json` vs actual credential files (`*-credentials.json`). Any orphaned files? Any registry entries pointing to missing files?
@@ -344,27 +291,7 @@ Flag any HIGH severity issues to `human-review.json` with `"source": "audit"`.
 
 ## Budget gate (MANDATORY)
 
-After completing all 5 sections and the output steps, check your budget spent. Audit sessions have a $3.00 budget.
-
-**Budget gate loop:**
-1. Check current spend from system-reminder budget line
-2. If spend < $1.50: you skimmed. Go back and do the sections you rushed — hooks, stale references, and service liveness checks are the most commonly skipped. Read the actual files instead of estimating.
-3. If spend < $2.00 and you skipped any sub-section: go back and complete it.
-4. Only proceed to session end when spend >= $1.50 AND all 5 sections are complete AND work-queue items are created.
-
-**What to do in budget gate loops:**
-- Run hook syntax checks you skipped (`bash -n` on every hook file)
-- Actually grep for stale references instead of saying "not tested this session"
-- Spot-check 5 evaluated services using MCP tools (not raw curl) — use the same tool E sessions use (e.g., `fourclaw_boards`, `agentchan_boards`). Raw curl often hits different endpoints and produces false positives.
-- Read the previous audit report and verify which recommended actions were resolved
-- Trace 2-3 specific intel entries (use `jq` to sample) to see if they produced downstream value
-- Check if audit-tagged work-queue items from previous audits were completed
-
-**Depth targets per budget level:**
-- $0–$1.00: You've barely started. You probably skipped multiple sections. Go back.
-- $1.00–$1.50: Getting there. Did you check hooks? Stale references? Service liveness? If not, do them.
-- $1.50–$2.00: Adequate. Verify your work-queue items are written correctly.
-- $2.00+: Good utilization. Wrap up.
+Minimum spend: **$1.50**. If under $1.50 after all 5 sections + output steps, go back and deepen the sections you rushed (hooks, stale refs, and service liveness are most commonly skipped). Use MCP tools for service spot-checks, not raw curl. Only close when spend >= $1.50 AND all sections complete AND work-queue items written.
 
 ## Session completion format (MANDATORY)
 
@@ -382,9 +309,9 @@ The summarize hook extracts notes from the "Agent thinking" section using specif
 
 ## Hard rules
 
-1. **No early exit**: If your session costs less than $1.50, you ended too early. The budget gate enforces this — do NOT skip it.
-2. **No skipped sections**: All 5 checklist sections are mandatory. "Not tested this session" is not acceptable.
-3. **Work-queue items are mandatory**: Every recommended action must have a corresponding `work-queue.json` entry with `["audit"]` tag. An audit without queue items is a failed audit.
-4. **No fixes**: Diagnosis only. Do not modify code, config, or state files (except `audit-report.json`, `work-queue.json`, and `human-review.json`).
-5. **Recommendation tracking**: Follow the "Recommendation lifecycle" protocol. Every previous recommendation MUST have a tracked status. Stale recommendations (2+ audits with no progress) MUST be escalated.
-6. **Use completion format**: End with the exact format from "Session completion format" section. This is not optional.
+1. **No early exit**: Minimum $1.50 spend (budget gate enforces this).
+2. **All 5 sections mandatory**: "Not tested this session" is not acceptable.
+3. **Work-queue items mandatory**: Every recommended action → `work-queue.json` entry with `["audit"]` tag.
+4. **Diagnosis only**: No code/config changes except `audit-report.json`, `work-queue.json`, `human-review.json`.
+5. **Recommendation tracking**: Every previous recommendation tracked. Stale 2+ audits → escalate.
+6. **Use completion format**: End with `Session A#NN complete. [summary]`.

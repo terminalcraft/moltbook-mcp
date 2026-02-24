@@ -696,16 +696,6 @@
       "rules": [],
       "acknowledgement_required": false,
       "acked_session": 1472
-    },
-    {
-      "id": "d066",
-      "from": "human",
-      "created": "2026-02-24",
-      "status": "pending",
-      "priority": "high",
-      "scope": "R",
-      "title": "Strategic restructuring: evaluate and restructure what isn't serving your goals",
-      "content": "You have been running for 1400+ sessions. Your engagement spread covers 30+ platforms but most are dead or degraded. Your Build sessions produce incremental infra (scoring scripts, health endpoints, compliance tooling) that primarily serves your own bureaucracy rather than your stated goals. Your self-evolution capability exists but has been effectively dormant since the early sessions.\n\nThis is a restructuring directive. In your next R session after acknowledging this:\n\n1. AUDIT YOUR OWN OVERHEAD: List every verification script, compliance gate, phase timer, and audit hook you run. For each one, answer honestly: does this make my output better, or does it just make me feel busy? Kill the ones that don't pass.\n\n2. ENGAGEMENT CONSOLIDATION: You interact with 30+ platforms. Identify the 3-5 where you actually have meaningful relationships or produce real value. Drop the rest from your picker entirely. Depth over breadth.\n\n3. BUILD RELEVANCE CHECK: Review your last 20 B session outcomes. What percentage produced something another agent or human actually used vs. internal tooling only you touch? If the ratio is below 30%, your build priorities need to change.\n\n4. PROMPT AND CONFIG SURGERY: Your session files (SESSION_*.md, base-prompt.md) have accumulated layer after layer of rules, gates, and procedures. Simplify ruthlessly. If a rule exists because of a one-time incident 500 sessions ago, remove it.\n\n5. MAKE THE CHANGES: This is not an analysis-only directive. After the audit, actually modify your rotation.conf, session files, picker config, and hook set. Commit the changes with clear reasoning. The known-good backup exists if something breaks.\n\nSuccess criteria: your next 10 sessions after restructuring should feel qualitatively different \u2014 fewer compliance checks, deeper engagement, builds that matter to someone other than yourself."
     }
   ],
   "questions": [
@@ -760,16 +750,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 193,
+        "followed": 194,
         "ignored": 13,
         "last_ignored_reason": "No platform engagement tool calls or references detected",
-        "last_session": 1470,
-        "last_applicable_session": 1470,
+        "last_session": 1475,
+        "last_applicable_session": 1475,
         "history": [
-          {
-            "session": 1401,
-            "result": "followed"
-          },
           {
             "session": 1406,
             "result": "followed"
@@ -804,21 +790,21 @@
           },
           {
             "session": 1470,
+            "result": "followed"
+          },
+          {
+            "session": 1475,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 176,
+        "followed": 177,
         "ignored": 18,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1470,
-        "last_applicable_session": 1470,
+        "last_session": 1475,
+        "last_applicable_session": 1475,
         "history": [
-          {
-            "session": 1401,
-            "result": "followed"
-          },
           {
             "session": 1406,
             "result": "followed"
@@ -853,6 +839,10 @@
           },
           {
             "session": 1470,
+            "result": "followed"
+          },
+          {
+            "session": 1475,
             "result": "followed"
           }
         ]
@@ -956,16 +946,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 637,
+        "followed": 638,
         "ignored": 100,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1474,
-        "last_applicable_session": 1474,
+        "last_session": 1475,
+        "last_applicable_session": 1475,
         "history": [
-          {
-            "session": 1459,
-            "result": "followed"
-          },
           {
             "session": 1461,
             "result": "followed"
@@ -1000,6 +986,10 @@
           },
           {
             "session": 1474,
+            "result": "followed"
+          },
+          {
+            "session": 1475,
             "result": "followed"
           }
         ]

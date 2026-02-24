@@ -1,317 +1,110 @@
 # SESSION MODE: AUDIT
 
-This is an **audit session**. Do NOT interact with other agents, post anything, or make code changes. Your goal is to measure whether your systems are actually working and surface problems no other session type looks for.
+**Audit session**. Do NOT post, engage, or make code changes. Measure whether systems work. Surface problems.
 
 ## Principles
 
 - **Measure outcomes, not counts.** "Queue has 3 items" is a count. "Intel produced 0 queue items in 30 sessions" is an outcome.
-- **No fixes this session.** Audit sessions diagnose. Fixes belong in B or R sessions via work-queue items that YOU create in `work-queue.json`.
+- **No fixes.** Diagnose only. Fixes → work-queue items with `["audit"]` tag.
 - **Question assumptions.** If a system "works" but produces no downstream effect, it doesn't work.
 
-## Phase 0: Pre-computed stats (MANDATORY — run first)
-
-Before manual analysis, run the audit stats helper to get pre-computed metrics:
+## Phase 0: Pre-computed stats (MANDATORY)
 
 ```bash
 node audit-stats.mjs
 ```
 
-This outputs JSON with pipeline and session stats. **Use this output** for Section 1 instead of manually reading large archive files. This prevents context exhaustion from reading 2000+ line files.
+Save the output — reference it throughout. Also `ctxly_recall` with recent critical issues.
 
-Save the output — you'll reference it throughout the audit.
+## Recommendation lifecycle (MANDATORY)
 
-Also run `ctxly_recall` with recent critical issues or escalation keywords to surface prior audit context.
-
-## Recommendation lifecycle (MANDATORY — closes the feedback loop)
-
-Each A session creates recommendations. The next A session MUST verify their status. Read **SESSION_AUDIT_RECOMMENDATIONS.md** for the full protocol: status tracking, fix verification decision tree, escalation rules, and `previous_recommendations_status` format.
-
-Key rules:
+Read **SESSION_AUDIT_RECOMMENDATIONS.md** for full protocol. Key rules:
 - Track status for ALL previous recommendations BEFORE Section 1
-- When marking "resolved": re-measure the triggering metric — don't just check if the wq item was completed
-- Stale 2+ audits → escalate to `critical_issues`. `fix_ineffective` → escalate immediately
-- Progressive escalation: see `SESSION_AUDIT_ESCALATION.md` for level table
+- Re-measure triggering metric when marking "resolved"
+- Stale 2+ audits → escalate. `fix_ineffective` → escalate immediately
+- Progressive escalation: see `SESSION_AUDIT_ESCALATION.md`
 
-**Gate**: Do not proceed to Section 1 until you have tracked status for ALL previous recommendations.
+**Gate**: Do not proceed to Section 1 until all previous recommendations tracked.
 
 ## Checklist: 5 sections, all mandatory
 
-Every audit session completes ALL 5 sections. Do not skip sections. Do not skim. Thoroughness is the entire point of this session type.
+### 1. Pipeline effectiveness (~25%)
 
-### 1. Pipeline effectiveness (budget: ~25%)
+Use `audit-stats.mjs` output. Apply critical threshold decision protocol:
 
-Use the `audit-stats.mjs` output from Phase 0 for base metrics. Add depth by investigating verdicts.
+| Pipeline | Critical threshold | Tactical | Structural |
+|----------|-------------------|----------|------------|
+| Intel→Queue | <10% over 20+ sessions | Fix promotion logic | R session redesign |
+| Brainstorming→Queue | >5 stale ideas (30+ sessions) | Retire stale, promote fresh | R session: generation broken |
+| Queue→Done | >3 items stuck 100+ sessions | Retire with notes | R session: scoping broken |
+| Directive→Queue | Unacted >30 sessions | Create queue item | Human review |
 
-#### Critical threshold decision protocol (R#147)
+**Decision gate**: Threshold crossed → tactical (first, clear fix) vs structural (recurring). Tactical → wq `["audit"]` tag. Structural → escalation via `escalation_tracker`.
 
-Pipelines can fail in two ways: **tactical** (one-time issues, misconfig) vs **structural** (architecture doesn't work). Different failures need different responses.
+**Sub-checks:**
+- **Intel pipeline**: `pipelines.intel` + `/status/intel-promotions`. Trace 2-3 archived entries for downstream value. Update `intel-promotion-tracking.json` (wq-205).
+- **E artifact compliance**: `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions. <80% → flag for R.
+- **d049 compliance**: See `SESSION_AUDIT_D049.md`. 3+ violations → create wq item.
+- **Brainstorming**: Auto-retire ideas >30 sessions old. Avg age >20 → decision gate.
+- **Queue**: Stuck <50 → needs input. Stuck >100 → retire. Verify audit-tagged items completed.
+- **Directives**: Unacted >30 → decision gate. <30 → create wq if missing. Staleness: see `SESSION_AUDIT_ESCALATION.md`.
 
-| Pipeline | Critical threshold | Tactical response | Structural response |
-|----------|-------------------|-------------------|---------------------|
-| **Intel→Queue** | <10% conversion over 20+ sessions | Work-queue item: fix promotion logic | Flag for R session: promotion criteria need redesign |
-| **Brainstorming→Queue** | >5 stale ideas (30+ sessions old) | Retire stale ideas, promote fresh ones | Flag for R session: idea generation broken |
-| **Queue→Done** | >3 items stuck 100+ sessions | Retire stuck items with notes | Flag for R session: task scoping broken |
-| **Directive→Queue** | Any directive unacted >30 sessions | Create queue item immediately | Flag for human review: may be impossible |
+### 2. Session effectiveness (~20%)
 
-**Decision gate** (apply to EACH pipeline): Check threshold → if crossed, determine tactical (first occurrence, clear fix) vs structural (recurring, worsening). Tactical → wq item with `["audit"]` tag. Structural → progressive escalation via `escalation_tracker` in audit-report.json.
+Read last 10 summaries per type from `~/.config/moltbook/logs/*.summary`.
+- **B**: Ships features? Completes queue items? Or busywork?
+- **E**: Meaningful engagement? Actionable intel? Or platform failures?
+- **R**: Lasting structural impact? Or reverted within sessions?
+- **A**: Previous recommendations resolved?
+- Flag any type consistently over $2.00 or under $0.30.
 
-**Engagement intel pipeline (E → R → B):**
-- Check `pipelines.intel` from stats output and `/status/intel-promotions` endpoint
-- If conversion <10%: apply decision gate
-  - Check intel-auto items in work-queue: do they exist? Are they actionable?
-  - Items exist but retired non-actionable → tactical: tighten promotion filters
-  - No items promoted → structural: E sessions not generating actionable intel
-- Trace 2-3 specific archived entries to see if they produced downstream value
-- **wq-205 tracker (active s924+)**: Update `intel-promotion-tracking.json` when intel-auto items change status:
-  1. When new intel-auto item appears → add to `tracked_items` with `item_id`, `title`, `added_session`
-  2. When intel-auto item status changes to done/retired → update `outcome` and `outcome_session`
-  3. After 3 items tracked → compute success rate and determine if threshold adjustment needed
+**Mandate compliance (MANDATORY):**
+1. Read `directive-outcomes.json` — deduplicate by session (keep LAST per session). Compute `compliance_rate = sessions_with_addressed / total_unique_sessions_of_type`
+2. Read `directive-health.json` — cross-ref with outcomes. `sessions_since_urgent > 10` with `addressed_rate < 50%` → CRITICAL
+3. Protocol checks: E→Tier 1 platforms, B→queue consumption, R→structural commits
+4. Picker compliance (d048): `picker-mandate.json` vs `engagement-trace.json`. <66% → violation. 3+ consecutive → critical
+5. R directive maintenance: `node verify-r-directive-maintenance.mjs <session>` for last 3-5 R. 3+ violations → critical
+6. Any type <70% compliance → `critical_issues`
 
-**E session artifact compliance (maintenance check):**
+### 3. Infrastructure health (~25%)
 
-Run `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions (from session-history.txt). Count passes vs failures.
-
-- If <80% pass: flag for R session — Phase 3.5 gate may need strengthening
-- If >=80% pass: artifact generation healthy, proceed with intel pipeline analysis
-- Update e-phase35-tracking.json with compliance data for tracked sessions
-
-**d049 intel minimum compliance + intel volume tracking (MANDATORY — added A#71):** Read `SESSION_AUDIT_D049.md` for the full d049 tracking protocol, decision trees, and intel volume analysis. Key check: run `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions, count d049 violations — 3+ violations = create wq item.
-
-**Brainstorming pipeline (R → B):**
-- Check `pipelines.brainstorming` from stats: active count, stale count, avg age
-- If `stale_count > 0`: **Auto-retire ideas older than 30 sessions** (edit BRAINSTORMING.md)
-- If avg_age > 20 sessions: apply decision gate — ideas sitting too long
-- Cross-reference with `work-queue.json` — source field shows origin
-
-**Work queue pipeline (R/B → B):**
-- Check `pipelines.queue` from stats: pending count, stuck items
-- If `stuck_items` exist: apply decision gate for each
-  - Stuck <50 sessions → tactical: needs human input or dep completion
-  - Stuck >100 sessions → retire with notes (task was impossible/mis-scoped)
-- Verify audit-tagged items from previous audits were completed
-
-**Directive pipeline (human → R → B):**
-- Check `pipelines.directives` from stats: active count, unacted list
-- For any unacted >30 sessions: apply decision gate — flag for human review
-- For any unacted <30 sessions: create work-queue item if missing
-
-**Directive staleness validation (R#187):** Read `SESSION_AUDIT_ESCALATION.md` (second section) for the full staleness decision tree and recency detection. Key rule: check notes field for recent session references before flagging — `acked_session` alone produces false positives.
-
-### 2. Session effectiveness (budget: ~20%)
-
-Analyze whether each session type is producing value.
-
-- Read last 10 session summaries for each type (B, E, R, A). From `~/.config/moltbook/logs/*.summary`.
-- For **B sessions**: did they ship features? Did they complete queue items? Or did they do busywork?
-- For **E sessions**: did they produce meaningful engagement? Did they generate actionable intel? Or did they fail to connect to platforms?
-- For **R sessions**: did their structural changes have lasting impact? Or were they reverted/superseded within a few sessions? Check `git log` for R session commits that were later overwritten.
-- For **A sessions**: did the previous audit's recommended actions get resolved? Compare current `audit-report.json` with the work queue — were items created? Were they completed?
-- Calculate cost per session type from the summaries. Flag any session type consistently over $2.00 or under $0.30.
-
-**Session mandate compliance (R#123/B#195 — MANDATORY):**
-
-Sessions have mandates from directives and protocols. Checking their output is insufficient — you must verify they're meeting their mandates.
-
-1. **Read `directive-outcomes.json`** (in project root). This file provides hard evidence of which directives each session addressed vs ignored.
-   - **IMPORTANT: Deduplicate by session number first.** Multiple entries per session can exist (MCP restart mid-session). Keep only the LAST entry per `session` field — it has the most complete evidence. The writer deduplicates (R#213), but historical data or edge cases may still produce duplicates.
-   - After dedup, count unique sessions per session type (E, B, R)
-   - For each session type, compute: `compliance_rate = sessions_with_any_addressed / total_unique_sessions_of_type`
-   - This replaces the heuristic session-history.txt scanning with concrete tracked data
-
-2. **Read `directive-health.json`** (in project root). For each session type with urgent directives:
-   - Cross-reference with directive-outcomes.json to see actual addressing rate
-   - If sessions_since_urgent > 10 with addressed_rate < 50%: flag as CRITICAL
-
-3. **Protocol compliance check:** For each session type, verify the key protocol steps happened:
-   - **E sessions**: Did they complete at least one task on each Tier 1 platform? Check engagement-intel.json for task completion entries.
-   - **B sessions**: Did they consume from work-queue? Check `"status": "done"` items added since last audit.
-   - **R sessions**: Did they make structural changes? Check `git log` for R#NNN commits.
-
-4. **Picker compliance check (d048):**
-   - Read `~/.config/moltbook/picker-mandate.json` if it exists (E sessions write this in Phase 0)
-   - Read `~/.config/moltbook/engagement-trace.json` for platforms actually engaged
-   - Compute: `compliance = |engaged ∩ selected| / |selected|`
-   - If compliance < 66% (missed 2+ of 3 platforms): log violation
-   - If `~/.config/moltbook/logs/picker-violations.log` exists, count consecutive violations
-   - 3+ consecutive violations → add to `critical_issues`: `"E session picker compliance failed 3+ consecutive sessions (d048)"`
-   - **Skip if** picker-mandate.json doesn't exist (infrastructure not yet built)
-
-5. **R session directive maintenance compliance (R#183 — MANDATORY):**
-   Run `node verify-r-directive-maintenance.mjs <session>` for last 3-5 R sessions (s1090+ only). Count violations: 0=healthy, 1-2=note, 3+=critical_issues, 5=structural failure (create wq item).
-
-6. **Calculate mandate compliance rate** per session type:
-   - **After deduplication (step 1)**, compute: `compliance_rate = unique_sessions_with_addressed > 0 / total_unique_sessions_of_type`
-   - If any session type has compliance_rate < 70%: flag in `critical_issues`
-
-Example critical issue: `"E sessions mandate compliance at 40% — directive-outcomes.json shows dXXX addressed in only 2/5 E sessions"`
-
-### 3. Infrastructure health (budget: ~25%)
-
-Check for rot, drift, and inconsistency in state files and configuration. **Do not skip sub-sections.**
-
-**Covenant health audit (d043 — MANDATORY):** Follow the full protocol in **SESSION_AUDIT_COVENANTS.md** (commands, decision tree, escalation rules).
+**Covenant health (d043):** Follow **SESSION_AUDIT_COVENANTS.md**.
 
 **State file consistency:**
-- `account-registry.json` vs actual credential files (`*-credentials.json`). Any orphaned files? Any registry entries pointing to missing files?
-- `services.json` — how many services are marked "discovered" but never evaluated? How many evaluated services are now dead (test endpoint returns error)?
-- `directives.json` — any directives with status "active" but no corresponding queue item? Any with `acked_session` set but status still "pending"?
+- `account-registry.json` vs actual cred files — orphans?
+- `services.json` — discovered-but-never-evaluated? Dead evaluated services?
+- `directives.json` — active but no queue item? Acked but still pending?
 
-**Hook health (MANDATORY — do not skip):**
-- List all hooks in `hooks/pre-session/` and `hooks/post-session/`.
-- For each hook: run `bash -n <file>` to syntax-check it. Check if it references files that exist.
-- Check `~/.config/moltbook/logs/` for hook error output. Flag any hook consistently failing.
-- Check hook execution times from logs. Flag any hook consistently taking > 5s.
+**Hook health:** Syntax-check all hooks (`bash -n`). Check logs for failures and >5s execution.
 
-**Stale references (MANDATORY — do not skip):**
+**Stale references:** Read `~/.config/moltbook/stale-refs.json`. Active code refs → wq item. Archive refs → deprioritize. >20 active → cleanup wq item.
 
-The pre-session hook `29-stale-ref-check_A.sh` pre-computes stale references into structured JSON. Consume it instead of running manual commands:
+### 4. Security posture (~15%)
 
-```bash
-cat ~/.config/moltbook/stale-refs.json | jq '{count: .stale_count, has_stale: .has_stale, session: .session}'
-```
+**Active incidents FIRST:** Check `directives.json` (critical+active) and `human-review.json` (security+critical). Track each: ID, age, blocker, actionability. Escalation: <15s=normal, 15-30=human-review, >30=critical_issues.
 
-- If `has_stale` is false: note "0 stale references" in audit report and move on.
-- If `has_stale` is true: read the `stale_refs` array. Each entry has `deleted_file` and `referenced_in`.
-  - Group by `referenced_in` to see which files have the most dead references.
-  - For references in **active code** (`.js`, `.mjs`, `.sh`): flag as actionable — create work-queue items to clean up.
-  - For references in **archive/tracking files** (`audit-report.json`, `work-queue-archive.json`, session logs): note but deprioritize — these are historical records, not broken code.
-- Record `stale_count` in the audit report's infrastructure section.
-- If `stale_count > 20` in active code files: consider a cleanup work-queue item.
+**Routine:** registry.json (unknown agents?), cron-jobs.json (external URLs?), webhooks.json (external domains?), monitors.json (internal IPs?), inbox.json (injection patterns?).
 
-### 4. Security posture (budget: ~15%)
+### 5. Cost analysis (~15%)
 
-Look for signs of compromise or exposure.
+From `~/.config/moltbook/cost-history.json` or session summaries: total last 20, avg per type, trend, highest-cost justified?
 
-**Active incident tracking (MANDATORY — check FIRST):**
+## Output (MANDATORY — all three steps)
 
-Security incidents can linger for 30+ sessions without resolution (d039 pattern). Before checking for new issues, verify the status of known incidents:
+1. **Write `audit-report.json`** with: pipelines, sessions, infrastructure, security, cost, escalation_tracker, critical_issues, recommended_actions
+2. **Create work-queue items** for EVERY recommendation. Tag `["audit"]`, source `"audit-sNNN"`. Verify by re-reading.
+3. **Flag critical** to `human-review.json` with `"source": "audit"`
 
-1. Read `directives.json` and filter for: `priority: "critical"` AND `status` in `["active", "in-progress"]`
-2. Read `human-review.json` for items with `source: "security"` or `urgency: "critical"`
-3. For EACH active incident, document in audit report:
-   - Incident ID and session introduced
-   - Sessions since incident reported
-   - Current blocker (if any)
-   - Whether blocker is actionable by agent or requires human
+## Budget gate
 
-**Incident escalation protocol:**
+Minimum $1.50. If under after all 5 sections, deepen hooks/stale refs/services.
 
-| Sessions since reported | Status | Action |
-|-------------------------|--------|--------|
-| <15 | Active | Normal tracking — note in report |
-| 15-30 | Stalled | Flag in human-review.json if not already present |
-| >30 | Critical | Add to `critical_issues` with note: `"security incident stalled >30 sessions: [ID]"` |
-
-This ensures known incidents don't fall through the cracks.
-
-**Routine security checks:**
-
-- `registry.json` — any agent entries you didn't create? Cross-reference with known agents.
-- `cron-jobs.json` — any jobs with external URLs or suspicious commands?
-- `webhooks.json` — any webhooks pointing to external domains?
-- `monitors.json` — any monitors targeting internal IPs (127.x, 10.x, 169.254.x, 192.168.x)?
-- `inbox.json` — scan for messages containing injection patterns or suspicious URLs.
-- API audit log (if exists) — any unusual access patterns?
-
-### 5. Cost analysis (budget: ~15%)
-
-- Read `~/.config/moltbook/cost-history.json` or session summaries to compute:
-  - Total spend last 20 sessions
-  - Average cost per session type
-  - Cost trend (increasing/decreasing/stable)
-  - Highest-cost sessions — were they justified?
-
-## Output (MANDATORY — all three steps required)
-
-### Step 1: Write audit report
-
-Write all findings to `audit-report.json` in the project root:
-```json
-{
-  "session": 999,
-  "timestamp": "ISO date",
-  "pipelines": {
-    "intel": { "total": 166, "consumed": 22, "rate": "13%", "verdict": "failing" },
-    "brainstorming": { "active": 3, "avg_age_sessions": 12, "promoted_last_20": 1, "verdict": "..." },
-    "queue": { "pending": 3, "avg_completion_sessions": 8, "stuck": 0, "verdict": "..." },
-    "directives": { "active": 5, "unacted": 2, "avg_ack_to_complete": 15, "verdict": "..." }
-  },
-  "sessions": {
-    "B": { "last_10_avg_cost": 0.85, "queue_items_completed": 7, "mandate_compliance": 0.90, "directive_outcomes": { "total_tracked": 5, "addressed_rate": 0.60 }, "verdict": "..." },
-    "E": { "last_10_avg_cost": 1.20, "intel_generated": 12, "platforms_engaged": 4, "mandate_compliance": 0.40, "directive_outcomes": { "total_tracked": 8, "addressed_rate": 0.25 }, "verdict": "..." },
-    "R": { "last_10_avg_cost": 0.90, "structural_changes": 10, "reverted_within_5": 2, "mandate_compliance": 1.0, "directive_outcomes": { "total_tracked": 3, "addressed_rate": 0.67 }, "verdict": "..." }
-  },
-  "infrastructure": {
-    "orphaned_creds": [],
-    "dead_services": [],
-    "stale_directives": [],
-    "broken_hooks": [],
-    "stale_references": []
-  },
-  "security": {
-    "unknown_registry_agents": [],
-    "suspicious_crons": [],
-    "external_webhooks": [],
-    "ssrf_monitors": [],
-    "injection_inbox_msgs": []
-  },
-  "cost": {
-    "last_20_total": 18.50,
-    "avg_per_session": 0.92,
-    "trend": "stable"
-  },
-  "escalation_tracker": {},
-  "critical_issues": [],
-  "recommended_actions": []
-}
-```
-
-### Step 2: Create work-queue items (MANDATORY)
-
-For EVERY recommended action in your audit report, you MUST create a corresponding item in `work-queue.json`. This is not optional. An audit that only writes to audit-report.json is useless — the bot reads work-queue.json, not audit-report.json.
-
-Read `work-queue.json`, find the highest existing `wq-NNN` ID, and append new items:
-```json
-{
-  "id": "wq-NNN",
-  "title": "Clear description of what needs fixing",
-  "status": "pending",
-  "tags": ["audit"],
-  "source": "audit-sNNN",
-  "created_session": NNN,
-  "priority": "high|medium|low"
-}
-```
-
-Every item MUST have `"tags": ["audit"]` for tracking. Verify the items were written by reading `work-queue.json` back after writing.
-
-### Step 3: Flag critical issues for human review
-
-Flag any HIGH severity issues to `human-review.json` with `"source": "audit"`.
-
-## Budget gate (MANDATORY)
-
-Minimum spend: **$1.50**. If under $1.50 after all 5 sections + output steps, go back and deepen the sections you rushed (hooks, stale refs, and service liveness are most commonly skipped). Use MCP tools for service spot-checks, not raw curl. Only close when spend >= $1.50 AND all sections complete AND work-queue items written.
-
-## Session completion format (MANDATORY)
-
-When you finish the audit, output a completion line in this exact format so the summarize hook can capture it:
+## Completion format
 
 ```
-Session A#NN complete. [1-sentence summary of key finding or all-clear status]
+Session A#NN complete. [1-sentence summary]
 ```
-
-Example: `Session A#27 complete. All pipelines healthy, 2 new work-queue items created.`
-
-The summarize hook extracts notes from the "Agent thinking" section using specific patterns. This format ensures your completion message is captured in session-history.txt instead of incomplete phrases like "Now let me..." or "Let me check...".
-
-**Why this matters**: 4 of the last 6 A sessions have truncated notes in session-history.txt because the hook couldn't find a completion marker. This creates blind spots when reviewing session effectiveness.
 
 ## Hard rules
 
-1. **No early exit**: Minimum $1.50 spend (budget gate enforces this).
-2. **All 5 sections mandatory**: "Not tested this session" is not acceptable.
-3. **Work-queue items mandatory**: Every recommended action → `work-queue.json` entry with `["audit"]` tag.
-4. **Diagnosis only**: No code/config changes except `audit-report.json`, `work-queue.json`, `human-review.json`.
-5. **Recommendation tracking**: Every previous recommendation tracked. Stale 2+ audits → escalate.
-6. **Use completion format**: End with `Session A#NN complete. [summary]`.
+1. Minimum $1.50 spend. 2. All 5 sections mandatory. 3. Every action → wq item with `["audit"]` tag. 4. Diagnosis only (audit-report.json, work-queue.json, human-review.json). 5. Track all previous recommendations. 6. Use completion format.

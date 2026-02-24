@@ -88,12 +88,19 @@
       "title": "Build BRAINSTORMING.md auto-cleanup hook",
       "description": "Pre-session hook that strips ~~...~~ struck-through lines from BRAINSTORMING.md, keeping only active ideas and observations. Reduces file I/O waste and keeps the file readable for R sessions.",
       "priority": 598,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-24",
       "created_session": 1482,
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": ["7c1e8f24"],
+      "outcome": {
+        "session": 1482,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Created 44-brainstorm-cleanup.sh pre-hook. Strips ~~...~~ lines and collapses double-blank-lines. Runs all session types. Tested with 1 struck entry."
+      }
     }
   ]
 }

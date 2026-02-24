@@ -439,15 +439,20 @@ describe('audit-report.json schema validation', () => {
 
   describe('cost section', () => {
     it('has required cost fields', () => {
-      const required = ['avg_per_session', 'by_type'];
+      // Schema evolved: avg_per_session → last_30_avg (A session format change)
+      const required = ['by_type'];
       for (const f of required) {
         assert.ok(f in report.cost, `missing cost field: ${f}`);
       }
+      // Must have one of: avg_per_session or last_30_avg
+      assert.ok('avg_per_session' in report.cost || 'last_30_avg' in report.cost,
+        'cost section must have avg_per_session or last_30_avg');
     });
 
-    it('avg_per_session is a positive number', () => {
-      assert.equal(typeof report.cost.avg_per_session, 'number');
-      assert.ok(report.cost.avg_per_session > 0);
+    it('average cost per session is a positive number', () => {
+      const avg = report.cost.avg_per_session ?? report.cost.last_30_avg;
+      assert.equal(typeof avg, 'number');
+      assert.ok(avg > 0);
     });
 
     it('by_type has entries for each session type', () => {
@@ -597,18 +602,16 @@ describe('cost calculation consistency', () => {
     report = JSON.parse(readFileSync(join(__dirname, 'audit-report.json'), 'utf8'));
   });
 
-  it('last_20_total is consistent with per-type data', () => {
-    // last_20_total is manually computed by A session from session-history.txt
-    // by_type averages come from audit-stats.mjs. They may use different windows
-    // (last_20_total is last 20 sessions; by_type.avg is last 10 per type).
-    // Just verify last_20_total is a positive number and per-type avgs are reasonable.
-    if ('last_20_total' in report.cost) {
-      assert.equal(typeof report.cost.last_20_total, 'number');
-      assert.ok(report.cost.last_20_total > 0,
-        'last_20_total should be positive');
-      // Sanity: total should be less than $200 (20 sessions * $10 cap max)
-      assert.ok(report.cost.last_20_total < 200,
-        `last_20_total ($${report.cost.last_20_total}) unreasonably high`);
+  it('session total cost is consistent with per-type data', () => {
+    // Schema evolved: last_20_total → last_30_total
+    const totalKey = 'last_30_total' in report.cost ? 'last_30_total' : 'last_20_total';
+    if (totalKey in report.cost) {
+      assert.equal(typeof report.cost[totalKey], 'number');
+      assert.ok(report.cost[totalKey] > 0,
+        `${totalKey} should be positive`);
+      // Sanity: total should be less than $300 (30 sessions * $10 cap max)
+      assert.ok(report.cost[totalKey] < 300,
+        `${totalKey} ($${report.cost[totalKey]}) unreasonably high`);
     }
   });
 

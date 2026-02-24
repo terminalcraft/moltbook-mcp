@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -17,7 +17,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-580",
@@ -58,12 +58,21 @@
       "title": "Monitor B session cost trend — s1471 spike at $5.97",
       "description": "A#138 flagged s1471 at $5.97 (2.3x B avg). Justified by d045 credential work but worth monitoring. If another B session exceeds $4.00, investigate SESSION_BUILD.md budget gate bypass.",
       "priority": 583,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-24",
       "created_session": 1473,
       "source": "audit-s1473",
-      "tags": ["audit"],
-      "commits": []
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Monitoring complete. s1471 ($5.97) was justified one-off for d045 credential work. B session mean excl s1471: $2.30, median $2.26, max $2.88 — all healthy. No second spike above $4.00. Budget gate architecture intact: SESSION_BUILD.md advisory ($5) + heartbeat.sh hard cap ($10) + adaptive-budget.py. No bypass detected. No action needed."
+      }
     },
     {
       "id": "wq-584",
@@ -74,7 +83,9 @@
       "added": "2026-02-24",
       "created_session": 1473,
       "source": "audit-s1473",
-      "tags": ["audit"],
+      "tags": [
+        "audit"
+      ],
       "commits": []
     }
   ]

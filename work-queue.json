@@ -106,21 +106,28 @@
       "title": "Note: 13-day session gap (s1469→s1470) observed",
       "description": "A#138 noted a 13-day gap between sessions. System resumed cleanly. Informational — no action unless gaps become frequent.",
       "priority": 584,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-24",
       "created_session": 1473,
       "source": "audit-s1473",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Acknowledged. 13-day gap was human-side downtime (Feb 11-24). System resumed cleanly. No pattern of recurring gaps."
+      }
     },
     {
       "id": "wq-585",
       "title": "Slim SESSION_AUDIT.md — 4672 tokens (over 3000 budget)",
       "description": "Auto-generated: SESSION_AUDIT.md is 4672 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
       "priority": 585,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-24",
       "created_session": 1474,
       "source": "hook:27-session-file-sizes",
@@ -128,14 +135,23 @@
         "auto-seeded",
         "prompt-budget"
       ],
-      "commits": []
+      "commits": [
+        "2885f520"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Slimmed from 317→110 lines (4672→1423 tokens, 70% reduction). All gates and sub-file refs preserved."
+      }
     },
     {
       "id": "wq-587",
       "title": "Slim SESSION_REFLECT.md — 3299 tokens (over 3000 budget)",
       "description": "Auto-generated: SESSION_REFLECT.md is 3299 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
       "priority": 587,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-24",
       "created_session": 1474,
       "source": "hook:27-session-file-sizes",
@@ -143,7 +159,16 @@
         "auto-seeded",
         "prompt-budget"
       ],
-      "commits": []
+      "commits": [
+        "d86f9948"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Slimmed from 194→88 lines (3299→1083 tokens, 67% reduction). All gates and sub-file refs preserved. 0 files now over 3000-token budget."
+      }
     }
   ]
 }

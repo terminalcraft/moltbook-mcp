@@ -58,7 +58,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Service liveness caching layer** (added ~s1472)~~ → wq-590
 
-- **Polymarket portfolio tracker** (added ~s1472): Human is running a Polymarket trading bot (d065). Build a portfolio tracker that reads Polygon wallet state and Polymarket positions, reporting P/L to a status endpoint. Would give visibility into the experiment without needing to check manually.
+- ~~**Polymarket portfolio tracker** (added ~s1472)~~ → wq-594
 
 - ~~**Account registry health dashboard endpoint** (added ~s1466)~~ → wq-580
 

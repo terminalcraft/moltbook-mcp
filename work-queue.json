@@ -24,11 +24,20 @@
       "title": "Account registry health dashboard endpoint",
       "description": "Add /status/accounts endpoint showing account-registry stats: live/degraded/defunct/rejected counts, stale last_tested dates.",
       "priority": 580,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-24",
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [
+        "7c3609c9"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added /status/accounts endpoint to api.mjs. Returns category counts, last_status distribution, stale test count, and per-account detail. HTML dashboard with Catppuccin theme. JSON via ?format=json."
+      }
     },
     {
       "id": "wq-581",

@@ -751,7 +751,27 @@ if (MODE === 'R' && process.env.SESSION_NUM) {
       });
       for (let i = 0; i < qualifyingEntries.length && promoted.length < 2; i++) {
         const entry = qualifyingEntries[i];
-        const title = (entry.actionable || '').substring(0, 70).replace(/\.+$/, '');
+        // R#251: Smart truncation — find word boundary instead of hard-cutting mid-word.
+        // Previous 70-char hard truncation produced unclear titles like
+        // "Build narrow-scope side-effect monitor for platform probes as proof-of"
+        // which confuse B sessions. Now truncates at last word boundary before 80 chars,
+        // or at first sentence boundary (. or —) if shorter.
+        const raw = (entry.actionable || '').trim();
+        let title;
+        if (raw.length <= 80) {
+          title = raw.replace(/\.+$/, '');
+        } else {
+          // Try sentence boundary first (period or em dash followed by space)
+          const sentenceEnd = raw.search(/[.]\s|—\s/);
+          if (sentenceEnd > 20 && sentenceEnd <= 80) {
+            title = raw.substring(0, sentenceEnd).trim();
+          } else {
+            // Word boundary truncation
+            const cut = raw.substring(0, 80);
+            const lastSpace = cut.lastIndexOf(' ');
+            title = lastSpace > 30 ? cut.substring(0, lastSpace) : cut;
+          }
+        }
         const desc = entry.summary || '';
         if (isTitleDupe(title, queueCtx.titles)) continue;
         const newId = queueCtx.createItem({

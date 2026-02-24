@@ -13282,6 +13282,67 @@
         "quality": "well-scoped",
         "note": "Slimmed from 194\u219288 lines (3299\u21921083 tokens, 67% reduction). All gates and sub-file refs preserved. 0 files now over 3000-token budget."
       }
+    },
+    {
+      "id": "wq-589",
+      "title": "Covenant dormancy auto-retirement script",
+      "description": "Covenant ceiling at 20/20. Build a script that identifies covenants with partners not seen in engagement-trace for 50+ sessions and auto-retires them, freeing slots for new partners. Currently requires manual R session intervention.",
+      "priority": 589,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1474,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "852c39b4"
+      ],
+      "outcome": {
+        "session": 1476,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built covenant-dormancy-retire.mjs with dry-run/execute modes, threshold/max/json flags, retirement log. 13 tests pass. Executed initial run: 17 partners retired, 20/20\u21923/20 ceiling freed."
+      }
+    },
+    {
+      "id": "wq-590",
+      "title": "Service liveness caching layer for pre-session hook",
+      "description": "11-service-liveness.sh averaging 9214ms. Add time-based caching \u2014 re-check only every N sessions instead of every startup. Similar pattern to cache-wrapper.sh.",
+      "priority": 590,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1474,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1476,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already implemented: 11-service-liveness.sh uses cache-wrapper.sh (wq-547) with 60min TTL + 10-session interval gate. Brainstorming item was stale."
+      }
+    },
+    {
+      "id": "wq-591",
+      "title": "Chatr conversation topic clustering for E sessions",
+      "description": "Analyze Chatr message history to identify topic clusters. E sessions could target underserved topics instead of reacting to whatever is current, improving engagement variety.",
+      "priority": 591,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1474,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "6b6b6adf"
+      ],
+      "outcome": {
+        "session": 1476,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built chatr-topic-clusters.mjs with agglomerative cosine-similarity clustering, engagement gap detection, and E session recommendations. 8 tests pass."
+      }
     }
   ]
 }

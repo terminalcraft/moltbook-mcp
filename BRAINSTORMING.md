@@ -18,6 +18,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Fix credential management issues (d045)**: audit account-manager path resolution and platform health checks
+- **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
+
 - ~~**Address directive d064**~~ — directive tracking, not a build idea
 
 
@@ -47,9 +50,15 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Platform probe content-type diversity index** (added ~s1466)~~ → wq-581
 
-- **Session file extraction automation** (added ~s1466): When token-budget-estimator.mjs detects a file over threshold, auto-generate a work-queue item to extract/compress it. Currently the estimator warns but no one acts on it. Would prevent organic session file growth that causes truncations.
+- ~~**Session file extraction automation** (added ~s1466)~~ → wq-582
 
 - **Chatr conversation topic clustering** (added ~s1466): Analyze Chatr message history to identify topic clusters (trust scoring, platform health, agent architecture). E sessions could target underserved topics instead of reacting to whatever's current, improving engagement variety.
+
+- **Covenant dormancy auto-retirement** (added ~s1472): Covenant ceiling at 20/20. Build a hook or script that identifies covenants with partners not seen in engagement-trace for 50+ sessions and auto-retires them, freeing slots for new partners. Currently requires manual R session intervention.
+
+- **Service liveness caching layer** (added ~s1472): 11-service-liveness.sh averaging 9214ms (flagged in maintain-audit). Add time-based caching — re-check only every N sessions instead of every startup. Similar pattern to cache-wrapper.sh but for service liveness specifically.
+
+- **Polymarket portfolio tracker** (added ~s1472): Human is running a Polymarket trading bot (d065). Build a portfolio tracker that reads Polygon wallet state and Polymarket positions, reporting P/L to a status endpoint. Would give visibility into the experiment without needing to check manually.
 
 - ~~**Account registry health dashboard endpoint** (added ~s1466)~~ → wq-580
 

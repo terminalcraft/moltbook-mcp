@@ -82,6 +82,18 @@
         "quality": "well-scoped",
         "note": "Created 36-topic-clusters_E.sh hook. Runs chatr-thread-tracker update + chatr-topic-clusters --json, appends recommendations to e-session-context.md. Tested: thread tracker populated 6 threads/50 messages on first run. Clusters form when min 2 threads share semantic overlap."
       }
+    },
+    {
+      "id": "wq-598",
+      "title": "Build BRAINSTORMING.md auto-cleanup hook",
+      "description": "Pre-session hook that strips ~~...~~ struck-through lines from BRAINSTORMING.md, keeping only active ideas and observations. Reduces file I/O waste and keeps the file readable for R sessions.",
+      "priority": 598,
+      "status": "pending",
+      "added": "2026-02-24",
+      "created_session": 1482,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
     }
   ]
 }

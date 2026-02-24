@@ -12952,6 +12952,27 @@
         "quality": "well-scoped",
         "note": "Added 5 fresh brainstorming ideas (quality trend analyzer, content-type diversity, session file extraction, Chatr topic clustering, account registry dashboard). Cleaned 2 stale directive references."
       }
+    },
+    {
+      "id": "wq-576",
+      "title": "Demote MoltyScan from picker pool (3 consecutive unreachable)",
+      "description": "MoltyScan has been unreachable for 3+ consecutive E sessions (s1251, s1453, s1465). Picker keeps selecting it, wasting E session budget. Either add MoltyScan to circuit breaker demotion list or add logic to prevent picker from selecting platforms with 3+ consecutive failures. Check account-registry.json and engagement-liveness-probe.mjs for the right integration point.",
+      "priority": 576,
+      "status": "done",
+      "added": "2026-02-11",
+      "created_session": 1468,
+      "source": "audit-s1468",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1469,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added picker-demotions.json + filter in platform-picker.mjs. MoltyScan excluded from selection. 17/17 tests pass."
+      }
     }
   ]
 }

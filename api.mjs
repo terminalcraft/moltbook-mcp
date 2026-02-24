@@ -2204,6 +2204,99 @@ app.get("/status/credential-health", auth, (req, res) => {
   }
 });
 
+// Account registry health dashboard: status counts, stale test dates, per-account detail (wq-580)
+app.get("/status/accounts", (req, res) => {
+  try {
+    const registry = JSON.parse(readFileSync(join(BASE, "account-registry.json"), "utf8"));
+    const accounts = registry.accounts || [];
+    const now = Date.now();
+    const STALE_DAYS = 7;
+
+    // Count by last_status
+    const statusCounts = {};
+    for (const a of accounts) {
+      const s = a.last_status || "unknown";
+      statusCounts[s] = (statusCounts[s] || 0) + 1;
+    }
+
+    // Count by explicit status field (live/defunct/rejected/needs_probe/unknown)
+    const categoryCounts = { live: 0, degraded: 0, defunct: 0, rejected: 0, needs_probe: 0, unknown: 0 };
+    for (const a of accounts) {
+      const cat = a.status || "unknown";
+      if (cat in categoryCounts) categoryCounts[cat]++;
+      else categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+    }
+
+    // Find stale last_tested (>STALE_DAYS old or never tested)
+    const staleAccounts = accounts.filter(a => {
+      if (!a.last_tested) return true;
+      const age = (now - new Date(a.last_tested).getTime()) / (1000 * 60 * 60 * 24);
+      return age > STALE_DAYS;
+    });
+
+    // Per-account summary
+    const detail = accounts.map(a => {
+      const testedAge = a.last_tested
+        ? Math.floor((now - new Date(a.last_tested).getTime()) / (1000 * 60 * 60 * 24))
+        : null;
+      return {
+        id: a.id,
+        platform: a.platform,
+        status: a.status || "unknown",
+        last_status: a.last_status || "unknown",
+        has_credentials: !!a.has_credentials,
+        last_tested_days_ago: testedAge,
+        last_engaged_session: a.last_engaged_session || null
+      };
+    });
+
+    const result = {
+      total: accounts.length,
+      categories: categoryCounts,
+      last_status_counts: statusCounts,
+      stale_tests: staleAccounts.length,
+      accounts: detail
+    };
+
+    if (req.query.format === "json" || req.headers.accept?.includes("application/json")) {
+      return res.json(result);
+    }
+
+    // HTML dashboard
+    const catBadges = Object.entries(categoryCounts)
+      .filter(([, v]) => v > 0)
+      .map(([k, v]) => {
+        const cls = k === "live" || k === "active" ? "ok" : k === "defunct" || k === "rejected" ? "bad" : "warn";
+        return `<span class="badge ${cls}">${k}: ${v}</span>`;
+      }).join(" ");
+
+    const rows = detail.map(a => {
+      const cls = a.last_status === "live" || a.last_status === "creds_ok" ? "ok"
+        : a.last_status === "unreachable" || a.last_status === "error" ? "bad" : "warn";
+      const tested = a.last_tested_days_ago !== null ? `${a.last_tested_days_ago}d` : "never";
+      return `<tr><td>${a.id}</td><td>${a.platform}</td><td class="${cls}">${a.last_status}</td><td>${a.status}</td><td>${a.has_credentials ? "✓" : "✗"}</td><td>${tested}</td><td>${a.last_engaged_session || "-"}</td></tr>`;
+    }).join("");
+
+    res.send(`<!DOCTYPE html><html><head><title>Account Registry</title>
+<style>body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;padding:2rem;max-width:1200px;margin:0 auto}
+h1{color:#89b4fa}table{border-collapse:collapse;margin:1rem 0;width:100%}td,th{padding:.4rem .8rem;border:1px solid #45475a;text-align:left}
+th{background:#313244}.ok{color:#a6e3a1}.warn{color:#f9e2af}.bad{color:#f38ba8}
+.badge{display:inline-block;padding:.2rem .5rem;margin:.1rem;border-radius:.25rem;background:#45475a}</style></head>
+<body><h1>Account Registry Health</h1>
+<p>${accounts.length} accounts · ${staleAccounts.length} stale tests</p>
+<p>${catBadges}</p>
+<table><tr><th>ID</th><th>Platform</th><th>Last Status</th><th>Category</th><th>Creds</th><th>Tested</th><th>Last Session</th></tr>
+${rows}</table>
+<p style="color:#6c7086;font-size:.75rem;margin-top:2rem">
+<a href="/status/accounts?format=json" style="color:#89b4fa">JSON</a> ·
+<a href="/status/credential-health" style="color:#89b4fa">Credential Health</a> ·
+<a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+</body></html>`);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Queue health: dedup stats, staleness, blocked-item age
 app.get("/status/queue-health", (req, res) => {
   try {

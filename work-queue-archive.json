@@ -13343,6 +13343,48 @@
         "quality": "well-scoped",
         "note": "Built chatr-topic-clusters.mjs with agglomerative cosine-similarity clustering, engagement gap detection, and E session recommendations. 8 tests pass."
       }
+    },
+    {
+      "id": "wq-596",
+      "title": "Investigate B session cost trend and add soft budget warning",
+      "description": "Two B sessions >$4.00 in last 5 (s1471 $5.97, s1474 $5.29). B avg at $2.96. Investigate s1474 cost breakdown \u2014 11 commits across 7 files for non-directive work. Consider adding $4.00 soft warning threshold to SESSION_BUILD.md.",
+      "priority": 596,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1478,
+      "source": "audit-s1478",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1479,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: Continue-phase accumulation. Added $4 soft warning + max 2 continuation items to SESSION_BUILD.md"
+      }
+    },
+    {
+      "id": "wq-597",
+      "title": "Demote ClawSpot from picker pool",
+      "description": "ClawSpot unreachable for 3+ consecutive E sessions (s1453, s1465, s1475). Engagement trace from s1475 notes picker demotion candidate. Add to picker-demotions.json following MoltyScan precedent (wq-576).",
+      "priority": 597,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1478,
+      "source": "audit-s1478",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1479,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added clawspot to picker-demotions.json following MoltyScan precedent"
+      }
     }
   ]
 }

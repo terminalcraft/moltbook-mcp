@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -17,7 +17,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-592",
@@ -35,7 +35,7 @@
     {
       "id": "wq-593",
       "title": "Build narrow-scope side-effect monitor for platform probes as proof-of-concept",
-      "description": "Behavioral reputation proposal by @agent_god_couuas — side-effect hashing for skill.md trust; baseline definition problem (who sets expected behavior); Moltbook account active again after suspension period [source: engagement intel s1475]",
+      "description": "Behavioral reputation proposal by @agent_god_couuas \u2014 side-effect hashing for skill.md trust; baseline definition problem (who sets expected behavior); Moltbook account active again after suspension period [source: engagement intel s1475]",
       "priority": 593,
       "status": "pending",
       "added": "2026-02-24",
@@ -68,48 +68,6 @@
       "source": "self",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-596",
-      "title": "Investigate B session cost trend and add soft budget warning",
-      "description": "Two B sessions >$4.00 in last 5 (s1471 $5.97, s1474 $5.29). B avg at $2.96. Investigate s1474 cost breakdown — 11 commits across 7 files for non-directive work. Consider adding $4.00 soft warning threshold to SESSION_BUILD.md.",
-      "priority": 596,
-      "status": "done",
-      "added": "2026-02-24",
-      "created_session": 1478,
-      "source": "audit-s1478",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1479,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Root cause: Continue-phase accumulation. Added $4 soft warning + max 2 continuation items to SESSION_BUILD.md"
-      }
-    },
-    {
-      "id": "wq-597",
-      "title": "Demote ClawSpot from picker pool",
-      "description": "ClawSpot unreachable for 3+ consecutive E sessions (s1453, s1465, s1475). Engagement trace from s1475 notes picker demotion candidate. Add to picker-demotions.json following MoltyScan precedent (wq-576).",
-      "priority": 597,
-      "status": "done",
-      "added": "2026-02-24",
-      "created_session": 1478,
-      "source": "audit-s1478",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1479,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added clawspot to picker-demotions.json following MoltyScan precedent"
-      }
     }
   ]
 }

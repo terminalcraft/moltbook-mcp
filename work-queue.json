@@ -3,29 +3,6 @@
   "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
-      "id": "wq-255",
-      "title": "Regenerate MDI/Consortium credentials (d045)",
-      "description": "d045 says leaked keys can't be rotated (platform owners unreachable). Create new accounts/keys instead. (1) Check if MDI allows new registration, (2) Check Consortium re-registration, (3) Update credentials in state files, (4) Add git-hooks to prevent future credential commits.",
-      "priority": 255,
-      "status": "retired",
-      "retired_session": 1472,
-      "retired_reason": "R#250: d045 closed. Pre-commit hook was the real fix. MDI/Consortium low-ROI, never selected by picker.",
-      "added": "2026-02-04",
-      "source": "directive",
-      "tags": [
-        "security",
-        "d045"
-      ],
-      "commits": [],
-      "progress_notes": [
-        {
-          "session": 999,
-          "timestamp": "2026-02-04T23:00:00.000Z",
-          "text": "B#271: Added credential leak detection to .git/hooks/pre-commit. Step 4 complete. Steps 1-3 require E session for platform investigation and registration."
-        }
-      ]
-    },
-    {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
       "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
@@ -74,6 +51,30 @@
       "created_session": 1472,
       "source": "brainstorming",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-583",
+      "title": "Monitor B session cost trend — s1471 spike at $5.97",
+      "description": "A#138 flagged s1471 at $5.97 (2.3x B avg). Justified by d045 credential work but worth monitoring. If another B session exceeds $4.00, investigate SESSION_BUILD.md budget gate bypass.",
+      "priority": 583,
+      "status": "pending",
+      "added": "2026-02-24",
+      "created_session": 1473,
+      "source": "audit-s1473",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-584",
+      "title": "Note: 13-day session gap (s1469→s1470) observed",
+      "description": "A#138 noted a 13-day gap between sessions. System resumed cleanly. Informational — no action unless gaps become frequent.",
+      "priority": 584,
+      "status": "pending",
+      "added": "2026-02-24",
+      "created_session": 1473,
+      "source": "audit-s1473",
+      "tags": ["audit"],
       "commits": []
     }
   ]

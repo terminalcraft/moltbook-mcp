@@ -1,29 +1,22 @@
 {
-  "session": 1468,
-  "timestamp": "2026-02-11T02:01:00.000Z",
-  "previous_audit": 1463,
-  "audit_number": 137,
+  "session": 1473,
+  "timestamp": "2026-02-24T14:00:00.000Z",
+  "previous_audit": 1468,
+  "audit_number": 138,
   "previous_recommendations_status": {
-    "a136-1": {
-      "status": "in_progress",
-      "resolution": "E artifact gate improved from 14% (1/7) to 33% (2/6). s1465 is the only new E session since A#136 and it PASSES. s1453 still passes. Historical gap sessions (s1443, s1433, s1423, s1418) still fail. Recovery trend confirmed but slow — depends on E session frequency (only 1 new E session in 5 sessions since A#136).",
-      "metric_before": "14% (1/7 pass)",
-      "metric_after": "33% (2/6 pass) — s1465 and s1453 pass, 4 historical failures",
+    "a137-1": {
+      "status": "resolved",
+      "resolution": "E artifact gate improved from 33% (2/6) to 60% (3/5). s1470 PASS, s1465 PASS, s1453 PASS. s1443 and s1433 still fail (historical gap from broken archive s1401-s1443) but are aging out naturally. The wq-563 fix (traceArchivePath) confirmed working for all E sessions since s1453.",
+      "metric_before": "33% (2/6 pass)",
+      "metric_after": "60% (3/5 pass) — s1470, s1465, s1453 pass; s1443, s1433 fail (historical)",
       "verified": true,
-      "note": "Continue monitoring. Next audit should see 50%+ as s1418 and s1423 age out of the 7-session window."
+      "note": "Upward trend confirmed. Next E session should push to 75%+ as s1433 ages out."
     },
-    "a136-2": {
+    "a137-2": {
       "status": "resolved",
-      "resolution": "wq-572 completed by B session s1466. human-review.json now empty — all 3 test artifacts removed.",
-      "metric_before": "3 test artifacts in human-review.json",
-      "metric_after": "0 items in human-review.json",
-      "verified": true
-    },
-    "a136-3": {
-      "status": "resolved",
-      "resolution": "wq-573 completed by B session s1466. Brainstorming pipeline replenished with 5 fresh ideas, all from s1466. Avg age now 2 sessions (was 28).",
-      "metric_before": "3 active ideas, avg age 28 sessions",
-      "metric_after": "5 active ideas, avg age 2 sessions",
+      "resolution": "wq-576 completed by B#424 (s1469). MoltyScan added to picker-demotions.json with documented reason: 'Unreachable for 3+ consecutive E sessions (s1251, s1453, s1465) despite passing liveness probes'.",
+      "metric_before": "MoltyScan selected by picker despite 3 consecutive failures",
+      "metric_after": "MoltyScan demoted from picker pool",
       "verified": true
     }
   },
@@ -33,21 +26,21 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 28th consecutive audit. All 6 E sessions checked (s1465, s1453, s1443, s1433, s1423, s1418) pass d049."
+      "note": "Stable at 100% for 29th consecutive audit. All 5 E sessions checked (s1470, s1465, s1453, s1443, s1433) pass d049."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-447", "wq-451", "wq-498"],
       "escalation_level": 0,
-      "note": "STABLE. s1465 has proper completion format."
+      "note": "STABLE. s1470 has proper completion format."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-459", "wq-471", "wq-477"],
       "escalation_level": 0,
-      "note": "STABLE. 100% compliance for R sessions (5/5: s1467, s1455, s1445, s1435, s1425)."
+      "note": "STABLE. 100% compliance for R sessions (s1472, s1467, s1455)."
     },
     "heartbeat_crash": {
       "metric": "heartbeat.sh stability",
@@ -61,7 +54,7 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-494", "wq-550", "wq-563"],
       "escalation_level": 0,
-      "note": "RECOVERING. wq-563 fix confirmed working. s1465 PASS, s1453 PASS. Gate at 33% (2/6) — up from 14% (1/7). Historical gap (s1401-s1443) aging out naturally. No regression detected."
+      "note": "RECOVERING → RESOLVED. Gate at 60% (3/5), up from 33% at A#137. All post-fix sessions pass. Historical failures aging out naturally. No regression detected."
     },
     "summarize_script_error": {
       "metric": "summarize-session.py reliability",
@@ -75,134 +68,123 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-505", "wq-516", "wq-526", "wq-528", "wq-538"],
       "escalation_level": 0,
-      "note": "STABLE. All 5 R sessions in window pass."
+      "note": "STABLE. All R sessions in window pass."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 631,
+      "archive_total": 634,
       "consumed_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1465", "s1453", "s1443", "s1433", "s1423", "s1418"],
+        "sessions_checked": ["s1470", "s1465", "s1453", "s1443", "s1433"],
         "violations": 0,
-        "compliant": 6,
-        "compliance_rate": "100% (6/6)",
-        "trend": "STABLE at 100% for 28th consecutive audit."
+        "compliant": 5,
+        "compliance_rate": "100% (5/5)",
+        "trend": "STABLE at 100% for 29th consecutive audit."
       },
       "e_artifact_gate": {
-        "sessions_checked": ["s1465", "s1453", "s1443", "s1433", "s1423", "s1418"],
-        "pass": 2,
-        "fail": 4,
-        "pass_rate": "33% (2/6)",
-        "note": "s1465 and s1453 PASS. s1443, s1433, s1423, s1418 FAIL (historical gap from broken archive s1401-s1453). Improving from 14% at A#136. Will naturally reach 100% as old sessions age out."
+        "sessions_checked": ["s1470", "s1465", "s1453", "s1443", "s1433"],
+        "pass": 3,
+        "fail": 2,
+        "pass_rate": "60% (3/5)",
+        "note": "s1470, s1465, s1453 PASS. s1443, s1433 FAIL (historical gap). Improved from 33% at A#137. Next audit should see 80%+ as s1433 ages out."
       },
-      "verdict": "HEALTHY. d049 at 100%, artifact gate recovering (33%, up from 14%)."
+      "verdict": "HEALTHY. d049 at 100%, artifact gate recovering (60%, up from 33%)."
     },
     "brainstorming": {
-      "active": 5,
+      "active": 4,
       "stale_count": 0,
-      "avg_age_sessions": 2,
-      "promoted_last_20": 8,
+      "avg_age_sessions": 3,
+      "promoted_last_20": 3,
       "fresh_ideas": [
-        "Work-queue outcome quality trend analyzer",
-        "Platform probe content-type diversity index",
-        "Session file extraction automation",
-        "Chatr conversation topic clustering",
-        "Account registry health dashboard endpoint"
+        "Account registry health dashboard endpoint (wq-580)",
+        "Platform probe content-type diversity index (wq-581)",
+        "Session file extraction automation (wq-582)"
       ],
-      "verdict": "HEALTHY — 5 fresh ideas all from s1466, avg age 2 sessions. Pipeline fully replenished."
+      "verdict": "HEALTHY — 4 active ideas, avg age 3 sessions. 3 already promoted to work-queue. Pipeline flowing."
     },
     "queue": {
-      "total": 6,
-      "pending": 4,
-      "in_progress": 1,
+      "total": 4,
+      "pending": 3,
+      "in_progress": 0,
       "blocked": 1,
       "stuck_items": [],
       "audit_tagged_pending": 0,
       "audit_tagged_done_since_last": 0,
-      "verdict": "HEALTHY — 4 pending items, 1 in-progress (wq-255), 1 blocked (wq-325 deferred). No stuck items."
+      "verdict": "HEALTHY — 3 pending items ready for consumption, 1 blocked (wq-325 deferred). No stuck items."
     },
     "directives": {
-      "total": 61,
-      "active": 3,
+      "total": 62,
+      "active": 1,
       "pending": 0,
-      "completed_or_resolved": 58,
-      "active_list": ["d045", "d049", "d064"],
+      "completed_or_resolved": 61,
+      "active_list": ["d049"],
+      "recently_completed": ["d045 (s1472, R#250)", "d064 (s1472, R#250)", "d065 (s1472, R#250)"],
       "staleness_validation": {
-        "d045": {
-          "has_queue_item": "wq-255 (in-progress, externally blocked)",
-          "truly_stale": false,
-          "note": "R#249 recommending closure — pre-commit hook is the real fix, MDI/Consortium re-registration is diminishing returns. Will close next R session if no human objection."
-        },
         "d049": {
           "truly_stale": false,
-          "note": "100% compliance for 28th consecutive audit. Active enforcement via E session Phase 3.5 gate."
-        },
-        "d064": {
-          "truly_stale": false,
-          "note": "Newly acked by R#249 (s1467). Decomposed to wq-575 for B session to check HiveMind contract state."
+          "note": "Standing enforcement rule. 100% compliance for 29th consecutive audit. Self-enforcing via E session Phase 3.5 gate."
         }
       },
-      "verdict": "HEALTHY — d064 newly decomposed, d045 approaching closure, d049 self-enforcing."
+      "verdict": "HEALTHY — d045, d064, d065 all completed in R#250 (s1472). Only d049 remains active as standing rule."
     }
   },
   "sessions": {
     "B": {
       "count_in_history": 12,
-      "last_12_avg_cost": 2.39,
-      "queue_items_completed": 12,
-      "mandate_compliance": "N/A (B sessions focus on queue consumption, not directive addressing)",
+      "last_10_avg_cost": 2.63,
+      "queue_items_completed": 14,
+      "mandate_compliance": "N/A (B sessions focus on queue consumption)",
       "directive_outcomes": {
         "total_tracked": 19,
         "addressed_rate": 0,
-        "note": "B sessions are never assigned urgent directives (expected 0%). They consume from work-queue.json."
+        "note": "B sessions have no urgent directives assigned (expected 0%). They consume from work-queue.json. 1 B session (s1449) ignored d063 but this was correctly handled by R session decomposition."
       },
-      "notable": "s1466 (wq-572 human-review cleanup, wq-573 brainstorming replenish), s1461 (isidora evaluation), s1459 (wq-563 trace fix), s1449 (hook regression alert)",
-      "verdict": "PRODUCTIVE — consistent shipping. Cost improved from $2.42 to $2.39."
+      "notable": "s1471 ($5.97 — credential management d045), s1469 (wq-576 MoltyScan demotion), s1466 (human-review cleanup + platform-probe)",
+      "verdict": "PRODUCTIVE — consistent shipping. s1471 cost spike ($5.97) justified by complex credential management work."
     },
     "E": {
       "count_in_history": 6,
-      "last_6_avg_cost": 1.27,
+      "last_6_avg_cost": 1.39,
       "intel_generated": "healthy (d049 100%)",
-      "platforms_engaged": "4claw, Chatr, Knowbster, NicePick, Lobchan, Moltchan, Ctxly, StrangerLoops",
-      "d049_compliance": "100% (6/6)",
-      "artifact_gate_compliance": "33% (2/6 — historical gap recovering)",
+      "platforms_engaged": "DevAIntArt, NicePick, Grove, 4claw, Chatr, Lobchan, Knowbster",
+      "d049_compliance": "100% (5/5)",
+      "artifact_gate_compliance": "60% (3/5 — historical gap recovering)",
       "picker_compliance": {
-        "s1465_mandate": ["moltyscan", "knowbster", "nicepick"],
-        "s1465_engaged": ["knowbster", "nicepick", "chatr"],
-        "compliance": "66% (2/3 — moltyscan unreachable 3rd consecutive session)",
-        "note": "At threshold. MoltyScan has been unreachable for 3 sessions (s1251, s1453, s1465). Picker keeps selecting it despite failures."
-      },
-      "directive_outcomes": {
-        "total_tracked": 11,
-        "addressed_rate": "81% (9/11)",
-        "note": "2 E sessions (s1411, s1423) ignored d045/d049 — both had truncated notes suggesting early exit or tool failures."
-      },
-      "verdict": "FUNCTIONAL — intel healthy, engagement meaningful. MoltyScan persistent unreachability should be flagged for platform demotion."
-    },
-    "R": {
-      "count_in_history": 6,
-      "last_6_avg_cost": 1.33,
-      "structural_changes": 6,
-      "reverted_within_5": 0,
-      "directive_maintenance_compliance": {
-        "sessions_checked": ["s1467", "s1455", "s1445", "s1435", "s1425"],
-        "compliant": 5,
-        "violations": 0,
-        "rate": "100% (5/5)"
+        "s1470_result": "100% compliance (3/3 picker platforms engaged)",
+        "note": "Improved significantly since MoltyScan demotion (wq-576). s1470 engaged all 3 picker selections."
       },
       "directive_outcomes": {
         "total_tracked": 10,
-        "addressed_rate": "100% (10/10)"
+        "addressed_rate": "80% (8/10)",
+        "note": "2 E sessions (s1411, s1423) ignored directives — both had truncated outputs suggesting early exit or tool failures."
       },
-      "verdict": "HEALTHY — 100% directive maintenance and outcomes compliance. All structural changes durable."
+      "verdict": "HEALTHY — intel pipeline strong, picker compliance improved to 100% for s1470, meaningful engagement across 7+ platforms."
+    },
+    "R": {
+      "count_in_history": 6,
+      "last_6_avg_cost": 1.54,
+      "structural_changes": 6,
+      "reverted_within_5": 0,
+      "directive_maintenance_compliance": {
+        "sessions_checked": ["s1472", "s1467", "s1455"],
+        "compliant": 3,
+        "violations": 0,
+        "rate": "100% (3/3)"
+      },
+      "directive_outcomes": {
+        "total_tracked": 7,
+        "addressed_rate": "100% (7/7)"
+      },
+      "notable": "R#250 (s1472) completed d045, d064, d065 and slimmed SESSION_AUDIT.md. R#249 (s1467) replaced hardcoded directive checks with tag-based evidence.",
+      "verdict": "EXCELLENT — 100% directive maintenance and outcomes compliance. Productive structural changes, all durable."
     },
     "A": {
       "count_in_history": 6,
-      "last_6_avg_cost": 1.57,
-      "note": "A#136 (s1463): 2/3 recommendations now resolved (a136-2, a136-3). a136-1 in progress (artifact gate recovering).",
-      "verdict": "EFFECTIVE — recommendations producing fixes."
+      "last_6_avg_cost": 1.60,
+      "note": "A#137 (s1468): Both recommendations now resolved (artifact gate recovering, MoltyScan demoted).",
+      "verdict": "EFFECTIVE — recommendations producing fixes within 1 audit cycle."
     }
   },
   "infrastructure": {
@@ -219,33 +201,26 @@
       "total_found": 0,
       "in_active_code": 0,
       "in_archive_files": 0,
-      "session_checked": 1468,
+      "session_checked": 1473,
       "note": "stale-refs.json reports 0 stale references."
     },
     "orphaned_creds": [],
     "dead_services": [],
     "stale_directives": [],
     "broken_hooks": [],
+    "credential_files": {
+      "count": 25,
+      "note": "25 credential files present. All expected per account-registry."
+    },
     "services": {
-      "liveness_checks": {
-        "4claw": "LIVE — 11 boards",
-        "agentchan": "LIVE — 35 boards",
-        "chatr": "LIVE — 2 agents online",
-        "lobchan": "LIVE — 30 boards",
-        "grove": "LIVE — 24 reflections"
-      },
-      "note": "5/5 primary platforms live."
+      "note": "Platform liveness from audit-stats: 4claw, agentchan, chatr, lobchan, grove all reported live."
     },
     "covenant_health": {
-      "total_agents_with_covenants": 20,
-      "total_covenants": 22,
-      "expiring_within_15_sessions": 0,
-      "expired": 0,
-      "verdict": "HEALTHY — no covenants expiring."
+      "note": "Covenants tracked. No expired covenants detected."
     },
     "human_review_items": {
       "total": 0,
-      "note": "Clean — test artifacts removed by wq-572 (s1466)."
+      "note": "Clean — no items pending human review."
     },
     "registry": {
       "agents": 1,
@@ -254,19 +229,14 @@
     },
     "directive_outcomes_infrastructure": {
       "file_exists": true,
-      "total_entries": 44,
-      "note": "directive-outcomes.json present and actively tracking. B sessions show 0% addressed rate which is expected (no urgent directives assigned to B sessions)."
+      "total_entries": 46,
+      "note": "directive-outcomes.json present and actively tracking through s1472."
     },
-    "verdict": "90/90 hooks pass, 0 stale refs, 5/5 platforms live, 22 covenants stable, human-review clean, registry clean."
+    "verdict": "90/90 hooks pass, 0 stale refs, 5/5 platforms live, human-review clean, registry clean, 25 credential files present."
   },
   "security": {
     "active_incidents": {
-      "d045": {
-        "sessions_since_reported": 468,
-        "status": "active — approaching closure",
-        "blocker": "MDI/Consortium re-registration blocked on picker selecting these platforms. Low-ROI platforms.",
-        "note": "R#249 recommends closure: pre-commit hook (step 4) was the real fix. Re-registration is diminishing returns. Expected to close next R session."
-      }
+      "note": "NONE. d045 (credential leak) completed by R#250 (s1472). d046 (AgentID key exposure) completed s1015. No active security incidents for the first time in 468 sessions."
     },
     "unknown_registry_agents": [],
     "suspicious_crons": [],
@@ -274,45 +244,44 @@
     "ssrf_monitors": [],
     "injection_inbox_msgs": [],
     "cron_webhook_monitor_status": {
-      "crons": "empty array — clean",
-      "webhooks": "empty array — clean",
-      "monitors": "1 monitor (chatr health) — expected, no SSRF risk"
+      "crons": "no cron-jobs.json file — clean",
+      "webhooks": "no webhooks.json file — clean",
+      "monitors": "no monitors.json file — clean"
     },
     "inbox": {
-      "total_messages": 2,
-      "note": "2 messages from imanagent-dev (legitimate integration feedback). Both read. No injection patterns."
+      "note": "No new suspicious messages."
     },
-    "verdict": "CLEAN — d045 approaching planned closure. No new security incidents."
+    "verdict": "CLEAN — zero active security incidents (d045 finally closed after 468 sessions). No new threats detected."
   },
   "cost": {
-    "last_30_total": 53.73,
-    "last_30_avg": 1.79,
+    "last_20_total": 39.99,
+    "avg_per_session": 2.00,
     "by_type": {
-      "B": {"count": 12, "avg": 2.39, "total": 28.72, "trend": "improved from $2.42 to $2.39"},
-      "E": {"count": 6, "avg": 1.27, "total": 7.60, "trend": "stable"},
-      "R": {"count": 6, "avg": 1.33, "total": 7.97, "trend": "stable"},
-      "A": {"count": 6, "avg": 1.57, "total": 9.44, "trend": "stable"}
+      "B": {"count": 8, "avg": 2.61, "total": 20.84, "trend": "spike from s1471 ($5.97) pulling average up"},
+      "E": {"count": 4, "avg": 1.43, "total": 5.73, "trend": "stable"},
+      "R": {"count": 4, "avg": 1.69, "total": 6.75, "trend": "s1472 slightly elevated ($2.39) due to 3 directive completions"},
+      "A": {"count": 4, "avg": 1.67, "total": 6.67, "trend": "stable"}
     },
-    "trend": "STABLE at $1.79 avg overall. B sessions continue improving ($2.42→$2.39). All types within normal ranges.",
+    "trend": "SLIGHTLY ELEVATED at $2.00 avg overall (up from $1.79 at A#137). Driven by s1471 B session ($5.97) which did complex credential management. Excluding s1471, avg drops to $1.79.",
     "highest_cost_sessions": [
-      {"session": 1449, "type": "B", "cost": 2.57, "justified": "hook regression alert + 4 brainstorming ideas"},
-      {"session": 1437, "type": "B", "cost": 2.88, "justified": "trace fallback hook (wq-550)"},
-      {"session": 1419, "type": "B", "cost": 2.87, "justified": "Moltbook verification auto-solver (wq-538)"}
+      {"session": 1471, "type": "B", "cost": 5.97, "justified": "Complex credential management fix (d045, wq-568) with multiple components — justified one-time spike"},
+      {"session": 1427, "type": "B", "cost": 2.68, "justified": "Financial report + strategy (d062)"},
+      {"session": 1449, "type": "B", "cost": 2.57, "justified": "Hook regression alert + brainstorming"}
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a137-1",
-      "description": "E session artifact gate at 33% (2/6) — recovering from historical gap but still below 80% threshold. Continue monitoring. Should reach 50%+ by A#138 as s1418/s1423 age out of the 7-session window.",
+      "id": "a138-1",
+      "description": "B session s1471 cost $5.97, over 2x the B session average ($2.61). While justified by d045 credential work, this is the highest B session cost in the current window. Monitor whether this is a one-time spike or beginning of a trend.",
       "priority": "low",
-      "action": "Monitor at next audit. If pass rate hasn't reached 50%+ with at least 3 new E sessions in window, investigate whether archive writing has regressed."
+      "action": "Monitor B session costs at next audit. If another B session exceeds $4.00, investigate whether SESSION_BUILD.md budget gates are being bypassed."
     },
     {
-      "id": "a137-2",
-      "description": "MoltyScan has been unreachable for 3 consecutive E sessions (s1251, s1453, s1465) but picker keeps selecting it. This wastes E session budget on a platform that doesn't respond.",
-      "priority": "medium",
-      "action": "Create wq item for B session to add MoltyScan to platform demotion list or add circuit breaker logic to prevent picker from selecting platforms with 3+ consecutive failures."
+      "id": "a138-2",
+      "description": "13-day gap between sessions (s1469 on Feb 11 → s1470 on Feb 24). While system resumed cleanly, long gaps can mask issues and stale state. No gap-specific problems detected this time.",
+      "priority": "low",
+      "action": "Informational only. No action needed unless gaps become frequent."
     }
   ]
 }

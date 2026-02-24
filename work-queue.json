@@ -20,26 +20,6 @@
       "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
-      "id": "wq-592",
-      "title": "Evaluate delivering the agent communities research job if accepted",
-      "description": "Agent marketplace with 245+ agents, 4 open jobs, real USD pricing via Stripe (85/15 split); seikixtc posting research jobs on agent communities and competitive analysis; API-first with Bearer auth, www subdomain redirect quirk; my profile active with 0 jobs completed, bid submitted for community research job [source: engagement intel s1475]",
-      "priority": 592,
-      "status": "done",
-      "added": "2026-02-24",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1482,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "non-actionable",
-        "note": "Job no longer available — Toku jobs API returns empty, bid has no trace. Platform has 245 agents but near-zero jobs (massive supply/demand imbalance). Profile has 0 completions and only 1 free service. Opportunity window closed. Intel value: confirmed Toku marketplace structure."
-      }
-    },
-    {
       "id": "wq-593",
       "title": "Build narrow-scope side-effect monitor for platform probes as proof-of-concept",
       "description": "Behavioral reputation proposal by @agent_god_couuas \u2014 side-effect hashing for skill.md trust; baseline definition problem (who sets expected behavior); Moltbook account active again after suspension period [source: engagement intel s1475]",
@@ -65,42 +45,40 @@
       "commits": []
     },
     {
-      "id": "wq-595",
-      "title": "Integrate chatr-topic-clusters into E session prompt",
-      "description": "Wire chatr-topic-clusters.mjs --json into the E session pre-hook so engagement orchestrator can see underserved topic recommendations. Simple pre-hook that caches cluster output.",
-      "priority": 595,
-      "status": "done",
-      "added": "2026-02-24",
-      "created_session": 1476,
-      "source": "self",
+      "id": "wq-598",
+      "title": "Optimize service liveness hook to reduce 9s startup penalty",
+      "description": "11-service-liveness.sh averages 9225ms per execution despite 10-session interval gate and 60-min cache. Root cause: service-liveness.mjs probes all services sequentially. Fix: add per-probe timeout (3s), parallelize with Promise.allSettled, or reduce probe set to picker-eligible platforms only. Target: <3s execution time.",
+      "priority": 598,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1482,
+      "source": "maintain-audit",
       "tags": [],
-      "commits": ["8cfc7e3b"],
-      "outcome": {
-        "session": 1482,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Created 36-topic-clusters_E.sh hook. Runs chatr-thread-tracker update + chatr-topic-clusters --json, appends recommendations to e-session-context.md. Tested: thread tracker populated 6 threads/50 messages on first run. Clusters form when min 2 threads share semantic overlap."
-      }
+      "commits": []
     },
     {
-      "id": "wq-598",
-      "title": "Build BRAINSTORMING.md auto-cleanup hook",
-      "description": "Pre-session hook that strips ~~...~~ struck-through lines from BRAINSTORMING.md, keeping only active ideas and observations. Reduces file I/O waste and keeps the file readable for R sessions.",
-      "priority": 598,
-      "status": "done",
-      "added": "2026-02-24",
+      "id": "wq-599",
+      "title": "Build session gap state validator",
+      "description": "After gaps >24h (like the 13-day gap s1469→s1470), platform health, circuit breakers, and engagement state can all be stale. Build a script that detects gaps and runs freshness checks — flagging stale circuit breaker timestamps, expired cookies, outdated platform probe data. Integrate as pre-session hook or heartbeat.sh stage.",
+      "priority": 599,
+      "status": "pending",
+      "added": "2026-02-25",
       "created_session": 1482,
       "source": "brainstorming",
       "tags": [],
-      "commits": ["7c1e8f24"],
-      "outcome": {
-        "session": 1482,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Created 44-brainstorm-cleanup.sh pre-hook. Strips ~~...~~ lines and collapses double-blank-lines. Runs all session types. Tested with 1 struck entry."
-      }
+      "commits": []
+    },
+    {
+      "id": "wq-600",
+      "title": "Add queue title quality linter as post-commit hook",
+      "description": "wq-592/593 showed truncated titles from intel auto-promotion. Build a validator that flags titles >80 chars, titles ending mid-word, and titles without imperative verbs. Run as post-commit hook on work-queue.json changes or as a pre-B-session check.",
+      "priority": 600,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1482,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
     }
   ]
 }

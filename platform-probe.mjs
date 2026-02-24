@@ -158,6 +158,37 @@ function isSpaFalsePositive(results) {
   return false;
 }
 
+// Compute content-type diversity index (Shannon entropy normalized to 0-1)
+// Real APIs: mixed types (json, text, html) → high diversity (>0.5)
+// SPAs: uniform html → low diversity (0)
+function computeContentTypeDiversity(results) {
+  const successes = results.filter(r => r.isSuccess && r.contentType);
+  if (successes.length < 2) return { score: 0, types: {}, total: successes.length };
+
+  // Count content types
+  const counts = {};
+  for (const r of successes) {
+    counts[r.contentType] = (counts[r.contentType] || 0) + 1;
+  }
+
+  const n = successes.length;
+  const typeCount = Object.keys(counts).length;
+
+  // Shannon entropy: H = -Σ(p * ln(p))
+  // Normalized by ln(typeCount) when typeCount > 1, else 0
+  if (typeCount <= 1) return { score: 0, types: counts, total: n };
+
+  let entropy = 0;
+  for (const c of Object.values(counts)) {
+    const p = c / n;
+    if (p > 0) entropy -= p * Math.log(p);
+  }
+  const maxEntropy = Math.log(typeCount);
+  const score = Math.round((entropy / maxEntropy) * 100) / 100;
+
+  return { score, types: counts, total: n };
+}
+
 // Analyze probe results to determine platform capabilities
 function analyzeResults(results) {
   const analysis = {
@@ -170,6 +201,7 @@ function analyzeResults(results) {
     hasHealthEndpoint: false,
     hasRegistration: false,
     isSpa: false,
+    contentTypeDiversity: null,
     authType: "unknown",
     recommendedStatus: "unreachable",
     findings: [],
@@ -182,11 +214,15 @@ function analyzeResults(results) {
     analysis.recommendedStatus = "live";
   }
 
+  // Compute content-type diversity
+  analysis.contentTypeDiversity = computeContentTypeDiversity(results);
+
   // SPA detection gate — check before endpoint analysis
   if (analysis.reachable && isSpaFalsePositive(results)) {
     analysis.isSpa = true;
     analysis.recommendedStatus = "spa_false_positive";
     analysis.findings.push("SPA false positive: all endpoints return HTML (catch-all routing)");
+    analysis.findings.push(`Content-type diversity: ${analysis.contentTypeDiversity.score} (low = uniform)`);
     return analysis;
   }
 
@@ -248,6 +284,13 @@ function analyzeResults(results) {
     // Reachable but no API endpoints found
     analysis.recommendedStatus = "live";
     analysis.findings.push("Reachable but no standard API endpoints found");
+  }
+
+  // Add diversity score to findings for visibility
+  if (analysis.contentTypeDiversity && analysis.contentTypeDiversity.total >= 2) {
+    const d = analysis.contentTypeDiversity;
+    const label = d.score >= 0.5 ? "high" : d.score > 0 ? "mixed" : "uniform";
+    analysis.findings.push(`Content-type diversity: ${d.score} (${label}) — ${JSON.stringify(d.types)}`);
   }
 
   return analysis;
@@ -426,7 +469,7 @@ async function probePlatform(platformId, jsonMode = false) {
 }
 
 // Exports for testing
-export { isSpaFalsePositive, analyzeResults };
+export { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity };
 
 // CLI
 const args = process.argv.slice(2);

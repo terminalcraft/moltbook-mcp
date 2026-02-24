@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { isSpaFalsePositive, analyzeResults } from "./platform-probe.mjs";
+import { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity } from "./platform-probe.mjs";
 
 // Helper to build mock probe results
 function mockResult(path, { status = 200, contentType = "html", body = "", isSuccess = true } = {}) {
@@ -82,5 +82,68 @@ describe("analyzeResults with SPA detection", () => {
     const analysis = analyzeResults(results);
     assert.equal(analysis.isSpa, false);
     assert.equal(analysis.recommendedStatus, "live");
+  });
+});
+
+describe("computeContentTypeDiversity", () => {
+  it("returns 0 for uniform content types", () => {
+    const results = [
+      mockResult("/api", { contentType: "html" }),
+      mockResult("/health", { contentType: "html" }),
+      mockResult("/docs", { contentType: "html" }),
+    ];
+    const d = computeContentTypeDiversity(results);
+    assert.equal(d.score, 0);
+    assert.deepEqual(d.types, { html: 3 });
+    assert.equal(d.total, 3);
+  });
+
+  it("returns 1 for perfectly diverse types", () => {
+    const results = [
+      mockResult("/health", { contentType: "json" }),
+      mockResult("/skill.md", { contentType: "text" }),
+    ];
+    const d = computeContentTypeDiversity(results);
+    assert.equal(d.score, 1);
+    assert.deepEqual(d.types, { json: 1, text: 1 });
+  });
+
+  it("returns intermediate score for mixed types", () => {
+    const results = [
+      mockResult("/api", { contentType: "json" }),
+      mockResult("/docs", { contentType: "html" }),
+      mockResult("/health", { contentType: "json" }),
+      mockResult("/skill.md", { contentType: "text" }),
+    ];
+    const d = computeContentTypeDiversity(results);
+    assert.ok(d.score > 0 && d.score < 1, `Expected 0 < ${d.score} < 1`);
+    assert.equal(d.total, 4);
+  });
+
+  it("returns 0 for fewer than 2 results", () => {
+    const results = [mockResult("/health", { contentType: "json" })];
+    const d = computeContentTypeDiversity(results);
+    assert.equal(d.score, 0);
+  });
+
+  it("excludes non-success results", () => {
+    const results = [
+      mockResult("/health", { contentType: "json" }),
+      mockResult("/api", { contentType: "html", isSuccess: false, status: 404 }),
+    ];
+    const d = computeContentTypeDiversity(results);
+    assert.equal(d.score, 0);
+    assert.equal(d.total, 1);
+  });
+
+  it("is included in analyzeResults output", () => {
+    const results = [
+      mockResult("/health", { contentType: "json", body: '{"status":"ok"}' }),
+      mockResult("/api", { contentType: "json", body: '{"version":"1"}' }),
+      mockResult("/skill.md", { status: 404, isSuccess: false }),
+    ];
+    const analysis = analyzeResults(results);
+    assert.ok(analysis.contentTypeDiversity, "analysis should include contentTypeDiversity");
+    assert.equal(analysis.contentTypeDiversity.score, 0); // all json
   });
 });

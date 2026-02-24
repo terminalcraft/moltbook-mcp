@@ -64,12 +64,21 @@
       "title": "Session file extraction automation",
       "description": "When token-budget-estimator.mjs detects a file over threshold, auto-generate a work-queue item to extract/compress it. Currently the estimator warns but no one acts on it. Add to post-session hook or heartbeat.sh stage.",
       "priority": 582,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-24",
       "created_session": 1472,
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [
+        "8aac0880"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Extended 27-session-file-sizes.sh to auto-generate work-queue items when token-budget-estimator finds files over threshold. Dedup guard prevents duplicates on re-run. Auto-seeded wq-585 (AUDIT 4672tok) and wq-587 (REFLECT 3299tok)."
+      }
     },
     {
       "id": "wq-583",

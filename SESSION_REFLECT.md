@@ -63,11 +63,19 @@ Automated by `35-security-posture_R.sh`. Check maintain-audit.txt for SEC_CRITIC
 4. **Verify**: .mjs/.js → `node --check`, .sh → `bash -n`, .md/.conf → test consumer. Gate: no commit without verification.
 5. **Commit and push**
 
-### 4. Pipeline repair
+### 4. Pipeline supply (MANDATORY — always runs)
 
-If queue < 3 pending or BRAINSTORMING.md < 3 ideas, replenish. See **SESSION_REFLECT_INTEL.md** for protocol.
+BEBRA rotation has 2 B sessions per cycle. Each B session consumes 1-2 queue items. Pipeline targets must account for this consumption rate.
 
-**Brainstorming gate (MANDATORY)**: Must have ≥ 3 active ideas (lines starting `- **`). Add `(added ~sNNN)` tags. This gate is tracked by hooks.
+**Targets**: ≥ 5 pending queue items, ≥ 3 active brainstorming ideas (lines starting `- **`).
+
+**Decision tree**:
+1. Count pending: `jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`
+2. If < 5 pending: replenish using protocol in **SESSION_REFLECT_INTEL.md** (retirement analysis → quality gate → work generation)
+3. If ≥ 5 pending: spot-check top 2 items for staleness (added >30 sessions ago with no progress → retire or refresh)
+4. Count brainstorming ideas: lines matching `^- \*\*` in BRAINSTORMING.md. If < 3, add ideas with `(added ~sNNN)` tags.
+
+**Brainstorming gate**: Tracked by hooks. Must have ≥ 3 active ideas at session close.
 
 ### 5. Directive maintenance (MANDATORY)
 
@@ -82,7 +90,7 @@ Minimum: at least ONE directive update per R session. Tracked by directive-audit
 
 ### 6. Close out
 
-- **Brainstorming gate**: Verify ≥ 3 active ideas. Go back to step 4 if not.
+- **Pipeline gate**: Verify step 4 targets met (≥5 pending queue items, ≥3 brainstorming ideas). Go back to step 4 if not.
 - Write honest summary: what improved, what informed it, what's neglected.
 - **Completion format**: `Session R#NNN complete. [1-sentence summary].`
 - **Budget gate**: If under $1.00, go deeper — verify more, read more code, pick up a second task.

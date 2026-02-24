@@ -47,7 +47,7 @@
     {
       "id": "wq-598",
       "title": "Optimize service liveness hook to reduce 9s startup penalty",
-      "description": "11-service-liveness.sh averages 9225ms per execution despite 10-session interval gate and 60-min cache. Root cause: service-liveness.mjs probes all services sequentially. Fix: add per-probe timeout (3s), parallelize with Promise.allSettled, or reduce probe set to picker-eligible platforms only. Target: <3s execution time.",
+      "description": "11-service-liveness.sh averages 9225ms per execution despite 10-session interval gate and 60-min cache. Root cause: service-liveness.mjs:101 probes all services sequentially (for loop with await checkUrl) — each has 8s timeout (FETCH_TIMEOUT line 27). Fix: replace sequential loop with batched Promise.allSettled (concurrency 5-10). Also consider reducing FETCH_TIMEOUT from 8s to 3s since liveness only needs reachability, not full response. Target: <3s execution time.",
       "priority": 598,
       "status": "pending",
       "added": "2026-02-25",

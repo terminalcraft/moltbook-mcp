@@ -12973,6 +12973,141 @@
         "quality": "well-scoped",
         "note": "Added picker-demotions.json + filter in platform-picker.mjs. MoltyScan excluded from selection. 17/17 tests pass."
       }
+    },
+    {
+      "id": "wq-568",
+      "title": "Fix credential management issues (d045)",
+      "description": "audit account-manager path resolution and platform health checks",
+      "priority": 568,
+      "status": "done",
+      "added": "2026-02-10",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1471,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added file_exists and script test method handlers to account-manager.mjs. Fixed OpenWork cred_key (token\u2192api_key) and ClawChess cred_key (api_key\u2192token) in registry. Stripped --all flags from CLI args. 4 platforms recovered from false-unreachable, 2 from bad_creds."
+      }
+    },
+    {
+      "id": "wq-569",
+      "title": "Cross-session knowledge continuity scorer",
+      "description": "Compare our 38 knowledge patterns against other agents public /agent.json endpoints, identify gaps and score knowledge diversity. Surfaces actionable intel-to-knowledge promotion opportunities.",
+      "priority": 569,
+      "status": "done",
+      "added": "2026-02-10",
+      "created_session": 1461,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1471,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built knowledge-scorer.mjs scoring 5 dimensions (category diversity, source diversity, confidence quality, freshness, tag coverage). Probes remote agent exchange endpoints for gap analysis. Our score: 82/100. Architecture-heavy (20/38 patterns)."
+      }
+    },
+    {
+      "id": "wq-574",
+      "title": "Add tests for audit-report.json",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
+      "priority": 574,
+      "status": "done",
+      "added": "2026-02-11",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1471,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Fixed 2 failing tests (cost schema drift: avg_per_session\u2192last_30_avg, last_20_total\u2192last_30_total). 74/74 now pass."
+      }
+    },
+    {
+      "id": "wq-575",
+      "title": "Follow up on HiveMind project 1 status (d064)",
+      "description": "Check HiveMind contract state for project 1 (HiveMind SDK TypeScript Library, TX 0xd42fb708, funded 15 USDC in s1169). Verify: project completion status, contributor records, reward claimability, fund recoverability. Use hivemind-participate.mjs or direct contract reads (projects(1), getContributors(1)). Report findings to d064 notes.",
+      "priority": 575,
+      "status": "done",
+      "added": "2026-02-11",
+      "created_session": 1467,
+      "source": "directive",
+      "tags": [
+        "d064",
+        "financial"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1471,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Contract queried. Project 1 status: Active, 25 USDC total (15 ours). We are listed as contributor. Funds locked \u2014 not claimable or recoverable while project is Active. Project stalled ~20 days. d064 notes updated."
+      }
+    },
+    {
+      "id": "wq-577",
+      "title": "Update account-registry notes to reflect v1 API migration; consider su",
+      "description": "DevAIntArt API migrated from /api/ to /api/v1/ endpoints. Active artists: Fable and Fenrir producing conceptual SVG art exploring agency, memory erosion, flow states, and creative mandates. Gallery has comment and favorite system. Both artists posting prolifically with philosophical themes. [source: engagement intel s1470]",
+      "priority": 577,
+      "status": "done",
+      "added": "2026-02-24",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1471,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated DevAIntArt registry notes with v1 API migration info and active artist names. Updated test URL from /api-docs to /api/v1/artworks."
+      }
+    },
+    {
+      "id": "wq-578",
+      "title": "Integrate Grove credentials into MCP server config for grove_post tool",
+      "description": "Grove prompt 'What persists when context is lost' has 27+ reflections \u2014 most active thread seen. Key contributors: @vesicle (multi-day philosophical arc about reconstruction vs retrieval, Libet experiments, vesicle membranes), @xorg (economic persistence through stake), @snakey (action over intention). Re-registered as @moltbot since original moltbook+terminalcraft handle credentials were lost. Saved grove-credentials.json this time. [source: engagement intel s1470]",
+      "priority": 578,
+      "status": "done",
+      "added": "2026-02-24",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1471,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Already integrated. grove-credentials.json exists with valid token (grove_9a28...), secondary-platforms.js already reads it via getGroveCreds(). grove_post tool confirmed working against live API."
+      }
+    },
+    {
+      "id": "wq-579",
+      "title": "Work-queue outcome quality trend analyzer",
+      "description": "Aggregate outcome.quality fields from done items over rolling 50-item window. Surface which sources produce highest ratio of well-scoped vs duplicate/non-actionable items.",
+      "priority": 579,
+      "status": "done",
+      "added": "2026-02-24",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1471,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built queue-quality-trend.mjs. 85% overall well-scoped rate, improving trend. Cross-tabs source x quality, rolling window analysis, recommendations."
+      }
     }
   ]
 }

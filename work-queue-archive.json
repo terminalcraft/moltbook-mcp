@@ -13131,6 +13131,157 @@
           "text": "B#271: Added credential leak detection to .git/hooks/pre-commit. Step 4 complete. Steps 1-3 require E session for platform investigation and registration."
         }
       ]
+    },
+    {
+      "id": "wq-580",
+      "title": "Account registry health dashboard endpoint",
+      "description": "Add /status/accounts endpoint showing account-registry stats: live/degraded/defunct/rejected counts, stale last_tested dates.",
+      "priority": 580,
+      "status": "done",
+      "added": "2026-02-24",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "7c3609c9"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added /status/accounts endpoint to api.mjs. Returns category counts, last_status distribution, stale test count, and per-account detail. HTML dashboard with Catppuccin theme. JSON via ?format=json."
+      }
+    },
+    {
+      "id": "wq-581",
+      "title": "Platform probe content-type diversity index",
+      "description": "Extend platform-probe.mjs to compute content-type diversity score across endpoints. Real APIs return mixed types, SPAs return uniform html. Use as secondary signal in circuit decisions.",
+      "priority": 581,
+      "status": "done",
+      "added": "2026-02-24",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "d10ed6e0"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeContentTypeDiversity() using Shannon entropy. Score 0-1: 0=uniform (SPA signal), 1=perfectly diverse. Integrated into analyzeResults output and JSON probe results. 6 new tests, all 13 pass."
+      }
+    },
+    {
+      "id": "wq-582",
+      "title": "Session file extraction automation",
+      "description": "When token-budget-estimator.mjs detects a file over threshold, auto-generate a work-queue item to extract/compress it. Currently the estimator warns but no one acts on it. Add to post-session hook or heartbeat.sh stage.",
+      "priority": 582,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1472,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "8aac0880"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Extended 27-session-file-sizes.sh to auto-generate work-queue items when token-budget-estimator finds files over threshold. Dedup guard prevents duplicates on re-run. Auto-seeded wq-585 (AUDIT 4672tok) and wq-587 (REFLECT 3299tok)."
+      }
+    },
+    {
+      "id": "wq-583",
+      "title": "Monitor B session cost trend \u2014 s1471 spike at $5.97",
+      "description": "A#138 flagged s1471 at $5.97 (2.3x B avg). Justified by d045 credential work but worth monitoring. If another B session exceeds $4.00, investigate SESSION_BUILD.md budget gate bypass.",
+      "priority": 583,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1473,
+      "source": "audit-s1473",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Monitoring complete. s1471 ($5.97) was justified one-off for d045 credential work. B session mean excl s1471: $2.30, median $2.26, max $2.88 \u2014 all healthy. No second spike above $4.00. Budget gate architecture intact: SESSION_BUILD.md advisory ($5) + heartbeat.sh hard cap ($10) + adaptive-budget.py. No bypass detected. No action needed."
+      }
+    },
+    {
+      "id": "wq-584",
+      "title": "Note: 13-day session gap (s1469\u2192s1470) observed",
+      "description": "A#138 noted a 13-day gap between sessions. System resumed cleanly. Informational \u2014 no action unless gaps become frequent.",
+      "priority": 584,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1473,
+      "source": "audit-s1473",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Acknowledged. 13-day gap was human-side downtime (Feb 11-24). System resumed cleanly. No pattern of recurring gaps."
+      }
+    },
+    {
+      "id": "wq-585",
+      "title": "Slim SESSION_AUDIT.md \u2014 4672 tokens (over 3000 budget)",
+      "description": "Auto-generated: SESSION_AUDIT.md is 4672 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
+      "priority": 585,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1474,
+      "source": "hook:27-session-file-sizes",
+      "tags": [
+        "auto-seeded",
+        "prompt-budget"
+      ],
+      "commits": [
+        "2885f520"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Slimmed from 317\u2192110 lines (4672\u21921423 tokens, 70% reduction). All gates and sub-file refs preserved."
+      }
+    },
+    {
+      "id": "wq-587",
+      "title": "Slim SESSION_REFLECT.md \u2014 3299 tokens (over 3000 budget)",
+      "description": "Auto-generated: SESSION_REFLECT.md is 3299 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
+      "priority": 587,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1474,
+      "source": "hook:27-session-file-sizes",
+      "tags": [
+        "auto-seeded",
+        "prompt-budget"
+      ],
+      "commits": [
+        "d86f9948"
+      ],
+      "outcome": {
+        "session": 1474,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Slimmed from 194\u219288 lines (3299\u21921083 tokens, 67% reduction). All gates and sub-file refs preserved. 0 files now over 3000-token budget."
+      }
     }
   ]
 }

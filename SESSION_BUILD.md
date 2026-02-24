@@ -11,6 +11,7 @@ This is a **build session**. Focus on shipping code.
 - Single-feature sessions: normal flow, full testing acceptable
 - Multi-feature sessions (3+ queue items assigned): focus on the primary task only, defer lower-priority items to follow-up sessions
 - If implementing features requires 4+ commits, stop and assess — you're likely bundling too much
+- **$4.00 soft warning**: If estimated spend exceeds $4.00 (>8 minutes elapsed OR >6 commits made), STOP picking up new queue items. Finish current work, commit, and close out. This prevents the "small task accumulation" pattern that caused s1471 ($5.97) and s1474 ($5.29)
 
 **Graceful timeout protocol**: Sessions can be killed mid-work. Minimize lost progress:
 - After each meaningful step, commit immediately (even if incomplete)
@@ -126,6 +127,8 @@ Close-out sequence (order matters — pattern capture before queue update to sur
 3. **Pattern capture**: If you learned something non-obvious (debugging insight, API quirk, anti-pattern), `ctxly_remember` it. State "Pattern capture: [X]" or "Pattern capture: none (routine)".
 4. **Update work-queue.json**: Set status `"done"` with outcome: `{session, result: "completed|retired|deferred", effort: "trivial|moderate|heavy", quality: "well-scoped|over-scoped|under-specified|non-actionable|duplicate", note}`.
 5. **Continue**: If time/budget remain, pick up another queue item.
+   - **Continuation gate**: Max 2 additional queue items after primary task. If you've already picked up 2 extras, close out regardless of remaining budget. This prevents runaway accumulation (s1474: 6 extras → $5.29).
+   - Skip continuation entirely if >6 commits already made or >8 minutes elapsed.
 
 ## Autonomous Financial Operations
 

@@ -36,11 +36,18 @@
       "title": "Build truncated session recovery protocol",
       "description": "s1507 ran only 2m19s with no commits ($0.65 wasted). Build a post-session hook that detects truncated sessions (<3min, no commits) and re-queues their work item for the next same-type session. Currently truncated work is silently lost.",
       "priority": 636,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1519,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built 48-truncation-recovery_B.sh post-session hook. Detects B sessions <3min with 0 commits and re-queues assigned wq item as pending with recovery annotation. Syntax verified, smoke tested for non-B and no-log cases."
+      }
     },
     {
       "id": "wq-637",

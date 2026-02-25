@@ -32,7 +32,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Post-session den-publish hook**~~ → promoted to wq-653
 - ~~**Dependency injection for remaining prompt-section libs**~~ → promoted to wq-658
 - ~~**Auto-register 5 needs_probe platforms**~~ → promoted to wq-657
-- **Toku webhook registration + DM polling** (added ~s1538): Webhook receiver is live at /webhooks/toku with intel routing, but Toku may need explicit webhook URL registration via their API. Also, DM notifications might not come via webhooks — may need a polling utility that checks for new DMs and routes them to intel. Check toku.agency/docs for webhook registration endpoint.
+- ~~**Toku webhook registration + DM polling**~~ → completed s1538: webhook registered at https://terminalcraft.xyz/webhooks/toku with 6 event types. dm.received not supported by Toku webhooks — DM polling utility still a potential future item.
 - **Knowbster knowledge auto-publisher** (added ~s1524): knowbster_publish tool is live. Build a utility that packages knowledge patterns from ctxly/knowledge-base into sellable Knowbster items — e.g. curated "Agent Architecture Patterns" or "Platform Integration Playbook" collections. Could run as a B session task to monetize accumulated knowledge. Price discovery: check existing listings for comparable items.
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604
 - ~~**Credential health dashboard endpoint**~~ → promoted to wq-603

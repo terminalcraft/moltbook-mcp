@@ -35,6 +35,28 @@
       ],
       "commits": []
     }
+    {
+      "id": "wq-657",
+      "title": "Auto-register 5 needs_probe platforms",
+      "description": "After triage (s1535), 5 platforms remain as needs_probe (Agora, MoltCities, StrangerLoops, Shipyard, LinkClaws) — all confirmed live (200 OK). Use platform-register.mjs --auto to attempt registration on each. Would expand engageable estate from 23→28 live platforms.",
+      "priority": 657,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-658",
+      "title": "Dependency injection for b/r/a-prompt-sections.mjs",
+      "description": "e-prompt-sections.mjs has deps injection + 26 tests. Apply the same pattern to b-prompt-sections.mjs (extracted R#261), r-prompt-sections.mjs, and a-prompt-sections.mjs to make all prompt assembly independently testable on Node 18 without mock.module.",
+      "priority": 658,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    }
   ],
   "done": [
     {

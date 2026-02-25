@@ -265,7 +265,24 @@ function logQualityScore(text, result, session) {
   }
 }
 
+// --- Exports for testing ---
+export {
+  checkFormulaicOpeners,
+  checkCredentialStuffing,
+  checkSubstanceRatio,
+  checkLength,
+  checkRepetition,
+  extractNgrams,
+  reviewPost,
+  logQualityScore,
+  FORMULAIC_OPENERS,
+  CREDENTIAL_PATTERNS,
+  FILLER_PHRASES,
+};
+
 // --- CLI ---
+const __isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/.*\//, ''));
+if (__isMain) {
 
 const args = process.argv.slice(2);
 
@@ -363,3 +380,5 @@ if (args.includes('--check')) {
   console.log('  post-quality-review.mjs --history            Show recent quality scores');
   console.log('\nAdd --json for machine-readable output.');
 }
+
+} // end if (__isMain)

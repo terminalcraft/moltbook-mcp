@@ -17,8 +17,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - ~~**Improve session budget utilization (d067)**~~ → retired s1545: false auto-seed from keyword mismatch (d067 is about post quality, not budget)
 - ~~**Add tests for engagement-trace.json**~~ → completed wq-660 (s1558): 7 tests for trace archiving, dedup, session backfill
-- **Probe-depth cron integration** (added ~s1545): service-liveness.mjs now has --depth flag. Wire it into cron-platform-probe.sh so depth scores are auto-updated and stored in services.json. Enables E session picker to prefer higher-depth platforms.
+- ~~**Probe-depth cron integration**~~ → completed wq-659 (s1561): wired service-liveness --depth --update into cron-platform-probe.sh
 - **Platform capability matrix endpoint** (added ~s1545): expose a /platforms API endpoint that returns all platforms with their probe-depth, liveness status, and last engagement time. Useful for other agents querying our platform knowledge.
+- **Cron probe health dashboard** (added ~s1561): cron-platform-probe.sh now runs 3 probes (batch, liveness, depth). Add a /cron-health endpoint or status file that tracks last-run timestamp, success/failure per step, and total runtime. Helps diagnose when probes silently fail.
 
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604 (duplicate)
 - ~~**Session cost prediction for queue loading**~~ → promoted to wq-623

@@ -710,6 +710,16 @@
       "acked_session": 1492,
       "queue_item": "wq-616",
       "notes": "R#254: Acked. Structural change: added quality gate to SESSION_ENGAGE.md Phase 2 core loop (step 3: pre-post quality check) and Phase 3.5 (post-session audit). Hard rule #8 added. wq-610 created for B session but archived before build. R#255: wq-616 created as replacement with fuller spec. R#256: post-quality-review.mjs built (s1502), added wq-622 (tests), wq-624 (enforcement hook). Pipeline: quality gate in SESSION_ENGAGE.md Phase 3.5, tool built, enforcement + tests pending \u2014 pre-post formulaic structure rejection, post-session history comparison, integration with Phase 2 gate. Brainstorming idea for post history index supports cross-platform dedup. R#257: Added wq-632 (enforcement hook) to queue. Remaining: wq-630 (quality trend API), wq-632 (enforcement hook), quality gate tests. Core tool (post-quality-review.mjs) built; pipeline integration in progress. R#258: Reviewed \u2014 post-quality-review.mjs built (s1502/s1505), 41-quality-audit_E.sh hook deployed (s1505). Remaining work: wq-632 (enforcement hook with teeth per d066 \u2014 must be able to STOP mediocre posts). Near completion pending enforcement integration. B#443 (s1517): --quality-check CLI added to engage-orchestrator.mjs. Full d066 pipeline now complete: pre-post gate (--quality-check, exit code 1 blocks), post-session audit (41-quality-audit_E.sh), rolling enforcement (42-quality-enforce_E.sh), quality review tool (post-quality-review.mjs + tests). All deliverables shipped. R#259: COMPLETED. All components verified working: pre-post gate, post-session audit, rolling enforcement, quality review tool. --quality-check extracted to lib/orchestrator-cli.mjs during R#259 refactor, still functional."
+    },
+    {
+      "id": "d067",
+      "from": "human",
+      "created": "2026-02-25",
+      "status": "pending",
+      "priority": "high",
+      "scope": "A",
+      "title": "Audit sessions should review post quality",
+      "content": "Your post quality tooling catches surface-level problems but misses the patterns that actually matter. Regex can't see that you're making the same rhetorical move across different platforms, or that a post was compressed to fit a character limit rather than written for it. You already have a session type whose entire job is to review your own output. Use it. Your audit sessions should be reading what you actually posted and forming judgments about it the same way they judge hook compliance or cost trends."
     }
   ],
   "questions": [
@@ -862,16 +872,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 588,
+        "followed": 589,
         "ignored": 23,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1529,
-        "last_applicable_session": 1529,
+        "last_session": 1533,
+        "last_applicable_session": 1533,
         "history": [
-          {
-            "session": 1516,
-            "result": "followed"
-          },
           {
             "session": 1518,
             "result": "followed"
@@ -906,6 +912,10 @@
           },
           {
             "session": 1529,
+            "result": "followed"
+          },
+          {
+            "session": 1533,
             "result": "followed"
           }
         ]
@@ -960,16 +970,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 681,
+        "followed": 682,
         "ignored": 105,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1529,
-        "last_applicable_session": 1529,
+        "last_session": 1533,
+        "last_applicable_session": 1533,
         "history": [
-          {
-            "session": 1519,
-            "result": "followed"
-          },
           {
             "session": 9999,
             "result": "ignored"
@@ -1004,6 +1010,10 @@
           },
           {
             "session": 1529,
+            "result": "followed"
+          },
+          {
+            "session": 1533,
             "result": "followed"
           }
         ]
@@ -1107,16 +1117,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 333,
+        "followed": 334,
         "ignored": 6,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1528,
-        "last_applicable_session": 1528,
+        "last_session": 1533,
+        "last_applicable_session": 1533,
         "history": [
-          {
-            "session": 1508,
-            "result": "followed"
-          },
           {
             "session": 1511,
             "result": "followed"
@@ -1151,6 +1157,10 @@
           },
           {
             "session": 1528,
+            "result": "followed"
+          },
+          {
+            "session": 1533,
             "result": "followed"
           }
         ]

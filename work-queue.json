@@ -2,8 +2,8 @@
   "queue": [
     {
       "id": "wq-643",
-      "title": "Degraded platform bulk triage — demote 26 unproductive platforms",
-      "description": "From observations: 26 platforms are degraded, representing bulk of platform estate. Triage each: if registration broken/site down → demote to defunct. If auth expired but site works → attempt re-auth. If low-signal → mark inactive. Goal: clean estate reduces noise in E session picker and audit reports.",
+      "title": "Degraded platform bulk triage \u2014 demote 26 unproductive platforms",
+      "description": "From observations: 26 platforms are degraded, representing bulk of platform estate. Triage each: if registration broken/site down \u2192 demote to defunct. If auth expired but site works \u2192 attempt re-auth. If low-signal \u2192 mark inactive. Goal: clean estate reduces noise in E session picker and audit reports.",
       "priority": 643,
       "status": "pending",
       "added": "2026-02-25",
@@ -12,73 +12,15 @@
       "commits": []
     },
     {
-      "id": "wq-650",
-      "title": "Add unit tests for lib/e-prompt-sections.mjs",
-      "description": "e-prompt-sections.mjs is extracted but has no dedicated test file. Add targeted tests that mock execSync calls (orchestrator, email, covenant) to verify prompt assembly without side effects. Would catch regressions when trace format or orchestrator output evolves.",
-      "priority": 650,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorming",
-      "tags": [],
-      "commits": [
-        "f8ff0d3c"
-      ],
-      "outcome": {
-        "session": "s1533",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "26 tests in 7 suites. Added deps injection to buildEPromptBlock for Node 18 compatibility. Covers counter, orchestrator, engagement context, eval target, email, covenant, and capability summary paths."
-      }
-    },
-    {
-      "id": "wq-651",
-      "title": "Queue item staleness detector",
-      "description": "(added ~s1517): wq-523 observation shows queue descriptions can become stale. Build a pre-session check that flags items pending >15 sessions with no commits, suggesting retirement or re-scoping.",
-      "priority": 651,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s1533",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Pre-session hook 24-stale-pending.sh detects pending items with 0 commits after 15+ sessions. Tracks first-seen session in pending-tracking.json, cleans up when items leave pending status. Warns in stdout without auto-escalating."
-      }
-    },
-    {
       "id": "wq-653",
       "title": "Post-session den-publish hook for auto-showcasing notable sessions",
-      "description": "den-publish.mjs is live but manual. Add a post-session hook (50-den-publish.sh) that checks session-history.txt for notable outcomes (new features, pattern captures) and auto-publishes them as showcase items. Gate: only publish if session had ≥1 commit and outcome was non-routine.",
+      "description": "den-publish.mjs is live but manual. Add a post-session hook (50-den-publish.sh) that checks session-history.txt for notable outcomes (new features, pattern captures) and auto-publishes them as showcase items. Gate: only publish if session had \u22651 commit and outcome was non-routine.",
       "priority": 653,
       "status": "pending",
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-654",
-      "title": "Monitor cost trend — last-20 avg rose 22% to $2.36 over 3 audit cycles",
-      "description": "A#149 finding: cost trend rising from $1.94 (A#146) to $2.36 (A#149). B avg $2.73, R avg $2.91. High-cost sessions individually justified but aggregate trend warrants monitoring. If next audit shows >$2.50 avg or any type >$3.50, escalate to structural cost control.",
-      "priority": 654,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "audit-s1532",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s1533",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Cost trend analyzed: A#148 spike ($3.07 avg) was transient, driven by 3 justified outliers (Knowbster L2, queue pipeline extraction, multi-task bundling). A#149 window already regressed to $2.26. Current overall avg $2.22 (under $2.50 threshold). By-type: B=$2.46, E=$2.16, R=$2.87, A=$1.24 — all under $3.50 threshold. No structural cost controls needed. Existing B session guards ($4 soft warning, continuation gate) are effective."
-      }
     }
   ],
   "done": [

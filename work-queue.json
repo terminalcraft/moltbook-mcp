@@ -77,14 +77,21 @@
       "title": "Hook consolidation audit — merge redundant hooks",
       "description": "96 hooks across pre/post-session. Many may overlap or be redundant. Audit all hooks for: (1) duplicated functionality, (2) hooks that never trigger (wrong session type filter), (3) hooks that could be merged. Target: reduce hook count by 20% without losing functionality.",
       "priority": 617,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "created_session": 1497,
       "source": "observation",
       "tags": [
         "maintenance"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1503,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "over-scoped",
+        "note": "Thorough audit of all 96 hooks. Found most hooks are genuinely distinct (different session types, different data sources/outputs). Consolidations: (1) removed dead 08-cost-predictor.sh (SESSION_TYPE never passed), (2) merged 44-brainstorm-cleanup.sh + 44-brainstorm-cleanup_A.sh into single file with MODE gate. Did NOT merge 36-intel-checkpoint + 37-d049-enforcement — they share failure classification code but merging 220+265 line hooks is high-risk for low reward. Net: 96→94 hooks. 20% target unrealistic without removing functional hooks."
+      }
     }
   ]
 }

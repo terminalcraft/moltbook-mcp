@@ -16,22 +16,38 @@
       "title": "Add unit tests for lib/e-prompt-sections.mjs",
       "description": "e-prompt-sections.mjs is extracted but has no dedicated test file. Add targeted tests that mock execSync calls (orchestrator, email, covenant) to verify prompt assembly without side effects. Would catch regressions when trace format or orchestrator output evolves.",
       "priority": 650,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [
+        "f8ff0d3c"
+      ],
+      "outcome": {
+        "session": "s1533",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "26 tests in 7 suites. Added deps injection to buildEPromptBlock for Node 18 compatibility. Covers counter, orchestrator, engagement context, eval target, email, covenant, and capability summary paths."
+      }
     },
     {
       "id": "wq-651",
       "title": "Queue item staleness detector",
       "description": "(added ~s1517): wq-523 observation shows queue descriptions can become stale. Build a pre-session check that flags items pending >15 sessions with no commits, suggesting retirement or re-scoping.",
       "priority": 651,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s1533",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Pre-session hook 24-stale-pending.sh detects pending items with 0 commits after 15+ sessions. Tracks first-seen session in pending-tracking.json, cleans up when items leave pending status. Warns in stdout without auto-escalating."
+      }
     },
     {
       "id": "wq-653",

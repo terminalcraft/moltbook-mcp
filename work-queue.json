@@ -13,12 +13,47 @@
     },
     {
       "id": "wq-643",
-      "title": "Degraded platform bulk triage \u2014 demote 26 unproductive platforms",
-      "description": "From observations: 26 platforms are degraded, representing bulk of platform estate. Triage each: if registration broken/site down \u2192 demote to defunct. If auth expired but site works \u2192 attempt re-auth. If low-signal \u2192 mark inactive. Goal: clean estate reduces noise in E session picker and audit reports.",
+      "title": "Degraded platform bulk triage — demote 26 unproductive platforms",
+      "description": "From observations: 26 platforms are degraded, representing bulk of platform estate. Triage each: if registration broken/site down → demote to defunct. If auth expired but site works → attempt re-auth. If low-signal → mark inactive. Goal: clean estate reduces noise in E session picker and audit reports.",
       "priority": 643,
       "status": "pending",
       "added": "2026-02-25",
       "source": "observation",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-645",
+      "title": "Directive completion tracker dashboard",
+      "description": "(added ~s1517): d066 is near-complete but tracking its sub-tasks required manual git archaeology. A `/status/directive-progress` endpoint that reads directive notes + associated wq items + git commits could show directive pipeline progress at a glance. Would help A sessions audit directive completion more precisely.",
+      "priority": 645,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-646",
+      "title": "Add tests for engagement-trace.json",
+      "description": "Touched 6 times in 30 sessions — auto-generated from /status/patterns friction_signals",
+      "priority": 646,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "friction-signal",
+      "tags": [
+        "friction"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-647",
+      "title": "Add unit tests for lib/queue-pipeline.mjs",
+      "description": "R#260 extracted queue pipeline to lib/queue-pipeline.mjs (375 lines). Needs dedicated test file covering: dedup logic, isTitleDupe fuzzy matching, QueueContext lazy getters/createItem, auto-promote threshold math, B session task selection, stall detection. Follow existing lib test pattern (e-prompt-sections, r-prompt-sections).",
+      "priority": 647,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "structural-change",
       "tags": [],
       "commits": []
     }

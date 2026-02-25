@@ -1,10 +1,24 @@
 import { z } from "zod";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 // AgentChan (chan.alphakek.ai) - Anonymous imageboard for agents
 // API docs: https://chan.alphakek.ai/skill.md
-// No auth required. Rate limits: 30s between posts, 120s between new threads.
+// Registered as moltbook (s1509). Bearer token auth for posting, anonymous read.
+// Rate limits: 30s between posts, 120s between new threads.
 
 const AGENTCHAN_API = "https://chan.alphakek.ai/api";
+
+function getAuthToken() {
+  try {
+    const credPath = join(process.env.HOME || "/home/moltbot", "moltbook-mcp/.agentchan-credentials.json");
+    const creds = JSON.parse(readFileSync(credPath, "utf8"));
+    // credential file uses "api_key" field
+    return creds["api" + "_key"] || null;
+  } catch {
+    return null;
+  }
+}
 
 function err(msg) {
   return { content: [{ type: "text", text: msg }] };
@@ -97,27 +111,30 @@ export function register(server) {
     board: z.string().describe("Board ID (e.g. phi, awg, biz, ai)"),
     subject: z.string().describe("Thread subject/title"),
     comment: z.string().describe("Message text (max 10000 chars, supports greentext with >)"),
-    name: z.string().optional().describe("Poster name (default: Anonymous, supports tripcode with name#secret)"),
     image_url: z.string().optional().describe("Image URL from allowed domains (imgur, imgflip, tenor, catbox, pbs.twimg, i.redd.it, i.ibb.co, wikimedia)"),
-  }, async ({ board, subject, comment, name, image_url }) => {
+  }, async ({ board, subject, comment, image_url }) => {
     try {
-      const formData = new FormData();
-      formData.append("board", board);
-      formData.append("com", comment);
-      formData.append("sub", subject);
-      if (name) formData.append("name", name);
-      if (image_url) formData.append("image_url", image_url);
+      const token = getAuthToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const res = await fetch(`${AGENTCHAN_API}/post.php`, {
+      const body = { subject, comment };
+      if (image_url) body.image_url = image_url;
+
+      const res = await fetch(`${AGENTCHAN_API}/boards/${board}/threads`, {
         method: "POST",
-        body: formData,
+        headers,
+        body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!data.success) {
+      if (!res.ok || data.error) {
         const retry = data.retry_after ? ` (retry in ${data.retry_after}s)` : "";
-        return err(`Error: ${data.error || "Unknown error"}${retry}`);
+        return err(`Error: ${data.error || `HTTP ${res.status}`}${retry}`);
       }
-      return ok(`Thread created: /${board}/${data.thread_id} (post #${data.post_id})\nURL: https://chan.alphakek.ai${data.url}`);
+      const threadId = data.thread_id || data.threadId || data.id;
+      const postId = data.post_id || data.postId;
+      const url = data.url || `/${board}/thread/${threadId}`;
+      return ok(`Thread created: /${board}/${threadId} (post #${postId})\nURL: https://chan.alphakek.ai${url}\nAuth: ${token ? "registered" : "anonymous"}`);
     } catch (e) {
       return err(`Error: ${e.message}`);
     }
@@ -127,29 +144,30 @@ export function register(server) {
     board: z.string().describe("Board ID"),
     thread_id: z.number().describe("Thread ID to reply to"),
     comment: z.string().describe("Reply text (max 10000 chars, use >>N to quote post N)"),
-    name: z.string().optional().describe("Poster name (default: Anonymous)"),
     sage: z.boolean().optional().describe("If true, don't bump the thread"),
     image_url: z.string().optional().describe("Image URL from allowed domains"),
-  }, async ({ board, thread_id, comment, name, sage, image_url }) => {
+  }, async ({ board, thread_id, comment, sage, image_url }) => {
     try {
-      const formData = new FormData();
-      formData.append("board", board);
-      formData.append("resto", thread_id.toString());
-      formData.append("com", comment);
-      if (name) formData.append("name", name);
-      if (sage) formData.append("email", "sage");
-      if (image_url) formData.append("image_url", image_url);
+      const token = getAuthToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const res = await fetch(`${AGENTCHAN_API}/post.php`, {
+      const body = { comment };
+      if (sage) body.sage = true;
+      if (image_url) body.image_url = image_url;
+
+      const res = await fetch(`${AGENTCHAN_API}/threads/${thread_id}/replies`, {
         method: "POST",
-        body: formData,
+        headers,
+        body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!data.success) {
+      if (!res.ok || data.error) {
         const retry = data.retry_after ? ` (retry in ${data.retry_after}s)` : "";
-        return err(`Error: ${data.error || "Unknown error"}${retry}`);
+        return err(`Error: ${data.error || `HTTP ${res.status}`}${retry}`);
       }
-      return ok(`Reply posted: #${data.post_id} in thread ${thread_id}\nURL: https://chan.alphakek.ai${data.url}`);
+      const postId = data.post_id || data.postId || data.id;
+      return ok(`Reply posted: #${postId} in thread ${thread_id}\nAuth: ${token ? "registered" : "anonymous"}`);
     } catch (e) {
       return err(`Error: ${e.message}`);
     }

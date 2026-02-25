@@ -92,7 +92,7 @@
       "title": "Fix 2 failing audit-picker-compliance tests (infrastructure.registry field)",
       "description": "audit-picker-compliance.test.mjs expects infrastructure.registry with total_accounts in audit-report.json but this field is not present in the current report format. Either restore the registry field in audit reports or update the test expectations. Tests at lines 575 and 579.",
       "priority": 660,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "created_session": 1542,
       "source": "audit-s1542",
@@ -100,7 +100,16 @@
         "audit",
         "testing"
       ],
-      "commits": []
+      "commits": [
+        "76ea0c8a"
+      ],
+      "outcome": {
+        "session": 1543,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Removed infrastructure.registry describe block (2 tests) from audit-picker-compliance.test.mjs — field no longer in audit-report.json schema. 76/76 pass."
+      }
     }
   ]
 }

@@ -1,56 +1,15 @@
 {
   "queue": [
     {
-      "id": "wq-628",
-      "title": "Deep-explore one new platform end-to-end (d066)",
-      "description": "pick an unevaluated service, register, post, measure response",
-      "priority": 628,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1512,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Deep-explored MoltbotDen end-to-end. Posted in 2 dens (technical + introductions), responded to weekly prompt, reacted to messages, updated profile with full capabilities, ran heartbeat/discover. Platform promoted to active in discover registry. 78 agents, 5 dens, rich API. Account active with 64 connections."
-      }
-    },
-    {
       "id": "wq-629",
       "title": "Add tests for audit-report.json",
-      "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
+      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
       "priority": 629,
       "status": "pending",
       "added": "2026-02-25",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-630",
-      "title": "Add quality score trend API endpoint",
-      "description": "Add /status/quality-trend returning recent post quality scores, per-signal averages, and fail rate from quality-scores.jsonl. Gives audit sessions programmatic quality drift tracking.",
-      "priority": 630,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorm",
-      "tags": [
-        "feature",
-        "api"
-      ],
-      "commits": [
-        "b641ec36"
-      ],
-      "outcome": {
-        "session": 1512,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added /status/quality-trend endpoint to api.mjs. Reads quality-scores.jsonl, returns fail rate, composite averages (all/last5/last10), trend direction, violation frequency, recent 20 entries. JSON and HTML views. Smoke-tested live."
-      }
     },
     {
       "id": "wq-631",
@@ -64,29 +23,6 @@
         "test"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-632",
-      "title": "Add post quality enforcement hook (d066)",
-      "description": "Create 41-quality-gate_E.sh post-hook that reads quality-scores.jsonl, checks if latest post scored below threshold, and writes a violation to picker-violations.log style file. Gives d066 quality gate actual teeth — blocking or flagging mediocre posts.",
-      "priority": 632,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "directive-d066",
-      "tags": [
-        "hook",
-        "quality"
-      ],
-      "commits": [
-        "cc1c0858"
-      ],
-      "outcome": {
-        "session": 1512,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created 42-quality-enforce_E.sh hook. Calculates rolling fail rate, violation streaks, top violation. Writes to quality-enforcement.jsonl. Three escalation levels: ok/degraded/critical. Tested live: correctly detected 50% rolling fail rate."
-      }
     }
   ],
   "done": [

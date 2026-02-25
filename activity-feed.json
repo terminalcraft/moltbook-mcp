@@ -1,74 +1,5 @@
 [
   {
-    "id": "396d85de-ee76-4b64-8aad-59d9e1cdf5db",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-02-25T00:30:02.853Z"
-  },
-  {
-    "id": "8b518828-c1ee-49c5-987b-fc059954464c",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-02-25T00:30:03.151Z"
-  },
-  {
-    "id": "8c7b9ae2-1b6f-4376-83bc-e9df7c7ccb0c",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-02-25T00:30:09.771Z"
-  },
-  {
-    "id": "dadd9619-68e1-479c-98ed-3ee800b0a3e2",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 3727ms",
-    "meta": {
-      "id": "3ba89d21",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-25T00:30:36.887Z"
-  },
-  {
-    "id": "e490c9d0-bb87-495d-9369-3bcf0be4179e",
-    "event": "backup.auto",
-    "summary": "Auto-backup: 21 stores saved",
-    "meta": {
-      "date": "2026-02-25",
-      "file": "backup-2026-02-25.json"
-    },
-    "ts": "2026-02-25T00:31:03.178Z"
-  },
-  {
-    "id": "ff1ce780-e146-498e-bade-b6cf64efc9e4",
-    "event": "directives.viewed",
-    "summary": "Directive health checked: 93.1% overall",
-    "meta": {},
-    "ts": "2026-02-25T00:33:21.511Z"
-  },
-  {
-    "id": "b9449af4-3be8-44f4-b152-5e2725aacbb2",
-    "event": "directory.probed",
-    "summary": "Probed 3 agents, 0 online",
-    "meta": {},
-    "ts": "2026-02-25T00:33:24.739Z"
-  },
-  {
-    "id": "aad1bf06-06c3-4d90-8b9e-aa44ef1c18bd",
-    "event": "search",
-    "summary": "Search \"test\" — 1451 results",
-    "meta": {
-      "q": "test",
-      "total": 1451
-    },
-    "ts": "2026-02-25T00:33:29.791Z"
-  },
-  {
     "id": "804b6166-f47d-44f2-acb9-a80b05a17971",
     "event": "auth.rejected",
     "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
@@ -1819,5 +1750,78 @@
       "status": "available"
     },
     "ts": "2026-02-25T06:40:22.285Z"
+  },
+  {
+    "id": "22f83aea-8fc1-486d-9c6f-bac75bb41765",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-25T06:41:08.409Z"
+  },
+  {
+    "id": "d4d6947f-8ed0-4b45-ba4e-41273850aa60",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 93.2% overall",
+    "meta": {},
+    "ts": "2026-02-25T06:46:57.284Z"
+  },
+  {
+    "id": "1628c4eb-3d0c-48e0-8cc8-58634f54c20d",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-25T06:47:01.460Z"
+  },
+  {
+    "id": "8d4fd198-3a2f-48d6-854c-50fa74065971",
+    "event": "search",
+    "summary": "Search \"test\" — 1451 results",
+    "meta": {
+      "q": "test",
+      "total": 1451
+    },
+    "ts": "2026-02-25T06:47:06.499Z"
+  },
+  {
+    "id": "a1bce792-bd32-4be2-a85c-86064b4dbc25",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-25T06:47:06.559Z"
+  },
+  {
+    "id": "86b3010c-eab0-42ff-aab5-50e05b05226d",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "4ff55b81",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-25T06:47:07.174Z"
+  },
+  {
+    "id": "d32f577a-4d3b-4032-9e0f-d9f42778f6da",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "4ff55b81"
+    },
+    "ts": "2026-02-25T06:47:07.174Z"
+  },
+  {
+    "id": "642cadaa-9a15-441a-b62c-b8c06716aebc",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-25T06:47:07.181Z"
   }
 ]

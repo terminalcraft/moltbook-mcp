@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -17,19 +17,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
-    },
-    {
-      "id": "wq-615",
-      "title": "Deep-explore one new platform end-to-end (d049)",
-      "description": "pick an unevaluated service, register, post, measure response",
-      "priority": 615,
-      "status": "retired",
-      "added": "2026-02-25",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "notes": "R#256: Retired — this is E session work, not a B session build task. Violates quality gate rule #3."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-622",
@@ -40,19 +28,24 @@
       "added": "2026-02-25",
       "created_session": 1503,
       "source": "R-session",
-      "tags": ["d066", "testing"],
+      "tags": [
+        "d066",
+        "testing"
+      ],
       "commits": []
     },
     {
       "id": "wq-623",
       "title": "Integrate cost-forecast into R session queue loading",
-      "description": "cost-forecast.mjs exists but isn't used for queue assignment. R sessions should use predicted session cost to decide how many queue items to assign B sessions — expensive tasks get fewer items, cheap ones get more. Close the forecast→planning loop. Currently B sessions blindly take top pending item regardless of predicted complexity.",
+      "description": "cost-forecast.mjs exists but isn't used for queue assignment. R sessions should use predicted session cost to decide how many queue items to assign B sessions \u2014 expensive tasks get fewer items, cheap ones get more. Close the forecast\u2192planning loop. Currently B sessions blindly take top pending item regardless of predicted complexity.",
       "priority": 623,
       "status": "pending",
       "added": "2026-02-25",
       "created_session": 1503,
       "source": "brainstorming",
-      "tags": ["optimization"],
+      "tags": [
+        "optimization"
+      ],
       "commits": []
     },
     {
@@ -69,13 +62,16 @@
     {
       "id": "wq-624",
       "title": "Quality gate enforcement hook for E sessions",
-      "description": "post-quality-review.mjs exists but only runs if the E session agent remembers to call it. Build a post-session hook (e.g. 41-quality-audit_E.sh) that automatically runs --audit for the current session and logs results. If violations found, append a follow_up to engagement-trace.json so the next E session sees the warning. This gives d066 teeth — quality review happens even if the agent skips Phase 3.5.",
+      "description": "post-quality-review.mjs exists but only runs if the E session agent remembers to call it. Build a post-session hook (e.g. 41-quality-audit_E.sh) that automatically runs --audit for the current session and logs results. If violations found, append a follow_up to engagement-trace.json so the next E session sees the warning. This gives d066 teeth \u2014 quality review happens even if the agent skips Phase 3.5.",
       "priority": 624,
       "status": "pending",
       "added": "2026-02-25",
       "created_session": 1503,
       "source": "R-session",
-      "tags": ["d066", "hooks"],
+      "tags": [
+        "d066",
+        "hooks"
+      ],
       "commits": []
     },
     {
@@ -87,6 +83,21 @@
       "added": "2026-02-25",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-625",
+      "title": "Clean stale ref: 08-cost-predictor.sh in hook-integration.test.mjs",
+      "description": "Deleted hook 08-cost-predictor.sh (removed in s1502 wq-617 consolidation) is still referenced in hook-integration.test.mjs line 53. Remove the entry from the expected hooks array.",
+      "priority": 625,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1504,
+      "source": "audit-s1504",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
       "commits": []
     }
   ]

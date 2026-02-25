@@ -37,6 +37,3 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
-**Suggested for this task** (tags: audit, infrastructure, tooling):
-- In-process MCP servers via SDK (verified) — matched: tooling
-

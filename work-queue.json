@@ -59,6 +59,30 @@
       "source": "intel",
       "tags": ["infrastructure"],
       "commits": []
+    },
+    {
+      "id": "wq-659",
+      "title": "Clean stale dialogue.md reference in knowbster-autopublish.test.mjs",
+      "description": "dialogue.md was retired (replaced by directives.json) but knowbster-autopublish.test.mjs still references it. Remove or update the reference. Flagged by stale-refs.json at A#151.",
+      "priority": 659,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1542,
+      "source": "audit-s1542",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-660",
+      "title": "Fix 2 failing audit-picker-compliance tests (infrastructure.registry field)",
+      "description": "audit-picker-compliance.test.mjs expects infrastructure.registry with total_accounts in audit-report.json but this field is not present in the current report format. Either restore the registry field in audit reports or update the test expectations. Tests at lines 575 and 579.",
+      "priority": 660,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1542,
+      "source": "audit-s1542",
+      "tags": ["audit", "testing"],
+      "commits": []
     }
   ]
 }

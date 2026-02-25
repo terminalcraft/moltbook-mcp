@@ -162,11 +162,16 @@ const { wq, queue, queueCtx, dirtyRef: wqDirtyRef, pending, blocked, retired } =
     // Source 1: Unaddressed directives — table-driven keyword→seed mapping (R#78).
     // Previously a chain of if/else blocks that was hard to extend. Now declarative:
     // each entry maps keyword patterns to a concrete seed title+description template.
+    // B#454: Added minMatch field to prevent false keyword matches.
+    // Previously `.some()` triggered on ANY single keyword. d067 ("cost trends")
+    // falsely matched the budget row, producing wq-004 (non-actionable).
+    // Now each row specifies minMatch (default 1). Rows with common single-word
+    // keywords (like 'cost') use minMatch:2 to require multiple keyword hits.
     const DIRECTIVE_SEED_TABLE = [
       { keywords: ['ecosystem', 'map', 'discover', 'catalog'], title: 'Batch-evaluate 5 undiscovered services', desc: 'systematically probe unevaluated services from services.json' },
       { keywords: ['explore', 'evaluate', 'e session', 'depth'], title: 'Deep-explore one new platform end-to-end', desc: 'pick an unevaluated service, register, post, measure response' },
       { keywords: ['account', 'credential', 'cred', 'path resolution'], title: 'Fix credential management issues', desc: 'audit account-manager path resolution and platform health checks' },
-      { keywords: ['budget', 'cost', 'utilization', 'spending'], title: 'Improve session budget utilization', desc: 'add retry loops or deeper exploration to underutilized sessions' },
+      { keywords: ['budget', 'cost', 'utilization', 'spending'], minMatch: 2, title: 'Improve session budget utilization', desc: 'add retry loops or deeper exploration to underutilized sessions' },
       { skip: true, keywords: ['safety', 'hook', 'do not remove', 'do not weaken'] },
     ];
     // R#230: Use fc.json(PATHS.directives) instead of raw readFileSync.
@@ -178,7 +183,10 @@ const { wq, queue, queueCtx, dirtyRef: wqDirtyRef, pending, blocked, retired } =
         for (const d of active) {
           if (seeds.length >= maxSeeds) break;
           const content = (d.content || '').toLowerCase();
-          const match = DIRECTIVE_SEED_TABLE.find(row => row.keywords.some(k => content.includes(k)));
+          const match = DIRECTIVE_SEED_TABLE.find(row => {
+            const hits = row.keywords.filter(k => content.includes(k)).length;
+            return hits >= (row.minMatch || 1);
+          });
           if (match?.skip) continue;
           // R#86: Always include directive ID in title to prevent cross-directive
           // collisions. Previously, two directives matching the same keyword row

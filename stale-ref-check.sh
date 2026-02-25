@@ -56,13 +56,43 @@ ARCHIVE_EXCLUDES=(
 )
 
 found_stale=0
+
+# is_structural_ref — for JSON files, verify the match is a structural reference
+# (not just mentioned in a content/description/note/title prose field)
+is_structural_ref() {
+  local ref_file="$1"
+  local search_term="$2"
+  # Non-JSON files: always structural
+  [[ "$ref_file" != *.json ]] && return 0
+  # For JSON files, check if ANY match line is NOT a prose field
+  # Prose fields: "content", "description", "note", "title", "summary", "body"
+  local prose_pattern='"(content|description|note|title|summary|body)"'
+  local all_matches non_prose
+  all_matches=$(grep -n "$search_term" "$ref_file" 2>/dev/null || true)
+  [ -z "$all_matches" ] && return 1
+  non_prose=$(echo "$all_matches" | grep -Ev "$prose_pattern" || true)
+  [ -n "$non_prose" ] && return 0
+  return 1
+}
+
 for file in $truly_deleted; do
   basename=$(basename "$file")
   refs=$(grep -rl "$basename" --include="*.sh" --include="*.mjs" --include="*.js" --include="*.md" --include="*.json" "${ARCHIVE_EXCLUDES[@]}" ~/moltbook-mcp/ 2>/dev/null || true)
   if [ -n "$refs" ]; then
-    echo "STALE: $file — referenced in:"
-    echo "$refs" | sed 's|/home/moltbot/moltbook-mcp/||' | sed 's/^/  /'
-    found_stale=1
+    # Filter refs to exclude false positives from prose fields in JSON
+    filtered_refs=""
+    while IFS= read -r ref; do
+      [ -z "$ref" ] && continue
+      if is_structural_ref "$ref" "$basename"; then
+        filtered_refs="$filtered_refs$ref"$'\n'
+      fi
+    done <<< "$refs"
+    filtered_refs=$(echo "$filtered_refs" | sed '/^$/d')
+    if [ -n "$filtered_refs" ]; then
+      echo "STALE: $file — referenced in:"
+      echo "$filtered_refs" | sed 's|/home/moltbot/moltbook-mcp/||' | sed 's/^/  /'
+      found_stale=1
+    fi
   fi
 done
 

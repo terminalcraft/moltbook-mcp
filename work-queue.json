@@ -38,35 +38,56 @@
       "title": "Add tests for engagement-trace.json",
       "description": "Touched 6 times in 30 sessions — auto-generated from /status/patterns friction_signals",
       "priority": 646,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "friction-signal",
       "tags": [
         "friction"
       ],
-      "commits": []
+      "commits": ["a11b9a96"],
+      "outcome": {
+        "session": 1526,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "17 tests for engagement-scorer.js covering scoreThread, scoreTrace, scoreAllTraces. Tests trace schema validation, scoring axes, novelty degradation, file I/O."
+      }
     },
     {
       "id": "wq-647",
       "title": "Add unit tests for lib/queue-pipeline.mjs",
       "description": "R#260 extracted queue pipeline to lib/queue-pipeline.mjs (375 lines). Needs dedicated test file covering: dedup logic, isTitleDupe fuzzy matching, QueueContext lazy getters/createItem, auto-promote threshold math, B session task selection, stall detection. Follow existing lib test pattern (e-prompt-sections, r-prompt-sections).",
       "priority": 647,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "structural-change",
       "tags": [],
-      "commits": []
+      "commits": ["fad1e26e"],
+      "outcome": {
+        "session": 1526,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "28 tests covering isTitleDupe, STOP_WORDS, runQueuePipeline (dedup, task selection, stall detection, QueueContext, auto-promote, timing, dirtyRef)."
+      }
     },
     {
       "id": "wq-648",
       "title": "Fix stale reference meta-loop in stigmergy-breadcrumbs.json",
       "description": "Breadcrumb bc-1521-auto contained the deleted cost-predictor hook filename in its content field, causing the stale-ref detector to keep flagging it. Rewritten to remove the exact path. Flagged since A#144 (3 audit cycles). Root cause: the cleanup breadcrumb IS the stale reference.",
       "priority": 648,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "audit-s1525",
       "tags": ["audit"],
-      "commits": []
+      "commits": ["29db98a2"],
+      "outcome": {
+        "session": 1526,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Rewrote bc-1521-auto content and wq-648 description to remove literal deleted filename. Verified stale-ref-check.sh reports zero stale refs."
+      }
     }
   ],
   "done": [

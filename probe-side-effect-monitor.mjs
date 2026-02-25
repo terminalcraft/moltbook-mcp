@@ -330,38 +330,37 @@ export {
   bucketTiming,
 };
 
-// --- CLI ---
+// --- CLI (only runs when executed directly) ---
+const isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/.*\//, ""));
+if (isMain) {
+  const args = process.argv.slice(2);
 
-const args = process.argv.slice(2);
-
-if (args.includes("--help") || args.length === 0) {
-  console.log("Usage:");
-  console.log("  node probe-side-effect-monitor.mjs <platform-id>          # Run monitored probe");
-  console.log("  node probe-side-effect-monitor.mjs --history <platform-id> # Show hash history");
-  console.log("  node probe-side-effect-monitor.mjs --compare <platform-id> # Compare latest two");
-} else if (args.includes("--history")) {
-  const platformId = args.find(a => !a.startsWith("--"));
-  if (!platformId) { console.error("Error: provide a platform ID"); process.exit(1); }
-  const traces = getTracesForPlatform(platformId);
-  if (traces.length === 0) {
-    console.log(`No side-effect history for ${platformId}`);
-  } else {
-    console.log(`Side-effect history for ${platformId} (${traces.length} traces):\n`);
-    for (const t of traces) {
-      console.log(`  s${t.session} ${t.timestamp.substring(0, 19)} hash=${t.behaviorHash.substring(0, 16)} timing=${t.timing.bucket}`);
+  if (args.includes("--help") || args.length === 0) {
+    console.log("Usage:");
+    console.log("  node probe-side-effect-monitor.mjs <platform-id>          # Run monitored probe");
+    console.log("  node probe-side-effect-monitor.mjs --history <platform-id> # Show hash history");
+    console.log("  node probe-side-effect-monitor.mjs --compare <platform-id> # Compare latest two");
+  } else if (args.includes("--history")) {
+    const platformId = args.find(a => !a.startsWith("--"));
+    if (!platformId) { console.error("Error: provide a platform ID"); process.exit(1); }
+    const traces = getTracesForPlatform(platformId);
+    if (traces.length === 0) {
+      console.log(`No side-effect history for ${platformId}`);
+    } else {
+      console.log(`Side-effect history for ${platformId} (${traces.length} traces):\n`);
+      for (const t of traces) {
+        console.log(`  s${t.session} ${t.timestamp.substring(0, 19)} hash=${t.behaviorHash.substring(0, 16)} timing=${t.timing.bucket}`);
+      }
     }
+  } else if (args.includes("--compare")) {
+    const platformId = args.find(a => !a.startsWith("--"));
+    if (!platformId) { console.error("Error: provide a platform ID"); process.exit(1); }
+    const result = compareLatest(platformId);
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    const platformId = args[0];
+    console.log(`Side-effect monitor ready for ${platformId}`);
+    console.log("Use monitorProbe() programmatically after running platform-probe.mjs");
+    console.log("Or use --history / --compare for existing traces.");
   }
-} else if (args.includes("--compare")) {
-  const platformId = args.find(a => !a.startsWith("--"));
-  if (!platformId) { console.error("Error: provide a platform ID"); process.exit(1); }
-  const result = compareLatest(platformId);
-  console.log(JSON.stringify(result, null, 2));
-} else {
-  // Monitored probe — delegates to platform-probe.mjs logic
-  // In practice, this is called programmatically via monitorProbe()
-  // CLI mode just shows what would be captured
-  const platformId = args[0];
-  console.log(`Side-effect monitor ready for ${platformId}`);
-  console.log("Use monitorProbe() programmatically after running platform-probe.mjs");
-  console.log("Or use --history / --compare for existing traces.");
 }

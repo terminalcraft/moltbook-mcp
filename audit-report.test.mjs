@@ -439,40 +439,46 @@ describe('audit-report.json schema validation', () => {
 
   describe('cost section', () => {
     it('has required cost fields', () => {
-      // Schema evolved: avg_per_session → last_30_avg (A session format change)
-      const required = ['by_type'];
-      for (const f of required) {
-        assert.ok(f in report.cost, `missing cost field: ${f}`);
-      }
-      // Must have one of: avg_per_session or last_30_avg
-      assert.ok('avg_per_session' in report.cost || 'last_30_avg' in report.cost,
-        'cost section must have avg_per_session or last_30_avg');
+      // Schema evolved: avg_per_session → last_30_avg → last_20_avg → last_20_sessions.average
+      const hasAvg = 'avg_per_session' in report.cost
+        || 'last_30_avg' in report.cost
+        || 'last_20_avg' in report.cost
+        || (report.cost.last_20_sessions && 'average' in report.cost.last_20_sessions);
+      assert.ok(hasAvg, 'cost section must have an average cost field');
     });
 
     it('average cost per session is a positive number', () => {
-      const avg = report.cost.avg_per_session ?? report.cost.last_30_avg;
+      const avg = report.cost.avg_per_session
+        ?? report.cost.last_30_avg
+        ?? report.cost.last_20_avg
+        ?? (report.cost.last_20_sessions && report.cost.last_20_sessions.average);
       assert.equal(typeof avg, 'number');
       assert.ok(avg > 0);
     });
 
     it('by_type has entries for each session type', () => {
+      // by_type may be at report.cost.by_type or report.cost.last_20_sessions.by_type
+      const byType = report.cost.by_type || (report.cost.last_20_sessions && report.cost.last_20_sessions.by_type);
+      assert.ok(byType, 'cost section must have by_type (directly or under last_20_sessions)');
       for (const type of ['B', 'E', 'R', 'A']) {
-        assert.ok(type in report.cost.by_type,
+        assert.ok(type in byType,
           `missing cost entry for type ${type}`);
       }
     });
 
     it('per-type costs have avg field', () => {
+      const byType = report.cost.by_type || (report.cost.last_20_sessions && report.cost.last_20_sessions.by_type);
       for (const type of ['B', 'E', 'R', 'A']) {
-        const entry = report.cost.by_type[type];
+        const entry = byType[type];
         assert.ok('avg' in entry, `${type} cost missing avg field`);
         assert.equal(typeof entry.avg, 'number');
       }
     });
 
     it('per-type costs have count field', () => {
+      const byType = report.cost.by_type || (report.cost.last_20_sessions && report.cost.last_20_sessions.by_type);
       for (const type of ['B', 'E', 'R', 'A']) {
-        const entry = report.cost.by_type[type];
+        const entry = byType[type];
         assert.ok('count' in entry, `${type} cost missing count field`);
         assert.equal(typeof entry.count, 'number');
       }
@@ -603,22 +609,23 @@ describe('cost calculation consistency', () => {
   });
 
   it('session total cost is consistent with per-type data', () => {
-    // Schema evolved: last_20_total → last_30_total
-    const totalKey = 'last_30_total' in report.cost ? 'last_30_total' : 'last_20_total';
-    if (totalKey in report.cost) {
-      assert.equal(typeof report.cost[totalKey], 'number');
-      assert.ok(report.cost[totalKey] > 0,
-        `${totalKey} should be positive`);
+    // Schema evolved: last_20_total → last_30_total → last_20_sessions.total
+    const total = report.cost.last_30_total
+      ?? report.cost.last_20_total
+      ?? (report.cost.last_20_sessions && report.cost.last_20_sessions.total);
+    if (total != null) {
+      assert.equal(typeof total, 'number');
+      assert.ok(total > 0, 'total should be positive');
       // Sanity: total should be less than $300 (30 sessions * $10 cap max)
-      assert.ok(report.cost[totalKey] < 300,
-        `${totalKey} ($${report.cost[totalKey]}) unreasonably high`);
+      assert.ok(total < 300, `total ($${total}) unreasonably high`);
     }
   });
 
   it('B sessions have highest average cost', () => {
     // B sessions typically ship code, so they should cost more
-    const bAvg = report.cost.by_type.B.avg;
-    const eAvg = report.cost.by_type.E.avg;
+    const byType = report.cost.by_type || (report.cost.last_20_sessions && report.cost.last_20_sessions.by_type);
+    const bAvg = byType.B.avg;
+    const eAvg = byType.E.avg;
     // B should generally cost more than E (engagement sessions are lighter)
     assert.ok(bAvg >= eAvg,
       `B avg ($${bAvg}) should be >= E avg ($${eAvg})`);
@@ -626,8 +633,9 @@ describe('cost calculation consistency', () => {
 
   it('no session type exceeds budget cap', () => {
     // Budget caps: Build=$10, Engage=$5, Reflect=$5
+    const byType = report.cost.by_type || (report.cost.last_20_sessions && report.cost.last_20_sessions.by_type);
     const caps = { B: 10, E: 5, R: 5, A: 10 };
-    for (const [type, entry] of Object.entries(report.cost.by_type)) {
+    for (const [type, entry] of Object.entries(byType)) {
       const cap = caps[type] || 10;
       assert.ok(entry.avg <= cap,
         `${type} avg ($${entry.avg}) exceeds budget cap ($${cap})`);

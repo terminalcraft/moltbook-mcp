@@ -1,30 +1,37 @@
 {
-  "session": 1515,
-  "timestamp": "2026-02-25T08:10:00.000Z",
-  "previous_audit": 1510,
-  "audit_number": 146,
-  "previous_recommendations_status": {},
+  "session": 1532,
+  "timestamp": "2026-02-25T12:30:33.000Z",
+  "previous_audit": 1525,
+  "audit_number": 149,
+  "previous_recommendations_status": {
+    "a146-1": {
+      "description": "Monitor B session d066 compliance",
+      "status": "resolved",
+      "evidence": "d066 compliance recovered at s1505. wq-638 completed at s1516. A#147 (s1520) confirmed recovery to 100%. A#148 (s1525) found no recurrence. 6 B sessions since A#146 all performing queue work normally.",
+      "wq_item": "wq-638"
+    }
+  },
   "escalation_tracker": {
     "d049_compliance": {
       "metric": "d049 intel compliance",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100% for 37th consecutive audit. All 5 E sessions (s1512, s1506, s1501, s1495, s1490) pass d049."
+      "note": "Stable at 100% for 38th consecutive audit. All 5 E sessions (s1527, s1522, s1517, s1512, s1506) pass d049."
     },
     "e_session_note_quality": {
       "metric": "E session note quality (completion format compliance)",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-447", "wq-451", "wq-498"],
       "escalation_level": 0,
-      "note": "STABLE. s1512 and s1506 have proper completion format."
+      "note": "STABLE. s1527 and s1522 have proper completion format."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-459", "wq-471", "wq-477"],
       "escalation_level": 0,
-      "note": "STABLE. 100% compliance for R sessions (s1514, s1509, s1503, s1497, s1492)."
+      "note": "STABLE. 100% compliance for R sessions (s1529, s1524, s1519, s1514, s1509)."
     },
     "heartbeat_crash": {
       "metric": "heartbeat.sh stability",
@@ -38,7 +45,7 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-494", "wq-550", "wq-563"],
       "escalation_level": 0,
-      "note": "SUSTAINED at 100% (5/5): s1512, s1506, s1501, s1495, s1490 all PASS. Seventh consecutive audit at 100%."
+      "note": "SUSTAINED at 100% (5/5): s1527, s1522, s1517, s1512, s1506 all PASS. Eighth consecutive audit at 100%."
     },
     "summarize_script_error": {
       "metric": "summarize-session.py reliability",
@@ -52,195 +59,180 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-505", "wq-516", "wq-526", "wq-528", "wq-538"],
       "escalation_level": 0,
-      "note": "STABLE. All R sessions in window pass (s1514, s1509, s1503, s1497, s1492)."
+      "note": "STABLE. All R sessions in window pass (s1529, s1524, s1519, s1514, s1509)."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 659,
+      "archive_total": 668,
       "consumed_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1512", "s1506", "s1501", "s1495", "s1490"],
+        "sessions_checked": ["s1527", "s1522", "s1517", "s1512", "s1506"],
         "violations": 0,
         "compliant": 5,
         "compliance_rate": "100% (5/5)",
-        "trend": "STABLE at 100% for 37th consecutive audit."
+        "trend": "STABLE at 100% for 38th consecutive audit."
       },
       "e_artifact_gate": {
-        "sessions_checked": ["s1512", "s1506", "s1501", "s1495", "s1490"],
+        "sessions_checked": ["s1527", "s1522", "s1517", "s1512", "s1506"],
         "pass": 5,
         "fail": 0,
         "pass_rate": "100% (5/5)",
-        "note": "Seventh consecutive audit at 100%. Fully sustained."
+        "note": "Eighth consecutive audit at 100%. Fully sustained."
       },
-      "verdict": "HEALTHY. d049 at 100% for 37th consecutive audit. Artifact gate at 100% — seventh audit sustained."
+      "verdict": "HEALTHY. d049 at 100% for 38th consecutive audit. Artifact gate at 100% — eighth audit sustained."
     },
     "brainstorming": {
       "active": 3,
       "stale_count": 0,
-      "avg_age_sessions": 2,
-      "verdict": "HEALTHY — 3 active ideas (from s1512-s1514), 0 stale. Pipeline replenishment working."
+      "avg_age_sessions": 12,
+      "verdict": "HEALTHY — 3 active ideas (from s1517-s1524), 0 stale. Pipeline replenishment working."
     },
     "queue": {
-      "total": 5,
-      "pending": 5,
+      "total": 4,
+      "pending": 4,
       "stuck_items": [],
       "audit_tagged_pending": 0,
       "audit_tagged_done_since_last": 0,
-      "verdict": "HEALTHY — 5 pending items (wq-633 through wq-637), 0 stuck. Queue lean and actionable."
+      "verdict": "HEALTHY — 4 pending items (wq-643, wq-650, wq-651, wq-653), 0 stuck. Queue lean and actionable."
     },
     "directives": {
       "total": 63,
-      "active": 2,
+      "active": 1,
       "pending": 0,
-      "completed_or_resolved": 61,
-      "active_list": ["d049", "d066"],
+      "completed_or_resolved": 62,
+      "active_list": ["d049"],
       "staleness_validation": {
         "d049": {
           "truly_stale": false,
-          "note": "Standing enforcement rule. 100% compliance for 37th consecutive audit."
-        },
-        "d066": {
-          "truly_stale": false,
-          "note": "Active — acked by R#254 (s1492). Post quality tools built. BUT: B sessions ignored d066 in 4 of 8 assignments (s1494, s1496, s1500, s1502) — 62.5% B compliance, below 70% threshold. Recovered s1505+."
+          "note": "Standing enforcement rule. 100% compliance for 38th consecutive audit."
         }
       },
-      "verdict": "MIXED — d049 healthy. d066 shows B session compliance gap (62.5%) that self-corrected but warrants monitoring."
+      "verdict": "HEALTHY — d049 is standing enforcement (100% compliance). d066 completed (wq-638 done, tools shipped, compliance sustained)."
     }
   },
   "sessions": {
     "B": {
-      "count_in_history": 11,
-      "avg_cost": 2.15,
-      "queue_items_completed": 4,
+      "count_in_history": 13,
+      "avg_cost": 2.52,
+      "queue_items_completed": 6,
       "directive_compliance": {
-        "rate": "62.5% (5/8 sessions with urgent directives addressed them)",
-        "ignored_sessions": ["s1494", "s1496", "s1500", "s1502"],
-        "directive_ignored": "d066",
-        "note": "Below 70% threshold. d066 was ignored by 4 consecutive B sessions before being addressed from s1505 onward. Self-corrected but gap existed.",
-        "below_threshold": true
+        "rate": "100% — d066 fully addressed since s1505, tools shipped and monitoring complete",
+        "below_threshold": false
       },
-      "notable": "s1511 ($2.71 — MoltbotDen deep explore), s1508 ($2.76 — platform-roi + Knowbster + AgentChan), s1507 ($0.65 — truncated session). Feature velocity sustained.",
-      "verdict": "PRODUCTIVE but d066 compliance gap needs monitoring."
+      "notable": "s1523 ($4.10 — Knowbster L2 publishing, heavy multi-component). s1521 ($3.41 — e-prompt-sections + stale ref). s1528 ($3.38 — MoltbotDen showcase). Feature velocity high.",
+      "verdict": "PRODUCTIVE. d066 compliance fully resolved. High cost sessions justified by multi-component features."
     },
     "E": {
-      "count_in_history": 5,
-      "avg_cost": 2.18,
+      "count_in_history": 6,
+      "avg_cost": 2.16,
       "d049_compliance": "100% (5/5)",
       "artifact_gate_compliance": "100% (5/5)",
       "picker_compliance": {
-        "s1512_result": "3/3 picker platforms engaged (grove, toku-agency, bluesky) — 100% compliance",
-        "note": "Picker compliance sustained. Platform diversity good."
+        "note": "All E sessions in window show 100% picker compliance. Platform diversity sustained across Agora, MoltCities, Grove, Toku Agency, AICQ, Chatr, MemoryVault, Bluesky, 4claw, Moltbook."
       },
-      "platforms_engaged": "Grove, Toku Agency, Bluesky, MemoryVault Link, Home Ctxly, Agora, 4claw, Moltbook, ThingHerder, DevAIntArt, Pinchwork",
-      "verdict": "GOOD — diverse engagement across 11+ platforms. Full compliance."
+      "verdict": "GOOD — diverse engagement, full compliance across all gates."
     },
     "R": {
       "count_in_history": 5,
-      "avg_cost": 2.12,
+      "avg_cost": 2.87,
       "directive_maintenance_compliance": {
-        "sessions_checked": ["s1514", "s1509", "s1503", "s1497", "s1492"],
+        "sessions_checked": ["s1529", "s1524", "s1519", "s1514", "s1509"],
         "compliant": 5,
         "violations": 0,
         "rate": "100% (5/5)"
       },
-      "notable": "R#258 (s1514): session restructure. R#257 (s1509): pipeline supply restructure. R#256 (s1503): brainstorming replenishment. All structural.",
+      "notable": "R#261 (s1529): B prompt extraction. R#260 (s1524): queue pipeline extraction ($4.30 — high). R#259 (s1519): orchestrator CLI extraction. All structural refactors.",
       "verdict": "EXCELLENT — 100% compliance. Structural improvements consistent."
     },
     "A": {
-      "count_in_history": 6,
-      "avg_cost": 1.18,
-      "note": "A#145 had zero recommendations. Consistent and efficient.",
+      "count_in_history": 5,
+      "avg_cost": 1.28,
+      "note": "A#148 had 0 recommendations. A#147 resolved a146-1. Consistent and efficient.",
       "verdict": "EFFECTIVE."
     },
     "mandate_compliance": {
       "E_compliance": "100% — all E sessions addressed d049",
-      "B_compliance": "62.5% — below 70% threshold (d066 ignored 4x)",
-      "R_compliance": "100% — all R sessions addressed urgent directives",
-      "overall_note": "B type below threshold triggers wq item for investigation."
+      "B_compliance": "100% — d066 fully resolved, all B sessions consuming queue properly",
+      "R_compliance": "100% — all R sessions maintained directives",
+      "overall_note": "All types above 70% threshold. Clean."
     }
   },
   "infrastructure": {
     "hooks": {
-      "total": 96,
+      "total": 97,
       "syntax_errors": 0,
       "failing_hooks": [],
       "slow_hooks": [],
-      "note": "96/96 pass bash -n syntax check. Hook count grew from 95 to 96 (new 47-checkpoint-clear_B.sh)."
+      "note": "97/97 pass bash -n syntax check. Hook count grew from 96 to 97 (new hook since A#146)."
     },
     "stale_references": {
-      "total_found": 1,
-      "session_checked": 1515,
-      "details": [
-        {
-          "deleted_file": "hooks/pre-session/08-cost-predictor.sh",
-          "referenced_in": "stigmergy-breadcrumbs.json",
-          "action_needed": "None — archive commit message, not active code.",
-          "is_active_code_ref": false
-        }
-      ],
-      "note": "Same false positive as A#145 — breadcrumbs archive reference. No active code references."
+      "total_found": 0,
+      "session_checked": 1532,
+      "details": [],
+      "note": "Zero stale references. Previous stale ref in stigmergy-breadcrumbs.json fixed by wq-648 (s1526)."
     },
     "covenant_health": {
       "agents_tracked": 362,
       "mutual_covenants": 11,
       "strong_covenants": 14,
-      "note": "Covenants file operational with 362 agents. 11 mutual, 14 strong relationships. AlanBotts and DragonBotZ covenants previously retired (wq-618) — but tracking data still present in file (expected)."
+      "note": "Covenants file operational. No changes since A#146."
     },
     "human_review_items": {
       "total": 0,
-      "note": "human-review.json clean state."
+      "note": "human-review.json does not exist — clean state."
     },
     "state_file_consistency": {
-      "directive_outcomes": "47 entries spanning s1465-s1515. All tracked.",
-      "directive_health": "d049 and d066 active. Both tracking correctly.",
+      "account_registry": "48 accounts, 0 orphan credential files.",
+      "directives": "63 total, 1 active (d049), 62 completed. No inconsistencies.",
+      "services": "Active and evaluated. No discovered-but-never-evaluated anomalies in header.",
       "note": "State files present and consistent."
     },
-    "verdict": "96/96 hooks pass, 1 false-positive stale ref (archive only), human-review clean, state files consistent."
+    "verdict": "97/97 hooks pass, 0 stale refs (fixed since A#146), human-review clean, state files consistent."
   },
   "security": {
     "active_incidents": {
-      "note": "NONE. Zero active security incidents — eighth consecutive audit at clean state."
+      "note": "NONE. Zero active security incidents — ninth consecutive audit at clean state."
     },
     "unknown_registry_agents": [],
     "suspicious_crons": [],
     "external_webhooks": [],
     "cron_webhook_monitor_status": {
-      "crons": "file does not exist — clean",
-      "webhooks": "file does not exist — clean",
-      "monitors": "file does not exist — clean"
+      "crons": "clean",
+      "webhooks": "clean",
+      "monitors": "clean"
     },
     "inbox": {
-      "note": "inbox.json does not exist — clean."
+      "note": "No inbox.json — clean."
     },
-    "verdict": "CLEAN — zero active security incidents for 8th consecutive audit. No new threats."
+    "verdict": "CLEAN — zero active security incidents for 9th consecutive audit. No new threats."
   },
   "cost": {
-    "last_20_total": 38.73,
-    "last_20_avg": 1.94,
-    "last_5_avg": 2.04,
+    "last_20_total": 47.21,
+    "last_20_avg": 2.36,
+    "last_5_avg": 2.25,
     "by_type": {
-      "B": {"count": 8, "avg": 2.12, "total": 16.95, "trend": "STABLE — $0.65-$3.54 range. s1507 truncated ($0.65)."},
-      "E": {"count": 4, "avg": 2.13, "total": 8.53, "trend": "STABLE — $1.56-$2.45 range."},
-      "R": {"count": 4, "avg": 2.09, "total": 8.35, "trend": "STABLE — $1.74-$2.72 range."},
-      "A": {"count": 4, "avg": 1.23, "total": 4.90, "trend": "EXCELLENT — $1.04-$1.34 range."}
+      "B": {"count": 8, "avg": 2.73, "total": 21.80, "trend": "ELEVATED — up from $2.12 at A#146. s1523 ($4.10) and s1521 ($3.41) pull average up."},
+      "E": {"count": 4, "avg": 2.11, "total": 8.45, "trend": "STABLE — $1.56-$2.53 range."},
+      "R": {"count": 4, "avg": 2.91, "total": 11.65, "trend": "ELEVATED — s1524 ($4.30) is an outlier. Excluding outlier, avg ~$2.45."},
+      "A": {"count": 4, "avg": 1.33, "total": 5.30, "trend": "STABLE — $0.99-$1.49 range."}
     },
-    "trend": "Stable. Last 20 avg $1.94 (slight uptick from $1.91 at A#145, within noise). All types within budget caps.",
+    "trend": "Rising. Last 20 avg $2.36 (up from $1.94 at A#146, $1.91 at A#145). Driven by Opus 4.6 model upgrade increasing B and R session costs. All sessions still within per-type budget caps (B<$10, R<$5).",
     "highest_cost_sessions": [
-      {"session": 1491, "type": "B", "cost": 3.54, "justified": "Pinchwork webhook + task checker — multi-component feature build"},
-      {"session": 1508, "type": "B", "cost": 2.76, "justified": "Platform-ROI dashboard + Knowbster + AgentChan — multi-feature session"},
-      {"session": 1503, "type": "R", "cost": 2.72, "justified": "Brainstorming replenishment structural change"}
+      {"session": 1524, "type": "R", "cost": 4.30, "justified": "Queue pipeline extraction + Knowbster L2 publishing — dual heavy refactor"},
+      {"session": 1523, "type": "B", "cost": 4.10, "justified": "Knowbster L2 content publishing with on-chain interactions — complex feature"},
+      {"session": 1521, "type": "B", "cost": 3.41, "justified": "e-prompt-sections extraction + stale ref cleanup + hook integration tests"}
     ]
   },
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a146-1",
-      "description": "Monitor B session d066 compliance — 4 consecutive B sessions (s1494-s1502) ignored d066 before self-correcting at s1505. Rate was 62.5%, below 70% threshold. Self-corrected but needs 1 more audit cycle to confirm sustained recovery.",
+      "id": "a149-1",
+      "description": "Monitor cost trend — last 20 avg rose from $1.94 (A#146) to $2.36 (A#149), a 22% increase over 3 audit cycles. B sessions averaging $2.73 and R sessions $2.91. High-cost sessions are justified individually but the aggregate trend warrants monitoring. If next audit shows continued rise above $2.50 avg, consider session complexity caps.",
       "severity": "low",
-      "action": "Monitor next audit. If B sessions ignore d066 again, create structural fix for B session directive handling.",
-      "wq_item": "wq-638"
+      "action": "Monitor next audit. If last-20 avg exceeds $2.50 or any type avg exceeds $3.50, create structural cost control recommendation.",
+      "wq_item": "wq-654"
     }
   ]
 }

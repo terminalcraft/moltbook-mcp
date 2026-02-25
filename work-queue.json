@@ -34,17 +34,6 @@
       "commits": []
     },
     {
-      "id": "wq-652",
-      "title": "Add unit tests for lib/b-prompt-sections.mjs",
-      "description": "b-prompt-sections.mjs (R#261) is the newest prompt section builder but has no tests. Add targeted tests verifying: B session counter read, task assignment (queue vs brainstorming fallback), capability line formatting, EVM balance display, queue depth warning. Follows pattern of wq-650 (e-prompt tests).",
-      "priority": 652,
-      "status": "pending",
-      "added": "2026-02-25",
-      "source": "R#261",
-      "tags": [],
-      "commits": []
-    },
-    {
       "id": "wq-653",
       "title": "Post-session den-publish hook for auto-showcasing notable sessions",
       "description": "den-publish.mjs is live but manual. Add a post-session hook (50-den-publish.sh) that checks session-history.txt for notable outcomes (new features, pattern captures) and auto-publishes them as showcase items. Gate: only publish if session had ≥1 commit and outcome was non-routine.",
@@ -53,6 +42,17 @@
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-654",
+      "title": "Monitor cost trend — last-20 avg rose 22% to $2.36 over 3 audit cycles",
+      "description": "A#149 finding: cost trend rising from $1.94 (A#146) to $2.36 (A#149). B avg $2.73, R avg $2.91. High-cost sessions individually justified but aggregate trend warrants monitoring. If next audit shows >$2.50 avg or any type >$3.50, escalate to structural cost control.",
+      "priority": 654,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "audit-s1532",
+      "tags": ["audit"],
       "commits": []
     }
   ],

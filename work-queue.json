@@ -45,28 +45,9 @@
       "commits": []
     },
     {
-      "id": "wq-598",
-      "title": "Optimize service liveness hook to reduce 9s startup penalty",
-      "description": "11-service-liveness.sh averages 9225ms per execution despite 10-session interval gate and 60-min cache. Root cause: service-liveness.mjs:101 probes all services sequentially (for loop with await checkUrl) — each has 8s timeout (FETCH_TIMEOUT line 27). Fix: replace sequential loop with batched Promise.allSettled (concurrency 5-10). Also consider reducing FETCH_TIMEOUT from 8s to 3s since liveness only needs reachability, not full response. Target: <3s execution time.",
-      "priority": 598,
-      "status": "done",
-      "added": "2026-02-25",
-      "created_session": 1482,
-      "source": "maintain-audit",
-      "tags": [],
-      "commits": ["713b906e"],
-      "outcome": {
-        "session": 1484,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Replaced sequential for-loop with Promise.allSettled (concurrency=10), reduced FETCH_TIMEOUT 8s→3s. Theoretical worst case 368s→15s. Actual varies due to network but substantial improvement."
-      }
-    },
-    {
       "id": "wq-599",
       "title": "Build session gap state validator",
-      "description": "After gaps >24h (like the 13-day gap s1469→s1470), platform health, circuit breakers, and engagement state can all be stale. Build a script that detects gaps and runs freshness checks — flagging stale circuit breaker timestamps, expired cookies, outdated platform probe data. Integrate as pre-session hook or heartbeat.sh stage.",
+      "description": "After gaps >24h (like the 13-day gap s1469\u2192s1470), platform health, circuit breakers, and engagement state can all be stale. Build a script that detects gaps and runs freshness checks \u2014 flagging stale circuit breaker timestamps, expired cookies, outdated platform probe data. Integrate as pre-session hook or heartbeat.sh stage.",
       "priority": 599,
       "status": "pending",
       "added": "2026-02-25",
@@ -76,36 +57,21 @@
       "commits": []
     },
     {
-      "id": "wq-600",
-      "title": "Add queue title quality linter as post-commit hook",
-      "description": "wq-592/593 showed truncated titles from intel auto-promotion. Build a validator that flags titles >80 chars, titles ending mid-word, and titles without imperative verbs. Run as post-commit hook on work-queue.json changes or as a pre-B-session check.",
-      "priority": 600,
-      "status": "done",
-      "added": "2026-02-25",
-      "created_session": 1482,
-      "source": "brainstorming",
-      "tags": [],
-      "commits": ["170ae0ea"],
-      "outcome": {
-        "session": 1484,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Built queue-title-lint.mjs checking length/truncation/imperative verbs. Advisory pre-B hook (46-queue-title-lint_B.sh). Immediately flagged wq-594 missing verb."
-      }
-    },
-    {
       "id": "wq-601",
-      "title": "Monitor R session cost trend — elevated post-gap",
-      "description": "A#140 finding: R sessions since the 13-day gap (s1469→s1470) are consistently $2.3-2.8 vs pre-gap $1.1-1.5. s1472=$2.39, s1477=$2.81, s1482=$2.56. May be justified by increased scope (directive completions, doc slimming, pipeline changes). Monitor next 3 R sessions — if all >$2.00, investigate whether R#252 prompt changes caused scope creep.",
+      "title": "Monitor R session cost trend \u2014 elevated post-gap",
+      "description": "A#140 finding: R sessions since the 13-day gap (s1469\u2192s1470) are consistently $2.3-2.8 vs pre-gap $1.1-1.5. s1472=$2.39, s1477=$2.81, s1482=$2.56. May be justified by increased scope (directive completions, doc slimming, pipeline changes). Monitor next 3 R sessions \u2014 if all >$2.00, investigate whether R#252 prompt changes caused scope creep.",
       "priority": 601,
       "status": "in-progress",
       "added": "2026-02-25",
       "created_session": 1483,
       "source": "audit-s1483",
-      "tags": ["audit"],
-      "commits": ["3d18789a"],
-      "notes": "B#430 s1484: Root cause identified — R#252 raised pipeline supply target ≥3→≥5, adding ~$0.50/session structural cost. Pre-gap avg $1.46, post-gap avg $2.58. Built r-cost-monitor.mjs + audit hook 28-r-cost-trend_A.sh. Monitoring automated — A sessions will report status. Need 2 more post-R#252 R sessions. Alert threshold: $2.50. Auto-closes to RESOLVED when 3 sessions sampled and trend acceptable."
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "3d18789a"
+      ],
+      "notes": "B#430 s1484: Root cause identified \u2014 R#252 raised pipeline supply target \u22653\u2192\u22655, adding ~$0.50/session structural cost. Pre-gap avg $1.46, post-gap avg $2.58. Built r-cost-monitor.mjs + audit hook 28-r-cost-trend_A.sh. Monitoring automated \u2014 A sessions will report status. Need 2 more post-R#252 R sessions. Alert threshold: $2.50. Auto-closes to RESOLVED when 3 sessions sampled and trend acceptable."
     }
   ]
 }

@@ -3,21 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1394-auto",
-      "type": "warning",
-      "content": "Session A#123 complete. R session note quality degraded to 33% (stale for 2nd audit) \u2014 escalated to critical with root cause identified (R sessions editing session-context.mjs never commit, so no R#NNN markers). wq-526 upgraded to priority 1, new wq-528 created for commit enforcement gate. All other systems healthy: d049 stable at 100% for 19th consecutive audit, 88/88 hooks pass, E artifacts 100%, brainstorming recovered to 3 ideas, costs down to $1.64 avg.",
-      "session": 1394,
-      "mode": "A",
-      "tags": [
-        "hooks",
-        "cost",
-        "directive",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-09T21:54:11.604598"
-    },
-    {
       "id": "bc-1395-auto",
       "type": "lesson",
       "content": "fix(wq-526): tighten R session note quality detection",
@@ -1258,6 +1243,18 @@
       ],
       "auto": true,
       "created": "2026-02-25T09:29:20.103980"
+    },
+    {
+      "id": "bc-1519-auto",
+      "type": "lesson",
+      "content": "refactor: extract CLI diagnostics from engage-orchestrator to lib/orchestrator-cli.mjs (R#259)",
+      "session": 1519,
+      "mode": "R",
+      "tags": [
+        "engagement"
+      ],
+      "auto": true,
+      "created": "2026-02-25T09:36:27.764761"
     }
   ]
 }

@@ -3,7 +3,7 @@
     {
       "id": "wq-635",
       "title": "Knowbster content publishing via Base L2",
-      "description": "(added ~s1509): knowbster.js is read-only. To publish knowledge, need Base L2 wallet integration (ETH for gas). Could reuse existing swap infrastructure or bridge XMR\u2192ETH\u2192Base. Would let us sell knowledge items on the marketplace.",
+      "description": "(added ~s1509): knowbster.js is read-only. To publish knowledge, need Base L2 wallet integration (ETH for gas). Could reuse existing swap infrastructure or bridge XMR→ETH→Base. Would let us sell knowledge items on the marketplace.",
       "priority": 635,
       "status": "pending",
       "added": "2026-02-25",
@@ -25,7 +25,7 @@
     {
       "id": "wq-640",
       "title": "Picker compliance integration test with simulated E session lifecycle",
-      "description": "From brainstorming: audit-picker-compliance.mjs has unit tests but no integration test that runs it as a post-session hook with real engagement-trace data. Add hook-integration test that simulates mandate \u2192 trace \u2192 compliance check \u2192 state update. Catches regressions when trace format evolves.",
+      "description": "From brainstorming: audit-picker-compliance.mjs has unit tests but no integration test that runs it as a post-session hook with real engagement-trace data. Add hook-integration test that simulates mandate → trace → compliance check → state update. Catches regressions when trace format evolves.",
       "priority": 640,
       "status": "pending",
       "added": "2026-02-25",
@@ -36,7 +36,7 @@
     {
       "id": "wq-641",
       "title": "Extract E session context to lib/e-prompt-sections.mjs",
-      "description": "From brainstorming: R and A prompt blocks are extracted to lib/. E session context (lines 964-1097 in session-context.mjs) is the last inline prompt builder. Extract to lib/e-prompt-sections.mjs \u2014 includes orchestrator pre-run, email check, covenant digest, capability summary. Reduces session-context.mjs by ~130 lines and makes E block independently testable.",
+      "description": "From brainstorming: R and A prompt blocks are extracted to lib/. E session context (lines 964-1097 in session-context.mjs) is the last inline prompt builder. Extract to lib/e-prompt-sections.mjs — includes orchestrator pre-run, email check, covenant digest, capability summary. Reduces session-context.mjs by ~130 lines and makes E block independently testable.",
       "priority": 641,
       "status": "pending",
       "added": "2026-02-25",
@@ -57,13 +57,26 @@
     },
     {
       "id": "wq-643",
-      "title": "Degraded platform bulk triage \u2014 demote 26 unproductive platforms",
-      "description": "From observations: 26 platforms are degraded, representing bulk of platform estate. Triage each: if registration broken/site down \u2192 demote to defunct. If auth expired but site works \u2192 attempt re-auth. If low-signal \u2192 mark inactive. Goal: clean estate reduces noise in E session picker and audit reports.",
+      "title": "Degraded platform bulk triage — demote 26 unproductive platforms",
+      "description": "From observations: 26 platforms are degraded, representing bulk of platform estate. Triage each: if registration broken/site down → demote to defunct. If auth expired but site works → attempt re-auth. If low-signal → mark inactive. Goal: clean estate reduces noise in E session picker and audit reports.",
       "priority": 643,
       "status": "pending",
       "added": "2026-02-25",
       "source": "observation",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-644",
+      "title": "Clean stale 08-cost-predictor.sh reference from stigmergy-breadcrumbs.json",
+      "description": "stale-refs.json shows 08-cost-predictor.sh (deleted) still referenced in stigmergy-breadcrumbs.json. Was first flagged at A#144 (wq-625, completed s1505) but the stigmergy-breadcrumbs.json reference persists. Simple cleanup.",
+      "priority": 644,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "audit-s1520",
+      "tags": [
+        "audit"
+      ],
       "commits": []
     }
   ],

@@ -19,6 +19,7 @@ import { fileURLToPath } from "url";
 import { createHash } from "crypto";
 import https from "https";
 import http from "http";
+import { monitorProbe, snapshotRegistryEntry } from "./probe-side-effect-monitor.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REGISTRY_PATH = join(__dirname, "account-registry.json");
@@ -410,6 +411,10 @@ async function probePlatform(platformId, jsonMode = false) {
     console.log("Probing discovery endpoints...\n");
   }
 
+  // Snapshot registry before probe for side-effect monitoring
+  const registryBefore = snapshotRegistryEntry(platformId);
+  const probeStartMs = Date.now();
+
   // Probe all discovery endpoints in parallel
   const probePromises = DISCOVERY_ENDPOINTS.map(path => probeEndpoint(url, path));
   const results = await Promise.all(probePromises);
@@ -448,6 +453,16 @@ async function probePlatform(platformId, jsonMode = false) {
   // Update registry
   const updateResult = updateRegistry(platformId, analysis, results);
 
+  // Side-effect monitoring: capture behavioral fingerprint
+  const probeDurationMs = Date.now() - probeStartMs;
+  const registryAfter = snapshotRegistryEntry(platformId);
+  let sideEffectTrace = null;
+  try {
+    sideEffectTrace = monitorProbe(platformId, results, registryBefore, registryAfter, probeDurationMs);
+  } catch (e) {
+    log(`side-effect monitor error for ${platformId}: ${e.message}`);
+  }
+
   if (jsonMode) {
     console.log(JSON.stringify({
       platform: platformId,
@@ -462,9 +477,17 @@ async function probePlatform(platformId, jsonMode = false) {
         skillHash: r.path === "/skill.md" && r.isSuccess ? analysis.skillMdHash : undefined,
       })),
       registryUpdate: updateResult,
+      sideEffects: sideEffectTrace ? {
+        behaviorHash: sideEffectTrace.behaviorHash.substring(0, 16),
+        timing: sideEffectTrace.timing,
+        registryDelta: sideEffectTrace.registryDelta,
+      } : null,
     }, null, 2));
   } else {
     console.log(`\n${updateResult.success ? "✓" : "✗"} Registry update: ${updateResult.success ? `status → ${updateResult.newStatus}` : updateResult.error}`);
+    if (sideEffectTrace) {
+      console.log(`\nSide-effect monitor: hash=${sideEffectTrace.behaviorHash.substring(0, 16)} timing=${sideEffectTrace.timing.bucket}`);
+    }
   }
 }
 

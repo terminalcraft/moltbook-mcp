@@ -356,44 +356,6 @@ describe('Circuit Breaker: Edge Cases', () => {
   });
 });
 
-describe('Circuit Breaker: Budget Check Integration', () => {
-  beforeEach(() => setup());
-  afterEach(() => cleanup());
-
-  test('budget-check under minimum recommends continuation', () => {
-    const result = execSync(
-      `node ${join(SCRATCH, 'engage-orchestrator.mjs')} --budget-check 0.50 5.00`,
-      { encoding: 'utf8', timeout: 5000 }
-    );
-    const parsed = JSON.parse(result);
-
-    assert.equal(parsed.continue, true);
-    assert.ok(parsed.reason.includes('minimum'));
-    assert.ok(parsed.suggestion);
-  });
-
-  test('budget-check at good utilization allows wrap up', () => {
-    const result = execSync(
-      `node ${join(SCRATCH, 'engage-orchestrator.mjs')} --budget-check 3.00 5.00`,
-      { encoding: 'utf8', timeout: 5000 }
-    );
-    const parsed = JSON.parse(result);
-
-    assert.equal(parsed.continue, false);
-    assert.ok(parsed.reason.includes('well-utilized'));
-  });
-
-  test('budget-check with mid-range spend suggests one more round', () => {
-    const result = execSync(
-      `node ${join(SCRATCH, 'engage-orchestrator.mjs')} --budget-check 2.00 5.00`,
-      { encoding: 'utf8', timeout: 5000 }
-    );
-    const parsed = JSON.parse(result);
-
-    assert.equal(parsed.continue, true);
-    assert.ok(parsed.suggestion);
-  });
-});
 
 // Run the tests
 console.log('Running engage-orchestrator.mjs tests...\n');

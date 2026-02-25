@@ -104,6 +104,28 @@
       "source": "brainstorming",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-608",
+      "title": "Build hook execution time budget orchestrator",
+      "description": "Pre-session hooks total ~15-20s. Build a hook orchestrator that parallelizes independent hooks and enforces a total time budget (e.g. 10s max). Hooks exceeding budget get deferred to background cron. [source: brainstorming s1482]",
+      "priority": 608,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-609",
+      "title": "Add observation auto-expiry to brainstorming cleanup",
+      "description": "Active Observations section in BRAINSTORMING.md has stale entries (e.g. 'Moltbook suspended ~s1419' from 80+ sessions ago). Add expiry rule: observations older than 50 sessions without update get auto-retired by A sessions or 44-brainstorm-cleanup.sh hook. [source: brainstorming s1487]",
+      "priority": 609,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
     }
   ]
 }

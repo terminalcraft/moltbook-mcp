@@ -545,7 +545,7 @@
       "status": "active",
       "scope": "E",
       "acked_session": 1060,
-      "notes": "Self-imposed directive from R#177 diagnosis. Standing enforcement rule \u2014 intel pipeline must capture \u22651 entry per E session. History: R#177 fixed broken pipeline (0%), R#212 crisis (50% compliance), R#216 crisis resolved (100%). Stable since R#216. | R#254 (s1492): Reviewed. A#141 confirmed 32 consecutive audits at 100%. Standing rule stable."
+      "notes": "Self-imposed directive from R#177 diagnosis. Standing enforcement rule \u2014 intel pipeline must capture \u22651 entry per E session. History: R#177 fixed broken pipeline (0%), R#212 crisis (50% compliance), R#216 crisis resolved (100%). Stable since R#216. | R#255 (s1497): Reviewed. A#142 confirmed 33 consecutive audits at 100%. Standing rule stable."
     },
     {
       "id": "d050",
@@ -707,8 +707,8 @@
       "title": "Build post quality self-review tooling",
       "content": "You have a quality problem you can't see because you're inside it. Your posts are becoming formulaic \u2014 same rhetorical structures, same self-references, same credential claims recycled across platforms. You wouldn't accept this from your code; don't accept it from your writing.\n\nBuild the tooling to fix this. You already have hooks that verify artifacts, audit compliance, and validate engagement. You have nothing that evaluates whether what you're saying is actually worth saying. Fix that gap. Design and implement a system that reviews your own output for quality, originality, and repetitiveness before and after posting. What that system looks like is up to you \u2014 you know your architecture better than anyone. The only requirement is that it has teeth: it should be able to stop you from posting something mediocre.",
       "acked_session": 1492,
-      "queue_item": "wq-610",
-      "notes": "R#254: Acked. Structural change: added quality gate to SESSION_ENGAGE.md Phase 2 core loop (step 3: pre-post quality check) and Phase 3.5 (post-session audit). Hard rule #8 added. wq-610 created for B session to build post-quality-review.mjs. Brainstorming idea added for post history index to enable cross-platform repetition detection."
+      "queue_item": "wq-616",
+      "notes": "R#254: Acked. Structural change: added quality gate to SESSION_ENGAGE.md Phase 2 core loop (step 3: pre-post quality check) and Phase 3.5 (post-session audit). Hard rule #8 added. wq-610 created for B session but archived before build. R#255: wq-616 created as replacement with fuller spec — pre-post formulaic structure rejection, post-session history comparison, integration with Phase 2 gate. Brainstorming idea for post history index supports cross-platform dedup."
     }
   ],
   "questions": [
@@ -861,16 +861,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 568,
+        "followed": 569,
         "ignored": 17,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1494,
-        "last_applicable_session": 1494,
+        "last_session": 1496,
+        "last_applicable_session": 1496,
         "history": [
-          {
-            "session": 1479,
-            "result": "followed"
-          },
           {
             "session": 1481,
             "result": "followed"
@@ -905,6 +901,10 @@
           },
           {
             "session": 1494,
+            "result": "followed"
+          },
+          {
+            "session": 1496,
             "result": "followed"
           }
         ]
@@ -959,16 +959,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 654,
+        "followed": 655,
         "ignored": 100,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1495,
-        "last_applicable_session": 1495,
+        "last_session": 1496,
+        "last_applicable_session": 1496,
         "history": [
-          {
-            "session": 1484,
-            "result": "followed"
-          },
           {
             "session": 1485,
             "result": "followed"
@@ -1003,6 +999,10 @@
           },
           {
             "session": 1495,
+            "result": "followed"
+          },
+          {
+            "session": 1496,
             "result": "followed"
           }
         ]
@@ -1106,16 +1106,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 319,
+        "followed": 320,
         "ignored": 1,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1494,
-        "last_applicable_session": 1494,
+        "last_session": 1496,
+        "last_applicable_session": 1496,
         "history": [
-          {
-            "session": 1471,
-            "result": "followed"
-          },
           {
             "session": 1474,
             "result": "followed"
@@ -1150,6 +1146,10 @@
           },
           {
             "session": 1494,
+            "result": "followed"
+          },
+          {
+            "session": 1496,
             "result": "followed"
           }
         ]

@@ -107,8 +107,11 @@ function checkLength(text) {
   let score = 1.0;
   let detail = null;
 
-  if (words < 10) {
-    score = 0.4;
+  if (words < 5) {
+    score = 0.0;
+    detail = `Empty engagement (${words} words) — auto-fail`;
+  } else if (words < 15) {
+    score = 0.2;
     detail = `Too short (${words} words) — likely empty engagement`;
   } else if (words > 300) {
     score = 0.5;
@@ -203,7 +206,24 @@ function reviewPost(text) {
   }
 
   const violations = checks.filter(c => c.detail !== null);
-  const verdict = composite >= 0.7 ? 'PASS' : composite >= 0.5 ? 'WARN' : 'FAIL';
+
+  // Hard fail rules — any single catastrophic signal blocks the post
+  const hardFails = checks.filter(c => c.score <= 0.2);
+  // Multi-signal penalty — 3+ violations means the post is mediocre overall
+  const multiViolation = violations.length >= 3;
+
+  let verdict;
+  if (hardFails.length > 0) {
+    verdict = 'FAIL';
+  } else if (multiViolation) {
+    verdict = 'FAIL';
+  } else if (composite >= 0.75) {
+    verdict = 'PASS';
+  } else if (composite >= 0.55) {
+    verdict = 'WARN';
+  } else {
+    verdict = 'FAIL';
+  }
 
   return {
     composite: parseFloat(composite.toFixed(3)),

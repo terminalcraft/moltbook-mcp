@@ -52,11 +52,18 @@
       "title": "Fix stall detection regex newline bug in queue-pipeline.mjs",
       "description": "The stall detection regex uses ([^ ]+) to capture the build field, but this captures newlines too. Should use ([^\\s]+) or add /m flag. Found during wq-647 test writing. Low risk since real lines always have fields after build=, but fix for robustness.",
       "priority": 649,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s1528",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Changed ([^ ]+) to (\\S+) in queue-pipeline.mjs:121. 28/28 tests pass."
+      }
     },
     {
       "id": "wq-650",

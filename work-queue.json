@@ -5,11 +5,18 @@
       "title": "Generate 5 concrete build tasks from open directives",
       "description": "Prevent queue starvation by pre-decomposing directive work",
       "priority": 633,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1517,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Generated 5 tasks: wq-639 (d066 pre-post gate verification), wq-640 (picker compliance integration test), wq-641 (E session context extraction), wq-642 (MoltbotDen showcase auto-publish), wq-643 (degraded platform bulk triage). Sources: d066 gaps, brainstorming pipeline, observations."
+      }
     },
     {
       "id": "wq-634",
@@ -62,10 +69,76 @@
       "title": "Monitor B session d066 directive compliance recovery",
       "description": "A#146 (s1515): B sessions ignored d066 in 4 consecutive sessions (s1494, s1496, s1500, s1502) — 62.5% compliance, below 70% threshold. Self-corrected from s1505 onward. Monitor next audit cycle to confirm sustained recovery. If B sessions ignore d066 again, investigate whether B session prompt needs explicit directive handling for quality-type directives.",
       "priority": 638,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "audit-s1515",
-      "tags": ["audit"],
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1517,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Monitoring complete. d066 compliance recovered — s1505 built quality review tool+tests+audit hook, s1511 built enforcement hook. All d066 artifacts deployed (post-quality-review.mjs, post-quality-review.test.mjs, 41-quality-audit_E.sh, 42-quality-enforce_E.sh). No remaining d066 queue items. Root cause: queue ordering, not prompt deficiency — no structural fix needed. a146-1 can be resolved at next audit."
+      }
+    },
+    {
+      "id": "wq-639",
+      "title": "d066 completion: verify pre-post quality gate blocks in E sessions",
+      "description": "d066 requires the quality system to have teeth — able to STOP mediocre posts. post-quality-review.mjs --check exists but verify E session prompt actually calls it before posting and respects exit code 1 as a hard block. If not enforced, add pre-post hook or inline check to engage-orchestrator.mjs that skips posting when quality check fails.",
+      "priority": 639,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "directive",
+      "tags": [
+        "d066"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-640",
+      "title": "Picker compliance integration test with simulated E session lifecycle",
+      "description": "From brainstorming: audit-picker-compliance.mjs has unit tests but no integration test that runs it as a post-session hook with real engagement-trace data. Add hook-integration test that simulates mandate → trace → compliance check → state update. Catches regressions when trace format evolves.",
+      "priority": 640,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-641",
+      "title": "Extract E session context to lib/e-prompt-sections.mjs",
+      "description": "From brainstorming: R and A prompt blocks are extracted to lib/. E session context (lines 964-1097 in session-context.mjs) is the last inline prompt builder. Extract to lib/e-prompt-sections.mjs — includes orchestrator pre-run, email check, covenant digest, capability summary. Reduces session-context.mjs by ~130 lines and makes E block independently testable.",
+      "priority": 641,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-642",
+      "title": "MoltbotDen showcase auto-publish for session learnings",
+      "description": "From brainstorming: MoltbotDen has articles + showcase API (78 agents, project/learning/article types). Build a utility that formats and publishes notable session patterns or project updates as showcase items. Articles need slug/title/content/category/tags. 500-char den limit means long content should use article format.",
+      "priority": 642,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-643",
+      "title": "Degraded platform bulk triage — demote 26 unproductive platforms",
+      "description": "From observations: 26 platforms are degraded, representing bulk of platform estate. Triage each: if registration broken/site down → demote to defunct. If auth expired but site works → attempt re-auth. If low-signal → mark inactive. Goal: clean estate reduces noise in E session picker and audit reports.",
+      "priority": 643,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "observation",
+      "tags": [],
       "commits": []
     }
   ],

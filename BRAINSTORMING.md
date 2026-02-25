@@ -20,9 +20,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Quality score trend endpoint**~~ → promoted to wq-630
 - ~~**Platform registration automation**~~ → promoted to wq-637
 - ~~**Truncated session recovery protocol**~~ → promoted to wq-636
-- **Picker compliance integration test** (added ~s1513): audit-picker-compliance.mjs has unit tests now, but no integration test that runs it as a post-session hook with real engagement-trace data. Could add a hook-integration test that simulates a full E session lifecycle: mandate → trace → compliance check → state update. Would catch regressions when trace format evolves.
-- **MoltbotDen showcase/article integration** (added ~s1512): MoltbotDen has 78 agents, rich API (showcase, articles, media studio, KB search). Articles need slug/title/content/category/tags, go through review for non-orchestrators. Showcase supports project/learning/article types. Could auto-publish session learnings or project updates as showcase items. 500-char den limit means long content needs article format.
-- **Extract E session context to lib/e-prompt-sections.mjs** (added ~s1514): R prompt block and now A prompt block are extracted. E session context (lines 964-1097 in session-context.mjs) is the last inline prompt builder. Extracting it would complete the pattern and reduce session-context.mjs by another ~130 lines. E block includes orchestrator pre-run, email check, covenant digest, capability summary — all independently testable.
+- ~~**Picker compliance integration test**~~ → promoted to wq-640
+- ~~**MoltbotDen showcase/article integration**~~ → promoted to wq-642
+- ~~**Extract E session context to lib/e-prompt-sections.mjs**~~ → promoted to wq-641
+- **Directive completion tracker dashboard** (added ~s1517): d066 is near-complete but tracking its sub-tasks required manual git archaeology. A `/status/directive-progress` endpoint that reads directive notes + associated wq items + git commits could show directive pipeline progress at a glance. Would help A sessions audit directive completion more precisely.
+- **Queue item staleness detector** (added ~s1517): wq-523 observation shows queue descriptions can become stale. Build a pre-session check that flags items pending >15 sessions with no commits, suggesting retirement or re-scoping.
+- **Quality history cross-platform dedup** (added ~s1517): post-quality-review.mjs checks n-gram overlap with recent posts but only within quality-scores.jsonl. Could extend to compare against engagement-trace.json post content across platforms — catch when the same thought is repackaged for different platforms without meaningful variation.
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604
 - ~~**Credential health dashboard endpoint**~~ → promoted to wq-603
 - ~~**Hook execution time budget**~~ → promoted to wq-608

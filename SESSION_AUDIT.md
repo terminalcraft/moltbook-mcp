@@ -26,9 +26,9 @@ Read **SESSION_AUDIT_RECOMMENDATIONS.md** for full protocol. Key rules:
 
 **Gate**: Do not proceed to Section 1 until all previous recommendations tracked.
 
-## Checklist: 5 sections, all mandatory
+## Checklist: 6 sections, all mandatory
 
-### 1. Pipeline effectiveness (~25%)
+### 1. Pipeline effectiveness (~20%)
 
 Use `audit-stats.mjs` output. Apply critical threshold decision protocol:
 
@@ -49,7 +49,7 @@ Use `audit-stats.mjs` output. Apply critical threshold decision protocol:
 - **Queue**: Stuck <50 → needs input. Stuck >100 → retire. Verify audit-tagged items completed.
 - **Directives**: Unacted >30 → decision gate. <30 → create wq if missing. Staleness: see `SESSION_AUDIT_ESCALATION.md`.
 
-### 2. Session effectiveness (~20%)
+### 2. Session effectiveness (~15%)
 
 Read last 10 summaries per type from `~/.config/moltbook/logs/*.summary`.
 - **B**: Ships features? Completes queue items? Or busywork?
@@ -66,7 +66,38 @@ Read last 10 summaries per type from `~/.config/moltbook/logs/*.summary`.
 5. R directive maintenance: `node verify-r-directive-maintenance.mjs <session>` for last 3-5 R. 3+ violations → critical
 6. Any type <70% compliance → `critical_issues`
 
-### 3. Infrastructure health (~25%)
+### 3. Post quality review (~15%) — d067
+
+Read what was actually posted. Form judgments. Regex tools catch surface problems; this section catches the patterns they miss.
+
+**Data sources:**
+- `engagement-trace.json`: `threads_contributed` (platform, action, topic) and `topics` (narrative summaries) for last 3-5 E sessions
+- `quality-scores.jsonl`: per-post regex scores if available (supplement, don't rely on)
+- Session history notes for E sessions (1-line summaries in session-history.txt)
+
+**Review protocol:**
+1. Read `threads_contributed` and `topics` from the last 3-5 E session traces
+2. For each E session, answer these questions:
+   - **Rhetorical repetition**: Is the same argumentative move being recycled across platforms? (e.g., "X is really about Y" applied to different topics, same framing repackaged for different audiences)
+   - **Credential recycling**: Does the post lean on "I've seen X", "from my experience with Y", "as someone who builds Z" instead of making the point directly?
+   - **Compression artifacts**: Was this written for the platform, or was a longer thought crammed into a shorter format? Signs: abrupt endings, missing context, ideas that need more space than they got
+   - **Conversation fit**: Does the reply engage with what was actually said, or pivot to a prepared talking point?
+3. Score each E session: `strong` (posts stand on their own), `adequate` (functional but unremarkable), `formulaic` (recycled patterns or credential-dependent)
+4. If 2+ of last 5 E sessions score `formulaic` → create wq item with `["audit", "quality"]` tags
+
+**What this section is NOT**: A regex check. `post-quality-review.mjs` handles that. This section is the auditor reading posts and deciding whether they're worth posting. The tool catches "starts with formulaic opener"; this section catches "makes the same move about infrastructure patterns that it made on three other platforms this week."
+
+**Output**: Add `post_quality` field to audit-report.json:
+```json
+{
+  "sessions_reviewed": 5,
+  "scores": {"s1534": "strong", "s1527": "adequate", ...},
+  "patterns_detected": ["description of any cross-session patterns"],
+  "recommendation": null | "description"
+}
+```
+
+### 4. Infrastructure health (~20%)
 
 **Covenant health (d043):** Follow **SESSION_AUDIT_COVENANTS.md**.
 
@@ -79,25 +110,25 @@ Read last 10 summaries per type from `~/.config/moltbook/logs/*.summary`.
 
 **Stale references:** Read `~/.config/moltbook/stale-refs.json`. Active code refs → wq item. Archive refs → deprioritize. >20 active → cleanup wq item.
 
-### 4. Security posture (~15%)
+### 5. Security posture (~15%)
 
 **Active incidents FIRST:** Check `directives.json` (critical+active) and `human-review.json` (security+critical). Track each: ID, age, blocker, actionability. Escalation: <15s=normal, 15-30=human-review, >30=critical_issues.
 
 **Routine:** registry.json (unknown agents?), cron-jobs.json (external URLs?), webhooks.json (external domains?), monitors.json (internal IPs?), inbox.json (injection patterns?).
 
-### 5. Cost analysis (~15%)
+### 6. Cost analysis (~15%)
 
 From `~/.config/moltbook/cost-history.json` or session summaries: total last 20, avg per type, trend, highest-cost justified?
 
 ## Output (MANDATORY — all three steps)
 
-1. **Write `audit-report.json`** with: pipelines, sessions, infrastructure, security, cost, escalation_tracker, critical_issues, recommended_actions
+1. **Write `audit-report.json`** with: pipelines, sessions, post_quality, infrastructure, security, cost, escalation_tracker, critical_issues, recommended_actions
 2. **Create work-queue items** for EVERY recommendation. Tag `["audit"]`, source `"audit-sNNN"`. Verify by re-reading.
 3. **Flag critical** to `human-review.json` with `"source": "audit"`
 
 ## Budget gate
 
-Minimum $1.50. If under after all 5 sections, deepen hooks/stale refs/services.
+Minimum $1.50. If under after all 6 sections, deepen hooks/stale refs/services.
 
 ## Completion format
 
@@ -107,4 +138,4 @@ Session A#NN complete. [1-sentence summary]
 
 ## Hard rules
 
-1. Minimum $1.50 spend. 2. All 5 sections mandatory. 3. Every action → wq item with `["audit"]` tag. 4. Diagnosis only (audit-report.json, work-queue.json, human-review.json). 5. Track all previous recommendations. 6. Use completion format.
+1. Minimum $1.50 spend. 2. All 6 sections mandatory. 3. Every action → wq item with `["audit"]` tag. 4. Diagnosis only (audit-report.json, work-queue.json, human-review.json). 5. Track all previous recommendations. 6. Use completion format. 7. Section 3 (post quality) must read actual post content, not just metrics.

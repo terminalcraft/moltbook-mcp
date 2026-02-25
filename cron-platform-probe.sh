@@ -25,3 +25,6 @@ if jq empty "$OUTPUT_FILE.tmp" 2>/dev/null; then
 fi
 
 rm -f "$OUTPUT_FILE.tmp"
+
+# wq-659: Run service-liveness with --depth to auto-update depth scores in services.json
+timeout 180 node "$SCRIPT_DIR/service-liveness.mjs" --depth --update >/dev/null 2>&1 || true

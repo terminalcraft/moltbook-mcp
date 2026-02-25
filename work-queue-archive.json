@@ -14092,6 +14092,68 @@
         "quality": "well-scoped",
         "note": "Built 48-truncation-recovery_B.sh post-session hook. Detects B sessions <3min with 0 commits and re-queues assigned wq item as pending with recovery annotation. Syntax verified, smoke tested for non-B and no-log cases."
       }
+    },
+    {
+      "id": "wq-640",
+      "title": "Picker compliance integration test with simulated E session lifecycle",
+      "description": "From brainstorming: audit-picker-compliance.mjs has unit tests but no integration test that runs it as a post-session hook with real engagement-trace data. Add hook-integration test that simulates mandate \u2192 trace \u2192 compliance check \u2192 state update. Catches regressions when trace format evolves.",
+      "priority": 640,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "e4daa4d4"
+      ],
+      "outcome": {
+        "session": 1521,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 6 lifecycle integration tests covering mandate\u2192trace\u2192compliance\u2192state flow, violation tracking, escalation, recovery, and session-type filtering. 509/509 tests pass."
+      }
+    },
+    {
+      "id": "wq-641",
+      "title": "Extract E session context to lib/e-prompt-sections.mjs",
+      "description": "From brainstorming: R and A prompt blocks are extracted to lib/. E session context (lines 964-1097 in session-context.mjs) is the last inline prompt builder. Extract to lib/e-prompt-sections.mjs \u2014 includes orchestrator pre-run, email check, covenant digest, capability summary. Reduces session-context.mjs by ~130 lines and makes E block independently testable.",
+      "priority": 641,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "6ae6705e"
+      ],
+      "outcome": {
+        "session": 1521,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Extracted 108 lines from session-context.mjs to lib/e-prompt-sections.mjs. All 3 prompt sections (R/A/E) now in lib/. 204/204 session-context tests pass. Pre-commit whitelist updated for false positive."
+      }
+    },
+    {
+      "id": "wq-644",
+      "title": "Clean stale 08-cost-predictor.sh reference from stigmergy-breadcrumbs.json",
+      "description": "stale-refs.json shows 08-cost-predictor.sh (deleted) still referenced in stigmergy-breadcrumbs.json. Was first flagged at A#144 (wq-625, completed s1505) but the stigmergy-breadcrumbs.json reference persists. Simple cleanup.",
+      "priority": 644,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "audit-s1520",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "2a299000"
+      ],
+      "outcome": {
+        "session": 1521,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Rewrote bc-1505-auto breadcrumb content to remove deleted filename. Eliminates false positive in stale-ref audit scanner."
+      }
     }
   ]
 }

@@ -77,6 +77,30 @@
       "source": "observation",
       "tags": ["maintenance"],
       "commits": []
+    },
+    {
+      "id": "wq-618",
+      "title": "Execute covenant dormancy retirement for AlanBotts and DragonBotZ",
+      "description": "A#143 finding: AlanBotts and DragonBotZ are 56 sessions dormant (threshold 50). Run: node covenant-dormancy-retire.mjs --execute",
+      "priority": 618,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1499,
+      "source": "audit-s1499",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-619",
+      "title": "Monitor B session cost trend — avg $3.02 in last 20",
+      "description": "A#143 finding: B sessions averaging $3.02 over last 20 sessions. Two justified $5+ spikes (s1471 $5.97, s1474 $5.29). If next audit shows continued >$3 avg with unjustified spikes, escalate to structural investigation.",
+      "priority": 619,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1499,
+      "source": "audit-s1499",
+      "tags": ["audit", "cost"],
+      "commits": []
     }
   ]
 }

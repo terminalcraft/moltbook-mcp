@@ -721,7 +721,7 @@
       "title": "Audit sessions should review post quality",
       "content": "Your post quality tooling catches surface-level problems but misses the patterns that actually matter. Regex can't see that you're making the same rhetorical move across different platforms, or that a post was compressed to fit a character limit rather than written for it. You already have a session type whose entire job is to review your own output. Use it. Your audit sessions should be reading what you actually posted and forming judgments about it the same way they judge hook compliance or cost trends.",
       "acked_session": 1536,
-      "notes": "R#262: Added Section 3 (Post Quality Review) to SESSION_AUDIT.md. A sessions now required to read actual post content from engagement traces, judge rhetorical repetition/credential recycling/compression artifacts/conversation fit, and score each E session. 2+ formulaic scores triggers wq item. Hard rule #7 added: must read actual content, not just metrics. R#263: A#150 (s1537) completed first d067 review \u2014 0 formulaic posts detected. Standing enforcement active."
+      "notes": "R#262: Added Section 3 (Post Quality Review) to SESSION_AUDIT.md. A sessions now required to read actual post content from engagement traces, judge rhetorical repetition/credential recycling/compression artifacts/conversation fit, and score each E session. 2+ formulaic scores triggers wq item. Hard rule #7 added: must read actual content, not just metrics. R#263: A#150 (s1537) completed first d067 review \u2014 0 formulaic posts detected. Standing enforcement active. R#267: A#151 (s1542) confirmed 0 formulaic sessions across 5 E sessions reviewed. probe-data-as-evidence pattern emerging — monitoring. Standing enforcement sustained across 2 audit cycles."
     }
   ],
   "questions": [
@@ -875,15 +875,11 @@
       },
       "commit-and-push": {
         "followed": 596,
-        "ignored": 25,
+        "ignored": 26,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1547,
-        "last_applicable_session": 1547,
+        "last_session": 1548,
+        "last_applicable_session": 1548,
         "history": [
-          {
-            "session": 1533,
-            "result": "followed"
-          },
           {
             "session": 1535,
             "result": "followed"
@@ -919,20 +915,20 @@
           {
             "session": 1547,
             "result": "ignored"
+          },
+          {
+            "session": 1548,
+            "result": "ignored"
           }
         ]
       },
       "structural-change": {
         "followed": 261,
-        "ignored": 11,
+        "ignored": 12,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 1547,
-        "last_applicable_session": 1547,
+        "last_session": 1548,
+        "last_applicable_session": 1548,
         "history": [
-          {
-            "session": 1503,
-            "result": "followed"
-          },
           {
             "session": 1509,
             "result": "followed"
@@ -968,20 +964,20 @@
           {
             "session": 1547,
             "result": "ignored"
+          },
+          {
+            "session": 1548,
+            "result": "ignored"
           }
         ]
       },
       "ecosystem-adoption": {
         "followed": 694,
-        "ignored": 105,
+        "ignored": 106,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1547,
-        "last_applicable_session": 1547,
+        "last_session": 1548,
+        "last_applicable_session": 1548,
         "history": [
-          {
-            "session": 1536,
-            "result": "followed"
-          },
           {
             "session": 1538,
             "result": "followed"
@@ -1017,20 +1013,20 @@
           {
             "session": 1547,
             "result": "followed"
+          },
+          {
+            "session": 1548,
+            "result": "ignored"
           }
         ]
       },
       "briefing-update": {
         "followed": 238,
-        "ignored": 14,
-        "last_ignored_reason": "Agent explicitly noted 'briefing-update (not applicable \u2014 no changes needed)' and made no edits to BRIEFING.md",
-        "last_session": 1547,
-        "last_applicable_session": 1547,
+        "ignored": 15,
+        "last_ignored_reason": "No BRIEFING.md edits detected",
+        "last_session": 1548,
+        "last_applicable_session": 1548,
         "history": [
-          {
-            "session": 1503,
-            "result": "followed"
-          },
           {
             "session": 1509,
             "result": "followed"
@@ -1066,20 +1062,20 @@
           {
             "session": 1547,
             "result": "followed"
+          },
+          {
+            "session": 1548,
+            "result": "ignored"
           }
         ]
       },
       "reflection-summary": {
         "followed": 249,
-        "ignored": 6,
+        "ignored": 7,
         "last_ignored_reason": "No reflection summary text detected",
-        "last_session": 1547,
-        "last_applicable_session": 1547,
+        "last_session": 1548,
+        "last_applicable_session": 1548,
         "history": [
-          {
-            "session": 1503,
-            "result": "followed"
-          },
           {
             "session": 1509,
             "result": "followed"
@@ -1115,6 +1111,10 @@
           {
             "session": 1547,
             "result": "followed"
+          },
+          {
+            "session": 1548,
+            "result": "ignored"
           }
         ]
       },
@@ -1169,15 +1169,11 @@
       },
       "directive-update": {
         "followed": 230,
-        "ignored": 30,
+        "ignored": 31,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 1547,
-        "last_applicable_session": 1547,
+        "last_session": 1548,
+        "last_applicable_session": 1548,
         "history": [
-          {
-            "session": 1503,
-            "result": "followed"
-          },
           {
             "session": 1509,
             "result": "followed"
@@ -1213,6 +1209,10 @@
           {
             "session": 1547,
             "result": "followed"
+          },
+          {
+            "session": 1548,
+            "result": "ignored"
           }
         ]
       }

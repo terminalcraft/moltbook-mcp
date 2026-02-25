@@ -427,47 +427,38 @@ PROMPT="${BASE_PROMPT}
 
 ${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
 
-# --- Prompt health gate (R#239) ---
+# --- Prompt health gate (R#239, refactored R#255) ---
 # Validates the assembled prompt has expected content for the session type.
 # Catches silent session-context.mjs failures that produce empty prompt blocks,
 # which historically lead to zero-output sessions (e.g. s1408).
-PROMPT_LEN=${#PROMPT}
-PROMPT_HEALTH="OK"
-PROMPT_WARNINGS=""
+#
+# validate_prompt_blocks: shared validation for initial check + post-retry.
+# Sets PROMPT_HEALTH and PROMPT_WARNINGS. $1 = label prefix for warnings.
+validate_prompt_blocks() {
+  local label="${1:-}"
+  PROMPT_HEALTH="OK"
+  PROMPT_WARNINGS=""
+  local plen=${#PROMPT}
+  if [ "$plen" -lt 2000 ]; then
+    PROMPT_HEALTH="DEGRADED"
+    PROMPT_WARNINGS="prompt too short (${plen} chars, min 2000)"
+  fi
+  case "$MODE_CHAR" in
+    R) [ -n "$R_FOCUS_BLOCK" ] && [ ${#R_FOCUS_BLOCK} -ge 100 ] || { PROMPT_HEALTH="DEGRADED"; PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }R prompt block ${label}(${#R_FOCUS_BLOCK} chars)"; } ;;
+    B) [ -n "$B_FOCUS_BLOCK" ] && [ ${#B_FOCUS_BLOCK} -ge 50 ] || { PROMPT_HEALTH="DEGRADED"; PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }B prompt block ${label}(${#B_FOCUS_BLOCK} chars)"; } ;;
+    E) [ -n "$E_CONTEXT_BLOCK" ] && [ ${#E_CONTEXT_BLOCK} -ge 100 ] || { PROMPT_HEALTH="DEGRADED"; PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }E prompt block ${label}(${#E_CONTEXT_BLOCK} chars)"; } ;;
+    A) [ -n "$A_CONTEXT_BLOCK" ] && [ ${#A_CONTEXT_BLOCK} -ge 100 ] || { PROMPT_HEALTH="DEGRADED"; PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }A prompt block ${label}(${#A_CONTEXT_BLOCK} chars)"; } ;;
+  esac
+}
 
-# Minimum viable prompt: base-prompt + mode file should always produce >2000 chars
-if [ "$PROMPT_LEN" -lt 2000 ]; then
-  PROMPT_HEALTH="DEGRADED"
-  PROMPT_WARNINGS="prompt too short (${PROMPT_LEN} chars, min 2000)"
-fi
+# reassemble_prompt: rebuild full prompt from current block variables.
+reassemble_prompt() {
+  PROMPT="${BASE_PROMPT}
 
-# Session-type-specific block validation
-case "$MODE_CHAR" in
-  R)
-    if [ -z "$R_FOCUS_BLOCK" ] || [ ${#R_FOCUS_BLOCK} -lt 100 ]; then
-      PROMPT_HEALTH="DEGRADED"
-      PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }R prompt block missing or too short (${#R_FOCUS_BLOCK} chars)"
-    fi
-    ;;
-  B)
-    if [ -z "$B_FOCUS_BLOCK" ] || [ ${#B_FOCUS_BLOCK} -lt 50 ]; then
-      PROMPT_HEALTH="DEGRADED"
-      PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }B prompt block missing or too short (${#B_FOCUS_BLOCK} chars)"
-    fi
-    ;;
-  E)
-    if [ -z "$E_CONTEXT_BLOCK" ] || [ ${#E_CONTEXT_BLOCK} -lt 100 ]; then
-      PROMPT_HEALTH="DEGRADED"
-      PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }E prompt block missing or too short (${#E_CONTEXT_BLOCK} chars)"
-    fi
-    ;;
-  A)
-    if [ -z "$A_CONTEXT_BLOCK" ] || [ ${#A_CONTEXT_BLOCK} -lt 100 ]; then
-      PROMPT_HEALTH="DEGRADED"
-      PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }A prompt block missing or too short (${#A_CONTEXT_BLOCK} chars)"
-    fi
-    ;;
-esac
+${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
+}
+
+validate_prompt_blocks "missing or too short "
 
 if [ "$PROMPT_HEALTH" = "DEGRADED" ] && [ -z "$EMERGENCY_MODE" ] && [ -z "$SAFE_MODE" ]; then
   echo "$(date -Iseconds) [prompt-health] DEGRADED (attempt 1): $PROMPT_WARNINGS — retrying session-context" >> "$LOG_DIR/init-errors.log"
@@ -504,20 +495,8 @@ Follow the checklist in SESSION_AUDIT.md.}"
       ;;
   esac
 
-  # Re-assemble full prompt with retried blocks
-  PROMPT="${BASE_PROMPT}
-
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
-
-  # Re-validate after retry
-  PROMPT_HEALTH="OK"
-  PROMPT_WARNINGS=""
-  case "$MODE_CHAR" in
-    R) [ -z "$R_FOCUS_BLOCK" ] || [ ${#R_FOCUS_BLOCK} -lt 100 ] && PROMPT_HEALTH="DEGRADED" && PROMPT_WARNINGS="R prompt block still too short after retry (${#R_FOCUS_BLOCK} chars)" ;;
-    B) [ -z "$B_FOCUS_BLOCK" ] || [ ${#B_FOCUS_BLOCK} -lt 50 ] && PROMPT_HEALTH="DEGRADED" && PROMPT_WARNINGS="B prompt block still too short after retry (${#B_FOCUS_BLOCK} chars)" ;;
-    E) [ -z "$E_CONTEXT_BLOCK" ] || [ ${#E_CONTEXT_BLOCK} -lt 100 ] && PROMPT_HEALTH="DEGRADED" && PROMPT_WARNINGS="E prompt block still too short after retry (${#E_CONTEXT_BLOCK} chars)" ;;
-    A) [ -z "$A_CONTEXT_BLOCK" ] || [ ${#A_CONTEXT_BLOCK} -lt 100 ] && PROMPT_HEALTH="DEGRADED" && PROMPT_WARNINGS="A prompt block still too short after retry (${#A_CONTEXT_BLOCK} chars)" ;;
-  esac
+  reassemble_prompt
+  validate_prompt_blocks "still too short after retry "
 
   if [ "$PROMPT_HEALTH" = "OK" ]; then
     echo "$(date -Iseconds) [prompt-health] RECOVERED after retry" >> "$LOG_DIR/init-errors.log"

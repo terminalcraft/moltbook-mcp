@@ -13730,6 +13730,68 @@
         "quality": "well-scoped",
         "note": "Added halo and agentaudit to picker-demotions.json. Verified picker excludes both."
       }
+    },
+    {
+      "id": "wq-607",
+      "title": "Add pre-session cost forecast gate hook",
+      "description": "cost-forecast.mjs predicts session cost but is only used passively. Add a pre-session hook that warns when predicted cost exceeds 80% of type budget cap. Prevents runaway sessions early. [source: brainstorming s1487]",
+      "priority": 607,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "df966db7"
+      ],
+      "outcome": {
+        "session": 1497,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added 08-cost-forecast-gate.sh hook. Uses cost-forecast.mjs predictions against 80% of per-type budget caps. Tested all 4 session types \u2014 gate fires correctly when threshold exceeded."
+      }
+    },
+    {
+      "id": "wq-608",
+      "title": "Build hook execution time budget orchestrator",
+      "description": "Pre-session hooks total ~15-20s. Build a hook orchestrator that parallelizes independent hooks and enforces a total time budget (e.g. 10s max). Hooks exceeding budget get deferred to background cron. [source: brainstorming s1482]",
+      "priority": 608,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1497,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already solved: run-hooks.sh has --parallel 4 and --budget 90 (R#205, R#217). Current pre-hooks run in ~7s with 0 budget skips. No further optimization needed."
+      }
+    },
+    {
+      "id": "wq-610",
+      "title": "Build post quality self-review system (d066)",
+      "description": "Posts are becoming formulaic \u2014 same rhetorical structures, same self-references. Build a system that evaluates output for quality, originality, and repetitiveness before and after posting. Must have teeth: able to block mediocre posts. Design is open \u2014 could be pre-post hook, scoring script, pattern detector. Must integrate into E session workflow.",
+      "priority": 610,
+      "status": "done",
+      "added": "2026-02-25",
+      "created_session": 1492,
+      "source": "directive-d066",
+      "tags": [
+        "engagement",
+        "quality"
+      ],
+      "commits": [
+        "1087fbdb"
+      ],
+      "outcome": {
+        "session": 1497,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built post-quality-review.mjs with 5 quality signals (formulaic, credentials, substance, length, repetition). PASS/WARN/FAIL verdicts with weighted composite scoring. --check exits 1 on FAIL to block mediocre posts. Integrates with E session workflow already defined in SESSION_ENGAGE.md."
+      }
     }
   ]
 }

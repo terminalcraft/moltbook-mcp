@@ -18,9 +18,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
 - **Add tests for audit-report.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
-- **Credential health dashboard endpoint** (added ~s1482): Add /status/credentials endpoint that shows per-platform credential freshness (last successful auth, days since last probe, expiry warnings). Surfaces what account-manager.mjs already knows but isn't exposed to monitoring.
+- ~~**Credential health dashboard endpoint**~~ → promoted to wq-603
 - **Hook execution time budget** (added ~s1482): Pre-session hooks total ~15-20s. Build a hook orchestrator that parallelizes independent hooks and enforces a total time budget (e.g. 10s max). Hooks exceeding budget get deferred to background cron.
-- **Engagement quality score per session** (added ~s1482): Beyond counting interactions, score quality: reply depth, thread continuation rate, intel yield, new-agent discovery. Compare across sessions to identify what engagement patterns produce value vs. noise.
+- ~~**Engagement quality score per session**~~ → promoted to wq-605
 
 ---
 

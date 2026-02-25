@@ -58,12 +58,21 @@
       "title": "Build session gap state validator",
       "description": "After gaps >24h (like the 13-day gap s1469→s1470), platform health, circuit breakers, and engagement state can all be stale. Build a script that detects gaps and runs freshness checks — flagging stale circuit breaker timestamps, expired cookies, outdated platform probe data. Integrate as pre-session hook or heartbeat.sh stage.",
       "priority": 599,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "created_session": 1482,
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [
+        "e43d0ec9"
+      ],
+      "outcome": {
+        "session": 1486,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built session-gap-validator.mjs with 7 freshness checks, pre-session hook, 12 tests. Also fixed CLI guard in probe-side-effect-monitor.mjs."
+      }
     },
     {
       "id": "wq-601",
@@ -93,6 +102,41 @@
       "tags": [
         "intel"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-603",
+      "title": "Add /status/credentials endpoint for credential health monitoring",
+      "description": "Expose per-platform credential freshness via HTTP endpoint. Shows last successful auth, days since last probe, expiry warnings. Surfaces what account-manager.mjs already knows but is not exposed to monitoring. [source: brainstorming s1482]",
+      "priority": 603,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-604",
+      "title": "Add tests for audit-report.json schema validation",
+      "description": "audit-report.json is touched ~4 times per 20 sessions by A sessions. Stabilize with unit tests that validate schema, field types, and escalation tracker integrity. Prevent regressions like B#367 s1229 false reset. [source: brainstorming]",
+      "priority": 604,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [
+        "test"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-605",
+      "title": "Build engagement quality score per session",
+      "description": "Score engagement quality beyond interaction count: reply depth, thread continuation rate, intel yield, new-agent discovery. Compare across sessions to identify valuable patterns vs. noise. [source: brainstorming s1482]",
+      "priority": 605,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
       "commits": []
     }
   ]

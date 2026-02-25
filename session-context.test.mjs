@@ -7,7 +7,7 @@
 // Instead, we use a safer approach: copy session-context.mjs to a temp dir,
 // patch the DIR/STATE_DIR references, and run from there.
 
-import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, copyFileSync } from 'fs';
+import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, copyFileSync, readdirSync } from 'fs';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -32,8 +32,9 @@ function setup() {
   const libSrc = new URL('./lib', import.meta.url).pathname;
   const libDst = join(SRC, 'lib');
   mkdirSync(libDst, { recursive: true });
-  for (const f of ['r-prompt-sections.mjs', 'a-prompt-sections.mjs', 'e-prompt-sections.mjs']) {
-    if (existsSync(join(libSrc, f))) copyFileSync(join(libSrc, f), join(libDst, f));
+  // Copy all .mjs files from lib/ (modules added over time: r-, a-, e-, b-prompt-sections, queue-pipeline, etc.)
+  for (const f of readdirSync(libSrc).filter(f => f.endsWith('.mjs'))) {
+    copyFileSync(join(libSrc, f), join(libDst, f));
   }
 
   // Copy session-context.mjs and patch DIR + STATE_DIR
@@ -1813,6 +1814,191 @@ function testPlatformPromotionLogsToFile() {
   assert(logContent.includes('svc-log-test'), 'log contains promoted platform ID');
 }
 
+// --- wq-660: Trace archiving, dedup, session attribution ---
+
+function makeTraceEntry(session, overrides = {}) {
+  return {
+    session,
+    date: '2026-02-25',
+    picker_mandate: ['chatr', 'moltbook'],
+    platforms_engaged: ['chatr', 'moltbook'],
+    skipped_platforms: [],
+    topics: ['Test topic'],
+    agents_interacted: ['@TestAgent (Chatr)'],
+    threads_contributed: [{ platform: 'chatr', action: 'reply', topic: 'Test' }],
+    ...overrides
+  };
+}
+
+// Intel must be non-empty for trace archiving to run (it's inside the intel block)
+function writeIntelForTrace() {
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify([
+    { session: 1, type: 'observation', summary: 'Trigger for trace archiving' }
+  ]));
+}
+
+function testTraceArchiveBasic() {
+  console.log('\n== Trace archive: basic archiving ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeIntelForTrace();
+
+  // Write trace with one entry
+  writeFileSync(join(STATE, 'engagement-trace.json'), JSON.stringify([makeTraceEntry(500)]));
+  // No archive yet
+  try { rmSync(join(STATE, 'engagement-trace-archive.json')); } catch {}
+
+  run('B');
+
+  const archive = JSON.parse(readFileSync(join(STATE, 'engagement-trace-archive.json'), 'utf8'));
+  assert(Array.isArray(archive), 'trace archive is array');
+  assert(archive.length === 1, 'trace archive has 1 entry');
+  assert(archive[0].session === 500, 'archived entry has correct session');
+  assert(archive[0].archived_at !== undefined, 'archived entry has archived_at field');
+}
+
+function testTraceArchiveDedup() {
+  console.log('\n== Trace archive: dedup by session number ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeIntelForTrace();
+
+  // Pre-populate archive with session 500
+  writeFileSync(join(STATE, 'engagement-trace-archive.json'), JSON.stringify([
+    { ...makeTraceEntry(500), archived_at: 99 }
+  ]));
+  // Current trace also has session 500 (same E session, no new data)
+  writeFileSync(join(STATE, 'engagement-trace.json'), JSON.stringify([makeTraceEntry(500)]));
+
+  const result = run('B');
+
+  const archive = JSON.parse(readFileSync(join(STATE, 'engagement-trace-archive.json'), 'utf8'));
+  assert(archive.length === 1, 'no duplicate: still 1 entry after dedup');
+  assert(archive[0].archived_at === 99, 'original entry preserved (not overwritten)');
+  assert(!result.trace_archived, 'result reports no new entries archived');
+}
+
+function testTraceArchiveAccumulation() {
+  console.log('\n== Trace archive: accumulates across runs ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeIntelForTrace();
+
+  // Clean slate
+  try { rmSync(join(STATE, 'engagement-trace-archive.json')); } catch {}
+
+  // First run: trace with session 500
+  writeFileSync(join(STATE, 'engagement-trace.json'), JSON.stringify([makeTraceEntry(500)]));
+  run('B');
+
+  // Second run: trace with session 501 (new E session)
+  writeFileSync(join(STATE, 'engagement-trace.json'), JSON.stringify([makeTraceEntry(501)]));
+  writeIntelForTrace();
+  run('B');
+
+  const archive = JSON.parse(readFileSync(join(STATE, 'engagement-trace-archive.json'), 'utf8'));
+  assert(archive.length === 2, 'archive accumulated 2 entries');
+  assert(archive[0].session === 500, 'first entry preserved');
+  assert(archive[1].session === 501, 'second entry added');
+}
+
+function testTraceArchiveEmptyTrace() {
+  console.log('\n== Trace archive: empty trace file ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeIntelForTrace();
+
+  // Empty trace array
+  writeFileSync(join(STATE, 'engagement-trace.json'), '[]');
+  writeFileSync(join(STATE, 'engagement-trace-archive.json'), JSON.stringify([
+    { ...makeTraceEntry(400), archived_at: 90 }
+  ]));
+
+  run('B');
+
+  const archive = JSON.parse(readFileSync(join(STATE, 'engagement-trace-archive.json'), 'utf8'));
+  assert(archive.length === 1, 'empty trace: archive unchanged');
+}
+
+function testTraceArchiveMissingFile() {
+  console.log('\n== Trace archive: missing trace file ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+  writeIntelForTrace();
+
+  // No trace file at all
+  try { rmSync(join(STATE, 'engagement-trace.json')); } catch {}
+  try { rmSync(join(STATE, 'engagement-trace-archive.json')); } catch {}
+
+  // Should not crash
+  const result = run('B');
+  assert(result !== null, 'missing trace file: session-context still runs');
+}
+
+function testIntelSessionBackfill() {
+  console.log('\n== Intel: session=0 backfill from trace ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // Trace archive with known E session
+  writeFileSync(join(STATE, 'engagement-trace-archive.json'), JSON.stringify([
+    { ...makeTraceEntry(800), archived_at: 801 }
+  ]));
+  writeFileSync(join(STATE, 'engagement-trace.json'), '[]');
+
+  // Intel with session=0 (the bug case)
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify([
+    { type: 'observation', source: 'chatr', summary: 'Orphaned intel entry', actionable: 'Evaluate this pattern for integration', session: 0 }
+  ]));
+
+  // Clean intel archive
+  try { rmSync(join(STATE, 'engagement-intel-archive.json')); } catch {}
+
+  run('B', '805');
+
+  const archive = JSON.parse(readFileSync(join(STATE, 'engagement-intel-archive.json'), 'utf8'));
+  assert(archive.length === 1, 'backfill: intel entry archived');
+  assert(archive[0].session === 800, 'backfill: session corrected from 0 to 800');
+  assert(archive[0].session_backfilled === true, 'backfill: session_backfilled flag set');
+}
+
+function testIntelSessionBackfillNoTrace() {
+  console.log('\n== Intel: session=0 no backfill when no trace ==');
+
+  writeWQ([]);
+  writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
+  writeFileSync(join(STATE, 'engagement-state.json'), '{}');
+
+  // No trace archive, no trace
+  try { rmSync(join(STATE, 'engagement-trace-archive.json')); } catch {}
+  try { rmSync(join(STATE, 'engagement-trace.json')); } catch {}
+  try { rmSync(join(STATE, 'engagement-intel-archive.json')); } catch {}
+
+  // Intel with session=0
+  writeFileSync(join(STATE, 'engagement-intel.json'), JSON.stringify([
+    { type: 'observation', source: 'chatr', summary: 'No trace to backfill from', actionable: 'Evaluate this pattern for action', session: 0 }
+  ]));
+
+  run('B', '805');
+
+  const archive = JSON.parse(readFileSync(join(STATE, 'engagement-intel-archive.json'), 'utf8'));
+  assert(archive.length === 1, 'no-trace backfill: intel still archived');
+  assert(archive[0].session === 0, 'no-trace backfill: session stays 0 (no trace to reference)');
+  assert(!archive[0].session_backfilled, 'no-trace backfill: no backfill flag');
+}
+
 // ===== RUN =====
 
 try {
@@ -1896,6 +2082,14 @@ try {
   setup(); testPlatformPromotionNoServices();
   setup(); testPlatformPromotionAllAlreadyRegistered();
   setup(); testPlatformPromotionLogsToFile();
+  // wq-660: Trace archiving, dedup, session attribution
+  setup(); testTraceArchiveBasic();
+  setup(); testTraceArchiveDedup();
+  setup(); testTraceArchiveAccumulation();
+  setup(); testTraceArchiveEmptyTrace();
+  setup(); testTraceArchiveMissingFile();
+  setup(); testIntelSessionBackfill();
+  setup(); testIntelSessionBackfillNoTrace();
   // Audit report tests (wq-062)
   setup(); testASessionPromptBlock();
   setup(); testASessionNoPreviousReport();

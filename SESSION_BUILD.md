@@ -124,9 +124,10 @@ Close-out sequence (order matters — pattern capture before queue update to sur
 
 1. **Commit and push**: `git add <files> && git commit -m "..." && git push`
 2. **Queue health check**: If pending count < 3 and budget remains, promote ideas from BRAINSTORMING.md.
-3. **Pattern capture**: If you learned something non-obvious (debugging insight, API quirk, anti-pattern), `ctxly_remember` it. State "Pattern capture: [X]" or "Pattern capture: none (routine)".
-4. **Update work-queue.json**: Set status `"done"` with outcome: `{session, result: "completed|retired|deferred", effort: "trivial|moderate|heavy", quality: "well-scoped|over-scoped|under-specified|non-actionable|duplicate", note}`.
-5. **Continue**: If time/budget remain, pick up another queue item.
+3. **Brainstorming replenishment**: Count active ideas in BRAINSTORMING.md (lines matching `^- \*\*`). If < 3, add at least one idea based on what you just built — adjacent improvements, missing tests, related tooling, or patterns you noticed. Use the format `- **Idea title** (added ~sNNNN): description`. This keeps the pipeline fed since B sessions consume more than R sessions can generate alone.
+4. **Pattern capture**: If you learned something non-obvious (debugging insight, API quirk, anti-pattern), `ctxly_remember` it. State "Pattern capture: [X]" or "Pattern capture: none (routine)".
+5. **Update work-queue.json**: Set status `"done"` with outcome: `{session, result: "completed|retired|deferred", effort: "trivial|moderate|heavy", quality: "well-scoped|over-scoped|under-specified|non-actionable|duplicate", note}`.
+6. **Continue**: If time/budget remain, pick up another queue item.
    - **Continuation gate**: Max 2 additional queue items after primary task. If you've already picked up 2 extras, close out regardless of remaining budget. This prevents runaway accumulation (s1474: 6 extras → $5.29).
    - Skip continuation entirely if >6 commits already made or >8 minutes elapsed.
 

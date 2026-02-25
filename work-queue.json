@@ -34,11 +34,18 @@
       "title": "Directive completion tracker dashboard",
       "description": "(added ~s1517): d066 is near-complete but tracking its sub-tasks required manual git archaeology. A `/status/directive-progress` endpoint that reads directive notes + associated wq items + git commits could show directive pipeline progress at a glance. Would help A sessions audit directive completion more precisely.",
       "priority": 645,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s1528",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "GET /status/directive-progress endpoint. Links 40/63 directives to wq items via queue_item field + reverse title/description matching. Shows per-directive completion % based on linked item status."
+      }
     }
   ],
   "done": [

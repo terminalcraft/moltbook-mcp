@@ -5458,6 +5458,106 @@ app.get("/status/directive-maintenance", (req, res) => {
   }
 });
 
+// Directive completion tracker — links directives to wq items and commits (wq-645)
+app.get("/status/directive-progress", (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(BASE, "directives.json"), "utf8"));
+    const dirs = data.directives || [];
+    const sessionNum = parseInt(process.env.SESSION_NUM) || 1528;
+
+    // Load work-queue for cross-reference
+    let queueItems = [];
+    try {
+      const wq = JSON.parse(readFileSync(join(BASE, "work-queue.json"), "utf8"));
+      queueItems = wq.queue || [];
+    } catch {}
+
+    // Also load archive for completed items
+    try {
+      const archive = JSON.parse(readFileSync(join(BASE, "work-queue-archive.json"), "utf8"));
+      queueItems = queueItems.concat(archive.archived || []);
+    } catch {}
+
+    const queueMap = new Map(queueItems.map(q => [q.id, q]));
+
+    // Find wq items that reference directives by source field
+    const directiveWqMap = new Map();
+    for (const q of queueItems) {
+      // Match by explicit queue_item link on directive side
+      // Also match by wq items with source: "directive" or title containing dXXX
+      const dMatch = q.title?.match(/d0*(\d+)/i) || q.description?.match(/directive.*d0*(\d+)/i);
+      if (dMatch) {
+        const dId = `d${dMatch[1].padStart(3, "0")}`;
+        if (!directiveWqMap.has(dId)) directiveWqMap.set(dId, []);
+        directiveWqMap.get(dId).push(q);
+      }
+    }
+
+    const progress = dirs.map(d => {
+      // Get linked wq items: from directive's queue_item field + reverse lookup
+      const linkedItems = [];
+      if (d.queue_item) {
+        const qi = queueMap.get(d.queue_item);
+        if (qi) linkedItems.push(qi);
+      }
+      // Add reverse-linked items (wq items referencing this directive)
+      const reverseLinked = directiveWqMap.get(d.id) || [];
+      for (const rl of reverseLinked) {
+        if (!linkedItems.find(li => li.id === rl.id)) linkedItems.push(rl);
+      }
+
+      const doneItems = linkedItems.filter(q => q.status === "done");
+      const totalItems = linkedItems.length;
+      const completionPct = totalItems > 0 ? Math.round((doneItems.length / totalItems) * 100) : null;
+
+      // Collect commits from linked items
+      const commits = linkedItems.flatMap(q => q.commits || []);
+
+      return {
+        id: d.id,
+        status: d.status,
+        from: d.from,
+        content_preview: d.content?.slice(0, 100) + (d.content?.length > 100 ? "..." : ""),
+        age_sessions: sessionNum - (d.session || sessionNum),
+        linked_queue_items: linkedItems.map(q => ({
+          id: q.id,
+          title: q.title,
+          status: q.status,
+          commits: q.commits || [],
+          outcome: q.outcome?.result || null,
+        })),
+        queue_progress: totalItems > 0 ? { done: doneItems.length, total: totalItems, pct: completionPct } : null,
+        total_commits: commits.length,
+        notes: d.notes?.slice(0, 200) || null,
+      };
+    });
+
+    // Filter by status if requested
+    const statusFilter = req.query.status;
+    const filtered = statusFilter ? progress.filter(p => p.status === statusFilter) : progress;
+
+    // Summary stats
+    const withQueue = progress.filter(p => p.queue_progress);
+    const fullyDone = withQueue.filter(p => p.queue_progress.pct === 100);
+    const inProgress = withQueue.filter(p => p.queue_progress.pct > 0 && p.queue_progress.pct < 100);
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      session: sessionNum,
+      summary: {
+        total_directives: dirs.length,
+        with_queue_items: withQueue.length,
+        fully_delivered: fullyDone.length,
+        in_progress: inProgress.length,
+        no_queue_link: dirs.length - withQueue.length,
+      },
+      directives: filtered,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Ecosystem service adoption dashboard — which tools used, trends, gaps (wq-077, B#165)
 app.get("/status/ecosystem", (req, res) => {
   try {

@@ -34,6 +34,7 @@ const flagAll = args.includes("--all");
 const flagJson = args.includes("--json");
 const flagUpdate = args.includes("--update");
 const flagProbeTld = args.includes("--probe-tld"); // wq-127: probe TLD variants on DNS failure
+const flagDepth = args.includes("--depth"); // wq-658: compute probe-depth metric (1-4)
 
 // --- Helpers ---
 
@@ -50,6 +51,91 @@ async function checkUrl(url) {
   if (status === 0) return { alive: false, status: 0, elapsed, error: result.error || "timeout" };
   if (status >= 200 && status < 400) return { alive: true, status, elapsed };
   return { alive: false, status, elapsed, error: `HTTP ${status}` };
+}
+
+/**
+ * Compute probe-depth metric for a live URL (wq-658).
+ * Level 1: HTTP alive (2xx/3xx) — already confirmed by caller
+ * Level 2: Returns meaningful content (body > 500 bytes, not just error/empty)
+ * Level 3: API endpoint responds (at least one of /api, /health, /api-docs returns 2xx)
+ * Level 4: Write-capable endpoint found (/register, /api/register, POST accepts)
+ * Returns { depth: 1-4, details: string[] }
+ */
+const DEPTH_API_ENDPOINTS = ["/api", "/health", "/api-docs", "/openapi.json", "/.well-known/ai-plugin.json"];
+const DEPTH_WRITE_ENDPOINTS = ["/register", "/api/register", "/api/v1/agents/register"];
+
+async function computeProbeDepth(url) {
+  const details = ["L1: HTTP alive"];
+  let depth = 1;
+
+  // Level 2: meaningful content check
+  try {
+    const bodyResult = await safeFetch(url, {
+      timeout: FETCH_TIMEOUT,
+      bodyMode: "text",
+      userAgent: "moltbook-liveness/1.0",
+      maxBody: 64 * 1024,
+    });
+    const bodyLen = (bodyResult.body || "").length;
+    if (bodyLen > 500) {
+      depth = 2;
+      details.push(`L2: meaningful content (${bodyLen} bytes)`);
+    } else {
+      details.push(`L2: thin content (${bodyLen} bytes)`);
+    }
+  } catch {
+    details.push("L2: body fetch failed");
+  }
+
+  // Level 3: API endpoint check
+  const base = url.replace(/\/+$/, "");
+  let apiFound = false;
+  for (const ep of DEPTH_API_ENDPOINTS) {
+    try {
+      const r = await safeFetch(base + ep, {
+        timeout: FETCH_TIMEOUT,
+        bodyMode: "none",
+        userAgent: "moltbook-liveness/1.0",
+      });
+      if (r.status >= 200 && r.status < 400) {
+        apiFound = true;
+        details.push(`L3: API responds (${ep} → ${r.status})`);
+        break;
+      }
+    } catch { /* skip */ }
+  }
+  if (apiFound) {
+    depth = 3;
+  } else {
+    details.push("L3: no API endpoints found");
+  }
+
+  // Level 4: write-capable endpoint check
+  if (depth >= 2) {
+    let writeFound = false;
+    for (const ep of DEPTH_WRITE_ENDPOINTS) {
+      try {
+        const r = await safeFetch(base + ep, {
+          timeout: FETCH_TIMEOUT,
+          bodyMode: "none",
+          userAgent: "moltbook-liveness/1.0",
+        });
+        // 2xx, 3xx, or 405 (Method Not Allowed = endpoint exists but needs POST)
+        if ((r.status >= 200 && r.status < 400) || r.status === 405) {
+          writeFound = true;
+          details.push(`L4: write endpoint found (${ep} → ${r.status})`);
+          break;
+        }
+      } catch { /* skip */ }
+    }
+    if (writeFound) {
+      depth = 4;
+    } else {
+      details.push("L4: no write endpoints found");
+    }
+  }
+
+  return { depth, details };
 }
 
 /**
@@ -119,6 +205,12 @@ for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
         }
       }
 
+      // wq-658: Probe depth metric
+      let probeDepth = null;
+      if (flagDepth && check.alive) {
+        probeDepth = await computeProbeDepth(svc.url);
+      }
+
       return {
         id: svc.id,
         name: svc.name,
@@ -129,6 +221,8 @@ for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
         elapsed: Math.round(check.elapsed * 1000),
         error: check.error || null,
         tldSuggestion: tldSuggestion ? tldSuggestion.url : null,
+        probeDepth: probeDepth ? probeDepth.depth : (check.alive ? 1 : 0),
+        probeDetails: probeDepth ? probeDepth.details : null,
       };
     })
   );
@@ -150,7 +244,8 @@ for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
     if (!flagJson) {
       const icon = r.liveness === "alive" ? "✓" : "✗";
       const code = r.httpStatus || "---";
-      process.stderr.write(`[${done}/${total}] ${icon} ${code} ${r.elapsed}ms ${r.name} (${r.url})\n`);
+      const depthTag = flagDepth && r.probeDepth ? ` D${r.probeDepth}` : "";
+      process.stderr.write(`[${done}/${total}] ${icon} ${code} ${r.elapsed}ms${depthTag} ${r.name} (${r.url})\n`);
     }
   }
 }
@@ -161,10 +256,22 @@ const down = results.filter(r => r.liveness === "down").length;
 const errored = results.filter(r => r.liveness === "error").length;
 
 if (flagJson) {
-  console.log(JSON.stringify({ checked: new Date().toISOString(), total, alive, down, errored, results }, null, 2));
+  const output = { checked: new Date().toISOString(), total, alive, down, errored, results };
+  if (flagDepth) {
+    output.depthDistribution = { L1: 0, L2: 0, L3: 0, L4: 0 };
+    for (const r of results) {
+      if (r.probeDepth >= 1 && r.probeDepth <= 4) output.depthDistribution[`L${r.probeDepth}`]++;
+    }
+  }
+  console.log(JSON.stringify(output, null, 2));
 } else {
   console.log(`\n--- Liveness Report ---`);
   console.log(`Total: ${total} | Alive: ${alive} | Down: ${down} | Error: ${errored}`);
+  if (flagDepth) {
+    const depthCounts = [0, 0, 0, 0, 0]; // index 0-4
+    for (const r of results) depthCounts[r.probeDepth || 0]++;
+    console.log(`Depth: L1=${depthCounts[1]} L2=${depthCounts[2]} L3=${depthCounts[3]} L4=${depthCounts[4]}`);
+  }
   console.log();
   if (down > 0) {
     console.log("DOWN:");
@@ -194,6 +301,10 @@ if (flagUpdate) {
     svc.liveness.elapsed = r.elapsed;
     if (r.error) svc.liveness.error = r.error;
     else delete svc.liveness.error;
+    // wq-658: Store probe-depth metric when --depth is used
+    if (flagDepth && r.probeDepth != null) {
+      svc.liveness.probeDepth = r.probeDepth;
+    }
 
     // Track consecutive failures for auto-stale
     if (r.liveness === "alive") {

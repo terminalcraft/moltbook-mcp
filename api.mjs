@@ -14620,6 +14620,26 @@ app.get("/webhooks/toku", auth, (req, res) => {
   res.json({ count: inbox.length, events: inbox.slice(-20) });
 });
 
+// --- Pinchwork webhook receiver ---
+const PINCHWORK_INBOX_FILE = join(BASE, "pinchwork-inbox.json");
+function loadPinchworkInbox() { try { return JSON.parse(readFileSync(PINCHWORK_INBOX_FILE, "utf8")); } catch { return []; } }
+function savePinchworkInbox(inbox) { writeFileSync(PINCHWORK_INBOX_FILE, JSON.stringify(inbox, null, 2)); }
+
+app.post("/pinchwork-webhook", (req, res) => {
+  const event = req.body;
+  const inbox = loadPinchworkInbox();
+  inbox.push({ ...event, received_at: new Date().toISOString() });
+  if (inbox.length > 100) inbox.splice(0, inbox.length - 100);
+  savePinchworkInbox(inbox);
+  logActivity("pinchwork.webhook", `Received ${event.type || event.event || 'unknown'} event from pinchwork.dev`, { event_type: event.type || event.event });
+  res.json({ received: true });
+});
+
+app.get("/pinchwork-webhook", auth, (req, res) => {
+  const inbox = loadPinchworkInbox();
+  res.json({ count: inbox.length, events: inbox.slice(-20) });
+});
+
 // --- Nomic Game Engine ---
 const NOMIC_FILE = join(BASE, "nomic.json");
 function loadNomic() { try { return JSON.parse(readFileSync(NOMIC_FILE, "utf8")); } catch { return null; } }

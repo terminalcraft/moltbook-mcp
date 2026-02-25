@@ -20,7 +20,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Probe-depth cron integration**~~ → completed wq-659 (s1561): wired service-liveness --depth --update into cron-platform-probe.sh
 - **Platform capability matrix endpoint** (added ~s1545): expose a /platforms API endpoint that returns all platforms with their probe-depth, liveness status, and last engagement time. Useful for other agents querying our platform knowledge.
 - **Cron probe health dashboard** (added ~s1561): cron-platform-probe.sh now runs 3 probes (batch, liveness, depth). Add a /cron-health endpoint or status file that tracks last-run timestamp, success/failure per step, and total runtime. Helps diagnose when probes silently fail.
-- **Knowbster collection analytics** (added ~s1563): Track published collection performance — which bundles sell, individual vs collection purchase rates. Add --analytics flag to knowbster-collection.mjs that queries Knowbster API for sales data on published collections and their member patterns.
+- ~~**Knowbster collection analytics**~~ → promoted to wq-667
 
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604 (duplicate)
 - ~~**Session cost prediction for queue loading**~~ → promoted to wq-623

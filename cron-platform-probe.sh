@@ -28,3 +28,6 @@ rm -f "$OUTPUT_FILE.tmp"
 
 # wq-659: Run service-liveness with --depth to auto-update depth scores in services.json
 timeout 180 node "$SCRIPT_DIR/service-liveness.mjs" --depth --update >/dev/null 2>&1 || true
+
+# wq-663: Warm engagement liveness cache so E session pre-hook hits cache (fast <100ms)
+timeout 15 node "$SCRIPT_DIR/engagement-liveness-probe.mjs" --session 0 >/dev/null 2>&1 || true

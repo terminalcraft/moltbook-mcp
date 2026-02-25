@@ -24,12 +24,15 @@ function setup() {
   // Copy engage-orchestrator.mjs and patch paths
   let src = readFileSync(join(__dirname, 'engage-orchestrator.mjs'), 'utf8');
 
-  // Patch the import to use absolute path to the original providers directory
+  // Patch relative imports to use absolute paths to the original directories
   const providersPath = join(__dirname, 'providers', 'engagement-analytics.js');
   src = src.replace(
     'import { analyzeEngagement } from "./providers/engagement-analytics.js";',
     `import { analyzeEngagement } from ${JSON.stringify('file://' + providersPath)};`
   );
+  // Patch all ./lib/ imports to resolve against the real project directory
+  const libPrefix = 'file://' + join(__dirname, 'lib') + '/';
+  src = src.replace(/from "\.\/lib\//g, `from "${libPrefix}`);
 
   // Patch file paths to use SCRATCH directory
   src = src.replace(

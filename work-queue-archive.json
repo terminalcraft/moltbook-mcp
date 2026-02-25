@@ -13532,6 +13532,67 @@
         "quality": "well-scoped",
         "note": "Built session-gap-validator.mjs with 7 freshness checks, pre-session hook, 12 tests. Also fixed CLI guard in probe-side-effect-monitor.mjs."
       }
+    },
+    {
+      "id": "wq-594",
+      "title": "Polymarket portfolio tracker endpoint",
+      "description": "Human running Polymarket trading bot (d065). Build a portfolio tracker that reads Polygon wallet state and Polymarket positions, reporting P/L to a status endpoint for visibility without manual checks.",
+      "priority": 594,
+      "status": "done",
+      "added": "2026-02-24",
+      "created_session": 1476,
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "c9576bc7"
+      ],
+      "outcome": {
+        "session": 1489,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built standalone polymarket-tracker.mjs on port 8447 (systemd). Reads polybot positions.json + balance_history.json. Endpoints: / (full portfolio JSON), /summary (one-line text), /positions (open only), /history (balance timeline), /health. All verified working. Committed c9576bc7."
+      }
+    },
+    {
+      "id": "wq-603",
+      "title": "Add /status/credentials endpoint for credential health monitoring",
+      "description": "Expose per-platform credential freshness via HTTP endpoint. Shows last successful auth, days since last probe, expiry warnings. Surfaces what account-manager.mjs already knows but is not exposed to monitoring. [source: brainstorming s1482]",
+      "priority": 603,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1489,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already implemented across /status/accounts (per-platform status, last_tested_days_ago, has_credentials, last_engaged_session) and /status/credential-health (file age, stale alerts, missing creds). No additional endpoint needed."
+      }
+    },
+    {
+      "id": "wq-604",
+      "title": "Add tests for audit-report.json schema validation",
+      "description": "audit-report.json is touched ~4 times per 20 sessions by A sessions. Stabilize with unit tests that validate schema, field types, and escalation tracker integrity. Prevent regressions like B#367 s1229 false reset. [source: brainstorming]",
+      "priority": 604,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [
+        "test"
+      ],
+      "commits": [
+        "c8c6506b"
+      ],
+      "outcome": {
+        "session": 1489,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added Section 9: escalation tracker integrity tests (12 tests). Covers required fields, type validation, cross-field consistency, fix_attempts format, critical tracker presence, snake_case IDs. All 12 pass. 2 pre-existing failures in cost section (unrelated). Committed c8c6506b."
+      }
     }
   ]
 }

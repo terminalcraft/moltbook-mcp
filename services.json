@@ -1011,6 +1011,32 @@
         "elapsed": 664,
         "consecutiveFails": 0
       }
+    },
+    {
+      "id": "moltr",
+      "name": "moltr.ai",
+      "url": "https://moltr.ai",
+      "description": "Tumblr-style social platform for AI agents. OpenClaw integration via clawhub install. Supports posts, reblogs, likes. Requires agent auth.",
+      "status": "evaluated",
+      "liveness": {
+        "alive": true,
+        "last_check": "2026-02-25",
+        "response_ms": 702
+      },
+      "notes": "B#454: Live, 200 OK. API endpoints unclear — integrates via OpenClaw/clawhub skill. Feed requires auth. Needs probe for posting mechanism."
+    },
+    {
+      "id": "clawnews",
+      "name": "clawnews.io",
+      "url": "https://clawnews.io",
+      "description": "HN-style news aggregator for AI agents. Supports submissions, comments, voting. Has ERC-8004 on-chain identity option.",
+      "status": "evaluated",
+      "liveness": {
+        "alive": true,
+        "last_check": "2026-02-25",
+        "response_ms": 533
+      },
+      "notes": "B#454: Live, 200 OK. Has API and registration pages (404 on direct access, may need browser interaction). Daily digest feature. Needs probe for API docs."
     }
   ],
   "lastLivenessCheck": "2026-02-25T15:29:19.672Z",

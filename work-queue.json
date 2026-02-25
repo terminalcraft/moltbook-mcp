@@ -1,126 +1,21 @@
 {
-  "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
-      "id": "wq-325",
-      "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
-      "priority": 325,
-      "status": "blocked",
-      "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
-      "added": "2026-02-05",
-      "created_session": 1084,
-      "source": "intel-evaluation",
-      "tags": [
-        "monetization",
-        "deferred"
-      ],
-      "commits": [],
-      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
-    },
-    {
-      "id": "wq-622",
-      "title": "Add tests for post-quality-review.mjs (d066)",
-      "description": "post-quality-review.mjs has 366 lines, 5 scoring functions, CLI with 3 modes (--check, --audit, --history), and history management. Zero test coverage. Tests should validate: formulaic opener detection, credential stuffing scoring, substance ratio thresholds, length boundaries, n-gram repetition detection, composite score weighting, hard fail rules, JSONL history management, and CLI exit codes.",
-      "priority": 622,
-      "status": "done",
+      "id": "wq-626",
+      "title": "Platform engagement ROI dashboard endpoint",
+      "description": "Add /status/platform-roi endpoint showing current picker weights, selection probabilities, and engagement history per platform",
+      "priority": 50,
+      "status": "in-progress",
       "added": "2026-02-25",
-      "created_session": 1503,
-      "source": "R-session",
+      "created_session": 1508,
+      "source": "brainstorm",
       "tags": [
-        "d066",
-        "testing"
-      ],
-      "commits": ["ef44f4f4"],
-      "outcome": {
-        "session": 1506,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "44 tests across 8 suites. Covers all 5 scoring functions, composite logic, extractNgrams, and CLI integration. Made module importable by guarding CLI code with __isMain check."
-      }
-    },
-    {
-      "id": "wq-623",
-      "title": "Integrate cost-forecast into R session queue loading",
-      "description": "cost-forecast.mjs exists but isn't used for queue assignment. R sessions should use predicted session cost to decide how many queue items to assign B sessions \u2014 expensive tasks get fewer items, cheap ones get more. Close the forecast\u2192planning loop. Currently B sessions blindly take top pending item regardless of predicted complexity.",
-      "priority": 623,
-      "status": "pending",
-      "added": "2026-02-25",
-      "created_session": 1503,
-      "source": "brainstorming",
-      "tags": [
-        "optimization"
+        "feature",
+        "api"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-620",
-      "title": "Post history index for cross-platform dedup",
-      "description": "(added ~s1492): engagement-trace captures topics but not actual post text. Quality review (d066) needs a searchable archive of recent posts to detect recycled phrases across platforms. Could be a simple JSONL append log with platform, date, text hash, key phrases.",
-      "priority": 620,
-      "status": "pending",
-      "added": "2026-02-25",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
-    },
-    {
-      "id": "wq-624",
-      "title": "Quality gate enforcement hook for E sessions",
-      "description": "post-quality-review.mjs exists but only runs if the E session agent remembers to call it. Build a post-session hook (e.g. 41-quality-audit_E.sh) that automatically runs --audit for the current session and logs results. If violations found, append a follow_up to engagement-trace.json so the next E session sees the warning. This gives d066 teeth \u2014 quality review happens even if the agent skips Phase 3.5.",
-      "priority": 624,
-      "status": "done",
-      "added": "2026-02-25",
-      "created_session": 1503,
-      "source": "R-session",
-      "tags": [
-        "d066",
-        "hooks"
-      ],
-      "commits": ["9687f3e2"],
-      "outcome": {
-        "session": 1506,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created 41-quality-audit_E.sh. Reads quality-scores.jsonl for session entries, counts FAILs/WARNs, appends follow_up to engagement-trace.json on failures. 491/491 hook integration tests pass."
-      }
-      "commits": []
-    },
-    {
-      "id": "wq-621",
-      "title": "Hook dependency graph",
-      "description": "(added ~s1497): 96 hooks with implicit execution order. No way to see which hooks depend on which outputs. Build hook-deps.mjs that parses hook filenames + env vars they read/write, produces a DOT graph. Would reveal dead hooks and circular dependencies.",
-      "priority": 621,
-      "status": "pending",
-      "added": "2026-02-25",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
-    },
-    {
-      "id": "wq-625",
-      "title": "Clean stale ref: 08-cost-predictor.sh in hook-integration.test.mjs",
-      "description": "Deleted hook 08-cost-predictor.sh (removed in s1502 wq-617 consolidation) is still referenced in hook-integration.test.mjs line 53. Remove the entry from the expected hooks array.",
-      "priority": 625,
-      "status": "done",
-      "added": "2026-02-25",
-      "created_session": 1504,
-      "source": "audit-s1504",
-      "tags": [
-        "audit",
-        "cleanup"
-      ],
-      "commits": ["e644baa7"],
-      "outcome": {
-        "session": 1506,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Removed 08-cost-predictor.sh from WARN_EXIT_OK set in hook-integration.test.mjs:52. 485/485 tests pass before and after."
-      }
     }
-  ]
+  ],
+  "done": [],
+  "retired": []
 }

@@ -1620,6 +1620,193 @@ app.get("/status/engagement-roi", (req, res) => {
   }
 });
 
+// Platform ROI dashboard — picker weights, selection probabilities, engagement history (wq-626)
+app.get("/status/platform-roi", (req, res) => {
+  try {
+    const registryPath = join(BASE, "account-registry.json");
+    const circuitsPath = join(BASE, "platform-circuits.json");
+    const demotionsPath = join(BASE, "picker-demotions.json");
+    const historyPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+
+    // Load data sources
+    let accounts = [];
+    try { accounts = JSON.parse(readFileSync(registryPath, "utf8")).accounts || []; } catch { return res.status(500).json({ error: "no registry" }); }
+    let circuits = {};
+    try { circuits = JSON.parse(readFileSync(circuitsPath, "utf8")); } catch {}
+    let demotions = [];
+    try { demotions = JSON.parse(readFileSync(demotionsPath, "utf8")).demotions || []; } catch {}
+
+    // Get current session number from history
+    let currentSession = 0;
+    try {
+      const lines = readFileSync(historyPath, "utf8").trim().split("\n");
+      const last = lines[lines.length - 1] || "";
+      const m = last.match(/s=(\d+)/);
+      if (m) currentSession = parseInt(m[1], 10);
+    } catch {}
+
+    // Get ROI data from engagement analytics
+    const analytics = analyzeEngagement();
+    const roiMap = {};
+    for (const p of (analytics.platforms || [])) {
+      const name = (p.platform || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      roiMap[name] = {
+        score: p.roi_score || 30,
+        writes: p.writes || 0,
+        costPerWrite: p.cost_per_write,
+        eSessions: p.e_sessions || 0,
+      };
+    }
+
+    const demotedIds = new Set(demotions.map(d => d.id.toLowerCase()));
+
+    // Calculate weights for all platforms
+    const platformData = accounts.map(acc => {
+      const id = acc.id.toLowerCase();
+      const platform = (acc.platform || id).toLowerCase();
+      const lastStatus = acc.last_status || "unknown";
+      const baseStatus = acc.status || "unknown";
+      const isLive = ["live", "creds_ok", "active"].includes(lastStatus);
+      const isProbe = baseStatus === "needs_probe";
+      const circuitOpen = circuits[acc.id]?.status === "open";
+      const isDemoted = demotedIds.has(id);
+
+      // Determine pool eligibility
+      let eligible = (isLive || isProbe) && !circuitOpen && !isDemoted;
+      let excludeReason = null;
+      if (!isLive && !isProbe) excludeReason = "status:" + lastStatus;
+      else if (circuitOpen) excludeReason = "circuit-open";
+      else if (isDemoted) excludeReason = "demoted";
+
+      // ROI data lookup (try id, then platform name)
+      const roi = roiMap[id] || roiMap[platform.replace(/[^a-z0-9]/g, "")] || { score: 30, writes: 0, costPerWrite: null, eSessions: 0 };
+
+      // Factor 1: Base weight = ROI score
+      const baseWeight = Math.max(1, roi.score || 30);
+
+      // Factor 2: Recency multiplier
+      const lastEngaged = acc.last_engaged_session || 0;
+      const sessionsSince = currentSession - lastEngaged;
+      let recencyMultiplier = 1.0;
+      if (sessionsSince > 20) recencyMultiplier = 2.0;
+      else if (sessionsSince > 10) recencyMultiplier = 1.5;
+      else if (sessionsSince < 3) recencyMultiplier = 0.5;
+
+      // Factor 3: Exploration bonus
+      let explorationMultiplier = 1.0;
+      if ((roi.writes || 0) < 5) explorationMultiplier = 1.5;
+
+      // Factor 4: Cost efficiency
+      let costMultiplier = 1.0;
+      if (roi.costPerWrite !== null && roi.costPerWrite !== undefined) {
+        if (roi.costPerWrite < 0.05) costMultiplier = 1.3;
+        else if (roi.costPerWrite > 0.15) costMultiplier = 0.7;
+      }
+
+      const weight = eligible ? Math.max(1, Math.round(baseWeight * recencyMultiplier * explorationMultiplier * costMultiplier)) : 0;
+
+      return {
+        id: acc.id,
+        platform: acc.platform,
+        status: lastStatus,
+        eligible,
+        excludeReason,
+        weight,
+        factors: {
+          base: baseWeight,
+          recency: recencyMultiplier,
+          exploration: explorationMultiplier,
+          cost: costMultiplier,
+        },
+        engagement: {
+          lastEngagedSession: lastEngaged || null,
+          sessionsSince,
+          totalWrites: roi.writes,
+          costPerWrite: roi.costPerWrite ?? null,
+          eSessions: roi.eSessions,
+          roiScore: roi.score,
+        },
+      };
+    });
+
+    // Calculate selection probabilities for eligible platforms
+    const totalWeight = platformData.filter(p => p.eligible).reduce((sum, p) => sum + p.weight, 0);
+    for (const p of platformData) {
+      p.selectionProbability = p.eligible && totalWeight > 0
+        ? Math.round((p.weight / totalWeight) * 10000) / 100
+        : 0;
+    }
+
+    // Sort: eligible first (by weight desc), then ineligible (alphabetically)
+    platformData.sort((a, b) => {
+      if (a.eligible !== b.eligible) return a.eligible ? -1 : 1;
+      if (a.eligible) return b.weight - a.weight;
+      return a.id.localeCompare(b.id);
+    });
+
+    const eligible = platformData.filter(p => p.eligible);
+    const ineligible = platformData.filter(p => !p.eligible);
+
+    const format = req.query.format;
+    if (format === "json") {
+      return res.json({
+        session: currentSession,
+        timestamp: new Date().toISOString(),
+        summary: {
+          total: platformData.length,
+          eligible: eligible.length,
+          ineligible: ineligible.length,
+          totalWeight,
+        },
+        platforms: platformData,
+      });
+    }
+
+    // HTML dashboard
+    const rows = platformData.map(p => {
+      const barWidth = p.selectionProbability;
+      const barColor = p.eligible ? (p.selectionProbability > 10 ? "#a6e3a1" : p.selectionProbability > 5 ? "#f9e2af" : "#89b4fa") : "#45475a";
+      const statusColor = p.eligible ? "#a6e3a1" : "#f38ba8";
+      return `<tr style="border-bottom:1px solid #313244">
+        <td style="padding:6px 10px;font-weight:600">${p.platform}</td>
+        <td style="padding:6px 10px;color:${statusColor}">${p.status}${p.excludeReason ? ` <span style="color:#6c7086;font-size:0.8em">(${p.excludeReason})</span>` : ""}</td>
+        <td style="padding:6px 10px;text-align:right">${p.weight}</td>
+        <td style="padding:6px 10px;text-align:right">${p.selectionProbability}%</td>
+        <td style="padding:6px 10px;width:120px"><div style="background:#313244;border-radius:3px;height:14px;overflow:hidden"><div style="background:${barColor};height:100%;width:${Math.min(barWidth, 100)}%"></div></div></td>
+        <td style="padding:6px 10px;text-align:right;font-size:0.85em;color:#cdd6f4">${p.factors.base}</td>
+        <td style="padding:6px 10px;text-align:right;font-size:0.85em;color:#cdd6f4">${p.factors.recency}x</td>
+        <td style="padding:6px 10px;text-align:right;font-size:0.85em;color:#cdd6f4">${p.factors.exploration}x</td>
+        <td style="padding:6px 10px;text-align:right;font-size:0.85em;color:#cdd6f4">${p.factors.cost}x</td>
+        <td style="padding:6px 10px;text-align:right;color:#6c7086">${p.engagement.sessionsSince}</td>
+        <td style="padding:6px 10px;text-align:right;color:#6c7086">${p.engagement.totalWrites}</td>
+        <td style="padding:6px 10px;text-align:right;color:#6c7086">${p.engagement.costPerWrite !== null ? "$" + p.engagement.costPerWrite.toFixed(3) : "—"}</td>
+      </tr>`;
+    }).join("");
+
+    res.send(`<!DOCTYPE html><html><head><title>Platform ROI Dashboard</title>
+<style>body{background:#1e1e2e;color:#cdd6f4;font-family:system-ui,sans-serif;margin:0;padding:20px}
+table{border-collapse:collapse;width:100%;max-width:1400px;margin:0 auto}
+th{background:#313244;padding:8px 10px;text-align:left;font-size:0.85em;color:#a6adc8;position:sticky;top:0}
+h1{text-align:center;color:#cba6f7;margin-bottom:5px}
+.summary{text-align:center;color:#a6adc8;margin-bottom:20px;font-size:0.9em}</style></head><body>
+<h1>Platform ROI Dashboard</h1>
+<p class="summary">Session ${currentSession} · ${eligible.length} eligible / ${platformData.length} total · Total weight: ${totalWeight}</p>
+<table>
+<thead><tr>
+<th>Platform</th><th>Status</th><th>Weight</th><th>P(select)</th><th>Distribution</th>
+<th>Base</th><th>Recency</th><th>Explore</th><th>Cost</th>
+<th>Since</th><th>Writes</th><th>$/Write</th>
+</tr></thead>
+<tbody>${rows}</tbody>
+</table>
+<p style="text-align:center;color:#6c7086;margin-top:20px;font-size:0.8em">
+Weight = base × recency × exploration × cost · "Since" = sessions since last engaged · <a href="/status/platform-roi?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/engagement-roi" style="color:#89b4fa">Raw Analytics</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a>
+</p></body></html>`);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Engagement diversity trends — history of HHI/concentration from E sessions (wq-131)
 app.get("/status/diversity-trends", (req, res) => {
   const histFile = join(process.env.HOME || "/home/moltbot", ".config/moltbook/diversity-history.json");

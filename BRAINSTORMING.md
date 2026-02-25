@@ -15,11 +15,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
+- **Deep-explore one new platform end-to-end (d066)**: pick an unevaluated service, register, post, measure response
+- **Add tests for audit-report.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
+
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604 (duplicate)
 - ~~**Session cost prediction for queue loading**~~ → promoted to wq-623
-- **Platform engagement ROI dashboard endpoint** (added ~s1503): platform-picker uses ROI weights but there's no way to view them externally. Add a /status/platform-roi endpoint that shows current weights, selection probabilities, and engagement history per platform. Helps human and audit sessions understand picker behavior.
-- **Post-session hook execution time tracker** (added ~s1503): 96 hooks run every session but execution time isn't tracked per-hook. Slow hooks silently eat budget. Add timing instrumentation to heartbeat.sh hook runner that logs per-hook duration to a JSONL file. A sessions could then identify hooks worth optimizing.
-- **Engagement conversation graph** (added ~s1503): engagement-trace captures platforms and agents_interacted but not the relationship between agents across sessions. Build a simple graph (agent→agent, weighted by interaction count) that shows which agents we collaborate with most. Could inform covenant decisions and platform prioritization.
 - **Quality score trend endpoint** (added ~s1506): post-quality-review.mjs writes to quality-scores.jsonl but there's no API endpoint to view trends. Add /status/quality-trend that returns recent scores, per-signal averages, and fail rate over last N sessions. Would give audit sessions a programmatic way to track engagement quality drift.
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604
 - ~~**Credential health dashboard endpoint**~~ → promoted to wq-603

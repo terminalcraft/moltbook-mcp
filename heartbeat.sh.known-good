@@ -312,51 +312,39 @@ else
   BASE_PROMPT="You are an autonomous agent on Moltbook. Read ~/moltbook-mcp/BRIEFING.md for instructions."
 fi
 
-# Assemble full prompt: base identity + session-specific instructions.
-# For R sessions, inject the focus type directly into the prompt (s299).
-# Previously R_FOCUS was only in MCP env, invisible to the agent's shell.
-# B session prompt block: fully assembled by session-context.mjs (R#261).
-# Extracted from ~50 lines of bash to lib/b-prompt-sections.mjs, completing the
-# symmetric pattern where all 4 modes (R/A/E/B) have JS-based prompt builders.
-B_FOCUS_BLOCK=""
-if [ "$MODE_CHAR" = "B" ]; then
-  B_FOCUS_BLOCK="
+# --- Prompt block assembly (R#267: consolidated from 4 duplicate per-mode blocks) ---
+# Each mode has a CTX_*_PROMPT_BLOCK env var set by session-context.mjs.
+# This table-driven approach replaces 4 separate if-blocks + a duplicate retry case.
+# MODE_BLOCK holds the assembled context block for the current session type.
+declare -A MODE_CTX_VAR=(
+  [R]="CTX_R_PROMPT_BLOCK" [B]="CTX_B_PROMPT_BLOCK"
+  [E]="CTX_E_PROMPT_BLOCK" [A]="CTX_A_PROMPT_BLOCK"
+)
+declare -A MODE_FALLBACK=(
+  [R]="## R Session
+Follow the checklist in SESSION_REFLECT.md."
+  [B]="## B Session
+Follow SESSION_BUILD.md."
+  [E]="## E Session
+Follow SESSION_ENGAGE.md."
+  [A]="## A Session
+Follow the checklist in SESSION_AUDIT.md."
+)
+# Minimum block size for health validation (B is smaller due to simpler context)
+declare -A MODE_MIN_BLOCK=( [R]=100 [B]=50 [E]=100 [A]=100 )
 
-${CTX_B_PROMPT_BLOCK:-## B Session
-Follow SESSION_BUILD.md.}"
-fi
+# assemble_mode_block: reads CTX var for current mode, falls back to default.
+# Sets MODE_BLOCK. Call after session-context.mjs populates CTX_ENV.
+assemble_mode_block() {
+  local ctx_var="${MODE_CTX_VAR[$MODE_CHAR]:-}"
+  local fallback="${MODE_FALLBACK[$MODE_CHAR]:-}"
+  local ctx_val="${!ctx_var:-}"
+  MODE_BLOCK="
 
-# E session prompt block: fully assembled by session-context.mjs (R#93).
-# Moved manual e-session-context.md + eval target assembly into JS pre-computation,
-# mirroring how R sessions consume CTX_R_PROMPT_BLOCK.
-E_CONTEXT_BLOCK=""
-if [ "$MODE_CHAR" = "E" ]; then
-  E_CONTEXT_BLOCK="
+${ctx_val:-$fallback}"
+}
 
-${CTX_E_PROMPT_BLOCK:-## E Session
-Follow SESSION_ENGAGE.md.}"
-fi
-
-# R session prompt block: fully assembled by session-context.mjs (R#52).
-# Moved 40 lines of bash string-building into JS where the data already lives.
-R_FOCUS_BLOCK=""
-if [ "$MODE_CHAR" = "R" ]; then
-  R_FOCUS_BLOCK="
-
-${CTX_R_PROMPT_BLOCK:-## R Session
-Follow the checklist in SESSION_REFLECT.md.}"
-fi
-
-# A session prompt block: fully assembled by session-context.mjs (R#102).
-# Audit sessions now get pre-computed context like R/E sessions: previous audit findings,
-# audit-tagged queue items status, and cost trend data.
-A_CONTEXT_BLOCK=""
-if [ "$MODE_CHAR" = "A" ]; then
-  A_CONTEXT_BLOCK="
-
-${CTX_A_PROMPT_BLOCK:-## A Session
-Follow the checklist in SESSION_AUDIT.md.}"
-fi
+assemble_mode_block
 
 # --- Prompt inject blocks (R#120: extracted to prompt-inject-processor.mjs) ---
 # Manifest-driven injection with dependency resolution, usage tracking.
@@ -379,17 +367,18 @@ This session may have incomplete context. Check ~/moltbook-mcp/logs/init-errors.
 Do NOT attempt to fix heartbeat.sh or init scripts — the human operator handles this."
 fi
 
-PROMPT="${BASE_PROMPT}
+# assemble_prompt: builds full prompt from current components.
+assemble_prompt() {
+  PROMPT="${BASE_PROMPT}
 
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
+${MODE_PROMPT}${MODE_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
+}
 
-# --- Prompt health gate (R#239, refactored R#255) ---
+assemble_prompt
+
+# --- Prompt health gate (R#239, refactored R#255, consolidated R#267) ---
 # Validates the assembled prompt has expected content for the session type.
-# Catches silent session-context.mjs failures that produce empty prompt blocks,
-# which historically lead to zero-output sessions (e.g. s1408).
-#
-# validate_prompt_blocks: shared validation for initial check + post-retry.
-# Sets PROMPT_HEALTH and PROMPT_WARNINGS. $1 = label prefix for warnings.
+# Catches silent session-context.mjs failures that produce empty prompt blocks.
 validate_prompt_blocks() {
   local label="${1:-}"
   PROMPT_HEALTH="OK"
@@ -399,19 +388,11 @@ validate_prompt_blocks() {
     PROMPT_HEALTH="DEGRADED"
     PROMPT_WARNINGS="prompt too short (${plen} chars, min 2000)"
   fi
-  case "$MODE_CHAR" in
-    R) [ -n "$R_FOCUS_BLOCK" ] && [ ${#R_FOCUS_BLOCK} -ge 100 ] || { PROMPT_HEALTH="DEGRADED"; PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }R prompt block ${label}(${#R_FOCUS_BLOCK} chars)"; } ;;
-    B) [ -n "$B_FOCUS_BLOCK" ] && [ ${#B_FOCUS_BLOCK} -ge 50 ] || { PROMPT_HEALTH="DEGRADED"; PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }B prompt block ${label}(${#B_FOCUS_BLOCK} chars)"; } ;;
-    E) [ -n "$E_CONTEXT_BLOCK" ] && [ ${#E_CONTEXT_BLOCK} -ge 100 ] || { PROMPT_HEALTH="DEGRADED"; PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }E prompt block ${label}(${#E_CONTEXT_BLOCK} chars)"; } ;;
-    A) [ -n "$A_CONTEXT_BLOCK" ] && [ ${#A_CONTEXT_BLOCK} -ge 100 ] || { PROMPT_HEALTH="DEGRADED"; PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }A prompt block ${label}(${#A_CONTEXT_BLOCK} chars)"; } ;;
-  esac
-}
-
-# reassemble_prompt: rebuild full prompt from current block variables.
-reassemble_prompt() {
-  PROMPT="${BASE_PROMPT}
-
-${MODE_PROMPT}${R_FOCUS_BLOCK}${B_FOCUS_BLOCK}${E_CONTEXT_BLOCK}${A_CONTEXT_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
+  local min_block="${MODE_MIN_BLOCK[$MODE_CHAR]:-100}"
+  if [ -z "$MODE_BLOCK" ] || [ ${#MODE_BLOCK} -lt "$min_block" ]; then
+    PROMPT_HEALTH="DEGRADED"
+    PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }${MODE_CHAR} prompt block ${label}(${#MODE_BLOCK} chars, min ${min_block})"
+  fi
 }
 
 validate_prompt_blocks "missing or too short "
@@ -419,45 +400,15 @@ validate_prompt_blocks "missing or too short "
 if [ "$PROMPT_HEALTH" = "DEGRADED" ] && [ -z "$EMERGENCY_MODE" ] && [ -z "$SAFE_MODE" ]; then
   echo "$(date -Iseconds) [prompt-health] DEGRADED (attempt 1): $PROMPT_WARNINGS — retrying session-context" >> "$LOG_DIR/init-errors.log"
 
-  # --- Prompt health retry (R#247) ---
-  # When session-context produces insufficient prompt blocks, retry once.
-  # This closes a feedback loop: previously degraded context was detected but not
-  # corrected, leading to recurring zero-output sessions (s1408, s1425, s1441).
+  # Retry: re-run session-context and re-assemble (R#247, simplified R#267)
   RETRY_CTX=$(node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" 2>/dev/null || echo "{}")
   echo "$RETRY_CTX" > "$CTX_FILE"
   if [ -f "$CTX_ENV" ]; then
     source "$CTX_ENV"
   fi
 
-  # Re-assemble the failed prompt block from fresh context
-  case "$MODE_CHAR" in
-    R)
-      R_FOCUS_BLOCK="
-
-${CTX_R_PROMPT_BLOCK:-## R Session
-Follow the checklist in SESSION_REFLECT.md.}"
-      ;;
-    B)
-      B_FOCUS_BLOCK="
-
-${CTX_B_PROMPT_BLOCK:-## B Session
-Follow SESSION_BUILD.md.}"
-      ;;
-    E)
-      E_CONTEXT_BLOCK="
-
-${CTX_E_PROMPT_BLOCK:-## E Session
-Follow SESSION_ENGAGE.md.}"
-      ;;
-    A)
-      A_CONTEXT_BLOCK="
-
-${CTX_A_PROMPT_BLOCK:-## A Session
-Follow the checklist in SESSION_AUDIT.md.}"
-      ;;
-  esac
-
-  reassemble_prompt
+  assemble_mode_block
+  assemble_prompt
   validate_prompt_blocks "still too short after retry "
 
   if [ "$PROMPT_HEALTH" = "OK" ]; then
@@ -467,7 +418,6 @@ fi
 
 if [ "$PROMPT_HEALTH" = "DEGRADED" ]; then
   echo "$(date -Iseconds) [prompt-health] DEGRADED (final): $PROMPT_WARNINGS" >> "$LOG_DIR/init-errors.log"
-  # Inject warning into the prompt so the agent knows its context is incomplete
   PROMPT="${PROMPT}
 
 ## PROMPT HEALTH WARNING

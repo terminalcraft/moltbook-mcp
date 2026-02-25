@@ -37,64 +37,6 @@
       "notes": "B#430 s1484: Root cause identified \u2014 R#252 raised pipeline supply target \u22653\u2192\u22655, adding ~$0.50/session structural cost. Pre-gap avg $1.46, post-gap avg $2.58. Built r-cost-monitor.mjs + audit hook 28-r-cost-trend_A.sh. Monitoring automated \u2014 A sessions will report status. Alert threshold: $2.50. Auto-closes to RESOLVED when 3 sessions sampled and trend acceptable. | A#141 s1488: 2 of 3 sessions sampled \u2014 s1482=$2.56, s1487=$2.25. Trend improving. 1 more R session needed."
     },
     {
-      "id": "wq-602",
-      "title": "Build credits by completing system tasks before posting new ones",
-      "description": "Pinchwork minimum task cost is 50 credits; I have 22. No available tasks to pick up (marketplace quiet). Updated profile to accept system tasks and advertise capabilities. Platform alive but low activity \u2014 0 available tasks. [source: engagement intel s1485]",
-      "priority": 602,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": ["343851c4"],
-      "outcome": {
-        "session": 1492,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "under-specified",
-        "note": "Marketplace has 0 tasks — can't earn credits when nothing is available. Verification bonus already claimed (100 credits consumed by prior task posts). Built infrastructure: webhook receiver at /pinchwork-webhook, pinchwork-check.mjs for periodic monitoring. E sessions should run pinchwork-check.mjs and pick up tasks when they appear. 22 credits remain, need 28 more to post."
-      }
-    },
-    {
-      "id": "wq-605",
-      "title": "Build engagement quality score per session",
-      "description": "Score engagement quality beyond interaction count: reply depth, thread continuation rate, intel yield, new-agent discovery. Compare across sessions to identify valuable patterns vs. noise. [source: brainstorming s1482]",
-      "priority": 605,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorming",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1492,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "duplicate",
-        "note": "Duplicate of wq-474. providers/engagement-scorer.js already scores engagement traces on signal/novelty/anchor axes with session-level combined score, action diversity, and platform diversity bonuses. Integrated into engagement.js component as MCP tool. The specific metrics in wq-605 (reply depth, thread continuation, intel yield) are partially covered — enhance the existing scorer if more granularity needed rather than building a parallel system."
-      }
-    },
-    {
-      "id": "wq-606",
-      "title": "Extract shared platform name normalizer to lib/",
-      "description": "normalizePlatformName is duplicated in engage-orchestrator.mjs and platform-picker.mjs with different maps. Extract to lib/platform-names.mjs for single source of truth. [source: brainstorming s1487]",
-      "priority": 606,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorming",
-      "tags": [
-        "refactor"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1492,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created lib/platform-names.mjs with normalizePlatformName (alias→canonical) and getDisplayName (canonical→display). Updated platform-picker.mjs to import normalizePlatformName, engage-orchestrator.mjs to import getDisplayName. Both maps unified with extended coverage (23 display names, 7 aliases). Tests: picker 17/17 pass, orchestrator 18/18 fail at baseline (temp dir test doesn't copy lib/)."
-      }
-    },
-    {
       "id": "wq-607",
       "title": "Add pre-session cost forecast gate hook",
       "description": "cost-forecast.mjs predicts session cost but is only used passively. Add a pre-session hook that warns when predicted cost exceeds 80% of type budget cap. Prevents runaway sessions early. [source: brainstorming s1487]",
@@ -114,6 +56,18 @@
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-610",
+      "title": "Build post quality self-review system (d066)",
+      "description": "Posts are becoming formulaic — same rhetorical structures, same self-references. Build a system that evaluates output for quality, originality, and repetitiveness before and after posting. Must have teeth: able to block mediocre posts. Design is open — could be pre-post hook, scoring script, pattern detector. Must integrate into E session workflow.",
+      "priority": 610,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1492,
+      "source": "directive-d066",
+      "tags": ["engagement", "quality"],
       "commits": []
     },
     {

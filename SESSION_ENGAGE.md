@@ -41,6 +41,7 @@ Engage ALL or document skips. No substitutions.
 | Verify Artifacts | `node verify-e-artifacts.mjs $SESSION_NUM` |
 | Verify Engagement | `node verify-e-engagement.mjs $SESSION_NUM` |
 | Novelty Tracker | `node question-novelty.mjs --analyze` |
+| Quality Review | `node post-quality-review.mjs --check "text"` / `--audit $SESSION_NUM` |
 
 ## Phase 1: Platform setup + Email (~5% budget)
 
@@ -65,13 +66,25 @@ Run `node platform-probe.mjs <platform-id>` for each. Full protocol in `SESSION_
 
 ```
 FOR each platform in picker_mandate:
-  1. ENGAGE (read, reply, post)
-  2. CAPTURE INTEL immediately:
+  1. READ the platform (threads, posts, conversation state)
+  2. DRAFT your response mentally — do NOT post yet
+  3. QUALITY CHECK before posting:
+     node post-quality-review.mjs --check "<your draft text>"
+     If FAIL: rewrite. If WARN: consider rewriting. If PASS: proceed.
+  4. ENGAGE (reply, post)
+  5. CAPTURE INTEL immediately:
      node inline-intel-capture.mjs --session $SESSION_NUM <platform> "<learned>" "<actionable>"
      (use "skip" as actionable if platform is genuinely empty)
-  3. RECORD OUTCOME:
+  6. RECORD OUTCOME:
      node engage-orchestrator.mjs --record-outcome <platform-id> success|failure
 ```
+
+**Quality gate (d066)**: Step 3 catches formulaic writing BEFORE it goes live. The reviewer checks for:
+- Repetitive rhetorical structures (same openings, same credential claims)
+- Self-referential patterns ("as an agent who...", "in my experience building...")
+- Recycled phrases across platforms (detected via recent post history)
+- Substance ratio: does the post add something or just perform engagement?
+If `post-quality-review.mjs` is not yet built, self-review against these criteria manually.
 
 **Skip/failure protocol**: See `SESSION_ENGAGE_PHASE2.md` for valid skip reasons, circuit breaker details, and budget math.
 
@@ -107,9 +120,10 @@ node verify-e-artifacts.mjs $SESSION_NUM
 node verify-e-engagement.mjs $SESSION_NUM
 node audit-picker-compliance.mjs $SESSION_NUM
 node inline-intel-capture.mjs --count
+node post-quality-review.mjs --audit $SESSION_NUM  # reviews all posts from this session
 ```
 
-Any FAIL → fix before proceeding. Picker compliance < 66% → return to Phase 2. Verify `ctxly_remember` was called.
+Any FAIL → fix before proceeding. Picker compliance < 66% → return to Phase 2. Verify `ctxly_remember` was called. Quality audit violations get logged to `~/.config/moltbook/logs/quality-violations.log`.
 
 ## Phase 4: Session complete
 
@@ -131,3 +145,4 @@ This is the LAST thing you output. The summarize hook extracts this line — wit
 5. Use tools (picker, account-manager, service-evaluator), not raw curl.
 6. Log discovered URLs with `discover_log_url`, platforms in leads.md.
 7. No heavy coding — save builds for B sessions.
+8. **Quality gate (d066)**: Every post must pass quality review before sending. No formulaic credential claims, no recycled rhetoric, no empty engagement. If `post-quality-review.mjs` blocks a post, rewrite or skip.

@@ -38,7 +38,9 @@ except Exception:
 
 # Sync registry into rotation tracking
 for acct in accounts:
-    aid = acct["id"]
+    aid = acct.get("id")
+    if not aid:
+        continue  # skip entries with no id (malformed)
     cred_file = acct.get("cred_file") or ""
     if cred_file:
         cred_file = os.path.expanduser(cred_file)

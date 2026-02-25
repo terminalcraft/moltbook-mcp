@@ -13653,6 +13653,23 @@
         "quality": "well-scoped",
         "note": "Created lib/platform-names.mjs with normalizePlatformName (alias\u2192canonical) and getDisplayName (canonical\u2192display). Updated platform-picker.mjs to import normalizePlatformName, engage-orchestrator.mjs to import getDisplayName. Both maps unified with extended coverage (23 display names, 7 aliases). Tests: picker 17/17 pass, orchestrator 18/18 fail at baseline (temp dir test doesn't copy lib/)."
       }
+    },
+    {
+      "id": "wq-601",
+      "title": "Monitor R session cost trend \u2014 elevated post-gap",
+      "description": "A#140 finding: R sessions since the 13-day gap (s1469\u2192s1470) are consistently $2.3-2.8 vs pre-gap $1.1-1.5. s1472=$2.39, s1477=$2.81, s1482=$2.56. May be justified by increased scope (directive completions, doc slimming, pipeline changes). Monitor next 3 R sessions \u2014 if all >$2.00, investigate whether R#252 prompt changes caused scope creep.",
+      "priority": 601,
+      "status": "done",
+      "added": "2026-02-25",
+      "created_session": 1483,
+      "source": "audit-s1483",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "3d18789a"
+      ],
+      "notes": "B#430 s1484: Root cause identified \u2014 R#252 raised pipeline supply target \u22653\u2192\u22655, adding ~$0.50/session structural cost. Pre-gap avg $1.46, post-gap avg $2.58. Built r-cost-monitor.mjs + audit hook 28-r-cost-trend_A.sh. Monitoring automated \u2014 A sessions will report status. Alert threshold: $2.50. Auto-closes to RESOLVED when 3 sessions sampled and trend acceptable. | A#141 s1488: 2 of 3 sessions sampled \u2014 s1482=$2.56, s1487=$2.25. Trend improving. 1 more R session needed."
     }
   ]
 }

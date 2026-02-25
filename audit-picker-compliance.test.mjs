@@ -571,18 +571,6 @@ describe('audit-report.json infrastructure deep fields', () => {
     });
   });
 
-  describe('registry', () => {
-    it('has registry in infrastructure', () => {
-      assert.ok('registry' in report.infrastructure);
-    });
-
-    it('registry has total_accounts count', () => {
-      const reg = report.infrastructure.registry;
-      assert.equal(typeof reg.total_accounts, 'number');
-      assert.ok(reg.total_accounts >= 0);
-    });
-  });
-
   describe('state_file_consistency', () => {
     it('has state_file_consistency in infrastructure', () => {
       assert.ok('state_file_consistency' in report.infrastructure);

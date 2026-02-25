@@ -25,6 +25,7 @@ import { fileURLToPath } from "url";
 import { execSync } from "child_process";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 import { getCachedLiveness } from "./lib/platform-liveness-cache.mjs";
+import { normalizePlatformName } from "./lib/platform-names.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -65,14 +66,7 @@ function getCircuitStatus(circuits, platformId) {
 }
 
 // Normalize platform names for ROI lookup
-function normalizePlatformName(name) {
-  const map = {
-    "fourclaw": "4claw",
-    "thecolony": "Colony",
-    "pinchwork": "Pinchwork",
-  };
-  return map[name.toLowerCase()] || name;
-}
+// normalizePlatformName imported from lib/platform-names.mjs
 
 function parseArgs(args) {
   const opts = {

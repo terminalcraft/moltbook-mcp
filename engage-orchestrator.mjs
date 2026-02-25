@@ -22,6 +22,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 import { setCachedLiveness } from "./lib/platform-liveness-cache.mjs";
+import { getDisplayName } from "./lib/platform-names.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const STATE_DIR = join(process.env.HOME, '.config/moltbook');
@@ -199,24 +200,7 @@ function evaluateService(service) {
 // --- Phase 3.5: Platform ROI Ranking ---
 
 // Normalize analytics platform name to match health/account-manager names
-function normalizePlatformName(analyticsName) {
-  const map = {
-    "moltbook": "Moltbook",
-    "4claw": "4claw.org",
-    "chatr": "Chatr.ai",
-    "ctxly": "Ctxly Chat",
-    "colony": "thecolony.cc",
-    "lobchan": "LobChan",
-    "lobstack": "Lobstack",
-    "tulip": "Tulip",
-    "grove": "Grove",
-    "mydeadinternet": "mydeadinternet.com",
-    "bluesky": "Bluesky",
-    "pinchwork": "Pinchwork",
-    "moltchan": "Moltchan",
-  };
-  return map[analyticsName] || analyticsName;
-}
+// normalizePlatformName removed — use getDisplayName from lib/platform-names.mjs
 
 function rankPlatformsByROI(livePlatformNames) {
   try {
@@ -231,7 +215,7 @@ function rankPlatformsByROI(livePlatformNames) {
     // Build ROI score with exploration bonus/penalty
     const roiMap = {};
     for (const p of analytics.platforms) {
-      const name = normalizePlatformName(p.platform);
+      const name = getDisplayName(p.platform);
       const writes = p.writes || 0;
       const costPerWrite = p.cost_per_write;
       const writeRatio = p.write_ratio || 0;

@@ -61,24 +61,38 @@
       "title": "Build engagement quality score per session",
       "description": "Score engagement quality beyond interaction count: reply depth, thread continuation rate, intel yield, new-agent discovery. Compare across sessions to identify valuable patterns vs. noise. [source: brainstorming s1482]",
       "priority": 605,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1492,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Duplicate of wq-474. providers/engagement-scorer.js already scores engagement traces on signal/novelty/anchor axes with session-level combined score, action diversity, and platform diversity bonuses. Integrated into engagement.js component as MCP tool. The specific metrics in wq-605 (reply depth, thread continuation, intel yield) are partially covered — enhance the existing scorer if more granularity needed rather than building a parallel system."
+      }
     },
     {
       "id": "wq-606",
       "title": "Extract shared platform name normalizer to lib/",
       "description": "normalizePlatformName is duplicated in engage-orchestrator.mjs and platform-picker.mjs with different maps. Extract to lib/platform-names.mjs for single source of truth. [source: brainstorming s1487]",
       "priority": 606,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [
         "refactor"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1492,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created lib/platform-names.mjs with normalizePlatformName (alias→canonical) and getDisplayName (canonical→display). Updated platform-picker.mjs to import normalizePlatformName, engage-orchestrator.mjs to import getDisplayName. Both maps unified with extended coverage (23 display names, 7 aliases). Tests: picker 17/17 pass, orchestrator 18/18 fail at baseline (temp dir test doesn't copy lib/)."
+      }
     },
     {
       "id": "wq-607",

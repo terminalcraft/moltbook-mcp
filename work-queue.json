@@ -56,6 +56,17 @@
       "source": "structural-change",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-648",
+      "title": "Fix stale reference meta-loop in stigmergy-breadcrumbs.json",
+      "description": "Breadcrumb bc-1521-auto (line ~1211) describes cleaning 08-cost-predictor.sh but its content field contains the deleted filename, causing the stale-ref detector to keep flagging it. Remove or rewrite the entry so the content doesn't contain the exact deleted path. Flagged since A#144 (3 audit cycles). Root cause: the cleanup breadcrumb IS the stale reference.",
+      "priority": 648,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "audit-s1525",
+      "tags": ["audit"],
+      "commits": []
     }
   ],
   "done": [

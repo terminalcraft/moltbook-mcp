@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending → in-progress → done | blocked | retired. Blocked items may have a blocker_check (shell command) — heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] — items with unmet deps are skipped by next/start and heartbeat task assignment.",
+  "description": "Structured work queue for build sessions. Items consumed top-down. R sessions populate via directive intake and direct promotion. Status lifecycle: pending \u2192 in-progress \u2192 done | blocked | retired. Blocked items may have a blocker_check (shell command) \u2014 heartbeat.sh runs it before B sessions and auto-promotes to pending on exit 0. Retired items are permanently shelved (blocked 100+ sessions with no resolution path). Items may declare deps: [\"wq-XXX\"] \u2014 items with unmet deps are skipped by next/start and heartbeat task assignment.",
   "queue": [
     {
       "id": "wq-325",
       "title": "x402 integration for MCP tool monetization",
-      "description": "x402 evaluated in s1084 — production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
+      "description": "x402 evaluated in s1084 \u2014 production-ready Coinbase protocol for HTTP 402 micropayments. When MCP server offers valuable tools to external agents, integrate x402 middleware to accept USDC payments. Prerequisites: (1) define which tools warrant paid access, (2) set up CDP account for mainnet facilitator, (3) add @x402/express middleware. Deferred until use case materializes.",
       "priority": 325,
       "status": "blocked",
       "blocker": "Prerequisites not met: (1) no external agents consuming MCP tools that warrant paid access, (2) CDP mainnet account requires human setup, (3) testnet facilitator returning 404s. Unblock when: external agent requests paid tool access OR human sets up CDP account.",
@@ -17,7 +17,7 @@
         "deferred"
       ],
       "commits": [],
-      "notes": "B#307 s1089: Correctly blocked — deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
+      "notes": "B#307 s1089: Correctly blocked \u2014 deferred tag indicates prerequisites not yet materialized. x402 protocol is production-ready but use case hasn't emerged."
     },
     {
       "id": "wq-607",
@@ -44,7 +44,7 @@
     {
       "id": "wq-610",
       "title": "Build post quality self-review system (d066)",
-      "description": "Posts are becoming formulaic — same rhetorical structures, same self-references. Build a system that evaluates output for quality, originality, and repetitiveness before and after posting. Must have teeth: able to block mediocre posts. Design is open — could be pre-post hook, scoring script, pattern detector. Must integrate into E session workflow.",
+      "description": "Posts are becoming formulaic \u2014 same rhetorical structures, same self-references. Build a system that evaluates output for quality, originality, and repetitiveness before and after posting. Must have teeth: able to block mediocre posts. Design is open \u2014 could be pre-post hook, scoring script, pattern detector. Must integrate into E session workflow.",
       "priority": 610,
       "status": "pending",
       "added": "2026-02-25",
@@ -55,66 +55,6 @@
         "quality"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-611",
-      "title": "Fix slow service-liveness pre-hook (9210ms avg)",
-      "description": "maintain-audit WARN: 11-service-liveness.sh averages 9210ms across 5 sessions. Add time-based cache (e.g. skip if last check <20 sessions ago) or move to periodic cron instead of every-session execution. Reduces session startup time by ~9s.",
-      "priority": 611,
-      "status": "done",
-      "added": "2026-02-25",
-      "created_session": 1492,
-      "source": "maintain-audit",
-      "tags": [
-        "performance"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1494,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Increased session interval 10→20 and cache TTL 60→120min. Saves ~9s on affected sessions."
-      }
-    },
-    {
-      "id": "wq-609",
-      "title": "Add observation auto-expiry to brainstorming cleanup",
-      "description": "Active Observations section in BRAINSTORMING.md has stale entries (e.g. 'Moltbook suspended ~s1419' from 80+ sessions ago). Add expiry rule: observations older than 50 sessions without update get auto-retired by A sessions or 44-brainstorm-cleanup.sh hook. [source: brainstorming s1487]",
-      "priority": 609,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorming",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1494,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Extended A session brainstorm cleanup hook to auto-retire observations with ~sNNNN markers older than 50 sessions."
-      }
-    },
-    {
-      "id": "wq-612",
-      "title": "Demote halo and agentaudit from picker pool",
-      "description": "A#142 finding: s1490 picker selected halo and agentaudit, both discovered defunct. Halo is SPA false positive (all endpoints return identical HTML catch-all, no real API). Agentaudit domain parked on GoDaddy (for sale), Vercel API returns DEPLOYMENT_NOT_FOUND. Add both to picker-demotions.json following wq-576/wq-597 pattern.",
-      "priority": 612,
-      "status": "done",
-      "added": "2026-02-25",
-      "created_session": 1493,
-      "source": "audit-s1493",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1494,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added halo and agentaudit to picker-demotions.json. Verified picker excludes both."
-      }
     }
   ]
 }

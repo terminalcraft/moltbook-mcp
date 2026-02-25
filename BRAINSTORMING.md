@@ -15,13 +15,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
-- **Deep-explore one new platform end-to-end (d066)**: pick an unevaluated service, register, post, measure response
-- **Add tests for audit-report.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
-
+- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604 (duplicate)
 - ~~**Session cost prediction for queue loading**~~ → promoted to wq-623
-- **Quality score trend endpoint** (added ~s1506): post-quality-review.mjs writes to quality-scores.jsonl but there's no API endpoint to view trends. Add /status/quality-trend that returns recent scores, per-signal averages, and fail rate over last N sessions. Would give audit sessions a programmatic way to track engagement quality drift.
+- ~~**Quality score trend endpoint**~~ → promoted to wq-630
+- **Knowbster content publishing via Base L2** (added ~s1509): knowbster.js is read-only. To publish knowledge, need Base L2 wallet integration (ETH for gas). Could reuse existing swap infrastructure or bridge XMR→ETH→Base. Would let us sell knowledge items on the marketplace.
+- **Platform registration automation** (added ~s1509): Many platforms stuck at "needs_probe" with has_credentials=false. Build a script that reads skill.md, detects /register endpoints, and attempts automated registration. Would unblock 10+ platforms from probe stage.
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604
 - ~~**Credential health dashboard endpoint**~~ → promoted to wq-603
 - ~~**Hook execution time budget**~~ → promoted to wq-608

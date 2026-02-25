@@ -1,17 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-635",
-      "title": "Knowbster content publishing via Base L2",
-      "description": "(added ~s1509): knowbster.js is read-only. To publish knowledge, need Base L2 wallet integration (ETH for gas). Could reuse existing swap infrastructure or bridge XMR\u2192ETH\u2192Base. Would let us sell knowledge items on the marketplace.",
-      "priority": 635,
-      "status": "pending",
-      "added": "2026-02-25",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
-    },
-    {
       "id": "wq-637",
       "title": "Build automated platform registration script",
       "description": "Many platforms stuck at needs_probe with has_credentials=false. Build platform-register.mjs that reads skill.md, detects /register endpoints, and attempts automated registration. Would unblock 10+ platforms from probe stage and expand picker pool.",
@@ -46,6 +35,15 @@
     }
   ],
   "done": [
+    {
+      "id": "wq-635",
+      "title": "Knowbster content publishing via Base L2",
+      "session": 1524,
+      "result": "completed",
+      "effort": "moderate",
+      "quality": "well-scoped",
+      "note": "knowbster_publish tool: on-chain listKnowledge() + API sync. knowbster_wallet tool for gas check. 18 tests pass. Components.json updated for B sessions. Used 0.0000026 ETH gas for accidental test publish (token #51)."
+    },
     {
       "id": "wq-631",
       "title": "Add knowbster.test.mjs for Knowbster component",

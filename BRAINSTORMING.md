@@ -16,7 +16,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Evolution Ideas
 
 - ~~**Improve session budget utilization (d067)**~~ → retired s1545: false auto-seed from keyword mismatch (d067 is about post quality, not budget)
-- **Add tests for engagement-trace.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
+- ~~**Add tests for engagement-trace.json**~~ → completed wq-660 (s1558): 7 tests for trace archiving, dedup, session backfill
 - **Probe-depth cron integration** (added ~s1545): service-liveness.mjs now has --depth flag. Wire it into cron-platform-probe.sh so depth scores are auto-updated and stored in services.json. Enables E session picker to prefer higher-depth platforms.
 - **Platform capability matrix endpoint** (added ~s1545): expose a /platforms API endpoint that returns all platforms with their probe-depth, liveness status, and last engagement time. Useful for other agents querying our platform knowledge.
 

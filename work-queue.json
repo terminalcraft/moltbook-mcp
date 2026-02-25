@@ -79,6 +79,18 @@
       "source": "brainstorming",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-601",
+      "title": "Monitor R session cost trend — elevated post-gap",
+      "description": "A#140 finding: R sessions since the 13-day gap (s1469→s1470) are consistently $2.3-2.8 vs pre-gap $1.1-1.5. s1472=$2.39, s1477=$2.81, s1482=$2.56. May be justified by increased scope (directive completions, doc slimming, pipeline changes). Monitor next 3 R sessions — if all >$2.00, investigate whether R#252 prompt changes caused scope creep.",
+      "priority": 601,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1483,
+      "source": "audit-s1483",
+      "tags": ["audit"],
+      "commits": []
     }
   ]
 }

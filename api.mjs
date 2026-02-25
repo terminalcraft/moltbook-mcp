@@ -2559,6 +2559,111 @@ app.get("/status/queue-predictions/:id", (req, res) => {
   }
 });
 
+// Quality score trend — reads quality-scores.jsonl for post quality drift tracking (wq-630, d066)
+app.get("/status/quality-trend", (req, res) => {
+  try {
+    const historyFile = join(LOGS, "quality-scores.jsonl");
+    if (!existsSync(historyFile)) {
+      return res.json({ entries: 0, scores: [], averages: {}, fail_rate: 0, message: "No quality history yet" });
+    }
+
+    const lines = readFileSync(historyFile, "utf8").trim().split("\n").filter(Boolean);
+    const entries = [];
+    for (const line of lines) {
+      try { entries.push(JSON.parse(line)); } catch { /* skip bad lines */ }
+    }
+
+    if (entries.length === 0) {
+      return res.json({ entries: 0, scores: [], averages: {}, fail_rate: 0 });
+    }
+
+    // Per-signal averages across all entries
+    const signalSums = {};
+    const signalCounts = {};
+    let failCount = 0;
+    let warnCount = 0;
+
+    for (const e of entries) {
+      if (e.verdict === "FAIL") failCount++;
+      if (e.verdict === "WARN") warnCount++;
+    }
+
+    // Recent scores (last 20)
+    const recent = entries.slice(-20).map(e => ({
+      session: e.session,
+      ts: e.ts,
+      verdict: e.verdict,
+      composite: e.composite,
+      violations: e.violations || [],
+    }));
+
+    // Violation frequency
+    const violationFreq = {};
+    for (const e of entries) {
+      for (const v of (e.violations || [])) {
+        violationFreq[v] = (violationFreq[v] || 0) + 1;
+      }
+    }
+
+    // Composite average over windows
+    const composites = entries.map(e => e.composite).filter(c => typeof c === "number");
+    const avg = arr => arr.length ? +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(3) : null;
+    const last5 = composites.slice(-5);
+    const last10 = composites.slice(-10);
+
+    const result = {
+      entries: entries.length,
+      fail_rate: +(failCount / entries.length).toFixed(3),
+      warn_rate: +(warnCount / entries.length).toFixed(3),
+      composite_avg: avg(composites),
+      composite_last5: avg(last5),
+      composite_last10: avg(last10),
+      trend: last5.length >= 2 ? (last5[last5.length - 1] > last5[0] ? "improving" : last5[last5.length - 1] < last5[0] ? "declining" : "stable") : "insufficient_data",
+      violation_frequency: violationFreq,
+      recent,
+    };
+
+    if (req.query.format === "json" || req.headers.accept?.includes("application/json")) {
+      return res.json(result);
+    }
+
+    // HTML view
+    const rows = recent.map(e => {
+      const cls = e.verdict === "PASS" ? "ok" : e.verdict === "WARN" ? "warn" : "bad";
+      return `<tr><td>s${e.session || "?"}</td><td class="${cls}">${e.verdict}</td><td>${e.composite}</td><td>${(e.violations || []).join(", ") || "-"}</td><td>${e.ts?.slice(0, 16) || "-"}</td></tr>`;
+    }).reverse().join("");
+
+    const freqBadges = Object.entries(violationFreq).sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => `<span class="badge">${k}: ${v}</span>`).join(" ");
+
+    const trendColor = result.trend === "improving" ? "#a6e3a1" : result.trend === "declining" ? "#f38ba8" : "#f9e2af";
+
+    res.send(`<!DOCTYPE html><html><head><title>Quality Trend</title>
+<style>body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;padding:2rem;max-width:1000px;margin:0 auto}
+h1{color:#89b4fa}table{border-collapse:collapse;margin:1rem 0;width:100%}td,th{padding:.4rem .8rem;border:1px solid #45475a;text-align:left}
+th{background:#313244}.ok{color:#a6e3a1}.warn{color:#f9e2af}.bad{color:#f38ba8}
+.badge{display:inline-block;padding:.2rem .5rem;margin:.1rem;border-radius:.25rem;background:#45475a}
+.stat{display:inline-block;margin:0 1.5rem .5rem 0}</style></head>
+<body><h1>Post Quality Trend</h1>
+<div>
+<div class="stat"><strong>${entries.length}</strong> posts</div>
+<div class="stat">Fail rate: <strong class="${result.fail_rate > 0.2 ? "bad" : "ok"}">${(result.fail_rate * 100).toFixed(1)}%</strong></div>
+<div class="stat">Avg score: <strong>${result.composite_avg}</strong></div>
+<div class="stat">Last 5 avg: <strong>${result.composite_last5 ?? "-"}</strong></div>
+<div class="stat">Trend: <strong style="color:${trendColor}">${result.trend}</strong></div>
+</div>
+<h3>Violation Frequency</h3><p>${freqBadges || "None"}</p>
+<h3>Recent Posts (newest first)</h3>
+<table><tr><th>Session</th><th>Verdict</th><th>Score</th><th>Violations</th><th>Time</th></tr>${rows}</table>
+<p style="color:#6c7086;font-size:.75rem;margin-top:2rem">
+<a href="/status/quality-trend?format=json" style="color:#89b4fa">JSON</a> ·
+<a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+</body></html>`);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // Intel promotion tracking — shows engagement intel items auto-promoted to work queue (d035/B#230)
 // Closes feedback loop on E→B pipeline: E sessions gather intel, R sessions promote, B sessions consume
 app.get("/status/intel-promotions", (req, res) => {

@@ -1,24 +1,44 @@
 {
-  "timestamp": "2026-02-25T15:17:04.419Z",
-  "sessionNum": 1538,
-  "sessionType": "B",
+  "timestamp": "2026-02-25T15:27:29.733Z",
+  "sessionNum": 1539,
+  "sessionType": "E",
   "loaded": [
     "moltbook-core",
-    "knowledge",
+    "engagement",
     "external",
+    "fourclaw",
     "registry",
+    "leaderboard",
     "kv",
-    "cron",
-    "webhooks",
+    "polls",
+    "badges",
+    "colony",
+    "lobchan",
+    "mdi",
+    "imanagent",
+    "moltbotden",
+    "engagement-log",
+    "intent-log",
+    "email",
+    "agentchan",
+    "moltchan",
+    "secondary-platforms",
     "dev",
-    "prompt-inject",
     "code-watch",
+    "agora",
+    "aicq",
+    "devaintart",
+    "clawhub",
+    "clawball",
     "mention-aggregator",
+    "nomic",
     "knowbster"
   ],
-  "loadedCount": 12,
+  "loadedCount": 30,
   "totalActive": 35,
-  "errors": [],
+  "errors": [
+    "moltgram: no register() export"
+  ],
   "manifest": [
     {
       "name": "moltbook-core"
@@ -160,12 +180,12 @@
   ],
   "lifecycle": {
     "hasOnLoad": [
-      "knowledge",
+      "engagement",
       "external",
       "dev"
     ],
     "onLoadSuccess": [
-      "knowledge",
+      "engagement",
       "external",
       "dev"
     ],
@@ -190,17 +210,20 @@
       "human_review_flag",
       "human_review_list"
     ],
-    "knowledge": [
-      "knowledge_read",
-      "knowledge_add_pattern",
-      "agent_crawl_repo",
-      "agent_crawl_suggest",
-      "agent_fetch_knowledge",
-      "agent_exchange_knowledge",
-      "knowledge_prune",
-      "knowledge_validate",
-      "breadcrumb_leave",
-      "breadcrumb_follow"
+    "engagement": [
+      "moltbook_state",
+      "moltbook_thread_diff",
+      "moltbook_digest",
+      "moltbook_trust",
+      "moltbook_karma",
+      "moltbook_pending",
+      "moltbook_export",
+      "moltbook_import",
+      "moltbook_dedup_check",
+      "moltbook_dedup_record",
+      "moltbook_dedup_stats",
+      "moltbook_replay_log",
+      "engagement_quality"
     ],
     "external": [
       "agentid_lookup",
@@ -221,6 +244,15 @@
       "inbox_read",
       "web_fetch"
     ],
+    "fourclaw": [
+      "fourclaw_boards",
+      "fourclaw_threads",
+      "fourclaw_thread",
+      "fourclaw_post",
+      "fourclaw_reply",
+      "fourclaw_search",
+      "fourclaw_digest"
+    ],
     "registry": [
       "registry_list",
       "registry_get",
@@ -229,36 +261,118 @@
       "dispatch",
       "registry_register"
     ],
+    "leaderboard": [
+      "leaderboard_view",
+      "leaderboard_submit"
+    ],
     "kv": [
       "kv_set",
       "kv_get",
       "kv_list",
       "kv_delete"
     ],
-    "cron": [
-      "cron_create",
-      "cron_list",
-      "cron_get",
-      "cron_delete",
-      "cron_update"
+    "polls": [
+      "poll_create",
+      "poll_list",
+      "poll_view",
+      "poll_vote"
     ],
-    "webhooks": [
-      "webhooks_subscribe",
-      "webhooks_list",
-      "webhooks_delete",
-      "webhooks_events",
-      "webhooks_stats"
+    "badges": [
+      "badges_view"
+    ],
+    "colony": [
+      "colony_feed",
+      "colony_post_read",
+      "colony_post_create",
+      "colony_comment",
+      "colony_status"
+    ],
+    "lobchan": [
+      "lobchan_boards",
+      "lobchan_threads",
+      "lobchan_thread",
+      "lobchan_post",
+      "lobchan_reply"
+    ],
+    "mdi": [
+      "mdi_pulse",
+      "mdi_stream",
+      "mdi_contribute",
+      "mdi_leaderboard",
+      "mdi_territories",
+      "mdi_questions",
+      "mdi_question",
+      "mdi_answer",
+      "mdi_ask_question",
+      "mdi_vote",
+      "mdi_dream_seed",
+      "mdi_moots",
+      "mdi_moot",
+      "mdi_vote_moot",
+      "mdi_conquests",
+      "mdi_contribute_conquest"
+    ],
+    "imanagent": [
+      "imanagent_status",
+      "imanagent_verify"
+    ],
+    "moltbotden": [
+      "moltbotden_dens",
+      "moltbotden_den_read",
+      "moltbotden_den_post",
+      "moltbotden_prompt",
+      "moltbotden_prompt_respond",
+      "moltbotden_showcase",
+      "moltbotden_discover",
+      "moltbotden_status"
+    ],
+    "engagement-log": [
+      "log_engagement"
+    ],
+    "intent-log": [
+      "intent_log",
+      "intent_verify",
+      "intent_status"
+    ],
+    "email": [
+      "email_status",
+      "email_setup",
+      "email_create_inbox",
+      "email_list",
+      "email_read",
+      "email_send",
+      "email_reply"
+    ],
+    "agentchan": [
+      "agentchan_boards",
+      "agentchan_recent",
+      "agentchan_thread",
+      "agentchan_post",
+      "agentchan_reply",
+      "agentchan_stats"
+    ],
+    "moltchan": [
+      "moltchan_boards",
+      "moltchan_threads",
+      "moltchan_thread",
+      "moltchan_post",
+      "moltchan_reply",
+      "moltchan_search",
+      "moltchan_me"
+    ],
+    "secondary-platforms": [
+      "lobstack_digest",
+      "lobstack_post",
+      "lobsterpedia_digest",
+      "lobsterpedia_contribute",
+      "dal_digest",
+      "dal_action",
+      "grove_digest",
+      "grove_post"
     ],
     "dev": [
       "dev_reload",
       "dev_components"
-    ],
-    "prompt-inject": [
-      "prompt_inject_list",
-      "prompt_inject_add",
-      "prompt_inject_update",
-      "prompt_inject_remove",
-      "prompt_inject_reorder"
     ],
     "code-watch": [
       "watch_repo",
@@ -269,11 +383,72 @@
       "review_list",
       "review_close"
     ],
+    "agora": [
+      "agora_markets",
+      "agora_market_detail",
+      "agora_register",
+      "agora_agent",
+      "agora_trade",
+      "agora_sell",
+      "agora_leaderboard",
+      "agora_stats",
+      "agora_positions",
+      "agora_comment",
+      "agora_create_market",
+      "agora_activity",
+      "agora_daily_claim",
+      "agora_achievements",
+      "agora_streak",
+      "agora_engagement",
+      "agora_trade_history",
+      "agora_reputation"
+    ],
+    "aicq": [
+      "aicq_heartbeat",
+      "aicq_send",
+      "aicq_online",
+      "aicq_search"
+    ],
+    "devaintart": [
+      "devaintart_feed",
+      "devaintart_gallery",
+      "devaintart_artwork",
+      "devaintart_post",
+      "devaintart_comment",
+      "devaintart_favorite",
+      "devaintart_profile"
+    ],
+    "clawhub": [
+      "clawhub_list_skills",
+      "clawhub_get_skill",
+      "clawhub_publish_skill",
+      "clawhub_livechat_join",
+      "clawhub_livechat_send",
+      "clawhub_livechat_read",
+      "clawhub_status"
+    ],
+    "clawball": [
+      "clawball_browse",
+      "clawball_submission",
+      "clawball_agent",
+      "clawball_stats",
+      "clawball_submit",
+      "clawball_vote"
+    ],
     "mention-aggregator": [
       "mentions_scan",
       "mentions_list",
       "mentions_mark_read",
       "mentions_draft_response"
+    ],
+    "nomic": [
+      "nomic_state",
+      "nomic_join",
+      "nomic_propose",
+      "nomic_vote",
+      "nomic_resolve",
+      "nomic_proposals",
+      "nomic_history"
     ],
     "knowbster": [
       "knowbster_browse",
@@ -284,21 +459,39 @@
     ]
   },
   "toolStats": {
-    "totalTools": 83,
+    "totalTools": 202,
     "byComponent": {
       "moltbook-core": 13,
-      "knowledge": 10,
+      "engagement": 13,
       "external": 17,
+      "fourclaw": 7,
       "registry": 6,
+      "leaderboard": 2,
       "kv": 4,
-      "cron": 5,
-      "webhooks": 5,
+      "polls": 4,
+      "badges": 1,
+      "colony": 5,
+      "lobchan": 5,
+      "mdi": 16,
+      "imanagent": 2,
+      "moltbotden": 8,
+      "engagement-log": 1,
+      "intent-log": 3,
+      "email": 7,
+      "agentchan": 6,
+      "moltchan": 7,
+      "secondary-platforms": 8,
       "dev": 2,
-      "prompt-inject": 5,
       "code-watch": 7,
+      "agora": 18,
+      "aicq": 4,
+      "devaintart": 7,
+      "clawhub": 7,
+      "clawball": 6,
       "mention-aggregator": 4,
+      "nomic": 7,
       "knowbster": 5
     }
   },
-  "exitTimestamp": "2026-02-25T15:18:01.925Z"
+  "exitTimestamp": "2026-02-25T15:28:01.569Z"
 }

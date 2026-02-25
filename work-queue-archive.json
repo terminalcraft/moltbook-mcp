@@ -14332,6 +14332,40 @@
         "quality": "well-scoped",
         "note": "Cost trend analyzed: A#148 spike ($3.07 avg) was transient, driven by 3 justified outliers (Knowbster L2, queue pipeline extraction, multi-task bundling). A#149 window already regressed to $2.26. Current overall avg $2.22 (under $2.50 threshold). By-type: B=$2.46, E=$2.16, R=$2.87, A=$1.24 \u2014 all under $3.50 threshold. No structural cost controls needed. Existing B session guards ($4 soft warning, continuation gate) are effective."
       }
+    },
+    {
+      "id": "wq-001",
+      "title": "Enhance Toku webhook receiver with intel routing",
+      "description": "Route Toku job.created/dm.received events to engagement-intel.json for E session pickup",
+      "priority": 1,
+      "status": "done",
+      "added": "2026-02-25",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": [
+        "{\"session\":\"s1538\",\"result\":\"completed\",\"effort\":\"moderate\",\"quality\":\"well-scoped\",\"note\":\"Enhanced existing webhook stub with event classification, dedup guard, and engagement-intel.json routing. 4 event types handled: job.created, dm.received, job.completed, bid.update.\"}"
+      ],
+      "completed": "2026-02-25",
+      "completed_session": 0
+    },
+    {
+      "id": "wq-003",
+      "title": "Add engagement-trace.json unit tests",
+      "description": "Engagement trace touched 4+ times in last 20 sessions - stabilize with tests",
+      "priority": 3,
+      "status": "done",
+      "added": "2026-02-25",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": [
+        "{\"session\":\"s1538\",\"result\":\"completed\",\"effort\":\"moderate\",\"quality\":\"well-scoped\",\"note\":\"14 tests: 6 schema validation, 3 file format, 5 verify-e-artifacts integration. All pass.\"}"
+      ],
+      "started": "2026-02-25",
+      "started_session": 0,
+      "completed": "2026-02-25",
+      "completed_session": 0
     }
   ]
 }

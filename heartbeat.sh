@@ -315,59 +315,15 @@ fi
 # Assemble full prompt: base identity + session-specific instructions.
 # For R sessions, inject the focus type directly into the prompt (s299).
 # Previously R_FOCUS was only in MCP env, invisible to the agent's shell.
+# B session prompt block: fully assembled by session-context.mjs (R#261).
+# Extracted from ~50 lines of bash to lib/b-prompt-sections.mjs, completing the
+# symmetric pattern where all 4 modes (R/A/E/B) have JS-based prompt builders.
 B_FOCUS_BLOCK=""
 if [ "$MODE_CHAR" = "B" ]; then
-  # Auto-unblock + task extraction handled by session-context.mjs (R#47)
-  WQ_ITEM="${CTX_WQ_ITEM:-}"
-
-  WQ_BLOCK=""
-  WQ_DEPTH="${CTX_PENDING_COUNT:-0}"
-  WQ_WARNING=""
-  if [ "$WQ_DEPTH" -le 1 ] 2>/dev/null; then
-    WQ_WARNING="
-WARNING: Work queue is nearly empty (${WQ_DEPTH} items). After completing your task, consider adding new items from BRAINSTORMING.md or generating new ideas."
-  fi
-  WQ_FALLBACK="${CTX_WQ_FALLBACK:-}"
-  if [ -n "$WQ_ITEM" ] && [ "$WQ_FALLBACK" = "true" ]; then
-    WQ_BLOCK="
-
-## YOUR ASSIGNED TASK (from brainstorming fallback — queue was empty):
-${WQ_ITEM}
-
-The work queue is empty. This idea was pulled from BRAINSTORMING.md. First, create a proper work-queue item for it (node work-queue.js add), then build it. Also add 2+ more queue items from brainstorming or new ideas to prevent future starvation."
-  elif [ -n "$WQ_ITEM" ]; then
-    WQ_BLOCK="
-
-## YOUR ASSIGNED TASK (from work queue):
-${WQ_ITEM}
-
-This is your primary task for this session. Complete it before picking up anything else. If blocked, explain why in your session log.${WQ_WARNING}"
-  fi
-
-  # wq-368: Surface configured capabilities so B sessions know what tools exist
-  CAP_LINE=""
-  if [ -n "${CTX_CAPABILITY_SUMMARY:-}" ]; then
-    CAP_LINE="
-Capabilities: ${CTX_CAPABILITY_SUMMARY}. Live: ${CTX_LIVE_PLATFORMS:-none}."
-    if [ -n "${CTX_CRED_MISSING:-}" ]; then
-      CAP_LINE="${CAP_LINE}
-WARN: Missing credential files: ${CTX_CRED_MISSING}"
-    fi
-  fi
-
-  # wq-374: EVM balance dashboard for onchain tasks
-  EVM_LINE=""
-  if [ -n "${CTX_EVM_BALANCE_SUMMARY:-}" ]; then
-    EVM_LINE="
-EVM wallet (Base): ${CTX_EVM_BALANCE_SUMMARY}. Onchain tasks: ${CTX_ONCHAIN_ITEMS:-none}."
-  elif [ -n "${CTX_EVM_BALANCE_ERROR:-}" ]; then
-    EVM_LINE="
-EVM balance check failed: ${CTX_EVM_BALANCE_ERROR}"
-  fi
-
   B_FOCUS_BLOCK="
 
-## B Session: #${B_COUNT}${CAP_LINE}${EVM_LINE}${WQ_BLOCK}"
+${CTX_B_PROMPT_BLOCK:-## B Session
+Follow SESSION_BUILD.md.}"
 fi
 
 # E session prompt block: fully assembled by session-context.mjs (R#93).
@@ -480,6 +436,12 @@ if [ "$PROMPT_HEALTH" = "DEGRADED" ] && [ -z "$EMERGENCY_MODE" ] && [ -z "$SAFE_
 
 ${CTX_R_PROMPT_BLOCK:-## R Session
 Follow the checklist in SESSION_REFLECT.md.}"
+      ;;
+    B)
+      B_FOCUS_BLOCK="
+
+${CTX_B_PROMPT_BLOCK:-## B Session
+Follow SESSION_BUILD.md.}"
       ;;
     E)
       E_CONTEXT_BLOCK="

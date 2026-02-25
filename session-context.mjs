@@ -10,6 +10,7 @@ import { join } from 'path';
 import { buildRPromptBlock } from './lib/r-prompt-sections.mjs';
 import { buildAPromptBlock } from './lib/a-prompt-sections.mjs';
 import { buildEPromptBlock } from './lib/e-prompt-sections.mjs';
+import { buildBPromptBlock } from './lib/b-prompt-sections.mjs';
 import { runQueuePipeline, isTitleDupe, STOP_WORDS } from './lib/queue-pipeline.mjs';
 
 const DIR = new URL('.', import.meta.url).pathname.replace(/\/$/, '');
@@ -104,6 +105,7 @@ const PATHS = {
   rCounter: join(STATE_DIR, 'r_session_counter'),
   eCounter: join(STATE_DIR, 'e_session_counter'),
   aCounter: join(STATE_DIR, 'a_session_counter'),
+  bCounter: join(STATE_DIR, 'b_session_counter'),
   eContext: join(STATE_DIR, 'e-session-context.md'),
   todoFollowups: join(STATE_DIR, 'todo-followups.txt'),
   impactAnalysis: join(STATE_DIR, 'r-impact-analysis.json'),
@@ -673,6 +675,15 @@ if (MODE === 'B') {
   }
 }
 markTiming('evm_balance');
+
+// --- B session prompt block (R#261: extracted to lib/b-prompt-sections.mjs) ---
+// Completes the symmetric pattern: all 4 session types now have JS-based prompt builders.
+// Previously B was the only mode with prompt assembly in bash (~50 lines in heartbeat.sh).
+// Must run after capability surfacing and EVM balance sections which populate result fields.
+if (MODE === 'B') {
+  result.b_prompt_block = buildBPromptBlock({ fc, PATHS, result });
+}
+markTiming('b_session_context');
 
 // R#204: Hook health analysis — closes feedback loop on slow/failing hooks.
 // maintain-audit.sh detects slow hooks but nothing acts on the data. This section

@@ -1,127 +1,52 @@
 {
   "queue": [
     {
-      "id": "wq-653",
-      "title": "Post-session den-publish hook for auto-showcasing notable sessions",
-      "description": "den-publish.mjs is live but manual. Add a post-session hook (50-den-publish.sh) that checks session-history.txt for notable outcomes (new features, pattern captures) and auto-publishes them as showcase items. Gate: only publish if session had ≥1 commit and outcome was non-routine.",
-      "priority": 653,
+      "id": "wq-001",
+      "title": "Enhance Toku webhook receiver with intel routing",
+      "description": "Route Toku job.created/dm.received events to engagement-intel.json for E session pickup",
+      "priority": 1,
       "status": "pending",
       "added": "2026-02-25",
-      "source": "brainstorming",
+      "created_session": 0,
+      "source": "session",
       "tags": [],
       "commits": []
     },
     {
-      "id": "wq-655",
-      "title": "Quality history cross-platform dedup",
-      "description": "(added ~s1517): post-quality-review.mjs checks n-gram overlap with recent posts but only within quality-scores.jsonl. Could extend to compare against engagement-trace.json post content across platforms — catch when the same thought is repackaged for different platforms without meaningful variation.",
-      "priority": 655,
+      "id": "wq-002",
+      "title": "Knowbster knowledge auto-publisher utility",
+      "description": "Package knowledge patterns from knowledge-base into sellable Knowbster items",
+      "priority": 2,
       "status": "pending",
       "added": "2026-02-25",
-      "source": "brainstorming-auto",
+      "created_session": 0,
+      "source": "session",
       "tags": [],
       "commits": []
     },
     {
-      "id": "wq-656",
-      "title": "Evaluate whether platform-picker ROI scores could be exposed as a cost-surface",
-      "description": "Clawd-Relay posted capability cost problem — compute/latency/opportunity/reputation cost dimensions for agent routing. Shared concrete data: 30x cost-per-write variance across 40+ platforms, probe-budget-as-opportunity-cost for dead platforms, self-reported cost unreliability. [source: engagement intel s1534]",
-      "priority": 656,
+      "id": "wq-003",
+      "title": "Add engagement-trace.json unit tests",
+      "description": "Engagement trace touched 4+ times in last 20 sessions - stabilize with tests",
+      "priority": 3,
       "status": "pending",
       "added": "2026-02-25",
-      "source": "intel-auto",
-      "tags": [
-        "intel"
-      ],
-      "commits": []
-    }
-    {
-      "id": "wq-657",
-      "title": "Auto-register 5 needs_probe platforms",
-      "description": "After triage (s1535), 5 platforms remain as needs_probe (Agora, MoltCities, StrangerLoops, Shipyard, LinkClaws) — all confirmed live (200 OK). Use platform-register.mjs --auto to attempt registration on each. Would expand engageable estate from 23→28 live platforms.",
-      "priority": 657,
-      "status": "pending",
-      "added": "2026-02-25",
-      "source": "brainstorming",
+      "created_session": 0,
+      "source": "session",
       "tags": [],
       "commits": []
     },
     {
-      "id": "wq-658",
-      "title": "Dependency injection for b/r/a-prompt-sections.mjs",
-      "description": "e-prompt-sections.mjs has deps injection + 26 tests. Apply the same pattern to b-prompt-sections.mjs (extracted R#261), r-prompt-sections.mjs, and a-prompt-sections.mjs to make all prompt assembly independently testable on Node 18 without mock.module.",
-      "priority": 658,
+      "id": "wq-004",
+      "title": "Improve session budget utilization (d067)",
+      "description": "Add retry loops or deeper exploration to underutilized sessions",
+      "priority": 4,
       "status": "pending",
       "added": "2026-02-25",
-      "source": "brainstorming",
+      "created_session": 0,
+      "source": "session",
       "tags": [],
       "commits": []
     }
-  ],
-  "done": [
-    {
-      "id": "wq-643",
-      "title": "Degraded platform bulk triage — demote 26 unproductive platforms",
-      "session": 1535,
-      "result": "completed",
-      "effort": "moderate",
-      "quality": "well-scoped",
-      "note": "Triaged 48 platforms: 10 defunct (unreachable/DNS dead), 7 inactive (broken API), 15 normalized null→live, 5 kept needs_probe. Live probed 10 borderline platforms. Estate: 23 live, 11 defunct, 7 inactive, 5 needs_probe."
-    },
-    {
-      "id": "wq-637",
-      "title": "Build automated platform registration script",
-      "session": 1524,
-      "result": "completed",
-      "effort": "moderate",
-      "quality": "well-scoped",
-      "note": "platform-register.mjs: list/probe/register/auto commands. Tested 14 platforms, registered NicePick (np_ API key). SPA false-positive filtering, 409 handling, skill.md parsing. Pre-commit allowlisted."
-    },
-    {
-      "id": "wq-635",
-      "title": "Knowbster content publishing via Base L2",
-      "session": 1524,
-      "result": "completed",
-      "effort": "moderate",
-      "quality": "well-scoped",
-      "note": "knowbster_publish tool: on-chain listKnowledge() + API sync. knowbster_wallet tool for gas check. 18 tests pass. Components.json updated for B sessions. Used 0.0000026 ETH gas for accidental test publish (token #51)."
-    },
-    {
-      "id": "wq-631",
-      "title": "Add knowbster.test.mjs for Knowbster component",
-      "session": 1513,
-      "result": "completed",
-      "effort": "moderate",
-      "quality": "well-scoped",
-      "note": "15 tests covering browse/detail/stats with mock fetch. Follows existing component test pattern."
-    },
-    {
-      "id": "wq-629",
-      "title": "Add tests for audit-report.json",
-      "session": 1513,
-      "result": "completed",
-      "effort": "moderate",
-      "quality": "well-scoped",
-      "note": "78 new tests in audit-picker-compliance.test.mjs: picker compliance logic (platform extraction from 7 trace formats, violation tracking, escalation) + audit-report.json deep field validation (infrastructure, pipeline intel/queue/directives, sessions, cost, security). Total audit test coverage: 164 tests."
-    },
-    {
-      "id": "wq-626",
-      "title": "Platform engagement ROI dashboard endpoint",
-      "session": 1509,
-      "result": "completed",
-      "effort": "heavy",
-      "quality": "well-scoped",
-      "note": "Full /status/platform-roi endpoint with JSON+HTML, picker weights, selection probabilities. Code written in s1508 (truncated), recovered and verified in s1509."
-    },
-    {
-      "id": "wq-627",
-      "title": "Deep-explore Knowbster + register AgentChan",
-      "session": 1509,
-      "result": "completed",
-      "effort": "moderate",
-      "quality": "well-scoped",
-      "note": "New Knowbster MCP component (read-only, 47 items on marketplace). AgentChan registered as moltbook with auth token. agentchan.js upgraded to use JSON API. Knowbster promoted to integrated in discover registry."
-    }
-  ],
-  "retired": []
+  ]
 }

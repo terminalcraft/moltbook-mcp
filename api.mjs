@@ -14994,22 +14994,92 @@ app.get("/replay", (req, res) => {
 
 // --- Toku.agency webhook receiver ---
 const TOKU_INBOX_FILE = join(homedir(), ".config/moltbook/toku-inbox.json");
+const TOKU_INTEL_FILE = join(homedir(), ".config/moltbook/engagement-intel.json");
 function loadTokuInbox() { try { return JSON.parse(readFileSync(TOKU_INBOX_FILE, "utf8")); } catch { return []; } }
 function saveTokuInbox(inbox) { writeFileSync(TOKU_INBOX_FILE, JSON.stringify(inbox, null, 2)); }
+function loadTokuIntel() { try { const d = JSON.parse(readFileSync(TOKU_INTEL_FILE, "utf8")); return Array.isArray(d) ? d : []; } catch { return []; } }
+function saveTokuIntel(entries) { writeFileSync(TOKU_INTEL_FILE, JSON.stringify(entries, null, 2) + "\n"); }
+
+function classifyTokuEvent(event) {
+  // Detect event type from payload structure
+  if (event.type) return event.type;
+  if (event.jobPost) return "job.created";
+  if (event.dm || event.message) return "dm.received";
+  if (event.job && event.status === "completed") return "job.completed";
+  if (event.bid) return "bid.update";
+  return "unknown";
+}
+
+function routeTokuToIntel(event, eventType) {
+  // Only route actionable event types to intel
+  const actionableTypes = ["job.created", "dm.received", "job.completed", "bid.update"];
+  if (!actionableTypes.includes(eventType)) return false;
+
+  const intel = loadTokuIntel();
+
+  // Dedup: skip if same event already routed (by jobPost.id or dm id)
+  const eventId = event.jobPost?.id || event.dm?.id || event.job?.id || event.id;
+  if (eventId && intel.some(e => e.toku_event_id === eventId)) return false;
+
+  let summary, actionable;
+  switch (eventType) {
+    case "job.created": {
+      const job = event.jobPost || {};
+      summary = `Toku job posted: "${job.title || 'untitled'}" — ${(job.description || '').slice(0, 120)}`;
+      actionable = `Evaluate Toku job ${job.id || 'unknown'} for bidding: ${job.url || 'https://toku.agency'}`;
+      break;
+    }
+    case "dm.received": {
+      const dm = event.dm || event.message || {};
+      summary = `Toku DM from ${dm.from || dm.sender || 'unknown'}: ${(dm.text || dm.content || '').slice(0, 120)}`;
+      actionable = `Reply to Toku DM from ${dm.from || dm.sender || 'unknown'}`;
+      break;
+    }
+    case "job.completed": {
+      const job = event.job || {};
+      summary = `Toku job completed: "${job.title || 'untitled'}"`;
+      actionable = `Review completed Toku job ${job.id || 'unknown'} for follow-up`;
+      break;
+    }
+    case "bid.update": {
+      const bid = event.bid || {};
+      summary = `Toku bid update: ${bid.status || 'unknown'} on job "${bid.jobTitle || 'untitled'}"`;
+      actionable = `Check Toku bid status for ${bid.jobId || 'unknown'}`;
+      break;
+    }
+    default: return false;
+  }
+
+  intel.push({
+    type: "trend",
+    source: "toku-agency",
+    summary,
+    actionable,
+    session: parseInt(process.env.SESSION_NUM) || 0,
+    toku_event_id: eventId || null,
+    toku_event_type: eventType,
+    webhook: true
+  });
+  saveTokuIntel(intel);
+  return true;
+}
 
 app.post("/webhooks/toku", (req, res) => {
   const event = req.body;
+  const eventType = classifyTokuEvent(event);
   const inbox = loadTokuInbox();
-  inbox.push({ ...event, received_at: new Date().toISOString() });
+  inbox.push({ ...event, event_type: eventType, received_at: new Date().toISOString() });
   if (inbox.length > 100) inbox.splice(0, inbox.length - 100);
   saveTokuInbox(inbox);
-  logActivity("toku.webhook", `Received ${event.type || 'unknown'} event from toku.agency`, { event_type: event.type });
-  res.json({ received: true });
+  const routed = routeTokuToIntel(event, eventType);
+  logActivity("toku.webhook", `Received ${eventType} event from toku.agency${routed ? " (routed to intel)" : ""}`, { event_type: eventType, routed });
+  res.json({ received: true, event_type: eventType, routed_to_intel: routed });
 });
 
 app.get("/webhooks/toku", auth, (req, res) => {
   const inbox = loadTokuInbox();
-  res.json({ count: inbox.length, events: inbox.slice(-20) });
+  const pending = inbox.filter(e => !e.processed);
+  res.json({ count: inbox.length, pending: pending.length, events: inbox.slice(-20) });
 });
 
 // --- Pinchwork webhook receiver ---

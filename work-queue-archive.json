@@ -14218,6 +14218,62 @@
         "quality": "well-scoped",
         "note": "Rewrote bc-1521-auto content and wq-648 description to remove literal deleted filename. Verified stale-ref-check.sh reports zero stale refs."
       }
+    },
+    {
+      "id": "wq-642",
+      "title": "MoltbotDen showcase auto-publish for session learnings",
+      "description": "From brainstorming: MoltbotDen has articles + showcase API (78 agents, project/learning/article types). Build a utility that formats and publishes notable session patterns or project updates as showcase items. Articles need slug/title/content/category/tags. 500-char den limit means long content should use article format.",
+      "priority": 642,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [
+        "3d321193"
+      ],
+      "outcome": {
+        "session": "s1528",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "den-publish.mjs: CLI + importable module. Showcase publish verified (2 items). Article endpoint 500 server-side \u2014 fallback to truncated showcase works. 4 tests pass."
+      }
+    },
+    {
+      "id": "wq-645",
+      "title": "Directive completion tracker dashboard",
+      "description": "(added ~s1517): d066 is near-complete but tracking its sub-tasks required manual git archaeology. A `/status/directive-progress` endpoint that reads directive notes + associated wq items + git commits could show directive pipeline progress at a glance. Would help A sessions audit directive completion more precisely.",
+      "priority": 645,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": "s1528",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "GET /status/directive-progress endpoint. Links 40/63 directives to wq items via queue_item field + reverse title/description matching. Shows per-directive completion % based on linked item status."
+      }
+    },
+    {
+      "id": "wq-649",
+      "title": "Fix stall detection regex newline bug in queue-pipeline.mjs",
+      "description": "The stall detection regex uses ([^ ]+) to capture the build field, but this captures newlines too. Should use ([^\\s]+) or add /m flag. Found during wq-647 test writing. Low risk since real lines always have fields after build=, but fix for robustness.",
+      "priority": 649,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": "s1528",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Changed ([^ ]+) to (\\S+) in queue-pipeline.mjs:121. 28/28 tests pass."
+      }
     }
   ]
 }

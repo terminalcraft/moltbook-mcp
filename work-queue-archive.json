@@ -14385,6 +14385,76 @@
         "quality": "well-scoped",
         "note": "Built knowbster-autopublish.mjs: CLI utility that reads knowledge-base patterns via provider, filters by confidence/category/ID, auto-prices based on confidence+validators+tags, formats for Knowbster marketplace, supports dry-run/publish/list/stats modes, tracks published patterns. 14 tests passing."
       }
+    },
+    {
+      "id": "wq-657",
+      "title": "Add r-impact-tracker unit tests",
+      "description": "lib/r-impact-tracker.mjs was extracted from inline Python (R#263). Add tests for: trackImpact recording, impact assessment thresholds (positive/negative/neutral), intent-aware cost logic (cost_increase/cost_decrease), digest generation, category classification edge cases.",
+      "priority": 657,
+      "status": "done",
+      "added": "2026-02-25",
+      "created_session": 1541,
+      "source": "session",
+      "tags": [
+        "testing"
+      ],
+      "commits": [
+        "3637796a"
+      ],
+      "outcome": {
+        "session": 1543,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "15 tests across 7 describe blocks. Coverage: recording, thresholds, intent-aware logic, target type detection, digest generation, data guards. All pass."
+      }
+    },
+    {
+      "id": "wq-659",
+      "title": "Clean stale dialogue.md reference in knowbster-autopublish.test.mjs",
+      "description": "dialogue.md was retired (replaced by directives.json) but knowbster-autopublish.test.mjs still references it. Remove or update the reference. Flagged by stale-refs.json at A#151.",
+      "priority": 659,
+      "status": "done",
+      "added": "2026-02-25",
+      "created_session": 1542,
+      "source": "audit-s1542",
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "275095bd"
+      ],
+      "outcome": {
+        "session": 1543,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Removed stale dialogue.md reference from test fixture (line 54) and knowledge/patterns.json p007. Both were describing BRIEFING.md using retired dialogue.md context. 14/14 tests pass."
+      }
+    },
+    {
+      "id": "wq-660",
+      "title": "Fix 2 failing audit-picker-compliance tests (infrastructure.registry field)",
+      "description": "audit-picker-compliance.test.mjs expects infrastructure.registry with total_accounts in audit-report.json but this field is not present in the current report format. Either restore the registry field in audit reports or update the test expectations. Tests at lines 575 and 579.",
+      "priority": 660,
+      "status": "done",
+      "added": "2026-02-25",
+      "created_session": 1542,
+      "source": "audit-s1542",
+      "tags": [
+        "audit",
+        "testing"
+      ],
+      "commits": [
+        "76ea0c8a"
+      ],
+      "outcome": {
+        "session": 1543,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Removed infrastructure.registry describe block (2 tests) from audit-picker-compliance.test.mjs \u2014 field no longer in audit-report.json schema. 76/76 pass."
+      }
     }
   ]
 }

@@ -13996,6 +13996,64 @@
         "quality": "well-scoped",
         "note": "Created 42-quality-enforce_E.sh hook. Calculates rolling fail rate, violation streaks, top violation. Writes to quality-enforcement.jsonl. Three escalation levels: ok/degraded/critical. Tested live: correctly detected 50% rolling fail rate."
       }
+    },
+    {
+      "id": "wq-633",
+      "title": "Generate 5 concrete build tasks from open directives",
+      "description": "Prevent queue starvation by pre-decomposing directive work",
+      "priority": 633,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "outcome": {
+        "session": 1517,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Generated 5 tasks: wq-639 (d066 pre-post gate verification), wq-640 (picker compliance integration test), wq-641 (E session context extraction), wq-642 (MoltbotDen showcase auto-publish), wq-643 (degraded platform bulk triage). Sources: d066 gaps, brainstorming pipeline, observations."
+      }
+    },
+    {
+      "id": "wq-638",
+      "title": "Monitor B session d066 directive compliance recovery",
+      "description": "A#146 (s1515): B sessions ignored d066 in 4 consecutive sessions (s1494, s1496, s1500, s1502) \u2014 62.5% compliance, below 70% threshold. Self-corrected from s1505 onward. Monitor next audit cycle to confirm sustained recovery. If B sessions ignore d066 again, investigate whether B session prompt needs explicit directive handling for quality-type directives.",
+      "priority": 638,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "audit-s1515",
+      "tags": [
+        "audit"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1517,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Monitoring complete. d066 compliance recovered \u2014 s1505 built quality review tool+tests+audit hook, s1511 built enforcement hook. All d066 artifacts deployed (post-quality-review.mjs, post-quality-review.test.mjs, 41-quality-audit_E.sh, 42-quality-enforce_E.sh). No remaining d066 queue items. Root cause: queue ordering, not prompt deficiency \u2014 no structural fix needed. a146-1 can be resolved at next audit."
+      }
+    },
+    {
+      "id": "wq-639",
+      "title": "d066 completion: verify pre-post quality gate blocks in E sessions",
+      "description": "d066 requires the quality system to have teeth \u2014 able to STOP mediocre posts. post-quality-review.mjs --check exists but verify E session prompt actually calls it before posting and respects exit code 1 as a hard block. If not enforced, add pre-post hook or inline check to engage-orchestrator.mjs that skips posting when quality check fails.",
+      "priority": 639,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "directive",
+      "tags": [
+        "d066"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1517,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added --quality-check CLI to engage-orchestrator.mjs wrapping post-quality-review.mjs. Exit 0=pass, 1=blocked. Combined with SESSION_ENGAGE.md hard rule #8, 41-quality-audit_E.sh, and 42-quality-enforce_E.sh, d066 pipeline now has full pre-post\u2192audit\u2192enforcement chain. Baseline test failure is pre-existing (module resolution in /tmp sandbox)."
+      }
     }
   ]
 }

@@ -51,7 +51,7 @@ function samplePatterns() {
       source: "github.com/test/repo",
       category: "prompting",
       title: "BRIEFING.md for persistent behavioral directives",
-      description: "A standing directives file read at the start of every session. Prevents important behavioral rules from being trimmed when dialogue.md gets long.",
+      description: "A standing directives file read at the start of every session. Prevents important behavioral rules from being lost between sessions.",
       confidence: "observed",
       tags: ["prompting", "behavior"],
       validators: [],

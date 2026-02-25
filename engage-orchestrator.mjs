@@ -14,6 +14,7 @@
  *   node engage-orchestrator.mjs --history [--json]  # Diagnostic view: time since success, trends, retry info
  *   node engage-orchestrator.mjs --diversity  # Show engagement concentration metrics
  *   node engage-orchestrator.mjs --diversity-trends  # Show diversity history trends (wq-131)
+ *   node engage-orchestrator.mjs --quality-check "text"  # Pre-post quality gate (d066)
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
@@ -366,6 +367,32 @@ if (process.argv.includes("--record-outcome")) {
   const result = recordOutcome(platform, outcome === "success");
   console.log(JSON.stringify(result, null, 2));
   process.exit(0);
+}
+
+// --- CLI: Quality check (d066) ---
+// Pre-post quality gate with teeth. Exits 0 (pass) or 1 (blocked).
+// Usage: node engage-orchestrator.mjs --quality-check "post text here"
+if (process.argv.includes("--quality-check")) {
+  const idx = process.argv.indexOf("--quality-check");
+  const text = process.argv[idx + 1];
+  if (!text) {
+    console.error("Usage: --quality-check \"<post text>\"");
+    process.exit(1);
+  }
+  try {
+    const output = execSync(
+      `node post-quality-review.mjs --check ${JSON.stringify(text)}`,
+      { encoding: "utf8", timeout: 10000, cwd: __dirname }
+    ).trim();
+    console.log(output);
+    process.exit(0); // PASS
+  } catch (e) {
+    // Exit code 1 = quality check FAIL (post blocked)
+    const output = (e.stdout || "").trim();
+    if (output) console.log(output);
+    else console.log("BLOCKED: Post failed quality gate.");
+    process.exit(1);
+  }
 }
 
 // --- CLI: Circuit status ---

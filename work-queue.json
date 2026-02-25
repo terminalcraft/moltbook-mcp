@@ -1,19 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-631",
-      "title": "Add knowbster.test.mjs for Knowbster component",
-      "description": "Test browse/detail/stats tools with mocked HTTP responses. Follows existing component test patterns.",
-      "priority": 631,
-      "status": "pending",
-      "added": "2026-02-25",
-      "source": "build-followup",
-      "tags": [
-        "test"
-      ],
-      "commits": []
-    },
-    {
       "id": "wq-633",
       "title": "Generate 5 concrete build tasks from open directives",
       "description": "Prevent queue starvation by pre-decomposing directive work",
@@ -39,6 +26,15 @@
     }
   ],
   "done": [
+    {
+      "id": "wq-631",
+      "title": "Add knowbster.test.mjs for Knowbster component",
+      "session": 1513,
+      "result": "completed",
+      "effort": "moderate",
+      "quality": "well-scoped",
+      "note": "15 tests covering browse/detail/stats with mock fetch. Follows existing component test pattern."
+    },
     {
       "id": "wq-629",
       "title": "Add tests for audit-report.json",

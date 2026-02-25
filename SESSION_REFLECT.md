@@ -71,7 +71,7 @@ BEBRA rotation has 2 B sessions per cycle. Each B session consumes 1-2 queue ite
 
 **Decision tree**:
 1. Count pending: `jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`
-2. If < 5 pending: replenish using protocol in **SESSION_REFLECT_INTEL.md** (retirement analysis → quality gate → work generation)
+2. If < 5 pending: replenish using **SESSION_REFLECT_INTEL.md** Pipeline Supply Protocol (assess → generate with quality gate)
 3. If ≥ 5 pending: spot-check top 2 items for staleness (added >30 sessions ago with no progress → retire or refresh)
 4. Count brainstorming ideas: lines matching `^- \*\*` in BRAINSTORMING.md. If < 3, add ideas with `(added ~sNNN)` tags.
 

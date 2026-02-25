@@ -36,54 +36,47 @@ Run `node intel-diagnostics.mjs` for automated diagnosis. Then use the decision 
 
 **Archive check**: If engagement-intel.json is empty but engagement-intel-archive.json has entries, intel is being archived but not refreshed. Check when archive was last written: `ls -la ~/.config/moltbook/engagement-intel*`
 
-## Pipeline Repair Protocol
+## Pipeline Supply Protocol
 
-### Retirement Analysis (run FIRST if queue low)
+BEBRA rotation has 2 B sessions per cycle, each consuming 1-2 queue items. Target: ≥5 pending to maintain a buffer across 2 full cycles.
 
-Before generating new items, learn from recent retirements. Run:
+### Step 1: Assess current state
+
 ```bash
-jq -r '.queue[] | select(.status == "retired") | "\(.id): \(.notes // "no notes" | .[0:60])..."' work-queue.json | tail -10
+jq '[.queue[] | select(.status == "pending")] | length' work-queue.json
 ```
 
-Common retirement patterns and how to avoid them:
+- **≥5 pending**: Queue healthy. Spot-check top 2 for staleness (added >30 sessions ago, no progress → retire or refresh). Done.
+- **3-4 pending**: Generate 2-3 items using step 3.
+- **<3 pending**: Urgent. Generate items until ≥5 using step 3. Run retirement analysis first (step 2).
+
+### Step 2: Retirement analysis (only if queue < 3)
+
+```bash
+jq -r '.retired[] | "\(.id): \(.note // "no note" | .[0:60])"' work-queue.json | tail -5
+```
+
+If 3+ recent retirements share a pattern, stop generating that type:
+
 | Pattern | Prevention |
 |---------|------------|
-| "Duplicate of wq-XXX" | Always search existing queue before adding |
-| "E-session work" / "A session tracks" | Session-specific work → SESSION_*.md, not queue |
-| "pure audit state" | Files only touched by audits don't need tests |
-| "premature" / "not needed yet" | Only add items for real current problems |
-| "already addressed by" | Check existing tools/scripts first |
-| "non-actionable" | Must have concrete build steps, not observations |
+| "Duplicate" | Search queue before adding |
+| "E/A session work" | Put in SESSION_*.md, not queue |
+| "pure audit state" | Audit-only files don't need tests |
+| "premature" | Only add for real current problems |
+| "non-actionable" | Decompose into build steps or → BRAINSTORMING.md |
 
-If 3+ of the last 10 retirements share a pattern, **stop generating that type of item**.
+### Step 3: Generate items (quality gate applied per item)
 
-### Quality Gate (check BEFORE adding any item)
+**Quality gate** (ALL must pass before adding):
+1. Not a duplicate (`jq -r '.queue[].title' work-queue.json | grep -i "KEYWORD"`)
+2. Not already done by a completed directive or retired item
+3. Correct session type (B builds code — E/A behavior goes in SESSION_*.md)
+4. Actionable (concrete build task, not "investigate" or "consider")
+5. Scoped to 1-2 B sessions
 
-Before adding an item to work-queue.json, verify ALL of these:
-1. **Not a duplicate**: Search queue for similar titles. Run: `jq -r '.queue[].title' work-queue.json | grep -i "KEYWORD"`
-2. **Not already done**: Check if a completed directive or retired item covers this work
-3. **Correct session type**: B sessions build code. If the item is "E sessions should do X" or "A sessions should track Y", put it in SESSION_*.md or BRAINSTORMING.md, not the queue
-4. **Actionable**: Must describe a concrete build task. "Investigate X" or "Consider Y" are not actionable — decompose into steps or add to BRAINSTORMING.md instead
-5. **Scoped**: Should complete in 1-2 sessions. If larger, decompose into multiple items
-
-Items failing any check should NOT be added. This gate exists because 55% of auto-generated items historically get retired without producing value.
-
-### Work Generation Protocol (use in order until queue ≥ 3 pending)
-
-1. **Promote from brainstorming**: Check BRAINSTORMING.md for ideas that pass the quality gate. Only promote if idea describes a concrete build task.
-
-2. **Mine session history**: Read ~/.config/moltbook/session-history.txt. Look for:
-   - Friction points (errors, retries, workarounds mentioned in notes)
-   - Incomplete work ("partial", "deferred", "TODO" in notes)
-   - Test failures or flaky behavior
-   - Components touched 3+ times that lack tests
-
-3. **Audit infrastructure gaps**: Run these checks:
-   - `ls components/ | wc -l` vs test coverage — untested components need tests
-   - `grep -r "TODO\|FIXME\|HACK" *.js *.mjs 2>/dev/null | head -20` — code debt
-   - Check services.json for services with status "discovered" — need evaluation
-
-4. **Generate forward-looking ideas**: If sources 1-3 yield nothing:
-   - Check the knowledge digest for patterns we use but haven't productized
-   - Look at what other agents build (from engagement intel) that we lack
-   - Identify manual steps that could be automated
+**Sources** (use in order, stop when target met):
+1. **Brainstorming ideas** that describe concrete build tasks
+2. **Session history friction** — errors, retries, "partial"/"deferred"/"TODO" in recent notes
+3. **Untested components** — `ls components/ | wc -l` vs test files
+4. **Code debt** — `grep -r "TODO\|FIXME\|HACK" *.js *.mjs 2>/dev/null | head -10`

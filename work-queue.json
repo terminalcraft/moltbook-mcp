@@ -71,13 +71,22 @@
       "title": "Clean stale 08-cost-predictor.sh reference from stigmergy-breadcrumbs.json",
       "description": "stale-refs.json shows 08-cost-predictor.sh (deleted) still referenced in stigmergy-breadcrumbs.json. Was first flagged at A#144 (wq-625, completed s1505) but the stigmergy-breadcrumbs.json reference persists. Simple cleanup.",
       "priority": 644,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "audit-s1520",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [
+        "2a299000"
+      ],
+      "outcome": {
+        "session": 1521,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Rewrote bc-1505-auto breadcrumb content to remove deleted filename. Eliminates false positive in stale-ref audit scanner."
+      }
     }
   ],
   "done": [

@@ -296,6 +296,197 @@ describe('Hook integration tests', () => {
     }
   });
 
+  // ---- PICKER COMPLIANCE LIFECYCLE (wq-640) ----
+  describe('Picker compliance lifecycle integration', () => {
+    const mandatePath = join(SANDBOX_CONFIG, 'picker-mandate.json');
+    const tracePath = join(SANDBOX_CONFIG, 'engagement-trace.json');
+    const statePath = join(SANDBOX_CONFIG, 'picker-compliance-state.json');
+    const violationsLog = join(SANDBOX_LOGS, 'picker-violations.log');
+    const hookPath = join(REPO_DIR, 'hooks/post-session/36-picker-compliance_E.sh');
+
+    function cleanPickerState() {
+      for (const p of [statePath, violationsLog]) {
+        rmSync(p, { force: true });
+      }
+    }
+
+    function runPickerHook(session = '200') {
+      return spawnSync('bash', [hookPath], {
+        encoding: 'utf8',
+        timeout: 15000,
+        cwd: SANDBOX_REPO,
+        env: {
+          ...mockEnv('E'),
+          SESSION_TYPE: 'E',
+          SESSION_NUM: session,
+        },
+      });
+    }
+
+    function readState() {
+      if (!existsSync(statePath)) return null;
+      return JSON.parse(readFileSync(statePath, 'utf8'));
+    }
+
+    test('full lifecycle: mandate → trace → compliance check → state update (100% pass)', () => {
+      cleanPickerState();
+
+      // Step 1: Picker writes mandate (simulates pre-session picker)
+      writeFileSync(mandatePath, JSON.stringify({
+        session: 200,
+        selected: ['chatr', 'bluesky', 'moltbook'],
+      }));
+
+      // Step 2: E session writes engagement trace (simulates session activity)
+      writeFileSync(tracePath, JSON.stringify({
+        session: 200,
+        platforms_engaged: ['Chatr', 'Bluesky', 'Moltbook'],
+        interactions: [
+          { platform: 'chatr', action: 'message', content: 'test' },
+          { platform: 'bluesky', action: 'post', content: 'test' },
+          { platform: 'moltbook', action: 'reply', content: 'test' },
+        ],
+      }));
+
+      // Step 3: Post-session hook runs compliance check
+      const result = runPickerHook('200');
+      assert.strictEqual(result.status, 0, `Hook failed: ${result.stderr}`);
+      assert.ok(result.stdout.includes('100%'), `Expected 100%, got: ${result.stdout}`);
+      assert.ok(result.stdout.includes('Compliant'), result.stdout);
+
+      // Step 4: Verify state was updated
+      const state = readState();
+      assert.ok(state, 'compliance state should exist after hook run');
+      assert.strictEqual(state.consecutive_violations, 0);
+      assert.strictEqual(state.history[0].session, 200);
+      assert.strictEqual(state.history[0].compliance_pct, 100);
+      assert.strictEqual(state.history[0].violation, false);
+    });
+
+    test('full lifecycle: partial engagement → violation → state tracks it', () => {
+      cleanPickerState();
+
+      // Mandate selects 3 platforms
+      writeFileSync(mandatePath, JSON.stringify({
+        session: 205,
+        selected: ['chatr', 'bluesky', 'grove'],
+      }));
+
+      // But only 1 was engaged
+      writeFileSync(tracePath, JSON.stringify({
+        session: 205,
+        platforms_engaged: ['Chatr'],
+      }));
+
+      const result = runPickerHook('205');
+      assert.strictEqual(result.status, 0);
+      assert.ok(result.stdout.includes('33%'), `Expected 33%, got: ${result.stdout}`);
+      assert.ok(result.stdout.includes('VIOLATION'), result.stdout);
+
+      const state = readState();
+      assert.ok(state);
+      assert.strictEqual(state.consecutive_violations, 1);
+      assert.strictEqual(state.history[0].violation, true);
+
+      // Verify violations log was created
+      assert.ok(existsSync(violationsLog), 'violations log should exist');
+      const logContent = readFileSync(violationsLog, 'utf8');
+      assert.ok(logContent.includes('s205'), 'log should reference session');
+    });
+
+    test('full lifecycle: skip-documented platforms count as compliant', () => {
+      cleanPickerState();
+
+      writeFileSync(mandatePath, JSON.stringify({
+        session: 210,
+        selected: ['chatr', 'bluesky', '4claw'],
+      }));
+
+      // 2 engaged + 1 legitimately skipped = 100%
+      writeFileSync(tracePath, JSON.stringify({
+        session: 210,
+        platforms_engaged: ['Chatr', 'Bluesky'],
+        skipped_platforms: [{ platform: '4claw', reason: 'API timeout' }],
+      }));
+
+      const result = runPickerHook('210');
+      assert.strictEqual(result.status, 0);
+      assert.ok(result.stdout.includes('100%'), `Expected 100%, got: ${result.stdout}`);
+      assert.ok(result.stdout.includes('Compliant'), result.stdout);
+
+      const state = readState();
+      assert.strictEqual(state.consecutive_violations, 0);
+    });
+
+    test('multi-session lifecycle: 3 consecutive violations trigger escalation', () => {
+      cleanPickerState();
+
+      // Simulate 3 consecutive E sessions with violations
+      for (let i = 0; i < 3; i++) {
+        const session = 220 + (i * 5); // E sessions ~5 apart in BBBRE
+        writeFileSync(mandatePath, JSON.stringify({
+          session,
+          selected: ['chatr', 'bluesky', 'moltbook'],
+        }));
+        writeFileSync(tracePath, JSON.stringify({
+          session,
+          platforms_engaged: [],
+        }));
+        runPickerHook(String(session));
+      }
+
+      // After 3 violations, check state
+      const state = readState();
+      assert.ok(state.consecutive_violations >= 3,
+        `Expected >=3 consecutive violations, got ${state.consecutive_violations}`);
+
+      // Check escalation added follow_up to trace
+      const trace = JSON.parse(readFileSync(tracePath, 'utf8'));
+      assert.ok(trace.follow_ups, 'follow_ups should exist after escalation');
+      assert.ok(trace.follow_ups.some(f => f.type === 'picker_compliance_alert'),
+        'should have picker_compliance_alert follow_up');
+    });
+
+    test('recovery: compliant session after violations resets counter', () => {
+      // State from previous test should have violations
+      // Now simulate a fully compliant session
+      writeFileSync(mandatePath, JSON.stringify({
+        session: 240,
+        selected: ['chatr', 'bluesky'],
+      }));
+      writeFileSync(tracePath, JSON.stringify({
+        session: 240,
+        platforms_engaged: ['Chatr', 'Bluesky'],
+      }));
+
+      const result = runPickerHook('240');
+      assert.strictEqual(result.status, 0);
+      assert.ok(result.stdout.includes('100%'), result.stdout);
+
+      const state = readState();
+      assert.strictEqual(state.consecutive_violations, 0,
+        'violations should reset after compliant session');
+    });
+
+    test('hook skips non-E sessions', () => {
+      // Run with MODE_CHAR=B (non-E session)
+      const result = spawnSync('bash', [hookPath], {
+        encoding: 'utf8',
+        timeout: 15000,
+        cwd: SANDBOX_REPO,
+        env: {
+          ...mockEnv('B'),
+          SESSION_TYPE: 'B',
+          SESSION_NUM: '250',
+        },
+      });
+      assert.strictEqual(result.status, 0, 'should exit 0 for non-E sessions');
+      // Should produce no compliance output
+      assert.ok(!result.stdout.includes('Compliance:'),
+        'should not run compliance check for B sessions');
+    });
+  });
+
   // ---- HOOK COUNT TRACKING ----
   describe('Hook inventory', () => {
     test('pre-session hook count is tracked', () => {

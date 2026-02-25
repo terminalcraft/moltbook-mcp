@@ -74,7 +74,7 @@
       "title": "Fix stale-refs checker false positive on breadcrumb content",
       "description": "stale-refs.json flags dialogue.md in stigmergy-breadcrumbs.json because bc-1543-auto's content field says 'fix(wq-659): remove stale dialogue.md references'. The checker does naive string matching — should exclude content/description fields or use path-pattern matching only.",
       "priority": 663,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "created_session": 1554,
       "source": "audit-s1554",
@@ -83,14 +83,21 @@
         "infrastructure",
         "tooling"
       ],
-      "commits": []
+      "commits": ["ed8e78db"],
+      "outcome": {
+        "session": 1555,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added is_structural_ref() filter to stale-ref-check.sh — excludes matches found only in prose fields (content, description, note, title, summary, body) of JSON files. Verified false positive eliminated and structural refs still detected."
+      }
     },
     {
       "id": "wq-664",
       "title": "Investigate R session rapid-exit pattern (s1546-s1548)",
       "description": "3 consecutive R sessions had very short durations: s1546 (2m28s, $1.09), s1547 (0m35s, $0.40), s1548 (0m06s, missing from cost-history). All had no file edits. s1549 recovered to normal (6m04s, $1.76). Check session logs and heartbeat.sh R-session startup path for root cause.",
       "priority": 664,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "created_session": 1554,
       "source": "audit-s1554",
@@ -99,7 +106,14 @@
         "infrastructure",
         "reliability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1555,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: retry cascade. s1546 R session exited non-zero (likely tool/prompt error), causing rotation-state retry logic to repeat R mode. s1547 (retry 1) and s1548 (retry 2) were progressively shorter as each R hit cooldown with nothing to do, also exiting non-zero. s1549 (retry 3) succeeded normally, breaking cycle. Self-healing via MAX_RETRIES=3 cap worked as designed. Session logs rotated so exact error unrecoverable. One-time transient — BEBRA pattern has only 1 R/cycle, making consecutive R collisions structurally unlikely. No code fix needed."
+      }
     }
   ]
 }

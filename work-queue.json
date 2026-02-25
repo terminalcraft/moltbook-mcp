@@ -27,22 +27,40 @@
       "title": "Picker compliance integration test with simulated E session lifecycle",
       "description": "From brainstorming: audit-picker-compliance.mjs has unit tests but no integration test that runs it as a post-session hook with real engagement-trace data. Add hook-integration test that simulates mandate → trace → compliance check → state update. Catches regressions when trace format evolves.",
       "priority": 640,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [
+        "e4daa4d4"
+      ],
+      "outcome": {
+        "session": 1521,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 6 lifecycle integration tests covering mandate→trace→compliance→state flow, violation tracking, escalation, recovery, and session-type filtering. 509/509 tests pass."
+      }
     },
     {
       "id": "wq-641",
       "title": "Extract E session context to lib/e-prompt-sections.mjs",
       "description": "From brainstorming: R and A prompt blocks are extracted to lib/. E session context (lines 964-1097 in session-context.mjs) is the last inline prompt builder. Extract to lib/e-prompt-sections.mjs — includes orchestrator pre-run, email check, covenant digest, capability summary. Reduces session-context.mjs by ~130 lines and makes E block independently testable.",
       "priority": 641,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming",
       "tags": [],
-      "commits": []
+      "commits": [
+        "6ae6705e"
+      ],
+      "outcome": {
+        "session": 1521,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Extracted 108 lines from session-context.mjs to lib/e-prompt-sections.mjs. All 3 prompt sections (R/A/E) now in lib/. 204/204 session-context tests pass. Pre-commit whitelist updated for false positive."
+      }
     },
     {
       "id": "wq-642",

@@ -37,11 +37,20 @@
       "title": "Add tests for audit-report.json",
       "description": "Touched 4 times in last 20 sessions — stabilize with unit tests",
       "priority": 614,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "bd674466"
+      ],
+      "outcome": {
+        "session": 1500,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Fixed 2 failing cost schema tests — audit-report.json cost section evolved to use last_20_avg. Updated tests to handle all 4 schema variants. 86/86 pass."
+      }
     },
     {
       "id": "wq-615",
@@ -111,7 +120,7 @@
       "title": "Monitor B session cost trend — avg $3.02 in last 20",
       "description": "A#143 finding: B sessions averaging $3.02 over last 20 sessions. Two justified $5+ spikes (s1471 $5.97, s1474 $5.29). If next audit shows continued >$3 avg with unjustified spikes, escalate to structural investigation.",
       "priority": 619,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "created_session": 1499,
       "source": "audit-s1499",
@@ -119,7 +128,14 @@
         "audit",
         "cost"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1500,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "B cost trend improving: last 6 completed sessions avg $2.64 (down from $3.02). Two $5+ spikes (s1471, s1474) have aged out. No structural intervention needed. Next A session will close the monitoring loop."
+      }
     }
   ]
 }

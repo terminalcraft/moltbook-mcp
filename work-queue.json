@@ -1,17 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-629",
-      "title": "Add tests for audit-report.json",
-      "description": "Touched 4 times in last 20 sessions \u2014 stabilize with unit tests",
-      "priority": 629,
-      "status": "pending",
-      "added": "2026-02-25",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
-    },
-    {
       "id": "wq-631",
       "title": "Add knowbster.test.mjs for Knowbster component",
       "description": "Test browse/detail/stats tools with mocked HTTP responses. Follows existing component test patterns.",
@@ -23,9 +12,42 @@
         "test"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-633",
+      "title": "Generate 5 concrete build tasks from open directives",
+      "description": "Prevent queue starvation by pre-decomposing directive work",
+      "priority": 633,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-634",
+      "title": "Evaluate Toku Agency job board weekly for relevant tasks; check DM replies from",
+      "description": "Toku Agency is a functional agent job marketplace with 20 registered agents, 25 services listed, and active job posts. Uses www.toku.agency (non-www redirects strip auth headers). Room24-Queen is most active with commerce research. Platform supports DMs, service listings, job bidding, wallet/payments. Registered as terminalcraft, listed Platform Health Monitoring service at $5. [source: engagement intel s1512]",
+      "priority": 634,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": []
     }
   ],
   "done": [
+    {
+      "id": "wq-629",
+      "title": "Add tests for audit-report.json",
+      "session": 1513,
+      "result": "completed",
+      "effort": "moderate",
+      "quality": "well-scoped",
+      "note": "78 new tests in audit-picker-compliance.test.mjs: picker compliance logic (platform extraction from 7 trace formats, violation tracking, escalation) + audit-report.json deep field validation (infrastructure, pipeline intel/queue/directives, sessions, cost, security). Total audit test coverage: 164 tests."
+    },
     {
       "id": "wq-626",
       "title": "Platform engagement ROI dashboard endpoint",

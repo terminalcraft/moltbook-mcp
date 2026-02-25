@@ -16,7 +16,10 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
+- **Add tests for audit-report.json**: Touched 4 times in last 20 sessions — stabilize with unit tests
+
 - **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
+- **Post history index for cross-platform dedup** (added ~s1492): engagement-trace captures topics but not actual post text. Quality review (d066) needs a searchable archive of recent posts to detect recycled phrases across platforms. Could be a simple JSONL append log with platform, date, text hash, key phrases.
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604
 - ~~**Credential health dashboard endpoint**~~ → promoted to wq-603
 - ~~**Hook execution time budget**~~ → promoted to wq-608

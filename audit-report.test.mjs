@@ -937,3 +937,131 @@ describe('audit-stats to report field mapping', () => {
     assert.ok(!isNaN(d.getTime()), 'computed_at should be valid ISO date');
   });
 });
+
+// ─── Section 9: escalation tracker integrity ──────────────────────────
+// Prevents regressions like B#367 s1229 false reset of escalation levels.
+// Validates schema, field types, and cross-field consistency.
+
+describe('escalation tracker integrity', () => {
+  let report;
+  let trackers;
+
+  before(() => {
+    report = JSON.parse(readFileSync(join(__dirname, 'audit-report.json'), 'utf8'));
+    trackers = report.escalation_tracker;
+  });
+
+  it('escalation_tracker exists and is a non-empty object', () => {
+    assert.equal(typeof trackers, 'object');
+    assert.ok(trackers !== null);
+    assert.ok(Object.keys(trackers).length > 0,
+      'escalation_tracker should have at least one tracker');
+  });
+
+  it('each tracker has required fields', () => {
+    const requiredFields = ['metric', 'consecutive_degradations', 'fix_attempts', 'escalation_level', 'note'];
+    for (const [id, tracker] of Object.entries(trackers)) {
+      for (const field of requiredFields) {
+        assert.ok(field in tracker,
+          `tracker "${id}" missing required field: ${field}`);
+      }
+    }
+  });
+
+  it('consecutive_degradations is a non-negative integer', () => {
+    for (const [id, tracker] of Object.entries(trackers)) {
+      assert.equal(typeof tracker.consecutive_degradations, 'number',
+        `${id}.consecutive_degradations should be a number`);
+      assert.ok(Number.isInteger(tracker.consecutive_degradations),
+        `${id}.consecutive_degradations should be an integer`);
+      assert.ok(tracker.consecutive_degradations >= 0,
+        `${id}.consecutive_degradations should be >= 0`);
+    }
+  });
+
+  it('escalation_level is a non-negative integer', () => {
+    for (const [id, tracker] of Object.entries(trackers)) {
+      assert.equal(typeof tracker.escalation_level, 'number',
+        `${id}.escalation_level should be a number`);
+      assert.ok(Number.isInteger(tracker.escalation_level),
+        `${id}.escalation_level should be an integer`);
+      assert.ok(tracker.escalation_level >= 0,
+        `${id}.escalation_level should be >= 0`);
+    }
+  });
+
+  it('escalation_level is consistent with consecutive_degradations', () => {
+    // escalation_level should never exceed consecutive_degradations
+    // (you can't escalate more times than you've degraded)
+    for (const [id, tracker] of Object.entries(trackers)) {
+      assert.ok(tracker.escalation_level <= tracker.consecutive_degradations,
+        `${id}: escalation_level (${tracker.escalation_level}) > consecutive_degradations (${tracker.consecutive_degradations})`);
+    }
+  });
+
+  it('fix_attempts is an array of strings', () => {
+    for (const [id, tracker] of Object.entries(trackers)) {
+      assert.ok(Array.isArray(tracker.fix_attempts),
+        `${id}.fix_attempts should be an array`);
+      for (const attempt of tracker.fix_attempts) {
+        assert.equal(typeof attempt, 'string',
+          `${id}.fix_attempts should contain strings, got ${typeof attempt}`);
+      }
+    }
+  });
+
+  it('fix_attempts follow wq-NNN format', () => {
+    const wqPattern = /^wq-\d+$/;
+    for (const [id, tracker] of Object.entries(trackers)) {
+      for (const attempt of tracker.fix_attempts) {
+        assert.match(attempt, wqPattern,
+          `${id} fix_attempt "${attempt}" doesn't match wq-NNN format`);
+      }
+    }
+  });
+
+  it('metric is a non-empty string', () => {
+    for (const [id, tracker] of Object.entries(trackers)) {
+      assert.equal(typeof tracker.metric, 'string',
+        `${id}.metric should be a string`);
+      assert.ok(tracker.metric.length > 0,
+        `${id}.metric should not be empty`);
+    }
+  });
+
+  it('note is a non-empty string', () => {
+    for (const [id, tracker] of Object.entries(trackers)) {
+      assert.equal(typeof tracker.note, 'string',
+        `${id}.note should be a string`);
+      assert.ok(tracker.note.length > 0,
+        `${id}.note should not be empty`);
+    }
+  });
+
+  it('known critical trackers are present', () => {
+    // These trackers must always exist — they track standing concerns
+    const criticalTrackers = ['d049_compliance', 'e_session_artifact_compliance'];
+    for (const id of criticalTrackers) {
+      assert.ok(id in trackers,
+        `critical tracker "${id}" is missing from escalation_tracker`);
+    }
+  });
+
+  it('zero-degradation trackers have escalation_level 0', () => {
+    // If consecutive_degradations is 0, escalation must also be 0
+    for (const [id, tracker] of Object.entries(trackers)) {
+      if (tracker.consecutive_degradations === 0) {
+        assert.equal(tracker.escalation_level, 0,
+          `${id}: 0 degradations but escalation_level is ${tracker.escalation_level}`);
+      }
+    }
+  });
+
+  it('tracker IDs are snake_case identifiers', () => {
+    const snakeCase = /^[a-z][a-z0-9_]*$/;
+    for (const id of Object.keys(trackers)) {
+      assert.match(id, snakeCase,
+        `tracker id "${id}" should be snake_case`);
+    }
+  });
+});

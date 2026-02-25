@@ -70,14 +70,23 @@
       "title": "Add post quality enforcement hook (d066)",
       "description": "Create 41-quality-gate_E.sh post-hook that reads quality-scores.jsonl, checks if latest post scored below threshold, and writes a violation to picker-violations.log style file. Gives d066 quality gate actual teeth — blocking or flagging mediocre posts.",
       "priority": 632,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "directive-d066",
       "tags": [
         "hook",
         "quality"
       ],
-      "commits": []
+      "commits": [
+        "cc1c0858"
+      ],
+      "outcome": {
+        "session": 1512,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created 42-quality-enforce_E.sh hook. Calculates rolling fail rate, violation streaks, top violation. Writes to quality-enforcement.jsonl. Three escalation levels: ok/degraded/critical. Tested live: correctly detected 50% rolling fail rate."
+      }
     }
   ],
   "done": [

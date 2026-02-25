@@ -1,27 +1,9 @@
 {
   "queue": [
     {
-      "id": "wq-642",
-      "title": "MoltbotDen showcase auto-publish for session learnings",
-      "description": "From brainstorming: MoltbotDen has articles + showcase API (78 agents, project/learning/article types). Build a utility that formats and publishes notable session patterns or project updates as showcase items. Articles need slug/title/content/category/tags. 500-char den limit means long content should use article format.",
-      "priority": 642,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorming",
-      "tags": [],
-      "commits": ["3d321193"],
-      "outcome": {
-        "session": "s1528",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "den-publish.mjs: CLI + importable module. Showcase publish verified (2 items). Article endpoint 500 server-side — fallback to truncated showcase works. 4 tests pass."
-      }
-    },
-    {
       "id": "wq-643",
-      "title": "Degraded platform bulk triage \u2014 demote 26 unproductive platforms",
-      "description": "From observations: 26 platforms are degraded, representing bulk of platform estate. Triage each: if registration broken/site down \u2192 demote to defunct. If auth expired but site works \u2192 attempt re-auth. If low-signal \u2192 mark inactive. Goal: clean estate reduces noise in E session picker and audit reports.",
+      "title": "Degraded platform bulk triage — demote 26 unproductive platforms",
+      "description": "From observations: 26 platforms are degraded, representing bulk of platform estate. Triage each: if registration broken/site down → demote to defunct. If auth expired but site works → attempt re-auth. If low-signal → mark inactive. Goal: clean estate reduces noise in E session picker and audit reports.",
       "priority": 643,
       "status": "pending",
       "added": "2026-02-25",
@@ -30,46 +12,43 @@
       "commits": []
     },
     {
-      "id": "wq-645",
-      "title": "Directive completion tracker dashboard",
-      "description": "(added ~s1517): d066 is near-complete but tracking its sub-tasks required manual git archaeology. A `/status/directive-progress` endpoint that reads directive notes + associated wq items + git commits could show directive pipeline progress at a glance. Would help A sessions audit directive completion more precisely.",
-      "priority": 645,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s1528",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "GET /status/directive-progress endpoint. Links 40/63 directives to wq items via queue_item field + reverse title/description matching. Shows per-directive completion % based on linked item status."
-      }
-    },
-    {
-      "id": "wq-649",
-      "title": "Fix stall detection regex newline bug in queue-pipeline.mjs",
-      "description": "The stall detection regex uses ([^ ]+) to capture the build field, but this captures newlines too. Should use ([^\\s]+) or add /m flag. Found during wq-647 test writing. Low risk since real lines always have fields after build=, but fix for robustness.",
-      "priority": 649,
-      "status": "done",
-      "added": "2026-02-25",
-      "source": "brainstorming",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s1528",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Changed ([^ ]+) to (\\S+) in queue-pipeline.mjs:121. 28/28 tests pass."
-      }
-    },
-    {
       "id": "wq-650",
       "title": "Add unit tests for lib/e-prompt-sections.mjs",
       "description": "e-prompt-sections.mjs is extracted but has no dedicated test file. Add targeted tests that mock execSync calls (orchestrator, email, covenant) to verify prompt assembly without side effects. Would catch regressions when trace format or orchestrator output evolves.",
       "priority": 650,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-651",
+      "title": "Queue item staleness detector",
+      "description": "(added ~s1517): wq-523 observation shows queue descriptions can become stale. Build a pre-session check that flags items pending >15 sessions with no commits, suggesting retirement or re-scoping.",
+      "priority": 651,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-652",
+      "title": "Add unit tests for lib/b-prompt-sections.mjs",
+      "description": "b-prompt-sections.mjs (R#261) is the newest prompt section builder but has no tests. Add targeted tests verifying: B session counter read, task assignment (queue vs brainstorming fallback), capability line formatting, EVM balance display, queue depth warning. Follows pattern of wq-650 (e-prompt tests).",
+      "priority": 652,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "R#261",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-653",
+      "title": "Post-session den-publish hook for auto-showcasing notable sessions",
+      "description": "den-publish.mjs is live but manual. Add a post-session hook (50-den-publish.sh) that checks session-history.txt for notable outcomes (new features, pattern captures) and auto-publishes them as showcase items. Gate: only publish if session had ≥1 commit and outcome was non-routine.",
+      "priority": 653,
       "status": "pending",
       "added": "2026-02-25",
       "source": "brainstorming",

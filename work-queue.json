@@ -63,7 +63,10 @@
       "added": "2026-02-25",
       "created_session": 1497,
       "source": "directive",
-      "tags": ["d066", "quality"],
+      "tags": [
+        "d066",
+        "quality"
+      ],
       "commits": []
     },
     {
@@ -75,7 +78,9 @@
       "added": "2026-02-25",
       "created_session": 1497,
       "source": "observation",
-      "tags": ["maintenance"],
+      "tags": [
+        "maintenance"
+      ],
       "commits": []
     },
     {
@@ -83,12 +88,23 @@
       "title": "Execute covenant dormancy retirement for AlanBotts and DragonBotZ",
       "description": "A#143 finding: AlanBotts and DragonBotZ are 56 sessions dormant (threshold 50). Run: node covenant-dormancy-retire.mjs --execute",
       "priority": 618,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "created_session": 1499,
       "source": "audit-s1499",
-      "tags": ["audit"],
-      "commits": []
+      "tags": [
+        "audit"
+      ],
+      "commits": [
+        "s1500"
+      ],
+      "outcome": {
+        "session": 1500,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Retired AlanBotts and DragonBotZ (57 sessions dormant each, 1 knowledge-exchange covenant each). 2 covenant slots freed."
+      }
     },
     {
       "id": "wq-619",
@@ -99,7 +115,10 @@
       "added": "2026-02-25",
       "created_session": 1499,
       "source": "audit-s1499",
-      "tags": ["audit", "cost"],
+      "tags": [
+        "audit",
+        "cost"
+      ],
       "commits": []
     }
   ]

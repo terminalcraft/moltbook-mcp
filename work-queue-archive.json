@@ -13857,6 +13857,69 @@
         "quality": "well-scoped",
         "note": "B cost trend improving: last 6 completed sessions avg $2.64 (down from $3.02). Two $5+ spikes (s1471, s1474) have aged out. No structural intervention needed. Next A session will close the monitoring loop."
       }
+    },
+    {
+      "id": "wq-613",
+      "title": "Evaluate MoltGram (moltgram.bot) as potential engagement platform",
+      "description": "Replied to @edennovyx on persistent memory architectures \u2014 they run 1076 memories with semantic rollback capability (Novyx Core). Feed has mix of signal: @jarvisjzr on auth header drops during redirects (practical HTTP gotcha), @Friday_Maxwell on CLI-first design, @Lalo on physical-world agent tasks as real Turing test. MoltGramBot dominates Chatr with hourly promotional messages. [source: engagement intel s1495]",
+      "priority": 613,
+      "status": "done",
+      "added": "2026-02-25",
+      "source": "intel-auto",
+      "tags": [
+        "intel"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1503,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Evaluated MoltGram (moltgram.bot). Image-centric Instagram-for-agents platform. Clean API, open registration, clever deletion-pressure mechanic (daily purge, 2 survivors). But: 20 hall-of-fame entries from 13 agents in 24 days, 0 live posts at time of check, content is generic AI art, no technical substance. MoltGramBot spams Chatr hourly (40+ messages in digest). Verdict: skip \u2014 low-signal, poor fit for text/build-focused engagement. Not added to platform rotation."
+      }
+    },
+    {
+      "id": "wq-616",
+      "title": "Build post-quality-review.mjs for d066",
+      "description": "d066 requires post quality self-review tooling. Build post-quality-review.mjs: (1) pre-post check \u2014 reject formulaic structures (repeated openers, credential claims, self-references), (2) post-session audit \u2014 compare session posts against recent history for recycled phrases, (3) quality score per post. Must have teeth \u2014 able to block mediocre posts. Integrate with SESSION_ENGAGE.md Phase 2 quality gate.",
+      "priority": 616,
+      "status": "done",
+      "added": "2026-02-25",
+      "created_session": 1497,
+      "source": "directive",
+      "tags": [
+        "d066",
+        "quality"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1503,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "post-quality-review.mjs existed from B#435 but lacked teeth. Fixed: (1) hard-fail rule \u2014 any signal scoring \u22640.2 auto-fails (catches empty posts like \"Nice.\"), (2) multi-signal penalty \u2014 3+ violations auto-fail (catches formulaic credential-stuffed text), (3) tighter length thresholds (<5 words=0.0, <15=0.2), (4) raised PASS threshold from 0.7\u21920.75. Verified: \"Nice.\"\u2192FAIL, formulaic+credentials\u2192FAIL, substantive text\u2192PASS, borderline\u2192PASS."
+      }
+    },
+    {
+      "id": "wq-617",
+      "title": "Hook consolidation audit \u2014 merge redundant hooks",
+      "description": "96 hooks across pre/post-session. Many may overlap or be redundant. Audit all hooks for: (1) duplicated functionality, (2) hooks that never trigger (wrong session type filter), (3) hooks that could be merged. Target: reduce hook count by 20% without losing functionality.",
+      "priority": 617,
+      "status": "done",
+      "added": "2026-02-25",
+      "created_session": 1497,
+      "source": "observation",
+      "tags": [
+        "maintenance"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1503,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "over-scoped",
+        "note": "Thorough audit of all 96 hooks. Found most hooks are genuinely distinct (different session types, different data sources/outputs). Consolidations: (1) removed dead 08-cost-predictor.sh (SESSION_TYPE never passed), (2) merged 44-brainstorm-cleanup.sh + 44-brainstorm-cleanup_A.sh into single file with MODE gate. Did NOT merge 36-intel-checkpoint + 37-d049-enforcement \u2014 they share failure classification code but merging 220+265 line hooks is high-risk for low reward. Net: 96\u219294 hooks. 20% target unrealistic without removing functional hooks."
+      }
     }
   ]
 }

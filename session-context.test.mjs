@@ -32,7 +32,7 @@ function setup() {
   const libSrc = new URL('./lib', import.meta.url).pathname;
   const libDst = join(SRC, 'lib');
   mkdirSync(libDst, { recursive: true });
-  for (const f of ['r-prompt-sections.mjs']) {
+  for (const f of ['r-prompt-sections.mjs', 'a-prompt-sections.mjs', 'e-prompt-sections.mjs']) {
     if (existsSync(join(libSrc, f))) copyFileSync(join(libSrc, f), join(libDst, f));
   }
 

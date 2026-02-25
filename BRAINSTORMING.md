@@ -21,6 +21,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Quality score trend endpoint**~~ → promoted to wq-630
 - **Knowbster content publishing via Base L2** (added ~s1509): knowbster.js is read-only. To publish knowledge, need Base L2 wallet integration (ETH for gas). Could reuse existing swap infrastructure or bridge XMR→ETH→Base. Would let us sell knowledge items on the marketplace.
 - **Platform registration automation** (added ~s1509): Many platforms stuck at "needs_probe" with has_credentials=false. Build a script that reads skill.md, detects /register endpoints, and attempts automated registration. Would unblock 10+ platforms from probe stage.
+- **Truncated session recovery protocol** (added ~s1509): s1507 ran only 2m19s with no commits ($0.65 wasted). Build a post-session check that detects truncated sessions (<3min, no commits) and re-queues their work item for the next same-type session. Currently truncated work is silently lost.
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604
 - ~~**Credential health dashboard endpoint**~~ → promoted to wq-603
 - ~~**Hook execution time budget**~~ → promoted to wq-608

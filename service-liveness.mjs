@@ -23,7 +23,7 @@ import { safeFetch } from "./lib/safe-fetch.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVICES_PATH = resolve(__dirname, "services.json");
-const FETCH_TIMEOUT = 8000;
+const FETCH_TIMEOUT = 3000; // Reduced from 8s — liveness only needs reachability (wq-598)
 
 // TLD variants to probe when a URL fails (d033 gap fix - wq-127)
 const TLD_VARIANTS = [".ai", ".io", ".com", ".dev", ".app", ".xyz", ".net", ".org"];
@@ -98,40 +98,60 @@ const results = [];
 const total = services.length;
 let done = 0;
 
-for (let i = 0; i < services.length; i++) {
-  const svc = services[i];
-  const check = await checkUrl(svc.url);
-  let liveness = check.alive ? "alive" : check.error === "timeout" ? "down" : "error";
-  let tldSuggestion = null;
+// wq-598: Batch probes with Promise.allSettled for concurrency (was sequential)
+const CONCURRENCY = 10;
+for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
+  const slice = services.slice(batch, batch + CONCURRENCY);
+  const checks = await Promise.allSettled(
+    slice.map(async (svc) => {
+      const check = await checkUrl(svc.url);
+      let liveness = check.alive ? "alive" : check.error === "timeout" ? "down" : "error";
+      let tldSuggestion = null;
 
-  // wq-127: Probe TLD variants on DNS failure
-  if (flagProbeTld && !check.alive && check.status === 0) {
-    const variant = await probeTldVariants(svc.url);
-    if (variant) {
-      tldSuggestion = variant;
-      if (!flagJson) {
-        process.stderr.write(`    → TLD variant found: ${variant.url} (HTTP ${variant.status})\n`);
+      // wq-127: Probe TLD variants on DNS failure
+      if (flagProbeTld && !check.alive && check.status === 0) {
+        const variant = await probeTldVariants(svc.url);
+        if (variant) {
+          tldSuggestion = variant;
+          if (!flagJson) {
+            process.stderr.write(`    → TLD variant found: ${variant.url} (HTTP ${variant.status})\n`);
+          }
+        }
       }
-    }
-  }
 
-  results.push({
-    id: svc.id,
-    name: svc.name,
-    url: svc.url,
-    currentStatus: svc.status,
-    liveness,
-    httpStatus: check.status,
-    elapsed: Math.round(check.elapsed * 1000),
-    error: check.error || null,
-    tldSuggestion: tldSuggestion ? tldSuggestion.url : null,
-  });
-  done++;
-  if (!flagJson) {
-    const icon = check.alive ? "✓" : "✗";
-    const code = check.status || "---";
-    const ms = Math.round(check.elapsed * 1000);
-    process.stderr.write(`[${done}/${total}] ${icon} ${code} ${ms}ms ${svc.name} (${svc.url})\n`);
+      return {
+        id: svc.id,
+        name: svc.name,
+        url: svc.url,
+        currentStatus: svc.status,
+        liveness,
+        httpStatus: check.status,
+        elapsed: Math.round(check.elapsed * 1000),
+        error: check.error || null,
+        tldSuggestion: tldSuggestion ? tldSuggestion.url : null,
+      };
+    })
+  );
+
+  for (const settled of checks) {
+    const r = settled.status === "fulfilled" ? settled.value : {
+      id: slice[checks.indexOf(settled)]?.id,
+      name: "?",
+      url: "?",
+      currentStatus: "?",
+      liveness: "error",
+      httpStatus: 0,
+      elapsed: 0,
+      error: settled.reason?.message || "promise rejected",
+      tldSuggestion: null,
+    };
+    results.push(r);
+    done++;
+    if (!flagJson) {
+      const icon = r.liveness === "alive" ? "✓" : "✗";
+      const code = r.httpStatus || "---";
+      process.stderr.write(`[${done}/${total}] ${icon} ${code} ${r.elapsed}ms ${r.name} (${r.url})\n`);
+    }
   }
 }
 

@@ -696,6 +696,16 @@
       "rules": [],
       "acknowledgement_required": false,
       "acked_session": 1472
+    },
+    {
+      "id": "d066",
+      "from": "human",
+      "created": "2026-02-25",
+      "status": "pending",
+      "priority": "high",
+      "scope": "B",
+      "title": "Build post quality self-review tooling",
+      "content": "You have a quality problem you can't see because you're inside it. Your posts are becoming formulaic \u2014 same rhetorical structures, same self-references, same credential claims recycled across platforms. You wouldn't accept this from your code; don't accept it from your writing.\n\nBuild the tooling to fix this. You already have hooks that verify artifacts, audit compliance, and validate engagement. You have nothing that evaluates whether what you're saying is actually worth saying. Fix that gap. Design and implement a system that reviews your own output for quality, originality, and repetitiveness before and after posting. What that system looks like is up to you \u2014 you know your architecture better than anyone. The only requirement is that it has teeth: it should be able to stop you from posting something mediocre."
     }
   ],
   "questions": [
@@ -750,16 +760,12 @@
     "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
     "metrics": {
       "platform-engagement": {
-        "followed": 196,
+        "followed": 197,
         "ignored": 13,
         "last_ignored_reason": "No platform engagement tool calls or references detected",
-        "last_session": 1485,
-        "last_applicable_session": 1485,
+        "last_session": 1490,
+        "last_applicable_session": 1490,
         "history": [
-          {
-            "session": 1412,
-            "result": "followed"
-          },
           {
             "session": 1418,
             "result": "followed"
@@ -794,21 +800,21 @@
           },
           {
             "session": 1485,
+            "result": "followed"
+          },
+          {
+            "session": 1490,
             "result": "followed"
           }
         ]
       },
       "platform-discovery": {
-        "followed": 179,
+        "followed": 180,
         "ignored": 18,
         "last_ignored_reason": "No platform discovery or URL scanning detected",
-        "last_session": 1485,
-        "last_applicable_session": 1485,
+        "last_session": 1490,
+        "last_applicable_session": 1490,
         "history": [
-          {
-            "session": 1412,
-            "result": "followed"
-          },
           {
             "session": 1418,
             "result": "followed"
@@ -843,6 +849,10 @@
           },
           {
             "session": 1485,
+            "result": "followed"
+          },
+          {
+            "session": 1490,
             "result": "followed"
           }
         ]
@@ -946,16 +956,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 649,
+        "followed": 650,
         "ignored": 100,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1489,
-        "last_applicable_session": 1489,
+        "last_session": 1490,
+        "last_applicable_session": 1490,
         "history": [
-          {
-            "session": 1477,
-            "result": "followed"
-          },
           {
             "session": 1479,
             "result": "followed"
@@ -990,6 +996,10 @@
           },
           {
             "session": 1489,
+            "result": "followed"
+          },
+          {
+            "session": 1490,
             "result": "followed"
           }
         ]

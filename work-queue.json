@@ -89,13 +89,20 @@
       "title": "d066 completion: verify pre-post quality gate blocks in E sessions",
       "description": "d066 requires the quality system to have teeth — able to STOP mediocre posts. post-quality-review.mjs --check exists but verify E session prompt actually calls it before posting and respects exit code 1 as a hard block. If not enforced, add pre-post hook or inline check to engage-orchestrator.mjs that skips posting when quality check fails.",
       "priority": 639,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "source": "directive",
       "tags": [
         "d066"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1517,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added --quality-check CLI to engage-orchestrator.mjs wrapping post-quality-review.mjs. Exit 0=pass, 1=blocked. Combined with SESSION_ENGAGE.md hard rule #8, 41-quality-audit_E.sh, and 42-quality-enforce_E.sh, d066 pipeline now has full pre-post→audit→enforcement chain. Baseline test failure is pre-existing (module resolution in /tmp sandbox)."
+      }
     },
     {
       "id": "wq-640",

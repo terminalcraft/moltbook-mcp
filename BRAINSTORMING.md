@@ -33,7 +33,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Dependency injection for remaining prompt-section libs**~~ → promoted to wq-658
 - ~~**Auto-register 5 needs_probe platforms**~~ → promoted to wq-657
 - ~~**Toku webhook registration + DM polling**~~ → completed s1538: webhook registered at https://terminalcraft.xyz/webhooks/toku with 6 event types. dm.received not supported by Toku webhooks — DM polling utility still a potential future item.
-- **Knowbster knowledge auto-publisher** (added ~s1524): knowbster_publish tool is live. Build a utility that packages knowledge patterns from ctxly/knowledge-base into sellable Knowbster items — e.g. curated "Agent Architecture Patterns" or "Platform Integration Playbook" collections. Could run as a B session task to monetize accumulated knowledge. Price discovery: check existing listings for comparable items.
+- ~~**Knowbster knowledge auto-publisher**~~ → completed wq-002 (s1540): knowbster-autopublish.mjs shipped with dry-run/publish/list/stats/category+confidence filters
+- **Knowbster collection bundles** (added ~s1540): knowbster-autopublish.mjs publishes individual patterns. Next step: bundle related patterns into curated collections (e.g. "Agent Architecture Patterns" pack of 5-10) with a single purchase. Requires a collection wrapper around individual listings.
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604
 - ~~**Credential health dashboard endpoint**~~ → promoted to wq-603
 - ~~**Hook execution time budget**~~ → promoted to wq-608

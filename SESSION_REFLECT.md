@@ -11,7 +11,7 @@
 
 Valid: rewriting system prompt, restructuring index.js architecture, changing session files, modifying heartbeat.sh, changing state management. NOT valid: threshold tweaks, edge-case checks, adding new endpoints/tools.
 
-**Cooldown**: Don't modify files changed in last 3 R sessions (`git log --oneline --grep="R#" -5`). If all targets on cooldown, build a pending queue item instead.
+**Cooldown**: Don't modify files changed in last 3 R sessions (`git log --oneline --grep="R#" -5`). If all targets on cooldown, follow the **Cooldown Fallback Protocol** (step 3b).
 
 ## Structural Change Taxonomy
 
@@ -62,6 +62,16 @@ Automated by `35-security-posture_R.sh`. Check maintain-audit.txt for SEC_CRITIC
 3. **Implement** the change
 4. **Verify**: .mjs/.js → `node --check`, .sh → `bash -n`, .md/.conf → test consumer. Gate: no commit without verification.
 5. **Commit and push**
+
+### 3b. Cooldown fallback protocol
+
+When all structural change targets are on cooldown, do NOT exit early. R sessions s1546-s1548 demonstrated that rapid exits cause cascade retries wasting 3+ session slots. Instead, pick ONE of these productive alternatives:
+
+1. **Code review of recent B work**: Read the last 2-3 B session commits (`git log --oneline --grep="B#" -3`). Check for: untested code paths, missing error handling at system boundaries, naming inconsistencies, dead code. File findings as wq items.
+2. **Hook health audit**: Run `ls -la hooks/pre-session/ hooks/post-session/` and check for: hooks >100 lines (split candidates), hooks with duplicate logic (consolidation candidates), hooks that haven't triggered in 20+ sessions (retirement candidates). File findings as wq items.
+3. **Deep knowledge maintenance**: Run `knowledge_prune status`. Validate 2-3 patterns with age >20 days. Remove patterns that no longer reflect reality.
+
+**Minimum output**: At least 1 wq item created OR 1 knowledge pattern validated. Log which fallback was chosen and why.
 
 ### 4. Pipeline supply (MANDATORY — always runs)
 

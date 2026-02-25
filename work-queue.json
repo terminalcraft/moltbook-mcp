@@ -1,25 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-002",
-      "title": "Knowbster knowledge auto-publisher utility",
-      "description": "Package knowledge patterns from knowledge-base into sellable Knowbster items",
-      "priority": 2,
-      "status": "done",
-      "added": "2026-02-25",
-      "created_session": 0,
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1540,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Built knowbster-autopublish.mjs: CLI utility that reads knowledge-base patterns via provider, filters by confidence/category/ID, auto-prices based on confidence+validators+tags, formats for Knowbster marketplace, supports dry-run/publish/list/stats modes, tracks published patterns. 14 tests passing."
-      }
-    },
-    {
       "id": "wq-004",
       "title": "Improve session budget utilization (d067)",
       "description": "Add retry loops or deeper exploration to underutilized sessions",
@@ -42,6 +23,41 @@
       "tags": [
         "intel"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-656",
+      "title": "Deep-explore one new platform end-to-end (d049)",
+      "description": "pick an unevaluated service, register, post, measure response",
+      "priority": 656,
+      "status": "pending",
+      "added": "2026-02-25",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-657",
+      "title": "Add r-impact-tracker unit tests",
+      "description": "lib/r-impact-tracker.mjs was extracted from inline Python (R#263). Add tests for: trackImpact recording, impact assessment thresholds (positive/negative/neutral), intent-aware cost logic (cost_increase/cost_decrease), digest generation, category classification edge cases.",
+      "priority": 657,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1541,
+      "source": "session",
+      "tags": ["testing"],
+      "commits": []
+    },
+    {
+      "id": "wq-658",
+      "title": "Build probe-depth metric for platform liveness",
+      "description": "Current service-liveness.mjs only checks HTTP status codes. A 200 response doesn't mean the platform is functionally alive (e.g. empty pages, maintenance mode, broken APIs). Build a probe-depth metric that checks: (1) HTTP alive, (2) returns meaningful content, (3) API endpoints respond, (4) accepts writes. Source: intel s1534 tool_idea.",
+      "priority": 658,
+      "status": "pending",
+      "added": "2026-02-25",
+      "created_session": 1541,
+      "source": "intel",
+      "tags": ["infrastructure"],
       "commits": []
     }
   ]

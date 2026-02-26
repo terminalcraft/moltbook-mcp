@@ -80,12 +80,34 @@
       "title": "Exclude shell comment lines from stale-ref checker",
       "description": "stale-ref-check.sh flags 7 false positives from shell comment lines in 36-e-session-posthook_E.sh that document which hooks it replaced. Same class of false positive as wq-663 (prose fields in JSON). Add exclusion for lines starting with # in .sh files when checking for deleted file references.",
       "priority": 672,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1570,
       "source": "audit-s1570",
       "tags": [
         "audit",
+        "infrastructure",
+        "hooks"
+      ],
+      "commits": ["4b2319c2"],
+      "outcome": {
+        "session": 1571,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Extended is_structural_ref() with per-filetype branching: .sh files filter comment lines (^\\s*#), .json files filter prose fields. All 7 false positives eliminated."
+      }
+    },
+    {
+      "id": "wq-673",
+      "title": "Stale-ref checker: exclude markdown code fences and blockquotes",
+      "description": "stale-ref-check.sh now handles JSON prose fields (wq-663) and shell comments (wq-672), but .md files can also produce false positives from code fences (``` blocks) and blockquotes (> lines) that reference deleted files as documentation. Add exclusion for lines inside fenced code blocks and lines starting with > in .md files.",
+      "priority": 673,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1571,
+      "source": "adjacent-improvement",
+      "tags": [
         "infrastructure",
         "hooks"
       ],

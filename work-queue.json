@@ -49,72 +49,6 @@
       "commits": []
     },
     {
-      "id": "wq-710",
-      "title": "Add probe timing budget alert to post-session hook",
-      "description": "probe-timing-dashboard.mjs exists but only runs on-demand. Add a check to 47-b-session-posthook_B.sh that reads liveness-timing.json, checks if latest wallMs exceeds 8000ms, and logs a warning to maintain-audit.txt. Prevents slow probes from going unnoticed between audit sessions. From brainstorming idea ~s1601.",
-      "priority": 710,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1606,
-      "source": "brainstorming",
-      "tags": [
-        "observability",
-        "hooks"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1607,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added check_probe_timing_budget() to 47-b-session-posthook_B.sh. Warns when liveness probe wallMs exceeds 8000ms."
-      }
-    },
-    {
-      "id": "wq-711",
-      "title": "Add E session scope-bleed detection to audit",
-      "description": "s1604 had 2 commits in an E session (code fixes to verifiers). This is build work bleeding into engagement sessions, inflating E session cost. Add a check to audit-stats.mjs that flags E sessions with build>0 commits as scope-bleed violations. Report alongside the E cost trend so audit can distinguish genuine engagement cost from scope bleed.",
-      "priority": 711,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1606,
-      "source": "adjacent",
-      "tags": [
-        "audit",
-        "cost"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1607,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added computeEScopeBleed() to audit-stats.mjs. Correctly detects s1604 as sole violation. Cost impact delta: $0.82. Updated SESSION_AUDIT.md with audit instructions."
-      }
-    },
-    {
-      "id": "wq-712",
-      "title": "E session scope-bleed prevention hook",
-      "description": "Add a post-session hook for E sessions that checks git log for commits made during the session. If build commits > 0, log a warning to session notes and append scope-bleed flag to session-history.txt. This is proactive prevention complementing wq-711 reactive detection.",
-      "priority": 712,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1607,
-      "source": "adjacent",
-      "tags": [
-        "hooks",
-        "cost"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1607,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Post-session hook 37-scope-bleed-detect_E.sh. Checks git log for non-snapshot commits during E sessions, logs warning."
-      }
-    },
-    {
       "id": "wq-713",
       "title": "E session scope-bleed root cause analysis tool",
       "description": "Build a diagnostic script that analyzes WHY scope bleed happened in a given E session — parse the git diff to categorize commits as bug-fix (reactive), feature (proactive), or config (accidental). Output helps audit distinguish justified emergency fixes from discipline failures. Extend computeEScopeBleed() with commit categorization.",
@@ -126,6 +60,54 @@
       "tags": [
         "audit",
         "tooling"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-714",
+      "title": "Slim SESSION_AUDIT.md — 3107 tokens (over 3000 budget)",
+      "description": "Auto-generated: SESSION_AUDIT.md is 3107 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
+      "priority": 714,
+      "status": "completed",
+      "added": "2026-02-26",
+      "created_session": 1608,
+      "completed_session": 1608,
+      "source": "hook:27-session-file-sizes",
+      "tags": [
+        "auto-seeded",
+        "prompt-budget"
+      ],
+      "commits": ["015a4281"],
+      "notes": "R#279: Extracted sub-checks to SESSION_AUDIT_SUBCHECKS.md. 202→116 lines, ~3107→960 tokens."
+    },
+    {
+      "id": "wq-715",
+      "title": "Add cron-based probe timing alerts",
+      "description": "probe-timing-dashboard.mjs exists but only runs on-demand. Add a cron job that runs the dashboard in --json mode, checks for budget violations (wall time >8s), and writes alerts to maintain-audit.txt. Currently slow probes go unnoticed between sessions.",
+      "priority": 715,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1608,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "monitoring"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-716",
+      "title": "Expose health-check results via /status/api-health endpoint",
+      "description": "health-check.cjs now probes 3 meaningful endpoints (submolts, feed_auth, search). Expose these results via /status/api-health for external monitoring. Complements platform-health API (d069) with self-monitoring data. Lightweight addition to api.mjs.",
+      "priority": 716,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1608,
+      "source": "brainstorming",
+      "tags": [
+        "api",
+        "monitoring",
+        "d069"
       ],
       "commits": []
     }

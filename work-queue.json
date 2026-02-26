@@ -88,7 +88,7 @@
       "title": "Update stale example JSON in SESSION_AUDIT.md scope budget section",
       "description": "SESSION_AUDIT.md line 62 contains an example JSON block referencing 49-pipeline-gate_B.sh which no longer exists. Update the example to use current session data that reflects actual recent R sessions. Cosmetic fix to prevent stale-ref checker false positives.",
       "priority": 694,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1590,
       "source": "audit-s1590",
@@ -96,7 +96,14 @@
         "audit",
         "documentation"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1591,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated stale example JSON in SESSION_AUDIT.md scope budget section — removed reference to 49-pipeline-gate_B.sh that triggered false positive stale-ref detection."
+      }
     }
   ]
 }

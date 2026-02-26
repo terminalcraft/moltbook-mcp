@@ -69,10 +69,10 @@ Read last 10 summaries per type from `~/.config/moltbook/logs/*.summary`.
   - **Scope budget compliance (wq-689)**: For last 5 R sessions in session-history.txt, parse the `files=[...]` field. Exclude routine files (directives.json, work-queue.json, BRAINSTORMING.md). Count remaining non-routine files per session. Flag any session that touched **3+ non-routine files** as a scope budget violation. Compute compliance rate = `compliant_sessions / total_checked`. Report in `sessions.R.scope_budget_compliance`:
     ```json
     {
-      "sessions_checked": ["s1584", "s1579", ...],
-      "violations": [{"session": "s1569", "non_routine_files": ["49-pipeline-gate_B.sh", "SESSION_BUILD.md"], "count": 2, "verdict": "compliant"}],
+      "sessions_checked": ["s1588", "s1584", ...],
+      "violations": [],
       "violation_count": 0,
-      "rate": "100% (5/5)"
+      "rate": "5/5 compliant"
     }
     ```
     If violation_count >= 2 in last 5 R sessions → create wq item with `["audit", "cost"]` tags for R session scope discipline review.

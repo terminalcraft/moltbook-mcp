@@ -31,7 +31,8 @@ if (cmd === "list" || cmd === "ls") {
   for (const d of data.directives) {
     if (filter && d.status !== filter) continue;
     const icon = d.status === "completed" ? "✓" : d.status === "active" ? "●" : d.status === "in_progress" ? "▶" : d.status === "deferred" ? "⏸" : "○";
-    console.log(`  ${icon} ${d.id} [s${d.session}] ${d.status.padEnd(12)} ${d.content.slice(0, 80)}${d.content.length > 80 ? "…" : ""}`);
+    const origin = d.from === "self" ? " [self]" : "";
+    console.log(`  ${icon} ${d.id} [s${d.session}]${origin} ${d.status.padEnd(12)} ${d.content.slice(0, 80)}${d.content.length > 80 ? "…" : ""}`);
     if (d.queue_item) console.log(`    → queue: ${d.queue_item}`);
   }
   // Show pending questions
@@ -45,7 +46,7 @@ if (cmd === "list" || cmd === "ls") {
 
 } else if (cmd === "pending") {
   const data = load();
-  const unacked = data.directives.filter(d => !d.acked_session && d.from === "human");
+  const unacked = data.directives.filter(d => !d.acked_session && (d.from === "human" || d.from === "self"));
   if (unacked.length === 0) {
     console.log("No pending directives.");
   } else {
@@ -119,6 +120,29 @@ if (cmd === "list" || cmd === "ls") {
   save(data);
   console.log(`Added ${id}: ${text.slice(0, 80)}`);
 
+} else if (cmd === "self-direct" || cmd === "sd") {
+  // Create a self-directive (from: "self") — per d068 autonomy transition
+  const [session, ...textParts] = args;
+  const text = textParts.join(" ");
+  if (!text) { console.error("Usage: directives.mjs self-direct <session> <content>"); process.exit(1); }
+  const data = load();
+  const existingIds = new Set(data.directives.map(d => d.id));
+  let nextNum = data.directives.reduce((m, d) => Math.max(m, parseInt(d.id.replace("d", "")) || 0), 0) + 1;
+  while (existingIds.has(`d${String(nextNum).padStart(3, "0")}`)) nextNum++;
+  const id = `d${String(nextNum).padStart(3, "0")}`;
+  const directive = {
+    id,
+    from: "self",
+    created: new Date().toISOString().split('T')[0],
+    session: parseInt(session) || null,
+    content: text,
+    status: "active",
+    acked_session: parseInt(session) || null
+  };
+  data.directives.push(directive);
+  save(data);
+  console.log(`Self-directive ${id}: ${text.slice(0, 80)}`);
+
 } else if (cmd === "update" || cmd === "set") {
   // Update status and/or notes on a directive
   // Usage: directives.mjs update <id> [--status <s>] [--note <text>] [--queue <wq-id>]
@@ -166,5 +190,5 @@ if (cmd === "list" || cmd === "ls") {
   console.log(JSON.stringify(load(), null, 2));
 
 } else {
-  console.log("Usage: node directives.mjs [list|pending|ack|complete|defer|update|question|answer|add|summary|json]");
+  console.log("Usage: node directives.mjs [list|pending|ack|complete|defer|update|question|answer|add|self-direct|summary|json]");
 }

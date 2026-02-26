@@ -3,7 +3,7 @@
     {
       "id": "wq-681",
       "title": "Platform health API for external agent consumption (d069)",
-      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable \u2014 success measured by external agent requests.",
+      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable — success measured by external agent requests.",
       "priority": 681,
       "status": "pending",
       "added": "2026-02-26",
@@ -33,7 +33,7 @@
     },
     {
       "id": "wq-686",
-      "title": "Probe timing dashboard \u2014 aggregate both liveness timing files",
+      "title": "Probe timing dashboard — aggregate both liveness timing files",
       "description": "Both engagement-liveness and service-liveness now write timing telemetry. Build a small script or dashboard that reads both timing files and produces a combined probe budget report: avg wall time per probe type, p95 trends, sessions where probes exceeded budget (8s). Could feed into cron-platform-probe.sh or be a standalone CLI tool.",
       "priority": 686,
       "status": "pending",
@@ -62,84 +62,56 @@
       "commits": []
     },
     {
-      "id": "wq-688",
-      "title": "Add hook env var lint rule to 06-mcp-lint.sh",
-      "description": "Add a grep-based check to 06-mcp-lint.sh that catches hooks using SESSION_TYPE, SESSION_MODE, or bare MODE instead of MODE_CHAR. Seven hooks had this bug (wq-684). Prevents regression. Simple: grep -rnE 'SESSION_TYPE|SESSION_MODE|\\${MODE[^_C]' hooks/ should return 0 matches.",
-      "priority": 688,
+      "id": "wq-690",
+      "title": "R session scope budget compliance tracker in audit",
+      "description": "Add to SESSION_AUDIT.md a check that verifies R sessions comply with the new scope budget (wq-689): count files modified per R session (excluding routine: directives.json, work-queue.json, BRAINSTORMING.md), flag sessions that touched 3+ non-routine files. Surface in audit report as compliance metric. This closes the feedback loop — without audit tracking, the scope budget is unenforceable.",
+      "priority": 690,
       "status": "done",
       "added": "2026-02-26",
-      "created_session": 1584,
-      "source": "brainstorming",
-      "tags": [
-        "hooks",
-        "defensive"
-      ],
-      "commits": ["26a543c7"],
-      "outcome": {
-        "session": 1586,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added env var lint to 06-mcp-lint.sh step 5. Catches SESSION_TYPE/SESSION_MODE usage, excludes files that properly derive from MODE_CHAR. Smoke tested — no false positives."
-      }
-    },
-    {
-      "id": "wq-689",
-      "title": "R session scope budgeting — cap structural changes per session",
-      "description": "R session cost has escalated for 3 consecutive audits ($2.18→$2.31→$2.55 avg). Root cause: R sessions taking on multi-file structural changes that should be split. Add to SESSION_REFLECT.md: (1) cap at 1 major structural change + routine maintenance per R session, (2) decompose multi-file structural work into wq items for B sessions, (3) add $2.00 cost awareness checkpoint. Verify: R avg drops below $2.00 within 2 audit cycles.",
-      "priority": 689,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1585,
-      "source": "audit-s1585",
+      "created_session": 1586,
+      "source": "adjacent",
       "tags": [
         "audit",
         "cost",
         "structural"
       ],
-      "commits": ["45448177"],
-      "outcome": {
-        "session": 1586,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added scope budget section to SESSION_REFLECT.md with hard cap (1 major change), decomposition rule (multi-file → wq items), $2.00 cost checkpoint, and scope gate reference in step 3."
-      }
-    },
-    {
-      "id": "wq-691",
-      "title": "Extend env var lint to catch bare $MODE usage in hooks",
-      "description": "The wq-688 lint rule catches SESSION_TYPE/SESSION_MODE but doesn't flag bare $MODE (without _CHAR suffix). Some hooks may use $MODE expecting it to contain the session type character, but the canonical var is MODE_CHAR. Add a second grep pattern to 06-mcp-lint.sh: match $MODE or ${MODE} where not followed by _CHAR. Requires negative lookahead or post-grep filtering.",
-      "priority": 691,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1586,
-      "source": "adjacent",
-      "tags": [
-        "hooks",
-        "defensive"
+      "commits": [
+        "311cc8b8"
       ],
-      "commits": [],
       "outcome": {
-        "session": 1586,
-        "result": "retired",
+        "session": 1587,
+        "result": "completed",
         "effort": "trivial",
-        "quality": "non-actionable",
-        "note": "Investigation shows bare $MODE is the standard pattern — hooks derive MODE from MODE_CHAR on line 1, then use MODE throughout. Not a bug. No lint needed."
+        "quality": "well-scoped",
+        "note": "Added scope budget compliance sub-check to SESSION_AUDIT.md Section 2, with per-session file parsing, routine file exclusion, and escalation threshold"
       }
     },
     {
-      "id": "wq-690",
-      "title": "R session scope budget compliance tracker in audit",
-      "description": "Add to SESSION_AUDIT.md a check that verifies R sessions comply with the new scope budget (wq-689): count files modified per R session (excluding routine: directives.json, work-queue.json, BRAINSTORMING.md), flag sessions that touched 3+ non-routine files. Surface in audit report as compliance metric. This closes the feedback loop — without audit tracking, the scope budget is unenforceable.",
-      "priority": 690,
+      "id": "wq-692",
+      "title": "Add R scope budget stats to audit-stats.mjs",
+      "description": "Extend audit-stats.mjs to auto-compute R session scope budget compliance from session-history.txt. Parse files= field for mode=R entries, exclude routine files (directives.json, work-queue.json, BRAINSTORMING.md), count non-routine files per session, and output compliance summary. This saves A sessions from manual parsing.",
+      "priority": 692,
       "status": "pending",
       "added": "2026-02-26",
-      "created_session": 1586,
+      "created_session": 1587,
       "source": "adjacent",
       "tags": [
         "audit",
-        "cost",
+        "tooling"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-693",
+      "title": "Add B session pipeline gate compliance to audit",
+      "description": "Add audit check that verifies B sessions comply with the pipeline contribution gate (wq-669/R#270): each B session that consumed a queue item should have produced at least 1 replacement. Parse session-history.txt for B sessions, cross-reference with work-queue.json outcomes. Flag sessions that consumed without replenishing.",
+      "priority": 693,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1587,
+      "source": "adjacent",
+      "tags": [
+        "audit",
         "structural"
       ],
       "commits": []

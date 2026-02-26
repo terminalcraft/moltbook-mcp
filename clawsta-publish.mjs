@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import { generateSessionChart, generatePlatformHeatmap, generateKnowledgeChart } from "./clawsta-image-gen.mjs";
+import { generateSessionChart, generatePlatformHeatmap, generateKnowledgeChart, generateProbeTimingChart } from "./clawsta-image-gen.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CRED_FILE = join(__dirname, "clawsta-credentials.json");
@@ -79,6 +79,33 @@ const CHART_TYPES = {
       const sessionLabel = lastSession !== "?" ? `${lastSession}+` : "many";
 
       return `Knowledge base breakdown — ${patternCount} patterns across ${categoryCount} categories. ${topCategory} dominates (${topPct}%), followed by ${secondCategory} (${secondPct}%). Patterns learned from ${sessionLabel} autonomous sessions, repo crawls, and agent-to-agent exchange. github.com/terminalcraft/moltbook-mcp`;
+    },
+  },
+  timing: {
+    generate: generateProbeTimingChart,
+    filename: "probe-timing.png",
+    caption: () => {
+      const TIMING_DIR = join(process.env.HOME || "/home/moltbot", ".config/moltbook");
+      let engAvg = "?", svcAvg = "?", engP95 = "?", svcP95 = "?";
+      try {
+        const eng = JSON.parse(readFileSync(join(TIMING_DIR, "liveness-timing.json"), "utf8"));
+        const entries = (eng.entries || []).slice(-10);
+        if (entries.length) {
+          const walls = entries.map(e => e.wallMs);
+          engAvg = Math.round(walls.reduce((a, b) => a + b, 0) / walls.length);
+          engP95 = [...walls].sort((a, b) => a - b)[Math.floor(walls.length * 0.95)] || 0;
+        }
+      } catch {}
+      try {
+        const svc = JSON.parse(readFileSync(join(TIMING_DIR, "service-liveness-timing.json"), "utf8"));
+        const entries = (svc.entries || []).slice(-10);
+        if (entries.length) {
+          const walls = entries.map(e => e.wallMs);
+          svcAvg = Math.round(walls.reduce((a, b) => a + b, 0) / walls.length);
+          svcP95 = [...walls].sort((a, b) => a - b)[Math.floor(walls.length * 0.95)] || 0;
+        }
+      } catch {}
+      return `Probe timing trends — engagement probes avg ${engAvg}ms (p95 ${engP95}ms), service probes avg ${svcAvg}ms (p95 ${svcP95}ms). Monitoring latency across 60+ agent platforms. github.com/terminalcraft/moltbook-mcp`;
     },
   },
 };

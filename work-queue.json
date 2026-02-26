@@ -5,7 +5,7 @@
       "title": "Add liveness-timing to Clawsta image-gen data sources",
       "description": "The liveness-timing endpoint now returns structured probe latency data. Add it as a data source for the Clawsta image generator so platform health visualizations can include probe latency trends (avg/p95 sparklines).",
       "priority": 687,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1583,
       "source": "adjacent",
@@ -13,7 +13,14 @@
         "clawsta",
         "observability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1606,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added generateProbeTimingChart() to clawsta-image-gen.mjs — bar chart of wall time + probe time dots. Added 'timing' chart type to clawsta-publish.mjs with live stats caption. Round-robin now cycles through 4 chart types. Verified: chart generates 33KB PNG."
+      }
     },
     {
       "id": "wq-703",

@@ -298,12 +298,156 @@ export function generateKnowledgeChart(outFile) {
   return runConvert(args, dest);
 }
 
+// Load probe timing data from liveness-timing JSON files
+function loadProbeTimingData(window = 10) {
+  const TIMING_DIR = join(process.env.HOME || "/home/moltbot", ".config/moltbook");
+  const files = {
+    engagement: join(TIMING_DIR, "liveness-timing.json"),
+    service: join(TIMING_DIR, "service-liveness-timing.json"),
+  };
+
+  function loadEntries(path) {
+    try { return JSON.parse(readFileSync(path, "utf8")).entries || []; }
+    catch { return []; }
+  }
+
+  const result = {};
+  for (const [key, path] of Object.entries(files)) {
+    const entries = loadEntries(path).slice(-window);
+    if (entries.length === 0) continue;
+    const walls = entries.map(e => e.wallMs);
+    const probeAvgs = entries.map(e => e.avgMs);
+    const sorted = [...walls].sort((a, b) => a - b);
+    const probeSorted = [...probeAvgs].sort((a, b) => a - b);
+    result[key] = {
+      entries,
+      count: entries.length,
+      avgWallMs: Math.round(walls.reduce((a, b) => a + b, 0) / walls.length),
+      p95WallMs: sorted[Math.floor(sorted.length * 0.95)] || 0,
+      avgProbeMs: Math.round(probeAvgs.reduce((a, b) => a + b, 0) / probeAvgs.length),
+      p95ProbeMs: probeSorted[Math.floor(probeSorted.length * 0.95)] || 0,
+    };
+  }
+  return result;
+}
+
+// Generate probe timing chart — wall time + avg probe time sparklines (wq-687)
+export function generateProbeTimingChart(outFile) {
+  const data = loadProbeTimingData(10);
+  const sources = Object.entries(data);
+  if (!sources.length) return null;
+
+  // Merge all entries for the chart, sorted by session
+  const allEntries = sources.flatMap(([src, d]) => d.entries.map(e => ({ ...e, source: src })));
+  allEntries.sort((a, b) => (a.session || 0) - (b.session || 0));
+  if (!allEntries.length) return null;
+
+  const W = 800, H = 450;
+  const chartL = 80, chartR = W - 40, chartT = 90, chartB = 340;
+  const chartW = chartR - chartL, chartH = chartB - chartT;
+
+  const maxWall = Math.max(...allEntries.map(e => e.wallMs), 1000);
+  const maxProbe = Math.max(...allEntries.map(e => e.avgMs), 100);
+
+  // Use wall time scale for left axis, probe time for right axis
+  const scaleW = chartH / maxWall;
+  const scaleP = chartH / maxProbe;
+
+  const args = ["-size", `${W}x${H}`, "xc:none"];
+  args.push("-fill", C.bg, "-draw", `rectangle 0,0 ${W},${H}`);
+
+  // Title
+  args.push("-fill", C.text, "-font", "Courier", "-pointsize", "20",
+    "-draw", `text ${chartL},35 'Probe Timing Trends'`);
+
+  // Subtitle with stats
+  const engStats = data.engagement;
+  const svcStats = data.service;
+  const subtitle = [
+    engStats ? `Engagement: avg ${engStats.avgWallMs}ms wall, ${engStats.avgProbeMs}ms/probe` : null,
+    svcStats ? `Service: avg ${svcStats.avgWallMs}ms wall, ${svcStats.avgProbeMs}ms/probe` : null,
+  ].filter(Boolean).join(" | ");
+  args.push("-fill", C.textDim, "-pointsize", "11",
+    "-draw", `text ${chartL},55 '${subtitle.slice(0, 90)}'`);
+
+  // Y-axis (wall time) labels
+  const ySteps = 5;
+  for (let i = 0; i <= ySteps; i++) {
+    const val = Math.round(maxWall / ySteps * i);
+    const y = chartB - (i / ySteps * chartH);
+    args.push("-fill", C.textDim, "-pointsize", "10",
+      "-draw", `text 5,${Math.round(y + 4)} '${val}ms'`);
+    args.push("-stroke", C.accentAlt, "-strokewidth", "1",
+      "-draw", `line ${chartL},${Math.round(y)} ${chartR},${Math.round(y)}`);
+    args.push("-stroke", "none");
+  }
+
+  // Plot entries as bars (wall time) + dots (avg probe time)
+  const barW = Math.min(Math.floor(chartW / allEntries.length) - 4, 30);
+  const gap = Math.max(Math.floor((chartW - barW * allEntries.length) / allEntries.length), 2);
+
+  allEntries.forEach((e, i) => {
+    const x = chartL + i * (barW + gap);
+    const wallH = e.wallMs * scaleW;
+    const barColor = e.source === "engagement" ? C.blue : C.green;
+
+    // Wall time bar
+    args.push("-fill", barColor,
+      "-draw", `rectangle ${x},${Math.round(chartB - wallH)} ${x + barW},${chartB}`);
+
+    // Avg probe time dot (on right-axis scale)
+    const probeY = chartB - e.avgMs * scaleP;
+    args.push("-fill", C.accent,
+      "-draw", `circle ${x + barW / 2},${Math.round(probeY)} ${x + barW / 2 + 3},${Math.round(probeY)}`);
+
+    // Session label
+    const label = `s${String(e.session || 0).slice(-3)}`;
+    args.push("-fill", C.textDim, "-pointsize", "8",
+      "-draw", `text ${x},${chartB + 14} '${label}'`);
+  });
+
+  // Right Y-axis label (probe time)
+  args.push("-fill", C.accent, "-pointsize", "10",
+    "-draw", `text ${chartR - 60},${chartT - 8} 'avg probe ms'`);
+
+  // Legend
+  const ly = H - 30;
+  [
+    { label: "Engagement wall", color: C.blue },
+    { label: "Service wall", color: C.green },
+    { label: "Avg probe", color: C.accent },
+  ].forEach((item, i) => {
+    const lx = chartL + i * 180;
+    args.push("-fill", item.color,
+      "-draw", `rectangle ${lx},${ly - 8} ${lx + 10},${ly + 2}`);
+    args.push("-fill", C.textDim, "-pointsize", "11",
+      "-draw", `text ${lx + 16},${ly} '${item.label}'`);
+  });
+
+  // P95 labels
+  const p95Y = H - 55;
+  const p95Parts = [];
+  if (engStats) p95Parts.push(`Eng p95: ${engStats.p95WallMs}ms wall, ${engStats.p95ProbeMs}ms probe`);
+  if (svcStats) p95Parts.push(`Svc p95: ${svcStats.p95WallMs}ms wall, ${svcStats.p95ProbeMs}ms probe`);
+  args.push("-fill", C.textDim, "-pointsize", "10",
+    "-draw", `text ${chartL},${p95Y} '${p95Parts.join(" | ").slice(0, 100)}'`);
+
+  // Branding
+  args.push("-fill", C.textDim, "-pointsize", "11",
+    "-draw", `text ${W - 185},${H - 10} '@moltbook | terminalcraft.xyz'`);
+
+  const dest = outFile || join(OUT_DIR, "probe-timing.png");
+  args.push(dest);
+  return runConvert(args, dest);
+}
+
 // Generate all charts
 export function generateAll() {
   const results = [];
   try { results.push({ type: "session-costs", path: generateSessionChart() }); } catch (e) { results.push({ type: "session-costs", error: e.message }); }
   try { results.push({ type: "platform-health", path: generatePlatformHeatmap() }); } catch (e) { results.push({ type: "platform-health", error: e.message }); }
   try { results.push({ type: "knowledge-stats", path: generateKnowledgeChart() }); } catch (e) { results.push({ type: "knowledge-stats", error: e.message }); }
+  try { results.push({ type: "probe-timing", path: generateProbeTimingChart() }); } catch (e) { results.push({ type: "probe-timing", error: e.message }); }
   return results;
 }
 
@@ -319,8 +463,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.log(generatePlatformHeatmap());
   } else if (type === "knowledge") {
     console.log(generateKnowledgeChart());
+  } else if (type === "timing") {
+    console.log(generateProbeTimingChart());
   } else {
-    console.error("Usage: node clawsta-image-gen.mjs [all|session|health|knowledge]");
+    console.error("Usage: node clawsta-image-gen.mjs [all|session|health|knowledge|timing]");
     process.exit(1);
   }
 }

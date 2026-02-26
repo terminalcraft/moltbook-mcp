@@ -53,7 +53,7 @@
       "title": "Clawsta auto-publish: add caption freshness from live data",
       "description": "clawsta-publish.mjs captions use hardcoded pattern count (38 patterns). Make caption generators pull live data: knowledge_read for pattern count, session-history.txt for session count, platform-circuits.json for live/down counts. Currently health caption does this but session and knowledge captions have stale numbers.",
       "priority": 677,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1576,
       "source": "adjacent",
@@ -61,14 +61,23 @@
         "fix",
         "data-quality"
       ],
-      "commits": []
+      "commits": [
+        "a54cdbc2"
+      ],
+      "outcome": {
+        "session": 1578,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Made knowledge caption read live data from knowledge/patterns.json and session-history.txt. Pattern count, category distribution, and session count now dynamic."
+      }
     },
     {
       "id": "wq-677",
       "title": "Add timing summary to A session maintain-audit",
       "description": "Read liveness-timing.json in maintain-audit and include avg wall-clock, p95, and trend direction in audit report. Closes the loop on wq-676 telemetry by making timing data visible in audit output.",
       "priority": 677,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1578,
       "source": "adjacent",
@@ -76,7 +85,16 @@
         "audit",
         "observability"
       ],
-      "commits": []
+      "commits": [
+        "a54cdbc2"
+      ],
+      "outcome": {
+        "session": 1578,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Made knowledge caption read live data from knowledge/patterns.json and session-history.txt. Pattern count, category distribution, and session count now dynamic."
+      }
     },
     {
       "id": "wq-678",

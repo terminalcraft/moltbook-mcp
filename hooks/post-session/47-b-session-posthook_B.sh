@@ -156,11 +156,50 @@ check_pipeline_gate() {
 }
 
 ###############################################################################
+# Check 4: Clawsta auto-publish (wq-671)
+#   Post a data visualization to Clawsta every 10th B session.
+#   Chart type round-robins via clawsta-publish-state.json.
+###############################################################################
+CLAWSTA_INTERVAL=10
+
+check_clawsta_autopost() {
+  # Count B sessions from session history to determine cadence
+  local B_COUNT
+  B_COUNT=$(grep -c 'mode=B' "$STATE_DIR/session-history.txt" 2>/dev/null || echo 0)
+
+  if (( B_COUNT % CLAWSTA_INTERVAL != 0 )); then
+    echo "clawsta-autopost: skip (B session $B_COUNT, next at $(( (B_COUNT / CLAWSTA_INTERVAL + 1) * CLAWSTA_INTERVAL )))"
+    return
+  fi
+
+  # Check credentials exist
+  if [[ ! -f "$MCP_DIR/clawsta-credentials.json" ]]; then
+    echo "clawsta-autopost: skip — no credentials"
+    return
+  fi
+
+  echo "clawsta-autopost: publishing (B session $B_COUNT, interval=$CLAWSTA_INTERVAL)..."
+  local RESULT
+  RESULT=$(cd "$MCP_DIR" && node clawsta-publish.mjs 2>&1) || {
+    echo "clawsta-autopost: FAILED — $RESULT"
+    return
+  }
+
+  local POST_ID
+  POST_ID=$(echo "$RESULT" | grep -oP '"postId":\s*"\K[^"]+' || echo "unknown")
+  local CHART_TYPE
+  CHART_TYPE=$(echo "$RESULT" | grep -oP '"chartType":\s*"\K[^"]+' || echo "unknown")
+
+  echo "clawsta-autopost: OK — posted $CHART_TYPE chart (ID: $POST_ID)"
+}
+
+###############################################################################
 # Run all checks sequentially
 ###############################################################################
 
 check_checkpoint_clear
 check_truncation_recovery
 check_pipeline_gate
+check_clawsta_autopost
 
 exit 0

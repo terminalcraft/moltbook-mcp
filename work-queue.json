@@ -74,6 +74,22 @@
         "automation"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-672",
+      "title": "Exclude shell comment lines from stale-ref checker",
+      "description": "stale-ref-check.sh flags 7 false positives from shell comment lines in 36-e-session-posthook_E.sh that document which hooks it replaced. Same class of false positive as wq-663 (prose fields in JSON). Add exclusion for lines starting with # in .sh files when checking for deleted file references.",
+      "priority": 672,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1570,
+      "source": "audit-s1570",
+      "tags": [
+        "audit",
+        "infrastructure",
+        "hooks"
+      ],
+      "commits": []
     }
   ]
 }

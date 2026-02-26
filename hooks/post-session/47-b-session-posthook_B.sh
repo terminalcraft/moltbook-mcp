@@ -147,6 +147,11 @@ check_pipeline_gate() {
   if [[ "$BRAIN_CHANGED" -eq 0 && "$WQ_CHANGED" -eq 0 ]]; then
     echo "pipeline-gate: WARN — B session s${SESSION_NUM} consumed queue without contributing. Pending: ${PENDING}"
     echo "WARN: B session s${SESSION_NUM} consumed queue without pipeline contribution (pending: ${PENDING})" >> "$AUDIT_LOG" 2>/dev/null
+    # Auto-remediation: append a pipeline-debt marker to BRAINSTORMING.md so next session replenishes
+    if [[ -f "$BRAIN" ]]; then
+      echo "- **[pipeline-debt from s${SESSION_NUM}]** (added ~s${SESSION_NUM}): Previous session consumed queue items without contributing replacements. Next B session should add a real idea here and remove this marker." >> "$BRAIN"
+      echo "pipeline-gate: auto-remediation — added pipeline-debt marker to BRAINSTORMING.md"
+    fi
   elif [[ "$PENDING" -lt 5 ]]; then
     echo "pipeline-gate: WARN — pipeline low after B session s${SESSION_NUM}. Pending: ${PENDING} (target: >=5)"
     echo "WARN: Pipeline low after B#s${SESSION_NUM}: ${PENDING} pending (target >=5)" >> "$AUDIT_LOG" 2>/dev/null

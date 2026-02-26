@@ -19,6 +19,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Add tests for engagement-trace.json**~~ → completed wq-660 (s1558): 7 tests for trace archiving, dedup, session backfill
 - ~~**Probe-depth cron integration**~~ → completed wq-659 (s1561): wired service-liveness --depth --update into cron-platform-probe.sh
 - **Platform capability matrix endpoint** (added ~s1545): expose a /platforms API endpoint that returns all platforms with their probe-depth, liveness status, and last engagement time. Useful for other agents querying our platform knowledge.
+- **Consolidate B-session post-hooks** (added ~s1566): Same pattern as wq-662 for E sessions. 47-checkpoint-clear_B and 48-truncation-recovery_B are small but the pattern could extend to 28-pattern-analytics_B and other session-typed hooks. Reduces hook invocation overhead further.
 - **Cron probe health dashboard** (added ~s1561): cron-platform-probe.sh now runs 3 probes (batch, liveness, depth). Add a /cron-health endpoint or status file that tracks last-run timestamp, success/failure per step, and total runtime. Helps diagnose when probes silently fail.
 - ~~**Knowbster collection analytics**~~ → promoted to wq-667
 

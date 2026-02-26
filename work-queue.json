@@ -5,7 +5,7 @@
       "title": "Consolidate E-session post-hooks into single dispatcher",
       "description": "7 E-session-only post-hooks (36-intel-checkpoint, 37-d049-enforcement, 38-early-exit, 39-note-fallback, 40-trace-fallback, 41-quality-audit, 42-quality-enforce) total ~900 lines with repeated session-type guards and JSON parsing. Merge into a single e-session-posthook.sh dispatcher that parses engagement-trace.json once and runs all checks sequentially. Reduces hook count and startup overhead.",
       "priority": 662,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-25",
       "created_session": 1549,
       "source": "brainstorming",
@@ -13,7 +13,16 @@
         "infrastructure",
         "hooks"
       ],
-      "commits": []
+      "commits": [
+        "61decc68"
+      ],
+      "outcome": {
+        "session": 1566,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Consolidated 7 E-session hooks into single dispatcher. 44\u219237 hooks, 1071\u2192843 lines, JSON parsed once instead of up to 14x. Tested with s1562 mock data."
+      }
     },
     {
       "id": "wq-664",
@@ -42,12 +51,11 @@
         "intel"
       ],
       "commits": []
-    }
-    ,
+    },
     {
       "id": "wq-667",
       "title": "Knowbster collection analytics",
-      "description": "Track published collection performance — which bundles sell, individual vs collection purchase rates. Add --analytics flag to knowbster-collection.mjs that queries Knowbster API for sales data on published collections and their member patterns.",
+      "description": "Track published collection performance \u2014 which bundles sell, individual vs collection purchase rates. Add --analytics flag to knowbster-collection.mjs that queries Knowbster API for sales data on published collections and their member patterns.",
       "priority": 667,
       "status": "pending",
       "added": "2026-02-26",

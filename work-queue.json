@@ -63,7 +63,7 @@
       "title": "Stale-ref checker: exclude markdown code fences and blockquotes",
       "description": "stale-ref-check.sh now handles JSON prose fields (wq-663) and shell comments (wq-672), but .md files can also produce false positives from code fences (``` blocks) and blockquotes (> lines) that reference deleted files as documentation. Add exclusion for lines inside fenced code blocks and lines starting with > in .md files.",
       "priority": 673,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1571,
       "source": "adjacent-improvement",
@@ -71,7 +71,14 @@
         "infrastructure",
         "hooks"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1576,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added .md file handling to is_structural_ref(): filters lines inside fenced code blocks (via awk) and blockquote lines (> prefix). Verified: syntax OK, full checker runs clean, awk fence detection tested."
+      }
     },
     {
       "id": "wq-675",

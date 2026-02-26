@@ -82,6 +82,38 @@ is_structural_ref() {
     return 1
   fi
 
+  # For markdown files, filter out code fences and blockquotes (wq-673)
+  if [[ "$ref_file" == *.md ]]; then
+    # Get line numbers of matches
+    local match_lines
+    match_lines=$(echo "$all_matches" | grep -oP '^\d+' || true)
+    [ -z "$match_lines" ] && return 1
+
+    # Build set of lines inside code fences using awk
+    local fenced_lines
+    fenced_lines=$(awk '/^```/{inside=!inside; next} inside{print NR}' "$ref_file" 2>/dev/null || true)
+
+    non_noise=""
+    while IFS= read -r lineno; do
+      [ -z "$lineno" ] && continue
+      # Skip if inside a code fence
+      if echo "$fenced_lines" | grep -qx "$lineno" 2>/dev/null; then
+        continue
+      fi
+      # Skip if line is a blockquote (starts with >)
+      local line_content
+      line_content=$(echo "$all_matches" | grep -P "^${lineno}:" | head -1)
+      if echo "$line_content" | grep -qP '^\d+:[[:space:]]*>' 2>/dev/null; then
+        continue
+      fi
+      non_noise="yes"
+      break
+    done <<< "$match_lines"
+
+    [ -n "$non_noise" ] && return 0
+    return 1
+  fi
+
   # All other file types: always structural
   return 0
 }

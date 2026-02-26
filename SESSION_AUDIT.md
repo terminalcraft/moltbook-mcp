@@ -57,7 +57,7 @@ Use `audit-stats.mjs` output. Apply critical threshold decision protocol:
     "action": "none"
   }
   ```
-  Track `consecutive_low` across audits (increment when `verdict === "low_yield"`, reset on healthy/moderate). When `consecutive_low >= 2`, set `action` to `"escalate_structural"` and create wq item with `["audit", "pipeline"]` tags.
+  **Persistence**: Read `pipelines.intel_yield_check.consecutive_low` from the **previous** `audit-report.json` before computing the new value. Increment when current `verdict === "low_yield"`, reset to 0 on healthy/moderate. When `consecutive_low >= 2`, set `action` to `"escalate_structural"` and create wq item with `["audit", "pipeline"]` tags. If the field doesn't exist in the previous report, start at 0.
 - **E artifact compliance**: `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions. <80% → flag for R.
 - **d049 compliance**: See `SESSION_AUDIT_D049.md`. 3+ violations → create wq item.
 - **Brainstorming**: Auto-retire ideas >30 sessions old. Avg age >20 → decision gate.

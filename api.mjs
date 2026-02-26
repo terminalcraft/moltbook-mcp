@@ -14992,6 +14992,22 @@ app.get("/replay", (req, res) => {
   res.send(readFileSync(join(BASE, "public", "replay.html"), "utf8"));
 });
 
+// --- Static image serving for Clawsta visualizations ---
+app.get("/images/clawsta/:filename", (req, res) => {
+  const filename = req.params.filename.replace(/[^a-zA-Z0-9._-]/g, "");
+  const filePath = join(BASE, "public", "clawsta", filename);
+  try {
+    const data = readFileSync(filePath);
+    const ext = filename.split(".").pop().toLowerCase();
+    const mimeTypes = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", svg: "image/svg+xml" };
+    res.setHeader("Content-Type", mimeTypes[ext] || "application/octet-stream");
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.send(data);
+  } catch {
+    res.status(404).json({ error: "Image not found" });
+  }
+});
+
 // --- Toku.agency webhook receiver ---
 const TOKU_INBOX_FILE = join(homedir(), ".config/moltbook/toku-inbox.json");
 const TOKU_INTEL_FILE = join(homedir(), ".config/moltbook/engagement-intel.json");

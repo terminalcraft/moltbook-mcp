@@ -75,7 +75,7 @@
       "title": "Add B session pipeline gate pre-session nudge hook",
       "description": "When pipeline gate violations >= 3 (from b_pipeline_gate in audit-stats.mjs), inject a warning into B session startup context. Add a pre-session hook (e.g. 50-pipeline-nudge_B.sh) that reads maintain-audit.txt for WARN entries and prints a reminder. Promotes from brainstorming idea added s1591.",
       "priority": 696,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1591,
       "source": "brainstorming",
@@ -83,7 +83,16 @@
         "hooks",
         "pipeline"
       ],
-      "commits": []
+      "commits": [
+        "bf359054"
+      ],
+      "outcome": {
+        "session": "s1592",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Created 49-pipeline-nudge_B.sh hook that warns when violation_count >= 3"
+      }
     },
     {
       "id": "wq-697",
@@ -121,6 +130,21 @@
       "tags": [
         "audit",
         "bootstrap"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-699",
+      "title": "Add configurable violation threshold to pipeline nudge hook",
+      "description": "49-pipeline-nudge_B.sh hardcodes threshold at 3. Consider making it configurable via an env var or config file so R sessions can tune the sensitivity without editing the hook. Low priority — current hardcoded value matches SESSION_AUDIT.md threshold.",
+      "priority": 699,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1592,
+      "source": "adjacent",
+      "tags": [
+        "hooks",
+        "config"
       ],
       "commits": []
     }

@@ -50,10 +50,11 @@ function extractEngagedPlatforms(trace) {
     return [];
   }
 
-  // Check platforms_engaged array (common format)
+  // Check platforms_engaged array (string or object format)
   if (trace.platforms_engaged && Array.isArray(trace.platforms_engaged)) {
     for (const p of trace.platforms_engaged) {
-      engaged.add(p.toLowerCase());
+      if (typeof p === 'string') engaged.add(p.toLowerCase());
+      else if (p && p.platform) engaged.add(p.platform.toLowerCase());
     }
   }
 
@@ -87,8 +88,8 @@ function extractEngagedPlatforms(trace) {
     }
   }
 
-  // Check threads_contributed array
-  if (trace.threads_contributed) {
+  // Check threads_contributed array (skip if number)
+  if (trace.threads_contributed && Array.isArray(trace.threads_contributed)) {
     for (const t of trace.threads_contributed) {
       if (t.platform) engaged.add(t.platform.toLowerCase());
     }

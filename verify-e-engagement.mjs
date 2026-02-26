@@ -88,7 +88,9 @@ if (!existsSync(TRACE_FILE)) {
     } else {
       // Cross-verify: trace platforms should match logged engagement platforms
       const loggedPlatforms = [...new Set(engagements.map(e => e.platform))];
-      const tracePlatforms = traceEntry.platforms_engaged || [];
+      const tracePlatforms = (traceEntry.platforms_engaged || []).map(tp =>
+        typeof tp === 'string' ? tp : (tp && tp.platform ? tp.platform : '')
+      );
 
       const missingFromTrace = loggedPlatforms.filter(p =>
         !tracePlatforms.some(tp => tp.toLowerCase().includes(p.toLowerCase()) ||

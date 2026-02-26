@@ -11,7 +11,7 @@ set -euo pipefail
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 BRAINSTORM="$DIR/BRAINSTORMING.md"
 SESSION=${SESSION_NUM:-0}
-CURRENT_MODE="${MODE:-B}"
+CURRENT_MODE="${MODE_CHAR:-B}"
 
 if [ ! -f "$BRAINSTORM" ]; then
   exit 0
@@ -94,14 +94,14 @@ console.log(retiredIdeas + ',' + retiredObs);
 fi
 
 # --- Phase 1: Strip struck-through lines (all sessions) ---
-struck=$(grep -cE '^\s*-\s*~~' "$BRAINSTORM" 2>/dev/null || echo 0)
+struck=$(grep -cE '^\s*-\s*~~.*~~' "$BRAINSTORM" 2>/dev/null) || struck=0
 
 if [ "$struck" -eq 0 ]; then
   exit 0
 fi
 
-# Remove lines that are entirely struck-through entries (- ~~...~~)
-sed -i '/^\s*-\s*~~.*~~\s*$/d' "$BRAINSTORM"
+# Remove lines with struck-through entries (- ~~...~~ with any trailing content)
+sed -i '/^\s*-\s*~~.*~~/d' "$BRAINSTORM"
 
 # Clean up any resulting double-blank-lines
 sed -i '/^$/N;/^\n$/d' "$BRAINSTORM"

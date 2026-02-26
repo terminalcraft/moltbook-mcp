@@ -90,13 +90,35 @@
       "title": "E session scope-bleed prevention hook",
       "description": "Add a post-session hook for E sessions that checks git log for commits made during the session. If build commits > 0, log a warning to session notes and append scope-bleed flag to session-history.txt. This is proactive prevention complementing wq-711 reactive detection.",
       "priority": 712,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1607,
       "source": "adjacent",
       "tags": [
         "hooks",
         "cost"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1607,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Post-session hook 37-scope-bleed-detect_E.sh. Checks git log for non-snapshot commits during E sessions, logs warning."
+      }
+    },
+    {
+      "id": "wq-713",
+      "title": "E session scope-bleed root cause analysis tool",
+      "description": "Build a diagnostic script that analyzes WHY scope bleed happened in a given E session — parse the git diff to categorize commits as bug-fix (reactive), feature (proactive), or config (accidental). Output helps audit distinguish justified emergency fixes from discipline failures. Extend computeEScopeBleed() with commit categorization.",
+      "priority": 713,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1607,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "tooling"
       ],
       "commits": []
     }

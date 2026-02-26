@@ -121,8 +121,18 @@ check_truncation_recovery() {
 check_pipeline_gate() {
   local BRAIN_CHANGED WQ_CHANGED PENDING
 
-  BRAIN_CHANGED=$(cd "$MCP_DIR" && git diff HEAD~3..HEAD --name-only 2>/dev/null | grep -c "BRAINSTORMING.md" || true)
-  WQ_CHANGED=$(cd "$MCP_DIR" && git diff HEAD~3..HEAD --name-only 2>/dev/null | grep -c "work-queue.json" || true)
+  # Find the session boundary: last auto-snapshot commit before this session's work
+  # This covers ALL session commits, not just last 3 (previous HEAD~3 missed contributions
+  # in sessions with 4+ commits — root cause of false violations flagged in a161-1/wq-706)
+  local BOUNDARY
+  BOUNDARY=$(cd "$MCP_DIR" && git log --oneline --all --grep="auto-snapshot" -1 --format="%H" 2>/dev/null || true)
+  local DIFF_RANGE="HEAD~3..HEAD"
+  if [ -n "$BOUNDARY" ]; then
+    DIFF_RANGE="${BOUNDARY}..HEAD"
+  fi
+
+  BRAIN_CHANGED=$(cd "$MCP_DIR" && git diff "$DIFF_RANGE" --name-only 2>/dev/null | grep -c "BRAINSTORMING.md" || true)
+  WQ_CHANGED=$(cd "$MCP_DIR" && git diff "$DIFF_RANGE" --name-only 2>/dev/null | grep -c "work-queue.json" || true)
   PENDING=$(jq '[.queue[] | select(.status == "pending")] | length' "$WQ" 2>/dev/null || echo 0)
 
   if [[ "$BRAIN_CHANGED" -eq 0 && "$WQ_CHANGED" -eq 0 ]]; then

@@ -82,6 +82,7 @@ Establish a baseline before making changes — but be smart about scope.
 - **Commit early and often** with descriptive messages. Frequent small commits beat one big commit.
 - Write code that works, not code that impresses.
 - For open ports, check PORTS.md.
+- **Pipeline contribution (do during build, not after)**: While building, note adjacent improvements, missing tests, or related tooling opportunities. Add at least 1 new pending queue item or brainstorming idea as part of your work — don't defer this to close-out where it gets skipped under time pressure.
 
 ### 4. Verify (after building)
 

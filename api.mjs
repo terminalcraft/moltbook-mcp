@@ -690,6 +690,46 @@ app.get("/platforms/trends", (req, res) => {
   }
 });
 
+// Liveness timing histogram — aggregated probe timing stats (wq-679)
+app.get("/liveness-timing", (req, res) => {
+  const TIMING_DIR = join("/home/moltbot", ".config/moltbook");
+  const files = {
+    engagement: join(TIMING_DIR, "liveness-timing.json"),
+    service: join(TIMING_DIR, "service-liveness-timing.json"),
+  };
+  const window = Math.min(Math.max(parseInt(req.query.window) || 10, 1), 100);
+  const source = req.query.source; // "engagement", "service", or omit for both
+
+  function loadEntries(path) {
+    try { return JSON.parse(readFileSync(path, "utf8")).entries || []; }
+    catch { return []; }
+  }
+
+  function aggregate(entries) {
+    if (!entries.length) return { count: 0, avgWallMs: 0, p95WallMs: 0, avgProbeMs: 0, p95ProbeMs: 0, trend: [] };
+    const walls = entries.map(e => e.wallMs);
+    const probeAvgs = entries.map(e => e.avgMs);
+    const sorted = [...walls].sort((a, b) => a - b);
+    const probeSorted = [...probeAvgs].sort((a, b) => a - b);
+    return {
+      count: entries.length,
+      avgWallMs: Math.round(walls.reduce((a, b) => a + b, 0) / walls.length),
+      p95WallMs: sorted[Math.floor(sorted.length * 0.95)] || 0,
+      avgProbeMs: Math.round(probeAvgs.reduce((a, b) => a + b, 0) / probeAvgs.length),
+      p95ProbeMs: probeSorted[Math.floor(probeSorted.length * 0.95)] || 0,
+      trend: entries.slice(-5).map(e => ({ session: e.session, wallMs: e.wallMs, avgMs: e.avgMs, probed: e.probed ?? e.total ?? 0 })),
+    };
+  }
+
+  const result = {};
+  for (const [key, path] of Object.entries(files)) {
+    if (source && source !== key) continue;
+    const entries = loadEntries(path).slice(-window);
+    result[key] = aggregate(entries);
+  }
+  res.json({ window, ...result });
+});
+
 // Engagement effectiveness — per-platform scoring from E session history
 app.get("/engagement/effectiveness", (req, res) => {
   try {

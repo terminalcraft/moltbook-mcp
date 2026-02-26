@@ -10,6 +10,10 @@
 #   of 30. Directives with from="system" are ongoing monitors (e.g. d049 intel
 #   minimum) that only need periodic "still healthy" notes, not active work.
 #   This eliminates false staleness alerts that create busywork for R sessions.
+# Updated R#278: scoped directives (with scope field like d067, d068) are
+#   standing behavioral rules enforced by session-type behavior. They use a
+#   50-session staleness threshold and don't trigger NEEDS_UPDATE for missing
+#   queue items — only for missing review notes.
 #
 # Output: ~/.config/moltbook/directive-status.txt
 # Categories: NEEDS_UPDATE, STALE, PENDING_QUESTION, HEALTHY
@@ -73,16 +77,26 @@ HEALTHY=0
 
 # Check active directives - now include notes field
 # Use tab as delimiter since notes often contain | characters
-while IFS=$'\t' read -r ID STATUS ACKED NOTES CONTENT FROM; do
+while IFS=$'\t' read -r ID STATUS ACKED NOTES CONTENT FROM SCOPE; do
   [ -z "$ID" ] && continue
   [ "$STATUS" != "active" ] && continue
 
-  # System/monitoring directives get higher staleness threshold (60 vs 30)
-  # because they are ongoing monitors that need periodic "still healthy" notes
-  # rather than active work toward completion.
+  # Threshold tiers by directive type:
+  # - system: ongoing monitors (d049), need periodic "still healthy" notes
+  # - scoped: standing behavioral rules with scope field (d067, d068),
+  #   don't need queue items — they're enforced by session-type behavior
+  # - default: task-oriented directives that should have queue items
+  HAS_SCOPE="no"
+  if [ -n "$SCOPE" ] && [ "$SCOPE" != "null" ]; then
+    HAS_SCOPE="yes"
+  fi
+
   if [ "$FROM" = "system" ]; then
     STALE_THRESHOLD=60
     NEEDS_UPDATE_THRESHOLD=40
+  elif [ "$HAS_SCOPE" = "yes" ]; then
+    STALE_THRESHOLD=50
+    NEEDS_UPDATE_THRESHOLD=35
   else
     STALE_THRESHOLD=30
     NEEDS_UPDATE_THRESHOLD=20
@@ -124,13 +138,15 @@ while IFS=$'\t' read -r ID STATUS ACKED NOTES CONTENT FROM; do
   if [ "$SESSIONS_SINCE" -gt "$STALE_THRESHOLD" ]; then
     echo "STALE: $ID (${SESSIONS_SINCE} sessions since s${LAST_ACTIVITY}, threshold=${STALE_THRESHOLD}) - $CONTENT_SHORT..." >> "$STATUS_FILE"
     NEEDS_ATTENTION=$((NEEDS_ATTENTION + 1))
-  elif [ "$SESSIONS_SINCE" -gt "$NEEDS_UPDATE_THRESHOLD" ] && [ "$HAS_QUEUE" = "no" ]; then
+  elif [ "$SESSIONS_SINCE" -gt "$NEEDS_UPDATE_THRESHOLD" ] && [ "$HAS_QUEUE" = "no" ] && [ "$HAS_SCOPE" = "no" ]; then
     echo "NEEDS_UPDATE: $ID (${SESSIONS_SINCE} sessions, no queue item, threshold=${NEEDS_UPDATE_THRESHOLD}) - $CONTENT_SHORT..." >> "$STATUS_FILE"
+  elif [ "$SESSIONS_SINCE" -gt "$NEEDS_UPDATE_THRESHOLD" ] && [ "$HAS_SCOPE" = "yes" ]; then
+    echo "NEEDS_UPDATE: $ID (${SESSIONS_SINCE} sessions, standing/scope=$SCOPE, threshold=${NEEDS_UPDATE_THRESHOLD}) - $CONTENT_SHORT..." >> "$STATUS_FILE"
     NEEDS_ATTENTION=$((NEEDS_ATTENTION + 1))
   else
     HEALTHY=$((HEALTHY + 1))
   fi
-done < <(jq -r '.directives[] | select(.status == "active") | [.id, .status, (.acked_session // "null" | tostring), (.notes // ""), (.content // ""), (.from // "human")] | @tsv' "$DIRECTIVES_FILE" 2>/dev/null)
+done < <(jq -r '.directives[] | select(.status == "active") | [.id, .status, (.acked_session // "null" | tostring), (.notes // ""), (.content // ""), (.from // "human"), (.scope // "null")] | @tsv' "$DIRECTIVES_FILE" 2>/dev/null)
 
 # Check pending questions
 PENDING_Q=$(jq -r '.questions[] | select(.status == "pending") | "\(.id): \(.question | .[0:50])..."' "$DIRECTIVES_FILE" 2>/dev/null || true)

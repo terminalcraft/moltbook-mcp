@@ -184,8 +184,16 @@ const results = [];
 const total = services.length;
 let done = 0;
 
+// wq-668: Hard global timeout — force exit if probes hang (same pattern as engagement-liveness)
+const GLOBAL_TIMEOUT = 8000;
+const forceExitTimer = setTimeout(() => {
+  process.stderr.write(`[!] Hard timeout (${GLOBAL_TIMEOUT}ms) — force exiting\n`);
+  process.exit(0);
+}, GLOBAL_TIMEOUT);
+
 // wq-598: Batch probes with Promise.allSettled for concurrency (was sequential)
-const CONCURRENCY = 10;
+// wq-668: Increased from 10→20 to reduce batch count (37 services = 2 batches instead of 4)
+const CONCURRENCY = 20;
 for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
   const slice = services.slice(batch, batch + CONCURRENCY);
   const checks = await Promise.allSettled(
@@ -249,6 +257,7 @@ for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
     }
   }
 }
+clearTimeout(forceExitTimer);
 
 // Summary
 const alive = results.filter(r => r.liveness === "alive").length;

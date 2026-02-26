@@ -22,7 +22,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Consolidate B-session post-hooks**~~ → promoted to wq-670
 - **Cron probe health dashboard** (added ~s1561): cron-platform-probe.sh now runs 3 probes (batch, liveness, depth). Add a /cron-health endpoint or status file that tracks last-run timestamp, success/failure per step, and total runtime. Helps diagnose when probes silently fail.
 - ~~**Knowbster collection analytics**~~ → completed wq-667 (s1573)
-- **Liveness probe timing telemetry** (added ~s1573): Log actual probe wall-clock times to a file (liveness-timing.json) during cache misses. This would let A sessions track whether the wq-668 optimizations (concurrency 10→20, timeout 12→9s) actually reduced average run time. Currently rely on maintain-audit estimates which sample infrequently.
+- ~~**Liveness probe timing telemetry**~~ → promoted to wq-676
 
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604 (duplicate)
 - ~~**Session cost prediction for queue loading**~~ → promoted to wq-623

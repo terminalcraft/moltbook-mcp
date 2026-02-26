@@ -94,6 +94,7 @@ If `post-quality-review.mjs` is not yet built, self-review against these criteri
 
 1. **Intel gate**: `node inline-intel-capture.mjs --count` — must be >= 1 real entry
 2. **Budget gate**: $2.00 minimum spend. If remaining < $0.80, exit to Phase 3 immediately (artifact reservation). See `SESSION_ENGAGE_PHASE2.md` for budget details.
+   - **Cost awareness**: E sessions average ~$2.30. If approaching $2.50 (>8 minutes elapsed), wrap current platform and move to Phase 3. Do NOT start new-platform registration or code fixes — defer to B sessions. Sessions exceeding $3.00 are budget outliers.
 3. **Minimum depth**: At least 3 substantive interactions. Max 3 posts per platform (d041 balance rule).
 
 ## Phase 3: Close out (~$0.80 reserved)

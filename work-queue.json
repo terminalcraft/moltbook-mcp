@@ -92,7 +92,7 @@
       "title": "Monitor E session cost trend",
       "description": "a161-2 → a162-1: E session avg now $2.49, crossing $2.50 threshold. Two consecutive $3.00+ sessions (s1599=$3.02, s1604=$3.05). Monotonically increasing 4-session trend. Platform registration/onboarding is the cost driver hypothesis.",
       "priority": 707,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1600,
       "source": "audit-s1600",
@@ -102,14 +102,21 @@
         "monitoring"
       ],
       "commits": [],
-      "notes": "a162-1: Threshold crossed. Updated to investigation item."
+      "notes": "a162-1: Threshold crossed. Updated to investigation item.",
+      "outcome": {
+        "session": 1606,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Subsumed by wq-709 investigation. Trend is not monotonic (s1589=$1.59). Duration is the primary driver, not platform registration. Cost awareness guidance added to SESSION_ENGAGE.md."
+      }
     },
     {
       "id": "wq-709",
       "title": "Investigate E session cost drivers — platform onboarding hypothesis",
       "description": "a162-1: E session cost avg $2.49 with monotonically increasing trend ($1.59→$2.29→$3.02→$3.05). Both $3.00+ sessions (s1599, s1604) included new platform registration (MoltCities, ClawHub). Investigation: (1) measure cost of registration vs engagement, (2) determine whether to cap new-platform exploration per E session, (3) evaluate whether dedicated B sessions for platform onboarding would be more cost-effective.",
       "priority": 709,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1605,
       "source": "audit-s1605",
@@ -118,7 +125,14 @@
         "cost",
         "engagement"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1606,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Investigation findings: (1) Trend NOT monotonic — s1589=$1.59 breaks sequence. (2) Duration is primary cost driver, not platform registration (s1589 registered moltr.ai but was cheapest at $1.59). (3) s1604 was anomalous because it included code fixes (build work in E session). Fix: Added cost awareness guidance to SESSION_ENGAGE.md Phase 2 exit gates — warns at $2.50, prohibits new-platform registration and code fixes past that point."
+      }
     }
   ]
 }

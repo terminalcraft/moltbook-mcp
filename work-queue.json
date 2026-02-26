@@ -89,6 +89,21 @@
         "quality": "well-scoped",
         "note": "Added PIPELINE_NUDGE_THRESHOLD env var (default: 3). R sessions can tune sensitivity without editing the hook."
       }
+    },
+    {
+      "id": "wq-702",
+      "title": "Replace python3 subprocess in truncation-recovery with jq/node",
+      "description": "47-b-session-posthook_B.sh check_truncation_recovery() still uses python3 subprocess for timestamp parsing (lines 48-77). Replace with a node one-liner or jq to align with the python3→jq migration pattern (R#274/R#275). The python3 call parses JSON timestamps which node handles natively.",
+      "priority": 702,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1596,
+      "source": "adjacent",
+      "tags": [
+        "hooks",
+        "python3-migration"
+      ],
+      "commits": []
     }
   ]
 }

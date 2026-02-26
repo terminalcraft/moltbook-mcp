@@ -45,36 +45,17 @@ check_truncation_recovery() {
   # Compute duration from session log timestamps
   local DURATION=0
   if [ -n "${LOG_FILE:-}" ] && [ -f "$LOG_FILE" ]; then
-    DURATION=$(python3 -c "
-import re, sys
-from datetime import datetime
-
-try:
-    with open('$LOG_FILE', 'r') as f:
-        lines = f.readlines()
-
-    first_ts = last_ts = None
-    ts_pat = re.compile(r'\"timestamp\":\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})')
-    for line in lines[:50]:
-        m = ts_pat.search(line)
-        if m and not first_ts:
-            first_ts = m.group(1)
-            break
-    for line in reversed(lines[-50:]):
-        m = ts_pat.search(line)
-        if m:
-            last_ts = m.group(1)
-            break
-
-    if first_ts and last_ts:
-        t1 = datetime.fromisoformat(first_ts)
-        t2 = datetime.fromisoformat(last_ts)
-        print(int((t2 - t1).total_seconds()))
-    else:
-        print(999)
-except Exception:
-    print(999)
-" 2>/dev/null || echo 999)
+    DURATION=$(node -e "
+      const fs = require('fs'), data = fs.readFileSync('$LOG_FILE', 'utf8');
+      const pat = /\"timestamp\":\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/g;
+      const lines = data.split('\n');
+      let first, last;
+      for (const l of lines.slice(0, 50)) { const m = pat.exec(l); if (m) { first = m[1]; break; } }
+      pat.lastIndex = 0;
+      for (let i = lines.length - 1; i >= Math.max(0, lines.length - 50); i--) { const m = pat.exec(lines[i]); if (m) { last = m[1]; break; } pat.lastIndex = 0; }
+      if (first && last) { console.log(Math.floor((new Date(last) - new Date(first)) / 1000)); }
+      else { console.log(999); }
+    " 2>/dev/null || echo 999)
   fi
 
   # Not truncated if >= 3 minutes

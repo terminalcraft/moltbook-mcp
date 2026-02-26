@@ -49,10 +49,32 @@
       "title": "Consolidate B-session post-hooks",
       "description": "47-checkpoint-clear_B.sh and 48-truncation-recovery_B.sh are small hooks that could be merged with 49-pipeline-gate_B.sh into a single B session post-hook dispatcher (same pattern as 36-e-session-posthook_E.sh for E sessions). Reduces hook invocation overhead and makes the B post-hook pipeline easier to maintain.",
       "priority": 670,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1569,
       "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "hooks"
+      ],
+      "commits": ["3b7d66fa"],
+      "outcome": {
+        "session": 1571,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Consolidated 47/48/49 B post-hooks into 47-b-session-posthook_B.sh. Fixed grep -c || echo 0 bug from original. B post-hook count: 4→2."
+      }
+    },
+    {
+      "id": "wq-674",
+      "title": "Consolidate R-session post-hooks",
+      "description": "R-session post-hooks (if any exist with _R suffix) could follow the same consolidation pattern as E (wq-662) and B (wq-670) sessions. Check hooks/post-session/*_R.sh and merge small hooks into a single dispatcher if 3+ exist.",
+      "priority": 674,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1571,
+      "source": "adjacent-improvement",
       "tags": [
         "infrastructure",
         "hooks"

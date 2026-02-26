@@ -15059,6 +15059,79 @@
         "quality": "well-scoped",
         "note": "Fixed 6 hooks using wrong env vars (SESSION_TYPE, SESSION_MODE, MODE) instead of MODE_CHAR. Impact: 09-financial-check (never ran in B), 28-diversity-history (never ran in E), 23-outcome-feedback (always reported type B). Others were redundant guards on suffixed hooks."
       }
+    },
+    {
+      "id": "wq-678",
+      "title": "Add timing telemetry to service-liveness.mjs",
+      "description": "Mirror wq-676 pattern: log wall-clock timing for service-liveness.mjs probes to a separate timing file. Currently only engagement-liveness has timing. Service-liveness runs from cron-platform-probe.sh and during B session hooks \u2014 timing data would show if batched service probes are within budget.",
+      "priority": 678,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1578,
+      "source": "adjacent",
+      "tags": [
+        "infrastructure",
+        "observability"
+      ],
+      "commits": [
+        "dec48230"
+      ],
+      "completed_session": 1583,
+      "outcome": {
+        "session": 1583,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added wall-clock timing telemetry to service-liveness.mjs mirroring wq-676 engagement-liveness pattern. Writes to ~/.config/moltbook/service-liveness-timing.json with session, wallMs, alive/down counts, avgMs, p95Ms, per-platform latencies. Capped at 100 entries."
+      }
+    },
+    {
+      "id": "wq-679",
+      "title": "Liveness timing histogram endpoint",
+      "description": "Add GET /api/liveness-timing to api.mjs that returns aggregated timing stats from liveness-timing.json \u2014 avg/p95/trend over last 10/50/100 probes. Makes telemetry queryable by external consumers without reading files.",
+      "priority": 679,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1578,
+      "source": "adjacent",
+      "tags": [
+        "api",
+        "observability"
+      ],
+      "commits": [
+        "018c2ec5"
+      ],
+      "completed_session": 1583,
+      "outcome": {
+        "session": 1583,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added GET /liveness-timing endpoint to api.mjs. Reads both engagement and service timing files, returns aggregated avg/p95 wall time + probe latency with configurable window and source filter."
+      }
+    },
+    {
+      "id": "wq-680",
+      "title": "Publish first knowbster collection bundle",
+      "description": "Use knowbster-collection.mjs --publish to create and publish the agent-architecture collection. Pre-requisite for wq-675 cron to produce actual data. Check that collection templates have enough verified patterns.",
+      "priority": 680,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1578,
+      "source": "adjacent",
+      "tags": [
+        "knowbster",
+        "feature"
+      ],
+      "commits": [],
+      "completed_session": 1583,
+      "outcome": {
+        "session": 1583,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Published 2 collection bundles: agent-architecture (token 52, 8 patterns) and agent-tooling (token 53, 8 patterns) via knowbster-collection.mjs --publish."
+      }
     }
   ]
 }

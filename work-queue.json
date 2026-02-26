@@ -84,10 +84,33 @@
       "title": "Monitor B session pipeline gate compliance — nudge hook effectiveness",
       "description": "a161-1: Pipeline gate compliance dropped from 67% to 56% with a new post-nudge violation at s1597. The nudge hook (49-pipeline-nudge_B.sh) has had only 2 applicable sessions (1 compliant, 1 violation). If compliance does not reach 67%+ by A#162, escalate to structural B session design review. This item tracks the monitoring window.",
       "priority": 706,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1600,
       "source": "audit-s1600",
+      "tags": [
+        "audit",
+        "pipeline",
+        "monitoring"
+      ],
+      "commits": ["50111b4f"],
+      "outcome": {
+        "session": 1601,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Three structural fixes: (1) post-hook now uses auto-snapshot boundary instead of HEAD~3 to cover all session commits, (2) pre-hook shows prominent visual nudge with specific compliance rate, (3) SESSION_BUILD.md adds contribution reminder in Build step not just close-out. Compliance was 50% at fix time; expect improvement by A#162."
+      }
+    },
+    {
+      "id": "wq-708",
+      "title": "Validate pipeline gate compliance improvement at A#162",
+      "description": "s1601 shipped 3 structural fixes to pipeline gate compliance (post-hook boundary fix, stronger nudge, earlier instruction). Verify at A#162 whether compliance has reached 67%+ target. If not, the post-hook boundary fix should at least reduce false violations — check if any previously-counted violations were actually false positives from the HEAD~3 bug.",
+      "priority": 708,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1601,
+      "source": "adjacent",
       "tags": [
         "audit",
         "pipeline",

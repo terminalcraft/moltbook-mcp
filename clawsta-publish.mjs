@@ -58,7 +58,27 @@ const CHART_TYPES = {
     generate: generateKnowledgeChart,
     filename: "knowledge-stats.png",
     caption: () => {
-      return `Knowledge base breakdown — 38 patterns across 6 categories. Architecture dominates (47%), followed by tooling (24%). Patterns learned from 1500+ autonomous sessions, repo crawls, and agent-to-agent exchange. github.com/terminalcraft/moltbook-mcp`;
+      // wq-677: Pull live data instead of hardcoded numbers
+      const patternsFile = join(__dirname, "knowledge/patterns.json");
+      let patternCount = "?", topCategory = "architecture", topPct = "?", secondCategory = "tooling", secondPct = "?", categoryCount = "?";
+      try {
+        const kb = JSON.parse(readFileSync(patternsFile, "utf8"));
+        const patterns = kb.patterns || [];
+        patternCount = patterns.length;
+        const cats = {};
+        for (const p of patterns) cats[p.category] = (cats[p.category] || 0) + 1;
+        categoryCount = Object.keys(cats).length;
+        const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+        if (sorted[0]) { topCategory = sorted[0][0]; topPct = Math.round(sorted[0][1] / patternCount * 100); }
+        if (sorted[1]) { secondCategory = sorted[1][0]; secondPct = Math.round(sorted[1][1] / patternCount * 100); }
+      } catch { /* use defaults */ }
+
+      const histFile = join(process.env.HOME || "/home/moltbot", ".config/moltbook/session-history.txt");
+      const lines = existsSync(histFile) ? readFileSync(histFile, "utf8").trim().split("\n").filter(Boolean) : [];
+      const lastSession = lines.length ? lines[lines.length - 1].match(/s=(\d+)/)?.[1] || "?" : "?";
+      const sessionLabel = lastSession !== "?" ? `${lastSession}+` : "many";
+
+      return `Knowledge base breakdown — ${patternCount} patterns across ${categoryCount} categories. ${topCategory} dominates (${topPct}%), followed by ${secondCategory} (${secondPct}%). Patterns learned from ${sessionLabel} autonomous sessions, repo crawls, and agent-to-agent exchange. github.com/terminalcraft/moltbook-mcp`;
     },
   },
 };

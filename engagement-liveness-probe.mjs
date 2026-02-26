@@ -26,6 +26,7 @@ const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const SERVICES_PATH = join(__dirname, "services.json");
 const CACHE_PATH = join(homedir(), ".config", "moltbook", "liveness-cache.json");
+const TIMING_PATH = join(homedir(), ".config", "moltbook", "liveness-timing.json"); // wq-676
 
 const PROBE_TIMEOUT = 3000; // 3s per platform — fast timeout, most respond in <1s
 const CIRCUIT_OPEN_THRESHOLD = 2; // Mark circuit open after 2 consecutive failures
@@ -121,6 +122,7 @@ function saveCache(cache) {
 }
 
 async function main() {
+  const wallStart = performance.now(); // wq-676: timing telemetry
   const args = process.argv.slice(2);
   const jsonOutput = args.includes("--json");
   const dryRun = args.includes("--dry");
@@ -331,6 +333,37 @@ async function main() {
     }
     cache.session = sessionNum;
     saveCache(cache);
+  }
+
+  // wq-676: Log timing telemetry on cache misses (actual live probes)
+  // Appends to liveness-timing.json so A sessions can track probe latency trends.
+  if (!dryRun && staleTasks.length > 0) {
+    const wallMs = Math.round(performance.now() - wallStart);
+    const probed = probeResults
+      .filter(s => s.status === "fulfilled" && !s.value.fromCache)
+      .map(s => ({
+        platform: s.value.account.platform,
+        ms: Math.round((s.value.probe.elapsed || 0) * 1000),
+        ok: s.value.probe.reachable,
+      }));
+    const timingEntry = {
+      ts: now,
+      session: sessionNum,
+      wallMs,
+      probed: probed.length,
+      cached: cacheHits,
+      skipped: skippedCount,
+      avgMs: probed.length > 0 ? Math.round(probed.reduce((a, p) => a + p.ms, 0) / probed.length) : 0,
+      p95Ms: probed.length > 0 ? probed.map(p => p.ms).sort((a, b) => a - b)[Math.floor(probed.length * 0.95)] : 0,
+      platforms: probed,
+    };
+    try {
+      const timing = loadJSON(TIMING_PATH, { entries: [] });
+      timing.entries.push(timingEntry);
+      // Keep last 100 entries to bound file size
+      if (timing.entries.length > 100) timing.entries = timing.entries.slice(-100);
+      saveJSON(TIMING_PATH, timing);
+    } catch { /* non-critical — don't fail probe on timing write error */ }
   }
 
   // Summary

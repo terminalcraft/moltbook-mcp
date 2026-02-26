@@ -73,7 +73,7 @@
       "title": "Add configurable violation threshold to pipeline nudge hook",
       "description": "49-pipeline-nudge_B.sh hardcodes threshold at 3. Consider making it configurable via an env var or config file so R sessions can tune the sensitivity without editing the hook. Low priority — current hardcoded value matches SESSION_AUDIT.md threshold.",
       "priority": 699,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1592,
       "source": "adjacent",
@@ -81,7 +81,14 @@
         "hooks",
         "config"
       ],
-      "commits": []
+      "commits": ["wq-699-s1596"],
+      "outcome": {
+        "session": 1596,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added PIPELINE_NUDGE_THRESHOLD env var (default: 3). R sessions can tune sensitivity without editing the hook."
+      }
     }
   ]
 }

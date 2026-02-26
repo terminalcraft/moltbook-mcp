@@ -22,8 +22,8 @@ import { execSync } from 'child_process';
 import { homedir } from 'os';
 
 const MCP_DIR = new URL('.', import.meta.url).pathname;
-const HOOK_36 = join(MCP_DIR, 'hooks/post-session/36-intel-checkpoint_E.sh');
-const HOOK_37 = join(MCP_DIR, 'hooks/post-session/37-d049-enforcement_E.sh');
+// Hooks 36-42 consolidated into single dispatcher (wq-662)
+const E_POSTHOOK = join(MCP_DIR, 'hooks/post-session/36-e-session-posthook_E.sh');
 const TRACKING_FILE = join(MCP_DIR, 'e-phase35-tracking.json');
 
 // Temp directory for dry-run state (isolated from real state)

@@ -14,7 +14,7 @@ set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUTCOMES_LOG="$HOME/.config/moltbook/logs/outcomes.log"
-SESSION_TYPE="${SESSION_TYPE:-B}"
+SESSION_TYPE="${MODE_CHAR:-B}"
 STATE_DIR="$HOME/.config/moltbook"
 TUNING_STATE="$STATE_DIR/rotation-tuning.json"
 

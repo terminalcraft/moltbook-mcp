@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Only run for E sessions
-MODE="${SESSION_TYPE:-}"
+MODE="${MODE_CHAR:-}"
 if [[ "$MODE" != "E" ]]; then
   exit 0
 fi

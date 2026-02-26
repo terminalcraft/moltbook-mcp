@@ -9,7 +9,7 @@ STATE_DIR="$HOME/.config/moltbook"
 HISTORY_FILE="$STATE_DIR/diversity-history.json"
 
 # Only run after E sessions
-MODE="${SESSION_MODE:-}"
+MODE="${MODE_CHAR:-}"
 if [ "$MODE" != "E" ]; then
   exit 0
 fi

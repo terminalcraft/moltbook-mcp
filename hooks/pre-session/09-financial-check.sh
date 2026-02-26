@@ -13,7 +13,7 @@ STATE_DIR="$HOME/.config/moltbook"
 ALERT_FILE="$STATE_DIR/financial-alert.txt"
 
 # Only run financial checks on B sessions (where autonomy matters)
-if [ "${SESSION_TYPE:-}" != "B" ]; then
+if [ "${MODE_CHAR:-}" != "B" ]; then
   exit 0
 fi
 

@@ -16,17 +16,22 @@
  * variants (.ai, .io, .com, .dev, .app) to find working alternatives.
  */
 
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { homedir } from "os";
 import { safeFetch } from "./lib/safe-fetch.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVICES_PATH = resolve(__dirname, "services.json");
+const TIMING_PATH = resolve(homedir(), ".config", "moltbook", "service-liveness-timing.json"); // wq-678
 const FETCH_TIMEOUT = 3000; // Reduced from 8s — liveness only needs reachability (wq-598)
 
 // TLD variants to probe when a URL fails (d033 gap fix - wq-127)
 const TLD_VARIANTS = [".ai", ".io", ".com", ".dev", ".app", ".xyz", ".net", ".org"];
+
+// wq-678: timing telemetry
+const wallStart = performance.now();
 
 // --- Args ---
 const args = process.argv.slice(2);
@@ -35,6 +40,12 @@ const flagJson = args.includes("--json");
 const flagUpdate = args.includes("--update");
 const flagProbeTld = args.includes("--probe-tld"); // wq-127: probe TLD variants on DNS failure
 const flagDepth = args.includes("--depth"); // wq-658: compute probe-depth metric (1-4)
+
+// Parse --session N flag for timing telemetry (mirrors engagement-liveness pattern)
+const sessionIdx = args.indexOf("--session");
+const sessionNum = (sessionIdx !== -1 && args[sessionIdx + 1])
+  ? parseInt(args[sessionIdx + 1]) || 0
+  : parseInt(process.env.SESSION_NUM) || 0;
 
 // --- Helpers ---
 
@@ -258,6 +269,38 @@ for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
   }
 }
 clearTimeout(forceExitTimer);
+
+// wq-678: Log timing telemetry to separate file (mirrors wq-676 engagement-liveness pattern).
+// Appends to service-liveness-timing.json so A sessions can track probe latency trends.
+{
+  const wallMs = Math.round(performance.now() - wallStart);
+  const probed = results.map(r => ({
+    name: r.name,
+    ms: r.elapsed || 0,
+    ok: r.liveness === "alive",
+  }));
+  const timingEntry = {
+    ts: new Date().toISOString(),
+    session: sessionNum,
+    wallMs,
+    total: results.length,
+    alive: results.filter(r => r.liveness === "alive").length,
+    down: results.filter(r => r.liveness !== "alive").length,
+    avgMs: probed.length > 0 ? Math.round(probed.reduce((a, p) => a + p.ms, 0) / probed.length) : 0,
+    p95Ms: probed.length > 0 ? probed.map(p => p.ms).sort((a, b) => a - b)[Math.floor(probed.length * 0.95)] : 0,
+    platforms: probed,
+  };
+  try {
+    mkdirSync(dirname(TIMING_PATH), { recursive: true });
+    const existing = existsSync(TIMING_PATH)
+      ? JSON.parse(readFileSync(TIMING_PATH, "utf8"))
+      : { entries: [] };
+    existing.entries.push(timingEntry);
+    // Keep last 100 entries to bound file size
+    if (existing.entries.length > 100) existing.entries = existing.entries.slice(-100);
+    writeFileSync(TIMING_PATH, JSON.stringify(existing, null, 2) + "\n");
+  } catch { /* non-critical — don't fail probe on timing write error */ }
+}
 
 // Summary
 const alive = results.filter(r => r.liveness === "alive").length;

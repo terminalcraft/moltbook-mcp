@@ -15390,6 +15390,23 @@
         "quality": "well-scoped",
         "note": "Added persistence instructions for consecutive_low counter in SESSION_AUDIT.md intel yield sub-check"
       }
+    },
+    {
+      "id": "wq-698",
+      "title": "Seed initial intel_yield_check in audit-report.json for A session bootstrapping",
+      "description": "The intel yield sub-check (wq-695/697) tells A sessions to read consecutive_low from the previous audit-report.json, but the field does not exist yet. The next A session will handle this gracefully (default 0), but seeding the initial value ensures the first audit that uses it has a clean baseline. Low priority \u2014 A sessions handle the missing-field case.",
+      "priority": 698,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1592,
+      "completed_session": 1595,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "bootstrap"
+      ],
+      "commits": [],
+      "notes": "A#160 seeded intel_yield_check with consecutive_low=0 and yield_pct=82 in audit-report.json. No separate build needed."
     }
   ]
 }

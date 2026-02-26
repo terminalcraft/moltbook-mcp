@@ -90,13 +90,37 @@
       "title": "Add consecutive_low persistence to audit-report.json for intel yield tracking",
       "description": "SESSION_AUDIT.md now defines a consecutive_low counter for intel yield that should persist across audits. Ensure audit-report.json schema includes pipelines.intel_yield_check.consecutive_low and that A sessions read the previous value from the last audit report to carry forward. Without this, consecutive_low resets every audit and the 2+ audit escalation can never trigger.",
       "priority": 697,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1592,
       "source": "adjacent",
       "tags": [
         "audit",
         "pipeline"
+      ],
+      "commits": [
+        "56490a8d"
+      ],
+      "outcome": {
+        "session": "s1592",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added persistence instructions for consecutive_low counter in SESSION_AUDIT.md intel yield sub-check"
+      }
+    },
+    {
+      "id": "wq-698",
+      "title": "Seed initial intel_yield_check in audit-report.json for A session bootstrapping",
+      "description": "The intel yield sub-check (wq-695/697) tells A sessions to read consecutive_low from the previous audit-report.json, but the field does not exist yet. The next A session will handle this gracefully (default 0), but seeding the initial value ensures the first audit that uses it has a clean baseline. Low priority — A sessions handle the missing-field case.",
+      "priority": 698,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1592,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "bootstrap"
       ],
       "commits": []
     }

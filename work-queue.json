@@ -111,6 +111,36 @@
         "quality": "well-scoped",
         "note": "Updated stale example JSON in SESSION_AUDIT.md scope budget section — removed reference to 49-pipeline-gate_B.sh that triggered false positive stale-ref detection."
       }
+    },
+    {
+      "id": "wq-695",
+      "title": "Add intel yield threshold to SESSION_AUDIT.md pipeline section",
+      "description": "audit-stats.mjs now computes intel_yield (wq-682). Add a sub-check to SESSION_AUDIT.md Section 1 (Pipeline effectiveness) that references pipelines.intel_yield and defines escalation thresholds: yield_pct < 20% for 2+ audits → structural issue. Include example JSON block for A session guidance.",
+      "priority": 695,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1591,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "documentation"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-696",
+      "title": "Add B session pipeline gate pre-session nudge hook",
+      "description": "When pipeline gate violations >= 3 (from b_pipeline_gate in audit-stats.mjs), inject a warning into B session startup context. Add a pre-session hook (e.g. 50-pipeline-nudge_B.sh) that reads maintain-audit.txt for WARN entries and prints a reminder. Promotes from brainstorming idea added s1591.",
+      "priority": 696,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1591,
+      "source": "brainstorming",
+      "tags": [
+        "hooks",
+        "pipeline"
+      ],
+      "commits": []
     }
   ]
 }

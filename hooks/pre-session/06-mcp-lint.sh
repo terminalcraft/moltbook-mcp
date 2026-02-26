@@ -55,7 +55,25 @@ for comp in "${COMPONENTS[@]}"; do
 done
 rm -f /tmp/mcp-lint-err
 
-# 5. Report
+# 5. Hook env var lint (wq-688): catch hooks using SESSION_TYPE/SESSION_MODE
+#    instead of MODE_CHAR. Exclude files that properly derive from MODE_CHAR.
+HOOK_DIRS="$DIR/hooks/pre-session $DIR/hooks/post-session"
+for hdir in $HOOK_DIRS; do
+  [ -d "$hdir" ] || continue
+  for hfile in "$hdir"/*.sh; do
+    [ -f "$hfile" ] || continue
+    # Skip files that properly derive SESSION_TYPE from MODE_CHAR
+    if grep -q 'SESSION_TYPE=.*MODE_CHAR' "$hfile" 2>/dev/null; then
+      continue
+    fi
+    # Flag any remaining direct usage of SESSION_TYPE or SESSION_MODE
+    if grep -qE '\$\{?SESSION_(TYPE|MODE)\}?' "$hfile" 2>/dev/null; then
+      ERRORS+=("ENV_VAR: $(basename "$hfile") uses SESSION_TYPE/SESSION_MODE instead of MODE_CHAR")
+    fi
+  done
+done
+
+# 6. Report
 if [ ${#ERRORS[@]} -eq 0 ]; then
   echo "mcp-lint: all $COMP_COUNT components OK"
 else

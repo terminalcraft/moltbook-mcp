@@ -62,17 +62,28 @@ found_stale=0
 is_structural_ref() {
   local ref_file="$1"
   local search_term="$2"
-  # Non-JSON files: always structural
-  [[ "$ref_file" != *.json ]] && return 0
-  # For JSON files, check if ANY match line is NOT a prose field
-  # Prose fields: "content", "description", "note", "title", "summary", "body"
-  local prose_pattern='"(content|description|note|title|summary|body)"'
-  local all_matches non_prose
+  local all_matches non_noise
+
   all_matches=$(grep -n "$search_term" "$ref_file" 2>/dev/null || true)
   [ -z "$all_matches" ] && return 1
-  non_prose=$(echo "$all_matches" | grep -Ev "$prose_pattern" || true)
-  [ -n "$non_prose" ] && return 0
-  return 1
+
+  # For JSON files, filter out prose fields
+  if [[ "$ref_file" == *.json ]]; then
+    local prose_pattern='"(content|description|note|title|summary|body)"'
+    non_noise=$(echo "$all_matches" | grep -Ev "$prose_pattern" || true)
+    [ -n "$non_noise" ] && return 0
+    return 1
+  fi
+
+  # For shell files, filter out comment lines (lines starting with optional whitespace + #)
+  if [[ "$ref_file" == *.sh ]]; then
+    non_noise=$(echo "$all_matches" | grep -Ev '^[0-9]+:[[:space:]]*#' || true)
+    [ -n "$non_noise" ] && return 0
+    return 1
+  fi
+
+  # All other file types: always structural
+  return 0
 }
 
 for file in $truly_deleted; do

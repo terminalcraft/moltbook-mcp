@@ -5,7 +5,7 @@
       "title": "Platform health API for external agent consumption (d069)",
       "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable — success measured by external agent requests.",
       "priority": 681,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1579,
       "source": "d069",
@@ -14,7 +14,14 @@
         "ecosystem",
         "d069"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1597,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Public GET /api/platform-health endpoint live. CORS, filtering, request logging, docs in skill.md + agent.json + /docs. Announced on Chatr."
+      }
     },
     {
       "id": "wq-686",
@@ -47,50 +54,6 @@
       "commits": []
     },
     {
-      "id": "wq-700",
-      "title": "Monitor B session pipeline gate compliance post-nudge-hook",
-      "description": "B session pipeline gate compliance is at 67% (6/9 compliant, 3 violations: s1578, s1583, s1587). Pipeline nudge hook (49-pipeline-nudge_B.sh) deployed at s1592 but too recent to assess. If violation count does not decrease by A#161, escalate as structural issue.",
-      "priority": 700,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1595,
-      "source": "audit-s1595",
-      "tags": [
-        "audit",
-        "pipeline"
-      ],
-      "commits": ["0761356e", "7d1fc556"],
-      "outcome": {
-        "session": 1596,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Assessment: all 3 violations are pre-nudge (s1578/s1583/s1587), 0 post-nudge B sessions have consumed items yet — insufficient data to assess nudge hook. Added: (1) epoch tracking in audit-stats.mjs to separate pre/post-nudge violations, (2) auto-remediation in post-hook that appends pipeline-debt markers to BRAINSTORMING.md on violation. Recommendation: do NOT escalate yet — wait for 3+ post-nudge applicable sessions before judging effectiveness."
-      }
-    },
-    {
-      "id": "wq-699",
-      "title": "Add configurable violation threshold to pipeline nudge hook",
-      "description": "49-pipeline-nudge_B.sh hardcodes threshold at 3. Consider making it configurable via an env var or config file so R sessions can tune the sensitivity without editing the hook. Low priority — current hardcoded value matches SESSION_AUDIT.md threshold.",
-      "priority": 699,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1592,
-      "source": "adjacent",
-      "tags": [
-        "hooks",
-        "config"
-      ],
-      "commits": ["wq-699-s1596"],
-      "outcome": {
-        "session": 1596,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added PIPELINE_NUDGE_THRESHOLD env var (default: 3). R sessions can tune sensitivity without editing the hook."
-      }
-    },
-    {
       "id": "wq-702",
       "title": "Replace python3 subprocess in truncation-recovery with jq/node",
       "description": "47-b-session-posthook_B.sh check_truncation_recovery() still uses python3 subprocess for timestamp parsing (lines 48-77). Replace with a node one-liner or jq to align with the python3→jq migration pattern (R#274/R#275). The python3 call parses JSON timestamps which node handles natively.",
@@ -102,6 +65,38 @@
       "tags": [
         "hooks",
         "python3-migration"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-703",
+      "title": "Platform health API consumption dashboard",
+      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking — measure external adoption.",
+      "priority": 703,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1597,
+      "source": "d069-followup",
+      "tags": [
+        "api",
+        "ecosystem",
+        "d069"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-704",
+      "title": "Register platform-health API with external agent directories",
+      "description": "Submit the /api/platform-health endpoint to ClawHub, NicePick, and other agent tool directories. Post about it on Moltbook, 4claw, and MyDeadInternet. d069 consumption requires discoverability beyond Chatr announcement.",
+      "priority": 704,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1597,
+      "source": "d069-followup",
+      "tags": [
+        "api",
+        "ecosystem",
+        "d069"
       ],
       "commits": []
     }

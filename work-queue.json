@@ -75,6 +75,21 @@
         "pipeline"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-683",
+      "title": "Fix brainstorming auto-retire gap for stale items",
+      "description": "Memory Paper contribution idea (added ~s1541) is 39 sessions old but wasn't auto-retired despite 30-session threshold. Investigate why the auto-retire mechanism in A session pre-hook (35-maintain-audit.sh or equivalent) didn't catch it. Clean up the stale item and verify the mechanism works for future items.",
+      "priority": 683,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1580,
+      "source": "audit-s1580",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": []
     }
   ]
 }

@@ -18,7 +18,7 @@
     {
       "id": "wq-703",
       "title": "Platform health API consumption dashboard",
-      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking \u2014 measure external adoption.",
+      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking — measure external adoption.",
       "priority": 703,
       "status": "pending",
       "added": "2026-02-26",
@@ -49,8 +49,8 @@
     },
     {
       "id": "wq-705",
-      "title": "Batch python3\u2192jq migration for pre-session hooks",
-      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first \u2014 post-session hooks can follow in a separate item.",
+      "title": "Batch python3→jq migration for pre-session hooks",
+      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first — post-session hooks can follow in a separate item.",
       "priority": 705,
       "status": "pending",
       "added": "2026-02-26",
@@ -68,7 +68,7 @@
       "title": "Validate pipeline gate compliance improvement at A#162",
       "description": "s1601 shipped 3 structural fixes to pipeline gate compliance (post-hook boundary fix, stronger nudge, earlier instruction). A#162 result: post-nudge compliance at 67% (2/3), meeting target. Aggregate still 56% due to pre-nudge legacy. Continue monitoring — need 2-3 more data points.",
       "priority": 708,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1601,
       "source": "adjacent",
@@ -78,7 +78,14 @@
         "monitoring"
       ],
       "commits": [],
-      "notes": "a162-2: Post-nudge rate is 67%, aggregate 56%. Directional improvement. Monitor at A#163."
+      "notes": "a162-2: Post-nudge rate is 67%, aggregate 56%. Directional improvement. Monitor at A#163.",
+      "outcome": {
+        "session": 1606,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Validated: post-s1601 compliance is 2/2 (100%). Post-nudge aggregate 2/3 (67%). Overall aggregate improved 56%→63% (5/8). Pre-nudge violations aging out naturally. Assessment: 'improving'. Audit section tracks this automatically — no further manual monitoring needed."
+      }
     },
     {
       "id": "wq-707",
@@ -110,22 +117,6 @@
         "audit",
         "cost",
         "engagement"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-710",
-      "title": "Continue pipeline gate compliance monitoring at A#163",
-      "description": "a162-2: Post-nudge compliance at 67% (2/3), aggregate at 56%. s1601 structural fixes need 2-3 more B sessions to assess. If aggregate doesn't reach 60%+ by A#163, consider time-windowing pre-nudge violations out of the metric.",
-      "priority": 710,
-      "status": "pending",
-      "added": "2026-02-26",
-      "created_session": 1605,
-      "source": "audit-s1605",
-      "tags": [
-        "audit",
-        "pipeline",
-        "monitoring"
       ],
       "commits": []
     }

@@ -295,27 +295,45 @@ if [[ ! -s "$PARSED_FILE" ]]; then
   exit 1
 fi
 
-# Extract parsed values into shell variables (read from temp file)
-_get() { python3 -c "import json; d=json.load(open('$PARSED_FILE')); print(d.get('$1','$2'))" 2>/dev/null; }
-_get_int() { python3 -c "import json; d=json.load(open('$PARSED_FILE')); print(int(d.get('$1',$2)))" 2>/dev/null; }
-_get_bool() { python3 -c "import json; d=json.load(open('$PARSED_FILE')); print('true' if d.get('$1') else 'false')" 2>/dev/null; }
-_get_json() { python3 -c "import json; d=json.load(open('$PARSED_FILE')); print(json.dumps(d.get('$1')))" 2>/dev/null; }
+# Extract parsed values into shell variables (single python3 call, not 17)
+SHELL_VARS=$(python3 << 'EXTRACT_PY' 2>/dev/null
+import json, os, shlex
 
-INTEL_COUNT=$(_get_int intel_count 0)
-HAS_TRACE=$(_get_bool has_trace)
-PHASE2_REACHED=$(_get_bool phase2_reached)
-IS_RATE_LIMITED=$(_get_bool is_rate_limited)
-ALL_PLATFORMS_FAILED=$(_get_bool all_platforms_failed)
-FAILURE_MODE=$(_get failure_mode unknown)
-PLATFORM_DETAILS=$(_get platform_details "")
-TOTAL_SECONDS=$(_get_int total_seconds -1)
-DURATION_STR=$(_get duration_str "")
-CURRENT_NOTE=$(_get current_note "")
-E_COUNT=$(_get_int e_count 0)
-Q_FAILS=$(_get_int quality_session_fails 0)
-Q_WARNS=$(_get_int quality_session_warns 0)
-Q_TOTAL=$(_get_int quality_session_total 0)
-ARCHIVE_INTEL_COUNT=$(_get_int archive_intel_count 0)
+d = json.load(open(os.environ['PARSED_FILE']))
+
+def boolstr(v):
+    return 'true' if v else 'false'
+
+def safe(v, default=''):
+    s = str(v) if v is not None else default
+    return shlex.quote(s)
+
+print(f"INTEL_COUNT={int(d.get('intel_count', 0))}")
+print(f"HAS_TRACE={boolstr(d.get('has_trace'))}")
+print(f"PHASE2_REACHED={boolstr(d.get('phase2_reached'))}")
+print(f"IS_RATE_LIMITED={boolstr(d.get('is_rate_limited'))}")
+print(f"ALL_PLATFORMS_FAILED={boolstr(d.get('all_platforms_failed'))}")
+print(f"FAILURE_MODE={safe(d.get('failure_mode', 'unknown'))}")
+print(f"PLATFORM_DETAILS={safe(d.get('platform_details', ''))}")
+print(f"TOTAL_SECONDS={int(d.get('total_seconds', -1))}")
+print(f"DURATION_STR={safe(d.get('duration_str', ''))}")
+print(f"CURRENT_NOTE={safe(d.get('current_note', ''))}")
+print(f"E_COUNT={int(d.get('e_count', 0))}")
+print(f"Q_FAILS={int(d.get('quality_session_fails', 0))}")
+print(f"Q_WARNS={int(d.get('quality_session_warns', 0))}")
+print(f"Q_TOTAL={int(d.get('quality_session_total', 0))}")
+print(f"ARCHIVE_INTEL_COUNT={int(d.get('archive_intel_count', 0))}")
+EXTRACT_PY
+)
+
+if [[ -z "$SHELL_VARS" ]]; then
+  echo "e-posthook: CRITICAL — variable extraction failed"
+  exit 1
+fi
+
+# Safe eval: only accept lines matching KEY=value pattern (per d061 rule)
+eval "$(echo "$SHELL_VARS" | grep '^[A-Z_]*=')"
+
 D049_COMPLIANT="false"
 [[ "$INTEL_COUNT" -gt 0 ]] && D049_COMPLIANT="true"
 

@@ -3,19 +3,6 @@
   "description": "Session breadcrumbs for stigmergic coordination",
   "breadcrumbs": [
     {
-      "id": "bc-1449-auto",
-      "type": "approach",
-      "content": "feat(wq-557): add hook execution time regression alert",
-      "session": 1449,
-      "mode": "B",
-      "tags": [
-        "hooks",
-        "work-queue"
-      ],
-      "auto": true,
-      "created": "2026-02-10T19:09:21.797248"
-    },
-    {
       "id": "bc-1451-auto",
       "type": "warning",
       "content": "Session A#131 complete. Root cause found for E session artifact gate collapse \u2014 `traceArchivePath` undefined variable in session-context.mjs:834 (R#225 fc cache migration regression) has silently broken trace archival for ~50 sessions; previous fix wq-550 was ineffective (wrong layer); wq-563 created with exact one-line fix; d063 financial report correction queued as wq-564; all other systems healthy with d049 at 100% for 26th consecutive audit, 90/90 hooks pass, 5/5 platforms live, R sessions a",
@@ -1270,6 +1257,18 @@
       ],
       "auto": true,
       "created": "2026-02-26T00:05:47.557164"
+    },
+    {
+      "id": "bc-1564-auto",
+      "type": "lesson",
+      "content": "fix: make cred-age hook defensive against malformed registry entries (R#269)",
+      "session": 1564,
+      "mode": "R",
+      "tags": [
+        "hooks"
+      ],
+      "auto": true,
+      "created": "2026-02-26T00:45:41.787279"
     }
   ]
 }

@@ -52,70 +52,55 @@ done
 # Reads structured JSON from pre/post-hook-results.json (written by run-hooks.sh).
 # Flags: (a) hooks failing >50% in last 5 sessions, (b) hooks averaging >5000ms,
 # (c) total hook time >60s per session (budget drain).
+# R#276: Replaced 60-line inline Python with jq — eliminates python3 dependency.
 for results_file in "$HOME/.config/moltbook/logs/pre-hook-results.json" "$HOME/.config/moltbook/logs/post-hook-results.json"; do
   [ -f "$results_file" ] || continue
   PHASE=$(basename "$results_file" | sed 's/-hook-results.json//')
 
-  HOOK_ANALYSIS=$(python3 -c "
-import json, sys
-from collections import defaultdict
+  # Take last 5 entries (one per session) and analyze with jq
+  HOOK_ANALYSIS=$(tail -5 "$results_file" | jq -rs --arg phase "$PHASE" '
+    # Parse lines into array of session entries
+    [.[] | select(. == null | not)] as $recent |
+    if ($recent | length) == 0 then empty else
 
-results_file, phase = sys.argv[1], sys.argv[2]
-lines = open(results_file).readlines()
-recent = []
-for line in lines[-5:]:
-    line = line.strip()
-    if not line:
-        continue
-    try:
-        recent.append(json.loads(line))
-    except json.JSONDecodeError:
-        continue
+    # Aggregate per-hook stats
+    [
+      $recent[].hooks[]? |
+      { hook, status, ms: (.ms // 0) }
+    ] | group_by(.hook) | map({
+      name: .[0].hook,
+      runs: length,
+      fails: [.[] | select(.status | startswith("fail"))] | length,
+      total_ms: [.[].ms] | add
+    }) as $stats |
 
-if not recent:
-    sys.exit(0)
+    # (a) Hooks failing >50% with >=2 runs
+    [ $stats[] | select(.runs >= 2 and (.fails / .runs) > 0.5) |
+      "WARN: \($phase) hook \(.name) failing \((.fails * 100 / .runs) | floor)% (\(.fails)/\(.runs) recent sessions)"
+    ] +
 
-hook_stats = defaultdict(lambda: {'runs': 0, 'fails': 0, 'total_ms': 0})
-session_totals = []
+    # (b) Hooks averaging >5000ms
+    [ $stats[] | select((.total_ms / .runs) > 5000) |
+      (.total_ms / .runs | floor) as $avg |
+      "WARN: \($phase) hook \(.name) slow (avg \($avg)ms across \(.runs) sessions)" +
+      if (.name | test("liveness|health|balance")) then " → FIX: add time-based cache or move to periodic cron"
+      elif (.name | test("engagement|intel")) then " → FIX: reduce API calls or add short-circuit on empty state"
+      elif $avg > 15000 then " → FIX: split into async background task"
+      else " → FIX: profile with LOG_DIR debug, check for network calls" end
+    ] +
 
-for entry in recent:
-    session_total_ms = 0
-    for h in entry.get('hooks', []):
-        name = h.get('hook', '?')
-        ms = h.get('ms', 0)
-        status = h.get('status', '')
-        hook_stats[name]['runs'] += 1
-        if status.startswith('fail'):
-            hook_stats[name]['fails'] += 1
-        hook_stats[name]['total_ms'] += ms
-        session_total_ms += ms
-    session_totals.append(session_total_ms)
+    # (c) Total hook time >60s per session
+    [ $recent | [.[].hooks[]?.ms // 0] |
+      (add / ($recent | length)) as $avg_total |
+      if $avg_total > 60000 then
+        "WARN: \($phase) hooks averaging \(($avg_total / 1000) | floor)s total per session (budget drain)"
+      else empty end
+    ] |
 
-for name, stats in sorted(hook_stats.items()):
-    if stats['runs'] >= 2 and stats['fails'] / stats['runs'] > 0.5:
-        pct = int(100 * stats['fails'] / stats['runs'])
-        print(f'WARN: {phase} hook {name} failing {pct}% ({stats[\"fails\"]}/{stats[\"runs\"]} recent sessions)')
+    .[]
 
-for name, stats in sorted(hook_stats.items()):
-    avg_ms = stats['total_ms'] / stats['runs'] if stats['runs'] > 0 else 0
-    if avg_ms > 5000:
-        # wq-472: Add fix recommendations based on hook characteristics
-        fix = ''
-        if 'liveness' in name or 'health' in name or 'balance' in name:
-            fix = ' → FIX: add time-based cache or move to periodic cron'
-        elif 'engagement' in name or 'intel' in name:
-            fix = ' → FIX: reduce API calls or add short-circuit on empty state'
-        elif avg_ms > 15000:
-            fix = ' → FIX: split into async background task'
-        else:
-            fix = ' → FIX: profile with LOG_DIR debug, check for network calls'
-        print(f'WARN: {phase} hook {name} slow (avg {int(avg_ms)}ms across {stats[\"runs\"]} sessions){fix}')
-
-if session_totals:
-    avg_total = sum(session_totals) / len(session_totals)
-    if avg_total > 60000:
-        print(f'WARN: {phase} hooks averaging {int(avg_total/1000)}s total per session (budget drain)')
-" "$results_file" "$PHASE" 2>/dev/null || true)
+    end
+  ' 2>/dev/null || true)
 
   if [ -n "$HOOK_ANALYSIS" ]; then
     echo "$HOOK_ANALYSIS" >> "$AUDIT_FILE"

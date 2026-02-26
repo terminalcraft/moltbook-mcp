@@ -21,7 +21,7 @@
       "title": "Intel-to-build yield tracker",
       "description": "Track what % of intel-auto queue items produce actual build work vs get closed as non-actionable. Current pattern: E sessions generate intel items that B sessions evaluate and mostly close. If yield is consistently <20%, the auto-seeding heuristic needs tuning. Add tracking to work-queue-archive.json analysis and surface in audit-stats.mjs.",
       "priority": 682,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1579,
       "source": "brainstorming",
@@ -29,7 +29,14 @@
         "analytics",
         "pipeline"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1591,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeIntelYield() to audit-stats.mjs. Classifies intel-sourced archived items by outcome (built/retired/deferred). Current yield: 82% (59 built, 13 retired out of 73 intel items). Verdict thresholds: <20% low, <50% moderate, else healthy."
+      }
     },
     {
       "id": "wq-686",

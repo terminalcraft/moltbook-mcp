@@ -404,12 +404,53 @@ function computeBPipelineGateCompliance() {
   }
 }
 
+function computeIntelYield() {
+  const archive = safeRead(join(PROJECT_DIR, 'work-queue-archive.json'), { archived: [] });
+  const allArchived = archive.archived || [];
+
+  // Filter to intel-sourced items (source contains "intel")
+  const intelItems = allArchived.filter(i => i.source && i.source.includes('intel'));
+
+  if (intelItems.length === 0) return { total: 0, built: 0, retired: 0, yield_pct: 0, verdict: 'no_data' };
+
+  let built = 0, retired = 0, deferred = 0;
+  for (const item of intelItems) {
+    // Newer format: outcome.result field
+    const result = item.outcome && item.outcome.result;
+    if (result === 'completed') { built++; continue; }
+    if (result === 'retired') { retired++; continue; }
+    if (result === 'deferred') { deferred++; continue; }
+
+    // Older format: status field directly, no outcome.result
+    if (item.status === 'completed' || item.status === 'done') { built++; continue; }
+    if (item.status === 'retired') { retired++; continue; }
+
+    // Fallback: check quality for non-actionable
+    const quality = item.outcome && item.outcome.quality;
+    if (quality === 'non-actionable' || quality === 'duplicate') { retired++; }
+    else { built++; } // Assume built if unclear
+  }
+
+  const decidedTotal = built + retired;
+  const yieldPct = decidedTotal > 0 ? Math.round((built / decidedTotal) * 100) : 0;
+
+  return {
+    total: intelItems.length,
+    built,
+    retired,
+    deferred,
+    yield_pct: yieldPct,
+    verdict: yieldPct < 20 ? 'low_yield' : (yieldPct < 50 ? 'moderate_yield' : 'healthy')
+  };
+}
+
 // Main output
 const stats = {
   computed_at: new Date().toISOString(),
   session: getCurrentSession(),
   pipelines: {
     intel: computeIntelStats(),
+    intel_yield: computeIntelYield(),
     brainstorming: computeBrainstormingStats(),
     queue: computeQueueStats(),
     directives: computeDirectiveStats()

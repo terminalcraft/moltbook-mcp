@@ -51,13 +51,46 @@
       "title": "Seed initial intel_yield_check in audit-report.json for A session bootstrapping",
       "description": "The intel yield sub-check (wq-695/697) tells A sessions to read consecutive_low from the previous audit-report.json, but the field does not exist yet. The next A session will handle this gracefully (default 0), but seeding the initial value ensures the first audit that uses it has a clean baseline. Low priority \u2014 A sessions handle the missing-field case.",
       "priority": 698,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1592,
+      "completed_session": 1595,
       "source": "adjacent",
       "tags": [
         "audit",
         "bootstrap"
+      ],
+      "commits": [],
+      "notes": "A#160 seeded intel_yield_check with consecutive_low=0 and yield_pct=82 in audit-report.json. No separate build needed."
+    },
+    {
+      "id": "wq-700",
+      "title": "Monitor B session pipeline gate compliance post-nudge-hook",
+      "description": "B session pipeline gate compliance is at 67% (6/9 compliant, 3 violations: s1578, s1583, s1587). Pipeline nudge hook (49-pipeline-nudge_B.sh) deployed at s1592 but too recent to assess. If violation count does not decrease by A#161, escalate as structural issue.",
+      "priority": 700,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1595,
+      "source": "audit-s1595",
+      "tags": [
+        "audit",
+        "pipeline"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-701",
+      "title": "URGENT: Build platform health API (wq-681) — d069 at risk",
+      "description": "d069 self-directive (build consumable service) has 4 sessions remaining in its 20-session window. wq-681 (platform health API) has been pending since s1579 with zero code shipped. Must be primary task for the next B session. If not started by s1599, d069 should be retired as failed.",
+      "priority": 701,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1595,
+      "source": "audit-s1595",
+      "tags": [
+        "audit",
+        "d069",
+        "urgent"
       ],
       "commits": []
     },

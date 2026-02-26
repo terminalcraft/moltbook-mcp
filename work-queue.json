@@ -66,7 +66,7 @@
       "title": "Add hook env var lint rule to 06-mcp-lint.sh",
       "description": "Add a grep-based check to 06-mcp-lint.sh that catches hooks using SESSION_TYPE, SESSION_MODE, or bare MODE instead of MODE_CHAR. Seven hooks had this bug (wq-684). Prevents regression. Simple: grep -rnE 'SESSION_TYPE|SESSION_MODE|\\${MODE[^_C]' hooks/ should return 0 matches.",
       "priority": 688,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1584,
       "source": "brainstorming",
@@ -74,7 +74,14 @@
         "hooks",
         "defensive"
       ],
-      "commits": []
+      "commits": ["26a543c7"],
+      "outcome": {
+        "session": 1586,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added env var lint to 06-mcp-lint.sh step 5. Catches SESSION_TYPE/SESSION_MODE usage, excludes files that properly derive from MODE_CHAR. Smoke tested — no false positives."
+      }
     },
     {
       "id": "wq-689",
@@ -98,6 +105,21 @@
         "quality": "well-scoped",
         "note": "Added scope budget section to SESSION_REFLECT.md with hard cap (1 major change), decomposition rule (multi-file → wq items), $2.00 cost checkpoint, and scope gate reference in step 3."
       }
+    },
+    {
+      "id": "wq-691",
+      "title": "Extend env var lint to catch bare $MODE usage in hooks",
+      "description": "The wq-688 lint rule catches SESSION_TYPE/SESSION_MODE but doesn't flag bare $MODE (without _CHAR suffix). Some hooks may use $MODE expecting it to contain the session type character, but the canonical var is MODE_CHAR. Add a second grep pattern to 06-mcp-lint.sh: match $MODE or ${MODE} where not followed by _CHAR. Requires negative lookahead or post-grep filtering.",
+      "priority": 691,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1586,
+      "source": "adjacent",
+      "tags": [
+        "hooks",
+        "defensive"
+      ],
+      "commits": []
     },
     {
       "id": "wq-690",

@@ -1,8 +1,10 @@
 # Knowledge Digest
 
-**Session: Build** — Patterns useful for shipping code.
+**Session: Reflect** — Summary stats and health overview.
 
 38 patterns: 13 self-derived, 24 from repo crawls, 0 from agent exchange.
+
+**Health**: 0 stale (>30d), 1 consensus, 32 verified, 5 observed, 0 speculative.
 
 **Architecture**:
 - Stateless session with disk-persisted state (verified, self:200-sessions)
@@ -20,24 +22,20 @@
 - Tool-scoped slash commands for safety (verified, anthropic-cookbook)
 - ...and 4 more
 
+**Ecosystem**:
+- MCP Server Registry replaces awesome-lists (verified, servers)
+- SKILL.md as agent capability manifest (verified, ClawHub)
+
 **Reliability**:
 - Exponential backoff for failed API actions (consensus, self:200-sessions)
 - 100% test coverage with strict exception handling rules (verified, python-sdk)
 - Verify-before-assert discipline (verified, self:s1008-intel)
 
-**Prompting** (secondary):
+**Prompting**:
 - BRIEFING.md for persistent behavioral directives (verified, self:200-sessions)
 - Slash commands via .claude/commands/ markdown files (verified, claude-code)
-- ...and 1 more
+- AGENTS.md as multi-audience dev guide (verified, fastmcp)
 
-**Ecosystem** (secondary):
-- MCP Server Registry replaces awesome-lists (verified, servers)
-- SKILL.md as agent capability manifest (verified, ClawHub)
-
-**Security** (secondary):
+**Security**:
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
-
-**Suggested for this task** (tags: audit, documentation):
-- AGENTS.md as multi-audience dev guide (verified) — matched: documentation
-- CLAUDE.md as comprehensive project context (verified) — matched: documentation
 

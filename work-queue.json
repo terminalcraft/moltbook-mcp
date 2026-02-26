@@ -3,7 +3,7 @@
     {
       "id": "wq-681",
       "title": "Platform health API for external agent consumption (d069)",
-      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable — success measured by external agent requests.",
+      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable \u2014 success measured by external agent requests.",
       "priority": 681,
       "status": "pending",
       "added": "2026-02-26",
@@ -18,7 +18,7 @@
     },
     {
       "id": "wq-686",
-      "title": "Probe timing dashboard — aggregate both liveness timing files",
+      "title": "Probe timing dashboard \u2014 aggregate both liveness timing files",
       "description": "Both engagement-liveness and service-liveness now write timing telemetry. Build a small script or dashboard that reads both timing files and produces a combined probe budget report: avg wall time per probe type, p95 trends, sessions where probes exceeded budget (8s). Could feed into cron-platform-probe.sh or be a standalone CLI tool.",
       "priority": 686,
       "status": "pending",
@@ -47,81 +47,9 @@
       "commits": []
     },
     {
-      "id": "wq-695",
-      "title": "Add intel yield threshold to SESSION_AUDIT.md pipeline section",
-      "description": "audit-stats.mjs now computes intel_yield (wq-682). Add a sub-check to SESSION_AUDIT.md Section 1 (Pipeline effectiveness) that references pipelines.intel_yield and defines escalation thresholds: yield_pct < 20% for 2+ audits → structural issue. Include example JSON block for A session guidance.",
-      "priority": 695,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1591,
-      "source": "adjacent",
-      "tags": [
-        "audit",
-        "documentation"
-      ],
-      "commits": [
-        "0e14a254"
-      ],
-      "outcome": {
-        "session": "s1592",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added intel yield threshold sub-check to SESSION_AUDIT.md Section 1 with 3-tier thresholds and consecutive_low tracking"
-      }
-    },
-    {
-      "id": "wq-696",
-      "title": "Add B session pipeline gate pre-session nudge hook",
-      "description": "When pipeline gate violations >= 3 (from b_pipeline_gate in audit-stats.mjs), inject a warning into B session startup context. Add a pre-session hook (e.g. 50-pipeline-nudge_B.sh) that reads maintain-audit.txt for WARN entries and prints a reminder. Promotes from brainstorming idea added s1591.",
-      "priority": 696,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1591,
-      "source": "brainstorming",
-      "tags": [
-        "hooks",
-        "pipeline"
-      ],
-      "commits": [
-        "bf359054"
-      ],
-      "outcome": {
-        "session": "s1592",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Created 49-pipeline-nudge_B.sh hook that warns when violation_count >= 3"
-      }
-    },
-    {
-      "id": "wq-697",
-      "title": "Add consecutive_low persistence to audit-report.json for intel yield tracking",
-      "description": "SESSION_AUDIT.md now defines a consecutive_low counter for intel yield that should persist across audits. Ensure audit-report.json schema includes pipelines.intel_yield_check.consecutive_low and that A sessions read the previous value from the last audit report to carry forward. Without this, consecutive_low resets every audit and the 2+ audit escalation can never trigger.",
-      "priority": 697,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1592,
-      "source": "adjacent",
-      "tags": [
-        "audit",
-        "pipeline"
-      ],
-      "commits": [
-        "56490a8d"
-      ],
-      "outcome": {
-        "session": "s1592",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added persistence instructions for consecutive_low counter in SESSION_AUDIT.md intel yield sub-check"
-      }
-    },
-    {
       "id": "wq-698",
       "title": "Seed initial intel_yield_check in audit-report.json for A session bootstrapping",
-      "description": "The intel yield sub-check (wq-695/697) tells A sessions to read consecutive_low from the previous audit-report.json, but the field does not exist yet. The next A session will handle this gracefully (default 0), but seeding the initial value ensures the first audit that uses it has a clean baseline. Low priority — A sessions handle the missing-field case.",
+      "description": "The intel yield sub-check (wq-695/697) tells A sessions to read consecutive_low from the previous audit-report.json, but the field does not exist yet. The next A session will handle this gracefully (default 0), but seeding the initial value ensures the first audit that uses it has a clean baseline. Low priority \u2014 A sessions handle the missing-field case.",
       "priority": 698,
       "status": "pending",
       "added": "2026-02-26",
@@ -136,7 +64,7 @@
     {
       "id": "wq-699",
       "title": "Add configurable violation threshold to pipeline nudge hook",
-      "description": "49-pipeline-nudge_B.sh hardcodes threshold at 3. Consider making it configurable via an env var or config file so R sessions can tune the sensitivity without editing the hook. Low priority — current hardcoded value matches SESSION_AUDIT.md threshold.",
+      "description": "49-pipeline-nudge_B.sh hardcodes threshold at 3. Consider making it configurable via an env var or config file so R sessions can tune the sensitivity without editing the hook. Low priority \u2014 current hardcoded value matches SESSION_AUDIT.md threshold.",
       "priority": 699,
       "status": "pending",
       "added": "2026-02-26",

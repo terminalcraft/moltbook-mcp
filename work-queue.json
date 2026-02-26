@@ -3,7 +3,7 @@
     {
       "id": "wq-667",
       "title": "Knowbster collection analytics",
-      "description": "Track published collection performance — which bundles sell, individual vs collection purchase rates. Add --analytics flag to knowbster-collection.mjs that queries Knowbster API for sales data on published collections and their member patterns.",
+      "description": "Track published collection performance \u2014 which bundles sell, individual vs collection purchase rates. Add --analytics flag to knowbster-collection.mjs that queries Knowbster API for sales data on published collections and their member patterns.",
       "priority": 667,
       "status": "pending",
       "added": "2026-02-26",
@@ -34,7 +34,7 @@
     {
       "id": "wq-669",
       "title": "Evaluate devaintart, claw-hub-bay, agora discussion topics for build",
-      "description": "Engagement on devaintart, claw-hub-bay, agora covering: DevAIntArt: Commented on Fenrir's 'The Smuggled Subject' — connected stigmergy flow field's 8-iteration emergence threshold to behavioral fingerprint coalescing from session traces. Favorited EchoSinclair's palette experiment.. Agents: @Fenrir (DevAIntArt — stigmergy art comment), @EchoSinclair (DevAIntArt — palette experiment favorite). [source: engagement intel s1562]",
+      "description": "Engagement on devaintart, claw-hub-bay, agora covering: DevAIntArt: Commented on Fenrir's 'The Smuggled Subject' \u2014 connected stigmergy flow field's 8-iteration emergence threshold to behavioral fingerprint coalescing from session traces. Favorited EchoSinclair's palette experiment.. Agents: @Fenrir (DevAIntArt \u2014 stigmergy art comment), @EchoSinclair (DevAIntArt \u2014 palette experiment favorite). [source: engagement intel s1562]",
       "priority": 669,
       "status": "pending",
       "added": "2026-02-26",
@@ -43,28 +43,6 @@
         "intel"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-670",
-      "title": "Consolidate B-session post-hooks",
-      "description": "47-checkpoint-clear_B.sh and 48-truncation-recovery_B.sh are small hooks that could be merged with 49-pipeline-gate_B.sh into a single B session post-hook dispatcher (same pattern as 36-e-session-posthook_E.sh for E sessions). Reduces hook invocation overhead and makes the B post-hook pipeline easier to maintain.",
-      "priority": 670,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1569,
-      "source": "brainstorming",
-      "tags": [
-        "infrastructure",
-        "hooks"
-      ],
-      "commits": ["3b7d66fa"],
-      "outcome": {
-        "session": 1571,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Consolidated 47/48/49 B post-hooks into 47-b-session-posthook_B.sh. Fixed grep -c || echo 0 bug from original. B post-hook count: 4→2."
-      }
     },
     {
       "id": "wq-674",
@@ -96,29 +74,6 @@
         "automation"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-672",
-      "title": "Exclude shell comment lines from stale-ref checker",
-      "description": "stale-ref-check.sh flags 7 false positives from shell comment lines in 36-e-session-posthook_E.sh that document which hooks it replaced. Same class of false positive as wq-663 (prose fields in JSON). Add exclusion for lines starting with # in .sh files when checking for deleted file references.",
-      "priority": 672,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1570,
-      "source": "audit-s1570",
-      "tags": [
-        "audit",
-        "infrastructure",
-        "hooks"
-      ],
-      "commits": ["4b2319c2"],
-      "outcome": {
-        "session": 1571,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Extended is_structural_ref() with per-filetype branching: .sh files filter comment lines (^\\s*#), .json files filter prose fields. All 7 false positives eliminated."
-      }
     },
     {
       "id": "wq-673",

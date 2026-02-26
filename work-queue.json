@@ -58,7 +58,7 @@
       "title": "Replace python3 subprocess in truncation-recovery with jq/node",
       "description": "47-b-session-posthook_B.sh check_truncation_recovery() still uses python3 subprocess for timestamp parsing (lines 48-77). Replace with a node one-liner or jq to align with the python3→jq migration pattern (R#274/R#275). The python3 call parses JSON timestamps which node handles natively.",
       "priority": 702,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1596,
       "source": "adjacent",
@@ -66,7 +66,14 @@
         "hooks",
         "python3-migration"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1597,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Replaced python3 timestamp parser with node one-liner. 30 lines removed, 11 added. Synthetic test passes."
+      }
     },
     {
       "id": "wq-703",

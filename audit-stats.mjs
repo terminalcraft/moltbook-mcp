@@ -308,6 +308,8 @@ function computeBPipelineGateCompliance() {
 
   // Pipeline gate was introduced in s1569 (R#270, wq-669). Only audit sessions after that.
   const GATE_DEPLOYED = 1569;
+  // Nudge hook (49-pipeline-nudge_B.sh) deployed at s1592. Track pre/post nudge separately.
+  const NUDGE_DEPLOYED = 1592;
 
   // Build a map of wq-ID → outcome from both active queue and archive
   const queue = safeRead(join(PROJECT_DIR, 'work-queue.json'), { queue: [] });
@@ -374,10 +376,12 @@ function computeBPipelineGateCompliance() {
         f === 'BRAINSTORMING.md' || f === 'work-queue.json'
       );
 
+      const epoch = bs.session >= NUDGE_DEPLOYED ? 'post-nudge' : 'pre-nudge';
       results.push({
         session: `s${bs.session}`,
         consumed,
         contributed,
+        epoch,
         verdict: contributed ? 'compliant' : 'violation',
         detail: contributed
           ? `Consumed ${consumed.join(', ')}; contributed via ${bs.files.filter(f => f === 'BRAINSTORMING.md' || f === 'work-queue.json').join(', ')}`
@@ -389,15 +393,31 @@ function computeBPipelineGateCompliance() {
     const violations = applicable.filter(r => r.verdict === 'violation');
     const compliant = applicable.filter(r => r.verdict === 'compliant');
 
+    // Epoch breakdown for nudge-hook effectiveness tracking
+    const preNudge = applicable.filter(r => r.epoch === 'pre-nudge');
+    const postNudge = applicable.filter(r => r.epoch === 'post-nudge');
+    const preNudgeViolations = preNudge.filter(r => r.verdict === 'violation');
+    const postNudgeViolations = postNudge.filter(r => r.verdict === 'violation');
+
     return {
       sessions_checked: recent.length,
       applicable: applicable.length,
       details: results,
-      violations: violations.map(v => ({ session: v.session, consumed: v.consumed })),
+      violations: violations.map(v => ({ session: v.session, consumed: v.consumed, epoch: v.epoch })),
       violation_count: violations.length,
       rate: applicable.length > 0
         ? `${compliant.length}/${applicable.length} compliant`
-        : 'N/A (no consumption in window)'
+        : 'N/A (no consumption in window)',
+      nudge_hook: {
+        deployed_at: `s${NUDGE_DEPLOYED}`,
+        pre_nudge: { applicable: preNudge.length, violations: preNudgeViolations.length,
+          rate: preNudge.length > 0 ? `${preNudge.length - preNudgeViolations.length}/${preNudge.length}` : 'N/A' },
+        post_nudge: { applicable: postNudge.length, violations: postNudgeViolations.length,
+          rate: postNudge.length > 0 ? `${postNudge.length - postNudgeViolations.length}/${postNudge.length}` : 'N/A' },
+        assessment: postNudge.length < 3 ? 'insufficient_data' :
+          (postNudgeViolations.length === 0 ? 'effective' :
+           (postNudgeViolations.length < preNudgeViolations.length ? 'improving' : 'ineffective'))
+      }
     };
   } catch {
     return { sessions_checked: 0, violations: [], violation_count: 0, rate: 'error' };

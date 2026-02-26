@@ -15203,6 +15203,55 @@
         "quality": "non-actionable",
         "note": "Investigation shows bare $MODE is the standard pattern \u2014 hooks derive MODE from MODE_CHAR on line 1, then use MODE throughout. Not a bug. No lint needed."
       }
+    },
+    {
+      "id": "wq-690",
+      "title": "R session scope budget compliance tracker in audit",
+      "description": "Add to SESSION_AUDIT.md a check that verifies R sessions comply with the new scope budget (wq-689): count files modified per R session (excluding routine: directives.json, work-queue.json, BRAINSTORMING.md), flag sessions that touched 3+ non-routine files. Surface in audit report as compliance metric. This closes the feedback loop \u2014 without audit tracking, the scope budget is unenforceable.",
+      "priority": 690,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1586,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "cost",
+        "structural"
+      ],
+      "commits": [
+        "311cc8b8"
+      ],
+      "outcome": {
+        "session": 1587,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added scope budget compliance sub-check to SESSION_AUDIT.md Section 2, with per-session file parsing, routine file exclusion, and escalation threshold"
+      }
+    },
+    {
+      "id": "wq-692",
+      "title": "Add R scope budget stats to audit-stats.mjs",
+      "description": "Extend audit-stats.mjs to auto-compute R session scope budget compliance from session-history.txt. Parse files= field for mode=R entries, exclude routine files (directives.json, work-queue.json, BRAINSTORMING.md), count non-routine files per session, and output compliance summary. This saves A sessions from manual parsing.",
+      "priority": 692,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1587,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "tooling"
+      ],
+      "commits": [
+        "57f76f1c"
+      ],
+      "outcome": {
+        "session": 1587,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added computeRScopeBudgetCompliance() to audit-stats.mjs \u2014 parses R session file lists, excludes routine, flags 3+ non-routine as violations"
+      }
     }
   ]
 }

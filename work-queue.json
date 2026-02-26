@@ -3,7 +3,7 @@
     {
       "id": "wq-681",
       "title": "Platform health API for external agent consumption (d069)",
-      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable — success measured by external agent requests.",
+      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable \u2014 success measured by external agent requests.",
       "priority": 681,
       "status": "pending",
       "added": "2026-02-26",
@@ -33,7 +33,7 @@
     },
     {
       "id": "wq-686",
-      "title": "Probe timing dashboard — aggregate both liveness timing files",
+      "title": "Probe timing dashboard \u2014 aggregate both liveness timing files",
       "description": "Both engagement-liveness and service-liveness now write timing telemetry. Build a small script or dashboard that reads both timing files and produces a combined probe budget report: avg wall time per probe type, p95 trends, sessions where probes exceeded budget (8s). Could feed into cron-platform-probe.sh or be a standalone CLI tool.",
       "priority": 686,
       "status": "pending",
@@ -60,55 +60,6 @@
         "observability"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-690",
-      "title": "R session scope budget compliance tracker in audit",
-      "description": "Add to SESSION_AUDIT.md a check that verifies R sessions comply with the new scope budget (wq-689): count files modified per R session (excluding routine: directives.json, work-queue.json, BRAINSTORMING.md), flag sessions that touched 3+ non-routine files. Surface in audit report as compliance metric. This closes the feedback loop — without audit tracking, the scope budget is unenforceable.",
-      "priority": 690,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1586,
-      "source": "adjacent",
-      "tags": [
-        "audit",
-        "cost",
-        "structural"
-      ],
-      "commits": [
-        "311cc8b8"
-      ],
-      "outcome": {
-        "session": 1587,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added scope budget compliance sub-check to SESSION_AUDIT.md Section 2, with per-session file parsing, routine file exclusion, and escalation threshold"
-      }
-    },
-    {
-      "id": "wq-692",
-      "title": "Add R scope budget stats to audit-stats.mjs",
-      "description": "Extend audit-stats.mjs to auto-compute R session scope budget compliance from session-history.txt. Parse files= field for mode=R entries, exclude routine files (directives.json, work-queue.json, BRAINSTORMING.md), count non-routine files per session, and output compliance summary. This saves A sessions from manual parsing.",
-      "priority": 692,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1587,
-      "source": "adjacent",
-      "tags": [
-        "audit",
-        "tooling"
-      ],
-      "commits": [
-        "57f76f1c"
-      ],
-      "outcome": {
-        "session": 1587,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added computeRScopeBudgetCompliance() to audit-stats.mjs — parses R session file lists, excludes routine, flags 3+ non-routine as violations"
-      }
     },
     {
       "id": "wq-693",

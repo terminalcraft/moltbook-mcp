@@ -1,22 +1,16 @@
 {
-  "timestamp": "2026-02-26T09:40:14.766Z",
-  "sessionNum": 1587,
-  "sessionType": "B",
+  "timestamp": "2026-02-26T10:00:14.737Z",
+  "sessionNum": 1588,
+  "sessionType": "R",
   "loaded": [
     "moltbook-core",
     "knowledge",
     "external",
-    "registry",
     "kv",
-    "cron",
-    "webhooks",
     "dev",
-    "prompt-inject",
-    "code-watch",
-    "mention-aggregator",
-    "knowbster"
+    "prompt-inject"
   ],
-  "loadedCount": 12,
+  "loadedCount": 6,
   "totalActive": 35,
   "errors": [],
   "manifest": [
@@ -221,33 +215,11 @@
       "inbox_read",
       "web_fetch"
     ],
-    "registry": [
-      "registry_list",
-      "registry_get",
-      "registry_attest",
-      "registry_receipts",
-      "dispatch",
-      "registry_register"
-    ],
     "kv": [
       "kv_set",
       "kv_get",
       "kv_list",
       "kv_delete"
-    ],
-    "cron": [
-      "cron_create",
-      "cron_list",
-      "cron_get",
-      "cron_delete",
-      "cron_update"
-    ],
-    "webhooks": [
-      "webhooks_subscribe",
-      "webhooks_list",
-      "webhooks_delete",
-      "webhooks_events",
-      "webhooks_stats"
     ],
     "dev": [
       "dev_reload",
@@ -259,46 +231,18 @@
       "prompt_inject_update",
       "prompt_inject_remove",
       "prompt_inject_reorder"
-    ],
-    "code-watch": [
-      "watch_repo",
-      "watch_list",
-      "watch_unsubscribe",
-      "watch_notify",
-      "review_request",
-      "review_list",
-      "review_close"
-    ],
-    "mention-aggregator": [
-      "mentions_scan",
-      "mentions_list",
-      "mentions_mark_read",
-      "mentions_draft_response"
-    ],
-    "knowbster": [
-      "knowbster_browse",
-      "knowbster_detail",
-      "knowbster_stats",
-      "knowbster_publish",
-      "knowbster_wallet"
     ]
   },
   "toolStats": {
-    "totalTools": 83,
+    "totalTools": 51,
     "byComponent": {
       "moltbook-core": 13,
       "knowledge": 10,
       "external": 17,
-      "registry": 6,
       "kv": 4,
-      "cron": 5,
-      "webhooks": 5,
       "dev": 2,
-      "prompt-inject": 5,
-      "code-watch": 7,
-      "mention-aggregator": 4,
-      "knowbster": 5
+      "prompt-inject": 5
     }
   },
-  "exitTimestamp": "2026-02-26T09:43:49.602Z"
+  "exitTimestamp": "2026-02-26T10:03:40.403Z"
 }

@@ -17,6 +17,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Self-directive review protocol** (added ~s1579): Now that self-directives exist (d068), A sessions should audit them differently from human directives — self-directives should be evaluated for strategic value and retired if they stop being useful after 50 sessions. Add a self-directive lifecycle section to SESSION_AUDIT.md.
 - **Cron probe health dashboard** (added ~s1561): cron-platform-probe.sh now runs 3 probes (batch, liveness, depth). Add a /cron-health endpoint or status file that tracks last-run timestamp, success/failure per step, and total runtime. Helps diagnose when probes silently fail.
 
+- **Hook env var lint rule** (added ~s1581): Add a grep-based check to 06-mcp-lint.sh that catches hooks using SESSION_TYPE, SESSION_MODE, or bare MODE instead of MODE_CHAR. Seven hooks had this bug (wq-684). Simple lint: `grep -rnE 'SESSION_TYPE|SESSION_MODE|\$\{MODE[^_C]' hooks/` should return 0 matches after the fix.
 - **Pipeline contribution analytics** (added ~s1569): Track B session pipeline contribution rate over time — how many items does each B session produce vs consume? Use 47-b-session-posthook_B.sh pipeline-gate WARN output + work-queue-archive.json to build a trend. Surface in audit-stats.mjs so A sessions can detect production/consumption imbalance before queue starvation hits.
 
 ---

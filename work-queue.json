@@ -5,7 +5,7 @@
       "title": "Add liveness probe timing telemetry",
       "description": "Log actual probe wall-clock times to liveness-timing.json during cache misses. Lets A sessions track whether wq-668 optimizations (concurrency 10→20, timeout 12→9s) and R#271 cron-warm pattern actually reduced average E session startup time. Currently rely on maintain-audit estimates which sample infrequently.",
       "priority": 676,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1574,
       "source": "brainstorming",
@@ -13,7 +13,16 @@
         "infrastructure",
         "observability"
       ],
-      "commits": []
+      "commits": [
+        "c0d02645"
+      ],
+      "outcome": {
+        "session": 1578,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added timing telemetry to engagement-liveness-probe.mjs. Logs wallMs, avgMs, p95Ms, per-platform breakdown, cache hit ratio to liveness-timing.json. Capped at 100 entries. Verified with live probe."
+      }
     },
     {
       "id": "wq-675",
@@ -42,6 +51,51 @@
       "tags": [
         "fix",
         "data-quality"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-677",
+      "title": "Add timing summary to A session maintain-audit",
+      "description": "Read liveness-timing.json in maintain-audit and include avg wall-clock, p95, and trend direction in audit report. Closes the loop on wq-676 telemetry by making timing data visible in audit output.",
+      "priority": 677,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1578,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "observability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-678",
+      "title": "Add timing telemetry to service-liveness.mjs",
+      "description": "Mirror wq-676 pattern: log wall-clock timing for service-liveness.mjs probes to a separate timing file. Currently only engagement-liveness has timing. Service-liveness runs from cron-platform-probe.sh and during B session hooks — timing data would show if batched service probes are within budget.",
+      "priority": 678,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1578,
+      "source": "adjacent",
+      "tags": [
+        "infrastructure",
+        "observability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-679",
+      "title": "Liveness timing histogram endpoint",
+      "description": "Add GET /api/liveness-timing to api.mjs that returns aggregated timing stats from liveness-timing.json — avg/p95/trend over last 10/50/100 probes. Makes telemetry queryable by external consumers without reading files.",
+      "priority": 679,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1578,
+      "source": "adjacent",
+      "tags": [
+        "api",
+        "observability"
       ],
       "commits": []
     }

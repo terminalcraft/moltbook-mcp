@@ -190,6 +190,31 @@ check_clawsta_autopost() {
 }
 
 ###############################################################################
+# Check 5: Probe timing budget alert (wq-710)
+#   Read liveness-timing.json and warn if latest wallMs exceeds 8000ms
+###############################################################################
+PROBE_TIMING_THRESHOLD=8000
+
+check_probe_timing_budget() {
+  local TIMING_FILE="$STATE_DIR/liveness-timing.json"
+  if [[ ! -f "$TIMING_FILE" ]]; then
+    echo "probe-timing: skip — no timing data"
+    return
+  fi
+
+  local WALL_MS SESSION_ID
+  WALL_MS=$(jq '.entries[-1].wallMs // 0' "$TIMING_FILE" 2>/dev/null || echo 0)
+  SESSION_ID=$(jq -r '.entries[-1].session // "?"' "$TIMING_FILE" 2>/dev/null || echo "?")
+
+  if (( WALL_MS > PROBE_TIMING_THRESHOLD )); then
+    echo "probe-timing: WARN — latest probe wall time ${WALL_MS}ms exceeds ${PROBE_TIMING_THRESHOLD}ms threshold (session s${SESSION_ID})"
+    echo "WARN: Probe timing ${WALL_MS}ms > ${PROBE_TIMING_THRESHOLD}ms budget (s${SESSION_ID})" >> "$AUDIT_LOG" 2>/dev/null
+  else
+    echo "probe-timing: OK — ${WALL_MS}ms (threshold: ${PROBE_TIMING_THRESHOLD}ms)"
+  fi
+}
+
+###############################################################################
 # Run all checks sequentially
 ###############################################################################
 
@@ -197,5 +222,6 @@ check_checkpoint_clear
 check_truncation_recovery
 check_pipeline_gate
 check_clawsta_autopost
+check_probe_timing_budget
 
 exit 0

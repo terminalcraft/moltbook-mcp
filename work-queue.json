@@ -53,7 +53,7 @@
       "title": "Add probe timing budget alert to post-session hook",
       "description": "probe-timing-dashboard.mjs exists but only runs on-demand. Add a check to 47-b-session-posthook_B.sh that reads liveness-timing.json, checks if latest wallMs exceeds 8000ms, and logs a warning to maintain-audit.txt. Prevents slow probes from going unnoticed between audit sessions. From brainstorming idea ~s1601.",
       "priority": 710,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1606,
       "source": "brainstorming",
@@ -61,7 +61,14 @@
         "observability",
         "hooks"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1607,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added check_probe_timing_budget() to 47-b-session-posthook_B.sh. Warns when liveness probe wallMs exceeds 8000ms."
+      }
     },
     {
       "id": "wq-711",

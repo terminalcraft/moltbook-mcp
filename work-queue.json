@@ -111,7 +111,7 @@
       "title": "Extend env var lint to catch bare $MODE usage in hooks",
       "description": "The wq-688 lint rule catches SESSION_TYPE/SESSION_MODE but doesn't flag bare $MODE (without _CHAR suffix). Some hooks may use $MODE expecting it to contain the session type character, but the canonical var is MODE_CHAR. Add a second grep pattern to 06-mcp-lint.sh: match $MODE or ${MODE} where not followed by _CHAR. Requires negative lookahead or post-grep filtering.",
       "priority": 691,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1586,
       "source": "adjacent",
@@ -119,7 +119,14 @@
         "hooks",
         "defensive"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1586,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Investigation shows bare $MODE is the standard pattern — hooks derive MODE from MODE_CHAR on line 1, then use MODE throughout. Not a bug. No lint needed."
+      }
     },
     {
       "id": "wq-690",

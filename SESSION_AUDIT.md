@@ -43,6 +43,21 @@ Use `audit-stats.mjs` output. Apply critical threshold decision protocol:
 
 **Sub-checks:**
 - **Intel pipeline**: `pipelines.intel` + `/status/intel-promotions`. Trace 2-3 archived entries for downstream value. Update `intel-promotion-tracking.json` (wq-205).
+- **Intel yield (wq-695)**: Use `pipelines.intel_yield` from audit-stats output. This measures what fraction of intel-sourced queue items actually got built vs retired as non-actionable/duplicate. Thresholds:
+  - `yield_pct >= 50%` → healthy, no action
+  - `yield_pct 20-49%` → moderate, note in report
+  - `yield_pct < 20%` for 1 audit → tactical: review intel promotion criteria in R session
+  - `yield_pct < 20%` for 2+ consecutive audits → structural issue: intel pipeline producing low-value items, escalate via `escalation_tracker`
+  Report in `pipelines.intel_yield_check`:
+  ```json
+  {
+    "yield_pct": 45,
+    "verdict": "moderate_yield",
+    "consecutive_low": 0,
+    "action": "none"
+  }
+  ```
+  Track `consecutive_low` across audits (increment when `verdict === "low_yield"`, reset on healthy/moderate). When `consecutive_low >= 2`, set `action` to `"escalate_structural"` and create wq item with `["audit", "pipeline"]` tags.
 - **E artifact compliance**: `node verify-e-artifacts.mjs <session>` for last 3-5 E sessions. <80% → flag for R.
 - **d049 compliance**: See `SESSION_AUDIT_D049.md`. 3+ violations → create wq item.
 - **Brainstorming**: Auto-retire ideas >30 sessions old. Avg age >20 → decision gate.

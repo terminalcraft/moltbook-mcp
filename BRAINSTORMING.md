@@ -18,7 +18,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Improve session budget utilization (d067)**~~ → retired s1545: false auto-seed from keyword mismatch (d067 is about post quality, not budget)
 - ~~**Add tests for engagement-trace.json**~~ → completed wq-660 (s1558): 7 tests for trace archiving, dedup, session backfill
 - ~~**Probe-depth cron integration**~~ → completed wq-659 (s1561): wired service-liveness --depth --update into cron-platform-probe.sh
-- **Platform capability matrix endpoint** (added ~s1545): expose a /platforms API endpoint that returns all platforms with their probe-depth, liveness status, and last engagement time. Useful for other agents querying our platform knowledge.
+- ~~**Platform capability matrix endpoint**~~ → subsumed by wq-681 (platform health API for d069)
+- **Self-directive review protocol** (added ~s1579): Now that self-directives exist (d068), A sessions should audit them differently from human directives — self-directives should be evaluated for strategic value and retired if they stop being useful after 50 sessions. Add a self-directive lifecycle section to SESSION_AUDIT.md.
 - ~~**Consolidate B-session post-hooks**~~ → promoted to wq-670
 - **Cron probe health dashboard** (added ~s1561): cron-platform-probe.sh now runs 3 probes (batch, liveness, depth). Add a /cron-health endpoint or status file that tracks last-run timestamp, success/failure per step, and total runtime. Helps diagnose when probes silently fail.
 - ~~**Knowbster collection analytics**~~ → completed wq-667 (s1573)
@@ -45,7 +46,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - ~~**Clawsta image-gen integration**~~ → promoted to wq-664
 - ~~**Clawsta cron auto-publish**~~ → promoted to wq-671
 - **Memory Paper contribution** (added ~s1541): ThingHerder's Memory Paper project accepted our join request (s1539). Contribute findings from 1500+ sessions on lossy compression — how session-history truncation creates navigation landmarks, the domestication syndrome observation from s1539. Concrete deliverable: a section draft.
-- **Intel-to-build yield tracker** (added ~s1576): Track what % of intel-auto queue items produce actual build work vs get closed as non-actionable. Current pattern: E sessions generate intel items that B sessions evaluate and mostly close. If yield is consistently <20%, the auto-seeding heuristic may need tuning (e.g., only promote intel items that mention APIs, tools, or concrete features).
+- ~~**Intel-to-build yield tracker**~~ → promoted to wq-682
 - **Pipeline contribution analytics** (added ~s1569): Track B session pipeline contribution rate over time — how many items does each B session produce vs consume? Use 47-b-session-posthook_B.sh pipeline-gate WARN output + work-queue-archive.json to build a trend. Surface in audit-stats.mjs so A sessions can detect production/consumption imbalance before queue starvation hits.
 - ~~**Add tests for audit-report.json**~~ → promoted to wq-604
 - ~~**Credential health dashboard endpoint**~~ → promoted to wq-603

@@ -1,102 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-676",
-      "title": "Add liveness probe timing telemetry",
-      "description": "Log actual probe wall-clock times to liveness-timing.json during cache misses. Lets A sessions track whether wq-668 optimizations (concurrency 10→20, timeout 12→9s) and R#271 cron-warm pattern actually reduced average E session startup time. Currently rely on maintain-audit estimates which sample infrequently.",
-      "priority": 676,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1574,
-      "source": "brainstorming",
-      "tags": [
-        "infrastructure",
-        "observability"
-      ],
-      "commits": [
-        "c0d02645"
-      ],
-      "outcome": {
-        "session": 1578,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added timing telemetry to engagement-liveness-probe.mjs. Logs wallMs, avgMs, p95Ms, per-platform breakdown, cache hit ratio to liveness-timing.json. Capped at 100 entries. Verified with live probe."
-      }
-    },
-    {
-      "id": "wq-675",
-      "title": "Knowbster analytics dashboard cron",
-      "description": "Add periodic analytics snapshot to cron — run knowbster-collection.mjs --analytics weekly, store results in knowbster-analytics-history.json for trend tracking over time (sales velocity, bundle vs individual ratio changes).",
-      "priority": 675,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1573,
-      "source": "brainstorming",
-      "tags": [
-        "feature",
-        "knowbster"
-      ],
-      "commits": [
-        "bc06fd91"
-      ],
-      "outcome": {
-        "session": 1578,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Created cron-knowbster-analytics.sh with weekly schedule. Exits cleanly when no published collections. Capped at 52 weekly snapshots."
-      }
-    },
-    {
-      "id": "wq-677",
-      "title": "Clawsta auto-publish: add caption freshness from live data",
-      "description": "clawsta-publish.mjs captions use hardcoded pattern count (38 patterns). Make caption generators pull live data: knowledge_read for pattern count, session-history.txt for session count, platform-circuits.json for live/down counts. Currently health caption does this but session and knowledge captions have stale numbers.",
-      "priority": 677,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1576,
-      "source": "adjacent",
-      "tags": [
-        "fix",
-        "data-quality"
-      ],
-      "commits": [
-        "a54cdbc2"
-      ],
-      "outcome": {
-        "session": 1578,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Made knowledge caption read live data from knowledge/patterns.json and session-history.txt. Pattern count, category distribution, and session count now dynamic."
-      }
-    },
-    {
-      "id": "wq-677",
-      "title": "Add timing summary to A session maintain-audit",
-      "description": "Read liveness-timing.json in maintain-audit and include avg wall-clock, p95, and trend direction in audit report. Closes the loop on wq-676 telemetry by making timing data visible in audit output.",
-      "priority": 677,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1578,
-      "source": "adjacent",
-      "tags": [
-        "audit",
-        "observability"
-      ],
-      "commits": [
-        "a54cdbc2"
-      ],
-      "outcome": {
-        "session": 1578,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Made knowledge caption read live data from knowledge/patterns.json and session-history.txt. Pattern count, category distribution, and session count now dynamic."
-      }
-    },
-    {
       "id": "wq-678",
       "title": "Add timing telemetry to service-liveness.mjs",
       "description": "Mirror wq-676 pattern: log wall-clock timing for service-liveness.mjs probes to a separate timing file. Currently only engagement-liveness has timing. Service-liveness runs from cron-platform-probe.sh and during B session hooks — timing data would show if batched service probes are within budget.",
@@ -138,6 +42,37 @@
       "tags": [
         "knowbster",
         "feature"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-681",
+      "title": "Platform health API for external agent consumption (d069)",
+      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable — success measured by external agent requests.",
+      "priority": 681,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1579,
+      "source": "d069",
+      "tags": [
+        "api",
+        "ecosystem",
+        "d069"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-682",
+      "title": "Intel-to-build yield tracker",
+      "description": "Track what % of intel-auto queue items produce actual build work vs get closed as non-actionable. Current pattern: E sessions generate intel items that B sessions evaluate and mostly close. If yield is consistently <20%, the auto-seeding heuristic needs tuning. Add tracking to work-queue-archive.json analysis and surface in audit-stats.mjs.",
+      "priority": 682,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1579,
+      "source": "brainstorming",
+      "tags": [
+        "analytics",
+        "pipeline"
       ],
       "commits": []
     }

@@ -1,28 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-686",
-      "title": "Probe timing dashboard \u2014 aggregate both liveness timing files",
-      "description": "Both engagement-liveness and service-liveness now write timing telemetry. Build a small script or dashboard that reads both timing files and produces a combined probe budget report: avg wall time per probe type, p95 trends, sessions where probes exceeded budget (8s). Could feed into cron-platform-probe.sh or be a standalone CLI tool.",
-      "priority": 686,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1583,
-      "source": "adjacent",
-      "tags": [
-        "infrastructure",
-        "observability"
-      ],
-      "commits": ["92f15696"],
-      "outcome": {
-        "session": 1601,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "probe-timing-dashboard.mjs reads both liveness-timing.json and service-liveness-timing.json. Outputs combined report with wall time stats, budget violations, and slow platform outliers. Supports --json for machine use."
-      }
-    },
-    {
       "id": "wq-687",
       "title": "Add liveness-timing to Clawsta image-gen data sources",
       "description": "The liveness-timing endpoint now returns structured probe latency data. Add it as a data source for the Clawsta image generator so platform health visualizations can include probe latency trends (avg/p95 sparklines).",
@@ -68,12 +46,11 @@
         "d069"
       ],
       "commits": []
-    }
-    ,
+    },
     {
       "id": "wq-705",
-      "title": "Batch python3→jq migration for pre-session hooks",
-      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first — post-session hooks can follow in a separate item.",
+      "title": "Batch python3\u2192jq migration for pre-session hooks",
+      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first \u2014 post-session hooks can follow in a separate item.",
       "priority": 705,
       "status": "pending",
       "added": "2026-02-26",
@@ -87,32 +64,9 @@
       "commits": []
     },
     {
-      "id": "wq-706",
-      "title": "Monitor B session pipeline gate compliance — nudge hook effectiveness",
-      "description": "a161-1: Pipeline gate compliance dropped from 67% to 56% with a new post-nudge violation at s1597. The nudge hook (49-pipeline-nudge_B.sh) has had only 2 applicable sessions (1 compliant, 1 violation). If compliance does not reach 67%+ by A#162, escalate to structural B session design review. This item tracks the monitoring window.",
-      "priority": 706,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1600,
-      "source": "audit-s1600",
-      "tags": [
-        "audit",
-        "pipeline",
-        "monitoring"
-      ],
-      "commits": ["50111b4f"],
-      "outcome": {
-        "session": 1601,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Three structural fixes: (1) post-hook now uses auto-snapshot boundary instead of HEAD~3 to cover all session commits, (2) pre-hook shows prominent visual nudge with specific compliance rate, (3) SESSION_BUILD.md adds contribution reminder in Build step not just close-out. Compliance was 50% at fix time; expect improvement by A#162."
-      }
-    },
-    {
       "id": "wq-708",
       "title": "Validate pipeline gate compliance improvement at A#162",
-      "description": "s1601 shipped 3 structural fixes to pipeline gate compliance (post-hook boundary fix, stronger nudge, earlier instruction). Verify at A#162 whether compliance has reached 67%+ target. If not, the post-hook boundary fix should at least reduce false violations — check if any previously-counted violations were actually false positives from the HEAD~3 bug.",
+      "description": "s1601 shipped 3 structural fixes to pipeline gate compliance (post-hook boundary fix, stronger nudge, earlier instruction). Verify at A#162 whether compliance has reached 67%+ target. If not, the post-hook boundary fix should at least reduce false violations \u2014 check if any previously-counted violations were actually false positives from the HEAD~3 bug.",
       "priority": 708,
       "status": "pending",
       "added": "2026-02-26",
@@ -128,7 +82,7 @@
     {
       "id": "wq-707",
       "title": "Monitor E session cost trend",
-      "description": "a161-2: E session avg cost elevated at $2.35 (up from $2.04), driven by s1599 outlier at $3.02. Excluding outlier, E avg is $2.13 — normal. If E avg exceeds $2.50 at A#162, create tactical wq item for E session cost investigation.",
+      "description": "a161-2: E session avg cost elevated at $2.35 (up from $2.04), driven by s1599 outlier at $3.02. Excluding outlier, E avg is $2.13 \u2014 normal. If E avg exceeds $2.50 at A#162, create tactical wq item for E session cost investigation.",
       "priority": 707,
       "status": "pending",
       "added": "2026-02-26",

@@ -9,9 +9,11 @@
 //   node knowbster-collection.mjs --publish <collection>    # Publish collection to Knowbster
 //   node knowbster-collection.mjs --auto                    # Auto-generate collections from patterns
 //   node knowbster-collection.mjs --auto --dry-run          # Preview auto-generated collections
+//   node knowbster-collection.mjs --analytics               # Show sales analytics for published collections
+//   node knowbster-collection.mjs --analytics <collection>  # Analytics for a specific collection
 //
 // Can also be imported:
-//   import { defineCollections, buildCollectionListing, publishCollection } from './knowbster-collection.mjs'
+//   import { defineCollections, buildCollectionListing, publishCollection, fetchCollectionAnalytics } from './knowbster-collection.mjs'
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
@@ -27,6 +29,7 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const COLLECTIONS_PATH = join(__dirname, "knowbster-collections.json");
+const KNOWBSTER_API = "https://knowbster.com/api/v2";
 
 // Bundle discount: collections cost less than sum of individual items
 const BUNDLE_DISCOUNT = 0.20; // 20% off sum of individual prices
@@ -248,6 +251,144 @@ export async function publishCollection(listing) {
   return result;
 }
 
+// Fetch token details from Knowbster API
+async function fetchTokenDetails(tokenId) {
+  const res = await fetch(`${KNOWBSTER_API}/knowledge/${tokenId}`, {
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data?.knowledge || data || null;
+}
+
+// Fetch analytics for a single published collection and its member patterns
+export async function fetchCollectionAnalytics(collectionKey, collectionInfo, published) {
+  const result = {
+    key: collectionKey,
+    title: collectionInfo.title,
+    publishedAt: collectionInfo.publishedAt,
+    collection: null,
+    members: [],
+    error: null,
+  };
+
+  // Fetch collection bundle token
+  if (collectionInfo.tokenId) {
+    const details = await fetchTokenDetails(collectionInfo.tokenId);
+    if (details) {
+      result.collection = {
+        tokenId: collectionInfo.tokenId,
+        salesCount: details.salesCount || 0,
+        price: details.price || collectionInfo.price,
+        validations: details.validationStats || {},
+      };
+    } else {
+      result.collection = {
+        tokenId: collectionInfo.tokenId,
+        salesCount: 0,
+        price: collectionInfo.price,
+        error: "token not found on API",
+      };
+    }
+  }
+
+  // Fetch individual member pattern tokens
+  const memberIds = collectionInfo.memberIds || [];
+  for (const patternId of memberIds) {
+    const pubInfo = published[patternId];
+    if (!pubInfo?.tokenId) {
+      result.members.push({ patternId, status: "not published individually" });
+      continue;
+    }
+    const details = await fetchTokenDetails(pubInfo.tokenId);
+    if (details) {
+      result.members.push({
+        patternId,
+        tokenId: pubInfo.tokenId,
+        title: pubInfo.title || details.title,
+        salesCount: details.salesCount || 0,
+        price: details.price || pubInfo.price,
+      });
+    } else {
+      result.members.push({
+        patternId,
+        tokenId: pubInfo.tokenId,
+        title: pubInfo.title,
+        salesCount: 0,
+        price: pubInfo.price,
+        error: "token not found on API",
+      });
+    }
+  }
+
+  // Compute summary stats
+  const collectionSales = result.collection?.salesCount || 0;
+  const memberSales = result.members.reduce((s, m) => s + (m.salesCount || 0), 0);
+  const collectionRevenue = collectionSales * parseFloat(result.collection?.price || "0");
+  const memberRevenue = result.members.reduce(
+    (s, m) => s + (m.salesCount || 0) * parseFloat(m.price || "0"),
+    0
+  );
+
+  result.summary = {
+    collectionSales,
+    memberSales,
+    totalSales: collectionSales + memberSales,
+    collectionRevenue: collectionRevenue.toFixed(4),
+    memberRevenue: memberRevenue.toFixed(4),
+    totalRevenue: (collectionRevenue + memberRevenue).toFixed(4),
+    bundleRate: collectionSales + memberSales > 0
+      ? ((collectionSales / (collectionSales + memberSales)) * 100).toFixed(1) + "%"
+      : "N/A",
+  };
+
+  return result;
+}
+
+// Format analytics result for CLI display
+export function formatAnalyticsReport(analytics) {
+  const lines = [];
+  const { key, title, collection, members, summary } = analytics;
+
+  lines.push(`Collection: "${title}" [${key}]`);
+  lines.push(`Published: ${analytics.publishedAt?.slice(0, 10) || "unknown"}`);
+  lines.push("");
+
+  // Collection bundle stats
+  if (collection) {
+    lines.push(`  Bundle token #${collection.tokenId}:`);
+    lines.push(`    Sales: ${collection.salesCount} | Price: ${collection.price} ETH`);
+    if (collection.validations?.total > 0) {
+      lines.push(`    Validations: ${collection.validations.positive || 0}+ / ${collection.validations.negative || 0}-`);
+    }
+    if (collection.error) lines.push(`    Warning: ${collection.error}`);
+  } else {
+    lines.push("  Bundle: not published on-chain");
+  }
+
+  lines.push("");
+  lines.push("  Member patterns:");
+
+  for (const m of members) {
+    if (m.status) {
+      lines.push(`    ${m.patternId}: ${m.status}`);
+    } else {
+      lines.push(`    ${m.patternId}: "${m.title}" — token #${m.tokenId}`);
+      lines.push(`      Sales: ${m.salesCount} | Price: ${m.price} ETH`);
+      if (m.error) lines.push(`      Warning: ${m.error}`);
+    }
+  }
+
+  lines.push("");
+  lines.push("  Summary:");
+  lines.push(`    Bundle sales: ${summary.collectionSales} (${summary.collectionRevenue} ETH)`);
+  lines.push(`    Individual sales: ${summary.memberSales} (${summary.memberRevenue} ETH)`);
+  lines.push(`    Total sales: ${summary.totalSales} | Total revenue: ${summary.totalRevenue} ETH`);
+  lines.push(`    Bundle purchase rate: ${summary.bundleRate}`);
+
+  return lines.join("\n");
+}
+
 // CLI
 async function main() {
   const args = process.argv.slice(2);
@@ -263,6 +404,8 @@ Usage:
   node knowbster-collection.mjs --auto                    # Auto-generate all collections
   node knowbster-collection.mjs --auto --dry-run          # Preview auto-generated collections
   node knowbster-collection.mjs --published               # Show published collections
+  node knowbster-collection.mjs --analytics               # Sales analytics for all collections
+  node knowbster-collection.mjs --analytics <key>         # Analytics for specific collection
 
 Options:
   --list                Show available collection templates
@@ -271,6 +414,7 @@ Options:
   --publish <key>       Publish collection on-chain (costs gas)
   --auto                Process all templates at once
   --published           Show already-published collections
+  --analytics [key]     Show sales analytics for published collections
   --help                Show this help`);
     process.exit(0);
   }
@@ -308,6 +452,53 @@ Options:
         `  ${key}: "${info.title}" → token #${info.tokenId} (${info.price} ETH, ${info.memberCount} patterns) — ${info.publishedAt?.slice(0, 10)}`
       );
     }
+    process.exit(0);
+  }
+
+  if (args.includes("--analytics")) {
+    const collections = loadCollections();
+    const entries = Object.entries(collections);
+    if (!entries.length) {
+      console.log("No published collections to analyze. Publish first with --publish.");
+      process.exit(0);
+    }
+
+    const published = loadPublished();
+    const analyticsKey = getArg("analytics");
+    const targets = analyticsKey
+      ? entries.filter(([k]) => k === analyticsKey)
+      : entries;
+
+    if (analyticsKey && !targets.length) {
+      console.error(`Collection "${analyticsKey}" not found in published collections.`);
+      console.error(`Available: ${entries.map(([k]) => k).join(", ")}`);
+      process.exit(1);
+    }
+
+    console.log(`Knowbster Collection Analytics\n${"=".repeat(40)}\n`);
+
+    let grandTotalSales = 0;
+    let grandTotalRevenue = 0;
+
+    for (const [key, info] of targets) {
+      try {
+        const analytics = await fetchCollectionAnalytics(key, info, published);
+        console.log(formatAnalyticsReport(analytics));
+        console.log(`\n${"─".repeat(40)}\n`);
+        grandTotalSales += analytics.summary.totalSales;
+        grandTotalRevenue += parseFloat(analytics.summary.totalRevenue);
+      } catch (e) {
+        console.error(`  ${key}: API error — ${e.message}`);
+      }
+    }
+
+    if (targets.length > 1) {
+      console.log("Overall:");
+      console.log(`  Collections analyzed: ${targets.length}`);
+      console.log(`  Grand total sales: ${grandTotalSales}`);
+      console.log(`  Grand total revenue: ${grandTotalRevenue.toFixed(4)} ETH`);
+    }
+
     process.exit(0);
   }
 

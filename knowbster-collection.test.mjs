@@ -4,12 +4,15 @@
 
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { mock } from "node:test";
 import {
   selectForCollection,
   computeCollectionPrice,
   buildCollectionListing,
   defineCollections,
   loadCollections,
+  fetchCollectionAnalytics,
+  formatAnalyticsReport,
 } from "./knowbster-collection.mjs";
 
 // Sample patterns matching real knowledge base structure
@@ -300,6 +303,166 @@ describe("knowbster-collection", () => {
     it("returns empty object when no file exists", () => {
       const collections = loadCollections();
       assert.equal(typeof collections, "object");
+    });
+  });
+
+  describe("fetchCollectionAnalytics", () => {
+    it("returns analytics with summary for a collection with API data", async (t) => {
+      // Mock fetch to return fake Knowbster API responses
+      const originalFetch = globalThis.fetch;
+      t.after(() => { globalThis.fetch = originalFetch; });
+
+      globalThis.fetch = async (url) => {
+        const tokenId = url.toString().split("/").pop();
+        const responses = {
+          "100": { knowledge: { tokenId: "100", salesCount: 3, price: "0.0048", validationStats: { total: 2, positive: 2, negative: 0 } } },
+          "50": { knowledge: { tokenId: "50", title: "Pattern A", salesCount: 1, price: "0.002" } },
+          "51": { knowledge: { tokenId: "51", title: "Pattern B", salesCount: 2, price: "0.002" } },
+        };
+        const body = responses[tokenId];
+        if (!body) return { ok: false, status: 404 };
+        return { ok: true, json: async () => body };
+      };
+
+      const collectionInfo = {
+        tokenId: "100",
+        title: "Test Collection",
+        publishedAt: "2026-02-20T00:00:00Z",
+        price: "0.0048",
+        memberIds: ["p002", "p005", "p099"],
+        memberCount: 3,
+      };
+
+      const published = {
+        p002: { tokenId: "50", title: "Pattern A", price: "0.002" },
+        p005: { tokenId: "51", title: "Pattern B", price: "0.002" },
+        // p099 not published individually
+      };
+
+      const analytics = await fetchCollectionAnalytics("test-arch", collectionInfo, published);
+
+      assert.equal(analytics.key, "test-arch");
+      assert.equal(analytics.title, "Test Collection");
+      assert.equal(analytics.collection.salesCount, 3);
+      assert.equal(analytics.members.length, 3);
+      assert.equal(analytics.members[0].salesCount, 1);
+      assert.equal(analytics.members[1].salesCount, 2);
+      assert.equal(analytics.members[2].status, "not published individually");
+      assert.equal(analytics.summary.collectionSales, 3);
+      assert.equal(analytics.summary.memberSales, 3);
+      assert.equal(analytics.summary.totalSales, 6);
+      assert.equal(analytics.summary.bundleRate, "50.0%");
+    });
+
+    it("handles collection with no published members gracefully", async (t) => {
+      const originalFetch = globalThis.fetch;
+      t.after(() => { globalThis.fetch = originalFetch; });
+
+      globalThis.fetch = async (url) => {
+        return {
+          ok: true,
+          json: async () => ({ knowledge: { tokenId: "200", salesCount: 0, price: "0.005" } }),
+        };
+      };
+
+      const collectionInfo = {
+        tokenId: "200",
+        title: "Empty Collection",
+        publishedAt: "2026-02-25T00:00:00Z",
+        price: "0.005",
+        memberIds: ["p001"],
+        memberCount: 1,
+      };
+
+      const analytics = await fetchCollectionAnalytics("empty", collectionInfo, {});
+
+      assert.equal(analytics.summary.collectionSales, 0);
+      assert.equal(analytics.summary.memberSales, 0);
+      assert.equal(analytics.summary.bundleRate, "N/A");
+    });
+
+    it("handles API failures for individual tokens", async (t) => {
+      const originalFetch = globalThis.fetch;
+      t.after(() => { globalThis.fetch = originalFetch; });
+
+      globalThis.fetch = async () => ({ ok: false, status: 500 });
+
+      const collectionInfo = {
+        tokenId: "300",
+        title: "Failing API",
+        price: "0.004",
+        memberIds: ["p001"],
+        memberCount: 1,
+      };
+
+      const published = { p001: { tokenId: "60", title: "Pattern", price: "0.002" } };
+      const analytics = await fetchCollectionAnalytics("fail", collectionInfo, published);
+
+      // Should still produce a result with error info
+      assert.ok(analytics.collection.error);
+      assert.ok(analytics.members[0].error);
+      assert.equal(analytics.summary.totalSales, 0);
+    });
+  });
+
+  describe("formatAnalyticsReport", () => {
+    it("produces readable report from analytics data", () => {
+      const analytics = {
+        key: "agent-arch",
+        title: "Agent Architecture Patterns",
+        publishedAt: "2026-02-20T12:00:00Z",
+        collection: {
+          tokenId: "100",
+          salesCount: 5,
+          price: "0.0048",
+          validations: { total: 3, positive: 3, negative: 0 },
+        },
+        members: [
+          { patternId: "p002", tokenId: "50", title: "Stateless session", salesCount: 2, price: "0.002" },
+          { patternId: "p005", status: "not published individually" },
+        ],
+        summary: {
+          collectionSales: 5,
+          memberSales: 2,
+          totalSales: 7,
+          collectionRevenue: "0.0240",
+          memberRevenue: "0.0040",
+          totalRevenue: "0.0280",
+          bundleRate: "71.4%",
+        },
+      };
+
+      const report = formatAnalyticsReport(analytics);
+
+      assert.ok(report.includes("Agent Architecture Patterns"), "should include title");
+      assert.ok(report.includes("token #100"), "should include bundle token");
+      assert.ok(report.includes("Sales: 5"), "should include bundle sales");
+      assert.ok(report.includes("3+"), "should include validations");
+      assert.ok(report.includes("Stateless session"), "should include member title");
+      assert.ok(report.includes("not published individually"), "should note unpublished members");
+      assert.ok(report.includes("Bundle purchase rate: 71.4%"), "should show bundle rate");
+      assert.ok(report.includes("0.0280 ETH"), "should show total revenue");
+    });
+
+    it("handles collection without on-chain token", () => {
+      const analytics = {
+        key: "no-token",
+        title: "Unpublished",
+        collection: null,
+        members: [],
+        summary: {
+          collectionSales: 0,
+          memberSales: 0,
+          totalSales: 0,
+          collectionRevenue: "0.0000",
+          memberRevenue: "0.0000",
+          totalRevenue: "0.0000",
+          bundleRate: "N/A",
+        },
+      };
+
+      const report = formatAnalyticsReport(analytics);
+      assert.ok(report.includes("not published on-chain"), "should note missing token");
     });
   });
 });

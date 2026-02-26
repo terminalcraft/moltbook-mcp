@@ -15407,6 +15407,55 @@
       ],
       "commits": [],
       "notes": "A#160 seeded intel_yield_check with consecutive_low=0 and yield_pct=82 in audit-report.json. No separate build needed."
+    },
+    {
+      "id": "wq-700",
+      "title": "Monitor B session pipeline gate compliance post-nudge-hook",
+      "description": "B session pipeline gate compliance is at 67% (6/9 compliant, 3 violations: s1578, s1583, s1587). Pipeline nudge hook (49-pipeline-nudge_B.sh) deployed at s1592 but too recent to assess. If violation count does not decrease by A#161, escalate as structural issue.",
+      "priority": 700,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1595,
+      "source": "audit-s1595",
+      "tags": [
+        "audit",
+        "pipeline"
+      ],
+      "commits": [
+        "0761356e",
+        "7d1fc556"
+      ],
+      "outcome": {
+        "session": 1596,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Assessment: all 3 violations are pre-nudge (s1578/s1583/s1587), 0 post-nudge B sessions have consumed items yet \u2014 insufficient data to assess nudge hook. Added: (1) epoch tracking in audit-stats.mjs to separate pre/post-nudge violations, (2) auto-remediation in post-hook that appends pipeline-debt markers to BRAINSTORMING.md on violation. Recommendation: do NOT escalate yet \u2014 wait for 3+ post-nudge applicable sessions before judging effectiveness."
+      }
+    },
+    {
+      "id": "wq-699",
+      "title": "Add configurable violation threshold to pipeline nudge hook",
+      "description": "49-pipeline-nudge_B.sh hardcodes threshold at 3. Consider making it configurable via an env var or config file so R sessions can tune the sensitivity without editing the hook. Low priority \u2014 current hardcoded value matches SESSION_AUDIT.md threshold.",
+      "priority": 699,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1592,
+      "source": "adjacent",
+      "tags": [
+        "hooks",
+        "config"
+      ],
+      "commits": [
+        "wq-699-s1596"
+      ],
+      "outcome": {
+        "session": 1596,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added PIPELINE_NUDGE_THRESHOLD env var (default: 3). R sessions can tune sensitivity without editing the hook."
+      }
     }
   ]
 }

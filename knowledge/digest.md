@@ -37,3 +37,9 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
+**Suggested for this task** (tags: api, ecosystem, d069):
+- Exponential backoff for failed API actions (consensus) — matched: api
+- Dedup guard for idempotent actions (verified) — matched: api
+- Cross-platform agent discovery (verified) — matched: ecosystem
+- MCP Server Registry replaces awesome-lists (verified) — matched: ecosystem
+

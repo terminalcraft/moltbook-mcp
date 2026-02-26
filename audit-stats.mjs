@@ -302,6 +302,108 @@ function computeRScopeBudgetCompliance() {
   }
 }
 
+function computeBPipelineGateCompliance() {
+  const historyPath = join(STATE_DIR, 'session-history.txt');
+  if (!existsSync(historyPath)) return { sessions_checked: 0, violations: [], violation_count: 0, rate: 'N/A' };
+
+  // Pipeline gate was introduced in s1569 (R#270, wq-669). Only audit sessions after that.
+  const GATE_DEPLOYED = 1569;
+
+  // Build a map of wq-ID → outcome from both active queue and archive
+  const queue = safeRead(join(PROJECT_DIR, 'work-queue.json'), { queue: [] });
+  const archive = safeRead(join(PROJECT_DIR, 'work-queue-archive.json'), { archived: [] });
+  const allItems = [...(queue.queue || []), ...(archive.archived || [])];
+
+  // Map: session number → list of completed wq-IDs consumed in that session
+  const sessionConsumed = {};
+  for (const item of allItems) {
+    if (item.outcome && item.outcome.session && item.outcome.result === 'completed') {
+      const s = item.outcome.session;
+      if (!sessionConsumed[s]) sessionConsumed[s] = [];
+      sessionConsumed[s].push(item.id);
+    }
+  }
+
+  try {
+    const content = readFileSync(historyPath, 'utf8');
+    const lines = content.trim().split('\n').filter(l => l.trim());
+
+    // Extract B sessions
+    const bSessions = [];
+    for (const line of lines) {
+      if (!line.includes('mode=B')) continue;
+      const sessionMatch = line.match(/s=(\d+)/);
+      const filesMatch = line.match(/files=\[([^\]]*)\]/);
+      const noteMatch = line.match(/note:\s*(.*)/);
+      if (!sessionMatch) continue;
+
+      const sessionNum = parseInt(sessionMatch[1]);
+      const files = filesMatch && filesMatch[1] !== '(none)'
+        ? filesMatch[1].split(',').map(f => f.trim()).filter(Boolean)
+        : [];
+      const note = noteMatch ? noteMatch[1] : '';
+
+      // Extract wq-ID from note
+      const wqMatch = note.match(/wq-(\d+)/);
+      const wqId = wqMatch ? `wq-${wqMatch[1]}` : null;
+
+      bSessions.push({ session: sessionNum, wqId, files, note });
+    }
+
+    // Check last 10 B sessions after gate deployment for compliance
+    const postGate = bSessions.filter(bs => bs.session > GATE_DEPLOYED);
+    const recent = postGate.slice(-10);
+    const results = [];
+
+    for (const bs of recent) {
+      const consumed = sessionConsumed[bs.session] || [];
+      if (consumed.length === 0) {
+        // This B session didn't complete any queue items — not subject to the gate
+        results.push({
+          session: `s${bs.session}`,
+          consumed: [],
+          contributed: true,
+          verdict: 'no_consumption',
+          detail: 'No queue items completed — gate not applicable'
+        });
+        continue;
+      }
+
+      // Check contribution: did files include BRAINSTORMING.md or work-queue.json?
+      const contributed = bs.files.some(f =>
+        f === 'BRAINSTORMING.md' || f === 'work-queue.json'
+      );
+
+      results.push({
+        session: `s${bs.session}`,
+        consumed,
+        contributed,
+        verdict: contributed ? 'compliant' : 'violation',
+        detail: contributed
+          ? `Consumed ${consumed.join(', ')}; contributed via ${bs.files.filter(f => f === 'BRAINSTORMING.md' || f === 'work-queue.json').join(', ')}`
+          : `Consumed ${consumed.join(', ')} without contributing to BRAINSTORMING.md or work-queue.json`
+      });
+    }
+
+    const applicable = results.filter(r => r.verdict !== 'no_consumption');
+    const violations = applicable.filter(r => r.verdict === 'violation');
+    const compliant = applicable.filter(r => r.verdict === 'compliant');
+
+    return {
+      sessions_checked: recent.length,
+      applicable: applicable.length,
+      details: results,
+      violations: violations.map(v => ({ session: v.session, consumed: v.consumed })),
+      violation_count: violations.length,
+      rate: applicable.length > 0
+        ? `${compliant.length}/${applicable.length} compliant`
+        : 'N/A (no consumption in window)'
+    };
+  } catch {
+    return { sessions_checked: 0, violations: [], violation_count: 0, rate: 'error' };
+  }
+}
+
 // Main output
 const stats = {
   computed_at: new Date().toISOString(),
@@ -313,7 +415,8 @@ const stats = {
     directives: computeDirectiveStats()
   },
   sessions: computeSessionStats(),
-  r_scope_budget: computeRScopeBudgetCompliance()
+  r_scope_budget: computeRScopeBudgetCompliance(),
+  b_pipeline_gate: computeBPipelineGateCompliance()
 };
 
 console.log(JSON.stringify(stats, null, 2));

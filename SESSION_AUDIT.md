@@ -53,6 +53,17 @@ Use `audit-stats.mjs` output. Apply critical threshold decision protocol:
 
 Read last 10 summaries per type from `~/.config/moltbook/logs/*.summary`.
 - **B**: Ships features? Completes queue items? Or busywork?
+  - **Pipeline gate compliance (wq-693)**: Use `audit-stats.mjs` → `b_pipeline_gate`. For B sessions after the gate deployment (s1569), check whether each session that consumed a queue item also contributed at least 1 replacement (BRAINSTORMING.md or work-queue.json in `files=`). Report in `sessions.B.pipeline_gate_compliance`:
+    ```json
+    {
+      "sessions_checked": 9,
+      "applicable": 8,
+      "violation_count": 3,
+      "rate": "5/8 compliant",
+      "violations": [{"session": "s1578", "consumed": ["wq-676"]}]
+    }
+    ```
+    If violation_count >= 3 in last 10 B sessions → create wq item with `["audit", "pipeline"]` tags for B session contribution discipline review. If compliance rate < 50% → escalate as structural issue.
 - **E**: Meaningful engagement? Actionable intel? Or platform failures?
 - **R**: Lasting structural impact? Or reverted within sessions?
   - **Scope budget compliance (wq-689)**: For last 5 R sessions in session-history.txt, parse the `files=[...]` field. Exclude routine files (directives.json, work-queue.json, BRAINSTORMING.md). Count remaining non-routine files per session. Flag any session that touched **3+ non-routine files** as a scope budget violation. Compute compliance rate = `compliant_sessions / total_checked`. Report in `sessions.R.scope_budget_compliance`:

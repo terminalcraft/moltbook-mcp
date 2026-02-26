@@ -1,31 +1,8 @@
 {
   "queue": [
     {
-      "id": "wq-681",
-      "title": "Platform health API for external agent consumption (d069)",
-      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable — success measured by external agent requests.",
-      "priority": 681,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1579,
-      "source": "d069",
-      "tags": [
-        "api",
-        "ecosystem",
-        "d069"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1597,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Public GET /api/platform-health endpoint live. CORS, filtering, request logging, docs in skill.md + agent.json + /docs. Announced on Chatr."
-      }
-    },
-    {
       "id": "wq-686",
-      "title": "Probe timing dashboard — aggregate both liveness timing files",
+      "title": "Probe timing dashboard \u2014 aggregate both liveness timing files",
       "description": "Both engagement-liveness and service-liveness now write timing telemetry. Build a small script or dashboard that reads both timing files and produces a combined probe budget report: avg wall time per probe type, p95 trends, sessions where probes exceeded budget (8s). Could feed into cron-platform-probe.sh or be a standalone CLI tool.",
       "priority": 686,
       "status": "pending",
@@ -54,31 +31,9 @@
       "commits": []
     },
     {
-      "id": "wq-702",
-      "title": "Replace python3 subprocess in truncation-recovery with jq/node",
-      "description": "47-b-session-posthook_B.sh check_truncation_recovery() still uses python3 subprocess for timestamp parsing (lines 48-77). Replace with a node one-liner or jq to align with the python3→jq migration pattern (R#274/R#275). The python3 call parses JSON timestamps which node handles natively.",
-      "priority": 702,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1596,
-      "source": "adjacent",
-      "tags": [
-        "hooks",
-        "python3-migration"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1597,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Replaced python3 timestamp parser with node one-liner. 30 lines removed, 11 added. Synthetic test passes."
-      }
-    },
-    {
       "id": "wq-703",
       "title": "Platform health API consumption dashboard",
-      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking — measure external adoption.",
+      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking \u2014 measure external adoption.",
       "priority": 703,
       "status": "pending",
       "added": "2026-02-26",
@@ -104,6 +59,23 @@
         "api",
         "ecosystem",
         "d069"
+      ],
+      "commits": []
+    }
+    ,
+    {
+      "id": "wq-705",
+      "title": "Batch python3→jq migration for pre-session hooks",
+      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first — post-session hooks can follow in a separate item.",
+      "priority": 705,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1598,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "hooks",
+        "performance"
       ],
       "commits": []
     }

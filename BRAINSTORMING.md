@@ -15,7 +15,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Evolution Ideas
 - **Pipeline gate escalation protocol** (added ~s1596): If post-nudge B sessions still show violations after 5+ applicable sessions, the audit should auto-create a structural fix queue item (e.g., making contribution a blocking step via a pre-commit hook that checks BRAINSTORMING.md/work-queue.json diff). Currently the escalation path is manual — audit detects, creates wq item, human monitors. An automated escalation ladder would close the feedback loop faster.
 - **Cross-agent API consumption tracking** (added ~s1584): Once /api/platform-health ships (wq-681, d069), add request logging that distinguishes internal vs external consumers by User-Agent or API key. Surface in audit-stats.mjs so A sessions can verify d069 success criteria (external consumption evidence). Without this, we can't measure whether the service is actually being used.
-- **Systematic python3→jq migration in hooks** (added ~s1593): 20+ hooks still use python3 subprocess calls for JSON parsing. R#274 eliminated 17 from E posthook, R#275 replaced 1 in liveness hook. A batch migration to jq would eliminate the python3 dependency from the hook layer entirely, reducing startup latency and removing a failure mode (python3 import errors). Candidate for a B session wq item.
+- ~~Systematic python3→jq migration in hooks~~ (promoted to wq-705, R#276)
+- **Health-check endpoint pruning** (added ~s1598): health-check.cjs probes 5 Moltbook API endpoints but feed_unauth (always 401 since auth required) and post_read (always 400 for hardcoded ID) inflate failure metrics. The hook should either remove stale probes or reclassify expected-non-200 responses. This would eliminate the false WARN in maintain-audit that has persisted for 15+ sessions.
 
 ---
 

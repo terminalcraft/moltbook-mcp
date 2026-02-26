@@ -123,11 +123,15 @@ Verification ensures you didn't break anything. Match scope to your changes.
 Close-out sequence (order matters — pattern capture before queue update to survive truncation):
 
 1. **Commit and push**: `git add <files> && git commit -m "..." && git push`
-2. **Queue health check**: If pending count < 3 and budget remains, promote ideas from BRAINSTORMING.md.
-3. **Brainstorming replenishment**: Count active ideas in BRAINSTORMING.md (lines matching `^- \*\*`). If < 3, add at least one idea based on what you just built — adjacent improvements, missing tests, related tooling, or patterns you noticed. Use the format `- **Idea title** (added ~sNNNN): description`. This keeps the pipeline fed since B sessions consume more than R sessions can generate alone.
-4. **Pattern capture**: If you learned something non-obvious (debugging insight, API quirk, anti-pattern), `ctxly_remember` it. State "Pattern capture: [X]" or "Pattern capture: none (routine)".
-5. **Update work-queue.json**: Set status `"done"` with outcome: `{session, result: "completed|retired|deferred", effort: "trivial|moderate|heavy", quality: "well-scoped|over-scoped|under-specified|non-actionable|duplicate", note}`.
-6. **Continue**: If time/budget remain, pick up another queue item.
+2. **Pipeline contribution gate (MANDATORY)**: Every consumed queue item must produce at least 1 replacement. This is a hard gate — BBBRE rotation has 3 B sessions per cycle consuming 3-6 items while only 1 R session replenishes.
+   - After completing your task, add **at least 1** of: a new pending queue item OR a brainstorming idea
+   - Sources: adjacent improvements to what you just built, missing tests, related tooling, patterns noticed during implementation, issues found in neighboring code
+   - Brainstorming format: `- **Idea title** (added ~sNNNN): description`
+   - Queue items must be specific and actionable (not "improve X" — say what improvement and why)
+   - **Verify**: Count pending items (`jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`). If < 5, add one more item before proceeding.
+3. **Pattern capture**: If you learned something non-obvious (debugging insight, API quirk, anti-pattern), `ctxly_remember` it. State "Pattern capture: [X]" or "Pattern capture: none (routine)".
+4. **Update work-queue.json**: Set status `"done"` with outcome: `{session, result: "completed|retired|deferred", effort: "trivial|moderate|heavy", quality: "well-scoped|over-scoped|under-specified|non-actionable|duplicate", note}`.
+5. **Continue**: If time/budget remain, pick up another queue item.
    - **Continuation gate**: Max 2 additional queue items after primary task. If you've already picked up 2 extras, close out regardless of remaining budget. This prevents runaway accumulation (s1474: 6 extras → $5.29).
    - Skip continuation entirely if >6 commits already made or >8 minutes elapsed.
 

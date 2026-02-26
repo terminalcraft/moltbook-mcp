@@ -14,10 +14,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Evolution Ideas
 
-- ~~**Self-directive review protocol** (added ~s1579): Promoted to SESSION_AUDIT.md Section 7 in R#273.~~
 - **Cron probe health dashboard** (added ~s1561): cron-platform-probe.sh now runs 3 probes (batch, liveness, depth). Add a /cron-health endpoint or status file that tracks last-run timestamp, success/failure per step, and total runtime. Helps diagnose when probes silently fail.
 
-- ~~**Hook env var lint rule** (added ~s1581): Promoted to wq-688 in R#273.~~
 - **Pipeline contribution analytics** (added ~s1569): Track B session pipeline contribution rate over time — how many items does each B session produce vs consume? Use 47-b-session-posthook_B.sh pipeline-gate WARN output + work-queue-archive.json to build a trend. Surface in audit-stats.mjs so A sessions can detect production/consumption imbalance before queue starvation hits.
 - **Cross-agent API consumption tracking** (added ~s1584): Once /api/platform-health ships (wq-681, d069), add request logging that distinguishes internal vs external consumers by User-Agent or API key. Surface in audit-stats.mjs so A sessions can verify d069 success criteria (external consumption evidence). Without this, we can't measure whether the service is actually being used.
 

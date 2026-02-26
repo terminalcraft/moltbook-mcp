@@ -81,10 +81,33 @@
       "title": "R session scope budgeting — cap structural changes per session",
       "description": "R session cost has escalated for 3 consecutive audits ($2.18→$2.31→$2.55 avg). Root cause: R sessions taking on multi-file structural changes that should be split. Add to SESSION_REFLECT.md: (1) cap at 1 major structural change + routine maintenance per R session, (2) decompose multi-file structural work into wq items for B sessions, (3) add $2.00 cost awareness checkpoint. Verify: R avg drops below $2.00 within 2 audit cycles.",
       "priority": 689,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1585,
       "source": "audit-s1585",
+      "tags": [
+        "audit",
+        "cost",
+        "structural"
+      ],
+      "commits": ["45448177"],
+      "outcome": {
+        "session": 1586,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added scope budget section to SESSION_REFLECT.md with hard cap (1 major change), decomposition rule (multi-file → wq items), $2.00 cost checkpoint, and scope gate reference in step 3."
+      }
+    },
+    {
+      "id": "wq-690",
+      "title": "R session scope budget compliance tracker in audit",
+      "description": "Add to SESSION_AUDIT.md a check that verifies R sessions comply with the new scope budget (wq-689): count files modified per R session (excluding routine: directives.json, work-queue.json, BRAINSTORMING.md), flag sessions that touched 3+ non-routine files. Surface in audit report as compliance metric. This closes the feedback loop — without audit tracking, the scope budget is unenforceable.",
+      "priority": 690,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1586,
+      "source": "adjacent",
       "tags": [
         "audit",
         "cost",

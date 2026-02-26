@@ -91,7 +91,7 @@
       "title": "Add R scope budget stats to audit-stats.mjs",
       "description": "Extend audit-stats.mjs to auto-compute R session scope budget compliance from session-history.txt. Parse files= field for mode=R entries, exclude routine files (directives.json, work-queue.json, BRAINSTORMING.md), count non-routine files per session, and output compliance summary. This saves A sessions from manual parsing.",
       "priority": 692,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1587,
       "source": "adjacent",
@@ -99,7 +99,16 @@
         "audit",
         "tooling"
       ],
-      "commits": []
+      "commits": [
+        "57f76f1c"
+      ],
+      "outcome": {
+        "session": 1587,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added computeRScopeBudgetCompliance() to audit-stats.mjs — parses R session file lists, excludes routine, flags 3+ non-routine as violations"
+      }
     },
     {
       "id": "wq-693",

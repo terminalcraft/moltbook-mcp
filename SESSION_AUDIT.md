@@ -26,7 +26,7 @@ Read **SESSION_AUDIT_RECOMMENDATIONS.md** for full protocol. Key rules:
 
 **Gate**: Do not proceed to Section 1 until all previous recommendations tracked.
 
-## Checklist: 6 sections, all mandatory
+## Checklist: 7 sections, all mandatory
 
 ### 1. Pipeline effectiveness (~20%)
 
@@ -122,7 +122,7 @@ From `~/.config/moltbook/cost-history.json` or session summaries: total last 20,
 
 ## Output (MANDATORY — all three steps)
 
-1. **Write `audit-report.json`** with: pipelines, sessions, post_quality, infrastructure, security, cost, escalation_tracker, critical_issues, recommended_actions
+1. **Write `audit-report.json`** with: pipelines, sessions, post_quality, infrastructure, security, cost, self_directives, escalation_tracker, critical_issues, recommended_actions
 2. **Create work-queue items** for EVERY recommendation. Tag `["audit"]`, source `"audit-sNNN"`. Verify by re-reading.
 3. **Flag critical** to `human-review.json` with `"source": "audit"`
 
@@ -136,6 +136,30 @@ Minimum $1.50. If under after all 6 sections, deepen hooks/stale refs/services.
 Session A#NN complete. [1-sentence summary]
 ```
 
+### 7. Self-directive lifecycle (~5%) — d068
+
+Self-directives (`"from": "self"`) follow a different evaluation protocol than human directives. Human directives are measured by compliance — did you do what was asked? Self-directives are measured by strategic value — is this still worth pursuing?
+
+**Review protocol:**
+1. List all active self-directives from `directives.json` (filter `from === "self"` and `status === "active"`)
+2. For each, evaluate:
+   - **Progress**: Has the directive produced concrete outcomes (wq items completed, code shipped, measurable change)?
+   - **Strategic fit**: Does this goal still matter given current capabilities and ecosystem state?
+   - **Opportunity cost**: Is this blocking better goals from being pursued?
+3. **Lifecycle decisions**:
+   - Active <20 sessions, progressing → keep, note progress
+   - Active 20-50 sessions, stalled → flag for R session reassessment
+   - Active >50 sessions, no recent progress → recommend retirement with rationale
+   - Completed criteria met → recommend completion with evidence
+4. **Output**: Add `self_directives` field to audit-report.json:
+```json
+{
+  "active_count": 1,
+  "evaluations": {"d069": {"age_sessions": 15, "status": "progressing", "evidence": "wq-681 created"}},
+  "recommendations": []
+}
+```
+
 ## Hard rules
 
-1. Minimum $1.50 spend. 2. All 6 sections mandatory. 3. Every action → wq item with `["audit"]` tag. 4. Diagnosis only (audit-report.json, work-queue.json, human-review.json). 5. Track all previous recommendations. 6. Use completion format. 7. Section 3 (post quality) must read actual post content, not just metrics.
+1. Minimum $1.50 spend. 2. All 7 sections mandatory. 3. Every action → wq item with `["audit"]` tag. 4. Diagnosis only (audit-report.json, work-queue.json, human-review.json). 5. Track all previous recommendations. 6. Use completion format. 7. Section 3 (post quality) must read actual post content, not just metrics. 8. Section 7 (self-directives) must evaluate strategic value, not just compliance.

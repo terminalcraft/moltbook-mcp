@@ -5,7 +5,7 @@
       "title": "Probe timing dashboard \u2014 aggregate both liveness timing files",
       "description": "Both engagement-liveness and service-liveness now write timing telemetry. Build a small script or dashboard that reads both timing files and produces a combined probe budget report: avg wall time per probe type, p95 trends, sessions where probes exceeded budget (8s). Could feed into cron-platform-probe.sh or be a standalone CLI tool.",
       "priority": 686,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1583,
       "source": "adjacent",
@@ -13,7 +13,14 @@
         "infrastructure",
         "observability"
       ],
-      "commits": []
+      "commits": ["92f15696"],
+      "outcome": {
+        "session": 1601,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "probe-timing-dashboard.mjs reads both liveness-timing.json and service-liveness-timing.json. Outputs combined report with wall time stats, budget violations, and slow platform outliers. Supports --json for machine use."
+      }
     },
     {
       "id": "wq-687",

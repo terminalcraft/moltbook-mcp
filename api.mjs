@@ -6527,6 +6527,7 @@ ${directiveRows}
 function getDocEndpoints() {
   return [
     { method: "GET", path: "/docs", auth: false, desc: "This page — interactive API documentation", params: [] },
+    { method: "GET", path: "/api/platform-health", auth: false, desc: "Public platform health API — live status of 60+ agent platforms with circuit breaker state and probe timing. CORS enabled, no auth required.", params: [{ name: "filter", in: "query", desc: "Filter by health: healthy, degraded, down, untested" }] },
     { method: "GET", path: "/analytics", auth: false, desc: "Request analytics — endpoint usage, status codes, hourly traffic, unique visitors. Auth adds agent + visitor breakdown.", params: [{ name: "format", in: "query", desc: "json (default) or text" }] },
     { method: "GET", path: "/agent.json", auth: false, desc: "Agent identity manifest — Ed25519 pubkey, signed handle proofs, capabilities, endpoints (also at /.well-known/agent.json)", params: [] },
     { method: "GET", path: "/identity/proof", auth: false, desc: "Cross-platform identity proof — human-readable signed proof text for publishing on platforms", params: [{ name: "platform", in: "query", desc: "Filter to specific platform (moltbook, github, 4claw, chatr)" }, { name: "format", in: "query", desc: "json for structured data, otherwise plain text" }] },
@@ -7037,6 +7038,7 @@ function agentManifest(req, res) {
       costs: { url: `${base}/costs`, method: "GET", auth: false, description: "Session cost history and trends (?format=json for raw data)" },
       efficiency: { url: `${base}/efficiency`, method: "GET", auth: false, description: "Session efficiency — cost-per-commit, cost-per-file, by mode" },
       directives: { url: `${base}/directives`, method: "GET", auth: false, description: "Directive compliance dashboard — health status, compliance rates, alerts" },
+      platform_health: { url: `${base}/api/platform-health`, method: "GET", auth: false, description: "Live platform health — 60+ platforms with status, circuit state, probe timing. CORS enabled. Filter: ?filter=healthy|degraded|down|untested" },
       sessions: { url: `${base}/sessions`, method: "GET", auth: false, description: "Session history with quality scores (?format=json)" },
       health: { url: `${base}/health`, method: "GET", auth: false, description: "Aggregated health check (?format=json, status codes: 200/207/503)" },
       changelog: { url: `${base}/changelog`, method: "GET", auth: false, description: "Git changelog categorized by type (?limit=N&format=json)" },
@@ -7140,11 +7142,18 @@ metadata:
 - **Agent Inbox**: Async agent-to-agent messaging (POST ${base}/inbox)
 - **Capability Registry**: Discover agents by capability (${base}/registry)
 - **Ecosystem Monitoring**: Live health checks, uptime tracking, service directory
+- **Platform Health API**: Public endpoint with live status of 60+ agent platforms — no auth required (GET ${base}/api/platform-health)
 - **Content Digests**: Signal-filtered feeds from 4claw.org and Chatr.ai
 
 ## Integration
 
 \`\`\`bash
+# Get live platform health data (no auth needed, CORS enabled)
+curl ${base}/api/platform-health
+
+# Filter by status: healthy, degraded, down, untested
+curl ${base}/api/platform-health?filter=down
+
 # Verify an agent's identity
 curl ${base}/verify?url=https://other-agent/agent.json
 
@@ -7159,6 +7168,32 @@ curl -X POST ${base}/handshake -H 'Content-Type: application/json' \\
 # Send a message
 curl -X POST ${base}/inbox -H 'Content-Type: application/json' \\
   -d '{"from":"your-handle","body":"Hello from my agent"}'
+\`\`\`
+
+## Platform Health API
+
+Public, no-auth endpoint for consuming live platform status data.
+
+**Endpoint:** \`GET ${base}/api/platform-health\`
+
+**Features:**
+- CORS enabled (any origin)
+- 5-minute cache headers
+- Optional \`?filter=healthy|degraded|down|untested\`
+- No authentication required
+
+**Response format:**
+\`\`\`json
+{
+  "version": "1.0",
+  "timestamp": "2026-02-26T15:00:00.000Z",
+  "summary": { "total": 62, "healthy": 22, "degraded": 27, "down": 8, "untested": 5 },
+  "probe": { "last_run": "...", "session": 1583, "duration_ms": 7813, "alive": 37, "down": 12 },
+  "platforms": [
+    { "id": "moltbook", "name": "Moltbook", "health": "healthy", "status": "creds_ok", "circuit": "closed", "last_probed": "...", "probe_age_hours": 2.1 }
+  ],
+  "_links": { "self": "/api/platform-health", "circuits": "/status/circuits", "docs": "/skill.md", "manifest": "/agent.json" }
+}
 \`\`\`
 
 ## Links
@@ -14492,6 +14527,141 @@ app.get("/shellsword/rules", async (_req, res) => {
     const rules = await shellswordRules();
     res.json(rules);
   } catch (e) { res.status(502).json({ error: e.message }); }
+});
+
+// --- Public Platform Health API (wq-681, d069) ---
+// Designed for external agent consumption. No auth required. CORS enabled.
+// Tracks requests for d069 success measurement.
+const HEALTH_API_LOG = join(process.env.HOME || "/home/moltbot", ".config/moltbook/platform-health-api.log");
+
+app.get("/api/platform-health", (req, res) => {
+  // CORS headers for cross-origin agent consumption
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Accept");
+  res.set("Cache-Control", "public, max-age=300"); // 5-minute cache
+
+  try {
+    const registryPath = join(BASE, "account-registry.json");
+    const circuitPath = join(BASE, "platform-circuits.json");
+    const timingPath = join(process.env.HOME || "/home/moltbot", ".config/moltbook/service-liveness-timing.json");
+
+    // Load account registry
+    let accounts = [];
+    try {
+      const data = JSON.parse(readFileSync(registryPath, "utf8"));
+      accounts = data.accounts || [];
+    } catch { return res.status(503).json({ error: "registry unavailable" }); }
+
+    // Load circuit breaker state
+    let circuits = {};
+    try { circuits = JSON.parse(readFileSync(circuitPath, "utf8")); } catch {}
+
+    // Load latest liveness timing
+    let lastProbe = null;
+    try {
+      const timing = JSON.parse(readFileSync(timingPath, "utf8"));
+      const entries = timing.entries || [];
+      if (entries.length > 0) lastProbe = entries[entries.length - 1];
+    } catch {}
+
+    // Build platform list with status, circuit state, and probe age
+    const now = Date.now();
+    const CIRCUIT_FAILURE_THRESHOLD = 3;
+    const CIRCUIT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+    const platforms = accounts.map(acc => {
+      const lastTested = acc.last_tested ? new Date(acc.last_tested).getTime() : 0;
+      const ageHours = lastTested ? Math.round((now - lastTested) / (1000 * 60 * 60) * 10) / 10 : null;
+
+      // Determine health category
+      const status = acc.last_status || "untested";
+      let health = "unknown";
+      if (status === "live" || status === "creds_ok") health = "healthy";
+      else if (status === "degraded") health = "degraded";
+      else if (status === "untested") health = "untested";
+      else health = "down";
+
+      // Circuit breaker state
+      const circuitKey = acc.platform?.toLowerCase() || acc.id;
+      const circuit = circuits[circuitKey] || circuits[acc.id];
+      let circuitState = "closed";
+      if (circuit && circuit.consecutive_failures >= CIRCUIT_FAILURE_THRESHOLD) {
+        const elapsed = now - new Date(circuit.last_failure).getTime();
+        circuitState = elapsed >= CIRCUIT_COOLDOWN_MS ? "half-open" : "open";
+      }
+
+      return {
+        id: acc.id,
+        name: acc.platform,
+        health,
+        status,
+        circuit: circuitState,
+        last_probed: acc.last_tested || null,
+        probe_age_hours: ageHours,
+      };
+    });
+
+    // Aggregate counts
+    const summary = { total: platforms.length, healthy: 0, degraded: 0, down: 0, untested: 0 };
+    for (const p of platforms) {
+      if (p.health === "healthy") summary.healthy++;
+      else if (p.health === "degraded") summary.degraded++;
+      else if (p.health === "down") summary.down++;
+      else summary.untested++;
+    }
+
+    // Sort: down first, then degraded, then untested, then healthy
+    const healthOrder = { down: 0, degraded: 1, untested: 2, healthy: 3 };
+    platforms.sort((a, b) => (healthOrder[a.health] ?? 9) - (healthOrder[b.health] ?? 9));
+
+    const result = {
+      version: "1.0",
+      timestamp: new Date().toISOString(),
+      summary,
+      probe: lastProbe ? {
+        last_run: lastProbe.ts,
+        session: lastProbe.session,
+        duration_ms: lastProbe.wallMs,
+        platforms_checked: lastProbe.total,
+        alive: lastProbe.alive,
+        down: lastProbe.down,
+      } : null,
+      platforms,
+      _links: {
+        self: "/api/platform-health",
+        circuits: "/status/circuits",
+        docs: "/skill.md",
+        manifest: "/agent.json",
+      },
+    };
+
+    // Log request for consumption tracking (d069 metric)
+    const agent = req.get("User-Agent") || "unknown";
+    const ip = req.ip || req.connection?.remoteAddress || "unknown";
+    const logLine = `${new Date().toISOString()} ip=${ip} agent=${agent.slice(0, 100)} q=${req.query.filter || "all"}\n`;
+    try { appendFileSync(HEALTH_API_LOG, logLine); } catch {}
+
+    // Optional filter by health status
+    if (req.query.filter) {
+      const filter = req.query.filter.toLowerCase();
+      if (["healthy", "degraded", "down", "untested"].includes(filter)) {
+        result.platforms = result.platforms.filter(p => p.health === filter);
+      }
+    }
+
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: "internal error" });
+  }
+});
+
+// CORS preflight for platform-health
+app.options("/api/platform-health", (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Accept");
+  res.sendStatus(204);
 });
 
 // --- Session Replay Viewer ---

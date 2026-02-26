@@ -256,6 +256,52 @@ function computeSessionStats() {
   }
 }
 
+function computeRScopeBudgetCompliance() {
+  const historyPath = join(STATE_DIR, 'session-history.txt');
+  if (!existsSync(historyPath)) return { sessions_checked: [], violations: [], violation_count: 0, rate: 'N/A' };
+
+  const ROUTINE_FILES = new Set(['directives.json', 'work-queue.json', 'BRAINSTORMING.md']);
+
+  try {
+    const content = readFileSync(historyPath, 'utf8');
+    const lines = content.trim().split('\n').filter(l => l.trim());
+
+    // Extract last 5 R sessions
+    const rSessions = [];
+    for (const line of lines) {
+      if (!line.includes('mode=R')) continue;
+      const sessionMatch = line.match(/s=(\d+)/);
+      const filesMatch = line.match(/files=\[([^\]]*)\]/);
+      if (!sessionMatch) continue;
+
+      const session = `s${sessionMatch[1]}`;
+      const files = filesMatch && filesMatch[1] !== '(none)'
+        ? filesMatch[1].split(',').map(f => f.trim()).filter(Boolean)
+        : [];
+      const nonRoutine = files.filter(f => !ROUTINE_FILES.has(f));
+
+      rSessions.push({
+        session,
+        non_routine_files: nonRoutine,
+        count: nonRoutine.length,
+        verdict: nonRoutine.length >= 3 ? 'violation' : 'compliant'
+      });
+    }
+
+    const last5 = rSessions.slice(-5);
+    const violations = last5.filter(s => s.verdict === 'violation');
+
+    return {
+      sessions_checked: last5.map(s => s.session),
+      details: last5,
+      violation_count: violations.length,
+      rate: `${last5.length - violations.length}/${last5.length} compliant`
+    };
+  } catch {
+    return { sessions_checked: [], violations: [], violation_count: 0, rate: 'error' };
+  }
+}
+
 // Main output
 const stats = {
   computed_at: new Date().toISOString(),
@@ -266,7 +312,8 @@ const stats = {
     queue: computeQueueStats(),
     directives: computeDirectiveStats()
   },
-  sessions: computeSessionStats()
+  sessions: computeSessionStats(),
+  r_scope_budget: computeRScopeBudgetCompliance()
 };
 
 console.log(JSON.stringify(stats, null, 2));

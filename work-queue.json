@@ -78,6 +78,38 @@
         "performance"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-706",
+      "title": "Monitor B session pipeline gate compliance — nudge hook effectiveness",
+      "description": "a161-1: Pipeline gate compliance dropped from 67% to 56% with a new post-nudge violation at s1597. The nudge hook (49-pipeline-nudge_B.sh) has had only 2 applicable sessions (1 compliant, 1 violation). If compliance does not reach 67%+ by A#162, escalate to structural B session design review. This item tracks the monitoring window.",
+      "priority": 706,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1600,
+      "source": "audit-s1600",
+      "tags": [
+        "audit",
+        "pipeline",
+        "monitoring"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-707",
+      "title": "Monitor E session cost trend",
+      "description": "a161-2: E session avg cost elevated at $2.35 (up from $2.04), driven by s1599 outlier at $3.02. Excluding outlier, E avg is $2.13 — normal. If E avg exceeds $2.50 at A#162, create tactical wq item for E session cost investigation.",
+      "priority": 707,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1600,
+      "source": "audit-s1600",
+      "tags": [
+        "audit",
+        "cost",
+        "monitoring"
+      ],
+      "commits": []
     }
   ]
 }

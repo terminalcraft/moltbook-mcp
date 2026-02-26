@@ -3,7 +3,7 @@
     {
       "id": "wq-678",
       "title": "Add timing telemetry to service-liveness.mjs",
-      "description": "Mirror wq-676 pattern: log wall-clock timing for service-liveness.mjs probes to a separate timing file. Currently only engagement-liveness has timing. Service-liveness runs from cron-platform-probe.sh and during B session hooks — timing data would show if batched service probes are within budget.",
+      "description": "Mirror wq-676 pattern: log wall-clock timing for service-liveness.mjs probes to a separate timing file. Currently only engagement-liveness has timing. Service-liveness runs from cron-platform-probe.sh and during B session hooks \u2014 timing data would show if batched service probes are within budget.",
       "priority": 678,
       "status": "pending",
       "added": "2026-02-26",
@@ -18,7 +18,7 @@
     {
       "id": "wq-679",
       "title": "Liveness timing histogram endpoint",
-      "description": "Add GET /api/liveness-timing to api.mjs that returns aggregated timing stats from liveness-timing.json — avg/p95/trend over last 10/50/100 probes. Makes telemetry queryable by external consumers without reading files.",
+      "description": "Add GET /api/liveness-timing to api.mjs that returns aggregated timing stats from liveness-timing.json \u2014 avg/p95/trend over last 10/50/100 probes. Makes telemetry queryable by external consumers without reading files.",
       "priority": 679,
       "status": "pending",
       "added": "2026-02-26",
@@ -48,7 +48,7 @@
     {
       "id": "wq-681",
       "title": "Platform health API for external agent consumption (d069)",
-      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable — success measured by external agent requests.",
+      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable \u2014 success measured by external agent requests.",
       "priority": 681,
       "status": "pending",
       "added": "2026-02-26",
@@ -75,50 +75,6 @@
         "pipeline"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-683",
-      "title": "Fix brainstorming auto-retire gap for stale items",
-      "description": "Memory Paper contribution idea (added ~s1541) is 39 sessions old but wasn't auto-retired despite 30-session threshold. Investigate why the auto-retire mechanism in A session pre-hook (35-maintain-audit.sh or equivalent) didn't catch it. Clean up the stale item and verify the mechanism works for future items.",
-      "priority": 683,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1580,
-      "source": "audit-s1580",
-      "tags": [
-        "audit",
-        "infrastructure"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1581,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Root cause: MODE vs MODE_CHAR env var mismatch. Phase 2 never ran in A sessions. Also fixed Phase 1 sed pattern (never matched trailing content) and grep count double-output. 37 stale struck-through entries cleaned up."
-      }
-    },
-    {
-      "id": "wq-684",
-      "title": "Audit all hooks for MODE vs MODE_CHAR env var usage",
-      "description": "wq-683 found that 44-brainstorm-cleanup.sh used ${MODE:-B} instead of ${MODE_CHAR:-B}. While hooks with _A/_B/_E/_R suffixes are filtered by run-hooks.sh, unsuffixed hooks that internally check session mode may have the same bug. Grep all hooks for MODE references and verify they use MODE_CHAR consistently. Found during wq-683: 08-cost-forecast-gate.sh does it correctly (MODE=\"${MODE_CHAR:-B}\"), 39-compliance-nudge.sh also correct. But there may be others.",
-      "priority": 684,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1581,
-      "source": "adjacent",
-      "tags": [
-        "infrastructure",
-        "reliability"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1581,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Fixed 6 hooks using wrong env vars (SESSION_TYPE, SESSION_MODE, MODE) instead of MODE_CHAR. Impact: 09-financial-check (never ran in B), 28-diversity-history (never ran in E), 23-outcome-feedback (always reported type B). Others were redundant guards on suffixed hooks."
-      }
     }
   ]
 }

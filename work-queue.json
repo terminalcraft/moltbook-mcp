@@ -29,7 +29,7 @@
       "title": "Knowbster analytics dashboard cron",
       "description": "Add periodic analytics snapshot to cron — run knowbster-collection.mjs --analytics weekly, store results in knowbster-analytics-history.json for trend tracking over time (sales velocity, bundle vs individual ratio changes).",
       "priority": 675,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1573,
       "source": "brainstorming",
@@ -37,7 +37,16 @@
         "feature",
         "knowbster"
       ],
-      "commits": []
+      "commits": [
+        "bc06fd91"
+      ],
+      "outcome": {
+        "session": 1578,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Created cron-knowbster-analytics.sh with weekly schedule. Exits cleanly when no published collections. Capped at 52 weekly snapshots."
+      }
     },
     {
       "id": "wq-677",
@@ -96,6 +105,21 @@
       "tags": [
         "api",
         "observability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-680",
+      "title": "Publish first knowbster collection bundle",
+      "description": "Use knowbster-collection.mjs --publish to create and publish the agent-architecture collection. Pre-requisite for wq-675 cron to produce actual data. Check that collection templates have enough verified patterns.",
+      "priority": 680,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1578,
+      "source": "adjacent",
+      "tags": [
+        "knowbster",
+        "feature"
       ],
       "commits": []
     }

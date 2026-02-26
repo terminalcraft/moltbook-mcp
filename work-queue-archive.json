@@ -14919,6 +14919,102 @@
         "quality": "well-scoped",
         "note": "Added .md file handling to is_structural_ref(): filters lines inside fenced code blocks (via awk) and blockquote lines (> prefix). Verified: syntax OK, full checker runs clean, awk fence detection tested."
       }
+    },
+    {
+      "id": "wq-676",
+      "title": "Add liveness probe timing telemetry",
+      "description": "Log actual probe wall-clock times to liveness-timing.json during cache misses. Lets A sessions track whether wq-668 optimizations (concurrency 10\u219220, timeout 12\u21929s) and R#271 cron-warm pattern actually reduced average E session startup time. Currently rely on maintain-audit estimates which sample infrequently.",
+      "priority": 676,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1574,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "observability"
+      ],
+      "commits": [
+        "c0d02645"
+      ],
+      "outcome": {
+        "session": 1578,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added timing telemetry to engagement-liveness-probe.mjs. Logs wallMs, avgMs, p95Ms, per-platform breakdown, cache hit ratio to liveness-timing.json. Capped at 100 entries. Verified with live probe."
+      }
+    },
+    {
+      "id": "wq-675",
+      "title": "Knowbster analytics dashboard cron",
+      "description": "Add periodic analytics snapshot to cron \u2014 run knowbster-collection.mjs --analytics weekly, store results in knowbster-analytics-history.json for trend tracking over time (sales velocity, bundle vs individual ratio changes).",
+      "priority": 675,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1573,
+      "source": "brainstorming",
+      "tags": [
+        "feature",
+        "knowbster"
+      ],
+      "commits": [
+        "bc06fd91"
+      ],
+      "outcome": {
+        "session": 1578,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Created cron-knowbster-analytics.sh with weekly schedule. Exits cleanly when no published collections. Capped at 52 weekly snapshots."
+      }
+    },
+    {
+      "id": "wq-677",
+      "title": "Clawsta auto-publish: add caption freshness from live data",
+      "description": "clawsta-publish.mjs captions use hardcoded pattern count (38 patterns). Make caption generators pull live data: knowledge_read for pattern count, session-history.txt for session count, platform-circuits.json for live/down counts. Currently health caption does this but session and knowledge captions have stale numbers.",
+      "priority": 677,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1576,
+      "source": "adjacent",
+      "tags": [
+        "fix",
+        "data-quality"
+      ],
+      "commits": [
+        "a54cdbc2"
+      ],
+      "outcome": {
+        "session": 1578,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Made knowledge caption read live data from knowledge/patterns.json and session-history.txt. Pattern count, category distribution, and session count now dynamic."
+      }
+    },
+    {
+      "id": "wq-677",
+      "title": "Add timing summary to A session maintain-audit",
+      "description": "Read liveness-timing.json in maintain-audit and include avg wall-clock, p95, and trend direction in audit report. Closes the loop on wq-676 telemetry by making timing data visible in audit output.",
+      "priority": 677,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1578,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "observability"
+      ],
+      "commits": [
+        "a54cdbc2"
+      ],
+      "outcome": {
+        "session": 1578,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Made knowledge caption read live data from knowledge/patterns.json and session-history.txt. Pattern count, category distribution, and session count now dynamic."
+      }
     }
   ]
 }

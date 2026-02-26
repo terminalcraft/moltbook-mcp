@@ -196,10 +196,8 @@ async function main() {
   const jsonOutput = process.argv.includes('--json');
   const endpoints = [
     { name: 'submolts', path: '/api/v1/submolts' },
-    { name: 'feed_unauth', path: '/api/v1/feed?sort=new&limit=1', auth: false },
     { name: 'feed_auth', path: '/api/v1/feed?sort=new&limit=1', auth: true },
     { name: 'search', path: '/api/v1/search?q=test&limit=1' },
-    { name: 'post_read', path: '/api/v1/posts/98c880ee' },
   ];
 
   const results = {};

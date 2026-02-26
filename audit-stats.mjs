@@ -464,6 +464,66 @@ function computeIntelYield() {
   };
 }
 
+function computeEScopeBleed() {
+  const historyPath = join(STATE_DIR, 'session-history.txt');
+  if (!existsSync(historyPath)) return { sessions_checked: 0, violations: [], violation_count: 0, verdict: 'no_data' };
+
+  try {
+    const content = readFileSync(historyPath, 'utf8');
+    const lines = content.trim().split('\n').filter(l => l.trim());
+
+    const eSessions = [];
+    for (const line of lines) {
+      if (!line.includes('mode=E')) continue;
+      const sessionMatch = line.match(/s=(\d+)/);
+      const buildMatch = line.match(/build=(\d+)\s+commit/);
+      const costMatch = line.match(/cost=\$?([\d.]+)/);
+      const noteMatch = line.match(/note:\s*(.*)/);
+      if (!sessionMatch) continue;
+
+      const sessionNum = parseInt(sessionMatch[1]);
+      const buildCommits = buildMatch ? parseInt(buildMatch[1]) : 0;
+      const cost = costMatch ? parseFloat(costMatch[1]) : 0;
+      const note = noteMatch ? noteMatch[1].slice(0, 120) : '';
+
+      eSessions.push({ session: sessionNum, build_commits: buildCommits, cost, note });
+    }
+
+    const last10 = eSessions.slice(-10);
+    const violations = last10.filter(s => s.build_commits > 0);
+
+    // Compute E cost with and without scope-bleed sessions for comparison
+    const cleanSessions = last10.filter(s => s.build_commits === 0);
+    const bleedSessions = last10.filter(s => s.build_commits > 0);
+    const cleanAvg = cleanSessions.length > 0
+      ? Math.round((cleanSessions.reduce((a, s) => a + s.cost, 0) / cleanSessions.length) * 100) / 100
+      : 0;
+    const bleedAvg = bleedSessions.length > 0
+      ? Math.round((bleedSessions.reduce((a, s) => a + s.cost, 0) / bleedSessions.length) * 100) / 100
+      : 0;
+
+    return {
+      sessions_checked: last10.length,
+      violations: violations.map(v => ({
+        session: `s${v.session}`,
+        build_commits: v.build_commits,
+        cost: v.cost,
+        note: v.note
+      })),
+      violation_count: violations.length,
+      cost_impact: {
+        clean_avg: cleanAvg,
+        bleed_avg: bleedAvg,
+        delta: bleedAvg > 0 ? Math.round((bleedAvg - cleanAvg) * 100) / 100 : 0
+      },
+      verdict: violations.length === 0 ? 'clean' :
+        (violations.length <= 1 ? 'minor_bleed' : 'recurring_bleed')
+    };
+  } catch {
+    return { sessions_checked: 0, violations: [], violation_count: 0, verdict: 'error' };
+  }
+}
+
 // Main output
 const stats = {
   computed_at: new Date().toISOString(),
@@ -477,7 +537,8 @@ const stats = {
   },
   sessions: computeSessionStats(),
   r_scope_budget: computeRScopeBudgetCompliance(),
-  b_pipeline_gate: computeBPipelineGateCompliance()
+  b_pipeline_gate: computeBPipelineGateCompliance(),
+  e_scope_bleed: computeEScopeBleed()
 };
 
 console.log(JSON.stringify(stats, null, 2));

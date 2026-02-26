@@ -80,6 +80,7 @@ Read last 10 summaries per type from `~/.config/moltbook/logs/*.summary`.
     ```
     If violation_count >= 3 in last 10 B sessions → create wq item with `["audit", "pipeline"]` tags for B session contribution discipline review. If compliance rate < 50% → escalate as structural issue.
 - **E**: Meaningful engagement? Actionable intel? Or platform failures?
+  - **Scope-bleed detection (wq-711)**: `audit-stats.mjs` now reports `e_scope_bleed` — E sessions where `build > 0` commits occurred, indicating build work bleeding into engagement time. Check `e_scope_bleed.violation_count` and `e_scope_bleed.cost_impact.delta` to quantify cost inflation from scope bleed vs genuine engagement cost. If `violation_count >= 2` in last 10 E sessions → create wq item with `["audit", "cost"]` tags for E session discipline review.
 - **R**: Lasting structural impact? Or reverted within sessions?
   - **Scope budget compliance (wq-689)**: For last 5 R sessions in session-history.txt, parse the `files=[...]` field. Exclude routine files (directives.json, work-queue.json, BRAINSTORMING.md). Count remaining non-routine files per session. Flag any session that touched **3+ non-routine files** as a scope budget violation. Compute compliance rate = `compliant_sessions / total_checked`. Report in `sessions.R.scope_budget_compliance`:
     ```json

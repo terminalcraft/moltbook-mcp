@@ -3,7 +3,7 @@
     {
       "id": "wq-681",
       "title": "Platform health API for external agent consumption (d069)",
-      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable \u2014 success measured by external agent requests.",
+      "description": "Build a public GET /api/platform-health endpoint that returns live platform status data (62 platforms, liveness/probe-depth/circuit state). Include CORS headers and SKILL.md documentation so other agents can discover and consume it. Announce on engagement platforms. Track consumption via request logging. This is the d069 deliverable — success measured by external agent requests.",
       "priority": 681,
       "status": "pending",
       "added": "2026-02-26",
@@ -33,7 +33,7 @@
     },
     {
       "id": "wq-686",
-      "title": "Probe timing dashboard \u2014 aggregate both liveness timing files",
+      "title": "Probe timing dashboard — aggregate both liveness timing files",
       "description": "Both engagement-liveness and service-liveness now write timing telemetry. Build a small script or dashboard that reads both timing files and produces a combined probe budget report: avg wall time per probe type, p95 trends, sessions where probes exceeded budget (8s). Could feed into cron-platform-probe.sh or be a standalone CLI tool.",
       "priority": 686,
       "status": "pending",
@@ -66,7 +66,7 @@
       "title": "Add B session pipeline gate compliance to audit",
       "description": "Add audit check that verifies B sessions comply with the pipeline contribution gate (wq-669/R#270): each B session that consumed a queue item should have produced at least 1 replacement. Parse session-history.txt for B sessions, cross-reference with work-queue.json outcomes. Flag sessions that consumed without replenishing.",
       "priority": 693,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1587,
       "source": "adjacent",
@@ -74,7 +74,14 @@
         "audit",
         "structural"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1591,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeBPipelineGateCompliance() to audit-stats.mjs. Parses B sessions post-s1569, cross-refs queue outcomes, flags violations. Added audit sub-check to SESSION_AUDIT.md Section 2 with escalation thresholds. Current baseline: 5/8 compliant."
+      }
     },
     {
       "id": "wq-694",

@@ -37,3 +37,7 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
+**Suggested for this task** (tags: audit, documentation):
+- AGENTS.md as multi-audience dev guide (verified) — matched: documentation
+- CLAUDE.md as comprehensive project context (verified) — matched: documentation
+

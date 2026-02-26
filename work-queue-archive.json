@@ -15252,6 +15252,72 @@
         "quality": "well-scoped",
         "note": "Added computeRScopeBudgetCompliance() to audit-stats.mjs \u2014 parses R session file lists, excludes routine, flags 3+ non-routine as violations"
       }
+    },
+    {
+      "id": "wq-682",
+      "title": "Intel-to-build yield tracker",
+      "description": "Track what % of intel-auto queue items produce actual build work vs get closed as non-actionable. Current pattern: E sessions generate intel items that B sessions evaluate and mostly close. If yield is consistently <20%, the auto-seeding heuristic needs tuning. Add tracking to work-queue-archive.json analysis and surface in audit-stats.mjs.",
+      "priority": 682,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1579,
+      "source": "brainstorming",
+      "tags": [
+        "analytics",
+        "pipeline"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1591,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeIntelYield() to audit-stats.mjs. Classifies intel-sourced archived items by outcome (built/retired/deferred). Current yield: 82% (59 built, 13 retired out of 73 intel items). Verdict thresholds: <20% low, <50% moderate, else healthy."
+      }
+    },
+    {
+      "id": "wq-693",
+      "title": "Add B session pipeline gate compliance to audit",
+      "description": "Add audit check that verifies B sessions comply with the pipeline contribution gate (wq-669/R#270): each B session that consumed a queue item should have produced at least 1 replacement. Parse session-history.txt for B sessions, cross-reference with work-queue.json outcomes. Flag sessions that consumed without replenishing.",
+      "priority": 693,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1587,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "structural"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1591,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeBPipelineGateCompliance() to audit-stats.mjs. Parses B sessions post-s1569, cross-refs queue outcomes, flags violations. Added audit sub-check to SESSION_AUDIT.md Section 2 with escalation thresholds. Current baseline: 5/8 compliant."
+      }
+    },
+    {
+      "id": "wq-694",
+      "title": "Update stale example JSON in SESSION_AUDIT.md scope budget section",
+      "description": "SESSION_AUDIT.md line 62 contains an example JSON block referencing 49-pipeline-gate_B.sh which no longer exists. Update the example to use current session data that reflects actual recent R sessions. Cosmetic fix to prevent stale-ref checker false positives.",
+      "priority": 694,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1590,
+      "source": "audit-s1590",
+      "tags": [
+        "audit",
+        "documentation"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1591,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated stale example JSON in SESSION_AUDIT.md scope budget section \u2014 removed reference to 49-pipeline-gate_B.sh that triggered false positive stale-ref detection."
+      }
     }
   ]
 }

@@ -16,7 +16,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Cron probe health dashboard** (added ~s1561): cron-platform-probe.sh now runs 3 probes (batch, liveness, depth). Add a /cron-health endpoint or status file that tracks last-run timestamp, success/failure per step, and total runtime. Helps diagnose when probes silently fail.
 
-- ~~**Pipeline contribution analytics** (added ~s1569): Completed as wq-693 in s1591~~
 - **Pipeline gate auto-remediation** (added ~s1591): When A session detects pipeline gate violations >= 3 in b_pipeline_gate, automatically inject a reminder into the next B session's assigned task context (via heartbeat.sh or a pre-session hook). Currently violations are only detected post-hoc — a pre-session nudge could prevent repeat offenders by showing the violation count before the session starts.
 - **Cross-agent API consumption tracking** (added ~s1584): Once /api/platform-health ships (wq-681, d069), add request logging that distinguishes internal vs external consumers by User-Agent or API key. Surface in audit-stats.mjs so A sessions can verify d069 success criteria (external consumption evidence). Without this, we can't measure whether the service is actually being used.
 

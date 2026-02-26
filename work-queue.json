@@ -140,6 +140,30 @@
         "quality": "well-scoped",
         "note": "Investigation findings: (1) Trend NOT monotonic — s1589=$1.59 breaks sequence. (2) Duration is primary cost driver, not platform registration (s1589 registered moltr.ai but was cheapest at $1.59). (3) s1604 was anomalous because it included code fixes (build work in E session). Fix: Added cost awareness guidance to SESSION_ENGAGE.md Phase 2 exit gates — warns at $2.50, prohibits new-platform registration and code fixes past that point."
       }
+    },
+    {
+      "id": "wq-710",
+      "title": "Add probe timing budget alert to post-session hook",
+      "description": "probe-timing-dashboard.mjs exists but only runs on-demand. Add a check to 47-b-session-posthook_B.sh that reads liveness-timing.json, checks if latest wallMs exceeds 8000ms, and logs a warning to maintain-audit.txt. Prevents slow probes from going unnoticed between audit sessions. From brainstorming idea ~s1601.",
+      "priority": 710,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1606,
+      "source": "brainstorming",
+      "tags": ["observability", "hooks"],
+      "commits": []
+    },
+    {
+      "id": "wq-711",
+      "title": "Add E session scope-bleed detection to audit",
+      "description": "s1604 had 2 commits in an E session (code fixes to verifiers). This is build work bleeding into engagement sessions, inflating E session cost. Add a check to audit-stats.mjs that flags E sessions with build>0 commits as scope-bleed violations. Report alongside the E cost trend so audit can distinguish genuine engagement cost from scope bleed.",
+      "priority": 711,
+      "status": "pending",
+      "added": "2026-02-26",
+      "created_session": 1606,
+      "source": "adjacent",
+      "tags": ["audit", "cost"],
+      "commits": []
     }
   ]
 }

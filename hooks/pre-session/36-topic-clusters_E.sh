@@ -30,43 +30,37 @@ if [ $clusters_exit -ne 0 ] || [ -z "$clusters_json" ]; then
 fi
 
 # Step 3: Extract recommendations and append to e-session-context.md
-recs=$(echo "$clusters_json" | python3 -c "
-import json, sys
-try:
-    data = json.load(sys.stdin)
-except:
-    sys.exit(0)
+# wq-705: Replaced python3 with jq for JSON parsing
+recs=$(echo "$clusters_json" | jq -r '
+  if ((.recommendations // []) | length) == 0 and ((.clusters // []) | length) == 0 then empty else
 
-recs = data.get('recommendations', [])
-clusters = data.get('clusters', [])
-thread_count = data.get('threadCount', 0)
-cluster_count = data.get('clusterCount', 0)
+  "## Chatr topic clusters (auto-generated)",
+  "\(.threadCount // 0) threads in \(.clusterCount // 0) clusters (last 72h)",
+  "",
 
-if not recs and not clusters:
-    sys.exit(0)
+  (if ((.recommendations // []) | length) > 0 then
+    "**Recommended engagement targets:**",
+    (.recommendations[] |
+      ([.participants[]? | "@" + .] | join(", ")) as $who |
+      (if ($who | length) > 0 then " (\($who))" else "" end) as $who_str |
+      "- **\(.topic)**: \(.reason)\($who_str)"
+    ),
+    ""
+  else empty end),
 
-lines = []
-lines.append('## Chatr topic clusters (auto-generated)')
-lines.append(f'{thread_count} threads in {cluster_count} clusters (last 72h)')
-lines.append('')
+  (if ((.clusters // []) | length) > 0 then
+    "**Cluster overview:**",
+    (.clusters[:5][] |
+      (if .engaged and (.engagementGap // 0) == 0 then "[engaged]"
+       elif (.engagementGap // 0) > 0 then "[gap]"
+       else "[unengaged]" end) as $tag |
+      "- \(.label) \($tag): \(.threadCount) threads, \(.totalMessages) msgs"
+    ),
+    ""
+  else empty end)
 
-if recs:
-    lines.append('**Recommended engagement targets:**')
-    for r in recs:
-        who = ', '.join('@' + p for p in r.get('participants', []))
-        who_str = f' ({who})' if who else ''
-        lines.append(f'- **{r[\"topic\"]}**: {r[\"reason\"]}{who_str}')
-    lines.append('')
-
-if clusters:
-    lines.append('**Cluster overview:**')
-    for c in clusters[:5]:
-        tag = '[engaged]' if c.get('engaged') and c.get('engagementGap', 0) == 0 else '[gap]' if c.get('engagementGap', 0) > 0 else '[unengaged]'
-        lines.append(f'- {c[\"label\"]} {tag}: {c[\"threadCount\"]} threads, {c[\"totalMessages\"]} msgs')
-    lines.append('')
-
-print('\n'.join(lines))
-" 2>/dev/null)
+  end
+' 2>/dev/null)
 
 if [ -n "$recs" ]; then
   echo "" >> "$CONTEXT_FILE"

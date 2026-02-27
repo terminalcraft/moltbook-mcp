@@ -8,70 +8,56 @@ STATE_DIR="$HOME/.config/moltbook"
 MCP_DIR="$HOME/moltbook-mcp"
 OUTPUT_FILE="$STATE_DIR/session-context.md"
 
-python3 - "$STATE_DIR" "$MCP_DIR" "${SESSION_NUM:-?}" "${MODE_CHAR:-?}" "${B_FOCUS:-}" <<'PYEOF'
-import json, sys, os
+# wq-705: Replaced python3 with jq+bash for context generation
+SESSION_NUM_VAL="${SESSION_NUM:-?}"
+MODE_VAL="${MODE_CHAR:-?}"
+B_FOCUS_VAL="${B_FOCUS:-}"
 
-state_dir, mcp_dir, session_num, mode, b_focus = sys.argv[1:6]
-lines = []
+{
+  echo "# Session $SESSION_NUM_VAL ($MODE_VAL) Context"
+  if [ "$MODE_VAL" = "B" ] && [ -n "$B_FOCUS_VAL" ]; then
+    echo "B_FOCUS=$B_FOCUS_VAL"
+  fi
+  echo ""
 
-lines.append(f"# Session {session_num} ({mode}) Context")
-if mode == "B" and b_focus:
-    lines.append(f"B_FOCUS={b_focus}")
-lines.append("")
+  # 1. Work queue — top 4 items with status
+  WQ_FILE="$MCP_DIR/work-queue.json"
+  if [ -f "$WQ_FILE" ]; then
+    WQ_ITEMS=$(jq -r '
+      [.queue[:4][] |
+        (.tags // [] | join(",")) as $tag |
+        "- [\(.status)] **\(.id)**: \(.title)" + (if ($tag | length) > 0 then " (\($tag))" else "" end) +
+        (if .notes then "\n  > \(.notes[:120])" + (if (.notes | length) > 120 then "..." else "" end) else "" end)
+      ] | if length > 0 then "## Work Queue (top items)\n" + join("\n") + "\n" else empty end
+    ' "$WQ_FILE" 2>/dev/null)
+    [ -n "$WQ_ITEMS" ] && echo -e "$WQ_ITEMS"
+  fi
 
-# 1. Work queue — top 3 items with status
-wq_file = os.path.join(mcp_dir, "work-queue.json")
-try:
-    with open(wq_file) as f:
-        wq = json.load(f)
-    items = wq.get("queue", [])[:4]
-    if items:
-        lines.append("## Work Queue (top items)")
-        for it in items:
-            tag = ",".join(it.get("tags", []))
-            lines.append(f"- [{it['status']}] **{it['id']}**: {it['title']}" + (f" ({tag})" if tag else ""))
-            if it.get("notes"):
-                # Truncate notes to 120 chars
-                n = it["notes"][:120]
-                lines.append(f"  > {n}{'...' if len(it.get('notes',''))>120 else ''}")
-        lines.append("")
-except Exception:
-    pass
+  # 2. Recent session history — last 5 entries
+  HIST_FILE="$STATE_DIR/session-history.txt"
+  if [ -f "$HIST_FILE" ]; then
+    RECENT=$(tail -5 "$HIST_FILE" | grep -v '^$')
+    if [ -n "$RECENT" ]; then
+      echo "## Recent Sessions"
+      echo "$RECENT" | while IFS= read -r line; do
+        echo "- $line"
+      done
+      echo ""
+    fi
+  fi
 
-# 2. Recent session history — last 5 entries
-hist_file = os.path.join(state_dir, "session-history.txt")
-try:
-    with open(hist_file) as f:
-        history = [l.strip() for l in f if l.strip()]
-    recent = history[-5:]
-    if recent:
-        lines.append("## Recent Sessions")
-        for entry in recent:
-            lines.append(f"- {entry}")
-        lines.append("")
-except FileNotFoundError:
-    pass
+  # 3. Engagement intel — last 4 entries (compact)
+  INTEL_FILE="$STATE_DIR/engagement-intel.json"
+  if [ -f "$INTEL_FILE" ]; then
+    INTEL_ITEMS=$(jq -r '
+      if length > 0 then
+        "## Engagement Intel\n" +
+        ([.[-4:][] | "- [\(.type // "?")]  (s\(.session // "?")) \(.summary // "")"] | join("\n")) + "\n"
+      else empty end
+    ' "$INTEL_FILE" 2>/dev/null)
+    [ -n "$INTEL_ITEMS" ] && echo -e "$INTEL_ITEMS"
+  fi
+} > "$OUTPUT_FILE"
 
-# 3. Engagement intel — last 4 entries (compact)
-intel_file = os.path.join(state_dir, "engagement-intel.json")
-try:
-    with open(intel_file) as f:
-        intel = json.load(f)
-    if intel:
-        recent_intel = intel[-4:]
-        lines.append("## Engagement Intel")
-        for item in recent_intel:
-            typ = item.get("type", "?")
-            summary = item.get("summary", "")
-            sess = item.get("session", "?")
-            lines.append(f"- [{typ}] (s{sess}) {summary}")
-        lines.append("")
-except Exception:
-    pass
-
-output = os.path.join(state_dir, "session-context.md")
-with open(output, "w") as f:
-    f.write("\n".join(lines))
-
-print(f"warm-start: wrote {len(lines)} lines to session-context.md")
-PYEOF
+LINE_COUNT=$(wc -l < "$OUTPUT_FILE")
+echo "warm-start: wrote $LINE_COUNT lines to session-context.md"

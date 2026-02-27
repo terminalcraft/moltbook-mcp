@@ -8,107 +8,90 @@ INTEL_FILE="$STATE_DIR/engagement-intel.json"
 HISTORY_FILE="$STATE_DIR/session-history.txt"
 OUTPUT_FILE="$STATE_DIR/e-session-context.md"
 
-python3 -c "
-import json, sys, os
+# wq-705: Replaced python3 with bash+jq for context generation
+HAS_CONTENT=false
 
-lines = []
+{
+  # 1. Recent E session summaries from session-history.txt
+  if [ -f "$HISTORY_FILE" ]; then
+    E_SESSIONS=$(grep 'mode=E' "$HISTORY_FILE" | tail -3)
+    if [ -n "$E_SESSIONS" ]; then
+      echo "## Last E sessions"
+      echo "$E_SESSIONS" | while IFS= read -r line; do echo "- $line"; done
+      echo ""
+      HAS_CONTENT=true
+    fi
+  fi
 
-# 1. Recent E session summaries from session-history.txt
-history_file = '$HISTORY_FILE'
-try:
-    with open(history_file) as f:
-        history = [l.strip() for l in f if l.strip()]
-    e_sessions = [l for l in history if 'mode=E' in l]
-    recent_e = e_sessions[-3:]  # last 3 E sessions
-    if recent_e:
-        lines.append('## Last E sessions')
-        for entry in recent_e:
-            lines.append('- ' + entry)
-        lines.append('')
-except FileNotFoundError:
-    pass
+  # 2. Engagement intel entries
+  if [ -f "$INTEL_FILE" ]; then
+    INTEL_OUT=$(jq -r '
+      if length > 0 then
+        "## Engagement intel (from recent sessions)\n" +
+        ([.[-8:][] |
+          "- **[\(.type // "?")]** (s\(.session // "?")) \(.summary // "")" +
+          (if .actionable then "\n  - Action: \(.actionable)" else "" end)
+        ] | join("\n")) + "\n"
+      else empty end
+    ' "$INTEL_FILE" 2>/dev/null)
+    if [ -n "$INTEL_OUT" ]; then
+      echo -e "$INTEL_OUT"
+      HAS_CONTENT=true
+    fi
+  fi
 
-# 2. Engagement intel entries
-intel_file = '$INTEL_FILE'
-try:
-    with open(intel_file) as f:
-        intel = json.load(f)
-    if intel:
-        lines.append('## Engagement intel (from recent sessions)')
-        for item in intel[-8:]:  # last 8 entries
-            typ = item.get('type', '?')
-            summary = item.get('summary', '')
-            action = item.get('actionable', '')
-            sess = item.get('session', '?')
-            lines.append(f'- **[{typ}]** (s{sess}) {summary}')
-            if action:
-                lines.append(f'  - Action: {action}')
-        lines.append('')
-except (FileNotFoundError, json.JSONDecodeError):
-    pass
+  # 3. Extract platforms covered in last E session to help rotation
+  if [ -f "$HISTORY_FILE" ]; then
+    LAST_E=$(grep 'mode=E' "$HISTORY_FILE" | tail -1)
+    if [ -n "$LAST_E" ]; then
+      NOTE=$(echo "$LAST_E" | sed -n 's/.*note: //p')
+      if [ -n "$NOTE" ]; then
+        echo "## Platform rotation hint"
+        echo "Last E session covered: $NOTE"
+        echo "Prioritize platforms NOT mentioned above."
+        echo ""
+        HAS_CONTENT=true
+      fi
+    fi
+  fi
 
-# 3. Extract platforms covered in last E session to help rotation
-try:
-    with open(history_file) as f:
-        history = [l.strip() for l in f if l.strip()]
-    e_sessions = [l for l in history if 'mode=E' in l]
-    if e_sessions:
-        last_e = e_sessions[-1]
-        # Extract the note field
-        note_idx = last_e.find('note:')
-        if note_idx >= 0:
-            note = last_e[note_idx+5:].strip()
-            lines.append('## Platform rotation hint')
-            lines.append(f'Last E session covered: {note}')
-            lines.append('Prioritize platforms NOT mentioned above.')
-            lines.append('')
-except Exception:
-    pass
+  # 4. Budget utilization warning from recent E sessions
+  if [ -f "$HISTORY_FILE" ]; then
+    COSTS=$(grep 'mode=E' "$HISTORY_FILE" | tail -5 | grep -oP 'cost=\$\K[\d.]+')
+    if [ -n "$COSTS" ]; then
+      COUNT=$(echo "$COSTS" | wc -l)
+      SUM=$(echo "$COSTS" | awk '{s+=$1} END {printf "%.2f", s}')
+      AVG=$(echo "$SUM $COUNT" | awk '{printf "%.2f", $1/$2}')
+      echo "## Budget utilization alert"
+      if [ "$(echo "$AVG" | awk '{print ($1 < 1.50)}')" = "1" ]; then
+        echo "WARNING: Last $COUNT E sessions averaged \$$AVG (target: \$1.50+)."
+        echo "You MUST use the Phase 4 budget gate. Do NOT end the session until you have spent at least \$1.50."
+        echo "After each platform engagement, check your budget spent from the system-reminder line."
+        echo "If under \$1.50, loop back to Phase 2 with another platform."
+      else
+        echo "Recent E sessions averaging \$$AVG — on target."
+      fi
+      echo ""
+      HAS_CONTENT=true
+    fi
+  fi
 
-# 4. Budget utilization warning from recent E sessions
-try:
-    with open(history_file) as f:
-        history = [l.strip() for l in f if l.strip()]
-    e_sessions = [l for l in history if 'mode=E' in l]
-    recent_costs = []
-    for entry in e_sessions[-5:]:
-        import re
-        m = re.search(r'cost=\\\$([\d.]+)', entry)
-        if m:
-            recent_costs.append(float(m.group(1)))
-    if recent_costs:
-        avg = sum(recent_costs) / len(recent_costs)
-        lines.append('## Budget utilization alert')
-        if avg < 1.50:
-            lines.append(f'WARNING: Last {len(recent_costs)} E sessions averaged \\\${avg:.2f} (target: \\\$1.50+).')
-            lines.append('You MUST use the Phase 4 budget gate. Do NOT end the session until you have spent at least \\\$1.50.')
-            lines.append('After each platform engagement, check your budget spent from the system-reminder line.')
-            lines.append('If under \\\$1.50, loop back to Phase 2 with another platform.')
-        else:
-            lines.append(f'Recent E sessions averaging \\\${avg:.2f} — on target.')
-        lines.append('')
-except Exception:
-    pass
+  # 5. d049 violation nudge (wq-375 mechanical enforcement)
+  NUDGE_FILE="$STATE_DIR/d049-nudge.txt"
+  if [ -f "$NUDGE_FILE" ]; then
+    NUDGE=$(cat "$NUDGE_FILE")
+    if [ -n "$NUDGE" ]; then
+      echo "$NUDGE"
+      echo ""
+      HAS_CONTENT=true
+    fi
+  fi
+} > "$OUTPUT_FILE"
 
-# 5. d049 violation nudge (wq-375 mechanical enforcement)
-nudge_file = os.path.join('$STATE_DIR', 'd049-nudge.txt')
-try:
-    with open(nudge_file) as f:
-        nudge = f.read().strip()
-    if nudge:
-        lines.append(nudge)
-        lines.append('')
-except FileNotFoundError:
-    pass
-
-if lines:
-    with open('$OUTPUT_FILE', 'w') as f:
-        f.write('\n'.join(lines))
-    print(f'wrote {len(lines)} lines to e-session-context.md')
-else:
-    # Remove stale file if no context
-    import os
-    try: os.remove('$OUTPUT_FILE')
-    except: pass
-    print('no engagement context to seed')
-" 2>/dev/null || true
+LINE_COUNT=$(wc -l < "$OUTPUT_FILE")
+if [ "$LINE_COUNT" -gt 0 ]; then
+  echo "wrote $LINE_COUNT lines to e-session-context.md"
+else
+  rm -f "$OUTPUT_FILE"
+  echo "no engagement context to seed"
+fi

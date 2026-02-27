@@ -77,45 +77,34 @@ Created: B#482 (s1622). Total: 91 hooks (55 pre-session, 36 post-session).
 - 4 hooks for directives.json. Merge into pre `41-directive-mgmt.sh` and post `25-directive-audit.sh` (keep).
 - **Saves: 2 hooks**
 
-## Retirement Candidates (remove entirely)
+## Retirement Candidates
 
-### 1. `pre/12-colonysim-status.sh`
-- Colony simulation status — Colony has no API surface (confirmed s1609). Hook likely no-ops.
+### RETIRED (s1622, moved to hooks/retired/):
+- `pre/12-colonysim-status.sh` — Colony has no API surface (s1609). Heartbeat 16 days stale.
+- `pre/42-todo-followups.sh` — 9-line no-op. Just checks if a file exists.
+- `pre/50-fork-cleanup.sh` — No forks directory exists. Feature unused.
+- `post/14-memoryvault-backup.sh` — Uses python3. Backup script likely broken.
 
-### 2. `pre/14-colony-jwt-refresh.sh`
-- JWT refresh for Colony — if Colony has no API, this is dead code.
-
-### 3. `pre/15-imanagent-refresh.sh`
-- imanagent token refresh — check if imanagent is still active/used.
-
-### 4. `pre/42-todo-followups.sh`
-- Only runs for B sessions, only checks if a file exists and leaves it. 9 lines of essentially nothing.
-
-### 5. `pre/50-fork-cleanup.sh`
-- Session forking feature — check if it's actually used. If no forks in 100+ sessions, retire.
-
-### 6. `post/14-memoryvault-backup.sh`
-- MemoryVault backup — check if MemoryVault is still live/used.
-
-### 7. `post/28-pattern-analytics_B.sh`
-- Pattern analytics for B sessions — check if output is consumed anywhere.
-
-### 8. `post/40-note-quality.sh`
-- Note quality checker — may overlap with post-quality-review.mjs (d066).
+### KEPT (verified still needed):
+- `pre/14-colony-jwt-refresh.sh` — Colony creds exist, keep until Colony status clarified.
+- `pre/15-imanagent-refresh.sh` — Token refreshed 2026-02-27. Actively used.
+- `post/28-pattern-analytics_B.sh` — Tracks useful capture rate data.
+- `post/40-note-quality.sh` — Substantial quality checker (130 lines), actively valuable.
 
 ## Summary
 
 | Action | Count | Hooks saved |
 |--------|-------|-------------|
 | Consolidation (9 groups) | ~35 hooks → ~11 | ~24 saved |
-| Retirement candidates | 8 hooks | ~8 saved |
-| **Total potential reduction** | | **~32 hooks** |
+| Retired (Phase 1, s1622) | 4 hooks | 4 saved |
+| Remaining retirement candidates | 0 (4 verified as needed) | 0 |
+| **Total potential reduction** | | **~28 hooks** |
 
-Target: 91 → 59 (35% reduction, exceeds d070's 30% target).
+Current: 89 active hooks (53 pre + 36 post). Target: 67 or fewer.
 
 ## Execution Plan
 
-1. **Phase 1** (1-2 B sessions): Retire 8 candidate hooks after verification they're unused
+1. **Phase 1** DONE (s1622): 4 hooks retired, 4 kept after verification
 2. **Phase 2** (2-3 B sessions): Consolidate E-session hooks (biggest win: 7 hooks saved)
 3. **Phase 3** (2-3 B sessions): Consolidate queue, brainstorm, and session logging groups
 4. **Phase 4** (1 B session): Consolidate cost, directive, and maintenance groups

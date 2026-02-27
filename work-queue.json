@@ -92,7 +92,7 @@
       "title": "d070 Phase 1: retire unused hooks (8 candidates)",
       "description": "Verify and retire 8 hook retirement candidates identified in docs/hook-inventory.md: colonysim-status, colony-jwt-refresh, imanagent-refresh, todo-followups, fork-cleanup, memoryvault-backup, pattern-analytics_B, note-quality. Each requires verification that it is truly unused before removal.",
       "priority": 726,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1622,
       "source": "directive-d070",
@@ -101,7 +101,14 @@
         "d070",
         "complexity-reduction"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1622,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "4 hooks retired (colonysim-status, todo-followups, fork-cleanup, memoryvault-backup). 4 candidates kept after verification (colony-jwt, imanagent, pattern-analytics, note-quality). Hook count: 89 (was 93). Inventory updated."
+      }
     }
   ]
 }

@@ -24,7 +24,7 @@
       "title": "Consolidate session-type-conditional hooks sharing 80%+ logic",
       "description": "Many hooks have _B.sh, _E.sh, _R.sh, _A.sh suffixes but share most of their logic. Identify hook groups where a single parameterized hook with a session-type switch can replace 2-4 type-specific hooks. Start with post-session hooks (session-history writer, compliance trackers). Each consolidation reduces hook count by 1-3, directly supporting d070's target of 67 or fewer hooks.",
       "priority": 727,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1623,
       "source": "brainstorming",
@@ -33,7 +33,14 @@
         "d070",
         "hooks"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1628,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Consolidated 4 hooks into 2: E-posthook absorbed covenant-update and scope-bleed (31, 37); cost-trend-monitor merged B and R trend hooks (28). Hook count 89→86. Remaining groups (B pre-session dispatcher, E pre-session dispatcher, R audit merger) tracked in wq-729."
+      }
     },
     {
       "id": "wq-725",
@@ -64,6 +71,22 @@
         "hooks",
         "d070"
       ]
+    },
+    {
+      "id": "wq-729",
+      "title": "Hook consolidation batch 2: B pre-session, E pre-session, R audit dispatchers",
+      "description": "Continue wq-727. Remaining groups: (1) B pre-session dispatcher merging 45-truncation-detect, 46-queue-title-lint, 46-stuck-items, 49-pipeline-nudge into single hook; (2) E pre-session dispatcher merging 35-engagement-liveness, 36-engagement-seed, 36-topic-clusters; (3) R pre-session merger of 35-maintain-audit and 35-security-posture. Each reduces 2-4 hooks → 1. Expected total reduction: 86 → ~79.",
+      "priority": 729,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1628,
+      "source": "session",
+      "tags": [
+        "infrastructure",
+        "d070",
+        "hooks"
+      ],
+      "commits": []
     }
   ]
 }

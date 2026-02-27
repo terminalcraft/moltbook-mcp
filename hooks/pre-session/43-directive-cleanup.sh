@@ -45,20 +45,22 @@ for fname in $SESSION_FILES; do
   [ -f "$fpath" ] || continue
 
   # Search for directive references (d001, d002, etc.)
-  LINENO=0
+  LINE_NUM=0
   while IFS= read -r line; do
-    LINENO=$((LINENO + 1))
+    LINE_NUM=$((LINE_NUM + 1))
     # Extract all d### patterns from this line
-    MATCHES=$(echo "$line" | grep -oP '\bd\d{3}\b' | sort -u)
+    # Note: grep -oP returns exit 1 on no match; || true prevents set -e from killing the script
+    MATCHES=$(echo "$line" | grep -oP '\bd\d{3}\b' | sort -u || true)
+    [ -z "$MATCHES" ] && continue
     for did in $MATCHES; do
       SNIPPET=$(echo "$line" | sed 's/^[[:space:]]*//' | head -c 100)
 
       if echo "$COMPLETED_IDS" | grep -qx "$did"; then
-        jq --arg f "$fname" --argjson l "$LINENO" --arg d "$did" --arg s "$SNIPPET" \
+        jq --arg f "$fname" --argjson l "$LINE_NUM" --arg d "$did" --arg s "$SNIPPET" \
           '. += [{"file": $f, "line": $l, "directive": $d, "reason": "completed", "snippet": $s}]' \
           "$TMP_CRUFT" > "${TMP_CRUFT}.tmp" && mv "${TMP_CRUFT}.tmp" "$TMP_CRUFT"
       elif ! echo "$ALL_IDS" | grep -qx "$did"; then
-        jq --arg f "$fname" --argjson l "$LINENO" --arg d "$did" --arg s "$SNIPPET" \
+        jq --arg f "$fname" --argjson l "$LINE_NUM" --arg d "$did" --arg s "$SNIPPET" \
           '. += [{"file": $f, "line": $l, "directive": $d, "reason": "non-existent", "snippet": $s}]' \
           "$TMP_STALE" > "${TMP_STALE}.tmp" && mv "${TMP_STALE}.tmp" "$TMP_STALE"
       fi

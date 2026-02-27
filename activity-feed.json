@@ -1,121 +1,5 @@
 [
   {
-    "id": "b7d6a2f4-2a4b-4a0e-ba6e-678bdae68f70",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "7dfecd16"
-    },
-    "ts": "2026-02-26T20:05:54.527Z"
-  },
-  {
-    "id": "b2755d3b-b28d-4529-b92a-ffff2257eb0a",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-26T20:05:54.535Z"
-  },
-  {
-    "id": "5213e4cb-a8a2-4353-83d4-d762888b8e32",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 2541ms",
-    "meta": {
-      "id": "d08eb766",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-26T20:33:10.192Z"
-  },
-  {
-    "id": "1ae56e9a-ead2-4430-96b6-367b924b8109",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 3183ms",
-    "meta": {
-      "id": "dea07c84",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-26T21:03:10.859Z"
-  },
-  {
-    "id": "56db4942-efb4-4ec1-8a0f-fac571b187f6",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "76a660c5",
-      "name": "Chatr API",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "degraded",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-26T21:13:54.266Z"
-  },
-  {
-    "id": "c2681d33-1bf7-40d6-af84-6bedad1e49ac",
-    "event": "monitor.status_changed",
-    "summary": "Chatr API up → degraded",
-    "meta": {
-      "id": "76a660c5",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "degraded"
-    },
-    "ts": "2026-02-26T21:13:54.267Z"
-  },
-  {
-    "id": "9d3075d7-bb20-48f8-8d45-7b33298d195d",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "76a660c5",
-      "name": "Chatr API",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "down",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-26T21:18:57.808Z"
-  },
-  {
-    "id": "11fc330d-b497-4515-849d-28740571c62e",
-    "event": "monitor.status_changed",
-    "summary": "Chatr API up → down",
-    "meta": {
-      "id": "76a660c5",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "down"
-    },
-    "ts": "2026-02-26T21:18:57.809Z"
-  },
-  {
-    "id": "535d1d9e-c928-4a96-b74a-5fadb3724eed",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 2659ms",
-    "meta": {
-      "id": "d051894b",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-26T21:33:10.359Z"
-  },
-  {
-    "id": "e702186a-5c05-4e58-af3e-1329bfd92c57",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 3108ms",
-    "meta": {
-      "id": "d0d32dc1",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-26T22:03:10.815Z"
-  },
-  {
     "id": "041af2cb-4045-41b3-a379-170144d23552",
     "event": "smoke.run",
     "summary": "Smoke tests: 21/22 passed in 2307ms",
@@ -1872,5 +1756,115 @@
       "failed": 1
     },
     "ts": "2026-02-27T23:00:39.480Z"
+  },
+  {
+    "id": "c42efca8-1b30-4c55-8003-e7e8eaef4723",
+    "event": "server.start",
+    "summary": "API v1.95.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-02-27T23:08:09.002Z"
+  },
+  {
+    "id": "1478f1a4-827f-4114-a961-3869fa6981c8",
+    "event": "health.violation",
+    "summary": "2 violation(s): degraded",
+    "meta": {
+      "verdict": "degraded",
+      "violation_count": 2,
+      "violations": [
+        {
+          "endpoint": "feed_unauth",
+          "type": "uptime_below_threshold",
+          "severity": "critical",
+          "threshold": 95,
+          "actual": 0,
+          "message": "Uptime 0% is below 95% threshold"
+        },
+        {
+          "endpoint": "post_read",
+          "type": "uptime_below_threshold",
+          "severity": "critical",
+          "threshold": 95,
+          "actual": 0,
+          "message": "Uptime 0% is below 95% threshold"
+        }
+      ],
+      "summary": "2 violation(s): degraded"
+    },
+    "ts": "2026-02-27T23:08:21.114Z"
+  },
+  {
+    "id": "066ab1cb-17ec-4102-bc25-8352719dd440",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 21/22 passed in 4721ms",
+    "meta": {
+      "id": "8fa5f06e",
+      "passed": 21,
+      "failed": 1
+    },
+    "ts": "2026-02-27T23:08:43.723Z"
+  },
+  {
+    "id": "af0ed755-e83f-486e-9e59-e44a871c3d7b",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 92.6% overall",
+    "meta": {},
+    "ts": "2026-02-27T23:09:58.421Z"
+  },
+  {
+    "id": "cd3f2653-830d-42c7-8ff0-10804c06670f",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-27T23:09:58.676Z"
+  },
+  {
+    "id": "5d0ceee5-ede1-41f7-bdc0-3f3e3a7bf59b",
+    "event": "search",
+    "summary": "Search \"test\" — 1451 results",
+    "meta": {
+      "q": "test",
+      "total": 1451
+    },
+    "ts": "2026-02-27T23:10:03.741Z"
+  },
+  {
+    "id": "b904088b-caab-495e-a982-deb6b4300378",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-27T23:10:03.834Z"
+  },
+  {
+    "id": "59fdb2e0-5d1f-4541-a758-2aabc7bd389f",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "30bbda31",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-27T23:10:04.466Z"
+  },
+  {
+    "id": "e5dd0c9d-fc0e-4e04-b33d-c9896c4b0992",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "30bbda31"
+    },
+    "ts": "2026-02-27T23:10:04.467Z"
+  },
+  {
+    "id": "ffef15b1-6225-43b8-b77d-6111a9a2cbe2",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-27T23:10:04.474Z"
   }
 ]

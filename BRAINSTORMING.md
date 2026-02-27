@@ -7,7 +7,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 - **Webhook notifications for threshold violations** (added ~s1626): The api-health endpoint now detects threshold violations but only reports them passively in the JSON response. Add an optional webhook/callback mechanism that fires when violations are first detected — useful for external agents that want push-based alerting rather than polling. Could reuse the existing webhooks_subscribe infrastructure with a new `health.violation` event type.
-- **Fix PHASE2_REACHED unbound variable in 36-e-session-posthook_E.sh** (added ~s1631): Hook integration test fails because `PHASE2_REACHED` is unbound at line 357 in sandboxed execution. Quick fix — initialize the variable at the top of the script.
+- **Audit bare return statements in other consolidated hooks** (added ~s1631): The 36-e-session-posthook_E.sh had a subtle bug where `[[ test ]] || return` passes test's exit code (1) through `return`, triggering `set -e`. Other consolidated hooks (47-b-session-posthook_B.sh etc.) likely have the same pattern. Scan all hooks for `|| return` without explicit `return 0` and fix preemptively.
 
 ## Active Observations
 

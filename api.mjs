@@ -7005,6 +7005,7 @@ function agentManifest(req, res) {
       status_intel_quality: { url: `${base}/status/intel-quality`, method: "GET", auth: false, description: "Intel pipeline metrics — E session intel generation, queue conversion rate, actionable text quality (?window=N, default 20)" },
       status_platform_health: { url: `${base}/status/platform-health`, method: "GET", auth: false, description: "Platform health status — recent alerts, status distribution, last probe times (?format=json for API)" },
       status_api_consumers: { url: `${base}/status/api-consumers`, method: "GET", auth: false, description: "Platform health API consumption dashboard — unique agents, request frequency, filter usage, IP distribution. d069 adoption tracking. (?format=json for API)" },
+      status_api_health: { url: `${base}/status/api-health`, method: "GET", auth: false, description: "Self-monitoring — Moltbook API endpoint uptime, latency percentiles, error breakdown (?window=N, ?format=json for API)" },
       status_cost_distribution: { url: `${base}/status/cost-distribution`, method: "GET", auth: false, description: "Interactive cost distribution charts — stacked bar, pie, rolling avg, utilization (?window=N, ?format=json)" },
       status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
       status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },
@@ -14825,6 +14826,125 @@ table{border-collapse:collapse;width:100%;margin:8px 0}td{padding:4px 12px;borde
 <h2>Daily Frequency</h2><table>${dayRows || "<tr><td style='color:#585b70'>No requests yet</td></tr>"}</table>
 <h2>IP Distribution</h2><table>${ipRows || "<tr><td style='color:#585b70'>No requests yet</td></tr>"}</table>
 <p style="margin-top:2rem;color:#585b70;font-size:11px">Source: platform-health-api.log (${entries.length} entries). <a href="/status/api-consumers?format=json" style="color:#89b4fa">JSON</a> · <a href="/api/platform-health" style="color:#89b4fa">Platform Health API</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+</body></html>`;
+    res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: "internal error" });
+  }
+});
+
+// --- Self-Monitoring Health Endpoint (wq-716, d069) ---
+// Exposes health-check.cjs results via API. Shows Moltbook endpoint status,
+// latency trends, uptime percentages, and recent failures for external monitoring.
+const HEALTH_LOG = join(process.env.HOME || "/home/moltbot", ".config/moltbook/health.jsonl");
+
+app.get("/status/api-health", (req, res) => {
+  try {
+    let entries = [];
+    try {
+      const lines = readFileSync(HEALTH_LOG, "utf8").trim().split("\n").filter(Boolean);
+      entries = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+    } catch {}
+
+    const window = Math.min(parseInt(req.query.window) || 50, 500);
+    const recent = entries.slice(-window);
+
+    // Per-endpoint stats
+    const endpoints = {};
+    for (const e of recent) {
+      for (const [name, r] of Object.entries(e.results || {})) {
+        if (!endpoints[name]) endpoints[name] = { checks: 0, ok: 0, fail: 0, totalLatencyMs: 0, errors: {}, latencies: [] };
+        const ep = endpoints[name];
+        ep.checks++;
+        if (r.ok) ep.ok++; else ep.fail++;
+        ep.totalLatencyMs += (r.latencyMs || 0);
+        ep.latencies.push(r.latencyMs || 0);
+        if (r.error) ep.errors[r.error] = (ep.errors[r.error] || 0) + 1;
+        else if (!r.ok) { const k = `http_${r.status}`; ep.errors[k] = (ep.errors[k] || 0) + 1; }
+      }
+    }
+
+    // Compute stats per endpoint
+    const endpointStats = {};
+    for (const [name, ep] of Object.entries(endpoints)) {
+      ep.latencies.sort((a, b) => a - b);
+      const p50 = ep.latencies[Math.floor(ep.latencies.length * 0.5)] || 0;
+      const p95 = ep.latencies[Math.floor(ep.latencies.length * 0.95)] || 0;
+      endpointStats[name] = {
+        uptime_pct: ep.checks > 0 ? Math.round(ep.ok / ep.checks * 1000) / 10 : null,
+        checks: ep.checks,
+        ok: ep.ok,
+        fail: ep.fail,
+        avg_latency_ms: ep.checks > 0 ? Math.round(ep.totalLatencyMs / ep.checks) : null,
+        p50_latency_ms: p50,
+        p95_latency_ms: p95,
+        errors: Object.keys(ep.errors).length > 0 ? ep.errors : undefined,
+      };
+    }
+
+    // Overall verdict
+    const allOk = Object.values(endpointStats).every(e => e.fail === 0);
+    const anyDown = Object.values(endpointStats).some(e => e.uptime_pct !== null && e.uptime_pct < 50);
+    const verdict = anyDown ? "degraded" : allOk ? "healthy" : "partial";
+
+    // Last check details
+    const lastEntry = recent.length > 0 ? recent[recent.length - 1] : null;
+
+    const result = {
+      version: "1.0",
+      timestamp: new Date().toISOString(),
+      verdict,
+      window: recent.length,
+      time_range: recent.length > 0 ? { first: recent[0].ts, last: recent[recent.length - 1].ts } : null,
+      endpoints: endpointStats,
+      last_check: lastEntry ? { ts: lastEntry.ts, results: lastEntry.results } : null,
+      _links: {
+        self: "/status/api-health",
+        platform_health: "/api/platform-health",
+        consumers: "/status/api-consumers",
+        docs: "/skill.md",
+      },
+    };
+
+    if (req.query.format === "json" || req.get("Accept")?.includes("application/json")) {
+      return res.json(result);
+    }
+
+    // HTML dashboard
+    const verdictColor = { healthy: "#a6e3a1", degraded: "#f38ba8", partial: "#f9e2af" };
+    const epRows = Object.entries(endpointStats).map(([name, s]) => {
+      const upColor = s.uptime_pct >= 99 ? "#a6e3a1" : s.uptime_pct >= 90 ? "#f9e2af" : "#f38ba8";
+      const errStr = s.errors ? Object.entries(s.errors).map(([e, c]) => `${e}(${c})`).join(", ") : "-";
+      return `<tr>
+        <td style="color:#cdd6f4;font-weight:bold">${name}</td>
+        <td style="color:${upColor};text-align:right">${s.uptime_pct}%</td>
+        <td style="text-align:right">${s.ok}/${s.checks}</td>
+        <td style="text-align:right">${s.avg_latency_ms}ms</td>
+        <td style="text-align:right">${s.p50_latency_ms}ms</td>
+        <td style="text-align:right">${s.p95_latency_ms}ms</td>
+        <td style="color:#585b70;font-size:11px">${errStr}</td>
+      </tr>`;
+    }).join("");
+
+    const lastCheckRows = lastEntry ? Object.entries(lastEntry.results).map(([name, r]) => {
+      const icon = r.ok ? "✓" : "✗";
+      const color = r.ok ? "#a6e3a1" : "#f38ba8";
+      return `<tr><td style="color:${color}">${icon} ${name}</td><td style="text-align:right">${r.status}</td><td style="text-align:right">${r.latencyMs}ms</td></tr>`;
+    }).join("") : "<tr><td colspan=3 style='color:#585b70'>No checks yet</td></tr>";
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>API Health — Self-Monitor</title>
+<style>body{background:#11111b;color:#cdd6f4;font-family:monospace;padding:20px;max-width:900px;margin:0 auto}
+h1{font-size:18px;color:#89b4fa}h2{font-size:15px;color:#cba6f7;margin-top:24px}
+table{border-collapse:collapse;width:100%;margin:8px 0}td,th{padding:4px 12px;border-bottom:1px solid #1e1e2e;text-align:left}
+th{color:#6c7086;font-weight:normal;font-size:11px}
+.verdict{padding:12px 16px;border-radius:8px;margin:12px 0;font-weight:bold;background:#1e1e2e}</style></head><body>
+<h1>Moltbook API — Self-Monitor</h1>
+<div class="verdict" style="color:${verdictColor[verdict] || "#cdd6f4"}">Verdict: ${verdict.toUpperCase()} (last ${recent.length} checks)</div>
+<h2>Endpoint Stats</h2>
+<table><tr><th>Endpoint</th><th>Uptime</th><th>OK/Total</th><th>Avg</th><th>P50</th><th>P95</th><th>Errors</th></tr>${epRows || "<tr><td colspan=7 style='color:#585b70'>No data</td></tr>"}</table>
+<h2>Last Check${lastEntry ? ` (${lastEntry.ts})` : ""}</h2>
+<table><tr><th>Endpoint</th><th>Status</th><th>Latency</th></tr>${lastCheckRows}</table>
+<p style="margin-top:2rem;color:#585b70;font-size:11px">Source: health.jsonl (${entries.length} total entries, showing last ${recent.length}). <a href="/status/api-health?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/api-consumers" style="color:#89b4fa">Consumer Dashboard</a> · <a href="/api/platform-health" style="color:#89b4fa">Platform Health API</a></p>
 </body></html>`;
     res.type("html").send(html);
   } catch (e) {

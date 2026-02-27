@@ -20,44 +20,32 @@ TUNING_STATE="$STATE_DIR/rotation-tuning.json"
 
 # ── Phase 1: Outcome health check ──
 
+# wq-705: Replaced Phase 1 python3 with bash+awk
 if [ -f "$OUTCOMES_LOG" ]; then
-python3 - "$OUTCOMES_LOG" "$SESSION_TYPE" <<'PYEOF'
-import sys
-from collections import Counter
+  # Filter to current session type's last 10 outcomes
+  TYPE_LINES=$(grep " ${SESSION_TYPE} s=" "$OUTCOMES_LOG" | tail -10)
+  LINE_COUNT=$(echo "$TYPE_LINES" | grep -c . 2>/dev/null || echo 0)
 
-log_file, current_type = sys.argv[1], sys.argv[2]
+  if [ "$LINE_COUNT" -ge 5 ]; then
+    TOTAL=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | wc -l)
+    TIMEOUTS=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | grep -c '^timeout$' || echo 0)
+    ERRORS=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | grep -c '^error$' || echo 0)
+    SUCCESSES=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | grep -c '^success$' || echo 0)
 
-lines = open(log_file).readlines()
+    if [ "$TOTAL" -gt 0 ]; then
+      TIMEOUT_PCT=$((TIMEOUTS * 100 / TOTAL))
+      ERROR_PCT=$((ERRORS * 100 / TOTAL))
 
-# Filter to current session type's last 10 outcomes
-type_lines = [l for l in lines if f" {current_type} s=" in l][-10:]
-
-if len(type_lines) < 5:
-    sys.exit(0)  # Not enough data
-
-outcomes = []
-durations = []
-for line in type_lines:
-    parts = line.strip().split()
-    for p in parts:
-        if p.startswith("outcome="):
-            outcomes.append(p.split("=", 1)[1])
-        if p.startswith("dur="):
-            durations.append(int(p.replace("dur=", "").replace("s", "")))
-
-counts = Counter(outcomes)
-total = len(outcomes)
-timeout_rate = counts.get("timeout", 0) / total if total else 0
-error_rate = counts.get("error", 0) / total if total else 0
-
-if timeout_rate > 0.5:
-    avg_dur = sum(durations) // len(durations) if durations else 0
-    print(f"OUTCOME_WARNING: {current_type} sessions have {timeout_rate:.0%} timeout rate (last {total}). Avg duration: {avg_dur}s. Reduce scope this session.")
-elif error_rate > 0.5:
-    print(f"OUTCOME_WARNING: {current_type} sessions have {error_rate:.0%} error rate (last {total}). Check infrastructure before starting work.")
-else:
-    print(f"OUTCOME_FEEDBACK: {current_type} sessions healthy — {counts.get('success', 0)}/{total} success rate")
-PYEOF
+      if [ "$TIMEOUT_PCT" -gt 50 ]; then
+        AVG_DUR=$(echo "$TYPE_LINES" | grep -oP 'dur=\K\d+' | awk '{s+=$1; n++} END {if(n>0) printf "%d", s/n; else print 0}')
+        echo "OUTCOME_WARNING: ${SESSION_TYPE} sessions have ${TIMEOUT_PCT}% timeout rate (last ${TOTAL}). Avg duration: ${AVG_DUR}s. Reduce scope this session."
+      elif [ "$ERROR_PCT" -gt 50 ]; then
+        echo "OUTCOME_WARNING: ${SESSION_TYPE} sessions have ${ERROR_PCT}% error rate (last ${TOTAL}). Check infrastructure before starting work."
+      else
+        echo "OUTCOME_FEEDBACK: ${SESSION_TYPE} sessions healthy — ${SUCCESSES}/${TOTAL} success rate"
+      fi
+    fi
+  fi
 fi
 
 # ── Phase 2: Rotation tuning ──
@@ -73,11 +61,11 @@ TUNER_OUTPUT=$(python3 "$TUNER" --json 2>/dev/null) || exit 0
 # Write tuning state for session consumption
 echo "$TUNER_OUTPUT" > "$TUNING_STATE"
 
-# Extract recommendation
-CHANGED=$(echo "$TUNER_OUTPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['recommendation']['changed'])" 2>/dev/null) || exit 0
-NEW_PATTERN=$(echo "$TUNER_OUTPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['recommendation']['pattern'])" 2>/dev/null) || exit 0
-REASON=$(echo "$TUNER_OUTPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['recommendation']['reason'])" 2>/dev/null) || exit 0
-CURRENT=$(echo "$TUNER_OUTPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['recommendation']['current'])" 2>/dev/null) || exit 0
+# wq-705: Replaced python3 JSON extraction with jq
+CHANGED=$(echo "$TUNER_OUTPUT" | jq -r '.recommendation.changed' 2>/dev/null) || exit 0
+NEW_PATTERN=$(echo "$TUNER_OUTPUT" | jq -r '.recommendation.pattern' 2>/dev/null) || exit 0
+REASON=$(echo "$TUNER_OUTPUT" | jq -r '.recommendation.reason' 2>/dev/null) || exit 0
+CURRENT=$(echo "$TUNER_OUTPUT" | jq -r '.recommendation.current' 2>/dev/null) || exit 0
 
 if [ "$CHANGED" = "True" ]; then
   if [ "$SESSION_TYPE" = "R" ]; then

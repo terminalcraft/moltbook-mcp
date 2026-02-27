@@ -17,88 +17,80 @@ if [ ! -f "$ROTATION_FILE" ]; then
   echo '{"credentials":{}}' > "$ROTATION_FILE"
 fi
 
-python3 - "$ROTATION_FILE" "$REGISTRY" "$MAX_AGE_DAYS" <<'PYEOF'
-import json, sys, os
-from datetime import datetime
-from pathlib import Path
+# wq-705: Replaced python3 with jq+bash for credential staleness check
+NOW_EPOCH=$(date +%s)
 
-rotation_file, registry_file, max_age_days = sys.argv[1], sys.argv[2], int(sys.argv[3])
-now = datetime.now()
+# Sync registry into rotation tracking — add new accounts, update paths
+if [ -f "$REGISTRY" ]; then
+  TMP_ROT=$(mktemp)
+  jq --slurpfile reg "$REGISTRY" '
+    .credentials as $creds |
+    reduce ($reg[0].accounts // [] | .[] | select(.id != null and .cred_file != null and .cred_file != "")) as $acct (.;
+      ($acct.cred_file | gsub("^~"; env.HOME)) as $path |
+      if .credentials[$acct.id] then
+        .credentials[$acct.id].path = $path
+      else
+        .credentials[$acct.id] = {"path": $path, "last_rotated": null, "first_seen": null}
+      end
+    )
+  ' "$ROTATION_FILE" > "$TMP_ROT" && mv "$TMP_ROT" "$ROTATION_FILE"
+fi
 
-# Load state
-rot_data = json.load(open(rotation_file))
-creds = rot_data.setdefault("credentials", {})
+# Check each credential for staleness
+STALE=()
+MISSING=()
+OK_COUNT=0
 
-# Load registry
-try:
-    registry = json.load(open(registry_file))
-    accounts = registry.get("accounts", [])
-except Exception:
-    accounts = []
+# Iterate through credentials using jq to extract name/path/last_rotated
+while IFS=$'\t' read -r name path last_rotated; do
+  [ -z "$path" ] && continue
+  # Expand ~ in path
+  path="${path/#\~/$HOME}"
 
-# Sync registry into rotation tracking
-for acct in accounts:
-    aid = acct.get("id")
-    if not aid:
-        continue  # skip entries with no id (malformed)
-    cred_file = acct.get("cred_file") or ""
-    if cred_file:
-        cred_file = os.path.expanduser(cred_file)
-    else:
-        continue  # skip accounts with no cred file
-    if aid not in creds:
-        creds[aid] = {"path": cred_file, "last_rotated": None, "first_seen": None}
-    else:
-        creds[aid]["path"] = cred_file  # keep path in sync
+  if [ ! -e "$path" ]; then
+    MISSING+=("$name")
+    continue
+  fi
 
-stale = []
-missing = []
-ok_count = 0
+  if [ -n "$last_rotated" ] && [ "$last_rotated" != "null" ]; then
+    ROT_EPOCH=$(date -d "$last_rotated" +%s 2>/dev/null || echo 0)
+  else
+    ROT_EPOCH=$(stat -c %Y "$path" 2>/dev/null || echo "$NOW_EPOCH")
+    # Set first_seen if not set
+    FIRST_SEEN=$(jq -r --arg name "$name" '.credentials[$name].first_seen // empty' "$ROTATION_FILE" 2>/dev/null)
+    if [ -z "$FIRST_SEEN" ]; then
+      FS_DATE=$(date -d "@$ROT_EPOCH" -Iseconds 2>/dev/null)
+      TMP_FS=$(mktemp)
+      jq --arg name "$name" --arg fs "$FS_DATE" '.credentials[$name].first_seen = $fs' "$ROTATION_FILE" > "$TMP_FS" && mv "$TMP_FS" "$ROTATION_FILE"
+    fi
+  fi
 
-for name, info in creds.items():
-    path = info.get("path") or ""
-    if not path:
-        continue
-    path = os.path.expanduser(path)
-    last_rotated = info.get("last_rotated")
+  AGE_DAYS=$(( (NOW_EPOCH - ROT_EPOCH) / 86400 ))
+  if [ "$AGE_DAYS" -gt "$MAX_AGE_DAYS" ]; then
+    STALE+=("$name: ${AGE_DAYS}d old (max ${MAX_AGE_DAYS}d)")
+  else
+    OK_COUNT=$((OK_COUNT + 1))
+  fi
+done < <(jq -r '.credentials | to_entries[] | [.key, .value.path, .value.last_rotated] | @tsv' "$ROTATION_FILE" 2>/dev/null)
 
-    if not os.path.exists(path):
-        missing.append(name)
-        continue
-
-    if last_rotated:
-        rot_date = datetime.fromisoformat(last_rotated)
-        if rot_date.tzinfo is not None:
-            rot_date = rot_date.replace(tzinfo=None)
-    else:
-        rot_date = datetime.fromtimestamp(os.path.getmtime(path))
-        if not info.get("first_seen"):
-            info["first_seen"] = rot_date.isoformat()
-
-    age_days = (now - rot_date).days
-    if age_days > max_age_days:
-        stale.append(f"{name}: {age_days}d old (max {max_age_days}d)")
-    else:
-        ok_count += 1
-
-# Save
-with open(rotation_file, 'w') as f:
-    json.dump(rot_data, f, indent=2)
-    f.write('\n')
+TOTAL=$(jq '.credentials | length' "$ROTATION_FILE" 2>/dev/null || echo 0)
 
 # Report
-total = len(creds)
-if stale:
-    print(f"⚠ cred-age: {len(stale)} stale, {ok_count} ok, {len(missing)} missing (of {total})")
-    for s in stale:
-        print(f"  - {s}")
-    alert_path = os.path.expanduser("~/.config/moltbook/cred-age-alert.txt")
-    with open(alert_path, 'w') as af:
-        af.write("## CREDENTIAL STALENESS WARNING\n")
-        for s in stale:
-            af.write(f"- {s}\n")
-        if missing:
-            af.write(f"\nMissing cred files: {', '.join(missing)}\n")
-else:
-    print(f"cred-age: {ok_count} ok, {len(missing)} missing (of {total}, max {max_age_days}d)")
-PYEOF
+if [ "${#STALE[@]}" -gt 0 ]; then
+  echo "cred-age: ${#STALE[@]} stale, $OK_COUNT ok, ${#MISSING[@]} missing (of $TOTAL)"
+  for s in "${STALE[@]}"; do
+    echo "  - $s"
+  done
+  # Write alert file
+  ALERT_PATH="$STATE_DIR/cred-age-alert.txt"
+  {
+    echo "## CREDENTIAL STALENESS WARNING"
+    for s in "${STALE[@]}"; do echo "- $s"; done
+    if [ "${#MISSING[@]}" -gt 0 ]; then
+      echo ""
+      echo "Missing cred files: $(IFS=', '; echo "${MISSING[*]}")"
+    fi
+  } > "$ALERT_PATH"
+else
+  echo "cred-age: $OK_COUNT ok, ${#MISSING[@]} missing (of $TOTAL, max ${MAX_AGE_DAYS}d)"
+fi

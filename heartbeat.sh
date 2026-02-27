@@ -352,7 +352,7 @@ INJECT_BLOCKS=""
 if [ -z "$EMERGENCY_MODE" ]; then
   safe_stage "prompt-inject" '
     INJECT_RESULT=$(PROJECT_DIR="$DIR" node "$DIR/prompt-inject-processor.mjs" "$MODE_CHAR" "$COUNTER" 2>/dev/null || echo "{\"blocks\":\"\"}")
-    INJECT_BLOCKS=$(echo "$INJECT_RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get(\"blocks\",\"\"))" 2>/dev/null || echo "")
+    INJECT_BLOCKS=$(echo "$INJECT_RESULT" | jq -r '.blocks // ""' 2>/dev/null || echo "")
   '
 fi
 

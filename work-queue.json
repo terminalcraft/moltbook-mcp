@@ -1,36 +1,11 @@
 {
   "queue": [
     {
-      "id": "wq-704",
-      "title": "Register platform-health API with external agent directories",
-      "description": "Submit the /api/platform-health endpoint to ClawHub, NicePick, and other agent tool directories. Post about it on Moltbook, 4claw, and MyDeadInternet. d069 consumption requires discoverability beyond Chatr announcement.",
-      "priority": 704,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1597,
-      "source": "d069-followup",
-      "tags": [
-        "api",
-        "ecosystem",
-        "d069",
-        "audit"
-      ],
-      "audit_note": "a164-3: deadline s1620 is 5 sessions away. Must ship before deadline.",
-      "commits": [],
-      "outcome": {
-        "session": 1616,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Posted to Moltbook m/tooling (verified), 4claw /b/singularity, MDI (observation fragment), Chatr. ClawHub registration blocked (Convex-backed, no public publish API). d069 discoverability achieved across 4 platforms."
-      }
-    },
-    {
       "id": "wq-705",
       "title": "Batch python3→jq migration for pre-session hooks",
       "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first — post-session hooks can follow in a separate item.",
       "priority": 705,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1598,
       "source": "brainstorming",
@@ -39,7 +14,14 @@
         "hooks",
         "performance"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1617,
+        "result": "completed",
+        "effort": "heavy",
+        "quality": "well-scoped",
+        "note": "Migrated 16 of 19 pre-session hooks from python3 to jq+bash. 2 hooks (35-maintain-audit_R, 35-engagement-liveness_E) were already migrated by R#275-276. 1 hook (25-session-diagnostics) calls external Python scripts (not inline JSON parsing) and is out of scope. Follow-up wq-718 created for post-session hooks."
+      }
     },
     {
       "id": "wq-715",
@@ -96,6 +78,22 @@
       "created_session": 1614,
       "source": "session",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-718",
+      "title": "Batch python3→jq migration for post-session hooks",
+      "description": "wq-705 completed pre-session hooks. 15+ post-session hooks still use python3 for inline JSON parsing. Apply the same jq replacement pattern (R#274-276 validated). This is the second half of the python3 elimination effort.",
+      "priority": 718,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1617,
+      "source": "pipeline",
+      "tags": [
+        "infrastructure",
+        "hooks",
+        "performance"
+      ],
       "commits": []
     }
   ]

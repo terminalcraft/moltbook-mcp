@@ -120,13 +120,23 @@
       "title": "Add api-consumers to self-test + rate-limit health API logging",
       "description": "Add /status/api-consumers to the self-test endpoint array so it gets health-checked. Also add rate-limiting to the platform-health-api.log writer — currently every request appends a line which could grow unbounded if an agent polls frequently. Cap at 1 log entry per IP per minute, and add log rotation when file exceeds 10K lines.",
       "priority": 720,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1612,
       "source": "pipeline-contribution",
       "tags": [
         "api",
         "reliability"
+      ],
+      "outcome": {
+        "session": 1612,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added rate-limiting (1/IP/min), log rotation (10K cap), and self-test entries for both new status endpoints."
+      },
+      "commits": [
+        "31cad960"
       ]
     },
     {

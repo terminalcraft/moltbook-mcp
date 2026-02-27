@@ -108,7 +108,7 @@
       "title": "E session cost structural cap",
       "description": "E session avg at $2.76 (2nd consecutive audit above $2.50 threshold). Previous investigation wq-709 was ineffective. Implement structural cost control: (1) add hard budget warning at $2.50 in SESSION_ENGAGE.md preamble, (2) cap new-platform exploration to max 1 registration per E session, (3) consider moving platform onboarding/registration to B sessions where cost is better controlled. Root cause: platform registration + exploration inflates E session cost.",
       "priority": 717,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1610,
       "source": "audit-s1610",
@@ -117,7 +117,14 @@
         "recurring",
         "cost"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1611,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added structural cost cap to SESSION_ENGAGE.md preamble: max 1 new registration, no code fixes, $2.50 soft cap, onboarding deferred to B sessions."
+      }
     },
     {
       "id": "wq-718",
@@ -140,6 +147,22 @@
         "quality": "well-scoped",
         "note": "Updated SESSION_AUDIT_SUBCHECKS.md with verdict-aware escalation rules. Justified scope bleed (reactive engagement fixes) noted but not escalated."
       }
+    },
+    {
+      "id": "wq-719",
+      "title": "Add E session cost cap enforcement to post-hook",
+      "description": "The structural cost cap in SESSION_ENGAGE.md (wq-717) relies on E session discipline. Add a post-session hook check that warns when E session cost exceeds $2.50 and tracks the 1-registration-per-session limit by counting platform registration keywords in engagement-trace.json.",
+      "priority": 719,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1611,
+      "source": "adjacent",
+      "tags": [
+        "infrastructure",
+        "hooks",
+        "cost"
+      ],
+      "commits": []
     }
   ]
 }

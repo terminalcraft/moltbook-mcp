@@ -845,6 +845,69 @@ if (action) console.log('quality-enforce: ACTION: ' + action);
 }
 
 ###############################################################################
+# Check 8: E session cost cap (wq-719)
+#   Warn when E session cost exceeds $2.50
+#   Track 1-registration-per-session limit via trace keywords
+###############################################################################
+E_COST_THRESHOLD="2.50"
+
+check_e_cost_cap() {
+  # Extract cost from session-history.txt for this session
+  local COST
+  COST=$(grep "s=${SESSION} " "$HISTORY_FILE" 2>/dev/null | grep -oP 'cost=\$\K[0-9.]+' | tail -1 || echo "")
+
+  if [[ -z "$COST" ]]; then
+    echo "e-cost-cap: skip — no cost data yet for s${SESSION}"
+    return
+  fi
+
+  # Compare cost to threshold (use node for float comparison)
+  local OVER
+  OVER=$(node -e "console.log(parseFloat('$COST') > parseFloat('$E_COST_THRESHOLD') ? 'yes' : 'no')" 2>/dev/null || echo "no")
+
+  if [[ "$OVER" == "yes" ]]; then
+    echo "e-cost-cap: WARN — s${SESSION} cost \$${COST} exceeds \$${E_COST_THRESHOLD} threshold"
+    echo "WARN: E session s${SESSION} cost \$${COST} > \$${E_COST_THRESHOLD} cap" >> "$HOME/.config/moltbook/maintain-audit.txt" 2>/dev/null
+  else
+    echo "e-cost-cap: OK — s${SESSION} cost \$${COST} (threshold: \$${E_COST_THRESHOLD})"
+  fi
+
+  # Check registration count in trace
+  if [[ "$HAS_TRACE" == "true" && -f "$TRACE_FILE" ]]; then
+    local REG_COUNT
+    REG_COUNT=$(node -e "
+      const fs = require('fs');
+      const traces = JSON.parse(fs.readFileSync('$TRACE_FILE', 'utf8'));
+      const arr = Array.isArray(traces) ? traces : [traces];
+      const t = arr.find(t => t.session === $SESSION);
+      if (!t) { console.log(0); process.exit(0); }
+      const text = JSON.stringify(t).toLowerCase();
+      const keywords = ['register', 'signup', 'sign up', 'create account', 'new account', 'registration'];
+      let count = 0;
+      for (const kw of keywords) {
+        const re = new RegExp(kw, 'gi');
+        const matches = text.match(re);
+        if (matches) count += matches.length;
+      }
+      // Normalize: count unique platform registrations, not keyword hits
+      const platforms = t.platforms_engaged || [];
+      const regPlatforms = platforms.filter(p => {
+        const pText = JSON.stringify(t).toLowerCase();
+        return keywords.some(kw => pText.includes(kw) && pText.includes(p.toLowerCase()));
+      });
+      console.log(Math.min(count > 0 ? Math.max(1, regPlatforms.length) : 0, 5));
+    " 2>/dev/null || echo "0")
+
+    if [[ "$REG_COUNT" -gt 1 ]]; then
+      echo "e-cost-cap: WARN — s${SESSION} appears to have ${REG_COUNT} platform registrations (limit: 1)"
+      echo "WARN: E session s${SESSION} had ${REG_COUNT} platform registrations (limit: 1)" >> "$HOME/.config/moltbook/maintain-audit.txt" 2>/dev/null
+    elif [[ "$REG_COUNT" -eq 1 ]]; then
+      echo "e-cost-cap: OK — 1 platform registration detected (within limit)"
+    fi
+  fi
+}
+
+###############################################################################
 # Phase 2: Run all checks sequentially
 ###############################################################################
 
@@ -855,5 +918,6 @@ check_note_fallback
 check_trace_fallback
 check_quality_audit
 check_quality_enforce
+check_e_cost_cap
 
 exit 0

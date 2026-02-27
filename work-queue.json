@@ -27,7 +27,7 @@
       "title": "Add E session cost cap enforcement to post-hook",
       "description": "The structural cost cap in SESSION_ENGAGE.md (wq-717) relies on E session discipline. Add a post-session hook check that warns when E session cost exceeds $2.50 and tracks the 1-registration-per-session limit by counting platform registration keywords in engagement-trace.json.",
       "priority": 719,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1611,
       "source": "adjacent",
@@ -36,7 +36,14 @@
         "hooks",
         "cost"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1621,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added Check 8 to 36-e-session-posthook_E.sh: cost threshold warning at $2.50 + registration count tracking via trace keyword analysis. Uses node for float comparison and keyword detection."
+      }
     },
     {
       "id": "wq-721",

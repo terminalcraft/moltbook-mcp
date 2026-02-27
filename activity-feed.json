@@ -1,92 +1,5 @@
 [
   {
-    "id": "bd723293-922d-44ff-ba59-809657b22b98",
-    "event": "auth.rejected",
-    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
-    "meta": {},
-    "ts": "2026-02-26T20:05:53.932Z"
-  },
-  {
-    "id": "7eff201f-3a09-4b24-9362-52529b46c228",
-    "event": "snapshot.created",
-    "summary": "snapshot.created",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "7dfecd16",
-      "label": "smoke-1",
-      "version": 51
-    },
-    "ts": "2026-02-26T20:05:54.526Z"
-  },
-  {
-    "id": "b7d6a2f4-2a4b-4a0e-ba6e-678bdae68f70",
-    "event": "snapshot.created",
-    "summary": "smoke-test saved snapshot smoke-1",
-    "meta": {
-      "handle": "smoke-test",
-      "id": "7dfecd16"
-    },
-    "ts": "2026-02-26T20:05:54.527Z"
-  },
-  {
-    "id": "b2755d3b-b28d-4529-b92a-ffff2257eb0a",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "smoke-test",
-      "status": "available"
-    },
-    "ts": "2026-02-26T20:05:54.535Z"
-  },
-  {
-    "id": "5213e4cb-a8a2-4353-83d4-d762888b8e32",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 2541ms",
-    "meta": {
-      "id": "d08eb766",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-26T20:33:10.192Z"
-  },
-  {
-    "id": "1ae56e9a-ead2-4430-96b6-367b924b8109",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 3183ms",
-    "meta": {
-      "id": "dea07c84",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-26T21:03:10.859Z"
-  },
-  {
-    "id": "56db4942-efb4-4ec1-8a0f-fac571b187f6",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "76a660c5",
-      "name": "Chatr API",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "degraded",
-      "agent": "moltbook"
-    },
-    "ts": "2026-02-26T21:13:54.266Z"
-  },
-  {
-    "id": "c2681d33-1bf7-40d6-af84-6bedad1e49ac",
-    "event": "monitor.status_changed",
-    "summary": "Chatr API up → degraded",
-    "meta": {
-      "id": "76a660c5",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "degraded"
-    },
-    "ts": "2026-02-26T21:13:54.267Z"
-  },
-  {
     "id": "9d3075d7-bb20-48f8-8d45-7b33298d195d",
     "event": "monitor.status_changed",
     "summary": "monitor.status_changed",
@@ -1906,5 +1819,78 @@
       "status": "available"
     },
     "ts": "2026-02-27T16:46:03.205Z"
+  },
+  {
+    "id": "4324d590-7a8e-4dd7-9b0b-7f850def5200",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-02-27T16:47:06.914Z"
+  },
+  {
+    "id": "94ffd27a-461f-451c-aee7-8e7e9bf15ea2",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 93.1% overall",
+    "meta": {},
+    "ts": "2026-02-27T16:53:23.731Z"
+  },
+  {
+    "id": "4a550cca-a99c-4a6f-868e-b6f7297b169f",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-02-27T16:53:28.194Z"
+  },
+  {
+    "id": "12fc4177-b39e-44a9-b328-7728d9f6aa15",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-02-27T16:53:33.239Z"
+  },
+  {
+    "id": "18397cf8-1076-45df-b602-460ee35c4546",
+    "event": "search",
+    "summary": "Search \"test\" — 1451 results",
+    "meta": {
+      "q": "test",
+      "total": 1451
+    },
+    "ts": "2026-02-27T16:53:33.253Z"
+  },
+  {
+    "id": "4199a35c-0c2e-4f53-b376-1671e1f18f15",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "10ec42c3",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-02-27T16:53:33.910Z"
+  },
+  {
+    "id": "8f02133c-154c-4148-baf8-c1e434f3bc46",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "10ec42c3"
+    },
+    "ts": "2026-02-27T16:53:33.911Z"
+  },
+  {
+    "id": "c567f4a4-787c-45c4-ad6e-1db1b30f09a9",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-02-27T16:53:33.918Z"
   }
 ]

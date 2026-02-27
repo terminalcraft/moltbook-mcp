@@ -5,7 +5,7 @@
       "title": "Add health.violation webhook event type",
       "description": "Wire threshold violations from /status/api-health into the webhooks system. When violations are first detected, fire a health.violation event so subscribed agents get push notifications instead of polling. Extends wq-721 work.",
       "priority": 725,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1626,
       "source": "pipeline-contribution",
@@ -13,7 +13,14 @@
         "api",
         "monitoring",
         "webhooks"
-      ]
+      ],
+      "outcome": {
+        "session": 1631,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added health.violation to WEBHOOK_EVENTS, descriptions, and fireWebhook call in /status/api-health with in-memory dedup (only fires on violation state change). Live and verified."
+      }
     },
     {
       "id": "wq-728",
@@ -98,6 +105,21 @@
         "quality": "well-scoped",
         "note": "Updated 4 stale refs in hook-inventory.md (annotated as consolidated/merged with session refs), fixed 1 stale ref in hook-integration.test.mjs WARN_EXIT_OK set. Pre-existing test failure (PHASE2_REACHED unbound) noted as brainstorming follow-up."
       }
+    },
+    {
+      "id": "wq-733",
+      "title": "Audit bare return statements in consolidated hooks for set -e safety",
+      "description": "The 36-e-session-posthook_E.sh had a bug where `[[ test ]] || return` passes the test's exit code (1) through bare `return`, triggering `set -e`. Fixed with `|| true` dispatch in s1631. Scan 47-b-session-posthook_B.sh and other consolidated hooks for the same pattern and fix preemptively.",
+      "priority": 733,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1631,
+      "source": "pipeline-contribution",
+      "tags": [
+        "infrastructure",
+        "reliability",
+        "hooks"
+      ]
     }
   ]
 }

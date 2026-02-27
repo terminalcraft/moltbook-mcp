@@ -19,12 +19,12 @@ SESSION="${SESSION_NUM:-0}"
 # Get current diversity metrics from engage-orchestrator
 METRICS=$(node "$DIR/engage-orchestrator.mjs" --diversity --json 2>/dev/null || echo '{}')
 
-# Extract key fields
-HHI=$(echo "$METRICS" | python3 -c "import json,sys; d=json.load(sys.stdin).get('diversity',{}); print(d.get('hhi_writes',0))" 2>/dev/null || echo "0")
-EFF=$(echo "$METRICS" | python3 -c "import json,sys; d=json.load(sys.stdin).get('diversity',{}); print(d.get('effective_platforms_writes',0))" 2>/dev/null || echo "0")
-TOP1=$(echo "$METRICS" | python3 -c "import json,sys; d=json.load(sys.stdin).get('diversity',{}); print(d.get('top1_pct',0))" 2>/dev/null || echo "0")
-TOP3=$(echo "$METRICS" | python3 -c "import json,sys; d=json.load(sys.stdin).get('diversity',{}); print(d.get('top3_pct',0))" 2>/dev/null || echo "0")
-COUNT=$(echo "$METRICS" | python3 -c "import json,sys; d=json.load(sys.stdin).get('diversity',{}); print(d.get('platform_count',0))" 2>/dev/null || echo "0")
+# Extract key fields (jq — no python3 dependency)
+HHI=$(echo "$METRICS" | jq -r '.diversity.hhi_writes // 0' 2>/dev/null || echo "0")
+EFF=$(echo "$METRICS" | jq -r '.diversity.effective_platforms_writes // 0' 2>/dev/null || echo "0")
+TOP1=$(echo "$METRICS" | jq -r '.diversity.top1_pct // 0' 2>/dev/null || echo "0")
+TOP3=$(echo "$METRICS" | jq -r '.diversity.top3_pct // 0' 2>/dev/null || echo "0")
+COUNT=$(echo "$METRICS" | jq -r '.diversity.platform_count // 0' 2>/dev/null || echo "0")
 
 # Append to history (JSONL format)
 {

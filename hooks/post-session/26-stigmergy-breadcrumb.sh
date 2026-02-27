@@ -60,34 +60,26 @@ echo "$SESSION_NOTE" | grep -iq 'wq-' && TAG_LIST="$TAG_LIST\"work-queue\","
 echo "$SESSION_NOTE" | grep -iq 'pattern\|knowledge' && TAG_LIST="$TAG_LIST\"knowledge\","
 [ -n "$TAG_LIST" ] && TAGS="[${TAG_LIST%,}]"
 
-# Create breadcrumb entry
-python3 -c "
-import json, sys
-from datetime import datetime
-
-breadcrumb = {
-    'id': 'bc-${SESSION_NUM:-0}-auto',
-    'type': '${CRUMB_TYPE}',
-    'content': '''${SESSION_NOTE//\'/\\\'}'''.strip()[:500],
-    'session': ${SESSION_NUM:-0},
-    'mode': '${MODE_CHAR:-?}',
-    'tags': $TAGS,
-    'auto': True,
-    'created': datetime.now().isoformat(),
-}
-
-try:
-    data = json.load(open('$BREADCRUMBS_FILE'))
-except:
-    data = {'version': 1, 'breadcrumbs': []}
-
+# Create breadcrumb entry (jq — no python3 dependency)
 # Skip if breadcrumb for this session already exists
-if any(b.get('session') == ${SESSION_NUM:-0} for b in data.get('breadcrumbs', [])):
-    sys.exit(0)
+if jq -e ".breadcrumbs[] | select(.session == ${SESSION_NUM:-0})" "$BREADCRUMBS_FILE" >/dev/null 2>&1; then
+  exit 0
+fi
 
-data['breadcrumbs'].append(breadcrumb)
-# Keep only last $BREADCRUMBS_MAX
-data['breadcrumbs'] = data['breadcrumbs'][-$BREADCRUMBS_MAX:]
-json.dump(data, open('$BREADCRUMBS_FILE', 'w'), indent=2)
-print(f\"stigmergy breadcrumb: [{breadcrumb['type']}] s{breadcrumb['session']} ({len(data['breadcrumbs'])} total)\")
-"
+# Truncate note to 500 chars for breadcrumb content
+CONTENT=$(echo "$SESSION_NOTE" | head -c 500)
+
+jq --argjson bc "$(jq -n \
+  --arg id "bc-${SESSION_NUM:-0}-auto" \
+  --arg type "$CRUMB_TYPE" \
+  --arg content "$CONTENT" \
+  --argjson session "${SESSION_NUM:-0}" \
+  --arg mode "${MODE_CHAR:-?}" \
+  --argjson tags "$TAGS" \
+  --arg created "$(date -Iseconds)" \
+  '{id: $id, type: $type, content: $content, session: $session, mode: $mode, tags: $tags, auto: true, created: $created}')" \
+  ".breadcrumbs += [\$bc] | .breadcrumbs = .breadcrumbs[-${BREADCRUMBS_MAX}:]" \
+  "$BREADCRUMBS_FILE" > "${BREADCRUMBS_FILE}.tmp" && mv "${BREADCRUMBS_FILE}.tmp" "$BREADCRUMBS_FILE"
+
+TOTAL=$(jq '.breadcrumbs | length' "$BREADCRUMBS_FILE" 2>/dev/null || echo "?")
+echo "stigmergy breadcrumb: [${CRUMB_TYPE}] s${SESSION_NUM:-0} (${TOTAL} total)"

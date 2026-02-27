@@ -45,39 +45,20 @@ check_regressions() {
   # Get hook names and ms from current session
   # Format: {"hooks":[{"hook":"name","ms":123,"status":"ok"}, ...]}
   local current_hooks
-  current_hooks=$(echo "$current" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-for h in data.get('hooks', []):
-    if h.get('status') in ('skip', 'budget_skip'):
-        continue
-    print(f\"{h['hook']}\t{h.get('ms', 0)}\")
-" 2>/dev/null) || return 0
+  current_hooks=$(echo "$current" | jq -r '.hooks[] | select(.status != "skip" and .status != "budget_skip") | "\(.hook)\t\(.ms // 0)"' 2>/dev/null) || return 0
 
   # Build baseline averages
   local baseline_avgs
-  baseline_avgs=$(echo "$baseline" | python3 -c "
-import json, sys
-from collections import defaultdict
-
-totals = defaultdict(list)
-for line in sys.stdin:
-    line = line.strip()
-    if not line:
-        continue
-    try:
-        data = json.loads(line)
-    except:
-        continue
-    for h in data.get('hooks', []):
-        if h.get('status') in ('skip', 'budget_skip'):
-            continue
-        totals[h['hook']].append(h.get('ms', 0))
-
-for hook, times in totals.items():
-    avg = sum(times) / len(times) if times else 0
-    print(f'{hook}\t{avg:.0f}\t{len(times)}')
-" 2>/dev/null) || return 0
+  baseline_avgs=$(echo "$baseline" | jq -r -s '
+    [.[] | .hooks[]? | select(.status != "skip" and .status != "budget_skip") | {hook, ms: (.ms // 0)}]
+    | group_by(.hook)
+    | map({
+        hook: .[0].hook,
+        avg: ((map(.ms) | add) / length | floor),
+        count: length
+      })
+    | .[] | "\(.hook)\t\(.avg)\t\(.count)"
+  ' 2>/dev/null) || return 0
 
   # Compare current vs baseline
   local alerts=0
@@ -96,20 +77,13 @@ for hook, times in totals.items():
     local avg_int=${baseline_avg%.*}
     [ "${avg_int:-0}" -lt 50 ] && continue
 
-    # Check ratio
+    # Check ratio (awk — no python3 dependency)
     local ratio
-    ratio=$(python3 -c "
-avg = $baseline_avg
-cur = $current_ms
-if avg > 0:
-    print(f'{cur/avg:.1f}')
-else:
-    print('0.0')
-" 2>/dev/null)
+    ratio=$(awk "BEGIN { avg=$baseline_avg; cur=$current_ms; if(avg>0) printf \"%.1f\", cur/avg; else print \"0.0\" }")
 
     # Compare ratio to threshold
     local exceeds
-    exceeds=$(python3 -c "print('yes' if float('$ratio') >= $THRESHOLD else 'no')" 2>/dev/null)
+    exceeds=$(awk "BEGIN { if($ratio >= $THRESHOLD) print \"yes\"; else print \"no\" }")
 
     if [ "$exceeds" = "yes" ]; then
       local msg="[s${SESSION_NUM}] ${phase}/${hook}: ${current_ms}ms (${ratio}x avg ${baseline_avg}ms over ${baseline_count} sessions)"

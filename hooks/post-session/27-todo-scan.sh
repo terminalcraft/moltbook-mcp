@@ -44,7 +44,7 @@ if [ -n "$NEW_TODOS" ]; then
   node -e "
     const fs = require('fs');
     const tracker = JSON.parse(fs.readFileSync('$TRACKER', 'utf8'));
-    const newLines = $(echo "$NEW_TODOS" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read().strip().split('\n')))" 2>/dev/null || echo '[]');
+    const newLines = $(echo "$NEW_TODOS" | jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null || echo '[]');
     for (const line of newLines) {
       const trimmed = line.trim();
       if (!trimmed) continue;

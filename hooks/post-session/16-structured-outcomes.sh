@@ -14,14 +14,7 @@ if [ ! -f "$OUTCOMES_FILE" ]; then
 fi
 
 # Extract cost from cost-history.json (last entry matching this session)
-COST=$(python3 -c "
-import json
-try:
-    data = json.load(open('$COST_FILE'))
-    matches = [e for e in data if e.get('session') == ${SESSION_NUM:-0}]
-    print(matches[-1].get('cost', matches[-1].get('spent', 0)) if matches else 0)
-except: print(0)
-" 2>/dev/null || echo 0)
+COST=$(jq -r "[.[] | select(.session == ${SESSION_NUM:-0})] | last | (.cost // .spent // 0)" "$COST_FILE" 2>/dev/null || echo 0)
 
 # Count commits made during session (from git log timestamps vs session log)
 COMMITS=0
@@ -45,27 +38,22 @@ FOCUS=""
 [ -n "${B_FOCUS:-}" ] && FOCUS="$B_FOCUS"
 [ -n "${R_FOCUS:-}" ] && FOCUS="$R_FOCUS"
 
-# Write entry
-python3 -c "
-import json, sys
-from datetime import datetime
+# Write entry (jq — no python3 dependency)
+FOCUS_JSON="null"
+[ -n "$FOCUS" ] && FOCUS_JSON="\"$FOCUS\""
+FILES_JSON="[]"
+[ -n "$FILES_CHANGED" ] && FILES_JSON=$(echo "$FILES_CHANGED" | jq -R 'split(",") | map(select(length > 0))' 2>/dev/null || echo '[]')
 
-entry = {
-    'timestamp': datetime.now().isoformat(),
-    'session': int('${SESSION_NUM:-0}'),
-    'mode': '${MODE_CHAR:-?}',
-    'focus': '${FOCUS}' or None,
-    'exit_code': int('${SESSION_EXIT:-1}'),
-    'outcome': '${SESSION_OUTCOME:-unknown}',
-    'cost_usd': float('${COST}'),
-    'files_changed': '${FILES_CHANGED}'.split(',') if '${FILES_CHANGED}' else [],
-}
-
-data = json.load(open('$OUTCOMES_FILE'))
-data.append(entry)
-# Keep last 200 sessions
-data = data[-200:]
-json.dump(data, open('$OUTCOMES_FILE', 'w'), indent=2)
-"
+jq --argjson entry "$(jq -n \
+  --arg ts "$(date -Iseconds)" \
+  --argjson session "${SESSION_NUM:-0}" \
+  --arg mode "${MODE_CHAR:-?}" \
+  --argjson focus "$FOCUS_JSON" \
+  --argjson exit_code "${SESSION_EXIT:-1}" \
+  --arg outcome "${SESSION_OUTCOME:-unknown}" \
+  --argjson cost "${COST}" \
+  --argjson files "$FILES_JSON" \
+  '{timestamp: $ts, session: $session, mode: $mode, focus: $focus, exit_code: $exit_code, outcome: $outcome, cost_usd: $cost, files_changed: $files}')" \
+  '. + [$entry] | .[-200:]' "$OUTCOMES_FILE" > "${OUTCOMES_FILE}.tmp" && mv "${OUTCOMES_FILE}.tmp" "$OUTCOMES_FILE"
 
 echo "$(date -Iseconds) structured outcome logged: s=${SESSION_NUM:-?} ${SESSION_OUTCOME:-?} \$${COST}"

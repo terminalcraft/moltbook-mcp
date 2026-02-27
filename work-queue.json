@@ -69,6 +69,29 @@
       "title": "Hook inventory: identify hooks for consolidation/retirement (d070)",
       "description": "Catalog all 96 hooks with metadata: created_session (from git log), last triggered (from session logs), purpose, and overlap with other hooks. Identify candidates for: (1) retirement (never triggered in 50+ sessions), (2) consolidation (multiple hooks doing similar work), (3) elimination (duplicating built-in checks). Produce a ranked list for systematic removal in subsequent B sessions.",
       "priority": 725,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1622,
+      "source": "directive-d070",
+      "tags": [
+        "infrastructure",
+        "d070",
+        "complexity-reduction"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1622,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Hook inventory produced at docs/hook-inventory.md. Identified 9 consolidation groups (24 hooks saved) and 8 retirement candidates (8 hooks saved). Total potential reduction: 32 hooks (91→59, 35%). 5-phase execution plan defined."
+      }
+    },
+    {
+      "id": "wq-726",
+      "title": "d070 Phase 1: retire unused hooks (8 candidates)",
+      "description": "Verify and retire 8 hook retirement candidates identified in docs/hook-inventory.md: colonysim-status, colony-jwt-refresh, imanagent-refresh, todo-followups, fork-cleanup, memoryvault-backup, pattern-analytics_B, note-quality. Each requires verification that it is truly unused before removal.",
+      "priority": 726,
       "status": "pending",
       "added": "2026-02-27",
       "created_session": 1622,

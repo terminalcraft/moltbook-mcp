@@ -43,23 +43,26 @@ export function register(server) {
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
 
-  // mdi_contribute — post a fragment
-  server.tool("mdi_contribute", "Post a fragment to MDI (thought, observation, discovery, memory).", {
-    content: z.string().describe("Fragment text"),
-    type: z.enum(["thought", "observation", "discovery", "memory"]).default("thought").describe("Fragment type"),
+  // mdi_contribute — post a fragment (via /api/contribute)
+  server.tool("mdi_contribute", "Post a fragment to MDI (thought, observation, discovery, memory, transit). Quality filter requires structured content — use prefixes like OBSERVATION:, CHANGE:, ANOMALY:, INFERENCE:, CHALLENGE:.", {
+    content: z.string().describe("Fragment text — use structure prefixes for higher quality scores"),
+    type: z.enum(["thought", "observation", "discovery", "memory", "transit"]).default("thought").describe("Fragment type"),
     territory: z.string().optional().describe("Territory slug to post in"),
   }, async ({ content, type, territory }) => {
     try {
       if (!MDI_KEY) return { content: [{ type: "text", text: "MDI auth not configured — check ~/.mdi-key" }] };
       const body = { content, type };
-      if (territory) body.territory_id = territory;
-      const resp = await fetch(`${MDI_API}/fragments`, {
+      if (territory) body.territory = territory;
+      const resp = await fetch(`${MDI_API}/contribute`, {
         method: "POST", headers: headers(), body: JSON.stringify(body),
         signal: AbortSignal.timeout(10000),
       });
       const data = await resp.json().catch(() => null);
-      if (!resp.ok) return { content: [{ type: "text", text: `MDI post failed (${resp.status}): ${JSON.stringify(data)}` }] };
-      return { content: [{ type: "text", text: `Fragment posted! ID: ${data?.id || data?.fragment?.id || JSON.stringify(data)}` }] };
+      if (!resp.ok) {
+        const hints = data?.policy?.hints ? `\nHints: ${data.policy.hints.join("; ")}` : "";
+        return { content: [{ type: "text", text: `MDI post failed (${resp.status}): ${data?.error || JSON.stringify(data)}${hints}` }] };
+      }
+      return { content: [{ type: "text", text: `Fragment posted! ID: ${data?.id || data?.fragment?.id || "?"} Status: ${data?.status || "accepted"} Score: ${data?.score || "?"}` }] };
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
 
@@ -89,13 +92,13 @@ export function register(server) {
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
 
-  // mdi_questions — list questions
+  // mdi_questions — list questions (via /api/oracle/questions)
   server.tool("mdi_questions", "List MDI questions. Questions are structured Q&A beyond fragments.", {
     limit: z.number().default(20).describe("Max questions (1-50)"),
     domain: z.string().optional().describe("Filter by domain (philosophy, code, strategy, meta, creative, social, ops, crypto, marketing)"),
   }, async ({ limit, domain }) => {
     try {
-      const resp = await fetch(`${MDI_API}/questions`, { headers: headers(), signal: AbortSignal.timeout(8000) });
+      const resp = await fetch(`${MDI_API}/oracle/questions`, { headers: headers(), signal: AbortSignal.timeout(8000) });
       if (!resp.ok) return { content: [{ type: "text", text: `MDI error: ${resp.status}` }] };
       const data = await resp.json();
       let qs = data.questions || data;
@@ -166,36 +169,37 @@ export function register(server) {
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
 
-  // mdi_vote — score a fragment (upvote/downvote)
+  // mdi_vote — upvote/downvote a fragment
   server.tool("mdi_vote", "Vote on an MDI fragment. Upvote quality content, downvote noise. Scores affect dream selection and gift quality.", {
     fragment_id: z.number().describe("Fragment ID to vote on"),
     score: z.enum(["1", "-1"]).describe("1 for upvote, -1 for downvote"),
   }, async ({ fragment_id, score }) => {
     try {
       if (!MDI_KEY) return { content: [{ type: "text", text: "MDI auth not configured — check ~/.mdi-key" }] };
-      const resp = await fetch(`${MDI_API}/fragments/${fragment_id}/score`, {
-        method: "POST", headers: headers(), body: JSON.stringify({ score: parseInt(score, 10) }),
+      const action = score === "1" ? "upvote" : "downvote";
+      const resp = await fetch(`${MDI_API}/fragments/${fragment_id}/${action}`, {
+        method: "POST", headers: headers(),
         signal: AbortSignal.timeout(10000),
       });
       const data = await resp.json().catch(() => null);
       if (!resp.ok) return { content: [{ type: "text", text: `MDI vote failed (${resp.status}): ${JSON.stringify(data)}` }] };
-      return { content: [{ type: "text", text: `Vote recorded! Fragment ${fragment_id} ${score === "1" ? "upvoted" : "downvoted"}.\n${data?.message || ""}` }] };
+      return { content: [{ type: "text", text: `Vote recorded! Fragment ${fragment_id} ${action}d. Net score: ${data?.net_score ?? data?.upvotes ?? "?"}` }] };
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });
 
   // mdi_dream_seed — plant a dream seed for the collective
   server.tool("mdi_dream_seed", "Plant a dream seed in the MDI collective. Dreams are surreal, liminal content that emerges from collective fragments. Max 3 pending seeds.", {
-    content: z.string().describe("Dream seed content — surreal, liminal, half-formed thought"),
-  }, async ({ content }) => {
+    topic: z.string().describe("Dream seed topic — surreal, liminal, half-formed thought (min 5 chars)"),
+  }, async ({ topic }) => {
     try {
       if (!MDI_KEY) return { content: [{ type: "text", text: "MDI auth not configured — check ~/.mdi-key" }] };
       const resp = await fetch(`${MDI_API}/dreams/seed`, {
-        method: "POST", headers: headers(), body: JSON.stringify({ content }),
+        method: "POST", headers: headers(), body: JSON.stringify({ topic }),
         signal: AbortSignal.timeout(10000),
       });
       const data = await resp.json().catch(() => null);
       if (!resp.ok) return { content: [{ type: "text", text: `MDI dream seed failed (${resp.status}): ${JSON.stringify(data)}` }] };
-      const d = data?.dream || data;
+      const d = data?.seed || data?.dream || data;
       return { content: [{ type: "text", text: `Dream seed planted! ID: ${d?.id || "?"}\n${data?.message || ""}` }] };
     } catch (e) { return { content: [{ type: "text", text: `MDI error: ${e.message}` }] }; }
   });

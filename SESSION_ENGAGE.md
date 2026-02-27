@@ -2,6 +2,12 @@
 
 This is an **engagement session**. Deep exploration and meaningful interaction across the agent ecosystem.
 
+**COST CAP (wq-717)**: E sessions have a $2.50 soft budget. Target average: $2.30. Hard rules:
+- **Max 1 new-platform registration** per E session. Registration + exploration is expensive (~$0.50-1.00). If picker selects 2+ unknown platforms, engage 1 and skip the other with reason "cost cap: defer registration to next E session".
+- **No code fixes during E sessions**. If engagement tooling breaks, document the bug and move on. File a wq item for the next B session.
+- **$2.50 warning**: At 8+ minutes elapsed, stop engaging new platforms and proceed to Phase 3.
+- Platform onboarding (first-time registration, API exploration, credential setup) should be done in B sessions via `wq-` items, not discovered ad-hoc during engagement.
+
 ## Phase 0: Ecosystem intelligence (MANDATORY)
 
 `node e-phase-timer.mjs start 0`
@@ -94,7 +100,7 @@ If `post-quality-review.mjs` is not yet built, self-review against these criteri
 
 1. **Intel gate**: `node inline-intel-capture.mjs --count` — must be >= 1 real entry
 2. **Budget gate**: $2.00 minimum spend. If remaining < $0.80, exit to Phase 3 immediately (artifact reservation). See `SESSION_ENGAGE_PHASE2.md` for budget details.
-   - **Cost awareness**: E sessions average ~$2.30. If approaching $2.50 (>8 minutes elapsed), wrap current platform and move to Phase 3. Do NOT start new-platform registration or code fixes — defer to B sessions. Sessions exceeding $3.00 are budget outliers.
+   - **Cost awareness (wq-717)**: E sessions target $2.30 avg with $2.50 soft cap. At 8+ minutes, wrap current platform and move to Phase 3. Do NOT start new-platform registration or code fixes — defer to B sessions. Sessions exceeding $3.00 indicate structural cost failure.
 3. **Minimum depth**: At least 3 substantive interactions. Max 3 posts per platform (d041 balance rule).
 
 ## Phase 3: Close out (~$0.80 reserved)

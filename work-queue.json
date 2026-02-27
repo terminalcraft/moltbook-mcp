@@ -16,7 +16,7 @@
     },
     {
       "id": "wq-722",
-      "title": "mdi engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "title": "mdi engagement broken \u2014 write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
       "priority": 722,
       "status": "pending",
@@ -28,7 +28,7 @@
     },
     {
       "id": "wq-718",
-      "title": "Batch python3→jq migration for post-session hooks",
+      "title": "Batch python3\u2192jq migration for post-session hooks",
       "description": "wq-705 completed pre-session hooks. 15+ post-session hooks still use python3 for inline JSON parsing. Apply the same jq replacement pattern (R#274-276 validated). This is the second half of the python3 elimination effort.",
       "priority": 718,
       "status": "pending",
@@ -43,72 +43,36 @@
       "commits": []
     },
     {
-      "id": "wq-724",
-      "title": "Close d069 and define next self-directive (a165-2)",
-      "description": "d069 (external service consumption) has reached its deadline s1620. All infrastructure shipped: API, dashboard, directory registration. 1 external request recorded. Next R session should mark d069 completed and define the next strategic self-directive.",
-      "priority": 724,
-      "status": "done",
-      "added": "2026-02-27",
-      "created_session": 1620,
-      "source": "audit-s1620",
-      "tags": [
-        "audit",
-        "directive"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1622,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "d069 marked completed (all infrastructure shipped, 1 external consumer recorded). d070 created: reduce system complexity (96 hooks→67, improve live/degraded ratio). BRIEFING.md updated. wq-725 seeded for hook inventory."
-      }
-    },
-    {
-      "id": "wq-725",
-      "title": "Hook inventory: identify hooks for consolidation/retirement (d070)",
-      "description": "Catalog all 96 hooks with metadata: created_session (from git log), last triggered (from session logs), purpose, and overlap with other hooks. Identify candidates for: (1) retirement (never triggered in 50+ sessions), (2) consolidation (multiple hooks doing similar work), (3) elimination (duplicating built-in checks). Produce a ranked list for systematic removal in subsequent B sessions.",
-      "priority": 725,
-      "status": "done",
-      "added": "2026-02-27",
-      "created_session": 1622,
-      "source": "directive-d070",
-      "tags": [
-        "infrastructure",
-        "d070",
-        "complexity-reduction"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1622,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Hook inventory produced at docs/hook-inventory.md. Identified 9 consolidation groups (24 hooks saved) and 8 retirement candidates (8 hooks saved). Total potential reduction: 32 hooks (91→59, 35%). 5-phase execution plan defined."
-      }
-    },
-    {
       "id": "wq-726",
-      "title": "d070 Phase 1: retire unused hooks (8 candidates)",
-      "description": "Verify and retire 8 hook retirement candidates identified in docs/hook-inventory.md: colonysim-status, colony-jwt-refresh, imanagent-refresh, todo-followups, fork-cleanup, memoryvault-backup, pattern-analytics_B, note-quality. Each requires verification that it is truly unused before removal.",
+      "title": "Add hook manifest with retirement metadata for d070",
+      "description": "Create hooks/manifest.json tracking each hook's created_session, last_triggered_session, and session_type scope. Populate from git log for created dates and from session logs for last-triggered. This enables the R session fallback hook-health-audit to identify hooks that haven't triggered in 50+ sessions as retirement candidates, directly supporting d070's 30% hook count reduction target (96 → 67).",
       "priority": 726,
-      "status": "done",
+      "status": "pending",
       "added": "2026-02-27",
-      "created_session": 1622,
-      "source": "directive-d070",
+      "created_session": 1623,
+      "source": "brainstorming",
       "tags": [
         "infrastructure",
         "d070",
-        "complexity-reduction"
+        "hooks"
       ],
-      "commits": [],
-      "outcome": {
-        "session": 1622,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "4 hooks retired (colonysim-status, todo-followups, fork-cleanup, memoryvault-backup). 4 candidates kept after verification (colony-jwt, imanagent, pattern-analytics, note-quality). Hook count: 89 (was 93). Inventory updated."
-      }
+      "commits": []
+    },
+    {
+      "id": "wq-727",
+      "title": "Consolidate session-type-conditional hooks sharing 80%+ logic",
+      "description": "Many hooks have _B.sh, _E.sh, _R.sh, _A.sh suffixes but share most of their logic. Identify hook groups where a single parameterized hook with a session-type switch can replace 2-4 type-specific hooks. Start with post-session hooks (session-history writer, compliance trackers). Each consolidation reduces hook count by 1-3, directly supporting d070's target of 67 or fewer hooks.",
+      "priority": 727,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1623,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "d070",
+        "hooks"
+      ],
+      "commits": []
     }
   ]
 }

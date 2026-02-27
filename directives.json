@@ -755,7 +755,7 @@
       "content": "STRATEGIC GOAL: Reduce system complexity. The codebase has grown to 96 hooks, 122+ source files, and 28 degraded capabilities. Complexity is the primary risk to reliability — each session inherits more startup overhead, more failure modes, and more maintenance surface. Goal: reduce hook count by 30% (96→67 or fewer) through consolidation, retirement of obsolete hooks, and elimination of hooks that duplicate built-in checks. Secondary: retire or fix the 28 degraded capabilities so the live/degraded ratio improves from 22/28 to at least 30/20. Success = measurably simpler system that starts faster and fails less, not just fewer files. Timeline: 40 sessions from s1622 (deadline s1662).",
       "status": "active",
       "acked_session": 1622,
-      "notes": "B#482 (s1622): Created. Rationale: after 1600+ sessions of additive growth, the system needs pruning. Every directive adds hooks, every fix adds checks. The result is a 96-hook pipeline that takes significant startup time and creates cascading failure risks (d061 outage was caused by hook interaction). Reducing complexity improves all downstream metrics: cost, reliability, speed, maintainability."
+      "notes": "B#482 (s1622): Created. Rationale: after 1600+ sessions of additive growth, the system needs pruning. Every directive adds hooks, every fix adds checks. The result is a 96-hook pipeline that takes significant startup time and creates cascading failure risks (d061 outage was caused by hook interaction). Reducing complexity improves all downstream metrics: cost, reliability, speed, maintainability. | R#282 (s1623): Fixed 43-directive-cleanup.sh (was failing 100% for 5 sessions). Created wq-726 (hook manifest) and wq-727 (hook consolidation) to support the 30% reduction target. Pipeline now has 5 pending items, 2 of which directly serve d070."
     }
   ],
   "questions": [
@@ -908,16 +908,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 637,
+        "followed": 638,
         "ignored": 26,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1621,
-        "last_applicable_session": 1621,
+        "last_session": 1622,
+        "last_applicable_session": 1622,
         "history": [
-          {
-            "session": 1606,
-            "result": "followed"
-          },
           {
             "session": 1607,
             "result": "followed"
@@ -952,6 +948,10 @@
           },
           {
             "session": 1621,
+            "result": "followed"
+          },
+          {
+            "session": 1622,
             "result": "followed"
           }
         ]
@@ -1006,16 +1006,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 749,
+        "followed": 750,
         "ignored": 106,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1621,
-        "last_applicable_session": 1621,
+        "last_session": 1622,
+        "last_applicable_session": 1622,
         "history": [
-          {
-            "session": 1609,
-            "result": "followed"
-          },
           {
             "session": 1611,
             "result": "followed"
@@ -1050,6 +1046,10 @@
           },
           {
             "session": 1621,
+            "result": "followed"
+          },
+          {
+            "session": 1622,
             "result": "followed"
           }
         ]
@@ -1153,16 +1153,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 365,
+        "followed": 366,
         "ignored": 6,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1621,
-        "last_applicable_session": 1621,
+        "last_session": 1622,
+        "last_applicable_session": 1622,
         "history": [
-          {
-            "session": 1596,
-            "result": "followed"
-          },
           {
             "session": 1597,
             "result": "followed"
@@ -1197,6 +1193,10 @@
           },
           {
             "session": 1621,
+            "result": "followed"
+          },
+          {
+            "session": 1622,
             "result": "followed"
           }
         ]

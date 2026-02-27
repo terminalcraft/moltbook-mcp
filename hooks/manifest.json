@@ -1,0 +1,630 @@
+{
+  "version": 1,
+  "generated": "2026-02-27T17:02:03.176Z",
+  "total": 89,
+  "hooks": [
+    {
+      "name": "01-session-start-log.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-08T21:45:24+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "02-periodic-evm-balance.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-08T22:33:26+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "02-periodic-platform-health.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-08T22:33:26+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "03-schema-check.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-08T20:39:17+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "04-api-freshness.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-08T19:10:23+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "05-integrity-check.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T05:49:00+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "06-mcp-lint.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T11:55:06+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "07-cred-age.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T11:56:26+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "08-cost-forecast-gate.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-25T06:56:15+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "08-cost-forecast-inject.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-10T00:45:21+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "09-financial-check.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-05T21:19:53+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "10-health-check.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-01T07:26:21+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "11-service-liveness.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T04:03:56+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "14-colony-jwt-refresh.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-09T23:05:53+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "15-imanagent-refresh.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T05:53:55+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "15-presence-heartbeat.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-01T17:23:18+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "20-poll-directories.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-01T07:26:21+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "22-stale-blocker.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T12:47:17+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "23-outcome-feedback.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T12:48:06+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "24-resurrect-retired.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T13:07:51+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "24-stale-pending.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-25T14:05:58+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "25-session-diagnostics.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-01T19:00:20+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "26-briefing-staleness.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T13:10:32+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "27-session-file-sizes.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-03T23:29:34+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "28-cost-trend-alert_A.sh",
+      "phase": "pre-session",
+      "scope": "A",
+      "created": "2026-02-09T05:02:11+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "28-r-cost-trend_A.sh",
+      "phase": "pre-session",
+      "scope": "A",
+      "created": "2026-02-25T03:02:14+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "29-stale-ref-check_A.sh",
+      "phase": "pre-session",
+      "scope": "A",
+      "created": "2026-02-09T19:50:16+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "30-prune-state.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-01T11:24:59+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "35-engagement-liveness_E.sh",
+      "phase": "pre-session",
+      "scope": "E",
+      "created": "2026-02-04T13:44:46+01:00",
+      "last_triggered_session": 1624
+    },
+    {
+      "name": "35-maintain-audit_R.sh",
+      "phase": "pre-session",
+      "scope": "R",
+      "created": "2026-02-03T06:14:45+01:00",
+      "last_triggered_session": 1623
+    },
+    {
+      "name": "35-security-posture_R.sh",
+      "phase": "pre-session",
+      "scope": "R",
+      "created": "2026-02-08T16:42:47+01:00",
+      "last_triggered_session": 1623
+    },
+    {
+      "name": "36-circuit-reset.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-04T21:05:54+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "36-directive-status_R.sh",
+      "phase": "pre-session",
+      "scope": "R",
+      "created": "2026-02-05T15:53:24+01:00",
+      "last_triggered_session": 1623
+    },
+    {
+      "name": "36-engagement-seed_E.sh",
+      "phase": "pre-session",
+      "scope": "E",
+      "created": "2026-02-03T06:14:45+01:00",
+      "last_triggered_session": 1624
+    },
+    {
+      "name": "36-topic-clusters_E.sh",
+      "phase": "pre-session",
+      "scope": "E",
+      "created": "2026-02-24T22:34:54+01:00",
+      "last_triggered_session": 1624
+    },
+    {
+      "name": "37-conversation-balance_E.sh",
+      "phase": "pre-session",
+      "scope": "E",
+      "created": "2026-02-04T22:26:20+01:00",
+      "last_triggered_session": 1624
+    },
+    {
+      "name": "37-dns-certbot.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T01:11:32+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "38-covenant-reminders.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-05T00:36:48+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "38-spending-policy_E.sh",
+      "phase": "pre-session",
+      "scope": "E",
+      "created": "2026-02-09T03:34:04+01:00",
+      "last_triggered_session": 1624
+    },
+    {
+      "name": "38-warm-start.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T01:59:02+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "39-compliance-nudge.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T14:24:07+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "39-defunct-probe.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-05T14:53:05+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "40-crash-awareness.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-03T03:41:01+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "41-directive-inject.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-02T13:54:01+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "43-directive-cleanup.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-04T00:08:59+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "44-brainstorm-cleanup.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-24T22:36:26+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "44-brainstorm-gate_R.sh",
+      "phase": "pre-session",
+      "scope": "R",
+      "created": "2026-02-05T23:42:52+01:00",
+      "last_triggered_session": 1623
+    },
+    {
+      "name": "45-covenant-ceiling_R.sh",
+      "phase": "pre-session",
+      "scope": "R",
+      "created": "2026-02-06T09:44:14+01:00",
+      "last_triggered_session": 1623
+    },
+    {
+      "name": "45-truncation-detect_B.sh",
+      "phase": "pre-session",
+      "scope": "B",
+      "created": "2026-02-04T12:23:44+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "46-queue-title-lint_B.sh",
+      "phase": "pre-session",
+      "scope": "B",
+      "created": "2026-02-25T03:07:28+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "46-stuck-items_B.sh",
+      "phase": "pre-session",
+      "scope": "B",
+      "created": "2026-02-04T12:27:43+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "47-gap-validator.sh",
+      "phase": "pre-session",
+      "scope": "all",
+      "created": "2026-02-25T05:48:40+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "49-pipeline-nudge_B.sh",
+      "phase": "pre-session",
+      "scope": "B",
+      "created": "2026-02-26T13:03:49+01:00",
+      "last_triggered_session": 1626
+    },
+    {
+      "name": "05-smoke-test.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-01T14:15:02+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "10-summarize.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-01T07:01:16+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "11-queue-compliance.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-01T22:48:26+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "12-fire-webhook.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-01T10:05:50+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "13-ctxly-summary.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-02T06:08:43+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "15-cost-pipeline.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-02T17:46:03+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "15-r-commit-gate.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-09T21:59:19+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "16-structured-outcomes.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-01T23:03:02+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "17-engagement-log.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-02T00:27:21+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "18-r-impact-track.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-03T22:09:49+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "19-session-debrief.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-02T02:37:10+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "20-auto-commit.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-01T07:01:16+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "21-cred-reconcile.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-03T03:41:01+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "22-ecosystem-snapshot.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-03T03:41:01+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "23-pattern-snapshot.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-03T14:24:43+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "24-engagement-audit.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-03T03:41:01+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "25-directive-audit.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-01T07:35:45+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "26-brainstorm-compliance_R.sh",
+      "phase": "post-session",
+      "scope": "R",
+      "created": "2026-02-05T23:42:52+01:00",
+      "last_triggered_session": 1623
+    },
+    {
+      "name": "26-engage-blockers.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-03T03:41:01+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "26-session-trace.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-06T12:03:30+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "26-stigmergy-breadcrumb.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-04T04:13:21+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "27-todo-scan.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-02T13:55:12+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "28-diversity-history.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-03T20:26:27+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "28-pattern-analytics_B.sh",
+      "phase": "post-session",
+      "scope": "B",
+      "created": "2026-02-04T21:06:55+01:00",
+      "last_triggered_session": 1622
+    },
+    {
+      "name": "29-audit-queue-verify.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-04T01:58:06+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "30-log-rotate.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-01T07:01:16+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "31-covenant-update_E.sh",
+      "phase": "post-session",
+      "scope": "E",
+      "created": "2026-02-04T20:02:32+01:00",
+      "last_triggered_session": 1624
+    },
+    {
+      "name": "32-compress-logs.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-01T23:49:28+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "33-queue-archive.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-02T00:21:02+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "34-hook-regression-alert.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-10T19:02:10+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "35-verify-before-assert.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-04T21:45:47+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "36-e-session-posthook_E.sh",
+      "phase": "post-session",
+      "scope": "E",
+      "created": "2026-02-26T01:46:59+01:00",
+      "last_triggered_session": 1624
+    },
+    {
+      "name": "36-picker-compliance_E.sh",
+      "phase": "post-session",
+      "scope": "E",
+      "created": "2026-02-05T04:37:09+01:00",
+      "last_triggered_session": 1624
+    },
+    {
+      "name": "37-scope-bleed-detect_E.sh",
+      "phase": "post-session",
+      "scope": "E",
+      "created": "2026-02-26T21:04:07+01:00",
+      "last_triggered_session": 1624
+    },
+    {
+      "name": "40-note-quality.sh",
+      "phase": "post-session",
+      "scope": "all",
+      "created": "2026-02-09T19:49:25+01:00",
+      "last_triggered_session": 1625
+    },
+    {
+      "name": "47-b-session-posthook_B.sh",
+      "phase": "post-session",
+      "scope": "B",
+      "created": "2026-02-26T04:03:18+01:00",
+      "last_triggered_session": 1622
+    }
+  ]
+}

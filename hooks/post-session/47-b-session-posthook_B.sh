@@ -190,27 +190,40 @@ check_clawsta_autopost() {
 }
 
 ###############################################################################
-# Check 5: Probe timing budget alert (wq-710)
-#   Read liveness-timing.json and warn if latest wallMs exceeds 8000ms
+# Check 5: Probe timing budget alert (wq-710, extended wq-715)
+#   Read both liveness-timing.json and service-liveness-timing.json
+#   Warn if latest wallMs exceeds budget or slow platforms detected
 ###############################################################################
 PROBE_TIMING_THRESHOLD=8000
 
 check_probe_timing_budget() {
-  local TIMING_FILE="$STATE_DIR/liveness-timing.json"
-  if [[ ! -f "$TIMING_FILE" ]]; then
+  local ENGAGEMENT_FILE="$STATE_DIR/liveness-timing.json"
+  local SERVICE_FILE="$STATE_DIR/service-liveness-timing.json"
+  local ANY_DATA=0
+
+  for TIMING_FILE in "$ENGAGEMENT_FILE" "$SERVICE_FILE"; do
+    if [[ ! -f "$TIMING_FILE" ]]; then
+      continue
+    fi
+    ANY_DATA=1
+
+    local LABEL
+    LABEL=$(basename "$TIMING_FILE" .json)
+
+    local WALL_MS SESSION_ID
+    WALL_MS=$(jq '.entries[-1].wallMs // 0' "$TIMING_FILE" 2>/dev/null || echo 0)
+    SESSION_ID=$(jq -r '.entries[-1].session // "?"' "$TIMING_FILE" 2>/dev/null || echo "?")
+
+    if (( WALL_MS > PROBE_TIMING_THRESHOLD )); then
+      echo "probe-timing($LABEL): WARN — ${WALL_MS}ms exceeds ${PROBE_TIMING_THRESHOLD}ms (s${SESSION_ID})"
+      echo "WARN: Probe timing $LABEL ${WALL_MS}ms > ${PROBE_TIMING_THRESHOLD}ms budget (s${SESSION_ID})" >> "$AUDIT_LOG" 2>/dev/null
+    else
+      echo "probe-timing($LABEL): OK — ${WALL_MS}ms (s${SESSION_ID})"
+    fi
+  done
+
+  if (( ANY_DATA == 0 )); then
     echo "probe-timing: skip — no timing data"
-    return
-  fi
-
-  local WALL_MS SESSION_ID
-  WALL_MS=$(jq '.entries[-1].wallMs // 0' "$TIMING_FILE" 2>/dev/null || echo 0)
-  SESSION_ID=$(jq -r '.entries[-1].session // "?"' "$TIMING_FILE" 2>/dev/null || echo "?")
-
-  if (( WALL_MS > PROBE_TIMING_THRESHOLD )); then
-    echo "probe-timing: WARN — latest probe wall time ${WALL_MS}ms exceeds ${PROBE_TIMING_THRESHOLD}ms threshold (session s${SESSION_ID})"
-    echo "WARN: Probe timing ${WALL_MS}ms > ${PROBE_TIMING_THRESHOLD}ms budget (s${SESSION_ID})" >> "$AUDIT_LOG" 2>/dev/null
-  else
-    echo "probe-timing: OK — ${WALL_MS}ms (threshold: ${PROBE_TIMING_THRESHOLD}ms)"
   fi
 }
 

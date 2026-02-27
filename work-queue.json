@@ -5,7 +5,7 @@
       "title": "Add cron-based probe timing alerts",
       "description": "probe-timing-dashboard.mjs exists but only runs on-demand. Add a cron job that runs the dashboard in --json mode, checks for budget violations (wall time >8s), and writes alerts to maintain-audit.txt. Currently slow probes go unnoticed between sessions.",
       "priority": 715,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1608,
       "source": "brainstorming",
@@ -13,7 +13,14 @@
         "infrastructure",
         "monitoring"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1621,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "over-scoped",
+        "note": "Extended Check 5 in 47-b-session-posthook_B.sh to cover both liveness-timing.json and service-liveness-timing.json. A standalone cron was unnecessary — timing data is only written during sessions, so the post-hook is the right check point."
+      }
     },
     {
       "id": "wq-719",

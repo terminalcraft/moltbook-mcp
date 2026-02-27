@@ -15728,6 +15728,73 @@
         "015a4281"
       ],
       "notes": "R#279: Extracted sub-checks to SESSION_AUDIT_SUBCHECKS.md. 202\u2192116 lines, ~3107\u2192960 tokens."
+    },
+    {
+      "id": "wq-713",
+      "title": "E session scope-bleed root cause analysis tool",
+      "description": "Build a diagnostic script that analyzes WHY scope bleed happened in a given E session \u2014 parse the git diff to categorize commits as bug-fix (reactive), feature (proactive), or config (accidental). Output helps audit distinguish justified emergency fixes from discipline failures. Extend computeEScopeBleed() with commit categorization.",
+      "priority": 713,
+      "status": "done",
+      "added": "2026-02-26",
+      "created_session": 1607,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "tooling"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1611,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built e-scope-bleed-rca.mjs standalone script + extended computeEScopeBleed() in audit-stats.mjs with root_cause commit categorization. Date-filtered git log prevents false matches."
+      }
+    },
+    {
+      "id": "wq-717",
+      "title": "E session cost structural cap",
+      "description": "E session avg at $2.76 (2nd consecutive audit above $2.50 threshold). Previous investigation wq-709 was ineffective. Implement structural cost control: (1) add hard budget warning at $2.50 in SESSION_ENGAGE.md preamble, (2) cap new-platform exploration to max 1 registration per E session, (3) consider moving platform onboarding/registration to B sessions where cost is better controlled. Root cause: platform registration + exploration inflates E session cost.",
+      "priority": 717,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1610,
+      "source": "audit-s1610",
+      "tags": [
+        "audit",
+        "recurring",
+        "cost"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1611,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added structural cost cap to SESSION_ENGAGE.md preamble: max 1 new registration, no code fixes, $2.50 soft cap, onboarding deferred to B sessions."
+      }
+    },
+    {
+      "id": "wq-718",
+      "title": "Audit: use RCA verdict to auto-dismiss justified scope bleed",
+      "description": "When computeEScopeBleed() returns violations with root_cause.verdict=justified, the audit should not escalate. Currently all scope bleed is treated equally. Add verdict-aware logic to the E scope bleed audit sub-check so justified reactive fixes (engagement infra bug fixes) are noted but not flagged.",
+      "priority": 718,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1611,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "tooling"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1611,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated SESSION_AUDIT_SUBCHECKS.md with verdict-aware escalation rules. Justified scope bleed (reactive engagement fixes) noted but not escalated."
+      }
     }
   ]
 }

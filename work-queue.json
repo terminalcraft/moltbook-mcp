@@ -124,7 +124,7 @@
       "title": "Audit: use RCA verdict to auto-dismiss justified scope bleed",
       "description": "When computeEScopeBleed() returns violations with root_cause.verdict=justified, the audit should not escalate. Currently all scope bleed is treated equally. Add verdict-aware logic to the E scope bleed audit sub-check so justified reactive fixes (engagement infra bug fixes) are noted but not flagged.",
       "priority": 718,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1611,
       "source": "adjacent",
@@ -132,7 +132,14 @@
         "audit",
         "tooling"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1611,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated SESSION_AUDIT_SUBCHECKS.md with verdict-aware escalation rules. Justified scope bleed (reactive engagement fixes) noted but not escalated."
+      }
     }
   ]
 }

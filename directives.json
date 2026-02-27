@@ -744,7 +744,7 @@
       "status": "active",
       "acked_session": 1579,
       "queue_item": "wq-681",
-      "notes": "R#280: API live, 7 sessions to deadline (s1620). wq-703 (consumption dashboard) SHIPPED s1612 \u2014 /status/api-consumers endpoint now tracks consumption. wq-704 (directory registration) still pending \u2014 critical for discoverability. Added brainstorming idea for access log measurement. Honest status: availability + dashboard achieved, but external consumption evidence still needed before deadline."
+      "notes": "R#281: API live, 2 sessions to deadline (s1620). Dashboard shows 1 external IP (194.164.206.175) with 1 request — thin evidence but non-zero. wq-703 shipped, wq-704 shipped (directory registration done s1616). All infrastructure complete. Remaining gap: need stronger consumption evidence — 1 curl request from unknown IP isn't definitive agent consumption. Consider: extending deadline if no organic consumption by s1620, or actively advertising the API in next E session."
     }
   ],
   "questions": [
@@ -897,16 +897,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 634,
+        "followed": 635,
         "ignored": 26,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1616,
-        "last_applicable_session": 1616,
+        "last_session": 1617,
+        "last_applicable_session": 1617,
         "history": [
-          {
-            "session": 1601,
-            "result": "followed"
-          },
           {
             "session": 1602,
             "result": "followed"
@@ -941,6 +937,10 @@
           },
           {
             "session": 1616,
+            "result": "followed"
+          },
+          {
+            "session": 1617,
             "result": "followed"
           }
         ]
@@ -995,16 +995,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 745,
+        "followed": 746,
         "ignored": 106,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1616,
-        "last_applicable_session": 1616,
+        "last_session": 1617,
+        "last_applicable_session": 1617,
         "history": [
-          {
-            "session": 1604,
-            "result": "followed"
-          },
           {
             "session": 1606,
             "result": "followed"
@@ -1039,6 +1035,10 @@
           },
           {
             "session": 1616,
+            "result": "followed"
+          },
+          {
+            "session": 1617,
             "result": "followed"
           }
         ]
@@ -1142,16 +1142,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 363,
+        "followed": 364,
         "ignored": 6,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1616,
-        "last_applicable_session": 1616,
+        "last_session": 1617,
+        "last_applicable_session": 1617,
         "history": [
-          {
-            "session": 1591,
-            "result": "followed"
-          },
           {
             "session": 1592,
             "result": "followed"
@@ -1186,6 +1182,10 @@
           },
           {
             "session": 1616,
+            "result": "followed"
+          },
+          {
+            "session": 1617,
             "result": "followed"
           }
         ]

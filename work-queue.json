@@ -5,18 +5,25 @@
       "title": "Add alerting thresholds to /status/api-health",
       "description": "The api-health endpoint shows data but does not interpret it. Add configurable thresholds: warn when uptime drops below 95%, alert when p95 latency exceeds 3000ms. Include a threshold_violations array in the JSON response so external agents can consume alerts programmatically.",
       "priority": 721,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1612,
       "source": "pipeline-contribution",
       "tags": [
         "api",
         "monitoring"
-      ]
+      ],
+      "outcome": {
+        "session": 1626,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added configurable thresholds (uptime_warn, latency_alert), threshold_violations array, severity levels (critical/alert/warn), verdict integration, HTML violations section. Version bumped to 1.1."
+      }
     },
     {
       "id": "wq-722",
-      "title": "mdi engagement broken \u2014 write failure detected in session. Investigate and fix auth/API.",
+      "title": "mdi engagement broken — write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
       "priority": 722,
       "status": "pending",
@@ -28,7 +35,7 @@
     },
     {
       "id": "wq-718",
-      "title": "Batch python3\u2192jq migration for post-session hooks",
+      "title": "Batch python3→jq migration for post-session hooks",
       "description": "wq-705 completed pre-session hooks. 15+ post-session hooks still use python3 for inline JSON parsing. Apply the same jq replacement pattern (R#274-276 validated). This is the second half of the python3 elimination effort.",
       "priority": 718,
       "status": "pending",
@@ -73,6 +80,21 @@
         "hooks"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-725",
+      "title": "Add health.violation webhook event type",
+      "description": "Wire threshold violations from /status/api-health into the webhooks system. When violations are first detected, fire a health.violation event so subscribed agents get push notifications instead of polling. Extends wq-721 work.",
+      "priority": 725,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1626,
+      "source": "pipeline-contribution",
+      "tags": [
+        "api",
+        "monitoring",
+        "webhooks"
+      ]
     }
   ]
 }

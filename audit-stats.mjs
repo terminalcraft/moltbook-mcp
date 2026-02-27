@@ -15,6 +15,7 @@ import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const STATE_DIR = join(homedir(), '.config/moltbook');
@@ -464,6 +465,89 @@ function computeIntelYield() {
   };
 }
 
+// --- E session scope-bleed commit categorization (wq-713) ---
+
+function categorizeCommitMessage(subject, files) {
+  const msg = subject.toLowerCase();
+  const engagementInfra = /verify|engagement|picker|compliance|engage|credential/i;
+
+  // Bug fix (reactive)
+  if (/^fix[:(]/.test(msg) || (/fix|handle|repair|patch/.test(msg) && files.some(f => engagementInfra.test(f)))) {
+    const justified = files.some(f => engagementInfra.test(f));
+    return {
+      category: 'bug-fix',
+      label: 'reactive',
+      justified,
+      reason: justified
+        ? 'Fixing engagement infrastructure during E session'
+        : 'Bug fix targeting non-engagement code'
+    };
+  }
+
+  // Config/credential (accidental)
+  if (files.every(f => /credential|config|\.json$/.test(f)) || (/^chore[:(]/.test(msg) && files.every(f => /\.json$/.test(f)))) {
+    return {
+      category: 'config',
+      label: 'accidental',
+      justified: true,
+      reason: 'Config/credential change during engagement'
+    };
+  }
+
+  // Feature/refactor (proactive — discipline failure)
+  if (/^feat[:(]/.test(msg) || /^refactor[:(]/.test(msg) || files.some(f => /\.(mjs|js|sh|cjs)$/.test(f))) {
+    return {
+      category: 'feature',
+      label: 'proactive',
+      justified: false,
+      reason: 'Proactive build work during E session — discipline failure'
+    };
+  }
+
+  return { category: 'unknown', label: 'unclassified', justified: false, reason: 'Could not categorize' };
+}
+
+function getSessionCommitDetails(sessionFiles, sessionDate) {
+  // Given the files touched by an E session, find matching git commits on the same date
+  const validFiles = sessionFiles.filter(f => f !== '(none)');
+  if (validFiles.length === 0) return [];
+
+  // Time-bound: only look at commits from the session date (±1 day buffer)
+  const dateFilter = sessionDate ? `--after="${sessionDate}T00:00:00" --before="${sessionDate}T23:59:59"` : '';
+
+  const commits = [];
+  for (const file of validFiles) {
+    try {
+      const raw = execSync(
+        `git log ${dateFilter} --format="%H %s" -- "${file}" 2>/dev/null | head -3`,
+        { cwd: PROJECT_DIR, encoding: 'utf8', timeout: 5000 }
+      );
+      for (const line of raw.trim().split('\n').filter(l => l.trim())) {
+        const [hash, ...msgParts] = line.split(' ');
+        const msg = msgParts.join(' ');
+        if (msg.includes('auto-snapshot')) continue;
+        if (commits.find(c => c.hash === hash.slice(0, 8))) continue;
+
+        let changedFiles = [file];
+        try {
+          const filesRaw = execSync(
+            `git diff-tree --no-commit-id --name-only -r ${hash}`,
+            { cwd: PROJECT_DIR, encoding: 'utf8', timeout: 3000 }
+          );
+          changedFiles = filesRaw.trim().split('\n').filter(f => f.trim());
+        } catch { /* use fallback */ }
+
+        commits.push({ hash: hash.slice(0, 8), subject: msg, files: changedFiles });
+      }
+    } catch { /* skip */ }
+  }
+
+  return commits.map(c => {
+    const classification = categorizeCommitMessage(c.subject, c.files);
+    return { hash: c.hash, message: c.subject, files: c.files, ...classification };
+  });
+}
+
 function computeEScopeBleed() {
   const historyPath = join(STATE_DIR, 'session-history.txt');
   if (!existsSync(historyPath)) return { sessions_checked: 0, violations: [], violation_count: 0, verdict: 'no_data' };
@@ -479,14 +563,17 @@ function computeEScopeBleed() {
       const buildMatch = line.match(/build=(\d+)\s+commit/);
       const costMatch = line.match(/cost=\$?([\d.]+)/);
       const noteMatch = line.match(/note:\s*(.*)/);
+      const filesMatch = line.match(/files=\[([^\]]*)\]/);
       if (!sessionMatch) continue;
 
       const sessionNum = parseInt(sessionMatch[1]);
       const buildCommits = buildMatch ? parseInt(buildMatch[1]) : 0;
       const cost = costMatch ? parseFloat(costMatch[1]) : 0;
       const note = noteMatch ? noteMatch[1].slice(0, 120) : '';
+      const files = filesMatch ? filesMatch[1].split(',').map(f => f.trim()).filter(Boolean) : [];
 
-      eSessions.push({ session: sessionNum, build_commits: buildCommits, cost, note });
+      const date = line.match(/^(\d{4}-\d{2}-\d{2})/);
+      eSessions.push({ session: sessionNum, build_commits: buildCommits, cost, note, files, date: date ? date[1] : null });
     }
 
     const last10 = eSessions.slice(-10);
@@ -502,14 +589,48 @@ function computeEScopeBleed() {
       ? Math.round((bleedSessions.reduce((a, s) => a + s.cost, 0) / bleedSessions.length) * 100) / 100
       : 0;
 
-    return {
-      sessions_checked: last10.length,
-      violations: violations.map(v => ({
+    // Root cause analysis for violations (wq-713)
+    const violationsWithRCA = violations.map(v => {
+      const commitDetails = getSessionCommitDetails(v.files, v.date);
+      const categories = commitDetails.map(c => c.category);
+      const allJustified = commitDetails.length > 0 && commitDetails.every(c => c.justified);
+      const hasFeature = categories.includes('feature');
+
+      let rca_verdict;
+      if (commitDetails.length === 0) rca_verdict = 'no_commits_found';
+      else if (allJustified) rca_verdict = 'justified';
+      else if (hasFeature) rca_verdict = 'discipline_failure';
+      else rca_verdict = 'reactive_fix';
+
+      return {
         session: `s${v.session}`,
         build_commits: v.build_commits,
         cost: v.cost,
-        note: v.note
-      })),
+        note: v.note,
+        root_cause: {
+          verdict: rca_verdict,
+          all_justified: allJustified,
+          commits: commitDetails.map(c => ({
+            hash: c.hash,
+            message: c.message,
+            category: c.category,
+            label: c.label,
+            justified: c.justified,
+            reason: c.reason
+          })),
+          summary: {
+            bug_fix: categories.filter(c => c === 'bug-fix').length,
+            feature: categories.filter(c => c === 'feature').length,
+            config: categories.filter(c => c === 'config').length,
+            unknown: categories.filter(c => c === 'unknown').length
+          }
+        }
+      };
+    });
+
+    return {
+      sessions_checked: last10.length,
+      violations: violationsWithRCA,
       violation_count: violations.length,
       cost_impact: {
         clean_avg: cleanAvg,

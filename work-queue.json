@@ -61,7 +61,7 @@
       "title": "Add hook manifest with retirement metadata for d070",
       "description": "Create hooks/manifest.json tracking each hook's created_session, last_triggered_session, and session_type scope. Populate from git log for created dates and from session logs for last-triggered. This enables the R session fallback hook-health-audit to identify hooks that haven't triggered in 50+ sessions as retirement candidates, directly supporting d070's 30% hook count reduction target (96 → 67).",
       "priority": 726,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1623,
       "source": "brainstorming",
@@ -70,7 +70,14 @@
         "d070",
         "hooks"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1626,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created generate-hook-manifest.mjs and hooks/manifest.json. 89 hooks catalogued with creation dates, scope, and last-triggered session data. Retirement candidate detection built in."
+      }
     },
     {
       "id": "wq-727",

@@ -20,110 +20,121 @@ if [ ! -f "$STATE_FILE" ]; then
   echo '{}' > "$STATE_FILE"
 fi
 
-python3 - "$BRIEFING" "$STATE_FILE" "$SESSION_NUM" "$STALE_THRESHOLD" <<'PYEOF'
-import json, sys, re, os
-from pathlib import Path
+# wq-705: Replaced python3 with jq+bash for JSON parsing and content checks
 
-briefing_file = sys.argv[1]
-state_file = sys.argv[2]
-session = int(sys.argv[3])
-threshold = int(sys.argv[4])
+if [ "$SESSION_NUM" -eq 0 ]; then
+  exit 0
+fi
 
-if session == 0:
-    sys.exit(0)
+MCP_DIR="$HOME/moltbook-mcp"
 
-home = Path.home()
-mcp_dir = home / "moltbook-mcp"
+# --- Phase 1: Section-level staleness ---
+# Extract ## headers from BRIEFING.md
+SECTIONS=$(grep -oP '^## \K.+' "$BRIEFING" | sed 's/[[:space:]]*$//')
+SECTION_COUNT=$(echo "$SECTIONS" | grep -c . 2>/dev/null || echo 0)
 
-content = Path(briefing_file).read_text()
+if [ "$SECTION_COUNT" -eq 0 ]; then
+  echo "BRIEFING_STALE: No sections found"
+  exit 0
+fi
 
-# --- Phase 1: Section-level staleness (existing) ---
-sections = []
-for line in content.splitlines():
-    m = re.match(r'^##\s+(.+)$', line)
-    if m:
-        sections.append(m.group(1).strip())
+# Build JSON array of section names
+SECTIONS_JSON=$(echo "$SECTIONS" | jq -R . | jq -s .)
 
-if not sections:
-    print("BRIEFING_STALE: No sections found")
-    sys.exit(0)
+# Update state: add new sections, remove deleted ones
+TMP_STATE=$(mktemp)
+jq --argjson session "$SESSION_NUM" --argjson sections "$SECTIONS_JSON" '
+  # Add new sections not yet tracked
+  reduce $sections[] as $sec (.;
+    if has($sec) then . else . + {($sec): {"last_updated": $session}} end
+  ) |
+  # Remove sections no longer in briefing
+  with_entries(select(.key as $k | $sections | index($k)))
+' "$STATE_FILE" > "$TMP_STATE" && mv "$TMP_STATE" "$STATE_FILE"
 
-state = json.loads(Path(state_file).read_text())
-changed = False
-for sec in sections:
-    if sec not in state:
-        state[sec] = {"last_updated": session}
-        changed = True
-for key in list(state.keys()):
-    if key not in sections:
-        del state[key]
-        changed = True
-if changed:
-    Path(state_file).write_text(json.dumps(state, indent=2) + "\n")
+# Check for stale sections
+STALE_OUTPUT=$(jq -r --argjson session "$SESSION_NUM" --argjson threshold "$STALE_THRESHOLD" '
+  [to_entries[] | select(($session - (.value.last_updated // 0)) >= $threshold) |
+    "  - \"\(.key)\" — \($session - (.value.last_updated // 0)) sessions since last update"
+  ] |
+  if length > 0 then
+    "BRIEFING_STALE: \(length) section(s) need review:\n" + join("\n")
+  else
+    "BRIEFING_STALE: All \(length + (. | length)) sections fresh (threshold: \($threshold))"
+  end
+' "$STATE_FILE" 2>/dev/null)
 
-stale = []
-for sec in sections:
-    last = state[sec].get("last_updated", 0)
-    age = session - last
-    if age >= threshold:
-        stale.append((sec, age))
+# Fix the "all fresh" count — need total sections not stale count
+STALE_COUNT=$(jq --argjson session "$SESSION_NUM" --argjson threshold "$STALE_THRESHOLD" \
+  '[to_entries[] | select(($session - (.value.last_updated // 0)) >= $threshold)] | length' "$STATE_FILE" 2>/dev/null || echo 0)
 
-if stale:
-    print(f"BRIEFING_STALE: {len(stale)} section(s) need review:")
-    for sec, age in stale:
-        print(f"  - \"{sec}\" — {age} sessions since last update")
-else:
-    print(f"BRIEFING_STALE: All {len(sections)} sections fresh (threshold: {threshold})")
+if [ "$STALE_COUNT" -gt 0 ]; then
+  echo -e "$STALE_OUTPUT"
+else
+  echo "BRIEFING_STALE: All $SECTION_COUNT sections fresh (threshold: $STALE_THRESHOLD)"
+fi
 
 # --- Phase 2: Content-level reference checks ---
-warnings = []
+WARNINGS=()
 
-# 2a: File path references that don't exist
-# Match ~/path, ~/.config/path, and bare filenames like backlog.md, work-queue.json
-for m in re.finditer(r'~/([^\s,)]+)', content):
-    p = home / m.group(1)
-    if not p.exists():
-        warnings.append(f"Missing file: ~/{m.group(1)}")
+# 2a: File path references that don't exist (~/path)
+while IFS= read -r ref; do
+  [ -z "$ref" ] && continue
+  FULL="$HOME/$ref"
+  if [ ! -e "$FULL" ]; then
+    WARNINGS+=("Missing file: ~/$ref")
+  fi
+done < <(grep -oP '~/\K[^\s,)]+' "$BRIEFING" 2>/dev/null)
 
-for m in re.finditer(r'\b(\w[\w.-]+\.(?:md|json|sh|mjs|js|txt|conf))\b', content):
-    fname = m.group(1)
-    # Skip common false positives and generic names
-    if fname in ('agent.json', 'session-history.txt', 'package.json'):
-        continue
-    candidates = [mcp_dir / fname, home / fname]
-    # Also check common subdirectories
-    for sub in ('hooks/pre-session', 'hooks/post-session'):
-        candidates.append(mcp_dir / sub / fname)
-    if not any(c.exists() for c in candidates):
-        warnings.append(f"Referenced file not found locally: {fname}")
+# 2a continued: Bare filenames (*.md, *.json, *.sh, etc.)
+SKIP_FILES="agent.json session-history.txt package.json"
+while IFS= read -r fname; do
+  [ -z "$fname" ] && continue
+  echo "$SKIP_FILES" | grep -qw "$fname" && continue
+  found=false
+  for cand in "$MCP_DIR/$fname" "$HOME/$fname" "$MCP_DIR/hooks/pre-session/$fname" "$MCP_DIR/hooks/post-session/$fname"; do
+    [ -e "$cand" ] && found=true && break
+  done
+  if [ "$found" = false ]; then
+    WARNINGS+=("Referenced file not found locally: $fname")
+  fi
+done < <(grep -oP '\b\w[\w.-]+\.(?:md|json|sh|mjs|js|txt|conf)\b' "$BRIEFING" 2>/dev/null | sort -u)
 
 # 2b: Session references that are very old (>200 sessions ago)
-old_refs = set()
-for m in re.finditer(r'\b[sS](\d{3,4})\b', content):
-    ref_session = int(m.group(1))
-    if session - ref_session > 200:
-        old_refs.add(ref_session)
-if old_refs:
-    oldest = min(old_refs)
-    warnings.append(f"{len(old_refs)} old session refs (oldest: s{oldest}, {session - oldest} sessions ago) — consider pruning")
+OLD_COUNT=0
+OLDEST=999999
+while IFS= read -r ref_num; do
+  [ -z "$ref_num" ] && continue
+  AGE=$((SESSION_NUM - ref_num))
+  if [ "$AGE" -gt 200 ]; then
+    OLD_COUNT=$((OLD_COUNT + 1))
+    [ "$ref_num" -lt "$OLDEST" ] && OLDEST=$ref_num
+  fi
+done < <(grep -oP '\b[sS]\K\d{3,4}\b' "$BRIEFING" 2>/dev/null | sort -u)
+
+if [ "$OLD_COUNT" -gt 0 ]; then
+  WARNINGS+=("$OLD_COUNT old session refs (oldest: s$OLDEST, $((SESSION_NUM - OLDEST)) sessions ago) — consider pruning")
+fi
 
 # 2c: "Next X: session NNN" where NNN is in the past
-for m in re.finditer(r'[Nn]ext\s+\w+:\s+session\s+(\d+)', content):
-    target = int(m.group(1))
-    if target < session:
-        warnings.append(f"Overdue scheduled check: 'next ... session {target}' (current: {session})")
+while IFS= read -r target; do
+  [ -z "$target" ] && continue
+  if [ "$target" -lt "$SESSION_NUM" ]; then
+    WARNINGS+=("Overdue scheduled check: 'next ... session $target' (current: $SESSION_NUM)")
+  fi
+done < <(grep -oiP '[Nn]ext\s+\w+:\s+session\s+\K\d+' "$BRIEFING" 2>/dev/null)
 
-# 2d: Version numbers — flag if version ref is >0.10.0 behind current
-# (just detect presence, agent decides if stale)
-versions = re.findall(r'\bVersion:\s*([\d.]+)', content)
-if versions:
-    for v in versions:
-        warnings.append(f"Version reference: {v} — verify still current")
+# 2d: Version numbers
+while IFS= read -r ver; do
+  [ -z "$ver" ] && continue
+  WARNINGS+=("Version reference: $ver — verify still current")
+done < <(grep -oP 'Version:\s*\K[\d.]+' "$BRIEFING" 2>/dev/null)
 
-if warnings:
-    print(f"BRIEFING_REFS: {len(warnings)} reference issue(s):")
-    for w in warnings:
-        print(f"  - {w}")
-else:
-    print("BRIEFING_REFS: All references valid")
-PYEOF
+if [ "${#WARNINGS[@]}" -gt 0 ]; then
+  echo "BRIEFING_REFS: ${#WARNINGS[@]} reference issue(s):"
+  for w in "${WARNINGS[@]}"; do
+    echo "  - $w"
+  done
+else
+  echo "BRIEFING_REFS: All references valid"
+fi

@@ -21,85 +21,88 @@ if [ ! -f "$BLOCKER_STATE" ]; then
   echo '{}' > "$BLOCKER_STATE"
 fi
 
-python3 - "$QUEUE" "$BLOCKER_STATE" "$DIRECTIVES" "$SESSION_NUM" "$STALE_THRESHOLD" "$RE_ESCALATE_INTERVAL" <<'PYEOF'
-import json, sys
-from pathlib import Path
+# wq-705: Replaced python3 with jq for JSON parsing
 
-queue_file, state_file, directives_file = sys.argv[1], sys.argv[2], sys.argv[3]
-session = int(sys.argv[4])
-threshold = int(sys.argv[5])
-re_escalate = int(sys.argv[6])
+if [ "$SESSION_NUM" -eq 0 ]; then
+  exit 0
+fi
 
-if session == 0:
-    sys.exit(0)
+# Phase 1: Update blocker tracking state and identify nudge candidates
+TMP_STATE=$(mktemp)
+TMP_NUDGES=$(mktemp)
 
-queue = json.loads(Path(queue_file).read_text())
-state = json.loads(Path(state_file).read_text())
-items = queue.get("queue", [])
+jq --argjson session "$SESSION_NUM" --argjson threshold "$STALE_THRESHOLD" \
+   --argjson re_escalate "$RE_ESCALATE_INTERVAL" \
+   --slurpfile queue "$QUEUE" '
+  . as $state |
+  # R#191: Filter out items with "deferred" tag
+  [$queue[0].queue[] | select(.status == "blocked" and ((.tags // []) | index("deferred") | not))] as $blocked |
+  [$blocked[].id] as $blocked_ids |
 
-# R#191: Filter out items with 'deferred' tag — these are intentionally blocked
-# until external conditions change (e.g., wq-325 waiting for ecosystem adoption).
-# Escalating deferred items creates noise since no one can action them.
-blocked = [
-    i for i in items
-    if i.get("status") == "blocked"
-    and "deferred" not in (i.get("tags") or [])
-]
-nudges = []
+  # Process each blocked item
+  reduce $blocked[] as $item ($state;
+    if (.[$item.id].first_seen_blocked // null) == null then
+      . + {($item.id): {"first_seen_blocked": $session, "last_escalated": 0}}
+    else . end
+  ) |
 
-for item in blocked:
-    wid = item["id"]
-    entry = state.get(wid, {})
+  # Remove entries for items no longer blocked
+  with_entries(select(.key as $k | $blocked_ids | index($k)))
+' "$BLOCKER_STATE" > "$TMP_STATE"
 
-    if not entry.get("first_seen_blocked"):
-        state[wid] = {
-            "first_seen_blocked": session,
-            "last_escalated": 0
-        }
-        continue
+# Extract nudge candidates (stale enough to escalate)
+jq -r --argjson session "$SESSION_NUM" --argjson threshold "$STALE_THRESHOLD" \
+   --argjson re_escalate "$RE_ESCALATE_INTERVAL" \
+   --slurpfile queue "$QUEUE" '
+  . as $state |
+  [$queue[0].queue[] | select(.status == "blocked" and ((.tags // []) | index("deferred") | not))] as $blocked |
+  [
+    $blocked[] |
+    ($state[.id] // {}) as $entry |
+    select(
+      $entry.first_seen_blocked != null and
+      ($session - $entry.first_seen_blocked) >= $threshold and
+      ($entry.last_escalated == 0 or ($session - $entry.last_escalated) >= $re_escalate)
+    ) |
+    {id, title: (.title // ""), blocker: (.blocker // ""), age: ($session - $entry.first_seen_blocked)}
+  ] | tojson
+' "$TMP_STATE" > "$TMP_NUDGES"
 
-    first_seen = entry["first_seen_blocked"]
-    last_esc = entry.get("last_escalated", 0)
-    age = session - first_seen
+NUDGES=$(cat "$TMP_NUDGES")
+NUDGE_COUNT=$(echo "$NUDGES" | jq 'length' 2>/dev/null || echo 0)
 
-    if age < threshold:
-        continue
+# Update last_escalated for nudged items
+if [ "$NUDGE_COUNT" -gt 0 ]; then
+  NUDGE_IDS=$(echo "$NUDGES" | jq -r '.[].id')
+  for nid in $NUDGE_IDS; do
+    jq --arg id "$nid" --argjson session "$SESSION_NUM" \
+      '.[$id].last_escalated = $session' "$TMP_STATE" > "${TMP_STATE}.tmp" && mv "${TMP_STATE}.tmp" "$TMP_STATE"
+  done
+fi
 
-    if last_esc > 0 and (session - last_esc) < re_escalate:
-        continue
+mv "$TMP_STATE" "$BLOCKER_STATE"
 
-    nudges.append({
-        "id": wid,
-        "title": item.get("title", ""),
-        "blocker": item.get("blocker", ""),
-        "age": age
-    })
-    state[wid]["last_escalated"] = session
+# Phase 2: Create directive if nudges exist
+BLOCKED_COUNT=$(jq --slurpfile queue "$QUEUE" \
+  '[$queue[0].queue[] | select(.status == "blocked" and ((.tags // []) | index("deferred") | not))] | length' \
+  "$BLOCKER_STATE" 2>/dev/null || echo 0)
 
-active_blocked_ids = {i["id"] for i in blocked}
-for wid in list(state.keys()):
-    if wid not in active_blocked_ids:
-        del state[wid]
+if [ "$NUDGE_COUNT" -gt 0 ]; then
+  ITEMS_LIST=$(echo "$NUDGES" | jq -r '[.[] | "\(.id) (\(.title[:50]), blocked \(.age)s, blocker: \(.blocker[:60]))"] | join(", ")')
+  CONTENT="Auto-escalation: ${NUDGE_COUNT} work queue items blocked >${STALE_THRESHOLD} sessions: ${ITEMS_LIST}. Human action may be needed."
+  MAX_ID=$(jq '[.directives[]?.id // "" | ltrimstr("d") | tonumber] | max // 0' "$DIRECTIVES" 2>/dev/null || echo 0)
+  NEW_NUM=$((MAX_ID + 1))
+  NEW_ID=$(printf "d%03d" "$NEW_NUM")
+  CREATED=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-Path(state_file).write_text(json.dumps(state, indent=2) + "\n")
+  TMP_DIR=$(mktemp)
+  jq --arg id "$NEW_ID" --argjson session "$SESSION_NUM" --arg content "$CONTENT" --arg created "$CREATED" '
+    .directives += [{id: $id, from: "system", session: $session, content: $content, status: "pending", created: $created}]
+  ' "$DIRECTIVES" > "$TMP_DIR" && mv "$TMP_DIR" "$DIRECTIVES"
 
-# Add escalation as a directive in directives.json
-if nudges:
-    directives = json.loads(Path(directives_file).read_text())
-    items_list = ", ".join(f"{n['id']} ({n['title'][:50]}, blocked {n['age']}s, blocker: {n['blocker'][:60]})" for n in nudges)
-    content = f"Auto-escalation: {len(nudges)} work queue items blocked >{threshold} sessions: {items_list}. Human action may be needed."
-    max_id = max((int(d["id"].replace("d", "")) for d in directives.get("directives", [])), default=0)
-    new_id = f"d{max_id + 1:03d}"
-    directives.setdefault("directives", []).append({
-        "id": new_id,
-        "from": "system",
-        "session": session,
-        "content": content,
-        "status": "pending",
-        "created": f"{__import__('datetime').datetime.utcnow().isoformat()}Z"
-    })
-    Path(directives_file).write_text(json.dumps(directives, indent=2) + "\n")
-    print(f"STALE_BLOCKER: Escalated {len(nudges)} blocked items as directive {new_id}")
-else:
-    print(f"STALE_BLOCKER: {len(blocked)} blocked items, none stale enough to escalate")
-PYEOF
+  echo "STALE_BLOCKER: Escalated ${NUDGE_COUNT} blocked items as directive ${NEW_ID}"
+else
+  echo "STALE_BLOCKER: ${BLOCKED_COUNT} blocked items, none stale enough to escalate"
+fi
+
+rm -f "$TMP_NUDGES"

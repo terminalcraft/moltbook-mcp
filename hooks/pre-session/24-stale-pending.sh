@@ -22,52 +22,48 @@ if [ "$SESSION_NUM" -eq 0 ]; then
   exit 0
 fi
 
-python3 - "$QUEUE" "$STALE_STATE" "$SESSION_NUM" "$STALE_THRESHOLD" <<'PYEOF'
-import json, sys
-from pathlib import Path
+# wq-705: Replaced python3 with jq for JSON parsing
 
-queue_file, state_file = sys.argv[1], sys.argv[2]
-session = int(sys.argv[3])
-threshold = int(sys.argv[4])
+# Get pending item IDs from queue
+PENDING_IDS=$(jq -r '[.queue[] | select(.status == "pending") | .id] | .[]' "$QUEUE" 2>/dev/null)
+PENDING_COUNT=$(echo "$PENDING_IDS" | grep -c . 2>/dev/null || echo 0)
 
-queue = json.loads(Path(queue_file).read_text())
-state = json.loads(Path(state_file).read_text())
-items = queue.get("queue", [])
+# Update state: add new pending items, remove non-pending
+TMP_STATE=$(mktemp)
+jq --argjson session "$SESSION_NUM" --argjson threshold "$STALE_THRESHOLD" \
+  --slurpfile queue "$QUEUE" '
+  . as $state |
+  [$queue[0].queue[] | select(.status == "pending")] as $pending |
+  [$pending[].id] as $pending_ids |
 
-pending = [i for i in items if i.get("status") == "pending"]
-stale = []
+  # Add new items not yet tracked
+  reduce $pending[] as $item ($state;
+    if has($item.id) then . else . + {($item.id): {"first_seen": $session}} end
+  ) |
 
-for item in pending:
-    wid = item["id"]
-    commits = len(item.get("commits") or [])
+  # Remove items no longer pending
+  with_entries(select(.key as $k | $pending_ids | index($k)))
+' "$STALE_STATE" > "$TMP_STATE" && mv "$TMP_STATE" "$STALE_STATE"
 
-    # Track first time we see this item as pending
-    if wid not in state:
-        state[wid] = {"first_seen": session}
-        continue
+# Find stale items and report
+STALE_OUTPUT=$(jq -r --argjson session "$SESSION_NUM" --argjson threshold "$STALE_THRESHOLD" \
+  --slurpfile queue "$QUEUE" '
+  . as $state |
+  [$queue[0].queue[] | select(.status == "pending")] as $pending |
+  [
+    $pending[] |
+    select(
+      (.commits // [] | length) == 0 and
+      $state[.id].first_seen != null and
+      ($session - $state[.id].first_seen) >= $threshold
+    ) |
+    "  - \(.id): \(.title[:60]) (\($session - $state[.id].first_seen) sessions)"
+  ] |
+  if length > 0 then
+    "STALE_PENDING: \(length) items pending >\($threshold) sessions with no commits:\n" + join("\n")
+  else
+    "STALE_PENDING: \($pending | length) pending items, none stale"
+  end
+' "$STALE_STATE" 2>/dev/null)
 
-    first_seen = state[wid]["first_seen"]
-    age = session - first_seen
-
-    if age >= threshold and commits == 0:
-        stale.append({
-            "id": wid,
-            "title": item.get("title", "")[:60],
-            "age": age,
-        })
-
-# Clean up tracking for items no longer pending
-active_pending_ids = {i["id"] for i in pending}
-for wid in list(state.keys()):
-    if wid not in active_pending_ids:
-        del state[wid]
-
-Path(state_file).write_text(json.dumps(state, indent=2) + "\n")
-
-if stale:
-    print(f"STALE_PENDING: {len(stale)} items pending >{threshold} sessions with no commits:")
-    for s in stale:
-        print(f"  - {s['id']}: {s['title']} ({s['age']} sessions)")
-else:
-    print(f"STALE_PENDING: {len(pending)} pending items, none stale")
-PYEOF
+echo -e "$STALE_OUTPUT"

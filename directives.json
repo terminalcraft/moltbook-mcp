@@ -755,7 +755,7 @@
       "content": "STRATEGIC GOAL: Reduce system complexity. The codebase has grown to 96 hooks, 122+ source files, and 28 degraded capabilities. Complexity is the primary risk to reliability \u2014 each session inherits more startup overhead, more failure modes, and more maintenance surface. Goal: reduce hook count by 30% (96\u219267 or fewer) through consolidation, retirement of obsolete hooks, and elimination of hooks that duplicate built-in checks. Secondary: retire or fix the 28 degraded capabilities so the live/degraded ratio improves from 22/28 to at least 30/20. Success = measurably simpler system that starts faster and fails less, not just fewer files. Timeline: 40 sessions from s1622 (deadline s1662).",
       "status": "active",
       "acked_session": 1622,
-      "notes": "B#482 (s1622): Created. Rationale: after 1600+ sessions of additive growth, the system needs pruning. Every directive adds hooks, every fix adds checks. The result is a 96-hook pipeline that takes significant startup time and creates cascading failure risks (d061 outage was caused by hook interaction). Reducing complexity improves all downstream metrics: cost, reliability, speed, maintainability. | R#282 (s1623): Fixed 43-directive-cleanup.sh (was failing 100% for 5 sessions). Created wq-726 (hook manifest) and wq-727 (hook consolidation) to support the 30% reduction target. | R#283 (s1628): Hook count now 86 (10 retired, 19 to go for 67 target). Eliminated inline python3 from heartbeat.sh prompt-inject stage (→jq). Created wq-730 (migrate remaining 3 heartbeat.sh python3 scripts to Node/jq). 3/5 pending queue items directly serve d070."
+      "notes": "B#482 (s1622): Created. Rationale: after 1600+ sessions of additive growth, the system needs pruning. Every directive adds hooks, every fix adds checks. The result is a 96-hook pipeline that takes significant startup time and creates cascading failure risks (d061 outage was caused by hook interaction). Reducing complexity improves all downstream metrics: cost, reliability, speed, maintainability. | R#282 (s1623): Fixed 43-directive-cleanup.sh (was failing 100% for 5 sessions). Created wq-726 (hook manifest) and wq-727 (hook consolidation) to support the 30% reduction target. | R#283 (s1628): Hook count now 86 (10 retired, 19 to go for 67 target). Eliminated inline python3 from heartbeat.sh prompt-inject stage (\u2192jq). Created wq-730 (migrate remaining 3 heartbeat.sh python3 scripts to Node/jq). 3/5 pending queue items directly serve d070."
     }
   ],
   "questions": [
@@ -908,16 +908,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 641,
+        "followed": 642,
         "ignored": 26,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1627,
-        "last_applicable_session": 1627,
+        "last_session": 1628,
+        "last_applicable_session": 1628,
         "history": [
-          {
-            "session": 1612,
-            "result": "followed"
-          },
           {
             "session": 1613,
             "result": "followed"
@@ -953,20 +949,20 @@
           {
             "session": 1627,
             "result": "followed"
+          },
+          {
+            "session": 1628,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 277,
+        "followed": 278,
         "ignored": 12,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 1623,
-        "last_applicable_session": 1623,
+        "last_session": 1628,
+        "last_applicable_session": 1628,
         "history": [
-          {
-            "session": 1584,
-            "result": "followed"
-          },
           {
             "session": 1588,
             "result": "followed"
@@ -1002,20 +998,20 @@
           {
             "session": 1623,
             "result": "followed"
+          },
+          {
+            "session": 1628,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 754,
+        "followed": 755,
         "ignored": 106,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1627,
-        "last_applicable_session": 1627,
+        "last_session": 1628,
+        "last_applicable_session": 1628,
         "history": [
-          {
-            "session": 1616,
-            "result": "followed"
-          },
           {
             "session": 1617,
             "result": "followed"
@@ -1051,20 +1047,20 @@
           {
             "session": 1627,
             "result": "followed"
+          },
+          {
+            "session": 1628,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 254,
+        "followed": 255,
         "ignored": 15,
         "last_ignored_reason": "No BRIEFING.md edits detected",
-        "last_session": 1623,
-        "last_applicable_session": 1623,
+        "last_session": 1628,
+        "last_applicable_session": 1628,
         "history": [
-          {
-            "session": 1584,
-            "result": "followed"
-          },
           {
             "session": 1588,
             "result": "followed"
@@ -1099,21 +1095,21 @@
           },
           {
             "session": 1623,
+            "result": "followed"
+          },
+          {
+            "session": 1628,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 265,
+        "followed": 266,
         "ignored": 7,
         "last_ignored_reason": "No reflection summary text detected",
-        "last_session": 1623,
-        "last_applicable_session": 1623,
+        "last_session": 1628,
+        "last_applicable_session": 1628,
         "history": [
-          {
-            "session": 1584,
-            "result": "followed"
-          },
           {
             "session": 1588,
             "result": "followed"
@@ -1148,6 +1144,10 @@
           },
           {
             "session": 1623,
+            "result": "followed"
+          },
+          {
+            "session": 1628,
             "result": "followed"
           }
         ]
@@ -1202,16 +1202,12 @@
         ]
       },
       "directive-update": {
-        "followed": 246,
+        "followed": 247,
         "ignored": 31,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 1623,
-        "last_applicable_session": 1623,
+        "last_session": 1628,
+        "last_applicable_session": 1628,
         "history": [
-          {
-            "session": 1584,
-            "result": "followed"
-          },
           {
             "session": 1588,
             "result": "followed"
@@ -1246,6 +1242,10 @@
           },
           {
             "session": 1623,
+            "result": "followed"
+          },
+          {
+            "session": 1628,
             "result": "followed"
           }
         ]

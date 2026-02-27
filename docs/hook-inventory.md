@@ -4,11 +4,10 @@ Created: B#482 (s1622). Total: 91 hooks (55 pre-session, 36 post-session).
 
 ## Consolidation Candidates (merge multiple hooks into one)
 
-### 1. Cost trend monitors → single hook
-- `pre/28-cost-trend-alert_A.sh` (B session cost trend)
-- `pre/28-r-cost-trend_A.sh` (R session cost trend)
-- Both are A-only, identical structure, different .mjs backends. Merge into `28-cost-trend_A.sh` that calls both monitors or a unified cost-trend.mjs.
-- **Saves: 1 hook**
+### 1. Cost trend monitors → single hook ✅ DONE
+- ~~`pre/28-cost-trend-alert_A.sh`~~ + ~~`pre/28-r-cost-trend_A.sh`~~ → `pre/28-cost-trend-monitor_A.sh`
+- Consolidated in B#483 (s1627). Both backends called from single hook.
+- **Saved: 1 hook**
 
 ### 2. Cost forecast hooks → single hook
 - `pre/08-cost-forecast-gate.sh` (blocks sessions over budget)
@@ -32,25 +31,25 @@ Created: B#482 (s1622). Total: 91 hooks (55 pre-session, 36 post-session).
 - Five hooks for work-queue.json. Merge into a pre and post `queue-mgmt.sh`.
 - **Saves: 3 hooks**
 
-### 5. Engagement E-session hooks → single orchestrator
+### 5. Engagement E-session hooks → single orchestrator (partially done)
 - `pre/35-engagement-liveness_E.sh`
 - `pre/36-engagement-seed_E.sh`
 - `pre/36-topic-clusters_E.sh`
 - `pre/37-conversation-balance_E.sh`
 - `pre/38-spending-policy_E.sh`
-- `post/31-covenant-update_E.sh`
+- ~~`post/31-covenant-update_E.sh`~~ → merged into `post/36-e-session-posthook_E.sh` (B#483, wq-727)
 - `post/36-e-session-posthook_E.sh`
 - `post/36-picker-compliance_E.sh`
-- `post/37-scope-bleed-detect_E.sh`
-- 9 E-only hooks. Merge into `35-e-session-prehook_E.sh` (5 pre) and consolidate the 4 post into `36-e-session-posthook_E.sh` (already exists, absorb 3 more).
-- **Saves: 7 hooks**
+- ~~`post/37-scope-bleed-detect_E.sh`~~ → merged into `post/36-e-session-posthook_E.sh` (B#483, wq-712)
+- Post-session: 2 of 4 absorbed. Pre-session: 5 still separate, pending consolidation.
+- **Saves so far: 2 hooks** (target: 7)
 
 ### 6. Covenant hooks → single hook
 - `pre/38-covenant-reminders.sh`
 - `pre/45-covenant-ceiling_R.sh`
-- `post/31-covenant-update_E.sh` (also in engagement group above)
-- Three covenant hooks. Merge into `38-covenant-mgmt.sh`.
-- **Saves: 2 hooks** (net of engagement overlap)
+- ~~`post/31-covenant-update_E.sh`~~ (merged into `post/36-e-session-posthook_E.sh`, see group 5)
+- Two remaining covenant hooks. Merge into `38-covenant-mgmt.sh`.
+- **Saves: 1 hook** (net of engagement overlap, 31- already merged)
 
 ### 7. Session logging/trace hooks → fewer hooks
 - `pre/01-session-start-log.sh`

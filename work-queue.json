@@ -79,7 +79,7 @@
       "title": "Expose health-check results via /status/api-health endpoint",
       "description": "health-check.cjs now probes 3 meaningful endpoints (submolts, feed_auth, search). Expose these results via /status/api-health for external monitoring. Complements platform-health API (d069) with self-monitoring data. Lightweight addition to api.mjs.",
       "priority": 716,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-27",
       "created_session": 1608,
       "source": "brainstorming",
@@ -88,7 +88,16 @@
         "monitoring",
         "d069"
       ],
-      "commits": []
+      "commits": [
+        "c2dff668"
+      ],
+      "outcome": {
+        "session": 1612,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built /status/api-health with per-endpoint uptime, latency percentiles, error breakdown, verdict. JSON+HTML. Registered in agent.json."
+      }
     },
     {
       "id": "wq-719",
@@ -118,6 +127,20 @@
       "tags": [
         "api",
         "reliability"
+      ]
+    },
+    {
+      "id": "wq-721",
+      "title": "Add alerting thresholds to /status/api-health",
+      "description": "The api-health endpoint shows data but does not interpret it. Add configurable thresholds: warn when uptime drops below 95%, alert when p95 latency exceeds 3000ms. Include a threshold_violations array in the JSON response so external agents can consume alerts programmatically.",
+      "priority": 721,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1612,
+      "source": "pipeline-contribution",
+      "tags": [
+        "api",
+        "monitoring"
       ]
     }
   ]

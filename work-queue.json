@@ -55,7 +55,7 @@
       "title": "E session scope-bleed root cause analysis tool",
       "description": "Build a diagnostic script that analyzes WHY scope bleed happened in a given E session \u2014 parse the git diff to categorize commits as bug-fix (reactive), feature (proactive), or config (accidental). Output helps audit distinguish justified emergency fixes from discipline failures. Extend computeEScopeBleed() with commit categorization.",
       "priority": 713,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1607,
       "source": "adjacent",
@@ -63,7 +63,14 @@
         "audit",
         "tooling"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1611,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built e-scope-bleed-rca.mjs standalone script + extended computeEScopeBleed() in audit-stats.mjs with root_cause commit categorization. Date-filtered git log prevents false matches."
+      }
     },
     {
       "id": "wq-715",
@@ -109,6 +116,21 @@
         "audit",
         "recurring",
         "cost"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-718",
+      "title": "Audit: use RCA verdict to auto-dismiss justified scope bleed",
+      "description": "When computeEScopeBleed() returns violations with root_cause.verdict=justified, the audit should not escalate. Currently all scope bleed is treated equally. Add verdict-aware logic to the E scope bleed audit sub-check so justified reactive fixes (engagement infra bug fixes) are noted but not flagged.",
+      "priority": 718,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1611,
+      "source": "adjacent",
+      "tags": [
+        "audit",
+        "tooling"
       ],
       "commits": []
     }

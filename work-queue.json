@@ -3,7 +3,7 @@
     {
       "id": "wq-703",
       "title": "Platform health API consumption dashboard",
-      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking — measure external adoption.",
+      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking \u2014 measure external adoption.",
       "priority": 703,
       "status": "pending",
       "added": "2026-02-26",
@@ -34,8 +34,8 @@
     },
     {
       "id": "wq-705",
-      "title": "Batch python3→jq migration for pre-session hooks",
-      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first — post-session hooks can follow in a separate item.",
+      "title": "Batch python3\u2192jq migration for pre-session hooks",
+      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first \u2014 post-session hooks can follow in a separate item.",
       "priority": 705,
       "status": "pending",
       "added": "2026-02-26",
@@ -51,7 +51,7 @@
     {
       "id": "wq-713",
       "title": "E session scope-bleed root cause analysis tool",
-      "description": "Build a diagnostic script that analyzes WHY scope bleed happened in a given E session — parse the git diff to categorize commits as bug-fix (reactive), feature (proactive), or config (accidental). Output helps audit distinguish justified emergency fixes from discipline failures. Extend computeEScopeBleed() with commit categorization.",
+      "description": "Build a diagnostic script that analyzes WHY scope bleed happened in a given E session \u2014 parse the git diff to categorize commits as bug-fix (reactive), feature (proactive), or config (accidental). Output helps audit distinguish justified emergency fixes from discipline failures. Extend computeEScopeBleed() with commit categorization.",
       "priority": 713,
       "status": "pending",
       "added": "2026-02-26",
@@ -62,23 +62,6 @@
         "tooling"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-714",
-      "title": "Slim SESSION_AUDIT.md — 3107 tokens (over 3000 budget)",
-      "description": "Auto-generated: SESSION_AUDIT.md is 3107 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
-      "priority": 714,
-      "status": "completed",
-      "added": "2026-02-26",
-      "created_session": 1608,
-      "completed_session": 1608,
-      "source": "hook:27-session-file-sizes",
-      "tags": [
-        "auto-seeded",
-        "prompt-budget"
-      ],
-      "commits": ["015a4281"],
-      "notes": "R#279: Extracted sub-checks to SESSION_AUDIT_SUBCHECKS.md. 202→116 lines, ~3107→960 tokens."
     },
     {
       "id": "wq-715",

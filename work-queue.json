@@ -109,6 +109,21 @@
         "monitoring",
         "webhooks"
       ]
+    },
+    {
+      "id": "wq-728",
+      "title": "Batch python3→jq migration for complex post-session hooks",
+      "description": "wq-718 migrated 5 simple_json hooks. 11 complex post-session hooks remain: 10-summarize, 13-ctxly-summary, 15-cost-pipeline, 17-engagement-log, 19-session-debrief, 25-directive-audit, 26-engage-blockers, 26-session-trace, 32-compress-logs, 33-queue-archive, 36-e-session-posthook_E. These need individual analysis — some may need partial node rewrites rather than pure jq replacement.",
+      "priority": 728,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1626,
+      "source": "pipeline-contribution",
+      "tags": [
+        "infrastructure",
+        "hooks",
+        "d070"
+      ]
     }
   ]
 }

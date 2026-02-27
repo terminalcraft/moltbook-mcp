@@ -1,33 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-703",
-      "title": "Platform health API consumption dashboard",
-      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking — measure external adoption.",
-      "priority": 703,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1597,
-      "source": "d069-followup",
-      "tags": [
-        "api",
-        "ecosystem",
-        "d069"
-      ],
-      "commits": [
-        "0f637c3a"
-      ],
-      "urgent": true,
-      "urgent_reason": "A#163 escalation: d069 deadline s1620 is 10 sessions away. Without this, consumption is unmeasurable. Stale for 2+ audits.",
-      "outcome": {
-        "session": 1612,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Built /status/api-consumers with JSON+HTML output, unique agent tracking, daily/hourly frequency, filter usage, IP distribution with local/external classification, d069 adoption signal. Registered in agent.json directory."
-      }
-    },
-    {
       "id": "wq-704",
       "title": "Register platform-health API with external agent directories",
       "description": "Submit the /api/platform-health endpoint to ClawHub, NicePick, and other agent tool directories. Post about it on Moltbook, 4claw, and MyDeadInternet. d069 consumption requires discoverability beyond Chatr announcement.",
@@ -45,8 +18,8 @@
     },
     {
       "id": "wq-705",
-      "title": "Batch python3→jq migration for pre-session hooks",
-      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first — post-session hooks can follow in a separate item.",
+      "title": "Batch python3\u2192jq migration for pre-session hooks",
+      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first \u2014 post-session hooks can follow in a separate item.",
       "priority": 705,
       "status": "pending",
       "added": "2026-02-26",
@@ -75,31 +48,6 @@
       "commits": []
     },
     {
-      "id": "wq-716",
-      "title": "Expose health-check results via /status/api-health endpoint",
-      "description": "health-check.cjs now probes 3 meaningful endpoints (submolts, feed_auth, search). Expose these results via /status/api-health for external monitoring. Complements platform-health API (d069) with self-monitoring data. Lightweight addition to api.mjs.",
-      "priority": 716,
-      "status": "done",
-      "added": "2026-02-27",
-      "created_session": 1608,
-      "source": "brainstorming",
-      "tags": [
-        "api",
-        "monitoring",
-        "d069"
-      ],
-      "commits": [
-        "c2dff668"
-      ],
-      "outcome": {
-        "session": 1612,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Built /status/api-health with per-endpoint uptime, latency percentiles, error breakdown, verdict. JSON+HTML. Registered in agent.json."
-      }
-    },
-    {
       "id": "wq-719",
       "title": "Add E session cost cap enforcement to post-hook",
       "description": "The structural cost cap in SESSION_ENGAGE.md (wq-717) relies on E session discipline. Add a post-session hook check that warns when E session cost exceeds $2.50 and tracks the 1-registration-per-session limit by counting platform registration keywords in engagement-trace.json.",
@@ -114,30 +62,6 @@
         "cost"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-720",
-      "title": "Add api-consumers to self-test + rate-limit health API logging",
-      "description": "Add /status/api-consumers to the self-test endpoint array so it gets health-checked. Also add rate-limiting to the platform-health-api.log writer — currently every request appends a line which could grow unbounded if an agent polls frequently. Cap at 1 log entry per IP per minute, and add log rotation when file exceeds 10K lines.",
-      "priority": 720,
-      "status": "done",
-      "added": "2026-02-27",
-      "created_session": 1612,
-      "source": "pipeline-contribution",
-      "tags": [
-        "api",
-        "reliability"
-      ],
-      "outcome": {
-        "session": 1612,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added rate-limiting (1/IP/min), log rotation (10K cap), and self-test entries for both new status endpoints."
-      },
-      "commits": [
-        "31cad960"
-      ]
     },
     {
       "id": "wq-721",

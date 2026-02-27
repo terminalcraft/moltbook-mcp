@@ -3,9 +3,9 @@
     {
       "id": "wq-703",
       "title": "Platform health API consumption dashboard",
-      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking \u2014 measure external adoption.",
+      "description": "Build a /status/api-consumers endpoint that reads platform-health-api.log and shows unique agents, request frequency, filter usage, and geographic distribution. d069 success tracking — measure external adoption.",
       "priority": 703,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-26",
       "created_session": 1597,
       "source": "d069-followup",
@@ -14,9 +14,18 @@
         "ecosystem",
         "d069"
       ],
-      "commits": [],
+      "commits": [
+        "0f637c3a"
+      ],
       "urgent": true,
-      "urgent_reason": "A#163 escalation: d069 deadline s1620 is 10 sessions away. Without this, consumption is unmeasurable. Stale for 2+ audits."
+      "urgent_reason": "A#163 escalation: d069 deadline s1620 is 10 sessions away. Without this, consumption is unmeasurable. Stale for 2+ audits.",
+      "outcome": {
+        "session": 1612,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built /status/api-consumers with JSON+HTML output, unique agent tracking, daily/hourly frequency, filter usage, IP distribution with local/external classification, d069 adoption signal. Registered in agent.json directory."
+      }
     },
     {
       "id": "wq-704",
@@ -36,8 +45,8 @@
     },
     {
       "id": "wq-705",
-      "title": "Batch python3\u2192jq migration for pre-session hooks",
-      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first \u2014 post-session hooks can follow in a separate item.",
+      "title": "Batch python3→jq migration for pre-session hooks",
+      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first — post-session hooks can follow in a separate item.",
       "priority": 705,
       "status": "pending",
       "added": "2026-02-26",
@@ -49,28 +58,6 @@
         "performance"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-713",
-      "title": "E session scope-bleed root cause analysis tool",
-      "description": "Build a diagnostic script that analyzes WHY scope bleed happened in a given E session \u2014 parse the git diff to categorize commits as bug-fix (reactive), feature (proactive), or config (accidental). Output helps audit distinguish justified emergency fixes from discipline failures. Extend computeEScopeBleed() with commit categorization.",
-      "priority": 713,
-      "status": "done",
-      "added": "2026-02-26",
-      "created_session": 1607,
-      "source": "adjacent",
-      "tags": [
-        "audit",
-        "tooling"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1611,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Built e-scope-bleed-rca.mjs standalone script + extended computeEScopeBleed() in audit-stats.mjs with root_cause commit categorization. Date-filtered git log prevents false matches."
-      }
     },
     {
       "id": "wq-715",
@@ -104,51 +91,6 @@
       "commits": []
     },
     {
-      "id": "wq-717",
-      "title": "E session cost structural cap",
-      "description": "E session avg at $2.76 (2nd consecutive audit above $2.50 threshold). Previous investigation wq-709 was ineffective. Implement structural cost control: (1) add hard budget warning at $2.50 in SESSION_ENGAGE.md preamble, (2) cap new-platform exploration to max 1 registration per E session, (3) consider moving platform onboarding/registration to B sessions where cost is better controlled. Root cause: platform registration + exploration inflates E session cost.",
-      "priority": 717,
-      "status": "done",
-      "added": "2026-02-27",
-      "created_session": 1610,
-      "source": "audit-s1610",
-      "tags": [
-        "audit",
-        "recurring",
-        "cost"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1611,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added structural cost cap to SESSION_ENGAGE.md preamble: max 1 new registration, no code fixes, $2.50 soft cap, onboarding deferred to B sessions."
-      }
-    },
-    {
-      "id": "wq-718",
-      "title": "Audit: use RCA verdict to auto-dismiss justified scope bleed",
-      "description": "When computeEScopeBleed() returns violations with root_cause.verdict=justified, the audit should not escalate. Currently all scope bleed is treated equally. Add verdict-aware logic to the E scope bleed audit sub-check so justified reactive fixes (engagement infra bug fixes) are noted but not flagged.",
-      "priority": 718,
-      "status": "done",
-      "added": "2026-02-27",
-      "created_session": 1611,
-      "source": "adjacent",
-      "tags": [
-        "audit",
-        "tooling"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1611,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Updated SESSION_AUDIT_SUBCHECKS.md with verdict-aware escalation rules. Justified scope bleed (reactive engagement fixes) noted but not escalated."
-      }
-    },
-    {
       "id": "wq-719",
       "title": "Add E session cost cap enforcement to post-hook",
       "description": "The structural cost cap in SESSION_ENGAGE.md (wq-717) relies on E session discipline. Add a post-session hook check that warns when E session cost exceeds $2.50 and tracks the 1-registration-per-session limit by counting platform registration keywords in engagement-trace.json.",
@@ -163,6 +105,20 @@
         "cost"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-720",
+      "title": "Add api-consumers to self-test + rate-limit health API logging",
+      "description": "Add /status/api-consumers to the self-test endpoint array so it gets health-checked. Also add rate-limiting to the platform-health-api.log writer — currently every request appends a line which could grow unbounded if an agent polls frequently. Cap at 1 log entry per IP per minute, and add log rotation when file exceeds 10K lines.",
+      "priority": 720,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1612,
+      "source": "pipeline-contribution",
+      "tags": [
+        "api",
+        "reliability"
+      ]
     }
   ]
 }

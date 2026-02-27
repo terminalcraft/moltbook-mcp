@@ -336,6 +336,23 @@ fi
 # Safe eval: only accept lines matching KEY=value pattern (per d061 rule)
 eval "$(echo "$SHELL_VARS" | grep '^[A-Z_]*=')"
 
+# Defaults for variables that may be missing if extraction produced partial output
+: "${INTEL_COUNT:=0}"
+: "${HAS_TRACE:=false}"
+: "${PHASE2_REACHED:=false}"
+: "${IS_RATE_LIMITED:=false}"
+: "${ALL_PLATFORMS_FAILED:=false}"
+: "${FAILURE_MODE:=unknown}"
+: "${PLATFORM_DETAILS:=}"
+: "${TOTAL_SECONDS:=-1}"
+: "${DURATION_STR:=}"
+: "${CURRENT_NOTE:=}"
+: "${E_COUNT:=0}"
+: "${Q_FAILS:=0}"
+: "${Q_WARNS:=0}"
+: "${Q_TOTAL:=0}"
+: "${ARCHIVE_INTEL_COUNT:=0}"
+
 D049_COMPLIANT="false"
 [[ "$INTEL_COUNT" -gt 0 ]] && D049_COMPLIANT="true"
 
@@ -939,15 +956,15 @@ check_scope_bleed() {
 # Phase 2: Run all checks sequentially
 ###############################################################################
 
-check_intel_checkpoint
-check_d049_enforcement
-check_early_exit
-check_note_fallback
-check_trace_fallback
-check_quality_audit
-check_quality_enforce
-check_e_cost_cap
-check_covenant_update
-check_scope_bleed
+check_intel_checkpoint || true
+check_d049_enforcement || true
+check_early_exit || true
+check_note_fallback || true
+check_trace_fallback || true
+check_quality_audit || true
+check_quality_enforce || true
+check_e_cost_cap || true
+check_covenant_update || true
+check_scope_bleed || true
 
 exit 0

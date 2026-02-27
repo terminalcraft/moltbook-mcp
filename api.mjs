@@ -37,7 +37,7 @@ function logActivity(event, summary, meta = {}) {
 // --- Webhooks (functions) ---
 const WEBHOOKS_FILE = join(BASE, "webhooks.json");
 const WEBHOOK_DELIVERIES_FILE = join(BASE, "webhook-deliveries.json");
-const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.verified", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed", "stigmergy.breadcrumb", "code.pushed", "watch.created", "watch.deleted", "review.requested", "review.updated", "review.deleted"];
+const WEBHOOK_EVENTS = ["task.created", "task.claimed", "task.done", "task.verified", "task.cancelled", "project.created", "pattern.added", "inbox.received", "session.completed", "monitor.status_changed", "short.create", "kv.set", "kv.delete", "cron.created", "cron.deleted", "poll.created", "poll.voted", "poll.closed", "topic.created", "topic.message", "paste.create", "registry.update", "leaderboard.update", "room.created", "room.joined", "room.left", "room.message", "room.deleted", "cron.failed", "cron.auto_paused", "buildlog.entry", "snapshot.created", "presence.heartbeat", "smoke.completed", "dispatch.request", "activity.posted", "crawl.completed", "stigmergy.breadcrumb", "code.pushed", "watch.created", "watch.deleted", "review.requested", "review.updated", "review.deleted", "health.violation"];
 function loadWebhooks() { try { return JSON.parse(readFileSync(WEBHOOKS_FILE, "utf8")); } catch { return []; } }
 function saveWebhooks(hooks) { writeFileSync(WEBHOOKS_FILE, JSON.stringify(hooks, null, 2)); }
 function loadDeliveries() { try { return JSON.parse(readFileSync(WEBHOOK_DELIVERIES_FILE, "utf8")); } catch { return {}; } }
@@ -11434,6 +11434,7 @@ app.get("/webhooks/events", (req, res) => {
     "code.pushed": "Code pushed to a repo. Payload: {repo, branch, commit, author, message, watchers_notified}",
     "watch.created": "New repo watch subscription. Payload: {id, agent, repo}",
     "watch.deleted": "Repo watch removed. Payload: {id, agent, repo}",
+    "health.violation": "API health threshold violated. Payload: {verdict, violations: [{endpoint, type, severity, threshold, actual, message}]}",
   };
   res.json({ events: WEBHOOK_EVENTS, wildcard: "*", descriptions });
 });
@@ -14939,6 +14940,22 @@ app.get("/status/api-health", (req, res) => {
     const hasAlerts = threshold_violations.some(v => v.severity === "alert");
     const hasWarns = threshold_violations.some(v => v.severity === "warn");
     const verdict = anyDown || hasCritical ? "degraded" : hasAlerts ? "alerting" : allOk && !hasWarns ? "healthy" : "partial";
+
+    // Fire webhook on threshold violations (deduplicated per verdict change)
+    if (threshold_violations.length > 0) {
+      const violationKey = verdict + ":" + threshold_violations.map(v => v.endpoint + ":" + v.type).sort().join(",");
+      if (violationKey !== app._lastHealthViolationKey) {
+        app._lastHealthViolationKey = violationKey;
+        fireWebhook("health.violation", {
+          verdict,
+          violation_count: threshold_violations.length,
+          violations: threshold_violations,
+          summary: `${threshold_violations.length} violation(s): ${verdict}`,
+        });
+      }
+    } else {
+      app._lastHealthViolationKey = null;  // Reset when healthy
+    }
 
     // Last check details
     const lastEntry = recent.length > 0 ? recent[recent.length - 1] : null;

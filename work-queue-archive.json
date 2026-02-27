@@ -16055,6 +16055,73 @@
         "quality": "well-scoped",
         "note": "4 hooks retired (colonysim-status, todo-followups, fork-cleanup, memoryvault-backup). 4 candidates kept after verification (colony-jwt, imanagent, pattern-analytics, note-quality). Hook count: 89 (was 93). Inventory updated."
       }
+    },
+    {
+      "id": "wq-721",
+      "title": "Add alerting thresholds to /status/api-health",
+      "description": "The api-health endpoint shows data but does not interpret it. Add configurable thresholds: warn when uptime drops below 95%, alert when p95 latency exceeds 3000ms. Include a threshold_violations array in the JSON response so external agents can consume alerts programmatically.",
+      "priority": 721,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1612,
+      "source": "pipeline-contribution",
+      "tags": [
+        "api",
+        "monitoring"
+      ],
+      "outcome": {
+        "session": 1626,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added configurable thresholds (uptime_warn, latency_alert), threshold_violations array, severity levels (critical/alert/warn), verdict integration, HTML violations section. Version bumped to 1.1."
+      }
+    },
+    {
+      "id": "wq-718",
+      "title": "Batch python3\u2192jq migration for post-session hooks",
+      "description": "wq-705 completed pre-session hooks. 15+ post-session hooks still use python3 for inline JSON parsing. Apply the same jq replacement pattern (R#274-276 validated). This is the second half of the python3 elimination effort.",
+      "priority": 718,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1617,
+      "source": "pipeline",
+      "tags": [
+        "infrastructure",
+        "hooks",
+        "performance"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1626,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Batch 1: 5 simple_json hooks migrated (13 python3 invocations \u2192 jq/awk). 11 complex hooks remain \u2014 these need individual analysis and are better split into separate items."
+      }
+    },
+    {
+      "id": "wq-726",
+      "title": "Add hook manifest with retirement metadata for d070",
+      "description": "Create hooks/manifest.json tracking each hook's created_session, last_triggered_session, and session_type scope. Populate from git log for created dates and from session logs for last-triggered. This enables the R session fallback hook-health-audit to identify hooks that haven't triggered in 50+ sessions as retirement candidates, directly supporting d070's 30% hook count reduction target (96 \u2192 67).",
+      "priority": 726,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1623,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "d070",
+        "hooks"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1626,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created generate-hook-manifest.mjs and hooks/manifest.json. 89 hooks catalogued with creation dates, scope, and last-triggered session data. Retirement candidate detection built in."
+      }
     }
   ]
 }

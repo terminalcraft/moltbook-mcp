@@ -13,6 +13,8 @@
 #   40-trace-fallback_E.sh     (wq-550)
 #   41-quality-audit_E.sh      (wq-624, d066)
 #   42-quality-enforce_E.sh    (wq-632, d066)
+#   31-covenant-update_E.sh    (wq-220) — merged B#483 (wq-727)
+#   37-scope-bleed-detect_E.sh (wq-712) — merged B#483 (wq-727)
 #
 # Created: B#459 (wq-662)
 set -euo pipefail
@@ -908,6 +910,32 @@ check_e_cost_cap() {
 }
 
 ###############################################################################
+# Check 9: Covenant update (was 31-covenant-update_E.sh, wq-220)
+#   Update covenant tracking from engagement trace after E session
+###############################################################################
+check_covenant_update() {
+  cd "$MCP_DIR" || return 0
+  node covenant-tracker.mjs update >/dev/null 2>&1 || true
+}
+
+###############################################################################
+# Check 10: Scope bleed detection (was 37-scope-bleed-detect_E.sh, wq-712)
+#   Warn if build commits were made during E session (scope violation)
+###############################################################################
+check_scope_bleed() {
+  cd "$MCP_DIR" || return 0
+  local RECENT_COMMITS
+  RECENT_COMMITS=$(git log --oneline --since="15 minutes ago" 2>/dev/null | grep -cv "auto-snapshot" || true)
+  if [ "$RECENT_COMMITS" -gt 0 ]; then
+    local COMMIT_LIST
+    COMMIT_LIST=$(git log --oneline --since="15 minutes ago" 2>/dev/null | grep -v "auto-snapshot" | head -5)
+    echo "$(date -Iseconds) SCOPE-BLEED WARNING: E session s${SESSION} has ${RECENT_COMMITS} build commit(s):" >> "${LOG_DIR}/hooks.log"
+    echo "$COMMIT_LIST" >> "${LOG_DIR}/hooks.log"
+    echo "scope-bleed: WARN — E session s${SESSION} made ${RECENT_COMMITS} code commit(s)"
+  fi
+}
+
+###############################################################################
 # Phase 2: Run all checks sequentially
 ###############################################################################
 
@@ -919,5 +947,7 @@ check_trace_fallback
 check_quality_audit
 check_quality_enforce
 check_e_cost_cap
+check_covenant_update
+check_scope_bleed
 
 exit 0

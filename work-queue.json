@@ -12,14 +12,16 @@
       "tags": [
         "api",
         "ecosystem",
-        "d069"
+        "d069",
+        "audit"
       ],
+      "audit_note": "a164-3: deadline s1620 is 5 sessions away. Must ship before deadline.",
       "commits": []
     },
     {
       "id": "wq-705",
-      "title": "Batch python3\u2192jq migration for pre-session hooks",
-      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first \u2014 post-session hooks can follow in a separate item.",
+      "title": "Batch python3→jq migration for pre-session hooks",
+      "description": "34 hooks still use python3 for JSON parsing. R#274-276 validated the jq replacement pattern. Migrate the 18 pre-session hooks that use python3 to jq, eliminating the python3 subprocess dependency from session startup. Focus on pre-session first — post-session hooks can follow in a separate item.",
       "priority": 705,
       "status": "pending",
       "added": "2026-02-26",
@@ -76,6 +78,18 @@
         "api",
         "monitoring"
       ]
+    },
+    {
+      "id": "wq-722",
+      "title": "mdi engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "description": "engage-blocker",
+      "priority": 722,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1614,
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

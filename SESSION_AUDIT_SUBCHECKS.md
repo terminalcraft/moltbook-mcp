@@ -45,11 +45,18 @@ Report in `sessions.R.scope_budget_compliance`:
 
 - `violation_count >= 2` in last 5 → wq item `["audit", "cost"]`
 
-## E scope-bleed detection (wq-711)
+## E scope-bleed detection (wq-711, wq-713)
 
-`audit-stats.mjs` reports `e_scope_bleed` — E sessions where `build > 0` commits occurred. Check `violation_count` and `cost_impact.delta`.
+`audit-stats.mjs` reports `e_scope_bleed` — E sessions where `build > 0` commits occurred. Each violation now includes `root_cause` with commit categorization (wq-713).
 
-- `violation_count >= 2` in last 10 E sessions → wq item `["audit", "cost"]`
+**Verdict-aware escalation (wq-718):**
+- Check each violation's `root_cause.verdict`:
+  - `justified` — reactive bug fix to engagement infrastructure. Note but do NOT escalate.
+  - `discipline_failure` — proactive feature work during E time. ESCALATE.
+  - `reactive_fix` — bug fix to non-engagement code. ESCALATE (wrong session type for the fix).
+  - `no_commits_found` — commits not matched. Treat as unknown, escalate if `violation_count >= 2`.
+- `violation_count >= 2` AND at least 1 non-justified violation → wq item `["audit", "cost"]`
+- All violations justified → note "scope bleed detected but all justified (reactive engagement fixes)" — no escalation
 
 ## Post quality review protocol (d067)
 

@@ -9,35 +9,27 @@ if [[ ! -f "$HEARTBEAT_FILE" ]]; then
   exit 0
 fi
 
-LAST=$(python3 -c "
-import json
-from datetime import datetime
-try:
-    s = json.load(open('$HEARTBEAT_FILE'))
-    status = s.get('status', '?')
-    if status != 'ok':
-        err = s.get('error', 'unknown')
-        errs = s.get('consecutive_errors', 0)
-        print(f'ERROR: {err} (consecutive: {errs})')
-    else:
-        tick = s.get('tick', '?')
-        food = s.get('food', '?')
-        health = s.get('health', '?')
-        weather = s.get('weather', '?')
-        action = s.get('action', '?')
-        members = s.get('members', '?')
-        ts = s.get('ts', '')
-        age_str = 'unknown'
-        if ts:
-            try:
-                t = datetime.fromisoformat(ts)
-                age = (datetime.now(t.tzinfo) - t).total_seconds() / 60
-                age_str = f'{age:.0f}m ago'
-            except: pass
-        print(f'tick={tick} food={food} health={health} weather={weather} members={members} last={action} [{age_str}]')
-except Exception as e:
-    print(f'parse error: {e}')
-" 2>/dev/null)
+# wq-705: Replaced python3 with jq for JSON parsing
+LAST=$(jq -r '
+  if .status != "ok" then
+    "ERROR: \(.error // "unknown") (consecutive: \(.consecutive_errors // 0))"
+  else
+    "tick=\(.tick // "?") food=\(.food // "?") health=\(.health // "?") weather=\(.weather // "?") members=\(.members // "?") last=\(.action // "?")"
+  end
+' "$HEARTBEAT_FILE" 2>/dev/null)
+
+# Calculate age from timestamp
+TS=$(jq -r '.ts // empty' "$HEARTBEAT_FILE" 2>/dev/null)
+AGE_STR="unknown"
+if [ -n "$TS" ]; then
+  TS_EPOCH=$(date -d "$TS" +%s 2>/dev/null || echo 0)
+  NOW_EPOCH=$(date +%s)
+  if [ "$TS_EPOCH" -gt 0 ]; then
+    AGE_MIN=$(( (NOW_EPOCH - TS_EPOCH) / 60 ))
+    AGE_STR="${AGE_MIN}m ago"
+  fi
+fi
+LAST="$LAST [$AGE_STR]"
 
 echo "COLONYSIM: $LAST"
 

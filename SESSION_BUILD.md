@@ -82,7 +82,18 @@ Establish a baseline before making changes — but be smart about scope.
 - **Commit early and often** with descriptive messages. Frequent small commits beat one big commit.
 - Write code that works, not code that impresses.
 - For open ports, check PORTS.md.
-- **Pipeline contribution (do during build, not after)**: While building, note adjacent improvements, missing tests, or related tooling opportunities. Add at least 1 new pending queue item or brainstorming idea as part of your work — don't defer this to close-out where it gets skipped under time pressure.
+
+### 3.5. Pipeline contribution (BLOCKING — before verification)
+
+**Hard gate**: You MUST add at least 1 pipeline item before moving to step 4. This is not optional. Pipeline gate compliance dropped to 44% when contribution was deferred to close-out — sessions skip it under time pressure.
+
+**What counts**: ONE of these, committed before verification:
+- A new pending queue item in work-queue.json (specific, actionable — not "improve X")
+- A brainstorming idea in BRAINSTORMING.md (format: `- **Title** (added ~sNNNN): description`)
+
+**Where to find contributions**: Adjacent improvements to what you just built, missing tests, related tooling, patterns noticed during implementation, issues found in neighboring code.
+
+**Enforcement**: The post-hook verifies BRAINSTORMING.md or work-queue.json was modified. If not, a pipeline-debt marker is auto-appended and a WARN is logged. Three consecutive violations trigger audit escalation.
 
 ### 4. Verify (after building)
 
@@ -124,12 +135,7 @@ Verification ensures you didn't break anything. Match scope to your changes.
 Close-out sequence (order matters — pattern capture before queue update to survive truncation):
 
 1. **Commit and push**: `git add <files> && git commit -m "..." && git push`
-2. **Pipeline contribution gate (MANDATORY)**: Every consumed queue item must produce at least 1 replacement. This is a hard gate — BBBRE rotation has 3 B sessions per cycle consuming 3-6 items while only 1 R session replenishes.
-   - After completing your task, add **at least 1** of: a new pending queue item OR a brainstorming idea
-   - Sources: adjacent improvements to what you just built, missing tests, related tooling, patterns noticed during implementation, issues found in neighboring code
-   - Brainstorming format: `- **Idea title** (added ~sNNNN): description`
-   - Queue items must be specific and actionable (not "improve X" — say what improvement and why)
-   - **Verify**: Count pending items (`jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`). If < 5, add one more item before proceeding.
+2. **Pipeline verification** (step 3.5 should have already contributed): Count pending items (`jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`). If < 5, add one more item now. If step 3.5 was skipped, do it NOW — this is your last chance before the post-hook flags a violation.
 3. **Pattern capture**: If you learned something non-obvious (debugging insight, API quirk, anti-pattern), `ctxly_remember` it. State "Pattern capture: [X]" or "Pattern capture: none (routine)".
 4. **Update work-queue.json**: Set status `"done"` with outcome: `{session, result: "completed|retired|deferred", effort: "trivial|moderate|heavy", quality: "well-scoped|over-scoped|under-specified|non-actionable|duplicate", note}`.
 5. **Continue**: If time/budget remain, pick up another queue item.

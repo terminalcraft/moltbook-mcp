@@ -20,70 +20,61 @@ rm -f "$OUTPUT"
 [ -f "$TRACKING" ] || exit 0
 [ -n "$MODE" ] || exit 0
 
-export TRACKING_FILE="$TRACKING"
-export OUTPUT_FILE="$OUTPUT"
-
-python3 << 'PYEOF'
-import json, os
-
-mode = os.environ.get("MODE_CHAR", "")
-tracking_file = os.environ.get("TRACKING_FILE", "")
-output_file = os.environ.get("OUTPUT_FILE", "")
-
-if not mode or not tracking_file or not output_file:
-    exit(0)
-
-MODE_MAP = {
-    "structural-change": ["R"], "commit-and-push": ["B", "R"],
-    "reflection-summary": ["R"], "platform-engagement": ["E"],
-    "platform-discovery": ["E"], "queue-consumption": ["B"],
-    "ecosystem-adoption": ["B", "E", "R"], "briefing-update": ["R"],
+# wq-705: Replaced python3 with jq for compliance nudge generation
+# MODE_MAP encoded in jq — maps metric names to applicable session types
+NUDGE_OUTPUT=$(jq -r --arg mode "$MODE" '
+  # Mode map: which metrics apply to which session types
+  {
+    "structural-change": ["R"],
+    "commit-and-push": ["B", "R"],
+    "reflection-summary": ["R"],
+    "platform-engagement": ["E"],
+    "platform-discovery": ["E"],
+    "queue-consumption": ["B"],
+    "ecosystem-adoption": ["B", "E", "R"],
+    "briefing-update": ["R"],
     "directive-update": ["R"]
-}
+  } as $mode_map |
 
-with open(tracking_file) as f:
-    data = json.load(f)
+  [
+    .compliance.metrics // {} | to_entries[] |
+    select(($mode_map[.key] // []) | index($mode)) |
+    .key as $did | .value as $info |
 
-nudges = []
-for did, info in data.get("compliance", {}).get("metrics", {}).items():
-    if mode not in MODE_MAP.get(did, []):
-        continue
+    select(($info.history // []) | length >= 3) |
+    ($info.history // [] | .[-5:]) as $recent |
+    ([$recent[] | select(.result == "ignored")] | length) as $ignored_count |
 
-    history = info.get("history", [])
-    if len(history) < 3:
-        continue
+    select($ignored_count >= 3) |
 
-    recent = history[-5:]
-    ignored_count = sum(1 for h in recent if h.get("result") == "ignored")
+    ($info.followed // 0) as $total_f |
+    ($info.ignored // 0) as $total_i |
+    ($total_f + $total_i) as $total |
+    (if $total > 0 then ($total_f * 100 / $total | floor) else 0 end) as $rate |
+    ($info.last_ignored_reason // "") as $reason |
 
-    if ignored_count >= 3:
-        total_f = info.get("followed", 0)
-        total_i = info.get("ignored", 0)
-        total = total_f + total_i
-        rate = int(100 * total_f / total) if total > 0 else 0
-        reason = info.get("last_ignored_reason", "")
-        streak = 0
-        for h in reversed(recent):
-            if h.get("result") == "ignored":
-                streak += 1
-            else:
-                break
+    # Calculate ignore streak from end
+    (reduce ($recent | reverse | .[]) as $h (0;
+      if . >= 0 and $h.result == "ignored" then . + 1 else -1 end
+    ) | if . < 0 then (. * -1) - 1 else . end) as $streak |
 
-        nudge = "- " + did + ": " + str(ignored_count) + "/5 recent sessions ignored (" + str(rate) + "% lifetime). "
-        if streak >= 3:
-            nudge += str(streak) + "-session ignore streak. "
-        if reason:
-            nudge += "Last reason: " + reason[:120]
-        nudges.append(nudge)
+    "- \($did): \($ignored_count)/5 recent sessions ignored (\($rate)% lifetime). " +
+    (if $streak >= 3 then "\($streak)-session ignore streak. " else "" end) +
+    (if ($reason | length) > 0 then "Last reason: \($reason[:120])" else "" end)
+  ] |
 
-if nudges:
-    with open(output_file, "w") as f:
-        f.write("## Compliance alerts (from directives.json)\n")
-        f.write("These directives are being consistently missed in your session type:\n")
-        for n in nudges:
-            f.write(n + "\n")
-        f.write("\nAddress at least one this session, or explain in your summary why you cannot.\n")
-    print("compliance-nudge: " + str(len(nudges)) + " alerts for mode " + mode)
-else:
-    print("compliance-nudge: all clear for mode " + mode)
-PYEOF
+  if length > 0 then
+    . as $nudges |
+    "## Compliance alerts (from directives.json)\nThese directives are being consistently missed in your session type:\n" +
+    ($nudges | join("\n")) +
+    "\n\nAddress at least one this session, or explain in your summary why you cannot."
+  else empty end
+' "$TRACKING" 2>/dev/null)
+
+if [ -n "$NUDGE_OUTPUT" ]; then
+  echo "$NUDGE_OUTPUT" > "$OUTPUT"
+  NUDGE_COUNT=$(echo "$NUDGE_OUTPUT" | grep -c '^- ' || echo 0)
+  echo "compliance-nudge: $NUDGE_COUNT alerts for mode $MODE"
+else
+  echo "compliance-nudge: all clear for mode $MODE"
+fi

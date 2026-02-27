@@ -10,23 +10,24 @@ OUTPUT="$STATE_DIR/compliance-nudge.txt"
 CHECKPOINT="$STATE_DIR/b-session-checkpoint.json"
 
 # Check for stale checkpoint first (wq-203)
+# wq-705: Replaced python3 with jq for JSON parsing
 if [[ -f "$CHECKPOINT" ]]; then
-    CHECKPOINT_AGE=$(python3 -c "
-import json, sys
-from datetime import datetime
-try:
-    cp = json.load(open('$CHECKPOINT'))
-    ts = datetime.fromisoformat(cp['timestamp'].replace('Z', '+00:00'))
-    age = (datetime.now(ts.tzinfo) - ts).total_seconds() / 60
-    print(int(age))
-except: print(0)
-" 2>/dev/null || echo 0)
+    # Calculate checkpoint age in minutes using file timestamp and jq
+    CP_TS=$(jq -r '.timestamp // empty' "$CHECKPOINT" 2>/dev/null)
+    CHECKPOINT_AGE=0
+    if [[ -n "$CP_TS" ]]; then
+        CP_EPOCH=$(date -d "$CP_TS" +%s 2>/dev/null || echo 0)
+        NOW_EPOCH=$(date +%s)
+        if [[ "$CP_EPOCH" -gt 0 ]]; then
+            CHECKPOINT_AGE=$(( (NOW_EPOCH - CP_EPOCH) / 60 ))
+        fi
+    fi
 
     # Only alert if checkpoint is 2+ minutes old (session likely truncated)
     if [[ "$CHECKPOINT_AGE" -ge 2 ]]; then
-        TASK_ID=$(python3 -c "import json; print(json.load(open('$CHECKPOINT')).get('task_id', 'unknown'))" 2>/dev/null)
-        INTENT=$(python3 -c "import json; print(json.load(open('$CHECKPOINT')).get('intent', '')[:60])" 2>/dev/null)
-        SESS=$(python3 -c "import json; print(json.load(open('$CHECKPOINT')).get('session', 0))" 2>/dev/null)
+        TASK_ID=$(jq -r '.task_id // "unknown"' "$CHECKPOINT" 2>/dev/null)
+        INTENT=$(jq -r '.intent // "" | .[:60]' "$CHECKPOINT" 2>/dev/null)
+        SESS=$(jq -r '.session // 0' "$CHECKPOINT" 2>/dev/null)
 
         {
             echo ""

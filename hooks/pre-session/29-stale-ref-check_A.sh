@@ -19,52 +19,41 @@ RAW_OUTPUT=$("$DIR/stale-ref-check.sh" 2>/dev/null) || {
   exit 0
 }
 
-# Parse output into structured JSON using python3
-python3 -c "
-import json, sys, re
-from datetime import datetime
+# wq-705: Replaced python3 with bash+jq for output parsing
+SESSION="${SESSION_NUM:-0}"
+CHECKED=$(date -Iseconds)
+STALE_REFS="[]"
+CURRENT_FILE=""
+TMP_REFS=$(mktemp)
+echo "[]" > "$TMP_REFS"
 
-raw = '''$RAW_OUTPUT'''
-session = int('${SESSION_NUM:-0}')
+while IFS= read -r line; do
+  line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+  [ -z "$line" ] && continue
 
-stale_refs = []
-current_file = None
+  if echo "$line" | grep -q '^STALE:'; then
+    CURRENT_FILE=$(echo "$line" | grep -oP 'STALE:\s+\K\S+')
+  elif [ -n "$CURRENT_FILE" ] && ! echo "$line" | grep -qE '^(===|No |All )'; then
+    # Reference line
+    jq --arg df "$CURRENT_FILE" --arg ri "$line" '. += [{"deleted_file": $df, "referenced_in": $ri}]' "$TMP_REFS" > "${TMP_REFS}.tmp" && mv "${TMP_REFS}.tmp" "$TMP_REFS"
+  fi
+done <<< "$RAW_OUTPUT"
 
-for line in raw.split('\n'):
-    line = line.strip()
-    if line.startswith('STALE:'):
-        # Format: STALE: <file> — referenced in:
-        match = re.match(r'STALE:\s+(\S+)', line)
-        if match:
-            current_file = match.group(1)
-    elif line and current_file and not line.startswith('===') and not line.startswith('No ') and not line.startswith('All '):
-        # Reference line (indented file path)
-        ref_file = line.strip()
-        stale_refs.append({
-            'deleted_file': current_file,
-            'referenced_in': ref_file
-        })
+STALE_COUNT=$(jq 'length' "$TMP_REFS")
+HAS_STALE=$([ "$STALE_COUNT" -gt 0 ] && echo "true" || echo "false")
 
-result = {
-    'checked': datetime.now().isoformat(),
-    'session': session,
-    'stale_count': len(stale_refs),
-    'stale_refs': stale_refs,
-    'has_stale': len(stale_refs) > 0
-}
+jq -n --arg checked "$CHECKED" --argjson session "$SESSION" --argjson count "$STALE_COUNT" \
+  --slurpfile refs "$TMP_REFS" --argjson has_stale "$HAS_STALE" \
+  '{checked: $checked, session: $session, stale_count: $count, stale_refs: $refs[0], has_stale: $has_stale}' > "$OUTPUT_FILE"
 
-with open('$OUTPUT_FILE', 'w') as f:
-    json.dump(result, f, indent=2)
+rm -f "$TMP_REFS"
 
-# Output summary for session context
-if stale_refs:
-    files = set(r['deleted_file'] for r in stale_refs)
-    print(f'stale-ref-check: {len(stale_refs)} stale reference(s) in {len(files)} deleted file(s)')
-else:
-    print('stale-ref-check: clean (0 stale references)')
-" 2>/dev/null || {
-  # Python parsing failed — write raw output as fallback
-  echo '{"checked":"'"$(date -Iseconds)"'","session":'"${SESSION_NUM:-0}"',"stale_count":0,"stale_refs":[],"error":"parse failed","raw":"'"${RAW_OUTPUT:0:500}"'"}' > "$OUTPUT_FILE"
-}
+# Output summary
+if [ "$STALE_COUNT" -gt 0 ]; then
+  FILE_COUNT=$(jq '[.[].deleted_file] | unique | length' <<< "$(jq '.' "$OUTPUT_FILE" | jq '.stale_refs')")
+  echo "stale-ref-check: $STALE_COUNT stale reference(s) in $FILE_COUNT deleted file(s)"
+else
+  echo "stale-ref-check: clean (0 stale references)"
+fi
 
 exit 0

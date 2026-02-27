@@ -13,117 +13,86 @@ SESSION_NUM="${SESSION_NUM:-0}"
 
 mkdir -p "$STATE_DIR"
 
-python3 - "$DIRECTIVES" "$DIR" "$OUTPUT_FILE" "$SESSION_NUM" <<'PYEOF'
-import json, sys, re, os
-from pathlib import Path
+# wq-705: Replaced python3 with bash+jq for directive cleanup detection
 
-directives_file = sys.argv[1]
-project_dir = Path(sys.argv[2])
-output_file = Path(sys.argv[3])
-session = int(sys.argv[4])
+if [ "$SESSION_NUM" -eq 0 ]; then
+  exit 0
+fi
 
-if session == 0:
-    sys.exit(0)
+# Load directive IDs and completed IDs
+if ! ALL_IDS=$(jq -r '[.directives[]?.id // empty] | .[]' "$DIRECTIVES" 2>/dev/null); then
+  echo "DIRECTIVE_CLEANUP: Cannot read directives.json"
+  exit 0
+fi
 
-# Load directives and get completed ones
-try:
-    with open(directives_file) as f:
-        data = json.load(f)
-except:
-    print("DIRECTIVE_CLEANUP: Cannot read directives.json")
-    sys.exit(0)
+COMPLETED_IDS=$(jq -r '[.directives[]? | select(.status == "completed") | .id] | .[]' "$DIRECTIVES" 2>/dev/null)
 
-completed = set()
-all_ids = set()
-for d in data.get("directives", []):
-    did = d.get("id", "")
-    all_ids.add(did)
-    if d.get("status") == "completed":
-        completed.add(did)
+if [ -z "$COMPLETED_IDS" ]; then
+  echo "DIRECTIVE_CLEANUP: No completed directives to check"
+  exit 0
+fi
 
-if not completed:
-    print("DIRECTIVE_CLEANUP: No completed directives to check")
-    sys.exit(0)
+# Files to scan
+SESSION_FILES="SESSION_BUILD.md SESSION_ENGAGE.md SESSION_REFLECT.md SESSION_AUDIT.md BRIEFING.md BRAINSTORMING.md"
 
-# Files to scan for directive references
-session_files = [
-    "SESSION_BUILD.md",
-    "SESSION_ENGAGE.md",
-    "SESSION_REFLECT.md",
-    "SESSION_AUDIT.md",
-    "BRIEFING.md",
-    "BRAINSTORMING.md",
-]
+TMP_CRUFT=$(mktemp)
+TMP_STALE=$(mktemp)
+echo "[]" > "$TMP_CRUFT"
+echo "[]" > "$TMP_STALE"
 
-# Pattern to match directive IDs (d001, d002, etc.)
-# Also catch references to non-existent directive IDs
-pattern = re.compile(r'\bd(\d{3})\b')
+for fname in $SESSION_FILES; do
+  fpath="$DIR/$fname"
+  [ -f "$fpath" ] || continue
 
-cruft = []
-stale_refs = []  # References to non-existent directive IDs
+  # Search for directive references (d001, d002, etc.)
+  LINENO=0
+  while IFS= read -r line; do
+    LINENO=$((LINENO + 1))
+    # Extract all d### patterns from this line
+    MATCHES=$(echo "$line" | grep -oP '\bd\d{3}\b' | sort -u)
+    for did in $MATCHES; do
+      SNIPPET=$(echo "$line" | sed 's/^[[:space:]]*//' | head -c 100)
 
-for fname in session_files:
-    fpath = project_dir / fname
-    if not fpath.exists():
-        continue
+      if echo "$COMPLETED_IDS" | grep -qx "$did"; then
+        jq --arg f "$fname" --argjson l "$LINENO" --arg d "$did" --arg s "$SNIPPET" \
+          '. += [{"file": $f, "line": $l, "directive": $d, "reason": "completed", "snippet": $s}]' \
+          "$TMP_CRUFT" > "${TMP_CRUFT}.tmp" && mv "${TMP_CRUFT}.tmp" "$TMP_CRUFT"
+      elif ! echo "$ALL_IDS" | grep -qx "$did"; then
+        jq --arg f "$fname" --argjson l "$LINENO" --arg d "$did" --arg s "$SNIPPET" \
+          '. += [{"file": $f, "line": $l, "directive": $d, "reason": "non-existent", "snippet": $s}]' \
+          "$TMP_STALE" > "${TMP_STALE}.tmp" && mv "${TMP_STALE}.tmp" "$TMP_STALE"
+      fi
+    done
+  done < "$fpath"
+done
 
-    content = fpath.read_text()
-    lines = content.splitlines()
+CRUFT_COUNT=$(jq 'length' "$TMP_CRUFT")
+STALE_COUNT=$(jq 'length' "$TMP_STALE")
+TOTAL_CRUFT=$((CRUFT_COUNT + STALE_COUNT))
 
-    for lineno, line in enumerate(lines, 1):
-        matches = pattern.findall(line)
-        for m in matches:
-            did = f"d{m}"
+# Build completed list for report
+COMPLETED_JSON=$(echo "$COMPLETED_IDS" | jq -R . | jq -s 'sort')
 
-            # Check if directive exists at all
-            if did not in all_ids:
-                stale_refs.append({
-                    "file": fname,
-                    "line": lineno,
-                    "directive": did,
-                    "reason": "non-existent",
-                    "snippet": line.strip()[:100]
-                })
-            elif did in completed:
-                cruft.append({
-                    "file": fname,
-                    "line": lineno,
-                    "directive": did,
-                    "reason": "completed",
-                    "snippet": line.strip()[:100]
-                })
+# Write report
+jq -n --argjson session "$SESSION_NUM" --argjson completed "$COMPLETED_JSON" \
+  --slurpfile cruft "$TMP_CRUFT" --slurpfile stale "$TMP_STALE" --argjson total "$TOTAL_CRUFT" \
+  '{session: $session, completed_directives: $completed, references_to_completed: $cruft[0], references_to_nonexistent: $stale[0], total_cruft: $total}' > "$OUTPUT_FILE"
 
-# Write detailed report
-report = {
-    "session": session,
-    "completed_directives": sorted(completed),
-    "references_to_completed": cruft,
-    "references_to_nonexistent": stale_refs,
-    "total_cruft": len(cruft) + len(stale_refs)
-}
-output_file.write_text(json.dumps(report, indent=2) + "\n")
+rm -f "$TMP_CRUFT" "$TMP_STALE"
 
 # Output summary
-if cruft or stale_refs:
-    print(f"DIRECTIVE_CLEANUP: {len(cruft) + len(stale_refs)} stale reference(s) found")
+if [ "$TOTAL_CRUFT" -gt 0 ]; then
+  echo "DIRECTIVE_CLEANUP: $TOTAL_CRUFT stale reference(s) found"
 
-    if cruft:
-        by_file = {}
-        for c in cruft:
-            by_file.setdefault(c["file"], []).append(c["directive"])
-        for fname, dids in by_file.items():
-            unique_dids = sorted(set(dids))
-            print(f"  - {fname}: {', '.join(unique_dids)} (completed)")
-
-    if stale_refs:
-        by_file = {}
-        for c in stale_refs:
-            by_file.setdefault(c["file"], []).append(c["directive"])
-        for fname, dids in by_file.items():
-            unique_dids = sorted(set(dids))
-            print(f"  - {fname}: {', '.join(unique_dids)} (non-existent)")
-
-    print(f"  Details: ~/.config/moltbook/directive-cruft.json")
-else:
-    print(f"DIRECTIVE_CLEANUP: No stale directive references in session files")
-PYEOF
+  if [ "$CRUFT_COUNT" -gt 0 ]; then
+    jq -r 'group_by(.file) | .[] | "  - \(.[0].file): \([.[].directive] | unique | sort | join(", ")) (completed)"' \
+      < <(jq '.' "$OUTPUT_FILE" | jq '.references_to_completed') 2>/dev/null
+  fi
+  if [ "$STALE_COUNT" -gt 0 ]; then
+    jq -r 'group_by(.file) | .[] | "  - \(.[0].file): \([.[].directive] | unique | sort | join(", ")) (non-existent)"' \
+      < <(jq '.references_to_nonexistent' "$OUTPUT_FILE") 2>/dev/null
+  fi
+  echo "  Details: ~/.config/moltbook/directive-cruft.json"
+else
+  echo "DIRECTIVE_CLEANUP: No stale directive references in session files"
+fi

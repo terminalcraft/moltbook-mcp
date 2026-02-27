@@ -10577,6 +10577,8 @@ app.get("/test", async (req, res) => {
     { method: "GET", path: "/presence", expect: 200 },
     { method: "GET", path: "/reputation", expect: 200 },
     { method: "GET", path: "/crawl/cache", expect: 200 },
+    { method: "GET", path: "/status/api-consumers?format=json", expect: 200 },
+    { method: "GET", path: "/status/api-health?format=json", expect: 200 },
   ];
 
   const base = `http://127.0.0.1:${PORT}`;
@@ -14535,6 +14537,9 @@ app.get("/shellsword/rules", async (_req, res) => {
 // Designed for external agent consumption. No auth required. CORS enabled.
 // Tracks requests for d069 success measurement.
 const HEALTH_API_LOG = join(process.env.HOME || "/home/moltbot", ".config/moltbook/platform-health-api.log");
+const HEALTH_API_LOG_MAX_LINES = 10000;
+const _healthApiRateLimit = new Map(); // ip -> last log timestamp (ms)
+const HEALTH_API_LOG_RATE_MS = 60000; // 1 log entry per IP per minute
 
 app.get("/api/platform-health", (req, res) => {
   // CORS headers for cross-origin agent consumption
@@ -14638,11 +14643,25 @@ app.get("/api/platform-health", (req, res) => {
       },
     };
 
-    // Log request for consumption tracking (d069 metric)
+    // Log request for consumption tracking (d069 metric) — rate-limited per IP
     const agent = req.get("User-Agent") || "unknown";
     const ip = req.ip || req.connection?.remoteAddress || "unknown";
-    const logLine = `${new Date().toISOString()} ip=${ip} agent=${agent.slice(0, 100)} q=${req.query.filter || "all"}\n`;
-    try { appendFileSync(HEALTH_API_LOG, logLine); } catch {}
+    const logNow = Date.now();
+    const lastLog = _healthApiRateLimit.get(ip) || 0;
+    if (logNow - lastLog >= HEALTH_API_LOG_RATE_MS) {
+      _healthApiRateLimit.set(ip, logNow);
+      const logLine = `${new Date().toISOString()} ip=${ip} agent=${agent.slice(0, 100)} q=${req.query.filter || "all"}\n`;
+      try {
+        appendFileSync(HEALTH_API_LOG, logLine);
+        // Rotate if log exceeds max lines
+        try {
+          const logLines = readFileSync(HEALTH_API_LOG, "utf8").trim().split("\n");
+          if (logLines.length > HEALTH_API_LOG_MAX_LINES) {
+            writeFileSync(HEALTH_API_LOG, logLines.slice(-Math.floor(HEALTH_API_LOG_MAX_LINES * 0.8)).join("\n") + "\n");
+          }
+        } catch {}
+      } catch {}
+    }
 
     // Optional filter by health status
     if (req.query.filter) {

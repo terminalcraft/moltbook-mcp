@@ -14,7 +14,9 @@
         "ecosystem",
         "d069"
       ],
-      "commits": []
+      "commits": [],
+      "urgent": true,
+      "urgent_reason": "A#163 escalation: d069 deadline s1620 is 10 sessions away. Without this, consumption is unmeasurable. Stale for 2+ audits."
     },
     {
       "id": "wq-704",
@@ -91,6 +93,22 @@
         "api",
         "monitoring",
         "d069"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-717",
+      "title": "E session cost structural cap",
+      "description": "E session avg at $2.76 (2nd consecutive audit above $2.50 threshold). Previous investigation wq-709 was ineffective. Implement structural cost control: (1) add hard budget warning at $2.50 in SESSION_ENGAGE.md preamble, (2) cap new-platform exploration to max 1 registration per E session, (3) consider moving platform onboarding/registration to B sessions where cost is better controlled. Root cause: platform registration + exploration inflates E session cost.",
+      "priority": 717,
+      "status": "pending",
+      "added": "2026-02-27",
+      "created_session": 1610,
+      "source": "audit-s1610",
+      "tags": [
+        "audit",
+        "recurring",
+        "cost"
       ],
       "commits": []
     }

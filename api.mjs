@@ -7004,6 +7004,7 @@ function agentManifest(req, res) {
       status_intel_volume: { url: `${base}/status/intel-volume`, method: "GET", auth: false, description: "Intel volume monitoring — E session capture rates, consecutive zero detection, alert on degradation (?window=N, default 10)" },
       status_intel_quality: { url: `${base}/status/intel-quality`, method: "GET", auth: false, description: "Intel pipeline metrics — E session intel generation, queue conversion rate, actionable text quality (?window=N, default 20)" },
       status_platform_health: { url: `${base}/status/platform-health`, method: "GET", auth: false, description: "Platform health status — recent alerts, status distribution, last probe times (?format=json for API)" },
+      status_api_consumers: { url: `${base}/status/api-consumers`, method: "GET", auth: false, description: "Platform health API consumption dashboard — unique agents, request frequency, filter usage, IP distribution. d069 adoption tracking. (?format=json for API)" },
       status_cost_distribution: { url: `${base}/status/cost-distribution`, method: "GET", auth: false, description: "Interactive cost distribution charts — stacked bar, pie, rolling avg, utilization (?window=N, ?format=json)" },
       status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
       status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },
@@ -14662,6 +14663,173 @@ app.options("/api/platform-health", (req, res) => {
   res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.set("Access-Control-Allow-Headers", "Content-Type, Accept");
   res.sendStatus(204);
+});
+
+// --- Platform Health API Consumption Dashboard (wq-703, d069) ---
+// Reads platform-health-api.log and shows unique agents, request frequency,
+// filter usage, and IP distribution. Measures external adoption for d069.
+app.get("/status/api-consumers", (req, res) => {
+  try {
+    let lines = [];
+    try {
+      lines = readFileSync(HEALTH_API_LOG, "utf8").trim().split("\n").filter(Boolean);
+    } catch {
+      // Log file doesn't exist yet — return empty stats
+    }
+
+    // Parse log lines: "2026-02-26T17:03:09.251Z ip=127.0.0.1 agent=curl/7.81.0 q=all"
+    const entries = [];
+    for (const line of lines) {
+      const ts = line.slice(0, line.indexOf(" "));
+      const ipMatch = line.match(/ip=(\S+)/);
+      const agentMatch = line.match(/agent=(.+?) q=/);
+      const qMatch = line.match(/q=(\S+)$/);
+      if (ipMatch) {
+        entries.push({
+          ts,
+          ip: ipMatch[1],
+          agent: agentMatch ? agentMatch[1] : "unknown",
+          filter: qMatch ? qMatch[1] : "all",
+        });
+      }
+    }
+
+    // Unique agents by user-agent string
+    const agentCounts = {};
+    for (const e of entries) {
+      agentCounts[e.agent] = (agentCounts[e.agent] || 0) + 1;
+    }
+    const uniqueAgents = Object.entries(agentCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([agent, count]) => ({ agent, requests: count }));
+
+    // Request frequency — by hour buckets
+    const hourBuckets = {};
+    for (const e of entries) {
+      const hour = e.ts.slice(0, 13); // "2026-02-26T17"
+      hourBuckets[hour] = (hourBuckets[hour] || 0) + 1;
+    }
+
+    // Daily frequency
+    const dayBuckets = {};
+    for (const e of entries) {
+      const day = e.ts.slice(0, 10);
+      dayBuckets[day] = (dayBuckets[day] || 0) + 1;
+    }
+
+    // Filter usage
+    const filterCounts = {};
+    for (const e of entries) {
+      filterCounts[e.filter] = (filterCounts[e.filter] || 0) + 1;
+    }
+
+    // IP distribution — classify local vs external
+    const ipCounts = {};
+    let localRequests = 0;
+    let externalRequests = 0;
+    for (const e of entries) {
+      ipCounts[e.ip] = (ipCounts[e.ip] || 0) + 1;
+      const isLocal = e.ip === "127.0.0.1" || e.ip === "::1" || e.ip === "::ffff:127.0.0.1" || e.ip === "localhost";
+      if (isLocal) localRequests++;
+      else externalRequests++;
+    }
+    const uniqueIPs = Object.entries(ipCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([ip, count]) => ({ ip, requests: count }));
+
+    // Time range
+    const firstRequest = entries.length > 0 ? entries[0].ts : null;
+    const lastRequest = entries.length > 0 ? entries[entries.length - 1].ts : null;
+
+    // d069 adoption signal: external (non-local) unique IPs
+    const externalIPs = uniqueIPs.filter(e => e.ip !== "127.0.0.1" && e.ip !== "::1" && e.ip !== "::ffff:127.0.0.1");
+
+    const result = {
+      version: "1.0",
+      timestamp: new Date().toISOString(),
+      summary: {
+        total_requests: entries.length,
+        unique_agents: uniqueAgents.length,
+        unique_ips: uniqueIPs.length,
+        external_ips: externalIPs.length,
+        local_requests: localRequests,
+        external_requests: externalRequests,
+        first_request: firstRequest,
+        last_request: lastRequest,
+        adoption_signal: externalIPs.length > 0 ? "external_consumption_detected" : "self_only",
+      },
+      agents: uniqueAgents,
+      filter_usage: filterCounts,
+      frequency: {
+        by_day: dayBuckets,
+        by_hour: hourBuckets,
+      },
+      ip_distribution: {
+        local: localRequests,
+        external: externalRequests,
+        unique_ips: uniqueIPs,
+      },
+      _links: {
+        self: "/status/api-consumers",
+        platform_health_api: "/api/platform-health",
+        docs: "/skill.md",
+      },
+    };
+
+    if (req.query.format === "json" || req.get("Accept")?.includes("application/json")) {
+      return res.json(result);
+    }
+
+    // HTML dashboard
+    const agentRows = uniqueAgents.map(a =>
+      `<tr><td style="color:#cdd6f4">${a.agent.replace(/</g,"&lt;")}</td><td style="color:#a6e3a1;text-align:right">${a.requests}</td></tr>`
+    ).join("");
+    const filterRows = Object.entries(filterCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([f, c]) => `<tr><td style="color:#cdd6f4">${f}</td><td style="color:#a6e3a1;text-align:right">${c}</td></tr>`)
+      .join("");
+    const ipRows = uniqueIPs.map(e => {
+      const isLocal = e.ip === "127.0.0.1" || e.ip === "::1" || e.ip === "::ffff:127.0.0.1";
+      const color = isLocal ? "#585b70" : "#f9e2af";
+      return `<tr><td style="color:${color}">${e.ip}${isLocal ? " (local)" : " (external)"}</td><td style="color:#a6e3a1;text-align:right">${e.requests}</td></tr>`;
+    }).join("");
+    const dayRows = Object.entries(dayBuckets)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([day, count]) => {
+        const bar = "█".repeat(Math.min(count, 50));
+        return `<tr><td style="color:#89b4fa">${day}</td><td style="color:#a6e3a1;text-align:right">${count}</td><td style="color:#585b70">${bar}</td></tr>`;
+      }).join("");
+
+    const adoptionColor = externalIPs.length > 0 ? "#a6e3a1" : "#f38ba8";
+    const adoptionText = externalIPs.length > 0
+      ? `External consumption detected (${externalIPs.length} unique external IP${externalIPs.length > 1 ? "s" : ""})`
+      : "Self-only — no external consumers yet";
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>API Consumers — Platform Health</title>
+<style>body{background:#11111b;color:#cdd6f4;font-family:monospace;padding:20px;max-width:900px;margin:0 auto}
+h1{font-size:18px;color:#89b4fa}h2{font-size:15px;color:#cba6f7;margin-top:24px}
+table{border-collapse:collapse;width:100%;margin:8px 0}td{padding:4px 12px;border-bottom:1px solid #1e1e2e}
+.stat{display:inline-block;background:#1e1e2e;padding:8px 16px;border-radius:8px;margin:4px 8px 4px 0}
+.stat .n{font-size:22px;font-weight:bold;color:#89b4fa}.stat .l{font-size:11px;color:#6c7086}
+.adoption{padding:12px 16px;border-radius:8px;margin:12px 0;font-weight:bold}</style></head><body>
+<h1>Platform Health API — Consumer Dashboard</h1>
+<div class="adoption" style="background:#1e1e2e;color:${adoptionColor}">${adoptionText}</div>
+<div>
+<span class="stat"><span class="n">${entries.length}</span><br><span class="l">Total Requests</span></span>
+<span class="stat"><span class="n">${uniqueAgents.length}</span><br><span class="l">Unique Agents</span></span>
+<span class="stat"><span class="n">${uniqueIPs.length}</span><br><span class="l">Unique IPs</span></span>
+<span class="stat"><span class="n">${externalIPs.length}</span><br><span class="l">External IPs</span></span>
+</div>
+<h2>Agents</h2><table>${agentRows || "<tr><td style='color:#585b70'>No requests yet</td></tr>"}</table>
+<h2>Filter Usage</h2><table>${filterRows || "<tr><td style='color:#585b70'>No requests yet</td></tr>"}</table>
+<h2>Daily Frequency</h2><table>${dayRows || "<tr><td style='color:#585b70'>No requests yet</td></tr>"}</table>
+<h2>IP Distribution</h2><table>${ipRows || "<tr><td style='color:#585b70'>No requests yet</td></tr>"}</table>
+<p style="margin-top:2rem;color:#585b70;font-size:11px">Source: platform-health-api.log (${entries.length} entries). <a href="/status/api-consumers?format=json" style="color:#89b4fa">JSON</a> · <a href="/api/platform-health" style="color:#89b4fa">Platform Health API</a> · <a href="/status/dashboard" style="color:#89b4fa">Dashboard</a></p>
+</body></html>`;
+    res.type("html").send(html);
+  } catch (e) {
+    res.status(500).json({ error: "internal error" });
+  }
 });
 
 // --- Session Replay Viewer ---

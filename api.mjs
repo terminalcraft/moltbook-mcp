@@ -7005,7 +7005,7 @@ function agentManifest(req, res) {
       status_intel_quality: { url: `${base}/status/intel-quality`, method: "GET", auth: false, description: "Intel pipeline metrics — E session intel generation, queue conversion rate, actionable text quality (?window=N, default 20)" },
       status_platform_health: { url: `${base}/status/platform-health`, method: "GET", auth: false, description: "Platform health status — recent alerts, status distribution, last probe times (?format=json for API)" },
       status_api_consumers: { url: `${base}/status/api-consumers`, method: "GET", auth: false, description: "Platform health API consumption dashboard — unique agents, request frequency, filter usage, IP distribution. d069 adoption tracking. (?format=json for API)" },
-      status_api_health: { url: `${base}/status/api-health`, method: "GET", auth: false, description: "Self-monitoring — Moltbook API endpoint uptime, latency percentiles, error breakdown (?window=N, ?format=json for API)" },
+      status_api_health: { url: `${base}/status/api-health`, method: "GET", auth: false, description: "Self-monitoring — Moltbook API endpoint uptime, latency percentiles, error breakdown, threshold violations (?window=N, ?uptime_warn=95, ?latency_alert=3000, ?format=json for API)" },
       status_cost_distribution: { url: `${base}/status/cost-distribution`, method: "GET", auth: false, description: "Interactive cost distribution charts — stacked bar, pie, rolling avg, utilization (?window=N, ?format=json)" },
       status_directives: { url: `${base}/status/directives`, method: "GET", auth: false, description: "Directive lifecycle dashboard — age, ack latency, completion rate (?format=html for web UI)" },
       status_human_review: { url: `${base}/status/human-review`, method: "GET", auth: false, description: "Human review queue — flagged items needing human attention (?format=html for dashboard)" },
@@ -14901,18 +14901,54 @@ app.get("/status/api-health", (req, res) => {
       };
     }
 
-    // Overall verdict
+    // Alerting thresholds (configurable via query params)
+    const thresholds = {
+      uptime_warn_pct: Math.max(0, Math.min(100, parseFloat(req.query.uptime_warn) || 95)),
+      p95_latency_alert_ms: Math.max(0, parseInt(req.query.latency_alert) || 3000),
+    };
+
+    // Check thresholds per endpoint
+    const threshold_violations = [];
+    for (const [name, s] of Object.entries(endpointStats)) {
+      if (s.uptime_pct !== null && s.uptime_pct < thresholds.uptime_warn_pct) {
+        threshold_violations.push({
+          endpoint: name,
+          type: "uptime_below_threshold",
+          severity: s.uptime_pct < 50 ? "critical" : "warn",
+          threshold: thresholds.uptime_warn_pct,
+          actual: s.uptime_pct,
+          message: `Uptime ${s.uptime_pct}% is below ${thresholds.uptime_warn_pct}% threshold`,
+        });
+      }
+      if (s.p95_latency_ms > thresholds.p95_latency_alert_ms) {
+        threshold_violations.push({
+          endpoint: name,
+          type: "p95_latency_exceeded",
+          severity: "alert",
+          threshold: thresholds.p95_latency_alert_ms,
+          actual: s.p95_latency_ms,
+          message: `P95 latency ${s.p95_latency_ms}ms exceeds ${thresholds.p95_latency_alert_ms}ms threshold`,
+        });
+      }
+    }
+
+    // Overall verdict (violations factor in)
     const allOk = Object.values(endpointStats).every(e => e.fail === 0);
     const anyDown = Object.values(endpointStats).some(e => e.uptime_pct !== null && e.uptime_pct < 50);
-    const verdict = anyDown ? "degraded" : allOk ? "healthy" : "partial";
+    const hasCritical = threshold_violations.some(v => v.severity === "critical");
+    const hasAlerts = threshold_violations.some(v => v.severity === "alert");
+    const hasWarns = threshold_violations.some(v => v.severity === "warn");
+    const verdict = anyDown || hasCritical ? "degraded" : hasAlerts ? "alerting" : allOk && !hasWarns ? "healthy" : "partial";
 
     // Last check details
     const lastEntry = recent.length > 0 ? recent[recent.length - 1] : null;
 
     const result = {
-      version: "1.0",
+      version: "1.1",
       timestamp: new Date().toISOString(),
       verdict,
+      thresholds,
+      threshold_violations,
       window: recent.length,
       time_range: recent.length > 0 ? { first: recent[0].ts, last: recent[recent.length - 1].ts } : null,
       endpoints: endpointStats,
@@ -14930,7 +14966,7 @@ app.get("/status/api-health", (req, res) => {
     }
 
     // HTML dashboard
-    const verdictColor = { healthy: "#a6e3a1", degraded: "#f38ba8", partial: "#f9e2af" };
+    const verdictColor = { healthy: "#a6e3a1", degraded: "#f38ba8", partial: "#f9e2af", alerting: "#fab387" };
     const epRows = Object.entries(endpointStats).map(([name, s]) => {
       const upColor = s.uptime_pct >= 99 ? "#a6e3a1" : s.uptime_pct >= 90 ? "#f9e2af" : "#f38ba8";
       const errStr = s.errors ? Object.entries(s.errors).map(([e, c]) => `${e}(${c})`).join(", ") : "-";
@@ -14961,6 +14997,12 @@ th{color:#6c7086;font-weight:normal;font-size:11px}
 <div class="verdict" style="color:${verdictColor[verdict] || "#cdd6f4"}">Verdict: ${verdict.toUpperCase()} (last ${recent.length} checks)</div>
 <h2>Endpoint Stats</h2>
 <table><tr><th>Endpoint</th><th>Uptime</th><th>OK/Total</th><th>Avg</th><th>P50</th><th>P95</th><th>Errors</th></tr>${epRows || "<tr><td colspan=7 style='color:#585b70'>No data</td></tr>"}</table>
+${threshold_violations.length > 0 ? `<h2 style="color:#f38ba8">Threshold Violations (${threshold_violations.length})</h2>
+<table><tr><th>Endpoint</th><th>Type</th><th>Severity</th><th>Threshold</th><th>Actual</th></tr>${threshold_violations.map(v => {
+      const sevColor = v.severity === "critical" ? "#f38ba8" : v.severity === "alert" ? "#fab387" : "#f9e2af";
+      return `<tr><td>${v.endpoint}</td><td>${v.type}</td><td style="color:${sevColor};font-weight:bold">${v.severity.toUpperCase()}</td><td style="text-align:right">${v.type.includes("uptime") ? v.threshold + "%" : v.threshold + "ms"}</td><td style="text-align:right;color:${sevColor}">${v.type.includes("uptime") ? v.actual + "%" : v.actual + "ms"}</td></tr>`;
+    }).join("")}</table>
+<p style="color:#585b70;font-size:11px">Thresholds: uptime warn &lt; ${thresholds.uptime_warn_pct}%, p95 latency alert &gt; ${thresholds.p95_latency_alert_ms}ms. Override: ?uptime_warn=N&amp;latency_alert=N</p>` : `<p style="color:#a6e3a1;margin:12px 0">✓ No threshold violations (uptime ≥ ${thresholds.uptime_warn_pct}%, p95 ≤ ${thresholds.p95_latency_alert_ms}ms)</p>`}
 <h2>Last Check${lastEntry ? ` (${lastEntry.ts})` : ""}</h2>
 <table><tr><th>Endpoint</th><th>Status</th><th>Latency</th></tr>${lastCheckRows}</table>
 <p style="margin-top:2rem;color:#585b70;font-size:11px">Source: health.jsonl (${entries.length} total entries, showing last ${recent.length}). <a href="/status/api-health?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/api-consumers" style="color:#89b4fa">Consumer Dashboard</a> · <a href="/api/platform-health" style="color:#89b4fa">Platform Health API</a></p>

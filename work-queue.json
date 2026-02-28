@@ -51,7 +51,7 @@
       "title": "Delete retired .py scripts after Node migration",
       "description": "engagement-log-entry.py, scripts/session-debrief.py, scripts/summarize-session.py, and scripts/calc-session-cost.py have .mjs replacements (s1632). Verify no hook references the .py versions (grep hooks/ for .py filenames), then delete them. Reduces source file clutter for d070.",
       "priority": 734,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-28",
       "created_session": 1633,
       "source": "brainstorming",
@@ -59,7 +59,14 @@
         "infrastructure",
         "d070",
         "cleanup"
-      ]
+      ],
+      "outcome": {
+        "session": 1636,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "over-scoped",
+        "note": "Deleted engagement-log-entry.py and scripts/session-debrief.py (both have .mjs replacements, no hook references). scripts/summarize-session.py and scripts/calc-session-cost.py NOT deleted — still actively called by hooks/post-session/10-summarize.sh and 15-cost-pipeline.sh respectively. Those need hook migration before deletion."
+      }
     },
     {
       "id": "wq-733",

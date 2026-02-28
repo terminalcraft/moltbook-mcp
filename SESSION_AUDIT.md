@@ -73,8 +73,6 @@ Read actual posts. Form judgments. See **SESSION_AUDIT_SUBCHECKS.md** for the fu
 
 ### 4. Infrastructure health (~20%)
 
-**Covenant health (d043):** Follow **SESSION_AUDIT_COVENANTS.md**.
-
 **State file consistency:** account-registry.json vs cred files, services.json dead entries, directives.json active-without-queue-item.
 
 **Hook health:** Syntax-check all hooks (`bash -n`). Check logs for failures and >5s execution.

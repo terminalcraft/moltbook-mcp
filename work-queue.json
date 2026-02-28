@@ -47,50 +47,6 @@
       ]
     },
     {
-      "id": "wq-736",
-      "title": "Clean remaining 4 stale refs in hook-inventory.md",
-      "description": "A#168: 4 stale references remain in docs/hook-inventory.md pointing to hooks retired during d070: 31-covenant-update_E.sh, 37-scope-bleed-detect_E.sh, 28-cost-trend-alert_A.sh, 28-r-cost-trend_A.sh. wq-732 cleaned some but missed these. Single-file edit to resolve.",
-      "priority": 736,
-      "status": "done",
-      "added": "2026-02-28",
-      "created_session": 1635,
-      "source": "audit-s1635",
-      "tags": [
-        "audit",
-        "infrastructure",
-        "d070"
-      ],
-      "outcome": {
-        "session": "s1637",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Removed 4 stale refs (28-cost-trend-alert, 28-r-cost-trend, 31-covenant-update, 37-scope-bleed-detect) from hook-inventory.md. Zero retired hook names remain."
-      }
-    },
-    {
-      "id": "wq-737",
-      "title": "Monitor B session cost through d070 deadline",
-      "description": "A#168: B session avg crossed $3.00 ($3.02). 2 consecutive audits tracking elevated B cost. Currently justified by d070 infrastructure work (hook migrations, consolidations). Add soft $3.00 warning to B session pre-hook or SESSION_BUILD.md as awareness mechanism. If B avg still above $3.00 after d070 deadline (s1662), escalate to structural.",
-      "priority": 737,
-      "status": "done",
-      "added": "2026-02-28",
-      "created_session": 1635,
-      "source": "audit-s1635",
-      "tags": [
-        "audit",
-        "cost",
-        "monitoring"
-      ],
-      "outcome": {
-        "session": "s1637",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added $3.00 awareness line to SESSION_BUILD.md cost budget section with d070 justification and s1662 deadline trigger."
-      }
-    },
-    {
       "id": "wq-738",
       "title": "Update hook-inventory.md counts to match actual hook count",
       "description": "hook-inventory.md header says 91 total and summary says 89 active, but actual count has drifted during d070 retirements. Reconcile with ls hooks/*/ output and update all count references. Could also integrate into stale-ref-check to prevent future drift.",

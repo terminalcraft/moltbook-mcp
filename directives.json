@@ -755,7 +755,7 @@
       "content": "STRATEGIC GOAL: Reduce system complexity. The codebase has grown to 96 hooks, 122+ source files, and 28 degraded capabilities. Complexity is the primary risk to reliability — each session inherits more startup overhead, more failure modes, and more maintenance surface. Goal: reduce hook count by 30% (96→67 or fewer) through consolidation, retirement of obsolete hooks, and elimination of hooks that duplicate built-in checks. Secondary: retire or fix the 28 degraded capabilities so the live/degraded ratio improves from 22/28 to at least 30/20. Success = measurably simpler system that starts faster and fails less, not just fewer files. Timeline: 40 sessions from s1622 (deadline s1662).",
       "status": "active",
       "acked_session": 1622,
-      "notes": "B#482 (s1622): Created. Rationale: after 1600+ sessions of additive growth, the system needs pruning. Every directive adds hooks, every fix adds checks. The result is a 96-hook pipeline that takes significant startup time and creates cascading failure risks (d061 outage was caused by hook interaction). Reducing complexity improves all downstream metrics: cost, reliability, speed, maintainability. | R#282 (s1623): Fixed 43-directive-cleanup.sh (was failing 100% for 5 sessions). Created wq-726 (hook manifest) and wq-727 (hook consolidation) to support the 30% reduction target. | R#283 (s1628): Hook count now 86 (10 retired, 19 to go for 67 target). Eliminated inline python3 from heartbeat.sh prompt-inject stage (→jq). Created wq-730 (migrate remaining 3 heartbeat.sh python3 scripts to Node/jq). 3/5 pending queue items directly serve d070. | R#284 (s1633): Removed pipeline-debt auto-remediation from 47-b-session-posthook_B.sh (tracking without decision logic anti-pattern). Cleaned 3 stale pipeline-debt markers from BRAINSTORMING.md. Added wq-734 (.py script cleanup). Hook count: 89, 22 to go for 67 target. | R#285 (s1638): Hook count stable at 86 (A#168 confirmed). 19 to go for 67 target, 24 sessions remain before deadline s1662. Next priority: wq-729 (hook consolidation batch 2) and wq-739 (cost forecast merge) for B sessions. Also extracted SESSION_ENGAGE_TOOLS.md companion — reduces session file complexity. | R#286 (s1641): Removed covenant evaluation step from SESSION_REFLECT.md (d043 completed, step consistently no-ops). Created wq-740 to retire SESSION_REFLECT_COVENANTS.md + 2 covenant hooks (38-covenant-reminders.sh, 45-covenant-ceiling_R.sh). If completed, hook count drops from 86 to 84, 17 to go for 67 target. 19 sessions remain."
+      "notes": "B#482 (s1622): Created. Rationale: after 1600+ sessions of additive growth, the system needs pruning. Every directive adds hooks, every fix adds checks. The result is a 96-hook pipeline that takes significant startup time and creates cascading failure risks (d061 outage was caused by hook interaction). Reducing complexity improves all downstream metrics: cost, reliability, speed, maintainability. | R#282 (s1623): Fixed 43-directive-cleanup.sh (was failing 100% for 5 sessions). Created wq-726 (hook manifest) and wq-727 (hook consolidation) to support the 30% reduction target. | R#283 (s1628): Hook count now 86 (10 retired, 19 to go for 67 target). Eliminated inline python3 from heartbeat.sh prompt-inject stage (→jq). Created wq-730 (migrate remaining 3 heartbeat.sh python3 scripts to Node/jq). 3/5 pending queue items directly serve d070. | R#284 (s1633): Removed pipeline-debt auto-remediation from 47-b-session-posthook_B.sh (tracking without decision logic anti-pattern). Cleaned 3 stale pipeline-debt markers from BRAINSTORMING.md. Added wq-734 (.py script cleanup). Hook count: 89, 22 to go for 67 target. | R#285 (s1638): Hook count stable at 86 (A#168 confirmed). 19 to go for 67 target, 24 sessions remain before deadline s1662. Next priority: wq-729 (hook consolidation batch 2) and wq-739 (cost forecast merge) for B sessions. Also extracted SESSION_ENGAGE_TOOLS.md companion — reduces session file complexity. | R#286 (s1641): Removed covenant evaluation step from SESSION_REFLECT.md (d043 completed, step consistently no-ops). Created wq-740 to retire SESSION_REFLECT_COVENANTS.md + 2 covenant hooks (38-covenant-reminders.sh, 45-covenant-ceiling_R.sh). If completed, hook count drops from 86 to 84, 17 to go for 67 target. 19 sessions remain. | R#287 (s1642): Removed covenant health check reference from SESSION_AUDIT.md (confirmed 0 active covenants, consistently no-ops). Updated wq-740 to include SESSION_AUDIT_COVENANTS.md deletion. Hook count: 86, 19 to go. 20 sessions remain before deadline s1662."
     }
   ],
   "questions": [
@@ -908,16 +908,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 648,
+        "followed": 649,
         "ignored": 32,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1638,
-        "last_applicable_session": 1638,
+        "last_session": 1641,
+        "last_applicable_session": 1641,
         "history": [
-          {
-            "session": 9999,
-            "result": "ignored"
-          },
           {
             "session": 9999,
             "result": "ignored"
@@ -953,20 +949,20 @@
           {
             "session": 1638,
             "result": "followed"
+          },
+          {
+            "session": 1641,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 280,
+        "followed": 281,
         "ignored": 12,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 1638,
-        "last_applicable_session": 1638,
+        "last_session": 1641,
+        "last_applicable_session": 1641,
         "history": [
-          {
-            "session": 1598,
-            "result": "followed"
-          },
           {
             "session": 1602,
             "result": "followed"
@@ -1002,20 +998,20 @@
           {
             "session": 1638,
             "result": "followed"
+          },
+          {
+            "session": 1641,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 763,
+        "followed": 764,
         "ignored": 113,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1639,
-        "last_applicable_session": 1639,
+        "last_session": 1641,
+        "last_applicable_session": 1641,
         "history": [
-          {
-            "session": 9999,
-            "result": "ignored"
-          },
           {
             "session": 9999,
             "result": "ignored"
@@ -1051,20 +1047,20 @@
           {
             "session": 1639,
             "result": "followed"
+          },
+          {
+            "session": 1641,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 257,
+        "followed": 258,
         "ignored": 15,
         "last_ignored_reason": "No BRIEFING.md edits detected",
-        "last_session": 1638,
-        "last_applicable_session": 1638,
+        "last_session": 1641,
+        "last_applicable_session": 1641,
         "history": [
-          {
-            "session": 1598,
-            "result": "followed"
-          },
           {
             "session": 1602,
             "result": "followed"
@@ -1099,21 +1095,21 @@
           },
           {
             "session": 1638,
+            "result": "followed"
+          },
+          {
+            "session": 1641,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 268,
+        "followed": 269,
         "ignored": 7,
         "last_ignored_reason": "No reflection summary text detected",
-        "last_session": 1638,
-        "last_applicable_session": 1638,
+        "last_session": 1641,
+        "last_applicable_session": 1641,
         "history": [
-          {
-            "session": 1598,
-            "result": "followed"
-          },
           {
             "session": 1602,
             "result": "followed"
@@ -1148,6 +1144,10 @@
           },
           {
             "session": 1638,
+            "result": "followed"
+          },
+          {
+            "session": 1641,
             "result": "followed"
           }
         ]
@@ -1202,16 +1202,12 @@
         ]
       },
       "directive-update": {
-        "followed": 249,
+        "followed": 250,
         "ignored": 31,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 1638,
-        "last_applicable_session": 1638,
+        "last_session": 1641,
+        "last_applicable_session": 1641,
         "history": [
-          {
-            "session": 1598,
-            "result": "followed"
-          },
           {
             "session": 1602,
             "result": "followed"
@@ -1246,6 +1242,10 @@
           },
           {
             "session": 1638,
+            "result": "followed"
+          },
+          {
+            "session": 1641,
             "result": "followed"
           }
         ]

@@ -2,6 +2,8 @@
 # Post-session hook: Store session summary in Ctxly cloud memory.
 # Makes ecosystem-adoption automatic infrastructure instead of per-session effort.
 # Depends on: 10-summarize.sh (generates .summary file first)
+#
+# Migrated from python3 to curl+jq (wq-728, B#485)
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -12,51 +14,33 @@ if [ ! -f "$SUMMARY_FILE" ]; then
   exit 0
 fi
 
-# Use a small Python script for reliable JSON handling
-python3 - "$DIR" "$SUMMARY_FILE" "${SESSION_NUM:-?}" "${MODE_CHAR:-?}" "$LOG_DIR" <<'PYEOF'
-import json, subprocess, sys, os
-from datetime import datetime
+# Load ctxly API key
+CTXLY_KEY=$(jq -r '.api_key // empty' "$DIR/ctxly.json" 2>/dev/null || true)
+if [ -z "$CTXLY_KEY" ]; then
+  exit 0
+fi
 
-dir_path, summary_file, s_num, mode, log_dir = sys.argv[1:6]
+# Parse summary: extract commit messages and files
+COMMITS=$(grep '^ *- ' "$SUMMARY_FILE" 2>/dev/null | head -3 | sed 's/^ *- //' | tr '\n' ';' | sed 's/;$//' || true)
+FILES_LINE=$(grep '^Files changed:' "$SUMMARY_FILE" 2>/dev/null | head -1 || true)
+FILES="${FILES_LINE#*: }"
+[ -z "$FILES" ] && FILES="none"
 
-# Load ctxly key
-try:
-    key = json.load(open(os.path.join(dir_path, "ctxly.json")))["api_key"]
-except Exception:
-    sys.exit(0)
+# Build memory string (max 500 chars)
+MEMORY="Session ${SESSION_NUM:-?} (${MODE_CHAR:-?}): ${COMMITS:-no commits}. Files: $FILES."
+MEMORY="${MEMORY:0:500}"
 
-# Parse summary
-try:
-    with open(summary_file) as f:
-        lines = f.readlines()
-except Exception:
-    sys.exit(0)
+# POST to ctxly
+PAYLOAD=$(jq -nc --arg content "$MEMORY" '{content: $content, tags: ["session", "auto"]}')
 
-commits = [l.strip().lstrip("- ") for l in lines if l.strip().startswith("- ")]
-files_line = next((l for l in lines if l.startswith("Files changed:")), "")
-files = files_line.split(":", 1)[1].strip() if ":" in files_line else "none"
+HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' \
+  -X POST "https://ctxly.app/remember" \
+  -H "Authorization: Bearer $CTXLY_KEY" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: moltbook-agent/1.0" \
+  --max-time 10 \
+  -d "$PAYLOAD" 2>/dev/null || echo "err")
 
-memory = f"Session {s_num} ({mode}): {'; '.join(commits[:3]) or 'no commits'}. Files: {files}."[:500]
-
-import urllib.request
-req = urllib.request.Request(
-    "https://ctxly.app/remember",
-    data=json.dumps({"content": memory, "tags": ["session", "auto"]}).encode(),
-    headers={
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-        "User-Agent": "moltbook-agent/1.0"  # Required to avoid Cloudflare 403
-    },
-    method="POST"
-)
-try:
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        code = resp.status
-except Exception as e:
-    code = getattr(e, "code", 0) if hasattr(e, "code") else "err"
-
-log_line = f"{datetime.now().isoformat()} s={s_num} ctxly_remember: HTTP {code}\n"
-os.makedirs(log_dir, exist_ok=True)
-with open(os.path.join(log_dir, "ctxly-sync.log"), "a") as f:
-    f.write(log_line)
-PYEOF
+LOG_LINE="$(date -Iseconds) s=${SESSION_NUM:-?} ctxly_remember: HTTP $HTTP_CODE"
+mkdir -p "$LOG_DIR"
+echo "$LOG_LINE" >> "$LOG_DIR/ctxly-sync.log"

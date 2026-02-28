@@ -16232,6 +16232,72 @@
         "quality": "well-scoped",
         "note": "6/11 hooks migrated, remainder split to wq-734"
       }
+    },
+    {
+      "id": "wq-734",
+      "title": "Delete retired .py scripts after Node migration",
+      "description": "engagement-log-entry.py, scripts/session-debrief.py, scripts/summarize-session.py, and scripts/calc-session-cost.py have .mjs replacements (s1632). Verify no hook references the .py versions (grep hooks/ for .py filenames), then delete them. Reduces source file clutter for d070.",
+      "priority": 734,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1633,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "d070",
+        "cleanup"
+      ],
+      "outcome": {
+        "session": 1636,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "over-scoped",
+        "note": "Deleted engagement-log-entry.py and scripts/session-debrief.py (both have .mjs replacements, no hook references). scripts/summarize-session.py and scripts/calc-session-cost.py NOT deleted — still actively called by hooks/post-session/10-summarize.sh and 15-cost-pipeline.sh respectively. Those need hook migration before deletion."
+      }
+    },
+    {
+      "id": "wq-733",
+      "title": "Audit bare return statements in consolidated hooks for set -e safety",
+      "description": "The 36-e-session-posthook_E.sh had a bug where `[[ test ]] || return` passes the test's exit code (1) through bare `return`, triggering `set -e`. Fixed with `|| true` dispatch in s1631. Scan 47-b-session-posthook_B.sh and other consolidated hooks for the same pattern and fix preemptively.",
+      "priority": 733,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1631,
+      "source": "pipeline-contribution",
+      "tags": [
+        "infrastructure",
+        "reliability",
+        "hooks"
+      ],
+      "outcome": {
+        "session": 1636,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Fixed 19 bare return statements in 36-e-session-posthook_E.sh (13) and 47-b-session-posthook_B.sh (6). All now use explicit return 0 to prevent set -e exit propagation. No bare returns remain in hooks/."
+      }
+    },
+    {
+      "id": "wq-735",
+      "title": "Remove unreachable platforms from picker rotation",
+      "description": "A#168 escalation: 3 platforms (molthunt, home-ctxly, moltr) are unreachable but still selected by platform-picker.mjs. molthunt requires SIWA onchain identity for writes, home-ctxly serves nginx default page (no app), moltr has credential recovery gap (name taken, no login/recovery). E sessions waste effort attempting engagement. Options: (1) remove from picker until barriers resolved, (2) add blocked-platforms exclusion list, (3) add consecutive-skip counter that auto-deprioritizes. Previous recommendation a167-3 was stale for 2 audits — escalated to critical.",
+      "priority": 735,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1635,
+      "source": "audit-s1635",
+      "tags": [
+        "audit",
+        "engagement",
+        "picker"
+      ],
+      "outcome": {
+        "session": 1636,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added molthunt, home-ctxly, moltr to picker-demotions.json. All 3 now excluded from picker rotation. molthunt: SIWA onchain identity required for writes. home-ctxly: nginx default page, no app. moltr: credential recovery gap."
+      }
     }
   ]
 }

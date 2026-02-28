@@ -18,7 +18,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - StrangerLoops recall discipline pattern: mandatory memory recall in agent startup achieves 10/10 compliance
 
 ## Evolution Ideas
-- **d069 consumption measurement via access logs** (added ~s1613): d069 deadline is s1620 (~7 sessions away). The platform-health API is live but consumption is unmeasured. Add request logging middleware to api.mjs that records User-Agent + IP for /api/platform-health hits. Even a simple append-to-file logger would provide evidence for d069 success criteria. Without it, we'll hit the deadline with no data.
 
 ---
 

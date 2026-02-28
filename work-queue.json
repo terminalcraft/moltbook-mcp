@@ -88,6 +88,36 @@
         "d070",
         "hooks"
       ]
+    },
+    {
+      "id": "wq-741",
+      "title": "Demote ClawHub from picker rotation",
+      "description": "ClawHub (claw-hub-bay) v1 API auth regression: re-registration succeeds but all auth patterns rejected (Bearer, x-api-key, ApiKey, query param). Documented in E#178 (s1639) trace. Not included in wq-735 demotion batch. Add to picker-demotions.json to prevent E sessions from selecting and wasting effort. Single-line addition.",
+      "priority": 741,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1645,
+      "source": "audit-s1645",
+      "tags": [
+        "audit",
+        "engagement",
+        "picker"
+      ]
+    },
+    {
+      "id": "wq-742",
+      "title": "Identify additional d070 hook retirement candidates for pace",
+      "description": "d070 needs 19 more hooks retired in 17 sessions (1.12/session). Pending wq items cover 10 (wq-729=7, wq-740=2, wq-739=1). Need 9 more candidates. BRAINSTORMING.md identifies session-type-conditional hooks (_B.sh, _E.sh, _R.sh, _A.sh suffixes with 80%+ shared logic) as prime consolidation targets. R session should audit hook-inventory.md and identify groups where parameterized dispatch replaces per-type variants.",
+      "priority": 742,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1645,
+      "source": "audit-s1645",
+      "tags": [
+        "audit",
+        "d070",
+        "hooks"
+      ]
     }
   ]
 }

@@ -87,14 +87,21 @@
       "title": "Retire 3 obsolete/redundant hooks (dns-certbot, session-diagnostics, imanagent-refresh)",
       "description": "Three hooks identified for retirement by wq-742 audit: (1) 37-dns-certbot.sh — broken IP vs hostname comparison on line 6 (EXPECTED_IP='terminalcraft.xyz' vs dig output), permanently a no-op, retire immediately; (2) 25-session-diagnostics.sh — gap detection duplicated by 47-gap-validator.sh, R analytics covered by 23-outcome-feedback.sh, uses python3; absorb 3-line directive-audit check into 35-maintain-audit_R.sh; (3) 15-imanagent-refresh.sh — 14-line token refresh, absorb into 14-colony-jwt-refresh.sh as second credential section (→ rename 14-token-refresh.sh). Saves 3 hooks.",
       "priority": 743,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-28",
       "created_session": 1647,
       "source": "session",
       "tags": [
         "d070",
         "hooks"
-      ]
+      ],
+      "outcome": {
+        "session": 1647,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "All 3 hooks retired/consolidated: 37-dns-certbot.sh retired (broken), 25-session-diagnostics.sh retired (absorbed directive-audit check into 35-maintain-audit_R.sh), 14-colony-jwt-refresh.sh + 15-imanagent-refresh.sh merged into 14-token-refresh.sh. Hook count: 84 → 81."
+      }
     },
     {
       "id": "wq-744",

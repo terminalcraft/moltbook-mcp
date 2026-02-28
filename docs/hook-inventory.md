@@ -1,6 +1,6 @@
 # Hook Inventory for d070 Complexity Reduction
 
-Created: B#482 (s1622). Original total: 91 hooks. Current: 84 active (50 pre-session, 34 post-session), 6 retired, 1 consolidated.
+Created: B#482 (s1622). Original total: 91 hooks. Current: 81 active (47 pre-session, 34 post-session), 9 retired, 1 consolidated.
 
 ## Consolidation Candidates (merge multiple hooks into one)
 
@@ -106,10 +106,13 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 84 active (50 pre-ses
 - `pre/50-fork-cleanup.sh` — No forks directory exists. Feature unused.
 - `post/14-memoryvault-backup.sh` — Uses python3. Backup script likely broken.
 
-### NEW RETIREMENT CANDIDATES (wq-742 audit, s1647):
-- `pre/37-dns-certbot.sh` — **Broken**: line 6 `EXPECTED_IP="terminalcraft.xyz"` compared against IP from `dig +short`. IP vs hostname comparison always fails. Permanent no-op. Retire immediately. (wq-743)
-- `pre/25-session-diagnostics.sh` — **Redundant**: gap detection duplicated by `47-gap-validator.sh`, R analytics covered by `23-outcome-feedback.sh`, uses python3. Absorb 3-line directive-audit check into `35-maintain-audit_R.sh`. (wq-743)
-- `post/24-engagement-audit.sh` — **Absorbable**: 23-line E-only hook that checks for 0 `log_engagement` calls. Fits as phase check inside existing `36-e-session-posthook_E.sh` mega-hook. (wq-745)
+### RETIRED (wq-743, s1647):
+- `pre/37-dns-certbot.sh` — **Broken**: IP vs hostname comparison always fails. RETIRED s1647.
+- `pre/25-session-diagnostics.sh` — **Redundant**: duplicated by gap-validator + outcome-feedback. Directive-audit check absorbed into `35-maintain-audit_R.sh`. RETIRED s1647.
+- `pre/14-colony-jwt-refresh.sh` + `pre/15-imanagent-refresh.sh` — **Consolidated** into `pre/14-token-refresh.sh`. RETIRED s1647.
+
+### PENDING RETIREMENT (wq-745):
+- `post/24-engagement-audit.sh` — **Absorbable**: 23-line E-only hook that checks for 0 `log_engagement` calls. Fits as phase check inside existing `36-e-session-posthook_E.sh` mega-hook.
 
 ### KEPT (verified still needed):
 - `pre/14-colony-jwt-refresh.sh` — Colony creds exist, keep until Colony status clarified.
@@ -124,15 +127,15 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 84 active (50 pre-ses
 | Retired (Phase 1, s1622) | 4 hooks | 4 saved |
 | Retired (covenant, s1646) | 2 hooks | 2 saved |
 | Consolidated (cost-trend, s1627) | 2 hooks → 1 | 1 saved |
-| **Completed so far** | | **7 hooks** |
+| Completed: wq-743 (retire dns-certbot, diagnostics, merge token-refresh) | 4 hooks → 1 | 3 saved |
+| **Completed so far** | | **10 hooks** |
 | Pending: wq-729 (B/E/R dispatchers) | ~10 hooks → ~3 | ~7 saved |
 | Pending: wq-739 (cost forecast) | 2 hooks → 1 | 1 saved |
-| Pending: wq-743 (retire dns-certbot, diagnostics, merge token-refresh) | 3 hooks | 3 saved |
 | Pending: wq-744 (stigmergy→trace, snapshots→1, logs→1) | 6 hooks → 3 | 3 saved |
 | Pending: wq-745 (periodic→1, engagement-audit→E posthook) | 4 hooks → 1 | 3 saved |
 | **Total potential reduction** | | **24 hooks** |
 
-Current: 84 active hooks (50 pre + 34 post). Target: 67 or fewer. Progress: 7 hooks reduced. Pipeline covers 17 more → potential 67 (exactly on target).
+Current: 81 active hooks (47 pre + 34 post). Target: 67 or fewer. Progress: 10 hooks reduced (7 prior + 3 from wq-743). Pipeline covers 14 more → potential 67 (exactly on target).
 
 Note: Groups 10/12/13 overlap with groups 8/7 in some hooks. When executing, pick one grouping per hook. The net save is 17 from pending items, reaching exactly 67.
 

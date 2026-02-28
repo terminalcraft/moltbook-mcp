@@ -16407,6 +16407,49 @@
         "quality": "well-scoped",
         "note": "Added claw-hub-bay to picker-demotions.json. Pre-commit allowlist updated for auth method names in reason text."
       }
+    },
+    {
+      "id": "wq-742",
+      "title": "Identify additional d070 hook retirement candidates for pace",
+      "description": "d070 needs 19 more hooks retired in 17 sessions (1.12/session). Pending wq items cover 10 (wq-729=7, wq-740=2, wq-739=1). Need 9 more candidates. BRAINSTORMING.md identifies session-type-conditional hooks (_B.sh, _E.sh, _R.sh, _A.sh suffixes with 80%+ shared logic) as prime consolidation targets. R session should audit hook-inventory.md and identify groups where parameterized dispatch replaces per-type variants.",
+      "priority": 742,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1645,
+      "source": "audit-s1645",
+      "tags": [
+        "audit",
+        "d070",
+        "hooks"
+      ],
+      "outcome": {
+        "session": 1647,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Audited all 84 hooks. Identified 9 net-new retirement/consolidation candidates across 8 groups: retire dns-certbot (broken) and session-diagnostics (duplicate), merge token refreshes, periodic checks, stigmergy→trace, snapshots, log housekeeping, and engagement-audit→E posthook. Created wq-743, wq-744, wq-745 covering all candidates. Total d070 pipeline now covers 19 saves (wq-729=7, wq-739=1, wq-743=3, wq-744=3, wq-745=3), meeting the 19/17 pace requirement."
+      }
+    },
+    {
+      "id": "wq-743",
+      "title": "Retire 3 obsolete/redundant hooks (dns-certbot, session-diagnostics, imanagent-refresh)",
+      "description": "Three hooks identified for retirement by wq-742 audit: (1) 37-dns-certbot.sh — broken IP vs hostname comparison on line 6 (EXPECTED_IP='terminalcraft.xyz' vs dig output), permanently a no-op, retire immediately; (2) 25-session-diagnostics.sh — gap detection duplicated by 47-gap-validator.sh, R analytics covered by 23-outcome-feedback.sh, uses python3; absorb 3-line directive-audit check into 35-maintain-audit_R.sh; (3) 15-imanagent-refresh.sh — 14-line token refresh, absorb into 14-colony-jwt-refresh.sh as second credential section (→ rename 14-token-refresh.sh). Saves 3 hooks.",
+      "priority": 743,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1647,
+      "source": "session",
+      "tags": [
+        "d070",
+        "hooks"
+      ],
+      "outcome": {
+        "session": 1647,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "All 3 hooks retired/consolidated: 37-dns-certbot.sh retired (broken), 25-session-diagnostics.sh retired (absorbed directive-audit check into 35-maintain-audit_R.sh), 14-colony-jwt-refresh.sh + 15-imanagent-refresh.sh merged into 14-token-refresh.sh. Hook count: 84 → 81."
+      }
     }
   ]
 }

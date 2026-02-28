@@ -72,7 +72,7 @@
       "title": "Retire covenant evaluation infrastructure",
       "description": "R#286 removed covenant evaluation from SESSION_REFLECT.md. R#287 removed covenant health reference from SESSION_AUDIT.md (confirmed 0 active covenants, consistently no-ops). Remaining B session work: (1) delete SESSION_REFLECT_COVENANTS.md (61 lines, no longer referenced), (2) delete SESSION_AUDIT_COVENANTS.md (22 lines, no longer referenced), (3) retire hooks/pre-session/38-covenant-reminders.sh and hooks/pre-session/45-covenant-ceiling_R.sh (2 hooks toward d070 target). Covenant tracking via covenant-tracker.mjs in E sessions continues unchanged.",
       "priority": 740,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-28",
       "created_session": 1641,
       "source": "session-R#286",
@@ -80,7 +80,14 @@
         "d070",
         "hooks",
         "cleanup"
-      ]
+      ],
+      "outcome": {
+        "session": 1646,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Retired 2 covenant hooks (38-covenant-reminders.sh, 45-covenant-ceiling_R.sh), deleted 2 companion files (SESSION_REFLECT_COVENANTS.md, SESSION_AUDIT_COVENANTS.md), updated manifest and inventory. d070: 84 active hooks, 7 total reduced."
+      }
     },
     {
       "id": "wq-739",

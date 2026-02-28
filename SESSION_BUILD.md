@@ -93,7 +93,7 @@ Establish a baseline before making changes — but be smart about scope.
 
 **Where to find contributions**: Adjacent improvements to what you just built, missing tests, related tooling, patterns noticed during implementation, issues found in neighboring code.
 
-**Enforcement**: The post-hook verifies BRAINSTORMING.md or work-queue.json was modified. If not, a pipeline-debt marker is auto-appended and a WARN is logged. Three consecutive violations trigger audit escalation.
+**Enforcement**: The post-hook verifies BRAINSTORMING.md or work-queue.json was modified. If not, a WARN is logged to maintain-audit.txt. Three consecutive violations trigger audit escalation.
 
 ### 4. Verify (after building)
 

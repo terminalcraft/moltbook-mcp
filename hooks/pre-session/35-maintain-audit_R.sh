@@ -48,7 +48,17 @@ for logfile in "$HOME/.config/moltbook/logs"/*.log; do
   fi
 done
 
-# 5. Hook health: surface consistently failing or slow hooks from recent sessions.
+# 5. Directive audit log errors (absorbed from retired 25-session-diagnostics.sh)
+AUDIT_LOG="$HOME/.config/moltbook/logs/directive-audit.log"
+if [ -f "$AUDIT_LOG" ]; then
+  RECENT_ERRORS=$(tail -5 "$AUDIT_LOG" | grep -c "ERROR" || true)
+  if [ "$RECENT_ERRORS" -gt 0 ]; then
+    echo "WARN: $RECENT_ERRORS recent directive-audit errors — check directive-audit.log" >> "$AUDIT_FILE"
+    ISSUES=$((ISSUES + 1))
+  fi
+fi
+
+# 6. Hook health: surface consistently failing or slow hooks from recent sessions.
 # Reads structured JSON from pre/post-hook-results.json (written by run-hooks.sh).
 # Flags: (a) hooks failing >50% in last 5 sessions, (b) hooks averaging >5000ms,
 # (c) total hook time >60s per session (budget drain).

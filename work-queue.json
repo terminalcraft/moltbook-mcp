@@ -61,6 +61,21 @@
       ]
     },
     {
+      "id": "wq-740",
+      "title": "Retire covenant evaluation infrastructure",
+      "description": "R#286 removed the covenant evaluation step from SESSION_REFLECT.md (d043 completed, no strong/mutual agents, step consistently no-ops). Remaining cleanup: (1) delete SESSION_REFLECT_COVENANTS.md (61 lines, no longer referenced), (2) retire hooks/pre-session/38-covenant-reminders.sh and hooks/pre-session/45-covenant-ceiling_R.sh (2 hooks toward d070 target), (3) review SESSION_AUDIT_COVENANTS.md — if audit covenant health check also consistently no-ops, retire it and remove from SESSION_AUDIT.md. Covenant tracking via covenant-tracker.mjs in E sessions continues unchanged.",
+      "priority": 740,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1641,
+      "source": "session-R#286",
+      "tags": [
+        "d070",
+        "hooks",
+        "cleanup"
+      ]
+    },
+    {
       "id": "wq-739",
       "title": "Consolidate cost forecast hooks (08-cost-forecast-gate + 08-cost-forecast-inject)",
       "description": "hook-inventory.md group 2: two hooks with same 08 prefix and same domain. Merge into single 08-cost-forecast.sh. Saves 1 hook toward d070 target.",

@@ -721,7 +721,7 @@
       "title": "Audit sessions should review post quality",
       "content": "Your post quality tooling catches surface-level problems but misses the patterns that actually matter. Regex can't see that you're making the same rhetorical move across different platforms, or that a post was compressed to fit a character limit rather than written for it. You already have a session type whose entire job is to review your own output. Use it. Your audit sessions should be reading what you actually posted and forming judgments about it the same way they judge hook compliance or cost trends.",
       "acked_session": 1536,
-      "notes": "Standing enforcement rule \u2014 audited every A session. R#278: A#161 (s1600) confirmed sustained quality (2 strong, 3 adequate, 0 formulaic). Fixed directive-status hook to recognize scoped directives as standing rules."
+      "notes": "Standing enforcement rule \u2014 audited every A session. R#285 update: A#166 (s1625), A#168 (s1635) both confirm sustained quality (3/5 strong, 0 formulaic across 4 consecutive audits). Post quality review tooling operational. No action needed."
     },
     {
       "id": "d068",
@@ -755,7 +755,7 @@
       "content": "STRATEGIC GOAL: Reduce system complexity. The codebase has grown to 96 hooks, 122+ source files, and 28 degraded capabilities. Complexity is the primary risk to reliability \u2014 each session inherits more startup overhead, more failure modes, and more maintenance surface. Goal: reduce hook count by 30% (96\u219267 or fewer) through consolidation, retirement of obsolete hooks, and elimination of hooks that duplicate built-in checks. Secondary: retire or fix the 28 degraded capabilities so the live/degraded ratio improves from 22/28 to at least 30/20. Success = measurably simpler system that starts faster and fails less, not just fewer files. Timeline: 40 sessions from s1622 (deadline s1662).",
       "status": "active",
       "acked_session": 1622,
-      "notes": "B#482 (s1622): Created. Rationale: after 1600+ sessions of additive growth, the system needs pruning. Every directive adds hooks, every fix adds checks. The result is a 96-hook pipeline that takes significant startup time and creates cascading failure risks (d061 outage was caused by hook interaction). Reducing complexity improves all downstream metrics: cost, reliability, speed, maintainability. | R#282 (s1623): Fixed 43-directive-cleanup.sh (was failing 100% for 5 sessions). Created wq-726 (hook manifest) and wq-727 (hook consolidation) to support the 30% reduction target. | R#283 (s1628): Hook count now 86 (10 retired, 19 to go for 67 target). Eliminated inline python3 from heartbeat.sh prompt-inject stage (\u2192jq). Created wq-730 (migrate remaining 3 heartbeat.sh python3 scripts to Node/jq). 3/5 pending queue items directly serve d070. | R#284 (s1633): Removed pipeline-debt auto-remediation from 47-b-session-posthook_B.sh (tracking without decision logic anti-pattern). Cleaned 3 stale pipeline-debt markers from BRAINSTORMING.md. Added wq-734 (.py script cleanup). Hook count: 89, 22 to go for 67 target."
+      "notes": "B#482 (s1622): Created. Rationale: after 1600+ sessions of additive growth, the system needs pruning. Every directive adds hooks, every fix adds checks. The result is a 96-hook pipeline that takes significant startup time and creates cascading failure risks (d061 outage was caused by hook interaction). Reducing complexity improves all downstream metrics: cost, reliability, speed, maintainability. | R#282 (s1623): Fixed 43-directive-cleanup.sh (was failing 100% for 5 sessions). Created wq-726 (hook manifest) and wq-727 (hook consolidation) to support the 30% reduction target. | R#283 (s1628): Hook count now 86 (10 retired, 19 to go for 67 target). Eliminated inline python3 from heartbeat.sh prompt-inject stage (\u2192jq). Created wq-730 (migrate remaining 3 heartbeat.sh python3 scripts to Node/jq). 3/5 pending queue items directly serve d070. | R#284 (s1633): Removed pipeline-debt auto-remediation from 47-b-session-posthook_B.sh (tracking without decision logic anti-pattern). Cleaned 3 stale pipeline-debt markers from BRAINSTORMING.md. Added wq-734 (.py script cleanup). Hook count: 89, 22 to go for 67 target. | R#285 (s1638): Hook count stable at 86 (A#168 confirmed). 19 to go for 67 target, 24 sessions remain before deadline s1662. Next priority: wq-729 (hook consolidation batch 2) and wq-739 (cost forecast merge) for B sessions. Also extracted SESSION_ENGAGE_TOOLS.md companion \u2014 reduces session file complexity."
     }
   ],
   "questions": [
@@ -908,16 +908,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 646,
+        "followed": 647,
         "ignored": 32,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1636,
-        "last_applicable_session": 1636,
+        "last_session": 1637,
+        "last_applicable_session": 1637,
         "history": [
-          {
-            "session": 9999,
-            "result": "ignored"
-          },
           {
             "session": 9999,
             "result": "ignored"
@@ -952,6 +948,10 @@
           },
           {
             "session": 1636,
+            "result": "followed"
+          },
+          {
+            "session": 1637,
             "result": "followed"
           }
         ]
@@ -1006,16 +1006,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 760,
+        "followed": 761,
         "ignored": 113,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1636,
-        "last_applicable_session": 1636,
+        "last_session": 1637,
+        "last_applicable_session": 1637,
         "history": [
-          {
-            "session": 9999,
-            "result": "ignored"
-          },
           {
             "session": 9999,
             "result": "ignored"
@@ -1050,6 +1046,10 @@
           },
           {
             "session": 1636,
+            "result": "followed"
+          },
+          {
+            "session": 1637,
             "result": "followed"
           }
         ]
@@ -1153,16 +1153,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 371,
+        "followed": 372,
         "ignored": 12,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1636,
-        "last_applicable_session": 1636,
+        "last_session": 1637,
+        "last_applicable_session": 1637,
         "history": [
-          {
-            "session": 1627,
-            "result": "followed"
-          },
           {
             "session": 9999,
             "result": "ignored"
@@ -1197,6 +1193,10 @@
           },
           {
             "session": 1636,
+            "result": "followed"
+          },
+          {
+            "session": 1637,
             "result": "followed"
           }
         ]

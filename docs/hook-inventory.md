@@ -5,8 +5,7 @@ Created: B#482 (s1622). Total: 91 hooks (55 pre-session, 36 post-session).
 ## Consolidation Candidates (merge multiple hooks into one)
 
 ### 1. Cost trend monitors → single hook ✅ DONE
-- ~~`pre/28-cost-trend-alert_A.sh`~~ + ~~`pre/28-r-cost-trend_A.sh`~~ → `pre/28-cost-trend-monitor_A.sh`
-- Consolidated in B#483 (s1627). Both backends called from single hook.
+- Consolidated into `pre/28-cost-trend-monitor_A.sh` (B#483, s1627).
 - **Saved: 1 hook**
 
 ### 2. Cost forecast hooks → single hook
@@ -37,17 +36,15 @@ Created: B#482 (s1622). Total: 91 hooks (55 pre-session, 36 post-session).
 - `pre/36-topic-clusters_E.sh`
 - `pre/37-conversation-balance_E.sh`
 - `pre/38-spending-policy_E.sh`
-- ~~`post/31-covenant-update_E.sh`~~ → merged into `post/36-e-session-posthook_E.sh` (B#483, wq-727)
-- `post/36-e-session-posthook_E.sh`
+- `post/36-e-session-posthook_E.sh` (consolidated post-session E orchestrator)
 - `post/36-picker-compliance_E.sh`
-- ~~`post/37-scope-bleed-detect_E.sh`~~ → merged into `post/36-e-session-posthook_E.sh` (B#483, wq-712)
 - Post-session: 2 of 4 absorbed. Pre-session: 5 still separate, pending consolidation.
 - **Saves so far: 2 hooks** (target: 7)
 
 ### 6. Covenant hooks → single hook
 - `pre/38-covenant-reminders.sh`
 - `pre/45-covenant-ceiling_R.sh`
-- ~~`post/31-covenant-update_E.sh`~~ (merged into `post/36-e-session-posthook_E.sh`, see group 5)
+- (covenant post-hook already merged into `post/36-e-session-posthook_E.sh`, see group 5)
 - Two remaining covenant hooks. Merge into `38-covenant-mgmt.sh`.
 - **Saves: 1 hook** (net of engagement overlap, 31- already merged)
 

@@ -1,29 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-728",
-      "title": "Batch python3→jq migration for complex post-session hooks",
-      "description": "wq-718 migrated 5 simple_json hooks. 11 complex post-session hooks remain: 10-summarize, 13-ctxly-summary, 15-cost-pipeline, 17-engagement-log, 19-session-debrief, 25-directive-audit, 26-engage-blockers, 26-session-trace, 32-compress-logs, 33-queue-archive, 36-e-session-posthook_E. These need individual analysis — some may need partial node rewrites rather than pure jq replacement.",
-      "priority": 728,
-      "status": "done",
-      "added": "2026-02-27",
-      "created_session": 1626,
-      "source": "pipeline-contribution",
-      "tags": [
-        "infrastructure",
-        "hooks",
-        "d070"
-      ],
-      "notes": "s1632: migrated 6 of 11 hooks — 33-queue-archive (jq), 13-ctxly-summary (curl+jq), 26-session-trace (jq), 32-compress-logs (node), 17-engagement-log (node), 19-session-debrief (node). Remaining 5 complex hooks deferred to wq-734.",
-      "outcome": {
-        "session": 1632,
-        "result": "completed",
-        "effort": "heavy",
-        "quality": "well-scoped",
-        "note": "6/11 hooks migrated, remainder split to wq-734"
-      }
-    },
-    {
       "id": "wq-729",
       "title": "Hook consolidation batch 2: B pre-session, E pre-session, R audit dispatchers",
       "description": "Continue wq-727. Remaining groups: (1) B pre-session dispatcher merging 45-truncation-detect, 46-queue-title-lint, 46-stuck-items, 49-pipeline-nudge into single hook; (2) E pre-session dispatcher merging 35-engagement-liveness, 36-engagement-seed, 36-topic-clusters; (3) R pre-session merger of 35-maintain-audit and 35-security-posture. Each reduces 2-4 hooks → 1. Expected total reduction: 86 → ~79.",
@@ -70,6 +47,21 @@
       ]
     },
     {
+      "id": "wq-734",
+      "title": "Delete retired .py scripts after Node migration",
+      "description": "engagement-log-entry.py, scripts/session-debrief.py, scripts/summarize-session.py, and scripts/calc-session-cost.py have .mjs replacements (s1632). Verify no hook references the .py versions (grep hooks/ for .py filenames), then delete them. Reduces source file clutter for d070.",
+      "priority": 734,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1633,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure",
+        "d070",
+        "cleanup"
+      ]
+    },
+    {
       "id": "wq-733",
       "title": "Audit bare return statements in consolidated hooks for set -e safety",
       "description": "The 36-e-session-posthook_E.sh had a bug where `[[ test ]] || return` passes the test's exit code (1) through bare `return`, triggering `set -e`. Fixed with `|| true` dispatch in s1631. Scan 47-b-session-posthook_B.sh and other consolidated hooks for the same pattern and fix preemptively.",
@@ -83,18 +75,6 @@
         "reliability",
         "hooks"
       ]
-    },
-    {
-      "id": "wq-734",
-      "title": "Migrate remaining 5 complex post-session hooks from python3 — 10-summarize (needs summarize-session.py→node), 15-cost-pipeline (statistics/anomaly→node), 25-directive-audit (JSONL parsing+compliance→node), 26-engage-blockers (JSONL parsing+pattern match→node), 36-e-session-posthook_E (consolidated 970-line hook, largest effort)",
-      "description": "d070,python3-migration",
-      "priority": 734,
-      "status": "pending",
-      "added": "2026-02-28",
-      "created_session": 0,
-      "source": "session",
-      "tags": [],
-      "commits": []
     }
   ]
 }

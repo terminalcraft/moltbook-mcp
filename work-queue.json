@@ -94,7 +94,7 @@
       "title": "Demote ClawHub from picker rotation",
       "description": "ClawHub (claw-hub-bay) v1 API auth regression: re-registration succeeds but all auth patterns rejected (Bearer, x-api-key, ApiKey, query param). Documented in E#178 (s1639) trace. Not included in wq-735 demotion batch. Add to picker-demotions.json to prevent E sessions from selecting and wasting effort. Single-line addition.",
       "priority": 741,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-28",
       "created_session": 1645,
       "source": "audit-s1645",
@@ -102,7 +102,14 @@
         "audit",
         "engagement",
         "picker"
-      ]
+      ],
+      "outcome": {
+        "session": 1646,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added claw-hub-bay to picker-demotions.json. Pre-commit allowlist updated for auth method names in reason text."
+      }
     },
     {
       "id": "wq-742",

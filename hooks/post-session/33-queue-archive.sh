@@ -3,6 +3,8 @@
 # Moves done/completed/retired items from work-queue.json to work-queue-archive.json
 # No delay — finished items have zero value in the active queue file.
 # This saves ~300-500 lines of token waste per session that reads the queue.
+#
+# Migrated from python3 to jq (wq-728, B#485)
 
 QUEUE_FILE="$HOME/moltbook-mcp/work-queue.json"
 ARCHIVE_FILE="$HOME/moltbook-mcp/work-queue-archive.json"
@@ -12,43 +14,27 @@ ARCHIVE_FILE="$HOME/moltbook-mcp/work-queue-archive.json"
 # Initialize archive if missing
 [ -f "$ARCHIVE_FILE" ] || echo '{"archived":[]}' > "$ARCHIVE_FILE"
 
-python3 - "$QUEUE_FILE" "$ARCHIVE_FILE" <<'PYEOF'
-import json, sys
+# Count archivable items first (avoid unnecessary writes)
+ARCHIVABLE=$(jq '[(.queue // [])[], (.completed // [])[]] | map(select(.status == "done" or .status == "completed" or .status == "retired")) | length' "$QUEUE_FILE" 2>/dev/null || echo 0)
 
-queue_file, archive_file = sys.argv[1], sys.argv[2]
+if [ "$ARCHIVABLE" -eq 0 ]; then
+  echo "queue-archive: moved 0 completed/retired items"
+  exit 0
+fi
 
-with open(queue_file) as f:
-    queue = json.load(f)
+# Extract items to archive
+TO_ARCHIVE=$(jq '[(.queue // [])[], (.completed // [])[]] | map(select(.status == "done" or .status == "completed" or .status == "retired"))' "$QUEUE_FILE")
 
-with open(archive_file) as f:
-    archive = json.load(f)
+# Update archive file: append new items
+jq --argjson new "$TO_ARCHIVE" '.archived += $new' "$ARCHIVE_FILE" > "${ARCHIVE_FILE}.tmp" && mv "${ARCHIVE_FILE}.tmp" "$ARCHIVE_FILE"
 
-moved = 0
+# Update queue file: remove archived items, clean empty completed array
+jq '
+  .queue = [(.queue // [])[] | select(.status != "done" and .status != "completed" and .status != "retired")]
+  | if (.completed // []) | length > 0 then
+      .completed = [(.completed // [])[] | select(.status != "done" and .status != "completed" and .status != "retired")]
+    else . end
+  | if (.completed // []) | length == 0 then del(.completed) else . end
+' "$QUEUE_FILE" > "${QUEUE_FILE}.tmp" && mv "${QUEUE_FILE}.tmp" "$QUEUE_FILE"
 
-# Archive completed items from both 'queue' and 'completed' arrays
-for key in ['queue', 'completed']:
-    items = queue.get(key, [])
-    keep, to_archive = [], []
-    for item in items:
-        if item.get('status') in ('done', 'completed', 'retired'):
-            to_archive.append(item)
-        else:
-            keep.append(item)
-    queue[key] = keep
-    archive['archived'].extend(to_archive)
-    moved += len(to_archive)
-
-# Remove empty 'completed' array entirely — no reason to keep it
-if 'completed' in queue and not queue['completed']:
-    del queue['completed']
-
-if moved > 0:
-    with open(queue_file, 'w') as f:
-        json.dump(queue, f, indent=2)
-        f.write('\n')
-    with open(archive_file, 'w') as f:
-        json.dump(archive, f, indent=2)
-        f.write('\n')
-
-print(f"queue-archive: moved {moved} completed/retired items")
-PYEOF
+echo "queue-archive: moved $ARCHIVABLE completed/retired items"

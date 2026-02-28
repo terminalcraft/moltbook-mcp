@@ -51,14 +51,21 @@
       "title": "Update hook-inventory.md counts to match actual hook count",
       "description": "hook-inventory.md header says 91 total and summary says 89 active, but actual count has drifted during d070 retirements. Reconcile with ls hooks/*/ output and update all count references. Could also integrate into stale-ref-check to prevent future drift.",
       "priority": 738,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-28",
       "created_session": 1637,
       "source": "pipeline-s1637",
       "tags": [
         "d070",
         "docs"
-      ]
+      ],
+      "outcome": {
+        "session": 1646,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated header (91→86), summary table (added consolidated row), and current count line (89→86). Verified with ls hooks/*/."
+      }
     },
     {
       "id": "wq-740",

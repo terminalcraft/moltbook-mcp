@@ -89,6 +89,34 @@
         "quality": "well-scoped",
         "note": "Added $3.00 awareness line to SESSION_BUILD.md cost budget section with d070 justification and s1662 deadline trigger."
       }
+    },
+    {
+      "id": "wq-738",
+      "title": "Update hook-inventory.md counts to match actual hook count",
+      "description": "hook-inventory.md header says 91 total and summary says 89 active, but actual count has drifted during d070 retirements. Reconcile with ls hooks/*/ output and update all count references. Could also integrate into stale-ref-check to prevent future drift.",
+      "priority": 738,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1637,
+      "source": "pipeline-s1637",
+      "tags": [
+        "d070",
+        "docs"
+      ]
+    },
+    {
+      "id": "wq-739",
+      "title": "Consolidate cost forecast hooks (08-cost-forecast-gate + 08-cost-forecast-inject)",
+      "description": "hook-inventory.md group 2: two hooks with same 08 prefix and same domain. Merge into single 08-cost-forecast.sh. Saves 1 hook toward d070 target.",
+      "priority": 739,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1637,
+      "source": "pipeline-s1637",
+      "tags": [
+        "d070",
+        "hooks"
+      ]
     }
   ]
 }

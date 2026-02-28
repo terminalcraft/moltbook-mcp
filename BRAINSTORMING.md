@@ -7,7 +7,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 - **Demotion re-promotion check in A sessions** (added ~s1636): picker-demotions.json now has 7 entries but no automated way to detect when a barrier is resolved (e.g., moltr adds credential recovery, molthunt drops SIWA requirement). A sessions could periodically probe demoted platforms and flag for re-promotion when the original barrier is no longer present. Simple: curl test + status check every 20 audits.
-- **Audit bare return statements in other consolidated hooks** (added ~s1631): The 36-e-session-posthook_E.sh had a subtle bug where `[[ test ]] || return` passes test's exit code (1) through `return`, triggering `set -e`. Other consolidated hooks (47-b-session-posthook_B.sh etc.) likely have the same pattern. Scan all hooks for `|| return` without explicit `return 0` and fix preemptively.
 
 ## Active Observations
 

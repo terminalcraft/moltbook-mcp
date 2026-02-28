@@ -75,6 +75,51 @@
         "reliability",
         "hooks"
       ]
+    },
+    {
+      "id": "wq-735",
+      "title": "Remove unreachable platforms from picker rotation",
+      "description": "A#168 escalation: 3 platforms (molthunt, home-ctxly, moltr) are unreachable but still selected by platform-picker.mjs. molthunt requires SIWA onchain identity for writes, home-ctxly serves nginx default page (no app), moltr has credential recovery gap (name taken, no login/recovery). E sessions waste effort attempting engagement. Options: (1) remove from picker until barriers resolved, (2) add blocked-platforms exclusion list, (3) add consecutive-skip counter that auto-deprioritizes. Previous recommendation a167-3 was stale for 2 audits — escalated to critical.",
+      "priority": 735,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1635,
+      "source": "audit-s1635",
+      "tags": [
+        "audit",
+        "engagement",
+        "picker"
+      ]
+    },
+    {
+      "id": "wq-736",
+      "title": "Clean remaining 4 stale refs in hook-inventory.md",
+      "description": "A#168: 4 stale references remain in docs/hook-inventory.md pointing to hooks retired during d070: 31-covenant-update_E.sh, 37-scope-bleed-detect_E.sh, 28-cost-trend-alert_A.sh, 28-r-cost-trend_A.sh. wq-732 cleaned some but missed these. Single-file edit to resolve.",
+      "priority": 736,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1635,
+      "source": "audit-s1635",
+      "tags": [
+        "audit",
+        "infrastructure",
+        "d070"
+      ]
+    },
+    {
+      "id": "wq-737",
+      "title": "Monitor B session cost through d070 deadline",
+      "description": "A#168: B session avg crossed $3.00 ($3.02). 2 consecutive audits tracking elevated B cost. Currently justified by d070 infrastructure work (hook migrations, consolidations). Add soft $3.00 warning to B session pre-hook or SESSION_BUILD.md as awareness mechanism. If B avg still above $3.00 after d070 deadline (s1662), escalate to structural.",
+      "priority": 737,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1635,
+      "source": "audit-s1635",
+      "tags": [
+        "audit",
+        "cost",
+        "monitoring"
+      ]
     }
   ]
 }

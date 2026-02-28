@@ -1,6 +1,6 @@
 # Hook Inventory for d070 Complexity Reduction
 
-Created: B#482 (s1622). Original total: 91 hooks. Current: 86 active (52 pre-session, 34 post-session), 4 retired, 1 consolidated.
+Created: B#482 (s1622). Original total: 91 hooks. Current: 84 active (50 pre-session, 34 post-session), 6 retired, 1 consolidated.
 
 ## Consolidation Candidates (merge multiple hooks into one)
 
@@ -41,12 +41,12 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 86 active (52 pre-ses
 - Post-session: 2 of 4 absorbed. Pre-session: 5 still separate, pending consolidation.
 - **Saves so far: 2 hooks** (target: 7)
 
-### 6. Covenant hooks → single hook
-- `pre/38-covenant-reminders.sh`
-- `pre/45-covenant-ceiling_R.sh`
+### 6. Covenant hooks → retired ✅ DONE
+- `pre/38-covenant-reminders.sh` — RETIRED (s1646, wq-740)
+- `pre/45-covenant-ceiling_R.sh` — RETIRED (s1646, wq-740)
 - (covenant post-hook already merged into `post/36-e-session-posthook_E.sh`, see group 5)
-- Two remaining covenant hooks. Merge into `38-covenant-mgmt.sh`.
-- **Saves: 1 hook** (net of engagement overlap, 31- already merged)
+- Covenant evaluation removed from R sessions (R#286) and A sessions (R#287). Hooks retired.
+- **Saved: 2 hooks**
 
 ### 7. Session logging/trace hooks → fewer hooks
 - `pre/01-session-start-log.sh`
@@ -93,12 +93,13 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 86 active (52 pre-ses
 |--------|-------|-------------|
 | Consolidation (9 groups) | ~35 hooks → ~11 | ~24 saved |
 | Retired (Phase 1, s1622) | 4 hooks | 4 saved |
+| Retired (covenant, s1646) | 2 hooks | 2 saved |
 | Consolidated (cost-trend, s1627) | 2 hooks → 1 | 1 saved |
 | **Completed so far** | | **5 hooks** |
 | Remaining retirement candidates | 0 (4 verified as needed) | 0 |
 | **Total potential reduction** | | **~28 hooks** |
 
-Current: 86 active hooks (52 pre + 34 post). Target: 67 or fewer. Progress: 5 hooks reduced (4 retired + 1 consolidated).
+Current: 84 active hooks (50 pre + 34 post). Target: 67 or fewer. Progress: 7 hooks reduced (6 retired + 1 consolidated).
 
 ## Execution Plan
 

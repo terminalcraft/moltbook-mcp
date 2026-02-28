@@ -363,7 +363,7 @@ D049_COMPLIANT="false"
 check_intel_checkpoint() {
   if [[ "$INTEL_COUNT" -gt 0 ]]; then
     echo "intel-checkpoint: s$SESSION has $INTEL_COUNT entries, no action needed"
-    return
+    return 0
   fi
 
   # Determine if we should write a checkpoint
@@ -384,7 +384,7 @@ check_intel_checkpoint() {
 
   if [[ "$action" != "write" ]]; then
     echo "intel-checkpoint: s$SESSION skipped ($reason: $details)"
-    return
+    return 0
   fi
 
   # Write checkpoint entry — uses PARSED_FILE for trace_intel_data
@@ -598,22 +598,22 @@ print(f'early-exit: stigmergic pressure injected into trace for s{session}')
 #   Replaces truncated session-history notes with trace-derived summaries
 ###############################################################################
 check_note_fallback() {
-  [[ -f "$HISTORY_FILE" ]] || return
-  [[ -f "$TRACE_FILE" ]] || return
-  [[ -n "$CURRENT_NOTE" ]] || return
+  [[ -f "$HISTORY_FILE" ]] || return 0
+  [[ -f "$TRACE_FILE" ]] || return 0
+  [[ -n "$CURRENT_NOTE" ]] || return 0
 
   # Check if note looks like a proper completion line
   if echo "$CURRENT_NOTE" | grep -qiE '^Session [A-Z]#[0-9]+.*complete'; then
-    return  # Note is fine
+    return 0  # Note is fine
   fi
 
   # Accept substantive notes (>60 chars with platform mentions)
   if [[ "${#CURRENT_NOTE}" -gt 60 ]] && echo "$CURRENT_NOTE" | grep -qiE 'engag|platform|chatr|moltbook|4claw|aicq|clawball|lobchan|pinchwork|colony'; then
-    return  # Substantive enough
+    return 0  # Substantive enough
   fi
 
   # Note is truncated — generate from trace
-  [[ "$HAS_TRACE" == "true" ]] || return
+  [[ "$HAS_TRACE" == "true" ]] || return 0
 
   GENERATED_NOTE=$(python3 -c "
 import json, sys
@@ -638,9 +638,9 @@ if len(summary) > 150:
     summary = summary[:147] + '...'
 
 print(f'Session E#{e_num} (s{session}) complete. {summary}.')
-" 2>/dev/null) || return
+" 2>/dev/null) || return 0
 
-  [[ -n "$GENERATED_NOTE" ]] || return
+  [[ -n "$GENERATED_NOTE" ]] || return 0
 
   # Replace truncated note in session-history.txt
   GENERATED_NOTE="$GENERATED_NOTE" python3 << 'NOTEFALLBACK_PY' 2>/dev/null || echo "note-fallback: failed to rewrite history (non-fatal)"
@@ -674,11 +674,11 @@ NOTEFALLBACK_PY
 #   Generates synthetic trace from intel when session truncated before Phase 3a
 ###############################################################################
 check_trace_fallback() {
-  [[ "$HAS_TRACE" == "true" ]] && return  # Trace exists, nothing to do
+  [[ "$HAS_TRACE" == "true" ]] && return 0  # Trace exists, nothing to do
 
   [[ "$ARCHIVE_INTEL_COUNT" -gt 0 ]] || {
     echo "trace-fallback: s$SESSION has no intel entries, skipping"
-    return
+    return 0
   }
 
   # Generate minimal trace from intel
@@ -734,7 +734,7 @@ print(f'trace-fallback: generated synthetic trace for s{session} from {len(platf
 check_quality_audit() {
   if [[ "$Q_TOTAL" -eq 0 ]]; then
     echo "quality-audit: s$SESSION had no quality-checked posts"
-    return
+    return 0
   fi
 
   echo "quality-audit: s$SESSION — $Q_TOTAL posts checked, $Q_FAILS fails, $Q_WARNS warns"
@@ -784,7 +784,7 @@ print(f'quality-audit: appended follow_up to trace for s{session}')
 check_quality_enforce() {
   if [[ ! -f "$QUALITY_SCORES" ]]; then
     echo "quality-enforce: no quality history, skipping"
-    return
+    return 0
   fi
 
   node -e "
@@ -877,7 +877,7 @@ check_e_cost_cap() {
 
   if [[ -z "$COST" ]]; then
     echo "e-cost-cap: skip — no cost data yet for s${SESSION}"
-    return
+    return 0
   fi
 
   # Compare cost to threshold (use node for float comparison)

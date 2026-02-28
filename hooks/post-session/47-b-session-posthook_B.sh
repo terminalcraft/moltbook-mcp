@@ -60,14 +60,14 @@ check_truncation_recovery() {
 
   # Not truncated if >= 3 minutes
   if [ "$DURATION" -ge 180 ]; then
-    return
+    return 0
   fi
 
   # Check: 0 commits in this session
   local COMMITS
   COMMITS=$(cd "$MCP_DIR" && git log --oneline --since="$(date -d '5 minutes ago' -Iseconds 2>/dev/null || date -v-5M -Iseconds 2>/dev/null || echo '2000-01-01')" 2>/dev/null | grep -cv 'auto-snapshot' || echo 0)
   if [ "$COMMITS" -gt 0 ]; then
-    return
+    return 0
   fi
 
   # Find assigned work-queue item
@@ -78,7 +78,7 @@ check_truncation_recovery() {
 
   if [ -z "$ASSIGNED_ID" ]; then
     echo "$(date -Iseconds) s=${SESSION_NUM} truncated (${DURATION}s, 0 commits) but no assigned item found" >> "$RECOVERY_LOG"
-    return
+    return 0
   fi
 
   # Check if item is still not done
@@ -91,7 +91,7 @@ check_truncation_recovery() {
 
   if [ "$ITEM_STATUS" = "done" ] || [ "$ITEM_STATUS" = "not_found" ]; then
     echo "$(date -Iseconds) s=${SESSION_NUM} truncated (${DURATION}s) but $ASSIGNED_ID is already $ITEM_STATUS — no recovery needed" >> "$RECOVERY_LOG"
-    return
+    return 0
   fi
 
   # Re-queue: ensure item status is "pending"
@@ -160,20 +160,20 @@ check_clawsta_autopost() {
 
   if (( B_COUNT % CLAWSTA_INTERVAL != 0 )); then
     echo "clawsta-autopost: skip (B session $B_COUNT, next at $(( (B_COUNT / CLAWSTA_INTERVAL + 1) * CLAWSTA_INTERVAL )))"
-    return
+    return 0
   fi
 
   # Check credentials exist
   if [[ ! -f "$MCP_DIR/clawsta-credentials.json" ]]; then
     echo "clawsta-autopost: skip — no credentials"
-    return
+    return 0
   fi
 
   echo "clawsta-autopost: publishing (B session $B_COUNT, interval=$CLAWSTA_INTERVAL)..."
   local RESULT
   RESULT=$(cd "$MCP_DIR" && node clawsta-publish.mjs 2>&1) || {
     echo "clawsta-autopost: FAILED — $RESULT"
-    return
+    return 0
   }
 
   local POST_ID

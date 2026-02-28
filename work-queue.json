@@ -66,7 +66,7 @@
       "title": "Audit bare return statements in consolidated hooks for set -e safety",
       "description": "The 36-e-session-posthook_E.sh had a bug where `[[ test ]] || return` passes the test's exit code (1) through bare `return`, triggering `set -e`. Fixed with `|| true` dispatch in s1631. Scan 47-b-session-posthook_B.sh and other consolidated hooks for the same pattern and fix preemptively.",
       "priority": 733,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-28",
       "created_session": 1631,
       "source": "pipeline-contribution",
@@ -74,7 +74,14 @@
         "infrastructure",
         "reliability",
         "hooks"
-      ]
+      ],
+      "outcome": {
+        "session": 1636,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Fixed 19 bare return statements in 36-e-session-posthook_E.sh (13) and 47-b-session-posthook_B.sh (6). All now use explicit return 0 to prevent set -e exit propagation. No bare returns remain in hooks/."
+      }
     },
     {
       "id": "wq-735",

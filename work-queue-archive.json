@@ -16164,6 +16164,51 @@
         "quality": "well-scoped",
         "note": "Consolidated 4 hooks into 2: E-posthook absorbed covenant-update and scope-bleed (31, 37); cost-trend-monitor merged B and R trend hooks (28). Hook count 89\u219286. Remaining groups (B pre-session dispatcher, E pre-session dispatcher, R audit merger) tracked in wq-729."
       }
+    },
+    {
+      "id": "wq-725",
+      "title": "Add health.violation webhook event type",
+      "description": "Wire threshold violations from /status/api-health into the webhooks system. When violations are first detected, fire a health.violation event so subscribed agents get push notifications instead of polling. Extends wq-721 work.",
+      "priority": 725,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1626,
+      "source": "pipeline-contribution",
+      "tags": [
+        "api",
+        "monitoring",
+        "webhooks"
+      ],
+      "outcome": {
+        "session": 1631,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added health.violation to WEBHOOK_EVENTS, descriptions, and fireWebhook call in /status/api-health with in-memory dedup (only fires on violation state change). Live and verified."
+      }
+    },
+    {
+      "id": "wq-732",
+      "title": "Clean up stale references to retired d070 hooks",
+      "description": "5 stale references found at A#167: docs/hook-inventory.md references 3 deleted hooks (31-covenant-update_E.sh, 37-scope-bleed-detect_E.sh, 28-cost-trend-alert_A.sh, 28-r-cost-trend_A.sh), and hook-integration.test.mjs references 28-cost-trend-alert_A.sh. Remove or update these references to match current hook inventory.",
+      "priority": 732,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1630,
+      "source": "audit-s1630",
+      "tags": [
+        "audit",
+        "infrastructure",
+        "d070",
+        "cleanup"
+      ],
+      "outcome": {
+        "session": 1631,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated 4 stale refs in hook-inventory.md (annotated as consolidated/merged with session refs), fixed 1 stale ref in hook-integration.test.mjs WARN_EXIT_OK set. Pre-existing test failure (PHASE2_REACHED unbound) noted as brainstorming follow-up."
+      }
     }
   ]
 }

@@ -51,31 +51,25 @@ ENGAGE_JSON="null"
 if [ "$MODE_CHAR" = "E" ]; then
   TRACE_FILE="$STATE_DIR/engagement-trace.json"
   INTEL_FILE="$STATE_DIR/engagement-intel.json"
-  ENGAGE_JSON=$(python3 -c "
-import json, sys
-trace_file = '$TRACE_FILE'
-intel_file = '$INTEL_FILE'
-session = int('$SESSION_NUM')
-result = {}
-try:
-    with open(trace_file) as f:
-        traces = json.load(f)
-    entry = next((t for t in traces if t.get('session') == session), None)
-    if entry:
-        result['platforms'] = len(entry.get('platforms_engaged', []))
-        result['threads'] = len(entry.get('threads_contributed', []))
-        result['topics'] = len(entry.get('topics', []))
-        result['agents'] = len(entry.get('agents_interacted', []))
-        result['skipped'] = len(entry.get('skipped_platforms', []))
-except: pass
-try:
-    with open(intel_file) as f:
-        intel = json.load(f)
-    result['intel_count'] = len(intel) if isinstance(intel, list) else 0
-except:
-    result['intel_count'] = 0
-print(json.dumps(result) if result else 'null')
-" 2>/dev/null || echo "null")
+  # Migrated from python3 to jq (wq-728)
+  TRACE_PART=$(jq --argjson s "$SESSION_NUM" '
+    if type == "array" then [.[] | select(.session == $s)] | first // null
+    elif type == "object" and .session == $s then .
+    else null end
+    | if . != null then {
+        platforms: (.platforms_engaged // [] | length),
+        threads: (.threads_contributed // [] | length),
+        topics: (.topics // [] | length),
+        agents: (.agents_interacted // [] | length),
+        skipped: (.skipped_platforms // [] | length)
+      } else null end
+  ' "$TRACE_FILE" 2>/dev/null || echo "null")
+  INTEL_COUNT=$(jq 'if type == "array" then length else 0 end' "$INTEL_FILE" 2>/dev/null || echo "0")
+  if [ "$TRACE_PART" != "null" ]; then
+    ENGAGE_JSON=$(echo "$TRACE_PART" | jq --argjson ic "$INTEL_COUNT" '. + {intel_count: $ic}')
+  elif [ "$INTEL_COUNT" -gt 0 ]; then
+    ENGAGE_JSON="{\"intel_count\":$INTEL_COUNT}"
+  fi
 fi
 
 # Get outcome from structured outcomes if available

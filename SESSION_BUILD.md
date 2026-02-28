@@ -7,10 +7,11 @@ This is a **build session**. Focus on shipping code.
 - Complex tasks (new features, API changes): commit frequently, defer comprehensive testing
 - If a task will hit the timeout, split it — ship what's done, create follow-up work-queue item
 
-**Cost budget**: B sessions average ~$2.70. Stay under $5 per session:
+**Cost budget**: B sessions average ~$3.00. Stay under $5 per session:
 - Single-feature sessions: normal flow, full testing acceptable
 - Multi-feature sessions (3+ queue items assigned): focus on the primary task only, defer lower-priority items to follow-up sessions
 - If implementing features requires 4+ commits, stop and assess — you're likely bundling too much
+- **$3.00 awareness**: B avg is at $3.00 (A#168). Currently justified by d070 infrastructure work. If avg remains above $3.00 after d070 deadline (s1662), this becomes a structural issue requiring investigation.
 - **$4.00 soft warning**: If estimated spend exceeds $4.00 (>8 minutes elapsed OR >6 commits made), STOP picking up new queue items. Finish current work, commit, and close out. This prevents the "small task accumulation" pattern that caused s1471 ($5.97) and s1474 ($5.29)
 
 **Graceful timeout protocol**: Sessions can be killed mid-work. Minimize lost progress:

@@ -47,49 +47,6 @@
       ]
     },
     {
-      "id": "wq-738",
-      "title": "Update hook-inventory.md counts to match actual hook count",
-      "description": "hook-inventory.md header says 91 total and summary says 89 active, but actual count has drifted during d070 retirements. Reconcile with ls hooks/*/ output and update all count references. Could also integrate into stale-ref-check to prevent future drift.",
-      "priority": 738,
-      "status": "done",
-      "added": "2026-02-28",
-      "created_session": 1637,
-      "source": "pipeline-s1637",
-      "tags": [
-        "d070",
-        "docs"
-      ],
-      "outcome": {
-        "session": 1646,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Updated header (91→86), summary table (added consolidated row), and current count line (89→86). Verified with ls hooks/*/."
-      }
-    },
-    {
-      "id": "wq-740",
-      "title": "Retire covenant evaluation infrastructure",
-      "description": "R#286 removed covenant evaluation from SESSION_REFLECT.md. R#287 removed covenant health reference from SESSION_AUDIT.md (confirmed 0 active covenants, consistently no-ops). Remaining B session work: (1) delete SESSION_REFLECT_COVENANTS.md (61 lines, no longer referenced), (2) delete SESSION_AUDIT_COVENANTS.md (22 lines, no longer referenced), (3) retire hooks/pre-session/38-covenant-reminders.sh and hooks/pre-session/45-covenant-ceiling_R.sh (2 hooks toward d070 target). Covenant tracking via covenant-tracker.mjs in E sessions continues unchanged.",
-      "priority": 740,
-      "status": "done",
-      "added": "2026-02-28",
-      "created_session": 1641,
-      "source": "session-R#286",
-      "tags": [
-        "d070",
-        "hooks",
-        "cleanup"
-      ],
-      "outcome": {
-        "session": 1646,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Retired 2 covenant hooks (38-covenant-reminders.sh, 45-covenant-ceiling_R.sh), deleted 2 companion files (SESSION_REFLECT_COVENANTS.md, SESSION_AUDIT_COVENANTS.md), updated manifest and inventory. d070: 84 active hooks, 7 total reduced."
-      }
-    },
-    {
       "id": "wq-739",
       "title": "Consolidate cost forecast hooks (08-cost-forecast-gate + 08-cost-forecast-inject)",
       "description": "hook-inventory.md group 2: two hooks with same 08 prefix and same domain. Merge into single 08-cost-forecast.sh. Saves 1 hook toward d070 target.",
@@ -104,38 +61,65 @@
       ]
     },
     {
-      "id": "wq-741",
-      "title": "Demote ClawHub from picker rotation",
-      "description": "ClawHub (claw-hub-bay) v1 API auth regression: re-registration succeeds but all auth patterns rejected (Bearer, x-api-key, ApiKey, query param). Documented in E#178 (s1639) trace. Not included in wq-735 demotion batch. Add to picker-demotions.json to prevent E sessions from selecting and wasting effort. Single-line addition.",
-      "priority": 741,
+      "id": "wq-742",
+      "title": "Identify additional d070 hook retirement candidates for pace",
+      "description": "d070 needs 19 more hooks retired in 17 sessions (1.12/session). Pending wq items cover 10 (wq-729=7, wq-740=2, wq-739=1). Need 9 more candidates. BRAINSTORMING.md identifies session-type-conditional hooks (_B.sh, _E.sh, _R.sh, _A.sh suffixes with 80%+ shared logic) as prime consolidation targets. R session should audit hook-inventory.md and identify groups where parameterized dispatch replaces per-type variants.",
+      "priority": 742,
       "status": "done",
       "added": "2026-02-28",
       "created_session": 1645,
       "source": "audit-s1645",
       "tags": [
         "audit",
-        "engagement",
-        "picker"
+        "d070",
+        "hooks"
       ],
       "outcome": {
-        "session": 1646,
+        "session": 1647,
         "result": "completed",
-        "effort": "trivial",
+        "effort": "moderate",
         "quality": "well-scoped",
-        "note": "Added claw-hub-bay to picker-demotions.json. Pre-commit allowlist updated for auth method names in reason text."
+        "note": "Audited all 84 hooks. Identified 9 net-new retirement/consolidation candidates across 8 groups: retire dns-certbot (broken) and session-diagnostics (duplicate), merge token refreshes, periodic checks, stigmergy→trace, snapshots, log housekeeping, and engagement-audit→E posthook. Created wq-743, wq-744, wq-745 covering all candidates. Total d070 pipeline now covers 19 saves (wq-729=7, wq-739=1, wq-743=3, wq-744=3, wq-745=3), meeting the 19/17 pace requirement."
       }
     },
     {
-      "id": "wq-742",
-      "title": "Identify additional d070 hook retirement candidates for pace",
-      "description": "d070 needs 19 more hooks retired in 17 sessions (1.12/session). Pending wq items cover 10 (wq-729=7, wq-740=2, wq-739=1). Need 9 more candidates. BRAINSTORMING.md identifies session-type-conditional hooks (_B.sh, _E.sh, _R.sh, _A.sh suffixes with 80%+ shared logic) as prime consolidation targets. R session should audit hook-inventory.md and identify groups where parameterized dispatch replaces per-type variants.",
-      "priority": 742,
+      "id": "wq-743",
+      "title": "Retire 3 obsolete/redundant hooks (dns-certbot, session-diagnostics, imanagent-refresh)",
+      "description": "Three hooks identified for retirement by wq-742 audit: (1) 37-dns-certbot.sh — broken IP vs hostname comparison on line 6 (EXPECTED_IP='terminalcraft.xyz' vs dig output), permanently a no-op, retire immediately; (2) 25-session-diagnostics.sh — gap detection duplicated by 47-gap-validator.sh, R analytics covered by 23-outcome-feedback.sh, uses python3; absorb 3-line directive-audit check into 35-maintain-audit_R.sh; (3) 15-imanagent-refresh.sh — 14-line token refresh, absorb into 14-colony-jwt-refresh.sh as second credential section (→ rename 14-token-refresh.sh). Saves 3 hooks.",
+      "priority": 743,
       "status": "pending",
       "added": "2026-02-28",
-      "created_session": 1645,
-      "source": "audit-s1645",
+      "created_session": 1647,
+      "source": "session",
       "tags": [
-        "audit",
+        "d070",
+        "hooks"
+      ]
+    },
+    {
+      "id": "wq-744",
+      "title": "Consolidate post-session hooks: stigmergy→trace, snapshots→1, log housekeeping→1",
+      "description": "Three post-session consolidation groups from wq-742 audit: (1) Absorb 26-stigmergy-breadcrumb.sh (85 lines) into 26-session-trace.sh — breadcrumb data is strict subset of trace, add type/tags classification as additional output pass; (2) Merge 22-ecosystem-snapshot.sh (55 lines) + 23-pattern-snapshot.sh (31 lines) into single 22-session-snapshots.sh — both append JSONL per session, same trigger, same pattern; (3) Merge 30-log-rotate.sh (12 lines) + 32-compress-logs.sh (62 lines) into single 30-log-maintenance.sh — both log housekeeping, zero dependencies. Saves 3 hooks.",
+      "priority": 744,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1647,
+      "source": "session",
+      "tags": [
+        "d070",
+        "hooks"
+      ]
+    },
+    {
+      "id": "wq-745",
+      "title": "Consolidate pre-session periodic hooks + absorb engagement-audit into E posthook",
+      "description": "Two consolidation groups from wq-742 audit: (1) Merge 02-periodic-evm-balance.sh (44 lines) + 02-periodic-platform-health.sh (27 lines) + 11-service-liveness.sh (22 lines) into single 02-periodic-checks.sh — all use identical interval-skip pattern, all write alert/log output, all non-session-type-conditional. Saves 2 hooks. (2) Absorb post/24-engagement-audit.sh (23 lines, E-only) into 36-e-session-posthook_E.sh — already E-only, checks for 0 log_engagement calls which fits as Phase N in the existing E mega-hook. Saves 1 hook. Total: 3 hooks saved.",
+      "priority": 745,
+      "status": "pending",
+      "added": "2026-02-28",
+      "created_session": 1647,
+      "source": "session",
+      "tags": [
         "d070",
         "hooks"
       ]

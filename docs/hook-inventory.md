@@ -1,6 +1,6 @@
 # Hook Inventory for d070 Complexity Reduction
 
-Created: B#482 (s1622). Total: 91 hooks (55 pre-session, 36 post-session).
+Created: B#482 (s1622). Original total: 91 hooks. Current: 86 active (52 pre-session, 34 post-session), 4 retired, 1 consolidated.
 
 ## Consolidation Candidates (merge multiple hooks into one)
 
@@ -93,10 +93,12 @@ Created: B#482 (s1622). Total: 91 hooks (55 pre-session, 36 post-session).
 |--------|-------|-------------|
 | Consolidation (9 groups) | ~35 hooks → ~11 | ~24 saved |
 | Retired (Phase 1, s1622) | 4 hooks | 4 saved |
+| Consolidated (cost-trend, s1627) | 2 hooks → 1 | 1 saved |
+| **Completed so far** | | **5 hooks** |
 | Remaining retirement candidates | 0 (4 verified as needed) | 0 |
 | **Total potential reduction** | | **~28 hooks** |
 
-Current: 89 active hooks (53 pre + 36 post). Target: 67 or fewer.
+Current: 86 active hooks (52 pre + 34 post). Target: 67 or fewer. Progress: 5 hooks reduced (4 retired + 1 consolidated).
 
 ## Execution Plan
 

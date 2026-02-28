@@ -53,20 +53,49 @@ if [ -f "$QUEUE_FILE" ]; then
   QUEUE_TITLES=$(jq -r '.queue[] | select(.status == "pending" or .status == "in-progress") | .title // .description' "$QUEUE_FILE" 2>/dev/null | tr '\n' '|')
 fi
 
+# Helper: look up actual session number for a type-session reference (R#286 → s1641)
+# Uses session-history.txt as source of truth. Returns 0 if not found.
+HISTORY_FILE="$HOME/.config/moltbook/session-history.txt"
+lookup_type_session() {
+  local ref="$1"  # e.g. "R#286"
+  if [ -f "$HISTORY_FILE" ]; then
+    # session-history.txt format: ... s=NNNN ... (R#286)
+    local result
+    result=$(grep -F "$ref" "$HISTORY_FILE" 2>/dev/null | grep -oE 's=[0-9]+' | grep -oE '[0-9]+' | tail -1)
+    echo "${result:-0}"
+  else
+    echo "0"
+  fi
+}
+
 # Helper: extract max session number from notes field
-# Patterns: R#189, s=1119, s1119, (s1119)
+# Patterns: s1119, s=1119, R#286, A#169, B#304, E#175
+# R#288 fix: also parse session-type references (R#/A#/B#/E#) by looking up
+# the actual session number from session-history.txt. This eliminates false
+# STALE alerts for directives like d049/d068 whose notes use R#/A# patterns
+# but no sNNN patterns.
 extract_max_session_from_notes() {
   local notes="$1"
   local max_session=0
 
-  # Extract all session references
-  # R#NNN -> NNN * 5 (rough approximation: ~5 sessions per R session)
-  # Actually, just extract sNNN patterns directly for accuracy
+  # Extract direct session references: sNNN, s=NNN
   while read -r num; do
     if [ -n "$num" ] && [ "$num" -gt "$max_session" ] 2>/dev/null; then
       max_session=$num
     fi
   done < <(echo "$notes" | grep -oE 's[0-9]+|s=[0-9]+' | grep -oE '[0-9]+' || true)
+
+  # Extract session-type references: R#NNN, A#NNN, B#NNN, E#NNN
+  # Look up actual session number from session-history.txt
+  while read -r ref; do
+    if [ -n "$ref" ]; then
+      local actual
+      actual=$(lookup_type_session "$ref")
+      if [ "$actual" -gt "$max_session" ] 2>/dev/null; then
+        max_session=$actual
+      fi
+    fi
+  done < <(echo "$notes" | grep -oE '[RABE]#[0-9]+' || true)
 
   echo "$max_session"
 }

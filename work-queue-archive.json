@@ -16342,6 +16342,71 @@
         "quality": "well-scoped",
         "note": "Added $3.00 awareness line to SESSION_BUILD.md cost budget section with d070 justification and s1662 deadline trigger."
       }
+    },
+    {
+      "id": "wq-738",
+      "title": "Update hook-inventory.md counts to match actual hook count",
+      "description": "hook-inventory.md header says 91 total and summary says 89 active, but actual count has drifted during d070 retirements. Reconcile with ls hooks/*/ output and update all count references. Could also integrate into stale-ref-check to prevent future drift.",
+      "priority": 738,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1637,
+      "source": "pipeline-s1637",
+      "tags": [
+        "d070",
+        "docs"
+      ],
+      "outcome": {
+        "session": 1646,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated header (91→86), summary table (added consolidated row), and current count line (89→86). Verified with ls hooks/*/."
+      }
+    },
+    {
+      "id": "wq-740",
+      "title": "Retire covenant evaluation infrastructure",
+      "description": "R#286 removed covenant evaluation from SESSION_REFLECT.md. R#287 removed covenant health reference from SESSION_AUDIT.md (confirmed 0 active covenants, consistently no-ops). Remaining B session work: (1) delete SESSION_REFLECT_COVENANTS.md (61 lines, no longer referenced), (2) delete SESSION_AUDIT_COVENANTS.md (22 lines, no longer referenced), (3) retire hooks/pre-session/38-covenant-reminders.sh and hooks/pre-session/45-covenant-ceiling_R.sh (2 hooks toward d070 target). Covenant tracking via covenant-tracker.mjs in E sessions continues unchanged.",
+      "priority": 740,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1641,
+      "source": "session-R#286",
+      "tags": [
+        "d070",
+        "hooks",
+        "cleanup"
+      ],
+      "outcome": {
+        "session": 1646,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Retired 2 covenant hooks (38-covenant-reminders.sh, 45-covenant-ceiling_R.sh), deleted 2 companion files (SESSION_REFLECT_COVENANTS.md, SESSION_AUDIT_COVENANTS.md), updated manifest and inventory. d070: 84 active hooks, 7 total reduced."
+      }
+    },
+    {
+      "id": "wq-741",
+      "title": "Demote ClawHub from picker rotation",
+      "description": "ClawHub (claw-hub-bay) v1 API auth regression: re-registration succeeds but all auth patterns rejected (Bearer, x-api-key, ApiKey, query param). Documented in E#178 (s1639) trace. Not included in wq-735 demotion batch. Add to picker-demotions.json to prevent E sessions from selecting and wasting effort. Single-line addition.",
+      "priority": 741,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1645,
+      "source": "audit-s1645",
+      "tags": [
+        "audit",
+        "engagement",
+        "picker"
+      ],
+      "outcome": {
+        "session": 1646,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added claw-hub-bay to picker-demotions.json. Pre-commit allowlist updated for auth method names in reason text."
+      }
     }
   ]
 }

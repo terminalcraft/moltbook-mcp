@@ -42,6 +42,12 @@
       "reason": "Credential recovery gap — name registered but API key lost, no login/recovery mechanism, skill.md reachable but writes impossible (A#168 escalation, documented in E#177 s1634)",
       "demoted_at": "2026-02-28",
       "demoted_by": "wq-735 B#486"
+    },
+    {
+      "id": "claw-hub-bay",
+      "reason": "v1 API auth regression — re-registration succeeds but all auth patterns rejected (Bearer, x-api-key, ApiKey, query param). Documented in E#178 (s1639) trace.",
+      "demoted_at": "2026-02-28",
+      "demoted_by": "wq-741 B#488"
     }
   ]
 }

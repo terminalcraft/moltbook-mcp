@@ -92,7 +92,7 @@
       "title": "Batch cleanup of 11 stale references from d070 hook retirements",
       "description": "stale-refs.json reports 11 stale references (up from 2 at A#171). 9 new refs from d070 hook retirements: hook-inventory.md lists 5 retired hooks, hook-integration.test.mjs tests a deleted hook (35-engagement-liveness_E.sh), audit-stats.mjs references deleted 49-pipeline-nudge_B.sh, SESSION_REFLECT.md references deleted 35-security-posture_R.sh, session-file-sizes-history.json has 2 covenant refs. Fix: remove retired hook entries from hook-inventory.md, delete or update test cases in hook-integration.test.mjs, update audit-stats.mjs reference, remove SESSION_REFLECT.md reference, clean session-file-sizes-history.json entries. Should pair with d070 consolidation work to prevent recurrence.",
       "priority": 749,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-01",
       "created_session": 1656,
       "source": "audit-s1656",
@@ -100,7 +100,14 @@
         "audit",
         "infrastructure",
         "d070"
-      ]
+      ],
+      "outcome": {
+        "session": 1657,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Cleaned 11 stale refs across 5 files: hook-inventory.md (2 KEPT entries), hook-integration.test.mjs (3 NETWORK_HOOKS), audit-stats.mjs (nudge epoch tracking), SESSION_REFLECT.md (35-security-posture_R.sh ref), session-file-sizes-history.json (80 covenant entries across 50 snapshots). All 388 tests pass. Push blocked by expired GitHub PAT (wq-748)."
+      }
     }
   ]
 }

@@ -1,28 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-730",
-      "title": "Migrate heartbeat.sh python3 scripts to Node",
-      "description": "3 external python3 scripts remain in heartbeat.sh: directive-enrichment.py, adaptive-budget.py, summarize-session.py. R#283 eliminated the inline python3 call (prompt-inject JSON extraction → jq). Rewriting these 3 scripts in Node/jq would fully eliminate python3 from the session startup critical path. Each is a standalone script: (1) directive-enrichment.py cross-references directives with work-queue to produce enrichment JSON — straightforward jq or node rewrite; (2) adaptive-budget.py computes session budgets from cost history — simple math, good jq candidate; (3) summarize-session.py is the emergency summary generator — most complex, may need node. Tackle one per B session.",
-      "priority": 730,
-      "status": "done",
-      "added": "2026-02-27",
-      "created_session": 1628,
-      "source": "brainstorming",
-      "tags": [
-        "infrastructure",
-        "d070",
-        "python3-elimination"
-      ],
-      "outcome": {
-        "session": 1658,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Migrated adaptive-budget.py to adaptive-budget.mjs (1/3 scripts). Output parity verified. heartbeat.sh updated. Remaining: directive-enrichment.py, summarize-session.py — brainstorming item added for next migration."
-      }
-    },
-    {
       "id": "wq-731",
       "title": "Word-based verification challenge solver for Moltbook",
       "description": "The current solveVerification() in moltbook-core.js only parses digit-based expressions via regex. Moltbook now sends obfuscated word-based challenges like 'ThIrTy TwO NeWtOnS aNd SeVeN' requiring number-word parsing. Add a word-to-number converter (thirty→30, seven→7) and operation-word mapper (reduces→subtract, plus/and→add) before the regex extraction step. Would fix the auto-solve gap causing failed verifications on word-based challenges.",

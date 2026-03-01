@@ -13,7 +13,6 @@
 #   40-trace-fallback_E.sh     (wq-550)
 #   41-quality-audit_E.sh      (wq-624, d066)
 #   42-quality-enforce_E.sh    (wq-632, d066)
-#   31-covenant-update_E.sh    (wq-220) — merged B#483 (wq-727)
 #   37-scope-bleed-detect_E.sh (wq-712) — merged B#483 (wq-727)
 #   24-engagement-audit.sh     (wq-745) — merged B#495 (wq-745)
 #
@@ -928,16 +927,7 @@ check_e_cost_cap() {
 }
 
 ###############################################################################
-# Check 9: Covenant update (was 31-covenant-update_E.sh, wq-220)
-#   Update covenant tracking from engagement trace after E session
-###############################################################################
-check_covenant_update() {
-  cd "$MCP_DIR" || return 0
-  node covenant-tracker.mjs update >/dev/null 2>&1 || true
-}
-
-###############################################################################
-# Check 10: Scope bleed detection (was 37-scope-bleed-detect_E.sh, wq-712)
+# Check 9: Scope bleed detection (was 37-scope-bleed-detect_E.sh, wq-712)
 #   Warn if build commits were made during E session (scope violation)
 ###############################################################################
 check_scope_bleed() {
@@ -954,7 +944,7 @@ check_scope_bleed() {
 }
 
 ###############################################################################
-# Check 11: Engagement logging audit (was 24-engagement-audit.sh, wq-745)
+# Check 10: Engagement logging audit (was 24-engagement-audit.sh, wq-745)
 #   Flags E sessions that didn't use log_engagement MCP tool
 ###############################################################################
 check_engagement_logging() {
@@ -989,7 +979,6 @@ check_trace_fallback || true
 check_quality_audit || true
 check_quality_enforce || true
 check_e_cost_cap || true
-check_covenant_update || true
 check_scope_bleed || true
 check_engagement_logging || true
 

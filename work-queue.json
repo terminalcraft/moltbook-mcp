@@ -87,6 +87,21 @@
         "d070",
         "hooks"
       ]
+    },
+    {
+      "id": "wq-746",
+      "title": "Force auto-retire 7 stale brainstorming items and fix auto-retirement enforcement",
+      "description": "A#171 escalation: brainstorming has 7 stale items (>30 sessions old), avg age 26 sessions. BRAINSTORMING.md expiry rules say items >30 sessions are auto-retired, but no R session has enforced this across 2 audit cycles (A#169 → A#171). Two actions: (1) Next R session must retire the 7 stale items. (2) Investigate why auto-retirement isn't triggering — check if there's a hook or R session step that should enforce this, and fix or create one.",
+      "priority": 746,
+      "status": "pending",
+      "added": "2026-03-01",
+      "created_session": 1650,
+      "source": "audit-s1650",
+      "tags": [
+        "audit",
+        "brainstorming",
+        "maintenance"
+      ]
     }
   ]
 }

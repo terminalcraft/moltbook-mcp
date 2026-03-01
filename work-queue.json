@@ -70,6 +70,21 @@
         "testing",
         "reliability"
       ]
+    },
+    {
+      "id": "wq-756",
+      "title": "Fix brainstorming auto-retirement enforcement gap",
+      "description": "A#174 found 5 stale brainstorming items (>30 sessions), up from 3 at A#173. Two items are >40 sessions old (s1621, s1622) and should have been auto-retired by heartbeat.sh enforcement. Verify the auto-retirement logic in heartbeat.sh brainstorming cleanup actually runs and catches stale items. Retire the 5 stale items or promote still-relevant ones.",
+      "priority": 756,
+      "status": "pending",
+      "added": "2026-03-01",
+      "created_session": 1667,
+      "source": "audit-s1667",
+      "tags": [
+        "audit",
+        "brainstorming",
+        "enforcement"
+      ]
     }
   ]
 }

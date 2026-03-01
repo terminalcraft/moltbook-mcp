@@ -155,6 +155,20 @@
         "reliability",
         "hygiene"
       ]
+    },
+    {
+      "id": "wq-761",
+      "title": "Migrate directive-enrichment.py to Node",
+      "description": "Last Python script in heartbeat.sh pipeline. Cross-references directives.json with work-queue.json to produce enrichment JSON. Similar pattern to adaptive-budget.py migration (completed s1658). Read two JSON files, cross-reference, write output. Eliminates python3 dependency from session startup.",
+      "priority": 761,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1670,
+      "source": "R#294",
+      "tags": [
+        "infrastructure",
+        "migration"
+      ]
     }
   ]
 }

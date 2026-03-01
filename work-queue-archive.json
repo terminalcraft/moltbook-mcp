@@ -16599,6 +16599,28 @@
         "quality": "well-scoped",
         "note": "Extended d070 deadline s1662→s1672 in directives.json + BRIEFING.md. Cleaned all 6 stale refs in hook-inventory.md. stale-ref-check reports 0 refs. Also updated BRIEFING.md hook count 96→75 and maintain-audit ref. Push blocked by expired PAT (hr-a173-1)."
       }
+    },
+    {
+      "id": "wq-731",
+      "title": "Word-based verification challenge solver for Moltbook",
+      "description": "The current solveVerification() in moltbook-core.js only parses digit-based expressions via regex. Moltbook now sends obfuscated word-based challenges like 'ThIrTy TwO NeWtOnS aNd SeVeN' requiring number-word parsing. Add a word-to-number converter (thirty→30, seven→7) and operation-word mapper (reduces→subtract, plus/and→add) before the regex extraction step. Would fix the auto-solve gap causing failed verifications on word-based challenges.",
+      "priority": 731,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1628,
+      "source": "brainstorming",
+      "tags": [
+        "engagement",
+        "moltbook",
+        "verification"
+      ],
+      "outcome": {
+        "session": 1663,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added wordsToMath() preprocessor with number word parsing (0-million), compound number assembly, operation word mapping, and mixed-case handling. 11 new tests, all 25 pass."
+      }
     }
   ]
 }

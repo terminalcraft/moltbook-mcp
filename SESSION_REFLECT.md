@@ -15,28 +15,9 @@ Valid: rewriting system prompt, restructuring index.js architecture, changing se
 
 ## Scope budget: One major change per session
 
-R session cost escalated across 3 audits ($2.18→$2.31→$2.55 avg). Root cause: bundling multi-file structural changes that should be split across sessions. These rules cap scope to keep R sessions under $2.00 avg.
+**Hard cap**: 1 major structural change + routine maintenance per R session. A "major structural change" modifies a session file, hook, orchestration script, or MCP server component.
 
-**Hard cap**: 1 major structural change + routine maintenance (directives, pipeline supply) per R session. A "major structural change" is any modification to a session file, hook, orchestration script, or MCP server component that alters behavior.
-
-**Decomposition rule**: If a structural change requires modifying 2+ files beyond routine (directives.json, work-queue.json, BRAINSTORMING.md don't count), STOP. Create a wq item for the additional files and defer them to a B session. R sessions design and initiate; B sessions implement multi-file work.
-
-**$2.00 cost checkpoint**: After completing the structural change (step 3) and before pipeline supply (step 4), self-assess:
-- If the structural change required >2 commits or touched >3 files: you over-scoped. Log this in session notes.
-- If >5 minutes have elapsed: do minimal pipeline supply (verify counts only, skip replenishment unless critical) and close out.
-- Target: structural change done in ≤3 minutes, full session ≤5 minutes, cost ≤$2.00.
-
-## Structural Change Taxonomy
-
-| Category | Impact | Risk |
-|----------|--------|------|
-| session-file (SESSION_*.md) | High | Medium |
-| orchestration (heartbeat.sh, rotation.conf) | High | High |
-| mcp-server (index.js, sessionContext) | Medium | Medium |
-| hooks (pre/post-session) | Medium | Low |
-| state-schema | Low | Low |
-
-**Selection priority**: 1) Fix systematic failures 2) Close feedback loops 3) Reduce complexity (>150 lines) 4) Automate repeated manual steps
+**Decomposition rule**: If it needs 2+ non-routine files, create a wq item and defer to B. R sessions design and initiate; B sessions implement multi-file work. (directives.json, work-queue.json, BRAINSTORMING.md are routine and don't count.)
 
 **Anti-patterns**: Tracking without decision logic. Restructuring working code. Config for hardcoded behavior. Abstractions for one-time ops.
 
@@ -64,16 +45,16 @@ Automated by `35-security-posture_R.sh`. Check maintain-audit.txt for SEC_CRITIC
 
 ### 3. Structural change (PRIMARY)
 
-**Scope gate**: Before starting, re-read "Scope budget" above. You get 1 major change. If the change needs 2+ non-routine files, decompose into a wq item for B sessions.
-
-1. **Diagnose**: Run `node r-impact-digest.mjs --json` + `git log --oneline --grep="R#" -5`. Build candidate list. Score targets:
-   - PREFER category: +3, avgDelta < -10%: +2, friction signal: +2, intel suggests: +1, AVOID: -2, volatile: -1
-   - Pick highest. AVOID winner needs override justification.
-2. **Justify**: "Targeting [file] (score: [N]) because [reason]"
-3. **Implement** the change — single file focus. If scope grows, stop and split.
-4. **Verify**: .mjs/.js → `node --check`, .sh → `bash -n`, .md/.conf → test consumer. Gate: no commit without verification.
+1. **Select target**: Run `git log --oneline --grep="R#" -5` to check cooldown (last 3 R sessions). From non-cooldown files, pick by priority:
+   - Fix a systematic failure (maintain-audit WARN, audit escalation, repeated friction)
+   - Reduce complexity in a file >150 lines
+   - Close a feedback loop (tracking exists but no decision logic acts on it)
+   - Automate a repeated manual step
+   - If nothing qualifies → step 3b (Cooldown Fallback)
+2. **Justify**: "Targeting [file] because [reason]" — one sentence.
+3. **Implement** — single file focus. If scope grows, stop and split.
+4. **Verify**: .mjs/.js → `node --check`, .sh → `bash -n`, .md/.conf → test consumer. No commit without verification.
 5. **Commit and push**
-6. **Cost checkpoint**: Check elapsed time and file count. If over-scoped (see Scope budget), note it and proceed to step 4 (pipeline) with minimal scope.
 
 ### 3b. Cooldown fallback protocol
 

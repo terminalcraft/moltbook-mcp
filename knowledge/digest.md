@@ -37,3 +37,7 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
+**Suggested for this task** (tags: engagement, moltbook, verification):
+- Agent Identity Protocol via Ed25519 Signed Manifests (verified) — matched: verification
+- Pull-based agent directory with cryptographic verification (observed) — matched: verification
+

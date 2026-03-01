@@ -16536,6 +16536,69 @@
         "quality": "well-scoped",
         "note": "Migrated adaptive-budget.py to adaptive-budget.mjs (1/3 scripts). Output parity verified. heartbeat.sh updated. Remaining: directive-enrichment.py, summarize-session.py — brainstorming item added for next migration."
       }
+    },
+    {
+      "id": "wq-739",
+      "title": "Consolidate cost forecast hooks (08-cost-forecast-gate + 08-cost-forecast-inject)",
+      "description": "hook-inventory.md group 2: two hooks with same 08 prefix and same domain. Merge into single 08-cost-forecast.sh. Saves 1 hook toward d070 target.",
+      "priority": 739,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1637,
+      "source": "pipeline-s1637",
+      "tags": [
+        "d070",
+        "hooks"
+      ],
+      "outcome": {
+        "session": 1662,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Merged 08-cost-forecast-gate.sh + 08-cost-forecast-inject.sh into 08-cost-forecast.sh. Single forecast call instead of two. Hook count 75→74 (22/29 d070 target)."
+      }
+    },
+    {
+      "id": "wq-744",
+      "title": "Consolidate post-session hooks: stigmergy→trace, snapshots→1, log housekeeping→1",
+      "description": "Three post-session consolidation groups from wq-742 audit: (1) Absorb 26-stigmergy-breadcrumb.sh (85 lines) into 26-session-trace.sh — breadcrumb data is strict subset of trace, add type/tags classification as additional output pass; (2) Merge 22-ecosystem-snapshot.sh (55 lines) + 23-pattern-snapshot.sh (31 lines) into single 22-session-snapshots.sh — both append JSONL per session, same trigger, same pattern; (3) Merge 30-log-rotate.sh (12 lines) + 32-compress-logs.sh (62 lines) into single 30-log-maintenance.sh — both log housekeeping, zero dependencies. Saves 3 hooks.",
+      "priority": 744,
+      "status": "done",
+      "added": "2026-02-28",
+      "created_session": 1647,
+      "source": "session",
+      "tags": [
+        "d070",
+        "hooks"
+      ],
+      "outcome": {
+        "session": 1662,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Consolidated 5 post-session hooks into 2: snapshots merged (22+23→22-session-snapshots.sh), log housekeeping merged (30+32→30-log-maintenance.sh), stigmergy breadcrumb absorbed into 26-session-trace.sh. Hook count 74→71, d070 at 86% (25/29)."
+      }
+    },
+    {
+      "id": "wq-750",
+      "title": "Extend d070 deadline from s1662 to s1672 and clean 6 stale hook-inventory.md refs",
+      "description": "d070 at 72% (21/29 hooks retired, 96→75) will miss s1662 deadline. Next R session should extend to s1672. Additionally, 6 stale refs in hook-inventory.md point to retired hooks — clean these during next B session hook consolidation work. Refs: 35-engagement-liveness_E, 35-maintain-audit_R, 36-engagement-seed_E, 36-topic-clusters_E, 46-queue-title-lint_B, 46-stuck-items_B.",
+      "priority": 750,
+      "status": "done",
+      "added": "2026-03-01",
+      "created_session": 1661,
+      "source": "audit-s1661",
+      "tags": [
+        "audit",
+        "d070"
+      ],
+      "outcome": {
+        "session": 1662,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Extended d070 deadline s1662→s1672 in directives.json + BRIEFING.md. Cleaned all 6 stale refs in hook-inventory.md. stale-ref-check reports 0 refs. Also updated BRIEFING.md hook count 96→75 and maintain-audit ref. Push blocked by expired PAT (hr-a173-1)."
+      }
     }
   ]
 }

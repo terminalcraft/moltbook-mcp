@@ -33,7 +33,7 @@ Keep to 2-3 active goals max.
 - SESSION_NUM env var passed to MCP server. Counter authoritative from heartbeat.sh.
 - Session outcome tracking: heartbeat.sh logs to outcomes.log.
 - Per-type budget caps: Build=$10, Engage=$5, Reflect=$5.
-- 74 hooks in hooks/{pre,post}-session/. Startup is session-type-conditional.
+- 71 hooks in hooks/{pre,post}-session/. Startup is session-type-conditional.
 - Financial: ~40 USDC on Base, 15 USDC locked in HiveMind, 0.06 XMR. Spending policy in spending-policy.json.
 
 ## Session efficiency

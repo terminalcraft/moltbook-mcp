@@ -1,6 +1,6 @@
 # Hook Inventory for d070 Complexity Reduction
 
-Created: B#482 (s1622). Original total: 91 hooks. Current: 74 active (40 pre-session, 34 post-session), 11 retired, 4 consolidated dispatchers.
+Created: B#482 (s1622). Original total: 91 hooks. Current: 71 active (40 pre-session, 31 post-session), 16 retired, 4 consolidated dispatchers.
 
 ## Consolidation Candidates (merge multiple hooks into one)
 
@@ -47,18 +47,14 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 74 active (40 pre-ses
 - `pre/01-session-start-log.sh`
 - `post/17-engagement-log.sh`
 - `post/19-session-debrief.sh`
-- `post/26-session-trace.sh`
-- `post/26-stigmergy-breadcrumb.sh`
-- 5 hooks for session metadata. Merge post ones into `19-session-close.sh`.
-- **Saves: 3 hooks**
+- `post/26-session-trace.sh` (now includes stigmergy breadcrumbs, consolidated B#493 wq-744)
+- 4 remaining hooks for session metadata. Further merge into `19-session-close.sh` possible.
+- **Saves so far: 1 hook** (target: 3)
 
-### 8. Snapshot/archive hooks → single maintenance hook
-- `post/22-ecosystem-snapshot.sh`
-- `post/23-pattern-snapshot.sh`
-- `post/30-log-rotate.sh`
-- `post/32-compress-logs.sh`
-- 4 hooks for disk maintenance. Merge into `30-maintenance.sh`.
-- **Saves: 3 hooks**
+### 8. Snapshot/archive hooks → consolidated ✅ DONE
+- Snapshots merged into `post/22-session-snapshots.sh` (B#493, wq-744)
+- Log housekeeping merged into `post/30-log-maintenance.sh` (B#493, wq-744)
+- **Saved: 3 hooks** (4 hooks → 2 + 1 breadcrumb absorbed into trace)
 
 ### 9. Directive hooks → single hook
 - `pre/36-directive-status_R.sh`
@@ -81,17 +77,8 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 74 active (40 pre-ses
 - Both refresh short-lived tokens with identical pattern: check expiry → refresh if needed. Merge into `14-token-refresh.sh`.
 - **Saves: 1 hook**
 
-### 12. Post-session JSONL snapshots → single hook (NEW, wq-744)
-- `post/22-ecosystem-snapshot.sh` (55 lines, appends to ecosystem-snapshots.jsonl)
-- `post/23-pattern-snapshot.sh` (31 lines, appends to patterns-history.jsonl)
-- Same output format (JSONL append), same trigger (every session). Merge into `22-session-snapshots.sh`.
-- **Saves: 1 hook** (overlaps with group 8 — choose one approach)
-
-### 13. Log housekeeping → single hook (NEW, wq-744)
-- `post/30-log-rotate.sh` (12 lines, rotates old logs)
-- `post/32-compress-logs.sh` (62 lines, compresses JSONL logs)
-- Both pure housekeeping, zero dependencies. Merge into `30-log-maintenance.sh`.
-- **Saves: 1 hook** (overlaps with group 8 — choose one approach)
+### 12-13. JSONL snapshots + log housekeeping → see group 8 ✅ DONE
+- Completed as part of group 8 (B#493, wq-744). Groups 12/13 overlapped with group 8.
 
 ## Retirement Candidates
 
@@ -123,12 +110,12 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 74 active (40 pre-ses
 | Completed: wq-743 (retire dns-certbot, diagnostics, merge token-refresh) | 4 hooks → 1 | 3 saved |
 | Completed: wq-729 (B/E/R pre-session dispatchers) | 9 hooks → 3 | 6 saved |
 | Completed: wq-739 (cost forecast) | 2 hooks → 1 | 1 saved |
-| **Completed so far** | | **17 hooks** |
-| Pending: wq-744 (stigmergy→trace, snapshots→1, logs→1) | 6 hooks → 3 | 3 saved |
+| Completed: wq-744 (stigmergy→trace, snapshots→1, logs→1) | 5 hooks → 2 | 3 saved |
+| **Completed so far** | | **20 hooks** |
 | Pending: wq-745 (periodic→1, engagement-audit→E posthook) | 4 hooks → 1 | 3 saved |
 | **Total potential reduction** | | **23 hooks** |
 
-Current: 74 active hooks (40 pre + 34 post). Target: 67 or fewer. Progress: 17 hooks reduced (7 prior + 3 from wq-743 + 6 from wq-729 + 1 from wq-739). Pipeline covers 6 more → potential 68 (within 1 of target, likely reachable with opportunistic retirements).
+Current: 71 active hooks (40 pre + 31 post). Target: 67 or fewer. Progress: 20 hooks reduced (7 prior + 3 wq-743 + 6 wq-729 + 1 wq-739 + 3 wq-744). Pipeline: wq-745 covers 3 more → potential 68. With brainstorm E-prehook consolidation (2 more), target of 67 reachable.
 
 Note: Groups 10/12/13 overlap with groups 8/7 in some hooks. When executing, pick one grouping per hook.
 
@@ -137,9 +124,9 @@ Note: Groups 10/12/13 overlap with groups 8/7 in some hooks. When executing, pic
 1. **Phase 1** DONE (s1622): 4 hooks retired, 4 kept after verification
 2. **Phase 2** (1 B session): Retire 3 hooks — wq-743 (dns-certbot, session-diagnostics, imanagent merge)
 3. **Phase 3** DONE (B#490, wq-729): Consolidated B/E/R pre-session dispatchers (9 hooks → 3, saved 6)
-4. **Phase 4** (1-2 B sessions): wq-744 — Post-session consolidation (stigmergy, snapshots, logs)
+4. **Phase 4** DONE (B#493, wq-744): Post-session consolidation (stigmergy→trace, snapshots→1, logs→1, saved 3)
 5. **Phase 5** (1 B session): wq-745 — Pre-session periodic consolidation + E engagement-audit absorption
-6. **Phase 6** (1 B session): wq-739 — Cost forecast merge
+6. **Phase 6** DONE (B#493, wq-739): Cost forecast merge (2→1, saved 1)
 7. **Phase 7** (1 B session): Verify hook count ≤67, measure startup time delta, close d070
 
 Each phase should be a separate wq item for clean tracking.

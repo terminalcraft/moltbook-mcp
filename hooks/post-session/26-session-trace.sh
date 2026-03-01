@@ -1,6 +1,7 @@
 #!/bin/bash
-# wq-180: Append comprehensive session trace to JSONL for stigmergic learning (d035)
-# Creates append-only session-traces.jsonl - never truncated, fully searchable
+# 26-session-trace.sh — Session trace + stigmergy breadcrumbs
+# Consolidated from 26-session-trace.sh + 26-stigmergy-breadcrumb.sh (wq-744, d070)
+# Appends to session-traces.jsonl (comprehensive) and stigmergy-breadcrumbs.json (type/tags)
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -132,3 +133,64 @@ TRACE=$(jq -nc \
 echo "$TRACE" >> "$TRACES_FILE"
 
 echo "$(date -Iseconds) s=$SESSION_NUM trace written" >> "$STATE_DIR/logs/trace.log"
+
+# --- Stigmergy breadcrumb (absorbed from 26-stigmergy-breadcrumb.sh) ---
+BREADCRUMBS_FILE="$DIR/stigmergy-breadcrumbs.json"
+BREADCRUMBS_MAX=100
+HISTORY_FILE="$HOME/.config/moltbook/session-history.txt"
+
+# Initialize breadcrumbs file if missing
+if [ ! -f "$BREADCRUMBS_FILE" ]; then
+  echo '{"version": 1, "description": "Session breadcrumbs for stigmergic coordination", "breadcrumbs": []}' > "$BREADCRUMBS_FILE"
+fi
+
+# Get session note from history
+BC_NOTE=""
+if [ -f "$HISTORY_FILE" ]; then
+  BC_NOTE=$(grep "s=${SESSION_NUM:-0} " "$HISTORY_FILE" 2>/dev/null | tail -1 | sed 's/.*note: //' || true)
+fi
+# Fallback to summary
+if [ -z "$BC_NOTE" ] && [ -f "$SUMMARY_FILE" ]; then
+  BC_NOTE=$(awk '/^Build:/ { in_build=1; next } /^[A-Z]/ { in_build=0 } in_build && /^ *- / { gsub(/^ *- /, ""); print; exit }' "$SUMMARY_FILE" || true)
+fi
+
+if [ -n "$BC_NOTE" ]; then
+  # Skip if breadcrumb for this session already exists
+  if ! jq -e ".breadcrumbs[] | select(.session == ${SESSION_NUM:-0})" "$BREADCRUMBS_FILE" >/dev/null 2>&1; then
+    # Determine type
+    CRUMB_TYPE="discovery"
+    case "${MODE_CHAR:-?}" in
+      B) CRUMB_TYPE="approach"; echo "$BC_NOTE" | grep -iq 'fix\|fixed\|resolve\|repair' && CRUMB_TYPE="lesson" ;;
+      R) CRUMB_TYPE="lesson" ;;
+      E) CRUMB_TYPE="discovery" ;;
+      A) CRUMB_TYPE="warning" ;;
+    esac
+
+    # Determine tags
+    TAG_LIST=""
+    echo "$BC_NOTE" | grep -iq 'test' && TAG_LIST="$TAG_LIST\"testing\","
+    echo "$BC_NOTE" | grep -iq 'api\|endpoint' && TAG_LIST="$TAG_LIST\"api\","
+    echo "$BC_NOTE" | grep -iq 'hook' && TAG_LIST="$TAG_LIST\"hooks\","
+    echo "$BC_NOTE" | grep -iq 'engage\|platform\|chatr\|4claw' && TAG_LIST="$TAG_LIST\"engagement\","
+    echo "$BC_NOTE" | grep -iq 'cost\|budget' && TAG_LIST="$TAG_LIST\"cost\","
+    echo "$BC_NOTE" | grep -iq 'directive\|d0[0-9][0-9]' && TAG_LIST="$TAG_LIST\"directive\","
+    echo "$BC_NOTE" | grep -iq 'wq-' && TAG_LIST="$TAG_LIST\"work-queue\","
+    echo "$BC_NOTE" | grep -iq 'pattern\|knowledge' && TAG_LIST="$TAG_LIST\"knowledge\","
+    TAGS="[]"
+    [ -n "$TAG_LIST" ] && TAGS="[${TAG_LIST%,}]"
+
+    BC_CONTENT=$(echo "$BC_NOTE" | head -c 500)
+
+    jq --argjson bc "$(jq -n \
+      --arg id "bc-${SESSION_NUM:-0}-auto" \
+      --arg type "$CRUMB_TYPE" \
+      --arg content "$BC_CONTENT" \
+      --argjson session "${SESSION_NUM:-0}" \
+      --arg mode "${MODE_CHAR:-?}" \
+      --argjson tags "$TAGS" \
+      --arg created "$(date -Iseconds)" \
+      '{id: $id, type: $type, content: $content, session: $session, mode: $mode, tags: $tags, auto: true, created: $created}')" \
+      ".breadcrumbs += [\$bc] | .breadcrumbs = .breadcrumbs[-${BREADCRUMBS_MAX}:]" \
+      "$BREADCRUMBS_FILE" > "${BREADCRUMBS_FILE}.tmp" && mv "${BREADCRUMBS_FILE}.tmp" "$BREADCRUMBS_FILE"
+  fi
+fi

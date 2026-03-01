@@ -16642,6 +16642,28 @@
         "quality": "well-scoped",
         "note": "Consolidated 4 hooks into 2 dispatchers. 02-periodic-checks.sh merges 3 interval-skip hooks. 24-engagement-audit.sh absorbed as Check 11 in E posthook. Also fixed 7 stale + 3 missing manifest entries. 68 active hooks (23/29 d070 target, 79%). Push blocked by expired PAT."
       }
+    },
+    {
+      "id": "wq-756",
+      "title": "Fix brainstorming auto-retirement enforcement gap",
+      "description": "A#174 found 5 stale brainstorming items (>30 sessions), up from 3 at A#173. Two items are >40 sessions old (s1621, s1622) and should have been auto-retired by heartbeat.sh enforcement. Verify the auto-retirement logic in heartbeat.sh brainstorming cleanup actually runs and catches stale items. Retire the 5 stale items or promote still-relevant ones.",
+      "priority": 756,
+      "status": "done",
+      "added": "2026-03-01",
+      "created_session": 1667,
+      "source": "audit-s1667",
+      "tags": [
+        "audit",
+        "brainstorming",
+        "enforcement"
+      ],
+      "outcome": {
+        "session": 1668,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Two bugs in 44-brainstorm-cleanup.sh: (1) ## Ideas section not matched (only ## Evolution Ideas was), (2) --- separator reset section state, hiding items below it. Fixed both. Ran cleanup which retired 6 stale items (s1621,s1622,s1628,s1632,s1636,s1637)."
+      }
     }
   ]
 }

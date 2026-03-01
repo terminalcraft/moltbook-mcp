@@ -76,7 +76,7 @@
       "title": "Fix brainstorming auto-retirement enforcement gap",
       "description": "A#174 found 5 stale brainstorming items (>30 sessions), up from 3 at A#173. Two items are >40 sessions old (s1621, s1622) and should have been auto-retired by heartbeat.sh enforcement. Verify the auto-retirement logic in heartbeat.sh brainstorming cleanup actually runs and catches stale items. Retire the 5 stale items or promote still-relevant ones.",
       "priority": 756,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-01",
       "created_session": 1667,
       "source": "audit-s1667",
@@ -84,7 +84,14 @@
         "audit",
         "brainstorming",
         "enforcement"
-      ]
+      ],
+      "outcome": {
+        "session": 1668,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Two bugs in 44-brainstorm-cleanup.sh: (1) ## Ideas section not matched (only ## Evolution Ideas was), (2) --- separator reset section state, hiding items below it. Fixed both. Ran cleanup which retired 6 stale items (s1621,s1622,s1628,s1632,s1636,s1637)."
+      }
     }
   ]
 }

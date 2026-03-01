@@ -40,8 +40,10 @@ for (let i = 0; i < lines.length; i++) {
 
   // Track which section we're in
   if (line.startsWith('## Active Observations')) { inObservations = true; inIdeas = false; continue; }
-  if (line.startsWith('## Evolution Ideas')) { inIdeas = true; inObservations = false; continue; }
-  if (line.startsWith('## ') || line.startsWith('---')) { inObservations = false; inIdeas = false; continue; }
+  if (line.startsWith('## Ideas') || line.startsWith('## Evolution Ideas')) { inIdeas = true; inObservations = false; continue; }
+  if (line.startsWith('## ')) { inObservations = false; inIdeas = false; continue; }
+  // Skip --- separators without resetting section state (cosmetic dividers, not section boundaries)
+  if (line.startsWith('---')) continue;
 
   // Skip already struck-through or empty lines
   if (line.trim().startsWith('- ~~') || !line.trim().startsWith('- ')) continue;

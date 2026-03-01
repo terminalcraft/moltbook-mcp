@@ -119,14 +119,18 @@ B_FOCUS="feature"  # Legacy — kept for hook compatibility but no longer altern
 CTX_FILE="$STATE_DIR/session-context.json"
 CTX_ENV="$STATE_DIR/session-context.env"
 
+# Shared function: run session-context.mjs and source the env output. (R#290)
+# Called on initial computation and again after mode downgrade.
+compute_session_context() {
+  node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo "{}" > "$CTX_FILE"
+  if [ -f "$CTX_ENV" ]; then
+    source "$CTX_ENV"
+  fi
+}
+
 if [ -z "$EMERGENCY_MODE" ]; then
   safe_stage "session-context" '
-    node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo "{}" > "$CTX_FILE"
-    # Source shell-compatible context — eliminates 11+ per-field node spawns. (R#50)
-    # All fields available as CTX_<FIELD> (e.g. CTX_PENDING_COUNT, CTX_WQ_ITEM).
-    if [ -f "$CTX_ENV" ]; then
-      source "$CTX_ENV"
-    fi
+    compute_session_context
     # Sync counter with engagement-state (from session-context.mjs)
     ESTATE_SESSION="${CTX_ESTATE_SESSION:-0}"
     if [ "$ESTATE_SESSION" -gt "$COUNTER" ] 2>/dev/null; then
@@ -172,10 +176,7 @@ fi
 if [ -n "$DOWNGRADED" ]; then
   safe_stage "context-recompute" '
     echo "$(date -Iseconds) recomputing session-context for downgrade: $DOWNGRADED → $MODE_CHAR" >> "$LOG_DIR/selfmod.log"
-    node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo "{}" > "$CTX_FILE"
-    if [ -f "$CTX_ENV" ]; then
-      source "$CTX_ENV"
-    fi
+    compute_session_context
   '
 fi
 

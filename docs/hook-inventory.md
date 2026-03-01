@@ -115,8 +115,6 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 75 active (41 pre-ses
 - `post/24-engagement-audit.sh` — **Absorbable**: 23-line E-only hook that checks for 0 `log_engagement` calls. Fits as phase check inside existing `36-e-session-posthook_E.sh` mega-hook.
 
 ### KEPT (verified still needed):
-- `pre/14-colony-jwt-refresh.sh` — Colony creds exist, keep until Colony status clarified.
-- `pre/15-imanagent-refresh.sh` — Token refreshed 2026-02-27. Actively used. (Merge into 14-token-refresh.sh per group 11.)
 - `post/28-pattern-analytics_B.sh` — Tracks useful capture rate data.
 - `post/40-note-quality.sh` — Substantial quality checker (130 lines), actively valuable.
 

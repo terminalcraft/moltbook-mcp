@@ -41,7 +41,7 @@ If prompt has "ANSWERED QUESTIONS": update each in directives.json `questions` a
 
 ### 2b. Security posture
 
-Automated by `35-security-posture_R.sh`. Check maintain-audit.txt for SEC_CRITICAL (staged cred → `git reset` + .gitignore) or SEC_WARN (add to .gitignore).
+Check maintain-audit.txt for SEC_CRITICAL (staged cred → `git reset` + .gitignore) or SEC_WARN (add to .gitignore).
 
 ### 3. Structural change (PRIMARY)
 

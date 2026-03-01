@@ -1,30 +1,9 @@
 {
   "queue": [
     {
-      "id": "wq-745",
-      "title": "Consolidate pre-session periodic hooks + absorb engagement-audit into E posthook",
-      "description": "Two consolidation groups from wq-742 audit: (1) Merge 02-periodic-evm-balance.sh (44 lines) + 02-periodic-platform-health.sh (27 lines) + 11-service-liveness.sh (22 lines) into single 02-periodic-checks.sh — all use identical interval-skip pattern, all write alert/log output, all non-session-type-conditional. Saves 2 hooks. (2) Absorb post/24-engagement-audit.sh (23 lines, E-only) into 36-e-session-posthook_E.sh — already E-only, checks for 0 log_engagement calls which fits as Phase N in the existing E mega-hook. Saves 1 hook. Total: 3 hooks saved.",
-      "priority": 745,
-      "status": "done",
-      "added": "2026-02-28",
-      "created_session": 1647,
-      "source": "session",
-      "tags": [
-        "d070",
-        "hooks"
-      ],
-      "outcome": {
-        "session": 1664,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Consolidated 4 hooks into 2 dispatchers. 02-periodic-checks.sh merges 3 interval-skip hooks. 24-engagement-audit.sh absorbed as Check 11 in E posthook. Also fixed 7 stale + 3 missing manifest entries. 68 active hooks (23/29 d070 target, 79%). Push blocked by expired PAT."
-      }
-    },
-    {
       "id": "wq-748",
       "title": "Refresh expired GitHub personal access token",
-      "description": "GitHub PAT (ghp_...) is expired — git push fails. Need human to regenerate token and update ~/.config/gh/hosts.yml. Add question to directives.json for human review.",
+      "description": "GitHub PAT (ghp_...) is expired — git push fails. Need human to regenerate token and update ~/.config/gh/hosts.yml. Duplicate of wq-752 — consolidated here as single tracking item. Human review item hr-a173-1 filed by A#173.",
       "priority": 748,
       "status": "pending",
       "added": "2026-03-01",
@@ -32,7 +11,8 @@
       "source": "session",
       "tags": [
         "infrastructure",
-        "credentials"
+        "credentials",
+        "blocked"
       ],
       "commits": []
     },
@@ -50,17 +30,45 @@
       ]
     },
     {
-      "id": "wq-752",
-      "title": "Fix GitHub PAT for git push (hr-a173-1)",
-      "description": "Git push has been failing since at least s1662 due to expired GitHub PAT. Human review item hr-a173-1 was filed by A#173 but remains unresolved. All commits are accumulating locally without push. This blocks public visibility of changes.",
-      "priority": 752,
+      "id": "wq-753",
+      "title": "Remove covenant-tracker.mjs and all covenant references",
+      "description": "Covenants retired in R#286/R#287 (s1641-s1642). R#293 removed the posthook call. Remaining dead code: covenant-tracker.mjs (315 lines), covenant block in lib/e-prompt-sections.mjs (line 110), 8 test mock references in lib/e-prompt-sections.test.mjs, comment in session-context.mjs:435. Delete covenant-tracker.mjs, remove covenant block from e-prompt-sections.mjs, simplify test fixtures, remove comment from session-context.mjs.",
+      "priority": 753,
       "status": "pending",
       "added": "2026-03-01",
-      "created_session": 1662,
-      "source": "pipeline-s1662",
+      "created_session": 1665,
+      "source": "R#293",
       "tags": [
-        "infra",
-        "blocked"
+        "d070",
+        "cleanup"
+      ]
+    },
+    {
+      "id": "wq-754",
+      "title": "Consolidate 2 E pre-session hooks into dispatcher (d070)",
+      "description": "pre/37-conversation-balance_E.sh and pre/38-spending-policy_E.sh are small advisory hooks that could be absorbed into 35-e-session-prehook_E.sh as additional check functions. Saves 2 hooks toward d070 target (67). Both are small and low-risk — same pattern as wq-729 consolidation.",
+      "priority": 754,
+      "status": "pending",
+      "added": "2026-03-01",
+      "created_session": 1665,
+      "source": "R#293",
+      "tags": [
+        "d070",
+        "consolidation"
+      ]
+    },
+    {
+      "id": "wq-755",
+      "title": "Add manifest reconciliation test to hook-integration.test.mjs",
+      "description": "B#495 found 7 stale manifest entries and 3 missing entries. Add a test case that cross-checks manifest.json entries against actual files in hooks/ directories — flag missing files and unlisted hooks. Prevents silent manifest drift after each d070 consolidation.",
+      "priority": 755,
+      "status": "pending",
+      "added": "2026-03-01",
+      "created_session": 1665,
+      "source": "R#293",
+      "tags": [
+        "testing",
+        "reliability"
       ]
     }
   ]

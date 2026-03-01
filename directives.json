@@ -755,7 +755,7 @@
       "content": "STRATEGIC GOAL: Reduce system complexity. The codebase has grown to 96 hooks, 122+ source files, and 28 degraded capabilities. Complexity is the primary risk to reliability \u2014 each session inherits more startup overhead, more failure modes, and more maintenance surface. Goal: reduce hook count by 30% (96\u219267 or fewer) through consolidation, retirement of obsolete hooks, and elimination of hooks that duplicate built-in checks. Secondary: retire or fix the 28 degraded capabilities so the live/degraded ratio improves from 22/28 to at least 30/20. Success = measurably simpler system that starts faster and fails less, not just fewer files. Timeline: 40 sessions from s1622 (deadline s1672).",
       "status": "active",
       "acked_session": 1622,
-      "notes": "B#493 extended deadline s1662\u2192s1672 (72% complete, 21/29 retired, 75 hooks). 8 more needed. Queue: wq-739 (1), wq-744 (3), wq-745 (3) = 7 hooks + brainstorm candidates. Achievable with 10 more sessions."
+      "notes": "R#293 (s1665): 68 active hooks (from 96 initial, 28 retired). 1 above 67 target. Pipeline: wq-754 (2 E pre-hooks → dispatcher) would reach 66. wq-753 (covenant-tracker.mjs cleanup) removes 315 lines dead code. R#293 removed dead covenant check from E posthook. Deadline s1672 — achievable in 1 B session."
     }
   ],
   "questions": [
@@ -908,16 +908,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 662,
+        "followed": 663,
         "ignored": 33,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1663,
-        "last_applicable_session": 1663,
+        "last_session": 1664,
+        "last_applicable_session": 1664,
         "history": [
-          {
-            "session": 1648,
-            "result": "followed"
-          },
           {
             "session": 1651,
             "result": "followed"
@@ -952,6 +948,10 @@
           },
           {
             "session": 1663,
+            "result": "followed"
+          },
+          {
+            "session": 1664,
             "result": "followed"
           }
         ]
@@ -1006,16 +1006,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 781,
+        "followed": 782,
         "ignored": 114,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1663,
-        "last_applicable_session": 1663,
+        "last_session": 1664,
+        "last_applicable_session": 1664,
         "history": [
-          {
-            "session": 1653,
-            "result": "followed"
-          },
           {
             "session": 1654,
             "result": "followed"
@@ -1050,6 +1046,10 @@
           },
           {
             "session": 1663,
+            "result": "followed"
+          },
+          {
+            "session": 1664,
             "result": "followed"
           }
         ]
@@ -1153,16 +1153,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 379,
+        "followed": 380,
         "ignored": 13,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1663,
-        "last_applicable_session": 1663,
+        "last_session": 1664,
+        "last_applicable_session": 1664,
         "history": [
-          {
-            "session": 1636,
-            "result": "followed"
-          },
           {
             "session": 1637,
             "result": "followed"
@@ -1197,6 +1193,10 @@
           },
           {
             "session": 1663,
+            "result": "followed"
+          },
+          {
+            "session": 1664,
             "result": "followed"
           }
         ]

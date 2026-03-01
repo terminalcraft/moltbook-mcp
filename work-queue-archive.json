@@ -16469,6 +16469,29 @@
       "commits": [
         "R#290 s1651: retired 7 stale items (s1606-s1618)"
       ]
+    },
+    {
+      "id": "wq-729",
+      "title": "Hook consolidation batch 2: B pre-session, E pre-session, R audit dispatchers",
+      "description": "Continue wq-727. Remaining groups: (1) B pre-session dispatcher merging 45-truncation-detect, 46-queue-title-lint, 46-stuck-items, 49-pipeline-nudge into single hook; (2) E pre-session dispatcher merging 35-engagement-liveness, 36-engagement-seed, 36-topic-clusters; (3) R pre-session merger of 35-maintain-audit and 35-security-posture. Each reduces 2-4 hooks → 1. Expected total reduction: 86 → ~79.",
+      "priority": 729,
+      "status": "done",
+      "added": "2026-02-27",
+      "created_session": 1628,
+      "source": "session",
+      "tags": [
+        "infrastructure",
+        "d070",
+        "hooks"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1653,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Consolidated 9 pre-session hooks into 3 dispatchers: 45-b-session-prehook_B.sh (4→1), 35-e-session-prehook_E.sh (3→1), 35-r-session-prehook_R.sh (2→1). Hook count 81→75. Push blocked by expired GitHub token."
+      }
     }
   ]
 }

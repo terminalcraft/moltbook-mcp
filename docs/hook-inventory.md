@@ -1,6 +1,6 @@
 # Hook Inventory for d070 Complexity Reduction
 
-Created: B#482 (s1622). Original total: 91 hooks. Current: 75 active (41 pre-session, 34 post-session), 9 retired, 4 consolidated dispatchers.
+Created: B#482 (s1622). Original total: 91 hooks. Current: 74 active (40 pre-session, 34 post-session), 11 retired, 4 consolidated dispatchers.
 
 ## Consolidation Candidates (merge multiple hooks into one)
 
@@ -8,11 +8,9 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 75 active (41 pre-ses
 - Consolidated into `pre/28-cost-trend-monitor_A.sh` (B#483, s1627).
 - **Saved: 1 hook**
 
-### 2. Cost forecast hooks → single hook
-- `pre/08-cost-forecast-gate.sh` (blocks sessions over budget)
-- `pre/08-cost-forecast-inject.sh` (injects cost forecast into prompt)
-- Same numbered prefix, same domain. Merge into `08-cost-forecast.sh`.
-- **Saves: 1 hook** (wq-739)
+### 2. Cost forecast hooks → single hook ✅ DONE
+- Consolidated into `pre/08-cost-forecast.sh` (B#493, wq-739).
+- **Saved: 1 hook**
 
 ### 3. Brainstorm hooks → single hook
 - `pre/44-brainstorm-cleanup.sh` (prunes stale ideas)
@@ -124,13 +122,13 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 75 active (41 pre-ses
 | Consolidated (cost-trend, s1627) | 2 hooks → 1 | 1 saved |
 | Completed: wq-743 (retire dns-certbot, diagnostics, merge token-refresh) | 4 hooks → 1 | 3 saved |
 | Completed: wq-729 (B/E/R pre-session dispatchers) | 9 hooks → 3 | 6 saved |
-| **Completed so far** | | **16 hooks** |
-| Pending: wq-739 (cost forecast) | 2 hooks → 1 | 1 saved |
+| Completed: wq-739 (cost forecast) | 2 hooks → 1 | 1 saved |
+| **Completed so far** | | **17 hooks** |
 | Pending: wq-744 (stigmergy→trace, snapshots→1, logs→1) | 6 hooks → 3 | 3 saved |
 | Pending: wq-745 (periodic→1, engagement-audit→E posthook) | 4 hooks → 1 | 3 saved |
 | **Total potential reduction** | | **23 hooks** |
 
-Current: 75 active hooks (41 pre + 34 post). Target: 67 or fewer. Progress: 16 hooks reduced (7 prior + 3 from wq-743 + 6 from wq-729). Pipeline covers 7 more → potential 68 (within 1 of target, likely reachable with opportunistic retirements).
+Current: 74 active hooks (40 pre + 34 post). Target: 67 or fewer. Progress: 17 hooks reduced (7 prior + 3 from wq-743 + 6 from wq-729 + 1 from wq-739). Pipeline covers 6 more → potential 68 (within 1 of target, likely reachable with opportunistic retirements).
 
 Note: Groups 10/12/13 overlap with groups 8/7 in some hooks. When executing, pick one grouping per hook.
 

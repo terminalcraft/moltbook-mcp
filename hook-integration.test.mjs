@@ -33,14 +33,12 @@ const SANDBOX_REPO = join(SANDBOX_HOME, 'moltbook-mcp');
 const NETWORK_HOOKS = new Set([
   '04-api-freshness.sh',       // checks localhost:3847
   '10-health-check.sh',        // checks localhost:3847
-  '11-service-liveness.sh',    // probes external services
+  '02-periodic-checks.sh',    // blockchain + platform probes + service liveness
   '15-presence-heartbeat.sh',  // external API
   '20-poll-directories.sh',    // external API
   '05-smoke-test.sh',          // needs running server
   '12-fire-webhook.sh',        // fires webhooks
   '13-ctxly-summary.sh',       // external API
-  '02-periodic-evm-balance.sh',  // blockchain check
-  '02-periodic-platform-health.sh', // probes platforms
   '39-defunct-probe.sh',       // probes services
 ]);
 

@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated": "2026-03-01T08:03:48.774Z",
-  "total": 75,
+  "generated": "2026-03-01T11:44:20.287Z",
+  "total": 68,
   "hooks": [
     {
       "name": "01-session-start-log.sh",
@@ -11,18 +11,11 @@
       "last_triggered_session": 1653
     },
     {
-      "name": "02-periodic-evm-balance.sh",
+      "name": "02-periodic-checks.sh",
       "phase": "pre-session",
       "scope": "all",
-      "created": "2026-02-08T22:33:26+01:00",
-      "last_triggered_session": 1653
-    },
-    {
-      "name": "02-periodic-platform-health.sh",
-      "phase": "pre-session",
-      "scope": "all",
-      "created": "2026-02-08T22:33:26+01:00",
-      "last_triggered_session": 1653
+      "created": "2026-03-01T13:00:00+01:00",
+      "last_triggered_session": null
     },
     {
       "name": "03-schema-check.sh",
@@ -60,18 +53,11 @@
       "last_triggered_session": 1653
     },
     {
-      "name": "08-cost-forecast-gate.sh",
+      "name": "08-cost-forecast.sh",
       "phase": "pre-session",
       "scope": "all",
-      "created": "2026-02-25T06:56:15+01:00",
-      "last_triggered_session": 1653
-    },
-    {
-      "name": "08-cost-forecast-inject.sh",
-      "phase": "pre-session",
-      "scope": "all",
-      "created": "2026-02-10T00:45:21+01:00",
-      "last_triggered_session": 1653
+      "created": "2026-03-01T00:00:00+01:00",
+      "last_triggered_session": null
     },
     {
       "name": "09-financial-check.sh",
@@ -85,13 +71,6 @@
       "phase": "pre-session",
       "scope": "all",
       "created": "2026-02-01T07:26:21+01:00",
-      "last_triggered_session": 1653
-    },
-    {
-      "name": "11-service-liveness.sh",
-      "phase": "pre-session",
-      "scope": "all",
-      "created": "2026-02-02T04:03:56+01:00",
       "last_triggered_session": 1653
     },
     {
@@ -382,25 +361,11 @@
       "last_triggered_session": 1651
     },
     {
-      "name": "22-ecosystem-snapshot.sh",
+      "name": "22-session-snapshots.sh",
       "phase": "post-session",
       "scope": "all",
-      "created": "2026-02-03T03:41:01+01:00",
-      "last_triggered_session": 1651
-    },
-    {
-      "name": "23-pattern-snapshot.sh",
-      "phase": "post-session",
-      "scope": "all",
-      "created": "2026-02-03T14:24:43+01:00",
-      "last_triggered_session": 1651
-    },
-    {
-      "name": "24-engagement-audit.sh",
-      "phase": "post-session",
-      "scope": "all",
-      "created": "2026-02-03T03:41:01+01:00",
-      "last_triggered_session": 1651
+      "created": "2026-03-01T00:00:00+01:00",
+      "last_triggered_session": null
     },
     {
       "name": "25-directive-audit.sh",
@@ -428,13 +393,6 @@
       "phase": "post-session",
       "scope": "all",
       "created": "2026-02-06T12:03:30+01:00",
-      "last_triggered_session": 1651
-    },
-    {
-      "name": "26-stigmergy-breadcrumb.sh",
-      "phase": "post-session",
-      "scope": "all",
-      "created": "2026-02-04T04:13:21+01:00",
       "last_triggered_session": 1651
     },
     {
@@ -466,18 +424,11 @@
       "last_triggered_session": 1651
     },
     {
-      "name": "30-log-rotate.sh",
+      "name": "30-log-maintenance.sh",
       "phase": "post-session",
       "scope": "all",
-      "created": "2026-02-01T07:01:16+01:00",
-      "last_triggered_session": 1651
-    },
-    {
-      "name": "32-compress-logs.sh",
-      "phase": "post-session",
-      "scope": "all",
-      "created": "2026-02-01T23:49:28+01:00",
-      "last_triggered_session": 1651
+      "created": "2026-03-01T00:00:00+01:00",
+      "last_triggered_session": null
     },
     {
       "name": "33-queue-archive.sh",

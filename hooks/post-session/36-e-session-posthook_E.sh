@@ -15,6 +15,7 @@
 #   42-quality-enforce_E.sh    (wq-632, d066)
 #   31-covenant-update_E.sh    (wq-220) — merged B#483 (wq-727)
 #   37-scope-bleed-detect_E.sh (wq-712) — merged B#483 (wq-727)
+#   24-engagement-audit.sh     (wq-745) — merged B#495 (wq-745)
 #
 # Created: B#459 (wq-662)
 set -euo pipefail
@@ -953,6 +954,30 @@ check_scope_bleed() {
 }
 
 ###############################################################################
+# Check 11: Engagement logging audit (was 24-engagement-audit.sh, wq-745)
+#   Flags E sessions that didn't use log_engagement MCP tool
+###############################################################################
+check_engagement_logging() {
+  local LOG_FILE="${LOG_FILE:-}"
+  [ -f "$LOG_FILE" ] || return 0
+
+  local COUNT
+  COUNT=$(grep -c '"log_engagement"' "$LOG_FILE" 2>/dev/null || echo 0)
+
+  if [ "$COUNT" -eq 0 ]; then
+    local NUDGE="$STATE_DIR/engagement-audit-nudge.txt"
+    cat > "$NUDGE" << MSG
+## Engagement logging alert
+Last E session (s${SESSION}) made 0 log_engagement calls. Every post, comment, reply, and upvote must be logged using the log_engagement MCP tool. This data feeds the monitoring dashboard. Call log_engagement immediately after each interaction.
+MSG
+    echo "engagement-audit: 0 log_engagement calls in E session"
+  else
+    rm -f "$STATE_DIR/engagement-audit-nudge.txt"
+    echo "engagement-audit: $COUNT log_engagement calls — ok"
+  fi
+}
+
+###############################################################################
 # Phase 2: Run all checks sequentially
 ###############################################################################
 
@@ -966,5 +991,6 @@ check_quality_enforce || true
 check_e_cost_cap || true
 check_covenant_update || true
 check_scope_bleed || true
+check_engagement_logging || true
 
 exit 0

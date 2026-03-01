@@ -15,6 +15,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **d070 startup time measurement** (added ~s1647): After hook consolidation reaches target (67 or fewer), measure actual pre-session pipeline duration before/after. The hook-timing.json data from pre-hook-results.json already captures per-hook execution time — sum the consolidated hooks' predecessors vs the new single hook to quantify the startup speedup. Would validate that d070 achieved its "starts faster" success criterion, not just "fewer files."
 - **Remove covenant code from e-prompt-sections.mjs** (added ~s1657): `lib/e-prompt-sections.mjs` still calls `node covenant-tracker.mjs digest` and builds a covenantBlock. Covenants were retired in R#286/R#287 with hooks removed in s1646 (wq-740). The E prompt section code and its test mocks in `lib/e-prompt-sections.test.mjs` are dead weight — remove the covenant block generation and simplify the test fixtures.
 
+- **Manifest reconciliation in post-hook regression test** (added ~s1664): B#495 found 7 stale manifest entries and 3 missing entries from prior consolidations (wq-739, wq-744). The `hook-integration.test.mjs` NETWORK_HOOKS set also drifts. Add a test case that cross-checks manifest.json entries against actual files on disk — flag missing files and unlisted hooks. Prevents silent manifest drift after each consolidation.
+
 ## Active Observations
 
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting

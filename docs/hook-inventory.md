@@ -1,6 +1,6 @@
 # Hook Inventory for d070 Complexity Reduction
 
-Created: B#482 (s1622). Original total: 91 hooks. Current: 71 active (40 pre-session, 31 post-session), 16 retired, 4 consolidated dispatchers.
+Created: B#482 (s1622). Original total: 91 hooks. Current: 72 active (37 pre-session, 30 post-session + 5 dispatchers), 20 retired, 5 consolidated dispatchers.
 
 ## Consolidation Candidates (merge multiple hooks into one)
 
@@ -64,12 +64,9 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 71 active (40 pre-ses
 - 4 hooks for directives.json. Merge into pre `41-directive-mgmt.sh` and post `25-directive-audit.sh` (keep).
 - **Saves: 2 hooks**
 
-### 10. Periodic interval hooks → single hook (NEW, wq-745)
-- `pre/02-periodic-evm-balance.sh` (every 70 sessions, 44 lines)
-- `pre/02-periodic-platform-health.sh` (every 20 sessions, 27 lines)
-- `pre/11-service-liveness.sh` (every 20 sessions, 22 lines)
-- All use identical `if (( SESSION_NUM % INTERVAL != 0 )); then exit 0; fi` skip pattern. Merge into `02-periodic-checks.sh`.
-- **Saves: 2 hooks**
+### 10. Periodic interval hooks → single hook ✅ DONE
+- Consolidated into `pre/02-periodic-checks.sh` (B#495, wq-745).
+- **Saved: 2 hooks**
 
 ### 11. Token refresh hooks → single hook (NEW, wq-743)
 - `pre/14-colony-jwt-refresh.sh` (Colony JWT, 43 lines)
@@ -93,8 +90,9 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 71 active (40 pre-ses
 - `pre/25-session-diagnostics.sh` — **Redundant**: duplicated by gap-validator + outcome-feedback. Directive-audit check absorbed into R pre-session dispatcher. RETIRED s1647.
 - `pre/14-colony-jwt-refresh.sh` + `pre/15-imanagent-refresh.sh` — **Consolidated** into `pre/14-token-refresh.sh`. RETIRED s1647.
 
-### PENDING RETIREMENT (wq-745):
-- `post/24-engagement-audit.sh` — **Absorbable**: 23-line E-only hook that checks for 0 `log_engagement` calls. Fits as phase check inside existing `36-e-session-posthook_E.sh` mega-hook.
+### RETIRED (wq-745, s1664):
+- `pre/02-periodic-evm-balance.sh` + `pre/02-periodic-platform-health.sh` + `pre/11-service-liveness.sh` — **Consolidated** into `pre/02-periodic-checks.sh`. RETIRED s1664.
+- `post/24-engagement-audit.sh` — **Absorbed** into `post/36-e-session-posthook_E.sh` as Check 11. RETIRED s1664.
 
 ### KEPT (verified still needed):
 - `post/28-pattern-analytics_B.sh` — Tracks useful capture rate data.
@@ -111,11 +109,10 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 71 active (40 pre-ses
 | Completed: wq-729 (B/E/R pre-session dispatchers) | 9 hooks → 3 | 6 saved |
 | Completed: wq-739 (cost forecast) | 2 hooks → 1 | 1 saved |
 | Completed: wq-744 (stigmergy→trace, snapshots→1, logs→1) | 5 hooks → 2 | 3 saved |
-| **Completed so far** | | **20 hooks** |
-| Pending: wq-745 (periodic→1, engagement-audit→E posthook) | 4 hooks → 1 | 3 saved |
-| **Total potential reduction** | | **23 hooks** |
+| Completed: wq-745 (periodic→1, engagement-audit→E posthook) | 4 hooks → 1 | 3 saved |
+| **Completed so far** | | **23 hooks** |
 
-Current: 71 active hooks (40 pre + 31 post). Target: 67 or fewer. Progress: 20 hooks reduced (7 prior + 3 wq-743 + 6 wq-729 + 1 wq-739 + 3 wq-744). Pipeline: wq-745 covers 3 more → potential 68. With brainstorm E-prehook consolidation (2 more), target of 67 reachable.
+Current: 72 active hooks (37 pre + 30 post + 5 dispatchers). Target: 67 or fewer. Progress: 23 hooks reduced (7 prior + 3 wq-743 + 6 wq-729 + 1 wq-739 + 3 wq-744 + 3 wq-745). Need 5 more to hit target of 67. Brainstorm consolidation (2), directive consolidation (2), queue management (1) can close the gap.
 
 Note: Groups 10/12/13 overlap with groups 8/7 in some hooks. When executing, pick one grouping per hook.
 
@@ -125,7 +122,7 @@ Note: Groups 10/12/13 overlap with groups 8/7 in some hooks. When executing, pic
 2. **Phase 2** (1 B session): Retire 3 hooks — wq-743 (dns-certbot, session-diagnostics, imanagent merge)
 3. **Phase 3** DONE (B#490, wq-729): Consolidated B/E/R pre-session dispatchers (9 hooks → 3, saved 6)
 4. **Phase 4** DONE (B#493, wq-744): Post-session consolidation (stigmergy→trace, snapshots→1, logs→1, saved 3)
-5. **Phase 5** (1 B session): wq-745 — Pre-session periodic consolidation + E engagement-audit absorption
+5. **Phase 5** DONE (B#495, wq-745): Pre-session periodic consolidation + E engagement-audit absorption (4→1, saved 3)
 6. **Phase 6** DONE (B#493, wq-739): Cost forecast merge (2→1, saved 1)
 7. **Phase 7** (1 B session): Verify hook count ≤67, measure startup time delta, close d070
 

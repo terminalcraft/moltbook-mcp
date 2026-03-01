@@ -77,14 +77,21 @@
       "title": "Extend d070 deadline from s1662 to s1672 and clean 6 stale hook-inventory.md refs",
       "description": "d070 at 72% (21/29 hooks retired, 96→75) will miss s1662 deadline. Next R session should extend to s1672. Additionally, 6 stale refs in hook-inventory.md point to retired hooks — clean these during next B session hook consolidation work. Refs: 35-engagement-liveness_E, 35-maintain-audit_R, 36-engagement-seed_E, 36-topic-clusters_E, 46-queue-title-lint_B, 46-stuck-items_B.",
       "priority": 750,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-01",
       "created_session": 1661,
       "source": "audit-s1661",
       "tags": [
         "audit",
         "d070"
-      ]
+      ],
+      "outcome": {
+        "session": 1662,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Extended d070 deadline s1662→s1672 in directives.json + BRIEFING.md. Cleaned all 6 stale refs in hook-inventory.md. stale-ref-check reports 0 refs. Also updated BRIEFING.md hook count 96→75 and maintain-audit ref. Push blocked by expired PAT (hr-a173-1)."
+      }
     }
   ]
 }

@@ -275,7 +275,7 @@ esac
 # Adaptive budget override (s429) — skip in safe/emergency mode
 if [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ]; then
   safe_stage "adaptive-budget" '
-    ADAPTIVE=$(python3 "$DIR/adaptive-budget.py" "$MODE_CHAR" 2>/dev/null)
+    ADAPTIVE=$(node "$DIR/adaptive-budget.mjs" "$MODE_CHAR" 2>/dev/null)
     if [ -n "$ADAPTIVE" ] && [ "$ADAPTIVE" != "$BUDGET" ]; then
       echo "$(date -Iseconds) adaptive budget: $MODE_CHAR $BUDGET -> $ADAPTIVE" >> "$LOG_DIR/hooks.log"
       BUDGET="$ADAPTIVE"

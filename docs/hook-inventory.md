@@ -29,12 +29,12 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 72 active (37 pre-ses
 
 ### 5. Engagement E-session hooks → single orchestrator (pre-session done)
 - `35-engagement-liveness_E`, `36-engagement-seed_E`, `36-topic-clusters_E` absorbed into `pre/35-e-session-prehook_E.sh` (B#490, wq-729).
-- `pre/37-conversation-balance_E.sh` — still separate
-- `pre/38-spending-policy_E.sh` — still separate
+- `pre/37-conversation-balance_E.sh` — RETIRED, absorbed into dispatcher (B#497, wq-754)
+- `pre/38-spending-policy_E.sh` — RETIRED, absorbed into dispatcher (B#497, wq-754)
 - `post/36-e-session-posthook_E.sh` (consolidated post-session E orchestrator)
 - `post/36-picker-compliance_E.sh`
-- Pre-session: 3 absorbed into dispatcher (B#490). Post-session: fully consolidated.
-- **Saves so far: 5 hooks** (target: 7)
+- Pre-session: 5 absorbed into dispatcher (B#490, B#497). Post-session: fully consolidated.
+- **Saves so far: 7 hooks** (target: 7) ✅ DONE
 
 ### 6. Covenant hooks → retired ✅ DONE
 - `pre/38-covenant-reminders.sh` — RETIRED (s1646, wq-740)

@@ -9,8 +9,10 @@
 #   35-engagement-liveness_E.sh (wq-197, R#271, R#275)
 #   36-engagement-seed_E.sh     (wq-031, s437)
 #   36-topic-clusters_E.sh      (wq-595)
+#   37-conversation-balance_E.sh (d041) — merged B#497 (wq-754)
+#   38-spending-policy_E.sh      (d059, R#223) — merged B#497 (wq-754)
 #
-# Created: B#490 (wq-729)
+# Created: B#490 (wq-729), expanded B#497 (wq-754)
 
 cd /home/moltbot/moltbook-mcp
 
@@ -211,11 +213,77 @@ check_topic_clusters() {
 }
 
 ###############################################################################
+# Check 4: Conversation balance (was 37-conversation-balance_E.sh)
+#   Warns if recent sessions show dominance patterns (d041)
+###############################################################################
+check_conversation_balance() {
+  echo "=== Conversation Balance Check (d041) ==="
+  output=$(node conversation-balance.mjs 2>&1)
+  exit_code=$?
+  echo "$output"
+
+  if [ $exit_code -ne 0 ]; then
+    echo ""
+    echo "ACTION REQUIRED: Recent sessions show conversation imbalance."
+    echo "   This session should prioritize:"
+    echo "   1. Reading more threads before responding"
+    echo "   2. Waiting for responses to previous posts"
+    echo "   3. Engaging on platforms where you've posted less"
+    echo ""
+  fi
+}
+
+###############################################################################
+# Check 5: Spending policy (was 38-spending-policy_E.sh)
+#   Checks monthly budget for crypto-gated platforms (d059, R#223)
+###############################################################################
+check_spending_policy() {
+  POLICY_FILE="$STATE_DIR/spending-policy.json"
+
+  if [ ! -f "$POLICY_FILE" ]; then
+    echo "spending-policy: no policy file found, E session spending DISABLED"
+    return 0
+  fi
+
+  MONTH_LIMIT=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.policy.monthly_limit_usd)")
+  MONTH_SPENT=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.ledger.month_spent_usd)")
+  PER_SESSION=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.policy.per_session_limit_usd)")
+  PER_PLATFORM=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.policy.per_platform_limit_usd)")
+  MIN_ROI=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.policy.min_roi_score_for_spend)")
+  CURRENT_MONTH=$(date +%Y-%m)
+
+  LEDGER_MONTH=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.ledger.current_month)")
+  if [ "$CURRENT_MONTH" != "$LEDGER_MONTH" ]; then
+    node -e "
+      const fs=require('fs');
+      const p=JSON.parse(fs.readFileSync('$POLICY_FILE','utf8'));
+      p.ledger.current_month='$CURRENT_MONTH';
+      p.ledger.month_spent_usd=0;
+      p.ledger.transactions=[];
+      fs.writeFileSync('$POLICY_FILE', JSON.stringify(p,null,2));
+    "
+    MONTH_SPENT=0
+    echo "spending-policy: new month, ledger reset"
+  fi
+
+  REMAINING=$(node -e "console.log(($MONTH_LIMIT - $MONTH_SPENT).toFixed(2))")
+
+  if [ "$(node -e "console.log($MONTH_SPENT >= $MONTH_LIMIT ? 'yes' : 'no')")" = "yes" ]; then
+    echo "SPENDING_GATE: BLOCKED — monthly limit reached (\$$MONTH_SPENT/\$$MONTH_LIMIT). Skip crypto-gated platforms this session."
+  else
+    echo "SPENDING_GATE: OPEN — budget \$$REMAINING remaining this month (limit: \$$MONTH_LIMIT)"
+    echo "SPENDING_RULES: max \$$PER_SESSION/session, max \$$PER_PLATFORM/platform, ROI >= $MIN_ROI required"
+  fi
+}
+
+###############################################################################
 # Run all checks sequentially (order matters — liveness before seed, seed before clusters)
 ###############################################################################
 
 check_engagement_liveness
 check_engagement_seed
 check_topic_clusters
+check_conversation_balance
+check_spending_policy
 
 exit 0

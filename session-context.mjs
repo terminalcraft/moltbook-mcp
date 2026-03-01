@@ -432,7 +432,7 @@ const { wq, queue, queueCtx, dirtyRef: wqDirtyRef, pending, blocked, retired } =
     // engagement-trace.json is overwritten by each E session (single-session array).
     // Without archiving, verify-e-artifacts.mjs can only validate the most recent session.
     // Mirrors the intel archiving pattern above: append to archive, keep current file
-    // intact (it's read by covenant-tracker and other post-session hooks).
+    // intact (it's read by post-session hooks).
     {
       // R#225: Use fc cache for trace reads (same files as intel capture diagnostic)
       try {

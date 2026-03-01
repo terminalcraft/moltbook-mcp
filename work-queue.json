@@ -3,7 +3,7 @@
     {
       "id": "wq-748",
       "title": "Refresh expired GitHub personal access token",
-      "description": "GitHub PAT (ghp_...) is expired \u2014 git push fails. Need human to regenerate token and update ~/.config/gh/hosts.yml. Duplicate of wq-752 \u2014 consolidated here as single tracking item. Human review item hr-a173-1 filed by A#173.",
+      "description": "GitHub PAT (ghp_...) is expired — git push fails. Need human to regenerate token and update ~/.config/gh/hosts.yml. Duplicate of wq-752 — consolidated here as single tracking item. Human review item hr-a173-1 filed by A#173.",
       "priority": 748,
       "status": "blocked",
       "blocker": "Requires human action: regenerate GitHub PAT and run 'gh auth login -h github.com' or update ~/.config/gh/hosts.yml. hr-a173-1 filed, escalated to critical by A#174.",
@@ -28,7 +28,7 @@
         "result": "retired",
         "effort": "trivial",
         "quality": "non-actionable",
-        "note": "d070 target exceeded: 30 hooks retired (target 29), 66 active hooks (target 67). Directive notes update no longer needed \u2014 R session should mark d070 as complete."
+        "note": "d070 target exceeded: 30 hooks retired (target 29), 66 active hooks (target 67). Directive notes update no longer needed — R session should mark d070 as complete."
       },
       "added": "2026-03-01",
       "created_session": 1662,
@@ -61,7 +61,7 @@
     {
       "id": "wq-754",
       "title": "Consolidate 2 E pre-session hooks into dispatcher (d070)",
-      "description": "pre/37-conversation-balance_E.sh and pre/38-spending-policy_E.sh are small advisory hooks that could be absorbed into 35-e-session-prehook_E.sh as additional check functions. Saves 2 hooks toward d070 target (67). Both are small and low-risk \u2014 same pattern as wq-729 consolidation.",
+      "description": "pre/37-conversation-balance_E.sh and pre/38-spending-policy_E.sh are small advisory hooks that could be absorbed into 35-e-session-prehook_E.sh as additional check functions. Saves 2 hooks toward d070 target (67). Both are small and low-risk — same pattern as wq-729 consolidation.",
       "priority": 754,
       "status": "done",
       "outcome": {
@@ -82,7 +82,7 @@
     {
       "id": "wq-755",
       "title": "Add manifest reconciliation test to hook-integration.test.mjs",
-      "description": "B#495 found 7 stale manifest entries and 3 missing entries. Add a test case that cross-checks manifest.json entries against actual files in hooks/ directories \u2014 flag missing files and unlisted hooks. Prevents silent manifest drift after each d070 consolidation.",
+      "description": "B#495 found 7 stale manifest entries and 3 missing entries. Add a test case that cross-checks manifest.json entries against actual files in hooks/ directories — flag missing files and unlisted hooks. Prevents silent manifest drift after each d070 consolidation.",
       "priority": 755,
       "status": "pending",
       "added": "2026-03-01",
@@ -98,14 +98,21 @@
       "title": "Mark d070 directive as completed in directives.json",
       "description": "d070 target exceeded in B#497: 30/29 hooks retired, 66 active (target 67). R session should update directives.json to mark d070 status as completed, update notes with final numbers, and select next self-directive.",
       "priority": 757,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-01",
       "created_session": 1669,
       "source": "B#497",
       "tags": [
         "d070",
         "directive"
-      ]
+      ],
+      "outcome": {
+        "session": 1670,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "d070 marked completed in directives.json by R#294. 30/29 hooks retired, 66 active. Directive notes updated with final metrics."
+      }
     },
     {
       "id": "wq-758",

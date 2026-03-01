@@ -1,76 +1,5 @@
 [
   {
-    "id": "83d6db5c-290a-4034-b555-ed31ee01e4c8",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 3346ms",
-    "meta": {
-      "id": "814d5a06",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-02-28T09:36:19.935Z"
-  },
-  {
-    "id": "76761cc9-bd7b-471e-9657-00f01db48794",
-    "event": "toku.webhook",
-    "summary": "Received job.created event from toku.agency (routed to intel)",
-    "meta": {
-      "event_type": "job.created",
-      "routed": true
-    },
-    "ts": "2026-02-28T09:40:31.485Z"
-  },
-  {
-    "id": "80f8376f-4cc0-474f-9ef2-2eccfd535021",
-    "event": "toku.webhook",
-    "summary": "Received job.created event from toku.agency",
-    "meta": {
-      "event_type": "job.created",
-      "routed": false
-    },
-    "ts": "2026-02-28T09:40:31.992Z"
-  },
-  {
-    "id": "72f933e1-c6e5-4b03-9649-36ebef5220ab",
-    "event": "toku.webhook",
-    "summary": "Received job.created event from toku.agency (routed to intel)",
-    "meta": {
-      "event_type": "job.created",
-      "routed": true
-    },
-    "ts": "2026-02-28T09:40:34.930Z"
-  },
-  {
-    "id": "dfcc7293-2fd4-42f0-9542-90cadb5485c8",
-    "event": "toku.webhook",
-    "summary": "Received job.created event from toku.agency",
-    "meta": {
-      "event_type": "job.created",
-      "routed": false
-    },
-    "ts": "2026-02-28T09:40:34.934Z"
-  },
-  {
-    "id": "3757dc2d-f53d-43e3-a576-7c23ca4687b3",
-    "event": "toku.webhook",
-    "summary": "Received job.created event from toku.agency (routed to intel)",
-    "meta": {
-      "event_type": "job.created",
-      "routed": true
-    },
-    "ts": "2026-02-28T09:40:37.926Z"
-  },
-  {
-    "id": "ea50ec6b-6125-4b92-acc2-ba5a8566d09c",
-    "event": "toku.webhook",
-    "summary": "Received job.created event from toku.agency",
-    "meta": {
-      "event_type": "job.created",
-      "routed": false
-    },
-    "ts": "2026-02-28T09:40:37.930Z"
-  },
-  {
     "id": "92821e35-1920-40ac-8f0a-289a77421a37",
     "event": "toku.webhook",
     "summary": "Received job.created event from toku.agency (routed to intel)",
@@ -1893,5 +1822,68 @@
       "failed": 1
     },
     "ts": "2026-03-01T10:31:36.609Z"
+  },
+  {
+    "id": "24740fb2-e6eb-44cd-814f-2014b1aeba1e",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 92.7% overall",
+    "meta": {},
+    "ts": "2026-03-01T10:42:06.490Z"
+  },
+  {
+    "id": "56e7bcdf-964b-4f1f-8575-972138c76c92",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-03-01T10:42:10.854Z"
+  },
+  {
+    "id": "d6c9e943-3251-49b1-bba3-3bfbf8fd0fc8",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-03-01T10:42:15.897Z"
+  },
+  {
+    "id": "281961e3-a812-4a8d-a8da-08cb342a378c",
+    "event": "search",
+    "summary": "Search \"test\" — 1451 results",
+    "meta": {
+      "q": "test",
+      "total": 1451
+    },
+    "ts": "2026-03-01T10:42:15.930Z"
+  },
+  {
+    "id": "98ac7e8d-f034-44cb-bd8b-c934f3f5a944",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "e730db62",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-03-01T10:42:16.550Z"
+  },
+  {
+    "id": "faa2ca96-b81d-4a62-be38-6b7a4b9723ed",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "e730db62"
+    },
+    "ts": "2026-03-01T10:42:16.551Z"
+  },
+  {
+    "id": "e727a132-04c5-461b-a7f4-04766916ca15",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-03-01T10:42:16.559Z"
   }
 ]

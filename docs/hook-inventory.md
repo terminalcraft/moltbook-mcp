@@ -1,6 +1,6 @@
 # Hook Inventory for d070 Complexity Reduction
 
-Created: B#482 (s1622). Original total: 91 hooks. Current: 81 active (47 pre-session, 34 post-session), 9 retired, 1 consolidated.
+Created: B#482 (s1622). Original total: 91 hooks. Current: 75 active (41 pre-session, 34 post-session), 9 retired, 4 consolidated dispatchers.
 
 ## Consolidation Candidates (merge multiple hooks into one)
 
@@ -21,25 +21,25 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 81 active (47 pre-ses
 - Three hooks for one file (BRAINSTORMING.md). Merge into `44-brainstorm-mgmt.sh` with pre/post and R-gate logic.
 - **Saves: 2 hooks**
 
-### 4. Queue management hooks → single hook
+### 4. Queue management hooks → single hook (partially done)
 - `post/11-queue-compliance.sh` (checks queue health)
 - `post/29-audit-queue-verify.sh` (verifies audit queue items)
 - `post/33-queue-archive.sh` (archives done items)
-- `pre/46-queue-title-lint_B.sh` (lints queue titles)
-- `pre/46-stuck-items_B.sh` (flags stuck items)
-- Five hooks for work-queue.json. Merge into a pre and post `queue-mgmt.sh`.
-- **Saves: 3 hooks**
+- ~~`pre/46-queue-title-lint_B.sh`~~ → absorbed into `pre/45-b-session-prehook_B.sh` (B#490, wq-729)
+- ~~`pre/46-stuck-items_B.sh`~~ → absorbed into `pre/45-b-session-prehook_B.sh` (B#490, wq-729)
+- Remaining 3 post-session hooks could still merge into `post/queue-mgmt.sh`.
+- **Saves so far: 2 hooks** (target: 3)
 
-### 5. Engagement E-session hooks → single orchestrator (partially done)
-- `pre/35-engagement-liveness_E.sh`
-- `pre/36-engagement-seed_E.sh`
-- `pre/36-topic-clusters_E.sh`
-- `pre/37-conversation-balance_E.sh`
-- `pre/38-spending-policy_E.sh`
+### 5. Engagement E-session hooks → single orchestrator (pre-session done)
+- ~~`pre/35-engagement-liveness_E.sh`~~ → absorbed into `pre/35-e-session-prehook_E.sh` (B#490, wq-729)
+- ~~`pre/36-engagement-seed_E.sh`~~ → absorbed into `pre/35-e-session-prehook_E.sh` (B#490, wq-729)
+- ~~`pre/36-topic-clusters_E.sh`~~ → absorbed into `pre/35-e-session-prehook_E.sh` (B#490, wq-729)
+- `pre/37-conversation-balance_E.sh` — still separate
+- `pre/38-spending-policy_E.sh` — still separate
 - `post/36-e-session-posthook_E.sh` (consolidated post-session E orchestrator)
 - `post/36-picker-compliance_E.sh`
-- Post-session: 2 of 4 absorbed. Pre-session: 5 still separate, pending consolidation.
-- **Saves so far: 2 hooks** (target: 7)
+- Pre-session: 3 absorbed into dispatcher (B#490). Post-session: fully consolidated.
+- **Saves so far: 5 hooks** (target: 7)
 
 ### 6. Covenant hooks → retired ✅ DONE
 - `pre/38-covenant-reminders.sh` — RETIRED (s1646, wq-740)
@@ -128,22 +128,22 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 81 active (47 pre-ses
 | Retired (covenant, s1646) | 2 hooks | 2 saved |
 | Consolidated (cost-trend, s1627) | 2 hooks → 1 | 1 saved |
 | Completed: wq-743 (retire dns-certbot, diagnostics, merge token-refresh) | 4 hooks → 1 | 3 saved |
-| **Completed so far** | | **10 hooks** |
-| Pending: wq-729 (B/E/R dispatchers) | ~10 hooks → ~3 | ~7 saved |
+| Completed: wq-729 (B/E/R pre-session dispatchers) | 9 hooks → 3 | 6 saved |
+| **Completed so far** | | **16 hooks** |
 | Pending: wq-739 (cost forecast) | 2 hooks → 1 | 1 saved |
 | Pending: wq-744 (stigmergy→trace, snapshots→1, logs→1) | 6 hooks → 3 | 3 saved |
 | Pending: wq-745 (periodic→1, engagement-audit→E posthook) | 4 hooks → 1 | 3 saved |
-| **Total potential reduction** | | **24 hooks** |
+| **Total potential reduction** | | **23 hooks** |
 
-Current: 81 active hooks (47 pre + 34 post). Target: 67 or fewer. Progress: 10 hooks reduced (7 prior + 3 from wq-743). Pipeline covers 14 more → potential 67 (exactly on target).
+Current: 75 active hooks (41 pre + 34 post). Target: 67 or fewer. Progress: 16 hooks reduced (7 prior + 3 from wq-743 + 6 from wq-729). Pipeline covers 7 more → potential 68 (within 1 of target, likely reachable with opportunistic retirements).
 
-Note: Groups 10/12/13 overlap with groups 8/7 in some hooks. When executing, pick one grouping per hook. The net save is 17 from pending items, reaching exactly 67.
+Note: Groups 10/12/13 overlap with groups 8/7 in some hooks. When executing, pick one grouping per hook.
 
 ## Execution Plan
 
 1. **Phase 1** DONE (s1622): 4 hooks retired, 4 kept after verification
 2. **Phase 2** (1 B session): Retire 3 hooks — wq-743 (dns-certbot, session-diagnostics, imanagent merge)
-3. **Phase 3** (2-3 B sessions): wq-729 — Consolidate B/E/R session-type dispatchers
+3. **Phase 3** DONE (B#490, wq-729): Consolidated B/E/R pre-session dispatchers (9 hooks → 3, saved 6)
 4. **Phase 4** (1-2 B sessions): wq-744 — Post-session consolidation (stigmergy, snapshots, logs)
 5. **Phase 5** (1 B session): wq-745 — Pre-session periodic consolidation + E engagement-audit absorption
 6. **Phase 6** (1 B session): wq-739 — Cost forecast merge

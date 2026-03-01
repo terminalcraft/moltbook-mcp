@@ -20,14 +20,21 @@
       "title": "Consolidate cost forecast hooks (08-cost-forecast-gate + 08-cost-forecast-inject)",
       "description": "hook-inventory.md group 2: two hooks with same 08 prefix and same domain. Merge into single 08-cost-forecast.sh. Saves 1 hook toward d070 target.",
       "priority": 739,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-28",
       "created_session": 1637,
       "source": "pipeline-s1637",
       "tags": [
         "d070",
         "hooks"
-      ]
+      ],
+      "outcome": {
+        "session": 1662,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Merged 08-cost-forecast-gate.sh + 08-cost-forecast-inject.sh into 08-cost-forecast.sh. Single forecast call instead of two. Hook count 75→74 (22/29 d070 target)."
+      }
     },
     {
       "id": "wq-744",

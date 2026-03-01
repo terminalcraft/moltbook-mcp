@@ -41,14 +41,21 @@
       "title": "Consolidate post-session hooks: stigmergy→trace, snapshots→1, log housekeeping→1",
       "description": "Three post-session consolidation groups from wq-742 audit: (1) Absorb 26-stigmergy-breadcrumb.sh (85 lines) into 26-session-trace.sh — breadcrumb data is strict subset of trace, add type/tags classification as additional output pass; (2) Merge 22-ecosystem-snapshot.sh (55 lines) + 23-pattern-snapshot.sh (31 lines) into single 22-session-snapshots.sh — both append JSONL per session, same trigger, same pattern; (3) Merge 30-log-rotate.sh (12 lines) + 32-compress-logs.sh (62 lines) into single 30-log-maintenance.sh — both log housekeeping, zero dependencies. Saves 3 hooks.",
       "priority": 744,
-      "status": "pending",
+      "status": "done",
       "added": "2026-02-28",
       "created_session": 1647,
       "source": "session",
       "tags": [
         "d070",
         "hooks"
-      ]
+      ],
+      "outcome": {
+        "session": 1662,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Consolidated 5 post-session hooks into 2: snapshots merged (22+23→22-session-snapshots.sh), log housekeeping merged (30+32→30-log-maintenance.sh), stigmergy breadcrumb absorbed into 26-session-trace.sh. Hook count 74→71, d070 at 86% (25/29)."
+      }
     },
     {
       "id": "wq-745",

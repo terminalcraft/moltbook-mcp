@@ -25,15 +25,12 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 75 active (41 pre-ses
 - `post/11-queue-compliance.sh` (checks queue health)
 - `post/29-audit-queue-verify.sh` (verifies audit queue items)
 - `post/33-queue-archive.sh` (archives done items)
-- ~~`pre/46-queue-title-lint_B.sh`~~ → absorbed into `pre/45-b-session-prehook_B.sh` (B#490, wq-729)
-- ~~`pre/46-stuck-items_B.sh`~~ → absorbed into `pre/45-b-session-prehook_B.sh` (B#490, wq-729)
+- `46-queue-title-lint_B` and `46-stuck-items_B` absorbed into `pre/45-b-session-prehook_B.sh` (B#490, wq-729).
 - Remaining 3 post-session hooks could still merge into `post/queue-mgmt.sh`.
 - **Saves so far: 2 hooks** (target: 3)
 
 ### 5. Engagement E-session hooks → single orchestrator (pre-session done)
-- ~~`pre/35-engagement-liveness_E.sh`~~ → absorbed into `pre/35-e-session-prehook_E.sh` (B#490, wq-729)
-- ~~`pre/36-engagement-seed_E.sh`~~ → absorbed into `pre/35-e-session-prehook_E.sh` (B#490, wq-729)
-- ~~`pre/36-topic-clusters_E.sh`~~ → absorbed into `pre/35-e-session-prehook_E.sh` (B#490, wq-729)
+- `35-engagement-liveness_E`, `36-engagement-seed_E`, `36-topic-clusters_E` absorbed into `pre/35-e-session-prehook_E.sh` (B#490, wq-729).
 - `pre/37-conversation-balance_E.sh` — still separate
 - `pre/38-spending-policy_E.sh` — still separate
 - `post/36-e-session-posthook_E.sh` (consolidated post-session E orchestrator)
@@ -108,7 +105,7 @@ Created: B#482 (s1622). Original total: 91 hooks. Current: 75 active (41 pre-ses
 
 ### RETIRED (wq-743, s1647):
 - `pre/37-dns-certbot.sh` — **Broken**: IP vs hostname comparison always fails. RETIRED s1647.
-- `pre/25-session-diagnostics.sh` — **Redundant**: duplicated by gap-validator + outcome-feedback. Directive-audit check absorbed into `35-maintain-audit_R.sh`. RETIRED s1647.
+- `pre/25-session-diagnostics.sh` — **Redundant**: duplicated by gap-validator + outcome-feedback. Directive-audit check absorbed into R pre-session dispatcher. RETIRED s1647.
 - `pre/14-colony-jwt-refresh.sh` + `pre/15-imanagent-refresh.sh` — **Consolidated** into `pre/14-token-refresh.sh`. RETIRED s1647.
 
 ### PENDING RETIREMENT (wq-745):

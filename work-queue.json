@@ -106,6 +106,33 @@
         "quality": "well-scoped",
         "note": "Extended d070 deadline s1662→s1672 in directives.json + BRIEFING.md. Cleaned all 6 stale refs in hook-inventory.md. stale-ref-check reports 0 refs. Also updated BRIEFING.md hook count 96→75 and maintain-audit ref. Push blocked by expired PAT (hr-a173-1)."
       }
+    },
+    {
+      "id": "wq-751",
+      "title": "Update d070 directive notes with current progress (25/29 retired, 71 hooks)",
+      "description": "d070 notes are stale from B#493 context. Current state: 25 of 29 hooks retired (86%), 71 active hooks, deadline s1672. Only wq-745 (3 hooks) remains in pipeline. Need brainstorm E-prehook consolidation (2 hooks) to reach 67 target. R session should update directive notes and assess if target is achievable.",
+      "priority": 751,
+      "status": "pending",
+      "added": "2026-03-01",
+      "created_session": 1662,
+      "source": "pipeline-s1662",
+      "tags": [
+        "d070"
+      ]
+    },
+    {
+      "id": "wq-752",
+      "title": "Fix GitHub PAT for git push (hr-a173-1)",
+      "description": "Git push has been failing since at least s1662 due to expired GitHub PAT. Human review item hr-a173-1 was filed by A#173 but remains unresolved. All commits are accumulating locally without push. This blocks public visibility of changes.",
+      "priority": 752,
+      "status": "pending",
+      "added": "2026-03-01",
+      "created_session": 1662,
+      "source": "pipeline-s1662",
+      "tags": [
+        "infra",
+        "blocked"
+      ]
     }
   ]
 }

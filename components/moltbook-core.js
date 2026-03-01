@@ -10,6 +10,124 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
+ * Convert word-based number/operator tokens to digits/symbols.
+ * Handles mixed-case words like "ThIrTy TwO NeWtOnS aNd SeVeN".
+ * Returns the normalized string with numbers and operators replaced.
+ */
+function wordsToMath(text) {
+  const numberWords = {
+    zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6,
+    seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12,
+    thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17,
+    eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40,
+    fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90,
+    hundred: 100, thousand: 1000, million: 1000000,
+  };
+  const opWords = {
+    plus: "+", and: "+", add: "+", added: "+", adds: "+",
+    minus: "-", subtract: "-", subtracted: "-", subtracts: "-",
+    reduces: "-", reduce: "-", less: "-", decreased: "-",
+    times: "*", multiplied: "*", multiply: "*", multiplies: "*",
+    divided: "/", divide: "/", divides: "/", over: "/",
+    "raised to": "**", "to the power of": "**",
+  };
+
+  // Normalize case and strip non-alphabetic/digit/space chars except operators
+  let normalized = text.toLowerCase().replace(/[^a-z0-9+\-*/().^ ]/g, " ").replace(/\s+/g, " ").trim();
+
+  // Replace multi-word operators first
+  for (const [phrase, op] of Object.entries(opWords)) {
+    if (phrase.includes(" ")) {
+      normalized = normalized.replace(new RegExp(phrase, "g"), ` ${op} `);
+    }
+  }
+
+  // Tokenize and convert
+  const tokens = normalized.split(/\s+/);
+  const result = [];
+  let currentNumber = null; // accumulator for compound numbers like "thirty two"
+  let lastWasMultiplier = false;
+  let pendingSmall = null; // tracks small number before a multiplier in compound like "three thousand five hundred"
+
+  function flushNumber() {
+    if (pendingSmall !== null) {
+      currentNumber = (currentNumber || 0) + pendingSmall;
+      pendingSmall = null;
+    }
+    if (currentNumber !== null) {
+      result.push(String(currentNumber));
+      currentNumber = null;
+      lastWasMultiplier = false;
+    }
+  }
+
+  for (const token of tokens) {
+    const lc = token;
+    if (lc in numberWords) {
+      const val = numberWords[lc];
+      if (val === 100 || val === 1000 || val === 1000000) {
+        if (pendingSmall !== null) {
+          // "three thousand FIVE HUNDRED" — pendingSmall=5 * 100 = 500, add to current
+          currentNumber = (currentNumber || 0) + pendingSmall * val;
+          pendingSmall = null;
+        } else if (currentNumber !== null && currentNumber > 0 && currentNumber < val) {
+          // "three hundred" = 3 * 100, "two thousand" = 2 * 1000
+          currentNumber *= val;
+        } else if (currentNumber !== null && currentNumber >= val) {
+          // "three thousand hundred" — unusual, treat hundred as additive
+          currentNumber += val;
+        } else {
+          currentNumber = val;
+        }
+        lastWasMultiplier = true;
+      } else if (lastWasMultiplier && val < 100) {
+        // After a multiplier: could be additive ("two hundred thirty") or
+        // start of sub-group ("three thousand five hundred").
+        // Store as pending — if next token is a multiplier, it multiplies this.
+        // If not, it's additive.
+        if (pendingSmall !== null) {
+          // Flush previous pending as additive
+          currentNumber = (currentNumber || 0) + pendingSmall;
+        }
+        pendingSmall = val;
+      } else if (currentNumber !== null && val < 10 && (currentNumber % 100 >= 20 || (pendingSmall !== null && pendingSmall >= 20))) {
+        // Compound: "thirty two" = 30 + 2
+        if (pendingSmall !== null && pendingSmall >= 20) {
+          pendingSmall += val;
+        } else {
+          currentNumber += val;
+        }
+        lastWasMultiplier = false;
+      } else if (currentNumber !== null && val >= 20 && currentNumber % 1000 >= 100) {
+        // "two hundred forty" after multiplier already applied
+        if (pendingSmall !== null) {
+          currentNumber = (currentNumber || 0) + pendingSmall;
+          pendingSmall = null;
+        }
+        currentNumber += val;
+        lastWasMultiplier = false;
+      } else {
+        flushNumber();
+        currentNumber = val;
+        lastWasMultiplier = false;
+      }
+    } else if (lc in opWords) {
+      flushNumber();
+      result.push(opWords[lc]);
+    } else if (/^[\d+\-*/().^]+$/.test(lc)) {
+      // Pass through digits AND operator characters
+      flushNumber();
+      result.push(lc);
+    } else {
+      // Unknown word — skip (e.g. "newtons", "what", "is")
+    }
+  }
+  flushNumber();
+
+  return result.join(" ");
+}
+
+/**
  * Solve a Moltbook verification challenge.
  * When creating posts/comments, the API may return a verification_code + challenge
  * (a math expression). We evaluate the math and POST the answer to /api/v1/verify.
@@ -21,9 +139,13 @@ async function solveVerification(data) {
   const challenge = data.challenge || data.math_challenge || data.question;
   if (!challenge) return null;
 
+  // Preprocess: convert word-based challenges to numeric expressions
+  // e.g. "ThIrTy TwO NeWtOnS aNd SeVeN" → "32 + 7"
+  const preprocessed = wordsToMath(challenge);
+
   // Extract the math expression — strip non-math characters for safety
   // Challenges are simple arithmetic: "What is 123 + 456?" or "525.00" style
-  const mathMatch = challenge.match(/[\d+\-*/().^ ]+/);
+  const mathMatch = preprocessed.match(/[\d+\-*/().^ ]+/);
   if (!mathMatch) return { success: false, error: "Could not parse math challenge", challenge };
 
   let answer;
@@ -62,6 +184,9 @@ function formatComments(comments, depth = 0, blocked = null) {
   }
   return out;
 }
+
+// Export wordsToMath for testing
+export { wordsToMath };
 
 export function register(server) {
   // Read post with comments

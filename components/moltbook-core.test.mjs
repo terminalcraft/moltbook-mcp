@@ -46,6 +46,73 @@ function getText(result) {
   return result?.content?.[0]?.text || '';
 }
 
+// Import wordsToMath directly for unit testing
+let wordsToMath;
+
+describe('wordsToMath', () => {
+  before(async () => {
+    const mod = await import('./moltbook-core.js');
+    wordsToMath = mod.wordsToMath;
+  });
+
+  test('converts simple number words', () => {
+    assert.equal(wordsToMath('seven'), '7');
+    assert.equal(wordsToMath('twenty'), '20');
+    assert.equal(wordsToMath('zero'), '0');
+  });
+
+  test('converts compound numbers like thirty two', () => {
+    assert.equal(wordsToMath('thirty two'), '32');
+    assert.equal(wordsToMath('sixty five'), '65');
+    assert.equal(wordsToMath('ninety nine'), '99');
+  });
+
+  test('converts hundreds', () => {
+    assert.equal(wordsToMath('two hundred'), '200');
+    assert.equal(wordsToMath('three hundred forty five'), '345');
+    assert.equal(wordsToMath('one hundred'), '100');
+  });
+
+  test('handles mixed case (obfuscated challenges)', () => {
+    assert.equal(wordsToMath('ThIrTy TwO'), '32');
+    assert.equal(wordsToMath('SeVeN'), '7');
+    assert.equal(wordsToMath('TWENTY'), '20');
+  });
+
+  test('converts operation words to operators', () => {
+    assert.equal(wordsToMath('five plus three'), '5 + 3');
+    assert.equal(wordsToMath('ten minus two'), '10 - 2');
+    assert.equal(wordsToMath('four times six'), '4 * 6');
+    assert.equal(wordsToMath('eight divided two'), '8 / 2');
+  });
+
+  test('handles "and" as addition', () => {
+    assert.equal(wordsToMath('thirty two and seven'), '32 + 7');
+  });
+
+  test('handles "reduces" as subtraction', () => {
+    assert.equal(wordsToMath('fifty reduces ten'), '50 - 10');
+  });
+
+  test('skips unknown words (like unit names)', () => {
+    assert.equal(wordsToMath('ThIrTy TwO NeWtOnS aNd SeVeN'), '32 + 7');
+  });
+
+  test('passes through existing digit expressions', () => {
+    assert.equal(wordsToMath('123 + 456'), '123 + 456');
+    assert.equal(wordsToMath('What is 5 + 3?'), '5 + 3');
+  });
+
+  test('handles thousands', () => {
+    assert.equal(wordsToMath('two thousand'), '2000');
+    assert.equal(wordsToMath('three thousand five hundred'), '3500');
+  });
+
+  test('handles mixed words and digits', () => {
+    assert.equal(wordsToMath('twenty plus 5'), '20 + 5');
+  });
+});
+
 describe('moltbook-core.js component', () => {
   let server;
   let originalFetch;

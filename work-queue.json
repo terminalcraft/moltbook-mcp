@@ -102,38 +102,39 @@
       ]
     },
     {
-      "id": "wq-766",
-      "title": "Investigate B session early-stall pattern",
-      "description": "A#177 found 2 of 6 recent B sessions (s1674, s1678) stalled within 1-2 minutes with 0 commits and truncated notes. Both sessions spent $0.20-$0.38 producing nothing. Investigate: (1) Are these heartbeat/context-loading failures? (2) Is the B session prompt hitting a degenerate path? (3) Should there be a minimum-duration or minimum-deliverable check? Root cause first, then fix.",
-      "priority": 766,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1683,
-      "source": "audit-s1683",
-      "tags": [
-        "reliability",
-        "audit"
-      ],
-      "outcome": {
-        "session": 1684,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Root cause: model outputs text-only response (no tool call) → Claude Code interprets as end_turn → session terminates. Secondary: heartbeat.sh pkill ran before lock check. Fix: anti-stall prompt rule in SESSION_BUILD.md, lock-before-pkill in heartbeat.sh, audit logging in 47-b-session-posthook_B.sh. 343 tests pass."
-      }
-    },
-    {
       "id": "wq-767",
       "title": "Define next self-directive under d068",
       "description": "A#177 flagged 14-session gap since d070 completed with no successor self-directive. R sessions are doing structural work but without declared strategic goals. Next R session must define a self-directive. Candidates: eliminate python3 dependency (wq-761), test coverage expansion, or B session reliability improvement. If not defined by A#178, consider closing d068.",
       "priority": 767,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1683,
       "source": "audit-s1683",
       "tags": [
         "strategic",
         "audit"
+      ],
+      "outcome": {
+        "session": 1685,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Defined d071 (harden test coverage) as d070 successor. Targets: ≥80% critical-path coverage, manifest reconciliation tests, state isolation, python3 elimination. Deadline s1725. Updated BRIEFING.md and d068 notes."
+      }
+    },
+    {
+      "id": "wq-768",
+      "title": "Measure d071 test coverage baseline",
+      "description": "Before starting d071 work, measure current state: count test files, list which hooks/modules have tests vs not, calculate critical-path coverage percentage. Output to d071-baseline.json. Needed to measure d071 progress against ≥80% target.",
+      "priority": 768,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1685,
+      "source": "d071",
+      "tags": [
+        "testing",
+        "d071",
+        "measurement"
       ]
     }
   ]

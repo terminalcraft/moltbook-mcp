@@ -245,30 +245,34 @@ check_spending_policy() {
     return 0
   fi
 
-  MONTH_LIMIT=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.policy.monthly_limit_usd)")
-  MONTH_SPENT=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.ledger.month_spent_usd)")
-  PER_SESSION=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.policy.per_session_limit_usd)")
-  PER_PLATFORM=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.policy.per_platform_limit_usd)")
-  MIN_ROI=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.policy.min_roi_score_for_spend)")
   CURRENT_MONTH=$(date +%Y-%m)
 
-  LEDGER_MONTH=$(node -e "const p=JSON.parse(require('fs').readFileSync('$POLICY_FILE','utf8')); console.log(p.ledger.current_month)")
-  if [ "$CURRENT_MONTH" != "$LEDGER_MONTH" ]; then
-    node -e "
-      const fs=require('fs');
-      const p=JSON.parse(fs.readFileSync('$POLICY_FILE','utf8'));
+  # Single node invocation reads all values and handles month reset (was 7 separate calls)
+  POLICY_OUT=$(node -e "
+    const fs=require('fs');
+    const p=JSON.parse(fs.readFileSync('$POLICY_FILE','utf8'));
+    let reset=false;
+    if (p.ledger.current_month !== '$CURRENT_MONTH') {
       p.ledger.current_month='$CURRENT_MONTH';
       p.ledger.month_spent_usd=0;
       p.ledger.transactions=[];
       fs.writeFileSync('$POLICY_FILE', JSON.stringify(p,null,2));
-    "
-    MONTH_SPENT=0
+      reset=true;
+    }
+    const ml=p.policy.monthly_limit_usd;
+    const ms=p.ledger.month_spent_usd;
+    console.log([ml,ms,p.policy.per_session_limit_usd,p.policy.per_platform_limit_usd,p.policy.min_roi_score_for_spend,reset].join('|'));
+  ")
+
+  IFS='|' read -r MONTH_LIMIT MONTH_SPENT PER_SESSION PER_PLATFORM MIN_ROI WAS_RESET <<< "$POLICY_OUT"
+
+  if [ "$WAS_RESET" = "true" ]; then
     echo "spending-policy: new month, ledger reset"
   fi
 
-  REMAINING=$(node -e "console.log(($MONTH_LIMIT - $MONTH_SPENT).toFixed(2))")
+  REMAINING=$(echo "$MONTH_LIMIT $MONTH_SPENT" | awk '{printf "%.2f", $1 - $2}')
 
-  if [ "$(node -e "console.log($MONTH_SPENT >= $MONTH_LIMIT ? 'yes' : 'no')")" = "yes" ]; then
+  if [ "$(echo "$MONTH_SPENT $MONTH_LIMIT" | awk '{print ($1 >= $2) ? "yes" : "no"}')" = "yes" ]; then
     echo "SPENDING_GATE: BLOCKED — monthly limit reached (\$$MONTH_SPENT/\$$MONTH_LIMIT). Skip crypto-gated platforms this session."
   else
     echo "SPENDING_GATE: OPEN — budget \$$REMAINING remaining this month (limit: \$$MONTH_LIMIT)"

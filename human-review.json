@@ -3,103 +3,19 @@
   "description": "Items flagged for human review.",
   "items": [
     {
-      "id": "5d5a1e96",
-      "title": "Test review item",
-      "body": "This needs human attention",
-      "source": "test-source",
-      "priority": "high",
+      "id": "hr-a173-1",
+      "title": "GitHub PAT expired — git push blocked for 19 sessions",
+      "body": "GitHub personal access token has expired since s1653 (19 sessions ago). git push fails with 'Invalid username or token'. 53 local commits unpushed. Agent cannot self-remediate — requires human to either: (1) Run 'gh auth login -h github.com' and complete browser flow, or (2) Generate new PAT at github.com/settings/tokens and update ~/.config/gh/hosts.yml. Escalated to Level 3 by A#175 after 4 consecutive audits unresolved. Original hr-a173-1 was lost when test execution overwrote this file with test data.",
+      "source": "audit-s1672",
+      "priority": "critical",
       "status": "open",
-      "created": "2026-03-01T11:36:46.695Z",
-      "resolved": null
-    },
-    {
-      "id": "e875652c",
-      "title": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-      "priority": "low",
-      "status": "open",
-      "created": "2026-03-01T11:36:46.696Z",
-      "resolved": null
-    },
-    {
-      "id": "f5a8f87e",
-      "title": "Default priority test",
-      "status": "open",
-      "created": "2026-03-01T11:36:46.697Z",
-      "resolved": null
-    },
-    {
-      "id": "54fef054",
-      "title": "Test review item",
-      "body": "This needs human attention",
-      "source": "test-source",
-      "priority": "high",
-      "status": "open",
-      "created": "2026-03-01T11:37:05.742Z",
-      "resolved": null
-    },
-    {
-      "id": "06b72732",
-      "title": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-      "priority": "low",
-      "status": "open",
-      "created": "2026-03-01T11:37:05.744Z",
-      "resolved": null
-    },
-    {
-      "id": "6a3ba255",
-      "title": "Default priority test",
-      "status": "open",
-      "created": "2026-03-01T11:37:05.748Z",
-      "resolved": null
-    },
-    {
-      "id": "e4af440e",
-      "title": "Test review item",
-      "body": "This needs human attention",
-      "source": "test-source",
-      "priority": "high",
-      "status": "open",
-      "created": "2026-03-01T11:37:09.794Z",
-      "resolved": null
-    },
-    {
-      "id": "e527a2cf",
-      "title": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-      "priority": "low",
-      "status": "open",
-      "created": "2026-03-01T11:37:09.795Z",
-      "resolved": null
-    },
-    {
-      "id": "2f0faddf",
-      "title": "Default priority test",
-      "status": "open",
-      "created": "2026-03-01T11:37:09.796Z",
-      "resolved": null
-    },
-    {
-      "id": "d216f316",
-      "title": "Test review item",
-      "body": "This needs human attention",
-      "source": "test-source",
-      "priority": "high",
-      "status": "open",
-      "created": "2026-03-01T11:38:23.411Z",
-      "resolved": null
-    },
-    {
-      "id": "a4ce7392",
-      "title": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-      "priority": "low",
-      "status": "open",
-      "created": "2026-03-01T11:38:23.413Z",
-      "resolved": null
-    },
-    {
-      "id": "56e950e0",
-      "title": "Default priority test",
-      "status": "open",
-      "created": "2026-03-01T11:38:23.414Z",
+      "created": "2026-03-01T12:18:42.000Z",
+      "original_filed": "A#173 (s1661)",
+      "escalation_history": [
+        "A#173: Filed as high priority",
+        "A#174: Escalated to critical (3 audits stale)",
+        "A#175: Escalated to Level 3 (4 audits stale, 53 unpushed commits, original item lost to file corruption)"
+      ],
       "resolved": null
     }
   ]

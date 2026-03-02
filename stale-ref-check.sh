@@ -60,11 +60,12 @@ ARCHIVE_EXCLUDES=(
 )
 
 # is_structural_ref — check if a match line is structural (not prose/comment/fence)
-# Args: $1=ref_file path, $2=matching line number, $3=matching line content
+# Args: $1=ref_file path, $2=matching line number, $3=matching line content, $4=basename being searched
 is_structural_ref_line() {
   local ref_file="$1"
   local lineno="$2"
   local line_content="$3"
+  local bn="${4:-}"
 
   # For JSON files, filter out prose fields
   if [[ "$ref_file" == *.json ]]; then
@@ -82,11 +83,29 @@ is_structural_ref_line() {
     return 0
   fi
 
-  # For markdown files, filter out code fences and blockquotes
+  # For markdown files, filter out code fences, blockquotes, inline code, and strikethrough
   if [[ "$ref_file" == *.md ]]; then
     # Skip blockquotes
     if echo "$line_content" | grep -qP '^[[:space:]]*>'; then
       return 1
+    fi
+    # Skip lines where the ref appears only inside inline backticks (e.g. `old-hook.sh`)
+    # or historical prose like "was `old-hook.sh`"
+    if echo "$line_content" | grep -qP '`[^`]*'"$bn"'[^`]*`'; then
+      # Verify the ref doesn't ALSO appear outside backticks
+      local stripped
+      stripped=$(echo "$line_content" | sed 's/`[^`]*`//g')
+      if ! echo "$stripped" | grep -qF "$bn"; then
+        return 1
+      fi
+    fi
+    # Skip strikethrough references (e.g. ~~old-hook.sh~~)
+    if echo "$line_content" | grep -qP '~~[^~]*'"$bn"'[^~]*~~'; then
+      local stripped_st
+      stripped_st=$(echo "$line_content" | sed 's/~~[^~]*~~//g')
+      if ! echo "$stripped_st" | grep -qF "$bn"; then
+        return 1
+      fi
     fi
     # Check if inside a code fence — count opening ``` before this line
     local fence_count
@@ -146,7 +165,7 @@ for file in $truly_deleted; do
     lineno=$(echo "$match_line" | cut -d: -f2)
     content=$(echo "$match_line" | cut -d: -f3-)
 
-    if is_structural_ref_line "$ref_file" "$lineno" "$content"; then
+    if is_structural_ref_line "$ref_file" "$lineno" "$content" "$bn"; then
       # Deduplicate by ref_file (only need one structural match per file)
       if ! echo "$filtered_refs" | grep -qF "$ref_file"; then
         filtered_refs="$filtered_refs$ref_file"$'\n'

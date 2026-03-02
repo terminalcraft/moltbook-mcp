@@ -37,3 +37,6 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
+**Suggested for this task** (tags: testing, d071, measurement):
+- 100% test coverage with strict exception handling rules (verified) — matched: testing
+

@@ -20,11 +20,18 @@
       "title": "Stale-ref-check: add inline-code exclusion for markdown",
       "description": "(added ~s1662): `stale-ref-check.sh` treats markdown inline code (`backtick-quoted`) refs as structural. Historical notes like \"was `old-hook.sh`\" trigger false positives. Adding a regex filter for `was \\`...\\`` or strikethrough `~~..~~` patterns in the markdown structural-ref check would reduce noise during d070 cleanup.",
       "priority": 772,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["2e473b64"],
+      "outcome": {
+        "session": 1695,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added inline backtick and strikethrough exclusion to is_structural_ref_line() in stale-ref-check.sh. 4/4 functional test cases pass."
+      }
     },
     {
       "id": "wq-773",

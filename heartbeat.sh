@@ -257,7 +257,7 @@ safe_stage "log-rotation" '
 # --- Directive enrichment + pre-session hooks (skipped in safe/emergency mode) ---
 if [ -z "$DRY_RUN" ] && [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ]; then
   safe_stage "directive-enrichment" \
-    'python3 "$DIR/scripts/directive-enrichment.py" "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" 2>/dev/null'
+    'node "$DIR/scripts/directive-enrichment.mjs" "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" 2>/dev/null'
 
   safe_stage "pre-session-hooks" '
     MODE_CHAR="$MODE_CHAR" SESSION_NUM="$COUNTER" R_FOCUS="$R_FOCUS" B_FOCUS="$B_FOCUS" \

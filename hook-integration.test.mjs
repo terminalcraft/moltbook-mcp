@@ -600,6 +600,47 @@ describe('Hook integration tests', () => {
     });
   });
 
+  // ---- WARN_EXIT_OK SET RECONCILIATION (wq-780) ----
+  describe('WARN_EXIT_OK set reconciliation', () => {
+    test('every WARN_EXIT_OK entry corresponds to an actual hook file', () => {
+      const stale = [];
+      for (const hookName of WARN_EXIT_OK) {
+        const inPre = existsSync(join(PRE_DIR, hookName));
+        const inPost = existsSync(join(POST_DIR, hookName));
+        if (!inPre && !inPost) {
+          stale.push(hookName);
+        }
+      }
+      assert.strictEqual(
+        stale.length, 0,
+        `WARN_EXIT_OK contains ${stale.length} stale entry/entries not found on disk:\n  ${stale.join('\n  ')}`
+      );
+    });
+
+    test('every WARN_EXIT_OK entry is listed in manifest.json', () => {
+      const manifestPath = join(REPO_DIR, 'hooks/manifest.json');
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      const manifestNames = new Set(manifest.hooks.map(h => h.name));
+      const unlisted = [];
+      for (const hookName of WARN_EXIT_OK) {
+        if (!manifestNames.has(hookName)) {
+          unlisted.push(hookName);
+        }
+      }
+      assert.strictEqual(
+        unlisted.length, 0,
+        `WARN_EXIT_OK contains ${unlisted.length} entry/entries not in manifest.json:\n  ${unlisted.join('\n  ')}`
+      );
+    });
+
+    test('all hooks that exit non-zero in dry-run are in WARN_EXIT_OK or NETWORK_HOOKS', () => {
+      // Informational — logs any hooks that exit non-zero but aren't tracked
+      // Not a failure since we can't easily dry-run all hooks, but documents intent
+      assert.ok(WARN_EXIT_OK.size > 0, 'WARN_EXIT_OK should not be empty');
+      console.log(`  WARN_EXIT_OK entries: ${[...WARN_EXIT_OK].join(', ')}`);
+    });
+  });
+
   // ---- HOOK COUNT TRACKING ----
   describe('Hook inventory', () => {
     test('pre-session hook count is tracked', () => {

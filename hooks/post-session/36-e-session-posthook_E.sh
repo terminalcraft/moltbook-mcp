@@ -45,291 +45,241 @@ mkdir -p "$LOG_DIR"
 export PARSED_FILE=$(mktemp)
 trap 'rm -f "$PARSED_FILE"' EXIT
 
-# All parsed data stored in a single python pass to avoid repeated subprocess spawns
-python3 << 'PYEOF' > "$PARSED_FILE"
-import json, sys, os, glob
-from datetime import date
+# Single Node.js pass: parse all JSON files and emit both parsed JSON + shell variables.
+# Replaces two python3 subprocess calls with one node call (d071 python3 elimination).
+PARSE_OUTPUT=$(node << 'NODEEOF' 2>/dev/null
+const fs = require('fs');
+const path = require('path');
 
-session = int(os.environ['SESSION_NUM'])
-state_dir = os.environ.get('STATE_DIR', os.path.expanduser('~/.config/moltbook'))
-intel_file = os.path.join(state_dir, 'engagement-intel.json')
-trace_file = os.path.join(state_dir, 'engagement-trace.json')
-timing_file = os.path.join(state_dir, 'e-phase-timing.json')
-history_file = os.path.join(state_dir, 'session-history.txt')
-log_dir = os.path.join(state_dir, 'logs')
-quality_file = os.path.join(log_dir, 'quality-scores.jsonl')
+const session = parseInt(process.env.SESSION_NUM);
+const stateDir = process.env.STATE_DIR || path.join(process.env.HOME, '.config/moltbook');
+const logDir = path.join(stateDir, 'logs');
+const logFile = process.env.LOG_FILE || '';
+const summaryFile = logFile ? logFile.replace('.log', '.summary') : '';
 
-result = {}
+function readJSON(filepath) {
+  try { return JSON.parse(fs.readFileSync(filepath, 'utf8')); } catch { return null; }
+}
 
-# --- Intel count ---
-intel_count = 0
-intel_entries = []
-try:
-    with open(intel_file) as f:
-        data = json.load(f)
-    if isinstance(data, list):
-        intel_count = len(data)
-        intel_entries = data
-except:
-    pass
-result['intel_count'] = intel_count
+const result = {};
 
-# --- Trace for this session ---
-session_trace = None
-all_traces = []
-try:
-    with open(trace_file) as f:
-        traces = json.load(f)
-    if isinstance(traces, list):
-        all_traces = traces
-        for t in traces:
-            if t.get('session') == session:
-                session_trace = t
-    elif isinstance(traces, dict) and traces.get('session') == session:
-        session_trace = traces
-        all_traces = [traces]
-except:
-    pass
-result['has_trace'] = session_trace is not None
-result['trace_platforms_engaged'] = session_trace.get('platforms_engaged', []) if session_trace else []
-result['trace_skipped_platforms'] = session_trace.get('skipped_platforms', []) if session_trace else []
-result['trace_topics'] = session_trace.get('topics', []) if session_trace else []
-result['trace_agents'] = session_trace.get('agents_interacted', []) if session_trace else []
-result['trace_picker_mandate'] = session_trace.get('picker_mandate', []) if session_trace else []
+// --- Intel count ---
+const intelData = readJSON(path.join(stateDir, 'engagement-intel.json'));
+const intelEntries = Array.isArray(intelData) ? intelData : [];
+result.intel_count = intelEntries.length;
 
-# --- Phase 2 reached? ---
-phase2_reached = False
-try:
-    with open(timing_file) as f:
-        timing = json.load(f)
-    phases = timing.get('phases', [])
-    last_p0_idx = -1
-    for i, p in enumerate(phases):
-        if p.get('phase') == '0':
-            last_p0_idx = i
-    if last_p0_idx >= 0:
-        current_phases = phases[last_p0_idx:]
-        phase2_reached = any(p.get('phase') == '2' for p in current_phases)
-    else:
-        phase2_reached = any(p.get('phase') == '2' for p in phases)
-except:
-    pass
-result['phase2_reached'] = phase2_reached
+// --- Trace for this session ---
+const traceRaw = readJSON(path.join(stateDir, 'engagement-trace.json'));
+let allTraces = [];
+if (Array.isArray(traceRaw)) allTraces = traceRaw;
+else if (traceRaw && typeof traceRaw === 'object') allTraces = [traceRaw];
+const sessionTrace = allTraces.find(t => t.session === session) || null;
 
-# --- Rate limit detection ---
-is_rate_limited = False
-summary_files = sorted(glob.glob(os.path.join(log_dir, '*.summary')))
-for sf in reversed(summary_files):
-    try:
-        with open(sf) as f:
-            content = f.read()
-        if f'Session: {session}' in content:
-            if 'Tools: 0' in content and ('hit your limit' in content.lower() or 'rate_limit' in content.lower() or 'resets' in content.lower()):
-                is_rate_limited = True
-            break
-    except:
-        continue
-result['is_rate_limited'] = is_rate_limited
+result.has_trace = sessionTrace !== null;
+result.trace_platforms_engaged = sessionTrace ? (sessionTrace.platforms_engaged || []) : [];
+result.trace_skipped_platforms = sessionTrace ? (sessionTrace.skipped_platforms || []) : [];
+result.trace_topics = sessionTrace ? (sessionTrace.topics || []) : [];
+result.trace_agents = sessionTrace ? (sessionTrace.agents_interacted || []) : [];
+result.trace_picker_mandate = sessionTrace ? (sessionTrace.picker_mandate || []) : [];
 
-# --- Platform failure analysis ---
-all_platforms_failed = False
-if phase2_reached and session_trace:
-    engaged = session_trace.get('platforms_engaged', [])
-    skipped = session_trace.get('skipped_platforms', [])
-    mandate = session_trace.get('picker_mandate', [])
-    if len(mandate) > 0 and len(engaged) == 0 and len(skipped) == len(mandate):
-        all_platforms_failed = True
-result['all_platforms_failed'] = all_platforms_failed
+// --- Phase 2 reached? ---
+let phase2Reached = false;
+const timing = readJSON(path.join(stateDir, 'e-phase-timing.json'));
+if (timing && Array.isArray(timing.phases)) {
+  const phases = timing.phases;
+  let lastP0 = -1;
+  for (let i = 0; i < phases.length; i++) {
+    if (phases[i].phase === '0') lastP0 = i;
+  }
+  const slice = lastP0 >= 0 ? phases.slice(lastP0) : phases;
+  phase2Reached = slice.some(p => p.phase === '2');
+}
+result.phase2_reached = phase2Reached;
 
-# Build platform_details string for intel-checkpoint
-platform_details = ''
-if phase2_reached and session_trace:
-    skipped = session_trace.get('skipped_platforms', [])
-    engaged = session_trace.get('platforms_engaged', [])
-    if skipped:
-        reasons = [s.get('platform', '?') + ': ' + s.get('reason', '?') for s in skipped if isinstance(s, dict)]
-        platform_details = '; '.join(reasons)
-    if len(engaged) == 0 and len(skipped) > 0:
-        platform_details = 'ALL_FAILED: ' + platform_details
-result['platform_details'] = platform_details
+// --- Rate limit detection ---
+let isRateLimited = false;
+try {
+  const summaries = fs.readdirSync(logDir).filter(f => f.endsWith('.summary')).sort();
+  for (let i = summaries.length - 1; i >= 0; i--) {
+    const content = fs.readFileSync(path.join(logDir, summaries[i]), 'utf8');
+    if (content.includes('Session: ' + session)) {
+      const lower = content.toLowerCase();
+      if (content.includes('Tools: 0') && (lower.includes('hit your limit') || lower.includes('rate_limit') || lower.includes('resets')))
+        isRateLimited = true;
+      break;
+    }
+  }
+} catch {}
+result.is_rate_limited = isRateLimited;
 
-# --- Failure mode classification ---
-if intel_count > 0:
-    failure_mode = 'none'
-elif is_rate_limited:
-    failure_mode = 'rate_limit'
-elif not phase2_reached:
-    failure_mode = 'truncated_early'
-elif all_platforms_failed:
-    failure_mode = 'platform_unavailable'
-elif session_trace is not None:
-    failure_mode = 'trace_without_intel'
-elif phase2_reached:
-    failure_mode = 'agent_skip'
-else:
-    failure_mode = 'unknown'
-result['failure_mode'] = failure_mode
+// --- Platform failure analysis ---
+let allPlatformsFailed = false;
+if (phase2Reached && sessionTrace) {
+  const engaged = sessionTrace.platforms_engaged || [];
+  const skipped = sessionTrace.skipped_platforms || [];
+  const mandate = sessionTrace.picker_mandate || [];
+  if (mandate.length > 0 && engaged.length === 0 && skipped.length === mandate.length)
+    allPlatformsFailed = true;
+}
+result.all_platforms_failed = allPlatformsFailed;
 
-# --- Session duration from summary (for early-exit check) ---
-log_file = os.environ.get('LOG_FILE', '')
-summary_file = log_file.replace('.log', '.summary') if log_file else ''
-total_seconds = -1
-duration_str = ''
-if summary_file and os.path.isfile(summary_file):
-    try:
-        with open(summary_file) as f:
-            for line in f:
-                if line.startswith('Duration:'):
-                    duration_str = line.split()[1].strip().lstrip('~')
-                    mins = 0
-                    secs = 0
-                    import re
-                    m = re.search(r'(\d+)m', duration_str)
-                    if m: mins = int(m.group(1))
-                    s = re.search(r'(\d+)s', duration_str)
-                    if s: secs = int(s.group(1))
-                    total_seconds = mins * 60 + secs
-                    break
-    except:
-        pass
-result['duration_str'] = duration_str
-result['total_seconds'] = total_seconds
+// Build platform_details string
+let platformDetails = '';
+if (phase2Reached && sessionTrace) {
+  const skipped = sessionTrace.skipped_platforms || [];
+  const engaged = sessionTrace.platforms_engaged || [];
+  if (skipped.length > 0) {
+    const reasons = skipped.filter(s => typeof s === 'object').map(s => (s.platform || '?') + ': ' + (s.reason || '?'));
+    platformDetails = reasons.join('; ');
+  }
+  if (engaged.length === 0 && skipped.length > 0)
+    platformDetails = 'ALL_FAILED: ' + platformDetails;
+}
+result.platform_details = platformDetails;
 
-# --- History note for this session (for note-fallback) ---
-current_note = ''
-try:
-    with open(history_file) as f:
-        for line in f:
-            if f's={session} ' in line and 'note: ' in line:
-                idx = line.index('note: ') + len('note: ')
-                current_note = line[idx:].strip()
-except:
-    pass
-result['current_note'] = current_note
+// --- Failure mode classification ---
+let failureMode;
+if (result.intel_count > 0) failureMode = 'none';
+else if (isRateLimited) failureMode = 'rate_limit';
+else if (!phase2Reached) failureMode = 'truncated_early';
+else if (allPlatformsFailed) failureMode = 'platform_unavailable';
+else if (sessionTrace) failureMode = 'trace_without_intel';
+else if (phase2Reached) failureMode = 'agent_skip';
+else failureMode = 'unknown';
+result.failure_mode = failureMode;
 
-# --- E session count (for note generation) ---
-e_count = 0
-try:
-    with open(history_file) as f:
-        e_count = sum(1 for line in f if ' mode=E ' in line)
-except:
-    pass
-result['e_count'] = e_count
+// --- Session duration from summary ---
+let totalSeconds = -1, durationStr = '';
+if (summaryFile) {
+  try {
+    for (const line of fs.readFileSync(summaryFile, 'utf8').split('\n')) {
+      if (line.startsWith('Duration:')) {
+        durationStr = line.split(/\s+/)[1].replace(/^~/, '');
+        const mMatch = durationStr.match(/(\d+)m/);
+        const sMatch = durationStr.match(/(\d+)s/);
+        totalSeconds = (mMatch ? parseInt(mMatch[1]) * 60 : 0) + (sMatch ? parseInt(sMatch[1]) : 0);
+        break;
+      }
+    }
+  } catch {}
+}
+result.duration_str = durationStr;
+result.total_seconds = totalSeconds;
 
-# --- Quality scores for this session ---
-session_fails = 0
-session_warns = 0
-session_total = 0
-try:
-    with open(quality_file) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                entry = json.loads(line)
-                if entry.get('session') == session:
-                    session_total += 1
-                    if entry.get('verdict') == 'FAIL':
-                        session_fails += 1
-                    elif entry.get('verdict') == 'WARN':
-                        session_warns += 1
-            except:
-                pass
-except:
-    pass
-result['quality_session_fails'] = session_fails
-result['quality_session_warns'] = session_warns
-result['quality_session_total'] = session_total
+// --- History note for this session ---
+let currentNote = '';
+const historyFile = path.join(stateDir, 'session-history.txt');
+try {
+  for (const line of fs.readFileSync(historyFile, 'utf8').split('\n')) {
+    if (line.includes('s=' + session + ' ') && line.includes('note: ')) {
+      currentNote = line.slice(line.indexOf('note: ') + 6).trim();
+    }
+  }
+} catch {}
+result.current_note = currentNote;
 
-# --- Trace intel extraction data (for intel-checkpoint) ---
-trace_intel_data = None
-if intel_count == 0 and session_trace:
-    topics = session_trace.get('topics', [])
-    agents = session_trace.get('agents_interacted', [])
-    platforms = session_trace.get('platforms_engaged', [])
-    if topics:
-        platform_str = ', '.join(platforms) if platforms else 'unknown platform'
-        agent_str = ', '.join(agents[:3]) if agents else 'various agents'
-        topic_str = topics[0] if topics else 'general discussion'
-        trace_intel_data = {
-            'type': 'pattern',
-            'source': f'{platform_str} (extracted from trace by checkpoint hook)',
-            'summary': f'Engagement on {platform_str} covering: {topic_str}. Agents: {agent_str}.',
-            'actionable': f'Evaluate {platform_str} discussion topics for build opportunities in next E session',
-            'session': session,
-            'checkpoint': True,
-            'extracted_from_trace': True,
-            'failure_reason': failure_mode
-        }
-result['trace_intel_data'] = trace_intel_data
+// --- E session count ---
+let eCount = 0;
+try {
+  for (const line of fs.readFileSync(historyFile, 'utf8').split('\n')) {
+    if (line.includes(' mode=E ')) eCount++;
+  }
+} catch {}
+result.e_count = eCount;
 
-# --- Intel archive entries for trace-fallback ---
-archive_intel = []
-archive_file = os.path.join(state_dir, 'engagement-intel-archive.json')
-for path in [intel_file, archive_file]:
-    try:
-        with open(path) as f:
-            data = json.load(f)
-        entries = data if isinstance(data, list) else data.get('entries', [])
-        for e in entries:
-            if e.get('session') == session:
-                archive_intel.append(e)
-    except:
-        pass
-result['archive_intel_count'] = len(archive_intel)
-result['archive_intel_platforms'] = list(set(
-    e.get('platform') or e.get('source', 'unknown')
-    for e in archive_intel
-    if e.get('platform') or e.get('source')
-))
-result['archive_intel_topics'] = list(set(
-    (e.get('learned') or e.get('summary', ''))[:60]
-    for e in archive_intel
-    if e.get('learned') or e.get('summary')
-))[:5]
+// --- Quality scores ---
+let qFails = 0, qWarns = 0, qTotal = 0;
+try {
+  for (const line of fs.readFileSync(path.join(logDir, 'quality-scores.jsonl'), 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    try {
+      const entry = JSON.parse(line);
+      if (entry.session === session) {
+        qTotal++;
+        if (entry.verdict === 'FAIL') qFails++;
+        else if (entry.verdict === 'WARN') qWarns++;
+      }
+    } catch {}
+  }
+} catch {}
+result.quality_session_fails = qFails;
+result.quality_session_warns = qWarns;
+result.quality_session_total = qTotal;
 
-json.dump(result, sys.stdout)
-PYEOF
+// --- Trace intel extraction data ---
+let traceIntelData = null;
+if (result.intel_count === 0 && sessionTrace) {
+  const topics = sessionTrace.topics || [];
+  const agents = sessionTrace.agents_interacted || [];
+  const platforms = sessionTrace.platforms_engaged || [];
+  if (topics.length > 0) {
+    const platformStr = platforms.length ? platforms.join(', ') : 'unknown platform';
+    const agentStr = agents.length ? agents.slice(0, 3).join(', ') : 'various agents';
+    traceIntelData = {
+      type: 'pattern',
+      source: platformStr + ' (extracted from trace by checkpoint hook)',
+      summary: 'Engagement on ' + platformStr + ' covering: ' + topics[0] + '. Agents: ' + agentStr + '.',
+      actionable: 'Evaluate ' + platformStr + ' discussion topics for build opportunities in next E session',
+      session, checkpoint: true, extracted_from_trace: true, failure_reason: failureMode
+    };
+  }
+}
+result.trace_intel_data = traceIntelData;
 
-if [[ ! -s "$PARSED_FILE" ]]; then
-  echo "e-posthook: CRITICAL — JSON parse phase failed"
+// --- Intel archive entries for trace-fallback ---
+const archiveIntel = [];
+const intelFile = path.join(stateDir, 'engagement-intel.json');
+const archiveFile = path.join(stateDir, 'engagement-intel-archive.json');
+for (const fp of [intelFile, archiveFile]) {
+  try {
+    const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
+    const entries = Array.isArray(data) ? data : (data.entries || []);
+    for (const e of entries) { if (e.session === session) archiveIntel.push(e); }
+  } catch {}
+}
+result.archive_intel_count = archiveIntel.length;
+result.archive_intel_platforms = [...new Set(archiveIntel.map(e => e.platform || e.source || 'unknown').filter(Boolean))];
+result.archive_intel_topics = [...new Set(archiveIntel.map(e => (e.learned || e.summary || '').slice(0, 60)).filter(Boolean))].slice(0, 5);
+
+// --- Output: JSON on first line (for PARSED_FILE), shell vars on subsequent lines ---
+const jsonLine = JSON.stringify(result);
+const boolStr = v => v ? 'true' : 'false';
+const safeQuote = v => { const s = String(v == null ? '' : v); return "'" + s.replace(/'/g, "'\\''") + "'"; };
+
+const shellVars = [
+  'INTEL_COUNT=' + result.intel_count,
+  'HAS_TRACE=' + boolStr(result.has_trace),
+  'PHASE2_REACHED=' + boolStr(result.phase2_reached),
+  'IS_RATE_LIMITED=' + boolStr(result.is_rate_limited),
+  'ALL_PLATFORMS_FAILED=' + boolStr(result.all_platforms_failed),
+  'FAILURE_MODE=' + safeQuote(result.failure_mode),
+  'PLATFORM_DETAILS=' + safeQuote(result.platform_details),
+  'TOTAL_SECONDS=' + result.total_seconds,
+  'DURATION_STR=' + safeQuote(result.duration_str),
+  'CURRENT_NOTE=' + safeQuote(result.current_note),
+  'E_COUNT=' + result.e_count,
+  'Q_FAILS=' + result.quality_session_fails,
+  'Q_WARNS=' + result.quality_session_warns,
+  'Q_TOTAL=' + result.quality_session_total,
+  'ARCHIVE_INTEL_COUNT=' + result.archive_intel_count,
+];
+
+console.log('JSON:' + jsonLine);
+for (const v of shellVars) console.log('VARS:' + v);
+NODEEOF
+)
+
+if [[ -z "$PARSE_OUTPUT" ]]; then
+  echo "e-posthook: CRITICAL — parse phase failed"
   exit 1
 fi
 
-# Extract parsed values into shell variables (single python3 call, not 17)
-SHELL_VARS=$(python3 << 'EXTRACT_PY' 2>/dev/null
-import json, os, shlex
+# Split output: JSON goes to PARSED_FILE, shell vars get eval'd
+echo "$PARSE_OUTPUT" | sed -n 's/^JSON://p' > "$PARSED_FILE"
+SHELL_VARS=$(echo "$PARSE_OUTPUT" | sed -n 's/^VARS://p')
 
-d = json.load(open(os.environ['PARSED_FILE']))
-
-def boolstr(v):
-    return 'true' if v else 'false'
-
-def safe(v, default=''):
-    s = str(v) if v is not None else default
-    return shlex.quote(s)
-
-print(f"INTEL_COUNT={int(d.get('intel_count', 0))}")
-print(f"HAS_TRACE={boolstr(d.get('has_trace'))}")
-print(f"PHASE2_REACHED={boolstr(d.get('phase2_reached'))}")
-print(f"IS_RATE_LIMITED={boolstr(d.get('is_rate_limited'))}")
-print(f"ALL_PLATFORMS_FAILED={boolstr(d.get('all_platforms_failed'))}")
-print(f"FAILURE_MODE={safe(d.get('failure_mode', 'unknown'))}")
-print(f"PLATFORM_DETAILS={safe(d.get('platform_details', ''))}")
-print(f"TOTAL_SECONDS={int(d.get('total_seconds', -1))}")
-print(f"DURATION_STR={safe(d.get('duration_str', ''))}")
-print(f"CURRENT_NOTE={safe(d.get('current_note', ''))}")
-print(f"E_COUNT={int(d.get('e_count', 0))}")
-print(f"Q_FAILS={int(d.get('quality_session_fails', 0))}")
-print(f"Q_WARNS={int(d.get('quality_session_warns', 0))}")
-print(f"Q_TOTAL={int(d.get('quality_session_total', 0))}")
-print(f"ARCHIVE_INTEL_COUNT={int(d.get('archive_intel_count', 0))}")
-EXTRACT_PY
-)
-
-if [[ -z "$SHELL_VARS" ]]; then
-  echo "e-posthook: CRITICAL — variable extraction failed"
+if [[ ! -s "$PARSED_FILE" ]] || [[ -z "$SHELL_VARS" ]]; then
+  echo "e-posthook: CRITICAL — parse output incomplete"
   exit 1
 fi
 

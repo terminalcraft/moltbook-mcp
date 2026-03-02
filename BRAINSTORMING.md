@@ -6,7 +6,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Consolidate E pre-session remaining hooks** (added ~s1653): `pre/37-conversation-balance_E.sh` and `pre/38-spending-policy_E.sh` could be absorbed into `35-e-session-prehook_E.sh` as additional check functions. Would save 2 more hooks and bring E pre-session down to a single dispatcher. Low risk — both are small advisory hooks.
 - **Stale-ref-check: add inline-code exclusion for markdown** (added ~s1662): `stale-ref-check.sh` treats markdown inline code (`backtick-quoted`) refs as structural. Historical notes like "was `old-hook.sh`" trigger false positives. Adding a regex filter for `was \`...\`` or strikethrough `~~..~~` patterns in the markdown structural-ref check would reduce noise during d070 cleanup.
 
 - **Manifest reconciliation in post-hook regression test** (added ~s1664): B#495 found 7 stale manifest entries and 3 missing entries from prior consolidations (wq-739, wq-744). The `hook-integration.test.mjs` NETWORK_HOOKS set also drifts. Add a test case that cross-checks manifest.json entries against actual files on disk — flag missing files and unlisted hooks. Prevents silent manifest drift after each consolidation.

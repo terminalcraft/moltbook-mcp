@@ -14,6 +14,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Add anti-stall rule to all session type prompts** (added ~s1684): The anti-stall rule added to SESSION_BUILD.md (wq-766 fix) should be replicated to SESSION_ENGAGE.md, SESSION_REFLECT.md, and SESSION_AUDIT.md. While E/R/A sessions haven't shown the same stall pattern, the underlying mechanism (text-only response = session termination in -p mode) applies to all types. Low risk, copy-paste.
 
+- **Integrate engagement-variety-analyzer.mjs into E session pre-hook** (added ~s1689): engagement-variety-analyzer.mjs is a well-built standalone tool that detects platform concentration in E sessions, but it's not wired into any hook. Adding a call in the E session prehook (35-e-session-prehook_E.sh) with `--json --alert-file` would automatically surface diversity warnings before each E session starts, preventing concentration drift proactively.
+
 ## Active Observations
 
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting

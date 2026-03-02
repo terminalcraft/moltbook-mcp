@@ -46,7 +46,7 @@ export PARSED_FILE=$(mktemp)
 trap 'rm -f "$PARSED_FILE"' EXIT
 
 # Single Node.js pass: parse all JSON files and emit both parsed JSON + shell variables.
-# Replaces two python3 subprocess calls with one node call (d071 python3 elimination).
+# All subprocess calls use node (d071 python3 elimination complete as of B#505, s1691).
 PARSE_OUTPUT=$(node << 'NODEEOF' 2>/dev/null
 const fs = require('fs');
 const path = require('path');
@@ -338,39 +338,35 @@ check_intel_checkpoint() {
   fi
 
   # Write checkpoint entry — uses PARSED_FILE for trace_intel_data
-  INTEL_REASON="$reason" INTEL_DETAILS="$details" python3 << 'CHECKPOINT_PY' 2>/dev/null || echo "intel-checkpoint: failed to write recovery entry"
-import json, os
+  INTEL_REASON="$reason" INTEL_DETAILS="$details" node << 'CHECKPOINT_JS' 2>/dev/null || echo "intel-checkpoint: failed to write recovery entry"
+const fs = require('fs');
+const path = require('path');
 
-intel_file = os.environ['INTEL_FILE']
-session = int(os.environ['SESSION'])
-reason = os.environ['INTEL_REASON']
-details = os.environ['INTEL_DETAILS']
-parsed_file = os.environ['PARSED_FILE']
+const intelFile = process.env.INTEL_FILE;
+const session = parseInt(process.env.SESSION);
+const reason = process.env.INTEL_REASON;
+const details = process.env.INTEL_DETAILS;
+const parsedFile = process.env.PARSED_FILE;
 
-parsed = json.load(open(parsed_file))
-trace_intel = parsed.get('trace_intel_data')
+const parsed = JSON.parse(fs.readFileSync(parsedFile, 'utf8'));
+const traceIntel = parsed.trace_intel_data;
 
-if trace_intel:
-    entry = trace_intel
-else:
-    entry = {
-        'type': 'pattern',
-        'source': 'post-session checkpoint (' + reason + ')',
-        'summary': 'E session s' + str(session) + ' completed with 0 intel. Reason: ' + reason + '. ' + details,
-        'actionable': 'Review s' + str(session) + ' failure (' + reason + ') and capture intel from next E session',
-        'session': session,
-        'checkpoint': True,
-        'failure_reason': reason
-    }
+const entry = traceIntel || {
+  type: 'pattern',
+  source: 'post-session checkpoint (' + reason + ')',
+  summary: 'E session s' + session + ' completed with 0 intel. Reason: ' + reason + '. ' + details,
+  actionable: 'Review s' + session + ' failure (' + reason + ') and capture intel from next E session',
+  session,
+  checkpoint: true,
+  failure_reason: reason
+};
 
-os.makedirs(os.path.dirname(intel_file), exist_ok=True)
-with open(intel_file, 'w') as f:
-    json.dump([entry], f, indent=2)
-    f.write('\n')
+fs.mkdirSync(path.dirname(intelFile), { recursive: true });
+fs.writeFileSync(intelFile, JSON.stringify([entry], null, 2) + '\n');
 
-source_label = 'trace-extracted' if trace_intel else reason
-print('intel-checkpoint: wrote ' + source_label + ' recovery entry for s' + str(session))
-CHECKPOINT_PY
+const sourceLabel = traceIntel ? 'trace-extracted' : reason;
+console.log('intel-checkpoint: wrote ' + sourceLabel + ' recovery entry for s' + session);
+CHECKPOINT_JS
 
   echo "$(date -Iseconds) intel-checkpoint: s=$SESSION reason=$reason details=$details" >> "$LOG_DIR/intel-checkpoint.log"
 }
@@ -383,61 +379,50 @@ check_d049_enforcement() {
   echo "$(date -Iseconds) d049-enforcement: s=$SESSION intel_count=$INTEL_COUNT compliant=$D049_COMPLIANT failure_mode=$FAILURE_MODE" >> "$LOG_DIR/d049-enforcement.log"
 
   # Update e-phase35-tracking.json
-  python3 -c "
-import json
+  node -e "
+const fs = require('fs');
+const trackingFile = '$TRACKING_FILE';
+const session = parseInt('$SESSION');
+const intelCount = parseInt('$INTEL_COUNT');
+const compliant = intelCount > 0;
+const failureMode = '$FAILURE_MODE';
 
-tracking_file = '$TRACKING_FILE'
-session = int('$SESSION')
-intel_count = int('$INTEL_COUNT')
-compliant = intel_count > 0
-failure_mode = '$FAILURE_MODE'
+let tracking;
+try { tracking = JSON.parse(fs.readFileSync(trackingFile, 'utf8')); } catch { tracking = { sessions: [] }; }
 
-try:
-    with open(tracking_file) as f:
-        tracking = json.load(f)
-except:
-    tracking = {'sessions': []}
+const sessions = tracking.sessions || [];
+const existing = sessions.find(s => s.session === session);
+if (existing) {
+  existing.d049_compliant = compliant;
+  existing.intel_count = intelCount;
+  existing.enforcement = 'post-hook';
+  if (failureMode !== 'none') existing.failure_mode = failureMode;
+} else {
+  let eNum = sessions.filter(s => (s.session || 0) < session).length + 1;
+  for (const s of sessions) { if ((s.e_number || 0) >= eNum) eNum = s.e_number + 1; }
+  const entry = {
+    session, e_number: eNum, d049_compliant: compliant,
+    intel_count: intelCount, enforcement: 'post-hook',
+    notes: 'Post-hook enforcement: ' + intelCount + ' intel entries captured'
+  };
+  if (failureMode !== 'none') {
+    entry.failure_mode = failureMode;
+    const labels = {
+      rate_limit: 'Rate-limited — session could not start',
+      truncated_early: 'Truncated before Phase 2',
+      platform_unavailable: 'All picker platforms returned errors',
+      trace_without_intel: 'Trace written (Phase 3a) but session ended before intel capture (Phase 3b)',
+      agent_skip: 'Agent reached Phase 2 but did not capture intel (no trace either)',
+      unknown: 'Failure mode could not be determined'
+    };
+    entry.notes = 'd049 violation (' + failureMode + '): ' + (labels[failureMode] || failureMode);
+  }
+  sessions.push(entry);
+}
 
-sessions = tracking.get('sessions', [])
-existing = [s for s in sessions if s.get('session') == session]
-if existing:
-    existing[0]['d049_compliant'] = compliant
-    existing[0]['intel_count'] = intel_count
-    existing[0]['enforcement'] = 'post-hook'
-    if failure_mode != 'none':
-        existing[0]['failure_mode'] = failure_mode
-else:
-    e_num = len([s for s in sessions if s.get('session', 0) < session]) + 1
-    for s in sessions:
-        if s.get('e_number', 0) >= e_num:
-            e_num = s['e_number'] + 1
-    entry = {
-        'session': session,
-        'e_number': e_num,
-        'd049_compliant': compliant,
-        'intel_count': intel_count,
-        'enforcement': 'post-hook',
-        'notes': f'Post-hook enforcement: {intel_count} intel entries captured'
-    }
-    if failure_mode != 'none':
-        entry['failure_mode'] = failure_mode
-        mode_labels = {
-            'rate_limit': 'Rate-limited — session could not start',
-            'truncated_early': 'Truncated before Phase 2',
-            'platform_unavailable': 'All picker platforms returned errors',
-            'trace_without_intel': 'Trace written (Phase 3a) but session ended before intel capture (Phase 3b)',
-            'agent_skip': 'Agent reached Phase 2 but did not capture intel (no trace either)',
-            'unknown': 'Failure mode could not be determined'
-        }
-        entry['notes'] = f'd049 violation ({failure_mode}): {mode_labels.get(failure_mode, failure_mode)}'
-    sessions.append(entry)
-
-tracking['sessions'] = sessions
-with open(tracking_file, 'w') as f:
-    json.dump(tracking, f, indent=2)
-    f.write('\n')
-
-print(f'd049-enforcement: updated tracking for s{session} (compliant={compliant}, count={intel_count}, failure_mode={failure_mode})')
+tracking.sessions = sessions;
+fs.writeFileSync(trackingFile, JSON.stringify(tracking, null, 2) + '\n');
+console.log('d049-enforcement: updated tracking for s' + session + ' (compliant=' + compliant + ', count=' + intelCount + ', failure_mode=' + failureMode + ')');
 " 2>/dev/null || echo "d049-enforcement: failed to update tracking"
 
   # Write or clear nudge
@@ -502,44 +487,37 @@ check_early_exit() {
   echo "$(date -Iseconds) s=$SESSION dur=${DURATION_STR} (${TOTAL_SECONDS}s) — early exit detected" >> "$LOG_DIR/e-early-exits.log"
 
   # Stigmergic pressure: inject follow_up into engagement-trace.json
-  python3 -c "
-import json, os
+  node -e "
+const fs = require('fs');
+const traceFile = '$TRACE_FILE';
+const session = parseInt('$SESSION');
+const duration = '$DURATION_STR';
+const totalS = parseInt('$TOTAL_SECONDS');
 
-trace_file = '$TRACE_FILE'
-session = int('$SESSION')
-duration = '$DURATION_STR'
-total_s = int('$TOTAL_SECONDS')
+let traces;
+try {
+  const raw = JSON.parse(fs.readFileSync(traceFile, 'utf8'));
+  traces = Array.isArray(raw) ? raw : (typeof raw === 'object' ? [raw] : []);
+} catch { traces = []; }
 
-try:
-    with open(trace_file) as f:
-        traces = json.load(f)
-    if not isinstance(traces, list):
-        traces = [traces] if isinstance(traces, dict) else []
-except:
-    traces = []
+const warning = 'EARLY EXIT WARNING: Previous E session (s' + session + ') exited in ' + duration + ' (' + totalS + 's). Ensure deeper engagement — check platform health first, then commit to full Phase 2 loop.';
 
-warning = f'EARLY EXIT WARNING: Previous E session (s{session}) exited in {duration} ({total_s}s). Ensure deeper engagement — check platform health first, then commit to full Phase 2 loop.'
+if (traces.length > 0) {
+  const latest = traces[traces.length - 1];
+  const followUps = latest.follow_ups || [];
+  followUps.push(warning);
+  latest.follow_ups = followUps;
+  latest.early_exit_flag = true;
+} else {
+  traces.push({
+    session, date: new Date().toISOString().slice(0, 10),
+    early_exit_flag: true, follow_ups: [warning],
+    note: 'Synthetic trace from early-exit hook. Session s' + session + ' lasted ' + duration + '.'
+  });
+}
 
-if traces:
-    latest = traces[-1]
-    follow_ups = latest.get('follow_ups', [])
-    follow_ups.append(warning)
-    latest['follow_ups'] = follow_ups
-    latest['early_exit_flag'] = True
-else:
-    traces.append({
-        'session': session,
-        'date': '$(date -I)',
-        'early_exit_flag': True,
-        'follow_ups': [warning],
-        'note': f'Synthetic trace from early-exit hook. Session s{session} lasted {duration}.'
-    })
-
-with open(trace_file, 'w') as f:
-    json.dump(traces, f, indent=2)
-    f.write('\n')
-
-print(f'early-exit: stigmergic pressure injected into trace for s{session}')
+fs.writeFileSync(traceFile, JSON.stringify(traces, null, 2) + '\n');
+console.log('early-exit: stigmergic pressure injected into trace for s' + session);
 " 2>/dev/null || echo "early-exit: failed to inject stigmergic pressure (non-fatal)"
 }
 
@@ -565,58 +543,48 @@ check_note_fallback() {
   # Note is truncated — generate from trace
   [[ "$HAS_TRACE" == "true" ]] || return 0
 
-  GENERATED_NOTE=$(python3 -c "
-import json, sys
+  GENERATED_NOTE=$(node -e "
+const fs = require('fs');
+const parsed = JSON.parse(fs.readFileSync('$PARSED_FILE', 'utf8'));
+const session = parseInt('$SESSION');
+const platforms = parsed.trace_platforms_engaged || [];
+const agents = parsed.trace_agents || [];
+const topics = parsed.trace_topics || [];
+const eNum = parsed.e_count || '?';
 
-parsed = json.load(open('$PARSED_FILE'))
-session = int('$SESSION')
-platforms = parsed.get('trace_platforms_engaged', [])
-agents = parsed.get('trace_agents', [])
-topics = parsed.get('trace_topics', [])
-e_num = parsed.get('e_count', '?')
+const parts = [];
+if (platforms.length) parts.push('Engaged ' + platforms.join(', '));
+if (agents.length) parts.push('interacted with ' + agents.slice(0, 3).join(', '));
+if (topics.length) parts.push(topics[0]);
 
-parts = []
-if platforms:
-    parts.append('Engaged ' + ', '.join(platforms))
-if agents:
-    parts.append('interacted with ' + ', '.join(agents[:3]))
-if topics:
-    parts.append(topics[0])
+let summary = parts.length ? parts.join('; ') : 'engagement session completed';
+if (summary.length > 150) summary = summary.slice(0, 147) + '...';
 
-summary = '; '.join(parts) if parts else 'engagement session completed'
-if len(summary) > 150:
-    summary = summary[:147] + '...'
-
-print(f'Session E#{e_num} (s{session}) complete. {summary}.')
+console.log('Session E#' + eNum + ' (s' + session + ') complete. ' + summary + '.');
 " 2>/dev/null) || return 0
 
   [[ -n "$GENERATED_NOTE" ]] || return 0
 
   # Replace truncated note in session-history.txt
-  GENERATED_NOTE="$GENERATED_NOTE" python3 << 'NOTEFALLBACK_PY' 2>/dev/null || echo "note-fallback: failed to rewrite history (non-fatal)"
-import os
+  GENERATED_NOTE="$GENERATED_NOTE" node << 'NOTEFALLBACK_JS' 2>/dev/null || echo "note-fallback: failed to rewrite history (non-fatal)"
+const fs = require('fs');
+const historyFile = process.env.HISTORY_FILE;
+const sessionNum = process.env.SESSION;
+const newNote = process.env.GENERATED_NOTE;
 
-history_file = os.environ['HISTORY_FILE']
-session_num = os.environ['SESSION']
-new_note = os.environ['GENERATED_NOTE']
+const lines = fs.readFileSync(historyFile, 'utf8').split('\n');
+const marker = 's=' + sessionNum + ' ';
+const newLines = lines.map(line => {
+  if (line.includes(marker) && line.includes('note: ')) {
+    const idx = line.indexOf('note: ') + 'note: '.length;
+    return line.slice(0, idx) + newNote;
+  }
+  return line;
+});
 
-with open(history_file) as f:
-    lines = f.readlines()
-
-marker = f's={session_num} '
-new_lines = []
-for line in lines:
-    if marker in line and 'note: ' in line:
-        prefix = line[:line.index('note: ') + len('note: ')]
-        new_lines.append(prefix + new_note + '\n')
-    else:
-        new_lines.append(line)
-
-with open(history_file, 'w') as f:
-    f.writelines(new_lines)
-
-print(f'note-fallback: replaced truncated note for s{session_num}')
-NOTEFALLBACK_PY
+fs.writeFileSync(historyFile, newLines.join('\n'));
+console.log('note-fallback: replaced truncated note for s' + sessionNum);
+NOTEFALLBACK_JS
 }
 
 ###############################################################################
@@ -632,48 +600,34 @@ check_trace_fallback() {
   }
 
   # Generate minimal trace from intel
-  python3 -c "
-import json, os, sys
-from datetime import date
+  node -e "
+const fs = require('fs');
+const session = parseInt('$SESSION');
+const traceFile = '$TRACE_FILE';
+const parsed = JSON.parse(fs.readFileSync('$PARSED_FILE', 'utf8'));
+const platforms = parsed.archive_intel_platforms || [];
+const topics = parsed.archive_intel_topics || [];
 
-session = int('$SESSION')
-trace_file = '$TRACE_FILE'
-parsed = json.load(open('$PARSED_FILE'))
-platforms = parsed.get('archive_intel_platforms', [])
-topics = parsed.get('archive_intel_topics', [])
+const traceEntry = {
+  session, date: new Date().toISOString().slice(0, 10),
+  picker_mandate: [], platforms_engaged: platforms,
+  skipped_platforms: [], topics, agents_interacted: [],
+  threads_contributed: [], follow_ups: [],
+  _synthetic: true, _source: 'trace-fallback (36-e-session-posthook_E.sh)',
+  _reason: 'Session s' + session + ' truncated before Phase 3a trace write'
+};
 
-trace_entry = {
-    'session': session,
-    'date': str(date.today()),
-    'picker_mandate': [],
-    'platforms_engaged': platforms,
-    'skipped_platforms': [],
-    'topics': topics,
-    'agents_interacted': [],
-    'threads_contributed': [],
-    'follow_ups': [],
-    '_synthetic': True,
-    '_source': 'trace-fallback (36-e-session-posthook_E.sh)',
-    '_reason': f'Session s{session} truncated before Phase 3a trace write'
-}
+let traces;
+try {
+  const raw = JSON.parse(fs.readFileSync(traceFile, 'utf8'));
+  traces = Array.isArray(raw) ? raw : (typeof raw === 'object' ? [raw] : []);
+} catch { traces = []; }
 
-try:
-    with open(trace_file) as f:
-        traces = json.load(f)
-    if not isinstance(traces, list):
-        traces = [traces] if isinstance(traces, dict) else []
-except:
-    traces = []
+traces.push(traceEntry);
+if (traces.length > 30) traces = traces.slice(-30);
 
-traces.append(trace_entry)
-if len(traces) > 30:
-    traces = traces[-30:]
-
-with open(trace_file, 'w') as f:
-    json.dump(traces, f, indent=2)
-    f.write('\n')
-
-print(f'trace-fallback: generated synthetic trace for s{session} from {len(platforms)} platforms')
+fs.writeFileSync(traceFile, JSON.stringify(traces, null, 2) + '\n');
+console.log('trace-fallback: generated synthetic trace for s' + session + ' from ' + platforms.length + ' platforms');
 " 2>/dev/null || echo "trace-fallback: failed to generate synthetic trace (non-fatal)"
 }
 
@@ -690,39 +644,34 @@ check_quality_audit() {
   echo "quality-audit: s$SESSION — $Q_TOTAL posts checked, $Q_FAILS fails, $Q_WARNS warns"
 
   if [[ "$Q_FAILS" -gt 0 ]] && [[ -f "$TRACE_FILE" ]]; then
-    python3 -c "
-import json
+    node -e "
+const fs = require('fs');
+const session = parseInt('$SESSION');
+const failCount = parseInt('$Q_FAILS');
+const total = parseInt('$Q_TOTAL');
+const traceFile = '$TRACE_FILE';
 
-session = int('$SESSION')
-fail_count = int('$Q_FAILS')
-total = int('$Q_TOTAL')
-trace_file = '$TRACE_FILE'
+let traces;
+try {
+  const raw = JSON.parse(fs.readFileSync(traceFile, 'utf8'));
+  traces = Array.isArray(raw) ? raw : (typeof raw === 'object' ? [raw] : []);
+} catch { traces = []; }
 
-try:
-    with open(trace_file) as f:
-        traces = json.load(f)
-    if not isinstance(traces, list):
-        traces = [traces] if isinstance(traces, dict) else []
-except:
-    traces = []
+for (let i = traces.length - 1; i >= 0; i--) {
+  if (traces[i].session === session) {
+    if (!traces[i].follow_ups) traces[i].follow_ups = [];
+    traces[i].follow_ups.push({
+      type: 'quality_warning',
+      message: 's' + session + ' quality gate: ' + failCount + '/' + total + ' posts FAILED quality review. Review violations in quality-scores.jsonl and avoid repeating flagged patterns.',
+      severity: failCount > 1 ? 'high' : 'medium',
+      source: '36-e-session-posthook_E.sh'
+    });
+    break;
+  }
+}
 
-for trace in reversed(traces):
-    if trace.get('session') == session:
-        if 'follow_ups' not in trace:
-            trace['follow_ups'] = []
-        trace['follow_ups'].append({
-            'type': 'quality_warning',
-            'message': f's{session} quality gate: {fail_count}/{total} posts FAILED quality review. Review violations in quality-scores.jsonl and avoid repeating flagged patterns.',
-            'severity': 'high' if fail_count > 1 else 'medium',
-            'source': '36-e-session-posthook_E.sh'
-        })
-        break
-
-with open(trace_file, 'w') as f:
-    json.dump(traces, f, indent=2)
-    f.write('\n')
-
-print(f'quality-audit: appended follow_up to trace for s{session}')
+fs.writeFileSync(traceFile, JSON.stringify(traces, null, 2) + '\n');
+console.log('quality-audit: appended follow_up to trace for s' + session);
 " 2>/dev/null || echo "quality-audit: failed to append follow_up (non-fatal)"
   fi
 }

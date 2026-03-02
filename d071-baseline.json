@@ -1,21 +1,14 @@
 {
-  "measured_at": "2026-03-02T14:48:48.045Z",
-  "measured_session": 1691,
+  "measured_at": "2026-03-02T17:35:30.009Z",
+  "measured_session": 1699,
   "directive": "d071",
   "target_coverage_pct": 80,
   "deadline_session": 1725,
-  "sessions_remaining": 34,
-  "summary": {
-    "total_test_files": 93,
-    "total_source_files": 215,
-    "total_hooks": 65,
-    "file_test_ratio_pct": 43
-  },
+  "sessions_remaining": 26,
   "critical_path": {
-    "definition": "Core runtime (index.js, api.mjs), session management (session-context.mjs, session-fork.mjs, session-gap-validator.mjs), directives.mjs, engagement pipeline (platform-picker.mjs, engage-orchestrator.mjs, post-quality-review.mjs), all lib/ modules, all providers/",
     "total": 33,
-    "covered": 17,
-    "coverage_pct": 52,
+    "covered": 20,
+    "coverage_pct": 61,
     "uncovered": [
       "index.js",
       "lib/a-prompt-sections.mjs",
@@ -27,125 +20,18 @@
       "lib/r-prompt-sections.mjs",
       "lib/safe-fetch.mjs",
       "providers/chatr-digest.js",
-      "providers/credentials.js",
       "providers/directive-outcome.js",
       "providers/engagement-analytics.js",
-      "providers/replay-log.js",
-      "providers/services.js",
-      "providers/state.js"
+      "providers/replay-log.js"
     ]
   },
   "by_category": {
-    "root_modules": {
-      "total": 127,
-      "covered": 22,
-      "coverage_pct": 17,
+    "core_and_session": {
+      "total": 9,
+      "covered": 8,
+      "coverage_pct": 89,
       "uncovered": [
-        "adaptive-budget.mjs",
-        "agent-compare.mjs",
-        "agent-exchange-client.mjs",
-        "agora-portfolio.mjs",
-        "audit-stats.mjs",
-        "b-cost-trend.mjs",
-        "base-swap.mjs",
-        "batch-service-probe.mjs",
-        "bluesky.cjs",
-        "bsky-discover.cjs",
-        "check-balance.cjs",
-        "check-evm-balance.mjs",
-        "circuit-reset-probe.mjs",
-        "clawsta-image-gen.mjs",
-        "clawsta-publish.mjs",
-        "cli-test.js",
-        "collect-agents.cjs",
-        "conversation-balance.mjs",
-        "cost-accuracy-validator.mjs",
-        "cred-audit.mjs",
-        "cred-rotation.mjs",
-        "d049-compliance-monitor.mjs",
-        "d049-dry-run.mjs",
-        "defunct-platform-probe.mjs",
-        "deploy-shipyard-dashboard.mjs",
-        "diagnose-context.mjs",
-        "discover-github.cjs",
-        "e-budget-tracker.mjs",
-        "e-intel-checkpoint.mjs",
-        "e-phase-timer.mjs",
-        "e-scope-bleed-rca.mjs",
-        "engagement-health.cjs",
-        "engagement-liveness-probe.mjs",
-        "engagement-log-entry.mjs",
-        "engagement-proof.cjs",
-        "engagement-variety-analyzer.mjs",
-        "game-attestation.mjs",
-        "gasless-swap.mjs",
-        "generate-hook-manifest.mjs",
-        "generate-test-scaffold.mjs",
-        "health-check.cjs",
-        "hivemind-participate.mjs",
-        "hook-diagnostics.mjs",
-        "hook-perf-detector.mjs",
-        "hook-test-harness.mjs",
-        "hook-timing-tuner.mjs",
-        "identity-tool.mjs",
-        "imanagent-verify.mjs",
-        "index.js",
-        "inline-intel-capture.mjs",
-        "intel-diagnostics.mjs",
-        "knowledge-scorer.mjs",
-        "lane-ctf-bot.mjs",
-        "lobsterpedia_botkit_node.mjs",
-        "matrix-client.cjs",
-        "mention-respond.mjs",
-        "mention-scan.mjs",
-        "monero-wallet-gen.cjs",
-        "monitor-api.mjs",
-        "node18-polyfill.mjs",
-        "note-quality-aggregate.mjs",
-        "open-circuit-repair.mjs",
-        "pinchwork-check.mjs",
-        "platform-batch-recover.mjs",
-        "platform-health.mjs",
-        "platform-recovery.mjs",
-        "platform-register.mjs",
-        "platform-triage.mjs",
-        "poll-directories.cjs",
-        "polymarket-tracker.mjs",
-        "probe-moltcities-jobs.mjs",
-        "probe-timing-dashboard.mjs",
-        "prompt-inject-processor.mjs",
-        "queue-outcome-predictor.mjs",
-        "queue-quality-trend.mjs",
-        "queue-scoping-analyzer.mjs",
-        "queue-staleness-check.mjs",
-        "queue-title-lint.mjs",
-        "r-cost-monitor.mjs",
-        "r-impact-digest.mjs",
-        "reliability-hotspots.mjs",
-        "reply-tracker.mjs",
-        "rotation-state.mjs",
-        "routstr-bench.mjs",
-        "schema-check.mjs",
-        "service-evaluator.mjs",
-        "service-liveness.mjs",
-        "session-checkpoint.mjs",
-        "session-stats.cjs",
-        "shellsword-bot.mjs",
-        "skill-audit.mjs",
-        "skill-verify.mjs",
-        "smoke-test.mjs",
-        "spam-detector.mjs",
-        "test-coverage-noncomponent.mjs",
-        "test-coverage-status.mjs",
-        "token-budget-estimator.mjs",
-        "verify-e-artifacts.mjs",
-        "verify-e-engagement.mjs",
-        "verify-r-directive-maintenance.mjs",
-        "verify-server.cjs",
-        "weth-unwrap.mjs",
-        "work-queue.js",
-        "xmr-sweep.mjs",
-        "xmr-sweep2.mjs"
+        "index.js"
       ]
     },
     "lib_modules": {
@@ -163,196 +49,51 @@
         "lib/safe-fetch.mjs"
       ]
     },
-    "components": {
-      "total": 53,
-      "covered": 53,
-      "coverage_pct": 100,
-      "uncovered": []
-    },
     "providers": {
       "total": 12,
-      "covered": 5,
-      "coverage_pct": 42,
+      "covered": 8,
+      "coverage_pct": 67,
       "uncovered": [
         "providers/chatr-digest.js",
-        "providers/credentials.js",
         "providers/directive-outcome.js",
         "providers/engagement-analytics.js",
-        "providers/replay-log.js",
-        "providers/services.js",
-        "providers/state.js"
-      ]
-    },
-    "scripts": {
-      "total": 3,
-      "covered": 1,
-      "coverage_pct": 33,
-      "uncovered": [
-        "scripts/backfill-intel-consumed.mjs",
-        "scripts/session-debrief.mjs"
-      ]
-    },
-    "packages": {
-      "total": 4,
-      "covered": 0,
-      "coverage_pct": 0,
-      "uncovered": [
-        "packages/agent-manifest/cli.js",
-        "packages/agent-manifest/index.js",
-        "packages/pattern-extractor/cli.js",
-        "packages/pattern-extractor/index.js"
-      ]
-    },
-    "transforms": {
-      "total": 4,
-      "covered": 0,
-      "coverage_pct": 0,
-      "uncovered": [
-        "transforms/guardrails.js",
-        "transforms/scoping.js",
-        "transforms/security.js",
-        "transforms/tool-tracking.js"
+        "providers/replay-log.js"
       ]
     }
   },
   "hooks": {
+    "total": 66,
+    "covered": 28,
+    "coverage_pct": 42,
     "pre_session": {
       "total": 36,
-      "covered": 9,
-      "coverage_pct": 25,
-      "covered_list": [
-        "02-periodic-checks.sh",
-        "04-api-freshness.sh",
-        "09-financial-check.sh",
-        "10-health-check.sh",
-        "15-presence-heartbeat.sh",
-        "20-poll-directories.sh",
-        "28-cost-trend-monitor_A.sh",
-        "39-compliance-nudge.sh",
-        "39-defunct-probe.sh"
-      ],
-      "uncovered": [
-        "01-session-start-log.sh",
-        "03-schema-check.sh",
-        "05-integrity-check.sh",
-        "06-mcp-lint.sh",
-        "07-cred-age.sh",
-        "08-cost-forecast.sh",
-        "14-token-refresh.sh",
-        "22-stale-blocker.sh",
-        "23-outcome-feedback.sh",
-        "24-resurrect-retired.sh",
-        "24-stale-pending.sh",
-        "26-briefing-staleness.sh",
-        "27-session-file-sizes.sh",
-        "29-stale-ref-check_A.sh",
-        "30-prune-state.sh",
-        "35-e-session-prehook_E.sh",
-        "35-r-session-prehook_R.sh",
-        "36-circuit-reset.sh",
-        "36-directive-status_R.sh",
-        "38-warm-start.sh",
-        "40-crash-awareness.sh",
-        "41-directive-inject.sh",
-        "43-directive-cleanup.sh",
-        "44-brainstorm-cleanup.sh",
-        "44-brainstorm-gate_R.sh",
-        "45-b-session-prehook_B.sh",
-        "47-gap-validator.sh"
-      ]
+      "covered": 14
     },
     "post_session": {
-      "total": 29,
-      "covered": 3,
-      "coverage_pct": 10,
-      "covered_list": [
-        "12-fire-webhook.sh",
-        "13-ctxly-summary.sh",
-        "36-picker-compliance_E.sh"
-      ],
-      "uncovered": [
-        "10-summarize.sh",
-        "11-queue-compliance.sh",
-        "15-cost-pipeline.sh",
-        "15-r-commit-gate.sh",
-        "16-structured-outcomes.sh",
-        "17-engagement-log.sh",
-        "18-r-impact-track.sh",
-        "19-session-debrief.sh",
-        "20-auto-commit.sh",
-        "21-cred-reconcile.sh",
-        "22-session-snapshots.sh",
-        "25-directive-audit.sh",
-        "26-brainstorm-compliance_R.sh",
-        "26-engage-blockers.sh",
-        "26-session-trace.sh",
-        "27-todo-scan.sh",
-        "28-diversity-history.sh",
-        "28-pattern-analytics_B.sh",
-        "29-audit-queue-verify.sh",
-        "30-log-maintenance.sh",
-        "33-queue-archive.sh",
-        "34-hook-regression-alert.sh",
-        "35-verify-before-assert.sh",
-        "36-e-session-posthook_E.sh",
-        "40-note-quality.sh",
-        "47-b-session-posthook_B.sh"
-      ]
-    }
-  },
-  "state_file_isolation": [
-    {
-      "file": "work-queue.json",
-      "has_isolation": true
-    },
-    {
-      "file": "directives.json",
-      "has_isolation": true
-    },
-    {
-      "file": "engagement-state.json",
-      "has_isolation": true
-    },
-    {
-      "file": "session-history.txt",
-      "has_isolation": true
-    },
-    {
-      "file": "BRAINSTORMING.md",
-      "has_isolation": true
-    },
-    {
-      "file": "audit-report.json",
-      "has_isolation": true
-    },
-    {
-      "file": "human-review.json",
-      "has_isolation": true
-    }
-  ],
-  "d071_targets": {
-    "hook_dispatcher_integration_tests": {
-      "status": "partial",
-      "note": "hook-integration.test.mjs exists, covers subset of hooks"
-    },
-    "manifest_reconciliation_tests": {
-      "status": "missing",
-      "note": "wq-755 pending"
-    },
-    "state_file_isolation": {
-      "status": "partial",
-      "note": "api.test.mjs has isolation (s1673), all 7 state files show isolation patterns"
-    },
-    "python3_elimination": {
-      "status": "done",
-      "note": "directive-enrichment.py migrated to Node (wq-761, s1689)"
+      "total": 30,
+      "covered": 14
     }
   },
   "combined_critical_coverage": {
-    "note": "Critical-path source files + all hooks — the d071 target surface",
-    "total": 98,
-    "covered": 29,
-    "coverage_pct": 30,
-    "gap_to_target": 50
-  }
+    "total": 99,
+    "covered": 48,
+    "coverage_pct": 48,
+    "gap_to_target": 32
+  },
+  "trend": {
+    "critical_path": {
+      "previous_pct": 52,
+      "current_pct": 61,
+      "delta": 9,
+      "measured_session": 1691
+    },
+    "combined": {
+      "previous_pct": 30,
+      "current_pct": 48,
+      "delta": 18,
+      "measured_session": 1691
+    }
+  },
+  "verdict": "on_track",
+  "pace_needed_pp_per_session": 1.23
 }

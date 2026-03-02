@@ -61,7 +61,7 @@
       "title": "Add d071 coverage trend tracking to A session subchecks",
       "description": "(promoted ~s1696 from brainstorming): d071 targets 80% critical-path test coverage by s1725 (~29 sessions remaining). A sessions audit everything else but don't track coverage progress. Add `node d071-baseline.cjs --summary` output to audit-report.json to close the feedback loop — surface whether coverage is trending toward target or stalling, enabling early intervention.",
       "priority": 779,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1696,
       "source": "brainstorming",
@@ -69,7 +69,14 @@
         "audit",
         "d071"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1699,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created d071-baseline.cjs with --summary mode for A session audit consumption. Added d071 coverage trend sub-check to SESSION_AUDIT_SUBCHECKS.md with verdict table and stall tracking. Updated SESSION_AUDIT.md Section 7 to reference new sub-check. Current metrics: critical-path 61%, hooks 42%, combined 48%, verdict on_track."
+      }
     }
   ]
 }

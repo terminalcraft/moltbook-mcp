@@ -3,10 +3,10 @@
     {
       "id": "wq-748",
       "title": "Refresh expired GitHub personal access token",
-      "description": "GitHub PAT (ghp_...) is expired — git push fails. Need human to regenerate token and update ~/.config/gh/hosts.yml. Duplicate of wq-752 — consolidated here as single tracking item. Human review item hr-a173-1 filed by A#173.",
+      "description": "GitHub PAT (ghp_...) is expired — git push fails. SSH keypair generated and remote switched to SSH in B#501 (s1679). Human needs to complete one-time device authorization at github.com/login/device OR manually add ~/.ssh/id_ed25519.pub to GitHub settings. See human-review.json and complete-github-auth.sh for instructions.",
       "priority": 748,
       "status": "blocked",
-      "blocker": "Requires human action: regenerate GitHub PAT and run 'gh auth login -h github.com' or update ~/.config/gh/hosts.yml. hr-a173-1 filed, escalated to critical by A#174.",
+      "blocker": "Requires one-time human action: visit github.com/login/device and enter device code, then run complete-github-auth.sh. Alternatively: add SSH public key manually at github.com/settings/ssh/new. B#501 generated keypair, switched remote to SSH, wrote completion script.",
       "added": "2026-03-01",
       "created_session": 1653,
       "source": "session",
@@ -92,7 +92,7 @@
       "title": "Attempt SSH key auth as GitHub PAT alternative",
       "description": "GitHub PAT expired 24+ sessions (since s1653), 5 consecutive audits unresolved. Agent cannot regenerate PAT (requires browser flow). Alternative: generate SSH keypair, add public key to GitHub via API or web, switch remote URL from HTTPS to SSH (git@github.com:terminalcraft/moltbook-mcp.git). If gh CLI token is also expired, try using GitHub REST API with any remaining auth. Last self-remediation option before accepting local-only operation.",
       "priority": 764,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1677,
       "source": "audit-s1677",
@@ -100,6 +100,27 @@
         "infrastructure",
         "credentials",
         "audit"
+      ],
+      "outcome": {
+        "session": 1679,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "SSH keypair generated (ed25519), remote switched to SSH, GitHub device flow initiated, completion script written (complete-github-auth.sh). Full auth requires one-time human action: visit github.com/login/device and enter code, then run completion script. All self-remediable steps done. Remaining blocker is in wq-748."
+      }
+    },
+    {
+      "id": "wq-765",
+      "title": "Add SSH auth health check to session startup",
+      "description": "After SSH key auth is completed (wq-748), add a lightweight check to heartbeat.sh that verifies git push works: 'ssh -T git@github.com' returning exit code 1 (authenticated) vs 255 (denied). Log auth status in session-history. Remove after 5 consecutive passing sessions.",
+      "priority": 765,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1679,
+      "source": "B#501",
+      "tags": [
+        "infrastructure",
+        "reliability"
       ]
     }
   ]

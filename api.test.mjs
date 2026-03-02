@@ -3,12 +3,38 @@
 // Tests response structure and content, not just status codes
 // Usage: node api.test.mjs [base_url]
 
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, copyFileSync, unlinkSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const INBOX_FILE = join(__dirname, "inbox.json");
+
+// State file isolation: backup files that tests write to, restore after test run.
+// Prevents test data from corrupting production state (wq-762).
+const STATE_FILES_TO_ISOLATE = ["human-review.json"];
+const BACKUP_SUFFIX = ".pre-test-backup";
+
+function backupStateFiles() {
+  for (const f of STATE_FILES_TO_ISOLATE) {
+    const p = join(__dirname, f);
+    const bp = p + BACKUP_SUFFIX;
+    if (existsSync(p)) {
+      copyFileSync(p, bp);
+    }
+  }
+}
+
+function restoreStateFiles() {
+  for (const f of STATE_FILES_TO_ISOLATE) {
+    const p = join(__dirname, f);
+    const bp = p + BACKUP_SUFFIX;
+    if (existsSync(bp)) {
+      copyFileSync(bp, p);
+      try { unlinkSync(bp); } catch {}
+    }
+  }
+}
 
 const BASE = process.argv[2] || "http://127.0.0.1:3847";
 let passed = 0, failed = 0;
@@ -2667,6 +2693,7 @@ async function testWebhookEventsStructure() {
 
 async function main() {
   console.log(`api.test.mjs — Testing ${BASE}\n`);
+  backupStateFiles();
   const start = Date.now();
 
   const tests = [
@@ -2884,30 +2911,35 @@ async function main() {
     testCronStructure, testWebhookEventsStructure,
   ];
 
-  for (const t of tests) {
-    try {
-      const t0 = Date.now();
-      const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("TEST TIMEOUT")), 20000));
-      await Promise.race([t(), timeout]);
-      if (Date.now() - t0 > 5000) console.log(`\n  SLOW: ${t.name} (${((Date.now() - t0)/1000).toFixed(1)}s)`);
-    }
-    catch (e) { failed++; console.log(`\n  ERROR in ${t.name}: ${e.message}`); }
-  }
-
-  const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-  console.log(`\n\n${passed} passed, ${failed} failed in ${elapsed}s`);
-
-  // Cleanup: remove test messages from inbox.json to avoid pollution (wq-060)
   try {
-    if (existsSync(INBOX_FILE)) {
-      const inbox = JSON.parse(readFileSync(INBOX_FILE, "utf-8"));
-      const cleaned = inbox.filter(m => m.from !== "api-test");
-      if (cleaned.length < inbox.length) {
-        writeFileSync(INBOX_FILE, JSON.stringify(cleaned, null, 2));
-        console.log(`Cleaned up ${inbox.length - cleaned.length} test message(s) from inbox.json`);
+    for (const t of tests) {
+      try {
+        const t0 = Date.now();
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("TEST TIMEOUT")), 20000));
+        await Promise.race([t(), timeout]);
+        if (Date.now() - t0 > 5000) console.log(`\n  SLOW: ${t.name} (${((Date.now() - t0)/1000).toFixed(1)}s)`);
       }
+      catch (e) { failed++; console.log(`\n  ERROR in ${t.name}: ${e.message}`); }
     }
-  } catch { /* cleanup failure is non-fatal */ }
+
+    const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+    console.log(`\n\n${passed} passed, ${failed} failed in ${elapsed}s`);
+
+    // Cleanup: remove test messages from inbox.json to avoid pollution (wq-060)
+    try {
+      if (existsSync(INBOX_FILE)) {
+        const inbox = JSON.parse(readFileSync(INBOX_FILE, "utf-8"));
+        const cleaned = inbox.filter(m => m.from !== "api-test");
+        if (cleaned.length < inbox.length) {
+          writeFileSync(INBOX_FILE, JSON.stringify(cleaned, null, 2));
+          console.log(`Cleaned up ${inbox.length - cleaned.length} test message(s) from inbox.json`);
+        }
+      }
+    } catch { /* cleanup failure is non-fatal */ }
+  } finally {
+    // Restore state files that tests may have modified (wq-762)
+    restoreStateFiles();
+  }
 
   if (failed > 0) process.exit(1);
 }

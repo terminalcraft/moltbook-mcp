@@ -13,6 +13,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Extend api.test.mjs state isolation to inbox.json and deprecations.json** (added ~s1673): wq-762 added backup/restore for human-review.json, but api.test.mjs also POSTs test data to /inbox, /deprecations, /snapshots, /directory, /paste, /kv, and /polls endpoints. Inbox has a post-test filter cleanup but the others don't. Extending STATE_FILES_TO_ISOLATE to cover inbox.json and deprecations.json (and any others that accumulate test data) would prevent all forms of test-data pollution. Low risk — same backup/restore pattern.
 - **Brainstorm cleanup regression test** (added ~s1668): 44-brainstorm-cleanup.sh had two bugs (## Ideas section not matched, --- separator resetting section state) that went undetected for 40+ sessions. A test with a mock BRAINSTORMING.md containing items in both ## Ideas and ## Evolution Ideas sections, plus --- separators, would catch regressions in the retirement logic.
 
+- **Add anti-stall rule to all session type prompts** (added ~s1684): The anti-stall rule added to SESSION_BUILD.md (wq-766 fix) should be replicated to SESSION_ENGAGE.md, SESSION_REFLECT.md, and SESSION_AUDIT.md. While E/R/A sessions haven't shown the same stall pattern, the underlying mechanism (text-only response = session termination in -p mode) applies to all types. Low risk, copy-paste.
+
 ## Active Observations
 
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting

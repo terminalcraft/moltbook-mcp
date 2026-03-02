@@ -112,6 +112,9 @@ check_truncation_recovery() {
   " 2>/dev/null
 
   echo "$(date -Iseconds) s=${SESSION_NUM} RECOVERED: $ASSIGNED_ID truncated after ${DURATION}s with 0 commits — re-queued as pending" >> "$RECOVERY_LOG"
+
+  # Track early-stall pattern for audit visibility (wq-766)
+  echo "WARN: B session s${SESSION_NUM} early stall (${DURATION}s, 0 commits, $ASSIGNED_ID re-queued)" >> "$AUDIT_LOG" 2>/dev/null
 }
 
 ###############################################################################

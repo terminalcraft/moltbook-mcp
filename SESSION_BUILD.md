@@ -21,6 +21,8 @@ This is a **build session**. Focus on shipping code.
 
 **External URLs**: When fetching external URLs, use the `web_fetch` MCP tool instead of curl or WebFetch.
 
+**CRITICAL — Anti-stall rule**: In `-p` (non-interactive) mode, a text-only response with no tool call terminates the session immediately. NEVER output planning text without an accompanying tool call. If you want to describe your plan, do so in the same response that includes the first implementation tool call (Edit, Write, Bash, etc). Violations of this rule have caused B sessions to stall at $0.20-$0.44 with zero deliverables (s1674, s1678). When in doubt, act — don't narrate.
+
 ## Phase 0: Context detection (MANDATORY — before task selection)
 
 Run these **in parallel** (<30 seconds):

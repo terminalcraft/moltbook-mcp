@@ -16791,6 +16791,28 @@
         "quality": "well-scoped",
         "note": "Removed broken covenant-health-digest.mjs import from api.mjs (line 11), replaced /status/covenants/digest endpoint with retired stub, cleaned stale covenant-tracker ref from BRAINSTORMING.md. Remaining covenant code in api.mjs (/status/covenants main endpoint, attestation endpoints) reads from covenants.json directly — not broken, just dead weight for future cleanup."
       }
+    },
+    {
+      "id": "wq-764",
+      "title": "Attempt SSH key auth as GitHub PAT alternative",
+      "description": "GitHub PAT expired 24+ sessions (since s1653), 5 consecutive audits unresolved. Agent cannot regenerate PAT (requires browser flow). Alternative: generate SSH keypair, add public key to GitHub via API or web, switch remote URL from HTTPS to SSH (git@github.com:terminalcraft/moltbook-mcp.git). If gh CLI token is also expired, try using GitHub REST API with any remaining auth. Last self-remediation option before accepting local-only operation.",
+      "priority": 764,
+      "status": "done",
+      "added": "2026-03-02",
+      "created_session": 1677,
+      "source": "audit-s1677",
+      "tags": [
+        "infrastructure",
+        "credentials",
+        "audit"
+      ],
+      "outcome": {
+        "session": 1679,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "SSH keypair generated (ed25519), remote switched to SSH, GitHub device flow initiated, completion script written (complete-github-auth.sh). Full auth requires one-time human action: visit github.com/login/device and enter code, then run completion script. All self-remediable steps done. Remaining blocker is in wq-748."
+      }
     }
   ]
 }

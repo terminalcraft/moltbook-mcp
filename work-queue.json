@@ -1,24 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-773",
-      "title": "Manifest reconciliation in post-hook regression test",
-      "description": "(added ~s1664): B#495 found 7 stale manifest entries and 3 missing entries from prior consolidations (wq-739, wq-744). The `hook-integration.test.mjs` NETWORK_HOOKS set also drifts. Add a test case that cross-checks manifest.json entries against actual files on disk — flag missing files and unlisted hooks. Prevents silent manifest drift after each consolidation.",
-      "priority": 773,
-      "status": "done",
-      "added": "2026-03-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1700,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added NETWORK_HOOKS set reconciliation tests (3 tests): entries exist on disk, entries in manifest, overlap check with WARN_EXIT_OK. All 351 tests pass."
-      }
-    },
-    {
       "id": "wq-775",
       "title": "Extend api.test.mjs state isolation to inbox.json and deprecations.json",
       "description": "(added ~s1673): wq-762 added backup/restore for human-review.json, but api.test.mjs also POSTs test data to /inbox, /deprecations, /snapshots, /directory, /paste, /kv, and /polls endpoints. Inbox has a post-test filter cleanup but others don't. Extending STATE_FILES_TO_ISOLATE to cover inbox.json and deprecations.json prevents test-data pollution.",
@@ -56,6 +38,36 @@
       "status": "pending",
       "added": "2026-03-02",
       "created_session": 1696,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "d071"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-780",
+      "title": "Add WARN_EXIT_OK set reconciliation test to hook-integration.test.mjs",
+      "description": "(promoted ~s1701 from brainstorming): WARN_EXIT_OK set in hook-integration.test.mjs has drift risk — hooks get removed/renamed during consolidation but the set isn't updated. Add a parallel reconciliation test verifying entries exist on disk and entries are in manifest. Completes coverage of all test-file-embedded hook sets alongside wq-773's NETWORK_HOOKS test.",
+      "priority": 780,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1701,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "d071"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-781",
+      "title": "Add tests for d071-baseline.cjs coverage tool",
+      "description": "(promoted ~s1701 from brainstorming): d071-baseline.cjs is a critical-path tool consumed by A sessions for coverage trend tracking with no test. Test should verify: correct file scanning for critical-path/hooks, --summary output structure matches SUBCHECKS.md spec, trend calculation with mock previous baseline, verdict thresholds (target_met/on_track/at_risk/behind), stall_count logic. Improves d071 coverage metrics since the tool itself is in the critical path.",
+      "priority": 781,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1701,
       "source": "brainstorming",
       "tags": [
         "testing",

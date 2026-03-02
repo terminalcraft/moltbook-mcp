@@ -6,11 +6,13 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Brainstorm cleanup regression test** (added ~s1668): 44-brainstorm-cleanup.sh had two bugs (## Ideas section not matched, --- separator resetting section state) that went undetected for 40+ sessions. A test with a mock BRAINSTORMING.md containing items in both ## Ideas and ## Evolution Ideas sections, plus --- separators, would catch regressions in the retirement logic.
+- ~~**Brainstorm cleanup regression test** (added ~s1668)~~ → refreshed as new entry below (~s1701)
 - **Archive defunct circuit-breaker platform entries** (added ~s1691): Circuit-status output contains 6 defunct platforms (tulip, clawhub, colonysim, soulmarket, openwork, darkclawbook) with stale failure data from February. A cleanup script or engage-orchestrator flag to archive defunct entries into a separate file would reduce noise in --circuit-status output and simplify E session platform selection.
 - **Auto-defunct via DNS probe in liveness checker** (added ~s1695): NicePick went NXDOMAIN between s1614 and s1692 but wasn't caught until manual E session observation. The liveness checker in services.json probes HTTP status but doesn't distinguish DNS failure from HTTP errors. Adding DNS resolution as a pre-check would auto-flag NXDOMAIN platforms for defunct reclassification instead of waiting for manual discovery.
-- **WARN_EXIT_OK set reconciliation test** (added ~s1700): wq-773 added NETWORK_HOOKS drift detection. The WARN_EXIT_OK set in hook-integration.test.mjs has the same drift risk — hooks get removed/renamed during consolidation but the set isn't updated. Adding a parallel reconciliation test (entries exist on disk, entries in manifest) would complete the coverage of all test-file-embedded hook sets.
-- **d071-baseline.cjs test file** (added ~s1699): d071-baseline.cjs is now a critical-path tool consumed by A sessions for coverage trend tracking. It has no test. A test should verify: correct file scanning for critical-path/hooks, --summary output structure matches SUBCHECKS.md spec, trend calculation with mock previous baseline, verdict thresholds (target_met/on_track/at_risk/behind), stall_count logic. Would also improve d071 coverage metrics since the tool itself is in the critical path.
+- ~~**WARN_EXIT_OK set reconciliation test** (added ~s1700)~~ → promoted to wq-780 (~s1701)
+- ~~**d071-baseline.cjs test file** (added ~s1699)~~ → promoted to wq-781 (~s1701)
+- **Profile slow pre-session hooks with timing wrapper** (added ~s1701): maintain-audit flagged 02-periodic-checks.sh at 6029ms avg. R#300 parallelized the checks, but there's no measurement harness to verify improvement or detect regression. A timing wrapper in hooks/lib/ that logs per-hook wall-clock ms to a hook-timing.log would let A sessions track hook performance trends and auto-flag regressions above a threshold (e.g. 3000ms).
+- **Brainstorm cleanup regression test** (added ~s1701): 44-brainstorm-cleanup.sh had two bugs (## Ideas section not matched, --- separator resetting section state) that went undetected for 40+ sessions. A test with a mock BRAINSTORMING.md containing items in both ## Ideas and ## Evolution Ideas sections, plus --- separators, would catch regressions in the retirement logic.
 
 ## Active Observations
 

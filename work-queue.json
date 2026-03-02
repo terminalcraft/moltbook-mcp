@@ -5,14 +5,21 @@
       "title": "Clean up untracked files in moltbook-mcp root",
       "description": "16 untracked files accumulated in repo root (backfill-traces.mjs, bridge-*.mjs, swap_usdc*.mjs, engagement-actions.log, etc). Review each: add to .gitignore if runtime artifact, delete if dead code, or commit if valuable. Prevents accidental staging.",
       "priority": 759,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-01",
       "created_session": 1669,
       "source": "B#497",
       "tags": [
         "cleanup",
         "hygiene"
-      ]
+      ],
+      "outcome": {
+        "session": 1689,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Reviewed 15 untracked files. Deleted 7 (dead code/embedded secrets: backfill-traces.mjs, bridge-*.mjs, get-pol-gas.mjs, swap_usdc*.mjs, mydeadinternet-exploration.md). Added 4 runtime state files to .gitignore (engagement-actions.log, knowbster-collections.json, pinchwork-inbox.json, review-requests.json). Committed 4 valuable files (components/clawball.js, engagement-variety-analyzer.mjs, pause-molty.sh, resume-molty.sh). Zero untracked files remaining."
+      }
     },
     {
       "id": "wq-760",
@@ -70,6 +77,20 @@
         "infrastructure",
         "d071",
         "migration"
+      ]
+    },
+    {
+      "id": "wq-770",
+      "title": "Audit .gitignore completeness against runtime state files",
+      "description": "wq-759 cleanup found 4 runtime state files (engagement-actions.log, knowbster-collections.json, pinchwork-inbox.json, review-requests.json) missing from .gitignore. Systematic audit: grep all readFileSync/writeFileSync calls in api.mjs and index.js for local .json/.log files, cross-check each against .gitignore. Prevents future accumulation of untracked runtime artifacts.",
+      "priority": 770,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1689,
+      "source": "B#504",
+      "tags": [
+        "hygiene",
+        "reliability"
       ]
     }
   ]

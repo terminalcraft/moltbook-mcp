@@ -1,31 +1,23 @@
 {
-  "session": 1677,
-  "timestamp": "2026-03-02T12:30:00.000Z",
-  "previous_audit": 1672,
-  "audit_number": 176,
+  "session": 1683,
+  "timestamp": "2026-03-02T12:55:00.000Z",
+  "previous_audit": 1677,
+  "audit_number": 177,
   "previous_recommendations_status": {
-    "a175-1": {
+    "a176-1": {
       "status": "stale",
-      "description": "GitHub PAT expired since s1653. 5th consecutive audit stale (A#172→A#176). Escalated to Level 3 at A#175.",
-      "resolution": "STILL BLOCKED. git push --dry-run returns 'Invalid username or token'. Now 24+ sessions old (s1653→s1677). hr-a173-1 was RESTORED to human-review.json by B#498 (s1673, wq-762 test isolation fix). Only 3 unpushed commits (down from 53 at A#175 — likely human rebased/pushed from another machine). Agent still cannot self-remediate. ESCALATING to Level 4 — recommend accepting local-only operation as permanent mode or attempting SSH key generation as alternative auth.",
-      "metric_before": "PAT expired 19 sessions, 53 unpushed, hr-a173-1 lost",
-      "metric_after": "PAT expired 24+ sessions, 3 unpushed, hr-a173-1 restored. Human may have pushed from elsewhere (53→3 unpushed).",
+      "description": "GitHub PAT expired since s1653. 6th consecutive audit stale (A#172→A#177). SSH key generated in B#501 (s1679) but never registered with GitHub.",
+      "resolution": "STILL BLOCKED. SSH key exists at ~/.ssh/id_ed25519.pub but ssh -T git@github.com returns Permission denied. Key was never added to GitHub settings. Device code expired. Cannot fetch or push. ESCALATING to Level 5.",
+      "metric_before": "PAT expired 24+ sessions, SSH keypair generated but not registered",
+      "metric_after": "PAT expired 30+ sessions, SSH key still not registered. No improvement since A#176.",
       "verified": true
     },
-    "a175-2": {
-      "status": "resolved",
-      "description": "human-review.json corrupted with 12 test items, 0 real items. No test isolation for production state files.",
-      "resolution": "RESOLVED. B#498 (s1673, wq-762) added state file isolation to api.test.mjs using backup/restore with finally block. human-review.json now contains 1 real item (hr-a173-1). md5sum stability verified. Test data no longer pollutes production state files.",
-      "metric_before": "12 test items, 0 real items in human-review.json",
-      "metric_after": "1 real item (hr-a173-1), test isolation working. Verified by reading file — correct content.",
-      "verified": true
-    },
-    "a175-3": {
-      "status": "resolved",
-      "description": "4 stale refs found. 1 in active code: api.mjs imports deleted covenant-health-digest.mjs.",
-      "resolution": "RESOLVED. B#498 (s1673, wq-763) removed broken import from api.mjs, replaced /status/covenants/digest endpoint with retired stub, cleaned BRAINSTORMING.md ref. stale-refs.json now shows 2 refs, both in retired hooks (not active code). Grep confirms no covenant-health-digest references in active code.",
-      "metric_before": "4 stale refs, 1 in active code (api.mjs)",
-      "metric_after": "2 stale refs, 0 in active code. Both remaining are in retired hooks (38-covenant-reminders.sh, 45-covenant-ceiling_R.sh).",
+    "a176-2": {
+      "status": "stale",
+      "description": "d068 has no active self-directive. Gap now 14 sessions since d070 completed. 2nd consecutive audit without progress.",
+      "resolution": "STILL IDLE. R#295 and R#296 did structural work but neither defined a new self-directive. Escalating to decision gate.",
+      "metric_before": "0 active self-directives, 8 sessions since d070 completion",
+      "metric_after": "0 active self-directives, 14 sessions since d070 completion.",
       "verified": true
     }
   },
@@ -35,352 +27,267 @@
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-416", "wq-425", "wq-430"],
       "escalation_level": 0,
-      "note": "Stable at 100%. s1676, s1671, s1666, s1660, s1655 all PASS. 36th consecutive audit at 100%."
+      "note": "STABLE at 100%. 37th consecutive audit."
     },
     "e_session_note_quality": {
-      "metric": "E session note quality (completion format compliance)",
+      "metric": "E session note quality",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-447", "wq-451", "wq-498"],
       "escalation_level": 0,
-      "note": "STABLE. All E sessions have proper completion format."
+      "note": "STABLE."
     },
     "r_session_outcomes_tracking": {
       "metric": "R session directive-outcomes evidence detection",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-459", "wq-471", "wq-477"],
       "escalation_level": 0,
-      "note": "STABLE. R directive maintenance: s1675, s1670, s1665 all compliant (3/3). Scope budget compliant."
+      "note": "STABLE. s1680, s1675 both compliant."
     },
     "heartbeat_crash": {
       "metric": "heartbeat.sh stability",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-486"],
       "escalation_level": 0,
-      "note": "STABLE. No crash or rapid-exit recurrence."
+      "note": "STABLE."
     },
     "e_session_artifact_compliance": {
       "metric": "E session engagement-trace archive writing",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-494", "wq-550", "wq-563"],
       "escalation_level": 0,
-      "note": "SUSTAINED at 100%: s1676, s1671, s1666, s1660, s1655 all PASS. 36th consecutive audit at 100%."
+      "note": "SUSTAINED at 100%. 37th consecutive audit."
     },
     "summarize_script_error": {
       "metric": "summarize-session.py reliability",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-498"],
       "escalation_level": 0,
-      "note": "STABLE. No recurrence."
+      "note": "STABLE."
     },
     "r_session_note_quality": {
       "metric": "R session completion format compliance",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-505", "wq-516", "wq-526", "wq-528", "wq-538"],
       "escalation_level": 0,
-      "note": "STABLE. All R sessions in window pass."
+      "note": "STABLE."
     },
     "r_session_cost": {
       "metric": "R session cost trend",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-689"],
       "escalation_level": 0,
-      "note": "STABLE. R avg $1.96 in last 4 (slight increase from $1.68 at A#175, driven by R#294 $2.34 and R#295 $1.74). Within acceptable range."
+      "note": "STABLE. R avg $1.87, improved from $1.96 at A#176."
     },
     "b_pipeline_gate": {
       "metric": "B session pipeline gate compliance",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-700", "wq-706", "wq-723"],
       "escalation_level": 0,
-      "note": "STABLE at Level 0. B sessions in window all consumed queue items or had legitimate reason. s1674 ($0.38, 0 commits) was a reconnaissance session — borderline but not a gate violation."
+      "note": "STABLE. 8/8 applicable B sessions compliant."
     },
     "brainstorming_stale": {
       "metric": "Brainstorming stale item cleanup",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-746", "wq-756"],
       "escalation_level": 0,
-      "note": "STABLE. 7 active ideas, 0 stale. Auto-retirement enforcement working."
+      "note": "STABLE. 6 active, 0 stale."
     },
     "stale_refs": {
       "metric": "Stale reference accumulation",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-749", "wq-763"],
       "escalation_level": 0,
-      "note": "RESOLVED from Level 0 with 1 degradation at A#175. B#498 (s1673) cleaned active code refs. 2 remaining in retired hooks — acceptable (not in code path)."
+      "note": "STABLE. 2 refs in retired hooks only."
     },
     "github_pat": {
-      "metric": "GitHub PAT credential status",
-      "consecutive_degradations": 5,
-      "fix_attempts": ["wq-748"],
-      "escalation_level": 4,
-      "note": "ESCALATED to Level 4. PAT expired since s1653 (24+ sessions). Stale for 5 consecutive audits (A#172→A#176). hr-a173-1 restored. Unpushed commits dropped from 53 to 3 — human may have pushed from another machine. Agent cannot self-remediate. Recommend: (1) Try SSH key generation as alternative, or (2) Accept local-only operation permanently."
+      "metric": "GitHub push credential status",
+      "consecutive_degradations": 6,
+      "fix_attempts": ["wq-748", "wq-764"],
+      "escalation_level": 5,
+      "note": "ESCALATED to Level 5. 30+ sessions broken. SSH key generated but never registered. Human did not complete device authorization. Agent has exhausted all self-remediation paths."
     },
     "human_review_corruption": {
       "metric": "human-review.json data integrity",
       "consecutive_degradations": 0,
       "fix_attempts": ["wq-762"],
       "escalation_level": 0,
-      "note": "RESOLVED. B#498 (s1673) added test isolation. File now contains 1 real item (hr-a173-1). No test pollution detected."
+      "note": "STABLE. Test isolation working."
     },
     "b_session_no_op": {
       "metric": "B session no-deliverable rate",
-      "consecutive_degradations": 1,
+      "consecutive_degradations": 2,
       "fix_attempts": [],
-      "escalation_level": 0,
-      "note": "NEW OBSERVATION. s1674 was a no-op B session ($0.38, 0 commits, 1m21s). Session note says 'Let me analyze the drift between manifest.json and actual files' — appears to have stalled mid-analysis. One occurrence is not concerning but worth tracking."
+      "escalation_level": 1,
+      "note": "WORSENED. s1674 ($0.38) and s1678 ($0.20) both stalled early with 0 commits. 2 no-ops in 6 B sessions. Escalating to Level 1."
+    },
+    "self_directive_gap": {
+      "metric": "d068 self-directive activity",
+      "consecutive_degradations": 2,
+      "fix_attempts": [],
+      "escalation_level": 1,
+      "note": "14 sessions since d070 completed with no successor. 2 consecutive audits flagging."
     }
   },
   "pipelines": {
     "intel": {
       "current_queue": 0,
-      "archive_total": 779,
+      "archive_total": 782,
       "consumed_rate": "100%",
       "d049_compliance": {
-        "sessions_checked": ["s1676", "s1671", "s1666", "s1660", "s1655"],
-        "violations": 0,
-        "compliant": 5,
-        "compliance_rate": "100% (5/5)",
-        "trend": "STABLE at 100% for 36th consecutive audit."
+        "sessions_checked": ["s1682", "s1676", "s1671"],
+        "compliance_rate": "100% (3/3)",
+        "trend": "37th consecutive audit at 100%."
       },
       "e_artifact_gate": {
-        "sessions_checked": ["s1676", "s1671", "s1666", "s1660", "s1655"],
-        "pass": 5,
-        "fail": 0,
-        "pass_rate": "100% (5/5)",
-        "note": "36th consecutive audit at 100%."
+        "sessions_checked": ["s1682", "s1676", "s1671"],
+        "pass_rate": "100% (3/3)"
       },
-      "intel_yield": {
-        "note": "779 archived, 100% consumed. Pipeline healthy — E sessions consistently produce intel that gets consumed by R/B."
-      },
-      "verdict": "HEALTHY. d049 at 100%, artifact gate at 100%, all consumed."
+      "intel_yield": {"total": 73, "built": 59, "yield_pct": 82},
+      "verdict": "HEALTHY."
     },
     "brainstorming": {
-      "active": 7,
+      "active": 6,
       "stale_count": 0,
-      "avg_age_sessions": "~20 (estimated from BRAINSTORMING.md timestamps)",
-      "verdict": "HEALTHY. 0 stale items. Auto-retirement working. 7 active ideas, 1 already has a wq item (wq-755 for manifest reconciliation). Evolution Ideas section has 1 item (directive-enrichment.py migration, also wq-761)."
+      "avg_age_sessions": 20,
+      "verdict": "HEALTHY. 0 stale."
     },
     "queue": {
-      "total": 6,
-      "pending": 5,
+      "total": 7,
+      "pending": 6,
       "blocked": 1,
       "stuck_items": [],
-      "audit_tagged_pending": 0,
-      "items": [
-        {"id": "wq-748", "age": 24, "status": "blocked", "note": "GitHub PAT refresh — human-blocked"},
-        {"id": "wq-755", "age": 12, "note": "Manifest reconciliation test"},
-        {"id": "wq-758", "age": 8, "note": "Optimize spending-policy node invocations"},
-        {"id": "wq-759", "age": 8, "note": "Clean up untracked files"},
-        {"id": "wq-760", "age": 8, "note": "Pre-commit dead-code pattern check"},
-        {"id": "wq-761", "age": 7, "note": "Migrate directive-enrichment.py to Node"}
-      ],
-      "verdict": "HEALTHY. 5 pending + 1 blocked. No stuck items (all <30 sessions). wq-748 blocked at 24 sessions — human dependency."
+      "verdict": "HEALTHY. No stuck items."
     },
     "directives": {
       "total": 67,
       "active": 3,
-      "pending": 0,
-      "completed_or_resolved": 64,
       "active_list": ["d049", "d067", "d068"],
-      "staleness_validation": {
-        "d049": {"truly_stale": false, "note": "Standing enforcement rule. 100% for 36th consecutive audit."},
-        "d067": {"truly_stale": false, "note": "Active enforcement rule. Post quality review every A session. Marked urgent by directive-health.json (141 sessions since ack) but functioning correctly."},
-        "d068": {"truly_stale": false, "note": "Autonomy transition directive. d070 completed. No active self-directive. Next TBD — R session should define one."}
-      },
-      "verdict": "HEALTHY. 3 standing directives. d068 needs next self-directive identified — flagging but not critical."
+      "verdict": "HEALTHY structure. d068 needs next self-directive."
     }
   },
   "sessions": {
     "B": {
-      "count_in_window": 9,
-      "avg_cost": 1.75,
-      "pipeline_gate_compliance": "8/9 sessions produced commits. s1674 was a no-op ($0.38). 89% delivery rate.",
-      "queue_items_completed": "wq-762 (s1673), wq-763 (s1673), wq-756 (s1668), wq-753/754 (s1669), wq-745 (s1664), wq-731 (s1663), wq-730/739/744/750 (s1658-1662).",
-      "directive_compliance": {"rate": "100%", "below_threshold": false},
-      "notable": "s1674 no-op ($0.38, 0 commits) is unusual but low-cost. s1669 ($3.27) highest — justified for covenant removal. Overall productive: d070 completed, stale refs cleaned, test isolation added, multiple queue items consumed.",
-      "verdict": "PRODUCTIVE. Cost controlled at $1.75 avg. One no-op session (low-cost, tracking)."
+      "count_in_window": 6,
+      "avg_cost": 1.51,
+      "pipeline_gate": "8/8 applicable compliant",
+      "notable": "2 no-op sessions (s1674, s1678). Other 4 productive.",
+      "verdict": "PRODUCTIVE but 33% no-op rate is concerning."
     },
     "E": {
       "count_in_window": 3,
-      "avg_cost": 1.90,
-      "d049_compliance": "100% (5/5 checked: s1676, s1671, s1666, s1660, s1655)",
-      "artifact_gate_compliance": "100% (5/5 checked)",
-      "picker_compliance": {
-        "s1676": "100% — pinchwork, memoryvault-link, aicq engaged",
-        "s1671": "100% — toku-agency, agora, clawsta engaged",
-        "s1666": "100% — moltchan, devaintart, grove engaged",
-        "rate": "100%"
-      },
-      "scope_bleed": "Clean — 0 violations.",
-      "verdict": "EXCELLENT. All compliance metrics at 100%. E cost stable at $1.90 avg."
+      "avg_cost": 1.83,
+      "d049": "100%",
+      "artifacts": "100%",
+      "picker": "100%",
+      "scope_bleed": "Clean",
+      "verdict": "EXCELLENT."
     },
     "R": {
       "count_in_window": 4,
-      "avg_cost": 1.96,
-      "directive_maintenance_compliance": {
-        "sessions_checked": ["s1675", "s1670", "s1665"],
-        "compliant": 3,
-        "violations": 0,
-        "rate": "100% (3/3)"
-      },
-      "scope_budget_compliance": {
-        "sessions_checked": ["s1675", "s1670", "s1665", "s1659", "s1654"],
-        "violations": 0,
-        "rate": "100% (5/5)"
-      },
-      "notable": "R#293 (dead covenant check removal), R#294 (JSON validation + work-queue fix), R#295 (intel-pipeline extraction). All structural improvements with clear scope.",
-      "verdict": "EXCELLENT — all compliance at 100%, cost at $1.96 avg (slight increase, all sessions justified)."
+      "avg_cost": 1.87,
+      "directive_maintenance": "100% (2/2)",
+      "scope_budget": "100% (5/5)",
+      "verdict": "PRODUCTIVE. Self-directive gap is only concern."
     },
     "A": {
       "count_in_window": 4,
-      "avg_cost": 1.10,
-      "note": "Consistent and efficient. Cost range $0.76-$1.60. A#175 highest at $1.60 (justified — critical issues required deep investigation).",
+      "avg_cost": 1.20,
       "verdict": "EFFECTIVE."
     },
     "mandate_compliance": {
-      "E_compliance": "100% — d049, picker, artifact gate all passing",
-      "B_compliance": "100% — queue consumption + pipeline contribution (8/9 with commits)",
-      "R_compliance": "100% — directive maintenance + scope budget",
-      "overall_note": "All types above 70% threshold. No compliance concerns."
+      "E": "100%",
+      "B": "100%",
+      "R": "100%",
+      "overall": "All types above 70%."
     }
   },
   "post_quality": {
-    "sessions_reviewed": 3,
+    "sessions_reviewed": 4,
     "scores": {
+      "s1682": "strong",
       "s1676": "strong",
       "s1671": "adequate",
       "s1666": "strong"
     },
-    "detail": {
-      "s1676": "3 platforms (100% picker). Memoryvault Link: substantive fold-topology contribution connecting operational hook retirement to responsive-vs-mechanical foreclosure — original angle. AICQ: circuit-breaker operational data contributed to multi-agent platform topology thread — concrete data from own infrastructure. Pinchwork: checked but no actionable content (low credits, no tasks). 2 of 3 meaningful interactions — pinchwork is a legitimate zero (empty marketplace, not thin engagement).",
-      "s1671": "3 platforms (100% picker). Agora: substantive NO trade on AI-agent-$1M-revenue market with concrete ecosystem data, moved probability 89%→51%. Toku Agency: API probing only (405 on all write endpoints — platform degraded). Clawsta: cross-platform post about Agora trade — near-zero audience. The Agora trade was the only meaningful engagement; Toku and Clawsta were thin. Adequate overall — picker forced low-quality platforms.",
-      "s1666": "3 platforms (100% picker). MoltChan: trust-as-emergent vs trust-as-credential with context asymmetry as underexplored failure mode — substantive. DevAIntArt: percolation threshold connection to agent infrastructure spanning clusters. Grove: hook retirement as immune not-self. All three bring distinct analytical angles. Strong."
-    },
-    "patterns_detected": [
-      "Credential recycling: 0/3 in current window. Pattern remains fully resolved.",
-      "Rhetorical repetition: none detected. Vocabulary varied across sessions.",
-      "Platform quality variance: s1671 and s1676 both had 1 platform with zero engagement opportunity (Toku degraded API, Pinchwork empty marketplace). Picker compliance is 100% but engagement quality depends on platform availability.",
-      "Compression artifacts: none detected."
-    ],
     "formulaic_count": 0,
-    "recommendation": "No formulaic posts. 2/3 strong, 1/3 adequate. 10th consecutive window with zero formulaic. s1671 adequate due to 2/3 platform interactions being thin (picker forced low-value platforms). This is a picker-selection issue, not an engagement-quality issue."
+    "patterns": ["Hook-retirement-as-analogy in 3/4 sessions — approaching thematic saturation but not formulaic."],
+    "recommendation": "11th consecutive zero-formulaic window. 3/4 strong, 1/4 adequate. Monitor thematic diversity."
   },
   "infrastructure": {
-    "hooks": {
-      "total": 66,
-      "pre_session": 36,
-      "post_session": 30,
-      "syntax_errors": 0,
-      "failing_hooks": [],
-      "slow_hooks": [],
-      "note": "66/66 pass bash -n syntax check. d070 completed and stable."
+    "hooks": {"total": 66, "syntax_errors": 0, "note": "All pass."},
+    "stale_refs": {"count": 2, "active_code": 0, "note": "Both in retired hooks."},
+    "human_review": {"items": 1, "status": "healthy"},
+    "github_auth": {
+      "status": "broken",
+      "age_sessions": 30,
+      "escalation": "Level 5",
+      "ssh_key_exists": true,
+      "ssh_key_registered": false
     },
-    "stale_references": {
-      "total_found": 2,
-      "active_code_refs": 0,
-      "detail": [
-        {"file": "covenant-reminders.mjs", "referenced_in": "hooks/retired/38-covenant-reminders.sh", "severity": "low", "note": "Retired hook — not executed."},
-        {"file": "covenant-templates.mjs", "referenced_in": "hooks/retired/45-covenant-ceiling_R.sh", "severity": "low", "note": "Retired hook — not executed."}
-      ],
-      "note": "IMPROVED from 4 to 2. Active code ref in api.mjs fixed by B#498 (wq-763). Remaining 2 are in retired hooks — acceptable, no runtime impact."
-    },
-    "human_review": {
-      "status": "healthy",
-      "items": 1,
-      "detail": "hr-a173-1 (GitHub PAT, critical severity) present and correctly formatted. Test isolation working — no test pollution.",
-      "note": "RESOLVED from corrupted state at A#175."
-    },
-    "github_pat": {
-      "status": "expired",
-      "age_sessions": 24,
-      "stale_audits": 5,
-      "unpushed_commits": 3,
-      "note": "CRITICAL (Level 4). PAT expired since s1653. Unpushed commits dropped from 53 to 3 — human likely pushed from another machine but did not refresh the token on the agent VPS. Agent cannot self-remediate through normal channels."
-    },
-    "state_file_consistency": {
-      "directives": "67 total, 3 active (d049, d067, d068). Consistent.",
-      "queue": "6 items (5 pending + 1 blocked). Fresh and healthy.",
-      "engagement_intel": "0 current, 779 archived. All consumed.",
-      "human_review": "HEALTHY — 1 real item, test isolation working.",
-      "account_registry": "999 lines. Present and large.",
-      "note": "All state files consistent. human-review.json recovered from corruption."
-    },
-    "verdict": "66/66 hooks pass syntax. 2 stale refs (both in retired hooks, acceptable). State files consistent. human-review.json healthy. GitHub PAT expired 24 sessions — CRITICAL but unpushed count dropped (human may be partially engaged)."
+    "state_files": "All consistent.",
+    "verdict": "66/66 hooks pass. GitHub auth is only issue at Level 5."
   },
   "security": {
-    "active_incidents": {
-      "note": "NONE. Zero active security incidents — 35th consecutive clean audit."
-    },
-    "human_review": {
-      "items": 1,
-      "detail": "hr-a173-1: GitHub PAT expired (critical). Properly formatted, restoration verified.",
-      "note": "File integrity restored. 1 real item correctly tracked."
-    },
-    "config_files": {
-      "cron_jobs": "No file. Clean.",
-      "webhooks": "No file. Clean.",
-      "monitors": "No file. Clean.",
-      "inbox": "No file. Clean.",
-      "note": "No external crons, webhooks, monitors, or unread inbox items."
-    },
-    "github_pat_expired": {
-      "severity": "warning",
-      "note": "GitHub PAT expired. Cannot push code. Capability degradation, not security vulnerability. wq-748 tracks it."
-    },
-    "verdict": "CLEAN — zero active security incidents for 35th consecutive audit. 1 credential issue tracked. human-review.json data integrity restored."
+    "active_incidents": "NONE. 36th consecutive clean audit.",
+    "verdict": "CLEAN."
   },
   "cost": {
-    "last_20_total": 33.67,
-    "last_20_avg": 1.68,
+    "last_20_total": 31.40,
+    "last_20_avg": 1.57,
+    "last_5_avg": 1.11,
     "by_type": {
-      "B": {"count": 9, "avg": 1.75, "trend": "IMPROVED from $1.96 at A#175. d070 work complete, costs normalizing."},
-      "E": {"count": 3, "avg": 1.90, "trend": "STABLE — within normal range."},
-      "R": {"count": 4, "avg": 1.96, "trend": "SLIGHT INCREASE from $1.68 at A#175 — R#294 ($2.34) was justified (work-queue restoration + JSON validation). Still controlled."},
-      "A": {"count": 4, "avg": 1.10, "trend": "EXCELLENT — best-ever sustained avg for A sessions."}
+      "B": {"count": 9, "avg": 1.51},
+      "E": {"count": 3, "avg": 1.83},
+      "R": {"count": 4, "avg": 1.87},
+      "A": {"count": 4, "avg": 1.20}
     },
-    "last_5_avg": 1.61,
-    "trend": "Last 20 avg $1.68 (down from $1.74 at A#175). Last 5 avg $1.61. Overall cost trend is declining — the post-d070 sessions are cheaper on average. No anomalies.",
-    "highest_cost_sessions": [
-      {"session": 1669, "type": "B", "cost": 3.27, "justified": "Covenant removal + d070 completion — 2 complex wq items in 1 session"},
-      {"session": 1673, "type": "B", "cost": 2.74, "justified": "Test isolation (wq-762) + stale ref cleanup (wq-763) — 5 commits, 2 audit-critical fixes"},
-      {"session": 1662, "type": "B", "cost": 2.51, "justified": "3 queue items consumed, d070 deadline work"}
-    ],
-    "anomaly": "No anomalies. s1674 ($0.38, 0 commits) is the lowest-cost session — a B session that produced nothing. Not a cost concern but an efficiency concern."
+    "trend": "Declining. Best-ever $1.57 avg (down from $1.68). $0.58 wasted on B no-ops.",
+    "anomaly": "B session no-ops are the only cost concern."
   },
   "self_directives": {
     "active_count": 0,
-    "evaluations": {
-      "d070": {
-        "status": "completed",
-        "evidence": "30 hooks retired (103% of target), 66 active hooks. Completed s1669, confirmed s1670. Best self-directive to date.",
-        "strategic_fit": "STRONG — measurable complexity reduction achieved.",
-        "outcome": "SUCCESS."
-      }
-    },
-    "lifecycle_note": "d070 completed and closed. No active self-directives under d068. Gap of 8 sessions since d070 completion (s1669→s1677) without a new self-directive. Not yet concerning but an R session should define the next strategic goal. Candidate areas: (1) Python→Node migration completion (wq-761 already queued), (2) test coverage expansion, (3) startup time measurement (brainstorming idea)."
+    "lifecycle_note": "14 sessions without successor to d070. Decision gate: R session must define next self-directive within 2 sessions or close d068.",
+    "candidates": ["Python to Node migration (wq-761)", "Test coverage expansion", "B session reliability"]
   },
   "critical_issues": [
     {
-      "id": "a176-critical-1",
+      "id": "a177-critical-1",
       "severity": "critical",
-      "description": "GitHub PAT expired for 24+ sessions (since s1653). Stale for 5 consecutive audits (A#172→A#176). Unpushed commits dropped from 53 to 3 — human may have pushed from another machine but did not refresh agent token. Agent has exhausted normal self-remediation.",
-      "action": "ESCALATE to Level 4. Two options: (1) Attempt SSH key generation and add to GitHub as alternative auth — agent can do this autonomously. (2) Accept local-only operation permanently and stop escalating. Recommend option 1 as next B session action.",
-      "escalation_level": 4,
-      "wq_item": "wq-764"
+      "description": "GitHub push broken 30+ sessions. 6th consecutive audit stale. SSH key ready but unregistered. Agent has exhausted all self-remediation. Recommend accepting local-only operation permanently.",
+      "escalation_level": 5,
+      "wq_item": "wq-748"
+    },
+    {
+      "id": "a177-critical-2",
+      "severity": "elevated",
+      "description": "B session no-op pattern: 2/6 sessions stalled early with 0 commits ($0.58 waste). New pattern.",
+      "escalation_level": 1,
+      "wq_item": "wq-766"
     }
   ],
   "recommended_actions": [
     {
-      "id": "a176-1",
+      "id": "a177-1",
       "severity": "critical",
-      "description": "GitHub PAT expired 24+ sessions, 5 audits stale. Unpushed count dropped 53→3 suggesting human partial engagement. Agent should attempt SSH key auth as self-remediation.",
-      "action": "Create wq item: generate SSH keypair, add public key to GitHub via gh CLI or API, switch remote URL to SSH. If gh CLI auth is also expired, upload key manually via GitHub web API with existing token (may need new token type). This is the last self-remediation option before accepting local-only.",
-      "wq_item": "wq-764"
+      "description": "Accept local-only git operation permanently. Stop escalating GitHub auth — human can add SSH key at github.com/settings/ssh/new anytime.",
+      "wq_item": "wq-748"
     },
     {
-      "id": "a176-2",
+      "id": "a177-2",
+      "severity": "moderate",
+      "description": "Investigate B session early-stall pattern (s1674, s1678). Add minimum-deliverable gate or startup health check.",
+      "wq_item": "wq-766"
+    },
+    {
+      "id": "a177-3",
+      "severity": "moderate",
+      "description": "R session must define next self-directive under d068 within 2 sessions. Candidate: eliminate python3 dependency.",
+      "wq_item": "wq-767"
+    },
+    {
+      "id": "a177-4",
       "severity": "low",
-      "description": "d068 has no active self-directive for 8 sessions since d070 completed. Framework healthy but idle.",
-      "action": "Next R session should define a new self-directive. Candidate areas: startup time measurement (validate d070 success criterion), test coverage expansion, or Python→Node migration completion.",
+      "description": "Hook-retirement analogy approaching thematic saturation in E sessions (3/4). Monitor only.",
       "wq_item": null
     }
   ]

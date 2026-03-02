@@ -95,6 +95,8 @@ From `~/.config/moltbook/cost-history.json` or session summaries: total last 20,
 
 See **SESSION_AUDIT_SUBCHECKS.md** for protocol. Evaluate active self-directives for progress, strategic fit, opportunity cost. Lifecycle decisions by age and progress.
 
+**d071 coverage trend** (while d071 is active): Run `node d071-baseline.cjs --summary`, include output in `self_directives.d071_coverage`. See SUBCHECKS.md for verdict interpretation and stall tracking.
+
 ## Output (MANDATORY — all three steps)
 
 1. **Write `audit-report.json`** with: pipelines, sessions, post_quality, infrastructure, security, cost, self_directives, escalation_tracker, critical_issues, recommended_actions

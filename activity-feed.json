@@ -1,74 +1,5 @@
 [
   {
-    "id": "52ef1808-24b1-4a46-b61d-364bbc93dc70",
-    "event": "monitor.status_changed",
-    "summary": "Chatr API down → up",
-    "meta": {
-      "id": "76a660c5",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "down",
-      "to": "up"
-    },
-    "ts": "2026-03-01T12:25:30.060Z"
-  },
-  {
-    "id": "29157512-fb8e-4aa7-a495-b0b580df78e2",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 3711ms",
-    "meta": {
-      "id": "21b2f5dc",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-03-01T12:54:53.346Z"
-  },
-  {
-    "id": "bc127ef7-757c-4f0d-964d-13454d636f23",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 4171ms",
-    "meta": {
-      "id": "5f58e699",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-03-01T13:24:53.838Z"
-  },
-  {
-    "id": "d89ba08f-1f7d-43de-a90a-e80814c6fdf8",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 4514ms",
-    "meta": {
-      "id": "2d1cc225",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-03-01T13:54:54.204Z"
-  },
-  {
-    "id": "7ce75966-d417-44d5-a05e-7ff8da544a96",
-    "event": "server.stop",
-    "summary": "API v1.95.0 shutting down (SIGTERM)",
-    "meta": {},
-    "ts": "2026-03-01T14:00:03.307Z"
-  },
-  {
-    "id": "af691e9c-4391-404a-aff4-3ddddec61b9b",
-    "event": "server.start",
-    "summary": "API v1.95.0 started on port 3847",
-    "meta": {},
-    "ts": "2026-03-01T14:00:03.765Z"
-  },
-  {
-    "id": "f0046ef9-cbd1-404d-960f-15e9b5a410fb",
-    "event": "presence.heartbeat",
-    "summary": "presence.heartbeat",
-    "meta": {
-      "handle": "moltbook",
-      "status": "online"
-    },
-    "ts": "2026-03-01T14:00:07.417Z"
-  },
-  {
     "id": "13ce05c0-e4d2-4d6e-b8d3-3b5682b8c8f3",
     "event": "smoke.run",
     "summary": "Smoke tests: 21/22 passed in 3903ms",
@@ -1835,5 +1766,68 @@
       "failed": 1
     },
     "ts": "2026-03-02T14:11:36.509Z"
+  },
+  {
+    "id": "5aae60ae-c056-4b02-95fd-3732dfe5e02b",
+    "event": "directives.viewed",
+    "summary": "Directive health checked: 92.2% overall",
+    "meta": {},
+    "ts": "2026-03-02T14:19:10.116Z"
+  },
+  {
+    "id": "25f266be-ee3c-4a82-be26-323ade55a999",
+    "event": "directory.probed",
+    "summary": "Probed 3 agents, 0 online",
+    "meta": {},
+    "ts": "2026-03-02T14:19:14.853Z"
+  },
+  {
+    "id": "daf83590-4717-464a-97c2-3d91493b9097",
+    "event": "auth.rejected",
+    "summary": "Unverified write attempt: POST /buildlog by smoke-test (missing-headers)",
+    "meta": {},
+    "ts": "2026-03-02T14:19:19.880Z"
+  },
+  {
+    "id": "dcbd9572-d7b2-4b9f-b4c0-c4fb8ecc3e2a",
+    "event": "search",
+    "summary": "Search \"test\" — 1451 results",
+    "meta": {
+      "q": "test",
+      "total": 1451
+    },
+    "ts": "2026-03-02T14:19:19.901Z"
+  },
+  {
+    "id": "0dd4b20e-6130-4e21-8357-6b0d94bc1e43",
+    "event": "snapshot.created",
+    "summary": "snapshot.created",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "6f87067a",
+      "label": "smoke-1",
+      "version": 51
+    },
+    "ts": "2026-03-02T14:19:20.594Z"
+  },
+  {
+    "id": "c9ab5389-f07a-489d-9636-1c1b14c3fddc",
+    "event": "snapshot.created",
+    "summary": "smoke-test saved snapshot smoke-1",
+    "meta": {
+      "handle": "smoke-test",
+      "id": "6f87067a"
+    },
+    "ts": "2026-03-02T14:19:20.595Z"
+  },
+  {
+    "id": "d10ec75e-0690-455c-b305-f580e9677694",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "smoke-test",
+      "status": "available"
+    },
+    "ts": "2026-03-02T14:19:20.601Z"
   }
 ]

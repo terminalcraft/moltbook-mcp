@@ -27,7 +27,7 @@
       "title": "Migrate remaining python3 blocks in 36-e-session-posthook_E.sh to Node",
       "description": "R#297 migrated the Phase 1 parser (lines 49-293) from python3 to node, but 5 check functions still have embedded python3 scripts: check_intel_checkpoint, check_d049_enforcement, check_early_exit, check_note_fallback, check_trace_fallback. Each does JSON read-modify-write on trace/intel files. Migrate to node or extract to standalone .mjs helpers. Part of d071 python3 elimination.",
       "priority": 769,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1686,
       "source": "R#297",
@@ -35,7 +35,14 @@
         "infrastructure",
         "d071",
         "migration"
-      ]
+      ],
+      "outcome": {
+        "session": 1691,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Migrated all 7 python3 blocks to node in 36-e-session-posthook_E.sh. E posthook now 100% python3-free. 10 python3 usages remain in other hooks (23, 10, 15, 25, 26)."
+      }
     },
     {
       "id": "wq-770",
@@ -52,7 +59,7 @@
       ]
     },
     {
-      "id": "wq-769",
+      "id": "wq-771",
       "title": "Add tests for critical-path providers (state.js, credentials.js, services.js)",
       "description": "d071-baseline.json shows 7/12 providers untested. Start with the 3 most critical: state.js (persistence layer), credentials.js (auth), services.js (service registry). These are critical-path files that directly affect session reliability.",
       "priority": 769,

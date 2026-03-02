@@ -35,14 +35,21 @@
       "title": "Add tests for lib/ modules to close d071 gap",
       "description": "(added ~s1704): After wq-778 brought providers to 100%, lib_modules at 33% (4/12) is the weakest category. platform-names.mjs and safe-fetch.mjs are pure functions (easy targets). platform-liveness-cache.mjs is file I/O with TTL logic. Covering 3-4 lib modules would move critical-path from 73% toward 85%+.",
       "priority": 785,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "source": "brainstorming-auto",
       "tags": [
         "d071",
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1709,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 33 tests across 3 lib modules (platform-names, safe-fetch, platform-liveness-cache). Lib coverage 20%→40%. All pass."
+      }
     },
     {
       "id": "wq-786",

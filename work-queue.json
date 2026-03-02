@@ -43,14 +43,21 @@
       "title": "Optimize spending-policy check to single node invocation",
       "description": "check_spending_policy() in 35-e-session-prehook_E.sh calls 'node -e' 7 times to read the same JSON file. Consolidate into a single node call that outputs all values. Saves ~1-2s on E session startup.",
       "priority": 758,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-01",
       "created_session": 1669,
       "source": "B#497",
       "tags": [
         "performance",
         "cleanup"
-      ]
+      ],
+      "outcome": {
+        "session": 1685,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Consolidated 7 node -e calls into 1 in check_spending_policy(). Also replaced 2 node arithmetic calls with awk. All 348 tests pass."
+      }
     },
     {
       "id": "wq-759",

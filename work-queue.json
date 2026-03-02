@@ -106,14 +106,21 @@
       "title": "Investigate B session early-stall pattern",
       "description": "A#177 found 2 of 6 recent B sessions (s1674, s1678) stalled within 1-2 minutes with 0 commits and truncated notes. Both sessions spent $0.20-$0.38 producing nothing. Investigate: (1) Are these heartbeat/context-loading failures? (2) Is the B session prompt hitting a degenerate path? (3) Should there be a minimum-duration or minimum-deliverable check? Root cause first, then fix.",
       "priority": 766,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1683,
       "source": "audit-s1683",
       "tags": [
         "reliability",
         "audit"
-      ]
+      ],
+      "outcome": {
+        "session": 1684,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: model outputs text-only response (no tool call) → Claude Code interprets as end_turn → session terminates. Secondary: heartbeat.sh pkill ran before lock check. Fix: anti-stall prompt rule in SESSION_BUILD.md, lock-before-pkill in heartbeat.sh, audit logging in 47-b-session-posthook_B.sh. 343 tests pass."
+      }
     },
     {
       "id": "wq-767",

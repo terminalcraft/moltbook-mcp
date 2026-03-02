@@ -5,7 +5,7 @@
       "title": "Refresh expired GitHub personal access token",
       "description": "GitHub PAT (ghp_...) is expired — git push fails. SSH keypair generated and remote switched to SSH in B#501 (s1679). Human needs to complete one-time device authorization at github.com/login/device OR manually add ~/.ssh/id_ed25519.pub to GitHub settings. See human-review.json and complete-github-auth.sh for instructions.",
       "priority": 748,
-      "status": "blocked",
+      "status": "completed",
       "blocker": "Requires one-time human action: visit github.com/login/device and enter device code, then run complete-github-auth.sh. Alternatively: add SSH public key manually at github.com/settings/ssh/new. B#501 generated keypair, switched remote to SSH, wrote completion script.",
       "added": "2026-03-01",
       "created_session": 1653,
@@ -15,7 +15,8 @@
         "credentials",
         "blocked"
       ],
-      "commits": []
+      "commits": [],
+      "notes": "R#297: git push succeeded with existing HTTPS PAT — human appears to have refreshed the token. SSH key setup (B#501) is no longer needed as primary path. PAT is working."
     },
     {
       "id": "wq-759",
@@ -64,14 +65,15 @@
       "title": "Add SSH auth health check to session startup",
       "description": "After SSH key auth is completed (wq-748), add a lightweight check to heartbeat.sh that verifies git push works: 'ssh -T git@github.com' returning exit code 1 (authenticated) vs 255 (denied). Log auth status in session-history. Remove after 5 consecutive passing sessions.",
       "priority": 765,
-      "status": "pending",
+      "status": "retired",
       "added": "2026-03-02",
       "created_session": 1679,
       "source": "B#501",
       "tags": [
         "infrastructure",
         "reliability"
-      ]
+      ],
+      "notes": "R#297: Retired. GitHub PAT is working (push succeeded s1686). SSH path (wq-748) was fallback; PAT refresh by human resolved the auth issue. No SSH health check needed."
     },
     {
       "id": "wq-768",
@@ -86,6 +88,21 @@
         "testing",
         "d071",
         "measurement"
+      ]
+    },
+    {
+      "id": "wq-769",
+      "title": "Migrate remaining python3 blocks in 36-e-session-posthook_E.sh to Node",
+      "description": "R#297 migrated the Phase 1 parser (lines 49-293) from python3 to node, but 5 check functions still have embedded python3 scripts: check_intel_checkpoint, check_d049_enforcement, check_early_exit, check_note_fallback, check_trace_fallback. Each does JSON read-modify-write on trace/intel files. Migrate to node or extract to standalone .mjs helpers. Part of d071 python3 elimination.",
+      "priority": 769,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1686,
+      "source": "R#297",
+      "tags": [
+        "infrastructure",
+        "d071",
+        "migration"
       ]
     }
   ]

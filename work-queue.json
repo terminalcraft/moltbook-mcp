@@ -92,7 +92,7 @@
       "title": "Restore human-review.json and add test isolation for state files",
       "description": "human-review.json was overwritten with 12 test items during test execution — real hr-a173-1 (GitHub PAT review) was lost. Restore the file with the real item. Add test isolation so tests use temp dirs for state files instead of production paths. Discovered in A#175 (s1672).",
       "priority": 762,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1672,
       "source": "audit-s1672",
@@ -100,7 +100,14 @@
         "audit",
         "reliability",
         "infrastructure"
-      ]
+      ],
+      "outcome": {
+        "session": 1673,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "human-review.json was already restored by A#175. Added backup/restore isolation to api.test.mjs: STATE_FILES_TO_ISOLATE array backs up listed files before test run and restores in finally block. Verified md5sum matches pre/post test execution. moltbook-core.test.mjs already had isolation (temp dir). .gitignore updated to exclude .pre-test-backup files."
+      }
     },
     {
       "id": "wq-763",

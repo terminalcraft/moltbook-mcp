@@ -74,6 +74,52 @@
         "d071"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-782",
+      "title": "Prioritize d071 coverage: execute wq-778/780/781 in next 2 B cycles",
+      "description": "(audit a181-1): d071 coverage stalled at 48% combined (61% critical-path) with zero progress in 5 sessions. 22 sessions to 80% deadline (s1725). wq-778 is highest-impact (4 provider tests → ~12pp critical-path gain). B sessions must prioritize d071 test authoring. Checkpoint: if not at 70% combined by s1715, flag critical.",
+      "priority": 782,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1703,
+      "source": "audit-s1703",
+      "tags": [
+        "audit",
+        "d071",
+        "priority"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-783",
+      "title": "Close stale hr-a173-1 entry in human-review.json",
+      "description": "(audit a181-2): hr-a173-1 (GitHub PAT expired) is effectively resolved via SSH key auth (wq-764, s1679). Git push confirmed working. Entry still shows as critical/open despite 2 audits recommending closure. Single edit: set status=resolved, add resolved date.",
+      "priority": 783,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1703,
+      "source": "audit-s1703",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-784",
+      "title": "Review Clawsta picker weight and make structural decision",
+      "description": "(audit a181-3): Clawsta engagement value questioned for 3 consecutive audits with no structural action. Platform has ~2 active users and near-zero engagement. Review Clawsta ROI weight in platform-picker scoring. Either confirm weight is appropriate (with documented justification) or adjust downward. Resolve the recurring audit finding.",
+      "priority": 784,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1703,
+      "source": "audit-s1703",
+      "tags": [
+        "audit",
+        "engagement"
+      ],
+      "commits": []
     }
   ]
 }

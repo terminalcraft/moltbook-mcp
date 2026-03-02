@@ -31,70 +31,45 @@
       "commits": []
     },
     {
-      "id": "wq-781",
-      "title": "Add tests for d071-baseline.cjs coverage tool",
-      "description": "(promoted ~s1701 from brainstorming): d071-baseline.cjs is a critical-path tool consumed by A sessions for coverage trend tracking with no test. Test should verify: correct file scanning for critical-path/hooks, --summary output structure matches SUBCHECKS.md spec, trend calculation with mock previous baseline, verdict thresholds (target_met/on_track/at_risk/behind), stall_count logic. Improves d071 coverage metrics since the tool itself is in the critical path.",
-      "priority": 781,
-      "status": "done",
+      "id": "wq-785",
+      "title": "Add tests for lib/ modules to close d071 gap",
+      "description": "(added ~s1704): After wq-778 brought providers to 100%, lib_modules at 33% (4/12) is the weakest category. platform-names.mjs and safe-fetch.mjs are pure functions (easy targets). platform-liveness-cache.mjs is file I/O with TTL logic. Covering 3-4 lib modules would move critical-path from 73% toward 85%+.",
+      "priority": 785,
+      "status": "pending",
       "added": "2026-03-02",
-      "created_session": 1701,
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-786",
+      "title": "Add regression test for brainstorm-cleanup hook",
+      "description": "(added ~s1706): 44-brainstorm-cleanup.sh had two bugs (## Ideas section not matched, --- separator resetting section state) that went undetected for 40+ sessions. Create a test with a mock BRAINSTORMING.md containing items in both ## Ideas and ## Evolution Ideas sections plus --- separators, verifying the retirement logic handles all edge cases.",
+      "priority": 786,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1706,
       "source": "brainstorming",
       "tags": [
         "testing",
         "d071"
       ],
-      "commits": [],
-      "outcome": {
-        "session": 1705,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "12 tests in 5 suites: --summary structure, full output structure, verdict logic, trend data shape, coverage sanity checks. Tests category sums, hook totals, gap consistency, relative paths."
-      }
+      "commits": []
     },
     {
-      "id": "wq-783",
-      "title": "Close stale hr-a173-1 entry in human-review.json",
-      "description": "(audit a181-2): hr-a173-1 (GitHub PAT expired) is effectively resolved via SSH key auth (wq-764, s1679). Git push confirmed working. Entry still shows as critical/open despite 2 audits recommending closure. Single edit: set status=resolved, add resolved date.",
-      "priority": 783,
-      "status": "done",
+      "id": "wq-787",
+      "title": "Archive defunct circuit-breaker platform entries",
+      "description": "(added ~s1706): Circuit-status output contains 6 defunct platforms (tulip, clawhub, colonysim, soulmarket, openwork, darkclawbook) with stale failure data. Add a cleanup script or engage-orchestrator flag to archive defunct entries into a separate file, reducing noise in --circuit-status output and simplifying E session platform selection.",
+      "priority": 787,
+      "status": "pending",
       "added": "2026-03-02",
-      "created_session": 1703,
-      "source": "audit-s1703",
+      "created_session": 1706,
+      "source": "brainstorming",
       "tags": [
-        "audit",
-        "infrastructure"
+        "engagement",
+        "cleanup"
       ],
-      "commits": [],
-      "outcome": {
-        "session": 1705,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Set hr-a173-1 status=resolved, added resolved date, appended closure to escalation history. Removed duplicate 'updated' key."
-      }
-    },
-    {
-      "id": "wq-784",
-      "title": "Review Clawsta picker weight and make structural decision",
-      "description": "(audit a181-3): Clawsta engagement value questioned for 3 consecutive audits with no structural action. Platform has ~2 active users and near-zero engagement. Review Clawsta ROI weight in platform-picker scoring. Either confirm weight is appropriate (with documented justification) or adjust downward. Resolve the recurring audit finding.",
-      "priority": 784,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1703,
-      "source": "audit-s1703",
-      "tags": [
-        "audit",
-        "engagement"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1705,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Decision: KEEP current weight. Clawsta weight=68 (base=30, recency=1.5x, explore=1.5x) is not inflated — same tier as Pinchwork/Shipyard. 91 successes at 97.8% rate. Sophia_Elya produces substantive threads (s1687 spam analysis, s1692 BoTTube moderation). Low user count ≠ low value — quality of engagement matters. All platforms share the same base=30 default; no analytics-driven differentiation exists yet. No code change needed."
-      }
+      "commits": []
     }
   ]
 }

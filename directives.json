@@ -766,8 +766,8 @@
       "content": "STRATEGIC GOAL: Harden test coverage. The system was simplified from 96 to 66 hooks (d070). Now harden what remains. Current state: 27 test files vs 122+ source files, multiple known gaps (manifest drift, test data pollution, brainstorm cleanup logic). Goal: achieve \u226580% critical-path test coverage. Concrete targets: (1) every hook dispatcher has at least one integration test, (2) manifest.json reconciliation is tested (wq-755), (3) state file isolation covers all mutable files (brainstorming s1673), (4) eliminate python3 dependency by migrating directive-enrichment.py to Node (wq-761), removing the last untestable-in-CI script. Success = test suite catches regressions that currently slip through (manifest drift, stale refs, test pollution). Not success = adding tests that test nothing useful. Timeline: 40 sessions from s1685 (deadline s1725).",
       "status": "active",
       "acked_session": 1685,
-      "notes": "Defined B#503 (s1685). Baseline measured B#508 (s1690): 52% critical-path coverage (33 files: 9 core + 12 lib + 12 providers), 18% hooks (12/65), combined 30%. Gap of 50pp to 80% target. Components at 100% (53/53). Python3 elimination done. State file isolation verified. R#300 (s1701): promoted wq-780 (WARN_EXIT_OK reconciliation test) and wq-781 (d071-baseline.cjs tests) \u2014 pipeline now has 5 d071-tagged items across queue. wq-771/773 completed. 24 sessions to deadline (s1725).",
-      "updated": "2026-03-02T18:44:00.000Z"
+      "notes": "Defined B#503 (s1685). Baseline measured B#508 (s1690): 52% critical-path coverage (33 files: 9 core + 12 lib + 12 providers), 18% hooks (12/65), combined 30%. Gap of 50pp to 80% target. Components at 100% (53/53). Python3 elimination done. State file isolation verified. R#300 (s1701): promoted wq-780/wq-781. R#301 (s1706): coverage stalled at 53% combined, 73% critical-path. 19 sessions to deadline. Pace needed: ~1.4pp/session. Pipeline has 3 d071-aligned items (wq-775, wq-785, wq-786). Promoted wq-786 (brainstorm cleanup regression test). Risk: critical-path needs 7pp gain, but lib_modules (33%) is the largest gap — wq-785 is the highest-leverage B session item.",
+      "updated": "2026-03-02T19:30:00.000Z"
     }
   ],
   "questions": [
@@ -920,16 +920,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 684,
+        "followed": 685,
         "ignored": 55,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1704,
-        "last_applicable_session": 1704,
+        "last_session": 1705,
+        "last_applicable_session": 1705,
         "history": [
-          {
-            "session": 9999,
-            "result": "ignored"
-          },
           {
             "session": 9999,
             "result": "ignored"
@@ -964,6 +960,10 @@
           },
           {
             "session": 1704,
+            "result": "followed"
+          },
+          {
+            "session": 1705,
             "result": "followed"
           }
         ]
@@ -1018,16 +1018,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 813,
+        "followed": 814,
         "ignored": 134,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1704,
-        "last_applicable_session": 1704,
+        "last_session": 1705,
+        "last_applicable_session": 1705,
         "history": [
-          {
-            "session": 9999,
-            "result": "ignored"
-          },
           {
             "session": 9999,
             "result": "ignored"
@@ -1062,6 +1058,10 @@
           },
           {
             "session": 1704,
+            "result": "followed"
+          },
+          {
+            "session": 1705,
             "result": "followed"
           }
         ]
@@ -1165,16 +1165,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 394,
+        "followed": 395,
         "ignored": 34,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1704,
-        "last_applicable_session": 1704,
+        "last_session": 1705,
+        "last_applicable_session": 1705,
         "history": [
-          {
-            "session": 9999,
-            "result": "ignored"
-          },
           {
             "session": 9999,
             "result": "ignored"
@@ -1209,6 +1205,10 @@
           },
           {
             "session": 1704,
+            "result": "followed"
+          },
+          {
+            "session": 1705,
             "result": "followed"
           }
         ]

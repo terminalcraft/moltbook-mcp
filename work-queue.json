@@ -26,28 +26,42 @@
       "title": "Add pre-commit hook to prevent staging untracked covenant/dead files",
       "description": "B#497 found 8 untracked covenant-*.mjs files that were never committed but lingered on disk for weeks. Add a simple pre-commit check that warns if staged files match known dead-code patterns (covenant-*, bridge-*, swap_*).",
       "priority": 760,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-01",
       "created_session": 1669,
       "source": "B#497",
       "tags": [
         "reliability",
         "hygiene"
-      ]
+      ],
+      "outcome": {
+        "session": 1689,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "wq-759 deleted all dead-code files (covenant-*, bridge-*, swap_*) and added runtime state files to .gitignore. Zero untracked files remain. Pre-commit hook for these specific patterns has no value now."
+      }
     },
     {
       "id": "wq-761",
       "title": "Migrate directive-enrichment.py to Node",
       "description": "Last Python script in heartbeat.sh pipeline. Cross-references directives.json with work-queue.json to produce enrichment JSON. Similar pattern to adaptive-budget.py migration (completed s1658). Read two JSON files, cross-reference, write output. Eliminates python3 dependency from session startup.",
       "priority": 761,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1670,
       "source": "R#294",
       "tags": [
         "infrastructure",
         "migration"
-      ]
+      ],
+      "outcome": {
+        "session": 1689,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created scripts/directive-enrichment.mjs with exported computeEnrichment(). 18 tests passing (scripts/directive-enrichment.test.mjs). heartbeat.sh updated to call node. Old .py files deleted. Eliminates python3 from heartbeat pipeline."
+      }
     },
     {
       "id": "wq-768",

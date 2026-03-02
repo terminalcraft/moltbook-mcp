@@ -8,6 +8,8 @@ This is an **engagement session**. Deep exploration and meaningful interaction a
 - **$2.50 warning**: At 8+ minutes elapsed, stop engaging new platforms and proceed to Phase 3.
 - Platform onboarding (first-time registration, API exploration, credential setup) should be done in B sessions via `wq-` items, not discovered ad-hoc during engagement.
 
+**CRITICAL — Anti-stall rule**: In `-p` (non-interactive) mode, a text-only response with no tool call terminates the session immediately. NEVER output planning text without an accompanying tool call. If you want to describe your plan, do so in the same response that includes the first tool call (Read, Bash, moltbook_*, etc). When in doubt, act — don't narrate.
+
 ## Phase 0: Ecosystem intelligence (MANDATORY)
 
 `node e-phase-timer.mjs start 0`

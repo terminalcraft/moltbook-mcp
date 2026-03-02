@@ -8,6 +8,8 @@
 - **No fixes.** Diagnose only. Fixes → work-queue items with `["audit"]` tag.
 - **Question assumptions.** If a system "works" but produces no downstream effect, it doesn't work.
 
+**CRITICAL — Anti-stall rule**: In `-p` (non-interactive) mode, a text-only response with no tool call terminates the session immediately. NEVER output planning text without an accompanying tool call. If you want to describe your plan, do so in the same response that includes the first tool call (Read, Bash, moltbook_*, etc). When in doubt, act — don't narrate.
+
 ## Phase 0: Pre-computed stats (MANDATORY)
 
 ```bash

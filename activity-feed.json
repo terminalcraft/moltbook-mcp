@@ -1,56 +1,5 @@
 [
   {
-    "id": "0b2a41ab-00d6-4d33-a529-e7f44bf8ec66",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "76a660c5",
-      "name": "Chatr API",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "down",
-      "agent": "moltbook"
-    },
-    "ts": "2026-03-01T12:20:29.758Z"
-  },
-  {
-    "id": "6df5d807-42b1-48b3-b206-0fbb56f3a28c",
-    "event": "monitor.status_changed",
-    "summary": "Chatr API up → down",
-    "meta": {
-      "id": "76a660c5",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "up",
-      "to": "down"
-    },
-    "ts": "2026-03-01T12:20:29.760Z"
-  },
-  {
-    "id": "3e055f37-f4d2-4037-9cd2-8c081476f913",
-    "event": "smoke.run",
-    "summary": "Smoke tests: 21/22 passed in 3300ms",
-    "meta": {
-      "id": "8a1b909f",
-      "passed": 21,
-      "failed": 1
-    },
-    "ts": "2026-03-01T12:24:52.925Z"
-  },
-  {
-    "id": "1d906658-5c9e-4a0a-ac28-77c5ee257b0f",
-    "event": "monitor.status_changed",
-    "summary": "monitor.status_changed",
-    "meta": {
-      "id": "76a660c5",
-      "name": "Chatr API",
-      "url": "https://chatr.ai/api/messages?limit=1",
-      "from": "down",
-      "to": "up",
-      "agent": "moltbook"
-    },
-    "ts": "2026-03-01T12:25:30.059Z"
-  },
-  {
     "id": "52ef1808-24b1-4a46-b61d-364bbc93dc70",
     "event": "monitor.status_changed",
     "summary": "Chatr API down → up",
@@ -1851,5 +1800,40 @@
       "status": "available"
     },
     "ts": "2026-03-02T14:06:44.866Z"
+  },
+  {
+    "id": "1d3ed9c6-e5f5-4f3d-b879-26d4571ddeb5",
+    "event": "server.stop",
+    "summary": "API v1.95.0 shutting down (SIGTERM)",
+    "meta": {},
+    "ts": "2026-03-02T14:11:02.715Z"
+  },
+  {
+    "id": "8e54d202-d2a8-4bfc-8545-eb0e67e384b6",
+    "event": "server.start",
+    "summary": "API v1.95.0 started on port 3847",
+    "meta": {},
+    "ts": "2026-03-02T14:11:02.980Z"
+  },
+  {
+    "id": "88972c31-b1d8-4465-89df-5db8a7f518cf",
+    "event": "presence.heartbeat",
+    "summary": "presence.heartbeat",
+    "meta": {
+      "handle": "moltbook",
+      "status": "online"
+    },
+    "ts": "2026-03-02T14:11:05.970Z"
+  },
+  {
+    "id": "1a3827da-843f-411e-8589-d11944c7d810",
+    "event": "smoke.run",
+    "summary": "Smoke tests: 21/22 passed in 3536ms",
+    "meta": {
+      "id": "7f89be46",
+      "passed": 21,
+      "failed": 1
+    },
+    "ts": "2026-03-02T14:11:36.509Z"
   }
 ]

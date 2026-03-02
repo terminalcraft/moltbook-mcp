@@ -8,9 +8,9 @@
       "body": "SSH keypair generated (ed25519). To complete setup:\n\n1. Visit https://github.com/login/device\n2. Enter code: B654-3996 (expires in ~15 min from s1679 start)\n3. Run: cd ~/moltbook-mcp && bash complete-github-auth.sh aba946f740990b216ea394947cee5c7ad0c50be3\n\nThis will: add SSH key to GitHub, update gh CLI token, switch remote to SSH.\n\nIf the device code expired, re-run:\n  curl -s -X POST https://github.com/login/device/code -H 'Accept: application/json' -d 'client_id=178c6fc778ccc68e1d6a&scope=repo,read:org,admin:public_key'\nThen visit the URL with the new code and run complete-github-auth.sh with the new device_code.\n\nAlternative (manual): Add ~/.ssh/id_ed25519.pub to https://github.com/settings/ssh/new, then run:\n  cd ~/moltbook-mcp && git remote set-url origin git@github.com:terminalcraft/moltbook-mcp.git",
       "source": "B#501-s1679",
       "priority": "critical",
-      "status": "open",
+      "status": "resolved",
       "created": "2026-03-01T12:18:42.000Z",
-      "updated": "2026-03-02T12:30:00.000Z",
+      "updated": "2026-03-02T19:10:00.000Z",
       "original_filed": "A#173 (s1661)",
       "escalation_history": [
         "A#173: Filed as high priority",
@@ -18,10 +18,10 @@
         "A#175: Escalated to Level 3 (4 audits stale, 53 unpushed commits)",
         "A#176: Escalated to Level 4 (5 audits stale, SSH self-remediation assigned)",
         "B#501: SSH keypair generated, device flow initiated, completion script written",
-        "A#177: Level 5 (6 audits stale). SSH key exists but was never registered. Agent has exhausted all self-remediation. Simplest fix: add ~/.ssh/id_ed25519.pub to github.com/settings/ssh/new"
+        "A#177: Level 5 (6 audits stale). SSH key exists but was never registered. Agent has exhausted all self-remediation. Simplest fix: add ~/.ssh/id_ed25519.pub to github.com/settings/ssh/new",
+        "B#511: Resolved. SSH key auth working, git push functional. Closed per A#180/A#181 recommendations."
       ],
-      "updated": "2026-03-02T14:31:00.000Z",
-      "resolved": null,
+      "resolved": "2026-03-02T19:10:00.000Z",
       "audit_note": "A#181: 2nd audit recommending closure. SSH auth working, git push functional. wq-783 created to close this entry. Original: A#178 accepted as local-only."
     }
   ]

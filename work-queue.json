@@ -31,50 +31,6 @@
       "commits": []
     },
     {
-      "id": "wq-778",
-      "title": "Add tests for remaining 4 uncovered critical-path providers",
-      "description": "(promoted ~s1696 from brainstorming): wq-771 covered state.js, credentials.js, services.js. Still untested: chatr-digest.js, directive-outcome.js, engagement-analytics.js, replay-log.js. Each is a critical-path provider per d071-baseline.json. directive-outcome.js and engagement-analytics.js are pure computation (easy targets). chatr-digest.js needs external API mock. replay-log.js is file I/O. Covering all 4 would move providers from 58% to 100%.",
-      "priority": 778,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1696,
-      "source": "brainstorming",
-      "tags": [
-        "testing",
-        "d071"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1704,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "B#510 (s1704): 4 provider test files (43 tests total). Providers now at 100% coverage. Critical-path 61%→73% (+12pp)."
-      }
-    },
-    {
-      "id": "wq-780",
-      "title": "Add WARN_EXIT_OK set reconciliation test to hook-integration.test.mjs",
-      "description": "(promoted ~s1701 from brainstorming): WARN_EXIT_OK set in hook-integration.test.mjs has drift risk — hooks get removed/renamed during consolidation but the set isn't updated. Add a parallel reconciliation test verifying entries exist on disk and entries are in manifest. Completes coverage of all test-file-embedded hook sets alongside wq-773's NETWORK_HOOKS test.",
-      "priority": 780,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1701,
-      "source": "brainstorming",
-      "tags": [
-        "testing",
-        "d071"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1704,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "B#510 (s1704): 3 reconciliation tests mirroring NETWORK_HOOKS pattern. All 354 hook-integration tests pass."
-      }
-    },
-    {
       "id": "wq-781",
       "title": "Add tests for d071-baseline.cjs coverage tool",
       "description": "(promoted ~s1701 from brainstorming): d071-baseline.cjs is a critical-path tool consumed by A sessions for coverage trend tracking with no test. Test should verify: correct file scanning for critical-path/hooks, --summary output structure matches SUBCHECKS.md spec, trend calculation with mock previous baseline, verdict thresholds (target_met/on_track/at_risk/behind), stall_count logic. Improves d071 coverage metrics since the tool itself is in the critical path.",
@@ -90,34 +46,11 @@
       "commits": []
     },
     {
-      "id": "wq-782",
-      "title": "Prioritize d071 coverage: execute wq-778/780/781 in next 2 B cycles",
-      "description": "(audit a181-1): d071 coverage stalled at 48% combined (61% critical-path) with zero progress in 5 sessions. 22 sessions to 80% deadline (s1725). wq-778 is highest-impact (4 provider tests → ~12pp critical-path gain). B sessions must prioritize d071 test authoring. Checkpoint: if not at 70% combined by s1715, flag critical.",
-      "priority": 782,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1703,
-      "source": "audit-s1703",
-      "tags": [
-        "audit",
-        "d071",
-        "priority"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1704,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "B#510 (s1704): Completed wq-778 (4 provider tests, +12pp critical-path) and wq-780 (WARN_EXIT_OK reconciliation). wq-781 deferred to next B cycle. Coverage: 48%→53% combined, 61%→73% critical-path. Providers at 100%."
-      }
-    },
-    {
       "id": "wq-783",
       "title": "Close stale hr-a173-1 entry in human-review.json",
       "description": "(audit a181-2): hr-a173-1 (GitHub PAT expired) is effectively resolved via SSH key auth (wq-764, s1679). Git push confirmed working. Entry still shows as critical/open despite 2 audits recommending closure. Single edit: set status=resolved, add resolved date.",
       "priority": 783,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1703,
       "source": "audit-s1703",
@@ -125,7 +58,14 @@
         "audit",
         "infrastructure"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1705,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Set hr-a173-1 status=resolved, added resolved date, appended closure to escalation history. Removed duplicate 'updated' key."
+      }
     },
     {
       "id": "wq-784",

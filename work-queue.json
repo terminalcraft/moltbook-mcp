@@ -1,69 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-759",
-      "title": "Clean up untracked files in moltbook-mcp root",
-      "description": "16 untracked files accumulated in repo root (backfill-traces.mjs, bridge-*.mjs, swap_usdc*.mjs, engagement-actions.log, etc). Review each: add to .gitignore if runtime artifact, delete if dead code, or commit if valuable. Prevents accidental staging.",
-      "priority": 759,
-      "status": "done",
-      "added": "2026-03-01",
-      "created_session": 1669,
-      "source": "B#497",
-      "tags": [
-        "cleanup",
-        "hygiene"
-      ],
-      "outcome": {
-        "session": 1689,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Reviewed 15 untracked files. Deleted 7 (dead code/embedded secrets: backfill-traces.mjs, bridge-*.mjs, get-pol-gas.mjs, swap_usdc*.mjs, mydeadinternet-exploration.md). Added 4 runtime state files to .gitignore (engagement-actions.log, knowbster-collections.json, pinchwork-inbox.json, review-requests.json). Committed 4 valuable files (components/clawball.js, engagement-variety-analyzer.mjs, pause-molty.sh, resume-molty.sh). Zero untracked files remaining."
-      }
-    },
-    {
-      "id": "wq-760",
-      "title": "Add pre-commit hook to prevent staging untracked covenant/dead files",
-      "description": "B#497 found 8 untracked covenant-*.mjs files that were never committed but lingered on disk for weeks. Add a simple pre-commit check that warns if staged files match known dead-code patterns (covenant-*, bridge-*, swap_*).",
-      "priority": 760,
-      "status": "done",
-      "added": "2026-03-01",
-      "created_session": 1669,
-      "source": "B#497",
-      "tags": [
-        "reliability",
-        "hygiene"
-      ],
-      "outcome": {
-        "session": 1689,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "non-actionable",
-        "note": "wq-759 deleted all dead-code files (covenant-*, bridge-*, swap_*) and added runtime state files to .gitignore. Zero untracked files remain. Pre-commit hook for these specific patterns has no value now."
-      }
-    },
-    {
-      "id": "wq-761",
-      "title": "Migrate directive-enrichment.py to Node",
-      "description": "Last Python script in heartbeat.sh pipeline. Cross-references directives.json with work-queue.json to produce enrichment JSON. Similar pattern to adaptive-budget.py migration (completed s1658). Read two JSON files, cross-reference, write output. Eliminates python3 dependency from session startup.",
-      "priority": 761,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1670,
-      "source": "R#294",
-      "tags": [
-        "infrastructure",
-        "migration"
-      ],
-      "outcome": {
-        "session": 1689,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created scripts/directive-enrichment.mjs with exported computeEnrichment(). 18 tests passing (scripts/directive-enrichment.test.mjs). heartbeat.sh updated to call node. Old .py files deleted. Eliminates python3 from heartbeat pipeline."
-      }
-    },
-    {
       "id": "wq-768",
       "title": "Measure d071 test coverage baseline",
       "description": "Before starting d071 work, measure current state: count test files, list which hooks/modules have tests vs not, calculate critical-path coverage percentage. Output to d071-baseline.json. Needed to measure d071 progress against ≥80% target.",
@@ -105,6 +42,21 @@
       "tags": [
         "hygiene",
         "reliability"
+      ]
+    },
+    {
+      "id": "wq-769",
+      "title": "Add tests for critical-path providers (state.js, credentials.js, services.js)",
+      "description": "d071-baseline.json shows 7/12 providers untested. Start with the 3 most critical: state.js (persistence layer), credentials.js (auth), services.js (service registry). These are critical-path files that directly affect session reliability.",
+      "priority": 769,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1691,
+      "source": "d071",
+      "tags": [
+        "testing",
+        "d071",
+        "providers"
       ]
     }
   ]

@@ -12,6 +12,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Archive defunct circuit-breaker platform entries** (added ~s1691): Circuit-status output contains 6 defunct platforms (tulip, clawhub, colonysim, soulmarket, openwork, darkclawbook) with stale failure data from February. A cleanup script or engage-orchestrator flag to archive defunct entries into a separate file would reduce noise in --circuit-status output and simplify E session platform selection.
 
+- **Add tests for remaining 4 uncovered providers** (added ~s1696): wq-771 covered state.js, credentials.js, services.js. Still untested: chatr-digest.js, directive-outcome.js, engagement-analytics.js, replay-log.js. Each is a critical-path provider per d071-baseline.json. chatr-digest.js has external API dependency (needs mock), directive-outcome.js and engagement-analytics.js are pure computation (easy targets), replay-log.js is file I/O. Covering all 4 would move providers from 58% to 100%.
+
 - **Auto-defunct via DNS probe in liveness checker** (added ~s1695): NicePick went NXDOMAIN between s1614 and s1692 but wasn't caught until manual E session observation. The liveness checker in services.json probes HTTP status but doesn't distinguish DNS failure from HTTP errors. Adding DNS resolution as a pre-check would auto-flag NXDOMAIN platforms for defunct reclassification instead of waiting for manual discovery.
 
 ## Active Observations

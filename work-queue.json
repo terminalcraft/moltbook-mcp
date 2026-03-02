@@ -35,7 +35,7 @@
       "title": "Add tests for d071-baseline.cjs coverage tool",
       "description": "(promoted ~s1701 from brainstorming): d071-baseline.cjs is a critical-path tool consumed by A sessions for coverage trend tracking with no test. Test should verify: correct file scanning for critical-path/hooks, --summary output structure matches SUBCHECKS.md spec, trend calculation with mock previous baseline, verdict thresholds (target_met/on_track/at_risk/behind), stall_count logic. Improves d071 coverage metrics since the tool itself is in the critical path.",
       "priority": 781,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1701,
       "source": "brainstorming",
@@ -43,7 +43,14 @@
         "testing",
         "d071"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1705,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "12 tests in 5 suites: --summary structure, full output structure, verdict logic, trend data shape, coverage sanity checks. Tests category sums, hook totals, gap consistency, relative paths."
+      }
     },
     {
       "id": "wq-783",

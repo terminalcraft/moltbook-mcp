@@ -345,86 +345,87 @@ assemble_mode_block() {
 ${ctx_val:-$fallback}"
 }
 
-assemble_mode_block
+# --- Prompt build + validate pipeline (R#296: consolidated from inline flow) ---
+# Assembles prompt inject blocks, degradation notice, and full prompt.
+# Validates health. If degraded, retries session-context once then appends warning.
+# Sets PROMPT (ready for claude invocation) and PROMPT_HEALTH.
+build_and_validate_prompt() {
+  # Prompt inject blocks (R#120: extracted to prompt-inject-processor.mjs)
+  INJECT_BLOCKS=""
+  if [ -z "$EMERGENCY_MODE" ]; then
+    safe_stage "prompt-inject" '
+      INJECT_RESULT=$(PROJECT_DIR="$DIR" node "$DIR/prompt-inject-processor.mjs" "$MODE_CHAR" "$COUNTER" 2>/dev/null || echo "{\"blocks\":\"\"}")
+      INJECT_BLOCKS=$(echo "$INJECT_RESULT" | jq -r '"'"'.blocks // ""'"'"' 2>/dev/null || echo "")
+    '
+  fi
 
-# --- Prompt inject blocks (R#120: extracted to prompt-inject-processor.mjs) ---
-# Manifest-driven injection with dependency resolution, usage tracking.
-INJECT_BLOCKS=""
-if [ -z "$EMERGENCY_MODE" ]; then
-  safe_stage "prompt-inject" '
-    INJECT_RESULT=$(PROJECT_DIR="$DIR" node "$DIR/prompt-inject-processor.mjs" "$MODE_CHAR" "$COUNTER" 2>/dev/null || echo "{\"blocks\":\"\"}")
-    INJECT_BLOCKS=$(echo "$INJECT_RESULT" | jq -r '.blocks // ""' 2>/dev/null || echo "")
-  '
-fi
-
-# Build degradation notice if any init stages failed
-DEGRADED_NOTICE=""
-if [ -n "$INIT_DEGRADED" ]; then
-  DEGRADED_NOTICE="
+  # Degradation notice for failed init stages
+  DEGRADED_NOTICE=""
+  if [ -n "$INIT_DEGRADED" ]; then
+    DEGRADED_NOTICE="
 
 ## INIT DEGRADATION NOTICE
 Some initialization stages failed and used defaults: ${INIT_FAILURES}.
 This session may have incomplete context. Check ~/moltbook-mcp/logs/init-errors.log for details.
 Do NOT attempt to fix heartbeat.sh or init scripts — the human operator handles this."
-fi
+  fi
 
-# assemble_prompt: builds full prompt from current components.
-assemble_prompt() {
+  # Assemble mode block + full prompt
+  assemble_mode_block
   PROMPT="${BASE_PROMPT}
 
 ${MODE_PROMPT}${MODE_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
-}
 
-assemble_prompt
-
-# --- Prompt health gate (R#239, refactored R#255, consolidated R#267) ---
-# Validates the assembled prompt has expected content for the session type.
-# Catches silent session-context.mjs failures that produce empty prompt blocks.
-validate_prompt_blocks() {
-  local label="${1:-}"
+  # Validate prompt health
+  local min_block="${MODE_MIN_BLOCK[$MODE_CHAR]:-100}"
   PROMPT_HEALTH="OK"
   PROMPT_WARNINGS=""
-  local plen=${#PROMPT}
-  if [ "$plen" -lt 2000 ]; then
+  if [ ${#PROMPT} -lt 2000 ]; then
     PROMPT_HEALTH="DEGRADED"
-    PROMPT_WARNINGS="prompt too short (${plen} chars, min 2000)"
+    PROMPT_WARNINGS="prompt too short (${#PROMPT} chars, min 2000)"
   fi
-  local min_block="${MODE_MIN_BLOCK[$MODE_CHAR]:-100}"
   if [ -z "$MODE_BLOCK" ] || [ ${#MODE_BLOCK} -lt "$min_block" ]; then
     PROMPT_HEALTH="DEGRADED"
-    PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }${MODE_CHAR} prompt block ${label}(${#MODE_BLOCK} chars, min ${min_block})"
-  fi
-}
-
-validate_prompt_blocks "missing or too short "
-
-if [ "$PROMPT_HEALTH" = "DEGRADED" ] && [ -z "$EMERGENCY_MODE" ] && [ -z "$SAFE_MODE" ]; then
-  echo "$(date -Iseconds) [prompt-health] DEGRADED (attempt 1): $PROMPT_WARNINGS — retrying session-context" >> "$LOG_DIR/init-errors.log"
-
-  # Retry: re-run session-context and re-assemble (R#247, simplified R#267)
-  RETRY_CTX=$(node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" 2>/dev/null || echo "{}")
-  echo "$RETRY_CTX" > "$CTX_FILE"
-  if [ -f "$CTX_ENV" ]; then
-    source "$CTX_ENV"
+    PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }${MODE_CHAR} prompt block missing or too short (${#MODE_BLOCK} chars, min ${min_block})"
   fi
 
-  assemble_mode_block
-  assemble_prompt
-  validate_prompt_blocks "still too short after retry "
+  # Retry once if degraded (re-run session-context, re-assemble, re-validate)
+  if [ "$PROMPT_HEALTH" = "DEGRADED" ] && [ -z "$EMERGENCY_MODE" ] && [ -z "$SAFE_MODE" ]; then
+    echo "$(date -Iseconds) [prompt-health] DEGRADED (attempt 1): $PROMPT_WARNINGS — retrying session-context" >> "$LOG_DIR/init-errors.log"
+    node "$DIR/session-context.mjs" "$MODE_CHAR" "$COUNTER" "$B_FOCUS" > "$CTX_FILE" 2>/dev/null || echo "{}" > "$CTX_FILE"
+    [ -f "$CTX_ENV" ] && source "$CTX_ENV"
+    assemble_mode_block
+    PROMPT="${BASE_PROMPT}
 
-  if [ "$PROMPT_HEALTH" = "OK" ]; then
-    echo "$(date -Iseconds) [prompt-health] RECOVERED after retry" >> "$LOG_DIR/init-errors.log"
+${MODE_PROMPT}${MODE_BLOCK}${INJECT_BLOCKS}${DEGRADED_NOTICE}"
+
+    PROMPT_HEALTH="OK"
+    PROMPT_WARNINGS=""
+    if [ ${#PROMPT} -lt 2000 ]; then
+      PROMPT_HEALTH="DEGRADED"
+      PROMPT_WARNINGS="prompt too short (${#PROMPT} chars, min 2000)"
+    fi
+    if [ -z "$MODE_BLOCK" ] || [ ${#MODE_BLOCK} -lt "$min_block" ]; then
+      PROMPT_HEALTH="DEGRADED"
+      PROMPT_WARNINGS="${PROMPT_WARNINGS:+$PROMPT_WARNINGS; }${MODE_CHAR} prompt block still too short after retry (${#MODE_BLOCK} chars, min ${min_block})"
+    fi
+    if [ "$PROMPT_HEALTH" = "OK" ]; then
+      echo "$(date -Iseconds) [prompt-health] RECOVERED after retry" >> "$LOG_DIR/init-errors.log"
+    fi
   fi
-fi
 
-if [ "$PROMPT_HEALTH" = "DEGRADED" ]; then
-  echo "$(date -Iseconds) [prompt-health] DEGRADED (final): $PROMPT_WARNINGS" >> "$LOG_DIR/init-errors.log"
-  PROMPT="${PROMPT}
+  # Append warning if still degraded
+  if [ "$PROMPT_HEALTH" = "DEGRADED" ]; then
+    echo "$(date -Iseconds) [prompt-health] DEGRADED (final): $PROMPT_WARNINGS" >> "$LOG_DIR/init-errors.log"
+    PROMPT="${PROMPT}
 
 ## PROMPT HEALTH WARNING
 Prompt assembly produced incomplete context: ${PROMPT_WARNINGS}.
 Session-context computation may have failed silently. Proceed with caution — check state files manually if needed."
-fi
+  fi
+}
+
+build_and_validate_prompt
 
 # MCP config pointing to the local server
 MCP_FILE="$STATE_DIR/mcp.json"

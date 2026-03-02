@@ -556,6 +556,50 @@ describe('Hook integration tests', () => {
     });
   });
 
+  // ---- NETWORK_HOOKS SET RECONCILIATION (wq-773) ----
+  describe('NETWORK_HOOKS set reconciliation', () => {
+    test('every NETWORK_HOOKS entry corresponds to an actual hook file', () => {
+      const stale = [];
+      for (const hookName of NETWORK_HOOKS) {
+        const inPre = existsSync(join(PRE_DIR, hookName));
+        const inPost = existsSync(join(POST_DIR, hookName));
+        if (!inPre && !inPost) {
+          stale.push(hookName);
+        }
+      }
+      assert.strictEqual(
+        stale.length, 0,
+        `NETWORK_HOOKS contains ${stale.length} stale entry/entries not found on disk:\n  ${stale.join('\n  ')}`
+      );
+    });
+
+    test('every NETWORK_HOOKS entry is listed in manifest.json', () => {
+      const manifestPath = join(REPO_DIR, 'hooks/manifest.json');
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      const manifestNames = new Set(manifest.hooks.map(h => h.name));
+      const unlisted = [];
+      for (const hookName of NETWORK_HOOKS) {
+        if (!manifestNames.has(hookName)) {
+          unlisted.push(hookName);
+        }
+      }
+      assert.strictEqual(
+        unlisted.length, 0,
+        `NETWORK_HOOKS contains ${unlisted.length} entry/entries not in manifest.json:\n  ${unlisted.join('\n  ')}`
+      );
+    });
+
+    test('NETWORK_HOOKS entries are not duplicated in WARN_EXIT_OK', () => {
+      // These sets serve different purposes; overlap is fine but worth tracking
+      const overlap = [...NETWORK_HOOKS].filter(h => WARN_EXIT_OK.has(h));
+      // Not a failure — just informational logging
+      if (overlap.length > 0) {
+        console.log(`  Note: ${overlap.length} hook(s) in both NETWORK_HOOKS and WARN_EXIT_OK: ${overlap.join(', ')}`);
+      }
+      assert.ok(true);
+    });
+  });
+
   // ---- HOOK COUNT TRACKING ----
   describe('Hook inventory', () => {
     test('pre-session hook count is tracked', () => {

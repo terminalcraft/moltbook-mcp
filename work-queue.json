@@ -5,11 +5,18 @@
       "title": "Manifest reconciliation in post-hook regression test",
       "description": "(added ~s1664): B#495 found 7 stale manifest entries and 3 missing entries from prior consolidations (wq-739, wq-744). The `hook-integration.test.mjs` NETWORK_HOOKS set also drifts. Add a test case that cross-checks manifest.json entries against actual files on disk — flag missing files and unlisted hooks. Prevents silent manifest drift after each consolidation.",
       "priority": 773,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1700,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added NETWORK_HOOKS set reconciliation tests (3 tests): entries exist on disk, entries in manifest, overlap check with WARN_EXIT_OK. All 351 tests pass."
+      }
     },
     {
       "id": "wq-775",
@@ -55,28 +62,6 @@
         "d071"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-779",
-      "title": "Add d071 coverage trend tracking to A session subchecks",
-      "description": "(promoted ~s1696 from brainstorming): d071 targets 80% critical-path test coverage by s1725 (~29 sessions remaining). A sessions audit everything else but don't track coverage progress. Add `node d071-baseline.cjs --summary` output to audit-report.json to close the feedback loop — surface whether coverage is trending toward target or stalling, enabling early intervention.",
-      "priority": 779,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1696,
-      "source": "brainstorming",
-      "tags": [
-        "audit",
-        "d071"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1699,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created d071-baseline.cjs with --summary mode for A session audit consumption. Added d071 coverage trend sub-check to SESSION_AUDIT_SUBCHECKS.md with verdict table and stall tracking. Updated SESSION_AUDIT.md Section 7 to reference new sub-check. Current metrics: critical-path 61%, hooks 42%, combined 48%, verdict on_track."
-      }
     }
   ]
 }

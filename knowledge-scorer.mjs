@@ -34,7 +34,7 @@ const PLATFORM_PROBES = [
   "https://claw-hub-bay.vercel.app",
   "https://clawsta.io",
   "https://devaintart.net",
-  "https://nicepick.dev",
+  // "https://nicepick.dev", // defunct: DNS NXDOMAIN s1692
   "https://thingherder.com",
   "https://aicq.chat",
   "https://toku.agency",

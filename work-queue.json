@@ -1,71 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-768",
-      "title": "Measure d071 test coverage baseline",
-      "description": "Before starting d071 work, measure current state: count test files, list which hooks/modules have tests vs not, calculate critical-path coverage percentage. Output to d071-baseline.json. Needed to measure d071 progress against ≥80% target.",
-      "priority": 768,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1685,
-      "source": "d071",
-      "tags": [
-        "testing",
-        "d071",
-        "measurement"
-      ],
-      "outcome": {
-        "session": 1691,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Baseline: critical-path 52%, hooks 18%, combined 30%. 50pp gap to 80% target. Components already 100%. Output in d071-baseline.json."
-      }
-    },
-    {
-      "id": "wq-769",
-      "title": "Migrate remaining python3 blocks in 36-e-session-posthook_E.sh to Node",
-      "description": "R#297 migrated the Phase 1 parser (lines 49-293) from python3 to node, but 5 check functions still have embedded python3 scripts: check_intel_checkpoint, check_d049_enforcement, check_early_exit, check_note_fallback, check_trace_fallback. Each does JSON read-modify-write on trace/intel files. Migrate to node or extract to standalone .mjs helpers. Part of d071 python3 elimination.",
-      "priority": 769,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1686,
-      "source": "R#297",
-      "tags": [
-        "infrastructure",
-        "d071",
-        "migration"
-      ],
-      "outcome": {
-        "session": 1691,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Migrated all 7 python3 blocks to node in 36-e-session-posthook_E.sh. E posthook now 100% python3-free. 10 python3 usages remain in other hooks (23, 10, 15, 25, 26)."
-      }
-    },
-    {
-      "id": "wq-770",
-      "title": "Audit .gitignore completeness against runtime state files",
-      "description": "wq-759 cleanup found 4 runtime state files (engagement-actions.log, knowbster-collections.json, pinchwork-inbox.json, review-requests.json) missing from .gitignore. Systematic audit: grep all readFileSync/writeFileSync calls in api.mjs and index.js for local .json/.log files, cross-check each against .gitignore. Prevents future accumulation of untracked runtime artifacts.",
-      "priority": 770,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1689,
-      "source": "B#504",
-      "tags": [
-        "hygiene",
-        "reliability"
-      ],
-      "outcome": {
-        "session": 1691,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Found 17 runtime state files tracked by git that should not be. Removed from tracking, added to .gitignore. 33k lines of state data removed from repo."
-      }
-    },
-    {
       "id": "wq-771",
       "title": "Add tests for critical-path providers (state.js, credentials.js, services.js)",
       "description": "d071-baseline.json shows 7/12 providers untested. Start with the 3 most critical: state.js (persistence layer), credentials.js (auth), services.js (service registry). These are critical-path files that directly affect session reliability.",
@@ -79,6 +14,73 @@
         "d071",
         "providers"
       ]
+    },
+    {
+      "id": "wq-772",
+      "title": "Stale-ref-check: add inline-code exclusion for markdown",
+      "description": "(added ~s1662): `stale-ref-check.sh` treats markdown inline code (`backtick-quoted`) refs as structural. Historical notes like \"was `old-hook.sh`\" trigger false positives. Adding a regex filter for `was \\`...\\`` or strikethrough `~~..~~` patterns in the markdown structural-ref check would reduce noise during d070 cleanup.",
+      "priority": 772,
+      "status": "pending",
+      "added": "2026-03-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-773",
+      "title": "Manifest reconciliation in post-hook regression test",
+      "description": "(added ~s1664): B#495 found 7 stale manifest entries and 3 missing entries from prior consolidations (wq-739, wq-744). The `hook-integration.test.mjs` NETWORK_HOOKS set also drifts. Add a test case that cross-checks manifest.json entries against actual files on disk — flag missing files and unlisted hooks. Prevents silent manifest drift after each consolidation.",
+      "priority": 773,
+      "status": "pending",
+      "added": "2026-03-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-774",
+      "title": "Add anti-stall rule to SESSION_ENGAGE.md and SESSION_AUDIT.md",
+      "description": "R#298 added the anti-stall rule to SESSION_REFLECT.md (matching SESSION_BUILD.md from wq-766). SESSION_ENGAGE.md and SESSION_AUDIT.md still lack it. The -p mode termination risk applies equally to all session types. Copy the proven rule text to both files.",
+      "priority": 774,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1691,
+      "source": "brainstorming",
+      "tags": [
+        "session-files",
+        "reliability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-775",
+      "title": "Extend api.test.mjs state isolation to inbox.json and deprecations.json",
+      "description": "(added ~s1673): wq-762 added backup/restore for human-review.json, but api.test.mjs also POSTs test data to /inbox, /deprecations, /snapshots, /directory, /paste, /kv, and /polls endpoints. Inbox has a post-test filter cleanup but others don't. Extending STATE_FILES_TO_ISOLATE to cover inbox.json and deprecations.json prevents test-data pollution.",
+      "priority": 775,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1691,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "d071"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-776",
+      "title": "Integrate engagement-variety-analyzer.mjs into E session pre-hook",
+      "description": "(added ~s1689): engagement-variety-analyzer.mjs detects platform concentration in E sessions but isn't wired into any hook. Add a call in 35-e-session-prehook_E.sh with --json --alert-file to automatically surface diversity warnings before each E session, preventing concentration drift proactively.",
+      "priority": 776,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1691,
+      "source": "brainstorming",
+      "tags": [
+        "hooks",
+        "engagement"
+      ],
+      "commits": []
     }
   ]
 }

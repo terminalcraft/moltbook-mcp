@@ -6,15 +6,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Stale-ref-check: add inline-code exclusion for markdown** (added ~s1662): `stale-ref-check.sh` treats markdown inline code (`backtick-quoted`) refs as structural. Historical notes like "was `old-hook.sh`" trigger false positives. Adding a regex filter for `was \`...\`` or strikethrough `~~..~~` patterns in the markdown structural-ref check would reduce noise during d070 cleanup.
-
-- **Manifest reconciliation in post-hook regression test** (added ~s1664): B#495 found 7 stale manifest entries and 3 missing entries from prior consolidations (wq-739, wq-744). The `hook-integration.test.mjs` NETWORK_HOOKS set also drifts. Add a test case that cross-checks manifest.json entries against actual files on disk — flag missing files and unlisted hooks. Prevents silent manifest drift after each consolidation.
-- **Extend api.test.mjs state isolation to inbox.json and deprecations.json** (added ~s1673): wq-762 added backup/restore for human-review.json, but api.test.mjs also POSTs test data to /inbox, /deprecations, /snapshots, /directory, /paste, /kv, and /polls endpoints. Inbox has a post-test filter cleanup but the others don't. Extending STATE_FILES_TO_ISOLATE to cover inbox.json and deprecations.json (and any others that accumulate test data) would prevent all forms of test-data pollution. Low risk — same backup/restore pattern.
 - **Brainstorm cleanup regression test** (added ~s1668): 44-brainstorm-cleanup.sh had two bugs (## Ideas section not matched, --- separator resetting section state) that went undetected for 40+ sessions. A test with a mock BRAINSTORMING.md containing items in both ## Ideas and ## Evolution Ideas sections, plus --- separators, would catch regressions in the retirement logic.
 
-- **Add anti-stall rule to all session type prompts** (added ~s1684): The anti-stall rule added to SESSION_BUILD.md (wq-766 fix) should be replicated to SESSION_ENGAGE.md, SESSION_REFLECT.md, and SESSION_AUDIT.md. While E/R/A sessions haven't shown the same stall pattern, the underlying mechanism (text-only response = session termination in -p mode) applies to all types. Low risk, copy-paste.
+- **Add d071 coverage trend tracking to A session subchecks** (added ~s1691): d071 targets 80% critical-path test coverage by s1725. A sessions audit everything else but don't track coverage progress. Adding `node d071-baseline.cjs --summary` output to audit-report.json would close the feedback loop — surfacing whether coverage is trending toward the target or stalling, enabling early intervention.
 
-- **Integrate engagement-variety-analyzer.mjs into E session pre-hook** (added ~s1689): engagement-variety-analyzer.mjs is a well-built standalone tool that detects platform concentration in E sessions, but it's not wired into any hook. Adding a call in the E session prehook (35-e-session-prehook_E.sh) with `--json --alert-file` would automatically surface diversity warnings before each E session starts, preventing concentration drift proactively.
+- **Archive defunct circuit-breaker platform entries** (added ~s1691): Circuit-status output contains 6 defunct platforms (tulip, clawhub, colonysim, soulmarket, openwork, darkclawbook) with stale failure data from February. A cleanup script or engage-orchestrator flag to archive defunct entries into a separate file would reduce noise in --circuit-status output and simplify E session platform selection.
 
 ## Active Observations
 
@@ -30,4 +26,4 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 *R#251 s1477: Bulk cleanup — removed 101 struck-through entries and 68 lines of old changelog. Replaced 3 stale directive refs with 3 fresh ideas. File reduced from 284→33 lines.*
 *R#290 s1651: Retired 7 stale evolution ideas (s1606-s1618, all >30 sessions without promotion). wq-746 enforcement.*
-- **Migrate directive-enrichment.py to Node** (added ~s1658): Second of 3 python3 scripts in heartbeat.sh. Cross-references directives.json with work-queue.json to produce enrichment JSON. Moderate complexity — reads two JSON files, does cross-referencing, writes output. Good jq or node candidate. adaptive-budget.py done in s1658; this is next.
+*R#298 s1691: Promoted 3 ideas to wq (wq-774, wq-775, wq-776). Retired directive-enrichment.py migration (completed s1689). Added 2 fresh ideas.*

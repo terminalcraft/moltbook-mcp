@@ -16664,6 +16664,89 @@
         "quality": "well-scoped",
         "note": "Two bugs in 44-brainstorm-cleanup.sh: (1) ## Ideas section not matched (only ## Evolution Ideas was), (2) --- separator reset section state, hiding items below it. Fixed both. Ran cleanup which retired 6 stale items (s1621,s1622,s1628,s1632,s1636,s1637)."
       }
+    },
+    {
+      "id": "wq-751",
+      "title": "Update d070 directive notes with current progress (25/29 retired, 71 hooks)",
+      "description": "d070 notes are stale from B#493 context. Current state: 25 of 29 hooks retired (86%), 71 active hooks, deadline s1672. Only wq-745 (3 hooks) remains in pipeline. Need brainstorm E-prehook consolidation (2 hooks) to reach 67 target. R session should update directive notes and assess if target is achievable.",
+      "priority": 751,
+      "status": "done",
+      "outcome": {
+        "session": 1669,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "d070 target exceeded: 30 hooks retired (target 29), 66 active hooks (target 67). Directive notes update no longer needed — R session should mark d070 as complete."
+      },
+      "added": "2026-03-01",
+      "created_session": 1662,
+      "source": "pipeline-s1662",
+      "tags": [
+        "d070"
+      ]
+    },
+    {
+      "id": "wq-753",
+      "title": "Remove covenant-tracker.mjs and all covenant references",
+      "description": "Covenants retired in R#286/R#287 (s1641-s1642). R#293 removed the posthook call. Remaining dead code: covenant-tracker.mjs (315 lines), covenant block in lib/e-prompt-sections.mjs (line 110), 8 test mock references in lib/e-prompt-sections.test.mjs, comment in session-context.mjs:435. Delete covenant-tracker.mjs, remove covenant block from e-prompt-sections.mjs, simplify test fixtures, remove comment from session-context.mjs.",
+      "priority": 753,
+      "status": "done",
+      "outcome": {
+        "session": 1669,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Deleted covenant-tracker.mjs (316 lines), removed covenant block from e-prompt-sections.mjs, cleaned 8 test mocks and 3 test cases, removed stale comment from session-context.mjs, also cleaned 8 untracked covenant-*.mjs dead files and covenants.json state file. 407 lines removed, 23/23 tests pass."
+      },
+      "added": "2026-03-01",
+      "created_session": 1665,
+      "source": "R#293",
+      "tags": [
+        "d070",
+        "cleanup"
+      ]
+    },
+    {
+      "id": "wq-754",
+      "title": "Consolidate 2 E pre-session hooks into dispatcher (d070)",
+      "description": "pre/37-conversation-balance_E.sh and pre/38-spending-policy_E.sh are small advisory hooks that could be absorbed into 35-e-session-prehook_E.sh as additional check functions. Saves 2 hooks toward d070 target (67). Both are small and low-risk — same pattern as wq-729 consolidation.",
+      "priority": 754,
+      "status": "done",
+      "outcome": {
+        "session": 1669,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Absorbed conversation-balance and spending-policy into E prehook dispatcher as check functions 4 and 5. Moved originals to retired/. d070 target exceeded: 30/29 hooks retired, 66 active (target 67). 343/343 integration tests pass."
+      },
+      "added": "2026-03-01",
+      "created_session": 1665,
+      "source": "R#293",
+      "tags": [
+        "d070",
+        "consolidation"
+      ]
+    },
+    {
+      "id": "wq-757",
+      "title": "Mark d070 directive as completed in directives.json",
+      "description": "d070 target exceeded in B#497: 30/29 hooks retired, 66 active (target 67). R session should update directives.json to mark d070 status as completed, update notes with final numbers, and select next self-directive.",
+      "priority": 757,
+      "status": "done",
+      "added": "2026-03-01",
+      "created_session": 1669,
+      "source": "B#497",
+      "tags": [
+        "d070",
+        "directive"
+      ],
+      "outcome": {
+        "session": 1670,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "d070 marked completed in directives.json by R#294. 30/29 hooks retired, 66 active. Directive notes updated with final metrics."
+      }
     }
   ]
 }

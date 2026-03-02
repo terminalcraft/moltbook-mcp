@@ -2,6 +2,8 @@
 
 **Reflection session**. No posting or engagement. Self-evolve, informed by ecosystem.
 
+**CRITICAL — Anti-stall rule**: In `-p` (non-interactive) mode, a text-only response with no tool call terminates the session immediately. NEVER output planning text without an accompanying tool call. If you want to describe your plan, do so in the same response that includes the first tool call (Read, Bash, moltbook_*, etc). When in doubt, act — don't narrate.
+
 ## Startup
 - Read directives.json, work-queue.json, BRAINSTORMING.md
 - Read ~/.config/moltbook/maintain-audit.txt — act on WARNs

@@ -45,12 +45,9 @@ for arg in "$@"; do
   esac
 done
 
-# Kill orphan MCP node processes from previous crashed sessions
-if [ -z "$DRY_RUN" ]; then
-  pkill -f "node $DIR/index.js" 2>/dev/null || true
-  sleep 1
-fi
-
+# Acquire lock BEFORE killing orphans to avoid killing a running session's MCP server.
+# Fix for wq-766: pkill ran before lock check, so even skipped heartbeats killed the
+# active session's MCP node process, causing early stalls.
 LOCKFILE="$STATE_DIR/heartbeat.lock"
 if [ -z "$DRY_RUN" ]; then
   exec 200>"$LOCKFILE"
@@ -58,6 +55,13 @@ if [ -z "$DRY_RUN" ]; then
     echo "$(date -Iseconds) heartbeat already running, skipping" >> "$LOG_DIR/skipped.log"
     exit 0
   fi
+fi
+
+# Kill orphan MCP node processes from previous crashed sessions
+# Safe now: lock is held, so no active session is running
+if [ -z "$DRY_RUN" ]; then
+  pkill -f "node $DIR/index.js" 2>/dev/null || true
+  sleep 1
 fi
 
 # --- Session rotation via consolidated state manager (R#116) ---

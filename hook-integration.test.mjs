@@ -481,6 +481,81 @@ describe('Hook integration tests', () => {
     });
   });
 
+  // ---- MANIFEST RECONCILIATION (wq-755, d071) ----
+  describe('Manifest reconciliation', () => {
+    const manifestPath = join(REPO_DIR, 'hooks/manifest.json');
+
+    test('manifest.json exists and is valid JSON', () => {
+      assert.ok(existsSync(manifestPath), 'hooks/manifest.json should exist');
+      const content = readFileSync(manifestPath, 'utf8');
+      const manifest = JSON.parse(content);
+      assert.ok(Array.isArray(manifest.hooks), 'manifest.hooks should be an array');
+      assert.ok(manifest.hooks.length > 0, 'manifest should list hooks');
+    });
+
+    test('every manifest entry has a corresponding file on disk', () => {
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      const missing = [];
+      for (const entry of manifest.hooks) {
+        const dir = entry.phase === 'pre-session' ? PRE_DIR : POST_DIR;
+        const hookPath = join(dir, entry.name);
+        if (!existsSync(hookPath)) {
+          missing.push(`${entry.phase}/${entry.name}`);
+        }
+      }
+      assert.strictEqual(
+        missing.length, 0,
+        `Manifest lists ${missing.length} hook(s) that don't exist on disk:\n  ${missing.join('\n  ')}`
+      );
+    });
+
+    test('every hook file on disk is listed in manifest', () => {
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      const manifestNames = new Set(manifest.hooks.map(h => `${h.phase}/${h.name}`));
+      const unlisted = [];
+      for (const [dir, phase] of [[PRE_DIR, 'pre-session'], [POST_DIR, 'post-session']]) {
+        for (const hook of getHooks(dir)) {
+          if (!manifestNames.has(`${phase}/${hook}`)) {
+            unlisted.push(`${phase}/${hook}`);
+          }
+        }
+      }
+      assert.strictEqual(
+        unlisted.length, 0,
+        `${unlisted.length} hook(s) on disk not listed in manifest:\n  ${unlisted.join('\n  ')}`
+      );
+    });
+
+    test('manifest total count matches actual hook count', () => {
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      const actualPre = getHooks(PRE_DIR).length;
+      const actualPost = getHooks(POST_DIR).length;
+      const actualTotal = actualPre + actualPost;
+      assert.strictEqual(
+        manifest.total, actualTotal,
+        `Manifest says ${manifest.total} hooks but ${actualTotal} exist on disk (${actualPre} pre + ${actualPost} post)`
+      );
+    });
+
+    test('manifest scope field matches filename suffix convention', () => {
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      const mismatches = [];
+      for (const entry of manifest.hooks) {
+        const fileMode = getHookMode(entry.name); // null = all, or B/E/R/A
+        const manifestScope = entry.scope;
+        if (fileMode === null && manifestScope !== 'all') {
+          mismatches.push(`${entry.name}: file has no suffix but manifest says scope="${manifestScope}"`);
+        } else if (fileMode !== null && manifestScope !== fileMode) {
+          mismatches.push(`${entry.name}: file suffix _${fileMode} but manifest says scope="${manifestScope}"`);
+        }
+      }
+      assert.strictEqual(
+        mismatches.length, 0,
+        `Scope mismatches:\n  ${mismatches.join('\n  ')}`
+      );
+    });
+  });
+
   // ---- HOOK COUNT TRACKING ----
   describe('Hook inventory', () => {
     test('pre-session hook count is tracked', () => {

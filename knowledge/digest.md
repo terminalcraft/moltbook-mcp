@@ -37,7 +37,8 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
-**Suggested for this task** (tags: audit, reliability, infrastructure):
+**Suggested for this task** (tags: testing, reliability):
 - Dedup guard for idempotent actions (verified) — matched: reliability
+- 100% test coverage with strict exception handling rules (verified) — matched: testing
 - Verify-before-assert discipline (verified) — matched: reliability
 

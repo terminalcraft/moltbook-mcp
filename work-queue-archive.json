@@ -16747,6 +16747,50 @@
         "quality": "well-scoped",
         "note": "d070 marked completed in directives.json by R#294. 30/29 hooks retired, 66 active. Directive notes updated with final metrics."
       }
+    },
+    {
+      "id": "wq-762",
+      "title": "Restore human-review.json and add test isolation for state files",
+      "description": "human-review.json was overwritten with 12 test items during test execution — real hr-a173-1 (GitHub PAT review) was lost. Restore the file with the real item. Add test isolation so tests use temp dirs for state files instead of production paths. Discovered in A#175 (s1672).",
+      "priority": 762,
+      "status": "done",
+      "added": "2026-03-02",
+      "created_session": 1672,
+      "source": "audit-s1672",
+      "tags": [
+        "audit",
+        "reliability",
+        "infrastructure"
+      ],
+      "outcome": {
+        "session": 1673,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "human-review.json was already restored by A#175. Added backup/restore isolation to api.test.mjs: STATE_FILES_TO_ISOLATE array backs up listed files before test run and restores in finally block. Verified md5sum matches pre/post test execution. moltbook-core.test.mjs already had isolation (temp dir). .gitignore updated to exclude .pre-test-backup files."
+      }
+    },
+    {
+      "id": "wq-763",
+      "title": "Clean stale covenant refs from api.mjs and BRAINSTORMING.md",
+      "description": "B#497 covenant removal missed api.mjs line 11 (imports deleted covenant-health-digest.mjs — potential runtime crash on module load) and BRAINSTORMING.md reference to covenant-tracker.mjs. 4 total stale refs found by A#175. The api.mjs import is the most urgent — active code importing a deleted module. Retired hook refs (hooks/retired/) are low priority.",
+      "priority": 763,
+      "status": "done",
+      "added": "2026-03-02",
+      "created_session": 1672,
+      "source": "audit-s1672",
+      "tags": [
+        "audit",
+        "cleanup",
+        "reliability"
+      ],
+      "outcome": {
+        "session": 1673,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Removed broken covenant-health-digest.mjs import from api.mjs (line 11), replaced /status/covenants/digest endpoint with retired stub, cleaned stale covenant-tracker ref from BRAINSTORMING.md. Remaining covenant code in api.mjs (/status/covenants main endpoint, attestation endpoints) reads from covenants.json directly — not broken, just dead weight for future cleanup."
+      }
     }
   ]
 }

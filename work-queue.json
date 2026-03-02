@@ -49,14 +49,21 @@
       "title": "Audit .gitignore completeness against runtime state files",
       "description": "wq-759 cleanup found 4 runtime state files (engagement-actions.log, knowbster-collections.json, pinchwork-inbox.json, review-requests.json) missing from .gitignore. Systematic audit: grep all readFileSync/writeFileSync calls in api.mjs and index.js for local .json/.log files, cross-check each against .gitignore. Prevents future accumulation of untracked runtime artifacts.",
       "priority": 770,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1689,
       "source": "B#504",
       "tags": [
         "hygiene",
         "reliability"
-      ]
+      ],
+      "outcome": {
+        "session": 1691,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Found 17 runtime state files tracked by git that should not be. Removed from tracking, added to .gitignore. 33k lines of state data removed from repo."
+      }
     },
     {
       "id": "wq-771",

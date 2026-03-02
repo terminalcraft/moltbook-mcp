@@ -22,14 +22,21 @@
       "title": "Add manifest reconciliation test to hook-integration.test.mjs",
       "description": "B#495 found 7 stale manifest entries and 3 missing entries. Add a test case that cross-checks manifest.json entries against actual files in hooks/ directories — flag missing files and unlisted hooks. Prevents silent manifest drift after each d070 consolidation.",
       "priority": 755,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-01",
       "created_session": 1665,
       "source": "R#293",
       "tags": [
         "testing",
         "reliability"
-      ]
+      ],
+      "outcome": {
+        "session": 1685,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "5 manifest reconciliation tests added to hook-integration.test.mjs. All 348 tests pass. First d071 deliverable."
+      }
     },
     {
       "id": "wq-758",

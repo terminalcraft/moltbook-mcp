@@ -19,7 +19,7 @@ function getToken() {
   } catch { return null; }
 }
 
-function probe(urlPath, token, timeoutMs = 10000) {
+function probe(urlPath, token, timeoutMs = 5000) {
   return new Promise(resolve => {
     const start = Date.now();
     const opts = {
@@ -200,11 +200,12 @@ async function main() {
     { name: 'search', path: '/api/v1/search?q=test&limit=1' },
   ];
 
-  const results = {};
-  for (const ep of endpoints) {
+  const probes = endpoints.map(ep => {
     const useToken = ep.auth === false ? null : token;
-    results[ep.name] = await probe(ep.path, useToken);
-  }
+    return probe(ep.path, useToken).then(r => [ep.name, r]);
+  });
+  const settled = await Promise.all(probes);
+  const results = Object.fromEntries(settled);
 
   const entry = {
     ts: new Date().toISOString(),

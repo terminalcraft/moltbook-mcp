@@ -81,6 +81,21 @@
         "engagement"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-777",
+      "title": "Reclassify NicePick as defunct in circuit-breaker and platform registry",
+      "description": "NicePick DNS is NXDOMAIN as of s1692 (was working at s1614). Platform-picker still assigns it, wasting E session time on DNS failures. Reclassify in engage-orchestrator circuit-breaker state and services.json. Confirmed by audit A#179.",
+      "priority": 777,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1693,
+      "source": "audit-s1693",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": []
     }
   ]
 }

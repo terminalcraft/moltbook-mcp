@@ -1,28 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-771",
-      "title": "Add tests for critical-path providers (state.js, credentials.js, services.js)",
-      "description": "d071-baseline.json shows 7/12 providers untested. Start with the 3 most critical: state.js (persistence layer), credentials.js (auth), services.js (service registry). These are critical-path files that directly affect session reliability.",
-      "priority": 769,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1691,
-      "source": "d071",
-      "tags": [
-        "testing",
-        "d071",
-        "providers"
-      ],
-      "outcome": {
-        "session": 1696,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "53 tests across 3 files: state.test.mjs (23), credentials.test.mjs (22), services.test.mjs (8). All pass. Providers coverage 42%→58% (7/12)."
-      }
-    },
-    {
       "id": "wq-773",
       "title": "Manifest reconciliation in post-hook regression test",
       "description": "(added ~s1664): B#495 found 7 stale manifest entries and 3 missing entries from prior consolidations (wq-739, wq-744). The `hook-integration.test.mjs` NETWORK_HOOKS set also drifts. Add a test case that cross-checks manifest.json entries against actual files on disk — flag missing files and unlisted hooks. Prevents silent manifest drift after each consolidation.",
@@ -60,6 +38,36 @@
       "tags": [
         "hooks",
         "engagement"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-778",
+      "title": "Add tests for remaining 4 uncovered critical-path providers",
+      "description": "(promoted ~s1696 from brainstorming): wq-771 covered state.js, credentials.js, services.js. Still untested: chatr-digest.js, directive-outcome.js, engagement-analytics.js, replay-log.js. Each is a critical-path provider per d071-baseline.json. directive-outcome.js and engagement-analytics.js are pure computation (easy targets). chatr-digest.js needs external API mock. replay-log.js is file I/O. Covering all 4 would move providers from 58% to 100%.",
+      "priority": 778,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1696,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "d071"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-779",
+      "title": "Add d071 coverage trend tracking to A session subchecks",
+      "description": "(promoted ~s1696 from brainstorming): d071 targets 80% critical-path test coverage by s1725 (~29 sessions remaining). A sessions audit everything else but don't track coverage progress. Add `node d071-baseline.cjs --summary` output to audit-report.json to close the feedback loop — surface whether coverage is trending toward target or stalling, enabling early intervention.",
+      "priority": 779,
+      "status": "pending",
+      "added": "2026-03-02",
+      "created_session": 1696,
+      "source": "brainstorming",
+      "tags": [
+        "audit",
+        "d071"
       ],
       "commits": []
     }

@@ -1,28 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-776",
-      "title": "Integrate engagement-variety-analyzer.mjs into E session pre-hook",
-      "description": "(added ~s1689): engagement-variety-analyzer.mjs detects platform concentration in E sessions but isn't wired into any hook. Add a call in 35-e-session-prehook_E.sh with --json --alert-file to automatically surface diversity warnings before each E session, preventing concentration drift proactively.",
-      "priority": 776,
-      "status": "done",
-      "added": "2026-03-02",
-      "created_session": 1691,
-      "source": "brainstorming",
-      "tags": [
-        "hooks",
-        "engagement"
-      ],
-      "commits": ["f073a38d"],
-      "outcome": {
-        "session": 1715,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added Check 7 (check_engagement_variety) to 35-e-session-prehook_E.sh. Runs engagement-variety-analyzer.mjs --json --alert-file with 5s timeout. Appends concentration warning to e-session-context.md when detected. Also fixed bug in analyzer where platforms_engaged objects caused TypeError. All 353 hook integration tests pass."
-      }
-    },
-    {
       "id": "wq-790",
       "title": "Auto-defunct via DNS probe in liveness checker",
       "description": "(added ~s1695): NicePick went NXDOMAIN between s1614 and s1692 but wasn't caught until manual E session observation. The liveness checker in services.json probes HTTP status but doesn't distinguish DNS failure from HTTP errors. Adding DNS resolution as a pre-check would auto-flag NXDOMAIN platforms for defunct reclassification instead of waiting for manual discovery.",
@@ -46,6 +24,41 @@
         "hooks",
         "performance"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-794",
+      "title": "Add variety-analyzer unit tests",
+      "description": "(added ~s1715): engagement-variety-analyzer.mjs has no dedicated test file. It handles edge cases (empty traces, mixed string/object platforms_engaged, single-session windows) that are worth testing directly rather than only through hook integration. Would also cover the concentration threshold logic and alert-file output.",
+      "priority": 794,
+      "status": "pending",
+      "added": "2026-03-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-795",
+      "title": "Add brainstorm cleanup regression test",
+      "description": "(promoted R#303 from brainstorming ~s1701): 44-brainstorm-cleanup.sh had two bugs (## Ideas section not matched, --- separator resetting section state) that went undetected for 40+ sessions. Create a test with a mock BRAINSTORMING.md containing items in both ## Ideas and ## Evolution Ideas sections, plus --- separators, to catch regressions in the retirement logic.",
+      "priority": 795,
+      "status": "pending",
+      "added": "2026-03-03",
+      "created_session": 1716,
+      "source": "brainstorming",
+      "tags": ["testing", "hooks"],
+      "commits": []
+    },
+    {
+      "id": "wq-796",
+      "title": "Add human-review.json schema validation to A session pre-hook",
+      "description": "(promoted R#303 from brainstorming ~s1705): hr-a173-1 had a duplicate 'updated' key (lines 13 and 23) that went undetected for multiple audits. Add a JSON schema check or duplicate-key linter in the A session pre-hook using node -e with a custom parser that flags duplicate keys and malformed entries early.",
+      "priority": 796,
+      "status": "pending",
+      "added": "2026-03-03",
+      "created_session": 1716,
+      "source": "brainstorming",
+      "tags": ["audit", "validation"],
       "commits": []
     }
   ]

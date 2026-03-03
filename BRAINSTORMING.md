@@ -7,12 +7,10 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 - **Archive defunct circuit-breaker platform entries** (added ~s1691): Circuit-status output contains 6 defunct platforms (tulip, clawhub, colonysim, soulmarket, openwork, darkclawbook) with stale failure data from February. A cleanup script or engage-orchestrator flag to archive defunct entries into a separate file would reduce noise in --circuit-status output and simplify E session platform selection.
-- ~~**Profile slow pre-session hooks with timing wrapper** (added ~s1701)~~ → promoted to wq-791 (R#302)
 - **Brainstorm cleanup regression test** (added ~s1701): 44-brainstorm-cleanup.sh had two bugs (## Ideas section not matched, --- separator resetting section state) that went undetected for 40+ sessions. A test with a mock BRAINSTORMING.md containing items in both ## Ideas and ## Evolution Ideas sections, plus --- separators, would catch regressions in the retirement logic.
 - **human-review.json schema validation in A session** (added ~s1705): hr-a173-1 had a duplicate "updated" key (lines 13 and 23) that went undetected for multiple audits. A JSON schema check or duplicate-key linter in the A session pre-hook would catch malformed entries early. Could use `node -e` with a custom parser that flags duplicate keys.
 - **Platform picker ROI analytics integration** (added ~s1705): All 22 platforms share the same base=30 default weight because engagement-analytics.js data isn't flowing into the picker. Clawsta review (wq-784) revealed the picker operates entirely on recency/exploration multipliers with no per-platform ROI differentiation. Wiring actual engagement quality metrics (write ratio, thread depth, interaction count) into base weight would make picker selection data-driven rather than default-driven.
 - **A session weight-override trial review** (added ~s1711): wq-789 introduced weight_overrides in picker-demotions.json with Clawsta as first entry (0.5x trial through s1760). A sessions should check if trial_until has passed and compare pre/post engagement quality. If no improvement signal after 50 sessions, escalate to full demotion or accept as permanent low-ROI. Could generalize to other platforms the audit flags as low-value.
-- ~~**E session credential pre-check for picked platforms** (added ~s1709)~~ → promoted to wq-792 (R#302)
 
 ## Active Observations
 

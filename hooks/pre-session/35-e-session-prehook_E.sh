@@ -287,8 +287,10 @@ check_spending_policy() {
 #   Validates credential files exist with non-placeholder values for all live
 #   platforms. Injects results into e-session-context.md so the E session
 #   agent knows which platforms have working credentials before picking.
+#   Accepts optional $1 as output file for context additions (parallel mode).
 ###############################################################################
 check_credential_status() {
+  local ctx_out="${1:-$CONTEXT_FILE}"
   REGISTRY_FILE="account-registry.json"
   if [ ! -f "$REGISTRY_FILE" ]; then
     echo "[cred-check] No account-registry.json found, skipping"
@@ -344,7 +346,7 @@ check_credential_status() {
 
   echo "[cred-check] $cred_report"
 
-  # Extract warnings and append to context file
+  # Extract warnings and append to context output file
   warn_line=$(echo "$cred_report" | grep '^WARN:' | sed 's/^WARN://')
   if [ -n "$warn_line" ]; then
     {
@@ -355,8 +357,8 @@ check_credential_status() {
         echo "- **$w**"
       done
       echo ""
-    } >> "$CONTEXT_FILE"
-    echo "[cred-check] Appended credential warnings to e-session-context.md"
+    } >> "$ctx_out"
+    echo "[cred-check] Appended credential warnings to $(basename "$ctx_out")"
   fi
 }
 
@@ -364,8 +366,10 @@ check_credential_status() {
 # Check 7: Engagement variety analysis (wq-776)
 #   Runs engagement-variety-analyzer.mjs to detect platform concentration
 #   drift across recent E sessions. Writes alert to context file if detected.
+#   Accepts optional $1 as output file for context additions (parallel mode).
 ###############################################################################
 check_engagement_variety() {
+  local ctx_out="${1:-$CONTEXT_FILE}"
   echo "=== Engagement Variety Check ==="
   variety_json=$(timeout 5 node engagement-variety-analyzer.mjs --json --alert-file 2>&1)
   variety_exit=$?
@@ -390,7 +394,7 @@ check_engagement_variety() {
 
   echo "[variety] Health: $health_score | Top: $top_platform ($top_pct%) | $recommendation"
 
-  # If concentration detected, append warning to e-session-context.md
+  # If concentration detected, append warning to context output file
   if [ -n "$alert_level" ] && [ "$alert_level" != "null" ]; then
     {
       echo ""
@@ -401,21 +405,48 @@ check_engagement_variety() {
       echo ""
       echo "**Action**: Prioritize under-represented platforms in this session's picker targets."
       echo ""
-    } >> "$CONTEXT_FILE"
-    echo "[variety] WARNING: Concentration alert appended to e-session-context.md"
+    } >> "$ctx_out"
+    echo "[variety] WARNING: Concentration alert appended to $(basename "$ctx_out")"
   fi
 }
 
 ###############################################################################
-# Run all checks sequentially (order matters — liveness before seed, seed before clusters)
+# Run checks: sequential chain (1→2→3), then parallel independent checks (4-7)
+#
+# Dependency chain: liveness → seed (creates CONTEXT_FILE) → topic clusters
+# Independent: conversation balance, spending policy, credential check, variety
+# Checks 6 and 7 write to per-check temp files to avoid interleaved appends,
+# then results are concatenated onto CONTEXT_FILE after all complete.
 ###############################################################################
 
+# Sequential dependency chain
 check_engagement_liveness
 check_engagement_seed
 check_topic_clusters
-check_conversation_balance
-check_spending_policy
-check_credential_status
-check_engagement_variety
+
+# Temp files for checks that append to CONTEXT_FILE
+CRED_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-cred.XXXXXX")
+VARIETY_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-variety.XXXXXX")
+
+# Run independent checks in parallel
+check_conversation_balance &
+pid_balance=$!
+check_spending_policy &
+pid_spending=$!
+check_credential_status "$CRED_TMP" &
+pid_cred=$!
+check_engagement_variety "$VARIETY_TMP" &
+pid_variety=$!
+
+# Wait for all parallel checks
+wait $pid_balance $pid_spending $pid_cred $pid_variety
+
+# Merge context additions from parallel checks (deterministic order)
+for tmp in "$CRED_TMP" "$VARIETY_TMP"; do
+  if [ -s "$tmp" ]; then
+    cat "$tmp" >> "$CONTEXT_FILE"
+  fi
+  rm -f "$tmp"
+done
 
 exit 0

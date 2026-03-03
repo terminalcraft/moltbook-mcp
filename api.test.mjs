@@ -12,7 +12,7 @@ const INBOX_FILE = join(__dirname, "inbox.json");
 
 // State file isolation: backup files that tests write to, restore after test run.
 // Prevents test data from corrupting production state (wq-762).
-const STATE_FILES_TO_ISOLATE = ["human-review.json"];
+const STATE_FILES_TO_ISOLATE = ["human-review.json", "inbox.json", "deprecations.json"];
 const BACKUP_SUFFIX = ".pre-test-backup";
 
 function backupStateFiles() {

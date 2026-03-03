@@ -281,6 +281,84 @@ check_spending_policy() {
 }
 
 ###############################################################################
+# Check 6: Credential pre-check for live platforms (wq-792)
+#   Validates credential files exist with non-placeholder values for all live
+#   platforms. Injects results into e-session-context.md so the E session
+#   agent knows which platforms have working credentials before picking.
+###############################################################################
+check_credential_status() {
+  REGISTRY_FILE="account-registry.json"
+  if [ ! -f "$REGISTRY_FILE" ]; then
+    echo "[cred-check] No account-registry.json found, skipping"
+    return 0
+  fi
+
+  # Use node for reliable JSON parsing of registry + credential files
+  cred_report=$(node -e "
+    const fs = require('fs');
+    const path = require('path');
+    const home = process.env.HOME || '/home/moltbot';
+    const reg = JSON.parse(fs.readFileSync('$REGISTRY_FILE', 'utf8'));
+    const live = reg.accounts.filter(a => a.status === 'live' || a.status === 'active');
+    const warnings = [];
+    const ok = [];
+    for (const a of live) {
+      if (!a.cred_file) {
+        // No cred file needed (MCP-native or no-auth)
+        ok.push(a.id + ': no-cred-needed');
+        continue;
+      }
+      const credPath = a.cred_file.replace('~', home);
+      if (!fs.existsSync(credPath)) {
+        warnings.push(a.id + ': MISSING credential file (' + a.cred_file + ')');
+        continue;
+      }
+      try {
+        const content = fs.readFileSync(credPath, 'utf8').trim();
+        // Check for placeholder values
+        if (content.includes('test-api-key') || content.includes('YOUR_API_KEY') || content.includes('placeholder')) {
+          warnings.push(a.id + ': PLACEHOLDER credential (not real key)');
+          continue;
+        }
+        // Check the specific key field has a value
+        if (a.cred_key) {
+          const json = JSON.parse(content);
+          const val = json[a.cred_key];
+          if (!val || val === '' || val === 'test-api-key') {
+            warnings.push(a.id + ': EMPTY or placeholder ' + a.cred_key);
+            continue;
+          }
+        }
+        ok.push(a.id + ': ok');
+      } catch (e) {
+        warnings.push(a.id + ': PARSE ERROR (' + e.message.slice(0, 50) + ')');
+      }
+    }
+    if (warnings.length > 0) {
+      console.log('WARN:' + warnings.join('|'));
+    }
+    console.log('OK:' + ok.length + '/' + (ok.length + warnings.length) + ' live platforms have valid credentials');
+  " 2>&1)
+
+  echo "[cred-check] $cred_report"
+
+  # Extract warnings and append to context file
+  warn_line=$(echo "$cred_report" | grep '^WARN:' | sed 's/^WARN://')
+  if [ -n "$warn_line" ]; then
+    {
+      echo ""
+      echo "## Credential warnings (auto-check)"
+      echo "The following live platforms have credential issues. SKIP them when picking engagement targets:"
+      echo "$warn_line" | tr '|' '\n' | while IFS= read -r w; do
+        echo "- **$w**"
+      done
+      echo ""
+    } >> "$CONTEXT_FILE"
+    echo "[cred-check] Appended credential warnings to e-session-context.md"
+  fi
+}
+
+###############################################################################
 # Run all checks sequentially (order matters — liveness before seed, seed before clusters)
 ###############################################################################
 
@@ -289,5 +367,6 @@ check_engagement_seed
 check_topic_clusters
 check_conversation_balance
 check_spending_policy
+check_credential_status
 
 exit 0

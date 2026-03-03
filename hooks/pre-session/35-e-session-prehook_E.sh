@@ -12,6 +12,8 @@
 #   37-conversation-balance_E.sh (d041) — merged B#497 (wq-754)
 #   38-spending-policy_E.sh      (d059, R#223) — merged B#497 (wq-754)
 #
+# Check 7: engagement-variety-analyzer.mjs integration (wq-776, B#515)
+#
 # Created: B#490 (wq-729), expanded B#497 (wq-754)
 
 cd /home/moltbot/moltbook-mcp
@@ -359,6 +361,52 @@ check_credential_status() {
 }
 
 ###############################################################################
+# Check 7: Engagement variety analysis (wq-776)
+#   Runs engagement-variety-analyzer.mjs to detect platform concentration
+#   drift across recent E sessions. Writes alert to context file if detected.
+###############################################################################
+check_engagement_variety() {
+  echo "=== Engagement Variety Check ==="
+  variety_json=$(timeout 5 node engagement-variety-analyzer.mjs --json --alert-file 2>&1)
+  variety_exit=$?
+
+  if [ $variety_exit -eq 124 ]; then
+    echo "[variety] Analyzer timed out (5s), skipping"
+    return 0
+  fi
+
+  if [ -z "$variety_json" ]; then
+    echo "[variety] No output from analyzer (exit $variety_exit), skipping"
+    return 0
+  fi
+
+  # Parse key fields from JSON output
+  health_score=$(echo "$variety_json" | jq -r '.health.score // "?"' 2>/dev/null)
+  top_platform=$(echo "$variety_json" | jq -r '.concentration.topPlatform // "?"' 2>/dev/null)
+  top_pct=$(echo "$variety_json" | jq -r '.concentration.topConcentrationPct // "?"' 2>/dev/null)
+  recommendation=$(echo "$variety_json" | jq -r '.health.recommendation // ""' 2>/dev/null)
+  alert_level=$(echo "$variety_json" | jq -r '.alert.level // empty' 2>/dev/null)
+  alert_msg=$(echo "$variety_json" | jq -r '.alert.message // empty' 2>/dev/null)
+
+  echo "[variety] Health: $health_score | Top: $top_platform ($top_pct%) | $recommendation"
+
+  # If concentration detected, append warning to e-session-context.md
+  if [ -n "$alert_level" ] && [ "$alert_level" != "null" ]; then
+    {
+      echo ""
+      echo "## Platform concentration alert (auto-detected)"
+      echo "**Level: ${alert_level^^}** — $alert_msg"
+      echo ""
+      echo "$recommendation"
+      echo ""
+      echo "**Action**: Prioritize under-represented platforms in this session's picker targets."
+      echo ""
+    } >> "$CONTEXT_FILE"
+    echo "[variety] WARNING: Concentration alert appended to e-session-context.md"
+  fi
+}
+
+###############################################################################
 # Run all checks sequentially (order matters — liveness before seed, seed before clusters)
 ###############################################################################
 
@@ -368,5 +416,6 @@ check_topic_clusters
 check_conversation_balance
 check_spending_policy
 check_credential_status
+check_engagement_variety
 
 exit 0

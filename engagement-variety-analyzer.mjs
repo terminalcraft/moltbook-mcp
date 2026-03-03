@@ -67,10 +67,12 @@ function saveJSON(path, data) {
 function extractEngagementCounts(trace) {
   const counts = {};
 
-  // Count from platforms_engaged array
+  // Count from platforms_engaged array (entries may be strings or {platform: "..."} objects)
   if (trace.platforms_engaged && Array.isArray(trace.platforms_engaged)) {
     for (const p of trace.platforms_engaged) {
-      const platform = p.toLowerCase();
+      const name = typeof p === "string" ? p : (p && p.platform ? p.platform : null);
+      if (!name) continue;
+      const platform = name.toLowerCase();
       counts[platform] = (counts[platform] || 0) + 1;
     }
   }

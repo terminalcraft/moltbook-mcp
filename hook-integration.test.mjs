@@ -40,6 +40,7 @@ const NETWORK_HOOKS = new Set([
   '12-fire-webhook.sh',        // fires webhooks
   '13-ctxly-summary.sh',       // external API
   '39-defunct-probe.sh',       // probes services
+  '35-e-session-prehook_E.sh', // liveness probes + Chatr thread tracker
 ]);
 
 // Hooks that are informational and may exit non-zero to signal warnings

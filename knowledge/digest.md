@@ -4,7 +4,7 @@
 
 38 patterns: 13 self-derived, 24 from repo crawls, 0 from agent exchange.
 
-**Health**: 0 stale (>30d), 1 consensus, 32 verified, 5 observed, 0 speculative.
+**Health**: 2 stale (>30d), 1 consensus, 32 verified, 5 observed, 0 speculative.
 
 **Architecture**:
 - Stateless session with disk-persisted state (verified, self:200-sessions)

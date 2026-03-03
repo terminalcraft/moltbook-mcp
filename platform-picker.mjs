@@ -260,6 +260,15 @@ function main() {
     console.error(`Demoted from picker: ${[...demotedIds].join(", ")}`);
   }
 
+  // wq-789: Load weight overrides (low-ROI platforms with reduced but non-zero weight)
+  const weightOverrides = {};
+  for (const ov of (demotions?.weight_overrides || [])) {
+    weightOverrides[ov.id.toLowerCase()] = ov.multiplier;
+  }
+  if (opts.verbose && Object.keys(weightOverrides).length > 0) {
+    console.error(`Weight overrides: ${Object.entries(weightOverrides).map(([k, v]) => `${k}=${v}x`).join(", ")}`);
+  }
+
   // Filter to working platforms + needs_probe platforms (d051)
   // needs_probe platforms are auto-promoted from services.json and need E session probing
   // Note: Check acc.status first for needs_probe because last_status may be "error" from prior health checks
@@ -334,7 +343,12 @@ function main() {
       else if (boost.count > 0) mentionMultiplier = 1.5;
       factors.mentionBoost = { count: boost.count, direct: boost.directCount, multiplier: mentionMultiplier };
     }
-    const boostedWeight = Math.max(1, Math.round(weight * mentionMultiplier));
+    // wq-789: Apply weight overrides for low-ROI platforms
+    const overrideMultiplier = weightOverrides[id] || weightOverrides[platform] || 1.0;
+    if (overrideMultiplier !== 1.0) {
+      factors.weightOverride = overrideMultiplier;
+    }
+    const boostedWeight = Math.max(1, Math.round(weight * mentionMultiplier * overrideMultiplier));
     return { acc, weight: boostedWeight, factors };
   });
 

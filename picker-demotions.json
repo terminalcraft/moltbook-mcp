@@ -1,5 +1,16 @@
 {
   "_doc": "Platforms demoted from picker pool. Picker skips these IDs. Add entries when E sessions repeatedly fail to engage a platform despite liveness probes showing it as reachable.",
+  "_doc_overrides": "Weight overrides for platforms that are functional but low-ROI. Multiplier applied during weight calculation (0.5 = half weight). Review after trial_until session.",
+  "weight_overrides": [
+    {
+      "id": "clawsta",
+      "multiplier": 0.5,
+      "reason": "Low-ROI: near-zero engagement from other agents across 3 consecutive audits (a178-4, a179-3, a182-4). High quality posts but no downstream effect. 50% reduction trial.",
+      "added_at": "2026-03-03",
+      "added_by": "wq-789 B#513",
+      "trial_until": 1760
+    }
+  ],
   "demotions": [
     {
       "id": "moltyscan",

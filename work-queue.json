@@ -5,7 +5,7 @@
       "title": "Extend api.test.mjs state isolation to inbox.json and deprecations.json",
       "description": "(added ~s1673): wq-762 added backup/restore for human-review.json, but api.test.mjs also POSTs test data to /inbox, /deprecations, /snapshots, /directory, /paste, /kv, and /polls endpoints. Inbox has a post-test filter cleanup but others don't. Extending STATE_FILES_TO_ISOLATE to cover inbox.json and deprecations.json prevents test-data pollution.",
       "priority": 775,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1691,
       "source": "brainstorming",
@@ -13,7 +13,16 @@
         "testing",
         "d071"
       ],
-      "commits": []
+      "commits": [
+        "f345b97b"
+      ],
+      "outcome": {
+        "session": 1711,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added inbox.json and deprecations.json to STATE_FILES_TO_ISOLATE array. Backup/restore in finally block covers crash scenarios."
+      }
     },
     {
       "id": "wq-776",
@@ -35,7 +44,7 @@
       "title": "Add regression test for brainstorm-cleanup hook",
       "description": "(added ~s1706): 44-brainstorm-cleanup.sh had two bugs (## Ideas section not matched, --- separator resetting section state) that went undetected for 40+ sessions. Create a test with a mock BRAINSTORMING.md containing items in both ## Ideas and ## Evolution Ideas sections plus --- separators, verifying the retirement logic handles all edge cases.",
       "priority": 786,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1706,
       "source": "brainstorming",
@@ -43,7 +52,16 @@
         "testing",
         "d071"
       ],
-      "commits": []
+      "commits": [
+        "927e1914"
+      ],
+      "outcome": {
+        "session": 1711,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "8 tests covering both Phase 2 (auto-retire) and Phase 1 (strip) logic. Regression coverage for --- separator and ## Ideas/Evolution Ideas section bugs. All pass."
+      }
     },
     {
       "id": "wq-787",

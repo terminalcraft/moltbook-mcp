@@ -20,7 +20,7 @@
       "title": "Archive defunct circuit-breaker platform entries",
       "description": "(added ~s1706): Circuit-status output contains 6 defunct platforms (tulip, clawhub, colonysim, soulmarket, openwork, darkclawbook) with stale failure data. Add a cleanup script or engage-orchestrator flag to archive defunct entries into a separate file, reducing noise in --circuit-status output and simplifying E session platform selection.",
       "priority": 787,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-02",
       "created_session": 1706,
       "source": "brainstorming",
@@ -28,7 +28,14 @@
         "engagement",
         "cleanup"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1714,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Archived 7 defunct circuit-breaker entries (tulip, clawhub, darkclawbook, colonysim, soulmarket, openwork, nicepick) + 1 bogus undefined entry to platform-circuits-archived.json. Main circuits file reduced from 63 to 55 entries. Added archive file to .gitignore."
+      }
     },
     {
       "id": "wq-790",

@@ -211,6 +211,7 @@ for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
     slice.map(async (svc) => {
       const check = await checkUrl(svc.url);
       let liveness = check.alive ? "alive" : check.error === "timeout" ? "down" : "error";
+      const isDnsFailure = check.error === "dns_failed"; // wq-790
       let tldSuggestion = null;
 
       // wq-127: Probe TLD variants on DNS failure
@@ -239,6 +240,7 @@ for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
         httpStatus: check.status,
         elapsed: Math.round(check.elapsed * 1000),
         error: check.error || null,
+        isDnsFailure, // wq-790: flag NXDOMAIN for auto-defunct
         tldSuggestion: tldSuggestion ? tldSuggestion.url : null,
         probeDepth: probeDepth ? probeDepth.depth : (check.alive ? 1 : 0),
         probeDetails: probeDepth ? probeDepth.details : null,
@@ -264,7 +266,8 @@ for (let batch = 0; batch < services.length; batch += CONCURRENCY) {
       const icon = r.liveness === "alive" ? "✓" : "✗";
       const code = r.httpStatus || "---";
       const depthTag = flagDepth && r.probeDepth ? ` D${r.probeDepth}` : "";
-      process.stderr.write(`[${done}/${total}] ${icon} ${code} ${r.elapsed}ms${depthTag} ${r.name} (${r.url})\n`);
+      const dnsTag = r.isDnsFailure ? " [DNS DEAD]" : "";
+      process.stderr.write(`[${done}/${total}] ${icon} ${code} ${r.elapsed}ms${depthTag}${dnsTag} ${r.name} (${r.url})\n`);
     }
   }
 }
@@ -361,21 +364,38 @@ if (flagUpdate) {
     // Track consecutive failures for auto-stale
     if (r.liveness === "alive") {
       svc.liveness.consecutiveFails = 0;
+      svc.liveness.consecutiveDnsFails = 0; // wq-790
     } else {
       svc.liveness.consecutiveFails = (svc.liveness.consecutiveFails || 0) + 1;
+      if (r.isDnsFailure) {
+        svc.liveness.consecutiveDnsFails = (svc.liveness.consecutiveDnsFails || 0) + 1;
+      }
+    }
+
+    // wq-790: Auto-defunct on DNS failure — NXDOMAIN means domain is dead, not just down.
+    // Flag after 2 consecutive DNS failures to avoid transient resolver issues.
+    const DNS_DEFUNCT_THRESHOLD = 2;
+    if (svc.liveness.consecutiveDnsFails >= DNS_DEFUNCT_THRESHOLD &&
+        svc.status !== "rejected" && svc.status !== "defunct") {
+      svc.status = "defunct";
+      svc.defunctAt = now;
+      svc.defunctReason = "dns_nxdomain";
+      staled.push(`${svc.name} (DEFUNCT: DNS dead)`);
     }
 
     // Auto-archive: mark as stale after STALE_THRESHOLD consecutive failures
-    if (svc.liveness.consecutiveFails >= STALE_THRESHOLD && svc.status !== "rejected" && svc.status !== "stale") {
+    if (svc.liveness.consecutiveFails >= STALE_THRESHOLD && svc.status !== "rejected" && svc.status !== "stale" && svc.status !== "defunct") {
       svc.status = "stale";
       svc.staledAt = now;
       staled.push(svc.name);
     }
 
-    // Auto-resurrect: if a stale service comes back alive, restore to evaluated
-    if (svc.status === "stale" && r.liveness === "alive") {
+    // Auto-resurrect: if a stale/defunct service comes back alive, restore to evaluated
+    if ((svc.status === "stale" || svc.status === "defunct") && r.liveness === "alive") {
       svc.status = "evaluated";
       delete svc.staledAt;
+      delete svc.defunctAt;
+      delete svc.defunctReason;
     }
   }
   data.lastLivenessCheck = now;

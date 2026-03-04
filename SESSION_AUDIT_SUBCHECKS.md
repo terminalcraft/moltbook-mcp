@@ -166,3 +166,32 @@ Pre-hook `32-hook-timing-check_A.sh` runs `node hook-timing-report.mjs --json --
 **Consecutive tracking**: Read `hook_timing.slow_count` from previous `audit-report.json`. If `slow_count` increases for 2+ consecutive audits, escalate to recommendation with specific optimization targets (start with worst offender).
 
 **Known baseline**: `05-smoke-test.sh` at ~10s avg is the prime optimization candidate (identified at wq-827 creation).
+
+## Stale directive tag detection (wq-828)
+
+Pre-hook `33-stale-tag-check_A.sh` cross-references `work-queue.json` tags against `directives.json` completion status and writes `~/.config/moltbook/stale-tags-audit.json`.
+
+**Data source**: Read `stale-tags-audit.json` during audit. Key fields:
+- `stale_count`: number of non-done queue items tagged with completed directives
+- `stale_items[]`: array of `{id, title, status, stale_tags, all_tags}`
+- `completed_directives_count`: total completed directives checked against
+
+**Verdict table**:
+
+| stale_count | Verdict | Action |
+|-------------|---------|--------|
+| 0 | `clean` | none |
+| 1-3 | `stale_tags` | note in report, recommend re-tagging in next B session |
+| 4+ | `stale_tags_accumulated` | create wq item `["audit", "maintenance"]` for batch re-tag |
+
+**Report in `stale_tags`**:
+```json
+{
+  "stale_count": 2,
+  "items": ["wq-825(d071)", "wq-830(d070)"],
+  "verdict": "stale_tags",
+  "action": "recommend re-tag in next B session"
+}
+```
+
+**Purpose**: Replaces the manual re-tagging workflow (e.g., wq-816). When directives close, items still tagged with them are stale — the tag no longer conveys useful grouping. Auditor should recommend re-tagging or tag removal.

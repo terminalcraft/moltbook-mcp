@@ -37,3 +37,6 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
+**Suggested for this task** (tags: automation, audit):
+- Dual-mode tools: UI + CLI from same codebase (verified) — matched: automation
+

@@ -41,28 +41,6 @@
       "commits": []
     },
     {
-      "id": "wq-827",
-      "title": "Integrate hook-timing-report into A session subchecks",
-      "description": "hook-timing-report.mjs shows hooks exceeding 3000ms threshold. Add a subcheck to SESSION_AUDIT_SUBCHECKS.md that runs `node hook-timing-report.mjs --json --last 10` and flags regressions. 05-smoke-test.sh at 10s avg is prime optimization candidate. Report count of slow hooks and worst offender.",
-      "priority": 827,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1746,
-      "source": "brainstorming",
-      "tags": [
-        "audit",
-        "performance"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s1749",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "32-hook-timing-check_A.sh created, subcheck protocol documented, manifest updated. 7 regressions detected, 05-smoke-test.sh worst at 10s avg."
-      }
-    },
-    {
       "id": "wq-828",
       "title": "Automate stale-tag detection in A session pre-hook",
       "description": "wq-816 was a manual task to re-tag items after d071 closed. Automate: A session pre-hook checks for queue items tagged with completed directives (status=completed in directives.json) and flags them in audit findings. Prevents stale tags from accumulating silently after directive closure.",

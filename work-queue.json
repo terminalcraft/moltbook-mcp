@@ -23,7 +23,7 @@
       "title": "Add hook timing wrapper for pre-session performance tracking",
       "description": "(promoted R#302 from brainstorming ~s1701): maintain-audit flagged 02-periodic-checks.sh at 6029ms avg. R#300 parallelized the checks but there's no measurement harness to verify improvement or detect regression. Create a timing wrapper in hooks/lib/ that logs per-hook wall-clock ms to a hook-timing.log, letting A sessions track performance trends and auto-flag regressions above 3000ms threshold.",
       "priority": 791,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-03",
       "created_session": 1711,
       "source": "brainstorming",
@@ -31,7 +31,14 @@
         "hooks",
         "performance"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1720,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created hook-timing-report.mjs that analyzes existing hook tracking data. Reports P50/P95/max per hook, trend detection, and regression flags above configurable threshold. Found 7 hooks exceeding 3000ms."
+      }
     },
     {
       "id": "wq-794",

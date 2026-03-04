@@ -71,7 +71,7 @@
       "title": "Extend duplicate-key linting to all critical JSON state files",
       "description": "validate-human-review.mjs's duplicate-key parser could be generalized into a shared utility that checks all hand-edited JSON files (directives.json, work-queue.json, account-registry.json) during pre-session. JSON.parse silently takes the last duplicate key value, making these bugs invisible. Create validate-json-keys.mjs that wraps the parser and runs against all state files.",
       "priority": 805,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1726,
       "source": "brainstorming-promotion",
@@ -79,7 +79,14 @@
         "tooling",
         "reliability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1729,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created validate-json-keys.mjs checking 6 critical state files for duplicate keys. Integrated into pre-session hook (11-json-key-lint.sh). Tested with known-bad input — correctly detects and reports duplicates with line numbers."
+      }
     },
     {
       "id": "wq-806",

@@ -49,8 +49,8 @@ const sessionNum = (sessionIdx !== -1 && args[sessionIdx + 1])
 
 // --- Helpers ---
 
-async function checkUrl(url) {
-  const result = await safeFetch(url, {
+async function checkUrl(url, fetchFn = safeFetch) {
+  const result = await fetchFn(url, {
     timeout: FETCH_TIMEOUT,
     bodyMode: "none",
     userAgent: "moltbook-liveness/1.0",
@@ -184,7 +184,12 @@ async function probeTldVariants(url) {
   return null;
 }
 
-// --- Main ---
+// --- Exports for testing (wq-809) ---
+export { checkUrl, computeProbeDepth, probeTldVariants, FETCH_TIMEOUT, TLD_VARIANTS };
+
+// --- Main (only when run as CLI) ---
+const _isCLI = process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+if (_isCLI) {
 
 const data = JSON.parse(readFileSync(SERVICES_PATH, "utf8"));
 const services = flagAll
@@ -405,3 +410,5 @@ if (flagUpdate) {
     if (staled.length > 0) console.log(`Auto-staled ${staled.length} services: ${staled.join(", ")}`);
   }
 }
+
+} // end if (_isCLI)

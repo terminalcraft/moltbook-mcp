@@ -119,14 +119,23 @@
       "title": "Build credential-health-check module for E prehook (d072)",
       "description": "Create a credential-health-check.mjs module that validates platform credentials before E session engagement. For each platform selected by the picker, verify the credential file exists, is valid JSON, and contains required fields (api_key, jwt, etc per platform type). For JWT-based platforms, check expiry timestamp. Return pass/fail per platform so the E prehook can skip or warn about unhealthy credentials instead of failing mid-session. First target: Colony JWT expiry check (already identified in wq-811).",
       "priority": 814,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1734,
       "source": "d072-decomposition",
       "tags": [
         "d072"
       ],
-      "commits": []
+      "commits": [
+        "4fe9597f"
+      ],
+      "outcome": {
+        "session": 1734,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "credential-health-check.mjs module with 14 tests. Validates file existence, placeholders, empty fields, JWT expiry for bearer tokens and JSON token fields. CLI and import interface. Pre-commit whitelist updated."
+      }
     }
   ]
 }

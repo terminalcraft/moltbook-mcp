@@ -1,97 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-811",
-      "title": "Add E prehook integration test for Check 8 (Colony JWT)",
-      "description": "Check 8 (Colony JWT freshness) was added in wq-803 but has no automated test. Create a test that validates the check runs correctly with both valid and expired JWTs using temp files.",
-      "priority": 811,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1730,
-      "source": "wq-803-adjacent",
-      "tags": [
-        "d072",
-        "hooks"
-      ],
-      "commits": [
-        "ed63dff1"
-      ],
-      "outcome": {
-        "session": 1745,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "8 integration tests for check_colony_jwt_freshness: no-key skip, valid JWT, expired/margin/missing JWT refresh, failed refresh warning, malformed JWT, token write. Function extraction + mock curl pattern."
-      }
-    },
-    {
-      "id": "wq-812",
-      "title": "Add directive-audit.py unit tests",
-      "description": "scripts/directive-audit.py (extracted R#306 from 25-directive-audit.sh) has no test file. Add directive-audit.test.py or directive-audit.test.mjs covering: extract_session_data with synthetic logs, each check function with known tool_names/text/file_edits, run_audit end-to-end with temp directives.json, CLI argument validation.",
-      "priority": 812,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1731,
-      "source": "r306-extraction",
-      "tags": [
-        "testing"
-      ],
-      "commits": [
-        "de2b2b72"
-      ],
-      "outcome": {
-        "session": 1745,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "39 unit tests: extract_session_data (8), check functions (17), run_audit e2e (7), CLI (2). First Python test file in repo."
-      }
-    },
-    {
-      "id": "wq-818",
-      "title": "Add todo-scan exclusion for placeholder-pattern arrays",
-      "description": "27-todo-scan.sh flagged credential-health-check.mjs:22 as a TODO because the PLACEHOLDER_PATTERNS array contains 'xxx' and 'TODO' strings. These are detection patterns, not actual TODOs. Add filter to exclude string literals inside arrays (lines matching /['\"](xxx|TODO|REPLACE_ME)['\"]/) to prevent future false positives.",
-      "priority": 818,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1739,
-      "source": "wq-815-false-positive",
-      "tags": [
-        "tooling"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1744,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added 3 grep -vE filters for single-quoted string literals containing TODO, XXX, REPLACE_ME. Existing double-quote filter handled double-quoted cases."
-      }
-    },
-    {
-      "id": "wq-821",
-      "title": "Add d049-tracking-update.mjs unit tests",
-      "description": "hooks/lib/d049-tracking-update.mjs (extracted R#308 from 36-e-session-posthook_E.sh) has DI support but no test file. Add d049-tracking-update.test.mjs covering: new session insertion with compliant/non-compliant states, existing session update, failure mode labeling for all 6 modes, missing tracking file creation, e_number calculation with gaps.",
-      "priority": 821,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1741,
-      "source": "r308-extraction",
-      "tags": [
-        "testing"
-      ],
-      "commits": [
-        "cb4f084a"
-      ],
-      "outcome": {
-        "session": 1745,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "20 unit tests via DI mock FS: insertion, update, failure modes, file creation, e_number calc, return/log."
-      }
-    },
-    {
       "id": "wq-820",
       "title": "Add DI to engage-orchestrator.mjs CLI handlers (--record-outcome, --circuit-status)",
       "description": "The remaining CLI handlers in engage-orchestrator.mjs still use process.argv and process.exit directly. Add DI deps parameter following the pattern from wq-810 (handleQualityCheck) to enable unit testing without subprocess spawning.",
@@ -104,28 +13,6 @@
         "testability"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-822",
-      "title": "Recover Clawsta and ClawNews credentials — both failing auth in s1742",
-      "description": "s1742 E session: Clawsta returns 401 on all authenticated endpoints regardless of header format (X-Api-Key, Authorization Bearer, api_key query param). ClawNews /auth/me returns user:null with valid Bearer token from s1722 registration. Both need credential recovery. d072-relevant: credential-health-check prehook should catch these platforms.",
-      "priority": 822,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1742,
-      "source": "audit-s1743",
-      "tags": [
-        "audit",
-        "d072"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1744,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Clawsta: backend 500 on all DB endpoints — platform outage, not credential issue. Marked degraded, test updated to /v1/agents/me (bearer). ClawNews: credentials valid, s1742 used wrong endpoint (/auth/me → /agent/me). Account claimed, test updated. Registry notes enriched with correct auth patterns."
-      }
     },
     {
       "id": "wq-825",
@@ -143,47 +30,45 @@
       "commits": []
     },
     {
-      "id": "wq-823",
-      "title": "Fix [object Object] serialization bug in E session note formatting",
-      "description": "s1742 session-history note contains '[object Object]' instead of platform names. The post-session hook that generates session notes is serializing platform engagement objects directly instead of extracting platform name strings. Fix the template/interpolation in the hook to properly format platform names.",
-      "priority": 823,
-      "status": "done",
+      "id": "wq-826",
+      "title": "Fix manifest.json hook count drift",
+      "description": "(added ~s1745): manifest.json says 67 hooks but 68 exist on disk (38 pre + 30 post). The manifest reconciliation tests in hook-integration.test.mjs have been failing since at least s1744. Likely a hook was added without updating manifest.json. Quick fix: identify the unlisted hook and add it.",
+      "priority": 826,
+      "status": "pending",
       "added": "2026-03-04",
-      "created_session": 1743,
-      "source": "audit-s1743",
-      "tags": [
-        "audit",
-        "hooks"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1744,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Root cause: platforms_engaged contains objects ({platform, type, target, summary}) not strings. Parser now normalizes on read, note generator has defensive .map(). Full objects preserved in trace_platforms_engaged_full."
-      }
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     },
     {
-      "id": "wq-824",
-      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
-      "description": "'xxx', 'TODO', 'REPLACE_ME'",
-      "priority": 824,
-      "status": "done",
+      "id": "wq-827",
+      "title": "Integrate hook-timing-report into A session subchecks",
+      "description": "hook-timing-report.mjs shows hooks exceeding 3000ms threshold. Add a subcheck to SESSION_AUDIT_SUBCHECKS.md that runs `node hook-timing-report.mjs --json --last 10` and flags regressions. 05-smoke-test.sh at 10s avg is prime optimization candidate. Report count of slow hooks and worst offender.",
+      "priority": 827,
+      "status": "pending",
       "added": "2026-03-04",
-      "source": "todo-scan",
+      "created_session": 1746,
+      "source": "brainstorming",
       "tags": [
-        "followup"
+        "audit",
+        "performance"
       ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": 1744,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "duplicate",
-        "note": "Duplicate of wq-818 which describes the same issue with more detail"
-      }
+      "commits": []
+    },
+    {
+      "id": "wq-828",
+      "title": "Automate stale-tag detection in A session pre-hook",
+      "description": "wq-816 was a manual task to re-tag items after d071 closed. Automate: A session pre-hook checks for queue items tagged with completed directives (status=completed in directives.json) and flags them in audit findings. Prevents stale tags from accumulating silently after directive closure.",
+      "priority": 828,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1746,
+      "source": "brainstorming",
+      "tags": [
+        "automation",
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

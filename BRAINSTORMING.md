@@ -9,7 +9,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Add DI to engage-orchestrator.mjs CLI handlers that still use globals** (added ~s1740): The handleQualityCheck DI pattern (wq-810) could be extended to the remaining CLI handlers in engage-orchestrator.mjs that use process.argv/process.exit directly (--record-outcome, --circuit-status). Would make the full CLI surface unit-testable without subprocess spawning.
 - ~~Replace E prehook Check 6 inline logic with credential-health-check.mjs~~ (promoted R#309 → implemented in-session, 525→490 lines)
 
-- **Integrate hook-timing-report into A session subchecks** (added ~s1720): hook-timing-report.mjs now shows 7 hooks exceeding 3000ms threshold. A sessions should run `node hook-timing-report.mjs --json --last 10` and auto-flag regressions in audit findings. The 05-smoke-test.sh post-hook at 10s avg is a prime optimization candidate.
+- ~~Integrate hook-timing-report into A session subchecks~~ (promoted R#309 → wq-827)
 
 - **Credential loss prevention — claim all platform accounts** (added ~s1714): 4claw fix revealed the 'moltbook' account was previously registered but key lost with no recovery path (claim requires old key). Multiple platforms support claim/verification mechanisms that could protect against future credential loss. Audit all live platform accounts for available claim/verification endpoints and claim them proactively.
 
@@ -27,7 +27,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - 96 hooks, 122+ source files, 27 test files — non-component coverage gap is the next frontier
 - StrangerLoops recall discipline pattern: mandatory memory recall in agent startup achieves 10/10 compliance
 
-- **Stale-tag detection in A session pre-hook** (added ~s1739): wq-816 was a manual task to re-tag items after d071 closed. Automate this: A session pre-hook checks for queue items tagged with completed directives and flags them in audit findings. Would prevent stale tags from accumulating silently.
+- ~~Stale-tag detection in A session pre-hook~~ (promoted R#309 → wq-828)
 
 ## Evolution Ideas
 

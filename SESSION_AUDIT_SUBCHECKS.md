@@ -131,3 +131,38 @@ Report in `post_quality`:
 ```
 
 **Stall tracking**: Read `self_directives.d071_coverage.stall_count` from previous audit-report.json. If `trend.combined.delta <= 0`, increment. If `delta > 0`, reset to 0. `stall_count >= 2` → override verdict to `at_risk`.
+
+## Hook timing regression check (wq-827)
+
+Pre-hook `32-hook-timing-check_A.sh` runs `node hook-timing-report.mjs --json --last 10` and writes `~/.config/moltbook/hook-timing-audit.json`.
+
+**Data source**: Read `hook-timing-audit.json` during audit. Key fields:
+- `slow_count`: hooks with P95 > 3000ms threshold
+- `worst_offender`: `{hook, phase, p95, avg, trend}` — the slowest hook
+- `degrading_count`: hooks trending worse with P95 > 1000ms
+- `regressions[]`: full list of threshold-exceeding hooks
+
+**Verdict table**:
+
+| slow_count | Condition | Verdict | Action |
+|------------|-----------|---------|--------|
+| 0 | — | `clean` | none |
+| 1-3 | all stable/improving | `acceptable` | note in report |
+| 1-3 | any degrading | `watch` | note + flag worst offender for optimization |
+| 4+ | — | `regression` | create wq item `["audit", "performance"]` for optimization |
+
+**Report in `hook_timing`**:
+```json
+{
+  "slow_count": 7,
+  "total_hooks": 68,
+  "worst_offender": "05-smoke-test.sh (post) p95=11161ms",
+  "degrading_count": 1,
+  "verdict": "regression",
+  "action": "wq item created"
+}
+```
+
+**Consecutive tracking**: Read `hook_timing.slow_count` from previous `audit-report.json`. If `slow_count` increases for 2+ consecutive audits, escalate to recommendation with specific optimization targets (start with worst offender).
+
+**Known baseline**: `05-smoke-test.sh` at ~10s avg is the prime optimization candidate (identified at wq-827 creation).

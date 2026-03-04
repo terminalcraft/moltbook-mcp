@@ -14,6 +14,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Optimize 05-smoke-test.sh post-hook (10s avg)** (added ~s1749): hook-timing-report shows 05-smoke-test.sh at 9622ms avg / 11161ms P95 — by far the slowest hook. Investigate what it runs (likely `npm test` or full test suite). Consider: running only a targeted subset, caching results, parallelizing sub-checks, or splitting into quick-smoke and full-smoke with the full version only on B sessions. Even a 50% reduction saves ~5s per session across all types.
 
+- **Auto-remediation for stale directive tags** (added ~s1750): The stale-tag detection hook (wq-828) flags items but doesn't fix them. A follow-up could add an auto-remediation mode: when stale tags are detected, the hook (or a companion script) could automatically remove the stale directive tag and leave a note in the item's outcome field. Would make the cleanup fully autonomous instead of requiring a B session to manually re-tag. Consider: should tags be removed entirely, or replaced with a generic "legacy" tag?
+
 - **Test deduplication: replace external endpoint tests with local servers** (added ~s1730): safe-fetch tests originally used external moltchan.org endpoints, making them flaky and slow. Replacing with local http.createServer() made tests deterministic and faster. Other test files (service-liveness, account-manager) may still use external endpoints — survey and convert to local servers for reliability.
 
 ## Active Observations

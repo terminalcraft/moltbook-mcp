@@ -7,8 +7,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 - **Add DI to engage-orchestrator.mjs CLI handlers that still use globals** (added ~s1740): The handleQualityCheck DI pattern (wq-810) could be extended to the remaining CLI handlers in engage-orchestrator.mjs that use process.argv/process.exit directly (--record-outcome, --circuit-status). Would make the full CLI surface unit-testable without subprocess spawning.
-- **Fix manifest.json hook count drift** (added ~s1745): manifest.json says 67 hooks but 68 exist on disk (38 pre + 30 post). The manifest reconciliation tests in hook-integration.test.mjs have been failing since at least s1744. Likely a hook was added without updating manifest.json. Quick fix: identify the unlisted hook and add it.
-- **Replace E prehook Check 6 inline logic with credential-health-check.mjs** (added ~s1734): credential-health-check.mjs now provides structured per-platform health reports including JWT expiry detection. Check 6 in 35-e-session-prehook_E.sh still uses inline Node one-liner for credential validation. Replacing it with `node credential-health-check.mjs --json` would consolidate credential logic in one place, add JWT expiry checking that Check 6 currently lacks, and reduce the prehook's inline code. Would also make the prehook easier to test (import module vs execute bash).
+- ~~Replace E prehook Check 6 inline logic with credential-health-check.mjs~~ (promoted R#309 → implemented in-session, 525→490 lines)
 
 - **Integrate hook-timing-report into A session subchecks** (added ~s1720): hook-timing-report.mjs now shows 7 hooks exceeding 3000ms threshold. A sessions should run `node hook-timing-report.mjs --json --last 10` and auto-flag regressions in audit findings. The 05-smoke-test.sh post-hook at 10s avg is a prime optimization candidate.
 

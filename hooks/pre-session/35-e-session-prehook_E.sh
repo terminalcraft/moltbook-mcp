@@ -284,78 +284,43 @@ check_spending_policy() {
 
 ###############################################################################
 # Check 6: Credential pre-check for live platforms (wq-792)
-#   Validates credential files exist with non-placeholder values for all live
-#   platforms. Injects results into e-session-context.md so the E session
-#   agent knows which platforms have working credentials before picking.
+#   Uses credential-health-check.mjs for validation (consolidated R#309).
+#   Previously contained 50-line inline Node script duplicating the module.
+#   Now delegates to the module which also provides JWT expiry detection.
 #   Accepts optional $1 as output file for context additions (parallel mode).
 ###############################################################################
 check_credential_status() {
   local ctx_out="${1:-$CONTEXT_FILE}"
-  REGISTRY_FILE="account-registry.json"
-  if [ ! -f "$REGISTRY_FILE" ]; then
+  if [ ! -f "account-registry.json" ]; then
     echo "[cred-check] No account-registry.json found, skipping"
     return 0
   fi
 
-  # Use node for reliable JSON parsing of registry + credential files
-  cred_report=$(node -e "
-    const fs = require('fs');
-    const path = require('path');
-    const home = process.env.HOME || '/home/moltbot';
-    const reg = JSON.parse(fs.readFileSync('$REGISTRY_FILE', 'utf8'));
-    const live = reg.accounts.filter(a => a.status === 'live' || a.status === 'active');
-    const warnings = [];
-    const ok = [];
-    for (const a of live) {
-      if (!a.cred_file) {
-        // No cred file needed (MCP-native or no-auth)
-        ok.push(a.id + ': no-cred-needed');
-        continue;
-      }
-      const credPath = a.cred_file.replace('~', home);
-      if (!fs.existsSync(credPath)) {
-        warnings.push(a.id + ': MISSING credential file (' + a.cred_file + ')');
-        continue;
-      }
-      try {
-        const content = fs.readFileSync(credPath, 'utf8').trim();
-        // Check for placeholder values
-        if (content.includes('test-api-key') || content.includes('YOUR_API_KEY') || content.includes('placeholder')) {
-          warnings.push(a.id + ': PLACEHOLDER credential (not real key)');
-          continue;
-        }
-        // Check the specific key field has a value
-        if (a.cred_key) {
-          const json = JSON.parse(content);
-          const val = json[a.cred_key];
-          if (!val || val === '' || val === 'test-api-key') {
-            warnings.push(a.id + ': EMPTY or placeholder ' + a.cred_key);
-            continue;
-          }
-        }
-        ok.push(a.id + ': ok');
-      } catch (e) {
-        warnings.push(a.id + ': PARSE ERROR (' + e.message.slice(0, 50) + ')');
-      }
-    }
-    if (warnings.length > 0) {
-      console.log('WARN:' + warnings.join('|'));
-    }
-    console.log('OK:' + ok.length + '/' + (ok.length + warnings.length) + ' live platforms have valid credentials');
-  " 2>&1)
+  cred_json=$(timeout 5 node credential-health-check.mjs --json 2>&1)
+  cred_exit=$?
 
-  echo "[cred-check] $cred_report"
+  if [ $cred_exit -eq 124 ]; then
+    echo "[cred-check] Timed out (5s), skipping"
+    return 0
+  fi
 
-  # Extract warnings and append to context output file
-  warn_line=$(echo "$cred_report" | grep '^WARN:' | sed 's/^WARN://')
-  if [ -n "$warn_line" ]; then
+  if [ $cred_exit -ne 0 ] || [ -z "$cred_json" ]; then
+    echo "[cred-check] Failed (exit $cred_exit), skipping"
+    return 0
+  fi
+
+  healthy=$(echo "$cred_json" | jq -r '.healthy // 0')
+  total=$(echo "$cred_json" | jq -r '.total // 0')
+  unhealthy=$(echo "$cred_json" | jq -r '.unhealthy // 0')
+
+  echo "[cred-check] OK: $healthy/$total live platforms have valid credentials"
+
+  if [ "$unhealthy" -gt 0 ]; then
     {
       echo ""
       echo "## Credential warnings (auto-check)"
       echo "The following live platforms have credential issues. SKIP them when picking engagement targets:"
-      echo "$warn_line" | tr '|' '\n' | while IFS= read -r w; do
-        echo "- **$w**"
-      done
+      echo "$cred_json" | jq -r '.warnings[]? | "- **\(.id)**: \(.status) — \(.details)"'
       echo ""
     } >> "$ctx_out"
     echo "[cred-check] Appended credential warnings to $(basename "$ctx_out")"

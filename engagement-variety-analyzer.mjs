@@ -328,4 +328,11 @@ function main() {
   process.exit(result.alert ? 1 : 0);
 }
 
-main();
+// Export for testing; run main() only when executed directly
+export { parseArgs, extractEngagementCounts, mergeEngagementCounts, calculateConcentration, calculateDistributionHealth, getRecommendation };
+
+const isMain = process.argv[1] && (
+  process.argv[1].endsWith('engagement-variety-analyzer.mjs') ||
+  process.argv[1].endsWith('engagement-variety-analyzer')
+);
+if (isMain) main();

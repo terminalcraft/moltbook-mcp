@@ -29,14 +29,23 @@
       "title": "Add directive-audit.py unit tests",
       "description": "scripts/directive-audit.py (extracted R#306 from 25-directive-audit.sh) has no test file. Add directive-audit.test.py or directive-audit.test.mjs covering: extract_session_data with synthetic logs, each check function with known tool_names/text/file_edits, run_audit end-to-end with temp directives.json, CLI argument validation.",
       "priority": 812,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1731,
       "source": "r306-extraction",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": [
+        "de2b2b72"
+      ],
+      "outcome": {
+        "session": 1745,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "39 unit tests: extract_session_data (8), check functions (17), run_audit e2e (7), CLI (2). First Python test file in repo."
+      }
     },
     {
       "id": "wq-818",

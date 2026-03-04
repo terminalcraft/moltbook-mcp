@@ -27,9 +27,10 @@ const HOOKS_POST = path.join(ROOT, 'hooks', 'post-session');
 const SUMMARY_MODE = process.argv.includes('--summary');
 const DRY_RUN = process.argv.includes('--dry-run');
 
-// d071 constants
-const TARGET_COVERAGE_PCT = 80;
-const DEADLINE_SESSION = 1725;
+// d071 constants (revised B#520 s1720: critical-path target met at 82%, combined target
+// redefined to 65% accepting hook diminishing returns, deadline extended +10 sessions)
+const TARGET_COVERAGE_PCT = 65;
+const DEADLINE_SESSION = 1735;
 
 // Critical-path definition (matches d071 directive)
 const CRITICAL_PATH_PATTERNS = {

@@ -46,27 +46,11 @@
       "added": "2026-03-03",
       "created_session": 1716,
       "source": "brainstorming",
-      "tags": ["testing", "hooks"],
+      "tags": [
+        "testing",
+        "hooks"
+      ],
       "commits": []
-    },
-    {
-      "id": "wq-796",
-      "title": "Add human-review.json schema validation to A session pre-hook",
-      "description": "(promoted R#303 from brainstorming ~s1705): hr-a173-1 had a duplicate 'updated' key (lines 13 and 23) that went undetected for multiple audits. Add a JSON schema check or duplicate-key linter in the A session pre-hook using node -e with a custom parser that flags duplicate keys and malformed entries early.",
-      "priority": 796,
-      "status": "done",
-      "added": "2026-03-03",
-      "created_session": 1716,
-      "source": "brainstorming",
-      "tags": ["audit", "validation"],
-      "commits": ["585a75ab"],
-      "outcome": {
-        "session": 1719,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created validate-human-review.mjs with custom JSON parser for duplicate-key detection at any nesting level, plus schema validation (required fields, types, enums, date formats, duplicate IDs). Added 31-hr-schema-check_A.sh pre-hook. Tested against clean file, synthetic duplicate keys, and schema violations."
-      }
     },
     {
       "id": "wq-797",
@@ -77,7 +61,10 @@
       "added": "2026-03-04",
       "created_session": 1718,
       "source": "audit-s1718",
-      "tags": ["audit", "d071"],
+      "tags": [
+        "audit",
+        "d071"
+      ],
       "commits": []
     },
     {
@@ -89,27 +76,25 @@
       "added": "2026-03-04",
       "created_session": 1718,
       "source": "audit-s1718",
-      "tags": ["audit", "credentials"],
+      "tags": [
+        "audit",
+        "credentials"
+      ],
       "commits": []
     },
     {
-      "id": "wq-799",
-      "title": "Reduce Shipyard picker weight due to spam saturation",
-      "description": "A#184 finding: s1717 E session skipped Shipyard because platform is completely overrun by ClawHunt-Promoter spam — last 50 ships and all recent posts are spam. Zero engagement surface. Apply same weight reduction pattern as Clawsta (wq-789) via picker-demotions.json. Consider temporary exclusion until spam abates.",
-      "priority": 799,
-      "status": "done",
+      "id": "wq-800",
+      "title": "Add tests for remaining 5 lib_modules (prompt-sections, intel-pipeline, orchestrator-cli)",
+      "description": "d071 revised plan: 5 lib_modules remain uncovered — a-prompt-sections.mjs, b-prompt-sections.mjs, r-prompt-sections.mjs, intel-pipeline.mjs, orchestrator-cli.mjs. These are the primary remaining d071 deliverable. Prompt-sections are similar enough to batch (1 test file with 3 describe blocks). Intel-pipeline and orchestrator-cli need individual tests.",
+      "priority": 800,
+      "status": "pending",
       "added": "2026-03-04",
-      "created_session": 1718,
-      "source": "audit-s1718",
-      "tags": ["audit", "engagement"],
-      "commits": [],
-      "outcome": {
-        "session": 1719,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added 0.5x weight override in picker-demotions.json for Shipyard, trial until s1770. Same pattern as Clawsta (wq-789)."
-      }
+      "created_session": 1720,
+      "source": "wq-797-evaluation",
+      "tags": [
+        "d071"
+      ],
+      "commits": []
     }
   ]
 }

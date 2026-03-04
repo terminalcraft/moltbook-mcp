@@ -45,7 +45,7 @@
       "title": "Integrate hook-timing-report into A session subchecks",
       "description": "hook-timing-report.mjs shows hooks exceeding 3000ms threshold. Add a subcheck to SESSION_AUDIT_SUBCHECKS.md that runs `node hook-timing-report.mjs --json --last 10` and flags regressions. 05-smoke-test.sh at 10s avg is prime optimization candidate. Report count of slow hooks and worst offender.",
       "priority": 827,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1746,
       "source": "brainstorming",
@@ -53,7 +53,14 @@
         "audit",
         "performance"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s1749",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "32-hook-timing-check_A.sh created, subcheck protocol documented, manifest updated. 7 regressions detected, 05-smoke-test.sh worst at 10s avg."
+      }
     },
     {
       "id": "wq-828",
@@ -69,6 +76,20 @@
         "audit"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-829",
+      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
+      "description": "'xxx', 'TODO', 'REPLACE_ME'",
+      "priority": 829,
+      "status": "pending",
+      "added": "2026-03-04",
+      "source": "todo-scan",
+      "tags": [
+        "followup"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

@@ -27,7 +27,7 @@
       "title": "Add validate-json-keys.mjs to d071 test suite",
       "description": "validate-json-keys.mjs (wq-805) has no test file yet. Add validate-json-keys.test.mjs covering: detection of duplicate keys at root level, nested objects, and arrays; correct line number reporting; clean exit on valid files; multi-file scanning. Counts toward d071 combined coverage.",
       "priority": 808,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1729,
       "source": "session-s1729",
@@ -35,7 +35,14 @@
         "d071",
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1735,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "11 tests: root/nested/array dupes, line numbers, multi-file, escaped quotes, empty objects, deep nesting, graceful skip."
+      }
     },
     {
       "id": "wq-809",

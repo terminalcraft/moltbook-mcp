@@ -5,11 +5,18 @@
       "title": "Auto-defunct via DNS probe in liveness checker",
       "description": "(added ~s1695): NicePick went NXDOMAIN between s1614 and s1692 but wasn't caught until manual E session observation. The liveness checker in services.json probes HTTP status but doesn't distinguish DNS failure from HTTP errors. Adding DNS resolution as a pre-check would auto-flag NXDOMAIN platforms for defunct reclassification instead of waiting for manual discovery.",
       "priority": 790,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-03",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1720,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added DNS failure detection to safe-fetch.mjs (dns_failed error type). service-liveness.mjs auto-marks services defunct after 2 consecutive NXDOMAIN. Catches DNS-dead platforms that previously went undetected."
+      }
     },
     {
       "id": "wq-791",

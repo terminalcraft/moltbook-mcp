@@ -159,52 +159,9 @@ CHECKPOINT_JS
 check_d049_enforcement() {
   echo "$(date -Iseconds) d049-enforcement: s=$SESSION intel_count=$INTEL_COUNT compliant=$D049_COMPLIANT failure_mode=$FAILURE_MODE" >> "$LOG_DIR/d049-enforcement.log"
 
-  # Update e-phase35-tracking.json
-  node -e "
-const fs = require('fs');
-const trackingFile = '$TRACKING_FILE';
-const session = parseInt('$SESSION');
-const intelCount = parseInt('$INTEL_COUNT');
-const compliant = intelCount > 0;
-const failureMode = '$FAILURE_MODE';
-
-let tracking;
-try { tracking = JSON.parse(fs.readFileSync(trackingFile, 'utf8')); } catch { tracking = { sessions: [] }; }
-
-const sessions = tracking.sessions || [];
-const existing = sessions.find(s => s.session === session);
-if (existing) {
-  existing.d049_compliant = compliant;
-  existing.intel_count = intelCount;
-  existing.enforcement = 'post-hook';
-  if (failureMode !== 'none') existing.failure_mode = failureMode;
-} else {
-  let eNum = sessions.filter(s => (s.session || 0) < session).length + 1;
-  for (const s of sessions) { if ((s.e_number || 0) >= eNum) eNum = s.e_number + 1; }
-  const entry = {
-    session, e_number: eNum, d049_compliant: compliant,
-    intel_count: intelCount, enforcement: 'post-hook',
-    notes: 'Post-hook enforcement: ' + intelCount + ' intel entries captured'
-  };
-  if (failureMode !== 'none') {
-    entry.failure_mode = failureMode;
-    const labels = {
-      rate_limit: 'Rate-limited — session could not start',
-      truncated_early: 'Truncated before Phase 2',
-      platform_unavailable: 'All picker platforms returned errors',
-      trace_without_intel: 'Trace written (Phase 3a) but session ended before intel capture (Phase 3b)',
-      agent_skip: 'Agent reached Phase 2 but did not capture intel (no trace either)',
-      unknown: 'Failure mode could not be determined'
-    };
-    entry.notes = 'd049 violation (' + failureMode + '): ' + (labels[failureMode] || failureMode);
-  }
-  sessions.push(entry);
-}
-
-tracking.sessions = sessions;
-fs.writeFileSync(trackingFile, JSON.stringify(tracking, null, 2) + '\n');
-console.log('d049-enforcement: updated tracking for s' + session + ' (compliant=' + compliant + ', count=' + intelCount + ', failure_mode=' + failureMode + ')');
-" 2>/dev/null || echo "d049-enforcement: failed to update tracking"
+  # Update e-phase35-tracking.json (extracted to d049-tracking-update.mjs, R#308)
+  TRACKING_UPDATE_SCRIPT="$(dirname "$(realpath "$0")")/../lib/d049-tracking-update.mjs"
+  node "$TRACKING_UPDATE_SCRIPT" 2>/dev/null || echo "d049-enforcement: failed to update tracking"
 
   # Write or clear nudge
   if [[ "$D049_COMPLIANT" == "false" ]]; then

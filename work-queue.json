@@ -5,7 +5,7 @@
       "title": "Add E prehook integration test for Check 8 (Colony JWT)",
       "description": "Check 8 (Colony JWT freshness) was added in wq-803 but has no automated test. Create a test that validates the check runs correctly with both valid and expired JWTs using temp files.",
       "priority": 811,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1730,
       "source": "wq-803-adjacent",
@@ -13,7 +13,16 @@
         "d072",
         "hooks"
       ],
-      "commits": []
+      "commits": [
+        "ed63dff1"
+      ],
+      "outcome": {
+        "session": 1745,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "8 integration tests for check_colony_jwt_freshness: no-key skip, valid JWT, expired/margin/missing JWT refresh, failed refresh warning, malformed JWT, token write. Function extraction + mock curl pattern."
+      }
     },
     {
       "id": "wq-812",

@@ -1,39 +1,25 @@
 {
   "queue": [
     {
-      "id": "wq-809",
-      "title": "Convert service-liveness tests to use local servers",
-      "description": "service-liveness tests may use external endpoints making them flaky. Convert to local http.createServer() pattern like safe-fetch.test.mjs for deterministic results.",
-      "priority": 809,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1730,
-      "source": "b-session-pipeline",
-      "tags": [
-        "testing"
-      ],
-      "commits": ["50bfd5bf"],
-      "outcome": {
-        "session": 1739,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created service-liveness.test.mjs with 14 tests using local http.createServer(). Refactored service-liveness.mjs: added fetchFn DI to checkUrl, exported helpers, guarded main with import.meta.url check. computeProbeDepth DI deferred — noted in test."
-      }
-    },
-    {
       "id": "wq-810",
       "title": "Add DI to handleQualityCheck for unit testability",
       "description": "handleQualityCheck uses execSync and process.exit directly, making it impossible to unit test. Add a deps parameter for execSync and process.exit (or return exit code instead).",
       "priority": 810,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1730,
       "source": "wq-804-adjacent",
       "tags": [
         "testability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1740,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added deps param with execSync/exit DI, return codes. 6 unit tests (pass/fail/missing-text/cwd/argv-position). Baseline 18→23 tests."
+      }
     },
     {
       "id": "wq-811",
@@ -65,61 +51,25 @@
       "commits": []
     },
     {
-      "id": "wq-815",
-      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
-      "description": "'xxx', 'TODO', 'REPLACE_ME'",
-      "priority": 815,
-      "status": "done",
-      "added": "2026-03-04",
-      "source": "todo-scan",
-      "tags": [
-        "followup"
-      ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": 1739,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "non-actionable",
-        "note": "False positive — 'xxx', 'TODO', 'REPLACE_ME' are placeholder detection patterns in credential-health-check.mjs:22, not actual TODOs in code."
-      }
-    },
-    {
-      "id": "wq-816",
-      "title": "Re-tag or retire d071-tagged queue items",
-      "description": "d071 closed s1734. Queue items wq-809, wq-810, wq-811, wq-812 still tagged d071. Next R session should evaluate each: keep as general testing/maintenance, re-tag to d072 if credential-related, or retire if no longer worth doing. Prevents stale tags accumulating.",
-      "priority": 816,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1738,
-      "source": "audit-s1738",
-      "tags": [
-        "audit",
-        "maintenance"
-      ],
-      "commits": ["79dbfdbb"],
-      "outcome": {
-        "session": 1739,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Re-tagged 4 items: wq-809/810/812 kept as general testing (d071 tag removed), wq-811 re-tagged d071→d072 (credential-related). Zero retirements — all items still valuable."
-      }
-    },
-    {
       "id": "wq-817",
       "title": "Add DI fetchFn parameter to computeProbeDepth and probeTldVariants",
       "description": "service-liveness.mjs checkUrl now accepts fetchFn for testability (wq-809), but computeProbeDepth and probeTldVariants still hardcode safeFetch. Add the same DI pattern so all three can be tested with local servers. Would enable full probe-depth test coverage.",
       "priority": 817,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1739,
       "source": "wq-809-adjacent",
       "tags": [
         "testability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1740,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added fetchFn DI param to computeProbeDepth and probeTldVariants. 3 placeholder tests replaced with 13 real tests covering L1-L4 depth, TLD probing, error handling."
+      }
     },
     {
       "id": "wq-818",
@@ -132,6 +82,34 @@
       "source": "wq-815-false-positive",
       "tags": [
         "tooling"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-819",
+      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
+      "description": "'xxx', 'TODO', 'REPLACE_ME'",
+      "priority": 819,
+      "status": "pending",
+      "added": "2026-03-04",
+      "source": "todo-scan",
+      "tags": [
+        "followup"
+      ],
+      "commits": [],
+      "complexity": "S"
+    },
+    {
+      "id": "wq-819",
+      "title": "Add DI to engage-orchestrator.mjs CLI handlers (--record-outcome, --circuit-status)",
+      "description": "The remaining CLI handlers in engage-orchestrator.mjs still use process.argv and process.exit directly. Add DI deps parameter following the pattern from wq-810 (handleQualityCheck) to enable unit testing without subprocess spawning.",
+      "priority": 819,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1740,
+      "source": "wq-810-adjacent",
+      "tags": [
+        "testability"
       ],
       "commits": []
     }

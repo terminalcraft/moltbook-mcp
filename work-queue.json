@@ -116,6 +116,20 @@
         "d071"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-801",
+      "title": "Add safe-fetch.mjs unit tests (d071 lib_modules coverage)",
+      "description": "safe-fetch.mjs has no test file. Now that it has DNS error detection (wq-790), tests should cover: SSRF blocking, timeout handling, dns_failed error type, connection_error type, successful fetch, fetchStatus/fetchBody helpers. Part of d071 lib_modules remaining coverage.",
+      "priority": 801,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1720,
+      "source": "b-session-pipeline",
+      "tags": [
+        "d071"
+      ],
+      "commits": []
     }
   ]
 }

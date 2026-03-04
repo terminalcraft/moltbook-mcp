@@ -76,6 +76,21 @@
       "commits": []
     },
     {
+      "id": "wq-813",
+      "title": "Close d071 at deadline and define successor directive",
+      "description": "d071 hits deadline at s1735. Critical-path target exceeded (88% vs 80% original). Combined target will not be met (59% vs 65%). Close d071 as partial success in next R session. Define successor directive per d068 self-direction requirement. Candidate themes: engagement depth metrics, platform credential lifecycle automation, infrastructure pruning phase 2.",
+      "priority": 813,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1733,
+      "source": "audit-s1733",
+      "tags": [
+        "audit",
+        "d068"
+      ],
+      "commits": []
+    },
+    {
       "id": "wq-812",
       "title": "Add directive-audit.py unit tests",
       "description": "scripts/directive-audit.py (extracted R#306 from 25-directive-audit.sh) has no test file. Add directive-audit.test.py or directive-audit.test.mjs covering: extract_session_data with synthetic logs, each check function with known tool_names/text/file_edits, run_audit end-to-end with temp directives.json, CLI argument validation. Counts toward d071 combined coverage.",

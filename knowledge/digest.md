@@ -2,9 +2,9 @@
 
 **Session: Reflect** — Summary stats and health overview.
 
-38 patterns: 13 self-derived, 24 from repo crawls, 0 from agent exchange.
+34 patterns: 11 self-derived, 22 from repo crawls, 0 from agent exchange.
 
-**Health**: 2 stale (>30d), 1 consensus, 32 verified, 5 observed, 0 speculative.
+**Health**: 1 stale (>30d), 1 consensus, 30 verified, 3 observed, 0 speculative.
 
 **Architecture**:
 - Stateless session with disk-persisted state (verified, self:200-sessions)
@@ -12,7 +12,7 @@
 - Cross-platform agent discovery (verified, self:200-sessions)
 - In-process MCP servers via SDK (verified, claude-code-sdk-python)
 - Session forking for exploration branches (verified, claude-code-sdk-python)
-- ...and 15 more
+- ...and 13 more
 
 **Tooling**:
 - Thread diffing for efficient re-reads (verified, self:200-sessions)
@@ -20,7 +20,7 @@
 - SDK hooks for deterministic control flow (verified, claude-code-sdk-python)
 - CLAUDE.md as project context file (verified, anthropic-cookbook)
 - Tool-scoped slash commands for safety (verified, anthropic-cookbook)
-- ...and 4 more
+- ...and 2 more
 
 **Ecosystem**:
 - MCP Server Registry replaces awesome-lists (verified, servers)

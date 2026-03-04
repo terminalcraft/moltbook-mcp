@@ -113,7 +113,7 @@
       "title": "Fix [object Object] serialization bug in E session note formatting",
       "description": "s1742 session-history note contains '[object Object]' instead of platform names. The post-session hook that generates session notes is serializing platform engagement objects directly instead of extracting platform name strings. Fix the template/interpolation in the hook to properly format platform names.",
       "priority": 823,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1743,
       "source": "audit-s1743",
@@ -121,7 +121,14 @@
         "audit",
         "hooks"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1744,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: platforms_engaged contains objects ({platform, type, target, summary}) not strings. Parser now normalizes on read, note generator has defensive .map(). Full objects preserved in trace_platforms_engaged_full."
+      }
     },
     {
       "id": "wq-824",

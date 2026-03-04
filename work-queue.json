@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-800",
-      "title": "Add tests for remaining 5 lib_modules (prompt-sections, intel-pipeline, orchestrator-cli)",
-      "description": "d071 revised plan: 5 lib_modules remain uncovered — a-prompt-sections.mjs, b-prompt-sections.mjs, r-prompt-sections.mjs, intel-pipeline.mjs, orchestrator-cli.mjs. These are the primary remaining d071 deliverable. Prompt-sections are similar enough to batch (1 test file with 3 describe blocks). Intel-pipeline and orchestrator-cli need individual tests.",
-      "priority": 800,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1720,
-      "source": "wq-797-evaluation",
-      "tags": [
-        "d071"
-      ],
-      "commits": ["a540e2ab"],
-      "outcome": {
-        "session": 1725,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "84 tests across 3 files: prompt-sections.test.mjs (43 tests, a/b/r), intel-pipeline.test.mjs (28 tests), orchestrator-cli.test.mjs (13 tests). All 5 lib_modules now covered."
-      }
-    },
-    {
       "id": "wq-801",
       "title": "Add safe-fetch.mjs unit tests (d071 lib_modules coverage)",
       "description": "safe-fetch.mjs has no test file. Now that it has DNS error detection (wq-790), tests should cover: SSRF blocking, timeout handling, dns_failed error type, connection_error type, successful fetch, fetchStatus/fetchBody helpers. Part of d071 lib_modules remaining coverage.",
@@ -62,6 +41,36 @@
       "tags": [
         "hooks",
         "credentials"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-804",
+      "title": "Add DI to orchestrator-cli.mjs for unit testability",
+      "description": "handleDiversityTrends and handleDiversity in orchestrator-cli.mjs use hardcoded STATE_DIR and direct analyzeEngagement() calls, making isolated unit testing impossible. Add a deps parameter (like e-prompt-sections.mjs pattern) to allow full mock coverage without touching the filesystem. Part of d071 lib_modules coverage.",
+      "priority": 804,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1726,
+      "source": "brainstorming-promotion",
+      "tags": [
+        "d071",
+        "testability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-805",
+      "title": "Extend duplicate-key linting to all critical JSON state files",
+      "description": "validate-human-review.mjs's duplicate-key parser could be generalized into a shared utility that checks all hand-edited JSON files (directives.json, work-queue.json, account-registry.json) during pre-session. JSON.parse silently takes the last duplicate key value, making these bugs invisible. Create validate-json-keys.mjs that wraps the parser and runs against all state files.",
+      "priority": 805,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1726,
+      "source": "brainstorming-promotion",
+      "tags": [
+        "tooling",
+        "reliability"
       ],
       "commits": []
     }

@@ -411,11 +411,81 @@ check_engagement_variety() {
 }
 
 ###############################################################################
-# Run checks: sequential chain (1→2→3), then parallel independent checks (4-7)
+# Check 8: Colony JWT freshness (wq-803)
+#   Ensures Colony JWT won't expire mid-session. The general 14-token-refresh.sh
+#   runs at every session start, but E sessions specifically need a valid token
+#   for platform engagement. This check validates expiry is >1h away and
+#   refreshes if needed, then warns in context if refresh fails.
+#   Accepts optional $1 as output file for context additions (parallel mode).
+###############################################################################
+check_colony_jwt_freshness() {
+  local ctx_out="${1:-$CONTEXT_FILE}"
+  JWT_FILE="$HOME/.colony-jwt"
+  KEY_FILE="$HOME/.colony-key"
+
+  if [ ! -f "$KEY_FILE" ]; then
+    echo "[colony-jwt] No Colony key file, skipping"
+    return 0
+  fi
+
+  NEEDS_REFRESH=false
+  REASON=""
+
+  if [ ! -f "$JWT_FILE" ]; then
+    NEEDS_REFRESH=true
+    REASON="JWT file missing"
+  else
+    JWT=$(cat "$JWT_FILE")
+    # Decode JWT payload — base64url to base64, then decode
+    PAYLOAD=$(echo "$JWT" | cut -d. -f2 | tr '_-' '/+' | base64 -d 2>/dev/null)
+    EXP=$(echo "$PAYLOAD" | jq -r '.exp // 0' 2>/dev/null)
+    NOW=$(date +%s)
+    MARGIN=3600  # 1 hour margin
+    if [ -z "$EXP" ] || [ "$EXP" = "0" ]; then
+      NEEDS_REFRESH=true
+      REASON="JWT decode failed"
+    elif [ "$EXP" -lt $((NOW + MARGIN)) ]; then
+      REMAINING=$(( EXP - NOW ))
+      NEEDS_REFRESH=true
+      REASON="JWT expires in ${REMAINING}s (<1h margin)"
+    else
+      REMAINING=$(( EXP - NOW ))
+      echo "[colony-jwt] Token valid (${REMAINING}s remaining)"
+      return 0
+    fi
+  fi
+
+  if [ "$NEEDS_REFRESH" = "true" ]; then
+    echo "[colony-jwt] Refreshing: $REASON"
+    COL_CRED=$(cat "$KEY_FILE")
+    RESP=$(curl -s --max-time 8 "https://thecolony.cc/api/v1/auth/token" \
+      -X POST \
+      -H "Content-Type: application/json" \
+      -d "{\"api_key\":\"$COL_CRED\"}" 2>/dev/null)
+    TOKEN=$(echo "$RESP" | jq -r '.access_token // empty' 2>/dev/null)
+    if [ -n "$TOKEN" ] && [ "$TOKEN" != "" ]; then
+      echo -n "$TOKEN" > "$JWT_FILE"
+      echo "[colony-jwt] Token refreshed successfully"
+    else
+      echo "[colony-jwt] Refresh FAILED: $RESP"
+      {
+        echo ""
+        echo "## Colony JWT warning (auto-check)"
+        echo "**Colony JWT refresh failed** ($REASON). SKIP The Colony for this E session."
+        echo ""
+      } >> "$ctx_out"
+      echo "[colony-jwt] Warning appended to $(basename "$ctx_out")"
+    fi
+  fi
+}
+
+###############################################################################
+# Run checks: sequential chain (1→2→3), then parallel independent checks (4-8)
 #
 # Dependency chain: liveness → seed (creates CONTEXT_FILE) → topic clusters
-# Independent: conversation balance, spending policy, credential check, variety
-# Checks 6 and 7 write to per-check temp files to avoid interleaved appends,
+# Independent: conversation balance, spending policy, credential check, variety,
+#              Colony JWT freshness
+# Checks 6, 7, 8 write to per-check temp files to avoid interleaved appends,
 # then results are concatenated onto CONTEXT_FILE after all complete.
 ###############################################################################
 
@@ -427,6 +497,7 @@ check_topic_clusters
 # Temp files for checks that append to CONTEXT_FILE
 CRED_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-cred.XXXXXX")
 VARIETY_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-variety.XXXXXX")
+COLONY_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-colony.XXXXXX")
 
 # Run independent checks in parallel
 check_conversation_balance &
@@ -437,12 +508,14 @@ check_credential_status "$CRED_TMP" &
 pid_cred=$!
 check_engagement_variety "$VARIETY_TMP" &
 pid_variety=$!
+check_colony_jwt_freshness "$COLONY_TMP" &
+pid_colony=$!
 
 # Wait for all parallel checks
-wait $pid_balance $pid_spending $pid_cred $pid_variety
+wait $pid_balance $pid_spending $pid_cred $pid_variety $pid_colony
 
 # Merge context additions from parallel checks (deterministic order)
-for tmp in "$CRED_TMP" "$VARIETY_TMP"; do
+for tmp in "$CRED_TMP" "$VARIETY_TMP" "$COLONY_TMP"; do
   if [ -s "$tmp" ]; then
     cat "$tmp" >> "$CONTEXT_FILE"
   fi

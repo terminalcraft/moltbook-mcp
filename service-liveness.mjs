@@ -70,18 +70,20 @@ async function checkUrl(url, fetchFn = safeFetch) {
  * Level 2: Returns meaningful content (body > 500 bytes, not just error/empty)
  * Level 3: API endpoint responds (at least one of /api, /health, /api-docs returns 2xx)
  * Level 4: Write-capable endpoint found (/register, /api/register, POST accepts)
+ * @param {string} url
+ * @param {function} [fetchFn=safeFetch] - Override for testability (wq-817).
  * Returns { depth: 1-4, details: string[] }
  */
 const DEPTH_API_ENDPOINTS = ["/api", "/health", "/api-docs", "/openapi.json", "/.well-known/ai-plugin.json"];
 const DEPTH_WRITE_ENDPOINTS = ["/register", "/api/register", "/api/v1/agents/register"];
 
-async function computeProbeDepth(url) {
+async function computeProbeDepth(url, fetchFn = safeFetch) {
   const details = ["L1: HTTP alive"];
   let depth = 1;
 
   // Level 2: meaningful content check
   try {
-    const bodyResult = await safeFetch(url, {
+    const bodyResult = await fetchFn(url, {
       timeout: FETCH_TIMEOUT,
       bodyMode: "text",
       userAgent: "moltbook-liveness/1.0",
@@ -103,7 +105,7 @@ async function computeProbeDepth(url) {
   let apiFound = false;
   for (const ep of DEPTH_API_ENDPOINTS) {
     try {
-      const r = await safeFetch(base + ep, {
+      const r = await fetchFn(base + ep, {
         timeout: FETCH_TIMEOUT,
         bodyMode: "none",
         userAgent: "moltbook-liveness/1.0",
@@ -126,7 +128,7 @@ async function computeProbeDepth(url) {
     let writeFound = false;
     for (const ep of DEPTH_WRITE_ENDPOINTS) {
       try {
-        const r = await safeFetch(base + ep, {
+        const r = await fetchFn(base + ep, {
           timeout: FETCH_TIMEOUT,
           bodyMode: "none",
           userAgent: "moltbook-liveness/1.0",
@@ -151,9 +153,11 @@ async function computeProbeDepth(url) {
 
 /**
  * Probe TLD variants when a URL fails due to DNS (wq-127).
+ * @param {string} url
+ * @param {function} [fetchFn=safeFetch] - Override for testability (wq-817).
  * Returns the first working variant or null.
  */
-async function probeTldVariants(url) {
+async function probeTldVariants(url, fetchFn = safeFetch) {
   try {
     const parsed = new URL(url);
     const hostParts = parsed.hostname.split(".");
@@ -168,7 +172,7 @@ async function probeTldVariants(url) {
       const variantHost = baseDomain + tld;
       const variantUrl = `${parsed.protocol}//${variantHost}${parsed.pathname}`;
 
-      const check = await safeFetch(variantUrl, {
+      const check = await fetchFn(variantUrl, {
         timeout: FETCH_TIMEOUT,
         bodyMode: "none",
         userAgent: "moltbook-liveness/1.0",

@@ -19,7 +19,7 @@
       "title": "Fix duplicate pattern IDs in knowledge base",
       "description": "R#304 finding: knowledge_prune remove/validate operations match the first pattern with a given ID, but duplicate IDs exist (p028, p029, p030 each had 2 entries from different sources). This caused collateral damage — 2 valid patterns (p028 'Granular permission layering', p029 'Task dependency tracking') were removed instead of their stale duplicates. Fix: either deduplicate IDs in the knowledge store (renumber stale entries) or update knowledge_prune to accept a disambiguator (source, title substring).",
       "priority": 802,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1721,
       "source": "r-session-finding",
@@ -27,7 +27,14 @@
         "knowledge-base",
         "bug"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1729,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "One duplicate: p030 appeared twice (handshake protocol + content sandboxing). Renumbered second to p039. Node script used for reliable fix."
+      }
     },
     {
       "id": "wq-803",

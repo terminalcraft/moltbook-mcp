@@ -1,77 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-801",
-      "title": "Add safe-fetch.mjs unit tests (d071 lib_modules coverage)",
-      "description": "safe-fetch.mjs has no test file. Now that it has DNS error detection (wq-790), tests should cover: SSRF blocking, timeout handling, dns_failed error type, connection_error type, successful fetch, fetchStatus/fetchBody helpers. Part of d071 lib_modules remaining coverage.",
-      "priority": 801,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1720,
-      "source": "b-session-pipeline",
-      "tags": [
-        "d071"
-      ],
-      "commits": [
-        "6575c964"
-      ],
-      "outcome": {
-        "session": 1730,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Expanded from 12 to 30 tests across 7 suites. Added dns_failed, connection_error, SSRF edge cases, POST body, maxBody truncation, local server deterministic tests. Replaced flaky external endpoint tests."
-      }
-    },
-    {
-      "id": "wq-803",
-      "title": "Add Colony JWT refresh to E session prehook",
-      "description": "Colony JWTs expire every 24h. The 14-token-refresh.sh pre-session hook refreshes on session start, but if an E session starts >23h after last refresh, the JWT may expire mid-session. Add a Colony-specific freshness check to 35-e-session-prehook_E.sh that validates token expiry before platform selection, similar to credential checks for other platforms.",
-      "priority": 803,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1724,
-      "source": "wq-798-adjacent",
-      "tags": [
-        "hooks",
-        "credentials"
-      ],
-      "commits": [
-        "74616173"
-      ],
-      "outcome": {
-        "session": 1730,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added Check 8 to E prehook — Colony JWT freshness with 1h margin, auto-refresh, failure warning injection. Runs in parallel block."
-      }
-    },
-    {
-      "id": "wq-804",
-      "title": "Add DI to orchestrator-cli.mjs for unit testability",
-      "description": "handleDiversityTrends and handleDiversity in orchestrator-cli.mjs use hardcoded STATE_DIR and direct analyzeEngagement() calls, making isolated unit testing impossible. Add a deps parameter (like e-prompt-sections.mjs pattern) to allow full mock coverage without touching the filesystem. Part of d071 lib_modules coverage.",
-      "priority": 804,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1726,
-      "source": "brainstorming-promotion",
-      "tags": [
-        "d071",
-        "testability"
-      ],
-      "commits": [
-        "55cb0669"
-      ],
-      "outcome": {
-        "session": 1730,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added DI to handleDiversity (deps.analyzeEngagement) and handleDiversityTrends (deps.historyFile). Tests expanded from 14 to 18, replacing 2 export-only stubs with 10 full mock tests."
-      }
-    },
-    {
       "id": "wq-807",
       "title": "Batch registration for 8 live-but-uncredentialed platforms",
       "description": "Liveness sweep B#520 confirmed 8 platforms live but unregistered: linkclaws, strangerloops, agora, moltcities, shipyard, moltr, clawnews, moltstack. All have skill.md or /register endpoints. Register on each using their documented API, store credentials. This expands engagement pool from ~21 to ~29 platforms.",
@@ -143,6 +72,21 @@
       "tags": [
         "d071",
         "hooks"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-812",
+      "title": "Add directive-audit.py unit tests",
+      "description": "scripts/directive-audit.py (extracted R#306 from 25-directive-audit.sh) has no test file. Add directive-audit.test.py or directive-audit.test.mjs covering: extract_session_data with synthetic logs, each check function with known tool_names/text/file_edits, run_audit end-to-end with temp directives.json, CLI argument validation. Counts toward d071 combined coverage.",
+      "priority": 812,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1731,
+      "source": "r306-extraction",
+      "tags": [
+        "d071",
+        "testing"
       ],
       "commits": []
     }

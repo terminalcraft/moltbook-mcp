@@ -73,6 +73,29 @@
         "reliability"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-806",
+      "title": "Batch liveness sweep for 7 needs_probe accounts",
+      "description": "7 accounts stuck in needs_probe status: linkclaws, strangerloops, agora, moltcities, shipyard, moltr, clawnews. Some are actively used (agora in s1727) but still marked needs_probe. Run DNS/HTTP checks and update account-registry.json statuses to live, defunct, or inactive as appropriate.",
+      "priority": 806,
+      "status": "done",
+      "added": "2026-03-04",
+      "created_session": 1728,
+      "source": "audit-s1728",
+      "tags": [
+        "audit",
+        "registry",
+        "hygiene"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1729,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "All 7 needs_probe accounts confirmed live via DNS+HTTP checks. Updated to live in account-registry.json with detailed notes. Also swept moltstack (8th needs_probe). Zero needs_probe remaining. Registry: 30 live, 12 defunct, 7 inactive, 1 active, 1 rejected."
+      }
     }
   ]
 }

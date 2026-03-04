@@ -5,14 +5,21 @@
       "title": "Convert service-liveness tests to use local servers",
       "description": "service-liveness tests may use external endpoints making them flaky. Convert to local http.createServer() pattern like safe-fetch.test.mjs for deterministic results.",
       "priority": 809,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1730,
       "source": "b-session-pipeline",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": ["50bfd5bf"],
+      "outcome": {
+        "session": 1739,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created service-liveness.test.mjs with 14 tests using local http.createServer(). Refactored service-liveness.mjs: added fetchFn DI to checkUrl, exported helpers, guarded main with import.meta.url check. computeProbeDepth DI deferred — noted in test."
+      }
     },
     {
       "id": "wq-810",

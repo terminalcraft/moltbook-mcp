@@ -69,14 +69,21 @@
       "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
       "description": "'xxx', 'TODO', 'REPLACE_ME'",
       "priority": 815,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "source": "todo-scan",
       "tags": [
         "followup"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1739,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "False positive — 'xxx', 'TODO', 'REPLACE_ME' are placeholder detection patterns in credential-health-check.mjs:22, not actual TODOs in code."
+      }
     },
     {
       "id": "wq-816",
@@ -99,6 +106,34 @@
         "quality": "well-scoped",
         "note": "Re-tagged 4 items: wq-809/810/812 kept as general testing (d071 tag removed), wq-811 re-tagged d071→d072 (credential-related). Zero retirements — all items still valuable."
       }
+    },
+    {
+      "id": "wq-817",
+      "title": "Add DI fetchFn parameter to computeProbeDepth and probeTldVariants",
+      "description": "service-liveness.mjs checkUrl now accepts fetchFn for testability (wq-809), but computeProbeDepth and probeTldVariants still hardcode safeFetch. Add the same DI pattern so all three can be tested with local servers. Would enable full probe-depth test coverage.",
+      "priority": 817,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1739,
+      "source": "wq-809-adjacent",
+      "tags": [
+        "testability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-818",
+      "title": "Add todo-scan exclusion for placeholder-pattern arrays",
+      "description": "27-todo-scan.sh flagged credential-health-check.mjs:22 as a TODO because the PLACEHOLDER_PATTERNS array contains 'xxx' and 'TODO' strings. These are detection patterns, not actual TODOs. Add filter to exclude string literals inside arrays (lines matching /['\"](xxx|TODO|REPLACE_ME)['\"]/) to prevent future false positives.",
+      "priority": 818,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1739,
+      "source": "wq-815-false-positive",
+      "tags": [
+        "tooling"
+      ],
+      "commits": []
     }
   ]
 }

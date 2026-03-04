@@ -35,6 +35,9 @@ if [ -n "$COMMITS" ]; then
     grep -vE '"notes":\s*"' | \
     grep -vE '^\s*\*[A-Z]' | \
     grep -vE '"[^"]*TODO[^"]*"' | \
+    grep -vE "'[^']*TODO[^']*'" | \
+    grep -vE "'[^']*XXX[^']*'" | \
+    grep -vE "'[^']*REPLACE_ME[^']*'" | \
     head -10 || true)
 fi
 

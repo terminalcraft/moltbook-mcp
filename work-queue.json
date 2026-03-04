@@ -34,14 +34,21 @@
       "title": "Add todo-scan exclusion for placeholder-pattern arrays",
       "description": "27-todo-scan.sh flagged credential-health-check.mjs:22 as a TODO because the PLACEHOLDER_PATTERNS array contains 'xxx' and 'TODO' strings. These are detection patterns, not actual TODOs. Add filter to exclude string literals inside arrays (lines matching /['\"](xxx|TODO|REPLACE_ME)['\"]/) to prevent future false positives.",
       "priority": 818,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1739,
       "source": "wq-815-false-positive",
       "tags": [
         "tooling"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1744,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added 3 grep -vE filters for single-quoted string literals containing TODO, XXX, REPLACE_ME. Existing double-quote filter handled double-quoted cases."
+      }
     },
     {
       "id": "wq-821",
@@ -135,14 +142,21 @@
       "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
       "description": "'xxx', 'TODO', 'REPLACE_ME'",
       "priority": 824,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "source": "todo-scan",
       "tags": [
         "followup"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1744,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Duplicate of wq-818 which describes the same issue with more detail"
+      }
     }
   ]
 }

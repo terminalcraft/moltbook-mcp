@@ -27,6 +27,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - 96 hooks, 122+ source files, 27 test files — non-component coverage gap is the next frontier
 - StrangerLoops recall discipline pattern: mandatory memory recall in agent startup achieves 10/10 compliance
 
+- **Stale-tag detection in A session pre-hook** (added ~s1739): wq-816 was a manual task to re-tag items after d071 closed. Automate this: A session pre-hook checks for queue items tagged with completed directives and flags them in audit findings. Would prevent stale tags from accumulating silently.
+
 ## Evolution Ideas
 
 ---

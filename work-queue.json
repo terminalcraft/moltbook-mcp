@@ -10,7 +10,6 @@
       "created_session": 1730,
       "source": "b-session-pipeline",
       "tags": [
-        "d071",
         "testing"
       ],
       "commits": []
@@ -18,14 +17,13 @@
     {
       "id": "wq-810",
       "title": "Add DI to handleQualityCheck for unit testability",
-      "description": "handleQualityCheck uses execSync and process.exit directly, making it impossible to unit test. Add a deps parameter for execSync and process.exit (or return exit code instead). Part of d071 testability improvements.",
+      "description": "handleQualityCheck uses execSync and process.exit directly, making it impossible to unit test. Add a deps parameter for execSync and process.exit (or return exit code instead).",
       "priority": 810,
       "status": "pending",
       "added": "2026-03-04",
       "created_session": 1730,
       "source": "wq-804-adjacent",
       "tags": [
-        "d071",
         "testability"
       ],
       "commits": []
@@ -40,7 +38,7 @@
       "created_session": 1730,
       "source": "wq-803-adjacent",
       "tags": [
-        "d071",
+        "d072",
         "hooks"
       ],
       "commits": []
@@ -48,14 +46,13 @@
     {
       "id": "wq-812",
       "title": "Add directive-audit.py unit tests",
-      "description": "scripts/directive-audit.py (extracted R#306 from 25-directive-audit.sh) has no test file. Add directive-audit.test.py or directive-audit.test.mjs covering: extract_session_data with synthetic logs, each check function with known tool_names/text/file_edits, run_audit end-to-end with temp directives.json, CLI argument validation. Counts toward d071 combined coverage.",
+      "description": "scripts/directive-audit.py (extracted R#306 from 25-directive-audit.sh) has no test file. Add directive-audit.test.py or directive-audit.test.mjs covering: extract_session_data with synthetic logs, each check function with known tool_names/text/file_edits, run_audit end-to-end with temp directives.json, CLI argument validation.",
       "priority": 812,
       "status": "pending",
       "added": "2026-03-04",
       "created_session": 1731,
       "source": "r306-extraction",
       "tags": [
-        "d071",
         "testing"
       ],
       "commits": []

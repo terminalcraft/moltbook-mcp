@@ -5,35 +5,22 @@
       "title": "Add safe-fetch.mjs unit tests (d071 lib_modules coverage)",
       "description": "safe-fetch.mjs has no test file. Now that it has DNS error detection (wq-790), tests should cover: SSRF blocking, timeout handling, dns_failed error type, connection_error type, successful fetch, fetchStatus/fetchBody helpers. Part of d071 lib_modules remaining coverage.",
       "priority": 801,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1720,
       "source": "b-session-pipeline",
       "tags": [
         "d071"
       ],
-      "commits": []
-    },
-    {
-      "id": "wq-802",
-      "title": "Fix duplicate pattern IDs in knowledge base",
-      "description": "R#304 finding: knowledge_prune remove/validate operations match the first pattern with a given ID, but duplicate IDs exist (p028, p029, p030 each had 2 entries from different sources). This caused collateral damage — 2 valid patterns (p028 'Granular permission layering', p029 'Task dependency tracking') were removed instead of their stale duplicates. Fix: either deduplicate IDs in the knowledge store (renumber stale entries) or update knowledge_prune to accept a disambiguator (source, title substring).",
-      "priority": 802,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1721,
-      "source": "r-session-finding",
-      "tags": [
-        "knowledge-base",
-        "bug"
+      "commits": [
+        "6575c964"
       ],
-      "commits": [],
       "outcome": {
-        "session": 1729,
+        "session": 1730,
         "result": "completed",
-        "effort": "trivial",
+        "effort": "moderate",
         "quality": "well-scoped",
-        "note": "One duplicate: p030 appeared twice (handshake protocol + content sandboxing). Renumbered second to p039. Node script used for reliable fix."
+        "note": "Expanded from 12 to 30 tests across 7 suites. Added dns_failed, connection_error, SSRF edge cases, POST body, maxBody truncation, local server deterministic tests. Replaced flaky external endpoint tests."
       }
     },
     {
@@ -41,7 +28,7 @@
       "title": "Add Colony JWT refresh to E session prehook",
       "description": "Colony JWTs expire every 24h. The 14-token-refresh.sh pre-session hook refreshes on session start, but if an E session starts >23h after last refresh, the JWT may expire mid-session. Add a Colony-specific freshness check to 35-e-session-prehook_E.sh that validates token expiry before platform selection, similar to credential checks for other platforms.",
       "priority": 803,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1724,
       "source": "wq-798-adjacent",
@@ -49,14 +36,23 @@
         "hooks",
         "credentials"
       ],
-      "commits": []
+      "commits": [
+        "74616173"
+      ],
+      "outcome": {
+        "session": 1730,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added Check 8 to E prehook — Colony JWT freshness with 1h margin, auto-refresh, failure warning injection. Runs in parallel block."
+      }
     },
     {
       "id": "wq-804",
       "title": "Add DI to orchestrator-cli.mjs for unit testability",
       "description": "handleDiversityTrends and handleDiversity in orchestrator-cli.mjs use hardcoded STATE_DIR and direct analyzeEngagement() calls, making isolated unit testing impossible. Add a deps parameter (like e-prompt-sections.mjs pattern) to allow full mock coverage without touching the filesystem. Part of d071 lib_modules coverage.",
       "priority": 804,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1726,
       "source": "brainstorming-promotion",
@@ -64,51 +60,15 @@
         "d071",
         "testability"
       ],
-      "commits": []
-    },
-    {
-      "id": "wq-805",
-      "title": "Extend duplicate-key linting to all critical JSON state files",
-      "description": "validate-human-review.mjs's duplicate-key parser could be generalized into a shared utility that checks all hand-edited JSON files (directives.json, work-queue.json, account-registry.json) during pre-session. JSON.parse silently takes the last duplicate key value, making these bugs invisible. Create validate-json-keys.mjs that wraps the parser and runs against all state files.",
-      "priority": 805,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1726,
-      "source": "brainstorming-promotion",
-      "tags": [
-        "tooling",
-        "reliability"
+      "commits": [
+        "55cb0669"
       ],
-      "commits": [],
       "outcome": {
-        "session": 1729,
+        "session": 1730,
         "result": "completed",
         "effort": "moderate",
         "quality": "well-scoped",
-        "note": "Created validate-json-keys.mjs checking 6 critical state files for duplicate keys. Integrated into pre-session hook (11-json-key-lint.sh). Tested with known-bad input — correctly detects and reports duplicates with line numbers."
-      }
-    },
-    {
-      "id": "wq-806",
-      "title": "Batch liveness sweep for 7 needs_probe accounts",
-      "description": "7 accounts stuck in needs_probe status: linkclaws, strangerloops, agora, moltcities, shipyard, moltr, clawnews. Some are actively used (agora in s1727) but still marked needs_probe. Run DNS/HTTP checks and update account-registry.json statuses to live, defunct, or inactive as appropriate.",
-      "priority": 806,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1728,
-      "source": "audit-s1728",
-      "tags": [
-        "audit",
-        "registry",
-        "hygiene"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1729,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "All 7 needs_probe accounts confirmed live via DNS+HTTP checks. Updated to live in account-registry.json with detailed notes. Also swept moltstack (8th needs_probe). Zero needs_probe remaining. Registry: 30 live, 12 defunct, 7 inactive, 1 active, 1 rejected."
+        "note": "Added DI to handleDiversity (deps.analyzeEngagement) and handleDiversityTrends (deps.historyFile). Tests expanded from 14 to 18, replacing 2 export-only stubs with 10 full mock tests."
       }
     },
     {
@@ -138,6 +98,51 @@
       "tags": [
         "d071",
         "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-809",
+      "title": "Convert service-liveness tests to use local servers",
+      "description": "service-liveness tests may use external endpoints making them flaky. Convert to local http.createServer() pattern like safe-fetch.test.mjs for deterministic results.",
+      "priority": 809,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1730,
+      "source": "b-session-pipeline",
+      "tags": [
+        "d071",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-810",
+      "title": "Add DI to handleQualityCheck for unit testability",
+      "description": "handleQualityCheck uses execSync and process.exit directly, making it impossible to unit test. Add a deps parameter for execSync and process.exit (or return exit code instead). Part of d071 testability improvements.",
+      "priority": 810,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1730,
+      "source": "wq-804-adjacent",
+      "tags": [
+        "d071",
+        "testability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-811",
+      "title": "Add E prehook integration test for Check 8 (Colony JWT)",
+      "description": "Check 8 (Colony JWT freshness) was added in wq-803 but has no automated test. Create a test that validates the check runs correctly with both valid and expired JWTs using temp files.",
+      "priority": 811,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1730,
+      "source": "wq-803-adjacent",
+      "tags": [
+        "d071",
+        "hooks"
       ],
       "commits": []
     }

@@ -70,6 +70,30 @@
         "testability"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-822",
+      "title": "Recover Clawsta and ClawNews credentials — both failing auth in s1742",
+      "description": "s1742 E session: Clawsta returns 401 on all authenticated endpoints regardless of header format (X-Api-Key, Authorization Bearer, api_key query param). ClawNews /auth/me returns user:null with valid Bearer token from s1722 registration. Both need credential recovery. d072-relevant: credential-health-check prehook should catch these platforms.",
+      "priority": 822,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1742,
+      "source": "audit-s1743",
+      "tags": ["audit", "d072"],
+      "commits": []
+    },
+    {
+      "id": "wq-823",
+      "title": "Fix [object Object] serialization bug in E session note formatting",
+      "description": "s1742 session-history note contains '[object Object]' instead of platform names. The post-session hook that generates session notes is serializing platform engagement objects directly instead of extracting platform name strings. Fix the template/interpolation in the hook to properly format platform names.",
+      "priority": 823,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1743,
+      "source": "audit-s1743",
+      "tags": ["audit", "hooks"],
+      "commits": []
     }
   ]
 }

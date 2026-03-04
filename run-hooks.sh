@@ -263,85 +263,40 @@ if [ "$PARALLEL_JOBS" -gt 1 ] && [ "${#ELIGIBLE_HOOKS[@]}" -gt 1 ]; then
 
 else
   # Sequential execution (original behavior, default)
+  # R#305: uses run_single_hook() to eliminate duplication with parallel path.
+  RESULTS_TMP=$(mktemp)
+
   for hook in "${ELIGIBLE_HOOKS[@]}"; do
     HOOK_NAME="$(basename "$hook")"
 
     # Aggregate budget enforcement (R#205)
     if [ "$BUDGET_SECS" -gt 0 ] && [ "$CUMULATIVE_MS" -gt $((BUDGET_SECS * 1000)) ]; then
       HOOK_BUDGET_SKIP=$((HOOK_BUDGET_SKIP + 1))
-      [ -n "$HOOK_DETAILS" ] && HOOK_DETAILS="$HOOK_DETAILS,"
-      HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"budget_skip\",\"ms\":0}"
+      echo "{\"hook\":\"$HOOK_NAME\",\"status\":\"budget_skip\",\"ms\":0}" >> "$RESULTS_TMP"
       echo "$(date -Iseconds) hook BUDGET_SKIP: $HOOK_NAME (cumulative ${CUMULATIVE_MS}ms > budget ${BUDGET_SECS}s)" >> "$HOOKS_LOG"
       continue
     fi
 
-    # Timeout selection: adaptive profile (wq-427) > penalty (R#205) > default
-    EFFECTIVE_TIMEOUT="$TIMEOUT_SECS"
-    if [ -n "${TUNED_TIMEOUTS[$HOOK_NAME]+x}" ]; then
-      EFFECTIVE_TIMEOUT="${TUNED_TIMEOUTS[$HOOK_NAME]}"
-    fi
-    if [ -n "${PREV_TIMEOUTS[$HOOK_NAME]+x}" ]; then
-      EFFECTIVE_TIMEOUT=$(( EFFECTIVE_TIMEOUT / 2 ))
-      [ "$EFFECTIVE_TIMEOUT" -lt 5 ] && EFFECTIVE_TIMEOUT=5
-      echo "$(date -Iseconds) hook PENALTY: $HOOK_NAME timeout ${TIMEOUT_SECS}s→${EFFECTIVE_TIMEOUT}s (timed out last session)" >> "$HOOKS_LOG"
-    fi
-
-    HOOK_START=$(date +%s%N)
-    echo "$(date -Iseconds) running hook: $HOOK_NAME" >> "$HOOKS_LOG"
-
-    HOOK_OUT=$(mktemp)
-    HOOK_EXIT=0
-    timeout "$EFFECTIVE_TIMEOUT" "$hook" > "$HOOK_OUT" 2>&1 || HOOK_EXIT=$?
-    cat "$HOOK_OUT" >> "$HOOKS_LOG"
-
-    HOOK_END=$(date +%s%N)
-    HOOK_DUR_MS=$(( (HOOK_END - HOOK_START) / 1000000 ))
-    CUMULATIVE_MS=$((CUMULATIVE_MS + HOOK_DUR_MS))
-
-    HOOK_ERROR=""
-    if [ "$HOOK_EXIT" -eq 0 ]; then
-      HOOK_PASS=$((HOOK_PASS + 1))
-      HOOK_STATUS="ok"
-    else
-      HOOK_FAIL=$((HOOK_FAIL + 1))
-      HOOK_STATUS="fail:$HOOK_EXIT"
-      echo "$(date -Iseconds) hook FAILED: $HOOK_NAME (exit=$HOOK_EXIT, ${HOOK_DUR_MS}ms)" >> "$HOOKS_LOG"
-      HOOK_ERROR=$(tail -3 "$HOOK_OUT" | tr '\n' ' ' | head -c 200 | sed 's/["\]/\\&/g; s/[[:cntrl:]]/ /g')
-
-      HOOK_RAW_ERR=$(cat "$HOOK_OUT" 2>/dev/null || true)
-      if [ "$HOOK_EXIT" -eq 124 ]; then
-        FAILURE_CAT="timeout"
-      elif [ "$HOOK_EXIT" -eq 127 ]; then
-        FAILURE_CAT="command_not_found"
-      elif [ "$HOOK_EXIT" -eq 126 ]; then
-        FAILURE_CAT="permission_denied"
-      elif echo "$HOOK_RAW_ERR" | grep -qiE 'Cannot find module|MODULE_NOT_FOUND'; then
-        FAILURE_CAT="module_not_found"
-      elif echo "$HOOK_RAW_ERR" | grep -qiE 'SyntaxError|syntax error'; then
-        FAILURE_CAT="syntax_error"
-      elif echo "$HOOK_RAW_ERR" | grep -qiE 'No such file or directory|ENOENT'; then
-        FAILURE_CAT="missing_file"
-      elif echo "$HOOK_RAW_ERR" | grep -qiE 'Permission denied|EACCES'; then
-        FAILURE_CAT="permission_denied"
-      elif echo "$HOOK_RAW_ERR" | grep -qiE 'ReferenceError|TypeError|RangeError|Error:.*\bat\b'; then
-        FAILURE_CAT="node_crash"
-      elif echo "$HOOK_RAW_ERR" | grep -qiE 'ECONNREFUSED|ETIMEDOUT|EHOSTUNREACH'; then
-        FAILURE_CAT="network_error"
-      elif echo "$HOOK_RAW_ERR" | grep -qiE 'invalid.*config|missing.*config|bad.*config'; then
-        FAILURE_CAT="config_error"
-      else
-        FAILURE_CAT="unknown"
-      fi
-    fi
-    rm -f "$HOOK_OUT"
-
-    [ -n "$HOOK_DETAILS" ] && HOOK_DETAILS="$HOOK_DETAILS,"
-    if [ -n "$HOOK_ERROR" ]; then
-      HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"$HOOK_STATUS\",\"ms\":$HOOK_DUR_MS,\"error\":\"$HOOK_ERROR\",\"failure_category\":\"$FAILURE_CAT\"}"
-    else
-      HOOK_DETAILS="$HOOK_DETAILS{\"hook\":\"$HOOK_NAME\",\"status\":\"$HOOK_STATUS\",\"ms\":$HOOK_DUR_MS}"
-    fi
+    local_start=$(date +%s%N)
+    run_single_hook "$hook" "$RESULTS_TMP"
+    local_end=$(date +%s%N)
+    CUMULATIVE_MS=$((CUMULATIVE_MS + (local_end - local_start) / 1000000))
   done
+
+  # Collect results from temp file into HOOK_DETAILS and counters
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    [ -n "$HOOK_DETAILS" ] && HOOK_DETAILS="$HOOK_DETAILS,"
+    HOOK_DETAILS="$HOOK_DETAILS$line"
+
+    local_status=$(echo "$line" | python3 -c "import sys,json; print(json.loads(sys.stdin.read().strip()).get('status',''))" 2>/dev/null || echo "")
+    case "$local_status" in
+      ok) HOOK_PASS=$((HOOK_PASS + 1)) ;;
+      budget_skip) ;; # already counted
+      *) HOOK_FAIL=$((HOOK_FAIL + 1)) ;;
+    esac
+  done < "$RESULTS_TMP"
+  rm -f "$RESULTS_TMP"
 fi
 
 # Write structured results if tracking enabled

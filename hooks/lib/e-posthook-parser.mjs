@@ -36,7 +36,11 @@ else if (traceRaw && typeof traceRaw === 'object') allTraces = [traceRaw];
 const sessionTrace = allTraces.find(t => t.session === session) || null;
 
 result.has_trace = sessionTrace !== null;
-result.trace_platforms_engaged = sessionTrace ? (sessionTrace.platforms_engaged || []) : [];
+// Normalize platforms_engaged: may be strings or objects with .platform field
+const rawPlatforms = sessionTrace ? (sessionTrace.platforms_engaged || []) : [];
+result.trace_platforms_engaged = rawPlatforms.map(p => typeof p === 'string' ? p : (p && p.platform ? p.platform : String(p)));
+// Keep full objects for detailed analysis
+result.trace_platforms_engaged_full = rawPlatforms;
 result.trace_skipped_platforms = sessionTrace ? (sessionTrace.skipped_platforms || []) : [];
 result.trace_topics = sessionTrace ? (sessionTrace.topics || []) : [];
 result.trace_agents = sessionTrace ? (sessionTrace.agents_interacted || []) : [];
@@ -171,7 +175,7 @@ let traceIntelData = null;
 if (result.intel_count === 0 && sessionTrace) {
   const topics = sessionTrace.topics || [];
   const agents = sessionTrace.agents_interacted || [];
-  const platforms = sessionTrace.platforms_engaged || [];
+  const platforms = result.trace_platforms_engaged;
   if (topics.length > 0) {
     const platformStr = platforms.length ? platforms.join(', ') : 'unknown platform';
     const agentStr = agents.length ? agents.slice(0, 3).join(', ') : 'various agents';

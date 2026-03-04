@@ -285,7 +285,7 @@ check_note_fallback() {
 const fs = require('fs');
 const parsed = JSON.parse(fs.readFileSync('$PARSED_FILE', 'utf8'));
 const session = parseInt('$SESSION');
-const platforms = parsed.trace_platforms_engaged || [];
+const platforms = (parsed.trace_platforms_engaged || []).map(p => typeof p === 'string' ? p : (p && p.platform ? p.platform : String(p)));
 const agents = parsed.trace_agents || [];
 const topics = parsed.trace_topics || [];
 const eNum = parsed.e_count || '?';

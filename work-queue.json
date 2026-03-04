@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-810",
-      "title": "Add DI to handleQualityCheck for unit testability",
-      "description": "handleQualityCheck uses execSync and process.exit directly, making it impossible to unit test. Add a deps parameter for execSync and process.exit (or return exit code instead).",
-      "priority": 810,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1730,
-      "source": "wq-804-adjacent",
-      "tags": [
-        "testability"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1740,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added deps param with execSync/exit DI, return codes. 6 unit tests (pass/fail/missing-text/cwd/argv-position). Baseline 18→23 tests."
-      }
-    },
-    {
       "id": "wq-811",
       "title": "Add E prehook integration test for Check 8 (Colony JWT)",
       "description": "Check 8 (Colony JWT freshness) was added in wq-803 but has no automated test. Create a test that validates the check runs correctly with both valid and expired JWTs using temp files.",
@@ -51,27 +30,6 @@
       "commits": []
     },
     {
-      "id": "wq-817",
-      "title": "Add DI fetchFn parameter to computeProbeDepth and probeTldVariants",
-      "description": "service-liveness.mjs checkUrl now accepts fetchFn for testability (wq-809), but computeProbeDepth and probeTldVariants still hardcode safeFetch. Add the same DI pattern so all three can be tested with local servers. Would enable full probe-depth test coverage.",
-      "priority": 817,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1739,
-      "source": "wq-809-adjacent",
-      "tags": [
-        "testability"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1740,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added fetchFn DI param to computeProbeDepth and probeTldVariants. 3 placeholder tests replaced with 13 real tests covering L1-L4 depth, TLD probing, error handling."
-      }
-    },
-    {
       "id": "wq-818",
       "title": "Add todo-scan exclusion for placeholder-pattern arrays",
       "description": "27-todo-scan.sh flagged credential-health-check.mjs:22 as a TODO because the PLACEHOLDER_PATTERNS array contains 'xxx' and 'TODO' strings. These are detection patterns, not actual TODOs. Add filter to exclude string literals inside arrays (lines matching /['\"](xxx|TODO|REPLACE_ME)['\"]/) to prevent future false positives.",
@@ -86,24 +44,24 @@
       "commits": []
     },
     {
-      "id": "wq-819",
-      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
-      "description": "'xxx', 'TODO', 'REPLACE_ME'",
-      "priority": 819,
+      "id": "wq-821",
+      "title": "Add d049-tracking-update.mjs unit tests",
+      "description": "hooks/lib/d049-tracking-update.mjs (extracted R#308 from 36-e-session-posthook_E.sh) has DI support but no test file. Add d049-tracking-update.test.mjs covering: new session insertion with compliant/non-compliant states, existing session update, failure mode labeling for all 6 modes, missing tracking file creation, e_number calculation with gaps.",
+      "priority": 821,
       "status": "pending",
       "added": "2026-03-04",
-      "source": "todo-scan",
+      "created_session": 1741,
+      "source": "r308-extraction",
       "tags": [
-        "followup"
+        "testing"
       ],
-      "commits": [],
-      "complexity": "S"
+      "commits": []
     },
     {
-      "id": "wq-819",
+      "id": "wq-820",
       "title": "Add DI to engage-orchestrator.mjs CLI handlers (--record-outcome, --circuit-status)",
       "description": "The remaining CLI handlers in engage-orchestrator.mjs still use process.argv and process.exit directly. Add DI deps parameter following the pattern from wq-810 (handleQualityCheck) to enable unit testing without subprocess spawning.",
-      "priority": 819,
+      "priority": 820,
       "status": "pending",
       "added": "2026-03-04",
       "created_session": 1740,

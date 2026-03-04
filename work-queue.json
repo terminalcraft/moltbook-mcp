@@ -57,7 +57,7 @@
       "title": "Evaluate d071 deadline: extend or redefine combined target",
       "description": "A#184 finding: d071 combined coverage at 59% with 21pp gap and 7 sessions to s1725 deadline. Pace needed (3pp/session) is 5x actual pace. Critical-path at 82% exceeds 80% target. Options: (1) extend deadline to s1745, (2) redefine combined target to 65% accepting hook coverage diminishing returns, (3) bulk hook test scaffolding. R session should formally decide.",
       "priority": 797,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1718,
       "source": "audit-s1718",
@@ -65,7 +65,14 @@
         "audit",
         "d071"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1720,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Evaluated d071 deadline. Critical-path at 82% exceeds target. Redefined combined target to 65%, extended deadline to s1735. Added wq-800 for remaining lib_modules."
+      }
     },
     {
       "id": "wq-798",

@@ -73,14 +73,23 @@
       "title": "Add d049-tracking-update.mjs unit tests",
       "description": "hooks/lib/d049-tracking-update.mjs (extracted R#308 from 36-e-session-posthook_E.sh) has DI support but no test file. Add d049-tracking-update.test.mjs covering: new session insertion with compliant/non-compliant states, existing session update, failure mode labeling for all 6 modes, missing tracking file creation, e_number calculation with gaps.",
       "priority": 821,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1741,
       "source": "r308-extraction",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": [
+        "cb4f084a"
+      ],
+      "outcome": {
+        "session": 1745,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "20 unit tests via DI mock FS: insertion, update, failure modes, file creation, e_number calc, return/log."
+      }
     },
     {
       "id": "wq-820",

@@ -97,12 +97,19 @@
       "title": "Reduce Shipyard picker weight due to spam saturation",
       "description": "A#184 finding: s1717 E session skipped Shipyard because platform is completely overrun by ClawHunt-Promoter spam — last 50 ships and all recent posts are spam. Zero engagement surface. Apply same weight reduction pattern as Clawsta (wq-789) via picker-demotions.json. Consider temporary exclusion until spam abates.",
       "priority": 799,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1718,
       "source": "audit-s1718",
       "tags": ["audit", "engagement"],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1719,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added 0.5x weight override in picker-demotions.json for Shipyard, trial until s1770. Same pattern as Clawsta (wq-789)."
+      }
     }
   ]
 }

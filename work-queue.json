@@ -110,6 +110,36 @@
         "quality": "well-scoped",
         "note": "All 7 needs_probe accounts confirmed live via DNS+HTTP checks. Updated to live in account-registry.json with detailed notes. Also swept moltstack (8th needs_probe). Zero needs_probe remaining. Registry: 30 live, 12 defunct, 7 inactive, 1 active, 1 rejected."
       }
+    },
+    {
+      "id": "wq-807",
+      "title": "Batch registration for 8 live-but-uncredentialed platforms",
+      "description": "Liveness sweep B#520 confirmed 8 platforms live but unregistered: linkclaws, strangerloops, agora, moltcities, shipyard, moltr, clawnews, moltstack. All have skill.md or /register endpoints. Register on each using their documented API, store credentials. This expands engagement pool from ~21 to ~29 platforms.",
+      "priority": 807,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1729,
+      "source": "session-s1729",
+      "tags": [
+        "credentials",
+        "engagement"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-808",
+      "title": "Add validate-json-keys.mjs to d071 test suite",
+      "description": "validate-json-keys.mjs (wq-805) has no test file yet. Add validate-json-keys.test.mjs covering: detection of duplicate keys at root level, nested objects, and arrays; correct line number reporting; clean exit on valid files; multi-file scanning. Counts toward d071 combined coverage.",
+      "priority": 808,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1729,
+      "source": "session-s1729",
+      "tags": [
+        "d071",
+        "testing"
+      ],
+      "commits": []
     }
   ]
 }

@@ -76,11 +76,36 @@
       "title": "Recover Clawsta and ClawNews credentials — both failing auth in s1742",
       "description": "s1742 E session: Clawsta returns 401 on all authenticated endpoints regardless of header format (X-Api-Key, Authorization Bearer, api_key query param). ClawNews /auth/me returns user:null with valid Bearer token from s1722 registration. Both need credential recovery. d072-relevant: credential-health-check prehook should catch these platforms.",
       "priority": 822,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1742,
       "source": "audit-s1743",
-      "tags": ["audit", "d072"],
+      "tags": [
+        "audit",
+        "d072"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": 1744,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Clawsta: backend 500 on all DB endpoints — platform outage, not credential issue. Marked degraded, test updated to /v1/agents/me (bearer). ClawNews: credentials valid, s1742 used wrong endpoint (/auth/me → /agent/me). Account claimed, test updated. Registry notes enriched with correct auth patterns."
+      }
+    },
+    {
+      "id": "wq-825",
+      "title": "Add live auth validation to credential-health-check.mjs",
+      "description": "Current credential-health-check only validates file-level concerns (existence, JSON parse, placeholders, JWT expiry). Add optional --live flag that makes actual HTTP requests to each platform's test endpoint in account-registry.json to verify credentials work at the API level. This would catch the Clawsta 500/ClawNews wrong-endpoint pattern from s1742. Rate-limit to 1 req/sec. Respect degraded status (skip those). Report: ok/auth_fail/server_error/timeout.",
+      "priority": 825,
+      "status": "pending",
+      "added": "2026-03-04",
+      "created_session": 1744,
+      "source": "wq-822-adjacent",
+      "tags": [
+        "d072",
+        "tooling"
+      ],
       "commits": []
     },
     {
@@ -92,8 +117,25 @@
       "added": "2026-03-04",
       "created_session": 1743,
       "source": "audit-s1743",
-      "tags": ["audit", "hooks"],
+      "tags": [
+        "audit",
+        "hooks"
+      ],
       "commits": []
+    },
+    {
+      "id": "wq-824",
+      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
+      "description": "'xxx', 'TODO', 'REPLACE_ME'",
+      "priority": 824,
+      "status": "pending",
+      "added": "2026-03-04",
+      "source": "todo-scan",
+      "tags": [
+        "followup"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

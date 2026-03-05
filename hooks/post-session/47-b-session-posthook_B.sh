@@ -172,6 +172,38 @@ check_probe_timing_budget() {
 }
 
 ###############################################################################
+# Check 6: Manifest drift detection (wq-856)
+#   Compare hook count on disk vs manifest. If mismatched, regenerate.
+#   Prevents recurring drift when B sessions create hooks via Write.
+###############################################################################
+check_manifest_drift() {
+  local MANIFEST="$MCP_DIR/hooks/manifest.json"
+  if [[ ! -f "$MANIFEST" ]]; then
+    echo "manifest-drift: WARN — manifest.json missing, regenerating"
+    (cd "$MCP_DIR" && SESSION_NUM="$SESSION_NUM" node generate-hook-manifest.mjs 2>/dev/null) || true
+    return 0
+  fi
+
+  local MANIFEST_COUNT DISK_COUNT
+  MANIFEST_COUNT=$(jq '.total' "$MANIFEST" 2>/dev/null || echo 0)
+  DISK_COUNT=0
+  for phase_dir in "$MCP_DIR/hooks/pre-session" "$MCP_DIR/hooks/post-session" "$MCP_DIR/hooks/mode-transform"; do
+    if [[ -d "$phase_dir" ]]; then
+      DISK_COUNT=$((DISK_COUNT + $(ls "$phase_dir"/*.sh 2>/dev/null | wc -l)))
+    fi
+  done
+
+  if [[ "$DISK_COUNT" -ne "$MANIFEST_COUNT" ]]; then
+    echo "manifest-drift: FIXING — disk=$DISK_COUNT manifest=$MANIFEST_COUNT, regenerating"
+    (cd "$MCP_DIR" && SESSION_NUM="$SESSION_NUM" node generate-hook-manifest.mjs 2>/dev/null) || true
+    # Stage the updated manifest so auto-commit picks it up
+    (cd "$MCP_DIR" && git add hooks/manifest.json 2>/dev/null) || true
+  else
+    echo "manifest-drift: OK — $DISK_COUNT hooks"
+  fi
+}
+
+###############################################################################
 # Run all checks sequentially
 ###############################################################################
 
@@ -180,5 +212,6 @@ check_truncation_recovery
 check_pipeline_gate
 check_clawsta_autopost
 check_probe_timing_budget
+check_manifest_drift
 
 exit 0

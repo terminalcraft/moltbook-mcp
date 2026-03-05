@@ -8,7 +8,7 @@ import { execSync } from "child_process";
 import { join, basename } from "path";
 
 const DIR = new URL(".", import.meta.url).pathname;
-const PHASES = ["pre-session", "post-session"];
+const PHASES = ["pre-session", "post-session", "mode-transform"];
 const MANIFEST_PATH = join(DIR, "hooks", "manifest.json");
 
 // Parse hook-results JSONL files for last-triggered data

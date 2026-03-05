@@ -65,6 +65,21 @@
         "audit"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-874",
+      "title": "Fix 02-periodic-checks.sh platform-health 100% timeout rate",
+      "description": "02-periodic-checks.sh platform-health sub-check calls account-manager.mjs test --all with 10s CHECK_TIMEOUT. This command tests 51 platforms sequentially and exceeds 10s every time (confirmed via periodic-check-timing.jsonl: s20, s1780, s1800 all timed out). Fix: use account-manager.mjs test --all --fast (wq-871) inside this hook, or reduce platform count to critical-only subset. p95=10175ms, degrading trend. Prioritize alongside wq-871.",
+      "priority": 874,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1805,
+      "source": "audit-s1805",
+      "tags": [
+        "audit",
+        "perf"
+      ],
+      "commits": []
     }
   ]
 }

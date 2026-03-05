@@ -5,7 +5,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
-- **TODO tracker telemetry: false-positive rate metric** (added ~s1771): ~~Promoted to wq-866~~ (s1792).
 
 - **Credential health check: transient vs persistent failure classification** (added ~s1776): ~~Promoted to wq-849~~ (consecutive-failure threshold added). Remaining: full transient classification (retry logic, not just threshold).
 - **E session backup substitution telemetry** (added ~s1782): ~~Promoted to wq-865~~ (s1792).

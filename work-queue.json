@@ -70,7 +70,7 @@
       "title": "Fix human-review.json schema: hr-a173-1 missing status field",
       "description": "hr-a173-1 has severity='resolved' but status=undefined. Add explicit status='resolved' field for schema consistency. Trivial fix.",
       "priority": 879,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1815,
       "source": "audit-s1815",
@@ -78,7 +78,14 @@
         "audit",
         "data-hygiene"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1816,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "False positive. hr-a173-1 already has status=\"resolved\" (line 11). validate-human-review.mjs passes. The A#203 audit description referenced a severity field that does not exist in the schema. No code change needed."
+      }
     }
   ]
 }

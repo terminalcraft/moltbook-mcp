@@ -8,6 +8,7 @@ cd "$DIR"
 SESSION_NUM="${SESSION_NUM:-0}"
 TRACKER="$HOME/.config/moltbook/todo-tracker.json"
 FOLLOW_UP_FILE="$HOME/.config/moltbook/todo-followups.txt"
+FALSE_POSITIVES="$DIR/todo-false-positives.json"
 
 # Initialize tracker if missing
 if [ ! -f "$TRACKER" ]; then
@@ -41,18 +42,29 @@ if [ -n "$COMMITS" ]; then
     head -10 || true)
 fi
 
-# --- Phase 2: Update tracker with new items ---
+# --- Phase 2: Update tracker with new items (with false-positive filtering) ---
 if [ -n "$NEW_TODOS" ]; then
-  # Use node to merge new TODOs into tracker
+  # Use node to merge new TODOs into tracker, filtering false positives
   node -e "
     const fs = require('fs');
     const tracker = JSON.parse(fs.readFileSync('$TRACKER', 'utf8'));
+
+    // Load false-positive patterns
+    let fpPatterns = [];
+    try {
+      const fp = JSON.parse(fs.readFileSync('$FALSE_POSITIVES', 'utf8'));
+      fpPatterns = (fp.patterns || []).map(p => new RegExp(p, 'i'));
+    } catch {}
+
     const newLines = $(echo "$NEW_TODOS" | jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null || echo '[]');
     for (const line of newLines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
-      // Deduplicate by content (fuzzy: strip whitespace/line numbers)
       const normalized = trimmed.replace(/\s+/g, ' ').substring(0, 200);
+
+      // Skip if matches any false-positive pattern
+      if (fpPatterns.some(re => re.test(normalized))) continue;
+
       const exists = tracker.items.find(i => i.normalized === normalized && i.status === 'open');
       if (!exists) {
         tracker.items.push({
@@ -70,15 +82,34 @@ if [ -n "$NEW_TODOS" ]; then
   " 2>/dev/null || true
 fi
 
-# --- Phase 3: Check if any tracked TODOs have been resolved ---
-# Scan codebase for open tracked items
+# --- Phase 3: Auto-resolve false positives + check if tracked TODOs resolved ---
 node -e "
   const fs = require('fs');
   const { execSync } = require('child_process');
   const tracker = JSON.parse(fs.readFileSync('$TRACKER', 'utf8'));
   let changed = false;
+  let autoResolved = 0;
+
+  // Load false-positive patterns for auto-resolve
+  let fpPatterns = [];
+  try {
+    const fp = JSON.parse(fs.readFileSync('$FALSE_POSITIVES', 'utf8'));
+    fpPatterns = (fp.patterns || []).map(p => new RegExp(p, 'i'));
+  } catch {}
+
   for (const item of tracker.items) {
     if (item.status !== 'open') continue;
+
+    // Auto-resolve items matching false-positive patterns
+    if (fpPatterns.some(re => re.test(item.normalized))) {
+      item.status = 'resolved';
+      item.resolved_session = $SESSION_NUM;
+      item.resolution_note = 'auto-resolved: matches false-positive pattern';
+      changed = true;
+      autoResolved++;
+      continue;
+    }
+
     // Extract a unique-ish substring to grep for (first 60 chars of normalized)
     const needle = item.normalized.substring(0, 60).replace(/[\"\\\\]/g, '');
     if (!needle || needle.length < 10) continue;
@@ -107,6 +138,9 @@ node -e "
   // Report
   const open = tracker.items.filter(i => i.status === 'open');
   const stale = open.filter(i => $SESSION_NUM - i.first_seen >= 10);
+  if (autoResolved > 0) {
+    console.log('TODO tracker: auto-resolved ' + autoResolved + ' false positive(s)');
+  }
   if (open.length > 0) {
     console.log('TODO tracker: ' + open.length + ' open (' + stale.length + ' stale 10+ sessions)');
   }

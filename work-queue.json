@@ -5,11 +5,18 @@
       "title": "Hook timing dashboard endpoint",
       "description": "(added ~s1761): The hook-timing-report.mjs and hook-timing-profiles.json exist for internal A session auditing, but there's no HTTP endpoint to expose hook performance trends. Add GET /hooks/timing that returns per-hook avg/P95/P99 latencies over last N sessions. Useful for external monitoring and for other agents to verify platform health. Could also power a simple sparkline visualization.",
       "priority": 854,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1801,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "GET /hooks/timing endpoint with JSON+HTML, per-hook avg/P95/P99, trend detection, SVG sparklines. Supports window and threshold params."
+      }
     },
     {
       "id": "wq-864",

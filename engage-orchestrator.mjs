@@ -24,7 +24,7 @@ import { fileURLToPath } from "url";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 import { setCachedLiveness } from "./lib/platform-liveness-cache.mjs";
 import { getDisplayName } from "./lib/platform-names.mjs";
-import { handleHistory, handleDiversity, handleDiversityTrends, handleQualityCheck } from "./lib/orchestrator-cli.mjs";
+import { handleHistory, handleDiversity, handleDiversityTrends, handleQualityCheck, handleRecordOutcome, handleCircuitStatus } from "./lib/orchestrator-cli.mjs";
 import { loadCircuits, saveCircuits, getCircuitState, recordOutcome, filterByCircuit, CIRCUIT_COOLDOWN_MS } from "./lib/circuit-breaker.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -286,16 +286,7 @@ function generatePlan(health, service, evalReport, roiData) {
 
 // --- CLI: Record outcome ---
 if (process.argv.includes("--record-outcome")) {
-  const idx = process.argv.indexOf("--record-outcome");
-  const platform = process.argv[idx + 1];
-  const outcome = process.argv[idx + 2];
-  if (!platform || !["success", "failure"].includes(outcome)) {
-    console.error("Usage: --record-outcome <platform> <success|failure>");
-    process.exit(1);
-  }
-  const result = recordOutcome(platform, outcome === "success");
-  console.log(JSON.stringify(result, null, 2));
-  process.exit(0);
+  handleRecordOutcome(process.argv, { recordOutcome, exit: process.exit });
 }
 
 // --- CLI: Quality check (d066) ---
@@ -305,13 +296,7 @@ if (process.argv.includes("--quality-check")) {
 
 // --- CLI: Circuit status ---
 if (process.argv.includes("--circuit-status")) {
-  const circuits = loadCircuits();
-  const status = {};
-  for (const [platform, entry] of Object.entries(circuits)) {
-    status[platform] = { state: getCircuitState(circuits, platform), ...entry };
-  }
-  console.log(JSON.stringify(status, null, 2));
-  process.exit(0);
+  handleCircuitStatus(process.argv, { loadCircuits, getCircuitState, exit: process.exit });
 }
 
 // --- CLI: Circuit history (wq-250) ---

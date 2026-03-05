@@ -6,7 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Add DI to engage-orchestrator.mjs CLI handlers that still use globals** (added ~s1740): The handleQualityCheck DI pattern (wq-810) could be extended to the remaining CLI handlers in engage-orchestrator.mjs that use process.argv/process.exit directly (--record-outcome, --circuit-status). Would make the full CLI surface unit-testable without subprocess spawning.
+- **Migrate engage-orchestrator.test.mjs from subprocess to DI-based tests** (added ~s1755): Now that all CLI handlers (handleHistory, handleDiversity, handleDiversityTrends, handleQualityCheck, handleRecordOutcome, handleCircuitStatus) have DI support in lib/orchestrator-cli.mjs, the integration tests in engage-orchestrator.test.mjs still spawn subprocesses with execSync. These could be converted to fast in-process tests using the DI deps pattern, eliminating the SCRATCH directory patching, file copying, and ~2s runtime overhead. Would also remove the fragile path-patching logic in the test setup() function.
 
 - **Auto-refresh Colony JWT in E session prehook** (added ~s1724): Colony JWTs expire every 24h. The 14-token-refresh.sh hook handles this automatically but only runs at session start. If an E session starts >23h after last refresh, the token may expire mid-session. Consider adding a Colony-specific JWT freshness check to the E session prehook (35-e-session-prehook_E.sh) that validates token expiry before platform selection, similar to how 4claw credential checks work.
 

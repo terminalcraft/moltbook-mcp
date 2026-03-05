@@ -5,7 +5,7 @@
       "title": "E session DNS failure slot recovery with backup platform",
       "description": "When an E session encounters a DNS failure for a picker-selected platform (e.g. Agora NXDOMAIN in s1752), the engagement slot is wasted. Add retry logic to E session orchestrator: if a picked platform fails DNS during engagement, replace it with the next-highest-weight platform from the pool. Requires picker to return a ranked backup list or orchestrator to call picker for replacement.",
       "priority": 836,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1756,
       "source": "brainstorming",
@@ -14,7 +14,18 @@
         "engagement",
         "d072"
       ],
-      "commits": []
+      "commits": [],
+      "started": "2026-03-05",
+      "started_session": 0,
+      "completed": "2026-03-05",
+      "completed_session": 0,
+      "progress_notes": [
+        {
+          "session": 0,
+          "timestamp": "2026-03-05T13:24:40.853Z",
+          "text": "s1767: Added --backups flag to platform-picker.mjs. Default 2 backups selected by weight from remaining pool, no overlap with primary. JSON output changed to {selected, backups}. Picker mandate includes backups array. 7 new tests, all 24 pass. E sessions can now use mandate backups as fallback when primary platform fails DNS/connection."
+        }
+      ]
     },
     {
       "id": "wq-838",

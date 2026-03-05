@@ -11,8 +11,9 @@ import { buildRPromptBlock } from './lib/r-prompt-sections.mjs';
 import { buildAPromptBlock } from './lib/a-prompt-sections.mjs';
 import { buildEPromptBlock } from './lib/e-prompt-sections.mjs';
 import { buildBPromptBlock } from './lib/b-prompt-sections.mjs';
-import { runQueuePipeline, isTitleDupe, STOP_WORDS } from './lib/queue-pipeline.mjs';
+import { runQueuePipeline } from './lib/queue-pipeline.mjs';
 import { runIntelPipeline } from './lib/intel-pipeline.mjs';
+import { runBrainstormPipeline } from './lib/brainstorm-pipeline.mjs';
 
 const DIR = new URL('.', import.meta.url).pathname.replace(/\/$/, '');
 const STATE_DIR = join(process.env.HOME, '.config/moltbook');
@@ -129,142 +130,9 @@ const { wq, queue, queueCtx, dirtyRef: wqDirtyRef, pending, blocked, retired } =
 // (queue starvation gate) left R sessions without brainstorm/intel/intake data.
 // Cost of always computing: ~3 file reads, negligible.
 {
-  // Brainstorming count + auto-seed when empty (R#70).
-  // When brainstorming hits 0 ideas, R sessions waste budget manually generating ideas.
-  // Instead, parse recent session-history.txt to extract "feat:" commits and generate
-  // follow-up seed ideas (test/harden/extend patterns). This shifts replenishment from
-  // expensive LLM generation to cheap deterministic pre-computation.
-  let bsContent = fc.text(PATHS.brainstorming);
-  let bsCount = (bsContent.match(/^- \*\*/gm) || []).length;
-
-  if (bsCount < 3) {
-    // Auto-seed (R#82): Trigger when brainstorming < 3 ideas (was === 0).
-    // Dead zone bug: with 1-2 ideas, auto-seed didn't run (threshold was 0),
-    // but auto-promote couldn't promote either (too few ideas vs buffer).
-    // Queue starved because neither mechanism could produce work.
-    // Now seeds up to 4 ideas when below the health threshold of 3.
-    // Previous approach (R#71) extracted 80-char substrings of directive content as titles,
-    // producing ideas like "Address: Map the entire agent ecosystem. Crawl directories, follow links from agent profi"
-    // — these are unreadable when promoted to queue items and tell B sessions nothing actionable.
-    // New approach: each seed has a short imperative title (<60 chars) and a description.
-    // Title format matches what a B session needs: "Build X", "Add Y support", "Fix Z".
-    const seeds = [];
-    const maxSeeds = 4 - bsCount; // Only fill gap to target (R#82)
-    const queueTitles = queue.map(i => i.title);
-    // R#84: Also dedup against existing brainstorming ideas, not just queue titles.
-    // Without this, auto-seed generates duplicate brainstorming entries when multiple
-    // active directives share keywords (e.g. d002 and d010 both produce "Batch-evaluate
-    // 5 undiscovered services"). The duplicates survive because isTitleDupe only checked
-    // queue items. Now we collect existing idea titles from BRAINSTORMING.md and check both.
-    const existingIdeas = [...bsContent.matchAll(/^- \*\*(.+?)\*\*/gm)].map(m => m[1].trim());
-    const allTitles = [...queueTitles, ...existingIdeas];
-    const isDupe = (title) => isTitleDupe(title, allTitles);
-
-    // Source 1: Unaddressed directives — table-driven keyword→seed mapping (R#78).
-    // Previously a chain of if/else blocks that was hard to extend. Now declarative:
-    // each entry maps keyword patterns to a concrete seed title+description template.
-    // B#454: Added minMatch field to prevent false keyword matches.
-    // Previously `.some()` triggered on ANY single keyword. d067 ("cost trends")
-    // falsely matched the budget row, producing wq-004 (non-actionable).
-    // Now each row specifies minMatch (default 1). Rows with common single-word
-    // keywords (like 'cost') use minMatch:2 to require multiple keyword hits.
-    const DIRECTIVE_SEED_TABLE = [
-      { keywords: ['ecosystem', 'map', 'discover', 'catalog'], title: 'Batch-evaluate 5 undiscovered services', desc: 'systematically probe unevaluated services from services.json' },
-      { keywords: ['explore', 'evaluate', 'e session', 'depth'], title: 'Deep-explore one new platform end-to-end', desc: 'pick an unevaluated service, register, post, measure response' },
-      { keywords: ['account', 'credential', 'cred', 'path resolution'], title: 'Fix credential management issues', desc: 'audit account-manager path resolution and platform health checks' },
-      { keywords: ['budget', 'cost', 'utilization', 'spending'], minMatch: 2, title: 'Improve session budget utilization', desc: 'add retry loops or deeper exploration to underutilized sessions' },
-      { skip: true, keywords: ['safety', 'hook', 'do not remove', 'do not weaken'] },
-    ];
-    // R#230: Use fc.json(PATHS.directives) instead of raw readFileSync.
-    // directives.json is read again at line ~889 for intake check — fc ensures single read.
-    {
-      const dData = fc.json(PATHS.directives);
-      if (dData) {
-        const active = (dData.directives || []).filter(d => d.status === 'active' || d.status === 'pending');
-        for (const d of active) {
-          if (seeds.length >= maxSeeds) break;
-          const content = (d.content || '').toLowerCase();
-          const match = DIRECTIVE_SEED_TABLE.find(row => {
-            const hits = row.keywords.filter(k => content.includes(k)).length;
-            return hits >= (row.minMatch || 1);
-          });
-          if (match?.skip) continue;
-          // R#86: Always include directive ID in title to prevent cross-directive
-          // collisions. Previously, two directives matching the same keyword row
-          // (e.g. d002 and d010 both hitting 'ecosystem') produced identical titles
-          // like "Batch-evaluate 5 undiscovered services". The dedup caught this
-          // within a single run but not across sessions (pre-existing dupes persisted).
-          // Now titles are directive-specific: "Batch-evaluate 5 undiscovered services (d002)".
-          const baseTitle = match ? match.title : `Address directive ${d.id}`;
-          const title = match ? `${baseTitle} (${d.id})` : baseTitle;
-          const desc = match ? match.desc : (d.content || '').substring(0, 120);
-          if (!isDupe(title)) {
-            seeds.push(`- **${title}**: ${desc}`);
-          }
-        }
-      }
-    }
-
-    // Source 2: Recent session patterns — find concrete improvement opportunities
-    // R#230: Use fc.text(PATHS.history) instead of raw readFileSync — already cached from stall detection.
-    if (seeds.length < maxSeeds) {
-      const hist = fc.text(PATHS.history);
-      const lines = hist.trim().split('\n').slice(-20);
-      // Find repeated build patterns (same file touched 4+ times = unstable code)
-      const fileCounts = {};
-      for (const line of lines) {
-        const files = line.match(/files=\[([^\]]+)\]/)?.[1];
-        if (files) {
-          for (const f of files.split(',').map(s => s.trim())) {
-            fileCounts[f] = (fileCounts[f] || 0) + 1;
-          }
-        }
-      }
-      const hotFiles = Object.entries(fileCounts)
-        .filter(([f, c]) => c >= 4 && !['work-queue.json', 'BRAINSTORMING.md', 'directives.json', '(none)'].includes(f))
-        .sort((a, b) => b[1] - a[1]);
-      if (hotFiles.length > 0 && seeds.length < maxSeeds) {
-        const top = hotFiles[0];
-        const title = `Add tests for ${top[0]}`;
-        if (!isDupe(title)) {
-          seeds.push(`- **${title}**: Touched ${top[1]} times in last 20 sessions — stabilize with unit tests`);
-        }
-      }
-      // E session underutilization
-      const lowCostE = lines.filter(l => {
-        const c = l.match(/cost=\$([0-9.]+)/); const m = l.match(/mode=([A-Z])/);
-        return c && m && m[1] === 'E' && parseFloat(c[1]) < 1.0;
-      });
-      if (lowCostE.length >= 3 && seeds.length < maxSeeds && !isDupe('E session budget utilization')) {
-        seeds.push(`- **Improve E session budget utilization**: ${lowCostE.length}/recent E sessions under $1 — add auto-retry or deeper exploration loops`);
-      }
-    }
-
-    // Source 3: Queue health
-    if (pending.length === 0 && seeds.length < maxSeeds && !isDupe('queue starvation')) {
-      seeds.push(`- **Generate 5 concrete build tasks from open directives**: Prevent queue starvation by pre-decomposing directive work`);
-    }
-
-    if (seeds.length > 0) {
-      const marker = '## Evolution Ideas';
-      if (bsContent.includes(marker)) {
-        bsContent = bsContent.replace(marker, marker + '\n\n' + seeds.join('\n'));
-      } else {
-        bsContent += '\n' + marker + '\n\n' + seeds.join('\n') + '\n';
-      }
-      writeFileSync(PATHS.brainstorming, bsContent);
-      fc.invalidate(PATHS.brainstorming); // R#223: reset cache after write
-      result.brainstorm_seeded = seeds.length;
-    }
-  }
-  // R#87: Always recount from file content after all mutations (auto-seed + auto-promote
-  // may both modify BRAINSTORMING.md). Previous code set bsCount = seeds.length after
-  // seeding, which REPLACED the count instead of adding to it — a brainstorming file
-  // with 2 existing ideas + 1 new seed would report bsCount=1 instead of 3. This caused
-  // pipeline health snapshots to underreport, triggering false WARN alerts and unnecessary
-  // re-seeding in subsequent sessions.
-  const finalBs = fc.text(PATHS.brainstorming);
-  result.brainstorm_count = (finalBs.match(/^- \*\*/gm) || []).length;
+  // Brainstorming pipeline: count ideas, auto-seed when below threshold.
+  // R#315: Extracted to lib/brainstorm-pipeline.mjs (~130 lines → single function call).
+  runBrainstormPipeline({ fc, PATHS, COUNTER, result, queue });
 
   // Intel pipeline: digest, auto-promote, archive (R#295: extracted to lib/intel-pipeline.mjs)
   const intel = readJSON(PATHS.intel);

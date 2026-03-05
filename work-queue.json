@@ -60,29 +60,6 @@
         "d073"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-869",
-      "title": "Fix 09-financial-check.sh hook timing regression (p95=4154ms, degrading)",
-      "description": "A#199 finding: 09-financial-check.sh emerged as worst offender at p95=4154ms avg=925ms (degrading). Was p95=3132ms (improving) at A#198. Overall degrading_count jumped 0→3. Investigate whether the EVM balance check or network calls are the latency source. Add timeout guards similar to what wq-842 did for 02-periodic-checks.sh.",
-      "priority": 869,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1795,
-      "source": "audit-s1795",
-      "tags": [
-        "audit"
-      ],
-      "commits": [
-        "d1c78890"
-      ],
-      "outcome": {
-        "session": 1797,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added 3s per-check timeouts, parallel execution, 5s hook watchdog. Tested: 3.03s wall time (was p95=4154ms). Syntax validated, non-B exit instant."
-      }
     }
   ]
 }

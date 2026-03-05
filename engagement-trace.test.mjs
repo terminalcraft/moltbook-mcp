@@ -84,6 +84,37 @@ describe('engagement-trace schema', () => {
       assert.ok(skip.reason, 'skip has reason');
     }
   });
+
+  it('backup_substitutions is optional array', () => {
+    const trace = makeTrace();
+    assert.equal(trace.backup_substitutions, undefined, 'absent by default');
+  });
+
+  it('backup_substitutions entries have original+backup+reason', () => {
+    const trace = makeTrace({
+      backup_substitutions: [
+        { original: 'lbstrs', backup: '4claw', reason: 'DNS NXDOMAIN' }
+      ]
+    });
+    assert.ok(Array.isArray(trace.backup_substitutions));
+    for (const sub of trace.backup_substitutions) {
+      assert.ok(sub.original, 'substitution has original platform');
+      assert.ok(sub.backup, 'substitution has backup platform');
+      assert.ok(sub.reason, 'substitution has reason');
+    }
+  });
+
+  it('backup_substitutions reason must describe failure type', () => {
+    const trace = makeTrace({
+      backup_substitutions: [
+        { original: 'lbstrs', backup: '4claw', reason: 'Connection refused' }
+      ]
+    });
+    for (const sub of trace.backup_substitutions) {
+      assert.equal(typeof sub.reason, 'string');
+      assert.ok(sub.reason.length > 3, 'reason should be descriptive');
+    }
+  });
 });
 
 // --- Trace array format tests ---

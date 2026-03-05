@@ -46,6 +46,11 @@ result.trace_topics = sessionTrace ? (sessionTrace.topics || []) : [];
 result.trace_agents = sessionTrace ? (sessionTrace.agents_interacted || []) : [];
 result.trace_picker_mandate = sessionTrace ? (sessionTrace.picker_mandate || []) : [];
 
+// Backup substitution telemetry (wq-865, wq-844 protocol)
+const rawSubstitutions = sessionTrace ? (sessionTrace.backup_substitutions || []) : [];
+result.backup_substitutions = rawSubstitutions;
+result.backup_substitution_count = rawSubstitutions.length;
+
 // --- Phase 2 reached? ---
 let phase2Reached = false;
 const timing = readJSON(join(stateDir, 'e-phase-timing.json'));
@@ -226,6 +231,7 @@ const shellVars = [
   'Q_WARNS=' + result.quality_session_warns,
   'Q_TOTAL=' + result.quality_session_total,
   'ARCHIVE_INTEL_COUNT=' + result.archive_intel_count,
+  'BACKUP_SUBSTITUTION_COUNT=' + result.backup_substitution_count,
 ];
 
 console.log('JSON:' + jsonLine);

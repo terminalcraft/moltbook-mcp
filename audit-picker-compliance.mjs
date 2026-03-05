@@ -164,10 +164,18 @@ function main() {
   const skipped = getSkippedPlatforms(trace);
   const skippedIds = skipped.map(s => s.platform);
 
+  // Backup substitutions (wq-865): when a mandate platform was unreachable and
+  // replaced by a backup, the original counts as compliant via substitution
+  const substitutions = Array.isArray(trace.backup_substitutions) ? trace.backup_substitutions : [];
+  const substitutedOriginals = new Set(substitutions.map(s => (s.original || "").toLowerCase()));
+  if (substitutions.length > 0) {
+    console.log(`  Substitutions: ${substitutions.map(s => `${s.original}→${s.backup} (${s.reason})`).join(", ")}`);
+  }
+
   // Calculate compliance
-  // Platforms that were selected AND (engaged OR legitimately skipped) count as compliant
-  const compliant = selected.filter(s => engaged.includes(s) || skippedIds.includes(s));
-  const missed = selected.filter(s => !engaged.includes(s) && !skippedIds.includes(s));
+  // Platforms that were selected AND (engaged OR legitimately skipped OR substituted) count as compliant
+  const compliant = selected.filter(s => engaged.includes(s) || skippedIds.includes(s) || substitutedOriginals.has(s));
+  const missed = selected.filter(s => !engaged.includes(s) && !skippedIds.includes(s) && !substitutedOriginals.has(s));
   const complianceRate = selected.length > 0 ? compliant.length / selected.length : 1;
   const compliancePct = Math.round(complianceRate * 100);
 

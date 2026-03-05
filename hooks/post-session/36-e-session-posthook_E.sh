@@ -83,6 +83,7 @@ eval "$(echo "$SHELL_VARS" | grep '^[A-Z_]*=')"
 : "${Q_WARNS:=0}"
 : "${Q_TOTAL:=0}"
 : "${ARCHIVE_INTEL_COUNT:=0}"
+: "${BACKUP_SUBSTITUTION_COUNT:=0}"
 
 D049_COMPLIANT="false"
 [[ "$INTEL_COUNT" -gt 0 ]] && D049_COMPLIANT="true"

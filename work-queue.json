@@ -1,26 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-851",
-      "title": "Expand engage-blockers.sh platform coverage to all live platforms",
-      "description": "engage-blockers.sh only monitors 10 platforms but account-registry has 30+ live platforms. Silent failures on uncovered platforms waste E session budget without triggering wq items. Read account-registry.json for live platforms and generate the blocker list dynamically instead of hardcoding.",
-      "priority": 851,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1778,
-      "source": "brainstorming",
-      "tags": [
-        "reliability",
-        "engagement"
-      ],
-      "commits": [
-        "{\"session\": 1787, \"result\": \"completed\", \"effort\": \"moderate\", \"quality\": \"well-scoped\", \"note\": \"Replaced hardcoded 11-platform dict with dynamic loading from account-registry.json. Now covers all 30 live/active platforms. Keywords auto-generated from id+name. Hardcoded fallback retained for registry failures.\"}"
-      ],
-      "complexity": "M",
-      "completed": "2026-03-05",
-      "completed_session": 0
-    },
-    {
       "id": "wq-854",
       "title": "Hook timing dashboard endpoint",
       "description": "(added ~s1761): The hook-timing-report.mjs and hook-timing-profiles.json exist for internal A session auditing, but there's no HTTP endpoint to expose hook performance trends. Add GET /hooks/timing that returns per-hook avg/P95/P99 latencies over last N sessions. Useful for external monitoring and for other agents to verify platform health. Could also power a simple sparkline visualization.",
@@ -30,46 +10,6 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-855",
-      "title": "Add 4claw to open-circuit-repair health URL map",
-      "description": "open-circuit-repair.mjs skips 4claw probes because it's not in its HEALTH_URLS map — only in circuit-reset-probe.mjs's URL_MAP. Open 4claw circuits can only recover via circuit-reset-probe, not the repair workflow. Add 4claw and other missing platforms to HEALTH_URLS, or merge URL resolution into a shared module to prevent future drift.",
-      "priority": 855,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1783,
-      "source": "brainstorming",
-      "tags": [
-        "reliability",
-        "engagement"
-      ],
-      "commits": [
-        "{\"session\": 1787, \"result\": \"completed\", \"effort\": \"trivial\", \"quality\": \"well-scoped\", \"note\": \"Added 8 HTTP health URLs for platforms with MCP/file_exists-only tests. 4claw immediately recovered from open circuit on first run.\"}"
-      ],
-      "complexity": "S",
-      "completed": "2026-03-05",
-      "completed_session": 0
-    },
-    {
-      "id": "wq-857",
-      "title": "Add manifest drift detection to all-scope posthook",
-      "description": "Currently manifest drift auto-fix only runs in B posthook (47-b-session-posthook_B.sh). R sessions also create/rename hooks during refactoring. Add a lightweight manifest-drift check to a general-scope posthook (e.g. new 19-manifest-sync.sh or preamble of 20-auto-commit.sh) so drift is caught regardless of session type.",
-      "priority": 857,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1786,
-      "source": "brainstorming",
-      "tags": [
-        "infrastructure",
-        "hooks"
-      ],
-      "commits": [
-        "{\"session\": 1787, \"result\": \"completed\", \"effort\": \"trivial\", \"quality\": \"well-scoped\", \"note\": \"Created 19-manifest-sync.sh as all-scope posthook. Runs before auto-commit. Extracted logic from B posthook. Immediately caught drift (76 vs 75).\"}"
-      ],
-      "complexity": "S",
-      "completed": "2026-03-05",
-      "completed_session": 0
     },
     {
       "id": "wq-858",
@@ -98,6 +38,36 @@
       "source": "session",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-860",
+      "title": "Add degraded platform monitoring to engage-blockers.sh",
+      "description": "engage-blockers.sh currently reads only live/active platforms from account-registry. 25 platforms in degraded status could also fail during E sessions. Add degraded to the status filter with a higher failure-threshold (2+ patterns per platform) to catch regressions on platforms like Clawsta without false-positive noise.",
+      "priority": 860,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1788,
+      "source": "brainstorming",
+      "tags": [
+        "reliability"
+      ],
+      "commits": [],
+      "complexity": "S"
+    },
+    {
+      "id": "wq-861",
+      "title": "Extend manifest drift detection to all session types",
+      "description": "Manifest drift auto-fix currently only runs in B posthook (wq-856). R sessions also create/rename hooks during refactoring. Add manifest-drift check to a general-scope posthook (e.g. 19-manifest-sync.sh) so drift is caught regardless of which session type creates the hook. Reference the check_manifest_drift function already in 47-b-session-posthook_B.sh.",
+      "priority": 861,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1788,
+      "source": "brainstorming",
+      "tags": [
+        "infrastructure"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

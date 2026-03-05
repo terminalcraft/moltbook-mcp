@@ -1254,6 +1254,15 @@ describe('escalation tracker integrity', () => {
     }
   });
 
+  it('cost trend trackers use canonical names (wq-884)', () => {
+    // All three session types should use *_session_cost naming pattern
+    const costTrackers = ['b_session_cost', 'r_session_cost', 'e_session_cost'];
+    for (const id of costTrackers) {
+      assert.ok(id in trackers,
+        `cost tracker "${id}" is missing from escalation_tracker — add it following SESSION_AUDIT_SUBCHECKS.md`);
+    }
+  });
+
   it('zero-degradation trackers have escalation_level 0', () => {
     // If consecutive_degradations is 0, escalation must also be 0
     for (const [id, tracker] of Object.entries(trackers)) {

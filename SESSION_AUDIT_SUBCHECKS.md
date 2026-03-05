@@ -160,7 +160,7 @@ Use `audit-stats.mjs` → `b_cost_trend`. Computes last-5 vs last-10 B session c
 - `threshold_breach` or `increasing` → increment `consecutive_degradations`
 - `stable` or `decreasing` → reset to 0
 
-## E/R session cost trend indicators (wq-875)
+## E/R session cost trend indicators (wq-875, wq-884)
 
 Same protocol as B cost trend above. Use `audit-stats.mjs` → `e_cost_trend` / `r_cost_trend`. Same fields, same verdict logic, same auto-escalation and escalation tracker rules. Only the thresholds differ:
 
@@ -170,6 +170,8 @@ Same protocol as B cost trend above. Use `audit-stats.mjs` → `e_cost_trend` / 
 | R | $2.00 | `r_session_cost` |
 
 Report in `sessions.E` / `sessions.R` with `cost_trend` and `cost_trend_detail` fields.
+
+**Automated escalation**: Run `node audit-cost-escalation.mjs` (or `--dry-run` to preview). Checks all three types (B/E/R), auto-creates wq items with `["audit", "cost"]` tags when threshold breached. Dedup guard prevents duplicate items. A sessions can run this instead of manually checking each trend.
 
 ## Stale directive tag detection (wq-828)
 

@@ -36,7 +36,7 @@
       "title": "Add 4claw to open-circuit-repair health URL map",
       "description": "open-circuit-repair.mjs skips 4claw probes because it's not in its HEALTH_URLS map — only in circuit-reset-probe.mjs's URL_MAP. Open 4claw circuits can only recover via circuit-reset-probe, not the repair workflow. Add 4claw and other missing platforms to HEALTH_URLS, or merge URL resolution into a shared module to prevent future drift.",
       "priority": 855,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1783,
       "source": "brainstorming",
@@ -44,8 +44,12 @@
         "reliability",
         "engagement"
       ],
-      "commits": [],
-      "complexity": "S"
+      "commits": [
+        "{\"session\": 1787, \"result\": \"completed\", \"effort\": \"trivial\", \"quality\": \"well-scoped\", \"note\": \"Added 8 HTTP health URLs for platforms with MCP/file_exists-only tests. 4claw immediately recovered from open circuit on first run.\"}"
+      ],
+      "complexity": "S",
+      "completed": "2026-03-05",
+      "completed_session": 0
     },
     {
       "id": "wq-857",

@@ -27,14 +27,21 @@
       "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
       "description": "'xxx', 'TODO', 'REPLACE_ME'",
       "priority": 833,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "source": "todo-scan",
       "tags": [
         "followup"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1761,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Recurring false positive \u2014 credential-health-check.mjs:22 contains TODO/xxx/REPLACE_ME as placeholder detection patterns. File already in EXCLUDE_PATHS. Cleaned 19 stale tracker items (100+ sessions old). 4th time this has been flagged per archive."
+      }
     },
     {
       "id": "wq-834",

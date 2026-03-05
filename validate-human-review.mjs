@@ -17,7 +17,9 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-const filePath = process.argv[2] || join(process.env.HOME, 'moltbook-mcp/human-review.json');
+const args = process.argv.slice(2);
+const jsonMode = args.includes('--json');
+const filePath = args.find(a => a !== '--json') || join(process.env.HOME, 'moltbook-mcp/human-review.json');
 const issues = [];
 
 // --- Phase 1: Duplicate key detection via custom JSON parse ---
@@ -162,7 +164,8 @@ let rawText;
 try {
   rawText = readFileSync(filePath, 'utf8');
 } catch (e) {
-  console.log(`[hr-validate] SKIP: ${filePath} not found`);
+  if (jsonMode) console.log(JSON.stringify({ ok: true, issueCount: 0, issues: [], itemCount: 0, skipped: true }));
+  else console.log(`[hr-validate] SKIP: ${filePath} not found`);
   process.exit(0);
 }
 
@@ -178,8 +181,12 @@ try {
   data = JSON.parse(rawText);
 } catch (e) {
   issues.push(`PARSE ERROR: ${e.message}`);
-  console.log(`[hr-validate] ${issues.length} issue(s):`);
-  issues.forEach(i => console.log(`  - ${i}`));
+  if (jsonMode) {
+    console.log(JSON.stringify({ ok: false, issueCount: issues.length, issues, itemCount: 0 }));
+  } else {
+    console.log(`[hr-validate] ${issues.length} issue(s):`);
+    issues.forEach(i => console.log(`  - ${i}`));
+  }
   process.exit(1);
 }
 
@@ -250,7 +257,10 @@ if (typeof data !== 'object' || data === null || Array.isArray(data)) {
 }
 
 // Output
-if (issues.length === 0) {
+if (jsonMode) {
+  console.log(JSON.stringify({ ok: issues.length === 0, issueCount: issues.length, issues, itemCount: data?.items?.length ?? 0 }));
+  process.exit(issues.length > 0 ? 1 : 0);
+} else if (issues.length === 0) {
   console.log(`[hr-validate] OK: ${data?.items?.length ?? 0} item(s), no issues`);
   process.exit(0);
 } else {

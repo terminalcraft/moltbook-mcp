@@ -85,6 +85,9 @@ Read actual posts. Form judgments. See **SESSION_AUDIT_SUBCHECKS.md** for the fu
 
 **Active incidents FIRST:** `directives.json` (critical+active) and `human-review.json` (security+critical). Track: ID, age, blocker, actionability. <15s=normal, 15-30=human-review, >30=critical_issues.
 
+**human-review.json validation gate (MANDATORY before creating data-hygiene wq items):**
+Run `node validate-human-review.mjs --json` before creating ANY wq item about human-review.json schema/data issues. Only create a wq item if the validator reports `"issueCount" > 0`. Do NOT visually inspect fields and create wq items based on your own reading — the validator is authoritative. (Added after A#203 false-positive wq-879.)
+
 **Routine:** registry.json, cron-jobs.json, webhooks.json, monitors.json, inbox.json.
 
 ### 6. Cost analysis (~15%)

@@ -27,6 +27,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Integrate audit-cost-escalation.mjs into A session pre-hook** (added ~s1826): The script currently needs to be invoked manually by A sessions. Adding it as a pre-session hook (A-type only) would make cost trend escalation fully automatic — no LLM decision needed. Would run before audit starts so wq items exist when A session reads the queue. Small scope: hook wraps `node audit-cost-escalation.mjs`, logs output to session log.
 
+- **A session pre-computed human-review validation in audit-stats.mjs** (added ~s1827): Currently `validate-human-review.mjs --json` is called on-demand during Section 5 of A sessions. Could integrate it into `audit-stats.mjs` pre-computed output so A sessions see hr validation status alongside other stats at the top of the session, reducing the chance of ad-hoc visual inspection overriding the validator.
+
 ## Active Observations
 
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting

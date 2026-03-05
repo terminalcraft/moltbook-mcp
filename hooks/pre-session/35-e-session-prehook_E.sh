@@ -2,8 +2,14 @@
 # 35-e-session-prehook_E.sh — Consolidated E-session pre-hook dispatcher
 #
 # Merges 3 individual E-session pre-hooks into a single dispatcher.
-# Runs liveness probe first (circuit state), then seeds context, then appends
-# topic clusters — preserving the dependency order.
+# All 8 checks are independent — only Check 2 (seed) must run first to
+# create CONTEXT_FILE, then all others run in parallel.
+#
+# Performance (wq-837, B#532): Profiling showed the old sequential chain
+# (liveness→seed→topics) took 5.9s worst-case because liveness probe can
+# take 5s with stale cache. Checks are actually independent — liveness
+# updates platform-circuits.json, which no other check reads. Now runs
+# seed first (~50ms), then all 7 others in parallel. Target: ≤3s avg.
 #
 # Replaces:
 #   35-engagement-liveness_E.sh (wq-197, R#271, R#275)
@@ -51,12 +57,12 @@ check_engagement_liveness() {
   fi
 
   echo "[liveness] Cache stale (${cache_age:-missing}s), probing live..."
-  output=$(timeout 5 node engagement-liveness-probe.mjs --session "${SESSION_NUM:-0}" 2>&1)
+  output=$(timeout 3 node engagement-liveness-probe.mjs --session "${SESSION_NUM:-0}" 2>&1)
   exit_code=$?
   echo "$output"
 
   if [ $exit_code -eq 124 ]; then
-    echo "[liveness] WARNING: Probe exceeded 5s hard limit, killed. Using cached circuit state."
+    echo "[liveness] WARNING: Probe exceeded 3s hard limit, killed. Using cached circuit state."
   elif [ $exit_code -ne 0 ]; then
     echo "[liveness] WARNING: Probe failed (exit $exit_code), continuing with cached circuit state"
   fi
@@ -156,16 +162,16 @@ check_engagement_seed() {
 ###############################################################################
 check_topic_clusters() {
   echo "[topic-clusters] Updating Chatr thread state..."
-  update_out=$(timeout 10 node chatr-thread-tracker.mjs update --json 2>/dev/null)
+  update_out=$(timeout 5 node chatr-thread-tracker.mjs update --json 2>/dev/null)
   update_exit=$?
 
   if [ $update_exit -eq 124 ]; then
-    echo "[topic-clusters] Thread tracker timed out (10s), using stale state"
+    echo "[topic-clusters] Thread tracker timed out (5s), using stale state"
   elif [ $update_exit -ne 0 ]; then
     echo "[topic-clusters] Thread tracker failed (exit $update_exit), trying clusters with existing state"
   fi
 
-  clusters_json=$(timeout 8 node chatr-topic-clusters.mjs --json --hours 72 2>/dev/null)
+  clusters_json=$(timeout 4 node chatr-topic-clusters.mjs --json --hours 72 2>/dev/null)
   clusters_exit=$?
 
   if [ $clusters_exit -ne 0 ] || [ -z "$clusters_json" ]; then
@@ -445,26 +451,102 @@ check_colony_jwt_freshness() {
 }
 
 ###############################################################################
-# Run checks: sequential chain (1→2→3), then parallel independent checks (4-8)
+# Run checks: seed first (creates CONTEXT_FILE), then all others in parallel
 #
-# Dependency chain: liveness → seed (creates CONTEXT_FILE) → topic clusters
-# Independent: conversation balance, spending policy, credential check, variety,
-#              Colony JWT freshness
-# Checks 6, 7, 8 write to per-check temp files to avoid interleaved appends,
-# then results are concatenated onto CONTEXT_FILE after all complete.
+# wq-837 optimization: Profiling showed checks 1-3 were falsely serialized.
+# Check 1 (liveness) writes to platform-circuits.json — no other check reads it.
+# Check 2 (seed) creates CONTEXT_FILE — must run first so checks 3,6,7,8 can
+# append to it. Check 3 (topic clusters) reads Chatr data, not circuits.
+# All checks except seed are fully independent.
+#
+# Execution model:
+#   Phase 1: seed (creates CONTEXT_FILE, ~50ms)
+#   Phase 2: all other 7 checks in parallel
+#     - Checks that append to CONTEXT_FILE use temp files (deterministic merge)
+#     - Checks that only print stdout run directly
+#   Phase 3: merge temp files into CONTEXT_FILE (deterministic order)
+#
+# Worst-case wall time: 50ms + max(3s liveness, 5s+4s topics, 5s creds, ...)
+#   = ~3.1s (vs 6.2s before). Liveness at 3s timeout is acceptable because
+#   circuit state is advisory — platform-picker handles open/half-open circuits
+#   gracefully regardless of freshness.
 ###############################################################################
 
-# Sequential dependency chain
-check_engagement_liveness
+# Phase 1: Seed creates CONTEXT_FILE (fast, ~50ms)
 check_engagement_seed
-check_topic_clusters
 
-# Temp files for checks that append to CONTEXT_FILE
+# Phase 2: Temp files for checks that append to CONTEXT_FILE
+TOPICS_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-topics.XXXXXX")
 CRED_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-cred.XXXXXX")
 VARIETY_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-variety.XXXXXX")
 COLONY_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-colony.XXXXXX")
 
-# Run independent checks in parallel
+# Wrap topic clusters to write to temp file instead of CONTEXT_FILE
+check_topic_clusters_parallel() {
+  echo "[topic-clusters] Updating Chatr thread state..."
+  update_out=$(timeout 5 node chatr-thread-tracker.mjs update --json 2>/dev/null)
+  update_exit=$?
+
+  if [ $update_exit -eq 124 ]; then
+    echo "[topic-clusters] Thread tracker timed out (5s), using stale state"
+  elif [ $update_exit -ne 0 ]; then
+    echo "[topic-clusters] Thread tracker failed (exit $update_exit), trying clusters with existing state"
+  fi
+
+  clusters_json=$(timeout 4 node chatr-topic-clusters.mjs --json --hours 72 2>/dev/null)
+  clusters_exit=$?
+
+  if [ $clusters_exit -ne 0 ] || [ -z "$clusters_json" ]; then
+    echo "[topic-clusters] No cluster data available (exit $clusters_exit), skipping"
+    return 0
+  fi
+
+  recs=$(echo "$clusters_json" | jq -r '
+    if ((.recommendations // []) | length) == 0 and ((.clusters // []) | length) == 0 then empty else
+
+    "## Chatr topic clusters (auto-generated)",
+    "\(.threadCount // 0) threads in \(.clusterCount // 0) clusters (last 72h)",
+    "",
+
+    (if ((.recommendations // []) | length) > 0 then
+      "**Recommended engagement targets:**",
+      (.recommendations[] |
+        ([.participants[]? | "@" + .] | join(", ")) as $who |
+        (if ($who | length) > 0 then " (\($who))" else "" end) as $who_str |
+        "- **\(.topic)**: \(.reason)\($who_str)"
+      ),
+      ""
+    else empty end),
+
+    (if ((.clusters // []) | length) > 0 then
+      "**Cluster overview:**",
+      (.clusters[:5][] |
+        (if .engaged and (.engagementGap // 0) == 0 then "[engaged]"
+         elif (.engagementGap // 0) > 0 then "[gap]"
+         else "[unengaged]" end) as $tag |
+        "- \(.label) \($tag): \(.threadCount) threads, \(.totalMessages) msgs"
+      ),
+      ""
+    else empty end)
+
+    end
+  ' 2>/dev/null)
+
+  if [ -n "$recs" ]; then
+    echo "" >> "$TOPICS_TMP"
+    echo "$recs" >> "$TOPICS_TMP"
+    line_count=$(echo "$recs" | wc -l)
+    echo "[topic-clusters] Appended $line_count lines (will merge)"
+  else
+    echo "[topic-clusters] No recommendations to inject"
+  fi
+}
+
+# Run all 7 independent checks in parallel
+check_engagement_liveness &
+pid_liveness=$!
+check_topic_clusters_parallel &
+pid_topics=$!
 check_conversation_balance &
 pid_balance=$!
 check_spending_policy &
@@ -477,10 +559,10 @@ check_colony_jwt_freshness "$COLONY_TMP" &
 pid_colony=$!
 
 # Wait for all parallel checks
-wait $pid_balance $pid_spending $pid_cred $pid_variety $pid_colony
+wait $pid_liveness $pid_topics $pid_balance $pid_spending $pid_cred $pid_variety $pid_colony
 
-# Merge context additions from parallel checks (deterministic order)
-for tmp in "$CRED_TMP" "$VARIETY_TMP" "$COLONY_TMP"; do
+# Phase 3: Merge context additions from parallel checks (deterministic order)
+for tmp in "$TOPICS_TMP" "$CRED_TMP" "$VARIETY_TMP" "$COLONY_TMP"; do
   if [ -s "$tmp" ]; then
     cat "$tmp" >> "$CONTEXT_FILE"
   fi

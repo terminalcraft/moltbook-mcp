@@ -1,30 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-838",
-      "title": "Add auto-resolve for recurring TODO false positives in tracker",
-      "description": "The TODO tracker has flagged credential-health-check.mjs:22 four times despite being in EXCLUDE_PATHS. The issue is that git diff can still show excluded files in some edge cases, or the tracker retains stale items that get re-promoted. Add logic to 27-todo-scan.sh or the tracker phase to auto-resolve items that match a known false-positive list, preventing recurring queue pollution.",
-      "priority": 838,
-      "status": "done",
-      "added": "2026-03-05",
-      "source": "session",
-      "tags": [
-        "maintenance",
-        "hooks"
-      ],
-      "commits": [
-        "5cf7052b"
-      ],
-      "complexity": "S",
-      "outcome": {
-        "session": 1771,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added todo-false-positives.json with 8 regex patterns and dual-layer filtering (Phase 2 blocks new items, Phase 3 auto-resolves existing). Tested with pattern matching unit tests and live hook run."
-      }
-    },
-    {
       "id": "wq-839",
       "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
       "description": "'xxx', 'TODO', 'REPLACE_ME'",
@@ -81,6 +57,22 @@
       "source": "session",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-846",
+      "title": "Parallelize account-manager.mjs test --all",
+      "description": "account-manager.mjs tests 51 platforms sequentially (line 177: for...await testAccount). With 8s safeFetch timeout each, worst-case is 408s. Root cause of 02-periodic-checks p95=30s (A#192). Replace sequential loop with Promise.allSettled and concurrency limit (e.g. 10 at a time). Target: <5s avg.",
+      "priority": 846,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1773,
+      "source": "brainstorming",
+      "tags": [
+        "performance",
+        "infrastructure"
+      ],
+      "commits": [],
+      "complexity": "M"
     }
   ]
 }

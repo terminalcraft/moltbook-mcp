@@ -6,72 +6,8 @@
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { handleRecordOutcome, handleCircuitStatus } from './lib/orchestrator-cli.mjs';
-import { getCircuitState, CIRCUIT_FAILURE_THRESHOLD, CIRCUIT_COOLDOWN_MS } from './lib/circuit-breaker.mjs';
-
-// --- In-memory circuit store factory ---
-// Replaces the SCRATCH directory + file patching with a pure in-memory store
-// that uses the real getCircuitState logic from circuit-breaker.mjs.
-
-function createCircuitStore(initial = {}) {
-  let circuits = JSON.parse(JSON.stringify(initial));
-
-  function recordOutcome(platform, success) {
-    if (!circuits[platform]) {
-      circuits[platform] = { consecutive_failures: 0, total_failures: 0, total_successes: 0, last_failure: null, last_success: null };
-    }
-    const entry = circuits[platform];
-    if (success) {
-      entry.consecutive_failures = 0;
-      entry.total_successes++;
-      entry.last_success = new Date().toISOString();
-    } else {
-      entry.consecutive_failures++;
-      entry.total_failures++;
-      entry.last_failure = new Date().toISOString();
-    }
-    return { platform, state: getCircuitState(circuits, platform), ...entry };
-  }
-
-  return {
-    loadCircuits: () => circuits,
-    getCircuitState: (circs, platform) => getCircuitState(circs, platform),
-    recordOutcome,
-    setCircuits: (c) => { circuits = JSON.parse(JSON.stringify(c)); },
-  };
-}
-
-// Helper: call handleRecordOutcome and return the parsed result
-function diRecordOutcome(store, platform, outcome) {
-  const logs = [];
-  const origLog = console.log;
-  console.log = (...args) => logs.push(args.join(' '));
-  try {
-    handleRecordOutcome(
-      ['--record-outcome', platform, outcome],
-      { recordOutcome: store.recordOutcome, exit: () => {} }
-    );
-  } finally {
-    console.log = origLog;
-  }
-  return JSON.parse(logs.join(''));
-}
-
-// Helper: call handleCircuitStatus and return the parsed result
-function diGetCircuitStatus(store) {
-  const logs = [];
-  const origLog = console.log;
-  console.log = (...args) => logs.push(args.join(' '));
-  try {
-    handleCircuitStatus(
-      ['--circuit-status'],
-      { loadCircuits: store.loadCircuits, getCircuitState: store.getCircuitState, exit: () => {} }
-    );
-  } finally {
-    console.log = origLog;
-  }
-  return JSON.parse(logs.join(''));
-}
+import { CIRCUIT_FAILURE_THRESHOLD, CIRCUIT_COOLDOWN_MS } from './lib/circuit-breaker.mjs';
+import { createCircuitStore, diRecordOutcome, diGetCircuitStatus } from './test-utils/circuit-store-mock.mjs';
 
 // ===== TEST SUITES =====
 

@@ -167,6 +167,39 @@ Pre-hook `32-hook-timing-check_A.sh` runs `node hook-timing-report.mjs --json --
 
 **Known baseline**: `05-smoke-test.sh` at ~10s avg is the prime optimization candidate (identified at wq-827 creation).
 
+## B session cost trend indicator (wq-873)
+
+Use `audit-stats.mjs` → `b_cost_trend`. Computes last-5 vs last-10 B session cost averages with directional arrow.
+
+**Key fields**:
+- `last5_avg`, `last10_avg`: rolling averages
+- `delta`: last5 - last10 (positive = increasing)
+- `trend`: `↑` (increasing >$0.15), `↓` (decreasing >$0.15), `→` (stable)
+- `threshold_crossed`: true when last-5 avg ≥ $2.00
+- `verdict`: `threshold_breach`, `increasing`, `decreasing`, `stable`, `no_data`, `insufficient_data`
+
+**Verdict table**:
+
+| verdict | Condition | Action |
+|---------|-----------|--------|
+| `stable` / `decreasing` | last-5 < $2.00 | none |
+| `increasing` | last-5 < $2.00 but trending up | note in `escalation_tracker.b_session_cost` |
+| `threshold_breach` | last-5 ≥ $2.00 | create wq item `["audit", "cost"]` for B session cost enforcement review |
+
+**Report in `sessions.B` (augment existing fields)**:
+```json
+{
+  "cost_trend": "↓",
+  "cost_trend_detail": "$1.36 last-5 vs $1.67 last-10 (↓ decreasing)"
+}
+```
+
+**Auto-escalation**: When `threshold_crossed === true`, A session MUST create a wq item targeting B session cost enforcement, unless one already exists in pending state with `["audit", "cost"]` tags. Check `jq '[.queue[] | select(.status == "pending" and (.tags | index("cost")))] | length' work-queue.json` first.
+
+**Escalation tracker update**: Update `escalation_tracker.b_session_cost` based on trend direction:
+- `threshold_breach` or `increasing` → increment `consecutive_degradations`
+- `stable` or `decreasing` → reset to 0
+
 ## Stale directive tag detection (wq-828)
 
 Pre-hook `33-stale-tag-check_A.sh` cross-references `work-queue.json` tags against `directives.json` completion status and writes `~/.config/moltbook/stale-tags-audit.json`.

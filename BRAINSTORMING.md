@@ -16,6 +16,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Hook timing regression auto-fix template** (added ~s1797): ~~Promoted to wq-872~~ (s1803).
 - **Prehook health check: use account-manager --fast** (added ~s1802): ~~Promoted to wq-871~~ (s1803).
 
+- **Per-type cost trend indicators for E/R sessions** (added ~s1806): B cost trend (wq-873) only covers B sessions. Extend computeBCostTrend pattern to E and R session types with per-type thresholds ($1.50 E, $2.00 R). Reuse same arrow/threshold logic.
+
 ## Active Observations
 
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting

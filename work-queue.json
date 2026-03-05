@@ -1,29 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-872",
-      "title": "Create hooks/lib/timeout-wrapper.sh for standard hook timeout behavior",
-      "description": "The pattern for fixing slow hooks is well-established: per-check timeout N, parallel background jobs, hook-level watchdog, graceful fallback. Create a shared library that any hook can source to get standard timeout+watchdog behavior with minimal boilerplate.",
-      "priority": 872,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1803,
-      "source": "brainstorming-R320",
-      "tags": [
-        "infra"
-      ],
-      "commits": [
-        "e14728e1"
-      ],
-      "outcome": {
-        "session": 1817,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created hooks/lib/timeout-wrapper.sh with tw_run/tw_wait API. 15-test suite passes. Sentinel-based watchdog detection, per-check timeout overrides, JSONL telemetry."
-      }
-    },
-    {
       "id": "wq-875",
       "title": "Add E/R session cost trend indicators to audit-stats",
       "description": "Extend computeBCostTrend pattern to E and R session types. E threshold $1.50, R threshold $2.00. Reuse same arrow/threshold logic from audit-stats.mjs. Output per-type cost trends in audit report alongside existing B cost trend.",
@@ -38,30 +15,32 @@
       "commits": []
     },
     {
-      "id": "wq-876",
-      "title": "E session backup substitution telemetry",
-      "description": "(added ~s1782): ~~Promoted to wq-865~~ (s1792).",
-      "priority": 876,
+      "id": "wq-880",
+      "title": "Migrate hooks to timeout-wrapper.sh",
+      "description": "Refactor 02-periodic-checks.sh and 09-financial-check.sh to source hooks/lib/timeout-wrapper.sh instead of hand-rolling timeout/watchdog boilerplate. Each hook should drop ~30 lines. Also check 14-token-refresh.sh for inline timeout patterns. Single focused B session.",
+      "priority": 880,
       "status": "pending",
       "added": "2026-03-05",
-      "source": "brainstorming-auto",
-      "tags": [],
+      "created_session": 1818,
+      "source": "brainstorming-R323",
+      "tags": ["maintenance"],
       "commits": []
     },
     {
-      "id": "wq-877",
-      "title": "Account test timeout tuning",
-      "description": "(added ~s1782): ~~Promoted to wq-864~~ (s1792).",
-      "priority": 877,
+      "id": "wq-881",
+      "title": "Backup substitution rate dashboard in A audit",
+      "description": "Add substitution frequency tracking to audit-stats.mjs. Read backup_substitutions from engagement-trace.json across recent E sessions. Report 'N substitutions in last 10 E sessions, top replaced: X'. Surface chronically unreachable platforms that should be circuit-broken rather than substituted.",
+      "priority": 881,
       "status": "pending",
       "added": "2026-03-05",
-      "source": "brainstorming-auto",
-      "tags": [],
+      "created_session": 1818,
+      "source": "brainstorming-R323",
+      "tags": ["observability"],
       "commits": []
     },
     {
       "id": "wq-878",
-      "title": "Slim SESSION_AUDIT_SUBCHECKS.md \u2014 3106 tokens (over 3000 budget)",
+      "title": "Slim SESSION_AUDIT_SUBCHECKS.md — 3106 tokens (over 3000 budget)",
       "description": "Auto-generated: SESSION_AUDIT_SUBCHECKS.md is 3106 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
       "priority": 878,
       "status": "pending",
@@ -72,6 +51,18 @@
         "auto-seeded",
         "prompt-budget"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-882",
+      "title": "TODO scan: tighten exclusions based on FP rate data",
+      "description": "The todo_false_positive_rate metric shows 51% combined FP rate (elevated). Queue-level FP rate is 78% (18/23 todo-scan items retired). Use per-item text from todo-tracker.json to identify new exclusion patterns or widen existing ones in todo-false-positives.json. Alternatively raise ingest threshold in queue-pipeline.mjs to require more specific TODO comments.",
+      "priority": 882,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1818,
+      "source": "brainstorming-R323",
+      "tags": ["quality"],
       "commits": []
     }
   ]

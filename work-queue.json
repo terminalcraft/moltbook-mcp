@@ -56,7 +56,7 @@
       "title": "Add manifest drift detection to all-scope posthook",
       "description": "Currently manifest drift auto-fix only runs in B posthook (47-b-session-posthook_B.sh). R sessions also create/rename hooks during refactoring. Add a lightweight manifest-drift check to a general-scope posthook (e.g. new 19-manifest-sync.sh or preamble of 20-auto-commit.sh) so drift is caught regardless of session type.",
       "priority": 857,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1786,
       "source": "brainstorming",
@@ -64,8 +64,12 @@
         "infrastructure",
         "hooks"
       ],
-      "commits": [],
-      "complexity": "S"
+      "commits": [
+        "{\"session\": 1787, \"result\": \"completed\", \"effort\": \"trivial\", \"quality\": \"well-scoped\", \"note\": \"Created 19-manifest-sync.sh as all-scope posthook. Runs before auto-commit. Extracted logic from B posthook. Immediately caught drift (76 vs 75).\"}"
+      ],
+      "complexity": "S",
+      "completed": "2026-03-05",
+      "completed_session": 0
     },
     {
       "id": "wq-858",
@@ -82,6 +86,18 @@
       ],
       "commits": [],
       "complexity": "S"
+    },
+    {
+      "id": "wq-859",
+      "title": "Consolidate HEALTH_URLS between open-circuit-repair.mjs and circuit-reset-probe.mjs into shared module",
+      "description": "reliability",
+      "priority": 859,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

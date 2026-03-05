@@ -1,110 +1,85 @@
 #!/usr/bin/env node
-// engage-orchestrator.test.mjs — Unit tests for engage-orchestrator.mjs circuit breaker
-// Tests: circuit state transitions, cooldown timing, outcome recording, ROI calculation
+// engage-orchestrator.test.mjs — DI-based unit tests for circuit breaker logic
+// Tests: circuit state transitions, cooldown timing, outcome recording, edge cases
+// Migrated from subprocess/SCRATCH-based tests to fast in-process DI tests (wq-834).
 // Usage: node --test engage-orchestrator.test.mjs
 
-import { test, describe, beforeEach, afterEach } from 'node:test';
+import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, copyFileSync } from 'fs';
-import { execSync } from 'child_process';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { tmpdir } from 'os';
+import { handleRecordOutcome, handleCircuitStatus } from './lib/orchestrator-cli.mjs';
+import { getCircuitState, CIRCUIT_FAILURE_THRESHOLD, CIRCUIT_COOLDOWN_MS } from './lib/circuit-breaker.mjs';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const SCRATCH = join(tmpdir(), 'eo-test-' + Date.now());
+// --- In-memory circuit store factory ---
+// Replaces the SCRATCH directory + file patching with a pure in-memory store
+// that uses the real getCircuitState logic from circuit-breaker.mjs.
 
-// Constants from engage-orchestrator.mjs
-const CIRCUIT_FAILURE_THRESHOLD = 3;
-const CIRCUIT_COOLDOWN_MS = 24 * 3600 * 1000; // 24h
+function createCircuitStore(initial = {}) {
+  let circuits = JSON.parse(JSON.stringify(initial));
 
-function setup() {
-  mkdirSync(SCRATCH, { recursive: true });
-  mkdirSync(join(SCRATCH, 'lib'), { recursive: true });
+  function recordOutcome(platform, success) {
+    if (!circuits[platform]) {
+      circuits[platform] = { consecutive_failures: 0, total_failures: 0, total_successes: 0, last_failure: null, last_success: null };
+    }
+    const entry = circuits[platform];
+    if (success) {
+      entry.consecutive_failures = 0;
+      entry.total_successes++;
+      entry.last_success = new Date().toISOString();
+    } else {
+      entry.consecutive_failures++;
+      entry.total_failures++;
+      entry.last_failure = new Date().toISOString();
+    }
+    return { platform, state: getCircuitState(circuits, platform), ...entry };
+  }
 
-  // Copy and patch lib/circuit-breaker.mjs to use SCRATCH directory
-  let cbSrc = readFileSync(join(__dirname, 'lib', 'circuit-breaker.mjs'), 'utf8');
-  cbSrc = cbSrc.replace(
-    'const CIRCUIT_PATH = join(__dirname, "..", "platform-circuits.json");',
-    `const CIRCUIT_PATH = ${JSON.stringify(join(SCRATCH, 'platform-circuits.json'))};`
-  );
-  writeFileSync(join(SCRATCH, 'lib', 'circuit-breaker.mjs'), cbSrc);
-
-  // Copy engage-orchestrator.mjs and patch paths
-  let src = readFileSync(join(__dirname, 'engage-orchestrator.mjs'), 'utf8');
-
-  // Patch relative imports to use absolute paths to the original directories
-  const providersPath = join(__dirname, 'providers', 'engagement-analytics.js');
-  src = src.replace(
-    'import { analyzeEngagement } from "./providers/engagement-analytics.js";',
-    `import { analyzeEngagement } from ${JSON.stringify('file://' + providersPath)};`
-  );
-  // Patch lib imports to resolve against SCRATCH/lib for circuit-breaker, original lib for others
-  const scratchLibPrefix = 'file://' + join(SCRATCH, 'lib') + '/';
-  const realLibPrefix = 'file://' + join(__dirname, 'lib') + '/';
-  src = src.replace(
-    /from "\.\/lib\/circuit-breaker\.mjs"/g,
-    `from "${scratchLibPrefix}circuit-breaker.mjs"`
-  );
-  src = src.replace(/from "\.\/lib\//g, `from "${realLibPrefix}`);
-
-  // Patch file paths to use SCRATCH directory
-  src = src.replace(
-    'const SERVICES_PATH = join(__dirname, "services.json");',
-    `const SERVICES_PATH = ${JSON.stringify(join(SCRATCH, 'services.json'))};`
-  );
-  src = src.replace(
-    'const INTEL_PATH = join(__dirname, "engagement-intel.json");',
-    `const INTEL_PATH = ${JSON.stringify(join(SCRATCH, 'engagement-intel.json'))};`
-  );
-
-  writeFileSync(join(SCRATCH, 'engage-orchestrator.mjs'), src);
-
-  // Create minimal services.json
-  writeFileSync(join(SCRATCH, 'services.json'), JSON.stringify({
-    services: []
-  }));
+  return {
+    loadCircuits: () => circuits,
+    getCircuitState: (circs, platform) => getCircuitState(circs, platform),
+    recordOutcome,
+    setCircuits: (c) => { circuits = JSON.parse(JSON.stringify(c)); },
+  };
 }
 
-function cleanup() {
-  try { rmSync(SCRATCH, { recursive: true, force: true }); } catch {}
+// Helper: call handleRecordOutcome and return the parsed result
+function diRecordOutcome(store, platform, outcome) {
+  const logs = [];
+  const origLog = console.log;
+  console.log = (...args) => logs.push(args.join(' '));
+  try {
+    handleRecordOutcome(
+      ['--record-outcome', platform, outcome],
+      { recordOutcome: store.recordOutcome, exit: () => {} }
+    );
+  } finally {
+    console.log = origLog;
+  }
+  return JSON.parse(logs.join(''));
 }
 
-function writeCircuits(circuits) {
-  writeFileSync(join(SCRATCH, 'platform-circuits.json'), JSON.stringify(circuits, null, 2));
-}
-
-function readCircuits() {
-  const path = join(SCRATCH, 'platform-circuits.json');
-  if (!existsSync(path)) return {};
-  return JSON.parse(readFileSync(path, 'utf8'));
-}
-
-function recordOutcome(platform, outcome) {
-  const result = execSync(
-    `node ${join(SCRATCH, 'engage-orchestrator.mjs')} --record-outcome ${platform} ${outcome}`,
-    { encoding: 'utf8', timeout: 5000 }
-  );
-  return JSON.parse(result);
-}
-
-function getCircuitStatus() {
-  const result = execSync(
-    `node ${join(SCRATCH, 'engage-orchestrator.mjs')} --circuit-status`,
-    { encoding: 'utf8', timeout: 5000 }
-  );
-  return JSON.parse(result);
+// Helper: call handleCircuitStatus and return the parsed result
+function diGetCircuitStatus(store) {
+  const logs = [];
+  const origLog = console.log;
+  console.log = (...args) => logs.push(args.join(' '));
+  try {
+    handleCircuitStatus(
+      ['--circuit-status'],
+      { loadCircuits: store.loadCircuits, getCircuitState: store.getCircuitState, exit: () => {} }
+    );
+  } finally {
+    console.log = origLog;
+  }
+  return JSON.parse(logs.join(''));
 }
 
 // ===== TEST SUITES =====
 
 describe('Circuit Breaker: State Transitions', () => {
-  beforeEach(() => setup());
-  afterEach(() => cleanup());
-
   test('new platform starts with closed circuit', () => {
-    recordOutcome('TestPlatform', 'success');
-    const status = getCircuitStatus();
+    const store = createCircuitStore();
+    diRecordOutcome(store, 'TestPlatform', 'success');
+    const status = diGetCircuitStatus(store);
 
     assert.equal(status.TestPlatform.state, 'closed');
     assert.equal(status.TestPlatform.consecutive_failures, 0);
@@ -112,10 +87,11 @@ describe('Circuit Breaker: State Transitions', () => {
   });
 
   test('circuit remains closed under failure threshold', () => {
+    const store = createCircuitStore();
     // 2 failures is under threshold of 3
-    recordOutcome('TestPlatform', 'failure');
-    recordOutcome('TestPlatform', 'failure');
-    const status = getCircuitStatus();
+    diRecordOutcome(store, 'TestPlatform', 'failure');
+    diRecordOutcome(store, 'TestPlatform', 'failure');
+    const status = diGetCircuitStatus(store);
 
     assert.equal(status.TestPlatform.state, 'closed');
     assert.equal(status.TestPlatform.consecutive_failures, 2);
@@ -123,20 +99,22 @@ describe('Circuit Breaker: State Transitions', () => {
   });
 
   test('circuit opens after threshold consecutive failures', () => {
+    const store = createCircuitStore();
     for (let i = 0; i < CIRCUIT_FAILURE_THRESHOLD; i++) {
-      recordOutcome('TestPlatform', 'failure');
+      diRecordOutcome(store, 'TestPlatform', 'failure');
     }
-    const status = getCircuitStatus();
+    const status = diGetCircuitStatus(store);
 
     assert.equal(status.TestPlatform.state, 'open');
     assert.equal(status.TestPlatform.consecutive_failures, CIRCUIT_FAILURE_THRESHOLD);
   });
 
   test('success resets consecutive failure count', () => {
-    recordOutcome('TestPlatform', 'failure');
-    recordOutcome('TestPlatform', 'failure');
-    recordOutcome('TestPlatform', 'success');
-    const status = getCircuitStatus();
+    const store = createCircuitStore();
+    diRecordOutcome(store, 'TestPlatform', 'failure');
+    diRecordOutcome(store, 'TestPlatform', 'failure');
+    diRecordOutcome(store, 'TestPlatform', 'success');
+    const status = diGetCircuitStatus(store);
 
     assert.equal(status.TestPlatform.state, 'closed');
     assert.equal(status.TestPlatform.consecutive_failures, 0);
@@ -145,9 +123,8 @@ describe('Circuit Breaker: State Transitions', () => {
   });
 
   test('circuit transitions to half-open after cooldown', () => {
-    // Create circuit data with old last_failure (past cooldown)
     const oldFailure = new Date(Date.now() - CIRCUIT_COOLDOWN_MS - 1000).toISOString();
-    writeCircuits({
+    const store = createCircuitStore({
       TestPlatform: {
         consecutive_failures: 3,
         total_failures: 3,
@@ -157,14 +134,13 @@ describe('Circuit Breaker: State Transitions', () => {
       }
     });
 
-    const status = getCircuitStatus();
+    const status = diGetCircuitStatus(store);
     assert.equal(status.TestPlatform.state, 'half-open');
   });
 
   test('circuit stays open during cooldown period', () => {
-    // Create circuit data with recent last_failure (within cooldown)
     const recentFailure = new Date(Date.now() - 1000).toISOString();
-    writeCircuits({
+    const store = createCircuitStore({
       TestPlatform: {
         consecutive_failures: 3,
         total_failures: 3,
@@ -174,17 +150,15 @@ describe('Circuit Breaker: State Transitions', () => {
       }
     });
 
-    const status = getCircuitStatus();
+    const status = diGetCircuitStatus(store);
     assert.equal(status.TestPlatform.state, 'open');
   });
 });
 
 describe('Circuit Breaker: Outcome Recording', () => {
-  beforeEach(() => setup());
-  afterEach(() => cleanup());
-
   test('recordOutcome tracks success correctly', () => {
-    const result = recordOutcome('Platform1', 'success');
+    const store = createCircuitStore();
+    const result = diRecordOutcome(store, 'Platform1', 'success');
 
     assert.equal(result.platform, 'Platform1');
     assert.equal(result.consecutive_failures, 0);
@@ -195,7 +169,8 @@ describe('Circuit Breaker: Outcome Recording', () => {
   });
 
   test('recordOutcome tracks failure correctly', () => {
-    const result = recordOutcome('Platform1', 'failure');
+    const store = createCircuitStore();
+    const result = diRecordOutcome(store, 'Platform1', 'failure');
 
     assert.equal(result.platform, 'Platform1');
     assert.equal(result.consecutive_failures, 1);
@@ -206,11 +181,12 @@ describe('Circuit Breaker: Outcome Recording', () => {
   });
 
   test('recordOutcome accumulates across multiple platforms', () => {
-    recordOutcome('Platform1', 'success');
-    recordOutcome('Platform2', 'failure');
-    recordOutcome('Platform3', 'success');
+    const store = createCircuitStore();
+    diRecordOutcome(store, 'Platform1', 'success');
+    diRecordOutcome(store, 'Platform2', 'failure');
+    diRecordOutcome(store, 'Platform3', 'success');
 
-    const status = getCircuitStatus();
+    const status = diGetCircuitStatus(store);
 
     assert.equal(Object.keys(status).length, 3);
     assert.equal(status.Platform1.total_successes, 1);
@@ -219,9 +195,10 @@ describe('Circuit Breaker: Outcome Recording', () => {
   });
 
   test('recordOutcome returns correct state after threshold', () => {
+    const store = createCircuitStore();
     let result;
     for (let i = 0; i < CIRCUIT_FAILURE_THRESHOLD; i++) {
-      result = recordOutcome('Platform1', 'failure');
+      result = diRecordOutcome(store, 'Platform1', 'failure');
     }
 
     assert.equal(result.state, 'open');
@@ -229,13 +206,14 @@ describe('Circuit Breaker: Outcome Recording', () => {
   });
 
   test('success after open circuit transitions to closed', () => {
+    const store = createCircuitStore();
     // Open the circuit
     for (let i = 0; i < CIRCUIT_FAILURE_THRESHOLD; i++) {
-      recordOutcome('Platform1', 'failure');
+      diRecordOutcome(store, 'Platform1', 'failure');
     }
 
     // Success resets it
-    const result = recordOutcome('Platform1', 'success');
+    const result = diRecordOutcome(store, 'Platform1', 'success');
 
     assert.equal(result.state, 'closed');
     assert.equal(result.consecutive_failures, 0);
@@ -243,13 +221,10 @@ describe('Circuit Breaker: Outcome Recording', () => {
 });
 
 describe('Circuit Breaker: Cooldown Timing', () => {
-  beforeEach(() => setup());
-  afterEach(() => cleanup());
-
   test('cooldown boundary: just before expiry stays open', () => {
     // 1 second before cooldown expires
     const justBeforeCooldown = new Date(Date.now() - CIRCUIT_COOLDOWN_MS + 1000).toISOString();
-    writeCircuits({
+    const store = createCircuitStore({
       TestPlatform: {
         consecutive_failures: 5,
         total_failures: 5,
@@ -259,14 +234,14 @@ describe('Circuit Breaker: Cooldown Timing', () => {
       }
     });
 
-    const status = getCircuitStatus();
+    const status = diGetCircuitStatus(store);
     assert.equal(status.TestPlatform.state, 'open');
   });
 
   test('cooldown boundary: just after expiry becomes half-open', () => {
     // 1 second after cooldown expires
     const justAfterCooldown = new Date(Date.now() - CIRCUIT_COOLDOWN_MS - 1000).toISOString();
-    writeCircuits({
+    const store = createCircuitStore({
       TestPlatform: {
         consecutive_failures: 5,
         total_failures: 5,
@@ -276,7 +251,7 @@ describe('Circuit Breaker: Cooldown Timing', () => {
       }
     });
 
-    const status = getCircuitStatus();
+    const status = diGetCircuitStatus(store);
     assert.equal(status.TestPlatform.state, 'half-open');
   });
 
@@ -284,7 +259,7 @@ describe('Circuit Breaker: Cooldown Timing', () => {
     const recentFailure = new Date(Date.now() - 1000).toISOString();
     const oldFailure = new Date(Date.now() - CIRCUIT_COOLDOWN_MS - 1000).toISOString();
 
-    writeCircuits({
+    const store = createCircuitStore({
       ClosedPlatform: {
         consecutive_failures: 1,
         total_failures: 1,
@@ -308,7 +283,7 @@ describe('Circuit Breaker: Cooldown Timing', () => {
       }
     });
 
-    const status = getCircuitStatus();
+    const status = diGetCircuitStatus(store);
     assert.equal(status.ClosedPlatform.state, 'closed');
     assert.equal(status.OpenPlatform.state, 'open');
     assert.equal(status.HalfOpenPlatform.state, 'half-open');
@@ -316,27 +291,26 @@ describe('Circuit Breaker: Cooldown Timing', () => {
 });
 
 describe('Circuit Breaker: Edge Cases', () => {
-  beforeEach(() => setup());
-  afterEach(() => cleanup());
-
   test('empty circuit file returns empty status', () => {
-    // Don't write any circuit file
-    const status = getCircuitStatus();
+    const store = createCircuitStore();
+    // No circuits recorded
+    const status = diGetCircuitStatus(store);
     assert.deepEqual(status, {});
   });
 
   test('platform names with special characters handled correctly', () => {
+    const store = createCircuitStore();
     // Platform names in practice use dots, dashes, etc (e.g., 4claw.org, Chatr.ai)
-    const result = recordOutcome('Test-Platform.org', 'success');
+    const result = diRecordOutcome(store, 'Test-Platform.org', 'success');
     assert.equal(result.platform, 'Test-Platform.org');
 
-    const status = getCircuitStatus();
+    const status = diGetCircuitStatus(store);
     assert.ok(status['Test-Platform.org']);
   });
 
   test('high failure counts work correctly', () => {
     // Simulate a platform that failed many times
-    writeCircuits({
+    const store = createCircuitStore({
       ReliablyBad: {
         consecutive_failures: 100,
         total_failures: 500,
@@ -346,13 +320,13 @@ describe('Circuit Breaker: Edge Cases', () => {
       }
     });
 
-    const status = getCircuitStatus();
+    const status = diGetCircuitStatus(store);
     assert.equal(status.ReliablyBad.state, 'open');
     assert.equal(status.ReliablyBad.total_failures, 500);
   });
 
   test('consecutive failures reset to 0 after success regardless of previous count', () => {
-    writeCircuits({
+    const store = createCircuitStore({
       TestPlatform: {
         consecutive_failures: 50,
         total_failures: 100,
@@ -362,13 +336,9 @@ describe('Circuit Breaker: Edge Cases', () => {
       }
     });
 
-    const result = recordOutcome('TestPlatform', 'success');
+    const result = diRecordOutcome(store, 'TestPlatform', 'success');
     assert.equal(result.consecutive_failures, 0);
     assert.equal(result.total_successes, 1);
     assert.equal(result.total_failures, 100); // preserved
   });
 });
-
-
-// Run the tests
-console.log('Running engage-orchestrator.mjs tests...\n');

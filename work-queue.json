@@ -1,57 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-865",
-      "title": "Add backup substitution telemetry field to engagement-trace.json",
-      "description": "brainstorming",
-      "priority": 865,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 0,
-      "source": "session",
-      "tags": [],
-      "commits": [
-        "d83421ef"
-      ],
-      "outcome": {
-        "session": 1811,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added backup_substitutions extraction to e-posthook-parser.mjs (count + array), shell var BACKUP_SUBSTITUTION_COUNT, 3 schema tests in engagement-trace.test.mjs, and substitution-aware compliance in audit-picker-compliance.mjs"
-      }
-    },
-    {
       "id": "wq-866",
       "title": "Add TODO tracker false-positive rate metric to audit reporting",
       "description": "brainstorming",
       "priority": 866,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 0,
       "source": "session",
       "tags": [],
-      "commits": []
-    },
-    {
-      "id": "wq-871",
-      "title": "Switch prehook credential checks to account-manager --fast",
-      "description": "Now that account-manager supports --fast (3s timeout), hooks calling node account-manager.mjs test/json can use --fast for faster session startup. Candidates: 09-financial-check.sh, engage-blockers.sh, any credential preflight. Should shave ~5s off startup.",
-      "priority": 871,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1803,
-      "source": "brainstorming-R320",
-      "tags": [
-        "perf"
-      ],
       "commits": [],
       "outcome": {
-        "session": 1811,
+        "session": 1812,
         "result": "completed",
-        "effort": "trivial",
+        "effort": "moderate",
         "quality": "well-scoped",
-        "note": "Already done: only live caller (02-periodic-checks.sh) uses --fast since wq-874 (s1807). 09-financial-check.sh and engage-blockers.sh do not call account-manager."
+        "note": "Added computeTodoFalsePositiveRate() to audit-stats.mjs combining todo-tracker.json and work-queue-archive data. Current: 51% combined FP, 78% queue FP. Documented in SESSION_AUDIT_SUBCHECKS.md with verdict table."
       }
     },
     {
@@ -80,6 +45,17 @@
       "tags": [
         "observability"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-876",
+      "title": "E session backup substitution telemetry",
+      "description": "(added ~s1782): ~~Promoted to wq-865~~ (s1792).",
+      "priority": 876,
+      "status": "pending",
+      "added": "2026-03-05",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

@@ -24,7 +24,7 @@
       "title": "Parallelize account-manager.mjs test --all",
       "description": "account-manager.mjs tests 51 platforms sequentially (line 177: for...await testAccount). With 8s safeFetch timeout each, worst-case is 408s. Root cause of 02-periodic-checks p95=30s (A#192). Replace sequential loop with Promise.allSettled and concurrency limit (e.g. 10 at a time). Target: <5s avg.",
       "priority": 846,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1773,
       "source": "brainstorming",
@@ -33,7 +33,14 @@
         "infrastructure"
       ],
       "commits": [],
-      "complexity": "M"
+      "complexity": "M",
+      "outcome": {
+        "session": 1782,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Parallelized test --all with concurrency 10. 51 platforms: ~10s (vs sequential ~400s). Root cause was 25 unreachable platforms hitting 8s timeout; parallelization batches them."
+      }
     },
     {
       "id": "wq-850",

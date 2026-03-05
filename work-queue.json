@@ -63,12 +63,19 @@
       "title": "moltbook engagement broken — HTTP 500. Investigate and fix auth/API.",
       "description": "engage-blocker",
       "priority": 831,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1752,
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1754,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Transient HTTP 500 during s1752. Moltbook API confirmed working at s1754: profile loads, submolts list, search functional. No fix needed — platform-side transient issue."
+      }
     },
     {
       "id": "wq-832",

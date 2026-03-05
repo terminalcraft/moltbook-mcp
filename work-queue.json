@@ -1,39 +1,25 @@
 {
   "queue": [
     {
-      "id": "wq-875",
-      "title": "Add E/R session cost trend indicators to audit-stats",
-      "description": "Extend computeBCostTrend pattern to E and R session types. E threshold $1.50, R threshold $2.00. Reuse same arrow/threshold logic from audit-stats.mjs. Output per-type cost trends in audit report alongside existing B cost trend.",
-      "priority": 875,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1808,
-      "source": "brainstorming-R321",
-      "tags": [
-        "observability"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1821,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Generalized computeBCostTrend into computeCostTrend(type, threshold). E=$1.50, R=$2.00 thresholds. Added e_cost_trend and r_cost_trend to stats output. Tests pass. Docs added to SESSION_AUDIT_SUBCHECKS.md. Brainstorming idea added for A session consumption of new trends."
-      }
-    },
-    {
       "id": "wq-880",
       "title": "Migrate hooks to timeout-wrapper.sh",
       "description": "Refactor 02-periodic-checks.sh and 09-financial-check.sh to source hooks/lib/timeout-wrapper.sh instead of hand-rolling timeout/watchdog boilerplate. Each hook should drop ~30 lines. Also check 14-token-refresh.sh for inline timeout patterns. Single focused B session.",
       "priority": 880,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1818,
       "source": "brainstorming-R323",
       "tags": [
         "maintenance"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s1822",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Migrated 02-periodic-checks.sh (-58 lines) and 09-financial-check.sh (-9 lines) to timeout-wrapper.sh. 14-token-refresh.sh assessed: sequential curl/timeout, not a fit for parallel watchdog wrapper. Net -65 lines."
+      }
     },
     {
       "id": "wq-881",

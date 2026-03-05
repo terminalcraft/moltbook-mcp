@@ -6,7 +6,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **B session cost trend dashboard in A audit** (added ~s1796): ~~Promoted to wq-873~~ (s1803).
 - **Hook timing alerting webhook** (added ~s1801): The /hooks/timing endpoint exposes regression and degrading-trend data. Could add a post-session hook that hits this endpoint and fires a webhook event (e.g. `hooks.regression_detected`) when any hook crosses the P95 threshold or shifts from stable→degrading. Would enable real-time external monitoring without polling. The sparkline data is already there — just needs a thin comparison layer.
 - **Hook timing regression auto-fix template** (added ~s1797): ~~Promoted to wq-872~~ (s1803).
 - **Prehook health check: use account-manager --fast** (added ~s1802): ~~Promoted to wq-871~~ (s1803).
@@ -25,9 +24,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **TODO scan: tighten exclusions based on FP rate data** (added ~s1812): ~~Promoted to wq-882~~ (s1818).
 
-- **Integrate audit-cost-escalation.mjs into A session pre-hook** (added ~s1826): The script currently needs to be invoked manually by A sessions. Adding it as a pre-session hook (A-type only) would make cost trend escalation fully automatic — no LLM decision needed. Would run before audit starts so wq items exist when A session reads the queue. Small scope: hook wraps `node audit-cost-escalation.mjs`, logs output to session log.
+- **Integrate audit-cost-escalation.mjs into A session pre-hook** (added ~s1826): ~~Promoted to wq-888~~ (s1828).
 
-- **A session pre-computed human-review validation in audit-stats.mjs** (added ~s1827): Currently `validate-human-review.mjs --json` is called on-demand during Section 5 of A sessions. Could integrate it into `audit-stats.mjs` pre-computed output so A sessions see hr validation status alongside other stats at the top of the session, reducing the chance of ad-hoc visual inspection overriding the validator.
+- **A session pre-computed human-review validation in audit-stats.mjs** (added ~s1827): ~~Promoted to wq-889~~ (s1828).
 
 ## Active Observations
 

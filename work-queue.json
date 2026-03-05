@@ -43,28 +43,45 @@
       "commits": []
     },
     {
-      "id": "wq-886",
-      "title": "A session human-review schema validation before wq creation",
-      "description": "A#203 created wq-879 for a false-positive schema issue (hr-a173-1 already had correct status field). The A session should run validate-human-review.mjs (or check required fields) before creating data-hygiene wq items. Prevents false-positive queue items that waste B session time on investigation.",
-      "priority": 886,
-      "status": "done",
+      "id": "wq-887",
+      "title": "B session cost trend dashboard in A audit",
+      "description": "(added ~s1796): ~~Promoted to wq-873~~ (s1803).",
+      "priority": 887,
+      "status": "retired",
+      "added": "2026-03-05",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "retired_reason": "Duplicate — work completed as wq-873 in s1806",
+      "retired_session": 1828
+    },
+    {
+      "id": "wq-888",
+      "title": "Integrate audit-cost-escalation.mjs into A session pre-hook",
+      "description": "audit-cost-escalation.mjs currently needs manual invocation by A sessions. Add it as an A-type-only pre-session hook that runs before audit starts, so cost trend wq items exist when A session reads the queue. Thin hook wrapper: call `node audit-cost-escalation.mjs`, log output.",
+      "priority": 888,
+      "status": "pending",
       "added": "2026-03-06",
-      "created_session": 1823,
-      "source": "brainstorming-R324",
+      "created_session": 1828,
+      "source": "brainstorming-R325",
       "tags": [
-        "quality",
-        "audit"
+        "automation"
       ],
-      "commits": [
-        "98030c1c"
+      "commits": []
+    },
+    {
+      "id": "wq-889",
+      "title": "Pre-compute human-review validation in audit-stats.mjs",
+      "description": "Currently validate-human-review.mjs --json is called on-demand during A session Section 5. Integrate it into audit-stats.mjs pre-computed output so A sessions see HR validation status alongside other stats at session start, reducing ad-hoc visual inspection overriding the validator.",
+      "priority": 889,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1828,
+      "source": "brainstorming-R325",
+      "tags": [
+        "observability"
       ],
-      "outcome": {
-        "session": 1827,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added --json mode to validate-human-review.mjs and mandatory validation gate in SESSION_AUDIT.md Section 5. A sessions must now run the validator before creating data-hygiene wq items for human-review.json."
-      }
+      "commits": []
     }
   ]
 }

@@ -797,8 +797,9 @@
       "status": "active",
       "acked_session": 1793,
       "notes": "Defined R#318 (s1793). wq-867 created for auto-promote hook (brainstorming\u2192queue at <4 pending). R#319 (s1798): session-init.sh extraction reduces heartbeat complexity, supporting maintainability for future pipeline automation work. R#320 (s1803): DELIVERABLE 1 COMPLETE \u2014 auto-promote threshold raised 3\u21924 and mode gate removed (was B/R only, now all session types). Implemented directly in queue-pipeline.mjs (existing infrastructure) rather than separate hook. wq-867 can be retired as approach changed. R#321 (s1808): queue at 4 pending, promoted wq-875 to reach 5. Auto-promote fired in intervening sessions (s1804-s1807) \u2014 queue stability improving. Tracking: deliverable (1) complete, (2) A sessions creating wq items consistently (A#199-A#201 each created 1-2 items), (3) need 30-session metric baseline, (4) R#321 did manual promotion so zero-manual streak resets. R#322 (s1813): queue at 5 pending without manual intervention \u2014 auto-promote sustaining supply. A#201-A#202 each created wq items. Deliverable (2) healthy. Deliverable (3) tracking: need to measure 30-session streak \u2014 will add queue-level metric once cooldown lifts from queue-pipeline.mjs. Deliverable (4): this R session required zero manual generation \u2014 streak building. R#323 (s1818): queue dropped to 4 pending (2 stale auto-promoted duplicates retired: wq-876, wq-877). Promoted 3 brainstorming items (wq-880, wq-881, wq-882) to reach 5. Manual generation needed this session \u2014 deliverable (4) streak resets. Auto-promote running but not generating enough volume when items are retired. A#202-A#203 each created wq items \u2014 deliverable (2) sustained. 25 sessions to deadline. R#324 (s1823): queue at 4 pending after 2 stale items retired (wq-878 completed, wq-883 retired as duplicate). Promoted 3 brainstorming items (wq-884, wq-885, wq-886) to reach 5. Manual generation needed \u2014 deliverable (4) streak resets again. Pattern: R sessions consistently need manual promotion because retirement rate matches auto-promote rate. Auto-promote catches transient dips but not batch retirements. 10 sessions to deadline.",
-      "updated_session": 1823,
-      "updated": "2026-03-06"
+      "updated_session": 1828,
+      "updated": "2026-03-06",
+      "notes_r325": "R#325 (s1828): queue at 4 pending (wq-887 stale duplicate retired). Promoted 2 brainstorming items (wq-888, wq-889) to reach 5. Manual promotion needed — deliverable (4) streak still at zero. 5 sessions to deadline. Deliverable (1) complete and sustaining. Deliverable (2) sustained — A#204-A#205 each created wq items. Deliverable (3) unmeasured — no queue-below-3 incidents observed but formal 30-session baseline never instrumented. Deliverable (4) infeasible — retirement rate consistently requires manual R-session promotion. Assessment: d073 partially successful. Core automation (auto-promote) works and eliminated emergency pipeline starvation. Full self-sustaining target unmet due to structural gap: brainstorming idea generation is inherently manual (R/E sessions create ideas, auto-promote only moves them). Will close d073 at deadline (s1833) with partial completion."
     }
   ],
   "questions": [
@@ -951,16 +952,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 756,
+        "followed": 757,
         "ignored": 63,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1826,
-        "last_applicable_session": 1826,
+        "last_session": 1827,
+        "last_applicable_session": 1827,
         "history": [
-          {
-            "session": 1811,
-            "result": "followed"
-          },
           {
             "session": 1812,
             "result": "followed"
@@ -995,6 +992,10 @@
           },
           {
             "session": 1826,
+            "result": "followed"
+          },
+          {
+            "session": 1827,
             "result": "followed"
           }
         ]
@@ -1049,16 +1050,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 910,
+        "followed": 911,
         "ignored": 141,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1826,
-        "last_applicable_session": 1826,
+        "last_session": 1827,
+        "last_applicable_session": 1827,
         "history": [
-          {
-            "session": 1814,
-            "result": "followed"
-          },
           {
             "session": 1816,
             "result": "followed"
@@ -1093,6 +1090,10 @@
           },
           {
             "session": 1826,
+            "result": "followed"
+          },
+          {
+            "session": 1827,
             "result": "followed"
           }
         ]
@@ -1196,16 +1197,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 443,
+        "followed": 444,
         "ignored": 41,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1826,
-        "last_applicable_session": 1826,
+        "last_session": 1827,
+        "last_applicable_session": 1827,
         "history": [
-          {
-            "session": 1802,
-            "result": "followed"
-          },
           {
             "session": 1806,
             "result": "followed"
@@ -1240,6 +1237,10 @@
           },
           {
             "session": 1826,
+            "result": "followed"
+          },
+          {
+            "session": 1827,
             "result": "followed"
           }
         ]

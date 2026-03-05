@@ -21,6 +21,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Migrate existing hooks to use timeout-wrapper.sh** (added ~s1817): ~~Promoted to wq-880~~ (s1818).
 
+- **timeout-wrapper.sh: add tw_run_fn for inline function dispatch** (added ~s1822): Currently tw_run requires `bash -c '...'` for multi-line check logic because timeout wraps a command. Adding a `tw_run_fn "name" my_function` helper that does `tw_run "name" bash -c "$(declare -f $fn); $fn"` would make migrations cleaner — no need to quote-escape or export vars. Would simplify future hook migrations.
 - **A session cost trend auto-escalation for E/R types** (added ~s1821): Now that E/R cost trends are computed alongside B, the A session audit-checks.mjs should consume `e_cost_trend` and `r_cost_trend` to update escalation trackers (e_session_cost, r_session_cost) and auto-create wq items on threshold breach — same pattern as the existing b_session_cost escalation in audit-checks.mjs. Currently the data is produced but not consumed by the auditor.
 - **A session human-review schema validation before wq creation** (added ~s1816): A#203 created wq-879 claiming hr-a173-1 had "severity='resolved' but status=undefined" — but the file already had `status: "resolved"` and passes `validate-human-review.mjs`. The A session should run the validator (or at minimum check the required fields from the schema) before creating data-hygiene wq items. Would prevent false-positive queue items that waste B session time on investigation.
 

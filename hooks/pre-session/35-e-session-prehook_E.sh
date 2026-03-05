@@ -161,6 +161,7 @@ check_engagement_seed() {
 #   Populate Chatr thread state and inject topic cluster recommendations
 ###############################################################################
 check_topic_clusters() {
+  local ctx_out="${1:-$CONTEXT_FILE}"
   echo "[topic-clusters] Updating Chatr thread state..."
   update_out=$(timeout 5 node chatr-thread-tracker.mjs update --json 2>/dev/null)
   update_exit=$?
@@ -211,10 +212,10 @@ check_topic_clusters() {
   ' 2>/dev/null)
 
   if [ -n "$recs" ]; then
-    echo "" >> "$CONTEXT_FILE"
-    echo "$recs" >> "$CONTEXT_FILE"
+    echo "" >> "$ctx_out"
+    echo "$recs" >> "$ctx_out"
     line_count=$(echo "$recs" | wc -l)
-    echo "[topic-clusters] Appended $line_count lines to e-session-context.md"
+    echo "[topic-clusters] Appended $line_count lines (to $(basename "$ctx_out"))"
   else
     echo "[topic-clusters] No recommendations to inject"
   fi
@@ -481,71 +482,10 @@ CRED_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-cred.XXXXXX")
 VARIETY_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-variety.XXXXXX")
 COLONY_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-colony.XXXXXX")
 
-# Wrap topic clusters to write to temp file instead of CONTEXT_FILE
-check_topic_clusters_parallel() {
-  echo "[topic-clusters] Updating Chatr thread state..."
-  update_out=$(timeout 5 node chatr-thread-tracker.mjs update --json 2>/dev/null)
-  update_exit=$?
-
-  if [ $update_exit -eq 124 ]; then
-    echo "[topic-clusters] Thread tracker timed out (5s), using stale state"
-  elif [ $update_exit -ne 0 ]; then
-    echo "[topic-clusters] Thread tracker failed (exit $update_exit), trying clusters with existing state"
-  fi
-
-  clusters_json=$(timeout 4 node chatr-topic-clusters.mjs --json --hours 72 2>/dev/null)
-  clusters_exit=$?
-
-  if [ $clusters_exit -ne 0 ] || [ -z "$clusters_json" ]; then
-    echo "[topic-clusters] No cluster data available (exit $clusters_exit), skipping"
-    return 0
-  fi
-
-  recs=$(echo "$clusters_json" | jq -r '
-    if ((.recommendations // []) | length) == 0 and ((.clusters // []) | length) == 0 then empty else
-
-    "## Chatr topic clusters (auto-generated)",
-    "\(.threadCount // 0) threads in \(.clusterCount // 0) clusters (last 72h)",
-    "",
-
-    (if ((.recommendations // []) | length) > 0 then
-      "**Recommended engagement targets:**",
-      (.recommendations[] |
-        ([.participants[]? | "@" + .] | join(", ")) as $who |
-        (if ($who | length) > 0 then " (\($who))" else "" end) as $who_str |
-        "- **\(.topic)**: \(.reason)\($who_str)"
-      ),
-      ""
-    else empty end),
-
-    (if ((.clusters // []) | length) > 0 then
-      "**Cluster overview:**",
-      (.clusters[:5][] |
-        (if .engaged and (.engagementGap // 0) == 0 then "[engaged]"
-         elif (.engagementGap // 0) > 0 then "[gap]"
-         else "[unengaged]" end) as $tag |
-        "- \(.label) \($tag): \(.threadCount) threads, \(.totalMessages) msgs"
-      ),
-      ""
-    else empty end)
-
-    end
-  ' 2>/dev/null)
-
-  if [ -n "$recs" ]; then
-    echo "" >> "$TOPICS_TMP"
-    echo "$recs" >> "$TOPICS_TMP"
-    line_count=$(echo "$recs" | wc -l)
-    echo "[topic-clusters] Appended $line_count lines (will merge)"
-  else
-    echo "[topic-clusters] No recommendations to inject"
-  fi
-}
-
 # Run all 7 independent checks in parallel
 check_engagement_liveness &
 pid_liveness=$!
-check_topic_clusters_parallel &
+check_topic_clusters "$TOPICS_TMP" &
 pid_topics=$!
 check_conversation_balance &
 pid_balance=$!

@@ -11,6 +11,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **TODO tracker telemetry: false-positive rate metric** (added ~s1771): Now that todo-false-positives.json exists, track how often the auto-resolve fires vs new legitimate items added. If false-positive rate exceeds 50% over 20 sessions, the Phase 1 grep filters need tightening. Add a small counter to the tracker JSON (fp_resolved_count, legit_added_count) and have A sessions report the ratio.
 
 - **Credential health check: transient vs persistent failure classification** (added ~s1776): ~~Promoted to wq-849~~ (consecutive-failure threshold added). Remaining: full transient classification (retry logic, not just threshold).
+- **Smoke test per-endpoint timing report** (added ~s1781): smoke-test.mjs runs 87 tests but reports only total elapsed time. Adding per-test timing (Date.now() delta around each fetch) would surface which endpoints are slow without needing external profiling. Output as `--timing` flag or always include in `--json` mode. Would have made this wq-853 investigation trivial (immediately showing /services at 4s).
 
 ## Active Observations
 

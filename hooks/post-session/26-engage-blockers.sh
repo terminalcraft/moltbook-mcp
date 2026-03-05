@@ -42,6 +42,7 @@ platforms = {
     "mdi": ["mydeadinternet", "mdi"],
     "ctxly-chat": ["ctxly chat", "ctxly-chat"],
     "lobstack": ["lobstack"],
+    "moltstack": ["moltstack"],
     "chatr": ["chatr"],
     "moltbook": ["moltbook"],
 }

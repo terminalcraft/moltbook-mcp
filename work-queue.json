@@ -3,9 +3,9 @@
     {
       "id": "wq-830",
       "title": "Optimize 05-smoke-test.sh post-hook performance (9.6s avg)",
-      "description": "hook-timing-report shows 05-smoke-test.sh at 9622ms avg / 11161ms P95 — the slowest hook by far. Investigate what it runs and optimize: run targeted subset, cache results, parallelize sub-checks, or split into quick-smoke (all sessions) and full-smoke (B sessions only). Target: ≤5s avg.",
+      "description": "hook-timing-report shows 05-smoke-test.sh at 9622ms avg / 11161ms P95 \u2014 the slowest hook by far. Investigate what it runs and optimize: run targeted subset, cache results, parallelize sub-checks, or split into quick-smoke (all sessions) and full-smoke (B sessions only). Target: \u22645s avg.",
       "priority": 830,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1751,
       "source": "brainstorming",
@@ -13,7 +13,14 @@
         "performance",
         "hooks"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1761,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Smoke test optimized from 9.6s avg to ~1.5s (warm) / ~4s (cold). Root causes: blocking pre-warm fetch (4-8s) + Node keepalive socket idle wait (~4s). Removed pre-warm, added process.exit(0), reduced timeouts."
+      }
     },
     {
       "id": "wq-833",

@@ -1,56 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-839",
-      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
-      "description": "'xxx', 'TODO', 'REPLACE_ME'",
-      "priority": 839,
-      "status": "done",
-      "added": "2026-03-05",
-      "source": "todo-scan",
-      "tags": [
-        "followup"
-      ],
-      "commits": [
-        "ca219032"
-      ],
-      "complexity": "S",
-      "notes": "B#541: Root cause: queue-pipeline.mjs TODO ingest did not load todo-false-positives.json patterns, AND todo-followups.txt was never cleaned up after processing (stale from s1736). Fixed both: (1) load shared false-positive patterns from todo-false-positives.json in queue-pipeline.mjs:306-313, (2) delete followups file after processing in queue-pipeline.mjs:352. Added 2 tests. This was the 5th+ occurrence of this exact false positive in the archive.",
-      "outcome": {
-        "session": 1778,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Dual root cause: missing pattern loading + stale file persistence. Both fixed with tests."
-      }
-    },
-    {
-      "id": "wq-841",
-      "title": "Extract createCircuitStore test helper into shared test-utils",
-      "description": "The in-memory circuit store factory in engage-orchestrator.test.mjs (from wq-834) duplicates recordOutcome logic from lib/circuit-breaker.mjs. Extract into test-utils/circuit-store-mock.mjs for reuse by future tests (filterByCircuit, CLI handler tests).",
-      "priority": 841,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1763,
-      "source": "brainstorming",
-      "tags": [
-        "testing",
-        "infrastructure"
-      ],
-      "commits": [
-        "3ba6d36e"
-      ],
-      "complexity": "S",
-      "notes": "B#541: Extracted createCircuitStore, diRecordOutcome, diGetCircuitStatus into test-utils/circuit-store-mock.mjs. engage-orchestrator.test.mjs now imports from shared module. All 18 tests pass.",
-      "outcome": {
-        "session": 1778,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Clean extraction, no behavior change, all tests green."
-      }
-    },
-    {
       "id": "wq-844",
       "title": "Update E session instructions to use picker mandate backups on DNS/connection failure",
       "description": "d072,engagement,resilience",
@@ -79,32 +29,6 @@
       "complexity": "M"
     },
     {
-      "id": "wq-849",
-      "title": "Add consecutive-failure threshold to credential health check",
-      "description": "credential-health-check.mjs escalates to wq items on single failures. wq-847 showed MoltCities s1774 INVALID_CREDENTIALS was transient — key was valid. Add a consecutive failure counter per platform (store in credential-health-state.json). Only create wq items after 2+ consecutive failures from different sessions. This prevents false-alarm credential recovery tasks.",
-      "priority": 849,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1776,
-      "source": "brainstorming-s1776",
-      "tags": [
-        "reliability",
-        "d072"
-      ],
-      "commits": [
-        "a4fbe5bb"
-      ],
-      "complexity": "S",
-      "notes": "B#541: Added consecutive-failure threshold (2) to credential-health-check.mjs. Single failures suppressed as transient, only 2+ consecutive from different sessions escalate. State persisted in credential-health-state.json. 6 new tests + all existing tests updated. checkAllCredentials API extended with statePath/session params.",
-      "outcome": {
-        "session": 1778,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Clean implementation with full test coverage. Addresses wq-847 false alarm pattern."
-      }
-    },
-    {
       "id": "wq-850",
       "title": "Add credential-health-state.json cleanup to A session audits",
       "description": "credential-health-state.json tracks consecutive failures per platform but is never pruned. Platforms that recover accumulate stale entries. A sessions should verify the state file: remove entries with consecutive_failures=0 (recovered), flag entries >50 sessions old as stale. Also validate file exists and has valid schema.",
@@ -116,6 +40,38 @@
       "tags": [
         "reliability",
         "d072"
+      ],
+      "commits": [],
+      "complexity": "S"
+    },
+    {
+      "id": "wq-851",
+      "title": "Expand engage-blockers.sh platform coverage to all live platforms",
+      "description": "engage-blockers.sh only monitors 10 platforms but account-registry has 30+ live platforms. Silent failures on uncovered platforms waste E session budget without triggering wq items. Read account-registry.json for live platforms and generate the blocker list dynamically instead of hardcoding.",
+      "priority": 851,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1778,
+      "source": "brainstorming",
+      "tags": [
+        "reliability",
+        "engagement"
+      ],
+      "commits": [],
+      "complexity": "M"
+    },
+    {
+      "id": "wq-852",
+      "title": "Add staleness guard to 27-todo-scan.sh followup file",
+      "description": "27-todo-scan.sh writes todo-followups.txt but never checks if the file is stale from a previous session. If a B session crashes before queue-pipeline processes the file, stale content persists indefinitely. Add check: if file session marker is >2 sessions old, delete rather than re-process.",
+      "priority": 852,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1778,
+      "source": "brainstorming",
+      "tags": [
+        "reliability",
+        "infrastructure"
       ],
       "commits": [],
       "complexity": "S"

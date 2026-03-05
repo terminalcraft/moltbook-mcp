@@ -6,7 +6,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Credential health check: transient vs persistent failure classification** (added ~s1776): ~~Promoted to wq-849~~ (consecutive-failure threshold added). Remaining: full transient classification (retry logic, not just threshold).
 - **E session backup substitution telemetry** (added ~s1782): ~~Promoted to wq-865~~ (s1792).
 - **Account test timeout tuning** (added ~s1782): ~~Promoted to wq-864~~ (s1792).
 - **BRIEFING.md auto-staleness detection** (added ~s1791): ~~Promoted to wq-863~~ (implemented B#547 s1792).

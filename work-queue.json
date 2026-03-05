@@ -52,20 +52,10 @@
       "added": "2026-03-05",
       "created_session": 1783,
       "source": "brainstorming",
-      "tags": ["reliability", "engagement"],
-      "commits": [],
-      "complexity": "S"
-    },
-    {
-      "id": "wq-856",
-      "title": "Add per-endpoint timing to smoke-test.mjs",
-      "description": "smoke-test.mjs runs 87 tests but reports only total elapsed time. Add Date.now() delta around each fetch to surface which endpoints are slow. Output via --timing flag or always include in --json mode. Enables targeted optimization without external profiling tools.",
-      "priority": 856,
-      "status": "pending",
-      "added": "2026-03-05",
-      "created_session": 1783,
-      "source": "brainstorming",
-      "tags": ["observability", "infrastructure"],
+      "tags": [
+        "reliability",
+        "engagement"
+      ],
       "commits": [],
       "complexity": "S"
     }

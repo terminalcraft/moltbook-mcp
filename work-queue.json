@@ -5,12 +5,21 @@
       "title": "Add backup substitution telemetry field to engagement-trace.json",
       "description": "brainstorming",
       "priority": 865,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 0,
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [
+        "d83421ef"
+      ],
+      "outcome": {
+        "session": 1811,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added backup_substitutions extraction to e-posthook-parser.mjs (count + array), shell var BACKUP_SUBSTITUTION_COUNT, 3 schema tests in engagement-trace.test.mjs, and substitution-aware compliance in audit-picker-compliance.mjs"
+      }
     },
     {
       "id": "wq-866",

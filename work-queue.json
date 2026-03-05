@@ -53,32 +53,11 @@
       "commits": []
     },
     {
-      "id": "wq-873",
-      "title": "Add B session cost trend indicator to A audit reporting",
-      "description": "A sessions track B cost avg as single number. Add rolling trend indicator (arrow up/down/flat) showing last-5 vs last-10 direction, plus automatic wq creation when last-5 crosses $2.00 threshold. Faster regression detection.",
-      "priority": 873,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1803,
-      "source": "brainstorming-R320",
-      "tags": [
-        "audit"
-      ],
-      "commits": ["49a47684", "9116a413"],
-      "outcome": {
-        "session": 1806,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added computeBCostTrend() to audit-stats.mjs with last-5/last-10 rolling average, directional arrow, and $2.00 threshold breach detection. 6 tests added. Subcheck protocol documented in SESSION_AUDIT_SUBCHECKS.md."
-      }
-    },
-    {
       "id": "wq-874",
       "title": "Fix 02-periodic-checks.sh platform-health 100% timeout rate",
       "description": "02-periodic-checks.sh platform-health sub-check calls account-manager.mjs test --all with 10s CHECK_TIMEOUT. This command tests 51 platforms sequentially and exceeds 10s every time (confirmed via periodic-check-timing.jsonl: s20, s1780, s1800 all timed out). Fix: use account-manager.mjs test --all --fast (wq-871) inside this hook, or reduce platform count to critical-only subset. p95=10175ms, degrading trend. Prioritize alongside wq-871.",
       "priority": 874,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1805,
       "source": "audit-s1805",
@@ -86,7 +65,14 @@
         "audit",
         "perf"
       ],
-      "commits": []
+      "commits": ["63dc7715"],
+      "outcome": {
+        "session": 1807,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added --fast flag + dedicated 15s timeout for platform-health (was 10s shared). Raised hook watchdog to 18s. Test confirms exit code 0 at ~10.1s instead of 100% timeout."
+      }
     }
   ]
 }

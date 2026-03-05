@@ -684,6 +684,81 @@ function computeEScopeBleed() {
   }
 }
 
+// --- TODO tracker false-positive rate (wq-866) ---
+
+function computeTodoFalsePositiveRate() {
+  const trackerPath = join(STATE_DIR, 'todo-tracker.json');
+  const archivePath = join(PROJECT_DIR, 'work-queue-archive.json');
+  const queuePath = join(PROJECT_DIR, 'work-queue.json');
+
+  // Source 1: todo-tracker.json — items caught by the scan hook
+  const tracker = safeRead(trackerPath, { items: [] });
+  const allTracked = tracker.items || [];
+  const openItems = allTracked.filter(i => i.status === 'open');
+  const resolvedItems = allTracked.filter(i => i.status === 'resolved');
+  const autoResolvedFP = resolvedItems.filter(i =>
+    i.resolution_note && /false.?positive/i.test(i.resolution_note)
+  );
+  const naturallyResolved = resolvedItems.filter(i =>
+    !i.resolution_note || !/false.?positive/i.test(i.resolution_note)
+  );
+
+  // Source 2: work-queue — todo-scan sourced items and their outcomes
+  const archive = safeRead(archivePath, { archived: [] });
+  const queue = safeRead(queuePath, { queue: [] });
+  const allQueueItems = [...(archive.archived || []), ...(queue.queue || [])];
+  const todoScanItems = allQueueItems.filter(i => i.source === 'todo-scan');
+
+  let queueCompleted = 0, queueRetired = 0, queuePending = 0;
+  for (const item of todoScanItems) {
+    const result = item.outcome?.result || item.status;
+    if (result === 'completed' || result === 'done') queueCompleted++;
+    else if (result === 'retired') queueRetired++;
+    else if (result === 'pending' || result === 'in-progress') queuePending++;
+    else queueRetired++; // unknown status treated as retired
+  }
+
+  const queueDecided = queueCompleted + queueRetired;
+  const queueFPRate = queueDecided > 0
+    ? Math.round((queueRetired / queueDecided) * 100)
+    : 0;
+
+  // Combined false-positive rate: auto-resolved FPs + queue retirements vs total processed
+  const totalProcessed = autoResolvedFP.length + naturallyResolved.length + queueDecided;
+  const totalFP = autoResolvedFP.length + queueRetired;
+  const combinedFPRate = totalProcessed > 0
+    ? Math.round((totalFP / totalProcessed) * 100)
+    : 0;
+
+  let verdict;
+  if (totalProcessed === 0) verdict = 'no_data';
+  else if (combinedFPRate <= 30) verdict = 'healthy';
+  else if (combinedFPRate <= 60) verdict = 'elevated';
+  else if (combinedFPRate <= 80) verdict = 'high';
+  else verdict = 'critical';
+
+  return {
+    tracker: {
+      total: allTracked.length,
+      open: openItems.length,
+      resolved: resolvedItems.length,
+      auto_resolved_fp: autoResolvedFP.length,
+      naturally_resolved: naturallyResolved.length
+    },
+    queue: {
+      total_todo_scan: todoScanItems.length,
+      completed: queueCompleted,
+      retired: queueRetired,
+      pending: queuePending,
+      fp_rate_pct: queueFPRate
+    },
+    combined_fp_rate_pct: combinedFPRate,
+    total_processed: totalProcessed,
+    total_false_positives: totalFP,
+    verdict
+  };
+}
+
 // Main output
 const stats = {
   computed_at: new Date().toISOString(),
@@ -699,7 +774,8 @@ const stats = {
   b_cost_trend: computeBCostTrend(),
   r_scope_budget: computeRScopeBudgetCompliance(),
   b_pipeline_gate: computeBPipelineGateCompliance(),
-  e_scope_bleed: computeEScopeBleed()
+  e_scope_bleed: computeEScopeBleed(),
+  todo_false_positive_rate: computeTodoFalsePositiveRate()
 };
 
 console.log(JSON.stringify(stats, null, 2));

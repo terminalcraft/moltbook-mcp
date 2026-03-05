@@ -228,3 +228,40 @@ Pre-hook `33-stale-tag-check_A.sh` cross-references `work-queue.json` tags again
 ```
 
 **Purpose**: Replaces the manual re-tagging workflow (e.g., wq-816). When directives close, items still tagged with them are stale — the tag no longer conveys useful grouping. Auditor should recommend re-tagging or tag removal.
+
+## TODO tracker false-positive rate (wq-866)
+
+Use `audit-stats.mjs` → `todo_false_positive_rate`. Measures what fraction of TODO scan detections are false positives — combining tracker-level auto-resolution with queue-level retirement data.
+
+**Data sources**:
+- `~/.config/moltbook/todo-tracker.json`: items detected by `27-todo-scan.sh`, including auto-resolved false positives
+- `work-queue-archive.json` + `work-queue.json`: items sourced from `todo-scan` and their completion/retirement outcomes
+
+**Key fields**:
+- `tracker.auto_resolved_fp`: items auto-resolved by `todo-false-positives.json` pattern matching
+- `queue.fp_rate_pct`: percentage of decided (completed+retired) todo-scan queue items that were retired
+- `combined_fp_rate_pct`: overall false-positive rate across both tracker and queue signals
+- `verdict`: `healthy` (≤30%), `elevated` (31-60%), `high` (61-80%), `critical` (>80%)
+
+**Verdict table**:
+
+| combined_fp_rate_pct | Verdict | Action |
+|---------------------|---------|--------|
+| ≤ 30% | `healthy` | none |
+| 31-60% | `elevated` | note in report — review scan exclusions |
+| 61-80% | `high` | recommend adding patterns to `todo-false-positives.json` |
+| > 80% | `critical` | create wq item `["audit", "tooling"]` to overhaul TODO scan filtering |
+
+**Report in `pipelines.todo_fp_rate`**:
+```json
+{
+  "combined_fp_rate_pct": 83,
+  "queue_fp_rate_pct": 100,
+  "auto_resolved_fp": 19,
+  "total_processed": 72,
+  "verdict": "critical",
+  "action": "wq item created for scan filter overhaul"
+}
+```
+
+**Trend tracking**: Compare `combined_fp_rate_pct` with previous audit. If rate increases for 2+ consecutive audits, escalate to recommendation: "TODO scan producing excessive false positives — consider disabling auto-ingest or tightening exclusion patterns."

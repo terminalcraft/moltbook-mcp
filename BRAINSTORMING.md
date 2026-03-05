@@ -6,7 +6,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **E session backup substitution telemetry** (added ~s1782): ~~Promoted to wq-865~~ (s1792).
 - **Account test timeout tuning** (added ~s1782): ~~Promoted to wq-864~~ (s1792).
 - **BRIEFING.md auto-staleness detection** (added ~s1791): ~~Promoted to wq-863~~ (implemented B#547 s1792).
 - **B session cost trend dashboard in A audit** (added ~s1796): ~~Promoted to wq-873~~ (s1803).
@@ -20,6 +19,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Per-type cost trend indicators for E/R sessions** (added ~s1806): ~~Promoted to wq-875~~ (s1808).
 
 - **Backup substitution rate dashboard in A audit** (added ~s1811): Now that backup_substitutions is tracked in engagement-trace.json (wq-865), A sessions could report substitution frequency as part of the E session health check — e.g. "3 substitutions in last 10 E sessions, top replaced platform: lbstrs". Would surface chronically unreachable platforms that should be circuit-broken rather than substituted.
+
+- **TODO scan: tighten exclusions based on FP rate data** (added ~s1812): The new todo_false_positive_rate metric shows 51% combined FP rate (elevated). The queue-level FP rate is 78% (18/23 todo-scan items retired). Could use the per-item text from todo-tracker.json to identify new exclusion patterns or widen existing ones in todo-false-positives.json. Alternatively, raise the ingest threshold in queue-pipeline.mjs to require more specific TODO comments before auto-creating queue items.
 
 ## Active Observations
 

@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-880",
-      "title": "Migrate hooks to timeout-wrapper.sh",
-      "description": "Refactor 02-periodic-checks.sh and 09-financial-check.sh to source hooks/lib/timeout-wrapper.sh instead of hand-rolling timeout/watchdog boilerplate. Each hook should drop ~30 lines. Also check 14-token-refresh.sh for inline timeout patterns. Single focused B session.",
-      "priority": 880,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1818,
-      "source": "brainstorming-R323",
-      "tags": [
-        "maintenance"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s1822",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Migrated 02-periodic-checks.sh (-58 lines) and 09-financial-check.sh (-9 lines) to timeout-wrapper.sh. 14-token-refresh.sh assessed: sequential curl/timeout, not a fit for parallel watchdog wrapper. Net -65 lines."
-      }
-    },
-    {
       "id": "wq-881",
       "title": "Backup substitution rate dashboard in A audit",
       "description": "Add substitution frequency tracking to audit-stats.mjs. Read backup_substitutions from engagement-trace.json across recent E sessions. Report 'N substitutions in last 10 E sessions, top replaced: X'. Surface chronically unreachable platforms that should be circuit-broken rather than substituted.",
@@ -40,7 +19,7 @@
       "title": "Slim SESSION_AUDIT_SUBCHECKS.md — 3106 tokens (over 3000 budget)",
       "description": "Auto-generated: SESSION_AUDIT_SUBCHECKS.md is 3106 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
       "priority": 878,
-      "status": "pending",
+      "status": "completed",
       "added": "2026-03-05",
       "created_session": 1813,
       "source": "hook:27-session-file-sizes",
@@ -48,7 +27,9 @@
         "auto-seeded",
         "prompt-budget"
       ],
-      "commits": []
+      "commits": [],
+      "completed_session": 1823,
+      "completed_note": "R#324: removed completed d071 section (40 lines), collapsed E/R cost trend sections into parameterized reference (45 lines). File reduced 311→238 lines."
     },
     {
       "id": "wq-882",
@@ -61,6 +42,63 @@
       "source": "brainstorming-R323",
       "tags": [
         "quality"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-883",
+      "title": "BRIEFING.md auto-staleness detection",
+      "description": "(added ~s1791): Already implemented as wq-863 (B#547 s1792). Stale duplicate.",
+      "priority": 883,
+      "status": "retired",
+      "added": "2026-03-05",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": [],
+      "retired_session": 1823,
+      "retired_reason": "duplicate — already implemented as wq-863 in s1792"
+    },
+    {
+      "id": "wq-884",
+      "title": "Auto-escalation for E/R cost trends in audit-checks",
+      "description": "audit-stats.mjs now computes e_cost_trend and r_cost_trend (wq-875), but audit-checks has no escalation logic consuming them. Add e_session_cost and r_session_cost to escalation_tracker — same pattern as existing b_session_cost escalation. When threshold_crossed is true ($1.50 for E, $2.00 for R), auto-create wq items. Currently the data is produced but not acted on.",
+      "priority": 884,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1823,
+      "source": "brainstorming-R324",
+      "tags": [
+        "observability",
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-885",
+      "title": "Add tw_run_fn helper to timeout-wrapper.sh",
+      "description": "Currently tw_run requires 'bash -c ...' for multi-line check logic. Adding a tw_run_fn helper that wraps function dispatch (declare -f + call) would simplify future hook migrations to timeout-wrapper.sh. Small utility addition, clear scope.",
+      "priority": 885,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1823,
+      "source": "brainstorming-R324",
+      "tags": [
+        "tooling"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-886",
+      "title": "A session human-review schema validation before wq creation",
+      "description": "A#203 created wq-879 for a false-positive schema issue (hr-a173-1 already had correct status field). The A session should run validate-human-review.mjs (or check required fields) before creating data-hygiene wq items. Prevents false-positive queue items that waste B session time on investigation.",
+      "priority": 886,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1823,
+      "source": "brainstorming-R324",
+      "tags": [
+        "quality",
+        "audit"
       ],
       "commits": []
     }

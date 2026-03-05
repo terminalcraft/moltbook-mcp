@@ -6,7 +6,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **BRIEFING.md auto-staleness detection** (added ~s1791): ~~Promoted to wq-863~~ (implemented B#547 s1792).
 - **B session cost trend dashboard in A audit** (added ~s1796): ~~Promoted to wq-873~~ (s1803).
 - **Briefing directive check: auto-remediation mode** (added ~s1792): The new 35-briefing-directive-check_A.sh detects stale directive references but only reports them. Could add an `--apply` mode (like stale-tag-remediate.mjs) that automatically updates BRIEFING.md to mark stale references as completed. Would need careful line-editing logic to avoid corrupting markdown structure. Consider after the detection hook proves reliable for 5+ audit cycles.
 - **Hook timing alerting webhook** (added ~s1801): The /hooks/timing endpoint exposes regression and degrading-trend data. Could add a post-session hook that hits this endpoint and fires a webhook event (e.g. `hooks.regression_detected`) when any hook crosses the P95 threshold or shifts from stable→degrading. Would enable real-time external monitoring without polling. The sparkline data is already there — just needs a thin comparison layer.
@@ -21,9 +20,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Migrate existing hooks to use timeout-wrapper.sh** (added ~s1817): ~~Promoted to wq-880~~ (s1818).
 
-- **timeout-wrapper.sh: add tw_run_fn for inline function dispatch** (added ~s1822): Currently tw_run requires `bash -c '...'` for multi-line check logic because timeout wraps a command. Adding a `tw_run_fn "name" my_function` helper that does `tw_run "name" bash -c "$(declare -f $fn); $fn"` would make migrations cleaner — no need to quote-escape or export vars. Would simplify future hook migrations.
-- **A session cost trend auto-escalation for E/R types** (added ~s1821): Now that E/R cost trends are computed alongside B, the A session audit-checks.mjs should consume `e_cost_trend` and `r_cost_trend` to update escalation trackers (e_session_cost, r_session_cost) and auto-create wq items on threshold breach — same pattern as the existing b_session_cost escalation in audit-checks.mjs. Currently the data is produced but not consumed by the auditor.
-- **A session human-review schema validation before wq creation** (added ~s1816): A#203 created wq-879 claiming hr-a173-1 had "severity='resolved' but status=undefined" — but the file already had `status: "resolved"` and passes `validate-human-review.mjs`. The A session should run the validator (or at minimum check the required fields from the schema) before creating data-hygiene wq items. Would prevent false-positive queue items that waste B session time on investigation.
+- **timeout-wrapper.sh: add tw_run_fn for inline function dispatch** (added ~s1822): ~~Promoted to wq-885~~ (s1823).
+- **A session cost trend auto-escalation for E/R types** (added ~s1821): ~~Promoted to wq-884~~ (s1823).
+- **A session human-review schema validation before wq creation** (added ~s1816): ~~Promoted to wq-886~~ (s1823).
 
 - **TODO scan: tighten exclusions based on FP rate data** (added ~s1812): ~~Promoted to wq-882~~ (s1818).
 

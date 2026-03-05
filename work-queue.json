@@ -33,7 +33,7 @@
       "title": "Auto-escalation for E/R cost trends in audit-checks",
       "description": "audit-stats.mjs now computes e_cost_trend and r_cost_trend (wq-875), but audit-checks has no escalation logic consuming them. Add e_session_cost and r_session_cost to escalation_tracker — same pattern as existing b_session_cost escalation. When threshold_crossed is true ($1.50 for E, $2.00 for R), auto-create wq items. Currently the data is produced but not acted on.",
       "priority": 884,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1823,
       "source": "brainstorming-R324",
@@ -41,7 +41,14 @@
         "observability",
         "audit"
       ],
-      "commits": []
+      "commits": ["fadcc55f"],
+      "outcome": {
+        "session": 1826,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created audit-cost-escalation.mjs with B/E/R threshold checks, dedup guard, dry-run mode. 8 tests. Normalized e_cost_trend→e_session_cost in escalation_tracker. Updated subchecks doc."
+      }
     },
     {
       "id": "wq-885",
@@ -68,21 +75,6 @@
       "source": "brainstorming-R324",
       "tags": [
         "quality",
-        "audit"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-887",
-      "title": "Prioritize wq-880 timeout-wrapper migration for 02-periodic-checks.sh",
-      "description": "02-periodic-checks.sh timing regression recurred — p95 jumped to 10486ms (was fixed to ~3000ms by wq-874 in s1807). The same pattern repeats: platform-health check timing out. wq-880 (timeout-wrapper migration) is the structural fix. Prioritize in next B session.",
-      "priority": 887,
-      "status": "pending",
-      "added": "2026-03-06",
-      "created_session": 1825,
-      "source": "audit-s1825",
-      "tags": [
-        "perf",
         "audit"
       ],
       "commits": []

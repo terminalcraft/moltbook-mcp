@@ -167,20 +167,35 @@ async function testAccount(account) {
   }
 }
 
+// Concurrency-limited parallel execution (wq-846)
+async function parallelMap(items, fn, concurrency = 10) {
+  const results = new Array(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const idx = next++;
+      results[idx] = await fn(items[idx]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()));
+  return results;
+}
+
 async function testAll(filterIds) {
   const reg = loadRegistry();
   const accounts = filterIds?.length
     ? reg.accounts.filter(a => filterIds.includes(a.id))
     : reg.accounts;
 
-  const results = [];
-  for (const account of accounts) {
+  const results = await parallelMap(accounts, async (account) => {
     const r = await testAccount(account);
     r.tested = new Date().toISOString();
-    results.push(r);
+    return r;
+  }, 10);
 
-    // Update registry with last status
-    const entry = reg.accounts.find(a => a.id === account.id);
+  // Update registry with results
+  for (const r of results) {
+    const entry = reg.accounts.find(a => a.id === r.id);
     if (entry) {
       entry.last_status = r.status;
       entry.last_tested = r.tested;

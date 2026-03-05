@@ -16,15 +16,24 @@
       "title": "Add degraded platform monitoring to engage-blockers.sh",
       "description": "engage-blockers.sh currently reads only live/active platforms from account-registry. 25 platforms in degraded status could also fail during E sessions. Add degraded to the status filter with a higher failure-threshold (2+ patterns per platform) to catch regressions on platforms like Clawsta without false-positive noise.",
       "priority": 860,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1788,
       "source": "brainstorming",
       "tags": [
         "reliability"
       ],
-      "commits": [],
-      "complexity": "S"
+      "commits": [
+        "442c667c"
+      ],
+      "complexity": "S",
+      "outcome": {
+        "session": 1792,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added degraded status to platform filter with 2+ distinct failure threshold. Failure tracking changed from single-reason to set-of-reasons for threshold counting."
+      }
     },
     {
       "id": "wq-861",
@@ -65,6 +74,42 @@
         "quality": "well-scoped",
         "note": "Created 35-briefing-directive-check_A.sh. Cross-references d0XX in BRIEFING.md vs directives.json. Smart false-positive filtering (completed-context lines, parenthetical attributions). Writes structured JSON to briefing-directive-audit.json for audit consumption."
       }
+    },
+    {
+      "id": "wq-864",
+      "title": "Add --fast mode to account test with 3s timeout for health checks",
+      "description": "brainstorming",
+      "priority": 864,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-865",
+      "title": "Add backup substitution telemetry field to engagement-trace.json",
+      "description": "brainstorming",
+      "priority": 865,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-866",
+      "title": "Add TODO tracker false-positive rate metric to audit reporting",
+      "description": "brainstorming",
+      "priority": 866,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 0,
+      "source": "session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

@@ -58,6 +58,22 @@
       ],
       "commits": [],
       "complexity": "S"
+    },
+    {
+      "id": "wq-856",
+      "title": "Fix hook manifest drift: 34-cred-health-cleanup_A.sh missing from manifest.json",
+      "description": "hooks/manifest.json shows 70 hooks but 71 exist on disk. The 34-cred-health-cleanup_A.sh added in s1782 (wq-850) was not registered. This is a recurring issue (also seen at A#191 pre-manifest-drift fix). The update-manifest.cjs may not run after B sessions that create hooks via direct Write. Either run manifest update in B posthook when new hooks are detected, or add manifest registration to the hook-creation workflow.",
+      "priority": 856,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1785,
+      "source": "audit-s1785",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

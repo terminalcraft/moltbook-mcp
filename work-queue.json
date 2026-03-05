@@ -41,33 +41,6 @@
       "commits": []
     },
     {
-      "id": "wq-828",
-      "title": "Automate stale-tag detection in A session pre-hook",
-      "description": "wq-816 was a manual task to re-tag items after d071 closed. Automate: A session pre-hook checks for queue items tagged with completed directives (status=completed in directives.json) and flags them in audit findings. Prevents stale tags from accumulating silently after directive closure.",
-      "priority": 828,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1746,
-      "source": "brainstorming",
-      "tags": [
-        "automation",
-        "audit"
-      ],
-      "commits": [
-        "c45df601",
-        "450801ac",
-        "86f8aef2",
-        "94f21c5b"
-      ],
-      "outcome": {
-        "session": 1750,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Hook 33-stale-tag-check_A.sh cross-references queue tags against completed directives. 16 unit tests, audit subchecks doc, manifest updated (70 hooks). Also fixed pre-existing manifest drift (11-json-key-lint.sh missing)."
-      }
-    },
-    {
       "id": "wq-829",
       "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
       "description": "'xxx', 'TODO', 'REPLACE_ME'",
@@ -80,6 +53,21 @@
       ],
       "commits": [],
       "complexity": "S"
+    },
+    {
+      "id": "wq-830",
+      "title": "Optimize 05-smoke-test.sh post-hook performance (9.6s avg)",
+      "description": "hook-timing-report shows 05-smoke-test.sh at 9622ms avg / 11161ms P95 — the slowest hook by far. Investigate what it runs and optimize: run targeted subset, cache results, parallelize sub-checks, or split into quick-smoke (all sessions) and full-smoke (B sessions only). Target: ≤5s avg.",
+      "priority": 830,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1751,
+      "source": "brainstorming",
+      "tags": [
+        "performance",
+        "hooks"
+      ],
+      "commits": []
     }
   ]
 }

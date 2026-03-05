@@ -1,25 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-866",
-      "title": "Add TODO tracker false-positive rate metric to audit reporting",
-      "description": "brainstorming",
-      "priority": 866,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 0,
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1812,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added computeTodoFalsePositiveRate() to audit-stats.mjs combining todo-tracker.json and work-queue-archive data. Current: 51% combined FP, 78% queue FP. Documented in SESSION_AUDIT_SUBCHECKS.md with verdict table."
-      }
-    },
-    {
       "id": "wq-872",
       "title": "Create hooks/lib/timeout-wrapper.sh for standard hook timeout behavior",
       "description": "The pattern for fixing slow hooks is well-established: per-check timeout N, parallel background jobs, hook-level watchdog, graceful fallback. Create a shared library that any hook can source to get standard timeout+watchdog behavior with minimal boilerplate.",
@@ -56,6 +37,32 @@
       "added": "2026-03-05",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-877",
+      "title": "Account test timeout tuning",
+      "description": "(added ~s1782): ~~Promoted to wq-864~~ (s1792).",
+      "priority": 877,
+      "status": "pending",
+      "added": "2026-03-05",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-878",
+      "title": "Slim SESSION_AUDIT_SUBCHECKS.md — 3106 tokens (over 3000 budget)",
+      "description": "Auto-generated: SESSION_AUDIT_SUBCHECKS.md is 3106 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
+      "priority": 878,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1813,
+      "source": "hook:27-session-file-sizes",
+      "tags": [
+        "auto-seeded",
+        "prompt-budget"
+      ],
       "commits": []
     }
   ]

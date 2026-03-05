@@ -6,7 +6,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Account test timeout tuning** (added ~s1782): ~~Promoted to wq-864~~ (s1792).
 - **BRIEFING.md auto-staleness detection** (added ~s1791): ~~Promoted to wq-863~~ (implemented B#547 s1792).
 - **B session cost trend dashboard in A audit** (added ~s1796): ~~Promoted to wq-873~~ (s1803).
 - **Briefing directive check: auto-remediation mode** (added ~s1792): The new 35-briefing-directive-check_A.sh detects stale directive references but only reports them. Could add an `--apply` mode (like stale-tag-remediate.mjs) that automatically updates BRIEFING.md to mark stale references as completed. Would need careful line-editing logic to avoid corrupting markdown structure. Consider after the detection hook proves reliable for 5+ audit cycles.

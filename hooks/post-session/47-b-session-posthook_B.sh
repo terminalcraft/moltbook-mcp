@@ -40,81 +40,27 @@ check_checkpoint_clear() {
 ###############################################################################
 # Check 2: Truncation recovery (was 48-truncation-recovery_B.sh)
 #   Detect truncated B sessions (<3 min, 0 commits) and re-queue assigned item
+#   R#313: Logic extracted to hooks/lib/truncation-recovery.mjs
 ###############################################################################
 check_truncation_recovery() {
-  # Compute duration from session log timestamps
-  local DURATION=0
-  if [ -n "${LOG_FILE:-}" ] && [ -f "$LOG_FILE" ]; then
-    DURATION=$(node -e "
-      const fs = require('fs'), data = fs.readFileSync('$LOG_FILE', 'utf8');
-      const pat = /\"timestamp\":\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/g;
-      const lines = data.split('\n');
-      let first, last;
-      for (const l of lines.slice(0, 50)) { const m = pat.exec(l); if (m) { first = m[1]; break; } }
-      pat.lastIndex = 0;
-      for (let i = lines.length - 1; i >= Math.max(0, lines.length - 50); i--) { const m = pat.exec(lines[i]); if (m) { last = m[1]; break; } pat.lastIndex = 0; }
-      if (first && last) { console.log(Math.floor((new Date(last) - new Date(first)) / 1000)); }
-      else { console.log(999); }
-    " 2>/dev/null || echo 999)
-  fi
-
-  # Not truncated if >= 3 minutes
-  if [ "$DURATION" -ge 180 ]; then
+  if [ -z "${LOG_FILE:-}" ] || [ ! -f "$LOG_FILE" ]; then
     return 0
   fi
 
-  # Check: 0 commits in this session
+  # Count commits in this session (git ops are cheaper in bash)
   local COMMITS
   COMMITS=$(cd "$MCP_DIR" && git log --oneline --since="$(date -d '5 minutes ago' -Iseconds 2>/dev/null || date -v-5M -Iseconds 2>/dev/null || echo '2000-01-01')" 2>/dev/null | grep -cv 'auto-snapshot' || echo 0)
-  if [ "$COMMITS" -gt 0 ]; then
-    return 0
+
+  # R#313: delegate duration check, item lookup, and re-queue to truncation-recovery.mjs
+  local OUTPUT
+  OUTPUT=$(node "$MCP_DIR/hooks/lib/truncation-recovery.mjs" "$SESSION_NUM" "$LOG_FILE" "$WQ" "$AUDIT_LOG" "$COMMITS" 2>/dev/null) || true
+  if [ -n "$OUTPUT" ]; then
+    echo "$OUTPUT"
+    # Log recovery events to the dedicated recovery log
+    if echo "$OUTPUT" | grep -q "RECOVERED\|truncated"; then
+      echo "$OUTPUT" >> "$RECOVERY_LOG"
+    fi
   fi
-
-  # Find assigned work-queue item
-  local ASSIGNED_ID=""
-  if [ -n "${LOG_FILE:-}" ] && [ -f "$LOG_FILE" ]; then
-    ASSIGNED_ID=$(grep -oP 'wq-\d+' "$LOG_FILE" | head -1 || true)
-  fi
-
-  if [ -z "$ASSIGNED_ID" ]; then
-    echo "$(date -Iseconds) s=${SESSION_NUM} truncated (${DURATION}s, 0 commits) but no assigned item found" >> "$RECOVERY_LOG"
-    return 0
-  fi
-
-  # Check if item is still not done
-  local ITEM_STATUS
-  ITEM_STATUS=$(node -e "
-    const q = JSON.parse(require('fs').readFileSync('$WQ', 'utf8'));
-    const item = q.queue && q.queue.find(i => i.id === '$ASSIGNED_ID');
-    console.log(item ? item.status : 'not_found');
-  " 2>/dev/null || echo "not_found")
-
-  if [ "$ITEM_STATUS" = "done" ] || [ "$ITEM_STATUS" = "not_found" ]; then
-    echo "$(date -Iseconds) s=${SESSION_NUM} truncated (${DURATION}s) but $ASSIGNED_ID is already $ITEM_STATUS — no recovery needed" >> "$RECOVERY_LOG"
-    return 0
-  fi
-
-  # Re-queue: ensure item status is "pending"
-  node -e "
-    const fs = require('fs');
-    const q = JSON.parse(fs.readFileSync('$WQ', 'utf8'));
-    const item = q.queue && q.queue.find(i => i.id === '$ASSIGNED_ID');
-    if (item && item.status !== 'done') {
-      const prevStatus = item.status;
-      item.status = 'pending';
-      if (!item.notes) item.notes = '';
-      item.notes += ' [truncation-recovery s${SESSION_NUM}: was ' + prevStatus + ', ${DURATION}s, re-queued]';
-      fs.writeFileSync('$WQ', JSON.stringify(q, null, 2));
-      console.log('recovered');
-    } else {
-      console.log('skip');
-    }
-  " 2>/dev/null
-
-  echo "$(date -Iseconds) s=${SESSION_NUM} RECOVERED: $ASSIGNED_ID truncated after ${DURATION}s with 0 commits — re-queued as pending" >> "$RECOVERY_LOG"
-
-  # Track early-stall pattern for audit visibility (wq-766)
-  echo "WARN: B session s${SESSION_NUM} early stall (${DURATION}s, 0 commits, $ASSIGNED_ID re-queued)" >> "$AUDIT_LOG" 2>/dev/null
 }
 
 ###############################################################################

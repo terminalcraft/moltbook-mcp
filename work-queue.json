@@ -5,15 +5,24 @@
       "title": "Add auto-resolve for recurring TODO false positives in tracker",
       "description": "The TODO tracker has flagged credential-health-check.mjs:22 four times despite being in EXCLUDE_PATHS. The issue is that git diff can still show excluded files in some edge cases, or the tracker retains stale items that get re-promoted. Add logic to 27-todo-scan.sh or the tracker phase to auto-resolve items that match a known false-positive list, preventing recurring queue pollution.",
       "priority": 838,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "source": "session",
       "tags": [
         "maintenance",
         "hooks"
       ],
-      "commits": [],
-      "complexity": "S"
+      "commits": [
+        "5cf7052b"
+      ],
+      "complexity": "S",
+      "outcome": {
+        "session": 1771,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added todo-false-positives.json with 8 regex patterns and dual-layer filtering (Phase 2 blocks new items, Phase 3 auto-resolves existing). Tested with pattern matching unit tests and live hook run."
+      }
     },
     {
       "id": "wq-839",
@@ -72,30 +81,6 @@
       "source": "session",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-845",
-      "title": "Profile and optimize 36-circuit-reset.sh degrading hook timing",
-      "description": "36-circuit-reset.sh is the only degrading hook in the system (p95=5170ms, avg=1928ms, trend=degrading). All other previously-degrading hooks are now improving after targeted optimization work. Profile this hook to identify the source of degradation — likely circuit-breaker state file reads scaling with platform entries (29 live + 22 inactive/defunct = 51 accounts). Add caching, truncation, or sampling to reduce P95.",
-      "priority": 845,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1770,
-      "source": "audit-s1770",
-      "tags": [
-        "audit",
-        "hooks",
-        "performance"
-      ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": 1771,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Profiled hook: root cause was sequential HTTP probes with high timeouts (8s/5s). Fixed: reduced timeouts to 3s, parallelized probes via Promise.allSettled in both node scripts, parallelized shell subprocesses, merged jq calls. Result: 5.06s→3.15s measured, p95 expected ~3s (bounded by single slowest probe timeout)."
-      }
     }
   ]
 }

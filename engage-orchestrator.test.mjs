@@ -20,6 +20,15 @@ const CIRCUIT_COOLDOWN_MS = 24 * 3600 * 1000; // 24h
 
 function setup() {
   mkdirSync(SCRATCH, { recursive: true });
+  mkdirSync(join(SCRATCH, 'lib'), { recursive: true });
+
+  // Copy and patch lib/circuit-breaker.mjs to use SCRATCH directory
+  let cbSrc = readFileSync(join(__dirname, 'lib', 'circuit-breaker.mjs'), 'utf8');
+  cbSrc = cbSrc.replace(
+    'const CIRCUIT_PATH = join(__dirname, "..", "platform-circuits.json");',
+    `const CIRCUIT_PATH = ${JSON.stringify(join(SCRATCH, 'platform-circuits.json'))};`
+  );
+  writeFileSync(join(SCRATCH, 'lib', 'circuit-breaker.mjs'), cbSrc);
 
   // Copy engage-orchestrator.mjs and patch paths
   let src = readFileSync(join(__dirname, 'engage-orchestrator.mjs'), 'utf8');
@@ -30,9 +39,14 @@ function setup() {
     'import { analyzeEngagement } from "./providers/engagement-analytics.js";',
     `import { analyzeEngagement } from ${JSON.stringify('file://' + providersPath)};`
   );
-  // Patch all ./lib/ imports to resolve against the real project directory
-  const libPrefix = 'file://' + join(__dirname, 'lib') + '/';
-  src = src.replace(/from "\.\/lib\//g, `from "${libPrefix}`);
+  // Patch lib imports to resolve against SCRATCH/lib for circuit-breaker, original lib for others
+  const scratchLibPrefix = 'file://' + join(SCRATCH, 'lib') + '/';
+  const realLibPrefix = 'file://' + join(__dirname, 'lib') + '/';
+  src = src.replace(
+    /from "\.\/lib\/circuit-breaker\.mjs"/g,
+    `from "${scratchLibPrefix}circuit-breaker.mjs"`
+  );
+  src = src.replace(/from "\.\/lib\//g, `from "${realLibPrefix}`);
 
   // Patch file paths to use SCRATCH directory
   src = src.replace(
@@ -42,10 +56,6 @@ function setup() {
   src = src.replace(
     'const INTEL_PATH = join(__dirname, "engagement-intel.json");',
     `const INTEL_PATH = ${JSON.stringify(join(SCRATCH, 'engagement-intel.json'))};`
-  );
-  src = src.replace(
-    'const CIRCUIT_PATH = join(__dirname, "platform-circuits.json");',
-    `const CIRCUIT_PATH = ${JSON.stringify(join(SCRATCH, 'platform-circuits.json'))};`
   );
 
   writeFileSync(join(SCRATCH, 'engage-orchestrator.mjs'), src);

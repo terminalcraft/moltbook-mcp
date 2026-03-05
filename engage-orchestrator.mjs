@@ -25,16 +25,12 @@ import { analyzeEngagement } from "./providers/engagement-analytics.js";
 import { setCachedLiveness } from "./lib/platform-liveness-cache.mjs";
 import { getDisplayName } from "./lib/platform-names.mjs";
 import { handleHistory, handleDiversity, handleDiversityTrends, handleQualityCheck } from "./lib/orchestrator-cli.mjs";
+import { loadCircuits, saveCircuits, getCircuitState, recordOutcome, filterByCircuit, CIRCUIT_COOLDOWN_MS } from "./lib/circuit-breaker.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const STATE_DIR = join(process.env.HOME, '.config/moltbook');
 const SERVICES_PATH = join(__dirname, "services.json");
 const INTEL_PATH = join(STATE_DIR, "engagement-intel.json");  // Must match session-context.mjs (wq-119 fix)
-const CIRCUIT_PATH = join(__dirname, "platform-circuits.json");
-
-// Circuit breaker config
-const CIRCUIT_FAILURE_THRESHOLD = 3;  // consecutive failures to open circuit
-const CIRCUIT_COOLDOWN_MS = 24 * 3600 * 1000;  // 24h before half-open retry
 
 // Priority engagement targets — integrated services that E sessions should visit frequently.
 // These get injected into the session plan with a high ROI boost (above normal platform scoring).
@@ -58,74 +54,6 @@ function run(cmd, timeout = 15000) {
   } catch (e) {
     return null;
   }
-}
-
-// --- Circuit Breaker ---
-// Tracks per-platform consecutive failures. States:
-//   closed (healthy) → open (disabled after N failures) → half-open (retry after cooldown)
-
-function loadCircuits() {
-  if (!existsSync(CIRCUIT_PATH)) return {};
-  try { return JSON.parse(readFileSync(CIRCUIT_PATH, "utf8")); } catch { return {}; }
-}
-
-function saveCircuits(circuits) {
-  writeFileSync(CIRCUIT_PATH, JSON.stringify(circuits, null, 2) + "\n");
-}
-
-function getCircuitState(circuits, platform) {
-  const entry = circuits[platform];
-  if (!entry || entry.consecutive_failures < CIRCUIT_FAILURE_THRESHOLD) return "closed";
-  // wq-319: Defunct platforms are permanently excluded
-  if (entry.status === "defunct") return "defunct";
-  // Check if cooldown has expired → half-open
-  const elapsed = Date.now() - new Date(entry.last_failure).getTime();
-  if (elapsed >= CIRCUIT_COOLDOWN_MS) return "half-open";
-  return "open";
-}
-
-function recordOutcome(platform, success) {
-  const circuits = loadCircuits();
-  if (!circuits[platform]) {
-    circuits[platform] = { consecutive_failures: 0, total_failures: 0, total_successes: 0, last_failure: null, last_success: null };
-  }
-  const entry = circuits[platform];
-  if (success) {
-    entry.consecutive_failures = 0;
-    entry.total_successes++;
-    entry.last_success = new Date().toISOString();
-  } else {
-    entry.consecutive_failures++;
-    entry.total_failures++;
-    entry.last_failure = new Date().toISOString();
-  }
-  saveCircuits(circuits);
-  return { platform, state: getCircuitState(circuits, platform), ...entry };
-}
-
-function filterByCircuit(platformNames) {
-  const circuits = loadCircuits();
-  const allowed = [];
-  const blocked = [];
-  const halfOpen = [];
-  const defunct = [];  // wq-319: Track defunct platforms separately
-  for (const name of platformNames) {
-    const state = getCircuitState(circuits, name);
-    if (state === "defunct") {
-      // wq-319: Defunct platforms are permanently excluded
-      const entry = circuits[name];
-      defunct.push({ platform: name, defunct_at: entry.defunct_at, reason: entry.defunct_reason });
-    } else if (state === "open") {
-      const entry = circuits[name];
-      blocked.push({ platform: name, failures: entry.consecutive_failures, last_failure: entry.last_failure });
-    } else if (state === "half-open") {
-      halfOpen.push(name);
-      allowed.push(name); // allow one retry
-    } else {
-      allowed.push(name);
-    }
-  }
-  return { allowed, blocked, halfOpen, defunct };
 }
 
 // --- Phase 1: Platform Health ---

@@ -25,6 +25,8 @@ node engage-orchestrator.mjs --record-outcome <platform-id> failure
 | UNREACHABLE | Connection timeout | Error from connection attempt |
 | OTHER | Platform closed | Link to announcement |
 
+**Backup substitution (wq-844)**: UNREACHABLE and API_ERROR skips trigger automatic backup substitution. Use the next unused backup from `picker-mandate.json`. See SESSION_ENGAGE.md Phase 2 backup protocol for the full flow. AUTH_FAILED and NO_CONTENT do NOT trigger substitution.
+
 **Invalid skip reasons (NOT acceptable):**
 - "Didn't feel like it" — No.
 - "Already engaged last session" — Picker knows this; it selected anyway.

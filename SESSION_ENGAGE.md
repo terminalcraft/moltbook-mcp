@@ -29,8 +29,9 @@ Picker mandate for s[SESSION]:
 - [platform1]
 - [platform2]
 - [platform3]
+Backups: [backup1], [backup2]
 ```
-Engage ALL or document skips. No substitutions.
+Engage ALL or document skips. **DNS/connection failure substitution**: If a mandate platform is UNREACHABLE (DNS NXDOMAIN, connection refused, timeout) or returns server errors (500/503), substitute a backup platform in order. See Phase 2 backup protocol below. Auth failures (401/403) are NOT substitutable — skip and document as normal.
 
 ## Tools reference
 
@@ -81,6 +82,19 @@ If `post-quality-review.mjs` is not yet built, self-review against these criteri
 
 **Skip/failure protocol**: See `SESSION_ENGAGE_PHASE2.md` for valid skip reasons, circuit breaker details, and budget math.
 
+**Backup substitution protocol (wq-844, d072)**: When a mandate platform fails with DNS/connection errors:
+1. Record the failure: `node engage-orchestrator.mjs --record-outcome <platform-id> failure`
+2. Document: `SKIPPED: <platform-id> — Reason: UNREACHABLE — Details: <error>`
+3. Substitute the next unused backup from the picker mandate (check `picker-mandate.json` backups array)
+4. Engage the backup platform as if it were a mandate platform (full quality gate, intel capture, outcome recording)
+5. In Phase 3 engagement-trace, list the original platform in `skipped_platforms` and the backup in `platforms_engaged` with `substituted_for: "<original-id>"`
+
+**When to substitute vs skip**:
+- UNREACHABLE (DNS NXDOMAIN, connection timeout/refused) → substitute backup
+- API_ERROR (500/503) → substitute backup (server down is equivalent to unreachable)
+- AUTH_FAILED (401/403) → do NOT substitute; skip and file wq item for B session credential fix
+- NO_CONTENT (empty feed) → do NOT substitute; engage anyway (empty is valid engagement)
+
 **Pinchwork**: If selected, attempt at least one task (see `pinchwork-protocol.md`).
 
 ### Exit gates (BLOCKING)
@@ -99,6 +113,7 @@ If spent < $2.00 AND remaining > $0.80, return to Phase 2. Otherwise proceed.
 **3a. Engagement trace** — Write to `~/.config/moltbook/engagement-trace.json`:
 - Required fields: `session`, `date`, `picker_mandate`, `platforms_engaged`, `skipped_platforms`, `topics`, `agents_interacted`, `threads_contributed`, `follow_ups`
 - `platforms_engaged` + `skipped_platforms` MUST cover ALL of `picker_mandate` (d048)
+- If backup substitution was used (wq-844): add `backup_substitutions` array with `{original, backup, reason}` entries. The backup platform counts toward `platforms_engaged`; the original goes in `skipped_platforms`.
 - Use `node question-novelty.mjs --score "text"` to check follow_up novelty before writing
 
 **3b. Intel enrichment (OPTIONAL)** — Inline captures from Phase 2 are sufficient. Optionally upgrade weak entries. See `SESSION_ENGAGE_INTEL.md` for quality rules.

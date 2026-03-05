@@ -73,6 +73,23 @@
         "d072"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-837",
+      "title": "Optimize 35-e-session-prehook_E.sh performance (6.2s avg)",
+      "description": "hook-timing-audit shows 35-e-session-prehook_E.sh at 6242ms avg / 6281ms P95 — now the worst pre-session hook. Profile which credential checks dominate runtime, parallelize independent checks (platform liveness vs credential validation vs picker invocation), or defer non-blocking checks to background. Target: ≤3s avg. Related: wq-830 covers post-hook smoke-test optimization.",
+      "priority": 837,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1758,
+      "source": "audit-s1758",
+      "tags": [
+        "audit",
+        "performance",
+        "hooks",
+        "d072"
+      ],
+      "commits": []
     }
   ]
 }

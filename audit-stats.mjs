@@ -445,9 +445,9 @@ function computeIntelYield() {
   };
 }
 
-// --- B session cost trend indicator (wq-873) ---
+// --- Session cost trend indicators (wq-873, wq-875) ---
 
-function computeBCostTrend() {
+function computeCostTrend(sessionType, thresholdValue) {
   const historyPath = join(STATE_DIR, 'session-history.txt');
   if (!existsSync(historyPath)) return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'no_data' };
 
@@ -455,33 +455,33 @@ function computeBCostTrend() {
     const content = readFileSync(historyPath, 'utf8');
     const lines = content.trim().split('\n').filter(l => l.trim());
 
-    const bCosts = [];
+    const costs = [];
     for (const line of lines) {
-      if (!line.includes('mode=B')) continue;
+      if (!line.includes(`mode=${sessionType}`)) continue;
       const costMatch = line.match(/cost=\$?([\d.]+)/);
       const sessionMatch = line.match(/s=(\d+)/);
       if (costMatch && sessionMatch) {
-        bCosts.push({ session: parseInt(sessionMatch[1]), cost: parseFloat(costMatch[1]) });
+        costs.push({ session: parseInt(sessionMatch[1]), cost: parseFloat(costMatch[1]) });
       }
     }
 
-    if (bCosts.length === 0) return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'no_data' };
-    if (bCosts.length < 2) return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'insufficient_data' };
+    if (costs.length === 0) return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'no_data' };
+    if (costs.length < 2) return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'insufficient_data' };
 
-    const last5 = bCosts.slice(-5);
-    const last10 = bCosts.slice(-10);
+    const last5 = costs.slice(-5);
+    const last10 = costs.slice(-10);
 
     const avg5 = Math.round((last5.reduce((a, b) => a + b.cost, 0) / last5.length) * 100) / 100;
     const avg10 = Math.round((last10.reduce((a, b) => a + b.cost, 0) / last10.length) * 100) / 100;
 
     const delta = avg5 - avg10;
-    const threshold = 0.15; // $0.15 change is significant
+    const significanceThreshold = 0.15; // $0.15 change is significant
     let arrow;
-    if (delta > threshold) arrow = '↑';
-    else if (delta < -threshold) arrow = '↓';
+    if (delta > significanceThreshold) arrow = '↑';
+    else if (delta < -significanceThreshold) arrow = '↓';
     else arrow = '→';
 
-    const thresholdCrossed = avg5 >= 2.00;
+    const thresholdCrossed = avg5 >= thresholdValue;
 
     let verdict;
     if (thresholdCrossed) verdict = 'threshold_breach';
@@ -495,13 +495,25 @@ function computeBCostTrend() {
       delta: Math.round(delta * 100) / 100,
       trend: arrow,
       threshold_crossed: thresholdCrossed,
-      threshold_value: 2.00,
+      threshold_value: thresholdValue,
       sessions_in_last5: last5.map(e => `s${e.session}`),
       verdict
     };
   } catch {
     return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'error' };
   }
+}
+
+function computeBCostTrend() {
+  return computeCostTrend('B', 2.00);
+}
+
+function computeECostTrend() {
+  return computeCostTrend('E', 1.50);
+}
+
+function computeRCostTrend() {
+  return computeCostTrend('R', 2.00);
 }
 
 // --- E session scope-bleed commit categorization (wq-713) ---
@@ -772,6 +784,8 @@ const stats = {
   },
   sessions: computeSessionStats(),
   b_cost_trend: computeBCostTrend(),
+  e_cost_trend: computeECostTrend(),
+  r_cost_trend: computeRCostTrend(),
   r_scope_budget: computeRScopeBudgetCompliance(),
   b_pipeline_gate: computeBPipelineGateCompliance(),
   e_scope_bleed: computeEScopeBleed(),

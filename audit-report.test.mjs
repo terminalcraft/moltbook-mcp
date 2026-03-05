@@ -417,6 +417,114 @@ describe('audit-stats.mjs computation', () => {
     });
   });
 
+  describe('E cost trend', () => {
+    it('computes E session trend with $1.50 threshold', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), [
+        '2026-02-01 mode=E s=80 dur=3m cost=$2.00 build=0',
+        '2026-02-01 mode=E s=81 dur=3m cost=$2.00 build=0',
+        '2026-02-01 mode=E s=82 dur=3m cost=$2.00 build=0',
+        '2026-02-01 mode=E s=83 dur=3m cost=$2.00 build=0',
+        '2026-02-01 mode=E s=84 dur=3m cost=$2.00 build=0',
+        '2026-02-02 mode=E s=85 dur=3m cost=$1.00 build=0',
+        '2026-02-02 mode=E s=86 dur=3m cost=$1.00 build=0',
+        '2026-02-02 mode=E s=87 dur=3m cost=$1.00 build=0',
+        '2026-02-02 mode=E s=88 dur=3m cost=$1.00 build=0',
+        '2026-02-02 mode=E s=89 dur=3m cost=$1.00 build=0',
+      ].join('\n'));
+
+      const stats = runStats('100');
+      assert.equal(stats.e_cost_trend.last5_avg, 1);
+      assert.equal(stats.e_cost_trend.last10_avg, 1.5);
+      assert.equal(stats.e_cost_trend.trend, '↓');
+      assert.equal(stats.e_cost_trend.threshold_crossed, false);
+      assert.equal(stats.e_cost_trend.threshold_value, 1.50);
+      assert.equal(stats.e_cost_trend.verdict, 'decreasing');
+    });
+
+    it('detects E threshold breach at $1.50', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), [
+        '2026-02-01 mode=E s=80 dur=3m cost=$1.00 build=0',
+        '2026-02-01 mode=E s=81 dur=3m cost=$1.00 build=0',
+        '2026-02-01 mode=E s=82 dur=3m cost=$1.00 build=0',
+        '2026-02-01 mode=E s=83 dur=3m cost=$1.00 build=0',
+        '2026-02-01 mode=E s=84 dur=3m cost=$1.00 build=0',
+        '2026-02-02 mode=E s=85 dur=3m cost=$1.80 build=0',
+        '2026-02-02 mode=E s=86 dur=3m cost=$1.80 build=0',
+        '2026-02-02 mode=E s=87 dur=3m cost=$1.80 build=0',
+        '2026-02-02 mode=E s=88 dur=3m cost=$1.80 build=0',
+        '2026-02-02 mode=E s=89 dur=3m cost=$1.80 build=0',
+      ].join('\n'));
+
+      const stats = runStats('100');
+      assert.equal(stats.e_cost_trend.last5_avg, 1.8);
+      assert.equal(stats.e_cost_trend.threshold_crossed, true);
+      assert.equal(stats.e_cost_trend.verdict, 'threshold_breach');
+    });
+
+    it('ignores non-E sessions', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), [
+        '2026-02-01 mode=B s=80 dur=5m cost=$3.00 build=1',
+        '2026-02-01 mode=E s=81 dur=3m cost=$1.00 build=0',
+        '2026-02-01 mode=R s=82 dur=3m cost=$1.50 build=1',
+        '2026-02-01 mode=E s=83 dur=3m cost=$1.20 build=0',
+      ].join('\n'));
+
+      const stats = runStats('100');
+      assert.equal(stats.e_cost_trend.sessions_in_last5.length, 2);
+      assert.deepEqual(stats.e_cost_trend.sessions_in_last5, ['s81', 's83']);
+    });
+  });
+
+  describe('R cost trend', () => {
+    it('computes R session trend with $2.00 threshold', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), [
+        '2026-02-01 mode=R s=80 dur=3m cost=$2.50 build=1',
+        '2026-02-01 mode=R s=81 dur=3m cost=$2.50 build=1',
+        '2026-02-01 mode=R s=82 dur=3m cost=$2.50 build=1',
+        '2026-02-01 mode=R s=83 dur=3m cost=$2.50 build=1',
+        '2026-02-01 mode=R s=84 dur=3m cost=$2.50 build=1',
+        '2026-02-02 mode=R s=85 dur=3m cost=$1.00 build=1',
+        '2026-02-02 mode=R s=86 dur=3m cost=$1.00 build=1',
+        '2026-02-02 mode=R s=87 dur=3m cost=$1.00 build=1',
+        '2026-02-02 mode=R s=88 dur=3m cost=$1.00 build=1',
+        '2026-02-02 mode=R s=89 dur=3m cost=$1.00 build=1',
+      ].join('\n'));
+
+      const stats = runStats('100');
+      assert.equal(stats.r_cost_trend.last5_avg, 1);
+      assert.equal(stats.r_cost_trend.last10_avg, 1.75);
+      assert.equal(stats.r_cost_trend.trend, '↓');
+      assert.equal(stats.r_cost_trend.threshold_crossed, false);
+      assert.equal(stats.r_cost_trend.threshold_value, 2.00);
+      assert.equal(stats.r_cost_trend.verdict, 'decreasing');
+    });
+
+    it('detects R threshold breach at $2.00', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), [
+        '2026-02-01 mode=R s=80 dur=3m cost=$1.50 build=1',
+        '2026-02-01 mode=R s=81 dur=3m cost=$1.50 build=1',
+        '2026-02-02 mode=R s=85 dur=3m cost=$2.50 build=1',
+        '2026-02-02 mode=R s=86 dur=3m cost=$2.50 build=1',
+        '2026-02-02 mode=R s=87 dur=3m cost=$2.50 build=1',
+        '2026-02-02 mode=R s=88 dur=3m cost=$2.50 build=1',
+        '2026-02-02 mode=R s=89 dur=3m cost=$2.50 build=1',
+      ].join('\n'));
+
+      const stats = runStats('100');
+      assert.equal(stats.r_cost_trend.last5_avg, 2.5);
+      assert.equal(stats.r_cost_trend.threshold_crossed, true);
+      assert.equal(stats.r_cost_trend.verdict, 'threshold_breach');
+    });
+
+    it('returns no_data with empty history', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), '');
+
+      const stats = runStats('100');
+      assert.equal(stats.r_cost_trend.verdict, 'no_data');
+      assert.equal(stats.e_cost_trend.verdict, 'no_data');
+    });
+  });
+
   describe('session number detection', () => {
     it('uses CLI argument when provided', () => {
       // Setup minimal fixtures

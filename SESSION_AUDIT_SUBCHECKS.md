@@ -200,6 +200,50 @@ Use `audit-stats.mjs` → `b_cost_trend`. Computes last-5 vs last-10 B session c
 - `threshold_breach` or `increasing` → increment `consecutive_degradations`
 - `stable` or `decreasing` → reset to 0
 
+## E session cost trend indicator (wq-875)
+
+Use `audit-stats.mjs` → `e_cost_trend`. Same logic as B cost trend but for E sessions with $1.50 threshold.
+
+**Key fields**: Same as B cost trend (`last5_avg`, `last10_avg`, `delta`, `trend`, `threshold_crossed`, `verdict`).
+
+**Verdict table**:
+
+| verdict | Condition | Action |
+|---------|-----------|--------|
+| `stable` / `decreasing` | last-5 < $1.50 | none |
+| `increasing` | last-5 < $1.50 but trending up | note in `escalation_tracker.e_session_cost` |
+| `threshold_breach` | last-5 ≥ $1.50 | create wq item `["audit", "cost"]` for E session cost review |
+
+**Report in `sessions.E` (augment existing fields)**:
+```json
+{
+  "cost_trend": "→",
+  "cost_trend_detail": "$1.20 last-5 vs $1.15 last-10 (→ stable)"
+}
+```
+
+## R session cost trend indicator (wq-875)
+
+Use `audit-stats.mjs` → `r_cost_trend`. Same logic as B cost trend but for R sessions with $2.00 threshold.
+
+**Key fields**: Same as B cost trend (`last5_avg`, `last10_avg`, `delta`, `trend`, `threshold_crossed`, `verdict`).
+
+**Verdict table**:
+
+| verdict | Condition | Action |
+|---------|-----------|--------|
+| `stable` / `decreasing` | last-5 < $2.00 | none |
+| `increasing` | last-5 < $2.00 but trending up | note in `escalation_tracker.r_session_cost` |
+| `threshold_breach` | last-5 ≥ $2.00 | create wq item `["audit", "cost"]` for R session cost review |
+
+**Report in `sessions.R` (augment existing fields)**:
+```json
+{
+  "cost_trend": "↓",
+  "cost_trend_detail": "$1.30 last-5 vs $1.60 last-10 (↓ decreasing)"
+}
+```
+
 ## Stale directive tag detection (wq-828)
 
 Pre-hook `33-stale-tag-check_A.sh` cross-references `work-queue.json` tags against `directives.json` completion status and writes `~/.config/moltbook/stale-tags-audit.json`.

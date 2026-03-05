@@ -5,12 +5,17 @@
 # - Low USDC when staking/payments scheduled
 # - Available XMR not being utilized for swaps
 # Emits warning with suggested resolution actions.
+#
+# wq-869: Added 3s per-check timeouts + 5s hook watchdog to fix p95=4154ms regression.
+#          Both balance checks now run in parallel. Timeout exits gracefully with defaults.
 
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 STATE_DIR="$HOME/.config/moltbook"
 ALERT_FILE="$STATE_DIR/financial-alert.txt"
+CHECK_TIMEOUT=3
+HOOK_TIMEOUT=5
 
 # Only run financial checks on B sessions (where autonomy matters)
 if [ "${MODE_CHAR:-}" != "B" ]; then
@@ -22,15 +27,53 @@ if [ ! -f "$DIR/base-swap.mjs" ]; then
   exit 0
 fi
 
-# Run balance check
-BALANCE_OUTPUT=$(node "$DIR/base-swap.mjs" balance 2>/dev/null || echo "FAIL")
+# Temp files for parallel results
+EVM_TMPFILE=$(mktemp)
+XMR_TMPFILE=$(mktemp)
+trap 'rm -f "$EVM_TMPFILE" "$XMR_TMPFILE" 2>/dev/null' EXIT
+
+# Start hook-level watchdog (kills all children after HOOK_TIMEOUT)
+(
+  sleep $HOOK_TIMEOUT
+  echo "financial-check: hook timeout (${HOOK_TIMEOUT}s), using defaults"
+  kill 0 2>/dev/null
+) &
+WATCHDOG_PID=$!
+
+# Run EVM balance check in background with per-check timeout
+(
+  output=$(timeout $CHECK_TIMEOUT node "$DIR/base-swap.mjs" balance 2>/dev/null) || output="FAIL"
+  echo "$output" > "$EVM_TMPFILE"
+) &
+EVM_PID=$!
+
+# Run XMR balance check in background with per-check timeout
+(
+  if [ -f "$DIR/check-balance.cjs" ]; then
+    output=$(timeout $CHECK_TIMEOUT node "$DIR/check-balance.cjs" 2>/dev/null) || output="0"
+  else
+    output="0"
+  fi
+  echo "$output" > "$XMR_TMPFILE"
+) &
+XMR_PID=$!
+
+# Wait for both checks
+wait "$EVM_PID" 2>/dev/null
+wait "$XMR_PID" 2>/dev/null
+
+# Cancel watchdog
+kill "$WATCHDOG_PID" 2>/dev/null
+wait "$WATCHDOG_PID" 2>/dev/null || true
+
+# Parse EVM results
+BALANCE_OUTPUT=$(cat "$EVM_TMPFILE" 2>/dev/null || echo "FAIL")
 
 if echo "$BALANCE_OUTPUT" | grep -q "FAIL"; then
-  echo "financial-check: balance fetch failed"
+  echo "financial-check: balance fetch failed or timed out"
   exit 0
 fi
 
-# Parse balances
 ETH_RAW=$(echo "$BALANCE_OUTPUT" | grep -oP 'ETH: \K[0-9.]+' || echo "0")
 USDC_RAW=$(echo "$BALANCE_OUTPUT" | grep -oP 'USDC: \K[0-9.]+' || echo "0")
 
@@ -51,12 +94,9 @@ usdc_sufficient() {
   fi
 }
 
-# Check XMR balance
-XMR_RAW="0"
-if [ -f "$DIR/check-balance.cjs" ]; then
-  XMR_OUTPUT=$(node "$DIR/check-balance.cjs" 2>/dev/null || echo "0")
-  XMR_RAW=$(echo "$XMR_OUTPUT" | grep -oP 'Balance: \K[0-9.]+' || echo "0")
-fi
+# Parse XMR results
+XMR_OUTPUT=$(cat "$XMR_TMPFILE" 2>/dev/null || echo "0")
+XMR_RAW=$(echo "$XMR_OUTPUT" | grep -oP 'Balance: \K[0-9.]+' || echo "0")
 
 # Build alert if needed
 ALERT=""

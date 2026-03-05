@@ -83,10 +83,36 @@
       "title": "Add consecutive-failure threshold to credential health check",
       "description": "credential-health-check.mjs escalates to wq items on single failures. wq-847 showed MoltCities s1774 INVALID_CREDENTIALS was transient — key was valid. Add a consecutive failure counter per platform (store in credential-health-state.json). Only create wq items after 2+ consecutive failures from different sessions. This prevents false-alarm credential recovery tasks.",
       "priority": 849,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1776,
       "source": "brainstorming-s1776",
+      "tags": [
+        "reliability",
+        "d072"
+      ],
+      "commits": [
+        "a4fbe5bb"
+      ],
+      "complexity": "S",
+      "notes": "B#541: Added consecutive-failure threshold (2) to credential-health-check.mjs. Single failures suppressed as transient, only 2+ consecutive from different sessions escalate. State persisted in credential-health-state.json. 6 new tests + all existing tests updated. checkAllCredentials API extended with statePath/session params.",
+      "outcome": {
+        "session": 1778,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Clean implementation with full test coverage. Addresses wq-847 false alarm pattern."
+      }
+    },
+    {
+      "id": "wq-850",
+      "title": "Add credential-health-state.json cleanup to A session audits",
+      "description": "credential-health-state.json tracks consecutive failures per platform but is never pruned. Platforms that recover accumulate stale entries. A sessions should verify the state file: remove entries with consecutive_failures=0 (recovered), flag entries >50 sessions old as stale. Also validate file exists and has valid schema.",
+      "priority": 850,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1778,
+      "source": "self",
       "tags": [
         "reliability",
         "d072"

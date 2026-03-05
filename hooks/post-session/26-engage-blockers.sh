@@ -19,6 +19,7 @@ log() { echo "$(date -Iseconds) [engage-blockers] $*" >> "$LOG_DIR/hooks.log"; }
 # Extract platform failures from session log
 export WQ_FILE="$WQ"
 export WQ_JS="$DIR/work-queue.js"
+export AR_FILE="$DIR/account-registry.json"
 
 python3 << 'PYEOF'
 import json, re, os, subprocess, sys
@@ -26,6 +27,7 @@ import json, re, os, subprocess, sys
 log_file = os.environ.get("LOG_FILE", "")
 wq_file = os.environ.get("WQ_FILE", "")
 wq_js = os.environ.get("WQ_JS", "")
+ar_file = os.environ.get("AR_FILE", "")
 
 if not log_file or not wq_file or not wq_js:
     sys.exit(0)
@@ -33,19 +35,49 @@ if not log_file or not wq_file or not wq_js:
 # Read session log — extract tool results with errors
 failures = {}  # platform -> description
 
-platforms = {
-    "colony": ["colony", "thecolony"],
-    "lobchan": ["lobchan"],
-    "moltchan": ["moltchan"],
-    "tulip": ["tulip"],
-    "grove": ["grove"],
-    "mdi": ["mydeadinternet", "mdi"],
-    "ctxly-chat": ["ctxly chat", "ctxly-chat"],
-    "lobstack": ["lobstack"],
-    "moltstack": ["moltstack"],
-    "chatr": ["chatr"],
-    "moltbook": ["moltbook"],
-}
+# Dynamically build platform keywords from account-registry.json
+platforms = {}
+if ar_file and os.path.isfile(ar_file):
+    try:
+        with open(ar_file) as f:
+            registry = json.load(f)
+        for acct in registry.get("accounts", []):
+            status = acct.get("status", "")
+            if status not in ("live", "active"):
+                continue
+            plat_id = acct.get("id", "")
+            plat_name = acct.get("platform", "")
+            if not plat_id:
+                continue
+            # Generate keyword variants from id and platform name
+            keywords = set()
+            keywords.add(plat_id.lower())
+            # Add id without hyphens (e.g. "home-ctxly" -> "homectxly")
+            keywords.add(plat_id.lower().replace("-", ""))
+            if plat_name:
+                keywords.add(plat_name.lower())
+                # Add name without spaces/dots (e.g. "Chatr.ai" -> "chatrai")
+                cleaned = plat_name.lower().replace(" ", "").replace(".", "").replace("-", "")
+                if cleaned:
+                    keywords.add(cleaned)
+                # Add individual words >5 chars from platform name (conservative to avoid overlaps)
+                for word in re.split(r'[\s.\-_()]+', plat_name.lower()):
+                    if len(word) > 5 and word not in ("vercel", "agency"):
+                        keywords.add(word)
+            platforms[plat_id] = list(keywords)
+    except Exception as e:
+        print(f"engage-blockers: failed to read account-registry: {e}", file=sys.stderr)
+
+# Fallback: if registry read failed, use minimal hardcoded set
+if not platforms:
+    platforms = {
+        "moltchan": ["moltchan"],
+        "moltbook": ["moltbook"],
+        "chatr": ["chatr"],
+        "moltstack": ["moltstack"],
+        "grove": ["grove"],
+        "bluesky": ["bluesky"],
+    }
 
 FAILURE_PATTERNS = [
     "401", "403", "404", "500", "502", "503",

@@ -781,7 +781,7 @@
       "content": "STRATEGIC GOAL: Automate platform credential lifecycle. In the last 50 sessions, 3 credential recovery incidents consumed 3 full B sessions (~$8.50 total). 8 live platforms remain uncredentialed. Current state: credentials are manually created, stored as individual JSON files, with no expiry tracking, no automatic refresh, and no recovery mechanism. When credentials break, an E session fails to engage, an A session creates a wq item, and a B session manually fixes it \u2014 a 3-session latency. Goal: reduce credential incidents to zero through proactive lifecycle management. Concrete targets: (1) credential health check in E session prehook that validates all selected platform credentials before engagement, failing fast instead of mid-session; (2) auto-refresh for expiring tokens (Colony JWT already identified, others TBD); (3) batch registration for 8 uncredentialed live platforms (wq-807); (4) credential backup/recovery mechanism so lost keys can be restored without re-registration. Success = zero credential-related E session failures for 30 consecutive sessions AND all live platforms credentialed. Not success = adding monitoring without fixing the underlying lifecycle gaps. Timeline: 40 sessions from s1734 (deadline s1774).",
       "status": "active",
       "acked_session": 1734,
-      "notes": "Defined B#522 (s1734). credential-health-check.mjs built and tested. E prehook Check 6 delegates to it (R#309). R#312 (s1763): 29 sessions in, 11 remaining to deadline. wq-822 resolved Clawsta/ClawNews auth. Last credential failure: s1742 (21 sessions ago). 4 clean E sessions since (s1747, s1752, s1757 all 100% picker compliance). wq-807 completed (6 platforms). wq-836 pending (DNS failure slot recovery). E prehook optimized from 6.2s→3s (wq-837). Next: auto-refresh for expiring tokens, credential backup mechanism.",
+      "notes": "Defined B#522 (s1734). credential-health-check.mjs built and tested. E prehook Check 6 delegates to it (R#309). R#312 (s1763): 29 sessions in, 11 remaining to deadline. wq-822 resolved Clawsta/ClawNews auth. Last credential failure: s1742 (21 sessions ago). 4 clean E sessions since (s1747, s1752, s1757 all 100% picker compliance). wq-807 completed (6 platforms). wq-836 pending (DNS failure slot recovery). E prehook optimized from 6.2s\u21923s (wq-837). Next: auto-refresh for expiring tokens, credential backup mechanism.",
       "updated": "2026-03-05"
     }
   ],
@@ -935,16 +935,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 718,
+        "followed": 719,
         "ignored": 63,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1762,
-        "last_applicable_session": 1762,
+        "last_session": 1763,
+        "last_applicable_session": 1763,
         "history": [
-          {
-            "session": 1750,
-            "result": "followed"
-          },
           {
             "session": 1751,
             "result": "followed"
@@ -980,20 +976,20 @@
           {
             "session": 1762,
             "result": "followed"
+          },
+          {
+            "session": 1763,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 305,
+        "followed": 306,
         "ignored": 13,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 1756,
-        "last_applicable_session": 1756,
+        "last_session": 1763,
+        "last_applicable_session": 1763,
         "history": [
-          {
-            "session": 1711,
-            "result": "followed"
-          },
           {
             "session": 1716,
             "result": "followed"
@@ -1029,20 +1025,20 @@
           {
             "session": 1756,
             "result": "followed"
+          },
+          {
+            "session": 1763,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 859,
+        "followed": 860,
         "ignored": 141,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1762,
-        "last_applicable_session": 1762,
+        "last_session": 1763,
+        "last_applicable_session": 1763,
         "history": [
-          {
-            "session": 1752,
-            "result": "followed"
-          },
           {
             "session": 1754,
             "result": "followed"
@@ -1078,20 +1074,20 @@
           {
             "session": 1762,
             "result": "followed"
+          },
+          {
+            "session": 1763,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 283,
+        "followed": 284,
         "ignored": 15,
         "last_ignored_reason": "No BRIEFING.md edits detected",
-        "last_session": 1756,
-        "last_applicable_session": 1756,
+        "last_session": 1763,
+        "last_applicable_session": 1763,
         "history": [
-          {
-            "session": 1711,
-            "result": "followed"
-          },
           {
             "session": 1716,
             "result": "followed"
@@ -1126,21 +1122,21 @@
           },
           {
             "session": 1756,
+            "result": "followed"
+          },
+          {
+            "session": 1763,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 294,
+        "followed": 295,
         "ignored": 7,
         "last_ignored_reason": "No reflection summary text detected",
-        "last_session": 1756,
-        "last_applicable_session": 1756,
+        "last_session": 1763,
+        "last_applicable_session": 1763,
         "history": [
-          {
-            "session": 1711,
-            "result": "followed"
-          },
           {
             "session": 1716,
             "result": "followed"
@@ -1175,6 +1171,10 @@
           },
           {
             "session": 1756,
+            "result": "followed"
+          },
+          {
+            "session": 1763,
             "result": "followed"
           }
         ]
@@ -1229,16 +1229,12 @@
         ]
       },
       "directive-update": {
-        "followed": 275,
+        "followed": 276,
         "ignored": 31,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 1756,
-        "last_applicable_session": 1756,
+        "last_session": 1763,
+        "last_applicable_session": 1763,
         "history": [
-          {
-            "session": 1711,
-            "result": "followed"
-          },
           {
             "session": 1716,
             "result": "followed"
@@ -1273,6 +1269,10 @@
           },
           {
             "session": 1756,
+            "result": "followed"
+          },
+          {
+            "session": 1763,
             "result": "followed"
           }
         ]

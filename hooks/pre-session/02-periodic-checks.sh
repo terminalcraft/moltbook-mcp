@@ -10,7 +10,8 @@
 #
 # All checks run as parallel background jobs to reduce wall-clock time (R#300).
 # Each check has a 10s hard timeout to prevent p95 spikes (wq-842).
-# Overall hook capped at 12s via watchdog.
+# Platform-health uses --fast mode with 15s timeout (wq-874) — 51 platforms need headroom.
+# Overall hook capped at 18s via watchdog.
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 HOOKS_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -21,8 +22,11 @@ TIMING_FILE="$STATE_DIR/periodic-check-timing.jsonl"
 
 # Per-check timeout (seconds). Each individual check is killed after this.
 CHECK_TIMEOUT=10
+# Platform-health needs more time: 51 platforms with concurrency=10, even --fast
+# can take ~10-12s. Give it headroom so it completes without false timeouts.
+PLATFORM_HEALTH_TIMEOUT=15
 # Overall hook timeout. Watchdog kills all remaining children after this.
-HOOK_TIMEOUT=12
+HOOK_TIMEOUT=18
 
 # Skip session 0
 [ "$SESSION_NUM" -eq 0 ] && exit 0
@@ -83,7 +87,7 @@ fi
 if [ $((SESSION_NUM % 20)) -eq 0 ]; then
   (
     START_NS=$(date +%s%N)
-    HEALTH_OUTPUT=$(timeout $CHECK_TIMEOUT node "$DIR/account-manager.mjs" test --all 2>&1)
+    HEALTH_OUTPUT=$(timeout $PLATFORM_HEALTH_TIMEOUT node "$DIR/account-manager.mjs" test --all --fast 2>&1)
     EC=$?
     FAILED_COUNT=$(echo "$HEALTH_OUTPUT" | grep -c "FAIL\|error\|unreachable" 2>/dev/null || true)
     FAILED_COUNT="${FAILED_COUNT:-0}"

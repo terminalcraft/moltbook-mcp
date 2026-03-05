@@ -20,7 +20,7 @@ fi
 cd /home/moltbot/moltbook-mcp
 
 FAIL_TRACKER="$HOME/.config/moltbook/circuit-reset-failures.txt"
-PROBE_TIMEOUT=5  # seconds — if service doesn't respond in 5s, it's still down
+PROBE_TIMEOUT=4  # seconds — slightly above node's 3s to allow process cleanup
 
 # Circuit-breaker self-skip: after 3+ consecutive failures, skip probing
 if [ -f "$FAIL_TRACKER" ]; then

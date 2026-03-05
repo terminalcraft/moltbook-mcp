@@ -27,7 +27,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const STATE_DIR = join(process.env.HOME, ".config/moltbook");
-const PROBE_TIMEOUT = 8000; // 8s per platform (allow for slow responses)
+const PROBE_TIMEOUT = 3000; // 3s per platform (reduced from 8s for hook timing)
 
 // Defunct thresholds
 const DEFUNCT_FAILURE_THRESHOLD = 10; // 10+ consecutive failures
@@ -188,16 +188,32 @@ async function main() {
   let stillOpen = 0;
   let registryUpdated = false;
 
-  for (const [platformId, circuit] of openCircuits) {
+  // Build probe tasks with URLs resolved upfront
+  const probeTasks = openCircuits.map(([platformId, circuit]) => {
     const url = getHealthUrl(platformId, registry);
-    if (!url) {
-      if (!jsonOutput) {
-        console.log(`[?] ${platformId} — no health URL found, skipping`);
-      }
-      continue;
-    }
+    return { platformId, circuit, url };
+  });
 
-    const probe = await probeUrl(url);
+  // Log skipped platforms (no URL)
+  for (const task of probeTasks.filter(t => !t.url)) {
+    if (!jsonOutput) {
+      console.log(`[?] ${task.platformId} — no health URL found, skipping`);
+    }
+  }
+
+  // Probe all platforms in parallel
+  const validTasks = probeTasks.filter(t => t.url);
+  const probeResults = await Promise.allSettled(
+    validTasks.map(async (task) => {
+      const probe = await probeUrl(task.url);
+      return { ...task, probe };
+    })
+  );
+
+  // Process results sequentially (state mutations)
+  for (const settled of probeResults) {
+    if (settled.status !== "fulfilled") continue;
+    const { platformId, circuit, url, probe } = settled.value;
     const ms = Math.round((probe.elapsed || 0) * 1000);
 
     if (probe.reachable) {

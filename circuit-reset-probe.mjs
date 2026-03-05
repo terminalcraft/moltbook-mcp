@@ -27,7 +27,7 @@ const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const STATE_DIR = join(process.env.HOME, ".config/moltbook");
 const RECOVERY_EVENTS_PATH = join(STATE_DIR, "circuit-recovery-events.json");
-const PROBE_TIMEOUT = 5000; // 5s per platform
+const PROBE_TIMEOUT = 3000; // 3s per platform (reduced from 5s for hook timing)
 
 // Platform URL mapping (same as engagement-liveness-probe.mjs)
 const URL_MAP = {
@@ -153,119 +153,100 @@ async function main() {
   let closed = 0;
   let reopened = 0;
 
-  // Phase 1: Probe open circuits (transition to half-open on success)
+  // Resolve URLs and build probe tasks for both phases
+  const allTasks = [];
   for (const [platformId, circuit] of openCircuits) {
     const url = getUrlForPlatform(platformId);
     if (!url) {
-      if (!jsonOutput) {
-        console.log(`[?] ${platformId} — no URL found, skipping`);
-      }
+      if (!jsonOutput) console.log(`[?] ${platformId} — no URL found, skipping`);
       continue;
     }
-
-    const probe = await probeUrl(url);
-    const ms = Math.round((probe.elapsed || 0) * 1000);
-
-    if (probe.reachable) {
-      // Transition to half-open
-      circuit.status = "half-open";
-      circuit.half_open_at = now;
-      circuit.consecutive_failures = 0; // Reset failure count
-      delete circuit.last_error;
-      recovered++;
-
-      // wq-317: Log recovery event for E session notification
-      if (!dryRun) {
-        logRecoveryEvent(platformId, "open->half-open", {
-          http_status: probe.status,
-          latency_ms: ms
-        });
-      }
-
-      if (!jsonOutput) {
-        console.log(`[✓] ${platformId} — recovered (${probe.status} ${ms}ms) → half-open`);
-      }
-    } else {
-      // Still down
-      circuit.last_probe = now;
-      circuit.last_error = probe.error || "unreachable";
-
-      if (!jsonOutput) {
-        console.log(`[✗] ${platformId} — still down (${probe.error || "unreachable"} ${ms}ms)`);
-      }
-    }
-
-    results.push({
-      platform: platformId,
-      url,
-      reachable: probe.reachable,
-      status: probe.status,
-      elapsed: ms,
-      new_state: circuit.status,
-    });
+    allTasks.push({ platformId, circuit, url, phase: "open" });
   }
-
-  // wq-300: Phase 2: Probe half-open circuits (close on success, re-open on failure)
   for (const [platformId, circuit] of halfOpenCircuits) {
     const url = getUrlForPlatform(platformId);
     if (!url) {
-      if (!jsonOutput) {
-        console.log(`[?] ${platformId} — no URL found, skipping`);
-      }
+      if (!jsonOutput) console.log(`[?] ${platformId} — no URL found, skipping`);
       continue;
     }
+    allTasks.push({ platformId, circuit, url, phase: "half-open" });
+  }
 
-    const probe = await probeUrl(url);
+  // Probe ALL circuits in parallel (open + half-open together)
+  const probeResults = await Promise.allSettled(
+    allTasks.map(async (task) => {
+      const probe = await probeUrl(task.url);
+      return { ...task, probe };
+    })
+  );
+
+  // Process results sequentially (state mutations)
+  for (const settled of probeResults) {
+    if (settled.status !== "fulfilled") continue;
+    const { platformId, circuit, url, probe, phase } = settled.value;
     const ms = Math.round((probe.elapsed || 0) * 1000);
 
-    if (probe.reachable) {
-      // Success! Close the circuit (fully healthy)
-      delete circuit.status;
-      delete circuit.half_open_at;
-      delete circuit.opened_at;
-      delete circuit.reason;
-      delete circuit.last_error;
-      circuit.consecutive_failures = 0;
-      circuit.total_successes = (circuit.total_successes || 0) + 1;
-      circuit.last_success = now;
-      closed++;
-
-      // wq-317: Log recovery event for E session notification
-      if (!dryRun) {
-        logRecoveryEvent(platformId, "half-open->closed", {
-          http_status: probe.status,
-          latency_ms: ms
-        });
+    if (phase === "open") {
+      // Phase 1: open circuits → half-open on success
+      if (probe.reachable) {
+        circuit.status = "half-open";
+        circuit.half_open_at = now;
+        circuit.consecutive_failures = 0;
+        delete circuit.last_error;
+        recovered++;
+        if (!dryRun) {
+          logRecoveryEvent(platformId, "open->half-open", {
+            http_status: probe.status,
+            latency_ms: ms
+          });
+        }
+        if (!jsonOutput) console.log(`[✓] ${platformId} — recovered (${probe.status} ${ms}ms) → half-open`);
+      } else {
+        circuit.last_probe = now;
+        circuit.last_error = probe.error || "unreachable";
+        if (!jsonOutput) console.log(`[✗] ${platformId} — still down (${probe.error || "unreachable"} ${ms}ms)`);
       }
-
-      if (!jsonOutput) {
-        console.log(`[✓] ${platformId} — closed (${probe.status} ${ms}ms) → healthy`);
-      }
+      results.push({
+        platform: platformId, url,
+        reachable: probe.reachable, status: probe.status,
+        elapsed: ms, new_state: circuit.status,
+      });
     } else {
-      // Still failing - re-open the circuit
-      circuit.status = "open";
-      circuit.opened_at = now;
-      circuit.reason = `half-open probe failed: ${probe.error || "unreachable"}`;
-      circuit.last_error = probe.error || "unreachable";
-      circuit.last_failure = now;
-      circuit.consecutive_failures = (circuit.consecutive_failures || 0) + 1;
-      circuit.total_failures = (circuit.total_failures || 0) + 1;
-      reopened++;
-
-      if (!jsonOutput) {
-        console.log(`[✗] ${platformId} — re-opened (${probe.error || "unreachable"} ${ms}ms) → open`);
+      // Phase 2: half-open circuits → close on success, re-open on failure
+      if (probe.reachable) {
+        delete circuit.status;
+        delete circuit.half_open_at;
+        delete circuit.opened_at;
+        delete circuit.reason;
+        delete circuit.last_error;
+        circuit.consecutive_failures = 0;
+        circuit.total_successes = (circuit.total_successes || 0) + 1;
+        circuit.last_success = now;
+        closed++;
+        if (!dryRun) {
+          logRecoveryEvent(platformId, "half-open->closed", {
+            http_status: probe.status, latency_ms: ms
+          });
+        }
+        if (!jsonOutput) console.log(`[✓] ${platformId} — closed (${probe.status} ${ms}ms) → healthy`);
+      } else {
+        circuit.status = "open";
+        circuit.opened_at = now;
+        circuit.reason = `half-open probe failed: ${probe.error || "unreachable"}`;
+        circuit.last_error = probe.error || "unreachable";
+        circuit.last_failure = now;
+        circuit.consecutive_failures = (circuit.consecutive_failures || 0) + 1;
+        circuit.total_failures = (circuit.total_failures || 0) + 1;
+        reopened++;
+        if (!jsonOutput) console.log(`[✗] ${platformId} — re-opened (${probe.error || "unreachable"} ${ms}ms) → open`);
       }
+      results.push({
+        platform: platformId, url,
+        reachable: probe.reachable, status: probe.status,
+        elapsed: ms, new_state: circuit.status || "closed",
+        was_half_open: true,
+      });
     }
-
-    results.push({
-      platform: platformId,
-      url,
-      reachable: probe.reachable,
-      status: probe.status,
-      elapsed: ms,
-      new_state: circuit.status || "closed",
-      was_half_open: true,
-    });
   }
 
   // Save updated circuits

@@ -31,9 +31,11 @@ if [ -f "$FAIL_TRACKER" ]; then
   fi
 fi
 
-# wq-300: Check for both open AND half-open circuits
-open_count=$(jq '[.[] | select(.status == "open")] | length' platform-circuits.json 2>/dev/null || echo "0")
-half_open_count=$(jq '[.[] | select(.status == "half-open")] | length' platform-circuits.json 2>/dev/null || echo "0")
+# wq-300/wq-845: Check for both open AND half-open circuits in single jq call
+read open_count half_open_count <<< $(jq -r '[
+  ([.[] | select(.status == "open")] | length),
+  ([.[] | select(.status == "half-open")] | length)
+] | join(" ")' platform-circuits.json 2>/dev/null || echo "0 0")
 
 if [ "$open_count" = "0" ] && [ "$half_open_count" = "0" ]; then
   # No circuits to probe — reset failure counter
@@ -45,19 +47,34 @@ echo "[circuit-reset] Probing $open_count open + $half_open_count half-open circ
 
 PROBE_FAILED=0
 
+# wq-845: Run both probes in parallel to reduce wall-clock time
+REPAIR_PID=""
+RESET_PID=""
+
 # wq-312: Use repair workflow for open circuits (handles recovery + defunct detection)
 if [ "$open_count" -gt 0 ]; then
   echo "[circuit-repair] Running open circuit repair workflow..."
-  if ! timeout "${PROBE_TIMEOUT}s" node open-circuit-repair.mjs 2>&1; then
-    echo "[circuit-repair] Timed out or failed after ${PROBE_TIMEOUT}s"
-    PROBE_FAILED=1
-  fi
+  timeout "${PROBE_TIMEOUT}s" node open-circuit-repair.mjs 2>&1 &
+  REPAIR_PID=$!
 fi
 
 # Use reset probe for half-open circuits
 if [ "$half_open_count" -gt 0 ]; then
   echo "[circuit-reset] Probing half-open circuits..."
-  if ! timeout "${PROBE_TIMEOUT}s" node circuit-reset-probe.mjs 2>&1; then
+  timeout "${PROBE_TIMEOUT}s" node circuit-reset-probe.mjs 2>&1 &
+  RESET_PID=$!
+fi
+
+# Wait for both and collect exit codes
+if [ -n "$REPAIR_PID" ]; then
+  if ! wait "$REPAIR_PID"; then
+    echo "[circuit-repair] Timed out or failed after ${PROBE_TIMEOUT}s"
+    PROBE_FAILED=1
+  fi
+fi
+
+if [ -n "$RESET_PID" ]; then
+  if ! wait "$RESET_PID"; then
     echo "[circuit-reset] Timed out or failed after ${PROBE_TIMEOUT}s"
     PROBE_FAILED=1
   fi

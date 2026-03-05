@@ -21,7 +21,7 @@
       "title": "Add staleness guard to 27-todo-scan.sh followup file",
       "description": "27-todo-scan.sh writes todo-followups.txt but never checks if the file is stale from a previous session. If a B session crashes before queue-pipeline processes the file, stale content persists indefinitely. Add check: if file session marker is >2 sessions old, delete rather than re-process.",
       "priority": 852,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1778,
       "source": "brainstorming",
@@ -29,8 +29,15 @@
         "reliability",
         "infrastructure"
       ],
-      "commits": [],
-      "complexity": "S"
+      "commits": ["617bc52b"],
+      "complexity": "S",
+      "outcome": {
+        "session": 1786,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added staleness guard to queue-pipeline.mjs todo-followups ingestion. Files from sessions >2 ago are deleted without processing. Test added and passing (31/31)."
+      }
     },
     {
       "id": "wq-854",
@@ -81,6 +88,32 @@
         "quality": "well-scoped",
         "note": "Two root causes fixed: (1) generate-hook-manifest.mjs missing mode-transform phase (4 hooks invisible), now 75 tracked. (2) Added check_manifest_drift to B posthook — auto-regenerates manifest when disk/manifest counts diverge. Brainstormed extending to all session types."
       }
+    },
+    {
+      "id": "wq-857",
+      "title": "Add manifest drift detection to all-scope posthook",
+      "description": "Currently manifest drift auto-fix only runs in B posthook (47-b-session-posthook_B.sh). R sessions also create/rename hooks during refactoring. Add a lightweight manifest-drift check to a general-scope posthook (e.g. new 19-manifest-sync.sh or preamble of 20-auto-commit.sh) so drift is caught regardless of session type.",
+      "priority": 857,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1786,
+      "source": "brainstorming",
+      "tags": ["infrastructure", "hooks"],
+      "commits": [],
+      "complexity": "S"
+    },
+    {
+      "id": "wq-858",
+      "title": "Add session-context staleness guards to other followup files",
+      "description": "The staleness guard pattern added for todo-followups.txt (wq-852) should be applied to other session-context files that persist across sessions. Check r-impact-analysis.json, e-session-context.md, and any other files that could survive a crashed session and cause stale data re-injection. Audit session-context.mjs for files that lack age checks.",
+      "priority": 858,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1786,
+      "source": "adjacent-improvement",
+      "tags": ["reliability", "infrastructure"],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

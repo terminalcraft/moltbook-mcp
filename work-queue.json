@@ -57,14 +57,21 @@
       "title": "Add B session cost trend indicator to A audit reporting",
       "description": "A sessions track B cost avg as single number. Add rolling trend indicator (arrow up/down/flat) showing last-5 vs last-10 direction, plus automatic wq creation when last-5 crosses $2.00 threshold. Faster regression detection.",
       "priority": 873,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1803,
       "source": "brainstorming-R320",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": ["49a47684", "9116a413"],
+      "outcome": {
+        "session": 1806,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeBCostTrend() to audit-stats.mjs with last-5/last-10 rolling average, directional arrow, and $2.00 threshold breach detection. 6 tests added. Subcheck protocol documented in SESSION_AUDIT_SUBCHECKS.md."
+      }
     },
     {
       "id": "wq-874",

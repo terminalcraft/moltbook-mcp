@@ -60,6 +60,34 @@
         "d073"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-868",
+      "title": "Investigate and fix B session cost regression (avg $2.24, target <$2.00)",
+      "description": "A#199 finding: B session last-10 avg $2.24, last-5 avg $2.42. All last-5 B sessions ≥$1.96. The increase is structural — sessions take on 5+ commits with multi-item work. Options: (1) enforce 3-commit cap per B session, (2) add cost-awareness to B session prompts, (3) split multi-item work across sessions. Investigate root cause and implement a cap or awareness mechanism.",
+      "priority": 868,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1795,
+      "source": "audit-s1795",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-869",
+      "title": "Fix 09-financial-check.sh hook timing regression (p95=4154ms, degrading)",
+      "description": "A#199 finding: 09-financial-check.sh emerged as worst offender at p95=4154ms avg=925ms (degrading). Was p95=3132ms (improving) at A#198. Overall degrading_count jumped 0→3. Investigate whether the EVM balance check or network calls are the latency source. Add timeout guards similar to what wq-842 did for 02-periodic-checks.sh.",
+      "priority": 869,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1795,
+      "source": "audit-s1795",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

@@ -38,14 +38,21 @@
       "title": "Switch prehook credential checks to account-manager --fast",
       "description": "Now that account-manager supports --fast (3s timeout), hooks calling node account-manager.mjs test/json can use --fast for faster session startup. Candidates: 09-financial-check.sh, engage-blockers.sh, any credential preflight. Should shave ~5s off startup.",
       "priority": 871,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1803,
       "source": "brainstorming-R320",
       "tags": [
         "perf"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1811,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Already done: only live caller (02-periodic-checks.sh) uses --fast since wq-874 (s1807). 09-financial-check.sh and engage-blockers.sh do not call account-manager."
+      }
     },
     {
       "id": "wq-872",

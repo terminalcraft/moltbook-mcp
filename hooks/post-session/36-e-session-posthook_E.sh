@@ -262,67 +262,12 @@ console.log('early-exit: stigmergic pressure injected into trace for s' + sessio
 ###############################################################################
 # Check 4: Note fallback (was 39-note-fallback_E.sh)
 #   Replaces truncated session-history notes with trace-derived summaries
+#   Logic extracted to hooks/lib/note-fallback.mjs (R#316)
 ###############################################################################
 check_note_fallback() {
-  [[ -f "$HISTORY_FILE" ]] || return 0
-  [[ -f "$TRACE_FILE" ]] || return 0
-  [[ -n "$CURRENT_NOTE" ]] || return 0
-
-  # Check if note looks like a proper completion line
-  if echo "$CURRENT_NOTE" | grep -qiE '^Session [A-Z]#[0-9]+.*complete'; then
-    return 0  # Note is fine
-  fi
-
-  # Accept substantive notes (>60 chars with platform mentions)
-  if [[ "${#CURRENT_NOTE}" -gt 60 ]] && echo "$CURRENT_NOTE" | grep -qiE 'engag|platform|chatr|moltbook|4claw|aicq|clawball|lobchan|pinchwork|colony'; then
-    return 0  # Substantive enough
-  fi
-
-  # Note is truncated — generate from trace
-  [[ "$HAS_TRACE" == "true" ]] || return 0
-
-  GENERATED_NOTE=$(node -e "
-const fs = require('fs');
-const parsed = JSON.parse(fs.readFileSync('$PARSED_FILE', 'utf8'));
-const session = parseInt('$SESSION');
-const platforms = (parsed.trace_platforms_engaged || []).map(p => typeof p === 'string' ? p : (p && p.platform ? p.platform : String(p)));
-const agents = parsed.trace_agents || [];
-const topics = parsed.trace_topics || [];
-const eNum = parsed.e_count || '?';
-
-const parts = [];
-if (platforms.length) parts.push('Engaged ' + platforms.join(', '));
-if (agents.length) parts.push('interacted with ' + agents.slice(0, 3).join(', '));
-if (topics.length) parts.push(topics[0]);
-
-let summary = parts.length ? parts.join('; ') : 'engagement session completed';
-if (summary.length > 150) summary = summary.slice(0, 147) + '...';
-
-console.log('Session E#' + eNum + ' (s' + session + ') complete. ' + summary + '.');
-" 2>/dev/null) || return 0
-
-  [[ -n "$GENERATED_NOTE" ]] || return 0
-
-  # Replace truncated note in session-history.txt
-  GENERATED_NOTE="$GENERATED_NOTE" node << 'NOTEFALLBACK_JS' 2>/dev/null || echo "note-fallback: failed to rewrite history (non-fatal)"
-const fs = require('fs');
-const historyFile = process.env.HISTORY_FILE;
-const sessionNum = process.env.SESSION;
-const newNote = process.env.GENERATED_NOTE;
-
-const lines = fs.readFileSync(historyFile, 'utf8').split('\n');
-const marker = 's=' + sessionNum + ' ';
-const newLines = lines.map(line => {
-  if (line.includes(marker) && line.includes('note: ')) {
-    const idx = line.indexOf('note: ') + 'note: '.length;
-    return line.slice(0, idx) + newNote;
-  }
-  return line;
-});
-
-fs.writeFileSync(historyFile, newLines.join('\n'));
-console.log('note-fallback: replaced truncated note for s' + sessionNum);
-NOTEFALLBACK_JS
+  local NOTE_FALLBACK_SCRIPT
+  NOTE_FALLBACK_SCRIPT="$(dirname "$(realpath "$0")")/../lib/note-fallback.mjs"
+  node "$NOTE_FALLBACK_SCRIPT" 2>/dev/null || echo "note-fallback: script error (non-fatal)"
 }
 
 ###############################################################################

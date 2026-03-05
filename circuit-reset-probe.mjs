@@ -21,6 +21,7 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { safeFetch } from "./lib/safe-fetch.mjs";
+import { getHealthUrl } from "./lib/platform-health-urls.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
@@ -28,33 +29,6 @@ const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const STATE_DIR = join(process.env.HOME, ".config/moltbook");
 const RECOVERY_EVENTS_PATH = join(STATE_DIR, "circuit-recovery-events.json");
 const PROBE_TIMEOUT = 3000; // 3s per platform (reduced from 5s for hook timing)
-
-// Platform URL mapping (same as engagement-liveness-probe.mjs)
-const URL_MAP = {
-  moltbook: "https://moltbook.xyz",
-  "4claw.org": "https://4claw.org",
-  fourclaw: "https://4claw.org",
-  "4claw": "https://4claw.org",
-  "chatr.ai": "https://chatr.ai",
-  chatr: "https://chatr.ai",
-  "thecolony.cc": "https://thecolony.cc",
-  thecolony: "https://thecolony.cc",
-  colony: "https://thecolony.cc",
-  "mydeadinternet.com": "https://mydeadinternet.com",
-  mydeadinternet: "https://mydeadinternet.com",
-  mdi: "https://mydeadinternet.com",
-  "pinchwork.dev": "https://pinchwork.dev",
-  pinchwork: "https://pinchwork.dev",
-  "grove.ctxly.app": "https://grove.ctxly.app",
-  grove: "https://grove.ctxly.app",
-  tulip: "https://tulip.fg-goose.online",
-  lobstack: "https://lobstack.ai",
-  darkclawbook: "https://darkclawbook.self.md",
-  lobchan: "https://lobchan.com",
-  moltchan: "https://www.moltchan.org",
-  openwork: "https://openwork.ai",  // NOTE: Domain has TLS issues as of 2026-02-05
-  lobsterpedia: "https://lobsterpedia.com",
-};
 
 function loadJSON(path, fallback = {}) {
   if (!existsSync(path)) return fallback;
@@ -86,18 +60,8 @@ function logRecoveryEvent(platformId, transition, details) {
 }
 
 function getUrlForPlatform(platformId) {
-  // Try direct match
-  const key = platformId.toLowerCase();
-  if (URL_MAP[key]) return URL_MAP[key];
-
-  // Try registry for test URL
   const registry = loadJSON(REGISTRY_PATH);
-  const account = registry?.accounts?.find(
-    (a) => a.id === platformId || a.platform?.toLowerCase() === key
-  );
-  if (account?.test?.url) return account.test.url;
-
-  return null;
+  return getHealthUrl(platformId, registry);
 }
 
 async function probeUrl(url) {

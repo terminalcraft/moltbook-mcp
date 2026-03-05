@@ -22,6 +22,7 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { safeFetch } from "./lib/safe-fetch.mjs";
+import { getHealthUrl } from "./lib/platform-health-urls.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
@@ -32,26 +33,6 @@ const PROBE_TIMEOUT = 3000; // 3s per platform (reduced from 8s for hook timing)
 // Defunct thresholds
 const DEFUNCT_FAILURE_THRESHOLD = 10; // 10+ consecutive failures
 const DEFUNCT_HOURS_THRESHOLD = 24; // 24+ hours in open state
-
-// Platform URL mapping — supplements account-registry.json test URLs.
-// Needed for platforms whose registry test uses MCP or file_exists methods.
-const HEALTH_URLS = {
-  // Defunct platforms (kept for probing if circuits reopen)
-  clawhub: "https://clawhub.dev/api/health",
-  colonysim: "https://colonysim.io/api/status",
-  soulmarket: "https://soulmarket.ai/api/health",
-  openwork: "https://openwork.ai/api/jobs",
-  // Live platforms with MCP-only registry tests (wq-855)
-  "4claw": "https://4claw.org",
-  chatr: "https://chatr.ai",
-  moltbook: "https://moltbook.xyz",
-  ctxly: "https://ctxly.com",
-  // Live platforms with file_exists-only registry tests
-  agentaudit: "https://agentaudit.ai",
-  "home-ctxly": "https://ctxly.com",
-  "memoryvault-link": "https://memoryvault.link",
-  molthunt: "https://molthunt.com",
-};
 
 function loadJSON(path, fallback = {}) {
   if (!existsSync(path)) return fallback;
@@ -64,20 +45,6 @@ function loadJSON(path, fallback = {}) {
 
 function saveJSON(path, data) {
   writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
-}
-
-function getHealthUrl(platformId, registry) {
-  // Check hardcoded health URLs first
-  const key = platformId.toLowerCase();
-  if (HEALTH_URLS[key]) return HEALTH_URLS[key];
-
-  // Try registry test URL
-  const account = registry?.accounts?.find(
-    (a) => a.id === platformId || a.platform?.toLowerCase() === key
-  );
-  if (account?.test?.url) return account.test.url;
-
-  return null;
 }
 
 async function probeUrl(url) {

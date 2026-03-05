@@ -19,20 +19,13 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { safeFetch } from "./lib/safe-fetch.mjs";
+import { getHealthUrl } from "./lib/platform-health-urls.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CIRCUITS_PATH = join(__dirname, "platform-circuits.json");
 const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const STATE_DIR = join(process.env.HOME, ".config/moltbook");
 const PROBE_TIMEOUT = 8000;
-
-// Health endpoints for platforms (same as open-circuit-repair.mjs)
-const HEALTH_URLS = {
-  clawhub: "https://clawhub.dev/api/health",
-  colonysim: "https://colonysim.io/api/status",
-  soulmarket: "https://soulmarket.ai/api/health",
-  openwork: "https://openwork.ai/api/jobs",
-};
 
 function loadJSON(path, fallback = {}) {
   if (!existsSync(path)) return fallback;
@@ -47,17 +40,7 @@ function saveJSON(path, data) {
   writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
 }
 
-function getHealthUrl(platformId, registry) {
-  const key = platformId.toLowerCase();
-  if (HEALTH_URLS[key]) return HEALTH_URLS[key];
-
-  const account = registry?.accounts?.find(
-    (a) => a.id === platformId || a.platform?.toLowerCase() === key
-  );
-  if (account?.test?.url) return account.test.url;
-
-  return null;
-}
+// getHealthUrl imported from lib/platform-health-urls.mjs (wq-859)
 
 async function probeUrl(url) {
   const startTime = Date.now();

@@ -5,14 +5,23 @@
       "title": "Create hooks/lib/timeout-wrapper.sh for standard hook timeout behavior",
       "description": "The pattern for fixing slow hooks is well-established: per-check timeout N, parallel background jobs, hook-level watchdog, graceful fallback. Create a shared library that any hook can source to get standard timeout+watchdog behavior with minimal boilerplate.",
       "priority": 872,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1803,
       "source": "brainstorming-R320",
       "tags": [
         "infra"
       ],
-      "commits": []
+      "commits": [
+        "e14728e1"
+      ],
+      "outcome": {
+        "session": 1817,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created hooks/lib/timeout-wrapper.sh with tw_run/tw_wait API. 15-test suite passes. Sentinel-based watchdog detection, per-check timeout overrides, JSONL telemetry."
+      }
     },
     {
       "id": "wq-875",
@@ -52,7 +61,7 @@
     },
     {
       "id": "wq-878",
-      "title": "Slim SESSION_AUDIT_SUBCHECKS.md — 3106 tokens (over 3000 budget)",
+      "title": "Slim SESSION_AUDIT_SUBCHECKS.md \u2014 3106 tokens (over 3000 budget)",
       "description": "Auto-generated: SESSION_AUDIT_SUBCHECKS.md is 3106 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
       "priority": 878,
       "status": "pending",
@@ -64,28 +73,6 @@
         "prompt-budget"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-879",
-      "title": "Fix human-review.json schema: hr-a173-1 missing status field",
-      "description": "hr-a173-1 has severity='resolved' but status=undefined. Add explicit status='resolved' field for schema consistency. Trivial fix.",
-      "priority": 879,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1815,
-      "source": "audit-s1815",
-      "tags": [
-        "audit",
-        "data-hygiene"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1816,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "non-actionable",
-        "note": "False positive. hr-a173-1 already has status=\"resolved\" (line 11). validate-human-review.mjs passes. The A#203 audit description referenced a severity field that does not exist in the schema. No code change needed."
-      }
     }
   ]
 }

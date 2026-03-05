@@ -5,14 +5,21 @@
       "title": "Add E/R session cost trend indicators to audit-stats",
       "description": "Extend computeBCostTrend pattern to E and R session types. E threshold $1.50, R threshold $2.00. Reuse same arrow/threshold logic from audit-stats.mjs. Output per-type cost trends in audit report alongside existing B cost trend.",
       "priority": 875,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1808,
       "source": "brainstorming-R321",
       "tags": [
         "observability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1821,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Generalized computeBCostTrend into computeCostTrend(type, threshold). E=$1.50, R=$2.00 thresholds. Added e_cost_trend and r_cost_trend to stats output. Tests pass. Docs added to SESSION_AUDIT_SUBCHECKS.md. Brainstorming idea added for A session consumption of new trends."
+      }
     },
     {
       "id": "wq-880",
@@ -23,7 +30,9 @@
       "added": "2026-03-05",
       "created_session": 1818,
       "source": "brainstorming-R323",
-      "tags": ["maintenance"],
+      "tags": [
+        "maintenance"
+      ],
       "commits": []
     },
     {
@@ -35,7 +44,9 @@
       "added": "2026-03-05",
       "created_session": 1818,
       "source": "brainstorming-R323",
-      "tags": ["observability"],
+      "tags": [
+        "observability"
+      ],
       "commits": []
     },
     {
@@ -62,19 +73,9 @@
       "added": "2026-03-05",
       "created_session": 1818,
       "source": "brainstorming-R323",
-      "tags": ["quality"],
-      "commits": []
-    },
-    {
-      "id": "wq-883",
-      "title": "Add incomplete-session detection to audit-stats",
-      "description": "s1817 was an incomplete session (dur=?, no cost entry) that caused a false-positive pipeline gate violation in audit-stats. Add detection for sessions with 'dur=?' or 'build=(started)' in session-history.txt and exclude them from compliance metrics. Report incomplete session count separately.",
-      "priority": 883,
-      "status": "pending",
-      "added": "2026-03-05",
-      "created_session": 1820,
-      "source": "audit-s1820",
-      "tags": ["audit", "quality"],
+      "tags": [
+        "quality"
+      ],
       "commits": []
     }
   ]

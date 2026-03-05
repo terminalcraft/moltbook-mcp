@@ -73,87 +73,11 @@ check_engagement_liveness() {
 ###############################################################################
 # Check 2: Engagement context seed (was 36-engagement-seed_E.sh)
 #   Generate E session context from engagement-intel.json + recent E history
+#   Extracted to hooks/lib/e-session-seed.mjs (R#323)
 ###############################################################################
 check_engagement_seed() {
-  {
-    # 1. Recent E session summaries
-    if [ -f "$HISTORY_FILE" ]; then
-      E_SESSIONS=$(grep 'mode=E' "$HISTORY_FILE" | tail -3)
-      if [ -n "$E_SESSIONS" ]; then
-        echo "## Last E sessions"
-        echo "$E_SESSIONS" | while IFS= read -r line; do echo "- $line"; done
-        echo ""
-      fi
-    fi
-
-    # 2. Engagement intel entries
-    if [ -f "$INTEL_FILE" ]; then
-      INTEL_OUT=$(jq -r '
-        if length > 0 then
-          "## Engagement intel (from recent sessions)\n" +
-          ([.[-8:][] |
-            "- **[\(.type // "?")]** (s\(.session // "?")) \(.summary // "")" +
-            (if .actionable then "\n  - Action: \(.actionable)" else "" end)
-          ] | join("\n")) + "\n"
-        else empty end
-      ' "$INTEL_FILE" 2>/dev/null)
-      if [ -n "$INTEL_OUT" ]; then
-        echo -e "$INTEL_OUT"
-      fi
-    fi
-
-    # 3. Platform rotation hint
-    if [ -f "$HISTORY_FILE" ]; then
-      LAST_E=$(grep 'mode=E' "$HISTORY_FILE" | tail -1)
-      if [ -n "$LAST_E" ]; then
-        NOTE=$(echo "$LAST_E" | sed -n 's/.*note: //p')
-        if [ -n "$NOTE" ]; then
-          echo "## Platform rotation hint"
-          echo "Last E session covered: $NOTE"
-          echo "Prioritize platforms NOT mentioned above."
-          echo ""
-        fi
-      fi
-    fi
-
-    # 4. Budget utilization warning
-    if [ -f "$HISTORY_FILE" ]; then
-      COSTS=$(grep 'mode=E' "$HISTORY_FILE" | tail -5 | grep -oP 'cost=\$\K[\d.]+')
-      if [ -n "$COSTS" ]; then
-        COUNT=$(echo "$COSTS" | wc -l)
-        SUM=$(echo "$COSTS" | awk '{s+=$1} END {printf "%.2f", s}')
-        AVG=$(echo "$SUM $COUNT" | awk '{printf "%.2f", $1/$2}')
-        echo "## Budget utilization alert"
-        if [ "$(echo "$AVG" | awk '{print ($1 < 1.50)}')" = "1" ]; then
-          echo "WARNING: Last $COUNT E sessions averaged \$$AVG (target: \$1.50+)."
-          echo "You MUST use the Phase 4 budget gate. Do NOT end the session until you have spent at least \$1.50."
-          echo "After each platform engagement, check your budget spent from the system-reminder line."
-          echo "If under \$1.50, loop back to Phase 2 with another platform."
-        else
-          echo "Recent E sessions averaging \$$AVG — on target."
-        fi
-        echo ""
-      fi
-    fi
-
-    # 5. d049 violation nudge
-    NUDGE_FILE="$STATE_DIR/d049-nudge.txt"
-    if [ -f "$NUDGE_FILE" ]; then
-      NUDGE=$(cat "$NUDGE_FILE")
-      if [ -n "$NUDGE" ]; then
-        echo "$NUDGE"
-        echo ""
-      fi
-    fi
-  } > "$CONTEXT_FILE"
-
-  LINE_COUNT=$(wc -l < "$CONTEXT_FILE")
-  if [ "$LINE_COUNT" -gt 0 ]; then
-    echo "wrote $LINE_COUNT lines to e-session-context.md"
-  else
-    rm -f "$CONTEXT_FILE"
-    echo "no engagement context to seed"
-  fi
+  output=$(node hooks/lib/e-session-seed.mjs --output "$CONTEXT_FILE" 2>&1)
+  echo "[seed] $output"
 }
 
 ###############################################################################

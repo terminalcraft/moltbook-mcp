@@ -92,46 +92,6 @@ Report in `post_quality`:
 {"active_count": 1, "evaluations": {"d069": {"age_sessions": 15, "status": "progressing", "evidence": "wq-681 created"}}, "recommendations": []}
 ```
 
-## d071 coverage trend tracking (wq-779)
-
-**When**: d071 is active. Run as part of Section 7 (self-directive lifecycle).
-
-**How**: Run `node d071-baseline.cjs --summary` and capture the JSON output. Include the `d071_coverage` object in `self_directives.d071_coverage` in audit-report.json.
-
-**Interpretation table**:
-
-| verdict | Meaning | Action |
-|---------|---------|--------|
-| `target_met` | Combined coverage ≥80% | Recommend d071 completion |
-| `on_track` | Gap ≤5pp OR pace ≤2.0 pp/session | Note progress, no action |
-| `at_risk` | Pace 2.0–3.5 pp/session needed | Flag in recommendations: "d071 at risk — prioritize test authoring in next B sessions" |
-| `behind` | Pace >3.5 pp/session needed | CRITICAL: create wq item `["audit", "d071"]` for immediate intervention. Consider scope reduction. |
-
-**Trend analysis**:
-- Compare `trend.combined.delta` to previous audit. Positive delta = progress. Zero or negative = stalling.
-- If `trend.combined.delta == 0` for 2+ consecutive audits, escalate to `at_risk` regardless of pace calculation.
-- `newly_covered` shows which files gained tests since the baseline — use to verify B sessions are contributing.
-
-**Report in `self_directives.d071_coverage`**:
-```json
-{
-  "measured_session": 1699,
-  "critical_path_pct": 61,
-  "hooks_pct": 42,
-  "combined_pct": 48,
-  "target_pct": 80,
-  "gap_pp": 32,
-  "pace_needed": 1.23,
-  "sessions_remaining": 26,
-  "verdict": "on_track",
-  "trend_delta": 18,
-  "newly_covered_count": 3,
-  "stall_count": 0
-}
-```
-
-**Stall tracking**: Read `self_directives.d071_coverage.stall_count` from previous audit-report.json. If `trend.combined.delta <= 0`, increment. If `delta > 0`, reset to 0. `stall_count >= 2` → override verdict to `at_risk`.
-
 ## Hook timing regression check (wq-827)
 
 Pre-hook `32-hook-timing-check_A.sh` runs `node hook-timing-report.mjs --json --last 10` and writes `~/.config/moltbook/hook-timing-audit.json`.
@@ -200,49 +160,16 @@ Use `audit-stats.mjs` → `b_cost_trend`. Computes last-5 vs last-10 B session c
 - `threshold_breach` or `increasing` → increment `consecutive_degradations`
 - `stable` or `decreasing` → reset to 0
 
-## E session cost trend indicator (wq-875)
+## E/R session cost trend indicators (wq-875)
 
-Use `audit-stats.mjs` → `e_cost_trend`. Same logic as B cost trend but for E sessions with $1.50 threshold.
+Same protocol as B cost trend above. Use `audit-stats.mjs` → `e_cost_trend` / `r_cost_trend`. Same fields, same verdict logic, same auto-escalation and escalation tracker rules. Only the thresholds differ:
 
-**Key fields**: Same as B cost trend (`last5_avg`, `last10_avg`, `delta`, `trend`, `threshold_crossed`, `verdict`).
+| Type | Threshold | Escalation tracker key |
+|------|-----------|----------------------|
+| E | $1.50 | `e_session_cost` |
+| R | $2.00 | `r_session_cost` |
 
-**Verdict table**:
-
-| verdict | Condition | Action |
-|---------|-----------|--------|
-| `stable` / `decreasing` | last-5 < $1.50 | none |
-| `increasing` | last-5 < $1.50 but trending up | note in `escalation_tracker.e_session_cost` |
-| `threshold_breach` | last-5 ≥ $1.50 | create wq item `["audit", "cost"]` for E session cost review |
-
-**Report in `sessions.E` (augment existing fields)**:
-```json
-{
-  "cost_trend": "→",
-  "cost_trend_detail": "$1.20 last-5 vs $1.15 last-10 (→ stable)"
-}
-```
-
-## R session cost trend indicator (wq-875)
-
-Use `audit-stats.mjs` → `r_cost_trend`. Same logic as B cost trend but for R sessions with $2.00 threshold.
-
-**Key fields**: Same as B cost trend (`last5_avg`, `last10_avg`, `delta`, `trend`, `threshold_crossed`, `verdict`).
-
-**Verdict table**:
-
-| verdict | Condition | Action |
-|---------|-----------|--------|
-| `stable` / `decreasing` | last-5 < $2.00 | none |
-| `increasing` | last-5 < $2.00 but trending up | note in `escalation_tracker.r_session_cost` |
-| `threshold_breach` | last-5 ≥ $2.00 | create wq item `["audit", "cost"]` for R session cost review |
-
-**Report in `sessions.R` (augment existing fields)**:
-```json
-{
-  "cost_trend": "↓",
-  "cost_trend_detail": "$1.30 last-5 vs $1.60 last-10 (↓ decreasing)"
-}
-```
+Report in `sessions.E` / `sessions.R` with `cost_trend` and `cost_trend_detail` fields.
 
 ## Stale directive tag detection (wq-828)
 

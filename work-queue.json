@@ -12,77 +12,6 @@
       "commits": []
     },
     {
-      "id": "wq-860",
-      "title": "Add degraded platform monitoring to engage-blockers.sh",
-      "description": "engage-blockers.sh currently reads only live/active platforms from account-registry. 25 platforms in degraded status could also fail during E sessions. Add degraded to the status filter with a higher failure-threshold (2+ patterns per platform) to catch regressions on platforms like Clawsta without false-positive noise.",
-      "priority": 860,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1788,
-      "source": "brainstorming",
-      "tags": [
-        "reliability"
-      ],
-      "commits": [
-        "442c667c"
-      ],
-      "complexity": "S",
-      "outcome": {
-        "session": 1792,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added degraded status to platform filter with 2+ distinct failure threshold. Failure tracking changed from single-reason to set-of-reasons for threshold counting."
-      }
-    },
-    {
-      "id": "wq-861",
-      "title": "Extend manifest drift detection to all session types",
-      "description": "Manifest drift auto-fix currently only runs in B posthook (wq-856). R sessions also create/rename hooks during refactoring. Add manifest-drift check to a general-scope posthook (e.g. 19-manifest-sync.sh) so drift is caught regardless of which session type creates the hook. Reference the check_manifest_drift function already in 47-b-session-posthook_B.sh.",
-      "priority": 861,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1788,
-      "source": "brainstorming",
-      "tags": [
-        "infrastructure"
-      ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": 1792,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "duplicate",
-        "note": "Already implemented by wq-857 (19-manifest-sync.sh, commit 361b345f). That hook runs all-scope and covers R sessions creating/renaming hooks."
-      }
-    },
-    {
-      "id": "wq-863",
-      "title": "Add BRIEFING.md staleness auto-detection to A session prehook",
-      "description": "BRIEFING.md had stale d072 reference for 8 sessions before A#198 caught it. Add a check in A prehook that compares BRIEFING.md directive references (e.g. d0XX patterns) against directives.json status. If BRIEFING references an active directive that is already completed in directives.json, flag it as a critical audit finding instead of waiting for manual observation. Promoted from BRAINSTORMING.md idea (s1791).",
-      "priority": 863,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1791,
-      "source": "brainstorming-promotion",
-      "tags": [
-        "reliability",
-        "audit"
-      ],
-      "commits": [
-        "067603c5"
-      ],
-      "complexity": "S",
-      "outcome": {
-        "session": 1792,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created 35-briefing-directive-check_A.sh. Cross-references d0XX in BRIEFING.md vs directives.json. Smart false-positive filtering (completed-context lines, parenthetical attributions). Writes structured JSON to briefing-directive-audit.json for audit consumption."
-      }
-    },
-    {
       "id": "wq-864",
       "title": "Add --fast mode to account test with 3s timeout for health checks",
       "description": "brainstorming",
@@ -116,6 +45,20 @@
       "created_session": 0,
       "source": "session",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-867",
+      "title": "Add auto-promote hook: brainstorming→queue when pending < 4",
+      "description": "d073 deliverable 1: Create a pre-session hook (or extend existing) that checks queue pending count and auto-promotes the oldest non-struck-through brainstorming idea when count drops below 4. Must apply the same quality gate as manual promotion (not duplicate, actionable, scoped to 1-2 B sessions). Should run for all session types so the queue never starves between R sessions.",
+      "priority": 867,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1793,
+      "source": "directive-d073",
+      "tags": [
+        "d073"
+      ],
       "commits": []
     }
   ]

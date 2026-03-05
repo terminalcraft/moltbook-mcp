@@ -445,6 +445,65 @@ function computeIntelYield() {
   };
 }
 
+// --- B session cost trend indicator (wq-873) ---
+
+function computeBCostTrend() {
+  const historyPath = join(STATE_DIR, 'session-history.txt');
+  if (!existsSync(historyPath)) return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'no_data' };
+
+  try {
+    const content = readFileSync(historyPath, 'utf8');
+    const lines = content.trim().split('\n').filter(l => l.trim());
+
+    const bCosts = [];
+    for (const line of lines) {
+      if (!line.includes('mode=B')) continue;
+      const costMatch = line.match(/cost=\$?([\d.]+)/);
+      const sessionMatch = line.match(/s=(\d+)/);
+      if (costMatch && sessionMatch) {
+        bCosts.push({ session: parseInt(sessionMatch[1]), cost: parseFloat(costMatch[1]) });
+      }
+    }
+
+    if (bCosts.length === 0) return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'no_data' };
+    if (bCosts.length < 2) return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'insufficient_data' };
+
+    const last5 = bCosts.slice(-5);
+    const last10 = bCosts.slice(-10);
+
+    const avg5 = Math.round((last5.reduce((a, b) => a + b.cost, 0) / last5.length) * 100) / 100;
+    const avg10 = Math.round((last10.reduce((a, b) => a + b.cost, 0) / last10.length) * 100) / 100;
+
+    const delta = avg5 - avg10;
+    const threshold = 0.15; // $0.15 change is significant
+    let arrow;
+    if (delta > threshold) arrow = '↑';
+    else if (delta < -threshold) arrow = '↓';
+    else arrow = '→';
+
+    const thresholdCrossed = avg5 >= 2.00;
+
+    let verdict;
+    if (thresholdCrossed) verdict = 'threshold_breach';
+    else if (arrow === '↑') verdict = 'increasing';
+    else if (arrow === '↓') verdict = 'decreasing';
+    else verdict = 'stable';
+
+    return {
+      last5_avg: avg5,
+      last10_avg: avg10,
+      delta: Math.round(delta * 100) / 100,
+      trend: arrow,
+      threshold_crossed: thresholdCrossed,
+      threshold_value: 2.00,
+      sessions_in_last5: last5.map(e => `s${e.session}`),
+      verdict
+    };
+  } catch {
+    return { last5_avg: 0, last10_avg: 0, trend: '—', threshold_crossed: false, verdict: 'error' };
+  }
+}
+
 // --- E session scope-bleed commit categorization (wq-713) ---
 
 function categorizeCommitMessage(subject, files) {
@@ -637,6 +696,7 @@ const stats = {
     directives: computeDirectiveStats()
   },
   sessions: computeSessionStats(),
+  b_cost_trend: computeBCostTrend(),
   r_scope_budget: computeRScopeBudgetCompliance(),
   b_pipeline_gate: computeBPipelineGateCompliance(),
   e_scope_bleed: computeEScopeBleed()

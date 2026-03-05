@@ -326,6 +326,97 @@ describe('audit-stats.mjs computation', () => {
     });
   });
 
+  describe('B cost trend', () => {
+    it('computes decreasing trend when last-5 < last-10', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), [
+        '2026-02-01 mode=B s=80 dur=5m cost=$3.00 build=1',
+        '2026-02-01 mode=B s=81 dur=5m cost=$3.00 build=1',
+        '2026-02-01 mode=B s=82 dur=5m cost=$3.00 build=1',
+        '2026-02-01 mode=B s=83 dur=5m cost=$3.00 build=1',
+        '2026-02-01 mode=B s=84 dur=5m cost=$3.00 build=1',
+        '2026-02-02 mode=B s=85 dur=5m cost=$1.00 build=1',
+        '2026-02-02 mode=B s=86 dur=5m cost=$1.00 build=1',
+        '2026-02-02 mode=B s=87 dur=5m cost=$1.00 build=1',
+        '2026-02-02 mode=B s=88 dur=5m cost=$1.00 build=1',
+        '2026-02-02 mode=B s=89 dur=5m cost=$1.00 build=1',
+      ].join('\n'));
+
+      const stats = runStats('100');
+      assert.equal(stats.b_cost_trend.last5_avg, 1);
+      assert.equal(stats.b_cost_trend.last10_avg, 2);
+      assert.equal(stats.b_cost_trend.trend, '↓');
+      assert.equal(stats.b_cost_trend.threshold_crossed, false);
+      assert.equal(stats.b_cost_trend.verdict, 'decreasing');
+    });
+
+    it('computes increasing trend when last-5 > last-10', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), [
+        '2026-02-01 mode=B s=80 dur=5m cost=$1.00 build=1',
+        '2026-02-01 mode=B s=81 dur=5m cost=$1.00 build=1',
+        '2026-02-01 mode=B s=82 dur=5m cost=$1.00 build=1',
+        '2026-02-01 mode=B s=83 dur=5m cost=$1.00 build=1',
+        '2026-02-01 mode=B s=84 dur=5m cost=$1.00 build=1',
+        '2026-02-02 mode=B s=85 dur=5m cost=$2.50 build=1',
+        '2026-02-02 mode=B s=86 dur=5m cost=$2.50 build=1',
+        '2026-02-02 mode=B s=87 dur=5m cost=$2.50 build=1',
+        '2026-02-02 mode=B s=88 dur=5m cost=$2.50 build=1',
+        '2026-02-02 mode=B s=89 dur=5m cost=$2.50 build=1',
+      ].join('\n'));
+
+      const stats = runStats('100');
+      assert.equal(stats.b_cost_trend.last5_avg, 2.5);
+      assert.equal(stats.b_cost_trend.last10_avg, 1.75);
+      assert.equal(stats.b_cost_trend.trend, '↑');
+      assert.equal(stats.b_cost_trend.threshold_crossed, true);
+      assert.equal(stats.b_cost_trend.verdict, 'threshold_breach');
+    });
+
+    it('computes stable trend when last-5 ≈ last-10', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), [
+        '2026-02-01 mode=B s=80 dur=5m cost=$1.50 build=1',
+        '2026-02-01 mode=B s=81 dur=5m cost=$1.50 build=1',
+        '2026-02-01 mode=B s=82 dur=5m cost=$1.50 build=1',
+        '2026-02-01 mode=B s=83 dur=5m cost=$1.50 build=1',
+        '2026-02-01 mode=B s=84 dur=5m cost=$1.50 build=1',
+        '2026-02-02 mode=B s=85 dur=5m cost=$1.55 build=1',
+        '2026-02-02 mode=B s=86 dur=5m cost=$1.55 build=1',
+        '2026-02-02 mode=B s=87 dur=5m cost=$1.55 build=1',
+        '2026-02-02 mode=B s=88 dur=5m cost=$1.55 build=1',
+        '2026-02-02 mode=B s=89 dur=5m cost=$1.55 build=1',
+      ].join('\n'));
+
+      const stats = runStats('100');
+      assert.equal(stats.b_cost_trend.trend, '→');
+      assert.equal(stats.b_cost_trend.verdict, 'stable');
+    });
+
+    it('returns insufficient_data with < 2 B sessions', () => {
+      writeFileSync(join(STATE, 'session-history.txt'),
+        '2026-02-01 mode=B s=80 dur=5m cost=$1.50 build=1\n');
+
+      const stats = runStats('100');
+      assert.equal(stats.b_cost_trend.verdict, 'insufficient_data');
+    });
+
+    it('handles empty session history', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), '');
+
+      const stats = runStats('100');
+      assert.equal(stats.b_cost_trend.verdict, 'no_data');
+    });
+
+    it('includes session IDs in last-5 list', () => {
+      writeFileSync(join(STATE, 'session-history.txt'), [
+        '2026-02-01 mode=B s=80 dur=5m cost=$1.50 build=1',
+        '2026-02-01 mode=B s=81 dur=5m cost=$1.50 build=1',
+        '2026-02-01 mode=B s=82 dur=5m cost=$1.50 build=1',
+      ].join('\n'));
+
+      const stats = runStats('100');
+      assert.deepEqual(stats.b_cost_trend.sessions_in_last5, ['s80', 's81', 's82']);
+    });
+  });
+
   describe('session number detection', () => {
     it('uses CLI argument when provided', () => {
       // Setup minimal fixtures

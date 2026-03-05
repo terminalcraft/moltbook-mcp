@@ -40,7 +40,7 @@
       "title": "Extend manifest drift detection to all session types",
       "description": "Manifest drift auto-fix currently only runs in B posthook (wq-856). R sessions also create/rename hooks during refactoring. Add manifest-drift check to a general-scope posthook (e.g. 19-manifest-sync.sh) so drift is caught regardless of which session type creates the hook. Reference the check_manifest_drift function already in 47-b-session-posthook_B.sh.",
       "priority": 861,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1788,
       "source": "brainstorming",
@@ -48,7 +48,14 @@
         "infrastructure"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1792,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Already implemented by wq-857 (19-manifest-sync.sh, commit 361b345f). That hook runs all-scope and covers R sessions creating/renaming hooks."
+      }
     },
     {
       "id": "wq-863",

@@ -32,12 +32,19 @@
       "title": "Consolidate HEALTH_URLS between open-circuit-repair.mjs and circuit-reset-probe.mjs into shared module",
       "description": "reliability",
       "priority": 859,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 0,
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1791,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created lib/platform-health-urls.mjs as single source of truth, updated 3 consumers (open-circuit-repair, circuit-reset-probe, defunct-platform-probe). All scripts verified working. Net -21 lines."
+      }
     },
     {
       "id": "wq-860",
@@ -74,7 +81,7 @@
       "title": "Update BRIEFING.md: remove stale d072 reference, note zero active self-directives",
       "description": "BRIEFING.md Strategic Direction still says d072 is active with deadline s1774, but d072 was closed in R#316 (s1783). Update to reflect current state: d072 completed (partial), zero active self-directives, system in maintenance mode. Next R session should also define d073 successor per d068 self-direction mandate.",
       "priority": 862,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1790,
       "source": "audit-s1790",
@@ -83,7 +90,14 @@
         "maintenance"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1791,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated BRIEFING.md: d072 marked completed (partial), zero active self-directives noted, d073 successor flagged for next R session, hook count fixed 66→71, added BRIEFING staleness auto-detection brainstorming idea"
+      }
     }
   ]
 }

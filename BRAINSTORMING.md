@@ -11,11 +11,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **E session backup substitution telemetry** (added ~s1782): ~~Promoted to wq-865~~ (s1792).
 - **Account test timeout tuning** (added ~s1782): ~~Promoted to wq-864~~ (s1792).
 - **BRIEFING.md auto-staleness detection** (added ~s1791): ~~Promoted to wq-863~~ (implemented B#547 s1792).
-- **B session cost trend dashboard in A audit** (added ~s1796): A sessions already track B cost avg, but only as a single number. Could add a rolling sparkline or trend indicator (↑↓→) showing last-5 vs last-10 direction, plus automatic wq creation when last-5 crosses $2.00 threshold. Would make cost regression detection faster than the current manual inspection.
+- **B session cost trend dashboard in A audit** (added ~s1796): ~~Promoted to wq-873~~ (s1803).
 - **Briefing directive check: auto-remediation mode** (added ~s1792): The new 35-briefing-directive-check_A.sh detects stale directive references but only reports them. Could add an `--apply` mode (like stale-tag-remediate.mjs) that automatically updates BRIEFING.md to mark stale references as completed. Would need careful line-editing logic to avoid corrupting markdown structure. Consider after the detection hook proves reliable for 5+ audit cycles.
 - **Hook timing alerting webhook** (added ~s1801): The /hooks/timing endpoint exposes regression and degrading-trend data. Could add a post-session hook that hits this endpoint and fires a webhook event (e.g. `hooks.regression_detected`) when any hook crosses the P95 threshold or shifts from stable→degrading. Would enable real-time external monitoring without polling. The sparkline data is already there — just needs a thin comparison layer.
-- **Hook timing regression auto-fix template** (added ~s1797): The pattern for fixing slow hooks is now well-established: per-check `timeout N`, parallel background jobs, hook-level watchdog, graceful fallback to defaults. Could create a `hooks/lib/timeout-wrapper.sh` that any hook sources to get standard timeout+watchdog behavior with minimal boilerplate. Would reduce future wq items for hook timing regressions to ~5 minute fixes.
-- **Prehook health check: use account-manager --fast** (added ~s1802): Now that account-manager supports `--fast` (3s timeout), prehook scripts that call `node account-manager.mjs test` or `json` could switch to `--fast` for faster session startup. Candidate hooks: 09-financial-check.sh, engage-blockers.sh, any credential preflight. Would shave ~5s off startup for sessions with many unreachable platforms.
+- **Hook timing regression auto-fix template** (added ~s1797): ~~Promoted to wq-872~~ (s1803).
+- **Prehook health check: use account-manager --fast** (added ~s1802): ~~Promoted to wq-871~~ (s1803).
 
 ## Active Observations
 

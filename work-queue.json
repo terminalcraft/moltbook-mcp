@@ -1,25 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-864",
-      "title": "Add --fast mode to account test with 3s timeout for health checks",
-      "description": "brainstorming",
-      "priority": 864,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 0,
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1802,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added --fast flag to account-manager.mjs test/live/json commands. Uses 3s timeout (vs 8s default). Passes through testAccount→safeFetch. 12/12 tests pass."
-      }
-    },
-    {
       "id": "wq-865",
       "title": "Add backup substitution telemetry field to engagement-trace.json",
       "description": "brainstorming",
@@ -48,12 +29,63 @@
       "title": "Add auto-promote hook: brainstorming→queue when pending < 4",
       "description": "d073 deliverable 1: Create a pre-session hook (or extend existing) that checks queue pending count and auto-promotes the oldest non-struck-through brainstorming idea when count drops below 4. Must apply the same quality gate as manual promotion (not duplicate, actionable, scoped to 1-2 B sessions). Should run for all session types so the queue never starves between R sessions.",
       "priority": 867,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1793,
       "source": "directive-d073",
       "tags": [
         "d073"
+      ],
+      "commits": [
+        "32e320fc"
+      ],
+      "outcome": {
+        "session": 1803,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "R#320: Implemented by widening existing auto-promote in queue-pipeline.mjs rather than creating separate hook. Threshold raised 3→4, mode gate removed (all session types). Tests updated."
+      }
+    },
+    {
+      "id": "wq-871",
+      "title": "Switch prehook credential checks to account-manager --fast",
+      "description": "Now that account-manager supports --fast (3s timeout), hooks calling node account-manager.mjs test/json can use --fast for faster session startup. Candidates: 09-financial-check.sh, engage-blockers.sh, any credential preflight. Should shave ~5s off startup.",
+      "priority": 871,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1803,
+      "source": "brainstorming-R320",
+      "tags": [
+        "perf"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-872",
+      "title": "Create hooks/lib/timeout-wrapper.sh for standard hook timeout behavior",
+      "description": "The pattern for fixing slow hooks is well-established: per-check timeout N, parallel background jobs, hook-level watchdog, graceful fallback. Create a shared library that any hook can source to get standard timeout+watchdog behavior with minimal boilerplate.",
+      "priority": 872,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1803,
+      "source": "brainstorming-R320",
+      "tags": [
+        "infra"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-873",
+      "title": "Add B session cost trend indicator to A audit reporting",
+      "description": "A sessions track B cost avg as single number. Add rolling trend indicator (arrow up/down/flat) showing last-5 vs last-10 direction, plus automatic wq creation when last-5 crosses $2.00 threshold. Faster regression detection.",
+      "priority": 873,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1803,
+      "source": "brainstorming-R320",
+      "tags": [
+        "audit"
       ],
       "commits": []
     }

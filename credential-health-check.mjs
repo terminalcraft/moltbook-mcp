@@ -7,11 +7,12 @@
 //   3. No placeholder values
 //   4. JWT expiry (for bearer/jwt auth types)
 //
-// Usage: node credential-health-check.mjs [--json] [--platform <id>]
-// Import: import { checkAllCredentials } from './credential-health-check.mjs'
+// Usage: node credential-health-check.mjs [--json] [--platform <id>] [--live]
+// Import: import { checkAllCredentials, checkAllCredentialsLive } from './credential-health-check.mjs'
 
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
+import { safeFetch } from './lib/safe-fetch.mjs';
 
 const HOME = process.env.HOME || '/home/moltbot';
 const BASE = resolve(HOME, 'moltbook-mcp');
@@ -168,6 +169,126 @@ function checkCredential(account) {
   return result;
 }
 
+function readCredValue(account) {
+  const credPath = resolveCredPath(account.cred_file);
+  if (!credPath || !existsSync(credPath)) return null;
+  try {
+    const raw = readFileSync(credPath, 'utf8').trim();
+    if (account.cred_key) {
+      return JSON.parse(raw)[account.cred_key];
+    }
+    try { return JSON.parse(raw); } catch { return raw; }
+  } catch { return null; }
+}
+
+function getAuthHeaders(account, cred) {
+  if (!cred) return {};
+  const token = typeof cred === 'string' ? cred : cred.token || cred.api_key || cred.apiKey || null;
+  if (!token || !account.test?.auth) return {};
+  if (account.test.auth === 'raw_header') return { Authorization: token };
+  if (account.test.auth === 'bearer') return { Authorization: `Bearer ${token}` };
+  if (account.test.auth === 'x-api-key') return { 'x-api-key': token };
+  return {};
+}
+
+async function checkLiveAuth(account, deps = {}) {
+  const fetch = deps.safeFetch || safeFetch;
+  const result = {
+    id: account.id,
+    live_status: 'skipped',
+    http_status: null,
+    elapsed_ms: null,
+    details: null
+  };
+
+  // Skip MCP-only platforms (no HTTP test endpoint)
+  if (!account.test || account.test.method === 'mcp') {
+    result.details = 'MCP-only, no HTTP endpoint';
+    return result;
+  }
+
+  // Skip platforms without test URL
+  if (!account.test.url) {
+    result.details = 'no test URL configured';
+    return result;
+  }
+
+  // Build request
+  const cred = readCredValue(account);
+  const headers = getAuthHeaders(account, cred);
+  const url = account.test.url;
+
+  try {
+    const resp = await fetch(url, {
+      method: account.test.http_method || 'GET',
+      headers,
+      timeout: 8000,
+    });
+
+    result.http_status = resp.status;
+    result.elapsed_ms = resp.elapsed;
+
+    if (resp.error) {
+      result.live_status = 'timeout';
+      result.details = resp.error;
+    } else if (resp.status >= 200 && resp.status < 300) {
+      result.live_status = 'ok';
+      result.details = `HTTP ${resp.status}`;
+    } else if (resp.status === 401 || resp.status === 403) {
+      result.live_status = 'auth_fail';
+      result.details = `HTTP ${resp.status} — credentials rejected`;
+    } else if (resp.status >= 500) {
+      result.live_status = 'server_error';
+      result.details = `HTTP ${resp.status}`;
+    } else {
+      result.live_status = 'unexpected';
+      result.details = `HTTP ${resp.status}`;
+    }
+  } catch (e) {
+    result.live_status = 'timeout';
+    result.details = e.message?.slice(0, 80) || 'unknown error';
+  }
+
+  return result;
+}
+
+export async function checkAllCredentialsLive({ registryPath, platformFilter, safeFetch: fetchOverride } = {}) {
+  const regPath = registryPath || REGISTRY;
+  if (!existsSync(regPath)) {
+    return { error: 'account-registry.json not found', results: [] };
+  }
+
+  const registry = JSON.parse(readFileSync(regPath, 'utf8'));
+  let accounts = registry.accounts.filter(a => a.status === 'live' || a.status === 'active');
+
+  if (platformFilter) {
+    accounts = accounts.filter(a => a.id === platformFilter);
+  }
+
+  // Filter to HTTP-testable accounts only
+  const httpAccounts = accounts.filter(a => a.test?.method === 'http' && a.test?.url);
+  const deps = fetchOverride ? { safeFetch: fetchOverride } : {};
+
+  // Sequential with 1s delay for rate limiting
+  const results = [];
+  for (let i = 0; i < httpAccounts.length; i++) {
+    if (i > 0) await new Promise(r => setTimeout(r, 1000));
+    results.push(await checkLiveAuth(httpAccounts[i], deps));
+  }
+
+  const ok = results.filter(r => r.live_status === 'ok').length;
+  const authFail = results.filter(r => r.live_status === 'auth_fail').length;
+  const serverErr = results.filter(r => r.live_status === 'server_error').length;
+  const timeouts = results.filter(r => r.live_status === 'timeout').length;
+
+  return {
+    total: results.length,
+    ok, auth_fail: authFail, server_error: serverErr, timeout: timeouts,
+    results,
+    failures: results.filter(r => r.live_status !== 'ok' && r.live_status !== 'skipped')
+  };
+}
+
 export function checkAllCredentials({ registryPath, platformFilter } = {}) {
   const regPath = registryPath || REGISTRY;
   if (!existsSync(regPath)) {
@@ -198,14 +319,15 @@ export function checkAllCredentials({ registryPath, platformFilter } = {}) {
 if (process.argv[1]?.endsWith('credential-health-check.mjs')) {
   const args = process.argv.slice(2);
   const jsonMode = args.includes('--json');
+  const liveMode = args.includes('--live');
   const platformIdx = args.indexOf('--platform');
   const platformFilter = platformIdx >= 0 ? args[platformIdx + 1] : undefined;
 
   const report = checkAllCredentials({ platformFilter });
 
-  if (jsonMode) {
+  if (jsonMode && !liveMode) {
     console.log(JSON.stringify(report, null, 2));
-  } else {
+  } else if (!liveMode) {
     console.log(`Credential health: ${report.healthy}/${report.total} platforms OK`);
     if (report.warnings) {
       console.log('\nWarnings:');
@@ -213,5 +335,25 @@ if (process.argv[1]?.endsWith('credential-health-check.mjs')) {
         console.log(`  ${w.id}: [${w.status}] ${w.details}`);
       }
     }
+  }
+
+  if (liveMode) {
+    checkAllCredentialsLive({ platformFilter }).then(liveReport => {
+      if (jsonMode) {
+        console.log(JSON.stringify({ file_check: report, live_check: liveReport }, null, 2));
+      } else {
+        if (!jsonMode && !liveMode) { /* already printed above */ }
+        console.log(`\nLive auth: ${liveReport.ok}/${liveReport.total} endpoints OK`);
+        if (liveReport.auth_fail > 0) console.log(`  Auth failures: ${liveReport.auth_fail}`);
+        if (liveReport.server_error > 0) console.log(`  Server errors: ${liveReport.server_error}`);
+        if (liveReport.timeout > 0) console.log(`  Timeouts: ${liveReport.timeout}`);
+        if (liveReport.failures.length > 0) {
+          console.log('\nLive failures:');
+          for (const f of liveReport.failures) {
+            console.log(`  ${f.id}: [${f.live_status}] ${f.details}`);
+          }
+        }
+      }
+    });
   }
 }

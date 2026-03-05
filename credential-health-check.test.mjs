@@ -5,7 +5,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 
 // Import the module
-import { checkAllCredentials } from './credential-health-check.mjs';
+import { checkAllCredentials, checkAllCredentialsLive } from './credential-health-check.mjs';
 
 const TEST_DIR = join(tmpdir(), `cred-health-test-${process.pid}`);
 const REGISTRY_PATH = join(TEST_DIR, 'account-registry.json');
@@ -181,5 +181,182 @@ describe('credential-health-check', () => {
     assert.equal(result.unhealthy, 1);
     assert.ok(result.warnings);
     assert.equal(result.warnings.length, 1);
+  });
+});
+
+// ========== checkAllCredentialsLive (wq-825) ==========
+
+describe('checkAllCredentialsLive', () => {
+  beforeEach(() => {
+    mkdirSync(TEST_DIR, { recursive: true });
+  });
+
+  afterEach(() => {
+    if (existsSync(TEST_DIR)) {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    }
+  });
+
+  it('returns ok for successful HTTP 200 response', async () => {
+    const credPath = writeCredFile('bearer.txt', 'real-token-abc12345');
+    // Use non-.json extension so it's treated as a bearer token file
+    const bearerPath = join(TEST_DIR, '.test-key');
+    writeFileSync(bearerPath, 'real-token-abc12345');
+    writeRegistry([
+      {
+        id: 'test-http', status: 'live', auth_type: 'bearer',
+        cred_file: bearerPath, cred_key: null,
+        test: { method: 'http', url: 'https://example.com/api', auth: 'bearer' }
+      }
+    ]);
+    const mockFetch = async () => ({ status: 200, elapsed: 150 });
+    const result = await checkAllCredentialsLive({
+      registryPath: REGISTRY_PATH,
+      safeFetch: mockFetch
+    });
+    assert.equal(result.total, 1);
+    assert.equal(result.ok, 1);
+    assert.equal(result.results[0].live_status, 'ok');
+    assert.equal(result.results[0].http_status, 200);
+  });
+
+  it('detects auth failures (401/403)', async () => {
+    const bearerPath = join(TEST_DIR, '.test-key2');
+    writeFileSync(bearerPath, 'expired-token-12345678');
+    writeRegistry([
+      {
+        id: 'auth-fail', status: 'live', auth_type: 'bearer',
+        cred_file: bearerPath, cred_key: null,
+        test: { method: 'http', url: 'https://example.com/api', auth: 'bearer' }
+      }
+    ]);
+    const mockFetch = async () => ({ status: 401, elapsed: 100 });
+    const result = await checkAllCredentialsLive({
+      registryPath: REGISTRY_PATH,
+      safeFetch: mockFetch
+    });
+    assert.equal(result.auth_fail, 1);
+    assert.equal(result.results[0].live_status, 'auth_fail');
+  });
+
+  it('detects server errors (5xx)', async () => {
+    const bearerPath = join(TEST_DIR, '.test-key3');
+    writeFileSync(bearerPath, 'valid-token-12345678');
+    writeRegistry([
+      {
+        id: 'srv-err', status: 'live', auth_type: 'bearer',
+        cred_file: bearerPath, cred_key: null,
+        test: { method: 'http', url: 'https://example.com/api', auth: 'bearer' }
+      }
+    ]);
+    const mockFetch = async () => ({ status: 500, elapsed: 200 });
+    const result = await checkAllCredentialsLive({
+      registryPath: REGISTRY_PATH,
+      safeFetch: mockFetch
+    });
+    assert.equal(result.server_error, 1);
+    assert.equal(result.results[0].live_status, 'server_error');
+  });
+
+  it('handles fetch errors as timeouts', async () => {
+    const bearerPath = join(TEST_DIR, '.test-key4');
+    writeFileSync(bearerPath, 'valid-token-12345678');
+    writeRegistry([
+      {
+        id: 'timeout-plat', status: 'live', auth_type: 'bearer',
+        cred_file: bearerPath, cred_key: null,
+        test: { method: 'http', url: 'https://example.com/api', auth: 'bearer' }
+      }
+    ]);
+    const mockFetch = async () => ({ status: null, elapsed: 8000, error: 'timeout after 8000ms' });
+    const result = await checkAllCredentialsLive({
+      registryPath: REGISTRY_PATH,
+      safeFetch: mockFetch
+    });
+    assert.equal(result.timeout, 1);
+    assert.equal(result.results[0].live_status, 'timeout');
+  });
+
+  it('skips MCP-only platforms', async () => {
+    writeRegistry([
+      {
+        id: 'mcp-plat', status: 'live', auth_type: 'none',
+        cred_file: null, cred_key: null,
+        test: { method: 'mcp', tool: 'some_tool' }
+      }
+    ]);
+    const mockFetch = async () => { throw new Error('should not be called'); };
+    const result = await checkAllCredentialsLive({
+      registryPath: REGISTRY_PATH,
+      safeFetch: mockFetch
+    });
+    assert.equal(result.total, 0); // MCP filtered out
+  });
+
+  it('filters by platform', async () => {
+    const key1 = join(TEST_DIR, '.key1');
+    const key2 = join(TEST_DIR, '.key2');
+    writeFileSync(key1, 'token-aaa-12345678');
+    writeFileSync(key2, 'token-bbb-12345678');
+    writeRegistry([
+      {
+        id: 'alpha', status: 'live', auth_type: 'bearer',
+        cred_file: key1, cred_key: null,
+        test: { method: 'http', url: 'https://alpha.com/api', auth: 'bearer' }
+      },
+      {
+        id: 'beta', status: 'live', auth_type: 'bearer',
+        cred_file: key2, cred_key: null,
+        test: { method: 'http', url: 'https://beta.com/api', auth: 'bearer' }
+      }
+    ]);
+    const mockFetch = async () => ({ status: 200, elapsed: 50 });
+    const result = await checkAllCredentialsLive({
+      registryPath: REGISTRY_PATH,
+      platformFilter: 'alpha',
+      safeFetch: mockFetch
+    });
+    assert.equal(result.total, 1);
+    assert.equal(result.results[0].id, 'alpha');
+  });
+
+  it('returns failure list for non-ok results', async () => {
+    const key1 = join(TEST_DIR, '.key-a');
+    const key2 = join(TEST_DIR, '.key-b');
+    writeFileSync(key1, 'good-token-12345678');
+    writeFileSync(key2, 'bad-token-123456789');
+    writeRegistry([
+      {
+        id: 'good', status: 'live', auth_type: 'bearer',
+        cred_file: key1, cred_key: null,
+        test: { method: 'http', url: 'https://good.com/api', auth: 'bearer' }
+      },
+      {
+        id: 'bad', status: 'live', auth_type: 'bearer',
+        cred_file: key2, cred_key: null,
+        test: { method: 'http', url: 'https://bad.com/api', auth: 'bearer' }
+      }
+    ]);
+    let callCount = 0;
+    const mockFetch = async () => {
+      callCount++;
+      return callCount === 1 ? { status: 200, elapsed: 50 } : { status: 403, elapsed: 50 };
+    };
+    const result = await checkAllCredentialsLive({
+      registryPath: REGISTRY_PATH,
+      safeFetch: mockFetch
+    });
+    assert.equal(result.ok, 1);
+    assert.equal(result.auth_fail, 1);
+    assert.equal(result.failures.length, 1);
+    assert.equal(result.failures[0].id, 'bad');
+  });
+
+  it('handles missing registry', async () => {
+    const result = await checkAllCredentialsLive({
+      registryPath: '/nonexistent/path.json'
+    });
+    assert.ok(result.error);
+    assert.equal(result.results.length, 0);
   });
 });

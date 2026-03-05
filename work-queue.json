@@ -76,6 +76,40 @@
       ],
       "commits": [],
       "complexity": "S"
+    },
+    {
+      "id": "wq-842",
+      "title": "Profile and optimize 02-periodic-checks.sh (p95=30s, degrading)",
+      "description": "02-periodic-checks.sh pre-session hook has p95=30043ms with avg=3037ms and is degrading. The 30s P95 suggests intermittent network call timeouts. Profile each check in the hook, identify which ones cause spikes, add timeout guards (curl --max-time), and consider deferring non-critical checks to background. Currently the worst hook by 5x margin over the next slowest.",
+      "priority": 842,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1765,
+      "source": "audit-s1765",
+      "tags": [
+        "audit",
+        "performance",
+        "hooks"
+      ],
+      "commits": [],
+      "complexity": "M"
+    },
+    {
+      "id": "wq-843",
+      "title": "Re-authenticate MoltStack write endpoints (401 on POST)",
+      "description": "s1764 E session encountered MoltStack auth failure: API key molt_e22... returns 401 on POST /api/posts while GET endpoints work. Also MCP lobstack tools are mapped to wrong domain (lobstack.app vs moltstack.net). Needs re-authentication and domain mapping fix. Within d072 scope — credential lifecycle issue.",
+      "priority": 843,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1765,
+      "source": "audit-s1765",
+      "tags": [
+        "audit",
+        "credentials",
+        "d072"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

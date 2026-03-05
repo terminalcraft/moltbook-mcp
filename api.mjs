@@ -13253,6 +13253,149 @@ ${phaseHtml}
   }
 });
 
+// Hook timing dashboard — per-hook avg/P95/P99 with trend sparklines (wq-854)
+app.get("/hooks/timing", (req, res) => {
+  try {
+    const logsDir = join(process.env.HOME || "/home/moltbot", ".config/moltbook/logs");
+    const window = Math.min(Math.max(parseInt(req.query.window) || 20, 1), 200);
+    const threshold = parseInt(req.query.threshold) || 3000;
+
+    const loadEntries = (file) => {
+      try {
+        return readFileSync(join(logsDir, file), "utf8").trim().split("\n").filter(Boolean)
+          .slice(-window).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+      } catch { return []; }
+    };
+
+    const preEntries = loadEntries("pre-hook-results.json");
+    const postEntries = loadEntries("hook-results.json");
+    if (!preEntries.length && !postEntries.length) return res.json({ error: "no hook timing data" });
+
+    const percentile = (arr, p) => {
+      if (!arr.length) return 0;
+      const sorted = [...arr].sort((a, b) => a - b);
+      return sorted[Math.max(0, Math.ceil(sorted.length * p / 100) - 1)];
+    };
+
+    const analyzePhase = (entries, phase) => {
+      // Collect per-hook per-session timings for trend data
+      const hookData = {}; // hook -> { times: number[], perSession: {session, ms}[] }
+      for (const entry of entries) {
+        for (const h of (entry.hooks || [])) {
+          if (!h.hook || h.status === "budget_skip") continue;
+          if (!hookData[h.hook]) hookData[h.hook] = { times: [], perSession: [] };
+          hookData[h.hook].times.push(h.ms || 0);
+          hookData[h.hook].perSession.push({ session: entry.session, ms: h.ms || 0 });
+        }
+      }
+
+      return Object.entries(hookData).map(([hook, d]) => {
+        const avg = Math.round(d.times.reduce((a, b) => a + b, 0) / d.times.length);
+        const p95 = percentile(d.times, 95);
+        const p99 = percentile(d.times, 99);
+
+        // Trend: compare first half vs second half averages
+        const mid = Math.floor(d.times.length / 2);
+        let trend = "stable";
+        if (d.times.length >= 4) {
+          const first = d.times.slice(0, mid);
+          const second = d.times.slice(mid);
+          const avgFirst = first.reduce((a, b) => a + b, 0) / first.length;
+          const avgSecond = second.reduce((a, b) => a + b, 0) / second.length;
+          const pctChange = ((avgSecond - avgFirst) / Math.max(avgFirst, 1)) * 100;
+          if (pctChange > 25) trend = "degrading";
+          else if (pctChange < -25) trend = "improving";
+        }
+
+        // Sparkline data: per-session timings (last 10 for compact view)
+        const sparkline = d.perSession.slice(-10).map(s => s.ms);
+
+        return {
+          hook, phase, samples: d.times.length,
+          avg_ms: avg, p95_ms: p95, p99_ms: p99,
+          max_ms: Math.max(...d.times), min_ms: Math.min(...d.times),
+          trend, regression: p95 > threshold, sparkline,
+        };
+      }).sort((a, b) => b.p95_ms - a.p95_ms);
+    };
+
+    const preHooks = analyzePhase(preEntries, "pre");
+    const postHooks = analyzePhase(postEntries, "post");
+    const allHooks = [...preHooks, ...postHooks];
+    const regressions = allHooks.filter(h => h.regression);
+    const degrading = allHooks.filter(h => h.trend === "degrading");
+
+    const result = {
+      generated_at: new Date().toISOString(),
+      window,
+      threshold_ms: threshold,
+      sessions: {
+        pre: { count: preEntries.length, range: preEntries.length ? { from: preEntries[0].session, to: preEntries[preEntries.length - 1].session } : null },
+        post: { count: postEntries.length, range: postEntries.length ? { from: postEntries[0].session, to: postEntries[postEntries.length - 1].session } : null },
+      },
+      summary: {
+        total_hooks: allHooks.length,
+        regressions: regressions.length,
+        degrading: degrading.length,
+        regression_hooks: regressions.map(h => h.hook),
+        degrading_hooks: degrading.map(h => h.hook),
+      },
+      hooks: allHooks,
+    };
+
+    if (req.query.format === "json" || req.headers.accept?.includes("application/json")) {
+      return res.json(result);
+    }
+
+    // HTML with sparkline visualization
+    const sparkSvg = (data, maxVal) => {
+      if (!data.length) return "";
+      const w = 80, h = 20;
+      const ceil = maxVal || Math.max(...data, 1);
+      const points = data.map((v, i) => `${(i / Math.max(data.length - 1, 1)) * w},${h - (v / ceil) * h}`).join(" ");
+      const color = data[data.length - 1] > threshold ? "#f38ba8" : "#a6e3a1";
+      return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${points}" fill="none" stroke="${color}" stroke-width="1.5"/></svg>`;
+    };
+
+    const globalMax = Math.max(...allHooks.map(h => Math.max(...h.sparkline, 0)), 1);
+    const rows = allHooks.map(h => {
+      const color = h.regression ? "#f38ba8" : h.p95_ms > 1000 ? "#fab387" : "#a6e3a1";
+      const trendIcon = h.trend === "degrading" ? '<span style="color:#f38ba8">↑</span>' : h.trend === "improving" ? '<span style="color:#a6e3a1">↓</span>' : '<span style="color:#6c7086">→</span>';
+      return `<tr>
+        <td style="font-family:monospace;white-space:nowrap">${h.hook}</td>
+        <td style="color:#6c7086">${h.phase}</td>
+        <td style="text-align:right">${h.samples}</td>
+        <td style="text-align:right">${h.avg_ms}</td>
+        <td style="text-align:right;color:${color}">${h.p95_ms}</td>
+        <td style="text-align:right;color:${color}">${h.p99_ms}</td>
+        <td style="text-align:right">${h.max_ms}</td>
+        <td style="text-align:center">${trendIcon}</td>
+        <td>${sparkSvg(h.sparkline, globalMax)}</td>
+      </tr>`;
+    }).join("\n");
+
+    const regList = regressions.length ? regressions.map(h => `<li><code>${h.hook}</code> (${h.phase}) — p95: ${h.p95_ms}ms, p99: ${h.p99_ms}ms ${h.trend === "degrading" ? "↑ degrading" : ""}</li>`).join("") : "<li style=\"color:#a6e3a1\">None — all hooks under threshold</li>";
+
+    res.type("html").send(`<!DOCTYPE html><html><head><title>Hook Timing Dashboard</title>
+<style>body{background:#1e1e2e;color:#cdd6f4;font-family:system-ui;margin:2rem}table{border-collapse:collapse;width:100%}th,td{padding:6px 10px;border-bottom:1px solid #313244}th{text-align:left;color:#89b4fa;font-size:12px;text-transform:uppercase}tr:hover{background:#313244}h1{color:#cba6f7}h2{color:#89b4fa;margin-top:2rem}.summary{display:flex;gap:2rem;margin:1rem 0;flex-wrap:wrap}.card{background:#313244;padding:1rem;border-radius:8px;min-width:120px}.card .val{font-size:1.5rem;font-weight:bold;color:#cba6f7}.card .lbl{font-size:.75rem;color:#6c7086;margin-top:4px}svg{vertical-align:middle}</style></head>
+<body><h1>Hook Timing Dashboard</h1>
+<p style="color:#6c7086">Last ${window} sessions · Threshold: ${threshold}ms · Pre: ${preEntries.length} sessions · Post: ${postEntries.length} sessions</p>
+<div class="summary">
+  <div class="card"><div class="val">${allHooks.length}</div><div class="lbl">Hooks tracked</div></div>
+  <div class="card"><div class="val" style="color:${regressions.length ? '#f38ba8' : '#a6e3a1'}">${regressions.length}</div><div class="lbl">Regressions (p95 &gt; ${threshold}ms)</div></div>
+  <div class="card"><div class="val" style="color:${degrading.length ? '#fab387' : '#a6e3a1'}">${degrading.length}</div><div class="lbl">Degrading trend</div></div>
+</div>
+<h2>Regressions</h2><ul>${regList}</ul>
+<h2>All Hooks</h2>
+<table><thead><tr><th>Hook</th><th>Phase</th><th>N</th><th>Avg</th><th>P95</th><th>P99</th><th>Max</th><th>Trend</th><th>Sparkline</th></tr></thead>
+<tbody>${rows}</tbody></table>
+<p style="margin-top:2rem;color:#555;font-size:.75rem"><a href="/hooks/timing?format=json" style="color:#89b4fa">JSON</a> · <a href="/status/hooks" style="color:#89b4fa">Per-Phase Detail</a> · <a href="/status/hooks-health" style="color:#89b4fa">Health</a> · ?window=N (default 20, max 200) · ?threshold=N (ms, default 3000)</p>
+</body></html>`);
+  } catch (e) {
+    res.status(500).json({ error: e.message?.slice(0, 100) });
+  }
+});
+
 // HTML smoke test dashboard (wq-015)
 app.get("/status/smoke", (req, res) => {
   const history = loadSmokeResults();

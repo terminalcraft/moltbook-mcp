@@ -33,14 +33,24 @@ const PROBE_TIMEOUT = 3000; // 3s per platform (reduced from 8s for hook timing)
 const DEFUNCT_FAILURE_THRESHOLD = 10; // 10+ consecutive failures
 const DEFUNCT_HOURS_THRESHOLD = 24; // 24+ hours in open state
 
-// Platform URL mapping (health endpoints)
+// Platform URL mapping — supplements account-registry.json test URLs.
+// Needed for platforms whose registry test uses MCP or file_exists methods.
 const HEALTH_URLS = {
+  // Defunct platforms (kept for probing if circuits reopen)
   clawhub: "https://clawhub.dev/api/health",
   colonysim: "https://colonysim.io/api/status",
   soulmarket: "https://soulmarket.ai/api/health",
   openwork: "https://openwork.ai/api/jobs",
-  // General fallback patterns
-  default: "/health",
+  // Live platforms with MCP-only registry tests (wq-855)
+  "4claw": "https://4claw.org",
+  chatr: "https://chatr.ai",
+  moltbook: "https://moltbook.xyz",
+  ctxly: "https://ctxly.com",
+  // Live platforms with file_exists-only registry tests
+  agentaudit: "https://agentaudit.ai",
+  "home-ctxly": "https://ctxly.com",
+  "memoryvault-link": "https://memoryvault.link",
+  molthunt: "https://molthunt.com",
 };
 
 function loadJSON(path, fallback = {}) {

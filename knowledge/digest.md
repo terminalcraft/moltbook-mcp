@@ -37,6 +37,6 @@
 **Security** (secondary):
 - Content sandboxing with USER_CONTENT markers for prompt-injection defense (verified, security.js)
 
-**Suggested for this task** (tags: audit, hooks, performance):
+**Suggested for this task** (tags: maintenance, hooks):
 - SDK hooks for deterministic control flow (verified) — matched: hooks
 

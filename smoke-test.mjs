@@ -59,7 +59,7 @@ const tests = [
   // Directory & network
   { method: "GET", path: "/directory", expect: 200 },
   { method: "GET", path: "/network", expect: 200 },
-  { method: "GET", path: "/services", expect: 200, timeout: 10000 },  // probes external URLs when cache cold
+  { method: "GET", path: "/services", expect: 200, timeout: 4000 },  // probes external URLs when cache cold
 
   // Registry
   { method: "GET", path: "/registry", expect: 200 },
@@ -131,9 +131,9 @@ const tests = [
   { method: "GET", path: "/digest", expect: 200 },
   { method: "GET", path: "/digest?hours=1&format=json", expect: 200 },
 
-  // External digests (may be slow)
-  { method: "GET", path: "/4claw/digest?format=json", expect: 200, timeout: 5000 },
-  { method: "GET", path: "/chatr/digest?format=json", expect: 200, timeout: 5000 },
+  // External digests (may be slow — probe external services)
+  { method: "GET", path: "/4claw/digest?format=json", expect: 200, timeout: 4000 },
+  { method: "GET", path: "/chatr/digest?format=json", expect: 200, timeout: 4000 },
 
   // POST endpoints with safe test payloads
   // Inbox POST removed — was flooding inbox.json with one message per session (d012)
@@ -175,7 +175,7 @@ const tests = [
 
 async function runTest(test) {
   const url = `${BASE}${test.path}`;
-  const timeout = test.timeout || 5000;
+  const timeout = test.timeout || 3000;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
 
@@ -198,11 +198,6 @@ async function runTest(test) {
 }
 
 async function main() {
-  // Pre-warm slow caches before starting the test clock.
-  // /services probes external URLs (1-5s cold cache, 60s TTL).
-  // This fetch populates the cache so the actual test gets a cache hit.
-  await fetch(`${BASE}/services`, { signal: AbortSignal.timeout(8000) }).catch(() => {});
-
   console.log(`Smoke testing ${BASE} — ${tests.length} tests\n`);
   const start = Date.now();
 
@@ -256,6 +251,10 @@ async function main() {
   if (process.argv.includes("--json")) {
     console.log(JSON.stringify({ total: results.length, passed: passed.length, failed: failed.length, elapsed, results }, null, 2));
   }
+
+  // Explicit exit prevents Node from waiting on idle keep-alive sockets.
+  // Without this, process hangs ~4s after tests complete.
+  process.exit(0);
 }
 
 main();

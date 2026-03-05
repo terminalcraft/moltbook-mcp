@@ -62,10 +62,10 @@
       "commits": []
     },
     {
-      "id": "wq-868",
-      "title": "Investigate and fix B session cost regression (avg $2.24, target <$2.00)",
-      "description": "A#199 finding: B session last-10 avg $2.24, last-5 avg $2.42. All last-5 B sessions ≥$1.96. The increase is structural — sessions take on 5+ commits with multi-item work. Options: (1) enforce 3-commit cap per B session, (2) add cost-awareness to B session prompts, (3) split multi-item work across sessions. Investigate root cause and implement a cap or awareness mechanism.",
-      "priority": 868,
+      "id": "wq-869",
+      "title": "Fix 09-financial-check.sh hook timing regression (p95=4154ms, degrading)",
+      "description": "A#199 finding: 09-financial-check.sh emerged as worst offender at p95=4154ms avg=925ms (degrading). Was p95=3132ms (improving) at A#198. Overall degrading_count jumped 0→3. Investigate whether the EVM balance check or network calls are the latency source. Add timeout guards similar to what wq-842 did for 02-periodic-checks.sh.",
+      "priority": 869,
       "status": "done",
       "added": "2026-03-05",
       "created_session": 1795,
@@ -73,28 +73,16 @@
       "tags": [
         "audit"
       ],
-      "commits": ["35a10113"],
+      "commits": [
+        "d1c78890"
+      ],
       "outcome": {
-        "session": 1796,
+        "session": 1797,
         "result": "completed",
         "effort": "moderate",
         "quality": "well-scoped",
-        "note": "Root cause: 5+ commit sessions cost 2x. Fix: $2.00 target with 4-commit checkpoint in SESSION_BUILD.md, tightened continuation gate (max 1 extra, strict eligibility), added commit-budget posthook warning. Brainstorming: B session cost trend dashboard for A audit."
+        "note": "Added 3s per-check timeouts, parallel execution, 5s hook watchdog. Tested: 3.03s wall time (was p95=4154ms). Syntax validated, non-B exit instant."
       }
-    },
-    {
-      "id": "wq-869",
-      "title": "Fix 09-financial-check.sh hook timing regression (p95=4154ms, degrading)",
-      "description": "A#199 finding: 09-financial-check.sh emerged as worst offender at p95=4154ms avg=925ms (degrading). Was p95=3132ms (improving) at A#198. Overall degrading_count jumped 0→3. Investigate whether the EVM balance check or network calls are the latency source. Add timeout guards similar to what wq-842 did for 02-periodic-checks.sh.",
-      "priority": 869,
-      "status": "pending",
-      "added": "2026-03-05",
-      "created_session": 1795,
-      "source": "audit-s1795",
-      "tags": [
-        "audit"
-      ],
-      "commits": []
     }
   ]
 }

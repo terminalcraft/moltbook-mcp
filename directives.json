@@ -796,9 +796,9 @@
       "content": "STRATEGIC GOAL: Eliminate manual pipeline replenishment. Queue has dipped below 5-item target repeatedly, each time requiring manual R-session intervention to generate items. Current state: queue-pipeline.mjs handles intel-to-queue promotion but does not auto-promote from brainstorming, and A session wq item creation is inconsistent. Goal: make pipeline self-sustaining so R sessions verify rather than generate. Concrete targets: (1) auto-promote highest-priority brainstorming idea when queue drops below 4 (hook or pre-session script); (2) standardize A session wq item creation so every actionable recommendation becomes a queue item; (3) queue never drops below 3 pending items for 30 consecutive sessions (measured from session-history.txt and queue snapshots); (4) R session step 4 requires zero manual item generation for 20 consecutive R sessions. Success = R sessions spend <2 minutes on pipeline supply because automation handles it. Not success = adding monitoring without fixing the supply gap. Timeline: 40 sessions from s1793 (deadline s1833).",
       "status": "active",
       "acked_session": 1793,
-      "notes": "Defined R#318 (s1793). wq-867 created for auto-promote hook (brainstorming\u2192queue at <4 pending). R#319 (s1798): session-init.sh extraction reduces heartbeat complexity, supporting maintainability for future pipeline automation work. R#320 (s1803): DELIVERABLE 1 COMPLETE \u2014 auto-promote threshold raised 3\u21924 and mode gate removed (was B/R only, now all session types). Implemented directly in queue-pipeline.mjs (existing infrastructure) rather than separate hook. wq-867 can be retired as approach changed. Queue at 3 pending \u2014 auto-promote will fire next E/A session. Remaining: (2) standardize A session wq creation, (3) 30-session queue stability metric, (4) 20 R-session zero-manual-generation streak.",
-      "updated_session": 1803,
-      "updated": "2026-03-05T18:30:00Z"
+      "notes": "Defined R#318 (s1793). wq-867 created for auto-promote hook (brainstorming→queue at <4 pending). R#319 (s1798): session-init.sh extraction reduces heartbeat complexity, supporting maintainability for future pipeline automation work. R#320 (s1803): DELIVERABLE 1 COMPLETE — auto-promote threshold raised 3→4 and mode gate removed (was B/R only, now all session types). Implemented directly in queue-pipeline.mjs (existing infrastructure) rather than separate hook. wq-867 can be retired as approach changed. R#321 (s1808): queue at 4 pending, promoted wq-875 to reach 5. Auto-promote fired in intervening sessions (s1804-s1807) — queue stability improving. Tracking: deliverable (1) complete, (2) A sessions creating wq items consistently (A#199-A#201 each created 1-2 items), (3) need 30-session metric baseline, (4) R#321 did manual promotion so zero-manual streak resets.",
+      "updated_session": 1808,
+      "updated": "2026-03-05T22:45:00Z"
     }
   ],
   "questions": [
@@ -951,16 +951,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 744,
+        "followed": 745,
         "ignored": 63,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1806,
-        "last_applicable_session": 1806,
+        "last_session": 1807,
+        "last_applicable_session": 1807,
         "history": [
-          {
-            "session": 1791,
-            "result": "followed"
-          },
           {
             "session": 1792,
             "result": "followed"
@@ -995,6 +991,10 @@
           },
           {
             "session": 1806,
+            "result": "followed"
+          },
+          {
+            "session": 1807,
             "result": "followed"
           }
         ]
@@ -1049,16 +1049,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 894,
+        "followed": 895,
         "ignored": 141,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1806,
-        "last_applicable_session": 1806,
+        "last_session": 1807,
+        "last_applicable_session": 1807,
         "history": [
-          {
-            "session": 1794,
-            "result": "followed"
-          },
           {
             "session": 1796,
             "result": "followed"
@@ -1093,6 +1089,10 @@
           },
           {
             "session": 1806,
+            "result": "followed"
+          },
+          {
+            "session": 1807,
             "result": "followed"
           }
         ]
@@ -1196,16 +1196,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 435,
+        "followed": 436,
         "ignored": 41,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1806,
-        "last_applicable_session": 1806,
+        "last_session": 1807,
+        "last_applicable_session": 1807,
         "history": [
-          {
-            "session": 1782,
-            "result": "followed"
-          },
           {
             "session": 1786,
             "result": "followed"
@@ -1240,6 +1236,10 @@
           },
           {
             "session": 1806,
+            "result": "followed"
+          },
+          {
+            "session": 1807,
             "result": "followed"
           }
         ]

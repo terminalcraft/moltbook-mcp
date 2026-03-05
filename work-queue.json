@@ -26,7 +26,7 @@
       "title": "Add auto-remediation mode to stale-tag-check hook",
       "description": "The stale-tag detection hook (33-stale-tag-check_A.sh) flags items tagged with completed directives but doesn't fix them. Add a companion script or mode that automatically removes stale directive tags from queue items and appends a note in the item's description. Run as part of A session post-processing or as a standalone utility.",
       "priority": 835,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1756,
       "source": "brainstorming",
@@ -34,7 +34,14 @@
         "automation",
         "maintenance"
       ],
-      "commits": []
+      "commits": ["72a2a2b7"],
+      "outcome": {
+        "session": 1762,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "New stale-tag-remediate.mjs with dry-run/apply/json modes, integrated into 33-stale-tag-check_A.sh hook, 6 DI-based tests."
+      }
     },
     {
       "id": "wq-836",

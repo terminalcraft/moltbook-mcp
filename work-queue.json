@@ -71,6 +71,21 @@
         "audit"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-887",
+      "title": "Prioritize wq-880 timeout-wrapper migration for 02-periodic-checks.sh",
+      "description": "02-periodic-checks.sh timing regression recurred — p95 jumped to 10486ms (was fixed to ~3000ms by wq-874 in s1807). The same pattern repeats: platform-health check timing out. wq-880 (timeout-wrapper migration) is the structural fix. Prioritize in next B session.",
+      "priority": 887,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1825,
+      "source": "audit-s1825",
+      "tags": [
+        "perf",
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

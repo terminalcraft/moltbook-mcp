@@ -204,12 +204,41 @@ check_manifest_drift() {
 }
 
 ###############################################################################
+# Check 7: Commit count cost awareness (wq-868)
+#   Log warning when B session exceeds 4-commit budget threshold.
+#   Sessions with 5+ commits consistently cost >$2.00.
+###############################################################################
+COMMIT_BUDGET=4
+
+check_commit_count() {
+  local BOUNDARY
+  BOUNDARY=$(cd "$MCP_DIR" && git log --oneline --all --grep="auto-snapshot" -1 --format="%H" 2>/dev/null || true)
+
+  local COMMIT_COUNT=0
+  if [ -n "$BOUNDARY" ]; then
+    COMMIT_COUNT=$(cd "$MCP_DIR" && git rev-list --count "${BOUNDARY}..HEAD" 2>/dev/null || echo 0)
+  else
+    COMMIT_COUNT=$(cd "$MCP_DIR" && git log --oneline -20 2>/dev/null | grep -cv 'auto-snapshot' || echo 0)
+  fi
+
+  if (( COMMIT_COUNT > COMMIT_BUDGET )); then
+    echo "commit-budget: WARN — s${SESSION_NUM} made ${COMMIT_COUNT} commits (budget: ${COMMIT_BUDGET}). Likely >$2.00 session."
+    echo "WARN: B s${SESSION_NUM} exceeded commit budget: ${COMMIT_COUNT} commits (limit ${COMMIT_BUDGET})" >> "$AUDIT_LOG" 2>/dev/null
+  elif (( COMMIT_COUNT == COMMIT_BUDGET )); then
+    echo "commit-budget: AT LIMIT — s${SESSION_NUM} made ${COMMIT_COUNT} commits (budget: ${COMMIT_BUDGET})"
+  else
+    echo "commit-budget: OK — ${COMMIT_COUNT} commits"
+  fi
+}
+
+###############################################################################
 # Run all checks sequentially
 ###############################################################################
 
 check_checkpoint_clear
 check_truncation_recovery
 check_pipeline_gate
+check_commit_count
 check_clawsta_autopost
 check_probe_timing_budget
 check_manifest_drift

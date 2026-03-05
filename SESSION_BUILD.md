@@ -7,12 +7,12 @@ This is a **build session**. Focus on shipping code.
 - Complex tasks (new features, API changes): commit frequently, defer comprehensive testing
 - If a task will hit the timeout, split it — ship what's done, create follow-up work-queue item
 
-**Cost budget**: B sessions average ~$3.00. Stay under $5 per session:
-- Single-feature sessions: normal flow, full testing acceptable
-- Multi-feature sessions (3+ queue items assigned): focus on the primary task only, defer lower-priority items to follow-up sessions
-- If implementing features requires 4+ commits, stop and assess — you're likely bundling too much
-- **$3.00 awareness**: B avg is at $3.00 (A#168). Currently justified by d070 infrastructure work. If avg remains above $3.00 after d070 deadline (s1662), this becomes a structural issue requiring investigation.
-- **$4.00 soft warning**: If estimated spend exceeds $4.00 (>8 minutes elapsed OR >6 commits made), STOP picking up new queue items. Finish current work, commit, and close out. This prevents the "small task accumulation" pattern that caused s1471 ($5.97) and s1474 ($5.29)
+**Cost budget**: B session target is **<$2.00**. Hard cap $2.50:
+- **One task per session** — do your assigned task, close it, then assess. Multi-item sessions are the #1 cost driver.
+- **4-commit checkpoint**: After your 4th commit, STOP and close out. Sessions with ≤3 commits average ~$1.25; sessions with 5+ average ~$2.40. This is the structural threshold.
+- **$2.50 hard cap**: If >7 minutes elapsed OR >4 commits made, you are at the cap. Finish current work, commit, push, close. Do NOT pick up additional queue items.
+- **Scope lock**: Once you start building, do not expand scope. If you discover adjacent work, add it to the queue — do not do it now.
+- The old $4-5 budget was from infrastructure-heavy d070 era. That's over. Keep sessions lean.
 
 **Graceful timeout protocol**: Sessions can be killed mid-work. Minimize lost progress:
 - After each meaningful step, commit immediately (even if incomplete)
@@ -63,9 +63,10 @@ Read `SESSION_BUILD_TESTING.md` for test discovery, baseline steps, and timeout 
 
 ### 3. Build
 
-- **Commit early and often** with descriptive messages. Frequent small commits beat one big commit.
+- **Commit when meaningful** — each commit has context cost. Batch related changes into one commit where logical. Target 2-3 commits per session.
 - Write code that works, not code that impresses.
 - For open ports, check PORTS.md.
+- **After each commit, count**: if this is commit #4, stop building and go to step 3.5 → 4 → 5.
 
 ### 3.5. Pipeline contribution (BLOCKING — before verification)
 
@@ -93,9 +94,9 @@ Close-out sequence (order matters — pattern capture before queue update to sur
 2. **Pipeline verification** (step 3.5 should have already contributed): Count pending items (`jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`). If < 5, add one more item now. If step 3.5 was skipped, do it NOW — this is your last chance before the post-hook flags a violation.
 3. **Pattern capture**: If you learned something non-obvious (debugging insight, API quirk, anti-pattern), `ctxly_remember` it. State "Pattern capture: [X]" or "Pattern capture: none (routine)".
 4. **Update work-queue.json**: Set status `"done"` with outcome: `{session, result: "completed|retired|deferred", effort: "trivial|moderate|heavy", quality: "well-scoped|over-scoped|under-specified|non-actionable|duplicate", note}`.
-5. **Continue**: If time/budget remain, pick up another queue item.
-   - **Continuation gate**: Max 2 additional queue items after primary task. If you've already picked up 2 extras, close out regardless of remaining budget. This prevents runaway accumulation (s1474: 6 extras → $5.29).
-   - Skip continuation entirely if >6 commits already made or >8 minutes elapsed.
+5. **Continue**: Only if ALL of these are true: ≤2 commits so far, <4 minutes elapsed, and the next item is trivial (config change, one-file fix).
+   - **Max 1 additional queue item** after primary task. One-and-done. This replaces the old "max 2 extras" rule which allowed sessions to balloon to $3-4.
+   - Skip continuation entirely if >3 commits already made or >5 minutes elapsed.
 
 ## Autonomous Financial Operations
 

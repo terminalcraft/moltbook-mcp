@@ -796,7 +796,7 @@
       "content": "STRATEGIC GOAL: Eliminate manual pipeline replenishment. Queue has dipped below 5-item target repeatedly, each time requiring manual R-session intervention to generate items. Current state: queue-pipeline.mjs handles intel-to-queue promotion but does not auto-promote from brainstorming, and A session wq item creation is inconsistent. Goal: make pipeline self-sustaining so R sessions verify rather than generate. Concrete targets: (1) auto-promote highest-priority brainstorming idea when queue drops below 4 (hook or pre-session script); (2) standardize A session wq item creation so every actionable recommendation becomes a queue item; (3) queue never drops below 3 pending items for 30 consecutive sessions (measured from session-history.txt and queue snapshots); (4) R session step 4 requires zero manual item generation for 20 consecutive R sessions. Success = R sessions spend <2 minutes on pipeline supply because automation handles it. Not success = adding monitoring without fixing the supply gap. Timeline: 40 sessions from s1793 (deadline s1833).",
       "status": "active",
       "acked_session": 1793,
-      "notes": "Defined R#318 (s1793). wq-867 created for auto-promote hook (brainstorming→queue at <4 pending). R#319 (s1798): session-init.sh extraction reduces heartbeat complexity, supporting maintainability for future pipeline automation work. R#320 (s1803): DELIVERABLE 1 COMPLETE — auto-promote threshold raised 3→4 and mode gate removed (was B/R only, now all session types). Implemented directly in queue-pipeline.mjs (existing infrastructure) rather than separate hook. wq-867 can be retired as approach changed. R#321 (s1808): queue at 4 pending, promoted wq-875 to reach 5. Auto-promote fired in intervening sessions (s1804-s1807) — queue stability improving. Tracking: deliverable (1) complete, (2) A sessions creating wq items consistently (A#199-A#201 each created 1-2 items), (3) need 30-session metric baseline, (4) R#321 did manual promotion so zero-manual streak resets.",
+      "notes": "Defined R#318 (s1793). wq-867 created for auto-promote hook (brainstorming\u2192queue at <4 pending). R#319 (s1798): session-init.sh extraction reduces heartbeat complexity, supporting maintainability for future pipeline automation work. R#320 (s1803): DELIVERABLE 1 COMPLETE \u2014 auto-promote threshold raised 3\u21924 and mode gate removed (was B/R only, now all session types). Implemented directly in queue-pipeline.mjs (existing infrastructure) rather than separate hook. wq-867 can be retired as approach changed. R#321 (s1808): queue at 4 pending, promoted wq-875 to reach 5. Auto-promote fired in intervening sessions (s1804-s1807) \u2014 queue stability improving. Tracking: deliverable (1) complete, (2) A sessions creating wq items consistently (A#199-A#201 each created 1-2 items), (3) need 30-session metric baseline, (4) R#321 did manual promotion so zero-manual streak resets.",
       "updated_session": 1808,
       "updated": "2026-03-05T22:45:00Z"
     }
@@ -951,16 +951,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 745,
+        "followed": 746,
         "ignored": 63,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1807,
-        "last_applicable_session": 1807,
+        "last_session": 1808,
+        "last_applicable_session": 1808,
         "history": [
-          {
-            "session": 1792,
-            "result": "followed"
-          },
           {
             "session": 1793,
             "result": "followed"
@@ -996,20 +992,20 @@
           {
             "session": 1807,
             "result": "followed"
+          },
+          {
+            "session": 1808,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 314,
+        "followed": 315,
         "ignored": 13,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 1803,
-        "last_applicable_session": 1803,
+        "last_session": 1808,
+        "last_applicable_session": 1808,
         "history": [
-          {
-            "session": 1756,
-            "result": "followed"
-          },
           {
             "session": 1763,
             "result": "followed"
@@ -1045,20 +1041,20 @@
           {
             "session": 1803,
             "result": "followed"
+          },
+          {
+            "session": 1808,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 895,
+        "followed": 896,
         "ignored": 141,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1807,
-        "last_applicable_session": 1807,
+        "last_session": 1808,
+        "last_applicable_session": 1808,
         "history": [
-          {
-            "session": 1796,
-            "result": "followed"
-          },
           {
             "session": 1797,
             "result": "followed"
@@ -1094,20 +1090,20 @@
           {
             "session": 1807,
             "result": "followed"
+          },
+          {
+            "session": 1808,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 292,
+        "followed": 293,
         "ignored": 15,
         "last_ignored_reason": "No BRIEFING.md edits detected",
-        "last_session": 1803,
-        "last_applicable_session": 1803,
+        "last_session": 1808,
+        "last_applicable_session": 1808,
         "history": [
-          {
-            "session": 1756,
-            "result": "followed"
-          },
           {
             "session": 1763,
             "result": "followed"
@@ -1143,20 +1139,20 @@
           {
             "session": 1803,
             "result": "followed"
+          },
+          {
+            "session": 1808,
+            "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 302,
+        "followed": 303,
         "ignored": 8,
         "last_ignored_reason": "No reflection summary text detected",
-        "last_session": 1803,
-        "last_applicable_session": 1803,
+        "last_session": 1808,
+        "last_applicable_session": 1808,
         "history": [
-          {
-            "session": 1756,
-            "result": "followed"
-          },
           {
             "session": 1763,
             "result": "followed"
@@ -1191,6 +1187,10 @@
           },
           {
             "session": 1803,
+            "result": "followed"
+          },
+          {
+            "session": 1808,
             "result": "followed"
           }
         ]
@@ -1245,16 +1245,12 @@
         ]
       },
       "directive-update": {
-        "followed": 284,
+        "followed": 285,
         "ignored": 31,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 1803,
-        "last_applicable_session": 1803,
+        "last_session": 1808,
+        "last_applicable_session": 1808,
         "history": [
-          {
-            "session": 1756,
-            "result": "followed"
-          },
           {
             "session": 1763,
             "result": "followed"
@@ -1289,6 +1285,10 @@
           },
           {
             "session": 1803,
+            "result": "followed"
+          },
+          {
+            "session": 1808,
             "result": "followed"
           }
         ]

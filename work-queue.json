@@ -66,14 +66,21 @@
       "title": "Investigate and fix B session cost regression (avg $2.24, target <$2.00)",
       "description": "A#199 finding: B session last-10 avg $2.24, last-5 avg $2.42. All last-5 B sessions ≥$1.96. The increase is structural — sessions take on 5+ commits with multi-item work. Options: (1) enforce 3-commit cap per B session, (2) add cost-awareness to B session prompts, (3) split multi-item work across sessions. Investigate root cause and implement a cap or awareness mechanism.",
       "priority": 868,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1795,
       "source": "audit-s1795",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": ["35a10113"],
+      "outcome": {
+        "session": 1796,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: 5+ commit sessions cost 2x. Fix: $2.00 target with 4-commit checkpoint in SESSION_BUILD.md, tightened continuation gate (max 1 extra, strict eligibility), added commit-budget posthook warning. Brainstorming: B session cost trend dashboard for A audit."
+      }
     },
     {
       "id": "wq-869",

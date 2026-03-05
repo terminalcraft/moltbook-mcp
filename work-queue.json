@@ -1,61 +1,25 @@
 {
   "queue": [
     {
-      "id": "wq-830",
-      "title": "Optimize 05-smoke-test.sh post-hook performance (9.6s avg)",
-      "description": "hook-timing-report shows 05-smoke-test.sh at 9622ms avg / 11161ms P95 \u2014 the slowest hook by far. Investigate what it runs and optimize: run targeted subset, cache results, parallelize sub-checks, or split into quick-smoke (all sessions) and full-smoke (B sessions only). Target: \u22645s avg.",
-      "priority": 830,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1751,
-      "source": "brainstorming",
-      "tags": [
-        "performance",
-        "hooks"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1761,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Smoke test optimized from 9.6s avg to ~1.5s (warm) / ~4s (cold). Root causes: blocking pre-warm fetch (4-8s) + Node keepalive socket idle wait (~4s). Removed pre-warm, added process.exit(0), reduced timeouts."
-      }
-    },
-    {
-      "id": "wq-833",
-      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
-      "description": "'xxx', 'TODO', 'REPLACE_ME'",
-      "priority": 833,
-      "status": "done",
-      "added": "2026-03-05",
-      "source": "todo-scan",
-      "tags": [
-        "followup"
-      ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": 1761,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "non-actionable",
-        "note": "Recurring false positive \u2014 credential-health-check.mjs:22 contains TODO/xxx/REPLACE_ME as placeholder detection patterns. File already in EXCLUDE_PATHS. Cleaned 19 stale tracker items (100+ sessions old). 4th time this has been flagged per archive."
-      }
-    },
-    {
       "id": "wq-834",
       "title": "Migrate engage-orchestrator.test.mjs to DI-based tests",
       "description": "Now that all 6 CLI handlers have DI support, convert the 18 subprocess-based integration tests in engage-orchestrator.test.mjs to fast in-process DI tests. Eliminates SCRATCH directory patching, file copying, and ~2s runtime overhead.",
       "priority": 834,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1755,
       "source": "wq-820-adjacent",
       "tags": [
         "testability"
       ],
-      "commits": []
+      "commits": ["1540b83b"],
+      "outcome": {
+        "session": 1762,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "18 tests migrated from subprocess/SCRATCH to in-process DI. Runtime ~105ms (was ~2s). Uses handleRecordOutcome/handleCircuitStatus with in-memory circuit store backed by real getCircuitState."
+      }
     },
     {
       "id": "wq-835",
@@ -99,6 +63,20 @@
       "tags": [
         "maintenance",
         "hooks"
+      ],
+      "commits": [],
+      "complexity": "S"
+    },
+    {
+      "id": "wq-839",
+      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
+      "description": "'xxx', 'TODO', 'REPLACE_ME'",
+      "priority": 839,
+      "status": "pending",
+      "added": "2026-03-05",
+      "source": "todo-scan",
+      "tags": [
+        "followup"
       ],
       "commits": [],
       "complexity": "S"

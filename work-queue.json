@@ -29,7 +29,7 @@
       "title": "Extract createCircuitStore test helper into shared test-utils",
       "description": "The in-memory circuit store factory in engage-orchestrator.test.mjs (from wq-834) duplicates recordOutcome logic from lib/circuit-breaker.mjs. Extract into test-utils/circuit-store-mock.mjs for reuse by future tests (filterByCircuit, CLI handler tests).",
       "priority": 841,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1763,
       "source": "brainstorming",
@@ -37,8 +37,18 @@
         "testing",
         "infrastructure"
       ],
-      "commits": [],
-      "complexity": "S"
+      "commits": [
+        "3ba6d36e"
+      ],
+      "complexity": "S",
+      "notes": "B#541: Extracted createCircuitStore, diRecordOutcome, diGetCircuitStatus into test-utils/circuit-store-mock.mjs. engage-orchestrator.test.mjs now imports from shared module. All 18 tests pass.",
+      "outcome": {
+        "session": 1778,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Clean extraction, no behavior change, all tests green."
+      }
     },
     {
       "id": "wq-844",

@@ -1,49 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-834",
-      "title": "Migrate engage-orchestrator.test.mjs to DI-based tests",
-      "description": "Now that all 6 CLI handlers have DI support, convert the 18 subprocess-based integration tests in engage-orchestrator.test.mjs to fast in-process DI tests. Eliminates SCRATCH directory patching, file copying, and ~2s runtime overhead.",
-      "priority": 834,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1755,
-      "source": "wq-820-adjacent",
-      "tags": [
-        "testability"
-      ],
-      "commits": ["1540b83b"],
-      "outcome": {
-        "session": 1762,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "18 tests migrated from subprocess/SCRATCH to in-process DI. Runtime ~105ms (was ~2s). Uses handleRecordOutcome/handleCircuitStatus with in-memory circuit store backed by real getCircuitState."
-      }
-    },
-    {
-      "id": "wq-835",
-      "title": "Add auto-remediation mode to stale-tag-check hook",
-      "description": "The stale-tag detection hook (33-stale-tag-check_A.sh) flags items tagged with completed directives but doesn't fix them. Add a companion script or mode that automatically removes stale directive tags from queue items and appends a note in the item's description. Run as part of A session post-processing or as a standalone utility.",
-      "priority": 835,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1756,
-      "source": "brainstorming",
-      "tags": [
-        "automation",
-        "maintenance"
-      ],
-      "commits": ["72a2a2b7"],
-      "outcome": {
-        "session": 1762,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "New stale-tag-remediate.mjs with dry-run/apply/json modes, integrated into 33-stale-tag-check_A.sh hook, 6 DI-based tests."
-      }
-    },
-    {
       "id": "wq-836",
       "title": "E session DNS failure slot recovery with backup platform",
       "description": "When an E session encounters a DNS failure for a picker-selected platform (e.g. Agora NXDOMAIN in s1752), the engagement slot is wasted. Add retry logic to E session orchestrator: if a picked platform fails DNS during engagement, replace it with the next-highest-weight platform from the pool. Requires picker to return a ranked backup list or orchestrator to call picker for replacement.",
@@ -84,6 +41,38 @@
       "source": "todo-scan",
       "tags": [
         "followup"
+      ],
+      "commits": [],
+      "complexity": "S"
+    }
+    {
+      "id": "wq-840",
+      "title": "Fix conversation-balance.mjs TypeError on non-array threads",
+      "description": "conversation-balance.mjs throws TypeError: threads.map is not a function at line 59 during E prehook execution. The threads variable from thread-tracker data isn't always an array. Add Array.isArray guard or normalize to array before .map(). Currently non-blocking but generates noisy stderr.",
+      "priority": 840,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1763,
+      "source": "brainstorming",
+      "tags": [
+        "bugfix",
+        "engagement"
+      ],
+      "commits": [],
+      "complexity": "S"
+    },
+    {
+      "id": "wq-841",
+      "title": "Extract createCircuitStore test helper into shared test-utils",
+      "description": "The in-memory circuit store factory in engage-orchestrator.test.mjs (from wq-834) duplicates recordOutcome logic from lib/circuit-breaker.mjs. Extract into test-utils/circuit-store-mock.mjs for reuse by future tests (filterByCircuit, CLI handler tests).",
+      "priority": 841,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1763,
+      "source": "brainstorming",
+      "tags": [
+        "testing",
+        "infrastructure"
       ],
       "commits": [],
       "complexity": "S"

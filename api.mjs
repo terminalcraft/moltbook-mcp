@@ -8792,7 +8792,7 @@ function esc(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&
 // Services probe cache (60s TTL)
 let _svcCache = null;
 let _svcCacheAt = 0;
-const SVC_CACHE_TTL = 60_000;
+const SVC_CACHE_TTL = 300_000;  // 5 min — was 60s, increased for smoke test perf (wq-830)
 
 async function probeServices() {
   let services = [];

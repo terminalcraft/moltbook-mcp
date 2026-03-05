@@ -1,6 +1,7 @@
 #!/bin/bash
 # Run smoke tests after each session to catch regressions
 # Fixed wq-445: handle server-down gracefully, only report real failures
+# Optimized wq-830: pre-warm slow caches, full parallelism, reduced timeouts
 LOG_DIR="$HOME/.config/moltbook/logs"
 cd /home/moltbot/moltbook-mcp
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Smoke test for moltbook API — tests all public endpoints
 // Usage: node smoke-test.mjs [base_url]
+// Rate limits: 120 GET/min + 30 writes/min per IP (api.mjs).
+// With ~73 GETs and ~6 writes, a single run fits comfortably within limits.
 
 const BASE = process.argv[2] || "http://127.0.0.1:3847";
 
@@ -57,7 +59,7 @@ const tests = [
   // Directory & network
   { method: "GET", path: "/directory", expect: 200 },
   { method: "GET", path: "/network", expect: 200 },
-  { method: "GET", path: "/services", expect: 200 },
+  { method: "GET", path: "/services", expect: 200, timeout: 10000 },  // probes external URLs when cache cold
 
   // Registry
   { method: "GET", path: "/registry", expect: 200 },
@@ -130,8 +132,8 @@ const tests = [
   { method: "GET", path: "/digest?hours=1&format=json", expect: 200 },
 
   // External digests (may be slow)
-  { method: "GET", path: "/4claw/digest?format=json", expect: 200, timeout: 15000 },
-  { method: "GET", path: "/chatr/digest?format=json", expect: 200, timeout: 15000 },
+  { method: "GET", path: "/4claw/digest?format=json", expect: 200, timeout: 5000 },
+  { method: "GET", path: "/chatr/digest?format=json", expect: 200, timeout: 5000 },
 
   // POST endpoints with safe test payloads
   // Inbox POST removed — was flooding inbox.json with one message per session (d012)
@@ -173,7 +175,7 @@ const tests = [
 
 async function runTest(test) {
   const url = `${BASE}${test.path}`;
-  const timeout = test.timeout || 10000;
+  const timeout = test.timeout || 5000;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
 
@@ -196,6 +198,11 @@ async function runTest(test) {
 }
 
 async function main() {
+  // Pre-warm slow caches before starting the test clock.
+  // /services probes external URLs (1-5s cold cache, 60s TTL).
+  // This fetch populates the cache so the actual test gets a cache hit.
+  await fetch(`${BASE}/services`, { signal: AbortSignal.timeout(8000) }).catch(() => {});
+
   console.log(`Smoke testing ${BASE} — ${tests.length} tests\n`);
   const start = Date.now();
 
@@ -204,22 +211,12 @@ async function main() {
   const seqGroups = {};
   for (const t of tests) if (t.seq) (seqGroups[t.seq] ||= []).push(t);
 
-  // Run parallel tests in batches of 30 (server rate limit: 120 GET/min)
-  // and run sequential groups concurrently with each other
-  // (only tests within a group must be sequential)
-  // wq-830: Changed from batches of 10 to 30. Old approach: 8 serial batches
-  // of 10 = ~10s. New approach: 3 batches of ~27 = ~2-3s. Sequential groups
-  // also run concurrently with parallel batches since they're independent.
+  // Run all parallel tests at once — no batching needed for localhost.
+  // Rate limits (120 GET/min, 30 writes/min) accommodate a single run.
+  // Slow endpoints (/services, external digests) have custom timeouts.
   const results = [];
 
-  const parallelPromise = (async () => {
-    const all = [];
-    for (let i = 0; i < parallel.length; i += 30) {
-      const batch = parallel.slice(i, i + 30);
-      all.push(...await Promise.all(batch.map(runTest)));
-    }
-    return all;
-  })();
+  const parallelPromise = Promise.all(parallel.map(runTest));
 
   const seqPromises = Object.values(seqGroups).map(async (group) => {
     const groupResults = [];

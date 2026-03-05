@@ -16,7 +16,7 @@
       "title": "Add session-context staleness guards to other followup files",
       "description": "The staleness guard pattern added for todo-followups.txt (wq-852) should be applied to other session-context files that persist across sessions. Check r-impact-analysis.json, e-session-context.md, and any other files that could survive a crashed session and cause stale data re-injection. Audit session-context.mjs for files that lack age checks.",
       "priority": 858,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1786,
       "source": "adjacent-improvement",
@@ -25,7 +25,14 @@
         "infrastructure"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1791,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added staleness guard to e-session-context.md in lib/e-prompt-sections.mjs — skips context with session refs >5 sessions old. Audited all session-context files: eContext was the only gap. 2 tests added, all 25 pass."
+      }
     },
     {
       "id": "wq-859",
@@ -98,6 +105,22 @@
         "quality": "well-scoped",
         "note": "Updated BRIEFING.md: d072 marked completed (partial), zero active self-directives noted, d073 successor flagged for next R session, hook count fixed 66→71, added BRIEFING staleness auto-detection brainstorming idea"
       }
+    },
+    {
+      "id": "wq-863",
+      "title": "Add BRIEFING.md staleness auto-detection to A session prehook",
+      "description": "BRIEFING.md had stale d072 reference for 8 sessions before A#198 caught it. Add a check in A prehook that compares BRIEFING.md directive references (e.g. d0XX patterns) against directives.json status. If BRIEFING references an active directive that is already completed in directives.json, flag it as a critical audit finding instead of waiting for manual observation. Promoted from BRAINSTORMING.md idea (s1791).",
+      "priority": 863,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1791,
+      "source": "brainstorming-promotion",
+      "tags": [
+        "reliability",
+        "audit"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

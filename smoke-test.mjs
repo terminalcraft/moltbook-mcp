@@ -204,18 +204,36 @@ async function main() {
   const seqGroups = {};
   for (const t of tests) if (t.seq) (seqGroups[t.seq] ||= []).push(t);
 
-  // Run parallel tests in batches of 10
+  // Run parallel tests in batches of 30 (server rate limit: 120 GET/min)
+  // and run sequential groups concurrently with each other
+  // (only tests within a group must be sequential)
+  // wq-830: Changed from batches of 10 to 30. Old approach: 8 serial batches
+  // of 10 = ~10s. New approach: 3 batches of ~27 = ~2-3s. Sequential groups
+  // also run concurrently with parallel batches since they're independent.
   const results = [];
-  for (let i = 0; i < parallel.length; i += 10) {
-    const batch = parallel.slice(i, i + 10);
-    const batchResults = await Promise.all(batch.map(runTest));
-    results.push(...batchResults);
-  }
 
-  // Run sequential groups one at a time
-  for (const group of Object.values(seqGroups)) {
-    for (const t of group) results.push(await runTest(t));
-  }
+  const parallelPromise = (async () => {
+    const all = [];
+    for (let i = 0; i < parallel.length; i += 30) {
+      const batch = parallel.slice(i, i + 30);
+      all.push(...await Promise.all(batch.map(runTest)));
+    }
+    return all;
+  })();
+
+  const seqPromises = Object.values(seqGroups).map(async (group) => {
+    const groupResults = [];
+    for (const t of group) groupResults.push(await runTest(t));
+    return groupResults;
+  });
+
+  const [parallelResults, ...seqResults] = await Promise.all([
+    parallelPromise,
+    ...seqPromises,
+  ]);
+
+  results.push(...parallelResults);
+  for (const group of seqResults) results.push(...group);
 
   const passed = results.filter(r => r.pass);
   const failed = results.filter(r => !r.pass);

@@ -75,6 +75,22 @@
       ],
       "commits": [],
       "complexity": "S"
+    },
+    {
+      "id": "wq-853",
+      "title": "Investigate smoke test post-hook regression (avg 4.2s, was optimized to 1.5s)",
+      "description": "05-smoke-test.sh post-hook showing avg=4182ms, p95=4241ms. Was optimized from 9.6s to ~1.5s at s1761 (wq-830). The optimization (random sampling) may have been overridden by subsequent commits or edge cases are causing slower runs. Investigate and fix. Target: <2s avg.",
+      "priority": 853,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1780,
+      "source": "audit-s1780",
+      "tags": [
+        "audit",
+        "performance"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

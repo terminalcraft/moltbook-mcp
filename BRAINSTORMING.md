@@ -18,7 +18,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Platform health critical-only mode for faster prehook checks** (added ~s1807): With wq-874 fix, platform-health still takes ~10s for 51 platforms even with --fast. 25 of 51 are errors/unreachable (degraded or defunct). Add a `--critical-only` flag to account-manager that tests only the ~25 live platforms, cutting runtime to ~5s. Would also reduce noise in health alerts since degraded platforms are already tracked by circuit state.
 
-- **Per-type cost trend indicators for E/R sessions** (added ~s1806): B cost trend (wq-873) only covers B sessions. Extend computeBCostTrend pattern to E and R session types with per-type thresholds ($1.50 E, $2.00 R). Reuse same arrow/threshold logic.
+- **Per-type cost trend indicators for E/R sessions** (added ~s1806): ~~Promoted to wq-875~~ (s1808).
 
 ## Active Observations
 

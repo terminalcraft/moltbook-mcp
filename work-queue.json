@@ -51,28 +51,21 @@
         "infra"
       ],
       "commits": []
-    },
+    }
+    ,
     {
-      "id": "wq-874",
-      "title": "Fix 02-periodic-checks.sh platform-health 100% timeout rate",
-      "description": "02-periodic-checks.sh platform-health sub-check calls account-manager.mjs test --all with 10s CHECK_TIMEOUT. This command tests 51 platforms sequentially and exceeds 10s every time (confirmed via periodic-check-timing.jsonl: s20, s1780, s1800 all timed out). Fix: use account-manager.mjs test --all --fast (wq-871) inside this hook, or reduce platform count to critical-only subset. p95=10175ms, degrading trend. Prioritize alongside wq-871.",
-      "priority": 874,
-      "status": "done",
+      "id": "wq-875",
+      "title": "Add E/R session cost trend indicators to audit-stats",
+      "description": "Extend computeBCostTrend pattern to E and R session types. E threshold $1.50, R threshold $2.00. Reuse same arrow/threshold logic from audit-stats.mjs. Output per-type cost trends in audit report alongside existing B cost trend.",
+      "priority": 875,
+      "status": "pending",
       "added": "2026-03-05",
-      "created_session": 1805,
-      "source": "audit-s1805",
+      "created_session": 1808,
+      "source": "brainstorming-R321",
       "tags": [
-        "audit",
-        "perf"
+        "observability"
       ],
-      "commits": ["63dc7715"],
-      "outcome": {
-        "session": 1807,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added --fast flag + dedicated 15s timeout for platform-health (was 10s shared). Raised hook watchdog to 18s. Test confirms exit code 0 at ~10.1s instead of 100% timeout."
-      }
+      "commits": []
     }
   ]
 }

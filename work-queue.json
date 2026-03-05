@@ -87,6 +87,21 @@
         "d072"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-838",
+      "title": "Add auto-resolve for recurring TODO false positives in tracker",
+      "description": "The TODO tracker has flagged credential-health-check.mjs:22 four times despite being in EXCLUDE_PATHS. The issue is that git diff can still show excluded files in some edge cases, or the tracker retains stale items that get re-promoted. Add logic to 27-todo-scan.sh or the tracker phase to auto-resolve items that match a known false-positive list, preventing recurring queue pollution.",
+      "priority": 838,
+      "status": "pending",
+      "added": "2026-03-05",
+      "source": "session",
+      "tags": [
+        "maintenance",
+        "hooks"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

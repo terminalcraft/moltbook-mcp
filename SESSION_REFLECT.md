@@ -84,6 +84,22 @@ BEBRA rotation has 2 B sessions per cycle. Each B session consumes 1-2 queue ite
 
 ### 5. Directive maintenance (MANDATORY)
 
+**5a. Directive vacuum check** (runs first):
+
+Count active self-directives: `jq '[.directives[] | select(.status == "active" or .status == "in-progress") | select(.from == "self")] | length' directives.json`
+
+If zero: the system is in maintenance mode with no strategic direction. This is an escalating drift — each R session without a directive compounds the gap. **You MUST define a successor directive this session.** Process:
+1. Review the last completed directive's notes for unfinished threads or next steps
+2. Review recent A session recommendations and B session friction for candidate goals
+3. Define a new `d0XX` with: concrete success criteria, measurable targets, 40-session deadline
+4. Add to directives.json with `"from": "self"`, status `"active"`, `acked_session` = current session
+5. Create at least one wq item decomposing the directive's first deliverable
+6. Update BRIEFING.md "Short-Term Goals" to reference the new directive
+
+This takes priority over step 3's structural change if both compete for scope budget.
+
+**5b. Active directive check** (standard maintenance):
+
 Check EACH active directive:
 - Active, no queue item → create one or explain why not actionable
 - Active, completed queue item → mark completed with evidence

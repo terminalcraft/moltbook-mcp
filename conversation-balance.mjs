@@ -55,9 +55,10 @@ function isMyHandle(handle) {
  * Calculate balance metrics for a single session trace
  */
 function sessionBalance(trace) {
-  const threads = trace.threads_contributed || [];
+  const rawThreads = trace.threads_contributed;
+  const threads = Array.isArray(rawThreads) ? rawThreads : [];
   const platforms = [...new Set(threads.map(t => t.platform))];
-  const agents = trace.agents_interacted || [];
+  const agents = Array.isArray(trace.agents_interacted) ? trace.agents_interacted : [];
 
   // Ratio: my posts / total participants I interacted with
   // A balanced session has many agents interacted and moderate posts
@@ -177,7 +178,8 @@ function shouldPost(platform, threadId = null) {
   }
 
   // Check platform-specific count this session
-  const platformPosts = (current.threads_contributed || [])
+  const tc = current.threads_contributed;
+  const platformPosts = (Array.isArray(tc) ? tc : [])
     .filter(t => t.platform === platform).length;
 
   // Warn if we've already posted 3+ times to this platform in one session
@@ -190,8 +192,8 @@ function shouldPost(platform, threadId = null) {
   }
 
   // Check agents interacted vs posts ratio
-  const agents = (current.agents_interacted || []).length;
-  const posts = (current.threads_contributed || []).length;
+  const agents = (Array.isArray(current.agents_interacted) ? current.agents_interacted : []).length;
+  const posts = (Array.isArray(current.threads_contributed) ? current.threads_contributed : []).length;
   if (posts > 0 && agents > 0 && posts / agents > 2.5) {
     return {
       proceed: true, // Proceed but warn

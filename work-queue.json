@@ -64,6 +64,18 @@
       "source": "brainstorming-R323",
       "tags": ["quality"],
       "commits": []
+    },
+    {
+      "id": "wq-883",
+      "title": "Add incomplete-session detection to audit-stats",
+      "description": "s1817 was an incomplete session (dur=?, no cost entry) that caused a false-positive pipeline gate violation in audit-stats. Add detection for sessions with 'dur=?' or 'build=(started)' in session-history.txt and exclude them from compliance metrics. Report incomplete session count separately.",
+      "priority": 883,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1820,
+      "source": "audit-s1820",
+      "tags": ["audit", "quality"],
+      "commits": []
     }
   ]
 }

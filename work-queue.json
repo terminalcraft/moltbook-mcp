@@ -47,7 +47,7 @@
       "title": "Add credential-health-state.json cleanup to A session audits",
       "description": "credential-health-state.json tracks consecutive failures per platform but is never pruned. Platforms that recover accumulate stale entries. A sessions should verify the state file: remove entries with consecutive_failures=0 (recovered), flag entries >50 sessions old as stale. Also validate file exists and has valid schema.",
       "priority": 850,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1778,
       "source": "self",
@@ -56,7 +56,14 @@
         "d072"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1782,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "A prehook 34-cred-health-cleanup_A.sh prunes recovered entries and flags stale ones. Pruned 30 recovered entries on first run."
+      }
     },
     {
       "id": "wq-851",

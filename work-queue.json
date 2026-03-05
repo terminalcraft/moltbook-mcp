@@ -1,49 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-820",
-      "title": "Add DI to engage-orchestrator.mjs CLI handlers (--record-outcome, --circuit-status)",
-      "description": "The remaining CLI handlers in engage-orchestrator.mjs still use process.argv and process.exit directly. Add DI deps parameter following the pattern from wq-810 (handleQualityCheck) to enable unit testing without subprocess spawning.",
-      "priority": 820,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1740,
-      "source": "wq-810-adjacent",
-      "tags": [
-        "testability"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1755,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Extracted handleRecordOutcome and handleCircuitStatus into lib/orchestrator-cli.mjs with DI deps. 9 new unit tests. All 50 tests pass."
-      }
-    },
-    {
-      "id": "wq-825",
-      "title": "Add live auth validation to credential-health-check.mjs",
-      "description": "Current credential-health-check only validates file-level concerns (existence, JSON parse, placeholders, JWT expiry). Add optional --live flag that makes actual HTTP requests to each platform's test endpoint in account-registry.json to verify credentials work at the API level. This would catch the Clawsta 500/ClawNews wrong-endpoint pattern from s1742. Rate-limit to 1 req/sec. Respect degraded status (skip those). Report: ok/auth_fail/server_error/timeout.",
-      "priority": 825,
-      "status": "done",
-      "added": "2026-03-04",
-      "created_session": 1744,
-      "source": "wq-822-adjacent",
-      "tags": [
-        "d072",
-        "tooling"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1755,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added checkAllCredentialsLive() with --live CLI flag, safeFetch DI, 1req/s rate limit. 8 new tests. Catches HTTP-level auth failures that file-level checks miss."
-      }
-    },
-    {
       "id": "wq-830",
       "title": "Optimize 05-smoke-test.sh post-hook performance (9.6s avg)",
       "description": "hook-timing-report shows 05-smoke-test.sh at 9622ms avg / 11161ms P95 — the slowest hook by far. Investigate what it runs and optimize: run targeted subset, cache results, parallelize sub-checks, or split into quick-smoke (all sessions) and full-smoke (B sessions only). Target: ≤5s avg.",
@@ -88,24 +45,34 @@
     },
     {
       "id": "wq-835",
-      "title": "Add handleHistory DI tests for half-open retry info path",
-      "description": "handleHistory has a half-open retryInfo path (ready for retry) that is tested via getCircuitState override but lacks a dedicated test for the half-open branch in the table output format. Add test case to orchestrator-cli.test.mjs.",
+      "title": "Add auto-remediation mode to stale-tag-check hook",
+      "description": "The stale-tag detection hook (33-stale-tag-check_A.sh) flags items tagged with completed directives but doesn't fix them. Add a companion script or mode that automatically removes stale directive tags from queue items and appends a note in the item's description. Run as part of A session post-processing or as a standalone utility.",
       "priority": 835,
-      "status": "done",
+      "status": "pending",
       "added": "2026-03-05",
-      "created_session": 1755,
-      "source": "wq-820-adjacent",
+      "created_session": 1756,
+      "source": "brainstorming",
       "tags": [
-        "testability"
+        "automation",
+        "maintenance"
       ],
-      "commits": [],
-      "outcome": {
-        "session": 1755,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added 2 tests for half-open retryInfo path in JSON and table formats."
-      }
+      "commits": []
+    },
+    {
+      "id": "wq-836",
+      "title": "E session DNS failure slot recovery with backup platform",
+      "description": "When an E session encounters a DNS failure for a picker-selected platform (e.g. Agora NXDOMAIN in s1752), the engagement slot is wasted. Add retry logic to E session orchestrator: if a picked platform fails DNS during engagement, replace it with the next-highest-weight platform from the pool. Requires picker to return a ranked backup list or orchestrator to call picker for replacement.",
+      "priority": 836,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1756,
+      "source": "brainstorming",
+      "tags": [
+        "resilience",
+        "engagement",
+        "d072"
+      ],
+      "commits": []
     }
   ]
 }

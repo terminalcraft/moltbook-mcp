@@ -417,87 +417,12 @@ console.log('quality-audit: appended follow_up to trace for s' + session);
 ###############################################################################
 # Check 7: Quality enforcement (was 42-quality-enforce_E.sh)
 #   Calculates rolling quality metrics and writes enforcement record
+#   Logic extracted to hooks/lib/quality-enforce.mjs (R#312)
 ###############################################################################
 check_quality_enforce() {
-  if [[ ! -f "$QUALITY_SCORES" ]]; then
-    echo "quality-enforce: no quality history, skipping"
-    return 0
-  fi
-
-  node -e "
-const fs = require('fs');
-const lines = fs.readFileSync('$QUALITY_SCORES', 'utf8').trim().split('\n').filter(Boolean);
-const entries = [];
-for (const line of lines) {
-  try { entries.push(JSON.parse(line)); } catch {}
-}
-
-if (entries.length === 0) {
-  console.log('quality-enforce: no entries, skipping');
-  process.exit(0);
-}
-
-const sessionEntries = entries.filter(e => e.session === $SESSION);
-const sessionFails = sessionEntries.filter(e => e.verdict === 'FAIL').length;
-const sessionTotal = sessionEntries.length;
-
-const recent10 = entries.slice(-10);
-const recentFails = recent10.filter(e => e.verdict === 'FAIL').length;
-const recentFailRate = recentFails / recent10.length;
-
-let streak = 0;
-for (let i = entries.length - 1; i >= 0; i--) {
-  if (entries[i].verdict === 'FAIL') streak++;
-  else break;
-}
-
-const violFreq = {};
-for (const e of recent10) {
-  for (const v of (e.violations || [])) {
-    violFreq[v] = (violFreq[v] || 0) + 1;
-  }
-}
-const topViolation = Object.entries(violFreq).sort((a, b) => b[1] - a[1])[0];
-
-const composites = recent10.map(e => e.composite).filter(c => typeof c === 'number');
-const avgComposite = composites.length ? +(composites.reduce((a, b) => a + b, 0) / composites.length).toFixed(3) : null;
-
-let level = 'ok';
-let action = null;
-if (recentFailRate > 0.6) {
-  level = 'critical';
-  action = 'Next E session: mandatory rewrite of any post scoring below 0.8. Consider pausing engagement until quality improves.';
-} else if (recentFailRate > 0.4) {
-  level = 'degraded';
-  action = 'Next E session: extra scrutiny on formulaic patterns. Review top violation type.';
-} else if (streak >= 3) {
-  level = 'streak_warning';
-  action = 'Consecutive failures detected. Break the pattern — try a different rhetorical approach.';
-}
-
-const record = {
-  ts: new Date().toISOString(),
-  session: $SESSION,
-  session_posts: sessionTotal,
-  session_fails: sessionFails,
-  rolling_fail_rate: +recentFailRate.toFixed(3),
-  rolling_avg_composite: avgComposite,
-  fail_streak: streak,
-  top_violation: topViolation ? topViolation[0] : null,
-  level,
-  action,
-};
-
-const enforceFile = '$ENFORCE_FILE';
-const existingLines = fs.existsSync(enforceFile) ? fs.readFileSync(enforceFile, 'utf8').trim().split('\n').filter(Boolean) : [];
-if (existingLines.length >= 50) existingLines.splice(0, existingLines.length - 49);
-existingLines.push(JSON.stringify(record));
-fs.writeFileSync(enforceFile, existingLines.join('\n') + '\n');
-
-const statusIcon = level === 'ok' ? '✓' : level === 'degraded' ? '⚠' : level === 'critical' ? '✗' : '△';
-console.log('quality-enforce: ' + statusIcon + ' s' + $SESSION + ' — ' + sessionTotal + ' posts (' + sessionFails + ' fails), rolling fail rate: ' + (recentFailRate * 100).toFixed(1) + '%, streak: ' + streak + ', level: ' + level);
-if (action) console.log('quality-enforce: ACTION: ' + action);
-" 2>/dev/null || echo "quality-enforce: script error (non-fatal)"
+  local ENFORCE_SCRIPT
+  ENFORCE_SCRIPT="$(dirname "$(realpath "$0")")/../lib/quality-enforce.mjs"
+  node "$ENFORCE_SCRIPT" 2>/dev/null || echo "quality-enforce: script error (non-fatal)"
 }
 
 ###############################################################################

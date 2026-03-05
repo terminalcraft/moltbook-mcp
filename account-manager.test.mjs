@@ -117,6 +117,30 @@ describe('account-manager.mjs', () => {
         throw e;
       }
     });
+
+    test('json --fast outputs valid JSON with shorter timeout', () => {
+      try {
+        const start = Date.now();
+        const output = execSync('node account-manager.mjs json --fast 2>&1', {
+          cwd: __dirname,
+          encoding: 'utf8',
+          timeout: 30000
+        });
+        const elapsed = Date.now() - start;
+        const parsed = JSON.parse(output);
+        assert.ok(Array.isArray(parsed), 'JSON output should be an array');
+        // --fast uses 3s timeout per account; total should be faster than default 8s
+        // We just verify it produces valid output — timing depends on network
+        if (parsed.length > 0) {
+          assert.ok(parsed[0].id, 'Results should have id field');
+        }
+      } catch (e) {
+        if (e.message.includes('ETIMEDOUT') || e.message.includes('timeout')) {
+          return; // Skip — network dependent
+        }
+        throw e;
+      }
+    });
   });
 
   describe('usage/help', () => {

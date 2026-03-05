@@ -8,6 +8,7 @@
  *   node account-manager.mjs live            # Test all, return only live platforms (for E sessions)
  *   node account-manager.mjs json            # Test all, output machine-readable JSON
  *   node account-manager.mjs diagnose <id>   # Probe alternative endpoints when test fails (d027)
+ *   --fast                                   # Use 3s timeout instead of 8s (for prehook health checks)
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
@@ -69,7 +70,7 @@ function buildTestUrl(account, cred) {
   return url;
 }
 
-async function testAccount(account) {
+async function testAccount(account, { timeout = 8000 } = {}) {
   const result = { id: account.id, platform: account.platform };
 
   // Handle no-auth platforms (cred_file may be null)
@@ -80,7 +81,7 @@ async function testAccount(account) {
     }
     // Test endpoint directly without auth
     try {
-      const response = await fetch(account.test.url, { method: account.test.method || "GET" });
+      const response = await fetch(account.test.url, { method: account.test.method || "GET", signal: AbortSignal.timeout(timeout) });
       if (response.status === (account.test.expect_status || 200)) {
         return { ...result, status: "live", note: "No auth required" };
       }
@@ -121,7 +122,7 @@ async function testAccount(account) {
     // Script-based tests — run a command and check stdout
     try {
       const { execSync } = await import("child_process");
-      const stdout = execSync(account.test.command, { timeout: 10000, encoding: "utf8" }).trim();
+      const stdout = execSync(account.test.command, { timeout, encoding: "utf8" }).trim();
       const expectStr = account.test.expect_stdout || "";
       if (stdout.includes(expectStr)) {
         return { ...result, status: "live", note: `Script OK: ${stdout.slice(0, 60)}` };
@@ -143,7 +144,7 @@ async function testAccount(account) {
 
   try {
     const resp = await safeFetch(url, {
-      timeout: 8000,
+      timeout,
       headers: fetchHeaders,
       allowInternal: true, // account tests may hit local services
     });
@@ -181,14 +182,15 @@ async function parallelMap(items, fn, concurrency = 10) {
   return results;
 }
 
-async function testAll(filterIds) {
+async function testAll(filterIds, { timeout } = {}) {
   const reg = loadRegistry();
   const accounts = filterIds?.length
     ? reg.accounts.filter(a => filterIds.includes(a.id))
     : reg.accounts;
 
+  const opts = timeout ? { timeout } : {};
   const results = await parallelMap(accounts, async (account) => {
-    const r = await testAccount(account);
+    const r = await testAccount(account, opts);
     r.tested = new Date().toISOString();
     return r;
   }, 10);
@@ -345,7 +347,10 @@ async function diagnose(platformId) {
 
 // CLI
 const cmd = process.argv[2] || "status";
-const args = process.argv.slice(3).filter(a => !a.startsWith("--"));
+const allArgs = process.argv.slice(3);
+const fastMode = allArgs.includes("--fast");
+const args = allArgs.filter(a => !a.startsWith("--"));
+const testOpts = fastMode ? { timeout: 3000 } : {};
 
 if (cmd === "status") {
   const reg = loadRegistry();
@@ -359,14 +364,14 @@ if (cmd === "status") {
     if (a.notes) console.log(`         ${a.notes}`);
   }
 } else if (cmd === "test") {
-  const results = await testAll(args.length ? args : null);
+  const results = await testAll(args.length ? args : null, testOpts);
   for (const r of results) {
     const icon = r.status === "live" ? "✓" : r.status === "creds_ok" ? "~" : "✗";
     const extra = r.http ? `(${r.http})` : r.error ? `(${r.error})` : r.note || "";
     console.log(`  ${icon} ${r.platform.padEnd(22)} ${r.status.padEnd(14)} ${extra}`);
   }
 } else if (cmd === "live") {
-  const results = await testAll();
+  const results = await testAll(null, testOpts);
   const live = results.filter(r => r.status === "live" || r.status === "creds_ok");
   if (live.length === 0) {
     console.log("No live platforms detected.");
@@ -376,7 +381,7 @@ if (cmd === "status") {
     }
   }
 } else if (cmd === "json") {
-  const results = await testAll();
+  const results = await testAll(null, testOpts);
   console.log(JSON.stringify(results, null, 2));
 } else if (cmd === "diagnose") {
   const platformId = args[0];
@@ -387,5 +392,5 @@ if (cmd === "status") {
   }
   await diagnose(platformId);
 } else {
-  console.log("Usage: node account-manager.mjs [status|test|live|json|diagnose] [id...]");
+  console.log("Usage: node account-manager.mjs [status|test|live|json|diagnose] [id...] [--fast]");
 }

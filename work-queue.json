@@ -91,14 +91,21 @@
       "title": "Add handleHistory DI tests for half-open retry info path",
       "description": "handleHistory has a half-open retryInfo path (ready for retry) that is tested via getCircuitState override but lacks a dedicated test for the half-open branch in the table output format. Add test case to orchestrator-cli.test.mjs.",
       "priority": 835,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1755,
       "source": "wq-820-adjacent",
       "tags": [
         "testability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1755,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added 2 tests for half-open retryInfo path in JSON and table formats."
+      }
     }
   ]
 }

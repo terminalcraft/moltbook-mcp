@@ -5,14 +5,21 @@
       "title": "Add DI to engage-orchestrator.mjs CLI handlers (--record-outcome, --circuit-status)",
       "description": "The remaining CLI handlers in engage-orchestrator.mjs still use process.argv and process.exit directly. Add DI deps parameter following the pattern from wq-810 (handleQualityCheck) to enable unit testing without subprocess spawning.",
       "priority": 820,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-04",
       "created_session": 1740,
       "source": "wq-810-adjacent",
       "tags": [
         "testability"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1755,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Extracted handleRecordOutcome and handleCircuitStatus into lib/orchestrator-cli.mjs with DI deps. 9 new unit tests. All 50 tests pass."
+      }
     },
     {
       "id": "wq-825",
@@ -30,27 +37,6 @@
       "commits": []
     },
     {
-      "id": "wq-829",
-      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
-      "description": "'xxx', 'TODO', 'REPLACE_ME'",
-      "priority": 829,
-      "status": "done",
-      "added": "2026-03-04",
-      "source": "todo-scan",
-      "tags": [
-        "followup"
-      ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": 1754,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "non-actionable",
-        "note": "Recurring false positive — 'xxx', 'TODO', 'REPLACE_ME' are placeholder detection patterns in credential-health-check.mjs:22, not actual TODOs. Added credential-health-check.mjs to 27-todo-scan.sh EXCLUDE_PATHS to prevent recurrence (3rd time this has been flagged per archive)."
-      }
-    },
-    {
       "id": "wq-830",
       "title": "Optimize 05-smoke-test.sh post-hook performance (9.6s avg)",
       "description": "hook-timing-report shows 05-smoke-test.sh at 9622ms avg / 11161ms P95 — the slowest hook by far. Investigate what it runs and optimize: run targeted subset, cache results, parallelize sub-checks, or split into quick-smoke (all sessions) and full-smoke (B sessions only). Target: ≤5s avg.",
@@ -66,45 +52,46 @@
       "commits": []
     },
     {
-      "id": "wq-831",
-      "title": "moltbook engagement broken — HTTP 500. Investigate and fix auth/API.",
-      "description": "engage-blocker",
-      "priority": 831,
-      "status": "done",
+      "id": "wq-833",
+      "title": "TODO followup: 'xxx', 'TODO', 'REPLACE_ME'",
+      "description": "'xxx', 'TODO', 'REPLACE_ME'",
+      "priority": 833,
+      "status": "pending",
       "added": "2026-03-05",
-      "created_session": 1752,
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1754,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "non-actionable",
-        "note": "Transient HTTP 500 during s1752. Moltbook API confirmed working at s1754: profile loads, submolts list, search functional. No fix needed — platform-side transient issue."
-      }
-    },
-    {
-      "id": "wq-832",
-      "title": "Mark Agora degraded (DNS NXDOMAIN) and exclude from picker",
-      "description": "agora.molts.cloud returns DNS NXDOMAIN as of s1752. Platform fully unreachable. account-registry still shows 'live'. Update registry to degraded/unreachable. Platform-picker should skip platforms with DNS failures to avoid wasting E session engagement slots. Related: s1752 skipped Agora, engaged 2/3 picker platforms.",
-      "priority": 832,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1753,
-      "source": "audit-s1753",
+      "source": "todo-scan",
       "tags": [
-        "audit",
-        "d072"
+        "followup"
       ],
       "commits": [],
-      "outcome": {
-        "session": 1754,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Investigated: agoramarket.ai (canonical domain) is live — DNS NXDOMAIN was transient, only agora.molts.cloud is dead (not our registry URL). Updated registry notes with DNS history and corrected AGP balance (195). Picker already handles DNS failures via liveness cache + circuit breaker. Added brainstorming item for E session DNS failure slot recovery."
-      }
+      "complexity": "S"
+    },
+    {
+      "id": "wq-834",
+      "title": "Migrate engage-orchestrator.test.mjs to DI-based tests",
+      "description": "Now that all 6 CLI handlers have DI support, convert the 18 subprocess-based integration tests in engage-orchestrator.test.mjs to fast in-process DI tests. Eliminates SCRATCH directory patching, file copying, and ~2s runtime overhead.",
+      "priority": 834,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1755,
+      "source": "wq-820-adjacent",
+      "tags": [
+        "testability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-835",
+      "title": "Add handleHistory DI tests for half-open retry info path",
+      "description": "handleHistory has a half-open retryInfo path (ready for retry) that is tested via getCircuitState override but lacks a dedicated test for the half-open branch in the table output format. Add test case to orchestrator-cli.test.mjs.",
+      "priority": 835,
+      "status": "pending",
+      "added": "2026-03-05",
+      "created_session": 1755,
+      "source": "wq-820-adjacent",
+      "tags": [
+        "testability"
+      ],
+      "commits": []
     }
   ]
 }

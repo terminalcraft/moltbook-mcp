@@ -11,6 +11,8 @@
  *   node platform-picker.mjs --json             # Output as JSON
  *   node platform-picker.mjs --update           # Mark returned platforms as engaged
  *   node platform-picker.mjs --verbose          # Show weight calculations
+ *   node platform-picker.mjs --backups 2        # Include 2 backup platforms (wq-836)
+ *   node platform-picker.mjs --no-backups       # Disable backup selection
  *
  * Weighting factors (combine multiplicatively, d042):
  *   1. Base weight = ROI score from analytics (default 30 for unknowns)
@@ -71,6 +73,7 @@ function getCircuitStatus(circuits, platformId) {
 function parseArgs(args) {
   const opts = {
     count: 3,
+    backups: 2,  // wq-836: backup platforms for DNS failure recovery
     exclude: [],
     require: [],
     json: false,
@@ -100,6 +103,10 @@ function parseArgs(args) {
       opts.mentionBoost = true;
     } else if (arg === "--no-mention-boost") {
       opts.mentionBoost = false;  // wq-500: explicit opt-out
+    } else if (arg === "--backups" && args[i + 1]) {
+      opts.backups = parseInt(args[++i], 10) || 2;  // wq-836: backup count
+    } else if (arg === "--no-backups") {
+      opts.backups = 0;  // wq-836: disable backups
     }
   }
   return opts;
@@ -357,6 +364,12 @@ function main() {
   const selectedWeighted = weightedRandomSelect(weighted, Math.max(0, remaining));
   const selected = [...required, ...selectedWeighted.map(w => ({ ...w.acc, _weight: w.weight, _factors: w.factors }))];
 
+  // wq-836: Select backup platforms from remaining pool for DNS failure recovery
+  const selectedIds = new Set(selected.map(s => s.id));
+  const backupPool = weighted.filter(w => !selectedIds.has(w.acc.id));
+  const backupWeighted = weightedRandomSelect(backupPool, Math.max(0, opts.backups));
+  const backups = backupWeighted.map(w => ({ ...w.acc, _weight: w.weight, _factors: w.factors, _backup: true }));
+
   // Update last_engaged_session if requested
   if (opts.update && selected.length > 0) {
     for (const sel of selected) {
@@ -366,40 +379,50 @@ function main() {
     saveJSON(REGISTRY_PATH, registry);
 
     // Write picker mandate for compliance tracking (d048)
+    // wq-836: Include backups in mandate for E session fallback
     const mandate = {
       session: currentSession,
       selected: selected.map(s => s.id),
+      backups: backups.map(b => b.id),
       timestamp: new Date().toISOString(),
     };
     saveJSON(MANDATE_PATH, mandate);
     if (opts.verbose) {
-      console.error(`Wrote picker mandate to ${MANDATE_PATH}`);
+      console.error(`Wrote picker mandate to ${MANDATE_PATH} (${backups.length} backups)`);
     }
+  }
+
+  // Output helper: format a platform entry for JSON
+  function formatEntry(acc) {
+    const displayStatus = acc.last_status || acc.status;
+    const needsProbe = acc.status === "needs_probe";
+    return {
+      id: acc.id,
+      platform: acc.platform,
+      status: displayStatus,
+      needs_probe: needsProbe,
+      last_engaged: acc.last_engaged_session || null,
+      notes: acc.notes || null,
+      warning: acc._warning || null,
+      weight: acc._weight || null,
+      factors: acc._factors || null,
+      test_url: acc.test?.url || null,
+      backup: acc._backup || false,  // wq-836
+    };
   }
 
   // Output
   if (opts.json) {
-    console.log(JSON.stringify(selected.map(acc => {
-      const displayStatus = acc.last_status || acc.status;
-      const needsProbe = acc.status === "needs_probe";  // d051: check base status field
-      return {
-        id: acc.id,
-        platform: acc.platform,
-        status: displayStatus,
-        needs_probe: needsProbe,  // d051: flag for E session probe duty
-        last_engaged: acc.last_engaged_session || null,
-        notes: acc.notes || null,
-        warning: acc._warning || null,
-        weight: acc._weight || null,
-        factors: acc._factors || null,
-        test_url: acc.test?.url || null,  // d051: URL to probe
-      };
-    }), null, 2));
+    const output = {
+      selected: selected.map(formatEntry),
+      backups: backups.map(formatEntry),  // wq-836
+    };
+    console.log(JSON.stringify(output, null, 2));
   } else {
     console.log("Selected " + selected.length + " platform(s) for engagement:\n");
     for (const acc of selected) {
       const displayStatus = acc.last_status || acc.status || "?";
-      const needsProbe = acc.status === "needs_probe";  // d051: check base status field
+      const needsProbe = acc.status === "needs_probe";
       const lastEngaged = acc.last_engaged_session ? "last: s" + acc.last_engaged_session : "never engaged";
       const warning = acc._warning ? " [!] " + acc._warning : "";
       const weightInfo = acc._weight ? ` [w:${acc._weight}]` : "";
@@ -407,8 +430,18 @@ function main() {
       console.log("  * " + acc.platform + " (" + acc.id + ") -- " + displayStatus + ", " + lastEngaged + weightInfo + probeFlag + warning);
       if (acc.notes) console.log("    " + acc.notes);
     }
+    // wq-836: Show backup platforms
+    if (backups.length > 0) {
+      console.log("\nBackup platforms (use if primary fails DNS/connection):");
+      for (const acc of backups) {
+        const displayStatus = acc.last_status || acc.status || "?";
+        const lastEngaged = acc.last_engaged_session ? "last: s" + acc.last_engaged_session : "never engaged";
+        const weightInfo = acc._weight ? ` [w:${acc._weight}]` : "";
+        console.log("  ~ " + acc.platform + " (" + acc.id + ") -- " + displayStatus + ", " + lastEngaged + weightInfo);
+      }
+    }
     // d051: Show needs_probe count in pool stats
-    console.log("\nPool stats: " + working.length + " working, " + pool.length + " available, " + needsProbe.length + " needs_probe, " + accounts.length + " total");
+    console.log("\nPool stats: " + working.length + " working, " + pool.length + " available, " + needsProbe.length + " needs_probe, " + backups.length + " backups, " + accounts.length + " total");
     if (opts.verbose) {
       console.log("\nWeight distribution:");
       const weights = weighted.map(w => w.weight);

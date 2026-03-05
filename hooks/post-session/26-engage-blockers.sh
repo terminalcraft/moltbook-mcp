@@ -33,17 +33,18 @@ if not log_file or not wq_file or not wq_js:
     sys.exit(0)
 
 # Read session log — extract tool results with errors
-failures = {}  # platform -> description
+failures = {}  # platform -> set of failure reasons
 
 # Dynamically build platform keywords from account-registry.json
 platforms = {}
+degraded_platforms = set()  # wq-860: track degraded platforms for higher threshold
 if ar_file and os.path.isfile(ar_file):
     try:
         with open(ar_file) as f:
             registry = json.load(f)
         for acct in registry.get("accounts", []):
             status = acct.get("status", "")
-            if status not in ("live", "active"):
+            if status not in ("live", "active", "degraded"):
                 continue
             plat_id = acct.get("id", "")
             plat_name = acct.get("platform", "")
@@ -65,6 +66,8 @@ if ar_file and os.path.isfile(ar_file):
                     if len(word) > 5 and word not in ("vercel", "agency"):
                         keywords.add(word)
             platforms[plat_id] = list(keywords)
+            if status == "degraded":
+                degraded_platforms.add(plat_id)
     except Exception as e:
         print(f"engage-blockers: failed to read account-registry: {e}", file=sys.stderr)
 
@@ -131,8 +134,7 @@ with open(log_file) as f:
                         if not any(kw in tl for kw in keywords):
                             continue
                         if check_text(tl, FAILURE_PATTERNS):
-                            if plat_id not in failures:
-                                failures[plat_id] = extract_reason(tl)
+                            failures.setdefault(plat_id, set()).add(extract_reason(tl))
 
         # Also check assistant tool_use calls that mention platform errors
         if obj.get("type") == "assistant":
@@ -147,12 +149,19 @@ with open(log_file) as f:
                         "auth expired", "token invalid", "credentials invalid",
                         "can't post", "cannot post", "write failed",
                     ]):
-                        if plat_id not in failures:
-                            failures[plat_id] = "write failure detected in session"
+                        failures.setdefault(plat_id, set()).add("write failure detected in session")
+
+# wq-860: Degraded platforms need 2+ distinct failure patterns to avoid noise
+for plat_id in list(failures.keys()):
+    if plat_id in degraded_platforms and len(failures[plat_id]) < 2:
+        del failures[plat_id]
 
 if not failures:
     print("engage-blockers: no platform failures detected")
     sys.exit(0)
+
+# Flatten failure sets to primary reason for queue item titles
+failures_flat = {k: sorted(v)[0] for k, v in failures.items()}
 
 # Dedup against existing queue items
 try:
@@ -165,14 +174,14 @@ existing = set()
 for item in wq.get("queue", []):
     if item.get("status") in ("pending", "blocked"):
         title_lower = item.get("title", "").lower()
-        for plat_id in failures:
+        for plat_id in failures_flat:
             if plat_id.replace("-", "") in title_lower.replace("-", ""):
                 existing.add(plat_id)
 
-new_failures = {k: v for k, v in failures.items() if k not in existing}
+new_failures = {k: v for k, v in failures_flat.items() if k not in existing}
 
 if not new_failures:
-    print(f"engage-blockers: {len(failures)} failures detected, all already queued")
+    print(f"engage-blockers: {len(failures_flat)} failures detected, all already queued")
     sys.exit(0)
 
 # Add new items

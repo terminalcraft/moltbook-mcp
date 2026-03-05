@@ -10,7 +10,7 @@
 // Usage: node credential-health-check.mjs [--json] [--platform <id>] [--live]
 // Import: import { checkAllCredentials, checkAllCredentialsLive } from './credential-health-check.mjs'
 
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import { safeFetch } from './lib/safe-fetch.mjs';
 
@@ -22,6 +22,34 @@ const PLACEHOLDER_PATTERNS = [
   'test-api-key', 'YOUR_API_KEY', 'placeholder', 'changeme',
   'xxx', 'TODO', 'REPLACE_ME'
 ];
+
+const CONSECUTIVE_FAILURE_THRESHOLD = 2;
+const STATE_PATH = resolve(HOME, '.config/moltbook/credential-health-state.json');
+
+function loadFailureState(statePath) {
+  try { return JSON.parse(readFileSync(statePath || STATE_PATH, 'utf8')); }
+  catch { return {}; }
+}
+
+function saveFailureState(state, statePath) {
+  writeFileSync(statePath || STATE_PATH, JSON.stringify(state, null, 2) + '\n');
+}
+
+export function updateFailureState(platformId, failed, state, session) {
+  if (!state[platformId]) state[platformId] = { consecutive_failures: 0, last_session: null };
+  const entry = state[platformId];
+  if (failed) {
+    // Only increment if this is a different session than last recorded
+    if (entry.last_session !== session) {
+      entry.consecutive_failures++;
+      entry.last_session = session;
+    }
+  } else {
+    entry.consecutive_failures = 0;
+    entry.last_session = session;
+  }
+  return entry;
+}
 
 function resolveCredPath(credFile) {
   if (!credFile) return null;
@@ -289,7 +317,7 @@ export async function checkAllCredentialsLive({ registryPath, platformFilter, sa
   };
 }
 
-export function checkAllCredentials({ registryPath, platformFilter } = {}) {
+export function checkAllCredentials({ registryPath, platformFilter, statePath, session } = {}) {
   const regPath = registryPath || REGISTRY;
   if (!existsSync(regPath)) {
     return { error: 'account-registry.json not found', results: [] };
@@ -302,9 +330,26 @@ export function checkAllCredentials({ registryPath, platformFilter } = {}) {
     accounts = accounts.filter(a => a.id === platformFilter);
   }
 
+  const sessionNum = session || parseInt(process.env.SESSION_NUM || '0', 10);
+  const sp = statePath || STATE_PATH;
+  const failureState = loadFailureState(sp);
   const results = accounts.map(checkCredential);
-  const healthy = results.filter(r => r.status === 'ok').length;
-  const warnings = results.filter(r => r.status !== 'ok');
+
+  // Update failure state and apply consecutive-failure threshold
+  for (const r of results) {
+    const failed = r.status !== 'ok';
+    const entry = updateFailureState(r.id, failed, failureState, sessionNum);
+    if (failed && entry.consecutive_failures < CONSECUTIVE_FAILURE_THRESHOLD) {
+      r._original_status = r.status;
+      r.status = 'transient';
+      r.details = `${r.details} (1/${CONSECUTIVE_FAILURE_THRESHOLD} consecutive, suppressed)`;
+    }
+  }
+
+  try { saveFailureState(failureState, sp); } catch { /* non-fatal */ }
+
+  const healthy = results.filter(r => r.status === 'ok' || r.status === 'transient').length;
+  const warnings = results.filter(r => r.status !== 'ok' && r.status !== 'transient');
 
   return {
     total: results.length,

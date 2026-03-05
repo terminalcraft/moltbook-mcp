@@ -1,14 +1,15 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { writeFileSync, mkdirSync, rmSync, existsSync } from 'fs';
+import { writeFileSync, readFileSync, mkdirSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
 // Import the module
-import { checkAllCredentials, checkAllCredentialsLive } from './credential-health-check.mjs';
+import { checkAllCredentials, checkAllCredentialsLive, updateFailureState } from './credential-health-check.mjs';
 
 const TEST_DIR = join(tmpdir(), `cred-health-test-${process.pid}`);
 const REGISTRY_PATH = join(TEST_DIR, 'account-registry.json');
+const STATE_PATH = join(TEST_DIR, 'credential-health-state.json');
 
 function writeRegistry(accounts) {
   writeFileSync(REGISTRY_PATH, JSON.stringify({ accounts }, null, 2));
@@ -41,36 +42,40 @@ describe('credential-health-check', () => {
     writeRegistry([
       { id: 'moltbook', status: 'live', auth_type: 'none', cred_file: null, cred_key: null }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.healthy, 1);
     assert.equal(result.results[0].status, 'ok');
     assert.match(result.results[0].details, /no credentials required/);
   });
 
-  it('detects missing credential files', () => {
+  it('detects missing credential files (after threshold)', () => {
     writeRegistry([
       { id: 'test-platform', status: 'live', auth_type: 'api_key', cred_file: join(TEST_DIR, 'nonexistent.json'), cred_key: 'api_key' }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    // Pre-seed with 1 prior failure to cross threshold
+    writeFileSync(STATE_PATH, JSON.stringify({ 'test-platform': { consecutive_failures: 1, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.unhealthy, 1);
     assert.equal(result.results[0].status, 'missing');
   });
 
-  it('detects placeholder credentials', () => {
+  it('detects placeholder credentials (after threshold)', () => {
     const credPath = writeCredFile('placeholder.json', { api_key: 'test-api-key' });
     writeRegistry([
       { id: 'test-plat', status: 'live', auth_type: 'api_key', cred_file: credPath, cred_key: 'api_key' }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    writeFileSync(STATE_PATH, JSON.stringify({ 'test-plat': { consecutive_failures: 1, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.results[0].status, 'placeholder');
   });
 
-  it('detects empty required key field', () => {
+  it('detects empty required key field (after threshold)', () => {
     const credPath = writeCredFile('empty-key.json', { api_key: '' });
     writeRegistry([
       { id: 'test-plat', status: 'live', auth_type: 'api_key', cred_file: credPath, cred_key: 'api_key' }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    writeFileSync(STATE_PATH, JSON.stringify({ 'test-plat': { consecutive_failures: 1, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.results[0].status, 'empty');
   });
 
@@ -79,7 +84,7 @@ describe('credential-health-check', () => {
     writeRegistry([
       { id: 'good-plat', status: 'live', auth_type: 'api_key', cred_file: credPath, cred_key: 'api_key' }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.healthy, 1);
     assert.equal(result.results[0].status, 'ok');
   });
@@ -94,7 +99,8 @@ describe('credential-health-check', () => {
     writeRegistry([
       { id: 'jwt-plat', status: 'live', auth_type: 'bearer', cred_file: credPath, cred_key: null }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    writeFileSync(STATE_PATH, JSON.stringify({ 'jwt-plat': { consecutive_failures: 1, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.results[0].status, 'expired');
   });
 
@@ -107,7 +113,8 @@ describe('credential-health-check', () => {
     writeRegistry([
       { id: 'jwt-plat2', status: 'live', auth_type: 'bearer', cred_file: credPath, cred_key: null }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    writeFileSync(STATE_PATH, JSON.stringify({ 'jwt-plat2': { consecutive_failures: 1, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.results[0].status, 'expiring');
   });
 
@@ -120,7 +127,7 @@ describe('credential-health-check', () => {
     writeRegistry([
       { id: 'jwt-plat3', status: 'live', auth_type: 'bearer', cred_file: credPath, cred_key: null }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.results[0].status, 'ok');
     assert.match(result.results[0].details, /JWT valid/);
   });
@@ -133,7 +140,8 @@ describe('credential-health-check', () => {
     writeRegistry([
       { id: 'json-jwt', status: 'live', auth_type: 'api_key', cred_file: credPath, cred_key: 'api_key' }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    writeFileSync(STATE_PATH, JSON.stringify({ 'json-jwt': { consecutive_failures: 1, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.results[0].status, 'expired');
   });
 
@@ -142,7 +150,7 @@ describe('credential-health-check', () => {
       { id: 'alpha', status: 'live', auth_type: 'none', cred_file: null, cred_key: null },
       { id: 'beta', status: 'live', auth_type: 'none', cred_file: null, cred_key: null }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, platformFilter: 'alpha' });
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100, platformFilter: 'alpha' });
     assert.equal(result.total, 1);
     assert.equal(result.results[0].id, 'alpha');
   });
@@ -153,7 +161,7 @@ describe('credential-health-check', () => {
       { id: 'dead-one', status: 'defunct', auth_type: 'none', cred_file: null, cred_key: null },
       { id: 'degraded-one', status: 'degraded', auth_type: 'none', cred_file: null, cred_key: null }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.total, 1);
     assert.equal(result.results[0].id, 'live-one');
   });
@@ -163,24 +171,83 @@ describe('credential-health-check', () => {
     writeRegistry([
       { id: 'bad-json', status: 'live', auth_type: 'api_key', cred_file: credPath, cred_key: 'api_key' }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    writeFileSync(STATE_PATH, JSON.stringify({ 'bad-json': { consecutive_failures: 1, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.results[0].status, 'error');
     assert.match(result.results[0].details, /JSON parse error/);
   });
 
-  it('returns summary counts correctly', () => {
+  it('returns summary counts correctly (with threshold)', () => {
     const goodPath = writeCredFile('good2.json', { api_key: 'real-key-123456' });
     writeRegistry([
       { id: 'ok-plat', status: 'live', auth_type: 'none', cred_file: null, cred_key: null },
       { id: 'ok-plat2', status: 'live', auth_type: 'api_key', cred_file: goodPath, cred_key: 'api_key' },
       { id: 'bad-plat', status: 'live', auth_type: 'api_key', cred_file: join(TEST_DIR, 'nope.json'), cred_key: 'api_key' }
     ]);
-    const result = checkAllCredentials({ registryPath: REGISTRY_PATH });
+    // Pre-seed bad-plat with 1 prior failure to cross threshold
+    writeFileSync(STATE_PATH, JSON.stringify({ 'bad-plat': { consecutive_failures: 1, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
     assert.equal(result.total, 3);
     assert.equal(result.healthy, 2);
     assert.equal(result.unhealthy, 1);
     assert.ok(result.warnings);
     assert.equal(result.warnings.length, 1);
+  });
+  it('suppresses first failure as transient', () => {
+    writeRegistry([
+      { id: 'flaky-plat', status: 'live', auth_type: 'api_key', cred_file: join(TEST_DIR, 'nope.json'), cred_key: 'api_key' }
+    ]);
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
+    assert.equal(result.results[0].status, 'transient');
+    assert.match(result.results[0].details, /1\/2 consecutive, suppressed/);
+    assert.equal(result.healthy, 1); // transient counts as healthy
+    assert.equal(result.unhealthy, 0);
+  });
+
+  it('escalates after 2 consecutive failures from different sessions', () => {
+    writeRegistry([
+      { id: 'bad-plat', status: 'live', auth_type: 'api_key', cred_file: join(TEST_DIR, 'nope.json'), cred_key: 'api_key' }
+    ]);
+    // Pre-seed with 1 failure from session 99
+    writeFileSync(STATE_PATH, JSON.stringify({ 'bad-plat': { consecutive_failures: 1, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
+    assert.equal(result.results[0].status, 'missing');
+    assert.equal(result.unhealthy, 1);
+  });
+
+  it('resets consecutive failures on success', () => {
+    const credPath = writeCredFile('good3.json', { api_key: 'real-key-xyz12345' });
+    writeRegistry([
+      { id: 'recovering', status: 'live', auth_type: 'api_key', cred_file: credPath, cred_key: 'api_key' }
+    ]);
+    // Pre-seed with prior failures
+    writeFileSync(STATE_PATH, JSON.stringify({ 'recovering': { consecutive_failures: 5, last_session: 99 } }));
+    const result = checkAllCredentials({ registryPath: REGISTRY_PATH, statePath: STATE_PATH, session: 100 });
+    assert.equal(result.results[0].status, 'ok');
+    // Verify state was reset
+    const state = JSON.parse(readFileSync(STATE_PATH, 'utf8'));
+    assert.equal(state.recovering.consecutive_failures, 0);
+  });
+});
+
+describe('updateFailureState', () => {
+  it('increments on failure from new session', () => {
+    const state = {};
+    const entry = updateFailureState('plat', true, state, 100);
+    assert.equal(entry.consecutive_failures, 1);
+    assert.equal(entry.last_session, 100);
+  });
+
+  it('does not double-count same session', () => {
+    const state = { plat: { consecutive_failures: 1, last_session: 100 } };
+    const entry = updateFailureState('plat', true, state, 100);
+    assert.equal(entry.consecutive_failures, 1); // no change
+  });
+
+  it('resets on success', () => {
+    const state = { plat: { consecutive_failures: 3, last_session: 99 } };
+    const entry = updateFailureState('plat', false, state, 100);
+    assert.equal(entry.consecutive_failures, 0);
   });
 });
 

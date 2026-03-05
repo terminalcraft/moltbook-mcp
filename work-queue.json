@@ -29,28 +29,6 @@
       "commits": []
     },
     {
-      "id": "wq-884",
-      "title": "Auto-escalation for E/R cost trends in audit-checks",
-      "description": "audit-stats.mjs now computes e_cost_trend and r_cost_trend (wq-875), but audit-checks has no escalation logic consuming them. Add e_session_cost and r_session_cost to escalation_tracker — same pattern as existing b_session_cost escalation. When threshold_crossed is true ($1.50 for E, $2.00 for R), auto-create wq items. Currently the data is produced but not acted on.",
-      "priority": 884,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1823,
-      "source": "brainstorming-R324",
-      "tags": [
-        "observability",
-        "audit"
-      ],
-      "commits": ["fadcc55f"],
-      "outcome": {
-        "session": 1826,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created audit-cost-escalation.mjs with B/E/R threshold checks, dedup guard, dry-run mode. 8 tests. Normalized e_cost_trend→e_session_cost in escalation_tracker. Updated subchecks doc."
-      }
-    },
-    {
       "id": "wq-885",
       "title": "Add tw_run_fn helper to timeout-wrapper.sh",
       "description": "Currently tw_run requires 'bash -c ...' for multi-line check logic. Adding a tw_run_fn helper that wraps function dispatch (declare -f + call) would simplify future hook migrations to timeout-wrapper.sh. Small utility addition, clear scope.",
@@ -69,7 +47,7 @@
       "title": "A session human-review schema validation before wq creation",
       "description": "A#203 created wq-879 for a false-positive schema issue (hr-a173-1 already had correct status field). The A session should run validate-human-review.mjs (or check required fields) before creating data-hygiene wq items. Prevents false-positive queue items that waste B session time on investigation.",
       "priority": 886,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1823,
       "source": "brainstorming-R324",
@@ -77,7 +55,16 @@
         "quality",
         "audit"
       ],
-      "commits": []
+      "commits": [
+        "98030c1c"
+      ],
+      "outcome": {
+        "session": 1827,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added --json mode to validate-human-review.mjs and mandatory validation gate in SESSION_AUDIT.md Section 5. A sessions must now run the validator before creating data-hygiene wq items for human-review.json."
+      }
     }
   ]
 }

@@ -69,6 +69,8 @@ STALE_COUNT=$(echo "$RESULT" | jq '.stale_count')
 if [ "$STALE_COUNT" -gt 0 ]; then
   ITEMS=$(echo "$RESULT" | jq -r '[.stale_items[] | "\(.id)(\(.stale_tags | join(",")))"] | join(", ")')
   echo "[stale-tags] $STALE_COUNT item(s) tagged with completed directives: $ITEMS"
+  # Auto-remediate: remove stale tags from queue items (wq-835)
+  node "$DIR/stale-tag-remediate.mjs" --apply 2>/dev/null && echo "[stale-tags] Auto-remediated stale tags" || echo "[stale-tags] WARN: auto-remediation failed"
 else
   echo "[stale-tags] OK: no stale directive tags found"
 fi

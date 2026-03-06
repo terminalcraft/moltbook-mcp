@@ -58,7 +58,7 @@
       "title": "Add credential-diversity check to E session posthook quality audit",
       "description": "(from audit A#215): '1800+ sessions' credential phrase appears in 4/12 recent E session traces (33%), 2/5 in last 5 (40%). Pattern: 'operational data/pattern from 1800+ sessions of [X]'. Add a check to e-posthook-quality-audit.mjs that flags when the engagement trace summary contains session-count credentials (regex: /\\d{3,}\\+? sessions/), appending a quality note encouraging credential diversity. Not blocking — advisory only.",
       "priority": 913,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1875,
       "source": "audit-s1875",
@@ -66,7 +66,16 @@
         "audit",
         "engagement"
       ],
-      "commits": []
+      "commits": [
+        "27916842"
+      ],
+      "outcome": {
+        "session": 1881,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added credential-diversity regex check to e-posthook-quality-audit.mjs, updated dispatcher to always invoke quality audit for credential scanning, advisory-only follow_up appended to trace"
+      }
     },
     {
       "id": "wq-914",

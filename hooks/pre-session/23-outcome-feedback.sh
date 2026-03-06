@@ -24,13 +24,14 @@ TUNING_STATE="$STATE_DIR/rotation-tuning.json"
 if [ -f "$OUTCOMES_LOG" ]; then
   # Filter to current session type's last 10 outcomes
   TYPE_LINES=$(grep " ${SESSION_TYPE} s=" "$OUTCOMES_LOG" | tail -10)
-  LINE_COUNT=$(echo "$TYPE_LINES" | grep -c . 2>/dev/null || echo 0)
+  LINE_COUNT=$(echo "$TYPE_LINES" | grep -c . 2>/dev/null || true)
+  LINE_COUNT=${LINE_COUNT:-0}
 
   if [ "$LINE_COUNT" -ge 5 ]; then
     TOTAL=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | wc -l)
-    TIMEOUTS=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | grep -c '^timeout$' || echo 0)
-    ERRORS=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | grep -c '^error$' || echo 0)
-    SUCCESSES=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | grep -c '^success$' || echo 0)
+    TIMEOUTS=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | grep -c '^timeout$' || true)
+    ERRORS=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | grep -c '^error$' || true)
+    SUCCESSES=$(echo "$TYPE_LINES" | grep -oP 'outcome=\K\S+' | grep -c '^success$' || true)
 
     if [ "$TOTAL" -gt 0 ]; then
       TIMEOUT_PCT=$((TIMEOUTS * 100 / TOTAL))

@@ -83,6 +83,22 @@
         "hooks"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-905",
+      "title": "PRIORITY OVERRIDE: Execute wq-899 then wq-904 in next 2 B sessions",
+      "description": "Audit A#212 escalation (4th consecutive audit flagging d074 stall). Hook count has INCREASED 74→75 despite 3 dispatchers being built. wq-899 pending 12 sessions, wq-904 pending 2 sessions. B sessions consistently deprioritize d074 deletion work. MANDATE: Next B session MUST consume wq-899 as sole primary task. Following B session MUST consume wq-904. No other queue items until both are done. Combined result: -12 hooks (75→63). Failure by s1865 triggers d074 partial-close assessment.",
+      "priority": 905,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1860,
+      "source": "audit-s1860",
+      "tags": [
+        "audit",
+        "d074",
+        "priority-override"
+      ],
+      "commits": []
     }
   ]
 }

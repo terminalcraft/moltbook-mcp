@@ -21,10 +21,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Fix auto-promote threshold tests in session-context.test.mjs** (added ~s1836): ~~Promoted to wq-896~~ (s1843).
 
-- **Integrate audit-cost-escalation.mjs into A session pre-hook** (added ~s1826): ~~Promoted to wq-888~~ (s1828).
-
-- **A session pre-computed human-review validation in audit-stats.mjs** (added ~s1827): ~~Promoted to wq-889~~ (s1828).
-
 - **Extract 4 inline node -e blocks from 27-session-file-sizes.sh** (added ~s1838): ~~Completed R#328 (s1843)~~ — extracted to hooks/lib/session-file-sizes.mjs.
 
 - **Consolidate type-gated pre-hooks into a single dispatcher** (added ~s1843): ~~A-type done R#329 (s1848), R-type expanded R#330 (s1853)~~ — Both A and R pre-hook dispatchers complete. Remaining: R post-hook dispatcher (Group 3), E/B post-hook absorption (Groups 4-5) in HOOK_CONSOLIDATION_PLAN.md.

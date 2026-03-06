@@ -161,7 +161,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 44-brainstorm-gate_R.sh | 39 | Low | Absorbed R#330 |
 
 **Result**: -2 hooks. Logic absorbed into dispatcher (247 lines total, under 300L target).
-**Status**: Dispatcher updated R#330 (s1853). wq-902 for B session to delete old hooks.
+**Status**: Dispatcher updated R#330 (s1853). Old hooks deleted B#574 (s1862). ✓ COMPLETE.
 
 ### Group 3: R-session post-hook dispatcher ✓
 **Merge 3 R post-hooks into a single `35-r-session-posthook_R.sh` dispatcher**
@@ -173,7 +173,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 18-r-impact-track.sh | 63 | Low | Absorbed R#331 |
 
 **Result**: -2 hooks (3 → 1). 214 lines consolidated.
-**Status**: Dispatcher created R#331 (s1858). wq-904 for B session to delete old hooks.
+**Status**: Dispatcher created R#331 (s1858). Old hooks deleted B#574 (s1862). ✓ COMPLETE.
 
 ### Group 4: E-session post-hook absorption
 **Merge 3 standalone E post-hooks into existing `36-e-session-posthook_E.sh`**

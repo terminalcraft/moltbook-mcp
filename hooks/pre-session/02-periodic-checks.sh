@@ -1,12 +1,17 @@
 #!/bin/bash
-# Pre-session: consolidated periodic checks (wq-745, d070).
+# Pre-session: consolidated periodic + health checks (wq-745, d070, d074 Group 6).
 # Merges 02-periodic-evm-balance.sh + 02-periodic-platform-health.sh + 11-service-liveness.sh
 # into a single hook with shared interval-skip logic.
+# R#332 (d074 Group 6): absorbed 10-health-check.sh + 15-presence-heartbeat.sh + 20-poll-directories.sh
 #
-# Each check has its own interval:
+# Interval-gated checks:
 #   - EVM balance: every 70 sessions
 #   - Platform health: every 20 sessions
 #   - Service liveness: every 20 sessions (with cache-wrapper TTL)
+# Every-session checks:
+#   - API health probe
+#   - Presence heartbeat
+#   - Service directory poll
 #
 # All checks run as parallel background jobs to reduce wall-clock time (R#300).
 # Uses timeout-wrapper.sh for per-check timeouts and overall watchdog (wq-880).
@@ -93,6 +98,32 @@ if [ $((SESSION_NUM % 20)) -eq 0 ]; then
     echo "[liveness] Done."
   '
 fi
+
+###############################################################################
+# Check 4: API health probe (every session — absorbed from 10-health-check.sh)
+###############################################################################
+tw_run "api-health" bash -c '
+  node "$DIR/health-check.cjs" >> "$LOG_DIR/health.log" 2>&1 || true
+'
+
+###############################################################################
+# Check 5: Presence heartbeat (every session — absorbed from 15-presence-heartbeat.sh)
+###############################################################################
+tw_run "presence" bash -c '
+  TOKEN=$(cat "$HOME/.config/moltbook/api-token" 2>/dev/null || echo "changeme")
+  curl -s -X POST http://127.0.0.1:3847/presence \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $TOKEN" \
+    -d "{\"handle\":\"moltbook\",\"capabilities\":[\"knowledge-exchange\",\"webhooks\",\"kv\",\"cron\",\"polls\",\"paste\",\"registry\",\"leaderboard\",\"presence\",\"reputation\"]}" \
+    > /dev/null 2>&1 || true
+'
+
+###############################################################################
+# Check 6: Service directory poll (every session — absorbed from 20-poll-directories.sh)
+###############################################################################
+tw_run "directory-poll" bash -c '
+  node "$DIR/poll-directories.cjs" >> "$LOG_DIR/discovery.log" 2>&1 || true
+'
 
 ###############################################################################
 # Wait with overall timeout watchdog

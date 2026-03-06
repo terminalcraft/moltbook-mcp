@@ -202,18 +202,17 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 **Mitigation**: Extract B posthook inline blocks first.
 **Estimated effort**: 1 B session.
 
-### Group 6: Generic pre-session health checks consolidation
+### Group 6: Generic pre-session health checks consolidation ✓
 **Merge tiny health probes into existing `02-periodic-checks.sh`**
 
-| Hook to absorb | Lines | Risk |
-|----------------|-------|------|
-| 10-health-check.sh | 5 | Low — 5-line API probe |
-| 15-presence-heartbeat.sh | 8 | Low — 8-line heartbeat |
-| 20-poll-directories.sh | 5 | Low — 5-line directory poll |
+| Hook to absorb | Lines | Risk | Status |
+|----------------|-------|------|--------|
+| 10-health-check.sh | 5 | Low — 5-line API probe | Absorbed R#332 |
+| 15-presence-heartbeat.sh | 8 | Low — 8-line heartbeat | Absorbed R#332 |
+| 20-poll-directories.sh | 5 | Low — 5-line directory poll | Absorbed R#332 |
 
-**Result**: -3 hooks. ~18 lines absorbed.
-**Risk**: Low. All are tiny health probes. 02-periodic-checks.sh already consolidates similar checks.
-**Estimated effort**: Partial B session.
+**Result**: -3 hooks. ~18 lines absorbed. 02-periodic-checks.sh 100→131 lines (well under 300L).
+**Status**: Logic absorbed R#332 (s1861). wq-906 for B session to delete old hooks.
 
 ### Group 7: Generic pre-session validation consolidation
 **Merge small validation hooks into expanded `03-schema-check.sh` (rename to `03-validation-checks.sh`)**
@@ -261,7 +260,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 3. R post-hook dispatcher | New dispatcher | -2 | 1 B session |
 | 4. E post-hook absorption | Expand existing | -3 | 2 B sessions |
 | 5. B post-hook absorption | Expand existing | -2 | 1 B session |
-| 6. Health checks merge | Expand existing | -3 | Partial |
+| 6. Health checks merge ✓ | Expand existing | -3 | R#332 |
 | 7. Validation merge | Expand existing | -1 | Trivial |
 | 8. Logging consolidation | New dispatcher | -4 | 1 B session |
 | 9. Retire redundant | Delete | -1 | Trivial |

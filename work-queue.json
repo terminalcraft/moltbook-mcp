@@ -99,6 +99,21 @@
         "priority-override"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-906",
+      "title": "Delete 3 health probe hooks absorbed by 02-periodic-checks.sh (d074 Group 6)",
+      "description": "R#332 absorbed 10-health-check.sh, 15-presence-heartbeat.sh, and 20-poll-directories.sh into 02-periodic-checks.sh as Checks 4-6. Delete the 3 old hooks and verify 02-periodic-checks.sh runs all 6 checks. Combined with wq-899 (-7) and wq-904 (-5): total -15 hooks when all three execute.",
+      "priority": 906,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1861,
+      "source": "R#332",
+      "tags": [
+        "d074",
+        "hooks"
+      ],
+      "commits": []
     }
   ]
 }

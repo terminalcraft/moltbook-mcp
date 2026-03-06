@@ -6,11 +6,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Add e-cost-cap unit tests** (added ~s1841): e-cost-cap.mjs has no dedicated test file. Should test threshold defaults ($1.80), duration gate logic, registration keyword detection. Low effort, improves d071 combined coverage.
+- **Add e-cost-cap unit tests** (added ~s1841): ~~Promoted to wq-900~~ (s1848).
 
 - **Add e-session-seed cost trend unit tests** (added ~s1847): e-session-seed.mjs now has cost trend injection logic (wq-897). Should test: COST PRESSURE triggers when avg > $1.50, platform count reduction instruction present, violation counting, duration formatting. Can share test patterns with e-cost-cap tests.
 
-- **Create A-session pre-hook dispatcher** (added ~s1846): Merge 8 _A.sh pre-hooks (28-cost-trend-monitor, 29-stale-ref-check, 31-hr-schema-check, 32-hook-timing-check, 33-stale-tag-check, 34-cred-health-cleanup, 35-briefing-directive-check, 37-cost-escalation) into single `35-a-session-prehook_A.sh` dispatcher. Biggest d074 win: -7 hooks in one session. See HOOK_CONSOLIDATION_PLAN.md Group 1.
+- **Create A-session pre-hook dispatcher** (added ~s1846): ~~Implemented R#329 (s1848)~~ — 35-a-session-prehook_A.sh created. wq-899 for B session to delete old hooks and wire up.
 
 - **Consolidate cost-trend-monitor and cost-escalation A hooks** (added ~s1837): ~~Promoted to wq-895~~ (s1838).
 
@@ -26,7 +26,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Extract 4 inline node -e blocks from 27-session-file-sizes.sh** (added ~s1838): ~~Completed R#328 (s1843)~~ — extracted to hooks/lib/session-file-sizes.mjs.
 
-- **Consolidate type-gated pre-hooks into a single dispatcher** (added ~s1843): Several pre-session hooks follow the same pattern — check session type, skip if not matching, run one operation. Examples: 31-hr-schema-check_A.sh, 35-r-session-prehook_R.sh, 35-e-session-prehook_E.sh, 37-cost-escalation_A.sh. Merging 3-4 of these into a pre-session dispatcher (like the post-session dispatchers already do) would reduce hook count toward d074's ≤55 target. Start with A-type pre-hooks since there are at least 2 candidates.
+- **Consolidate type-gated pre-hooks into a single dispatcher** (added ~s1843): ~~A-type done R#329 (s1848)~~ — 35-a-session-prehook_A.sh created. R/E pre-hook dispatchers already exist. Remaining: R post-hook dispatcher (Group 3 in HOOK_CONSOLIDATION_PLAN.md).
 
 - **E session scope-bleed: detect uncommitted file creation** (added ~s1831): The posthook scope-bleed check (check 9) only counts git commits. s1819 created 15 debug .mjs files without committing — these inflate cost without triggering scope-bleed detection. Add `git status --porcelain | grep '^??' | wc -l` to check_scope_bleed() and warn when >2 untracked files created during an E session. Would catch the cost driver that pushed s1819 to $2.29.
 

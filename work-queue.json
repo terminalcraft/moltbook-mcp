@@ -41,28 +41,6 @@
       "commits": []
     },
     {
-      "id": "wq-897",
-      "title": "Monitor E session cost trend — last-5 avg $1.95",
-      "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.95 vs last-10 avg $2.01 (→ threshold_breach). Review session efficiency and enforce cost controls.",
-      "priority": 897,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1845,
-      "source": "audit-cost-escalation-s1845",
-      "tags": [
-        "audit",
-        "cost"
-      ],
-      "commits": ["95292e2f"],
-      "outcome": {
-        "session": 1847,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Injected cost trend data into e-session-seed.mjs so E sessions see their own avg ($1.95) and violation count at startup. When COST PRESSURE detected: reduces to 2 platforms, budget-based exit gate ($0.80 spent), 2-3 tool calls per platform. Tightened posthook duration gate 360s→300s. Changed $1.80 from soft to hard budget. Also partially addresses wq-898 deliverable (1)."
-      }
-    },
-    {
       "id": "wq-898",
       "title": "Harden E session cost controls — clawnews circuit-break",
       "description": "Remaining from original scope: implement clawnews circuit-break (3 consecutive API_ERROR substitutions) to reduce E session complexity. Deliverable (1) — inject hard timeout instruction — completed by wq-897 (s1847). Deliverable (2) — clawnews circuit-break — still pending.",
@@ -74,6 +52,35 @@
       "tags": [
         "audit",
         "cost"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-899",
+      "title": "Wire up A-session pre-hook dispatcher — delete 7 old hooks",
+      "description": "R#329 created 35-a-session-prehook_A.sh consolidating all 7 A-only pre-hooks. B session needs to: (1) delete 28-cost-trend-monitor_A.sh, 29-stale-ref-check_A.sh, 32-hook-timing-check_A.sh, 33-stale-tag-check_A.sh, 34-cred-health-cleanup_A.sh, 35-briefing-directive-check_A.sh, 37-cost-escalation_A.sh; (2) run A session dry-run to verify dispatcher output matches; (3) update hook manifest. Net result: -6 hooks toward d074 target.",
+      "priority": 899,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1848,
+      "source": "R329-structural",
+      "tags": [
+        "d074",
+        "hooks"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-900",
+      "title": "Add e-cost-cap unit tests",
+      "description": "(from brainstorming ~s1841): e-cost-cap.mjs has no dedicated test file. Should test threshold defaults ($1.80), duration gate logic, registration keyword detection. Low effort, improves d071 combined coverage.",
+      "priority": 900,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1848,
+      "source": "brainstorming-R329",
+      "tags": [
+        "testing"
       ],
       "commits": []
     }

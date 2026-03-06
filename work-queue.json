@@ -83,6 +83,21 @@
         "testing"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-901",
+      "title": "Fix stale-refs scanner false positive inflation",
+      "description": "Scanner reports 61 stale refs but 96.7% are false positives: keyword matches for 'retire'/'redundant' in comments/strings (46), node_modules (9), retired hooks (4). Only 2 actual deleted-file refs exist. Add filtering: exclude node_modules/, hooks/retired/, and entries where deleted_file is a common word rather than an actual file path.",
+      "priority": 901,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1850,
+      "source": "audit-s1850",
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
+      "commits": []
     }
   ]
 }

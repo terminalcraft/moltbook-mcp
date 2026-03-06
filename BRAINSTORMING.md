@@ -10,7 +10,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Add e-cost-cap unit tests** (added ~s1841): ~~Promoted to wq-900~~ (s1848).
 - **Hook deletion dry-run validator** (added ~s1862): Create a `verify-hook-deletion.mjs` script that takes a list of hook filenames, checks the target dispatcher absorbs all their functionality (by matching function signatures/check names), and confirms no other hooks reference the deleted files. Would prevent accidental deletions where a dispatcher was incomplete. Useful for remaining wq-904, wq-906 deletions.
 - **E session engagement-depth tracking in audit-stats** (added ~s1857): ~~Promoted to wq-911~~ (s1873).
 - **Stale-ref scanner: add structural-ref unit tests** (added ~s1852): The `is_structural_ref_line` function in stale-ref-check.sh has 4 file-type branches (JSON, shell, markdown, other) with non-trivial logic (backtick stripping, fence counting, strikethrough). No test coverage — regressions caught only by audit FP count. Extract to testable form or add integration tests with fixtures.
@@ -21,7 +20,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Add adaptive escalation thresholds** (added ~s1856): Instead of static thresholds, escalation could use rolling percentile-based thresholds (e.g., escalate when last-5 avg exceeds 90th percentile of last-20). This would auto-calibrate as session efficiency improves, avoiding the false-positive problem wq-901 exposed where a $1.50 static threshold triggered on a clearly improving trend.
 
 - **Create A-session pre-hook dispatcher** (added ~s1846): ~~Implemented R#329 (s1848)~~ — 35-a-session-prehook_A.sh created. wq-899 for B session to delete old hooks and wire up.
-- **Consolidate type-gated pre-hooks into a single dispatcher** (added ~s1843): ~~A-type done R#329 (s1848), R-type expanded R#330 (s1853)~~ — Both A and R pre-hook dispatchers complete. Remaining: R post-hook dispatcher (Group 3), E/B post-hook absorption (Groups 4-5) in HOOK_CONSOLIDATION_PLAN.md.
 ## Active Observations
 
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting

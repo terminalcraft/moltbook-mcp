@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// stale-tag-check.test.mjs — Unit tests for 33-stale-tag-check_A.sh
+// stale-tag-check.test.mjs — Unit tests for stale tag detection (check_stale_tags in 35-a-session-prehook_A.sh)
 // wq-828: Validates stale directive tag detection in A session pre-hook
 //
 // Usage: node --test stale-tag-check.test.mjs
@@ -12,7 +12,7 @@ import assert from 'node:assert';
 import { tmpdir } from 'os';
 
 const REPO_DIR = join(import.meta.dirname || process.cwd());
-const HOOK_PATH = join(REPO_DIR, 'hooks/pre-session/33-stale-tag-check_A.sh');
+const HOOK_PATH = join(REPO_DIR, 'hooks/pre-session/35-a-session-prehook_A.sh');
 
 const SANDBOX = join(tmpdir(), `stale-tag-test-${process.pid}`);
 const SANDBOX_HOME = join(SANDBOX, 'home');
@@ -36,7 +36,7 @@ function writeFixtures(directives, queue) {
 }
 
 function runHook(session = '9999') {
-  return spawnSync('bash', [join(SANDBOX_REPO, 'hooks/pre-session/33-stale-tag-check_A.sh')], {
+  return spawnSync('bash', [join(SANDBOX_REPO, 'hooks/pre-session/35-a-session-prehook_A.sh')], {
     encoding: 'utf8',
     timeout: 10000,
     cwd: SANDBOX_REPO,
@@ -53,7 +53,7 @@ function readOutput() {
   return JSON.parse(readFileSync(path, 'utf8'));
 }
 
-describe('33-stale-tag-check_A.sh', () => {
+describe('stale-tag-check (in 35-a-session-prehook_A.sh)', () => {
   before(() => setupSandbox());
   after(() => teardownSandbox());
 

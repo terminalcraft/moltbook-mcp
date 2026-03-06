@@ -2,7 +2,7 @@
 /**
  * stale-tag-remediate.mjs — Auto-remove stale directive tags from queue items.
  *
- * Reads stale-tags-audit.json (produced by 33-stale-tag-check_A.sh) and removes
+ * Reads stale-tags-audit.json (produced by 35-a-session-prehook_A.sh) and removes
  * tags referencing completed directives from non-done queue items. Appends a note
  * to each remediated item's description.
  *
@@ -36,7 +36,7 @@ export function remediate(argv = process.argv, deps = {}) {
 
   // Load audit results
   if (!existsSync(auditPath)) {
-    const msg = "No stale-tags-audit.json found. Run 33-stale-tag-check_A.sh first.";
+    const msg = "No stale-tags-audit.json found. Run 35-a-session-prehook_A.sh first.";
     if (jsonMode) console.log(JSON.stringify({ error: msg, remediated: [] }));
     else console.log(msg);
     exit(0);

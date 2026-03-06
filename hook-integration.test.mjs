@@ -45,7 +45,6 @@ const NETWORK_HOOKS = new Set([
 
 // Hooks that are informational and may exit non-zero to signal warnings
 const WARN_EXIT_OK = new Set([
-  '28-cost-trend-monitor_A.sh',  // may warn about cost trend
   '39-compliance-nudge.sh',    // compliance warnings
   '09-financial-check.sh',     // financial warnings
 ]);

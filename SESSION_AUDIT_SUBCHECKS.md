@@ -175,7 +175,7 @@ Report in `sessions.E` / `sessions.R` with `cost_trend` and `cost_trend_detail` 
 
 ## Stale directive tag detection (wq-828)
 
-Pre-hook `33-stale-tag-check_A.sh` cross-references `work-queue.json` tags against `directives.json` completion status and writes `~/.config/moltbook/stale-tags-audit.json`.
+The A session pre-hook (`35-a-session-prehook_A.sh`, check_stale_tags) cross-references `work-queue.json` tags against `directives.json` completion status and writes `~/.config/moltbook/stale-tags-audit.json`.
 
 **Data source**: Read `stale-tags-audit.json` during audit. Key fields:
 - `stale_count`: number of non-done queue items tagged with completed directives

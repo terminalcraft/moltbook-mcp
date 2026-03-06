@@ -62,4 +62,4 @@ jq -r '.directives[] | select(.id == "dXXX") |
 - Extract highest session number from notes: `echo "$NOTES" | grep -oE '(s|R#|B#|A#)[0-9]+' | sed 's/[^0-9]//g' | sort -n | tail -1`
 - If max session in notes is within 30 of current session: directive has recent progress
 
-**Why this matters:** The 36-directive-status_R.sh hook flags directives based on session distance from `acked_session`. Directives like d049 (intel minimum) get flagged as "115 sessions stale" despite having active notes documenting healthy compliance. This creates noise that distracts R sessions from truly problematic directives.
+**Why this matters:** The directive status check (now in 35-r-session-prehook_R.sh) flags directives based on session distance from `acked_session`. Directives like d049 (intel minimum) get flagged as "115 sessions stale" despite having active notes documenting healthy compliance. This creates noise that distracts R sessions from truly problematic directives.

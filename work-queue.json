@@ -54,30 +54,6 @@
       "commits": []
     },
     {
-      "id": "wq-914",
-      "title": "Fix picker compliance tracker to not excuse unsubstituted BUDGET_CAP skips",
-      "description": "(from audit A#216): s1874 shows 100% in picker-compliance-state.json but actual mandate coverage was 33% (1/3 platforms). BUDGET_CAP skips without backup substitutions are counted as non-violations, inflating reported compliance. Fix the compliance tracker to require a backup substitution for BUDGET_CAP skips, or flag as partial compliance.",
-      "priority": 914,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1880,
-      "source": "audit-s1880",
-      "tags": [
-        "audit",
-        "engagement"
-      ],
-      "commits": [
-        "a2071616"
-      ],
-      "outcome": {
-        "session": 1882,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "BUDGET_CAP skips without backup substitution no longer count as compliant. Added 6 tests. s1874 would now correctly show 33% instead of 100%."
-      }
-    },
-    {
       "id": "wq-915",
       "title": "Fix 23-outcome-feedback.sh arithmetic expression error",
       "description": "(from audit A#216): hooks.log shows recurring runtime arithmetic error on line 36 of 23-outcome-feedback.sh ('0\\n0: syntax error in expression'). Non-fatal but produces noise in hook logs. Fix the expression parsing — likely a variable containing a newline being used in arithmetic context.",

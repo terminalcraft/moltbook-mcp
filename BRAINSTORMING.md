@@ -5,6 +5,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 - **Stale-ref scanner scope expansion** (added ~s1866): The stale-ref-check.sh scanner found code refs but not doc refs (SESSION_AUDIT_SUBCHECKS.md, SESSION_AUDIT_ESCALATION.md). Expand scanner to include *.md files for hook name patterns, reducing manual cleanup after future hook consolidation.
+- **Circuit-break auto-recovery** (added ~s1867): circuit-break-auto.mjs only demotes. Add a companion mechanism to auto-re-enable platforms after N sessions if their liveness cache shows them reachable again, avoiding permanent demotions for transient outages.
 
 ## Ideas
 

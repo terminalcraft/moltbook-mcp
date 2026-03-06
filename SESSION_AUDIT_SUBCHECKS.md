@@ -223,7 +223,9 @@ Use `audit-stats.mjs` → `backup_substitution_rate`. Tracks how often E session
 |---------|--------|
 | `clean` | none |
 | `occasional` | note in report |
-| `circuit_break_recommended` | create wq item `["audit", "platform"]` to disable chronic platform in picker |
+| `circuit_break_recommended` | run `node circuit-break-auto.mjs` to auto-demote chronic platforms in picker-demotions.json (wq-891) |
+
+**Auto-remediation (wq-891)**: When verdict is `circuit_break_recommended`, run `node circuit-break-auto.mjs` (or `--dry-run` to preview). This auto-adds candidates to `picker-demotions.json` demotions array, closing the detection→remediation loop without a manual wq item. Idempotent — already-demoted platforms are skipped. Use `--json` for structured output.
 
 **Report in `engagement.substitution_rate`**:
 ```json
@@ -231,7 +233,8 @@ Use `audit-stats.mjs` → `backup_substitution_rate`. Tracks how often E session
   "total_substitutions": 4,
   "top_replaced": "clawnews",
   "circuit_break": ["clawnews (4/10 sessions)"],
-  "verdict": "circuit_break_recommended"
+  "verdict": "circuit_break_recommended",
+  "auto_remediation": "demoted 1 platform(s)"
 }
 ```
 

@@ -51,107 +51,13 @@ fi
 
 # --- Phase 2: Update tracker with new items (with false-positive filtering) ---
 if [ -n "$NEW_TODOS" ]; then
-  # Use node to merge new TODOs into tracker, filtering false positives
-  node -e "
-    const fs = require('fs');
-    const tracker = JSON.parse(fs.readFileSync('$TRACKER', 'utf8'));
-
-    // Load false-positive patterns
-    let fpPatterns = [];
-    try {
-      const fp = JSON.parse(fs.readFileSync('$FALSE_POSITIVES', 'utf8'));
-      fpPatterns = (fp.patterns || []).map(p => new RegExp(p, 'i'));
-    } catch {}
-
-    const newLines = $(echo "$NEW_TODOS" | jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null || echo '[]');
-    for (const line of newLines) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      const normalized = trimmed.replace(/\s+/g, ' ').substring(0, 200);
-
-      // Skip if matches any false-positive pattern
-      if (fpPatterns.some(re => re.test(normalized))) continue;
-
-      const exists = tracker.items.find(i => i.normalized === normalized && i.status === 'open');
-      if (!exists) {
-        tracker.items.push({
-          text: trimmed.substring(0, 300),
-          normalized,
-          first_seen: $SESSION_NUM,
-          last_seen: $SESSION_NUM,
-          status: 'open'
-        });
-      } else {
-        exists.last_seen = $SESSION_NUM;
-      }
-    }
-    fs.writeFileSync('$TRACKER', JSON.stringify(tracker, null, 2) + '\n');
-  " 2>/dev/null || true
+  TRACKER="$TRACKER" FALSE_POSITIVES="$FALSE_POSITIVES" SESSION_NUM="$SESSION_NUM" \
+    NEW_TODOS="$NEW_TODOS" node hooks/lib/todo-scan.mjs merge 2>/dev/null || true
 fi
 
 # --- Phase 3: Auto-resolve false positives + check if tracked TODOs resolved ---
-node -e "
-  const fs = require('fs');
-  const { execSync } = require('child_process');
-  const tracker = JSON.parse(fs.readFileSync('$TRACKER', 'utf8'));
-  let changed = false;
-  let autoResolved = 0;
-
-  // Load false-positive patterns for auto-resolve
-  let fpPatterns = [];
-  try {
-    const fp = JSON.parse(fs.readFileSync('$FALSE_POSITIVES', 'utf8'));
-    fpPatterns = (fp.patterns || []).map(p => new RegExp(p, 'i'));
-  } catch {}
-
-  for (const item of tracker.items) {
-    if (item.status !== 'open') continue;
-
-    // Auto-resolve items matching false-positive patterns
-    if (fpPatterns.some(re => re.test(item.normalized))) {
-      item.status = 'resolved';
-      item.resolved_session = $SESSION_NUM;
-      item.resolution_note = 'auto-resolved: matches false-positive pattern';
-      changed = true;
-      autoResolved++;
-      continue;
-    }
-
-    // Extract a unique-ish substring to grep for (first 60 chars of normalized)
-    const needle = item.normalized.substring(0, 60).replace(/[\"\\\\]/g, '');
-    if (!needle || needle.length < 10) continue;
-    try {
-      execSync('grep -rF \"' + needle + '\" --include=\"*.js\" --include=\"*.mjs\" --include=\"*.sh\" --include=\"*.json\" . 2>/dev/null', { encoding: 'utf8', timeout: 5000 });
-      // Still present — update last_seen
-      item.last_seen = $SESSION_NUM;
-      changed = true;
-    } catch {
-      // Not found — mark resolved
-      item.status = 'resolved';
-      item.resolved_session = $SESSION_NUM;
-      changed = true;
-    }
-  }
-  // Prune: keep max 50 items, drop oldest resolved
-  if (tracker.items.length > 50) {
-    const resolved = tracker.items.filter(i => i.status === 'resolved');
-    resolved.sort((a, b) => a.resolved_session - b.resolved_session);
-    const toRemove = resolved.slice(0, tracker.items.length - 50);
-    tracker.items = tracker.items.filter(i => !toRemove.includes(i));
-    changed = true;
-  }
-  if (changed) fs.writeFileSync('$TRACKER', JSON.stringify(tracker, null, 2) + '\n');
-
-  // Report
-  const open = tracker.items.filter(i => i.status === 'open');
-  const stale = open.filter(i => $SESSION_NUM - i.first_seen >= 10);
-  if (autoResolved > 0) {
-    console.log('TODO tracker: auto-resolved ' + autoResolved + ' false positive(s)');
-  }
-  if (open.length > 0) {
-    console.log('TODO tracker: ' + open.length + ' open (' + stale.length + ' stale 10+ sessions)');
-  }
-" 2>/dev/null || true
+TRACKER="$TRACKER" FALSE_POSITIVES="$FALSE_POSITIVES" SESSION_NUM="$SESSION_NUM" \
+  node hooks/lib/todo-scan.mjs resolve 2>/dev/null || true
 
 # --- Phase 4: Write follow-up file for session-context injection ---
 if [ -n "$NEW_TODOS" ]; then

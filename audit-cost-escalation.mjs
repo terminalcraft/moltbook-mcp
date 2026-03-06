@@ -24,7 +24,7 @@ const dryRun = process.argv.includes('--dry-run');
 // Cost trend configs: session type → { stats_key, tracker_key, threshold, label }
 const COST_CONFIGS = [
   { type: 'B', statsKey: 'b_cost_trend', trackerKey: 'b_session_cost', threshold: 2.00, label: 'B session' },
-  { type: 'E', statsKey: 'e_cost_trend', trackerKey: 'e_session_cost', threshold: 1.50, label: 'E session' },  // wq-890: escalation at $1.50, soft cap $1.80, 6min exit gate. wq-894: duration gate enforcement added to posthook
+  { type: 'E', statsKey: 'e_cost_trend', trackerKey: 'e_session_cost', threshold: 1.80, label: 'E session' },  // wq-901: escalation aligned to cap ($1.80) not target ($1.50). Old $1.50 threshold triggered on healthy improving trends due to single-outlier sensitivity in 5-session window.
   { type: 'R', statsKey: 'r_cost_trend', trackerKey: 'r_session_cost', threshold: 2.00, label: 'R session' },
 ];
 

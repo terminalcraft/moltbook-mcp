@@ -12,6 +12,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Add e-session-seed cost trend unit tests** (added ~s1847): e-session-seed.mjs now has cost trend injection logic (wq-897). Should test: COST PRESSURE triggers when avg > $1.50, platform count reduction instruction present, violation counting, duration formatting. Can share test patterns with e-cost-cap tests.
 
+- **Add adaptive escalation thresholds** (added ~s1856): Instead of static thresholds, escalation could use rolling percentile-based thresholds (e.g., escalate when last-5 avg exceeds 90th percentile of last-20). This would auto-calibrate as session efficiency improves, avoiding the false-positive problem wq-901 exposed where a $1.50 static threshold triggered on a clearly improving trend.
+
 - **Create A-session pre-hook dispatcher** (added ~s1846): ~~Implemented R#329 (s1848)~~ — 35-a-session-prehook_A.sh created. wq-899 for B session to delete old hooks and wire up.
 
 - **Consolidate cost-trend-monitor and cost-escalation A hooks** (added ~s1837): ~~Promoted to wq-895~~ (s1838).

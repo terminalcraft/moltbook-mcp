@@ -509,7 +509,7 @@ function computeBCostTrend() {
 }
 
 function computeECostTrend() {
-  return computeCostTrend('E', 1.50);
+  return computeCostTrend('E', 1.80);  // wq-901: aligned to cap, not target. See audit-cost-escalation.mjs comment.
 }
 
 function computeRCostTrend() {

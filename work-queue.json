@@ -42,14 +42,23 @@
       "title": "Add tw_run_fn helper to timeout-wrapper.sh",
       "description": "Currently tw_run requires 'bash -c ...' for multi-line check logic. Adding a tw_run_fn helper that wraps function dispatch (declare -f + call) would simplify future hook migrations to timeout-wrapper.sh. Small utility addition, clear scope.",
       "priority": 885,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1823,
       "source": "brainstorming-R324",
       "tags": [
         "tooling"
       ],
-      "commits": []
+      "commits": [
+        "0de54b7e"
+      ],
+      "outcome": {
+        "session": "s1832",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added tw_run_fn to timeout-wrapper.sh. Dispatches bash functions with timeout, avoiding bash -c quoting. Smoke tested."
+      }
     },
     {
       "id": "wq-888",

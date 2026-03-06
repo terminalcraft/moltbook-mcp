@@ -5,6 +5,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
+- **Consolidate cost-trend-monitor and cost-escalation A hooks** (added ~s1837): 28-cost-trend-monitor_A.sh uses older b-cost-trend.mjs/r-cost-monitor.mjs while 37-cost-escalation_A.sh uses audit-cost-escalation.mjs (which consumes audit-stats.mjs with unified trend data). The older hook could be retired and its display logic folded into the escalation hook, reducing A-only pre-hooks by 1 (d074 contribution).
+
 - **Fix auto-promote threshold tests in session-context.test.mjs** (added ~s1836): 11 pre-existing test failures in auto-promote tests — all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix, just adjust expected counts.
 
 - **Platform health critical-only mode for faster prehook checks** (added ~s1807): With wq-874 fix, platform-health still takes ~10s for 51 platforms even with --fast. 25 of 51 are errors/unreachable (degraded or defunct). Add a `--critical-only` flag to account-manager that tests only the ~25 live platforms, cutting runtime to ~5s. Would also reduce noise in health alerts since degraded platforms are already tracked by circuit state.

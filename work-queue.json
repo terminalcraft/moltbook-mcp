@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-882",
-      "title": "TODO scan: tighten exclusions based on FP rate data",
-      "description": "The todo_false_positive_rate metric shows 51% combined FP rate (elevated). Queue-level FP rate is 78% (18/23 todo-scan items retired). Use per-item text from todo-tracker.json to identify new exclusion patterns or widen existing ones in todo-false-positives.json. Alternatively raise ingest threshold in queue-pipeline.mjs to require more specific TODO comments.",
-      "priority": 882,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1818,
-      "source": "brainstorming-R323",
-      "tags": [
-        "quality"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1836,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Three-layer fix: 9 new patterns in todo-false-positives.json, 7 new grep filters + 2 EXCLUDE_PATHS in 27-todo-scan.sh, specificity gate (isSpecificEnough) in queue-pipeline.mjs requiring file refs/identifiers/URL paths/4+ non-stop words. Forward-looking fix — historical 78% rate will decay as new items are processed with tighter filters."
-      }
-    },
-    {
       "id": "wq-888",
       "title": "Integrate audit-cost-escalation.mjs into A session pre-hook",
       "description": "audit-cost-escalation.mjs currently needs manual invocation by A sessions. Add it as an A-type-only pre-session hook that runs before audit starts, so cost trend wq items exist when A session reads the queue. Thin hook wrapper: call `node audit-cost-escalation.mjs`, log output.",
@@ -87,6 +66,21 @@
       "tags": [
         "d074",
         "planning"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-894",
+      "title": "Monitor E session cost trend — last-5 avg $1.84",
+      "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.84 vs last-10 avg $1.69 (↑ threshold_breach). Review session efficiency and enforce cost controls.",
+      "priority": 894,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1837,
+      "source": "audit-cost-escalation-s1837",
+      "tags": [
+        "audit",
+        "cost"
       ],
       "commits": []
     }

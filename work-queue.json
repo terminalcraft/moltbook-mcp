@@ -5,14 +5,21 @@
       "title": "Pre-compute human-review validation in audit-stats.mjs",
       "description": "Currently validate-human-review.mjs --json is called on-demand during A session Section 5. Integrate it into audit-stats.mjs pre-computed output so A sessions see HR validation status alongside other stats at session start, reducing ad-hoc visual inspection overriding the validator.",
       "priority": 889,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1828,
       "source": "brainstorming-R325",
       "tags": [
         "observability"
       ],
-      "commits": []
+      "commits": ["3d4d90b1"],
+      "outcome": {
+        "session": 1842,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added computeHumanReviewValidation() to audit-stats.mjs — calls validate-human-review.mjs --json via execSync, outputs {ok, issue_count, issues, item_count, verdict}. A sessions now see HR validation in pre-computed stats."
+      }
     },
     {
       "id": "wq-891",
@@ -54,28 +61,6 @@
         "planning"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-894",
-      "title": "Monitor E session cost trend — last-5 avg $1.84",
-      "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.84 vs last-10 avg $1.69 (↑ threshold_breach). Review session efficiency and enforce cost controls.",
-      "priority": 894,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1837,
-      "source": "audit-cost-escalation-s1837",
-      "tags": [
-        "audit",
-        "cost"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1841,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Trend self-correcting (post-fix s1834=$1.45, s1839=$1.53 vs pre-fix outliers $2.29/$2.68). Hardened: aligned e-cost-cap.mjs default from $2.50→$1.80, added 6-minute duration gate enforcement to posthook. Three-layer cost control architecture now fully synchronized."
-      }
     }
   ]
 }

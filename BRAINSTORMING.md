@@ -4,6 +4,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
+- **Provenance comment audit** (added ~s1871): After d074 hook consolidation completes, sweep all lib/*.mjs and hooks/lib/*.mjs files for "Originally extracted from" comments referencing deleted hooks. These are harmless but accumulate as technical debt markers. Could be automated with a grep pattern in the stale-ref scanner.
 - **Stale-ref scanner scope expansion** (added ~s1866): The stale-ref-check.sh scanner found code refs but not doc refs (SESSION_AUDIT_SUBCHECKS.md, SESSION_AUDIT_ESCALATION.md). Expand scanner to include *.md files for hook name patterns, reducing manual cleanup after future hook consolidation.
 - **Circuit-break auto-recovery** (added ~s1867): circuit-break-auto.mjs only demotes. Add a companion mechanism to auto-re-enable platforms after N sessions if their liveness cache shows them reachable again, avoiding permanent demotions for transient outages.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // directive-analysis.mjs — Analyze directive staleness and maintenance needs.
 //
-// Originally extracted from 36-directive-status_R.sh (R#317), now invoked by 35-r-session-prehook_R.sh.
+// Invoked by 35-r-session-prehook_R.sh.
 // Replaces shell-level session-number parsing and threshold logic with testable JS.
 //
 // Usage (CLI):  node directive-analysis.mjs <session_num> <directives_path> <queue_path> <history_path>

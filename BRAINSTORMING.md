@@ -7,6 +7,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 - **Add e-cost-cap unit tests** (added ~s1841): ~~Promoted to wq-900~~ (s1848).
+- **Stale-ref scanner: add structural-ref unit tests** (added ~s1852): The `is_structural_ref_line` function in stale-ref-check.sh has 4 file-type branches (JSON, shell, markdown, other) with non-trivial logic (backtick stripping, fence counting, strikethrough). No test coverage — regressions caught only by audit FP count. Extract to testable form or add integration tests with fixtures.
 - **Add e-session-seed unit tests** (added ~s1851): The seed generator now has 6 sections (E history, intel, rotation, cost trend, circuit-break, d049 nudge) but zero test coverage. Each section has independent logic that could regress silently. Test with mock filesystem deps.
 
 - **Add e-session-seed cost trend unit tests** (added ~s1847): e-session-seed.mjs now has cost trend injection logic (wq-897). Should test: COST PRESSURE triggers when avg > $1.50, platform count reduction instruction present, violation counting, duration formatting. Can share test patterns with e-cost-cap tests.

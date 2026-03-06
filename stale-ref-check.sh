@@ -11,7 +11,14 @@ set -euo pipefail
 cd ~/moltbook-mcp
 
 # Step 1: Find files deleted from git in last 60 days
-deleted=$(git log --oneline --diff-filter=D --since="60 days ago" --name-only | grep -E '\.(json|js|mjs|sh|md)$' | sort -u)
+# Use --format="" to suppress commit subject lines (which can match extension
+# filters when they mention filenames, e.g. "retire redundant foo.sh").
+# Also exclude node_modules/ and hooks/retired/ — these are expected/irrelevant.
+deleted=$(git log --format="" --diff-filter=D --since="60 days ago" --name-only \
+  | grep -E '\.(json|js|mjs|sh|md)$' \
+  | grep -v '^node_modules/' \
+  | grep -v '^hooks/retired/' \
+  | sort -u)
 
 if [ -z "$deleted" ]; then
   echo "No files deleted from git in last 60 days."
@@ -57,6 +64,8 @@ ARCHIVE_EXCLUDES=(
   --exclude="patterns.json"
   --exclude-dir="backups"
   --exclude-dir=".git"
+  --exclude-dir="node_modules"
+  --exclude-dir="retired"
 )
 
 # is_structural_ref — check if a match line is structural (not prose/comment/fence)

@@ -5,6 +5,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
+- **Retire 31-hr-schema-check_A.sh pre-hook** (added ~s1842): Now that audit-stats.mjs pre-computes HR validation, the separate pre-hook is redundant. Removing it would reduce hook count by 1 (d074 goal) and eliminate a duplicate subprocess call.
+
 - **Add e-cost-cap unit tests** (added ~s1841): e-cost-cap.mjs has no dedicated test file. Should test threshold defaults ($1.80), duration gate logic, registration keyword detection. Low effort, improves d071 combined coverage.
 
 - **Consolidate cost-trend-monitor and cost-escalation A hooks** (added ~s1837): ~~Promoted to wq-895~~ (s1838).

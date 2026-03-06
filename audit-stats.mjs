@@ -748,6 +748,40 @@ function computeBackupSubstitutionRate() {
   };
 }
 
+// --- Human-review validation (wq-889) ---
+
+function computeHumanReviewValidation() {
+  try {
+    const raw = execSync(
+      'node validate-human-review.mjs --json 2>/dev/null',
+      { cwd: PROJECT_DIR, encoding: 'utf8', timeout: 5000 }
+    );
+    const result = JSON.parse(raw.trim());
+    return {
+      ok: result.ok,
+      issue_count: result.issueCount,
+      issues: result.issues,
+      item_count: result.itemCount,
+      verdict: result.ok ? 'valid' : 'has_issues'
+    };
+  } catch (e) {
+    // If validator exits non-zero, it found issues — try parsing stdout
+    if (e.stdout) {
+      try {
+        const result = JSON.parse(e.stdout.trim());
+        return {
+          ok: false,
+          issue_count: result.issueCount || 0,
+          issues: result.issues || [],
+          item_count: result.itemCount || 0,
+          verdict: 'has_issues'
+        };
+      } catch { /* fall through */ }
+    }
+    return { ok: false, issue_count: -1, issues: ['validator failed to run'], item_count: 0, verdict: 'error' };
+  }
+}
+
 // --- TODO tracker false-positive rate (wq-866) ---
 
 function computeTodoFalsePositiveRate() {
@@ -842,7 +876,8 @@ const stats = {
   b_pipeline_gate: computeBPipelineGateCompliance(),
   e_scope_bleed: computeEScopeBleed(),
   backup_substitution_rate: computeBackupSubstitutionRate(),
-  todo_false_positive_rate: computeTodoFalsePositiveRate()
+  todo_false_positive_rate: computeTodoFalsePositiveRate(),
+  human_review_validation: computeHumanReviewValidation()
 };
 
 console.log(JSON.stringify(stats, null, 2));

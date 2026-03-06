@@ -150,7 +150,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 37-cost-escalation_A.sh | 23 | Low | Absorbed R#329 |
 
 **Result**: -7 hooks (8 → 1 dispatcher). ~457 lines consolidated.
-**Status**: Dispatcher created R#329 (s1848). wq-899 for B session to delete old hooks.
+**Status**: Dispatcher created R#329 (s1848). Old hooks deleted B#574 (s1862). ✓ COMPLETE.
 
 ### Group 2: R-session pre-hook dispatcher expansion ✓
 **Merge 2 standalone R hooks into existing `35-r-session-prehook_R.sh`**

@@ -17,7 +17,7 @@ import { readFileSync, appendFileSync } from 'fs';
 
 const REG_KEYWORDS = ['register', 'signup', 'sign up', 'create account', 'new account', 'registration'];
 
-export function checkCostCap({ session, historyFile, traceFile, hasTrace, threshold = 2.50, auditFile, deps = {} }) {
+export function checkCostCap({ session, historyFile, traceFile, hasTrace, threshold = 1.80, auditFile, deps = {} }) {
   const fs = {
     readFileSync: deps.readFileSync || readFileSync,
     appendFileSync: deps.appendFileSync || appendFileSync,
@@ -106,7 +106,7 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
   const historyFile = process.env.HISTORY_FILE;
   const traceFile = process.env.TRACE_FILE;
   const hasTrace = process.env.HAS_TRACE === 'true';
-  const threshold = parseFloat(process.env.E_COST_THRESHOLD || '2.50');
+  const threshold = parseFloat(process.env.E_COST_THRESHOLD || '1.80');
   const auditFile = `${process.env.HOME}/.config/moltbook/maintain-audit.txt`;
 
   if (!session || !historyFile) {

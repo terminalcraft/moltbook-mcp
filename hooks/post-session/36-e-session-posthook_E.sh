@@ -372,15 +372,23 @@ check_quality_enforce() {
 }
 
 ###############################################################################
-# Check 8: E session cost cap (wq-719)
-#   Warn when E session cost exceeds $2.50
+# Check 8: E session cost cap (wq-719, wq-890, wq-894)
+#   Warn when E session cost exceeds $1.80 soft cap
 #   Track 1-registration-per-session limit via trace keywords
+#   Also enforces 6-minute exit gate — logs violations for audit
 #   Logic extracted to hooks/lib/e-cost-cap.mjs (R#321)
 ###############################################################################
 check_e_cost_cap() {
   local COST_CAP_SCRIPT
   COST_CAP_SCRIPT="$(dirname "$(realpath "$0")")/../lib/e-cost-cap.mjs"
   E_COST_THRESHOLD="${E_COST_THRESHOLD:-1.80}" node "$COST_CAP_SCRIPT" 2>/dev/null || echo "e-cost-cap: script error (non-fatal)"
+
+  # Duration gate enforcement (wq-894): warn if E session exceeded 6 minutes
+  if [[ "$TOTAL_SECONDS" -gt 360 ]]; then
+    local OVER_MIN=$(( (TOTAL_SECONDS - 360) / 60 ))
+    echo "e-cost-cap: WARN — s${SESSION} duration ${DURATION_STR} exceeded 6-minute exit gate by ~${OVER_MIN}m"
+    echo "$(date -Iseconds) DURATION-GATE WARN: E session s${SESSION} ran ${DURATION_STR} (${TOTAL_SECONDS}s > 360s gate)" >> "${LOG_DIR}/hooks.log"
+  fi
 }
 
 ###############################################################################

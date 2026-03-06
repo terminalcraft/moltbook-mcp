@@ -24,7 +24,7 @@ const dryRun = process.argv.includes('--dry-run');
 // Cost trend configs: session type → { stats_key, tracker_key, threshold, label }
 const COST_CONFIGS = [
   { type: 'B', statsKey: 'b_cost_trend', trackerKey: 'b_session_cost', threshold: 2.00, label: 'B session' },
-  { type: 'E', statsKey: 'e_cost_trend', trackerKey: 'e_session_cost', threshold: 1.50, label: 'E session' },  // wq-890: threshold at $1.50, soft cap lowered to $1.80
+  { type: 'E', statsKey: 'e_cost_trend', trackerKey: 'e_session_cost', threshold: 1.50, label: 'E session' },  // wq-890: escalation at $1.50, soft cap $1.80, 6min exit gate. wq-894: duration gate enforcement added to posthook
   { type: 'R', statsKey: 'r_cost_trend', trackerKey: 'r_session_cost', threshold: 2.00, label: 'R session' },
 ];
 

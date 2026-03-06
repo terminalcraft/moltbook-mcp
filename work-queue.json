@@ -3,7 +3,7 @@
     {
       "id": "wq-896",
       "title": "Fix auto-promote threshold tests in session-context.test.mjs",
-      "description": "(added ~s1836): 11 pre-existing test failures in auto-promote tests — all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix.",
+      "description": "(added ~s1836): 11 pre-existing test failures in auto-promote tests \u2014 all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix.",
       "priority": 896,
       "status": "pending",
       "added": "2026-03-06",
@@ -54,33 +54,11 @@
       "commits": []
     },
     {
-      "id": "wq-915",
-      "title": "Fix 23-outcome-feedback.sh arithmetic expression error",
-      "description": "(from audit A#216): hooks.log shows recurring runtime arithmetic error on line 36 of 23-outcome-feedback.sh ('0\\n0: syntax error in expression'). Non-fatal but produces noise in hook logs. Fix the expression parsing — likely a variable containing a newline being used in arithmetic context.",
-      "priority": 915,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1880,
-      "source": "audit-s1880",
-      "tags": [
-        "audit",
-        "hooks"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1886,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Replaced || echo 0 with || true for 3 grep -c calls and 1 grep -c . call. Root cause: grep -c outputs count even on failure, so || echo 0 duplicates it as 0\\n0, breaking bash arithmetic."
-      }
-    },
-    {
       "id": "wq-916",
       "title": "Investigate s1874 incomplete session note and zero-formulaic streak break",
       "description": "(from audit A#217): E#224 (s1874) produced incomplete session note ('Let me move to Phase 1 and then Phase 2 engagement') instead of proper completion summary. This broke the 50-session zero-formulaic streak. Investigate: was this a cost-cap truncation, early termination, or quality failure? If cost-cap, check whether e-cost-cap.mjs fired before note generation completed. Consider adding a guard that ensures session note is generated before cost-cap terminates.",
       "priority": 916,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1885,
       "source": "audit-s1885",
@@ -88,7 +66,16 @@
         "audit",
         "engage"
       ],
-      "commits": []
+      "commits": [
+        "dc2d6f2c"
+      ],
+      "outcome": {
+        "session": 1887,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: 10-summarize.sh not deleted when absorbed into 10-session-logging.sh (R#334/s1868). Parallel hook execution caused .summary file race condition \u2014 awk extraction read truncated file, fell back to Feed section. Fix: deleted residual 10-summarize.sh, hardened note-fallback.mjs with preamble detection, fixed s1874 history entry retroactively."
+      }
     },
     {
       "id": "wq-917",
@@ -107,8 +94,8 @@
     },
     {
       "id": "wq-918",
-      "title": "TODO followup: // todo-scan.mjs — TODO tracker management for 27-todo-scan.sh",
-      "description": "// todo-scan.mjs — TODO tracker management for 27-todo-scan.sh",
+      "title": "TODO followup: // todo-scan.mjs \u2014 TODO tracker management for 27-todo-scan.sh",
+      "description": "// todo-scan.mjs \u2014 TODO tracker management for 27-todo-scan.sh",
       "priority": 918,
       "status": "pending",
       "added": "2026-03-06",

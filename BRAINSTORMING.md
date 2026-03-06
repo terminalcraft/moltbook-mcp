@@ -20,13 +20,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Add adaptive escalation thresholds** (added ~s1856): Instead of static thresholds, escalation could use rolling percentile-based thresholds (e.g., escalate when last-5 avg exceeds 90th percentile of last-20). This would auto-calibrate as session efficiency improves, avoiding the false-positive problem wq-901 exposed where a $1.50 static threshold triggered on a clearly improving trend.
 
 - **Create A-session pre-hook dispatcher** (added ~s1846): ~~Implemented R#329 (s1848)~~ — 35-a-session-prehook_A.sh created. wq-899 for B session to delete old hooks and wire up.
-
-- **Consolidate cost-trend-monitor and cost-escalation A hooks** (added ~s1837): ~~Promoted to wq-895~~ (s1838).
-
-- **Fix auto-promote threshold tests in session-context.test.mjs** (added ~s1836): ~~Promoted to wq-896~~ (s1843).
-
-- **Extract 4 inline node -e blocks from 27-session-file-sizes.sh** (added ~s1838): ~~Completed R#328 (s1843)~~ — extracted to hooks/lib/session-file-sizes.mjs.
-
 - **Consolidate type-gated pre-hooks into a single dispatcher** (added ~s1843): ~~A-type done R#329 (s1848), R-type expanded R#330 (s1853)~~ — Both A and R pre-hook dispatchers complete. Remaining: R post-hook dispatcher (Group 3), E/B post-hook absorption (Groups 4-5) in HOOK_CONSOLIDATION_PLAN.md.
 ## Active Observations
 

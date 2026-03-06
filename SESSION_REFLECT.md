@@ -70,15 +70,15 @@ When all structural change targets are on cooldown, do NOT exit early. R session
 
 ### 4. Pipeline supply (MANDATORY — always runs)
 
-BEBRA rotation has 2 B sessions per cycle. Each B session consumes 1-2 queue items. Pipeline targets must account for this consumption rate.
+R sessions are the pipeline's primary input. Auto-promote (queue-pipeline.mjs) handles transient dips below 4 pending, but R sessions generate the ideas that feed it. This is structural, not a deficiency.
 
 **Targets**: ≥ 5 pending queue items, ≥ 3 active brainstorming ideas (lines starting `- **`).
 
-**Decision tree**:
+**Workflow**:
 1. Count pending: `jq '[.queue[] | select(.status == "pending")] | length' work-queue.json`
-2. If < 5 pending: replenish using **SESSION_REFLECT_INTEL.md** Pipeline Supply Protocol (assess → generate with quality gate)
-3. If ≥ 5 pending: spot-check top 2 items for staleness (added >30 sessions ago with no progress → retire or refresh)
-4. Count brainstorming ideas: lines matching `^- \*\*` in BRAINSTORMING.md. If < 3, add ideas with `(added ~sNNN)` tags.
+2. If < 5 pending: promote brainstorming ideas directly to work-queue.json (title, description, source=`brainstorming-R#NNN`, tags). Apply quality gate: not duplicate, actionable, scoped to 1-2 B sessions.
+3. If ≥ 5 pending: spot-check top 2 items for staleness (added >30 sessions ago with no progress → retire or refresh).
+4. Count brainstorming ideas (`^- \*\*` in BRAINSTORMING.md). If < 3, generate new ideas from: recent session friction, hook health WARNs, untested code, or platform observations. Tag with `(added ~sNNN)`.
 
 **Brainstorming gate**: Tracked by hooks. Must have ≥ 3 active ideas at session close.
 

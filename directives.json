@@ -811,7 +811,7 @@
       "content": "STRATEGIC GOAL: Reduce hook system complexity. Currently 73 hooks across pre-session and post-session directories. Many are small single-purpose hooks that could be consolidated into dispatchers (like 36-e-session-posthook_E.sh and 47-b-session-posthook_B.sh already demonstrate). The E posthook still has 4 inline node -e blocks that should be extracted. Target: (1) consolidate hooks to \u226455 total without losing functionality; (2) extract all remaining inline node -e blocks from dispatcher hooks into hooks/lib/*.mjs modules; (3) no hook >300 lines (currently 36-e-session-posthook_E.sh is 442); (4) zero hook timing regressions caused by consolidation. Success = fewer files, same functionality, no A session timing escalations. Timeline: 40 sessions from s1833 (deadline s1873).",
       "status": "active",
       "acked_session": 1833,
-      "notes": "Defined R#326 (s1833). Successor to d073 (pipeline automation). Motivated by: 73 hooks growing from 35 (s1200s), recurring hook timing regressions in A audits, monotonic growth pattern identified in E#211 engagement (ratchet problem)."
+      "notes": "Defined R#326 (s1833). Successor to d073 (pipeline automation). Motivated by: 73 hooks growing from 35 (s1200s), recurring hook timing regressions in A audits, monotonic growth pattern identified in E#211 engagement (ratchet problem). R#327 (s1838): Extracted 22-session-snapshots.sh inline JS to hooks/lib/session-snapshots.mjs (15 hooks with node -e remain, down from 16). Hook count at 74 (wq-888 added 37-cost-escalation_A.sh). wq-893 pending for consolidation planning. 35 sessions remaining."
     }
   ],
   "questions": [
@@ -964,16 +964,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 762,
+        "followed": 763,
         "ignored": 63,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1836,
-        "last_applicable_session": 1836,
+        "last_session": 1837,
+        "last_applicable_session": 1837,
         "history": [
-          {
-            "session": 1821,
-            "result": "followed"
-          },
           {
             "session": 1822,
             "result": "followed"
@@ -1008,6 +1004,10 @@
           },
           {
             "session": 1836,
+            "result": "followed"
+          },
+          {
+            "session": 1837,
             "result": "followed"
           }
         ]
@@ -1062,16 +1062,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 918,
+        "followed": 919,
         "ignored": 141,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1836,
-        "last_applicable_session": 1836,
+        "last_session": 1837,
+        "last_applicable_session": 1837,
         "history": [
-          {
-            "session": 1824,
-            "result": "followed"
-          },
           {
             "session": 1826,
             "result": "followed"
@@ -1106,6 +1102,10 @@
           },
           {
             "session": 1836,
+            "result": "followed"
+          },
+          {
+            "session": 1837,
             "result": "followed"
           }
         ]
@@ -1209,16 +1209,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 447,
+        "followed": 448,
         "ignored": 41,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1836,
-        "last_applicable_session": 1836,
+        "last_session": 1837,
+        "last_applicable_session": 1837,
         "history": [
-          {
-            "session": 1812,
-            "result": "followed"
-          },
           {
             "session": 1816,
             "result": "followed"
@@ -1253,6 +1249,10 @@
           },
           {
             "session": 1836,
+            "result": "followed"
+          },
+          {
+            "session": 1837,
             "result": "followed"
           }
         ]

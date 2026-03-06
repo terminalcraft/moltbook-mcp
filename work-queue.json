@@ -54,40 +54,25 @@
       "commits": []
     },
     {
-      "id": "wq-911",
-      "title": "Add E session engagement-depth tracking to audit-stats",
-      "description": "(from brainstorming ~s1857): Audit currently only tracks E session cost trend (last-5 avg). Should also track engagement depth: threads-per-session and platforms-per-session as separate metrics in audit-stats.mjs output. Adds e_engagement_trend with {avg_threads, avg_platforms, min_threads, floor_violations}. Would catch engagement thinning earlier — the 3→2→1 thread decline took 5 sessions to flag.",
-      "priority": 911,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1873,
-      "source": "brainstorming-R335",
-      "tags": [
-        "audit",
-        "engagement"
-      ],
-      "commits": ["d1f3024f"],
-      "outcome": {
-        "session": 1876,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added computeEEngagementTrend() to audit-stats.mjs. Tracks avg_threads, avg_platforms, min_threads, floor_violations, trend direction from engagement-trace data. Includes session dedup for current+archive overlap. Outputs e_engagement_trend in audit-stats JSON."
-      }
-    },
-    {
       "id": "wq-912",
       "title": "Revise R scope budget metric to exclude directive-plan files",
       "description": "(from audit A#215): R scope budget has been stale at 20% compliance for 3 consecutive audits. All violations driven by BRIEFING.md and HOOK_CONSOLIDATION_PLAN.md updates as structural side-effects of d074/d075 directive work. Evaluate adding a 'directive_plan_files' exclusion list to r_scope_budget in audit-stats.mjs so that plan-tracking files touched during active directive work don't count as non-routine. Risk: could mask genuine scope creep. Mitigation: only exclude files explicitly listed in active directive metadata.",
       "priority": 912,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1875,
       "source": "audit-s1875",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1877,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added BRIEFING.md to ROUTINE_FILES, plan_files to d075, dynamic exclusion of active directive plan files. R scope budget went from 1/5 to 4/5 compliant."
+      }
     },
     {
       "id": "wq-913",

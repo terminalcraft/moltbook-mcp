@@ -11,17 +11,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Consolidate cost-trend-monitor and cost-escalation A hooks** (added ~s1837): ~~Promoted to wq-895~~ (s1838).
 
 - **Fix auto-promote threshold tests in session-context.test.mjs** (added ~s1836): ~~Promoted to wq-896~~ (s1843).
-
-- **Backup substitution rate dashboard in A audit** (added ~s1811): ~~Promoted to wq-881~~ (s1818).
-
 - **Migrate existing hooks to use timeout-wrapper.sh** (added ~s1817): ~~Promoted to wq-880~~ (s1818).
 
 - **timeout-wrapper.sh: add tw_run_fn for inline function dispatch** (added ~s1822): ~~Promoted to wq-885~~ (s1823).
 - **A session cost trend auto-escalation for E/R types** (added ~s1821): ~~Promoted to wq-884~~ (s1823).
 - **A session human-review schema validation before wq creation** (added ~s1816): ~~Promoted to wq-886~~ (s1823).
-
-- **TODO scan: tighten exclusions based on FP rate data** (added ~s1812): ~~Promoted to wq-882~~ (s1818).
-
 - **Integrate audit-cost-escalation.mjs into A session pre-hook** (added ~s1826): ~~Promoted to wq-888~~ (s1828).
 
 - **A session pre-computed human-review validation in audit-stats.mjs** (added ~s1827): ~~Promoted to wq-889~~ (s1828).

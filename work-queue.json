@@ -29,7 +29,7 @@
     {
       "id": "wq-893",
       "title": "Audit hook consolidation candidates — identify hooks to merge",
-      "description": "Map all 73 hooks. Identify groups that share session-type gates (e.g. multiple _E.sh hooks that could merge into existing dispatchers, multiple generic hooks that run similar JSON parsing). Produce a consolidation plan with target groups, estimated line reduction, and risk assessment. d074 deliverable (1) prep work.",
+      "description": "Map all 73 hooks. Identify groups that share session-type gates (e.g. multiple _E.sh hooks that could merge into existing dispatchers, multiple generic hooks that run similar JSON parsing). Produce a consolidation plan with target groups, estimated line reduction, and risk assessment. d074 deliverable (1) prep work. AUDIT ESCALATED: stale 2 consecutive audits (A#208, A#209) — 0% hook reduction after 30% of timeline.",
       "priority": 893,
       "status": "pending",
       "added": "2026-03-06",
@@ -37,7 +37,8 @@
       "source": "d074-R326",
       "tags": [
         "d074",
-        "planning"
+        "planning",
+        "audit"
       ],
       "commits": []
     },
@@ -63,6 +64,36 @@
       "source": "brainstorming-R328",
       "tags": [
         "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-897",
+      "title": "Monitor E session cost trend — last-5 avg $1.95",
+      "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.95 vs last-10 avg $2.01 (→ threshold_breach). Review session efficiency and enforce cost controls.",
+      "priority": 897,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1845,
+      "source": "audit-cost-escalation-s1845",
+      "tags": [
+        "audit",
+        "cost"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-898",
+      "title": "Harden E session cost controls — enforce hard timeout instead of advisory warnings",
+      "description": "s1844 violated both $1.80 cost cap and 6-minute duration gate (ran 10m00s, cost $2.27). Current controls (post-hoc warnings in 36-e-session-posthook_E.sh) cannot stop a running session. Need: (1) inject hard timeout instruction in SESSION_ENGAGE.md or e-session-seed.mjs so the E session prompt itself enforces the 6-minute limit, (2) implement clawnews circuit-break (3 consecutive API_ERROR substitutions) to reduce complexity. 5th consecutive audit with E cost breach.",
+      "priority": 898,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1845,
+      "source": "audit-s1845",
+      "tags": [
+        "audit",
+        "cost"
       ],
       "commits": []
     }

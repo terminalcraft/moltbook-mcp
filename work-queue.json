@@ -41,30 +41,6 @@
       "commits": []
     },
     {
-      "id": "wq-899",
-      "title": "Wire up A-session pre-hook dispatcher — delete 7 old hooks",
-      "description": "R#329 created 35-a-session-prehook_A.sh consolidating all 7 A-only pre-hooks. B session needs to: (1) delete 28-cost-trend-monitor_A.sh, 29-stale-ref-check_A.sh, 32-hook-timing-check_A.sh, 33-stale-tag-check_A.sh, 34-cred-health-cleanup_A.sh, 35-briefing-directive-check_A.sh, 37-cost-escalation_A.sh; (2) run A session dry-run to verify dispatcher output matches; (3) update hook manifest. Net result: -6 hooks toward d074 target.",
-      "priority": 899,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1848,
-      "source": "R329-structural",
-      "tags": [
-        "d074",
-        "hooks"
-      ],
-      "commits": [
-        "2f016b7d"
-      ],
-      "outcome": {
-        "session": 1862,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Deleted 7 A pre-hooks absorbed by 35-a-session-prehook_A.sh dispatcher. Hook count 75→68. First actual d074 reduction."
-      }
-    },
-    {
       "id": "wq-900",
       "title": "Add e-cost-cap unit tests",
       "description": "(from brainstorming ~s1841): e-cost-cap.mjs has no dedicated test file. Should test threshold defaults ($1.80), duration gate logic, registration keyword detection. Low effort, improves d071 combined coverage.",
@@ -79,56 +55,6 @@
       "commits": []
     },
     {
-      "id": "wq-904",
-      "title": "Delete old R-session hooks absorbed by dispatchers (Groups 2+3)",
-      "description": "R#330 absorbed 36-directive-status_R.sh and 44-brainstorm-gate_R.sh into 35-r-session-prehook_R.sh (Group 2). R#331 created 35-r-session-posthook_R.sh absorbing 15-r-commit-gate.sh, 18-r-impact-track.sh, and 26-brainstorm-compliance_R.sh (Group 3). B session needs to: (1) delete all 5 old hooks; (2) verify dispatchers run correctly in dry-run; (3) update hook manifest. Net result: -4 hooks toward d074 target.",
-      "priority": 904,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1858,
-      "source": "R331-structural",
-      "tags": [
-        "d074",
-        "hooks"
-      ],
-      "commits": [
-        "pending"
-      ],
-      "outcome": {
-        "session": 1862,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Deleted 5 R hooks absorbed by dispatchers (Groups 2+3). Hook count 68→63."
-      }
-    },
-    {
-      "id": "wq-905",
-      "title": "PRIORITY OVERRIDE: Execute wq-899 then wq-904 in next 2 B sessions",
-      "description": "Audit A#212 escalation (4th consecutive audit flagging d074 stall). Hook count has INCREASED 74→75 despite 3 dispatchers being built. wq-899 pending 12 sessions, wq-904 pending 2 sessions. B sessions consistently deprioritize d074 deletion work. MANDATE: Next B session MUST consume wq-899 as sole primary task. Following B session MUST consume wq-904. No other queue items until both are done. Combined result: -12 hooks (75→63). Failure by s1865 triggers d074 partial-close assessment.",
-      "priority": 905,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1860,
-      "source": "audit-s1860",
-      "tags": [
-        "audit",
-        "d074",
-        "priority-override"
-      ],
-      "commits": [
-        "2f016b7d",
-        "pending"
-      ],
-      "outcome": {
-        "session": 1862,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Both wq-899 and wq-904 executed in single session. Hook count 75→63 (-12). d074 unblocked."
-      }
-    },
-    {
       "id": "wq-906",
       "title": "Delete 3 health probe hooks absorbed by 02-periodic-checks.sh (d074 Group 6)",
       "description": "R#332 absorbed 10-health-check.sh, 15-presence-heartbeat.sh, and 20-poll-directories.sh into 02-periodic-checks.sh as Checks 4-6. Delete the 3 old hooks and verify 02-periodic-checks.sh runs all 6 checks. Combined with wq-899 (-7) and wq-904 (-5): total -15 hooks when all three execute.",
@@ -137,6 +63,21 @@
       "added": "2026-03-06",
       "created_session": 1861,
       "source": "R#332",
+      "tags": [
+        "d074",
+        "hooks"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-907",
+      "title": "Delete 11-json-key-lint.sh absorbed by 03-schema-check.sh (d074 Group 7)",
+      "description": "R#333 absorbed 11-json-key-lint.sh logic into 03-schema-check.sh. Delete the old hook and update hooks/manifest.json to remove the 11-json-key-lint.sh entry.",
+      "priority": 907,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1863,
+      "source": "R#333",
       "tags": [
         "d074",
         "hooks"

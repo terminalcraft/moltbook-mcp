@@ -214,17 +214,17 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 **Result**: -3 hooks. ~18 lines absorbed. 02-periodic-checks.sh 100→131 lines (well under 300L).
 **Status**: Logic absorbed R#332 (s1861). wq-906 for B session to delete old hooks.
 
-### Group 7: Generic pre-session validation consolidation
-**Merge small validation hooks into expanded `03-schema-check.sh` (rename to `03-validation-checks.sh`)**
+### Group 7: Generic pre-session validation consolidation ✓
+**Merge small validation hooks into expanded `03-schema-check.sh`**
 
-| Hook to absorb | Lines | Risk |
-|----------------|-------|------|
-| 03-schema-check.sh (base) | 9 | — |
-| 11-json-key-lint.sh | 6 | Low — duplicate key check |
+| Hook to absorb | Lines | Risk | Status |
+|----------------|-------|------|--------|
+| 03-schema-check.sh (base) | 9 | — | — |
+| 11-json-key-lint.sh | 6 | Low — duplicate key check | Absorbed R#333 |
 
 **Result**: -1 hook. ~6 lines absorbed.
 **Risk**: Low. Both do JSON validation.
-**Estimated effort**: Trivial (partial session).
+**Status**: Logic absorbed R#333 (s1863). wq-907 for B session to delete old hook + update manifest.
 
 ### Group 8: Generic post-session logging consolidation
 **Merge small logging hooks into a single `10-session-logging.sh` dispatcher**
@@ -261,7 +261,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 4. E post-hook absorption | Expand existing | -3 | 2 B sessions |
 | 5. B post-hook absorption | Expand existing | -2 | 1 B session |
 | 6. Health checks merge ✓ | Expand existing | -3 | R#332 |
-| 7. Validation merge | Expand existing | -1 | Trivial |
+| 7. Validation merge ✓ | Expand existing | -1 | R#333 |
 | 8. Logging consolidation | New dispatcher | -4 | 1 B session |
 | 9. Retire redundant | Delete | -1 | Trivial |
 | **Total** | | **-25** | **~7-8 B sessions** |

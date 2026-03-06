@@ -5,14 +5,21 @@
       "title": "Integrate audit-cost-escalation.mjs into A session pre-hook",
       "description": "audit-cost-escalation.mjs currently needs manual invocation by A sessions. Add it as an A-type-only pre-session hook that runs before audit starts, so cost trend wq items exist when A session reads the queue. Thin hook wrapper: call `node audit-cost-escalation.mjs`, log output.",
       "priority": 888,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1828,
       "source": "brainstorming-R325",
       "tags": [
         "automation"
       ],
-      "commits": []
+      "commits": ["3193a0bc"],
+      "outcome": {
+        "session": 1837,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Created 37-cost-escalation_A.sh — thin wrapper calling audit-cost-escalation.mjs, non-blocking, logs summary. Verified: run-hooks.sh gates _A.sh suffix to A sessions only."
+      }
     },
     {
       "id": "wq-889",

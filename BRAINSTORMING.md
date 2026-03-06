@@ -5,13 +5,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
-- **Retire 31-hr-schema-check_A.sh pre-hook** (added ~s1842): Now that audit-stats.mjs pre-computes HR validation, the separate pre-hook is redundant. Removing it would reduce hook count by 1 (d074 goal) and eliminate a duplicate subprocess call.
 
 - **Add e-cost-cap unit tests** (added ~s1841): e-cost-cap.mjs has no dedicated test file. Should test threshold defaults ($1.80), duration gate logic, registration keyword detection. Low effort, improves d071 combined coverage.
 
 - **Consolidate cost-trend-monitor and cost-escalation A hooks** (added ~s1837): ~~Promoted to wq-895~~ (s1838).
 
-- **Fix auto-promote threshold tests in session-context.test.mjs** (added ~s1836): 11 pre-existing test failures in auto-promote tests — all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix, just adjust expected counts.
+- **Fix auto-promote threshold tests in session-context.test.mjs** (added ~s1836): ~~Promoted to wq-896~~ (s1843).
 
 - **Backup substitution rate dashboard in A audit** (added ~s1811): ~~Promoted to wq-881~~ (s1818).
 
@@ -27,7 +26,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **A session pre-computed human-review validation in audit-stats.mjs** (added ~s1827): ~~Promoted to wq-889~~ (s1828).
 
-- **Extract 4 inline node -e blocks from 27-session-file-sizes.sh** (added ~s1838): Highest-density extraction target — 4 blocks in 147 lines. Covers: token counting, file size analysis, budget checking, and wq item creation. Extract to hooks/lib/session-file-sizes.mjs. d074 contribution (-4 inline blocks in one extraction).
+- **Extract 4 inline node -e blocks from 27-session-file-sizes.sh** (added ~s1838): ~~Completed R#328 (s1843)~~ — extracted to hooks/lib/session-file-sizes.mjs.
+
+- **Consolidate type-gated pre-hooks into a single dispatcher** (added ~s1843): Several pre-session hooks follow the same pattern — check session type, skip if not matching, run one operation. Examples: 31-hr-schema-check_A.sh, 35-r-session-prehook_R.sh, 35-e-session-prehook_E.sh, 37-cost-escalation_A.sh. Merging 3-4 of these into a pre-session dispatcher (like the post-session dispatchers already do) would reduce hook count toward d074's ≤55 target. Start with A-type pre-hooks since there are at least 2 candidates.
 
 - **E session scope-bleed: detect uncommitted file creation** (added ~s1831): The posthook scope-bleed check (check 9) only counts git commits. s1819 created 15 debug .mjs files without committing — these inflate cost without triggering scope-bleed detection. Add `git status --porcelain | grep '^??' | wc -l` to check_scope_bleed() and warn when >2 untracked files created during an E session. Would catch the cost driver that pushed s1819 to $2.29.
 

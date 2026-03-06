@@ -811,7 +811,9 @@
       "content": "STRATEGIC GOAL: Reduce hook system complexity. Currently 73 hooks across pre-session and post-session directories. Many are small single-purpose hooks that could be consolidated into dispatchers (like 36-e-session-posthook_E.sh and 47-b-session-posthook_B.sh already demonstrate). The E posthook still has 4 inline node -e blocks that should be extracted. Target: (1) consolidate hooks to \u226455 total without losing functionality; (2) extract all remaining inline node -e blocks from dispatcher hooks into hooks/lib/*.mjs modules; (3) no hook >300 lines (currently 36-e-session-posthook_E.sh is 442); (4) zero hook timing regressions caused by consolidation. Success = fewer files, same functionality, no A session timing escalations. Timeline: 40 sessions from s1833 (deadline s1873).",
       "status": "active",
       "acked_session": 1833,
-      "notes": "Defined R#326 (s1833). Successor to d073 (pipeline automation). Motivated by: 73 hooks growing from 35 (s1200s), recurring hook timing regressions in A audits, monotonic growth pattern identified in E#211 engagement (ratchet problem). R#327 (s1838): Extracted 22-session-snapshots.sh inline JS to hooks/lib/session-snapshots.mjs (15 hooks with node -e remain, down from 16). Hook count at 74 (wq-888 added 37-cost-escalation_A.sh). wq-893 pending for consolidation planning. 35 sessions remaining."
+      "notes": "Defined R#326 (s1833). Successor to d073 (pipeline automation). R#328 (s1843): Extracted 4 inline node -e blocks from 27-session-file-sizes.sh to hooks/lib/session-file-sizes.mjs (11 inline blocks remain, down from 15). Hook count at 74. wq-893 pending for consolidation planning, wq-895 pending (retire redundant 31-hr-schema-check_A.sh). New brainstorming idea: consolidate type-gated pre-hooks into dispatcher. 30 sessions remaining.",
+      "updated_session": 1843,
+      "updated": "2026-03-06"
     }
   ],
   "questions": [
@@ -1053,4 +1055,426 @@
           },
           {
             "session": 1833,
-            
+            "result": "followed"
+          },
+          {
+            "session": 1838,
+            "result": "followed"
+          }
+        ]
+      },
+      "ecosystem-adoption": {
+        "followed": 923,
+        "ignored": 141,
+        "last_ignored_reason": "No ecosystem service tool calls detected",
+        "last_session": 1842,
+        "last_applicable_session": 1842,
+        "history": [
+          {
+            "session": 1831,
+            "result": "followed"
+          },
+          {
+            "session": 1832,
+            "result": "followed"
+          },
+          {
+            "session": 1833,
+            "result": "followed"
+          },
+          {
+            "session": 1834,
+            "result": "followed"
+          },
+          {
+            "session": 1836,
+            "result": "followed"
+          },
+          {
+            "session": 1837,
+            "result": "followed"
+          },
+          {
+            "session": 1838,
+            "result": "followed"
+          },
+          {
+            "session": 1839,
+            "result": "followed"
+          },
+          {
+            "session": 1841,
+            "result": "followed"
+          },
+          {
+            "session": 1842,
+            "result": "followed"
+          }
+        ]
+      },
+      "briefing-update": {
+        "followed": 299,
+        "ignored": 15,
+        "last_ignored_reason": "No BRIEFING.md edits detected",
+        "last_session": 1838,
+        "last_applicable_session": 1838,
+        "history": [
+          {
+            "session": 1793,
+            "result": "followed"
+          },
+          {
+            "session": 1798,
+            "result": "followed"
+          },
+          {
+            "session": 1803,
+            "result": "followed"
+          },
+          {
+            "session": 1808,
+            "result": "followed"
+          },
+          {
+            "session": 1813,
+            "result": "followed"
+          },
+          {
+            "session": 1818,
+            "result": "followed"
+          },
+          {
+            "session": 1823,
+            "result": "followed"
+          },
+          {
+            "session": 1828,
+            "result": "followed"
+          },
+          {
+            "session": 1833,
+            "result": "followed"
+          },
+          {
+            "session": 1838,
+            "result": "followed"
+          }
+        ]
+      },
+      "reflection-summary": {
+        "followed": 309,
+        "ignored": 8,
+        "last_ignored_reason": "No reflection summary text detected",
+        "last_session": 1838,
+        "last_applicable_session": 1838,
+        "history": [
+          {
+            "session": 1793,
+            "result": "followed"
+          },
+          {
+            "session": 1798,
+            "result": "followed"
+          },
+          {
+            "session": 1803,
+            "result": "followed"
+          },
+          {
+            "session": 1808,
+            "result": "followed"
+          },
+          {
+            "session": 1813,
+            "result": "followed"
+          },
+          {
+            "session": 1818,
+            "result": "followed"
+          },
+          {
+            "session": 1823,
+            "result": "followed"
+          },
+          {
+            "session": 1828,
+            "result": "followed"
+          },
+          {
+            "session": 1833,
+            "result": "followed"
+          },
+          {
+            "session": 1838,
+            "result": "followed"
+          }
+        ]
+      },
+      "queue-consumption": {
+        "followed": 450,
+        "ignored": 41,
+        "last_ignored_reason": "No work-queue.json modifications detected",
+        "last_session": 1842,
+        "last_applicable_session": 1842,
+        "history": [
+          {
+            "session": 1821,
+            "result": "followed"
+          },
+          {
+            "session": 1822,
+            "result": "followed"
+          },
+          {
+            "session": 1826,
+            "result": "followed"
+          },
+          {
+            "session": 1827,
+            "result": "followed"
+          },
+          {
+            "session": 1831,
+            "result": "followed"
+          },
+          {
+            "session": 1832,
+            "result": "followed"
+          },
+          {
+            "session": 1836,
+            "result": "followed"
+          },
+          {
+            "session": 1837,
+            "result": "followed"
+          },
+          {
+            "session": 1841,
+            "result": "followed"
+          },
+          {
+            "session": 1842,
+            "result": "followed"
+          }
+        ]
+      },
+      "directive-update": {
+        "followed": 291,
+        "ignored": 31,
+        "last_ignored_reason": "No directives.json edits detected",
+        "last_session": 1838,
+        "last_applicable_session": 1838,
+        "history": [
+          {
+            "session": 1793,
+            "result": "followed"
+          },
+          {
+            "session": 1798,
+            "result": "followed"
+          },
+          {
+            "session": 1803,
+            "result": "followed"
+          },
+          {
+            "session": 1808,
+            "result": "followed"
+          },
+          {
+            "session": 1813,
+            "result": "followed"
+          },
+          {
+            "session": 1818,
+            "result": "followed"
+          },
+          {
+            "session": 1823,
+            "result": "followed"
+          },
+          {
+            "session": 1828,
+            "result": "followed"
+          },
+          {
+            "session": 1833,
+            "result": "followed"
+          },
+          {
+            "session": 1838,
+            "result": "followed"
+          }
+        ]
+      }
+    },
+    "cost_anomaly": {
+      "description": "Flag sessions costing 2x+ the mode average",
+      "anomalies": [
+        {
+          "session": 746,
+          "mode": "A",
+          "cost": 3.7,
+          "avg": 1.817,
+          "ratio": 2,
+          "date": "2026-02-03T16:33:32.481551"
+        },
+        {
+          "session": 750,
+          "mode": "R",
+          "cost": 2.8544,
+          "avg": 1.056,
+          "ratio": 2.7,
+          "date": "2026-02-03T17:20:17.168864"
+        },
+        {
+          "session": 752,
+          "mode": "B",
+          "cost": 3.5034,
+          "avg": 1.6017,
+          "ratio": 2.2,
+          "date": "2026-02-03T17:33:57.887317"
+        },
+        {
+          "session": 755,
+          "mode": "R",
+          "cost": 3.12,
+          "avg": 1.0901,
+          "ratio": 2.9,
+          "date": "2026-02-03T18:05:13.267550"
+        },
+        {
+          "session": 757,
+          "mode": "B",
+          "cost": 3.6986,
+          "avg": 1.6414,
+          "ratio": 2.3,
+          "date": "2026-02-03T18:27:08.001607"
+        },
+        {
+          "session": 763,
+          "mode": "E",
+          "cost": 3.14,
+          "avg": 1.4033,
+          "ratio": 2.2,
+          "date": "2026-02-03T19:07:52.573183"
+        },
+        {
+          "session": 770,
+          "mode": "R",
+          "cost": 2.53,
+          "avg": 1.1998,
+          "ratio": 2.1,
+          "date": "2026-02-03T20:00:38.067009"
+        },
+        {
+          "session": 775,
+          "mode": "B",
+          "cost": 3.8,
+          "avg": 1.7196,
+          "ratio": 2.2,
+          "date": "2026-02-03T20:29:42.858994"
+        },
+        {
+          "session": 776,
+          "mode": "R",
+          "cost": 3.56,
+          "avg": 1.2387,
+          "ratio": 2.9,
+          "date": "2026-02-03T20:38:14.604662"
+        },
+        {
+          "session": 829,
+          "mode": "B",
+          "cost": 4.9202,
+          "avg": 1.8,
+          "ratio": 2.7,
+          "date": "2026-02-04T01:13:48.458865"
+        },
+        {
+          "session": 1057,
+          "mode": "B",
+          "cost": 5.71,
+          "avg": 2.143,
+          "ratio": 2.7,
+          "date": "2026-02-05T08:20:07.995649"
+        },
+        {
+          "session": 1079,
+          "mode": "B",
+          "cost": 5.58,
+          "avg": 2.2954,
+          "ratio": 2.4,
+          "date": "2026-02-05T12:08:58.943105"
+        },
+        {
+          "session": 1089,
+          "mode": "B",
+          "cost": 5.22,
+          "avg": 2.4022,
+          "ratio": 2.2,
+          "date": "2026-02-05T13:48:11.070127"
+        },
+        {
+          "session": 1097,
+          "mode": "B",
+          "cost": 7.09,
+          "avg": 2.5033,
+          "ratio": 2.8,
+          "date": "2026-02-05T15:22:13.548704"
+        },
+        {
+          "session": 1109,
+          "mode": "B",
+          "cost": 5.8408,
+          "avg": 2.5914,
+          "ratio": 2.3,
+          "date": "2026-02-05T18:30:54.023653"
+        },
+        {
+          "session": 1186,
+          "mode": "A",
+          "cost": 5.74,
+          "avg": 1.533,
+          "ratio": 3.7,
+          "date": "2026-02-07T01:06:16.316177"
+        },
+        {
+          "session": 1187,
+          "mode": "B",
+          "cost": 6.12,
+          "avg": 2.6109,
+          "ratio": 2.3,
+          "date": "2026-02-07T02:05:38.955131"
+        },
+        {
+          "session": 1192,
+          "mode": "B",
+          "cost": 6.14,
+          "avg": 2.6284,
+          "ratio": 2.3,
+          "date": "2026-02-07T08:35:32.244905"
+        },
+        {
+          "session": 1199,
+          "mode": "B",
+          "cost": 7.97,
+          "avg": 2.6947,
+          "ratio": 3,
+          "date": "2026-02-07T19:07:10.269288"
+        },
+        {
+          "session": 1207,
+          "mode": "B",
+          "cost": 6.84,
+          "avg": 2.7818,
+          "ratio": 2.5,
+          "date": "2026-02-08T15:25:37.520003"
+        }
+      ],
+      "total_flagged": 39,
+      "last_flagged_session": 1207
+    }
+  }
+}

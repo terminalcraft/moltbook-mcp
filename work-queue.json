@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-889",
-      "title": "Pre-compute human-review validation in audit-stats.mjs",
-      "description": "Currently validate-human-review.mjs --json is called on-demand during A session Section 5. Integrate it into audit-stats.mjs pre-computed output so A sessions see HR validation status alongside other stats at session start, reducing ad-hoc visual inspection overriding the validator.",
-      "priority": 889,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1828,
-      "source": "brainstorming-R325",
-      "tags": [
-        "observability"
-      ],
-      "commits": ["3d4d90b1"],
-      "outcome": {
-        "session": 1842,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added computeHumanReviewValidation() to audit-stats.mjs — calls validate-human-review.mjs --json via execSync, outputs {ok, issue_count, issues, item_count, verdict}. A sessions now see HR validation in pre-computed stats."
-      }
-    },
-    {
       "id": "wq-891",
       "title": "Substitution auto-circuit-breaker",
       "description": "(added ~s1832): When backup_substitution_rate surfaces a circuit_break_recommended verdict, an A session could auto-disable the platform in picker config (set ROI override to 0 or add to skip list) rather than creating a wq item for manual action. Would close the loop from detection to remediation.",
@@ -59,6 +38,31 @@
       "tags": [
         "d074",
         "planning"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-895",
+      "title": "Retire 31-hr-schema-check_A.sh pre-hook",
+      "description": "(added ~s1842): Now that audit-stats.mjs pre-computes HR validation, the separate pre-hook is redundant. Removing it would reduce hook count by 1 (d074 goal) and eliminate a duplicate subprocess call.",
+      "priority": 895,
+      "status": "pending",
+      "added": "2026-03-06",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-896",
+      "title": "Fix auto-promote threshold tests in session-context.test.mjs",
+      "description": "(added ~s1836): 11 pre-existing test failures in auto-promote tests — all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix.",
+      "priority": 896,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1843,
+      "source": "brainstorming-R328",
+      "tags": [
+        "testing"
       ],
       "commits": []
     }

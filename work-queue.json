@@ -69,6 +69,36 @@
         "observability"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-891",
+      "title": "Migrate 10-health-check.sh to timeout-wrapper.sh",
+      "description": "10-health-check.sh is newly degrading with p95=5394ms (trend=degrading). Same pattern as 02-periodic-checks.sh before wq-880 fix. Migrate to timeout-wrapper.sh for structural timeout enforcement. May benefit from wq-885 tw_run_fn helper.",
+      "priority": 891,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1830,
+      "source": "audit-s1830",
+      "tags": [
+        "audit",
+        "performance"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-890",
+      "title": "Monitor E session cost trend — last-5 avg $1.74",
+      "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.74 vs last-10 avg $1.7 (→ threshold_breach). Review session efficiency and enforce cost controls.",
+      "priority": 890,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1830,
+      "source": "audit-cost-escalation-s1830",
+      "tags": [
+        "audit",
+        "cost"
+      ],
+      "commits": []
     }
   ]
 }

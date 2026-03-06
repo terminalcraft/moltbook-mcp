@@ -45,7 +45,7 @@
       "title": "Harden E session cost controls — clawnews circuit-break",
       "description": "Remaining from original scope: implement clawnews circuit-break (3 consecutive API_ERROR substitutions) to reduce E session complexity. Deliverable (1) — inject hard timeout instruction — completed by wq-897 (s1847). Deliverable (2) — clawnews circuit-break — still pending.",
       "priority": 898,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1845,
       "source": "audit-s1845",
@@ -53,7 +53,16 @@
         "audit",
         "cost"
       ],
-      "commits": []
+      "commits": [
+        "3c49b2b9"
+      ],
+      "outcome": {
+        "session": 1851,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added circuit-break section to e-session-seed.mjs — surfaces open-circuit platforms in E session context so agent skips them without wasting tool calls. SESSION_ENGAGE.md Phase 2 updated with pre-check instruction. clawnews currently at 2/3 failures; next E session failure will trip the circuit and the seed will inject the warning."
+      }
     },
     {
       "id": "wq-899",

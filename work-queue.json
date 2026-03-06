@@ -69,21 +69,6 @@
         "cost"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-895",
-      "title": "Merge 28-cost-trend-monitor_A.sh into 37-cost-escalation_A.sh",
-      "description": "Hook 28 uses legacy b-cost-trend.mjs and r-cost-monitor.mjs for display-only cost info. Hook 37 uses audit-cost-escalation.mjs which already consumes unified trend data from audit-stats.mjs AND creates wq items. Merge 28's display output into 37's hook, then retire 28 and the two legacy scripts. Reduces A-only pre-hooks by 1 (d074 contribution, -1 toward ≤55 target).",
-      "priority": 895,
-      "status": "pending",
-      "added": "2026-03-06",
-      "created_session": 1838,
-      "source": "brainstorming-R327",
-      "tags": [
-        "d074",
-        "consolidation"
-      ],
-      "commits": []
     }
   ]
 }

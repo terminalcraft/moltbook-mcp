@@ -226,21 +226,19 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 **Risk**: Low. Both do JSON validation.
 **Status**: Logic absorbed R#333 (s1863). wq-907 for B session to delete old hook + update manifest.
 
-### Group 8: Generic post-session logging consolidation
-**Merge small logging hooks into a single `10-session-logging.sh` dispatcher**
+### Group 8: Generic post-session logging consolidation ✓
+**Merge logging hooks into `10-session-logging.sh` dispatcher**
 
-| Hook to absorb | Lines | Risk |
-|----------------|-------|------|
-| 10-summarize.sh (base) | 104 | — |
-| 13-ctxly-summary.sh | 46 | Medium — depends on 10-summarize output |
-| 16-structured-outcomes.sh | 59 | Medium — depends on cost pipeline |
-| 19-session-debrief.sh | 19 | Low — independent debrief |
-| 22-session-snapshots.sh | 18 | Low — independent snapshots |
+| Hook to absorb | Lines | Risk | Status |
+|----------------|-------|------|--------|
+| 10-summarize.sh (base) | 104 | — | Absorbed R#334 |
+| 13-ctxly-summary.sh | 46 | Low — depends on summary (same dispatcher) | Absorbed R#334 |
+| 16-structured-outcomes.sh | 59 | EXCLUDED — depends on 15-cost-pipeline ordering | Kept standalone |
+| 19-session-debrief.sh | 19 | Low — independent debrief | Absorbed R#334 |
+| 22-session-snapshots.sh | 18 | Low — independent snapshots | Absorbed R#334 |
 
-**Result**: -4 hooks (5 → 1). ~142 lines consolidated.
-**Risk**: Medium. Dependency ordering critical — 13 depends on 10, 16 depends on 15-cost-pipeline.
-**Mitigation**: Careful ordering within dispatcher. Test with all session types.
-**Estimated effort**: 1 B session.
+**Result**: -3 hooks (4 → 1). 146 lines consolidated. 16-structured-outcomes.sh excluded due to ordering dependency on 15-cost-pipeline.sh.
+**Status**: Dispatcher created R#334 (s1868). wq-909 for B session to delete 4 old hooks.
 
 ### Group 9: Retire redundant hooks
 | Hook | Lines | Reason | Risk |
@@ -262,7 +260,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 5. B post-hook absorption | Expand existing | -2 | 1 B session |
 | 6. Health checks merge ✓ | Expand existing | -3 | R#332 |
 | 7. Validation merge ✓ | Expand existing | -1 | R#333 |
-| 8. Logging consolidation | New dispatcher | -4 | 1 B session |
+| 8. Logging consolidation ✓ | New dispatcher | -3 | R#334 |
 | 9. Retire redundant | Delete | -1 | Trivial |
 | **Total** | | **-25** | **~7-8 B sessions** |
 

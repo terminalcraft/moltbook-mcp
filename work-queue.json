@@ -1,26 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-891",
-      "title": "Substitution auto-circuit-breaker",
-      "description": "(added ~s1832): When backup_substitution_rate surfaces a circuit_break_recommended verdict, an A session could auto-disable the platform in picker config (set ROI override to 0 or add to skip list) rather than creating a wq item for manual action. Would close the loop from detection to remediation.",
-      "priority": 891,
-      "status": "done",
-      "added": "2026-03-06",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "3297c158"
-      ],
-      "outcome": {
-        "session": "s1867",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created circuit-break-auto.mjs — auto-demotes platforms in picker-demotions.json when backup_substitution_rate verdict is circuit_break_recommended. Updated SESSION_AUDIT_SUBCHECKS.md to reference auto-remediation instead of manual wq item creation."
-      }
-    },
-    {
       "id": "wq-892",
       "title": "Slim SESSION_AUDIT_SUBCHECKS.md — 3202 tokens (over 3000 budget)",
       "description": "Auto-generated: SESSION_AUDIT_SUBCHECKS.md is 3202 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
@@ -87,6 +67,21 @@
       "added": "2026-03-06",
       "created_session": 1863,
       "source": "R#333",
+      "tags": [
+        "d074",
+        "hooks"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-909",
+      "title": "Delete 4 logging hooks absorbed by 10-session-logging.sh (d074 Group 8)",
+      "description": "R#334 absorbed 10-summarize.sh, 13-ctxly-summary.sh, 19-session-debrief.sh, and 22-session-snapshots.sh into 10-session-logging.sh. Delete the 4 old hooks and update hooks/manifest.json. Note: 16-structured-outcomes.sh kept standalone (ordering dependency on 15-cost-pipeline.sh).",
+      "priority": 909,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1868,
+      "source": "R#334",
       "tags": [
         "d074",
         "hooks"

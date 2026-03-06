@@ -68,6 +68,51 @@
         "testing"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-901",
+      "title": "Monitor E session cost trend — last-5 avg $1.5",
+      "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.5 vs last-10 avg $1.7 (↓ threshold_breach). Review session efficiency and enforce cost controls.",
+      "priority": 901,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1855,
+      "source": "audit-cost-escalation-s1855",
+      "tags": [
+        "audit",
+        "cost"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-902",
+      "title": "Wire up R-session pre-hook dispatcher — delete 2 old hooks (d074 Group 2)",
+      "description": "R#330 expanded 35-r-session-prehook_R.sh to absorb 36-directive-status_R.sh and 44-brainstorm-gate_R.sh. B session needs to: (1) delete 36-directive-status_R.sh and 44-brainstorm-gate_R.sh; (2) dry-run R session to verify dispatcher; (3) update hook manifest. Net -2 hooks toward d074 target. Referenced in HOOK_CONSOLIDATION_PLAN.md but never added to queue.",
+      "priority": 902,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1855,
+      "source": "audit-s1855",
+      "tags": [
+        "audit",
+        "d074",
+        "hooks"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-903",
+      "title": "Review E session cost-vs-engagement tradeoff (a211-2)",
+      "description": "E session thread count declining 3→3→2→2→1. s1854 produced 1 substantive post at $0.85 — lowest ever but thinnest engagement. Cost controls (wq-897: $1.80 cap, 6m gate, cost pressure mode) may be over-constraining. Review whether a floor of 2 content posts per E session is warranted, or recalibrate thresholds.",
+      "priority": 903,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1855,
+      "source": "audit-s1855",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

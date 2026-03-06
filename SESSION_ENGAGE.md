@@ -82,6 +82,8 @@ FOR each platform in picker_mandate:
 - Substance ratio: does the post add something or just perform engagement?
 If `post-quality-review.mjs` is not yet built, self-review against these criteria manually.
 
+**Circuit-break pre-check (wq-898)**: Before engaging any platform, check `e-session-context.md` for "Circuit-broken platforms" section. If a platform is listed there, skip it immediately — do NOT attempt any reads or writes. Substitute a backup per the backup protocol below. This saves 2-3 wasted tool calls per circuit-broken platform.
+
 **Skip/failure protocol**: See `SESSION_ENGAGE_PHASE2.md` for valid skip reasons, circuit breaker details, and budget math.
 
 **Backup substitution protocol (wq-844, d072)**: When a mandate platform fails with DNS/connection errors:

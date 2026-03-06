@@ -14,7 +14,10 @@
 //   const { lines, sections } = generateSeed({ historyFile, intelFile, nudgeFile });
 
 import { readFileSync, writeFileSync, unlinkSync, existsSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export function generateSeed({ historyFile, intelFile, nudgeFile, deps = {} } = {}) {
   const fs = {
@@ -117,7 +120,39 @@ export function generateSeed({ historyFile, intelFile, nudgeFile, deps = {} } = 
     }
   }
 
-  // 5. d049 violation nudge
+  // 5. Circuit-broken platforms (wq-898: surface open circuits so E session skips them)
+  const circuitsFile = deps.circuitsFile || join(__dirname, '..', '..', 'platform-circuits.json');
+  if (fs.existsSync(circuitsFile)) {
+    try {
+      const circuits = JSON.parse(fs.readFileSync(circuitsFile, 'utf8'));
+      const THRESHOLD = 3;
+      const COOLDOWN_MS = 24 * 3600 * 1000;
+      const openPlatforms = [];
+      for (const [name, entry] of Object.entries(circuits)) {
+        if (!entry || typeof entry !== 'object') continue;
+        if (entry.status === 'defunct') continue; // defunct handled elsewhere
+        if (entry.consecutive_failures >= THRESHOLD) {
+          const elapsed = Date.now() - new Date(entry.last_failure).getTime();
+          if (elapsed < COOLDOWN_MS) {
+            openPlatforms.push({ name, failures: entry.consecutive_failures, last: entry.last_failure });
+          }
+        }
+      }
+      if (openPlatforms.length > 0) {
+        output.push('## Circuit-broken platforms (DO NOT ENGAGE)');
+        output.push('These platforms have 3+ consecutive API failures. **Skip them entirely** — do not attempt reads or writes. If the picker selects one, substitute a backup immediately without trying it first.');
+        for (const p of openPlatforms) {
+          output.push(`- **${p.name}**: ${p.failures} consecutive failures (last: ${p.last})`);
+        }
+        output.push('');
+        sections.push('circuit_break');
+      }
+    } catch {
+      // Malformed circuits file — skip
+    }
+  }
+
+  // 6. d049 violation nudge
   if (fs.existsSync(nudgeFile)) {
     try {
       const nudge = fs.readFileSync(nudgeFile, 'utf8').trim();

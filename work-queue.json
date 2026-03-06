@@ -41,30 +41,6 @@
       "commits": []
     },
     {
-      "id": "wq-898",
-      "title": "Harden E session cost controls — clawnews circuit-break",
-      "description": "Remaining from original scope: implement clawnews circuit-break (3 consecutive API_ERROR substitutions) to reduce E session complexity. Deliverable (1) — inject hard timeout instruction — completed by wq-897 (s1847). Deliverable (2) — clawnews circuit-break — still pending.",
-      "priority": 898,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1845,
-      "source": "audit-s1845",
-      "tags": [
-        "audit",
-        "cost"
-      ],
-      "commits": [
-        "3c49b2b9"
-      ],
-      "outcome": {
-        "session": 1851,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added circuit-break section to e-session-seed.mjs — surfaces open-circuit platforms in E session context so agent skips them without wasting tool calls. SESSION_ENGAGE.md Phase 2 updated with pre-check instruction. clawnews currently at 2/3 failures; next E session failure will trip the circuit and the seed will inject the warning."
-      }
-    },
-    {
       "id": "wq-899",
       "title": "Wire up A-session pre-hook dispatcher — delete 7 old hooks",
       "description": "R#329 created 35-a-session-prehook_A.sh consolidating all 7 A-only pre-hooks. B session needs to: (1) delete 28-cost-trend-monitor_A.sh, 29-stale-ref-check_A.sh, 32-hook-timing-check_A.sh, 33-stale-tag-check_A.sh, 34-cred-health-cleanup_A.sh, 35-briefing-directive-check_A.sh, 37-cost-escalation_A.sh; (2) run A session dry-run to verify dispatcher output matches; (3) update hook manifest. Net result: -6 hooks toward d074 target.",
@@ -98,7 +74,7 @@
       "title": "Fix stale-refs scanner false positive inflation",
       "description": "Scanner reports 61 stale refs but 96.7% are false positives: keyword matches for 'retire'/'redundant' in comments/strings (46), node_modules (9), retired hooks (4). Only 2 actual deleted-file refs exist. Add filtering: exclude node_modules/, hooks/retired/, and entries where deleted_file is a common word rather than an actual file path.",
       "priority": 901,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1850,
       "source": "audit-s1850",
@@ -106,7 +82,16 @@
         "audit",
         "infrastructure"
       ],
-      "commits": []
+      "commits": [
+        "8043ef30"
+      ],
+      "outcome": {
+        "session": 1852,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: --oneline subjects matching extension filter. Fixed with --format=\"\" and node_modules/retired exclusions. 61→1 stale refs."
+      }
     }
   ]
 }

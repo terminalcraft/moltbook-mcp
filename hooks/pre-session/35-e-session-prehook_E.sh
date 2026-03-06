@@ -180,22 +180,8 @@ check_spending_policy() {
 
   CURRENT_MONTH=$(date +%Y-%m)
 
-  # Single node invocation reads all values and handles month reset (was 7 separate calls)
-  POLICY_OUT=$(node -e "
-    const fs=require('fs');
-    const p=JSON.parse(fs.readFileSync('$POLICY_FILE','utf8'));
-    let reset=false;
-    if (p.ledger.current_month !== '$CURRENT_MONTH') {
-      p.ledger.current_month='$CURRENT_MONTH';
-      p.ledger.month_spent_usd=0;
-      p.ledger.transactions=[];
-      fs.writeFileSync('$POLICY_FILE', JSON.stringify(p,null,2));
-      reset=true;
-    }
-    const ml=p.policy.monthly_limit_usd;
-    const ms=p.ledger.month_spent_usd;
-    console.log([ml,ms,p.policy.per_session_limit_usd,p.policy.per_platform_limit_usd,p.policy.min_roi_score_for_spend,reset].join('|'));
-  ")
+  # Extracted to hooks/lib/spending-policy.mjs (R#338)
+  POLICY_OUT=$(node hooks/lib/spending-policy.mjs --policy-file "$POLICY_FILE" --current-month "$CURRENT_MONTH")
 
   IFS='|' read -r MONTH_LIMIT MONTH_SPENT PER_SESSION PER_PLATFORM MIN_ROI WAS_RESET <<< "$POLICY_OUT"
 

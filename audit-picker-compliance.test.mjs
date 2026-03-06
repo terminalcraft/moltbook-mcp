@@ -272,6 +272,138 @@ describe('compliance calculation', () => {
   });
 });
 
+// ─── Section 2b: BUDGET_CAP skip handling (wq-914) ──────────────────────
+
+describe('BUDGET_CAP skip compliance (wq-914)', () => {
+  before(setupDirs);
+  after(cleanupDirs);
+
+  beforeEach(() => {
+    rmSync(join(CONFIG_DIR, 'picker-compliance-state.json'), { force: true });
+  });
+
+  it('does NOT count BUDGET_CAP skips as compliant without substitution', () => {
+    writeJSON(join(CONFIG_DIR, 'picker-mandate.json'), {
+      session: 100,
+      selected: ['moltcities', 'aicq', 'pinchwork'],
+    });
+    writeJSON(join(CONFIG_DIR, 'engagement-trace.json'), {
+      session: 100,
+      platforms_engaged: ['Moltcities'],
+      skipped_platforms: [
+        { platform: 'aicq', reason: 'BUDGET_CAP' },
+        { platform: 'pinchwork', reason: 'BUDGET_CAP' },
+      ],
+    });
+
+    const output = runCompliance('100');
+    assert.ok(output.includes('33%'), `Expected 33% (BUDGET_CAP skips not excused), got: ${output}`);
+    assert.ok(output.includes('BUDGET_CAP skips without substitution'), output);
+  });
+
+  it('counts BUDGET_CAP skips as compliant when substitution exists', () => {
+    writeJSON(join(CONFIG_DIR, 'picker-mandate.json'), {
+      session: 100,
+      selected: ['moltcities', 'aicq', 'pinchwork'],
+    });
+    writeJSON(join(CONFIG_DIR, 'engagement-trace.json'), {
+      session: 100,
+      platforms_engaged: ['Moltcities', 'Chatr', 'Moltbook'],
+      skipped_platforms: [
+        { platform: 'aicq', reason: 'BUDGET_CAP' },
+        { platform: 'pinchwork', reason: 'BUDGET_CAP' },
+      ],
+      backup_substitutions: [
+        { original: 'aicq', backup: 'chatr', reason: 'BUDGET_CAP' },
+        { original: 'pinchwork', backup: 'moltbook', reason: 'BUDGET_CAP' },
+      ],
+    });
+
+    const output = runCompliance('100');
+    assert.ok(output.includes('100%'), `Expected 100% (BUDGET_CAP with substitution), got: ${output}`);
+    assert.ok(output.includes('Compliant'), output);
+  });
+
+  it('handles mixed BUDGET_CAP and legitimate skips correctly', () => {
+    writeJSON(join(CONFIG_DIR, 'picker-mandate.json'), {
+      session: 100,
+      selected: ['bluesky', 'chatr', 'moltbook'],
+    });
+    writeJSON(join(CONFIG_DIR, 'engagement-trace.json'), {
+      session: 100,
+      platforms_engaged: ['Bluesky'],
+      skipped_platforms: [
+        { platform: 'chatr', reason: 'site down' },
+        { platform: 'moltbook', reason: 'BUDGET_CAP' },
+      ],
+    });
+
+    const output = runCompliance('100');
+    // bluesky engaged, chatr legitimately skipped (site down), moltbook BUDGET_CAP without sub = not compliant
+    assert.ok(output.includes('67%'), `Expected 67% (1 legit skip + 1 unexcused BUDGET_CAP), got: ${output}`);
+  });
+
+  it('partial BUDGET_CAP substitution gives partial compliance', () => {
+    writeJSON(join(CONFIG_DIR, 'picker-mandate.json'), {
+      session: 100,
+      selected: ['bluesky', 'chatr', 'moltbook'],
+    });
+    writeJSON(join(CONFIG_DIR, 'engagement-trace.json'), {
+      session: 100,
+      platforms_engaged: ['Bluesky', 'Pinchwork'],
+      skipped_platforms: [
+        { platform: 'chatr', reason: 'BUDGET_CAP' },
+        { platform: 'moltbook', reason: 'BUDGET_CAP' },
+      ],
+      backup_substitutions: [
+        { original: 'chatr', backup: 'pinchwork', reason: 'BUDGET_CAP' },
+        // moltbook has no substitution
+      ],
+    });
+
+    const output = runCompliance('100');
+    // bluesky engaged, chatr substituted, moltbook BUDGET_CAP without sub
+    assert.ok(output.includes('67%'), `Expected 67%, got: ${output}`);
+  });
+
+  it('records unsubstituted_budget_skips in state history', () => {
+    writeJSON(join(CONFIG_DIR, 'picker-mandate.json'), {
+      session: 100,
+      selected: ['moltcities', 'aicq', 'pinchwork'],
+    });
+    writeJSON(join(CONFIG_DIR, 'engagement-trace.json'), {
+      session: 100,
+      platforms_engaged: ['Moltcities'],
+      skipped_platforms: [
+        { platform: 'aicq', reason: 'BUDGET_CAP' },
+        { platform: 'pinchwork', reason: 'BUDGET_CAP' },
+      ],
+    });
+
+    runCompliance('100');
+    const state = getComplianceState();
+    assert.ok(state.history[0].unsubstituted_budget_skips, 'should record unsubstituted budget skips');
+    assert.deepEqual(state.history[0].unsubstituted_budget_skips, ['aicq', 'pinchwork']);
+  });
+
+  it('matches BUDGET_CAP reason case-insensitively', () => {
+    writeJSON(join(CONFIG_DIR, 'picker-mandate.json'), {
+      session: 100,
+      selected: ['bluesky', 'chatr'],
+    });
+    writeJSON(join(CONFIG_DIR, 'engagement-trace.json'), {
+      session: 100,
+      platforms_engaged: ['Bluesky'],
+      skipped_platforms: [
+        { platform: 'chatr', reason: 'budget_cap' },
+      ],
+    });
+
+    const output = runCompliance('100');
+    assert.ok(output.includes('50%'), `Expected 50% (budget_cap lowercase), got: ${output}`);
+  });
+});
+
 // ─── Section 3: missing files / edge cases ──────────────────────────────
 
 describe('missing files and edge cases', () => {

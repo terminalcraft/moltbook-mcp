@@ -173,9 +173,19 @@ function main() {
   }
 
   // Calculate compliance
-  // Platforms that were selected AND (engaged OR legitimately skipped OR substituted) count as compliant
-  const compliant = selected.filter(s => engaged.includes(s) || skippedIds.includes(s) || substitutedOriginals.has(s));
-  const missed = selected.filter(s => !engaged.includes(s) && !skippedIds.includes(s) && !substitutedOriginals.has(s));
+  // BUDGET_CAP skips require a backup substitution to count as compliant (wq-914).
+  // Other skip reasons (site_down, API error, etc.) are inherently legitimate.
+  const budgetCapSkips = new Set(skipped.filter(s => /budget.?cap/i.test(s.reason)).map(s => s.platform));
+  const legitimateSkipIds = skippedIds.filter(id => !budgetCapSkips.has(id));
+
+  // A platform is compliant if: engaged, legitimately skipped (non-BUDGET_CAP), or substituted.
+  // BUDGET_CAP skips WITHOUT substitution are NOT compliant — they inflate reported coverage.
+  const compliant = selected.filter(s =>
+    engaged.includes(s) ||
+    legitimateSkipIds.includes(s) ||
+    substitutedOriginals.has(s)
+  );
+  const missed = selected.filter(s => !compliant.includes(s));
   const complianceRate = selected.length > 0 ? compliant.length / selected.length : 1;
   const compliancePct = Math.round(complianceRate * 100);
 
@@ -184,6 +194,10 @@ function main() {
   console.log(`  Engaged: ${engaged.join(", ") || "(none)"}`);
   if (skipped.length > 0) {
     console.log(`  Skipped: ${skipped.map(s => `${s.platform} (${s.reason})`).join(", ")}`);
+  }
+  const unsubstitutedBudgetSkips = [...budgetCapSkips].filter(p => !substitutedOriginals.has(p));
+  if (unsubstitutedBudgetSkips.length > 0) {
+    console.log(`  ⚠ BUDGET_CAP skips without substitution: ${unsubstitutedBudgetSkips.join(", ")}`);
   }
   console.log(`  Compliance: ${compliancePct}% (${compliant.length}/${selected.length})`);
 
@@ -202,6 +216,7 @@ function main() {
     selected,
     engaged,
     skipped: skippedIds,
+    unsubstituted_budget_skips: unsubstitutedBudgetSkips,
     compliance_pct: compliancePct,
     violation: isViolation,
     timestamp: new Date().toISOString(),

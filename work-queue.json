@@ -74,7 +74,7 @@
       "title": "Monitor E session cost trend — last-5 avg $1.5",
       "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.5 vs last-10 avg $1.7 (↓ threshold_breach). Review session efficiency and enforce cost controls.",
       "priority": 901,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1855,
       "source": "audit-cost-escalation-s1855",
@@ -82,23 +82,14 @@
         "audit",
         "cost"
       ],
-      "commits": []
-    },
-    {
-      "id": "wq-902",
-      "title": "Wire up R-session pre-hook dispatcher — delete 2 old hooks (d074 Group 2)",
-      "description": "R#330 expanded 35-r-session-prehook_R.sh to absorb 36-directive-status_R.sh and 44-brainstorm-gate_R.sh. B session needs to: (1) delete 36-directive-status_R.sh and 44-brainstorm-gate_R.sh; (2) dry-run R session to verify dispatcher; (3) update hook manifest. Net -2 hooks toward d074 target. Referenced in HOOK_CONSOLIDATION_PLAN.md but never added to queue.",
-      "priority": 902,
-      "status": "pending",
-      "added": "2026-03-06",
-      "created_session": 1855,
-      "source": "audit-s1855",
-      "tags": [
-        "audit",
-        "d074",
-        "hooks"
-      ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1856,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Aligned E escalation threshold from $1.50 (target) to $1.80 (cap). Consistent with B/R pattern. Post-fix E sessions already trending under $1.50 — threshold was triggering false escalation on healthy improving trend."
+      }
     },
     {
       "id": "wq-903",

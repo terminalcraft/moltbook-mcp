@@ -54,11 +54,18 @@
       "title": "Retire 31-hr-schema-check_A.sh pre-hook",
       "description": "(added ~s1842): Now that audit-stats.mjs pre-computes HR validation, the separate pre-hook is redundant. Removing it would reduce hook count by 1 (d074 goal) and eliminate a duplicate subprocess call.",
       "priority": 895,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1846,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Removed 31-hr-schema-check_A.sh — triple-redundant with 11-json-key-lint.sh (all sessions) and audit-stats.mjs line 756 (A sessions). Hook count 73→72."
+      }
     },
     {
       "id": "wq-896",

@@ -45,7 +45,7 @@
       "title": "Wire up A-session pre-hook dispatcher — delete 7 old hooks",
       "description": "R#329 created 35-a-session-prehook_A.sh consolidating all 7 A-only pre-hooks. B session needs to: (1) delete 28-cost-trend-monitor_A.sh, 29-stale-ref-check_A.sh, 32-hook-timing-check_A.sh, 33-stale-tag-check_A.sh, 34-cred-health-cleanup_A.sh, 35-briefing-directive-check_A.sh, 37-cost-escalation_A.sh; (2) run A session dry-run to verify dispatcher output matches; (3) update hook manifest. Net result: -6 hooks toward d074 target.",
       "priority": 899,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1848,
       "source": "R329-structural",
@@ -53,7 +53,16 @@
         "d074",
         "hooks"
       ],
-      "commits": []
+      "commits": [
+        "2f016b7d"
+      ],
+      "outcome": {
+        "session": 1862,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Deleted 7 A pre-hooks absorbed by 35-a-session-prehook_A.sh dispatcher. Hook count 75→68. First actual d074 reduction."
+      }
     },
     {
       "id": "wq-900",

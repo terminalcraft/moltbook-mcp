@@ -5,14 +5,23 @@
       "title": "Backup substitution rate dashboard in A audit",
       "description": "Add substitution frequency tracking to audit-stats.mjs. Read backup_substitutions from engagement-trace.json across recent E sessions. Report 'N substitutions in last 10 E sessions, top replaced: X'. Surface chronically unreachable platforms that should be circuit-broken rather than substituted.",
       "priority": 881,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1818,
       "source": "brainstorming-R323",
       "tags": [
         "observability"
       ],
-      "commits": []
+      "commits": [
+        "87817126"
+      ],
+      "outcome": {
+        "session": "s1832",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeBackupSubstitutionRate() to audit-stats.mjs. Reads backup_substitutions from engagement-trace + archive, reports per-platform frequency and circuit-break candidates (>=3/10 threshold). Added audit subcheck reference in SESSION_AUDIT_SUBCHECKS.md."
+      }
     },
     {
       "id": "wq-882",
@@ -69,28 +78,6 @@
         "observability"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-890",
-      "title": "Monitor E session cost trend — last-5 avg $1.74",
-      "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.74 vs last-10 avg $1.7 (→ threshold_breach). Review session efficiency and enforce cost controls.",
-      "priority": 890,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1830,
-      "source": "audit-cost-escalation-s1830",
-      "tags": [
-        "audit",
-        "cost"
-      ],
-      "commits": ["12ad33be"],
-      "outcome": {
-        "session": 1831,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Tightened E session cost controls: soft cap $2.50→$1.80, target $2.30→$1.50, exit gate 8m→6m. Added debug file prohibition and platform failure fast-skip protocol. Root cause: duration (>8m = >$2) and scope bleed (debug file creation). Efficient sessions (<5m) cost <$1.00."
-      }
     }
   ]
 }

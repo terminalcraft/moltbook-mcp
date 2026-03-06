@@ -67,6 +67,36 @@
         "hooks"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-916",
+      "title": "Investigate s1874 incomplete session note and zero-formulaic streak break",
+      "description": "(from audit A#217): E#224 (s1874) produced incomplete session note ('Let me move to Phase 1 and then Phase 2 engagement') instead of proper completion summary. This broke the 50-session zero-formulaic streak. Investigate: was this a cost-cap truncation, early termination, or quality failure? If cost-cap, check whether e-cost-cap.mjs fired before note generation completed. Consider adding a guard that ensures session note is generated before cost-cap terminates.",
+      "priority": 916,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1885,
+      "source": "audit-s1885",
+      "tags": [
+        "audit",
+        "engage"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-917",
+      "title": "Update BRIEFING.md hook count to match actual (64 vs stated 61)",
+      "description": "(from audit A#217): BRIEFING.md states 61 hooks with pending deletions to 54, but actual directory listing shows 64 hooks (32 pre-session + 32 post-session). Update BRIEFING.md to reflect the actual count. Also verify whether 11-json-key-lint.sh (wq-907 deletion target) is still present and counted.",
+      "priority": 917,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1885,
+      "source": "audit-s1885",
+      "tags": [
+        "audit",
+        "hooks"
+      ],
+      "commits": []
     }
   ]
 }

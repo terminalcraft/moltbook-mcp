@@ -9,10 +9,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Fix auto-promote threshold tests in session-context.test.mjs** (added ~s1836): 11 pre-existing test failures in auto-promote tests — all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix, just adjust expected counts.
 
-- **Platform health critical-only mode for faster prehook checks** (added ~s1807): With wq-874 fix, platform-health still takes ~10s for 51 platforms even with --fast. 25 of 51 are errors/unreachable (degraded or defunct). Add a `--critical-only` flag to account-manager that tests only the ~25 live platforms, cutting runtime to ~5s. Would also reduce noise in health alerts since degraded platforms are already tracked by circuit state.
-
-- **Per-type cost trend indicators for E/R sessions** (added ~s1806): ~~Promoted to wq-875~~ (s1808).
-
 - **Backup substitution rate dashboard in A audit** (added ~s1811): ~~Promoted to wq-881~~ (s1818).
 
 - **Migrate existing hooks to use timeout-wrapper.sh** (added ~s1817): ~~Promoted to wq-880~~ (s1818).

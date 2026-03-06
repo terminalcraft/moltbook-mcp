@@ -8,6 +8,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Add e-cost-cap unit tests** (added ~s1841): e-cost-cap.mjs has no dedicated test file. Should test threshold defaults ($1.80), duration gate logic, registration keyword detection. Low effort, improves d071 combined coverage.
 
+- **Create A-session pre-hook dispatcher** (added ~s1846): Merge 8 _A.sh pre-hooks (28-cost-trend-monitor, 29-stale-ref-check, 31-hr-schema-check, 32-hook-timing-check, 33-stale-tag-check, 34-cred-health-cleanup, 35-briefing-directive-check, 37-cost-escalation) into single `35-a-session-prehook_A.sh` dispatcher. Biggest d074 win: -7 hooks in one session. See HOOK_CONSOLIDATION_PLAN.md Group 1.
+
 - **Consolidate cost-trend-monitor and cost-escalation A hooks** (added ~s1837): ~~Promoted to wq-895~~ (s1838).
 
 - **Fix auto-promote threshold tests in session-context.test.mjs** (added ~s1836): ~~Promoted to wq-896~~ (s1843).

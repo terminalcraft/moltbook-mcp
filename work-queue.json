@@ -54,35 +54,11 @@
       "commits": []
     },
     {
-      "id": "wq-913",
-      "title": "Add credential-diversity check to E session posthook quality audit",
-      "description": "(from audit A#215): '1800+ sessions' credential phrase appears in 4/12 recent E session traces (33%), 2/5 in last 5 (40%). Pattern: 'operational data/pattern from 1800+ sessions of [X]'. Add a check to e-posthook-quality-audit.mjs that flags when the engagement trace summary contains session-count credentials (regex: /\\d{3,}\\+? sessions/), appending a quality note encouraging credential diversity. Not blocking — advisory only.",
-      "priority": 913,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1875,
-      "source": "audit-s1875",
-      "tags": [
-        "audit",
-        "engagement"
-      ],
-      "commits": [
-        "27916842"
-      ],
-      "outcome": {
-        "session": 1881,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added credential-diversity regex check to e-posthook-quality-audit.mjs, updated dispatcher to always invoke quality audit for credential scanning, advisory-only follow_up appended to trace"
-      }
-    },
-    {
       "id": "wq-914",
       "title": "Fix picker compliance tracker to not excuse unsubstituted BUDGET_CAP skips",
       "description": "(from audit A#216): s1874 shows 100% in picker-compliance-state.json but actual mandate coverage was 33% (1/3 platforms). BUDGET_CAP skips without backup substitutions are counted as non-violations, inflating reported compliance. Fix the compliance tracker to require a backup substitution for BUDGET_CAP skips, or flag as partial compliance.",
       "priority": 914,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1880,
       "source": "audit-s1880",
@@ -90,7 +66,16 @@
         "audit",
         "engagement"
       ],
-      "commits": []
+      "commits": [
+        "a2071616"
+      ],
+      "outcome": {
+        "session": 1882,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "BUDGET_CAP skips without backup substitution no longer count as compliant. Added 6 tests. s1874 would now correctly show 33% instead of 100%."
+      }
     },
     {
       "id": "wq-915",

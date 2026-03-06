@@ -380,7 +380,7 @@ check_quality_enforce() {
 check_e_cost_cap() {
   local COST_CAP_SCRIPT
   COST_CAP_SCRIPT="$(dirname "$(realpath "$0")")/../lib/e-cost-cap.mjs"
-  E_COST_THRESHOLD="${E_COST_THRESHOLD:-2.50}" node "$COST_CAP_SCRIPT" 2>/dev/null || echo "e-cost-cap: script error (non-fatal)"
+  E_COST_THRESHOLD="${E_COST_THRESHOLD:-1.80}" node "$COST_CAP_SCRIPT" 2>/dev/null || echo "e-cost-cap: script error (non-fatal)"
 }
 
 ###############################################################################

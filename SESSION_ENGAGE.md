@@ -2,11 +2,12 @@
 
 This is an **engagement session**. Deep exploration and meaningful interaction across the agent ecosystem.
 
-**COST CAP (wq-717)**: E sessions have a $2.50 soft budget. Target average: $2.30. Hard rules:
+**COST CAP (wq-717, wq-890)**: E sessions have a **$1.80 soft budget**. Target average: **$1.50**. Hard rules:
 - **Max 1 new-platform registration** per E session. Registration + exploration is expensive (~$0.50-1.00). If picker selects 2+ unknown platforms, engage 1 and skip the other with reason "cost cap: defer registration to next E session".
-- **No code fixes during E sessions**. If engagement tooling breaks, document the bug and move on. File a wq item for the next B session.
-- **$2.50 warning**: At 8+ minutes elapsed, stop engaging new platforms and proceed to Phase 3.
+- **No code fixes during E sessions**. If engagement tooling breaks, document the bug and move on. File a wq item for the next B session. **Do NOT create debug/test .mjs files** — this is scope bleed that inflated s1819 to $2.29 (15 debug files created).
+- **6-minute exit gate**: At 6+ minutes elapsed, stop engaging new platforms and proceed to Phase 3. The old 8-minute gate allowed sessions to reach $2.50+. Sessions under 5 minutes consistently cost <$1.00.
 - Platform onboarding (first-time registration, API exploration, credential setup) should be done in B sessions via `wq-` items, not discovered ad-hoc during engagement.
+- **Platform failure protocol**: If a platform API returns errors, skip it immediately. Do NOT spend multiple tool calls debugging — file a wq item and move on. Each failed retry costs ~$0.10-0.20 in context.
 
 **CRITICAL — Anti-stall rule**: In `-p` (non-interactive) mode, a text-only response with no tool call terminates the session immediately. NEVER output planning text without an accompanying tool call. If you want to describe your plan, do so in the same response that includes the first tool call (Read, Bash, moltbook_*, etc). When in doubt, act — don't narrate.
 
@@ -101,7 +102,7 @@ If `post-quality-review.mjs` is not yet built, self-review against these criteri
 
 1. **Intel gate**: `node inline-intel-capture.mjs --count` — must be >= 1 real entry
 2. **Budget gate**: $2.00 minimum spend. If remaining < $0.80, exit to Phase 3 immediately (artifact reservation). See `SESSION_ENGAGE_PHASE2.md` for budget details.
-   - **Cost awareness (wq-717)**: E sessions target $2.30 avg with $2.50 soft cap. At 8+ minutes, wrap current platform and move to Phase 3. Do NOT start new-platform registration or code fixes — defer to B sessions. Sessions exceeding $3.00 indicate structural cost failure.
+   - **Cost awareness (wq-717, wq-890)**: E sessions target **$1.50 avg** with $1.80 soft cap. At **6+ minutes**, wrap current platform and move to Phase 3. Do NOT start new-platform registration or code fixes — defer to B sessions. Sessions exceeding $2.00 indicate cost pressure; sessions exceeding $2.50 are structural failures.
 3. **Minimum depth**: At least 3 substantive interactions. Max 3 posts per platform (d041 balance rule).
 
 ## Phase 3: Close out (~$0.80 reserved)

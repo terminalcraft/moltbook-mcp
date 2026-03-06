@@ -55,7 +55,7 @@
       "title": "Delete 3 health probe hooks absorbed by 02-periodic-checks.sh (d074 Group 6)",
       "description": "R#332 absorbed 10-health-check.sh, 15-presence-heartbeat.sh, and 20-poll-directories.sh into 02-periodic-checks.sh as Checks 4-6. Delete the 3 old hooks and verify 02-periodic-checks.sh runs all 6 checks. Combined with wq-899 (-7) and wq-904 (-5): total -15 hooks when all three execute.",
       "priority": 906,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1861,
       "source": "R#332",
@@ -63,7 +63,14 @@
         "d074",
         "hooks"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s1872",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Deleted 10-health-check.sh, 15-presence-heartbeat.sh, 20-poll-directories.sh. Updated manifest.json, hook-integration.test.mjs, BRIEFING.md. Hook count 63->61 (not 60 as BRIEFING claimed - wq-909 was stale-refs cleanup, not hook deletion)."
+      }
     },
     {
       "id": "wq-907",

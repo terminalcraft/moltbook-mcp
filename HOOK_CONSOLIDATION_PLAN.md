@@ -212,7 +212,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 20-poll-directories.sh | 5 | Low — 5-line directory poll | Absorbed R#332 |
 
 **Result**: -3 hooks. ~18 lines absorbed. 02-periodic-checks.sh 100→131 lines (well under 300L).
-**Status**: Logic absorbed R#332 (s1861). wq-906 for B session to delete old hooks.
+**Status**: Logic absorbed R#332 (s1861). Old hooks deleted B#578 (s1872).
 
 ### Group 7: Generic pre-session validation consolidation ✓
 **Merge small validation hooks into expanded `03-schema-check.sh`**

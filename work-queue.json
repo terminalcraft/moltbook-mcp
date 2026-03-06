@@ -78,7 +78,7 @@
       "title": "Clean 2 residual stale code refs after wq-908",
       "description": "wq-908 cleaned 6 files but 2 active code refs remain: lib/r-impact-tracker.mjs references deleted hooks/post-session/18-r-impact-track.sh, hooks/lib/directive-analysis.mjs references deleted hooks/pre-session/36-directive-status_R.sh. Remove or update these references.",
       "priority": 909,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1870,
       "source": "audit-s1870",
@@ -86,7 +86,14 @@
         "audit",
         "stale-refs"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1871,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Removed stale provenance comments referencing deleted 18-r-impact-track.sh and 36-directive-status_R.sh from r-impact-tracker.mjs:3 and directive-analysis.mjs:4"
+      }
     }
   ]
 }

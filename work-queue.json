@@ -83,6 +83,22 @@
         "hooks"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-908",
+      "title": "Clean stale refs from active code files after d074 hook deletions",
+      "description": "d074 hook deletions (s1862) left 5 active code files referencing deleted hooks: lib/r-impact-tracker.mjs (→18-r-impact-track.sh), hook-integration.test.mjs (→28-cost-trend-monitor_A.sh), stale-tag-remediate.mjs (→33-stale-tag-check_A.sh), stale-tag-check.test.mjs (→33-stale-tag-check_A.sh), hooks/lib/directive-analysis.mjs (→36-directive-status_R.sh). Also 1 doc ref: SESSION_AUDIT_ESCALATION.md (→36-directive-status_R.sh). Update or remove dead references. Can bundle with wq-906/wq-907 execution.",
+      "priority": 908,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1865,
+      "source": "audit-s1865",
+      "tags": [
+        "audit",
+        "d074",
+        "cleanup"
+      ],
+      "commits": []
     }
   ]
 }

@@ -696,6 +696,58 @@ function computeEScopeBleed() {
   }
 }
 
+// --- Backup substitution rate (wq-881) ---
+
+function computeBackupSubstitutionRate() {
+  // Combine current trace and archive
+  const current = safeRead(join(STATE_DIR, 'engagement-trace.json'), []);
+  const archive = safeRead(join(STATE_DIR, 'engagement-trace-archive.json'), []);
+  const allTraces = [...archive, ...current];
+
+  // Get last 10 E sessions (each trace entry is one E session)
+  const last10 = allTraces.slice(-10);
+  if (last10.length === 0) return { sessions_checked: 0, total_substitutions: 0, verdict: 'no_data' };
+
+  let totalSubs = 0;
+  const platformCounts = {}; // original platform → count of times substituted away from
+
+  for (const trace of last10) {
+    const subs = trace.backup_substitutions || [];
+    totalSubs += subs.length;
+    for (const sub of subs) {
+      const orig = sub.original;
+      if (orig) {
+        platformCounts[orig] = (platformCounts[orig] || 0) + 1;
+      }
+    }
+  }
+
+  // Sort platforms by substitution frequency (descending)
+  const ranked = Object.entries(platformCounts)
+    .sort((a, b) => b[1] - a[1]);
+
+  const topReplaced = ranked.length > 0 ? ranked[0][0] : null;
+
+  // Circuit-break candidates: platforms substituted in ≥3 of last 10 sessions
+  const circuitBreakCandidates = ranked
+    .filter(([, count]) => count >= 3)
+    .map(([platform, count]) => ({ platform, count, rate: `${count}/${last10.length}` }));
+
+  let verdict;
+  if (totalSubs === 0) verdict = 'clean';
+  else if (circuitBreakCandidates.length > 0) verdict = 'circuit_break_recommended';
+  else verdict = 'occasional';
+
+  return {
+    sessions_checked: last10.length,
+    total_substitutions: totalSubs,
+    summary: `${totalSubs} substitutions in last ${last10.length} E sessions${topReplaced ? `, top replaced: ${topReplaced}` : ''}`,
+    by_platform: Object.fromEntries(ranked),
+    circuit_break_candidates: circuitBreakCandidates,
+    verdict
+  };
+}
+
 // --- TODO tracker false-positive rate (wq-866) ---
 
 function computeTodoFalsePositiveRate() {
@@ -789,6 +841,7 @@ const stats = {
   r_scope_budget: computeRScopeBudgetCompliance(),
   b_pipeline_gate: computeBPipelineGateCompliance(),
   e_scope_bleed: computeEScopeBleed(),
+  backup_substitution_rate: computeBackupSubstitutionRate(),
   todo_false_positive_rate: computeTodoFalsePositiveRate()
 };
 

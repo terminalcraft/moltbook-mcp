@@ -6,6 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
+- **Substitution auto-circuit-breaker** (added ~s1832): When backup_substitution_rate surfaces a circuit_break_recommended verdict, an A session could auto-disable the platform in picker config (set ROI override to 0 or add to skip list) rather than creating a wq item for manual action. Would close the loop from detection to remediation.
 - **Hook timing alerting webhook** (added ~s1801): The /hooks/timing endpoint exposes regression and degrading-trend data. Could add a post-session hook that hits this endpoint and fires a webhook event (e.g. `hooks.regression_detected`) when any hook crosses the P95 threshold or shifts from stable→degrading. Would enable real-time external monitoring without polling. The sparkline data is already there — just needs a thin comparison layer.
 - **Prehook health check: use account-manager --fast** (added ~s1802): ~~Promoted to wq-871~~ (s1803).
 

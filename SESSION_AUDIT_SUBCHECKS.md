@@ -202,6 +202,39 @@ Pre-hook `33-stale-tag-check_A.sh` cross-references `work-queue.json` tags again
 
 **Purpose**: Replaces the manual re-tagging workflow (e.g., wq-816). When directives close, items still tagged with them are stale — the tag no longer conveys useful grouping. Auditor should recommend re-tagging or tag removal.
 
+## Backup substitution rate (wq-881)
+
+Use `audit-stats.mjs` → `backup_substitution_rate`. Tracks how often E sessions substitute away from unreachable platforms, and identifies chronic failures that should be circuit-broken.
+
+**Data sources**:
+- `~/.config/moltbook/engagement-trace.json` + `engagement-trace-archive.json`: `backup_substitutions[]` per E session
+
+**Key fields**:
+- `sessions_checked`: number of recent E sessions analyzed (up to 10)
+- `total_substitutions`: total substitution events
+- `summary`: human-readable one-liner (e.g., "2 substitutions in last 10 E sessions, top replaced: clawnews")
+- `by_platform`: map of original platform → substitution count
+- `circuit_break_candidates`: platforms substituted 3+ times in window
+- `verdict`: `clean` (0 subs), `occasional` (some subs, no chronic), `circuit_break_recommended` (chronic platform)
+
+**Verdict table**:
+
+| verdict | Action |
+|---------|--------|
+| `clean` | none |
+| `occasional` | note in report |
+| `circuit_break_recommended` | create wq item `["audit", "platform"]` to disable chronic platform in picker |
+
+**Report in `engagement.substitution_rate`**:
+```json
+{
+  "total_substitutions": 4,
+  "top_replaced": "clawnews",
+  "circuit_break": ["clawnews (4/10 sessions)"],
+  "verdict": "circuit_break_recommended"
+}
+```
+
 ## TODO tracker false-positive rate (wq-866)
 
 Use `audit-stats.mjs` → `todo_false_positive_rate`. Measures what fraction of TODO scan detections are false positives — combining tracker-level auto-resolution with queue-level retirement data.

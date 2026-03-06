@@ -43,19 +43,6 @@
       "commits": []
     },
     {
-      "id": "wq-887",
-      "title": "B session cost trend dashboard in A audit",
-      "description": "(added ~s1796): ~~Promoted to wq-873~~ (s1803).",
-      "priority": 887,
-      "status": "retired",
-      "added": "2026-03-05",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "retired_reason": "Duplicate — work completed as wq-873 in s1806",
-      "retired_session": 1828
-    },
-    {
       "id": "wq-888",
       "title": "Integrate audit-cost-escalation.mjs into A session pre-hook",
       "description": "audit-cost-escalation.mjs currently needs manual invocation by A sessions. Add it as an A-type-only pre-session hook that runs before audit starts, so cost trend wq items exist when A session reads the queue. Thin hook wrapper: call `node audit-cost-escalation.mjs`, log output.",

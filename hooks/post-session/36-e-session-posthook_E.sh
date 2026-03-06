@@ -267,18 +267,14 @@ check_trace_fallback() {
 #   Appends follow_up to trace when quality violations found
 ###############################################################################
 check_quality_audit() {
-  if [[ "$Q_TOTAL" -eq 0 ]]; then
-    echo "quality-audit: s$SESSION had no quality-checked posts"
-    return 0
-  fi
-
   echo "quality-audit: s$SESSION — $Q_TOTAL posts checked, $Q_FAILS fails, $Q_WARNS warns"
 
-  if [[ "$Q_FAILS" -gt 0 ]] && [[ -f "$TRACE_FILE" ]]; then
-    # Logic extracted to hooks/lib/e-posthook-quality-audit.mjs (R#335)
+  # Run quality audit + credential-diversity check (wq-913)
+  # Script handles both Q_FAILS > 0 (quality gate) and CURRENT_NOTE credential scanning
+  if [[ -f "$TRACE_FILE" ]]; then
     local QUALITY_AUDIT_SCRIPT
     QUALITY_AUDIT_SCRIPT="$(dirname "$(realpath "$0")")/../lib/e-posthook-quality-audit.mjs"
-    node "$QUALITY_AUDIT_SCRIPT" 2>/dev/null || echo "quality-audit: failed to append follow_up (non-fatal)"
+    CURRENT_NOTE="$CURRENT_NOTE" node "$QUALITY_AUDIT_SCRIPT" 2>/dev/null || echo "quality-audit: failed to run quality audit (non-fatal)"
   fi
 }
 

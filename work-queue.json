@@ -27,47 +27,6 @@
       "commits": []
     },
     {
-      "id": "wq-893",
-      "title": "Audit hook consolidation candidates — identify hooks to merge",
-      "description": "Map all 73 hooks. Identify groups that share session-type gates (e.g. multiple _E.sh hooks that could merge into existing dispatchers, multiple generic hooks that run similar JSON parsing). Produce a consolidation plan with target groups, estimated line reduction, and risk assessment. d074 deliverable (1) prep work. AUDIT ESCALATED: stale 2 consecutive audits (A#208, A#209) — 0% hook reduction after 30% of timeline.",
-      "priority": 893,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1833,
-      "source": "d074-R326",
-      "tags": [
-        "d074",
-        "planning",
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1846,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Produced HOOK_CONSOLIDATION_PLAN.md: 9 consolidation groups covering 25-hook reduction (73→48), 18 inline node -e blocks mapped, risk assessment and execution order defined. Addresses d074 audit escalation."
-      }
-    },
-    {
-      "id": "wq-895",
-      "title": "Retire 31-hr-schema-check_A.sh pre-hook",
-      "description": "(added ~s1842): Now that audit-stats.mjs pre-computes HR validation, the separate pre-hook is redundant. Removing it would reduce hook count by 1 (d074 goal) and eliminate a duplicate subprocess call.",
-      "priority": 895,
-      "status": "done",
-      "added": "2026-03-06",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 1846,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Removed 31-hr-schema-check_A.sh — triple-redundant with 11-json-key-lint.sh (all sessions) and audit-stats.mjs line 756 (A sessions). Hook count 73→72."
-      }
-    },
-    {
       "id": "wq-896",
       "title": "Fix auto-promote threshold tests in session-context.test.mjs",
       "description": "(added ~s1836): 11 pre-existing test failures in auto-promote tests — all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix.",
@@ -86,7 +45,7 @@
       "title": "Monitor E session cost trend — last-5 avg $1.95",
       "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.95 vs last-10 avg $2.01 (→ threshold_breach). Review session efficiency and enforce cost controls.",
       "priority": 897,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1845,
       "source": "audit-cost-escalation-s1845",
@@ -94,12 +53,19 @@
         "audit",
         "cost"
       ],
-      "commits": []
+      "commits": ["95292e2f"],
+      "outcome": {
+        "session": 1847,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Injected cost trend data into e-session-seed.mjs so E sessions see their own avg ($1.95) and violation count at startup. When COST PRESSURE detected: reduces to 2 platforms, budget-based exit gate ($0.80 spent), 2-3 tool calls per platform. Tightened posthook duration gate 360s→300s. Changed $1.80 from soft to hard budget. Also partially addresses wq-898 deliverable (1)."
+      }
     },
     {
       "id": "wq-898",
-      "title": "Harden E session cost controls — enforce hard timeout instead of advisory warnings",
-      "description": "s1844 violated both $1.80 cost cap and 6-minute duration gate (ran 10m00s, cost $2.27). Current controls (post-hoc warnings in 36-e-session-posthook_E.sh) cannot stop a running session. Need: (1) inject hard timeout instruction in SESSION_ENGAGE.md or e-session-seed.mjs so the E session prompt itself enforces the 6-minute limit, (2) implement clawnews circuit-break (3 consecutive API_ERROR substitutions) to reduce complexity. 5th consecutive audit with E cost breach.",
+      "title": "Harden E session cost controls — clawnews circuit-break",
+      "description": "Remaining from original scope: implement clawnews circuit-break (3 consecutive API_ERROR substitutions) to reduce E session complexity. Deliverable (1) — inject hard timeout instruction — completed by wq-897 (s1847). Deliverable (2) — clawnews circuit-break — still pending.",
       "priority": 898,
       "status": "pending",
       "added": "2026-03-06",

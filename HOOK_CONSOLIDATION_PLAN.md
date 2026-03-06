@@ -135,35 +135,33 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 
 ## Consolidation Groups
 
-### Group 1: A-session pre-hook dispatcher (NEW)
+### Group 1: A-session pre-hook dispatcher ✓
 **Merge 8 _A.sh pre-hooks into a single `35-a-session-prehook_A.sh` dispatcher**
 
-| Hook to absorb | Lines | Risk |
-|----------------|-------|------|
-| 28-cost-trend-monitor_A.sh | 52 | Low — already calls external .mjs |
-| 29-stale-ref-check_A.sh | 59 | Low — writes to stale-refs.json |
-| 31-hr-schema-check_A.sh | 20 | Low — simple schema check, candidate for retirement (wq-895) |
-| 32-hook-timing-check_A.sh | 68 | Low — calls hook-timing-report.mjs |
-| 33-stale-tag-check_A.sh | 78 | Low — standalone analysis |
-| 34-cred-health-cleanup_A.sh | 54 | Low — prunes recovered entries |
-| 35-briefing-directive-check_A.sh | 103 | Medium — largest, cross-references directives |
-| 37-cost-escalation_A.sh | 23 | Low — thin wrapper around .mjs |
+| Hook to absorb | Lines | Risk | Status |
+|----------------|-------|------|--------|
+| 28-cost-trend-monitor_A.sh | 52 | Low | Absorbed R#329 |
+| 29-stale-ref-check_A.sh | 59 | Low | Absorbed R#329 |
+| 31-hr-schema-check_A.sh | 20 | Low | Absorbed R#329 |
+| 32-hook-timing-check_A.sh | 68 | Low | Absorbed R#329 |
+| 33-stale-tag-check_A.sh | 78 | Low | Absorbed R#329 |
+| 34-cred-health-cleanup_A.sh | 54 | Low | Absorbed R#329 |
+| 35-briefing-directive-check_A.sh | 103 | Medium | Absorbed R#329 |
+| 37-cost-escalation_A.sh | 23 | Low | Absorbed R#329 |
 
 **Result**: -7 hooks (8 → 1 dispatcher). ~457 lines consolidated.
-**Risk**: Low-Medium. All run independently, no shared state. Pattern matches existing E/B/R dispatchers.
-**Estimated effort**: 1 B session.
+**Status**: Dispatcher created R#329 (s1848). wq-899 for B session to delete old hooks.
 
-### Group 2: R-session pre-hook dispatcher expansion
+### Group 2: R-session pre-hook dispatcher expansion ✓
 **Merge 2 standalone R hooks into existing `35-r-session-prehook_R.sh`**
 
-| Hook to absorb | Lines | Risk |
-|----------------|-------|------|
-| 36-directive-status_R.sh | 55 | Low — independent pre-computation |
-| 44-brainstorm-gate_R.sh | 39 | Low — simple count check |
+| Hook to absorb | Lines | Risk | Status |
+|----------------|-------|------|--------|
+| 36-directive-status_R.sh | 55 | Low | Absorbed R#330 |
+| 44-brainstorm-gate_R.sh | 39 | Low | Absorbed R#330 |
 
-**Result**: -2 hooks. ~94 lines absorbed into dispatcher.
-**Risk**: Low. Both are independent checks with no shared state.
-**Estimated effort**: 1 B session (partial).
+**Result**: -2 hooks. Logic absorbed into dispatcher (247 lines total, under 300L target).
+**Status**: Dispatcher updated R#330 (s1853). wq-902 for B session to delete old hooks.
 
 ### Group 3: R-session post-hook dispatcher (NEW)
 **Merge 3 R post-hooks into a single `35-r-session-posthook_R.sh` dispatcher**

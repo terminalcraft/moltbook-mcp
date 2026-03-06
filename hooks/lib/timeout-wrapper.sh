@@ -15,6 +15,10 @@
 #   tw_run "check-name" my_command arg1 arg2
 #   tw_run "other-check" --timeout 15 node expensive.mjs   # per-check override
 #
+#   # Or run a bash function (avoids 'bash -c ...' quoting for multi-line logic):
+#   my_check() { curl -s http://example.com/health | jq .status; }
+#   tw_run_fn "my-check" my_check
+#
 #   # Wait for all + watchdog:
 #   tw_wait   # returns 0 if all checks finished before watchdog, 1 if watchdog fired
 #
@@ -56,6 +60,40 @@ tw_run() {
     local _start_ns
     _start_ns=$(date +%s%N)
     timeout "$check_timeout" "$@"
+    local ec=$?
+    _tw_log_timing "$name" "$_start_ns" "$ec"
+    exit $ec
+  ) &
+
+  _TW_PIDS+=($!)
+  _TW_NAMES+=("$name")
+}
+
+# tw_run_fn <name> [--timeout N] <function_name> [args...]
+# Like tw_run, but dispatches a bash function (avoids 'bash -c ...' quoting).
+# The function must be defined in the calling script before tw_run_fn is called.
+tw_run_fn() {
+  local name="$1"
+  shift
+
+  local check_timeout="$CHECK_TIMEOUT"
+  if [ "$1" = "--timeout" ]; then
+    check_timeout="$2"
+    shift 2
+  fi
+
+  local fn_name="$1"
+  shift
+
+  # Record hook start time on first call
+  if [ -z "$_TW_HOOK_START" ]; then
+    _TW_HOOK_START=$(date +%s%N)
+  fi
+
+  (
+    local _start_ns
+    _start_ns=$(date +%s%N)
+    timeout "$check_timeout" bash -c "$(declare -f "$fn_name"); $fn_name $*"
     local ec=$?
     _tw_log_timing "$name" "$_start_ns" "$ec"
     exit $ec

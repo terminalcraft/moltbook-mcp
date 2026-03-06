@@ -70,25 +70,19 @@
       "commits": []
     },
     {
-      "id": "wq-903",
-      "title": "Review E session cost-vs-engagement tradeoff (a211-2)",
-      "description": "E session thread count declining 3→3→2→2→1. s1854 produced 1 substantive post at $0.85 — lowest ever but thinnest engagement. Cost controls (wq-897: $1.80 cap, 6m gate, cost pressure mode) may be over-constraining. Review whether a floor of 2 content posts per E session is warranted, or recalibrate thresholds.",
-      "priority": 903,
-      "status": "done",
+      "id": "wq-904",
+      "title": "Delete old R-session hooks absorbed by dispatchers (Groups 2+3)",
+      "description": "R#330 absorbed 36-directive-status_R.sh and 44-brainstorm-gate_R.sh into 35-r-session-prehook_R.sh (Group 2). R#331 created 35-r-session-posthook_R.sh absorbing 15-r-commit-gate.sh, 18-r-impact-track.sh, and 26-brainstorm-compliance_R.sh (Group 3). B session needs to: (1) delete all 5 old hooks; (2) verify dispatchers run correctly in dry-run; (3) update hook manifest. Net result: -4 hooks toward d074 target.",
+      "priority": 904,
+      "status": "pending",
       "added": "2026-03-06",
-      "created_session": 1855,
-      "source": "audit-s1855",
+      "created_session": 1858,
+      "source": "R331-structural",
       "tags": [
-        "audit"
+        "d074",
+        "hooks"
       ],
-      "commits": [],
-      "outcome": {
-        "session": 1857,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Root cause: cost pressure triggered at avg>$1.50 (target) instead of avg>$1.80 (cap), causing 2-platform downgrade that halved engagement. Fix: raised trigger to $1.80, added intermediate $1.50-1.80 advisory zone, established 3-platform engagement floor in both seed and SESSION_ENGAGE.md. Removed 2-platform cost lever entirely — per-platform efficiency is the correct lever."
-      }
+      "commits": []
     }
   ]
 }

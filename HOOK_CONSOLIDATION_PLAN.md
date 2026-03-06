@@ -163,18 +163,17 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 **Result**: -2 hooks. Logic absorbed into dispatcher (247 lines total, under 300L target).
 **Status**: Dispatcher updated R#330 (s1853). wq-902 for B session to delete old hooks.
 
-### Group 3: R-session post-hook dispatcher (NEW)
+### Group 3: R-session post-hook dispatcher ✓
 **Merge 3 R post-hooks into a single `35-r-session-posthook_R.sh` dispatcher**
 
-| Hook to absorb | Lines | Risk |
-|----------------|-------|------|
-| 15-r-commit-gate.sh | 130 | Medium — gate logic, must not break |
-| 26-brainstorm-compliance_R.sh | 29 | Low — simple check |
-| 18-r-impact-track.sh | 63 | Low — calls .mjs module |
+| Hook to absorb | Lines | Risk | Status |
+|----------------|-------|------|--------|
+| 15-r-commit-gate.sh | 130 | Medium | Absorbed R#331 |
+| 26-brainstorm-compliance_R.sh | 29 | Low | Absorbed R#331 |
+| 18-r-impact-track.sh | 63 | Low | Absorbed R#331 |
 
-**Result**: -2 hooks (3 → 1). ~222 lines consolidated.
-**Risk**: Medium. 15-r-commit-gate.sh is a gate hook — must preserve exit-code semantics.
-**Estimated effort**: 1 B session.
+**Result**: -2 hooks (3 → 1). 214 lines consolidated.
+**Status**: Dispatcher created R#331 (s1858). wq-904 for B session to delete old hooks.
 
 ### Group 4: E-session post-hook absorption
 **Merge 3 standalone E post-hooks into existing `36-e-session-posthook_E.sh`**

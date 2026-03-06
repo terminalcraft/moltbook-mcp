@@ -58,7 +58,7 @@
       "title": "Add E session engagement-depth tracking to audit-stats",
       "description": "(from brainstorming ~s1857): Audit currently only tracks E session cost trend (last-5 avg). Should also track engagement depth: threads-per-session and platforms-per-session as separate metrics in audit-stats.mjs output. Adds e_engagement_trend with {avg_threads, avg_platforms, min_threads, floor_violations}. Would catch engagement thinning earlier — the 3→2→1 thread decline took 5 sessions to flag.",
       "priority": 911,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1873,
       "source": "brainstorming-R335",
@@ -66,7 +66,14 @@
         "audit",
         "engagement"
       ],
-      "commits": []
+      "commits": ["d1f3024f"],
+      "outcome": {
+        "session": 1876,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeEEngagementTrend() to audit-stats.mjs. Tracks avg_threads, avg_platforms, min_threads, floor_violations, trend direction from engagement-trace data. Includes session dedup for current+archive overlap. Outputs e_engagement_trend in audit-stats JSON."
+      }
     },
     {
       "id": "wq-912",

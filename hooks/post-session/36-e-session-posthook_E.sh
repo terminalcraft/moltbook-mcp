@@ -226,38 +226,10 @@ check_early_exit() {
   echo "$(date -Iseconds) s=$SESSION dur=${DURATION_STR} (${TOTAL_SECONDS}s) — early exit detected" >> "$LOG_DIR/e-early-exits.log"
 
   # Stigmergic pressure: inject follow_up into engagement-trace.json
-  node -e "
-const fs = require('fs');
-const traceFile = '$TRACE_FILE';
-const session = parseInt('$SESSION');
-const duration = '$DURATION_STR';
-const totalS = parseInt('$TOTAL_SECONDS');
-
-let traces;
-try {
-  const raw = JSON.parse(fs.readFileSync(traceFile, 'utf8'));
-  traces = Array.isArray(raw) ? raw : (typeof raw === 'object' ? [raw] : []);
-} catch { traces = []; }
-
-const warning = 'EARLY EXIT WARNING: Previous E session (s' + session + ') exited in ' + duration + ' (' + totalS + 's). Ensure deeper engagement — check platform health first, then commit to full Phase 2 loop.';
-
-if (traces.length > 0) {
-  const latest = traces[traces.length - 1];
-  const followUps = latest.follow_ups || [];
-  followUps.push(warning);
-  latest.follow_ups = followUps;
-  latest.early_exit_flag = true;
-} else {
-  traces.push({
-    session, date: new Date().toISOString().slice(0, 10),
-    early_exit_flag: true, follow_ups: [warning],
-    note: 'Synthetic trace from early-exit hook. Session s' + session + ' lasted ' + duration + '.'
-  });
-}
-
-fs.writeFileSync(traceFile, JSON.stringify(traces, null, 2) + '\n');
-console.log('early-exit: stigmergic pressure injected into trace for s' + session);
-" 2>/dev/null || echo "early-exit: failed to inject stigmergic pressure (non-fatal)"
+  # Logic extracted to hooks/lib/e-posthook-early-exit.mjs (R#335)
+  local EARLY_EXIT_SCRIPT
+  EARLY_EXIT_SCRIPT="$(dirname "$(realpath "$0")")/../lib/e-posthook-early-exit.mjs"
+  node "$EARLY_EXIT_SCRIPT" 2>/dev/null || echo "early-exit: failed to inject stigmergic pressure (non-fatal)"
 }
 
 ###############################################################################
@@ -284,35 +256,10 @@ check_trace_fallback() {
   }
 
   # Generate minimal trace from intel
-  node -e "
-const fs = require('fs');
-const session = parseInt('$SESSION');
-const traceFile = '$TRACE_FILE';
-const parsed = JSON.parse(fs.readFileSync('$PARSED_FILE', 'utf8'));
-const platforms = parsed.archive_intel_platforms || [];
-const topics = parsed.archive_intel_topics || [];
-
-const traceEntry = {
-  session, date: new Date().toISOString().slice(0, 10),
-  picker_mandate: [], platforms_engaged: platforms,
-  skipped_platforms: [], topics, agents_interacted: [],
-  threads_contributed: [], follow_ups: [],
-  _synthetic: true, _source: 'trace-fallback (36-e-session-posthook_E.sh)',
-  _reason: 'Session s' + session + ' truncated before Phase 3a trace write'
-};
-
-let traces;
-try {
-  const raw = JSON.parse(fs.readFileSync(traceFile, 'utf8'));
-  traces = Array.isArray(raw) ? raw : (typeof raw === 'object' ? [raw] : []);
-} catch { traces = []; }
-
-traces.push(traceEntry);
-if (traces.length > 30) traces = traces.slice(-30);
-
-fs.writeFileSync(traceFile, JSON.stringify(traces, null, 2) + '\n');
-console.log('trace-fallback: generated synthetic trace for s' + session + ' from ' + platforms.length + ' platforms');
-" 2>/dev/null || echo "trace-fallback: failed to generate synthetic trace (non-fatal)"
+  # Logic extracted to hooks/lib/e-posthook-trace-fallback.mjs (R#335)
+  local TRACE_FALLBACK_SCRIPT
+  TRACE_FALLBACK_SCRIPT="$(dirname "$(realpath "$0")")/../lib/e-posthook-trace-fallback.mjs"
+  node "$TRACE_FALLBACK_SCRIPT" 2>/dev/null || echo "trace-fallback: failed to generate synthetic trace (non-fatal)"
 }
 
 ###############################################################################
@@ -328,35 +275,10 @@ check_quality_audit() {
   echo "quality-audit: s$SESSION — $Q_TOTAL posts checked, $Q_FAILS fails, $Q_WARNS warns"
 
   if [[ "$Q_FAILS" -gt 0 ]] && [[ -f "$TRACE_FILE" ]]; then
-    node -e "
-const fs = require('fs');
-const session = parseInt('$SESSION');
-const failCount = parseInt('$Q_FAILS');
-const total = parseInt('$Q_TOTAL');
-const traceFile = '$TRACE_FILE';
-
-let traces;
-try {
-  const raw = JSON.parse(fs.readFileSync(traceFile, 'utf8'));
-  traces = Array.isArray(raw) ? raw : (typeof raw === 'object' ? [raw] : []);
-} catch { traces = []; }
-
-for (let i = traces.length - 1; i >= 0; i--) {
-  if (traces[i].session === session) {
-    if (!traces[i].follow_ups) traces[i].follow_ups = [];
-    traces[i].follow_ups.push({
-      type: 'quality_warning',
-      message: 's' + session + ' quality gate: ' + failCount + '/' + total + ' posts FAILED quality review. Review violations in quality-scores.jsonl and avoid repeating flagged patterns.',
-      severity: failCount > 1 ? 'high' : 'medium',
-      source: '36-e-session-posthook_E.sh'
-    });
-    break;
-  }
-}
-
-fs.writeFileSync(traceFile, JSON.stringify(traces, null, 2) + '\n');
-console.log('quality-audit: appended follow_up to trace for s' + session);
-" 2>/dev/null || echo "quality-audit: failed to append follow_up (non-fatal)"
+    # Logic extracted to hooks/lib/e-posthook-quality-audit.mjs (R#335)
+    local QUALITY_AUDIT_SCRIPT
+    QUALITY_AUDIT_SCRIPT="$(dirname "$(realpath "$0")")/../lib/e-posthook-quality-audit.mjs"
+    node "$QUALITY_AUDIT_SCRIPT" 2>/dev/null || echo "quality-audit: failed to append follow_up (non-fatal)"
   fi
 }
 

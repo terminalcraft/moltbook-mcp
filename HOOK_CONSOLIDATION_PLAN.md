@@ -268,11 +268,11 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 
 ## Inline `node -e` Extraction Status (d074 deliverable 2)
 
-**18 remaining inline blocks across 14 active hooks:**
+**15 remaining inline blocks across 13 active hooks:** (3 extracted R#335)
 
 | Hook | Blocks | Priority | Extraction target |
 |------|--------|----------|-------------------|
-| 36-e-session-posthook_E.sh | 3 | HIGH — dispatcher over 300L | hooks/lib/e-posthook-*.mjs |
+| 36-e-session-posthook_E.sh | ~~3~~ 0 | ~~HIGH~~ DONE — extracted R#335 (450→372L) | hooks/lib/e-posthook-{early-exit,trace-fallback,quality-audit}.mjs |
 | 45-b-session-prehook_B.sh | 3 | HIGH — needed before Group 5 | hooks/lib/b-prehook-stats.mjs |
 | 35-e-session-prehook_E.sh | 1 | MEDIUM — spending policy | hooks/lib/spending-policy.mjs |
 | 27-todo-scan.sh | 2 | MEDIUM — substantial blocks | hooks/lib/todo-scan.mjs |
@@ -286,7 +286,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 06-mcp-lint.sh | 1 | LOW — import validation | keep inline (structural) |
 | 30-log-maintenance.sh | 1 | LOW — compression | keep inline (trivial) |
 
-**Extraction plan**: 11 blocks need extraction into .mjs modules. 7 are trivial one-liners that can stay inline.
+**Extraction plan**: 8 blocks need extraction into .mjs modules. 7 are trivial one-liners that can stay inline. 3 extracted R#335 from E posthook.
 
 ## Risk Assessment
 

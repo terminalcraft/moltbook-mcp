@@ -260,7 +260,7 @@ function testTodoIngestFiltersCode() {
 
   writeFileSync(join(STATE, 'todo-followups.txt'), `- title: \`TODO followup: \${raw.substring(0, 80)}\`
 - Something with require('fs') in it
-- Legit TODO: refactor the config loader
+- TODO: refactor the configLoader in session-context.mjs
 `);
 
   const result = run('B');
@@ -270,7 +270,7 @@ function testTodoIngestFiltersCode() {
   const wq = readWQ();
   const todoItems = wq.queue.filter(i => i.source === 'todo-scan');
   assert(todoItems.length === 1, '1 real TODO in queue');
-  assert(todoItems[0].title.includes('refactor the config loader'), 'correct TODO ingested');
+  assert(todoItems[0].title.includes('configLoader'), 'correct TODO ingested');
 }
 
 function testBFallback() {
@@ -846,7 +846,7 @@ function testGetMaxQueueId() {
   ]);
   writeBS('## Evolution Ideas\n\n- **Idea**: d\n- **Idea2**: d\n- **Idea3**: d\n- **Idea4**: d\n');
   writeFileSync(join(STATE, 'engagement-state.json'), '{}');
-  writeFileSync(join(STATE, 'todo-followups.txt'), '- Legit new TODO item\n');
+  writeFileSync(join(STATE, 'todo-followups.txt'), '- TODO: refactor the configLoader in session-context.mjs\n');
 
   const result = run('B');
   // Auto-promote may run first (adding wq-011 from brainstorming), shifting TODO to wq-012+

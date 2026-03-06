@@ -23,7 +23,7 @@ COMMITS=$(git log --since="$SINCE" --format="%H" --max-count=10 2>/dev/null || t
 
 NEW_TODOS=""
 # Exclude infrastructure files that contain TODO/FIXME as template text
-EXCLUDE_PATHS=":(exclude)session-context.mjs :(exclude)work-queue.js :(exclude)work-queue.json :(exclude)hooks/post-session/27-todo-scan.sh :(exclude)hooks/post-session/42-todo-followups.sh :(exclude)*.test.mjs :(exclude)*.test.js :(exclude)*.spec.mjs :(exclude)*.spec.js :(exclude)*.md :(exclude)BRAINSTORMING.md :(exclude)summarize-session.py :(exclude)prediction-log.json :(exclude)credential-health-check.mjs"
+EXCLUDE_PATHS=":(exclude)session-context.mjs :(exclude)work-queue.js :(exclude)work-queue.json :(exclude)hooks/post-session/27-todo-scan.sh :(exclude)hooks/post-session/42-todo-followups.sh :(exclude)*.test.mjs :(exclude)*.test.js :(exclude)*.spec.mjs :(exclude)*.spec.js :(exclude)*.md :(exclude)BRAINSTORMING.md :(exclude)summarize-session.py :(exclude)prediction-log.json :(exclude)credential-health-check.mjs :(exclude)todo-false-positives.json :(exclude)lib/queue-pipeline.mjs"
 if [ -n "$COMMITS" ]; then
   NEW_TODOS=$(echo "$COMMITS" | while read -r hash; do
     git diff "$hash~1".."$hash" -- . $EXCLUDE_PATHS 2>/dev/null | grep -E '^\+.*\b(TODO|FIXME|HACK|XXX)\b' | sed 's/^\+//' || true
@@ -39,6 +39,13 @@ if [ -n "$COMMITS" ]; then
     grep -vE "'[^']*TODO[^']*'" | \
     grep -vE "'[^']*XXX[^']*'" | \
     grep -vE "'[^']*REPLACE_ME[^']*'" | \
+    grep -vE '\{[[:space:]]*pattern:[[:space:]]*/' | \
+    grep -vE 'risk:[[:space:]]*[0-9.]+,[[:space:]]*reason:' | \
+    grep -vE 'assert\(.*\b(TODO|FIXME)\b' | \
+    grep -vE 'console\.log\(.*\b(TODO|FIXME)\b' | \
+    grep -vE '^\s*"[^"]+"\s*:' | \
+    grep -vE '^\s*//\s*---\s+' | \
+    grep -vE '\btests? added:' | \
     head -10 || true)
 fi
 

@@ -54,27 +54,6 @@
       "commits": []
     },
     {
-      "id": "wq-912",
-      "title": "Revise R scope budget metric to exclude directive-plan files",
-      "description": "(from audit A#215): R scope budget has been stale at 20% compliance for 3 consecutive audits. All violations driven by BRIEFING.md and HOOK_CONSOLIDATION_PLAN.md updates as structural side-effects of d074/d075 directive work. Evaluate adding a 'directive_plan_files' exclusion list to r_scope_budget in audit-stats.mjs so that plan-tracking files touched during active directive work don't count as non-routine. Risk: could mask genuine scope creep. Mitigation: only exclude files explicitly listed in active directive metadata.",
-      "priority": 912,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1875,
-      "source": "audit-s1875",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1877,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added BRIEFING.md to ROUTINE_FILES, plan_files to d075, dynamic exclusion of active directive plan files. R scope budget went from 1/5 to 4/5 compliant."
-      }
-    },
-    {
       "id": "wq-913",
       "title": "Add credential-diversity check to E session posthook quality audit",
       "description": "(from audit A#215): '1800+ sessions' credential phrase appears in 4/12 recent E session traces (33%), 2/5 in last 5 (40%). Pattern: 'operational data/pattern from 1800+ sessions of [X]'. Add a check to e-posthook-quality-audit.mjs that flags when the engagement trace summary contains session-count credentials (regex: /\\d{3,}\\+? sessions/), appending a quality note encouraging credential diversity. Not blocking — advisory only.",

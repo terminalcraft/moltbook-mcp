@@ -105,13 +105,15 @@ export function generateSeed({ historyFile, intelFile, nudgeFile, deps = {} } = 
         output.push(`Avg duration: ${Math.round(avgDur / 60)}m${Math.round(avgDur % 60)}s`);
       }
 
-      if (avg > 1.50) {
+      if (avg > 1.80) {
         output.push('');
-        output.push('**COST PRESSURE** — trend is above $1.50 target. Mandatory controls:');
-        output.push('1. Engage **2 platforms only** (skip lowest-ROI picker selection)');
+        output.push('**COST PRESSURE** — trend is above $1.80 cap. Mandatory controls:');
+        output.push('1. Still engage **3 platforms** (engagement floor — do not reduce below 3)');
         output.push('2. At **$0.80 spent** (check system-reminder), stop engaging and go to Phase 3');
         output.push('3. Keep each platform interaction to **2-3 tool calls max** (read → quality check → post)');
         output.push('4. Skip surveys — only engage platforms where you can reply to an existing thread');
+      } else if (avg > 1.50) {
+        output.push(`Recent E sessions averaging $${avg.toFixed(2)} — above $1.50 target but under cap. Aim for efficiency but maintain 3-platform engagement.`);
       } else {
         output.push(`Recent E sessions averaging $${avg.toFixed(2)} — on target.`);
       }

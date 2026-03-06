@@ -167,20 +167,15 @@ check_stuck_items() {
 ###############################################################################
 # Check 4: Pipeline nudge (was 49-pipeline-nudge_B.sh)
 #   Advisory reminder for pipeline gate compliance
+#   R#336: Inline node -e blocks extracted to hooks/lib/pipeline-nudge-stats.mjs
 ###############################################################################
 check_pipeline_nudge() {
   THRESHOLD="${PIPELINE_NUDGE_THRESHOLD:-3}"
 
-  stats=$(node -e "
-const stats = JSON.parse(require('child_process').execSync('SESSION_NUM=${SESSION_NUM:-0} node $DIR/audit-stats.mjs', {encoding:'utf8'}));
-const g = stats.b_pipeline_gate || {};
-const v = g.violation_count || 0;
-const rate = g.rate || 'N/A';
-process.stdout.write(JSON.stringify({v, rate}));
-" 2>/dev/null) || return 0
+  stats=$(node "$DIR/hooks/lib/pipeline-nudge-stats.mjs" "${SESSION_NUM:-0}" "$DIR" 2>/dev/null) || return 0
 
-  violations=$(echo "$stats" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write(String(d.v))" 2>/dev/null || echo 0)
-  rate=$(echo "$stats" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write(d.rate)" 2>/dev/null || echo "?/?")
+  violations=$(echo "$stats" | jq -r '.violations // 0' 2>/dev/null || echo 0)
+  rate=$(echo "$stats" | jq -r '.rate // "N/A"' 2>/dev/null || echo "?/?")
 
   if [ -n "$violations" ] && [ "$violations" -ge "$THRESHOLD" ] 2>/dev/null; then
     echo ""

@@ -1,29 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-881",
-      "title": "Backup substitution rate dashboard in A audit",
-      "description": "Add substitution frequency tracking to audit-stats.mjs. Read backup_substitutions from engagement-trace.json across recent E sessions. Report 'N substitutions in last 10 E sessions, top replaced: X'. Surface chronically unreachable platforms that should be circuit-broken rather than substituted.",
-      "priority": 881,
-      "status": "done",
-      "added": "2026-03-05",
-      "created_session": 1818,
-      "source": "brainstorming-R323",
-      "tags": [
-        "observability"
-      ],
-      "commits": [
-        "87817126"
-      ],
-      "outcome": {
-        "session": "s1832",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added computeBackupSubstitutionRate() to audit-stats.mjs. Reads backup_substitutions from engagement-trace + archive, reports per-platform frequency and circuit-break candidates (>=3/10 threshold). Added audit subcheck reference in SESSION_AUDIT_SUBCHECKS.md."
-      }
-    },
-    {
       "id": "wq-882",
       "title": "TODO scan: tighten exclusions based on FP rate data",
       "description": "The todo_false_positive_rate metric shows 51% combined FP rate (elevated). Queue-level FP rate is 78% (18/23 todo-scan items retired). Use per-item text from todo-tracker.json to identify new exclusion patterns or widen existing ones in todo-false-positives.json. Alternatively raise ingest threshold in queue-pipeline.mjs to require more specific TODO comments.",
@@ -36,29 +13,6 @@
         "quality"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-885",
-      "title": "Add tw_run_fn helper to timeout-wrapper.sh",
-      "description": "Currently tw_run requires 'bash -c ...' for multi-line check logic. Adding a tw_run_fn helper that wraps function dispatch (declare -f + call) would simplify future hook migrations to timeout-wrapper.sh. Small utility addition, clear scope.",
-      "priority": 885,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1823,
-      "source": "brainstorming-R324",
-      "tags": [
-        "tooling"
-      ],
-      "commits": [
-        "0de54b7e"
-      ],
-      "outcome": {
-        "session": "s1832",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added tw_run_fn to timeout-wrapper.sh. Dispatches bash functions with timeout, avoiding bash -c quoting. Smoke tested."
-      }
     },
     {
       "id": "wq-888",
@@ -85,6 +39,47 @@
       "source": "brainstorming-R325",
       "tags": [
         "observability"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-891",
+      "title": "Substitution auto-circuit-breaker",
+      "description": "(added ~s1832): When backup_substitution_rate surfaces a circuit_break_recommended verdict, an A session could auto-disable the platform in picker config (set ROI override to 0 or add to skip list) rather than creating a wq item for manual action. Would close the loop from detection to remediation.",
+      "priority": 891,
+      "status": "pending",
+      "added": "2026-03-06",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-892",
+      "title": "Slim SESSION_AUDIT_SUBCHECKS.md — 3202 tokens (over 3000 budget)",
+      "description": "Auto-generated: SESSION_AUDIT_SUBCHECKS.md is 3202 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
+      "priority": 892,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1833,
+      "source": "hook:27-session-file-sizes",
+      "tags": [
+        "auto-seeded",
+        "prompt-budget"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-893",
+      "title": "Audit hook consolidation candidates — identify hooks to merge",
+      "description": "Map all 73 hooks. Identify groups that share session-type gates (e.g. multiple _E.sh hooks that could merge into existing dispatchers, multiple generic hooks that run similar JSON parsing). Produce a consolidation plan with target groups, estimated line reduction, and risk assessment. d074 deliverable (1) prep work.",
+      "priority": 893,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1833,
+      "source": "d074-R326",
+      "tags": [
+        "d074",
+        "planning"
       ],
       "commits": []
     }

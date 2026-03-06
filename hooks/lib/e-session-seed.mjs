@@ -79,23 +79,36 @@ export function generateSeed({ historyFile, intelFile, nudgeFile, deps = {} } = 
     }
   }
 
-  // 4. Budget utilization warning
+  // 4. Cost trend + budget control (wq-897: inject trend data so E session self-regulates)
   if (fs.existsSync(historyFile)) {
     const lines = fs.readFileSync(historyFile, 'utf8').split('\n').filter(Boolean);
     const eSessions = lines.filter(l => l.includes('mode=E')).slice(-5);
     const costs = [];
+    const durations = [];
     for (const line of eSessions) {
-      const m = line.match(/cost=\$(\d+\.?\d*)/);
-      if (m) costs.push(parseFloat(m[1]));
+      const cm = line.match(/cost=\$(\d+\.?\d*)/);
+      if (cm) costs.push(parseFloat(cm[1]));
+      const dm = line.match(/dur=(\d+)m(\d+)s/);
+      if (dm) durations.push(parseInt(dm[1]) * 60 + parseInt(dm[2]));
     }
     if (costs.length > 0) {
       const avg = costs.reduce((a, b) => a + b, 0) / costs.length;
-      output.push('## Budget utilization alert');
-      if (avg < 1.50) {
-        output.push(`WARNING: Last ${costs.length} E sessions averaged $${avg.toFixed(2)} (target: $1.50+).`);
-        output.push('You MUST use the Phase 4 budget gate. Do NOT end the session until you have spent at least $1.50.');
-        output.push('After each platform engagement, check your budget spent from the system-reminder line.');
-        output.push('If under $1.50, loop back to Phase 2 with another platform.');
+      const avgDur = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
+      const overBudget = costs.filter(c => c > 1.80).length;
+
+      output.push('## E session cost trend');
+      output.push(`Last ${costs.length}: ${costs.map(c => '$' + c.toFixed(2)).join(', ')} | avg: $${avg.toFixed(2)} | violations (>$1.80): ${overBudget}/${costs.length}`);
+      if (avgDur > 0) {
+        output.push(`Avg duration: ${Math.round(avgDur / 60)}m${Math.round(avgDur % 60)}s`);
+      }
+
+      if (avg > 1.50) {
+        output.push('');
+        output.push('**COST PRESSURE** — trend is above $1.50 target. Mandatory controls:');
+        output.push('1. Engage **2 platforms only** (skip lowest-ROI picker selection)');
+        output.push('2. At **$0.80 spent** (check system-reminder), stop engaging and go to Phase 3');
+        output.push('3. Keep each platform interaction to **2-3 tool calls max** (read → quality check → post)');
+        output.push('4. Skip surveys — only engage platforms where you can reply to an existing thread');
       } else {
         output.push(`Recent E sessions averaging $${avg.toFixed(2)} — on target.`);
       }

@@ -748,6 +748,72 @@ function computeBackupSubstitutionRate() {
   };
 }
 
+// --- E session engagement depth (wq-911) ---
+
+function computeEEngagementTrend() {
+  const current = safeRead(join(STATE_DIR, 'engagement-trace.json'), []);
+  const archive = safeRead(join(STATE_DIR, 'engagement-trace-archive.json'), []);
+  const allTraces = [...archive, ...current];
+
+  // Deduplicate by session number (current may overlap with archive)
+  const seen = new Set();
+  const unique = [];
+  for (const t of allTraces) {
+    if (t.session && !seen.has(t.session)) {
+      seen.add(t.session);
+      unique.push(t);
+    }
+  }
+
+  const last10 = unique.slice(-10);
+  if (last10.length === 0) return { sessions_checked: 0, verdict: 'no_data' };
+
+  const THREAD_FLOOR = 2; // Minimum expected threads per E session
+
+  const dataPoints = last10.map(t => ({
+    session: t.session,
+    threads: typeof t.threads_contributed === 'number' ? t.threads_contributed : (t.platforms_engaged || []).length,
+    platforms: (t.platforms_engaged || []).length
+  }));
+
+  const threads = dataPoints.map(d => d.threads);
+  const platforms = dataPoints.map(d => d.platforms);
+
+  const avgThreads = Math.round((threads.reduce((a, b) => a + b, 0) / threads.length) * 100) / 100;
+  const avgPlatforms = Math.round((platforms.reduce((a, b) => a + b, 0) / platforms.length) * 100) / 100;
+  const minThreads = Math.min(...threads);
+  const floorViolations = threads.filter(t => t < THREAD_FLOOR).length;
+
+  // Trend: compare last-5 vs last-10 averages
+  const last5Threads = threads.slice(-5);
+  const avg5Threads = last5Threads.length > 0
+    ? Math.round((last5Threads.reduce((a, b) => a + b, 0) / last5Threads.length) * 100) / 100
+    : 0;
+  const delta = Math.round((avg5Threads - avgThreads) * 100) / 100;
+  const trend = delta < -0.5 ? '↓' : (delta > 0.5 ? '↑' : '→');
+
+  let verdict;
+  if (floorViolations >= 3) verdict = 'engagement_thinning';
+  else if (floorViolations >= 1 && trend === '↓') verdict = 'declining';
+  else if (floorViolations >= 1) verdict = 'occasional_thin';
+  else verdict = 'healthy';
+
+  return {
+    sessions_checked: last10.length,
+    avg_threads: avgThreads,
+    avg_platforms: avgPlatforms,
+    min_threads: minThreads,
+    floor_violations: floorViolations,
+    thread_floor: THREAD_FLOOR,
+    last5_avg_threads: avg5Threads,
+    trend,
+    delta,
+    sessions: dataPoints.map(d => `s${d.session}`),
+    detail: dataPoints,
+    verdict
+  };
+}
+
 // --- Human-review validation (wq-889) ---
 
 function computeHumanReviewValidation() {
@@ -875,6 +941,7 @@ const stats = {
   r_scope_budget: computeRScopeBudgetCompliance(),
   b_pipeline_gate: computeBPipelineGateCompliance(),
   e_scope_bleed: computeEScopeBleed(),
+  e_engagement_trend: computeEEngagementTrend(),
   backup_substitution_rate: computeBackupSubstitutionRate(),
   todo_false_positive_rate: computeTodoFalsePositiveRate(),
   human_review_validation: computeHumanReviewValidation()

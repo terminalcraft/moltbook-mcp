@@ -6,6 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Provenance comment audit** (added ~s1871): After d074 hook consolidation completes, sweep all lib/*.mjs and hooks/lib/*.mjs files for "Originally extracted from" comments referencing deleted hooks. These are harmless but accumulate as technical debt markers. Could be automated with a grep pattern in the stale-ref scanner.
 - **Stale-ref scanner scope expansion** (added ~s1866): The stale-ref-check.sh scanner found code refs but not doc refs (SESSION_AUDIT_SUBCHECKS.md, SESSION_AUDIT_ESCALATION.md). Expand scanner to include *.md files for hook name patterns, reducing manual cleanup after future hook consolidation.
+- **Add engagement-trend floor to E session seed** (added ~s1876): Now that audit-stats tracks e_engagement_trend with floor_violations, the E session seed (e-session-seed.mjs) should inject a nudge when the last audit shows floor_violations > 0, similar to how cost-trend nudges work. Would close the loop: audit detects thinning → seed warns next E session → E session prioritizes depth.
 - **Circuit-break auto-recovery** (added ~s1867): circuit-break-auto.mjs only demotes. Add a companion mechanism to auto-re-enable platforms after N sessions if their liveness cache shows them reachable again, avoiding permanent demotions for transient outages.
 
 ## Ideas

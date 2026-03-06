@@ -1,20 +1,23 @@
 #!/bin/bash
 # 35-r-session-prehook_R.sh — Consolidated R-session pre-hook dispatcher
 #
-# Merges 2 individual R-session pre-hooks into a single dispatcher.
-# Runs maintenance audit then security posture check, both writing
-# to maintain-audit.txt.
+# Merges 4 individual R-session pre-hooks into a single dispatcher.
+# All checks write to maintain-audit.txt for R session visibility.
 #
 # Replaces:
 #   35-maintain-audit_R.sh    (s383, R#201, R#276)
 #   35-security-posture_R.sh  (R#211, d045/d046)
+#   36-directive-status_R.sh  (R#185, R#317)
+#   44-brainstorm-gate_R.sh   (wq-365)
 #
 # Created: B#490 (wq-729)
+# Expanded: R#330 (d074 Group 2)
 
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 AUDIT_FILE="$HOME/.config/moltbook/maintain-audit.txt"
+SESSION_NUM="${SESSION_NUM:-1100}"
 
 ISSUES=0
 
@@ -157,11 +160,83 @@ check_security_posture() {
 }
 
 ###############################################################################
+# Check 3: Directive status (was 36-directive-status_R.sh)
+#   Pre-computes which directives need attention in step 5
+###############################################################################
+check_directive_status() {
+  local STATUS_FILE="$HOME/.config/moltbook/directive-status.txt"
+  local DIRECTIVES_FILE="$DIR/directives.json"
+  local QUEUE_FILE="$DIR/work-queue.json"
+  local HISTORY_FILE="$HOME/.config/moltbook/session-history.txt"
+
+  echo "=== Directive status $(date -Iseconds) s=$SESSION_NUM ===" > "$STATUS_FILE"
+
+  if [ ! -f "$DIRECTIVES_FILE" ]; then
+    echo "ERROR: directives.json not found" >> "$STATUS_FILE"
+    echo "Directive status: directives.json missing"
+    return
+  fi
+
+  local OUTPUT
+  OUTPUT=$(node "$DIR/hooks/lib/directive-analysis.mjs" \
+    "$SESSION_NUM" "$DIRECTIVES_FILE" "$QUEUE_FILE" "$HISTORY_FILE" 2>/dev/null) || {
+    echo "ERROR: directive-analysis.mjs failed" >> "$STATUS_FILE"
+    echo "Directive status: analysis failed"
+    return
+  }
+
+  echo "$OUTPUT" >> "$STATUS_FILE"
+
+  local NEEDS_ATTENTION
+  NEEDS_ATTENTION=$(echo "$OUTPUT" | grep -cE '^(STALE|NEEDS_UPDATE|PENDING)' || true)
+
+  if [ "$NEEDS_ATTENTION" -eq 0 ]; then
+    echo "Directive status: healthy, step 5 = add review note"
+  else
+    echo "Directive status: $NEEDS_ATTENTION need attention"
+  fi
+
+  # Append to maintain-audit.txt for visibility
+  echo "" >> "$AUDIT_FILE"
+  cat "$STATUS_FILE" >> "$AUDIT_FILE"
+}
+
+###############################################################################
+# Check 4: Brainstorming health gate (was 44-brainstorm-gate_R.sh)
+#   Ensures ≥3 active brainstorming ideas
+###############################################################################
+check_brainstorm_gate() {
+  local BRAINSTORM="$DIR/BRAINSTORMING.md"
+  local MIN_IDEAS=3
+
+  if [ ! -f "$BRAINSTORM" ]; then
+    echo "brainstorm-gate: BRAINSTORMING.md not found"
+    return
+  fi
+
+  local TOTAL_ACTIVE FRESH_COUNT
+  TOTAL_ACTIVE=$(grep -cE '^- \*\*' "$BRAINSTORM" 2>/dev/null || echo 0)
+  FRESH_COUNT=$(grep -cE '^- \*\*.+\(added ~s[0-9]+\)' "$BRAINSTORM" 2>/dev/null || echo 0)
+
+  if [ "$FRESH_COUNT" -lt "$MIN_IDEAS" ]; then
+    local MSG="WARN: BRAINSTORMING.md has only $FRESH_COUNT active idea(s) (minimum: $MIN_IDEAS). You MUST add $(($MIN_IDEAS - $FRESH_COUNT))+ new ideas before closing this R session."
+    echo "$MSG"
+    echo "" >> "$AUDIT_FILE"
+    echo "=== Brainstorming health ===" >> "$AUDIT_FILE"
+    echo "$MSG" >> "$AUDIT_FILE"
+  else
+    echo "brainstorm-gate: $FRESH_COUNT fresh ideas ($TOTAL_ACTIVE total active) (healthy)"
+  fi
+}
+
+###############################################################################
 # Run all checks sequentially, then summarize
 ###############################################################################
 
 check_maintain_audit
 check_security_posture
+check_directive_status
+check_brainstorm_gate
 
 if [ "$ISSUES" -eq 0 ]; then
   echo "ALL CLEAR: security, disk, API, logs, hooks, git posture all healthy" >> "$AUDIT_FILE"

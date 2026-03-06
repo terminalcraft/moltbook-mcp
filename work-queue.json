@@ -70,28 +70,19 @@
       "commits": []
     },
     {
-      "id": "wq-901",
-      "title": "Fix stale-refs scanner false positive inflation",
-      "description": "Scanner reports 61 stale refs but 96.7% are false positives: keyword matches for 'retire'/'redundant' in comments/strings (46), node_modules (9), retired hooks (4). Only 2 actual deleted-file refs exist. Add filtering: exclude node_modules/, hooks/retired/, and entries where deleted_file is a common word rather than an actual file path.",
-      "priority": 901,
-      "status": "done",
+      "id": "wq-902",
+      "title": "Wire up R pre-hook dispatcher expansion — delete 2 old hooks",
+      "description": "R#330 expanded 35-r-session-prehook_R.sh to absorb 36-directive-status_R.sh and 44-brainstorm-gate_R.sh (d074 Group 2). B session needs to: (1) delete 36-directive-status_R.sh and 44-brainstorm-gate_R.sh; (2) dry-run R session pre-hooks to verify dispatcher output matches old hooks; (3) update hook manifest. Net result: -2 hooks toward d074 target.",
+      "priority": 902,
+      "status": "pending",
       "added": "2026-03-06",
-      "created_session": 1850,
-      "source": "audit-s1850",
+      "created_session": 1853,
+      "source": "R330-structural",
       "tags": [
-        "audit",
-        "infrastructure"
+        "d074",
+        "hooks"
       ],
-      "commits": [
-        "8043ef30"
-      ],
-      "outcome": {
-        "session": 1852,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Root cause: --oneline subjects matching extension filter. Fixed with --format=\"\" and node_modules/retired exclusions. 61→1 stale refs."
-      }
+      "commits": []
     }
   ]
 }

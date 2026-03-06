@@ -29,9 +29,14 @@ if (/^Session [A-Z]#[0-9]+.*complete/i.test(currentNote)) {
   process.exit(0);
 }
 
-// Accept substantive notes (>60 chars with platform mentions)
+// Reject agent preamble patterns regardless of length (wq-916: s1874 race condition
+// where parallel hook execution caused partial .summary read, producing garbage notes)
+const preambleRe = /^(Let me|I'll |Now |Here's my|Starting|First,? let)/i;
+const isPreamble = preambleRe.test(currentNote);
+
+// Accept substantive notes (>60 chars with platform mentions) unless they're preamble
 const platformRe = /engag|platform|chatr|moltbook|4claw|aicq|clawball|lobchan|pinchwork|colony/i;
-if (currentNote.length > 60 && platformRe.test(currentNote)) {
+if (!isPreamble && currentNote.length > 60 && platformRe.test(currentNote)) {
   process.exit(0);
 }
 

@@ -5,14 +5,21 @@
       "title": "TODO scan: tighten exclusions based on FP rate data",
       "description": "The todo_false_positive_rate metric shows 51% combined FP rate (elevated). Queue-level FP rate is 78% (18/23 todo-scan items retired). Use per-item text from todo-tracker.json to identify new exclusion patterns or widen existing ones in todo-false-positives.json. Alternatively raise ingest threshold in queue-pipeline.mjs to require more specific TODO comments.",
       "priority": 882,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-05",
       "created_session": 1818,
       "source": "brainstorming-R323",
       "tags": [
         "quality"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1836,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Three-layer fix: 9 new patterns in todo-false-positives.json, 7 new grep filters + 2 EXCLUDE_PATHS in 27-todo-scan.sh, specificity gate (isSpecificEnough) in queue-pipeline.mjs requiring file refs/identifiers/URL paths/4+ non-stop words. Forward-looking fix — historical 78% rate will decay as new items are processed with tighter filters."
+      }
     },
     {
       "id": "wq-888",

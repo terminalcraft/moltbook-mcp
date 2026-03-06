@@ -5,7 +5,7 @@
       "title": "Slim SESSION_AUDIT_SUBCHECKS.md — 3202 tokens (over 3000 budget)",
       "description": "Auto-generated: SESSION_AUDIT_SUBCHECKS.md is 3202 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
       "priority": 892,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1833,
       "source": "hook:27-session-file-sizes",
@@ -13,7 +13,14 @@
         "auto-seeded",
         "prompt-budget"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s1872",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "3319→2113 tokens (36% reduction). Removed JSON examples, merged B/E/R cost sections, compressed verbose prose. 276→160 lines."
+      }
     },
     {
       "id": "wq-896",
@@ -72,28 +79,6 @@
         "hooks"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-909",
-      "title": "Clean 2 residual stale code refs after wq-908",
-      "description": "wq-908 cleaned 6 files but 2 active code refs remain: lib/r-impact-tracker.mjs references deleted hooks/post-session/18-r-impact-track.sh, hooks/lib/directive-analysis.mjs references deleted hooks/pre-session/36-directive-status_R.sh. Remove or update these references.",
-      "priority": 909,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1870,
-      "source": "audit-s1870",
-      "tags": [
-        "audit",
-        "stale-refs"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1871,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Removed stale provenance comments referencing deleted 18-r-impact-track.sh and 36-directive-status_R.sh from r-impact-tracker.mjs:3 and directive-analysis.mjs:4"
-      }
     }
   ]
 }

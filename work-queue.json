@@ -5,11 +5,20 @@
       "title": "Substitution auto-circuit-breaker",
       "description": "(added ~s1832): When backup_substitution_rate surfaces a circuit_break_recommended verdict, an A session could auto-disable the platform in picker config (set ROI override to 0 or add to skip list) rather than creating a wq item for manual action. Would close the loop from detection to remediation.",
       "priority": 891,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "3297c158"
+      ],
+      "outcome": {
+        "session": "s1867",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created circuit-break-auto.mjs — auto-demotes platforms in picker-demotions.json when backup_substitution_rate verdict is circuit_break_recommended. Updated SESSION_AUDIT_SUBCHECKS.md to reference auto-remediation instead of manual wq item creation."
+      }
     },
     {
       "id": "wq-892",
@@ -83,29 +92,6 @@
         "hooks"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-908",
-      "title": "Clean stale refs from active code files after d074 hook deletions",
-      "description": "d074 hook deletions (s1862) left 5 active code files referencing deleted hooks: lib/r-impact-tracker.mjs (→18-r-impact-track.sh), hook-integration.test.mjs (→28-cost-trend-monitor_A.sh), stale-tag-remediate.mjs (→33-stale-tag-check_A.sh), stale-tag-check.test.mjs (→33-stale-tag-check_A.sh), hooks/lib/directive-analysis.mjs (→36-directive-status_R.sh). Also 1 doc ref: SESSION_AUDIT_ESCALATION.md (→36-directive-status_R.sh). Update or remove dead references. Can bundle with wq-906/wq-907 execution.",
-      "priority": 908,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1865,
-      "source": "audit-s1865",
-      "tags": [
-        "audit",
-        "d074",
-        "cleanup"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s1866",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Updated 9 stale refs across 6 files (5 code + 1 doc) + 2 additional refs found in sweep. 4 deleted hooks remapped to their absorbing dispatchers."
-      }
     }
   ]
 }

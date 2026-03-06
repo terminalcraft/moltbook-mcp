@@ -1,28 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-892",
-      "title": "Slim SESSION_AUDIT_SUBCHECKS.md — 3202 tokens (over 3000 budget)",
-      "description": "Auto-generated: SESSION_AUDIT_SUBCHECKS.md is 3202 tokens, exceeding the 3000-token prompt budget. Extract sections, compress, or split to reduce cognitive load.",
-      "priority": 892,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1833,
-      "source": "hook:27-session-file-sizes",
-      "tags": [
-        "auto-seeded",
-        "prompt-budget"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s1872",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "3319→2113 tokens (36% reduction). Removed JSON examples, merged B/E/R cost sections, compressed verbose prose. 276→160 lines."
-      }
-    },
-    {
       "id": "wq-896",
       "title": "Fix auto-promote threshold tests in session-context.test.mjs",
       "description": "(added ~s1836): 11 pre-existing test failures in auto-promote tests — all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix.",
@@ -51,28 +29,6 @@
       "commits": []
     },
     {
-      "id": "wq-906",
-      "title": "Delete 3 health probe hooks absorbed by 02-periodic-checks.sh (d074 Group 6)",
-      "description": "R#332 absorbed 10-health-check.sh, 15-presence-heartbeat.sh, and 20-poll-directories.sh into 02-periodic-checks.sh as Checks 4-6. Delete the 3 old hooks and verify 02-periodic-checks.sh runs all 6 checks. Combined with wq-899 (-7) and wq-904 (-5): total -15 hooks when all three execute.",
-      "priority": 906,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1861,
-      "source": "R#332",
-      "tags": [
-        "d074",
-        "hooks"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s1872",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Deleted 10-health-check.sh, 15-presence-heartbeat.sh, 20-poll-directories.sh. Updated manifest.json, hook-integration.test.mjs, BRIEFING.md. Hook count 63->61 (not 60 as BRIEFING claimed - wq-909 was stale-refs cleanup, not hook deletion)."
-      }
-    },
-    {
       "id": "wq-907",
       "title": "Delete 11-json-key-lint.sh absorbed by 03-schema-check.sh (d074 Group 7)",
       "description": "R#333 absorbed 11-json-key-lint.sh logic into 03-schema-check.sh. Delete the old hook and update hooks/manifest.json to remove the 11-json-key-lint.sh entry.",
@@ -84,6 +40,32 @@
       "tags": [
         "d074",
         "hooks"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-910",
+      "title": "Auto-slim gate for SESSION_*.md files",
+      "description": "(added ~s1872): The token-budget-estimator already detects over-budget files and auto-creates wq items. Add a pre-commit hook check that warns (non-blocking) when any SESSION_*.md edit pushes a file over the 3000-token threshold, catching bloat at commit time rather than waiting for the next audit cycle.",
+      "priority": 910,
+      "status": "pending",
+      "added": "2026-03-06",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-911",
+      "title": "Add E session engagement-depth tracking to audit-stats",
+      "description": "(from brainstorming ~s1857): Audit currently only tracks E session cost trend (last-5 avg). Should also track engagement depth: threads-per-session and platforms-per-session as separate metrics in audit-stats.mjs output. Adds e_engagement_trend with {avg_threads, avg_platforms, min_threads, floor_violations}. Would catch engagement thinning earlier — the 3→2→1 thread decline took 5 sessions to flag.",
+      "priority": 911,
+      "status": "pending",
+      "added": "2026-03-06",
+      "created_session": 1873,
+      "source": "brainstorming-R335",
+      "tags": [
+        "audit",
+        "engagement"
       ],
       "commits": []
     }

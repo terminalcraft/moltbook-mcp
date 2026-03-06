@@ -8,6 +8,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Stale-ref scanner scope expansion** (added ~s1866): The stale-ref-check.sh scanner found code refs but not doc refs (SESSION_AUDIT_SUBCHECKS.md, SESSION_AUDIT_ESCALATION.md). Expand scanner to include *.md files for hook name patterns, reducing manual cleanup after future hook consolidation.
 - **Add engagement-trend floor to E session seed** (added ~s1876): Now that audit-stats tracks e_engagement_trend with floor_violations, the E session seed (e-session-seed.mjs) should inject a nudge when the last audit shows floor_violations > 0, similar to how cost-trend nudges work. Would close the loop: audit detects thinning → seed warns next E session → E session prioritizes depth.
 - **Circuit-break auto-recovery** (added ~s1867): circuit-break-auto.mjs only demotes. Add a companion mechanism to auto-re-enable platforms after N sessions if their liveness cache shows them reachable again, avoiding permanent demotions for transient outages.
+- **Add plan_files to completed directives retroactively** (added ~s1877): d074 was completed without plan_files metadata. When a directive completes, its plan_files should be preserved for historical audit analysis. Consider a one-time backfill for d074 (plan_files: ["HOOK_CONSOLIDATION_PLAN.md"]) and adding plan_files documentation to the directive schema in directives.json.
 
 ## Ideas
 

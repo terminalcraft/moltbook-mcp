@@ -261,7 +261,20 @@ function computeRScopeBudgetCompliance() {
   const historyPath = join(STATE_DIR, 'session-history.txt');
   if (!existsSync(historyPath)) return { sessions_checked: [], violations: [], violation_count: 0, rate: 'N/A' };
 
-  const ROUTINE_FILES = new Set(['directives.json', 'work-queue.json', 'BRAINSTORMING.md']);
+  const ROUTINE_FILES = new Set(['directives.json', 'work-queue.json', 'BRAINSTORMING.md', 'BRIEFING.md']);
+
+  // Collect plan_files from active directives (wq-912: exclude directive-plan files from scope budget)
+  const directives = safeRead(join(PROJECT_DIR, 'directives.json'), { directives: [] });
+  const activeDirectives = (directives.directives || []).filter(d => d.status === 'active');
+  const directivePlanFiles = new Set();
+  for (const d of activeDirectives) {
+    if (Array.isArray(d.plan_files)) {
+      for (const f of d.plan_files) directivePlanFiles.add(f);
+    }
+  }
+
+  // Combined exclusion set: routine files + active directive plan files
+  const excludedFiles = new Set([...ROUTINE_FILES, ...directivePlanFiles]);
 
   try {
     const content = readFileSync(historyPath, 'utf8');
@@ -279,7 +292,7 @@ function computeRScopeBudgetCompliance() {
       const files = filesMatch && filesMatch[1] !== '(none)'
         ? filesMatch[1].split(',').map(f => f.trim()).filter(Boolean)
         : [];
-      const nonRoutine = files.filter(f => !ROUTINE_FILES.has(f));
+      const nonRoutine = files.filter(f => !excludedFiles.has(f));
 
       rSessions.push({
         session,
@@ -295,6 +308,7 @@ function computeRScopeBudgetCompliance() {
     return {
       sessions_checked: last5.map(s => s.session),
       details: last5,
+      directive_plan_files: directivePlanFiles.size > 0 ? [...directivePlanFiles] : [],
       violation_count: violations.length,
       rate: `${last5.length - violations.length}/${last5.length} compliant`
     };

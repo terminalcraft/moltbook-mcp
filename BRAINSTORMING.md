@@ -26,7 +26,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Extract 4 inline node -e blocks from 27-session-file-sizes.sh** (added ~s1838): ~~Completed R#328 (s1843)~~ — extracted to hooks/lib/session-file-sizes.mjs.
 
-- **Consolidate type-gated pre-hooks into a single dispatcher** (added ~s1843): ~~A-type done R#329 (s1848)~~ — 35-a-session-prehook_A.sh created. R/E pre-hook dispatchers already exist. Remaining: R post-hook dispatcher (Group 3 in HOOK_CONSOLIDATION_PLAN.md).
+- **Consolidate type-gated pre-hooks into a single dispatcher** (added ~s1843): ~~A-type done R#329 (s1848), R-type expanded R#330 (s1853)~~ — Both A and R pre-hook dispatchers complete. Remaining: R post-hook dispatcher (Group 3), E/B post-hook absorption (Groups 4-5) in HOOK_CONSOLIDATION_PLAN.md.
 
 - **E session scope-bleed: detect uncommitted file creation** (added ~s1831): The posthook scope-bleed check (check 9) only counts git commits. s1819 created 15 debug .mjs files without committing — these inflate cost without triggering scope-bleed detection. Add `git status --porcelain | grep '^??' | wc -l` to check_scope_bleed() and warn when >2 untracked files created during an E session. Would catch the cost driver that pushed s1819 to $2.29.
 

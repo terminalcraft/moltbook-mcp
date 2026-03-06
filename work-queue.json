@@ -60,7 +60,7 @@
       "title": "Monitor E session cost trend — last-5 avg $1.84",
       "description": "Auto-escalation: E session cost trend breached $1.5 threshold. Last-5 avg $1.84 vs last-10 avg $1.69 (↑ threshold_breach). Review session efficiency and enforce cost controls.",
       "priority": 894,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1837,
       "source": "audit-cost-escalation-s1837",
@@ -68,7 +68,14 @@
         "audit",
         "cost"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1841,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Trend self-correcting (post-fix s1834=$1.45, s1839=$1.53 vs pre-fix outliers $2.29/$2.68). Hardened: aligned e-cost-cap.mjs default from $2.50→$1.80, added 6-minute duration gate enforcement to posthook. Three-layer cost control architecture now fully synchronized."
+      }
     }
   ]
 }

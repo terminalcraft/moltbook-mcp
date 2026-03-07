@@ -5,14 +5,21 @@
       "title": "Fix auto-promote threshold tests in session-context.test.mjs",
       "description": "(added ~s1836): 11 pre-existing test failures in auto-promote tests — all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix.",
       "priority": 896,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1843,
       "source": "brainstorming-R328",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1896,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated 11 test expectations from threshold=3 to threshold=4 in session-context.test.mjs. 222/222 pass."
+      }
     },
     {
       "id": "wq-900",
@@ -73,7 +80,7 @@
       "title": "Execute or retire wq-896 (52 sessions stuck, 2-audit escalation)",
       "description": "(escalated at A#219): wq-896 now at 52 sessions — crossed 50-session threshold and stale at 2nd consecutive audit. Simple fix: update 11 test expectations from threshold=3 to threshold=4 in session-context.test.mjs. Or retire with rationale if tests are obsolete. Must resolve at next B session.",
       "priority": 920,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-07",
       "created_session": 1890,
       "source": "audit-s1890",
@@ -82,7 +89,14 @@
         "testing"
       ],
       "commits": [],
-      "escalated_at": "A#219 (s1895)"
+      "escalated_at": "A#219 (s1895)",
+      "outcome": {
+        "session": 1896,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Resolved via wq-896 fix. Escalation cleared."
+      }
     },
     {
       "id": "wq-922",

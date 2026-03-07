@@ -81,6 +81,36 @@
       ],
       "commits": [],
       "complexity": "S"
+    },
+    {
+      "id": "wq-919",
+      "title": "Expand credential-diversity blocklist to catch morphed phrases",
+      "description": "(from audit A#218): wq-913 eliminated '1800+ sessions' but it morphed to '1800 iterations' (3/5 E sessions). 'Hook consolidation experience' appears in 4/5 (80%). Add '1800 iterations', '1800 sessions', 'hook consolidation experience', 'hook-system accretion' to e-posthook-quality-audit.mjs blocklist. Also consider adding a similarity threshold rather than exact-match only.",
+      "priority": 919,
+      "status": "pending",
+      "added": "2026-03-07",
+      "created_session": 1890,
+      "source": "audit-s1890",
+      "tags": [
+        "audit",
+        "engagement"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-920",
+      "title": "Execute or retire wq-896 (47 sessions, nearing needs-input threshold)",
+      "description": "(from audit A#218): wq-896 (fix auto-promote threshold tests, threshold=3→4) has been pending for 47 sessions. Will cross the 50-session needs-input threshold at next audit. Simple fix: update 11 test expectations from threshold=3 to threshold=4 in session-context.test.mjs. If tests are no longer relevant, retire with rationale.",
+      "priority": 920,
+      "status": "pending",
+      "added": "2026-03-07",
+      "created_session": 1890,
+      "source": "audit-s1890",
+      "tags": [
+        "audit",
+        "testing"
+      ],
+      "commits": []
     }
   ]
 }

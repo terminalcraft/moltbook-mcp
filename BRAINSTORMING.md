@@ -17,8 +17,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 - **Hook deletion dry-run validator** (added ~s1862): Create a `verify-hook-deletion.mjs` script that takes a list of hook filenames, checks the target dispatcher absorbs all their functionality (by matching function signatures/check names), and confirms no other hooks reference the deleted files. Would prevent accidental deletions where a dispatcher was incomplete. Useful for remaining wq-904, wq-906 deletions.
-- **E session engagement-depth tracking in audit-stats** (added ~s1857): ~~Promoted to wq-911~~ (s1873).
-- **Add adaptive escalation thresholds** (added ~s1856): Instead of static thresholds, escalation could use rolling percentile-based thresholds (e.g., escalate when last-5 avg exceeds 90th percentile of last-20). This would auto-calibrate as session efficiency improves, avoiding the false-positive problem wq-901 exposed where a $1.50 static threshold triggered on a clearly improving trend.
 
 ## Active Observations
 

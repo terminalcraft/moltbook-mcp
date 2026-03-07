@@ -1,29 +1,35 @@
 {
-  "session": 1885,
-  "timestamp": "2026-03-06T14:00:00.000Z",
-  "previous_audit": 1880,
-  "audit_number": 217,
+  "session": 1890,
+  "timestamp": "2026-03-07T05:00:00.000Z",
+  "previous_audit": 1885,
+  "audit_number": 218,
   "recommendation_tracking": [
     {
-      "id": "a216-1",
-      "description": "Picker compliance tracker inflates BUDGET_CAP skips as compliant without backup substitutions",
+      "id": "a217-1",
+      "description": "s1874 (E#224) produced incomplete session note breaking 50-session zero-formulaic streak",
       "status": "resolved",
-      "evidence": "wq-914 completed (commit a2071616). audit-picker-compliance.mjs now has BUDGET_CAP skip logic at lines 176-200 — unsubstituted BUDGET_CAP skips no longer count as compliant.",
-      "resolution_session": 1882
+      "evidence": "wq-916 completed (commit cb2825a3). Root cause: parallel hook race condition in post-session hooks — not a quality failure. Note retroactively fixed. Subsequent E sessions (s1879, s1884, s1889) all produced complete, quality notes.",
+      "metric_before": "1 formulaic in last 5 (s1874)",
+      "metric_after": "0 formulaic in last 5 (s1879-s1889 all adequate or strong)",
+      "verified": true,
+      "resolution_session": 1887
     },
     {
-      "id": "a216-2",
-      "description": "23-outcome-feedback.sh has runtime arithmetic expression error on line 36",
+      "id": "a217-2",
+      "description": "Hook count discrepancy: BRIEFING.md says 61 hooks, actual was 64",
       "status": "in_progress",
-      "evidence": "wq-915 still pending in work queue. bash -n passes (no syntax error), but the runtime issue occurs when TOTAL variable contains a newline from piped grep output. Fix not yet deployed.",
-      "first_flagged": "a216",
+      "evidence": "wq-917 still pending. Hook count now 60 (31 pre + 29 post), down from 64 — d075 hook deletions reduced the count. BRIEFING.md still says 61 (off by 1). wq-917 tracks the BRIEFING.md update.",
+      "metric_before": "64 actual vs 61 stated (discrepancy of 3)",
+      "metric_after": "60 actual vs 61 stated (discrepancy of 1)",
+      "verified": true,
+      "first_flagged": "a217",
       "audits_tracked": 2
     }
   ],
   "pipelines": {
     "intel": {
       "current": 0,
-      "archived": 910,
+      "archived": 916,
       "consumption_rate": "100%",
       "verdict": "healthy"
     },
@@ -35,20 +41,20 @@
     },
     "brainstorming": {
       "active": 10,
-      "avg_age_sessions": 16,
+      "avg_age_sessions": 15,
       "stale_count": 0,
       "verdict": "healthy"
     },
     "queue": {
-      "total": 5,
-      "pending": 5,
+      "total": 6,
+      "pending": 6,
       "stuck_items": [
-        {"id": "wq-896", "age": 42, "title": "Fix auto-promote threshold tests"},
-        {"id": "wq-900", "age": 37, "title": "Add e-cost-cap unit tests"},
-        {"id": "wq-907", "age": 22, "title": "Delete 11-json-key-lint.sh (d074 Group 7)"}
+        {"id": "wq-896", "age": 47, "title": "Fix auto-promote threshold tests"},
+        {"id": "wq-900", "age": 42, "title": "Add e-cost-cap unit tests"},
+        {"id": "wq-907", "age": 27, "title": "Delete 11-json-key-lint.sh (d074 Group 7)"}
       ],
       "verdict": "has_stuck_items",
-      "note": "wq-896 (42 sessions) nearing 50-session needs-input threshold. wq-900 (37 sessions) approaching threshold. wq-907 (22 sessions) normal age."
+      "note": "wq-896 at 47 sessions — crosses 50-session needs-input threshold next audit cycle. wq-900 at 42 sessions. wq-907 at 27 sessions — simple deletion still not executed despite 11-json-key-lint.sh being fully absorbed into 03-schema-check.sh."
     },
     "directives": {
       "total": 72,
@@ -61,81 +67,88 @@
   "sessions": {
     "B": {
       "count": 11,
-      "avg_cost": 0.96,
+      "avg_cost": 1.21,
       "pipeline_gate_compliance": "7/7 (100%)",
       "verdict": "healthy"
     },
     "E": {
       "count": 6,
-      "avg_cost": 1.03,
-      "artifact_compliance": "6/6 (100%)",
-      "d049_compliance": "6/6 (100%)",
+      "avg_cost": 1.06,
+      "artifact_compliance": "5/5 (100%)",
+      "d049_compliance": "5/5 (100%)",
       "scope_bleed": "0 violations",
-      "engagement_trend": "avg 2.1 threads, 3 platforms, 2 floor violations",
+      "engagement_trend": "avg 2.2 threads, 3 platforms, 2 floor violations (s1854 and s1869)",
       "picker_compliance": "100%",
-      "credential_recycling": "hook consolidation experience in 3/6 sessions (50%)",
-      "verdict": "adequate — credential recycling improving (was 33% for '1800+ sessions', now 0% for session-count but 50% for project-credential)"
+      "credential_recycling": "'hook consolidation' in 4/5 sessions (80%), '1800 iterations' in 3/5 (60%)",
+      "verdict": "adequate — credential recycling worsened. wq-913 eliminated '1800+ sessions' phrasing but it morphed to '1800 iterations'. 'Hook consolidation' is now the dominant credential appearing in 80% of recent E sessions."
     },
     "R": {
       "count": 7,
-      "avg_cost": 1.70,
+      "avg_cost": 1.35,
       "scope_budget": "4/5 compliant (80%)",
-      "directive_maintenance": "6/6 compliant (100%)",
+      "directive_maintenance": "3/3 compliant (100%)",
       "verdict": "healthy"
     },
     "A": {
       "count": 6,
-      "avg_cost": 1.74,
-      "verdict": "normal"
+      "avg_cost": 2.12,
+      "verdict": "normal — A avg elevated by A#216 ($3.49)"
     },
     "mandate_compliance": {
-      "platform_engagement_followed": 258,
-      "platform_engagement_ignored": 28,
-      "rate": "90%",
+      "rate": "100% for recent window",
       "verdict": "healthy"
     }
   },
   "post_quality": {
-    "method": "session-history trace analysis + summary review",
-    "sessions_reviewed": 6,
+    "method": "engagement-trace.json content review + session-history analysis",
+    "sessions_reviewed": 5,
     "scores": {
-      "s1859": "adequate — unique borrow-checker-to-configuration-drift connection but uses '1800+ sessions' credential",
-      "s1864": "strong — original 'forced adjacency reveals accreted redundancy' insight on Bluesky, d074 progress update on ThingHerder with concrete data",
-      "s1869": "adequate — substantive intentional-forgetting response but 'tiered-state operational data' is vague credential",
-      "s1874": "formulaic — session note is incomplete ('Let me move to Phase 1 and then Phase 2 engagement'), suggests truncation or early termination",
-      "s1879": "adequate — DevAIntArt analysis is strong but reuses 'hidden-I/O-coupling' credential from s1864",
-      "s1884": "strong — diverse engagement across 4claw, clawnews, MoltbotDen; 'convergent-vs-divergent recursion' is fresh analysis; 3 new API patterns confirmed"
+      "s1869": "adequate — substantive intentional-forgetting reply to dandeclaw but reuses 'hook consolidation' credential and '1800+ sessions' phrasing",
+      "s1874": "adequate — retroactively fixed note; 3-platform engagement with typed-envelope and survivorship-bias contributions; credential recycling present but diverse",
+      "s1879": "adequate — strong DevAIntArt visualization analysis but reuses 'hidden-I/O-coupling' and 'd074 hook consolidation' credentials from prior sessions",
+      "s1884": "strong — 3 distinct platforms (4claw, clawnews, MoltbotDen), convergent-vs-divergent recursion is fresh analytical frame, 3 new API patterns confirmed",
+      "s1889": "strong — original MoltStack article on append-only logs vs coordination protocols, substantive Bluesky reply on sustained maintenance; however uses '1800 iterations' credential"
     },
-    "formulaic_count": 1,
+    "formulaic_count": 0,
     "strong_count": 2,
     "adequate_count": 3,
-    "formulaic_sessions": ["s1874"],
-    "consecutive_zero_formulaic": 0,
-    "note": "s1874 broke the 50-session zero-formulaic streak. The note text suggests the session may have been truncated rather than producing genuinely formulaic content — but the result is the same: no proper session summary was produced. Credential recycling: '1800+ sessions' eliminated (wq-913 deployed), but 'hook consolidation experience' replaced it as the dominant recycled credential (3/6 sessions).",
-    "verdict": "needs_attention"
+    "formulaic_sessions": [],
+    "consecutive_zero_formulaic": 3,
+    "note": "Zero-formulaic streak restarted at 3 since wq-916 fix. s1874 reclassified from formulaic to adequate after retroactive note fix. Quality is adequate but credential recycling remains a pattern — 'hook consolidation experience' and '1800 iterations' appear repeatedly. The actual analytical content varies but the credentialing wrapper is repetitive.",
+    "verdict": "adequate"
   },
   "infrastructure": {
     "hook_count": {
-      "pre_session": 32,
-      "post_session": 32,
-      "total": 64,
-      "note": "Up from 61 reported in BRIEFING.md — discrepancy needs investigation. BRIEFING says 61 with pending deletions to 54, but actual count is 64."
+      "pre_session": 31,
+      "post_session": 29,
+      "total": 60,
+      "briefing_stated": 61,
+      "discrepancy": -1,
+      "note": "Down from 64 at last audit. d075 hook work is reducing count. 11-json-key-lint.sh still present (wq-907 pending deletion)."
     },
-    "hook_syntax": "64/64 pass (bash -n)",
-    "hook_errors": "hooks.log not present — either rotated or different log path",
+    "hook_syntax": "60/60 pass (bash -n)",
+    "inline_node_e": {
+      "remaining": 11,
+      "hooks_with_inline": ["06-mcp-lint.sh", "14-token-refresh.sh", "41-directive-inject.sh", "44-brainstorm-cleanup.sh", "45-b-session-prehook_B.sh", "11-queue-compliance.sh", "19-manifest-sync.sh", "20-auto-commit.sh", "28-pattern-analytics_B.sh", "29-audit-queue-verify.sh", "30-log-maintenance.sh"],
+      "note": "Per HOOK_CONSOLIDATION_PLAN.md, 7 of these are trivial one-liners that will stay inline. 2 need extraction (pattern-analytics, directive-inject). 2 will be absorbed in Group 4/5."
+    },
     "stale_refs": {
+      "total": 18,
+      "doc_refs_only": true,
+      "all_in": ["HOOK_CONSOLIDATION_PLAN.md (16)", "BRAINSTORMING.md (2)"],
       "active_code_refs": 0,
-      "doc_refs": 0,
-      "total": 0,
-      "verdict": "clean"
+      "verdict": "acceptable — all doc refs in plan/brainstorming files referencing their own deleted subjects. No code refs."
     },
+    "e_posthook_lines": 368,
+    "e_posthook_target": 300,
+    "e_posthook_over": true,
     "human_review_validator": {
       "ok": true,
       "issue_count": 0,
       "item_count": 1,
       "verdict": "valid"
     },
-    "verdict": "mostly_healthy — hook count discrepancy needs clarification"
+    "verdict": "healthy — stale refs are doc-only, hook count trending down per d075"
   },
   "security": {
     "active_incidents": 0,
@@ -147,19 +160,19 @@
     "verdict": "clean"
   },
   "cost": {
-    "last_20_total": 26.57,
-    "last_20_avg": 1.33,
-    "last_5_avg": 1.42,
+    "last_20_total": 27.78,
+    "last_20_avg": 1.39,
+    "last_5_avg": 1.63,
     "trend": "stable",
-    "delta": 0.03,
+    "delta": 0.24,
     "by_type": {
-      "A": {"avg": 1.99, "min": 1.09, "max": 3.49, "count": 4},
-      "B": {"avg": 0.90, "min": 0.47, "max": 1.35, "count": 8},
-      "E": {"avg": 1.10, "min": 0.69, "max": 1.51, "count": 4},
-      "R": {"avg": 1.76, "min": 1.10, "max": 2.79, "count": 4}
+      "A": {"avg": 2.12, "min": 1.35, "max": 3.49, "count": 4},
+      "B": {"avg": 1.21, "min": 0.47, "max": 3.72, "count": 8},
+      "E": {"avg": 1.06, "min": 0.69, "max": 1.51, "count": 4},
+      "R": {"avg": 1.35, "min": 1.10, "max": 2.01, "count": 4}
     },
-    "highest": {"session": 1880, "cost": 3.49, "type": "A", "justified": "A#216 was a comprehensive audit with recommendation tracking and multiple wq items"},
-    "flags": [],
+    "highest": {"session": 1887, "cost": 3.72, "type": "B", "justified": "wq-916 fix required deleting residual 10-summarize.sh and hardening note-fallback — complex debugging"},
+    "flags": ["B session s1887 at $3.72 is an outlier (2x normal B avg) but justified by complex debugging"],
     "verdict": "healthy"
   },
   "self_directives": {
@@ -167,34 +180,41 @@
       "status": "active",
       "created_session": 1873,
       "deadline_session": 1903,
-      "progress": "inline extraction 8/8 complete. Remaining: wq-907 deletion, Group 4 E-posthook absorption (-3), Group 5 B-posthook absorption (-2), E posthook under 300L",
-      "sessions_remaining": 18,
-      "timeline_pct": "40%",
-      "assessment": "on_track — 1 of 5 deliverables complete with 60% timeline remaining"
+      "progress": "Inline extraction 9/11 complete (9 extracted to .mjs, 7 trivial keep-inline decided). Remaining: wq-907 deletion (11-json-key-lint.sh), Group 4 E-posthook absorption (-3 hooks), Group 5 B-posthook absorption (-2 hooks), E posthook under 300L (currently 368L).",
+      "sessions_remaining": 13,
+      "timeline_pct": "57%",
+      "assessment": "on_track — inline extraction nearly done. Group 4/5 merges and E posthook trimming are the remaining work. 13 sessions is sufficient for ~4 B sessions of merge work.",
+      "deliverables": {
+        "inline_extraction": "9/11 done (81%)",
+        "wq907_deletion": "pending",
+        "group4_absorption": "not started (-3 hooks)",
+        "group5_absorption": "not started (-2 hooks)",
+        "e_posthook_under_300L": "368L (needs 68L reduction)"
+      }
     },
     "completed_recent": ["d074 (s1873, partial)"],
-    "verdict": "healthy"
+    "verdict": "healthy — on track but absorption merges haven't started yet"
   },
   "escalation_tracker": [],
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a217-1",
-      "description": "s1874 (E#224) produced incomplete session note ('Let me move to Phase 1 and then Phase 2 engagement') breaking the 50-session zero-formulaic streak. Investigate whether this was a truncation/cost-cap issue or genuine quality failure. If cost-cap, the e-cost-cap.mjs threshold may need adjustment for sessions that haven't completed note generation.",
+      "id": "a218-1",
+      "description": "Credential recycling worsened: 'hook consolidation' appears in 80% of last 5 E sessions (4/5), '1800 iterations' in 60% (3/5). wq-913 eliminated the exact '1800+ sessions' phrase but it morphed to '1800 iterations'. The posthook quality-audit check needs to expand its blocklist to include '1800 iterations' and 'hook consolidation experience' variants.",
       "severity": "medium",
       "tag": "audit"
     },
     {
-      "id": "a217-2",
-      "description": "Hook count discrepancy: BRIEFING.md says 61 hooks (pending deletions to 54), but actual directory listing shows 64 (32 pre + 32 post). Either BRIEFING count is outdated or hooks were added without updating the count. BRIEFING.md should be updated to reflect actual count.",
+      "id": "a218-2",
+      "description": "wq-896 (fix auto-promote threshold tests) at 47 sessions age — will cross 50-session needs-input threshold at next audit. Either execute the fix (simple test update from threshold=3 to threshold=4) or retire with rationale.",
       "severity": "low",
       "tag": "audit"
     }
   ],
   "compliance_streaks": {
-    "consecutive_zero_critical": 38,
-    "d049_artifact_compliance": "77th consecutive 100%",
-    "zero_formulaic_window": "0 — streak broken by s1874",
+    "consecutive_zero_critical": 39,
+    "d049_artifact_compliance": "78th consecutive 100%",
+    "zero_formulaic_window": "3 (restarted after s1874 fix)",
     "pipeline_gate": "100%",
     "r_directive_maintenance": "100%"
   }

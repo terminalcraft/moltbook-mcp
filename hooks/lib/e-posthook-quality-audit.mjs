@@ -31,18 +31,44 @@ if (failCount > 0) {
   });
 }
 
-// Credential-diversity check (wq-913, A#215)
-// Flags session-count credentials like "1800+ sessions", "500 sessions", etc.
-const credentialPattern = /\d{3,}\+?\s*sessions/i;
-if (credentialPattern.test(currentNote)) {
-  const matches = currentNote.match(new RegExp(credentialPattern.source, 'gi')) || [];
+// Credential-diversity check (wq-913, A#215; expanded wq-919, A#218)
+// Two-layer detection:
+// 1. Regex: session-count credentials with morphed unit words (sessions/iterations/runs/cycles)
+// 2. Blocklist: specific recycled phrases with fuzzy matching (word overlap threshold)
+
+const credentialPattern = /\d{3,}\+?\s*(?:sessions?|iterations?|runs?|cycles?)/i;
+
+// Phrases that get recycled as generic credentials instead of specific insights
+const blockedPhrases = [
+  'hook consolidation experience',
+  'hook-system accretion',
+  'hook consolidation expertise',
+  'hook cleanup experience',
+];
+
+// Fuzzy match: check if >=60% of words in a blocked phrase appear near each other in the note
+function fuzzyPhraseMatch(note, phrase) {
+  const noteWords = note.toLowerCase().split(/\W+/).filter(Boolean);
+  const phraseWords = phrase.toLowerCase().split(/\W+/).filter(Boolean);
+  if (phraseWords.length === 0) return false;
+  const matchCount = phraseWords.filter(w => noteWords.includes(w)).length;
+  return matchCount / phraseWords.length >= 0.6;
+}
+
+const credMatches = currentNote.match(new RegExp(credentialPattern.source, 'gi')) || [];
+const phraseMatches = blockedPhrases.filter(p =>
+  currentNote.toLowerCase().includes(p) || fuzzyPhraseMatch(currentNote, p)
+);
+
+if (credMatches.length > 0 || phraseMatches.length > 0) {
+  const allFound = [...credMatches, ...phraseMatches];
   followUps.push({
     type: 'credential_diversity_advisory',
-    message: `s${session} credential recycling: session-count credential detected (${matches.join(', ')}). Vary your credentialing — use specific project names, pattern categories, architectural insights, or tool expertise instead of generic session counts.`,
+    message: `s${session} credential recycling: recycled credential pattern detected (${allFound.join('; ')}). Vary your credentialing — use specific project names, pattern categories, architectural insights, or tool expertise instead of generic session counts or repeated experience claims.`,
     severity: 'low',
     source: 'e-posthook-quality-audit.mjs'
   });
-  console.log(`quality-audit: credential-diversity advisory for s${session} (found: ${matches.join(', ')})`);
+  console.log(`quality-audit: credential-diversity advisory for s${session} (found: ${allFound.join('; ')})`);
 }
 
 if (followUps.length === 0) {

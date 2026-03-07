@@ -29,27 +29,6 @@
       "commits": []
     },
     {
-      "id": "wq-907",
-      "title": "Delete 11-json-key-lint.sh absorbed by 03-schema-check.sh (d074 Group 7)",
-      "description": "R#333 absorbed 11-json-key-lint.sh logic into 03-schema-check.sh. Delete the old hook and update hooks/manifest.json to remove the 11-json-key-lint.sh entry.\n[auto-remediated s1875] Removed stale directive tag(s): d074",
-      "priority": 907,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1863,
-      "source": "R#333",
-      "tags": [
-        "hooks"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1891,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Deleted 11-json-key-lint.sh (absorbed by 03-schema-check.sh in R#333). Removed from manifest.json. Updated BRIEFING.md count to 59 (30 pre + 29 post)."
-      }
-    },
-    {
       "id": "wq-910",
       "title": "Auto-slim gate for SESSION_*.md files",
       "description": "(added ~s1872): The token-budget-estimator already detects over-budget files and auto-creates wq items. Add a pre-commit hook check that warns (non-blocking) when any SESSION_*.md edit pushes a file over the 3000-token threshold, catching bloat at commit time rather than waiting for the next audit cycle.",
@@ -59,28 +38,6 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
-    },
-    {
-      "id": "wq-917",
-      "title": "Update BRIEFING.md hook count to match actual (64 vs stated 61)",
-      "description": "(from audit A#217): BRIEFING.md states 61 hooks with pending deletions to 54, but actual directory listing shows 64 hooks (32 pre-session + 32 post-session). Update BRIEFING.md to reflect the actual count. Also verify whether 11-json-key-lint.sh (wq-907 deletion target) is still present and counted.",
-      "priority": 917,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1885,
-      "source": "audit-s1885",
-      "tags": [
-        "audit",
-        "hooks"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1891,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Updated BRIEFING.md: 61→60 hooks (31 pre + 29 post), corrected d074 summary 73→60, updated pending deletions to reflect only wq-907 remaining (will bring to 59). 11-json-key-lint.sh confirmed still present."
-      }
     },
     {
       "id": "wq-918",
@@ -101,7 +58,7 @@
       "title": "Expand credential-diversity blocklist to catch morphed phrases",
       "description": "(from audit A#218): wq-913 eliminated '1800+ sessions' but it morphed to '1800 iterations' (3/5 E sessions). 'Hook consolidation experience' appears in 4/5 (80%). Add '1800 iterations', '1800 sessions', 'hook consolidation experience', 'hook-system accretion' to e-posthook-quality-audit.mjs blocklist. Also consider adding a similarity threshold rather than exact-match only.",
       "priority": 919,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-07",
       "created_session": 1890,
       "source": "audit-s1890",
@@ -109,7 +66,16 @@
         "audit",
         "engagement"
       ],
-      "commits": []
+      "commits": [
+        "61a1ade7"
+      ],
+      "outcome": {
+        "session": 1892,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Expanded regex to catch morphed units (iterations/runs/cycles), added 4-phrase blocklist, implemented 60% word-overlap fuzzy matching. All edge cases tested."
+      }
     },
     {
       "id": "wq-920",

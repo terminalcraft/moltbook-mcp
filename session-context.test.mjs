@@ -1283,7 +1283,7 @@ function intTestFullPipelineChain() {
   assert(Array.isArray(result.deduped), 'pipeline: dedup ran');
   assert(result.deduped?.length === 1, 'pipeline: 1 duplicate removed');
 
-  // After dedup, only 1 pending item remains, so auto-promote should fire (pending < 3)
+  // After dedup, only 1 pending item remains, so auto-promote should fire (pending < 4)
   assert(result.auto_promoted?.length >= 1 || result.pending_count >= 1, 'pipeline: promote or pending available');
 
   // TODO ingest should have fired
@@ -1348,14 +1348,14 @@ function intTestAutoPromote0Pending() {
   writeFileSync(join(STATE, 'engagement-state.json'), '{}');
 
   const result = run('B');
-  // 0 pending → deficit=3, buffer=max(1,0)=1, promotable=5-1=4, cap=3-0=3 → 3 promoted
-  assert(result.auto_promoted?.length === 3, `0 pending: expected 3 promoted, got ${result.auto_promoted?.length}`);
-  assert(result.pending_count === 3, `0 pending: final pending_count should be 3, got ${result.pending_count}`);
+  // 0 pending → deficit=4, buffer=max(1,-1)=1, promotable=5-1=4, cap=4-0=4 → 4 promoted
+  assert(result.auto_promoted?.length === 4, `0 pending: expected 4 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 4, `0 pending: final pending_count should be 4, got ${result.pending_count}`);
 
-  // At least 2 original ideas remain (5 - 3 promoted); auto-seed may add more
+  // At least 1 original idea remains (5 - 4 promoted); auto-seed may add more
   const bs = readBS();
   const remaining = (bs.match(/^- \*\*/gm) || []).length;
-  assert(remaining >= 2, `0 pending: at least 2 ideas should remain in brainstorming, got ${remaining}`);
+  assert(remaining >= 1, `0 pending: at least 1 idea should remain in brainstorming, got ${remaining}`);
 }
 
 function intTestAutoPromote1Pending() {
@@ -1367,9 +1367,9 @@ function intTestAutoPromote1Pending() {
   writeFileSync(join(STATE, 'engagement-state.json'), '{}');
 
   const result = run('B');
-  // 1 pending → deficit=2, buffer=max(1,1)=1, promotable=5-1=4, cap=3-1=2 → 2 promoted
-  assert(result.auto_promoted?.length === 2, `1 pending: expected 2 promoted, got ${result.auto_promoted?.length}`);
-  assert(result.pending_count === 3, `1 pending: final pending_count should be 3, got ${result.pending_count}`);
+  // 1 pending → deficit=3, buffer=max(1,0)=1, promotable=5-1=4, cap=4-1=3 → 3 promoted
+  assert(result.auto_promoted?.length === 3, `1 pending: expected 3 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 4, `1 pending: final pending_count should be 4, got ${result.pending_count}`);
 }
 
 function intTestAutoPromote2Pending() {
@@ -1381,9 +1381,9 @@ function intTestAutoPromote2Pending() {
   writeFileSync(join(STATE, 'engagement-state.json'), '{}');
 
   const result = run('B');
-  // 2 pending → deficit=1, buffer=max(1,2)=2, promotable=5-2=3, cap=3-2=1 → 1 promoted
-  assert(result.auto_promoted?.length === 1, `2 pending: expected 1 promoted, got ${result.auto_promoted?.length}`);
-  assert(result.pending_count === 3, `2 pending: final pending_count should be 3, got ${result.pending_count}`);
+  // 2 pending → deficit=2, buffer=max(1,1)=1, promotable=5-1=4, cap=4-2=2 → 2 promoted
+  assert(result.auto_promoted?.length === 2, `2 pending: expected 2 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 4, `2 pending: final pending_count should be 4, got ${result.pending_count}`);
 }
 
 function intTestAutoPromote3Pending() {
@@ -1395,9 +1395,9 @@ function intTestAutoPromote3Pending() {
   writeFileSync(join(STATE, 'engagement-state.json'), '{}');
 
   const result = run('B');
-  // 3 pending → currentPending >= 3, auto-promote block skipped entirely
-  assert(!result.auto_promoted, `3 pending: no promotion expected, got ${result.auto_promoted?.length || 0}`);
-  assert(result.pending_count === 3, `3 pending: pending_count stays 3, got ${result.pending_count}`);
+  // 3 pending → deficit=1, buffer=max(1,2)=2, promotable=5-2=3, cap=4-3=1 → 1 promoted
+  assert(result.auto_promoted?.length === 1, `3 pending: expected 1 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 4, `3 pending: final pending_count should be 4, got ${result.pending_count}`);
 }
 
 function intTestAutoPromoteFewIdeas() {
@@ -1409,7 +1409,7 @@ function intTestAutoPromoteFewIdeas() {
   writeFileSync(join(STATE, 'engagement-state.json'), '{}');
 
   const result = run('B');
-  // 0 pending → buffer=1, promotable=2-1=1, cap=3 → 1 promoted
+  // 0 pending → buffer=max(1,-1)=1, promotable=2-1=1, cap=4 → 1 promoted
   assert(result.auto_promoted?.length === 1, `starvation: expected 1 promoted, got ${result.auto_promoted?.length}`);
   assert(result.pending_count === 1, `starvation: pending_count should be 1, got ${result.pending_count}`);
 
@@ -1443,9 +1443,9 @@ function intTestAutoPromoteRThresholds() {
 
   const result = run('R', '200');
   // Same logic applies in R sessions (R#74)
-  // 1 pending → buffer=1, promotable=4-1=3, cap=3-1=2 → 2 promoted
-  assert(result.auto_promoted?.length === 2, `R session: expected 2 promoted, got ${result.auto_promoted?.length}`);
-  assert(result.pending_count === 3, `R session: final pending_count should be 3, got ${result.pending_count}`);
+  // 1 pending → deficit=3, buffer=max(1,0)=1, promotable=4-1=3, cap=4-1=3 → 3 promoted
+  assert(result.auto_promoted?.length === 3, `R session: expected 3 promoted, got ${result.auto_promoted?.length}`);
+  assert(result.pending_count === 4, `R session: final pending_count should be 4, got ${result.pending_count}`);
 }
 
 // ===== wq-393: HIGH-RISK PATH TESTS =====

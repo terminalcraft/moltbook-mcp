@@ -825,8 +825,8 @@
       "content": "STRATEGIC GOAL: Complete hook system cleanup and close inline-extraction debt. (1) Execute pending hook deletions: wq-906 (-3), wq-907 (-1), wq-909 (-3) to reach 54 hooks. (2) Build Group 4 E-posthook absorption dispatcher: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into 36-e-session-posthook_E.sh (-3 hooks). (3) Build Group 5 B-posthook absorption: absorb 28-pattern-analytics_B.sh, 11-queue-compliance.sh into 47-b-session-posthook_B.sh (-2 hooks). (4) Extract remaining 8 inline node -e blocks from dispatchers into hooks/lib/*.mjs modules. (5) Get 36-e-session-posthook_E.sh under 300 lines (currently 372). Success = \u226449 hooks, 0 non-trivial inline node -e blocks, no hook >300 lines. Timeline: 30 sessions from s1873 (deadline s1903).",
       "status": "active",
       "acked_session": 1873,
-      "notes": "Successor to d074 (completed partial s1873). R#338: extracted spending-policy inline node -e from E prehook (436\u2192422L) into hooks/lib/spending-policy.mjs. Inline extraction progress: 9/11 non-trivial blocks extracted (E posthook R#335, B prehook R#336, todo-scan R#337, E prehook R#338). 2 remaining (28-pattern-analytics_B, 41-directive-inject) will be absorbed in Group 4/5. Remaining deliverables: (1) wq-907 deletion for B, (2) Group 4 E-posthook absorption (-3 hooks), (3) Group 5 B-posthook absorption (-2 hooks), (4) get E posthook under 300L.",
-      "updated_session": 1888,
+      "notes": "Successor to d074 (completed partial s1873). R#339: extracted directive-inject inline node -e (37→18L) into hooks/lib/directive-inject.mjs. Inline extraction progress: 10/11 non-trivial blocks extracted. 1 remaining (28-pattern-analytics_B, absorbed in Group 5). Also discovered Group 8 residual hooks — 3 absorbed hooks never deleted (wq-921). Remaining deliverables: (1) wq-921 Group 8 residual deletion (-3 hooks), (2) Group 4 E-posthook absorption (-3 hooks), (3) Group 5 B-posthook absorption (-2 hooks, includes final extraction), (4) get E posthook under 300L.",
+      "updated_session": 1893,
       "updated": "2026-03-07",
       "plan_files": [
         "HOOK_CONSOLIDATION_PLAN.md"
@@ -983,16 +983,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 795,
+        "followed": 796,
         "ignored": 63,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1891,
-        "last_applicable_session": 1891,
+        "last_session": 1892,
+        "last_applicable_session": 1892,
         "history": [
-          {
-            "session": 1876,
-            "result": "followed"
-          },
           {
             "session": 1877,
             "result": "followed"
@@ -1027,6 +1023,10 @@
           },
           {
             "session": 1891,
+            "result": "followed"
+          },
+          {
+            "session": 1892,
             "result": "followed"
           }
         ]
@@ -1081,16 +1081,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 962,
+        "followed": 963,
         "ignored": 141,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1891,
-        "last_applicable_session": 1891,
+        "last_session": 1892,
+        "last_applicable_session": 1892,
         "history": [
-          {
-            "session": 1879,
-            "result": "followed"
-          },
           {
             "session": 1881,
             "result": "followed"
@@ -1125,6 +1121,10 @@
           },
           {
             "session": 1891,
+            "result": "followed"
+          },
+          {
+            "session": 1892,
             "result": "followed"
           }
         ]
@@ -1228,16 +1228,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 468,
+        "followed": 469,
         "ignored": 41,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1891,
-        "last_applicable_session": 1891,
+        "last_session": 1892,
+        "last_applicable_session": 1892,
         "history": [
-          {
-            "session": 1867,
-            "result": "followed"
-          },
           {
             "session": 1871,
             "result": "followed"
@@ -1272,6 +1268,10 @@
           },
           {
             "session": 1891,
+            "result": "followed"
+          },
+          {
+            "session": 1892,
             "result": "followed"
           }
         ]

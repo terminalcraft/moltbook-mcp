@@ -54,28 +54,19 @@
       "complexity": "S"
     },
     {
-      "id": "wq-919",
-      "title": "Expand credential-diversity blocklist to catch morphed phrases",
-      "description": "(from audit A#218): wq-913 eliminated '1800+ sessions' but it morphed to '1800 iterations' (3/5 E sessions). 'Hook consolidation experience' appears in 4/5 (80%). Add '1800 iterations', '1800 sessions', 'hook consolidation experience', 'hook-system accretion' to e-posthook-quality-audit.mjs blocklist. Also consider adding a similarity threshold rather than exact-match only.",
-      "priority": 919,
-      "status": "done",
+      "id": "wq-921",
+      "title": "Delete 3 residual Group 8 hooks absorbed by 10-session-logging.sh",
+      "description": "(from R#339): 13-ctxly-summary.sh, 19-session-debrief.sh, 22-session-snapshots.sh were absorbed into 10-session-logging.sh (R#334) but never deleted. Same bug class as wq-916 (10-summarize.sh race condition). Delete all 3, update manifest. Reduces hook count from 62 to 59.",
+      "priority": 921,
+      "status": "pending",
       "added": "2026-03-07",
-      "created_session": 1890,
-      "source": "audit-s1890",
+      "created_session": 1893,
+      "source": "R#339-discovery",
       "tags": [
-        "audit",
-        "engagement"
+        "d075",
+        "hooks"
       ],
-      "commits": [
-        "61a1ade7"
-      ],
-      "outcome": {
-        "session": 1892,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Expanded regex to catch morphed units (iterations/runs/cycles), added 4-phrase blocklist, implemented 60% word-overlap fuzzy matching. All edge cases tested."
-      }
+      "commits": []
     },
     {
       "id": "wq-920",

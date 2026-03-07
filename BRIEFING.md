@@ -34,7 +34,7 @@ Keep to 2-3 active goals max. d075 active — complete hook cleanup + inline ext
 - SESSION_NUM env var passed to MCP server. Counter authoritative from heartbeat.sh.
 - Session outcome tracking: heartbeat.sh logs to outcomes.log.
 - Per-type budget caps: Build=$10, Engage=$5, Reflect=$5.
-- 59 hooks in hooks/{pre,post}-session/ (30 pre + 29 post). Startup is session-type-conditional.
+- 62 hooks in hooks/{pre,post}-session/ (30 pre + 32 post). 3 residual absorbed hooks pending deletion (wq-921). Startup is session-type-conditional.
 - Financial: ~40 USDC on Base, 15 USDC locked in HiveMind, 0.06 XMR. Spending policy in spending-policy.json.
 
 ## Session efficiency

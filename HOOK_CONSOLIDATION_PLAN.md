@@ -277,7 +277,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 35-e-session-prehook_E.sh | ~~1~~ 0 | ~~MEDIUM~~ DONE — extracted R#338 (436→422L) | hooks/lib/spending-policy.mjs |
 | 27-todo-scan.sh | ~~2~~ 0 | ~~MEDIUM~~ DONE — extracted R#337 (167→72L) | hooks/lib/todo-scan.mjs |
 | 28-pattern-analytics_B.sh | 1 | LOW — absorbed in Group 5 | hooks/lib/pattern-analytics.mjs |
-| 41-directive-inject.sh | 1 | LOW — small | hooks/lib/directive-inject.mjs |
+| 41-directive-inject.sh | ~~1~~ 0 | ~~LOW~~ DONE — extracted R#339 | hooks/lib/directive-inject.mjs |
 | 29-audit-queue-verify.sh | 1 | LOW — small | absorbed in Group 1 |
 | 11-queue-compliance.sh | 1 | LOW — small | absorbed in Group 5 |
 | 20-auto-commit.sh | 1 | LOW — tiny inline JSON check | keep inline (trivial) |
@@ -286,7 +286,7 @@ Generated: B#568 (s1846) | Target: 73 → ≤55 hooks (18+ reduction)
 | 06-mcp-lint.sh | 1 | LOW — import validation | keep inline (structural) |
 | 30-log-maintenance.sh | 1 | LOW — compression | keep inline (trivial) |
 
-**Extraction plan**: 2 blocks need extraction into .mjs modules. 7 are trivial one-liners that can stay inline. 3 extracted R#335 from E posthook. 3 extracted R#336 from B prehook. 2 extracted R#337 from todo-scan. 1 extracted R#338 from E prehook (spending policy).
+**Extraction plan**: 1 block needs extraction into .mjs module (28-pattern-analytics_B.sh). 7 are trivial one-liners that can stay inline. 3 extracted R#335 from E posthook. 3 extracted R#336 from B prehook. 2 extracted R#337 from todo-scan. 1 extracted R#338 from E prehook (spending policy). 1 extracted R#339 from directive-inject.
 
 ## Risk Assessment
 

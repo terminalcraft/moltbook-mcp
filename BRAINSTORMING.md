@@ -17,9 +17,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Audit subcheck for BRIEFING.md hook count drift** (added ~s1891): wq-917 showed BRIEFING.md hook count drifted from actual (stated 61, actual 60). Add a subcheck to the audit that compares `ls hooks/{pre,post}-session/ | wc -l` against the count stated in BRIEFING.md and flags discrepancies. Would catch drift automatically instead of requiring manual audit findings.
 
 ## Ideas
-
-- **Hook deletion dry-run validator** (added ~s1862): Create a `verify-hook-deletion.mjs` script that takes a list of hook filenames, checks the target dispatcher absorbs all their functionality (by matching function signatures/check names), and confirms no other hooks reference the deleted files. Would prevent accidental deletions where a dispatcher was incomplete. Useful for remaining wq-904, wq-906 deletions.
-
 ## Active Observations
 
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting

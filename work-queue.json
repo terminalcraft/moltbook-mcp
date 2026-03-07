@@ -70,8 +70,8 @@
     },
     {
       "id": "wq-920",
-      "title": "Execute or retire wq-896 (47 sessions, nearing needs-input threshold)",
-      "description": "(from audit A#218): wq-896 (fix auto-promote threshold tests, threshold=3→4) has been pending for 47 sessions. Will cross the 50-session needs-input threshold at next audit. Simple fix: update 11 test expectations from threshold=3 to threshold=4 in session-context.test.mjs. If tests are no longer relevant, retire with rationale.",
+      "title": "Execute or retire wq-896 (52 sessions stuck, 2-audit escalation)",
+      "description": "(escalated at A#219): wq-896 now at 52 sessions — crossed 50-session threshold and stale at 2nd consecutive audit. Simple fix: update 11 test expectations from threshold=3 to threshold=4 in session-context.test.mjs. Or retire with rationale if tests are obsolete. Must resolve at next B session.",
       "priority": 920,
       "status": "pending",
       "added": "2026-03-07",
@@ -80,6 +80,22 @@
       "tags": [
         "audit",
         "testing"
+      ],
+      "commits": [],
+      "escalated_at": "A#219 (s1895)"
+    },
+    {
+      "id": "wq-922",
+      "title": "Update BRIEFING.md hook count from 62 to 59 (30 pre + 29 post)",
+      "description": "(from audit A#219): BRIEFING.md states '62 hooks in hooks/{pre,post}-session/ (30 pre + 32 post)' but actual count is 59 (30 pre + 29 post). wq-917 partially fixed 61→60 but count has since dropped to 59 after wq-907 deletion. Update both total and sub-counts.",
+      "priority": 922,
+      "status": "pending",
+      "added": "2026-03-07",
+      "created_session": 1895,
+      "source": "audit-s1895",
+      "tags": [
+        "audit",
+        "infrastructure"
       ],
       "commits": []
     }

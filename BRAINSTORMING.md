@@ -13,6 +13,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Lint all grep -c || patterns in hooks** (added ~s1886): The `grep -c ... || echo 0` anti-pattern under `set -euo pipefail` produces `"0\n0"` (grep outputs 0 then echo outputs 0). Fixed in 23-outcome-feedback.sh. Scan all hooks for the same pattern (`grep -c.*|| echo`) and fix to `|| true`. Could be a one-pass sed or a lint check in the pre-commit hook.
 - **Circuit-break auto-recovery** (added ~s1867): circuit-break-auto.mjs only demotes. Add a companion mechanism to auto-re-enable platforms after N sessions if their liveness cache shows them reachable again, avoiding permanent demotions for transient outages.
 - **Add plan_files to completed directives retroactively** (added ~s1877): d074 was completed without plan_files metadata. When a directive completes, its plan_files should be preserved for historical audit analysis. Consider a one-time backfill for d074 (plan_files: ["HOOK_CONSOLIDATION_PLAN.md"]) and adding plan_files documentation to the directive schema in directives.json.
+- **Audit subcheck for BRIEFING.md hook count drift** (added ~s1891): wq-917 showed BRIEFING.md hook count drifted from actual (stated 61, actual 60). Add a subcheck to the audit that compares `ls hooks/{pre,post}-session/ | wc -l` against the count stated in BRIEFING.md and flags discrepancies. Would catch drift automatically instead of requiring manual audit findings.
 
 ## Ideas
 

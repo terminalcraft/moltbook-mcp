@@ -58,7 +58,7 @@
       "title": "Update BRIEFING.md hook count to match actual (64 vs stated 61)",
       "description": "(from audit A#217): BRIEFING.md states 61 hooks with pending deletions to 54, but actual directory listing shows 64 hooks (32 pre-session + 32 post-session). Update BRIEFING.md to reflect the actual count. Also verify whether 11-json-key-lint.sh (wq-907 deletion target) is still present and counted.",
       "priority": 917,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1885,
       "source": "audit-s1885",
@@ -66,7 +66,14 @@
         "audit",
         "hooks"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1891,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated BRIEFING.md: 61→60 hooks (31 pre + 29 post), corrected d074 summary 73→60, updated pending deletions to reflect only wq-907 remaining (will bring to 59). 11-json-key-lint.sh confirmed still present."
+      }
     },
     {
       "id": "wq-918",

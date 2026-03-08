@@ -5,14 +5,21 @@
       "title": "Add e-cost-cap unit tests",
       "description": "(from brainstorming ~s1841): e-cost-cap.mjs has no dedicated test file. Should test threshold defaults ($1.80), duration gate logic, registration keyword detection. Low effort, improves d071 combined coverage.",
       "priority": 900,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "created_session": 1848,
       "source": "brainstorming-R329",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1902,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "24 tests across 7 suites covering cost threshold, registration keyword detection, audit logging, trace edge cases, return structure, and log output. All pass."
+      }
     },
     {
       "id": "wq-910",
@@ -40,28 +47,6 @@
       "complexity": "S"
     },
     {
-      "id": "wq-921",
-      "title": "Delete 3 residual Group 8 hooks absorbed by 10-session-logging.sh",
-      "description": "(from R#339): 13-ctxly-summary.sh, 19-session-debrief.sh, 22-session-snapshots.sh were absorbed into 10-session-logging.sh (R#334) but never deleted. Same bug class as wq-916 (10-summarize.sh race condition). Delete all 3, update manifest. Reduces hook count from 62 to 59.",
-      "priority": 921,
-      "status": "done",
-      "added": "2026-03-07",
-      "created_session": 1893,
-      "source": "R#339-discovery",
-      "tags": [
-        "d075",
-        "hooks"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1901,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Deleted 13-ctxly-summary.sh, 19-session-debrief.sh, 22-session-snapshots.sh. Hook count 59→56 (30 pre + 26 post). Verified all 3 absorbed by 10-session-logging.sh header comment."
-      }
-    },
-    {
       "id": "wq-923",
       "title": "Auto-update BRIEFING.md hook count in pre-session hook",
       "description": "BRIEFING.md hook count has drifted 3 times (wq-917, wq-922, and a218-2). Add a pre-session hook step that counts hooks via ls and updates BRIEFING.md inline if the stated count differs from actual. Eliminates drift entirely. Small scope: one sed/awk replacement in a pre-hook, tested with bash -n.",
@@ -85,44 +70,6 @@
       "added": "2026-03-08",
       "created_session": 1898,
       "source": "d075-R#340",
-      "tags": [
-        "d075",
-        "hooks",
-        "refactor"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-927",
-      "title": "d075 deadline triage: prioritize wq-921/924 in next B sessions",
-      "description": "d075 deadline s1903 — 3 sessions remaining with 3 tasks: wq-921 (delete 3 hooks), wq-924 (Group 4 absorption + E posthook slim), Group 5 (needs wq item creation). Next 2 B sessions must consume wq-921 and wq-924 in order. If Group 5 can't fit before s1903, extend deadline by 5 sessions. This is a scheduling/prioritization item, not a code change.",
-      "priority": 927,
-      "status": "done",
-      "added": "2026-03-08",
-      "created_session": 1900,
-      "source": "audit-s1900",
-      "tags": [
-        "audit",
-        "d075"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1901,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Triage complete: extended d075 deadline s1903→s1908 (+5 sessions). wq-921 consumed in this session. wq-924 reprioritized as top B task. wq-928 created for Group 5. Rotation analysis: BBREA means only 2 B sessions per 5-session cycle, so 5-session extension gives 2 more B sessions for wq-924 + wq-928."
-      }
-    },
-    {
-      "id": "wq-928",
-      "title": "Group 5: absorb 2 B-posthook hooks into 47-b-session-posthook_B.sh",
-      "description": "d075 Group 5: absorb 28-pattern-analytics_B.sh and 11-queue-compliance.sh into 47-b-session-posthook_B.sh (-2 hooks, 56→54). Follow same absorption pattern as Groups 1-4/6-8. Final d075 code task after wq-924.",
-      "priority": 928,
-      "status": "pending",
-      "added": "2026-03-08",
-      "created_session": 1901,
-      "source": "wq-927-triage",
       "tags": [
         "d075",
         "hooks",

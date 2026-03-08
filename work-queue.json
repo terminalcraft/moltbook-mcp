@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-896",
-      "title": "Fix auto-promote threshold tests in session-context.test.mjs",
-      "description": "(added ~s1836): 11 pre-existing test failures in auto-promote tests — all expect threshold=3 but code uses threshold=4 since d073/R#320. Tests need updating to match new threshold. Simple fix.",
-      "priority": 896,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1843,
-      "source": "brainstorming-R328",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1896,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Updated 11 test expectations from threshold=3 to threshold=4 in session-context.test.mjs. 222/222 pass."
-      }
-    },
-    {
       "id": "wq-900",
       "title": "Add e-cost-cap unit tests",
       "description": "(from brainstorming ~s1841): e-cost-cap.mjs has no dedicated test file. Should test threshold defaults ($1.80), duration gate logic, registration keyword detection. Low effort, improves d071 combined coverage.",
@@ -76,34 +55,11 @@
       "commits": []
     },
     {
-      "id": "wq-920",
-      "title": "Execute or retire wq-896 (52 sessions stuck, 2-audit escalation)",
-      "description": "(escalated at A#219): wq-896 now at 52 sessions — crossed 50-session threshold and stale at 2nd consecutive audit. Simple fix: update 11 test expectations from threshold=3 to threshold=4 in session-context.test.mjs. Or retire with rationale if tests are obsolete. Must resolve at next B session.",
-      "priority": 920,
-      "status": "done",
-      "added": "2026-03-07",
-      "created_session": 1890,
-      "source": "audit-s1890",
-      "tags": [
-        "audit",
-        "testing"
-      ],
-      "commits": [],
-      "escalated_at": "A#219 (s1895)",
-      "outcome": {
-        "session": 1896,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Resolved via wq-896 fix. Escalation cleared."
-      }
-    },
-    {
       "id": "wq-922",
       "title": "Update BRIEFING.md hook count from 62 to 59 (30 pre + 29 post)",
       "description": "(from audit A#219): BRIEFING.md states '62 hooks in hooks/{pre,post}-session/ (30 pre + 32 post)' but actual count is 59 (30 pre + 29 post). wq-917 partially fixed 61→60 but count has since dropped to 59 after wq-907 deletion. Update both total and sub-counts.",
       "priority": 922,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-07",
       "created_session": 1895,
       "source": "audit-s1895",
@@ -111,7 +67,14 @@
         "audit",
         "infrastructure"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s1897",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated 62→59 (30 pre + 29 post). Added brainstorming idea to auto-update count in pre-session hook to prevent future drift."
+      }
     }
   ]
 }

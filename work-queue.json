@@ -55,26 +55,51 @@
       "commits": []
     },
     {
-      "id": "wq-922",
-      "title": "Update BRIEFING.md hook count from 62 to 59 (30 pre + 29 post)",
-      "description": "(from audit A#219): BRIEFING.md states '62 hooks in hooks/{pre,post}-session/ (30 pre + 32 post)' but actual count is 59 (30 pre + 29 post). wq-917 partially fixed 61→60 but count has since dropped to 59 after wq-907 deletion. Update both total and sub-counts.",
-      "priority": 922,
-      "status": "done",
-      "added": "2026-03-07",
-      "created_session": 1895,
-      "source": "audit-s1895",
+      "id": "wq-923",
+      "title": "Auto-update BRIEFING.md hook count in pre-session hook",
+      "description": "BRIEFING.md hook count has drifted 3 times (wq-917, wq-922, and a218-2). Add a pre-session hook step that counts hooks via ls and updates BRIEFING.md inline if the stated count differs from actual. Eliminates drift entirely. Small scope: one sed/awk replacement in a pre-hook, tested with bash -n.",
+      "priority": 923,
+      "status": "pending",
+      "added": "2026-03-08",
+      "created_session": 1898,
+      "source": "brainstorming-R#340",
       "tags": [
-        "audit",
-        "infrastructure"
+        "maintenance",
+        "hooks"
       ],
-      "commits": [],
-      "outcome": {
-        "session": "s1897",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Updated 62→59 (30 pre + 29 post). Added brainstorming idea to auto-update count in pre-session hook to prevent future drift."
-      }
+      "commits": []
+    },
+    {
+      "id": "wq-924",
+      "title": "Group 4: absorb 3 E-posthook hooks into 36-e-session-posthook_E.sh",
+      "description": "d075 Group 4: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into the existing E posthook dispatcher. -3 hooks (59→56). Follow the same absorption pattern as Groups 1-3/6-8. Also get E posthook under 300 lines (currently ~372, needs slim after absorption).",
+      "priority": 924,
+      "status": "pending",
+      "added": "2026-03-08",
+      "created_session": 1898,
+      "source": "d075-R#340",
+      "tags": [
+        "d075",
+        "hooks",
+        "refactor"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-925",
+      "title": "Group 5: absorb 2 B-posthook hooks into 47-b-session-posthook_B.sh",
+      "description": "d075 Group 5: absorb 28-pattern-analytics_B.sh, 11-queue-compliance.sh into the B posthook dispatcher. -2 hooks (56→54). Includes extracting the last inline node -e block from 28-pattern-analytics_B (11th/11 extraction). Follow the same absorption pattern.",
+      "priority": 925,
+      "status": "pending",
+      "added": "2026-03-08",
+      "created_session": 1898,
+      "source": "d075-R#340",
+      "tags": [
+        "d075",
+        "hooks",
+        "refactor"
+      ],
+      "commits": []
     }
   ]
 }

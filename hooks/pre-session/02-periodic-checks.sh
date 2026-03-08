@@ -100,11 +100,20 @@ if [ $((SESSION_NUM % 20)) -eq 0 ]; then
 fi
 
 ###############################################################################
-# Check 4: API health probe (every session — absorbed from 10-health-check.sh)
+# Check 4: API health probe
+# Full probe (3 external HTTPS endpoints) every 10 sessions — the search
+# endpoint alone averages 4-5s, causing 6s+ hook times on every session.
+# Every-session check is a fast localhost-only probe (~100ms).
 ###############################################################################
-tw_run "api-health" bash -c '
-  node "$DIR/health-check.cjs" >> "$LOG_DIR/health.log" 2>&1 || true
-'
+if [ $((SESSION_NUM % 10)) -eq 0 ]; then
+  tw_run "api-health" bash -c '
+    node "$DIR/health-check.cjs" >> "$LOG_DIR/health.log" 2>&1 || true
+  '
+else
+  tw_run "api-health" bash -c '
+    curl -s -o /dev/null -w "" --max-time 2 http://127.0.0.1:3847/health 2>/dev/null || true
+  '
+fi
 
 ###############################################################################
 # Check 5: Presence heartbeat (every session — absorbed from 15-presence-heartbeat.sh)

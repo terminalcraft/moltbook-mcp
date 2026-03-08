@@ -825,9 +825,9 @@
       "content": "STRATEGIC GOAL: Complete hook system cleanup and close inline-extraction debt. (1) Execute pending hook deletions: wq-906 (-3), wq-907 (-1), wq-909 (-3) to reach 54 hooks. (2) Build Group 4 E-posthook absorption dispatcher: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into 36-e-session-posthook_E.sh (-3 hooks). (3) Build Group 5 B-posthook absorption: absorb 28-pattern-analytics_B.sh, 11-queue-compliance.sh into 47-b-session-posthook_B.sh (-2 hooks). (4) Extract remaining 8 inline node -e blocks from dispatchers into hooks/lib/*.mjs modules. (5) Get 36-e-session-posthook_E.sh under 300 lines (currently 372). Success = \u226449 hooks, 0 non-trivial inline node -e blocks, no hook >300 lines. Timeline: 30 sessions from s1873 (deadline s1903).",
       "status": "active",
       "acked_session": 1873,
-      "notes": "R#340 update: 10/11 inline extractions done. wq-921 pending (Group 8 residual deletion, -3 hooks). Need wq items for Group 4 E-posthook absorption (-3 hooks) and Group 5 B-posthook absorption (-2 hooks + final extraction). 5 sessions to deadline s1903. A prehook parallelized this session \u2014 not d075 scope but reduces hook timing findings.",
-      "updated_session": 1893,
-      "updated": "2026-03-07",
+      "notes": "B#589 triage (s1901): deadline extended s1903→s1908 (+5 sessions). wq-921 completed s1901 (Group 8 residual deletion, -3 hooks). 10/11 inline extractions done. Remaining: wq-924 (Group 4 E-posthook absorption, -3 hooks) and wq-928 (Group 5 B-posthook absorption, -2 hooks). 2 B sessions available in extended window. On track.",
+      "updated_session": 1901,
+      "updated": "2026-03-08",
       "plan_files": [
         "HOOK_CONSOLIDATION_PLAN.md"
       ]

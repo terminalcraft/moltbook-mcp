@@ -84,6 +84,30 @@
         "refactor"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-926",
+      "title": "Resolve wq-900 (e-cost-cap unit tests) — execute or retire",
+      "description": "wq-900 at 52 sessions, crossed 50-session needs-input threshold. Either: (a) write the test file (~30min B session), or (b) retire with rationale that e-cost-cap.mjs is stable, low-change-frequency, and testing it doesn't improve critical-path coverage. Decision needed, not just deferral.",
+      "priority": 926,
+      "status": "pending",
+      "added": "2026-03-08",
+      "created_session": 1900,
+      "source": "audit-s1900",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-927",
+      "title": "d075 deadline triage: prioritize wq-921/924 in next B sessions",
+      "description": "d075 deadline s1903 — 3 sessions remaining with 3 tasks: wq-921 (delete 3 hooks), wq-924 (Group 4 absorption + E posthook slim), Group 5 (needs wq item creation). Next 2 B sessions must consume wq-921 and wq-924 in order. If Group 5 can't fit before s1903, extend deadline by 5 sessions. This is a scheduling/prioritization item, not a code change.",
+      "priority": 927,
+      "status": "pending",
+      "added": "2026-03-08",
+      "created_session": 1900,
+      "source": "audit-s1900",
+      "tags": ["audit", "d075"],
+      "commits": []
     }
   ]
 }

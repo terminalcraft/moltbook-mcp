@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-900",
-      "title": "Add e-cost-cap unit tests",
-      "description": "(from brainstorming ~s1841): e-cost-cap.mjs has no dedicated test file. Should test threshold defaults ($1.80), duration gate logic, registration keyword detection. Low effort, improves d071 combined coverage.",
-      "priority": 900,
-      "status": "done",
-      "added": "2026-03-06",
-      "created_session": 1848,
-      "source": "brainstorming-R329",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1902,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "24 tests across 7 suites covering cost threshold, registration keyword detection, audit logging, trace edge cases, return structure, and log output. All pass."
-      }
-    },
-    {
       "id": "wq-910",
       "title": "Auto-slim gate for SESSION_*.md files",
       "description": "(added ~s1872): The token-budget-estimator already detects over-budget files and auto-creates wq items. Add a pre-commit hook check that warns (non-blocking) when any SESSION_*.md edit pushes a file over the 3000-token threshold, catching bloat at commit time rather than waiting for the next audit cycle.",
@@ -62,6 +41,18 @@
       "commits": []
     },
     {
+      "id": "wq-925",
+      "title": "Add threshold=4 boundary test for auto-promote",
+      "description": "session-context.test.mjs tests 0-3 pending items but lacks a test for exactly 4 pending (the boundary where auto-promote should NOT fire). Add intTestAutoPromote4Pending() with 4 pending items and 5 fresh ideas, asserting no promotion occurs. Catches future threshold regression.",
+      "priority": 925,
+      "status": "pending",
+      "added": "2026-03-08",
+      "created_session": 1903,
+      "source": "brainstorming-R#341",
+      "tags": ["testing", "auto-promote"],
+      "commits": []
+    },
+    {
       "id": "wq-924",
       "title": "Group 4: absorb 3 E-posthook hooks into 36-e-session-posthook_E.sh",
       "description": "d075 Group 4: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into the existing E posthook dispatcher. -3 hooks (59→56). Follow the same absorption pattern as Groups 1-3/6-8. Also get E posthook under 300 lines (currently ~372, needs slim after absorption).",
@@ -70,6 +61,22 @@
       "added": "2026-03-08",
       "created_session": 1898,
       "source": "d075-R#340",
+      "tags": [
+        "d075",
+        "hooks",
+        "refactor"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-928",
+      "title": "Group 5: absorb 2 B-posthook hooks into 47-b-session-posthook_B.sh",
+      "description": "d075 Group 5: absorb 28-pattern-analytics_B.sh and 11-queue-compliance.sh into the existing B posthook dispatcher. -2 hooks (56→54). Extract inline node -e from pattern-analytics first to keep dispatcher under 300L. Follow same absorption pattern as Groups 1-3/6-8.",
+      "priority": 928,
+      "status": "pending",
+      "added": "2026-03-08",
+      "created_session": 1903,
+      "source": "d075-R#341",
       "tags": [
         "d075",
         "hooks",

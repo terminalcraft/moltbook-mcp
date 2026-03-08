@@ -382,15 +382,27 @@ check_cost_escalation() {
 }
 
 ###############################################################################
-# Run all checks sequentially
+# Run all checks in parallel — each check is independent, writes its own
+# state file, and handles its own errors (always returns 0).
+# Parallelism cuts wall time from sum(checks) to max(checks).
 ###############################################################################
 
-check_cost_trends
-check_stale_refs
-check_hook_timing
-check_stale_tags
-check_cred_health
-check_briefing_directives
-check_cost_escalation
+TMPDIR_CHECKS=$(mktemp -d)
+trap 'rm -rf "$TMPDIR_CHECKS"' EXIT
 
-echo "[a-prehook] All 7 checks complete"
+check_cost_trends    > "$TMPDIR_CHECKS/1-cost-trends.out"    2>&1 &
+check_stale_refs     > "$TMPDIR_CHECKS/2-stale-refs.out"     2>&1 &
+check_hook_timing    > "$TMPDIR_CHECKS/3-hook-timing.out"    2>&1 &
+check_stale_tags     > "$TMPDIR_CHECKS/4-stale-tags.out"     2>&1 &
+check_cred_health    > "$TMPDIR_CHECKS/5-cred-health.out"    2>&1 &
+check_briefing_directives > "$TMPDIR_CHECKS/6-briefing.out"  2>&1 &
+check_cost_escalation > "$TMPDIR_CHECKS/7-cost-escalation.out" 2>&1 &
+
+wait
+
+# Output results in consistent order
+for f in "$TMPDIR_CHECKS"/*.out; do
+  [ -s "$f" ] && cat "$f"
+done
+
+echo "[a-prehook] All 7 checks complete (parallel)"

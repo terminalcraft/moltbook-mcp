@@ -112,14 +112,21 @@
       "id": "wq-931",
       "title": "Fix manifest.json stale mode-transform hook entries",
       "description": "manifest.json lists 4 mode-transform hooks (10-engage-health.sh, 20-queue-starvation.sh, 30-urgency-escalation.sh, 40-pattern-friction.sh) that do not exist on disk. Also manifest total says 60 but actual count is 56. Remove stale entries and update total. Causes 2 test failures in hook-integration.test.mjs.",
-      "status": "pending",
+      "status": "done",
       "priority": 4,
       "created": "s1906",
       "source": "audit",
       "tags": [
         "hook-system",
         "test-fix"
-      ]
+      ],
+      "outcome": {
+        "session": "s1906",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Root cause was test not scanning hooks/mode-transform/ directory, not stale manifest entries. Added MODE_DIR to 3 manifest reconciliation tests. 304/304 pass."
+      }
     }
   ]
 }

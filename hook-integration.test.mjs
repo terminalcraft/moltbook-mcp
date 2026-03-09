@@ -21,6 +21,7 @@ import { tmpdir } from 'os';
 const REPO_DIR = join(import.meta.dirname || process.cwd());
 const PRE_DIR = join(REPO_DIR, 'hooks/pre-session');
 const POST_DIR = join(REPO_DIR, 'hooks/post-session');
+const MODE_DIR = join(REPO_DIR, 'hooks/mode-transform');
 
 // Sandbox directory — isolated HOME for hook execution
 const SANDBOX_ROOT = join(tmpdir(), `hook-test-${process.pid}`);
@@ -491,9 +492,10 @@ describe('Hook integration tests', () => {
 
     test('every manifest entry has a corresponding file on disk', () => {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      const phaseDirs = { 'pre-session': PRE_DIR, 'post-session': POST_DIR, 'mode-transform': MODE_DIR };
       const missing = [];
       for (const entry of manifest.hooks) {
-        const dir = entry.phase === 'pre-session' ? PRE_DIR : POST_DIR;
+        const dir = phaseDirs[entry.phase] || POST_DIR;
         const hookPath = join(dir, entry.name);
         if (!existsSync(hookPath)) {
           missing.push(`${entry.phase}/${entry.name}`);
@@ -509,7 +511,7 @@ describe('Hook integration tests', () => {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
       const manifestNames = new Set(manifest.hooks.map(h => `${h.phase}/${h.name}`));
       const unlisted = [];
-      for (const [dir, phase] of [[PRE_DIR, 'pre-session'], [POST_DIR, 'post-session']]) {
+      for (const [dir, phase] of [[PRE_DIR, 'pre-session'], [POST_DIR, 'post-session'], [MODE_DIR, 'mode-transform']]) {
         for (const hook of getHooks(dir)) {
           if (!manifestNames.has(`${phase}/${hook}`)) {
             unlisted.push(`${phase}/${hook}`);
@@ -526,10 +528,11 @@ describe('Hook integration tests', () => {
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
       const actualPre = getHooks(PRE_DIR).length;
       const actualPost = getHooks(POST_DIR).length;
-      const actualTotal = actualPre + actualPost;
+      const actualMode = getHooks(MODE_DIR).length;
+      const actualTotal = actualPre + actualPost + actualMode;
       assert.strictEqual(
         manifest.total, actualTotal,
-        `Manifest says ${manifest.total} hooks but ${actualTotal} exist on disk (${actualPre} pre + ${actualPost} post)`
+        `Manifest says ${manifest.total} hooks but ${actualTotal} exist on disk (${actualPre} pre + ${actualPost} post + ${actualMode} mode-transform)`
       );
     });
 

@@ -58,14 +58,13 @@
     {
       "id": "wq-924",
       "title": "Group 4: absorb 3 E-posthook hooks into 36-e-session-posthook_E.sh",
-      "description": "d075 Group 4: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into the existing E posthook dispatcher. -3 hooks (59→56). Follow the same absorption pattern as Groups 1-3/6-8. Also get E posthook under 300 lines (currently ~372, needs slim after absorption).",
+      "description": "d075 Group 4: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into the existing E posthook dispatcher. -3 hooks (59→56). Follow the same absorption pattern as Groups 1-3/6-8. Also get E posthook under 300 lines (currently ~372, needs slim after absorption).\n[auto-remediated s1910] Removed stale directive tag(s): d075",
       "priority": 924,
       "status": "pending",
       "added": "2026-03-08",
       "created_session": 1898,
       "source": "d075-R#340",
       "tags": [
-        "d075",
         "hooks",
         "refactor"
       ],
@@ -101,6 +100,42 @@
       ],
       "commits": [],
       "complexity": "S"
+    },
+    {
+      "id": "wq-934",
+      "title": "moltbook engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "description": "engage-blocker",
+      "priority": 934,
+      "status": "pending",
+      "added": "2026-03-09",
+      "created_session": 1909,
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-935",
+      "title": "Circuit-break memoryvault-link in platform picker backup rotation",
+      "description": "memoryvault-link failed 4/10 E sessions (40%) with all endpoints returning 404. audit-stats recommends circuit break. Either remove from backup rotation entirely or add persistent circuit-breaker state that auto-skips after N consecutive failures. Currently wastes E session time attempting failed backups before falling through.",
+      "priority": 935,
+      "status": "pending",
+      "added": "2026-03-09",
+      "created_session": 1910,
+      "source": "audit-s1910",
+      "tags": ["audit", "platform-health"],
+      "commits": []
+    },
+    {
+      "id": "wq-936",
+      "title": "Monitor R scope budget recovery post-d075",
+      "description": "R scope budget at 60% (3/5) with violations in s1888/s1893 — both d075 hook consolidation touching 3+ non-routine files. d075 is now complete (s1908). Monitor next 5 R sessions; if scope budget returns to 100%, close. If violations persist without a multi-file directive, investigate structural cause.",
+      "priority": 936,
+      "status": "pending",
+      "added": "2026-03-09",
+      "created_session": 1910,
+      "source": "audit-s1910",
+      "tags": ["audit", "monitoring"],
+      "commits": []
     }
   ]
 }

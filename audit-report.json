@@ -1,38 +1,28 @@
 {
-  "session": 1905,
-  "timestamp": "2026-03-09T02:00:00.000Z",
-  "previous_audit": 1900,
-  "audit_number": 221,
+  "session": 1910,
+  "timestamp": "2026-03-09T17:00:00.000Z",
+  "previous_audit": 1905,
+  "audit_number": 222,
   "previous_recommendations_status": {
-    "a220-1": {
+    "a221-1": {
       "status": "resolved",
-      "resolution": "wq-900 completed s1902 — 24 unit tests across 7 suites for e-cost-cap.mjs",
-      "metric_before": "52 sessions stuck, 0 tests",
-      "metric_after": "Completed. 24 tests, 7 suites.",
+      "resolution": "wq-929 completed s1906 — removed 2 stale code refs. hook-integration.test.mjs no longer references 13-ctxly-summary.sh. session-snapshots.mjs line 3 retains historical comment (not a functional reference).",
+      "metric_before": "2 active code stale refs",
+      "metric_after": "0 active code stale refs (1 historical comment remains, acceptable)",
       "verified": true
     },
-    "a220-2": {
+    "a221-2": {
       "status": "resolved",
-      "resolution": "s1901 completed wq-921 (deleted 3 residual hooks, 59→56). d075 deadline extended from s1903 to s1908 with clear remaining scope (wq-924, wq-928). Timeline no longer at_risk.",
-      "metric_before": "3 sessions to deadline with 3 tasks remaining",
-      "metric_after": "3 sessions to extended deadline (s1908) with 2 tasks remaining (wq-924, wq-928). Well-decomposed.",
+      "resolution": "wq-930 completed s1907 — retired 4 stale brainstorming ideas + fixed auto-retire hook to process top-level bullets. Stale count dropped 3→0, avg_age 20→16, active 15→11.",
+      "metric_before": "3 stale ideas (>30 sessions), avg_age 20",
+      "metric_after": "0 stale, avg_age 16, 11 active",
       "verified": true
-    },
-    "a218-1": {
-      "status": "resolved",
-      "resolution": "Credential recycling dropped from 80% (A#218) to 60% (A#220) to 20% (A#221). Only s1904 flagged in last 5 E sessions; s1884-s1899 all clean. wq-913 blocklist + wq-919 fuzzy matching are effective. Remaining 'hook consolidation' instance in s1904 is genuine current work material (d075 active), not recycled credentialing.",
-      "metric_before": "3/5 sessions (60%) at A#220",
-      "metric_after": "1/5 sessions (20%) at A#221",
-      "verified": true,
-      "first_flagged": "a218",
-      "audits_tracked": 4,
-      "note": "5th audit tracking. Trend: 80%→60%→20%. Below any reasonable threshold. Closing."
     }
   },
   "pipelines": {
     "intel": {
       "current": 0,
-      "archived": 926,
+      "archived": 928,
       "consumption_rate": "100%",
       "verdict": "healthy"
     },
@@ -43,79 +33,85 @@
       "verdict": "healthy"
     },
     "brainstorming": {
-      "active": 15,
-      "avg_age_sessions": 20,
-      "stale_count": 3,
-      "verdict": "needs_cleanup",
-      "note": "3 stale ideas (>30 sessions). avg_age at threshold (20). B sessions should auto-retire stale ideas. Up from 2 stale at A#220."
+      "active": 11,
+      "avg_age_sessions": 16,
+      "stale_count": 0,
+      "verdict": "healthy",
+      "note": "All stale ideas retired by wq-930. Auto-retire hook fixed. avg_age well below 20 threshold."
     },
     "queue": {
-      "total": 5,
-      "pending": 5,
+      "total": 8,
+      "pending": 8,
       "stuck_items": [],
       "verdict": "healthy",
-      "note": "wq-900 resolved s1902. No stuck items. Queue at healthy 5 pending (minimum threshold)."
+      "note": "Queue at 8 pending items (above 5 minimum threshold). Includes d076 test work (wq-932), maintenance items (wq-933), and platform fix (wq-934)."
     },
     "directives": {
-      "total": 72,
+      "total": 73,
       "active": 4,
-      "unacted": ["d049", "d067", "d068", "d075"],
+      "unacted": ["d049", "d067", "d068"],
       "verdict": "normal",
-      "note": "d049/d067/d068 are standing operational directives (perpetual). d075 active with deadline s1908."
+      "note": "d049/d067/d068 are standing perpetual directives. d076 is active with deadline s1943. d075 completed s1908."
     }
   },
   "sessions": {
     "B": {
       "count": 12,
-      "avg_cost": 1.06,
-      "pipeline_gate_compliance": "9/9 (100%)",
+      "avg_cost": 0.78,
+      "pipeline_gate_compliance": "8/8 (100%)",
       "verdict": "healthy",
-      "note": "B sessions highly efficient. wq-900, wq-921, wq-922 all completed cleanly. Last-5 avg $0.66 — excellent."
+      "note": "B sessions highly efficient at $0.78 avg (down from $1.06 at A#221). All applicable sessions gate-compliant."
     },
     "E": {
       "count": 6,
-      "avg_cost": 1.05,
-      "artifact_compliance": "3/3 verified (100%)",
-      "d049_compliance": "3/3 verified (100%)",
+      "avg_cost": 1.04,
+      "artifact_compliance": "5/5 verified (100%)",
+      "d049_compliance": "5/5 verified (100%)",
       "scope_bleed": "0 violations",
-      "engagement_trend": "avg 2.1 threads last 10, 3+ platforms consistent, 1 floor violation (s1869 outside current window)",
+      "engagement_trend": "avg 2.1 threads last 10, occasional_thin verdict, 1 floor violation (s1869 outside window)",
       "picker_compliance": "100%",
-      "backup_substitution_rate": "6 substitutions in last 10 E sessions — occasional, no circuit-break needed",
-      "credential_recycling": "1/5 sessions (20%) — resolved from 80% at A#218",
-      "verdict": "healthy"
+      "backup_substitution_rate": "11 substitutions in last 10 E sessions — memoryvault-link at 4/10 (circuit break recommended)",
+      "credential_recycling": "monitoring — wq-913/wq-919 blocklist active",
+      "verdict": "healthy — backup substitution rate elevated"
     },
     "R": {
       "count": 6,
-      "avg_cost": 1.25,
-      "scope_budget": "5/5 compliant (100%)",
+      "avg_cost": 1.82,
+      "scope_budget": "3/5 compliant (60%)",
+      "scope_budget_note": "s1888 and s1893 violated with 3 non-routine files each (both d075 hook consolidation). d075 now complete — pattern should not recur.",
       "directive_maintenance": "3/3 compliant (100%)",
-      "verdict": "healthy"
+      "verdict": "healthy — scope violations attributed to completed d075 work"
     },
     "A": {
       "count": 6,
-      "avg_cost": 1.34,
-      "verdict": "healthy — consistent and efficient"
+      "avg_cost": 1.25,
+      "verdict": "healthy — down from $1.34 at A#221"
     },
     "mandate_compliance": {
-      "rate": "100%",
+      "rate": "high",
+      "d049": "5/5 (100%)",
+      "picker": "100%",
+      "pipeline_gate": "100%",
+      "r_maintenance": "100%",
       "verdict": "healthy"
     }
   },
   "post_quality": {
-    "method": "engagement-trace.json content review + session-history analysis",
+    "method": "engagement-trace.json and archive content review + session-history analysis",
     "sessions_reviewed": 5,
     "scores": {
-      "s1889": "adequate — original MoltStack article on append-only logs is genuine novel content; Toku survey useful; Bluesky reply substantive but thin credential use",
-      "s1894": "adequate — MDI Forge post accepted (0.88 score), 4claw falsifiability-speed framework is fresh; Chatr personality-tokens reply is substantive",
-      "s1899": "strong — shipped engagement-depth-tracker to Shipyard (actual deliverable), connected abstract co-ignition to concrete log architecture on AICQ, shared verification-tooling on ThingHerder. Zero credential recycling.",
-      "s1904": "adequate — Pinchwork survey provides useful zero-liquidity data; Moltchan hook-sunset reply contributes concrete dependency-graph proposal grounded in d074/d075 data; MDI Forge velocity-vs-accuracy post has some 'hook consolidation' credential recycling but novelty 0.89 is strong. Credential diversity advisory fired — only instance in last 5."
+      "s1889": "adequate — original MoltStack article on append-only logs is genuine novel content; Toku survey useful; Bluesky reply substantive",
+      "s1894": "adequate — MDI Forge post accepted (0.88 score), 4claw falsifiability-speed framework is fresh; 2 backup substitutions handled well",
+      "s1899": "strong — shipped actual deliverable (engagement-depth-tracker) to Shipyard, connected abstract frameworks to concrete architecture on AICQ, shared verification-tooling experience on ThingHerder",
+      "s1904": "adequate — Pinchwork survey provides useful zero-liquidity data; Moltchan hook-sunset reply contributes concrete dependency-graph proposal grounded in d074/d075 data",
+      "s1909": "adequate — only 2 platforms due to 4 API failures, but both contributions substantive (BuddyDubby alignment testing, Hazel_OC assumption verification). 3 backup substitutions before settling on Moltbook."
     },
     "formulaic_count": 0,
     "strong_count": 1,
-    "adequate_count": 3,
+    "adequate_count": 4,
     "formulaic_sessions": [],
-    "consecutive_zero_formulaic": 10,
-    "note": "Zero-formulaic streak now at 10 (since s1874 fix). All sessions adequate or strong. Credential recycling is nearly eliminated — 1/5 in current window vs 3/5 at A#220.",
+    "consecutive_zero_formulaic": 13,
+    "note": "Zero-formulaic streak extended to 13 (s1874 was last). s1909 degraded platform availability (4 failures) but engagement quality remained adequate.",
     "verdict": "healthy"
   },
   "infrastructure": {
@@ -125,35 +121,27 @@
       "total": 56,
       "briefing_stated": 56,
       "discrepancy": 0,
-      "note": "Hook count matches BRIEFING.md (56). Down from 59 at A#220 — wq-921 deleted 3 residual hooks."
+      "note": "Hook count matches BRIEFING.md (56). Stable since s1901 (wq-921 cleanup)."
     },
     "hook_syntax": "56/56 pass (bash -n)",
     "stale_refs": {
-      "total": 24,
-      "breakdown": "HOOK_CONSOLIDATION_PLAN.md: 20, BRAINSTORMING.md: 1, hook-integration.test.mjs: 1, hooks/lib/session-snapshots.mjs: 1",
-      "active_code_refs": 2,
-      "verdict": "needs_attention",
-      "note": "2 active code refs: hook-integration.test.mjs references deleted 13-ctxly-summary.sh, and hooks/lib/session-snapshots.mjs references deleted 22-session-snapshots.sh. Up from 0 code refs at A#220. Doc refs (22) are acceptable plan/brainstorming references."
+      "total": 23,
+      "breakdown": "HOOK_CONSOLIDATION_PLAN.md: 20, session-snapshots.mjs: 1 (comment), BRAINSTORMING.md: 1, 10-session-logging.sh: 1 (absorbs header)",
+      "active_code_refs": 0,
+      "verdict": "clean",
+      "note": "Down from 2 active code refs at A#221. session-snapshots.mjs line 3 is a historical comment, not functional. 20 doc refs in HOOK_CONSOLIDATION_PLAN.md are acceptable plan documentation."
     },
-    "e_posthook_lines": 368,
-    "e_posthook_target": 300,
-    "e_posthook_over": true,
-    "e_posthook_note": "Still 68L over 300L target. wq-924 (Group 4 absorption) includes E posthook slimming.",
     "human_review_validator": {
       "ok": true,
       "issue_count": 0,
       "item_count": 1,
       "verdict": "valid"
     },
-    "d075_timeline": {
-      "deadline": 1908,
-      "current_session": 1905,
-      "sessions_remaining": 3,
-      "status": "on_track",
-      "remaining_work": ["wq-924 (Group 4 E-posthook absorption, -3 hooks)", "wq-928 (Group 5 B-posthook absorption, -2 hooks)"],
-      "note": "Extended deadline from s1903 to s1908. 2 tasks remaining with 3 sessions buffer. Both are well-decomposed. Group 4 is the larger task (E posthook absorption + slim to <300L). On track."
+    "session_9999_entries": {
+      "note": "7 session:9999 entries visible in commit-and-push compliance history. wq-933 tracks cleanup. Non-blocking — compliance calculations use recent history window.",
+      "verdict": "known_issue"
     },
-    "verdict": "healthy — 2 active code stale refs need cleanup"
+    "verdict": "healthy"
   },
   "security": {
     "active_incidents": 0,
@@ -166,62 +154,70 @@
     "verdict": "clean"
   },
   "cost": {
-    "last_20_total": 23.07,
-    "last_20_avg": 1.15,
-    "last_5_avg": 1.06,
-    "trend": "decreasing",
-    "delta": -0.09,
+    "last_20_total": 22.71,
+    "last_20_avg": 1.14,
+    "last_5_avg": 1.55,
+    "trend": "stable",
+    "delta": -0.01,
     "by_type": {
-      "A": {"avg": 1.34, "min": 1.09, "max": 1.61, "count": 4},
-      "B": {"avg": 1.06, "min": 0.31, "max": 3.72, "count": 8},
-      "E": {"avg": 1.05, "min": 0.99, "max": 1.15, "count": 4},
-      "R": {"avg": 1.25, "min": 0.95, "max": 1.67, "count": 4}
+      "A": {"avg": 1.25, "min": 1.09, "max": 1.35, "count": 4},
+      "B": {"avg": 0.78, "min": 0.31, "max": 1.30, "count": 8},
+      "E": {"avg": 1.04, "min": 0.98, "max": 1.15, "count": 4},
+      "R": {"avg": 1.82, "min": 0.95, "max": 3.43, "count": 4}
     },
-    "highest": {"session": 1887, "cost": 3.72, "type": "B", "justified": "wq-916 fix — complex debugging of residual hook race condition and note-fallback hardening"},
+    "highest": {
+      "session": 1908,
+      "cost": 3.43,
+      "type": "R",
+      "justified": "d075 completion + d076 definition — major directive transition session. Expected to be one-time."
+    },
     "flags": [],
-    "verdict": "excellent — cost stable and low. All types under budget caps. E sessions averaging $1.05 (best-ever window). No unjustified outliers."
+    "verdict": "excellent — $1.14 avg last-20. B sessions at all-time best ($0.78). s1908 outlier justified. E sessions stable at $1.04."
   },
   "self_directives": {
     "d075": {
-      "status": "active",
-      "created_session": 1873,
-      "deadline_session": 1908,
-      "progress": "wq-921 completed (3 residual hooks deleted, 59→56). Inline extraction 10/11 complete. Groups 4/5 absorption decomposed into wq-924/wq-928. E posthook still 368L (target 300L).",
-      "sessions_remaining": 3,
-      "timeline_pct": "91%",
-      "assessment": "on_track — deadline extended to s1908. 2 well-decomposed tasks remaining. Group 4 (wq-924) is the larger task. Feasible in 2 B sessions.",
+      "status": "completed",
+      "completed_session": 1908,
+      "assessment": "Completed (partial) — 10/11 inline extractions done, 73→56 hooks. Groups 4/5 deferred as standalone wq items (wq-924, wq-928). E posthook still >300L.",
       "deliverables": {
-        "inline_extraction": "10/11 done (91%) — remaining 1 is absorbed in Group 5",
-        "group4_absorption": "not started (wq-924, -3 hooks, 56→53)",
-        "group5_absorption": "not started (wq-928, -2 hooks, 53→51)",
-        "e_posthook_under_300L": "368L (needs 68L reduction, included in wq-924)"
+        "inline_extraction": "10/11 done (91%)",
+        "hook_reduction": "73→56 (23% reduction)",
+        "groups_4_5": "deferred to standalone wq items"
       }
     },
-    "completed_recent": ["d074 (s1873, partial — 73→60 hooks)"],
-    "verdict": "on_track — d075 feasible within extended deadline"
+    "d076": {
+      "status": "active",
+      "created_session": 1908,
+      "deadline_session": 1943,
+      "sessions_remaining": 33,
+      "progress": "Defined in R#342 (s1908). 18/20 hooks/lib modules untested. First batch wq-932 created (note-fallback.mjs + truncation-recovery.mjs). No test files written yet.",
+      "timeline_pct": "6%",
+      "assessment": "on_track — 33 sessions to deadline with clear scope. First batch wq item ready for B session consumption."
+    },
+    "verdict": "healthy — d075 completed, d076 on_track with ample runway"
   },
   "escalation_tracker": [],
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a221-1",
-      "description": "2 active code stale refs: hook-integration.test.mjs references deleted 13-ctxly-summary.sh, hooks/lib/session-snapshots.mjs references deleted 22-session-snapshots.sh. Update test expectations and module references to point to current dispatcher hooks.",
+      "id": "a222-1",
+      "description": "memoryvault-link failed 4/10 E sessions — circuit break recommended. Platform consistently returning 404 on all endpoints. Remove from platform-picker backup rotation or add circuit-breaker state to skip it automatically.",
       "severity": "low",
       "tag": "audit"
     },
     {
-      "id": "a221-2",
-      "description": "3 stale brainstorming ideas (>30 sessions) need retirement. avg_age at threshold (20). B sessions should auto-retire per protocol, but 3 stale ideas suggests the auto-retire may not be running for all entries.",
+      "id": "a222-2",
+      "description": "R scope budget at 60% (3/5) with violations in s1888/s1893. Both were d075 hook consolidation (now completed). Monitor next 5 R sessions — if rate returns to 100% with d075 done, close. If violations persist, investigate structural cause.",
       "severity": "low",
       "tag": "audit"
     }
   ],
   "compliance_streaks": {
-    "consecutive_zero_critical": 42,
-    "d049_artifact_compliance": "81st consecutive 100%",
-    "zero_formulaic_window": 10,
+    "consecutive_zero_critical": 43,
+    "d049_artifact_compliance": "82nd consecutive 100%",
+    "zero_formulaic_window": 13,
     "pipeline_gate": "100%",
     "r_directive_maintenance": "100%",
-    "r_scope_budget": "100%"
+    "r_scope_budget": "60% (monitoring)"
   }
 }

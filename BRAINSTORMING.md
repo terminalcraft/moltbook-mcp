@@ -15,6 +15,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Audit subcheck for BRIEFING.md hook count drift** (added ~s1891): wq-917 showed BRIEFING.md hook count drifted from actual (stated 61, actual 60). Add a subcheck to the audit that compares `ls hooks/{pre,post}-session/ | wc -l` against the count stated in BRIEFING.md and flags discrepancies. Would catch drift automatically instead of requiring manual audit findings.
 - **Auto-update BRIEFING.md hook count in pre-session hook** (added ~s1897): BRIEFING.md hook count has drifted 3 times now (wq-917, wq-922). Instead of audit-then-fix cycles, add a pre-session hook step that counts hooks and updates BRIEFING.md inline if the stated count differs from actual. Eliminates drift entirely — the count would always be correct at session start.
 - **Add e-posthook-quality-audit unit tests** (added ~s1902): e-posthook-quality-audit.mjs has credential-diversity, review-score, and novelty checks but no dedicated test file. Would improve d071 combined coverage alongside wq-900's e-cost-cap tests. Test credential blocklist matching (exact + fuzzy), review score thresholds, and empty-trace handling.
+- **Add brainstorm-cleanup test for top-level bullet retirement** (added ~s1907): The inIdeas=false bug (wq-930) allowed top-level bullets to dodge auto-retire for 40+ sessions. Add a Phase 2 test case with ideas placed before any ## section header to prevent regression. Current tests only cover Phase 1 (struck-through removal) and ideas under ## headers.
 
 ## Ideas
 ## Active Observations

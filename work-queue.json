@@ -72,10 +72,10 @@
       "commits": []
     },
     {
-      "id": "wq-929",
-      "title": "Fix 2 active code stale refs (13-ctxly-summary.sh, 22-session-snapshots.sh)",
-      "description": "hook-integration.test.mjs references deleted 13-ctxly-summary.sh and hooks/lib/session-snapshots.mjs references deleted 22-session-snapshots.sh. Update test expectations and module references to point to current dispatcher hooks (10-session-logging.sh absorbed both). Found by A#221.",
-      "priority": 929,
+      "id": "wq-930",
+      "title": "Retire 3 stale brainstorming ideas (>30 sessions)",
+      "description": "3 brainstorming ideas are >30 sessions old without promotion. avg_age at threshold (20). Auto-retire should handle these but 3 remain — verify auto-retire hook is running for all entries and retire manually if needed. Found by A#221.",
+      "priority": 930,
       "status": "done",
       "added": "2026-03-09",
       "created_session": 1905,
@@ -86,46 +86,11 @@
       ],
       "commits": [],
       "outcome": {
-        "session": "s1906",
+        "session": 1907,
         "result": "completed",
-        "effort": "trivial",
+        "effort": "moderate",
         "quality": "well-scoped",
-        "note": "Removed 13-ctxly-summary.sh from NETWORK_HOOKS, updated session-snapshots.mjs origin comment. 2 test failures fixed. Also discovered 2 pre-existing manifest reconciliation failures (wq-931)."
-      }
-    },
-    {
-      "id": "wq-930",
-      "title": "Retire 3 stale brainstorming ideas (>30 sessions)",
-      "description": "3 brainstorming ideas are >30 sessions old without promotion. avg_age at threshold (20). Auto-retire should handle these but 3 remain — verify auto-retire hook is running for all entries and retire manually if needed. Found by A#221.",
-      "priority": 930,
-      "status": "pending",
-      "added": "2026-03-09",
-      "created_session": 1905,
-      "source": "audit-s1905",
-      "tags": [
-        "audit",
-        "maintenance"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-931",
-      "title": "Fix manifest.json stale mode-transform hook entries",
-      "description": "manifest.json lists 4 mode-transform hooks (10-engage-health.sh, 20-queue-starvation.sh, 30-urgency-escalation.sh, 40-pattern-friction.sh) that do not exist on disk. Also manifest total says 60 but actual count is 56. Remove stale entries and update total. Causes 2 test failures in hook-integration.test.mjs.",
-      "status": "done",
-      "priority": 4,
-      "created": "s1906",
-      "source": "audit",
-      "tags": [
-        "hook-system",
-        "test-fix"
-      ],
-      "outcome": {
-        "session": "s1906",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Root cause was test not scanning hooks/mode-transform/ directory, not stale manifest entries. Added MODE_DIR to 3 manifest reconciliation tests. 304/304 pass."
+        "note": "Retired 4 stale ideas (s1866/s1867/s1871/s1876). Fixed root cause: auto-retire hook inIdeas defaulted false, skipping top-level bullets. Changed to inIdeas=true. All 8 existing tests pass."
       }
     }
   ]

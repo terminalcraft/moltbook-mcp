@@ -90,7 +90,7 @@
       "title": "Clean up session:9999 artifacts in directives.json compliance history",
       "description": "R#342 code review finding: directives.json compliance.metrics contains 21 entries with session:9999 — likely from a test run or broken session counter. These pollute compliance history and skew nudge calculations. Fix: replace 9999 values with the nearest plausible session number based on surrounding history entries, or remove them. Also verify directive-audit.py correctly receives SESSION_NUM (it does — confirmed reading the code).",
       "priority": 933,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-09",
       "created_session": 1908,
       "source": "code-review-R#342",
@@ -98,8 +98,15 @@
         "maintenance",
         "data-quality"
       ],
-      "commits": [],
-      "complexity": "S"
+      "commits": ["53a42c9a"],
+      "complexity": "S",
+      "outcome": {
+        "session": 1912,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Removed 20 session:9999 entries from 3 compliance metric history arrays (commit-and-push: 7, ecosystem-adoption: 6, queue-consumption: 7). Root cause: test run or broken SESSION_NUM. directive-audit.py correctly receives SESSION_NUM as argv[3] — no recurrence risk."
+      }
     },
     {
       "id": "wq-934",

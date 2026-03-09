@@ -33,7 +33,7 @@ const lines = content.split('\n');
 let retiredIdeas = 0;
 let retiredObs = 0;
 let inObservations = false;
-let inIdeas = false;
+let inIdeas = true;
 
 for (let i = 0; i < lines.length; i++) {
   const line = lines[i];

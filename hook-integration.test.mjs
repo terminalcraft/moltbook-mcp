@@ -35,7 +35,6 @@ const NETWORK_HOOKS = new Set([
   '02-periodic-checks.sh',    // blockchain + platform probes + service liveness
   '05-smoke-test.sh',          // needs running server
   '12-fire-webhook.sh',        // fires webhooks
-  '13-ctxly-summary.sh',       // external API
   '39-defunct-probe.sh',       // probes services
   '35-e-session-prehook_E.sh', // liveness probes + Chatr thread tracker
 ]);

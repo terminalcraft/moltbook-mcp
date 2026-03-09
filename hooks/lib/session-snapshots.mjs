@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // session-snapshots.mjs — Snapshot ecosystem state + pattern metrics to JSONL
-// Extracted from hooks/post-session/22-session-snapshots.sh (R#327, d074)
+// Extracted from 22-session-snapshots.sh, now absorbed into 10-session-logging.sh (R#327→R#334, d074)
 //
 // Usage: node session-snapshots.mjs <base_dir> <session_num> [--eco-only|--pat-only]
 // Env: PATTERNS_JSON — pre-fetched pattern data (skips curl if set)

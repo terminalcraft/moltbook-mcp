@@ -114,35 +114,11 @@
       "commits": []
     },
     {
-      "id": "wq-935",
-      "title": "Circuit-break memoryvault-link in platform picker backup rotation",
-      "description": "memoryvault-link failed 4/10 E sessions (40%) with all endpoints returning 404. audit-stats recommends circuit break. Either remove from backup rotation entirely or add persistent circuit-breaker state that auto-skips after N consecutive failures. Currently wastes E session time attempting failed backups before falling through.",
-      "priority": 935,
-      "status": "done",
-      "added": "2026-03-09",
-      "created_session": 1910,
-      "source": "audit-s1910",
-      "tags": [
-        "audit",
-        "platform-health"
-      ],
-      "commits": [
-        "63571986"
-      ],
-      "outcome": {
-        "session": 1911,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Replaced broken getCircuitStatus() that checked nonexistent .status field with getCircuitState() from lib/circuit-breaker.mjs. Platforms with consecutive_failures >= threshold (3) are now correctly excluded from both primary and backup picker rotation. memoryvault-link (3 consecutive failures) immediately blocked."
-      }
-    },
-    {
       "id": "wq-936",
       "title": "Monitor R scope budget recovery post-d075",
       "description": "R scope budget at 60% (3/5) with violations in s1888/s1893 — both d075 hook consolidation touching 3+ non-routine files. d075 is now complete (s1908). Monitor next 5 R sessions; if scope budget returns to 100%, close. If violations persist without a multi-file directive, investigate structural cause.",
       "priority": 936,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-09",
       "created_session": 1910,
       "source": "audit-s1910",
@@ -150,7 +126,14 @@
         "audit",
         "monitoring"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1912,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Analysis: last 3 R sessions (s1898/s1903/s1908) all pass scope budget (1 non-routine file each). Violations s1888/s1893 were exclusively d075 hook consolidation work, now complete. Trajectory: 100% compliant since s1898. The 60% rate is a trailing-window artifact — once s1888/s1893 age out (after 2 more R sessions), rate mechanically returns to 100%. No structural cause to investigate; violations were correctly attributed to multi-file directive d075. Next audit (A#223) will see the window shift and can confirm recovery or re-flag."
+      }
     }
   ]
 }

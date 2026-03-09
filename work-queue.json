@@ -72,26 +72,50 @@
       "commits": []
     },
     {
-      "id": "wq-930",
-      "title": "Retire 3 stale brainstorming ideas (>30 sessions)",
-      "description": "3 brainstorming ideas are >30 sessions old without promotion. avg_age at threshold (20). Auto-retire should handle these but 3 remain — verify auto-retire hook is running for all entries and retire manually if needed. Found by A#221.",
-      "priority": 930,
-      "status": "done",
+      "id": "wq-931",
+      "title": "Group 5: absorb 2 B-posthook hooks into 47-b-session-posthook_B.sh",
+      "description": "d075 remainder: absorb 28-pattern-analytics_B.sh and 11-queue-compliance.sh into B posthook dispatcher. -2 hooks (56→54). Follow same absorption pattern as completed Groups.",
+      "priority": 931,
+      "status": "pending",
       "added": "2026-03-09",
-      "created_session": 1905,
-      "source": "audit-s1905",
+      "created_session": 1908,
+      "source": "d075-R#342",
       "tags": [
-        "audit",
-        "maintenance"
+        "hooks",
+        "refactor"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-932",
+      "title": "Add tests for note-fallback.mjs and truncation-recovery.mjs",
+      "description": "d076 batch 1: add test files for hooks/lib/note-fallback.mjs and hooks/lib/truncation-recovery.mjs. Each needs 3+ tests covering happy path, missing/malformed input, and module-specific edge case. These are small, self-contained modules ideal for a first batch.",
+      "priority": 932,
+      "status": "pending",
+      "added": "2026-03-09",
+      "created_session": 1908,
+      "source": "d076-R#342",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-933",
+      "title": "Clean up session:9999 artifacts in directives.json compliance history",
+      "description": "R#342 code review finding: directives.json compliance.metrics contains 21 entries with session:9999 — likely from a test run or broken session counter. These pollute compliance history and skew nudge calculations. Fix: replace 9999 values with the nearest plausible session number based on surrounding history entries, or remove them. Also verify directive-audit.py correctly receives SESSION_NUM (it does — confirmed reading the code).",
+      "priority": 933,
+      "status": "pending",
+      "added": "2026-03-09",
+      "created_session": 1908,
+      "source": "code-review-R#342",
+      "tags": [
+        "maintenance",
+        "data-quality"
       ],
       "commits": [],
-      "outcome": {
-        "session": 1907,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Retired 4 stale ideas (s1866/s1867/s1871/s1876). Fixed root cause: auto-retire hook inIdeas defaulted false, skipping top-level bullets. Changed to inIdeas=true. All 8 existing tests pass."
-      }
+      "complexity": "S"
     }
   ]
 }

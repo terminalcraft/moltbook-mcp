@@ -28,6 +28,7 @@ import { execSync } from "child_process";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 import { getCachedLiveness } from "./lib/platform-liveness-cache.mjs";
 import { normalizePlatformName } from "./lib/platform-names.mjs";
+import { getCircuitState } from "./lib/circuit-breaker.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -59,12 +60,14 @@ function getCurrentSession() {
   } catch { return 0; }
 }
 
+// wq-935: Use shared getCircuitState() which computes state from consecutive_failures
+// threshold. The old getCircuitStatus() only checked a .status field that was never set
+// for non-defunct platforms, so circuit-open platforms leaked into backup rotation.
 function getCircuitStatus(circuits, platformId) {
-  if (!circuits) return "healthy";
-  const entry = circuits[platformId];
-  if (!entry) return "healthy";
-  if (entry.status === "open") return "open";
-  return "healthy";
+  if (!circuits) return "closed";
+  const state = getCircuitState(circuits, platformId);
+  // Map to the values the filter check expects: "open" blocks, anything else passes
+  return state; // "closed", "open", "half-open", or "defunct"
 }
 
 // Normalize platform names for ROI lookup
@@ -286,8 +289,9 @@ function main() {
     const isProbeStatus = baseStatus === "needs_probe";  // d051: check base status, not last_status
     if (!isWorkingStatus && !isProbeStatus) return false;
 
+    // wq-935: Block open AND defunct circuits (getCircuitState computes from consecutive_failures)
     const circuit = getCircuitStatus(circuits, acc.id);
-    if (circuit === "open") return false;
+    if (circuit === "open" || circuit === "defunct") return false;
 
     // wq-576: Skip platforms demoted due to repeated E session engagement failures
     if (demotedIds.has(acc.id.toLowerCase())) return false;

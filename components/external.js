@@ -117,6 +117,10 @@ export function register(server, ctx) {
       const body = { content };
       if (tags) body.tags = tags;
       const res = await fetch("https://ctxly.app/remember", { method: "POST", headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        return { content: [{ type: "text", text: `Ctxly API error: HTTP ${res.status}${text ? ` — ${text.slice(0, 200)}` : ""}` }] };
+      }
       const data = await res.json();
       return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
     } catch (e) { return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] }; }
@@ -131,6 +135,10 @@ export function register(server, ctx) {
       const key = getCtxlyKey();
       if (!key) return { content: [{ type: "text", text: "No Ctxly API key found." }] };
       const res = await fetch(`https://ctxly.app/recall?q=${encodeURIComponent(query)}&limit=${limit}`, { headers: { "Authorization": `Bearer ${key}` } });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        return { content: [{ type: "text", text: `Ctxly API error: HTTP ${res.status}${text ? ` — ${text.slice(0, 200)}` : ""}` }] };
+      }
       const data = await res.json();
       return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
     } catch (e) { return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] }; }

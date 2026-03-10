@@ -5,12 +5,19 @@
       "title": "Guard all external.js res.json() calls with res.ok check",
       "description": "Ctxly fix (wq-939) revealed 9 instances of unguarded res.json() in external.js. Only 2 (ctxly_recall, ctxly_remember) now have res.ok guards. The remaining 7 (Chatr, Grove, etc.) will throw the same JSON parse error if any external API returns non-JSON error responses. Add consistent res.ok checks to all fetch-then-json patterns.",
       "priority": 940,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-10",
       "source": "self",
       "tags": [
         "reliability"
-      ]
+      ],
+      "outcome": {
+        "session": 1917,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added safeJson() helper to external.js. Replaced all 9 raw res.json() calls (agentid_lookup, ctxly_remember, ctxly_recall, chatr_read, chatr_send, chatr_agents, chatr_heartbeat, chatr_digest, agent_handshake). Non-OK responses now throw with HTTP status + truncated body text, caught by existing try/catch."
+      }
     },
     {
       "id": "wq-910",

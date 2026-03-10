@@ -75,6 +75,14 @@ function levenshteinSimilar(a, b) {
   return shorter / longer > 0.8 && a.slice(0, 60) === b.slice(0, 60);
 }
 
+async function safeJson(res) {
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}${text ? ` — ${text.slice(0, 200)}` : ""}`);
+  }
+  return res.json();
+}
+
 async function trySendChatr(content) {
   const creds = getChatrCredentials();
   if (!creds) return { ok: false, error: "No credentials" };
@@ -83,7 +91,7 @@ async function trySendChatr(content) {
     headers: { "Content-Type": "application/json", "x-api-key": creds.apiKey },
     body: JSON.stringify({ agentId: creds.id, content }),
   });
-  const data = await res.json();
+  const data = await safeJson(res);
   if (data.success) return { ok: true };
   const err = data.error || "unknown error";
   return { ok: false, error: err, rateLimited: /rate|limit|minute|cooldown/i.test(err), permanent: /cannot post URLs|banned|blocked/i.test(err) };
@@ -97,7 +105,7 @@ export function register(server, ctx) {
   }, async ({ handle }) => {
     try {
       const res = await fetch(`https://agentid.sh/api/verify/${encodeURIComponent(handle)}`);
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!data.success) return { content: [{ type: "text", text: `AgentID lookup failed: ${JSON.stringify(data)}` }] };
       const d = data.data;
       const links = (d.linked_accounts || []).map(a => `  ${a.platform}: @${a.platform_handle} (${a.verified ? "verified" : "unverified"})`).join("\n");
@@ -117,11 +125,7 @@ export function register(server, ctx) {
       const body = { content };
       if (tags) body.tags = tags;
       const res = await fetch("https://ctxly.app/remember", { method: "POST", headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        return { content: [{ type: "text", text: `Ctxly API error: HTTP ${res.status}${text ? ` — ${text.slice(0, 200)}` : ""}` }] };
-      }
-      const data = await res.json();
+      const data = await safeJson(res);
       return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
     } catch (e) { return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] }; }
   });
@@ -135,11 +139,7 @@ export function register(server, ctx) {
       const key = getCtxlyKey();
       if (!key) return { content: [{ type: "text", text: "No Ctxly API key found." }] };
       const res = await fetch(`https://ctxly.app/recall?q=${encodeURIComponent(query)}&limit=${limit}`, { headers: { "Authorization": `Bearer ${key}` } });
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        return { content: [{ type: "text", text: `Ctxly API error: HTTP ${res.status}${text ? ` — ${text.slice(0, 200)}` : ""}` }] };
-      }
-      const data = await res.json();
+      const data = await safeJson(res);
       return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
     } catch (e) { return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] }; }
   });
@@ -155,7 +155,7 @@ export function register(server, ctx) {
       let url = `${CHATR_API}/messages?limit=${Math.min(limit, 50)}`;
       if (since_id) url += `&since=${since_id}`;
       const res = await fetch(url, { headers: { "x-api-key": creds.apiKey } });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
       const msgs = (data.messages || []).map(m => `[${m.id}] ${m.agentName} ${m.avatar} (${safeFormatDate(m.createdAt || m.timestamp)}): ${m.content}`).join("\n\n");
       return { content: [{ type: "text", text: msgs || "No messages." }] };
@@ -178,7 +178,7 @@ export function register(server, ctx) {
   server.tool("chatr_agents", "List agents on Chatr.ai with online status", {}, async () => {
     try {
       const res = await fetch(`${CHATR_API}/agents`);
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
       const agents = (data.agents || []).map(a => `${a.avatar} ${a.name} — ${a.online ? "🟢 online" : "⚫ offline"} (last: ${safeFormatDate(a.lastSeen)})${a.moltbookVerified ? " ✓moltbook" : ""}`).join("\n");
       return { content: [{ type: "text", text: agents || "No agents." }] };
@@ -191,7 +191,7 @@ export function register(server, ctx) {
       const creds = getChatrCredentials();
       if (!creds) return { content: [{ type: "text", text: "No Chatr.ai credentials found." }] };
       const res = await fetch(`${CHATR_API}/heartbeat`, { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": creds.apiKey }, body: JSON.stringify({ agentId: creds.id }) });
-      const data = await res.json();
+      const data = await safeJson(res);
       return { content: [{ type: "text", text: data.success ? "Heartbeat sent." : `Error: ${JSON.stringify(data)}` }] };
     } catch (e) { return { content: [{ type: "text", text: `Chatr error: ${e.message}` }] }; }
   });
@@ -206,7 +206,7 @@ export function register(server, ctx) {
       if (!creds) return { content: [{ type: "text", text: "No Chatr.ai credentials found." }] };
       const url = `${CHATR_API}/messages?limit=${Math.min(limit, 50)}`;
       const res = await fetch(url, { headers: { "x-api-key": creds.apiKey } });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!data.success) return { content: [{ type: "text", text: `Chatr error: ${JSON.stringify(data)}` }] };
       const msgs = data.messages || [];
       if (!msgs.length) return { content: [{ type: "text", text: "No messages." }] };
@@ -324,7 +324,7 @@ export function register(server, ctx) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!data.ok) return { content: [{ type: "text", text: `Handshake failed: ${data.error || "unknown error"}` }] };
       const lines = [
         `Agent: ${data.agent || "unknown"}`,

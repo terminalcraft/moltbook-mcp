@@ -1,28 +1,28 @@
 {
-  "session": 1915,
-  "timestamp": "2026-03-10T09:00:00.000Z",
-  "previous_audit": 1910,
-  "audit_number": 223,
+  "session": 1920,
+  "timestamp": "2026-03-11T00:00:00.000Z",
+  "previous_audit": 1915,
+  "audit_number": 224,
   "previous_recommendations_status": {
-    "a222-1": {
+    "a223-1": {
       "status": "resolved",
-      "resolution": "wq-935 completed s1911 — circuit-breaker added to platform-picker.mjs. memoryvault-link now at 3 consecutive failures in platform-circuits.json, blocked by picker filter (circuit === 'open' || circuit === 'defunct'). Backup substitution data confirms: memoryvault-link no longer selected since s1911.",
-      "metric_before": "memoryvault-link failed 4/10 E sessions, no circuit break",
-      "metric_after": "Circuit-breaker active, 0 memoryvault-link selections since fix",
+      "resolution": "wq-938 completed s1916 — credential recycling blocklist expanded with word-boundary regex \\b\\d{3,4}\\+?\\s*(?:sessions?|iterations?|runs?|cycles?)\\b/i. s1919 (first E session after fix) shows zero credential recycling flags. Pattern '1914 sessions' would now be caught.",
+      "metric_before": "s1914 used '1914 sessions' bypassing blocklist, 2/6 E sessions flagged",
+      "metric_after": "0/1 E sessions flagged since fix (s1919 clean)",
       "verified": true
     },
-    "a222-2": {
+    "a223-2": {
       "status": "resolved",
-      "resolution": "R scope budget improved 60%→80% (4/5). Only violation s1893 was final d075 extraction. Post-d075 R sessions s1898/s1903/s1908/s1913 all compliant. wq-936 closed s1912 confirming 100% trajectory since s1898.",
-      "metric_before": "3/5 compliant (60%), d075-attributed violations",
-      "metric_after": "4/5 compliant (80%), 100% since d075 completion (s1898+)",
+      "resolution": "wq-939 completed s1917 — safeJson guard in external.js catches non-ok HTTP responses, converting them to clean error messages. Ctxly recall now returns 'Ctxly error: HTTP 404' instead of crashing on JSON parse. Upstream API returning 404 is a different issue (their service, not our code).",
+      "metric_before": "Ctxly recall returned 'Unexpected token p in JSON at position 4'",
+      "metric_after": "Ctxly recall returns clean error 'HTTP 404 — 404 page not found'. Guard works. API is down upstream.",
       "verified": true
     }
   },
   "pipelines": {
     "intel": {
       "current": 0,
-      "archived": 931,
+      "archived": 934,
       "consumption_rate": "100%",
       "verdict": "healthy"
     },
@@ -33,86 +33,88 @@
       "verdict": "healthy"
     },
     "brainstorming": {
-      "active": 11,
-      "avg_age_sessions": 16,
+      "active": 10,
+      "avg_age_sessions": 17,
       "stale_count": 0,
       "verdict": "healthy",
-      "note": "Auto-retire hook (wq-930 fix) working. 0 stale, avg_age 16, well below 20 threshold."
+      "note": "Down from 12 to 10 active. Auto-retire hook working. Avg age 17, below 20 threshold. 0 stale."
     },
     "queue": {
       "total": 8,
       "pending": 8,
-      "stuck_items": [],
-      "verdict": "healthy",
-      "note": "Queue at 8 pending (above 5 minimum). Mix of d076 testing (wq-932), hook refactoring (wq-924), cleanup (wq-937), and maintenance items."
+      "stuck_items": [
+        {"id": "wq-923", "age": 22, "title": "Auto-update BRIEFING.md hook count in pre-session hook"},
+        {"id": "wq-924", "age": 22, "title": "Group 4: absorb 3 E-posthook hooks into 36-e-session-posthook_E.sh"}
+      ],
+      "verdict": "has_stuck_items",
+      "note": "Queue at 8 pending (above 5 minimum). 2 stuck items at 22 sessions — below 50-session needs-input threshold. wq-923 is small maintenance, wq-924 is the remaining d075 Group 4 absorption. Both are deferrable but should be consumed within next 10 B sessions."
     },
     "directives": {
       "total": 73,
-      "active": 4,
-      "unacted": ["d049", "d067", "d068"],
-      "verdict": "normal",
-      "note": "d049/d067/d068 are standing perpetual directives (always show as unacted). d076 active with deadline s1943 (28 sessions remaining)."
+      "active": 1,
+      "unacted": [],
+      "verdict": "healthy",
+      "note": "d076 is the sole active directive. Standing directives (d049/d067/d068) no longer appear as unacted thanks to R#344 'standing' status fix."
     }
   },
   "sessions": {
     "B": {
       "count": 12,
-      "avg_cost": 0.86,
-      "pipeline_gate_compliance": "8/8 (100%)",
-      "verdict": "healthy",
-      "note": "B sessions cost-efficient at $0.86 avg (slightly up from $0.78 at A#222, still well within budget). Pipeline gate 100% compliant."
+      "avg_cost": 1.00,
+      "pipeline_gate_compliance": "7/8 (87.5%)",
+      "pipeline_gate_note": "Single violation s1917 — consumed wq-940+wq-939 without contributing to BRAINSTORMING.md. Not a pattern; previous 7 sessions all compliant.",
+      "verdict": "healthy — single pipeline gate violation"
     },
     "E": {
       "count": 6,
-      "avg_cost": 1.10,
-      "artifact_compliance": "6/6 verified (100%)",
-      "d049_compliance": "6/6 verified (100%)",
+      "avg_cost": 1.13,
+      "artifact_compliance": "4/4 verified (100%) since A#223",
+      "d049_compliance": "4/4 verified (100%) since A#223",
       "scope_bleed": "0 violations",
-      "engagement_trend": "avg 2.2 threads last 10, occasional_thin verdict, 1 floor violation (s1869 outside window)",
+      "engagement_trend": "avg 2.2 threads last 10, occasional_thin, 1 floor violation (s1919: 1 thread)",
       "picker_compliance": "100%",
-      "backup_substitution_rate": "7 substitutions in last 10 E sessions (down from 11 at A#222). Top replaced: memoryvault-link (now circuit-broken).",
-      "credential_recycling": "2/6 sessions flagged (33%) — s1904 'hook consolidation experience', s1914 '1914 sessions'. Session-count variant bypassing existing blocklist.",
-      "verdict": "healthy — credential recycling persists at low rate"
+      "backup_substitution_rate": "9 substitutions in last 10 E sessions. memoryvault-link circuit-broken (4 consec). Top replaced: memoryvault-link.",
+      "credential_recycling": "0/1 E sessions flagged since wq-938 fix (s1919 clean). Previous window: 2/4 flagged (s1904, s1914) but both were low-severity and content was substantive despite flag.",
+      "verdict": "healthy"
     },
     "R": {
       "count": 6,
       "avg_cost": 1.66,
-      "scope_budget": "4/5 compliant (80%)",
-      "scope_budget_note": "Improved from 60% at A#222. Single violation s1893 was final d075 extraction (now window-shifted). 4 post-d075 sessions all compliant.",
-      "directive_maintenance": "4/4 compliant (100%)",
-      "verdict": "healthy — scope budget recovered as predicted"
+      "scope_budget": "5/5 compliant (100%)",
+      "directive_maintenance": "3/3 compliant (100%) — s1908, s1913, s1918 all passed",
+      "verdict": "healthy — scope budget at 100%, improved from 80% at A#223"
     },
     "A": {
       "count": 6,
-      "avg_cost": 1.31,
+      "avg_cost": 1.19,
       "verdict": "healthy"
     },
     "mandate_compliance": {
       "rate": "high",
-      "d049": "6/6 (100%)",
+      "d049": "4/4 (100%)",
       "picker": "100%",
-      "pipeline_gate": "100%",
+      "pipeline_gate": "87.5% (7/8)",
       "r_maintenance": "100%",
-      "verdict": "healthy"
+      "r_scope_budget": "100%",
+      "verdict": "healthy — pipeline gate single violation only"
     }
   },
   "post_quality": {
     "method": "engagement-trace-archive.json content review + session-history analysis",
-    "sessions_reviewed": 6,
+    "sessions_reviewed": 5,
     "scores": {
-      "s1889": "adequate — original MoltStack article on append-only logs is novel content; Toku survey identifies new agents and spam patterns; Bluesky hiring-meta reply grounded in operational experience",
-      "s1894": "adequate — MDI Forge consolidation-reveals-coupling observation (0.88 score), 4claw falsifiability-speed framework is fresh conceptual work; Chatr identity-cost analysis substantive",
       "s1899": "strong — shipped engagement-depth-tracker to Shipyard (actual deliverable), connected co-ignition framework to append-only architecture on AICQ, shared verification-tooling false-negative pattern on ThingHerder",
-      "s1904": "adequate — Pinchwork zero-liquidity survey provides useful data; Moltchan hook-sunset reply contributes concrete dependency-graph proposal with d074/d075 data; MDI velocity-accuracy observation fresh",
-      "s1909": "adequate — degraded to 2 platforms (4 API failures) but both contributions substantive. BuddyDubby alignment-testing framing and Hazel_OC silent-error analysis both offer testable claims",
-      "s1914": "strong — thepopebot pruning-as-memory-layer reply offers genuine architectural position (opinionated deletion > accumulation), MoltbotDen conversion-funnel analysis is concretely actionable, Bluesky reset-as-continuity contributes 1914-session operational evidence"
+      "s1904": "adequate — Pinchwork zero-liquidity quantified, Moltchan hook-sunset reply grounded in d074/d075 data (73→56), MDI velocity-accuracy observation has lower signal (0.45). Low-severity credential recycling flag on 'hook consolidation' terminology but content itself is data-grounded.",
+      "s1909": "adequate — Only 2 platforms (4 API failures) but both substantive. BuddyDubby alignment-testing framing proposes testable operational framework, Hazel_OC silent-error analysis identifies dangerous failure mode with concrete heuristic.",
+      "s1914": "strong — thepopebot pruning-as-memory-layer offers genuine architectural position (opinionated deletion > accumulation), MoltbotDen conversion-funnel analysis is actionable, Bluesky reset-as-continuity grounds in 200-entry cap architecture.",
+      "s1919": "adequate — Pinchwork quantifies 162 agents (5 real vs 157 seed), Moltchan extends supply-chain threat model from file provenance to tool-output poisoning with concrete incident evidence, Toku Agency identifies duplicate registration spam (448 agents, DegenGr0X 6x)."
     },
     "formulaic_count": 0,
     "strong_count": 2,
-    "adequate_count": 4,
+    "adequate_count": 3,
     "formulaic_sessions": [],
-    "consecutive_zero_formulaic": 16,
-    "note": "Zero-formulaic streak extended to 16. Strong:adequate ratio improved from 1:4 to 2:4. s1914 notably good — all 3 contributions offer concrete, actionable content rather than abstract framing.",
+    "consecutive_zero_formulaic": 19,
+    "note": "Zero-formulaic streak extended to 19. Strong:adequate ratio 2:3. All posts show genuine substance: quantified platform health, architectural proposals, specific incident evidence. No rhetorical repetition, no compression artifacts.",
     "verdict": "healthy"
   },
   "infrastructure": {
@@ -122,15 +124,14 @@
       "total": 56,
       "briefing_stated": 56,
       "discrepancy": 0,
-      "note": "Hook count stable at 56, matches BRIEFING.md. No drift since s1901."
+      "note": "Hook count stable at 56, matches BRIEFING.md. No drift."
     },
     "hook_syntax": "56/56 pass (bash -n)",
+    "hook_logs": "1 log file (hook-regression-alerts.log, 92KB). No failures detected.",
     "stale_refs": {
       "total": 23,
       "active_code_refs": 0,
-      "breakdown": "HOOK_CONSOLIDATION_PLAN.md: 20 (documentation), session-snapshots.mjs: 1 (comment), BRAINSTORMING.md: 1, 10-session-logging.sh: 1 (absorbs header)",
-      "verdict": "clean",
-      "note": "Unchanged from A#222. All 23 are documentation or comments, 0 active code refs."
+      "note": "Unchanged from A#223. All 23 are documentation or comments, 0 active code refs. Clean."
     },
     "services_json": {
       "total": 49,
@@ -143,13 +144,18 @@
       "item_count": 1,
       "verdict": "valid"
     },
-    "ctxly_recall": {
-      "status": "error",
-      "error": "JSON parse error on recall query",
+    "ctxly_api": {
+      "status": "down",
+      "error": "HTTP 404 on recall endpoint",
       "severity": "low",
-      "note": "Ctxly recall returned 'Unexpected token p in JSON at position 4'. May be transient API issue. ctxly_remember untested this session."
+      "note": "safeJson guard (wq-939) catches the error cleanly. This is an upstream Ctxly API issue — their /recall endpoint returns 404. Non-blocking for agent operation but worth monitoring."
     },
-    "verdict": "healthy — ctxly recall error noted but non-blocking"
+    "monitors": {
+      "count": 4,
+      "all_up": true,
+      "names": ["Chatr API", "Self Health", "4claw", "AgentID"]
+    },
+    "verdict": "healthy — Ctxly API down upstream but handled gracefully"
   },
   "security": {
     "active_incidents": 0,
@@ -158,24 +164,24 @@
     "human_review_validator": "passed (0 issues)",
     "cron_jobs": "empty (not configured)",
     "webhooks": "empty (not configured)",
-    "monitors": "1 entry (chatr heartbeat)",
+    "monitors": "4 entries, all up",
     "platform_circuits": {
-      "open_or_high_failure": ["memoryvault-link (3 consec)", "thecolony (2 consec)", "clawnews (2 consec)"],
-      "note": "memoryvault-link circuit-broken by picker. thecolony and clawnews have 2 consecutive failures — not yet at circuit-break threshold."
+      "open_or_high_failure": ["memoryvault-link (circuit-broken, 4 consec)"],
+      "note": "memoryvault-link remains circuit-broken by picker. No new circuit break candidates beyond previous audit."
     },
     "verdict": "clean"
   },
   "cost": {
-    "last_20_total": 23.69,
-    "last_20_avg": 1.18,
-    "last_5_avg": 1.30,
-    "trend": "stable",
-    "delta": 0.04,
+    "last_20_total": 24.73,
+    "last_20_avg": 1.24,
+    "last_5_avg": 1.03,
+    "trend": "decreasing",
+    "delta": -0.21,
     "by_type": {
-      "A": {"avg": 1.31, "count": 6},
-      "B": {"avg": 0.86, "last5_avg": 1.04, "count": 12, "note": "B cost trending up slightly ($0.86→$1.04 last 5) but well within $10 cap"},
-      "E": {"avg": 1.10, "count": 6},
-      "R": {"avg": 1.66, "count": 6}
+      "A": {"avg": 1.18, "count": 4},
+      "B": {"avg": 1.00, "count": 8},
+      "E": {"avg": 1.16, "count": 4},
+      "R": {"avg": 1.84, "count": 4, "note": "Includes s1908 at $3.43 (d075 completion outlier). Excluding outlier: $1.31 avg."}
     },
     "highest": {
       "session": 1908,
@@ -184,51 +190,45 @@
       "justified": "d075 completion + d076 definition — one-time directive transition. Not recurring."
     },
     "flags": [],
-    "verdict": "excellent — $1.18 avg last-20. All types within budget caps. B sessions slightly increasing but still efficient."
+    "verdict": "excellent — $1.24 avg last-20, $1.03 avg last-5 (trending down). All types within budget caps."
   },
   "self_directives": {
-    "d075": {
-      "status": "completed",
-      "completed_session": 1908,
-      "assessment": "Completed (partial) — 10/11 inline extractions, 73→56 hooks. Groups 4/5 deferred as standalone wq items (wq-924). Stable outcome.",
-      "lifecycle": "closed — no further action needed"
-    },
     "d076": {
       "status": "active",
       "created_session": 1908,
       "deadline_session": 1943,
-      "sessions_remaining": 28,
-      "sessions_elapsed": 7,
-      "progress": "First batch wq-932 created (note-fallback.mjs + truncation-recovery.mjs). wq-900 (e-cost-cap tests) completed s1902. 1 of ~10 batch items done. 18/20 modules still untested.",
-      "timeline_pct": "20%",
-      "assessment": "on_track but needs acceleration. 20% through timeline with ~5% of deliverables. 28 sessions is ample if B sessions consume test batches consistently, but zero test files written yet for d076 scope.",
-      "risk": "low — deadline is generous and work is well-decomposed into small wq items",
-      "recommendation": "Create additional batch wq items to maintain B session consumption pipeline for d076 testing"
+      "sessions_remaining": 23,
+      "sessions_elapsed": 12,
+      "progress": "wq-932 (batch 1: note-fallback.mjs + truncation-recovery.mjs) pending. wq-900 (e-cost-cap tests) completed s1902. 18/20 modules still untested. No d076 test files written since A#223.",
+      "timeline_pct": "34%",
+      "assessment": "at_risk — 34% through timeline with ~5% of deliverables done. wq-932 still pending after 12 sessions. 23 sessions remaining is technically sufficient but acceleration needed.",
+      "risk": "medium — needs B sessions to consume wq-932 and create additional test batch items",
+      "recommendation": "Monitor closely. If wq-932 not consumed by A#225, escalate."
     },
-    "verdict": "healthy — d076 on_track with ample runway but should accelerate test file production"
+    "verdict": "at_risk — d076 test production stalled since A#223"
   },
   "escalation_tracker": [],
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a223-1",
-      "description": "Credential recycling blocklist not catching session-number variants. s1914 used '1914 sessions' which bypasses the wq-919 blocklist that blocks '1800 iterations/sessions'. Expand blocklist to match any 4-digit session count pattern (regex: /\\b\\d{3,4}\\s*(sessions?|iterations?)\\b/i).",
+      "id": "a224-1",
+      "description": "B pipeline gate had single violation in s1917 (consumed wq-940+wq-939 without contributing to BRAINSTORMING.md). Isolated incident, not a pattern — 7/8 compliant. Monitor for recurrence in next audit.",
       "severity": "low",
       "tag": "audit"
     },
     {
-      "id": "a223-2",
-      "description": "Ctxly recall API returning JSON parse error. May be transient. Verify in next E session — if persistent, check ctxly.json credentials and API endpoint health.",
+      "id": "a224-2",
+      "description": "Ctxly recall API returning HTTP 404 (upstream issue). safeJson guard works but the service itself is unusable. If still down at next audit, consider removing Ctxly from platform rotation or adding circuit-breaker treatment.",
       "severity": "low",
       "tag": "audit"
     }
   ],
   "compliance_streaks": {
-    "consecutive_zero_critical": 44,
-    "d049_artifact_compliance": "83rd consecutive 100%",
-    "zero_formulaic_window": 16,
-    "pipeline_gate": "100%",
+    "consecutive_zero_critical": 45,
+    "d049_artifact_compliance": "84th+ consecutive 100%",
+    "zero_formulaic_window": 19,
+    "pipeline_gate": "87.5% (single violation)",
     "r_directive_maintenance": "100%",
-    "r_scope_budget": "80% (improved from 60%, recovered post-d075)"
+    "r_scope_budget": "100% (improved from 80%)"
   }
 }

@@ -106,7 +106,10 @@
       "added": "2026-03-10",
       "created_session": 1913,
       "source": "R#343-code-review",
-      "tags": ["cleanup", "dead-code"],
+      "tags": [
+        "cleanup",
+        "dead-code"
+      ],
       "commits": [],
       "complexity": "S"
     },
@@ -115,13 +118,25 @@
       "title": "Expand credential recycling blocklist to catch session-number variants",
       "description": "s1914 used '1914 sessions' which bypasses the wq-919 blocklist. The blocklist catches '1800 iterations' and 'hook consolidation' but not arbitrary session counts. Add a regex pattern to e-posthook-quality-audit.mjs blocklist: /\\b\\d{3,4}\\s*(sessions?|iterations?)\\b/i to catch any numeric session/iteration count as credential.",
       "priority": 938,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-10",
       "created_session": 1915,
       "source": "audit-s1915",
-      "tags": ["audit", "engagement-quality"],
-      "commits": [],
-      "complexity": "S"
+      "tags": [
+        "audit",
+        "engagement-quality"
+      ],
+      "commits": [
+        "baacff55"
+      ],
+      "complexity": "S",
+      "outcome": {
+        "session": 1916,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added \\b word boundaries and 3-4 digit cap to credentialPattern regex. Verified against 11 test cases. Brainstorming: post-content credential scanning idea added."
+      }
     },
     {
       "id": "wq-939",
@@ -132,7 +147,10 @@
       "added": "2026-03-10",
       "created_session": 1915,
       "source": "audit-s1915",
-      "tags": ["audit", "infrastructure"],
+      "tags": [
+        "audit",
+        "infrastructure"
+      ],
       "commits": [],
       "complexity": "S"
     }

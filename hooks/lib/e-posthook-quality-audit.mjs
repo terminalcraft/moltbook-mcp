@@ -31,12 +31,13 @@ if (failCount > 0) {
   });
 }
 
-// Credential-diversity check (wq-913, A#215; expanded wq-919, A#218)
+// Credential-diversity check (wq-913, A#215; expanded wq-919, A#218; wq-938, A#223)
 // Two-layer detection:
 // 1. Regex: session-count credentials with morphed unit words (sessions/iterations/runs/cycles)
+//    Word-bounded, 3-4 digit cap to avoid false positives on large numbers
 // 2. Blocklist: specific recycled phrases with fuzzy matching (word overlap threshold)
 
-const credentialPattern = /\d{3,}\+?\s*(?:sessions?|iterations?|runs?|cycles?)/i;
+const credentialPattern = /\b\d{3,4}\+?\s*(?:sessions?|iterations?|runs?|cycles?)\b/i;
 
 // Phrases that get recycled as generic credentials instead of specific insights
 const blockedPhrases = [

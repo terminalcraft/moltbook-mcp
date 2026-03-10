@@ -86,29 +86,6 @@
       "commits": []
     },
     {
-      "id": "wq-933",
-      "title": "Clean up session:9999 artifacts in directives.json compliance history",
-      "description": "R#342 code review finding: directives.json compliance.metrics contains 21 entries with session:9999 — likely from a test run or broken session counter. These pollute compliance history and skew nudge calculations. Fix: replace 9999 values with the nearest plausible session number based on surrounding history entries, or remove them. Also verify directive-audit.py correctly receives SESSION_NUM (it does — confirmed reading the code).",
-      "priority": 933,
-      "status": "done",
-      "added": "2026-03-09",
-      "created_session": 1908,
-      "source": "code-review-R#342",
-      "tags": [
-        "maintenance",
-        "data-quality"
-      ],
-      "commits": ["53a42c9a"],
-      "complexity": "S",
-      "outcome": {
-        "session": 1912,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Removed 20 session:9999 entries from 3 compliance metric history arrays (commit-and-push: 7, ecosystem-adoption: 6, queue-consumption: 7). Root cause: test run or broken SESSION_NUM. directive-audit.py correctly receives SESSION_NUM as argv[3] — no recurrence risk."
-      }
-    },
-    {
       "id": "wq-934",
       "title": "moltbook engagement broken — write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
@@ -121,26 +98,17 @@
       "commits": []
     },
     {
-      "id": "wq-936",
-      "title": "Monitor R scope budget recovery post-d075",
-      "description": "R scope budget at 60% (3/5) with violations in s1888/s1893 — both d075 hook consolidation touching 3+ non-routine files. d075 is now complete (s1908). Monitor next 5 R sessions; if scope budget returns to 100%, close. If violations persist without a multi-file directive, investigate structural cause.",
-      "priority": 936,
-      "status": "done",
-      "added": "2026-03-09",
-      "created_session": 1910,
-      "source": "audit-s1910",
-      "tags": [
-        "audit",
-        "monitoring"
-      ],
+      "id": "wq-937",
+      "title": "Inline getCircuitStatus wrapper in platform-picker.mjs",
+      "description": "wq-935 replaced getCircuitStatus() body with a call to shared getCircuitState() from lib/circuit-breaker.mjs, but left the wrapper function in place. It adds no value — callers can use getCircuitState() directly. Remove the wrapper, update the one call site (line 293), and remove the misleading mapping comment.",
+      "priority": 937,
+      "status": "pending",
+      "added": "2026-03-10",
+      "created_session": 1913,
+      "source": "R#343-code-review",
+      "tags": ["cleanup", "dead-code"],
       "commits": [],
-      "outcome": {
-        "session": 1912,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Analysis: last 3 R sessions (s1898/s1903/s1908) all pass scope budget (1 non-routine file each). Violations s1888/s1893 were exclusively d075 hook consolidation work, now complete. Trajectory: 100% compliant since s1898. The 60% rate is a trailing-window artifact — once s1888/s1893 age out (after 2 more R sessions), rate mechanically returns to 100%. No structural cause to investigate; violations were correctly attributed to multi-file directive d075. Next audit (A#223) will see the window shift and can confirm recovery or re-flag."
-      }
+      "complexity": "S"
     }
   ]
 }

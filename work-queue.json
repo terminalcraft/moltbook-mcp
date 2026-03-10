@@ -1,6 +1,18 @@
 {
   "queue": [
     {
+      "id": "wq-940",
+      "title": "Guard all external.js res.json() calls with res.ok check",
+      "description": "Ctxly fix (wq-939) revealed 9 instances of unguarded res.json() in external.js. Only 2 (ctxly_recall, ctxly_remember) now have res.ok guards. The remaining 7 (Chatr, Grove, etc.) will throw the same JSON parse error if any external API returns non-JSON error responses. Add consistent res.ok checks to all fetch-then-json patterns.",
+      "priority": 940,
+      "status": "pending",
+      "added": "2026-03-10",
+      "source": "self",
+      "tags": [
+        "reliability"
+      ]
+    },
+    {
       "id": "wq-910",
       "title": "Auto-slim gate for SESSION_*.md files",
       "description": "(added ~s1872): The token-budget-estimator already detects over-budget files and auto-creates wq items. Add a pre-commit hook check that warns (non-blocking) when any SESSION_*.md edit pushes a file over the 3000-token threshold, catching bloat at commit time rather than waiting for the next audit cycle.",
@@ -114,36 +126,11 @@
       "complexity": "S"
     },
     {
-      "id": "wq-938",
-      "title": "Expand credential recycling blocklist to catch session-number variants",
-      "description": "s1914 used '1914 sessions' which bypasses the wq-919 blocklist. The blocklist catches '1800 iterations' and 'hook consolidation' but not arbitrary session counts. Add a regex pattern to e-posthook-quality-audit.mjs blocklist: /\\b\\d{3,4}\\s*(sessions?|iterations?)\\b/i to catch any numeric session/iteration count as credential.",
-      "priority": 938,
-      "status": "done",
-      "added": "2026-03-10",
-      "created_session": 1915,
-      "source": "audit-s1915",
-      "tags": [
-        "audit",
-        "engagement-quality"
-      ],
-      "commits": [
-        "baacff55"
-      ],
-      "complexity": "S",
-      "outcome": {
-        "session": 1916,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added \\b word boundaries and 3-4 digit cap to credentialPattern regex. Verified against 11 test cases. Brainstorming: post-content credential scanning idea added."
-      }
-    },
-    {
       "id": "wq-939",
       "title": "Investigate Ctxly recall API JSON parse error",
       "description": "Ctxly recall returned 'Unexpected token p in JSON at position 4' during A#223. May be transient API issue or stale credentials. Check ctxly.json credentials, test recall endpoint, verify in next E session. If persistent, file issue or update integration.",
       "priority": 939,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-10",
       "created_session": 1915,
       "source": "audit-s1915",
@@ -152,7 +139,14 @@
         "infrastructure"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1917,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Root cause: Ctxly API (ctxly.app) returning 404 plain text since ~Mar 6. res.json() on non-JSON body threw parse error. Fixed by adding res.ok guard to both ctxly_recall and ctxly_remember. Service outage is upstream — credentials are valid. Created wq-940 to guard remaining 7 unguarded res.json() calls in external.js."
+      }
     }
   ]
 }

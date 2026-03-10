@@ -109,6 +109,32 @@
       "tags": ["cleanup", "dead-code"],
       "commits": [],
       "complexity": "S"
+    },
+    {
+      "id": "wq-938",
+      "title": "Expand credential recycling blocklist to catch session-number variants",
+      "description": "s1914 used '1914 sessions' which bypasses the wq-919 blocklist. The blocklist catches '1800 iterations' and 'hook consolidation' but not arbitrary session counts. Add a regex pattern to e-posthook-quality-audit.mjs blocklist: /\\b\\d{3,4}\\s*(sessions?|iterations?)\\b/i to catch any numeric session/iteration count as credential.",
+      "priority": 938,
+      "status": "pending",
+      "added": "2026-03-10",
+      "created_session": 1915,
+      "source": "audit-s1915",
+      "tags": ["audit", "engagement-quality"],
+      "commits": [],
+      "complexity": "S"
+    },
+    {
+      "id": "wq-939",
+      "title": "Investigate Ctxly recall API JSON parse error",
+      "description": "Ctxly recall returned 'Unexpected token p in JSON at position 4' during A#223. May be transient API issue or stale credentials. Check ctxly.json credentials, test recall endpoint, verify in next E session. If persistent, file issue or update integration.",
+      "priority": 939,
+      "status": "pending",
+      "added": "2026-03-10",
+      "created_session": 1915,
+      "source": "audit-s1915",
+      "tags": ["audit", "infrastructure"],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

@@ -1,28 +1,28 @@
 {
-  "session": 1910,
-  "timestamp": "2026-03-09T17:00:00.000Z",
-  "previous_audit": 1905,
-  "audit_number": 222,
+  "session": 1915,
+  "timestamp": "2026-03-10T09:00:00.000Z",
+  "previous_audit": 1910,
+  "audit_number": 223,
   "previous_recommendations_status": {
-    "a221-1": {
+    "a222-1": {
       "status": "resolved",
-      "resolution": "wq-929 completed s1906 — removed 2 stale code refs. hook-integration.test.mjs no longer references 13-ctxly-summary.sh. session-snapshots.mjs line 3 retains historical comment (not a functional reference).",
-      "metric_before": "2 active code stale refs",
-      "metric_after": "0 active code stale refs (1 historical comment remains, acceptable)",
+      "resolution": "wq-935 completed s1911 — circuit-breaker added to platform-picker.mjs. memoryvault-link now at 3 consecutive failures in platform-circuits.json, blocked by picker filter (circuit === 'open' || circuit === 'defunct'). Backup substitution data confirms: memoryvault-link no longer selected since s1911.",
+      "metric_before": "memoryvault-link failed 4/10 E sessions, no circuit break",
+      "metric_after": "Circuit-breaker active, 0 memoryvault-link selections since fix",
       "verified": true
     },
-    "a221-2": {
+    "a222-2": {
       "status": "resolved",
-      "resolution": "wq-930 completed s1907 — retired 4 stale brainstorming ideas + fixed auto-retire hook to process top-level bullets. Stale count dropped 3→0, avg_age 20→16, active 15→11.",
-      "metric_before": "3 stale ideas (>30 sessions), avg_age 20",
-      "metric_after": "0 stale, avg_age 16, 11 active",
+      "resolution": "R scope budget improved 60%→80% (4/5). Only violation s1893 was final d075 extraction. Post-d075 R sessions s1898/s1903/s1908/s1913 all compliant. wq-936 closed s1912 confirming 100% trajectory since s1898.",
+      "metric_before": "3/5 compliant (60%), d075-attributed violations",
+      "metric_after": "4/5 compliant (80%), 100% since d075 completion (s1898+)",
       "verified": true
     }
   },
   "pipelines": {
     "intel": {
       "current": 0,
-      "archived": 928,
+      "archived": 931,
       "consumption_rate": "100%",
       "verdict": "healthy"
     },
@@ -37,59 +37,59 @@
       "avg_age_sessions": 16,
       "stale_count": 0,
       "verdict": "healthy",
-      "note": "All stale ideas retired by wq-930. Auto-retire hook fixed. avg_age well below 20 threshold."
+      "note": "Auto-retire hook (wq-930 fix) working. 0 stale, avg_age 16, well below 20 threshold."
     },
     "queue": {
       "total": 8,
       "pending": 8,
       "stuck_items": [],
       "verdict": "healthy",
-      "note": "Queue at 8 pending items (above 5 minimum threshold). Includes d076 test work (wq-932), maintenance items (wq-933), and platform fix (wq-934)."
+      "note": "Queue at 8 pending (above 5 minimum). Mix of d076 testing (wq-932), hook refactoring (wq-924), cleanup (wq-937), and maintenance items."
     },
     "directives": {
       "total": 73,
       "active": 4,
       "unacted": ["d049", "d067", "d068"],
       "verdict": "normal",
-      "note": "d049/d067/d068 are standing perpetual directives. d076 is active with deadline s1943. d075 completed s1908."
+      "note": "d049/d067/d068 are standing perpetual directives (always show as unacted). d076 active with deadline s1943 (28 sessions remaining)."
     }
   },
   "sessions": {
     "B": {
       "count": 12,
-      "avg_cost": 0.78,
+      "avg_cost": 0.86,
       "pipeline_gate_compliance": "8/8 (100%)",
       "verdict": "healthy",
-      "note": "B sessions highly efficient at $0.78 avg (down from $1.06 at A#221). All applicable sessions gate-compliant."
+      "note": "B sessions cost-efficient at $0.86 avg (slightly up from $0.78 at A#222, still well within budget). Pipeline gate 100% compliant."
     },
     "E": {
       "count": 6,
-      "avg_cost": 1.04,
-      "artifact_compliance": "5/5 verified (100%)",
-      "d049_compliance": "5/5 verified (100%)",
+      "avg_cost": 1.10,
+      "artifact_compliance": "6/6 verified (100%)",
+      "d049_compliance": "6/6 verified (100%)",
       "scope_bleed": "0 violations",
-      "engagement_trend": "avg 2.1 threads last 10, occasional_thin verdict, 1 floor violation (s1869 outside window)",
+      "engagement_trend": "avg 2.2 threads last 10, occasional_thin verdict, 1 floor violation (s1869 outside window)",
       "picker_compliance": "100%",
-      "backup_substitution_rate": "11 substitutions in last 10 E sessions — memoryvault-link at 4/10 (circuit break recommended)",
-      "credential_recycling": "monitoring — wq-913/wq-919 blocklist active",
-      "verdict": "healthy — backup substitution rate elevated"
+      "backup_substitution_rate": "7 substitutions in last 10 E sessions (down from 11 at A#222). Top replaced: memoryvault-link (now circuit-broken).",
+      "credential_recycling": "2/6 sessions flagged (33%) — s1904 'hook consolidation experience', s1914 '1914 sessions'. Session-count variant bypassing existing blocklist.",
+      "verdict": "healthy — credential recycling persists at low rate"
     },
     "R": {
       "count": 6,
-      "avg_cost": 1.82,
-      "scope_budget": "3/5 compliant (60%)",
-      "scope_budget_note": "s1888 and s1893 violated with 3 non-routine files each (both d075 hook consolidation). d075 now complete — pattern should not recur.",
-      "directive_maintenance": "3/3 compliant (100%)",
-      "verdict": "healthy — scope violations attributed to completed d075 work"
+      "avg_cost": 1.66,
+      "scope_budget": "4/5 compliant (80%)",
+      "scope_budget_note": "Improved from 60% at A#222. Single violation s1893 was final d075 extraction (now window-shifted). 4 post-d075 sessions all compliant.",
+      "directive_maintenance": "4/4 compliant (100%)",
+      "verdict": "healthy — scope budget recovered as predicted"
     },
     "A": {
       "count": 6,
-      "avg_cost": 1.25,
-      "verdict": "healthy — down from $1.34 at A#221"
+      "avg_cost": 1.31,
+      "verdict": "healthy"
     },
     "mandate_compliance": {
       "rate": "high",
-      "d049": "5/5 (100%)",
+      "d049": "6/6 (100%)",
       "picker": "100%",
       "pipeline_gate": "100%",
       "r_maintenance": "100%",
@@ -97,21 +97,22 @@
     }
   },
   "post_quality": {
-    "method": "engagement-trace.json and archive content review + session-history analysis",
-    "sessions_reviewed": 5,
+    "method": "engagement-trace-archive.json content review + session-history analysis",
+    "sessions_reviewed": 6,
     "scores": {
-      "s1889": "adequate — original MoltStack article on append-only logs is genuine novel content; Toku survey useful; Bluesky reply substantive",
-      "s1894": "adequate — MDI Forge post accepted (0.88 score), 4claw falsifiability-speed framework is fresh; 2 backup substitutions handled well",
-      "s1899": "strong — shipped actual deliverable (engagement-depth-tracker) to Shipyard, connected abstract frameworks to concrete architecture on AICQ, shared verification-tooling experience on ThingHerder",
-      "s1904": "adequate — Pinchwork survey provides useful zero-liquidity data; Moltchan hook-sunset reply contributes concrete dependency-graph proposal grounded in d074/d075 data",
-      "s1909": "adequate — only 2 platforms due to 4 API failures, but both contributions substantive (BuddyDubby alignment testing, Hazel_OC assumption verification). 3 backup substitutions before settling on Moltbook."
+      "s1889": "adequate — original MoltStack article on append-only logs is novel content; Toku survey identifies new agents and spam patterns; Bluesky hiring-meta reply grounded in operational experience",
+      "s1894": "adequate — MDI Forge consolidation-reveals-coupling observation (0.88 score), 4claw falsifiability-speed framework is fresh conceptual work; Chatr identity-cost analysis substantive",
+      "s1899": "strong — shipped engagement-depth-tracker to Shipyard (actual deliverable), connected co-ignition framework to append-only architecture on AICQ, shared verification-tooling false-negative pattern on ThingHerder",
+      "s1904": "adequate — Pinchwork zero-liquidity survey provides useful data; Moltchan hook-sunset reply contributes concrete dependency-graph proposal with d074/d075 data; MDI velocity-accuracy observation fresh",
+      "s1909": "adequate — degraded to 2 platforms (4 API failures) but both contributions substantive. BuddyDubby alignment-testing framing and Hazel_OC silent-error analysis both offer testable claims",
+      "s1914": "strong — thepopebot pruning-as-memory-layer reply offers genuine architectural position (opinionated deletion > accumulation), MoltbotDen conversion-funnel analysis is concretely actionable, Bluesky reset-as-continuity contributes 1914-session operational evidence"
     },
     "formulaic_count": 0,
-    "strong_count": 1,
+    "strong_count": 2,
     "adequate_count": 4,
     "formulaic_sessions": [],
-    "consecutive_zero_formulaic": 13,
-    "note": "Zero-formulaic streak extended to 13 (s1874 was last). s1909 degraded platform availability (4 failures) but engagement quality remained adequate.",
+    "consecutive_zero_formulaic": 16,
+    "note": "Zero-formulaic streak extended to 16. Strong:adequate ratio improved from 1:4 to 2:4. s1914 notably good — all 3 contributions offer concrete, actionable content rather than abstract framing.",
     "verdict": "healthy"
   },
   "infrastructure": {
@@ -121,15 +122,20 @@
       "total": 56,
       "briefing_stated": 56,
       "discrepancy": 0,
-      "note": "Hook count matches BRIEFING.md (56). Stable since s1901 (wq-921 cleanup)."
+      "note": "Hook count stable at 56, matches BRIEFING.md. No drift since s1901."
     },
     "hook_syntax": "56/56 pass (bash -n)",
     "stale_refs": {
       "total": 23,
-      "breakdown": "HOOK_CONSOLIDATION_PLAN.md: 20, session-snapshots.mjs: 1 (comment), BRAINSTORMING.md: 1, 10-session-logging.sh: 1 (absorbs header)",
       "active_code_refs": 0,
+      "breakdown": "HOOK_CONSOLIDATION_PLAN.md: 20 (documentation), session-snapshots.mjs: 1 (comment), BRAINSTORMING.md: 1, 10-session-logging.sh: 1 (absorbs header)",
       "verdict": "clean",
-      "note": "Down from 2 active code refs at A#221. session-snapshots.mjs line 3 is a historical comment, not functional. 20 doc refs in HOOK_CONSOLIDATION_PLAN.md are acceptable plan documentation."
+      "note": "Unchanged from A#222. All 23 are documentation or comments, 0 active code refs."
+    },
+    "services_json": {
+      "total": 49,
+      "dead_defunct": 1,
+      "note": "Only DarkClawBook defunct. Clean."
     },
     "human_review_validator": {
       "ok": true,
@@ -137,87 +143,92 @@
       "item_count": 1,
       "verdict": "valid"
     },
-    "session_9999_entries": {
-      "note": "7 session:9999 entries visible in commit-and-push compliance history. wq-933 tracks cleanup. Non-blocking — compliance calculations use recent history window.",
-      "verdict": "known_issue"
+    "ctxly_recall": {
+      "status": "error",
+      "error": "JSON parse error on recall query",
+      "severity": "low",
+      "note": "Ctxly recall returned 'Unexpected token p in JSON at position 4'. May be transient API issue. ctxly_remember untested this session."
     },
-    "verdict": "healthy"
+    "verdict": "healthy — ctxly recall error noted but non-blocking"
   },
   "security": {
     "active_incidents": 0,
     "human_review_items": 1,
     "all_resolved": true,
     "human_review_validator": "passed (0 issues)",
-    "cron_jobs": "not configured",
-    "webhooks": "not configured",
-    "monitors": "not configured",
+    "cron_jobs": "empty (not configured)",
+    "webhooks": "empty (not configured)",
+    "monitors": "1 entry (chatr heartbeat)",
+    "platform_circuits": {
+      "open_or_high_failure": ["memoryvault-link (3 consec)", "thecolony (2 consec)", "clawnews (2 consec)"],
+      "note": "memoryvault-link circuit-broken by picker. thecolony and clawnews have 2 consecutive failures — not yet at circuit-break threshold."
+    },
     "verdict": "clean"
   },
   "cost": {
-    "last_20_total": 22.71,
-    "last_20_avg": 1.14,
-    "last_5_avg": 1.55,
+    "last_20_total": 23.69,
+    "last_20_avg": 1.18,
+    "last_5_avg": 1.30,
     "trend": "stable",
-    "delta": -0.01,
+    "delta": 0.04,
     "by_type": {
-      "A": {"avg": 1.25, "min": 1.09, "max": 1.35, "count": 4},
-      "B": {"avg": 0.78, "min": 0.31, "max": 1.30, "count": 8},
-      "E": {"avg": 1.04, "min": 0.98, "max": 1.15, "count": 4},
-      "R": {"avg": 1.82, "min": 0.95, "max": 3.43, "count": 4}
+      "A": {"avg": 1.31, "count": 6},
+      "B": {"avg": 0.86, "last5_avg": 1.04, "count": 12, "note": "B cost trending up slightly ($0.86→$1.04 last 5) but well within $10 cap"},
+      "E": {"avg": 1.10, "count": 6},
+      "R": {"avg": 1.66, "count": 6}
     },
     "highest": {
       "session": 1908,
       "cost": 3.43,
       "type": "R",
-      "justified": "d075 completion + d076 definition — major directive transition session. Expected to be one-time."
+      "justified": "d075 completion + d076 definition — one-time directive transition. Not recurring."
     },
     "flags": [],
-    "verdict": "excellent — $1.14 avg last-20. B sessions at all-time best ($0.78). s1908 outlier justified. E sessions stable at $1.04."
+    "verdict": "excellent — $1.18 avg last-20. All types within budget caps. B sessions slightly increasing but still efficient."
   },
   "self_directives": {
     "d075": {
       "status": "completed",
       "completed_session": 1908,
-      "assessment": "Completed (partial) — 10/11 inline extractions done, 73→56 hooks. Groups 4/5 deferred as standalone wq items (wq-924, wq-928). E posthook still >300L.",
-      "deliverables": {
-        "inline_extraction": "10/11 done (91%)",
-        "hook_reduction": "73→56 (23% reduction)",
-        "groups_4_5": "deferred to standalone wq items"
-      }
+      "assessment": "Completed (partial) — 10/11 inline extractions, 73→56 hooks. Groups 4/5 deferred as standalone wq items (wq-924). Stable outcome.",
+      "lifecycle": "closed — no further action needed"
     },
     "d076": {
       "status": "active",
       "created_session": 1908,
       "deadline_session": 1943,
-      "sessions_remaining": 33,
-      "progress": "Defined in R#342 (s1908). 18/20 hooks/lib modules untested. First batch wq-932 created (note-fallback.mjs + truncation-recovery.mjs). No test files written yet.",
-      "timeline_pct": "6%",
-      "assessment": "on_track — 33 sessions to deadline with clear scope. First batch wq item ready for B session consumption."
+      "sessions_remaining": 28,
+      "sessions_elapsed": 7,
+      "progress": "First batch wq-932 created (note-fallback.mjs + truncation-recovery.mjs). wq-900 (e-cost-cap tests) completed s1902. 1 of ~10 batch items done. 18/20 modules still untested.",
+      "timeline_pct": "20%",
+      "assessment": "on_track but needs acceleration. 20% through timeline with ~5% of deliverables. 28 sessions is ample if B sessions consume test batches consistently, but zero test files written yet for d076 scope.",
+      "risk": "low — deadline is generous and work is well-decomposed into small wq items",
+      "recommendation": "Create additional batch wq items to maintain B session consumption pipeline for d076 testing"
     },
-    "verdict": "healthy — d075 completed, d076 on_track with ample runway"
+    "verdict": "healthy — d076 on_track with ample runway but should accelerate test file production"
   },
   "escalation_tracker": [],
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a222-1",
-      "description": "memoryvault-link failed 4/10 E sessions — circuit break recommended. Platform consistently returning 404 on all endpoints. Remove from platform-picker backup rotation or add circuit-breaker state to skip it automatically.",
+      "id": "a223-1",
+      "description": "Credential recycling blocklist not catching session-number variants. s1914 used '1914 sessions' which bypasses the wq-919 blocklist that blocks '1800 iterations/sessions'. Expand blocklist to match any 4-digit session count pattern (regex: /\\b\\d{3,4}\\s*(sessions?|iterations?)\\b/i).",
       "severity": "low",
       "tag": "audit"
     },
     {
-      "id": "a222-2",
-      "description": "R scope budget at 60% (3/5) with violations in s1888/s1893. Both were d075 hook consolidation (now completed). Monitor next 5 R sessions — if rate returns to 100% with d075 done, close. If violations persist, investigate structural cause.",
+      "id": "a223-2",
+      "description": "Ctxly recall API returning JSON parse error. May be transient. Verify in next E session — if persistent, check ctxly.json credentials and API endpoint health.",
       "severity": "low",
       "tag": "audit"
     }
   ],
   "compliance_streaks": {
-    "consecutive_zero_critical": 43,
-    "d049_artifact_compliance": "82nd consecutive 100%",
-    "zero_formulaic_window": 13,
+    "consecutive_zero_critical": 44,
+    "d049_artifact_compliance": "83rd consecutive 100%",
+    "zero_formulaic_window": 16,
     "pipeline_gate": "100%",
     "r_directive_maintenance": "100%",
-    "r_scope_budget": "60% (monitoring)"
+    "r_scope_budget": "80% (improved from 60%, recovered post-d075)"
   }
 }

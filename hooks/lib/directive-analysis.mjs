@@ -87,6 +87,7 @@ export function getThresholds(directive) {
  */
 export function analyzeDirectives({ sessionNum, directives, queue, historyLines }) {
   const results = [];
+  const standing = [];
   let needsAttention = 0;
   let healthy = 0;
 
@@ -97,6 +98,18 @@ export function analyzeDirectives({ sessionNum, directives, queue, historyLines 
     .join('|');
 
   for (const d of (directives?.directives || [])) {
+    // Standing directives are ongoing enforcement rules, not tasks.
+    // They're enforced by session-type hooks, not R session attention.
+    if (d.status === 'standing') {
+      standing.push({
+        id: d.id,
+        scope: d.scope || '?',
+        content: (d.content || '').slice(0, 60)
+      });
+      healthy++;
+      continue;
+    }
+
     if (d.status !== 'active') continue;
 
     const thresholds = getThresholds(d);
@@ -169,13 +182,13 @@ export function analyzeDirectives({ sessionNum, directives, queue, historyLines 
     ? `All ${healthy} active directives healthy. Add review note to most recent.`
     : `${needsAttention} directive(s) need attention, ${healthy} healthy.`;
 
-  return { results, pendingQuestions, summary, needsAttention, healthy };
+  return { results, pendingQuestions, standing, summary, needsAttention, healthy };
 }
 
 /**
  * Format analysis results as text output matching the original shell format.
  */
-export function formatResults({ results, pendingQuestions, summary }) {
+export function formatResults({ results, pendingQuestions, standing, summary }) {
   const lines = [];
 
   for (const r of results) {
@@ -186,6 +199,10 @@ export function formatResults({ results, pendingQuestions, summary }) {
     } else if (r.status === 'NEEDS_UPDATE') {
       lines.push(`NEEDS_UPDATE: ${r.id} (${r.sessionsSince} sessions, no queue item, threshold=${r.threshold}) - ${r.content}...`);
     }
+  }
+
+  if (standing && standing.length > 0) {
+    lines.push(`STANDING: ${standing.map(s => `${s.id}(${s.scope})`).join(', ')} — enforced by session-type hooks`);
   }
 
   if (pendingQuestions.length > 0) {

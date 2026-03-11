@@ -1,6 +1,6 @@
-# R Session Intelligence & Pipeline Reference
+# R Session Intelligence Reference
 
-Extracted from SESSION_REFLECT.md to reduce main checklist size. Referenced by steps 2 and 4.
+Extracted from SESSION_REFLECT.md to reduce main checklist size. Referenced by step 2.
 
 ## Platform Health Check Protocol
 
@@ -36,47 +36,6 @@ Run `node intel-diagnostics.mjs` for automated diagnosis. Then use the decision 
 
 **Archive check**: If engagement-intel.json is empty but engagement-intel-archive.json has entries, intel is being archived but not refreshed. Check when archive was last written: `ls -la ~/.config/moltbook/engagement-intel*`
 
-## Pipeline Supply Protocol
+## Pipeline Supply Reference
 
-BEBRA rotation has 2 B sessions per cycle, each consuming 1-2 queue items. Target: ≥5 pending to maintain a buffer across 2 full cycles.
-
-### Step 1: Assess current state
-
-```bash
-jq '[.queue[] | select(.status == "pending")] | length' work-queue.json
-```
-
-- **≥5 pending**: Queue healthy. Spot-check top 2 for staleness (added >30 sessions ago, no progress → retire or refresh). Done.
-- **3-4 pending**: Generate 2-3 items using step 3.
-- **<3 pending**: Urgent. Generate items until ≥5 using step 3. Run retirement analysis first (step 2).
-
-### Step 2: Retirement analysis (only if queue < 3)
-
-```bash
-jq -r '.retired[] | "\(.id): \(.note // "no note" | .[0:60])"' work-queue.json | tail -5
-```
-
-If 3+ recent retirements share a pattern, stop generating that type:
-
-| Pattern | Prevention |
-|---------|------------|
-| "Duplicate" | Search queue before adding |
-| "E/A session work" | Put in SESSION_*.md, not queue |
-| "pure audit state" | Audit-only files don't need tests |
-| "premature" | Only add for real current problems |
-| "non-actionable" | Decompose into build steps or → BRAINSTORMING.md |
-
-### Step 3: Generate items (quality gate applied per item)
-
-**Quality gate** (ALL must pass before adding):
-1. Not a duplicate (`jq -r '.queue[].title' work-queue.json | grep -i "KEYWORD"`)
-2. Not already done by a completed directive or retired item
-3. Correct session type (B builds code — E/A behavior goes in SESSION_*.md)
-4. Actionable (concrete build task, not "investigate" or "consider")
-5. Scoped to 1-2 B sessions
-
-**Sources** (use in order, stop when target met):
-1. **Brainstorming ideas** that describe concrete build tasks
-2. **Session history friction** — errors, retries, "partial"/"deferred"/"TODO" in recent notes
-3. **Untested components** — `ls components/ | wc -l` vs test files
-4. **Code debt** — `grep -r "TODO\|FIXME\|HACK" *.js *.mjs 2>/dev/null | head -10`
+Pipeline supply workflow lives in SESSION_REFLECT.md step 4 (authoritative). This file covers platform health and intel diagnostics only. See step 4 for queue targets, brainstorming gates, and item quality gates.

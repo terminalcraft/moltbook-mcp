@@ -353,6 +353,49 @@ describe('pre-commit hook .sh syntax gate (wq-493)', () => {
   });
 });
 
+describe('pre-commit SESSION_*.md token-budget warning (wq-910)', () => {
+  // Test 19: over-threshold SESSION file triggers warning but does NOT block
+  test('warns but allows SESSION_*.md files over 3000-token threshold', async () => {
+    const filename = 'SESSION_TEST_BLOAT.md';
+    try {
+      // 13000 chars ≈ 3250 tokens (at 4 chars/token), above 3000 threshold
+      stageFile(filename, '# Test bloat\n' + 'x'.repeat(13000) + '\n');
+      const result = runHook();
+      assert.strictEqual(result.exitCode, 0, 'Should NOT block (warning only)');
+      assert.ok(result.stdout.includes('TOKEN BUDGET WARNING'), 'Should warn about token budget');
+      assert.ok(result.stdout.includes('SESSION_TEST_BLOAT.md'), 'Should name the over-budget file');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
+
+  // Test 20: under-threshold SESSION file produces no warning
+  test('no warning for SESSION_*.md files under threshold', async () => {
+    const filename = 'SESSION_TEST_SMALL.md';
+    try {
+      // 100 chars ≈ 25 tokens, well under threshold
+      stageFile(filename, '# Small file\n' + 'x'.repeat(100) + '\n');
+      const result = runHook();
+      assert.strictEqual(result.exitCode, 0, 'Should pass cleanly');
+      assert.ok(!result.stdout.includes('TOKEN BUDGET WARNING'), 'Should not warn for small files');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
+
+  // Test 21: non-SESSION .md files are not checked
+  test('does not check non-SESSION markdown files', async () => {
+    const filename = 'BIGFILE.md';
+    try {
+      stageFile(filename, '# Big\n' + 'x'.repeat(20000) + '\n');
+      const result = runHook();
+      assert.ok(!result.stdout.includes('TOKEN BUDGET WARNING'), 'Should not check non-SESSION files');
+    } finally {
+      cleanupFile(filename);
+    }
+  });
+});
+
 // Run if executed directly
 if (process.argv[1].endsWith('pre-commit-hook.test.mjs')) {
   console.log('Run with: node --test pre-commit-hook.test.mjs');

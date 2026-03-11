@@ -78,7 +78,7 @@
       "title": "Add tests for e-posthook-parser.mjs",
       "description": "d076: E posthook parser at 238 lines is the largest untested module. Test trace parsing, malformed JSON handling, missing fields. 3+ cases.",
       "priority": 942,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-11",
       "created_session": 1923,
       "source": "R#345-d076-batch",
@@ -86,7 +86,14 @@
         "d076",
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1927,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "17 tests across 8 suites covering all parser code paths. Largest untested hooks/lib module now covered."
+      }
     },
     {
       "id": "wq-943",

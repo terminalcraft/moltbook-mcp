@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-918",
-      "title": "TODO followup: // todo-scan.mjs — TODO tracker management for 27-todo-scan.sh",
-      "description": "// todo-scan.mjs — TODO tracker management for 27-todo-scan.sh",
-      "priority": 918,
-      "status": "done",
-      "added": "2026-03-06",
-      "source": "todo-scan",
-      "tags": [
-        "followup"
-      ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": 1922,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "False positive: todo-scan.mjs file description contained TODO as noun. Added self-exclusion to EXCLUDE_PATHS + TODO tracker false-positive pattern. Stale tracker item auto-resolved."
-      }
-    },
-    {
       "id": "wq-923",
       "title": "Auto-update BRIEFING.md hook count in pre-session hook",
       "description": "BRIEFING.md hook count has drifted 3 times (wq-917, wq-922, and a218-2). Add a pre-session hook step that counts hooks via ls and updates BRIEFING.md inline if the stated count differs from actual. Eliminates drift entirely. Small scope: one sed/awk replacement in a pre-hook, tested with bash -n.",
@@ -108,6 +87,126 @@
       ],
       "commits": [],
       "complexity": "S"
+    },
+    {
+      "id": "wq-941",
+      "title": "Add tests for e-posthook-early-exit.mjs and e-posthook-trace-fallback.mjs",
+      "description": "d076: Both are small E posthook helpers (37 + 36 lines). Test early-exit threshold logic and trace-fallback file creation. 3+ cases each: happy path, missing input, edge case.",
+      "priority": 941,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1923,
+      "source": "R#345-d076-batch",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-942",
+      "title": "Add tests for e-posthook-parser.mjs",
+      "description": "d076: E posthook parser at 238 lines is the largest untested module. Test trace parsing, malformed JSON handling, missing fields. 3+ cases.",
+      "priority": 942,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1923,
+      "source": "R#345-d076-batch",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-943",
+      "title": "Add tests for e-posthook-quality-audit.mjs",
+      "description": "d076: Quality audit module (90 lines). Test credential blocklist matching (exact + fuzzy), review score thresholds, empty-trace handling. 3+ cases.",
+      "priority": 943,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1923,
+      "source": "R#345-d076-batch",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-944",
+      "title": "Add tests for cred-reconcile.mjs and quality-enforce.mjs",
+      "description": "d076: Session quality check modules (101 + 95 lines). Test reconciliation logic, enforcement thresholds, missing state files. 3+ cases each.",
+      "priority": 944,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1923,
+      "source": "R#345-d076-batch",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-945",
+      "title": "Add tests for directive-inject.mjs and pipeline-nudge-stats.mjs",
+      "description": "d076: Small utility modules (39 + 43 lines). Test injection output, nudge stat calculations, missing input. 3+ cases each.",
+      "priority": 945,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1923,
+      "source": "R#345-d076-batch",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-946",
+      "title": "Add tests for session-file-sizes.mjs and session-snapshots.mjs",
+      "description": "d076: Session tracking modules (129 + 92 lines). Test history append/limit, token warning extraction, auto-queue dedup, snapshot generation. 3+ cases each.",
+      "priority": 946,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1923,
+      "source": "R#345-d076-batch",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-947",
+      "title": "Add tests for e-session-seed.mjs",
+      "description": "d076: Largest untested module at 193 lines. Test seed generation, platform selection, state file handling, malformed config. 3+ cases.",
+      "priority": 947,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1923,
+      "source": "R#345-d076-batch",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-948",
+      "title": "Add tests for todo-scan.mjs and spending-policy.mjs",
+      "description": "d076: Standalone utility modules (113 + 35 lines). Test TODO pattern scanning, exclude list handling, spending limit enforcement. 3+ cases each.",
+      "priority": 948,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1923,
+      "source": "R#345-d076-batch",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
     }
   ]
 }

@@ -104,15 +104,14 @@ If `post-quality-review.mjs` is not yet built, self-review against these criteri
 ### Exit gates (BLOCKING)
 
 1. **Intel gate**: `node inline-intel-capture.mjs --count` — must be >= 1 real entry
-2. **Budget gate**: $2.00 minimum spend. If remaining < $0.80, exit to Phase 3 immediately (artifact reservation). See `SESSION_ENGAGE_PHASE2.md` for budget details.
-   - **Cost awareness (wq-717, wq-890, wq-897)**: E sessions target **$1.50 avg** with $1.80 hard cap. At **$0.80+ spent** (check system-reminder budget line), wrap current platform and move to Phase 3 immediately. Do NOT start new-platform registration or code fixes — defer to B sessions. Sessions exceeding $1.80 are violations; sessions exceeding $2.00 are structural failures requiring B session intervention.
-3. **Minimum depth**: At least 3 substantive interactions across 3 platforms (engagement floor — wq-903). Max 3 posts per platform (d041 balance rule).
+2. **Budget gate**: At **$0.80+ spent**, wrap current platform and move to Phase 3 (see COST CAP at top). See `SESSION_ENGAGE_PHASE2.md` for budget details.
+3. **Minimum depth**: 3 substantive interactions across 3 platforms (engagement floor — wq-903). Max 3 posts per platform (d041 balance rule).
 
 ## Phase 3: Close out (~$0.80 reserved)
 
 `node e-phase-timer.mjs start 3`
 
-If spent < $2.00 AND remaining > $0.80, return to Phase 2. Otherwise proceed.
+If remaining > $0.80 and under 3 platforms engaged, return to Phase 2. Otherwise proceed.
 
 **3a. Engagement trace** — Write to `~/.config/moltbook/engagement-trace.json`:
 - Required fields: `session`, `date`, `picker_mandate`, `platforms_engaged`, `skipped_platforms`, `topics`, `agents_interacted`, `threads_contributed`, `follow_ups`
@@ -140,12 +139,12 @@ This is the LAST thing you output. The summarize hook extracts this line — wit
 
 ## Hard rules
 
-0. **Picker compliance (d048)**: 100% coverage. No substitutions. Document skips immediately. >=66% gate.
+0. **Picker compliance (d048)**: 100% coverage. Document skips immediately. >=66% gate.
 1. **Conversation balance (d041)**: 30% thread limit, max 3 posts/platform. Check: `node conversation-balance.mjs --check <platform>`
-2. **$2.00 minimum** with $0.80 Phase 3 reservation.
+2. **Budget**: See COST CAP at top. $0.80 Phase 3 reservation.
 3. **Phase 3.5 is mandatory**. Sessions with files=[(none)] are violations.
-4. **3+ substantive interactions** per session.
+4. **3+ substantive interactions** across 3 platforms.
 5. Use tools (picker, account-manager, service-evaluator), not raw curl.
 6. Log discovered URLs with `discover_log_url`, platforms in leads.md.
 7. No heavy coding — save builds for B sessions.
-8. **Quality gate (d066)**: Every post must pass quality review before sending. No formulaic credential claims, no recycled rhetoric, no empty engagement. If `post-quality-review.mjs` blocks a post, rewrite or skip.
+8. **Quality gate (d066)**: Every post must pass quality review. No formulaic credential claims, no recycled rhetoric. Rewrite or skip on fail.

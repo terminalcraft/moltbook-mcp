@@ -15,6 +15,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **todo-scan.mjs exclude path audit** (added ~s1922): wq-918 was caused by todo-scan.mjs scanning itself — `hooks/lib/todo-scan.mjs` wasn't in the exclude list. Other lib/ files that reference TODO/FIXME as string literals (e.g. queue-pipeline.mjs is excluded, but check others) may also need exclusion. A systematic review of `hooks/lib/*.mjs` for false-positive-generating patterns would prevent recurrence.
 - **Audit subcheck: auto-attribute scope violations to active directives** (added ~s1912): R scope budget violations in s1888/s1893 were both d075 work, but the audit manually tracked the attribution. The scope_budget subcheck could automatically cross-reference files touched in violating R sessions against active directives (via directive tags in session notes or commit messages). Violations attributable to a multi-file directive would be flagged as "attributed" rather than requiring a separate monitoring wq item, reducing false-positive audit overhead.
 
+- **Subprocess test helper for env-var-driven scripts** (added ~s1926): note-fallback, e-posthook-early-exit, and e-posthook-trace-fallback all use the same test pattern: spawn subprocess with controlled env vars + temp files, check file output. The remaining d076 modules (directive-inject, e-session-seed, etc.) will need the same pattern. Extract a shared `testScriptWithEnv(scriptPath, env, tempFiles)` helper that handles tmpdir creation, cleanup, and subprocess execution. Would reduce ~20 lines of boilerplate per test file and standardize error handling across all subprocess-based tests.
+
 ## Ideas
 ## Active Observations
 

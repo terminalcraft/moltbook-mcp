@@ -46,28 +46,6 @@
       "commits": []
     },
     {
-      "id": "wq-932",
-      "title": "Add tests for note-fallback.mjs and truncation-recovery.mjs",
-      "description": "d076 batch 1: add test files for hooks/lib/note-fallback.mjs and hooks/lib/truncation-recovery.mjs. Each needs 3+ tests covering happy path, missing/malformed input, and module-specific edge case. These are small, self-contained modules ideal for a first batch.",
-      "priority": 932,
-      "status": "done",
-      "added": "2026-03-09",
-      "created_session": 1908,
-      "source": "d076-R#342",
-      "tags": [
-        "d076",
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1926,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "44 tests: 31 truncation-recovery (5 exported functions), 13 note-fallback (subprocess). All pass."
-      }
-    },
-    {
       "id": "wq-934",
       "title": "moltbook engagement broken — write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
@@ -94,28 +72,6 @@
       ],
       "commits": [],
       "complexity": "S"
-    },
-    {
-      "id": "wq-941",
-      "title": "Add tests for e-posthook-early-exit.mjs and e-posthook-trace-fallback.mjs",
-      "description": "d076: Both are small E posthook helpers (37 + 36 lines). Test early-exit threshold logic and trace-fallback file creation. 3+ cases each: happy path, missing input, edge case.",
-      "priority": 941,
-      "status": "done",
-      "added": "2026-03-11",
-      "created_session": 1923,
-      "source": "R#345-d076-batch",
-      "tags": [
-        "d076",
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1926,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "17 tests: 8 early-exit (warning injection, empty/broken trace, single-object), 9 trace-fallback (synthetic trace, 30-cap, broken JSON). All pass."
-      }
     },
     {
       "id": "wq-942",
@@ -223,34 +179,11 @@
       "commits": []
     },
     {
-      "id": "wq-949",
-      "title": "d076 delivery at risk — B sessions must prioritize d076 testing wq items",
-      "description": "A#225 finding: d076 is at 34% timeline (17/50 sessions) with 0% deliverables (0 of 16 test files created). 9 wq items (wq-932, wq-941 through wq-948) are ready for consumption. B sessions must prioritize these over non-d076 items. No non-d076 queue consumption until at least 2 d076 test files shipped. Deadline s1943.",
-      "priority": 949,
-      "status": "done",
-      "added": "2026-03-11",
-      "created_session": 1925,
-      "source": "audit-s1925",
-      "tags": [
-        "audit",
-        "d076",
-        "priority"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1926,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Shipped 4 test files (wq-932 + wq-941) covering 4 modules. d076 progress: 2/20 → 6/20 tested. 61 tests, all passing."
-      }
-    },
-    {
       "id": "wq-950",
       "title": "Clean stale ref: session-snapshots.mjs references deleted 22-session-snapshots.sh",
       "description": "hooks/lib/session-snapshots.mjs contains a reference to the deleted hooks/post-session/22-session-snapshots.sh. This is the only active-code stale ref (rest are in HOOK_CONSOLIDATION_PLAN.md historical docs). Remove or update the reference.",
       "priority": 950,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-11",
       "created_session": 1925,
       "source": "audit-s1925",
@@ -259,7 +192,14 @@
         "cleanup"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1927,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Updated comment in session-snapshots.mjs:3 to remove reference to deleted 22-session-snapshots.sh. One-line fix."
+      }
     }
   ]
 }

@@ -207,6 +207,38 @@
         "testing"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-949",
+      "title": "d076 delivery at risk — B sessions must prioritize d076 testing wq items",
+      "description": "A#225 finding: d076 is at 34% timeline (17/50 sessions) with 0% deliverables (0 of 16 test files created). 9 wq items (wq-932, wq-941 through wq-948) are ready for consumption. B sessions must prioritize these over non-d076 items. No non-d076 queue consumption until at least 2 d076 test files shipped. Deadline s1943.",
+      "priority": 949,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1925,
+      "source": "audit-s1925",
+      "tags": [
+        "audit",
+        "d076",
+        "priority"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-950",
+      "title": "Clean stale ref: session-snapshots.mjs references deleted 22-session-snapshots.sh",
+      "description": "hooks/lib/session-snapshots.mjs contains a reference to the deleted hooks/post-session/22-session-snapshots.sh. This is the only active-code stale ref (rest are in HOOK_CONSOLIDATION_PLAN.md historical docs). Remove or update the reference.",
+      "priority": 950,
+      "status": "pending",
+      "added": "2026-03-11",
+      "created_session": 1925,
+      "source": "audit-s1925",
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

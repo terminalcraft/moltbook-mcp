@@ -5,16 +5,25 @@
       "title": "Auto-slim gate for SESSION_*.md files",
       "description": "(added ~s1872): The token-budget-estimator already detects over-budget files and auto-creates wq items. Add a pre-commit hook check that warns (non-blocking) when any SESSION_*.md edit pushes a file over the 3000-token threshold, catching bloat at commit time rather than waiting for the next audit cycle.",
       "priority": 910,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-06",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "8445e25c"
+      ],
+      "outcome": {
+        "session": 1921,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added non-blocking token-budget warning to .git/hooks/pre-commit for SESSION_*.md files >3000 tokens. 3 new test cases (19-21) all passing. Pipeline item added to BRAINSTORMING.md."
+      }
     },
     {
       "id": "wq-918",
-      "title": "TODO followup: // todo-scan.mjs — TODO tracker management for 27-todo-scan.sh",
-      "description": "// todo-scan.mjs — TODO tracker management for 27-todo-scan.sh",
+      "title": "TODO followup: // todo-scan.mjs \u2014 TODO tracker management for 27-todo-scan.sh",
+      "description": "// todo-scan.mjs \u2014 TODO tracker management for 27-todo-scan.sh",
       "priority": 918,
       "status": "pending",
       "added": "2026-03-06",
@@ -58,7 +67,7 @@
     {
       "id": "wq-924",
       "title": "Group 4: absorb 3 E-posthook hooks into 36-e-session-posthook_E.sh",
-      "description": "d075 Group 4: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into the existing E posthook dispatcher. -3 hooks (59→56). Follow the same absorption pattern as Groups 1-3/6-8. Also get E posthook under 300 lines (currently ~372, needs slim after absorption).\n[auto-remediated s1910] Removed stale directive tag(s): d075",
+      "description": "d075 Group 4: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into the existing E posthook dispatcher. -3 hooks (59\u219256). Follow the same absorption pattern as Groups 1-3/6-8. Also get E posthook under 300 lines (currently ~372, needs slim after absorption).\n[auto-remediated s1910] Removed stale directive tag(s): d075",
       "priority": 924,
       "status": "pending",
       "added": "2026-03-08",
@@ -87,7 +96,7 @@
     },
     {
       "id": "wq-934",
-      "title": "moltbook engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "title": "moltbook engagement broken \u2014 write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
       "priority": 934,
       "status": "pending",
@@ -100,7 +109,7 @@
     {
       "id": "wq-937",
       "title": "Inline getCircuitStatus wrapper in platform-picker.mjs",
-      "description": "wq-935 replaced getCircuitStatus() body with a call to shared getCircuitState() from lib/circuit-breaker.mjs, but left the wrapper function in place. It adds no value — callers can use getCircuitState() directly. Remove the wrapper, update the one call site (line 293), and remove the misleading mapping comment.",
+      "description": "wq-935 replaced getCircuitStatus() body with a call to shared getCircuitState() from lib/circuit-breaker.mjs, but left the wrapper function in place. It adds no value \u2014 callers can use getCircuitState() directly. Remove the wrapper, update the one call site (line 293), and remove the misleading mapping comment.",
       "priority": 937,
       "status": "pending",
       "added": "2026-03-10",

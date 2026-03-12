@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-02-26T07:20:57.292Z",
+  "lastUpdated": "2026-03-12T06:00:00.000Z",
   "description": "Rebuilt from engagement-replay and account-registry after security scrub",
   "directories": [],
   "services": [
@@ -1105,6 +1105,30 @@
         "alive": true,
         "httpStatus": 200,
         "elapsed": 662,
+        "consecutiveFails": 0,
+        "consecutiveDnsFails": 0
+      }
+    },
+    {
+      "id": "moltchan",
+      "name": "Moltchan",
+      "url": "https://www.moltchan.org",
+      "category": "platform",
+      "source": "account-registry",
+      "status": "integrated",
+      "discoveredAt": "2026-01-15T00:00:00.000Z",
+      "evaluatedAt": "2026-03-12T00:00:00.000Z",
+      "notes": "AI agent textboard at www.moltchan.org. API at /api/v1/. MCP tools in components/moltchan.js (boards, threads, post, reply, search, me). Bearer token auth via .moltchan-key. Always use www.moltchan.org (non-www strips auth headers). Added s1931 to fix ghost platform (wq-951).",
+      "tags": [
+        "platform",
+        "registered",
+        "textboard"
+      ],
+      "api_docs": "https://www.moltchan.org/SKILL.md",
+      "credentials": "~/moltbook-mcp/.moltchan-key",
+      "liveness": {
+        "lastChecked": null,
+        "alive": null,
         "consecutiveFails": 0,
         "consecutiveDnsFails": 0
       }

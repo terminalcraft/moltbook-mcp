@@ -128,53 +128,84 @@ Auto-committed by r-commit-gate hook to ensure R#NNN tracking."
 ###############################################################################
 # Check 2: R impact tracking (was 18-r-impact-track.sh)
 #   Detect structural file changes from git, classify, delegate to Node.js
+#   R#347: Use full session commit range and structural priority for file selection
 ###############################################################################
-check_impact_track() {
-  local CHANGE_FILE
-  CHANGE_FILE=$(git diff --name-only HEAD~2 HEAD 2>/dev/null \
-    | grep -E '\.(sh|js|mjs|md|conf)$' | head -1 || echo "")
 
-  local LATEST_COMMIT_MSG
-  LATEST_COMMIT_MSG=$(git log -1 --format="%s" 2>/dev/null || echo "")
+# Classify a file into an impact category, returning a priority number (lower = more structural)
+classify_file() {
+  case "$1" in
+    SESSION_*.md)                                      echo "1 session-file" ;;
+    heartbeat.sh|rotation.conf|rotation-state.mjs)     echo "2 orchestration" ;;
+    hooks/*)                                           echo "3 hooks" ;;
+    index.js|api.mjs)                                  echo "4 mcp-server" ;;
+    components/*|providers/*)                           echo "5 components" ;;
+    *.test.mjs|*.test.js)                              echo "6 tests" ;;
+    BRAINSTORMING.md|work-queue.json|directives.json)  echo "7 state-files" ;;
+    *)                                                 echo "8 other" ;;
+  esac
+}
+
+check_impact_track() {
+  # Find the session boundary: most recent auto-snapshot before our commits
+  local SNAPSHOT_SHA
+  SNAPSHOT_SHA=$(git log --grep="auto-snapshot" --format="%H" -1 2>/dev/null || echo "")
+
+  # Get all structural files changed since session start (or fall back to HEAD~3)
+  local ALL_FILES
+  if [ -n "$SNAPSHOT_SHA" ]; then
+    ALL_FILES=$(git diff --name-only "$SNAPSHOT_SHA" HEAD 2>/dev/null \
+      | grep -E '\.(sh|js|mjs|md|conf)$' || echo "")
+  else
+    ALL_FILES=$(git diff --name-only HEAD~3 HEAD 2>/dev/null \
+      | grep -E '\.(sh|js|mjs|md|conf)$' || echo "")
+  fi
+
+  # Collect all commit messages in the session range for intent detection
+  local ALL_MSGS
+  if [ -n "$SNAPSHOT_SHA" ]; then
+    ALL_MSGS=$(git log --format="%s" "$SNAPSHOT_SHA"..HEAD 2>/dev/null || echo "")
+  else
+    ALL_MSGS=$(git log --format="%s" -3 2>/dev/null || echo "")
+  fi
 
   # Filter pipeline repair operations (operational, not structural)
-  if [[ "$LATEST_COMMIT_MSG" =~ ^chore:.*pipeline.*repair ]] || \
-     [[ "$LATEST_COMMIT_MSG" =~ ^chore:.*replenish ]]; then
-    echo "$(date -Iseconds) r-impact-track: skipping pipeline repair edit to $CHANGE_FILE"
-    return
+  if echo "$ALL_MSGS" | grep -qE '^chore:.*pipeline.*repair|^chore:.*replenish'; then
+    # Only skip if ALL commits are pipeline repair
+    local NON_REPAIR
+    NON_REPAIR=$(echo "$ALL_MSGS" | grep -cvE '^chore:.*pipeline.*repair|^chore:.*replenish' || echo 0)
+    if [ "$NON_REPAIR" -eq 0 ]; then
+      echo "$(date -Iseconds) r-impact-track: skipping pipeline-only session"
+      return
+    fi
   fi
 
-  # Classify category from filename
-  local CHANGE_CATEGORY=""
-  if [ -n "$CHANGE_FILE" ]; then
-    case "$CHANGE_FILE" in
-      SESSION_*.md) CHANGE_CATEGORY="session-file" ;;
-      heartbeat.sh|rotation.conf|rotation-state.mjs) CHANGE_CATEGORY="orchestration" ;;
-      hooks/*) CHANGE_CATEGORY="hooks" ;;
-      index.js|api.mjs) CHANGE_CATEGORY="mcp-server" ;;
-      components/*|providers/*) CHANGE_CATEGORY="components" ;;
-      *.test.mjs|*.test.js) CHANGE_CATEGORY="tests" ;;
-      BRAINSTORMING.md|work-queue.json|directives.json) CHANGE_CATEGORY="state-files" ;;
-      *) CHANGE_CATEGORY="other" ;;
-    esac
-  fi
+  # Pick the most structurally significant file using priority ranking
+  local CHANGE_FILE="" CHANGE_CATEGORY="" BEST_PRIORITY=99
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    local classified
+    classified=$(classify_file "$file")
+    local priority="${classified%% *}"
+    local category="${classified#* }"
+    if [ "$priority" -lt "$BEST_PRIORITY" ]; then
+      BEST_PRIORITY=$priority
+      CHANGE_FILE="$file"
+      CHANGE_CATEGORY="$category"
+    fi
+  done <<< "$ALL_FILES"
 
-  # Detect intent from commit message
+  # Detect intent from all commit messages in the session
   local CHANGE_INTENT=""
-  if [[ "$LATEST_COMMIT_MSG" =~ enforce.*budget ]] || \
-     [[ "$LATEST_COMMIT_MSG" =~ budget.*minimum ]] || \
-     [[ "$LATEST_COMMIT_MSG" =~ increase.*spending ]]; then
+  if echo "$ALL_MSGS" | grep -qiE 'enforce.*budget|budget.*minimum|increase.*spending'; then
     CHANGE_INTENT="cost_increase"
-  elif [[ "$LATEST_COMMIT_MSG" =~ reduce.*cost ]] || \
-       [[ "$LATEST_COMMIT_MSG" =~ lower.*budget ]] || \
-       [[ "$LATEST_COMMIT_MSG" =~ optimize.*spending ]]; then
+  elif echo "$ALL_MSGS" | grep -qiE 'reduce.*cost|lower.*budget|optimize.*spending'; then
     CHANGE_INTENT="cost_decrease"
   fi
 
   node "$DIR/lib/r-impact-tracker.mjs" \
     "${SESSION_NUM:-0}" "$CHANGE_FILE" "$CHANGE_CATEGORY" "$CHANGE_INTENT"
 
-  echo "$(date -Iseconds) r-impact-track: s=${SESSION_NUM:-?} category=${CHANGE_CATEGORY:-none}"
+  echo "$(date -Iseconds) r-impact-track: s=${SESSION_NUM:-?} file=${CHANGE_FILE:-none} category=${CHANGE_CATEGORY:-none}"
 }
 
 ###############################################################################

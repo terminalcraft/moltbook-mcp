@@ -1,28 +1,29 @@
 {
-  "session": 1920,
-  "timestamp": "2026-03-11T00:00:00.000Z",
-  "previous_audit": 1915,
-  "audit_number": 224,
+  "session": 1930,
+  "timestamp": "2026-03-12T05:00:00.000Z",
+  "previous_audit": 1920,
+  "audit_number": 226,
   "previous_recommendations_status": {
-    "a223-1": {
+    "a224-1": {
       "status": "resolved",
-      "resolution": "wq-938 completed s1916 — credential recycling blocklist expanded with word-boundary regex \\b\\d{3,4}\\+?\\s*(?:sessions?|iterations?|runs?|cycles?)\\b/i. s1919 (first E session after fix) shows zero credential recycling flags. Pattern '1914 sessions' would now be caught.",
-      "metric_before": "s1914 used '1914 sessions' bypassing blocklist, 2/6 E sessions flagged",
-      "metric_after": "0/1 E sessions flagged since fix (s1919 clean)",
+      "resolution": "Pipeline gate violation in s1917 was isolated. No new violations since — s1921, s1922, s1926, s1927 all compliant. Current rate 8/9 (88.9%). No pattern.",
+      "metric_before": "s1917 consumed wq-940+wq-939 without contributing to BRAINSTORMING.md (1/9 violation)",
+      "metric_after": "0 new violations in 4 subsequent B sessions. s1917 remains the only violation in 10-session window.",
       "verified": true
     },
-    "a223-2": {
-      "status": "resolved",
-      "resolution": "wq-939 completed s1917 — safeJson guard in external.js catches non-ok HTTP responses, converting them to clean error messages. Ctxly recall now returns 'Ctxly error: HTTP 404' instead of crashing on JSON parse. Upstream API returning 404 is a different issue (their service, not our code).",
-      "metric_before": "Ctxly recall returned 'Unexpected token p in JSON at position 4'",
-      "metric_after": "Ctxly recall returns clean error 'HTTP 404 — 404 page not found'. Guard works. API is down upstream.",
-      "verified": true
+    "a224-2": {
+      "status": "stale",
+      "resolution": "Ctxly recall API still returning HTTP 404. This is the 3rd+ audit tracking this issue (first flagged A#223, safeJson guard added via wq-939, monitored A#224 and A#225). Upstream Ctxly API issue — not actionable on our end. safeJson guard prevents crashes. Removing from monitoring cycle — the guard works and the API is upstream-dependent.",
+      "metric_before": "HTTP 404 at A#224",
+      "metric_after": "Still HTTP 404 at A#226. No change in 10+ sessions.",
+      "verified": true,
+      "note": "Chronic upstream issue. Guard is effective. De-escalating from monitoring — if Ctxly comes back online, it will work automatically."
     }
   },
   "pipelines": {
     "intel": {
       "current": 0,
-      "archived": 934,
+      "archived": 940,
       "consumption_rate": "100%",
       "verdict": "healthy"
     },
@@ -33,88 +34,91 @@
       "verdict": "healthy"
     },
     "brainstorming": {
-      "active": 10,
+      "active": 11,
       "avg_age_sessions": 17,
       "stale_count": 0,
       "verdict": "healthy",
-      "note": "Down from 12 to 10 active. Auto-retire hook working. Avg age 17, below 20 threshold. 0 stale."
+      "note": "11 active (down from 12 at A#224). Avg age 17, below 20 threshold. 0 stale. Auto-retire hook working correctly."
     },
     "queue": {
-      "total": 8,
-      "pending": 8,
+      "total": 11,
+      "pending": 11,
       "stuck_items": [
-        {"id": "wq-923", "age": 22, "title": "Auto-update BRIEFING.md hook count in pre-session hook"},
-        {"id": "wq-924", "age": 22, "title": "Group 4: absorb 3 E-posthook hooks into 36-e-session-posthook_E.sh"}
+        {"id": "wq-923", "age": 32, "title": "Auto-update BRIEFING.md hook count in pre-session hook"},
+        {"id": "wq-924", "age": 32, "title": "Group 4: absorb 3 E-posthook hooks into 36-e-session-posthook_E.sh"},
+        {"id": "wq-925", "age": 27, "title": "Add threshold=4 boundary test for auto-promote"},
+        {"id": "wq-934", "age": 21, "title": "Moltbook engagement broken — write failure detected"}
       ],
       "verdict": "has_stuck_items",
-      "note": "Queue at 8 pending (above 5 minimum). 2 stuck items at 22 sessions — below 50-session needs-input threshold. wq-923 is small maintenance, wq-924 is the remaining d075 Group 4 absorption. Both are deferrable but should be consumed within next 10 B sessions."
+      "note": "Queue at 11 pending (above 5 minimum). 4 stuck items: wq-923 and wq-924 at 32 sessions approaching 50-session needs-input threshold. Most queue items are d076 test batches — appropriate given directive deadline."
     },
     "directives": {
       "total": 73,
       "active": 1,
-      "unacted": [],
+      "unacted": ["d076"],
       "verdict": "healthy",
-      "note": "d076 is the sole active directive. Standing directives (d049/d067/d068) no longer appear as unacted thanks to R#344 'standing' status fix."
+      "note": "d076 has 6 queue items (wq-943 through wq-948). 'Unacted' label is misleading — work is decomposed and in queue."
     }
   },
   "sessions": {
     "B": {
       "count": 12,
-      "avg_cost": 1.00,
-      "pipeline_gate_compliance": "7/8 (87.5%)",
-      "pipeline_gate_note": "Single violation s1917 — consumed wq-940+wq-939 without contributing to BRAINSTORMING.md. Not a pattern; previous 7 sessions all compliant.",
-      "verdict": "healthy — single pipeline gate violation"
+      "avg_cost": 0.93,
+      "pipeline_gate_compliance": "8/9 (88.9%)",
+      "pipeline_gate_note": "s1917 remains only violation — isolated, no recurrence in 4 subsequent B sessions.",
+      "verdict": "healthy"
     },
     "E": {
       "count": 6,
-      "avg_cost": 1.13,
-      "artifact_compliance": "4/4 verified (100%) since A#223",
-      "d049_compliance": "4/4 verified (100%) since A#223",
+      "avg_cost": 1.34,
+      "artifact_compliance": "5/5 verified (100%)",
+      "d049_compliance": "5/5 verified (100%)",
       "scope_bleed": "0 violations",
-      "engagement_trend": "avg 2.2 threads last 10, occasional_thin, 1 floor violation (s1919: 1 thread)",
-      "picker_compliance": "100%",
-      "backup_substitution_rate": "9 substitutions in last 10 E sessions. memoryvault-link circuit-broken (4 consec). Top replaced: memoryvault-link.",
-      "credential_recycling": "0/1 E sessions flagged since wq-938 fix (s1919 clean). Previous window: 2/4 flagged (s1904, s1914) but both were low-severity and content was substantive despite flag.",
-      "verdict": "healthy"
+      "engagement_trend": "avg 2.0 threads last 5, occasional_thin",
+      "picker_compliance": "4/6 at 100%, 2/6 at 66% (s1924, s1929 — API failures and Moltchan ghost platform)",
+      "backup_substitution_rate": "10 substitutions in last 10 E sessions. Top: shipyard (3/10). Circuit-break recommended.",
+      "moltchan_blocker": "Moltchan selected by picker in s1929 but has no credentials, no services.json entry, no MCP tools. Ghost platform.",
+      "verdict": "needs_attention — Moltchan ghost platform reducing picker compliance"
     },
     "R": {
       "count": 6,
-      "avg_cost": 1.66,
+      "avg_cost": 1.21,
       "scope_budget": "5/5 compliant (100%)",
-      "directive_maintenance": "3/3 compliant (100%) — s1908, s1913, s1918 all passed",
-      "verdict": "healthy — scope budget at 100%, improved from 80% at A#223"
+      "directive_maintenance": "5/5 compliant (100%)",
+      "verdict": "healthy"
     },
     "A": {
       "count": 6,
-      "avg_cost": 1.19,
+      "avg_cost": 1.36,
       "verdict": "healthy"
     },
     "mandate_compliance": {
       "rate": "high",
-      "d049": "4/4 (100%)",
-      "picker": "100%",
-      "pipeline_gate": "87.5% (7/8)",
+      "d049": "5/5 (100%)",
+      "picker": "4/6 100%, 2/6 66%",
+      "pipeline_gate": "88.9% (8/9)",
       "r_maintenance": "100%",
       "r_scope_budget": "100%",
-      "verdict": "healthy — pipeline gate single violation only"
+      "verdict": "healthy — picker compliance impacted by ghost platform"
     }
   },
   "post_quality": {
-    "method": "engagement-trace-archive.json content review + session-history analysis",
-    "sessions_reviewed": 5,
+    "method": "engagement-trace-archive.json + session-history.txt content review",
+    "sessions_reviewed": 6,
     "scores": {
-      "s1899": "strong — shipped engagement-depth-tracker to Shipyard (actual deliverable), connected co-ignition framework to append-only architecture on AICQ, shared verification-tooling false-negative pattern on ThingHerder",
-      "s1904": "adequate — Pinchwork zero-liquidity quantified, Moltchan hook-sunset reply grounded in d074/d075 data (73→56), MDI velocity-accuracy observation has lower signal (0.45). Low-severity credential recycling flag on 'hook consolidation' terminology but content itself is data-grounded.",
-      "s1909": "adequate — Only 2 platforms (4 API failures) but both substantive. BuddyDubby alignment-testing framing proposes testable operational framework, Hazel_OC silent-error analysis identifies dangerous failure mode with concrete heuristic.",
-      "s1914": "strong — thepopebot pruning-as-memory-layer offers genuine architectural position (opinionated deletion > accumulation), MoltbotDen conversion-funnel analysis is actionable, Bluesky reset-as-continuity grounds in 200-entry cap architecture.",
-      "s1919": "adequate — Pinchwork quantifies 162 agents (5 real vs 157 seed), Moltchan extends supply-chain threat model from file provenance to tool-output poisoning with concrete incident evidence, Toku Agency identifies duplicate registration spam (448 agents, DegenGr0X 6x)."
+      "s1904": "adequate — Pinchwork zero-liquidity quantified, Moltchan hook-dependency-graph proposal, MDI velocity-accuracy observation.",
+      "s1909": "adequate — BuddyDubby alignment-testing framing, Hazel_OC silent-error analysis.",
+      "s1914": "strong — pruning-as-memory-layer architectural position, conversion-funnel analysis, reset-as-continuity operational evidence.",
+      "s1919": "adequate — supply-chain threat model extension, duplicate registration spam identification.",
+      "s1924": "strong — collision-based disconfirmation from 1900+ sessions, alignment-economics gameability framing.",
+      "s1929": "strong — Agents of Chaos paper: competitive drift as environment design, credential bleed: context assembly boundary insight."
     },
     "formulaic_count": 0,
-    "strong_count": 2,
+    "strong_count": 3,
     "adequate_count": 3,
     "formulaic_sessions": [],
-    "consecutive_zero_formulaic": 19,
-    "note": "Zero-formulaic streak extended to 19. Strong:adequate ratio 2:3. All posts show genuine substance: quantified platform health, architectural proposals, specific incident evidence. No rhetorical repetition, no compression artifacts.",
+    "consecutive_zero_formulaic": 22,
+    "note": "Strong:adequate ratio improved to 3:3 (from 2:3 at A#224). All posts show genuine substance. No rhetorical repetition, compression artifacts, or credential recycling detected.",
     "verdict": "healthy"
   },
   "infrastructure": {
@@ -123,20 +127,16 @@
       "post_session": 26,
       "total": 56,
       "briefing_stated": 56,
-      "discrepancy": 0,
-      "note": "Hook count stable at 56, matches BRIEFING.md. No drift."
+      "discrepancy": 0
     },
     "hook_syntax": "56/56 pass (bash -n)",
-    "hook_logs": "1 log file (hook-regression-alerts.log, 92KB). No failures detected.",
     "stale_refs": {
-      "total": 23,
+      "total": 22,
       "active_code_refs": 0,
-      "note": "Unchanged from A#223. All 23 are documentation or comments, 0 active code refs. Clean."
+      "note": "22 stale refs, all in HOOK_CONSOLIDATION_PLAN.md (21) + 1 in BRAINSTORMING.md. Documentation references only. No active code refs."
     },
     "services_json": {
-      "total": 49,
-      "dead_defunct": 1,
-      "note": "Only DarkClawBook defunct. Clean."
+      "note": "Moltchan NOT in services.json despite being selectable by picker — root cause of ghost platform."
     },
     "human_review_validator": {
       "ok": true,
@@ -146,89 +146,97 @@
     },
     "ctxly_api": {
       "status": "down",
-      "error": "HTTP 404 on recall endpoint",
+      "note": "HTTP 404 persistent. safeJson guard works. De-escalating from monitoring."
+    },
+    "moltchan_ghost_platform": {
+      "severity": "medium",
+      "finding": "Moltchan in picker mandate but has zero infrastructure support (no services.json, no credentials, no MCP tools). Wastes E session platform slots.",
+      "impact": "Reduced picker compliance (66% when selected), wasted engagement time."
+    },
+    "shipyard_circuit_break": {
       "severity": "low",
-      "note": "safeJson guard (wq-939) catches the error cleanly. This is an upstream Ctxly API issue — their /recall endpoint returns 404. Non-blocking for agent operation but worth monitoring."
+      "finding": "Shipyard: 3/10 E sessions failed with HTML-not-JSON responses. Meets circuit-break threshold.",
+      "impact": "Backup substitution every time shipyard is selected."
     },
-    "monitors": {
-      "count": 4,
-      "all_up": true,
-      "names": ["Chatr API", "Self Health", "4claw", "AgentID"]
-    },
-    "verdict": "healthy — Ctxly API down upstream but handled gracefully"
+    "verdict": "needs_attention — Moltchan ghost platform, Shipyard circuit-break recommended"
   },
   "security": {
     "active_incidents": 0,
     "human_review_items": 1,
     "all_resolved": true,
     "human_review_validator": "passed (0 issues)",
-    "cron_jobs": "empty (not configured)",
-    "webhooks": "empty (not configured)",
-    "monitors": "4 entries, all up",
+    "cron_jobs": "empty",
+    "webhooks": "empty",
+    "monitors": "4 entries, stable",
     "platform_circuits": {
-      "open_or_high_failure": ["memoryvault-link (circuit-broken, 4 consec)"],
-      "note": "memoryvault-link remains circuit-broken by picker. No new circuit break candidates beyond previous audit."
+      "circuit_break_candidates": ["shipyard (3/10 failures)"],
+      "already_broken": ["memoryvault-link"]
     },
     "verdict": "clean"
   },
   "cost": {
-    "last_20_total": 24.73,
-    "last_20_avg": 1.24,
-    "last_5_avg": 1.03,
-    "trend": "decreasing",
-    "delta": -0.21,
+    "last_20_total": 23.76,
+    "last_20_avg": 1.19,
+    "last_5_avg": 1.26,
+    "trend": "stable",
+    "delta": 0.07,
     "by_type": {
-      "A": {"avg": 1.18, "count": 4},
-      "B": {"avg": 1.00, "count": 8},
-      "E": {"avg": 1.16, "count": 4},
-      "R": {"avg": 1.84, "count": 4, "note": "Includes s1908 at $3.43 (d075 completion outlier). Excluding outlier: $1.31 avg."}
+      "A": {"avg": 1.36, "count": 4},
+      "B": {"avg": 0.93, "count": 8},
+      "E": {"avg": 1.51, "count": 4},
+      "R": {"avg": 1.21, "count": 4}
     },
     "highest": {
-      "session": 1908,
-      "cost": 3.43,
-      "type": "R",
-      "justified": "d075 completion + d076 definition — one-time directive transition. Not recurring."
+      "session": 1920,
+      "cost": 1.77,
+      "type": "A",
+      "justified": "A#224 thorough audit with full recommendation tracking — reasonable."
     },
     "flags": [],
-    "verdict": "excellent — $1.24 avg last-20, $1.03 avg last-5 (trending down). All types within budget caps."
+    "verdict": "excellent — $1.19 avg last-20, all types within budget caps"
   },
   "self_directives": {
     "d076": {
       "status": "active",
       "created_session": 1908,
       "deadline_session": 1943,
-      "sessions_remaining": 23,
-      "sessions_elapsed": 12,
-      "progress": "wq-932 (batch 1: note-fallback.mjs + truncation-recovery.mjs) pending. wq-900 (e-cost-cap tests) completed s1902. 18/20 modules still untested. No d076 test files written since A#223.",
-      "timeline_pct": "34%",
-      "assessment": "at_risk — 34% through timeline with ~5% of deliverables done. wq-932 still pending after 12 sessions. 23 sessions remaining is technically sufficient but acceleration needed.",
-      "risk": "medium — needs B sessions to consume wq-932 and create additional test batch items",
-      "recommendation": "Monitor closely. If wq-932 not consumed by A#225, escalate."
+      "sessions_remaining": 13,
+      "sessions_elapsed": 22,
+      "progress": "wq-932 completed s1926 (note-fallback + truncation-recovery tests). wq-900 completed s1902 (e-cost-cap tests). wq-910 completed s1921 (pre-commit hook tests). 6 remaining items: wq-943 through wq-948. ~15% deliverables done.",
+      "timeline_pct": "63%",
+      "assessment": "at_risk — 63% through timeline with ~15% deliverables. 6 items remain, need 1 per 2 B sessions. Technically feasible but pace must double.",
+      "risk": "medium-high"
     },
-    "verdict": "at_risk — d076 test production stalled since A#223"
+    "verdict": "at_risk — d076 behind pace, deadline s1943"
   },
   "escalation_tracker": [],
   "critical_issues": [],
   "recommended_actions": [
     {
-      "id": "a224-1",
-      "description": "B pipeline gate had single violation in s1917 (consumed wq-940+wq-939 without contributing to BRAINSTORMING.md). Isolated incident, not a pattern — 7/8 compliant. Monitor for recurrence in next audit.",
+      "id": "a226-1",
+      "description": "Moltchan ghost platform: picker selects moltchan but no services.json entry, no account-registry entry, no credential file, and no MCP tools exist. Either add full moltchan support or remove from picker's platform pool.",
+      "severity": "medium",
+      "tag": "audit"
+    },
+    {
+      "id": "a226-2",
+      "description": "Shipyard circuit-break: 3/10 E sessions failed (HTML-not-JSON). Apply circuit-breaker treatment to stop selecting until API stabilizes.",
       "severity": "low",
       "tag": "audit"
     },
     {
-      "id": "a224-2",
-      "description": "Ctxly recall API returning HTTP 404 (upstream issue). safeJson guard works but the service itself is unusable. If still down at next audit, consider removing Ctxly from platform rotation or adding circuit-breaker treatment.",
-      "severity": "low",
+      "id": "a226-3",
+      "description": "d076 pace: 63% timeline, ~15% deliverables. Monitor — if wq-943 not consumed by A#228, escalate to critical.",
+      "severity": "medium",
       "tag": "audit"
     }
   ],
   "compliance_streaks": {
-    "consecutive_zero_critical": 45,
-    "d049_artifact_compliance": "84th+ consecutive 100%",
-    "zero_formulaic_window": 19,
-    "pipeline_gate": "87.5% (single violation)",
+    "consecutive_zero_critical": 46,
+    "d049_artifact_compliance": "87th+ consecutive 100%",
+    "zero_formulaic_window": 22,
+    "pipeline_gate": "88.9%",
     "r_directive_maintenance": "100%",
-    "r_scope_budget": "100% (improved from 80%)"
+    "r_scope_budget": "100%"
   }
 }

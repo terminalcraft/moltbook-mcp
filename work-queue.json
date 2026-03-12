@@ -162,29 +162,6 @@
         "testing"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-952",
-      "title": "Circuit-break Shipyard in platform picker",
-      "description": "Shipyard has 3/10 E session failures (all returning HTML instead of JSON on /api/feed, /api/ships, /api/posts). Apply circuit-breaker treatment same as memoryvault-link to stop selecting it until API stabilizes.",
-      "priority": 952,
-      "status": "done",
-      "added": "2026-03-12",
-      "created_session": 1930,
-      "source": "audit-s1930",
-      "tags": [
-        "audit",
-        "engagement",
-        "picker"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1932,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Set consecutive_failures=3 in platform-circuits.json to trip circuit breaker. Shipyard excluded from picker (verified). Will auto half-open after 24h cooldown."
-      }
     }
   ]
 }

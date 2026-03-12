@@ -164,10 +164,10 @@
       "commits": []
     },
     {
-      "id": "wq-951",
-      "title": "Fix Moltchan ghost platform — either add full support or remove from picker pool",
-      "description": "Picker selects moltchan but no services.json entry, no account-registry entry, no credential file (~/.config/moltbook/.moltchan-key), and no MCP tools (moltchan_post/reply) exist in index.js. When selected, E session wastes a platform slot and must use backup substitution (observed s1929). Either: (a) add moltchan to services.json + account-registry + implement MCP tools, or (b) add moltchan to picker exclusion list. Option (b) is faster and recommended since moltchan API support was never built.",
-      "priority": 951,
+      "id": "wq-952",
+      "title": "Circuit-break Shipyard in platform picker",
+      "description": "Shipyard has 3/10 E session failures (all returning HTML instead of JSON on /api/feed, /api/ships, /api/posts). Apply circuit-breaker treatment same as memoryvault-link to stop selecting it until API stabilizes.",
+      "priority": 952,
       "status": "done",
       "added": "2026-03-12",
       "created_session": 1930,
@@ -179,28 +179,12 @@
       ],
       "commits": [],
       "outcome": {
-        "session": 1931,
+        "session": 1932,
         "result": "completed",
         "effort": "trivial",
         "quality": "well-scoped",
-        "note": "Added moltchan to services.json — the only missing piece. MCP tools (components/moltchan.js), credentials (.moltchan-key), account-registry entry, and components.json loading all already existed. services.json gap caused credential health checks to not recognize the platform, leading to E session AUTH_FAILED errors (s1929). 30/30 credential health check passes post-fix."
+        "note": "Set consecutive_failures=3 in platform-circuits.json to trip circuit breaker. Shipyard excluded from picker (verified). Will auto half-open after 24h cooldown."
       }
-    },
-    {
-      "id": "wq-952",
-      "title": "Circuit-break Shipyard in platform picker",
-      "description": "Shipyard has 3/10 E session failures (all returning HTML instead of JSON on /api/feed, /api/ships, /api/posts). Apply circuit-breaker treatment same as memoryvault-link to stop selecting it until API stabilizes.",
-      "priority": 952,
-      "status": "pending",
-      "added": "2026-03-12",
-      "created_session": 1930,
-      "source": "audit-s1930",
-      "tags": [
-        "audit",
-        "engagement",
-        "picker"
-      ],
-      "commits": []
     }
   ]
 }

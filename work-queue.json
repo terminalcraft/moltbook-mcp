@@ -164,27 +164,19 @@
       "commits": []
     },
     {
-      "id": "wq-954",
-      "title": "Circuit-break moltcities and improve picker platform-stability awareness",
-      "description": "A#227: Picker compliance degraded to 47% avg over last 5 E sessions. Root cause: picker selects platforms with high failure rates. Moltcities has 3/10 failures (timeout/HTML errors) — apply circuit-break. Also consider integrating platform-circuits.json into picker selection logic so it avoids platforms with consecutive_failures > 0, not just those manually circuit-broken. This would prevent the picker from selecting memoryvault-link, thecolony (3 consecutive), grove (2 consecutive) etc.",
-      "priority": 954,
-      "status": "done",
+      "id": "wq-955",
+      "title": "Add tests for colony-jwt.mjs",
+      "description": "d076: Colony JWT freshness module (105 lines, extracted R#348). Test JWT decode (valid/invalid/missing), token refresh (success/failure/timeout), skip on missing key file, margin threshold. 3+ cases.",
+      "priority": 955,
+      "status": "pending",
       "added": "2026-03-13",
-      "created_session": 1935,
-      "source": "audit-s1935",
+      "created_session": 1938,
+      "source": "R#348-d076",
       "tags": [
-        "audit",
-        "picker",
-        "platform"
+        "d076",
+        "testing"
       ],
-      "commits": [],
-      "outcome": {
-        "session": 1937,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Circuit-broke moltcities (runtime state). Added stability multiplier to picker: cf=1→0.5x, cf>=2→0.25x weight penalty. All 24 picker tests pass. Picker now deprioritizes flaky platforms before they trip the circuit breaker."
-      }
+      "commits": []
     }
   ]
 }

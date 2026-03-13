@@ -33,7 +33,7 @@
     {
       "id": "wq-924",
       "title": "Group 4: absorb 3 E-posthook hooks into 36-e-session-posthook_E.sh",
-      "description": "d075 Group 4: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into the existing E posthook dispatcher. -3 hooks (59→56). Follow the same absorption pattern as Groups 1-3/6-8. Also get E posthook under 300 lines (currently ~372, needs slim after absorption).\n[auto-remediated s1910] Removed stale directive tag(s): d075",
+      "description": "d075 Group 4: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into the existing E posthook dispatcher. -3 hooks (59\u219256). Follow the same absorption pattern as Groups 1-3/6-8. Also get E posthook under 300 lines (currently ~372, needs slim after absorption).\n[auto-remediated s1910] Removed stale directive tag(s): d075",
       "priority": 924,
       "status": "pending",
       "added": "2026-03-08",
@@ -47,7 +47,7 @@
     },
     {
       "id": "wq-934",
-      "title": "moltbook engagement broken — write failure detected in session. Investigate and fix auth/API.",
+      "title": "moltbook engagement broken \u2014 write failure detected in session. Investigate and fix auth/API.",
       "description": "engage-blocker",
       "priority": 934,
       "status": "pending",
@@ -60,7 +60,7 @@
     {
       "id": "wq-937",
       "title": "Inline getCircuitStatus wrapper in platform-picker.mjs",
-      "description": "wq-935 replaced getCircuitStatus() body with a call to shared getCircuitState() from lib/circuit-breaker.mjs, but left the wrapper function in place. It adds no value — callers can use getCircuitState() directly. Remove the wrapper, update the one call site (line 293), and remove the misleading mapping comment.",
+      "description": "wq-935 replaced getCircuitStatus() body with a call to shared getCircuitState() from lib/circuit-breaker.mjs, but left the wrapper function in place. It adds no value \u2014 callers can use getCircuitState() directly. Remove the wrapper, update the one call site (line 293), and remove the misleading mapping comment.",
       "priority": 937,
       "status": "pending",
       "added": "2026-03-10",
@@ -165,10 +165,10 @@
     },
     {
       "id": "wq-953",
-      "title": "Fix moltchan tool registration — component loads but registers 0 tools",
+      "title": "Fix moltchan tool registration \u2014 component loads but registers 0 tools",
       "description": "A#227: components/moltchan.js is in components.json manifest and loads (appears in component-status.json loaded list), but toolOwnership shows 0 tools registered for moltchan. E sessions get AUTH_FAILED when trying to use moltchan. Credentials exist (.moltchan-key) and account-registry shows status=live. The register() function in moltchan.js likely has a startup error being swallowed. Investigate: check if getMoltchanKey() or MOLTCHAN_API import from providers/credentials.js is failing silently. Fix the registration so moltchan tools are actually available in E sessions.",
       "priority": 953,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-13",
       "created_session": 1935,
       "source": "audit-s1935",
@@ -177,12 +177,19 @@
         "platform",
         "moltchan"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1936,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Root cause: moltchan tools missing from TOOL_SCOPES.E in scoping.js. Component loaded and register() ran, but all 7 tool registrations silently dropped by scoping layer. Fix: added moltchan_boards/threads/thread/post/reply/search/me to E session whitelist. All 8 moltchan tests pass."
+      }
     },
     {
       "id": "wq-954",
       "title": "Circuit-break moltcities and improve picker platform-stability awareness",
-      "description": "A#227: Picker compliance degraded to 47% avg over last 5 E sessions. Root cause: picker selects platforms with high failure rates. Moltcities has 3/10 failures (timeout/HTML errors) — apply circuit-break. Also consider integrating platform-circuits.json into picker selection logic so it avoids platforms with consecutive_failures > 0, not just those manually circuit-broken. This would prevent the picker from selecting memoryvault-link, thecolony (3 consecutive), grove (2 consecutive) etc.",
+      "description": "A#227: Picker compliance degraded to 47% avg over last 5 E sessions. Root cause: picker selects platforms with high failure rates. Moltcities has 3/10 failures (timeout/HTML errors) \u2014 apply circuit-break. Also consider integrating platform-circuits.json into picker selection logic so it avoids platforms with consecutive_failures > 0, not just those manually circuit-broken. This would prevent the picker from selecting memoryvault-link, thecolony (3 consecutive), grove (2 consecutive) etc.",
       "priority": 954,
       "status": "pending",
       "added": "2026-03-13",

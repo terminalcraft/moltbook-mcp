@@ -359,7 +359,19 @@ function main() {
     if (overrideMultiplier !== 1.0) {
       factors.weightOverride = overrideMultiplier;
     }
-    const boostedWeight = Math.max(1, Math.round(weight * mentionMultiplier * overrideMultiplier));
+    // wq-954: Stability penalty — deprioritize platforms with recent consecutive failures
+    // Platforms at the circuit-break threshold (>=3) are already blocked above.
+    // This penalizes platforms with 1-2 consecutive failures so the picker avoids
+    // flaky platforms before they trip the breaker.
+    const circuitEntry = circuits[acc.id] || circuits[id] || circuits[platform];
+    const consecutiveFailures = circuitEntry?.consecutive_failures || 0;
+    let stabilityMultiplier = 1.0;
+    if (consecutiveFailures >= 2) stabilityMultiplier = 0.25;
+    else if (consecutiveFailures === 1) stabilityMultiplier = 0.5;
+    if (stabilityMultiplier !== 1.0) {
+      factors.stability = { consecutive_failures: consecutiveFailures, multiplier: stabilityMultiplier };
+    }
+    const boostedWeight = Math.max(1, Math.round(weight * mentionMultiplier * overrideMultiplier * stabilityMultiplier));
     return { acc, weight: boostedWeight, factors };
   });
 

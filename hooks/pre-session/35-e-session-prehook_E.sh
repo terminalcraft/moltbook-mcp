@@ -294,71 +294,56 @@ check_engagement_variety() {
 
 ###############################################################################
 # Check 8: Colony JWT freshness (wq-803)
-#   Ensures Colony JWT won't expire mid-session. The general 14-token-refresh.sh
-#   runs at every session start, but E sessions specifically need a valid token
-#   for platform engagement. This check validates expiry is >1h away and
-#   refreshes if needed, then warns in context if refresh fails.
+#   Ensures Colony JWT won't expire mid-session. Extracted to
+#   hooks/lib/colony-jwt.mjs (R#348) for testability and modularity.
 #   Accepts optional $1 as output file for context additions (parallel mode).
 ###############################################################################
 check_colony_jwt_freshness() {
   local ctx_out="${1:-$CONTEXT_FILE}"
-  JWT_FILE="$HOME/.colony-jwt"
-  KEY_FILE="$HOME/.colony-key"
 
-  if [ ! -f "$KEY_FILE" ]; then
-    echo "[colony-jwt] No Colony key file, skipping"
+  jwt_json=$(timeout 10 node hooks/lib/colony-jwt.mjs 2>&1)
+  jwt_exit=$?
+
+  if [ $jwt_exit -eq 124 ]; then
+    echo "[colony-jwt] Timed out (10s), skipping"
     return 0
   fi
 
-  NEEDS_REFRESH=false
-  REASON=""
+  status=$(echo "$jwt_json" | jq -r '.status // "error"' 2>/dev/null)
+  action=$(echo "$jwt_json" | jq -r '.action // "none"' 2>/dev/null)
+  reason=$(echo "$jwt_json" | jq -r '.reason // ""' 2>/dev/null)
+  remaining=$(echo "$jwt_json" | jq -r '.remaining // ""' 2>/dev/null)
+  warning=$(echo "$jwt_json" | jq -r '.warning // ""' 2>/dev/null)
 
-  if [ ! -f "$JWT_FILE" ]; then
-    NEEDS_REFRESH=true
-    REASON="JWT file missing"
-  else
-    JWT=$(cat "$JWT_FILE")
-    # Decode JWT payload — base64url to base64, then decode
-    PAYLOAD=$(echo "$JWT" | cut -d. -f2 | tr '_-' '/+' | base64 -d 2>/dev/null)
-    EXP=$(echo "$PAYLOAD" | jq -r '.exp // 0' 2>/dev/null)
-    NOW=$(date +%s)
-    MARGIN=3600  # 1 hour margin
-    if [ -z "$EXP" ] || [ "$EXP" = "0" ]; then
-      NEEDS_REFRESH=true
-      REASON="JWT decode failed"
-    elif [ "$EXP" -lt $((NOW + MARGIN)) ]; then
-      REMAINING=$(( EXP - NOW ))
-      NEEDS_REFRESH=true
-      REASON="JWT expires in ${REMAINING}s (<1h margin)"
-    else
-      REMAINING=$(( EXP - NOW ))
-      echo "[colony-jwt] Token valid (${REMAINING}s remaining)"
-      return 0
-    fi
-  fi
-
-  if [ "$NEEDS_REFRESH" = "true" ]; then
-    echo "[colony-jwt] Refreshing: $REASON"
-    COL_CRED=$(cat "$KEY_FILE")
-    RESP=$(curl -s --max-time 8 "https://thecolony.cc/api/v1/auth/token" \
-      -X POST \
-      -H "Content-Type: application/json" \
-      -d "{\"api_key\":\"$COL_CRED\"}" 2>/dev/null)
-    TOKEN=$(echo "$RESP" | jq -r '.access_token // empty' 2>/dev/null)
-    if [ -n "$TOKEN" ] && [ "$TOKEN" != "" ]; then
-      echo -n "$TOKEN" > "$JWT_FILE"
-      echo "[colony-jwt] Token refreshed successfully"
-    else
-      echo "[colony-jwt] Refresh FAILED: $RESP"
-      {
-        echo ""
-        echo "## Colony JWT warning (auto-check)"
-        echo "**Colony JWT refresh failed** ($REASON). SKIP The Colony for this E session."
-        echo ""
-      } >> "$ctx_out"
-      echo "[colony-jwt] Warning appended to $(basename "$ctx_out")"
-    fi
-  fi
+  case "$status" in
+    skip)
+      echo "[colony-jwt] $reason, skipping"
+      ;;
+    ok)
+      if [ "$action" = "refreshed" ]; then
+        echo "[colony-jwt] Token refreshed ($reason)"
+      elif [ -n "$remaining" ] && [ "$remaining" != "null" ]; then
+        echo "[colony-jwt] Token valid (${remaining}s remaining)"
+      else
+        echo "[colony-jwt] Token OK"
+      fi
+      ;;
+    failed)
+      echo "[colony-jwt] Refresh FAILED: $reason"
+      if [ -n "$warning" ] && [ "$warning" != "null" ]; then
+        {
+          echo ""
+          echo "## Colony JWT warning (auto-check)"
+          echo "**$warning**"
+          echo ""
+        } >> "$ctx_out"
+        echo "[colony-jwt] Warning appended to $(basename "$ctx_out")"
+      fi
+      ;;
+    *)
+      echo "[colony-jwt] Unexpected status: $status"
+      ;;
+  esac
 }
 
 ###############################################################################

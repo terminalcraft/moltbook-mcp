@@ -177,6 +177,38 @@
         "testing"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-956",
+      "title": "Fix picker compliance: add real-time health revalidation in E session startup",
+      "description": "Picker compliance at 25% avg over last 4 E sessions. Root cause: picker pre-selects platforms hours before E session runs; platform health degrades between selection and execution. Fix: in E session prehook (35-e-session-prehook_E.sh), after reading picker-mandate.json, re-check platform-circuits.json for each selected platform. If consecutive_failures > 0, auto-substitute from backup pool. This moves health checking from selection time to engagement time. Escalated across A#226→A#227→A#228.",
+      "priority": 956,
+      "status": "pending",
+      "added": "2026-03-14",
+      "created_session": 1940,
+      "source": "audit-s1940",
+      "tags": [
+        "audit",
+        "picker",
+        "engagement"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-957",
+      "title": "Circuit-break thecolony — 4 consecutive failures",
+      "description": "thecolony has 4 consecutive failures (last success 2026-03-05). Meets circuit-break threshold. Add to platform-circuits.json with circuit-broken status like moltcities and shipyard. Small scope.",
+      "priority": 957,
+      "status": "pending",
+      "added": "2026-03-14",
+      "created_session": 1940,
+      "source": "audit-s1940",
+      "tags": [
+        "audit",
+        "platform"
+      ],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

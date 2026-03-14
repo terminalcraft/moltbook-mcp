@@ -404,4 +404,27 @@ for tmp in "$TOPICS_TMP" "$CRED_TMP" "$VARIETY_TMP" "$COLONY_TMP"; do
   rm -f "$tmp"
 done
 
+###############################################################################
+# Phase 4: Picker mandate revalidation (wq-956)
+#   After liveness probe updates platform-circuits.json, re-check each
+#   mandated platform against fresh circuit data. Substitutes unhealthy
+#   platforms from backup pool before the E session sees the mandate.
+#   This moves health checking from picker selection time to engagement time.
+###############################################################################
+if [ -f "$STATE_DIR/picker-mandate.json" ]; then
+  echo "[picker-revalidate] Revalidating mandate against fresh circuit data..."
+  revalidate_out=$(timeout 3 node hooks/lib/picker-revalidate.mjs 2>&1)
+  revalidate_exit=$?
+
+  if [ $revalidate_exit -eq 124 ]; then
+    echo "[picker-revalidate] Timed out (3s), using original mandate"
+  elif [ $revalidate_exit -ne 0 ]; then
+    echo "[picker-revalidate] Failed (exit $revalidate_exit), using original mandate"
+  else
+    echo "$revalidate_out"
+  fi
+else
+  echo "[picker-revalidate] No picker mandate found, skipping revalidation"
+fi
+
 exit 0

@@ -179,27 +179,45 @@
       "commits": []
     },
     {
-      "id": "wq-957",
-      "title": "Circuit-break thecolony — 4 consecutive failures",
-      "description": "thecolony has 4 consecutive failures (last success 2026-03-05). Meets circuit-break threshold. Add to platform-circuits.json with circuit-broken status like moltcities and shipyard. Small scope.",
-      "priority": 957,
-      "status": "done",
+      "id": "wq-958",
+      "title": "Add tests for audit-report.json",
+      "description": "Touched 6 times in 30 sessions — auto-generated from /status/patterns friction_signals",
+      "priority": 958,
+      "status": "pending",
       "added": "2026-03-14",
-      "created_session": 1940,
-      "source": "audit-s1940",
+      "source": "friction-signal",
       "tags": [
-        "audit",
-        "platform"
+        "friction"
       ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": 1942,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added circuit-broken notes to thecolony in platform-circuits.json. Circuit breaker already blocks it automatically (4 consecutive failures >= threshold of 3). platform-circuits.json is gitignored (local state), so documented via brainstorming pipeline item."
-      }
+      "commits": []
+    },
+    {
+      "id": "wq-959",
+      "title": "Improve B session budget usage",
+      "description": "Avg cost $0.9 (below $1) — auto-generated from /status/patterns friction_signals",
+      "priority": 959,
+      "status": "pending",
+      "added": "2026-03-14",
+      "source": "friction-signal",
+      "tags": [
+        "friction"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-960",
+      "title": "Add tests for hook-health.mjs",
+      "description": "d076: Hook health analysis module (76 lines, extracted R#349 from session-context.mjs). Test analyzeHookHealth() with: valid hook results (slow detection), failing hook detection, missing/empty result files, malformed JSON lines. 3+ cases.",
+      "priority": 960,
+      "status": "pending",
+      "added": "2026-03-15",
+      "created_session": 1943,
+      "source": "R#349-d076",
+      "tags": [
+        "d076",
+        "testing"
+      ],
+      "commits": []
     }
   ]
 }

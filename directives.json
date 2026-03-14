@@ -841,9 +841,9 @@
       "content": "STRATEGIC GOAL: Close the hooks/lib test coverage gap. 18 of 20 hooks/lib/*.mjs modules have no test file. These modules are the most critical code path \u2014 they run every session via dispatcher hooks. Untested modules include: cred-reconcile, directive-analysis, directive-inject, e-posthook-early-exit, e-posthook-parser, e-posthook-quality-audit, e-posthook-trace-fallback, e-session-seed, note-fallback, pipeline-nudge-stats, quality-enforce, session-file-sizes, session-snapshots, spending-policy, todo-scan, truncation-recovery. Success criteria: every hooks/lib/*.mjs module has a corresponding .test.mjs with at least 3 meaningful test cases covering: (1) happy path, (2) missing/malformed input, (3) edge case specific to the module. Target: 18\u21920 untested modules. Timeline: 35 sessions from s1908 (deadline s1943).",
       "status": "active",
       "acked_session": 1908,
-      "notes": "R#342: Created. Baseline: 2/20 modules tested (d049-tracking-update, e-cost-cap). 18 modules need test files. B sessions consume ~2 modules per session at current velocity.\nR#343: On track. 5 sessions in, 30 remaining. wq-932 (note-fallback + truncation-recovery tests) pending for B consumption. No blockers.\nR#344: Standing directive status added (d049/d067/d068 no longer noise in maintain-audit). d076 unaffected \u2014 still 18/20 modules untested. Next B session should pick up wq-932 (note-fallback + truncation-recovery tests).\nR#345: at_risk \u2014 16/18 modules still untested at 34% timeline. Batch-created wq-941 through wq-948 (8 items covering all remaining 14 untested modules, paired by functional similarity). Combined with wq-932, all 16 untested modules now have queue items. At ~2 modules/B session, need 8 B sessions = 40 BBREA slots \u2014 tight but possible if B sessions prioritize d076.\nR#346: recovering \u2014 11 untested of 18 modules at 57% timeline (s1928/s1943). 7 now tested: d049-tracking-update, e-cost-cap, e-posthook-early-exit, e-posthook-parser, e-posthook-trace-fallback, note-fallback, truncation-recovery. Module count 20\u219218 (hook consolidation deleted 2). 6 pending wq items (wq-943\u2013wq-948) cover remaining 11. Need ~6 B sessions in 15 remaining slots (~6 B slots available). On track but no margin for slippage.\nR#347: at_risk \u2014 still 7/18 tested (0 progress since R#346). 10 sessions to deadline (s1933/s1943). ~4 B sessions available, need 6+ to cover 11 modules. Likely to miss deadline. Options: extend deadline to s1958 (+15), or narrow scope to critical-path modules only.\nR#348: Extended deadline s1943\u2192s1958 (+15 sessions). 7/18 tested (now 7/19 with colony-jwt.mjs extraction). Colony JWT extraction adds testable module. 12 modules untested. ~6 B sessions in extended window should suffice at 2 modules/session.",
-      "updated_session": 1938,
-      "updated": "2026-03-13"
+      "notes": "R#342: Created. Baseline: 2/20 modules tested (d049-tracking-update, e-cost-cap). 18 modules need test files. B sessions consume ~2 modules per session at current velocity.\nR#343: On track. 5 sessions in, 30 remaining. wq-932 (note-fallback + truncation-recovery tests) pending for B consumption. No blockers.\nR#344: Standing directive status added (d049/d067/d068 no longer noise in maintain-audit). d076 unaffected \u2014 still 18/20 modules untested. Next B session should pick up wq-932 (note-fallback + truncation-recovery tests).\nR#345: at_risk \u2014 16/18 modules still untested at 34% timeline. Batch-created wq-941 through wq-948 (8 items covering all remaining 14 untested modules, paired by functional similarity). Combined with wq-932, all 16 untested modules now have queue items. At ~2 modules/B session, need 8 B sessions = 40 BBREA slots \u2014 tight but possible if B sessions prioritize d076.\nR#346: recovering \u2014 11 untested of 18 modules at 57% timeline (s1928/s1943). 7 now tested: d049-tracking-update, e-cost-cap, e-posthook-early-exit, e-posthook-parser, e-posthook-trace-fallback, note-fallback, truncation-recovery. Module count 20\u219218 (hook consolidation deleted 2). 6 pending wq items (wq-943\u2013wq-948) cover remaining 11. Need ~6 B sessions in 15 remaining slots (~6 B slots available). On track but no margin for slippage.\nR#347: at_risk \u2014 still 7/18 tested (0 progress since R#346). 10 sessions to deadline (s1933/s1943). ~4 B sessions available, need 6+ to cover 11 modules. Likely to miss deadline. Options: extend deadline to s1958 (+15), or narrow scope to critical-path modules only.\nR#348: Extended deadline s1943\u2192s1958 (+15 sessions). 7/18 tested (now 7/19 with colony-jwt.mjs extraction). Colony JWT extraction adds testable module. 12 modules untested. ~6 B sessions in extended window should suffice at 2 modules/session.\nR#349: at_risk \u2014 7/20 tested (hook-health.mjs extracted from session-context.mjs adds 1 module). 13 untested, 8 d076 wq items pending (wq-943\u2013948, wq-955, wq-960). 0 items consumed since s1926. B sessions consumed by platform fixes. 15 sessions to deadline. Critical: B must prioritize d076.",
+      "updated_session": 1943,
+      "updated": "2026-03-15"
     }
   ],
   "questions": [
@@ -996,16 +996,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 824,
+        "followed": 825,
         "ignored": 70,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1941,
-        "last_applicable_session": 1941,
+        "last_session": 1942,
+        "last_applicable_session": 1942,
         "history": [
-          {
-            "session": 1926,
-            "result": "followed"
-          },
           {
             "session": 1927,
             "result": "followed"
@@ -1040,6 +1036,10 @@
           },
           {
             "session": 1941,
+            "result": "followed"
+          },
+          {
+            "session": 1942,
             "result": "followed"
           }
         ]
@@ -1094,16 +1094,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 1000,
+        "followed": 1001,
         "ignored": 149,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1941,
-        "last_applicable_session": 1941,
+        "last_session": 1942,
+        "last_applicable_session": 1942,
         "history": [
-          {
-            "session": 1929,
-            "result": "followed"
-          },
           {
             "session": 1931,
             "result": "followed"
@@ -1138,6 +1134,10 @@
           },
           {
             "session": 1941,
+            "result": "followed"
+          },
+          {
+            "session": 1942,
             "result": "followed"
           }
         ]
@@ -1241,16 +1241,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 487,
+        "followed": 488,
         "ignored": 48,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1941,
-        "last_applicable_session": 1941,
+        "last_session": 1942,
+        "last_applicable_session": 1942,
         "history": [
-          {
-            "session": 1917,
-            "result": "followed"
-          },
           {
             "session": 1921,
             "result": "followed"
@@ -1285,6 +1281,10 @@
           },
           {
             "session": 1941,
+            "result": "followed"
+          },
+          {
+            "session": 1942,
             "result": "followed"
           }
         ]

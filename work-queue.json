@@ -218,6 +218,45 @@
         "testing"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-961",
+      "title": "Monitor E session cost trend — last-5 avg $1.84",
+      "description": "Auto-escalation: E session cost trend breached $1.8 threshold. Last-5 avg $1.84 vs last-10 avg $1.74 (→ threshold_breach). Review session efficiency and enforce cost controls.",
+      "priority": 961,
+      "status": "pending",
+      "added": "2026-03-15",
+      "created_session": 1945,
+      "source": "audit-cost-escalation-s1945",
+      "tags": [
+        "audit",
+        "cost"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-962",
+      "title": "Debug picker-revalidation execution gap — wq-956 fix not executing at E session time",
+      "description": "A#229 finding: picker-revalidate.mjs works when run manually but s1944 shows unrevalidated mandate. Debug: (1) add logging to prehook revalidation block (line 416 of 35-e-session-prehook_E.sh) to verify it executes, (2) check if picker-mandate.json is overwritten between revalidation and E session mandate reading, (3) verify E session reads post-revalidation version. 4th consecutive audit flagging picker compliance at ~33%. PRIORITY: do before any other work.",
+      "priority": 962,
+      "status": "pending",
+      "added": "2026-03-15",
+      "created_session": 1945,
+      "source": "audit-s1945",
+      "tags": ["audit", "picker", "critical"],
+      "commits": []
+    },
+    {
+      "id": "wq-963",
+      "title": "Unblock d076 — consume wq-943 (quality-audit tests) immediately",
+      "description": "A#229 escalation: d076 has 0 items consumed in 10 sessions across 2 audit cycles. B sessions consistently prioritize audit items over d076. wq-943 (e-posthook-quality-audit.mjs tests) MUST be consumed in the next B session before any other work. A#230 trigger: if still unconsumed, begin d076 scope reduction. 76% timeline with 27% deliverables — deadline s1958 at risk.",
+      "priority": 963,
+      "status": "pending",
+      "added": "2026-03-15",
+      "created_session": 1945,
+      "source": "audit-s1945",
+      "tags": ["audit", "d076", "critical"],
+      "commits": []
     }
   ]
 }

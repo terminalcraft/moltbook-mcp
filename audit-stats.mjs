@@ -488,6 +488,13 @@ function computeCostTrend(sessionType, thresholdValue) {
     const avg5 = Math.round((last5.reduce((a, b) => a + b.cost, 0) / last5.length) * 100) / 100;
     const avg10 = Math.round((last10.reduce((a, b) => a + b.cost, 0) / last10.length) * 100) / 100;
 
+    // Median is outlier-resistant — use it for threshold gating (wq-961)
+    const sorted5 = [...last5].sort((a, b) => a.cost - b.cost);
+    const median5 = sorted5.length % 2 === 1
+      ? sorted5[Math.floor(sorted5.length / 2)].cost
+      : (sorted5[sorted5.length / 2 - 1].cost + sorted5[sorted5.length / 2].cost) / 2;
+    const last5_median = Math.round(median5 * 100) / 100;
+
     const delta = avg5 - avg10;
     const significanceThreshold = 0.15; // $0.15 change is significant
     let arrow;
@@ -495,7 +502,8 @@ function computeCostTrend(sessionType, thresholdValue) {
     else if (delta < -significanceThreshold) arrow = '↓';
     else arrow = '→';
 
-    const thresholdCrossed = avg5 >= thresholdValue;
+    // Use median for threshold — single outliers no longer trigger escalation (wq-961)
+    const thresholdCrossed = last5_median >= thresholdValue;
 
     let verdict;
     if (thresholdCrossed) verdict = 'threshold_breach';
@@ -505,6 +513,7 @@ function computeCostTrend(sessionType, thresholdValue) {
 
     return {
       last5_avg: avg5,
+      last5_median,
       last10_avg: avg10,
       delta: Math.round(delta * 100) / 100,
       trend: arrow,

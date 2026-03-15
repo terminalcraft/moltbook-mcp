@@ -81,6 +81,7 @@ function run() {
     const entry = {
       type: config.type,
       last5_avg: trend.last5_avg,
+      last5_median: trend.last5_median,
       threshold: config.threshold,
       threshold_crossed: trend.threshold_crossed,
       verdict: trend.verdict,
@@ -88,7 +89,7 @@ function run() {
 
     if (!trend.threshold_crossed) {
       entry.action = 'none';
-      entry.reason = `last-5 avg $${trend.last5_avg} under $${config.threshold} threshold`;
+      entry.reason = `last-5 median $${trend.last5_median} under $${config.threshold} threshold`;
       results.push(entry);
       continue;
     }
@@ -106,8 +107,8 @@ function run() {
     const sessionNum = stats.session || 0;
     const newItem = {
       id: newId,
-      title: `Monitor ${config.label} cost trend — last-5 avg $${trend.last5_avg}`,
-      description: `Auto-escalation: ${config.label} cost trend breached $${config.threshold} threshold. Last-5 avg $${trend.last5_avg} vs last-10 avg $${trend.last10_avg} (${trend.trend} ${trend.verdict}). Review session efficiency and enforce cost controls.`,
+      title: `Monitor ${config.label} cost trend — last-5 median $${trend.last5_median}`,
+      description: `Auto-escalation: ${config.label} cost trend breached $${config.threshold} threshold. Last-5 median $${trend.last5_median} (avg $${trend.last5_avg}) vs last-10 avg $${trend.last10_avg} (${trend.trend} ${trend.verdict}). Review session efficiency and enforce cost controls.`,
       priority: parseInt(newId.replace('wq-', '')),
       status: 'pending',
       added: new Date().toISOString().split('T')[0],

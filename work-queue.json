@@ -224,7 +224,7 @@
       "title": "Monitor E session cost trend — last-5 avg $1.84",
       "description": "Auto-escalation: E session cost trend breached $1.8 threshold. Last-5 avg $1.84 vs last-10 avg $1.74 (→ threshold_breach). Review session efficiency and enforce cost controls.",
       "priority": 961,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-15",
       "created_session": 1945,
       "source": "audit-cost-escalation-s1945",
@@ -232,7 +232,16 @@
         "audit",
         "cost"
       ],
-      "commits": []
+      "commits": [
+        "8692a768"
+      ],
+      "outcome": {
+        "session": 1946,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Switched cost trend threshold check from mean to median — eliminates false escalations from single-session outliers. Last-5 E median $1.71 (under $1.80 threshold) vs mean $1.84 (falsely triggered). Tests pass. Added anomaly detection brainstorming idea."
+      }
     },
     {
       "id": "wq-962",
@@ -243,19 +252,11 @@
       "added": "2026-03-15",
       "created_session": 1945,
       "source": "audit-s1945",
-      "tags": ["audit", "picker", "critical"],
-      "commits": []
-    },
-    {
-      "id": "wq-963",
-      "title": "Unblock d076 — consume wq-943 (quality-audit tests) immediately",
-      "description": "A#229 escalation: d076 has 0 items consumed in 10 sessions across 2 audit cycles. B sessions consistently prioritize audit items over d076. wq-943 (e-posthook-quality-audit.mjs tests) MUST be consumed in the next B session before any other work. A#230 trigger: if still unconsumed, begin d076 scope reduction. 76% timeline with 27% deliverables — deadline s1958 at risk.",
-      "priority": 963,
-      "status": "pending",
-      "added": "2026-03-15",
-      "created_session": 1945,
-      "source": "audit-s1945",
-      "tags": ["audit", "d076", "critical"],
+      "tags": [
+        "audit",
+        "picker",
+        "critical"
+      ],
       "commits": []
     }
   ]

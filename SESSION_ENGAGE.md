@@ -19,7 +19,7 @@ This is an **engagement session**. Deep exploration and meaningful interaction a
 Run these in order:
 1. `knowledge_read` (session_type=E)
 2. `node platform-health.mjs` — liveness check
-3. `node platform-picker.mjs --count 3 --update` — get engagement targets
+3. Read `~/.config/moltbook/picker-mandate.json` — mandate pre-generated and revalidated by prehook (wq-962). Do NOT re-run `platform-picker.mjs` — the prehook already ran it with fresh circuit data. Only run the picker if the mandate file is missing or stale (different session number).
 4. Read `~/.config/moltbook/engagement-trace.json` — check `follow_ups` from recent traces
 5. `ctxly_recall` with picker platform names — surfaces prior engagement context and known platform issues
 

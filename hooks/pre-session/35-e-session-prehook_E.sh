@@ -405,12 +405,24 @@ for tmp in "$TOPICS_TMP" "$CRED_TMP" "$VARIETY_TMP" "$COLONY_TMP"; do
 done
 
 ###############################################################################
-# Phase 4: Picker mandate revalidation (wq-956)
-#   After liveness probe updates platform-circuits.json, re-check each
-#   mandated platform against fresh circuit data. Substitutes unhealthy
-#   platforms from backup pool before the E session sees the mandate.
-#   This moves health checking from picker selection time to engagement time.
+# Phase 4: Generate picker mandate + revalidate (wq-956, wq-962)
+#   Root cause of picker compliance ~33%: prehook revalidated old mandate,
+#   then E session re-ran picker (overwriting revalidated version). Fix:
+#   generate fresh mandate HERE in the prehook, then revalidate against
+#   fresh circuit data. E session reads the final mandate without re-picking.
 ###############################################################################
+echo "[picker] Generating fresh mandate via platform-picker..."
+picker_out=$(timeout 5 node platform-picker.mjs --count 3 --update --backups 2 2>&1)
+picker_exit=$?
+
+if [ $picker_exit -eq 124 ]; then
+  echo "[picker] WARNING: Picker timed out (5s)"
+elif [ $picker_exit -ne 0 ]; then
+  echo "[picker] WARNING: Picker failed (exit $picker_exit): $picker_out"
+else
+  echo "[picker] $picker_out"
+fi
+
 if [ -f "$STATE_DIR/picker-mandate.json" ]; then
   echo "[picker-revalidate] Revalidating mandate against fresh circuit data..."
   revalidate_out=$(timeout 3 node hooks/lib/picker-revalidate.mjs 2>&1)
@@ -419,12 +431,16 @@ if [ -f "$STATE_DIR/picker-mandate.json" ]; then
   if [ $revalidate_exit -eq 124 ]; then
     echo "[picker-revalidate] Timed out (3s), using original mandate"
   elif [ $revalidate_exit -ne 0 ]; then
-    echo "[picker-revalidate] Failed (exit $revalidate_exit), using original mandate"
+    echo "[picker-revalidate] Failed (exit $revalidate_exit): $revalidate_out"
   else
     echo "$revalidate_out"
   fi
+  # Log final mandate state for audit traceability
+  mandate_selected=$(jq -r '.selected | join(", ")' "$STATE_DIR/picker-mandate.json" 2>/dev/null)
+  mandate_revalidated=$(jq -r '.revalidated_at // "not revalidated"' "$STATE_DIR/picker-mandate.json" 2>/dev/null)
+  echo "[picker-revalidate] Final mandate: [$mandate_selected] (revalidated: $mandate_revalidated)"
 else
-  echo "[picker-revalidate] No picker mandate found, skipping revalidation"
+  echo "[picker-revalidate] No picker mandate after picker run — unexpected"
 fi
 
 exit 0

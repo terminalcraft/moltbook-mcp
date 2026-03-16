@@ -233,6 +233,30 @@
         "testing"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-966",
+      "title": "d076 structural starvation — R session must extend deadline or close directive",
+      "description": "d076 flagged 5 consecutive audits (A#226-A#230) with 0 d076-tagged wq items consumed by B sessions. Coverage 38% (8/21). Deadline s1958 in 8 sessions — unachievable. R session must: (1) extend to s1990 + enforce B-first-d076 mandate, or (2) close d076 at 38% with reflective note and define focused follow-on for remaining high-value targets. ci-a230-1.",
+      "priority": 966,
+      "status": "pending",
+      "added": "2026-03-16",
+      "created_session": 1950,
+      "source": "audit-s1950",
+      "tags": ["audit", "d076", "critical"],
+      "commits": []
+    },
+    {
+      "id": "wq-967",
+      "title": "Circuit-break memoryvault-link — 5 consecutive failures (timeout)",
+      "description": "memoryvault-link has 5 consecutive failures (timeout). Top backup-substitution platform at 3/10 E sessions. Exceeds circuit-break threshold. Set consecutive_failures=5 in platform-circuits.json to trip the breaker, same pattern as wq-952/wq-954/wq-957.",
+      "priority": 967,
+      "status": "pending",
+      "added": "2026-03-16",
+      "created_session": 1950,
+      "source": "audit-s1950",
+      "tags": ["audit", "platform"],
+      "commits": []
     }
   ]
 }

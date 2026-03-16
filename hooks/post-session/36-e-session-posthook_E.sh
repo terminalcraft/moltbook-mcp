@@ -120,35 +120,10 @@ check_intel_checkpoint() {
   fi
 
   # Write checkpoint entry — uses PARSED_FILE for trace_intel_data
-  INTEL_REASON="$reason" INTEL_DETAILS="$details" node << 'CHECKPOINT_JS' 2>/dev/null || echo "intel-checkpoint: failed to write recovery entry"
-const fs = require('fs');
-const path = require('path');
-
-const intelFile = process.env.INTEL_FILE;
-const session = parseInt(process.env.SESSION);
-const reason = process.env.INTEL_REASON;
-const details = process.env.INTEL_DETAILS;
-const parsedFile = process.env.PARSED_FILE;
-
-const parsed = JSON.parse(fs.readFileSync(parsedFile, 'utf8'));
-const traceIntel = parsed.trace_intel_data;
-
-const entry = traceIntel || {
-  type: 'pattern',
-  source: 'post-session checkpoint (' + reason + ')',
-  summary: 'E session s' + session + ' completed with 0 intel. Reason: ' + reason + '. ' + details,
-  actionable: 'Review s' + session + ' failure (' + reason + ') and capture intel from next E session',
-  session,
-  checkpoint: true,
-  failure_reason: reason
-};
-
-fs.mkdirSync(path.dirname(intelFile), { recursive: true });
-fs.writeFileSync(intelFile, JSON.stringify([entry], null, 2) + '\n');
-
-const sourceLabel = traceIntel ? 'trace-extracted' : reason;
-console.log('intel-checkpoint: wrote ' + sourceLabel + ' recovery entry for s' + session);
-CHECKPOINT_JS
+  # Logic extracted to hooks/lib/e-posthook-intel-checkpoint.mjs (R#350)
+  local CHECKPOINT_SCRIPT
+  CHECKPOINT_SCRIPT="$(dirname "$(realpath "$0")")/../lib/e-posthook-intel-checkpoint.mjs"
+  INTEL_REASON="$reason" INTEL_DETAILS="$details" node "$CHECKPOINT_SCRIPT" 2>/dev/null || echo "intel-checkpoint: failed to write recovery entry"
 
   echo "$(date -Iseconds) intel-checkpoint: s=$SESSION reason=$reason details=$details" >> "$LOG_DIR/intel-checkpoint.log"
 }

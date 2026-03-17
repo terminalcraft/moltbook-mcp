@@ -74,28 +74,6 @@
       "complexity": "S"
     },
     {
-      "id": "wq-943",
-      "title": "Add tests for e-posthook-quality-audit.mjs",
-      "description": "d076: Quality audit module (90 lines). Test credential blocklist matching (exact + fuzzy), review score thresholds, empty-trace handling. 3+ cases.",
-      "priority": 943,
-      "status": "done",
-      "added": "2026-03-11",
-      "created_session": 1923,
-      "source": "R#345-d076-batch",
-      "tags": [
-        "testing",
-        "d077"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1951,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "13 tests across 5 suites: quality warning (happy path, severity levels), credential recycling (regex, exact, fuzzy), clean pass, malformed input (missing file, single-object, bad JSON), edge cases (both warnings, regex digit bounds, fuzzy threshold, multi-entry session matching)."
-      }
-    },
-    {
       "id": "wq-944",
       "title": "Add tests for cred-reconcile.mjs and quality-enforce.mjs",
       "description": "d076: Session quality check modules (101 + 95 lines). Test reconciliation logic, enforcement thresholds, missing state files. 3+ cases each.",
@@ -111,50 +89,6 @@
       "commits": []
     },
     {
-      "id": "wq-945",
-      "title": "Add tests for directive-inject.mjs and pipeline-nudge-stats.mjs",
-      "description": "d076: Small utility modules (39 + 43 lines). Test injection output, nudge stat calculations, missing input. 3+ cases each.",
-      "priority": 945,
-      "status": "done",
-      "added": "2026-03-11",
-      "created_session": 1923,
-      "source": "R#345-d076-batch",
-      "tags": [
-        "d076",
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1951,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Retired — d076 closed. Module not in d077 critical-6 scope. Tracked in BRAINSTORMING.md for opportunistic coverage."
-      }
-    },
-    {
-      "id": "wq-946",
-      "title": "Add tests for session-file-sizes.mjs and session-snapshots.mjs",
-      "description": "d076: Session tracking modules (129 + 92 lines). Test history append/limit, token warning extraction, auto-queue dedup, snapshot generation. 3+ cases each.",
-      "priority": 946,
-      "status": "done",
-      "added": "2026-03-11",
-      "created_session": 1923,
-      "source": "R#345-d076-batch",
-      "tags": [
-        "d076",
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1951,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Retired — d076 closed. Module not in d077 critical-6 scope. Tracked in BRAINSTORMING.md for opportunistic coverage."
-      }
-    },
-    {
       "id": "wq-947",
       "title": "Add tests for e-session-seed.mjs",
       "description": "d076: Largest untested module at 193 lines. Test seed generation, platform selection, state file handling, malformed config. 3+ cases.",
@@ -168,50 +102,6 @@
         "d077"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-948",
-      "title": "Add tests for todo-scan.mjs and spending-policy.mjs",
-      "description": "d076: Standalone utility modules (113 + 35 lines). Test TODO pattern scanning, exclude list handling, spending limit enforcement. 3+ cases each.",
-      "priority": 948,
-      "status": "done",
-      "added": "2026-03-11",
-      "created_session": 1923,
-      "source": "R#345-d076-batch",
-      "tags": [
-        "d076",
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1951,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Retired — d076 closed. Module not in d077 critical-6 scope. Tracked in BRAINSTORMING.md for opportunistic coverage."
-      }
-    },
-    {
-      "id": "wq-955",
-      "title": "Add tests for colony-jwt.mjs",
-      "description": "d076: Colony JWT freshness module (105 lines, extracted R#348). Test JWT decode (valid/invalid/missing), token refresh (success/failure/timeout), skip on missing key file, margin threshold. 3+ cases.",
-      "priority": 955,
-      "status": "done",
-      "added": "2026-03-13",
-      "created_session": 1938,
-      "source": "R#348-d076",
-      "tags": [
-        "d076",
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1951,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Retired — d076 closed. Module not in d077 critical-6 scope. Tracked in BRAINSTORMING.md for opportunistic coverage."
-      }
     },
     {
       "id": "wq-958",
@@ -240,78 +130,11 @@
       "commits": []
     },
     {
-      "id": "wq-960",
-      "title": "Add tests for hook-health.mjs",
-      "description": "d076: Hook health analysis module (76 lines, extracted R#349 from session-context.mjs). Test analyzeHookHealth() with: valid hook results (slow detection), failing hook detection, missing/empty result files, malformed JSON lines. 3+ cases.",
-      "priority": 960,
-      "status": "done",
-      "added": "2026-03-15",
-      "created_session": 1943,
-      "source": "R#349-d076",
-      "tags": [
-        "d076",
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1951,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Retired — d076 closed. Module not in d077 critical-6 scope. Tracked in BRAINSTORMING.md for opportunistic coverage."
-      }
-    },
-    {
-      "id": "wq-965",
-      "title": "Add tests for e-posthook-intel-checkpoint.mjs",
-      "description": "d076: Intel checkpoint module (42 lines). Test recovery entry creation with trace-extracted data vs synthetic, missing env vars handling, and empty parsed file edge case. 3+ cases.",
-      "priority": 965,
-      "status": "done",
-      "added": "2026-03-16",
-      "created_session": 1948,
-      "source": "R#350-d076",
-      "tags": [
-        "d076",
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1951,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Retired — d076 closed. Module not in d077 critical-6 scope. Tracked in BRAINSTORMING.md for opportunistic coverage."
-      }
-    },
-    {
-      "id": "wq-966",
-      "title": "d076 structural starvation — R session must extend deadline or close directive",
-      "description": "d076 flagged 5 consecutive audits (A#226-A#230) with 0 d076-tagged wq items consumed by B sessions. Coverage 38% (8/21). Deadline s1958 in 8 sessions — unachievable. R session must: (1) extend to s1990 + enforce B-first-d076 mandate, or (2) close d076 at 38% with reflective note and define focused follow-on for remaining high-value targets. ci-a230-1.",
-      "priority": 966,
-      "status": "done",
-      "added": "2026-03-16",
-      "created_session": 1950,
-      "source": "audit-s1950",
-      "tags": [
-        "audit",
-        "d076",
-        "critical"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1951,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Closed d076 at 38% (8/21). Created focused d077 for 6 critical modules. Retired 6 stale d076 wq items, kept 3 high-value ones re-tagged d077."
-      }
-    },
-    {
       "id": "wq-967",
       "title": "Circuit-break memoryvault-link — 5 consecutive failures (timeout)",
       "description": "memoryvault-link has 5 consecutive failures (timeout). Top backup-substitution platform at 3/10 E sessions. Exceeds circuit-break threshold. Set consecutive_failures=5 in platform-circuits.json to trip the breaker, same pattern as wq-952/wq-954/wq-957.",
       "priority": 967,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-16",
       "created_session": 1950,
       "source": "audit-s1950",
@@ -319,7 +142,14 @@
         "audit",
         "platform"
       ],
-      "commits": []
+      "commits": ["9aa497e1"],
+      "outcome": {
+        "session": 1952,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added status:closed and notes to memoryvault-link in platform-circuits.json. Platform already functionally circuit-broken by consecutive_failures=5 >= threshold=3. Currently in half-open state (5 days past cooldown) — will auto-revert to open on next failure."
+      }
     },
     {
       "id": "wq-968",

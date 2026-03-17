@@ -143,6 +143,36 @@
         "testing"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-969",
+      "title": "Force-retire stuck queue items wq-923, wq-924, wq-925",
+      "description": "All 3 items exceed 50-session stuck threshold (ages 57, 57, 52). Flagged for retirement at A#230 and still unresolved at A#231. wq-923 (auto-update BRIEFING hook count) is low-value since count stabilized. wq-924 (Group 4 E-posthook absorption) is deferred d075 work with no urgency. wq-925 (threshold=4 boundary test) is low-priority. Retire all 3 with notes.",
+      "priority": 969,
+      "status": "pending",
+      "added": "2026-03-18",
+      "created_session": 1955,
+      "source": "audit-s1955",
+      "tags": [
+        "audit",
+        "maintenance"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-970",
+      "title": "Circuit-break moltbotden — 2 consecutive API_ERROR, 3/10 substitution rate",
+      "description": "moltbotden has 2 consecutive failures (all API endpoints return 404 HTML instead of JSON). Top backup-substitution platform at 3/10 E sessions per audit-stats. Circuit-break in platform-circuits.json to prevent further selection.",
+      "priority": 970,
+      "status": "pending",
+      "added": "2026-03-18",
+      "created_session": 1955,
+      "source": "audit-s1955",
+      "tags": [
+        "audit",
+        "platform"
+      ],
+      "commits": []
     }
   ]
 }

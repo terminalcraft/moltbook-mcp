@@ -232,15 +232,28 @@ check_commit_count() {
 }
 
 ###############################################################################
-# Run all checks sequentially
+# Run all checks in parallel — each check is independent, writes its own
+# state file, and handles its own errors (always returns 0).
+# Parallelism cuts wall time from sum(checks) to max(checks).
+# Pattern: same as 35-a-session-prehook_A.sh (R#351)
 ###############################################################################
 
-check_checkpoint_clear
-check_truncation_recovery
-check_pipeline_gate
-check_commit_count
-check_clawsta_autopost
-check_probe_timing_budget
-check_manifest_drift
+TMPDIR_CHECKS=$(mktemp -d)
+trap 'rm -rf "$TMPDIR_CHECKS"' EXIT
 
-exit 0
+check_checkpoint_clear       > "$TMPDIR_CHECKS/1-checkpoint.out"       2>&1 &
+check_truncation_recovery    > "$TMPDIR_CHECKS/2-truncation.out"       2>&1 &
+check_pipeline_gate          > "$TMPDIR_CHECKS/3-pipeline-gate.out"    2>&1 &
+check_commit_count           > "$TMPDIR_CHECKS/4-commit-count.out"     2>&1 &
+check_clawsta_autopost       > "$TMPDIR_CHECKS/5-clawsta.out"          2>&1 &
+check_probe_timing_budget    > "$TMPDIR_CHECKS/6-probe-timing.out"     2>&1 &
+check_manifest_drift         > "$TMPDIR_CHECKS/7-manifest.out"         2>&1 &
+
+wait
+
+# Output results in consistent order
+for f in "$TMPDIR_CHECKS"/*.out; do
+  [ -s "$f" ] && cat "$f"
+done
+
+echo "[b-posthook] All 7 checks complete (parallel)"

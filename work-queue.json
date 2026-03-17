@@ -130,28 +130,6 @@
       "commits": []
     },
     {
-      "id": "wq-967",
-      "title": "Circuit-break memoryvault-link — 5 consecutive failures (timeout)",
-      "description": "memoryvault-link has 5 consecutive failures (timeout). Top backup-substitution platform at 3/10 E sessions. Exceeds circuit-break threshold. Set consecutive_failures=5 in platform-circuits.json to trip the breaker, same pattern as wq-952/wq-954/wq-957.",
-      "priority": 967,
-      "status": "done",
-      "added": "2026-03-16",
-      "created_session": 1950,
-      "source": "audit-s1950",
-      "tags": [
-        "audit",
-        "platform"
-      ],
-      "commits": ["9aa497e1"],
-      "outcome": {
-        "session": 1952,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added status:closed and notes to memoryvault-link in platform-circuits.json. Platform already functionally circuit-broken by consecutive_failures=5 >= threshold=3. Currently in half-open state (5 days past cooldown) — will auto-revert to open on next failure."
-      }
-    },
-    {
       "id": "wq-968",
       "title": "Add tests for session-snapshots.mjs and directive-analysis.mjs (d077)",
       "description": "d077 critical modules. session-snapshots.mjs (92 lines): test ecosystem/pattern snapshot structure + JSONL append + missing file handling. directive-analysis.mjs (241 lines): test staleness thresholds (3 tiers), maintenance needs detection, empty/malformed directive input. 3+ test cases each.",

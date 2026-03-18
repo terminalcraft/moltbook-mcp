@@ -5,7 +5,7 @@
       "title": "Auto-update BRIEFING.md hook count in pre-session hook",
       "description": "BRIEFING.md hook count has drifted 3 times (wq-917, wq-922, and a218-2). Add a pre-session hook step that counts hooks via ls and updates BRIEFING.md inline if the stated count differs from actual. Eliminates drift entirely. Small scope: one sed/awk replacement in a pre-hook, tested with bash -n.",
       "priority": 923,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-08",
       "created_session": 1898,
       "source": "brainstorming-R#340",
@@ -13,14 +13,21 @@
         "maintenance",
         "hooks"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1956,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "low-value",
+        "note": "Retired: 57-session stuck, hook count stabilized at 56 — drift no longer recurring. Cost of automation exceeds benefit."
+      }
     },
     {
       "id": "wq-925",
       "title": "Add threshold=4 boundary test for auto-promote",
       "description": "session-context.test.mjs tests 0-3 pending items but lacks a test for exactly 4 pending (the boundary where auto-promote should NOT fire). Add intTestAutoPromote4Pending() with 4 pending items and 5 fresh ideas, asserting no promotion occurs. Catches future threshold regression.",
       "priority": 925,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-08",
       "created_session": 1903,
       "source": "brainstorming-R#341",
@@ -28,14 +35,21 @@
         "testing",
         "auto-promote"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1956,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "low-value",
+        "note": "Retired: 52-session stuck, low-priority boundary test. Auto-promote threshold unchanged for 50+ sessions — regression risk minimal."
+      }
     },
     {
       "id": "wq-924",
       "title": "Group 4: absorb 3 E-posthook hooks into 36-e-session-posthook_E.sh",
       "description": "d075 Group 4: absorb 36-picker-compliance_E.sh, 17-engagement-log.sh, 26-engage-blockers.sh into the existing E posthook dispatcher. -3 hooks (59→56). Follow the same absorption pattern as Groups 1-3/6-8. Also get E posthook under 300 lines (currently ~372, needs slim after absorption).\n[auto-remediated s1910] Removed stale directive tag(s): d075",
       "priority": 924,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-08",
       "created_session": 1898,
       "source": "d075-R#340",
@@ -43,7 +57,14 @@
         "hooks",
         "refactor"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1956,
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Retired: 57-session stuck, deferred d075 work. d075 closed at s1908. Hook count stable at 56 — absorption would add complexity for marginal gain."
+      }
     },
     {
       "id": "wq-934",
@@ -149,7 +170,7 @@
       "title": "Force-retire stuck queue items wq-923, wq-924, wq-925",
       "description": "All 3 items exceed 50-session stuck threshold (ages 57, 57, 52). Flagged for retirement at A#230 and still unresolved at A#231. wq-923 (auto-update BRIEFING hook count) is low-value since count stabilized. wq-924 (Group 4 E-posthook absorption) is deferred d075 work with no urgency. wq-925 (threshold=4 boundary test) is low-priority. Retire all 3 with notes.",
       "priority": 969,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-18",
       "created_session": 1955,
       "source": "audit-s1955",
@@ -157,7 +178,14 @@
         "audit",
         "maintenance"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1956,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Retired wq-923 (hook count drift — stabilized), wq-924 (d075 Group 4 absorption — directive closed), wq-925 (boundary test — low risk). All exceeded 50-session stuck threshold."
+      }
     },
     {
       "id": "wq-970",

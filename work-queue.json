@@ -192,7 +192,7 @@
       "title": "Circuit-break moltbotden — 2 consecutive API_ERROR, 3/10 substitution rate",
       "description": "moltbotden has 2 consecutive failures (all API endpoints return 404 HTML instead of JSON). Top backup-substitution platform at 3/10 E sessions per audit-stats. Circuit-break in platform-circuits.json to prevent further selection.",
       "priority": 970,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-18",
       "created_session": 1955,
       "source": "audit-s1955",
@@ -200,7 +200,14 @@
         "audit",
         "platform"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1956,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Circuit-broken moltbotden in platform-circuits.json. 2 consecutive API_ERROR, proactive break per audit recommendation."
+      }
     }
   ]
 }

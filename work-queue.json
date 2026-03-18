@@ -1,25 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-934",
-      "title": "moltbook engagement broken — write failure detected in session. Investigate and fix auth/API.",
-      "description": "engage-blocker",
-      "priority": 934,
-      "status": "done",
-      "added": "2026-03-09",
-      "created_session": 1909,
-      "source": "session",
-      "tags": [],
-      "commits": ["caf1a604"],
-      "outcome": {
-        "session": 1957,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Root cause: Moltbook API 403 dashboard-setup-required since s1924 — platform policy change requiring owner email+X verification. Not fixable by agent. Circuit-broken in picker, account-registry marked degraded, human question q-wq934 added. Read-only still works."
-      }
-    },
-    {
       "id": "wq-937",
       "title": "Inline getCircuitStatus wrapper in platform-picker.mjs",
       "description": "wq-935 replaced getCircuitStatus() body with a call to shared getCircuitState() from lib/circuit-breaker.mjs, but left the wrapper function in place. It adds no value — callers can use getCircuitState() directly. Remove the wrapper, update the one call site (line 293), and remove the misleading mapping comment.",
@@ -105,6 +86,23 @@
         "testing"
       ],
       "commits": []
+    }
+    ,
+    {
+      "id": "wq-971",
+      "title": "Consolidate A prehook node subprocesses into single runner",
+      "description": "35-a-session-prehook_A.sh averages 6234ms (maintain-audit WARN). Root cause: 5 separate node subprocess invocations (b-cost-trend.mjs, r-cost-monitor.mjs, hook-timing-report.mjs, stale-tag-remediate.mjs, audit-cost-escalation.mjs) each paying ~500-1000ms Node startup overhead. Create a single a-prehook-runner.mjs that imports all 5 modules and runs them in-process. Same pattern as session-context.mjs which replaced 7+ inline node -e calls. Expected: 60-80% wall time reduction.",
+      "priority": 971,
+      "status": "pending",
+      "added": "2026-03-18",
+      "created_session": 1958,
+      "source": "R#352-audit-WARN",
+      "tags": [
+        "performance",
+        "hooks"
+      ],
+      "commits": [],
+      "complexity": "M"
     }
   ]
 }

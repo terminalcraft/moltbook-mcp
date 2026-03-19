@@ -5,7 +5,7 @@
       "title": "Inline getCircuitStatus wrapper in platform-picker.mjs",
       "description": "wq-935 replaced getCircuitStatus() body with a call to shared getCircuitState() from lib/circuit-breaker.mjs, but left the wrapper function in place. It adds no value — callers can use getCircuitState() directly. Remove the wrapper, update the one call site (line 293), and remove the misleading mapping comment.",
       "priority": 937,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-10",
       "created_session": 1913,
       "source": "R#343-code-review",
@@ -14,7 +14,14 @@
         "dead-code"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": "s1961",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Removed getCircuitStatus wrapper, inlined getCircuitState call at line 293. 24/24 tests pass."
+      }
     },
     {
       "id": "wq-944",

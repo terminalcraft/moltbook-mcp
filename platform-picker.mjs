@@ -60,15 +60,6 @@ function getCurrentSession() {
   } catch { return 0; }
 }
 
-// wq-935: Use shared getCircuitState() which computes state from consecutive_failures
-// threshold. The old getCircuitStatus() only checked a .status field that was never set
-// for non-defunct platforms, so circuit-open platforms leaked into backup rotation.
-function getCircuitStatus(circuits, platformId) {
-  if (!circuits) return "closed";
-  const state = getCircuitState(circuits, platformId);
-  // Map to the values the filter check expects: "open" blocks, anything else passes
-  return state; // "closed", "open", "half-open", or "defunct"
-}
 
 // Normalize platform names for ROI lookup
 // normalizePlatformName imported from lib/platform-names.mjs
@@ -290,7 +281,7 @@ function main() {
     if (!isWorkingStatus && !isProbeStatus) return false;
 
     // wq-935: Block open AND defunct circuits (getCircuitState computes from consecutive_failures)
-    const circuit = getCircuitStatus(circuits, acc.id);
+    const circuit = getCircuitState(circuits, acc.id);
     if (circuit === "open" || circuit === "defunct") return false;
 
     // wq-576: Skip platforms demoted due to repeated E session engagement failures

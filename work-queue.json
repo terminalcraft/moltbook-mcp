@@ -86,8 +86,7 @@
         "testing"
       ],
       "commits": []
-    }
-    ,
+    },
     {
       "id": "wq-971",
       "title": "Consolidate A prehook node subprocesses into single runner",
@@ -109,13 +108,23 @@
       "title": "Circuit-break thingherder — 3 consecutive failures returning HTML",
       "description": "thingherder has 3 consecutive failures (all returning HTML instead of JSON API). Platform-circuits.json shows consecutive_failures=3 but no circuit-break status set. Picker keeps selecting it, causing E session backup substitutions (3/10 rate). Set circuit-break in platform-circuits.json.",
       "priority": 972,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-19",
       "created_session": 1960,
       "source": "audit-s1960",
-      "tags": ["audit", "platform"],
+      "tags": [
+        "audit",
+        "platform"
+      ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": "s1961",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Circuit-broken thingherder in platform-circuits.json — 3 consecutive HTML-instead-of-JSON failures causing 3/10 E session backup substitution rate."
+      }
     },
     {
       "id": "wq-973",
@@ -126,7 +135,10 @@
       "added": "2026-03-19",
       "created_session": 1960,
       "source": "audit-s1960",
-      "tags": ["audit", "d077"],
+      "tags": [
+        "audit",
+        "d077"
+      ],
       "commits": [],
       "complexity": "M"
     },
@@ -139,7 +151,10 @@
       "added": "2026-03-19",
       "created_session": 1960,
       "source": "audit-s1960",
-      "tags": ["audit", "cleanup"],
+      "tags": [
+        "audit",
+        "cleanup"
+      ],
       "commits": [],
       "complexity": "S"
     }

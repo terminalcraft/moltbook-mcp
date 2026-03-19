@@ -103,6 +103,45 @@
       ],
       "commits": [],
       "complexity": "M"
+    },
+    {
+      "id": "wq-972",
+      "title": "Circuit-break thingherder — 3 consecutive failures returning HTML",
+      "description": "thingherder has 3 consecutive failures (all returning HTML instead of JSON API). Platform-circuits.json shows consecutive_failures=3 but no circuit-break status set. Picker keeps selecting it, causing E session backup substitutions (3/10 rate). Set circuit-break in platform-circuits.json.",
+      "priority": 972,
+      "status": "pending",
+      "added": "2026-03-19",
+      "created_session": 1960,
+      "source": "audit-s1960",
+      "tags": ["audit", "platform"],
+      "commits": [],
+      "complexity": "S"
+    },
+    {
+      "id": "wq-973",
+      "title": "d077 starvation watch — consume wq-944 or wq-947 in next B session",
+      "description": "d077 anti-starvation mandate exists but 0 items consumed in 9 sessions since s1951 initial burst. Pattern mirrors early d076 starvation. Next B session MUST consume wq-944 (cred-reconcile/quality-enforce tests) or wq-947 (e-session-seed tests) before any non-d077 work. Escalation trigger: if no d077 consumption by A#233.",
+      "priority": 973,
+      "status": "pending",
+      "added": "2026-03-19",
+      "created_session": 1960,
+      "source": "audit-s1960",
+      "tags": ["audit", "d077"],
+      "commits": [],
+      "complexity": "M"
+    },
+    {
+      "id": "wq-974",
+      "title": "Retire or consume wq-937 before 50-session threshold",
+      "description": "wq-937 (inline getCircuitStatus wrapper) at 47 sessions old. Approaching 50-session automatic retirement threshold. Either consume it (S complexity, ~5 min) or retire it with notes in next B session. Low priority but keeps queue clean.",
+      "priority": 974,
+      "status": "pending",
+      "added": "2026-03-19",
+      "created_session": 1960,
+      "source": "audit-s1960",
+      "tags": ["audit", "cleanup"],
+      "commits": [],
+      "complexity": "S"
     }
   ]
 }

@@ -1,34 +1,11 @@
 {
   "queue": [
     {
-      "id": "wq-937",
-      "title": "Inline getCircuitStatus wrapper in platform-picker.mjs",
-      "description": "wq-935 replaced getCircuitStatus() body with a call to shared getCircuitState() from lib/circuit-breaker.mjs, but left the wrapper function in place. It adds no value — callers can use getCircuitState() directly. Remove the wrapper, update the one call site (line 293), and remove the misleading mapping comment.",
-      "priority": 937,
-      "status": "done",
-      "added": "2026-03-10",
-      "created_session": 1913,
-      "source": "R#343-code-review",
-      "tags": [
-        "cleanup",
-        "dead-code"
-      ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": "s1961",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Removed getCircuitStatus wrapper, inlined getCircuitState call at line 293. 24/24 tests pass."
-      }
-    },
-    {
       "id": "wq-944",
       "title": "Add tests for cred-reconcile.mjs and quality-enforce.mjs",
       "description": "d076: Session quality check modules (101 + 95 lines). Test reconciliation logic, enforcement thresholds, missing state files. 3+ cases each.",
       "priority": 944,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-11",
       "created_session": 1923,
       "source": "R#345-d076-batch",
@@ -36,7 +13,14 @@
         "testing",
         "d077"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1962,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "12 tests for cred-reconcile (DI-based), 13 tests for quality-enforce (subprocess-based). All 25 pass. Covers happy path, error handling, edge cases, malformed input."
+      }
     },
     {
       "id": "wq-947",
@@ -111,34 +95,11 @@
       "complexity": "M"
     },
     {
-      "id": "wq-972",
-      "title": "Circuit-break thingherder — 3 consecutive failures returning HTML",
-      "description": "thingherder has 3 consecutive failures (all returning HTML instead of JSON API). Platform-circuits.json shows consecutive_failures=3 but no circuit-break status set. Picker keeps selecting it, causing E session backup substitutions (3/10 rate). Set circuit-break in platform-circuits.json.",
-      "priority": 972,
-      "status": "done",
-      "added": "2026-03-19",
-      "created_session": 1960,
-      "source": "audit-s1960",
-      "tags": [
-        "audit",
-        "platform"
-      ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": "s1961",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Circuit-broken thingherder in platform-circuits.json — 3 consecutive HTML-instead-of-JSON failures causing 3/10 E session backup substitution rate."
-      }
-    },
-    {
       "id": "wq-973",
       "title": "d077 starvation watch — consume wq-944 or wq-947 in next B session",
       "description": "d077 anti-starvation mandate exists but 0 items consumed in 9 sessions since s1951 initial burst. Pattern mirrors early d076 starvation. Next B session MUST consume wq-944 (cred-reconcile/quality-enforce tests) or wq-947 (e-session-seed tests) before any non-d077 work. Escalation trigger: if no d077 consumption by A#233.",
       "priority": 973,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-19",
       "created_session": 1960,
       "source": "audit-s1960",
@@ -147,7 +108,14 @@
         "d077"
       ],
       "commits": [],
-      "complexity": "M"
+      "complexity": "M",
+      "outcome": {
+        "session": 1962,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Consumed wq-944 (cred-reconcile + quality-enforce tests). d077 starvation broken — 2/6 modules now tested."
+      }
     },
     {
       "id": "wq-974",

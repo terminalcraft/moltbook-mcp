@@ -1,28 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-944",
-      "title": "Add tests for cred-reconcile.mjs and quality-enforce.mjs",
-      "description": "d076: Session quality check modules (101 + 95 lines). Test reconciliation logic, enforcement thresholds, missing state files. 3+ cases each.",
-      "priority": 944,
-      "status": "done",
-      "added": "2026-03-11",
-      "created_session": 1923,
-      "source": "R#345-d076-batch",
-      "tags": [
-        "testing",
-        "d077"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1962,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "12 tests for cred-reconcile (DI-based), 13 tests for quality-enforce (subprocess-based). All 25 pass. Covers happy path, error handling, edge cases, malformed input."
-      }
-    },
-    {
       "id": "wq-947",
       "title": "Add tests for e-session-seed.mjs",
       "description": "d076: Largest untested module at 193 lines. Test seed generation, platform selection, state file handling, malformed config. 3+ cases.",
@@ -93,29 +71,6 @@
       ],
       "commits": [],
       "complexity": "M"
-    },
-    {
-      "id": "wq-973",
-      "title": "d077 starvation watch — consume wq-944 or wq-947 in next B session",
-      "description": "d077 anti-starvation mandate exists but 0 items consumed in 9 sessions since s1951 initial burst. Pattern mirrors early d076 starvation. Next B session MUST consume wq-944 (cred-reconcile/quality-enforce tests) or wq-947 (e-session-seed tests) before any non-d077 work. Escalation trigger: if no d077 consumption by A#233.",
-      "priority": 973,
-      "status": "done",
-      "added": "2026-03-19",
-      "created_session": 1960,
-      "source": "audit-s1960",
-      "tags": [
-        "audit",
-        "d077"
-      ],
-      "commits": [],
-      "complexity": "M",
-      "outcome": {
-        "session": 1962,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Consumed wq-944 (cred-reconcile + quality-enforce tests). d077 starvation broken — 2/6 modules now tested."
-      }
     },
     {
       "id": "wq-974",

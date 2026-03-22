@@ -73,34 +73,11 @@
       "complexity": "M"
     },
     {
-      "id": "wq-974",
-      "title": "Retire or consume wq-937 before 50-session threshold",
-      "description": "wq-937 (inline getCircuitStatus wrapper) at 47 sessions old. Approaching 50-session automatic retirement threshold. Either consume it (S complexity, ~5 min) or retire it with notes in next B session. Low priority but keeps queue clean.",
-      "priority": 974,
-      "status": "done",
-      "added": "2026-03-19",
-      "created_session": 1960,
-      "source": "audit-s1960",
-      "tags": [
-        "audit",
-        "cleanup"
-      ],
-      "commits": [],
-      "complexity": "S",
-      "outcome": {
-        "session": 1966,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "wq-937 was already retired by A#233 (s1965). wq-974 resolved with no action needed."
-      }
-    },
-    {
       "id": "wq-975",
       "title": "Delete HOOK_CONSOLIDATION_PLAN.md to clear 21 stale refs",
       "description": "HOOK_CONSOLIDATION_PLAN.md is a completed planning document (d074/d075) that references 21 deleted hooks. It is the sole source of all stale refs in stale-refs.json. All consolidation groups are either done or deferred as standalone wq items. Delete this file to eliminate stale-ref noise. S complexity.",
       "priority": 975,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-21",
       "created_session": 1965,
       "source": "audit-s1965",
@@ -109,7 +86,14 @@
         "cleanup"
       ],
       "commits": [],
-      "complexity": "S"
+      "complexity": "S",
+      "outcome": {
+        "session": 1967,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Deleted HOOK_CONSOLIDATION_PLAN.md (321 lines). Eliminates all 21 stale refs traced by A#233."
+      }
     }
   ]
 }

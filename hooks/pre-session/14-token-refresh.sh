@@ -1,9 +1,23 @@
 #!/bin/bash
 # Auto-refresh short-lived tokens: Colony JWT and imanagent.dev
 # Consolidated from 14-colony-jwt-refresh.sh + 15-imanagent-refresh.sh (d070, wq-743)
+# R#354: Added circuit-breaker awareness — skip refresh for circuit-broken platforms
 
 set -euo pipefail
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+CIRCUITS_FILE="$DIR/platform-circuits.json"
+
+# Helper: check if a platform is circuit-broken (consecutive_failures >= threshold)
+is_circuit_open() {
+  local platform="$1"
+  local threshold=3
+  if [[ ! -f "$CIRCUITS_FILE" ]]; then
+    return 1  # No circuits file → not open
+  fi
+  local failures
+  failures=$(jq -r --arg p "$platform" '.[$p].consecutive_failures // 0' "$CIRCUITS_FILE" 2>/dev/null) || return 1
+  [[ "$failures" -ge "$threshold" ]]
+}
 
 # --- Colony JWT ---
 # JWT tokens last ~5 days. Refresh if <1 hour remaining.
@@ -11,31 +25,35 @@ JWT_FILE="$HOME/.colony-jwt"
 KEY_FILE="$HOME/.colony-key"
 
 if [[ -f "$KEY_FILE" ]]; then
-  NEEDS_REFRESH=false
-  if [[ ! -f "$JWT_FILE" ]]; then
-    NEEDS_REFRESH=true
+  if is_circuit_open "thecolony"; then
+    echo "[token-refresh] Colony circuit-broken, skipping JWT refresh"
   else
-    JWT=$(cat "$JWT_FILE")
-    EXP=$(echo "$JWT" | cut -d. -f2 | base64 -d 2>/dev/null | jq -r '.exp // 0' 2>/dev/null)
-    NOW=$(date +%s)
-    MARGIN=3600
-    if [[ -z "$EXP" ]] || [[ "$EXP" -lt $((NOW + MARGIN)) ]]; then
+    NEEDS_REFRESH=false
+    if [[ ! -f "$JWT_FILE" ]]; then
       NEEDS_REFRESH=true
-    fi
-  fi
-
-  if [[ "$NEEDS_REFRESH" == "true" ]]; then
-    COL_CRED=$(cat "$KEY_FILE")
-    RESP=$(curl -s --max-time 8 "https://thecolony.cc/api/v1/auth/token" \
-      -X POST \
-      -H "Content-Type: application/json" \
-      -d "{\"api_key\":\"$COL_CRED\"}" 2>/dev/null)
-    TOKEN=$(echo "$RESP" | jq -r '.access_token // empty' 2>/dev/null)
-    if [[ -n "$TOKEN" && "$TOKEN" != "" ]]; then
-      echo -n "$TOKEN" > "$JWT_FILE"
-      echo "[token-refresh] Colony JWT refreshed"
     else
-      echo "[token-refresh] Colony JWT refresh failed: $RESP"
+      JWT=$(cat "$JWT_FILE")
+      EXP=$(echo "$JWT" | cut -d. -f2 | base64 -d 2>/dev/null | jq -r '.exp // 0' 2>/dev/null)
+      NOW=$(date +%s)
+      MARGIN=3600
+      if [[ -z "$EXP" ]] || [[ "$EXP" -lt $((NOW + MARGIN)) ]]; then
+        NEEDS_REFRESH=true
+      fi
+    fi
+
+    if [[ "$NEEDS_REFRESH" == "true" ]]; then
+      COL_CRED=$(cat "$KEY_FILE")
+      RESP=$(curl -s --max-time 8 "https://thecolony.cc/api/v1/auth/token" \
+        -X POST \
+        -H "Content-Type: application/json" \
+        -d "{\"api_key\":\"$COL_CRED\"}" 2>/dev/null)
+      TOKEN=$(echo "$RESP" | jq -r '.access_token // empty' 2>/dev/null)
+      if [[ -n "$TOKEN" && "$TOKEN" != "" ]]; then
+        echo -n "$TOKEN" > "$JWT_FILE"
+        echo "[token-refresh] Colony JWT refreshed"
+      else
+        echo "[token-refresh] Colony JWT refresh failed: $RESP"
+      fi
     fi
   fi
 fi

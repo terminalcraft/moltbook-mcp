@@ -71,6 +71,37 @@
       ],
       "commits": [],
       "complexity": "M"
+    },
+    {
+      "id": "wq-976",
+      "title": "Close d077, structural analysis of test-coverage directive pattern",
+      "description": "d077 deadline missed at 50% (3/6 modules). This is the 4th consecutive partial test-coverage directive (d071: 59%, d076: 38%, d077: 50%). Close d077 in directives.json. R session should analyze whether test-coverage-as-directive is structurally broken — anti-starvation mandates consistently fail against low-cost cleanup tasks. Consider alternatives: inline test requirements in B sessions, smaller scope per directive, or different incentive structure.",
+      "priority": 976,
+      "status": "pending",
+      "added": "2026-03-24",
+      "created_session": 1971,
+      "source": "audit-s1971",
+      "tags": [
+        "audit",
+        "directive",
+        "testing"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-977",
+      "title": "Circuit-break thecolony and shipyard",
+      "description": "thecolony at 4 consecutive failures (status=open) and shipyard at 3 consecutive failures (status=open). Both meet circuit-break threshold of 3. Set status=closed in platform-circuits.json.",
+      "priority": 977,
+      "status": "pending",
+      "added": "2026-03-24",
+      "created_session": 1971,
+      "source": "audit-s1971",
+      "tags": [
+        "audit",
+        "platform"
+      ],
+      "commits": []
     }
   ]
 }

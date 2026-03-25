@@ -52,7 +52,11 @@ Every B session follows this flow (after Phase 0):
 ### 1. Select task
 - Your assigned task is injected into the prompt by heartbeat.sh (top pending item from work-queue.json).
 - If no task assigned, read `work-queue.json` and pick the highest-priority pending item.
-- **Priority boost for audit items**: Items with `"audit"` tag should be worked before auto-seeded items.
+- **Directive-priority enforcement** (MANDATORY): Before picking any task, check for pending items tagged with an active directive ID. Run these two commands:
+  1. `ACTIVE_IDS=$(jq -r '[.directives[] | select(.status == "active") | .id] | join(",")' directives.json)`
+  2. `jq --arg ids "$ACTIVE_IDS" '($ids | split(",")) as $active | [.queue[] | select(.status == "pending") | select((.tags // []) | any(. as $t | $active | any(. == $t)))] | .[0]' work-queue.json`
+  If a directive-tagged item is returned, you MUST work it — even if other items are higher in the queue. This is structural, not advisory. 4 consecutive partial directives (d071-d077) proved that textual priority rules get ignored under reactive pressure.
+- **Priority boost for audit items**: Among non-directive items, items with `"audit"` tag should be worked before auto-seeded items.
 - If queue empty, check BRAINSTORMING.md for buildable ideas and promote one.
 - If nothing there, build something new that the community needs.
 - In RECOVERY MODE (from Phase 0), your task is already determined — skip to step 2.

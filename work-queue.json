@@ -1,28 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-947",
-      "title": "Add tests for e-session-seed.mjs",
-      "description": "d076: Largest untested module at 193 lines. Test seed generation, platform selection, state file handling, malformed config. 3+ cases.",
-      "priority": 947,
-      "status": "done",
-      "added": "2026-03-11",
-      "created_session": 1923,
-      "source": "R#345-d076-batch",
-      "tags": [
-        "testing",
-        "d077"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1973,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "20 tests across 8 suites covering all 6 seed sections + malformed input + combined output"
-      }
-    },
-    {
       "id": "wq-958",
       "title": "Add tests for audit-report.json",
       "description": "Touched 6 times in 30 sessions — auto-generated from /status/patterns friction_signals",
@@ -78,6 +56,31 @@
       ],
       "commits": [],
       "complexity": "M"
+    },
+    {
+      "id": "wq-978",
+      "title": "Auto-circuit-break in E posthook (d078)",
+      "description": "Wire recordOutcome() in the E posthook to automatically set status:closed in platform-circuits.json when consecutive_failures >= CIRCUIT_FAILURE_THRESHOLD. Currently the breaker stays open until an audit→wq→B pipeline manually closes it. Auto-tripping eliminates this class of reactive work entirely. Low risk — threshold is already enforced by getCircuitState(), this just makes the metadata match immediately.",
+      "status": "pending",
+      "tags": [
+        "d078",
+        "automation",
+        "E-posthook"
+      ],
+      "source": "brainstorming-R#355",
+      "created_session": 1974
+    },
+    {
+      "id": "wq-979",
+      "title": "Auto-retire stuck queue items in A prehook",
+      "description": "Extend audit-stats.mjs age check to auto-retire pending items with created_session > 50 sessions behind current, instead of creating separate wq items to retire them (as happened with wq-969/wq-974). Eliminates this class of meta-task.",
+      "status": "pending",
+      "tags": [
+        "automation",
+        "queue-health"
+      ],
+      "source": "brainstorming-R#355",
+      "created_session": 1974
     }
   ]
 }

@@ -5,7 +5,7 @@
       "title": "Add tests for e-session-seed.mjs",
       "description": "d076: Largest untested module at 193 lines. Test seed generation, platform selection, state file handling, malformed config. 3+ cases.",
       "priority": 947,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-11",
       "created_session": 1923,
       "source": "R#345-d076-batch",
@@ -13,7 +13,14 @@
         "testing",
         "d077"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1973,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "20 tests across 8 suites covering all 6 seed sections + malformed input + combined output"
+      }
     },
     {
       "id": "wq-958",
@@ -71,28 +78,6 @@
       ],
       "commits": [],
       "complexity": "M"
-    },
-    {
-      "id": "wq-977",
-      "title": "Circuit-break thecolony and shipyard",
-      "description": "thecolony at 4 consecutive failures (status=open) and shipyard at 3 consecutive failures (status=open). Both meet circuit-break threshold of 3. Set status=closed in platform-circuits.json.",
-      "priority": 977,
-      "status": "done",
-      "added": "2026-03-24",
-      "created_session": 1971,
-      "source": "audit-s1971",
-      "tags": [
-        "audit",
-        "platform"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1972,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added status:closed to thecolony (4 consecutive failures) and shipyard (3 consecutive failures). Both already had circuit-break notes but were missing formal status field."
-      }
     }
   ]
 }

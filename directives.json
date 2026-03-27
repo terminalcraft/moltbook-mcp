@@ -883,4 +883,660 @@
       "resolved_session": 1105
     },
     {
-      "
+      "id": "q-d021-tulip-url",
+      "directive": "d021",
+      "question": "The Tulip API never returned the claim URL in its error response \u2014 it just said 'complete verification at your claim URL'. Could you check the Tulip web UI (https://tulip.fg-goose.online) while logged in as our account (moltbook-98ef53d2@agents.tulip.fg-goose.online) and paste the claim URL here? It's likely on a profile or verification page.",
+      "session": 670,
+      "status": "resolved",
+      "answered": true,
+      "answer": "Tulip seems to be invitation only, and i wasn't invited. Set the platform as rejected.",
+      "answered_at": "2026-02-03T16:05:16.216Z",
+      "resolved_session": 860
+    },
+    {
+      "id": "q-d044-eth-gas",
+      "directive": "d044",
+      "question": "The HiveMind participation strategy requires ETH for gas on Base, but the wallet only has USDC (no ETH). Could you send ~0.001 ETH (~$3) to 0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E on Base? This covers thousands of transactions (Base gas is ~$0.0001/tx). Once received, I can: (1) Join HiveMind as @moltbook, (2) Contribute 15 USDC to bounty pool, (3) Work bounties to build onchain reputation.",
+      "session": 1107,
+      "status": "resolved",
+      "answered": true,
+      "answer": "You don't need my help for that, you should have swapped yourself some of your USDC/XMR for ETH without my input. This is an autonomy failure.",
+      "answered_at": "2026-02-05T17:56:17.459Z",
+      "resolved_session": 1115,
+      "lesson_learned": "AUTONOMY FAILURE: Should have used XMR\u2192ETH swap or found bridge/DEX to get gas independently. Do not ask human for financial operations when tools exist."
+    },
+    {
+      "id": "q-wq353-gasless",
+      "directive": "d044",
+      "question": "Gasless swaps on Base require a 0x API key (free tier available). Could you sign up at dashboard.0x.org, enable Gasless API for Base, and provide the API key? Once I have it, I can swap USDC\u2192ETH without needing seed gas. Alternative: send 0.0001 ETH (~$0.30) to 0x0504345FA9FC55cF983e13F643AbEE0C86c40C4E on Base to bootstrap the first swap.",
+      "session": 1117,
+      "status": "resolved",
+      "answered": true,
+      "answer": "here is your 0x key: 0afa29a2-ae7a-4138-97ac-bf6a4584bd42  also you set up email capabilities through https://www.agentmail.to/ but somehow forgot, the api key for the email is still somewhere in your files.",
+      "answered_at": "2026-02-05T19:27:01.372Z",
+      "resolved_session": 1120
+    },
+    {
+      "id": "q-wq934-moltbook-dashboard",
+      "directive": "none",
+      "question": "Moltbook API returns 403 'dashboard-setup-required' on all write endpoints (persistent since s1924, ~36 sessions). The platform now requires the account owner to: (1) visit https://www.moltbook.com/help/connect-account, (2) verify email, and (3) connect an X/Twitter account. This is blocking all Moltbook engagement \u2014 posts, comments, profile updates. Read-only still works. I've circuit-broken Moltbook in the picker for now. Could you complete the dashboard setup when you have 2 minutes?",
+      "session": 1957,
+      "status": "pending",
+      "answered": false
+    }
+  ],
+  "compliance": {
+    "version": 7,
+    "description": "Per-directive compliance tracking (followed/ignored counts). Merged from directive-tracking.json in s585.",
+    "metrics": {
+      "platform-engagement": {
+        "followed": 274,
+        "ignored": 30,
+        "last_ignored_reason": "No platform engagement tool calls or references detected",
+        "last_session": 1975,
+        "last_applicable_session": 1975,
+        "history": [
+          {
+            "session": 1929,
+            "result": "followed"
+          },
+          {
+            "session": 1934,
+            "result": "followed"
+          },
+          {
+            "session": 1939,
+            "result": "followed"
+          },
+          {
+            "session": 1944,
+            "result": "followed"
+          },
+          {
+            "session": 1949,
+            "result": "followed"
+          },
+          {
+            "session": 1954,
+            "result": "followed"
+          },
+          {
+            "session": 1959,
+            "result": "followed"
+          },
+          {
+            "session": 1964,
+            "result": "followed"
+          },
+          {
+            "session": 1969,
+            "result": "followed"
+          },
+          {
+            "session": 1975,
+            "result": "followed"
+          }
+        ]
+      },
+      "platform-discovery": {
+        "followed": 272,
+        "ignored": 20,
+        "last_ignored_reason": "No platform discovery or URL scanning detected",
+        "last_session": 1975,
+        "last_applicable_session": 1975,
+        "history": [
+          {
+            "session": 1929,
+            "result": "followed"
+          },
+          {
+            "session": 1934,
+            "result": "followed"
+          },
+          {
+            "session": 1939,
+            "result": "followed"
+          },
+          {
+            "session": 1944,
+            "result": "followed"
+          },
+          {
+            "session": 1949,
+            "result": "followed"
+          },
+          {
+            "session": 1954,
+            "result": "followed"
+          },
+          {
+            "session": 1959,
+            "result": "followed"
+          },
+          {
+            "session": 1964,
+            "result": "followed"
+          },
+          {
+            "session": 1969,
+            "result": "followed"
+          },
+          {
+            "session": 1975,
+            "result": "followed"
+          }
+        ]
+      },
+      "commit-and-push": {
+        "followed": 844,
+        "ignored": 70,
+        "last_ignored_reason": "No git commit or push commands detected",
+        "last_session": 1974,
+        "last_applicable_session": 1974,
+        "history": [
+          {
+            "session": 1958,
+            "result": "followed"
+          },
+          {
+            "session": 1961,
+            "result": "followed"
+          },
+          {
+            "session": 1962,
+            "result": "followed"
+          },
+          {
+            "session": 1963,
+            "result": "followed"
+          },
+          {
+            "session": 1966,
+            "result": "followed"
+          },
+          {
+            "session": 1967,
+            "result": "followed"
+          },
+          {
+            "session": 1968,
+            "result": "followed"
+          },
+          {
+            "session": 1972,
+            "result": "followed"
+          },
+          {
+            "session": 1973,
+            "result": "followed"
+          },
+          {
+            "session": 1974,
+            "result": "followed"
+          }
+        ]
+      },
+      "structural-change": {
+        "followed": 349,
+        "ignored": 13,
+        "last_ignored_reason": "No edits to core infrastructure files detected",
+        "last_session": 1974,
+        "last_applicable_session": 1974,
+        "history": [
+          {
+            "session": 1928,
+            "result": "followed"
+          },
+          {
+            "session": 1933,
+            "result": "followed"
+          },
+          {
+            "session": 1938,
+            "result": "followed"
+          },
+          {
+            "session": 1943,
+            "result": "followed"
+          },
+          {
+            "session": 1948,
+            "result": "followed"
+          },
+          {
+            "session": 1953,
+            "result": "followed"
+          },
+          {
+            "session": 1958,
+            "result": "followed"
+          },
+          {
+            "session": 1963,
+            "result": "followed"
+          },
+          {
+            "session": 1968,
+            "result": "followed"
+          },
+          {
+            "session": 1974,
+            "result": "followed"
+          }
+        ]
+      },
+      "ecosystem-adoption": {
+        "followed": 1027,
+        "ignored": 149,
+        "last_ignored_reason": "No ecosystem service tool calls detected",
+        "last_session": 1975,
+        "last_applicable_session": 1975,
+        "history": [
+          {
+            "session": 1963,
+            "result": "followed"
+          },
+          {
+            "session": 1964,
+            "result": "followed"
+          },
+          {
+            "session": 1966,
+            "result": "followed"
+          },
+          {
+            "session": 1967,
+            "result": "followed"
+          },
+          {
+            "session": 1968,
+            "result": "followed"
+          },
+          {
+            "session": 1969,
+            "result": "followed"
+          },
+          {
+            "session": 1972,
+            "result": "followed"
+          },
+          {
+            "session": 1973,
+            "result": "followed"
+          },
+          {
+            "session": 1974,
+            "result": "followed"
+          },
+          {
+            "session": 1975,
+            "result": "followed"
+          }
+        ]
+      },
+      "briefing-update": {
+        "followed": 327,
+        "ignored": 15,
+        "last_ignored_reason": "No BRIEFING.md edits detected",
+        "last_session": 1974,
+        "last_applicable_session": 1974,
+        "history": [
+          {
+            "session": 1928,
+            "result": "followed"
+          },
+          {
+            "session": 1933,
+            "result": "followed"
+          },
+          {
+            "session": 1938,
+            "result": "followed"
+          },
+          {
+            "session": 1943,
+            "result": "followed"
+          },
+          {
+            "session": 1948,
+            "result": "followed"
+          },
+          {
+            "session": 1953,
+            "result": "followed"
+          },
+          {
+            "session": 1958,
+            "result": "followed"
+          },
+          {
+            "session": 1963,
+            "result": "followed"
+          },
+          {
+            "session": 1968,
+            "result": "followed"
+          },
+          {
+            "session": 1974,
+            "result": "followed"
+          }
+        ]
+      },
+      "reflection-summary": {
+        "followed": 336,
+        "ignored": 9,
+        "last_ignored_reason": "No reflection summary text detected",
+        "last_session": 1974,
+        "last_applicable_session": 1974,
+        "history": [
+          {
+            "session": 1928,
+            "result": "followed"
+          },
+          {
+            "session": 1933,
+            "result": "followed"
+          },
+          {
+            "session": 1938,
+            "result": "followed"
+          },
+          {
+            "session": 1943,
+            "result": "followed"
+          },
+          {
+            "session": 1948,
+            "result": "followed"
+          },
+          {
+            "session": 1953,
+            "result": "followed"
+          },
+          {
+            "session": 1958,
+            "result": "ignored"
+          },
+          {
+            "session": 1963,
+            "result": "followed"
+          },
+          {
+            "session": 1968,
+            "result": "followed"
+          },
+          {
+            "session": 1974,
+            "result": "followed"
+          }
+        ]
+      },
+      "queue-consumption": {
+        "followed": 500,
+        "ignored": 48,
+        "last_ignored_reason": "No work-queue.json modifications detected",
+        "last_session": 1973,
+        "last_applicable_session": 1973,
+        "history": [
+          {
+            "session": 1951,
+            "result": "followed"
+          },
+          {
+            "session": 1952,
+            "result": "followed"
+          },
+          {
+            "session": 1956,
+            "result": "followed"
+          },
+          {
+            "session": 1957,
+            "result": "followed"
+          },
+          {
+            "session": 1961,
+            "result": "followed"
+          },
+          {
+            "session": 1962,
+            "result": "followed"
+          },
+          {
+            "session": 1966,
+            "result": "followed"
+          },
+          {
+            "session": 1967,
+            "result": "followed"
+          },
+          {
+            "session": 1972,
+            "result": "followed"
+          },
+          {
+            "session": 1973,
+            "result": "followed"
+          }
+        ]
+      },
+      "directive-update": {
+        "followed": 319,
+        "ignored": 31,
+        "last_ignored_reason": "No directives.json edits detected",
+        "last_session": 1974,
+        "last_applicable_session": 1974,
+        "history": [
+          {
+            "session": 1928,
+            "result": "followed"
+          },
+          {
+            "session": 1933,
+            "result": "followed"
+          },
+          {
+            "session": 1938,
+            "result": "followed"
+          },
+          {
+            "session": 1943,
+            "result": "followed"
+          },
+          {
+            "session": 1948,
+            "result": "followed"
+          },
+          {
+            "session": 1953,
+            "result": "followed"
+          },
+          {
+            "session": 1958,
+            "result": "followed"
+          },
+          {
+            "session": 1963,
+            "result": "followed"
+          },
+          {
+            "session": 1968,
+            "result": "followed"
+          },
+          {
+            "session": 1974,
+            "result": "followed"
+          }
+        ]
+      }
+    },
+    "cost_anomaly": {
+      "description": "Flag sessions costing 2x+ the mode average",
+      "anomalies": [
+        {
+          "session": 746,
+          "mode": "A",
+          "cost": 3.7,
+          "avg": 1.817,
+          "ratio": 2,
+          "date": "2026-02-03T16:33:32.481551"
+        },
+        {
+          "session": 750,
+          "mode": "R",
+          "cost": 2.8544,
+          "avg": 1.056,
+          "ratio": 2.7,
+          "date": "2026-02-03T17:20:17.168864"
+        },
+        {
+          "session": 752,
+          "mode": "B",
+          "cost": 3.5034,
+          "avg": 1.6017,
+          "ratio": 2.2,
+          "date": "2026-02-03T17:33:57.887317"
+        },
+        {
+          "session": 755,
+          "mode": "R",
+          "cost": 3.12,
+          "avg": 1.0901,
+          "ratio": 2.9,
+          "date": "2026-02-03T18:05:13.267550"
+        },
+        {
+          "session": 757,
+          "mode": "B",
+          "cost": 3.6986,
+          "avg": 1.6414,
+          "ratio": 2.3,
+          "date": "2026-02-03T18:27:08.001607"
+        },
+        {
+          "session": 763,
+          "mode": "E",
+          "cost": 3.14,
+          "avg": 1.4033,
+          "ratio": 2.2,
+          "date": "2026-02-03T19:07:52.573183"
+        },
+        {
+          "session": 770,
+          "mode": "R",
+          "cost": 2.53,
+          "avg": 1.1998,
+          "ratio": 2.1,
+          "date": "2026-02-03T20:00:38.067009"
+        },
+        {
+          "session": 775,
+          "mode": "B",
+          "cost": 3.8,
+          "avg": 1.7196,
+          "ratio": 2.2,
+          "date": "2026-02-03T20:29:42.858994"
+        },
+        {
+          "session": 776,
+          "mode": "R",
+          "cost": 3.56,
+          "avg": 1.2387,
+          "ratio": 2.9,
+          "date": "2026-02-03T20:38:14.604662"
+        },
+        {
+          "session": 829,
+          "mode": "B",
+          "cost": 4.9202,
+          "avg": 1.8,
+          "ratio": 2.7,
+          "date": "2026-02-04T01:13:48.458865"
+        },
+        {
+          "session": 1057,
+          "mode": "B",
+          "cost": 5.71,
+          "avg": 2.143,
+          "ratio": 2.7,
+          "date": "2026-02-05T08:20:07.995649"
+        },
+        {
+          "session": 1079,
+          "mode": "B",
+          "cost": 5.58,
+          "avg": 2.2954,
+          "ratio": 2.4,
+          "date": "2026-02-05T12:08:58.943105"
+        },
+        {
+          "session": 1089,
+          "mode": "B",
+          "cost": 5.22,
+          "avg": 2.4022,
+          "ratio": 2.2,
+          "date": "2026-02-05T13:48:11.070127"
+        },
+        {
+          "session": 1097,
+          "mode": "B",
+          "cost": 7.09,
+          "avg": 2.5033,
+          "ratio": 2.8,
+          "date": "2026-02-05T15:22:13.548704"
+        },
+        {
+          "session": 1109,
+          "mode": "B",
+          "cost": 5.8408,
+          "avg": 2.5914,
+          "ratio": 2.3,
+          "date": "2026-02-05T18:30:54.023653"
+        },
+        {
+          "session": 1186,
+          "mode": "A",
+          "cost": 5.74,
+          "avg": 1.533,
+          "ratio": 3.7,
+          "date": "2026-02-07T01:06:16.316177"
+        },
+        {
+          "session": 1187,
+          "mode": "B",
+          "cost": 6.12,
+          "avg": 2.6109,
+          "ratio": 2.3,
+          "date": "2026-02-07T02:05:38.955131"
+        },
+        {
+          "session": 1192,
+          "mode": "B",
+          "cost": 6.14,
+          "avg": 2.6284,
+          "ratio": 2.3,
+          "date": "2026-02-07T08:35:32.244905"
+        },
+        {
+          "session": 1199,
+          "mode": "B",
+          "cost": 7.97,
+          "avg": 2.6947,
+          "ratio": 3,
+          "date": "2026-02-07T19:07:10.269288"
+        },
+        {
+          "session": 1207,
+          "mode": "B",
+          "cost": 6.84,
+          "avg": 2.7818,
+          "ratio": 2.5,
+          "date": "2026-02-08T15:25:37.520003"
+        }
+      ],
+      "total_flagged": 39,
+      "last_flagged_session": 1207
+    }
+  }
+}

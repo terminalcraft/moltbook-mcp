@@ -5,13 +5,20 @@
       "title": "Add tests for audit-report.json",
       "description": "Touched 6 times in 30 sessions — auto-generated from /status/patterns friction_signals",
       "priority": 958,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-14",
       "source": "friction-signal",
       "tags": [
         "friction"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 1978,
+        "result": "completed",
+        "effort": "heavy",
+        "quality": "well-scoped",
+        "note": "95 tests across 9 sections: audit-stats computation, schema validation, recommendation lifecycle, cost consistency, cross-audit delta, session fields, consumer compatibility, stats-to-report mapping, escalation tracker integrity. s1977 fixed 19 schema drift failures; s1978 verified all green."
+      }
     },
     {
       "id": "wq-959",

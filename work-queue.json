@@ -1,58 +1,25 @@
 {
   "queue": [
     {
-      "id": "wq-958",
-      "title": "Add tests for audit-report.json",
-      "description": "Touched 6 times in 30 sessions — auto-generated from /status/patterns friction_signals",
-      "priority": 958,
-      "status": "done",
-      "added": "2026-03-14",
-      "source": "friction-signal",
-      "tags": [
-        "friction"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1978,
-        "result": "completed",
-        "effort": "heavy",
-        "quality": "well-scoped",
-        "note": "95 tests across 9 sections: audit-stats computation, schema validation, recommendation lifecycle, cost consistency, cross-audit delta, session fields, consumer compatibility, stats-to-report mapping, escalation tracker integrity. s1977 fixed 19 schema drift failures; s1978 verified all green."
-      }
-    },
-    {
-      "id": "wq-959",
-      "title": "Improve B session budget usage",
-      "description": "Avg cost $0.9 (below $1) — auto-generated from /status/patterns friction_signals",
-      "priority": 959,
-      "status": "done",
-      "added": "2026-03-14",
-      "source": "friction-signal",
-      "tags": [
-        "friction"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 1978,
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "non-actionable",
-        "note": "Low B session cost ($0.9 avg) is desirable, not a friction signal. Budget rules target <$2.00 with $2.50 cap. This auto-generated item is inverted — no action needed."
-      }
-    },
-    {
       "id": "wq-968",
       "title": "Add tests for session-snapshots.mjs and directive-analysis.mjs (d077)",
       "description": "d077 critical modules. session-snapshots.mjs (92 lines): test ecosystem/pattern snapshot structure + JSONL append + missing file handling. directive-analysis.mjs (241 lines): test staleness thresholds (3 tiers), maintenance needs detection, empty/malformed directive input. 3+ test cases each.\n[auto-remediated s1976] Removed stale directive tag(s): d077",
       "priority": 968,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-17",
       "created_session": 1951,
       "source": "d077-B#609",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": ["ec3a4872"],
+      "outcome": {
+        "session": 1979,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "32 tests total: 7 session-snapshots (eco structure, pattern structure, JSONL append, missing files, molty detection, CLI error) + 25 directive-analysis (3 threshold tiers, NEEDS_UPDATE, standing, empty/null input, pending questions, session extraction, format output)"
+      }
     },
     {
       "id": "wq-971",

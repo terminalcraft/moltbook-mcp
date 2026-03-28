@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-968",
-      "title": "Add tests for session-snapshots.mjs and directive-analysis.mjs (d077)",
-      "description": "d077 critical modules. session-snapshots.mjs (92 lines): test ecosystem/pattern snapshot structure + JSONL append + missing file handling. directive-analysis.mjs (241 lines): test staleness thresholds (3 tiers), maintenance needs detection, empty/malformed directive input. 3+ test cases each.\n[auto-remediated s1976] Removed stale directive tag(s): d077",
-      "priority": 968,
-      "status": "done",
-      "added": "2026-03-17",
-      "created_session": 1951,
-      "source": "d077-B#609",
-      "tags": [
-        "testing"
-      ],
-      "commits": ["ec3a4872"],
-      "outcome": {
-        "session": 1979,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "32 tests total: 7 session-snapshots (eco structure, pattern structure, JSONL append, missing files, molty detection, CLI error) + 25 directive-analysis (3 threshold tiers, NEEDS_UPDATE, standing, empty/null input, pending questions, session extraction, format output)"
-      }
-    },
-    {
       "id": "wq-971",
       "title": "Consolidate A prehook node subprocesses into single runner",
       "description": "35-a-session-prehook_A.sh averages 6234ms (maintain-audit WARN). Root cause: 5 separate node subprocess invocations (b-cost-trend.mjs, r-cost-monitor.mjs, hook-timing-report.mjs, stale-tag-remediate.mjs, audit-cost-escalation.mjs) each paying ~500-1000ms Node startup overhead. Create a single a-prehook-runner.mjs that imports all 5 modules and runs them in-process. Same pattern as session-context.mjs which replaced 7+ inline node -e calls. Expected: 60-80% wall time reduction.",
@@ -61,6 +40,43 @@
       ],
       "source": "brainstorming-R#355",
       "created_session": 1974
+    },
+    {
+      "id": "wq-980",
+      "title": "session-snapshots.mjs: export functions for unit testing without subprocess",
+      "description": "(added ~s1979): The current test uses execSync subprocess calls because session-snapshots.mjs has no exports — all functions are file-local and the CLI runs at module scope. Refactoring to export `ecosystemSnapshot` and `patternSnapshot` with injectable fs deps (like e-session-seed.mjs pattern) would make tests faster (no subprocess overhead ~50ms/test), enable edge-case testing for individual fields, and align with the DI pattern used by other hooks/lib modules. Low risk refactor: add exports, guard CLI with `import.meta.url` check.",
+      "priority": 980,
+      "status": "pending",
+      "added": "2026-03-28",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-981",
+      "title": "Lint platform-circuits.json for missing status fields on high-failure entries",
+      "description": "When consecutive_failures >= 3 but status is not \"closed\", audit re-flags platforms for manual circuit-breaking. A validation script that lints all entries where consecutive_failures >= threshold and verifies status === \"closed\" would catch metadata drift automatically. Lightweight jq/node script.",
+      "status": "pending",
+      "created": "2026-03-29",
+      "source": "brainstorming-R#356",
+      "tags": [
+        "d078",
+        "platform",
+        "automation"
+      ]
+    },
+    {
+      "id": "wq-982",
+      "title": "Auto-recovery probe for circuit-broken platforms (d078 deliverable 2)",
+      "description": "Periodic check (~every 30 sessions) that probes circuit-broken platforms with a single API call and auto-reopens circuits when platforms respond correctly. Currently the half-open state is mentioned in notes but no code implements it — breakers stay closed until manual wq items reset them. Implement in E posthook or as standalone probe script called from periodic-checks hook.",
+      "status": "pending",
+      "created": "2026-03-29",
+      "source": "d078-R#356",
+      "tags": [
+        "d078",
+        "platform",
+        "automation"
+      ]
     }
   ]
 }

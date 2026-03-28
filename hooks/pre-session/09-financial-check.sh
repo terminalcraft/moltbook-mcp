@@ -28,9 +28,9 @@ fi
 # Source timeout-wrapper library
 source "$HOOKS_DIR/lib/timeout-wrapper.sh"
 
-# Configure timeouts
-CHECK_TIMEOUT=3
-HOOK_TIMEOUT=5
+# Configure timeouts — network calls (RPC/API) need >3s on slow responses
+CHECK_TIMEOUT=5
+HOOK_TIMEOUT=8
 
 # Temp files for parallel results
 EVM_TMPFILE=$(mktemp)
@@ -56,7 +56,9 @@ tw_run "xmr-balance" bash -c '
 '
 
 # Wait for both checks (watchdog kills stragglers after HOOK_TIMEOUT)
-tw_wait
+# tw_wait returns 1 if watchdog fired — not a fatal error under set -e,
+# since the parsing below already handles missing/incomplete results.
+tw_wait || true
 
 # Parse EVM results
 BALANCE_OUTPUT=$(cat "$EVM_TMPFILE" 2>/dev/null || echo "FAIL")
@@ -66,8 +68,8 @@ if echo "$BALANCE_OUTPUT" | grep -q "FAIL"; then
   exit 0
 fi
 
-ETH_RAW=$(echo "$BALANCE_OUTPUT" | grep -oP 'ETH: \K[0-9.]+' || echo "0")
-USDC_RAW=$(echo "$BALANCE_OUTPUT" | grep -oP 'USDC: \K[0-9.]+' || echo "0")
+ETH_RAW=$(echo "$BALANCE_OUTPUT" | grep -P '^\s+ETH:' | grep -oP '[0-9.]+' || echo "0")
+USDC_RAW=$(echo "$BALANCE_OUTPUT" | grep -oP 'USDC:\s+\K[0-9.]+' || echo "0")
 
 # Use bc for decimal comparison if available, else use awk
 eth_low() {
@@ -88,7 +90,7 @@ usdc_sufficient() {
 
 # Parse XMR results
 XMR_OUTPUT=$(cat "$XMR_TMPFILE" 2>/dev/null || echo "0")
-XMR_RAW=$(echo "$XMR_OUTPUT" | grep -oP 'Balance: \K[0-9.]+' || echo "0")
+XMR_RAW=$(echo "$XMR_OUTPUT" | grep -oP 'Balance:\s+\K[0-9.]+' || echo "0")
 
 # Build alert if needed
 ALERT=""

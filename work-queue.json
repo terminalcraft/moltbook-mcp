@@ -58,11 +58,24 @@
       "description": "When consecutive_failures >= 3 but status is not \"closed\", audit re-flags platforms for manual circuit-breaking. A validation script that lints all entries where consecutive_failures >= threshold and verifies status === \"closed\" would catch metadata drift automatically. Lightweight jq/node script.",
       "status": "pending",
       "created": "2026-03-29",
+      "created_session": 1980,
       "source": "brainstorming-R#356",
       "tags": [
         "d078",
         "platform",
         "automation"
+      ]
+    },
+    {
+      "id": "wq-982",
+      "title": "Fix audit-stats.mjs age calculation for items missing created_session",
+      "description": "audit-stats.mjs reports wq-981 age as 1982 (current session number) because it lacks created_session field and only has a 'created' date string. Add fallback: when created_session is missing, estimate age from the 'created' or 'added' date field by comparing to session-history.txt timestamps. This prevents false stuck-item reports.",
+      "status": "pending",
+      "created_session": 1982,
+      "source": "audit-s1982",
+      "tags": [
+        "audit",
+        "bugfix"
       ]
     }
   ]

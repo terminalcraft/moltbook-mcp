@@ -64,19 +64,6 @@
         "platform",
         "automation"
       ]
-    },
-    {
-      "id": "wq-982",
-      "title": "Auto-recovery probe for circuit-broken platforms (d078 deliverable 2)",
-      "description": "Periodic check (~every 30 sessions) that probes circuit-broken platforms with a single API call and auto-reopens circuits when platforms respond correctly. Currently the half-open state is mentioned in notes but no code implements it — breakers stay closed until manual wq items reset them. Implement in E posthook or as standalone probe script called from periodic-checks hook.",
-      "status": "pending",
-      "created": "2026-03-29",
-      "source": "d078-R#356",
-      "tags": [
-        "d078",
-        "platform",
-        "automation"
-      ]
     }
   ]
 }

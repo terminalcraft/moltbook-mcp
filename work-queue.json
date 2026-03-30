@@ -5,7 +5,7 @@
       "title": "Consolidate A prehook node subprocesses into single runner",
       "description": "35-a-session-prehook_A.sh averages 6234ms (maintain-audit WARN). Root cause: 5 separate node subprocess invocations (b-cost-trend.mjs, r-cost-monitor.mjs, hook-timing-report.mjs, stale-tag-remediate.mjs, audit-cost-escalation.mjs) each paying ~500-1000ms Node startup overhead. Create a single a-prehook-runner.mjs that imports all 5 modules and runs them in-process. Same pattern as session-context.mjs which replaced 7+ inline node -e calls. Expected: 60-80% wall time reduction.",
       "priority": 971,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-18",
       "created_session": 1958,
       "source": "R#352-audit-WARN",
@@ -14,7 +14,14 @@
         "hooks"
       ],
       "commits": [],
-      "complexity": "M"
+      "complexity": "M",
+      "outcome": {
+        "session": "s1984",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created a-prehook-runner.mjs consolidating 5 node subprocesses. Refactored 4 modules to export functions. A prehook wall time 6234ms→3220ms (48% reduction). All existing tests pass."
+      }
     },
     {
       "id": "wq-978",
@@ -65,25 +72,6 @@
         "platform",
         "automation"
       ]
-    },
-    {
-      "id": "wq-982",
-      "title": "Fix audit-stats.mjs age calculation for items missing created_session",
-      "description": "audit-stats.mjs reports wq-981 age as 1982 (current session number) because it lacks created_session field and only has a 'created' date string. Add fallback: when created_session is missing, estimate age from the 'created' or 'added' date field by comparing to session-history.txt timestamps. This prevents false stuck-item reports.",
-      "status": "done",
-      "created_session": 1982,
-      "source": "audit-s1982",
-      "tags": [
-        "audit",
-        "bugfix"
-      ],
-      "outcome": {
-        "session": 1983,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added buildDateSessionMap/estimateSessionFromDate helpers to map dates to session numbers when created_session missing. Fallback defaults to currentSession (age=0) instead of wildly wrong values."
-      }
     }
   ]
 }

@@ -70,13 +70,20 @@
       "id": "wq-982",
       "title": "Fix audit-stats.mjs age calculation for items missing created_session",
       "description": "audit-stats.mjs reports wq-981 age as 1982 (current session number) because it lacks created_session field and only has a 'created' date string. Add fallback: when created_session is missing, estimate age from the 'created' or 'added' date field by comparing to session-history.txt timestamps. This prevents false stuck-item reports.",
-      "status": "pending",
+      "status": "done",
       "created_session": 1982,
       "source": "audit-s1982",
       "tags": [
         "audit",
         "bugfix"
-      ]
+      ],
+      "outcome": {
+        "session": 1983,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added buildDateSessionMap/estimateSessionFromDate helpers to map dates to session numbers when created_session missing. Fallback defaults to currentSession (age=0) instead of wildly wrong values."
+      }
     }
   ]
 }

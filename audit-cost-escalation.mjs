@@ -57,11 +57,12 @@ function getNextWqId(queue) {
   return `wq-${maxId + 1}`;
 }
 
-function run() {
+export function run(opts = {}) {
+  const isDryRun = opts.dryRun ?? dryRun;
+
   const stats = getStats();
   if (!stats) {
-    console.log(JSON.stringify({ error: 'Failed to run audit-stats.mjs' }));
-    process.exit(1);
+    return { error: 'Failed to run audit-stats.mjs' };
   }
 
   const queueData = JSON.parse(readFileSync(QUEUE_PATH, 'utf8'));
@@ -118,11 +119,11 @@ function run() {
       commits: [],
     };
 
-    if (!dryRun) {
+    if (!isDryRun) {
       queue.push(newItem);
     }
 
-    entry.action = dryRun ? 'would_create' : 'created';
+    entry.action = isDryRun ? 'would_create' : 'created';
     entry.wq_id = newId;
     entry.reason = `last-5 avg $${trend.last5_avg} >= $${config.threshold}`;
     results.push(entry);
@@ -130,19 +131,22 @@ function run() {
   }
 
   // Write updated queue if items were created
-  if (created.length > 0 && !dryRun) {
+  if (created.length > 0 && !isDryRun) {
     writeFileSync(QUEUE_PATH, JSON.stringify(queueData, null, 2) + '\n');
   }
 
-  const output = {
-    dry_run: dryRun,
+  return {
+    dry_run: isDryRun,
     session: stats.session,
     existing_cost_item: existingCostItem,
     checks: results,
     items_created: created,
   };
-
-  console.log(JSON.stringify(output, null, 2));
 }
 
-run();
+// CLI entry point
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('audit-cost-escalation.mjs')) {
+  const result = run();
+  console.log(JSON.stringify(result, null, 2));
+  if (result.error) process.exit(1);
+}

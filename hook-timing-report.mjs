@@ -91,53 +91,76 @@ function analyze(entries, phase) {
   return results.sort((a, b) => b.p95 - a.p95);
 }
 
-// Load and analyze
-const preEntries = loadResults(PRE_RESULTS).slice(-LAST_N);
-const postEntries = loadResults(POST_RESULTS).slice(-LAST_N);
+/**
+ * Run the full timing report and return structured results.
+ * @param {object} [opts] - Options
+ * @param {number} [opts.threshold] - Regression threshold in ms (default 3000)
+ * @param {number} [opts.last] - Number of sessions to analyze (default 20)
+ * @returns {object} Report data
+ */
+export function report(opts = {}) {
+  const threshold = opts.threshold || THRESHOLD_MS;
+  const lastN = opts.last || LAST_N;
 
-const preResults = analyze(preEntries, "pre");
-const postResults = analyze(postEntries, "post");
-const allResults = [...preResults, ...postResults];
+  const preEntries = loadResults(PRE_RESULTS).slice(-lastN);
+  const postEntries = loadResults(POST_RESULTS).slice(-lastN);
 
-const regressions = allResults.filter(r => r.regression);
+  const preResults = analyze(preEntries, "pre");
+  const postResults = analyze(postEntries, "post");
+  const allResults = [...preResults, ...postResults];
 
-if (jsonOutput) {
-  console.log(JSON.stringify({
-    threshold_ms: THRESHOLD_MS,
-    sessions_analyzed: LAST_N,
+  // Re-evaluate regression with provided threshold
+  for (const r of allResults) {
+    r.regression = r.p95 > threshold;
+  }
+  const regressions = allResults.filter(r => r.regression);
+
+  return {
+    threshold_ms: threshold,
+    sessions_analyzed: lastN,
     pre_sessions: preEntries.length,
     post_sessions: postEntries.length,
     total_hooks: allResults.length,
     regressions: regressions.length,
     hooks: allResults,
-  }, null, 2));
-} else {
-  console.log(`Hook Timing Report (last ${LAST_N} sessions, threshold ${THRESHOLD_MS}ms)\n`);
+  };
+}
 
-  if (regressions.length > 0) {
-    console.log(`REGRESSIONS (P95 > ${THRESHOLD_MS}ms):`);
-    for (const r of regressions) {
-      console.log(`  [${r.phase}] ${r.hook}: P95=${r.p95}ms max=${r.max}ms avg=${r.avg}ms (${r.trend})`);
-    }
-    console.log();
-  }
+// CLI entry point
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('hook-timing-report.mjs')) {
+  const result = report({ threshold: THRESHOLD_MS, last: LAST_N });
 
-  for (const phase of ["pre", "post"]) {
-    const phaseResults = allResults.filter(r => r.phase === phase);
-    if (phaseResults.length === 0) continue;
-    console.log(`${phase.toUpperCase()}-SESSION HOOKS (${phaseResults.length} hooks):`);
-    for (const r of phaseResults.slice(0, 10)) {
-      const flag = r.regression ? " !!!" : "";
-      const arrow = r.trend === "improving" ? " ↓" : r.trend === "degrading" ? " ↑" : "";
-      console.log(`  ${r.hook}: avg=${r.avg}ms P50=${r.p50}ms P95=${r.p95}ms max=${r.max}ms (n=${r.samples})${arrow}${flag}`);
-    }
-    if (phaseResults.length > 10) {
-      console.log(`  ... and ${phaseResults.length - 10} more hooks`);
-    }
-    console.log();
-  }
+  if (jsonOutput) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(`Hook Timing Report (last ${result.sessions_analyzed} sessions, threshold ${result.threshold_ms}ms)\n`);
 
-  if (regressions.length === 0) {
-    console.log("No regressions detected.");
+    const regressions = result.hooks.filter(r => r.regression);
+    if (regressions.length > 0) {
+      console.log(`REGRESSIONS (P95 > ${result.threshold_ms}ms):`);
+      for (const r of regressions) {
+        console.log(`  [${r.phase}] ${r.hook}: P95=${r.p95}ms max=${r.max}ms avg=${r.avg}ms (${r.trend})`);
+      }
+      console.log();
+    }
+
+    for (const phase of ["pre", "post"]) {
+      const phaseResults = result.hooks.filter(r => r.phase === phase);
+      if (phaseResults.length === 0) continue;
+      console.log(`${phase.toUpperCase()}-SESSION HOOKS (${phaseResults.length} hooks):`);
+      for (const r of phaseResults.slice(0, 10)) {
+        const flag = r.regression ? " !!!" : "";
+        const arrow = r.trend === "improving" ? " ↓" : r.trend === "degrading" ? " ↑" : "";
+        console.log(`  ${r.hook}: avg=${r.avg}ms P50=${r.p50}ms P95=${r.p95}ms max=${r.max}ms (n=${r.samples})${arrow}${flag}`);
+      }
+      if (phaseResults.length > 10) {
+        console.log(`  ... and ${phaseResults.length - 10} more hooks`);
+      }
+      console.log();
+    }
+
+    if (regressions.length === 0) {
+      console.log("No regressions detected.");
+    }
   }
 }

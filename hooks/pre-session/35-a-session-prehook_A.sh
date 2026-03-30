@@ -14,6 +14,7 @@
 #   37-cost-escalation_A.sh     (B#565, wq-888)
 #
 # Created: R#329 (d074 Group 1)
+# Optimized: B#624 (wq-971) — single node runner replaces 5 subprocesses
 
 set -euo pipefail
 
@@ -22,17 +23,31 @@ STATE_DIR="$HOME/.config/moltbook"
 SESSION="${SESSION_NUM:-0}"
 
 ###############################################################################
+# Phase 1: Run consolidated node runner (checks 1, 3, 4-remediate, 7)
+# Single node process replaces 5 separate invocations (~3-5s saved)
+###############################################################################
+RUNNER_JSON=""
+run_node_checks() {
+  RUNNER_JSON=$(node "$DIR/a-prehook-runner.mjs" --apply-stale-tags 2>/dev/null) || RUNNER_JSON=""
+}
+
+###############################################################################
 # Check 1: Cost trend monitor (was 28-cost-trend-monitor_A.sh)
-#   B/R session cost trend analysis via external .mjs modules
+#   Uses runner output for B and R cost trends
 ###############################################################################
 check_cost_trends() {
+  if [ -z "$RUNNER_JSON" ]; then
+    echo "[cost-trend] ERROR: runner failed"
+    return 0
+  fi
+
   # B session cost trend
-  b_result=$(node "$DIR/b-cost-trend.mjs" --json 2>/dev/null) || b_result=""
-  if [ -n "$b_result" ]; then
-    b_status=$(echo "$b_result" | jq -r '.status')
-    b_avg=$(echo "$b_result" | jq -r '.recentAvg')
-    b_trend=$(echo "$b_result" | jq -r '.trendPct')
-    b_high=$(echo "$b_result" | jq -r '.highCount')
+  b_error=$(echo "$RUNNER_JSON" | jq -r '.b_cost_trend.error // empty')
+  if [ -z "$b_error" ]; then
+    b_status=$(echo "$RUNNER_JSON" | jq -r '.b_cost_trend.status')
+    b_avg=$(echo "$RUNNER_JSON" | jq -r '.b_cost_trend.recentAvg')
+    b_trend=$(echo "$RUNNER_JSON" | jq -r '.b_cost_trend.trendPct')
+    b_high=$(echo "$RUNNER_JSON" | jq -r '.b_cost_trend.highCount')
 
     case "$b_status" in
       critical)
@@ -51,12 +66,12 @@ check_cost_trends() {
   fi
 
   # R session cost trend
-  r_result=$(node "$DIR/r-cost-monitor.mjs" --json 2>/dev/null) || r_result=""
-  if [ -n "$r_result" ]; then
-    r_status=$(echo "$r_result" | jq -r '.status')
-    r_avg=$(echo "$r_result" | jq -r '.postR252Avg')
-    r_monitored=$(echo "$r_result" | jq -r '.monitored')
-    r_remaining=$(echo "$r_result" | jq -r '.remaining')
+  r_error=$(echo "$RUNNER_JSON" | jq -r '.r_cost_monitor.error // empty')
+  if [ -z "$r_error" ]; then
+    r_status=$(echo "$RUNNER_JSON" | jq -r '.r_cost_monitor.status')
+    r_avg=$(echo "$RUNNER_JSON" | jq -r '.r_cost_monitor.postR252Avg')
+    r_monitored=$(echo "$RUNNER_JSON" | jq -r '.r_cost_monitor.monitored')
+    r_remaining=$(echo "$RUNNER_JSON" | jq -r '.r_cost_monitor.remaining')
 
     case "$r_status" in
       ALERT)
@@ -121,16 +136,28 @@ check_stale_refs() {
 
 ###############################################################################
 # Check 3: Hook timing report (was 32-hook-timing-check_A.sh)
-#   Reports slow hooks and regressions for audit consumption
+#   Uses runner output for hook timing analysis
 ###############################################################################
 check_hook_timing() {
   local OUTPUT_FILE="$STATE_DIR/hook-timing-audit.json"
 
-  RAW=$(node "$DIR/hook-timing-report.mjs" --json --last 10 2>/dev/null) || {
-    echo '{"checked":"'"$(date -Iseconds)"'","session":'"$SESSION"',"error":"hook-timing-report.mjs failed","slow_count":0,"worst_offender":null}' > "$OUTPUT_FILE"
-    echo "[hook-timing] ERROR: hook-timing-report.mjs failed"
+  if [ -z "$RUNNER_JSON" ]; then
+    echo '{"checked":"'"$(date -Iseconds)"'","session":'"$SESSION"',"error":"runner failed","slow_count":0,"worst_offender":null}' > "$OUTPUT_FILE"
+    echo "[hook-timing] ERROR: runner failed"
     return 0
-  }
+  fi
+
+  local ht_error
+  ht_error=$(echo "$RUNNER_JSON" | jq -r '.hook_timing.error // empty')
+  if [ -n "$ht_error" ]; then
+    echo '{"checked":"'"$(date -Iseconds)"'","session":'"$SESSION"',"error":"'"$ht_error"'","slow_count":0,"worst_offender":null}' > "$OUTPUT_FILE"
+    echo "[hook-timing] ERROR: $ht_error"
+    return 0
+  fi
+
+  # Extract hook_timing from runner output
+  local RAW
+  RAW=$(echo "$RUNNER_JSON" | jq '.hook_timing')
 
   local SLOW_COUNT TOTAL DEGRADING_COUNT
   SLOW_COUNT=$(echo "$RAW" | jq '.regressions')
@@ -175,7 +202,7 @@ check_hook_timing() {
 
 ###############################################################################
 # Check 4: Stale tag detection (was 33-stale-tag-check_A.sh)
-#   Detects queue items tagged with completed directives
+#   Detection via jq, remediation via runner output
 ###############################################################################
 check_stale_tags() {
   local OUTPUT_FILE="$STATE_DIR/stale-tags-audit.json"
@@ -232,7 +259,14 @@ check_stale_tags() {
     local ITEMS
     ITEMS=$(echo "$RESULT" | jq -r '[.stale_items[] | "\(.id)(\(.stale_tags | join(",")))"] | join(", ")')
     echo "[stale-tags] $STALE_COUNT item(s) tagged with completed directives: $ITEMS"
-    node "$DIR/stale-tag-remediate.mjs" --apply 2>/dev/null && echo "[stale-tags] Auto-remediated stale tags" || echo "[stale-tags] WARN: auto-remediation failed"
+    # Remediation already handled by runner (--apply-stale-tags)
+    if [ -n "$RUNNER_JSON" ]; then
+      local rem_count
+      rem_count=$(echo "$RUNNER_JSON" | jq '.stale_tag_remediate.remediated | length' 2>/dev/null) || rem_count=0
+      if [ "$rem_count" -gt 0 ]; then
+        echo "[stale-tags] Auto-remediated $rem_count stale tag(s) via runner"
+      fi
+    fi
   else
     echo "[stale-tags] OK: no stale directive tags found"
   fi
@@ -363,33 +397,42 @@ check_briefing_directives() {
 
 ###############################################################################
 # Check 7: Cost escalation (was 37-cost-escalation_A.sh)
-#   Runs audit-cost-escalation.mjs to create wq items for cost trends
+#   Uses runner output for cost escalation checks
 ###############################################################################
 check_cost_escalation() {
-  local output
-  output=$(node "$DIR/audit-cost-escalation.mjs" 2>&1) || {
-    echo "[cost-escalation] WARN: audit-cost-escalation.mjs failed: $output"
+  if [ -z "$RUNNER_JSON" ]; then
+    echo "[cost-escalation] WARN: runner failed"
     return 0
-  }
+  fi
+
+  local ce_error
+  ce_error=$(echo "$RUNNER_JSON" | jq -r '.cost_escalation.error // empty')
+  if [ -n "$ce_error" ]; then
+    echo "[cost-escalation] WARN: $ce_error"
+    return 0
+  fi
 
   local items_created
-  items_created=$(echo "$output" | jq -r '.items_created | length' 2>/dev/null) || items_created="?"
+  items_created=$(echo "$RUNNER_JSON" | jq -r '.cost_escalation.items_created | length' 2>/dev/null) || items_created="?"
   echo "[cost-escalation] OK: checked cost trends, $items_created items created."
 
   if [ "$items_created" != "0" ] && [ "$items_created" != "?" ]; then
-    echo "$output" | jq -r '.checks[] | select(.action == "created") | "  → \(.wq_id): \(.type) session avg $\(.last5_avg) >= $\(.threshold)"' 2>/dev/null || true
+    echo "$RUNNER_JSON" | jq -r '.cost_escalation.checks[] | select(.action == "created") | "  → \(.wq_id): \(.type) session avg $\(.last5_avg) >= $\(.threshold)"' 2>/dev/null || true
   fi
 }
 
 ###############################################################################
-# Run all checks in parallel — each check is independent, writes its own
-# state file, and handles its own errors (always returns 0).
-# Parallelism cuts wall time from sum(checks) to max(checks).
+# Run: first the node runner (single process), then all checks in parallel.
+# The runner result is shared across checks 1, 3, 4-remediate, 7.
 ###############################################################################
+
+# Run the consolidated node runner first (blocking — all node checks in one process)
+run_node_checks
 
 TMPDIR_CHECKS=$(mktemp -d)
 trap 'rm -rf "$TMPDIR_CHECKS"' EXIT
 
+# Now run all shell checks in parallel (node data already available)
 check_cost_trends    > "$TMPDIR_CHECKS/1-cost-trends.out"    2>&1 &
 check_stale_refs     > "$TMPDIR_CHECKS/2-stale-refs.out"     2>&1 &
 check_hook_timing    > "$TMPDIR_CHECKS/3-hook-timing.out"    2>&1 &
@@ -405,4 +448,4 @@ for f in "$TMPDIR_CHECKS"/*.out; do
   [ -s "$f" ] && cat "$f"
 done
 
-echo "[a-prehook] All 7 checks complete (parallel)"
+echo "[a-prehook] All 7 checks complete (1 node process + parallel shell)"

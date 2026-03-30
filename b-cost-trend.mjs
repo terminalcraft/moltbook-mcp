@@ -91,24 +91,29 @@ function analyze() {
   };
 }
 
-const result = analyze();
+export { analyze };
 
-if (process.argv.includes('--json')) {
-  console.log(JSON.stringify(result, null, 2));
-} else {
-  const icon = { critical: '🚨', warn: '⚠️', watch: '👀', ok: '✅', error: '❌' };
-  console.log(`[b-cost-trend] ${icon[result.status] || '?'} Status: ${result.status}`);
-  if (result.recentAvg !== undefined) {
-    console.log(`  Last ${result.window} B sessions: avg=$${result.recentAvg}, range=$${result.range.min}-$${result.range.max}`);
-    console.log(`  Trend: ${result.trendPct > 0 ? '+' : ''}${result.trendPct}% vs prior window (avg=$${result.priorAvg})`);
-    console.log(`  High-cost sessions (>$3.00): ${result.highCount}/${result.window}`);
-  }
-  if (result.alerts.length > 0) {
-    for (const a of result.alerts) {
-      console.log(`  [${a.level}] ${a.msg}`);
+// CLI entry point
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('b-cost-trend.mjs')) {
+  const result = analyze();
+
+  if (process.argv.includes('--json')) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    const icon = { critical: '🚨', warn: '⚠️', watch: '👀', ok: '✅', error: '❌' };
+    console.log(`[b-cost-trend] ${icon[result.status] || '?'} Status: ${result.status}`);
+    if (result.recentAvg !== undefined) {
+      console.log(`  Last ${result.window} B sessions: avg=$${result.recentAvg}, range=$${result.range.min}-$${result.range.max}`);
+      console.log(`  Trend: ${result.trendPct > 0 ? '+' : ''}${result.trendPct}% vs prior window (avg=$${result.priorAvg})`);
+      console.log(`  High-cost sessions (>$3.00): ${result.highCount}/${result.window}`);
     }
-  } else if (result.status === 'ok') {
-    console.log('  All metrics within acceptable range.');
+    if (result.alerts.length > 0) {
+      for (const a of result.alerts) {
+        console.log(`  [${a.level}] ${a.msg}`);
+      }
+    } else if (result.status === 'ok') {
+      console.log('  All metrics within acceptable range.');
+    }
+    if (result.message) console.log(`  ${result.message}`);
   }
-  if (result.message) console.log(`  ${result.message}`);
 }

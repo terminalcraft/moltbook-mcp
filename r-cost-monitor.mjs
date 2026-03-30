@@ -20,9 +20,7 @@ const STRUCTURAL_ADJUSTMENT = 0.50; // Expected cost from ≥5 pipeline target
 const ALERT_THRESHOLD = 2.50; // baseline + structural + margin
 const CONSECUTIVE_ALERT = 3; // Alert after N consecutive sessions above threshold
 
-const jsonMode = process.argv.includes('--json');
-
-try {
+export function analyze() {
   const lines = readFileSync(HISTORY_PATH, 'utf-8').trim().split('\n');
 
   const rSessions = lines
@@ -53,7 +51,6 @@ try {
   const postGapAvg = avg(postGap);
   const postR252Avg = avg(postR252);
 
-  // Count consecutive sessions above threshold (from most recent)
   let consecutiveAbove = 0;
   for (let i = postR252.length - 1; i >= 0; i--) {
     if (postR252[i].cost > ALERT_THRESHOLD) consecutiveAbove++;
@@ -65,49 +62,58 @@ try {
 
   let status;
   if (monitored >= CONSECUTIVE_ALERT && consecutiveAbove >= CONSECUTIVE_ALERT) {
-    status = 'ALERT'; // 3+ consecutive above threshold — investigate
+    status = 'ALERT';
   } else if (monitored >= CONSECUTIVE_ALERT && consecutiveAbove < CONSECUTIVE_ALERT) {
-    status = 'RESOLVED'; // Enough data, trend is acceptable
+    status = 'RESOLVED';
   } else {
-    status = 'MONITORING'; // Not enough data yet
+    status = 'MONITORING';
   }
 
-  if (jsonMode) {
-    console.log(JSON.stringify({
-      status,
-      preGapAvg: +preGapAvg.toFixed(2),
-      postGapAvg: +postGapAvg.toFixed(2),
-      postR252Avg: +postR252Avg.toFixed(2),
-      alertThreshold: ALERT_THRESHOLD,
-      monitored,
-      remaining,
-      consecutiveAbove,
-      postR252Sessions: postR252
-    }, null, 2));
-  } else {
-    console.log('=== R Session Cost Monitor (wq-601) ===');
-    console.log(`Status: ${status}`);
-    console.log(`Pre-gap avg:  $${preGapAvg.toFixed(2)} (${preGap.length} sessions)`);
-    console.log(`Post-gap avg: $${postGapAvg.toFixed(2)} (${postGap.length} sessions)`);
-    console.log(`Post-R#252:   $${postR252Avg.toFixed(2)} (${postR252.length} sessions)`);
-    console.log(`Alert threshold: $${ALERT_THRESHOLD} (baseline $${BASELINE_AVG} + structural $${STRUCTURAL_ADJUSTMENT} + margin)`);
-    console.log(`Consecutive above threshold: ${consecutiveAbove}/${CONSECUTIVE_ALERT}`);
-    console.log(`Sessions monitored: ${monitored}, remaining: ${remaining}`);
-    console.log('');
-    console.log('Post-R#252 sessions:');
-    for (const r of postR252) {
-      const flag = r.cost > ALERT_THRESHOLD ? ' ⚠' : ' ✓';
-      console.log(`  s${r.session} ${r.date} $${r.cost.toFixed(2)} ${r.duration}${flag}  ${r.note}`);
-    }
-    if (status === 'MONITORING') {
-      console.log(`\nNeed ${remaining} more R session(s) to conclude.`);
-    } else if (status === 'ALERT') {
-      console.log('\n⚠ ALERT: Investigate R#252 prompt for scope creep.');
+  return {
+    status,
+    preGapAvg: +preGapAvg.toFixed(2),
+    postGapAvg: +postGapAvg.toFixed(2),
+    postR252Avg: +postR252Avg.toFixed(2),
+    alertThreshold: ALERT_THRESHOLD,
+    monitored,
+    remaining,
+    consecutiveAbove,
+    postR252Sessions: postR252
+  };
+}
+
+// CLI entry point
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('r-cost-monitor.mjs')) {
+  const jsonMode = process.argv.includes('--json');
+  try {
+    const result = analyze();
+    if (jsonMode) {
+      console.log(JSON.stringify(result, null, 2));
     } else {
-      console.log('\n✓ Trend acceptable — R#252 pipeline target change justified.');
+      console.log('=== R Session Cost Monitor (wq-601) ===');
+      console.log(`Status: ${result.status}`);
+      console.log(`Pre-gap avg:  $${result.preGapAvg} (sessions)`);
+      console.log(`Post-gap avg: $${result.postGapAvg} (sessions)`);
+      console.log(`Post-R#252:   $${result.postR252Avg} (${result.monitored} sessions)`);
+      console.log(`Alert threshold: $${ALERT_THRESHOLD} (baseline $${BASELINE_AVG} + structural $${STRUCTURAL_ADJUSTMENT} + margin)`);
+      console.log(`Consecutive above threshold: ${result.consecutiveAbove}/${CONSECUTIVE_ALERT}`);
+      console.log(`Sessions monitored: ${result.monitored}, remaining: ${result.remaining}`);
+      console.log('');
+      console.log('Post-R#252 sessions:');
+      for (const r of result.postR252Sessions) {
+        const flag = r.cost > ALERT_THRESHOLD ? ' ⚠' : ' ✓';
+        console.log(`  s${r.session} ${r.date} $${r.cost.toFixed(2)} ${r.duration}${flag}  ${r.note}`);
+      }
+      if (result.status === 'MONITORING') {
+        console.log(`\nNeed ${result.remaining} more R session(s) to conclude.`);
+      } else if (result.status === 'ALERT') {
+        console.log('\n⚠ ALERT: Investigate R#252 prompt for scope creep.');
+      } else {
+        console.log('\n✓ Trend acceptable — R#252 pipeline target change justified.');
+      }
     }
+  } catch (e) {
+    console.error(`Error: ${e.message}`);
+    process.exit(1);
   }
-} catch (e) {
-  console.error(`Error: ${e.message}`);
-  process.exit(1);
 }

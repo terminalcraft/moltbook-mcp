@@ -127,6 +127,51 @@ function computeBrainstormingStats() {
   };
 }
 
+/**
+ * Build a date→session mapping from session-history.txt.
+ * Returns a sorted array of { date: 'YYYY-MM-DD', session: N } entries.
+ * Used as fallback when queue items lack created_session.
+ */
+function buildDateSessionMap() {
+  const historyPath = join(STATE_DIR, 'session-history.txt');
+  if (!existsSync(historyPath)) return [];
+
+  try {
+    const content = readFileSync(historyPath, 'utf8');
+    const entries = [];
+    for (const line of content.split('\n')) {
+      const dateMatch = line.match(/^(\d{4}-\d{2}-\d{2})/);
+      const sessionMatch = line.match(/s=(\d+)/);
+      if (dateMatch && sessionMatch) {
+        entries.push({ date: dateMatch[1], session: parseInt(sessionMatch[1]) });
+      }
+    }
+    return entries;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Estimate session number from a date string (YYYY-MM-DD) using session history.
+ * Finds the closest session that ran on or before the given date.
+ * Returns null if no match found.
+ */
+function estimateSessionFromDate(dateStr, dateSessionMap) {
+  if (!dateStr || dateSessionMap.length === 0) return null;
+
+  // Find last session on or before this date
+  let best = null;
+  for (const entry of dateSessionMap) {
+    if (entry.date <= dateStr) {
+      best = entry.session;
+    } else {
+      break; // entries are chronological, no need to continue past the date
+    }
+  }
+  return best;
+}
+
 function computeQueueStats() {
   const queue = safeRead(join(PROJECT_DIR, 'work-queue.json'), { queue: [] });
   const archive = safeRead(join(PROJECT_DIR, 'work-queue-archive.json'), { archived: [] });
@@ -138,6 +183,7 @@ function computeQueueStats() {
   const auditCompleted = [];
   const stuck = [];
   const currentSession = getCurrentSession();
+  const dateSessionMap = buildDateSessionMap();
 
   for (const item of items) {
     statusCounts[item.status] = (statusCounts[item.status] || 0) + 1;
@@ -148,8 +194,12 @@ function computeQueueStats() {
 
     if (item.status === 'pending') {
       // Check both field names: created_session (newer format) and session_added (wq-295 format)
-      // Fall back to parsing date from 'added' field, or 0 if nothing works
-      const createdSession = item.created_session || item.session_added || parseInt(item.added?.replace(/\D/g, '') || '0');
+      // Fall back to estimating from 'created' or 'added' date via session-history.txt (wq-982)
+      let createdSession = item.created_session || item.session_added || null;
+      if (!createdSession) {
+        const dateStr = item.created || item.added || null;
+        createdSession = estimateSessionFromDate(dateStr, dateSessionMap) || currentSession;
+      }
       const age = currentSession - createdSession;
       if (age > 20) {
         stuck.push({ id: item.id, age });

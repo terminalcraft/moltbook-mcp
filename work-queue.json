@@ -1,29 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-971",
-      "title": "Consolidate A prehook node subprocesses into single runner",
-      "description": "35-a-session-prehook_A.sh averages 6234ms (maintain-audit WARN). Root cause: 5 separate node subprocess invocations (b-cost-trend.mjs, r-cost-monitor.mjs, hook-timing-report.mjs, stale-tag-remediate.mjs, audit-cost-escalation.mjs) each paying ~500-1000ms Node startup overhead. Create a single a-prehook-runner.mjs that imports all 5 modules and runs them in-process. Same pattern as session-context.mjs which replaced 7+ inline node -e calls. Expected: 60-80% wall time reduction.",
-      "priority": 971,
-      "status": "done",
-      "added": "2026-03-18",
-      "created_session": 1958,
-      "source": "R#352-audit-WARN",
-      "tags": [
-        "performance",
-        "hooks"
-      ],
-      "commits": [],
-      "complexity": "M",
-      "outcome": {
-        "session": "s1984",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created a-prehook-runner.mjs consolidating 5 node subprocesses. Refactored 4 modules to export functions. A prehook wall time 6234ms→3220ms (48% reduction). All existing tests pass."
-      }
-    },
-    {
       "id": "wq-978",
       "title": "Auto-circuit-break in E posthook (d078)",
       "description": "Wire recordOutcome() in the E posthook to automatically set status:closed in platform-circuits.json when consecutive_failures >= CIRCUIT_FAILURE_THRESHOLD. Currently the breaker stays open until an audit→wq→B pipeline manually closes it. Auto-tripping eliminates this class of reactive work entirely. Low risk — threshold is already enforced by getCircuitState(), this just makes the metadata match immediately.",
@@ -58,6 +35,31 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-983",
+      "title": "Consolidate E prehook node subprocesses into single runner",
+      "description": "Apply the same runner pattern from wq-971 (a-prehook-runner.mjs) to 35-e-session-prehook_E.sh. The E prehook currently spawns 9 node subprocesses (seed, liveness, topic-clusters, conversation-balance, spending-policy, credential-health, variety-analyzer, colony-jwt, picker + revalidate). Audit flags it slow at 6292ms avg. A single e-prehook-runner.mjs that imports and runs the checks would eliminate ~1-2s of Node startup overhead. Requires: export functions from each module (some already exported), create runner, update shell script to call runner once. Same pattern as wq-971.",
+      "status": "pending",
+      "created": "2026-03-31",
+      "created_session": 1985,
+      "source": "R#357-code-review",
+      "tags": [
+        "performance",
+        "E-prehook"
+      ]
+    },
+    {
+      "id": "wq-984",
+      "title": "Add tests for a-prehook-runner.mjs",
+      "description": "a-prehook-runner.mjs (wq-971, B#624) has no test file. Should test: safeRun() catches errors and returns {ok:false, error}, module imports don't cause side effects, output is valid JSON with expected keys. Small scope: 3-5 test cases.",
+      "status": "pending",
+      "created": "2026-03-31",
+      "created_session": 1985,
+      "source": "R#357-code-review",
+      "tags": [
+        "test"
+      ]
     },
     {
       "id": "wq-981",

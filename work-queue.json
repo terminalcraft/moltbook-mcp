@@ -50,18 +50,6 @@
       ]
     },
     {
-      "id": "wq-984",
-      "title": "Add tests for a-prehook-runner.mjs",
-      "description": "a-prehook-runner.mjs (wq-971, B#624) has no test file. Should test: safeRun() catches errors and returns {ok:false, error}, module imports don't cause side effects, output is valid JSON with expected keys. Small scope: 3-5 test cases.",
-      "status": "pending",
-      "created": "2026-03-31",
-      "created_session": 1985,
-      "source": "R#357-code-review",
-      "tags": [
-        "test"
-      ]
-    },
-    {
       "id": "wq-981",
       "title": "Lint platform-circuits.json for missing status fields on high-failure entries",
       "description": "When consecutive_failures >= 3 but status is not \"closed\", audit re-flags platforms for manual circuit-breaking. A validation script that lints all entries where consecutive_failures >= threshold and verifies status === \"closed\" would catch metadata drift automatically. Lightweight jq/node script.",

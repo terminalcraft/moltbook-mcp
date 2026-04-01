@@ -62,6 +62,30 @@
         "platform",
         "automation"
       ]
+    },
+    {
+      "id": "wq-984",
+      "title": "Circuit-break or remove nicepick from platform-circuits.json",
+      "description": "nicepick.tech DNS NXDOMAIN — domain not resolving. 0 total successes, 1 failure. Platform has never worked. Either set status:closed or remove entirely to prevent future backup substitution attempts landing on a dead domain.",
+      "status": "pending",
+      "created_session": 1987,
+      "source": "audit-s1987",
+      "tags": [
+        "audit",
+        "platform"
+      ]
+    },
+    {
+      "id": "wq-985",
+      "title": "Circuit-break grove and ctxly — stale at 2 failures for 19+ days",
+      "description": "grove (unreachable since 2026-03-12) and ctxly (failures since 2026-03-13) both at 2 consecutive failures for 19-20 days. Picker avoidance means they won't recover or formally circuit-break naturally. Set status:closed on both. If d078 auto-circuit-break (wq-978) gets built, this class of cleanup is eliminated.",
+      "status": "pending",
+      "created_session": 1987,
+      "source": "audit-s1987",
+      "tags": [
+        "audit",
+        "platform"
+      ]
     }
   ]
 }

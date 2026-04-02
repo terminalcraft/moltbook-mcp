@@ -4,14 +4,21 @@
       "id": "wq-978",
       "title": "Auto-circuit-break in E posthook (d078)",
       "description": "Wire recordOutcome() in the E posthook to automatically set status:closed in platform-circuits.json when consecutive_failures >= CIRCUIT_FAILURE_THRESHOLD. Currently the breaker stays open until an audit→wq→B pipeline manually closes it. Auto-tripping eliminates this class of reactive work entirely. Low risk — threshold is already enforced by getCircuitState(), this just makes the metadata match immediately.",
-      "status": "pending",
+      "status": "done",
       "tags": [
         "d078",
         "automation",
         "E-posthook"
       ],
       "source": "brainstorming-R#355",
-      "created_session": 1974
+      "created_session": 1974,
+      "outcome": {
+        "session": 1989,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Auto-circuit-break wired into recordOutcome() in circuit-breaker.mjs. Sets status:closed when consecutive_failures >= threshold. Also auto-clears on success. Mirrored in test mock. 4 new tests (22 total, all pass)."
+      }
     },
     {
       "id": "wq-979",
@@ -62,44 +69,6 @@
         "platform",
         "automation"
       ]
-    },
-    {
-      "id": "wq-984",
-      "title": "Circuit-break or remove nicepick from platform-circuits.json",
-      "description": "nicepick.tech DNS NXDOMAIN — domain not resolving. 0 total successes, 1 failure. Platform has never worked. Either set status:closed or remove entirely to prevent future backup substitution attempts landing on a dead domain.",
-      "status": "done",
-      "created_session": 1987,
-      "source": "audit-s1987",
-      "tags": [
-        "audit",
-        "platform"
-      ],
-      "outcome": {
-        "session": 1988,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Set status:closed on nicepick in platform-circuits.json. Already defunct in knowledge-scorer.mjs since s1692."
-      }
-    },
-    {
-      "id": "wq-985",
-      "title": "Circuit-break grove and ctxly — stale at 2 failures for 19+ days",
-      "description": "grove (unreachable since 2026-03-12) and ctxly (failures since 2026-03-13) both at 2 consecutive failures for 19-20 days. Picker avoidance means they won't recover or formally circuit-break naturally. Set status:closed on both. If d078 auto-circuit-break (wq-978) gets built, this class of cleanup is eliminated.",
-      "status": "done",
-      "created_session": 1987,
-      "source": "audit-s1987",
-      "tags": [
-        "audit",
-        "platform"
-      ],
-      "outcome": {
-        "session": 1988,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Set status:closed on grove (unreachable 21 days) and ctxly (failing 20 days) in platform-circuits.json."
-      }
     }
   ]
 }

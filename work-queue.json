@@ -1,26 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-978",
-      "title": "Auto-circuit-break in E posthook (d078)",
-      "description": "Wire recordOutcome() in the E posthook to automatically set status:closed in platform-circuits.json when consecutive_failures >= CIRCUIT_FAILURE_THRESHOLD. Currently the breaker stays open until an audit→wq→B pipeline manually closes it. Auto-tripping eliminates this class of reactive work entirely. Low risk — threshold is already enforced by getCircuitState(), this just makes the metadata match immediately.",
-      "status": "done",
-      "tags": [
-        "d078",
-        "automation",
-        "E-posthook"
-      ],
-      "source": "brainstorming-R#355",
-      "created_session": 1974,
-      "outcome": {
-        "session": 1989,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Auto-circuit-break wired into recordOutcome() in circuit-breaker.mjs. Sets status:closed when consecutive_failures >= threshold. Also auto-clears on success. Mirrored in test mock. 4 new tests (22 total, all pass)."
-      }
-    },
-    {
       "id": "wq-979",
       "title": "Auto-retire stuck queue items in A prehook",
       "description": "Extend audit-stats.mjs age check to auto-retire pending items with created_session > 50 sessions behind current, instead of creating separate wq items to retire them (as happened with wq-969/wq-974). Eliminates this class of meta-task.",
@@ -68,6 +48,19 @@
         "d078",
         "platform",
         "automation"
+      ]
+    },
+    {
+      "id": "wq-986",
+      "title": "Auto-circuit-break E posthook integration test",
+      "description": "wq-978 wired auto-circuit-break into recordOutcome() in circuit-breaker.mjs. Validate the full end-to-end pipeline: simulate 3 consecutive E session failures for a platform and verify platform-circuits.json has status:closed without manual B session intervention. Also verify the auto-reopen-on-success path. Test should exercise the actual engage-orchestrator → circuit-breaker → platform-circuits.json flow.",
+      "status": "pending",
+      "created": "2026-04-03",
+      "created_session": 1990,
+      "source": "brainstorming-R#358",
+      "tags": [
+        "d078",
+        "testing"
       ]
     }
   ]

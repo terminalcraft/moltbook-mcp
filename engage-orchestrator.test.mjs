@@ -278,3 +278,72 @@ describe('Circuit Breaker: Edge Cases', () => {
     assert.equal(result.total_failures, 100); // preserved
   });
 });
+
+describe('Circuit Breaker: Auto-circuit-break (d078, wq-978)', () => {
+  test('auto-sets status:closed when consecutive_failures reaches threshold', () => {
+    const store = createCircuitStore();
+    let result;
+    for (let i = 0; i < CIRCUIT_FAILURE_THRESHOLD; i++) {
+      result = diRecordOutcome(store, 'AutoBreak1', 'failure');
+    }
+
+    assert.equal(result.consecutive_failures, CIRCUIT_FAILURE_THRESHOLD);
+    assert.equal(result.state, 'open');
+    // Verify status was written to the store
+    const circuits = store.loadCircuits();
+    assert.equal(circuits.AutoBreak1.status, 'closed');
+    assert.ok(circuits.AutoBreak1.notes.includes('Auto-circuit-broken'));
+  });
+
+  test('does not double-write status if already closed', () => {
+    const store = createCircuitStore({
+      AlreadyClosed: {
+        consecutive_failures: 5,
+        total_failures: 10,
+        total_successes: 20,
+        last_failure: new Date().toISOString(),
+        last_success: null,
+        status: 'closed',
+        notes: 'Manual circuit-break note'
+      }
+    });
+
+    // Another failure should not overwrite existing notes
+    const result = diRecordOutcome(store, 'AlreadyClosed', 'failure');
+    const circuits = store.loadCircuits();
+    assert.equal(circuits.AlreadyClosed.status, 'closed');
+    assert.equal(circuits.AlreadyClosed.notes, 'Manual circuit-break note');
+  });
+
+  test('success clears closed status (auto-reopen)', () => {
+    const store = createCircuitStore({
+      WasClosed: {
+        consecutive_failures: 5,
+        total_failures: 10,
+        total_successes: 20,
+        last_failure: new Date().toISOString(),
+        last_success: null,
+        status: 'closed',
+        notes: 'Some notes'
+      }
+    });
+
+    const result = diRecordOutcome(store, 'WasClosed', 'success');
+    assert.equal(result.consecutive_failures, 0);
+    assert.equal(result.state, 'closed'); // getCircuitState returns 'closed' for healthy
+    const circuits = store.loadCircuits();
+    assert.equal(circuits.WasClosed.status, undefined);
+  });
+
+  test('failures below threshold do not set status:closed', () => {
+    const store = createCircuitStore();
+    // Record failures just below threshold
+    for (let i = 0; i < CIRCUIT_FAILURE_THRESHOLD - 1; i++) {
+      diRecordOutcome(store, 'BelowThreshold', 'failure');
+    }
+
+    const circuits = store.loadCircuits();
+    assert.equal(circuits.BelowThreshold.status, undefined);
+    assert.equal(circuits.BelowThreshold.consecutive_failures, CIRCUIT_FAILURE_THRESHOLD - 1);
+  });
+});

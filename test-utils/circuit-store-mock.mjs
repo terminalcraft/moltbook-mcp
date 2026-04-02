@@ -3,7 +3,7 @@
 // Provides createCircuitStore() and DI helpers for testing circuit breaker logic
 // without filesystem access.
 
-import { getCircuitState } from '../lib/circuit-breaker.mjs';
+import { getCircuitState, CIRCUIT_FAILURE_THRESHOLD } from '../lib/circuit-breaker.mjs';
 import { handleRecordOutcome, handleCircuitStatus } from '../lib/orchestrator-cli.mjs';
 
 /**
@@ -22,10 +22,19 @@ export function createCircuitStore(initial = {}) {
       entry.consecutive_failures = 0;
       entry.total_successes++;
       entry.last_success = new Date().toISOString();
+      // Auto-reopen: clear closed status on success (d078)
+      if (entry.status === "closed") {
+        delete entry.status;
+      }
     } else {
       entry.consecutive_failures++;
       entry.total_failures++;
       entry.last_failure = new Date().toISOString();
+      // Auto-circuit-break: set status closed when threshold reached (d078, wq-978)
+      if (entry.consecutive_failures >= CIRCUIT_FAILURE_THRESHOLD && entry.status !== "closed") {
+        entry.status = "closed";
+        entry.notes = `Auto-circuit-broken at ${entry.consecutive_failures} consecutive failures (${new Date().toISOString()})`;
+      }
     }
     return { platform, state: getCircuitState(circuits, platform), ...entry };
   }

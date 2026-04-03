@@ -51,6 +51,19 @@
       ]
     },
     {
+      "id": "wq-987",
+      "title": "Optimize 2 slowest pre-session hooks (09-financial-check.sh, 43-directive-cleanup.sh)",
+      "description": "A#239 hook timing regression: 5 hooks above 3000ms P95 (threshold 4+). wq-983 already targets E prehook (P95 3770ms). The 2 remaining worst offenders are 09-financial-check.sh (P95 5012ms, avg 1669ms — sporadic slow) and 43-directive-cleanup.sh (P95 5008ms, avg 3253ms — consistently slow). Both are pre-session hooks. Consider: caching financial data between sessions, reducing directive-cleanup scope, or applying the runner consolidation pattern from wq-971/wq-983. All trends stable so not degrading, but count crossed the 4+ regression threshold.",
+      "status": "pending",
+      "created": "2026-04-04",
+      "created_session": 1992,
+      "source": "audit-s1992",
+      "tags": [
+        "audit",
+        "performance"
+      ]
+    },
+    {
       "id": "wq-986",
       "title": "Auto-circuit-break E posthook integration test",
       "description": "wq-978 wired auto-circuit-break into recordOutcome() in circuit-breaker.mjs. Validate the full end-to-end pipeline: simulate 3 consecutive E session failures for a platform and verify platform-circuits.json has status:closed without manual B session intervention. Also verify the auto-reopen-on-success path. Test should exercise the actual engage-orchestrator → circuit-breaker → platform-circuits.json flow.",

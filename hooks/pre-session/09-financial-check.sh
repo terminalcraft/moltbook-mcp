@@ -14,6 +14,8 @@ DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 HOOKS_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 STATE_DIR="$HOME/.config/moltbook"
 ALERT_FILE="$STATE_DIR/financial-alert.txt"
+CACHE_FILE="$STATE_DIR/financial-cache.json"
+CACHE_TTL=600  # 10 minutes — balances don't change between sessions
 
 # Only run financial checks on B sessions (where autonomy matters)
 if [ "${MODE_CHAR:-}" != "B" ]; then
@@ -25,51 +27,72 @@ if [ ! -f "$DIR/base-swap.mjs" ]; then
   exit 0
 fi
 
-# Source timeout-wrapper library
-source "$HOOKS_DIR/lib/timeout-wrapper.sh"
-
-# Configure timeouts — network calls (RPC/API) need >3s on slow responses
-CHECK_TIMEOUT=5
-HOOK_TIMEOUT=8
-
-# Temp files for parallel results
-EVM_TMPFILE=$(mktemp)
-XMR_TMPFILE=$(mktemp)
-trap 'rm -f "$EVM_TMPFILE" "$XMR_TMPFILE" 2>/dev/null' EXIT
-
-export DIR
-
-# Run EVM balance check
-tw_run "evm-balance" bash -c '
-  output=$(node "'"$DIR"'/base-swap.mjs" balance 2>/dev/null) || output="FAIL"
-  echo "$output" > "'"$EVM_TMPFILE"'"
-'
-
-# Run XMR balance check
-tw_run "xmr-balance" bash -c '
-  if [ -f "'"$DIR"'/check-balance.cjs" ]; then
-    output=$(node "'"$DIR"'/check-balance.cjs" 2>/dev/null) || output="0"
-  else
-    output="0"
+# --- Cache check: skip node calls if cache is fresh ---
+if [ -f "$CACHE_FILE" ]; then
+  CACHE_AGE=$(( $(date +%s) - $(stat -c %Y "$CACHE_FILE" 2>/dev/null || echo 0) ))
+  if [ "$CACHE_AGE" -lt "$CACHE_TTL" ]; then
+    ETH_RAW=$(jq -r '.eth // "0"' "$CACHE_FILE" 2>/dev/null || echo "0")
+    USDC_RAW=$(jq -r '.usdc // "0"' "$CACHE_FILE" 2>/dev/null || echo "0")
+    XMR_RAW=$(jq -r '.xmr // "0"' "$CACHE_FILE" 2>/dev/null || echo "0")
+    echo "financial-check: cached (age ${CACHE_AGE}s, ETH: $ETH_RAW, USDC: $USDC_RAW)"
+    # Still evaluate alerts from cached data (fall through to alert logic below)
+    CACHE_HIT=1
   fi
-  echo "$output" > "'"$XMR_TMPFILE"'"
-'
-
-# Wait for both checks (watchdog kills stragglers after HOOK_TIMEOUT)
-# tw_wait returns 1 if watchdog fired — not a fatal error under set -e,
-# since the parsing below already handles missing/incomplete results.
-tw_wait || true
-
-# Parse EVM results
-BALANCE_OUTPUT=$(cat "$EVM_TMPFILE" 2>/dev/null || echo "FAIL")
-
-if echo "$BALANCE_OUTPUT" | grep -q "FAIL"; then
-  echo "financial-check: balance fetch failed or timed out"
-  exit 0
 fi
 
-ETH_RAW=$(echo "$BALANCE_OUTPUT" | grep -P '^\s+ETH:' | grep -oP '[0-9.]+' || echo "0")
-USDC_RAW=$(echo "$BALANCE_OUTPUT" | grep -oP 'USDC:\s+\K[0-9.]+' || echo "0")
+if [ "${CACHE_HIT:-0}" -eq 0 ]; then
+  # Source timeout-wrapper library
+  source "$HOOKS_DIR/lib/timeout-wrapper.sh"
+
+  # Configure timeouts — network calls (RPC/API) need >3s on slow responses
+  CHECK_TIMEOUT=5
+  HOOK_TIMEOUT=8
+
+  # Temp files for parallel results
+  EVM_TMPFILE=$(mktemp)
+  XMR_TMPFILE=$(mktemp)
+  trap 'rm -f "$EVM_TMPFILE" "$XMR_TMPFILE" 2>/dev/null' EXIT
+
+  export DIR
+
+  # Run EVM balance check
+  tw_run "evm-balance" bash -c '
+    output=$(node "'"$DIR"'/base-swap.mjs" balance 2>/dev/null) || output="FAIL"
+    echo "$output" > "'"$EVM_TMPFILE"'"
+  '
+
+  # Run XMR balance check
+  tw_run "xmr-balance" bash -c '
+    if [ -f "'"$DIR"'/check-balance.cjs" ]; then
+      output=$(node "'"$DIR"'/check-balance.cjs" 2>/dev/null) || output="0"
+    else
+      output="0"
+    fi
+    echo "$output" > "'"$XMR_TMPFILE"'"
+  '
+
+  # Wait for both checks (watchdog kills stragglers after HOOK_TIMEOUT)
+  tw_wait || true
+
+  # Parse EVM results
+  BALANCE_OUTPUT=$(cat "$EVM_TMPFILE" 2>/dev/null || echo "FAIL")
+
+  if echo "$BALANCE_OUTPUT" | grep -q "FAIL"; then
+    echo "financial-check: balance fetch failed or timed out"
+    exit 0
+  fi
+
+  ETH_RAW=$(echo "$BALANCE_OUTPUT" | grep -P '^\s+ETH:' | grep -oP '[0-9.]+' || echo "0")
+  USDC_RAW=$(echo "$BALANCE_OUTPUT" | grep -oP 'USDC:\s+\K[0-9.]+' || echo "0")
+
+  # Parse XMR results
+  XMR_OUTPUT=$(cat "$XMR_TMPFILE" 2>/dev/null || echo "0")
+  XMR_RAW=$(echo "$XMR_OUTPUT" | grep -oP 'Balance:\s+\K[0-9.]+' || echo "0")
+
+  # Write cache for next session
+  printf '{"eth":"%s","usdc":"%s","xmr":"%s","ts":%d}\n' \
+    "$ETH_RAW" "$USDC_RAW" "$XMR_RAW" "$(date +%s)" > "$CACHE_FILE"
+fi
 
 # Use bc for decimal comparison if available, else use awk
 eth_low() {
@@ -87,10 +110,6 @@ usdc_sufficient() {
     awk "BEGIN {exit !($USDC_RAW > 5)}"
   fi
 }
-
-# Parse XMR results
-XMR_OUTPUT=$(cat "$XMR_TMPFILE" 2>/dev/null || echo "0")
-XMR_RAW=$(echo "$XMR_OUTPUT" | grep -oP 'Balance:\s+\K[0-9.]+' || echo "0")
 
 # Build alert if needed
 ALERT=""

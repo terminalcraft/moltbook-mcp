@@ -54,14 +54,21 @@
       "id": "wq-987",
       "title": "Optimize 2 slowest pre-session hooks (09-financial-check.sh, 43-directive-cleanup.sh)",
       "description": "A#239 hook timing regression: 5 hooks above 3000ms P95 (threshold 4+). wq-983 already targets E prehook (P95 3770ms). The 2 remaining worst offenders are 09-financial-check.sh (P95 5012ms, avg 1669ms — sporadic slow) and 43-directive-cleanup.sh (P95 5008ms, avg 3253ms — consistently slow). Both are pre-session hooks. Consider: caching financial data between sessions, reducing directive-cleanup scope, or applying the runner consolidation pattern from wq-971/wq-983. All trends stable so not degrading, but count crossed the 4+ regression threshold.",
-      "status": "pending",
+      "status": "done",
       "created": "2026-04-04",
       "created_session": 1992,
       "source": "audit-s1992",
       "tags": [
         "audit",
         "performance"
-      ]
+      ],
+      "outcome": {
+        "session": 1993,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "09-financial-check.sh: added 10-min TTL cache — 80ms cached vs 3660ms cold (45x). 43-directive-cleanup.sh: replaced line-by-line bash loop with single grep+jq pass — 340ms vs 3253ms avg (9.5x). Both below 3000ms threshold now."
+      }
     },
     {
       "id": "wq-986",

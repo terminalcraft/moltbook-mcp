@@ -23,6 +23,7 @@ import { analyze as rCostAnalyze } from './r-cost-monitor.mjs';
 import { report as hookTimingReport } from './hook-timing-report.mjs';
 import { remediate } from './stale-tag-remediate.mjs';
 import { run as costEscalation } from './audit-cost-escalation.mjs';
+import { autoRetireStuckItems } from './audit-stats.mjs';
 
 const applyTags = process.argv.includes('--apply-stale-tags');
 
@@ -58,12 +59,16 @@ const staleTagResult = safeRun('stale-tag-remediate', () => {
 
 const costEsc = safeRun('audit-cost-escalation', () => costEscalation());
 
+// wq-979: Auto-retire pending queue items stuck for >50 sessions
+const autoRetire = safeRun('auto-retire-stuck', () => autoRetireStuckItems());
+
 const output = {
   b_cost_trend: bCost.ok ? bCost.result : { error: bCost.error },
   r_cost_monitor: rCost.ok ? rCost.result : { error: rCost.error },
   hook_timing: hookTiming.ok ? hookTiming.result : { error: hookTiming.error },
   stale_tag_remediate: staleTagResult.ok ? staleTagResult.result : { error: staleTagResult.error },
   cost_escalation: costEsc.ok ? costEsc.result : { error: costEsc.error },
+  auto_retire: autoRetire.ok ? autoRetire.result : { error: autoRetire.error },
 };
 
 console.log(JSON.stringify(output));

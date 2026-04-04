@@ -11,7 +11,7 @@
  * Created: R#130 (structural change to fix A session truncation)
  */
 
-import { readFileSync, readdirSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
@@ -996,28 +996,100 @@ function computeTodoFalsePositiveRate() {
   };
 }
 
-// Main output
-const stats = {
-  computed_at: new Date().toISOString(),
-  session: getCurrentSession(),
-  pipelines: {
-    intel: computeIntelStats(),
-    intel_yield: computeIntelYield(),
-    brainstorming: computeBrainstormingStats(),
-    queue: computeQueueStats(),
-    directives: computeDirectiveStats()
-  },
-  sessions: computeSessionStats(),
-  b_cost_trend: computeBCostTrend(),
-  e_cost_trend: computeECostTrend(),
-  r_cost_trend: computeRCostTrend(),
-  r_scope_budget: computeRScopeBudgetCompliance(),
-  b_pipeline_gate: computeBPipelineGateCompliance(),
-  e_scope_bleed: computeEScopeBleed(),
-  e_engagement_trend: computeEEngagementTrend(),
-  backup_substitution_rate: computeBackupSubstitutionRate(),
-  todo_false_positive_rate: computeTodoFalsePositiveRate(),
-  human_review_validation: computeHumanReviewValidation()
-};
+// --- Auto-retire stuck queue items (wq-979) ---
 
-console.log(JSON.stringify(stats, null, 2));
+const AUTO_RETIRE_AGE = 50; // Sessions behind current to trigger auto-retirement
+
+/**
+ * Auto-retire pending queue items that are > AUTO_RETIRE_AGE sessions old.
+ * Moves them from work-queue.json to work-queue-archive.json with a retirement outcome.
+ * Returns { retired: [{id, title, age}], count: N }.
+ */
+export function autoRetireStuckItems() {
+  const queuePath = join(PROJECT_DIR, 'work-queue.json');
+  const archivePath = join(PROJECT_DIR, 'work-queue-archive.json');
+
+  const queue = safeRead(queuePath, { queue: [] });
+  const archive = safeRead(archivePath, { archived: [] });
+  const items = queue.queue || [];
+  const currentSession = getCurrentSession();
+  const dateSessionMap = buildDateSessionMap();
+
+  const toRetire = [];
+  const keepItems = [];
+
+  for (const item of items) {
+    if (item.status !== 'pending') {
+      keepItems.push(item);
+      continue;
+    }
+
+    let createdSession = item.created_session || item.session_added || null;
+    if (!createdSession) {
+      const dateStr = item.created || item.added || null;
+      createdSession = estimateSessionFromDate(dateStr, dateSessionMap) || currentSession;
+    }
+
+    const age = currentSession - createdSession;
+    if (age > AUTO_RETIRE_AGE) {
+      toRetire.push({ item, age });
+    } else {
+      keepItems.push(item);
+    }
+  }
+
+  if (toRetire.length === 0) {
+    return { retired: [], count: 0 };
+  }
+
+  // Move retired items to archive with outcome metadata
+  for (const { item, age } of toRetire) {
+    item.status = 'done';
+    item.outcome = {
+      session: currentSession,
+      result: 'retired',
+      effort: 'trivial',
+      quality: 'non-actionable',
+      note: `Auto-retired: ${age} sessions old (threshold: ${AUTO_RETIRE_AGE})`
+    };
+    archive.archived.push(item);
+  }
+
+  // Write both files
+  queue.queue = keepItems;
+  writeFileSync(queuePath, JSON.stringify(queue, null, 2) + '\n');
+  writeFileSync(archivePath, JSON.stringify(archive, null, 2) + '\n');
+
+  return {
+    retired: toRetire.map(({ item, age }) => ({ id: item.id, title: item.title, age })),
+    count: toRetire.length
+  };
+}
+
+// Main output — only when run directly as CLI
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('audit-stats.mjs')) {
+  const stats = {
+    computed_at: new Date().toISOString(),
+    session: getCurrentSession(),
+    pipelines: {
+      intel: computeIntelStats(),
+      intel_yield: computeIntelYield(),
+      brainstorming: computeBrainstormingStats(),
+      queue: computeQueueStats(),
+      directives: computeDirectiveStats()
+    },
+    sessions: computeSessionStats(),
+    b_cost_trend: computeBCostTrend(),
+    e_cost_trend: computeECostTrend(),
+    r_cost_trend: computeRCostTrend(),
+    r_scope_budget: computeRScopeBudgetCompliance(),
+    b_pipeline_gate: computeBPipelineGateCompliance(),
+    e_scope_bleed: computeEScopeBleed(),
+    e_engagement_trend: computeEEngagementTrend(),
+    backup_substitution_rate: computeBackupSubstitutionRate(),
+    todo_false_positive_rate: computeTodoFalsePositiveRate(),
+    human_review_validation: computeHumanReviewValidation()
+  };
+
+  console.log(JSON.stringify(stats, null, 2));
+}

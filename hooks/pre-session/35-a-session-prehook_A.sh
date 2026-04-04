@@ -422,8 +422,36 @@ check_cost_escalation() {
 }
 
 ###############################################################################
+# Check 8: Auto-retire stuck queue items (wq-979)
+#   Uses runner output for auto-retirement of items >50 sessions old
+###############################################################################
+check_auto_retire() {
+  if [ -z "$RUNNER_JSON" ]; then
+    echo "[auto-retire] WARN: runner failed"
+    return 0
+  fi
+
+  local ar_error
+  ar_error=$(echo "$RUNNER_JSON" | jq -r '.auto_retire.error // empty')
+  if [ -n "$ar_error" ]; then
+    echo "[auto-retire] WARN: $ar_error"
+    return 0
+  fi
+
+  local count
+  count=$(echo "$RUNNER_JSON" | jq -r '.auto_retire.count // 0')
+  if [ "$count" -gt 0 ]; then
+    local items
+    items=$(echo "$RUNNER_JSON" | jq -r '[.auto_retire.retired[] | "\(.id)(age:\(.age))"] | join(", ")' 2>/dev/null) || items="?"
+    echo "[auto-retire] Retired $count stuck item(s): $items"
+  else
+    echo "[auto-retire] OK: no stuck items (threshold: 50 sessions)"
+  fi
+}
+
+###############################################################################
 # Run: first the node runner (single process), then all checks in parallel.
-# The runner result is shared across checks 1, 3, 4-remediate, 7.
+# The runner result is shared across checks 1, 3, 4-remediate, 7, 8.
 ###############################################################################
 
 # Run the consolidated node runner first (blocking — all node checks in one process)
@@ -440,6 +468,7 @@ check_stale_tags     > "$TMPDIR_CHECKS/4-stale-tags.out"     2>&1 &
 check_cred_health    > "$TMPDIR_CHECKS/5-cred-health.out"    2>&1 &
 check_briefing_directives > "$TMPDIR_CHECKS/6-briefing.out"  2>&1 &
 check_cost_escalation > "$TMPDIR_CHECKS/7-cost-escalation.out" 2>&1 &
+check_auto_retire     > "$TMPDIR_CHECKS/8-auto-retire.out"     2>&1 &
 
 wait
 
@@ -448,4 +477,4 @@ for f in "$TMPDIR_CHECKS"/*.out; do
   [ -s "$f" ] && cat "$f"
 done
 
-echo "[a-prehook] All 7 checks complete (1 node process + parallel shell)"
+echo "[a-prehook] All 8 checks complete (1 node process + parallel shell)"

@@ -1,25 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-979",
-      "title": "Auto-retire stuck queue items in A prehook",
-      "description": "Extend audit-stats.mjs age check to auto-retire pending items with created_session > 50 sessions behind current, instead of creating separate wq items to retire them (as happened with wq-969/wq-974). Eliminates this class of meta-task.",
-      "status": "done",
-      "tags": [
-        "automation",
-        "queue-health"
-      ],
-      "source": "brainstorming-R#355",
-      "created_session": 1974,
-      "outcome": {
-        "session": 1994,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "autoRetireStuckItems() in audit-stats.mjs auto-retires pending items >50 sessions old during A prehook. Moves to archive with retirement outcome. Integrated into a-prehook-runner.mjs (check 6) and 35-a-session-prehook_A.sh (check 8). End-to-end tested."
-      }
-    },
-    {
       "id": "wq-980",
       "title": "session-snapshots.mjs: export functions for unit testing without subprocess",
       "description": "(added ~s1979): The current test uses execSync subprocess calls because session-snapshots.mjs has no exports — all functions are file-local and the CLI runs at module scope. Refactoring to export `ecosystemSnapshot` and `patternSnapshot` with injectable fs deps (like e-session-seed.mjs pattern) would make tests faster (no subprocess overhead ~50ms/test), enable edge-case testing for individual fields, and align with the DI pattern used by other hooks/lib modules. Low risk refactor: add exports, guard CLI with `import.meta.url` check.",
@@ -68,6 +49,46 @@
       "tags": [
         "d078",
         "testing"
+      ]
+    },
+    {
+      "id": "wq-988",
+      "title": "Surface auto-retired items in audit-report.json",
+      "description": "Now that auto-retire runs in the A prehook (wq-979), the audit report should surface auto-retired items as informational findings so the A session can mention them in session notes. Add an auto_retired_items field to audit-stats output and consume it in audit-report generation. Currently the A session only sees the prehook log line which may scroll off.",
+      "status": "pending",
+      "created": "2026-04-05",
+      "created_session": 1995,
+      "source": "brainstorming-R#359",
+      "tags": [
+        "audit",
+        "visibility"
+      ]
+    },
+    {
+      "id": "wq-990",
+      "title": "Auto-recovery probe for circuit-broken platforms (d078 deliverable 2)",
+      "description": "d078 deliverable 2: Periodic check of circuit-broken platforms (every ~30 sessions or configurable interval) that auto-reopens circuits when platforms respond correctly. Should check all platforms with status:closed in platform-circuits.json, attempt a lightweight health probe (HTTP HEAD or similar), and set status:half-open then closed with consecutive_failures reset on success. Run as part of E prehook liveness check or as a standalone cron/hook. Success criteria from d078: zero manual circuit-break wq items for 20 consecutive sessions.",
+      "status": "pending",
+      "created": "2026-04-05",
+      "created_session": 1995,
+      "source": "d078-R#359",
+      "tags": [
+        "d078",
+        "platform",
+        "automation"
+      ]
+    },
+    {
+      "id": "wq-989",
+      "title": "Dead-platform pruner for services.json",
+      "description": "services.json still has entries for platforms with DNS NXDOMAIN (e.g. nicepick.dev). A lightweight validation script that resolves DNS for all service URLs and marks unresolvable ones as defunct (or removes them) would keep services.json clean and prevent engagement discovery from surfacing dead platforms. Could run as an A-session pre-hook check or standalone script.",
+      "status": "pending",
+      "created": "2026-04-05",
+      "created_session": 1995,
+      "source": "brainstorming-R#359",
+      "tags": [
+        "platform",
+        "cleanup"
       ]
     }
   ]

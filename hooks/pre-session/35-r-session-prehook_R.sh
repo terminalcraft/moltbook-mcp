@@ -72,9 +72,14 @@ check_maintain_audit() {
   fi
 
   # 6. Hook health: surface consistently failing or slow hooks
-  for results_file in "$HOME/.config/moltbook/logs/pre-hook-results.json" "$HOME/.config/moltbook/logs/post-hook-results.json"; do
+  # Pre-session results in pre-hook-results.json, post-session in hook-results.json
+  # (naming inconsistency from heartbeat.sh — tracked, not worth renaming existing data)
+  for results_file in "$HOME/.config/moltbook/logs/pre-hook-results.json" "$HOME/.config/moltbook/logs/hook-results.json"; do
     [ -f "$results_file" ] || continue
-    PHASE=$(basename "$results_file" | sed 's/-hook-results.json//')
+    case "$(basename "$results_file")" in
+      pre-hook-results.json) PHASE="pre" ;;
+      *) PHASE="post" ;;
+    esac
 
     HOOK_ANALYSIS=$(tail -5 "$results_file" | jq -rs --arg phase "$PHASE" '
       [.[] | select(. == null | not)] as $recent |

@@ -205,9 +205,17 @@ export function register(server) {
     const trackingWarnings = [...checkInboundTracking(p.content), ...checkInboundTracking(p.title)];
     const trackingNote = trackingWarnings.length ? `\n⚠️ INBOUND: ${trackingWarnings.join(", ")}` : "";
     let text = `"${sanitize(p.title)}" by @${p.author?.name || "unknown"} in m/${p.submolt?.name || "unknown"}${stateLabel}\n${p.upvotes}↑ ${p.downvotes}↓ ${p.comment_count} comments\n\n${sanitize(p.content) || p.url || ""}${trackingNote}`;
-    if (data.comments?.length) {
+    // Fetch comments from dedicated endpoint if post has any
+    let comments = data.comments;
+    if (!comments?.length && p.comment_count > 0) {
+      try {
+        const commentsData = await moltFetch(`/posts/${post_id}/comments`);
+        if (commentsData.success) comments = commentsData.comments;
+      } catch (_) { /* fail silently */ }
+    }
+    if (comments?.length) {
       text += "\n\n--- Comments ---\n";
-      text += formatComments(data.comments);
+      text += formatComments(comments);
     }
     return { content: [{ type: "text", text }] };
   });

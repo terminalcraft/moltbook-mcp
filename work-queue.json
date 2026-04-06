@@ -90,6 +90,20 @@
         "platform",
         "cleanup"
       ]
+    },
+    {
+      "id": "wq-991",
+      "title": "Investigate 02-periodic-checks.sh P95 spike (13041ms)",
+      "description": "A#240 found 02-periodic-checks.sh has the worst P95 of any hook at 13041ms (avg 1028ms, trend improving). The P95 is 2.5x higher than the next worst hook (35-e-session-prehook_E.sh at 6292ms). Likely an intermittent slow path — the avg is only 1028ms so most runs are fast. Need to: (1) identify what triggers the slow path (filesystem? network? specific periodic check?), (2) add timeout/guard if a specific check is hanging. May be as simple as a DNS lookup or XMR balance check timing out on one session.",
+      "status": "pending",
+      "created": "2026-04-06",
+      "created_session": 1997,
+      "source": "audit-s1997",
+      "tags": [
+        "audit",
+        "performance",
+        "hooks"
+      ]
     }
   ]
 }

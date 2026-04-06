@@ -1060,9 +1060,41 @@ export function autoRetireStuckItems() {
   writeFileSync(queuePath, JSON.stringify(queue, null, 2) + '\n');
   writeFileSync(archivePath, JSON.stringify(archive, null, 2) + '\n');
 
-  return {
+  // Persist results to state file so audit-stats can surface them (wq-988)
+  const result = {
     retired: toRetire.map(({ item, age }) => ({ id: item.id, title: item.title, age })),
-    count: toRetire.length
+    count: toRetire.length,
+    session: currentSession,
+    timestamp: new Date().toISOString()
+  };
+  try {
+    writeFileSync(join(STATE_DIR, 'auto-retired-items.json'), JSON.stringify(result, null, 2) + '\n');
+  } catch { /* non-fatal — state dir may not exist in tests */ }
+
+  return result;
+}
+
+/**
+ * Read auto-retired items from state file (wq-988).
+ * Returns the most recent auto-retire results if they're from the current session.
+ * This surfaces prehook auto-retire actions in audit-stats output so the A session
+ * can mention them in session notes without relying on scrolled-off log lines.
+ */
+function computeAutoRetiredItems() {
+  const statePath = join(STATE_DIR, 'auto-retired-items.json');
+  const data = safeRead(statePath, null);
+  if (!data) return { count: 0, retired: [], stale: true };
+
+  const currentSession = getCurrentSession();
+  // Only surface items retired in the current session (or very recently)
+  const isRecent = data.session && (currentSession - data.session) <= 1;
+
+  return {
+    count: data.count || 0,
+    retired: data.retired || [],
+    session: data.session || null,
+    timestamp: data.timestamp || null,
+    stale: !isRecent
   };
 }
 
@@ -1088,7 +1120,8 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
     e_engagement_trend: computeEEngagementTrend(),
     backup_substitution_rate: computeBackupSubstitutionRate(),
     todo_false_positive_rate: computeTodoFalsePositiveRate(),
-    human_review_validation: computeHumanReviewValidation()
+    human_review_validation: computeHumanReviewValidation(),
+    auto_retired_items: computeAutoRetiredItems()
   };
 
   console.log(JSON.stringify(stats, null, 2));

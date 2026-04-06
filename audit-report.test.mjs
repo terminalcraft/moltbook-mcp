@@ -1243,3 +1243,80 @@ describe('escalation tracker integrity', () => {
       `duplicate tracker IDs found: ${ids.filter((id, i) => ids.indexOf(id) !== i)}`);
   });
 });
+
+// ─── Section 10: auto_retired_items in audit-stats output (wq-988) ──────
+
+describe('audit-stats auto_retired_items (wq-988)', () => {
+  before(() => {
+    setupDirs();
+    patchAuditStats();
+    // Minimal fixtures
+    writeJSON(STATE, 'engagement-intel.json', []);
+    writeJSON(STATE, 'engagement-intel-archive.json', []);
+    writeJSON(SRC, 'work-queue.json', { queue: [] });
+    writeJSON(SRC, 'work-queue-archive.json', { archived: [] });
+    writeJSON(SRC, 'directives.json', { directives: [] });
+    writeFileSync(join(SRC, 'BRAINSTORMING.md'), '# Brainstorming\n');
+    writeFileSync(join(STATE, 'session-history.txt'), '');
+  });
+
+  after(() => {
+    cleanupDirs();
+  });
+
+  it('includes auto_retired_items field in output', () => {
+    const stats = runStats('100');
+    assert.ok('auto_retired_items' in stats, 'stats should have auto_retired_items field');
+  });
+
+  it('returns stale:true when no state file exists', () => {
+    // No auto-retired-items.json written
+    const stats = runStats('100');
+    assert.equal(stats.auto_retired_items.count, 0);
+    assert.equal(stats.auto_retired_items.stale, true);
+  });
+
+  it('returns retired items from current session', () => {
+    writeJSON(STATE, 'auto-retired-items.json', {
+      retired: [
+        { id: 'wq-500', title: 'Old task', age: 55 },
+        { id: 'wq-501', title: 'Another old task', age: 60 }
+      ],
+      count: 2,
+      session: 100,
+      timestamp: '2026-04-07T00:00:00Z'
+    });
+
+    const stats = runStats('100');
+    assert.equal(stats.auto_retired_items.count, 2);
+    assert.equal(stats.auto_retired_items.stale, false);
+    assert.equal(stats.auto_retired_items.retired.length, 2);
+    assert.equal(stats.auto_retired_items.retired[0].id, 'wq-500');
+    assert.equal(stats.auto_retired_items.retired[0].age, 55);
+  });
+
+  it('marks items as stale when from an old session', () => {
+    writeJSON(STATE, 'auto-retired-items.json', {
+      retired: [{ id: 'wq-400', title: 'Very old', age: 70 }],
+      count: 1,
+      session: 50,
+      timestamp: '2026-01-01T00:00:00Z'
+    });
+
+    const stats = runStats('100');
+    assert.equal(stats.auto_retired_items.count, 1);
+    assert.equal(stats.auto_retired_items.stale, true);
+  });
+
+  it('treats items from previous session as recent (within ±1)', () => {
+    writeJSON(STATE, 'auto-retired-items.json', {
+      retired: [{ id: 'wq-600', title: 'Recent', age: 52 }],
+      count: 1,
+      session: 99,
+      timestamp: '2026-04-07T00:00:00Z'
+    });
+
+    const stats = runStats('100');
+    assert.equal(stats.auto_retired_items.stale, false);
+  });
+});

@@ -55,14 +55,21 @@
       "id": "wq-988",
       "title": "Surface auto-retired items in audit-report.json",
       "description": "Now that auto-retire runs in the A prehook (wq-979), the audit report should surface auto-retired items as informational findings so the A session can mention them in session notes. Add an auto_retired_items field to audit-stats output and consume it in audit-report generation. Currently the A session only sees the prehook log line which may scroll off.",
-      "status": "pending",
+      "status": "done",
       "created": "2026-04-05",
       "created_session": 1995,
       "source": "brainstorming-R#359",
       "tags": [
         "audit",
         "visibility"
-      ]
+      ],
+      "outcome": {
+        "session": 1998,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added auto_retired_items to audit-stats output + a-prompt-sections consumption + 5 tests, all 100 passing"
+      }
     },
     {
       "id": "wq-990",

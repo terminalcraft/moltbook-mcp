@@ -102,7 +102,7 @@ fi
 COMMIT_COUNT=0
 if [ -n "${LOG_FILE:-}" ] && [ -f "$LOG_FILE" ]; then
   # Count commits by looking for git commit tool calls in the session log
-  COMMIT_COUNT=$(grep -c '"git","commit"' "$LOG_FILE" 2>/dev/null || echo 0)
+  COMMIT_COUNT=$(grep -c '"git","commit"' "$LOG_FILE" 2>/dev/null || true)
 fi
 
 # === Steps 2-6: Analysis (standalone Python module, extracted R#304) ===

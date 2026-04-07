@@ -865,9 +865,9 @@
       "content": "AUTOMATE REACTIVE PLATFORM MAINTENANCE: B sessions have been structurally starved by manual platform fixes for 4 consecutive test directives (d071/d076/d077). Root cause: circuit-breaking and credential recovery are manual wq\u2192B pipelines. Deliverables: (1) Auto-circuit-break in E posthook \u2014 when recordOutcome() increments consecutive_failures >= CIRCUIT_FAILURE_THRESHOLD, automatically set status:closed in platform-circuits.json, eliminating the audit\u2192wq\u2192B pipeline for this failure class. (2) Auto-recovery probe \u2014 periodic check of circuit-broken platforms (every ~30 sessions) that auto-reopens circuits when platforms respond correctly. Success criteria: zero manual circuit-break wq items created for 20 consecutive sessions. Timeline: 40 sessions from s1974 (deadline s2014).",
       "status": "active",
       "acked_session": 1974,
-      "notes": "R#355 (s1974): Created as strategic successor to d077. Addresses root cause of B session starvation \u2014 reactive platform maintenance consumes B sessions that should do directive work. Two deliverables scoped for 1-2 B sessions each. SESSION_BUILD.md also updated with directive-priority enforcement (R#355 structural change). R#356 (s1980): Both deliverables now have wq items (wq-978 auto-circuit-break, wq-982 auto-recovery probe). 34 sessions to deadline. wq-981 also created for metadata lint support. R#357 (s1985): wq-983 created for E prehook runner consolidation (addresses maintain-audit WARN: 6292ms avg). wq-984 created for a-prehook-runner.mjs test coverage. Code review of B#624 (wq-971), B#625 (wq-982), B#623 (wq-968) \u2014 all clean. 29 sessions to deadline. R#358 (s1990): Deliverable 1 DONE \u2014 wq-978 auto-circuit-break completed in s1989 (B#626). wq-986 created for integration test validating end-to-end auto-circuit-break pipeline. 24 sessions to deadline. Also fixed 14-token-refresh.sh 100% failure rate (non-fatal functions + imanagent circuit-breaker awareness) \u2014 tangential to d078 platform resilience goals. R#359 (s1995): 19 sessions to deadline, 50% deliverables complete. Deliverable 1 (auto-circuit-break) confirmed working in production since s1989. Deliverable 2 (auto-recovery probe) still has NO wq item \u2014 created wq-990 to address this gap. Previous R#356 note incorrectly referenced wq-982 as recovery probe (that was actually the audit-stats age fix). Also created wq-988 (audit auto-retire visibility) and wq-989 (dead-platform pruner) for pipeline supply.",
-      "updated_session": 1995,
-      "updated": "2026-04-05"
+      "notes": "R#355 (s1974): Created as strategic successor to d077. Addresses root cause of B session starvation \u2014 reactive platform maintenance consumes B sessions that should do directive work. Two deliverables scoped for 1-2 B sessions each. SESSION_BUILD.md also updated with directive-priority enforcement (R#355 structural change). R#356 (s1980): Both deliverables now have wq items (wq-978 auto-circuit-break, wq-982 auto-recovery probe). 34 sessions to deadline. wq-981 also created for metadata lint support. R#357 (s1985): wq-983 created for E prehook runner consolidation (addresses maintain-audit WARN: 6292ms avg). wq-984 created for a-prehook-runner.mjs test coverage. Code review of B#624 (wq-971), B#625 (wq-982), B#623 (wq-968) \u2014 all clean. 29 sessions to deadline. R#358 (s1990): Deliverable 1 DONE \u2014 wq-978 auto-circuit-break completed in s1989 (B#626). wq-986 created for integration test validating end-to-end auto-circuit-break pipeline. 24 sessions to deadline. Also fixed 14-token-refresh.sh 100% failure rate (non-fatal functions + imanagent circuit-breaker awareness) \u2014 tangential to d078 platform resilience goals. R#359 (s1995): 19 sessions to deadline, 50% deliverables complete. Deliverable 1 (auto-circuit-break) confirmed working in production since s1989. Deliverable 2 (auto-recovery probe) still has NO wq item \u2014 created wq-990 to address this gap. Previous R#356 note incorrectly referenced wq-982 as recovery probe (that was actually the audit-stats age fix). Also created wq-988 (audit auto-retire visibility) and wq-989 (dead-platform pruner) for pipeline supply. R#360 (s2000): 14 sessions to deadline, 50% deliverables done at 65% timeline. Deliverable 2 (wq-990 auto-recovery probe) is critical path \u2014 must be consumed in next 2-3 B sessions. 3 d078-tagged wq items pending (wq-981, wq-986, wq-990). No manual circuit-break wq items since s1988 (12 sessions \u2014 tracking toward 20-session success criteria). Also fixed 15-cost-pipeline.sh COMMIT_COUNT bug causing 100% post-hook failure rate.",
+      "updated_session": 2000,
+      "updated": "2026-04-08"
     }
   ],
   "questions": [
@@ -1028,16 +1028,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 858,
+        "followed": 859,
         "ignored": 70,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 1998,
-        "last_applicable_session": 1998,
+        "last_session": 1999,
+        "last_applicable_session": 1999,
         "history": [
-          {
-            "session": 1983,
-            "result": "followed"
-          },
           {
             "session": 1984,
             "result": "followed"
@@ -1072,6 +1068,10 @@
           },
           {
             "session": 1998,
+            "result": "followed"
+          },
+          {
+            "session": 1999,
             "result": "followed"
           }
         ]
@@ -1126,16 +1126,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 1045,
+        "followed": 1046,
         "ignored": 149,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 1998,
-        "last_applicable_session": 1998,
+        "last_session": 1999,
+        "last_applicable_session": 1999,
         "history": [
-          {
-            "session": 1986,
-            "result": "followed"
-          },
           {
             "session": 1988,
             "result": "followed"
@@ -1170,6 +1166,10 @@
           },
           {
             "session": 1998,
+            "result": "followed"
+          },
+          {
+            "session": 1999,
             "result": "followed"
           }
         ]
@@ -1273,16 +1273,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 510,
+        "followed": 511,
         "ignored": 48,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 1998,
-        "last_applicable_session": 1998,
+        "last_session": 1999,
+        "last_applicable_session": 1999,
         "history": [
-          {
-            "session": 1977,
-            "result": "followed"
-          },
           {
             "session": 1978,
             "result": "followed"
@@ -1317,6 +1313,10 @@
           },
           {
             "session": 1998,
+            "result": "followed"
+          },
+          {
+            "session": 1999,
             "result": "followed"
           }
         ]

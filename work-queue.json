@@ -52,26 +52,6 @@
       ]
     },
     {
-      "id": "wq-988",
-      "title": "Surface auto-retired items in audit-report.json",
-      "description": "Now that auto-retire runs in the A prehook (wq-979), the audit report should surface auto-retired items as informational findings so the A session can mention them in session notes. Add an auto_retired_items field to audit-stats output and consume it in audit-report generation. Currently the A session only sees the prehook log line which may scroll off.",
-      "status": "done",
-      "created": "2026-04-05",
-      "created_session": 1995,
-      "source": "brainstorming-R#359",
-      "tags": [
-        "audit",
-        "visibility"
-      ],
-      "outcome": {
-        "session": 1998,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added auto_retired_items to audit-stats output + a-prompt-sections consumption + 5 tests, all 100 passing"
-      }
-    },
-    {
       "id": "wq-990",
       "title": "Auto-recovery probe for circuit-broken platforms (d078 deliverable 2)",
       "description": "d078 deliverable 2: Periodic check of circuit-broken platforms (every ~30 sessions or configurable interval) that auto-reopens circuits when platforms respond correctly. Should check all platforms with status:closed in platform-circuits.json, attempt a lightweight health probe (HTTP HEAD or similar), and set status:half-open then closed with consecutive_failures reset on success. Run as part of E prehook liveness check or as a standalone cron/hook. Success criteria from d078: zero manual circuit-break wq items for 20 consecutive sessions.",
@@ -102,7 +82,7 @@
       "id": "wq-991",
       "title": "Investigate 02-periodic-checks.sh P95 spike (13041ms)",
       "description": "A#240 found 02-periodic-checks.sh has the worst P95 of any hook at 13041ms (avg 1028ms, trend improving). The P95 is 2.5x higher than the next worst hook (35-e-session-prehook_E.sh at 6292ms). Likely an intermittent slow path — the avg is only 1028ms so most runs are fast. Need to: (1) identify what triggers the slow path (filesystem? network? specific periodic check?), (2) add timeout/guard if a specific check is hanging. May be as simple as a DNS lookup or XMR balance check timing out on one session.",
-      "status": "pending",
+      "status": "done",
       "created": "2026-04-06",
       "created_session": 1997,
       "source": "audit-s1997",
@@ -110,7 +90,14 @@
         "audit",
         "performance",
         "hooks"
-      ]
+      ],
+      "outcome": {
+        "session": 1999,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: platform-health (12-14s) and service-liveness (8-10s) on every-20 runs. Fixed by tightening HOOK_TIMEOUT 18→10s, CHECK_TIMEOUT 10→6s, platform-health 15→8s. Verified: P95 capped at ~8s."
+      }
     }
   ]
 }

@@ -15,7 +15,8 @@
 #
 # All checks run as parallel background jobs to reduce wall-clock time (R#300).
 # Uses timeout-wrapper.sh for per-check timeouts and overall watchdog (wq-880).
-# Platform-health uses --fast mode with 15s timeout (wq-874) — 51 platforms need headroom.
+# wq-991: Tightened timeouts (HOOK=18→10s, CHECK=10→6s, platform-health=15→8s)
+# to cap P95 spikes. Platform-health was 12-14s, service-liveness ~10s on every-20 runs.
 
 DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 HOOKS_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -29,9 +30,9 @@ SESSION_NUM="${SESSION_NUM:-0}"
 # Source timeout-wrapper library
 source "$HOOKS_DIR/lib/timeout-wrapper.sh"
 
-# Configure timeouts
-HOOK_TIMEOUT=18
-CHECK_TIMEOUT=10
+# Configure timeouts (wq-991: reduced from 18/10 to cap P95 spikes)
+HOOK_TIMEOUT=10
+CHECK_TIMEOUT=6
 TIMING_FILE="$STATE_DIR/periodic-check-timing.jsonl"
 
 # Export variables needed by subshells
@@ -71,7 +72,7 @@ fi
 # Check 2: Platform health (every 20 sessions)
 ###############################################################################
 if [ $((SESSION_NUM % 20)) -eq 0 ]; then
-  tw_run "platform-health" --timeout 15 bash -c '
+  tw_run "platform-health" --timeout 8 bash -c '
     HEALTH_OUTPUT=$(node "$DIR/account-manager.mjs" test --all --fast 2>&1) || true
     FAILED_COUNT=$(echo "$HEALTH_OUTPUT" | grep -c "FAIL\|error\|unreachable" 2>/dev/null || true)
     FAILED_COUNT="${FAILED_COUNT:-0}"
@@ -106,7 +107,7 @@ fi
 # Every-session check is a fast localhost-only probe (~100ms).
 ###############################################################################
 if [ $((SESSION_NUM % 10)) -eq 0 ]; then
-  tw_run "api-health" bash -c '
+  tw_run "api-health" --timeout 8 bash -c '
     node "$DIR/health-check.cjs" >> "$LOG_DIR/health.log" 2>&1 || true
   '
 else

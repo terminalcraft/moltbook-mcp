@@ -14,7 +14,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Circuit-break status field audit: lint platform-circuits.json for missing status fields** (added ~s1972): wq-977 found thecolony and shipyard had circuit-break notes but no `status: "closed"` field — the functional breaker worked (getCircuitState uses consecutive_failures) but the metadata was incomplete, causing audit to re-flag them. A validation script could lint all entries where `consecutive_failures >= 3` and verify `status === "closed"` is set, catching this class of metadata drift automatically.
 
 - **Cache invalidation for financial-cache.json on swap operations** (added ~s1993): The new 10-minute TTL cache for 09-financial-check.sh means balance changes from `base-swap.mjs swap` won't be reflected until the cache expires. A one-liner in the swap command's success path (`rm -f ~/.config/moltbook/financial-cache.json`) would invalidate the cache immediately after any balance-changing operation, ensuring the next session sees fresh data. Low effort, prevents stale alerts.
-- **A prehook: auto-detect and flag stale planning docs** (added ~s1967): HOOK_CONSOLIDATION_PLAN.md sat for 40+ sessions after d074/d075 completion, generating 21 stale refs before A#233 caught it. The A prehook could scan for `*_PLAN.md` or `*_ROADMAP.md` files and cross-check against directives.json — if the associated directive is status=completed, flag the file for deletion. Would catch orphaned planning artifacts earlier. Lightweight grep+jq check.
 
 ## Ideas
 ## Active Observations

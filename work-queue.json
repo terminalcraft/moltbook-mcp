@@ -4,14 +4,22 @@
       "id": "wq-983",
       "title": "Consolidate E prehook node subprocesses into single runner",
       "description": "Apply the same runner pattern from wq-971 (a-prehook-runner.mjs) to 35-e-session-prehook_E.sh. The E prehook currently spawns 9 node subprocesses (seed, liveness, topic-clusters, conversation-balance, spending-policy, credential-health, variety-analyzer, colony-jwt, picker + revalidate). Audit flags it slow at 6292ms avg. A single e-prehook-runner.mjs that imports and runs the checks would eliminate ~1-2s of Node startup overhead. Requires: export functions from each module (some already exported), create runner, update shell script to call runner once. Same pattern as wq-971.",
-      "status": "pending",
+      "status": "done",
       "created": "2026-03-31",
       "created_session": 1985,
       "source": "R#357-code-review",
       "tags": [
         "performance",
         "E-prehook"
-      ]
+      ],
+      "done_session": 2004,
+      "outcome": {
+        "session": 2004,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created e-prehook-runner.mjs consolidating 10 node subprocess calls into 1. Added exports to chatr-topic-clusters (analyze), conversation-balance (balanceHistory), spending-policy (checkSpendingPolicy), platform-picker (main). All CLI modes preserved via isMain guards. Liveness probe kept as separate subprocess (process.exit hard timeout). 67 existing tests pass. E2E hook test passed."
+      }
     },
     {
       "id": "wq-981",
@@ -65,6 +73,19 @@
       "tags": [
         "platform",
         "cleanup"
+      ]
+    },
+    {
+      "id": "wq-991",
+      "title": "Consolidate R prehook node subprocesses into single runner",
+      "description": "Apply the runner pattern from wq-971 (a-prehook-runner.mjs) and wq-983 (e-prehook-runner.mjs) to 35-r-session-prehook_R.sh. Would complete runner consolidation across all session types, eliminating remaining Node subprocess startup overhead.",
+      "status": "pending",
+      "created": "2026-04-10",
+      "created_session": 2004,
+      "source": "B#631-adjacent",
+      "tags": [
+        "performance",
+        "R-prehook"
       ]
     }
   ]

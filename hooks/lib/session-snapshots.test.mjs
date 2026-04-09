@@ -1,176 +1,211 @@
 #!/usr/bin/env node
-// session-snapshots.test.mjs — Unit tests for session-snapshots.mjs (wq-968)
+// session-snapshots.test.mjs — Unit tests for session-snapshots.mjs (wq-968, wq-980)
 //
-// Tests: ecosystem snapshot structure, pattern snapshot structure,
-// JSONL append behavior, missing/malformed file handling.
-//
-// The module uses fs directly at module scope for CLI, so we test the
-// exported functions by re-implementing the core logic as testable units.
-// Since the module doesn't export functions (CLI-only), we import-test
-// by creating thin wrappers around the same logic.
+// Tests ecosystem snapshot structure, pattern snapshot structure,
+// missing/malformed file handling, edge cases — all via direct imports
+// with injectable fs deps (no subprocess overhead).
 //
 // Usage: node --test hooks/lib/session-snapshots.test.mjs
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import { readFileSync, writeFileSync, unlinkSync, mkdirSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
 import { execSync } from 'child_process';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+
+import { ecosystemSnapshot, patternSnapshot, loadJSON } from './session-snapshots.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = join(__dirname, 'session-snapshots.mjs');
 
-function makeTmpDir() {
-  const dir = join(tmpdir(), `snap-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
-  mkdirSync(dir, { recursive: true });
-  return dir;
+// ---- Mock fs helpers ----
+
+function mockReadFileSync(files) {
+  return (filepath, encoding) => {
+    if (files[filepath] !== undefined) return files[filepath];
+    const err = new Error(`ENOENT: no such file or directory, open '${filepath}'`);
+    err.code = 'ENOENT';
+    throw err;
+  };
 }
 
-function cleanup(dir) {
-  try { execSync(`rm -rf "${dir}"`); } catch {}
+function mockAppendFileSync() {
+  const calls = [];
+  const fn = (file, data) => { calls.push({ file, data }); };
+  fn.calls = calls;
+  return fn;
 }
+
+// ---- loadJSON tests ----
+describe('loadJSON', () => {
+  test('parses valid JSON file', () => {
+    const deps = { readFileSync: mockReadFileSync({ '/test.json': '{"a":1}' }) };
+    assert.deepStrictEqual(loadJSON('/test.json', deps), { a: 1 });
+  });
+
+  test('returns null for missing file', () => {
+    const deps = { readFileSync: mockReadFileSync({}) };
+    assert.strictEqual(loadJSON('/missing.json', deps), null);
+  });
+
+  test('returns null for malformed JSON', () => {
+    const deps = { readFileSync: mockReadFileSync({ '/bad.json': '{broken' }) };
+    assert.strictEqual(loadJSON('/bad.json', deps), null);
+  });
+});
 
 // ---- Ecosystem snapshot tests ----
 describe('ecosystemSnapshot', () => {
-  test('produces correct structure with valid service/registry/ecosystem files', () => {
-    const baseDir = makeTmpDir();
-    const homeDir = makeTmpDir();
-    const configDir = join(homeDir, '.config', 'moltbook');
-    mkdirSync(configDir, { recursive: true });
-
-    try {
-      writeFileSync(join(baseDir, 'services.json'), JSON.stringify({
+  test('produces correct structure with valid data', () => {
+    const baseDir = '/fake';
+    const files = {
+      [join(baseDir, 'services.json')]: JSON.stringify({
         services: [
           { name: 'moltbook', status: 'active' },
           { name: 'chatr', status: 'active' },
           { name: 'newsite', status: 'discovered' },
           { name: 'badsite', status: 'rejected' },
         ]
-      }));
-      writeFileSync(join(baseDir, 'account-registry.json'), JSON.stringify({
+      }),
+      [join(baseDir, 'account-registry.json')]: JSON.stringify({
         accounts: [
           { platform: 'moltbook', last_status: 'live' },
           { platform: 'chatr', last_status: 'creds_ok' },
           { platform: 'dead', last_status: 'no_creds' },
         ]
-      }));
-      writeFileSync(join(baseDir, 'ecosystem-map.json'), JSON.stringify({
+      }),
+      [join(baseDir, 'ecosystem-map.json')]: JSON.stringify({
         agents: [
           { name: 'terminalcraft', url: 'https://terminalcraft.xyz', rank: 5, online: true },
           { name: 'other', online: false },
           { name: 'third', online: true },
         ]
-      }));
+      }),
+    };
 
-      const outFile = join(configDir, 'ecosystem-snapshots.jsonl');
-      execSync(`HOME="${homeDir}" node "${SCRIPT}" "${baseDir}" 1500 --eco-only`);
+    const appendFs = mockAppendFileSync();
+    const snap = ecosystemSnapshot({
+      baseDir,
+      session: 1500,
+      outFile: '/out.jsonl',
+      deps: { readFileSync: mockReadFileSync(files), appendFileSync: appendFs },
+    });
 
-      const lines = readFileSync(outFile, 'utf-8').trim().split('\n');
-      assert.strictEqual(lines.length, 1, 'Should produce exactly one JSONL line');
+    assert.strictEqual(snap.session, 1500);
+    assert.ok(snap.ts);
+    assert.strictEqual(snap.platforms_known, 4);
+    assert.strictEqual(snap.platforms_evaluated, 3);
+    assert.strictEqual(snap.platforms_rejected, 1);
+    assert.strictEqual(snap.platforms_with_creds, 2);
+    assert.strictEqual(snap.platforms_no_creds, 1);
+    assert.strictEqual(snap.agents_total, 3);
+    assert.strictEqual(snap.agents_online, 2);
+    assert.strictEqual(snap.molty_rank, 5);
 
-      const snap = JSON.parse(lines[0]);
-      assert.strictEqual(snap.session, 1500);
-      assert.ok(snap.ts, 'Should have timestamp');
-      assert.strictEqual(snap.platforms_known, 4);
-      assert.strictEqual(snap.platforms_evaluated, 3, 'active + active + rejected = 3 non-discovered');
-      assert.strictEqual(snap.platforms_rejected, 1);
-      assert.strictEqual(snap.platforms_with_creds, 2, 'live + creds_ok');
-      assert.strictEqual(snap.platforms_no_creds, 1);
-      assert.strictEqual(snap.agents_total, 3);
-      assert.strictEqual(snap.agents_online, 2);
-      assert.strictEqual(snap.molty_rank, 5);
-    } finally {
-      cleanup(baseDir);
-      cleanup(homeDir);
-    }
+    // Verify JSONL append
+    assert.strictEqual(appendFs.calls.length, 1);
+    assert.strictEqual(appendFs.calls[0].file, '/out.jsonl');
+    assert.ok(appendFs.calls[0].data.endsWith('\n'));
+    assert.deepStrictEqual(JSON.parse(appendFs.calls[0].data.trim()), snap);
   });
 
-  test('handles missing JSON files gracefully (null loadJSON)', () => {
-    const baseDir = makeTmpDir(); // empty — no services.json etc.
-    const homeDir = makeTmpDir();
-    const configDir = join(homeDir, '.config', 'moltbook');
-    mkdirSync(configDir, { recursive: true });
-    const outFile = join(configDir, 'ecosystem-snapshots.jsonl');
+  test('handles missing JSON files gracefully', () => {
+    const snap = ecosystemSnapshot({
+      baseDir: '/empty',
+      session: 999,
+      deps: { readFileSync: mockReadFileSync({}), appendFileSync: mockAppendFileSync() },
+    });
 
-    try {
-      execSync(`HOME="${homeDir}" node "${SCRIPT}" "${baseDir}" 999 --eco-only`);
-
-      const lines = readFileSync(outFile, 'utf-8').trim().split('\n');
-      const snap = JSON.parse(lines[0]);
-
-      assert.strictEqual(snap.session, 999);
-      assert.strictEqual(snap.platforms_known, 0);
-      assert.strictEqual(snap.platforms_with_creds, 0);
-      assert.strictEqual(snap.agents_total, 0);
-      assert.strictEqual(snap.molty_rank, null);
-    } finally {
-      cleanup(baseDir);
-      cleanup(homeDir);
-    }
+    assert.strictEqual(snap.session, 999);
+    assert.strictEqual(snap.platforms_known, 0);
+    assert.strictEqual(snap.platforms_with_creds, 0);
+    assert.strictEqual(snap.agents_total, 0);
+    assert.strictEqual(snap.molty_rank, null);
   });
 
-  test('JSONL appends on successive runs', () => {
-    const baseDir = makeTmpDir();
-    const homeDir = makeTmpDir();
-    const configDir = join(homeDir, '.config', 'moltbook');
-    mkdirSync(configDir, { recursive: true });
-    const outFile = join(configDir, 'ecosystem-snapshots.jsonl');
+  test('skips file write when outFile is null', () => {
+    const appendFs = mockAppendFileSync();
+    const snap = ecosystemSnapshot({
+      baseDir: '/empty',
+      session: 50,
+      outFile: null,
+      deps: { readFileSync: mockReadFileSync({}), appendFileSync: appendFs },
+    });
 
-    writeFileSync(join(baseDir, 'services.json'), JSON.stringify({ services: [] }));
-
-    try {
-      execSync(`HOME="${homeDir}" node "${SCRIPT}" "${baseDir}" 100 --eco-only`);
-      execSync(`HOME="${homeDir}" node "${SCRIPT}" "${baseDir}" 101 --eco-only`);
-      execSync(`HOME="${homeDir}" node "${SCRIPT}" "${baseDir}" 102 --eco-only`);
-
-      const lines = readFileSync(outFile, 'utf-8').trim().split('\n');
-      assert.strictEqual(lines.length, 3, 'Should have 3 JSONL lines after 3 runs');
-
-      const sessions = lines.map(l => JSON.parse(l).session);
-      assert.deepStrictEqual(sessions, [100, 101, 102]);
-    } finally {
-      cleanup(baseDir);
-      cleanup(homeDir);
-    }
+    assert.strictEqual(snap.session, 50);
+    assert.strictEqual(appendFs.calls.length, 0);
   });
 
-  test('finds molty via different name patterns', () => {
-    const baseDir = makeTmpDir();
-    const homeDir = makeTmpDir();
-    const configDir = join(homeDir, '.config', 'moltbook');
-    mkdirSync(configDir, { recursive: true });
+  test('finds molty via name="molty"', () => {
+    const files = {
+      [join('/d', 'services.json')]: '{"services":[]}',
+      [join('/d', 'account-registry.json')]: '{"accounts":[]}',
+      [join('/d', 'ecosystem-map.json')]: JSON.stringify({
+        agents: [{ name: 'molty', rank: 3, online: true }]
+      }),
+    };
+    const snap = ecosystemSnapshot({
+      baseDir: '/d',
+      session: 200,
+      deps: { readFileSync: mockReadFileSync(files), appendFileSync: mockAppendFileSync() },
+    });
+    assert.strictEqual(snap.molty_rank, 3);
+  });
 
-    writeFileSync(join(baseDir, 'services.json'), JSON.stringify({ services: [] }));
-    writeFileSync(join(baseDir, 'account-registry.json'), JSON.stringify({ accounts: [] }));
-    writeFileSync(join(baseDir, 'ecosystem-map.json'), JSON.stringify({
-      agents: [{ name: 'molty', rank: 3, online: true }]
-    }));
+  test('finds molty via url containing terminalcraft', () => {
+    const files = {
+      [join('/d', 'services.json')]: '{"services":[]}',
+      [join('/d', 'account-registry.json')]: '{"accounts":[]}',
+      [join('/d', 'ecosystem-map.json')]: JSON.stringify({
+        agents: [{ name: 'someone', url: 'https://terminalcraft.xyz', rank: 7, online: false }]
+      }),
+    };
+    const snap = ecosystemSnapshot({
+      baseDir: '/d',
+      session: 201,
+      deps: { readFileSync: mockReadFileSync(files), appendFileSync: mockAppendFileSync() },
+    });
+    assert.strictEqual(snap.molty_rank, 7);
+  });
 
-    try {
-      execSync(`HOME="${homeDir}" node "${SCRIPT}" "${baseDir}" 200 --eco-only`);
-      const outFile = join(configDir, 'ecosystem-snapshots.jsonl');
-      const snap = JSON.parse(readFileSync(outFile, 'utf-8').trim());
-      assert.strictEqual(snap.molty_rank, 3, 'Should find molty by name="molty"');
-    } finally {
-      cleanup(baseDir);
-      cleanup(homeDir);
-    }
+  test('handles registry as flat array', () => {
+    const files = {
+      [join('/d', 'services.json')]: '{"services":[]}',
+      [join('/d', 'account-registry.json')]: JSON.stringify([
+        { platform: 'x', last_status: 'live' },
+        { platform: 'y', last_status: 'no_creds' },
+      ]),
+      [join('/d', 'ecosystem-map.json')]: '{"agents":[]}',
+    };
+    const snap = ecosystemSnapshot({
+      baseDir: '/d',
+      session: 300,
+      deps: { readFileSync: mockReadFileSync(files), appendFileSync: mockAppendFileSync() },
+    });
+    assert.strictEqual(snap.platforms_with_creds, 1);
+    assert.strictEqual(snap.platforms_no_creds, 1);
+  });
+
+  test('counts degraded status as having creds', () => {
+    const files = {
+      [join('/d', 'services.json')]: '{"services":[]}',
+      [join('/d', 'account-registry.json')]: JSON.stringify({
+        accounts: [{ platform: 'z', last_status: 'degraded' }]
+      }),
+      [join('/d', 'ecosystem-map.json')]: '{"agents":[]}',
+    };
+    const snap = ecosystemSnapshot({
+      baseDir: '/d',
+      session: 301,
+      deps: { readFileSync: mockReadFileSync(files), appendFileSync: mockAppendFileSync() },
+    });
+    assert.strictEqual(snap.platforms_with_creds, 1);
   });
 });
 
 // ---- Pattern snapshot tests ----
 describe('patternSnapshot', () => {
-  test('produces correct structure with PATTERNS_JSON env', () => {
-    const baseDir = makeTmpDir();
-    const homeDir = makeTmpDir();
-    const configDir = join(homeDir, '.config', 'moltbook');
-    mkdirSync(configDir, { recursive: true });
-
-    writeFileSync(join(baseDir, 'services.json'), JSON.stringify({ services: [] }));
-
+  test('produces correct structure with pattern data', () => {
     const patternsData = {
       patterns: {
         hot_files: { friction_signal: 3, count: 7 },
@@ -185,53 +220,85 @@ describe('patternSnapshot', () => {
       ]
     };
 
-    try {
-      execSync(
-        `HOME="${homeDir}" PATTERNS_JSON='${JSON.stringify(patternsData)}' node "${SCRIPT}" "${baseDir}" 1600 --pat-only`
-      );
+    const appendFs = mockAppendFileSync();
+    const snap = patternSnapshot({
+      session: 1600,
+      patternsJSON: patternsData,
+      outFile: '/pat.jsonl',
+      deps: { appendFileSync: appendFs },
+    });
 
-      const outFile = join(configDir, 'patterns-history.jsonl');
-      const lines = readFileSync(outFile, 'utf-8').trim().split('\n');
-      assert.strictEqual(lines.length, 1);
+    assert.strictEqual(snap.session, 1600);
+    assert.ok(snap.ts);
+    assert.strictEqual(snap.friction_signal, 3);
+    assert.strictEqual(snap.hot_files_count, 7);
+    assert.strictEqual(snap.build_stalls, 2);
+    assert.strictEqual(snap.repeated_tasks, 1);
+    assert.strictEqual(snap.friction_items.length, 3);
+    assert.deepStrictEqual(snap.friction_items, ['fix flaky test', 'reduce hook count', 'cache API calls']);
 
-      const snap = JSON.parse(lines[0]);
-      assert.strictEqual(snap.session, 1600);
-      assert.ok(snap.ts);
-      assert.strictEqual(snap.friction_signal, 3);
-      assert.strictEqual(snap.hot_files_count, 7);
-      assert.strictEqual(snap.build_stalls, 2);
-      assert.strictEqual(snap.repeated_tasks, 1);
-      assert.strictEqual(snap.friction_items.length, 3, 'Should cap at 3 items');
-      assert.deepStrictEqual(snap.friction_items, ['fix flaky test', 'reduce hook count', 'cache API calls']);
-    } finally {
-      cleanup(baseDir);
-      cleanup(homeDir);
-    }
+    // Verify append
+    assert.strictEqual(appendFs.calls.length, 1);
+    assert.deepStrictEqual(JSON.parse(appendFs.calls[0].data.trim()), snap);
   });
 
-  test('skips pattern snapshot when PATTERNS_JSON not set', () => {
-    const baseDir = makeTmpDir();
-    const homeDir = makeTmpDir();
-    const configDir = join(homeDir, '.config', 'moltbook');
-    mkdirSync(configDir, { recursive: true });
+  test('accepts patternsJSON as string', () => {
+    const data = { patterns: { hot_files: { friction_signal: 1, count: 2 } }, friction_signals: [] };
+    const snap = patternSnapshot({
+      session: 1601,
+      patternsJSON: JSON.stringify(data),
+      deps: { appendFileSync: mockAppendFileSync() },
+    });
+    assert.strictEqual(snap.friction_signal, 1);
+    assert.strictEqual(snap.hot_files_count, 2);
+  });
 
-    writeFileSync(join(baseDir, 'services.json'), JSON.stringify({ services: [] }));
+  test('returns null when patternsJSON is null', () => {
+    const snap = patternSnapshot({ session: 1700, patternsJSON: null });
+    assert.strictEqual(snap, null);
+  });
 
-    try {
-      execSync(`HOME="${homeDir}" node "${SCRIPT}" "${baseDir}" 1700 --pat-only`);
+  test('returns null when patternsJSON is undefined', () => {
+    const snap = patternSnapshot({ session: 1701, patternsJSON: undefined });
+    assert.strictEqual(snap, null);
+  });
 
-      const outFile = join(configDir, 'patterns-history.jsonl');
-      let exists = true;
-      try { readFileSync(outFile); } catch { exists = false; }
-      assert.strictEqual(exists, false, 'No patterns file should be created without PATTERNS_JSON');
-    } finally {
-      cleanup(baseDir);
-      cleanup(homeDir);
-    }
+  test('returns null for malformed JSON string', () => {
+    const snap = patternSnapshot({
+      session: 1702,
+      patternsJSON: '{broken',
+      deps: { appendFileSync: mockAppendFileSync() },
+    });
+    assert.strictEqual(snap, null);
+  });
+
+  test('handles missing nested pattern fields with defaults', () => {
+    const snap = patternSnapshot({
+      session: 1703,
+      patternsJSON: { patterns: {}, friction_signals: [] },
+      deps: { appendFileSync: mockAppendFileSync() },
+    });
+    assert.strictEqual(snap.friction_signal, 0);
+    assert.strictEqual(snap.hot_files_count, 0);
+    assert.strictEqual(snap.build_stalls, 0);
+    assert.strictEqual(snap.repeated_tasks, 0);
+    assert.deepStrictEqual(snap.friction_items, []);
+  });
+
+  test('skips file write when outFile is null', () => {
+    const appendFs = mockAppendFileSync();
+    const snap = patternSnapshot({
+      session: 1704,
+      patternsJSON: { patterns: {}, friction_signals: [] },
+      outFile: null,
+      deps: { appendFileSync: appendFs },
+    });
+    assert.ok(snap);
+    assert.strictEqual(appendFs.calls.length, 0);
   });
 });
 
-// ---- CLI mode tests ----
+// ---- CLI mode tests (kept for integration coverage) ----
 describe('CLI usage', () => {
   test('exits with error when no baseDir provided', () => {
     try {

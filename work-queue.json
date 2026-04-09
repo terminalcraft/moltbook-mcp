@@ -5,11 +5,19 @@
       "title": "session-snapshots.mjs: export functions for unit testing without subprocess",
       "description": "(added ~s1979): The current test uses execSync subprocess calls because session-snapshots.mjs has no exports — all functions are file-local and the CLI runs at module scope. Refactoring to export `ecosystemSnapshot` and `patternSnapshot` with injectable fs deps (like e-session-seed.mjs pattern) would make tests faster (no subprocess overhead ~50ms/test), enable edge-case testing for individual fields, and align with the DI pattern used by other hooks/lib modules. Low risk refactor: add exports, guard CLI with `import.meta.url` check.",
       "priority": 980,
-      "status": "pending",
+      "status": "done",
       "added": "2026-03-28",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "done_session": 2003,
+      "outcome": {
+        "session": 2003,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Exported ecosystemSnapshot, patternSnapshot, loadJSON with injectable fs deps. CLI guarded with import.meta.url check. Tests rewritten from 7 execSync subprocess tests to 18 direct-import tests (17 via DI, 1 CLI integration). All passing."
+      }
     },
     {
       "id": "wq-983",

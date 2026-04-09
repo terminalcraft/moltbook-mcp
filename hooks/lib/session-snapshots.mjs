@@ -2,20 +2,31 @@
 // session-snapshots.mjs — Snapshot ecosystem state + pattern metrics to JSONL
 // Called by 10-session-logging.sh (extracted d074, R#327→R#334)
 //
-// Usage: node session-snapshots.mjs <base_dir> <session_num> [--eco-only|--pat-only]
+// Usage (CLI): node session-snapshots.mjs <base_dir> <session_num> [--eco-only|--pat-only]
 // Env: PATTERNS_JSON — pre-fetched pattern data (skips curl if set)
+//
+// Usage (import):
+//   import { ecosystemSnapshot, patternSnapshot, loadJSON } from './session-snapshots.mjs';
+//   const snap = ecosystemSnapshot({ baseDir, session, outFile, deps: { readFileSync, appendFileSync } });
 
-import { readFileSync, appendFileSync } from 'fs';
+import { readFileSync as _readFileSync, appendFileSync as _appendFileSync } from 'fs';
 import { join } from 'path';
+import { fileURLToPath } from 'url';
 
-function loadJSON(filepath) {
-  try { return JSON.parse(readFileSync(filepath, 'utf-8')); } catch { return null; }
+export function loadJSON(filepath, deps = {}) {
+  const fs = { readFileSync: deps.readFileSync || _readFileSync };
+  try { return JSON.parse(fs.readFileSync(filepath, 'utf-8')); } catch { return null; }
 }
 
-function ecosystemSnapshot(baseDir, session, outFile) {
-  const services = loadJSON(join(baseDir, 'services.json'));
-  const registry = loadJSON(join(baseDir, 'account-registry.json'));
-  const ecomap = loadJSON(join(baseDir, 'ecosystem-map.json'));
+export function ecosystemSnapshot({ baseDir, session, outFile, deps = {} }) {
+  const fs = {
+    readFileSync: deps.readFileSync || _readFileSync,
+    appendFileSync: deps.appendFileSync || _appendFileSync,
+  };
+
+  const services = loadJSON(join(baseDir, 'services.json'), { readFileSync: fs.readFileSync });
+  const registry = loadJSON(join(baseDir, 'account-registry.json'), { readFileSync: fs.readFileSync });
+  const ecomap = loadJSON(join(baseDir, 'ecosystem-map.json'), { readFileSync: fs.readFileSync });
 
   const svcList = services?.services || [];
   const accounts = Array.isArray(registry) ? registry : (registry?.accounts || []);
@@ -39,12 +50,18 @@ function ecosystemSnapshot(baseDir, session, outFile) {
     molty_rank: molty?.rank || null
   };
 
-  appendFileSync(outFile, JSON.stringify(snap) + '\n');
+  if (outFile) {
+    fs.appendFileSync(outFile, JSON.stringify(snap) + '\n');
+  }
   return snap;
 }
 
-function patternSnapshot(session, patternsJSON, outFile) {
+export function patternSnapshot({ session, patternsJSON, outFile, deps = {} }) {
   if (!patternsJSON) return null;
+
+  const fs = {
+    appendFileSync: deps.appendFileSync || _appendFileSync,
+  };
 
   let patterns;
   try {
@@ -61,32 +78,38 @@ function patternSnapshot(session, patternsJSON, outFile) {
     friction_items: (patterns.friction_signals || []).map(s => s.suggestion).slice(0, 3)
   };
 
-  appendFileSync(outFile, JSON.stringify(snap) + '\n');
+  if (outFile) {
+    fs.appendFileSync(outFile, JSON.stringify(snap) + '\n');
+  }
   return snap;
 }
 
-// CLI entry point
-const args = process.argv.slice(2);
-const baseDir = args[0];
-const session = parseInt(args[1]) || 0;
-const mode = args[2]; // --eco-only or --pat-only
+// CLI entry point — only runs when executed directly
+const isCLI = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 
-if (!baseDir) {
-  console.error('Usage: node session-snapshots.mjs <base_dir> <session_num> [--eco-only|--pat-only]');
-  process.exit(1);
-}
+if (isCLI) {
+  const args = process.argv.slice(2);
+  const baseDir = args[0];
+  const session = parseInt(args[1]) || 0;
+  const mode = args[2]; // --eco-only or --pat-only
 
-const stateDir = join(process.env.HOME || '/home/moltbot', '.config/moltbook');
-const ecoOut = join(stateDir, 'ecosystem-snapshots.jsonl');
-const patOut = join(stateDir, 'patterns-history.jsonl');
+  if (!baseDir) {
+    console.error('Usage: node session-snapshots.mjs <base_dir> <session_num> [--eco-only|--pat-only]');
+    process.exit(1);
+  }
 
-if (mode !== '--pat-only') {
-  ecosystemSnapshot(baseDir, session, ecoOut);
-}
+  const stateDir = join(process.env.HOME || '/home/moltbot', '.config/moltbook');
+  const ecoOut = join(stateDir, 'ecosystem-snapshots.jsonl');
+  const patOut = join(stateDir, 'patterns-history.jsonl');
 
-if (mode !== '--eco-only') {
-  const patternsJSON = process.env.PATTERNS_JSON || null;
-  if (patternsJSON) {
-    patternSnapshot(session, patternsJSON, patOut);
+  if (mode !== '--pat-only') {
+    ecosystemSnapshot({ baseDir, session, outFile: ecoOut });
+  }
+
+  if (mode !== '--eco-only') {
+    const patternsJSON = process.env.PATTERNS_JSON || null;
+    if (patternsJSON) {
+      patternSnapshot({ session, patternsJSON, outFile: patOut });
+    }
   }
 }

@@ -148,7 +148,7 @@ function labelCluster(cluster) {
   return sorted.join(', ') || 'misc';
 }
 
-function analyze(opts = {}) {
+export function analyze(opts = {}) {
   const state = loadJSON(THREADS_PATH);
   if (!state || !state.threads) {
     return { error: 'No Chatr thread state found. Run chatr-thread-tracker.mjs update first.', clusters: [] };
@@ -221,48 +221,51 @@ function analyze(opts = {}) {
   };
 }
 
-// CLI
-const args = process.argv.slice(2);
-const jsonFlag = args.includes('--json');
-const hoursArg = args.find(a => a.startsWith('--hours'));
-const hours = hoursArg ? parseInt(args[args.indexOf(hoursArg) + 1] || hoursArg.split('=')[1], 10) : 72;
-const minThreadsArg = args.find(a => a.startsWith('--min-threads'));
-const minThreads = minThreadsArg ? parseInt(args[args.indexOf(minThreadsArg) + 1] || minThreadsArg.split('=')[1], 10) : 2;
+// CLI — only run when executed directly
+const isMain = process.argv[1] && process.argv[1].endsWith('chatr-topic-clusters.mjs');
+if (isMain) {
+  const args = process.argv.slice(2);
+  const jsonFlag = args.includes('--json');
+  const hoursArg = args.find(a => a.startsWith('--hours'));
+  const hours = hoursArg ? parseInt(args[args.indexOf(hoursArg) + 1] || hoursArg.split('=')[1], 10) : 72;
+  const minThreadsArg = args.find(a => a.startsWith('--min-threads'));
+  const minThreads = minThreadsArg ? parseInt(args[args.indexOf(minThreadsArg) + 1] || minThreadsArg.split('=')[1], 10) : 2;
 
-const result = analyze({ hours, minThreads });
+  const result = analyze({ hours, minThreads });
 
-if (result.error) {
-  console.error(result.error);
-  process.exit(1);
-}
-
-if (jsonFlag) {
-  console.log(JSON.stringify(result, null, 2));
-} else {
-  console.log(`Chatr Topic Clusters (last ${hours}h, ${result.threadCount} threads)`);
-  console.log('─'.repeat(60));
-
-  if (result.clusters.length === 0) {
-    console.log('\nNo topic clusters found (try increasing --hours or reducing --min-threads).');
-  } else {
-    for (const c of result.clusters) {
-      const engageTag = c.engaged ? (c.engagementGap > 0 ? ' [partial]' : ' [engaged]') : ' [UNENGAGED]';
-      const age = timeSince(c.lastActivity);
-      console.log(`\n  ${c.label}${engageTag}`);
-      console.log(`    ${c.threadCount} threads, ${c.totalMessages} messages, ${c.participantCount} participants`);
-      console.log(`    Top words: ${c.topWords.join(', ')}`);
-      console.log(`    Last active: ${age}`);
-    }
+  if (result.error) {
+    console.error(result.error);
+    process.exit(1);
   }
 
-  if (result.recommendations.length > 0) {
-    console.log('\n─ Recommendations for next E session ─');
-    for (const r of result.recommendations) {
-      const who = r.participants.length > 0 ? ` (${r.participants.map(p => '@' + p).join(', ')})` : '';
-      console.log(`  Target: "${r.topic}" — ${r.reason}${who}`);
-    }
+  if (jsonFlag) {
+    console.log(JSON.stringify(result, null, 2));
   } else {
-    console.log('\nAll topic clusters engaged. Good coverage.');
+    console.log(`Chatr Topic Clusters (last ${hours}h, ${result.threadCount} threads)`);
+    console.log('─'.repeat(60));
+
+    if (result.clusters.length === 0) {
+      console.log('\nNo topic clusters found (try increasing --hours or reducing --min-threads).');
+    } else {
+      for (const c of result.clusters) {
+        const engageTag = c.engaged ? (c.engagementGap > 0 ? ' [partial]' : ' [engaged]') : ' [UNENGAGED]';
+        const age = timeSince(c.lastActivity);
+        console.log(`\n  ${c.label}${engageTag}`);
+        console.log(`    ${c.threadCount} threads, ${c.totalMessages} messages, ${c.participantCount} participants`);
+        console.log(`    Top words: ${c.topWords.join(', ')}`);
+        console.log(`    Last active: ${age}`);
+      }
+    }
+
+    if (result.recommendations.length > 0) {
+      console.log('\n─ Recommendations for next E session ─');
+      for (const r of result.recommendations) {
+        const who = r.participants.length > 0 ? ` (${r.participants.map(p => '@' + p).join(', ')})` : '';
+        console.log(`  Target: "${r.topic}" — ${r.reason}${who}`);
+      }
+    } else {
+      console.log('\nAll topic clusters engaged. Good coverage.');
+    }
   }
 }
 

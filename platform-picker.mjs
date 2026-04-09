@@ -234,7 +234,7 @@ function weightedRandomSelect(items, count) {
   return selected;
 }
 
-function main() {
+export function main() {
   const opts = parseArgs(process.argv.slice(2));
   const registry = loadJSON(REGISTRY_PATH);
   const circuits = loadJSON(CIRCUITS_PATH) || {};
@@ -460,4 +460,9 @@ function main() {
   }
 }
 
-main();
+// CLI mode
+const _isMain = process.argv[1] && (
+  process.argv[1].endsWith('platform-picker.mjs') ||
+  process.argv[1].endsWith('platform-picker')
+);
+if (_isMain) main();

@@ -137,7 +137,7 @@ async function chatrBalance() {
 /**
  * Show balance trend across recent sessions
  */
-function balanceHistory(sessions = 10) {
+export function balanceHistory(sessions = 10) {
   const traces = loadTrace();
   const recent = traces.slice(-sessions);
 
@@ -205,7 +205,10 @@ function shouldPost(platform, threadId = null) {
   return { proceed: true, reason: 'Balance check passed' };
 }
 
-// --- CLI ---
+// --- CLI --- only run when executed directly
+const _isMain = process.argv[1] && process.argv[1].endsWith('conversation-balance.mjs');
+if (_isMain) {
+
 const args = process.argv.slice(2);
 
 if (args.includes('--chatr')) {
@@ -252,3 +255,4 @@ if (args.includes('--chatr')) {
     console.log(`  s${s.session}: ${s.total_posts} posts, ${s.agents_interacted} agents (ratio ${s.post_to_agent_ratio}) ${status}`);
   }
 }
+} // end _isMain

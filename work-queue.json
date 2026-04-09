@@ -1,25 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-980",
-      "title": "session-snapshots.mjs: export functions for unit testing without subprocess",
-      "description": "(added ~s1979): The current test uses execSync subprocess calls because session-snapshots.mjs has no exports — all functions are file-local and the CLI runs at module scope. Refactoring to export `ecosystemSnapshot` and `patternSnapshot` with injectable fs deps (like e-session-seed.mjs pattern) would make tests faster (no subprocess overhead ~50ms/test), enable edge-case testing for individual fields, and align with the DI pattern used by other hooks/lib modules. Low risk refactor: add exports, guard CLI with `import.meta.url` check.",
-      "priority": 980,
-      "status": "done",
-      "added": "2026-03-28",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "done_session": 2003,
-      "outcome": {
-        "session": 2003,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Exported ecosystemSnapshot, patternSnapshot, loadJSON with injectable fs deps. CLI guarded with import.meta.url check. Tests rewritten from 7 execSync subprocess tests to 18 direct-import tests (17 via DI, 1 CLI integration). All passing."
-      }
-    },
-    {
       "id": "wq-983",
       "title": "Consolidate E prehook node subprocesses into single runner",
       "description": "Apply the same runner pattern from wq-971 (a-prehook-runner.mjs) to 35-e-session-prehook_E.sh. The E prehook currently spawns 9 node subprocesses (seed, liveness, topic-clusters, conversation-balance, spending-policy, credential-health, variety-analyzer, colony-jwt, picker + revalidate). Audit flags it slow at 6292ms avg. A single e-prehook-runner.mjs that imports and runs the checks would eliminate ~1-2s of Node startup overhead. Requires: export functions from each module (some already exported), create runner, update shell script to call runner once. Same pattern as wq-971.",

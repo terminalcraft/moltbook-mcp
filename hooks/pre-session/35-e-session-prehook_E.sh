@@ -1,15 +1,11 @@
 #!/bin/bash
 # 35-e-session-prehook_E.sh — Consolidated E-session pre-hook dispatcher
 #
-# Merges 3 individual E-session pre-hooks into a single dispatcher.
-# All 8 checks are independent — only Check 2 (seed) must run first to
-# create CONTEXT_FILE, then all others run in parallel.
+# Runs all E session pre-checks: liveness probe (separate process) +
+# consolidated runner (single node process for 10 checks).
 #
-# Performance (wq-837, B#532): Profiling showed the old sequential chain
-# (liveness→seed→topics) took 5.9s worst-case because liveness probe can
-# take 5s with stale cache. Checks are actually independent — liveness
-# updates platform-circuits.json, which no other check reads. Now runs
-# seed first (~50ms), then all 7 others in parallel. Target: ≤3s avg.
+# Performance: The runner eliminates ~10 Node subprocess startups (~1-2s saved).
+# Liveness probe stays separate due to its process.exit() hard timeout pattern.
 #
 # Replaces:
 #   35-engagement-liveness_E.sh (wq-197, R#271, R#275)
@@ -18,22 +14,18 @@
 #   37-conversation-balance_E.sh (d041) — merged B#497 (wq-754)
 #   38-spending-policy_E.sh      (d059, R#223) — merged B#497 (wq-754)
 #
-# Check 7: engagement-variety-analyzer.mjs integration (wq-776, B#515)
-#
 # Created: B#490 (wq-729), expanded B#497 (wq-754)
+# Optimized: B#631 (wq-983) — single node runner replaces 10 subprocesses
 
 cd /home/moltbot/moltbook-mcp
 
 STATE_DIR="$HOME/.config/moltbook"
 CACHE_FILE="$STATE_DIR/liveness-cache.json"
 CACHE_MAX_AGE=7200
-INTEL_FILE="$STATE_DIR/engagement-intel.json"
-HISTORY_FILE="$STATE_DIR/session-history.txt"
 CONTEXT_FILE="$STATE_DIR/e-session-context.md"
 
 ###############################################################################
-# Check 1: Engagement platform liveness (was 35-engagement-liveness_E.sh)
-#   Opens circuits for degraded platforms so platform-picker excludes them
+# Check 1: Engagement platform liveness (separate process — uses process.exit)
 ###############################################################################
 check_engagement_liveness() {
   cache_fresh=false
@@ -71,91 +63,94 @@ check_engagement_liveness() {
 }
 
 ###############################################################################
-# Check 2: Engagement context seed (was 36-engagement-seed_E.sh)
-#   Generate E session context from engagement-intel.json + recent E history
-#   Extracted to hooks/lib/e-session-seed.mjs (R#323)
+# Run: liveness in background, then consolidated runner for everything else
 ###############################################################################
-check_engagement_seed() {
-  output=$(node hooks/lib/e-session-seed.mjs --output "$CONTEXT_FILE" 2>&1)
-  echo "[seed] $output"
-}
 
-###############################################################################
-# Check 3: Topic clusters (was 36-topic-clusters_E.sh)
-#   Populate Chatr thread state and inject topic cluster recommendations
-###############################################################################
-check_topic_clusters() {
-  local ctx_out="${1:-$CONTEXT_FILE}"
-  echo "[topic-clusters] Updating Chatr thread state..."
-  update_out=$(timeout 5 node chatr-thread-tracker.mjs update --json 2>/dev/null)
-  update_exit=$?
+# Phase 1: Liveness probe (separate process, background)
+check_engagement_liveness &
+pid_liveness=$!
 
-  if [ $update_exit -eq 124 ]; then
-    echo "[topic-clusters] Thread tracker timed out (5s), using stale state"
-  elif [ $update_exit -ne 0 ]; then
-    echo "[topic-clusters] Thread tracker failed (exit $update_exit), trying clusters with existing state"
-  fi
+# Phase 2: Consolidated runner (single node process for checks 2-8 + picker)
+POLICY_FILE="$STATE_DIR/spending-policy.json"
+RUNNER_JSON=""
+runner_output=$(timeout 12 node e-prehook-runner.mjs \
+  --context-file "$CONTEXT_FILE" \
+  --policy-file "$POLICY_FILE" \
+  --session "${SESSION_NUM:-0}" 2>&1)
+runner_exit=$?
 
-  clusters_json=$(timeout 4 node chatr-topic-clusters.mjs --json --hours 72 2>/dev/null)
-  clusters_exit=$?
+if [ $runner_exit -eq 124 ]; then
+  echo "[e-runner] WARNING: Runner timed out (12s)"
+elif [ $runner_exit -ne 0 ]; then
+  echo "[e-runner] WARNING: Runner failed (exit $runner_exit)"
+else
+  RUNNER_JSON="$runner_output"
+fi
 
-  if [ $clusters_exit -ne 0 ] || [ -z "$clusters_json" ]; then
-    echo "[topic-clusters] No cluster data available (exit $clusters_exit), skipping"
-    return 0
-  fi
+# Wait for liveness probe
+wait $pid_liveness
 
-  recs=$(echo "$clusters_json" | jq -r '
-    if ((.recommendations // []) | length) == 0 and ((.clusters // []) | length) == 0 then empty else
+# Phase 3: Parse runner output and log results
+if [ -z "$RUNNER_JSON" ]; then
+  echo "[e-runner] No runner output — checks skipped"
+  exit 0
+fi
 
-    "## Chatr topic clusters (auto-generated)",
-    "\(.threadCount // 0) threads in \(.clusterCount // 0) clusters (last 72h)",
-    "",
+# Check 2: Seed
+seed_error=$(echo "$RUNNER_JSON" | jq -r '.seed.error // empty')
+if [ -n "$seed_error" ]; then
+  echo "[seed] ERROR: $seed_error"
+else
+  seed_lines=$(echo "$RUNNER_JSON" | jq -r '.seed.lines // 0')
+  echo "[seed] Generated context ($seed_lines lines)"
+fi
 
-    (if ((.recommendations // []) | length) > 0 then
-      "**Recommended engagement targets:**",
-      (.recommendations[] |
-        ([.participants[]? | "@" + .] | join(", ")) as $who |
-        (if ($who | length) > 0 then " (\($who))" else "" end) as $who_str |
-        "- **\(.topic)**: \(.reason)\($who_str)"
-      ),
-      ""
-    else empty end),
+# Check 3: Thread tracker + topic clusters
+tt_error=$(echo "$RUNNER_JSON" | jq -r '.thread_tracker.error // empty')
+if [ -n "$tt_error" ] && [ "$tt_error" != "null" ]; then
+  echo "[topic-clusters] Thread tracker: $tt_error"
+else
+  tt_msgs=$(echo "$RUNNER_JSON" | jq -r '.thread_tracker.messagesProcessed // 0')
+  echo "[topic-clusters] Thread tracker updated ($tt_msgs messages)"
+fi
 
-    (if ((.clusters // []) | length) > 0 then
-      "**Cluster overview:**",
-      (.clusters[:5][] |
-        (if .engaged and (.engagementGap // 0) == 0 then "[engaged]"
-         elif (.engagementGap // 0) > 0 then "[gap]"
-         else "[unengaged]" end) as $tag |
-        "- \(.label) \($tag): \(.threadCount) threads, \(.totalMessages) msgs"
-      ),
-      ""
-    else empty end)
+tc_error=$(echo "$RUNNER_JSON" | jq -r '.topic_clusters.error // empty')
+if [ -n "$tc_error" ] && [ "$tc_error" != "null" ]; then
+  echo "[topic-clusters] $tc_error"
+else
+  tc_count=$(echo "$RUNNER_JSON" | jq -r '.topic_clusters.clusterCount // 0')
+  tc_threads=$(echo "$RUNNER_JSON" | jq -r '.topic_clusters.threadCount // 0')
+  tc_recs=$(echo "$RUNNER_JSON" | jq -r '.topic_clusters.recommendations | length')
 
-    end
-  ' 2>/dev/null)
-
-  if [ -n "$recs" ]; then
-    echo "" >> "$ctx_out"
-    echo "$recs" >> "$ctx_out"
-    line_count=$(echo "$recs" | wc -l)
-    echo "[topic-clusters] Appended $line_count lines (to $(basename "$ctx_out"))"
+  # Append topic cluster data to context file if recommendations exist
+  if [ "$tc_recs" -gt 0 ]; then
+    {
+      echo ""
+      echo "## Chatr topic clusters (auto-generated)"
+      echo "$tc_threads threads in $tc_count clusters (last 72h)"
+      echo ""
+      echo "**Recommended engagement targets:**"
+      echo "$RUNNER_JSON" | jq -r '.topic_clusters.recommendations[] |
+        "- **\(.topic)**: \(.reason)"'
+      echo ""
+    } >> "$CONTEXT_FILE"
+    echo "[topic-clusters] $tc_count clusters, $tc_recs recommendations (appended to context)"
   else
-    echo "[topic-clusters] No recommendations to inject"
+    echo "[topic-clusters] $tc_count clusters, no recommendations"
   fi
-}
+fi
 
-###############################################################################
-# Check 4: Conversation balance (was 37-conversation-balance_E.sh)
-#   Warns if recent sessions show dominance patterns (d041)
-###############################################################################
-check_conversation_balance() {
+# Check 4: Conversation balance
+cb_error=$(echo "$RUNNER_JSON" | jq -r '.conversation_balance.error // empty')
+if [ -n "$cb_error" ]; then
+  echo "[conversation-balance] ERROR: $cb_error"
+else
+  cb_trend=$(echo "$RUNNER_JSON" | jq -r '.conversation_balance.trend // "?"')
+  cb_ratio=$(echo "$RUNNER_JSON" | jq -r '.conversation_balance.avgRatio // "?"')
   echo "=== Conversation Balance Check (d041) ==="
-  output=$(node conversation-balance.mjs 2>&1)
-  exit_code=$?
-  echo "$output"
-
-  if [ $exit_code -ne 0 ]; then
+  echo "[conversation-balance] Trend: $cb_trend, avg ratio: $cb_ratio"
+  cb_warning=$(echo "$RUNNER_JSON" | jq -r '.conversation_balance.warning')
+  if [ "$cb_warning" = "true" ]; then
     echo ""
     echo "ACTION REQUIRED: Recent sessions show conversation imbalance."
     echo "   This session should prioritize:"
@@ -164,283 +159,160 @@ check_conversation_balance() {
     echo "   3. Engaging on platforms where you've posted less"
     echo ""
   fi
-}
+fi
 
-###############################################################################
-# Check 5: Spending policy (was 38-spending-policy_E.sh)
-#   Checks monthly budget for crypto-gated platforms (d059, R#223)
-###############################################################################
-check_spending_policy() {
-  POLICY_FILE="$STATE_DIR/spending-policy.json"
-
-  if [ ! -f "$POLICY_FILE" ]; then
+# Check 5: Spending policy
+sp_error=$(echo "$RUNNER_JSON" | jq -r '.spending_policy.error // empty')
+if [ -n "$sp_error" ]; then
+  echo "[spending-policy] ERROR: $sp_error"
+else
+  sp_status=$(echo "$RUNNER_JSON" | jq -r '.spending_policy.status // empty')
+  if [ "$sp_status" = "disabled" ]; then
     echo "spending-policy: no policy file found, E session spending DISABLED"
-    return 0
-  fi
-
-  CURRENT_MONTH=$(date +%Y-%m)
-
-  # Extracted to hooks/lib/spending-policy.mjs (R#338)
-  POLICY_OUT=$(node hooks/lib/spending-policy.mjs --policy-file "$POLICY_FILE" --current-month "$CURRENT_MONTH")
-
-  IFS='|' read -r MONTH_LIMIT MONTH_SPENT PER_SESSION PER_PLATFORM MIN_ROI WAS_RESET <<< "$POLICY_OUT"
-
-  if [ "$WAS_RESET" = "true" ]; then
-    echo "spending-policy: new month, ledger reset"
-  fi
-
-  REMAINING=$(echo "$MONTH_LIMIT $MONTH_SPENT" | awk '{printf "%.2f", $1 - $2}')
-
-  if [ "$(echo "$MONTH_SPENT $MONTH_LIMIT" | awk '{print ($1 >= $2) ? "yes" : "no"}')" = "yes" ]; then
-    echo "SPENDING_GATE: BLOCKED — monthly limit reached (\$$MONTH_SPENT/\$$MONTH_LIMIT). Skip crypto-gated platforms this session."
   else
-    echo "SPENDING_GATE: OPEN — budget \$$REMAINING remaining this month (limit: \$$MONTH_LIMIT)"
-    echo "SPENDING_RULES: max \$$PER_SESSION/session, max \$$PER_PLATFORM/platform, ROI >= $MIN_ROI required"
+    sp_reset=$(echo "$RUNNER_JSON" | jq -r '.spending_policy.wasReset')
+    [ "$sp_reset" = "true" ] && echo "spending-policy: new month, ledger reset"
+
+    sp_limit=$(echo "$RUNNER_JSON" | jq -r '.spending_policy.monthlyLimit')
+    sp_spent=$(echo "$RUNNER_JSON" | jq -r '.spending_policy.monthSpent')
+    sp_remaining=$(echo "$sp_limit $sp_spent" | awk '{printf "%.2f", $1 - $2}')
+
+    if [ "$(echo "$sp_spent $sp_limit" | awk '{print ($1 >= $2) ? "yes" : "no"}')" = "yes" ]; then
+      echo "SPENDING_GATE: BLOCKED — monthly limit reached (\$$sp_spent/\$$sp_limit). Skip crypto-gated platforms this session."
+    else
+      sp_per_session=$(echo "$RUNNER_JSON" | jq -r '.spending_policy.perSession')
+      sp_per_platform=$(echo "$RUNNER_JSON" | jq -r '.spending_policy.perPlatform')
+      sp_min_roi=$(echo "$RUNNER_JSON" | jq -r '.spending_policy.minRoi')
+      echo "SPENDING_GATE: OPEN — budget \$$sp_remaining remaining this month (limit: \$$sp_limit)"
+      echo "SPENDING_RULES: max \$$sp_per_session/session, max \$$sp_per_platform/platform, ROI >= $sp_min_roi required"
+    fi
   fi
-}
+fi
 
-###############################################################################
-# Check 6: Credential pre-check for live platforms (wq-792)
-#   Uses credential-health-check.mjs for validation (consolidated R#309).
-#   Previously contained 50-line inline Node script duplicating the module.
-#   Now delegates to the module which also provides JWT expiry detection.
-#   Accepts optional $1 as output file for context additions (parallel mode).
-###############################################################################
-check_credential_status() {
-  local ctx_out="${1:-$CONTEXT_FILE}"
-  if [ ! -f "account-registry.json" ]; then
-    echo "[cred-check] No account-registry.json found, skipping"
-    return 0
-  fi
+# Check 6: Credential health
+ch_error=$(echo "$RUNNER_JSON" | jq -r '.credential_health.error // empty')
+if [ -n "$ch_error" ]; then
+  echo "[cred-check] ERROR: $ch_error"
+else
+  ch_healthy=$(echo "$RUNNER_JSON" | jq -r '.credential_health.healthy // 0')
+  ch_total=$(echo "$RUNNER_JSON" | jq -r '.credential_health.total // 0')
+  ch_unhealthy=$(echo "$RUNNER_JSON" | jq -r '.credential_health.unhealthy // 0')
+  echo "[cred-check] OK: $ch_healthy/$ch_total live platforms have valid credentials"
 
-  cred_json=$(timeout 5 node credential-health-check.mjs --json 2>&1)
-  cred_exit=$?
-
-  if [ $cred_exit -eq 124 ]; then
-    echo "[cred-check] Timed out (5s), skipping"
-    return 0
-  fi
-
-  if [ $cred_exit -ne 0 ] || [ -z "$cred_json" ]; then
-    echo "[cred-check] Failed (exit $cred_exit), skipping"
-    return 0
-  fi
-
-  healthy=$(echo "$cred_json" | jq -r '.healthy // 0')
-  total=$(echo "$cred_json" | jq -r '.total // 0')
-  unhealthy=$(echo "$cred_json" | jq -r '.unhealthy // 0')
-
-  echo "[cred-check] OK: $healthy/$total live platforms have valid credentials"
-
-  if [ "$unhealthy" -gt 0 ]; then
+  if [ "$ch_unhealthy" -gt 0 ]; then
     {
       echo ""
       echo "## Credential warnings (auto-check)"
       echo "The following live platforms have credential issues. SKIP them when picking engagement targets:"
-      echo "$cred_json" | jq -r '.warnings[]? | "- **\(.id)**: \(.status) — \(.details)"'
+      echo "$RUNNER_JSON" | jq -r '.credential_health.warnings[]? | "- **\(.id)**: \(.status) — \(.details)"'
       echo ""
-    } >> "$ctx_out"
-    echo "[cred-check] Appended credential warnings to $(basename "$ctx_out")"
+    } >> "$CONTEXT_FILE"
+    echo "[cred-check] Appended credential warnings to $(basename "$CONTEXT_FILE")"
   fi
-}
+fi
 
-###############################################################################
-# Check 7: Engagement variety analysis (wq-776)
-#   Runs engagement-variety-analyzer.mjs to detect platform concentration
-#   drift across recent E sessions. Writes alert to context file if detected.
-#   Accepts optional $1 as output file for context additions (parallel mode).
-###############################################################################
-check_engagement_variety() {
-  local ctx_out="${1:-$CONTEXT_FILE}"
+# Check 7: Engagement variety
+ev_error=$(echo "$RUNNER_JSON" | jq -r '.engagement_variety.error // empty')
+if [ -n "$ev_error" ]; then
+  echo "[variety] $ev_error"
+else
+  ev_health=$(echo "$RUNNER_JSON" | jq -r '.engagement_variety.healthScore // "?"')
+  ev_top=$(echo "$RUNNER_JSON" | jq -r '.engagement_variety.topPlatform // "?"')
+  ev_pct=$(echo "$RUNNER_JSON" | jq -r '.engagement_variety.topConcentrationPct // "?"')
+  ev_rec=$(echo "$RUNNER_JSON" | jq -r '.engagement_variety.recommendation // ""')
   echo "=== Engagement Variety Check ==="
-  variety_json=$(timeout 5 node engagement-variety-analyzer.mjs --json --alert-file 2>&1)
-  variety_exit=$?
+  echo "[variety] Health: $ev_health | Top: $ev_top ($ev_pct%) | $ev_rec"
 
-  if [ $variety_exit -eq 124 ]; then
-    echo "[variety] Analyzer timed out (5s), skipping"
-    return 0
-  fi
-
-  if [ -z "$variety_json" ]; then
-    echo "[variety] No output from analyzer (exit $variety_exit), skipping"
-    return 0
-  fi
-
-  # Parse key fields from JSON output
-  health_score=$(echo "$variety_json" | jq -r '.health.score // "?"' 2>/dev/null)
-  top_platform=$(echo "$variety_json" | jq -r '.concentration.topPlatform // "?"' 2>/dev/null)
-  top_pct=$(echo "$variety_json" | jq -r '.concentration.topConcentrationPct // "?"' 2>/dev/null)
-  recommendation=$(echo "$variety_json" | jq -r '.health.recommendation // ""' 2>/dev/null)
-  alert_level=$(echo "$variety_json" | jq -r '.alert.level // empty' 2>/dev/null)
-  alert_msg=$(echo "$variety_json" | jq -r '.alert.message // empty' 2>/dev/null)
-
-  echo "[variety] Health: $health_score | Top: $top_platform ($top_pct%) | $recommendation"
-
-  # If concentration detected, append warning to context output file
-  if [ -n "$alert_level" ] && [ "$alert_level" != "null" ]; then
+  ev_alert_level=$(echo "$RUNNER_JSON" | jq -r '.engagement_variety.alert.level // empty')
+  if [ -n "$ev_alert_level" ]; then
+    ev_alert_msg=$(echo "$RUNNER_JSON" | jq -r '.engagement_variety.alert.message // ""')
     {
       echo ""
       echo "## Platform concentration alert (auto-detected)"
-      echo "**Level: ${alert_level^^}** — $alert_msg"
+      echo "**Level: ${ev_alert_level^^}** — $ev_alert_msg"
       echo ""
-      echo "$recommendation"
+      echo "$ev_rec"
       echo ""
       echo "**Action**: Prioritize under-represented platforms in this session's picker targets."
       echo ""
-    } >> "$ctx_out"
-    echo "[variety] WARNING: Concentration alert appended to $(basename "$ctx_out")"
+    } >> "$CONTEXT_FILE"
+    echo "[variety] WARNING: Concentration alert appended to $(basename "$CONTEXT_FILE")"
   fi
-}
+fi
 
-###############################################################################
-# Check 8: Colony JWT freshness (wq-803)
-#   Ensures Colony JWT won't expire mid-session. Extracted to
-#   hooks/lib/colony-jwt.mjs (R#348) for testability and modularity.
-#   Accepts optional $1 as output file for context additions (parallel mode).
-###############################################################################
-check_colony_jwt_freshness() {
-  local ctx_out="${1:-$CONTEXT_FILE}"
+# Check 8: Colony JWT
+cj_error=$(echo "$RUNNER_JSON" | jq -r '.colony_jwt.error // empty')
+if [ -n "$cj_error" ]; then
+  echo "[colony-jwt] ERROR: $cj_error"
+else
+  cj_status=$(echo "$RUNNER_JSON" | jq -r '.colony_jwt.status // "error"')
+  cj_action=$(echo "$RUNNER_JSON" | jq -r '.colony_jwt.action // "none"')
+  cj_reason=$(echo "$RUNNER_JSON" | jq -r '.colony_jwt.reason // ""')
+  cj_remaining=$(echo "$RUNNER_JSON" | jq -r '.colony_jwt.remaining // ""')
+  cj_warning=$(echo "$RUNNER_JSON" | jq -r '.colony_jwt.warning // ""')
 
-  jwt_json=$(timeout 10 node hooks/lib/colony-jwt.mjs 2>&1)
-  jwt_exit=$?
-
-  if [ $jwt_exit -eq 124 ]; then
-    echo "[colony-jwt] Timed out (10s), skipping"
-    return 0
-  fi
-
-  status=$(echo "$jwt_json" | jq -r '.status // "error"' 2>/dev/null)
-  action=$(echo "$jwt_json" | jq -r '.action // "none"' 2>/dev/null)
-  reason=$(echo "$jwt_json" | jq -r '.reason // ""' 2>/dev/null)
-  remaining=$(echo "$jwt_json" | jq -r '.remaining // ""' 2>/dev/null)
-  warning=$(echo "$jwt_json" | jq -r '.warning // ""' 2>/dev/null)
-
-  case "$status" in
+  case "$cj_status" in
     skip)
-      echo "[colony-jwt] $reason, skipping"
+      echo "[colony-jwt] $cj_reason, skipping"
       ;;
     ok)
-      if [ "$action" = "refreshed" ]; then
-        echo "[colony-jwt] Token refreshed ($reason)"
-      elif [ -n "$remaining" ] && [ "$remaining" != "null" ]; then
-        echo "[colony-jwt] Token valid (${remaining}s remaining)"
+      if [ "$cj_action" = "refreshed" ]; then
+        echo "[colony-jwt] Token refreshed ($cj_reason)"
+      elif [ -n "$cj_remaining" ] && [ "$cj_remaining" != "null" ]; then
+        echo "[colony-jwt] Token valid (${cj_remaining}s remaining)"
       else
         echo "[colony-jwt] Token OK"
       fi
       ;;
     failed)
-      echo "[colony-jwt] Refresh FAILED: $reason"
-      if [ -n "$warning" ] && [ "$warning" != "null" ]; then
+      echo "[colony-jwt] Refresh FAILED: $cj_reason"
+      if [ -n "$cj_warning" ] && [ "$cj_warning" != "null" ]; then
         {
           echo ""
           echo "## Colony JWT warning (auto-check)"
-          echo "**$warning**"
+          echo "**$cj_warning**"
           echo ""
-        } >> "$ctx_out"
-        echo "[colony-jwt] Warning appended to $(basename "$ctx_out")"
+        } >> "$CONTEXT_FILE"
+        echo "[colony-jwt] Warning appended to $(basename "$CONTEXT_FILE")"
       fi
       ;;
     *)
-      echo "[colony-jwt] Unexpected status: $status"
+      echo "[colony-jwt] Unexpected status: $cj_status"
       ;;
   esac
-}
-
-###############################################################################
-# Run checks: seed first (creates CONTEXT_FILE), then all others in parallel
-#
-# wq-837 optimization: Profiling showed checks 1-3 were falsely serialized.
-# Check 1 (liveness) writes to platform-circuits.json — no other check reads it.
-# Check 2 (seed) creates CONTEXT_FILE — must run first so checks 3,6,7,8 can
-# append to it. Check 3 (topic clusters) reads Chatr data, not circuits.
-# All checks except seed are fully independent.
-#
-# Execution model:
-#   Phase 1: seed (creates CONTEXT_FILE, ~50ms)
-#   Phase 2: all other 7 checks in parallel
-#     - Checks that append to CONTEXT_FILE use temp files (deterministic merge)
-#     - Checks that only print stdout run directly
-#   Phase 3: merge temp files into CONTEXT_FILE (deterministic order)
-#
-# Worst-case wall time: 50ms + max(3s liveness, 5s+4s topics, 5s creds, ...)
-#   = ~3.1s (vs 6.2s before). Liveness at 3s timeout is acceptable because
-#   circuit state is advisory — platform-picker handles open/half-open circuits
-#   gracefully regardless of freshness.
-###############################################################################
-
-# Phase 1: Seed creates CONTEXT_FILE (fast, ~50ms)
-check_engagement_seed
-
-# Phase 2: Temp files for checks that append to CONTEXT_FILE
-TOPICS_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-topics.XXXXXX")
-CRED_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-cred.XXXXXX")
-VARIETY_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-variety.XXXXXX")
-COLONY_TMP=$(mktemp "${TMPDIR:-/tmp}/e-prehook-colony.XXXXXX")
-
-# Run all 7 independent checks in parallel
-check_engagement_liveness &
-pid_liveness=$!
-check_topic_clusters "$TOPICS_TMP" &
-pid_topics=$!
-check_conversation_balance &
-pid_balance=$!
-check_spending_policy &
-pid_spending=$!
-check_credential_status "$CRED_TMP" &
-pid_cred=$!
-check_engagement_variety "$VARIETY_TMP" &
-pid_variety=$!
-check_colony_jwt_freshness "$COLONY_TMP" &
-pid_colony=$!
-
-# Wait for all parallel checks
-wait $pid_liveness $pid_topics $pid_balance $pid_spending $pid_cred $pid_variety $pid_colony
-
-# Phase 3: Merge context additions from parallel checks (deterministic order)
-for tmp in "$TOPICS_TMP" "$CRED_TMP" "$VARIETY_TMP" "$COLONY_TMP"; do
-  if [ -s "$tmp" ]; then
-    cat "$tmp" >> "$CONTEXT_FILE"
-  fi
-  rm -f "$tmp"
-done
-
-###############################################################################
-# Phase 4: Generate picker mandate + revalidate (wq-956, wq-962)
-#   Root cause of picker compliance ~33%: prehook revalidated old mandate,
-#   then E session re-ran picker (overwriting revalidated version). Fix:
-#   generate fresh mandate HERE in the prehook, then revalidate against
-#   fresh circuit data. E session reads the final mandate without re-picking.
-###############################################################################
-echo "[picker] Generating fresh mandate via platform-picker..."
-picker_out=$(timeout 5 node platform-picker.mjs --count 3 --update --backups 2 2>&1)
-picker_exit=$?
-
-if [ $picker_exit -eq 124 ]; then
-  echo "[picker] WARNING: Picker timed out (5s)"
-elif [ $picker_exit -ne 0 ]; then
-  echo "[picker] WARNING: Picker failed (exit $picker_exit): $picker_out"
-else
-  echo "[picker] $picker_out"
 fi
 
-if [ -f "$STATE_DIR/picker-mandate.json" ]; then
-  echo "[picker-revalidate] Revalidating mandate against fresh circuit data..."
-  revalidate_out=$(timeout 3 node hooks/lib/picker-revalidate.mjs 2>&1)
-  revalidate_exit=$?
+# Phase 4: Picker + revalidate (already run by runner)
+pk_error=$(echo "$RUNNER_JSON" | jq -r '.picker.error // empty')
+if [ -n "$pk_error" ]; then
+  echo "[picker] ERROR: $pk_error"
+else
+  echo "[picker] $(echo "$RUNNER_JSON" | jq -r '.picker.output' | head -1)"
+fi
 
-  if [ $revalidate_exit -eq 124 ]; then
-    echo "[picker-revalidate] Timed out (3s), using original mandate"
-  elif [ $revalidate_exit -ne 0 ]; then
-    echo "[picker-revalidate] Failed (exit $revalidate_exit): $revalidate_out"
-  else
-    echo "$revalidate_out"
+pr_error=$(echo "$RUNNER_JSON" | jq -r '.picker_revalidate.error // empty')
+if [ -n "$pr_error" ] && [ "$pr_error" != "null" ]; then
+  echo "[picker-revalidate] $pr_error"
+else
+  pr_revalidated=$(echo "$RUNNER_JSON" | jq -r '.picker_revalidate.revalidated')
+  if [ "$pr_revalidated" = "true" ]; then
+    pr_subs=$(echo "$RUNNER_JSON" | jq -r '.picker_revalidate.substitutions | length')
+    if [ "$pr_subs" -gt 0 ]; then
+      echo "[picker-revalidate] Revalidated with $pr_subs substitution(s)"
+      echo "$RUNNER_JSON" | jq -r '.picker_revalidate.substitutions[] | select(.replacement != null) |
+        "[picker-revalidate] \(.original) → \(.replacement) (\(.reason))"'
+    else
+      echo "[picker-revalidate] Revalidated, no substitutions needed"
+    fi
   fi
+
   # Log final mandate state for audit traceability
-  mandate_selected=$(jq -r '.selected | join(", ")' "$STATE_DIR/picker-mandate.json" 2>/dev/null)
-  mandate_revalidated=$(jq -r '.revalidated_at // "not revalidated"' "$STATE_DIR/picker-mandate.json" 2>/dev/null)
-  echo "[picker-revalidate] Final mandate: [$mandate_selected] (revalidated: $mandate_revalidated)"
-else
-  echo "[picker-revalidate] No picker mandate after picker run — unexpected"
+  if [ -f "$STATE_DIR/picker-mandate.json" ]; then
+    mandate_selected=$(jq -r '.selected | join(", ")' "$STATE_DIR/picker-mandate.json" 2>/dev/null)
+    mandate_revalidated=$(jq -r '.revalidated_at // "not revalidated"' "$STATE_DIR/picker-mandate.json" 2>/dev/null)
+    echo "[picker-revalidate] Final mandate: [$mandate_selected] (revalidated: $mandate_revalidated)"
+  fi
 fi
 
+echo "[e-prehook] All checks complete (1 subprocess + 1 consolidated runner)"
 exit 0

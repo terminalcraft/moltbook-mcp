@@ -281,6 +281,10 @@ export function main() {
     if (!isWorkingStatus && !isProbeStatus) return false;
 
     // wq-935: Block open AND defunct circuits (getCircuitState computes from consecutive_failures)
+    // wq-992: half-open is intentionally allowed through — platforms transition to half-open
+    // after 24h cooldown, allowing one retry engagement. If the retry succeeds, the circuit
+    // resets via recordOutcome(). The status:"closed" field in platform-circuits.json is
+    // bookkeeping for auto-circuit-break (d078), NOT the computed circuit state.
     const circuit = getCircuitState(circuits, acc.id);
     if (circuit === "open" || circuit === "defunct") return false;
 

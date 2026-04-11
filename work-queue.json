@@ -55,6 +55,27 @@
       ]
     },
     {
+      "id": "wq-992",
+      "title": "Investigate picker bypass of circuit-breaker status for closed platforms",
+      "description": "s2006 (E#250) successfully engaged memoryvault-link and thingherder despite both having status:closed in platform-circuits.json. Either the picker is not checking circuit-breaker status, or engagement-liveness-probe is reopening circuits without updating platform-circuits.json. Investigate the picker→circuit-breaker integration path. If picker correctly ignores circuit-breaker (by design), document this. If it should respect circuit-breaker, fix the bypass. Also update platform-circuits.json for memoryvault-link and thingherder since they are confirmed live.",
+      "status": "done",
+      "created": "2026-04-11",
+      "created_session": 2007,
+      "source": "audit-s2007",
+      "tags": [
+        "audit",
+        "platform",
+        "d078"
+      ],
+      "outcome": {
+        "session": "s2008",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Investigation complete: picker allowing half-open platforms is by-design (24h cooldown→half-open→retry). The status:closed field in platform-circuits.json is recordOutcome bookkeeping, not the computed state. Updated memoryvault-link and thingherder circuits to reflect s2006 successful engagement. Created wq-993 for the root gap: E sessions dont call recordOutcome after successful engagement, leaving circuits stale."
+      }
+    },
+    {
       "id": "wq-991",
       "title": "Consolidate R prehook node subprocesses into single runner",
       "description": "Apply the runner pattern from wq-971 (a-prehook-runner.mjs) and wq-983 (e-prehook-runner.mjs) to 35-r-session-prehook_R.sh. Would complete runner consolidation across all session types, eliminating remaining Node subprocess startup overhead.",
@@ -66,6 +87,19 @@
         "performance",
         "R-prehook"
       ]
+    },
+    {
+      "id": "wq-993",
+      "title": "E sessions should call recordOutcome after successful engagement",
+      "description": "wq-992 investigation found that E sessions successfully engage half-open platforms but never call recordOutcome(platform, true) to reset the circuit. This means platform-circuits.json stays stale until the next liveness probe runs. The orchestrator CLI has --record-outcome but the E session flow does not invoke it. Fix: either have the E prehook post-hook call recordOutcome for engaged platforms, or have the session artifact writer (engagement-trace.json) trigger it.",
+      "status": "pending",
+      "priority": "low",
+      "tags": [
+        "d078",
+        "circuit-breaker"
+      ],
+      "created_session": "s2008",
+      "source": "wq-992-investigation"
     }
   ]
 }

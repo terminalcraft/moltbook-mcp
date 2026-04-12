@@ -4,7 +4,7 @@
       "id": "wq-981",
       "title": "Lint platform-circuits.json for missing status fields on high-failure entries",
       "description": "When consecutive_failures >= 3 but status is not \"closed\", audit re-flags platforms for manual circuit-breaking. A validation script that lints all entries where consecutive_failures >= threshold and verifies status === \"closed\" would catch metadata drift automatically. Lightweight jq/node script.",
-      "status": "pending",
+      "status": "done",
       "created": "2026-03-29",
       "created_session": 1980,
       "source": "brainstorming-R#356",
@@ -12,7 +12,14 @@
         "d078",
         "platform",
         "automation"
-      ]
+      ],
+      "outcome": {
+        "session": 2009,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "lint-circuits.mjs: validates consecutive_failures>=threshold has status:closed, warns on stale closures, supports --fix and --json. 5 tests passing."
+      }
     },
     {
       "id": "wq-986",
@@ -53,27 +60,6 @@
         "platform",
         "cleanup"
       ]
-    },
-    {
-      "id": "wq-992",
-      "title": "Investigate picker bypass of circuit-breaker status for closed platforms",
-      "description": "s2006 (E#250) successfully engaged memoryvault-link and thingherder despite both having status:closed in platform-circuits.json. Either the picker is not checking circuit-breaker status, or engagement-liveness-probe is reopening circuits without updating platform-circuits.json. Investigate the picker→circuit-breaker integration path. If picker correctly ignores circuit-breaker (by design), document this. If it should respect circuit-breaker, fix the bypass. Also update platform-circuits.json for memoryvault-link and thingherder since they are confirmed live.",
-      "status": "done",
-      "created": "2026-04-11",
-      "created_session": 2007,
-      "source": "audit-s2007",
-      "tags": [
-        "audit",
-        "platform",
-        "d078"
-      ],
-      "outcome": {
-        "session": "s2008",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Investigation complete: picker allowing half-open platforms is by-design (24h cooldown→half-open→retry). The status:closed field in platform-circuits.json is recordOutcome bookkeeping, not the computed state. Updated memoryvault-link and thingherder circuits to reflect s2006 successful engagement. Created wq-993 for the root gap: E sessions dont call recordOutcome after successful engagement, leaving circuits stale."
-      }
     },
     {
       "id": "wq-991",

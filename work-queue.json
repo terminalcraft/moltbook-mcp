@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-981",
-      "title": "Lint platform-circuits.json for missing status fields on high-failure entries",
-      "description": "When consecutive_failures >= 3 but status is not \"closed\", audit re-flags platforms for manual circuit-breaking. A validation script that lints all entries where consecutive_failures >= threshold and verifies status === \"closed\" would catch metadata drift automatically. Lightweight jq/node script.",
-      "status": "done",
-      "created": "2026-03-29",
-      "created_session": 1980,
-      "source": "brainstorming-R#356",
-      "tags": [
-        "d078",
-        "platform",
-        "automation"
-      ],
-      "outcome": {
-        "session": 2009,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "lint-circuits.mjs: validates consecutive_failures>=threshold has status:closed, warns on stale closures, supports --fix and --json. 5 tests passing."
-      }
-    },
-    {
       "id": "wq-986",
       "title": "Auto-circuit-break E posthook integration test",
       "description": "wq-978 wired auto-circuit-break into recordOutcome() in circuit-breaker.mjs. Validate the full end-to-end pipeline: simulate 3 consecutive E session failures for a platform and verify platform-circuits.json has status:closed without manual B session intervention. Also verify the auto-reopen-on-success path. Test should exercise the actual engage-orchestrator → circuit-breaker → platform-circuits.json flow.",
@@ -84,8 +63,9 @@
         "d078",
         "circuit-breaker"
       ],
-      "created_session": "s2008",
-      "source": "wq-992-investigation"
+      "created_session": 2008,
+      "source": "wq-992-investigation",
+      "note": "R#362 review: SESSION_ENGAGE.md Phase 2 step 6 already instructs record-outcome. Recent E session logs show 3-5 calls per session. Actual gap may be narrower than described — verify which specific platforms are missed before building posthook automation."
     }
   ]
 }

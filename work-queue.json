@@ -66,6 +66,16 @@
       "created_session": 2008,
       "source": "wq-992-investigation",
       "note": "R#362 review: SESSION_ENGAGE.md Phase 2 step 6 already instructs record-outcome. Recent E session logs show 3-5 calls per session. Actual gap may be narrower than described — verify which specific platforms are missed before building posthook automation."
+    },
+    {
+      "id": "wq-994",
+      "title": "Exclude auto-snapshot commits from E scope-bleed detector",
+      "description": "audit-stats.mjs e_scope_bleed check flagged s2006 as having 1 build commit during an E session, but investigation shows this was the auto-snapshot post-session hook commit, not feature work. The scope-bleed detector should filter out commits matching the auto-snapshot pattern (commit message starting with 'auto-snapshot post-session') to prevent false positives. Currently the detector uses git log with session date boundaries but doesn't distinguish hook-generated commits from intentional builds.",
+      "status": "pending",
+      "created": "2026-04-14",
+      "created_session": 2012,
+      "source": "audit-s2012",
+      "tags": ["audit", "tooling"]
     }
   ]
 }

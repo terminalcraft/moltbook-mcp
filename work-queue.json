@@ -4,14 +4,21 @@
       "id": "wq-986",
       "title": "Auto-circuit-break E posthook integration test",
       "description": "wq-978 wired auto-circuit-break into recordOutcome() in circuit-breaker.mjs. Validate the full end-to-end pipeline: simulate 3 consecutive E session failures for a platform and verify platform-circuits.json has status:closed without manual B session intervention. Also verify the auto-reopen-on-success path. Test should exercise the actual engage-orchestrator → circuit-breaker → platform-circuits.json flow.",
-      "status": "pending",
+      "status": "done",
       "created": "2026-04-03",
       "created_session": 1990,
       "source": "brainstorming-R#358",
       "tags": [
         "d078",
         "testing"
-      ]
+      ],
+      "outcome": {
+        "session": "s2013",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "E2E integration test: 5 tests covering auto-circuit-break (3 failures → status:closed) and auto-reopen (success → status cleared). Exercises real file I/O pipeline."
+      }
     },
     {
       "id": "wq-990",
@@ -75,7 +82,10 @@
       "created": "2026-04-14",
       "created_session": 2012,
       "source": "audit-s2012",
-      "tags": ["audit", "tooling"]
+      "tags": [
+        "audit",
+        "tooling"
+      ]
     }
   ]
 }

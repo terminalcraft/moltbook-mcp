@@ -282,6 +282,25 @@ else
   esac
 fi
 
+# Check 9: Recovery probe (d078, wq-990)
+rp_error=$(echo "$RUNNER_JSON" | jq -r '.recovery_probe.error // empty')
+if [ -n "$rp_error" ]; then
+  echo "[recovery-probe] ERROR: $rp_error"
+else
+  rp_skipped=$(echo "$RUNNER_JSON" | jq -r '.recovery_probe.skipped // false')
+  if [ "$rp_skipped" = "true" ]; then
+    rp_reason=$(echo "$RUNNER_JSON" | jq -r '.recovery_probe.reason // "interval not reached"')
+    echo "[recovery-probe] Skipped ($rp_reason)"
+  else
+    rp_probed=$(echo "$RUNNER_JSON" | jq -r '.recovery_probe.probed // 0')
+    rp_recovered=$(echo "$RUNNER_JSON" | jq -r '.recovery_probe.recovered | join(", ") // "none"')
+    rp_failed=$(echo "$RUNNER_JSON" | jq -r '.recovery_probe.failed | join(", ") // "none"')
+    echo "[recovery-probe] Probed $rp_probed circuit-broken platforms"
+    [ "$rp_recovered" != "none" ] && [ -n "$rp_recovered" ] && echo "[recovery-probe] Recovered: $rp_recovered"
+    [ "$rp_failed" != "none" ] && [ -n "$rp_failed" ] && echo "[recovery-probe] Still down: $rp_failed"
+  fi
+fi
+
 # Phase 4: Picker + revalidate (already run by runner)
 pk_error=$(echo "$RUNNER_JSON" | jq -r '.picker.error // empty')
 if [ -n "$pk_error" ]; then

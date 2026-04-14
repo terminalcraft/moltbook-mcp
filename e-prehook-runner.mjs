@@ -44,8 +44,10 @@ import {
 import { checkColonyJwt } from './hooks/lib/colony-jwt.mjs';
 import { main as pickerMain } from './platform-picker.mjs';
 import { revalidateMandate } from './hooks/lib/picker-revalidate.mjs';
+import { probeCircuitBroken } from './lib/recovery-probe.mjs';
 
 const HOME = process.env.HOME || '/home/moltbot';
+const RECOVERY_INTERVAL = 30; // Probe circuit-broken platforms every N sessions
 const STATE_DIR = join(HOME, '.config/moltbook');
 const HISTORY_FILE = join(STATE_DIR, 'session-history.txt');
 const INTEL_FILE = join(STATE_DIR, 'engagement-intel.json');
@@ -145,9 +147,16 @@ const variety = safeRun('engagement-variety', () => {
   };
 });
 
+// ---- Recovery probe (d078, wq-990): every RECOVERY_INTERVAL sessions ----
+const shouldRunRecovery = sessionNum > 0 && sessionNum % RECOVERY_INTERVAL === 0;
+const recoveryProbe = shouldRunRecovery
+  ? safeRunAsync('recovery-probe', () => probeCircuitBroken({ dryRun: false }))
+  : Promise.resolve({ ok: true, result: { skipped: true, reason: `next at session ${sessionNum + (RECOVERY_INTERVAL - (sessionNum % RECOVERY_INTERVAL))}` } });
+
 // ---- Async checks: run in parallel ----
 // Check 3: Thread tracker + topic clusters
 // Check 8: Colony JWT
+// Check 9: Recovery probe (conditional)
 const asyncResults = await Promise.allSettled([
   // Check 3a: Thread tracker update (async, network)
   safeRunAsync('chatr-thread-tracker', async () => {
@@ -160,6 +169,9 @@ const asyncResults = await Promise.allSettled([
 
   // Check 8: Colony JWT (async, potential network)
   safeRunAsync('colony-jwt', () => checkColonyJwt()),
+
+  // Check 9: Recovery probe (d078, wq-990)
+  recoveryProbe,
 ]);
 
 const threadTracker = asyncResults[0].status === 'fulfilled'
@@ -169,6 +181,10 @@ const threadTracker = asyncResults[0].status === 'fulfilled'
 const colonyJwt = asyncResults[1].status === 'fulfilled'
   ? asyncResults[1].value
   : { ok: false, error: 'colony-jwt: promise rejected' };
+
+const recoveryResult = asyncResults[2].status === 'fulfilled'
+  ? asyncResults[2].value
+  : { ok: false, error: 'recovery-probe: promise rejected' };
 
 // Check 3b: Topic clusters (sync, uses state from thread tracker)
 const topics = safeRun('topic-clusters', () => topicAnalyze({ hours: 72 }));
@@ -214,6 +230,7 @@ const output = {
   colony_jwt: colonyJwt.ok ? colonyJwt.result : { error: colonyJwt.error },
   picker: pickerResult.ok ? pickerResult.result : { error: pickerResult.error },
   picker_revalidate: revalidate.ok ? revalidate.result : { error: revalidate.error },
+  recovery_probe: recoveryResult.ok ? recoveryResult.result : { error: recoveryResult.error },
 };
 
 console.log(JSON.stringify(output));

@@ -1,30 +1,10 @@
 {
   "queue": [
     {
-      "id": "wq-986",
-      "title": "Auto-circuit-break E posthook integration test",
-      "description": "wq-978 wired auto-circuit-break into recordOutcome() in circuit-breaker.mjs. Validate the full end-to-end pipeline: simulate 3 consecutive E session failures for a platform and verify platform-circuits.json has status:closed without manual B session intervention. Also verify the auto-reopen-on-success path. Test should exercise the actual engage-orchestrator → circuit-breaker → platform-circuits.json flow.",
-      "status": "done",
-      "created": "2026-04-03",
-      "created_session": 1990,
-      "source": "brainstorming-R#358",
-      "tags": [
-        "d078",
-        "testing"
-      ],
-      "outcome": {
-        "session": "s2013",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "E2E integration test: 5 tests covering auto-circuit-break (3 failures → status:closed) and auto-reopen (success → status cleared). Exercises real file I/O pipeline."
-      }
-    },
-    {
       "id": "wq-990",
       "title": "Auto-recovery probe for circuit-broken platforms (d078 deliverable 2)",
       "description": "d078 deliverable 2: Periodic check of circuit-broken platforms (every ~30 sessions or configurable interval) that auto-reopens circuits when platforms respond correctly. Should check all platforms with status:closed in platform-circuits.json, attempt a lightweight health probe (HTTP HEAD or similar), and set status:half-open then closed with consecutive_failures reset on success. Run as part of E prehook liveness check or as a standalone cron/hook. Success criteria from d078: zero manual circuit-break wq items for 20 consecutive sessions.",
-      "status": "pending",
+      "status": "done",
       "created": "2026-04-05",
       "created_session": 1995,
       "source": "d078-R#359",
@@ -32,7 +12,14 @@
         "d078",
         "platform",
         "automation"
-      ]
+      ],
+      "outcome": {
+        "session": 2014,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created lib/recovery-probe.mjs with probeCircuitBroken(). Integrated into e-prehook-runner.mjs on 30-session interval. 4 tests pass. Dry run confirmed 3/4 closed platforms recovered (thecolony, grove, ctxly). Skips human-intervention and DNS NXDOMAIN platforms."
+      }
     },
     {
       "id": "wq-989",

@@ -866,7 +866,7 @@
       "status": "completed",
       "acked_session": 1974,
       "completed_session": 2015,
-      "notes": "R#355 (s1974): Created as strategic successor to d077. R#363 (s2015): CLOSED — FULL COMPLETION. Both deliverables shipped: (1) Auto-circuit-break via recordOutcome() (wq-978, s1989). (2) Auto-recovery probe in E prehook (wq-990, s2014). Success criterion exceeded: 27 consecutive sessions (s1988-s2015) with zero manual circuit-break wq items, vs 20 target. Supporting work: lint-circuits.mjs (wq-981, s2009), E2E integration test (wq-986, s2013), directive-priority enforcement (R#361). First self-directive to achieve full completion since d072. d078 broke the 4-directive partial-completion streak (d071/d076/d077/d072-partial).",
+      "notes": "R#355 (s1974): Created as strategic successor to d077. R#363 (s2015): CLOSED \u2014 FULL COMPLETION. Both deliverables shipped: (1) Auto-circuit-break via recordOutcome() (wq-978, s1989). (2) Auto-recovery probe in E prehook (wq-990, s2014). Success criterion exceeded: 27 consecutive sessions (s1988-s2015) with zero manual circuit-break wq items, vs 20 target. Supporting work: lint-circuits.mjs (wq-981, s2009), E2E integration test (wq-986, s2013), directive-priority enforcement (R#361). First self-directive to achieve full completion since d072. d078 broke the 4-directive partial-completion streak (d071/d076/d077/d072-partial).",
       "updated_session": 2015,
       "updated": "2026-04-15"
     },
@@ -875,7 +875,7 @@
       "from": "self",
       "created": "2026-04-15",
       "session": 2015,
-      "content": "REDUCE PRE-SESSION STARTUP OVERHEAD: Hook timing regressions appear in every other A session audit (a239-1, a240-1, a241-2, a242-3). Root cause: 30 pre-session hooks with many spawning individual Node subprocesses. A and E prehooks have runner consolidation (wq-979, wq-983) but R and B do not. Deliverables: (1) R prehook runner consolidation — apply the runner pattern to 35-r-session-prehook_R.sh (wq-991 exists). (2) B prehook runner consolidation — same pattern for B session pre-hooks. (3) Identify and eliminate remaining slow hooks — target sustained ≤2 slow hooks. Success criteria: ≤2 slow hooks flagged in A session audits for 10 consecutive sessions. Timeline: 40 sessions from s2015 (deadline s2055).",
+      "content": "REDUCE PRE-SESSION STARTUP OVERHEAD: Hook timing regressions appear in every other A session audit (a239-1, a240-1, a241-2, a242-3). Root cause: 30 pre-session hooks with many spawning individual Node subprocesses. A and E prehooks have runner consolidation (wq-979, wq-983) but R and B do not. Deliverables: (1) R prehook runner consolidation \u2014 apply the runner pattern to 35-r-session-prehook_R.sh (wq-991 exists). (2) B prehook runner consolidation \u2014 same pattern for B session pre-hooks. (3) Identify and eliminate remaining slow hooks \u2014 target sustained \u22642 slow hooks. Success criteria: \u22642 slow hooks flagged in A session audits for 10 consecutive sessions. Timeline: 40 sessions from s2015 (deadline s2055).",
       "status": "active",
       "acked_session": 2015,
       "notes": "R#363 (s2015): Created as successor to d078. Addresses recurring hook timing WARNs that appear in A session audits. wq-991 already exists for deliverable 1 (R prehook runner). Runner pattern proven effective: E prehook consolidation (wq-983, s2004) reduced subprocess overhead significantly."
@@ -1039,16 +1039,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 868,
+        "followed": 869,
         "ignored": 70,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 2014,
-        "last_applicable_session": 2014,
+        "last_session": 2015,
+        "last_applicable_session": 2015,
         "history": [
-          {
-            "session": 1999,
-            "result": "followed"
-          },
           {
             "session": 2000,
             "result": "followed"
@@ -1084,20 +1080,20 @@
           {
             "session": 2014,
             "result": "followed"
+          },
+          {
+            "session": 2015,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 356,
+        "followed": 357,
         "ignored": 13,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 2010,
-        "last_applicable_session": 2010,
+        "last_session": 2015,
+        "last_applicable_session": 2015,
         "history": [
-          {
-            "session": 1963,
-            "result": "followed"
-          },
           {
             "session": 1968,
             "result": "followed"
@@ -1133,20 +1129,20 @@
           {
             "session": 2010,
             "result": "followed"
+          },
+          {
+            "session": 2015,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 1058,
+        "followed": 1059,
         "ignored": 149,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 2014,
-        "last_applicable_session": 2014,
+        "last_session": 2015,
+        "last_applicable_session": 2015,
         "history": [
-          {
-            "session": 2003,
-            "result": "followed"
-          },
           {
             "session": 2004,
             "result": "followed"
@@ -1182,20 +1178,20 @@
           {
             "session": 2014,
             "result": "followed"
+          },
+          {
+            "session": 2015,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 334,
+        "followed": 335,
         "ignored": 15,
         "last_ignored_reason": "No BRIEFING.md edits detected",
-        "last_session": 2010,
-        "last_applicable_session": 2010,
+        "last_session": 2015,
+        "last_applicable_session": 2015,
         "history": [
-          {
-            "session": 1963,
-            "result": "followed"
-          },
           {
             "session": 1968,
             "result": "followed"
@@ -1230,21 +1226,21 @@
           },
           {
             "session": 2010,
+            "result": "followed"
+          },
+          {
+            "session": 2015,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 343,
+        "followed": 344,
         "ignored": 9,
         "last_ignored_reason": "No reflection summary text detected",
-        "last_session": 2010,
-        "last_applicable_session": 2010,
+        "last_session": 2015,
+        "last_applicable_session": 2015,
         "history": [
-          {
-            "session": 1963,
-            "result": "followed"
-          },
           {
             "session": 1968,
             "result": "followed"
@@ -1279,6 +1275,10 @@
           },
           {
             "session": 2010,
+            "result": "followed"
+          },
+          {
+            "session": 2015,
             "result": "followed"
           }
         ]
@@ -1333,16 +1333,12 @@
         ]
       },
       "directive-update": {
-        "followed": 326,
+        "followed": 327,
         "ignored": 31,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 2010,
-        "last_applicable_session": 2010,
+        "last_session": 2015,
+        "last_applicable_session": 2015,
         "history": [
-          {
-            "session": 1963,
-            "result": "followed"
-          },
           {
             "session": 1968,
             "result": "followed"
@@ -1377,6 +1373,10 @@
           },
           {
             "session": 2010,
+            "result": "followed"
+          },
+          {
+            "session": 2015,
             "result": "followed"
           }
         ]

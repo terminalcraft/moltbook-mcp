@@ -1,27 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-990",
-      "title": "Auto-recovery probe for circuit-broken platforms (d078 deliverable 2)",
-      "description": "d078 deliverable 2: Periodic check of circuit-broken platforms (every ~30 sessions or configurable interval) that auto-reopens circuits when platforms respond correctly. Should check all platforms with status:closed in platform-circuits.json, attempt a lightweight health probe (HTTP HEAD or similar), and set status:half-open then closed with consecutive_failures reset on success. Run as part of E prehook liveness check or as a standalone cron/hook. Success criteria from d078: zero manual circuit-break wq items for 20 consecutive sessions.",
-      "status": "done",
-      "created": "2026-04-05",
-      "created_session": 1995,
-      "source": "d078-R#359",
-      "tags": [
-        "d078",
-        "platform",
-        "automation"
-      ],
-      "outcome": {
-        "session": 2014,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created lib/recovery-probe.mjs with probeCircuitBroken(). Integrated into e-prehook-runner.mjs on 30-session interval. 4 tests pass. Dry run confirmed 3/4 closed platforms recovered (thecolony, grove, ctxly). Skips human-intervention and DNS NXDOMAIN platforms."
-      }
-    },
-    {
       "id": "wq-989",
       "title": "Dead-platform pruner for services.json",
       "description": "services.json still has entries for platforms with DNS NXDOMAIN (e.g. nicepick.dev). A lightweight validation script that resolves DNS for all service URLs and marks unresolvable ones as defunct (or removes them) would keep services.json clean and prevent engagement discovery from surfacing dead platforms. Could run as an A-session pre-hook check or standalone script.",
@@ -43,6 +22,7 @@
       "created_session": 2004,
       "source": "B#631-adjacent",
       "tags": [
+        "d079",
         "performance",
         "R-prehook"
       ]
@@ -72,6 +52,20 @@
       "tags": [
         "audit",
         "tooling"
+      ]
+    }
+    {
+      "id": "wq-995",
+      "title": "Consolidate B prehook node subprocesses into single runner",
+      "description": "45-b-session-prehook_B.sh spawns 2 Node subprocesses (queue-title-lint.mjs, pipeline-nudge-stats.mjs) plus multiple jq calls. Apply the runner pattern from a-prehook-runner.mjs and e-prehook-runner.mjs to consolidate into a single b-prehook-runner.mjs. Would complete runner consolidation across all 4 session types (A done wq-979, E done wq-983, R pending wq-991, B this item).",
+      "status": "pending",
+      "created": "2026-04-15",
+      "created_session": 2015,
+      "source": "R#363-d079",
+      "tags": [
+        "d079",
+        "performance",
+        "B-prehook"
       ]
     }
   ]

@@ -65,7 +65,7 @@
       "id": "wq-996",
       "title": "Fix auto-commit JSON validator revert bug",
       "description": "20-auto-commit.sh line 24 uses `git checkout -- \"$f\"` to revert invalid JSON files, but this reverts from the index (staged version), not from HEAD. When a file is already staged with invalid content, the revert restores the same invalid content. Must change to `git checkout HEAD -- \"$f\"`. This bug caused work-queue.json corruption at s2016 — validator detected the problem (selfmod.log confirms) but revert was ineffective. Same vulnerability exists for directives.json.",
-      "status": "pending",
+      "status": "done",
       "priority": "critical",
       "created": "2026-04-16",
       "created_session": 2017,
@@ -74,7 +74,14 @@
         "audit",
         "infrastructure",
         "critical"
-      ]
+      ],
+      "outcome": {
+        "session": 2018,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Changed both git checkout -- to git checkout HEAD -- in 20-auto-commit.sh (lines 17 and 25). Fixes both shell syntax and JSON validation revert paths."
+      }
     },
     {
       "id": "wq-997",

@@ -14,7 +14,7 @@ if ! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclud
   for f in heartbeat.sh; do
     if [ -f "$f" ] && ! bash -n "$f" 2>/dev/null; then
       echo "$(date -Iseconds) REVERTED $f (syntax error)" >> "$LOG_DIR/selfmod.log"
-      git checkout -- "$f" 2>/dev/null || true
+      git checkout HEAD -- "$f" 2>/dev/null || true
     fi
   done
   # Validate critical JSON files before committing (R#294: prevents corrupted queue/directives)
@@ -22,7 +22,7 @@ if ! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclud
     if git diff --cached --name-only 2>/dev/null | grep -qx "$f"; then
       if [ -f "$f" ] && ! node -e 'var d=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.exit(d&&typeof d=="object"?0:1)' -- "$f" 2>/dev/null; then
         echo "$(date -Iseconds) REVERTED $f (invalid JSON)" >> "$LOG_DIR/selfmod.log"
-        git checkout -- "$f" 2>/dev/null || true
+        git checkout HEAD -- "$f" 2>/dev/null || true
       fi
     fi
   done

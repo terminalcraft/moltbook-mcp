@@ -12,6 +12,7 @@
 #
 # Created: B#490 (wq-729)
 # Expanded: R#330 (d074 Group 2)
+# Runner consolidation: B#636 (wq-991, d079)
 
 set -euo pipefail
 
@@ -20,6 +21,13 @@ AUDIT_FILE="$HOME/.config/moltbook/maintain-audit.txt"
 SESSION_NUM="${SESSION_NUM:-1100}"
 
 ISSUES=0
+
+###############################################################################
+# Pre-compute: Run r-prehook-runner.mjs once for all Node/jq checks
+###############################################################################
+RUNNER_JSON=$(node "$DIR/r-prehook-runner.mjs" \
+  "$SESSION_NUM" "$DIR/directives.json" "$DIR/work-queue.json" \
+  "$HOME/.config/moltbook/session-history.txt" 2>/dev/null || echo '{}')
 
 ###############################################################################
 # Check 1: Maintenance audit (was 35-maintain-audit_R.sh)
@@ -72,60 +80,13 @@ check_maintain_audit() {
   fi
 
   # 6. Hook health: surface consistently failing or slow hooks
-  # Pre-session results in pre-hook-results.json, post-session in hook-results.json
-  # (naming inconsistency from heartbeat.sh — tracked, not worth renaming existing data)
-  for results_file in "$HOME/.config/moltbook/logs/pre-hook-results.json" "$HOME/.config/moltbook/logs/hook-results.json"; do
-    [ -f "$results_file" ] || continue
-    case "$(basename "$results_file")" in
-      pre-hook-results.json) PHASE="pre" ;;
-      *) PHASE="post" ;;
-    esac
-
-    HOOK_ANALYSIS=$(tail -5 "$results_file" | jq -rs --arg phase "$PHASE" '
-      [.[] | select(. == null | not)] as $recent |
-      if ($recent | length) == 0 then empty else
-
-      [
-        $recent[].hooks[]? |
-        { hook, status, ms: (.ms // 0) }
-      ] | group_by(.hook) | map({
-        name: .[0].hook,
-        runs: length,
-        fails: [.[] | select(.status | startswith("fail"))] | length,
-        total_ms: [.[].ms] | add
-      }) as $stats |
-
-      [ $stats[] | select(.runs >= 2 and (.fails / .runs) > 0.5) |
-        "WARN: \($phase) hook \(.name) failing \((.fails * 100 / .runs) | floor)% (\(.fails)/\(.runs) recent sessions)"
-      ] +
-
-      [ $stats[] | select((.total_ms / .runs) > 5000) |
-        (.total_ms / .runs | floor) as $avg |
-        "WARN: \($phase) hook \(.name) slow (avg \($avg)ms across \(.runs) sessions)" +
-        if (.name | test("liveness|health|balance")) then " → FIX: add time-based cache or move to periodic cron"
-        elif (.name | test("engagement|intel")) then " → FIX: reduce API calls or add short-circuit on empty state"
-        elif $avg > 15000 then " → FIX: split into async background task"
-        else " → FIX: profile with LOG_DIR debug, check for network calls" end
-      ] +
-
-      [ $recent | [.[].hooks[]?.ms // 0] |
-        (add / ($recent | length)) as $avg_total |
-        if $avg_total > 60000 then
-          "WARN: \($phase) hooks averaging \(($avg_total / 1000) | floor)s total per session (budget drain)"
-        else empty end
-      ] |
-
-      .[]
-
-      end
-    ' 2>/dev/null || true)
-
-    if [ -n "$HOOK_ANALYSIS" ]; then
-      echo "$HOOK_ANALYSIS" >> "$AUDIT_FILE"
-      HOOK_ISSUES=$(echo "$HOOK_ANALYSIS" | grep -c "WARN:" || echo 0)
-      ISSUES=$((ISSUES + HOOK_ISSUES))
-    fi
-  done
+  # Uses pre-computed runner output (r-prehook-runner.mjs) instead of jq subprocess
+  HOOK_WARNINGS=$(echo "$RUNNER_JSON" | jq -r '.hook_health.warnings[]? // empty' 2>/dev/null || true)
+  if [ -n "$HOOK_WARNINGS" ]; then
+    echo "$HOOK_WARNINGS" >> "$AUDIT_FILE"
+    HOOK_ISSUES=$(echo "$HOOK_WARNINGS" | grep -c "WARN:" || echo 0)
+    ISSUES=$((ISSUES + HOOK_ISSUES))
+  fi
 }
 
 ###############################################################################
@@ -182,13 +143,19 @@ check_directive_status() {
     return
   fi
 
+  # Uses pre-computed runner output (r-prehook-runner.mjs) instead of node subprocess
+  local RUNNER_OK
+  RUNNER_OK=$(echo "$RUNNER_JSON" | jq -r '.directive_analysis.text // empty' 2>/dev/null || true)
+  local RUNNER_ERR
+  RUNNER_ERR=$(echo "$RUNNER_JSON" | jq -r '.directive_analysis.error // empty' 2>/dev/null || true)
+
   local OUTPUT
-  OUTPUT=$(node "$DIR/hooks/lib/directive-analysis.mjs" \
-    "$SESSION_NUM" "$DIRECTIVES_FILE" "$QUEUE_FILE" "$HISTORY_FILE" 2>/dev/null) || {
-    echo "ERROR: directive-analysis.mjs failed" >> "$STATUS_FILE"
+  if [ -n "$RUNNER_ERR" ] || [ -z "$RUNNER_OK" ]; then
+    echo "ERROR: r-prehook-runner directive-analysis failed: $RUNNER_ERR" >> "$STATUS_FILE"
     echo "Directive status: analysis failed"
     return
-  }
+  fi
+  OUTPUT="$RUNNER_OK"
 
   echo "$OUTPUT" >> "$STATUS_FILE"
 

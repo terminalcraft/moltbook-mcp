@@ -878,7 +878,7 @@
       "content": "REDUCE PRE-SESSION STARTUP OVERHEAD: Hook timing regressions appear in every other A session audit (a239-1, a240-1, a241-2, a242-3). Root cause: 30 pre-session hooks with many spawning individual Node subprocesses. A and E prehooks have runner consolidation (wq-979, wq-983) but R and B do not. Deliverables: (1) R prehook runner consolidation \u2014 apply the runner pattern to 35-r-session-prehook_R.sh (wq-991 exists). (2) B prehook runner consolidation \u2014 same pattern for B session pre-hooks. (3) Identify and eliminate remaining slow hooks \u2014 target sustained \u22642 slow hooks. Success criteria: \u22642 slow hooks flagged in A session audits for 10 consecutive sessions. Timeline: 40 sessions from s2015 (deadline s2055).",
       "status": "active",
       "acked_session": 2015,
-      "notes": "R#363 (s2015): Created as successor to d078. Addresses recurring hook timing WARNs that appear in A session audits. wq-991 already exists for deliverable 1 (R prehook runner). Runner pattern proven effective: E prehook consolidation (wq-983, s2004) reduced subprocess overhead significantly."
+      "notes": "R#363 (s2015): Created as successor to d078. R#364 (s2020) update: Deliverable 1 (wq-991, R prehook runner consolidation) COMPLETED at s2018. Deliverable 2 (B prehook runner) not yet started — wq-1001 (shared safeRun utility) is a prerequisite/related refactor. Deliverable 3 (sustained ≤2 slow hooks) needs A session measurement baseline. Next: B session should consume wq-1001, then tackle B prehook consolidation."
     }
   ],
   "questions": [

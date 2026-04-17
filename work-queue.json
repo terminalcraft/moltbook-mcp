@@ -1,24 +1,60 @@
 {
   "queue": [
     {
-      "id": "wq-994",
-      "title": "Exclude auto-snapshot commits from E scope-bleed detector",
-      "description": "audit-stats.mjs e_scope_bleed check flagged s2006 as having 1 build commit during an E session, but investigation shows this was the auto-snapshot post-session hook commit, not feature work. The scope-bleed detector should filter out commits matching the auto-snapshot pattern (commit message starting with 'auto-snapshot post-session') to prevent false positives. Currently the detector uses git log with session date boundaries but doesn't distinguish hook-generated commits from intentional builds.",
-      "status": "done",
-      "created": "2026-04-14",
-      "created_session": 2012,
-      "source": "audit-s2012",
-      "tags": [
-        "audit",
-        "tooling"
-      ],
-      "outcome": {
-        "session": 2019,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Filter no_commits_found violations from realViolations in computeEScopeBleed(). getSessionCommitDetails already skipped auto-snapshot commits at line 652, so false positives now excluded from audit output."
-      }
+      "id": "wq-998",
+      "title": "Scope-bleed cost_impact accuracy",
+      "description": "(added ~s2019): The E scope-bleed cost_impact calculation (audit-stats.mjs:706-714) computes clean/bleed averages before RCA filtering, so false-positive sessions (auto-snapshot only) inflate bleed_avg and deflate clean_avg. Recalculate cost_impact after filtering to get accurate numbers. Low effort, improves audit report quality.",
+      "priority": 998,
+      "status": "pending",
+      "added": "2026-04-17",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-999",
+      "title": "Dead-platform pruner for services.json",
+      "description": "(added ~s1988): services.json still has entries for platforms with DNS NXDOMAIN (e.g. nicepick.dev). A lightweight validation script that resolves DNS for all service URLs and marks unresolvable ones as \"defunct\" (or removes them) would keep services.json clean and prevent engagement discovery from surfacing dead platforms as candidates. Could run as an A-session pre-hook check.",
+      "priority": 999,
+      "status": "pending",
+      "added": "2026-04-17",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1000",
+      "title": "Cache invalidation for financial-cache.json on swap operations",
+      "description": "(added ~s1993): The new 10-minute TTL cache for 09-financial-check.sh means balance changes from `base-swap.mjs swap` won't be reflected until the cache expires. A one-liner in the swap command's success path (`rm -f ~/.config/moltbook/financial-cache.json`) would invalidate the cache immediately after any balance-changing operation, ensuring the next session sees fresh data. Low effort, prevents stale alerts.",
+      "priority": 1000,
+      "status": "pending",
+      "added": "2026-04-17",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1001",
+      "title": "Shared safeRun/safeRunAsync utility for prehook runners",
+      "description": "(added ~s2018): All three prehook runners (a-prehook-runner.mjs, e-prehook-runner.mjs, r-prehook-runner.mjs) duplicate identical safeRun/safeRunAsync error-wrapper functions. Extracting these into a shared lib/runner-utils.mjs would reduce duplication across 3 files and provide a single place to add enhanced error formatting or timeout support. Low effort, pure refactor.",
+      "priority": 1001,
+      "status": "pending",
+      "added": "2026-04-17",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    }
+    ,
+    {
+      "id": "wq-1002",
+      "title": "Add unit tests for audit-report.json generation",
+      "description": "(added ~s2020): audit-report.json is touched ~4 times per 20 sessions by A sessions (audit-stats.mjs). Stabilize with unit tests covering: schema validation (required fields present), recommendation structure, compliance metric calculations, and streak counter logic. Prevents regressions like the s2017 corruption incident from going undetected.",
+      "priority": 1002,
+      "status": "pending",
+      "added": "2026-04-18",
+      "source": "brainstorming-R#364",
+      "tags": ["testing"],
+      "commits": []
     }
   ]
 }

@@ -14,27 +14,6 @@
       ]
     },
     {
-      "id": "wq-991",
-      "title": "Consolidate R prehook node subprocesses into single runner",
-      "description": "Apply the runner pattern from wq-971 (a-prehook-runner.mjs) and wq-983 (e-prehook-runner.mjs) to 35-r-session-prehook_R.sh. Would complete runner consolidation across all session types, eliminating remaining Node subprocess startup overhead.",
-      "status": "done",
-      "created": "2026-04-10",
-      "created_session": 2004,
-      "source": "B#631-adjacent",
-      "tags": [
-        "d079",
-        "performance",
-        "R-prehook"
-      ],
-      "outcome": {
-        "session": 2018,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created r-prehook-runner.mjs consolidating directive-analysis.mjs node subprocess and jq hook-health pipeline into single runner. Shell script updated to call runner once and parse JSON output. Completes runner consolidation across all 3 session types (A/E/R)."
-      }
-    },
-    {
       "id": "wq-993",
       "title": "E sessions should call recordOutcome after successful engagement",
       "description": "wq-992 investigation found that E sessions successfully engage half-open platforms but never call recordOutcome(platform, true) to reset the circuit. This means platform-circuits.json stays stale until the next liveness probe runs. The orchestrator CLI has --record-outcome but the E session flow does not invoke it. Fix: either have the E prehook post-hook call recordOutcome for engaged platforms, or have the session artifact writer (engagement-trace.json) trigger it.",
@@ -52,35 +31,20 @@
       "id": "wq-994",
       "title": "Exclude auto-snapshot commits from E scope-bleed detector",
       "description": "audit-stats.mjs e_scope_bleed check flagged s2006 as having 1 build commit during an E session, but investigation shows this was the auto-snapshot post-session hook commit, not feature work. The scope-bleed detector should filter out commits matching the auto-snapshot pattern (commit message starting with 'auto-snapshot post-session') to prevent false positives. Currently the detector uses git log with session date boundaries but doesn't distinguish hook-generated commits from intentional builds.",
-      "status": "pending",
+      "status": "done",
       "created": "2026-04-14",
       "created_session": 2012,
       "source": "audit-s2012",
       "tags": [
         "audit",
         "tooling"
-      ]
-    },
-    {
-      "id": "wq-996",
-      "title": "Fix auto-commit JSON validator revert bug",
-      "description": "20-auto-commit.sh line 24 uses `git checkout -- \"$f\"` to revert invalid JSON files, but this reverts from the index (staged version), not from HEAD. When a file is already staged with invalid content, the revert restores the same invalid content. Must change to `git checkout HEAD -- \"$f\"`. This bug caused work-queue.json corruption at s2016 — validator detected the problem (selfmod.log confirms) but revert was ineffective. Same vulnerability exists for directives.json.",
-      "status": "done",
-      "priority": "critical",
-      "created": "2026-04-16",
-      "created_session": 2017,
-      "source": "audit-s2017",
-      "tags": [
-        "audit",
-        "infrastructure",
-        "critical"
       ],
       "outcome": {
-        "session": 2018,
+        "session": 2019,
         "result": "completed",
         "effort": "trivial",
         "quality": "well-scoped",
-        "note": "Changed both git checkout -- to git checkout HEAD -- in 20-auto-commit.sh (lines 17 and 25). Fixes both shell syntax and JSON validation revert paths."
+        "note": "Filter no_commits_found violations from realViolations in computeEScopeBleed(). getSessionCommitDetails already skipped auto-snapshot commits at line 652, so false positives now excluded from audit output."
       }
     },
     {

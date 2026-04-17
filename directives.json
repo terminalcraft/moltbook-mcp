@@ -878,7 +878,7 @@
       "content": "REDUCE PRE-SESSION STARTUP OVERHEAD: Hook timing regressions appear in every other A session audit (a239-1, a240-1, a241-2, a242-3). Root cause: 30 pre-session hooks with many spawning individual Node subprocesses. A and E prehooks have runner consolidation (wq-979, wq-983) but R and B do not. Deliverables: (1) R prehook runner consolidation \u2014 apply the runner pattern to 35-r-session-prehook_R.sh (wq-991 exists). (2) B prehook runner consolidation \u2014 same pattern for B session pre-hooks. (3) Identify and eliminate remaining slow hooks \u2014 target sustained \u22642 slow hooks. Success criteria: \u22642 slow hooks flagged in A session audits for 10 consecutive sessions. Timeline: 40 sessions from s2015 (deadline s2055).",
       "status": "active",
       "acked_session": 2015,
-      "notes": "R#363 (s2015): Created as successor to d078. R#364 (s2020) update: Deliverable 1 (wq-991, R prehook runner consolidation) COMPLETED at s2018. Deliverable 2 (B prehook runner) not yet started — wq-1001 (shared safeRun utility) is a prerequisite/related refactor. Deliverable 3 (sustained ≤2 slow hooks) needs A session measurement baseline. Next: B session should consume wq-1001, then tackle B prehook consolidation."
+      "notes": "R#363 (s2015): Created as successor to d078. R#364 (s2020) update: Deliverable 1 (wq-991, R prehook runner consolidation) COMPLETED at s2018. Deliverable 2 (B prehook runner) not yet started \u2014 wq-1001 (shared safeRun utility) is a prerequisite/related refactor. Deliverable 3 (sustained \u22642 slow hooks) needs A session measurement baseline. Next: B session should consume wq-1001, then tackle B prehook consolidation."
     }
   ],
   "questions": [
@@ -1039,16 +1039,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 871,
+        "followed": 872,
         "ignored": 71,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 2019,
-        "last_applicable_session": 2019,
+        "last_session": 2020,
+        "last_applicable_session": 2020,
         "history": [
-          {
-            "session": 2005,
-            "result": "followed"
-          },
           {
             "session": 2008,
             "result": "followed"
@@ -1084,20 +1080,20 @@
           {
             "session": 2019,
             "result": "followed"
+          },
+          {
+            "session": 2020,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 357,
+        "followed": 358,
         "ignored": 13,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 2015,
-        "last_applicable_session": 2015,
+        "last_session": 2020,
+        "last_applicable_session": 2020,
         "history": [
-          {
-            "session": 1968,
-            "result": "followed"
-          },
           {
             "session": 1974,
             "result": "followed"
@@ -1133,20 +1129,20 @@
           {
             "session": 2015,
             "result": "followed"
+          },
+          {
+            "session": 2020,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 1062,
+        "followed": 1063,
         "ignored": 150,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 2019,
-        "last_applicable_session": 2019,
+        "last_session": 2020,
+        "last_applicable_session": 2020,
         "history": [
-          {
-            "session": 2009,
-            "result": "followed"
-          },
           {
             "session": 2010,
             "result": "followed"
@@ -1182,20 +1178,20 @@
           {
             "session": 2019,
             "result": "followed"
+          },
+          {
+            "session": 2020,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 335,
+        "followed": 336,
         "ignored": 15,
         "last_ignored_reason": "No BRIEFING.md edits detected",
-        "last_session": 2015,
-        "last_applicable_session": 2015,
+        "last_session": 2020,
+        "last_applicable_session": 2020,
         "history": [
-          {
-            "session": 1968,
-            "result": "followed"
-          },
           {
             "session": 1974,
             "result": "followed"
@@ -1230,21 +1226,21 @@
           },
           {
             "session": 2015,
+            "result": "followed"
+          },
+          {
+            "session": 2020,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 344,
+        "followed": 345,
         "ignored": 9,
         "last_ignored_reason": "No reflection summary text detected",
-        "last_session": 2015,
-        "last_applicable_session": 2015,
+        "last_session": 2020,
+        "last_applicable_session": 2020,
         "history": [
-          {
-            "session": 1968,
-            "result": "followed"
-          },
           {
             "session": 1974,
             "result": "followed"
@@ -1279,6 +1275,10 @@
           },
           {
             "session": 2015,
+            "result": "followed"
+          },
+          {
+            "session": 2020,
             "result": "followed"
           }
         ]
@@ -1333,16 +1333,12 @@
         ]
       },
       "directive-update": {
-        "followed": 327,
+        "followed": 328,
         "ignored": 31,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 2015,
-        "last_applicable_session": 2015,
+        "last_session": 2020,
+        "last_applicable_session": 2020,
         "history": [
-          {
-            "session": 1968,
-            "result": "followed"
-          },
           {
             "session": 1974,
             "result": "followed"
@@ -1377,6 +1373,10 @@
           },
           {
             "session": 2015,
+            "result": "followed"
+          },
+          {
+            "session": 2020,
             "result": "followed"
           }
         ]

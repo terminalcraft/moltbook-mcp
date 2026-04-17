@@ -104,6 +104,26 @@ HOOK_BUDGET_SKIP=0
 HOOK_DETAILS=""
 CUMULATIVE_MS=0
 
+# collect_hook_results: read JSON fragments from temp file into counters and HOOK_DETAILS
+# Args: $1=results_tmp_file
+collect_hook_results() {
+  local results_tmp="$1"
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    [ -n "$HOOK_DETAILS" ] && HOOK_DETAILS="$HOOK_DETAILS,"
+    HOOK_DETAILS="$HOOK_DETAILS$line"
+
+    local local_status
+    local_status=$(echo "$line" | python3 -c "import sys,json; print(json.loads(sys.stdin.read().strip()).get('status',''))" 2>/dev/null || echo "")
+    case "$local_status" in
+      ok) HOOK_PASS=$((HOOK_PASS + 1)) ;;
+      budget_skip) ;; # already counted
+      *) HOOK_FAIL=$((HOOK_FAIL + 1)) ;;
+    esac
+  done < "$results_tmp"
+  rm -f "$results_tmp"
+}
+
 # run_single_hook: execute one hook, classify result, append to HOOKS_LOG
 # Sets: HOOK_STATUS, HOOK_DUR_MS, HOOK_ERROR, FAILURE_CAT (via output file protocol)
 # Args: $1=hook_path $2=result_file (writes JSON fragment per hook)
@@ -245,21 +265,7 @@ if [ "$PARALLEL_JOBS" -gt 1 ] && [ "${#ELIGIBLE_HOOKS[@]}" -gt 1 ]; then
     CUMULATIVE_MS=$((CUMULATIVE_MS + BATCH_DUR_MS))
   fi
 
-  # Collect results from temp file into HOOK_DETAILS and counters
-  while IFS= read -r line; do
-    [ -z "$line" ] && continue
-    [ -n "$HOOK_DETAILS" ] && HOOK_DETAILS="$HOOK_DETAILS,"
-    HOOK_DETAILS="$HOOK_DETAILS$line"
-
-    # Parse status for counters
-    local_status=$(echo "$line" | python3 -c "import sys,json; print(json.loads(sys.stdin.read().strip()).get('status',''))" 2>/dev/null || echo "")
-    case "$local_status" in
-      ok) HOOK_PASS=$((HOOK_PASS + 1)) ;;
-      budget_skip) ;; # already counted
-      *) HOOK_FAIL=$((HOOK_FAIL + 1)) ;;
-    esac
-  done < "$RESULTS_TMP"
-  rm -f "$RESULTS_TMP"
+  collect_hook_results "$RESULTS_TMP"
 
 else
   # Sequential execution (original behavior, default)
@@ -283,20 +289,7 @@ else
     CUMULATIVE_MS=$((CUMULATIVE_MS + (local_end - local_start) / 1000000))
   done
 
-  # Collect results from temp file into HOOK_DETAILS and counters
-  while IFS= read -r line; do
-    [ -z "$line" ] && continue
-    [ -n "$HOOK_DETAILS" ] && HOOK_DETAILS="$HOOK_DETAILS,"
-    HOOK_DETAILS="$HOOK_DETAILS$line"
-
-    local_status=$(echo "$line" | python3 -c "import sys,json; print(json.loads(sys.stdin.read().strip()).get('status',''))" 2>/dev/null || echo "")
-    case "$local_status" in
-      ok) HOOK_PASS=$((HOOK_PASS + 1)) ;;
-      budget_skip) ;; # already counted
-      *) HOOK_FAIL=$((HOOK_FAIL + 1)) ;;
-    esac
-  done < "$RESULTS_TMP"
-  rm -f "$RESULTS_TMP"
+  collect_hook_results "$RESULTS_TMP"
 fi
 
 # Write structured results if tracking enabled

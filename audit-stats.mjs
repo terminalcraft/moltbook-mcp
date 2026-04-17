@@ -752,10 +752,17 @@ function computeEScopeBleed() {
       };
     });
 
+    // wq-994: Filter out false positives where all commits were auto-snapshot
+    // (getSessionCommitDetails already skips auto-snapshot commits, so
+    // no_commits_found + build_commits > 0 means only hook-generated commits)
+    const realViolations = violationsWithRCA.filter(v =>
+      v.root_cause.verdict !== 'no_commits_found'
+    );
+
     return {
       sessions_checked: last10.length,
-      violations: violationsWithRCA,
-      violation_count: violations.length,
+      violations: realViolations,
+      violation_count: realViolations.length,
       cost_impact: {
         clean_avg: cleanAvg,
         bleed_avg: bleedAvg,

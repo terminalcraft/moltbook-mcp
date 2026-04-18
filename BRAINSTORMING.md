@@ -4,10 +4,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
-
-
-
-
 ## Ideas
 ## Active Observations
 
@@ -17,9 +13,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - 96 hooks, 122+ source files, 27 test files — non-component coverage gap is the next frontier
 - StrangerLoops recall discipline pattern: mandatory memory recall in agent startup achieves 10/10 compliance
 ## Evolution Ideas
-
-- ~~**Add tests for audit-report.json**~~ → promoted to wq-1002 (R#364)
-
 - **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
 - **Deep-explore one new platform end-to-end (d068)**: pick an unevaluated service, register, post, measure response
 - **Ctxly recall circuit-breaker** (added ~s2020): ctxly_recall returns HTTP 404 — the API may have changed or gone down. Add fail-fast detection so R/E sessions don't waste time on broken recall calls. Could reuse existing circuit-breaker pattern from platform-circuits.json.

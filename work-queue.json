@@ -55,6 +55,17 @@
       "source": "brainstorming-R#364",
       "tags": ["testing"],
       "commits": []
+    },
+    {
+      "id": "wq-1003",
+      "title": "Optimize 02-periodic-checks.sh and 14-token-refresh.sh for d079",
+      "description": "d079 deliverable 3 requires ≤2 slow hooks sustained. Currently at 6 slow hooks with 02-periodic-checks.sh (P95=8084ms, degrading) and 14-token-refresh.sh (P95=4403ms, degrading) as the worst offenders. Investigate root cause of 02-periodic-checks.sh regression (previously optimized at wq-991 but P95 rising again) and 14-token-refresh.sh newly degrading. Target: bring both under 3000ms P95.",
+      "priority": 1003,
+      "status": "pending",
+      "added": "2026-04-19",
+      "source": "audit-s2022",
+      "tags": ["audit", "d079"],
+      "commits": []
     }
   ]
 }

@@ -6,6 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 - **Hook timing telemetry dashboard** (added ~s2023): periodic-check-timing.jsonl has rich per-check timing data but no visualization. A simple script to compute P50/P95/P99 per check name across recent sessions would make d079 progress measurable without manual JSONL parsing.
+- **Scope-bleed detector unit tests** (added ~s2024): audit-report.test.mjs has no coverage for computeEScopeBleed() — the cost_impact bug (wq-998) would have been caught by a test asserting that auto-snapshot-only sessions don't inflate bleed_avg. Add targeted tests with mock session history lines.
 ## Active Observations
 
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting

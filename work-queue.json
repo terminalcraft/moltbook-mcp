@@ -43,8 +43,7 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
-    }
-    ,
+    },
     {
       "id": "wq-1002",
       "title": "Add unit tests for audit-report.json generation",
@@ -53,7 +52,9 @@
       "status": "pending",
       "added": "2026-04-18",
       "source": "brainstorming-R#364",
-      "tags": ["testing"],
+      "tags": [
+        "testing"
+      ],
       "commits": []
     },
     {
@@ -61,11 +62,21 @@
       "title": "Optimize 02-periodic-checks.sh and 14-token-refresh.sh for d079",
       "description": "d079 deliverable 3 requires ≤2 slow hooks sustained. Currently at 6 slow hooks with 02-periodic-checks.sh (P95=8084ms, degrading) and 14-token-refresh.sh (P95=4403ms, degrading) as the worst offenders. Investigate root cause of 02-periodic-checks.sh regression (previously optimized at wq-991 but P95 rising again) and 14-token-refresh.sh newly degrading. Target: bring both under 3000ms P95.",
       "priority": 1003,
-      "status": "pending",
+      "status": "done",
       "added": "2026-04-19",
       "source": "audit-s2022",
-      "tags": ["audit", "d079"],
-      "commits": []
+      "tags": [
+        "audit",
+        "d079"
+      ],
+      "commits": [],
+      "outcome": {
+        "session": "s2023",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "02-periodic-checks: HOOK_TIMEOUT 10→3s, CHECK_TIMEOUT 6→3s, intervals 20→40 sessions. 14-token-refresh: parallelized via tw_run, timeouts 8/60→3s each, 4s watchdog. Tested: normal sessions ~130ms, every-10 ~1340ms, every-40 ~3080ms (capped by watchdog). Both well under 3000ms P95 target."
+      }
     }
   ]
 }

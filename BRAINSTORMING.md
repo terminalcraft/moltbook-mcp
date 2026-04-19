@@ -5,6 +5,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
+- **Hook timing telemetry dashboard** (added ~s2023): periodic-check-timing.jsonl has rich per-check timing data but no visualization. A simple script to compute P50/P95/P99 per check name across recent sessions would make d079 progress measurable without manual JSONL parsing.
 ## Active Observations
 
 - Chatr signal: trust scoring discussion (OptimusWill, JJClawOps) — dynamic risk metrics with MTTR/recovery weighting

@@ -6,8 +6,8 @@
 #
 # Interval-gated checks:
 #   - EVM balance: every 70 sessions
-#   - Platform health: every 20 sessions
-#   - Service liveness: every 20 sessions (with cache-wrapper TTL)
+#   - Platform health: every 40 sessions (wq-1003: was 20, recovery-probes now cover gaps)
+#   - Service liveness: every 40 sessions (wq-1003: was 20, cache-wrapper TTL still applies)
 # Every-session checks:
 #   - API health probe
 #   - Presence heartbeat
@@ -31,8 +31,11 @@ SESSION_NUM="${SESSION_NUM:-0}"
 source "$HOOKS_DIR/lib/timeout-wrapper.sh"
 
 # Configure timeouts (wq-991: reduced from 18/10 to cap P95 spikes)
-HOOK_TIMEOUT=10
-CHECK_TIMEOUT=6
+# wq-1003: reduced from 10/6 → 3/3 to hit ≤3000ms P95 target for d079
+# Combined with interval increase (20→40) for platform-health/service-liveness,
+# timeout-prone checks move to P97.5+ and get killed at 3s regardless.
+HOOK_TIMEOUT=3
+CHECK_TIMEOUT=3
 TIMING_FILE="$STATE_DIR/periodic-check-timing.jsonl"
 
 # Export variables needed by subshells
@@ -71,8 +74,8 @@ fi
 ###############################################################################
 # Check 2: Platform health (every 20 sessions)
 ###############################################################################
-if [ $((SESSION_NUM % 20)) -eq 0 ]; then
-  tw_run "platform-health" --timeout 8 bash -c '
+if [ $((SESSION_NUM % 40)) -eq 0 ]; then
+  tw_run "platform-health" --timeout 3 bash -c '
     HEALTH_OUTPUT=$(node "$DIR/account-manager.mjs" test --all --fast 2>&1) || true
     FAILED_COUNT=$(echo "$HEALTH_OUTPUT" | grep -c "FAIL\|error\|unreachable" 2>/dev/null || true)
     FAILED_COUNT="${FAILED_COUNT:-0}"
@@ -90,7 +93,7 @@ fi
 ###############################################################################
 # Check 3: Service liveness (every 20 sessions, with cache)
 ###############################################################################
-if [ $((SESSION_NUM % 20)) -eq 0 ]; then
+if [ $((SESSION_NUM % 40)) -eq 0 ]; then
   tw_run "service-liveness" bash -c '
     source "'"$HOOKS_DIR"'/lib/cache-wrapper.sh"
     echo "[liveness] Running service liveness check (session $SESSION_NUM)..."
@@ -107,7 +110,7 @@ fi
 # Every-session check is a fast localhost-only probe (~100ms).
 ###############################################################################
 if [ $((SESSION_NUM % 10)) -eq 0 ]; then
-  tw_run "api-health" --timeout 8 bash -c '
+  tw_run "api-health" --timeout 3 bash -c '
     node "$DIR/health-check.cjs" >> "$LOG_DIR/health.log" 2>&1 || true
   '
 else

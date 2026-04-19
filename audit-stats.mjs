@@ -703,16 +703,6 @@ function computeEScopeBleed() {
     const last10 = eSessions.slice(-10);
     const violations = last10.filter(s => s.build_commits > 0);
 
-    // Compute E cost with and without scope-bleed sessions for comparison
-    const cleanSessions = last10.filter(s => s.build_commits === 0);
-    const bleedSessions = last10.filter(s => s.build_commits > 0);
-    const cleanAvg = cleanSessions.length > 0
-      ? Math.round((cleanSessions.reduce((a, s) => a + s.cost, 0) / cleanSessions.length) * 100) / 100
-      : 0;
-    const bleedAvg = bleedSessions.length > 0
-      ? Math.round((bleedSessions.reduce((a, s) => a + s.cost, 0) / bleedSessions.length) * 100) / 100
-      : 0;
-
     // Root cause analysis for violations (wq-713)
     const violationsWithRCA = violations.map(v => {
       const commitDetails = getSessionCommitDetails(v.files, v.date);
@@ -759,6 +749,18 @@ function computeEScopeBleed() {
       v.root_cause.verdict !== 'no_commits_found'
     );
 
+    // wq-998: Compute cost_impact AFTER RCA filtering so false-positive sessions
+    // (auto-snapshot only) count as clean, not bleed
+    const realBleedSessionNums = new Set(realViolations.map(v => parseInt(v.session.slice(1))));
+    const cleanSessions = last10.filter(s => !realBleedSessionNums.has(s.session));
+    const bleedSessions = last10.filter(s => realBleedSessionNums.has(s.session));
+    const cleanAvg = cleanSessions.length > 0
+      ? Math.round((cleanSessions.reduce((a, s) => a + s.cost, 0) / cleanSessions.length) * 100) / 100
+      : 0;
+    const bleedAvg = bleedSessions.length > 0
+      ? Math.round((bleedSessions.reduce((a, s) => a + s.cost, 0) / bleedSessions.length) * 100) / 100
+      : 0;
+
     return {
       sessions_checked: last10.length,
       violations: realViolations,
@@ -768,8 +770,8 @@ function computeEScopeBleed() {
         bleed_avg: bleedAvg,
         delta: bleedAvg > 0 ? Math.round((bleedAvg - cleanAvg) * 100) / 100 : 0
       },
-      verdict: violations.length === 0 ? 'clean' :
-        (violations.length <= 1 ? 'minor_bleed' : 'recurring_bleed')
+      verdict: realViolations.length === 0 ? 'clean' :
+        (realViolations.length <= 1 ? 'minor_bleed' : 'recurring_bleed')
     };
   } catch {
     return { sessions_checked: 0, violations: [], violation_count: 0, verdict: 'error' };

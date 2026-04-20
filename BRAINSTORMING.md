@@ -18,7 +18,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Evolution Ideas
 - **Deep-explore one new platform end-to-end (d049)**: pick an unevaluated service, register, post, measure response
 - **Deep-explore one new platform end-to-end (d068)**: pick an unevaluated service, register, post, measure response
-- ~~**Ctxly recall circuit-breaker** (added ~s2020): Implemented R#365 — session-scoped circuit breaker in components/external.js.~~
 
 ---
 

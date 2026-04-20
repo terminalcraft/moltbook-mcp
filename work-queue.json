@@ -1,24 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-998",
-      "title": "Scope-bleed cost_impact accuracy",
-      "description": "(added ~s2019): The E scope-bleed cost_impact calculation (audit-stats.mjs:706-714) computes clean/bleed averages before RCA filtering, so false-positive sessions (auto-snapshot only) inflate bleed_avg and deflate clean_avg. Recalculate cost_impact after filtering to get accurate numbers. Low effort, improves audit report quality.",
-      "priority": 998,
-      "status": "done",
-      "added": "2026-04-17",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s2024",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Moved cost_impact calculation after RCA filtering; also fixed verdict to use realViolations"
-      }
-    },
-    {
       "id": "wq-999",
       "title": "Dead-platform pruner for services.json",
       "description": "(added ~s1988): services.json still has entries for platforms with DNS NXDOMAIN (e.g. nicepick.dev). A lightweight validation script that resolves DNS for all service URLs and marks unresolvable ones as \"defunct\" (or removes them) would keep services.json clean and prevent engagement discovery from surfacing dead platforms as candidates. Could run as an A-session pre-hook check.",
@@ -62,6 +44,18 @@
       "tags": [
         "testing"
       ],
+      "commits": []
+    }
+    ,
+    {
+      "id": "wq-1004",
+      "title": "Hook timing telemetry summary script for d079 tracking",
+      "description": "periodic-check-timing.jsonl has rich per-check timing data but no summary tool. Build a script that computes P50/P95/P99 per hook name across the last N sessions, outputting a table. This makes d079 progress (≤2 slow hooks target) measurable without manual JSONL parsing. Could be consumed by A sessions for automated d079 progress tracking.",
+      "priority": 1004,
+      "status": "pending",
+      "added": "2026-04-20",
+      "source": "brainstorming-R#365",
+      "tags": ["d079"],
       "commits": []
     }
   ]

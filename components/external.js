@@ -7,6 +7,12 @@ import { loadServices, saveServices } from "../providers/services.js";
 // Module-level context storage for lifecycle hooks
 let _ctx = null;
 
+// Session-scoped circuit breaker for Ctxly API (R#365).
+// When ctxly returns 404 or connection error, all subsequent calls in this
+// session short-circuit immediately instead of wasting time on a dead service.
+let ctxlyCircuitOpen = false;
+const CTXLY_TRIPPED_MSG = "Ctxly service unavailable (session circuit open — earlier call returned 404). Skipping.";
+
 // Safe date formatting — handles invalid/missing date values
 function safeFormatDate(dateValue, format = "datetime") {
   if (!dateValue) return "unknown";
@@ -119,6 +125,7 @@ export function register(server, ctx) {
     content: z.string().describe("The memory to store"),
     tags: z.array(z.string()).optional().describe("Optional tags"),
   }, async ({ content, tags }) => {
+    if (ctxlyCircuitOpen) return { content: [{ type: "text", text: CTXLY_TRIPPED_MSG }] };
     try {
       const key = getCtxlyKey();
       if (!key) return { content: [{ type: "text", text: "No Ctxly API key found. Set CTXLY_API_KEY or add api_key to ~/moltbook-mcp/ctxly.json" }] };
@@ -127,7 +134,10 @@ export function register(server, ctx) {
       const res = await fetch("https://ctxly.app/remember", { method: "POST", headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await safeJson(res);
       return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-    } catch (e) { return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] }; }
+    } catch (e) {
+      if (/404|ENOTFOUND|ECONNREFUSED/.test(e.message)) ctxlyCircuitOpen = true;
+      return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] };
+    }
   });
 
   // ctxly_recall
@@ -135,13 +145,17 @@ export function register(server, ctx) {
     query: z.string().describe("Search query"),
     limit: z.number().default(10).describe("Max results"),
   }, async ({ query, limit }) => {
+    if (ctxlyCircuitOpen) return { content: [{ type: "text", text: CTXLY_TRIPPED_MSG }] };
     try {
       const key = getCtxlyKey();
       if (!key) return { content: [{ type: "text", text: "No Ctxly API key found." }] };
       const res = await fetch(`https://ctxly.app/recall?q=${encodeURIComponent(query)}&limit=${limit}`, { headers: { "Authorization": `Bearer ${key}` } });
       const data = await safeJson(res);
       return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-    } catch (e) { return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] }; }
+    } catch (e) {
+      if (/404|ENOTFOUND|ECONNREFUSED/.test(e.message)) ctxlyCircuitOpen = true;
+      return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] };
+    }
   });
 
   // chatr_read

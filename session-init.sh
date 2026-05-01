@@ -62,6 +62,27 @@ if [ -z "$DRY_RUN" ]; then
   sleep 1
 fi
 
+# --- Claude API DNS pre-flight (R#369) ---
+# s2026-s2044: 19 sessions wasted ~4min each on EAI_AGAIN (DNS failure for api.anthropic.com).
+# The existing outage check only tests Moltbook API, not Claude API reachability.
+# This check exits immediately if DNS can't resolve, saving the full retry cycle.
+run_api_dns_check() {
+  if [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ] && [ -z "$DRY_RUN" ]; then
+    local dns_fail_file="$STATE_DIR/api_dns_failures"
+    if ! getent hosts api.anthropic.com >/dev/null 2>&1; then
+      local fail_count=0
+      [ -f "$dns_fail_file" ] && fail_count=$(cat "$dns_fail_file")
+      fail_count=$((fail_count + 1))
+      echo "$fail_count" > "$dns_fail_file"
+      echo "$(date -Iseconds) dns-preflight: api.anthropic.com unresolvable (streak: $fail_count), skipping session" >> "$LOG_DIR/skipped.log"
+      exit 0
+    else
+      # DNS works — reset failure counter
+      rm -f "$dns_fail_file"
+    fi
+  fi
+}
+
 # --- Outage-aware session skip ---
 # If API has been down 5+ consecutive checks, skip every other heartbeat.
 # Skip this check in safe/emergency mode — we want to try regardless.
@@ -131,5 +152,6 @@ run_presession_pipeline() {
 }
 
 # Run the init sequence
+run_api_dns_check
 run_outage_check
 run_log_rotation

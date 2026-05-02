@@ -18,17 +18,10 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { analyzeDirectives, formatResults } from './hooks/lib/directive-analysis.mjs';
+import { safeRun } from './lib/runner-utils.mjs';
 
 const HOME = process.env.HOME || '/home/moltbot';
 const LOGS_DIR = join(HOME, '.config/moltbook/logs');
-
-function safeRun(label, fn) {
-  try {
-    return { ok: true, result: fn() };
-  } catch (e) {
-    return { ok: false, error: `${label}: ${(e.message || 'unknown').slice(0, 200)}` };
-  }
-}
 
 // ---- Check 1: Hook health analysis (replaces jq pipeline) ----
 

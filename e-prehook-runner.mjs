@@ -63,21 +63,7 @@ const contextFile = getArg('--context-file') || join(STATE_DIR, 'e-session-conte
 const policyFile = getArg('--policy-file') || join(STATE_DIR, 'spending-policy.json');
 const sessionNum = parseInt(getArg('--session') || process.env.SESSION_NUM || '0', 10);
 
-function safeRun(label, fn) {
-  try {
-    return { ok: true, result: fn() };
-  } catch (e) {
-    return { ok: false, error: `${label}: ${(e.message || 'unknown').slice(0, 200)}` };
-  }
-}
-
-async function safeRunAsync(label, fn) {
-  try {
-    return { ok: true, result: await fn() };
-  } catch (e) {
-    return { ok: false, error: `${label}: ${(e.message || 'unknown').slice(0, 200)}` };
-  }
-}
+import { safeRun, safeRunAsync } from './lib/runner-utils.mjs';
 
 // ---- Check 2: Seed ----
 const seed = safeRun('seed', () => {

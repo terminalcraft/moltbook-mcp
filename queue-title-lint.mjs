@@ -24,10 +24,13 @@ const IMPERATIVE_VERBS = [
   'design', 'prototype', 'publish', 'register', 'submit', 'probe'
 ];
 
-const jsonMode = process.argv.includes('--json');
-
-try {
-  const data = JSON.parse(readFileSync(QUEUE_PATH, 'utf8'));
+/**
+ * Lint queue item titles. Returns { checked, issues }.
+ * @param {string} [queuePath] - Path to work-queue.json. Defaults to local.
+ * @returns {{ checked: number, issues: Array<{ id: string, title: string, issues: string[] }> }}
+ */
+export function lintTitles(queuePath) {
+  const data = JSON.parse(readFileSync(queuePath || QUEUE_PATH, 'utf8'));
   const active = data.queue.filter(i => i.status === 'pending' || i.status === 'in-progress');
 
   const issues = [];
@@ -44,7 +47,6 @@ try {
     // Check for truncation (ends mid-word or with common truncation artifacts)
     const lastWord = title.split(/\s+/).pop() || '';
     if (lastWord.length >= 20 && !lastWord.includes('-') && /[a-z]$/i.test(lastWord)) {
-      // Very long last word without hyphens — likely truncated
       itemIssues.push('may be truncated (long trailing word, no punctuation)');
     }
     if (title.endsWith('—') || title.endsWith('...') || title.endsWith(' -')) {
@@ -62,22 +64,31 @@ try {
     }
   }
 
-  if (jsonMode) {
-    console.log(JSON.stringify({ checked: active.length, issues }, null, 2));
-  } else {
-    if (issues.length === 0) {
-      console.log(`[queue-lint] OK: ${active.length} titles pass all checks.`);
+  return { checked: active.length, issues };
+}
+
+// CLI mode
+const isCLI = process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+if (isCLI) {
+  const jsonMode = process.argv.includes('--json');
+  try {
+    const { checked, issues } = lintTitles();
+    if (jsonMode) {
+      console.log(JSON.stringify({ checked, issues }, null, 2));
     } else {
-      console.log(`[queue-lint] ${issues.length} issue(s) in ${active.length} active items:`);
-      for (const i of issues) {
-        console.log(`  ${i.id}: ${i.issues.join('; ')}`);
-        console.log(`    "${i.title}"`);
+      if (issues.length === 0) {
+        console.log(`[queue-lint] OK: ${checked} titles pass all checks.`);
+      } else {
+        console.log(`[queue-lint] ${issues.length} issue(s) in ${checked} active items:`);
+        for (const i of issues) {
+          console.log(`  ${i.id}: ${i.issues.join('; ')}`);
+          console.log(`    "${i.title}"`);
+        }
       }
     }
+    process.exit(issues.length > 0 ? 1 : 0);
+  } catch (e) {
+    console.error(`[queue-lint] Error: ${e.message}`);
+    process.exit(2);
   }
-
-  process.exit(issues.length > 0 ? 1 : 0);
-} catch (e) {
-  console.error(`[queue-lint] Error: ${e.message}`);
-  process.exit(2);
 }

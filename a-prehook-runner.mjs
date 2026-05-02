@@ -24,16 +24,9 @@ import { report as hookTimingReport } from './hook-timing-report.mjs';
 import { remediate } from './stale-tag-remediate.mjs';
 import { run as costEscalation } from './audit-cost-escalation.mjs';
 import { autoRetireStuckItems } from './audit-stats.mjs';
+import { safeRun } from './lib/runner-utils.mjs';
 
 const applyTags = process.argv.includes('--apply-stale-tags');
-
-function safeRun(label, fn) {
-  try {
-    return { ok: true, result: fn() };
-  } catch (e) {
-    return { ok: false, error: `${label}: ${(e.message || 'unknown').slice(0, 200)}` };
-  }
-}
 
 // Run all 5 checks
 const bCost = safeRun('b-cost-trend', () => bCostAnalyze());

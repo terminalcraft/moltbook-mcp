@@ -41,12 +41,9 @@
       "status": "pending",
       "added": "2026-04-18",
       "source": "brainstorming-R#364",
-      "tags": [
-        "testing"
-      ],
+      "tags": ["testing"],
       "commits": []
-    }
-    ,
+    },
     {
       "id": "wq-1004",
       "title": "Hook timing telemetry summary script for d079 tracking",
@@ -56,6 +53,28 @@
       "added": "2026-04-20",
       "source": "brainstorming-R#365",
       "tags": ["d079"],
+      "commits": []
+    },
+    {
+      "id": "wq-1005",
+      "title": "Generic error-streak circuit breaker in session-init.sh",
+      "description": "(audit a250-1, CRITICAL priority): 19 consecutive sessions (s2026-s2044) burned ~75 min compute with zero output because no automated intervention exists for consecutive failures. DNS pre-flight (R#369/s2045) handles the specific DNS case, but any other failure mode (API auth, rate limiting, MCP crash) would cause identical burn-through. Add an outcomes.log reader to session-init.sh that counts consecutive exit=1 entries and skips sessions after N consecutive failures (suggest N=3), with an exponential backoff or safe-mode fallback. From BRAINSTORMING.md idea.",
+      "priority": 1005,
+      "status": "pending",
+      "added": "2026-05-02",
+      "source": "audit-s2047",
+      "tags": ["audit", "resilience"],
+      "commits": []
+    },
+    {
+      "id": "wq-1006",
+      "title": "d079 deliverable 2: B prehook runner consolidation",
+      "description": "(audit a250-2): d079 deliverable 2 (B prehook runner consolidation) was never started — no wq item existed. Apply the same runner pattern used for A/E/R prehooks to B session pre-hooks. Prerequisite: wq-1001 (shared safeRun utility). When d079 closes at s2055, carry this as standalone work item.",
+      "priority": 1006,
+      "status": "pending",
+      "added": "2026-05-02",
+      "source": "audit-s2047",
+      "tags": ["audit", "d079"],
       "commits": []
     }
   ]

@@ -23,24 +23,6 @@
       "commits": []
     },
     {
-      "id": "wq-1001",
-      "title": "Shared safeRun/safeRunAsync utility for prehook runners",
-      "description": "(added ~s2018): All three prehook runners (a-prehook-runner.mjs, e-prehook-runner.mjs, r-prehook-runner.mjs) duplicate identical safeRun/safeRunAsync error-wrapper functions. Extracting these into a shared lib/runner-utils.mjs would reduce duplication across 3 files and provide a single place to add enhanced error formatting or timeout support. Low effort, pure refactor.",
-      "priority": 1001,
-      "status": "done",
-      "added": "2026-04-17",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s2048",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Extracted safeRun/safeRunAsync to lib/runner-utils.mjs. All 4 runners updated to use shared utility."
-      }
-    },
-    {
       "id": "wq-1002",
       "title": "Add unit tests for audit-report.json generation",
       "description": "(added ~s2020): audit-report.json is touched ~4 times per 20 sessions by A sessions (audit-stats.mjs). Stabilize with unit tests covering: schema validation (required fields present), recommendation structure, compliance metric calculations, and streak counter logic. Prevents regressions like the s2017 corruption incident from going undetected.",
@@ -58,13 +40,22 @@
       "title": "Hook timing telemetry summary script for d079 tracking",
       "description": "periodic-check-timing.jsonl has rich per-check timing data but no summary tool. Build a script that computes P50/P95/P99 per hook name across the last N sessions, outputting a table. This makes d079 progress (≤2 slow hooks target) measurable without manual JSONL parsing. Could be consumed by A sessions for automated d079 progress tracking.",
       "priority": 1004,
-      "status": "pending",
+      "status": "done",
       "added": "2026-04-20",
       "source": "brainstorming-R#365",
       "tags": [
         "d079"
       ],
-      "commits": []
+      "commits": [
+        "913214e0"
+      ],
+      "outcome": {
+        "session": "s2049",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "timing-summary.mjs ships table+JSON output with P50/P95/P99 per hook, d079 pass/fail, --last/--slow/--json flags"
+      }
     },
     {
       "id": "wq-1005",
@@ -79,27 +70,6 @@
         "resilience"
       ],
       "commits": []
-    },
-    {
-      "id": "wq-1006",
-      "title": "d079 deliverable 2: B prehook runner consolidation",
-      "description": "(audit a250-2): d079 deliverable 2 (B prehook runner consolidation) was never started — no wq item existed. Apply the same runner pattern used for A/E/R prehooks to B session pre-hooks. Prerequisite: wq-1001 (shared safeRun utility). When d079 closes at s2055, carry this as standalone work item.",
-      "priority": 1006,
-      "status": "done",
-      "added": "2026-05-02",
-      "source": "audit-s2047",
-      "tags": [
-        "audit",
-        "d079"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s2048",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created b-prehook-runner.mjs consolidating 2 node + jq subprocess calls. Updated shell hook to call runner."
-      }
     }
   ]
 }

@@ -68,13 +68,9 @@ if [ -f "$PROFILES_PATH" ]; then
   [[ "$HOOKS_DIR_BASE" == "post-session" ]] && PROFILE_SECTION="post_session"
   while IFS='=' read -r hook_name rec_timeout; do
     [ -n "$hook_name" ] && TUNED_TIMEOUTS["$hook_name"]="$rec_timeout"
-  done < <(python3 -c "
-import sys,json
-try:
-    d = json.load(open('$PROFILES_PATH'))
-    for name, p in d.get('$PROFILE_SECTION', {}).get('profiles', {}).items():
-        print(f\"{name}={p['recommended_timeout_secs']}\")
-except: pass" 2>/dev/null)
+  done < <(jq -r --arg section "$PROFILE_SECTION" \
+    '.[$section].profiles // {} | to_entries[] | "\(.key)=\(.value.recommended_timeout_secs)"' \
+    "$PROFILES_PATH" 2>/dev/null)
 fi
 
 # Build set of hooks that timed out in previous session (R#205: timeout penalty)
@@ -86,14 +82,8 @@ if [ -n "$TRACK" ] && [ -n "$RESULTS_FILE" ] && [ -f "$RESULTS_FILE" ]; then
     # Extract hook names with fail:124 status (timeout) from JSON
     while IFS= read -r hook_name; do
       [ -n "$hook_name" ] && PREV_TIMEOUTS["$hook_name"]=1
-    done < <(echo "$LAST_LINE" | python3 -c "
-import sys,json
-try:
-    d = json.loads(sys.stdin.read().strip())
-    for h in d.get('hooks', []):
-        if h.get('status') == 'fail:124':
-            print(h['hook'])
-except: pass" 2>/dev/null)
+    done < <(echo "$LAST_LINE" | jq -r \
+      '.hooks[] | select(.status == "fail:124") | .hook' 2>/dev/null)
   fi
 fi
 
@@ -114,7 +104,7 @@ collect_hook_results() {
     HOOK_DETAILS="$HOOK_DETAILS$line"
 
     local local_status
-    local_status=$(echo "$line" | python3 -c "import sys,json; print(json.loads(sys.stdin.read().strip()).get('status',''))" 2>/dev/null || echo "")
+    local_status=$(echo "$line" | jq -r '.status // ""' 2>/dev/null)
     case "$local_status" in
       ok) HOOK_PASS=$((HOOK_PASS + 1)) ;;
       budget_skip) ;; # already counted

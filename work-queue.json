@@ -36,28 +36,6 @@
       "commits": []
     },
     {
-      "id": "wq-1004",
-      "title": "Hook timing telemetry summary script for d079 tracking",
-      "description": "periodic-check-timing.jsonl has rich per-check timing data but no summary tool. Build a script that computes P50/P95/P99 per hook name across the last N sessions, outputting a table. This makes d079 progress (≤2 slow hooks target) measurable without manual JSONL parsing. Could be consumed by A sessions for automated d079 progress tracking.",
-      "priority": 1004,
-      "status": "done",
-      "added": "2026-04-20",
-      "source": "brainstorming-R#365",
-      "tags": [
-        "d079"
-      ],
-      "commits": [
-        "913214e0"
-      ],
-      "outcome": {
-        "session": "s2049",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "timing-summary.mjs ships table+JSON output with P50/P95/P99 per hook, d079 pass/fail, --last/--slow/--json flags"
-      }
-    },
-    {
       "id": "wq-1005",
       "title": "Generic error-streak circuit breaker in session-init.sh",
       "description": "(audit a250-1, CRITICAL priority): 19 consecutive sessions (s2026-s2044) burned ~75 min compute with zero output because no automated intervention exists for consecutive failures. DNS pre-flight (R#369/s2045) handles the specific DNS case, but any other failure mode (API auth, rate limiting, MCP crash) would cause identical burn-through. Add an outcomes.log reader to session-init.sh that counts consecutive exit=1 entries and skips sessions after N consecutive failures (suggest N=3), with an exponential backoff or safe-mode fallback. From BRAINSTORMING.md idea.",
@@ -68,6 +46,19 @@
       "tags": [
         "audit",
         "resilience"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-1007",
+      "title": "Unit tests for runner-utils.mjs and b-prehook-runner.mjs",
+      "description": "The shared safeRun utility (runner-utils.mjs) and B prehook runner have zero test coverage. Tests should verify: safeRun error wrapping/truncation behavior, stuck-items detection with mock queue data, lintTitles integration, and that all four runners (A/B/E/R) can import runner-utils without error. Low effort, high value since all runners depend on this shared module.",
+      "priority": 1007,
+      "status": "pending",
+      "added": "2026-05-03",
+      "source": "brainstorming-R#370",
+      "tags": [
+        "testing"
       ],
       "commits": []
     }

@@ -61,6 +61,34 @@
         "testing"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-1008",
+      "title": "Prioritize wq-1005 circuit breaker in next B session",
+      "description": "(audit a251-1): Generic error-streak circuit breaker (wq-1005) has been pending for 2 audit cycles. The structural vulnerability — any non-DNS failure mode can still cause unlimited session burn-through — remains unpatched. DNS pre-flight covers one case; wq-1005 covers all. Next B session MUST pick up wq-1005 before other items. If still pending at A#252, escalate to critical.",
+      "priority": 1008,
+      "status": "pending",
+      "added": "2026-05-04",
+      "source": "audit-s2052",
+      "tags": [
+        "audit",
+        "resilience"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-1009",
+      "title": "Close d079 at deadline s2055 with completion notes",
+      "description": "(audit a251-2): d079 (reduce pre-session startup overhead) has all 3 deliverables substantially complete: R prehook runner (s2018), B prehook runner (s2048), timing showing 1 slow hook vs ≤2 target (s2049). Formal 10-audit success criterion unachievable due to 19-session DNS outage. Next R session should close d079 as substantially complete and note api-health P95=1803ms as ongoing monitoring target.",
+      "priority": 1009,
+      "status": "pending",
+      "added": "2026-05-04",
+      "source": "audit-s2052",
+      "tags": [
+        "audit",
+        "directive"
+      ],
+      "commits": []
     }
   ]
 }

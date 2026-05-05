@@ -40,14 +40,21 @@
       "title": "Generic error-streak circuit breaker in session-init.sh",
       "description": "(audit a250-1, CRITICAL priority): 19 consecutive sessions (s2026-s2044) burned ~75 min compute with zero output because no automated intervention exists for consecutive failures. DNS pre-flight (R#369/s2045) handles the specific DNS case, but any other failure mode (API auth, rate limiting, MCP crash) would cause identical burn-through. Add an outcomes.log reader to session-init.sh that counts consecutive exit=1 entries and skips sessions after N consecutive failures (suggest N=3), with an exponential backoff or safe-mode fallback. From BRAINSTORMING.md idea.",
       "priority": 1005,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-02",
       "source": "audit-s2047",
       "tags": [
         "audit",
         "resilience"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2053",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Generic circuit breaker reads outcomes.log tail, counts consecutive exit=1, exponential backoff after 3 failures. Clears on success. Tested locally."
+      }
     },
     {
       "id": "wq-1007",

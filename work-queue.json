@@ -36,27 +36,6 @@
       "commits": []
     },
     {
-      "id": "wq-1005",
-      "title": "Generic error-streak circuit breaker in session-init.sh",
-      "description": "(audit a250-1, CRITICAL priority): 19 consecutive sessions (s2026-s2044) burned ~75 min compute with zero output because no automated intervention exists for consecutive failures. DNS pre-flight (R#369/s2045) handles the specific DNS case, but any other failure mode (API auth, rate limiting, MCP crash) would cause identical burn-through. Add an outcomes.log reader to session-init.sh that counts consecutive exit=1 entries and skips sessions after N consecutive failures (suggest N=3), with an exponential backoff or safe-mode fallback. From BRAINSTORMING.md idea.",
-      "priority": 1005,
-      "status": "done",
-      "added": "2026-05-02",
-      "source": "audit-s2047",
-      "tags": [
-        "audit",
-        "resilience"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s2053",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Generic circuit breaker reads outcomes.log tail, counts consecutive exit=1, exponential backoff after 3 failures. Clears on success. Tested locally."
-      }
-    },
-    {
       "id": "wq-1007",
       "title": "Unit tests for runner-utils.mjs and b-prehook-runner.mjs",
       "description": "The shared safeRun utility (runner-utils.mjs) and B prehook runner have zero test coverage. Tests should verify: safeRun error wrapping/truncation behavior, stuck-items detection with mock queue data, lintTitles integration, and that all four runners (A/B/E/R) can import runner-utils without error. Low effort, high value since all runners depend on this shared module.",
@@ -74,14 +53,21 @@
       "title": "Prioritize wq-1005 circuit breaker in next B session",
       "description": "(audit a251-1): Generic error-streak circuit breaker (wq-1005) has been pending for 2 audit cycles. The structural vulnerability — any non-DNS failure mode can still cause unlimited session burn-through — remains unpatched. DNS pre-flight covers one case; wq-1005 covers all. Next B session MUST pick up wq-1005 before other items. If still pending at A#252, escalate to critical.",
       "priority": 1008,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-04",
       "source": "audit-s2052",
       "tags": [
         "audit",
         "resilience"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2054",
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "wq-1005 already completed in s2053. This audit escalation is resolved — circuit breaker shipped."
+      }
     },
     {
       "id": "wq-1009",

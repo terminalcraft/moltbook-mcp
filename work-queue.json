@@ -5,11 +5,20 @@
       "title": "Dead-platform pruner for services.json",
       "description": "(added ~s1988, refreshed s2045): services.json still has entries for platforms with DNS NXDOMAIN (e.g. nicepick.dev). A lightweight validation script that resolves DNS for all service URLs and marks unresolvable ones as \"defunct\" (or removes them) would keep services.json clean and prevent engagement discovery from surfacing dead platforms as candidates. Could run as an A-session pre-hook check.",
       "priority": 999,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-01",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "108e546f"
+      ],
+      "outcome": {
+        "session": "s2054",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "DNS-only pruner script shipped. Also reset 49 stale counters from outage. Automation hook deferred to brainstorming."
+      }
     },
     {
       "id": "wq-1000",

@@ -83,6 +83,68 @@ run_api_dns_check() {
   fi
 }
 
+# --- Generic error-streak circuit breaker (wq-1005, A#250) ---
+# s2026-s2044: 19 consecutive failures burned ~75 min with zero output.
+# DNS pre-flight handles that specific case; this handles ANY failure mode
+# (API auth, rate limiting, MCP crash, etc.) by reading outcomes.log.
+# After N consecutive exit=1 entries, skip with exponential backoff.
+# N=3 threshold, backoff: skip next 2^(streak-3) sessions (capped at 8).
+run_error_streak_check() {
+  if [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ] && [ -z "$DRY_RUN" ]; then
+    local outcomes_file="$LOG_DIR/outcomes.log"
+    local streak_skip_file="$STATE_DIR/error_streak_skip"
+    local STREAK_THRESHOLD=3
+
+    # If skip file exists, we're in backoff — decrement and skip
+    if [ -f "$streak_skip_file" ]; then
+      local remaining
+      remaining=$(cat "$streak_skip_file")
+      if [ "${remaining:-0}" -gt 0 ]; then
+        echo "$((remaining - 1))" > "$streak_skip_file"
+        echo "$(date -Iseconds) circuit-breaker: skipping session (backoff remaining: $remaining)" >> "$LOG_DIR/skipped.log"
+        exit 0
+      else
+        # Backoff expired — remove file and proceed
+        rm -f "$streak_skip_file"
+      fi
+    fi
+
+    # Count consecutive failures from end of outcomes.log
+    if [ -f "$outcomes_file" ]; then
+      local streak=0
+      while IFS= read -r line; do
+        if echo "$line" | grep -q "exit=1"; then
+          streak=$((streak + 1))
+        else
+          break
+        fi
+      done < <(tail -20 "$outcomes_file" | tac)
+
+      if [ "$streak" -ge "$STREAK_THRESHOLD" ]; then
+        # Calculate backoff: 2^(streak - threshold), capped at 8
+        local backoff_exp=$((streak - STREAK_THRESHOLD))
+        local skip_count=1
+        local i=0
+        while [ $i -lt $backoff_exp ] && [ $skip_count -lt 8 ]; do
+          skip_count=$((skip_count * 2))
+          i=$((i + 1))
+        done
+        [ $skip_count -gt 8 ] && skip_count=8
+
+        echo "$((skip_count - 1))" > "$streak_skip_file"
+        echo "$(date -Iseconds) circuit-breaker: $streak consecutive failures detected (threshold=$STREAK_THRESHOLD), entering backoff (skip next $((skip_count - 1)) sessions)" >> "$LOG_DIR/skipped.log"
+        # Don't skip THIS session — let it try once to see if the issue resolved.
+        # The backoff kicks in on the NEXT invocation if this one also fails.
+        # But if streak is very high (>= threshold + 3 = 6), skip immediately.
+        if [ "$streak" -ge $((STREAK_THRESHOLD + 3)) ]; then
+          echo "$(date -Iseconds) circuit-breaker: streak=$streak >= $(( STREAK_THRESHOLD + 3 )), skipping immediately" >> "$LOG_DIR/skipped.log"
+          exit 0
+        fi
+      fi
+    fi
+  fi
+}
+
 # --- Outage-aware session skip ---
 # If API has been down 5+ consecutive checks, skip every other heartbeat.
 # Skip this check in safe/emergency mode — we want to try regardless.
@@ -153,5 +215,6 @@ run_presession_pipeline() {
 
 # Run the init sequence
 run_api_dns_check
+run_error_streak_check
 run_outage_check
 run_log_rotation

@@ -173,6 +173,8 @@ case "$EXIT_CODE" in
 esac
 
 echo "$(date -Iseconds) $MODE_CHAR s=$COUNTER exit=$EXIT_CODE outcome=$OUTCOME dur=${DURATION}s" >> "$LOG_DIR/outcomes.log"
+# Clear circuit breaker backoff on success (wq-1005)
+[ "$EXIT_CODE" -eq 0 ] && rm -f "$STATE_DIR/error_streak_skip"
 # R#116: Store outcome via consolidated state manager for next session's rotation logic
 node "$DIR/rotation-state.mjs" set-outcome "$OUTCOME" >> "$LOG_DIR/selfmod.log" 2>&1 || echo "$OUTCOME" > "$STATE_DIR/last_outcome"
 

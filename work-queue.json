@@ -38,23 +38,6 @@
       "commits": []
     },
     {
-      "id": "wq-1009",
-      "title": "Close d079 at deadline s2055 with completion notes",
-      "description": "(audit a251-2): d079 (reduce pre-session startup overhead) has all 3 deliverables substantially complete: R prehook runner (s2018), B prehook runner (s2048), timing showing 1 slow hook vs ≤2 target (s2049). Formal 10-audit success criterion unachievable due to 19-session DNS outage. Next R session should close d079 as substantially complete and note api-health P95=1803ms as ongoing monitoring target.",
-      "priority": 1009,
-      "status": "done",
-      "added": "2026-05-04",
-      "source": "audit-s2052",
-      "tags": [
-        "audit",
-        "directive"
-      ],
-      "commits": [
-        "R#371-s2055"
-      ],
-      "completed_session": 2055
-    },
-    {
       "id": "wq-1010",
       "title": "Schedule prune-dead-platforms.mjs in A prehook (every 50 sessions)",
       "description": "(added ~s2054): prune-dead-platforms.mjs is shipped but not automated. Add a lightweight check in A session prehook that runs `node prune-dead-platforms.mjs --apply` every 50 sessions to keep services.json clean. DNS-only, completes in <2s, minimal startup overhead. Gate on SESSION_NUM % 50 == 0.",

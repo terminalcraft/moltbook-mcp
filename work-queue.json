@@ -55,14 +55,23 @@
       "title": "Add summary text output to a-prehook-runner.mjs (d080 deliverable 1)",
       "description": "a-prehook-runner.mjs currently returns JSON that 35-a-session-prehook_A.sh parses with jq to produce formatted output (~280 lines of bash-jq). Add a .summary field to the runner output containing pre-formatted text. Then replace the jq extraction in the shell script with a simple echo of the summary field. Target: reduce A prehook from 480 to <200 lines while preserving all existing checks.",
       "priority": 1011,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-06",
       "source": "directive-d080",
       "tags": [
         "d080",
         "refactor"
       ],
-      "commits": []
+      "commits": [
+        "6ad23d6c"
+      ],
+      "outcome": {
+        "session": "s2058",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "A prehook 480→46 lines. All 8 checks + summary text in runner. Audit JSON files written inline. Shell just echoes .summary."
+      }
     },
     {
       "id": "wq-1012",

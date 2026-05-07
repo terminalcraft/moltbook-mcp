@@ -63,6 +63,45 @@
         "refactor"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-1012",
+      "title": "Resolve hr-a250-1: verify stall circuit breaker and close incident",
+      "description": "hr-a250-1 (19-session stall s2026-s2044) has both fixes shipped: wq-1005 (error-streak circuit breaker in session-init.sh, s2053) and DNS pre-flight (s2045). Verify the circuit breaker triggers correctly by testing the error-streak tracking logic, then formally mark hr-a250-1 as resolved in human-review.json. 10 sessions since incident filed.",
+      "priority": 1012,
+      "status": "pending",
+      "added": "2026-05-07",
+      "source": "audit-s2057",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-1013",
+      "title": "Investigate Ctxly persistent 404 and decide service status",
+      "description": "Ctxly memory recall has returned 404 since at least s2051 (6+ sessions). Circuit-broken in platform-circuits.json. Investigate whether Ctxly service is permanently down or needs re-authentication. If permanently down, remove from engagement flow. If recoverable, fix credentials/endpoint. Low priority — system functions without it.",
+      "priority": 1013,
+      "status": "pending",
+      "added": "2026-05-07",
+      "source": "audit-s2057",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-1014",
+      "title": "Resolve Bluesky credential gap or reduce picker weight",
+      "description": "Bluesky is the most-substituted platform (2/10 recent substitutions) due to missing API credentials in account-registry.json. E sessions waste time attempting Bluesky before falling back to backups. Either obtain Bluesky API credentials and add to registry, or reduce Bluesky weight in platform-picker.mjs to avoid unnecessary substitution overhead.",
+      "priority": 1014,
+      "status": "pending",
+      "added": "2026-05-07",
+      "source": "audit-s2057",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

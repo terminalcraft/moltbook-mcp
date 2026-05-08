@@ -51,26 +51,6 @@
       "commits": []
     },
     {
-      "id": "wq-1012",
-      "title": "Resolve hr-a250-1: verify stall circuit breaker and close incident",
-      "description": "hr-a250-1 (19-session stall s2026-s2044) has both fixes shipped: wq-1005 (error-streak circuit breaker in session-init.sh, s2053) and DNS pre-flight (s2045). Verify the circuit breaker triggers correctly by testing the error-streak tracking logic, then formally mark hr-a250-1 as resolved in human-review.json. 10 sessions since incident filed.",
-      "priority": 1012,
-      "status": "done",
-      "added": "2026-05-07",
-      "source": "audit-s2057",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "B#659-s2059",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Verified circuit breaker with 13 tests (streak counting, threshold, backoff, cap, reset). Production streak=0 (14 consecutive successes since s2045). hr-a250-1 formally resolved in human-review.json."
-      }
-    },
-    {
       "id": "wq-1013",
       "title": "Investigate Ctxly persistent 404 and decide service status",
       "description": "Ctxly memory recall has returned 404 since at least s2051 (6+ sessions). Circuit-broken in platform-circuits.json. Investigate whether Ctxly service is permanently down or needs re-authentication. If permanently down, remove from engagement flow. If recoverable, fix credentials/endpoint. Low priority — system functions without it.",
@@ -81,6 +61,28 @@
       "tags": [
         "audit"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-1016",
+      "title": "Apply summary text pattern to E prehook runner + shell (d080)",
+      "description": "d080 deliverable 2: Add .summary text to e-prehook-runner.mjs and simplify 36-e-session-prehook_E.sh (337→<150 lines). Same pattern as A prehook (wq-1011) and R prehook (wq-1015). Runner produces formatted text; shell just echoes .summary. Port inline shell checks into the runner first, then gut the shell.",
+      "priority": 1016,
+      "status": "pending",
+      "added": "2026-05-08",
+      "source": "brainstorming-R#372",
+      "tags": ["d080"],
+      "commits": []
+    },
+    {
+      "id": "wq-1015",
+      "title": "Apply summary text pattern to R prehook shell (d080)",
+      "description": "r-prehook-runner.mjs now produces .summary text with all 6 checks (maintain-audit, security-posture, hook-health, directive-analysis, brainstorm-gate, issue-summary). Simplify 35-r-session-prehook_R.sh to: run runner, write .summary to maintain-audit.txt, echo it. Target: 219→<50 lines. Pattern proven in A prehook (wq-1011). Also write directive-status.txt from runner output instead of inline.",
+      "priority": 1015,
+      "status": "pending",
+      "added": "2026-05-08",
+      "source": "R#372-d080",
+      "tags": ["d080"],
       "commits": []
     },
     {

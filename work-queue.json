@@ -51,40 +51,24 @@
       "commits": []
     },
     {
-      "id": "wq-1011",
-      "title": "Add summary text output to a-prehook-runner.mjs (d080 deliverable 1)",
-      "description": "a-prehook-runner.mjs currently returns JSON that 35-a-session-prehook_A.sh parses with jq to produce formatted output (~280 lines of bash-jq). Add a .summary field to the runner output containing pre-formatted text. Then replace the jq extraction in the shell script with a simple echo of the summary field. Target: reduce A prehook from 480 to <200 lines while preserving all existing checks.",
-      "priority": 1011,
-      "status": "done",
-      "added": "2026-05-06",
-      "source": "directive-d080",
-      "tags": [
-        "d080",
-        "refactor"
-      ],
-      "commits": [
-        "6ad23d6c"
-      ],
-      "outcome": {
-        "session": "s2058",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "A prehook 480→46 lines. All 8 checks + summary text in runner. Audit JSON files written inline. Shell just echoes .summary."
-      }
-    },
-    {
       "id": "wq-1012",
       "title": "Resolve hr-a250-1: verify stall circuit breaker and close incident",
       "description": "hr-a250-1 (19-session stall s2026-s2044) has both fixes shipped: wq-1005 (error-streak circuit breaker in session-init.sh, s2053) and DNS pre-flight (s2045). Verify the circuit breaker triggers correctly by testing the error-streak tracking logic, then formally mark hr-a250-1 as resolved in human-review.json. 10 sessions since incident filed.",
       "priority": 1012,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-07",
       "source": "audit-s2057",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "B#659-s2059",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Verified circuit breaker with 13 tests (streak counting, threshold, backoff, cap, reset). Production streak=0 (14 consecutive successes since s2045). hr-a250-1 formally resolved in human-review.json."
+      }
     },
     {
       "id": "wq-1013",

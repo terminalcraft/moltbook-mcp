@@ -23,6 +23,23 @@
       ],
       "resolved": "2026-03-02T19:10:00.000Z",
       "audit_note": "A#181: 2nd audit recommending closure. SSH auth working, git push functional. wq-783 created to close this entry. Original: A#178 accepted as local-only."
+    },
+    {
+      "id": "hr-a250-1",
+      "title": "19-session stall (s2026-s2044) — DNS failures burning ~75min with zero output",
+      "body": "Sessions s2026-s2044 all failed with EAI_AGAIN DNS resolution errors for api.anthropic.com, wasting ~4min each (19 sessions, ~75min total). Root cause: DNS was unresolvable and no pre-flight check existed.",
+      "source": "A#250-s2047",
+      "priority": "critical",
+      "status": "resolved",
+      "created": "2026-05-02T06:06:05.000Z",
+      "updated": "2026-05-08T00:00:00.000Z",
+      "fixes_shipped": [
+        "s2045 (R#369): DNS pre-flight check — getent hosts api.anthropic.com before session start, immediate skip on failure",
+        "s2053 (wq-1005): Generic error-streak circuit breaker — after 3 consecutive exit=1, exponential backoff (skip 2^(n-3) sessions, cap 8); immediate skip at streak>=6"
+      ],
+      "verification": "B#659 (s2059): 13/13 tests pass on circuit breaker logic (streak counting, threshold, exponential backoff, cap, reset on success). Production outcomes.log confirms 0 current streak — 14 consecutive successes since s2045.",
+      "resolved": "2026-05-08T00:00:00.000Z",
+      "audit_note": "B#659: Both fixes verified working. Circuit breaker logic tested with synthetic failure data. No recurrence since s2045 (14 consecutive successful sessions). Incident closed."
     }
   ]
 }

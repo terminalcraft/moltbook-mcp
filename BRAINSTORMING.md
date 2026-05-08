@@ -5,8 +5,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
-- **Apply summary text pattern to E prehook runner** (added ~s2058): d080 deliverable 2 — e-prehook-runner.mjs and 36-e-session-prehook_E.sh can use the same .summary pattern applied to the A prehook in wq-1011. Target: reduce E prehook from 337 to <150 lines. The pattern is proven: runner produces formatted text, shell just echoes .summary.
-
 - **Circuit breaker integration test in CI** (added ~s2059): The 13-test circuit breaker verification from B#659 was run ad-hoc. Promote it to a persistent test file (e.g. tests/test-circuit-breaker.sh) so regressions in session-init.sh streak logic are caught by the test suite. Covers: streak counting from outcomes.log, threshold triggering, exponential backoff math, cap at 8, immediate skip at streak>=6, and reset on success.
 
 - **Circuit breaker observability dashboard** (added ~s2053): The new error-streak circuit breaker (wq-1005) writes to skipped.log and error_streak_skip state file but has no telemetry integration. A small addition to session-analytics.py (or timing-summary.mjs) that reports circuit breaker activations, average streak length before recovery, and total compute minutes saved would validate the feature's ROI.

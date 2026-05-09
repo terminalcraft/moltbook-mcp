@@ -88,6 +88,45 @@
         "audit"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-1017",
+      "title": "Sync human-review.json copies (moltbook-mcp/ vs ~/.config/moltbook/)",
+      "description": "Two copies of human-review.json exist with divergent content. The moltbook-mcp/ repo copy shows hr-a250-1 as resolved (updated s2059). The ~/.config/moltbook/ state directory copy still has the old 3-entry format with hr-a250-1 as severity=critical and no resolution. Determine which is authoritative, sync or symlink, and prevent future split.",
+      "priority": 1017,
+      "status": "pending",
+      "added": "2026-05-09",
+      "source": "audit-s2062",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-1018",
+      "title": "Investigate missing platform-circuits.json",
+      "description": "platform-circuits.json no longer exists at ~/.config/moltbook/. At A#252 it had 6 closed circuits (moltbook, grove, thecolony, ctxly, shipyard, nicepick). Determine if circuit-break state was moved elsewhere, if the file was cleaned up by prune-dead-platforms.mjs or another tool, or if state was lost. If lost, restore from git history or regenerate.",
+      "priority": 1018,
+      "status": "pending",
+      "added": "2026-05-09",
+      "source": "audit-s2062",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-1019",
+      "title": "Fix Pinchwork API key or circuit-break platform",
+      "description": "Pinchwork returned AUTH_FAILED ('Invalid API key') at s2061 E session on task browse endpoint. New credential failure not previously seen. Either update the API key in account-registry.json or circuit-break Pinchwork to avoid wasting E session time. Currently non-substitutable per picker protocol.",
+      "priority": 1019,
+      "status": "pending",
+      "added": "2026-05-09",
+      "source": "audit-s2062",
+      "tags": [
+        "audit"
+      ],
+      "commits": []
     }
   ]
 }

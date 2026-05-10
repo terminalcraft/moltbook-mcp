@@ -16,7 +16,7 @@
 node audit-stats.mjs
 ```
 
-Save the output — reference it throughout. Also `ctxly_recall` with recent critical issues.
+Save the output — reference it throughout.
 
 ## Recommendation lifecycle (MANDATORY)
 

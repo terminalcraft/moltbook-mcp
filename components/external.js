@@ -1,17 +1,15 @@
 import { z } from "zod";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { getCtxlyKey, getChatrCredentials, CHATR_API } from "../providers/credentials.js";
+import { getChatrCredentials, CHATR_API } from "../providers/credentials.js";
 import { loadServices, saveServices } from "../providers/services.js";
 
 // Module-level context storage for lifecycle hooks
 let _ctx = null;
 
-// Session-scoped circuit breaker for Ctxly API (R#365).
-// When ctxly returns 404 or connection error, all subsequent calls in this
-// session short-circuit immediately instead of wasting time on a dead service.
-let ctxlyCircuitOpen = false;
-const CTXLY_TRIPPED_MSG = "Ctxly service unavailable (session circuit open — earlier call returned 404). Skipping.";
+// Ctxly service permanently down since s2051 (B#659 confirmed 404 on all endpoints).
+// Tools kept registered to avoid breaking tool references, but always return immediately.
+const CTXLY_DEAD_MSG = "Ctxly service permanently down (confirmed B#659/s2064 — 404 on all endpoints including root). Use local memory instead.";
 
 // Safe date formatting — handles invalid/missing date values
 function safeFormatDate(dateValue, format = "datetime") {
@@ -120,42 +118,20 @@ export function register(server, ctx) {
     } catch (e) { return { content: [{ type: "text", text: `AgentID lookup error: ${e.message}` }] }; }
   });
 
-  // ctxly_remember
-  server.tool("ctxly_remember", "Store a memory in Ctxly cloud context. Requires CTXLY_API_KEY env var or ~/moltbook-mcp/ctxly.json.", {
+  // ctxly_remember — DEFUNCT (service down since s2051)
+  server.tool("ctxly_remember", "[DEFUNCT] Ctxly service is permanently down. Use local memory instead.", {
     content: z.string().describe("The memory to store"),
     tags: z.array(z.string()).optional().describe("Optional tags"),
-  }, async ({ content, tags }) => {
-    if (ctxlyCircuitOpen) return { content: [{ type: "text", text: CTXLY_TRIPPED_MSG }] };
-    try {
-      const key = getCtxlyKey();
-      if (!key) return { content: [{ type: "text", text: "No Ctxly API key found. Set CTXLY_API_KEY or add api_key to ~/moltbook-mcp/ctxly.json" }] };
-      const body = { content };
-      if (tags) body.tags = tags;
-      const res = await fetch("https://ctxly.app/remember", { method: "POST", headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      const data = await safeJson(res);
-      return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-    } catch (e) {
-      if (/404|ENOTFOUND|ECONNREFUSED/.test(e.message)) ctxlyCircuitOpen = true;
-      return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] };
-    }
+  }, async () => {
+    return { content: [{ type: "text", text: CTXLY_DEAD_MSG }] };
   });
 
-  // ctxly_recall
-  server.tool("ctxly_recall", "Search Ctxly cloud memories by keyword. Requires CTXLY_API_KEY.", {
+  // ctxly_recall — DEFUNCT (service down since s2051)
+  server.tool("ctxly_recall", "[DEFUNCT] Ctxly service is permanently down. Use local memory instead.", {
     query: z.string().describe("Search query"),
     limit: z.number().default(10).describe("Max results"),
-  }, async ({ query, limit }) => {
-    if (ctxlyCircuitOpen) return { content: [{ type: "text", text: CTXLY_TRIPPED_MSG }] };
-    try {
-      const key = getCtxlyKey();
-      if (!key) return { content: [{ type: "text", text: "No Ctxly API key found." }] };
-      const res = await fetch(`https://ctxly.app/recall?q=${encodeURIComponent(query)}&limit=${limit}`, { headers: { "Authorization": `Bearer ${key}` } });
-      const data = await safeJson(res);
-      return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-    } catch (e) {
-      if (/404|ENOTFOUND|ECONNREFUSED/.test(e.message)) ctxlyCircuitOpen = true;
-      return { content: [{ type: "text", text: `Ctxly error: ${e.message}` }] };
-    }
+  }, async () => {
+    return { content: [{ type: "text", text: CTXLY_DEAD_MSG }] };
   });
 
   // chatr_read
@@ -477,9 +453,8 @@ export function register(server, ctx) {
 
 export function onLoad(ctx) {
   const hasChatr = !!getChatrCredentials();
-  const hasCtxly = !!getCtxlyKey();
   const services = loadServices();
   const activeCount = services.services?.filter(s => s.status === "active").length || 0;
   const integratedCount = services.services?.filter(s => s.status === "integrated").length || 0;
-  console.error(`[external] onLoad: session=${ctx.sessionNum} type=${ctx.sessionType} chatr=${hasChatr} ctxly=${hasCtxly} services=${activeCount}active/${integratedCount}integrated`);
+  console.error(`[external] onLoad: session=${ctx.sessionNum} type=${ctx.sessionType} chatr=${hasChatr} ctxly=DEFUNCT services=${activeCount}active/${integratedCount}integrated`);
 }

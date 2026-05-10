@@ -55,32 +55,19 @@
       "title": "Investigate Ctxly persistent 404 and decide service status",
       "description": "Ctxly memory recall has returned 404 since at least s2051 (6+ sessions). Circuit-broken in platform-circuits.json. Investigate whether Ctxly service is permanently down or needs re-authentication. If permanently down, remove from engagement flow. If recoverable, fix credentials/endpoint. Low priority — system functions without it.",
       "priority": 1013,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-07",
       "source": "audit-s2057",
       "tags": [
         "audit"
       ],
-      "commits": []
-    },
-    {
-      "id": "wq-1016",
-      "title": "Apply summary text pattern to E prehook runner + shell (d080)",
-      "description": "d080 deliverable 2: Add .summary text to e-prehook-runner.mjs and simplify 36-e-session-prehook_E.sh (337→<150 lines). Same pattern as A prehook (wq-1011) and R prehook (wq-1015). Runner produces formatted text; shell just echoes .summary. Port inline shell checks into the runner first, then gut the shell.",
-      "priority": 1016,
-      "status": "done",
-      "added": "2026-05-08",
-      "source": "brainstorming-R#372",
-      "tags": [
-        "d080"
-      ],
       "commits": [],
       "outcome": {
-        "session": "B#658 (s2063)",
+        "session": "B#659/s2064",
         "result": "completed",
         "effort": "moderate",
         "quality": "well-scoped",
-        "note": "Runner produces .summary text for all 10 checks + context-file appending. Shell 337→91 lines (73% reduction). appendFileSync consolidated. Liveness probe stays separate."
+        "note": "Confirmed ctxly.app permanently down (404 on all endpoints including root, DNS → Cloudflare but no backend). Marked tools as DEFUNCT, updated BRIEFING.md, SESSION_AUDIT.md, platform-circuits.json. Tools kept registered to avoid breaking references but return immediately. Added brainstorming idea for Grove cleanup (same dead domain)."
       }
     },
     {

@@ -12,7 +12,7 @@ export function loadState() {
   try {
     if (existsSync(STATE_FILE)) state = JSON.parse(readFileSync(STATE_FILE, "utf8"));
   } catch {}
-  if (!state) state = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, pendingComments: [] };
+  if (!state) state = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, browsedSubmolts: {}, pendingComments: [] };
   _stateCache = state;
   return state;
 }

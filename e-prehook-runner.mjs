@@ -2,13 +2,14 @@
 /**
  * e-prehook-runner.mjs — Single-process runner for E session prehook checks.
  *
- * Replaces 10 separate `node` subprocess invocations in 35-e-session-prehook_E.sh,
- * eliminating ~1-2s of Node startup overhead.
+ * Produces JSON with individual check results plus a pre-formatted .summary
+ * field that the shell script can echo directly — matching the d080 pattern
+ * established in a-prehook-runner.mjs (wq-1011) and r-prehook-runner.mjs (R#372).
  *
  * Does NOT include Check 1 (engagement-liveness-probe.mjs) because it uses
  * process.exit() for hard timeout — that would kill the entire runner.
  *
- * Imports and runs:
+ * Checks (10 total in runner):
  *   Check 2: e-session-seed.mjs         → generateSeed()
  *   Check 3: chatr-thread-tracker.mjs   → fetchAndUpdate() [async]
  *   Check 3: chatr-topic-clusters.mjs   → analyze()
@@ -17,16 +18,17 @@
  *   Check 6: credential-health-check.mjs → checkAllCredentials()
  *   Check 7: engagement-variety-analyzer.mjs → utility functions
  *   Check 8: colony-jwt.mjs             → checkColonyJwt() [async]
- *   Phase 4: platform-picker.mjs        → main()
- *   Phase 4: picker-revalidate.mjs      → revalidateMandate()
+ *   Check 9: recovery-probe.mjs         → probeCircuitBroken()
+ *   Phase 4: platform-picker.mjs + picker-revalidate.mjs
  *
- * Output: JSON with results from all checks.
+ * Output: JSON with all results + .summary text
  * Usage: node e-prehook-runner.mjs --context-file <path> --policy-file <path> --session <N>
  *
  * Created: wq-983 (B#631)
+ * Refactored: wq-1016 (d080) — added summary text + context-file appending
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, appendFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { generateSeed } from './hooks/lib/e-session-seed.mjs';
 import { fetchAndUpdate } from './chatr-thread-tracker.mjs';
@@ -65,6 +67,8 @@ const sessionNum = parseInt(getArg('--session') || process.env.SESSION_NUM || '0
 
 import { safeRun, safeRunAsync } from './lib/runner-utils.mjs';
 
+const summary = [];
+
 // ---- Check 2: Seed ----
 const seed = safeRun('seed', () => {
   const nudgeFile = join(STATE_DIR, 'd049-nudge.txt');
@@ -78,6 +82,12 @@ const seed = safeRun('seed', () => {
   return { wrote: contextFile, lines: result.lines, sections: result.sections };
 });
 
+if (!seed.ok) {
+  summary.push(`[seed] ERROR: ${seed.error}`);
+} else {
+  summary.push(`[seed] Generated context (${seed.result.lines || 0} lines)`);
+}
+
 // ---- Check 4: Conversation balance ----
 const balance = safeRun('conversation-balance', () => {
   const history = balanceHistory(5);
@@ -89,6 +99,23 @@ const balance = safeRun('conversation-balance', () => {
   };
 });
 
+if (!balance.ok) {
+  summary.push(`[conversation-balance] ERROR: ${balance.error}`);
+} else {
+  const cb = balance.result;
+  summary.push(`=== Conversation Balance Check (d041) ===`);
+  summary.push(`[conversation-balance] Trend: ${cb.trend || '?'}, avg ratio: ${cb.avgRatio || '?'}`);
+  if (cb.warning) {
+    summary.push('');
+    summary.push('ACTION REQUIRED: Recent sessions show conversation imbalance.');
+    summary.push('   This session should prioritize:');
+    summary.push('   1. Reading more threads before responding');
+    summary.push('   2. Waiting for responses to previous posts');
+    summary.push('   3. Engaging on platforms where you\'ve posted less');
+    summary.push('');
+  }
+}
+
 // ---- Check 5: Spending policy ----
 const spending = safeRun('spending-policy', () => {
   if (!existsSync(policyFile)) {
@@ -98,10 +125,47 @@ const spending = safeRun('spending-policy', () => {
   return checkSpendingPolicy({ policyFile, currentMonth });
 });
 
+if (!spending.ok) {
+  summary.push(`[spending-policy] ERROR: ${spending.error}`);
+} else {
+  const sp = spending.result;
+  if (sp.status === 'disabled') {
+    summary.push('spending-policy: no policy file found, E session spending DISABLED');
+  } else {
+    if (sp.wasReset) summary.push('spending-policy: new month, ledger reset');
+    const limit = sp.monthlyLimit, spent = sp.monthSpent;
+    const remaining = (limit - spent).toFixed(2);
+    if (spent >= limit) {
+      summary.push(`SPENDING_GATE: BLOCKED — monthly limit reached ($${spent}/$${limit}). Skip crypto-gated platforms this session.`);
+    } else {
+      summary.push(`SPENDING_GATE: OPEN — budget $${remaining} remaining this month (limit: $${limit})`);
+      summary.push(`SPENDING_RULES: max $${sp.perSession}/session, max $${sp.perPlatform}/platform, ROI >= ${sp.minRoi} required`);
+    }
+  }
+}
+
 // ---- Check 6: Credential health ----
 const creds = safeRun('credential-health', () => {
   return checkAllCredentials();
 });
+
+if (!creds.ok) {
+  summary.push(`[cred-check] ERROR: ${creds.error}`);
+} else {
+  const ch = creds.result;
+  summary.push(`[cred-check] OK: ${ch.healthy || 0}/${ch.total || 0} live platforms have valid credentials`);
+  if ((ch.unhealthy || 0) > 0 && ch.warnings) {
+    const credBlock = [
+      '',
+      '## Credential warnings (auto-check)',
+      'The following live platforms have credential issues. SKIP them when picking engagement targets:',
+      ...ch.warnings.map(w => `- **${w.id}**: ${w.status} — ${w.details}`),
+      '',
+    ].join('\n');
+    try { appendFileSync(contextFile, credBlock); } catch {}
+    summary.push(`[cred-check] Appended credential warnings to context`);
+  }
+}
 
 // ---- Check 7: Engagement variety ----
 const variety = safeRun('engagement-variety', () => {
@@ -132,6 +196,32 @@ const variety = safeRun('engagement-variety', () => {
     } : null,
   };
 });
+
+if (!variety.ok) {
+  summary.push(`[variety] ${variety.error}`);
+} else {
+  const ev = variety.result;
+  if (ev.error) {
+    summary.push(`[variety] ${ev.error}`);
+  } else {
+    summary.push('=== Engagement Variety Check ===');
+    summary.push(`[variety] Health: ${ev.healthScore || '?'} | Top: ${ev.topPlatform || '?'} (${ev.topConcentrationPct || '?'}%) | ${ev.recommendation || ''}`);
+    if (ev.alert) {
+      const alertBlock = [
+        '',
+        '## Platform concentration alert (auto-detected)',
+        `**Level: ${ev.alert.level.toUpperCase()}** — ${ev.alert.message}`,
+        '',
+        ev.recommendation || '',
+        '',
+        '**Action**: Prioritize under-represented platforms in this session\'s picker targets.',
+        '',
+      ].join('\n');
+      try { appendFileSync(contextFile, alertBlock); } catch {}
+      summary.push('[variety] WARNING: Concentration alert appended to context');
+    }
+  }
+}
 
 // ---- Recovery probe (d078, wq-990): every RECOVERY_INTERVAL sessions ----
 const shouldRunRecovery = sessionNum > 0 && sessionNum % RECOVERY_INTERVAL === 0;
@@ -172,8 +262,93 @@ const recoveryResult = asyncResults[2].status === 'fulfilled'
   ? asyncResults[2].value
   : { ok: false, error: 'recovery-probe: promise rejected' };
 
+// Summary for thread tracker
+if (!threadTracker.ok) {
+  summary.push(`[topic-clusters] Thread tracker: ${threadTracker.error}`);
+} else {
+  summary.push(`[topic-clusters] Thread tracker updated (${threadTracker.result.messagesProcessed || 0} messages)`);
+}
+
 // Check 3b: Topic clusters (sync, uses state from thread tracker)
 const topics = safeRun('topic-clusters', () => topicAnalyze({ hours: 72 }));
+
+if (!topics.ok) {
+  summary.push(`[topic-clusters] ${topics.error}`);
+} else {
+  const tc = topics.result;
+  if (tc.error) {
+    summary.push(`[topic-clusters] ${tc.error}`);
+  } else {
+    const recs = tc.recommendations || [];
+    if (recs.length > 0) {
+      const topicBlock = [
+        '',
+        '## Chatr topic clusters (auto-generated)',
+        `${tc.threadCount || 0} threads in ${tc.clusterCount || 0} clusters (last 72h)`,
+        '',
+        '**Recommended engagement targets:**',
+        ...recs.map(r => `- **${r.topic}**: ${r.reason}`),
+        '',
+      ].join('\n');
+      try { appendFileSync(contextFile, topicBlock); } catch {}
+      summary.push(`[topic-clusters] ${tc.clusterCount || 0} clusters, ${recs.length} recommendations (appended to context)`);
+    } else {
+      summary.push(`[topic-clusters] ${tc.clusterCount || 0} clusters, no recommendations`);
+    }
+  }
+}
+
+// Summary for colony JWT
+if (!colonyJwt.ok) {
+  summary.push(`[colony-jwt] ERROR: ${colonyJwt.error}`);
+} else {
+  const cj = colonyJwt.result;
+  if (cj.error) {
+    summary.push(`[colony-jwt] ERROR: ${cj.error}`);
+  } else if (cj.status === 'skip') {
+    summary.push(`[colony-jwt] ${cj.reason || 'skipped'}, skipping`);
+  } else if (cj.status === 'ok') {
+    if (cj.action === 'refreshed') {
+      summary.push(`[colony-jwt] Token refreshed (${cj.reason || ''})`);
+    } else if (cj.remaining) {
+      summary.push(`[colony-jwt] Token valid (${cj.remaining}s remaining)`);
+    } else {
+      summary.push('[colony-jwt] Token OK');
+    }
+  } else if (cj.status === 'failed') {
+    summary.push(`[colony-jwt] Refresh FAILED: ${cj.reason || ''}`);
+    if (cj.warning) {
+      const jwtBlock = [
+        '',
+        '## Colony JWT warning (auto-check)',
+        `**${cj.warning}**`,
+        '',
+      ].join('\n');
+      try { appendFileSync(contextFile, jwtBlock); } catch {}
+      summary.push('[colony-jwt] Warning appended to context');
+    }
+  } else {
+    summary.push(`[colony-jwt] Unexpected status: ${cj.status}`);
+  }
+}
+
+// Summary for recovery probe
+if (!recoveryResult.ok) {
+  summary.push(`[recovery-probe] ERROR: ${recoveryResult.error}`);
+} else {
+  const rp = recoveryResult.result;
+  if (rp.error) {
+    summary.push(`[recovery-probe] ERROR: ${rp.error}`);
+  } else if (rp.skipped) {
+    summary.push(`[recovery-probe] Skipped (${rp.reason || 'interval not reached'})`);
+  } else {
+    summary.push(`[recovery-probe] Probed ${rp.probed || 0} circuit-broken platforms`);
+    const recovered = (rp.recovered || []).join(', ');
+    const failed = (rp.failed || []).join(', ');
+    if (recovered) summary.push(`[recovery-probe] Recovered: ${recovered}`);
+    if (failed) summary.push(`[recovery-probe] Still down: ${failed}`);
+  }
+}
 
 // ---- Phase 4: Picker + revalidate ----
 // Suppress stdout from picker (it prints to console)
@@ -204,6 +379,47 @@ const revalidate = safeRun('picker-revalidate', () => {
   return revalidateMandate();
 });
 
+// Summary for picker
+if (!pickerResult.ok) {
+  summary.push(`[picker] ERROR: ${pickerResult.error}`);
+} else {
+  const firstLine = (pickerResult.result.output || '').split('\n')[0] || '';
+  summary.push(`[picker] ${firstLine}`);
+}
+
+// Summary for revalidate
+if (!revalidate.ok) {
+  summary.push(`[picker-revalidate] ${revalidate.error}`);
+} else {
+  const pr = revalidate.result;
+  if (pr.error) {
+    summary.push(`[picker-revalidate] ${pr.error}`);
+  } else if (pr.revalidated) {
+    const subs = pr.substitutions || [];
+    if (subs.length > 0) {
+      summary.push(`[picker-revalidate] Revalidated with ${subs.length} substitution(s)`);
+      for (const s of subs) {
+        if (s.replacement) summary.push(`[picker-revalidate] ${s.original} → ${s.replacement} (${s.reason})`);
+      }
+    } else {
+      summary.push('[picker-revalidate] Revalidated, no substitutions needed');
+    }
+  }
+}
+
+// Log final mandate state
+const mandatePath = join(STATE_DIR, 'picker-mandate.json');
+if (existsSync(mandatePath)) {
+  try {
+    const mandate = JSON.parse(readFileSync(mandatePath, 'utf8'));
+    const selected = (mandate.selected || []).join(', ');
+    const revalidatedAt = mandate.revalidated_at || 'not revalidated';
+    summary.push(`[picker-revalidate] Final mandate: [${selected}] (revalidated: ${revalidatedAt})`);
+  } catch {}
+}
+
+summary.push('[e-prehook] All checks complete (1 subprocess + 1 consolidated runner)');
+
 // ---- Assemble output ----
 const output = {
   seed: seed.ok ? seed.result : { error: seed.error },
@@ -217,6 +433,7 @@ const output = {
   picker: pickerResult.ok ? pickerResult.result : { error: pickerResult.error },
   picker_revalidate: revalidate.ok ? revalidate.result : { error: revalidate.error },
   recovery_probe: recoveryResult.ok ? recoveryResult.result : { error: recoveryResult.error },
+  summary: summary.join('\n'),
 };
 
 console.log(JSON.stringify(output));

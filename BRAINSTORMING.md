@@ -14,7 +14,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Unit tests for lib/runner-utils.mjs and b-prehook-runner.mjs** (added ~s2048): The shared safeRun utility and B runner have zero test coverage. Tests should verify error wrapping behavior (safeRun catches and truncates), stuck-items detection with mock queue data, and lintTitles integration. Low effort, high value since all four runners now depend on runner-utils.
 
-- ~~**B prehook shell summary text pattern** (added ~s2063)~~: Promoted to wq-1020 (R#373). Runner summary text shipped s2065.
 - **R prehook shell simplification** (added ~s2065): 35-r-session-prehook_R.sh is 220 lines and still duplicates checks that r-prehook-runner.mjs already performs (security posture, maintain audit, brainstorm gate). The shell can be reduced to: run runner, write .summary to maintain-audit.txt, echo status. Would cut ~100 lines. Depends on verifying runner output covers all shell checks.
 
 ## Active Observations

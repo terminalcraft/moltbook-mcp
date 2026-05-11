@@ -30,9 +30,25 @@ const mcpDir = process.argv[3] || '.';
 const queuePath = process.argv[4] || 'work-queue.json';
 const historyPath = process.argv[5] || '';
 
+const summary = [];
+
 // ---- Check 1: Queue title lint ----
 
 const titleLint = safeRun('queue-title-lint', () => lintTitles(queuePath));
+
+// ---- Summary: title lint ----
+if (!titleLint.ok) {
+  summary.push('[queue-lint] ERROR: runner failed');
+} else {
+  const issues = titleLint.result.issues || [];
+  if (issues.length > 0) {
+    summary.push(`[queue-lint] ${issues.length} issue(s) in ${titleLint.result.checked || '?'} active items:`);
+    for (const i of issues) {
+      summary.push(`  ${i.id}: ${i.issues.join('; ')}`);
+      summary.push(`    "${i.title}"`);
+    }
+  }
+}
 
 // ---- Check 2: Stuck items detection (replaces jq loop in bash) ----
 
@@ -83,11 +99,36 @@ const stuckItems = safeRun('stuck-items', () => {
   return { items: stuck, count: stuck.length };
 });
 
+// ---- Summary: stuck items ----
+if (!stuckItems.ok) {
+  summary.push('[stuck-items] ERROR: runner failed');
+} else {
+  const r = stuckItems.result;
+  if (r.count > 0) {
+    summary.push(`[stuck-items] ${r.count} item(s) in-progress for 5+ B sessions:`);
+    for (const item of r.items) {
+      summary.push(`  - ${item.id}: ${item.title} (started ~s${item.startSession}, ~${item.bSessionsApprox} B sessions)`);
+    }
+  }
+}
+
 // ---- Check 3: Pipeline nudge stats ----
 
 const pipelineNudge = safeRun('pipeline-nudge', () => {
   return getPipelineGateStats(sessionNum, mcpDir);
 });
+
+// ---- Summary: pipeline nudge ----
+if (!pipelineNudge.ok) {
+  summary.push('[pipeline-nudge] ERROR: runner failed');
+} else {
+  const r = pipelineNudge.result;
+  const threshold = parseInt(process.env.PIPELINE_NUDGE_THRESHOLD || '3', 10);
+  if (r.violations >= threshold) {
+    summary.push(`[pipeline-nudge] COMPLIANCE: ${r.rate} (${r.violations} violations)`);
+    summary.push('OBLIGATION: Add >=1 new pending queue item OR brainstorming idea BEFORE marking task done.');
+  }
+}
 
 // ---- Output ----
 
@@ -95,6 +136,7 @@ const output = {
   title_lint: titleLint.ok ? titleLint.result : { error: titleLint.error },
   stuck_items: stuckItems.ok ? stuckItems.result : { error: stuckItems.error },
   pipeline_nudge: pipelineNudge.ok ? pipelineNudge.result : { error: pipelineNudge.error },
+  summary: summary.join('\n'),
 };
 
 console.log(JSON.stringify(output));

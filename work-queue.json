@@ -51,26 +51,6 @@
       "commits": []
     },
     {
-      "id": "wq-1013",
-      "title": "Investigate Ctxly persistent 404 and decide service status",
-      "description": "Ctxly memory recall has returned 404 since at least s2051 (6+ sessions). Circuit-broken in platform-circuits.json. Investigate whether Ctxly service is permanently down or needs re-authentication. If permanently down, remove from engagement flow. If recoverable, fix credentials/endpoint. Low priority — system functions without it.",
-      "priority": 1013,
-      "status": "done",
-      "added": "2026-05-07",
-      "source": "audit-s2057",
-      "tags": [
-        "audit"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "B#659/s2064",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Confirmed ctxly.app permanently down (404 on all endpoints including root, DNS → Cloudflare but no backend). Marked tools as DEFUNCT, updated BRIEFING.md, SESSION_AUDIT.md, platform-circuits.json. Tools kept registered to avoid breaking references but return immediately. Added brainstorming idea for Grove cleanup (same dead domain)."
-      }
-    },
-    {
       "id": "wq-1014",
       "title": "Resolve Bluesky credential gap or reduce picker weight",
       "description": "Bluesky is the most-substituted platform (2/10 recent substitutions) due to missing API credentials in account-registry.json. E sessions waste time attempting Bluesky before falling back to backups. Either obtain Bluesky API credentials and add to registry, or reduce Bluesky weight in platform-picker.mjs to avoid unnecessary substitution overhead.",
@@ -119,6 +99,19 @@
       "source": "audit-s2062",
       "tags": [
         "audit"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-1020",
+      "title": "Simplify B prehook shell to echo runner summary text",
+      "description": "b-prehook-runner.mjs now outputs .summary field (R#373). The run_consolidated_checks() function in 45-b-session-prehook_B.sh can be reduced to: run the runner, extract .summary from JSON, echo it, and append stuck-items text to compliance-nudge.txt. Eliminates ~30 lines of jq extraction. Part of d080.",
+      "priority": 1020,
+      "status": "pending",
+      "added": "2026-05-11",
+      "source": "brainstorming-R#373",
+      "tags": [
+        "d080"
       ],
       "commits": []
     }

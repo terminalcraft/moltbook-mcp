@@ -99,16 +99,21 @@ const stuckItems = safeRun('stuck-items', () => {
   return { items: stuck, count: stuck.length };
 });
 
-// ---- Summary: stuck items ----
+// ---- Summary + nudge text: stuck items ----
+const stuckNudgeLines = [];
 if (!stuckItems.ok) {
   summary.push('[stuck-items] ERROR: runner failed');
 } else {
   const r = stuckItems.result;
   if (r.count > 0) {
     summary.push(`[stuck-items] ${r.count} item(s) in-progress for 5+ B sessions:`);
+    stuckNudgeLines.push('', '## STUCK ITEMS — in-progress for 5+ B sessions');
+    stuckNudgeLines.push('These work-queue items may need attention or closure:');
     for (const item of r.items) {
       summary.push(`  - ${item.id}: ${item.title} (started ~s${item.startSession}, ~${item.bSessionsApprox} B sessions)`);
+      stuckNudgeLines.push(`  - ${item.id}: ${item.title} (started ~s${item.startSession}, ~${item.bSessionsApprox} B sessions)`);
     }
+    stuckNudgeLines.push('', 'Either complete, block (with blocker reason), or retire if no longer relevant.');
   }
 }
 
@@ -137,6 +142,7 @@ const output = {
   stuck_items: stuckItems.ok ? stuckItems.result : { error: stuckItems.error },
   pipeline_nudge: pipelineNudge.ok ? pipelineNudge.result : { error: pipelineNudge.error },
   summary: summary.join('\n'),
+  stuck_nudge: stuckNudgeLines.join('\n'),
 };
 
 console.log(JSON.stringify(output));

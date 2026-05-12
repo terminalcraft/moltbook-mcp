@@ -100,50 +100,23 @@ check_truncation_detect() {
 
 ###############################################################################
 # Checks 2-4: Consolidated runner (wq-1006, d079 deliverable 2)
-#   Replaces individual node/jq subprocess calls with single-process runner:
-#     - queue-title-lint (was check_queue_title_lint)
-#     - stuck items detection (was check_stuck_items, jq loop)
-#     - pipeline nudge stats (was check_pipeline_nudge)
+#   Single node process runs queue-title-lint, stuck items, pipeline nudge.
+#   Runner produces pre-formatted .summary text; shell just echoes it.
+#   Refactored: wq-1020 (d080) — eliminated ~30 lines of jq extraction.
 ###############################################################################
 run_consolidated_checks() {
-  THRESHOLD="${PIPELINE_NUDGE_THRESHOLD:-3}"
-
   RUNNER_OUTPUT=$(node "$DIR/b-prehook-runner.mjs" "${SESSION_NUM:-0}" "$DIR" "$WORK_QUEUE" "$HIST" 2>/dev/null) || {
     echo "b-prehook-runner: failed, falling back to skip"
     return 0
   }
 
-  # Extract title lint results
-  LINT_COUNT=$(echo "$RUNNER_OUTPUT" | jq -r '.title_lint.issues | length // 0' 2>/dev/null || echo 0)
-  if [ "$LINT_COUNT" -gt 0 ]; then
-    CHECKED=$(echo "$RUNNER_OUTPUT" | jq -r '.title_lint.checked // 0' 2>/dev/null)
-    echo "[queue-lint] $LINT_COUNT issue(s) in $CHECKED active items:"
-    echo "$RUNNER_OUTPUT" | jq -r '.title_lint.issues[] | "  \(.id): \(.issues | join("; "))\n    \"\(.title)\""' 2>/dev/null
-  fi
+  # Echo pre-formatted summary (title lint, stuck items, pipeline nudge)
+  SUMMARY=$(echo "$RUNNER_OUTPUT" | jq -r '.summary // ""')
+  [ -n "$SUMMARY" ] && echo "$SUMMARY"
 
-  # Extract stuck items
-  STUCK_COUNT=$(echo "$RUNNER_OUTPUT" | jq -r '.stuck_items.count // 0' 2>/dev/null || echo 0)
-  if [ "$STUCK_COUNT" -gt 0 ]; then
-    {
-      echo ""
-      echo "## STUCK ITEMS — in-progress for 5+ B sessions"
-      echo "These work-queue items may need attention or closure:"
-      echo "$RUNNER_OUTPUT" | jq -r '.stuck_items.items[] | "  - \(.id): \(.title) (started ~s\(.startSession), ~\(.bSessionsApprox) B sessions)"' 2>/dev/null
-      echo ""
-      echo "Either complete, block (with blocker reason), or retire if no longer relevant."
-    } >> "$OUTPUT"
-    echo "stuck-items: found $STUCK_COUNT potentially stuck item(s)"
-  fi
-
-  # Extract pipeline nudge
-  VIOLATIONS=$(echo "$RUNNER_OUTPUT" | jq -r '.pipeline_nudge.violations // 0' 2>/dev/null || echo 0)
-  RATE=$(echo "$RUNNER_OUTPUT" | jq -r '.pipeline_nudge.rate // "N/A"' 2>/dev/null || echo "?/?")
-  if [ -n "$VIOLATIONS" ] && [ "$VIOLATIONS" -ge "$THRESHOLD" ] 2>/dev/null; then
-    echo ""
-    echo "PIPELINE GATE COMPLIANCE: $RATE ($VIOLATIONS violations)"
-    echo "OBLIGATION: Add >=1 new pending queue item OR brainstorming idea BEFORE marking task done."
-    echo ""
-  fi
+  # Append stuck-items nudge text to compliance-nudge.txt if present
+  STUCK_NUDGE=$(echo "$RUNNER_OUTPUT" | jq -r '.stuck_nudge // ""')
+  [ -n "$STUCK_NUDGE" ] && echo "$STUCK_NUDGE" >> "$OUTPUT"
 }
 
 ###############################################################################

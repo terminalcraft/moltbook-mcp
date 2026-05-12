@@ -5,6 +5,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
+- **Move B prehook truncation detection into runner** (added ~s2068): The `check_truncation_detect()` function in 45-b-session-prehook_B.sh is still ~70 lines of bash with date arithmetic and history parsing. Moving it into b-prehook-runner.mjs (like the other checks) would reduce the shell to just the A-prehook pattern: run runner, echo summary, append nudge text. Would complete d080's B prehook goal.
+
 - **Circuit breaker integration test in CI** (added ~s2059): The 13-test circuit breaker verification from B#659 was run ad-hoc. Promote it to a persistent test file (e.g. tests/test-circuit-breaker.sh) so regressions in session-init.sh streak logic are caught by the test suite. Covers: streak counting from outcomes.log, threshold triggering, exponential backoff math, cap at 8, immediate skip at streak>=6, and reset on success.
 
 - **Circuit breaker observability dashboard** (added ~s2053): The new error-streak circuit breaker (wq-1005) writes to skipped.log and error_streak_skip state file but has no telemetry integration. A small addition to session-analytics.py (or timing-summary.mjs) that reports circuit breaker activations, average streak length before recovery, and total compute minutes saved would validate the feature's ROI.

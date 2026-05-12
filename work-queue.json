@@ -107,13 +107,20 @@
       "title": "Simplify B prehook shell to echo runner summary text",
       "description": "b-prehook-runner.mjs now outputs .summary field (R#373). The run_consolidated_checks() function in 45-b-session-prehook_B.sh can be reduced to: run the runner, extract .summary from JSON, echo it, and append stuck-items text to compliance-nudge.txt. Eliminates ~30 lines of jq extraction. Part of d080.",
       "priority": 1020,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-11",
       "source": "brainstorming-R#373",
       "tags": [
         "d080"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2068",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "run_consolidated_checks() reduced from 40→13 lines. Runner outputs .summary and .stuck_nudge; shell echoes/appends. Brainstorming idea added for moving truncation detection into runner."
+      }
     },
     {
       "id": "wq-1021",

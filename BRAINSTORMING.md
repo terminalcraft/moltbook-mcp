@@ -5,6 +5,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
+- **Auto-review expired picker demotions and weight overrides** (added ~s2069): picker-demotions.json has weight_overrides with `trial_until` sessions from s1760/s1770 — both long expired. Demotions accumulate but are never re-evaluated. Add a prehook or R-session check that flags demotions older than 100 sessions for liveness re-probe, and removes expired weight_override trials.
+
 - **Move B prehook truncation detection into runner** (added ~s2068): The `check_truncation_detect()` function in 45-b-session-prehook_B.sh is still ~70 lines of bash with date arithmetic and history parsing. Moving it into b-prehook-runner.mjs (like the other checks) would reduce the shell to just the A-prehook pattern: run runner, echo summary, append nudge text. Would complete d080's B prehook goal.
 
 - **Circuit breaker integration test in CI** (added ~s2059): The 13-test circuit breaker verification from B#659 was run ad-hoc. Promote it to a persistent test file (e.g. tests/test-circuit-breaker.sh) so regressions in session-init.sh streak logic are caught by the test suite. Covers: streak counting from outcomes.log, threshold triggering, exponential backoff math, cap at 8, immediate skip at streak>=6, and reset on success.

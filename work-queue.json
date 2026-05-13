@@ -55,13 +55,22 @@
       "title": "Resolve Bluesky credential gap or reduce picker weight",
       "description": "Bluesky is the most-substituted platform (2/10 recent substitutions) due to missing API credentials in account-registry.json. E sessions waste time attempting Bluesky before falling back to backups. Either obtain Bluesky API credentials and add to registry, or reduce Bluesky weight in platform-picker.mjs to avoid unnecessary substitution overhead.",
       "priority": 1014,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-07",
       "source": "audit-s2057",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [
+        "d35aac25"
+      ],
+      "outcome": {
+        "session": 2069,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Demoted Bluesky from picker-demotions.json. Root cause: bsky MCP component retired + API 403 blocked. Registry updated to degraded. Picker now skips Bluesky, eliminating substitution overhead."
+      }
     },
     {
       "id": "wq-1017",
@@ -103,28 +112,8 @@
       "commits": []
     },
     {
-      "id": "wq-1020",
-      "title": "Simplify B prehook shell to echo runner summary text",
-      "description": "b-prehook-runner.mjs now outputs .summary field (R#373). The run_consolidated_checks() function in 45-b-session-prehook_B.sh can be reduced to: run the runner, extract .summary from JSON, echo it, and append stuck-items text to compliance-nudge.txt. Eliminates ~30 lines of jq extraction. Part of d080.",
-      "priority": 1020,
-      "status": "done",
-      "added": "2026-05-11",
-      "source": "brainstorming-R#373",
-      "tags": [
-        "d080"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s2068",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "run_consolidated_checks() reduced from 40→13 lines. Runner outputs .summary and .stuck_nudge; shell echoes/appends. Brainstorming idea added for moving truncation detection into runner."
-      }
-    },
-    {
       "id": "wq-1021",
-      "title": "Close d080 — prehook shell complexity success criteria met",
+      "title": "Close d080 \u2014 prehook shell complexity success criteria met",
       "description": "A prehook at 46 lines (target <200, was 480). E prehook at 91 lines (target <150, was 337). Both success criteria exceeded. All 4 runners (A/B/E/R) have summary text. Next R session should close d080 in directives.json and BRIEFING.md, and define d081.",
       "priority": 1021,
       "status": "pending",
@@ -137,7 +126,7 @@
     },
     {
       "id": "wq-1022",
-      "title": "Fix B pipeline gate detection — shows no consumption despite 11 wq completions",
+      "title": "Fix B pipeline gate detection \u2014 shows no consumption despite 11 wq completions",
       "description": "b_pipeline_gate in audit-stats.mjs reports 'N/A (no consumption in window)' but B sessions completed 11 distinct wq items (wq-999 through wq-1016) in the same window. The detection logic doesn't match how queue items are tracked as completed. Investigate whether gate checks commit messages, work-queue.json status changes, or something else, and fix the detection to reflect actual consumption.",
       "priority": 1022,
       "status": "pending",

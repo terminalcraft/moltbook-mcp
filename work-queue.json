@@ -90,20 +90,6 @@
       "commits": []
     },
     {
-      "id": "wq-1021",
-      "title": "Close d080 — prehook shell complexity success criteria met",
-      "description": "A prehook at 46 lines (target <200, was 480). E prehook at 91 lines (target <150, was 337). R prehook at 52 lines (was 219). Both success criteria exceeded. All 4 runners (A/B/E/R) have summary text. d080 closed, d081 defined.",
-      "priority": 1021,
-      "status": "completed",
-      "added": "2026-05-12",
-      "completed": "2026-05-14",
-      "source": "audit-s2067",
-      "tags": [
-        "audit"
-      ],
-      "commits": ["R#375"]
-    },
-    {
       "id": "wq-1023",
       "title": "Add knowledge staleness metric to A session audit-stats.mjs",
       "description": "d081 deliverable 1: Read knowledge/patterns.json in audit-stats.mjs, calculate stale% (patterns with last_verified >30 days ago), add to audit-report.json. Flag WARN if stale >50%. This gives A sessions visibility into knowledge decay without manual B session pruning.",

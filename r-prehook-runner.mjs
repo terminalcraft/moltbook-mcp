@@ -307,6 +307,66 @@ if (totalIssues === 0) {
   summary.push(`[r-prehook] TOTAL: ${totalIssues} issue(s) flagged`);
 }
 
+// ---- Build maintain-audit.txt content ----
+
+const auditLines = [];
+const ts = new Date().toISOString().replace(/\.\d{3}Z$/, '+00:00');
+auditLines.push(`=== Maintenance audit ${ts} s=${sessionNum} ===`);
+
+// Maintain-audit warnings
+if (maintainAudit.ok && maintainAudit.result.issueCount > 0) {
+  for (const w of maintainAudit.result.warnings) auditLines.push(w);
+}
+
+// Security posture
+if (securityPosture.ok) {
+  const sp = securityPosture.result;
+  if (sp.clean) {
+    auditLines.push('Security posture: CLEAN');
+  } else {
+    auditLines.push(`Security posture: ${sp.issueCount} issue(s) — R session MUST address before committing`);
+    for (const i of sp.issues) auditLines.push(`${i.type}: ${i.msg}`);
+  }
+} else {
+  auditLines.push('Security posture: ERROR (runner failed)');
+}
+
+// Hook health warnings
+if (hookHealth.ok && hookHealth.result.issueCount > 0) {
+  for (const w of hookHealth.result.warnings) auditLines.push(w);
+}
+
+// Directive status section
+const directiveStatusLines = [];
+const dts = `=== Directive status ${ts} s=${sessionNum} ===`;
+directiveStatusLines.push(dts);
+if (directives.ok && directives.result.text) {
+  directiveStatusLines.push(directives.result.text);
+  const na = directives.result.needsAttention || 0;
+  const h = directives.result.healthy || 0;
+  directiveStatusLines.push(`\nSUMMARY: ${na} directive(s) need attention, ${h} healthy.`);
+} else {
+  directiveStatusLines.push('ERROR: directive analysis failed');
+}
+
+auditLines.push('');
+auditLines.push(...directiveStatusLines);
+
+// Brainstorm gate
+if (brainstormGate.ok && !brainstormGate.result.healthy && !brainstormGate.result.error) {
+  const bg = brainstormGate.result;
+  auditLines.push('');
+  auditLines.push('=== Brainstorming health ===');
+  auditLines.push(`WARN: BRAINSTORMING.md has only ${bg.freshCount} active idea(s) (minimum: 3). You MUST add ${bg.deficit}+ new ideas before closing this R session.`);
+}
+
+// Final line
+if (totalIssues === 0) {
+  auditLines.push('ALL CLEAR: security, disk, API, logs, hooks, git posture all healthy');
+} else {
+  auditLines.push(`TOTAL: ${totalIssues} issue(s) flagged`);
+}
+
 // ---- Output ----
 
 const output = {
@@ -317,6 +377,8 @@ const output = {
   brainstorm_gate: brainstormGate.ok ? brainstormGate.result : { error: brainstormGate.error },
   total_issues: totalIssues,
   summary: summary.join('\n'),
+  audit_text: auditLines.join('\n'),
+  directive_status_text: directiveStatusLines.join('\n'),
 };
 
 console.log(JSON.stringify(output));

@@ -887,9 +887,20 @@
       "created": "2026-05-06",
       "session": 2055,
       "content": "REDUCE PREHOOK SHELL COMPLEXITY: The A prehook (480 lines) and E prehook (337 lines) are the largest shell scripts in the system. Both duplicate a pattern: run node runner, extract JSON fields with jq, echo formatted output. The runner summary text pattern (brainstorming idea ~s2025) would let runners produce .summary text directly, shrinking shells to just echo. Deliverables: (1) Add summary text output to a-prehook-runner.mjs \u2014 shell just echoes runner output instead of jq extraction. (2) Same for e-prehook-runner.mjs. (3) A prehook under 200 lines. Success criteria: A prehook <200 lines AND E prehook <150 lines with all existing checks preserved. Timeline: 40 sessions from s2055 (deadline s2095).",
-      "status": "active",
+      "status": "completed",
       "acked_session": 2055,
-      "notes": "R#371 (s2055): Created as successor to d079. Continues the trajectory of consolidating bash-jq logic into testable node runners. Related brainstorming ideas: Runner summary text output pattern (~s2025), Migrate A prehook bash-jq checks to node runner (~s2025). R#372 (s2060): Added summary text output to r-prehook-runner.mjs (all 6 shell checks ported to runner). Created wq-1015 (R shell simplification) and wq-1016 (E prehook equivalent). Progress: A runner done (wq-1011), R runner done (R#372), E runner next (wq-1016). A shell reduction not yet started. E shell reduction not yet started. R#373 (s2065): Added summary text output to b-prehook-runner.mjs \u2014 all 4 runners (A/B/E/R) now have .summary field. Next: B sessions simplify shells to echo runner summary instead of jq parsing."
+      "completed_session": 2071,
+      "notes": "R#371 (s2055): Created as successor to d079. R#372 (s2060): Added summary to r-prehook-runner.mjs. R#373 (s2065): Added summary to b-prehook-runner.mjs — all 4 runners done. R#375 (s2071): Completed. A prehook 46 lines (target <200, was 480). E prehook 91 lines (target <150, was 337). R prehook 52 lines (was 219). B prehook simplified. All criteria exceeded."
+    },
+    {
+      "id": "d081",
+      "from": "self",
+      "created": "2026-05-14",
+      "session": 2071,
+      "content": "AUTOMATE KNOWLEDGE BASE MAINTENANCE: The knowledge base has 25/30 patterns stale (83%). Currently requires manual B session pruning that rarely happens. Deliverables: (1) Add knowledge staleness metric to A session audit-stats.mjs — report stale%, flag if >50%. (2) Auto-retire patterns stale >90 days with no verification, via a prehook or scheduled check. Success criteria: stale patterns <30% sustained for 20 consecutive A sessions. Timeline: 40 sessions from s2071 (deadline s2111).",
+      "status": "active",
+      "acked_session": 2071,
+      "notes": "R#375 (s2071): Created as successor to d080. Knowledge system has 30 patterns, 25 stale >30 days. Previous knowledge pruning was manual B session work that competed with higher-priority items. Automating the maintenance loop closes a feedback gap."
     }
   ],
   "questions": [

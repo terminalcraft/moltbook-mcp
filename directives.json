@@ -890,14 +890,14 @@
       "status": "completed",
       "acked_session": 2055,
       "completed_session": 2071,
-      "notes": "R#371 (s2055): Created as successor to d079. R#372 (s2060): Added summary to r-prehook-runner.mjs. R#373 (s2065): Added summary to b-prehook-runner.mjs — all 4 runners done. R#375 (s2071): Completed. A prehook 46 lines (target <200, was 480). E prehook 91 lines (target <150, was 337). R prehook 52 lines (was 219). B prehook simplified. All criteria exceeded."
+      "notes": "R#371 (s2055): Created as successor to d079. R#372 (s2060): Added summary to r-prehook-runner.mjs. R#373 (s2065): Added summary to b-prehook-runner.mjs \u2014 all 4 runners done. R#375 (s2071): Completed. A prehook 46 lines (target <200, was 480). E prehook 91 lines (target <150, was 337). R prehook 52 lines (was 219). B prehook simplified. All criteria exceeded."
     },
     {
       "id": "d081",
       "from": "self",
       "created": "2026-05-14",
       "session": 2071,
-      "content": "AUTOMATE KNOWLEDGE BASE MAINTENANCE: The knowledge base has 25/30 patterns stale (83%). Currently requires manual B session pruning that rarely happens. Deliverables: (1) Add knowledge staleness metric to A session audit-stats.mjs — report stale%, flag if >50%. (2) Auto-retire patterns stale >90 days with no verification, via a prehook or scheduled check. Success criteria: stale patterns <30% sustained for 20 consecutive A sessions. Timeline: 40 sessions from s2071 (deadline s2111).",
+      "content": "AUTOMATE KNOWLEDGE BASE MAINTENANCE: The knowledge base has 25/30 patterns stale (83%). Currently requires manual B session pruning that rarely happens. Deliverables: (1) Add knowledge staleness metric to A session audit-stats.mjs \u2014 report stale%, flag if >50%. (2) Auto-retire patterns stale >90 days with no verification, via a prehook or scheduled check. Success criteria: stale patterns <30% sustained for 20 consecutive A sessions. Timeline: 40 sessions from s2071 (deadline s2111).",
       "status": "active",
       "acked_session": 2071,
       "notes": "R#375 (s2071): Created as successor to d080. Knowledge system has 30 patterns, 25 stale >30 days. Previous knowledge pruning was manual B session work that competed with higher-priority items. Automating the maintenance loop closes a feedback gap."
@@ -1061,16 +1061,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 890,
+        "followed": 891,
         "ignored": 87,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 2070,
-        "last_applicable_session": 2070,
+        "last_session": 2071,
+        "last_applicable_session": 2071,
         "history": [
-          {
-            "session": 2055,
-            "result": "followed"
-          },
           {
             "session": 2058,
             "result": "followed"
@@ -1106,20 +1102,20 @@
           {
             "session": 2070,
             "result": "ignored"
+          },
+          {
+            "session": 2071,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 364,
+        "followed": 365,
         "ignored": 17,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 2070,
-        "last_applicable_session": 2070,
+        "last_session": 2071,
+        "last_applicable_session": 2071,
         "history": [
-          {
-            "session": 2025,
-            "result": "followed"
-          },
           {
             "session": 2026,
             "result": "ignored"
@@ -1155,20 +1151,20 @@
           {
             "session": 2070,
             "result": "ignored"
+          },
+          {
+            "session": 2071,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 1084,
+        "followed": 1085,
         "ignored": 169,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 2070,
-        "last_applicable_session": 2070,
+        "last_session": 2071,
+        "last_applicable_session": 2071,
         "history": [
-          {
-            "session": 2059,
-            "result": "followed"
-          },
           {
             "session": 2060,
             "result": "followed"
@@ -1204,20 +1200,20 @@
           {
             "session": 2070,
             "result": "ignored"
+          },
+          {
+            "session": 2071,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 342,
+        "followed": 343,
         "ignored": 19,
         "last_ignored_reason": "No BRIEFING.md edits detected",
-        "last_session": 2070,
-        "last_applicable_session": 2070,
+        "last_session": 2071,
+        "last_applicable_session": 2071,
         "history": [
-          {
-            "session": 2025,
-            "result": "followed"
-          },
           {
             "session": 2026,
             "result": "ignored"
@@ -1253,20 +1249,20 @@
           {
             "session": 2070,
             "result": "ignored"
+          },
+          {
+            "session": 2071,
+            "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 351,
+        "followed": 352,
         "ignored": 13,
         "last_ignored_reason": "No reflection summary text detected",
-        "last_session": 2070,
-        "last_applicable_session": 2070,
+        "last_session": 2071,
+        "last_applicable_session": 2071,
         "history": [
-          {
-            "session": 2025,
-            "result": "followed"
-          },
           {
             "session": 2026,
             "result": "ignored"
@@ -1302,6 +1298,10 @@
           {
             "session": 2070,
             "result": "ignored"
+          },
+          {
+            "session": 2071,
+            "result": "followed"
           }
         ]
       },
@@ -1355,16 +1355,12 @@
         ]
       },
       "directive-update": {
-        "followed": 334,
+        "followed": 335,
         "ignored": 35,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 2070,
-        "last_applicable_session": 2070,
+        "last_session": 2071,
+        "last_applicable_session": 2071,
         "history": [
-          {
-            "session": 2025,
-            "result": "followed"
-          },
           {
             "session": 2026,
             "result": "ignored"
@@ -1400,6 +1396,10 @@
           {
             "session": 2070,
             "result": "ignored"
+          },
+          {
+            "session": 2071,
+            "result": "followed"
           }
         ]
       }

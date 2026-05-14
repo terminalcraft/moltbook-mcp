@@ -342,9 +342,6 @@ const dts = `=== Directive status ${ts} s=${sessionNum} ===`;
 directiveStatusLines.push(dts);
 if (directives.ok && directives.result.text) {
   directiveStatusLines.push(directives.result.text);
-  const na = directives.result.needsAttention || 0;
-  const h = directives.result.healthy || 0;
-  directiveStatusLines.push(`\nSUMMARY: ${na} directive(s) need attention, ${h} healthy.`);
 } else {
   directiveStatusLines.push('ERROR: directive analysis failed');
 }

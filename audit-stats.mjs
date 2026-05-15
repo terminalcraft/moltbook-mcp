@@ -1005,6 +1005,47 @@ function computeTodoFalsePositiveRate() {
   };
 }
 
+// --- Knowledge staleness metric (wq-1023, d081) ---
+
+function computeKnowledgeStaleness() {
+  const patternsPath = join(PROJECT_DIR, 'knowledge', 'patterns.json');
+  const data = safeRead(patternsPath, null);
+  if (!data || !Array.isArray(data.patterns)) return { total: 0, stale: 0, stale_pct: 0, verdict: 'no_data' };
+
+  const patterns = data.patterns;
+  const now = Date.now();
+  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+  let staleCount = 0;
+  const stalePatterns = [];
+
+  for (const p of patterns) {
+    const validated = p.lastValidated ? new Date(p.lastValidated).getTime() : 0;
+    const ageDays = Math.round((now - validated) / (24 * 60 * 60 * 1000));
+    if (now - validated > THIRTY_DAYS_MS) {
+      staleCount++;
+      stalePatterns.push({ id: p.id, title: p.title, age_days: ageDays });
+    }
+  }
+
+  const stalePct = patterns.length > 0 ? Math.round((staleCount / patterns.length) * 100) : 0;
+
+  let verdict;
+  if (stalePct > 50) verdict = 'WARN_high_staleness';
+  else if (stalePct > 30) verdict = 'elevated';
+  else verdict = 'healthy';
+
+  return {
+    total: patterns.length,
+    stale: staleCount,
+    fresh: patterns.length - staleCount,
+    stale_pct: stalePct,
+    threshold: 30,
+    stale_patterns: stalePatterns.slice(0, 10),
+    verdict
+  };
+}
+
 // --- Auto-retire stuck queue items (wq-979) ---
 
 const AUTO_RETIRE_AGE = 50; // Sessions behind current to trigger auto-retirement
@@ -1130,7 +1171,8 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
     backup_substitution_rate: computeBackupSubstitutionRate(),
     todo_false_positive_rate: computeTodoFalsePositiveRate(),
     human_review_validation: computeHumanReviewValidation(),
-    auto_retired_items: computeAutoRetiredItems()
+    auto_retired_items: computeAutoRetiredItems(),
+    knowledge_staleness: computeKnowledgeStaleness()
   };
 
   console.log(JSON.stringify(stats, null, 2));

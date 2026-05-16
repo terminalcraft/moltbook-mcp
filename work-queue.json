@@ -90,29 +90,6 @@
       "commits": []
     },
     {
-      "id": "wq-1024",
-      "title": "Auto-retire knowledge patterns stale >90 days",
-      "description": "d081 deliverable 2: Add a check (prehook or standalone script) that auto-retires patterns from knowledge/patterns.json when last_verified is >90 days ago and status is not 'consensus'. Log retirements. Run periodically (every 20 sessions or in B prehook). Keeps the knowledge base fresh without manual intervention.",
-      "priority": 1024,
-      "status": "done",
-      "added": "2026-05-14",
-      "source": "directive-d081-R#375",
-      "tags": [
-        "d081",
-        "automation"
-      ],
-      "commits": [
-        "0697b573"
-      ],
-      "outcome": {
-        "session": "s2075",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "knowledge-auto-retire.mjs script + B prehook integration every 20 sessions. Retires patterns >90d stale (excluding consensus). Logs to knowledge/retirement-log.json."
-      }
-    },
-    {
       "id": "wq-1022",
       "title": "Fix B pipeline gate detection — shows no consumption despite 11 wq completions",
       "description": "b_pipeline_gate in audit-stats.mjs reports 'N/A (no consumption in window)' but B sessions completed 11 distinct wq items (wq-999 through wq-1016) in the same window. The detection logic doesn't match how queue items are tracked as completed. Investigate whether gate checks commit messages, work-queue.json status changes, or something else, and fix the detection to reflect actual consumption.",

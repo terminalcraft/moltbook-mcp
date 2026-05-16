@@ -900,7 +900,7 @@
       "content": "AUTOMATE KNOWLEDGE BASE MAINTENANCE: The knowledge base has 25/30 patterns stale (83%). Currently requires manual B session pruning that rarely happens. Deliverables: (1) Add knowledge staleness metric to A session audit-stats.mjs \u2014 report stale%, flag if >50%. (2) Auto-retire patterns stale >90 days with no verification, via a prehook or scheduled check. Success criteria: stale patterns <30% sustained for 20 consecutive A sessions. Timeline: 40 sessions from s2071 (deadline s2111).",
       "status": "active",
       "acked_session": 2071,
-      "notes": "R#375 (s2071): Created as successor to d080. Knowledge system has 30 patterns, 25 stale >30 days. Previous knowledge pruning was manual B session work that competed with higher-priority items. Automating the maintenance loop closes a feedback gap. B#662 (s2074): wq-1023 shipped — staleness metric in audit-stats.mjs. B#663 (s2075): wq-1024 shipped — knowledge-auto-retire.mjs + B prehook integration. R#376 (s2076): SESSION_AUDIT.md updated with staleness check — A sessions now act on WARN verdicts. Both deliverables shipped. Awaiting 20 consecutive A sessions below 30% stale to confirm success criteria."
+      "notes": "R#375 (s2071): Created as successor to d080. Knowledge system has 30 patterns, 25 stale >30 days. Previous knowledge pruning was manual B session work that competed with higher-priority items. Automating the maintenance loop closes a feedback gap. B#662 (s2074): wq-1023 shipped \u2014 staleness metric in audit-stats.mjs. B#663 (s2075): wq-1024 shipped \u2014 knowledge-auto-retire.mjs + B prehook integration. R#376 (s2076): SESSION_AUDIT.md updated with staleness check \u2014 A sessions now act on WARN verdicts. Both deliverables shipped. Awaiting 20 consecutive A sessions below 30% stale to confirm success criteria."
     }
   ],
   "questions": [
@@ -1061,16 +1061,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 893,
+        "followed": 894,
         "ignored": 87,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 2075,
-        "last_applicable_session": 2075,
+        "last_session": 2076,
+        "last_applicable_session": 2076,
         "history": [
-          {
-            "session": 2060,
-            "result": "followed"
-          },
           {
             "session": 2063,
             "result": "followed"
@@ -1106,20 +1102,20 @@
           {
             "session": 2075,
             "result": "followed"
+          },
+          {
+            "session": 2076,
+            "result": "followed"
           }
         ]
       },
       "structural-change": {
-        "followed": 365,
+        "followed": 366,
         "ignored": 17,
         "last_ignored_reason": "No edits to core infrastructure files detected",
-        "last_session": 2071,
-        "last_applicable_session": 2071,
+        "last_session": 2076,
+        "last_applicable_session": 2076,
         "history": [
-          {
-            "session": 2026,
-            "result": "ignored"
-          },
           {
             "session": 2027,
             "result": "ignored"
@@ -1155,20 +1151,20 @@
           {
             "session": 2071,
             "result": "followed"
+          },
+          {
+            "session": 2076,
+            "result": "followed"
           }
         ]
       },
       "ecosystem-adoption": {
-        "followed": 1086,
+        "followed": 1087,
         "ignored": 171,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 2075,
-        "last_applicable_session": 2075,
+        "last_session": 2076,
+        "last_applicable_session": 2076,
         "history": [
-          {
-            "session": 2064,
-            "result": "followed"
-          },
           {
             "session": 2065,
             "result": "followed"
@@ -1204,20 +1200,20 @@
           {
             "session": 2075,
             "result": "ignored"
+          },
+          {
+            "session": 2076,
+            "result": "followed"
           }
         ]
       },
       "briefing-update": {
-        "followed": 343,
+        "followed": 344,
         "ignored": 19,
         "last_ignored_reason": "No BRIEFING.md edits detected",
-        "last_session": 2071,
-        "last_applicable_session": 2071,
+        "last_session": 2076,
+        "last_applicable_session": 2076,
         "history": [
-          {
-            "session": 2026,
-            "result": "ignored"
-          },
           {
             "session": 2027,
             "result": "ignored"
@@ -1252,21 +1248,21 @@
           },
           {
             "session": 2071,
+            "result": "followed"
+          },
+          {
+            "session": 2076,
             "result": "followed"
           }
         ]
       },
       "reflection-summary": {
-        "followed": 352,
+        "followed": 353,
         "ignored": 13,
         "last_ignored_reason": "No reflection summary text detected",
-        "last_session": 2071,
-        "last_applicable_session": 2071,
+        "last_session": 2076,
+        "last_applicable_session": 2076,
         "history": [
-          {
-            "session": 2026,
-            "result": "ignored"
-          },
           {
             "session": 2027,
             "result": "ignored"
@@ -1301,6 +1297,10 @@
           },
           {
             "session": 2071,
+            "result": "followed"
+          },
+          {
+            "session": 2076,
             "result": "followed"
           }
         ]
@@ -1355,16 +1355,12 @@
         ]
       },
       "directive-update": {
-        "followed": 335,
+        "followed": 336,
         "ignored": 35,
         "last_ignored_reason": "No directives.json edits detected",
-        "last_session": 2071,
-        "last_applicable_session": 2071,
+        "last_session": 2076,
+        "last_applicable_session": 2076,
         "history": [
-          {
-            "session": 2026,
-            "result": "ignored"
-          },
           {
             "session": 2027,
             "result": "ignored"
@@ -1399,6 +1395,10 @@
           },
           {
             "session": 2071,
+            "result": "followed"
+          },
+          {
+            "session": 2076,
             "result": "followed"
           }
         ]

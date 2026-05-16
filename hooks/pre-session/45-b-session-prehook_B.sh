@@ -120,10 +120,26 @@ run_consolidated_checks() {
 }
 
 ###############################################################################
+# Check 5: Knowledge auto-retire (wq-1024, d081 deliverable 2)
+#   Retires stale patterns (>90 days, not consensus) every 20 B sessions.
+###############################################################################
+run_knowledge_auto_retire() {
+  local sn="${SESSION_NUM:-0}"
+  # Run every 20 sessions (session num mod 20 == 0), or if SESSION_NUM is 0 (unknown)
+  if [[ "$sn" -eq 0 ]] || (( sn % 20 != 0 )); then
+    return 0
+  fi
+  node "$DIR/knowledge-auto-retire.mjs" 2>/dev/null || {
+    echo "knowledge-auto-retire: failed (non-fatal)"
+  }
+}
+
+###############################################################################
 # Run all checks
 ###############################################################################
 
 check_truncation_detect
 run_consolidated_checks
+run_knowledge_auto_retire
 
 exit 0

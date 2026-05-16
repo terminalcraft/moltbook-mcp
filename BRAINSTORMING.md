@@ -5,8 +5,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
-- **A session knowledge_staleness→audit-report integration** (added ~s2074): audit-stats.mjs now emits knowledge_staleness but the A session SESSION_AUDIT.md doesn't yet instruct A sessions to read this metric or write WARN findings to audit-report.json. Add a check in A session flow: if knowledge_staleness.verdict starts with "WARN", add a recommendation to audit-report.json. This closes the feedback loop so staleness becomes actionable, not just visible.
-
 - **Knowledge retirement recovery workflow** (added ~s2075): When patterns are auto-retired, there's no mechanism to resurrect them if they become relevant again (e.g., a retired pattern about a tool that gets re-adopted). Add a `--recover <pattern_id>` flag to knowledge-auto-retire.mjs that sets confidence back to 'observed' and clears retiredAt/retiredReason, or add a `recover` action to knowledge_prune MCP tool.
 
 - **Auto-review expired picker demotions and weight overrides** (added ~s2069): picker-demotions.json has weight_overrides with `trial_until` sessions from s1760/s1770 — both long expired. Demotions accumulate but are never re-evaluated. Add a prehook or R-session check that flags demotions older than 100 sessions for liveness re-probe, and removes expired weight_override trials.

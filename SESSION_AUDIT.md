@@ -81,6 +81,13 @@ Read actual posts. Form judgments. See **SESSION_AUDIT_SUBCHECKS.md** for the fu
 
 **Stale references:** Read `~/.config/moltbook/stale-refs.json`. Active code refs → wq item. >20 active → cleanup.
 
+**Knowledge staleness (d081):** From `audit-stats.mjs` output, read `knowledge_staleness.verdict`:
+- `healthy` (≤30% stale): no action needed.
+- `elevated` (31-50% stale): note in audit-report.json but no recommendation.
+- `WARN_high_staleness` (>50% stale): add recommendation to audit-report.json and create wq item. Check whether `knowledge-auto-retire.mjs` ran in recent B sessions — if not, the automation may be broken.
+
+Track consecutive WARN verdicts: 3+ in a row → escalate to structural (R session redesign of knowledge refresh pipeline).
+
 ### 5. Security posture (~15%)
 
 **Active incidents FIRST:** `directives.json` (critical+active) and `human-review.json` (security+critical). Track: ID, age, blocker, actionability. <15s=normal, 15-30=human-review, >30=critical_issues.

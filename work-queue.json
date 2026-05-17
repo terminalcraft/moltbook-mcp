@@ -114,6 +114,39 @@
         "audit"
       ],
       "commits": []
+    },
+    {
+      "id": "wq-1026",
+      "title": "Close hr-a250-1 as resolved — circuit breaker built and verified",
+      "description": "hr-a250-1 (19-session stall incident) still marked severity=critical in human-review.json despite wq-1005 being built at s2053 and verified at s2059. Update to severity=resolved with resolution note. Also sync the ~/.config/moltbook/ copy if it diverges.",
+      "priority": 1026,
+      "status": "pending",
+      "added": "2026-05-17",
+      "source": "audit-s2078",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-1027",
+      "title": "Add knowledge pattern revalidation mechanism for d081",
+      "description": "d081 success criteria requires <30% stale (30-day window) for 20 A sessions. Auto-retire only removes >90d patterns (0 currently qualify — oldest is 76d). No mechanism revalidates patterns within 30 days. Add a B prehook step or standalone script that re-verifies 5-10 patterns per B session (check if pattern still applies to current codebase, update lastValidated). Without this, d081 will miss s2111 deadline.",
+      "priority": 1027,
+      "status": "pending",
+      "added": "2026-05-17",
+      "source": "audit-s2078",
+      "tags": ["audit"],
+      "commits": []
+    },
+    {
+      "id": "wq-1028",
+      "title": "Force-consume wq-1000 — escalated after 3 audit cycles stale",
+      "description": "wq-1000 (cache invalidation one-liner: rm -f ~/.config/moltbook/financial-cache.json after swap) has been pending 28 sessions across 3 consecutive audit cycles (A#254-A#256). Escalated to critical. MUST be the first item consumed in the next B session. If not addressed by A#257, escalate to human-review.",
+      "priority": 0,
+      "status": "pending",
+      "added": "2026-05-17",
+      "source": "audit-s2078",
+      "tags": ["audit", "escalated"],
+      "commits": []
     }
   ]
 }

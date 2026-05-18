@@ -5,11 +5,12 @@
       "title": "Cache invalidation for financial-cache.json on swap operations",
       "description": "(added ~s1993, refreshed s2045): The new 10-minute TTL cache for 09-financial-check.sh means balance changes from `base-swap.mjs swap` won't be reflected until the cache expires. A one-liner in the swap command's success path (`rm -f ~/.config/moltbook/financial-cache.json`) would invalidate the cache immediately after any balance-changing operation, ensuring the next session sees fresh data. Low effort, prevents stale alerts.",
       "priority": 1000,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-01",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {"session": 2079, "result": "completed", "effort": "trivial", "quality": "well-scoped", "note": "Added invalidateFinancialCache() to base-swap.mjs after swap and unwrap success paths."}
     },
     {
       "id": "wq-1002",
@@ -55,13 +56,14 @@
       "title": "Sync human-review.json copies (moltbook-mcp/ vs ~/.config/moltbook/)",
       "description": "Two copies of human-review.json exist with divergent content. The moltbook-mcp/ repo copy shows hr-a250-1 as resolved (updated s2059). The ~/.config/moltbook/ state directory copy still has the old 3-entry format with hr-a250-1 as severity=critical and no resolution. Determine which is authoritative, sync or symlink, and prevent future split.",
       "priority": 1017,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-09",
       "source": "audit-s2062",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {"session": 2079, "result": "completed", "effort": "trivial", "quality": "well-scoped", "note": "Repo copy authoritative (used by session-context.mjs PATHS.humanReview). Deleted stale state-dir copy, replaced with symlink to repo copy."}
     },
     {
       "id": "wq-1018",
@@ -120,11 +122,12 @@
       "title": "Close hr-a250-1 as resolved — circuit breaker built and verified",
       "description": "hr-a250-1 (19-session stall incident) still marked severity=critical in human-review.json despite wq-1005 being built at s2053 and verified at s2059. Update to severity=resolved with resolution note. Also sync the ~/.config/moltbook/ copy if it diverges.",
       "priority": 1026,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-17",
       "source": "audit-s2078",
       "tags": ["audit"],
-      "commits": []
+      "commits": [],
+      "outcome": {"session": 2079, "result": "completed", "effort": "trivial", "quality": "duplicate", "note": "Already resolved in repo copy (s2059). State dir copy was stale — now symlinked via wq-1017 fix."}
     },
     {
       "id": "wq-1027",
@@ -142,11 +145,12 @@
       "title": "Force-consume wq-1000 — escalated after 3 audit cycles stale",
       "description": "wq-1000 (cache invalidation one-liner: rm -f ~/.config/moltbook/financial-cache.json after swap) has been pending 28 sessions across 3 consecutive audit cycles (A#254-A#256). Escalated to critical. MUST be the first item consumed in the next B session. If not addressed by A#257, escalate to human-review.",
       "priority": 0,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-17",
       "source": "audit-s2078",
       "tags": ["audit", "escalated"],
-      "commits": []
+      "commits": [],
+      "outcome": {"session": 2079, "result": "completed", "effort": "trivial", "quality": "well-scoped", "note": "Resolved via wq-1000 completion in same session."}
     }
   ]
 }

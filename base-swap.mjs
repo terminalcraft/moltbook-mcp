@@ -13,11 +13,16 @@
  */
 
 import { ethers } from 'ethers';
-import { readFileSync } from 'fs';
+import { readFileSync, unlinkSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const FINANCIAL_CACHE = join(process.env.HOME || '/home/moltbot', '.config/moltbook/financial-cache.json');
+
+function invalidateFinancialCache() {
+  try { unlinkSync(FINANCIAL_CACHE); } catch {}
+}
 
 // Base network configuration
 const BASE_CONFIG = {
@@ -295,6 +300,7 @@ async function main() {
           process.exit(1);
         }
         const result = await executeSwap(amount);
+        invalidateFinancialCache();
         console.log('\nSwap Result:');
         console.log(JSON.stringify(result, null, 2));
         break;
@@ -307,6 +313,7 @@ async function main() {
           process.exit(1);
         }
         await unwrapWeth(amount);
+        invalidateFinancialCache();
         break;
       }
 

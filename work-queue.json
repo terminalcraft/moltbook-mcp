@@ -64,13 +64,20 @@
       "title": "Fix Pinchwork API key or circuit-break platform",
       "description": "Pinchwork returned AUTH_FAILED ('Invalid API key') at s2061 E session on task browse endpoint. New credential failure not previously seen. Either update the API key in account-registry.json or circuit-break Pinchwork to avoid wasting E session time. Currently non-substitutable per picker protocol.",
       "priority": 1019,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-09",
       "source": "audit-s2062",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2080",
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "API key is valid — /v1/me returns 200. Tasks endpoint returns 405 (Method Not Allowed), not auth failure. The s2061 error was transient or endpoint-specific. Circuit at 1 consecutive failure, not closed. No action needed."
+      }
     },
     {
       "id": "wq-1022",

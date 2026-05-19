@@ -44,13 +44,20 @@
       "title": "Fix B pipeline gate detection — shows no consumption despite 11 wq completions",
       "description": "b_pipeline_gate in audit-stats.mjs reports 'N/A (no consumption in window)' but B sessions completed 11 distinct wq items (wq-999 through wq-1016) in the same window. The detection logic doesn't match how queue items are tracked as completed. Investigate whether gate checks commit messages, work-queue.json status changes, or something else, and fix the detection to reflect actual consumption.",
       "priority": 1022,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-12",
       "source": "audit-s2067",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 2082,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Root cause: outcome.session had 4+ inconsistent formats (plain int, s-prefixed, B#NNN-sNNN, B#NNN (sNNN)). Fixed by regex-extracting session number from any format. 3/3 → 9/9 applicable."
+      }
     },
     {
       "id": "wq-1025",

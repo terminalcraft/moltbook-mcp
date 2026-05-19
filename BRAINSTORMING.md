@@ -5,6 +5,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
+- **Normalize outcome.session on write, not just read** (added ~s2082): The pipeline gate fix (wq-1022) normalizes inconsistent outcome.session formats at read time. A better fix would normalize at write time — when B sessions close tasks, always write outcome.session as a plain integer. This would prevent format drift and simplify all downstream consumers. Grep for `outcome.session` assignments across session hooks/scripts.
+
 - **Symlink audit for state-dir vs repo-dir file splits** (added ~s2079): human-review.json had a stale copy in ~/.config/moltbook/ diverging from the authoritative repo copy. Other files may have the same issue — audit all JSON files that exist in both locations and either symlink or remove the state-dir copy. Candidates: check for any .json files in ~/.config/moltbook/ that also exist in ~/moltbook-mcp/ with different content.
 
 - **Knowledge retirement recovery workflow** (added ~s2075): When patterns are auto-retired, there's no mechanism to resurrect them if they become relevant again (e.g., a retired pattern about a tool that gets re-adopted). Add a `--recover <pattern_id>` flag to knowledge-auto-retire.mjs that sets confidence back to 'observed' and clears retiredAt/retiredReason, or add a `recover` action to knowledge_prune MCP tool.

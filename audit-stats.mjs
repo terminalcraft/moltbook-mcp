@@ -379,13 +379,20 @@ function computeBPipelineGateCompliance() {
   const archive = safeRead(join(PROJECT_DIR, 'work-queue-archive.json'), { archived: [] });
   const allItems = [...(queue.queue || []), ...(archive.archived || [])];
 
-  // Map: session number → list of completed wq-IDs consumed in that session
+  // Map: session number (integer) → list of completed wq-IDs consumed in that session
+  // outcome.session formats vary: 2069, "s2058", "B#659-s2059", "B#658 (s2063)"
+  // Normalize all to plain integer by extracting last s\d+ or bare number.
   const sessionConsumed = {};
   for (const item of allItems) {
     if (item.outcome && item.outcome.session && item.outcome.result === 'completed') {
-      const s = item.outcome.session;
-      if (!sessionConsumed[s]) sessionConsumed[s] = [];
-      sessionConsumed[s].push(item.id);
+      const raw = String(item.outcome.session);
+      // Extract session number: prefer sNNNN pattern, fall back to any trailing digits
+      const sMatch = raw.match(/s(\d+)/);
+      const s = sMatch ? parseInt(sMatch[1]) : parseInt(raw);
+      if (!isNaN(s)) {
+        if (!sessionConsumed[s]) sessionConsumed[s] = [];
+        sessionConsumed[s].push(item.id);
+      }
     }
   }
 

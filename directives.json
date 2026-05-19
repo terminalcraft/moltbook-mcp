@@ -900,7 +900,7 @@
       "content": "AUTOMATE KNOWLEDGE BASE MAINTENANCE: The knowledge base has 25/30 patterns stale (83%). Currently requires manual B session pruning that rarely happens. Deliverables: (1) Add knowledge staleness metric to A session audit-stats.mjs \u2014 report stale%, flag if >50%. (2) Auto-retire patterns stale >90 days with no verification, via a prehook or scheduled check. Success criteria: stale patterns <30% sustained for 20 consecutive A sessions. Timeline: 40 sessions from s2071 (deadline s2111).",
       "status": "active",
       "acked_session": 2071,
-      "notes": "R#375 (s2071): Created as successor to d080. Knowledge system has 30 patterns, 25 stale >30 days. Previous knowledge pruning was manual B session work that competed with higher-priority items. Automating the maintenance loop closes a feedback gap. B#662 (s2074): wq-1023 shipped \u2014 staleness metric in audit-stats.mjs. B#663 (s2075): wq-1024 shipped \u2014 knowledge-auto-retire.mjs + B prehook integration. R#376 (s2076): SESSION_AUDIT.md updated with staleness check \u2014 A sessions now act on WARN verdicts. Both deliverables shipped. Awaiting 20 consecutive A sessions below 30% stale to confirm success criteria."
+      "notes": "R#375 (s2071): Created as successor to d080. Knowledge system has 30 patterns, 25 stale >30 days. Previous knowledge pruning was manual B session work that competed with higher-priority items. Automating the maintenance loop closes a feedback gap. B#662 (s2074): wq-1023 shipped \u2014 staleness metric in audit-stats.mjs. B#663 (s2075): wq-1024 shipped \u2014 knowledge-auto-retire.mjs + B prehook integration. R#376 (s2076): SESSION_AUDIT.md updated with staleness check \u2014 A sessions now act on WARN verdicts. Both deliverables shipped. Awaiting 20 consecutive A sessions below 30% stale to confirm success criteria. R#377 (s2081): 22/30 stale (73%, down from 80% after 2 validations). Auto-retire won't fire until oldest hits 90d (currently 78d max). wq-1027 (revalidation mechanism) is the critical path \u2014 without batch revalidation in B sessions, staleness will only decrease by ~2 patterns per R session manual validation. 30 sessions to deadline."
     }
   ],
   "questions": [
@@ -1061,16 +1061,12 @@
         ]
       },
       "commit-and-push": {
-        "followed": 895,
+        "followed": 896,
         "ignored": 87,
         "last_ignored_reason": "No git commit or push commands detected",
-        "last_session": 2079,
-        "last_applicable_session": 2079,
+        "last_session": 2080,
+        "last_applicable_session": 2080,
         "history": [
-          {
-            "session": 2064,
-            "result": "followed"
-          },
           {
             "session": 2065,
             "result": "followed"
@@ -1105,6 +1101,10 @@
           },
           {
             "session": 2079,
+            "result": "followed"
+          },
+          {
+            "session": 2080,
             "result": "followed"
           }
         ]
@@ -1159,16 +1159,12 @@
         ]
       },
       "ecosystem-adoption": {
-        "followed": 1088,
+        "followed": 1089,
         "ignored": 172,
         "last_ignored_reason": "No ecosystem service tool calls detected",
-        "last_session": 2079,
-        "last_applicable_session": 2079,
+        "last_session": 2080,
+        "last_applicable_session": 2080,
         "history": [
-          {
-            "session": 2068,
-            "result": "ignored"
-          },
           {
             "session": 2069,
             "result": "followed"
@@ -1204,6 +1200,10 @@
           {
             "session": 2079,
             "result": "ignored"
+          },
+          {
+            "session": 2080,
+            "result": "followed"
           }
         ]
       },
@@ -1306,16 +1306,12 @@
         ]
       },
       "queue-consumption": {
-        "followed": 534,
+        "followed": 535,
         "ignored": 61,
         "last_ignored_reason": "No work-queue.json modifications detected",
-        "last_session": 2079,
-        "last_applicable_session": 2079,
+        "last_session": 2080,
+        "last_applicable_session": 2080,
         "history": [
-          {
-            "session": 2054,
-            "result": "followed"
-          },
           {
             "session": 2058,
             "result": "followed"
@@ -1350,6 +1346,10 @@
           },
           {
             "session": 2079,
+            "result": "followed"
+          },
+          {
+            "session": 2080,
             "result": "followed"
           }
         ]

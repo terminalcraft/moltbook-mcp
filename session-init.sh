@@ -3,6 +3,7 @@
 # Extracted from heartbeat.sh (R#319) to reduce complexity.
 # Provides: safe_stage(), arg parsing, lock acquisition, orphan cleanup,
 # outage-aware skip, log rotation, and directive enrichment + pre-session hooks.
+# R#377: Replaced eval-based safe_stage with function-reference pattern.
 #
 # Expected variables from caller:
 #   DIR, STATE_DIR, LOG_DIR (set before sourcing)
@@ -18,7 +19,7 @@ INIT_FAILURES=""
 safe_stage() {
   local stage_name="$1"
   shift
-  if eval "$@" 2>>"$LOG_DIR/init-errors.log"; then
+  if "$@" 2>>"$LOG_DIR/init-errors.log"; then
     return 0
   else
     local exit_code=$?
@@ -148,68 +149,77 @@ run_error_streak_check() {
 # --- Outage-aware session skip ---
 # If API has been down 5+ consecutive checks, skip every other heartbeat.
 # Skip this check in safe/emergency mode — we want to try regardless.
+_outage_check() {
+  local SKIP_FILE="$STATE_DIR/outage_skip_toggle"
+  local API_STATUS
+  API_STATUS=$(node "$DIR/health-check.cjs" --status 2>&1 || true)
+  if echo "$API_STATUS" | grep -q "^DOWN" ; then
+    local DOWN_COUNT
+    DOWN_COUNT=$(echo "$API_STATUS" | grep -oP "down \K[0-9]+")
+    if [ "${DOWN_COUNT:-0}" -ge 5 ]; then
+      if [ -f "$SKIP_FILE" ]; then
+        rm -f "$SKIP_FILE"
+        echo "$(date -Iseconds) outage skip: API down $DOWN_COUNT checks, skipping this session" >> "$LOG_DIR/skipped.log"
+        exit 0
+      else
+        touch "$SKIP_FILE"
+      fi
+    else
+      rm -f "$SKIP_FILE"
+    fi
+  else
+    rm -f "$SKIP_FILE"
+  fi
+}
+
 run_outage_check() {
   if [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ]; then
-    safe_stage "outage-check" '
-      SKIP_FILE="$STATE_DIR/outage_skip_toggle"
-      API_STATUS=$(node "$DIR/health-check.cjs" --status 2>&1 || true)
-      if echo "$API_STATUS" | grep -q "^DOWN" ; then
-        DOWN_COUNT=$(echo "$API_STATUS" | grep -oP "down \K[0-9]+")
-        if [ "${DOWN_COUNT:-0}" -ge 5 ]; then
-          if [ -f "$SKIP_FILE" ]; then
-            rm -f "$SKIP_FILE"
-            echo "$(date -Iseconds) outage skip: API down $DOWN_COUNT checks, skipping this session" >> "$LOG_DIR/skipped.log"
-            exit 0
-          else
-            touch "$SKIP_FILE"
-          fi
-        else
-          rm -f "$SKIP_FILE"
-        fi
-      else
-        rm -f "$SKIP_FILE"
-      fi
-    '
+    safe_stage "outage-check" _outage_check
   fi
 }
 
 # --- Log rotation (non-critical, never abort on failure) ---
-run_log_rotation() {
-  safe_stage "log-rotation" '
-    SESSION_LOGS=( $(ls -t "$LOG_DIR"/20*.log 2>/dev/null) )
-    if [ ${#SESSION_LOGS[@]} -gt 20 ]; then
-      for old_log in "${SESSION_LOGS[@]:20}"; do
-        rm -f "$old_log"
-      done
-      echo "$(date -Iseconds) log-rotate: removed $((${#SESSION_LOGS[@]} - 20)) old session logs" >> "$LOG_DIR/selfmod.log"
-    fi
-    for util_log in "$LOG_DIR/cron.log" "$LOG_DIR/hooks.log" "$LOG_DIR/health.log"; do
-      if [ -f "$util_log" ] && [ "$(stat -c%s "$util_log" 2>/dev/null || echo 0)" -gt 1048576 ]; then
-        tail -100 "$util_log" > "${util_log}.tmp" && mv "${util_log}.tmp" "$util_log"
-        echo "$(date -Iseconds) log-rotate: truncated $(basename "$util_log")" >> "$LOG_DIR/selfmod.log"
-      fi
+_log_rotation() {
+  local SESSION_LOGS
+  SESSION_LOGS=( $(ls -t "$LOG_DIR"/20*.log 2>/dev/null) )
+  if [ ${#SESSION_LOGS[@]} -gt 20 ]; then
+    for old_log in "${SESSION_LOGS[@]:20}"; do
+      rm -f "$old_log"
     done
-  '
+    echo "$(date -Iseconds) log-rotate: removed $((${#SESSION_LOGS[@]} - 20)) old session logs" >> "$LOG_DIR/selfmod.log"
+  fi
+  for util_log in "$LOG_DIR/cron.log" "$LOG_DIR/hooks.log" "$LOG_DIR/health.log"; do
+    if [ -f "$util_log" ] && [ "$(stat -c%s "$util_log" 2>/dev/null || echo 0)" -gt 1048576 ]; then
+      tail -100 "$util_log" > "${util_log}.tmp" && mv "${util_log}.tmp" "$util_log"
+      echo "$(date -Iseconds) log-rotate: truncated $(basename "$util_log")" >> "$LOG_DIR/selfmod.log"
+    fi
+  done
+}
+
+run_log_rotation() {
+  safe_stage "log-rotation" _log_rotation
 }
 
 # --- Directive enrichment + pre-session hooks (skipped in safe/emergency mode) ---
-run_presession_pipeline() {
-  local mode_char="$1"
-  local counter="$2"
-  local r_focus="$3"
-  local b_focus="$4"
-  if [ -z "$DRY_RUN" ] && [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ]; then
-    safe_stage "directive-enrichment" \
-      'node "$DIR/scripts/directive-enrichment.mjs" "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" 2>/dev/null'
+_directive_enrichment() {
+  node "$DIR/scripts/directive-enrichment.mjs" "$DIR/directives.json" "$DIR/work-queue.json" "$STATE_DIR/directive-enrichment.json" 2>/dev/null
+}
 
-    safe_stage "pre-session-hooks" '
-      MODE_CHAR="'"$mode_char"'" SESSION_NUM="'"$counter"'" R_FOCUS="'"$r_focus"'" B_FOCUS="'"$b_focus"'" \
-        LOG_DIR="$LOG_DIR" \
-        DIRECTIVE_ENRICHMENT="$STATE_DIR/directive-enrichment.json" \
-        "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
-          --track "$LOG_DIR/pre-hook-results.json" "'"$counter"'" \
-          --budget 90 --parallel 4
-    '
+_pre_session_hooks() {
+  local mode_char="$1" counter="$2" r_focus="$3" b_focus="$4"
+  MODE_CHAR="$mode_char" SESSION_NUM="$counter" R_FOCUS="$r_focus" B_FOCUS="$b_focus" \
+    LOG_DIR="$LOG_DIR" \
+    DIRECTIVE_ENRICHMENT="$STATE_DIR/directive-enrichment.json" \
+    "$DIR/run-hooks.sh" "$DIR/hooks/pre-session" 30 \
+      --track "$LOG_DIR/pre-hook-results.json" "$counter" \
+      --budget 90 --parallel 4
+}
+
+run_presession_pipeline() {
+  local mode_char="$1" counter="$2" r_focus="$3" b_focus="$4"
+  if [ -z "$DRY_RUN" ] && [ -z "$SAFE_MODE" ] && [ -z "$EMERGENCY_MODE" ]; then
+    safe_stage "directive-enrichment" _directive_enrichment
+    safe_stage "pre-session-hooks" _pre_session_hooks "$mode_char" "$counter" "$r_focus" "$b_focus"
   fi
 }
 

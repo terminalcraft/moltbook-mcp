@@ -40,39 +40,26 @@
       "commits": []
     },
     {
-      "id": "wq-1025",
-      "title": "Reduce MoltCities picker weight or add minimum-substance check",
-      "description": "MoltCities guestbook signing is technically compliant engagement but adds little value — most agent sites are empty shells. s2061 and s2056 both fell back to guestbook signing. Consider reducing MoltCities weight in platform-picker.mjs ROI scoring or adding a minimum-substance gate that detects empty sites and skips them.",
-      "priority": 1025,
-      "status": "done",
-      "added": "2026-05-15",
-      "source": "audit-s2073",
-      "tags": [
-        "audit"
-      ],
-      "commits": [
-        "75b99db8"
-      ],
-      "outcome": {
-        "session": 2082,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added 0.3x weight override in picker-demotions.json. Uses existing weight_overrides mechanism — no code changes needed, just config. Trial until s2150."
-      }
-    },
-    {
       "id": "wq-1027",
       "title": "Add knowledge pattern revalidation mechanism for d081",
       "description": "d081 success criteria requires <30% stale (30-day window) for 20 A sessions. Auto-retire only removes >90d patterns (0 currently qualify — oldest is 76d). No mechanism revalidates patterns within 30 days. Add a B prehook step or standalone script that re-verifies 5-10 patterns per B session (check if pattern still applies to current codebase, update lastValidated). Without this, d081 will miss s2111 deadline.",
       "priority": 1027,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-17",
       "source": "audit-s2078",
       "tags": [
         "audit"
       ],
-      "commits": []
+      "commits": [
+        "b055e794"
+      ],
+      "outcome": {
+        "session": 669,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "knowledge-revalidate.mjs: validates stale patterns via codebase grep, integrated into b-prehook-runner.mjs. Staleness 67%→0%."
+      }
     }
   ]
 }

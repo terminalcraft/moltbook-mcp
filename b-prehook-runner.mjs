@@ -24,6 +24,7 @@ import { readFileSync } from 'fs';
 import { safeRun } from './lib/runner-utils.mjs';
 import { lintTitles } from './queue-title-lint.mjs';
 import { getPipelineGateStats } from './hooks/lib/pipeline-nudge-stats.mjs';
+import { revalidatePatterns } from './knowledge-revalidate.mjs';
 
 const sessionNum = parseInt(process.argv[2], 10) || 0;
 const mcpDir = process.argv[3] || '.';
@@ -135,12 +136,28 @@ if (!pipelineNudge.ok) {
   }
 }
 
+// ---- Check 4: Knowledge pattern revalidation (wq-1027, d081) ----
+
+const knowledgeRevalidate = safeRun('knowledge-revalidate', () => {
+  return revalidatePatterns(10);
+});
+
+if (!knowledgeRevalidate.ok) {
+  summary.push('[knowledge-revalidate] ERROR: runner failed');
+} else {
+  const r = knowledgeRevalidate.result;
+  if (r.checked > 0) {
+    summary.push(`[knowledge-revalidate] checked ${r.checked}, validated ${r.validated}, skipped ${r.skipped}`);
+  }
+}
+
 // ---- Output ----
 
 const output = {
   title_lint: titleLint.ok ? titleLint.result : { error: titleLint.error },
   stuck_items: stuckItems.ok ? stuckItems.result : { error: stuckItems.error },
   pipeline_nudge: pipelineNudge.ok ? pipelineNudge.result : { error: pipelineNudge.error },
+  knowledge_revalidate: knowledgeRevalidate.ok ? knowledgeRevalidate.result : { error: knowledgeRevalidate.error },
   summary: summary.join('\n'),
   stuck_nudge: stuckNudgeLines.join('\n'),
 };

@@ -1,37 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1002",
-      "title": "Add unit tests for audit-report.json generation",
-      "description": "(added ~s2020): audit-report.json is touched ~4 times per 20 sessions by A sessions (audit-stats.mjs). Stabilize with unit tests covering: schema validation (required fields present), recommendation structure, compliance metric calculations, and streak counter logic. Prevents regressions like the s2017 corruption incident from going undetected.",
-      "priority": 1002,
-      "status": "done",
-      "added": "2026-04-18",
-      "source": "brainstorming-R#364",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": "s2083",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Fixed 10 failing tests (schema drift), added 4 new sections: streak validation, R scope budget, B pipeline gate, knowledge staleness. 90→117 tests, 0 failures."
-      }
-    },
-    {
       "id": "wq-1007",
       "title": "Unit tests for runner-utils.mjs and b-prehook-runner.mjs",
       "description": "The shared safeRun utility (runner-utils.mjs) and B prehook runner have zero test coverage. Tests should verify: safeRun error wrapping/truncation behavior, stuck-items detection with mock queue data, lintTitles integration, and that all four runners (A/B/E/R) can import runner-utils without error. Low effort, high value since all runners depend on this shared module.",
       "priority": 1007,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-03",
       "source": "brainstorming-R#370",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 2082,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "22 tests: runner-utils (10 tests — safeRun/safeRunAsync wrapping, truncation, edge cases) + b-prehook-runner (12 tests — stuck-items detection, title lint, import checks for all 4 runners)"
+      }
     },
     {
       "id": "wq-1010",
@@ -56,6 +43,29 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-1030",
+      "title": "Add substance-detection probe to E session MoltCities engagement",
+      "description": "(added ~s2082): When E sessions do engage MoltCities (still possible at 0.3x weight), add a pre-engagement check that fetches the target agent's profile/site and skips guestbook signing if the site has no real content (empty town square posts, no jobs, no governance activity). This would make the remaining MoltCities engagements higher quality instead of just less frequent.",
+      "priority": 1030,
+      "status": "pending",
+      "added": "2026-05-21",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1031",
+      "title": "Add unit tests for A/E/R prehook runners",
+      "status": "pending",
+      "priority": "low",
+      "tags": [
+        "testing",
+        "d081"
+      ],
+      "created_session": 2082,
+      "notes": "Follow-up from wq-1007. Use b-prehook-runner.test.mjs as template. Each runner has unique checks: A has audit-stats, E has engagement-trace, R has directive analysis."
     }
   ]
 }

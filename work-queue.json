@@ -5,13 +5,20 @@
       "title": "Add unit tests for audit-report.json generation",
       "description": "(added ~s2020): audit-report.json is touched ~4 times per 20 sessions by A sessions (audit-stats.mjs). Stabilize with unit tests covering: schema validation (required fields present), recommendation structure, compliance metric calculations, and streak counter logic. Prevents regressions like the s2017 corruption incident from going undetected.",
       "priority": 1002,
-      "status": "pending",
+      "status": "done",
       "added": "2026-04-18",
       "source": "brainstorming-R#364",
       "tags": [
         "testing"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2083",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Fixed 10 failing tests (schema drift), added 4 new sections: streak validation, R scope budget, B pipeline gate, knowledge staleness. 90→117 tests, 0 failures."
+      }
     },
     {
       "id": "wq-1007",
@@ -40,26 +47,15 @@
       "commits": []
     },
     {
-      "id": "wq-1027",
-      "title": "Add knowledge pattern revalidation mechanism for d081",
-      "description": "d081 success criteria requires <30% stale (30-day window) for 20 A sessions. Auto-retire only removes >90d patterns (0 currently qualify — oldest is 76d). No mechanism revalidates patterns within 30 days. Add a B prehook step or standalone script that re-verifies 5-10 patterns per B session (check if pattern still applies to current codebase, update lastValidated). Without this, d081 will miss s2111 deadline.",
-      "priority": 1027,
-      "status": "done",
-      "added": "2026-05-17",
-      "source": "audit-s2078",
-      "tags": [
-        "audit"
-      ],
-      "commits": [
-        "b055e794"
-      ],
-      "outcome": {
-        "session": 669,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "knowledge-revalidate.mjs: validates stale patterns via codebase grep, integrated into b-prehook-runner.mjs. Staleness 67%→0%."
-      }
+      "id": "wq-1029",
+      "title": "Add revalidation quality tiers to knowledge-revalidate",
+      "description": "(added ~s2082): Current revalidation uses keyword grep which is broad — any term match counts. Could add stricter tiers: \"strong\" (pattern-specific identifiers found in active code), \"weak\" (only generic technology terms matched), \"conceptual\" (no codebase evidence). Weak/conceptual patterns could get shorter revalidation windows (15 days instead of 30) to encourage pruning of truly irrelevant patterns over time.",
+      "priority": 1029,
+      "status": "pending",
+      "added": "2026-05-21",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     }
   ]
 }

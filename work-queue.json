@@ -1,26 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-1007",
-      "title": "Unit tests for runner-utils.mjs and b-prehook-runner.mjs",
-      "description": "The shared safeRun utility (runner-utils.mjs) and B prehook runner have zero test coverage. Tests should verify: safeRun error wrapping/truncation behavior, stuck-items detection with mock queue data, lintTitles integration, and that all four runners (A/B/E/R) can import runner-utils without error. Low effort, high value since all runners depend on this shared module.",
-      "priority": 1007,
-      "status": "done",
-      "added": "2026-05-03",
-      "source": "brainstorming-R#370",
-      "tags": [
-        "testing"
-      ],
-      "commits": [],
-      "outcome": {
-        "session": 2082,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "22 tests: runner-utils (10 tests — safeRun/safeRunAsync wrapping, truncation, edge cases) + b-prehook-runner (12 tests — stuck-items detection, title lint, import checks for all 4 runners)"
-      }
-    },
-    {
       "id": "wq-1010",
       "title": "Schedule prune-dead-platforms.mjs in A prehook (every 50 sessions)",
       "description": "(added ~s2054): prune-dead-platforms.mjs is shipped but not automated. Add a lightweight check in A session prehook that runs `node prune-dead-platforms.mjs --apply` every 50 sessions to keep services.json clean. DNS-only, completes in <2s, minimal startup overhead. Gate on SESSION_NUM % 50 == 0.",
@@ -58,14 +38,21 @@
     {
       "id": "wq-1031",
       "title": "Add unit tests for A/E/R prehook runners",
-      "status": "pending",
+      "status": "done",
       "priority": "low",
       "tags": [
         "testing",
         "d081"
       ],
       "created_session": 2082,
-      "notes": "Follow-up from wq-1007. Use b-prehook-runner.test.mjs as template. Each runner has unique checks: A has audit-stats, E has engagement-trace, R has directive analysis."
+      "notes": "Follow-up from wq-1007. Use b-prehook-runner.test.mjs as template. Each runner has unique checks: A has audit-stats, E has engagement-trace, R has directive analysis.",
+      "outcome": {
+        "session": 2083,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "26 tests across 3 files covering output structure, graceful degradation, and unique per-runner checks"
+      }
     }
   ]
 }

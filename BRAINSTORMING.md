@@ -7,7 +7,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 
-- **Test coverage for remaining prehook runners (A/E/R)** (added ~s2082): runner-utils and b-prehook-runner now have tests. The A, E, and R prehook runners have similar stuck-items/lint/pipeline patterns but no dedicated tests. Each runner has unique checks (e.g., A runner has audit-stats integration, E has engagement-trace validation) that should be verified independently. Could reuse the b-prehook test patterns as templates.
+- **Mock network calls in E prehook tests for faster CI** (added ~s2083): e-prehook-runner.test.mjs currently exercises real async network calls (chatr, colony-jwt, recovery-probe) making the suite ~18s. Could inject mock fetch/HTTP to test logic paths without network latency — would also enable testing specific error scenarios (timeouts, 403s, malformed JSON) that are hard to reproduce live.
 
 - **Normalize outcome.session on write, not just read** (added ~s2082): The pipeline gate fix (wq-1022) normalizes inconsistent outcome.session formats at read time. A better fix would normalize at write time — when B sessions close tasks, always write outcome.session as a plain integer. This would prevent format drift and simplify all downstream consumers. Grep for `outcome.session` assignments across session hooks/scripts.
 

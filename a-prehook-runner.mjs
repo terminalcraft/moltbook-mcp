@@ -6,7 +6,7 @@
  * field that the shell script can echo directly — eliminating ~280 lines of
  * bash/jq formatting.
  *
- * Checks (8 total):
+ * Checks (9 total, check 9 conditional):
  *   1. b-cost-trend       (module import)
  *   2. r-cost-monitor      (module import)
  *   3. hook-timing-report  (module import)
@@ -16,6 +16,7 @@
  *   7. cost escalation     (module import)
  *   8. auto-retire stuck   (module import)
  *   9. stale references    (calls stale-ref-check.sh)
+ *  10. dead platform DNS prune (every 50 sessions, calls prune-dead-platforms.mjs)
  *
  * Usage: node a-prehook-runner.mjs [--apply-stale-tags] [--session <num>]
  * Output: JSON with all results + .summary text
@@ -396,7 +397,34 @@ if (!autoRetire.ok) {
   }
 }
 
-summary.push('[a-prehook] All 8 checks complete (single node process)');
+// ---- Check 9: Dead platform DNS pruning (every 50 sessions) ----
+
+if (SESSION > 0 && SESSION % 50 === 0) {
+  const prunResult = safeRun('prune-dead-platforms', () => {
+    const out = execSync(`node "${DIR}/prune-dead-platforms.mjs" --apply`, { encoding: 'utf8', timeout: 10000 });
+    // Parse output for change summary
+    const lines = out.trim().split('\n');
+    const summaryLine = lines[0] || '';
+    const changes = lines.filter(l => /^\s+(DEFUNCT|RESURRECTED):/.test(l)).map(l => l.trim());
+    return { summaryLine, changes, applied: true };
+  });
+
+  if (!prunResult.ok) {
+    summary.push(`[dead-platform-prune] WARN: runner failed (${prunResult.error})`);
+  } else {
+    const r = prunResult.result;
+    if (r.changes.length > 0) {
+      summary.push(`[dead-platform-prune] ${r.summaryLine} — ${r.changes.length} change(s) applied`);
+      for (const c of r.changes) summary.push(`  → ${c}`);
+    } else {
+      summary.push(`[dead-platform-prune] OK: ${r.summaryLine}`);
+    }
+  }
+} else {
+  summary.push(`[dead-platform-prune] SKIP: runs every 50 sessions (next: s${SESSION > 0 ? SESSION + (50 - SESSION % 50) : 50})`);
+}
+
+summary.push(`[a-prehook] All ${SESSION > 0 && SESSION % 50 === 0 ? 9 : 8} checks complete (single node process)`);
 
 // ---- Output ----
 

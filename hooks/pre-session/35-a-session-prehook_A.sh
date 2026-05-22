@@ -13,6 +13,7 @@
 #   6. BRIEFING.md directive staleness
 #   7. Cost escalation
 #   8. Auto-retire stuck queue items
+#   9. Dead platform DNS prune (every 50 sessions)
 #
 # Originally 480 lines of bash/jq. Reduced via d080 (wq-1011) by moving
 # all formatting into the runner's .summary field.

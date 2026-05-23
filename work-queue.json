@@ -1,33 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1029",
-      "title": "Add revalidation quality tiers to knowledge-revalidate",
-      "description": "(added ~s2082): Current revalidation uses keyword grep which is broad — any term match counts. Could add stricter tiers: \"strong\" (pattern-specific identifiers found in active code), \"weak\" (only generic technology terms matched), \"conceptual\" (no codebase evidence). Weak/conceptual patterns could get shorter revalidation windows (15 days instead of 30) to encourage pruning of truly irrelevant patterns over time.",
-      "priority": 1029,
-      "status": "done",
-      "added": "2026-05-21",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s2083",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added strong/weak/conceptual tiers to knowledge-revalidate. Tier-aware windows (15d vs 30d) and retirement thresholds (45d vs 90d). Updated auto-retire and prehook summary."
-      }
-    },
-    {
       "id": "wq-1030",
       "title": "Add substance-detection probe to E session MoltCities engagement",
       "description": "(added ~s2082): When E sessions do engage MoltCities (still possible at 0.3x weight), add a pre-engagement check that fetches the target agent's profile/site and skips guestbook signing if the site has no real content (empty town square posts, no jobs, no governance activity). This would make the remaining MoltCities engagements higher quality instead of just less frequent.",
       "priority": 1030,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-21",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "c1260358"
+      ],
+      "outcome": {
+        "session": "B#675",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created probe-moltcities-substance.mjs with scoring (0-100) based on views, status, skills, guestbook, town square, jobs. Integrated into SESSION_ENGAGE.md Phase 2 as MoltCities gate. 26/50 agents pass substance check."
+      }
     },
     {
       "id": "wq-1032",
@@ -48,6 +39,28 @@
       "status": "pending",
       "added": "2026-05-23",
       "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1034",
+      "title": "Knowledge revalidation test suite",
+      "description": "(added ~s2083): knowledge-revalidate.mjs has no test file. Add tests for extractSearchTerms, isSpecificTerm, validatePattern tier classification, and getStalest tier-aware window logic. Would catch regressions in the tier system added by wq-1029.",
+      "priority": 1034,
+      "status": "pending",
+      "added": "2026-05-23",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1031",
+      "title": "Add substance probe to E session prehook context",
+      "description": "(added ~s2083): The substance probe results should be pre-computed in e-prehook-runner.mjs and included in e-session-context.md so E sessions see the picked agent and score without running the probe themselves. Saves ~5s and 2 API calls during the E session.",
+      "priority": 1031,
+      "status": "pending",
+      "added": "2026-05-23",
+      "source": "session",
       "tags": [],
       "commits": []
     }

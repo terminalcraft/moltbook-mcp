@@ -1,37 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1010",
-      "title": "Schedule prune-dead-platforms.mjs in A prehook (every 50 sessions)",
-      "description": "(added ~s2054): prune-dead-platforms.mjs is shipped but not automated. Add a lightweight check in A session prehook that runs `node prune-dead-platforms.mjs --apply` every 50 sessions to keep services.json clean. DNS-only, completes in <2s, minimal startup overhead. Gate on SESSION_NUM % 50 == 0.",
-      "priority": 1010,
-      "status": "done",
-      "added": "2026-05-06",
-      "source": "brainstorming-R#371",
-      "tags": [
-        "automation"
-      ],
-      "commits": [
-        "81cb28a0"
-      ],
-      "outcome": {
-        "session": "B#673",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added check #9 to a-prehook-runner.mjs — runs prune-dead-platforms.mjs --apply every 50 sessions (SESSION % 50 == 0). Tested both gated and skipped paths."
-      }
-    },
-    {
       "id": "wq-1029",
       "title": "Add revalidation quality tiers to knowledge-revalidate",
       "description": "(added ~s2082): Current revalidation uses keyword grep which is broad — any term match counts. Could add stricter tiers: \"strong\" (pattern-specific identifiers found in active code), \"weak\" (only generic technology terms matched), \"conceptual\" (no codebase evidence). Weak/conceptual patterns could get shorter revalidation windows (15 days instead of 30) to encourage pruning of truly irrelevant patterns over time.",
       "priority": 1029,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-21",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2083",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added strong/weak/conceptual tiers to knowledge-revalidate. Tier-aware windows (15d vs 30d) and retirement thresholds (45d vs 90d). Updated auto-retire and prehook summary."
+      }
     },
     {
       "id": "wq-1030",
@@ -51,6 +36,17 @@
       "priority": 1032,
       "status": "pending",
       "added": "2026-05-22",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1033",
+      "title": "Add --resurrect to periodic DNS prune",
+      "description": "(added ~s2082): The scheduled prune check doesn't use --resurrect flag. Could add a less-frequent resurrect pass (every 200 sessions?) to recover defunct platforms whose DNS comes back, separate from the routine 50-session prune.",
+      "priority": 1033,
+      "status": "pending",
+      "added": "2026-05-23",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []

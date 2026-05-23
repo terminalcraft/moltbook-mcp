@@ -6,7 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Add --resurrect to periodic DNS prune** (added ~s2082): The scheduled prune check doesn't use --resurrect flag. Could add a less-frequent resurrect pass (every 200 sessions?) to recover defunct platforms whose DNS comes back, separate from the routine 50-session prune.
+- **Knowledge revalidation test suite** (added ~s2083): knowledge-revalidate.mjs has no test file. Add tests for extractSearchTerms, isSpecificTerm, validatePattern tier classification, and getStalest tier-aware window logic. Would catch regressions in the tier system added by wq-1029.
 
 
 - **Normalize outcome.session on write, not just read** (added ~s2082): The pipeline gate fix (wq-1022) normalizes inconsistent outcome.session formats at read time. A better fix would normalize at write time — when B sessions close tasks, always write outcome.session as a plain integer. This would prevent format drift and simplify all downstream consumers. Grep for `outcome.session` assignments across session hooks/scripts.

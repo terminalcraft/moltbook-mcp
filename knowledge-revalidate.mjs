@@ -27,6 +27,21 @@ import { execSync } from 'child_process';
 const MCP_DIR = join(process.env.HOME || '/tmp', 'moltbook-mcp');
 const PATTERNS_FILE = join(MCP_DIR, 'knowledge', 'patterns.json');
 const THIRTY_DAYS_MS = 30 * 86400000;
+const FIFTEEN_DAYS_MS = 15 * 86400000;
+
+/**
+ * Revalidation quality tiers (wq-1029):
+ *   - "strong": pattern-specific identifiers found in active code (≥2 specific terms match)
+ *   - "weak": only generic technology terms matched (matches exist but all generic)
+ *   - "conceptual": no codebase evidence at all
+ *
+ * Weak/conceptual patterns use 15-day revalidation windows instead of 30.
+ */
+const TIER_WINDOWS = {
+  strong: THIRTY_DAYS_MS,
+  weak: FIFTEEN_DAYS_MS,
+  conceptual: FIFTEEN_DAYS_MS,
+};
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
@@ -39,17 +54,19 @@ function loadPatterns() {
 
 /**
  * Get patterns sorted by staleness (most stale first), excluding retired.
- * Only returns patterns that are >30 days stale.
+ * Uses tier-aware staleness windows: strong=30d, weak/conceptual=15d.
  */
 function getStalest(patterns, n) {
   const now = Date.now();
   return patterns
     .filter(p => p.confidence !== 'retired')
-    .map(p => ({
-      pattern: p,
-      lastValidated: new Date(p.lastValidated || p.extractedAt || 0).getTime(),
-    }))
-    .filter(p => (now - p.lastValidated) > THIRTY_DAYS_MS)
+    .map(p => {
+      const lastValidated = new Date(p.lastValidated || p.extractedAt || 0).getTime();
+      const tier = p.revalidationTier || 'strong';
+      const window = TIER_WINDOWS[tier] || THIRTY_DAYS_MS;
+      return { pattern: p, lastValidated, window };
+    })
+    .filter(p => (now - p.lastValidated) > p.window)
     .sort((a, b) => a.lastValidated - b.lastValidated)
     .slice(0, n)
     .map(p => p.pattern);
@@ -150,18 +167,48 @@ function grepFileCount(term) {
 }
 
 /**
+ * Classify a search term as specific or generic.
+ * Specific terms are pattern-unique identifiers (filenames, tool names, technical identifiers).
+ * Generic terms are broad technology words that many patterns could match.
+ */
+const GENERIC_TERMS = new Set([
+  'mcp', 'MCP', 'sdk', 'SDK', 'claude', 'anthropic', 'agent', 'hook',
+  'transport', 'proxy', 'session', 'state', 'config', 'server', 'client',
+  'api', 'json', 'node', 'test', 'error', 'retry', 'queue', 'log',
+  'subagent', 'oauth', 'OAuth',
+]);
+
+function isSpecificTerm(term) {
+  // Filenames (contains dot extension) are always specific
+  if (/\.\w{1,4}$/.test(term)) return true;
+  // Snake_case identifiers (tool names) are specific
+  if (/^[a-z]+_[a-z_]+$/.test(term)) return true;
+  // CamelCase identifiers are specific
+  if (/^[A-Z][a-z]+[A-Z]/.test(term)) return true;
+  // Multi-word hyphenated identifiers are specific
+  if (/^[a-z]+-[a-z]+-/.test(term)) return true;
+  // Everything else: check against generic set
+  return !GENERIC_TERMS.has(term) && !GENERIC_TERMS.has(term.toLowerCase());
+}
+
+/**
  * Validate a single pattern against the current codebase.
- * Returns { valid: boolean, evidence: string }
+ * Returns { valid: boolean, tier: string, evidence: string }
+ *
+ * Tier classification (wq-1029):
+ *   - "strong": ≥2 specific terms matched in codebase
+ *   - "weak": matches found but <2 specific terms (mostly generic)
+ *   - "conceptual": no codebase evidence at all
  */
 function validatePattern(pattern) {
   const terms = extractSearchTerms(pattern);
 
   if (terms.length === 0) {
-    // No searchable terms — validate by default (pattern is conceptual)
-    return { valid: true, evidence: 'conceptual pattern, no codebase check needed' };
+    return { valid: true, tier: 'conceptual', evidence: 'conceptual pattern, no searchable terms' };
   }
 
   let matchedTerms = 0;
+  let specificMatches = 0;
   let totalFiles = 0;
   const hits = [];
 
@@ -170,17 +217,30 @@ function validatePattern(pattern) {
     if (count > 0) {
       matchedTerms++;
       totalFiles += count;
-      hits.push(`${term}(${count})`);
+      const specific = isSpecificTerm(term);
+      if (specific) specificMatches++;
+      hits.push(`${term}(${count}${specific ? '*' : ''})`);
     }
   }
 
   // Valid if ≥2 terms found OR ≥2 files reference any term
   const valid = matchedTerms >= 2 || totalFiles >= 2;
+
+  // Tier classification
+  let tier;
+  if (!valid) {
+    tier = 'conceptual';
+  } else if (specificMatches >= 2) {
+    tier = 'strong';
+  } else {
+    tier = 'weak';
+  }
+
   const evidence = hits.length > 0
-    ? `${matchedTerms}/${terms.length} terms matched: ${hits.slice(0, 5).join(', ')}`
+    ? `${matchedTerms}/${terms.length} terms matched (${specificMatches} specific): ${hits.slice(0, 5).join(', ')}`
     : `0/${terms.length} terms matched`;
 
-  return { valid, evidence };
+  return { valid, tier, evidence };
 }
 
 /**
@@ -198,14 +258,15 @@ export function revalidatePatterns(count = 10) {
   const now = new Date().toISOString();
 
   for (const pattern of stale) {
-    const { valid, evidence } = validatePattern(pattern);
+    const { valid, tier, evidence } = validatePattern(pattern);
     const ageDays = Math.round((Date.now() - new Date(pattern.lastValidated || pattern.extractedAt).getTime()) / 86400000);
 
     if (valid) {
       pattern.lastValidated = now;
+      pattern.revalidationTier = tier;
     }
 
-    results.push({ id: pattern.id, title: pattern.title, ageDays, valid, evidence });
+    results.push({ id: pattern.id, title: pattern.title, ageDays, valid, tier, evidence });
   }
 
   const validated = results.filter(r => r.valid).length;
@@ -242,11 +303,12 @@ const results = [];
 const now = new Date().toISOString();
 
 for (const pattern of stale) {
-  const { valid, evidence } = validatePattern(pattern);
+  const { valid, tier, evidence } = validatePattern(pattern);
   const ageDays = Math.round((Date.now() - new Date(pattern.lastValidated || pattern.extractedAt).getTime()) / 86400000);
 
   if (valid && !dryRun) {
     pattern.lastValidated = now;
+    pattern.revalidationTier = tier;
   }
 
   results.push({
@@ -254,6 +316,7 @@ for (const pattern of stale) {
     title: pattern.title,
     ageDays,
     valid,
+    tier,
     evidence,
   });
 }
@@ -270,7 +333,7 @@ if (validated > 0 && !dryRun) {
 const mode = dryRun ? '[DRY RUN] ' : '';
 console.log(`${mode}knowledge-revalidate: checked ${results.length}, validated ${validated}, skipped ${skipped}`);
 for (const r of results) {
-  const status = r.valid ? 'PASS' : 'SKIP';
+  const status = r.valid ? `PASS:${r.tier}` : 'SKIP';
   console.log(`  ${r.id} [${status}] ${r.title} (${r.ageDays}d stale) — ${r.evidence}`);
 }
 

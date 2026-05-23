@@ -26,6 +26,13 @@ const RETIREMENT_LOG = join(KNOWLEDGE_DIR, 'retirement-log.json');
 const STALE_THRESHOLD_DAYS = 90;
 const STALE_THRESHOLD_MS = STALE_THRESHOLD_DAYS * 86400000;
 
+// Tier-aware thresholds (wq-1029): weak/conceptual patterns retire faster
+const TIER_RETIRE_DAYS = {
+  strong: 90,
+  weak: 45,
+  conceptual: 45,
+};
+
 const dryRun = process.argv.includes('--dry-run');
 
 function loadJSON(path, fallback) {
@@ -50,19 +57,23 @@ for (const p of data.patterns) {
   if (!lastValidated) continue;
 
   const ageDays = (now - new Date(lastValidated).getTime()) / 86400000;
-  if (ageDays > STALE_THRESHOLD_DAYS) {
+  const tier = p.revalidationTier || 'strong';
+  const threshold = TIER_RETIRE_DAYS[tier] || STALE_THRESHOLD_DAYS;
+  if (ageDays > threshold) {
     retired.push({
       id: p.id,
       title: p.title,
       previousConfidence: p.confidence,
+      tier,
       ageDays: Math.round(ageDays),
+      threshold,
       lastValidated,
     });
 
     if (!dryRun) {
       p.confidence = 'retired';
       p.retiredAt = new Date().toISOString();
-      p.retiredReason = `auto-retired: stale ${Math.round(ageDays)} days (threshold: ${STALE_THRESHOLD_DAYS})`;
+      p.retiredReason = `auto-retired: stale ${Math.round(ageDays)} days (threshold: ${threshold}, tier: ${tier})`;
     }
   }
 }

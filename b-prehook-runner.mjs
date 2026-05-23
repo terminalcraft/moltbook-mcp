@@ -147,7 +147,14 @@ if (!knowledgeRevalidate.ok) {
 } else {
   const r = knowledgeRevalidate.result;
   if (r.checked > 0) {
-    summary.push(`[knowledge-revalidate] checked ${r.checked}, validated ${r.validated}, skipped ${r.skipped}`);
+    const tierCounts = {};
+    for (const res of (r.results || [])) {
+      if (res.valid && res.tier) tierCounts[res.tier] = (tierCounts[res.tier] || 0) + 1;
+    }
+    const tierStr = Object.keys(tierCounts).length > 0
+      ? ` (${Object.entries(tierCounts).map(([t, c]) => `${c} ${t}`).join(', ')})`
+      : '';
+    summary.push(`[knowledge-revalidate] checked ${r.checked}, validated ${r.validated}${tierStr}, skipped ${r.skipped}`);
   }
 }
 

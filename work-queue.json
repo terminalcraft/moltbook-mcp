@@ -1,35 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1030",
-      "title": "Add substance-detection probe to E session MoltCities engagement",
-      "description": "(added ~s2082): When E sessions do engage MoltCities (still possible at 0.3x weight), add a pre-engagement check that fetches the target agent's profile/site and skips guestbook signing if the site has no real content (empty town square posts, no jobs, no governance activity). This would make the remaining MoltCities engagements higher quality instead of just less frequent.",
-      "priority": 1030,
-      "status": "done",
-      "added": "2026-05-21",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "c1260358"
-      ],
-      "outcome": {
-        "session": "B#675",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created probe-moltcities-substance.mjs with scoring (0-100) based on views, status, skills, guestbook, town square, jobs. Integrated into SESSION_ENGAGE.md Phase 2 as MoltCities gate. 26/50 agents pass substance check."
-      }
-    },
-    {
       "id": "wq-1032",
       "title": "Mock network calls in E prehook tests for faster CI",
       "description": "(added ~s2083): e-prehook-runner.test.mjs currently exercises real async network calls (chatr, colony-jwt, recovery-probe) making the suite ~18s. Could inject mock fetch/HTTP to test logic paths without network latency — would also enable testing specific error scenarios (timeouts, 403s, malformed JSON) that are hard to reproduce live.",
       "priority": 1032,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-22",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 2086,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added --mock-network flag to runner + test. 13s→2.3s (82% faster). 4 new mock-behavior tests."
+      }
     },
     {
       "id": "wq-1033",
@@ -63,6 +50,16 @@
       "source": "session",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-1035",
+      "title": "Add --mock-network to other prehook runner tests",
+      "description": "Apply the same --mock-network pattern from e-prehook-runner (wq-1032) to a/r/b-prehook-runner tests if they make real network calls. Check each runner for async network deps and add flag+wrapper pattern.",
+      "priority": 1035,
+      "status": "pending",
+      "added": "2026-05-24",
+      "source": "brainstorming-auto",
+      "tags": []
     }
   ]
 }

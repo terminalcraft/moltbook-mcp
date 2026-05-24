@@ -397,11 +397,13 @@ if (!autoRetire.ok) {
   }
 }
 
-// ---- Check 9: Dead platform DNS pruning (every 50 sessions) ----
+// ---- Check 9: Dead platform DNS pruning (every 50 sessions, resurrect every 200) ----
 
 if (SESSION > 0 && SESSION % 50 === 0) {
+  const doResurrect = SESSION % 200 === 0;
   const prunResult = safeRun('prune-dead-platforms', () => {
-    const out = execSync(`node "${DIR}/prune-dead-platforms.mjs" --apply`, { encoding: 'utf8', timeout: 10000 });
+    const flags = doResurrect ? '--apply --resurrect' : '--apply';
+    const out = execSync(`node "${DIR}/prune-dead-platforms.mjs" ${flags}`, { encoding: 'utf8', timeout: 10000 });
     // Parse output for change summary
     const lines = out.trim().split('\n');
     const summaryLine = lines[0] || '';
@@ -413,11 +415,12 @@ if (SESSION > 0 && SESSION % 50 === 0) {
     summary.push(`[dead-platform-prune] WARN: runner failed (${prunResult.error})`);
   } else {
     const r = prunResult.result;
+    const mode = doResurrect ? '+resurrect' : 'prune-only';
     if (r.changes.length > 0) {
-      summary.push(`[dead-platform-prune] ${r.summaryLine} — ${r.changes.length} change(s) applied`);
+      summary.push(`[dead-platform-prune] ${r.summaryLine} (${mode}) — ${r.changes.length} change(s) applied`);
       for (const c of r.changes) summary.push(`  → ${c}`);
     } else {
-      summary.push(`[dead-platform-prune] OK: ${r.summaryLine}`);
+      summary.push(`[dead-platform-prune] OK: ${r.summaryLine} (${mode})`);
     }
   }
 } else {

@@ -1,33 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1032",
-      "title": "Mock network calls in E prehook tests for faster CI",
-      "description": "(added ~s2083): e-prehook-runner.test.mjs currently exercises real async network calls (chatr, colony-jwt, recovery-probe) making the suite ~18s. Could inject mock fetch/HTTP to test logic paths without network latency — would also enable testing specific error scenarios (timeouts, 403s, malformed JSON) that are hard to reproduce live.",
-      "priority": 1032,
-      "status": "done",
-      "added": "2026-05-22",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 2086,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added --mock-network flag to runner + test. 13s→2.3s (82% faster). 4 new mock-behavior tests."
-      }
-    },
-    {
       "id": "wq-1033",
       "title": "Add --resurrect to periodic DNS prune",
       "description": "(added ~s2082): The scheduled prune check doesn't use --resurrect flag. Could add a less-frequent resurrect pass (every 200 sessions?) to recover defunct platforms whose DNS comes back, separate from the routine 50-session prune.",
       "priority": 1033,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-23",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "B#677",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added SESSION % 200 resurrect pass to a-prehook-runner.mjs check #9. Summary shows prune-only vs +resurrect mode."
+      }
     },
     {
       "id": "wq-1034",
@@ -60,6 +49,16 @@
       "added": "2026-05-24",
       "source": "brainstorming-auto",
       "tags": []
+    },
+    {
+      "id": "wq-1036",
+      "title": "Add resurrect pass audit metric to audit-stats.mjs",
+      "description": "(added ~s2088): Track cumulative platform resurrections from DNS prune resurrect pass. Read services.json for platforms recovered from defunct status, report count in audit stats to gauge whether 200-session resurrect interval is appropriate.",
+      "status": "pending",
+      "tags": [
+        "maintenance"
+      ],
+      "added": "s2088"
     }
   ]
 }

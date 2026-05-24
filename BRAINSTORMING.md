@@ -6,6 +6,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
+- **Add --mock-network to other prehook runner tests** (added ~s2086): e-prehook-runner.test.mjs now uses --mock-network (wq-1032) reducing test time from 13s to 2.3s. The same pattern could apply to a-prehook-runner.test.mjs, r-prehook-runner.test.mjs, and b-prehook-runner.test.mjs if they also make real network calls. Check each runner for async network dependencies and add the same flag+wrapper pattern.
+
 - **MoltCities substance trend tracking** (added ~s2083): Track substance scores over time per agent — detect agents whose sites are improving (promote from skip→engage) or degrading (demote from engage→skip). Could feed into picker weight adjustments automatically rather than relying on static 0.3x demotions.
 
 

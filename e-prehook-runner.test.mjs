@@ -4,8 +4,13 @@
 // Tests: output structure, summary format, graceful degradation when network
 // calls fail, and seed generation with mock context.
 //
+// Uses --mock-network flag (wq-1032) to skip real async network calls (chatr,
+// colony-jwt, recovery-probe, credential-health), testing logic paths without
+// network latency.
+//
 // Usage: node --test e-prehook-runner.test.mjs
 // Created: wq-1031
+// Updated: wq-1032 — mock network calls for faster CI
 
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -28,15 +33,16 @@ function cleanup() {
 }
 
 // Run the e-prehook-runner as a subprocess and parse its JSON output.
-// E runner has async network calls that may timeout — use generous timeout.
-function runRunner(sessionNum, contextFile, policyFile) {
+// --mock-network replaces async network calls with instant mocks.
+function runRunner(sessionNum, contextFile, policyFile, { mockNetwork = true } = {}) {
   const args = [`--session`, `${sessionNum}`];
   if (contextFile) args.push('--context-file', contextFile);
   if (policyFile) args.push('--policy-file', policyFile);
+  if (mockNetwork) args.push('--mock-network');
 
   const cmd = `node ${join(__dirname, 'e-prehook-runner.mjs')} ${args.join(' ')}`;
   try {
-    const out = execSync(cmd, { encoding: 'utf8', timeout: 30000 });
+    const out = execSync(cmd, { encoding: 'utf8', timeout: 15000 });
     const lines = out.trim().split('\n');
     for (let i = lines.length - 1; i >= 0; i--) {
       try { return JSON.parse(lines[i]); } catch {}
@@ -146,13 +152,50 @@ describe('e-prehook-runner recovery probe', () => {
     }
   });
 
-  it('runs recovery probe when session on interval', () => {
+  it('runs recovery probe mock when session on interval', () => {
     const ctxFile = join(SCRATCH, 'ctx-rp2.md');
-    // Session 9990 is a multiple of 30
+    // Session 9990 is a multiple of 30 — with mock, probe returns skipped+mock
     const out = runRunner(9990, ctxFile, join(SCRATCH, 'nope.json'));
     const rp = out.recovery_probe;
-    // Should either run (probed field) or error (network issues in test env)
-    assert.ok(rp.probed !== undefined || rp.error || rp.skipped !== true);
+    // Mock returns { skipped: true, reason: 'mock-network' }
+    assert.ok(rp.skipped === true || rp.error);
+  });
+});
+
+describe('e-prehook-runner mock-network behavior', () => {
+  before(setup);
+  after(cleanup);
+
+  it('thread_tracker returns mock result with zero messages', () => {
+    const ctxFile = join(SCRATCH, 'ctx-mock-tt.md');
+    const out = runRunner(9999, ctxFile, join(SCRATCH, 'nope.json'));
+    const tt = out.thread_tracker;
+    assert.ok(!tt.error, 'mock should not error');
+    assert.equal(tt.messagesProcessed, 0);
+  });
+
+  it('colony_jwt returns skip status under mock', () => {
+    const ctxFile = join(SCRATCH, 'ctx-mock-jwt.md');
+    const out = runRunner(9999, ctxFile, join(SCRATCH, 'nope.json'));
+    const cj = out.colony_jwt;
+    assert.ok(!cj.error, 'mock should not error');
+    assert.equal(cj.status, 'skip');
+    assert.equal(cj.reason, 'mock-network');
+  });
+
+  it('credential_health returns zero totals under mock', () => {
+    const ctxFile = join(SCRATCH, 'ctx-mock-cred.md');
+    const out = runRunner(9999, ctxFile, join(SCRATCH, 'nope.json'));
+    const ch = out.credential_health;
+    assert.ok(!ch.error, 'mock should not error');
+    assert.equal(ch.healthy, 0);
+    assert.equal(ch.total, 0);
+  });
+
+  it('summary includes mock-network indicator for colony-jwt', () => {
+    const ctxFile = join(SCRATCH, 'ctx-mock-sum.md');
+    const out = runRunner(9999, ctxFile, join(SCRATCH, 'nope.json'));
+    assert.ok(out.summary.includes('mock-network'), 'summary should mention mock-network');
   });
 });
 

@@ -64,8 +64,22 @@ function getArg(name) {
 const contextFile = getArg('--context-file') || join(STATE_DIR, 'e-session-context.md');
 const policyFile = getArg('--policy-file') || join(STATE_DIR, 'spending-policy.json');
 const sessionNum = parseInt(getArg('--session') || process.env.SESSION_NUM || '0', 10);
+const mockNetwork = args.includes('--mock-network');
 
 import { safeRun, safeRunAsync } from './lib/runner-utils.mjs';
+
+// Network-calling functions, replaceable via --mock-network for testing
+let _fetchAndUpdate = fetchAndUpdate;
+let _checkColonyJwt = checkColonyJwt;
+let _probeCircuitBroken = probeCircuitBroken;
+let _checkAllCredentials = checkAllCredentials;
+
+if (mockNetwork) {
+  _fetchAndUpdate = async () => ({ messagesProcessed: 0 });
+  _checkColonyJwt = async () => ({ status: 'skip', reason: 'mock-network' });
+  _probeCircuitBroken = async () => ({ skipped: true, reason: 'mock-network' });
+  _checkAllCredentials = () => ({ healthy: 0, total: 0, unhealthy: 0, warnings: [] });
+}
 
 const summary = [];
 
@@ -146,7 +160,7 @@ if (!spending.ok) {
 
 // ---- Check 6: Credential health ----
 const creds = safeRun('credential-health', () => {
-  return checkAllCredentials();
+  return _checkAllCredentials();
 });
 
 if (!creds.ok) {
@@ -226,7 +240,7 @@ if (!variety.ok) {
 // ---- Recovery probe (d078, wq-990): every RECOVERY_INTERVAL sessions ----
 const shouldRunRecovery = sessionNum > 0 && sessionNum % RECOVERY_INTERVAL === 0;
 const recoveryProbe = shouldRunRecovery
-  ? safeRunAsync('recovery-probe', () => probeCircuitBroken({ dryRun: false }))
+  ? safeRunAsync('recovery-probe', () => _probeCircuitBroken({ dryRun: false }))
   : Promise.resolve({ ok: true, result: { skipped: true, reason: `next at session ${sessionNum + (RECOVERY_INTERVAL - (sessionNum % RECOVERY_INTERVAL))}` } });
 
 // ---- Async checks: run in parallel ----
@@ -236,7 +250,7 @@ const recoveryProbe = shouldRunRecovery
 const asyncResults = await Promise.allSettled([
   // Check 3a: Thread tracker update (async, network)
   safeRunAsync('chatr-thread-tracker', async () => {
-    const result = await fetchAndUpdate();
+    const result = await _fetchAndUpdate();
     return {
       error: result.error,
       messagesProcessed: result.messagesProcessed || 0,
@@ -244,7 +258,7 @@ const asyncResults = await Promise.allSettled([
   }),
 
   // Check 8: Colony JWT (async, potential network)
-  safeRunAsync('colony-jwt', () => checkColonyJwt()),
+  safeRunAsync('colony-jwt', () => _checkColonyJwt()),
 
   // Check 9: Recovery probe (d078, wq-990)
   recoveryProbe,

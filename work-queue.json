@@ -1,35 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1034",
-      "title": "Knowledge revalidation test suite",
-      "description": "(added ~s2083): knowledge-revalidate.mjs has no test file. Add tests for extractSearchTerms, isSpecificTerm, validatePattern tier classification, and getStalest tier-aware window logic. Would catch regressions in the tier system added by wq-1029.",
-      "priority": 1034,
-      "status": "done",
-      "added": "2026-05-23",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "a0c24866"
-      ],
-      "outcome": {
-        "session": "s2090",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "32 tests across 5 describe blocks. Exported 4 internal functions for testability."
-      }
-    },
-    {
       "id": "wq-1031",
       "title": "Add substance probe to E session prehook context",
       "description": "(added ~s2083): The substance probe results should be pre-computed in e-prehook-runner.mjs and included in e-session-context.md so E sessions see the picked agent and score without running the probe themselves. Saves ~5s and 2 API calls during the E session.",
       "priority": 1031,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-23",
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2091",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Exported scoreAgent/mcFetch from probe, imported in e-prehook-runner.mjs with conditional execution when MoltCities in mandate. Context file gets pre-computed pick. SESSION_ENGAGE.md updated. All 13 tests pass."
+      }
     },
     {
       "id": "wq-1035",
@@ -50,6 +37,17 @@
         "maintenance"
       ],
       "added": "s2088"
+    },
+    {
+      "id": "wq-1037",
+      "title": "Mock grepFileCount in revalidate tests",
+      "description": "(added ~s2090): knowledge-revalidate.test.mjs validatePattern tests currently shell out to real grep (each test ~500ms). Injecting a mock grepFileCount would make tests deterministic and ~100x faster. Would also enable testing edge cases like \"exactly 2 specific matches\" without depending on codebase state.",
+      "priority": 1037,
+      "status": "pending",
+      "added": "2026-05-25",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     }
   ]
 }

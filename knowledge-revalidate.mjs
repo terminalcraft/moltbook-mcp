@@ -243,6 +243,9 @@ function validatePattern(pattern) {
   return { valid, tier, evidence };
 }
 
+// Exported for testing
+export { extractSearchTerms, isSpecificTerm, validatePattern, getStalest, GENERIC_TERMS, TIER_WINDOWS };
+
 /**
  * Run revalidation programmatically. Returns { checked, validated, skipped, results }.
  */

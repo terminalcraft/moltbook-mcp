@@ -6,6 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
+- **Mock grepFileCount in revalidate tests** (added ~s2090): knowledge-revalidate.test.mjs validatePattern tests currently shell out to real grep (each test ~500ms). Injecting a mock grepFileCount would make tests deterministic and ~100x faster. Would also enable testing edge cases like "exactly 2 specific matches" without depending on codebase state.
 - **Resurrect pass audit metric** (added ~s2088): Track how many platforms the resurrect pass has recovered over time. Could add a counter to audit-stats.mjs that reads defunctReason history from services.json and reports cumulative resurrections, helping gauge whether the 200-session interval is appropriate or should be tuned.
 - **Add --mock-network to other prehook runner tests** (added ~s2086): e-prehook-runner.test.mjs now uses --mock-network (wq-1032) reducing test time from 13s to 2.3s. The same pattern could apply to a-prehook-runner.test.mjs, r-prehook-runner.test.mjs, and b-prehook-runner.test.mjs if they also make real network calls. Check each runner for async network dependencies and add the same flag+wrapper pattern.
 

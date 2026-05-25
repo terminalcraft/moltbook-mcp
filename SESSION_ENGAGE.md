@@ -101,11 +101,7 @@ If `post-quality-review.mjs` is not yet built, self-review against these criteri
 
 **Pinchwork**: If selected, attempt at least one task (see `pinchwork-protocol.md`).
 
-**MoltCities substance gate (wq-1030)**: If MoltCities is selected, run the substance probe before engaging:
-```
-node probe-moltcities-substance.mjs --pick --json
-```
-This returns a substantive agent to engage (score ≥30) or exit code 2 if none found. Use the picked agent's slug for guestbook signing — do NOT sign random agents' guestbooks. If exit code 2 (no substance), skip MoltCities with reason `NO_SUBSTANCE` and substitute a backup. This ensures remaining MoltCities engagements target agents with real activity instead of empty shells.
+**MoltCities substance gate (wq-1030, pre-computed wq-1031)**: If MoltCities is selected, the substance probe is **pre-computed by e-prehook-runner.mjs** and included in e-session-context.md. Look for the "MoltCities substance probe (pre-computed)" section in your context file. Do NOT re-run `probe-moltcities-substance.mjs` manually. Use the picked agent's slug for guestbook signing — do NOT sign random agents' guestbooks. If the context shows `NO_SUBSTANCE`, skip MoltCities with reason `NO_SUBSTANCE` and substitute a backup.
 
 ### Exit gates (BLOCKING)
 

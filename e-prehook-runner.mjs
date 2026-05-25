@@ -9,7 +9,7 @@
  * Does NOT include Check 1 (engagement-liveness-probe.mjs) because it uses
  * process.exit() for hard timeout — that would kill the entire runner.
  *
- * Checks (10 total in runner):
+ * Checks (11 total in runner):
  *   Check 2: e-session-seed.mjs         → generateSeed()
  *   Check 3: chatr-thread-tracker.mjs   → fetchAndUpdate() [async]
  *   Check 3: chatr-topic-clusters.mjs   → analyze()
@@ -20,6 +20,7 @@
  *   Check 8: colony-jwt.mjs             → checkColonyJwt() [async]
  *   Check 9: recovery-probe.mjs         → probeCircuitBroken()
  *   Phase 4: platform-picker.mjs + picker-revalidate.mjs
+ *   Check 10: probe-moltcities-substance.mjs → scoreAgent() [async, conditional on mandate]
  *
  * Output: JSON with all results + .summary text
  * Usage: node e-prehook-runner.mjs --context-file <path> --policy-file <path> --session <N>
@@ -47,6 +48,7 @@ import { checkColonyJwt } from './hooks/lib/colony-jwt.mjs';
 import { main as pickerMain } from './platform-picker.mjs';
 import { revalidateMandate } from './hooks/lib/picker-revalidate.mjs';
 import { probeCircuitBroken } from './lib/recovery-probe.mjs';
+import { scoreAgent, loadApiKey, mcFetch } from './probe-moltcities-substance.mjs';
 
 const HOME = process.env.HOME || '/home/moltbot';
 const RECOVERY_INTERVAL = 30; // Probe circuit-broken platforms every N sessions
@@ -74,11 +76,16 @@ let _checkColonyJwt = checkColonyJwt;
 let _probeCircuitBroken = probeCircuitBroken;
 let _checkAllCredentials = checkAllCredentials;
 
+let _scoreAgent = scoreAgent;
+let _mcFetch = mcFetch;
+
 if (mockNetwork) {
   _fetchAndUpdate = async () => ({ messagesProcessed: 0 });
   _checkColonyJwt = async () => ({ status: 'skip', reason: 'mock-network' });
   _probeCircuitBroken = async () => ({ skipped: true, reason: 'mock-network' });
   _checkAllCredentials = () => ({ healthy: 0, total: 0, unhealthy: 0, warnings: [] });
+  _scoreAgent = async () => ({ slug: 'mock', name: 'Mock', score: 50, signals: {}, verdict: 'engage' });
+  _mcFetch = async () => ({ agents: [], messages: [], jobs: [] });
 }
 
 const summary = [];
@@ -432,6 +439,108 @@ if (existsSync(mandatePath)) {
   } catch {}
 }
 
+// ---- Substance probe (wq-1031): pre-compute MoltCities substance if selected ----
+let substanceResult = { ok: true, result: { skipped: true, reason: 'MoltCities not in mandate' } };
+let moltcitiesInMandate = false;
+if (existsSync(mandatePath)) {
+  try {
+    const mandate = JSON.parse(readFileSync(mandatePath, 'utf8'));
+    const selected = (mandate.selected || []).map(s => s.toLowerCase());
+    const backups = (mandate.backups || []).map(s => s.toLowerCase());
+    moltcitiesInMandate = selected.includes('moltcities') || backups.includes('moltcities');
+  } catch {}
+}
+
+if (moltcitiesInMandate) {
+  substanceResult = await safeRunAsync('substance-probe', async () => {
+    const apiKey = loadApiKey();
+    if (!apiKey) return { skipped: true, reason: 'no MoltCities API key' };
+
+    // Pre-fetch shared data (town square + jobs)
+    let townSquare = [];
+    let jobs = [];
+    try {
+      const tsData = await _mcFetch('/api/town-square', apiKey);
+      townSquare = tsData.messages || [];
+    } catch {}
+    try {
+      const jobData = await _mcFetch('/api/jobs', apiKey);
+      jobs = (jobData.jobs || []).filter(j => j.status === 'open');
+    } catch {}
+
+    // Fetch all agents and score them
+    let agents;
+    try {
+      const agentData = await _mcFetch('/api/agents', apiKey);
+      agents = agentData.agents || [];
+    } catch (e) {
+      return { skipped: true, reason: `agent fetch failed: ${e.message}` };
+    }
+
+    const others = agents.filter(a => (a.site?.slug || '').toLowerCase() !== 'terminalcraft');
+    const results = [];
+    for (const a of others) {
+      const agentSlug = a.site?.slug;
+      if (!agentSlug) continue;
+      try {
+        const result = await _scoreAgent(agentSlug, apiKey, { townSquare, jobs });
+        results.push(result);
+      } catch {}
+    }
+    results.sort((a, b) => b.score - a.score);
+
+    const engageable = results.filter(r => r.verdict === 'engage');
+    if (engageable.length === 0) {
+      return { picked: null, reason: 'no_substantive_agents', total: results.length };
+    }
+
+    // Weighted random pick
+    const totalScore = engageable.reduce((s, r) => s + r.score, 0);
+    let rand = Math.random() * totalScore;
+    let picked = engageable[0];
+    for (const r of engageable) {
+      rand -= r.score;
+      if (rand <= 0) { picked = r; break; }
+    }
+
+    return { picked, engageable_count: engageable.length, total_agents: results.length };
+  });
+}
+
+// Summary + context for substance probe
+if (!substanceResult.ok) {
+  summary.push(`[substance-probe] ERROR: ${substanceResult.error}`);
+} else {
+  const sp = substanceResult.result;
+  if (sp.skipped) {
+    summary.push(`[substance-probe] Skipped (${sp.reason})`);
+  } else if (sp.picked) {
+    summary.push(`[substance-probe] Picked: ${sp.picked.name} (score=${sp.picked.score}, ${sp.engageable_count}/${sp.total_agents} substantive)`);
+    // Append to context file so E session sees the pre-computed pick
+    const substanceBlock = [
+      '',
+      '## MoltCities substance probe (pre-computed)',
+      `**Picked agent**: ${sp.picked.name} (slug: ${sp.picked.slug})`,
+      `**Score**: ${sp.picked.score}/100 — verdict: ${sp.picked.verdict}`,
+      `**Engageable**: ${sp.engageable_count}/${sp.total_agents} agents have substance (score ≥30)`,
+      '',
+      'Use this agent for guestbook signing. Do NOT re-run the substance probe.',
+      '',
+    ].join('\n');
+    try { appendFileSync(contextFile, substanceBlock); } catch {}
+  } else {
+    summary.push(`[substance-probe] No substantive agents found (${sp.total || 0} scored) — skip MoltCities`);
+    const noSubBlock = [
+      '',
+      '## MoltCities substance probe (pre-computed)',
+      '**Result**: NO_SUBSTANCE — no agents scored ≥30.',
+      'Skip MoltCities this session and substitute a backup platform.',
+      '',
+    ].join('\n');
+    try { appendFileSync(contextFile, noSubBlock); } catch {}
+  }
+}
+
 summary.push('[e-prehook] All checks complete (1 subprocess + 1 consolidated runner)');
 
 // ---- Assemble output ----
@@ -447,6 +556,7 @@ const output = {
   picker: pickerResult.ok ? pickerResult.result : { error: pickerResult.error },
   picker_revalidate: revalidate.ok ? revalidate.result : { error: revalidate.error },
   recovery_probe: recoveryResult.ok ? recoveryResult.result : { error: recoveryResult.error },
+  substance_probe: substanceResult.ok ? substanceResult.result : { error: substanceResult.error },
   summary: summary.join('\n'),
 };
 

@@ -263,7 +263,18 @@ async function main() {
   process.exit(1);
 }
 
-main().catch((e) => {
-  console.error(e.message);
-  process.exit(1);
-});
+// Exported for use by e-prehook-runner.mjs (wq-1031)
+export { scoreAgent, loadApiKey, mcFetch };
+
+// Only run main() when executed directly (not imported)
+const isDirectRun = process.argv[1] && (
+  process.argv[1].endsWith('probe-moltcities-substance.mjs') ||
+  process.argv[1].endsWith('probe-moltcities-substance')
+);
+
+if (isDirectRun) {
+  main().catch((e) => {
+    console.error(e.message);
+    process.exit(1);
+  });
+}

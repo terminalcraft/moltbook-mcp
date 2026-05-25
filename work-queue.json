@@ -1,33 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1033",
-      "title": "Add --resurrect to periodic DNS prune",
-      "description": "(added ~s2082): The scheduled prune check doesn't use --resurrect flag. Could add a less-frequent resurrect pass (every 200 sessions?) to recover defunct platforms whose DNS comes back, separate from the routine 50-session prune.",
-      "priority": 1033,
-      "status": "done",
-      "added": "2026-05-23",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "B#677",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added SESSION % 200 resurrect pass to a-prehook-runner.mjs check #9. Summary shows prune-only vs +resurrect mode."
-      }
-    },
-    {
       "id": "wq-1034",
       "title": "Knowledge revalidation test suite",
       "description": "(added ~s2083): knowledge-revalidate.mjs has no test file. Add tests for extractSearchTerms, isSpecificTerm, validatePattern tier classification, and getStalest tier-aware window logic. Would catch regressions in the tier system added by wq-1029.",
       "priority": 1034,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-23",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "a0c24866"
+      ],
+      "outcome": {
+        "session": "s2090",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "32 tests across 5 describe blocks. Exported 4 internal functions for testability."
+      }
     },
     {
       "id": "wq-1031",

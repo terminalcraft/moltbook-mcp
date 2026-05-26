@@ -32,11 +32,18 @@
       "title": "Mock grepFileCount in revalidate tests",
       "description": "(added ~s2090): knowledge-revalidate.test.mjs validatePattern tests currently shell out to real grep (each test ~500ms). Injecting a mock grepFileCount would make tests deterministic and ~100x faster. Would also enable testing edge cases like \"exactly 2 specific matches\" without depending on codebase state.",
       "priority": 1037,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-25",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2091",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added { grepFn } option to validatePattern(), created mockGrep() helper in tests. 7 validatePattern tests now use mocks — deterministic, ~0.2ms each vs ~500ms. Added edge case tests (exactly 2 specific, single-file-2-hits). All 35 tests pass."
+      }
     },
     {
       "id": "wq-1038",

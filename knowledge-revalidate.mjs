@@ -200,7 +200,7 @@ function isSpecificTerm(term) {
  *   - "weak": matches found but <2 specific terms (mostly generic)
  *   - "conceptual": no codebase evidence at all
  */
-function validatePattern(pattern) {
+function validatePattern(pattern, { grepFn = grepFileCount } = {}) {
   const terms = extractSearchTerms(pattern);
 
   if (terms.length === 0) {
@@ -213,7 +213,7 @@ function validatePattern(pattern) {
   const hits = [];
 
   for (const term of terms.slice(0, 8)) { // Cap at 8 terms to limit grep cost
-    const count = grepFileCount(term);
+    const count = grepFn(term);
     if (count > 0) {
       matchedTerms++;
       totalFiles += count;

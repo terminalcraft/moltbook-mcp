@@ -1,32 +1,21 @@
 {
   "queue": [
     {
-      "id": "wq-1031",
-      "title": "Add substance probe to E session prehook context",
-      "description": "(added ~s2083): The substance probe results should be pre-computed in e-prehook-runner.mjs and included in e-session-context.md so E sessions see the picked agent and score without running the probe themselves. Saves ~5s and 2 API calls during the E session.",
-      "priority": 1031,
-      "status": "done",
-      "added": "2026-05-23",
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s2091",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Exported scoreAgent/mcFetch from probe, imported in e-prehook-runner.mjs with conditional execution when MoltCities in mandate. Context file gets pre-computed pick. SESSION_ENGAGE.md updated. All 13 tests pass."
-      }
-    },
-    {
       "id": "wq-1035",
       "title": "Add --mock-network to other prehook runner tests",
       "description": "Apply the same --mock-network pattern from e-prehook-runner (wq-1032) to a/r/b-prehook-runner tests if they make real network calls. Check each runner for async network deps and add flag+wrapper pattern.",
       "priority": 1035,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-24",
       "source": "brainstorming-auto",
-      "tags": []
+      "tags": [],
+      "outcome": {
+        "session": "s2091",
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "non-actionable",
+        "note": "Audited all 3 runners: a-prehook has only localhost curl (try/catch wrapped), r-prehook same, b-prehook has zero network calls. All tests pass fast (a:3s, r:1.2s, b:2.6s) without mocking. --mock-network only needed for e-prehook's external async APIs (chatr, colony-jwt, recovery-probe)."
+      }
     },
     {
       "id": "wq-1036",
@@ -45,6 +34,17 @@
       "priority": 1037,
       "status": "pending",
       "added": "2026-05-25",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1038",
+      "title": "Add substance probe test to e-prehook-runner.test.mjs",
+      "description": "(added ~s2091): wq-1031 added the substance probe to e-prehook-runner.mjs but the test file doesn't yet verify the new `substance_probe` output field. Add a test case that runs with `--mock-network` and checks that `substance_probe` exists in output and has expected shape (skipped/picked/no-substance). Also verify context file gets the substance block appended when MoltCities is in the mandate.",
+      "priority": 1038,
+      "status": "pending",
+      "added": "2026-05-26",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []

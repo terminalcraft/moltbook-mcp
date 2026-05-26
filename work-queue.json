@@ -55,6 +55,17 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-1039",
+      "title": "Extract shared runRunner test helper from prehook test files",
+      "description": "All 4 prehook runner test files duplicate ~30 lines of subprocess-invoke + JSON-parse-from-stdout logic. Extract into a shared test-runner-utils.mjs that handles subprocess execution, last-line JSON extraction, and error recovery. Would reduce boilerplate and centralize timeout/parsing logic.",
+      "status": "pending",
+      "added": "2026-05-26",
+      "source": "brainstorming-auto",
+      "tags": [
+        "testing"
+      ]
     }
   ]
 }

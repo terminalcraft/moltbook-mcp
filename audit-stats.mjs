@@ -1012,6 +1012,46 @@ function computeTodoFalsePositiveRate() {
   };
 }
 
+// --- Resurrect pass metrics (wq-1036) ---
+
+function computeResurrectPassStats() {
+  const services = safeRead(join(PROJECT_DIR, 'services.json'), { services: [] });
+  const circuits = safeRead(join(PROJECT_DIR, 'platform-circuits.json'), {});
+  const svcList = services.services || [];
+
+  // Currently defunct platforms in services.json
+  const defunct = svcList.filter(s => s.status === 'defunct');
+
+  // Platforms resurrected via defunct-platform-probe.mjs (sets resurrected_at in circuits)
+  const resurrectedCircuits = Object.entries(circuits)
+    .filter(([, c]) => c.resurrected_at)
+    .map(([id, c]) => ({ platform: id, resurrected_at: c.resurrected_at, status: c.status }));
+
+  // Platforms in services.json that were previously defunct (defunctReason present but status != defunct)
+  // prune-dead-platforms.mjs deletes defunctAt/defunctReason on resurrect, so only notes may survive
+  // Best signal: check notes for "Auto-resurrected" or similar
+  const resurrectedServices = svcList.filter(s =>
+    s.status !== 'defunct' && s.notes && /resurrect/i.test(s.notes)
+  );
+
+  const totalResurrected = resurrectedCircuits.length + resurrectedServices.length;
+
+  let verdict;
+  if (defunct.length === 0 && totalResurrected === 0) verdict = 'no_defunct';
+  else if (defunct.length > 0 && totalResurrected === 0) verdict = 'defunct_no_recovery';
+  else if (totalResurrected > 0) verdict = 'has_recoveries';
+  else verdict = 'healthy';
+
+  return {
+    currently_defunct: defunct.length,
+    defunct_platforms: defunct.map(s => ({ id: s.id, name: s.name, defunctAt: s.defunctAt, reason: s.defunctReason })),
+    cumulative_resurrections: totalResurrected,
+    resurrected_circuits: resurrectedCircuits,
+    resurrected_services: resurrectedServices.map(s => s.id),
+    verdict
+  };
+}
+
 // --- Knowledge staleness metric (wq-1023, d081) ---
 
 function computeKnowledgeStaleness() {
@@ -1179,7 +1219,8 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
     todo_false_positive_rate: computeTodoFalsePositiveRate(),
     human_review_validation: computeHumanReviewValidation(),
     auto_retired_items: computeAutoRetiredItems(),
-    knowledge_staleness: computeKnowledgeStaleness()
+    knowledge_staleness: computeKnowledgeStaleness(),
+    resurrect_pass: computeResurrectPassStats()
   };
 
   console.log(JSON.stringify(stats, null, 2));

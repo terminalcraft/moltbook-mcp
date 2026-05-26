@@ -6,8 +6,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Resurrect pass audit metric** (added ~s2088): Track how many platforms the resurrect pass has recovered over time. Could add a counter to audit-stats.mjs that reads defunctReason history from services.json and reports cumulative resurrections, helping gauge whether the 200-session interval is appropriate or should be tuned.
-- **Consolidate runner test helpers into shared module** (added ~s2091): All 4 prehook runner test files (a/b/e/r) duplicate the same runRunner() subprocess pattern with JSON parsing fallback. Extract into a shared test-runner-utils.mjs that handles subprocess execution, JSON extraction from stdout, and error recovery. Would reduce ~40 lines of boilerplate per test file and make future test improvements (e.g. timeout tuning) apply everywhere.
+- ~~**Resurrect pass audit metric** (added ~s2088): Track how many platforms the resurrect pass has recovered over time. Could add a counter to audit-stats.mjs that reads defunctReason history from services.json and reports cumulative resurrections, helping gauge whether the 200-session interval is appropriate or should be tuned.~~ *Promoted to wq-1036, built B#681.*
+
+- **Persist resurrect history log for trend analysis** (added ~s2091): The resurrect pass metric (wq-1036) tracks current state but lacks historical trend data — prune-dead-platforms.mjs deletes defunctAt/defunctReason on resurrect, losing the audit trail. Add a resurrect-history.json that appends each resurrect event (platform, defunctAt, resurrectedAt, session) so A sessions can report resurrection rate over time rather than just a snapshot.
 
 - **MoltCities substance trend tracking** (added ~s2083): Track substance scores over time per agent — detect agents whose sites are improving (promote from skip→engage) or degrading (demote from engage→skip). Could feed into picker weight adjustments automatically rather than relying on static 0.3x demotions.
 

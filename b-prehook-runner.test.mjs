@@ -9,33 +9,20 @@
 
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, writeFileSync, rmSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { join } from 'path';
-import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { execRunner, createScratch } from './test-runner-utils.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SCRATCH = join(tmpdir(), 'b-prehook-test-' + Date.now());
-
-function setup() {
-  mkdirSync(SCRATCH, { recursive: true });
-}
-
-function cleanup() {
-  rmSync(SCRATCH, { recursive: true, force: true });
-}
-
-function writeJSON(path, data) {
-  writeFileSync(path, JSON.stringify(data, null, 2));
-}
+const scratch = createScratch('b-prehook-test');
 
 // Run the b-prehook-runner as a subprocess and parse its JSON output
 function runRunner(sessionNum, queuePath, historyPath) {
   const cmd = `node ${join(__dirname, 'b-prehook-runner.mjs')} ${sessionNum} ${__dirname} ${queuePath} ${historyPath || ''}`;
-  const out = execSync(cmd, { encoding: 'utf8', timeout: 10000 });
-  return JSON.parse(out.trim());
+  return execRunner(cmd, { timeout: 10000 });
 }
 
 describe('runner-utils importability', () => {
@@ -82,17 +69,16 @@ describe('runner-utils importability', () => {
 });
 
 describe('b-prehook-runner stuck-items detection', () => {
-  before(setup);
-  after(cleanup);
+  before(() => scratch.setup());
+  after(() => scratch.cleanup());
 
   it('detects no stuck items when queue has no in-progress items', () => {
-    const queuePath = join(SCRATCH, 'queue-empty.json');
-    const histPath = join(SCRATCH, 'history-empty.txt');
-    writeJSON(queuePath, { queue: [
+    const queuePath = scratch.writeJSON('queue-empty.json', { queue: [
       { id: 'wq-100', title: 'Test pending', status: 'pending' },
       { id: 'wq-101', title: 'Test done', status: 'done' },
     ]});
-    writeFileSync(histPath, '2026-05-21 mode=B s=2082 dur=2m cost=$0.50 build=1 commit(s) files=[] note: test\n');
+    const histPath = scratch.writeFile('history-empty.txt',
+      '2026-05-21 mode=B s=2082 dur=2m cost=$0.50 build=1 commit(s) files=[] note: test\n');
 
     const out = runRunner(2082, queuePath, histPath);
     assert.equal(out.stuck_items.count, 0);
@@ -100,15 +86,14 @@ describe('b-prehook-runner stuck-items detection', () => {
   });
 
   it('detects stuck items that have been in-progress for 5+ B sessions', () => {
-    const queuePath = join(SCRATCH, 'queue-stuck.json');
-    const histPath = join(SCRATCH, 'history-stuck.txt');
     // Item started at s1900, current session is 2082 → elapsed = 182
     // bSessionsApprox = floor(182 * 60 / 100) = 109 → well above 5
-    writeJSON(queuePath, { queue: [
+    const queuePath = scratch.writeJSON('queue-stuck.json', { queue: [
       { id: 'wq-200', title: 'Stuck task', status: 'in-progress', created_session: 1900 },
       { id: 'wq-201', title: 'Recent task', status: 'in-progress', created_session: 2080 },
     ]});
-    writeFileSync(histPath, '2026-05-21 mode=B s=2082 dur=2m cost=$0.50 build=1 commit(s) files=[] note: test\n');
+    const histPath = scratch.writeFile('history-stuck.txt',
+      '2026-05-21 mode=B s=2082 dur=2m cost=$0.50 build=1 commit(s) files=[] note: test\n');
 
     const out = runRunner(2082, queuePath, histPath);
     assert.equal(out.stuck_items.count, 1);
@@ -117,12 +102,11 @@ describe('b-prehook-runner stuck-items detection', () => {
   });
 
   it('extracts session from notes when created_session is missing', () => {
-    const queuePath = join(SCRATCH, 'queue-notes.json');
-    const histPath = join(SCRATCH, 'history-notes.txt');
-    writeJSON(queuePath, { queue: [
+    const queuePath = scratch.writeJSON('queue-notes.json', { queue: [
       { id: 'wq-300', title: 'Old task from notes', status: 'in-progress', notes: 'Started in s1800' },
     ]});
-    writeFileSync(histPath, '2026-05-21 mode=B s=2082 dur=2m cost=$0.50 build=1 commit(s) files=[] note: test\n');
+    const histPath = scratch.writeFile('history-notes.txt',
+      '2026-05-21 mode=B s=2082 dur=2m cost=$0.50 build=1 commit(s) files=[] note: test\n');
 
     const out = runRunner(2082, queuePath, histPath);
     assert.equal(out.stuck_items.count, 1);
@@ -130,8 +114,7 @@ describe('b-prehook-runner stuck-items detection', () => {
   });
 
   it('returns empty when no history path provided', () => {
-    const queuePath = join(SCRATCH, 'queue-nohist.json');
-    writeJSON(queuePath, { queue: [
+    const queuePath = scratch.writeJSON('queue-nohist.json', { queue: [
       { id: 'wq-400', title: 'In progress', status: 'in-progress', created_session: 1900 },
     ]});
 
@@ -140,12 +123,11 @@ describe('b-prehook-runner stuck-items detection', () => {
   });
 
   it('skips items without determinable start session', () => {
-    const queuePath = join(SCRATCH, 'queue-nostart.json');
-    const histPath = join(SCRATCH, 'history-nostart.txt');
-    writeJSON(queuePath, { queue: [
+    const queuePath = scratch.writeJSON('queue-nostart.json', { queue: [
       { id: 'wq-500', title: 'No start info', status: 'in-progress' },
     ]});
-    writeFileSync(histPath, '2026-05-21 mode=B s=2082 dur=2m cost=$0.50 build=1 commit(s) files=[] note: test\n');
+    const histPath = scratch.writeFile('history-nostart.txt',
+      '2026-05-21 mode=B s=2082 dur=2m cost=$0.50 build=1 commit(s) files=[] note: test\n');
 
     const out = runRunner(2082, queuePath, histPath);
     assert.equal(out.stuck_items.count, 0);
@@ -153,12 +135,11 @@ describe('b-prehook-runner stuck-items detection', () => {
 });
 
 describe('b-prehook-runner title lint integration', () => {
-  before(setup);
-  after(cleanup);
+  before(() => scratch.setup());
+  after(() => scratch.cleanup());
 
   it('runs title lint and returns result structure', () => {
-    const queuePath = join(SCRATCH, 'queue-lint.json');
-    writeJSON(queuePath, { queue: [
+    const queuePath = scratch.writeJSON('queue-lint.json', { queue: [
       { id: 'wq-600', title: 'Add unit tests for runner module', status: 'pending' },
     ]});
 
@@ -169,9 +150,8 @@ describe('b-prehook-runner title lint integration', () => {
   });
 
   it('flags overly long titles', () => {
-    const queuePath = join(SCRATCH, 'queue-long.json');
     const longTitle = 'A'.repeat(85) + ' something something';
-    writeJSON(queuePath, { queue: [
+    const queuePath = scratch.writeJSON('queue-long.json', { queue: [
       { id: 'wq-601', title: longTitle, status: 'pending' },
     ]});
 
@@ -184,12 +164,11 @@ describe('b-prehook-runner title lint integration', () => {
 });
 
 describe('b-prehook-runner output structure', () => {
-  before(setup);
-  after(cleanup);
+  before(() => scratch.setup());
+  after(() => scratch.cleanup());
 
   it('produces all expected top-level keys', () => {
-    const queuePath = join(SCRATCH, 'queue-struct.json');
-    writeJSON(queuePath, { queue: [] });
+    const queuePath = scratch.writeJSON('queue-struct.json', { queue: [] });
 
     const out = runRunner(2082, queuePath, '');
     assert.ok('title_lint' in out);

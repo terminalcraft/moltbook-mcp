@@ -9,33 +9,17 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { execSync } from 'child_process';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { execRunner } from './test-runner-utils.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Run the a-prehook-runner as a subprocess and parse its JSON output
 function runRunner(sessionNum) {
   const cmd = `node ${join(__dirname, 'a-prehook-runner.mjs')} --session ${sessionNum}`;
-  try {
-    const out = execSync(cmd, { encoding: 'utf8', timeout: 20000 });
-    const lines = out.trim().split('\n');
-    for (let i = lines.length - 1; i >= 0; i--) {
-      try { return JSON.parse(lines[i]); } catch {}
-    }
-    throw new Error('No valid JSON in runner output: ' + out.slice(0, 200));
-  } catch (e) {
-    // If the process exits non-zero but still produced JSON on stdout, parse it
-    if (e.stdout) {
-      const lines = e.stdout.trim().split('\n');
-      for (let i = lines.length - 1; i >= 0; i--) {
-        try { return JSON.parse(lines[i]); } catch {}
-      }
-    }
-    throw e;
-  }
+  return execRunner(cmd, { timeout: 20000 });
 }
 
 describe('a-prehook-runner output structure', () => {

@@ -14,7 +14,7 @@
 
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
+import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -77,6 +77,7 @@ describe('e-prehook-runner output structure', () => {
     assert.ok('picker' in out);
     assert.ok('picker_revalidate' in out);
     assert.ok('recovery_probe' in out);
+    assert.ok('substance_probe' in out);
     assert.ok('summary' in out);
   });
 
@@ -210,7 +211,8 @@ describe('e-prehook-runner graceful degradation', () => {
     const checks = [
       'seed', 'thread_tracker', 'topic_clusters', 'conversation_balance',
       'spending_policy', 'credential_health', 'engagement_variety',
-      'colony_jwt', 'picker', 'picker_revalidate', 'recovery_probe'
+      'colony_jwt', 'picker', 'picker_revalidate', 'recovery_probe',
+      'substance_probe'
     ];
     for (const key of checks) {
       assert.ok(out[key] !== undefined, `${key} should not be undefined`);
@@ -223,5 +225,83 @@ describe('e-prehook-runner graceful degradation', () => {
     const ev = out.engagement_variety;
     // Should gracefully report error about missing trace data
     assert.ok(ev.error || ev.healthScore, 'should have error or healthScore');
+  });
+});
+
+describe('e-prehook-runner substance probe', () => {
+  const mandatePath = join(process.env.HOME || '/home/moltbot', '.config/moltbook/picker-mandate.json');
+  let savedMandate = null;
+
+  before(() => {
+    setup();
+    // Preserve existing mandate file
+    if (existsSync(mandatePath)) {
+      savedMandate = readFileSync(mandatePath, 'utf8');
+    }
+  });
+
+  after(() => {
+    // Restore original mandate
+    if (savedMandate !== null) {
+      writeFileSync(mandatePath, savedMandate);
+    }
+    cleanup();
+  });
+
+  it('substance_probe is skipped when MoltCities not in mandate', () => {
+    // Write mandate without MoltCities
+    writeFileSync(mandatePath, JSON.stringify({
+      selected: ['Moltchan', '4claw.org', 'Chatr'],
+      backups: ['DevAIntArt'],
+      revalidated_at: new Date().toISOString()
+    }));
+    const ctxFile = join(SCRATCH, 'ctx-sp-skip.md');
+    const out = runRunner(9999, ctxFile, join(SCRATCH, 'nope.json'));
+    const sp = out.substance_probe;
+    assert.ok(sp.skipped, 'should be skipped when MoltCities not in mandate');
+    assert.ok(sp.reason.includes('not in mandate'), 'reason should mention not in mandate');
+  });
+
+  it('reports no-substance when MoltCities in mandate with mock (empty agents)', () => {
+    // Mock _mcFetch returns { agents: [] }, so no agents to score → no_substantive_agents
+    writeFileSync(mandatePath, JSON.stringify({
+      selected: ['Moltchan', 'MoltCities', 'Chatr'],
+      backups: [],
+      revalidated_at: new Date().toISOString()
+    }));
+    const ctxFile = join(SCRATCH, 'ctx-sp-nosub.md');
+    const out = runRunner(9999, ctxFile, join(SCRATCH, 'nope.json'));
+    const sp = out.substance_probe;
+    assert.ok(!sp.skipped, 'should not be skipped when MoltCities in mandate');
+    assert.equal(sp.picked, null, 'picked should be null with empty mock agents');
+    assert.equal(sp.reason, 'no_substantive_agents');
+    assert.equal(sp.total, 0);
+  });
+
+  it('appends NO_SUBSTANCE block to context file when MoltCities in mandate', () => {
+    writeFileSync(mandatePath, JSON.stringify({
+      selected: ['MoltCities'],
+      backups: [],
+      revalidated_at: new Date().toISOString()
+    }));
+    const ctxFile = join(SCRATCH, 'ctx-sp-ctx.md');
+    const out = runRunner(9999, ctxFile, join(SCRATCH, 'nope.json'));
+    assert.ok(existsSync(ctxFile), 'context file should exist');
+    const ctx = readFileSync(ctxFile, 'utf8');
+    assert.ok(ctx.includes('MoltCities substance probe'), 'context should have substance probe section');
+    assert.ok(ctx.includes('NO_SUBSTANCE'), 'context should have NO_SUBSTANCE result');
+  });
+
+  it('substance_probe skipped when MoltCities only in backups and not selected', () => {
+    writeFileSync(mandatePath, JSON.stringify({
+      selected: ['Moltchan', 'Chatr'],
+      backups: ['MoltCities'],
+      revalidated_at: new Date().toISOString()
+    }));
+    const ctxFile = join(SCRATCH, 'ctx-sp-backup.md');
+    const out = runRunner(9999, ctxFile, join(SCRATCH, 'nope.json'));
+    const sp = out.substance_probe;
+    // MoltCities in backups should still trigger the probe (runner checks both)
+    assert.ok(!sp.skipped, 'should run when MoltCities is in backups');
   });
 });

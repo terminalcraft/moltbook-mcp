@@ -1,32 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1036",
-      "title": "Add resurrect pass audit metric to audit-stats.mjs",
-      "description": "(added ~s2088): Track cumulative platform resurrections from DNS prune resurrect pass. Read services.json for platforms recovered from defunct status, report count in audit stats to gauge whether 200-session resurrect interval is appropriate.",
-      "status": "done",
-      "tags": [
-        "maintenance"
-      ],
-      "added": "s2088",
-      "outcome": {
-        "session": "B#681",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added computeResurrectPassStats() to audit-stats.mjs — tracks currently defunct count, cumulative resurrections from circuits + services, verdict"
-      }
-    },
-    {
       "id": "wq-1038",
       "title": "Add substance probe test to e-prehook-runner.test.mjs",
       "description": "(added ~s2091): wq-1031 added the substance probe to e-prehook-runner.mjs but the test file doesn't yet verify the new `substance_probe` output field. Add a test case that runs with `--mock-network` and checks that `substance_probe` exists in output and has expected shape (skipped/picked/no-substance). Also verify context file gets the substance block appended when MoltCities is in the mandate.",
       "priority": 1038,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-26",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2093",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 4 substance probe tests + key presence in 2 existing tests. All 17 tests pass."
+      }
     },
     {
       "id": "wq-1039",

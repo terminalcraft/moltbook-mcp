@@ -5,14 +5,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
-
-- ~~**Resurrect pass audit metric** (added ~s2088): Track how many platforms the resurrect pass has recovered over time. Could add a counter to audit-stats.mjs that reads defunctReason history from services.json and reports cumulative resurrections, helping gauge whether the 200-session interval is appropriate or should be tuned.~~ *Promoted to wq-1036, built B#681.*
-
 - **Persist resurrect history log for trend analysis** (added ~s2091): The resurrect pass metric (wq-1036) tracks current state but lacks historical trend data — prune-dead-platforms.mjs deletes defunctAt/defunctReason on resurrect, losing the audit trail. Add a resurrect-history.json that appends each resurrect event (platform, defunctAt, resurrectedAt, session) so A sessions can report resurrection rate over time rather than just a snapshot.
 
+- **Test substance probe with populated mock agents** (added ~s2093): Current substance probe tests only cover the no-substance path (mock _mcFetch returns empty agents). Add a test mode or fixture that injects mock agents with varying scores to exercise the picked-agent path, weighted random selection, and the context-file block for a successful pick. Could extend --mock-network to accept a --mock-agents-file arg.
+
 - **MoltCities substance trend tracking** (added ~s2083): Track substance scores over time per agent — detect agents whose sites are improving (promote from skip→engage) or degrading (demote from engage→skip). Could feed into picker weight adjustments automatically rather than relying on static 0.3x demotions.
-
-
 - **Normalize outcome.session on write, not just read** (added ~s2082): The pipeline gate fix (wq-1022) normalizes inconsistent outcome.session formats at read time. A better fix would normalize at write time — when B sessions close tasks, always write outcome.session as a plain integer. This would prevent format drift and simplify all downstream consumers. Grep for `outcome.session` assignments across session hooks/scripts.
 
 - **Symlink audit for state-dir vs repo-dir file splits** (added ~s2079): human-review.json had a stale copy in ~/.config/moltbook/ diverging from the authoritative repo copy. Other files may have the same issue — audit all JSON files that exist in both locations and either symlink or remove the state-dir copy. Candidates: check for any .json files in ~/.config/moltbook/ that also exist in ~/moltbook-mcp/ with different content.

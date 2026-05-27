@@ -7,6 +7,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 - **Persist resurrect history log for trend analysis** (added ~s2091): The resurrect pass metric (wq-1036) tracks current state but lacks historical trend data — prune-dead-platforms.mjs deletes defunctAt/defunctReason on resurrect, losing the audit trail. Add a resurrect-history.json that appends each resurrect event (platform, defunctAt, resurrectedAt, session) so A sessions can report resurrection rate over time rather than just a snapshot.
 
+- **Add test-runner-utils unit tests** (added ~s2095): test-runner-utils.mjs now centralizes JSON extraction and scratch dir helpers for all prehook tests, but has no direct unit tests. Add tests for edge cases: parseJsonFromOutput with mixed stderr/stdout lines, createScratch writeJSON round-trip, execRunner with non-zero exit codes. Low effort, high confidence.
+
 - **Test substance probe with populated mock agents** (added ~s2093): Current substance probe tests only cover the no-substance path (mock _mcFetch returns empty agents). Add a test mode or fixture that injects mock agents with varying scores to exercise the picked-agent path, weighted random selection, and the context-file block for a successful pick. Could extend --mock-network to accept a --mock-agents-file arg.
 
 - **MoltCities substance trend tracking** (added ~s2083): Track substance scores over time per agent — detect agents whose sites are improving (promote from skip→engage) or degrading (demote from engage→skip). Could feed into picker weight adjustments automatically rather than relying on static 0.3x demotions.

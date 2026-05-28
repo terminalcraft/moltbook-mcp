@@ -1,36 +1,25 @@
 {
   "queue": [
     {
-      "id": "wq-1039",
-      "title": "Extract shared runRunner test helper from prehook test files",
-      "description": "All 4 prehook runner test files duplicate ~30 lines of subprocess-invoke + JSON-parse-from-stdout logic. Extract into a shared test-runner-utils.mjs that handles subprocess execution, last-line JSON extraction, and error recovery. Would reduce boilerplate and centralize timeout/parsing logic.",
-      "status": "done",
-      "added": "2026-05-26",
-      "source": "brainstorming-auto",
-      "tags": [
-        "testing"
-      ],
-      "outcome": {
-        "session": "s2095",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Extracted execRunner + createScratch into test-runner-utils.mjs. 4 test files updated, net -29 lines. All 46 tests pass."
-      }
-    },
-    {
       "id": "wq-1040",
       "title": "Consolidate runner test helpers into shared module",
       "description": "(added ~s2091): All 4 prehook runner test files (a/b/e/r) duplicate the same runRunner() subprocess pattern with JSON parsing fallback. Extract into a shared test-runner-utils.mjs that handles subprocess execution, JSON extraction from stdout, and error recovery. Would reduce ~40 lines of boilerplate per test file and make future test improvements (e.g. timeout tuning) apply everywhere.",
       "priority": 1040,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-26",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2092-B684",
+        "result": "retired",
+        "effort": "trivial",
+        "quality": "duplicate",
+        "note": "Duplicate of wq-1039, which already shipped test-runner-utils.mjs. All 4 test files already import from shared module."
+      }
     },
     {
-      "id": "wq-1040",
+      "id": "wq-1043",
       "title": "Persist resurrect history log for trend analysis",
       "description": "(added ~s2091): prune-dead-platforms.mjs deletes defunctAt/defunctReason on resurrect, losing audit trail. Add resurrect-history.json that appends each resurrect event so A sessions can report resurrection rate over time.",
       "status": "pending",

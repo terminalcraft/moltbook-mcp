@@ -14,7 +14,7 @@ import { tmpdir } from 'os';
  * Parse JSON from subprocess output by scanning lines from the end.
  * Handles stderr noise that may precede the JSON line.
  */
-function parseJsonFromOutput(out) {
+export function parseJsonFromOutput(out) {
   const lines = out.trim().split('\n');
   for (let i = lines.length - 1; i >= 0; i--) {
     try { return JSON.parse(lines[i]); } catch {}

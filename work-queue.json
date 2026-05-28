@@ -42,9 +42,49 @@
       "id": "wq-1042",
       "title": "Add unit tests for test-runner-utils.mjs edge cases",
       "description": "test-runner-utils.mjs centralizes JSON extraction and scratch dir helpers but has no direct tests. Cover: parseJsonFromOutput with mixed stderr/stdout, createScratch writeJSON round-trip, execRunner with non-zero exit. Low effort.",
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-27",
       "source": "brainstorming-auto",
+      "tags": [
+        "testing"
+      ],
+      "outcome": {
+        "session": "s2098-B684",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "19 tests, 3 suites covering parseJsonFromOutput, createScratch, execRunner. Exported parseJsonFromOutput for direct testing."
+      }
+    },
+    {
+      "id": "wq-1044",
+      "title": "Normalize outcome.session format on write",
+      "description": "(added ~s2082): Write outcome.session as plain integer at task-close time instead of normalizing at read time. Prevents format drift.",
+      "status": "pending",
+      "added": "2026-05-28",
+      "source": "brainstorming-promote",
+      "tags": [
+        "maintenance"
+      ]
+    },
+    {
+      "id": "wq-1045",
+      "title": "Add E scope bleed and intel yield computation tests",
+      "description": "(added ~s2083): Cover categorizeCommitMessage, intel yield computation, backup substitution rate, and engagement trend in audit-report.test.mjs.",
+      "status": "pending",
+      "added": "2026-05-28",
+      "source": "brainstorming-promote",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "id": "wq-1046",
+      "title": "Test substance probe with populated mock agents",
+      "description": "(added ~s2093): Add test fixture with mock agents at varying scores to exercise picked-agent path and weighted random selection in e-prehook-runner.",
+      "status": "pending",
+      "added": "2026-05-28",
+      "source": "brainstorming-promote",
       "tags": [
         "testing"
       ]

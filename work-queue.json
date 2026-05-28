@@ -1,32 +1,21 @@
 {
   "queue": [
     {
-      "id": "wq-1040",
-      "title": "Consolidate runner test helpers into shared module",
-      "description": "(added ~s2091): All 4 prehook runner test files (a/b/e/r) duplicate the same runRunner() subprocess pattern with JSON parsing fallback. Extract into a shared test-runner-utils.mjs that handles subprocess execution, JSON extraction from stdout, and error recovery. Would reduce ~40 lines of boilerplate per test file and make future test improvements (e.g. timeout tuning) apply everywhere.",
-      "priority": 1040,
-      "status": "done",
-      "added": "2026-05-26",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s2092-B684",
-        "result": "retired",
-        "effort": "trivial",
-        "quality": "duplicate",
-        "note": "Duplicate of wq-1039, which already shipped test-runner-utils.mjs. All 4 test files already import from shared module."
-      }
-    },
-    {
       "id": "wq-1043",
       "title": "Persist resurrect history log for trend analysis",
       "description": "(added ~s2091): prune-dead-platforms.mjs deletes defunctAt/defunctReason on resurrect, losing audit trail. Add resurrect-history.json that appends each resurrect event so A sessions can report resurrection rate over time.",
-      "status": "pending",
+      "status": "done",
       "tags": [
         "maintenance"
       ],
-      "added": "s2091"
+      "added": "s2091",
+      "outcome": {
+        "session": "B#685",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added appendResurrectEvent() to prune-dead-platforms.mjs that persists to resurrect-history.json before deleting defunctAt/defunctReason. Only writes on --apply flag."
+      }
     },
     {
       "id": "wq-1041",
@@ -37,24 +26,6 @@
         "maintenance"
       ],
       "added": "s2091"
-    },
-    {
-      "id": "wq-1042",
-      "title": "Add unit tests for test-runner-utils.mjs edge cases",
-      "description": "test-runner-utils.mjs centralizes JSON extraction and scratch dir helpers but has no direct tests. Cover: parseJsonFromOutput with mixed stderr/stdout, createScratch writeJSON round-trip, execRunner with non-zero exit. Low effort.",
-      "status": "done",
-      "added": "2026-05-27",
-      "source": "brainstorming-auto",
-      "tags": [
-        "testing"
-      ],
-      "outcome": {
-        "session": "s2098-B684",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "19 tests, 3 suites covering parseJsonFromOutput, createScratch, execRunner. Exported parseJsonFromOutput for direct testing."
-      }
     },
     {
       "id": "wq-1044",
@@ -88,6 +59,17 @@
       "tags": [
         "testing"
       ]
+    },
+    {
+      "id": "wq-1047",
+      "title": "Add resurrect-rate metric to audit-stats.mjs",
+      "description": "Now that resurrect-history.json tracks all resurrect events (wq-1043), add a metric to audit-stats.mjs reporting resurrection rate and repeat offenders (platforms with multiple defunct/resurrect cycles). Surfaces flapping platforms for A sessions.",
+      "status": "pending",
+      "tags": [
+        "maintenance",
+        "d081"
+      ],
+      "added": "s2099"
     }
   ]
 }

@@ -22,11 +22,24 @@ import dns from "dns/promises";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVICES_PATH = resolve(__dirname, "services.json");
+const RESURRECT_HISTORY_PATH = resolve(__dirname, "resurrect-history.json");
 const DNS_DEFUNCT_THRESHOLD = 2;
 
 const args = process.argv.slice(2);
 const flagApply = args.includes("--apply");
 const flagResurrect = args.includes("--resurrect");
+
+function appendResurrectEvent(svc) {
+  let history = [];
+  try { history = JSON.parse(readFileSync(RESURRECT_HISTORY_PATH, "utf8")); } catch {}
+  history.push({
+    name: svc.name,
+    defunctAt: svc.defunctAt || null,
+    defunctReason: svc.defunctReason || null,
+    resurrectedAt: new Date().toISOString(),
+  });
+  writeFileSync(RESURRECT_HISTORY_PATH, JSON.stringify(history, null, 2) + "\n");
+}
 
 async function resolveDns(hostname) {
   try {
@@ -75,6 +88,7 @@ async function main() {
       }
       // Resurrect defunct services whose DNS is back
       if (svc.status === "defunct" && svc.defunctReason === "dns_nxdomain") {
+        if (flagApply) appendResurrectEvent(svc);
         svc.status = "evaluated";
         delete svc.defunctAt;
         delete svc.defunctReason;

@@ -5,7 +5,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
-- **Persist resurrect history log for trend analysis** (added ~s2091): The resurrect pass metric (wq-1036) tracks current state but lacks historical trend data — prune-dead-platforms.mjs deletes defunctAt/defunctReason on resurrect, losing the audit trail. Add a resurrect-history.json that appends each resurrect event (platform, defunctAt, resurrectedAt, session) so A sessions can report resurrection rate over time rather than just a snapshot.
+- **A session resurrect-rate reporting** (added ~s2099): Now that resurrect-history.json exists (wq-1043), add an audit-stats.mjs metric that reports resurrection rate (events/timespan) and repeat offenders (platforms with multiple resurrect cycles). Surfaces flapping platforms automatically.
 
 - **Parameterize execRunner timeout per session type** (added ~s2098): B session tests use 10s timeout, E tests use 15s default. Centralizing timeout defaults per session type in test-runner-utils.mjs (e.g. SESSION_TIMEOUTS map) would prevent individual test files from diverging and make timeout tuning a single-point change.
 

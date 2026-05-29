@@ -4,11 +4,18 @@
       "id": "wq-1041",
       "title": "Auto-review expired picker demotions and weight overrides",
       "description": "(added ~s2069): picker-demotions.json has weight_overrides with expired trial_until sessions. Add prehook check that flags demotions >100 sessions old for re-probe and removes expired trials.",
-      "status": "pending",
+      "status": "done",
       "tags": [
         "maintenance"
       ],
-      "added": "s2091"
+      "added": "s2091",
+      "outcome": {
+        "session": 2102,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Created picker-demotion-review.mjs, integrated as Check 5 in b-prehook-runner.mjs. Auto-removes expired weight overrides and flags stale demotions >100 sessions for re-probe. First run cleaned 2 expired trials (clawsta, shipyard)."
+      }
     },
     {
       "id": "wq-1044",
@@ -44,22 +51,25 @@
       ]
     },
     {
-      "id": "wq-1047",
-      "title": "Add resurrect-rate metric to audit-stats.mjs",
-      "description": "Now that resurrect-history.json tracks all resurrect events (wq-1043), add a metric to audit-stats.mjs reporting resurrection rate and repeat offenders (platforms with multiple defunct/resurrect cycles). Surfaces flapping platforms for A sessions.",
-      "status": "done",
+      "id": "wq-1048",
+      "title": "E prehook: auto-probe 1 stale demotion per session",
+      "description": "(added ~s2102): picker-demotion-review.mjs flags stale demotions but only in B prehook output. Add an E session pre-hook that picks 1 stale demotion and runs a lightweight probe (DNS + HTTP 200). If reachable, create wq item to restore it.",
+      "status": "pending",
       "tags": [
         "maintenance",
-        "d081"
+        "engagement"
       ],
-      "added": "s2099",
-      "outcome": {
-        "session": "s2100",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added computeResurrectRate() to audit-stats.mjs — reads resurrect-history.json, reports total events, 30d window, per-platform counts, repeat offenders (2+ cycles), flapping verdict. Tested with synthetic data."
-      }
+      "added": "s2102"
+    },
+    {
+      "id": "wq-1049",
+      "title": "Add unit tests for picker-demotion-review.mjs",
+      "description": "(added ~s2102): New module has no test coverage. Test expired trial removal, stale demotion flagging, edge cases (empty arrays, no trial_until field, session 0).",
+      "status": "pending",
+      "tags": [
+        "testing"
+      ],
+      "added": "s2102"
     }
   ]
 }

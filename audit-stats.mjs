@@ -1052,6 +1052,61 @@ function computeResurrectPassStats() {
   };
 }
 
+// --- Resurrect rate and flapping platforms (wq-1047) ---
+
+function computeResurrectRate() {
+  const historyPath = join(PROJECT_DIR, 'resurrect-history.json');
+  const history = safeRead(historyPath, []);
+
+  if (!Array.isArray(history) || history.length === 0) {
+    return { total_events: 0, unique_platforms: 0, repeat_offenders: [], verdict: 'no_data' };
+  }
+
+  // Group by platform name
+  const byPlatform = {};
+  for (const event of history) {
+    const name = event.name || 'unknown';
+    if (!byPlatform[name]) byPlatform[name] = [];
+    byPlatform[name].push({
+      defunctAt: event.defunctAt || null,
+      resurrectedAt: event.resurrectedAt || null,
+      reason: event.defunctReason || null
+    });
+  }
+
+  const uniquePlatforms = Object.keys(byPlatform).length;
+
+  // Repeat offenders: platforms with 2+ resurrect events (defunct/resurrect cycles)
+  const repeatOffenders = Object.entries(byPlatform)
+    .filter(([, events]) => events.length >= 2)
+    .map(([name, events]) => ({ platform: name, cycles: events.length, events }))
+    .sort((a, b) => b.cycles - a.cycles);
+
+  // Time-windowed rate: events in last 30 days
+  const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+  const recentEvents = history.filter(e => {
+    const ts = e.resurrectedAt ? new Date(e.resurrectedAt).getTime() : 0;
+    return ts > thirtyDaysAgo;
+  });
+
+  let verdict;
+  if (repeatOffenders.length >= 3) verdict = 'high_flapping';
+  else if (repeatOffenders.length >= 1) verdict = 'some_flapping';
+  else if (history.length > 0) verdict = 'healthy';
+  else verdict = 'no_data';
+
+  return {
+    total_events: history.length,
+    unique_platforms: uniquePlatforms,
+    recent_30d: recentEvents.length,
+    by_platform: Object.fromEntries(
+      Object.entries(byPlatform).map(([name, events]) => [name, events.length])
+    ),
+    repeat_offenders: repeatOffenders,
+    verdict
+  };
+}
+
 // --- Knowledge staleness metric (wq-1023, d081) ---
 
 function computeKnowledgeStaleness() {
@@ -1220,7 +1275,8 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
     human_review_validation: computeHumanReviewValidation(),
     auto_retired_items: computeAutoRetiredItems(),
     knowledge_staleness: computeKnowledgeStaleness(),
-    resurrect_pass: computeResurrectPassStats()
+    resurrect_pass: computeResurrectPassStats(),
+    resurrect_rate: computeResurrectRate()
   };
 
   console.log(JSON.stringify(stats, null, 2));

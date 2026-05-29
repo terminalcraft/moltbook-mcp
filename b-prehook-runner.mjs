@@ -25,6 +25,7 @@ import { safeRun } from './lib/runner-utils.mjs';
 import { lintTitles } from './queue-title-lint.mjs';
 import { getPipelineGateStats } from './hooks/lib/pipeline-nudge-stats.mjs';
 import { revalidatePatterns } from './knowledge-revalidate.mjs';
+import { reviewPickerDemotions } from './picker-demotion-review.mjs';
 
 const sessionNum = parseInt(process.argv[2], 10) || 0;
 const mcpDir = process.argv[3] || '.';
@@ -158,6 +159,30 @@ if (!knowledgeRevalidate.ok) {
   }
 }
 
+// ---- Check 5: Picker demotion review (wq-1041) ----
+
+const demotionReview = safeRun('picker-demotion-review', () => {
+  return reviewPickerDemotions(sessionNum, mcpDir);
+});
+
+if (!demotionReview.ok) {
+  summary.push('[picker-demotions] ERROR: runner failed');
+} else {
+  const r = demotionReview.result;
+  if (r.expiredTrials.length > 0) {
+    summary.push(`[picker-demotions] Removed ${r.expiredTrials.length} expired weight override(s):`);
+    for (const t of r.expiredTrials) {
+      summary.push(`  ${t.id}: trial expired ${t.sessions_past} sessions ago`);
+    }
+  }
+  if (r.staleDemotions.length > 0) {
+    summary.push(`[picker-demotions] ${r.staleDemotions.length} demotion(s) >100 sessions old — consider re-probe:`);
+    for (const d of r.staleDemotions) {
+      summary.push(`  ${d.id}: demoted ${d.sessions_age} sessions ago (${d.demoted_at})`);
+    }
+  }
+}
+
 // ---- Output ----
 
 const output = {
@@ -165,6 +190,7 @@ const output = {
   stuck_items: stuckItems.ok ? stuckItems.result : { error: stuckItems.error },
   pipeline_nudge: pipelineNudge.ok ? pipelineNudge.result : { error: pipelineNudge.error },
   knowledge_revalidate: knowledgeRevalidate.ok ? knowledgeRevalidate.result : { error: knowledgeRevalidate.error },
+  demotion_review: demotionReview.ok ? demotionReview.result : { error: demotionReview.error },
   summary: summary.join('\n'),
   stuck_nudge: stuckNudgeLines.join('\n'),
 };

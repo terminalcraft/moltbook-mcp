@@ -5,7 +5,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
-- ~~**A session resurrect-rate reporting** (added ~s2099): Built in wq-1047.~~
+- **Promote stale demotions to re-probe queue** (added ~s2102): picker-demotion-review.mjs now flags demotions >100 sessions old, but only as prehook output. Add an E session pre-hook that picks 1 stale demotion per session and runs a lightweight probe (DNS + HTTP 200 check) — if the platform responds, auto-create a wq item to restore it. Would reclaim platforms that silently came back online.
+
 - **Auto-demote flapping platforms from picker** (added ~s2100): When resurrect-rate metric shows a platform with 3+ cycles, auto-add it to picker-demotions.json with reduced weight. Currently resurrect-rate surfaces flapping but doesn't act on it — closing the loop would reduce wasted E session substitutions on chronically unstable platforms.
 
 - **Parameterize execRunner timeout per session type** (added ~s2098): B session tests use 10s timeout, E tests use 15s default. Centralizing timeout defaults per session type in test-runner-utils.mjs (e.g. SESSION_TIMEOUTS map) would prevent individual test files from diverging and make timeout tuning a single-point change.

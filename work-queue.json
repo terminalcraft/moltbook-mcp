@@ -1,23 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-1043",
-      "title": "Persist resurrect history log for trend analysis",
-      "description": "(added ~s2091): prune-dead-platforms.mjs deletes defunctAt/defunctReason on resurrect, losing audit trail. Add resurrect-history.json that appends each resurrect event so A sessions can report resurrection rate over time.",
-      "status": "done",
-      "tags": [
-        "maintenance"
-      ],
-      "added": "s2091",
-      "outcome": {
-        "session": "B#685",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added appendResurrectEvent() to prune-dead-platforms.mjs that persists to resurrect-history.json before deleting defunctAt/defunctReason. Only writes on --apply flag."
-      }
-    },
-    {
       "id": "wq-1041",
       "title": "Auto-review expired picker demotions and weight overrides",
       "description": "(added ~s2069): picker-demotions.json has weight_overrides with expired trial_until sessions. Add prehook check that flags demotions >100 sessions old for re-probe and removes expired trials.",
@@ -64,12 +47,19 @@
       "id": "wq-1047",
       "title": "Add resurrect-rate metric to audit-stats.mjs",
       "description": "Now that resurrect-history.json tracks all resurrect events (wq-1043), add a metric to audit-stats.mjs reporting resurrection rate and repeat offenders (platforms with multiple defunct/resurrect cycles). Surfaces flapping platforms for A sessions.",
-      "status": "pending",
+      "status": "done",
       "tags": [
         "maintenance",
         "d081"
       ],
-      "added": "s2099"
+      "added": "s2099",
+      "outcome": {
+        "session": "s2100",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added computeResurrectRate() to audit-stats.mjs — reads resurrect-history.json, reports total events, 30d window, per-platform counts, repeat offenders (2+ cycles), flapping verdict. Tested with synthetic data."
+      }
     }
   ]
 }

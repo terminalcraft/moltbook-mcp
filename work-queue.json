@@ -1,34 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1044",
-      "title": "Normalize outcome.session format on write",
-      "description": "(added ~s2082): Write outcome.session as plain integer at task-close time instead of normalizing at read time. Prevents format drift.",
+      "id": "wq-1045",
+      "title": "Add E scope bleed and intel yield computation tests",
+      "description": "(added ~s2083): Cover categorizeCommitMessage, intel yield computation, backup substitution rate, and engagement trend in audit-report.test.mjs.",
       "status": "done",
       "added": "2026-05-28",
       "source": "brainstorming-promote",
       "tags": [
-        "maintenance"
-      ],
-      "completed": "2026-05-30",
-      "outcome": {
-        "session": 2103,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added normalizeOutcomeSession() to save() + extended done CLI with outcome flags. Write-side fix prevents format drift."
-      }
-    },
-    {
-      "id": "wq-1045",
-      "title": "Add E scope bleed and intel yield computation tests",
-      "description": "(added ~s2083): Cover categorizeCommitMessage, intel yield computation, backup substitution rate, and engagement trend in audit-report.test.mjs.",
-      "status": "pending",
-      "added": "2026-05-28",
-      "source": "brainstorming-promote",
-      "tags": [
         "testing"
-      ]
+      ],
+      "outcome": {
+        "session": 2089,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "25 tests added across 4 new sections (15-18): categorizeCommitMessage, intel yield, backup substitution rate, engagement trend. All 142 tests pass."
+      }
     },
     {
       "id": "wq-1046",

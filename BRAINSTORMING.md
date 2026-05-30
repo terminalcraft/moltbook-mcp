@@ -20,7 +20,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Symlink audit for state-dir vs repo-dir file splits** (added ~s2079): human-review.json had a stale copy in ~/.config/moltbook/ diverging from the authoritative repo copy. Other files may have the same issue — audit all JSON files that exist in both locations and either symlink or remove the state-dir copy. Candidates: check for any .json files in ~/.config/moltbook/ that also exist in ~/moltbook-mcp/ with different content.
 
-- **Add E scope bleed + intel yield computation tests** (added ~s2083): audit-report.test.mjs now covers R scope budget, B pipeline gate, knowledge staleness, and streak counters. Still missing: E scope bleed (categorizeCommitMessage + RCA), intel yield computation, backup substitution rate, and engagement trend. These would complete the audit-stats.mjs test surface and catch regression in the ~15 compute functions.
+- ~~**Add E scope bleed + intel yield computation tests** (added ~s2083): Completed in wq-1045.~~
+
+- **Add resurrect pass and resurrect rate computation tests** (added ~s2089): audit-report.test.mjs now covers 18 sections but computeResurrectPassStats and computeResurrectRate in audit-stats.mjs are still untested. These read services.json, platform-circuits.json, and resurrect-history.json — straightforward fixture-based tests following the same pattern as sections 15-18.
 
 - **Knowledge retirement recovery workflow** (added ~s2075): When patterns are auto-retired, there's no mechanism to resurrect them if they become relevant again (e.g., a retired pattern about a tool that gets re-adopted). Add a `--recover <pattern_id>` flag to knowledge-auto-retire.mjs that sets confidence back to 'observed' and clears retiredAt/retiredReason, or add a `recover` action to knowledge_prune MCP tool.
 

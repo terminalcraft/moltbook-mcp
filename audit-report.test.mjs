@@ -14,6 +14,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { categorizeCommitMessage } from './audit-stats.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCRATCH = join(tmpdir(), 'audit-test-' + Date.now());
@@ -1640,5 +1641,377 @@ describe('audit-stats knowledge staleness (wq-1002)', () => {
     assert.equal(stats.knowledge_staleness.stale_pct, 50);
     // 50% > 30% but not > 50%, so elevated
     assert.equal(stats.knowledge_staleness.verdict, 'elevated');
+  });
+});
+
+// ─── Section 15: categorizeCommitMessage (wq-1045) ──────────────────────
+
+describe('categorizeCommitMessage (wq-1045)', () => {
+  it('classifies fix: prefix on engagement files as justified bug-fix', () => {
+    const result = categorizeCommitMessage('fix: handle picker crash', ['engagement-picker.mjs']);
+    assert.equal(result.category, 'bug-fix');
+    assert.equal(result.label, 'reactive');
+    assert.equal(result.justified, true);
+  });
+
+  it('classifies fix: prefix on non-engagement files as unjustified bug-fix', () => {
+    const result = categorizeCommitMessage('fix: typo in README', ['README.md']);
+    assert.equal(result.category, 'bug-fix');
+    assert.equal(result.label, 'reactive');
+    assert.equal(result.justified, false);
+  });
+
+  it('classifies config-only JSON changes as accidental/justified', () => {
+    const result = categorizeCommitMessage('chore: update credentials', ['account-registry.json', 'config.json']);
+    assert.equal(result.category, 'config');
+    assert.equal(result.label, 'accidental');
+    assert.equal(result.justified, true);
+  });
+
+  it('classifies feat: prefix as proactive discipline failure', () => {
+    const result = categorizeCommitMessage('feat: add new tool', ['new-tool.mjs']);
+    assert.equal(result.category, 'feature');
+    assert.equal(result.label, 'proactive');
+    assert.equal(result.justified, false);
+  });
+
+  it('classifies refactor: prefix as proactive discipline failure', () => {
+    const result = categorizeCommitMessage('refactor: simplify parser', ['parser.mjs']);
+    assert.equal(result.category, 'feature');
+    assert.equal(result.label, 'proactive');
+    assert.equal(result.justified, false);
+  });
+
+  it('classifies .mjs files without conventional prefix as feature', () => {
+    const result = categorizeCommitMessage('update some module', ['module.mjs']);
+    assert.equal(result.category, 'feature');
+    assert.equal(result.label, 'proactive');
+    assert.equal(result.justified, false);
+  });
+
+  it('returns unknown for unclassifiable commits', () => {
+    const result = categorizeCommitMessage('misc changes', ['notes.txt']);
+    assert.equal(result.category, 'unknown');
+    assert.equal(result.label, 'unclassified');
+  });
+
+  it('recognizes engagement infrastructure keywords in files', () => {
+    const engFiles = ['verify-server.cjs', 'engagement-state.json', 'picker-config.json',
+      'compliance-check.mjs', 'credential-rotate.sh'];
+    for (const f of engFiles) {
+      const result = categorizeCommitMessage('fix broken thing', [f]);
+      assert.equal(result.justified, true,
+        `file "${f}" should be recognized as engagement infrastructure`);
+    }
+  });
+});
+
+// ─── Section 16: intel yield computation (wq-1045) ──────────────────────
+
+describe('audit-stats intel yield computation (wq-1045)', () => {
+  before(() => {
+    setupDirs();
+    patchAuditStats();
+    writeJSON(STATE, 'engagement-intel.json', []);
+    writeJSON(STATE, 'engagement-intel-archive.json', []);
+    writeJSON(SRC, 'work-queue.json', { queue: [] });
+    writeJSON(SRC, 'directives.json', { directives: [] });
+    writeFileSync(join(SRC, 'BRAINSTORMING.md'), '# Brainstorming\n');
+    writeFileSync(join(STATE, 'session-history.txt'), '');
+    mkdirSync(join(SRC, 'knowledge'), { recursive: true });
+  });
+
+  after(() => {
+    cleanupDirs();
+  });
+
+  it('returns no_data when no intel-sourced items exist', () => {
+    writeJSON(SRC, 'work-queue-archive.json', { archived: [] });
+    const stats = runStats('100');
+    assert.equal(stats.pipelines.intel_yield.total, 0);
+    assert.equal(stats.pipelines.intel_yield.verdict, 'no_data');
+  });
+
+  it('computes yield from completed vs retired intel items', () => {
+    writeJSON(SRC, 'work-queue-archive.json', {
+      archived: [
+        { id: 'wq-10', source: 'intel', status: 'done', outcome: { result: 'completed' } },
+        { id: 'wq-11', source: 'intel', status: 'done', outcome: { result: 'completed' } },
+        { id: 'wq-12', source: 'intel', status: 'done', outcome: { result: 'retired' } },
+        { id: 'wq-13', source: 'intel-brainstorm', status: 'done', outcome: { result: 'completed' } },
+      ]
+    });
+
+    const stats = runStats('100');
+    assert.equal(stats.pipelines.intel_yield.total, 4);
+    assert.equal(stats.pipelines.intel_yield.built, 3);
+    assert.equal(stats.pipelines.intel_yield.retired, 1);
+    assert.equal(stats.pipelines.intel_yield.yield_pct, 75);
+    assert.equal(stats.pipelines.intel_yield.verdict, 'healthy');
+  });
+
+  it('counts deferred items separately', () => {
+    writeJSON(SRC, 'work-queue-archive.json', {
+      archived: [
+        { id: 'wq-20', source: 'intel', status: 'done', outcome: { result: 'deferred' } },
+        { id: 'wq-21', source: 'intel', status: 'done', outcome: { result: 'completed' } },
+      ]
+    });
+
+    const stats = runStats('100');
+    assert.equal(stats.pipelines.intel_yield.deferred, 1);
+    assert.equal(stats.pipelines.intel_yield.built, 1);
+    // yield_pct is built/(built+retired), deferred excluded from ratio
+    assert.equal(stats.pipelines.intel_yield.yield_pct, 100);
+  });
+
+  it('handles older format with status field directly', () => {
+    writeJSON(SRC, 'work-queue-archive.json', {
+      archived: [
+        { id: 'wq-30', source: 'intel', status: 'completed' },
+        { id: 'wq-31', source: 'intel', status: 'retired' },
+      ]
+    });
+
+    const stats = runStats('100');
+    assert.equal(stats.pipelines.intel_yield.built, 1);
+    assert.equal(stats.pipelines.intel_yield.retired, 1);
+    assert.equal(stats.pipelines.intel_yield.yield_pct, 50);
+    // 50% is not < 50, so verdict is 'healthy' (boundary: < 50 → moderate_yield)
+    assert.equal(stats.pipelines.intel_yield.verdict, 'healthy');
+  });
+
+  it('classifies non-actionable quality as retired when status is not done/completed', () => {
+    // quality fallback only applies when status doesn't match done/completed/retired
+    writeJSON(SRC, 'work-queue-archive.json', {
+      archived: [
+        { id: 'wq-40', source: 'intel', status: 'archived', outcome: { quality: 'non-actionable' } },
+        { id: 'wq-41', source: 'intel', status: 'archived', outcome: { quality: 'duplicate' } },
+      ]
+    });
+
+    const stats = runStats('100');
+    assert.equal(stats.pipelines.intel_yield.retired, 2);
+    assert.equal(stats.pipelines.intel_yield.yield_pct, 0);
+    assert.equal(stats.pipelines.intel_yield.verdict, 'low_yield');
+  });
+
+  it('ignores non-intel-sourced items', () => {
+    writeJSON(SRC, 'work-queue-archive.json', {
+      archived: [
+        { id: 'wq-50', source: 'brainstorming', status: 'done', outcome: { result: 'completed' } },
+        { id: 'wq-51', source: 'audit', status: 'done', outcome: { result: 'completed' } },
+        { id: 'wq-52', source: 'intel', status: 'done', outcome: { result: 'completed' } },
+      ]
+    });
+
+    const stats = runStats('100');
+    assert.equal(stats.pipelines.intel_yield.total, 1);
+    assert.equal(stats.pipelines.intel_yield.built, 1);
+  });
+});
+
+// ─── Section 17: backup substitution rate (wq-1045) ─────────────────────
+
+describe('audit-stats backup substitution rate (wq-1045)', () => {
+  before(() => {
+    setupDirs();
+    patchAuditStats();
+    writeJSON(STATE, 'engagement-intel.json', []);
+    writeJSON(STATE, 'engagement-intel-archive.json', []);
+    writeJSON(SRC, 'work-queue.json', { queue: [] });
+    writeJSON(SRC, 'work-queue-archive.json', { archived: [] });
+    writeJSON(SRC, 'directives.json', { directives: [] });
+    writeFileSync(join(SRC, 'BRAINSTORMING.md'), '# Brainstorming\n');
+    writeFileSync(join(STATE, 'session-history.txt'), '');
+  });
+
+  after(() => {
+    cleanupDirs();
+  });
+
+  it('returns no_data when no trace entries exist', () => {
+    writeJSON(STATE, 'engagement-trace.json', []);
+    writeJSON(STATE, 'engagement-trace-archive.json', []);
+
+    const stats = runStats('100');
+    assert.equal(stats.backup_substitution_rate.sessions_checked, 0);
+    assert.equal(stats.backup_substitution_rate.verdict, 'no_data');
+  });
+
+  it('returns clean when no substitutions occurred', () => {
+    writeJSON(STATE, 'engagement-trace.json', [
+      { session: 90, platforms_engaged: ['Moltchan'], backup_substitutions: [] },
+      { session: 91, platforms_engaged: ['4claw'], backup_substitutions: [] },
+    ]);
+    writeJSON(STATE, 'engagement-trace-archive.json', []);
+
+    const stats = runStats('100');
+    assert.equal(stats.backup_substitution_rate.total_substitutions, 0);
+    assert.equal(stats.backup_substitution_rate.verdict, 'clean');
+  });
+
+  it('counts substitutions and identifies top replaced platform', () => {
+    writeJSON(STATE, 'engagement-trace.json', [
+      { session: 90, platforms_engaged: ['Moltchan'], backup_substitutions: [
+        { original: 'Bluesky', replacement: 'Moltchan' }
+      ]},
+      { session: 91, platforms_engaged: ['4claw'], backup_substitutions: [
+        { original: 'Bluesky', replacement: '4claw' },
+        { original: 'Tulip', replacement: 'Chatr' }
+      ]},
+    ]);
+    writeJSON(STATE, 'engagement-trace-archive.json', []);
+
+    const stats = runStats('100');
+    assert.equal(stats.backup_substitution_rate.total_substitutions, 3);
+    assert.equal(stats.backup_substitution_rate.by_platform.Bluesky, 2);
+    assert.equal(stats.backup_substitution_rate.by_platform.Tulip, 1);
+    assert.equal(stats.backup_substitution_rate.verdict, 'occasional');
+  });
+
+  it('recommends circuit break for platform substituted >=3 times in 10 sessions', () => {
+    const traces = [];
+    for (let i = 0; i < 5; i++) {
+      traces.push({
+        session: 80 + i,
+        platforms_engaged: ['Moltchan'],
+        backup_substitutions: [{ original: 'Bluesky', replacement: 'Moltchan' }]
+      });
+    }
+    writeJSON(STATE, 'engagement-trace.json', traces);
+    writeJSON(STATE, 'engagement-trace-archive.json', []);
+
+    const stats = runStats('100');
+    assert.equal(stats.backup_substitution_rate.circuit_break_candidates.length, 1);
+    assert.equal(stats.backup_substitution_rate.circuit_break_candidates[0].platform, 'Bluesky');
+    assert.equal(stats.backup_substitution_rate.verdict, 'circuit_break_recommended');
+  });
+
+  it('combines current and archive traces', () => {
+    writeJSON(STATE, 'engagement-trace-archive.json', [
+      { session: 80, platforms_engaged: ['Moltchan'], backup_substitutions: [
+        { original: 'Tulip', replacement: 'Moltchan' }
+      ]},
+    ]);
+    writeJSON(STATE, 'engagement-trace.json', [
+      { session: 90, platforms_engaged: ['4claw'], backup_substitutions: [] },
+    ]);
+
+    const stats = runStats('100');
+    assert.equal(stats.backup_substitution_rate.sessions_checked, 2);
+    assert.equal(stats.backup_substitution_rate.total_substitutions, 1);
+  });
+});
+
+// ─── Section 18: E engagement trend (wq-1045) ──────────────────────────
+
+describe('audit-stats E engagement trend (wq-1045)', () => {
+  before(() => {
+    setupDirs();
+    patchAuditStats();
+    writeJSON(STATE, 'engagement-intel.json', []);
+    writeJSON(STATE, 'engagement-intel-archive.json', []);
+    writeJSON(SRC, 'work-queue.json', { queue: [] });
+    writeJSON(SRC, 'work-queue-archive.json', { archived: [] });
+    writeJSON(SRC, 'directives.json', { directives: [] });
+    writeFileSync(join(SRC, 'BRAINSTORMING.md'), '# Brainstorming\n');
+    writeFileSync(join(STATE, 'session-history.txt'), '');
+  });
+
+  after(() => {
+    cleanupDirs();
+  });
+
+  it('returns no_data when no trace entries exist', () => {
+    writeJSON(STATE, 'engagement-trace.json', []);
+    writeJSON(STATE, 'engagement-trace-archive.json', []);
+
+    const stats = runStats('100');
+    assert.equal(stats.e_engagement_trend.sessions_checked, 0);
+    assert.equal(stats.e_engagement_trend.verdict, 'no_data');
+  });
+
+  it('reports healthy when all sessions meet thread floor', () => {
+    const traces = [];
+    for (let i = 0; i < 5; i++) {
+      traces.push({
+        session: 80 + i,
+        threads_contributed: 3,
+        platforms_engaged: ['Moltchan', '4claw', 'MoltCities']
+      });
+    }
+    writeJSON(STATE, 'engagement-trace.json', traces);
+    writeJSON(STATE, 'engagement-trace-archive.json', []);
+
+    const stats = runStats('100');
+    assert.equal(stats.e_engagement_trend.avg_threads, 3);
+    assert.equal(stats.e_engagement_trend.floor_violations, 0);
+    assert.equal(stats.e_engagement_trend.thread_floor, 2);
+    assert.equal(stats.e_engagement_trend.verdict, 'healthy');
+  });
+
+  it('detects engagement_thinning with >=3 floor violations', () => {
+    const traces = [];
+    for (let i = 0; i < 5; i++) {
+      traces.push({
+        session: 80 + i,
+        threads_contributed: 1,
+        platforms_engaged: ['Moltchan']
+      });
+    }
+    writeJSON(STATE, 'engagement-trace.json', traces);
+    writeJSON(STATE, 'engagement-trace-archive.json', []);
+
+    const stats = runStats('100');
+    assert.equal(stats.e_engagement_trend.floor_violations, 5);
+    assert.equal(stats.e_engagement_trend.verdict, 'engagement_thinning');
+  });
+
+  it('falls back to platforms_engaged length when threads_contributed missing', () => {
+    writeJSON(STATE, 'engagement-trace.json', [
+      { session: 90, platforms_engaged: ['Moltchan', '4claw', 'MoltCities'] },
+    ]);
+    writeJSON(STATE, 'engagement-trace-archive.json', []);
+
+    const stats = runStats('100');
+    assert.equal(stats.e_engagement_trend.avg_threads, 3);
+    assert.equal(stats.e_engagement_trend.detail[0].threads, 3);
+  });
+
+  it('deduplicates by session number across current and archive', () => {
+    writeJSON(STATE, 'engagement-trace-archive.json', [
+      { session: 90, threads_contributed: 3, platforms_engaged: ['A', 'B', 'C'] },
+    ]);
+    writeJSON(STATE, 'engagement-trace.json', [
+      { session: 90, threads_contributed: 3, platforms_engaged: ['A', 'B', 'C'] },
+      { session: 91, threads_contributed: 2, platforms_engaged: ['A', 'B'] },
+    ]);
+
+    const stats = runStats('100');
+    // Session 90 should appear only once
+    assert.equal(stats.e_engagement_trend.sessions_checked, 2);
+    assert.deepEqual(stats.e_engagement_trend.sessions, ['s90', 's91']);
+  });
+
+  it('computes declining trend when last-5 avg drops with few floor violations', () => {
+    const traces = [];
+    // First 5 sessions with high threads
+    for (let i = 0; i < 5; i++) {
+      traces.push({ session: 80 + i, threads_contributed: 4, platforms_engaged: ['A', 'B', 'C', 'D'] });
+    }
+    // Last 5 sessions: mostly at floor but 2 below (< 3 violations to avoid engagement_thinning)
+    traces.push({ session: 85, threads_contributed: 2, platforms_engaged: ['A', 'B'] });
+    traces.push({ session: 86, threads_contributed: 1, platforms_engaged: ['A'] });
+    traces.push({ session: 87, threads_contributed: 2, platforms_engaged: ['A', 'B'] });
+    traces.push({ session: 88, threads_contributed: 1, platforms_engaged: ['A'] });
+    traces.push({ session: 89, threads_contributed: 2, platforms_engaged: ['A', 'B'] });
+    writeJSON(STATE, 'engagement-trace.json', traces);
+    writeJSON(STATE, 'engagement-trace-archive.json', []);
+
+    const stats = runStats('100');
+    assert.equal(stats.e_engagement_trend.trend, '↓');
+    // floor_violations is 2 (< 3), but >= 1 and trend is ↓ → declining
+    assert.equal(stats.e_engagement_trend.verdict, 'declining');
   });
 });

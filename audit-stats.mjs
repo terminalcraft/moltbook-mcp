@@ -1157,6 +1157,8 @@ const AUTO_RETIRE_AGE = 50; // Sessions behind current to trigger auto-retiremen
  * Moves them from work-queue.json to work-queue-archive.json with a retirement outcome.
  * Returns { retired: [{id, title, age}], count: N }.
  */
+export { categorizeCommitMessage };
+
 export function autoRetireStuckItems() {
   const queuePath = join(PROJECT_DIR, 'work-queue.json');
   const archivePath = join(PROJECT_DIR, 'work-queue-archive.json');

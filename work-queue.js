@@ -26,7 +26,30 @@ function load() {
   return JSON.parse(readFileSync(QUEUE_FILE, "utf8"));
 }
 
+// wq-1044: Normalize outcome.session to plain integer on every write.
+// Handles formats like "s2100", "B#658 (s2063)", "B#659-s2059", or already-integer.
+// "B#685" (type counter only, no global session) is left as-is — can't recover correct value.
+function normalizeOutcomeSession(val) {
+  if (val == null) return undefined;
+  if (typeof val === "number") return val;
+  if (typeof val === "string") {
+    // Prefer sNNNN pattern (global session number)
+    const sMatch = val.match(/s(\d+)/i);
+    if (sMatch) return parseInt(sMatch[1], 10);
+    // Pure numeric string → integer
+    if (/^\d+$/.test(val.trim())) return parseInt(val.trim(), 10);
+  }
+  return val; // fallback: leave as-is if unparseable (e.g. "B#685" without session ref)
+}
+
 function save(data) {
+  // Normalize outcome.session on all items before writing (wq-1044)
+  for (const item of data.queue) {
+    if (item.outcome && item.outcome.session !== undefined) {
+      const normalized = normalizeOutcomeSession(item.outcome.session);
+      if (normalized !== undefined) item.outcome.session = normalized;
+    }
+  }
   writeFileSync(QUEUE_FILE, JSON.stringify(data, null, 2) + "\n");
 }
 
@@ -123,12 +146,29 @@ switch (cmd) {
   case "done": {
     const id = args[0];
     const hash = args[1];
+    // Parse --result, --effort, --quality, --note flags for outcome (wq-1044)
+    let result = "completed", effort = "moderate", quality = "well-scoped", note = "";
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] === "--result" && args[i + 1]) result = args[++i];
+      else if (args[i] === "--effort" && args[i + 1]) effort = args[++i];
+      else if (args[i] === "--quality" && args[i + 1]) quality = args[++i];
+      else if (args[i] === "--note" && args[i + 1]) note = args[++i];
+    }
     const item = id ? data.queue.find(i => i.id === id) : data.queue.find(i => i.status === "in-progress");
     if (!item) { console.log("No in-progress item found."); break; }
+    const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
     item.status = "done";
     item.completed = new Date().toISOString().slice(0, 10);
-    item.completed_session = parseInt(process.env.SESSION_NUM || "0", 10); // wq-200: velocity tracking
+    item.completed_session = sessionNum; // wq-200: velocity tracking
     if (hash) item.commits = [...(item.commits || []), hash];
+    // wq-1044: Always write outcome.session as plain integer
+    item.outcome = {
+      session: sessionNum,
+      result,
+      effort,
+      quality,
+      note: note || `Completed in session ${sessionNum}`
+    };
     save(data);
     console.log(`Done: ${item.id} — ${item.title}`);
     break;

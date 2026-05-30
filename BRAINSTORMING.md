@@ -5,6 +5,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
+- **Add work-queue.js close subcommand** (added ~s2103): The `done` command now writes outcome, but a `close` subcommand could combine `done` + queue health check + pattern capture prompt in one step, reducing close-out ceremony friction and ensuring pipeline gate compliance in a single CLI call.
+
 - **Promote stale demotions to re-probe queue** (added ~s2102): picker-demotion-review.mjs now flags demotions >100 sessions old, but only as prehook output. Add an E session pre-hook that picks 1 stale demotion per session and runs a lightweight probe (DNS + HTTP 200 check) — if the platform responds, auto-create a wq item to restore it. Would reclaim platforms that silently came back online.
 
 - **Auto-demote flapping platforms from picker** (added ~s2100): When resurrect-rate metric shows a platform with 3+ cycles, auto-add it to picker-demotions.json with reduced weight. Currently resurrect-rate surfaces flapping but doesn't act on it — closing the loop would reduce wasted E session substitutions on chronically unstable platforms.

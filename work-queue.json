@@ -1,32 +1,23 @@
 {
   "queue": [
     {
-      "id": "wq-1041",
-      "title": "Auto-review expired picker demotions and weight overrides",
-      "description": "(added ~s2069): picker-demotions.json has weight_overrides with expired trial_until sessions. Add prehook check that flags demotions >100 sessions old for re-probe and removes expired trials.",
-      "status": "done",
-      "tags": [
-        "maintenance"
-      ],
-      "added": "s2091",
-      "outcome": {
-        "session": 2102,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Created picker-demotion-review.mjs, integrated as Check 5 in b-prehook-runner.mjs. Auto-removes expired weight overrides and flags stale demotions >100 sessions for re-probe. First run cleaned 2 expired trials (clawsta, shipyard)."
-      }
-    },
-    {
       "id": "wq-1044",
       "title": "Normalize outcome.session format on write",
       "description": "(added ~s2082): Write outcome.session as plain integer at task-close time instead of normalizing at read time. Prevents format drift.",
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-28",
       "source": "brainstorming-promote",
       "tags": [
         "maintenance"
-      ]
+      ],
+      "completed": "2026-05-30",
+      "outcome": {
+        "session": 2103,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added normalizeOutcomeSession() to save() + extended done CLI with outcome flags. Write-side fix prevents format drift."
+      }
     },
     {
       "id": "wq-1045",

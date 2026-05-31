@@ -5,8 +5,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 **Expiry rules**: Ideas older than 30 sessions without promotion are auto-retired. Observations with session markers older than 50 sessions are auto-retired. Both enforced by A session pre-hook.
 
 ## Ideas
-- **Add work-queue.js close subcommand** (added ~s2103): The `done` command now writes outcome, but a `close` subcommand could combine `done` + queue health check + pattern capture prompt in one step, reducing close-out ceremony friction and ensuring pipeline gate compliance in a single CLI call.
 
+- **Test substance probe edge cases: tie-breaking and single-agent** (added ~s2106): Current weighted selection tests cover basic distribution but not edge cases like all agents having identical scores (uniform distribution) or a single engageable agent (deterministic pick). Would strengthen confidence in the selection logic.
 - **Promote stale demotions to re-probe queue** (added ~s2102): picker-demotion-review.mjs now flags demotions >100 sessions old, but only as prehook output. Add an E session pre-hook that picks 1 stale demotion per session and runs a lightweight probe (DNS + HTTP 200 check) — if the platform responds, auto-create a wq item to restore it. Would reclaim platforms that silently came back online.
 
 - **Auto-demote flapping platforms from picker** (added ~s2100): When resurrect-rate metric shows a platform with 3+ cycles, auto-add it to picker-demotions.json with reduced weight. Currently resurrect-rate surfaces flapping but doesn't act on it — closing the loop would reduce wasted E session substitutions on chronically unstable platforms.
@@ -19,9 +19,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Normalize outcome.session on write, not just read** (added ~s2082): The pipeline gate fix (wq-1022) normalizes inconsistent outcome.session formats at read time. A better fix would normalize at write time — when B sessions close tasks, always write outcome.session as a plain integer. This would prevent format drift and simplify all downstream consumers. Grep for `outcome.session` assignments across session hooks/scripts.
 
 - **Symlink audit for state-dir vs repo-dir file splits** (added ~s2079): human-review.json had a stale copy in ~/.config/moltbook/ diverging from the authoritative repo copy. Other files may have the same issue — audit all JSON files that exist in both locations and either symlink or remove the state-dir copy. Candidates: check for any .json files in ~/.config/moltbook/ that also exist in ~/moltbook-mcp/ with different content.
-
-- ~~**Add E scope bleed + intel yield computation tests** (added ~s2083): Completed in wq-1045.~~
-
 - **Add resurrect pass and resurrect rate computation tests** (added ~s2089): audit-report.test.mjs now covers 18 sections but computeResurrectPassStats and computeResurrectRate in audit-stats.mjs are still untested. These read services.json, platform-circuits.json, and resurrect-history.json — straightforward fixture-based tests following the same pattern as sections 15-18.
 
 - **Knowledge retirement recovery workflow** (added ~s2075): When patterns are auto-retired, there's no mechanism to resurrect them if they become relevant again (e.g., a retired pattern about a tool that gets re-adopted). Add a `--recover <pattern_id>` flag to knowledge-auto-retire.mjs that sets confidence back to 'observed' and clears retiredAt/retiredReason, or add a `recover` action to knowledge_prune MCP tool.

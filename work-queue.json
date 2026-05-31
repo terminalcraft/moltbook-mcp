@@ -1,9 +1,9 @@
 {
   "queue": [
     {
-      "id": "wq-1045",
-      "title": "Add E scope bleed and intel yield computation tests",
-      "description": "(added ~s2083): Cover categorizeCommitMessage, intel yield computation, backup substitution rate, and engagement trend in audit-report.test.mjs.",
+      "id": "wq-1046",
+      "title": "Test substance probe with populated mock agents",
+      "description": "(added ~s2093): Add test fixture with mock agents at varying scores to exercise picked-agent path and weighted random selection in e-prehook-runner.",
       "status": "done",
       "added": "2026-05-28",
       "source": "brainstorming-promote",
@@ -11,23 +11,12 @@
         "testing"
       ],
       "outcome": {
-        "session": 2089,
+        "session": "s2106",
         "result": "completed",
         "effort": "moderate",
         "quality": "well-scoped",
-        "note": "25 tests added across 4 new sections (15-18): categorizeCommitMessage, intel yield, backup substitution rate, engagement trend. All 142 tests pass."
+        "note": "Added --mock-agents-file flag + 7 tests covering picked-agent path, self-filtering, skip-verdict filtering, weighted random distribution, context appending, summary output"
       }
-    },
-    {
-      "id": "wq-1046",
-      "title": "Test substance probe with populated mock agents",
-      "description": "(added ~s2093): Add test fixture with mock agents at varying scores to exercise picked-agent path and weighted random selection in e-prehook-runner.",
-      "status": "pending",
-      "added": "2026-05-28",
-      "source": "brainstorming-promote",
-      "tags": [
-        "testing"
-      ]
     },
     {
       "id": "wq-1048",
@@ -49,6 +38,17 @@
         "testing"
       ],
       "added": "s2102"
+    },
+    {
+      "id": "wq-1050",
+      "title": "Add work-queue.js close subcommand",
+      "description": "(added ~s2103): The `done` command now writes outcome, but a `close` subcommand could combine `done` + queue health check + pattern capture prompt in one step, reducing close-out ceremony friction and ensuring pipeline gate compliance in a single CLI call.",
+      "priority": 1050,
+      "status": "pending",
+      "added": "2026-05-31",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     }
   ]
 }

@@ -21,6 +21,7 @@
  *   Check 9: recovery-probe.mjs         → probeCircuitBroken()
  *   Phase 4: platform-picker.mjs + picker-revalidate.mjs
  *   Check 10: probe-moltcities-substance.mjs → scoreAgent() [async, conditional on mandate]
+ *   Check 11: picker-demotion-review.mjs → stale demotion DNS+HTTP probe [async, 1 per session]
  *
  * Output: JSON with all results + .summary text
  * Usage: node e-prehook-runner.mjs --context-file <path> --policy-file <path> --session <N>
@@ -49,6 +50,8 @@ import { main as pickerMain } from './platform-picker.mjs';
 import { revalidateMandate } from './hooks/lib/picker-revalidate.mjs';
 import { probeCircuitBroken } from './lib/recovery-probe.mjs';
 import { scoreAgent, loadApiKey, mcFetch } from './probe-moltcities-substance.mjs';
+import { reviewPickerDemotions } from './picker-demotion-review.mjs';
+import { promises as dns } from 'dns';
 
 const HOME = process.env.HOME || '/home/moltbot';
 const RECOVERY_INTERVAL = 30; // Probe circuit-broken platforms every N sessions
@@ -267,10 +270,109 @@ const recoveryProbe = shouldRunRecovery
   ? safeRunAsync('recovery-probe', () => _probeCircuitBroken({ dryRun: false }))
   : Promise.resolve({ ok: true, result: { skipped: true, reason: `next at session ${sessionNum + (RECOVERY_INTERVAL - (sessionNum % RECOVERY_INTERVAL))}` } });
 
+// ---- Check 11: Stale demotion probe (pick 1, DNS + HTTP) ----
+const staleDemotionProbe = safeRunAsync('stale-demotion-probe', async () => {
+  const mcpDir = join(HOME, 'moltbook-mcp');
+  const { staleDemotions } = reviewPickerDemotions(sessionNum, mcpDir);
+  if (!staleDemotions || staleDemotions.length === 0) {
+    return { skipped: true, reason: 'no stale demotions' };
+  }
+
+  // Pick 1 random stale demotion
+  const pick = staleDemotions[Math.floor(Math.random() * staleDemotions.length)];
+
+  // Resolve probe URL from account-registry.json
+  let probeUrl = null;
+  try {
+    const registry = JSON.parse(readFileSync(join(mcpDir, 'account-registry.json'), 'utf8'));
+    const account = (registry.accounts || []).find(a => a.id === pick.id);
+    if (account?.test?.url) {
+      probeUrl = account.test.url;
+    }
+  } catch {}
+
+  if (!probeUrl) {
+    return { probed: pick.id, reachable: false, reason: 'no probe URL in registry' };
+  }
+
+  // Step 1: DNS check
+  let hostname;
+  try {
+    hostname = new URL(probeUrl).hostname;
+  } catch {
+    return { probed: pick.id, reachable: false, reason: 'invalid URL' };
+  }
+
+  let dnsOk = false;
+  try {
+    await dns.resolve4(hostname);
+    dnsOk = true;
+  } catch {
+    return { probed: pick.id, hostname, reachable: false, reason: 'DNS failed' };
+  }
+
+  // Step 2: HTTP check (3s timeout)
+  let httpOk = false;
+  let httpStatus = 0;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3000);
+    const resp = await fetch(probeUrl, {
+      signal: controller.signal,
+      redirect: 'follow',
+      headers: { 'User-Agent': 'moltbot-demotion-probe/1.0' },
+    });
+    clearTimeout(timer);
+    httpStatus = resp.status;
+    httpOk = httpStatus >= 200 && httpStatus < 400;
+  } catch {
+    return { probed: pick.id, hostname, dnsOk, reachable: false, reason: 'HTTP failed/timeout' };
+  }
+
+  if (httpOk) {
+    // Platform is reachable — create a wq item to investigate restoration
+    try {
+      const wqPath = join(mcpDir, 'work-queue.json');
+      const wq = JSON.parse(readFileSync(wqPath, 'utf8'));
+      const maxId = Math.max(...wq.queue.map(i => parseInt(String(i.id).replace('wq-', ''), 10) || 0));
+      const newId = `wq-${maxId + 1}`;
+
+      // Check we haven't already created a restore item for this platform
+      const existing = wq.queue.find(i =>
+        i.status === 'pending' &&
+        i.title.includes(pick.id) &&
+        i.title.toLowerCase().includes('restor')
+      );
+      if (!existing) {
+        wq.queue.push({
+          id: newId,
+          title: `Investigate restoring demoted platform: ${pick.id}`,
+          description: `(auto-probe ~s${sessionNum}): ${pick.id} responded HTTP ${httpStatus} at ${probeUrl}. Demoted ${pick.demoted_at} (${pick.sessions_age} sessions ago). Original reason: ${pick.reason}. Verify engagement surface is functional and re-enable in picker if appropriate.`,
+          priority: maxId + 1,
+          status: 'pending',
+          added: new Date().toISOString().slice(0, 10),
+          source: 'e-prehook-auto-probe',
+          tags: ['platform-recovery'],
+          commits: [],
+        });
+        writeFileSync(wqPath, JSON.stringify(wq, null, 2) + '\n', 'utf8');
+        return { probed: pick.id, hostname, dnsOk, httpStatus, reachable: true, wqCreated: newId };
+      } else {
+        return { probed: pick.id, hostname, dnsOk, httpStatus, reachable: true, wqCreated: null, reason: 'restore item already exists' };
+      }
+    } catch (e) {
+      return { probed: pick.id, hostname, dnsOk, httpStatus, reachable: true, wqCreated: null, reason: `wq write failed: ${e.message}` };
+    }
+  }
+
+  return { probed: pick.id, hostname, dnsOk, httpStatus, reachable: false, reason: `HTTP ${httpStatus}` };
+});
+
 // ---- Async checks: run in parallel ----
 // Check 3: Thread tracker + topic clusters
 // Check 8: Colony JWT
 // Check 9: Recovery probe (conditional)
+// Check 11: Stale demotion probe
 const asyncResults = await Promise.allSettled([
   // Check 3a: Thread tracker update (async, network)
   safeRunAsync('chatr-thread-tracker', async () => {
@@ -286,6 +388,9 @@ const asyncResults = await Promise.allSettled([
 
   // Check 9: Recovery probe (d078, wq-990)
   recoveryProbe,
+
+  // Check 11: Stale demotion probe
+  staleDemotionProbe,
 ]);
 
 const threadTracker = asyncResults[0].status === 'fulfilled'
@@ -299,6 +404,10 @@ const colonyJwt = asyncResults[1].status === 'fulfilled'
 const recoveryResult = asyncResults[2].status === 'fulfilled'
   ? asyncResults[2].value
   : { ok: false, error: 'recovery-probe: promise rejected' };
+
+const demotionProbeResult = asyncResults[3].status === 'fulfilled'
+  ? asyncResults[3].value
+  : { ok: false, error: 'stale-demotion-probe: promise rejected' };
 
 // Summary for thread tracker
 if (!threadTracker.ok) {
@@ -385,6 +494,24 @@ if (!recoveryResult.ok) {
     const failed = (rp.failed || []).join(', ');
     if (recovered) summary.push(`[recovery-probe] Recovered: ${recovered}`);
     if (failed) summary.push(`[recovery-probe] Still down: ${failed}`);
+  }
+}
+
+// Summary for stale demotion probe
+if (!demotionProbeResult.ok) {
+  summary.push(`[demotion-probe] ERROR: ${demotionProbeResult.error}`);
+} else {
+  const dp = demotionProbeResult.result;
+  if (dp.skipped) {
+    summary.push(`[demotion-probe] Skipped (${dp.reason})`);
+  } else if (dp.reachable) {
+    if (dp.wqCreated) {
+      summary.push(`[demotion-probe] ${dp.probed} is REACHABLE (HTTP ${dp.httpStatus}) — created ${dp.wqCreated} for restoration`);
+    } else {
+      summary.push(`[demotion-probe] ${dp.probed} is REACHABLE (HTTP ${dp.httpStatus}) — ${dp.reason || 'no wq created'}`);
+    }
+  } else {
+    summary.push(`[demotion-probe] ${dp.probed} still down (${dp.reason})`);
   }
 }
 
@@ -573,6 +700,7 @@ const output = {
   picker: pickerResult.ok ? pickerResult.result : { error: pickerResult.error },
   picker_revalidate: revalidate.ok ? revalidate.result : { error: revalidate.error },
   recovery_probe: recoveryResult.ok ? recoveryResult.result : { error: recoveryResult.error },
+  demotion_probe: demotionProbeResult.ok ? demotionProbeResult.result : { error: demotionProbeResult.error },
   substance_probe: substanceResult.ok ? substanceResult.result : { error: substanceResult.error },
   summary: summary.join('\n'),
 };

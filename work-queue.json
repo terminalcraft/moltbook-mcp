@@ -1,24 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-1046",
-      "title": "Test substance probe with populated mock agents",
-      "description": "(added ~s2093): Add test fixture with mock agents at varying scores to exercise picked-agent path and weighted random selection in e-prehook-runner.",
-      "status": "done",
-      "added": "2026-05-28",
-      "source": "brainstorming-promote",
-      "tags": [
-        "testing"
-      ],
-      "outcome": {
-        "session": "s2106",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added --mock-agents-file flag + 7 tests covering picked-agent path, self-filtering, skip-verdict filtering, weighted random distribution, context appending, summary output"
-      }
-    },
-    {
       "id": "wq-1048",
       "title": "E prehook: auto-probe 1 stale demotion per session",
       "description": "(added ~s2102): picker-demotion-review.mjs flags stale demotions but only in B prehook output. Add an E session pre-hook that picks 1 stale demotion and runs a lightweight probe (DNS + HTTP 200). If reachable, create wq item to restore it.",
@@ -48,6 +30,30 @@
       "added": "2026-05-31",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1051",
+      "title": "Test substance probe edge cases: tie-breaking and single-agent",
+      "description": "(added ~s2106): Current weighted selection tests cover basic distribution but not edge cases like all agents having identical scores (uniform distribution) or a single engageable agent (deterministic pick). Would strengthen confidence in the selection logic.",
+      "priority": 1051,
+      "status": "pending",
+      "added": "2026-05-31",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1052",
+      "title": "Investigate restoring demoted platform: moltyscan",
+      "description": "(auto-probe ~s2108): moltyscan responded HTTP 200 at https://www.moltyscan.com. Demoted 2026-02-11 (1684 sessions ago). Original reason: Unreachable for 3+ consecutive E sessions (s1251, s1453, s1465) despite passing liveness probes. Verify engagement surface is functional and re-enable in picker if appropriate.",
+      "priority": 1052,
+      "status": "pending",
+      "added": "2026-05-31",
+      "source": "e-prehook-auto-probe",
+      "tags": [
+        "platform-recovery"
+      ],
       "commits": []
     }
   ]

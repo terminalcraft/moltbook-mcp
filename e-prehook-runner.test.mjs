@@ -280,3 +280,179 @@ describe('e-prehook-runner substance probe', () => {
     assert.ok(!sp.skipped, 'should run when MoltCities is in backups');
   });
 });
+
+describe('e-prehook-runner substance probe with populated agents', () => {
+  const mandatePath = join(process.env.HOME || '/home/moltbot', '.config/moltbook/picker-mandate.json');
+  let savedMandate = null;
+
+  before(() => {
+    scratch.setup();
+    if (existsSync(mandatePath)) {
+      savedMandate = readFileSync(mandatePath, 'utf8');
+    }
+    // All tests in this block need MoltCities in mandate
+    writeFileSync(mandatePath, JSON.stringify({
+      selected: ['MoltCities', 'Moltchan'],
+      backups: [],
+      revalidated_at: new Date().toISOString()
+    }));
+  });
+
+  after(() => {
+    if (savedMandate !== null) {
+      writeFileSync(mandatePath, savedMandate);
+    }
+    scratch.cleanup();
+  });
+
+  // Helper to run with a mock agents fixture file
+  function runWithAgents(fixture, sessionNum) {
+    const agentsFile = scratch.writeJSON(`agents-${Date.now()}.json`, fixture);
+    const ctxFile = join(scratch.dir, `ctx-pop-${Date.now()}.md`);
+    const args = [`--session`, `${sessionNum || 9999}`];
+    args.push('--context-file', ctxFile);
+    args.push('--policy-file', join(scratch.dir, 'nope.json'));
+    args.push('--mock-network');
+    args.push('--mock-agents-file', agentsFile);
+    const cmd = `node ${join(__dirname, 'e-prehook-runner.mjs')} ${args.join(' ')}`;
+    return { out: execRunner(cmd), ctxFile };
+  }
+
+  it('picks an agent when engageable agents exist', () => {
+    const fixture = {
+      agents: [
+        { site: { slug: 'alpha' }, name: 'Alpha Bot' },
+        { site: { slug: 'beta' }, name: 'Beta Bot' },
+      ],
+      scores: {
+        alpha: { slug: 'alpha', name: 'Alpha Bot', score: 75, signals: {}, verdict: 'engage' },
+        beta: { slug: 'beta', name: 'Beta Bot', score: 60, signals: {}, verdict: 'engage' },
+      },
+    };
+    const { out } = runWithAgents(fixture);
+    const sp = out.substance_probe;
+    assert.ok(!sp.skipped, 'should not be skipped with populated agents');
+    assert.ok(sp.picked, 'should pick an agent');
+    assert.ok(['alpha', 'beta'].includes(sp.picked.slug), `picked slug should be alpha or beta, got ${sp.picked.slug}`);
+    assert.equal(sp.engageable_count, 2);
+    assert.equal(sp.total_agents, 2);
+  });
+
+  it('filters self (terminalcraft) from agent list', () => {
+    const fixture = {
+      agents: [
+        { site: { slug: 'terminalcraft' }, name: 'Self' },
+        { site: { slug: 'gamma' }, name: 'Gamma Bot' },
+      ],
+      scores: {
+        gamma: { slug: 'gamma', name: 'Gamma Bot', score: 55, signals: {}, verdict: 'engage' },
+      },
+    };
+    const { out } = runWithAgents(fixture);
+    const sp = out.substance_probe;
+    assert.ok(sp.picked, 'should pick an agent');
+    assert.equal(sp.picked.slug, 'gamma', 'should only pick non-self agent');
+    assert.equal(sp.total_agents, 1, 'self should be excluded from total');
+  });
+
+  it('skips agents below substance threshold', () => {
+    const fixture = {
+      agents: [
+        { site: { slug: 'high' }, name: 'High Scorer' },
+        { site: { slug: 'low' }, name: 'Low Scorer' },
+      ],
+      scores: {
+        high: { slug: 'high', name: 'High Scorer', score: 80, signals: {}, verdict: 'engage' },
+        low: { slug: 'low', name: 'Low Scorer', score: 10, signals: {}, verdict: 'skip' },
+      },
+    };
+    const { out } = runWithAgents(fixture);
+    const sp = out.substance_probe;
+    assert.ok(sp.picked, 'should pick an agent');
+    assert.equal(sp.picked.slug, 'high', 'should only pick engageable agent');
+    assert.equal(sp.engageable_count, 1, 'only 1 engageable');
+    assert.equal(sp.total_agents, 2, 'both scored');
+  });
+
+  it('returns no_substantive_agents when all agents score skip', () => {
+    const fixture = {
+      agents: [
+        { site: { slug: 'skip1' }, name: 'Skip One' },
+        { site: { slug: 'skip2' }, name: 'Skip Two' },
+      ],
+      scores: {
+        skip1: { slug: 'skip1', name: 'Skip One', score: 5, signals: {}, verdict: 'skip' },
+        skip2: { slug: 'skip2', name: 'Skip Two', score: 15, signals: {}, verdict: 'skip' },
+      },
+    };
+    const { out } = runWithAgents(fixture);
+    const sp = out.substance_probe;
+    assert.equal(sp.picked, null, 'no agent should be picked');
+    assert.equal(sp.reason, 'no_substantive_agents');
+    assert.equal(sp.total, 2);
+  });
+
+  it('weighted selection favors higher-scored agents over many runs', () => {
+    // Agent "heavy" has score 90, "light" has score 10
+    // Over 20 runs, heavy should be picked significantly more often
+    const fixture = {
+      agents: [
+        { site: { slug: 'heavy' }, name: 'Heavy' },
+        { site: { slug: 'light' }, name: 'Light' },
+      ],
+      scores: {
+        heavy: { slug: 'heavy', name: 'Heavy', score: 90, signals: {}, verdict: 'engage' },
+        light: { slug: 'light', name: 'Light', score: 10, signals: {}, verdict: 'engage' },
+      },
+    };
+
+    const picks = { heavy: 0, light: 0 };
+    const runs = 20;
+    for (let i = 0; i < runs; i++) {
+      const { out } = runWithAgents(fixture, 9999 + i);
+      const sp = out.substance_probe;
+      assert.ok(sp.picked, `run ${i}: should pick an agent`);
+      picks[sp.picked.slug]++;
+    }
+
+    // With 90:10 weighting over 20 runs, heavy should win most.
+    // Probability of heavy getting ≤3 picks is astronomically low (~0.0001%)
+    assert.ok(picks.heavy > 3,
+      `heavy (score=90) should be picked more than 3 times in ${runs} runs, got ${picks.heavy}`);
+  });
+
+  it('appends substance block to context file when agent picked', () => {
+    const fixture = {
+      agents: [
+        { site: { slug: 'contextbot' }, name: 'Context Bot' },
+      ],
+      scores: {
+        contextbot: { slug: 'contextbot', name: 'Context Bot', score: 70, signals: {}, verdict: 'engage' },
+      },
+    };
+    const { out, ctxFile } = runWithAgents(fixture);
+    const sp = out.substance_probe;
+    assert.equal(sp.picked.slug, 'contextbot');
+
+    const ctx = readFileSync(ctxFile, 'utf8');
+    assert.ok(ctx.includes('MoltCities substance probe'), 'context should have substance probe section');
+    assert.ok(ctx.includes('Context Bot'), 'context should mention picked agent name');
+    assert.ok(ctx.includes('contextbot'), 'context should mention picked agent slug');
+    assert.ok(!ctx.includes('NO_SUBSTANCE'), 'should NOT have NO_SUBSTANCE when agent picked');
+  });
+
+  it('summary reports picked agent details', () => {
+    const fixture = {
+      agents: [
+        { site: { slug: 'sumbot' }, name: 'Summary Bot' },
+      ],
+      scores: {
+        sumbot: { slug: 'sumbot', name: 'Summary Bot', score: 65, signals: {}, verdict: 'engage' },
+      },
+    };
+    const { out } = runWithAgents(fixture);
+    assert.ok(out.summary.includes('Picked:'), 'summary should say Picked');
+    assert.ok(out.summary.includes('Summary Bot'), 'summary should include agent name');
+    assert.ok(out.summary.includes('score=65'), 'summary should include score');
+  });
+});

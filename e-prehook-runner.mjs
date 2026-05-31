@@ -67,6 +67,7 @@ const contextFile = getArg('--context-file') || join(STATE_DIR, 'e-session-conte
 const policyFile = getArg('--policy-file') || join(STATE_DIR, 'spending-policy.json');
 const sessionNum = parseInt(getArg('--session') || process.env.SESSION_NUM || '0', 10);
 const mockNetwork = args.includes('--mock-network');
+const mockAgentsFile = getArg('--mock-agents-file');
 
 import { safeRun, safeRunAsync } from './lib/runner-utils.mjs';
 
@@ -86,6 +87,22 @@ if (mockNetwork) {
   _checkAllCredentials = () => ({ healthy: 0, total: 0, unhealthy: 0, warnings: [] });
   _scoreAgent = async () => ({ slug: 'mock', name: 'Mock', score: 50, signals: {}, verdict: 'engage' });
   _mcFetch = async () => ({ agents: [], messages: [], jobs: [] });
+}
+
+// --mock-agents-file overrides _mcFetch and _scoreAgent with fixture data
+// Fixture format: { agents: [...], scores: { slug: { slug, name, score, signals, verdict } } }
+if (mockAgentsFile) {
+  try {
+    const fixture = JSON.parse(readFileSync(mockAgentsFile, 'utf8'));
+    _mcFetch = async (endpoint) => {
+      if (endpoint.includes('/api/agents')) return { agents: fixture.agents || [] };
+      return { messages: [], jobs: [] };
+    };
+    _scoreAgent = async (slug) => {
+      if (fixture.scores && fixture.scores[slug]) return fixture.scores[slug];
+      return { slug, name: slug, score: 0, signals: {}, verdict: 'skip' };
+    };
+  } catch {}
 }
 
 const summary = [];

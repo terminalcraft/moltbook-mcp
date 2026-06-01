@@ -13,6 +13,7 @@
  *   node work-queue.js velocity          # Show completion velocity stats (wq-200)
  *   node work-queue.js retire [id] [reason]  # Retire item with reason (wq-199)
  *   node work-queue.js retirement-stats      # Show retirement reason breakdown
+ *   node work-queue.js close [id] [--flags]  # Combined close-out: done + health + pipeline + pattern (wq-1050)
  */
 
 import { readFileSync, writeFileSync } from "fs";
@@ -382,6 +383,75 @@ switch (cmd) {
     }
     break;
   }
+  case "close": {
+    // wq-1050: Combined close-out — done + queue health + pipeline gate + pattern capture prompt
+    const closeId = args[0];
+    // Parse flags (same as done)
+    let closeResult = "completed", closeEffort = "moderate", closeQuality = "well-scoped", closeNote = "";
+    let closeHash = null;
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] === "--result" && args[i + 1]) closeResult = args[++i];
+      else if (args[i] === "--effort" && args[i + 1]) closeEffort = args[++i];
+      else if (args[i] === "--quality" && args[i + 1]) closeQuality = args[++i];
+      else if (args[i] === "--note" && args[i + 1]) closeNote = args[++i];
+      else if (args[i] === "--hash" && args[i + 1]) closeHash = args[++i];
+    }
+
+    // Step 1: Mark done (same logic as done command)
+    const closeItem = closeId && !closeId.startsWith("--")
+      ? data.queue.find(i => i.id === closeId)
+      : data.queue.find(i => i.status === "in-progress");
+    if (!closeItem) {
+      console.log("No in-progress item found.");
+      break;
+    }
+    const closeSession = parseInt(process.env.SESSION_NUM || "0", 10);
+    closeItem.status = "done";
+    closeItem.completed = new Date().toISOString().slice(0, 10);
+    closeItem.completed_session = closeSession;
+    if (closeHash) closeItem.commits = [...(closeItem.commits || []), closeHash];
+    closeItem.outcome = {
+      session: closeSession,
+      result: closeResult,
+      effort: closeEffort,
+      quality: closeQuality,
+      note: closeNote || `Completed in session ${closeSession}`
+    };
+    save(data);
+    console.log(`✓ Done: ${closeItem.id} — ${closeItem.title}`);
+
+    // Step 2: Queue health check
+    const reloaded = load();
+    const pendingCount = reloaded.queue.filter(i => i.status === "pending").length;
+    if (pendingCount === 0) {
+      console.log(`⚠ CRITICAL: 0 pending items — replenish immediately`);
+    } else if (pendingCount < 3) {
+      console.log(`⚠ Queue low: ${pendingCount} pending — consider adding items`);
+    } else if (pendingCount < 5) {
+      console.log(`• Queue OK: ${pendingCount} pending (target ≥5)`);
+    } else {
+      console.log(`• Queue healthy: ${pendingCount} pending`);
+    }
+
+    // Step 3: Pipeline gate check (BRAINSTORMING.md or work-queue.json modified)
+    try {
+      const { execSync } = await import("child_process");
+      const diffOutput = execSync("git diff --name-only HEAD~3", { cwd: __dirname, encoding: "utf8" });
+      const pipelineFiles = ["BRAINSTORMING.md", "work-queue.json"];
+      const modified = pipelineFiles.filter(f => diffOutput.includes(f));
+      if (modified.length > 0) {
+        console.log(`• Pipeline gate: PASS (modified: ${modified.join(", ")})`);
+      } else {
+        console.log(`⚠ Pipeline gate: FAIL — add a brainstorming idea or queue item before pushing`);
+      }
+    } catch {
+      console.log(`• Pipeline gate: could not check (git not available)`);
+    }
+
+    // Step 4: Pattern capture reminder
+    console.log(`• Pattern capture: did you learn something non-obvious? Use ctxly_remember or note "Pattern capture: none (routine)"`);
+    break;
+  }
   default:
-    console.log("Usage: work-queue.js <next|list|start|done|add|drop|retire|status|deps|note|archive|velocity|retirement-stats>");
+    console.log("Usage: work-queue.js <next|list|start|done|add|drop|retire|status|deps|note|archive|velocity|retirement-stats|close>");
 }

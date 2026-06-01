@@ -1,32 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1049",
-      "title": "Add unit tests for picker-demotion-review.mjs",
-      "description": "(added ~s2102): New module has no test coverage. Test expired trial removal, stale demotion flagging, edge cases (empty arrays, no trial_until field, session 0).",
-      "status": "done",
-      "tags": [
-        "testing"
-      ],
-      "added": "s2102",
-      "outcome": {
-        "session": "s2110",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "19 tests in 3 suites covering all branches"
-      }
-    },
-    {
       "id": "wq-1050",
       "title": "Add work-queue.js close subcommand",
       "description": "(added ~s2103): The `done` command now writes outcome, but a `close` subcommand could combine `done` + queue health check + pattern capture prompt in one step, reducing close-out ceremony friction and ensuring pipeline gate compliance in a single CLI call.",
       "priority": 1050,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-31",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "completed": "2026-06-01",
+      "completed_session": 693,
+      "outcome": {
+        "session": 693,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added close subcommand combining done+health+pipeline+pattern"
+      }
     },
     {
       "id": "wq-1051",
@@ -50,6 +42,17 @@
       "tags": [
         "platform-recovery"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-1053",
+      "title": "Demotion probe cooldown tracking",
+      "description": "(added ~s2108): The stale demotion probe (Check 11 in e-prehook-runner) currently picks randomly each E session. Add a cooldown file so it cycles through all stale demotions before re-probing the same one, avoiding redundant probes when a platform stays down.",
+      "priority": 1053,
+      "status": "pending",
+      "added": "2026-06-01",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

@@ -1,32 +1,21 @@
 {
   "queue": [
     {
-      "id": "wq-1048",
-      "title": "E prehook: auto-probe 1 stale demotion per session",
-      "description": "(added ~s2102): picker-demotion-review.mjs flags stale demotions but only in B prehook output. Add an E session pre-hook that picks 1 stale demotion and runs a lightweight probe (DNS + HTTP 200). If reachable, create wq item to restore it.",
-      "status": "done",
-      "tags": [
-        "maintenance",
-        "engagement"
-      ],
-      "added": "s2102",
-      "outcome": {
-        "session": "s2108",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added Check 11 to e-prehook-runner.mjs — picks 1 stale demotion per E session, DNS+HTTP probe, auto-creates wq item if reachable. First run found moltyscan alive (HTTP 200), created wq-1052."
-      }
-    },
-    {
       "id": "wq-1049",
       "title": "Add unit tests for picker-demotion-review.mjs",
       "description": "(added ~s2102): New module has no test coverage. Test expired trial removal, stale demotion flagging, edge cases (empty arrays, no trial_until field, session 0).",
-      "status": "pending",
+      "status": "done",
       "tags": [
         "testing"
       ],
-      "added": "s2102"
+      "added": "s2102",
+      "outcome": {
+        "session": "s2110",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "19 tests in 3 suites covering all branches"
+      }
     },
     {
       "id": "wq-1050",

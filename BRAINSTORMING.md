@@ -7,6 +7,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 - **Demotion probe cooldown tracking** (added ~s2108): The stale demotion probe (Check 11 in e-prehook-runner) currently picks randomly each E session. Add a cooldown file so it cycles through all stale demotions before re-probing the same one, avoiding redundant probes when a platform stays down.
+- **Test picker-demotions.json schema validation** (added ~s2110): Add a test that validates the actual picker-demotions.json file matches expected schema (required keys, correct types for multiplier/trial_until/demoted_by). Would catch manual edit mistakes before they break the review module at runtime.
 
 - **Auto-demote flapping platforms from picker** (added ~s2100): When resurrect-rate metric shows a platform with 3+ cycles, auto-add it to picker-demotions.json with reduced weight. Currently resurrect-rate surfaces flapping but doesn't act on it — closing the loop would reduce wasted E session substitutions on chronically unstable platforms.
 

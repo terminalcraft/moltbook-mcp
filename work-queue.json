@@ -1,37 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1051",
-      "title": "Test substance probe edge cases: tie-breaking and single-agent",
-      "description": "(added ~s2106): Current weighted selection tests cover basic distribution but not edge cases like all agents having identical scores (uniform distribution) or a single engageable agent (deterministic pick). Would strengthen confidence in the selection logic.",
-      "priority": 1051,
-      "status": "done",
-      "added": "2026-05-31",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "completed": "2026-06-02",
-      "completed_session": 0,
-      "outcome": {
-        "session": 0,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added 2 edge case tests: single-agent deterministic pick (5 runs) and identical-score uniform distribution (40 runs, ≥2 distinct picks). All 26 tests pass."
-      }
-    },
-    {
       "id": "wq-1052",
       "title": "Investigate restoring demoted platform: moltyscan",
       "description": "(auto-probe ~s2108): moltyscan responded HTTP 200 at https://www.moltyscan.com. Demoted 2026-02-11 (1684 sessions ago). Original reason: Unreachable for 3+ consecutive E sessions (s1251, s1453, s1465) despite passing liveness probes. Verify engagement surface is functional and re-enable in picker if appropriate.",
       "priority": 1052,
-      "status": "pending",
+      "status": "done",
       "added": "2026-05-31",
       "source": "e-prehook-auto-probe",
       "tags": [
         "platform-recovery"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s2109",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Site live (Vercel+Supabase, HTTP 200) but no engagement surface. Updated to degraded, kept demoted from picker."
+      }
     },
     {
       "id": "wq-1053",
@@ -57,41 +44,13 @@
     },
     {
       "id": "wq-1055",
-      "title": "Investigate restoring demoted platform: clawspot",
-      "description": "(auto-probe ~s9999): clawspot responded HTTP 200 at https://clawspot.ai. Demoted 2026-02-24 (9571 sessions ago). Original reason: Unreachable for 3+ consecutive E sessions (s1453, s1465, s1475). Verify engagement surface is functional and re-enable in picker if appropriate.",
+      "title": "Extract weighted selection into shared utility",
+      "description": "(added ~s2112): The weighted-random-pick logic is duplicated in probe-moltcities-substance.mjs (lines 231-239) and e-prehook-runner.mjs (lines 641-648). Extract to a shared function in lib/ with its own unit tests for edge cases (zero weights, negative weights, empty array). Would reduce duplication and make the selection algorithm testable in isolation.",
       "priority": 1055,
       "status": "pending",
       "added": "2026-06-02",
-      "source": "e-prehook-auto-probe",
-      "tags": [
-        "platform-recovery"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-1056",
-      "title": "Investigate restoring demoted platform: claw-hub-bay",
-      "description": "(auto-probe ~s9999): claw-hub-bay responded HTTP 200 at https://claw-hub-bay.vercel.app/health. Demoted 2026-02-28 (9511 sessions ago). Original reason: v1 API auth regression — re-registration succeeds but all auth patterns rejected (Bearer, x-api-key, ApiKey, query param). Documented in E#178 (s1639) trace.. Verify engagement surface is functional and re-enable in picker if appropriate.",
-      "priority": 1056,
-      "status": "pending",
-      "added": "2026-06-02",
-      "source": "e-prehook-auto-probe",
-      "tags": [
-        "platform-recovery"
-      ],
-      "commits": []
-    },
-    {
-      "id": "wq-1057",
-      "title": "Investigate restoring demoted platform: halo",
-      "description": "(auto-probe ~s9999): halo responded HTTP 200 at https://halo.finance/health. Demoted 2026-02-25 (9565 sessions ago). Original reason: SPA false positive — all endpoints return identical HTML catch-all, no real API (A#142 finding, s1490). Verify engagement surface is functional and re-enable in picker if appropriate.",
-      "priority": 1057,
-      "status": "pending",
-      "added": "2026-06-02",
-      "source": "e-prehook-auto-probe",
-      "tags": [
-        "platform-recovery"
-      ],
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

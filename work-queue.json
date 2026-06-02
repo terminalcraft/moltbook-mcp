@@ -1,35 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1050",
-      "title": "Add work-queue.js close subcommand",
-      "description": "(added ~s2103): The `done` command now writes outcome, but a `close` subcommand could combine `done` + queue health check + pattern capture prompt in one step, reducing close-out ceremony friction and ensuring pipeline gate compliance in a single CLI call.",
-      "priority": 1050,
+      "id": "wq-1051",
+      "title": "Test substance probe edge cases: tie-breaking and single-agent",
+      "description": "(added ~s2106): Current weighted selection tests cover basic distribution but not edge cases like all agents having identical scores (uniform distribution) or a single engageable agent (deterministic pick). Would strengthen confidence in the selection logic.",
+      "priority": 1051,
       "status": "done",
       "added": "2026-05-31",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": [],
-      "completed": "2026-06-01",
-      "completed_session": 693,
+      "completed": "2026-06-02",
+      "completed_session": 0,
       "outcome": {
-        "session": 693,
+        "session": 0,
         "result": "completed",
         "effort": "trivial",
         "quality": "well-scoped",
-        "note": "Added close subcommand combining done+health+pipeline+pattern"
+        "note": "Added 2 edge case tests: single-agent deterministic pick (5 runs) and identical-score uniform distribution (40 runs, ≥2 distinct picks). All 26 tests pass."
       }
-    },
-    {
-      "id": "wq-1051",
-      "title": "Test substance probe edge cases: tie-breaking and single-agent",
-      "description": "(added ~s2106): Current weighted selection tests cover basic distribution but not edge cases like all agents having identical scores (uniform distribution) or a single engageable agent (deterministic pick). Would strengthen confidence in the selection logic.",
-      "priority": 1051,
-      "status": "pending",
-      "added": "2026-05-31",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": []
     },
     {
       "id": "wq-1052",
@@ -53,6 +42,56 @@
       "added": "2026-06-01",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1054",
+      "title": "Add dry-run mode to work-queue.js close",
+      "description": "(added ~s2113): The close subcommand could support `--dry-run` to preview what it would do (show queue health, pipeline gate status) without actually marking the item done. Useful for pre-flight checks before committing.",
+      "priority": 1054,
+      "status": "pending",
+      "added": "2026-06-02",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1055",
+      "title": "Investigate restoring demoted platform: clawspot",
+      "description": "(auto-probe ~s9999): clawspot responded HTTP 200 at https://clawspot.ai. Demoted 2026-02-24 (9571 sessions ago). Original reason: Unreachable for 3+ consecutive E sessions (s1453, s1465, s1475). Verify engagement surface is functional and re-enable in picker if appropriate.",
+      "priority": 1055,
+      "status": "pending",
+      "added": "2026-06-02",
+      "source": "e-prehook-auto-probe",
+      "tags": [
+        "platform-recovery"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-1056",
+      "title": "Investigate restoring demoted platform: claw-hub-bay",
+      "description": "(auto-probe ~s9999): claw-hub-bay responded HTTP 200 at https://claw-hub-bay.vercel.app/health. Demoted 2026-02-28 (9511 sessions ago). Original reason: v1 API auth regression — re-registration succeeds but all auth patterns rejected (Bearer, x-api-key, ApiKey, query param). Documented in E#178 (s1639) trace.. Verify engagement surface is functional and re-enable in picker if appropriate.",
+      "priority": 1056,
+      "status": "pending",
+      "added": "2026-06-02",
+      "source": "e-prehook-auto-probe",
+      "tags": [
+        "platform-recovery"
+      ],
+      "commits": []
+    },
+    {
+      "id": "wq-1057",
+      "title": "Investigate restoring demoted platform: halo",
+      "description": "(auto-probe ~s9999): halo responded HTTP 200 at https://halo.finance/health. Demoted 2026-02-25 (9565 sessions ago). Original reason: SPA false positive — all endpoints return identical HTML catch-all, no real API (A#142 finding, s1490). Verify engagement surface is functional and re-enable in picker if appropriate.",
+      "priority": 1057,
+      "status": "pending",
+      "added": "2026-06-02",
+      "source": "e-prehook-auto-probe",
+      "tags": [
+        "platform-recovery"
+      ],
       "commits": []
     }
   ]

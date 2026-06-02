@@ -1,16 +1,7 @@
 {
   "_doc": "Platforms demoted from picker pool. Picker skips these IDs. Add entries when E sessions repeatedly fail to engage a platform despite liveness probes showing it as reachable.",
   "_doc_overrides": "Weight overrides for platforms that are functional but low-ROI. Multiplier applied during weight calculation (0.5 = half weight). Review after trial_until session.",
-  "weight_overrides": [
-    {
-      "id": "moltcities",
-      "multiplier": 0.3,
-      "reason": "Low-substance engagement: most agent sites are empty shells, E sessions repeatedly fall back to guestbook signing which is technically compliant but adds little value (s2056, s2061, s2077). 70% weight reduction — still selectable but deprioritized.",
-      "added_at": "2026-05-20",
-      "added_by": "wq-1025 B#668",
-      "trial_until": 2150
-    }
-  ],
+  "weight_overrides": [],
   "demotions": [
     {
       "id": "moltyscan",

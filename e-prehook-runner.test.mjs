@@ -455,4 +455,63 @@ describe('e-prehook-runner substance probe with populated agents', () => {
     assert.ok(out.summary.includes('Summary Bot'), 'summary should include agent name');
     assert.ok(out.summary.includes('score=65'), 'summary should include score');
   });
+
+  it('single engageable agent is always picked (deterministic)', () => {
+    const fixture = {
+      agents: [
+        { site: { slug: 'solo' }, name: 'Solo Agent' },
+        { site: { slug: 'nopass' }, name: 'No Pass' },
+      ],
+      scores: {
+        solo: { slug: 'solo', name: 'Solo Agent', score: 50, signals: {}, verdict: 'engage' },
+        nopass: { slug: 'nopass', name: 'No Pass', score: 20, signals: {}, verdict: 'skip' },
+      },
+    };
+
+    // Run 5 times — solo should be picked every time
+    for (let i = 0; i < 5; i++) {
+      const { out } = runWithAgents(fixture, 8000 + i);
+      const sp = out.substance_probe;
+      assert.ok(sp.picked, `run ${i}: should pick an agent`);
+      assert.equal(sp.picked.slug, 'solo', `run ${i}: only engageable agent must be picked`);
+      assert.equal(sp.engageable_count, 1, `run ${i}: exactly 1 engageable`);
+      assert.equal(sp.total_agents, 2, `run ${i}: 2 total agents scored`);
+    }
+  });
+
+  it('identical scores produce uniform distribution (tie-breaking)', () => {
+    // All 4 agents have the same score — weighted selection should pick uniformly
+    const fixture = {
+      agents: [
+        { site: { slug: 'a' }, name: 'Agent A' },
+        { site: { slug: 'b' }, name: 'Agent B' },
+        { site: { slug: 'c' }, name: 'Agent C' },
+        { site: { slug: 'd' }, name: 'Agent D' },
+      ],
+      scores: {
+        a: { slug: 'a', name: 'Agent A', score: 50, signals: {}, verdict: 'engage' },
+        b: { slug: 'b', name: 'Agent B', score: 50, signals: {}, verdict: 'engage' },
+        c: { slug: 'c', name: 'Agent C', score: 50, signals: {}, verdict: 'engage' },
+        d: { slug: 'd', name: 'Agent D', score: 50, signals: {}, verdict: 'engage' },
+      },
+    };
+
+    const picks = { a: 0, b: 0, c: 0, d: 0 };
+    const runs = 40;
+    for (let i = 0; i < runs; i++) {
+      const { out } = runWithAgents(fixture, 7000 + i);
+      const sp = out.substance_probe;
+      assert.ok(sp.picked, `run ${i}: should pick an agent`);
+      assert.ok(['a', 'b', 'c', 'd'].includes(sp.picked.slug),
+        `run ${i}: picked slug should be a/b/c/d, got ${sp.picked.slug}`);
+      assert.equal(sp.engageable_count, 4, `run ${i}: all 4 engageable`);
+      picks[sp.picked.slug]++;
+    }
+
+    // With uniform weights over 40 runs (expected 10 each), at least 2 distinct
+    // agents should be picked. Probability of only 1 agent in 40 runs = (1/4)^39 ≈ 0.
+    const distinctPicked = Object.values(picks).filter(c => c > 0).length;
+    assert.ok(distinctPicked >= 2,
+      `uniform weights should produce ≥2 distinct picks in ${runs} runs, got ${distinctPicked} (picks: ${JSON.stringify(picks)})`);
+  });
 });

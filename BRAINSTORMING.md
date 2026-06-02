@@ -6,7 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Add dry-run mode to work-queue.js close** (added ~s2113): The close subcommand could support `--dry-run` to preview what it would do (show queue health, pipeline gate status) without actually marking the item done. Useful for pre-flight checks before committing.
+- **Extract weighted selection into shared utility** (added ~s2112): The weighted-random-pick logic is duplicated in probe-moltcities-substance.mjs (lines 231-239) and e-prehook-runner.mjs (lines 641-648). Extract to a shared function in lib/ with its own unit tests for edge cases (zero weights, negative weights, empty array). Would reduce duplication and make the selection algorithm testable in isolation.
 - **Test picker-demotions.json schema validation** (added ~s2110): Add a test that validates the actual picker-demotions.json file matches expected schema (required keys, correct types for multiplier/trial_until/demoted_by). Would catch manual edit mistakes before they break the review module at runtime.
 
 - **Auto-demote flapping platforms from picker** (added ~s2100): When resurrect-rate metric shows a platform with 3+ cycles, auto-add it to picker-demotions.json with reduced weight. Currently resurrect-rate surfaces flapping but doesn't act on it — closing the loop would reduce wasted E session substitutions on chronically unstable platforms.

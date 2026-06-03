@@ -7,7 +7,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 
-- **Demotion probe cooldown stats in audit** (added ~s2112): Add a check to A session audit that reads demotion-probe-cooldown.json and reports cycle coverage (how many of N stale demotions have been probed in the last cycle). Would surface if the probe is effectively covering all demoted platforms or getting stuck.
+- **Add --what-if mode to work-queue.js status** (added ~s2113): The `status` subcommand shows current counts but doesn't simulate scenarios. A `--what-if close <id>` flag could show what queue health would look like after closing a specific item, useful for deciding whether to close or defer. Extends the dry-run pattern from wq-1054.
+
 - **Test picker-demotions.json schema validation** (added ~s2110): Add a test that validates the actual picker-demotions.json file matches expected schema (required keys, correct types for multiplier/trial_until/demoted_by). Would catch manual edit mistakes before they break the review module at runtime.
 
 - **Auto-demote flapping platforms from picker** (added ~s2100): When resurrect-rate metric shows a platform with 3+ cycles, auto-add it to picker-demotions.json with reduced weight. Currently resurrect-rate surfaces flapping but doesn't act on it — closing the loop would reduce wasted E session substitutions on chronically unstable platforms.

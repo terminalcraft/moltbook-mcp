@@ -14,6 +14,7 @@
  *   node work-queue.js retire [id] [reason]  # Retire item with reason (wq-199)
  *   node work-queue.js retirement-stats      # Show retirement reason breakdown
  *   node work-queue.js close [id] [--flags]  # Combined close-out: done + health + pipeline + pattern (wq-1050)
+ *     --dry-run                              # Preview close-out without marking done (wq-1054)
  */
 
 import { readFileSync, writeFileSync } from "fs";
@@ -389,15 +390,17 @@ switch (cmd) {
     // Parse flags (same as done)
     let closeResult = "completed", closeEffort = "moderate", closeQuality = "well-scoped", closeNote = "";
     let closeHash = null;
+    let dryRun = false;
     for (let i = 0; i < args.length; i++) {
       if (args[i] === "--result" && args[i + 1]) closeResult = args[++i];
       else if (args[i] === "--effort" && args[i + 1]) closeEffort = args[++i];
       else if (args[i] === "--quality" && args[i + 1]) closeQuality = args[++i];
       else if (args[i] === "--note" && args[i + 1]) closeNote = args[++i];
       else if (args[i] === "--hash" && args[i + 1]) closeHash = args[++i];
+      else if (args[i] === "--dry-run") dryRun = true;
     }
 
-    // Step 1: Mark done (same logic as done command)
+    // Step 1: Find item (same logic as done command)
     const closeItem = closeId && !closeId.startsWith("--")
       ? data.queue.find(i => i.id === closeId)
       : data.queue.find(i => i.status === "in-progress");
@@ -406,23 +409,33 @@ switch (cmd) {
       break;
     }
     const closeSession = parseInt(process.env.SESSION_NUM || "0", 10);
-    closeItem.status = "done";
-    closeItem.completed = new Date().toISOString().slice(0, 10);
-    closeItem.completed_session = closeSession;
-    if (closeHash) closeItem.commits = [...(closeItem.commits || []), closeHash];
-    closeItem.outcome = {
-      session: closeSession,
-      result: closeResult,
-      effort: closeEffort,
-      quality: closeQuality,
-      note: closeNote || `Completed in session ${closeSession}`
-    };
-    save(data);
-    console.log(`✓ Done: ${closeItem.id} — ${closeItem.title}`);
 
-    // Step 2: Queue health check
-    const reloaded = load();
-    const pendingCount = reloaded.queue.filter(i => i.status === "pending").length;
+    if (dryRun) {
+      console.log(`[DRY RUN] Would close: ${closeItem.id} — ${closeItem.title}`);
+      console.log(`  result=${closeResult} effort=${closeEffort} quality=${closeQuality}`);
+      if (closeNote) console.log(`  note: ${closeNote}`);
+      if (closeHash) console.log(`  commit: ${closeHash}`);
+    } else {
+      closeItem.status = "done";
+      closeItem.completed = new Date().toISOString().slice(0, 10);
+      closeItem.completed_session = closeSession;
+      if (closeHash) closeItem.commits = [...(closeItem.commits || []), closeHash];
+      closeItem.outcome = {
+        session: closeSession,
+        result: closeResult,
+        effort: closeEffort,
+        quality: closeQuality,
+        note: closeNote || `Completed in session ${closeSession}`
+      };
+      save(data);
+      console.log(`✓ Done: ${closeItem.id} — ${closeItem.title}`);
+    }
+
+    // Step 2: Queue health check (simulate post-close count in dry-run)
+    const currentPending = data.queue.filter(i => i.status === "pending").length;
+    const pendingCount = dryRun && closeItem.status === "pending"
+      ? currentPending - 1
+      : dryRun ? currentPending : load().queue.filter(i => i.status === "pending").length;
     if (pendingCount === 0) {
       console.log(`⚠ CRITICAL: 0 pending items — replenish immediately`);
     } else if (pendingCount < 3) {

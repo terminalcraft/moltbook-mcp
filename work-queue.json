@@ -1,33 +1,26 @@
 {
   "queue": [
     {
-      "id": "wq-1053",
-      "title": "Demotion probe cooldown tracking",
-      "description": "(added ~s2108): The stale demotion probe (Check 11 in e-prehook-runner) currently picks randomly each E session. Add a cooldown file so it cycles through all stale demotions before re-probing the same one, avoiding redundant probes when a platform stays down.",
-      "priority": 1053,
-      "status": "done",
-      "added": "2026-06-01",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "B#696 s2112",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added cooldown file tracking to demotion probe. Reads/writes ~/.config/moltbook/demotion-probe-cooldown.json with per-platform last-probed session. Sorts stale demotions by oldest probe, ensuring full cycle before re-probe."
-      }
-    },
-    {
       "id": "wq-1054",
       "title": "Add dry-run mode to work-queue.js close",
       "description": "(added ~s2113): The close subcommand could support `--dry-run` to preview what it would do (show queue health, pipeline gate status) without actually marking the item done. Useful for pre-flight checks before committing.",
       "priority": 1054,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "d4d50af5"
+      ],
+      "completed": "2026-06-03",
+      "completed_session": 697,
+      "outcome": {
+        "session": 697,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added --dry-run flag to close subcommand. Previews item, queue health, pipeline gate, pattern reminder without mutation."
+      }
     },
     {
       "id": "wq-1055",
@@ -45,6 +38,17 @@
       "title": "Periodic re-probe of degraded platforms for engagement surfaces",
       "description": "(added ~s2109): Some degraded platforms (e.g. moltyscan) are live but lack engagement APIs. A periodic probe (every ~100 sessions) could check if SPAs have added comment/post features by scanning JS bundles for form-related patterns or new API routes. Would catch platforms that become engageable after updates without manual queue items.",
       "priority": 1056,
+      "status": "pending",
+      "added": "2026-06-03",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1057",
+      "title": "Demotion probe cooldown stats in audit",
+      "description": "(added ~s2112): Add a check to A session audit that reads demotion-probe-cooldown.json and reports cycle coverage (how many of N stale demotions have been probed in the last cycle). Would surface if the probe is effectively covering all demoted platforms or getting stuck.",
+      "priority": 1057,
       "status": "pending",
       "added": "2026-06-03",
       "source": "brainstorming-auto",

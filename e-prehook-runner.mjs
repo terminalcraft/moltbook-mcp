@@ -270,7 +270,7 @@ const recoveryProbe = shouldRunRecovery
   ? safeRunAsync('recovery-probe', () => _probeCircuitBroken({ dryRun: false }))
   : Promise.resolve({ ok: true, result: { skipped: true, reason: `next at session ${sessionNum + (RECOVERY_INTERVAL - (sessionNum % RECOVERY_INTERVAL))}` } });
 
-// ---- Check 11: Stale demotion probe (pick 1, DNS + HTTP) ----
+// ---- Check 11: Stale demotion probe (pick 1, DNS + HTTP, cooldown-cycled) ----
 const staleDemotionProbe = safeRunAsync('stale-demotion-probe', async () => {
   const mcpDir = join(HOME, 'moltbook-mcp');
   const { staleDemotions } = reviewPickerDemotions(sessionNum, mcpDir);
@@ -278,8 +278,24 @@ const staleDemotionProbe = safeRunAsync('stale-demotion-probe', async () => {
     return { skipped: true, reason: 'no stale demotions' };
   }
 
-  // Pick 1 random stale demotion
-  const pick = staleDemotions[Math.floor(Math.random() * staleDemotions.length)];
+  // Load cooldown file to avoid re-probing the same platform before cycling through all
+  const cooldownPath = join(HOME, '.config', 'moltbook', 'demotion-probe-cooldown.json');
+  let cooldown = {};
+  try {
+    cooldown = JSON.parse(readFileSync(cooldownPath, 'utf8'));
+  } catch { /* missing or corrupt — start fresh */ }
+
+  // Pick the stale demotion with the oldest (or missing) probe session
+  const sorted = [...staleDemotions].sort((a, b) => {
+    const aLast = cooldown[a.id] || 0;
+    const bLast = cooldown[b.id] || 0;
+    return aLast - bLast;
+  });
+  const pick = sorted[0];
+
+  // Update cooldown — record that we're probing this platform this session
+  cooldown[pick.id] = sessionNum;
+  try { writeFileSync(cooldownPath, JSON.stringify(cooldown, null, 2) + '\n', 'utf8'); } catch { /* best-effort */ }
 
   // Resolve probe URL from account-registry.json
   let probeUrl = null;

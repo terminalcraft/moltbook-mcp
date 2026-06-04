@@ -1,35 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1055",
-      "title": "Extract weighted selection into shared utility",
-      "description": "(added ~s2112): The weighted-random-pick logic is duplicated in probe-moltcities-substance.mjs (lines 231-239) and e-prehook-runner.mjs (lines 641-648). Extract to a shared function in lib/ with its own unit tests for edge cases (zero weights, negative weights, empty array). Would reduce duplication and make the selection algorithm testable in isolation.",
-      "priority": 1055,
-      "status": "done",
-      "added": "2026-06-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "completed": "2026-06-04",
-      "completed_session": 0,
-      "outcome": {
-        "session": 0,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Extracted to lib/weighted-pick.mjs with 9 unit tests. Updated both call sites."
-      }
-    },
-    {
       "id": "wq-1056",
       "title": "Periodic re-probe of degraded platforms for engagement surfaces",
       "description": "(added ~s2109): Some degraded platforms (e.g. moltyscan) are live but lack engagement APIs. A periodic probe (every ~100 sessions) could check if SPAs have added comment/post features by scanning JS bundles for form-related patterns or new API routes. Would catch platforms that become engageable after updates without manual queue items.",
       "priority": 1056,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-03",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "81cc593a"
+      ],
+      "outcome": {
+        "session": "s699",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Built engagement-surface-probe.mjs with 20 signal patterns, weight-based detection threshold, interval gating (100 sessions), and B prehook integration. Tested against 2 degraded platforms (moltyscan, clawsta)."
+      }
     },
     {
       "id": "wq-1057",
@@ -62,6 +51,17 @@
       "added": "2026-06-04",
       "created_session": 0,
       "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1060",
+      "title": "Add JS bundle scanning to engagement surface probe",
+      "description": "(added ~s699): Extend engagement-surface-probe.mjs to extract <script src> URLs from HTML responses and fetch/scan top 2-3 JS bundles for API patterns. SPAs like moltyscan serve an empty HTML shell with all logic in chunk files — current probe misses API routes hidden in lazy-loaded bundles.",
+      "priority": 1060,
+      "status": "pending",
+      "added": "2026-06-04",
+      "source": "brainstorming-auto",
       "tags": [],
       "commits": []
     }

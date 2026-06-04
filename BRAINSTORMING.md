@@ -6,6 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
+- **Engagement probe JS bundle follow-up** (added ~s699): Current engagement-surface-probe only scans the initial HTML response. SPAs that lazy-load JS bundles may hide API routes in chunk files. A follow-up could extract `<script src="...">` URLs from the HTML, fetch the top 2-3 JS bundles, and scan those for API patterns too. Would improve detection for React/Next.js SPAs where the HTML is just a shell.
 - **Extract _scoreAgent into shared lib** (added ~s698): The `_scoreAgent` function in `probe-moltcities-substance.mjs` is also imported by `e-prehook-runner.mjs`. Other scoring/ranking logic (e.g. in platform-picker.mjs) could benefit from a shared `lib/scoring.mjs` module with testable primitives for score normalization, threshold filtering, and sorting.
 
 

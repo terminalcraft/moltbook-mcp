@@ -21,11 +21,12 @@
  */
 
 import { readFileSync } from 'fs';
-import { safeRun } from './lib/runner-utils.mjs';
+import { safeRun, safeRunAsync } from './lib/runner-utils.mjs';
 import { lintTitles } from './queue-title-lint.mjs';
 import { getPipelineGateStats } from './hooks/lib/pipeline-nudge-stats.mjs';
 import { revalidatePatterns } from './knowledge-revalidate.mjs';
 import { reviewPickerDemotions } from './picker-demotion-review.mjs';
+import { probeEngagementSurfaces } from './lib/engagement-surface-probe.mjs';
 
 const sessionNum = parseInt(process.argv[2], 10) || 0;
 const mcpDir = process.argv[3] || '.';
@@ -183,6 +184,29 @@ if (!demotionReview.ok) {
   }
 }
 
+// ---- Check 6: Engagement surface probe for degraded platforms (wq-1056) ----
+
+const engagementProbe = await safeRunAsync('engagement-probe', () => {
+  return probeEngagementSurfaces({ sessionNum, force: false });
+});
+
+if (!engagementProbe.ok) {
+  summary.push('[engagement-probe] ERROR: runner failed');
+} else {
+  const r = engagementProbe.result;
+  if (r.skipped) {
+    // Silent — no output when interval hasn't elapsed
+  } else if (r.detected && r.detected.length > 0) {
+    summary.push(`[engagement-probe] DETECTED engagement surfaces on ${r.detected.length} platform(s):`);
+    for (const d of r.detected) {
+      summary.push(`  ${d.platform}: weight=${d.scan.totalWeight} signals=[${d.scan.matches.map(m => m.signal).join(', ')}]`);
+    }
+    summary.push('  → Review these platforms for promotion from degraded status.');
+  } else if (r.probed > 0) {
+    summary.push(`[engagement-probe] Probed ${r.probed} degraded platform(s) — no new engagement surfaces`);
+  }
+}
+
 // ---- Output ----
 
 const output = {
@@ -191,6 +215,7 @@ const output = {
   pipeline_nudge: pipelineNudge.ok ? pipelineNudge.result : { error: pipelineNudge.error },
   knowledge_revalidate: knowledgeRevalidate.ok ? knowledgeRevalidate.result : { error: knowledgeRevalidate.error },
   demotion_review: demotionReview.ok ? demotionReview.result : { error: demotionReview.error },
+  engagement_probe: engagementProbe.ok ? engagementProbe.result : { error: engagementProbe.error },
   summary: summary.join('\n'),
   stuck_nudge: stuckNudgeLines.join('\n'),
 };

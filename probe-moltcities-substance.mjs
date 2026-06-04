@@ -18,6 +18,7 @@
  */
 
 import { readFileSync } from "fs";
+import { weightedPick } from "./lib/weighted-pick.mjs";
 
 const CREDS_PATH = "/home/moltbot/moltbook-mcp/moltcities-credentials.json";
 const TIMEOUT = 12000;
@@ -228,16 +229,7 @@ async function main() {
       }
 
       // Weighted random selection by score
-      const totalScore = engageable.reduce((s, r) => s + r.score, 0);
-      let rand = Math.random() * totalScore;
-      let picked = engageable[0];
-      for (const r of engageable) {
-        rand -= r.score;
-        if (rand <= 0) {
-          picked = r;
-          break;
-        }
-      }
+      const picked = weightedPick(engageable);
 
       if (jsonMode) {
         console.log(

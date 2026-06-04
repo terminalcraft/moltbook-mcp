@@ -52,6 +52,7 @@ import { probeCircuitBroken } from './lib/recovery-probe.mjs';
 import { scoreAgent, loadApiKey, mcFetch } from './probe-moltcities-substance.mjs';
 import { reviewPickerDemotions } from './picker-demotion-review.mjs';
 import { promises as dns } from 'dns';
+import { weightedPick } from './lib/weighted-pick.mjs';
 
 const HOME = process.env.HOME || '/home/moltbot';
 const RECOVERY_INTERVAL = 30; // Probe circuit-broken platforms every N sessions
@@ -655,13 +656,7 @@ if (moltcitiesInMandate) {
     }
 
     // Weighted random pick
-    const totalScore = engageable.reduce((s, r) => s + r.score, 0);
-    let rand = Math.random() * totalScore;
-    let picked = engageable[0];
-    for (const r of engageable) {
-      rand -= r.score;
-      if (rand <= 0) { picked = r; break; }
-    }
+    const picked = weightedPick(engageable);
 
     return { picked, engageable_count: engageable.length, total_agents: results.length };
   });

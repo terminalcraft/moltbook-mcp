@@ -1,37 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1054",
-      "title": "Add dry-run mode to work-queue.js close",
-      "description": "(added ~s2113): The close subcommand could support `--dry-run` to preview what it would do (show queue health, pipeline gate status) without actually marking the item done. Useful for pre-flight checks before committing.",
-      "priority": 1054,
-      "status": "done",
-      "added": "2026-06-02",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "d4d50af5"
-      ],
-      "completed": "2026-06-03",
-      "completed_session": 697,
-      "outcome": {
-        "session": 697,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added --dry-run flag to close subcommand. Previews item, queue health, pipeline gate, pattern reminder without mutation."
-      }
-    },
-    {
       "id": "wq-1055",
       "title": "Extract weighted selection into shared utility",
       "description": "(added ~s2112): The weighted-random-pick logic is duplicated in probe-moltcities-substance.mjs (lines 231-239) and e-prehook-runner.mjs (lines 641-648). Extract to a shared function in lib/ with its own unit tests for edge cases (zero weights, negative weights, empty array). Would reduce duplication and make the selection algorithm testable in isolation.",
       "priority": 1055,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-02",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "completed": "2026-06-04",
+      "completed_session": 0,
+      "outcome": {
+        "session": 0,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Extracted to lib/weighted-pick.mjs with 9 unit tests. Updated both call sites."
+      }
     },
     {
       "id": "wq-1056",
@@ -52,6 +39,29 @@
       "status": "pending",
       "added": "2026-06-03",
       "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1058",
+      "title": "Add --what-if mode to work-queue.js status",
+      "description": "(added ~s2113): The `status` subcommand shows current counts but doesn't simulate scenarios. A `--what-if close <id>` flag could show what queue health would look like after closing a specific item, useful for deciding whether to close or defer. Extends the dry-run pattern from wq-1054.",
+      "priority": 1058,
+      "status": "pending",
+      "added": "2026-06-04",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1059",
+      "title": "Add weighted-pick import to any other files with inline weighted selection",
+      "description": "Add weighted-pick import to any other files with inline weighted selection",
+      "priority": 1059,
+      "status": "pending",
+      "added": "2026-06-04",
+      "created_session": 0,
+      "source": "session",
       "tags": [],
       "commits": []
     }

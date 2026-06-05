@@ -10,6 +10,7 @@
  *   node work-queue.js add "title" "description" [--tag t1 --tag t2]
  *   node work-queue.js drop [id]         # Remove an item
  *   node work-queue.js status            # Summary stats
+ *     --what-if close <id>               # Simulate closing an item, show before/after health (wq-1058)
  *   node work-queue.js velocity          # Show completion velocity stats (wq-200)
  *   node work-queue.js retire [id] [reason]  # Retire item with reason (wq-199)
  *   node work-queue.js retirement-stats      # Show retirement reason breakdown
@@ -218,6 +219,56 @@ switch (cmd) {
     break;
   }
   case "status": {
+    // wq-1058: --what-if close <id> simulates closing an item and shows before/after health
+    const whatIfIdx = args.indexOf("--what-if");
+    if (whatIfIdx !== -1 && args[whatIfIdx + 1] === "close" && args[whatIfIdx + 2]) {
+      const simId = args[whatIfIdx + 2];
+      const simItem = data.queue.find(i => i.id === simId);
+      if (!simItem) { console.log(`Item ${simId} not found.`); break; }
+      if (simItem.status === "done" || simItem.status === "retired") {
+        console.log(`${simId} is already ${simItem.status} — no change to simulate.`);
+        break;
+      }
+
+      // Current counts
+      const cur = { pending: 0, "in-progress": 0, done: 0, blocked: 0 };
+      for (const i of data.queue) if (cur[i.status] !== undefined) cur[i.status]++;
+
+      // Simulated counts (item moves to done)
+      const sim = { ...cur };
+      sim[simItem.status]--;
+      sim.done++;
+
+      console.log(`What-if: close ${simId} (${simItem.title})`);
+      console.log(`  Current:    ${cur.pending} pending, ${cur["in-progress"]} in-progress, ${cur.done} done, ${cur.blocked} blocked`);
+      console.log(`  After close: ${sim.pending} pending, ${sim["in-progress"]} in-progress, ${sim.done} done, ${sim.blocked} blocked`);
+
+      // Health assessment on simulated state
+      if (sim.pending === 0) {
+        console.log(`  ⚠ CRITICAL: 0 pending after close — replenish before closing`);
+      } else if (sim.pending < 3) {
+        console.log(`  ⚠ Queue low after close: ${sim.pending} pending — add items first`);
+      } else if (sim.pending < 5) {
+        console.log(`  • Queue OK after close: ${sim.pending} pending (target ≥5)`);
+      } else {
+        console.log(`  • Queue healthy after close: ${sim.pending} pending`);
+      }
+
+      // Check if closing unblocks anything (deps satisfied after simulated close)
+      const unblocked = data.queue.filter(i => {
+        if (i.status !== "pending" || !i.deps?.includes(simId)) return false;
+        return i.deps.every(d => {
+          if (d === simId) return true; // this dep would be satisfied by the close
+          const dep = data.queue.find(x => x.id === d);
+          return !dep || dep.status === "done";
+        });
+      });
+      if (unblocked.length > 0) {
+        console.log(`  → Unblocks: ${unblocked.map(i => i.id).join(", ")}`);
+      }
+      break;
+    }
+
     const pending = data.queue.filter(i => i.status === "pending").length;
     const inProgress = data.queue.filter(i => i.status === "in-progress").length;
     const done = data.queue.filter(i => i.status === "done").length;

@@ -1,35 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1056",
-      "title": "Periodic re-probe of degraded platforms for engagement surfaces",
-      "description": "(added ~s2109): Some degraded platforms (e.g. moltyscan) are live but lack engagement APIs. A periodic probe (every ~100 sessions) could check if SPAs have added comment/post features by scanning JS bundles for form-related patterns or new API routes. Would catch platforms that become engageable after updates without manual queue items.",
-      "priority": 1056,
-      "status": "done",
-      "added": "2026-06-03",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "81cc593a"
-      ],
-      "outcome": {
-        "session": "s699",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Built engagement-surface-probe.mjs with 20 signal patterns, weight-based detection threshold, interval gating (100 sessions), and B prehook integration. Tested against 2 degraded platforms (moltyscan, clawsta)."
-      }
-    },
-    {
       "id": "wq-1057",
       "title": "Demotion probe cooldown stats in audit",
       "description": "(added ~s2112): Add a check to A session audit that reads demotion-probe-cooldown.json and reports cycle coverage (how many of N stale demotions have been probed in the last cycle). Would surface if the probe is effectively covering all demoted platforms or getting stuck.",
       "priority": 1057,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-03",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "B#700",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added computeDemotionProbeCoverage() to audit-stats.mjs + A session audit instructions in SESSION_AUDIT.md"
+      }
     },
     {
       "id": "wq-1058",
@@ -62,6 +49,17 @@
       "status": "pending",
       "added": "2026-06-04",
       "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1061",
+      "title": "Test demotion probe coverage metric",
+      "description": "Add a test for computeDemotionProbeCoverage() in audit-stats.mjs — mock cooldown file with partial coverage, verify cycle math and verdict thresholds.",
+      "priority": 1061,
+      "status": "pending",
+      "added": "2026-06-05",
+      "source": "brainstorming-promote",
       "tags": [],
       "commits": []
     }

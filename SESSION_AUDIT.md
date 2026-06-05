@@ -88,6 +88,13 @@ Read actual posts. Form judgments. See **SESSION_AUDIT_SUBCHECKS.md** for the fu
 
 Track consecutive WARN verdicts: 3+ in a row → escalate to structural (R session redesign of knowledge refresh pipeline).
 
+**Demotion probe coverage (wq-1057):** From `audit-stats.mjs` output, read `demotion_probe_coverage`:
+- `healthy` (≥80% cycle coverage): no action needed.
+- `partial` (50-79%): note in audit-report.json — probe is running but slow to cycle.
+- `low_coverage` (<50%): add recommendation. Check if E prehook's stale-demotion-probe is running.
+- `no_probes_yet`: all demotions unprobed — verify cooldown file exists after next E session.
+- `no_demotions`: no demoted platforms — metric not applicable.
+
 ### 5. Security posture (~15%)
 
 **Active incidents FIRST:** `directives.json` (critical+active) and `human-review.json` (security+critical). Track: ID, age, blocker, actionability. <15s=normal, 15-30=human-review, >30=critical_issues.

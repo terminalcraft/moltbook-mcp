@@ -1107,6 +1107,66 @@ function computeResurrectRate() {
   };
 }
 
+// --- Demotion probe cooldown coverage (wq-1057) ---
+
+function computeDemotionProbeCoverage() {
+  const demotionsPath = join(PROJECT_DIR, 'picker-demotions.json');
+  const cooldownPath = join(STATE_DIR, 'demotion-probe-cooldown.json');
+
+  const demotionsData = safeRead(demotionsPath, { demotions: [] });
+  const demotions = demotionsData.demotions || [];
+  const cooldown = safeRead(cooldownPath, {});
+  const currentSession = getCurrentSession();
+
+  if (demotions.length === 0) {
+    return { total_demoted: 0, probed: 0, unprobed: 0, cycle_coverage_pct: 100, verdict: 'no_demotions' };
+  }
+
+  // A full cycle = enough sessions for each demotion to be probed once
+  // Since the probe picks 1 per E session and cycles through all, a cycle length = demotions.length * 5
+  // (roughly 1 E session per 5 sessions in BBREA rotation)
+  const cycleLength = demotions.length * 5;
+
+  let probedInCycle = 0;
+  let neverProbed = 0;
+  const platformDetails = [];
+
+  for (const d of demotions) {
+    const lastProbed = cooldown[d.id] || null;
+    const age = lastProbed != null ? currentSession - lastProbed : null;
+    const inCycle = lastProbed != null && age <= cycleLength;
+
+    if (inCycle) probedInCycle++;
+    if (lastProbed == null) neverProbed++;
+
+    platformDetails.push({
+      id: d.id,
+      last_probed_session: lastProbed,
+      age_sessions: age,
+      in_current_cycle: inCycle
+    });
+  }
+
+  const cycleCoveragePct = Math.round((probedInCycle / demotions.length) * 100);
+
+  let verdict;
+  if (cycleCoveragePct >= 80) verdict = 'healthy';
+  else if (cycleCoveragePct >= 50) verdict = 'partial';
+  else if (neverProbed === demotions.length) verdict = 'no_probes_yet';
+  else verdict = 'low_coverage';
+
+  return {
+    total_demoted: demotions.length,
+    probed_in_cycle: probedInCycle,
+    unprobed: demotions.length - probedInCycle,
+    never_probed: neverProbed,
+    cycle_length_sessions: cycleLength,
+    cycle_coverage_pct: cycleCoveragePct,
+    platforms: platformDetails,
+    verdict
+  };
+}
+
 // --- Knowledge staleness metric (wq-1023, d081) ---
 
 function computeKnowledgeStaleness() {
@@ -1278,7 +1338,8 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
     auto_retired_items: computeAutoRetiredItems(),
     knowledge_staleness: computeKnowledgeStaleness(),
     resurrect_pass: computeResurrectPassStats(),
-    resurrect_rate: computeResurrectRate()
+    resurrect_rate: computeResurrectRate(),
+    demotion_probe_coverage: computeDemotionProbeCoverage()
   };
 
   console.log(JSON.stringify(stats, null, 2));

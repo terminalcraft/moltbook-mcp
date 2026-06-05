@@ -10,6 +10,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 - **Extract _scoreAgent into shared lib** (added ~s698): The `_scoreAgent` function in `probe-moltcities-substance.mjs` is also imported by `e-prehook-runner.mjs`. Other scoring/ranking logic (e.g. in platform-picker.mjs) could benefit from a shared `lib/scoring.mjs` module with testable primitives for score normalization, threshold filtering, and sorting.
 
 
+- **Test demotion probe coverage metric** (added ~s2118): Add a test for `computeDemotionProbeCoverage()` in audit-stats.mjs — mock cooldown file with partial coverage, verify cycle math and verdict thresholds. Would complement the existing audit-stats test coverage.
+
 - **Test picker-demotions.json schema validation** (added ~s2110): Add a test that validates the actual picker-demotions.json file matches expected schema (required keys, correct types for multiplier/trial_until/demoted_by). Would catch manual edit mistakes before they break the review module at runtime.
 
 - **Auto-demote flapping platforms from picker** (added ~s2100): When resurrect-rate metric shows a platform with 3+ cycles, auto-add it to picker-demotions.json with reduced weight. Currently resurrect-rate surfaces flapping but doesn't act on it — closing the loop would reduce wasted E session substitutions on chronically unstable platforms.

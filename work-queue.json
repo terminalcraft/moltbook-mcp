@@ -1,33 +1,26 @@
 {
   "queue": [
     {
-      "id": "wq-1057",
-      "title": "Demotion probe cooldown stats in audit",
-      "description": "(added ~s2112): Add a check to A session audit that reads demotion-probe-cooldown.json and reports cycle coverage (how many of N stale demotions have been probed in the last cycle). Would surface if the probe is effectively covering all demoted platforms or getting stuck.",
-      "priority": 1057,
-      "status": "done",
-      "added": "2026-06-03",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "B#700",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added computeDemotionProbeCoverage() to audit-stats.mjs + A session audit instructions in SESSION_AUDIT.md"
-      }
-    },
-    {
       "id": "wq-1058",
       "title": "Add --what-if mode to work-queue.js status",
       "description": "(added ~s2113): The `status` subcommand shows current counts but doesn't simulate scenarios. A `--what-if close <id>` flag could show what queue health would look like after closing a specific item, useful for deciding whether to close or defer. Extends the dry-run pattern from wq-1054.",
       "priority": 1058,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "--result"
+      ],
+      "completed": "2026-06-05",
+      "completed_session": 0,
+      "outcome": {
+        "session": 0,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added --what-if close mode to status subcommand, shows before/after health + unblocked deps"
+      }
     },
     {
       "id": "wq-1059",

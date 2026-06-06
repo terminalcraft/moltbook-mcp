@@ -6,8 +6,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
+- **Add weightedPickN (without-replacement) to weighted-pick.mjs** (added ~s702): The `weightedRandomSelect` in platform-picker.mjs was refactored to use `weightedPick` internally but the without-replacement multi-pick pattern is generic enough to export from the shared module. Would let any future multi-selection use `weightedPickN(items, count, weightFn)` instead of reimplementing the removal loop.
+
 - **Engagement probe JS bundle follow-up** (added ~s699): Current engagement-surface-probe only scans the initial HTML response. SPAs that lazy-load JS bundles may hide API routes in chunk files. A follow-up could extract `<script src="...">` URLs from the HTML, fetch the top 2-3 JS bundles, and scan those for API patterns too. Would improve detection for React/Next.js SPAs where the HTML is just a shell.
-- **Extract _scoreAgent into shared lib** (added ~s698): The `_scoreAgent` function in `probe-moltcities-substance.mjs` is also imported by `e-prehook-runner.mjs`. Other scoring/ranking logic (e.g. in platform-picker.mjs) could benefit from a shared `lib/scoring.mjs` module with testable primitives for score normalization, threshold filtering, and sorting.
 
 
 - **Add --what-if retire to work-queue.js status** (added ~s701): Extend the --what-if pattern to also support `--what-if retire <id>`, simulating retirement instead of close. Would show how the queue health changes when retiring stale items — useful for R sessions deciding whether to prune vs defer.

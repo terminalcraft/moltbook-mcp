@@ -28,6 +28,7 @@ import { execSync } from "child_process";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 import { getCachedLiveness } from "./lib/platform-liveness-cache.mjs";
 import { normalizePlatformName } from "./lib/platform-names.mjs";
+import { weightedPick } from "./lib/weighted-pick.mjs";
 import { getCircuitState } from "./lib/circuit-breaker.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -210,25 +211,11 @@ function weightedRandomSelect(items, count) {
   const remaining = [...items];
 
   while (selected.length < count && remaining.length > 0) {
-    // Calculate total weight
-    const totalWeight = remaining.reduce((sum, item) => sum + item.weight, 0);
-    if (totalWeight <= 0) break;
+    const pick = weightedPick(remaining, item => item.weight);
+    if (!pick) break;
 
-    // Random selection
-    let random = Math.random() * totalWeight;
-    let selectedIdx = 0;
-
-    for (let i = 0; i < remaining.length; i++) {
-      random -= remaining[i].weight;
-      if (random <= 0) {
-        selectedIdx = i;
-        break;
-      }
-    }
-
-    // Move selected item
-    selected.push(remaining[selectedIdx]);
-    remaining.splice(selectedIdx, 1);
+    selected.push(pick);
+    remaining.splice(remaining.indexOf(pick), 1);
   }
 
   return selected;

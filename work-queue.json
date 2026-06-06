@@ -1,38 +1,23 @@
 {
   "queue": [
     {
-      "id": "wq-1058",
-      "title": "Add --what-if mode to work-queue.js status",
-      "description": "(added ~s2113): The `status` subcommand shows current counts but doesn't simulate scenarios. A `--what-if close <id>` flag could show what queue health would look like after closing a specific item, useful for deciding whether to close or defer. Extends the dry-run pattern from wq-1054.",
-      "priority": 1058,
-      "status": "done",
-      "added": "2026-06-04",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "--result"
-      ],
-      "completed": "2026-06-05",
-      "completed_session": 0,
-      "outcome": {
-        "session": 0,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added --what-if close mode to status subcommand, shows before/after health + unblocked deps"
-      }
-    },
-    {
       "id": "wq-1059",
       "title": "Add weighted-pick import to any other files with inline weighted selection",
       "description": "Add weighted-pick import to any other files with inline weighted selection",
       "priority": 1059,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-04",
       "created_session": 0,
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 702,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Replaced inline weightedRandomSelect in platform-picker.mjs with imported weightedPick from lib/weighted-pick.mjs. Only file needing the refactor — all other weighted selection already used the import."
+      }
     },
     {
       "id": "wq-1060",
@@ -53,6 +38,29 @@
       "status": "pending",
       "added": "2026-06-05",
       "source": "brainstorming-promote",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1062",
+      "title": "Extract _scoreAgent into shared lib",
+      "description": "(added ~s698): The `_scoreAgent` function in `probe-moltcities-substance.mjs` is also imported by `e-prehook-runner.mjs`. Other scoring/ranking logic (e.g. in platform-picker.mjs) could benefit from a shared `lib/scoring.mjs` module with testable primitives for score normalization, threshold filtering, and sorting.",
+      "priority": 1062,
+      "status": "pending",
+      "added": "2026-06-06",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1060",
+      "title": "Export weightedPickN from lib/weighted-pick.mjs for multi-select without replacement",
+      "description": "Extract the without-replacement loop from platform-picker.mjs weightedRandomSelect into a generic weightedPickN(items, count, weightFn) exported from lib/weighted-pick.mjs. Update platform-picker.mjs to use the new export. Add tests.",
+      "priority": 1060,
+      "status": "pending",
+      "added": "2026-06-06",
+      "created_session": 702,
+      "source": "session",
       "tags": [],
       "commits": []
     }

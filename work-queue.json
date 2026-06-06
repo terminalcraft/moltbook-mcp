@@ -1,34 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1059",
-      "title": "Add weighted-pick import to any other files with inline weighted selection",
-      "description": "Add weighted-pick import to any other files with inline weighted selection",
-      "priority": 1059,
-      "status": "done",
-      "added": "2026-06-04",
-      "created_session": 0,
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 702,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Replaced inline weightedRandomSelect in platform-picker.mjs with imported weightedPick from lib/weighted-pick.mjs. Only file needing the refactor — all other weighted selection already used the import."
-      }
-    },
-    {
       "id": "wq-1060",
       "title": "Add JS bundle scanning to engagement surface probe",
       "description": "(added ~s699): Extend engagement-surface-probe.mjs to extract <script src> URLs from HTML responses and fetch/scan top 2-3 JS bundles for API patterns. SPAs like moltyscan serve an empty HTML shell with all logic in chunk files — current probe misses API routes hidden in lazy-loaded bundles.",
       "priority": 1060,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-04",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s703",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added extractScriptUrls, prioritizeBundles, scanJsBundles functions. Moltyscan SPA now detected with weight=7 from JS bundle scanning."
+      }
     },
     {
       "id": "wq-1061",
@@ -53,13 +41,25 @@
       "commits": []
     },
     {
-      "id": "wq-1060",
+      "id": "wq-1062",
       "title": "Export weightedPickN from lib/weighted-pick.mjs for multi-select without replacement",
       "description": "Extract the without-replacement loop from platform-picker.mjs weightedRandomSelect into a generic weightedPickN(items, count, weightFn) exported from lib/weighted-pick.mjs. Update platform-picker.mjs to use the new export. Add tests.",
       "priority": 1060,
       "status": "pending",
       "added": "2026-06-06",
       "created_session": 702,
+      "source": "session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1061",
+      "title": "Auto-promote degraded platforms when engagement probe detects signals",
+      "description": "When engagement-surface-probe detects signals above threshold (weight >= 6), automatically create a work-queue item to investigate and promote the platform from degraded to active. Currently probe only adds notes to account-registry — make it actionable.",
+      "priority": 1061,
+      "status": "pending",
+      "added": "2026-06-06",
+      "created_session": 703,
       "source": "session",
       "tags": [],
       "commits": []

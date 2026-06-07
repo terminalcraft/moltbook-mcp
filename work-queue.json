@@ -1,33 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1060",
-      "title": "Add JS bundle scanning to engagement surface probe",
-      "description": "(added ~s699): Extend engagement-surface-probe.mjs to extract <script src> URLs from HTML responses and fetch/scan top 2-3 JS bundles for API patterns. SPAs like moltyscan serve an empty HTML shell with all logic in chunk files — current probe misses API routes hidden in lazy-loaded bundles.",
-      "priority": 1060,
-      "status": "done",
-      "added": "2026-06-04",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s703",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added extractScriptUrls, prioritizeBundles, scanJsBundles functions. Moltyscan SPA now detected with weight=7 from JS bundle scanning."
-      }
-    },
-    {
       "id": "wq-1061",
       "title": "Test demotion probe coverage metric",
       "description": "Add a test for computeDemotionProbeCoverage() in audit-stats.mjs — mock cooldown file with partial coverage, verify cycle math and verdict thresholds.",
       "priority": 1061,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-05",
       "source": "brainstorming-promote",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 704,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "8 tests covering cycle math, all 5 verdicts, platform details, and missing file handling"
+      }
     },
     {
       "id": "wq-1062",

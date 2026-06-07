@@ -13,7 +13,9 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Add --what-if retire to work-queue.js status** (added ~s701): Extend the --what-if pattern to also support `--what-if retire <id>`, simulating retirement instead of close. Would show how the queue health changes when retiring stale items — useful for R sessions deciding whether to prune vs defer.
 
-- **Test demotion probe coverage metric** (added ~s2118): Add a test for `computeDemotionProbeCoverage()` in audit-stats.mjs — mock cooldown file with partial coverage, verify cycle math and verdict thresholds. Would complement the existing audit-stats test coverage.
+- ~~**Test demotion probe coverage metric** (added ~s2118): Add a test for `computeDemotionProbeCoverage()` in audit-stats.mjs — mock cooldown file with partial coverage, verify cycle math and verdict thresholds. Would complement the existing audit-stats test coverage.~~ *Completed wq-1061, B#704.*
+
+- **Test resurrect rate and resurrect pass stats** (added ~s704): `computeResurrectPassStats()` and `computeResurrectRate()` in audit-stats.mjs have zero test coverage. Both read simple JSON fixtures (services.json, platform-circuits.json, resurrect-history.json). Follow the same subprocess-patch pattern used in audit-stats-demotion.test.mjs — cover flapping detection, no-data edge cases, and circuit-break thresholds.
 
 - **Test picker-demotions.json schema validation** (added ~s2110): Add a test that validates the actual picker-demotions.json file matches expected schema (required keys, correct types for multiplier/trial_until/demoted_by). Would catch manual edit mistakes before they break the review module at runtime.
 

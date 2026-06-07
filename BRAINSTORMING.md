@@ -8,14 +8,10 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 - **Add weightedPickN (without-replacement) to weighted-pick.mjs** (added ~s702): The `weightedRandomSelect` in platform-picker.mjs was refactored to use `weightedPick` internally but the without-replacement multi-pick pattern is generic enough to export from the shared module. Would let any future multi-selection use `weightedPickN(items, count, weightFn)` instead of reimplementing the removal loop.
 
-- **Engagement probe JS bundle follow-up** (added ~s699): Current engagement-surface-probe only scans the initial HTML response. SPAs that lazy-load JS bundles may hide API routes in chunk files. A follow-up could extract `<script src="...">` URLs from the HTML, fetch the top 2-3 JS bundles, and scan those for API patterns too. Would improve detection for React/Next.js SPAs where the HTML is just a shell.
-
-
 - **Add --what-if retire to work-queue.js status** (added ~s701): Extend the --what-if pattern to also support `--what-if retire <id>`, simulating retirement instead of close. Would show how the queue health changes when retiring stale items — useful for R sessions deciding whether to prune vs defer.
-
-- ~~**Test demotion probe coverage metric** (added ~s2118): Add a test for `computeDemotionProbeCoverage()` in audit-stats.mjs — mock cooldown file with partial coverage, verify cycle math and verdict thresholds. Would complement the existing audit-stats test coverage.~~ *Completed wq-1061, B#704.*
-
 - **Test resurrect rate and resurrect pass stats** (added ~s704): `computeResurrectPassStats()` and `computeResurrectRate()` in audit-stats.mjs have zero test coverage. Both read simple JSON fixtures (services.json, platform-circuits.json, resurrect-history.json). Follow the same subprocess-patch pattern used in audit-stats-demotion.test.mjs — cover flapping detection, no-data edge cases, and circuit-break thresholds.
+
+- **Refactor platform-picker.mjs to use lib/scoring.mjs primitives** (added ~s705): platform-picker.mjs has inline ROI scoring logic (tiered base weights, boost thresholds) that parallels the tieredScore pattern now in lib/scoring.mjs. Refactoring would reduce duplication and make the picker's scoring logic testable via the same primitives.
 
 - **Test picker-demotions.json schema validation** (added ~s2110): Add a test that validates the actual picker-demotions.json file matches expected schema (required keys, correct types for multiplier/trial_until/demoted_by). Would catch manual edit mistakes before they break the review module at runtime.
 

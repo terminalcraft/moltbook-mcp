@@ -19,6 +19,7 @@
 
 import { readFileSync } from "fs";
 import { weightedPick } from "./lib/weighted-pick.mjs";
+import { tieredScore, booleanScore, verdictFromScore, sortByScore, filterByThreshold } from "./lib/scoring.mjs";
 
 const CREDS_PATH = "/home/moltbot/moltbook-mcp/moltcities-credentials.json";
 const TIMEOUT = 12000;
@@ -69,33 +70,35 @@ async function scoreAgent(slug, apiKey, { townSquare, jobs } = {}) {
   signals.soul_length = (agent.soul || "").length;
 
   // View count scoring (0-15 pts)
-  if (signals.view_count >= 500) score += 15;
-  else if (signals.view_count >= 200) score += 10;
-  else if (signals.view_count >= 100) score += 5;
-  else if (signals.view_count >= 50) score += 2;
+  score += tieredScore(signals.view_count, [
+    { min: 500, points: 15 }, { min: 200, points: 10 },
+    { min: 100, points: 5 },  { min: 50, points: 2 },
+  ]);
 
   // Active status (0-15 pts)
-  if (signals.has_status) score += 15;
+  score += booleanScore(signals.has_status, 15);
 
   // Skills depth (0-10 pts)
-  if (signals.skills_count >= 5) score += 10;
-  else if (signals.skills_count >= 3) score += 5;
+  score += tieredScore(signals.skills_count, [
+    { min: 5, points: 10 }, { min: 3, points: 5 },
+  ]);
 
   // Non-suburbs neighborhood (5 pts — indicates some customization)
-  if (signals.neighborhood !== "suburbs") score += 5;
+  score += booleanScore(signals.neighborhood !== "suburbs", 5);
 
   // Soul description depth (0-5 pts)
-  if (signals.soul_length >= 150) score += 5;
-  else if (signals.soul_length >= 80) score += 2;
+  score += tieredScore(signals.soul_length, [
+    { min: 150, points: 5 }, { min: 80, points: 2 },
+  ]);
 
   // 2. Guestbook entries
   try {
     const gb = await mcFetch(`/api/sites/${slug}/guestbook`, apiKey);
     signals.guestbook_count = (gb.entries || []).length;
     // Guestbook scoring (0-20 pts)
-    if (signals.guestbook_count >= 5) score += 20;
-    else if (signals.guestbook_count >= 3) score += 15;
-    else if (signals.guestbook_count >= 1) score += 8;
+    score += tieredScore(signals.guestbook_count, [
+      { min: 5, points: 20 }, { min: 3, points: 15 }, { min: 1, points: 8 },
+    ]);
   } catch {
     signals.guestbook_count = 0;
   }
@@ -108,9 +111,9 @@ async function scoreAgent(slug, apiKey, { townSquare, jobs } = {}) {
     );
     signals.town_square_posts = posts.length;
     // Town square scoring (0-20 pts)
-    if (posts.length >= 5) score += 20;
-    else if (posts.length >= 2) score += 12;
-    else if (posts.length >= 1) score += 5;
+    score += tieredScore(posts.length, [
+      { min: 5, points: 20 }, { min: 2, points: 12 }, { min: 1, points: 5 },
+    ]);
   }
 
   // 4. Job posting (use pre-fetched data if available)
@@ -121,10 +124,10 @@ async function scoreAgent(slug, apiKey, { townSquare, jobs } = {}) {
     );
     signals.jobs_posted = posted.length;
     // Jobs scoring (0-10 pts)
-    if (posted.length >= 1) score += 10;
+    score += booleanScore(posted.length >= 1, 10);
   }
 
-  const verdict = score >= 30 ? "engage" : "skip";
+  const verdict = verdictFromScore(score, 30);
   return { slug, name: agent.name || slug, score, signals, verdict };
 }
 
@@ -200,25 +203,25 @@ async function main() {
       }
     }
 
-    results.sort((a, b) => b.score - a.score);
+    const sorted = sortByScore(results);
 
     if (allMode) {
       if (jsonMode) {
-        console.log(JSON.stringify(results, null, 2));
+        console.log(JSON.stringify(sorted, null, 2));
       } else {
-        for (const r of results) {
+        for (const r of sorted) {
           const tag = r.verdict === "engage" ? "✓" : "✗";
           console.log(`${tag} ${r.name}: score=${r.score} (${r.verdict})`);
         }
-        const engageable = results.filter((r) => r.verdict === "engage").length;
-        console.log(`\n${engageable}/${results.length} agents have substance`);
+        const engageable = filterByThreshold(sorted, 30).length;
+        console.log(`\n${engageable}/${sorted.length} agents have substance`);
       }
       process.exit(0);
     }
 
     if (pickMode) {
       // Pick a random substantive agent (weighted by score)
-      const engageable = results.filter((r) => r.verdict === "engage");
+      const engageable = filterByThreshold(sorted, 30);
       if (engageable.length === 0) {
         if (jsonMode) {
           console.log(JSON.stringify({ picked: null, reason: "no_substantive_agents" }));
@@ -234,14 +237,14 @@ async function main() {
       if (jsonMode) {
         console.log(
           JSON.stringify(
-            { picked, engageable_count: engageable.length, total_agents: results.length },
+            { picked, engageable_count: engageable.length, total_agents: sorted.length },
             null,
             2
           )
         );
       } else {
         console.log(`Picked: ${picked.name} (score=${picked.score})`);
-        console.log(`${engageable.length}/${results.length} agents have substance`);
+        console.log(`${engageable.length}/${sorted.length} agents have substance`);
         for (const [k, v] of Object.entries(picked.signals)) {
           console.log(`  ${k}: ${v}`);
         }

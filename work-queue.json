@@ -1,35 +1,25 @@
 {
   "queue": [
     {
-      "id": "wq-1062",
-      "title": "Export weightedPickN from lib/weighted-pick.mjs for multi-select without replacement",
-      "description": "Extract the without-replacement loop from platform-picker.mjs weightedRandomSelect into a generic weightedPickN(items, count, weightFn) exported from lib/weighted-pick.mjs. Update platform-picker.mjs to use the new export. Add tests.",
-      "priority": 1060,
-      "status": "done",
-      "added": "2026-06-06",
-      "created_session": 702,
-      "source": "session",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "B#706",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Exported weightedPickN from lib/weighted-pick.mjs, updated platform-picker.mjs, 9 tests"
-      }
-    },
-    {
       "id": "wq-1061",
       "title": "Auto-promote degraded platforms when engagement probe detects signals",
       "description": "When engagement-surface-probe detects signals above threshold (weight >= 6), automatically create a work-queue item to investigate and promote the platform from degraded to active. Currently probe only adds notes to account-registry — make it actionable.",
       "priority": 1061,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-06",
       "created_session": 703,
       "source": "session",
       "tags": [],
-      "commits": []
+      "commits": [
+        "35861b6e"
+      ],
+      "outcome": {
+        "session": 707,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Auto-creates work-queue items when probe detects engagement signals >= threshold. Platform-name dedup prevents duplicates. Prehook summary reports created items."
+      }
     },
     {
       "id": "wq-1063",
@@ -53,6 +43,17 @@
       "tags": [
         "platform-recovery"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-1065",
+      "title": "Add --what-if retire to work-queue.js status",
+      "description": "(added ~s701): Extend the --what-if pattern to also support `--what-if retire <id>`, simulating retirement instead of close. Would show how the queue health changes when retiring stale items — useful for R sessions deciding whether to prune vs defer.",
+      "priority": 1065,
+      "status": "pending",
+      "added": "2026-06-08",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

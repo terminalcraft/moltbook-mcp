@@ -28,7 +28,7 @@ import { execSync } from "child_process";
 import { analyzeEngagement } from "./providers/engagement-analytics.js";
 import { getCachedLiveness } from "./lib/platform-liveness-cache.mjs";
 import { normalizePlatformName } from "./lib/platform-names.mjs";
-import { weightedPick } from "./lib/weighted-pick.mjs";
+import { weightedPick, weightedPickN } from "./lib/weighted-pick.mjs";
 import { getCircuitState } from "./lib/circuit-breaker.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -205,20 +205,8 @@ function getMentionBoosts(verbose) {
   }
 }
 
-// Weighted random selection without replacement
 function weightedRandomSelect(items, count) {
-  const selected = [];
-  const remaining = [...items];
-
-  while (selected.length < count && remaining.length > 0) {
-    const pick = weightedPick(remaining, item => item.weight);
-    if (!pick) break;
-
-    selected.push(pick);
-    remaining.splice(remaining.indexOf(pick), 1);
-  }
-
-  return selected;
+  return weightedPickN(items, count, item => item.weight);
 }
 
 export function main() {

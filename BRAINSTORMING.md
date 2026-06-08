@@ -6,12 +6,12 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Add weightedPickN (without-replacement) to weighted-pick.mjs** (added ~s702): The `weightedRandomSelect` in platform-picker.mjs was refactored to use `weightedPick` internally but the without-replacement multi-pick pattern is generic enough to export from the shared module. Would let any future multi-selection use `weightedPickN(items, count, weightFn)` instead of reimplementing the removal loop.
-
 - **Add --what-if retire to work-queue.js status** (added ~s701): Extend the --what-if pattern to also support `--what-if retire <id>`, simulating retirement instead of close. Would show how the queue health changes when retiring stale items — useful for R sessions deciding whether to prune vs defer.
 - **Test resurrect rate and resurrect pass stats** (added ~s704): `computeResurrectPassStats()` and `computeResurrectRate()` in audit-stats.mjs have zero test coverage. Both read simple JSON fixtures (services.json, platform-circuits.json, resurrect-history.json). Follow the same subprocess-patch pattern used in audit-stats-demotion.test.mjs — cover flapping detection, no-data edge cases, and circuit-break thresholds.
 
 - **Refactor platform-picker.mjs to use lib/scoring.mjs primitives** (added ~s705): platform-picker.mjs has inline ROI scoring logic (tiered base weights, boost thresholds) that parallels the tieredScore pattern now in lib/scoring.mjs. Refactoring would reduce duplication and make the picker's scoring logic testable via the same primitives.
+
+- **Use weightedPickN in e-prehook-runner.mjs engagement selection** (added ~s706): e-prehook-runner.mjs line 659 uses single `weightedPick` in a manual loop for multi-platform selection. Could replace with `weightedPickN` for cleaner code and consistent without-replacement behavior.
 
 - **Test picker-demotions.json schema validation** (added ~s2110): Add a test that validates the actual picker-demotions.json file matches expected schema (required keys, correct types for multiplier/trial_until/demoted_by). Would catch manual edit mistakes before they break the review module at runtime.
 

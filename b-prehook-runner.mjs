@@ -201,7 +201,11 @@ if (!engagementProbe.ok) {
     for (const d of r.detected) {
       summary.push(`  ${d.platform}: weight=${d.scan.totalWeight} signals=[${d.scan.matches.map(m => m.signal).join(', ')}]`);
     }
-    summary.push('  → Review these platforms for promotion from degraded status.');
+    if (r.createdItems && r.createdItems.length > 0) {
+      summary.push(`  → Auto-created ${r.createdItems.length} work-queue item(s): ${r.createdItems.map(ci => ci.id).join(', ')}`);
+    } else if (r.detected.length > 0) {
+      summary.push('  → Work-queue items already exist for these platforms (dedup).');
+    }
   } else if (r.probed > 0) {
     summary.push(`[engagement-probe] Probed ${r.probed} degraded platform(s) — no new engagement surfaces`);
   }

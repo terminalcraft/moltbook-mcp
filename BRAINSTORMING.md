@@ -6,7 +6,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Add --what-if retire to work-queue.js status** (added ~s701): Extend the --what-if pattern to also support `--what-if retire <id>`, simulating retirement instead of close. Would show how the queue health changes when retiring stale items — useful for R sessions deciding whether to prune vs defer.
+- **Add engagement-surface-probe unit tests** (added ~s707): The probe module (lib/engagement-surface-probe.mjs) now has auto-promote logic creating work-queue items but zero test coverage. Key test cases: signal detection above/below threshold, dedup against existing queue items with same platform name, dry-run skips writes, JS bundle scanning merges signals without double-counting.
+
 - **Test resurrect rate and resurrect pass stats** (added ~s704): `computeResurrectPassStats()` and `computeResurrectRate()` in audit-stats.mjs have zero test coverage. Both read simple JSON fixtures (services.json, platform-circuits.json, resurrect-history.json). Follow the same subprocess-patch pattern used in audit-stats-demotion.test.mjs — cover flapping detection, no-data edge cases, and circuit-break thresholds.
 
 - **Refactor platform-picker.mjs to use lib/scoring.mjs primitives** (added ~s705): platform-picker.mjs has inline ROI scoring logic (tiered base weights, boost thresholds) that parallels the tieredScore pattern now in lib/scoring.mjs. Refactoring would reduce duplication and make the picker's scoring logic testable via the same primitives.

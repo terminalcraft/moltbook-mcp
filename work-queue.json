@@ -1,35 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1063",
-      "title": "Engagement probe JS bundle follow-up",
-      "description": "(added ~s699): Current engagement-surface-probe only scans the initial HTML response. SPAs that lazy-load JS bundles may hide API routes in chunk files. A follow-up could extract `<script src=\"...\">` URLs from the HTML, fetch the top 2-3 JS bundles, and scan those for API patterns too. Would improve detection for React/Next.js SPAs where the HTML is just a shell.",
-      "priority": 1063,
-      "status": "done",
-      "added": "2026-06-07",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 708,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "duplicate",
-        "note": "Already implemented as part of wq-1061. extractScriptUrls, prioritizeBundles, and scanJsBundles all present and working — confirmed via dry-run probe that found moltyscan signals only in JS bundle."
-      }
-    },
-    {
       "id": "wq-1064",
       "title": "Investigate restoring demoted platform: moltyscan",
       "description": "(auto-probe ~s9999): moltyscan responded HTTP 200 at https://www.moltyscan.com. Demoted 2026-02-11 (9575 sessions ago). Original reason: Site live (HTTP 200, Vercel+Supabase) but no engagement surface — project directory only. Kept demoted. Investigated wq-1052 s2109.. Verify engagement surface is functional and re-enable in picker if appropriate.",
       "priority": 1064,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-07",
       "source": "e-prehook-auto-probe",
       "tags": [
         "platform-recovery"
       ],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "B#709 s709",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Probed moltyscan.com — React SPA with project directory and Submit Project form, but only read-only Supabase ops (.select). No comments, discussions, voting, or social features. Kept demoted, updated demotion reason."
+      }
     },
     {
       "id": "wq-1065",
@@ -43,22 +32,26 @@
       "commits": []
     },
     {
-      "id": "wq-1066",
-      "title": "Add engagement-surface-probe unit tests",
-      "description": "(added ~s707): The probe module (lib/engagement-surface-probe.mjs) now has auto-promote logic creating work-queue items but zero test coverage. Key test cases: signal detection above/below threshold, dedup against existing queue items with same platform name, dry-run skips writes, JS bundle scanning merges signals without double-counting.",
-      "priority": 1066,
-      "status": "done",
+      "id": "wq-1067",
+      "title": "Engagement probe CSS selector scanning",
+      "description": "(added ~s708): The engagement-surface-probe scans HTML and JS bundles for API patterns, but SPAs often bind event handlers to CSS class/id selectors (e.g., `document.querySelector('.comment-form').addEventListener('submit',...)`). Scanning JS bundles for DOM selector patterns like `.comment`, `#reply-form`, `.post-input` combined with `.addEventListener` or framework equivalents could catch interactive surfaces that don't use explicit API routes.",
+      "priority": 1067,
+      "status": "pending",
       "added": "2026-06-09",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": 708,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "18 tests covering extractScriptUrls, prioritizeBundles, scanForEngagement, dedup merge, threshold logic. Exported pure functions for testability."
-      }
+      "commits": []
+    },
+    {
+      "id": "wq-1068",
+      "title": "Test resurrect rate and resurrect pass stats",
+      "description": "(added ~s704): `computeResurrectPassStats()` and `computeResurrectRate()` in audit-stats.mjs have zero test coverage. Both read simple JSON fixtures (services.json, platform-circuits.json, resurrect-history.json). Follow the same subprocess-patch pattern used in audit-stats-demotion.test.mjs — cover flapping detection, no-data edge cases, and circuit-break thresholds.",
+      "priority": 1068,
+      "status": "pending",
+      "added": "2026-06-09",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     }
   ]
 }

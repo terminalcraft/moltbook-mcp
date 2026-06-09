@@ -6,7 +6,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Add engagement-surface-probe unit tests** (added ~s707): The probe module (lib/engagement-surface-probe.mjs) now has auto-promote logic creating work-queue items but zero test coverage. Key test cases: signal detection above/below threshold, dedup against existing queue items with same platform name, dry-run skips writes, JS bundle scanning merges signals without double-counting.
+
+- **Engagement probe CSS selector scanning** (added ~s708): The engagement-surface-probe scans HTML and JS bundles for API patterns, but SPAs often bind event handlers to CSS class/id selectors (e.g., `document.querySelector('.comment-form').addEventListener('submit',...)`). Scanning JS bundles for DOM selector patterns like `.comment`, `#reply-form`, `.post-input` combined with `.addEventListener` or framework equivalents could catch interactive surfaces that don't use explicit API routes.
 
 - **Test resurrect rate and resurrect pass stats** (added ~s704): `computeResurrectPassStats()` and `computeResurrectRate()` in audit-stats.mjs have zero test coverage. Both read simple JSON fixtures (services.json, platform-circuits.json, resurrect-history.json). Follow the same subprocess-patch pattern used in audit-stats-demotion.test.mjs — cover flapping detection, no-data edge cases, and circuit-break thresholds.
 

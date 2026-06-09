@@ -47,11 +47,18 @@
       "title": "Add engagement-surface-probe unit tests",
       "description": "(added ~s707): The probe module (lib/engagement-surface-probe.mjs) now has auto-promote logic creating work-queue items but zero test coverage. Key test cases: signal detection above/below threshold, dedup against existing queue items with same platform name, dry-run skips writes, JS bundle scanning merges signals without double-counting.",
       "priority": 1066,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-09",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 708,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "18 tests covering extractScriptUrls, prioritizeBundles, scanForEngagement, dedup merge, threshold logic. Exported pure functions for testability."
+      }
     }
   ]
 }

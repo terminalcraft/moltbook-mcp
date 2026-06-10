@@ -5,11 +5,22 @@
       "title": "Add --what-if retire to work-queue.js status",
       "description": "(added ~s701): Extend the --what-if pattern to also support `--what-if retire <id>`, simulating retirement instead of close. Would show how the queue health changes when retiring stale items — useful for R sessions deciding whether to prune vs defer.",
       "priority": 1065,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-08",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "3ffbffa5"
+      ],
+      "completed": "2026-06-10",
+      "completed_session": 0,
+      "outcome": {
+        "session": 0,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added --what-if retire to status command, mirrors close pattern with retire-specific context (age, dep warnings)"
+      }
     },
     {
       "id": "wq-1067",

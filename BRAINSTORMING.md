@@ -9,7 +9,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 
 
-- **Engagement probe: detect Supabase RPC/edge function writes** (added ~s709): Current probe checks for `.insert()`/`.update()` in client JS, but Supabase apps can perform writes via RPC calls (`supabase.rpc('function_name')`) or edge functions (`supabase.functions.invoke('name')`). Scanning for these patterns would catch write-capable SPAs that hide mutations behind server-side functions — moltyscan's Submit Project form likely uses one of these but the current probe misses it.
 
 - **Refactor platform-picker.mjs to use lib/scoring.mjs primitives** (added ~s705): platform-picker.mjs has inline ROI scoring logic (tiered base weights, boost thresholds) that parallels the tieredScore pattern now in lib/scoring.mjs. Refactoring would reduce duplication and make the picker's scoring logic testable via the same primitives.
 

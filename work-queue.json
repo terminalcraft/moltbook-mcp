@@ -1,37 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1065",
-      "title": "Add --what-if retire to work-queue.js status",
-      "description": "(added ~s701): Extend the --what-if pattern to also support `--what-if retire <id>`, simulating retirement instead of close. Would show how the queue health changes when retiring stale items — useful for R sessions deciding whether to prune vs defer.",
-      "priority": 1065,
-      "status": "done",
-      "added": "2026-06-08",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "3ffbffa5"
-      ],
-      "completed": "2026-06-10",
-      "completed_session": 0,
-      "outcome": {
-        "session": 0,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added --what-if retire to status command, mirrors close pattern with retire-specific context (age, dep warnings)"
-      }
-    },
-    {
       "id": "wq-1067",
       "title": "Engagement probe CSS selector scanning",
       "description": "(added ~s708): The engagement-surface-probe scans HTML and JS bundles for API patterns, but SPAs often bind event handlers to CSS class/id selectors (e.g., `document.querySelector('.comment-form').addEventListener('submit',...)`). Scanning JS bundles for DOM selector patterns like `.comment`, `#reply-form`, `.post-input` combined with `.addEventListener` or framework equivalents could catch interactive surfaces that don't use explicit API routes.",
       "priority": 1067,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-09",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "89efe5b1"
+      ],
+      "outcome": {
+        "session": "s711",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 5 CSS selector+event handler signal patterns to engagement-surface-probe. 9 new tests, all 27 pass."
+      }
     },
     {
       "id": "wq-1068",

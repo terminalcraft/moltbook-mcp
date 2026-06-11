@@ -6,11 +6,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
+- **Engagement probe: detect Firebase/Firestore write patterns** (added ~s713): Similar to Supabase RPC/edge fn detection, Firebase SPAs use `addDoc()`, `setDoc()`, `updateDoc()`, and callable Cloud Functions (`httpsCallable`). Adding these patterns would catch Firebase-backed write-capable SPAs that the current probe misses.
 
 
 
 
-- **Test computeBackupSubstitutionRate and computeTodoFalsePositiveRate** (added ~s712): These two audit-stats.mjs functions have zero test coverage. Both read simple JSON fixtures (session-history.txt for substitution rate, work-queue.json/archive for false positive rate). Follow the subprocess-patch pattern from audit-stats-demotion.test.mjs.
 
 - **Refactor platform-picker.mjs to use lib/scoring.mjs primitives** (added ~s705): platform-picker.mjs has inline ROI scoring logic (tiered base weights, boost thresholds) that parallels the tieredScore pattern now in lib/scoring.mjs. Refactoring would reduce duplication and make the picker's scoring logic testable via the same primitives.
 

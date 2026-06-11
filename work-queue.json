@@ -1,35 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1067",
-      "title": "Engagement probe CSS selector scanning",
-      "description": "(added ~s708): The engagement-surface-probe scans HTML and JS bundles for API patterns, but SPAs often bind event handlers to CSS class/id selectors (e.g., `document.querySelector('.comment-form').addEventListener('submit',...)`). Scanning JS bundles for DOM selector patterns like `.comment`, `#reply-form`, `.post-input` combined with `.addEventListener` or framework equivalents could catch interactive surfaces that don't use explicit API routes.",
-      "priority": 1067,
-      "status": "done",
-      "added": "2026-06-09",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "89efe5b1"
-      ],
-      "outcome": {
-        "session": "s711",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added 5 CSS selector+event handler signal patterns to engagement-surface-probe. 9 new tests, all 27 pass."
-      }
-    },
-    {
       "id": "wq-1068",
       "title": "Test resurrect rate and resurrect pass stats",
       "description": "(added ~s704): `computeResurrectPassStats()` and `computeResurrectRate()` in audit-stats.mjs have zero test coverage. Both read simple JSON fixtures (services.json, platform-circuits.json, resurrect-history.json). Follow the same subprocess-patch pattern used in audit-stats-demotion.test.mjs — cover flapping detection, no-data edge cases, and circuit-break thresholds.",
       "priority": 1068,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-09",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": 712,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "16 tests across 2 describe blocks covering both functions — verdicts, edge cases, flapping detection, sorting, time windows"
+      }
     },
     {
       "id": "wq-1069",
@@ -55,6 +42,17 @@
         "tooling"
       ],
       "complexity": "S",
+      "commits": []
+    },
+    {
+      "id": "wq-1071",
+      "title": "Engagement probe framework detection",
+      "description": "(added ~s711): The CSS selector scanning (wq-1067) catches jQuery/vanilla DOM patterns, but modern frameworks like React/Vue/Svelte compile away event handlers. Scanning for framework-specific compiled output patterns (e.g., `__reactFiber`, `__vue_app__`, Svelte's `listen` calls in compiled output) could identify interactive SPAs that have no visible DOM selectors or API routes in their bundles.",
+      "priority": 1071,
+      "status": "pending",
+      "added": "2026-06-11",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

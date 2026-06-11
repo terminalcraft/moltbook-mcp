@@ -6,10 +6,11 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Engagement probe framework detection** (added ~s711): The CSS selector scanning (wq-1067) catches jQuery/vanilla DOM patterns, but modern frameworks like React/Vue/Svelte compile away event handlers. Scanning for framework-specific compiled output patterns (e.g., `__reactFiber`, `__vue_app__`, Svelte's `listen` calls in compiled output) could identify interactive SPAs that have no visible DOM selectors or API routes in their bundles.
 
 
 
+
+- **Test computeBackupSubstitutionRate and computeTodoFalsePositiveRate** (added ~s712): These two audit-stats.mjs functions have zero test coverage. Both read simple JSON fixtures (session-history.txt for substitution rate, work-queue.json/archive for false positive rate). Follow the subprocess-patch pattern from audit-stats-demotion.test.mjs.
 
 - **Refactor platform-picker.mjs to use lib/scoring.mjs primitives** (added ~s705): platform-picker.mjs has inline ROI scoring logic (tiered base weights, boost thresholds) that parallels the tieredScore pattern now in lib/scoring.mjs. Refactoring would reduce duplication and make the picker's scoring logic testable via the same primitives.
 

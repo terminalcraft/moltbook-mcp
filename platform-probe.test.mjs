@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity } from "./platform-probe.mjs";
+import { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity, detectFrameworks } from "./platform-probe.mjs";
 
 // Helper to build mock probe results
 function mockResult(path, { status = 200, contentType = "html", body = "", isSuccess = true } = {}) {
@@ -82,6 +82,132 @@ describe("analyzeResults with SPA detection", () => {
     const analysis = analyzeResults(results);
     assert.equal(analysis.isSpa, false);
     assert.equal(analysis.recommendedStatus, "live");
+  });
+});
+
+describe("detectFrameworks", () => {
+  it("detects React from __reactFiber markers", () => {
+    const results = [
+      mockResult("/", { body: '<div id="root" data-reactroot></div><script>window.__reactFiber$abc=1</script>' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.ok(detected.some(f => f.framework === "react"), "should detect React");
+  });
+
+  it("detects Vue from __vue_app__ and data-v- attributes", () => {
+    const results = [
+      mockResult("/", { body: '<div id="app" data-v-3a2b1c __vue_app__></div>' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.ok(detected.some(f => f.framework === "vue"), "should detect Vue");
+  });
+
+  it("detects Svelte from __svelte marker", () => {
+    const results = [
+      mockResult("/", { body: '<div class="svelte-abc123">hello</div><script>window.__svelte</script>' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.ok(detected.some(f => f.framework === "svelte"), "should detect Svelte");
+  });
+
+  it("detects Next.js from __NEXT_DATA__", () => {
+    const results = [
+      mockResult("/", { body: '<script id="__NEXT_DATA__" type="application/json">{"props":{}}</script>' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.ok(detected.some(f => f.framework === "nextjs"), "should detect Next.js");
+  });
+
+  it("detects Nuxt from __NUXT__", () => {
+    const results = [
+      mockResult("/", { body: '<script>window.__NUXT__={}</script>' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.ok(detected.some(f => f.framework === "nuxt"), "should detect Nuxt");
+  });
+
+  it("detects Angular from ng-version attribute", () => {
+    const results = [
+      mockResult("/", { body: '<app-root ng-version="17.0.0" _nghost-abc></app-root>' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.ok(detected.some(f => f.framework === "angular"), "should detect Angular");
+  });
+
+  it("returns empty array for plain HTML", () => {
+    const results = [
+      mockResult("/", { body: '<html><body><h1>Hello World</h1></body></html>' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.equal(detected.length, 0);
+  });
+
+  it("returns empty array when no successful results", () => {
+    const results = [
+      mockResult("/", { status: 500, isSuccess: false, body: '' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.equal(detected.length, 0);
+  });
+
+  it("detects multiple frameworks across different responses", () => {
+    const results = [
+      mockResult("/app1", { body: '<div data-reactroot></div>' }),
+      mockResult("/app2", { body: '<div data-v-abc123></div>' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.ok(detected.length >= 2, `expected >=2 frameworks, got ${detected.length}`);
+  });
+
+  it("reports signal count per framework", () => {
+    const results = [
+      mockResult("/", { body: '<div __reactFiber$x data-reactroot __reactProps$y></div>' }),
+    ];
+    const detected = detectFrameworks(results);
+    const react = detected.find(f => f.framework === "react");
+    assert.ok(react, "should detect React");
+    assert.ok(react.signals >= 2, `expected >=2 signals, got ${react.signals}`);
+  });
+});
+
+describe("isSpaFalsePositive with framework detection", () => {
+  it("detects SPA when framework markers present but no classic SPA patterns", () => {
+    // No id="root", no <script src=, no window.__ — but has __vue_app__
+    const results = [
+      mockResult("/api", { body: '<html><div __vue_app__>Content</div></html>' }),
+      mockResult("/health", { body: '<html><div __vue_app__>Content</div></html>' }),
+      mockResult("/docs", { body: '<html><div __vue_app__>Content</div></html>' }),
+    ];
+    assert.equal(isSpaFalsePositive(results), true);
+  });
+});
+
+describe("analyzeResults with framework hints", () => {
+  it("includes frameworkHints in analysis for SPA sites", () => {
+    const spaBody = '<html><div id="root" data-reactroot></div><script src="/app.js"></script></html>';
+    const results = [
+      mockResult("/skill.md", { body: spaBody }),
+      mockResult("/api", { body: spaBody }),
+      mockResult("/api-docs", { body: spaBody }),
+      mockResult("/health", { body: spaBody }),
+      mockResult("/openapi.json", { body: spaBody }),
+    ];
+    const analysis = analyzeResults(results);
+    assert.equal(analysis.isSpa, true);
+    assert.ok(analysis.frameworkHints.length > 0, "should detect React framework");
+    assert.ok(analysis.frameworkHints.some(f => f.framework === "react"));
+    assert.ok(analysis.findings.some(f => f.includes("Framework detected")));
+  });
+
+  it("includes frameworkHints even for non-SPA sites", () => {
+    const results = [
+      mockResult("/health", { contentType: "json", body: '{"status":"ok"}' }),
+      mockResult("/api", { contentType: "json", body: '{"version":"1"}' }),
+      mockResult("/skill.md", { contentType: "text", body: "# Agent\ndata-reactroot marker in docs" }),
+    ];
+    const analysis = analyzeResults(results);
+    assert.equal(analysis.isSpa, false);
+    assert.ok(Array.isArray(analysis.frameworkHints));
   });
 });
 

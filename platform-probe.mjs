@@ -135,6 +135,36 @@ function computeSha256(content) {
   return createHash("sha256").update(content, "utf8").digest("hex");
 }
 
+// Detect frontend frameworks from compiled output patterns in HTML body previews.
+// Modern frameworks (React, Vue, Svelte, Angular, Next.js, Nuxt) compile away event
+// handlers, so DOM selector scanning misses them. This checks for framework-specific
+// runtime markers that appear in compiled bundles and hydrated HTML.
+const FRAMEWORK_PATTERNS = [
+  { name: "react", patterns: [/__reactFiber/i, /__reactProps/i, /_reactRootContainer/i, /data-reactroot/i, /data-reactid/i] },
+  { name: "vue", patterns: [/__vue_app__/i, /__VUE__/, /data-v-[a-f0-9]/i] },
+  { name: "svelte", patterns: [/__svelte/i, /\bSvelteComponent\b/, /create_fragment/] },
+  { name: "nextjs", patterns: [/__NEXT_DATA__/, /_next\/static/] },
+  { name: "nuxt", patterns: [/__NUXT__/, /_nuxt\//] },
+  { name: "angular", patterns: [/ng-version=/, /_nghost-/, /_ngcontent-/, /ng-app/i] },
+];
+
+function detectFrameworks(results) {
+  const detected = [];
+  const successes = results.filter(r => r.isSuccess && r.bodyPreview);
+  if (successes.length === 0) return detected;
+
+  // Concatenate all body previews for scanning
+  const combined = successes.map(r => r.bodyPreview).join("\n");
+
+  for (const fw of FRAMEWORK_PATTERNS) {
+    const matched = fw.patterns.filter(p => p.test(combined));
+    if (matched.length > 0) {
+      detected.push({ framework: fw.name, signals: matched.length });
+    }
+  }
+  return detected;
+}
+
 // Detect SPA false positives: sites that return 200 on every path with HTML content
 // SPA catch-all routing serves the same HTML shell for any URL, faking endpoint presence
 function isSpaFalsePositive(results) {
@@ -149,6 +179,11 @@ function isSpaFalsePositive(results) {
   const spaPatterns = /id=["'](root|app|__next|__nuxt)["']|<script\s+src=|window\.__/i;
   const bodiesMatch = successes.filter(r => r.bodyPreview && spaPatterns.test(r.bodyPreview));
   if (bodiesMatch.length > 0) return true;
+
+  // Framework-compiled output detection (wq-1071): React/Vue/Svelte/Angular compile
+  // away event handlers so DOM selectors miss them. Check for runtime markers.
+  const frameworks = detectFrameworks(successes);
+  if (frameworks.length > 0) return true;
 
   // API-specific paths (.json, .md) returning HTML is a strong SPA signal
   const apiPaths = successes.filter(r =>
@@ -202,6 +237,7 @@ function analyzeResults(results) {
     hasHealthEndpoint: false,
     hasRegistration: false,
     isSpa: false,
+    frameworkHints: [],
     contentTypeDiversity: null,
     authType: "unknown",
     recommendedStatus: "unreachable",
@@ -218,11 +254,18 @@ function analyzeResults(results) {
   // Compute content-type diversity
   analysis.contentTypeDiversity = computeContentTypeDiversity(results);
 
+  // Framework detection (wq-1071) — always run, even for non-SPA sites
+  analysis.frameworkHints = detectFrameworks(results);
+
   // SPA detection gate — check before endpoint analysis
   if (analysis.reachable && isSpaFalsePositive(results)) {
     analysis.isSpa = true;
     analysis.recommendedStatus = "spa_false_positive";
     analysis.findings.push("SPA false positive: all endpoints return HTML (catch-all routing)");
+    if (analysis.frameworkHints.length > 0) {
+      const fwNames = analysis.frameworkHints.map(f => f.framework).join(", ");
+      analysis.findings.push(`Framework detected: ${fwNames}`);
+    }
     analysis.findings.push(`Content-type diversity: ${analysis.contentTypeDiversity.score} (low = uniform)`);
     return analysis;
   }
@@ -436,6 +479,7 @@ async function probePlatform(platformId, jsonMode = false) {
     console.log("Analysis:");
     console.log(`  Reachable: ${analysis.reachable}`);
     if (analysis.isSpa) console.log(`  SPA detected: true (false positive — no real API)`);
+    if (analysis.frameworkHints.length > 0) console.log(`  Frameworks: ${analysis.frameworkHints.map(f => `${f.framework}(${f.signals})`).join(", ")}`);
     console.log(`  Has skill.md: ${analysis.hasSkillMd}`);
     console.log(`  Has API docs: ${analysis.hasApiDocs}`);
     console.log(`  Has OpenAPI: ${analysis.hasOpenAPI}`);
@@ -492,7 +536,7 @@ async function probePlatform(platformId, jsonMode = false) {
 }
 
 // Exports for testing
-export { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity };
+export { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity, detectFrameworks };
 
 // CLI
 const args = process.argv.slice(2);

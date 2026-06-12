@@ -1,31 +1,11 @@
 {
   "queue": [
     {
-      "id": "wq-1069",
-      "title": "Engagement probe: detect Supabase RPC/edge function writes",
-      "description": "(added ~s709): Current probe checks for `.insert()`/`.update()` in client JS, but Supabase apps can perform writes via RPC calls (`supabase.rpc('function_name')`) or edge functions (`supabase.functions.invoke('name')`). Scanning for these patterns would catch write-capable SPAs that hide mutations behind server-side functions — moltyscan's Submit Project form likely uses one of these but the current probe misses it.",
-      "priority": 1069,
-      "status": "done",
-      "added": "2026-06-10",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "8e7e3074"
-      ],
-      "outcome": {
-        "session": "s713",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added supabase-rpc and supabase-edge-fn signals (weight 4 each) + 6 tests. All 33 tests pass."
-      }
-    },
-    {
       "id": "wq-1070",
       "title": "Add --what-if batch-retire to status command",
       "description": "Extend --what-if to accept multiple IDs: --what-if retire wq-100 wq-101 wq-102 to simulate batch retirement and show cumulative health impact. Useful for R sessions evaluating stale-item sweeps.",
       "priority": 1070,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-10",
       "created_session": 0,
       "source": "session",
@@ -33,7 +13,18 @@
         "tooling"
       ],
       "complexity": "S",
-      "commits": []
+      "commits": [
+        "10c0381b"
+      ],
+      "completed": "2026-06-12",
+      "completed_session": 0,
+      "outcome": {
+        "session": 0,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Batch --what-if retire with cumulative health impact, backwards-compatible single-ID"
+      }
     },
     {
       "id": "wq-1071",
@@ -55,6 +46,32 @@
       "added": "2026-06-11",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1073",
+      "title": "Engagement probe: detect Firebase/Firestore write patterns",
+      "description": "(added ~s713): Similar to Supabase RPC/edge fn detection, Firebase SPAs use `addDoc()`, `setDoc()`, `updateDoc()`, and callable Cloud Functions (`httpsCallable`). Adding these patterns would catch Firebase-backed write-capable SPAs that the current probe misses.",
+      "priority": 1073,
+      "status": "pending",
+      "added": "2026-06-12",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1074",
+      "title": "Add --what-if batch-close to status command",
+      "description": "Mirror batch-retire for close: simulate closing multiple items at once, show cumulative unblocking and health impact.",
+      "priority": 1074,
+      "status": "pending",
+      "added": "2026-06-12",
+      "created_session": 0,
+      "source": "session",
+      "tags": [
+        "tooling"
+      ],
+      "complexity": "S",
       "commits": []
     }
   ]

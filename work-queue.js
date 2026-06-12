@@ -11,7 +11,7 @@
  *   node work-queue.js drop [id]         # Remove an item
  *   node work-queue.js status            # Summary stats
  *     --what-if close <id>               # Simulate closing an item, show before/after health (wq-1058)
- *     --what-if retire <id>              # Simulate retiring an item, show before/after health (wq-1065)
+ *     --what-if retire <id> [id2...]      # Simulate retiring item(s), show cumulative before/after health (wq-1065, wq-1070)
  *   node work-queue.js velocity          # Show completion velocity stats (wq-200)
  *   node work-queue.js retire [id] [reason]  # Retire item with reason (wq-199)
  *   node work-queue.js retirement-stats      # Show retirement reason breakdown
@@ -270,13 +270,29 @@ switch (cmd) {
       break;
     }
 
-    // wq-1065: --what-if retire <id> simulates retiring an item and shows before/after health
+    // wq-1065, wq-1070: --what-if retire <id> [id2...] simulates retiring item(s) and shows cumulative before/after health
     if (whatIfIdx !== -1 && args[whatIfIdx + 1] === "retire" && args[whatIfIdx + 2]) {
-      const simId = args[whatIfIdx + 2];
-      const simItem = data.queue.find(i => i.id === simId);
-      if (!simItem) { console.log(`Item ${simId} not found.`); break; }
-      if (simItem.status === "done" || simItem.status === "retired") {
-        console.log(`${simId} is already ${simItem.status} — no change to simulate.`);
+      const simIds = args.slice(whatIfIdx + 2);
+      const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
+
+      // Validate all IDs up front
+      const simItems = [];
+      const skipped = [];
+      for (const simId of simIds) {
+        const item = data.queue.find(i => i.id === simId);
+        if (!item) { skipped.push({ id: simId, reason: "not found" }); continue; }
+        if (item.status === "done" || item.status === "retired") {
+          skipped.push({ id: simId, reason: `already ${item.status}` });
+          continue;
+        }
+        simItems.push(item);
+      }
+
+      if (skipped.length > 0) {
+        for (const s of skipped) console.log(`Skipping ${s.id}: ${s.reason}`);
+      }
+      if (simItems.length === 0) {
+        console.log("No valid items to simulate.");
         break;
       }
 
@@ -284,22 +300,35 @@ switch (cmd) {
       const cur = { pending: 0, "in-progress": 0, done: 0, retired: 0, blocked: 0 };
       for (const i of data.queue) if (cur[i.status] !== undefined) cur[i.status]++;
 
-      // Simulated counts (item moves to retired)
+      // Simulated counts (all items move to retired)
       const sim = { ...cur };
-      sim[simItem.status]--;
-      sim.retired++;
+      for (const item of simItems) {
+        sim[item.status]--;
+        sim.retired++;
+      }
 
-      // Age info for context (helps R sessions decide prune vs defer)
-      const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
-      const age = simItem.created_session ? sessionNum - simItem.created_session : null;
-      const ageStr = age !== null ? ` — ${age} sessions old` : "";
+      // Header — single vs batch
+      const isBatch = simItems.length > 1;
+      if (isBatch) {
+        console.log(`What-if: batch retire ${simItems.length} items`);
+        for (const item of simItems) {
+          const age = item.created_session ? sessionNum - item.created_session : null;
+          const ageStr = age !== null ? ` — ${age} sessions old` : "";
+          console.log(`  ${item.id}: ${item.title} [${item.status}]${ageStr}`);
+        }
+      } else {
+        const item = simItems[0];
+        const age = item.created_session ? sessionNum - item.created_session : null;
+        const ageStr = age !== null ? ` — ${age} sessions old` : "";
+        console.log(`What-if: retire ${item.id} (${item.title})${ageStr}`);
+      }
 
-      console.log(`What-if: retire ${simId} (${simItem.title})${ageStr}`);
       console.log(`  Current:     ${cur.pending} pending, ${cur["in-progress"]} in-progress, ${cur.done} done, ${cur.retired} retired, ${cur.blocked} blocked`);
       console.log(`  After retire: ${sim.pending} pending, ${sim["in-progress"]} in-progress, ${sim.done} done, ${sim.retired} retired, ${sim.blocked} blocked`);
 
-      // Health assessment — retiring a pending item shrinks the active queue
-      if (simItem.status === "pending") {
+      // Health assessment — check cumulative pending impact
+      const pendingRetired = simItems.filter(i => i.status === "pending").length;
+      if (pendingRetired > 0) {
         if (sim.pending === 0) {
           console.log(`  ⚠ CRITICAL: 0 pending after retire — replenish before retiring`);
         } else if (sim.pending < 3) {
@@ -310,15 +339,21 @@ switch (cmd) {
           console.log(`  • Queue healthy after retire: ${sim.pending} pending`);
         }
       } else {
-        console.log(`  • No pending impact (item was ${simItem.status})`);
+        console.log(`  • No pending impact (${isBatch ? "all items were non-pending" : `item was ${simItems[0].status}`})`);
       }
 
-      // Unlike close, retiring does NOT satisfy deps — warn if anything depends on this item
+      // Unlike close, retiring does NOT satisfy deps — warn if anything depends on these items
+      const retiredIds = new Set(simItems.map(i => i.id));
       const dependents = data.queue.filter(i =>
-        i.status !== "done" && i.status !== "retired" && i.deps?.includes(simId)
+        i.status !== "done" && i.status !== "retired" && !retiredIds.has(i.id) &&
+        i.deps?.some(d => retiredIds.has(d))
       );
       if (dependents.length > 0) {
-        console.log(`  ⚠ Blocks: ${dependents.map(i => i.id).join(", ")} depend on ${simId} — retiring won't satisfy their deps`);
+        const depDetails = dependents.map(i => {
+          const blockedBy = i.deps.filter(d => retiredIds.has(d));
+          return `${i.id} (needs ${blockedBy.join(", ")})`;
+        });
+        console.log(`  ⚠ Blocks: ${depDetails.join("; ")} — retiring won't satisfy their deps`);
       }
 
       break;

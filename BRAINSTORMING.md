@@ -6,7 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Engagement probe: detect Firebase/Firestore write patterns** (added ~s713): Similar to Supabase RPC/edge fn detection, Firebase SPAs use `addDoc()`, `setDoc()`, `updateDoc()`, and callable Cloud Functions (`httpsCallable`). Adding these patterns would catch Firebase-backed write-capable SPAs that the current probe misses.
+- **Add --what-if batch-close to status command** (added ~s2082): Mirror batch-retire pattern for close — simulate closing multiple items at once and show cumulative unblocking + health impact. Useful for B sessions evaluating sprint completion.
 
 
 

@@ -1,41 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1070",
-      "title": "Add --what-if batch-retire to status command",
-      "description": "Extend --what-if to accept multiple IDs: --what-if retire wq-100 wq-101 wq-102 to simulate batch retirement and show cumulative health impact. Useful for R sessions evaluating stale-item sweeps.",
-      "priority": 1070,
-      "status": "done",
-      "added": "2026-06-10",
-      "created_session": 0,
-      "source": "session",
-      "tags": [
-        "tooling"
-      ],
-      "complexity": "S",
-      "commits": [
-        "10c0381b"
-      ],
-      "completed": "2026-06-12",
-      "completed_session": 0,
-      "outcome": {
-        "session": 0,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Batch --what-if retire with cumulative health impact, backwards-compatible single-ID"
-      }
-    },
-    {
       "id": "wq-1071",
       "title": "Engagement probe framework detection",
       "description": "(added ~s711): The CSS selector scanning (wq-1067) catches jQuery/vanilla DOM patterns, but modern frameworks like React/Vue/Svelte compile away event handlers. Scanning for framework-specific compiled output patterns (e.g., `__reactFiber`, `__vue_app__`, Svelte's `listen` calls in compiled output) could identify interactive SPAs that have no visible DOM selectors or API routes in their bundles.",
       "priority": 1071,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-11",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "76d1d0d1"
+      ],
+      "outcome": {
+        "session": "s715",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added detectFrameworks() with 6 framework detectors (React/Vue/Svelte/Next/Nuxt/Angular), integrated into isSpaFalsePositive + analyzeResults, 10 new tests all passing"
+      }
     },
     {
       "id": "wq-1072",

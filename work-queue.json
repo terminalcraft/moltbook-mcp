@@ -1,33 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1072",
-      "title": "Test computeBackupSubstitutionRate and computeTodoFalsePositiveRate",
-      "description": "(added ~s712): These two audit-stats.mjs functions have zero test coverage. Both read simple JSON fixtures (session-history.txt for substitution rate, work-queue.json/archive for false positive rate). Follow the subprocess-patch pattern from audit-stats-demotion.test.mjs.",
-      "priority": 1072,
-      "status": "done",
-      "added": "2026-06-11",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "B#716-s2082",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "14 tests (6 substitution, 8 FP rate) covering verdicts, edge cases, missing files. All pass."
-      }
-    },
-    {
       "id": "wq-1073",
       "title": "Engagement probe: detect Firebase/Firestore write patterns",
       "description": "(added ~s713): Similar to Supabase RPC/edge fn detection, Firebase SPAs use `addDoc()`, `setDoc()`, `updateDoc()`, and callable Cloud Functions (`httpsCallable`). Adding these patterns would catch Firebase-backed write-capable SPAs that the current probe misses.",
       "priority": 1073,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-12",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s717",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "7 Firebase/Firestore signals added, 9 tests, all 42 passing"
+      }
     },
     {
       "id": "wq-1074",
@@ -53,6 +42,30 @@
       "added": "2026-06-13",
       "source": "brainstorming-auto",
       "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1076",
+      "title": "Test computeEScopeBleed commit categorization edge cases",
+      "description": "(added ~s2082): categorizeCommitMessage is exported but only tested implicitly through E scope bleed stats. Unit tests for edge cases (mixed files, ambiguous commit messages, empty file lists) would catch regressions faster than integration-only coverage.",
+      "priority": 1076,
+      "status": "pending",
+      "added": "2026-06-13",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1077",
+      "title": "Engagement probe: detect Convex/Appwrite/PocketBase write patterns",
+      "description": "(added ~s717): After Supabase (wq-1069) and Firebase (wq-1073), add detection for Convex (useMutation, ctx.db.insert), Appwrite (databases.createDocument), and PocketBase (pb.collection().create()) write patterns in engagement-surface-probe.mjs.",
+      "priority": 1077,
+      "status": "pending",
+      "added": "2026-06-13",
+      "source": "brainstorming",
+      "tags": [
+        "engagement-probe"
+      ],
       "commits": []
     }
   ]

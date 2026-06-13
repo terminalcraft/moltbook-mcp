@@ -1,35 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1071",
-      "title": "Engagement probe framework detection",
-      "description": "(added ~s711): The CSS selector scanning (wq-1067) catches jQuery/vanilla DOM patterns, but modern frameworks like React/Vue/Svelte compile away event handlers. Scanning for framework-specific compiled output patterns (e.g., `__reactFiber`, `__vue_app__`, Svelte's `listen` calls in compiled output) could identify interactive SPAs that have no visible DOM selectors or API routes in their bundles.",
-      "priority": 1071,
-      "status": "done",
-      "added": "2026-06-11",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "76d1d0d1"
-      ],
-      "outcome": {
-        "session": "s715",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added detectFrameworks() with 6 framework detectors (React/Vue/Svelte/Next/Nuxt/Angular), integrated into isSpaFalsePositive + analyzeResults, 10 new tests all passing"
-      }
-    },
-    {
       "id": "wq-1072",
       "title": "Test computeBackupSubstitutionRate and computeTodoFalsePositiveRate",
       "description": "(added ~s712): These two audit-stats.mjs functions have zero test coverage. Both read simple JSON fixtures (session-history.txt for substitution rate, work-queue.json/archive for false positive rate). Follow the subprocess-patch pattern from audit-stats-demotion.test.mjs.",
       "priority": 1072,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-11",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "B#716-s2082",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "14 tests (6 substitution, 8 FP rate) covering verdicts, edge cases, missing files. All pass."
+      }
     },
     {
       "id": "wq-1073",
@@ -55,6 +42,17 @@
         "tooling"
       ],
       "complexity": "S",
+      "commits": []
+    },
+    {
+      "id": "wq-1075",
+      "title": "Probe framework-version extraction",
+      "description": "(added ~s715): detectFrameworks identifies which framework a site uses, but extracting the version (from ng-version=, __NEXT_DATA__.buildId, meta[name=generator]) would help track outdated/vulnerable SPAs in the platform registry. Low effort extension of wq-1071.",
+      "priority": 1075,
+      "status": "pending",
+      "added": "2026-06-13",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

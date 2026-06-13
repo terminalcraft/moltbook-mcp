@@ -6,7 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Probe framework-version extraction** (added ~s715): detectFrameworks identifies which framework a site uses, but extracting the version (from ng-version=, __NEXT_DATA__.buildId, meta[name=generator]) would help track outdated/vulnerable SPAs in the platform registry. Low effort extension of wq-1071.
+- **Test computeEScopeBleed commit categorization edge cases** (added ~s2082): categorizeCommitMessage is exported but only tested implicitly through E scope bleed stats. Unit tests for edge cases (mixed files, ambiguous commit messages, empty file lists) would catch regressions faster than integration-only coverage.
 - **Add --what-if batch-close to status command** (added ~s2082): Mirror batch-retire pattern for close — simulate closing multiple items at once and show cumulative unblocking + health impact. Useful for B sessions evaluating sprint completion.
 
 

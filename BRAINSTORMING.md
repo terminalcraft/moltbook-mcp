@@ -6,7 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Add --what-if batch-close to status command** (added ~s2082): Mirror batch-retire pattern for close — simulate closing multiple items at once and show cumulative unblocking + health impact. Useful for B sessions evaluating sprint completion.
+- **Add combined what-if close+retire simulation** (added ~s2082): Allow `--what-if mixed wq-1 close wq-2 retire` to simulate mixed operations in one pass — useful for sprint planning where some items get completed and others get retired.
 
 - **Engagement probe: detect Convex/Appwrite/PocketBase write patterns** (added ~s717): After Supabase (wq-1069) and Firebase (wq-1073), the next BaaS blind spots are Convex (`useMutation`, `ctx.db.insert`), Appwrite (`databases.createDocument`), and PocketBase (`pb.collection().create()`). Adding these would cover the remaining popular BaaS platforms used in SPAs.
 

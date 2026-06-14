@@ -1,29 +1,11 @@
 {
   "queue": [
     {
-      "id": "wq-1073",
-      "title": "Engagement probe: detect Firebase/Firestore write patterns",
-      "description": "(added ~s713): Similar to Supabase RPC/edge fn detection, Firebase SPAs use `addDoc()`, `setDoc()`, `updateDoc()`, and callable Cloud Functions (`httpsCallable`). Adding these patterns would catch Firebase-backed write-capable SPAs that the current probe misses.",
-      "priority": 1073,
-      "status": "done",
-      "added": "2026-06-12",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s717",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "7 Firebase/Firestore signals added, 9 tests, all 42 passing"
-      }
-    },
-    {
       "id": "wq-1074",
       "title": "Add --what-if batch-close to status command",
       "description": "Mirror batch-retire for close: simulate closing multiple items at once, show cumulative unblocking and health impact.",
       "priority": 1074,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-12",
       "created_session": 0,
       "source": "session",
@@ -31,7 +13,18 @@
         "tooling"
       ],
       "complexity": "S",
-      "commits": []
+      "commits": [
+        "--result"
+      ],
+      "completed": "2026-06-14",
+      "completed_session": 0,
+      "outcome": {
+        "session": 0,
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Batch close what-if mirroring batch-retire pattern"
+      }
     },
     {
       "id": "wq-1075",

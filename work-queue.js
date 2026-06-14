@@ -10,7 +10,7 @@
  *   node work-queue.js add "title" "description" [--tag t1 --tag t2]
  *   node work-queue.js drop [id]         # Remove an item
  *   node work-queue.js status            # Summary stats
- *     --what-if close <id>               # Simulate closing an item, show before/after health (wq-1058)
+ *     --what-if close <id> [id2...]       # Simulate closing item(s), show cumulative before/after health (wq-1058, wq-1074)
  *     --what-if retire <id> [id2...]      # Simulate retiring item(s), show cumulative before/after health (wq-1065, wq-1070)
  *   node work-queue.js velocity          # Show completion velocity stats (wq-200)
  *   node work-queue.js retire [id] [reason]  # Retire item with reason (wq-199)
@@ -220,14 +220,30 @@ switch (cmd) {
     break;
   }
   case "status": {
-    // wq-1058: --what-if close <id> simulates closing an item and shows before/after health
+    // wq-1058, wq-1074: --what-if close <id> [id2...] simulates closing item(s) and shows cumulative before/after health
     const whatIfIdx = args.indexOf("--what-if");
     if (whatIfIdx !== -1 && args[whatIfIdx + 1] === "close" && args[whatIfIdx + 2]) {
-      const simId = args[whatIfIdx + 2];
-      const simItem = data.queue.find(i => i.id === simId);
-      if (!simItem) { console.log(`Item ${simId} not found.`); break; }
-      if (simItem.status === "done" || simItem.status === "retired") {
-        console.log(`${simId} is already ${simItem.status} — no change to simulate.`);
+      const simIds = args.slice(whatIfIdx + 2);
+      const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
+
+      // Validate all IDs up front
+      const simItems = [];
+      const skipped = [];
+      for (const simId of simIds) {
+        const item = data.queue.find(i => i.id === simId);
+        if (!item) { skipped.push({ id: simId, reason: "not found" }); continue; }
+        if (item.status === "done" || item.status === "retired") {
+          skipped.push({ id: simId, reason: `already ${item.status}` });
+          continue;
+        }
+        simItems.push(item);
+      }
+
+      if (skipped.length > 0) {
+        for (const s of skipped) console.log(`Skipping ${s.id}: ${s.reason}`);
+      }
+      if (simItems.length === 0) {
+        console.log("No valid items to simulate.");
         break;
       }
 
@@ -235,37 +251,61 @@ switch (cmd) {
       const cur = { pending: 0, "in-progress": 0, done: 0, blocked: 0 };
       for (const i of data.queue) if (cur[i.status] !== undefined) cur[i.status]++;
 
-      // Simulated counts (item moves to done)
+      // Simulated counts (all items move to done)
       const sim = { ...cur };
-      sim[simItem.status]--;
-      sim.done++;
+      for (const item of simItems) {
+        sim[item.status]--;
+        sim.done++;
+      }
 
-      console.log(`What-if: close ${simId} (${simItem.title})`);
-      console.log(`  Current:    ${cur.pending} pending, ${cur["in-progress"]} in-progress, ${cur.done} done, ${cur.blocked} blocked`);
+      // Header — single vs batch
+      const isBatch = simItems.length > 1;
+      if (isBatch) {
+        console.log(`What-if: batch close ${simItems.length} items`);
+        for (const item of simItems) {
+          const age = item.created_session ? sessionNum - item.created_session : null;
+          const ageStr = age !== null ? ` — ${age} sessions old` : "";
+          console.log(`  ${item.id}: ${item.title} [${item.status}]${ageStr}`);
+        }
+      } else {
+        const item = simItems[0];
+        const age = item.created_session ? sessionNum - item.created_session : null;
+        const ageStr = age !== null ? ` — ${age} sessions old` : "";
+        console.log(`What-if: close ${item.id} (${item.title})${ageStr}`);
+      }
+
+      console.log(`  Current:     ${cur.pending} pending, ${cur["in-progress"]} in-progress, ${cur.done} done, ${cur.blocked} blocked`);
       console.log(`  After close: ${sim.pending} pending, ${sim["in-progress"]} in-progress, ${sim.done} done, ${sim.blocked} blocked`);
 
-      // Health assessment on simulated state
-      if (sim.pending === 0) {
-        console.log(`  ⚠ CRITICAL: 0 pending after close — replenish before closing`);
-      } else if (sim.pending < 3) {
-        console.log(`  ⚠ Queue low after close: ${sim.pending} pending — add items first`);
-      } else if (sim.pending < 5) {
-        console.log(`  • Queue OK after close: ${sim.pending} pending (target ≥5)`);
+      // Health assessment
+      const pendingClosed = simItems.filter(i => i.status === "pending").length;
+      if (pendingClosed > 0) {
+        if (sim.pending === 0) {
+          console.log(`  ⚠ CRITICAL: 0 pending after close — replenish before closing`);
+        } else if (sim.pending < 3) {
+          console.log(`  ⚠ Queue low after close: ${sim.pending} pending — add items first`);
+        } else if (sim.pending < 5) {
+          console.log(`  • Queue OK after close: ${sim.pending} pending (target ≥5)`);
+        } else {
+          console.log(`  • Queue healthy after close: ${sim.pending} pending`);
+        }
       } else {
-        console.log(`  • Queue healthy after close: ${sim.pending} pending`);
+        console.log(`  • No pending impact (${isBatch ? "all items were non-pending" : `item was ${simItems[0].status}`})`);
       }
 
       // Check if closing unblocks anything (deps satisfied after simulated close)
+      const closedIds = new Set(simItems.map(i => i.id));
       const unblocked = data.queue.filter(i => {
-        if (i.status !== "pending" || !i.deps?.includes(simId)) return false;
+        if (closedIds.has(i.id)) return false; // don't count items being closed
+        if (i.status !== "pending" || !i.deps?.some(d => closedIds.has(d))) return false;
         return i.deps.every(d => {
-          if (d === simId) return true; // this dep would be satisfied by the close
+          if (closedIds.has(d)) return true; // this dep would be satisfied by the close
           const dep = data.queue.find(x => x.id === d);
           return !dep || dep.status === "done";
         });
       });
       if (unblocked.length > 0) {
-        console.log(`  → Unblocks: ${unblocked.map(i => i.id).join(", ")}`);
+        console.log(`  → Unblocks: ${unblocked.map(i => `${i.id} (${i.title})`).join(", ")}`);
       }
       break;
     }

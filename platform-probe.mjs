@@ -148,6 +148,16 @@ const FRAMEWORK_PATTERNS = [
   { name: "angular", patterns: [/ng-version=/, /_nghost-/, /_ngcontent-/, /ng-app/i] },
 ];
 
+// Version extraction patterns — regexes with a capture group for the version string.
+// Each extractor is keyed by framework name; "generic" applies to any site.
+const VERSION_EXTRACTORS = [
+  { framework: "angular", pattern: /ng-version="([^"]+)"/i },
+  { framework: "nextjs", pattern: /"buildId"\s*:\s*"([^"]+)"/ },
+  { framework: "nuxt", pattern: /nuxt[/]([0-9][0-9.]+)/ },
+  { framework: "generic", pattern: /<meta\s+name=["']generator["']\s+content=["']([^"']+)["']/i },
+  { framework: "generic", pattern: /<meta\s+content=["']([^"']+)["']\s+name=["']generator["']/i },
+];
+
 function detectFrameworks(results) {
   const detected = [];
   const successes = results.filter(r => r.isSuccess && r.bodyPreview);
@@ -159,9 +169,30 @@ function detectFrameworks(results) {
   for (const fw of FRAMEWORK_PATTERNS) {
     const matched = fw.patterns.filter(p => p.test(combined));
     if (matched.length > 0) {
-      detected.push({ framework: fw.name, signals: matched.length });
+      const entry = { framework: fw.name, signals: matched.length };
+      // Try to extract version for this framework
+      const extractor = VERSION_EXTRACTORS.find(e => e.framework === fw.name);
+      if (extractor) {
+        const m = combined.match(extractor.pattern);
+        if (m) entry.version = m[1];
+      }
+      detected.push(entry);
     }
   }
+
+  // Check generic extractors (meta[name=generator]) — adds a standalone entry
+  // only if no framework-specific match already captured it
+  for (const ext of VERSION_EXTRACTORS.filter(e => e.framework === "generic")) {
+    const m = combined.match(ext.pattern);
+    if (m) {
+      // Avoid duplicate if a detected framework already covers this
+      if (!detected.some(d => m[1].toLowerCase().includes(d.framework))) {
+        detected.push({ framework: "generator", signals: 1, version: m[1] });
+      }
+      break; // one generator match is enough
+    }
+  }
+
   return detected;
 }
 
@@ -263,7 +294,7 @@ function analyzeResults(results) {
     analysis.recommendedStatus = "spa_false_positive";
     analysis.findings.push("SPA false positive: all endpoints return HTML (catch-all routing)");
     if (analysis.frameworkHints.length > 0) {
-      const fwNames = analysis.frameworkHints.map(f => f.framework).join(", ");
+      const fwNames = analysis.frameworkHints.map(f => f.version ? `${f.framework}@${f.version}` : f.framework).join(", ");
       analysis.findings.push(`Framework detected: ${fwNames}`);
     }
     analysis.findings.push(`Content-type diversity: ${analysis.contentTypeDiversity.score} (low = uniform)`);
@@ -479,7 +510,7 @@ async function probePlatform(platformId, jsonMode = false) {
     console.log("Analysis:");
     console.log(`  Reachable: ${analysis.reachable}`);
     if (analysis.isSpa) console.log(`  SPA detected: true (false positive — no real API)`);
-    if (analysis.frameworkHints.length > 0) console.log(`  Frameworks: ${analysis.frameworkHints.map(f => `${f.framework}(${f.signals})`).join(", ")}`);
+    if (analysis.frameworkHints.length > 0) console.log(`  Frameworks: ${analysis.frameworkHints.map(f => `${f.framework}(${f.signals})${f.version ? `@${f.version}` : ""}`).join(", ")}`);
     console.log(`  Has skill.md: ${analysis.hasSkillMd}`);
     console.log(`  Has API docs: ${analysis.hasApiDocs}`);
     console.log(`  Has OpenAPI: ${analysis.hasOpenAPI}`);

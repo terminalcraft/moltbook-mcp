@@ -142,6 +142,54 @@ describe("detectFrameworks", () => {
     assert.equal(detected.length, 0);
   });
 
+  it("extracts Angular version from ng-version attribute", () => {
+    const results = [
+      mockResult("/", { body: '<app-root ng-version="17.3.1" _nghost-abc></app-root>' }),
+    ];
+    const detected = detectFrameworks(results);
+    const angular = detected.find(f => f.framework === "angular");
+    assert.ok(angular, "should detect Angular");
+    assert.equal(angular.version, "17.3.1");
+  });
+
+  it("extracts Next.js buildId from __NEXT_DATA__", () => {
+    const results = [
+      mockResult("/", { body: '<script id="__NEXT_DATA__" type="application/json">{"props":{},"buildId":"abc123xyz"}</script>' }),
+    ];
+    const detected = detectFrameworks(results);
+    const nextjs = detected.find(f => f.framework === "nextjs");
+    assert.ok(nextjs, "should detect Next.js");
+    assert.equal(nextjs.version, "abc123xyz");
+  });
+
+  it("extracts generator from meta tag", () => {
+    const results = [
+      mockResult("/", { body: '<html><head><meta name="generator" content="Hugo 0.92.0"></head><body>Hello</body></html>' }),
+    ];
+    const detected = detectFrameworks(results);
+    const gen = detected.find(f => f.framework === "generator");
+    assert.ok(gen, "should detect generator");
+    assert.equal(gen.version, "Hugo 0.92.0");
+  });
+
+  it("does not add generator entry when framework already detected", () => {
+    const results = [
+      mockResult("/", { body: '<div data-reactroot></div><meta name="generator" content="react app">' }),
+    ];
+    const detected = detectFrameworks(results);
+    assert.ok(!detected.some(f => f.framework === "generator"), "should not duplicate react as generator");
+  });
+
+  it("returns no version when version pattern not present", () => {
+    const results = [
+      mockResult("/", { body: '<div __vue_app__></div>' }),
+    ];
+    const detected = detectFrameworks(results);
+    const vue = detected.find(f => f.framework === "vue");
+    assert.ok(vue, "should detect Vue");
+    assert.equal(vue.version, undefined);
+  });
+
   it("returns empty array when no successful results", () => {
     const results = [
       mockResult("/", { status: 500, isSuccess: false, body: '' }),

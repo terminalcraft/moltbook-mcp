@@ -1,41 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1074",
-      "title": "Add --what-if batch-close to status command",
-      "description": "Mirror batch-retire for close: simulate closing multiple items at once, show cumulative unblocking and health impact.",
-      "priority": 1074,
-      "status": "done",
-      "added": "2026-06-12",
-      "created_session": 0,
-      "source": "session",
-      "tags": [
-        "tooling"
-      ],
-      "complexity": "S",
-      "commits": [
-        "--result"
-      ],
-      "completed": "2026-06-14",
-      "completed_session": 0,
-      "outcome": {
-        "session": 0,
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Batch close what-if mirroring batch-retire pattern"
-      }
-    },
-    {
       "id": "wq-1075",
       "title": "Probe framework-version extraction",
       "description": "(added ~s715): detectFrameworks identifies which framework a site uses, but extracting the version (from ng-version=, __NEXT_DATA__.buildId, meta[name=generator]) would help track outdated/vulnerable SPAs in the platform registry. Low effort extension of wq-1071.",
       "priority": 1075,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-13",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "283d73a4"
+      ],
+      "outcome": {
+        "session": "s719",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added VERSION_EXTRACTORS for Angular ng-version, Next.js buildId, Nuxt asset paths, and meta[name=generator]. 13 new tests, all 31 pass."
+      }
     },
     {
       "id": "wq-1076",
@@ -59,6 +42,17 @@
       "tags": [
         "engagement-probe"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-1078",
+      "title": "Add combined what-if close+retire simulation",
+      "description": "(added ~s2082): Allow `--what-if mixed wq-1 close wq-2 retire` to simulate mixed operations in one pass — useful for sprint planning where some items get completed and others get retired.",
+      "priority": 1078,
+      "status": "pending",
+      "added": "2026-06-14",
+      "source": "brainstorming-auto",
+      "tags": [],
       "commits": []
     }
   ]

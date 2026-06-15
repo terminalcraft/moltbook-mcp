@@ -1706,6 +1706,145 @@ describe('categorizeCommitMessage (wq-1045)', () => {
   });
 });
 
+// ─── Section 15b: categorizeCommitMessage edge cases (wq-1076) ─────────
+
+describe('categorizeCommitMessage edge cases (wq-1076)', () => {
+  // Empty file list — files.every() returns true vacuously
+  it('classifies empty files with "chore:" as config (vacuous every)', () => {
+    const result = categorizeCommitMessage('chore: housekeeping', []);
+    assert.equal(result.category, 'config');
+    assert.equal(result.label, 'accidental');
+    assert.equal(result.justified, true);
+  });
+
+  it('classifies empty files with "fix:" as unjustified bug-fix', () => {
+    const result = categorizeCommitMessage('fix: something', []);
+    assert.equal(result.category, 'bug-fix');
+    assert.equal(result.label, 'reactive');
+    assert.equal(result.justified, false);
+  });
+
+  it('classifies empty files with generic message as config (vacuous every)', () => {
+    // No fix/feat/refactor prefix, no code files → files.every(json) is vacuously true
+    const result = categorizeCommitMessage('random update', []);
+    assert.equal(result.category, 'config');
+  });
+
+  // Mixed engagement + non-engagement files
+  it('classifies fix: with mixed engagement/non-engagement files as justified', () => {
+    const result = categorizeCommitMessage('fix: multi-file repair', ['engagement-picker.mjs', 'README.md']);
+    assert.equal(result.category, 'bug-fix');
+    assert.equal(result.justified, true, 'should be justified because at least one engagement file');
+  });
+
+  it('classifies fix keyword (no prefix) with mixed files as bug-fix when engagement file present', () => {
+    const result = categorizeCommitMessage('handle picker crash gracefully', ['engagement-picker.mjs', 'utils.mjs']);
+    assert.equal(result.category, 'bug-fix');
+    assert.equal(result.justified, true);
+  });
+
+  it('does not match fix keyword without engagement files (falls to feature for .mjs)', () => {
+    const result = categorizeCommitMessage('handle crash gracefully', ['utils.mjs']);
+    // "handle" keyword present but no engagement file → first rule fails
+    // Has .mjs file → matches feature rule
+    assert.equal(result.category, 'feature');
+    assert.equal(result.label, 'proactive');
+  });
+
+  // Ambiguous messages — multiple keyword matches
+  it('fix: prefix takes priority over feat content in message', () => {
+    const result = categorizeCommitMessage('fix: feat regression in picker', ['engagement-picker.mjs']);
+    assert.equal(result.category, 'bug-fix');
+  });
+
+  it('fix( parenthetical prefix matches bug-fix', () => {
+    const result = categorizeCommitMessage('fix(wq-999): broken thing', ['random.txt']);
+    assert.equal(result.category, 'bug-fix');
+    assert.equal(result.justified, false);
+  });
+
+  it('feat( parenthetical prefix matches feature', () => {
+    const result = categorizeCommitMessage('feat(d081): add staleness metric', ['audit-stats.mjs']);
+    assert.equal(result.category, 'feature');
+    assert.equal(result.label, 'proactive');
+  });
+
+  // Config edge cases
+  it('classifies all-JSON files without chore prefix as config', () => {
+    const result = categorizeCommitMessage('update settings', ['settings.json', 'data.json']);
+    assert.equal(result.category, 'config');
+    assert.equal(result.justified, true);
+  });
+
+  it('classifies mixed JSON and code files as feature (not config)', () => {
+    const result = categorizeCommitMessage('chore: update everything', ['config.json', 'index.mjs']);
+    // files.every(json) fails because index.mjs isn't json
+    // Has .mjs → feature
+    assert.equal(result.category, 'feature');
+    assert.equal(result.label, 'proactive');
+  });
+
+  // Engagement keyword in file path (not just filename)
+  it('recognizes engagement keyword embedded in file path', () => {
+    const result = categorizeCommitMessage('fix broken verification', ['lib/verify-proof.mjs']);
+    // "fix" + "verify" in filename → justified
+    assert.equal(result.category, 'bug-fix');
+    assert.equal(result.justified, true);
+  });
+
+  // Case sensitivity — subject is lowercased but regex uses /i on engagementInfra
+  it('handles uppercase commit prefix (FIX:)', () => {
+    const result = categorizeCommitMessage('FIX: broken thing', ['engagement-picker.mjs']);
+    assert.equal(result.category, 'bug-fix');
+  });
+
+  it('handles mixed case commit prefix (Fix:)', () => {
+    const result = categorizeCommitMessage('Fix: broken thing', ['notes.txt']);
+    assert.equal(result.category, 'bug-fix');
+  });
+
+  // Shell and cjs files trigger feature rule
+  it('classifies .sh files as feature even with neutral message', () => {
+    const result = categorizeCommitMessage('update startup script', ['heartbeat.sh']);
+    assert.equal(result.category, 'feature');
+    assert.equal(result.justified, false);
+  });
+
+  it('classifies .cjs files as feature', () => {
+    const result = categorizeCommitMessage('improve health check', ['health-check.cjs']);
+    assert.equal(result.category, 'feature');
+  });
+
+  // Repair and patch keywords
+  it('repair keyword with engagement file matches justified bug-fix', () => {
+    const result = categorizeCommitMessage('repair credential rotation', ['credential-rotate.sh']);
+    assert.equal(result.category, 'bug-fix');
+    assert.equal(result.justified, true);
+  });
+
+  it('patch keyword without engagement file falls through to feature for code files', () => {
+    const result = categorizeCommitMessage('patch the parser', ['parser.mjs']);
+    // "patch" keyword present but no engagement file → first rule fails on the OR branch
+    // No ^fix[:(] prefix → first part of OR fails too
+    // Has .mjs → feature
+    assert.equal(result.category, 'feature');
+  });
+
+  // Single non-code, non-JSON, non-engagement file
+  it('classifies non-code non-JSON file with neutral message as unknown', () => {
+    const result = categorizeCommitMessage('update documentation', ['docs.txt']);
+    assert.equal(result.category, 'unknown');
+    assert.equal(result.label, 'unclassified');
+  });
+
+  // Credential keyword in file (not JSON extension)
+  it('credential keyword in non-JSON file triggers config rule', () => {
+    const result = categorizeCommitMessage('rotate keys', ['credential-store.yaml']);
+    assert.equal(result.category, 'config');
+    assert.equal(result.justified, true);
+  });
+});
+
 // ─── Section 16: intel yield computation (wq-1045) ──────────────────────
 
 describe('audit-stats intel yield computation (wq-1045)', () => {

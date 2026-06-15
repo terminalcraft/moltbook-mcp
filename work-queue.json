@@ -1,35 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1075",
-      "title": "Probe framework-version extraction",
-      "description": "(added ~s715): detectFrameworks identifies which framework a site uses, but extracting the version (from ng-version=, __NEXT_DATA__.buildId, meta[name=generator]) would help track outdated/vulnerable SPAs in the platform registry. Low effort extension of wq-1071.",
-      "priority": 1075,
-      "status": "done",
-      "added": "2026-06-13",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "283d73a4"
-      ],
-      "outcome": {
-        "session": "s719",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added VERSION_EXTRACTORS for Angular ng-version, Next.js buildId, Nuxt asset paths, and meta[name=generator]. 13 new tests, all 31 pass."
-      }
-    },
-    {
       "id": "wq-1076",
       "title": "Test computeEScopeBleed commit categorization edge cases",
       "description": "(added ~s2082): categorizeCommitMessage is exported but only tested implicitly through E scope bleed stats. Unit tests for edge cases (mixed files, ambiguous commit messages, empty file lists) would catch regressions faster than integration-only coverage.",
       "priority": 1076,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-13",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s720",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "22 edge case tests for categorizeCommitMessage covering empty files, mixed files, ambiguous messages, case sensitivity, path keywords, credential files, repair/patch keywords"
+      }
     },
     {
       "id": "wq-1077",
@@ -51,6 +38,17 @@
       "priority": 1078,
       "status": "pending",
       "added": "2026-06-14",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1079",
+      "title": "Probe version-staleness alerting",
+      "description": "(added ~s719): Now that detectFrameworks extracts versions, a natural next step is comparing detected versions against known-latest (e.g., Angular 17 vs 14) and flagging platforms running outdated/EOL framework versions in the registry. Could use a simple JSON lookup table of framework→latest-stable maintained by R sessions.",
+      "priority": 1079,
+      "status": "pending",
+      "added": "2026-06-15",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []

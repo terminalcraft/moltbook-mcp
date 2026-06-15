@@ -7,8 +7,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 ## Ideas
 
 
-- **Test computeEScopeBleed integration with mocked git history** (added ~s720): The `getSessionCommitDetails` function that feeds `categorizeCommitMessage` uses `execSync(git log)` making it hard to test without real commits. A mock-git approach (temp repo with scripted commits) would enable full integration coverage of the E scope bleed pipeline without depending on real session history.
-- **Engagement probe: detect Convex/Appwrite/PocketBase write patterns** (added ~s717): After Supabase (wq-1069) and Firebase (wq-1073), the next BaaS blind spots are Convex (`useMutation`, `ctx.db.insert`), Appwrite (`databases.createDocument`), and PocketBase (`pb.collection().create()`). Adding these would cover the remaining popular BaaS platforms used in SPAs.
+- **Engagement probe: detect Drizzle/Prisma ORM write patterns** (added ~s721): Now that BaaS detection covers Supabase, Firebase, Convex, Appwrite, and PocketBase, the next blind spot is ORM-level write patterns in SSR apps — Drizzle (`db.insert().values()`, `db.update().set()`), Prisma (`prisma.model.create()`, `prisma.model.update()`). These would catch server-rendered platforms with engagement surfaces backed by SQL.
 
 
 

@@ -1,35 +1,26 @@
 {
   "queue": [
     {
-      "id": "wq-1076",
-      "title": "Test computeEScopeBleed commit categorization edge cases",
-      "description": "(added ~s2082): categorizeCommitMessage is exported but only tested implicitly through E scope bleed stats. Unit tests for edge cases (mixed files, ambiguous commit messages, empty file lists) would catch regressions faster than integration-only coverage.",
-      "priority": 1076,
-      "status": "done",
-      "added": "2026-06-13",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s720",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "22 edge case tests for categorizeCommitMessage covering empty files, mixed files, ambiguous messages, case sensitivity, path keywords, credential files, repair/patch keywords"
-      }
-    },
-    {
       "id": "wq-1077",
       "title": "Engagement probe: detect Convex/Appwrite/PocketBase write patterns",
       "description": "(added ~s717): After Supabase (wq-1069) and Firebase (wq-1073), add detection for Convex (useMutation, ctx.db.insert), Appwrite (databases.createDocument), and PocketBase (pb.collection().create()) write patterns in engagement-surface-probe.mjs.",
       "priority": 1077,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-13",
       "source": "brainstorming",
       "tags": [
         "engagement-probe"
       ],
-      "commits": []
+      "commits": [
+        "8e49f5d9"
+      ],
+      "outcome": {
+        "session": "s721",
+        "result": "completed",
+        "effort": "trivial",
+        "quality": "well-scoped",
+        "note": "Added 11 signals (5 Convex, 3 Appwrite, 3 PocketBase) + 16 tests. All 58 tests pass."
+      }
     },
     {
       "id": "wq-1078",
@@ -47,6 +38,17 @@
       "title": "Probe version-staleness alerting",
       "description": "(added ~s719): Now that detectFrameworks extracts versions, a natural next step is comparing detected versions against known-latest (e.g., Angular 17 vs 14) and flagging platforms running outdated/EOL framework versions in the registry. Could use a simple JSON lookup table of framework→latest-stable maintained by R sessions.",
       "priority": 1079,
+      "status": "pending",
+      "added": "2026-06-15",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1080",
+      "title": "Test computeEScopeBleed integration with mocked git history",
+      "description": "(added ~s720): The `getSessionCommitDetails` function that feeds `categorizeCommitMessage` uses `execSync(git log)` making it hard to test without real commits. A mock-git approach (temp repo with scripted commits) would enable full integration coverage of the E scope bleed pipeline without depending on real session history.",
+      "priority": 1080,
       "status": "pending",
       "added": "2026-06-15",
       "source": "brainstorming-auto",

@@ -52,6 +52,17 @@
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-1083",
+      "title": "Add version extraction for React and Vue frameworks",
+      "description": "detectFrameworks currently only extracts version numbers for Angular (ng-version), Next.js (buildId), and Nuxt. React and Vue lack version extractors — add patterns for React (e.g. __REACT_DEVTOOLS_GLOBAL_HOOK__ version hints, or React CDN URLs with version) and Vue (e.g. __VUE__.version) to improve staleness alerting coverage.",
+      "priority": 1083,
+      "status": "pending",
+      "added": "2026-06-16",
+      "source": "build-session",
+      "tags": [],
+      "commits": []
     }
   ]
 }

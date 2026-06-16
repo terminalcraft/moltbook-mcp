@@ -1,37 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1078",
-      "title": "Add combined what-if close+retire simulation",
-      "description": "(added ~s2082): Allow `--what-if mixed wq-1 close wq-2 retire` to simulate mixed operations in one pass — useful for sprint planning where some items get completed and others get retired.",
-      "priority": 1078,
-      "status": "done",
-      "added": "2026-06-14",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "ac033db5"
-      ],
-      "completed": "2026-06-16",
-      "completed_session": 0,
-      "outcome": {
-        "session": 0,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Completed in session 0"
-      }
-    },
-    {
       "id": "wq-1079",
       "title": "Probe version-staleness alerting",
       "description": "(added ~s719): Now that detectFrameworks extracts versions, a natural next step is comparing detected versions against known-latest (e.g., Angular 17 vs 14) and flagging platforms running outdated/EOL framework versions in the registry. Could use a simple JSON lookup table of framework→latest-stable maintained by R sessions.",
       "priority": 1079,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-15",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "5afed4c1"
+      ],
+      "outcome": {
+        "session": "s723",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added framework-versions.json lookup table, checkVersionStaleness() in platform-probe.mjs, integrated into analyzeResults with findings output. 7 new tests, all 38 pass."
+      }
     },
     {
       "id": "wq-1080",
@@ -49,6 +36,17 @@
       "title": "Engagement probe: detect Drizzle/Prisma ORM write patterns",
       "description": "(added ~s721): Now that BaaS detection covers Supabase, Firebase, Convex, Appwrite, and PocketBase, the next blind spot is ORM-level write patterns in SSR apps — Drizzle (`db.insert().values()`, `db.update().set()`), Prisma (`prisma.model.create()`, `prisma.model.update()`). These would catch server-rendered platforms with engagement surfaces backed by SQL.",
       "priority": 1081,
+      "status": "pending",
+      "added": "2026-06-16",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1082",
+      "title": "What-if scenario save/compare",
+      "description": "(added ~s2083): Save named what-if simulation results to disk and compare across scenarios — e.g., `--what-if save \"plan-a\"` then `--what-if compare plan-a plan-b` to see which sprint plan leaves healthier queue state.",
+      "priority": 1082,
       "status": "pending",
       "added": "2026-06-16",
       "source": "brainstorming-auto",

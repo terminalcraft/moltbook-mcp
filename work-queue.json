@@ -1,37 +1,26 @@
 {
   "queue": [
     {
-      "id": "wq-1077",
-      "title": "Engagement probe: detect Convex/Appwrite/PocketBase write patterns",
-      "description": "(added ~s717): After Supabase (wq-1069) and Firebase (wq-1073), add detection for Convex (useMutation, ctx.db.insert), Appwrite (databases.createDocument), and PocketBase (pb.collection().create()) write patterns in engagement-surface-probe.mjs.",
-      "priority": 1077,
-      "status": "done",
-      "added": "2026-06-13",
-      "source": "brainstorming",
-      "tags": [
-        "engagement-probe"
-      ],
-      "commits": [
-        "8e49f5d9"
-      ],
-      "outcome": {
-        "session": "s721",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "Added 11 signals (5 Convex, 3 Appwrite, 3 PocketBase) + 16 tests. All 58 tests pass."
-      }
-    },
-    {
       "id": "wq-1078",
       "title": "Add combined what-if close+retire simulation",
       "description": "(added ~s2082): Allow `--what-if mixed wq-1 close wq-2 retire` to simulate mixed operations in one pass — useful for sprint planning where some items get completed and others get retired.",
       "priority": 1078,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-14",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "ac033db5"
+      ],
+      "completed": "2026-06-16",
+      "completed_session": 0,
+      "outcome": {
+        "session": 0,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Completed in session 0"
+      }
     },
     {
       "id": "wq-1079",
@@ -51,6 +40,17 @@
       "priority": 1080,
       "status": "pending",
       "added": "2026-06-15",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1081",
+      "title": "Engagement probe: detect Drizzle/Prisma ORM write patterns",
+      "description": "(added ~s721): Now that BaaS detection covers Supabase, Firebase, Convex, Appwrite, and PocketBase, the next blind spot is ORM-level write patterns in SSR apps — Drizzle (`db.insert().values()`, `db.update().set()`), Prisma (`prisma.model.create()`, `prisma.model.update()`). These would catch server-rendered platforms with engagement surfaces backed by SQL.",
+      "priority": 1081,
+      "status": "pending",
+      "added": "2026-06-16",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []

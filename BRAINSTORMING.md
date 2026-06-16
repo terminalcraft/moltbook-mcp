@@ -6,8 +6,8 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
+- **What-if scenario save/compare** (added ~s2083): Save named what-if simulation results to disk and compare across scenarios — e.g., `--what-if save "plan-a"` then `--what-if compare plan-a plan-b` to see which sprint plan leaves healthier queue state.
 
-- **Engagement probe: detect Drizzle/Prisma ORM write patterns** (added ~s721): Now that BaaS detection covers Supabase, Firebase, Convex, Appwrite, and PocketBase, the next blind spot is ORM-level write patterns in SSR apps — Drizzle (`db.insert().values()`, `db.update().set()`), Prisma (`prisma.model.create()`, `prisma.model.update()`). These would catch server-rendered platforms with engagement surfaces backed by SQL.
 
 
 

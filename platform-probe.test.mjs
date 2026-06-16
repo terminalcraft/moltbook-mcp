@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity, detectFrameworks } from "./platform-probe.mjs";
+import { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity, detectFrameworks, checkVersionStaleness } from "./platform-probe.mjs";
 
 // Helper to build mock probe results
 function mockResult(path, { status = 200, contentType = "html", body = "", isSuccess = true } = {}) {
@@ -319,5 +319,57 @@ describe("computeContentTypeDiversity", () => {
     const analysis = analyzeResults(results);
     assert.ok(analysis.contentTypeDiversity, "analysis should include contentTypeDiversity");
     assert.equal(analysis.contentTypeDiversity.score, 0); // all json
+  });
+});
+
+describe("checkVersionStaleness", () => {
+  it("flags EOL framework versions", () => {
+    const hints = [{ framework: "angular", signals: 2, version: "14.2.1" }];
+    const alerts = checkVersionStaleness(hints);
+    assert.equal(alerts.length, 1);
+    assert.equal(alerts[0].severity, "eol");
+    assert.equal(alerts[0].framework, "angular");
+    assert.equal(alerts[0].detectedMajor, 14);
+  });
+
+  it("flags outdated but not EOL versions", () => {
+    const hints = [{ framework: "angular", signals: 2, version: "17.1.0" }];
+    const alerts = checkVersionStaleness(hints);
+    assert.equal(alerts.length, 1);
+    assert.equal(alerts[0].severity, "outdated");
+  });
+
+  it("returns no alerts for current versions", () => {
+    const hints = [{ framework: "angular", signals: 2, version: "19.0.1" }];
+    const alerts = checkVersionStaleness(hints);
+    assert.equal(alerts.length, 0);
+  });
+
+  it("skips frameworks without version info", () => {
+    const hints = [{ framework: "react", signals: 1 }];
+    const alerts = checkVersionStaleness(hints);
+    assert.equal(alerts.length, 0);
+  });
+
+  it("skips generator entries", () => {
+    const hints = [{ framework: "generator", signals: 1, version: "WordPress 5.0" }];
+    const alerts = checkVersionStaleness(hints);
+    assert.equal(alerts.length, 0);
+  });
+
+  it("handles unknown frameworks gracefully", () => {
+    const hints = [{ framework: "ember", signals: 1, version: "4.0" }];
+    const alerts = checkVersionStaleness(hints);
+    assert.equal(alerts.length, 0);
+  });
+
+  it("integrates into analyzeResults", () => {
+    const results = [
+      mockResult("/", { body: '<div ng-version="12.0.5" _nghost-abc></div>' }),
+    ];
+    const analysis = analyzeResults(results);
+    assert.ok(analysis.versionAlerts.length > 0, "should have version alerts");
+    assert.equal(analysis.versionAlerts[0].severity, "eol");
+    assert.ok(analysis.findings.some(f => f.includes("Version alert")), "findings should include version alert");
   });
 });

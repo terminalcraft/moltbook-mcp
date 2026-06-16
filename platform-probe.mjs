@@ -24,6 +24,7 @@ import { monitorProbe, snapshotRegistryEntry } from "./probe-side-effect-monitor
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REGISTRY_PATH = join(__dirname, "account-registry.json");
 const SERVICES_PATH = join(__dirname, "services.json");
+const FRAMEWORK_VERSIONS_PATH = join(__dirname, "framework-versions.json");
 const STATE_DIR = join(process.env.HOME || "/home/moltbot", ".config/moltbook");
 const LOG_PATH = join(STATE_DIR, "logs", "platform-probes.log");
 
@@ -196,6 +197,51 @@ function detectFrameworks(results) {
   return detected;
 }
 
+// Check detected framework versions against known-latest for staleness alerts (wq-1079).
+// Returns array of { framework, detected, latest, severity, message }.
+function checkVersionStaleness(frameworkHints) {
+  const alerts = [];
+  let versions;
+  try {
+    versions = JSON.parse(readFileSync(FRAMEWORK_VERSIONS_PATH, "utf8")).frameworks;
+  } catch {
+    return alerts; // no lookup table — skip silently
+  }
+
+  for (const hint of frameworkHints) {
+    if (!hint.version || hint.framework === "generator") continue;
+    const info = versions[hint.framework];
+    if (!info) continue;
+
+    // Extract major version number from detected version string
+    const majorMatch = hint.version.match(/^(\d+)/);
+    if (!majorMatch) continue;
+    const detectedMajor = parseInt(majorMatch[1], 10);
+
+    if (info.eolMajors && info.eolMajors.includes(detectedMajor)) {
+      alerts.push({
+        framework: hint.framework,
+        detected: hint.version,
+        detectedMajor,
+        latestStable: info.latestStable,
+        severity: "eol",
+        message: `${hint.framework}@${hint.version} is EOL (latest: ${info.latestStable})`,
+      });
+    } else if (detectedMajor < info.latestMajor) {
+      alerts.push({
+        framework: hint.framework,
+        detected: hint.version,
+        detectedMajor,
+        latestStable: info.latestStable,
+        severity: "outdated",
+        message: `${hint.framework}@${hint.version} is outdated (latest: ${info.latestStable})`,
+      });
+    }
+  }
+
+  return alerts;
+}
+
 // Detect SPA false positives: sites that return 200 on every path with HTML content
 // SPA catch-all routing serves the same HTML shell for any URL, faking endpoint presence
 function isSpaFalsePositive(results) {
@@ -269,6 +315,7 @@ function analyzeResults(results) {
     hasRegistration: false,
     isSpa: false,
     frameworkHints: [],
+    versionAlerts: [],
     contentTypeDiversity: null,
     authType: "unknown",
     recommendedStatus: "unreachable",
@@ -287,6 +334,12 @@ function analyzeResults(results) {
 
   // Framework detection (wq-1071) — always run, even for non-SPA sites
   analysis.frameworkHints = detectFrameworks(results);
+
+  // Version staleness alerting (wq-1079) — compare detected versions against known-latest
+  analysis.versionAlerts = checkVersionStaleness(analysis.frameworkHints);
+  for (const alert of analysis.versionAlerts) {
+    analysis.findings.push(`Version alert [${alert.severity}]: ${alert.message}`);
+  }
 
   // SPA detection gate — check before endpoint analysis
   if (analysis.reachable && isSpaFalsePositive(results)) {
@@ -567,7 +620,7 @@ async function probePlatform(platformId, jsonMode = false) {
 }
 
 // Exports for testing
-export { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity, detectFrameworks };
+export { isSpaFalsePositive, analyzeResults, computeContentTypeDiversity, detectFrameworks, checkVersionStaleness };
 
 // CLI
 const args = process.argv.slice(2);

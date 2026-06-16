@@ -6,12 +6,13 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **What-if scenario save/compare** (added ~s2083): Save named what-if simulation results to disk and compare across scenarios — e.g., `--what-if save "plan-a"` then `--what-if compare plan-a plan-b` to see which sprint plan leaves healthier queue state.
 
 
 
 
 
+
+- **Auto-update framework-versions.json via R sessions** (added ~s723): R sessions could periodically fetch latest stable versions from npm/CDN APIs and update framework-versions.json, keeping staleness alerting accurate without manual maintenance. Could use a simple `npm view <pkg> version` approach.
 
 - **Refactor platform-picker.mjs to use lib/scoring.mjs primitives** (added ~s705): platform-picker.mjs has inline ROI scoring logic (tiered base weights, boost thresholds) that parallels the tieredScore pattern now in lib/scoring.mjs. Refactoring would reduce duplication and make the picker's scoring logic testable via the same primitives.
 

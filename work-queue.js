@@ -12,6 +12,7 @@
  *   node work-queue.js status            # Summary stats
  *     --what-if close <id> [id2...]       # Simulate closing item(s), show cumulative before/after health (wq-1058, wq-1074)
  *     --what-if retire <id> [id2...]      # Simulate retiring item(s), show cumulative before/after health (wq-1065, wq-1070)
+ *     --what-if mixed <id> close|retire [<id> close|retire ...]  # Simulate mixed operations in one pass (wq-1078)
  *   node work-queue.js velocity          # Show completion velocity stats (wq-200)
  *   node work-queue.js retire [id] [reason]  # Retire item with reason (wq-199)
  *   node work-queue.js retirement-stats      # Show retirement reason breakdown
@@ -394,6 +395,127 @@ switch (cmd) {
           return `${i.id} (needs ${blockedBy.join(", ")})`;
         });
         console.log(`  ⚠ Blocks: ${depDetails.join("; ")} — retiring won't satisfy their deps`);
+      }
+
+      break;
+    }
+
+    // wq-1078: --what-if mixed <id> <close|retire> [<id> <close|retire> ...] simulates mixed operations in one pass
+    if (whatIfIdx !== -1 && args[whatIfIdx + 1] === "mixed" && args[whatIfIdx + 2]) {
+      const mixedArgs = args.slice(whatIfIdx + 2);
+      const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
+
+      // Parse id/action pairs
+      const ops = [];
+      const parseErrors = [];
+      for (let i = 0; i < mixedArgs.length; i += 2) {
+        const id = mixedArgs[i];
+        const action = mixedArgs[i + 1];
+        if (!action) { parseErrors.push(`${id}: missing action (close or retire)`); continue; }
+        if (action !== "close" && action !== "retire") {
+          parseErrors.push(`${id}: invalid action "${action}" (must be close or retire)`);
+          continue;
+        }
+        ops.push({ id, action });
+      }
+      if (parseErrors.length > 0) {
+        for (const e of parseErrors) console.log(`Parse error: ${e}`);
+        if (ops.length === 0) { console.log("No valid operations to simulate."); break; }
+      }
+
+      // Validate IDs and deduplicate
+      const seen = new Set();
+      const simOps = [];
+      const skipped = [];
+      for (const op of ops) {
+        if (seen.has(op.id)) { skipped.push({ id: op.id, reason: "duplicate" }); continue; }
+        seen.add(op.id);
+        const item = data.queue.find(i => i.id === op.id);
+        if (!item) { skipped.push({ id: op.id, reason: "not found" }); continue; }
+        if (item.status === "done" || item.status === "retired") {
+          skipped.push({ id: op.id, reason: `already ${item.status}` });
+          continue;
+        }
+        simOps.push({ item, action: op.action });
+      }
+      if (skipped.length > 0) {
+        for (const s of skipped) console.log(`Skipping ${s.id}: ${s.reason}`);
+      }
+      if (simOps.length === 0) { console.log("No valid items to simulate."); break; }
+
+      // Current counts
+      const cur = { pending: 0, "in-progress": 0, done: 0, retired: 0, blocked: 0 };
+      for (const i of data.queue) if (cur[i.status] !== undefined) cur[i.status]++;
+
+      // Simulated counts
+      const sim = { ...cur };
+      const closingIds = new Set();
+      const retiringIds = new Set();
+      for (const op of simOps) {
+        sim[op.item.status]--;
+        if (op.action === "close") { sim.done++; closingIds.add(op.item.id); }
+        else { sim.retired++; retiringIds.add(op.item.id); }
+      }
+
+      // Header
+      const closeCount = closingIds.size;
+      const retireCount = retiringIds.size;
+      console.log(`What-if: mixed simulation — ${closeCount} close, ${retireCount} retire`);
+      for (const op of simOps) {
+        const age = op.item.created_session ? sessionNum - op.item.created_session : null;
+        const ageStr = age !== null ? ` — ${age} sessions old` : "";
+        console.log(`  ${op.item.id}: ${op.action} — ${op.item.title} [${op.item.status}]${ageStr}`);
+      }
+
+      console.log(`  Current: ${cur.pending} pending, ${cur["in-progress"]} in-progress, ${cur.done} done, ${cur.retired} retired, ${cur.blocked} blocked`);
+      console.log(`  After:   ${sim.pending} pending, ${sim["in-progress"]} in-progress, ${sim.done} done, ${sim.retired} retired, ${sim.blocked} blocked`);
+
+      // Health assessment
+      const pendingAffected = simOps.filter(o => o.item.status === "pending").length;
+      if (pendingAffected > 0) {
+        if (sim.pending === 0) {
+          console.log(`  ⚠ CRITICAL: 0 pending after operations — replenish before proceeding`);
+        } else if (sim.pending < 3) {
+          console.log(`  ⚠ Queue low after operations: ${sim.pending} pending — add items first`);
+        } else if (sim.pending < 5) {
+          console.log(`  • Queue OK after operations: ${sim.pending} pending (target ≥5)`);
+        } else {
+          console.log(`  • Queue healthy after operations: ${sim.pending} pending`);
+        }
+      } else {
+        console.log(`  • No pending impact (all items were non-pending)`);
+      }
+
+      // Closing items can unblock deps
+      if (closingIds.size > 0) {
+        const unblocked = data.queue.filter(i => {
+          if (closingIds.has(i.id) || retiringIds.has(i.id)) return false;
+          if (i.status !== "pending" || !i.deps?.some(d => closingIds.has(d))) return false;
+          return i.deps.every(d => {
+            if (closingIds.has(d)) return true;
+            const dep = data.queue.find(x => x.id === d);
+            return !dep || dep.status === "done";
+          });
+        });
+        if (unblocked.length > 0) {
+          console.log(`  → Unblocks: ${unblocked.map(i => `${i.id} (${i.title})`).join(", ")}`);
+        }
+      }
+
+      // Retiring items can break deps
+      if (retiringIds.size > 0) {
+        const dependents = data.queue.filter(i =>
+          i.status !== "done" && i.status !== "retired" &&
+          !closingIds.has(i.id) && !retiringIds.has(i.id) &&
+          i.deps?.some(d => retiringIds.has(d))
+        );
+        if (dependents.length > 0) {
+          const depDetails = dependents.map(i => {
+            const blockedBy = i.deps.filter(d => retiringIds.has(d));
+            return `${i.id} (needs ${blockedBy.join(", ")})`;
+          });
+          console.log(`  ⚠ Blocks: ${depDetails.join("; ")} — retiring won't satisfy their deps`);
+        }
       }
 
       break;

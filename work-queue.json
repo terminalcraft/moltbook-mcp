@@ -1,35 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1079",
-      "title": "Probe version-staleness alerting",
-      "description": "(added ~s719): Now that detectFrameworks extracts versions, a natural next step is comparing detected versions against known-latest (e.g., Angular 17 vs 14) and flagging platforms running outdated/EOL framework versions in the registry. Could use a simple JSON lookup table of framework→latest-stable maintained by R sessions.",
-      "priority": 1079,
-      "status": "done",
-      "added": "2026-06-15",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "5afed4c1"
-      ],
-      "outcome": {
-        "session": "s723",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added framework-versions.json lookup table, checkVersionStaleness() in platform-probe.mjs, integrated into analyzeResults with findings output. 7 new tests, all 38 pass."
-      }
-    },
-    {
       "id": "wq-1080",
       "title": "Test computeEScopeBleed integration with mocked git history",
       "description": "(added ~s720): The `getSessionCommitDetails` function that feeds `categorizeCommitMessage` uses `execSync(git log)` making it hard to test without real commits. A mock-git approach (temp repo with scripted commits) would enable full integration coverage of the E scope bleed pipeline without depending on real session history.",
       "priority": 1080,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-15",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [],
+      "outcome": {
+        "session": "s724",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added projectDir/stateDir overrides to getSessionCommitDetails+computeEScopeBleed, 10 integration tests using temp git repo with scripted commits. 172/172 pass."
+      }
     },
     {
       "id": "wq-1081",
@@ -63,6 +50,16 @@
       "source": "build-session",
       "tags": [],
       "commits": []
+    },
+    {
+      "id": "wq-1084",
+      "title": "Test computeBackupSubstitutionRate with mocked engagement traces",
+      "description": "(added ~s724): Add stateDir override to computeBackupSubstitutionRate and write integration tests with synthetic trace data covering empty archives, all-substitution sessions, and platform distribution edge cases. Follows wq-1080 pattern.",
+      "status": "pending",
+      "tags": [
+        "testing"
+      ],
+      "added": "s724"
     }
   ]
 }

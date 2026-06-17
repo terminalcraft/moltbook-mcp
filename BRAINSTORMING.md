@@ -6,6 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
+- **Engagement probe: detect Kysely/Knex query builder write patterns** (added ~s725): With Drizzle and Prisma now covered, the remaining ORM blind spot is raw query builders — Kysely (`db.insertInto().values()`, `db.updateTable().set()`) and Knex (`knex('table').insert()`, `knex('table').update()`). These are common in lightweight SSR stacks.
 - **Test computeBackupSubstitutionRate with mocked engagement traces** (added ~s724): Similar to wq-1080 pattern — `computeBackupSubstitutionRate` reads trace files from STATE_DIR. Adding `stateDir` override param would enable integration tests with synthetic trace data covering edge cases like empty archives, all-substitution sessions, and platform distribution.
 
 

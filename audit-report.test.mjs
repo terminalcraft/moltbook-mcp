@@ -14,7 +14,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { categorizeCommitMessage } from './audit-stats.mjs';
+import { categorizeCommitMessage, getSessionCommitDetails, computeEScopeBleed } from './audit-stats.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCRATCH = join(tmpdir(), 'audit-test-' + Date.now());
@@ -2152,5 +2152,183 @@ describe('audit-stats E engagement trend (wq-1045)', () => {
     assert.equal(stats.e_engagement_trend.trend, '↓');
     // floor_violations is 2 (< 3), but >= 1 and trend is ↓ → declining
     assert.equal(stats.e_engagement_trend.verdict, 'declining');
+  });
+});
+
+// ─── Section 17: computeEScopeBleed integration with mocked git (wq-1080) ────
+
+describe('computeEScopeBleed integration with mocked git history (wq-1080)', () => {
+  const MOCK_REPO = join(tmpdir(), 'escope-mock-' + Date.now());
+  const MOCK_STATE = join(tmpdir(), 'escope-state-' + Date.now());
+
+  function gitIn(cmd) {
+    return execSync(cmd, { cwd: MOCK_REPO, encoding: 'utf8', timeout: 5000,
+      env: { ...process.env, GIT_AUTHOR_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@test.com',
+        GIT_COMMITTER_NAME: 'test', GIT_COMMITTER_EMAIL: 'test@test.com' }
+    });
+  }
+
+  function makeCommit(filename, content, message, date) {
+    writeFileSync(join(MOCK_REPO, filename), content);
+    gitIn(`git add "${filename}"`);
+    const env = date ? `GIT_AUTHOR_DATE="${date}T12:00:00" GIT_COMMITTER_DATE="${date}T12:00:00"` : '';
+    gitIn(`${env} git commit -m "${message}"`);
+  }
+
+  function writeHistory(lines) {
+    writeFileSync(join(MOCK_STATE, 'session-history.txt'), lines.join('\n') + '\n');
+  }
+
+  before(() => {
+    mkdirSync(MOCK_REPO, { recursive: true });
+    mkdirSync(MOCK_STATE, { recursive: true });
+    gitIn('git init');
+    gitIn('git config user.email "test@test.com"');
+    gitIn('git config user.name "test"');
+    // Initial commit so repo is valid
+    writeFileSync(join(MOCK_REPO, '.gitkeep'), '');
+    gitIn('git add .gitkeep');
+    gitIn('git commit -m "init"');
+  });
+
+  after(() => {
+    rmSync(MOCK_REPO, { recursive: true, force: true });
+    rmSync(MOCK_STATE, { recursive: true, force: true });
+  });
+
+  it('returns no_data when session-history.txt missing', () => {
+    const fakeState = join(tmpdir(), 'escope-empty-' + Date.now());
+    mkdirSync(fakeState, { recursive: true });
+    const result = computeEScopeBleed({ projectDir: MOCK_REPO, stateDir: fakeState });
+    assert.equal(result.verdict, 'no_data');
+    assert.equal(result.sessions_checked, 0);
+    rmSync(fakeState, { recursive: true, force: true });
+  });
+
+  it('returns clean when E sessions have no build commits', () => {
+    writeHistory([
+      '2026-06-01 mode=E s=100 dur=3m cost=$0.50 build=(none) files=[(none)] note: engaged platforms',
+      '2026-06-02 mode=E s=105 dur=4m cost=$0.60 build=(none) files=[(none)] note: engaged more',
+    ]);
+    const result = computeEScopeBleed({ projectDir: MOCK_REPO, stateDir: MOCK_STATE });
+    assert.equal(result.verdict, 'clean');
+    assert.equal(result.violation_count, 0);
+    assert.equal(result.sessions_checked, 2);
+  });
+
+  it('detects discipline_failure when E session has feature commits', () => {
+    const date = '2026-06-10';
+    makeCommit('new-tool.mjs', 'console.log("hi")', 'feat: add new tool during E session', date);
+
+    writeHistory([
+      `${date} mode=E s=200 dur=5m cost=$0.80 build=1 commit(s) files=[new-tool.mjs] note: scope bleed`,
+    ]);
+
+    const result = computeEScopeBleed({ projectDir: MOCK_REPO, stateDir: MOCK_STATE });
+    assert.equal(result.violation_count, 1);
+    assert.ok(result.verdict === 'minor_bleed' || result.verdict === 'recurring_bleed');
+
+    const v = result.violations[0];
+    assert.equal(v.session, 's200');
+    assert.equal(v.root_cause.verdict, 'discipline_failure');
+    assert.ok(v.root_cause.commits.length > 0);
+    assert.equal(v.root_cause.commits[0].category, 'feature');
+    assert.equal(v.root_cause.commits[0].justified, false);
+    assert.equal(v.root_cause.summary.feature, 1);
+  });
+
+  it('classifies justified bug-fix on engagement infra as justified', () => {
+    const date = '2026-06-11';
+    makeCommit('engagement-picker.mjs', '// fixed', 'fix: handle picker crash', date);
+
+    writeHistory([
+      `${date} mode=E s=210 dur=3m cost=$0.70 build=1 commit(s) files=[engagement-picker.mjs] note: fixed picker`,
+    ]);
+
+    const result = computeEScopeBleed({ projectDir: MOCK_REPO, stateDir: MOCK_STATE });
+    assert.equal(result.violations.length, 1);
+    const v = result.violations[0];
+    assert.equal(v.root_cause.verdict, 'justified');
+    assert.equal(v.root_cause.all_justified, true);
+    assert.equal(v.root_cause.summary.bug_fix, 1);
+  });
+
+  it('filters out auto-snapshot commits as false positives', () => {
+    const date = '2026-06-12';
+    makeCommit('snapshot.txt', 'snap', 'auto-snapshot post-session 20260612', date);
+
+    writeHistory([
+      `${date} mode=E s=220 dur=2m cost=$0.40 build=1 commit(s) files=[snapshot.txt] note: snapshot only`,
+    ]);
+
+    const result = computeEScopeBleed({ projectDir: MOCK_REPO, stateDir: MOCK_STATE });
+    // auto-snapshot commits are skipped by getSessionCommitDetails, resulting in no_commits_found
+    // which is then filtered as a false positive by computeEScopeBleed
+    assert.equal(result.violation_count, 0);
+    assert.equal(result.verdict, 'clean');
+  });
+
+  it('computes cost_impact between clean and bleed sessions', () => {
+    const dateClean = '2026-06-13';
+    const dateBleed = '2026-06-14';
+    makeCommit('feature.mjs', '// feat', 'feat: scope bleed feature', dateBleed);
+
+    writeHistory([
+      `${dateClean} mode=E s=300 dur=3m cost=$0.50 build=(none) files=[(none)] note: clean session`,
+      `${dateClean} mode=E s=301 dur=3m cost=$0.60 build=(none) files=[(none)] note: clean session 2`,
+      `${dateBleed} mode=E s=302 dur=5m cost=$1.20 build=1 commit(s) files=[feature.mjs] note: bleed session`,
+    ]);
+
+    const result = computeEScopeBleed({ projectDir: MOCK_REPO, stateDir: MOCK_STATE });
+    assert.equal(result.sessions_checked, 3);
+    assert.ok(result.cost_impact.clean_avg > 0);
+    assert.ok(result.cost_impact.bleed_avg > 0);
+    assert.ok(result.cost_impact.delta > 0, 'bleed sessions should cost more');
+    assert.equal(result.cost_impact.clean_avg, 0.55); // (0.50 + 0.60) / 2
+    assert.equal(result.cost_impact.bleed_avg, 1.20);
+  });
+
+  it('recurring_bleed when multiple violations exist', () => {
+    const date1 = '2026-06-15';
+    const date2 = '2026-06-16';
+    makeCommit('tool-a.mjs', '// a', 'feat: tool a', date1);
+    makeCommit('tool-b.mjs', '// b', 'feat: tool b', date2);
+
+    writeHistory([
+      `${date1} mode=E s=400 dur=4m cost=$0.90 build=1 commit(s) files=[tool-a.mjs] note: bleed 1`,
+      `${date2} mode=E s=401 dur=4m cost=$0.85 build=1 commit(s) files=[tool-b.mjs] note: bleed 2`,
+    ]);
+
+    const result = computeEScopeBleed({ projectDir: MOCK_REPO, stateDir: MOCK_STATE });
+    assert.equal(result.verdict, 'recurring_bleed');
+    assert.equal(result.violation_count, 2);
+  });
+
+  it('getSessionCommitDetails returns classified commits from mock repo', () => {
+    const date = '2026-06-17';
+    makeCommit('config.json', '{}', 'chore: update config', date);
+
+    const details = getSessionCommitDetails(['config.json'], date, MOCK_REPO);
+    assert.ok(details.length > 0);
+    const configCommit = details.find(d => d.message.includes('update config'));
+    assert.ok(configCommit, 'should find the config commit');
+    assert.equal(configCommit.category, 'config');
+    assert.equal(configCommit.label, 'accidental');
+    assert.equal(configCommit.justified, true);
+  });
+
+  it('getSessionCommitDetails returns empty for (none) files', () => {
+    const details = getSessionCommitDetails(['(none)'], '2026-06-17', MOCK_REPO);
+    assert.deepStrictEqual(details, []);
+  });
+
+  it('only checks last 10 E sessions', () => {
+    const lines = [];
+    for (let i = 0; i < 15; i++) {
+      lines.push(`2026-06-01 mode=E s=${500 + i} dur=3m cost=$0.50 build=(none) files=[(none)] note: session ${i}`);
+    }
+    writeHistory(lines);
+    const result = computeEScopeBleed({ projectDir: MOCK_REPO, stateDir: MOCK_STATE });
+    assert.equal(result.sessions_checked, 10);
   });
 });

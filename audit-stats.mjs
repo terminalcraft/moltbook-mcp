@@ -638,7 +638,7 @@ function categorizeCommitMessage(subject, files) {
   return { category: 'unknown', label: 'unclassified', justified: false, reason: 'Could not categorize' };
 }
 
-function getSessionCommitDetails(sessionFiles, sessionDate) {
+function getSessionCommitDetails(sessionFiles, sessionDate, projectDir = PROJECT_DIR) {
   // Given the files touched by an E session, find matching git commits on the same date
   const validFiles = sessionFiles.filter(f => f !== '(none)');
   if (validFiles.length === 0) return [];
@@ -651,7 +651,7 @@ function getSessionCommitDetails(sessionFiles, sessionDate) {
     try {
       const raw = execSync(
         `git log ${dateFilter} --format="%H %s" -- "${file}" 2>/dev/null | head -3`,
-        { cwd: PROJECT_DIR, encoding: 'utf8', timeout: 5000 }
+        { cwd: projectDir, encoding: 'utf8', timeout: 5000 }
       );
       for (const line of raw.trim().split('\n').filter(l => l.trim())) {
         const [hash, ...msgParts] = line.split(' ');
@@ -663,7 +663,7 @@ function getSessionCommitDetails(sessionFiles, sessionDate) {
         try {
           const filesRaw = execSync(
             `git diff-tree --no-commit-id --name-only -r ${hash}`,
-            { cwd: PROJECT_DIR, encoding: 'utf8', timeout: 3000 }
+            { cwd: projectDir, encoding: 'utf8', timeout: 3000 }
           );
           changedFiles = filesRaw.trim().split('\n').filter(f => f.trim());
         } catch { /* use fallback */ }
@@ -679,8 +679,8 @@ function getSessionCommitDetails(sessionFiles, sessionDate) {
   });
 }
 
-function computeEScopeBleed() {
-  const historyPath = join(STATE_DIR, 'session-history.txt');
+function computeEScopeBleed({ projectDir = PROJECT_DIR, stateDir = STATE_DIR } = {}) {
+  const historyPath = join(stateDir, 'session-history.txt');
   if (!existsSync(historyPath)) return { sessions_checked: 0, violations: [], violation_count: 0, verdict: 'no_data' };
 
   try {
@@ -712,7 +712,7 @@ function computeEScopeBleed() {
 
     // Root cause analysis for violations (wq-713)
     const violationsWithRCA = violations.map(v => {
-      const commitDetails = getSessionCommitDetails(v.files, v.date);
+      const commitDetails = getSessionCommitDetails(v.files, v.date, projectDir);
       const categories = commitDetails.map(c => c.category);
       const allJustified = commitDetails.length > 0 && commitDetails.every(c => c.justified);
       const hasFeature = categories.includes('feature');
@@ -1217,7 +1217,7 @@ const AUTO_RETIRE_AGE = 50; // Sessions behind current to trigger auto-retiremen
  * Moves them from work-queue.json to work-queue-archive.json with a retirement outcome.
  * Returns { retired: [{id, title, age}], count: N }.
  */
-export { categorizeCommitMessage };
+export { categorizeCommitMessage, getSessionCommitDetails, computeEScopeBleed };
 
 export function autoRetireStuckItems() {
   const queuePath = join(PROJECT_DIR, 'work-queue.json');

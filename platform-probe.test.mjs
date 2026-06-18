@@ -216,6 +216,46 @@ describe("detectFrameworks", () => {
     assert.ok(react, "should detect React");
     assert.ok(react.signals >= 2, `expected >=2 signals, got ${react.signals}`);
   });
+
+  it("extracts React version from CDN URL (unpkg)", () => {
+    const results = [
+      mockResult("/", { body: '<div data-reactroot></div><script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>' }),
+    ];
+    const detected = detectFrameworks(results);
+    const react = detected.find(f => f.framework === "react");
+    assert.ok(react, "should detect React");
+    assert.equal(react.version, "18.2.0");
+  });
+
+  it("extracts React version from cdnjs URL", () => {
+    const results = [
+      mockResult("/", { body: '<div data-reactroot></div><script src="https://cdnjs.cloudflare.com/ajax/libs/react/19.1.0/cjs/react.production.min.js"></script>' }),
+    ];
+    const detected = detectFrameworks(results);
+    const react = detected.find(f => f.framework === "react");
+    assert.ok(react, "should detect React");
+    assert.equal(react.version, "19.1.0");
+  });
+
+  it("extracts Vue version from __VUE__ runtime object", () => {
+    const results = [
+      mockResult("/", { body: '<div id="app" __vue_app__></div><script>window.__VUE__={version:"3.4.21"}</script>' }),
+    ];
+    const detected = detectFrameworks(results);
+    const vue = detected.find(f => f.framework === "vue");
+    assert.ok(vue, "should detect Vue");
+    assert.equal(vue.version, "3.4.21");
+  });
+
+  it("extracts Vue version from CDN URL", () => {
+    const results = [
+      mockResult("/", { body: '<div data-v-abc123></div><script src="https://unpkg.com/vue@3.5.4/dist/vue.global.prod.js"></script>' }),
+    ];
+    const detected = detectFrameworks(results);
+    const vue = detected.find(f => f.framework === "vue");
+    assert.ok(vue, "should detect Vue");
+    assert.equal(vue.version, "3.5.4");
+  });
 });
 
 describe("isSpaFalsePositive with framework detection", () => {

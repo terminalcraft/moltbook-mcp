@@ -155,6 +155,11 @@ const VERSION_EXTRACTORS = [
   { framework: "angular", pattern: /ng-version="([^"]+)"/i },
   { framework: "nextjs", pattern: /"buildId"\s*:\s*"([^"]+)"/ },
   { framework: "nuxt", pattern: /nuxt[/]([0-9][0-9.]+)/ },
+  // React: CDN URLs (unpkg/cdnjs/jsdelivr) embed the version, e.g. react@18.2.0 or react/18.2.0
+  { framework: "react", pattern: /react(?:\.production\.min|\.development)?(?:@|[/])(\d+\.\d+\.\d+)/i },
+  // Vue: __VUE__.version or Vue.version exposed at runtime; CDN URLs embed version
+  { framework: "vue", pattern: /__VUE__[^}]*?version\s*(?::|=)\s*["'](\d+\.\d+\.\d+)["']/i },
+  { framework: "vue", pattern: /vue(?:\.global|\.esm-browser|\.runtime\.global)?(?:\.prod|\.min)?(?:@|[/])(\d+\.\d+\.\d+)/i },
   { framework: "generic", pattern: /<meta\s+name=["']generator["']\s+content=["']([^"']+)["']/i },
   { framework: "generic", pattern: /<meta\s+content=["']([^"']+)["']\s+name=["']generator["']/i },
 ];
@@ -171,11 +176,10 @@ function detectFrameworks(results) {
     const matched = fw.patterns.filter(p => p.test(combined));
     if (matched.length > 0) {
       const entry = { framework: fw.name, signals: matched.length };
-      // Try to extract version for this framework
-      const extractor = VERSION_EXTRACTORS.find(e => e.framework === fw.name);
-      if (extractor) {
+      // Try to extract version for this framework (try all matching extractors)
+      for (const extractor of VERSION_EXTRACTORS.filter(e => e.framework === fw.name)) {
         const m = combined.match(extractor.pattern);
-        if (m) entry.version = m[1];
+        if (m) { entry.version = m[1]; break; }
       }
       detected.push(entry);
     }

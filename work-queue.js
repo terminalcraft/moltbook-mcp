@@ -13,6 +13,9 @@
  *     --what-if close <id> [id2...]       # Simulate closing item(s), show cumulative before/after health (wq-1058, wq-1074)
  *     --what-if retire <id> [id2...]      # Simulate retiring item(s), show cumulative before/after health (wq-1065, wq-1070)
  *     --what-if mixed <id> close|retire [<id> close|retire ...]  # Simulate mixed operations in one pass (wq-1078)
+ *     --what-if save <name> close|retire|mixed <args...>  # Save simulation result as named scenario (wq-1082)
+ *     --what-if compare <name1> <name2>   # Compare two saved scenarios side-by-side (wq-1082)
+ *     --what-if scenarios                 # List saved scenarios (wq-1082)
  *   node work-queue.js velocity          # Show completion velocity stats (wq-200)
  *   node work-queue.js retire [id] [reason]  # Retire item with reason (wq-199)
  *   node work-queue.js retirement-stats      # Show retirement reason breakdown
@@ -20,12 +23,13 @@
  *     --dry-run                              # Preview close-out without marking done (wq-1054)
  */
 
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const QUEUE_FILE = join(__dirname, "work-queue.json");
+const SCENARIOS_DIR = join(__dirname, "scenarios");
 
 function load() {
   return JSON.parse(readFileSync(QUEUE_FILE, "utf8"));
@@ -100,6 +104,172 @@ function fitsbudget(item) {
   if (budgetRemaining === null) return true;
   const c = item.complexity || "M"; // default M
   return COMPLEXITY_BUDGET[c] <= budgetRemaining;
+}
+
+// wq-1082: Compute a what-if simulation result as structured data
+function computeWhatIf(data, type, simArgs, sessionNum) {
+  const result = { type, session: sessionNum, items: [], skipped: [], before: {}, after: {}, health: "", unblocked: [], blocked: [] };
+
+  // Current counts
+  const cur = { pending: 0, "in-progress": 0, done: 0, retired: 0, blocked: 0 };
+  for (const i of data.queue) if (cur[i.status] !== undefined) cur[i.status]++;
+  result.before = { ...cur };
+
+  if (type === "mixed") {
+    // Parse id/action pairs
+    const ops = [];
+    for (let i = 0; i < simArgs.length; i += 2) {
+      const id = simArgs[i], action = simArgs[i + 1];
+      if (!action || (action !== "close" && action !== "retire")) {
+        result.skipped.push({ id, reason: !action ? "missing action" : `invalid action "${action}"` });
+        continue;
+      }
+      ops.push({ id, action });
+    }
+    const seen = new Set();
+    for (const op of ops) {
+      if (seen.has(op.id)) { result.skipped.push({ id: op.id, reason: "duplicate" }); continue; }
+      seen.add(op.id);
+      const item = data.queue.find(i => i.id === op.id);
+      if (!item) { result.skipped.push({ id: op.id, reason: "not found" }); continue; }
+      if (item.status === "done" || item.status === "retired") {
+        result.skipped.push({ id: op.id, reason: `already ${item.status}` }); continue;
+      }
+      const age = item.created_session ? sessionNum - item.created_session : null;
+      result.items.push({ id: item.id, title: item.title, status: item.status, action: op.action, age });
+    }
+  } else {
+    // close or retire — all IDs get the same action
+    for (const simId of simArgs) {
+      const item = data.queue.find(i => i.id === simId);
+      if (!item) { result.skipped.push({ id: simId, reason: "not found" }); continue; }
+      if (item.status === "done" || item.status === "retired") {
+        result.skipped.push({ id: simId, reason: `already ${item.status}` }); continue;
+      }
+      const age = item.created_session ? sessionNum - item.created_session : null;
+      result.items.push({ id: item.id, title: item.title, status: item.status, action: type, age });
+    }
+  }
+
+  if (result.items.length === 0) return result;
+
+  // Compute after counts
+  const sim = { ...cur };
+  const closingIds = new Set(), retiringIds = new Set();
+  for (const it of result.items) {
+    sim[it.status]--;
+    if (it.action === "close") { sim.done++; closingIds.add(it.id); }
+    else { sim.retired++; retiringIds.add(it.id); }
+  }
+  result.after = { ...sim };
+
+  // Health
+  const pendingAffected = result.items.filter(i => i.status === "pending").length;
+  if (pendingAffected === 0) result.health = "no-impact";
+  else if (sim.pending === 0) result.health = "critical";
+  else if (sim.pending < 3) result.health = "low";
+  else if (sim.pending < 5) result.health = "ok";
+  else result.health = "healthy";
+
+  // Unblocked by closes
+  if (closingIds.size > 0) {
+    result.unblocked = data.queue.filter(i => {
+      if (closingIds.has(i.id) || retiringIds.has(i.id)) return false;
+      if (i.status !== "pending" || !i.deps?.some(d => closingIds.has(d))) return false;
+      return i.deps.every(d => {
+        if (closingIds.has(d)) return true;
+        const dep = data.queue.find(x => x.id === d);
+        return !dep || dep.status === "done";
+      });
+    }).map(i => ({ id: i.id, title: i.title }));
+  }
+
+  // Blocked by retires
+  if (retiringIds.size > 0) {
+    result.blocked = data.queue.filter(i =>
+      i.status !== "done" && i.status !== "retired" &&
+      !closingIds.has(i.id) && !retiringIds.has(i.id) &&
+      i.deps?.some(d => retiringIds.has(d))
+    ).map(i => ({ id: i.id, title: i.title, blockedBy: i.deps.filter(d => retiringIds.has(d)) }));
+  }
+
+  return result;
+}
+
+// wq-1082: Display a what-if result to console
+function displayWhatIf(result) {
+  if (result.skipped.length > 0) {
+    for (const s of result.skipped) console.log(`Skipping ${s.id}: ${s.reason}`);
+  }
+  if (result.items.length === 0) { console.log("No valid items to simulate."); return; }
+
+  const isBatch = result.items.length > 1;
+  const typeLabel = result.type === "mixed"
+    ? `mixed simulation — ${result.items.filter(i => i.action === "close").length} close, ${result.items.filter(i => i.action === "retire").length} retire`
+    : `${isBatch ? "batch " : ""}${result.type} ${result.items.length === 1 ? result.items[0].id + " (" + result.items[0].title + ")" : result.items.length + " items"}`;
+  console.log(`What-if: ${typeLabel}`);
+
+  if (isBatch || result.type === "mixed") {
+    for (const it of result.items) {
+      const ageStr = it.age !== null ? ` — ${it.age} sessions old` : "";
+      const actionStr = result.type === "mixed" ? `${it.action} — ` : "";
+      console.log(`  ${it.id}: ${actionStr}${it.title} [${it.status}]${ageStr}`);
+    }
+  } else {
+    const it = result.items[0];
+    const ageStr = it.age !== null ? ` — ${it.age} sessions old` : "";
+    // Already shown in header for single items
+    if (ageStr) console.log(`  ${ageStr.trim()}`);
+  }
+
+  const b = result.before, a = result.after;
+  const hasRetired = b.retired > 0 || a.retired > 0;
+  const retiredStr = hasRetired ? `, ${b.retired} retired` : "";
+  const retiredStrA = hasRetired ? `, ${a.retired} retired` : "";
+  console.log(`  Current: ${b.pending} pending, ${b["in-progress"]} in-progress, ${b.done} done${retiredStr}, ${b.blocked} blocked`);
+  const afterLabel = result.type === "mixed" ? "After" : result.type === "close" ? "After close" : "After retire";
+  console.log(`  ${afterLabel}: ${a.pending} pending, ${a["in-progress"]} in-progress, ${a.done} done${retiredStrA}, ${a.blocked} blocked`);
+
+  // Health
+  const healthMsgs = {
+    "critical": `  ⚠ CRITICAL: 0 pending after operations — replenish before proceeding`,
+    "low": `  ⚠ Queue low after operations: ${a.pending} pending — add items first`,
+    "ok": `  • Queue OK after operations: ${a.pending} pending (target ≥5)`,
+    "healthy": `  • Queue healthy after operations: ${a.pending} pending`,
+    "no-impact": `  • No pending impact`
+  };
+  console.log(healthMsgs[result.health] || `  • Health: ${result.health}`);
+
+  if (result.unblocked.length > 0) {
+    console.log(`  → Unblocks: ${result.unblocked.map(i => `${i.id} (${i.title})`).join(", ")}`);
+  }
+  if (result.blocked.length > 0) {
+    console.log(`  ⚠ Blocks: ${result.blocked.map(i => `${i.id} (needs ${i.blockedBy.join(", ")})`).join("; ")} — retiring won't satisfy their deps`);
+  }
+}
+
+// wq-1082: Save/load scenarios
+function saveScenario(name, result) {
+  if (!existsSync(SCENARIOS_DIR)) mkdirSync(SCENARIOS_DIR);
+  const scenario = { ...result, name, savedAt: new Date().toISOString() };
+  writeFileSync(join(SCENARIOS_DIR, `${name}.json`), JSON.stringify(scenario, null, 2) + "\n");
+  return scenario;
+}
+
+function loadScenario(name) {
+  const path = join(SCENARIOS_DIR, `${name}.json`);
+  if (!existsSync(path)) return null;
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+function listScenarios() {
+  if (!existsSync(SCENARIOS_DIR)) return [];
+  return readdirSync(SCENARIOS_DIR)
+    .filter(f => f.endsWith(".json"))
+    .map(f => {
+      const s = JSON.parse(readFileSync(join(SCENARIOS_DIR, f), "utf8"));
+      return { name: s.name, type: s.type, savedAt: s.savedAt, items: s.items?.length || 0, health: s.health };
+    });
 }
 
 const data = load();
@@ -221,304 +391,121 @@ switch (cmd) {
     break;
   }
   case "status": {
-    // wq-1058, wq-1074: --what-if close <id> [id2...] simulates closing item(s) and shows cumulative before/after health
+    // wq-1058, wq-1074, wq-1082: --what-if close/retire/mixed/save/compare/scenarios
     const whatIfIdx = args.indexOf("--what-if");
-    if (whatIfIdx !== -1 && args[whatIfIdx + 1] === "close" && args[whatIfIdx + 2]) {
-      const simIds = args.slice(whatIfIdx + 2);
+    if (whatIfIdx !== -1 && args[whatIfIdx + 1]) {
+      const whatIfCmd = args[whatIfIdx + 1];
       const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
 
-      // Validate all IDs up front
-      const simItems = [];
-      const skipped = [];
-      for (const simId of simIds) {
-        const item = data.queue.find(i => i.id === simId);
-        if (!item) { skipped.push({ id: simId, reason: "not found" }); continue; }
-        if (item.status === "done" || item.status === "retired") {
-          skipped.push({ id: simId, reason: `already ${item.status}` });
-          continue;
-        }
-        simItems.push(item);
-      }
-
-      if (skipped.length > 0) {
-        for (const s of skipped) console.log(`Skipping ${s.id}: ${s.reason}`);
-      }
-      if (simItems.length === 0) {
-        console.log("No valid items to simulate.");
+      if (whatIfCmd === "close" && args[whatIfIdx + 2]) {
+        const result = computeWhatIf(data, "close", args.slice(whatIfIdx + 2), sessionNum);
+        displayWhatIf(result);
         break;
       }
 
-      // Current counts
-      const cur = { pending: 0, "in-progress": 0, done: 0, blocked: 0 };
-      for (const i of data.queue) if (cur[i.status] !== undefined) cur[i.status]++;
-
-      // Simulated counts (all items move to done)
-      const sim = { ...cur };
-      for (const item of simItems) {
-        sim[item.status]--;
-        sim.done++;
-      }
-
-      // Header — single vs batch
-      const isBatch = simItems.length > 1;
-      if (isBatch) {
-        console.log(`What-if: batch close ${simItems.length} items`);
-        for (const item of simItems) {
-          const age = item.created_session ? sessionNum - item.created_session : null;
-          const ageStr = age !== null ? ` — ${age} sessions old` : "";
-          console.log(`  ${item.id}: ${item.title} [${item.status}]${ageStr}`);
-        }
-      } else {
-        const item = simItems[0];
-        const age = item.created_session ? sessionNum - item.created_session : null;
-        const ageStr = age !== null ? ` — ${age} sessions old` : "";
-        console.log(`What-if: close ${item.id} (${item.title})${ageStr}`);
-      }
-
-      console.log(`  Current:     ${cur.pending} pending, ${cur["in-progress"]} in-progress, ${cur.done} done, ${cur.blocked} blocked`);
-      console.log(`  After close: ${sim.pending} pending, ${sim["in-progress"]} in-progress, ${sim.done} done, ${sim.blocked} blocked`);
-
-      // Health assessment
-      const pendingClosed = simItems.filter(i => i.status === "pending").length;
-      if (pendingClosed > 0) {
-        if (sim.pending === 0) {
-          console.log(`  ⚠ CRITICAL: 0 pending after close — replenish before closing`);
-        } else if (sim.pending < 3) {
-          console.log(`  ⚠ Queue low after close: ${sim.pending} pending — add items first`);
-        } else if (sim.pending < 5) {
-          console.log(`  • Queue OK after close: ${sim.pending} pending (target ≥5)`);
-        } else {
-          console.log(`  • Queue healthy after close: ${sim.pending} pending`);
-        }
-      } else {
-        console.log(`  • No pending impact (${isBatch ? "all items were non-pending" : `item was ${simItems[0].status}`})`);
-      }
-
-      // Check if closing unblocks anything (deps satisfied after simulated close)
-      const closedIds = new Set(simItems.map(i => i.id));
-      const unblocked = data.queue.filter(i => {
-        if (closedIds.has(i.id)) return false; // don't count items being closed
-        if (i.status !== "pending" || !i.deps?.some(d => closedIds.has(d))) return false;
-        return i.deps.every(d => {
-          if (closedIds.has(d)) return true; // this dep would be satisfied by the close
-          const dep = data.queue.find(x => x.id === d);
-          return !dep || dep.status === "done";
-        });
-      });
-      if (unblocked.length > 0) {
-        console.log(`  → Unblocks: ${unblocked.map(i => `${i.id} (${i.title})`).join(", ")}`);
-      }
-      break;
-    }
-
-    // wq-1065, wq-1070: --what-if retire <id> [id2...] simulates retiring item(s) and shows cumulative before/after health
-    if (whatIfIdx !== -1 && args[whatIfIdx + 1] === "retire" && args[whatIfIdx + 2]) {
-      const simIds = args.slice(whatIfIdx + 2);
-      const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
-
-      // Validate all IDs up front
-      const simItems = [];
-      const skipped = [];
-      for (const simId of simIds) {
-        const item = data.queue.find(i => i.id === simId);
-        if (!item) { skipped.push({ id: simId, reason: "not found" }); continue; }
-        if (item.status === "done" || item.status === "retired") {
-          skipped.push({ id: simId, reason: `already ${item.status}` });
-          continue;
-        }
-        simItems.push(item);
-      }
-
-      if (skipped.length > 0) {
-        for (const s of skipped) console.log(`Skipping ${s.id}: ${s.reason}`);
-      }
-      if (simItems.length === 0) {
-        console.log("No valid items to simulate.");
+      if (whatIfCmd === "retire" && args[whatIfIdx + 2]) {
+        const result = computeWhatIf(data, "retire", args.slice(whatIfIdx + 2), sessionNum);
+        displayWhatIf(result);
         break;
       }
 
-      // Current counts (include retired in display)
-      const cur = { pending: 0, "in-progress": 0, done: 0, retired: 0, blocked: 0 };
-      for (const i of data.queue) if (cur[i.status] !== undefined) cur[i.status]++;
-
-      // Simulated counts (all items move to retired)
-      const sim = { ...cur };
-      for (const item of simItems) {
-        sim[item.status]--;
-        sim.retired++;
+      if (whatIfCmd === "mixed" && args[whatIfIdx + 2]) {
+        const result = computeWhatIf(data, "mixed", args.slice(whatIfIdx + 2), sessionNum);
+        displayWhatIf(result);
+        break;
       }
 
-      // Header — single vs batch
-      const isBatch = simItems.length > 1;
-      if (isBatch) {
-        console.log(`What-if: batch retire ${simItems.length} items`);
-        for (const item of simItems) {
-          const age = item.created_session ? sessionNum - item.created_session : null;
-          const ageStr = age !== null ? ` — ${age} sessions old` : "";
-          console.log(`  ${item.id}: ${item.title} [${item.status}]${ageStr}`);
+      // wq-1082: Save a named scenario
+      if (whatIfCmd === "save" && args[whatIfIdx + 2] && args[whatIfIdx + 3]) {
+        const scenarioName = args[whatIfIdx + 2];
+        const simType = args[whatIfIdx + 3];
+        if (!["close", "retire", "mixed"].includes(simType)) {
+          console.log(`Invalid simulation type "${simType}". Use: close, retire, or mixed`);
+          break;
         }
-      } else {
-        const item = simItems[0];
-        const age = item.created_session ? sessionNum - item.created_session : null;
-        const ageStr = age !== null ? ` — ${age} sessions old` : "";
-        console.log(`What-if: retire ${item.id} (${item.title})${ageStr}`);
-      }
-
-      console.log(`  Current:     ${cur.pending} pending, ${cur["in-progress"]} in-progress, ${cur.done} done, ${cur.retired} retired, ${cur.blocked} blocked`);
-      console.log(`  After retire: ${sim.pending} pending, ${sim["in-progress"]} in-progress, ${sim.done} done, ${sim.retired} retired, ${sim.blocked} blocked`);
-
-      // Health assessment — check cumulative pending impact
-      const pendingRetired = simItems.filter(i => i.status === "pending").length;
-      if (pendingRetired > 0) {
-        if (sim.pending === 0) {
-          console.log(`  ⚠ CRITICAL: 0 pending after retire — replenish before retiring`);
-        } else if (sim.pending < 3) {
-          console.log(`  ⚠ Queue low after retire: ${sim.pending} pending — add items first`);
-        } else if (sim.pending < 5) {
-          console.log(`  • Queue OK after retire: ${sim.pending} pending (target ≥5)`);
-        } else {
-          console.log(`  • Queue healthy after retire: ${sim.pending} pending`);
+        const simArgs = args.slice(whatIfIdx + 4);
+        if (simArgs.length === 0) {
+          console.log(`Usage: --what-if save <name> <close|retire|mixed> <id> [...]`);
+          break;
         }
-      } else {
-        console.log(`  • No pending impact (${isBatch ? "all items were non-pending" : `item was ${simItems[0].status}`})`);
-      }
-
-      // Unlike close, retiring does NOT satisfy deps — warn if anything depends on these items
-      const retiredIds = new Set(simItems.map(i => i.id));
-      const dependents = data.queue.filter(i =>
-        i.status !== "done" && i.status !== "retired" && !retiredIds.has(i.id) &&
-        i.deps?.some(d => retiredIds.has(d))
-      );
-      if (dependents.length > 0) {
-        const depDetails = dependents.map(i => {
-          const blockedBy = i.deps.filter(d => retiredIds.has(d));
-          return `${i.id} (needs ${blockedBy.join(", ")})`;
-        });
-        console.log(`  ⚠ Blocks: ${depDetails.join("; ")} — retiring won't satisfy their deps`);
-      }
-
-      break;
-    }
-
-    // wq-1078: --what-if mixed <id> <close|retire> [<id> <close|retire> ...] simulates mixed operations in one pass
-    if (whatIfIdx !== -1 && args[whatIfIdx + 1] === "mixed" && args[whatIfIdx + 2]) {
-      const mixedArgs = args.slice(whatIfIdx + 2);
-      const sessionNum = parseInt(process.env.SESSION_NUM || "0", 10);
-
-      // Parse id/action pairs
-      const ops = [];
-      const parseErrors = [];
-      for (let i = 0; i < mixedArgs.length; i += 2) {
-        const id = mixedArgs[i];
-        const action = mixedArgs[i + 1];
-        if (!action) { parseErrors.push(`${id}: missing action (close or retire)`); continue; }
-        if (action !== "close" && action !== "retire") {
-          parseErrors.push(`${id}: invalid action "${action}" (must be close or retire)`);
-          continue;
+        const result = computeWhatIf(data, simType, simArgs, sessionNum);
+        if (result.items.length === 0) {
+          displayWhatIf(result);
+          break;
         }
-        ops.push({ id, action });
-      }
-      if (parseErrors.length > 0) {
-        for (const e of parseErrors) console.log(`Parse error: ${e}`);
-        if (ops.length === 0) { console.log("No valid operations to simulate."); break; }
+        displayWhatIf(result);
+        const scenario = saveScenario(scenarioName, result);
+        console.log(`\n  ✓ Saved as scenario "${scenarioName}" (${scenario.savedAt})`);
+        break;
       }
 
-      // Validate IDs and deduplicate
-      const seen = new Set();
-      const simOps = [];
-      const skipped = [];
-      for (const op of ops) {
-        if (seen.has(op.id)) { skipped.push({ id: op.id, reason: "duplicate" }); continue; }
-        seen.add(op.id);
-        const item = data.queue.find(i => i.id === op.id);
-        if (!item) { skipped.push({ id: op.id, reason: "not found" }); continue; }
-        if (item.status === "done" || item.status === "retired") {
-          skipped.push({ id: op.id, reason: `already ${item.status}` });
-          continue;
+      // wq-1082: Compare two saved scenarios
+      if (whatIfCmd === "compare" && args[whatIfIdx + 2] && args[whatIfIdx + 3]) {
+        const name1 = args[whatIfIdx + 2], name2 = args[whatIfIdx + 3];
+        const s1 = loadScenario(name1), s2 = loadScenario(name2);
+        if (!s1) { console.log(`Scenario "${name1}" not found.`); break; }
+        if (!s2) { console.log(`Scenario "${name2}" not found.`); break; }
+
+        console.log(`Comparing scenarios: "${name1}" vs "${name2}"\n`);
+
+        // Items in each
+        console.log(`  "${name1}" (${s1.type}, ${s1.items.length} items): ${s1.items.map(i => i.id).join(", ")}`);
+        console.log(`  "${name2}" (${s2.type}, ${s2.items.length} items): ${s2.items.map(i => i.id).join(", ")}`);
+
+        // Overlap
+        const ids1 = new Set(s1.items.map(i => i.id));
+        const ids2 = new Set(s2.items.map(i => i.id));
+        const shared = [...ids1].filter(id => ids2.has(id));
+        const only1 = [...ids1].filter(id => !ids2.has(id));
+        const only2 = [...ids2].filter(id => !ids1.has(id));
+        if (shared.length > 0) console.log(`  Shared: ${shared.join(", ")}`);
+        if (only1.length > 0) console.log(`  Only in "${name1}": ${only1.join(", ")}`);
+        if (only2.length > 0) console.log(`  Only in "${name2}": ${only2.join(", ")}`);
+
+        // After-state comparison
+        console.log(`\n  Queue state after each:`);
+        const fields = ["pending", "in-progress", "done", "retired", "blocked"];
+        const pad = (s, n) => String(s).padStart(n);
+        console.log(`  ${"".padEnd(14)} ${pad(name1, 10)} ${pad(name2, 10)} ${pad("diff", 6)}`);
+        for (const f of fields) {
+          const v1 = s1.after[f] || 0, v2 = s2.after[f] || 0;
+          const diff = v2 - v1;
+          const diffStr = diff === 0 ? "—" : (diff > 0 ? `+${diff}` : `${diff}`);
+          console.log(`  ${f.padEnd(14)} ${pad(v1, 10)} ${pad(v2, 10)} ${pad(diffStr, 6)}`);
         }
-        simOps.push({ item, action: op.action });
-      }
-      if (skipped.length > 0) {
-        for (const s of skipped) console.log(`Skipping ${s.id}: ${s.reason}`);
-      }
-      if (simOps.length === 0) { console.log("No valid items to simulate."); break; }
 
-      // Current counts
-      const cur = { pending: 0, "in-progress": 0, done: 0, retired: 0, blocked: 0 };
-      for (const i of data.queue) if (cur[i.status] !== undefined) cur[i.status]++;
+        // Health comparison
+        const healthOrder = { critical: 0, low: 1, ok: 2, healthy: 3, "no-impact": 4 };
+        const h1 = healthOrder[s1.health] ?? -1, h2 = healthOrder[s2.health] ?? -1;
+        console.log(`\n  Health: "${name1}" = ${s1.health}, "${name2}" = ${s2.health}`);
+        if (h1 > h2) console.log(`  → "${name1}" leaves healthier queue state`);
+        else if (h2 > h1) console.log(`  → "${name2}" leaves healthier queue state`);
+        else console.log(`  → Both scenarios have equal health impact`);
 
-      // Simulated counts
-      const sim = { ...cur };
-      const closingIds = new Set();
-      const retiringIds = new Set();
-      for (const op of simOps) {
-        sim[op.item.status]--;
-        if (op.action === "close") { sim.done++; closingIds.add(op.item.id); }
-        else { sim.retired++; retiringIds.add(op.item.id); }
-      }
-
-      // Header
-      const closeCount = closingIds.size;
-      const retireCount = retiringIds.size;
-      console.log(`What-if: mixed simulation — ${closeCount} close, ${retireCount} retire`);
-      for (const op of simOps) {
-        const age = op.item.created_session ? sessionNum - op.item.created_session : null;
-        const ageStr = age !== null ? ` — ${age} sessions old` : "";
-        console.log(`  ${op.item.id}: ${op.action} — ${op.item.title} [${op.item.status}]${ageStr}`);
-      }
-
-      console.log(`  Current: ${cur.pending} pending, ${cur["in-progress"]} in-progress, ${cur.done} done, ${cur.retired} retired, ${cur.blocked} blocked`);
-      console.log(`  After:   ${sim.pending} pending, ${sim["in-progress"]} in-progress, ${sim.done} done, ${sim.retired} retired, ${sim.blocked} blocked`);
-
-      // Health assessment
-      const pendingAffected = simOps.filter(o => o.item.status === "pending").length;
-      if (pendingAffected > 0) {
-        if (sim.pending === 0) {
-          console.log(`  ⚠ CRITICAL: 0 pending after operations — replenish before proceeding`);
-        } else if (sim.pending < 3) {
-          console.log(`  ⚠ Queue low after operations: ${sim.pending} pending — add items first`);
-        } else if (sim.pending < 5) {
-          console.log(`  • Queue OK after operations: ${sim.pending} pending (target ≥5)`);
-        } else {
-          console.log(`  • Queue healthy after operations: ${sim.pending} pending`);
+        // Unblocked/blocked differences
+        const ub1 = new Set((s1.unblocked || []).map(i => i.id));
+        const ub2 = new Set((s2.unblocked || []).map(i => i.id));
+        if (ub1.size > 0 || ub2.size > 0) {
+          const onlyUb1 = [...ub1].filter(id => !ub2.has(id));
+          const onlyUb2 = [...ub2].filter(id => !ub1.has(id));
+          if (onlyUb1.length > 0) console.log(`  Only "${name1}" unblocks: ${onlyUb1.join(", ")}`);
+          if (onlyUb2.length > 0) console.log(`  Only "${name2}" unblocks: ${onlyUb2.join(", ")}`);
         }
-      } else {
-        console.log(`  • No pending impact (all items were non-pending)`);
+
+        break;
       }
 
-      // Closing items can unblock deps
-      if (closingIds.size > 0) {
-        const unblocked = data.queue.filter(i => {
-          if (closingIds.has(i.id) || retiringIds.has(i.id)) return false;
-          if (i.status !== "pending" || !i.deps?.some(d => closingIds.has(d))) return false;
-          return i.deps.every(d => {
-            if (closingIds.has(d)) return true;
-            const dep = data.queue.find(x => x.id === d);
-            return !dep || dep.status === "done";
-          });
-        });
-        if (unblocked.length > 0) {
-          console.log(`  → Unblocks: ${unblocked.map(i => `${i.id} (${i.title})`).join(", ")}`);
+      // wq-1082: List saved scenarios
+      if (whatIfCmd === "scenarios") {
+        const scenarios = listScenarios();
+        if (scenarios.length === 0) { console.log("No saved scenarios."); break; }
+        console.log(`Saved scenarios (${scenarios.length}):`);
+        for (const s of scenarios) {
+          const date = s.savedAt ? s.savedAt.slice(0, 10) : "?";
+          console.log(`  ${s.name} — ${s.type}, ${s.items} items, health=${s.health} (${date})`);
         }
+        break;
       }
-
-      // Retiring items can break deps
-      if (retiringIds.size > 0) {
-        const dependents = data.queue.filter(i =>
-          i.status !== "done" && i.status !== "retired" &&
-          !closingIds.has(i.id) && !retiringIds.has(i.id) &&
-          i.deps?.some(d => retiringIds.has(d))
-        );
-        if (dependents.length > 0) {
-          const depDetails = dependents.map(i => {
-            const blockedBy = i.deps.filter(d => retiringIds.has(d));
-            return `${i.id} (needs ${blockedBy.join(", ")})`;
-          });
-          console.log(`  ⚠ Blocks: ${depDetails.join("; ")} — retiring won't satisfy their deps`);
-        }
-      }
-
-      break;
     }
 
     const pending = data.queue.filter(i => i.status === "pending").length;

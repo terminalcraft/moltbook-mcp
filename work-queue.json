@@ -1,33 +1,26 @@
 {
   "queue": [
     {
-      "id": "wq-1081",
-      "title": "Engagement probe: detect Drizzle/Prisma ORM write patterns",
-      "description": "(added ~s721): Now that BaaS detection covers Supabase, Firebase, Convex, Appwrite, and PocketBase, the next blind spot is ORM-level write patterns in SSR apps — Drizzle (`db.insert().values()`, `db.update().set()`), Prisma (`prisma.model.create()`, `prisma.model.update()`). These would catch server-rendered platforms with engagement surfaces backed by SQL.",
-      "priority": 1081,
-      "status": "done",
-      "added": "2026-06-16",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [],
-      "outcome": {
-        "session": "s725",
-        "result": "completed",
-        "effort": "trivial",
-        "quality": "well-scoped",
-        "note": "8 ORM signals (3 Drizzle, 5 Prisma), 13 tests, all 71 pass"
-      }
-    },
-    {
       "id": "wq-1082",
       "title": "What-if scenario save/compare",
       "description": "(added ~s2083): Save named what-if simulation results to disk and compare across scenarios — e.g., `--what-if save \"plan-a\"` then `--what-if compare plan-a plan-b` to see which sprint plan leaves healthier queue state.",
       "priority": 1082,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-16",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": [
+        "8242aec6"
+      ],
+      "completed": "2026-06-18",
+      "completed_session": 0,
+      "outcome": {
+        "session": 0,
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Save/compare/list scenarios for what-if simulations. Refactored inline what-if code into reusable computeWhatIf()+displayWhatIf() functions."
+      }
     },
     {
       "id": "wq-1083",
@@ -49,6 +42,17 @@
         "testing"
       ],
       "added": "s724"
+    },
+    {
+      "id": "wq-1085",
+      "title": "Engagement probe: detect Kysely/Knex query builder write patterns",
+      "description": "(added ~s725): With Drizzle and Prisma now covered, the remaining ORM blind spot is raw query builders — Kysely (`db.insertInto().values()`, `db.updateTable().set()`) and Knex (`knex('table').insert()`, `knex('table').update()`). These are common in lightweight SSR stacks.",
+      "priority": 1085,
+      "status": "pending",
+      "added": "2026-06-18",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
     }
   ]
 }

@@ -1,37 +1,24 @@
 {
   "queue": [
     {
-      "id": "wq-1082",
-      "title": "What-if scenario save/compare",
-      "description": "(added ~s2083): Save named what-if simulation results to disk and compare across scenarios — e.g., `--what-if save \"plan-a\"` then `--what-if compare plan-a plan-b` to see which sprint plan leaves healthier queue state.",
-      "priority": 1082,
-      "status": "done",
-      "added": "2026-06-16",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": [
-        "8242aec6"
-      ],
-      "completed": "2026-06-18",
-      "completed_session": 0,
-      "outcome": {
-        "session": 0,
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Save/compare/list scenarios for what-if simulations. Refactored inline what-if code into reusable computeWhatIf()+displayWhatIf() functions."
-      }
-    },
-    {
       "id": "wq-1083",
       "title": "Add version extraction for React and Vue frameworks",
       "description": "detectFrameworks currently only extracts version numbers for Angular (ng-version), Next.js (buildId), and Nuxt. React and Vue lack version extractors — add patterns for React (e.g. __REACT_DEVTOOLS_GLOBAL_HOOK__ version hints, or React CDN URLs with version) and Vue (e.g. __VUE__.version) to improve staleness alerting coverage.",
       "priority": 1083,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-16",
       "source": "build-session",
       "tags": [],
-      "commits": []
+      "commits": [
+        "9ceab5a5"
+      ],
+      "outcome": {
+        "session": "B#727",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added React CDN URL extractor, Vue __VUE__.version + CDN extractor. Updated extractor loop to try all matching patterns. 4 new tests, all 42 pass."
+      }
     },
     {
       "id": "wq-1084",
@@ -66,6 +53,17 @@
       "tags": [
         "what-if"
       ],
+      "commits": []
+    },
+    {
+      "id": "wq-1087",
+      "title": "Add version extraction for Svelte framework",
+      "description": "Svelte is detected by FRAMEWORK_PATTERNS but has no VERSION_EXTRACTOR. Add pattern for Svelte CDN URLs (e.g. svelte@5.5.0) and/or SvelteKit __sveltekit markers with version. Follows wq-1083 pattern.",
+      "priority": 1087,
+      "status": "pending",
+      "added": "2026-06-18",
+      "source": "build-session",
+      "tags": [],
       "commits": []
     }
   ]

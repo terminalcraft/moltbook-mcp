@@ -6,7 +6,7 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Test computeBackupSubstitutionRate with mocked engagement traces** (added ~s724): Similar to wq-1080 pattern — `computeBackupSubstitutionRate` reads trace files from STATE_DIR. Adding `stateDir` override param would enable integration tests with synthetic trace data covering edge cases like empty archives, all-substitution sessions, and platform distribution.
+- **Engagement probe: detect tRPC mutation patterns** (added ~s729): tRPC is increasingly common in Next.js/T3 stacks. `trpc.*.useMutation()` and `createTRPCRouter` with `mutation()` procedures indicate write-capable APIs that the probe currently misses.
 
 
 

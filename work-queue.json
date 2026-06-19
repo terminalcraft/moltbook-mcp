@@ -1,32 +1,22 @@
 {
   "queue": [
     {
-      "id": "wq-1084",
-      "title": "Test computeBackupSubstitutionRate with mocked engagement traces",
-      "description": "(added ~s724): Add stateDir override to computeBackupSubstitutionRate and write integration tests with synthetic trace data covering empty archives, all-substitution sessions, and platform distribution edge cases. Follows wq-1080 pattern.",
-      "status": "done",
-      "tags": [
-        "testing"
-      ],
-      "added": "s724",
-      "outcome": {
-        "session": "s728",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added stateDir param + export to computeBackupSubstitutionRate, 15 direct integration tests all passing"
-      }
-    },
-    {
       "id": "wq-1085",
       "title": "Engagement probe: detect Kysely/Knex query builder write patterns",
       "description": "(added ~s725): With Drizzle and Prisma now covered, the remaining ORM blind spot is raw query builders — Kysely (`db.insertInto().values()`, `db.updateTable().set()`) and Knex (`knex('table').insert()`, `knex('table').update()`). These are common in lightweight SSR stacks.",
       "priority": 1085,
-      "status": "pending",
+      "status": "done",
       "added": "2026-06-18",
       "source": "brainstorming-auto",
       "tags": [],
-      "commits": []
+      "commits": ["e3746c5b"],
+      "outcome": {
+        "session": "B#729",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added 6 Kysely/Knex write patterns with chain-aware regex. 12 new tests, all 82 pass."
+      }
     },
     {
       "id": "wq-1086",
@@ -50,6 +40,17 @@
       "status": "pending",
       "added": "2026-06-18",
       "source": "build-session",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1088",
+      "title": "Test computeBackupSubstitutionRate with mocked engagement traces",
+      "description": "(added ~s724): Similar to wq-1080 pattern — `computeBackupSubstitutionRate` reads trace files from STATE_DIR. Adding `stateDir` override param would enable integration tests with synthetic trace data covering edge cases like empty archives, all-substitution sessions, and platform distribution.",
+      "priority": 1088,
+      "status": "pending",
+      "added": "2026-06-19",
+      "source": "brainstorming-auto",
       "tags": [],
       "commits": []
     }

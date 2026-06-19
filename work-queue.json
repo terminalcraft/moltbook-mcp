@@ -1,34 +1,21 @@
 {
   "queue": [
     {
-      "id": "wq-1083",
-      "title": "Add version extraction for React and Vue frameworks",
-      "description": "detectFrameworks currently only extracts version numbers for Angular (ng-version), Next.js (buildId), and Nuxt. React and Vue lack version extractors — add patterns for React (e.g. __REACT_DEVTOOLS_GLOBAL_HOOK__ version hints, or React CDN URLs with version) and Vue (e.g. __VUE__.version) to improve staleness alerting coverage.",
-      "priority": 1083,
-      "status": "done",
-      "added": "2026-06-16",
-      "source": "build-session",
-      "tags": [],
-      "commits": [
-        "9ceab5a5"
-      ],
-      "outcome": {
-        "session": "B#727",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added React CDN URL extractor, Vue __VUE__.version + CDN extractor. Updated extractor loop to try all matching patterns. 4 new tests, all 42 pass."
-      }
-    },
-    {
       "id": "wq-1084",
       "title": "Test computeBackupSubstitutionRate with mocked engagement traces",
       "description": "(added ~s724): Add stateDir override to computeBackupSubstitutionRate and write integration tests with synthetic trace data covering empty archives, all-substitution sessions, and platform distribution edge cases. Follows wq-1080 pattern.",
-      "status": "pending",
+      "status": "done",
       "tags": [
         "testing"
       ],
-      "added": "s724"
+      "added": "s724",
+      "outcome": {
+        "session": "s728",
+        "result": "completed",
+        "effort": "moderate",
+        "quality": "well-scoped",
+        "note": "Added stateDir param + export to computeBackupSubstitutionRate, 15 direct integration tests all passing"
+      }
     },
     {
       "id": "wq-1085",

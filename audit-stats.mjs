@@ -787,10 +787,10 @@ function computeEScopeBleed({ projectDir = PROJECT_DIR, stateDir = STATE_DIR } =
 
 // --- Backup substitution rate (wq-881) ---
 
-function computeBackupSubstitutionRate() {
+function computeBackupSubstitutionRate({ stateDir = STATE_DIR } = {}) {
   // Combine current trace and archive
-  const current = safeRead(join(STATE_DIR, 'engagement-trace.json'), []);
-  const archive = safeRead(join(STATE_DIR, 'engagement-trace-archive.json'), []);
+  const current = safeRead(join(stateDir, 'engagement-trace.json'), []);
+  const archive = safeRead(join(stateDir, 'engagement-trace-archive.json'), []);
   const allTraces = [...archive, ...current];
 
   // Get last 10 E sessions (each trace entry is one E session)
@@ -1217,7 +1217,7 @@ const AUTO_RETIRE_AGE = 50; // Sessions behind current to trigger auto-retiremen
  * Moves them from work-queue.json to work-queue-archive.json with a retirement outcome.
  * Returns { retired: [{id, title, age}], count: N }.
  */
-export { categorizeCommitMessage, getSessionCommitDetails, computeEScopeBleed };
+export { categorizeCommitMessage, getSessionCommitDetails, computeEScopeBleed, computeBackupSubstitutionRate };
 
 export function autoRetireStuckItems() {
   const queuePath = join(PROJECT_DIR, 'work-queue.json');

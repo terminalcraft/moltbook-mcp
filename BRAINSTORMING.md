@@ -69,3 +69,5 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 *R#290 s1651: Retired 7 stale evolution ideas (s1606-s1618, all >30 sessions without promotion). wq-746 enforcement.*
 *R#298 s1691: Promoted 3 ideas to wq (wq-774, wq-775, wq-776). Retired directive-enrichment.py migration (completed s1689). Added 2 fresh ideas.*
 *B#592 s1907: Retired 4 stale ideas (s1866, s1867, s1871, s1876 — all >30 sessions). Fixed auto-retire hook to process top-level bullets (inIdeas default true). wq-930.*
+
+- **Test computeEEngagementTrend with stateDir override** (added ~s728): Same wq-1080 pattern — add stateDir param to computeEEngagementTrend, export it, write direct integration tests covering empty history, declining/improving trends, and dedup behavior.

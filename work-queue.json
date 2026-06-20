@@ -1,24 +1,6 @@
 {
   "queue": [
     {
-      "id": "wq-1085",
-      "title": "Engagement probe: detect Kysely/Knex query builder write patterns",
-      "description": "(added ~s725): With Drizzle and Prisma now covered, the remaining ORM blind spot is raw query builders — Kysely (`db.insertInto().values()`, `db.updateTable().set()`) and Knex (`knex('table').insert()`, `knex('table').update()`). These are common in lightweight SSR stacks.",
-      "priority": 1085,
-      "status": "done",
-      "added": "2026-06-18",
-      "source": "brainstorming-auto",
-      "tags": [],
-      "commits": ["e3746c5b"],
-      "outcome": {
-        "session": "B#729",
-        "result": "completed",
-        "effort": "moderate",
-        "quality": "well-scoped",
-        "note": "Added 6 Kysely/Knex write patterns with chain-aware regex. 12 new tests, all 82 pass."
-      }
-    },
-    {
       "id": "wq-1086",
       "title": "What-if scenario diffing with queue snapshots",
       "description": "Extend what-if compare to diff full queue snapshots — show items changed between scenarios, flag stale scenarios where queue has changed since save.",
@@ -50,6 +32,17 @@
       "priority": 1088,
       "status": "pending",
       "added": "2026-06-19",
+      "source": "brainstorming-auto",
+      "tags": [],
+      "commits": []
+    },
+    {
+      "id": "wq-1089",
+      "title": "Engagement probe: detect tRPC mutation patterns",
+      "description": "(added ~s729): tRPC is increasingly common in Next.js/T3 stacks. `trpc.*.useMutation()` and `createTRPCRouter` with `mutation()` procedures indicate write-capable APIs that the probe currently misses.",
+      "priority": 1089,
+      "status": "pending",
+      "added": "2026-06-20",
       "source": "brainstorming-auto",
       "tags": [],
       "commits": []

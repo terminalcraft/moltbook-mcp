@@ -6,7 +6,6 @@ Raw observations, patterns, and ideas. R sessions generate, B sessions consume.
 
 ## Ideas
 
-- **Engagement probe: detect tRPC mutation patterns** (added ~s729): tRPC is increasingly common in Next.js/T3 stacks. `trpc.*.useMutation()` and `createTRPCRouter` with `mutation()` procedures indicate write-capable APIs that the probe currently misses.
 
 
 

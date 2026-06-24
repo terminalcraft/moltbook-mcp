@@ -144,6 +144,12 @@ describe('moltbook-core.js component', () => {
           json: async () => ({ success: true, submolts: [{ name: 'general', display_name: 'General', subscriber_count: 100 }] })
         };
       }
+      if (url.includes('/posts') && opts?.method === 'POST') {
+        return {
+          ok: true,
+          json: async () => ({ success: true, post: { id: 'new-post-123' } })
+        };
+      }
       // Default: return error
       return {
         ok: false,
@@ -270,6 +276,46 @@ describe('moltbook-core.js component', () => {
       const result = await server.callTool('moltbook_submolts', {});
       const text = getText(result);
       assert.ok(text.includes('general') || text.includes('error'), 'Should list submolts or error');
+    });
+
+    test('moltbook_post_create dry_run previews request without API call', async () => {
+      global.fetch.mock.resetCalls();
+      const result = await server.callTool('moltbook_post_create', {
+        submolt: 'general',
+        title: 'Dry run title',
+        content: 'Dry run body',
+        dry_run: true
+      });
+      const data = JSON.parse(getText(result));
+      assert.equal(data.success, true);
+      assert.equal(data.dry_run, true);
+      assert.equal(data.action, 'moltbook_post_create');
+      assert.deepEqual(data.request, {
+        method: 'POST',
+        path: '/posts',
+        body: { submolt: 'general', title: 'Dry run title', content: 'Dry run body' }
+      });
+      assert.equal(global.fetch.mock.callCount(), 0);
+    });
+
+    test('moltbook_comment dry_run previews request without API call', async () => {
+      global.fetch.mock.resetCalls();
+      const result = await server.callTool('moltbook_comment', {
+        post_id: 'post-123',
+        content: 'Dry run comment',
+        parent_id: 'parent-456',
+        dry_run: true
+      });
+      const data = JSON.parse(getText(result));
+      assert.equal(data.success, true);
+      assert.equal(data.dry_run, true);
+      assert.equal(data.action, 'moltbook_comment');
+      assert.deepEqual(data.request, {
+        method: 'POST',
+        path: '/posts/post-123/comments',
+        body: { content: 'Dry run comment', parent_id: 'parent-456' }
+      });
+      assert.equal(global.fetch.mock.callCount(), 0);
     });
 
     test('moltbook_vote requires type and direction', async () => {

@@ -218,7 +218,8 @@ export function register(server) {
     title: z.string().describe("Post title"),
     content: z.string().optional().describe("Post body text"),
     url: z.string().optional().describe("Link URL (for link posts)"),
-  }, async ({ submolt, title, content, url }) => {
+    dry_run: z.boolean().optional().describe("Preview the request without creating a post"),
+  }, async ({ submolt, title, content, url, dry_run }) => {
     if (title && title.length > MAX_POST_TITLE_LEN) title = title.slice(0, MAX_POST_TITLE_LEN) + "…";
     if (content && content.length > MAX_POST_CONTENT_LEN) content = content.slice(0, MAX_POST_CONTENT_LEN) + "\n\n[truncated]";
     const dk = dedupKey("post", submolt, title);
@@ -227,6 +228,15 @@ export function register(server) {
     const body = { submolt, title };
     if (content) body.content = content;
     if (url) body.url = url;
+    if (dry_run) {
+      return { content: [{ type: "text", text: JSON.stringify({
+        success: true,
+        dry_run: true,
+        action: "moltbook_post_create",
+        request: { method: "POST", path: "/posts", body },
+        warnings: outboundWarnings,
+      }, null, 2) }] };
+    }
     const data = await moltFetch("/posts", { method: "POST", body: JSON.stringify(body) });
     // Handle verification challenge if present
     const verifyResult = await solveVerification(data);
@@ -256,13 +266,23 @@ export function register(server) {
     post_id: z.string().describe("Post ID"),
     content: z.string().describe("Comment text"),
     parent_id: z.string().optional().describe("Parent comment ID for replies"),
-  }, async ({ post_id, content, parent_id }) => {
+    dry_run: z.boolean().optional().describe("Preview the request without posting a comment"),
+  }, async ({ post_id, content, parent_id, dry_run }) => {
     if (content && content.length > MAX_COMMENT_LEN) content = content.slice(0, MAX_COMMENT_LEN) + "\n\n[truncated]";
     const dk = dedupKey("comment", parent_id || post_id, content);
     if (isDuplicate(dk)) return { content: [{ type: "text", text: JSON.stringify({ success: false, error: "Duplicate comment blocked (same content within 2 minutes)" }) }] };
     const outboundWarnings = checkOutbound(content);
     const body = { content };
     if (parent_id) body.parent_id = parent_id;
+    if (dry_run) {
+      return { content: [{ type: "text", text: JSON.stringify({
+        success: true,
+        dry_run: true,
+        action: "moltbook_comment",
+        request: { method: "POST", path: `/posts/${post_id}/comments`, body },
+        warnings: outboundWarnings,
+      }, null, 2) }] };
+    }
     const data = await moltFetch(`/posts/${post_id}/comments`, { method: "POST", body: JSON.stringify(body) });
     // Handle verification challenge if present
     const verifyResult = await solveVerification(data);

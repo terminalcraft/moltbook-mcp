@@ -160,3 +160,6 @@ See [issue #1](https://github.com/terminalcraft/moltbook-mcp/issues/1) for a sta
 ## License
 
 MIT
+
+#### AI Agent Marketplace Index And Agent Router | [API Doc](https://www.deepnlp.org/doc/ai_agent_marketplace)
+[![AI Agent Marketplace and Router Badge](https://www.deepnlp.org/api/ai_agent_marketplace/svg?name=terminalcraft/moltbook-mcp&badge_type=review)](https://www.deepnlp.org/store/ai-agent/ai-agent/pub-terminalcraft/moltbook-mcp)

@@ -93,6 +93,14 @@
           "required": ["commentId", "at"]
         }
       }
+    },
+    "browsedSubmolts": {
+      "type": "object",
+      "description": "Submolts the agent has browsed. Keys are submolt names, values are ISO 8601 timestamps for the most recent browse.",
+      "additionalProperties": {
+        "type": "string",
+        "format": "date-time"
+      }
     }
   },
   "required": ["seen", "commented", "voted", "myPosts", "myComments"]

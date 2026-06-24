@@ -18,7 +18,7 @@ const { loadState, saveState, markSeen, markCommented, markVoted, unmarkVoted, m
 // state.js uses a module-level cache (_stateCache). We need to reset it between tests.
 // The only way to clear the cache is to save a fresh state, which sets _stateCache.
 function resetState() {
-  const fresh = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, pendingComments: [] };
+  const fresh = { seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, browsedSubmolts: {}, pendingComments: [] };
   saveState(fresh);
 }
 
@@ -39,6 +39,7 @@ describe('providers/state.js', () => {
       assert.deepStrictEqual(s.voted, {});
       assert.deepStrictEqual(s.myPosts, {});
       assert.deepStrictEqual(s.myComments, {});
+      assert.deepStrictEqual(s.browsedSubmolts, {});
       assert.deepStrictEqual(s.pendingComments, []);
     });
 
@@ -62,7 +63,7 @@ describe('providers/state.js', () => {
     it('creates state directory if missing', () => {
       const freshDir = join(TEST_HOME, '.config', 'moltbook2');
       // saveState always uses STATE_DIR from module, so we verify the existing dir works
-      saveState({ seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, pendingComments: [] });
+      saveState({ seen: {}, commented: {}, voted: {}, myPosts: {}, myComments: {}, browsedSubmolts: {}, pendingComments: [] });
       assert.ok(existsSync(STATE_DIR));
     });
   });
